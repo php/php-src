@@ -80,6 +80,7 @@ static zend_always_inline zval *reflection_prop_class(zval *object) {
 
 /* Class entry pointers */
 PHPAPI zend_class_entry *reflector_ptr;
+PHPAPI zend_class_entry *reflection_attribute_target_ptr;
 PHPAPI zend_class_entry *reflection_exception_ptr;
 PHPAPI zend_class_entry *reflection_ptr;
 PHPAPI zend_class_entry *reflection_function_abstract_ptr;
@@ -146,6 +147,31 @@ typedef struct _type_reference {
 	bool legacy_behavior;
 } type_reference;
 
+// Based on the target
+// TARGET_CLASS: zend_class_entry
+// TARGET_FUNCTION: zend_function
+// TARGET_METHOD: zend_function
+// TARGET_PROPERTY: zend_property_info
+// TARGET_CLASS_CONST: zend_class_constant and its name which isn't a part of
+//   the struct
+// TARGET_PARAMETER: target function, closure (or null), and offset
+// TARGET_CONST: zend_constant
+typedef union _attribute_target_reference {
+	zend_class_entry *target_class;
+	zend_function *target_function;
+	zend_property_info *target_property;
+	zend_constant *target_const;
+	struct {
+		zend_class_constant *constant;
+		zend_string *name;
+	} target_class_constant;
+	struct {
+		zend_function *target_function;
+		zval *closure_obj;
+		uint32_t offset;
+	} target_parameter;
+} attribute_target_reference;
+
 /* Struct for attributes */
 typedef struct _attribute_reference {
 	HashTable *attributes;
@@ -153,6 +179,7 @@ typedef struct _attribute_reference {
 	zend_class_entry *scope;
 	zend_string *filename;
 	uint32_t target;
+	attribute_target_reference target_data;
 } attribute_reference;
 
 typedef enum {
@@ -1243,7 +1270,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module, c
 
 /* {{{ reflection_attribute_factory */
 static void reflection_attribute_factory(zval *object, HashTable *attributes, zend_attribute *data,
-		zend_class_entry *scope, uint32_t target, zend_string *filename)
+		zend_class_entry *scope, uint32_t target, zend_string *filename, attribute_target_reference target_data)
 {
 	reflection_object *intern;
 	attribute_reference *reference;
@@ -1256,6 +1283,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 	reference->scope = scope;
 	reference->filename = filename ? zend_string_copy(filename) : NULL;
 	reference->target = target;
+	reference->target_data = target_data;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_ATTRIBUTE;
 	ZVAL_STR_COPY(reflection_prop_name(object), data->name);
@@ -1263,7 +1291,8 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 /* }}} */
 
 static zend_result read_attributes(zval *ret, HashTable *attributes, zend_class_entry *scope,
-		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename) /* {{{ */
+		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename,
+	attribute_target_reference target_data) /* {{{ */
 {
 	ZEND_ASSERT(attributes != NULL);
 
@@ -1276,7 +1305,7 @@ static zend_result read_attributes(zval *ret, HashTable *attributes, zend_class_
 
 		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && zend_string_equals(attr->lcname, filter)) {
-				reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
+				reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename, target_data);
 				add_next_index_zval(ret, &tmp);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1308,7 +1337,7 @@ static zend_result read_attributes(zval *ret, HashTable *attributes, zend_class_
 			}
 		}
 
-		reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
+		reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename, target_data);
 		add_next_index_zval(ret, &tmp);
 	} ZEND_HASH_FOREACH_END();
 
@@ -1317,7 +1346,8 @@ static zend_result read_attributes(zval *ret, HashTable *attributes, zend_class_
 /* }}} */
 
 static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attributes,
-		uint32_t offset, zend_class_entry *scope, uint32_t target, zend_string *filename) /* {{{ */
+		uint32_t offset, zend_class_entry *scope, uint32_t target, zend_string *filename,
+	attribute_target_reference target_data) /* {{{ */
 {
 	zend_string *name = NULL;
 	zend_long flags = 0;
@@ -1350,7 +1380,7 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 
 	array_init(return_value);
 
-	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename)) {
+	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename, target_data)) {
 		RETURN_THROWS();
 	}
 }
@@ -2059,9 +2089,13 @@ ZEND_METHOD(ReflectionFunctionAbstract, getAttributes)
 		target = ZEND_ATTRIBUTE_TARGET_FUNCTION;
 	}
 
+	attribute_target_reference ref;
+	ref.target_function = fptr;
+
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		fptr->common.attributes, 0, fptr->common.scope, target,
-		fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL);
+		fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL,
+		ref);
 }
 /* }}} */
 
@@ -2870,9 +2904,14 @@ ZEND_METHOD(ReflectionParameter, getAttributes)
 	HashTable *attributes = param->fptr->common.attributes;
 	zend_class_entry *scope = param->fptr->common.scope;
 
+	attribute_target_reference ref;
+	ref.target_parameter.target_function = param->fptr;
+	ref.target_parameter.closure_obj = Z_ISUNDEF(intern->obj) ? NULL : &intern->obj;
+	ref.target_parameter.offset = param->offset;
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER,
-		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL);
+		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL,
+		ref);
 }
 
 /* {{{ Returns the index of the parameter, starting from 0 */
@@ -4004,9 +4043,14 @@ ZEND_METHOD(ReflectionClassConstant, getAttributes)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
+	attribute_target_reference ref_details;
+	ref_details.target_class_constant.constant = ref;
+	zval *constant_name = reflection_prop_name(ZEND_THIS);
+	ref_details.target_class_constant.name = zend_string_copy(Z_STR_P(constant_name));
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ref->attributes, 0, ref->ce, ZEND_ATTRIBUTE_TARGET_CLASS_CONST,
-		ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL);
+		ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL,
+		ref_details);
 }
 /* }}} */
 
@@ -4409,9 +4453,12 @@ ZEND_METHOD(ReflectionClass, getAttributes)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
+	attribute_target_reference ref;
+	ref.target_class = ce;
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS,
-		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL);
+		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL,
+		ref);
 }
 /* }}} */
 
@@ -6357,9 +6404,12 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 		RETURN_EMPTY_ARRAY();
 	}
 
+	attribute_target_reference ref_details;
+	ref_details.target_property = ref->prop;
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY,
-		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL);
+		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL,
+		ref_details);
 }
 /* }}} */
 
@@ -7590,6 +7640,105 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	RETURN_COPY_VALUE(&obj);
 }
 
+ZEND_METHOD(ReflectionAttribute, getCurrent)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_execute_data *prev_ex = EX(prev_execute_data);
+
+	// Previous: attribute constructor
+	// Previous of that: ZEND_ACC_CALL_VIA_TRAMPOLINE call set up by
+	//   zend_get_attribute_object() to make it look like the call is from
+	//   where the attribute was declared
+	// Previous of *that*: ReflectionAttribute::newInstance()
+	if (!prev_ex
+		|| !prev_ex->prev_execute_data
+		|| !prev_ex->prev_execute_data->prev_execute_data
+		|| !prev_ex->prev_execute_data->prev_execute_data->func
+	) {
+		zend_throw_error(NULL, "Current function was not invoked via ReflectionAttribute::newInstance()");
+		RETURN_THROWS();
+	}
+	zend_execute_data *caller_context = prev_ex->prev_execute_data->prev_execute_data;
+	zend_function *caller = caller_context->func;
+	if (caller->type != ZEND_INTERNAL_FUNCTION) {
+		zend_throw_error(NULL, "Current function was not invoked via ReflectionAttribute::newInstance()");
+		RETURN_THROWS();
+	}
+	zend_internal_function *internal_caller = (zend_internal_function *)caller;
+	if (internal_caller->handler != zim_ReflectionAttribute_newInstance) {
+		zend_throw_error(NULL, "Current function was not invoked via ReflectionAttribute::newInstance()");
+		RETURN_THROWS();
+	}
+
+	zval caller_this = caller_context->This;
+	ZEND_ASSERT(Z_TYPE(caller_this) == IS_OBJECT);
+	ZEND_ASSERT(Z_OBJCE(caller_this) == reflection_attribute_ptr);
+
+	reflection_object *intern = Z_REFLECTION_P(&caller_this);
+	if (intern->ptr == NULL) {
+		if (EG(exception) && EG(exception)->ce == reflection_exception_ptr) {
+			RETURN_THROWS();
+		}
+		zend_throw_error(NULL, "Internal error: Failed to retrieve the reflection object");
+		RETURN_THROWS();
+	}
+	attribute_reference *attr = intern->ptr;
+
+	switch (attr->target) {
+		case ZEND_ATTRIBUTE_TARGET_CLASS:
+			zend_reflection_class_factory(attr->target_data.target_class, return_value);
+			return;
+		case ZEND_ATTRIBUTE_TARGET_FUNCTION:
+			reflection_function_factory(attr->target_data.target_function, NULL, return_value);
+			return;
+		case ZEND_ATTRIBUTE_TARGET_METHOD:
+			reflection_method_factory(
+				attr->target_data.target_function->common.scope,
+				attr->target_data.target_function,
+				NULL,
+				return_value
+			);
+			return;
+		case ZEND_ATTRIBUTE_TARGET_PROPERTY:
+			reflection_property_factory(
+				attr->target_data.target_property->ce,
+				attr->target_data.target_property->name,
+				attr->target_data.target_property,
+				return_value
+			);
+			return;
+		case ZEND_ATTRIBUTE_TARGET_CLASS_CONST:
+			reflection_class_constant_factory(
+				attr->target_data.target_class_constant.name,
+				attr->target_data.target_class_constant.constant,
+				return_value
+			);
+			return;
+		case ZEND_ATTRIBUTE_TARGET_PARAMETER:
+			zend_function *target_function = attr->target_data.target_parameter.target_function;
+			reflection_parameter_factory(
+				_copy_function(target_function),
+				attr->target_data.target_parameter.closure_obj,
+				target_function->common.arg_info,
+				attr->target_data.target_parameter.offset,
+				attr->target_data.target_parameter.offset < target_function->common.required_num_args,
+				return_value
+			);
+			return;
+		case ZEND_ATTRIBUTE_TARGET_CONST:
+			object_init_ex(return_value, reflection_constant_ptr);
+			reflection_object *intern = Z_REFLECTION_P(return_value);
+			intern->ptr = attr->target_data.target_const;
+			intern->ref_type = REF_TYPE_OTHER;
+			zval *name_zv = reflection_prop_name(return_value);
+			zval_ptr_dtor(name_zv);
+			ZVAL_STR_COPY(name_zv, attr->target_data.target_const->name);
+			return;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
 ZEND_METHOD(ReflectionEnum, __construct)
 {
 	reflection_class_object_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -8111,9 +8260,11 @@ ZEND_METHOD(ReflectionConstant, getAttributes)
 
 	GET_REFLECTION_OBJECT_PTR(const_);
 
+	attribute_target_reference ref;
+	ref.target_const = const_;
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		const_->attributes, 0, NULL, ZEND_ATTRIBUTE_TARGET_CONST,
-		const_->filename);
+		const_->filename, ref);
 }
 
 ZEND_METHOD(ReflectionConstant, __toString)
@@ -8144,7 +8295,9 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	reflector_ptr = register_class_Reflector(zend_ce_stringable);
 
-	reflection_function_abstract_ptr = register_class_ReflectionFunctionAbstract(reflector_ptr);
+	reflection_attribute_target_ptr = register_class_ReflectionAttributeTarget(reflector_ptr);
+
+	reflection_function_abstract_ptr = register_class_ReflectionFunctionAbstract(reflector_ptr, reflection_attribute_target_ptr);
 	reflection_function_abstract_ptr->default_object_handlers = &reflection_object_handlers;
 	reflection_function_abstract_ptr->create_object = reflection_objects_new;
 
@@ -8156,7 +8309,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_generator_ptr->create_object = reflection_objects_new;
 	reflection_generator_ptr->default_object_handlers = &reflection_object_handlers;
 
-	reflection_parameter_ptr = register_class_ReflectionParameter(reflector_ptr);
+	reflection_parameter_ptr = register_class_ReflectionParameter(reflector_ptr, reflection_attribute_target_ptr);
 	reflection_parameter_ptr->create_object = reflection_objects_new;
 	reflection_parameter_ptr->default_object_handlers = &reflection_object_handlers;
 
@@ -8180,7 +8333,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_method_ptr->create_object = reflection_objects_new;
 	reflection_method_ptr->default_object_handlers = &reflection_object_handlers;
 
-	reflection_class_ptr = register_class_ReflectionClass(reflector_ptr);
+	reflection_class_ptr = register_class_ReflectionClass(reflector_ptr, reflection_attribute_target_ptr);
 	reflection_class_ptr->create_object = reflection_objects_new;
 	reflection_class_ptr->default_object_handlers = &reflection_object_handlers;
 
@@ -8188,11 +8341,11 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_object_ptr->create_object = reflection_objects_new;
 	reflection_object_ptr->default_object_handlers = &reflection_object_handlers;
 
-	reflection_property_ptr = register_class_ReflectionProperty(reflector_ptr);
+	reflection_property_ptr = register_class_ReflectionProperty(reflector_ptr, reflection_attribute_target_ptr);
 	reflection_property_ptr->create_object = reflection_objects_new;
 	reflection_property_ptr->default_object_handlers = &reflection_object_handlers;
 
-	reflection_class_constant_ptr = register_class_ReflectionClassConstant(reflector_ptr);
+	reflection_class_constant_ptr = register_class_ReflectionClassConstant(reflector_ptr, reflection_attribute_target_ptr);
 	reflection_class_constant_ptr->create_object = reflection_objects_new;
 	reflection_class_constant_ptr->default_object_handlers = &reflection_object_handlers;
 
@@ -8228,7 +8381,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_fiber_ptr->create_object = reflection_objects_new;
 	reflection_fiber_ptr->default_object_handlers = &reflection_object_handlers;
 
-	reflection_constant_ptr = register_class_ReflectionConstant(reflector_ptr);
+	reflection_constant_ptr = register_class_ReflectionConstant(reflector_ptr, reflection_attribute_target_ptr);
 	reflection_constant_ptr->create_object = reflection_objects_new;
 	reflection_constant_ptr->default_object_handlers = &reflection_object_handlers;
 
