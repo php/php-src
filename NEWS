@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - Bz2:
   . Fix truncation of total output size causing erroneous errors. (ndossche)
 
+- GD:
+  . Fixed bug GH-21431 (phpinfo() to display libJPEG 10.0 support).
+    (David Carlier)
+
 - Opcache:
   . Fixed bug GH-21052 (Preloaded constant erroneously propagated to file-cached
     script). (ilutov)
