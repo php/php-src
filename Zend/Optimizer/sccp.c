@@ -402,7 +402,7 @@ static inline zend_result ct_eval_fetch_dim(zval *result, zval *op1, zval *op2, 
 			return FAILURE;
 		}
 		if (index >= 0 && index < Z_STRLEN_P(op1)) {
-			ZVAL_STR(result, zend_string_init(&Z_STRVAL_P(op1)[index], 1, 0));
+			ZVAL_STR(result, zend_string_init_fast(&Z_STRVAL_P(op1)[index], 1, 0));
 			return SUCCESS;
 		}
 	}
