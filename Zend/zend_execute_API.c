@@ -195,6 +195,8 @@ void init_executor(void) /* {{{ */
 	EG(num_errors) = 0;
 	EG(errors) = NULL;
 
+	EG(transitive_compare_mode) = false;
+
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
 

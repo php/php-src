@@ -2253,18 +2253,30 @@ ZEND_API zend_result ZEND_FASTCALL compare_function(zval *result, zval *op1, zva
 }
 /* }}} */
 
-static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
+static int compare_long_to_string(zend_long lval, zend_string *str, bool transitive_mode) /* {{{ */
 {
 	zend_long str_lval;
 	double str_dval;
 	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
 
 	if (type == IS_LONG) {
-		return lval > str_lval ? 1 : lval < str_lval ? -1 : 0;
+		return ZEND_THREEWAY_COMPARE(lval, str_lval);
 	}
 
 	if (type == IS_DOUBLE) {
 		return ZEND_THREEWAY_COMPARE((double) lval, str_dval);
+	}
+
+	/* String is non-numeric. In transitive mode, enforce consistent ordering.
+	 * Empty string < numeric < non-numeric string.
+	 * Since str is non-numeric, check if it's empty. */
+	if (UNEXPECTED(transitive_mode)) {
+		/* Empty string comes before everything */
+		if (ZSTR_LEN(str) == 0) {
+			return 1;  /* lval > empty string */
+		}
+		/* Non-empty, non-numeric string comes after numbers */
+		return -1;  /* lval < non-numeric string */
 	}
 
 	zend_string *lval_as_str = zend_long_to_str(lval);
@@ -2275,7 +2287,7 @@ static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 }
 /* }}} */
 
-static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
+static int compare_double_to_string(double dval, zend_string *str, bool transitive_mode) /* {{{ */
 {
 	zend_long str_lval;
 	double str_dval;
@@ -2291,6 +2303,18 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 		return ZEND_THREEWAY_COMPARE(dval, str_dval);
 	}
 
+	/* String is non-numeric. In transitive mode, enforce consistent ordering.
+	 * Empty string < numeric < non-numeric string.
+	 * Since str is non-numeric, check if it's empty. */
+	if (UNEXPECTED(transitive_mode)) {
+		/* Empty string comes before everything */
+		if (ZSTR_LEN(str) == 0) {
+			return 1;  /* dval > empty string */
+		}
+		/* Non-empty, non-numeric string comes after numbers */
+		return -1;  /* dval < non-numeric string */
+	}
+
 	zend_string *dval_as_str = zend_double_to_str(dval);
 	int cmp_result = zend_binary_strcmp(
 		ZSTR_VAL(dval_as_str), ZSTR_LEN(dval_as_str), ZSTR_VAL(str), ZSTR_LEN(str));
@@ -2303,6 +2327,8 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 {
 	bool converted = false;
 	zval op1_copy, op2_copy;
+	
+	bool transitive_mode = UNEXPECTED(EG(transitive_compare_mode));
 
 	while (1) {
 		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
@@ -2347,24 +2373,24 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 				return Z_STRLEN_P(op1) == 0 ? 0 : 1;
 
 			case TYPE_PAIR(IS_LONG, IS_STRING):
-				return compare_long_to_string(Z_LVAL_P(op1), Z_STR_P(op2));
+				return compare_long_to_string(Z_LVAL_P(op1), Z_STR_P(op2), transitive_mode);
 
 			case TYPE_PAIR(IS_STRING, IS_LONG):
-				return -compare_long_to_string(Z_LVAL_P(op2), Z_STR_P(op1));
+				return -compare_long_to_string(Z_LVAL_P(op2), Z_STR_P(op1), transitive_mode);
 
 			case TYPE_PAIR(IS_DOUBLE, IS_STRING):
 				if (zend_isnan(Z_DVAL_P(op1))) {
 					return 1;
 				}
 
-				return compare_double_to_string(Z_DVAL_P(op1), Z_STR_P(op2));
+				return compare_double_to_string(Z_DVAL_P(op1), Z_STR_P(op2), transitive_mode);
 
 			case TYPE_PAIR(IS_STRING, IS_DOUBLE):
 				if (zend_isnan(Z_DVAL_P(op2))) {
 					return 1;
 				}
 
-				return -compare_double_to_string(Z_DVAL_P(op2), Z_STR_P(op1));
+				return -compare_double_to_string(Z_DVAL_P(op2), Z_STR_P(op1), transitive_mode);
 
 			case TYPE_PAIR(IS_OBJECT, IS_NULL):
 				return 1;
@@ -3421,8 +3447,36 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
 
-	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL)) &&
-		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL))) {
+	/* Handle empty strings */
+	if (UNEXPECTED(s1->len == 0 || s2->len == 0)) {
+		if (UNEXPECTED(EG(transitive_compare_mode))) {
+			if (s1->len == 0 && s2->len == 0) return 0;
+			return s1->len == 0 ? -1 : 1;
+		}
+		goto string_cmp;
+	}
+
+	/* Skip numeric parsing if both strings start with letters */
+	unsigned char c1 = (unsigned char)s1->val[0];
+	unsigned char c2 = (unsigned char)s2->val[0];
+	
+	if (((c1 >= 'a' && c1 <= 'z') || (c1 >= 'A' && c1 <= 'Z')) &&
+	    ((c2 >= 'a' && c2 <= 'z') || (c2 >= 'A' && c2 <= 'Z'))) {
+		goto string_cmp;
+	}
+
+	ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL);
+	ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL);
+
+	/* In transitive mode, enforce numeric < non-numeric ordering */
+	if (UNEXPECTED(EG(transitive_compare_mode))) {
+		int type_mismatch = (!!ret1) ^ (!!ret2);
+		if (UNEXPECTED(type_mismatch)) {
+			return ret1 ? -1 : 1;
+		}
+	}
+
+	if (ret1 && ret2) {
 #if ZEND_ULONG_MAX == 0xFFFFFFFF
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
 			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
@@ -3451,10 +3505,9 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) 
 				 * so a numeric comparison would be inaccurate */
 				goto string_cmp;
 			}
-			dval1 = dval1 - dval2;
-			return ZEND_NORMALIZE_BOOL(dval1);
+			return ZEND_THREEWAY_COMPARE(dval1, dval2);
 		} else { /* they both have to be long's */
-			return lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0);
+			return ZEND_THREEWAY_COMPARE(lval1, lval2);
 		}
 	} else {
 		int strcmp_ret;
