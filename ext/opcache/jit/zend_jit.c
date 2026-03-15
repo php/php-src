@@ -30,8 +30,18 @@
 #include "Zend/zend_observer.h"
 #include "zend_smart_str.h"
 #include "jit/zend_jit.h"
+#if __has_include(<sys/mman.h>)
+# include <sys/mman.h>
+#endif
 
 #ifdef HAVE_JIT
+
+#if defined(HAVE_PKEY_MPROTECT) && defined(PKEY_DISABLE_WRITE)
+# define ZEND_JIT_USE_PKEYS
+# ifndef PKEY_DISABLE_EXECUTE
+#  define PKEY_DISABLE_EXECUTE 0
+# endif
+#endif
 
 #include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_ssa.h"
@@ -88,6 +98,10 @@ static void **dasm_ptr = NULL;
 
 static size_t dasm_size = 0;
 
+#ifdef ZEND_JIT_USE_PKEYS
+static int pkey = 0; /* Memory Protection Key */
+#endif
+
 static zend_long jit_bisect_pos = 0;
 
 static zend_vm_opcode_handler_t zend_jit_runtime_jit_handler = NULL;
@@ -103,6 +117,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_runtime_jit(ZEND_O
 #else
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS);
 #endif
+
+static void zend_jit_protect_init(void);
 
 static int zend_jit_trace_op_len(const zend_op *opline);
 static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline);
@@ -3515,10 +3531,80 @@ jit_failure:
 	return FAILURE;
 }
 
+static void zend_jit_protect_init(void)
+{
+#ifdef HAVE_MPROTECT
+# ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+	if (zend_write_protect) {
+		pthread_jit_write_protect_np(1);
+	}
+# endif
+
+	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
+		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
+			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+		}
+		return;
+	}
+
+# ifdef ZEND_JIT_USE_PKEYS
+	pkey = pkey_alloc(0, PKEY_DISABLE_WRITE);
+	if (pkey < 0) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "zend_jit_protect_init: pkey_alloc() failed [%d] %s", errno, strerror(errno));
+		pkey = 0;
+	} else if (pkey_mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC, pkey) != 0) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "zend_jit_protect_init: pkey_mprotect() failed [%d] %s", errno, strerror(errno));
+		pkey = 0;
+	} else {
+		return;
+	}
+# endif
+
+	if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
+		fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+	}
+
+#elif defined(_WIN32)
+	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
+		DWORD old;
+
+		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READWRITE, &old)) {
+			DWORD err = GetLastError();
+			char *msg = php_win32_error_to_msg(err);
+			fprintf(stderr, "VirtualProtect() failed [%lu] %s\n", err, msg);
+			php_win32_error_msg_free(msg);
+		}
+	} else {
+		DWORD old;
+
+		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READ, &old)) {
+			DWORD err = GetLastError();
+			char *msg = php_win32_error_to_msg(err);
+			fprintf(stderr, "VirtualProtect() failed [%lu] %s\n", err, msg);
+			php_win32_error_msg_free(msg);
+		}
+	}
+#endif
+}
+
 void zend_jit_unprotect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
+# ifdef ZEND_JIT_USE_PKEYS
+		if (pkey) {
+#  ifdef ZTS
+			int restrictions = 0;
+#  else
+			int restrictions = PKEY_DISABLE_EXECUTE;
+#  endif
+			if (pkey_set(pkey, restrictions) != 0) {
+				ZEND_UNREACHABLE();
+			}
+			return;
+		}
+# endif
+
 		int opts = PROT_READ | PROT_WRITE;
 #ifdef ZTS
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
@@ -3554,6 +3640,15 @@ void zend_jit_protect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
+# ifdef ZEND_JIT_USE_PKEYS
+		if (pkey) {
+			if (pkey_set(pkey, PKEY_DISABLE_WRITE) != 0) {
+				ZEND_UNREACHABLE();
+			}
+			return;
+		}
+# endif
+
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 		if (zend_write_protect) {
 			pthread_jit_write_protect_np(1);
@@ -3787,42 +3882,7 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 	dasm_size = size;
 	dasm_ptr = dasm_end = (void*)(((char*)dasm_buf) + size - sizeof(*dasm_ptr) * 2);
 
-#ifdef HAVE_MPROTECT
-#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-	if (zend_write_protect) {
-		pthread_jit_write_protect_np(1);
-	}
-#endif
-	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
-		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
-			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
-		}
-	} else {
-		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
-			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
-		}
-	}
-#elif defined(_WIN32)
-	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
-		DWORD old;
-
-		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READWRITE, &old)) {
-			DWORD err = GetLastError();
-			char *msg = php_win32_error_to_msg(err);
-			fprintf(stderr, "VirtualProtect() failed [%lu] %s\n", err, msg);
-			php_win32_error_msg_free(msg);
-		}
-	} else {
-		DWORD old;
-
-		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READ, &old)) {
-			DWORD err = GetLastError();
-			char *msg = php_win32_error_to_msg(err);
-			fprintf(stderr, "VirtualProtect() failed [%lu] %s\n", err, msg);
-			php_win32_error_msg_free(msg);
-		}
-	}
-#endif
+	zend_jit_protect_init();
 
 	if (!reattached) {
 		zend_jit_unprotect();
@@ -3880,6 +3940,12 @@ void zend_jit_shutdown(void)
 	dasm_buf = NULL;
 	dasm_end = NULL;
 	dasm_size = 0;
+
+#ifdef ZEND_JIT_USE_PKEYS
+	if (pkey) {
+		pkey_free(pkey);
+	}
+#endif
 }
 
 static void zend_jit_reset_counters(void)
