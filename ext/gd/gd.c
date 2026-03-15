@@ -4090,15 +4090,35 @@ PHP_FUNCTION(imageaffinematrixget)
 				RETURN_THROWS();
 			}
 
-			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "x", sizeof("x") - 1)) != NULL) {
-				x = zval_get_double(tmp);
+			if ((tmp = zend_hash_str_find_deref(Z_ARRVAL_P(options), "x", sizeof("x") - 1)) != NULL) {
+				switch (Z_TYPE_P(tmp)) {
+				case IS_LONG:
+				case IS_DOUBLE:
+				case IS_STRING:
+				case IS_OBJECT:
+					x = zval_get_double(tmp);
+					break;
+				default:
+					zend_argument_type_error(2, "must be a float for the \"x\" key, %s given", zend_zval_value_name(tmp));
+					RETURN_THROWS();
+				}
 			} else {
 				zend_argument_value_error(2, "must have an \"x\" key");
 				RETURN_THROWS();
 			}
 
-			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "y", sizeof("y") - 1)) != NULL) {
-				y = zval_get_double(tmp);
+			if ((tmp = zend_hash_str_find_deref(Z_ARRVAL_P(options), "y", sizeof("y") - 1)) != NULL) {
+				switch (Z_TYPE_P(tmp)) {
+				case IS_LONG:
+				case IS_DOUBLE:
+				case IS_STRING:
+				case IS_OBJECT:
+					y = zval_get_double(tmp);
+					break;
+				default:
+					zend_argument_type_error(2, "must be a float for the \"y\" key, %s given", zend_zval_value_name(tmp));
+					RETURN_THROWS();
+				}
 			} else {
 				zend_argument_value_error(2, "must have a \"y\" key");
 				RETURN_THROWS();
@@ -4117,7 +4137,17 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SHEAR_VERTICAL: {
 			double angle;
 
-			angle = zval_get_double(options);
+			switch (Z_TYPE_P(options)) {
+			case IS_LONG:
+			case IS_DOUBLE:
+			case IS_STRING:
+			case IS_OBJECT:
+				angle = zval_get_double(options);
+				break;
+			default:
+				zend_argument_type_error(2, "must be of type float, %s given", zend_zval_value_name(options));
+				RETURN_THROWS();
+			}
 
 			if (type == GD_AFFINE_SHEAR_HORIZONTAL) {
 				res = gdAffineShearHorizontal(affine, angle);
