@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_reflection.stub.php instead.
- * Stub hash: 75f975e31f78446c918d29ca14321e7b1ad0b0c6
+ * Stub hash: f10c9d3d2d3a5fe71f60c6a3fdd682ffaf58275c
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
@@ -519,7 +519,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionParameter___toString arginfo_class_ReflectionFunction___toString
 
-#define arginfo_class_ReflectionParameter_getDocComment arginfo_class_ReflectionFunctionAbstract_getDocComment
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionParameter_getDocComment, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionParameter_getName arginfo_class_ReflectionFunctionAbstract_getName
 
@@ -716,13 +717,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionConstant_isDeprecated arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionConstant_getFileName, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionConstant_getFileName arginfo_class_ReflectionParameter_getDocComment
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionConstant_getExtension, 0, 0, ReflectionExtension, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ReflectionConstant_getExtensionName arginfo_class_ReflectionConstant_getFileName
+#define arginfo_class_ReflectionConstant_getExtensionName arginfo_class_ReflectionParameter_getDocComment
 
 #define arginfo_class_ReflectionConstant___toString arginfo_class_ReflectionFunction___toString
 
