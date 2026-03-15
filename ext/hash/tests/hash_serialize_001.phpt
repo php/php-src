@@ -41,7 +41,10 @@ foreach ($algos as $algo) {
 
 function not_serializable(string $algo)
 {
-    return in_array($algo, ["xxh3", "xxh128"]);
+    return in_array($algo, [
+        "xxh3", 
+        "xxh128",
+        ], true);
 }
 
 echo "Done\n";
@@ -176,6 +179,9 @@ string(8) "eee74423"
 string(5) "xxh64"
 string(16) "9d6ab4708056a619"
 string(16) "9d6ab4708056a619"
+string(6) "blake3"
+string(64) "e232493e3d416e24ffc588b24a1772ccc6f80290f1920cf15f21313bc3543a51"
+string(64) "e232493e3d416e24ffc588b24a1772ccc6f80290f1920cf15f21313bc3543a51"
 string(10) "haval128,3"
 string(32) "86362472c8895e68e223ef8b3711d8d9"
 string(32) "86362472c8895e68e223ef8b3711d8d9"
@@ -350,6 +356,9 @@ string(8) "3b7a100b"
 string(5) "xxh64"
 string(16) "5a90002ef76d172f"
 string(16) "5a90002ef76d172f"
+string(6) "blake3"
+string(64) "dbdea45e5a6c3bad18a4f96d9d4b9105e4cceaa4fc06568f69829435c47587fb"
+string(64) "dbdea45e5a6c3bad18a4f96d9d4b9105e4cceaa4fc06568f69829435c47587fb"
 string(10) "haval128,3"
 string(32) "ebeeeb05c18af1e53d2d127b561d5e0d"
 string(32) "ebeeeb05c18af1e53d2d127b561d5e0d"
