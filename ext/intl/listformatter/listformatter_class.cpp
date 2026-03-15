@@ -14,10 +14,15 @@
 
 extern "C" {
 #include "php.h"
-#include "php_intl.h"
-#include "intl_convert.h"
 }
-#include <unicode/ulistformatter.h>
+
+#include <unicode/listformatter.h>
+#include <unicode/locid.h>
+#include "../intl_convertcpp.h"
+
+extern "C" {
+#include "php_intl.h"
+}
 #include "listformatter_class.h"
 #include "listformatter_arginfo.h"
 
@@ -27,9 +32,7 @@ static void listformatter_free_obj(zend_object *object)
 {
     ListFormatter_object *obj = php_intl_listformatter_fetch_object(object);
 
-    if( obj->lf_data.ulistfmt )
-        ulistfmt_close( obj->lf_data.ulistfmt );
-
+    delete obj->lf_data.ulistfmt;
     obj->lf_data.ulistfmt = nullptr;
     intl_error_reset( &obj->lf_data.error );
 
@@ -78,7 +81,7 @@ PHP_METHOD(IntlListFormatter, __construct)
         RETURN_THROWS();
     }
 
-    if (strlen(uloc_getISO3Language(locale)) == 0) {
+    if (icu::Locale(locale).getISO3Language()[0] == '\0') {
         zend_argument_value_error(1, "\"%s\" is invalid", locale);
         RETURN_THROWS();
     }
@@ -89,13 +92,13 @@ PHP_METHOD(IntlListFormatter, __construct)
             zend_argument_value_error(2, "must be one of IntlListFormatter::TYPE_AND, IntlListFormatter::TYPE_OR, or IntlListFormatter::TYPE_UNITS");
             RETURN_THROWS();
         }
-        
+
         if (width != ULISTFMT_WIDTH_WIDE && width != ULISTFMT_WIDTH_SHORT && width != ULISTFMT_WIDTH_NARROW) {
             zend_argument_value_error(3, "must be one of IntlListFormatter::WIDTH_WIDE, IntlListFormatter::WIDTH_SHORT, or IntlListFormatter::WIDTH_NARROW");
             RETURN_THROWS();
         }
 
-        LISTFORMATTER_OBJECT(obj) = ulistfmt_openForType(locale, static_cast<UListFormatterType>(type), static_cast<UListFormatterWidth>(width), &status);
+        LISTFORMATTER_OBJECT(obj) = ListFormatter::createInstance(icu::Locale(locale), static_cast<UListFormatterType>(type), static_cast<UListFormatterWidth>(width), status);
     #else
         if (type != INTL_LISTFORMATTER_FALLBACK_TYPE_AND) {
             zend_argument_value_error(2, "contains an unsupported type. ICU 66 and below only support IntlListFormatter::TYPE_AND");
@@ -107,7 +110,7 @@ PHP_METHOD(IntlListFormatter, __construct)
             RETURN_THROWS();
         }
 
-        LISTFORMATTER_OBJECT(obj) = ulistfmt_open(locale, &status);
+        LISTFORMATTER_OBJECT(obj) = ListFormatter::createInstance(icu::Locale(locale), status);
     #endif
 
     if (U_FAILURE(status)) {
@@ -131,84 +134,50 @@ PHP_METHOD(IntlListFormatter, format)
         RETURN_EMPTY_STRING();
     }
 
-    const UChar **items = (const UChar **)safe_emalloc(count, sizeof(const UChar *), 0);
-    int32_t *itemLengths = (int32_t *)safe_emalloc(count, sizeof(int32_t), 0);
+    UnicodeString *items = new UnicodeString[count];
     uint32_t i = 0;
     zval *val;
 
     ZEND_HASH_FOREACH_VAL(ht, val) {
         zend_string *str_val, *tmp_str;
-        
-        str_val = zval_get_tmp_string(val, &tmp_str);
-        
-        // Convert PHP string to UTF-16
-        UChar *ustr = nullptr;
-        int32_t ustr_len = 0;
-        UErrorCode status = U_ZERO_ERROR;
-        
-        intl_convert_utf8_to_utf16(&ustr, &ustr_len, ZSTR_VAL(str_val), ZSTR_LEN(str_val), &status);
+        UErrorCode conv_status = U_ZERO_ERROR;
+
+        str_val = zval_try_get_tmp_string(val, &tmp_str);
+        if (UNEXPECTED(!str_val)) {
+            delete[] items;
+            RETURN_THROWS();
+        }
+        intl_stringFromChar(items[i], ZSTR_VAL(str_val), ZSTR_LEN(str_val), &conv_status);
         zend_tmp_string_release(tmp_str);
 
-        if (U_FAILURE(status)) {
-            // We can't use goto cleanup because items and itemLengths are incompletely allocated
-            for (uint32_t j = 0; j < i; j++) {
-                efree((void *)items[j]);
-            }
-            efree(items);
-            efree(itemLengths);
-            intl_error_set(nullptr, status, "Failed to convert string to UTF-16");
+        if (U_FAILURE(conv_status)) {
+            delete[] items;
+            intl_error_set(nullptr, conv_status, "Failed to convert string to UTF-16");
             RETURN_FALSE;
         }
-        
-        items[i] = ustr;
-        itemLengths[i] = ustr_len;
+
         i++;
     } ZEND_HASH_FOREACH_END();
 
     UErrorCode status = U_ZERO_ERROR;
-    int32_t resultLength;
-    UChar *result = nullptr;
-    zend_string *ret = nullptr;
+    UnicodeString result;
 
-    resultLength = ulistfmt_format(LISTFORMATTER_OBJECT(obj), items, itemLengths, count, nullptr, 0, &status);
-
-    if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
-        intl_error_set(nullptr, status, "Failed to format list");
-        RETVAL_FALSE;
-        goto cleanup;
-    }
-
-    // Allocate buffer and try again
-    status = U_ZERO_ERROR;
-    result = (UChar *)safe_emalloc(resultLength + 1, sizeof(UChar), 0);
-    ulistfmt_format(LISTFORMATTER_OBJECT(obj), items, itemLengths, count, result, resultLength, &status);
+    LISTFORMATTER_OBJECT(obj)->format(items, count, result, status);
+    delete[] items;
 
     if (U_FAILURE(status)) {
-        if (result) {
-            efree(result);
-        }
         intl_error_set(nullptr, status, "Failed to format list");
-        RETVAL_FALSE;
-        goto cleanup;
+        RETURN_FALSE;
     }
 
-    // Convert result back to UTF-8
-    ret = intl_convert_utf16_to_utf8(result, resultLength, &status);
-    efree(result);
-    
+    zend_string *ret = intl_charFromString(result, &status);
+
     if (!ret) {
         intl_error_set(nullptr, status, "Failed to convert result to UTF-8");
-        RETVAL_FALSE;
-    } else {
-        RETVAL_NEW_STR(ret);
+        RETURN_FALSE;
     }
 
-cleanup:
-    for (i = 0; i < count; i++) {
-        efree((void *)items[i]);
-    }
-    efree(items);
-    efree(itemLengths);
+    RETVAL_STR(ret);
 }
 
 PHP_METHOD(IntlListFormatter, getErrorCode)
@@ -236,7 +205,7 @@ void listformatter_register_class(void)
 {
     zend_class_entry *class_entry = register_class_IntlListFormatter();
     class_entry->create_object = listformatter_create_object;
-    
+
     memcpy(&listformatter_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     listformatter_handlers.offset = XtOffsetOf(ListFormatter_object, zo);
     listformatter_handlers.free_obj = listformatter_free_obj;

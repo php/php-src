@@ -16,14 +16,17 @@
 #include <config.h>
 #endif
 
-#include <unicode/ustring.h>
-#include <unicode/uloc.h>
+#include <unicode/locid.h>
+#include <unicode/decimfmt.h>
+#include <unicode/dcfmtsym.h>
+#include <unicode/rbnf.h>
+#include <unicode/compactdecimalformat.h>
+#include "../intl_convertcpp.h"
+#include "formatter_class.h"
 
 extern "C" {
 #include "php_intl.h"
-#include "intl_convert.h"
 }
-#include "formatter_class.h"
 
 /* {{{ */
 static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
@@ -32,8 +35,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	char*       pattern = NULL;
 	size_t      locale_len = 0, pattern_len = 0;
 	zend_long   style;
-	UChar*      spattern     = NULL;
-	int32_t     spattern_len = 0;
+	UnicodeString upattern;
 	FORMATTER_METHOD_INIT_VARS;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -53,7 +55,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	/* Convert pattern (if specified) to UTF-16. */
 	if(pattern && pattern_len) {
-		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
+		intl_stringFromChar(upattern, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
 		INTL_CTOR_CHECK_STATUS(nfo, "error converting pattern to UTF-16");
 	}
 
@@ -61,7 +63,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		locale = (char *)intl_locale_get_default();
 	}
 
-	if (strlen(uloc_getISO3Language(locale)) == 0) {
+	if (icu::Locale(locale).getISO3Language()[0] == '\0') {
 		zend_argument_value_error(1, "\"%s\" is invalid", locale);
 		return FAILURE;
 	}
@@ -70,12 +72,55 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	const char* final_locale = canonicalized_locale ? canonicalized_locale : locale;
 
 	/* Create an ICU number formatter. */
-	FORMATTER_OBJECT(nfo) = unum_open(static_cast<UNumberFormatStyle>(style), spattern, spattern_len, final_locale, nullptr, &INTL_DATA_ERROR_CODE(nfo));
-
-	if (spattern) {
-		efree(spattern);
+	icu::Locale loc(final_locale);
+	switch (style) {
+		case UNUM_PATTERN_DECIMAL: {
+			icu::DecimalFormatSymbols *syms = new icu::DecimalFormatSymbols(loc, INTL_DATA_ERROR_CODE(nfo));
+			if (U_FAILURE(INTL_DATA_ERROR_CODE(nfo))) {
+				delete syms;
+				break;
+			}
+			FORMATTER_OBJECT(nfo) = new icu::DecimalFormat(upattern, syms, INTL_DATA_ERROR_CODE(nfo));
+			if (FORMATTER_OBJECT(nfo) == nullptr) {
+				delete syms;
+			}
+			break;
+		}
+		case UNUM_PATTERN_RULEBASED: {
+			UParseError parseError;
+			FORMATTER_OBJECT(nfo) = new icu::RuleBasedNumberFormat(upattern, loc, parseError, INTL_DATA_ERROR_CODE(nfo));
+			break;
+		}
+		case UNUM_SPELLOUT:
+			FORMATTER_OBJECT(nfo) = new icu::RuleBasedNumberFormat(icu::URBNF_SPELLOUT, loc, INTL_DATA_ERROR_CODE(nfo));
+			break;
+		case UNUM_ORDINAL:
+			FORMATTER_OBJECT(nfo) = new icu::RuleBasedNumberFormat(icu::URBNF_ORDINAL, loc, INTL_DATA_ERROR_CODE(nfo));
+			break;
+		case UNUM_DURATION:
+			FORMATTER_OBJECT(nfo) = new icu::RuleBasedNumberFormat(icu::URBNF_DURATION, loc, INTL_DATA_ERROR_CODE(nfo));
+			break;
+		case UNUM_NUMBERING_SYSTEM: {
+			UErrorCode localErr = U_ZERO_ERROR;
+			int32_t keywordLength = loc.getKeywordValue("numbers", nullptr, 0, localErr);
+			if (keywordLength > 0) {
+				FORMATTER_OBJECT(nfo) = NumberFormat::createInstance(loc, UNUM_DEFAULT, INTL_DATA_ERROR_CODE(nfo));
+			} else {
+				FORMATTER_OBJECT(nfo) = new icu::RuleBasedNumberFormat(icu::URBNF_NUMBERING_SYSTEM, loc, INTL_DATA_ERROR_CODE(nfo));
+			}
+			break;
+		}
+		case UNUM_DECIMAL_COMPACT_SHORT:
+			FORMATTER_OBJECT(nfo) = icu::CompactDecimalFormat::createInstance(loc, UNUM_SHORT, INTL_DATA_ERROR_CODE(nfo));
+			break;
+		case UNUM_DECIMAL_COMPACT_LONG:
+			FORMATTER_OBJECT(nfo) = icu::CompactDecimalFormat::createInstance(loc, UNUM_LONG, INTL_DATA_ERROR_CODE(nfo));
+			break;
+		default:
+			FORMATTER_OBJECT(nfo) = NumberFormat::createInstance(loc, static_cast<UNumberFormatStyle>(style), INTL_DATA_ERROR_CODE(nfo));
+			break;
 	}
-	
+
 	if (canonicalized_locale) {
 		efree(canonicalized_locale);
 	}
