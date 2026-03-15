@@ -1817,7 +1817,6 @@ ZEND_API void zend_free_recorded_errors(void)
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
 {
 	va_list va;
-	char *message = NULL;
 
 	if (!exception_ce) {
 		exception_ce = zend_ce_error;
@@ -1829,16 +1828,16 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 	}
 
 	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
+	zend_string *message = zend_vstrpprintf(0, format, va);
 
 	//TODO: we can't convert compile-time errors to exceptions yet???
 	if (EG(current_execute_data) && !CG(in_compilation)) {
-		zend_throw_exception(exception_ce, message, 0);
+		zend_throw_exception_zstr(exception_ce, message, 0);
 	} else {
-		zend_error_noreturn(E_ERROR, "%s", message);
+		zend_error_noreturn(E_ERROR, "%s", ZSTR_VAL(message));
 	}
 
-	efree(message);
+	zend_string_release_ex(message, false);
 	va_end(va);
 }
 /* }}} */
@@ -1869,24 +1868,22 @@ ZEND_API ZEND_COLD void zend_illegal_container_offset(const zend_string *contain
 ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
-	char *message = NULL;
 
 	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-	zend_throw_exception(zend_ce_type_error, message, 0);
-	efree(message);
+	zend_string *message = zend_vstrpprintf(0, format, va);
+	zend_throw_exception_zstr(zend_ce_type_error, message, 0);
+	zend_string_release_ex(message, false);
 	va_end(va);
 } /* }}} */
 
 ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
-	char *message = NULL;
 
 	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-	zend_throw_exception(zend_ce_argument_count_error, message, 0);
-	efree(message);
+	zend_string *message = zend_vstrpprintf(0, format, va);
+	zend_throw_exception_zstr(zend_ce_argument_count_error, message, 0);
+	zend_string_release_ex(message, false);
 
 	va_end(va);
 } /* }}} */
@@ -1894,12 +1891,11 @@ ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) /* {{
 ZEND_API ZEND_COLD void zend_value_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
-	char *message = NULL;
 
 	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-	zend_throw_exception(zend_ce_value_error, message, 0);
-	efree(message);
+	zend_string *message = zend_vstrpprintf(0, format, va);
+	zend_throw_exception_zstr(zend_ce_value_error, message, 0);
+	zend_string_release_ex(message, false);
 	va_end(va);
 } /* }}} */
 
