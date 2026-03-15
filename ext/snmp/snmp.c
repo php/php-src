@@ -1637,6 +1637,14 @@ PHP_FUNCTION(snmp_read_mib)
 }
 /* }}} */
 
+/* {{{ Resets the MIB tree using the MIBDIRS, MIBS and MIBFILES environment variables. */
+PHP_FUNCTION(snmp_init_mib)
+{
+	shutdown_mib();
+	init_mib();
+}
+/* }}} */
+
 /* {{{ Creates a new SNMP session to specified host. */
 PHP_METHOD(SNMP, __construct)
 {
