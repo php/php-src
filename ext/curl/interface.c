@@ -602,9 +602,9 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 /* {{{ curl_progress */
 static int curl_progress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 {
-	/* 2. Check if we are in a "bailout" state (timeout) */
-	if (EG(exception) || (EG(flags) & ZEN_EG_BAILOUT)) {
-		return 1; 
+	/* 2. Do not call progress callback if we are in a shutdown state (eg. timeout)*/
+	if (UNEXPECTED(EG(flags) & EG_FLAGS_IN_SHUTDOWN)) {
+		return 0;
 	}
 
 	php_curl *ch = (php_curl *)clientp;
