@@ -408,6 +408,32 @@ static int pdo_sqlite_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
 			zend_value_error("explain statement unsupported");
 			return 0;
 #endif
+		case PDO_SQLITE_ATTR_SQL: {
+			const char *sql = sqlite3_sql(S->stmt);
+			if (sql) {
+				ZVAL_STRING(val, sql);
+			} else {
+				ZVAL_NULL(val);
+			}
+			return 1;
+		}
+
+		case PDO_SQLITE_ATTR_EXPANDED_SQL: {
+#ifdef HAVE_SQLITE3_EXPANDED_SQL
+			char *sql = sqlite3_expanded_sql(S->stmt);
+			if (sql) {
+				ZVAL_STRING(val, sql);
+				sqlite3_free(sql);
+			} else {
+				ZVAL_NULL(val);
+			}
+			return 1;
+#else
+			zend_value_error("expanded sql unsupported");
+			return -1;
+#endif
+		}
+
 		default:
 			return 0;
 	}
