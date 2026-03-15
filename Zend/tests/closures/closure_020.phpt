@@ -28,7 +28,7 @@ object(foo)#%d (2) {
   ["test":"foo":private]=>
   int(3)
   ["a"]=>
-  object(Closure)#%d (5) {
+  object(Closure)#%d (%d) {
     ["name"]=>
     string(%d) "{closure:%s:%d}"
     ["file"]=>
@@ -40,8 +40,6 @@ object(foo)#%d (2) {
       ["a"]=>
       *RECURSION*
     }
-    ["this"]=>
-    *RECURSION*
   }
 }
 bool(true)
