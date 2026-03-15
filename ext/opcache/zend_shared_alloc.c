@@ -520,6 +520,9 @@ void zend_shared_alloc_lock(void)
 #endif
 
 	ZCG(locked) = 1;
+#if ZEND_DEBUG
+	CG(map_ptr_protected) = false;
+#endif
 }
 
 void zend_shared_alloc_unlock(void)
@@ -535,6 +538,9 @@ void zend_shared_alloc_unlock(void)
 	mem_write_unlock.l_len = 1;
 #endif
 
+#if ZEND_DEBUG
+	CG(map_ptr_protected) = true;
+#endif
 	ZCG(locked) = 0;
 
 #ifndef ZEND_WIN32
