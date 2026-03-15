@@ -2131,6 +2131,8 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 }
 /* }}} */
 
+/* Note: php_array_compare_objects_transitive() in ext/standard/array.c mirrors
+ * this function for SORT_REGULAR. Changes here may need to be reflected there. */
 ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
 	zend_object *zobj1, *zobj2;
