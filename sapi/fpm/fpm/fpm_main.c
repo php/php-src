@@ -984,6 +984,7 @@ static void init_request_info(void)
 	/* initialize the defaults */
 	SG(request_info).path_translated = NULL;
 	SG(request_info).request_method = FCGI_GETENV(request, "REQUEST_METHOD");
+	SG(request_info).path_info = FCGI_GETENV(request, "PATH_INFO");
 	SG(request_info).proto_num = 1000;
 	SG(request_info).query_string = NULL;
 	SG(request_info).request_uri = NULL;
