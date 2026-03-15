@@ -1200,18 +1200,12 @@ PHP_METHOD(ArrayObject, count)
 	RETURN_LONG(spl_array_object_count_elements_helper(intern));
 } /* }}} */
 
-enum spl_array_object_sort_methods {
-	SPL_NAT_SORT,
-	SPL_CALLBACK_SORT,
-	SPL_OPTIONAL_FLAG_SORT
-};
-
-static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, const char *fname, size_t fname_len, enum spl_array_object_sort_methods use_arg) /* {{{ */
+static void spl_array_method(zval *return_value, spl_array_object *intern, const char *fname, size_t fname_len, const zval *extra_arg) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 	HashTable **ht_ptr = spl_array_get_hash_table_ptr(intern);
 	HashTable *aht = *ht_ptr;
-	zval params[2], *arg = NULL;
+	zval params[2];
+	uint32_t param_num = 1;
 
 	zend_function *fn = zend_hash_str_find_ptr(EG(function_table), fname, fname_len);
 	if (UNEXPECTED(fn == NULL)) {
@@ -1223,68 +1217,85 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, const char *fname, si
 	ZVAL_ARR(Z_REFVAL(params[0]), aht);
 	GC_ADDREF(aht);
 
-	if (use_arg == SPL_NAT_SORT) {
-		if (zend_parse_parameters_none() == FAILURE) {
-			goto exit;
-		}
-
-		intern->nApplyCount++;
-		zend_call_known_function(fn, NULL, NULL, return_value, 1, params, NULL);
-		intern->nApplyCount--;
-	} else if (use_arg == SPL_OPTIONAL_FLAG_SORT) {
-		zend_long sort_flags = 0;
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &sort_flags) == FAILURE) {
-			goto exit;
-		}
-		ZVAL_LONG(&params[1], sort_flags);
-		intern->nApplyCount++;
-		zend_call_known_function(fn, NULL, NULL, return_value, 2, params, NULL);
-		intern->nApplyCount--;
-	} else {
-		ZEND_ASSERT(use_arg == SPL_CALLBACK_SORT);
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
-			goto exit;
-		}
-		ZVAL_COPY_VALUE(&params[1], arg);
-		intern->nApplyCount++;
-		zend_call_known_function(fn, NULL, NULL, return_value, 2, params, NULL);
-		intern->nApplyCount--;
+	if (extra_arg) {
+		param_num = 2;
+		ZVAL_COPY_VALUE(&params[1], extra_arg);
 	}
+	intern->nApplyCount++;
+	zend_call_known_function(fn, NULL, NULL, return_value, param_num, params, NULL);
+	intern->nApplyCount--;
 
-exit:
-	{
-		zval *ht_zv = Z_REFVAL(params[0]);
-		zend_array_release(*ht_ptr);
-		SEPARATE_ARRAY(ht_zv);
-		*ht_ptr = Z_ARRVAL_P(ht_zv);
-		ZVAL_NULL(ht_zv);
-		zval_ptr_dtor(&params[0]);
-	}
+	zval *ht_zv = Z_REFVAL(params[0]);
+	zend_array_release(*ht_ptr);
+	SEPARATE_ARRAY(ht_zv);
+	*ht_ptr = Z_ARRVAL_P(ht_zv);
+	ZVAL_NULL(ht_zv);
+	zval_ptr_dtor(&params[0]);
 } /* }}} */
 
-#define SPL_ARRAY_METHOD(cname, fname, use_arg) \
-PHP_METHOD(cname, fname) \
-{ \
-	spl_array_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, #fname, sizeof(#fname)-1, use_arg); \
+/* Sort the entries by values. */
+PHP_METHOD(ArrayObject, asort)
+{
+	zend_long sort_flags = 0;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &sort_flags) == FAILURE) {
+		RETURN_THROWS();
+	}
+	zval sort_flag_param;
+	ZVAL_LONG(&sort_flag_param, sort_flags);
+
+	spl_array_method(return_value, Z_SPLARRAY_P(ZEND_THIS), ZEND_STRL("asort"), &sort_flag_param);
 }
 
-/* Sort the entries by values. */
-SPL_ARRAY_METHOD(ArrayObject, asort, SPL_OPTIONAL_FLAG_SORT)
-
 /* Sort the entries by key. */
-SPL_ARRAY_METHOD(ArrayObject, ksort, SPL_OPTIONAL_FLAG_SORT)
+PHP_METHOD(ArrayObject, ksort)
+{
+	zend_long sort_flags = 0;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &sort_flags) == FAILURE) {
+		RETURN_THROWS();
+	}
+	zval sort_flag_param;
+	ZVAL_LONG(&sort_flag_param, sort_flags);
+
+	spl_array_method(return_value, Z_SPLARRAY_P(ZEND_THIS), ZEND_STRL("ksort"), &sort_flag_param);
+}
 
 /* Sort the entries by values user defined function. */
-SPL_ARRAY_METHOD(ArrayObject, uasort, SPL_CALLBACK_SORT)
+PHP_METHOD(ArrayObject, uasort)
+{
+	zval *callback = NULL;
+	/* TODO: Should check variable is callable */
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback) == FAILURE) {
+		RETURN_THROWS();
+	}
+	spl_array_method(return_value, Z_SPLARRAY_P(ZEND_THIS), ZEND_STRL("uasort"), callback);
+}
 
 /* Sort the entries by key using user defined function. */
-SPL_ARRAY_METHOD(ArrayObject, uksort, SPL_CALLBACK_SORT)
+PHP_METHOD(ArrayObject, uksort)
+{
+	zval *callback = NULL;
+	/* TODO: Should check variable is callable */
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback) == FAILURE) {
+		RETURN_THROWS();
+	}
+	spl_array_method(return_value, Z_SPLARRAY_P(ZEND_THIS), ZEND_STRL("uksort"), callback);
+}
 
 /* Sort the entries by values using "natural order" algorithm. */
-SPL_ARRAY_METHOD(ArrayObject, natsort, SPL_NAT_SORT)
+PHP_METHOD(ArrayObject, natsort)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
 
-/* {{{ Sort the entries by key using case-insensitive "natural order" algorithm. */
-SPL_ARRAY_METHOD(ArrayObject, natcasesort, SPL_NAT_SORT)
+	spl_array_method(return_value, Z_SPLARRAY_P(ZEND_THIS), ZEND_STRL("natsort"), NULL);
+}
+
+/* Sort the entries by key using case-insensitive "natural order" algorithm. */
+PHP_METHOD(ArrayObject, natcasesort)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	spl_array_method(return_value, Z_SPLARRAY_P(ZEND_THIS), ZEND_STRL("natcasesort"), NULL);
+}
 
 /* {{{ Serialize the object */
 PHP_METHOD(ArrayObject, serialize)
