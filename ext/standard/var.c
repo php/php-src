@@ -30,6 +30,7 @@
 #include "zend_enum.h"
 #include "zend_exceptions.h"
 #include "zend_types.h"
+#include "zend_generics.h"
 /* }}} */
 
 struct php_serialize_data {
@@ -816,14 +817,34 @@ static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* 
 	PHP_CLASS_ATTRIBUTES;
 
 	PHP_SET_CLASS_ATTRIBUTES(struc);
-	size_t class_name_len = ZSTR_LEN(class_name);
-	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, class_name_len);
+
+	/* Append generic type args to class name if present (e.g., "Box<int>") */
+	zend_string *generic_suffix = NULL;
+	if (!incomplete_class) {
+		zend_object *obj = Z_OBJ_P(struc);
+		if (obj->generic_args) {
+			generic_suffix = zend_generic_args_to_string(obj->generic_args);
+		} else if (obj->ce->bound_generic_args) {
+			generic_suffix = zend_generic_args_to_string(obj->ce->bound_generic_args);
+		}
+	}
+
+	size_t full_name_len = ZSTR_LEN(class_name);
+	if (generic_suffix) {
+		full_name_len += ZSTR_LEN(generic_suffix);
+	}
+
+	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, full_name_len);
 	size_t l = b + sizeof(b) - 1 - s;
-	char *res = smart_str_extend(buf, 2 + l + 2 + class_name_len + 2);
+	char *res = smart_str_extend(buf, 2 + l + 2 + full_name_len + 2);
 	res = zend_mempcpy(res, "O:", 2);
 	res = zend_mempcpy(res, s, l);
 	res = zend_mempcpy(res, ":\"", 2);
-	res = zend_mempcpy(res, ZSTR_VAL(class_name), class_name_len);
+	res = zend_mempcpy(res, ZSTR_VAL(class_name), ZSTR_LEN(class_name));
+	if (generic_suffix) {
+		res = zend_mempcpy(res, ZSTR_VAL(generic_suffix), ZSTR_LEN(generic_suffix));
+		zend_string_release(generic_suffix);
+	}
 	memcpy(res, "\":", 2);
 	PHP_CLEANUP_CLASS_ATTRIBUTES();
 	return incomplete_class;

@@ -301,22 +301,28 @@ bool zend_optimizer_update_op1_const(zend_op_array *op_array,
 			opline->extended_value = alloc_cache_slots(op_array, 1);
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
-		case ZEND_NEW:
+		case ZEND_NEW: {
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
+			/* Non-const ZEND_NEW converted to const can never have generic args.
+			 * Generic args are only added during compilation for const class names.
+			 * Clear the flag to prevent false positives from uninitialized op2.num. */
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			opline->op2.num = alloc_cache_slots(op_array, 1);
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
-		case ZEND_INIT_STATIC_METHOD_CALL:
+		}
+		case ZEND_INIT_STATIC_METHOD_CALL: {
+			uint32_t generic_flag = opline->result.num & 0x80000000;
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			if (opline->op2_type != IS_CONST) {
-				opline->result.num = alloc_cache_slots(op_array, 1);
+				opline->result.num = alloc_cache_slots(op_array, 1) | generic_flag;
 			}
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
+		}
 		case ZEND_FETCH_CLASS_CONSTANT:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);

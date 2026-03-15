@@ -27,6 +27,7 @@
 #include "zend_operators.h"
 #include "zend_attributes.h"
 #include "zend_constants.h"
+#include "zend_generics.h"
 
 #define ADD_DUP_SIZE(m,s)  ZCG(current_persistent_script)->size += zend_shared_memdup_size((void*)m, s)
 #define ADD_SIZE(m)        ZCG(current_persistent_script)->size += ZEND_ALIGNED_SIZE(m)
@@ -197,8 +198,30 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 	}
 }
 
+static void zend_persist_generic_args_calc(zend_generic_args *args);
+
 static void zend_persist_type_calc(zend_type *type)
 {
+	/* Handle generic type references before the list/name iteration */
+	if (ZEND_TYPE_IS_GENERIC_PARAM(*type)) {
+		zend_generic_type_ref *ref = ZEND_TYPE_GENERIC_PARAM_REF(*type);
+		ADD_SIZE(sizeof(zend_generic_type_ref));
+		ADD_INTERNED_STRING(ref->name);
+		return;
+	}
+	if (ZEND_TYPE_IS_GENERIC_CLASS(*type)) {
+		zend_generic_class_ref *ref = ZEND_TYPE_GENERIC_CLASS_REF(*type);
+		ADD_SIZE(sizeof(zend_generic_class_ref));
+		ADD_INTERNED_STRING(ref->class_name);
+		if (ref->type_args) {
+			zend_persist_generic_args_calc(ref->type_args);
+		}
+		if (ref->wildcard_bounds && ref->type_args) {
+			ADD_SIZE(ref->type_args->num_args * sizeof(zend_generic_bound));
+		}
+		return;
+	}
+
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		ADD_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
 	}
@@ -215,6 +238,24 @@ static void zend_persist_type_calc(zend_type *type)
 			ZEND_TYPE_SET_PTR(*single_type, type_name);
 		}
 	} ZEND_TYPE_FOREACH_END();
+}
+
+static void zend_persist_generic_args_calc(zend_generic_args *args)
+{
+	ADD_SIZE(ZEND_GENERIC_ARGS_SIZE(args->num_args));
+	for (uint32_t i = 0; i < args->num_args; i++) {
+		zend_persist_type_calc(&args->args[i]);
+	}
+}
+
+static void zend_persist_generic_params_info_calc(zend_generic_params_info *info)
+{
+	ADD_SIZE(ZEND_GENERIC_PARAMS_INFO_SIZE(info->num_params));
+	for (uint32_t i = 0; i < info->num_params; i++) {
+		ADD_INTERNED_STRING(info->params[i].name);
+		zend_persist_type_calc(&info->params[i].constraint);
+		zend_persist_type_calc(&info->params[i].default_type);
+	}
 }
 
 static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
@@ -284,6 +325,33 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		}
 	}
 
+	/* Calculate size for generic args stored as literals in opcodes */
+	{
+		zend_op *op = op_array->opcodes;
+		zend_op *end = op + op_array->last;
+		while (op < end) {
+			if (op->opcode == ZEND_NEW && op->op1_type == IS_CONST
+			 && (op->op2.num & 0x80000000)) {
+				zval *literal = RT_CONSTANT(op, op->op1) + 2;
+				zend_generic_args *args = (zend_generic_args *) Z_PTR_P(literal);
+				zend_persist_generic_args_calc(args);
+			}
+			if (op->opcode == ZEND_INIT_STATIC_METHOD_CALL && op->op1_type == IS_CONST
+			 && (op->result.num & 0x80000000)) {
+				zval *literal = RT_CONSTANT(op, op->op1) + 2;
+				zend_generic_args *args = (zend_generic_args *) Z_PTR_P(literal);
+				zend_persist_generic_args_calc(args);
+			}
+			if (op->opcode == ZEND_INSTANCEOF && op->op2_type == IS_CONST
+			 && (op->extended_value & ZEND_INSTANCEOF_GENERIC_FLAG)) {
+				zval *literal = RT_CONSTANT(op, op->op2) + 2;
+				zend_generic_args *args = (zend_generic_args *)(uintptr_t) Z_LVAL_P(literal);
+				zend_persist_generic_args_calc(args);
+			}
+			op++;
+		}
+	}
+
 	if (op_array->filename) {
 		ADD_STRING(op_array->filename);
 	}
@@ -341,6 +409,10 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			ZVAL_PTR(&tmp, op_array->dynamic_func_defs[i]);
 			zend_persist_op_array_calc(&tmp);
 		}
+	}
+
+	if (op_array->generic_params_info) {
+		zend_persist_generic_params_info_calc(op_array->generic_params_info);
 	}
 
 	ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
@@ -592,6 +664,31 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 				}
 				ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
 			}
+		}
+
+		if (ce->generic_params_info) {
+			zend_persist_generic_params_info_calc(ce->generic_params_info);
+		}
+		if (ce->bound_generic_args) {
+			zend_persist_generic_args_calc(ce->bound_generic_args);
+		}
+		if (ce->interface_bound_generic_args) {
+			ADD_SIZE(sizeof(HashTable));
+			zend_hash_persist_calc(ce->interface_bound_generic_args);
+			ZEND_HASH_MAP_FOREACH_BUCKET(ce->interface_bound_generic_args, p) {
+				ZEND_ASSERT(p->key != NULL);
+				ADD_INTERNED_STRING(p->key);
+				zend_persist_generic_args_calc(Z_PTR(p->val));
+			} ZEND_HASH_FOREACH_END();
+		}
+		if (ce->trait_bound_generic_args) {
+			ADD_SIZE(sizeof(HashTable));
+			zend_hash_persist_calc(ce->trait_bound_generic_args);
+			ZEND_HASH_MAP_FOREACH_BUCKET(ce->trait_bound_generic_args, p) {
+				ZEND_ASSERT(p->key != NULL);
+				ADD_INTERNED_STRING(p->key);
+				zend_persist_generic_args_calc(Z_PTR(p->val));
+			} ZEND_HASH_FOREACH_END();
 		}
 	}
 }

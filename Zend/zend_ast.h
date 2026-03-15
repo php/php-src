@@ -70,6 +70,8 @@ enum _zend_ast_kind {
 	ZEND_AST_ATTRIBUTE_GROUP,
 	ZEND_AST_MATCH_ARM_LIST,
 	ZEND_AST_MODIFIER_LIST,
+	ZEND_AST_GENERIC_PARAMS,      /* <T, U: Foo> in declarations */
+	ZEND_AST_GENERIC_ARGS,        /* <int, string> in type references */
 
 	/* 0 child nodes */
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -112,6 +114,7 @@ enum _zend_ast_kind {
 	ZEND_AST_BREAK,
 	ZEND_AST_CONTINUE,
 	ZEND_AST_PROPERTY_HOOK_SHORT_BODY,
+	ZEND_AST_GENERIC_WILDCARD,    /* ? / ? extends Foo / ? super Foo — attr=bound_kind, child[0]=bound_type or NULL */
 
 	/* 2 child nodes */
 	ZEND_AST_DIM = 2 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -155,6 +158,7 @@ enum _zend_ast_kind {
 	ZEND_AST_NAMED_ARG,
 	ZEND_AST_PARENT_PROPERTY_HOOK_CALL,
 	ZEND_AST_PIPE,
+	ZEND_AST_GENERIC_TYPE,        /* child[0]=class_name, child[1]=ZEND_AST_GENERIC_ARGS list */
 
 	/* 3 child nodes */
 	ZEND_AST_METHOD_CALL = 3 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -167,6 +171,7 @@ enum _zend_ast_kind {
 	ZEND_AST_PROP_GROUP,
 	ZEND_AST_CONST_ELEM,
 	ZEND_AST_CLASS_CONST_GROUP,
+	ZEND_AST_GENERIC_PARAM,       /* child[0]=name(ZVAL), child[1]=constraint or NULL, child[2]=default_type or NULL */
 
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -227,7 +232,7 @@ typedef struct _zend_ast_decl {
 	uint32_t flags;
 	zend_string *doc_comment;
 	zend_string *name;
-	zend_ast *child[5];
+	zend_ast *child[6];
 } zend_ast_decl;
 
 // TODO: rename
@@ -339,7 +344,8 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_arg_list_add(zend_ast *list, zend_ast
 
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
-	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4
+	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4,
+	zend_ast *child5
 );
 
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_fcc(zend_ast *args);

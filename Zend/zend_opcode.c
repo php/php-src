@@ -28,6 +28,7 @@
 #include "zend_sort.h"
 #include "zend_constants.h"
 #include "zend_observer.h"
+#include "zend_generics.h"
 
 #include "zend_vm.h"
 
@@ -91,6 +92,7 @@ void init_op_array(zend_op_array *op_array, zend_function_type type, int initial
 
 	op_array->num_dynamic_func_defs = 0;
 	op_array->dynamic_func_defs = NULL;
+	op_array->generic_params_info = NULL;
 
 	ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 	op_array->cache_size = zend_op_array_extension_handles * sizeof(void*);
@@ -111,6 +113,14 @@ ZEND_API void destroy_zend_function(zend_function *function)
 }
 
 ZEND_API void zend_type_release(zend_type type, bool persistent) {
+	if (ZEND_TYPE_IS_GENERIC_PARAM(type)) {
+		zend_generic_type_ref_dtor(ZEND_TYPE_GENERIC_PARAM_REF(type));
+		return;
+	}
+	if (ZEND_TYPE_IS_GENERIC_CLASS(type)) {
+		zend_generic_class_ref_dtor(ZEND_TYPE_GENERIC_CLASS_REF(type));
+		return;
+	}
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH_MUTABLE(ZEND_TYPE_LIST(type), list_type) {
@@ -376,6 +386,29 @@ ZEND_API void destroy_zend_class(zval *zv)
 				if (ce->num_traits > 0) {
 					_destroy_zend_class_traits_info(ce);
 				}
+
+				if (ce->generic_params_info) {
+					zend_generic_params_info_dtor(ce->generic_params_info);
+				}
+				if (ce->bound_generic_args) {
+					zend_generic_args_release(ce->bound_generic_args);
+				}
+				if (ce->interface_bound_generic_args) {
+					zend_generic_args *gargs;
+					ZEND_HASH_MAP_FOREACH_PTR(ce->interface_bound_generic_args, gargs) {
+						zend_generic_args_release(gargs);
+					} ZEND_HASH_FOREACH_END();
+					zend_hash_destroy(ce->interface_bound_generic_args);
+					FREE_HASHTABLE(ce->interface_bound_generic_args);
+				}
+				if (ce->trait_bound_generic_args) {
+					zend_generic_args *gargs;
+					ZEND_HASH_MAP_FOREACH_PTR(ce->trait_bound_generic_args, gargs) {
+						zend_generic_args_release(gargs);
+					} ZEND_HASH_FOREACH_END();
+					zend_hash_destroy(ce->trait_bound_generic_args);
+					FREE_HASHTABLE(ce->trait_bound_generic_args);
+				}
 			}
 
 			if (ce->default_properties_table) {
@@ -601,6 +634,41 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			op++;
 		}
 	}
+	/* Free generic args stored as literals in ZEND_NEW and ZEND_INSTANCEOF opcodes */
+	if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
+		zend_op *op = op_array->opcodes;
+		zend_op *end = op + op_array->last;
+		while (op < end) {
+			if (op->opcode == ZEND_NEW && op->op1_type == IS_CONST
+				&& (op->op2.num & 0x80000000)) {
+				/* Generic args literal is at op1.constant + 2 */
+				zval *generic_args_zv = RT_CONSTANT(op, op->op1) + 2;
+				if (Z_TYPE_P(generic_args_zv) == IS_PTR && Z_PTR_P(generic_args_zv) != NULL) {
+					zend_generic_args_release((zend_generic_args *) Z_PTR_P(generic_args_zv));
+					ZVAL_NULL(generic_args_zv);
+				}
+			}
+			if (op->opcode == ZEND_INIT_STATIC_METHOD_CALL && op->op1_type == IS_CONST
+				&& (op->result.num & 0x80000000)) {
+				/* Generic args literal is at op1.constant + 2 */
+				zval *generic_args_zv = RT_CONSTANT(op, op->op1) + 2;
+				if (Z_TYPE_P(generic_args_zv) == IS_PTR && Z_PTR_P(generic_args_zv) != NULL) {
+					zend_generic_args_release((zend_generic_args *) Z_PTR_P(generic_args_zv));
+					ZVAL_NULL(generic_args_zv);
+				}
+			}
+			if (op->opcode == ZEND_INSTANCEOF && op->op2_type == IS_CONST
+				&& (op->extended_value & ZEND_INSTANCEOF_GENERIC_FLAG)) {
+				/* Generic args literal is at op2.constant + 2 */
+				zval *generic_args_zv = RT_CONSTANT(op, op->op2) + 2;
+				if (Z_TYPE_P(generic_args_zv) == IS_LONG && Z_LVAL_P(generic_args_zv) != 0) {
+					zend_generic_args_release((zend_generic_args *)(uintptr_t) Z_LVAL_P(generic_args_zv));
+					ZVAL_LONG(generic_args_zv, 0);
+				}
+			}
+			op++;
+		}
+	}
 	if (op_array->literals) {
 		zval *literal = op_array->literals;
 		zval *end = literal + op_array->last_literal;
@@ -660,6 +728,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			destroy_op_array(op_array->dynamic_func_defs[i]);
 		}
 		efree(op_array->dynamic_func_defs);
+	}
+	if (op_array->generic_params_info) {
+		zend_generic_params_info_dtor(op_array->generic_params_info);
+		op_array->generic_params_info = NULL;
 	}
 }
 

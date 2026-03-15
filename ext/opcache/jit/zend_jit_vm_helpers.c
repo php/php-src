@@ -23,6 +23,7 @@
 #include "Zend/zend_closures.h"
 #include "Zend/zend_constants.h"
 #include "Zend/zend_API.h"
+#include "Zend/zend_generics.h"
 
 #include <ZendAccelerator.h>
 #include "Optimizer/zend_func_info.h"
@@ -59,6 +60,13 @@ ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_leave_func_helper_tai
 
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
+			/* Infer generic args from constructor before releasing $this */
+			if (UNEXPECTED(EX(func)->common.fn_flags & ZEND_ACC_CTOR)) {
+				zend_object *obj = Z_OBJ(execute_data->This);
+				if (obj->ce->generic_params_info && !obj->generic_args) {
+					zend_infer_generic_args_from_constructor(obj, execute_data);
+				}
+			}
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
@@ -110,6 +118,13 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPC
 
 	zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 	if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
+		/* Infer generic args from constructor before releasing $this */
+		if (UNEXPECTED(EX(func)->common.fn_flags & ZEND_ACC_CTOR)) {
+			zend_object *obj = Z_OBJ(execute_data->This);
+			if (obj->ce->generic_params_info && !obj->generic_args) {
+				zend_infer_generic_args_from_constructor(obj, execute_data);
+			}
+		}
 		OBJ_RELEASE(Z_OBJ(execute_data->This));
 	} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));

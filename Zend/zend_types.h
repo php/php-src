@@ -89,6 +89,12 @@ typedef struct _zend_reference  zend_reference;
 typedef struct _zend_ast_ref    zend_ast_ref;
 typedef struct _zend_ast        zend_ast;
 
+typedef struct zend_generic_type_ref   zend_generic_type_ref;
+typedef struct zend_generic_class_ref  zend_generic_class_ref;
+typedef struct zend_generic_args       zend_generic_args;
+typedef struct zend_generic_param      zend_generic_param;
+typedef struct zend_generic_params_info zend_generic_params_info;
+
 typedef int  (*compare_func_t)(const void *, const void *);
 typedef void (*swap_func_t)(void *, void *);
 typedef void (*sort_func_t)(void *, size_t, size_t, compare_func_t, swap_func_t);
@@ -151,6 +157,14 @@ typedef struct {
 /* Must have same value as MAY_BE_NULL */
 #define _ZEND_TYPE_NULLABLE_BIT 0x2u
 
+/* Generic type parameter reference: ptr is a zend_generic_type_ref*.
+ * Uses bit 13 which is free in zend_type (IS_ITERABLE uses _ZEND_TYPE_ITERABLE_BIT instead). */
+#define MAY_BE_GENERIC_PARAM (1u << 13)
+
+/* Generic class reference (e.g., Collection<int>): ptr is a zend_generic_class_ref*.
+ * Uses bit 11 which is free in zend_type (IS_CONSTANT_AST is an internal type, not used in hints). */
+#define _ZEND_TYPE_GENERIC_CLASS_BIT (1u << 11)
+
 #define ZEND_TYPE_IS_SET(t) \
 	(((t).type_mask & _ZEND_TYPE_MASK) != 0)
 
@@ -179,6 +193,23 @@ typedef struct {
 
 #define ZEND_TYPE_USES_ARENA(t) \
 	((((t).type_mask) & _ZEND_TYPE_ARENA_BIT) != 0)
+
+/* Generic type parameter reference (e.g., T in a method signature) */
+#define ZEND_TYPE_IS_GENERIC_PARAM(t) \
+	(((t).type_mask & MAY_BE_GENERIC_PARAM) != 0)
+#define ZEND_TYPE_GENERIC_PARAM_REF(t) \
+	((zend_generic_type_ref *)(t).ptr)
+#define ZEND_TYPE_INIT_GENERIC_PARAM(ref, extra_flags) \
+	_ZEND_TYPE_PREFIX { (void *)(ref), MAY_BE_GENERIC_PARAM | (extra_flags) }
+
+/* Generic class reference (e.g., Collection<int> in a type hint) */
+#define ZEND_TYPE_IS_GENERIC_CLASS(t) \
+	(((t).type_mask & _ZEND_TYPE_GENERIC_CLASS_BIT) != 0)
+#define ZEND_TYPE_GENERIC_CLASS_REF(t) \
+	((zend_generic_class_ref *)(t).ptr)
+#define ZEND_TYPE_INIT_GENERIC_CLASS(ref, allow_null, extra_flags) \
+	_ZEND_TYPE_PREFIX { (void *)(ref), _ZEND_TYPE_GENERIC_CLASS_BIT \
+		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
 
 #define ZEND_TYPE_IS_ONLY_MASK(t) \
 	(ZEND_TYPE_IS_SET(t) && (t).ptr == NULL)
@@ -569,6 +600,7 @@ struct _zend_object {
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
 	HashTable        *properties;
+	zend_generic_args *generic_args; /* Per-instance type arguments (NULL if non-generic) */
 	zval              properties_table[1];
 };
 
@@ -858,6 +890,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define IS_OBJ_LAZY_UNINITIALIZED   (1U<<31) /* Virtual proxy or uninitialized Ghost */
 #define IS_OBJ_LAZY_PROXY           (1U<<30) /* Virtual proxy (may be initialized) */
+#define IS_OBJ_GENERIC_PROGRESSIVE  (1U<<29) /* Progressive generic inference active */
 
 #define OBJ_EXTRA_FLAGS(obj)		((obj)->extra_flags)
 
