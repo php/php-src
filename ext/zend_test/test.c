@@ -548,6 +548,61 @@ static ZEND_FUNCTION(zend_call_method_if_exists)
 	}
 }
 
+static ZEND_FUNCTION(zend_test_call_with_consumed_args)
+{
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	zval *args;
+	zend_long consumed_args;
+	zval retval;
+	uint32_t actual_consumed_args = 0;
+	uint32_t i;
+	zend_result call_result;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_ARRAY(args)
+		Z_PARAM_LONG(consumed_args)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(consumed_args < 0 || consumed_args > UINT32_MAX)) {
+		zend_argument_value_error(3, "must be between 0 and 4294967295");
+		RETURN_THROWS();
+	}
+
+	zend_fcall_info_args(&fci, args);
+
+	ZVAL_UNDEF(&retval);
+	fci.retval = &retval;
+	fci.consumed_args = (uint32_t) consumed_args;
+
+	call_result = zend_call_function(&fci, &fcc);
+
+	for (i = 0; i < fci.param_count && i < 32; i++) {
+		if (Z_ISUNDEF(fci.params[i])) {
+			actual_consumed_args |= (1u << i);
+		}
+	}
+
+	zend_fcall_info_args_clear(&fci, true);
+
+	if (call_result == FAILURE || EG(exception)) {
+		if (!Z_ISUNDEF(retval)) {
+			zval_ptr_dtor(&retval);
+		}
+		RETURN_THROWS();
+	}
+
+	array_init(return_value);
+	add_assoc_long(return_value, "consumed_args", actual_consumed_args);
+
+	if (Z_ISUNDEF(retval)) {
+		add_assoc_null(return_value, "retval");
+	} else {
+		add_assoc_zval(return_value, "retval", &retval);
+	}
+}
+
 static ZEND_FUNCTION(zend_get_unit_enum)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
