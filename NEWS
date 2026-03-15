@@ -154,4 +154,8 @@ PHP                                                                        NEWS
   . Added ZipArchive::openString() method.
     (Tim Starling, Soner Sayakci, Ghaith Olabi)
 
+- Standard:
+  . Passing 1 or negative base to log() now throws a ValueError.
+    (alexandre-daubois)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
