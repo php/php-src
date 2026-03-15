@@ -134,17 +134,20 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 #else
 		"NTS"
 #endif
-#ifdef PHP_BUILD_COMPILER
-		" " PHP_BUILD_COMPILER
-#endif
-#ifdef PHP_BUILD_ARCH
-		" " PHP_BUILD_ARCH
-#endif
 #if ZEND_DEBUG
 		" DEBUG"
 #endif
 #ifdef HAVE_GCOV
 		" GCOV"
+#endif
+#ifdef PHP_BUILD_ARCH
+		" " PHP_BUILD_ARCH
+#endif
+#ifdef PHP_BUILD_OS
+		" " PHP_BUILD_OS
+#endif
+#ifdef PHP_BUILD_COMPILER
+		" " PHP_BUILD_COMPILER
 #endif
 	);
 	smart_string_appends(&version_info, "Copyright (c) The PHP Group\n");
