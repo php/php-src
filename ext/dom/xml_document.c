@@ -81,6 +81,22 @@ void dom_mark_namespaces_as_attributes_too(php_dom_libxml_ns_mapper *ns_mapper, 
 	xmlNodePtr node = doc->children;
 	while (node != NULL) {
 		if (node->type == XML_ELEMENT_NODE) {
+			/* Apply ID rules of WHATWG DOM. */
+			for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
+				if (attr->atype == XML_ATTRIBUTE_ID) {
+					if (attr->ns != NULL || !xmlStrEqual(attr->name, BAD_CAST "id")) {
+						xmlRemoveID(doc, attr);
+					}
+				} else if (attr->atype == 0 && attr->ns == NULL && xmlStrEqual(attr->name, BAD_CAST "id")) {
+					bool should_free;
+					xmlChar *value = php_libxml_attr_value(attr, &should_free);
+					xmlAddID(NULL, doc, value, attr);
+					if (UNEXPECTED(should_free)) {
+						xmlFree(value);
+					}
+				}
+			}
+
 			php_dom_ns_compat_mark_attribute_list(ns_mapper, node);
 		}
 
