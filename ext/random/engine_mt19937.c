@@ -87,7 +87,7 @@
 */
 
 #define N             624                 /* length of state vector */
-ZEND_STATIC_ASSERT(
+static_assert(
 	N == sizeof(((php_random_status_state_mt19937*)0)->state) / sizeof(((php_random_status_state_mt19937*)0)->state[0]),
 	"Assumed length of Mt19937 state vector does not match actual size."
 );

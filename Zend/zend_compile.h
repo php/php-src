@@ -711,7 +711,7 @@ struct _zend_execute_data {
 	(call)->This.u2.num_args
 
 /* Ensure the correct alignment before slots calculation */
-ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
+static_assert(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
                    "zval must be aligned by ZEND_MM_ALIGNMENT");
 /* A number of call frame slots (zvals) reserved for zend_execute_data. */
 #define ZEND_CALL_FRAME_SLOT \
