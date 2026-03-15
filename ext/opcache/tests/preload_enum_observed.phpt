@@ -11,10 +11,6 @@ opcache.preload={PWD}/preload_enum.inc
 zend_test.observer.enabled=1
 zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
---SKIPIF--
-<?php
-if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
-?>
 --FILE--
 <?php
 
