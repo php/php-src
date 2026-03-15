@@ -1103,7 +1103,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				if (zend_call_function(&arg_replace_fci, &arg_replace_fci_cache) == SUCCESS &&
 						!Z_ISUNDEF(retval)) {
 					convert_to_string(&retval);
-					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRLEN(retval));
+					smart_str_append(&out_buf, Z_STR(retval));
 					smart_str_free(&eval_buf);
 					zval_ptr_dtor(&retval);
 				}

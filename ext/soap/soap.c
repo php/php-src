@@ -3390,7 +3390,7 @@ static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, c
 							smart_str_appends(&key, (char*)hdr_func->ns->href);
 							smart_str_appendc(&key, ':');
 						}
-						smart_str_appendl(&key, Z_STRVAL(h->function_name), Z_STRLEN(h->function_name));
+						smart_str_append(&key, Z_STR(h->function_name));
 						smart_str_0(&key);
 						if ((hdr = zend_hash_find_ptr(fnb->input.headers, key.s)) != NULL) {
 							h->hdr = hdr;
@@ -3627,14 +3627,14 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, const char *fu
 
 				tmp = Z_HEADER_NAMESPACE_P(hdr_ret);
 				if (Z_TYPE_P(tmp) == IS_STRING) {
-					smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+					smart_str_append(&key, Z_STR_P(tmp));
 					smart_str_appendc(&key, ':');
 					hdr_ns = Z_STRVAL_P(tmp);
 				}
 
 				tmp = Z_HEADER_NAME_P(hdr_ret);
 				if (Z_TYPE_P(tmp) == IS_STRING) {
-					smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+					smart_str_append(&key, Z_STR_P(tmp));
 					hdr_name = Z_STRVAL_P(tmp);
 				}
 				smart_str_0(&key);
@@ -3860,13 +3860,13 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, const char *fu
 
 						tmp = Z_HEADER_NAMESPACE_P(&h->retval);
 						if (Z_TYPE_P(tmp) == IS_STRING) {
-							smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+							smart_str_append(&key, Z_STR_P(tmp));
 							smart_str_appendc(&key, ':');
 							hdr_ns = Z_STRVAL_P(tmp);
 						}
 						tmp = Z_HEADER_NAME_P(&h->retval);
 						if (Z_TYPE_P(tmp) == IS_STRING) {
-							smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+							smart_str_append(&key, Z_STR_P(tmp));
 							hdr_name = Z_STRVAL_P(tmp);
 						}
 						smart_str_0(&key);
@@ -4102,9 +4102,9 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 					smart_str key = {0};
 					sdlSoapBindingFunctionHeaderPtr hdr;
 
-					smart_str_appendl(&key, Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+					smart_str_append(&key, Z_STR_P(ns));
 					smart_str_appendc(&key, ':');
-					smart_str_appendl(&key, Z_STRVAL_P(name), Z_STRLEN_P(name));
+					smart_str_append(&key, Z_STR_P(name));
 					smart_str_0(&key);
 					if ((hdr = zend_hash_find_ptr(hdrs, key.s)) != NULL) {
 						hdr_use = hdr->use;
@@ -4437,7 +4437,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 		smart_str_appendc(&spaces, ' ');
 	}
 	if (spaces.s) {
-		smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+		smart_str_append(buf, spaces.s);
 	}
 	switch (type->kind) {
 		case XSD_TYPEKIND_SIMPLE:
@@ -4576,7 +4576,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 					}
 					if (enc) {
 						if (spaces.s) {
-							smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+							smart_str_append(buf, spaces.s);
 						}
 						smart_str_appendc(buf, ' ');
 						smart_str_appends(buf, type->encode->details.type_str);
@@ -4591,7 +4591,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 
 					ZEND_HASH_FOREACH_PTR(type->attributes, attr) {
 						if (spaces.s) {
-							smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+							smart_str_append(buf, spaces.s);
 						}
 						smart_str_appendc(buf, ' ');
 						if (attr->encode && attr->encode->details.type_str) {
@@ -4605,7 +4605,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 					} ZEND_HASH_FOREACH_END();
 				}
 				if (spaces.s) {
-					smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+					smart_str_append(buf, spaces.s);
 				}
 				smart_str_appendc(buf, '}');
 			}

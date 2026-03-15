@@ -245,32 +245,32 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	}
 
 	if (url_parts->scheme) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->scheme));
+		smart_str_append(dest, url_parts->scheme);
 		smart_str_appends(dest, "://");
 	} else if (*(ZSTR_VAL(url->s)) == '/' && *(ZSTR_VAL(url->s)+1) == '/') {
 		smart_str_appends(dest, "//");
 	}
 	if (url_parts->user) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->user));
+		smart_str_append(dest, url_parts->user);
 		if (url_parts->pass) {
-			smart_str_appends(dest, ZSTR_VAL(url_parts->pass));
+			smart_str_append(dest, url_parts->pass);
 			smart_str_appendc(dest, ':');
 		}
 		smart_str_appendc(dest, '@');
 	}
 	if (url_parts->host) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->host));
+		smart_str_append(dest, url_parts->host);
 	}
 	if (url_parts->port) {
 		smart_str_appendc(dest, ':');
 		smart_str_append_unsigned(dest, (long)url_parts->port);
 	}
 	if (url_parts->path) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->path));
+		smart_str_append(dest, url_parts->path);
 	}
 	smart_str_appendc(dest, '?');
 	if (url_parts->query) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->query));
+		smart_str_append(dest, url_parts->query);
 		smart_str_append(dest, separator);
 		smart_str_append_smart_str(dest, url_app);
 	} else {
@@ -278,7 +278,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	}
 	if (url_parts->fragment) {
 		smart_str_appendc(dest, '#');
-		smart_str_appends(dest, ZSTR_VAL(url_parts->fragment));
+		smart_str_append(dest, url_parts->fragment);
 	}
 	php_url_free(url_parts);
 }
@@ -601,7 +601,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 
 	if (encode) {
 		encoded = php_raw_url_encode(name, strlen(name));
-		smart_str_appendl(&url_app, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		smart_str_append(&url_app, encoded);
 		zend_string_free(encoded);
 	} else {
 		smart_str_appends(&url_app, name);
@@ -609,7 +609,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 	smart_str_appendc(&url_app, '=');
 	if (encode) {
 		encoded = php_raw_url_encode(value, strlen(value));
-		smart_str_appendl(&url_app, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		smart_str_append(&url_app, encoded);
 		zend_string_free(encoded);
 	} else {
 		smart_str_appends(&url_app, value);
@@ -760,13 +760,13 @@ static inline void php_url_scanner_add_var_impl(const char *name, size_t name_le
 
 	if (encode) {
 		encoded = php_raw_url_encode(name, name_len);
-		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		smart_str_append(&sname, encoded); zend_string_free(encoded);
 		encoded = php_raw_url_encode(value, value_len);
-		smart_str_appendl(&svalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		smart_str_append(&svalue, encoded); zend_string_free(encoded);
 		encoded = php_escape_html_entities_ex((const unsigned char *) name, name_len, 0, ENT_QUOTES|ENT_SUBSTITUTE, NULL, /* double_encode */ 0, /* quiet */ 1);
-		smart_str_appendl(&hname, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		smart_str_append(&hname, encoded); zend_string_free(encoded);
 		encoded = php_escape_html_entities_ex((const unsigned char *) value, value_len, 0, ENT_QUOTES|ENT_SUBSTITUTE, NULL, /* double_encode */ 0, /* quiet */ 1);
-		smart_str_appendl(&hvalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		smart_str_append(&hvalue, encoded); zend_string_free(encoded);
 	} else {
 		smart_str_appendl(&sname, name, name_len);
 		smart_str_appendl(&svalue, value, value_len);
@@ -867,14 +867,14 @@ static inline zend_result php_url_scanner_reset_var_impl(zend_string *name, int 
 
 	if (encode) {
 		encoded = php_raw_url_encode(ZSTR_VAL(name), ZSTR_LEN(name));
-		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		smart_str_append(&sname, encoded);
 		zend_string_free(encoded);
 		encoded = php_escape_html_entities_ex((const unsigned char *) ZSTR_VAL(name), ZSTR_LEN(name), 0, ENT_QUOTES|ENT_SUBSTITUTE, SG(default_charset), /* double_encode */ 0, /* quiet */ 1);
-		smart_str_appendl(&hname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		smart_str_append(&hname, encoded);
 		zend_string_free(encoded);
 	} else {
-		smart_str_appendl(&sname, ZSTR_VAL(name), ZSTR_LEN(name));
-		smart_str_appendl(&hname, ZSTR_VAL(name), ZSTR_LEN(name));
+		smart_str_append(&sname, name);
+		smart_str_append(&hname, name);
 	}
 	smart_str_0(&sname);
 	smart_str_0(&hname);

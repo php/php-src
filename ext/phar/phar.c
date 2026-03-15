@@ -2606,7 +2606,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 	/* compress as necessary, calculate crcs, serialize meta-data, manifest size, and file sizes */
 	main_metadata_str.s = NULL;
 	if (phar->metadata_tracker.str) {
-		smart_str_appendl(&main_metadata_str, ZSTR_VAL(phar->metadata_tracker.str), ZSTR_LEN(phar->metadata_tracker.str));
+		smart_str_append(&main_metadata_str, phar->metadata_tracker.str);
 	} else if (!Z_ISUNDEF(phar->metadata_tracker.val)) {
 		PHP_VAR_SERIALIZE_INIT(metadata_hash);
 		php_var_serialize(&main_metadata_str, &phar->metadata_tracker.val, &metadata_hash);
