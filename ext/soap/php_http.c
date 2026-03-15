@@ -354,7 +354,6 @@ int make_http_soap_request(
 	size_t cookie_len;
 	int http_close;
 	zend_string *http_headers;
-	char *connection;
 	int http_1_1;
 	int http_status;
 	int content_type_xml = 0;
@@ -1072,43 +1071,37 @@ try_again:
 	/* See if the server requested a close */
 	if (http_1_1) {
 		http_close = FALSE;
+		char *connection = NULL;
+
 		if (use_proxy && !use_ssl) {
 			connection = get_http_header_value(ZSTR_VAL(http_headers), "Proxy-Connection:");
-			if (connection) {
-				if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
-					http_close = TRUE;
-				}
-				efree(connection);
-			}
 		}
 		if (http_close == FALSE) {
 			connection = get_http_header_value(ZSTR_VAL(http_headers), "Connection:");
-			if (connection) {
-				if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
-					http_close = TRUE;
-				}
-				efree(connection);
+		}
+
+		if (connection) {
+			if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
+				http_close = TRUE;
 			}
+			efree(connection);
 		}
 	} else {
 		http_close = TRUE;
+		char *connection = NULL;
+
 		if (use_proxy && !use_ssl) {
 			connection = get_http_header_value(ZSTR_VAL(http_headers), "Proxy-Connection:");
-			if (connection) {
-				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
-					http_close = FALSE;
-				}
-				efree(connection);
-			}
 		}
 		if (http_close == TRUE) {
 			connection = get_http_header_value(ZSTR_VAL(http_headers), "Connection:");
-			if (connection) {
-				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
-					http_close = FALSE;
-				}
-				efree(connection);
+		}
+
+		if (connection) {
+			if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
+				http_close = FALSE;
 			}
+			efree(connection);
 		}
 	}
 
