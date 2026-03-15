@@ -153,6 +153,7 @@ ZEND_API void zend_reset_internal_run_time_cache(void);
 
 BEGIN_EXTERN_C()
 ZEND_API zend_result zend_load_extension(const char *path);
+ZEND_API zend_result zend_load_extension_handle_ex(DL_HANDLE handle, const char *path, bool unload_on_failure, bool silent);
 ZEND_API zend_result zend_load_extension_handle(DL_HANDLE handle, const char *path);
 ZEND_API void zend_register_extension(zend_extension *new_extension, DL_HANDLE handle);
 ZEND_API zend_extension *zend_get_extension(const char *extension_name);
