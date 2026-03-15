@@ -90,13 +90,21 @@ string(%d) "%s"
 GET single: MD5/AES128
 string(%d) "%s"
 GET single: MD5/AES192
-string(%d) "%s"
+
+Warning: snmp3_get(): Fatal error: Unknown user name in /home/runner/work/php-src/php-src/ext/snmp/tests/snmp3.php on line 20
+bool(false)
 GET single: MD5/AES192C
-string(%d) "%s"
+
+Warning: snmp3_get(): Fatal error: Unknown user name in /home/runner/work/php-src/php-src/ext/snmp/tests/snmp3.php on line 20
+bool(false)
 GET single: MD5/AES256
-string(%d) "%s"
+
+Warning: snmp3_get(): Fatal error: Unknown user name in /home/runner/work/php-src/php-src/ext/snmp/tests/snmp3.php on line 20
+bool(false)
 GET single: MD5/AES256C
-string(%d) "%s"
+
+Warning: snmp3_get(): Fatal error: Unknown user name in /home/runner/work/php-src/php-src/ext/snmp/tests/snmp3.php on line 20
+bool(false)
 GET multiple
 array(2) {
   ["%s"]=>
