@@ -15,8 +15,6 @@ if test "$PHP_BCMATH" != "no"; then
       libbcmath/src/floor_or_ceil.c
       libbcmath/src/long2num.c
       libbcmath/src/init.c
-      libbcmath/src/int2num.c
-      libbcmath/src/nearzero.c
       libbcmath/src/neg.c
       libbcmath/src/num2long.c
       libbcmath/src/num2str.c

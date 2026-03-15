@@ -257,19 +257,3 @@ bc_raise_status bc_raise(bc_num base, long exponent, bc_num *result, size_t scal
 	}
 	return BC_RAISE_STATUS_OK;
 }
-
-/* This is used internally by BCMath */
-void bc_raise_bc_exponent(bc_num base, bc_num expo, bc_num *result, size_t scale) {
-	/* Exponent must not have fractional part */
-	assert(expo->n_scale == 0);
-
-	long exponent = bc_num2long(expo);
-	/* Exponent must be properly convertable to long */
-	if (exponent == 0 && (expo->n_len > 1 || expo->n_value[0] != 0)) {
-		assert(false && "Exponent is not well formed in internal call");
-		//assert(exponent != 0 || (expo->n_len == 0 && expo->n_value[0] == 0));
-	}
-	//assert(exponent != 0 || (expo->n_len == 0 && expo->n_value[0] == 0));
-	bc_raise(base, exponent, result, scale);
-}
-
