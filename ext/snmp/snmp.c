@@ -1637,6 +1637,17 @@ PHP_FUNCTION(snmp_read_mib)
 }
 /* }}} */
 
+/* {{{ Resets the MIB tree using the MIBDIRS, MIBS and MIBFILES environment variables. */
+PHP_FUNCTION(snmp_init_mib)
+{
+	// Destroy the old MIB tree and set the internal MIB directory list to NULL
+	shutdown_mib();
+	netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, NULL);
+	// Initialise the new MIB tree
+	init_mib();
+}
+/* }}} */
+
 /* {{{ Creates a new SNMP session to specified host. */
 PHP_METHOD(SNMP, __construct)
 {
