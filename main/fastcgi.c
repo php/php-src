@@ -1394,7 +1394,11 @@ int fcgi_accept_request(fcgi_request *req)
 					socklen_t len = sizeof(sa);
 
 					FCGI_LOCK(req->listen_socket);
+#if defined(HAVE_ACCEPT4)
+					req->fd = accept4(listen_socket, (struct sockaddr *)&sa, &len, SOCK_CLOEXEC);
+#else
 					req->fd = accept(listen_socket, (struct sockaddr *)&sa, &len);
+#endif
 					FCGI_UNLOCK(req->listen_socket);
 
 					client_sa = sa;
@@ -1414,7 +1418,8 @@ int fcgi_accept_request(fcgi_request *req)
 					return -1;
 				}
 
-#if defined(F_SETFD) && defined(FD_CLOEXEC)
+// TODO once we drop support for older solaris (i.e < 11.4) we could drop this block
+#if defined(F_SETFD) && defined(FD_CLOEXEC) && !defined(HAVE_ACCEPT4)
 				int fd_attrs = fcntl(req->fd, F_GETFD);
 				if (0 > fd_attrs) {
 					fcgi_log(FCGI_WARNING, "failed to get attributes of the connection socket");
