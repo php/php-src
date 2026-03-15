@@ -7,7 +7,7 @@ enum Foo: string {
 	case Bar = "Baz";
 
 	public function __debugInfo() {
-		return [ __CLASS__ . '::' . $this->name . ' = ' . $this->value ];
+		return [__CLASS__ . '::' . $this->name . ' = ' . $this->value];
 	}
 }
 
