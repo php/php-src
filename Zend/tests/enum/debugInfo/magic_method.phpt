@@ -14,8 +14,8 @@ enum Foo {
 var_dump(Foo::Bar);
 
 ?>
---EXPECTF--
-object(Foo)#%d (1) {
+--EXPECT--
+enum(Foo::Bar) (1) {
   [0]=>
   string(29) "Bar is a case of the Foo enum"
 }

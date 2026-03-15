@@ -14,8 +14,8 @@ enum Foo: string {
 var_dump(Foo::Bar);
 
 ?>
---EXPECTF--
-object(Foo)#%d (1) {
+--EXPECT--
+enum(Foo::Bar) (1) {
   [0]=>
   string(14) "Foo::Bar = Baz"
 }

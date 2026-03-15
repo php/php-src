@@ -16,5 +16,5 @@ var_dump(Foo::Bar);
 ?>
 --EXPECTF--
 Warning: The magic method Foo::__debugInfo() must have public visibility in %s on line %d
-object(Foo)#%d (0) {
+enum(Foo::Bar) (0) {
 }
