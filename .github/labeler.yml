@@ -443,7 +443,6 @@
       - 'ext/json/php_json_parser.h'
       - 'ext/json/php_json_scanner.h'
       - 'ext/libxml/php_libxml.h'
-      - 'ext/mbstring/libmbfl/config.h'
       - 'ext/mbstring/libmbfl/mbfl/eaw_table.h'
       - 'ext/mbstring/libmbfl/mbfl/mbfilter.h'
       - 'ext/mbstring/libmbfl/mbfl/mbfilter_8bit.h'
