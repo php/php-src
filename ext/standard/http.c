@@ -184,13 +184,17 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				if (key_prefix && num_prefix) {
 					/* zend_string_concat4() */
 					size_t len = ZSTR_LEN(key_prefix) + num_prefix_len + index_int_as_str_len + strlen("%5D%5B");
-					new_prefix = zend_string_alloc(len, 0);
+					zend_string *tmp = zend_string_concat3(
+						ZSTR_VAL(key_prefix), ZSTR_LEN(key_prefix),
+						num_prefix, num_prefix_len,
+						index_int_as_str, index_int_as_str_len
+					);
 
-					memcpy(ZSTR_VAL(new_prefix), ZSTR_VAL(key_prefix), ZSTR_LEN(key_prefix));
-					memcpy(ZSTR_VAL(new_prefix) + ZSTR_LEN(key_prefix), num_prefix, num_prefix_len);
-					memcpy(ZSTR_VAL(new_prefix) + ZSTR_LEN(key_prefix) + num_prefix_len, index_int_as_str, index_int_as_str_len);
-					memcpy(ZSTR_VAL(new_prefix) + ZSTR_LEN(key_prefix) + num_prefix_len +index_int_as_str_len, "%5D%5B", strlen("%5D%5B"));
-					ZSTR_VAL(new_prefix)[len] = '\0';
+					new_prefix = zend_string_concat2(
+						ZSTR_VAL(tmp), ZSTR_LEN(tmp),
+						"%5D%5B", sizeof("%5D%5B") - 1
+					);
+					zend_string_release(tmp);
 				} else if (key_prefix) {
 					new_prefix = zend_string_concat3(ZSTR_VAL(key_prefix), ZSTR_LEN(key_prefix), index_int_as_str, index_int_as_str_len, "%5D%5B", strlen("%5D%5B"));
 				} else if (num_prefix) {
