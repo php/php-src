@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-#define BLAKE3_VERSION_STRING "1.5.5"
+#define BLAKE3_VERSION_STRING "1.8.3"
 #define BLAKE3_KEY_LEN 32
 #define BLAKE3_OUT_LEN 32
 #define BLAKE3_BLOCK_LEN 64
@@ -38,13 +38,12 @@ extern "C" {
 #define BLAKE3_MAX_DEPTH 54
 
 // This struct is a private implementation detail. It has to be here because
-// it's part of blake3_hasher below.
+// it's part of the blake3_hasher structure defined below.
 typedef struct {
   uint32_t cv[8];
   uint64_t chunk_counter;
   uint8_t buf[BLAKE3_BLOCK_LEN];
   uint8_t buf_len;
-  uint8_t padding_1[5];
   uint8_t blocks_compressed;
   uint8_t flags;
 } blake3_chunk_state;
@@ -59,7 +58,6 @@ typedef struct {
   // don't know whether more input is coming. This is different from how the
   // reference implementation does things.
   uint8_t cv_stack[(BLAKE3_MAX_DEPTH + 1) * BLAKE3_OUT_LEN];
-  uint8_t padding_2[7];
 } blake3_hasher;
 
 BLAKE3_API const char *blake3_version(void);
@@ -71,6 +69,10 @@ BLAKE3_API void blake3_hasher_init_derive_key_raw(blake3_hasher *self, const voi
                                                   size_t context_len);
 BLAKE3_API void blake3_hasher_update(blake3_hasher *self, const void *input,
                                      size_t input_len);
+#if defined(BLAKE3_USE_TBB)
+BLAKE3_API void blake3_hasher_update_tbb(blake3_hasher *self, const void *input,
+                                         size_t input_len);
+#endif // BLAKE3_USE_TBB
 BLAKE3_API void blake3_hasher_finalize(const blake3_hasher *self, uint8_t *out,
                                        size_t out_len);
 BLAKE3_API void blake3_hasher_finalize_seek(const blake3_hasher *self, uint64_t seek,
