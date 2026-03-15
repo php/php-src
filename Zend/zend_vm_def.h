@@ -9225,7 +9225,7 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, ANY, REF)
 				ZVAL_COPY(&ref->val, GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R));
 				FREE_OP2();
 			}
-			ref->sources.ptr = NULL;
+			ref->sources.ptr = 0;
 			Z_REF_P(value) = ref;
 			Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
 			i_zval_ptr_dtor(variable_ptr);
