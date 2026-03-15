@@ -706,10 +706,12 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* create the link */
 			pgsql = PQconnectdb(connstring);
 			if (pgsql == NULL || PQstatus(pgsql) == CONNECTION_BAD) {
-				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql)
+				zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
 				if (pgsql) {
 					PQfinish(pgsql);
 				}
+				php_error_docref(NULL, E_WARNING, "Unable to connect to PostgreSQL server: %s", ZSTR_VAL(msgbuf));
+				zend_string_release(msgbuf);
 				goto err;
 			}
 
@@ -790,19 +792,23 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (connect_type & PGSQL_CONNECT_ASYNC) {
 			pgsql = PQconnectStart(connstring);
 			if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql);
+				zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
 				if (pgsql) {
 					PQfinish(pgsql);
 				}
+				php_error_docref(NULL, E_WARNING, "Unable to connect to PostgreSQL server: %s", ZSTR_VAL(msgbuf));
+				zend_string_release(msgbuf);
 				goto err;
 			}
 		} else {
 			pgsql = PQconnectdb(connstring);
 			if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-				PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql);
+				zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
 				if (pgsql) {
 					PQfinish(pgsql);
 				}
+				php_error_docref(NULL, E_WARNING, "Unable to connect to PostgreSQL server: %s", ZSTR_VAL(msgbuf));
+				zend_string_release(msgbuf);
 				goto err;
 			}
 		}
@@ -3023,10 +3029,7 @@ PHP_FUNCTION(pg_lo_export)
 
 	pgsql = link->conn;
 
-	if (lo_export(pgsql, oid, ZSTR_VAL(file_out)) == -1) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(lo_export(pgsql, oid, ZSTR_VAL(file_out)) != -1);
 }
 /* }}} */
 
@@ -3080,15 +3083,11 @@ PHP_FUNCTION(pg_lo_tell)
 	pgsql = Z_PGSQL_LOB_P(pgsql_id);
 	CHECK_PGSQL_LOB(pgsql);
 
-#ifdef VE_PG_LO64
 	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
 		offset = lo_tell64((PGconn *)pgsql->conn, pgsql->lofd);
 	} else {
 		offset = lo_tell((PGconn *)pgsql->conn, pgsql->lofd);
 	}
-#else
-	offset = lo_tell((PGconn *)pgsql->conn, pgsql->lofd);
-#endif
 	RETURN_LONG(offset);
 }
 /* }}} */
@@ -3109,15 +3108,11 @@ PHP_FUNCTION(pg_lo_truncate)
 	pgsql = Z_PGSQL_LOB_P(pgsql_id);
 	CHECK_PGSQL_LOB(pgsql);
 
-#ifdef VE_PG_LO64
 	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
 		result = lo_truncate64((PGconn *)pgsql->conn, pgsql->lofd, size);
 	} else {
 		result = lo_truncate((PGconn *)pgsql->conn, pgsql->lofd, size);
 	}
-#else
-	result = lo_truncate((PGconn *)pgsql->conn, pgsql->lofd, size);
-#endif
 	if (!result) {
 		RETURN_TRUE;
 	} else {
@@ -3350,9 +3345,8 @@ PHP_FUNCTION(pg_copy_to)
 	pgsql_link_handle *link;
 	zend_string *table_name;
 	zend_string *pg_delimiter = NULL;
-	char *pg_null_as = NULL;
+	char *pg_null_as = "\\\\N";
 	size_t pg_null_as_len = 0;
-	bool free_pg_null = false;
 	char *query;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
@@ -3377,10 +3371,6 @@ PHP_FUNCTION(pg_copy_to)
 		zend_argument_value_error(3, "must be one character");
 		RETURN_THROWS();
 	}
-	if (!pg_null_as) {
-		pg_null_as = estrdup("\\\\N");
-		free_pg_null = true;
-	}
 
 	spprintf(&query, 0, "COPY %s TO STDOUT DELIMITER E'%c' NULL AS E'%s'", ZSTR_VAL(table_name), *ZSTR_VAL(pg_delimiter), pg_null_as);
 
@@ -3388,9 +3378,6 @@ PHP_FUNCTION(pg_copy_to)
 		PQclear(pgsql_result);
 	}
 	pgsql_result = PQexec(pgsql, query);
-	if (free_pg_null) {
-		efree(pg_null_as);
-	}
 	efree(query);
 
 	if (pgsql_result) {
@@ -3475,9 +3462,8 @@ PHP_FUNCTION(pg_copy_from)
 	zval *value;
 	zend_string *table_name;
 	zend_string *pg_delimiter = NULL;
-	char *pg_null_as = NULL;
+	char *pg_null_as = "\\\\N";
 	size_t pg_null_as_len;
-	bool pg_null_as_free = false;
 	char *query;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
@@ -3502,10 +3488,6 @@ PHP_FUNCTION(pg_copy_from)
 		zend_argument_value_error(4, "must be one character");
 		RETURN_THROWS();
 	}
-	if (!pg_null_as) {
-		pg_null_as = estrdup("\\\\N");
-		pg_null_as_free = true;
-	}
 
 	spprintf(&query, 0, "COPY %s FROM STDIN DELIMITER E'%c' NULL AS E'%s'", ZSTR_VAL(table_name), *ZSTR_VAL(pg_delimiter), pg_null_as);
 	while ((pgsql_result = PQgetResult(pgsql))) {
@@ -3513,9 +3495,6 @@ PHP_FUNCTION(pg_copy_from)
 	}
 	pgsql_result = PQexec(pgsql, query);
 
-	if (pg_null_as_free) {
-		efree(pg_null_as);
-	}
 	efree(query);
 
 	if (pgsql_result) {
@@ -3692,7 +3671,6 @@ PHP_FUNCTION(pg_unescape_bytea)
 	tmp = (char *)PQunescapeBytea((unsigned char*)from, &to_len);
 	if (!tmp) {
 		zend_error_noreturn(E_ERROR, "Out of memory");
-		return;
 	}
 
 	RETVAL_STRINGL(tmp, to_len);
@@ -3804,12 +3782,8 @@ PHP_FUNCTION(pg_result_error_field)
 
 	if (fieldcode & (PG_DIAG_SEVERITY|PG_DIAG_SQLSTATE|PG_DIAG_MESSAGE_PRIMARY|PG_DIAG_MESSAGE_DETAIL
 				|PG_DIAG_MESSAGE_HINT|PG_DIAG_STATEMENT_POSITION
-#ifdef PG_DIAG_INTERNAL_POSITION
 				|PG_DIAG_INTERNAL_POSITION
-#endif
-#ifdef PG_DIAG_INTERNAL_QUERY
 				|PG_DIAG_INTERNAL_QUERY
-#endif
 				|PG_DIAG_CONTEXT|PG_DIAG_SOURCE_FILE|PG_DIAG_SOURCE_LINE
 				|PG_DIAG_SOURCE_FUNCTION)) {
 		field = PQresultErrorField(pgsql_result, (int)fieldcode);
@@ -3880,10 +3854,8 @@ PHP_FUNCTION(pg_connection_reset)
 	pgsql = link->conn;
 
 	PQreset(pgsql);
-	if (PQstatus(pgsql) == CONNECTION_BAD) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	
+	RETURN_BOOL(PQstatus(pgsql) != CONNECTION_BAD);
 }
 /* }}} */
 
@@ -5637,7 +5609,6 @@ static inline zend_result build_tablename(smart_str *querystr, PGconn *pg_link, 
 PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *table, zval *var_array, zend_ulong opt, zend_string **sql)
 {
 	zval *val, converted;
-	char buf[256];
 	char *tmp;
 	smart_str querystr = {0};
 	zend_result ret = FAILURE;
@@ -5679,7 +5650,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 			goto cleanup;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
-			tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
+			tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld));
 			if (tmp == NULL) {
 				php_error_docref(NULL, E_NOTICE, "Failed to escape field '%s'", ZSTR_VAL(fld));
 				goto cleanup;
@@ -5720,7 +5691,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 				smart_str_append_long(&querystr, Z_LVAL_P(val));
 				break;
 			case IS_DOUBLE:
-				smart_str_appendl(&querystr, buf, snprintf(buf, sizeof(buf), "%F", Z_DVAL_P(val)));
+				smart_str_append_double(&querystr, Z_DVAL_P(val), 6, false);
 				break;
 			case IS_NULL:
 				smart_str_appendl(&querystr, "NULL", sizeof("NULL")-1);
@@ -5864,7 +5835,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 			return -1;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
-			char *tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
+			char *tmp = PQescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld));
 			if (tmp == NULL) {
 				php_error_docref(NULL, E_NOTICE, "Failed to escape field '%s'", ZSTR_VAL(fld));
 				return -1;
@@ -5904,8 +5875,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 				smart_str_append_long(querystr, Z_LVAL_P(val));
 				break;
 			case IS_DOUBLE: {
-				char buf[256];
-				smart_str_appendl(querystr, buf, MIN(snprintf(buf, sizeof(buf), "%F", Z_DVAL_P(val)), sizeof(buf) - 1));
+				smart_str_append_double(querystr, Z_DVAL_P(val), 6, false);
 				}
 				break;
 			case IS_NULL:

@@ -18,7 +18,7 @@ if (PHP_OPENSSL != "no") {
 		if (PHP_OPENSSL_ARGON2 != "no") {
 			if (PHP_ZTS != "no") {
 				WARNING("OpenSSL argon2 hashing not supported in ZTS mode for now");
-			} else if (!CHECK_FUNC_IN_HEADER("openssl/thread.h", "OSSL_set_max_threads", PHP_PHP_BUILD + "\\include")) {
+			} else if (!GREP_HEADER("openssl/thread.h", "OSSL_set_max_threads", PHP_PHP_BUILD + "\\include")) {
 				WARNING("OpenSSL argon2 hashing requires OpenSSL >= 3.2");
 			} else {
 				AC_DEFINE("HAVE_OPENSSL_ARGON2", 1, "Define to 1 to enable OpenSSL argon2 password hashing.");

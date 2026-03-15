@@ -1,5 +1,7 @@
 --TEST--
 Auto implement BackedEnum interface
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 
@@ -13,8 +15,12 @@ enum Baz: int {
 
 var_dump(Foo::Bar instanceof BackedEnum);
 var_dump(Baz::Qux instanceof BackedEnum);
+var_dump(ZendTestUnitEnum::Foo instanceof BackedEnum);
+var_dump(ZendTestIntEnum::Foo instanceof BackedEnum);
 
 ?>
 --EXPECT--
+bool(false)
+bool(true)
 bool(false)
 bool(true)

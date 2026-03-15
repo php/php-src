@@ -18,6 +18,38 @@ void ir_print_proto(const ir_ctx *ctx, ir_ref func_proto, FILE *f)
 	}
 }
 
+static void ir_print_call_conv(uint32_t flags, FILE *f)
+{
+	switch (flags & IR_CALL_CONV_MASK) {
+		case IR_CC_BUILTIN:
+			fprintf(f, " __builtin");
+			break;
+		case IR_CC_FASTCALL:
+			fprintf(f, " __fastcall");
+			break;
+		case IR_CC_PRESERVE_NONE:
+			fprintf(f, " __preserve_none");
+			break;
+#if defined(IR_TARGET_X64)
+		case IR_CC_X86_64_SYSV:
+			fprintf(f, " __sysv");
+			break;
+		case IR_CC_X86_64_MS:
+			fprintf(f, " __win64");
+			break;
+#elif defined(IR_TARGET_AARCH64)
+		case IR_CC_AARCH64_SYSV:
+			fprintf(f, " __sysv");
+			break;
+		case IR_CC_AARCH64_DARWIN:
+			fprintf(f, " __darwin");
+			break;
+#endif
+		default:
+			IR_ASSERT((flags & IR_CALL_CONV_MASK) == IR_CC_DEFAULT);
+	}
+}
+
 void ir_print_proto_ex(uint8_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types, FILE *f)
 {
 	uint32_t j;
@@ -35,10 +67,43 @@ void ir_print_proto_ex(uint8_t flags, ir_type ret_type, uint32_t params_count, c
 		fprintf(f, "...");
 	}
 	fprintf(f, "): %s", ir_type_cname[ret_type]);
-	if (flags & IR_FASTCALL_FUNC) {
-		fprintf(f, " __fastcall");
-	} else if (flags & IR_BUILTIN_FUNC) {
-		fprintf(f, " __builtin");
+	ir_print_call_conv(flags, f);
+	if (flags & IR_CONST_FUNC) {
+		fprintf(f, " __const");
+	} else if (flags & IR_PURE_FUNC) {
+		fprintf(f, " __pure");
+	}
+}
+
+void ir_print_func_proto(const ir_ctx *ctx, const char *name, bool prefix, FILE *f)
+{
+	if (ctx->flags & IR_STATIC) {
+		fprintf(f, "static ");
+	}
+	fprintf(f, "func %s%s(",
+		prefix ? "@" : "",
+		name);
+	if (ctx->ir_base[2].op == IR_PARAM) {
+		ir_insn *insn = &ctx->ir_base[2];
+
+		fprintf(f, "%s", ir_type_cname[insn->type]);
+		insn++;
+		while (insn->op == IR_PARAM) {
+			fprintf(f, ", %s", ir_type_cname[insn->type]);
+			insn++;;
+		}
+		if (ctx->flags & IR_VARARG_FUNC) {
+			fprintf(f, ", ...");
+		}
+	} else if (ctx->flags & IR_VARARG_FUNC) {
+		fprintf(f, "...");
+	}
+	fprintf(f, "): %s", ir_type_cname[ctx->ret_type != (ir_type)-1 ? ctx->ret_type : IR_VOID]);
+	ir_print_call_conv(ctx->flags, f);
+	if (ctx->flags & IR_CONST_FUNC) {
+		fprintf(f, " __const");
+	} else if (ctx->flags & IR_PURE_FUNC) {
+		fprintf(f, " __pure");
 	}
 }
 
@@ -107,6 +172,10 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 			ir_print_proto(ctx, insn->proto, f);
 		} else if (insn->op == IR_SYM) {
 			fprintf(f, "sym(%s%s)",
+				(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
+				ir_get_str(ctx, insn->val.name));
+		} else if (insn->op == IR_LABEL) {
+			fprintf(f, "label(%s%s)",
 				(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
 				ir_get_str(ctx, insn->val.name));
 		} else if (insn->op == IR_FUNC_ADDR) {
@@ -271,6 +340,13 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 					case IR_OPND_NUM:
 						fprintf(f, "%s%d", first ? "(" : ", ", ref);
 						first = 0;
+						break;
+					case IR_OPND_LABEL_REF:
+						if (ref) {
+							IR_ASSERT(IR_IS_CONST_REF(ref));
+							fprintf(f, "%sc_%d", first ? "(" : ", ", -ref);
+							first = 0;
+						}
 						break;
 				}
 			} else if (opnd_kind == IR_OPND_NUM) {

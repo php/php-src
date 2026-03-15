@@ -86,7 +86,7 @@ class IntlBreakIterator implements IteratorAggregate
     public function getLocale(int $type): string|false {}
 
     /** @tentative-return-type */
-    public function getPartsIterator(string $type = IntlPartsIterator::KEY_SEQUENTIAL): IntlPartsIterator {}
+    public function getPartsIterator(int $type = IntlPartsIterator::KEY_SEQUENTIAL): IntlPartsIterator {}
 
     /** @tentative-return-type */
     public function getText(): ?string {}

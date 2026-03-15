@@ -118,7 +118,7 @@ dnl Ugly hack to check if dlsym() requires a leading underscore in symbol name.
 dnl
 AC_DEFUN([ZEND_DLSYM_CHECK], [dnl
 AC_MSG_CHECKING([whether dlsym() requires a leading underscore in symbol names])
-_LT_AC_TRY_DLOPEN_SELF([AC_MSG_RESULT([no])], [
+_LT_TRY_DLOPEN_SELF([AC_MSG_RESULT([no])], [
   AC_MSG_RESULT([yes])
   AC_DEFINE([DLSYM_NEEDS_UNDERSCORE], [1],
     [Define to 1 if 'dlsym()' requires a leading underscore in symbol names.])
@@ -474,7 +474,7 @@ dnl expectations.
 dnl
 AC_DEFUN([ZEND_CHECK_PRESERVE_NONE], [dnl
   AC_CACHE_CHECK([for preserve_none calling convention],
-   [php_cv_preverve_none],
+   [php_cv_preserve_none],
    [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
 #include <stdint.h>
@@ -487,7 +487,7 @@ uint64_t key = UINT64_C(0x9d7f71d2bd296364);
 uintptr_t _a = 0;
 uintptr_t _b = 0;
 
-uintptr_t __attribute__((preserve_none)) fun(uintptr_t a, uintptr_t b) {
+uintptr_t __attribute__((preserve_none,noinline,used)) fun(uintptr_t a, uintptr_t b) {
 	_a = a;
 	_b = b;
 	return (uintptr_t)const3;
@@ -504,7 +504,11 @@ uintptr_t __attribute__((preserve_none)) test(void) {
 		"movq %2, %%r13\n"
 		"xorq %3, %%r13\n"
 		"xorq %%rax, %%rax\n"
+#if defined(__APPLE__)
+		"call _fun\n"
+#else
 		"call fun\n"
+#endif
 		: "=a" (ret)
 		: "r" (const1), "r" (const2), "r" (key)
 		: "r12", "r13"
@@ -515,7 +519,11 @@ uintptr_t __attribute__((preserve_none)) test(void) {
 		"eor    x20, %1, %3\n"
 		"eor    x21, %2, %3\n"
 		"eor    x0, x0, x0\n"
+#if defined(__APPLE__)
+		"bl     _fun\n"
+#else
 		"bl     fun\n"
+#endif
 		"mov    %0, x0\n"
 		: "=r" (ret)
 		: "r" (const1), "r" (const2), "r" (key)

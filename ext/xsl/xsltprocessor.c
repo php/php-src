@@ -123,65 +123,38 @@ static void xsl_ext_function_trampoline(xmlXPathParserContextPtr ctxt, int nargs
 	}
 }
 
-static void xsl_add_ns_to_map(xmlHashTablePtr table, xsltStylesheetPtr sheet, const xmlNode *cur, const xmlChar *prefix, const xmlChar *uri)
+static void xsl_add_ns_def(xmlNodePtr node)
 {
-	const xmlChar *existing_url = xmlHashLookup(table, prefix);
-	if (existing_url != NULL && !xmlStrEqual(existing_url, uri)) {
-		xsltTransformError(NULL, sheet, (xmlNodePtr) cur, "Namespaces prefix %s used for multiple namespaces\n", prefix);
-		sheet->warnings++;
-	} else if (existing_url == NULL) {
-		xmlHashUpdateEntry(table, prefix, (void *) uri, NULL);
-	}
-}
-
-/* Adds all namespace declaration (not using nsDef) into a hash map that maps prefix to uri. Warns on conflicting declarations. */
-static void xsl_build_ns_map(xmlHashTablePtr table, xsltStylesheetPtr sheet, php_dom_libxml_ns_mapper *ns_mapper, const xmlDoc *doc)
-{
-	const xmlNode *cur = xmlDocGetRootElement(doc);
-
-	while (cur != NULL) {
-		if (cur->type == XML_ELEMENT_NODE) {
-			if (cur->ns != NULL && cur->ns->prefix != NULL) {
-				xsl_add_ns_to_map(table, sheet, cur, cur->ns->prefix, cur->ns->href);
-			}
-
-			for (const xmlAttr *attr = cur->properties; attr != NULL; attr = attr->next) {
-				if (attr->ns != NULL && attr->ns->prefix != NULL && php_dom_ns_is_fast_ex(attr->ns, php_dom_ns_is_xmlns_magic_token)
-					&& attr->children != NULL && attr->children->content != NULL) {
-					/* This attribute declares a namespace, get the relevant instance.
-					 * The declared namespace is not the same as the namespace of this attribute (which is xmlns). */
-					const xmlChar *prefix = attr->name;
-					xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, (const char *) prefix, (const char *) attr->children->content);
-					xsl_add_ns_to_map(table, sheet, cur, prefix, ns->href);
+	if (node->type == XML_ELEMENT_NODE) {
+		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
+			if (php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
+				xmlNsPtr ns = xmlMalloc(sizeof(*ns));
+				if (!ns) {
+					return;
 				}
+
+				bool should_free;
+				xmlChar *attr_value = php_libxml_attr_value(attr, &should_free);
+
+				memset(ns, 0, sizeof(*ns));
+				ns->type = XML_LOCAL_NAMESPACE;
+				ns->href = should_free ? attr_value : xmlStrdup(attr_value);
+				ns->prefix = attr->ns->prefix ? xmlStrdup(attr->name) : NULL;
+				ns->next = node->nsDef;
+				node->nsDef = ns;
 			}
 		}
-
-		cur = php_dom_next_in_tree_order(cur, (const xmlNode *) doc);
 	}
 }
 
-/* Apply namespace corrections for new DOM */
-typedef enum {
-	XSL_NS_HASH_CORRECTION_NONE = 0,
-	XSL_NS_HASH_CORRECTION_APPLIED = 1,
-	XSL_NS_HASH_CORRECTION_FAILED = 2
-} xsl_ns_hash_correction_status;
-
-static zend_always_inline xsl_ns_hash_correction_status xsl_apply_ns_hash_corrections(xsltStylesheetPtr sheetp, xmlNodePtr nodep, xmlDocPtr doc)
+static void xsl_add_ns_defs(xmlDocPtr doc)
 {
-	if (sheetp->nsHash == NULL) {
-		dom_object *node_intern = php_dom_object_get_data(nodep);
-		if (node_intern != NULL && php_dom_follow_spec_intern(node_intern)) {
-			sheetp->nsHash = xmlHashCreate(10);
-			if (UNEXPECTED(!sheetp->nsHash)) {
-				return XSL_NS_HASH_CORRECTION_FAILED;
-			}
-			xsl_build_ns_map(sheetp->nsHash, sheetp, php_dom_get_ns_mapper(node_intern), doc);
-			return XSL_NS_HASH_CORRECTION_APPLIED;
-		}
+	xmlNodePtr base = (xmlNodePtr) doc;
+	xmlNodePtr node = base->children;
+	while (node != NULL) {
+		xsl_add_ns_def(node);
+		node = php_dom_next_in_tree_order(node, base);
 	}
-	return XSL_NS_HASH_CORRECTION_NONE;
 }
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
@@ -190,11 +163,11 @@ Since:
 PHP_METHOD(XSLTProcessor, importStylesheet)
 {
 	zval *id, *docp = NULL;
-	xmlDoc *doc = NULL, *newdoc = NULL;
+	xmlDoc *newdoc = NULL;
 	xsltStylesheetPtr sheetp;
 	bool clone_docu = false;
 	xmlNode *nodep = NULL;
-	zval *cloneDocu, rv;
+	zval *cloneDocu, rv, clone_zv;
 	zend_string *member;
 
 	id = ZEND_THIS;
@@ -202,51 +175,59 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		RETURN_THROWS();
 	}
 
-	nodep = php_libxml_import_node(docp);
+	/* libxslt uses _private, so we must copy the imported
+	 * stylesheet document otherwise the node proxies will be a mess.
+	 * We will clone the object and detach the libxml internals later. */
+	zend_object *clone = Z_OBJ_HANDLER_P(docp, clone_obj)(Z_OBJ_P(docp));
+	if (!clone) {
+		RETURN_THROWS();
+	}
+
+	ZVAL_OBJ(&clone_zv, clone);
+	nodep = php_libxml_import_node(&clone_zv);
 
 	if (nodep) {
-		doc = nodep->doc;
+		newdoc = nodep->doc;
 	}
-	if (doc == NULL) {
+	if (newdoc == NULL) {
+		OBJ_RELEASE(clone);
 		zend_argument_type_error(1, "must be a valid XML node");
 		RETURN_THROWS();
 	}
 
-	/* libxslt uses _private, so we must copy the imported
-	stylesheet document otherwise the node proxies will be a mess */
-	newdoc = xmlCopyDoc(doc, 1);
-	xmlNodeSetBase((xmlNodePtr) newdoc, (xmlChar *)doc->URL);
+	php_libxml_node_object *clone_lxml_obj = Z_LIBXML_NODE_P(&clone_zv);
+
 	PHP_LIBXML_SANITIZE_GLOBALS(parse);
 	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 	xmlSubstituteEntitiesDefault(1);
 	xmlLoadExtDtdDefaultValue = XML_DETECT_IDS | XML_COMPLETE_ATTRS;
 	ZEND_DIAGNOSTIC_IGNORED_END
 
+	if (clone_lxml_obj->document->class_type == PHP_LIBXML_CLASS_MODERN) {
+		xsl_add_ns_defs(newdoc);
+	}
+
 	sheetp = xsltParseStylesheetDoc(newdoc);
 	PHP_LIBXML_RESTORE_GLOBALS(parse);
 
 	if (!sheetp) {
-		xmlFreeDoc(newdoc);
+		OBJ_RELEASE(clone);
 		RETURN_FALSE;
 	}
 
 	xsl_object *intern = Z_XSL_P(id);
 
-	xsl_ns_hash_correction_status status = xsl_apply_ns_hash_corrections(sheetp, nodep, doc);
-	if (UNEXPECTED(status == XSL_NS_HASH_CORRECTION_FAILED)) {
-		xsltFreeStylesheet(sheetp);
-		xmlFreeDoc(newdoc);
-		RETURN_FALSE;
-	} else if (status == XSL_NS_HASH_CORRECTION_APPLIED) {
-		/* The namespace mappings need to be kept alive.
-		 * This is stored in the ref obj outside of libxml2, but that means that the sheet won't keep it alive
-		 * unlike with namespaces from old DOM. */
-		if (intern->sheet_ref_obj) {
-			php_libxml_decrement_doc_ref_directly(intern->sheet_ref_obj);
-		}
-		intern->sheet_ref_obj = Z_LIBXML_NODE_P(docp)->document;
-		intern->sheet_ref_obj->refcount++;
+	/* Detach object */
+	clone_lxml_obj->document->ptr = NULL;
+	/* The namespace mappings need to be kept alive.
+	 * This is stored in the ref obj outside of libxml2, but that means that the sheet won't keep it alive
+	 * unlike with namespaces from old DOM. */
+	if (intern->sheet_ref_obj) {
+		php_libxml_decrement_doc_ref_directly(intern->sheet_ref_obj);
 	}
+	intern->sheet_ref_obj = clone_lxml_obj->document;
+	intern->sheet_ref_obj->refcount++;
+	OBJ_RELEASE(clone);
 
 	member = ZSTR_INIT_LITERAL("cloneDocument", 0);
 	cloneDocu = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_R, NULL, &rv);
@@ -703,11 +684,7 @@ PHP_METHOD(XSLTProcessor, removeParameter)
 		RETURN_THROWS();
 	}
 	intern = Z_XSL_P(id);
-	if (zend_hash_del(intern->parameter, key) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETVAL_BOOL(zend_hash_del(intern->parameter, key) == SUCCESS);
 	zend_string_release_ex(key, false);
 }
 /* }}} end XSLTProcessor::removeParameter */
@@ -818,9 +795,7 @@ PHP_METHOD(XSLTProcessor, getSecurityPrefs)
 	zval *id = ZEND_THIS;
 	xsl_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_XSL_P(id);
 
@@ -831,9 +806,7 @@ PHP_METHOD(XSLTProcessor, getSecurityPrefs)
 /* {{{ */
 PHP_METHOD(XSLTProcessor, hasExsltSupport)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 #ifdef HAVE_XSL_EXSLT
 	RETURN_TRUE;

@@ -328,7 +328,9 @@ bool ir_check(const ir_ctx *ctx)
 				}
 				break;
 			case IR_LOAD:
+			case IR_LOAD_v:
 			case IR_STORE:
+			case IR_STORE_v:
 				type = ctx->ir_base[insn->op2].type;
 				if (type != IR_ADDR
 				 && (!IR_IS_TYPE_INT(type) || ir_type_size[type] != ir_type_size[IR_ADDR])) {
@@ -338,7 +340,9 @@ bool ir_check(const ir_ctx *ctx)
 				}
 				break;
 			case IR_VLOAD:
+			case IR_VLOAD_v:
 			case IR_VSTORE:
+			case IR_VSTORE_v:
 				if (ctx->ir_base[insn->op2].op != IR_VAR) {
 					fprintf(stderr, "ir_base[%d].op2 must be 'VAR' (%s)\n",
 						i, ir_op_name[ctx->ir_base[insn->op2].op]);
@@ -407,6 +411,8 @@ bool ir_check(const ir_ctx *ctx)
 								i, ir_op_name[insn->op], use_list->count);
 							ok = 0;
 						}
+						break;
+					case IR_IGOTO:
 						break;
 					default:
 						/* skip data references */

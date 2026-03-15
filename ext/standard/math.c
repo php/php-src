@@ -304,30 +304,28 @@ PHP_FUNCTION(floor)
 }
 /* }}} */
 
-PHPAPI int php_math_round_mode_from_enum(zend_object *mode)
+PHPAPI int php_math_round_mode_from_enum(zend_enum_RoundingMode mode)
 {
-	zval *case_name = zend_enum_fetch_case_name(mode);
-	zend_string *mode_name = Z_STR_P(case_name);
-
-	switch (ZSTR_VAL(mode_name)[0] + ZSTR_VAL(mode_name)[4]) {
-		case 'H' + 'A':
+	switch (mode) {
+		case ZEND_ENUM_RoundingMode_HalfAwayFromZero:
 			return PHP_ROUND_HALF_UP;
-		case 'H' + 'T':
+		case ZEND_ENUM_RoundingMode_HalfTowardsZero:
 			return PHP_ROUND_HALF_DOWN;
-		case 'H' + 'E':
+		case ZEND_ENUM_RoundingMode_HalfEven:
 			return PHP_ROUND_HALF_EVEN;
-		case 'H' + 'O':
+		case ZEND_ENUM_RoundingMode_HalfOdd:
 			return PHP_ROUND_HALF_ODD;
-		case 'T' + 'r':
+		case ZEND_ENUM_RoundingMode_TowardsZero:
 			return PHP_ROUND_TOWARD_ZERO;
-		case 'A' + 'F':
+		case ZEND_ENUM_RoundingMode_AwayFromZero:
 			return PHP_ROUND_AWAY_FROM_ZERO;
-		case 'N' + 't':
+		case ZEND_ENUM_RoundingMode_NegativeInfinity:
 			return PHP_ROUND_FLOOR;
-		case 'P' + 't':
+		case ZEND_ENUM_RoundingMode_PositiveInfinity:
 			return PHP_ROUND_CEILING;
-		EMPTY_SWITCH_DEFAULT_CASE();
 	}
+
+	ZEND_UNREACHABLE();
 }
 
 /* {{{ Returns the number rounded to specified precision */
@@ -355,7 +353,7 @@ PHP_FUNCTION(round)
 	}
 
 	if (mode_object != NULL) {
-		mode = php_math_round_mode_from_enum(mode_object);
+		mode = php_math_round_mode_from_enum(zend_enum_fetch_case_id(mode_object));
 	}
 
 	switch (mode) {
@@ -386,6 +384,62 @@ PHP_FUNCTION(round)
 
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
+}
+/* }}} */
+
+/* Return the given value if in range of min and max */
+static void php_math_clamp(zval *return_value, zval *value, zval *min, zval *max)
+{
+	if (Z_TYPE_P(min) == IS_DOUBLE && UNEXPECTED(zend_isnan(Z_DVAL_P(min)))) {
+		zend_argument_value_error(2, "must not be NAN");
+		RETURN_THROWS();
+	}
+
+	if (Z_TYPE_P(max) == IS_DOUBLE && UNEXPECTED(zend_isnan(Z_DVAL_P(max)))) {
+		zend_argument_value_error(3, "must not be NAN");
+		RETURN_THROWS();
+	}
+
+	if (zend_compare(max, min) == -1) {
+		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)");
+		RETURN_THROWS();
+	}
+
+	if (zend_compare(max, value) == -1) {
+		RETURN_COPY(max);
+	}
+
+	if (zend_compare(value, min) == -1) {
+		RETURN_COPY(min);
+	}
+
+	RETURN_COPY(value);
+}
+
+/* {{{ Return the given value if in range of min and max */
+PHP_FUNCTION(clamp)
+{
+	zval *zvalue, *zmin, *zmax;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_ZVAL(zvalue)
+		Z_PARAM_ZVAL(zmin)
+		Z_PARAM_ZVAL(zmax)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_math_clamp(return_value, zvalue, zmin, zmax);
+}
+/* }}} */
+
+/* {{{ Return the given value if in range of min and max */
+ZEND_FRAMELESS_FUNCTION(clamp, 3)
+{
+	zval *zvalue, *zmin, *zmax;
+	Z_FLF_PARAM_ZVAL(1, zvalue);
+	Z_FLF_PARAM_ZVAL(2, zmin);
+	Z_FLF_PARAM_ZVAL(3, zmax);
+
+	php_math_clamp(return_value, zvalue, zmin, zmax);
 }
 /* }}} */
 

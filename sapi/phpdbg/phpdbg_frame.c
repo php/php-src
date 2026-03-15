@@ -34,11 +34,7 @@ static inline void phpdbg_append_individual_arg(smart_str *s, uint32_t i, zend_f
 	}
 	if (i < func->common.num_args) {
 		if (arginfo) {
-			if (func->type == ZEND_INTERNAL_FUNCTION) {
-				arg_name = (char *) ((zend_internal_arg_info *) &arginfo[i])->name;
-			} else {
-				arg_name = ZSTR_VAL(arginfo[i].name);
-			}
+			arg_name = ZSTR_VAL(arginfo[i].name);
 		}
 		smart_str_appends(s, arg_name ? arg_name : "?");
 		smart_str_appendc(s, '=');
@@ -213,11 +209,7 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 				char *arg_name = NULL;
 
 				if (arginfo) {
-					if (func->type == ZEND_INTERNAL_FUNCTION) {
-						arg_name = (char *)((zend_internal_arg_info *)&arginfo[j])->name;
-					} else {
-						arg_name = ZSTR_VAL(arginfo[j].name);
-					}
+					arg_name = ZSTR_VAL(arginfo[j].name);
 				}
 
 				if (!is_variadic) {

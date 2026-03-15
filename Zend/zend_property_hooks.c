@@ -121,7 +121,7 @@ skip_property:
 			if (Z_TYPE_P(prop_value) == IS_INDIRECT) {
 				continue;
 			}
-			zval *tmp = _zend_hash_append(properties, prop_name, prop_value);
+			zval *tmp = zend_hash_add_new(properties, prop_name, prop_value);
 			Z_TRY_ADDREF_P(tmp);
 		} ZEND_HASH_FOREACH_END();
 	}

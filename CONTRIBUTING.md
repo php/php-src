@@ -100,6 +100,7 @@ scattered across different websites, and often outdated. Nonetheless, they can
 provide a good starting point for learning about the fundamentals of the code
 base.
 
+* https://php.github.io/php-src/
 * https://www.phpinternalsbook.com/
 * https://www.npopov.com/
   * [Internal value representation](https://www.npopov.com/2015/05/05/Internal-value-representation-in-PHP-7-part-1.html), [part 2](https://www.npopov.com/2015/06/19/Internal-value-representation-in-PHP-7-part-2.html)
@@ -175,6 +176,7 @@ locations.
     ├─ config.guess                 # https://git.savannah.gnu.org/cgit/config.git
     ├─ config.sub                   # https://git.savannah.gnu.org/cgit/config.git
     ├─ libtool.m4                   # https://git.savannah.gnu.org/cgit/libtool.git
+    ├─ lt*.m4                       # https://git.savannah.gnu.org/cgit/libtool.git
     ├─ ltmain.sh                    # https://git.savannah.gnu.org/cgit/libtool.git
     ├─ pkg.m4                       # https://gitlab.freedesktop.org/pkg-config/pkg-config
     ├─ shtool                       # https://www.gnu.org/software/shtool/

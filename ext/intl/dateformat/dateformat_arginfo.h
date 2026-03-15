@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit dateformat.stub.php instead.
  * Stub hash: 160d05ec65c45b66b13eaecbef20b3c59bfb33d1 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter___construct, 0, 0, 1)

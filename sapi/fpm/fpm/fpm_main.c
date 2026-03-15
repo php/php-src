@@ -24,7 +24,6 @@
 #include "php_variables.h"
 #include "php_ini_builder.h"
 #include "zend_modules.h"
-#include "php.h"
 #include "zend_ini_scanner.h"
 #include "zend_globals.h"
 #include "zend_stream.h"
@@ -32,7 +31,6 @@
 #include "SAPI.h"
 
 #include <stdio.h>
-#include "php.h"
 
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
@@ -61,7 +59,6 @@
 #include "zend.h"
 #include "zend_extensions.h"
 #include "php_ini.h"
-#include "php_globals.h"
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
@@ -1495,9 +1492,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!fcgi_is_closed(request)) {
 		php_output_end_all();
@@ -1517,9 +1512,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
 	fcgi_request *request;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	if ((request = (fcgi_request*) SG(server_context))) {
@@ -1530,9 +1523,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 /* {{{ Returns the status of the fastcgi process manager */
 PHP_FUNCTION(fpm_get_status) /* {{{ */
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (fpm_status_export_to_zval(return_value)) {
 		RETURN_FALSE;

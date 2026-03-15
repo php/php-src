@@ -272,7 +272,7 @@ PHPAPI zend_string *php_escape_shell_cmd(const zend_string *unescaped_cmd)
 	size_t x, y;
 	zend_string *cmd;
 #ifndef PHP_WIN32
-	char *p = NULL;
+	const char *p = NULL;
 #endif
 
 	ZEND_ASSERT(!zend_str_has_nul_byte(unescaped_cmd) && "Must be a binary safe string");

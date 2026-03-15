@@ -162,8 +162,8 @@ U_CFUNC PHP_METHOD(Spoofchecker, setRestrictionLevel)
 			USPOOF_MINIMALLY_RESTRICTIVE != level &&
 			USPOOF_UNRESTRICTIVE != level) {
 		zend_argument_value_error(1, "must be one of Spoofchecker::ASCII, Spoofchecker::SINGLE_SCRIPT_RESTRICTIVE, "
-			"Spoofchecker::SINGLE_HIGHLY_RESTRICTIVE, Spoofchecker::SINGLE_MODERATELY_RESTRICTIVE, "
-			"Spoofchecker::SINGLE_MINIMALLY_RESTRICTIVE, or Spoofchecker::UNRESTRICTIVE");
+			"Spoofchecker::HIGHLY_RESTRICTIVE, Spoofchecker::MODERATELY_RESTRICTIVE, "
+			"Spoofchecker::MINIMALLY_RESTRICTIVE, or Spoofchecker::UNRESTRICTIVE");
 		RETURN_THROWS();
 	}
 

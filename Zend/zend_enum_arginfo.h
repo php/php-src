@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit zend_enum.stub.php instead.
  * Stub hash: 7092f1d4ba651f077cff37050899f090f00abf22 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_UnitEnum_cases, 0, 0, IS_ARRAY, 0)

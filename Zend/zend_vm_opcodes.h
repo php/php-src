@@ -86,6 +86,7 @@ typedef const void* zend_vm_opcode_handler_t;
 #define ZEND_VM_OP_NUM           0x00000010
 #define ZEND_VM_OP_JMP_ADDR      0x00000020
 #define ZEND_VM_OP_TRY_CATCH     0x00000030
+#define ZEND_VM_OP_LOOP_END      0x00000040
 #define ZEND_VM_OP_THIS          0x00000050
 #define ZEND_VM_OP_NEXT          0x00000060
 #define ZEND_VM_OP_CLASS_FETCH   0x00000070
@@ -330,7 +331,8 @@ END_EXTERN_C()
 #define ZEND_JMP_FRAMELESS                  208
 #define ZEND_INIT_PARENT_PROPERTY_HOOK_CALL 209
 #define ZEND_DECLARE_ATTRIBUTED_CONST       210
+#define ZEND_TYPE_ASSERT                    211
 
-#define ZEND_VM_LAST_OPCODE                 210
+#define ZEND_VM_LAST_OPCODE                 211
 
 #endif

@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit tokenizer_data.stub.php instead.
  * Stub hash: c5235344b7c651d27c2c33c90696a418a9c96837 */
 
 static void register_tokenizer_data_symbols(int module_number)

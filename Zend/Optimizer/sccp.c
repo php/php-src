@@ -363,8 +363,7 @@ static inline zend_result zval_to_string_offset(zend_long *result, zval *op) {
 static inline zend_result fetch_array_elem(zval **result, zval *op1, zval *op2) {
 	switch (Z_TYPE_P(op2)) {
 		case IS_NULL:
-			*result = zend_hash_find(Z_ARR_P(op1), ZSTR_EMPTY_ALLOC());
-			return SUCCESS;
+			return FAILURE;
 		case IS_FALSE:
 			*result = zend_hash_index_find(Z_ARR_P(op1), 0);
 			return SUCCESS;
@@ -403,7 +402,7 @@ static inline zend_result ct_eval_fetch_dim(zval *result, zval *op1, zval *op2, 
 			return FAILURE;
 		}
 		if (index >= 0 && index < Z_STRLEN_P(op1)) {
-			ZVAL_STR(result, zend_string_init(&Z_STRVAL_P(op1)[index], 1, 0));
+			ZVAL_CHAR(result, Z_STRVAL_P(op1)[index]);
 			return SUCCESS;
 		}
 	}
@@ -969,7 +968,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					SET_RESULT(op1, &zv);
 				} else if (ct_eval_assign_dim(&zv, data, op2) == SUCCESS) {
 					/* Mark array containing partial array as partial */
-					if (IS_PARTIAL_ARRAY(data)) {
+					if (IS_PARTIAL_ARRAY(data) || IS_PARTIAL_OBJECT(data)) {
 						MAKE_PARTIAL_ARRAY(&zv);
 					}
 					SET_RESULT(result, data);
@@ -1174,7 +1173,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						/* We can't add NEXT element into partial array (skip it) */
 						SET_RESULT(result, &zv);
 					} else if (ct_eval_add_array_elem(&zv, op1, op2) == SUCCESS) {
-						if (IS_PARTIAL_ARRAY(op1)) {
+						if (IS_PARTIAL_ARRAY(op1) || IS_PARTIAL_OBJECT(op1)) {
 							MAKE_PARTIAL_ARRAY(&zv);
 						}
 						SET_RESULT(result, &zv);

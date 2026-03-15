@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit pdo_dbh.stub.php instead.
  * Stub hash: 006be61b2c519e7d9ca997a7f12135eb3e0f3500 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)

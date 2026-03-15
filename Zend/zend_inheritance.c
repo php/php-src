@@ -60,8 +60,8 @@ static void add_property_hook_obligation(
 		zend_class_entry *ce, const zend_property_info *hooked_prop, const zend_function *hook_func);
 
 static void ZEND_COLD emit_incompatible_method_error(
-		const zend_function *child, zend_class_entry *child_scope,
-		const zend_function *parent, zend_class_entry *parent_scope,
+		const zend_function *child, const zend_class_entry *child_scope,
+		const zend_function *parent, const zend_class_entry *parent_scope,
 		inheritance_status status);
 
 static void zend_type_copy_ctor(zend_type *const type, bool use_arena, bool persistent);
@@ -100,7 +100,7 @@ static zend_function *zend_duplicate_internal_function(const zend_function *func
 {
 	zend_function *new_function;
 
-	if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
+	if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS)) {
 		new_function = (zend_function *)pemalloc(sizeof(zend_internal_function), 1);
 		memcpy(new_function, func, sizeof(zend_internal_function));
 	} else {
@@ -320,7 +320,7 @@ static bool unlinked_instanceof(const zend_class_entry *ce1, const zend_class_en
 	}
 
 	if (ce1->parent) {
-		zend_class_entry *parent_ce;
+		const zend_class_entry *parent_ce;
 		if (ce1->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
 			parent_ce = ce1->parent;
 		} else {
@@ -671,7 +671,7 @@ static inheritance_status zend_is_intersection_subtype_of_type(
 	return early_exit_status == INHERITANCE_ERROR ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 }
 
-ZEND_API inheritance_status zend_perform_covariant_type_check(
+static inheritance_status zend_perform_covariant_type_check(
 		zend_class_entry *fe_scope, const zend_type fe_type,
 		zend_class_entry *proto_scope, const zend_type proto_type)
 {
@@ -763,8 +763,8 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 }
 
 static inheritance_status zend_do_perform_arg_type_hint_check(
-		zend_class_entry *fe_scope, zend_arg_info *fe_arg_info,
-		zend_class_entry *proto_scope, zend_arg_info *proto_arg_info) /* {{{ */
+		zend_class_entry *fe_scope, const zend_arg_info *fe_arg_info,
+		zend_class_entry *proto_scope, const zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (!ZEND_TYPE_IS_SET(fe_arg_info->type) || ZEND_TYPE_PURE_MASK(fe_arg_info->type) == MAY_BE_ANY) {
 		/* Child with no type or mixed type is always compatible */
@@ -897,7 +897,7 @@ static inheritance_status zend_do_perform_implementation_check(
 /* }}} */
 
 static ZEND_COLD void zend_append_type_hint(
-		smart_str *str, zend_class_entry *scope, const zend_arg_info *arg_info, bool return_hint) /* {{{ */
+		smart_str *str, const zend_class_entry *scope, const zend_arg_info *arg_info, bool return_hint) /* {{{ */
 {
 	if (ZEND_TYPE_IS_SET(arg_info->type)) {
 		zend_string *type_str = zend_type_to_string_resolved(arg_info->type, scope);
@@ -911,7 +911,7 @@ static ZEND_COLD void zend_append_type_hint(
 /* }}} */
 
 static ZEND_COLD zend_string *zend_get_function_declaration(
-		const zend_function *fptr, zend_class_entry *scope) /* {{{ */
+		const zend_function *fptr, const zend_class_entry *scope) /* {{{ */
 {
 	smart_str str = {0};
 
@@ -953,18 +953,14 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 			}
 
 			smart_str_appendc(&str, '$');
-			if (fptr->type == ZEND_INTERNAL_FUNCTION) {
-				smart_str_appends(&str, ((zend_internal_arg_info*)arg_info)->name);
-			} else {
-				smart_str_appendl(&str, ZSTR_VAL(arg_info->name), ZSTR_LEN(arg_info->name));
-			}
+			smart_str_append(&str, arg_info->name);
 
 			if (i >= required && !ZEND_ARG_IS_VARIADIC(arg_info)) {
 				smart_str_appends(&str, " = ");
 
 				if (fptr->type == ZEND_INTERNAL_FUNCTION) {
-					if (((zend_internal_arg_info*)arg_info)->default_value) {
-						smart_str_appends(&str, ((zend_internal_arg_info*)arg_info)->default_value);
+					if (arg_info->default_value) {
+						smart_str_append(&str, arg_info->default_value);
 					} else {
 						smart_str_appends(&str, "<default>");
 					}
@@ -1011,7 +1007,9 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 							zend_ast *ast = Z_ASTVAL_P(zv);
 							if (ast->kind == ZEND_AST_CONSTANT) {
 								smart_str_append(&str, zend_ast_get_constant_name(ast));
-							} else if (ast->kind == ZEND_AST_CLASS_CONST) {
+							} else if (ast->kind == ZEND_AST_CLASS_CONST
+							 && ast->child[1]->kind == ZEND_AST_ZVAL
+							 && Z_TYPE_P(zend_ast_get_zval(ast->child[1])) == IS_STRING) {
 								smart_str_append(&str, zend_ast_get_str(ast->child[0]));
 								smart_str_appends(&str, "::");
 								smart_str_append(&str, zend_ast_get_str(ast->child[1]));
@@ -1056,8 +1054,8 @@ static zend_always_inline uint32_t func_lineno(const zend_function *fn) {
 }
 
 static void ZEND_COLD emit_incompatible_method_error(
-		const zend_function *child, zend_class_entry *child_scope,
-		const zend_function *parent, zend_class_entry *parent_scope,
+		const zend_function *child, const zend_class_entry *child_scope,
+		const zend_function *parent, const zend_class_entry *parent_scope,
 		inheritance_status status) {
 	zend_string *parent_prototype = zend_get_function_declaration(parent, parent_scope);
 	zend_string *child_prototype = zend_get_function_declaration(child, child_scope);
@@ -1517,10 +1515,9 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				}
 
 				int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
+				/* Don't keep default properties in GC (they may be freed by opcache) */
+				zval_ptr_dtor_nogc(&(ce->default_properties_table[parent_num]));
 				if (child_info->offset != ZEND_VIRTUAL_PROPERTY_OFFSET) {
-					/* Don't keep default properties in GC (they may be freed by opcache) */
-					zval_ptr_dtor_nogc(&(ce->default_properties_table[parent_num]));
-
 					if (use_child_prop) {
 						ZVAL_UNDEF(&ce->default_properties_table[parent_num]);
 					} else {
@@ -1672,7 +1669,7 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 				Z_CONSTANT_FLAGS(c->value) |= CONST_OWNED;
 			}
 		}
-		if (ce->type & ZEND_INTERNAL_CLASS) {
+		if (ce->type == ZEND_INTERNAL_CLASS) {
 			c = pemalloc(sizeof(zend_class_constant), 1);
 			memcpy(c, parent_const, sizeof(zend_class_constant));
 			parent_const = c;
@@ -2154,7 +2151,7 @@ static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c,
 				Z_CONSTANT_FLAGS(c->value) |= CONST_OWNED;
 			}
 		}
-		if (ce->type & ZEND_INTERNAL_CLASS) {
+		if (ce->type == ZEND_INTERNAL_CLASS) {
 			ct = pemalloc(sizeof(zend_class_constant), 1);
 			memcpy(ct, c, sizeof(zend_class_constant));
 			c = ct;
@@ -2170,6 +2167,10 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	zend_string *key;
 	zend_class_constant *c;
 	uint32_t flags = ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY;
+
+	if (iface->num_interfaces) {
+		zend_do_inherit_interfaces(ce, iface);
+	}
 
 	if (!(ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		/* We are not setting the prototype of overridden interface methods because of abstract
@@ -2202,9 +2203,6 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	} ZEND_HASH_FOREACH_END();
 
 	do_implement_interface(ce, iface);
-	if (iface->num_interfaces) {
-		zend_do_inherit_interfaces(ce, iface);
-	}
 }
 /* }}} */
 
@@ -2266,7 +2264,6 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 		if (UNEXPECTED(!(iface->ce_flags & ZEND_ACC_INTERFACE))) {
 			efree(interfaces);
 			zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
-			return;
 		}
 		for (uint32_t j = 0; j < num_interfaces; j++) {
 			if (interfaces[j] == iface) {
@@ -2276,7 +2273,6 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 						zend_get_object_type_uc(ce),
 						ZSTR_VAL(ce->name),
 						ZSTR_VAL(iface->name));
-					return;
 				}
 				/* skip duplications */
 				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
@@ -2527,7 +2523,6 @@ static uint32_t zend_check_trait_usage(const zend_class_entry *ce, const zend_cl
 {
 	if (UNEXPECTED((trait->ce_flags & ZEND_ACC_TRAIT) != ZEND_ACC_TRAIT)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Class %s is not a trait, Only traits may be used in 'as' and 'insteadof' statements", ZSTR_VAL(trait->name));
-		return 0;
 	}
 
 	for (uint32_t i = 0; i < ce->num_traits; i++) {
@@ -2536,7 +2531,6 @@ static uint32_t zend_check_trait_usage(const zend_class_entry *ce, const zend_cl
 		}
 	}
 	zend_error_noreturn(E_COMPILE_ERROR, "Required Trait %s wasn't added to %s", ZSTR_VAL(trait->name), ZSTR_VAL(ce->name));
-	return 0;
 }
 /* }}} */
 
@@ -2932,9 +2926,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 								ZSTR_VAL(prop_name),
 								ZSTR_VAL(ce->name));
 					}
-					if (!(flags & ZEND_ACC_STATIC)) {
-						continue;
-					}
+					continue;
 				}
 			}
 

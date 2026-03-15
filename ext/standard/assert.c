@@ -79,7 +79,7 @@ static PHP_INI_MH(OnChangeCallback) /* {{{ */
 
 static PHP_INI_MH(OnUpdateActiveBool)
 {
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	if (php_must_emit_ini_deprecation(stage) && !*p) {
 		php_error_docref(NULL, E_DEPRECATED, "assert.active INI setting is deprecated");
@@ -89,7 +89,7 @@ static PHP_INI_MH(OnUpdateActiveBool)
 
 static PHP_INI_MH(OnUpdateBailBool)
 {
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	if (php_must_emit_ini_deprecation(stage) && *p) {
 		php_error_docref(NULL, E_DEPRECATED, "assert.bail INI setting is deprecated");
@@ -99,7 +99,7 @@ static PHP_INI_MH(OnUpdateBailBool)
 
 static PHP_INI_MH(OnUpdateExceptionBool)
 {
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	if (php_must_emit_ini_deprecation(stage) && !*p) {
 		php_error_docref(NULL, E_DEPRECATED, "assert.exception INI setting is deprecated");
@@ -110,7 +110,7 @@ static PHP_INI_MH(OnUpdateExceptionBool)
 
 static PHP_INI_MH(OnUpdateWarningBool)
 {
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	if (php_must_emit_ini_deprecation(stage) && !*p) {
 		php_error_docref(NULL, E_DEPRECATED, "assert.warning INI setting is deprecated");

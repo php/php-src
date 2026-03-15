@@ -515,11 +515,16 @@ static inline zend_result php_charmask(const unsigned char *input, size_t len, c
 }
 /* }}} */
 
+static zend_always_inline bool php_is_whitespace(unsigned char c)
+{
+	return c <= ' ' && (c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0');
+}
+
 /* {{{ php_trim_int()
  * mode 1 : trim left
  * mode 2 : trim right
  * mode 3 : trim left and right
- * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
+ * what indicates which chars are to be trimmed. NULL->default (' \f\t\n\r\v\0')
  */
 static zend_always_inline zend_string *php_trim_int(zend_string *str, const char *what, size_t what_len, int mode)
 {
@@ -573,10 +578,7 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, const char
 	} else {
 		if (mode & 1) {
 			while (start != end) {
-				unsigned char c = (unsigned char)*start;
-
-				if (c <= ' ' &&
-				    (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
+				if (php_is_whitespace((unsigned char)*start)) {
 					start++;
 				} else {
 					break;
@@ -585,10 +587,7 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, const char
 		}
 		if (mode & 2) {
 			while (start != end) {
-				unsigned char c = (unsigned char)*(end-1);
-
-				if (c <= ' ' &&
-				    (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
+				if (php_is_whitespace((unsigned char)*(end-1))) {
 					end--;
 				} else {
 					break;
@@ -611,7 +610,7 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, const char
  * mode 1 : trim left
  * mode 2 : trim right
  * mode 3 : trim left and right
- * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
+ * what indicates which chars are to be trimmed. NULL->default (' \f\t\n\r\v\0')
  */
 PHPAPI zend_string *php_trim(zend_string *str, const char *what, size_t what_len, int mode)
 {
@@ -1500,7 +1499,7 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 }
 /* }}} */
 
-static inline void _zend_dirname(zval *return_value, zend_string *str, zend_long levels)
+static zend_always_inline void _zend_dirname(zval *return_value, zend_string *str, zend_long levels)
 {
 	zend_string *ret;
 
@@ -1745,7 +1744,7 @@ PHP_FUNCTION(stristr)
 }
 /* }}} */
 
-static inline void _zend_strstr(zval *return_value, zend_string *haystack, zend_string *needle, bool part)
+static zend_always_inline void _zend_strstr(zval *return_value, zend_string *haystack, zend_string *needle, bool part)
 {
 	const char *found = NULL;
 	zend_long found_offset;
@@ -1889,7 +1888,7 @@ PHP_FUNCTION(str_ends_with)
 }
 /* }}} */
 
-static inline void _zend_strpos(zval *return_value, zend_string *haystack, zend_string *needle, zend_long offset)
+static zend_always_inline void _zend_strpos(zval *return_value, zend_string *haystack, zend_string *needle, zend_long offset)
 {
 	const char *found = NULL;
 
@@ -4955,7 +4954,7 @@ PHP_FUNCTION(setlocale)
 
 	for (uint32_t i = 0; i < num_args; i++) {
 		if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && !zend_parse_arg_str(&args[i], &strings[i], true, i + 2))) {
-			zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_ARRAY_OR_STRING, &args[i]);
+			zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_ARRAY_OR_STRING_OR_NULL, &args[i]);
 			goto out;
 		}
 	}

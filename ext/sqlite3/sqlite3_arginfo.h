@@ -1,5 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: da91c32c6070c808d6e1b01894b5f8beedda7b45 */
+/* This is a generated file, edit sqlite3.stub.php instead.
+ * Stub hash: 247f02e9b12b901b36bb863cf2a8e73b3d97a191 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -41,13 +41,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3_loadExte
 ZEND_END_ARG_INFO()
 #endif
 
-#if SQLITE_VERSION_NUMBER >= 3006011
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3_backup, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, destination, SQLite3, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sourceDatabase, IS_STRING, 0, "\"main\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, destinationDatabase, IS_STRING, 0, "\"main\"")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3_escapeString, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -193,9 +191,7 @@ ZEND_METHOD(SQLite3, busyTimeout);
 #if !defined(SQLITE_OMIT_LOAD_EXTENSION)
 ZEND_METHOD(SQLite3, loadExtension);
 #endif
-#if SQLITE_VERSION_NUMBER >= 3006011
 ZEND_METHOD(SQLite3, backup);
-#endif
 ZEND_METHOD(SQLite3, escapeString);
 ZEND_METHOD(SQLite3, prepare);
 ZEND_METHOD(SQLite3, exec);
@@ -246,9 +242,7 @@ static const zend_function_entry class_SQLite3_methods[] = {
 #if !defined(SQLITE_OMIT_LOAD_EXTENSION)
 	ZEND_ME(SQLite3, loadExtension, arginfo_class_SQLite3_loadExtension, ZEND_ACC_PUBLIC)
 #endif
-#if SQLITE_VERSION_NUMBER >= 3006011
 	ZEND_ME(SQLite3, backup, arginfo_class_SQLite3_backup, ZEND_ACC_PUBLIC)
-#endif
 	ZEND_ME(SQLite3, escapeString, arginfo_class_SQLite3_escapeString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(SQLite3, prepare, arginfo_class_SQLite3_prepare, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3, exec, arginfo_class_SQLite3_exec, ZEND_ACC_PUBLIC)

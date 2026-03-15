@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit object_handlers.stub.php instead.
  * Stub hash: 81be60f2c465ffe5c036739d072ab80d9c388907 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DoOperationNoCast___construct, 0, 0, 1)

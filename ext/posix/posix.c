@@ -699,7 +699,8 @@ static void php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ 
 	for (count = 0;; count++) {
 		/* gr_mem entries may be misaligned on macos. */
 		char *gr_mem;
-		memcpy(&gr_mem, &g->gr_mem[count], sizeof(char *));
+		char *entry = (char *)g->gr_mem + (count * sizeof (char *));
+		memcpy(&gr_mem, entry, sizeof(char *));
 		if (!gr_mem) {
 			break;
 		}
@@ -741,6 +742,15 @@ PHP_FUNCTION(posix_access)
 		efree(path);
 		POSIX_G(last_error) = EPERM;
 		RETURN_FALSE;
+	}
+
+	if (mode < 0 || (mode & ~(F_OK | R_OK | W_OK | X_OK))) {
+		zend_argument_value_error(
+			2,
+			"must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK"
+		);
+		efree(path);
+		RETURN_THROWS();
 	}
 
 	ret = access(path, mode);

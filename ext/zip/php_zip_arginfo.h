@@ -1,5 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1f77735273373672b9c8c5b92c46e23ea99faeaf */
+/* This is a generated file, edit php_zip.stub.php instead.
+ * Stub hash: e04b3e90c42074ac364ea25a0e794815bd4271e5 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -43,6 +43,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_ZipArchive_open, 0, 1, MAY_BE_BOOL|MAY_BE_LONG)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ZipArchive_openString, 0, 1, MAY_BE_BOOL|MAY_BE_LONG)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_setPassword, 0, 1, _IS_BOOL, 0)
@@ -313,6 +317,7 @@ ZEND_FUNCTION(zip_entry_compressedsize);
 ZEND_FUNCTION(zip_entry_filesize);
 ZEND_FUNCTION(zip_entry_compressionmethod);
 ZEND_METHOD(ZipArchive, open);
+ZEND_METHOD(ZipArchive, openString);
 ZEND_METHOD(ZipArchive, setPassword);
 ZEND_METHOD(ZipArchive, close);
 ZEND_METHOD(ZipArchive, count);
@@ -391,6 +396,7 @@ static const zend_function_entry ext_functions[] = {
 
 static const zend_function_entry class_ZipArchive_methods[] = {
 	ZEND_ME(ZipArchive, open, arginfo_class_ZipArchive_open, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, openString, arginfo_class_ZipArchive_openString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, setPassword, arginfo_class_ZipArchive_setPassword, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, close, arginfo_class_ZipArchive_close, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, count, arginfo_class_ZipArchive_count, ZEND_ACC_PUBLIC)
@@ -550,14 +556,12 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *const_OVERWRITE_name = zend_string_init_interned("OVERWRITE", sizeof("OVERWRITE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_OVERWRITE_name, &const_OVERWRITE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_OVERWRITE_name, true);
-#if defined(ZIP_RDONLY)
 
 	zval const_RDONLY_value;
 	ZVAL_LONG(&const_RDONLY_value, ZIP_RDONLY);
 	zend_string *const_RDONLY_name = zend_string_init_interned("RDONLY", sizeof("RDONLY") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_RDONLY_name, &const_RDONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_RDONLY_name, true);
-#endif
 
 	zval const_FL_NOCASE_value;
 	ZVAL_LONG(&const_FL_NOCASE_value, ZIP_FL_NOCASE);

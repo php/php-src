@@ -4717,9 +4717,8 @@ ZEND_METHOD(FFI, isNull) /* {{{ */
 ZEND_METHOD(FFI_CType, getName) /* {{{ */
 {
 	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_ffi_ctype_name_buf buf;
 
@@ -4739,9 +4738,7 @@ ZEND_METHOD(FFI_CType, getKind) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	RETURN_LONG(type->kind);
@@ -4753,9 +4750,7 @@ ZEND_METHOD(FFI_CType, getSize) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	RETURN_LONG(type->size);
@@ -4767,9 +4762,7 @@ ZEND_METHOD(FFI_CType, getAlignment) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	RETURN_LONG(type->align);
@@ -4781,9 +4774,7 @@ ZEND_METHOD(FFI_CType, getAttributes) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	RETURN_LONG(type->attr);
@@ -4795,9 +4786,7 @@ ZEND_METHOD(FFI_CType, getEnumKind) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_ENUM) {
@@ -4814,9 +4803,7 @@ ZEND_METHOD(FFI_CType, getArrayElementType) /* {{{ */
 	zend_ffi_type *type;
 	zend_ffi_ctype *ret;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_ARRAY) {
@@ -4835,9 +4822,7 @@ ZEND_METHOD(FFI_CType, getArrayLength) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_ARRAY) {
@@ -4854,9 +4839,7 @@ ZEND_METHOD(FFI_CType, getPointerType) /* {{{ */
 	zend_ffi_ctype *ret;
 	zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_POINTER) {
@@ -4878,9 +4861,7 @@ ZEND_METHOD(FFI_CType, getStructFieldNames) /* {{{ */
 	zend_string* name;
 	zval zv;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_STRUCT) {
@@ -4958,9 +4939,7 @@ ZEND_METHOD(FFI_CType, getFuncABI) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_FUNC) {
@@ -4977,9 +4956,7 @@ ZEND_METHOD(FFI_CType, getFuncReturnType) /* {{{ */
 	zend_ffi_ctype *ret;
 	zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_FUNC) {
@@ -4998,9 +4975,7 @@ ZEND_METHOD(FFI_CType, getFuncParameterCount) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_FUNC) {

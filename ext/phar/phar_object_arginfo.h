@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit phar_object.stub.php instead.
  * Stub hash: 031dc8f07d2d9bac4a5f82f4ac2c5b3da5995405 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)

@@ -406,6 +406,7 @@ static size_t php_read_stream_all_chunks(php_stream *stream, char *buffer, size_
 		if (read_now < stream->chunk_size && read_total != length) {
 			return 0;
 		}
+		buffer += read_now;
 	} while (read_total < length);
 
 	return read_total;

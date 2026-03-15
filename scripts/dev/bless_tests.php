@@ -124,7 +124,7 @@ function insertOutput(string $phpt, string $out): string {
 }
 
 /**
- * Implementation of the the Myers diff algorithm.
+ * Implementation of the Myers diff algorithm.
  *
  * Myers, Eugene W. "An O (ND) difference algorithm and its variations."
  * Algorithmica 1.1 (1986): 251-266.

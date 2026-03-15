@@ -82,12 +82,10 @@ class ZipArchive implements Countable
      * @cvalue ZIP_OVERWRITE
      */
     public const int OVERWRITE = UNKNOWN;
-#ifdef ZIP_RDONLY
     /**
      * @cvalue ZIP_RDONLY
      */
     public const int RDONLY = UNKNOWN;
-#endif
 
     /**
      * @cvalue ZIP_FL_NOCASE
@@ -647,6 +645,8 @@ class ZipArchive implements Countable
 
     /** @tentative-return-type */
     public function open(string $filename, int $flags = 0): bool|int {}
+
+    public function openString(string $data): bool|int {}
 
     /**
      * @tentative-return-type

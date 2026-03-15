@@ -476,8 +476,15 @@ PHP_FUNCTION(bzcompress)
 	   + .01 x length of data + 600 which is the largest size the results of the compression
 	   could possibly be, at least that's what the libbz2 docs say (thanks to jeremy@nirvani.net
 	   for pointing this out).  */
-	// TODO Check source string length fits in unsigned int
-	dest_len = (unsigned int) (source_len + (0.01 * source_len) + 600);
+	size_t chunk_len = source_len + source_len / 100 + 600;
+	const size_t min = MIN(ZSTR_MAX_LEN, UINT_MAX);
+
+	if (chunk_len < source_len || chunk_len > min) {
+		zend_argument_value_error(1, "must have a length less than or equal to %zu", min);
+		RETURN_THROWS();
+	}
+
+	dest_len = (unsigned int) chunk_len;
 
 	/* Allocate the destination buffer */
 	dest = zend_string_alloc(dest_len, 0);
@@ -530,18 +537,17 @@ PHP_FUNCTION(bzdecompress)
 	while ((error = BZ2_bzDecompress(&bzs)) == BZ_OK && bzs.avail_in > 0) {
 		/* compression is better then 2:1, need to allocate more memory */
 		bzs.avail_out = source_len;
-		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
+		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
 		if (UNEXPECTED(size > SIZE_MAX)) {
 			/* no reason to continue if we're going to drop it anyway */
 			break;
 		}
-
 		dest = zend_string_safe_realloc(dest, 1, bzs.avail_out+1, (size_t) size, 0);
 		bzs.next_out = ZSTR_VAL(dest) + size;
 	}
 
 	if (error == BZ_STREAM_END || error == BZ_OK) {
-		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
+		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
 		if (UNEXPECTED(size > SIZE_MAX)) {
 			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zu", SIZE_MAX);
 			zend_string_efree(dest);

@@ -312,7 +312,9 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 			zend_object *old_exception = NULL;
 			const zend_op *old_opline_before_exception = NULL;
 			if (EG(exception)) {
-				if (EG(current_execute_data)) {
+				if (EG(current_execute_data)
+				 && EG(current_execute_data)->opline
+				 && EG(current_execute_data)->opline->opcode == ZEND_HANDLE_EXCEPTION) {
 					EG(current_execute_data)->opline = EG(opline_before_exception);
 					old_opline_before_exception = EG(opline_before_exception);
 				}
@@ -329,7 +331,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 			zend_generator_resume(generator);
 
 			if (old_exception) {
-				if (EG(current_execute_data)) {
+				if (old_opline_before_exception) {
 					EG(current_execute_data)->opline = EG(exception_op);
 					EG(opline_before_exception) = old_opline_before_exception;
 				}
@@ -652,7 +654,9 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 			} else {
 				zval_ptr_dtor(&new_root->value);
 				ZVAL_COPY(&new_root->value, &new_root_parent->value);
-				ZVAL_COPY(ZEND_CALL_VAR(new_root->execute_data, yield_from->result.var), &new_root_parent->retval);
+				if (yield_from->result_type != IS_UNUSED) {
+					ZVAL_COPY(ZEND_CALL_VAR(new_root->execute_data, yield_from->result.var), &new_root_parent->retval);
+				}
 			}
 		}
 	}

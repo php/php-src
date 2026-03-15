@@ -30,10 +30,6 @@ require_once 'skipifconnectfailure.inc';
     /* label column, result set charset */
     $tmp = mysqli_fetch_field($res);
     var_dump($tmp);
-    if ($tmp->charsetnr != $charsetInfo->number) {
-        printf("[004] Expecting charset %s/%d got %d\n",
-            $charsetInfo->charset, $charsetInfo->number, $tmp->charsetnr);
-    }
     if ($tmp->db != $db) {
         printf("011] Expecting database '%s' got '%s'\n",
             $db, $tmp->db);

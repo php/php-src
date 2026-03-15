@@ -120,7 +120,7 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS);
 /* End Section filters declarations */
 static gdImagePtr _php_image_create_from_string(zend_string *Data, const char *tn, gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn, gdImagePtr (*func_p)(FILE *), gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn);
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type);
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream);
 static gdIOCtx *create_output_context(zval *to_zval, uint32_t arg_num);
 static int _php_image_type(zend_string *data);
@@ -1729,7 +1729,7 @@ PHP_FUNCTION(imagecreatefromtga)
 /* }}} */
 
 /* {{{ _php_image_output */
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn)
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type)
 {
 	zval *imgind;
 	char *file = NULL;
@@ -2102,14 +2102,14 @@ PHP_FUNCTION(imagewbmp)
 /* {{{ Output GD image to browser or file */
 PHP_FUNCTION(imagegd)
 {
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD, "GD");
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD);
 }
 /* }}} */
 
 /* {{{ Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
 {
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2");
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2);
 }
 /* }}} */
 
@@ -2453,8 +2453,18 @@ PHP_FUNCTION(imagegammacorrect)
 		RETURN_THROWS();
 	}
 
+	if (!zend_finite(input)) {
+		zend_argument_value_error(2, "must be finite");
+		RETURN_THROWS();
+	}
+
 	if (output <= 0.0) {
 		zend_argument_value_error(3, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (!zend_finite(output)) {
+		zend_argument_value_error(3, "must be finite");
 		RETURN_THROWS();
 	}
 
@@ -2966,7 +2976,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zend_long X, Y, COL;
 	zend_string *C;
 	gdImagePtr im;
-	int ch = 0, col, x, y, i;
+	int ch = 0, col, i;
+	unsigned int x, y;
 	size_t l = 0;
 	unsigned char *str = NULL;
 	zend_object *font_obj = NULL;
@@ -2999,21 +3010,21 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	switch (mode) {
 		case 0:
-			gdImageChar(im, font, x, y, ch, col);
+			gdImageChar(im, font, (int)x, (int)y, ch, col);
 			break;
 		case 1:
 			php_gdimagecharup(im, font, x, y, ch, col);
 			break;
 		case 2:
 			for (i = 0; (i < l); i++) {
-				gdImageChar(im, font, x, y, (int) ((unsigned char) str[i]), col);
+				gdImageChar(im, font, (int)x, (int)y, (int) ((unsigned char) str[i]), col);
 				x += font->w;
 			}
 			break;
 		case 3: {
 			for (i = 0; (i < l); i++) {
 				/* php_gdimagecharup(im, font, x, y, (int) str[i], col); */
-				gdImageCharUp(im, font, x, y, (int) str[i], col);
+				gdImageCharUp(im, font, (int)x, (int)y, (int) str[i], col);
 				y -= font->w;
 			}
 			break;
@@ -3921,9 +3932,17 @@ PHP_FUNCTION(imagescale)
 		src_y = gdImageSY(im);
 
 		if (src_x && tmp_h < 0) {
+			if (tmp_w > (ZEND_LONG_MAX / src_y)) {
+				zend_argument_value_error(2, "must be less than or equal to " ZEND_LONG_FMT, (zend_long)(ZEND_LONG_MAX / src_y));
+				RETURN_THROWS();
+			}
 			tmp_h = tmp_w * src_y / src_x;
 		}
 		if (src_y && tmp_w < 0) {
+			if (tmp_h > (ZEND_LONG_MAX / src_x)) {
+				zend_argument_value_error(3, "must be less than or equal to " ZEND_LONG_FMT, (zend_long)(ZEND_LONG_MAX / src_x));
+				RETURN_THROWS();
+			}
 			tmp_w = tmp_h * src_x / src_y;
 		}
 	}
@@ -4290,7 +4309,7 @@ PHP_FUNCTION(imageresolution)
  *
  * Stream Handling
  * Formerly contained within ext/gd/gd_ctx.c and included
- * at the the top of this file
+ * at the top of this file
  *
  ********************************************************/
 

@@ -1321,6 +1321,7 @@ static void cls_method_dtor(zval *el) /* {{{ */ {
 	if (func->common.attributes) {
 		zend_hash_release(func->common.attributes);
 	}
+	zend_free_internal_arg_info(&func->internal_function, false);
 	efree(func);
 }
 /* }}} */
@@ -1336,6 +1337,7 @@ static void cls_method_pdtor(zval *el) /* {{{ */ {
 	if (func->common.attributes) {
 		zend_hash_release(func->common.attributes);
 	}
+	zend_free_internal_arg_info(&func->internal_function, true);
 	pefree(func, 1);
 }
 /* }}} */
@@ -1408,7 +1410,19 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		if (funcs->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)funcs->arg_info;
 
-			func.arg_info = (zend_internal_arg_info*)funcs->arg_info + 1;
+			uint32_t num_arg_info = 1 + funcs->num_args;
+			if (func.fn_flags & ZEND_ACC_VARIADIC) {
+				num_arg_info++;
+			}
+
+			zend_arg_info *arg_info = safe_pemalloc(num_arg_info,
+					sizeof(zend_arg_info), 0, dbh->is_persistent);
+			for (uint32_t i = 0; i < num_arg_info; i++) {
+				zend_convert_internal_arg_info(&arg_info[i],
+						&funcs->arg_info[i], i == 0, dbh->is_persistent);
+			}
+
+			func.arg_info = arg_info + 1;
 			func.num_args = funcs->num_args;
 			if (info->required_num_args == (uint32_t)-1) {
 				func.required_num_args = funcs->num_args;

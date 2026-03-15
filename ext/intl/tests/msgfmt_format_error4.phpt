@@ -25,8 +25,21 @@ try {
     var_dump($e::class === 'IntlException');
     var_dump("MessageFormatter::format(): Invalid UTF-8 data in string argument: '\x80'" ===  $e->getMessage());
 }
+
+try {
+    var_dump($mf->format(array("foo" => new class {
+        function __toString(): string {
+            return str_repeat("\x80", random_int(1, 1));
+        }
+    })));
+} catch (Throwable $e) {
+    var_dump($e::class === 'IntlException');
+    var_dump("MessageFormatter::format(): Invalid UTF-8 data in string argument: '\x80'" ===  $e->getMessage());
+}
 ?>
 --EXPECT--
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 bool(true)

@@ -46,6 +46,9 @@
 #define IN_ISSET	ZEND_GUARD_PROPERTY_ISSET
 #define IN_HOOK		ZEND_GUARD_PROPERTY_HOOK
 
+static zend_arg_info zend_call_trampoline_arginfo[1] = {{0}};
+static zend_arg_info zend_property_hook_arginfo[1] = {{0}};
+
 static zend_always_inline bool zend_objects_check_stack_limit(void)
 {
 #ifdef ZEND_CHECK_STACK_LIMIT
@@ -959,25 +962,27 @@ call_getter:
 uninit_error:
 	if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
 		if (!prop_info || (Z_PROP_FLAG_P(retval) & IS_PROP_LAZY)) {
-			zobj = zend_lazy_object_init(zobj);
-			if (!zobj) {
+			zend_object *instance = zend_lazy_object_init(zobj);
+			if (!instance) {
 				retval = &EG(uninitialized_zval);
 				goto exit;
 			}
 
-			if (UNEXPECTED(guard)) {
+			if (UNEXPECTED(guard && (instance->ce->ce_flags & ZEND_ACC_USE_GUARDS))) {
+				/* Find which guard was used on zobj, so we can set the same
+				 * guard on instance. */
 				uint32_t guard_type = (type == BP_VAR_IS) && zobj->ce->__isset
 					? IN_ISSET : IN_GET;
-				guard = zend_get_property_guard(zobj, name);
+				guard = zend_get_property_guard(instance, name);
 				if (!((*guard) & guard_type)) {
 					(*guard) |= guard_type;
-					retval = zend_std_read_property(zobj, name, type, cache_slot, rv);
+					retval = zend_std_read_property(instance, name, type, cache_slot, rv);
 					(*guard) &= ~guard_type;
 					return retval;
 				}
 			}
 
-			return zend_std_read_property(zobj, name, type, cache_slot, rv);
+			return zend_std_read_property(instance, name, type, cache_slot, rv);
 		}
 	}
 	if (type != BP_VAR_IS) {
@@ -1016,7 +1021,7 @@ static zval *forward_write_to_lazy_object(zend_object *zobj,
 		return &EG(error_zval);
 	}
 
-	if (UNEXPECTED(guarded)) {
+	if (UNEXPECTED(guarded && (instance->ce->ce_flags & ZEND_ACC_USE_GUARDS))) {
 		uint32_t *guard = zend_get_property_guard(instance, name);
 		if (!((*guard) & IN_SET)) {
 			(*guard) |= IN_SET;
@@ -1388,6 +1393,8 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 	uintptr_t property_offset;
 	const zend_property_info *prop_info = NULL;
 
+	ZEND_ASSERT(type != BP_VAR_R && type != BP_VAR_IS);
+
 #if DEBUG_OBJECT_HANDLERS
 	fprintf(stderr, "Ptr object #%d property: %s\n", zobj->handle, ZSTR_VAL(name));
 #endif
@@ -1395,6 +1402,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__get != NULL), cache_slot, &prop_info);
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
+try_again:
 		retval = OBJ_PROP(zobj, property_offset);
 		if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
 			if (EXPECTED(!zobj->ce->__get) ||
@@ -1408,7 +1416,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 
 					return zend_std_get_property_ptr_ptr(zobj, name, type, cache_slot);
 				}
-				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
+				if (UNEXPECTED(type == BP_VAR_RW)) {
 					if (prop_info) {
 						zend_typed_property_uninitialized_access(prop_info, name);
 						retval = &EG(error_zval);
@@ -1469,12 +1477,20 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			if (UNEXPECTED(!zobj->properties)) {
 				rebuild_object_properties_internal(zobj);
 			}
-			if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
+			if (UNEXPECTED(type == BP_VAR_RW)) {
 				zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 			}
 			retval = zend_hash_add(zobj->properties, name, &EG(uninitialized_zval));
 		}
-	} else if (!IS_HOOKED_PROPERTY_OFFSET(property_offset) && zobj->ce->__get == NULL) {
+	} else if (IS_HOOKED_PROPERTY_OFFSET(property_offset)) {
+		if (!(prop_info->flags & ZEND_ACC_VIRTUAL) && !zend_should_call_hook(prop_info, zobj)) {
+			property_offset = prop_info->offset;
+			if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+				prop_info = NULL;
+			}
+			goto try_again;
+		}
+	} else if (zobj->ce->__get == NULL) {
 		retval = &EG(error_zval);
 	}
 
@@ -1591,7 +1607,7 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 			return;
 		}
 
-		if (UNEXPECTED(guard)) {
+		if (UNEXPECTED(guard && zobj->ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 			guard = zend_get_property_guard(zobj, name);
 			if (!((*guard) & IN_UNSET)) {
 				(*guard) |= IN_UNSET;
@@ -1682,7 +1698,6 @@ ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(
 	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset.
 	 */
 	static const void *dummy = (void*)(intptr_t)2;
-	static const zend_arg_info arg_info[1] = {{0}};
 
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
 		func = &EG(trampoline).op_array;
@@ -1729,7 +1744,7 @@ ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(
 	func->prop_info = NULL;
 	func->num_args = 0;
 	func->required_num_args = 0;
-	func->arg_info = (zend_arg_info *) arg_info;
+	func->arg_info = zend_call_trampoline_arginfo;
 
 	return (zend_function*)func;
 }
@@ -1782,9 +1797,6 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	const zend_property_info *prop_info,
 	zend_property_hook_kind kind, zend_string *prop_name)
 {
-	static const zend_internal_arg_info arg_info[2] = {
-		{ .name = "value" }
-	};
 	zend_function *func;
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
 		func = &EG(trampoline);
@@ -1810,7 +1822,7 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	func->common.scope = prop_info->ce;
 	func->common.prototype = NULL;
 	func->common.prop_info = prop_info;
-	func->common.arg_info = (zend_arg_info *) arg_info;
+	func->common.arg_info = zend_property_hook_arginfo;
 	func->internal_function.handler = kind == ZEND_PROPERTY_HOOK_GET
 		? ZEND_FN(zend_parent_hook_get_trampoline)
 		: ZEND_FN(zend_parent_hook_set_trampoline);
@@ -2574,3 +2586,9 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_compare_objects,				/* compare */
 	NULL,									/* get_properties_for */
 };
+
+void zend_object_handlers_startup(void) {
+	zend_call_trampoline_arginfo[0].name = ZSTR_KNOWN(ZEND_STR_ARGUMENTS);
+	zend_call_trampoline_arginfo[0].type = (zend_type)ZEND_TYPE_INIT_CODE(IS_MIXED, false, _ZEND_ARG_INFO_FLAGS(false, 1, 0));
+	zend_property_hook_arginfo[0].name = ZSTR_KNOWN(ZEND_STR_VALUE);
+}

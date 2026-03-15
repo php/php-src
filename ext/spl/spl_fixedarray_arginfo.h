@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit spl_fixedarray.stub.php instead.
  * Stub hash: 0c838fed60b29671fe04e63315ab662d8cb16f0c */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
