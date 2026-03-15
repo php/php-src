@@ -14,10 +14,12 @@ var_dump(Pdo\Sqlite::OPEN_CREATE);
 var_dump(Pdo\Sqlite::ATTR_READONLY_STATEMENT);
 var_dump(Pdo\Sqlite::ATTR_EXTENDED_RESULT_CODES);
 var_dump(Pdo\Sqlite::ATTR_BUSY_STATEMENT);
+var_dump(Pdo\Sqlite::ATTR_SQL);
 
 ?>
 --EXPECTF--
 Hello
+int(%d)
 int(%d)
 int(%d)
 int(%d)
