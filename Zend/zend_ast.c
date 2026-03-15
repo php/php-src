@@ -1460,6 +1460,16 @@ ZEND_API zend_ast_ref * ZEND_FASTCALL zend_ast_copy(zend_ast *ast)
 	return ref;
 }
 
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_dup(zend_ast *ast)
+{
+	ZEND_ASSERT(ast != NULL);
+
+	zend_ast *buf = zend_ast_alloc(zend_ast_tree_size(ast));
+	zend_ast_tree_copy(ast, buf);
+
+	return buf;
+}
+
 ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast)
 {
 tail_call:

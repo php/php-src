@@ -3906,6 +3906,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			}
 			break;
 		case ZEND_CALLABLE_CONVERT:
+		case ZEND_CALLABLE_CONVERT_PARTIAL:
 			UPDATE_SSA_TYPE(MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN, ssa_op->result_def);
 			UPDATE_SSA_OBJ_TYPE(zend_ce_closure, /* is_instanceof */ false, ssa_op->result_def);
 			break;
