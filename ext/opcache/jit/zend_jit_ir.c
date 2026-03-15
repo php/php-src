@@ -3198,6 +3198,10 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_uninit_static_prop);
 	REGISTER_HELPER(zend_jit_rope_end);
 	REGISTER_HELPER(zend_fcall_interrupt);
+# ifdef __SANITIZE_ADDRESS__
+	REGISTER_HELPER(zend_jit_poison_memory_region_helper);
+	REGISTER_HELPER(zend_jit_unpoison_memory_region_helper);
+# endif
 
 #ifndef ZTS
 	REGISTER_DATA(EG(current_execute_data));
@@ -8585,6 +8589,11 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 #endif
 	ir_STORE(ref, ir_ADD_A(top, used_stack_ref));
 
+#ifdef __SANITIZE_ADDRESS__
+	ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_unpoison_memory_region_helper),
+			rx, used_stack_ref);
+#endif
+
 	// JIT: zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
 	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE || opline->opcode != ZEND_INIT_METHOD_CALL) {
 		// JIT: ZEND_SET_CALL_INFO(call, 0, call_info);
@@ -11148,6 +11157,11 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 		// TODO: avoid EG(excption) check for $this->foo() calls
 		may_throw = 1;
 	}
+
+#ifdef __SANITIZE_ADDRESS__
+	ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_poison_memory_region_helper),
+			jit_FP(jit), ir_SUB_A(ir_LOAD_A(jit_EG(vm_stack_top)), jit_FP(jit)));
+#endif
 
 	// JIT: EG(vm_stack_top) = (zval*)execute_data
 	ir_STORE(jit_EG(vm_stack_top), jit_FP(jit));
