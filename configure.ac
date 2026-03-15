@@ -585,7 +585,6 @@ AC_CHECK_FUNCS(m4_normalize([
   poll
   pthread_jit_write_protect_np
   putenv
-  reallocarray
   scandir
   setenv
   setitimer
