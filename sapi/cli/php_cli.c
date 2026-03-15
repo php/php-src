@@ -1179,18 +1179,10 @@ err:
 }
 /* }}} */
 
-/* {{{ main */
-#ifdef PHP_CLI_WIN32_NO_CONSOLE
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
-#else
-int main(int argc, char *argv[])
-#endif
+/* {{{ do_php_cli */
+PHP_CLI_API int do_php_cli(int argc, char *argv[])
 {
 #if defined(PHP_WIN32)
-# ifdef PHP_CLI_WIN32_NO_CONSOLE
-	int argc = __argc;
-	char **argv = __argv;
-# endif
 	int num_args;
 	wchar_t **argv_wide;
 	char **argv_save = argv;
@@ -1393,6 +1385,6 @@ out:
 	 * exiting.
 	 */
 	cleanup_ps_args(argv);
-	exit(exit_status);
+	return exit_status;
 }
 /* }}} */

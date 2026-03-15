@@ -56,4 +56,6 @@ typedef struct php_cli_server_context {
 	php_cli_mode mode;
 } php_cli_server_context;
 
+extern PHP_CLI_API int do_php_cli(int argc, char *argv[]);
+
 #endif /* CLI_H */

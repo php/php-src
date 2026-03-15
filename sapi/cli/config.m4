@@ -5,6 +5,11 @@ PHP_ARG_ENABLE([cli],
   [yes],
   [no])
 
+dnl The embed SAPI requires the CLI sources for do_php_cli().
+if test "$PHP_EMBED" != "no" -a "$PHP_CLI" = "no"; then
+  AC_MSG_ERROR([--enable-embed requires the CLI SAPI, do not use --disable-cli with --enable-embed])
+fi
+
 if test "$PHP_CLI" != "no"; then
   AC_CHECK_FUNCS([setproctitle])
 
@@ -32,7 +37,7 @@ if test "$PHP_CLI" != "no"; then
   dnl Select SAPI.
   PHP_SELECT_SAPI([cli],
     [program],
-    [php_cli.c php_http_parser.c php_cli_server.c ps_title.c php_cli_process_title.c],
+    [php_cli.c php_cli_main.c php_http_parser.c php_cli_server.c ps_title.c php_cli_process_title.c],
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   AS_CASE([$host_alias],
