@@ -749,6 +749,16 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 	}
 #endif
 
+#ifdef SO_LINGER
+	if (PHP_STREAM_XPORT_IS_TCP(stream)
+		&& PHP_STREAM_CONTEXT(stream)
+		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_linger")) != NULL
+	) {
+		sockvals.mask |= PHP_SOCKVAL_SO_LINGER;
+		sockvals.linger = (int)zval_get_long(tmpzval);
+	}
+#endif
+
 #ifdef SO_KEEPALIVE
 	if (PHP_STREAM_XPORT_IS_TCP(stream) /* SO_KEEPALIVE is only applicable for TCP */
 		&& PHP_STREAM_CONTEXT(stream)
@@ -876,6 +886,16 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	) {
 		sockopts |= STREAM_SOCKOP_TCP_NODELAY;
 	}
+
+#ifdef SO_LINGER
+	if (PHP_STREAM_XPORT_IS_TCP(stream)
+		&& PHP_STREAM_CONTEXT(stream)
+		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_linger")) != NULL
+	) {
+		sockvals.mask |= PHP_SOCKVAL_SO_LINGER;
+		sockvals.linger = (int)zval_get_long(tmpzval);
+	}
+#endif
 
 #ifdef SO_KEEPALIVE
 	if (PHP_STREAM_XPORT_IS_TCP(stream) /* SO_KEEPALIVE is only applicable for TCP */
