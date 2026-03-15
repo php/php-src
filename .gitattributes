@@ -29,5 +29,9 @@
 # The OSS fuzz files are binary
 /ext/date/tests/ossfuzz*.txt binary
 
+# "Win only" text files that should have CRLF EOL
+*.bat -text eol=crlf
+*.ps1 -text eol=crlf
+
 # Vendored libraries
 /ext/dom/lexbor/lexbor linguist-vendored
