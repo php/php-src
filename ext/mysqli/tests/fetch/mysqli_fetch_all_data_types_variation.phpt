@@ -16,6 +16,8 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
 $link = default_mysqli_connect();
 
+mysqli_query($link, "DROP TABLE IF EXISTS test_mysqli_fetch_all_data_types_variation");
+
 function func_mysqli_fetch_all(
     mysqli $link,
     string $engine,
