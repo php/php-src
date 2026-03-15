@@ -1637,8 +1637,9 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, bool
 
 	return result;
 }
+
 /* Fallback copy using stream read/write API */
-static ssize_t php_stream_copy_fallback(php_stream *src, php_stream *dest, size_t maxlen, size_t *len)
+static zend_result php_stream_copy_fallback(php_stream *src, php_stream *dest, size_t maxlen, size_t *len)
 {
 	char buf[CHUNK_SIZE];
 	size_t haveread = 0;
