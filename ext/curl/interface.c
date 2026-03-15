@@ -603,6 +603,11 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 /* {{{ curl_progress */
 static int curl_progress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 {
+	/* Do not call progress callback if we are in a shutdown state (eg. timeout)*/
+	if (UNEXPECTED(EG(flags) & EG_FLAGS_IN_SHUTDOWN)) {
+		return 0;
+	}
+
 	php_curl *ch = (php_curl *)clientp;
 	int rval = 0;
 
