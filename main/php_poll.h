@@ -159,7 +159,7 @@ struct php_poll_handle_object {
 };
 
 #define PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(obj) \
-	((php_poll_handle_object *) ((char *) (obj) - XtOffsetOf(php_poll_handle_object, std)))
+	((php_poll_handle_object *) ((char *) (obj) - offsetof(php_poll_handle_object, std)))
 
 #define PHP_POLL_HANDLE_OBJ_FROM_ZV(zv) PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(Z_OBJ_P(zv))
 

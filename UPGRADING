@@ -197,6 +197,10 @@ PHP 8.6 UPGRADE NOTES
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_RANGE identity fallbacks.
     It is supported from icu 63.
 
+- IO:
+  . Added new polling API.
+    RFC: https://wiki.php.net/rfc/poll_api
+
 - JSON:
   . Added extra info about error location to the JSON error messages returned
     from json_last_error_msg() and JsonException message.
@@ -351,6 +355,23 @@ PHP 8.6 UPGRADE NOTES
   . enum StreamErrorMode
   . enum StreamErrorCode
     RFC: https://wiki.php.net/rfc/stream_errors
+  . Io\Poll\Context
+  . Io\Poll\Watcher
+  . enum Io\Poll\Backend
+  . enum Io\Poll\Event
+  . interface Io\Poll\Handle
+  . Io\IoException
+  . Io\Poll\PollException
+  . Io\Poll\FailedPollOperationException
+  . Io\Poll\FailedContextInitializationException
+  . Io\Poll\FailedHandleAddException
+  . Io\Poll\FailedWatcherModificationException
+  . Io\Poll\FailedPollWaitException
+  . Io\Poll\BackendUnavailableException
+  . Io\Poll\InactiveWatcherException
+  . Io\Poll\HandleAlreadyWatchedException
+  . Io\Poll\InvalidHandleException
+  . StreamPollHandle
 
 ========================================
 8. Removed Extensions and SAPIs
