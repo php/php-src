@@ -715,16 +715,16 @@ ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
                    "zval must be aligned by ZEND_MM_ALIGNMENT");
 /* A number of call frame slots (zvals) reserved for zend_execute_data. */
 #define ZEND_CALL_FRAME_SLOT \
-	((int)((sizeof(zend_execute_data) + sizeof(zval) - 1) / sizeof(zval)))
+	((sizeof(zend_execute_data) + sizeof(zval) - 1) / sizeof(zval))
 
 #define ZEND_CALL_VAR(call, n) \
-	((zval*)(((char*)(call)) + ((int)(n))))
+	((zval*)(((char*)(call)) + (n)))
 
 #define ZEND_CALL_VAR_NUM(call, n) \
-	(((zval*)(call)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))
+	(((zval*)(call)) + (ZEND_CALL_FRAME_SLOT + (n)))
 
 #define ZEND_CALL_ARG(call, n) \
-	ZEND_CALL_VAR_NUM(call, ((int)(n)) - 1)
+	ZEND_CALL_VAR_NUM(call, (n) - 1)
 
 #define EX(element) 			((execute_data)->element)
 
