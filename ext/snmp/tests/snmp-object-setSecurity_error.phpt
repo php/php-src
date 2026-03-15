@@ -68,8 +68,8 @@ bool(false)
 
 Warning: SNMP::setSecurity(): Error generating a key for authentication pass phrase 'te': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)
-Security protocol must be one of "DES", "AES128", or "AES"
-Security protocol must be one of "DES", "AES128", or "AES"
+Security protocol must be one of %s
+Security protocol must be one of %s
 
 Warning: SNMP::setSecurity(): Error generating a key for privacy pass phrase '': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)
