@@ -691,6 +691,7 @@ STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 	BIO *in=NULL;
 	X509_INFO *xi;
 	char cert_path[MAXPATHLEN];
+	int i;
 
 	if (!php_openssl_check_path(cert_file, cert_file_len, cert_path, arg_num)) {
 		goto end;
@@ -709,29 +710,32 @@ STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 		goto end;
 	}
 
-	if(!(stack = sk_X509_new_reserve(NULL, sk_X509_INFO_num(sk)))) {
+	if(!(stack = sk_X509_new_null())) {
 		php_openssl_store_errors();
 		goto end;
 	}
 
 	/* scan over it and pull out the certs */
-	while (sk_X509_INFO_num(sk)) {
-		xi=sk_X509_INFO_shift(sk);
+	for (i = 0; i < sk_X509_INFO_num(sk); i++) {
+		xi=sk_X509_INFO_value(sk,i);
 		if (xi->x509 != NULL) {
-			sk_X509_push(stack,xi->x509);
+			if (!sk_X509_push(stack,xi->x509)) {
+				php_error_docref(NULL, E_ERROR, "Memory allocation failure");
+				goto end;
+			}
 			xi->x509=NULL;
 		}
-		X509_INFO_free(xi);
 	}
 	if (!sk_X509_num(stack)) {
 		php_error_docref(NULL, E_WARNING, "No certificates in file, %s", cert_path);
-		sk_X509_free(stack);
 		goto end;
 	}
 	ret = stack;
+	stack = NULL;
 end:
 	BIO_free(in);
-	sk_X509_INFO_free(sk);
+	sk_X509_INFO_pop_free(sk,X509_INFO_free);
+	sk_X509_pop_free(stack,X509_free);
 
 	return ret;
 }
