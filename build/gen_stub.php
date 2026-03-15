@@ -3568,7 +3568,7 @@ class ClassInfo {
                     $code .= "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n";
                 }
 
-                $template = "\tclass_entry = zend_register_internal_class_with_flags(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ", %s);\n";
+                $template = "\tclass_entry = zend_register_internal_class_with_flags(&ce, NULL, %s);\n";
                 $entries = $flags->generateVersionDependentFlagCode($template, $this->phpVersionIdMinimumCompatibility ? max($this->phpVersionIdMinimumCompatibility, PHP_84_VERSION_ID) : null);
                 if ($entries !== '') {
                     $code .= $entries;
@@ -3612,10 +3612,6 @@ class ClassInfo {
             },
             $this->type === "interface" ? $this->extends : $this->implements
         );
-
-        if (!empty($implements)) {
-            $code .= "\tzend_class_implements(class_entry, " . count($implements) . ", " . implode(", ", $implements) . ");\n";
-        }
 
         if ($this->alias) {
             $code .= "\tzend_register_class_alias(\"" . str_replace("\\", "\\\\", $this->alias) . "\", class_entry);\n";
@@ -3677,6 +3673,16 @@ class ClassInfo {
             $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
             $code .= $php80CondEnd;
+        }
+
+        if ($this->type === "class" && isset($this->extends[0])) {
+            $parent = "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString());
+            $code .= "\n\tzend_do_inheritance_ex(class_entry, $parent, 0);";
+        }
+        $code .= "\n\tzend_build_properties_info_table(class_entry);\n";
+
+        if (!empty($implements)) {
+            $code .= "\tzend_class_implements(class_entry, " . count($implements) . ", " . implode(", ", $implements) . ");\n";
         }
 
         $code .= "\n\treturn class_entry;\n";

@@ -390,5 +390,7 @@ static zend_class_entry *register_class_XMLReader(void)
 	zend_declare_typed_property(class_entry, property_xmlLang_name, &property_xmlLang_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release_ex(property_xmlLang_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

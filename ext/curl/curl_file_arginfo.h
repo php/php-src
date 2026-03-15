@@ -74,6 +74,8 @@ static zend_class_entry *register_class_CURLFile(void)
 	zend_declare_typed_property(class_entry, property_postname_name, &property_postname_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release_ex(property_postname_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -101,6 +103,8 @@ static zend_class_entry *register_class_CURLStringFile(void)
 	zend_string *property_mime_name = zend_string_init("mime", sizeof("mime") - 1, true);
 	zend_declare_typed_property(class_entry, property_mime_name, &property_mime_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release_ex(property_mime_name, true);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

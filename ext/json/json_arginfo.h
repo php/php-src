@@ -89,6 +89,8 @@ static zend_class_entry *register_class_JsonSerializable(void)
 	INIT_CLASS_ENTRY(ce, "JsonSerializable", class_JsonSerializable_methods);
 	class_entry = zend_register_internal_interface(&ce);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -97,7 +99,10 @@ static zend_class_entry *register_class_JsonException(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "JsonException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Exception, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

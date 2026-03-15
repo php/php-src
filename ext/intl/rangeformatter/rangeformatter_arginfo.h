@@ -144,5 +144,7 @@ static zend_class_entry *register_class_IntlNumberRangeFormatter(void)
 	zend_string_release_ex(const_IDENTITY_FALLBACK_RANGE_name, true);
 #endif
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

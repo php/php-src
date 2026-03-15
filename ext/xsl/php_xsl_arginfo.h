@@ -141,5 +141,7 @@ static zend_class_entry *register_class_XSLTProcessor(void)
 	zend_declare_typed_property(class_entry, property_maxTemplateVars_name, &property_maxTemplateVars_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_maxTemplateVars_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

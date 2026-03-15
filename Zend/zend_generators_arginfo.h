@@ -56,6 +56,8 @@ static zend_class_entry *register_class_Generator(zend_class_entry *class_entry_
 
 	INIT_CLASS_ENTRY(ce, "Generator", class_Generator_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
 
 	return class_entry;
@@ -66,7 +68,10 @@ static zend_class_entry *register_class_ClosedGeneratorException(zend_class_entr
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ClosedGeneratorException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Exception, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

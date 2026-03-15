@@ -1031,6 +1031,8 @@ static zend_class_entry *register_class_PgSql_Connection(void)
 	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Connection", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -1041,6 +1043,8 @@ static zend_class_entry *register_class_PgSql_Result(void)
 	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Result", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -1050,6 +1054,8 @@ static zend_class_entry *register_class_PgSql_Lob(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Lob", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

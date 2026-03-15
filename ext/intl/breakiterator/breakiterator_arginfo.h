@@ -157,7 +157,6 @@ static zend_class_entry *register_class_IntlBreakIterator(zend_class_entry *clas
 
 	INIT_CLASS_ENTRY(ce, "IntlBreakIterator", class_IntlBreakIterator_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
-	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	zval const_DONE_value;
 	ZVAL_LONG(&const_DONE_value, BreakIterator::DONE);
@@ -273,6 +272,9 @@ static zend_class_entry *register_class_IntlBreakIterator(zend_class_entry *clas
 	zend_declare_typed_class_constant(class_entry, const_SENTENCE_SEP_LIMIT_name, &const_SENTENCE_SEP_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_SENTENCE_SEP_LIMIT_name, true);
 
+	zend_build_properties_info_table(class_entry);
+	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
+
 	return class_entry;
 }
 
@@ -281,7 +283,10 @@ static zend_class_entry *register_class_IntlRuleBasedBreakIterator(zend_class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlRuleBasedBreakIterator", class_IntlRuleBasedBreakIterator_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IntlBreakIterator, ZEND_ACC_NOT_SERIALIZABLE);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_do_inheritance_ex(class_entry, class_entry_IntlBreakIterator, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -291,7 +296,10 @@ static zend_class_entry *register_class_IntlCodePointBreakIterator(zend_class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlCodePointBreakIterator", class_IntlCodePointBreakIterator_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IntlBreakIterator, ZEND_ACC_NOT_SERIALIZABLE);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_do_inheritance_ex(class_entry, class_entry_IntlBreakIterator, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

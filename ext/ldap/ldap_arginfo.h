@@ -775,6 +775,8 @@ static zend_class_entry *register_class_LDAP_Connection(void)
 	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Connection", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -785,6 +787,8 @@ static zend_class_entry *register_class_LDAP_Result(void)
 	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Result", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -794,6 +798,8 @@ static zend_class_entry *register_class_LDAP_ResultEntry(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "LDAP", "ResultEntry", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

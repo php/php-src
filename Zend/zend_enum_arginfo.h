@@ -31,6 +31,8 @@ static zend_class_entry *register_class_UnitEnum(void)
 	INIT_CLASS_ENTRY(ce, "UnitEnum", class_UnitEnum_methods);
 	class_entry = zend_register_internal_interface(&ce);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -40,6 +42,8 @@ static zend_class_entry *register_class_BackedEnum(zend_class_entry *class_entry
 
 	INIT_CLASS_ENTRY(ce, "BackedEnum", class_BackedEnum_methods);
 	class_entry = zend_register_internal_interface(&ce);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 1, class_entry_UnitEnum);
 
 	return class_entry;

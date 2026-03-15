@@ -130,5 +130,7 @@ static zend_class_entry *register_class_LibXMLError(void)
 	ZVAL_UNDEF(&property_line_default_value);
 	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_LINE), &property_line_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

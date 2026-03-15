@@ -60,6 +60,8 @@ static zend_class_entry *register_class_php_user_filter(void)
 	zend_declare_typed_property(class_entry, property_stream_name, &property_stream_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release_ex(property_stream_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -93,6 +95,8 @@ static zend_class_entry *register_class_StreamBucket(void)
 	zend_string *property_dataLength_name = zend_string_init("dataLength", sizeof("dataLength") - 1, true);
 	zend_declare_typed_property(class_entry, property_dataLength_name, &property_dataLength_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_dataLength_name, true);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

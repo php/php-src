@@ -94,7 +94,6 @@ static zend_class_entry *register_class_SplFixedArray(zend_class_entry *class_en
 
 	INIT_CLASS_ENTRY(ce, "SplFixedArray", class_SplFixedArray_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
-	zend_class_implements(class_entry, 4, class_entry_IteratorAggregate, class_entry_ArrayAccess, class_entry_Countable, class_entry_JsonSerializable);
 
 
 	zend_attribute *attribute_Deprecated_func___wakeup_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__wakeup", sizeof("__wakeup") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
@@ -103,6 +102,9 @@ static zend_class_entry *register_class_SplFixedArray(zend_class_entry *class_en
 	zend_string *attribute_Deprecated_func___wakeup_0_arg1_str = zend_string_init("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()", strlen("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()"), 1);
 	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[1].value, attribute_Deprecated_func___wakeup_0_arg1_str);
 	attribute_Deprecated_func___wakeup_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_build_properties_info_table(class_entry);
+	zend_class_implements(class_entry, 4, class_entry_IteratorAggregate, class_entry_ArrayAccess, class_entry_Countable, class_entry_JsonSerializable);
 
 	return class_entry;
 }

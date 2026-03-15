@@ -251,6 +251,8 @@ static zend_class_entry *register_class_Random_Engine_Mt19937(zend_class_entry *
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\Engine", "Mt19937", class_Random_Engine_Mt19937_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
 	return class_entry;
@@ -262,6 +264,8 @@ static zend_class_entry *register_class_Random_Engine_PcgOneseq128XslRr64(zend_c
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\Engine", "PcgOneseq128XslRr64", class_Random_Engine_PcgOneseq128XslRr64_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
 	return class_entry;
@@ -273,6 +277,8 @@ static zend_class_entry *register_class_Random_Engine_Xoshiro256StarStar(zend_cl
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\Engine", "Xoshiro256StarStar", class_Random_Engine_Xoshiro256StarStar_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
 	return class_entry;
@@ -284,6 +290,8 @@ static zend_class_entry *register_class_Random_Engine_Secure(zend_class_entry *c
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\Engine", "Secure", class_Random_Engine_Secure_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 1, class_entry_Random_CryptoSafeEngine);
 
 	return class_entry;
@@ -296,6 +304,8 @@ static zend_class_entry *register_class_Random_Engine(void)
 	INIT_NS_CLASS_ENTRY(ce, "Random", "Engine", class_Random_Engine_methods);
 	class_entry = zend_register_internal_interface(&ce);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -305,6 +315,8 @@ static zend_class_entry *register_class_Random_CryptoSafeEngine(zend_class_entry
 
 	INIT_NS_CLASS_ENTRY(ce, "Random", "CryptoSafeEngine", NULL);
 	class_entry = zend_register_internal_interface(&ce);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
 	return class_entry;
@@ -324,6 +336,8 @@ static zend_class_entry *register_class_Random_Randomizer(void)
 	zend_declare_typed_property(class_entry, property_engine_name, &property_engine_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_engine_class_Random_Engine, 0, 0));
 	zend_string_release_ex(property_engine_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -339,6 +353,8 @@ static zend_class_entry *register_class_Random_IntervalBoundary(void)
 
 	zend_enum_add_case_cstr(class_entry, "OpenOpen", NULL);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -347,7 +363,10 @@ static zend_class_entry *register_class_Random_RandomError(zend_class_entry *cla
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomError", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Error, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -357,7 +376,10 @@ static zend_class_entry *register_class_Random_BrokenRandomEngineError(zend_clas
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random", "BrokenRandomEngineError", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Random_RandomError, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Random_RandomError, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -367,7 +389,10 @@ static zend_class_entry *register_class_Random_RandomException(zend_class_entry 
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Exception, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
