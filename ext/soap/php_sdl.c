@@ -50,6 +50,75 @@ static void delete_header_int(sdlSoapBindingFunctionHeaderPtr hdr);
 static void delete_header_persistent(zval *zv);
 static void delete_document(zval *zv);
 
+/* Note: name is an NCName, so we do not have to perform a prefix lookup. */
+static zend_result qname_hash_table_add(qname_hash_table *ht, zend_string *ns_uri, const xmlChar *name, xmlNodePtr value)
+{
+	ZEND_ASSERT(ns_uri != NULL);
+
+	HashTable *ns_table = zend_hash_find_ptr(&ht->inner, ns_uri);
+
+	if (!ns_table) {
+		ALLOC_HASHTABLE(ns_table);
+		zend_hash_init(ns_table, 0, NULL, NULL, false);
+		zend_hash_real_init_mixed(ns_table);
+
+		/* Also store the chosen namespace in _private so that the fallback can be obtained by reading that pointer later
+		 * on when constructing internal data structures in load_wsdl(). */
+		zend_hash_add_new_ptr(&ht->inner, ns_uri, ns_table);
+		value->_private = ZSTR_VAL(ns_uri);
+	}
+
+	return zend_hash_str_add_ptr(ns_table, (const char *) name, xmlStrlen(name), value) ? SUCCESS : FAILURE;
+}
+
+static xmlNodePtr qname_hash_table_find(const char *fallback_ns, qname_hash_table *ht, const xmlAttr *attr)
+{
+	/* The fallback namespace will be the target namespace by default.
+	 * If we never had a namespace, the empty namespace is the fallback. */
+	const char *default_ns_uri = fallback_ns ? fallback_ns : "";
+	const char *ns_uri;
+	char *local_name = strchr((char *) attr->children->content, ':');
+	if (local_name == NULL) {
+		local_name = (char *) attr->children->content;
+		ns_uri = default_ns_uri;
+	} else {
+		*local_name = '\0';
+		xmlNsPtr ns = xmlSearchNs(attr->doc, attr->parent, attr->children->content);
+		/* Note: we fall back to the default namespace if the prefix is not found for backwards compatibility reasons
+		 * (in the past namespace prefixes were ignored). */
+		ns_uri = ns && ns->href ? (const char *) ns->href : default_ns_uri;
+		*local_name = ':';
+		++local_name;
+	}
+
+	HashTable *ns_table = NULL;
+#if LIBXML_VERSION < 21300
+	if (ns_uri != default_ns_uri && strchr(ns_uri, '&')) {
+		/* This is a workaround for a bug in libxml2 < 2.13.0 where the namespace URI is not properly unescaped. */
+		size_t ns_uri_len = strlen(ns_uri);
+		ALLOCA_FLAG(use_heap);
+		zend_string *tmp;
+		ZSTR_ALLOCA_ALLOC(tmp, ns_uri_len, use_heap);
+		memcpy(ZSTR_VAL(tmp), ns_uri, ns_uri_len + 1 /* include '\0' */);
+		zend_string *unescaped = php_unescape_html_entities(tmp, 0, ENT_XML1 | ENT_NOQUOTES, NULL);
+		ZEND_ASSERT(unescaped != tmp);
+		ZSTR_ALLOCA_FREE(tmp, use_heap);
+		ns_table = zend_hash_find_ptr(&ht->inner, unescaped);
+		zend_string_release_ex(unescaped, false);
+	}
+#endif
+
+	if (!ns_table) {
+		ns_table = zend_hash_str_find_ptr(&ht->inner, ns_uri, strlen(ns_uri));
+	}
+
+	if (ns_table) {
+		return zend_hash_str_find_ptr(ns_table, local_name, strlen(local_name));
+	}
+
+	return NULL;
+}
+
 encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr node, const xmlChar *type)
 {
 	encodePtr enc = NULL;
@@ -300,7 +369,7 @@ void sdl_restore_uri_credentials(sdlCtx *ctx)
 
 #define SAFE_STR(a) ((a)?((const char *)a):"")
 
-static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include)
+static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include, const char *import_namespace)
 {
 	sdlPtr tmpsdl = ctx->sdl;
 	xmlDocPtr wsdl;
@@ -339,12 +408,29 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include
 		soap_error1(E_ERROR, "Parsing WSDL: Couldn't find <definitions> in '%s'", struri);
 	}
 
-	if (!include) {
-		xmlAttrPtr targetNamespace = get_attribute(definitions->properties, "targetNamespace");
-		if (targetNamespace) {
-			tmpsdl->target_ns = estrdup((char*)targetNamespace->children->content);
+	const char *targetNamespaceValue = NULL;
+
+	xmlAttrPtr targetNamespace = get_attribute(definitions->properties, "targetNamespace");
+	if (targetNamespace) {
+		targetNamespaceValue = (const char *) targetNamespace->children->content;
+		if (!include) {
+			tmpsdl->target_ns = estrdup(targetNamespaceValue);
 		}
+
+		/* TODO: spec requires these to match, but for BC reasons we allow it, see round3_groupD_import3.wsdl :-(. */
+#if 0
+		if (import_namespace && strcmp(import_namespace, targetNamespaceValue) != 0) {
+			soap_error2(E_ERROR, "Parsing WSDL: Import namespace '%s' does not match target namespace '%s'", import_namespace, targetNamespaceValue);
+		}
+#endif
 	}
+
+	if (!targetNamespaceValue) {
+		/* If no target namespace is given but we have an import namespace attribute, use that one.
+		 * If we don't have an import namespace attribute (i.e. chameleon schema), inherit the one from the parent WSDL. */
+		targetNamespaceValue = import_namespace ? import_namespace : tmpsdl->target_ns;
+	}
+	zend_string *targetNamespaceStr = targetNamespaceValue ? zend_string_init(targetNamespaceValue, strlen(targetNamespaceValue), false) : ZSTR_EMPTY_ALLOC();
 
 	trav = definitions->children;
 	while (trav != NULL) {
@@ -365,18 +451,25 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include
 				trav2 = trav2->next;
 			}
 		} else if (node_is_equal(trav,"import")) {
-			/* TODO: namespace ??? */
-			xmlAttrPtr tmp = get_attribute(trav->properties, "location");
-			if (tmp) {
-				xmlChar *uri = schema_location_construct_uri(tmp);
-				load_wsdl_ex(this_ptr, (char*)uri, ctx, true);
+			/* https://www.w3.org/TR/2003/WD-wsdl12-20030303/#imports */
+			const char *new_import_namespace = NULL;
+			xmlAttrPtr namespace_attr = get_attribute(trav->properties, "namespace");
+			if (namespace_attr) {
+				/* XXX: the value must not match the enclosing's target namespace, but for BC reasons we allow it. */
+				new_import_namespace = (const char *) namespace_attr->children->content;
+			}
+
+			xmlAttrPtr location_attr = get_attribute(trav->properties, "location");
+			if (location_attr) {
+				xmlChar *uri = schema_location_construct_uri(location_attr);
+				load_wsdl_ex(this_ptr, (char*)uri, ctx, true, new_import_namespace);
 				xmlFree(uri);
 			}
 
 		} else if (node_is_equal(trav,"message")) {
 			xmlAttrPtr name = get_attribute(trav->properties, "name");
 			if (name && name->children && name->children->content) {
-				if (zend_hash_str_add_ptr(&ctx->messages, (char*)name->children->content, xmlStrlen(name->children->content), trav) == NULL) {
+				if (qname_hash_table_add(&ctx->messages, targetNamespaceStr, name->children->content, trav) != SUCCESS) {
 					soap_error1(E_ERROR, "Parsing WSDL: <message> '%s' already defined", name->children->content);
 				}
 			} else {
@@ -386,7 +479,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include
 		} else if (node_is_equal(trav,"portType")) {
 			xmlAttrPtr name = get_attribute(trav->properties, "name");
 			if (name && name->children && name->children->content) {
-				if (zend_hash_str_add_ptr(&ctx->portTypes, (char*)name->children->content, xmlStrlen(name->children->content), trav) == NULL) {
+				if (qname_hash_table_add(&ctx->portTypes, targetNamespaceStr, name->children->content, trav) != SUCCESS) {
 					soap_error1(E_ERROR, "Parsing WSDL: <portType> '%s' already defined", name->children->content);
 				}
 			} else {
@@ -396,7 +489,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include
 		} else if (node_is_equal(trav,"binding")) {
 			xmlAttrPtr name = get_attribute(trav->properties, "name");
 			if (name && name->children && name->children->content) {
-				if (zend_hash_str_add_ptr(&ctx->bindings, (char*)name->children->content, xmlStrlen(name->children->content), trav) == NULL) {
+				if (qname_hash_table_add(&ctx->bindings, targetNamespaceStr, name->children->content, trav) != SUCCESS) {
 					soap_error1(E_ERROR, "Parsing WSDL: <binding> '%s' already defined", name->children->content);
 				}
 			} else {
@@ -406,7 +499,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include
 		} else if (node_is_equal(trav,"service")) {
 			xmlAttrPtr name = get_attribute(trav->properties, "name");
 			if (name && name->children && name->children->content) {
-				if (zend_hash_str_add_ptr(&ctx->services, (char*)name->children->content, xmlStrlen(name->children->content), trav) == NULL) {
+				if (qname_hash_table_add(&ctx->services, targetNamespaceStr, name->children->content, trav) != SUCCESS) {
 					soap_error1(E_ERROR, "Parsing WSDL: <service> '%s' already defined", name->children->content);
 				}
 			} else {
@@ -417,13 +510,14 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include
 		}
 		trav = trav->next;
 	}
+
+	zend_string_release_ex(targetNamespaceStr, false);
 }
 
-static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xmlNodePtr header, char* wsdl_soap_namespace, int fault)
+static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, const char *fallback_ns, xmlNodePtr header, char* wsdl_soap_namespace, int fault)
 {
 	xmlAttrPtr tmp;
 	xmlNodePtr message, part;
-	char *ctype;
 	sdlSoapBindingFunctionHeaderPtr h;
 
 	tmp = get_attribute(header->properties, "message");
@@ -431,13 +525,8 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 		soap_error0(E_ERROR, "Parsing WSDL: Missing message attribute for <header>");
 	}
 
-	ctype = strrchr((char*)tmp->children->content,':');
-	if (ctype == NULL) {
-		ctype = (char*)tmp->children->content;
-	} else {
-		++ctype;
-	}
-	if ((message = zend_hash_str_find_ptr(&ctx->messages, ctype, strlen(ctype))) == NULL) {
+	message = qname_hash_table_find(fallback_ns, &ctx->messages, tmp);
+	if (!message) {
 		soap_error1(E_ERROR, "Parsing WSDL: Missing <message> with name '%s'", tmp->children->content);
 	}
 
@@ -504,7 +593,7 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 		xmlNodePtr trav = header->children;
 		while (trav != NULL) {
 			if (node_is_equal_ex(trav, "headerfault", wsdl_soap_namespace)) {
-				sdlSoapBindingFunctionHeaderPtr hf = wsdl_soap_binding_header(ctx, trav, wsdl_soap_namespace, 1);
+				sdlSoapBindingFunctionHeaderPtr hf = wsdl_soap_binding_header(ctx, fallback_ns, trav, wsdl_soap_namespace, 1);
 				smart_str key = {0};
 
 				if (h->headerfaults == NULL) {
@@ -531,7 +620,7 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 	return h;
 }
 
-static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap_namespace, sdlSoapBindingFunctionBody *binding, HashTable* params)
+static void wsdl_soap_binding_body(sdlCtx* ctx, const char *fallback_ns, xmlNodePtr node, char* wsdl_soap_namespace, sdlSoapBindingFunctionBody *binding, HashTable* params)
 {
 	xmlNodePtr trav;
 
@@ -604,7 +693,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 				}
 			}
 		} else if (node_is_equal_ex(trav, "header", wsdl_soap_namespace)) {
-			sdlSoapBindingFunctionHeaderPtr h = wsdl_soap_binding_header(ctx, trav, wsdl_soap_namespace, 0);
+			sdlSoapBindingFunctionHeaderPtr h = wsdl_soap_binding_header(ctx, fallback_ns, trav, wsdl_soap_namespace, 0);
 			smart_str key = {0};
 
 			if (binding->headers == NULL) {
@@ -629,23 +718,14 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 	}
 }
 
-static HashTable* wsdl_message(const sdlCtx *ctx, const xmlChar* message_name)
+static HashTable* wsdl_message(sdlCtx *ctx, const char *fallback_ns, const xmlAttr *message_name)
 {
-	HashTable* parameters = NULL;
-
-	const char *ctype = strrchr((const char*)message_name,':');
-	if (ctype == NULL) {
-		ctype = (const char*)message_name;
-	} else {
-		++ctype;
+	xmlNodePtr message = qname_hash_table_find(fallback_ns, &ctx->messages, message_name);
+	if (!message) {
+		soap_error1(E_ERROR, "Parsing WSDL: Missing <message> with name '%s'", message_name->children->content);
 	}
 
-	xmlNodePtr message = zend_hash_str_find_ptr(&ctx->messages, ctype, strlen(ctype));
-	if (message == NULL) {
-		soap_error1(E_ERROR, "Parsing WSDL: Missing <message> with name '%s'", (const char*)message_name);
-	}
-
-	parameters = emalloc(sizeof(HashTable));
+	HashTable *parameters = emalloc(sizeof(HashTable));
 	zend_hash_init(parameters, 0, NULL, delete_parameter, 0);
 
 	xmlNodePtr trav = message->children;
@@ -695,6 +775,12 @@ static HashTable* wsdl_message(const sdlCtx *ctx, const xmlChar* message_name)
 	return parameters;
 }
 
+static void dtor_inner_qname_ht(zval *zv)
+{
+	zend_hash_destroy(Z_ARR_P(zv));
+	efree(Z_ARR_P(zv));
+}
+
 static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 {
 	sdlCtx ctx = {0};
@@ -705,34 +791,40 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	zend_hash_init(&ctx.sdl->functions, 0, NULL, delete_function, 0);
 
 	zend_hash_init(&ctx.docs, 0, NULL, delete_document, 0);
-	zend_hash_init(&ctx.messages, 0, NULL, NULL, 0);
-	zend_hash_init(&ctx.bindings, 0, NULL, NULL, 0);
-	zend_hash_init(&ctx.portTypes, 0, NULL, NULL, 0);
-	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
+	zend_hash_init(&ctx.messages.inner, 0, NULL, dtor_inner_qname_ht, 0);
+	zend_hash_init(&ctx.bindings.inner, 0, NULL, dtor_inner_qname_ht, 0);
+	zend_hash_init(&ctx.portTypes.inner, 0, NULL, dtor_inner_qname_ht, 0);
+	zend_hash_init(&ctx.services.inner,  0, NULL, dtor_inner_qname_ht, 0);
 
 	zend_try {
-		load_wsdl_ex(this_ptr, struri, &ctx, false);
-		schema_pass2(&ctx);
+	load_wsdl_ex(this_ptr, struri, &ctx, false, NULL);
+	schema_pass2(&ctx);
 
-		uint32_t n = zend_hash_num_elements(&ctx.services);
-		if (n == 0) {
-			soap_error0(E_ERROR, "Parsing WSDL: Couldn't bind to service");
-		}
+	uint32_t service_ns_count = zend_hash_num_elements(&ctx.services.inner);
+	if (service_ns_count == 0) {
+		soap_error0(E_ERROR, "Parsing WSDL: Couldn't bind to service");
+	}
 
-		zend_hash_internal_pointer_reset(&ctx.services);
-		for (uint32_t i = 0; i < n; i++) {
-			xmlNodePtr service, tmp;
+	zend_hash_internal_pointer_reset(&ctx.services.inner);
+	for (uint32_t service_ns_idx = 0; service_ns_idx < service_ns_count; service_ns_idx++) {
+		HashTable* service_array = zend_hash_get_current_data_ptr(&ctx.services.inner);
+		zend_hash_internal_pointer_reset(service_array);
+		uint32_t service_count = zend_hash_num_elements(service_array);
+
+		for (uint32_t service_idx = 0; service_idx < service_count; service_idx++) {
+			xmlNodePtr service;
 			xmlNodePtr trav, port;
 			bool has_soap_port = false;
 
-			service = tmp = zend_hash_get_current_data_ptr(&ctx.services);
+			service = zend_hash_get_current_data_ptr(service_array);
+			/* If no namespace is defined for the service, use the target namespace of the WSDL service */
+			const char *service_ns_key = service->_private;
 
 			trav = service->children;
 			while (trav != NULL) {
 				xmlAttrPtr type, name, bindingAttr, location;
 				xmlNodePtr portType, operation;
 				xmlNodePtr address, binding, trav2;
-				char *ctype;
 				sdlBindingPtr tmpbinding;
 				char *wsdl_soap_namespace = NULL;
 
@@ -785,7 +877,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 				  trav2 = trav2->next;
 				}
 				if (!address || tmpbinding->bindingType == BINDING_HTTP) {
-					if (has_soap_port || trav->next || i < n-1) {
+					if (has_soap_port || trav->next || service_idx < service_count - 1) {
 						efree(tmpbinding);
 						trav = trav->next;
 						continue;
@@ -802,16 +894,10 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 
 				tmpbinding->location = estrdup((char*)location->children->content);
 
-				ctype = strrchr((char*)bindingAttr->children->content,':');
-				if (ctype == NULL) {
-					ctype = (char*)bindingAttr->children->content;
-				} else {
-					++ctype;
+				binding = qname_hash_table_find(service_ns_key, &ctx.bindings, bindingAttr);
+				if (!binding) {
+					soap_error1(E_ERROR, "Parsing WSDL: No <binding> element with name '%s'", bindingAttr->children->content);
 				}
-				if ((tmp = zend_hash_str_find_ptr(&ctx.bindings, ctype, strlen(ctype))) == NULL) {
-					soap_error1(E_ERROR, "Parsing WSDL: No <binding> element with name '%s'", ctype);
-				}
-				binding = tmp;
 
 				if (tmpbinding->bindingType == BINDING_SOAP) {
 					sdlSoapBindingPtr soapBinding;
@@ -856,16 +942,10 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					soap_error0(E_ERROR, "Parsing WSDL: Missing 'type' attribute for <binding>");
 				}
 
-				ctype = strchr((char*)type->children->content,':');
-				if (ctype == NULL) {
-					ctype = (char*)type->children->content;
-				} else {
-					++ctype;
-				}
-				if ((tmp = zend_hash_str_find_ptr(&ctx.portTypes, ctype, strlen(ctype))) == NULL) {
+				portType = qname_hash_table_find(binding->_private, &ctx.portTypes, type);
+				if (!portType) {
 					soap_error1(E_ERROR, "Parsing WSDL: Missing <portType> with name '%s'", name->children->content);
 				}
-				portType = tmp;
 
 				trav2 = binding->children;
 				while (trav2 != NULL) {
@@ -954,7 +1034,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						if (message == NULL) {
 							soap_error1(E_ERROR, "Parsing WSDL: Missing name for <input> of '%s'", op_name->children->content);
 						}
-						function->requestParameters = wsdl_message(&ctx, message->children->content);
+						function->requestParameters = wsdl_message(&ctx, portType->_private, message);
 
 /* FIXME
 						xmlAttrPtr name = get_attribute(input->properties, "name");
@@ -970,7 +1050,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 							input = get_node_ex(operation->children, "input", WSDL_NAMESPACE);
 							if (input != NULL) {
 								sdlSoapBindingFunctionPtr soapFunctionBinding = function->bindingAttributes;
-								wsdl_soap_binding_body(&ctx, input, wsdl_soap_namespace, &soapFunctionBinding->input, function->requestParameters);
+								wsdl_soap_binding_body(&ctx, portType->_private, input, wsdl_soap_namespace, &soapFunctionBinding->input, function->requestParameters);
 							}
 						}
 					}
@@ -983,7 +1063,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						if (message == NULL) {
 							soap_error1(E_ERROR, "Parsing WSDL: Missing name for <output> of '%s'", op_name->children->content);
 						}
-						function->responseParameters = wsdl_message(&ctx, message->children->content);
+						function->responseParameters = wsdl_message(&ctx, portType->_private, message);
 
 /* FIXME
 						xmlAttrPtr name = get_attribute(output->properties, "name");
@@ -1004,7 +1084,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 							output = get_node_ex(operation->children, "output", WSDL_NAMESPACE);
 							if (output != NULL) {
 								sdlSoapBindingFunctionPtr soapFunctionBinding = function->bindingAttributes;
-								wsdl_soap_binding_body(&ctx, output, wsdl_soap_namespace, &soapFunctionBinding->output, function->responseParameters);
+								wsdl_soap_binding_body(&ctx, portType->_private, output, wsdl_soap_namespace, &soapFunctionBinding->output, function->responseParameters);
 							}
 						}
 					}
@@ -1033,7 +1113,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 							memset(f, 0, sizeof(sdlFault));
 
 							f->name = estrdup((char*)faultNameAttribute->children->content);
-							f->details = wsdl_message(&ctx, message->children->content);
+							f->details = wsdl_message(&ctx, portType->_private, message);
 							if (f->details == NULL || zend_hash_num_elements(f->details) > 1) {
 								soap_error1(E_ERROR, "Parsing WSDL: The fault message '%s' must have a single part", message->children->content);
 							}
@@ -1130,23 +1210,23 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 				trav= trav->next;
 			}
 
-			zend_hash_move_forward(&ctx.services);
+			zend_hash_move_forward(service_array);
 		}
 
 		if (ctx.sdl->bindings == NULL || ctx.sdl->bindings->nNumOfElements == 0) {
 			soap_error0(E_ERROR, "Parsing WSDL: Could not find any usable binding services in WSDL.");
 		}
-
+	}
 	} zend_catch {
 		/* Avoid persistent memory leak. */
 		zend_hash_destroy(&ctx.docs);
 		zend_bailout();
 	} zend_end_try();
 
-	zend_hash_destroy(&ctx.messages);
-	zend_hash_destroy(&ctx.bindings);
-	zend_hash_destroy(&ctx.portTypes);
-	zend_hash_destroy(&ctx.services);
+	zend_hash_destroy(&ctx.messages.inner);
+	zend_hash_destroy(&ctx.bindings.inner);
+	zend_hash_destroy(&ctx.portTypes.inner);
+	zend_hash_destroy(&ctx.services.inner);
 	zend_hash_destroy(&ctx.docs);
 
 	return ctx.sdl;
