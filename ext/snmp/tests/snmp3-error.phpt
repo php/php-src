@@ -59,7 +59,7 @@ try {
 ?>
 --EXPECTF--
 Checking error handling
-Security level must be one of %s
+Security level must be one of "noAuthNoPriv", "authNoPriv", or "authPriv"
 Security level must be one of "noAuthNoPriv", "authNoPriv", or "authPriv"
 Authentication protocol must be %s
 
@@ -68,7 +68,7 @@ bool(false)
 
 Warning: snmp3_get(): Error generating a key for authentication pass phrase 'te': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)
-Security protocol must be one of "AES256", "AES256C", "AES192", "AES192C", "AES128", "AES", or "DES"
+Security protocol must be one of %s
 
 Warning: snmp3_get(): Error generating a key for privacy pass phrase '': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)
