@@ -756,10 +756,29 @@ static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 }
 /* }}} */
 
+static zend_class_entry *zend_closure_rt_cache_scope(zend_function *func, void **run_time_cache, bool is_fake, zend_class_entry *default_scope)
+{
+	ZEND_ASSERT(!(func->op_array.fn_flags & ZEND_ACC_HEAP_RT_CACHE));
+
+	if (is_fake) {
+		return func->op_array.scope;
+	}
+
+	/* Zero RT cache is valid for any scope */
+	if (func->op_array.cache_size == 0) {
+		return default_scope;
+	}
+
+	ZEND_ASSERT(func->common.fn_flags & ZEND_ACC_CLOSURE);
+	ZEND_ASSERT(!(func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE));
+
+	return CACHED_PTR_EX(run_time_cache - 1);
+}
+
 static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr, bool is_fake) /* {{{ */
 {
 	zend_closure *closure;
-	void *ptr;
+	void **ptr;
 
 	object_init_ex(res, zend_ce_closure);
 
@@ -800,19 +819,22 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
 		ptr = ZEND_MAP_PTR_GET(func->op_array.run_time_cache);
 		if (!ptr
-			|| func->common.scope != scope
 			|| (func->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE)
+			|| zend_closure_rt_cache_scope(func, ptr, is_fake, scope) != scope
 		) {
-			if (!ptr
-			 && (func->common.fn_flags & ZEND_ACC_CLOSURE)
-			 && (func->common.scope == scope ||
-			     !(func->common.fn_flags & ZEND_ACC_IMMUTABLE))) {
+			if (func->op_array.cache_size == 0) {
+				ptr = zend_arena_alloc(&CG(arena), 0);
+				ZEND_MAP_PTR_SET(func->op_array.run_time_cache, ptr);
+				closure->func.op_array.fn_flags &= ~ZEND_ACC_HEAP_RT_CACHE;
+			} else if (!ptr
+			 && func->common.fn_flags & ZEND_ACC_CLOSURE) {
+				ZEND_ASSERT(!(func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE));
 				/* If a real closure is used for the first time, we create a shared runtime cache
-				 * and remember which scope it is for. */
-				if (func->common.scope != scope) {
-					func->common.scope = scope;
-				}
-				ptr = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
+				 * and remember which scope it is for. The scope is stored in
+				 * an extra slot before the run_time_cache. */
+				size_t extra_slot_size = sizeof(void*);
+				ptr = zend_arena_alloc(&CG(arena), func->op_array.cache_size + extra_slot_size) + extra_slot_size;
+				CACHE_PTR_EX(ptr - 1, scope);
 				ZEND_MAP_PTR_SET(func->op_array.run_time_cache, ptr);
 				closure->func.op_array.fn_flags &= ~ZEND_ACC_HEAP_RT_CACHE;
 			} else {
