@@ -8310,6 +8310,9 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		zend_op *opline = zend_emit_op(NULL,
 			is_ref ? ZEND_ASSIGN_OBJ_REF : ZEND_ASSIGN_OBJ, NULL, &name_node);
 		opline->extended_value = zend_alloc_cache_slots(3);
+		if ((flags & ZEND_ACC_READONLY) != 0) {
+			opline->extended_value |= ZEND_ASSIGN_OBJ_PROMOTED_READONLY_INIT;
+		}
 		zend_emit_op_data(&value_node);
 	}
 }

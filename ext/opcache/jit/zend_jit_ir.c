@@ -14874,7 +14874,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 
 	if (!prop_info) {
 		ir_ref run_time_cache = ir_LOAD_A(jit_EX(run_time_cache));
-		ir_ref ref = ir_LOAD_A(ir_ADD_OFFSET(run_time_cache, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS));
+		ir_ref ref = ir_LOAD_A(ir_ADD_OFFSET(run_time_cache, opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS));
 		ir_ref if_same = ir_IF(ir_EQ(ref, ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, ce)))));
 
 		ir_IF_FALSE_cold(if_same);
@@ -14882,7 +14882,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 
 		ir_IF_TRUE(if_same);
 		ir_ref offset_ref = ir_LOAD_A(
-			ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*)));
+			ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) + sizeof(void*)));
 
 		ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, ir_CONST_ADDR(ZEND_FIRST_PROPERTY_OFFSET)));
 		ir_IF_TRUE_cold(if_dynamic);
@@ -14900,7 +14900,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		if (!ce || ce_is_instanceof || (ce->ce_flags & (ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_TRAIT))) {
 			ir_ref arg3, arg4;
 			ir_ref prop_info_ref = ir_LOAD_A(
-				ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2));
+				ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) + sizeof(void*) * 2));
 			ir_ref if_has_prop_info = ir_IF(prop_info_ref);
 			ir_IF_TRUE_cold(if_has_prop_info);
 
@@ -15068,7 +15068,7 @@ slow_path:
 			obj_ref,
 			ir_CONST_ADDR(name),
 			arg3,
-			ir_ADD_OFFSET(run_time_cache, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS),
+			ir_ADD_OFFSET(run_time_cache, opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS),
 			arg5);
 
 		ir_END_list(end_inputs);
@@ -15232,7 +15232,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 
 	if (!prop_info) {
 		ir_ref run_time_cache = ir_LOAD_A(jit_EX(run_time_cache));
-		ir_ref ref = ir_LOAD_A(ir_ADD_OFFSET(run_time_cache, (opline+1)->extended_value & ~ZEND_FETCH_OBJ_FLAGS));
+		ir_ref ref = ir_LOAD_A(ir_ADD_OFFSET(run_time_cache, (opline+1)->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS));
 		ir_ref if_same = ir_IF(ir_EQ(ref, ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, ce)))));
 
 		ir_IF_FALSE_cold(if_same);
@@ -15241,7 +15241,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 		ir_IF_TRUE(if_same);
 		if (!ce || ce_is_instanceof || (ce->ce_flags & (ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_TRAIT))) {
 			ir_ref prop_info_ref = ir_LOAD_A(
-				ir_ADD_OFFSET(run_time_cache, ((opline+1)->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2));
+				ir_ADD_OFFSET(run_time_cache, ((opline+1)->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) + sizeof(void*) * 2));
 			ir_ref if_has_prop_info = ir_IF(prop_info_ref);
 			ir_IF_TRUE_cold(if_has_prop_info);
 			ir_END_list(slow_inputs);
@@ -15249,7 +15249,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 			ir_IF_FALSE(if_has_prop_info);
 		}
 		ir_ref offset_ref = ir_LOAD_A(
-			ir_ADD_OFFSET(run_time_cache, ((opline+1)->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*)));
+			ir_ADD_OFFSET(run_time_cache, ((opline+1)->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) + sizeof(void*)));
 
 		ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, ir_CONST_ADDR(ZEND_FIRST_PROPERTY_OFFSET)));
 		ir_IF_TRUE_cold(if_dynamic);
@@ -15508,7 +15508,7 @@ long_math:
 			obj_ref,
 			ir_CONST_ADDR(name),
 			arg3,
-			ir_ADD_OFFSET(run_time_cache, (opline+1)->extended_value & ~ZEND_FETCH_OBJ_FLAGS),
+			ir_ADD_OFFSET(run_time_cache, (opline+1)->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS),
 			ir_CONST_FC_FUNC(binary_op));
 
 		ir_END_list(end_inputs);
@@ -15655,7 +15655,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 
 	if (!prop_info) {
 		ir_ref run_time_cache = ir_LOAD_A(jit_EX(run_time_cache));
-		ir_ref ref = ir_LOAD_A(ir_ADD_OFFSET(run_time_cache, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS));
+		ir_ref ref = ir_LOAD_A(ir_ADD_OFFSET(run_time_cache, opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS));
 		ir_ref if_same = ir_IF(ir_EQ(ref, ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, ce)))));
 
 		ir_IF_FALSE_cold(if_same);
@@ -15664,7 +15664,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 		ir_IF_TRUE(if_same);
 		if (!ce || ce_is_instanceof || (ce->ce_flags & (ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_TRAIT))) {
 			ir_ref prop_info_ref = ir_LOAD_A(
-				ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2));
+				ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) + sizeof(void*) * 2));
 			ir_ref if_has_prop_info = ir_IF(prop_info_ref);
 			ir_IF_TRUE_cold(if_has_prop_info);
 			ir_END_list(slow_inputs);
@@ -15672,7 +15672,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 			ir_IF_FALSE(if_has_prop_info);
 		}
 		ir_ref offset_ref = ir_LOAD_A(
-			ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*)));
+			ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) + sizeof(void*)));
 
 		ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, ir_CONST_ADDR(ZEND_FIRST_PROPERTY_OFFSET)));
 		ir_IF_TRUE_cold(if_dynamic);
@@ -15993,7 +15993,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 		ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(func),
 			obj_ref,
 			ir_CONST_ADDR(name),
-			ir_ADD_OFFSET(run_time_cache, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS),
+			ir_ADD_OFFSET(run_time_cache, opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS),
 			(opline->result_type == IS_UNUSED) ? IR_NULL : jit_ZVAL_ADDR(jit, res_addr));
 
 		ir_END_list(end_inputs);

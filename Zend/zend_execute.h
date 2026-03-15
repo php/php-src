@@ -584,6 +584,45 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS))
 #define ZEND_CLASS_HAS_READONLY_PROPS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_READONLY_PROPS))
 
+typedef enum _zend_property_write_kind {
+	ZEND_PROPERTY_WRITE_FORBIDDEN = 0,            /* Write disallowed */
+	ZEND_PROPERTY_WRITE_OK,                       /* Write allowed */
+	ZEND_PROPERTY_WRITE_READONLY_REINITABLE,      /* Clone reinit window: clear IS_PROP_REINITABLE after write */
+	ZEND_PROPERTY_WRITE_READONLY_CTOR_REASSIGNED, /* CPP ctor reassignment: set IS_PROP_CTOR_REASSIGNED after write */
+} zend_property_write_kind;
+
+ZEND_API ZEND_COLD zend_property_write_kind zend_verify_readonly_slow(zval *property_val, const zend_property_info *info);
+
+static zend_always_inline zend_property_write_kind zend_verify_readonly_and_avis(
+	zval *property_val, const zend_property_info *info, bool indirect)
+{
+	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
+		zend_property_write_kind prop_write_kind = ZEND_PROPERTY_WRITE_OK;
+		if ((info->flags & ZEND_ACC_READONLY) && !Z_ISUNDEF_P(property_val)) {
+			prop_write_kind = zend_verify_readonly_slow(property_val, info);
+			if (prop_write_kind == ZEND_PROPERTY_WRITE_FORBIDDEN) {
+				zend_readonly_property_modification_error(info);
+				return ZEND_PROPERTY_WRITE_FORBIDDEN;
+			}
+		}
+		if ((info->flags & ZEND_ACC_PPP_SET_MASK) && !zend_asymmetric_property_has_set_access(info)) {
+			const char *operation = indirect ? "indirectly modify" : "modify";
+			zend_asymmetric_visibility_property_modification_error(info, operation);
+			return ZEND_PROPERTY_WRITE_FORBIDDEN;
+		}
+		return prop_write_kind;
+	}
+	return ZEND_PROPERTY_WRITE_OK;
+}
+
+static zend_always_inline void zend_property_write_commit(zval *property_val, zend_property_write_kind kind)
+{
+	if (kind == ZEND_PROPERTY_WRITE_READONLY_REINITABLE) {
+		Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
+	} else if (kind == ZEND_PROPERTY_WRITE_READONLY_CTOR_REASSIGNED) {
+		Z_PROP_FLAG_P(property_val) |= IS_PROP_CTOR_REASSIGNED;
+	}
+}
 
 ZEND_API bool zend_verify_class_constant_type(const zend_class_constant *c, const zend_string *name, zval *constant);
 ZEND_COLD void zend_verify_class_constant_type_error(const zend_class_constant *c, const zend_string *name, const zval *constant);

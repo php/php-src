@@ -2512,8 +2512,8 @@ ZEND_VM_HANDLER(24, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMP|CV, CACHE_SLO
 ZEND_VM_C_LABEL(assign_object):
 	zobj = Z_OBJ_P(object);
 	if (OP2_TYPE == IS_CONST) {
-		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
-			void **cache_slot = CACHE_ADDR(opline->extended_value);
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 			zval *property_val;
 			zend_property_info *prop_info;
@@ -2619,7 +2619,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 		ZVAL_DEREF(value);
 	}
 
-	value = zobj->handlers->write_property(zobj, name, value, (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_ASSIGN_OBJ_FLAGS) : NULL);
 
 	if (OP2_TYPE != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
