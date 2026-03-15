@@ -44,6 +44,7 @@ typedef struct {
   uint64_t chunk_counter;
   uint8_t buf[BLAKE3_BLOCK_LEN];
   uint8_t buf_len;
+  uint8_t padding_1[5];
   uint8_t blocks_compressed;
   uint8_t flags;
 } blake3_chunk_state;
@@ -58,6 +59,7 @@ typedef struct {
   // don't know whether more input is coming. This is different from how the
   // reference implementation does things.
   uint8_t cv_stack[(BLAKE3_MAX_DEPTH + 1) * BLAKE3_OUT_LEN];
+  uint8_t padding_2[7];
 } blake3_hasher;
 
 BLAKE3_API const char *blake3_version(void);
