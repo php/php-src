@@ -4,7 +4,28 @@ mysqli_get_client_stats()
 mysqli
 --SKIPIF--
 <?PHP
-require_once 'skipifconnectfailure.inc';
+    require_once __DIR__ . '/test_setup/test_helpers.inc';
+    $link = mysqli_connect_or_skip();
+    // We run some operations that need CREATE SERVER and CREATE DATABASE in
+    // this test, so check if we can do that. We don't check if we can merely
+    // create a table; if that doesn't work with the provided database, many
+    // more tests would fail.
+    try {
+        $sql = "CREATE DATABASE mysqli_get_client_stats";
+        mysqli_query($link, $sql);
+        mysqli_query($link, "DROP DATABASE mysqli_get_client_stats");
+    } catch (\mysqli_sql_exception) {
+        die("skip don't have create database privilege");
+    }
+    try {
+        $sql = sprintf("CREATE SERVER myself FOREIGN DATA WRAPPER mysql OPTIONS (user '%s', password '%s', database '%s')",
+            get_default_user(), get_default_password(), get_default_database());
+        mysqli_query($link, $sql);
+        mysqli_query($link, "DROP SERVER myself");
+    } catch(\mysqli_sql_exception) {
+        die("skip don't have create server privilege");
+    }
+    mysqli_close($link);
 ?>
 --INI--
 mysqlnd.collect_statistics=1
