@@ -454,6 +454,7 @@ again:
 // TODO: Use a different value to allow an actual distinction here.
 #define ZEND_UNCOMPARABLE 1
 
+ZEND_API int ZEND_FASTCALL zend_equals_object(zval *op1, zval *op2, zend_uchar equals);
 ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2);
 
 ZEND_API zend_result ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2);
