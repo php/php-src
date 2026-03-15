@@ -334,7 +334,7 @@ static void php_load_zend_extension_cb(void *arg)
 	} else {
 		DL_HANDLE handle;
 		char *libpath;
-		char *extension_dir = INI_STR("extension_dir");
+		const char *extension_dir = zend_ini_string_literal("extension_dir");
 		int slash_suffix = 0;
 		char *err1, *err2;
 

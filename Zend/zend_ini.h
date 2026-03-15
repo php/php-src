@@ -88,12 +88,18 @@ ZEND_API void display_ini_entries(zend_module_entry *module);
 
 ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, bool orig);
 ZEND_API double zend_ini_double(const char *name, size_t name_length, bool orig);
-ZEND_API char *zend_ini_string(const char *name, size_t name_length, bool orig);
-ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, bool orig, bool *exists);
+ZEND_API const char *zend_ini_string(const char *name, size_t name_length, bool orig);
+ZEND_API const char *zend_ini_string_ex(const char *name, size_t name_length, bool orig, bool *exists);
 ZEND_API zend_string *zend_ini_str(const char *name, size_t name_length, bool orig);
 ZEND_API zend_string *zend_ini_str_ex(const char *name, size_t name_length, bool orig, bool *exists);
 ZEND_API zend_string *zend_ini_get_value(zend_string *name);
 ZEND_API bool zend_ini_parse_bool(const zend_string *str);
+
+#define zend_ini_bool_literal(name) zend_ini_parse_bool(zend_ini_str((name), sizeof("" name) - 1, false))
+#define zend_ini_long_literal(name) zend_ini_long((name), sizeof("" name) - 1, false)
+#define zend_ini_double_literal(name) zend_ini_double((name), sizeof("" name) - 1, false)
+#define zend_ini_str_literal(name) zend_ini_str((name), sizeof("" name) - 1, false)
+#define zend_ini_string_literal(name) zend_ini_string((name), sizeof("" name) - 1, false)
 
 /**
  * Parses an ini quantity
@@ -190,16 +196,6 @@ END_EXTERN_C()
 #define STD_ZEND_INI_BOOLEAN(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
 	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, NULL, zend_ini_boolean_displayer_cb)
 #endif
-
-#define INI_INT(name) zend_ini_long((name), strlen(name), 0)
-#define INI_FLT(name) zend_ini_double((name), strlen(name), 0)
-#define INI_STR(name) zend_ini_string_ex((name), strlen(name), 0, NULL)
-#define INI_BOOL(name) ((bool) INI_INT(name))
-
-#define INI_ORIG_INT(name)	zend_ini_long((name), strlen(name), 1)
-#define INI_ORIG_FLT(name)	zend_ini_double((name), strlen(name), 1)
-#define INI_ORIG_STR(name)	zend_ini_string((name), strlen(name), 1)
-#define INI_ORIG_BOOL(name) ((bool) INI_ORIG_INT(name))
 
 #define REGISTER_INI_ENTRIES() zend_register_ini_entries_ex(ini_entries, module_number, type)
 #define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries_ex(module_number, type)

@@ -1599,7 +1599,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 
 #ifdef HAVE_GD_JPG
 			case PHP_GDIMG_TYPE_JPG:
-				ignore_warning = INI_INT("gd.jpeg_ignore_warning");
+				ignore_warning = zend_ini_bool_literal("gd.jpeg_ignore_warning");
 				im = gdImageCreateFromJpegEx(fp, ignore_warning);
 			break;
 #endif
