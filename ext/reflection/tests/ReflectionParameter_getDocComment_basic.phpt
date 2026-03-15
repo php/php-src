@@ -28,6 +28,13 @@ function func(
 	/** Doc comment for $h */
 	$h /** Doc comment for $h behind parameter */,
 ) {}
+
+public string $property {
+     set(
+          /** Doc Comment for property hook parameter $value */
+          string $value
+     ) { $this->property = $value; }
+}
 }
 
 function func(
@@ -75,9 +82,10 @@ $func = function(
 ) {};
 
 foreach([
-		'A::func' => (new ReflectionClass('A'))->getMethod('func'),
-		'func'    => new ReflectionFunction('func'),
-		'closure' => new ReflectionFunction($func),
+		'A::func'       => (new ReflectionClass('A'))->getMethod('func'),
+		'func'          => new ReflectionFunction('func'),
+		'closure'       => new ReflectionFunction($func),
+		'property hook' => (new ReflectionClass('A'))->getProperty('property')->getHook(PropertyHookType::Set),
 	] as $function => $rc) {
     $rps = $rc->getParameters();
     foreach($rps as $rp) {
@@ -180,4 +188,7 @@ string(%d) "/** Doc comment for $g behind parameter */"
 
 ---> Doc comment for closure parameter $h:
 string(%d) "/** Doc comment for $h behind parameter */"
+
+---> Doc comment for property hook parameter $value:
+string(%d) "/** Doc Comment for property hook parameter $value */"
 
