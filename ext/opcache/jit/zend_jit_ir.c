@@ -17091,6 +17091,27 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 	ir_ref ref;
 
 	zend_jit_set_ip(jit, opline);
+	/* FETCH_OBJ_FUNC_ARG/FETCH_OBJ_R may dispatch to a VM handler that
+	 * pushes a call frame for SIMPLE_GET property hooks, which would
+	 * corrupt the trace's call stack. Clear the SIMPLE_GET flag so the
+	 * handler falls through to read_property instead. */
+	if ((opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG || opline->opcode == ZEND_FETCH_OBJ_R)
+	 && opline->op2_type == IS_CONST) {
+		ir_ref run_time_cache = ir_LOAD_A(jit_EX(run_time_cache));
+		ir_ref cache_slot_ref = ir_ADD_OFFSET(run_time_cache,
+			(opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*));
+		ir_ref prop_offset_ref = ir_LOAD_A(cache_slot_ref);
+		/* Only clear SIMPLE_GET for hooked property offsets (range 1..15).
+		 * Other offset types (dynamic = -1, valid >= 16) may have bit 3
+		 * set coincidentally and must not be modified. */
+		ir_ref if_hooked_lo = ir_IF(ir_GE(prop_offset_ref, ir_CONST_ADDR(ZEND_PROPERTY_HOOK_SIMPLE_GET_BIT)));
+		ir_IF_TRUE(if_hooked_lo);
+		ir_ref if_hooked_hi = ir_IF(ir_LT(prop_offset_ref, ir_CONST_ADDR(ZEND_FIRST_PROPERTY_OFFSET)));
+		ir_IF_TRUE(if_hooked_hi);
+		ir_STORE(cache_slot_ref, ir_AND_A(prop_offset_ref, ir_CONST_ADDR(~(uintptr_t)ZEND_PROPERTY_HOOK_SIMPLE_GET_BIT)));
+		ir_MERGE_WITH_EMPTY_FALSE(if_hooked_hi);
+		ir_MERGE_WITH_EMPTY_FALSE(if_hooked_lo);
+	}
 	if (GCC_GLOBAL_REGS) {
 		ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
 	} else {
