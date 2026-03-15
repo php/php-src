@@ -842,53 +842,19 @@ slightly different steps. We'll call attention where the steps differ.
     for posting the release announcement to Mastodon. Posts need to be
     approved.
 
-## Re-releasing the same version or a patch-level (i.e., `-plN`)
+## Re-releasing the same version
 
 While unlikely, there may be times we need to re-release the same version. This
-might happen if the tarballs have a corrupted file, for example.
-
-Should this occur *before* announcing the release, you may choose to delete the
-tag and go through the full packaging process again, as described above.
+might happen if the tarballs have a corrupted file, for example, or when there
+is a build error.
 
 > 💬 **Hint** \
 > This is one of the reasons we package releases two days before announcing
 > them.
 
-If this happens *after* announcing the release, you may choose to tag, package,
-and release a patch-level (i.e., *pl*) release. If it is not critical and/or
-affects a very limited subset of users, then you may choose to wait until the
-next release.
-
-If you choose to create a patch-level release, follow these steps:
-
-1. Commit the new binaries to `web-php-distributions`
-
-2. Update $data['X.Y'] in `web-php:/include/version.inc`
-   (X.Y=major.minor release, e.g. '8.0'):
-
-    * `version` to the full version number (e.g. '8.0.1-pl1')
-    * `date` to the release date in `j M Y` format (e.g. '9 Jan 2021')
-    * `tags` array should include `security` if this is a security release
-    * `sha256` array and sub-elements for all SHA256 sums
-
-3. Add a short notice to `web-php` stating that there is a new release, and
-   highlight the major important things (security fixes) and when it is
-   important to upgrade.
-
-    * Call `php bin/createReleaseEntry -v <version> [ --security ]` in your
-      local web-php checkout.
-
-4. Commit all the changes (`include/version.inc`, `archive/archive.xml`,
-   `archive/entries/YYYY-MM-DD-N.xml`).
-
-5. Wait an hour or two, then send a mail to php-announce@lists.php.net,
-   php-general@lists.php.net and internals@lists.php.net with a text similar to
-   the news entry.
-
-   Please make sure that the mail to php-announce@ is its own completely
-   separate email. This is to make sure that replies to the announcement on
-   php-general@ or internals@ will not accidentally hit the php-announce@
-   mailinglist.
+You *must not* delete and recreate a pushed tag. Instead, you need to go
+through the full packaging process again, as described above, whilst increasing
+the version number. This is unfortunate, but published tags must be immutable.
 
 
 ## Soft feature freeze
