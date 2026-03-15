@@ -59,7 +59,7 @@ try {
 ?>
 --EXPECTF--
 Checking error handling
-Security level must be one of "noAuthNoPriv", "authNoPriv", or "authPriv"
+Security level must be one of %s
 Security level must be one of "noAuthNoPriv", "authNoPriv", or "authPriv"
 Authentication protocol must be %s
 
