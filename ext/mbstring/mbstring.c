@@ -67,6 +67,28 @@
 
 #include "zend_simd.h"
 
+#include "ext/opcache/zend_shared_alloc.h"
+#include "ext/opcache/ZendAccelerator.h"
+
+static void mark_zstr_as_utf8(zend_string *s)
+{
+	if (!ZSTR_IS_INTERNED(s)) {
+		GC_ADD_FLAGS(s, IS_STR_VALID_UTF8);
+		return;
+	}
+
+	/* We don't use zend_atomic.h as we're writing to a non-_Atomic field. */
+#if (__GNUC__ == 4 && __GNUC_MINOR__ >= 7) || (__GNUC__ > 4)
+	SHM_UNPROTECT();
+	__atomic_or_fetch(&GC_TYPE_INFO(s), IS_STR_VALID_UTF8 << GC_FLAGS_SHIFT, __ATOMIC_SEQ_CST);
+	SHM_PROTECT();
+#elif defined(__GNUC__)
+	SHM_UNPROTECT();
+	__sync_or_and_fetch(&GC_TYPE_INFO(s), IS_STR_VALID_UTF8 << GC_FLAGS_SHIFT);
+	SHM_PROTECT();
+#endif
+}
+
 /* }}} */
 
 /* {{{ prototypes */
@@ -2295,8 +2317,8 @@ PHP_FUNCTION(mb_substr_count)
 		} else {
 			unsigned int num_errors = 0;
 			haystack_u8 = mb_fast_convert((unsigned char*)ZSTR_VAL(haystack), ZSTR_LEN(haystack), enc, &mbfl_encoding_utf8, 0, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, &num_errors);
-			if (!num_errors && !ZSTR_IS_INTERNED(haystack)) {
-				GC_ADD_FLAGS(haystack, IS_STR_VALID_UTF8);
+			if (!num_errors) {
+				mark_zstr_as_utf8(haystack);
 			}
 		}
 
@@ -2305,8 +2327,8 @@ PHP_FUNCTION(mb_substr_count)
 		} else {
 			unsigned int num_errors = 0;
 			needle_u8 = mb_fast_convert((unsigned char*)ZSTR_VAL(needle), ZSTR_LEN(needle), enc, &mbfl_encoding_utf8, 0, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, &num_errors);
-			if (!num_errors && !ZSTR_IS_INTERNED(needle)) {
-				GC_ADD_FLAGS(needle, IS_STR_VALID_UTF8);
+			if (!num_errors) {
+				mark_zstr_as_utf8(needle);
 			}
 		}
 	} else {
@@ -5645,8 +5667,8 @@ static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encodin
 			return true;
 		}
 		bool result = mb_fast_check_utf8(str);
-		if (result && !ZSTR_IS_INTERNED(str)) {
-			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
+		if (result) {
+			mark_zstr_as_utf8(str);
 		}
 		return result;
 	} else {
