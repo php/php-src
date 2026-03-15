@@ -184,9 +184,13 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /*
 			return;
 		}
 		if (EG(exception)) {
-			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF
-			 && !zend_is_unwind_exit(EG(exception))
-			 && !zend_is_graceful_exit(EG(exception))) {
+			if (zend_is_unwind_exit(EG(exception))
+			 || zend_is_graceful_exit(EG(exception))) {
+				/* Stack is fully unwound, clear the unwind exit. */
+				zend_exception_error(EG(exception), E_ERROR);
+				return;
+			}
+			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 				zend_user_exception_handler();
 				if (EG(exception)) {
 					zend_exception_error(EG(exception), E_ERROR);
