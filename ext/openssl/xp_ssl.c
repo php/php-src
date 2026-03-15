@@ -1766,8 +1766,8 @@ static int php_openssl_capture_peer_certs(php_stream *stream,
 		chain = SSL_get_peer_cert_chain(sslsock->ssl_handle);
 
 		if (chain && sk_X509_num(chain) > 0) {
-			int i;
-			array_init(&arr);
+			int i, num_chains = sk_X509_num(chain);
+			array_init_packed_size(&arr, num_chains);
 
 			for (i = 0; i < sk_X509_num(chain); i++) {
 				X509 *mycert = X509_dup(sk_X509_value(chain, i));
@@ -1775,7 +1775,7 @@ static int php_openssl_capture_peer_certs(php_stream *stream,
 				object_init_ex(&zcert, php_openssl_certificate_ce);
 				cert_object = Z_OPENSSL_CERTIFICATE_P(&zcert);
 				cert_object->x509 = mycert;
-				add_next_index_zval(&arr, &zcert);
+				add_index_zval(&arr, i, &zcert);
 			}
 
 		} else {
