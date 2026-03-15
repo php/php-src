@@ -17,6 +17,8 @@
 #ifndef CLI_H
 #define CLI_H
 
+#include "php.h"
+
 #ifdef PHP_WIN32
 #   define PHP_CLI_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
@@ -25,6 +27,8 @@
 #   define PHP_CLI_API
 #endif
 
+
+extern PHP_CLI_API int do_php_cli(int argc, char *argv[]);
 
 extern PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length);
 

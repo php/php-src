@@ -50,7 +50,7 @@
 #include "zend_highlight.h"
 #include "zend_exceptions.h"
 
-#include "sapi/cli/cli.h"
+#include "main/cli/cli.h"
 #include "readline_cli.h"
 
 #if defined(COMPILE_DL_READLINE) && !defined(PHP_WIN32)
