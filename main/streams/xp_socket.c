@@ -17,7 +17,7 @@
 #include "php.h"
 #include "ext/standard/file.h"
 #include "php_streams.h"
-#include "php_network.h"
+#include "php_io.h"
 
 #if defined(PHP_WIN32) || defined(__riscos__)
 # undef AF_UNIX
@@ -527,11 +527,17 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret)
 			if (ret)
 				*(php_socket_t *)ret = sock->socket;
 			return SUCCESS;
+		case PHP_STREAM_AS_FD_FOR_COPY:
+			if (ret) {
+				php_io_fd *copy_fd = (php_io_fd *) ret;
+				copy_fd->socket = sock->socket;
+				copy_fd->fd_type = PHP_IO_FD_SOCKET;
+			}
+			return SUCCESS;
 		default:
 			return FAILURE;
 	}
 }
-/* }}} */
 
 /* These may look identical, but we need them this way so that
  * we can determine which type of socket we are dealing with

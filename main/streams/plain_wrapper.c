@@ -34,6 +34,7 @@
 #endif
 #include "SAPI.h"
 
+#include "php_io.h"
 #include "php_streams_int.h"
 #ifdef PHP_WIN32
 # include "win32/winutil.h"
@@ -684,7 +685,6 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 
 		case PHP_STREAM_AS_FD:
 			PHP_STDIOP_GET_FD(fd, data);
-
 			if (SOCK_ERR == fd) {
 				return FAILURE;
 			}
@@ -695,6 +695,22 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 				*(php_socket_t *)ret = fd;
 			}
 			return SUCCESS;
+
+		case PHP_STREAM_AS_FD_FOR_COPY:
+			PHP_STDIOP_GET_FD(fd, data);
+			if (SOCK_ERR == fd) {
+				return FAILURE;
+			}
+			if (data->file) {
+				fflush(data->file);
+			}
+			if (ret) {
+				php_io_fd *copy_fd = (php_io_fd *) ret;
+				copy_fd->fd = fd;
+				copy_fd->fd_type = data->is_pipe ? PHP_IO_FD_PIPE : PHP_IO_FD_FILE;
+			}
+			return SUCCESS;
+
 		default:
 			return FAILURE;
 	}

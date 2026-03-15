@@ -554,6 +554,8 @@ END_EXTERN_C()
 #define PHP_STREAM_AS_SOCKETD	2
 /* cast as fd/socket for select purposes */
 #define PHP_STREAM_AS_FD_FOR_SELECT 3
+/* cast as fd/socket for copy purposes */
+#define PHP_STREAM_AS_FD_FOR_COPY   4
 
 /* try really, really hard to make sure the cast happens (avoid using this flag if possible) */
 #define PHP_STREAM_CAST_TRY_HARD	0x80000000
