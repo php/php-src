@@ -2,6 +2,10 @@
 Pdo\Sqlite basic
 --EXTENSIONS--
 pdo_sqlite
+--SKIPIF--
+<?php
+if (!defined('Pdo\Sqlite::DETERMINISTIC')) die('skip Pdo\Sqlite::DETERMINISTIC requires SQLite library >= 3.8.3');
+?>
 --FILE--
 <?php
 
