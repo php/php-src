@@ -1173,14 +1173,26 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 	p = ZSTR_VAL(ret);
 
 	ubrk_setUText(bi, ut, &ustatus);
+	if (U_FAILURE(ustatus)) {
+		intl_error_set_code(nullptr, ustatus);
+		intl_error_set_custom_msg(nullptr, "Error ubrk_setUText");
+
+		RETVAL_FALSE;
+		goto ubrk_false_end;
+	}
+
 	pos = ubrk_last(bi);
 	if (pos == UBRK_DONE) {
+		RETVAL_EMPTY_STRING();
 		goto ubrk_end;
 	}
 
 	current = ZSTR_LEN(string);
 	for (end = pstr; pos != UBRK_DONE; ) {
 		pos = ubrk_previous(bi);
+		if (pos == UBRK_DONE) {
+			break;
+		}
 		end_len = current - pos;
 		for (int32_t j = 0; j < end_len; j++) {
 			*p++ = *(pstr + pos + j);
@@ -1188,7 +1200,9 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 		current = pos;
 	}
 ubrk_end:
+	*p = '\0';
 	RETVAL_NEW_STR(ret);
+ubrk_false_end:
 	ubrk_close(bi);
 close:
 	utext_close(ut);
