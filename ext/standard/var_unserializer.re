@@ -796,14 +796,22 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool 
 			return 0;
 		}
 
-		array_init_size(&ary, elements);
-		/* Avoid reallocation due to packed -> mixed conversion. */
-		zend_hash_real_init_mixed(Z_ARRVAL(ary));
-		if (!process_nested_array_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL(ary), elements)) {
-			ZVAL_DEREF(rval);
-			GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
-			zval_ptr_dtor(&ary);
-			return 0;
+		if (elements > 0) {
+			/* Avoid reallocation due to packed -> mixed conversion.
+			 * Note that an array must have at least 2 elements in order for the packed -> mixed conversion to change zval locations.
+			 */
+			array_init_size(&ary, elements);
+			if (elements > 1) {
+				zend_hash_real_init_mixed(Z_ARRVAL(ary));
+			}
+			if (!process_nested_array_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL(ary), elements)) {
+				ZVAL_DEREF(rval);
+				GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
+				zval_ptr_dtor(&ary);
+				return 0;
+			}
+		} else {
+			ZVAL_EMPTY_ARRAY(&ary);
 		}
 
 		/* Delay __unserialize() call until end of serialization. We use two slots here to
@@ -1108,8 +1116,12 @@ use_double:
 	if (elements) {
 		array_init_size(rval, elements);
 		/* we can't convert from packed to hash during unserialization, because
-		   reference to some zvals might be kept in var_hash (to support references) */
-		zend_hash_real_init_mixed(Z_ARRVAL_P(rval));
+		 * references to some zvals might be kept in var_hash (to support references).
+		 * This will only change zval addresses if there are at least 2 values
+		 * (the value being referenced, and the value being added afterwards) */
+		if (elements > 1) {
+			zend_hash_real_init_mixed(Z_ARRVAL_P(rval));
+		}
 	} else {
 		ZVAL_EMPTY_ARRAY(rval);
 		return finish_nested_data(UNSERIALIZE_PASSTHRU);
