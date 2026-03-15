@@ -4282,6 +4282,7 @@ PHP_FUNCTION(timezone_transitions_get)
 	uint64_t             begin = 0;
 	bool                 found;
 	zend_long            timestamp_begin = ZEND_LONG_MIN, timestamp_end = INT32_MAX;
+	zend_long            last_transition_ts = ZEND_LONG_MIN;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|ll", &object, date_ce_timezone, &timestamp_begin, &timestamp_end) == FAILURE) {
 		RETURN_THROWS();
@@ -4292,13 +4293,13 @@ PHP_FUNCTION(timezone_transitions_get)
 		RETURN_FALSE;
 	}
 
-#define add_nominal() \
+#define add_by_index(i,ts) \
 		array_init_size(&element, 5); \
-		add_assoc_long(&element, "ts",     timestamp_begin); \
-		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, timestamp_begin, 0)); \
-		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[0].offset); \
-		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[0].isdst); \
-		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[0].abbr_idx]); \
+		add_assoc_long(&element, "ts",     ts); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
+		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[i].offset); \
+		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[i].isdst); \
+		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[i].abbr_idx]); \
 		add_next_index_zval(return_value, &element);
 
 #define add(i,ts) \
@@ -4310,14 +4311,13 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx]); \
 		add_next_index_zval(return_value, &element);
 
-#define add_by_index(i,ts) \
-		array_init_size(&element, 5); \
+#define upd_prev(i,ts) \
+		element = *ZEND_HASH_ELEMENT(Z_ARRVAL_P(return_value), Z_ARRVAL_P(return_value)->nNumUsed-1); \
 		add_assoc_long(&element, "ts",     ts); \
 		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
-		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[i].offset); \
-		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[i].isdst); \
-		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[i].abbr_idx]); \
-		add_next_index_zval(return_value, &element);
+		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset); \
+		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].isdst); \
+		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx]);
 
 #define add_from_tto(to,ts) \
 		array_init_size(&element, 5); \
@@ -4328,6 +4328,7 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_assoc_string(&element, "abbr", (to)->abbr); \
 		add_next_index_zval(return_value, &element);
 
+#define add_nominal() add_by_index(0, timestamp_begin)
 #define add_last() add(tzobj->tzi.tz->bit64.timecnt - 1, timestamp_begin)
 
 	array_init(return_value);
@@ -4344,8 +4345,10 @@ PHP_FUNCTION(timezone_transitions_get)
 				if (tzobj->tzi.tz->trans[begin] > timestamp_begin) {
 					if (begin > 0) {
 						add(begin - 1, timestamp_begin);
+						last_transition_ts = timestamp_begin;
 					} else {
 						add_nominal();
+						last_transition_ts = timestamp_begin;
 					}
 					found = true;
 					break;
@@ -4361,24 +4364,32 @@ PHP_FUNCTION(timezone_transitions_get)
 				timelib_time_offset *tto = timelib_get_time_zone_info(timestamp_begin, tzobj->tzi.tz);
 				add_from_tto(tto, timestamp_begin);
 				timelib_time_offset_dtor(tto);
+				last_transition_ts = timestamp_begin;
 			} else {
 				add_last();
+				last_transition_ts = timestamp_begin;
 			}
 		} else {
 			add_nominal();
+			last_transition_ts = timestamp_begin;
 		}
 	} else {
 		for (uint64_t i = begin; i < tzobj->tzi.tz->bit64.timecnt; ++i) {
-			if (tzobj->tzi.tz->trans[i] < timestamp_end) {
-				add(i, tzobj->tzi.tz->trans[i]);
-			} else {
+			if (tzobj->tzi.tz->trans[i] > timestamp_end) {
 				return;
+			}
+
+			if (tzobj->tzi.tz->trans[i] > timestamp_begin) {
+				add(i, tzobj->tzi.tz->trans[i]);
+				last_transition_ts = tzobj->tzi.tz->trans[i];
+			} else {
+				upd_prev(i, timestamp_begin);
 			}
 		}
 	}
+
 	if (tzobj->tzi.tz->posix_info && tzobj->tzi.tz->posix_info->dst_end) {
 		timelib_sll start_y, end_y, dummy_m, dummy_d;
-		timelib_sll last_transition_ts = tzobj->tzi.tz->trans[tzobj->tzi.tz->bit64.timecnt - 1];
 
 		/* Find out year for last transition */
 		timelib_unixtime2date(last_transition_ts, &start_y, &dummy_m, &dummy_d);
