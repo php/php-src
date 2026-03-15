@@ -1,0 +1,247 @@
+/*
+   +----------------------------------------------------------------------+
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
+   +----------------------------------------------------------------------+
+   | Authors: Jakub Zelenka <bukka@php.net>                               |
+   +----------------------------------------------------------------------+
+*/
+
+#include "php_poll_internal.h"
+
+#ifdef HAVE_EPOLL
+
+#include <sys/epoll.h>
+
+typedef struct {
+	int epoll_fd;
+	struct epoll_event *events;
+	int events_capacity;
+	int fd_count;
+} epoll_backend_data_t;
+
+static uint32_t epoll_events_to_native(uint32_t events)
+{
+	uint32_t native = 0;
+	if (events & PHP_POLL_READ) {
+		native |= EPOLLIN;
+	}
+	if (events & PHP_POLL_WRITE) {
+		native |= EPOLLOUT;
+	}
+	if (events & PHP_POLL_ERROR) {
+		native |= EPOLLERR;
+	}
+	if (events & PHP_POLL_HUP) {
+		native |= EPOLLHUP;
+	}
+	if (events & PHP_POLL_RDHUP) {
+		native |= EPOLLRDHUP;
+	}
+	if (events & PHP_POLL_ONESHOT) {
+		native |= EPOLLONESHOT;
+	}
+	if (events & PHP_POLL_ET) {
+		native |= EPOLLET;
+	}
+	return native;
+}
+
+static uint32_t epoll_events_from_native(uint32_t native)
+{
+	uint32_t events = 0;
+	if (native & EPOLLIN) {
+		events |= PHP_POLL_READ;
+	}
+	if (native & EPOLLOUT) {
+		events |= PHP_POLL_WRITE;
+	}
+	if (native & EPOLLERR) {
+		events |= PHP_POLL_ERROR;
+	}
+	if (native & EPOLLHUP) {
+		events |= PHP_POLL_HUP;
+	}
+	if (native & EPOLLRDHUP) {
+		events |= PHP_POLL_RDHUP;
+	}
+	return events;
+}
+
+static zend_result epoll_backend_init(php_poll_ctx *ctx)
+{
+	epoll_backend_data_t *data = php_poll_calloc(1, sizeof(epoll_backend_data_t), ctx->persistent);
+	if (!data) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
+	}
+
+	data->epoll_fd = epoll_create1(EPOLL_CLOEXEC);
+	if (data->epoll_fd == -1) {
+		pefree(data, ctx->persistent);
+		php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+		return FAILURE;
+	}
+
+	/* Use hint for initial allocation if provided, otherwise start with reasonable default */
+	int initial_capacity = ctx->max_events_hint > 0 ? ctx->max_events_hint : 64;
+	data->events = php_poll_calloc(initial_capacity, sizeof(struct epoll_event), ctx->persistent);
+	if (!data->events) {
+		close(data->epoll_fd);
+		pefree(data, ctx->persistent);
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
+	}
+	data->events_capacity = initial_capacity;
+
+	ctx->backend_data = data;
+	return SUCCESS;
+}
+
+static void epoll_backend_cleanup(php_poll_ctx *ctx)
+{
+	epoll_backend_data_t *data = (epoll_backend_data_t *) ctx->backend_data;
+	if (data) {
+		if (data->epoll_fd >= 0) {
+			close(data->epoll_fd);
+		}
+		pefree(data->events, ctx->persistent);
+		pefree(data, ctx->persistent);
+		ctx->backend_data = NULL;
+	}
+}
+
+static zend_result epoll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+{
+	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
+
+	struct epoll_event ev = { 0 };
+	ev.events = epoll_events_to_native(events);
+	ev.data.ptr = data;
+
+	if (epoll_ctl(backend_data->epoll_fd, EPOLL_CTL_ADD, fd, &ev) == -1) {
+		php_poll_set_error(ctx, (errno == EEXIST) ? PHP_POLL_ERR_EXISTS : PHP_POLL_ERR_SYSTEM);
+		return FAILURE;
+	}
+	backend_data->fd_count++;
+
+	return SUCCESS;
+}
+
+static zend_result epoll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+{
+	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
+
+	struct epoll_event ev = { 0 };
+	ev.events = epoll_events_to_native(events);
+	ev.data.ptr = data;
+
+	if (epoll_ctl(backend_data->epoll_fd, EPOLL_CTL_MOD, fd, &ev) == -1) {
+		php_poll_set_error(ctx, (errno == ENOENT) ? PHP_POLL_ERR_NOTFOUND : PHP_POLL_ERR_SYSTEM);
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
+static zend_result epoll_backend_remove(php_poll_ctx *ctx, int fd)
+{
+	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
+
+	if (epoll_ctl(backend_data->epoll_fd, EPOLL_CTL_DEL, fd, NULL) == -1) {
+		php_poll_set_error(ctx, (errno == ENOENT) ? PHP_POLL_ERR_NOTFOUND : PHP_POLL_ERR_SYSTEM);
+		return FAILURE;
+	}
+	backend_data->fd_count--;
+
+	return SUCCESS;
+}
+
+static int epoll_backend_wait(
+		php_poll_ctx *ctx, php_poll_event *events, int max_events,
+		const struct timespec *timeout)
+{
+	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
+
+	/* Ensure we have enough space for the requested events */
+	if (max_events > backend_data->events_capacity) {
+		struct epoll_event *new_events = php_poll_realloc(
+				backend_data->events, max_events * sizeof(struct epoll_event), ctx->persistent);
+		if (!new_events) {
+			php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+			return -1;
+		}
+		backend_data->events = new_events;
+		backend_data->events_capacity = max_events;
+	}
+
+	int nfds;
+#ifdef HAVE_EPOLL_PWAIT2
+	nfds = epoll_pwait2(backend_data->epoll_fd, backend_data->events, max_events, timeout, NULL);
+#else
+	int timeout_ms = php_poll_timespec_to_ms(timeout);
+	nfds = epoll_wait(backend_data->epoll_fd, backend_data->events, max_events, timeout_ms);
+#endif
+
+	if (nfds > 0) {
+		for (int i = 0; i < nfds; i++) {
+			events[i].fd = backend_data->events[i].data.fd;
+			events[i].events = 0; /* Not used in results */
+			events[i].revents = epoll_events_from_native(backend_data->events[i].events);
+			events[i].data = backend_data->events[i].data.ptr;
+		}
+	}
+
+	return nfds;
+}
+
+static int epoll_backend_get_suitable_max_events(php_poll_ctx *ctx)
+{
+	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
+
+	if (!backend_data) {
+		return -1;
+	}
+
+	/* For epoll, we now track exactly how many FDs are registered */
+	int active_fds = backend_data->fd_count;
+
+	if (active_fds == 0) {
+		return 1;
+	}
+
+	/* Epoll can return exactly one event per registered FD,
+	 * so the suitable max_events is exactly the number of registered FDs */
+	return active_fds;
+}
+
+static bool epoll_backend_is_available(void)
+{
+	int fd = epoll_create1(EPOLL_CLOEXEC);
+	if (fd >= 0) {
+		close(fd);
+		return true;
+	}
+	return false;
+}
+
+const php_poll_backend_ops php_poll_backend_epoll_ops = {
+	.type = PHP_POLL_BACKEND_EPOLL,
+	.name = "epoll",
+	.init = epoll_backend_init,
+	.cleanup = epoll_backend_cleanup,
+	.add = epoll_backend_add,
+	.modify = epoll_backend_modify,
+	.remove = epoll_backend_remove,
+	.wait = epoll_backend_wait,
+	.is_available = epoll_backend_is_available,
+	.get_suitable_max_events = epoll_backend_get_suitable_max_events,
+	.supports_et = true,
+};
+
+#endif /* HAVE_EPOLL */
