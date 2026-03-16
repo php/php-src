@@ -1372,12 +1372,10 @@ static void php_zip_entry_get_info(INTERNAL_FUNCTION_PARAMETERS, int opt) /* {{{
 					RETURN_STRING("imploded");
 				case 7:
 					RETURN_STRING("tokenized");
-					break;
 				case 8:
 					RETURN_STRING("deflated");
 				case 9:
 					RETURN_STRING("deflatedX");
-					break;
 				case 10:
 					RETURN_STRING("implodedX");
 				default:
