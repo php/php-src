@@ -24,9 +24,9 @@ function func(
      * Doc comment for $f
      */
     $f,
-	$g /** Doc comment for $g behind parameter */,
+	$g /** Doc comment for $g after parameter */,
 	/** Doc comment for $h */
-	$h /** Doc comment for $h behind parameter */,
+	$h /** Doc comment for $h after parameter */,
 ) {}
 
 public string $property {
@@ -54,9 +54,9 @@ function func(
      * Doc comment for $f
      */
     $f,
-	$g /** Doc comment for $g behind parameter */,
+	$g /** Doc comment for $g after parameter */,
 	/** Doc comment for $h */
-	$h /** Doc comment for $h behind parameter */,
+	$h /** Doc comment for $h after parameter */,
 ) {}
 
 $func = function(
@@ -76,9 +76,9 @@ $func = function(
      * Doc comment for $f
      */
     $f,
-	$g /** Doc comment for $g behind parameter */,
+	$g /** Doc comment for $g after parameter */,
 	/** Doc comment for $h */
-	$h /** Doc comment for $h behind parameter */,
+	$h /** Doc comment for $h after parameter */,
 ) {};
 
 foreach([
@@ -122,10 +122,10 @@ string(%d) "/**
      */"
 
 ---> Doc comment for A::func parameter $g:
-string(%d) "/** Doc comment for $g behind parameter */"
+string(%d) "/** Doc comment for $g after parameter */"
 
 ---> Doc comment for A::func parameter $h:
-string(%d) "/** Doc comment for $h behind parameter */"
+string(%d) "/** Doc comment for $h after parameter */"
 
 ---> Doc comment for func parameter $a:
 string(%d) "/**
@@ -153,10 +153,10 @@ string(%d) "/**
      */"
 
 ---> Doc comment for func parameter $g:
-string(%d) "/** Doc comment for $g behind parameter */"
+string(%d) "/** Doc comment for $g after parameter */"
 
 ---> Doc comment for func parameter $h:
-string(%d) "/** Doc comment for $h behind parameter */"
+string(%d) "/** Doc comment for $h after parameter */"
 
 ---> Doc comment for closure parameter $a:
 string(%d) "/**
@@ -184,10 +184,10 @@ string(%d) "/**
      */"
 
 ---> Doc comment for closure parameter $g:
-string(%d) "/** Doc comment for $g behind parameter */"
+string(%d) "/** Doc comment for $g after parameter */"
 
 ---> Doc comment for closure parameter $h:
-string(%d) "/** Doc comment for $h behind parameter */"
+string(%d) "/** Doc comment for $h after parameter */"
 
 ---> Doc comment for property hook parameter $value:
 string(%d) "/** Doc Comment for property hook parameter $value */"
