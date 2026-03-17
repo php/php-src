@@ -2653,7 +2653,7 @@ ZEND_METHOD(ReflectionParameter, __toString)
 
 /* }}} */
 
-/* {{{ Returns the doc comment for this function */
+/* {{{ Returns the doc comment for this parameter */
 ZEND_METHOD(ReflectionParameter, getDocComment)
 {
 	reflection_object *intern;
@@ -2667,6 +2667,7 @@ ZEND_METHOD(ReflectionParameter, getDocComment)
 	}
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ Returns this parameter's name */
 ZEND_METHOD(ReflectionParameter, getName)
