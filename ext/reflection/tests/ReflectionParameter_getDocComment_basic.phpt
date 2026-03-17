@@ -7,7 +7,7 @@ opcache.save_comments=1
 
 class A
 {
-function func(
+function method(
     /**
      * My Doc Comment for $a
      *
@@ -37,7 +37,7 @@ public string $property {
 }
 }
 
-function func(
+function global_function(
     /**
      * My Doc Comment for $a
      *
@@ -59,7 +59,7 @@ function func(
 	$h /** Doc comment for $h after parameter */,
 ) {}
 
-$func = function(
+$closure = function(
     /**
      * My Doc Comment for $a
      *
@@ -81,11 +81,34 @@ $func = function(
 	$h /** Doc comment for $h after parameter */,
 ) {};
 
+$arrow_function = fn(
+    /**
+     * My Doc Comment for $a
+     *
+     */
+    $a, $b, $c,
+    /**
+     * My Doc Comment for $d
+     */
+    $d,
+    // Not a doc comment
+    /**Not a doc comment */
+    $e,
+    /**
+     * Doc comment for $f
+     */
+    $f,
+	$g /** Doc comment for $g after parameter */,
+	/** Doc comment for $h */
+	$h /** Doc comment for $h after parameter */,
+) => true;
+
 foreach([
-		'A::func'       => (new ReflectionClass('A'))->getMethod('func'),
-		'func'          => new ReflectionFunction('func'),
-		'closure'       => new ReflectionFunction($func),
-		'property hook' => (new ReflectionClass('A'))->getProperty('property')->getHook(PropertyHookType::Set),
+		'A::method'       => (new ReflectionClass('A'))->getMethod('method'),
+		'global_function' => new ReflectionFunction('global_function'),
+		'closure'         => new ReflectionFunction($closure),
+		'arrow_function'  => new ReflectionFunction($arrow_function),
+		'property hook'   => (new ReflectionClass('A'))->getProperty('property')->getHook(PropertyHookType::Set),
 	] as $function => $rc) {
     $rps = $rc->getParameters();
     foreach($rps as $rp) {
@@ -96,66 +119,66 @@ foreach([
 
 ?>
 --EXPECTF--
----> Doc comment for A::func parameter $a:
+---> Doc comment for A::method parameter $a:
 string(%d) "/**
      * My Doc Comment for $a
      *
      */"
 
----> Doc comment for A::func parameter $b:
+---> Doc comment for A::method parameter $b:
 bool(false)
 
----> Doc comment for A::func parameter $c:
+---> Doc comment for A::method parameter $c:
 bool(false)
 
----> Doc comment for A::func parameter $d:
+---> Doc comment for A::method parameter $d:
 string(%d) "/**
      * My Doc Comment for $d
      */"
 
----> Doc comment for A::func parameter $e:
+---> Doc comment for A::method parameter $e:
 bool(false)
 
----> Doc comment for A::func parameter $f:
+---> Doc comment for A::method parameter $f:
 string(%d) "/**
      * Doc comment for $f
      */"
 
----> Doc comment for A::func parameter $g:
+---> Doc comment for A::method parameter $g:
 string(%d) "/** Doc comment for $g after parameter */"
 
----> Doc comment for A::func parameter $h:
+---> Doc comment for A::method parameter $h:
 string(%d) "/** Doc comment for $h after parameter */"
 
----> Doc comment for func parameter $a:
+---> Doc comment for global_function parameter $a:
 string(%d) "/**
      * My Doc Comment for $a
      *
      */"
 
----> Doc comment for func parameter $b:
+---> Doc comment for global_function parameter $b:
 bool(false)
 
----> Doc comment for func parameter $c:
+---> Doc comment for global_function parameter $c:
 bool(false)
 
----> Doc comment for func parameter $d:
+---> Doc comment for global_function parameter $d:
 string(%d) "/**
      * My Doc Comment for $d
      */"
 
----> Doc comment for func parameter $e:
+---> Doc comment for global_function parameter $e:
 bool(false)
 
----> Doc comment for func parameter $f:
+---> Doc comment for global_function parameter $f:
 string(%d) "/**
      * Doc comment for $f
      */"
 
----> Doc comment for func parameter $g:
+---> Doc comment for global_function parameter $g:
 string(%d) "/** Doc comment for $g after parameter */"
 
----> Doc comment for func parameter $h:
+---> Doc comment for global_function parameter $h:
 string(%d) "/** Doc comment for $h after parameter */"
 
 ---> Doc comment for closure parameter $a:
@@ -187,6 +210,37 @@ string(%d) "/**
 string(%d) "/** Doc comment for $g after parameter */"
 
 ---> Doc comment for closure parameter $h:
+string(%d) "/** Doc comment for $h after parameter */"
+
+---> Doc comment for arrow_function parameter $a:
+string(%d) "/**
+     * My Doc Comment for $a
+     *
+     */"
+
+---> Doc comment for arrow_function parameter $b:
+bool(false)
+
+---> Doc comment for arrow_function parameter $c:
+bool(false)
+
+---> Doc comment for arrow_function parameter $d:
+string(%d) "/**
+     * My Doc Comment for $d
+     */"
+
+---> Doc comment for arrow_function parameter $e:
+bool(false)
+
+---> Doc comment for arrow_function parameter $f:
+string(%d) "/**
+     * Doc comment for $f
+     */"
+
+---> Doc comment for arrow_function parameter $g:
+string(%d) "/** Doc comment for $g after parameter */"
+
+---> Doc comment for arrow_function parameter $h:
 string(%d) "/** Doc comment for $h after parameter */"
 
 ---> Doc comment for property hook parameter $value:
