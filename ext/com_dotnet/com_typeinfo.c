@@ -184,7 +184,6 @@ PHP_COM_DOTNET_API zend_result php_com_import_typelib(ITypeLib *TL, int mode, in
 	VARDESC *pVarDesc;
 	UINT NameCount;
 	BSTR bstr_ids;
-	zend_constant c;
 	zval *exists, results, value;
 
 	if (TL == NULL) {
