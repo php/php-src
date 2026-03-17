@@ -224,16 +224,13 @@ PHP_COM_DOTNET_API zend_result php_com_import_typelib(ITypeLib *TL, int mode, in
 
 				/* register the constant */
 				if (Z_TYPE(value) == IS_LONG) {
-					ZEND_CONSTANT_SET_FLAGS(&c, mode, 0);
-					ZVAL_LONG(&c.value, Z_LVAL(value));
-					if (mode & CONST_PERSISTENT) {
-						/* duplicate string in a persistent manner */
-						c.name = zend_string_dup(const_name, /* persistent */ true);
-						zend_string_release_ex(const_name, /* persistent */ false);
-					} else {
-						c.name = const_name;
-					}
-					zend_register_constant(&c);
+					zend_register_long_constant(
+						ZSTR_VAL(const_name),
+						ZSTR_LEN(const_name),
+						Z_LVAL(value),
+						mode,
+						module_number
+					);
 				}
 				ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
 			}
