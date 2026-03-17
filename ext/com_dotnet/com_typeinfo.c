@@ -229,7 +229,7 @@ PHP_COM_DOTNET_API zend_result php_com_import_typelib(ITypeLib *TL, int mode, in
 						ZSTR_LEN(const_name),
 						Z_LVAL(value),
 						mode,
-						module_number
+						0
 					);
 				}
 				ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
