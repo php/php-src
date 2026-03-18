@@ -32,6 +32,8 @@ typedef struct {
 		php_socket_t socket;
 	};
 	int fd_type;
+	struct timeval timeout;
+	unsigned is_blocked:1;
 } php_io_fd;
 
 typedef ssize_t (*php_io_copy_fn)(php_io_fd *src, php_io_fd *dest, size_t maxlen);

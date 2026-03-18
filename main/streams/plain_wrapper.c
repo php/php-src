@@ -708,6 +708,9 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 				php_io_fd *copy_fd = (php_io_fd *) ret;
 				copy_fd->fd = fd;
 				copy_fd->fd_type = data->is_pipe ? PHP_IO_FD_PIPE : PHP_IO_FD_FILE;
+				copy_fd->timeout.tv_sec = 0;
+				copy_fd->timeout.tv_usec = 0;
+				copy_fd->is_blocked = 0;
 			}
 			return SUCCESS;
 
