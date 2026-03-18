@@ -22,7 +22,6 @@ const ps_module ps_mod_user = {
 	PS_MOD_UPDATE_TIMESTAMP(user)
 };
 
-
 static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 {
 	int i;

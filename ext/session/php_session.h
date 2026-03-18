@@ -95,7 +95,6 @@ typedef struct ps_module_struct {
 	 ps_delete_##x, ps_gc_##x, ps_create_sid_##x, \
 	 ps_validate_sid_##x, ps_update_timestamp_##x
 
-
 typedef enum {
 	php_session_disabled,
 	php_session_none,

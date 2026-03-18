@@ -76,6 +76,7 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 
 #define PS_MAX_SID_LENGTH 256
 
+
 /* ***********
    * Helpers *
    *********** */
@@ -386,7 +387,6 @@ PHPAPI zend_result php_session_valid_key(const char *key)
 	return SUCCESS;
 }
 
-
 static zend_long php_session_gc(bool immediate)
 {
 	zend_long sessions_deleted = -1;
@@ -564,6 +564,7 @@ static void php_session_normalize_vars(void)
 	}
 }
 
+
 /* *************************
    * INI Settings/Handlers *
    ************************* */
@@ -664,7 +665,6 @@ static PHP_INI_MH(OnUpdateSaveDir)
 	return OnUpdateStr(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
-
 static PHP_INI_MH(OnUpdateName)
 {
 	SESSION_CHECK_ACTIVE_STATE;
@@ -695,7 +695,6 @@ static PHP_INI_MH(OnUpdateName)
 	return OnUpdateStrNotEmpty(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
-
 static PHP_INI_MH(OnUpdateCookieLifetime)
 {
 	SESSION_CHECK_ACTIVE_STATE;
@@ -716,7 +715,6 @@ static PHP_INI_MH(OnUpdateCookieLifetime)
 	return OnUpdateLongGEZero(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
-
 static PHP_INI_MH(OnUpdateSessionLong)
 {
 	SESSION_CHECK_ACTIVE_STATE;
@@ -731,14 +729,12 @@ static PHP_INI_MH(OnUpdateSessionStr)
 	return OnUpdateStr(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
-
 static PHP_INI_MH(OnUpdateSessionBool)
 {
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
-
 
 static PHP_INI_MH(OnUpdateSidLength)
 {
@@ -917,9 +913,11 @@ PHP_INI_BEGIN()
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
 PHP_INI_END()
 
+
 /* ***************
    * Serializers *
    *************** */
+
 PS_SERIALIZER_ENCODE_FUNC(php_serialize)
 {
 	smart_str buf = {0};
@@ -1130,6 +1128,7 @@ PHPAPI zend_result php_session_register_serializer(const char *name, zend_string
 	return ret;
 }
 
+
 /* *******************
    * Storage Modules *
    ******************* */
@@ -1310,6 +1309,7 @@ static int php_session_cache_limiter(void)
 
 	return -1;
 }
+
 
 /* *********************
    * Cookie Management *
@@ -1548,7 +1548,6 @@ static void proposed_session_id_to_session_id(const zval *proposed_session_id) {
 	}
 }
 
-
 PHPAPI zend_result php_session_reset_id(void)
 {
 	int module_number = PS(module_number);
@@ -1626,7 +1625,6 @@ PHPAPI zend_result php_session_reset_id(void)
 	}
 	return SUCCESS;
 }
-
 
 PHPAPI zend_result php_session_start(void)
 {
@@ -1737,6 +1735,7 @@ static bool php_session_reset(void)
 {
 	return PS(session_status) == php_session_active && php_session_initialize() == SUCCESS;
 }
+
 
 /* ********************************
    * Userspace exported functions *
@@ -2676,7 +2675,6 @@ PHP_FUNCTION(session_gc)
 	RETURN_LONG(num);
 }
 
-
 PHP_FUNCTION(session_write_close)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -2740,6 +2738,7 @@ PHP_FUNCTION(session_register_shutdown)
 	}
 }
 
+
 /* ********************************
    * Module Setup and Destruction *
    ******************************** */
@@ -2786,7 +2785,6 @@ static PHP_RINIT_FUNCTION(session)
 		zval_ptr_dtor(&PS(mod_user_names).struct_name); \
 		ZVAL_UNDEF(&PS(mod_user_names).struct_name); \
 	}
-
 
 static PHP_RSHUTDOWN_FUNCTION(session)
 {
@@ -2957,6 +2955,7 @@ static PHP_MINFO_FUNCTION(session)
 
 	DISPLAY_INI_ENTRIES();
 }
+
 
 /* ************************
    * Upload hook handling *

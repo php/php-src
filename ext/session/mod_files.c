@@ -103,7 +103,6 @@ const ps_module ps_mod_files = {
 	PS_MOD_UPDATE_TIMESTAMP(files)
 };
 
-
 static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const zend_string *key)
 {
 	const char *p;
@@ -346,9 +345,7 @@ static zend_result ps_files_key_exists(ps_files *data, const zend_string *key)
 	return SUCCESS;
 }
 
-
 #define PS_FILES_DATA ps_files *data = PS_GET_MOD_DATA()
-
 
 /*
  * Open save handler. Setup resources that are needed by the handler.
@@ -427,7 +424,6 @@ PS_OPEN_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Clean up opened resources.
  * PARAMETERS: PS_CLOSE_ARGS in php_session.h
@@ -455,7 +451,6 @@ PS_CLOSE_FUNC(files)
 
 	return SUCCESS;
 }
-
 
 /*
  * Read session data from opened resource.
@@ -531,7 +526,6 @@ PS_READ_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Write session data.
  * PARAMETERS: PS_WRITE_ARGS in php_session.h
@@ -546,7 +540,6 @@ PS_WRITE_FUNC(files)
 
 	return ps_files_write(data, key, val);
 }
-
 
 /*
  * Update session data modification/access time stamp.
@@ -582,7 +575,6 @@ PS_UPDATE_TIMESTAMP_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Delete session data.
  * PARAMETERS: PS_DESTROY_ARGS in php_session.h
@@ -617,7 +609,6 @@ PS_DESTROY_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Cleanup expired session data.
  * PARAMETERS: PS_GC_ARGS in php_session.h
@@ -645,7 +636,6 @@ PS_GC_FUNC(files)
 
 	return *nrdels;
 }
-
 
 /*
  * Create session ID.
@@ -688,7 +678,6 @@ PS_CREATE_SID_FUNC(files)
 
 	return sid;
 }
-
 
 /*
  * Check session ID existence for use_strict_mode support.
