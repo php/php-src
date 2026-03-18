@@ -617,7 +617,8 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 {
 	php_stream *stream;
 	php_stream_temp_data *ts;
-	char *comma, *semi, *sep;
+	char *comma;
+	const char *semi, *sep;
 	size_t mlen, dlen, plen, vlen, ilen;
 	zend_off_t newoffs;
 	zval meta;
@@ -639,7 +640,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		path += 2;
 	}
 
-	if ((comma = memchr(path, ',', dlen)) == NULL) {
+	if ((comma = (char *) memchr(path, ',', dlen)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options, "rfc2397: no comma in URL");
 		return NULL;
 	}

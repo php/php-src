@@ -1014,22 +1014,22 @@ try_again:
 		char *eqpos = strstr(cookie, "=");
 		char *sempos = strstr(cookie, ";");
 		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
-			size_t cookie_len;
 			zval zcookie;
+			size_t cookie_value_len;
 
 			if (sempos != NULL) {
-				cookie_len = sempos-(eqpos+1);
+				cookie_value_len = sempos-(eqpos+1);
 			} else {
-				cookie_len = strlen(cookie)-(eqpos-cookie)-1;
+				cookie_value_len = strlen(cookie)-(eqpos-cookie)-1;
 			}
 
 			zend_string *name = zend_string_init(cookie, eqpos - cookie, false);
 
 			array_init(&zcookie);
-			add_index_stringl(&zcookie, 0, eqpos + 1, cookie_len);
+			add_index_stringl(&zcookie, 0, eqpos + 1, cookie_value_len);
 
 			if (sempos != NULL) {
-				char *options = cookie + cookie_len+1;
+				char *options = sempos + 1;
 				while (*options) {
 					while (*options == ' ') {options++;}
 					sempos = strstr(options, ";");
@@ -1168,18 +1168,12 @@ try_again:
 							char *t = ZSTR_VAL(new_uri->path);
 							char *p = strrchr(t, '/');
 							if (p) {
-								zend_string *s = zend_string_alloc((p - t) + ZSTR_LEN(new_uri->path) + 2, 0);
-								strncpy(ZSTR_VAL(s), t, (p - t) + 1);
-								ZSTR_VAL(s)[(p - t) + 1] = 0;
-								strcat(ZSTR_VAL(s), ZSTR_VAL(new_uri->path));
+								zend_string *s = zend_string_concat2(t, (p - t) + 1, ZSTR_VAL(new_uri->path), ZSTR_LEN(new_uri->path));
 								zend_string_release_ex(new_uri->path, 0);
 								new_uri->path = s;
 							}
 						} else {
-							zend_string *s = zend_string_alloc(ZSTR_LEN(new_uri->path) + 2, 0);
-							ZSTR_VAL(s)[0] = '/';
-							ZSTR_VAL(s)[1] = 0;
-							strcat(ZSTR_VAL(s), ZSTR_VAL(new_uri->path));
+							zend_string *s = zend_string_concat2("/", 1, ZSTR_VAL(new_uri->path), ZSTR_LEN(new_uri->path));
 							zend_string_release_ex(new_uri->path, 0);
 							new_uri->path = s;
 						}

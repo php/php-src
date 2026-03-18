@@ -11,7 +11,13 @@ echo "*** Testing flock() fun with file and dir ***\n";
 
 $lock_file = preg_replace("~\.phpt?$~", '', __FILE__);
 
-$file_handle = fopen($lock_file, "w");
+/*
+ On Solaris, flock() is emulated via fcntl(). A shared lock (LOCK_SH) maps to
+ F_RDLCK, which requires the file descriptor to be open for reading. Using "w"
+ opens write-only and causes EBADF on Solaris. Open with "w+" so LOCK_SH works
+ portably across platforms.
+*/
+$file_handle = fopen($lock_file, "w+");
 var_dump(flock($file_handle, LOCK_SH|LOCK_NB));
 var_dump(flock($file_handle, LOCK_UN));
 var_dump(flock($file_handle, LOCK_EX));

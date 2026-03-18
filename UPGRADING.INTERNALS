@@ -89,8 +89,24 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_enum_fetch_case_id(zend_object*).
 
 - Unix build system changes:
+  . scripts/dev/update-autoconf.sh has been added to update config.*/libtool.
+  . libtool has been upgraded to 2.5.4 (serial 63), which fixes many bugs.
+  . As part of the upgrade to the new libtool:
+    . libtool is now spread across multiple files. phpize has been updated to
+      handle this.
+    . On macOS, libtool now uses -undefined dynamic_lookup for shared objects,
+      instead of -undefined suppress -flat_namespace.
+    . --with-pic is now --enable-pic. The old flag will result in an error.
   . Symbol HAVE_ST_BLOCKS has been removed from php_config.h (use
     HAVE_STRUCT_STAT_ST_BLOCKS).
+
+- Windows build system changes:
+  . Function SETUP_OPENSSL() doesn't accept 6th argument anymore and doesn't
+    define the HAVE_OPENSSL_SSL_H preprocessor macro anymore.
+  . Function SETUP_SQLITE3() doesn't define HAVE_SQLITE3_H and HAVE_SQLITE3EXT_H
+    preprocessor macros anymore.
+  . Added a new function CHECK_HEADER() which is intended to be used instead of
+    the CHECK_HEADER_ADD_INCLUDE().
 
 ========================
 3. Module changes

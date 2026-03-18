@@ -4,6 +4,12 @@ iconv_mime_encode()
 iconv
 --INI--
 iconv.internal_charset=iso-8859-1
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris native iconv does not support MIME encoding");
+}
+?>
 --FILE--
 <?php
 function my_error_handler($errno, $errmsg, $filename, $linenum)

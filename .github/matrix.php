@@ -52,7 +52,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     $test_alpine = in_array('CI: Alpine', $labels, true);
     $test_benchmarking = in_array('CI: Benchmarking', $labels, true);
     $test_community = in_array('CI: Community', $labels, true);
-    $test_coverage = in_array('CI: COVERAGE', $labels, true);
+    $test_coverage = in_array('CI: Coverage', $labels, true);
     $test_freebsd = in_array('CI: FreeBSD', $labels, true);
     $test_libmysqlclient = in_array('CI: libmysqlclient', $labels, true);
     $test_linux_ppc64 = in_array('CI: Linux PPC64', $labels, true);
@@ -62,6 +62,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     $test_msan = in_array('CI: MSAN', $labels, true);
     $test_opcache_variation = in_array('CI: Opcache Variation', $labels, true);
     $test_pecl = in_array('CI: PECL', $labels, true);
+    $test_solaris = in_array('CI: Solaris', $labels, true);
     $test_windows = in_array('CI: Windows', $labels, true);
 
     $jobs = [];
@@ -73,7 +74,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
         && ($all_jobs || !$no_jobs || $test_benchmarking)
         // push trigger is restricted to official repository.
         && ($repository === 'php/php-src' || $trigger === 'pull_request')) {
-        $jobs['BENCHMARKING'] = true;
+        $jobs['BENCHMARKING']['config']['integrated_opcache'] = version_compare($php_version, '8.5', '>=');
     }
     if ($all_jobs || $test_community) {
         $jobs['COMMUNITY']['matrix'] = version_compare($php_version, '8.4', '>=')
@@ -131,6 +132,9 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     }
     if (($all_jobs && $ref === 'master') || $test_pecl) {
         $jobs['PECL'] = true;
+    }
+    if (version_compare($php_version, '8.6', '>=') && ($all_jobs || $test_solaris)) {
+        $jobs['SOLARIS'] = true;
     }
     if ($all_jobs || !$no_jobs || $test_windows) {
         $jobs['WINDOWS']['matrix'] = $all_variations

@@ -537,18 +537,17 @@ PHP_FUNCTION(bzdecompress)
 	while ((error = BZ2_bzDecompress(&bzs)) == BZ_OK && bzs.avail_in > 0) {
 		/* compression is better then 2:1, need to allocate more memory */
 		bzs.avail_out = source_len;
-		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
+		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
 		if (UNEXPECTED(size > SIZE_MAX)) {
 			/* no reason to continue if we're going to drop it anyway */
 			break;
 		}
-
 		dest = zend_string_safe_realloc(dest, 1, bzs.avail_out+1, (size_t) size, 0);
 		bzs.next_out = ZSTR_VAL(dest) + size;
 	}
 
 	if (error == BZ_STREAM_END || error == BZ_OK) {
-		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
+		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
 		if (UNEXPECTED(size > SIZE_MAX)) {
 			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zu", SIZE_MAX);
 			zend_string_efree(dest);

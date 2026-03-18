@@ -571,7 +571,6 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 	const struct in_addr *addr = (const struct in_addr *)data;
 	socklen_t size = INET_ADDRSTRLEN;
 	zend_string *str = zend_string_alloc(size - 1, 0);
-	memset(ZSTR_VAL(str), '\0', size);
 
 	ZVAL_NEW_STR(zv, str);
 
@@ -581,7 +580,7 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STR_P(zv) = zend_string_truncate(Z_STR_P(zv), strlen(Z_STRVAL_P(zv)), 0);
 }
 static const field_descriptor descriptors_sockaddr_in[] = {
 		{"family", sizeof("family"), false, offsetof(struct sockaddr_in, sin_family), from_zval_write_sa_family, to_zval_read_sa_family},
@@ -622,8 +621,6 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 	socklen_t size = INET6_ADDRSTRLEN;
 	zend_string *str = zend_string_alloc(size - 1, 0);
 
-	memset(ZSTR_VAL(str), '\0', size);
-
 	ZVAL_NEW_STR(zv, str);
 
 	if (inet_ntop(AF_INET6, addr, Z_STRVAL_P(zv), size) == NULL) {
@@ -632,7 +629,7 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STR_P(zv) = zend_string_truncate(Z_STR_P(zv), strlen(Z_STRVAL_P(zv)), 0);
 }
 static const field_descriptor descriptors_sockaddr_in6[] = {
 		{"family", sizeof("family"), false, offsetof(struct sockaddr_in6, sin6_family), from_zval_write_sa_family, to_zval_read_sa_family},

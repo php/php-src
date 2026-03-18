@@ -2,6 +2,15 @@ name: ccache
 inputs:
   name:
     required: true
+  php_directory:
+    required: false
+    default: '.'
+  cc:
+    required: false
+    default: 'gcc'
+  cxx:
+    required: false
+    default: 'g++'
 runs:
   using: composite
   steps:
@@ -9,9 +18,9 @@ runs:
       shell: bash
       id: cache_key
       run: |
-        major=$(cat main/php_version.h | sed -En 's/^#define PHP_MAJOR_VERSION ([0-9]+)/\1/p')
-        minor=$(cat main/php_version.h | sed -En 's/^#define PHP_MINOR_VERSION ([0-9]+)/\1/p')
-        release=$(cat main/php_version.h | sed -En 's/^#define PHP_RELEASE_VERSION ([0-9]+)/\1/p')
+        major=$(cat ${{ inputs.php_directory }}/main/php_version.h | sed -En 's/^#define PHP_MAJOR_VERSION ([0-9]+)/\1/p')
+        minor=$(cat ${{ inputs.php_directory }}/main/php_version.h | sed -En 's/^#define PHP_MINOR_VERSION ([0-9]+)/\1/p')
+        release=$(cat ${{ inputs.php_directory }}/main/php_version.h | sed -En 's/^#define PHP_RELEASE_VERSION ([0-9]+)/\1/p')
         week=$(date +"%Y-%W")
         prefix="${{ inputs.name }}-$major.$minor.$release"
         echo "key=$prefix-$week" >> $GITHUB_OUTPUT
@@ -26,5 +35,5 @@ runs:
     - name: Export CC/CXX
       shell: bash
       run: |
-        echo "CC=ccache gcc" >> $GITHUB_ENV
-        echo "CXX=ccache g++" >> $GITHUB_ENV
+        echo "CC=ccache ${{ inputs.cc }}" >> $GITHUB_ENV
+        echo "CXX=ccache ${{ inputs.cxx }}" >> $GITHUB_ENV

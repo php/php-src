@@ -2,8 +2,6 @@
 GH-16322 (imageaffine overflow/underflow on affine matrix)
 --EXTENSIONS--
 gd
---INI--
-memory_limit=-1
 --FILE--
 <?php
 $matrix = [INF, 1, 1, 1, 1, 1];

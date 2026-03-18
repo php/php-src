@@ -1492,9 +1492,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!fcgi_is_closed(request)) {
 		php_output_end_all();
@@ -1514,9 +1512,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
 	fcgi_request *request;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	if ((request = (fcgi_request*) SG(server_context))) {
@@ -1527,9 +1523,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 /* {{{ Returns the status of the fastcgi process manager */
 PHP_FUNCTION(fpm_get_status) /* {{{ */
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (fpm_status_export_to_zval(return_value)) {
 		RETURN_FALSE;

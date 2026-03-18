@@ -2,6 +2,12 @@
 Bug #25745 (ctype functions fail with non-ascii characters)
 --EXTENSIONS--
 ctype
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip not valid fo Solaris");
+}
+?>
 --INI--
 error_reporting=E_ALL&~E_DEPRECATED
 --FILE--

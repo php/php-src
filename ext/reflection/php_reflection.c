@@ -106,10 +106,6 @@ PHPAPI zend_class_entry *reflection_fiber_ptr;
 PHPAPI zend_class_entry *reflection_constant_ptr;
 PHPAPI zend_class_entry *reflection_property_hook_type_ptr;
 
-/* Exception throwing macro */
-#define _DO_THROW(msg) \
-	zend_throw_exception(reflection_exception_ptr, msg, 0);
-
 #define GET_REFLECTION_OBJECT() do { \
 	intern = Z_REFLECTION_P(ZEND_THIS); \
 	if (intern->ptr == NULL) { \
@@ -195,7 +191,7 @@ static zend_always_inline uint32_t prop_get_flags(const property_reference *ref)
 
 static inline bool is_closure_invoke(const zend_class_entry *ce, const zend_string *lcname) {
 	return ce == zend_ce_closure
-		&& zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME);
+		&& zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
 }
 
 static zend_function *_copy_function(zend_function *fptr) /* {{{ */
@@ -879,7 +875,7 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->internal_function.doc_comment));
 	}
 
-	smart_str_appendl(str, indent, strlen(indent));
+	smart_str_appends(str, indent);
 	smart_str_appends(str, fptr->common.fn_flags & ZEND_ACC_CLOSURE ? "Closure [ " : (fptr->common.scope ? "Method [ " : "Function [ "));
 	smart_str_appends(str, (fptr->type == ZEND_USER_FUNCTION) ? "<user" : "<internal");
 	if (fptr->common.fn_flags & ZEND_ACC_DEPRECATED) {
@@ -1658,7 +1654,7 @@ static zend_result get_parameter_default(zval *result, parameter_reference *para
 ZEND_METHOD(ReflectionClass, __clone)
 {
 	/* __clone() is private but this is reachable with reflection */
-	_DO_THROW("Cannot clone object using __clone()");
+	zend_throw_exception(reflection_exception_ptr, "Cannot clone object using __clone()", 0);
 }
 /* }}} */
 
@@ -2325,7 +2321,7 @@ ZEND_METHOD(ReflectionGenerator, __construct)
 
 #define REFLECTION_CHECK_VALID_GENERATOR(ex) \
 	if (!ex) { \
-		_DO_THROW("Cannot fetch information from a closed Generator"); \
+		zend_throw_exception(reflection_exception_ptr, "Cannot fetch information from a closed Generator", 0); \
 		RETURN_THROWS(); \
 	}
 
@@ -2505,7 +2501,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 				if (((classref = zend_hash_index_find(Z_ARRVAL_P(reference), 0)) == NULL)
 					|| ((method = zend_hash_index_find(Z_ARRVAL_P(reference), 1)) == NULL))
 				{
-					_DO_THROW("Expected array($object, $method) or array($classname, $method)");
+					zend_throw_exception(reflection_exception_ptr, "Expected array($object, $method) or array($classname, $method)", 0);
 					RETURN_THROWS();
 				}
 
@@ -2587,7 +2583,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 			}
 		}
 		if (position == -1) {
-			_DO_THROW("The parameter specified by its name could not be found");
+			zend_throw_exception(reflection_exception_ptr, "The parameter specified by its name could not be found", 0);
 			goto failure;
 		}
 	} else {
@@ -2596,7 +2592,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 			goto failure;
 		}
 		if (position >= num_args) {
-			_DO_THROW("The parameter specified by its offset could not be found");
+			zend_throw_exception(reflection_exception_ptr, "The parameter specified by its offset could not be found", 0);
 			goto failure;
 		}
 	}
@@ -3322,7 +3318,9 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 		&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 		&& (mptr = zend_get_closure_invoke_method(orig_obj)) != NULL)
 	{
-		/* do nothing, mptr already set */
+		/* Store the original closure object so we can validate it in invoke/invokeArgs.
+		 * Each closure has a unique __invoke signature, so we must reject different closures. */
+		ZVAL_OBJ_COPY(&intern->obj, orig_obj);
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, method_name_len)) == NULL) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -3384,7 +3382,7 @@ ZEND_METHOD(ReflectionMethod, getClosure)
 		}
 
 		if (!instanceof_function(Z_OBJCE_P(obj), mptr->common.scope)) {
-			_DO_THROW("Given object is not an instance of the class this method was declared in");
+			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this method was declared in", 0);
 			RETURN_THROWS();
 		}
 
@@ -3454,8 +3452,38 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 			if (!variadic) {
 				efree(params);
 			}
-			_DO_THROW("Given object is not an instance of the class this method was declared in");
+			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this method was declared in", 0);
 			RETURN_THROWS();
+		}
+
+		/* For Closure::__invoke(), closures from different source locations have
+		 * different signatures, so we must reject those. */
+		if (obj_ce == zend_ce_closure && !Z_ISUNDEF(intern->obj)
+				&& Z_OBJ_P(object) != Z_OBJ(intern->obj)) {
+			const zend_function *orig_func = zend_get_closure_method_def(Z_OBJ(intern->obj));
+			const zend_function *given_func = zend_get_closure_method_def(Z_OBJ_P(object));
+
+			bool same_closure = false;
+			/* Check if they are either both fake closures or they both are not. */
+			if ((orig_func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) == (given_func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
+				if (orig_func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+					/* For fake closures, scope and name must match. */
+					same_closure = orig_func->common.scope == given_func->common.scope
+						&& orig_func->common.function_name == given_func->common.function_name;
+				} else {
+					/* Otherwise the opcode structure must be identical. */
+					ZEND_ASSERT(orig_func->type == ZEND_USER_FUNCTION);
+					same_closure = orig_func->op_array.opcodes == given_func->op_array.opcodes;
+				}
+			}
+
+			if (!same_closure) {
+				if (!variadic) {
+					efree(params);
+				}
+				zend_throw_exception(reflection_exception_ptr, "Given Closure is not the same as the reflected Closure", 0);
+				RETURN_THROWS();
+			}
 		}
 	}
 	/* Copy the zend_function when calling via handler (e.g. Closure::__invoke()) */
@@ -5901,7 +5929,7 @@ ZEND_METHOD(ReflectionProperty, getValue)
 
 		/* TODO: Should this always use intern->ce? */
 		if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
-			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
 			RETURN_THROWS();
 		}
 
@@ -6009,7 +6037,7 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!instanceof_function(Z_OBJCE_P(object), intern->ce)) {
-		_DO_THROW("Given object is not an instance of the class this property was declared in");
+		zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
 		RETURN_THROWS();
 	}
 
@@ -6028,7 +6056,7 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 			intern->ce, Z_OBJ_P(object));
 
 	if (UNEXPECTED(prop && (prop->flags & ZEND_ACC_STATIC))) {
-		_DO_THROW("May not use getRawValue on static properties");
+		zend_throw_exception(reflection_exception_ptr, "May not use getRawValue on static properties", 0);
 		RETURN_THROWS();
 	}
 
@@ -6088,7 +6116,7 @@ ZEND_METHOD(ReflectionProperty, setRawValue)
 			intern->ce, Z_OBJ_P(object));
 
 	if (UNEXPECTED(prop && (prop->flags & ZEND_ACC_STATIC))) {
-		_DO_THROW("May not use setRawValue on static properties");
+		zend_throw_exception(reflection_exception_ptr, "May not use setRawValue on static properties", 0);
 		RETURN_THROWS();
 	}
 
@@ -6292,7 +6320,7 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 
 		/* TODO: Should this always use intern->ce? */
 		if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
-			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
 			RETURN_THROWS();
 		}
 
@@ -6615,6 +6643,242 @@ ZEND_METHOD(ReflectionProperty, getHook)
 ZEND_METHOD(ReflectionProperty, isFinal)
 {
 	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_FINAL);
+}
+
+static zend_result get_ce_from_scope_name(zend_class_entry **scope, zend_string *scope_name, zend_execute_data *execute_data)
+{
+	if (!scope_name) {
+		*scope = NULL;
+		return SUCCESS;
+	}
+
+	*scope = zend_lookup_class(scope_name);
+	if (!*scope) {
+		zend_throw_error(NULL, "Class \"%s\" not found", ZSTR_VAL(scope_name));
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+static zend_always_inline uint32_t set_visibility_to_visibility(uint32_t set_visibility)
+{
+	switch (set_visibility) {
+		case ZEND_ACC_PUBLIC_SET:
+			return ZEND_ACC_PUBLIC;
+		case ZEND_ACC_PROTECTED_SET:
+			return ZEND_ACC_PROTECTED;
+		case ZEND_ACC_PRIVATE_SET:
+			return ZEND_ACC_PRIVATE;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
+static bool check_visibility(uint32_t visibility, zend_class_entry *ce, zend_class_entry *scope)
+{
+	if (!(visibility & ZEND_ACC_PUBLIC) && (scope != ce)) {
+		if (!scope) {
+			return false;
+		}
+		if (visibility & ZEND_ACC_PRIVATE) {
+			return false;
+		}
+		ZEND_ASSERT(visibility & ZEND_ACC_PROTECTED);
+		if (!instanceof_function(scope, ce) && !instanceof_function(ce, scope)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+ZEND_METHOD(ReflectionProperty, isReadable)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_string *scope_name;
+	zend_object *obj = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR_OR_NULL(scope_name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OR_NULL(obj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	zend_property_info *prop = ref->prop;
+	if (prop && obj) {
+		if (prop->flags & ZEND_ACC_STATIC) {
+			zend_throw_exception(reflection_exception_ptr, "null is expected as object argument for static properties", 0);
+			RETURN_THROWS();
+		}
+		if (!instanceof_function(obj->ce, prop->ce)) {
+			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
+			RETURN_THROWS();
+		}
+		prop = reflection_property_get_effective_prop(ref, intern->ce, obj);
+	}
+
+	zend_class_entry *ce = obj ? obj->ce : intern->ce;
+	if (!prop) {
+		if (obj && obj->properties && zend_hash_find(obj->properties, ref->unmangled_name)) {
+			RETURN_TRUE;
+		}
+handle_magic_get:
+		if (ce->__get) {
+			if (obj && ce->__isset) {
+				uint32_t *guard = zend_get_property_guard(obj, ref->unmangled_name);
+				if (!((*guard) & ZEND_GUARD_PROPERTY_ISSET)) {
+					GC_ADDREF(obj);
+					*guard |= ZEND_GUARD_PROPERTY_ISSET;
+					zval member;
+					ZVAL_STR(&member, ref->unmangled_name);
+					zend_call_known_instance_method_with_1_params(ce->__isset, obj, return_value, &member);
+					*guard &= ~ZEND_GUARD_PROPERTY_ISSET;
+					OBJ_RELEASE(obj);
+					return;
+				}
+			}
+			RETURN_TRUE;
+		}
+		if (obj && zend_lazy_object_must_init(obj)) {
+			obj = zend_lazy_object_init(obj);
+			if (!obj) {
+				RETURN_THROWS();
+			}
+			if (obj->properties && zend_hash_find(obj->properties, ref->unmangled_name)) {
+				RETURN_TRUE;
+			}
+		}
+		RETURN_FALSE;
+	}
+
+	zend_class_entry *scope;
+	if (get_ce_from_scope_name(&scope, scope_name, execute_data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!check_visibility(prop->flags & ZEND_ACC_PPP_MASK, prop->ce, scope)) {
+		if (!(prop->flags & ZEND_ACC_STATIC)) {
+			goto handle_magic_get;
+		}
+		RETURN_FALSE;
+	}
+
+	if (prop->flags & ZEND_ACC_VIRTUAL) {
+		ZEND_ASSERT(prop->hooks);
+		if (!prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
+			RETURN_FALSE;
+		}
+	} else if (obj && (!prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_GET])) {
+retry_declared:;
+		zval *prop_val = OBJ_PROP(obj, prop->offset);
+		if (Z_TYPE_P(prop_val) == IS_UNDEF) {
+			if (zend_lazy_object_must_init(obj) && (Z_PROP_FLAG_P(prop_val) & IS_PROP_LAZY)) {
+				obj = zend_lazy_object_init(obj);
+				if (!obj) {
+					RETURN_THROWS();
+				}
+				goto retry_declared;
+			}
+			if (!(Z_PROP_FLAG_P(prop_val) & IS_PROP_UNINIT)) {
+				goto handle_magic_get;
+			}
+			RETURN_FALSE;
+		}
+	} else if (prop->flags & ZEND_ACC_STATIC) {
+		if (ce->default_static_members_count && !CE_STATIC_MEMBERS(ce)) {
+			zend_class_init_statics(ce);
+		}
+		zval *prop_val = CE_STATIC_MEMBERS(ce) + prop->offset;
+		RETURN_BOOL(!Z_ISUNDEF_P(prop_val));
+	}
+
+	RETURN_TRUE;
+}
+
+ZEND_METHOD(ReflectionProperty, isWritable)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_string *scope_name;
+	zend_object *obj = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR_OR_NULL(scope_name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OR_NULL(obj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	zend_property_info *prop = ref->prop;
+	if (prop && obj) {
+		if (prop->flags & ZEND_ACC_STATIC) {
+			zend_throw_exception(reflection_exception_ptr, "null is expected as object argument for static properties", 0);
+			RETURN_THROWS();
+		}
+		if (!instanceof_function(obj->ce, prop->ce)) {
+			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
+			RETURN_THROWS();
+		}
+		prop = reflection_property_get_effective_prop(ref, intern->ce, obj);
+	}
+
+	zend_class_entry *ce = obj ? obj->ce : intern->ce;
+	if (!prop) {
+		if (!(ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
+			RETURN_TRUE;
+		}
+		/* This path is effectively unreachable, but theoretically possible for
+		 * two internal classes where ZEND_ACC_NO_DYNAMIC_PROPERTIES is only
+		 * added to the subclass, in which case a ReflectionProperty can be
+		 * constructed on the parent class, and then tested on the subclass. */
+handle_magic_set:
+		RETURN_BOOL(ce->__set);
+	}
+
+	zend_class_entry *scope;
+	if (get_ce_from_scope_name(&scope, scope_name, execute_data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!check_visibility(prop->flags & ZEND_ACC_PPP_MASK, prop->ce, scope)) {
+		if (!(prop->flags & ZEND_ACC_STATIC)) {
+			goto handle_magic_set;
+		}
+		RETURN_FALSE;
+	}
+	uint32_t set_visibility = prop->flags & ZEND_ACC_PPP_SET_MASK;
+	if (!set_visibility) {
+		set_visibility = zend_visibility_to_set_visibility(prop->flags & ZEND_ACC_PPP_MASK);
+	}
+	if (!check_visibility(set_visibility_to_visibility(set_visibility), prop->ce, scope)) {
+		RETURN_FALSE;
+	}
+
+	if (prop->flags & ZEND_ACC_VIRTUAL) {
+		ZEND_ASSERT(prop->hooks);
+		if (!prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+			RETURN_FALSE;
+		}
+	} else if (obj && (prop->flags & ZEND_ACC_READONLY)) {
+retry:;
+		zval *prop_val = OBJ_PROP(obj, prop->offset);
+		if (Z_TYPE_P(prop_val) == IS_UNDEF
+		 && zend_lazy_object_must_init(obj)
+		 && (Z_PROP_FLAG_P(prop_val) & IS_PROP_LAZY)) {
+			obj = zend_lazy_object_init(obj);
+			if (!obj) {
+				RETURN_THROWS();
+			}
+			goto retry;
+		}
+		if (Z_TYPE_P(prop_val) != IS_UNDEF && !(Z_PROP_FLAG_P(prop_val) & IS_PROP_REINITABLE)) {
+			RETURN_FALSE;
+		}
+	}
+
+	RETURN_TRUE;
 }
 
 /* {{{ Constructor. Throws an Exception in case the given extension does not exist */
@@ -7054,10 +7318,9 @@ ZEND_METHOD(ReflectionZendExtension, getCopyright)
 /* {{{     Dummy constructor -- always throws ReflectionExceptions. */
 ZEND_METHOD(ReflectionReference, __construct)
 {
-	_DO_THROW(
+	zend_throw_exception(reflection_exception_ptr,
 		"Cannot directly instantiate ReflectionReference. "
-		"Use ReflectionReference::fromArrayElement() instead"
-	);
+		"Use ReflectionReference::fromArrayElement() instead", 0);
 }
 /* }}} */
 
@@ -7092,7 +7355,7 @@ ZEND_METHOD(ReflectionReference, fromArrayElement)
 	}
 
 	if (!item) {
-		_DO_THROW("Array key not found");
+		zend_throw_exception(reflection_exception_ptr, "Array key not found", 0);
 		RETURN_THROWS();
 	}
 
@@ -7119,7 +7382,7 @@ ZEND_METHOD(ReflectionReference, getId)
 
 	intern = Z_REFLECTION_P(ZEND_THIS);
 	if (Z_TYPE(intern->obj) != IS_REFERENCE) {
-		_DO_THROW("Corrupted ReflectionReference object");
+		zend_throw_exception(reflection_exception_ptr, "Corrupted ReflectionReference object", 0);
 		RETURN_THROWS();
 	}
 
@@ -7143,13 +7406,13 @@ ZEND_METHOD(ReflectionReference, getId)
 
 ZEND_METHOD(ReflectionAttribute, __construct)
 {
-	_DO_THROW("Cannot directly instantiate ReflectionAttribute");
+	zend_throw_exception(reflection_exception_ptr, "Cannot directly instantiate ReflectionAttribute", 0);
 }
 
 ZEND_METHOD(ReflectionAttribute, __clone)
 {
 	/* __clone() is private but this is reachable with reflection */
-	_DO_THROW("Cannot clone object using __clone()");
+	zend_throw_exception(reflection_exception_ptr, "Cannot clone object using __clone()", 0);
 }
 
 /* {{{ Returns a string representation */
@@ -7656,7 +7919,7 @@ ZEND_METHOD(ReflectionFiber, getCallable)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (fiber == NULL || fiber->context.status == ZEND_FIBER_STATUS_DEAD) {
-		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated"); \
+		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated");
 		RETURN_THROWS();
 	}
 

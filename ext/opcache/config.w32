@@ -23,7 +23,7 @@ ADD_EXTENSION_DEP('opcache', 'pcre');
 if (PHP_OPCACHE_JIT == "yes") {
 	if (TARGET_ARCH == 'arm64') {
 		WARNING("JIT not enabled; not yet supported for ARM64");
-	} else if (CHECK_HEADER_ADD_INCLUDE("ir/ir.h", "CFLAGS_OPCACHE", PHP_OPCACHE + ";ext\\opcache\\jit")) {
+	} else if (CHECK_HEADER("ir/ir.h", "CFLAGS_OPCACHE", PHP_OPCACHE + ";ext\\opcache\\jit")) {
 		var dasm_flags = (X64 ? "-D X64=1" : "") + (X64 ? " -D X64WIN=1" : "") + " -D WIN=1";
 		var ir_target = (X64 ? "IR_TARGET_X64" : "IR_TARGET_X86");
 		var ir_src = "ir_strtab.c ir_cfg.c ir_sccp.c ir_gcm.c ir_ra.c ir_save.c \
@@ -41,7 +41,7 @@ if (PHP_OPCACHE_JIT == "yes") {
 			ADD_FLAG("CFLAGS_OPCACHE", "/D IR_DEBUG");
 		}
 
-		if (CHECK_HEADER_ADD_INCLUDE("capstone\\capstone.h", "CFLAGS_OPCACHE", PHP_OPCACHE+ ";" + PHP_PHP_BUILD + "\\include") &&
+		if (CHECK_HEADER("capstone\\capstone.h", "CFLAGS_OPCACHE", PHP_OPCACHE+ ";" + PHP_PHP_BUILD + "\\include") &&
 			CHECK_LIB("capstone.lib", "opcache", PHP_OPCACHE)) {
 			AC_DEFINE('HAVE_CAPSTONE', 1, 'Define to 1 if Capstone is available.');
 			ir_src += " ir_disasm.c";

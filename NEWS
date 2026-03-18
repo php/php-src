@@ -37,6 +37,7 @@ PHP                                                                        NEWS
     (BogdanUngureanu)
   . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
     suggests missing constants). (DanielEScherzer)
+  . Added grapheme_strrev (Yuya Hamada)
 
 - JSON:
   . Enriched JSON last error / exception message with error location.
@@ -71,6 +72,10 @@ PHP                                                                        NEWS
   . Clear session-local state disconnect-equivalent processing.
     (KentarouTakeda)
 
+- PGSQL:
+  . Enabled 64 bits support for pg_lo_truncate()/pg_lo_tell()
+    if the server supports it. (KentarouTakeda)
+
 - Phar:
   . Support reference values in Phar::mungServer(). (ndossche)
   . Invalid values now throw in Phar::mungServer() instead of being silently
@@ -87,6 +92,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
   . Added ReflectionConstant::inNamespace(). (Khaled Alam)
+  . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
+    (ilutov)
+  . Fixed bug GH-21362 (ReflectionMethod::invoke/invokeArgs() did not verify
+    Closure instance identity for Closure::__invoke()). (Ilia Alshanetsky)
 
 - Session:
   . Fixed bug 71162 (updateTimestamp never called when session data is empty).
@@ -104,6 +113,9 @@ PHP                                                                        NEWS
   . Fixed GH-20532 (socket_addrinfo_lookup gives the error code with a new
     optional parameter). (David Carlier)
 
+- Sodium:
+  . Added support for libsodium 1.0.21 IPcrypt and XOF APIs. (jedisct1)
+
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
@@ -114,10 +126,14 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
+  . Added form feed (\f) in the default trimmed characters of trim(), rtrim()
+    and ltrim(). (Weilin Du)
   . Invalid mode values now throw in array_filter() instead of being silently
     defaulted to 0. (Jorg Sowa)
   . Fixed bug GH-21058 (error_log() crashes with message_type 3 and
     null destination). (David Carlier)
+  . Fixed bug GH-13204 (glob() fails if square bracket is in current directory).
+    (ndossche)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
@@ -127,11 +143,16 @@ PHP                                                                        NEWS
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
   . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)
+  . Fixed bug GH-21221 (Prevent closing of innerstream of php://temp stream).
+    (ilutov)
+  . Improved stream_socket_server() bind failure error reporting. (ilutov)
 
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.
     (ilutov)
   . Support minimum version for libzip dependency updated to 1.0.0.
     (David Carlier)
+  . Added ZipArchive::openString() method.
+    (Tim Starling, Soner Sayakci, Ghaith Olabi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

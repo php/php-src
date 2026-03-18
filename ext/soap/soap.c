@@ -730,9 +730,7 @@ PHP_METHOD(SoapFault, __toString)
 	zend_string *faultcode_val, *faultstring_val, *file_val;
 	zend_long line_val;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	this_ptr = ZEND_THIS;
 	faultcode = zend_read_property(soap_fault_class_entry, Z_OBJ_P(this_ptr), "faultcode", sizeof("faultcode")-1, 1, &rv1);
@@ -1134,9 +1132,7 @@ PHP_METHOD(SoapServer, getFunctions)
 	soapServicePtr  service;
 	HashTable      *ft = NULL;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	FETCH_THIS_SERVICE_NO_BAILOUT(service);
 
@@ -2692,9 +2688,7 @@ PHP_METHOD(SoapClient, __soapCall)
 /* {{{ Returns list of SOAP functions */
 PHP_METHOD(SoapClient, __getFunctions)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	sdl *sdl;
 	FETCH_THIS_SDL(sdl);
@@ -2717,9 +2711,7 @@ PHP_METHOD(SoapClient, __getFunctions)
 /* {{{ Returns list of SOAP types */
 PHP_METHOD(SoapClient, __getTypes)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	sdl *sdl;
 	FETCH_THIS_SDL(sdl);
@@ -2744,9 +2736,7 @@ PHP_METHOD(SoapClient, __getTypes)
 /* {{{ Returns last SOAP request */
 PHP_METHOD(SoapClient, __getLastRequest)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_COPY(Z_CLIENT_LAST_REQUEST_P(ZEND_THIS));
 }
@@ -2756,9 +2746,7 @@ PHP_METHOD(SoapClient, __getLastRequest)
 /* {{{ Returns last SOAP response */
 PHP_METHOD(SoapClient, __getLastResponse)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_COPY(Z_CLIENT_LAST_RESPONSE_P(ZEND_THIS));
 }
@@ -2768,9 +2756,7 @@ PHP_METHOD(SoapClient, __getLastResponse)
 /* {{{ Returns last SOAP request headers */
 PHP_METHOD(SoapClient, __getLastRequestHeaders)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_COPY(Z_CLIENT_LAST_REQUEST_HEADERS_P(ZEND_THIS));
 }
@@ -2780,9 +2766,7 @@ PHP_METHOD(SoapClient, __getLastRequestHeaders)
 /* {{{ Returns last SOAP response headers */
 PHP_METHOD(SoapClient, __getLastResponseHeaders)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_COPY(Z_CLIENT_LAST_RESPONSE_HEADERS_P(ZEND_THIS));
 }
@@ -2848,9 +2832,7 @@ PHP_METHOD(SoapClient, __setCookie)
 /* {{{ Returns list of cookies */
 PHP_METHOD(SoapClient, __getCookies)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_COPY(Z_CLIENT_COOKIES_P(ZEND_THIS));
 }
@@ -4344,7 +4326,7 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf) /* {{{ *
 			zend_hash_internal_pointer_reset(function->responseParameters);
 			param = zend_hash_get_current_data_ptr(function->responseParameters);
 			if (param->encode && param->encode->details.type_str) {
-				smart_str_appendl(buf, param->encode->details.type_str, strlen(param->encode->details.type_str));
+				smart_str_appends(buf, param->encode->details.type_str);
 				smart_str_appendc(buf, ' ');
 			} else {
 				smart_str_appendl(buf, "UNKNOWN ", 8);
@@ -4357,12 +4339,12 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf) /* {{{ *
 					smart_str_appendl(buf, ", ", 2);
 				}
 				if (param->encode && param->encode->details.type_str) {
-					smart_str_appendl(buf, param->encode->details.type_str, strlen(param->encode->details.type_str));
+					smart_str_appends(buf, param->encode->details.type_str);
 				} else {
 					smart_str_appendl(buf, "UNKNOWN", 7);
 				}
 				smart_str_appendl(buf, " $", 2);
-				smart_str_appendl(buf, param->paramName, strlen(param->paramName));
+				smart_str_appends(buf, param->paramName);
 				i++;
 			} ZEND_HASH_FOREACH_END();
 			smart_str_appendl(buf, ") ", 2);
@@ -4371,7 +4353,7 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf) /* {{{ *
 		smart_str_appendl(buf, "void ", 5);
 	}
 
-	smart_str_appendl(buf, function->functionName, strlen(function->functionName));
+	smart_str_appends(buf, function->functionName);
 
 	smart_str_appendc(buf, '(');
 	if (function->requestParameters) {
@@ -4381,12 +4363,12 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf) /* {{{ *
 				smart_str_appendl(buf, ", ", 2);
 			}
 			if (param->encode && param->encode->details.type_str) {
-				smart_str_appendl(buf, param->encode->details.type_str, strlen(param->encode->details.type_str));
+				smart_str_appends(buf, param->encode->details.type_str);
 			} else {
 				smart_str_appendl(buf, "UNKNOWN", 7);
 			}
 			smart_str_appendl(buf, " $", 2);
-			smart_str_appendl(buf, param->paramName, strlen(param->paramName));
+			smart_str_appends(buf, param->paramName);
 			i++;
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -4442,12 +4424,12 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 	switch (type->kind) {
 		case XSD_TYPEKIND_SIMPLE:
 			if (type->encode) {
-				smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
+				smart_str_appends(buf, type->encode->details.type_str);
 				smart_str_appendc(buf, ' ');
 			} else {
 				smart_str_appendl(buf, "anyType ", sizeof("anyType ")-1);
 			}
-			smart_str_appendl(buf, type->name, strlen(type->name));
+			smart_str_appends(buf, type->name);
 
 			if (type->restrictions && type->restrictions->enumeration) {
 				zend_string *key;
@@ -4467,20 +4449,20 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 			break;
 		case XSD_TYPEKIND_LIST:
 			smart_str_appendl(buf, "list ", 5);
-			smart_str_appendl(buf, type->name, strlen(type->name));
+			smart_str_appends(buf, type->name);
 			if (type->elements) {
 				sdlTypePtr item_type;
 
 				smart_str_appendl(buf, " {", 2);
 				ZEND_HASH_FOREACH_PTR(type->elements, item_type) {
-					smart_str_appendl(buf, item_type->name, strlen(item_type->name));
+					smart_str_appends(buf, item_type->name);
 				} ZEND_HASH_FOREACH_END();
 				smart_str_appendc(buf, '}');
 			}
 			break;
 		case XSD_TYPEKIND_UNION:
 			smart_str_appendl(buf, "union ", 6);
-			smart_str_appendl(buf, type->name, strlen(type->name));
+			smart_str_appends(buf, type->name);
 			if (type->elements) {
 				sdlTypePtr item_type;
 				int first = 0;
@@ -4491,7 +4473,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 						smart_str_appendc(buf, ',');
 						first = 0;
 					}
-					smart_str_appendl(buf, item_type->name, strlen(item_type->name));
+					smart_str_appends(buf, item_type->name);
 				} ZEND_HASH_FOREACH_END();
 				smart_str_appendc(buf, '}');
 			}
@@ -4523,7 +4505,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 						smart_str_appendl(buf, ext->val, len);
 					}
 					smart_str_appendc(buf, ' ');
-					smart_str_appendl(buf, type->name, strlen(type->name));
+					smart_str_appends(buf, type->name);
 					if (end != NULL) {
 						smart_str_appends(buf, end);
 					}
@@ -4546,7 +4528,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 					} else {
 						smart_str_appendl(buf, "anyType ", 8);
 					}
-					smart_str_appendl(buf, type->name, strlen(type->name));
+					smart_str_appends(buf, type->name);
 					if (type->attributes &&
 					    (attr = zend_hash_str_find_ptr(type->attributes, SOAP_1_2_ENC_NAMESPACE":arraySize",
 					      sizeof(SOAP_1_2_ENC_NAMESPACE":arraySize")-1)) != NULL &&
@@ -4561,7 +4543,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 				}
 			} else {
 				smart_str_appendl(buf, "struct ", 7);
-				smart_str_appendl(buf, type->name, strlen(type->name));
+				smart_str_appends(buf, type->name);
 				smart_str_appendc(buf, ' ');
 				smart_str_appendl(buf, "{\n", 2);
 				if ((type->kind == XSD_TYPEKIND_RESTRICTION ||
@@ -4579,7 +4561,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 							smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
 						}
 						smart_str_appendc(buf, ' ');
-						smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
+						smart_str_appends(buf, type->encode->details.type_str);
 						smart_str_appendl(buf, " _;\n", 4);
 					}
 				}

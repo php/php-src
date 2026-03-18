@@ -1088,7 +1088,7 @@ flf_clean:;
 	Z_FLF_PARAM_FREE_STR(2, property_tmp)
 }
 
-static inline void _class_exists_impl(zval *return_value, zend_string *name, bool autoload, int flags, int skip_flags) /* {{{ */
+static zend_always_inline void _class_exists_impl(zval *return_value, zend_string *name, bool autoload, int flags, int skip_flags) /* {{{ */
 {
 	zend_string *lcname;
 	zend_class_entry *ce;
@@ -2228,11 +2228,7 @@ ZEND_FUNCTION(extension_loaded)
 	}
 
 	lcname = zend_string_tolower(extension_name);
-	if (zend_hash_exists(&module_registry, lcname)) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETVAL_BOOL(zend_hash_exists(&module_registry, lcname));
 	zend_string_release_ex(lcname, 0);
 }
 /* }}} */

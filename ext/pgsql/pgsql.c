@@ -3083,15 +3083,11 @@ PHP_FUNCTION(pg_lo_tell)
 	pgsql = Z_PGSQL_LOB_P(pgsql_id);
 	CHECK_PGSQL_LOB(pgsql);
 
-#ifdef VE_PG_LO64
 	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
 		offset = lo_tell64((PGconn *)pgsql->conn, pgsql->lofd);
 	} else {
 		offset = lo_tell((PGconn *)pgsql->conn, pgsql->lofd);
 	}
-#else
-	offset = lo_tell((PGconn *)pgsql->conn, pgsql->lofd);
-#endif
 	RETURN_LONG(offset);
 }
 /* }}} */
@@ -3112,15 +3108,11 @@ PHP_FUNCTION(pg_lo_truncate)
 	pgsql = Z_PGSQL_LOB_P(pgsql_id);
 	CHECK_PGSQL_LOB(pgsql);
 
-#ifdef VE_PG_LO64
 	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
 		result = lo_truncate64((PGconn *)pgsql->conn, pgsql->lofd, size);
 	} else {
 		result = lo_truncate((PGconn *)pgsql->conn, pgsql->lofd, size);
 	}
-#else
-	result = lo_truncate((PGconn *)pgsql->conn, pgsql->lofd, size);
-#endif
 	if (!result) {
 		RETURN_TRUE;
 	} else {
@@ -3790,12 +3782,8 @@ PHP_FUNCTION(pg_result_error_field)
 
 	if (fieldcode & (PG_DIAG_SEVERITY|PG_DIAG_SQLSTATE|PG_DIAG_MESSAGE_PRIMARY|PG_DIAG_MESSAGE_DETAIL
 				|PG_DIAG_MESSAGE_HINT|PG_DIAG_STATEMENT_POSITION
-#ifdef PG_DIAG_INTERNAL_POSITION
 				|PG_DIAG_INTERNAL_POSITION
-#endif
-#ifdef PG_DIAG_INTERNAL_QUERY
 				|PG_DIAG_INTERNAL_QUERY
-#endif
 				|PG_DIAG_CONTEXT|PG_DIAG_SOURCE_FILE|PG_DIAG_SOURCE_LINE
 				|PG_DIAG_SOURCE_FUNCTION)) {
 		field = PQresultErrorField(pgsql_result, (int)fieldcode);
@@ -5621,7 +5609,6 @@ static inline zend_result build_tablename(smart_str *querystr, PGconn *pg_link, 
 PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *table, zval *var_array, zend_ulong opt, zend_string **sql)
 {
 	zval *val, converted;
-	char buf[256];
 	char *tmp;
 	smart_str querystr = {0};
 	zend_result ret = FAILURE;
@@ -5704,7 +5691,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 				smart_str_append_long(&querystr, Z_LVAL_P(val));
 				break;
 			case IS_DOUBLE:
-				smart_str_appendl(&querystr, buf, snprintf(buf, sizeof(buf), "%F", Z_DVAL_P(val)));
+				smart_str_append_double(&querystr, Z_DVAL_P(val), 6, false);
 				break;
 			case IS_NULL:
 				smart_str_appendl(&querystr, "NULL", sizeof("NULL")-1);
@@ -5888,8 +5875,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 				smart_str_append_long(querystr, Z_LVAL_P(val));
 				break;
 			case IS_DOUBLE: {
-				char buf[256];
-				smart_str_appendl(querystr, buf, MIN(snprintf(buf, sizeof(buf), "%F", Z_DVAL_P(val)), sizeof(buf) - 1));
+				smart_str_append_double(querystr, Z_DVAL_P(val), 6, false);
 				}
 				break;
 			case IS_NULL:

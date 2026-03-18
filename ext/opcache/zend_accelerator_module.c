@@ -801,9 +801,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 {
 	zval directives, version, blacklist;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!validate_api_restriction()) {
 		RETURN_FALSE;
@@ -908,9 +906,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 /* {{{ Request that the contents of the opcode cache to be reset */
 ZEND_FUNCTION(opcache_reset)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!validate_api_restriction()) {
 		RETURN_FALSE;

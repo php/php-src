@@ -32,7 +32,9 @@ function test($stream, $sock) {
         echo "\n";
         echo "socket_get_option ";
         try {
-            print_r(socket_get_option($sock, SOL_SOCKET, SO_TYPE));
+            // Solaris uses different numeric values for SOCK_* constants
+            $opt = socket_get_option($sock, SOL_SOCKET, SO_TYPE);
+            print_r($opt === SOCK_DGRAM ? "DGRAM" : $opt);
         } catch (Error $e) {
             echo get_class($e), ": ", $e->getMessage(), "\n";
         }
@@ -81,12 +83,12 @@ echo "Done.\n";
 normal
 stream_set_blocking 1
 socket_set_block 1
-socket_get_option 2
+socket_get_option DGRAM
 
 
 unset stream
 socket_set_block 1
-socket_get_option 2
+socket_get_option DGRAM
 
 
 unset socket

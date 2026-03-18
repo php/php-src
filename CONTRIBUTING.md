@@ -176,6 +176,7 @@ locations.
     ├─ config.guess                 # https://git.savannah.gnu.org/cgit/config.git
     ├─ config.sub                   # https://git.savannah.gnu.org/cgit/config.git
     ├─ libtool.m4                   # https://git.savannah.gnu.org/cgit/libtool.git
+    ├─ lt*.m4                       # https://git.savannah.gnu.org/cgit/libtool.git
     ├─ ltmain.sh                    # https://git.savannah.gnu.org/cgit/libtool.git
     ├─ pkg.m4                       # https://gitlab.freedesktop.org/pkg-config/pkg-config
     ├─ shtool                       # https://www.gnu.org/software/shtool/

@@ -1417,7 +1417,7 @@ static zend_string *resolve_class_name(zend_string *name, const zend_class_entry
 }
 
 static zend_string *add_intersection_type(zend_string *str,
-	const zend_type_list *intersection_type_list, zend_class_entry *scope,
+	const zend_type_list *intersection_type_list,
 	bool is_bracketed)
 {
 	const zend_type *single_type;
@@ -1442,19 +1442,19 @@ static zend_string *add_intersection_type(zend_string *str,
 	return str;
 }
 
-zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry *scope) {
+zend_string *zend_type_to_string_resolved(const zend_type type, const zend_class_entry *scope) {
 	zend_string *str = NULL;
 
 	/* Pure intersection type */
 	if (ZEND_TYPE_IS_INTERSECTION(type)) {
 		ZEND_ASSERT(!ZEND_TYPE_IS_UNION(type));
-		str = add_intersection_type(str, ZEND_TYPE_LIST(type), scope, /* is_bracketed */ false);
+		str = add_intersection_type(str, ZEND_TYPE_LIST(type), /* is_bracketed */ false);
 	} else if (ZEND_TYPE_HAS_LIST(type)) {
 		/* A union type might not be a list */
 		const zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
 			if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
-				str = add_intersection_type(str, ZEND_TYPE_LIST(*list_type), scope, /* is_bracketed */ true);
+				str = add_intersection_type(str, ZEND_TYPE_LIST(*list_type), /* is_bracketed */ true);
 				continue;
 			}
 			ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
@@ -9059,8 +9059,8 @@ static void zend_compile_property_hooks(
 				value_type_ast_ptr = &param->child[0];
 				hook->child[0] = zend_ast_create_list(1, ZEND_AST_PARAM_LIST, param);
 			}
-			zend_ast *return_type = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_VOID));
-			return_type->attr = ZEND_NAME_NOT_FQ;
+			zend_ast *return_type = zend_ast_create(ZEND_AST_TYPE);
+			return_type->attr = IS_VOID;
 			hook->child[3] = return_type;
 		} else {
 			ZEND_UNREACHABLE();

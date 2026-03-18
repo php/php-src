@@ -1527,7 +1527,7 @@ PHP_FUNCTION(array_walk_recursive)
  * 0 = return boolean
  * 1 = return key
  */
-static inline void _php_search_array(zval *return_value, zval *value, zval *array, bool strict, int behavior) /* {{{ */
+static zend_always_inline void _php_search_array(zval *return_value, zval *value, zval *array, bool strict, int behavior) /* {{{ */
 {
 	zval *entry; /* pointer to array entry */
 	zend_ulong num_idx;
@@ -6477,8 +6477,7 @@ PHP_FUNCTION(array_filter)
 	}
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
-		RETVAL_EMPTY_ARRAY();
-		return;
+		RETURN_EMPTY_ARRAY();
 	}
 	array_init(return_value);
 

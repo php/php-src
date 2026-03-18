@@ -505,20 +505,16 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 				case CONNECTION_AUTH_OK:
 					ZVAL_STRINGL(return_value, "Received authentication; waiting for backend start-up to finish.", strlen("Received authentication; waiting for backend start-up to finish."));
 					break;
-#ifdef CONNECTION_SSL_STARTUP
 				case CONNECTION_SSL_STARTUP:
 					ZVAL_STRINGL(return_value, "Negotiating SSL encryption.", strlen("Negotiating SSL encryption."));
 					break;
-#endif
 				case CONNECTION_SETENV:
 					ZVAL_STRINGL(return_value, "Negotiating environment-driven parameter settings.", strlen("Negotiating environment-driven parameter settings."));
 					break;
 
-#ifdef CONNECTION_CONSUME
 				case CONNECTION_CONSUME:
 					ZVAL_STRINGL(return_value, "Flushing send queue/consuming extra data.", strlen("Flushing send queue/consuming extra data."));
 					break;
-#endif
 #ifdef CONNECTION_GSS_STARTUP
 				case CONNECTION_GSS_STARTUP:
 					ZVAL_STRINGL(return_value, "Negotiating GSSAPI.", strlen("Negotiating GSSAPI."));

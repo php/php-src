@@ -60,8 +60,8 @@ static void add_property_hook_obligation(
 		zend_class_entry *ce, const zend_property_info *hooked_prop, const zend_function *hook_func);
 
 static void ZEND_COLD emit_incompatible_method_error(
-		const zend_function *child, zend_class_entry *child_scope,
-		const zend_function *parent, zend_class_entry *parent_scope,
+		const zend_function *child, const zend_class_entry *child_scope,
+		const zend_function *parent, const zend_class_entry *parent_scope,
 		inheritance_status status);
 
 static void zend_type_copy_ctor(zend_type *const type, bool use_arena, bool persistent);
@@ -320,7 +320,7 @@ static bool unlinked_instanceof(const zend_class_entry *ce1, const zend_class_en
 	}
 
 	if (ce1->parent) {
-		zend_class_entry *parent_ce;
+		const zend_class_entry *parent_ce;
 		if (ce1->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
 			parent_ce = ce1->parent;
 		} else {
@@ -671,7 +671,7 @@ static inheritance_status zend_is_intersection_subtype_of_type(
 	return early_exit_status == INHERITANCE_ERROR ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 }
 
-ZEND_API inheritance_status zend_perform_covariant_type_check(
+static inheritance_status zend_perform_covariant_type_check(
 		zend_class_entry *fe_scope, const zend_type fe_type,
 		zend_class_entry *proto_scope, const zend_type proto_type)
 {
@@ -763,8 +763,8 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 }
 
 static inheritance_status zend_do_perform_arg_type_hint_check(
-		zend_class_entry *fe_scope, zend_arg_info *fe_arg_info,
-		zend_class_entry *proto_scope, zend_arg_info *proto_arg_info) /* {{{ */
+		zend_class_entry *fe_scope, const zend_arg_info *fe_arg_info,
+		zend_class_entry *proto_scope, const zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (!ZEND_TYPE_IS_SET(fe_arg_info->type) || ZEND_TYPE_PURE_MASK(fe_arg_info->type) == MAY_BE_ANY) {
 		/* Child with no type or mixed type is always compatible */
@@ -897,7 +897,7 @@ static inheritance_status zend_do_perform_implementation_check(
 /* }}} */
 
 static ZEND_COLD void zend_append_type_hint(
-		smart_str *str, zend_class_entry *scope, const zend_arg_info *arg_info, bool return_hint) /* {{{ */
+		smart_str *str, const zend_class_entry *scope, const zend_arg_info *arg_info, bool return_hint) /* {{{ */
 {
 	if (ZEND_TYPE_IS_SET(arg_info->type)) {
 		zend_string *type_str = zend_type_to_string_resolved(arg_info->type, scope);
@@ -911,7 +911,7 @@ static ZEND_COLD void zend_append_type_hint(
 /* }}} */
 
 static ZEND_COLD zend_string *zend_get_function_declaration(
-		const zend_function *fptr, zend_class_entry *scope) /* {{{ */
+		const zend_function *fptr, const zend_class_entry *scope) /* {{{ */
 {
 	smart_str str = {0};
 
@@ -1054,8 +1054,8 @@ static zend_always_inline uint32_t func_lineno(const zend_function *fn) {
 }
 
 static void ZEND_COLD emit_incompatible_method_error(
-		const zend_function *child, zend_class_entry *child_scope,
-		const zend_function *parent, zend_class_entry *parent_scope,
+		const zend_function *child, const zend_class_entry *child_scope,
+		const zend_function *parent, const zend_class_entry *parent_scope,
 		inheritance_status status) {
 	zend_string *parent_prototype = zend_get_function_declaration(parent, parent_scope);
 	zend_string *child_prototype = zend_get_function_declaration(child, child_scope);
@@ -2168,6 +2168,10 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	zend_class_constant *c;
 	uint32_t flags = ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY;
 
+	if (iface->num_interfaces) {
+		zend_do_inherit_interfaces(ce, iface);
+	}
+
 	if (!(ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		/* We are not setting the prototype of overridden interface methods because of abstract
 		 * constructors. See Zend/tests/interface_constructor_prototype_001.phpt. */
@@ -2199,9 +2203,6 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	} ZEND_HASH_FOREACH_END();
 
 	do_implement_interface(ce, iface);
-	if (iface->num_interfaces) {
-		zend_do_inherit_interfaces(ce, iface);
-	}
 }
 /* }}} */
 
@@ -2925,9 +2926,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 								ZSTR_VAL(prop_name),
 								ZSTR_VAL(ce->name));
 					}
-					if (!(flags & ZEND_ACC_STATIC)) {
-						continue;
-					}
+					continue;
 				}
 			}
 

@@ -2433,7 +2433,6 @@ static HashTable* make_persistent_sdl_function_headers(HashTable *headers, HashT
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(headers, key, tmp) {
 		pheader = malloc(sizeof(sdlSoapBindingFunctionHeader));
-		memset(pheader, 0, sizeof(sdlSoapBindingFunctionHeader));
 		*pheader = *tmp;
 
 		if (pheader->name) {
@@ -2497,7 +2496,6 @@ static HashTable* make_persistent_sdl_parameters(HashTable *params, HashTable *p
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(params, key, tmp) {
 		pparam = malloc(sizeof(sdlParam));
-		memset(pparam, 0, sizeof(sdlParam));
 		*pparam = *tmp;
 
 		if (pparam->paramName) {
@@ -2539,7 +2537,6 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(faults, key, tmp) {
 		pfault = malloc(sizeof(sdlFault));
-		memset(pfault, 0, sizeof(sdlFault));
 		*pfault = *tmp;
 
 		if (pfault->name) {

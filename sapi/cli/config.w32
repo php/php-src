@@ -12,7 +12,7 @@ if (PHP_CLI == "yes") {
 	PHP_INSTALL_HEADERS("sapi/cli", "cli.h");
 
 	if (CHECK_LIB("edit_a.lib;edit.lib", "cli", PHP_CLI) &&
-		CHECK_HEADER_ADD_INCLUDE("editline/readline.h", "CFLAGS_CLI")) {
+		CHECK_HEADER("editline/readline.h", "CFLAGS_CLI")) {
 		ADD_FLAG("CFLAGS_CLI", "/D HAVE_LIBEDIT");
 	}
 }

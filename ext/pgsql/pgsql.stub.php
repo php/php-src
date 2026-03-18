@@ -98,13 +98,11 @@ namespace {
      * @cvalue CONNECTION_AUTH_OK
      */
     const PGSQL_CONNECTION_AUTH_OK = UNKNOWN;
-#ifdef CONNECTION_SSL_STARTUP
     /**
      * @var int
      * @cvalue CONNECTION_SSL_STARTUP
      */
     const PGSQL_CONNECTION_SSL_STARTUP = UNKNOWN;
-#endif
     /**
      * @var int
      * @cvalue CONNECTION_SETENV
@@ -310,20 +308,16 @@ namespace {
      * @cvalue PG_DIAG_STATEMENT_POSITION
      */
     const PGSQL_DIAG_STATEMENT_POSITION = UNKNOWN;
-#ifdef PG_DIAG_INTERNAL_POSITION
     /**
      * @var int
      * @cvalue PG_DIAG_INTERNAL_POSITION
      */
     const PGSQL_DIAG_INTERNAL_POSITION = UNKNOWN;
-#endif
-#ifdef PG_DIAG_INTERNAL_QUERY
     /**
      * @var int
      * @cvalue PG_DIAG_INTERNAL_QUERY
      */
     const PGSQL_DIAG_INTERNAL_QUERY = UNKNOWN;
-#endif
     /**
      * @var int
      * @cvalue PG_DIAG_CONTEXT
@@ -344,48 +338,36 @@ namespace {
      * @cvalue PG_DIAG_SOURCE_FUNCTION
      */
     const PGSQL_DIAG_SOURCE_FUNCTION = UNKNOWN;
-#ifdef PG_DIAG_SCHEMA_NAME
     /**
      * @var int
      * @cvalue PG_DIAG_SCHEMA_NAME
      */
     const PGSQL_DIAG_SCHEMA_NAME = UNKNOWN;
-#endif
-#ifdef PG_DIAG_TABLE_NAME
     /**
      * @var int
      * @cvalue PG_DIAG_TABLE_NAME
      */
     const PGSQL_DIAG_TABLE_NAME = UNKNOWN;
-#endif
-#ifdef PG_DIAG_COLUMN_NAME
     /**
      * @var int
      * @cvalue PG_DIAG_COLUMN_NAME
      */
     const PGSQL_DIAG_COLUMN_NAME = UNKNOWN;
-#endif
-#ifdef PG_DIAG_DATATYPE_NAME
     /**
      * @var int
      * @cvalue PG_DIAG_DATATYPE_NAME
      */
     const PGSQL_DIAG_DATATYPE_NAME = UNKNOWN;
-#endif
-#ifdef PG_DIAG_CONSTRAINT_NAME
     /**
      * @var int
      * @cvalue PG_DIAG_CONSTRAINT_NAME
      */
     const PGSQL_DIAG_CONSTRAINT_NAME = UNKNOWN;
-#endif
-#ifdef PG_DIAG_SEVERITY_NONLOCALIZED
     /**
      * @var int
      * @cvalue PG_DIAG_SEVERITY_NONLOCALIZED
      */
     const PGSQL_DIAG_SEVERITY_NONLOCALIZED = UNKNOWN;
-#endif
 
     /* pg_convert options */
 
@@ -432,7 +414,7 @@ namespace {
      * @cvalue PGSQL_DML_STRING
      */
     const PGSQL_DML_STRING = UNKNOWN;
-#ifdef PQTRACE_SUPPPRESS_TIMESTAMPS
+#ifdef PQTRACE_SUPPRESS_TIMESTAMPS
     /**
      * @var int
      * @cvalue PQTRACE_SUPPRESS_TIMESTAMPS
