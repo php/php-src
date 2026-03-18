@@ -40,11 +40,11 @@
 
 typedef struct ps_sd {
 	struct ps_sd *next;
-	uint32_t hv;		/* hash value of key */
-	time_t ctime;		/* time of last change */
+	uint32_t hv;        /* hash value of key */
+	time_t ctime;       /* time of last change */
 	void *data;
-	size_t datalen;		/* amount of valid data */
-	size_t alloclen;	/* amount of allocated memory for data */
+	size_t datalen;     /* amount of valid data */
+	size_t alloclen;    /* amount of allocated memory for data */
 	zend_string *key;
 } ps_sd;
 

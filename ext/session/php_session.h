@@ -52,15 +52,15 @@ typedef struct ps_module_struct {
 #define PS_GET_MOD_DATA() *mod_data
 #define PS_SET_MOD_DATA(a) *mod_data = (a)
 
-#define PS_OPEN_FUNC(x) 	zend_result ps_open_##x(PS_OPEN_ARGS)
-#define PS_CLOSE_FUNC(x) 	zend_result ps_close_##x(PS_CLOSE_ARGS)
-#define PS_READ_FUNC(x) 	zend_result ps_read_##x(PS_READ_ARGS)
-#define PS_WRITE_FUNC(x) 	zend_result ps_write_##x(PS_WRITE_ARGS)
-#define PS_DESTROY_FUNC(x) 	zend_result ps_delete_##x(PS_DESTROY_ARGS)
-#define PS_GC_FUNC(x) 		zend_long ps_gc_##x(PS_GC_ARGS)
-#define PS_CREATE_SID_FUNC(x)	zend_string *ps_create_sid_##x(PS_CREATE_SID_ARGS)
-#define PS_VALIDATE_SID_FUNC(x)	zend_result ps_validate_sid_##x(PS_VALIDATE_SID_ARGS)
-#define PS_UPDATE_TIMESTAMP_FUNC(x) 	zend_result ps_update_timestamp_##x(PS_UPDATE_TIMESTAMP_ARGS)
+#define PS_OPEN_FUNC(x) zend_result ps_open_##x(PS_OPEN_ARGS)
+#define PS_CLOSE_FUNC(x) zend_result ps_close_##x(PS_CLOSE_ARGS)
+#define PS_READ_FUNC(x) zend_result ps_read_##x(PS_READ_ARGS)
+#define PS_WRITE_FUNC(x) zend_result ps_write_##x(PS_WRITE_ARGS)
+#define PS_DESTROY_FUNC(x) zend_result ps_delete_##x(PS_DESTROY_ARGS)
+#define PS_GC_FUNC(x) zend_long ps_gc_##x(PS_GC_ARGS)
+#define PS_CREATE_SID_FUNC(x) zend_string *ps_create_sid_##x(PS_CREATE_SID_ARGS)
+#define PS_VALIDATE_SID_FUNC(x) zend_result ps_validate_sid_##x(PS_VALIDATE_SID_ARGS)
+#define PS_UPDATE_TIMESTAMP_FUNC(x) zend_result ps_update_timestamp_##x(PS_UPDATE_TIMESTAMP_ARGS)
 
 /* Save handler module definitions without timestamp enabled */
 #define PS_FUNCS(x) \
@@ -69,7 +69,7 @@ typedef struct ps_module_struct {
 	PS_READ_FUNC(x); \
 	PS_WRITE_FUNC(x); \
 	PS_DESTROY_FUNC(x); \
-	PS_GC_FUNC(x);	\
+	PS_GC_FUNC(x); \
 	PS_CREATE_SID_FUNC(x); \
 	PS_VALIDATE_SID_FUNC(x);
 
@@ -115,8 +115,8 @@ typedef struct _php_session_rfc1867_progress {
 
 	zval      data;                 /* the array exported to session data */
 	zval      files;                /* data["files"] array */
-	zval	 *post_bytes_processed; /* data["bytes_processed"] */
-	zval	 *current_file_bytes_processed;
+	zval     *post_bytes_processed; /* data["bytes_processed"] */
+	zval     *current_file_bytes_processed;
 	zval      current_file;         /* array of currently uploading file */
 } php_session_rfc1867_progress;
 
@@ -256,22 +256,22 @@ PHPAPI zend_result php_session_reset_id(void);
 
 /* Do not use a return statement in `code` because that may leak memory.
  * Break out of the loop instead. */
-#define PS_ENCODE_LOOP(code) do {									\
-	zval _zv;														\
-	/* protect against user interference */							\
-	ZVAL_COPY(&_zv, Z_REFVAL(PS(http_session_vars)));				\
+#define PS_ENCODE_LOOP(code) do { \
+	zval _zv; \
+	/* protect against user interference */ \
+	ZVAL_COPY(&_zv, Z_REFVAL(PS(http_session_vars))); \
 	ZEND_HASH_FOREACH_KEY(Z_ARRVAL(_zv), zend_ulong num_key, zend_string * key) { \
-		if (key == NULL) {											\
-			php_error_docref(NULL, E_WARNING,						\
-					"Skipping numeric key " ZEND_LONG_FMT, num_key);\
-			continue;												\
-		}															\
-		zval *struc = php_get_session_var(key);						\
-		if (struc) {												\
-			code;		 											\
-		} 															\
-	} ZEND_HASH_FOREACH_END();										\
-	zval_ptr_dtor(&_zv);											\
+		if (key == NULL) { \
+			php_error_docref(NULL, E_WARNING, \
+					"Skipping numeric key " ZEND_LONG_FMT, num_key); \
+			continue; \
+		} \
+		zval *struc = php_get_session_var(key); \
+		if (struc) { \
+			code; \
+		} \
+	} ZEND_HASH_FOREACH_END(); \
+	zval_ptr_dtor(&_zv); \
 } while(0)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)

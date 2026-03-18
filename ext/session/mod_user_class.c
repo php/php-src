@@ -17,7 +17,7 @@
 #include "php.h"
 #include "php_session.h"
 
-#define PS_SANITY_CHECK						\
+#define PS_SANITY_CHECK \
 	if (PS(session_status) != php_session_active) { \
 		zend_throw_error(NULL, "Session is not active"); \
 		RETURN_THROWS(); \
@@ -27,11 +27,11 @@
 		RETURN_THROWS(); \
 	}
 
-#define PS_SANITY_CHECK_IS_OPEN				\
+#define PS_SANITY_CHECK_IS_OPEN \
 	PS_SANITY_CHECK; \
-	if (!PS(mod_user_is_open)) {			\
-		php_error_docref(NULL, E_WARNING, "Parent session handler is not open");	\
-		RETURN_FALSE;						\
+	if (!PS(mod_user_is_open)) { \
+		php_error_docref(NULL, E_WARNING, "Parent session handler is not open"); \
+		RETURN_FALSE; \
 	}
 
 PHP_METHOD(SessionHandler, open)

@@ -83,16 +83,16 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 #define IF_SESSION_VARS() \
 	if (Z_ISREF_P(&PS(http_session_vars)) && Z_TYPE_P(Z_REFVAL(PS(http_session_vars))) == IS_ARRAY)
 
-#define SESSION_CHECK_ACTIVE_STATE	\
-	if (PS(session_status) == php_session_active) {	\
-		php_session_session_already_started_error(E_WARNING, "Session ini settings cannot be changed when a session is active");	\
-		return FAILURE;	\
+#define SESSION_CHECK_ACTIVE_STATE \
+	if (PS(session_status) == php_session_active) { \
+		php_session_session_already_started_error(E_WARNING, "Session ini settings cannot be changed when a session is active"); \
+		return FAILURE; \
 	}
 
-#define SESSION_CHECK_OUTPUT_STATE										\
-	if (SG(headers_sent) && stage != ZEND_INI_STAGE_DEACTIVATE) {												\
-		php_session_headers_already_sent_error(E_WARNING, "Session ini settings cannot be changed after headers have already been sent");	\
-		return FAILURE;													\
+#define SESSION_CHECK_OUTPUT_STATE \
+	if (SG(headers_sent) && stage != ZEND_INI_STAGE_DEACTIVATE) { \
+		php_session_headers_already_sent_error(E_WARNING, "Session ini settings cannot be changed after headers have already been sent"); \
+		return FAILURE; \
 	}
 
 #define SESSION_FORBIDDEN_CHARS "=,;.[ \t\r\n\013\014"
@@ -1408,8 +1408,8 @@ static zend_result php_session_send_cookie(void)
 	smart_str_0(&ncookie);
 
 	php_session_remove_cookie(); /* remove already sent session ID cookie */
-	/*	'replace' must be 0 here, else a previous Set-Cookie
-		header, probably sent with setcookie() will be replaced! */
+	/* 'replace' must be 0 here, else a previous Set-Cookie
+	   header, probably sent with setcookie() will be replaced! */
 	sapi_add_header_ex(estrndup(ZSTR_VAL(ncookie.s), ZSTR_LEN(ncookie.s)), ZSTR_LEN(ncookie.s), false, false);
 	smart_str_free(&ncookie);
 
