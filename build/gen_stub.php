@@ -945,6 +945,22 @@ class PropertyName implements VariableLikeName {
     }
 }
 
+class EnumCaseName {
+    public /* readonly */ Name $enum;
+    public /* readonly */ string $case;
+
+    public function __construct(Name $enum, string $case)
+    {
+        $this->enum = $enum;
+        $this->case = $case;
+    }
+
+    public function __toString(): string
+    {
+        return "$this->enum::$this->case";
+    }
+}
+
 interface FunctionOrMethodName {
     public function getDeclaration(): string;
     public function getArgInfoName(): string;
@@ -3286,17 +3302,19 @@ class PropertyInfo extends VariableLike
 }
 
 class EnumCaseInfo {
-    private /* readonly */ string $name;
+    private /* readonly */ EnumCaseName $name;
     private /* readonly */ ?Expr $value;
+    private /* readonly */ ?string $valueString;
 
-    public function __construct(string $name, ?Expr $value) {
+    public function __construct(EnumCaseName $name, ?Expr $value, ?string $valueString) {
         $this->name = $name;
         $this->value = $value;
+        $this->valueString = $valueString;
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
     public function getDeclaration(array $allConstInfos): string {
-        $escapedName = addslashes($this->name);
+        $escapedName = addslashes($this->name->case);
         if ($this->value === null) {
             $code = "\n\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", NULL);\n";
         } else {
@@ -3308,6 +3326,55 @@ class EnumCaseInfo {
         }
 
         return $code;
+    }
+
+    /** @param array<string, ConstInfo> $allConstInfos */
+    public function getEnumSynopsisItemElement(DOMDocument $doc, array $allConstInfos, int $indentationLevel): DOMElement
+    {
+        $indentation = str_repeat(" ", $indentationLevel);
+
+        $itemElement = $doc->createElement("enumitem");
+
+        $identifierElement = $doc->createElement("enumidentifier", $this->name->case);
+
+        $itemElement->appendChild(new DOMText("\n$indentation "));
+        $itemElement->appendChild($identifierElement);
+
+        $valueString = $this->getEnumSynopsisValueString($allConstInfos);
+        if ($valueString) {
+            $itemElement->appendChild(new DOMText("\n$indentation "));
+            $valueElement = $doc->createElement("enumvalue",  $valueString);
+            $itemElement->appendChild($valueElement);
+        }
+
+        $descriptionElement = $doc->createElement("enumitemdescription", "Description.");
+        $itemElement->appendChild(new DOMText("\n$indentation "));
+        $itemElement->appendChild($descriptionElement);
+
+        $itemElement->appendChild(new DOMText("\n$indentation"));
+
+        return $itemElement;
+    }
+
+    /** @param array<string, ConstInfo> $allConstInfos */
+    public function getEnumSynopsisValueString(array $allConstInfos): ?string
+    {
+        if ($this->value === null) {
+            return null;
+        }
+
+        $value = EvaluatedValue::createFromExpression($this->value, null, null, $allConstInfos);
+        if ($value->isUnknownConstValue) {
+            return null;
+        }
+
+        if ($value->originatingConsts) {
+            return implode("\n", array_map(function (ConstInfo $const) use ($allConstInfos) {
+                return $const->getFieldSynopsisValueString($allConstInfos);
+            }, $value->originatingConsts));
+        }
+
+        return $this->valueString;
     }
 }
 
@@ -3748,8 +3815,12 @@ class ClassInfo {
      * @param array<string, ConstInfo> $allConstInfos
      */
     public function getClassSynopsisElement(DOMDocument $doc, array $classMap, array $allConstInfos): ?DOMElement {
-        $classSynopsis = $doc->createElement("classsynopsis");
-        $classSynopsis->setAttribute("class", $this->type === "interface" ? "interface" : "class");
+        if ($this->type === "enum") {
+            $classSynopsis = $doc->createElement("enumsynopsis");
+        } else {
+            $classSynopsis = $doc->createElement("classsynopsis");
+            $classSynopsis->setAttribute("class", $this->type === "interface" ? "interface" : "class");
+        }
 
         $namespace = $this->getNamespace();
         if ($namespace) {
@@ -3769,108 +3840,120 @@ class ClassInfo {
             $classSynopsisIndentation = str_repeat(" ", $classSynopsisIndentationLevel);
         }
 
-        $exceptionOverride = $this->type === "class" && $this->isException($classMap) ? "exception" : null;
-        $ooElement = self::createOoElement($doc, $this, $exceptionOverride, true, null, $classSynopsisIndentationLevel + 1);
-        if (!$ooElement) {
-            return null;
-        }
         $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
-        $classSynopsis->appendChild($ooElement);
 
-        foreach ($this->extends as $k => $parent) {
-            $parentInfo = $classMap[$parent->toString()] ?? null;
-            if ($parentInfo === null) {
-                throw new Exception("Missing parent class " . $parent->toString());
+        if ($this->type === "enum") {
+            $enumName = $doc->createElement("enumname", $this->getClassName());
+            $classSynopsis->appendChild($enumName);
+
+            foreach ($this->enumCaseInfos as $enumCaseInfo) {
+                $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
+                $enumItemElement = $enumCaseInfo->getEnumSynopsisItemElement($doc, $allConstInfos, $classSynopsisIndentationLevel + 1);
+                $classSynopsis->appendChild($enumItemElement);
+            }
+        } else {
+            $exceptionOverride = $this->type === "class" && $this->isException($classMap) ? "exception" : null;
+            $ooElement = self::createOoElement($doc, $this, $exceptionOverride, true, null, $classSynopsisIndentationLevel + 1);
+            if (!$ooElement) {
+                return null;
+            }
+            $classSynopsis->appendChild($ooElement);
+
+            foreach ($this->extends as $k => $parent) {
+                $parentInfo = $classMap[$parent->toString()] ?? null;
+                if ($parentInfo === null) {
+                    throw new Exception("Missing parent class " . $parent->toString());
+                }
+
+                $ooElement = self::createOoElement(
+                    $doc,
+                    $parentInfo,
+                    null,
+                    false,
+                    $k === 0 ? "extends" : null,
+                    $classSynopsisIndentationLevel + 1
+                );
+                if (!$ooElement) {
+                    return null;
+                }
+
+                $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
+                $classSynopsis->appendChild($ooElement);
             }
 
-            $ooElement = self::createOoElement(
+            foreach ($this->implements as $k => $interface) {
+                $interfaceInfo = $classMap[$interface->toString()] ?? null;
+                if (!$interfaceInfo) {
+                    throw new Exception("Missing implemented interface " . $interface->toString());
+                }
+
+                $ooElement = self::createOoElement($doc, $interfaceInfo, null, false, $k === 0 ? "implements" : null, $classSynopsisIndentationLevel + 1);
+                if (!$ooElement) {
+                    return null;
+                }
+                $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
+                $classSynopsis->appendChild($ooElement);
+            }
+
+            /** @var array<string, Name> $parentsWithInheritedConstants */
+            $parentsWithInheritedConstants = [];
+            /** @var array<string, Name> $parentsWithInheritedProperties */
+            $parentsWithInheritedProperties = [];
+            /** @var array<int, array{name: Name, types: int[]}> $parentsWithInheritedMethods */
+            $parentsWithInheritedMethods = [];
+
+            $this->collectInheritedMembers(
+                $parentsWithInheritedConstants,
+                $parentsWithInheritedProperties,
+                $parentsWithInheritedMethods,
+                $this->hasConstructor(),
+                $classMap
+            );
+
+            $this->appendInheritedMemberSectionToClassSynopsis(
                 $doc,
-                $parentInfo,
-                null,
-                false,
-                $k === 0 ? "extends" : null,
+                $classSynopsis,
+                $parentsWithInheritedConstants,
+                "&Constants;",
+                "&InheritedConstants;",
                 $classSynopsisIndentationLevel + 1
             );
-            if (!$ooElement) {
-                return null;
+
+            if (!empty($this->constInfos)) {
+                $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
+                $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Constants;");
+                $classSynopsisInfo->setAttribute("role", "comment");
+                $classSynopsis->appendChild($classSynopsisInfo);
+
+                foreach ($this->constInfos as $constInfo) {
+                    $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
+                    $fieldSynopsisElement = $constInfo->getFieldSynopsisElement($doc, $allConstInfos, $classSynopsisIndentationLevel + 1);
+                    $classSynopsis->appendChild($fieldSynopsisElement);
+                }
             }
 
-            $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
-            $classSynopsis->appendChild($ooElement);
+            if (!empty($this->propertyInfos)) {
+                $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
+                $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Properties;");
+                $classSynopsisInfo->setAttribute("role", "comment");
+                $classSynopsis->appendChild($classSynopsisInfo);
+
+                foreach ($this->propertyInfos as $propertyInfo) {
+                    $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
+                    $fieldSynopsisElement = $propertyInfo->getFieldSynopsisElement($doc, $allConstInfos, $classSynopsisIndentationLevel + 1);
+                    $classSynopsis->appendChild($fieldSynopsisElement);
+                }
+            }
+
+            $this->appendInheritedMemberSectionToClassSynopsis(
+                $doc,
+                $classSynopsis,
+                $parentsWithInheritedProperties,
+                "&Properties;",
+                "&InheritedProperties;",
+                $classSynopsisIndentationLevel + 1
+            );
         }
-
-        foreach ($this->implements as $k => $interface) {
-            $interfaceInfo = $classMap[$interface->toString()] ?? null;
-            if (!$interfaceInfo) {
-                throw new Exception("Missing implemented interface " . $interface->toString());
-            }
-
-            $ooElement = self::createOoElement($doc, $interfaceInfo, null, false, $k === 0 ? "implements" : null, $classSynopsisIndentationLevel + 1);
-            if (!$ooElement) {
-                return null;
-            }
-            $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
-            $classSynopsis->appendChild($ooElement);
-        }
-
-        /** @var array<string, Name> $parentsWithInheritedConstants */
-        $parentsWithInheritedConstants = [];
-        /** @var array<string, Name> $parentsWithInheritedProperties */
-        $parentsWithInheritedProperties = [];
-        /** @var array<int, array{name: Name, types: int[]}> $parentsWithInheritedMethods */
-        $parentsWithInheritedMethods = [];
-
-        $this->collectInheritedMembers(
-            $parentsWithInheritedConstants,
-            $parentsWithInheritedProperties,
-            $parentsWithInheritedMethods,
-            $this->hasConstructor(),
-            $classMap
-        );
-
-        $this->appendInheritedMemberSectionToClassSynopsis(
-            $doc,
-            $classSynopsis,
-            $parentsWithInheritedConstants,
-            "&Constants;",
-            "&InheritedConstants;",
-            $classSynopsisIndentationLevel + 1
-        );
-
-        if (!empty($this->constInfos)) {
-            $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
-            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Constants;");
-            $classSynopsisInfo->setAttribute("role", "comment");
-            $classSynopsis->appendChild($classSynopsisInfo);
-
-            foreach ($this->constInfos as $constInfo) {
-                $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
-                $fieldSynopsisElement = $constInfo->getFieldSynopsisElement($doc, $allConstInfos, $classSynopsisIndentationLevel + 1);
-                $classSynopsis->appendChild($fieldSynopsisElement);
-            }
-        }
-
-        if (!empty($this->propertyInfos)) {
-            $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
-            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Properties;");
-            $classSynopsisInfo->setAttribute("role", "comment");
-            $classSynopsis->appendChild($classSynopsisInfo);
-
-            foreach ($this->propertyInfos as $propertyInfo) {
-                $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
-                $fieldSynopsisElement = $propertyInfo->getFieldSynopsisElement($doc, $allConstInfos, $classSynopsisIndentationLevel + 1);
-                $classSynopsis->appendChild($fieldSynopsisElement);
-            }
-        }
-
-        $this->appendInheritedMemberSectionToClassSynopsis(
-            $doc,
-            $classSynopsis,
-            $parentsWithInheritedProperties,
-            "&Properties;",
-            "&InheritedProperties;",
-            $classSynopsisIndentationLevel + 1
-        );
 
         if (!empty($this->funcInfos)) {
             $classSynopsis->appendChild(new DOMText("\n\n$classSynopsisIndentation "));
@@ -3954,7 +4037,7 @@ class ClassInfo {
         $indentation = str_repeat(" ", $indentationLevel);
 
         if ($classInfo->type !== "class" && $classInfo->type !== "interface") {
-            echo "Class synopsis generation is not implemented for " . $classInfo->type . "\n";
+            echo "Warning: Class synopsis generation is not implemented for " . $classInfo->type . " of type " . $classInfo->name . "\n";
             return null;
         }
 
@@ -4491,7 +4574,10 @@ class FileInfo {
                         );
                     } else if ($classStmt instanceof Stmt\EnumCase) {
                         $enumCaseInfos[] = new EnumCaseInfo(
-                            $classStmt->name->toString(), $classStmt->expr);
+                            new EnumCaseName($className, $classStmt->name->toString()),
+                            $classStmt->expr,
+                            $classStmt->expr ? $prettyPrinter->prettyPrintExpr($classStmt->expr) : null,
+                        );
                     } else {
                         throw new Exception("Not implemented {$classStmt->getType()}");
                     }
@@ -5741,7 +5827,7 @@ function replaceClassSynopses(
             continue;
         }
 
-        if (stripos($xml, "<classsynopsis") === false) {
+        if (stripos($xml, "<classsynopsis") === false && stripos($xml, "<enumsynopsis") === false) {
             continue;
         }
 
@@ -5757,36 +5843,48 @@ function replaceClassSynopses(
             continue;
         }
 
-        $classSynopsisElements = [];
+        $synopsisElements = [];
         foreach ($doc->getElementsByTagName("classsynopsis") as $element) {
-            $classSynopsisElements[] = $element;
+            $synopsisElements[] = $element;
         }
 
-        foreach ($classSynopsisElements as $classSynopsis) {
-            if (!$classSynopsis instanceof DOMElement) {
+        foreach ($doc->getElementsByTagName("enumsynopsis") as $element) {
+            $synopsisElements[] = $element;
+        }
+
+        foreach ($synopsisElements as $synopsis) {
+            if (!$synopsis instanceof DOMElement) {
                 continue;
             }
 
-            $child = $classSynopsis->firstElementChild;
-            if ($child === null) {
-                continue;
+            if ($synopsis->nodeName === "classsynopsis") {
+                $child = $synopsis->firstElementChild;
+                if ($child === null) {
+                    continue;
+                }
+                $child = $child->lastElementChild;
+                if ($child === null) {
+                    continue;
+                }
+            } elseif ($synopsis->nodeName === "enumsynopsis") {
+                $child = $synopsis->firstElementChild;
+                if ($child === null) {
+                    continue;
+                }
             }
-            $child = $child->lastElementChild;
-            if ($child === null) {
-                continue;
-            }
+
             $className = $child->textContent;
 
-            if ($classSynopsis->parentElement->nodeName === "packagesynopsis" &&
-                $classSynopsis->parentElement->firstElementChild->nodeName === "package"
+            if ($synopsis->parentElement->nodeName === "packagesynopsis" &&
+                $synopsis->parentElement->firstElementChild->nodeName === "package"
             ) {
-                $package = $classSynopsis->parentElement->firstElementChild;
+                $package = $synopsis->parentElement->firstElementChild;
                 $namespace = $package->textContent;
 
                 $className = $namespace . "\\" . $className;
-                $elementToReplace = $classSynopsis->parentElement;
+                $elementToReplace = $synopsis->parentElement;
             } else {
-                $elementToReplace = $classSynopsis;
+                $elementToReplace = $synopsis;
             }
 
             if (!isset($classMap[$className])) {
@@ -5797,15 +5895,30 @@ function replaceClassSynopses(
 
             $classInfo = $classMap[$className];
 
-            $newClassSynopsis = $classInfo->getClassSynopsisElement($doc, $classMap, $allConstInfos);
-            if ($newClassSynopsis === null) {
+            $newSynopsis = $classInfo->getClassSynopsisElement($doc, $classMap, $allConstInfos);
+            if ($newSynopsis === null) {
                 continue;
             }
 
             // Check if there is any change - short circuit if there is not any.
 
-            if (replaceAndCompareXmls($doc, $elementToReplace, $newClassSynopsis)) {
+            if (replaceAndCompareXmls($doc, $elementToReplace, $newSynopsis)) {
                 continue;
+            }
+
+            if ($synopsis->nodeName === "enumsynopsis") {
+                $oldEnumCaseDescriptionElements = collectEnumSynopsisItemDescriptions($className, $elementToReplace);
+                $newEnumCaseDescriptionElements = collectEnumSynopsisItemDescriptions($className, $newSynopsis);
+
+                foreach ($newEnumCaseDescriptionElements as $key => $newEnumCaseDescriptionElement) {
+                    if (isset($oldEnumCaseDescriptionElements[$key]) === false) {
+                        continue;
+                    }
+
+                    $oldEnumCaseDescriptionElement = $oldEnumCaseDescriptionElements[$key];
+
+                    $newEnumCaseDescriptionElement->parentElement->replaceChild($oldEnumCaseDescriptionElement, $newEnumCaseDescriptionElement);
+                }
             }
 
             // Return the updated XML
@@ -5841,6 +5954,28 @@ function replaceClassSynopses(
     $undocumentedClassMap = array_diff_key($classMap, $documentedClassMap);
 
     return $classSynopses;
+}
+
+/**
+ * @return array<string, DOMElement>
+ */
+function collectEnumSynopsisItemDescriptions(string $className, DOMElement $synopsis): array
+{
+    $enumCaseDescriptionElements = [];
+
+    $enumCaseDescriptions = $synopsis->getElementsByTagName("enumitemdescription");
+    foreach ($enumCaseDescriptions as $enumItemDescription) {
+        $enumCaseNames = $enumItemDescription->parentElement->getElementsByTagName("enumidentifier");
+        if (empty($enumCaseNames)) {
+            continue;
+        }
+
+        $enumCaseName = $enumCaseNames[0]->textContent;
+
+        $enumCaseDescriptionElements["$className::$enumCaseName"] = $enumItemDescription;
+    }
+
+    return $enumCaseDescriptionElements;
 }
 
 function getReplacedSynopsisXml(string $xml): string
