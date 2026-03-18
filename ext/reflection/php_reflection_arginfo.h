@@ -1,9 +1,5 @@
 /* This is a generated file, edit php_reflection.stub.php instead.
-<<<<<<< parameter-doccomments
- * Stub hash: f10c9d3d2d3a5fe71f60c6a3fdd682ffaf58275c
-=======
- * Stub hash: 267472e2b726ca5e788eb5cc3e946bc9aa7c9c41
->>>>>>> master
+ * Stub hash: c80946cc8c8215bb6527e09bb71b3a97a76a6a98
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
