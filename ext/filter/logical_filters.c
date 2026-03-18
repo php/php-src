@@ -33,11 +33,6 @@
 # define INADDR_NONE ((unsigned long int) -1)
 #endif
 
-#ifdef HAVE_ARPA_INET_H
-# include <arpa/inet.h>
-#endif
-
-
 
 /* {{{ FETCH_DOUBLE_OPTION(var_name, option_name) */
 #define FETCH_DOUBLE_OPTION(var_name, option_name) \
