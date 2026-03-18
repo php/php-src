@@ -272,7 +272,7 @@ PHPAPI zend_result php_session_reset_id(void);
 		} \
 	} ZEND_HASH_FOREACH_END(); \
 	zval_ptr_dtor(&_zv); \
-} while(0)
+} while (0)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
 

@@ -823,12 +823,12 @@ static PHP_INI_MH(OnUpdateSessionDivisor)
 static PHP_INI_MH(OnUpdateRfc1867Freq)
 {
 	int tmp = ZEND_ATOL(ZSTR_VAL(new_value));
-	if(tmp < 0) {
+	if (tmp < 0) {
 		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be greater than or equal to 0");
 		return FAILURE;
 	}
-	if(ZSTR_LEN(new_value) > 0 && ZSTR_VAL(new_value)[ZSTR_LEN(new_value)-1] == '%') {
-		if(tmp > 100) {
+	if (ZSTR_LEN(new_value) > 0 && ZSTR_VAL(new_value)[ZSTR_LEN(new_value)-1] == '%') {
+		if (tmp > 100) {
 			php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be less than or equal to 100%%");
 			return FAILURE;
 		}
@@ -2577,7 +2577,7 @@ PHP_FUNCTION(session_start)
 				zend_argument_value_error(1, "must be of type array with keys as string");
 				RETURN_THROWS();
 			}
-			switch(Z_TYPE_P(value)) {
+			switch (Z_TYPE_P(value)) {
 				case IS_STRING:
 				case IS_TRUE:
 				case IS_FALSE:
@@ -3071,7 +3071,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 
 	progress = PS(rfc1867_progress);
 
-	switch(event) {
+	switch (event) {
 		case MULTIPART_EVENT_START: {
 			const multipart_event_start *data = event_data;
 			progress = ecalloc(1, sizeof(php_session_rfc1867_progress));

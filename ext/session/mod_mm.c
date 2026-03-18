@@ -464,7 +464,7 @@ PS_CREATE_SID_FUNC(mm)
 				return NULL;
 			}
 		}
-	} while(!sid);
+	} while (!sid);
 
 	return sid;
 }

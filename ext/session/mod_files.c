@@ -183,7 +183,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 #else
 		/* Check to make sure that the opened file is not outside of allowable dirs.
 		   This is not 100% safe but it's hard to do something better without O_NOFOLLOW */
-		if(PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf)) {
+		if (PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf)) {
 			return;
 		}
 		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, data->filemode);
@@ -258,7 +258,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 			buf = wrote > -1 ? buf + wrote : 0;
 			to_write = wrote > -1 ? SESS_FILE_BUF_SIZE(ZSTR_LEN(val) - n) : 0;
 
-		} while(wrote > 0);
+		} while (wrote > 0);
 	}
 #else
 	n = write(data->fd, ZSTR_VAL(val), ZSTR_LEN(val));
@@ -508,7 +508,7 @@ PS_READ_FUNC(files)
 			buf = read_in > -1 ? buf + read_in : 0;
 			to_read = read_in > -1 ? SESS_FILE_BUF_SIZE(ZSTR_LEN(*val) - n) : 0;
 
-		} while(read_in > 0);
+		} while (read_in > 0);
 
 	}
 #else
@@ -684,7 +684,7 @@ PS_CREATE_SID_FUNC(files)
 				return NULL;
 			}
 		}
-	} while(!sid);
+	} while (!sid);
 
 	return sid;
 }
