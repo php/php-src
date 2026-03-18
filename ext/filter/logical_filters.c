@@ -37,9 +37,6 @@
 # include <arpa/inet.h>
 #endif
 
-#ifndef INADDR_NONE
-# define INADDR_NONE ((unsigned long int) -1)
-#endif
 
 
 /* {{{ FETCH_DOUBLE_OPTION(var_name, option_name) */
