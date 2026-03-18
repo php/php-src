@@ -571,19 +571,19 @@ static void php_session_normalize_vars(void)
 
 static PHP_INI_MH(OnUpdateSaveHandler)
 {
-	const ps_module *tmp;
+	const ps_module *new_module;
 	int err_type = E_ERROR;
 
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 
-	tmp = _php_find_ps_module(ZSTR_VAL(new_value));
+	new_module = _php_find_ps_module(ZSTR_VAL(new_value));
 
 	if (stage == ZEND_INI_STAGE_RUNTIME) {
 		err_type = E_WARNING;
 	}
 
-	if (PG(modules_activated) && !tmp) {
+	if (PG(modules_activated) && !new_module) {
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
 			php_error_docref(NULL, err_type, "Session save handler \"%s\" cannot be found", ZSTR_VAL(new_value));
@@ -593,27 +593,27 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 	}
 
 	/* "user" save handler should not be set by user */
-	if (!PS(set_handler) &&  tmp == ps_user_ptr) {
+	if (!PS(set_handler) && new_module == ps_user_ptr) {
 		php_error_docref(NULL, err_type, "Session save handler \"user\" cannot be set by ini_set()");
 		return FAILURE;
 	}
 
 	PS(default_mod) = PS(mod);
-	PS(mod) = tmp;
+	PS(mod) = new_module;
 
 	return SUCCESS;
 }
 
 static PHP_INI_MH(OnUpdateSerializer)
 {
-	const ps_serializer *tmp;
+	const ps_serializer *new_serializer;
 
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 
-	tmp = _php_find_ps_serializer(ZSTR_VAL(new_value));
+	new_serializer = _php_find_ps_serializer(ZSTR_VAL(new_value));
 
-	if (PG(modules_activated) && !tmp) {
+	if (PG(modules_activated) && !new_serializer) {
 		int err_type;
 
 		if (stage == ZEND_INI_STAGE_RUNTIME) {
@@ -628,7 +628,8 @@ static PHP_INI_MH(OnUpdateSerializer)
 		}
 		return FAILURE;
 	}
-	PS(serializer) = tmp;
+
+	PS(serializer) = new_serializer;
 
 	return SUCCESS;
 }
@@ -712,6 +713,7 @@ static PHP_INI_MH(OnUpdateCookieLifetime)
 	} else if (v > maxcookie) {
 		return SUCCESS;
 	}
+
 	return OnUpdateLongGEZero(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
@@ -719,6 +721,7 @@ static PHP_INI_MH(OnUpdateSessionLong)
 {
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
+
 	return OnUpdateLong(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
@@ -726,6 +729,7 @@ static PHP_INI_MH(OnUpdateSessionStr)
 {
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
+
 	return OnUpdateStr(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
@@ -733,6 +737,7 @@ static PHP_INI_MH(OnUpdateSessionBool)
 {
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
+
 	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
@@ -743,19 +748,21 @@ static PHP_INI_MH(OnUpdateSidLength)
 
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
+
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
+
 	if (val != 32) {
 		php_error_docref("session.configuration", E_DEPRECATED, "session.sid_length INI setting is deprecated");
 	}
-	if (endptr && (*endptr == '\0')
-		&& val >= 22 && val <= PS_MAX_SID_LENGTH) {
-		/* Numeric value */
-		PS(sid_length) = val;
-		return SUCCESS;
+
+	if (!endptr || (*endptr != '\0') || (val < 22) || (val > PS_MAX_SID_LENGTH)) {
+		php_error_docref(NULL, E_WARNING, "session.configuration \"session.sid_length\" must be between 22 and 256");
+		return FAILURE;
 	}
 
-	php_error_docref(NULL, E_WARNING, "session.configuration \"session.sid_length\" must be between 22 and 256");
-	return FAILURE;
+	PS(sid_length) = val;
+
+	return SUCCESS;
 }
 
 static PHP_INI_MH(OnUpdateSidBits)
@@ -765,19 +772,21 @@ static PHP_INI_MH(OnUpdateSidBits)
 
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
+
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
+
 	if (val != 4) {
 		php_error_docref("session.configuration", E_DEPRECATED, "session.sid_bits_per_character INI setting is deprecated");
 	}
-	if (endptr && (*endptr == '\0')
-		&& val >= 4 && val <=6) {
-		/* Numeric value */
-		PS(sid_bits_per_character) = val;
-		return SUCCESS;
+
+	if (!endptr || (*endptr != '\0') || (val < 4) || (val > 6)) {
+		php_error_docref(NULL, E_WARNING, "session.configuration \"session.sid_bits_per_character\" must be between 4 and 6");
+		return FAILURE;
 	}
 
-	php_error_docref(NULL, E_WARNING, "session.configuration \"session.sid_bits_per_character\" must be between 4 and 6");
-	return FAILURE;
+	PS(sid_bits_per_character) = val;
+
+	return SUCCESS;
 }
 
 static PHP_INI_MH(OnUpdateSessionGcProbability)
@@ -785,15 +794,15 @@ static PHP_INI_MH(OnUpdateSessionGcProbability)
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 
-	zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
+	zend_long new_probability = zend_ini_parse_quantity_warn(new_value, entry->name);
 
-	if (tmp < 0) {
+	if (new_probability < 0) {
 		php_error_docref("session.gc_probability", E_WARNING, "session.gc_probability must be greater than or equal to 0");
 		return FAILURE;
 	}
 
 	zend_long *p = ZEND_INI_GET_ADDR();
-	*p = tmp;
+	*p = new_probability;
 
 	return SUCCESS;
 }
@@ -803,35 +812,38 @@ static PHP_INI_MH(OnUpdateSessionDivisor)
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 
-	zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
+	zend_long new_divisor = zend_ini_parse_quantity_warn(new_value, entry->name);
 
-	if (tmp <= 0) {
+	if (new_divisor <= 0) {
 		php_error_docref("session.gc_divisor", E_WARNING, "session.gc_divisor must be greater than 0");
 		return FAILURE;
 	}
 
 	zend_long *p = ZEND_INI_GET_ADDR();
-	*p = tmp;
+	*p = new_divisor;
 
 	return SUCCESS;
 }
 
 static PHP_INI_MH(OnUpdateRfc1867Freq)
 {
-	int tmp = ZEND_ATOL(ZSTR_VAL(new_value));
-	if (tmp < 0) {
+	int new_freq = ZEND_ATOL(ZSTR_VAL(new_value));
+
+	if (new_freq < 0) {
 		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be greater than or equal to 0");
 		return FAILURE;
 	}
-	if (ZSTR_LEN(new_value) > 0 && ZSTR_VAL(new_value)[ZSTR_LEN(new_value)-1] == '%') {
-		if (tmp > 100) {
+
+	if (ZSTR_LEN(new_value) > 0 && ZSTR_VAL(new_value)[ZSTR_LEN(new_value) - 1] == '%') {
+		if (new_freq > 100) {
 			php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be less than or equal to 100%%");
 			return FAILURE;
 		}
-		PS(rfc1867_freq) = -tmp;
+		PS(rfc1867_freq) = -new_freq;
 	} else {
-		PS(rfc1867_freq) = tmp;
+		PS(rfc1867_freq) = new_freq;
 	}
+
 	return SUCCESS;
 }
 
@@ -839,11 +851,14 @@ static PHP_INI_MH(OnUpdateUseOnlyCookies)
 {
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
+
 	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
+
 	if (!*p) {
 		php_error_docref("session.configuration", E_DEPRECATED, "Disabling session.use_only_cookies INI setting is deprecated");
 	}
+
 	return SUCCESS;
 }
 
@@ -851,11 +866,14 @@ static PHP_INI_MH(OnUpdateUseTransSid)
 {
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
+
 	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
+
 	if (*p) {
 		php_error_docref("session.configuration", E_DEPRECATED, "Enabling session.use_trans_sid INI setting is deprecated");
 	}
+
 	return SUCCESS;
 }
 
@@ -863,9 +881,11 @@ static PHP_INI_MH(OnUpdateRefererCheck)
 {
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
+
 	if (ZSTR_LEN(new_value) != 0) {
 		php_error_docref("session.configuration", E_DEPRECATED, "Usage of session.referer_check INI setting is deprecated");
 	}
+
 	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
