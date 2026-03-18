@@ -3579,6 +3579,8 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)  
 				php_io_fd *copy_fd = (php_io_fd *) ret;
 				copy_fd->socket = sslsock->s.socket;
 				copy_fd->fd_type = PHP_IO_FD_SOCKET;
+				copy_fd->timeout = sslsock->s.timeout;
+				copy_fd->is_blocked = sslsock->s.is_blocked;
 			}
 			return SUCCESS;
 		default:

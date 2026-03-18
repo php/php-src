@@ -528,6 +528,8 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret)
 				php_io_fd *copy_fd = (php_io_fd *) ret;
 				copy_fd->socket = sock->socket;
 				copy_fd->fd_type = PHP_IO_FD_SOCKET;
+				copy_fd->timeout = sock->timeout;
+				copy_fd->is_blocked = sock->is_blocked;
 			}
 			return SUCCESS;
 		default:

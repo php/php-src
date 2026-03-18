@@ -36,6 +36,33 @@ static inline ssize_t copy_file_range(
 #include <fcntl.h>
 #endif
 
+static inline int php_io_linux_wait_for_data(php_io_fd *fd)
+{
+	if (fd->fd_type != PHP_IO_FD_SOCKET || !fd->is_blocked) {
+		return 1;
+	}
+
+	struct timeval *ptimeout = (fd->timeout.tv_sec == -1) ? NULL : &fd->timeout;
+	int timeout_ms;
+
+	if (ptimeout == NULL) {
+		timeout_ms = -1;
+	} else {
+		timeout_ms = ptimeout->tv_sec * 1000 + ptimeout->tv_usec / 1000;
+	}
+
+	struct pollfd pfd;
+	pfd.fd = fd->fd;
+	pfd.events = POLLIN;
+
+	int ret;
+	do {
+		ret = poll(&pfd, 1, timeout_ms);
+	} while (ret == -1 && errno == EINTR);
+
+	return ret;
+}
+
 static ssize_t php_io_linux_copy_file_to_file(int src_fd, int dest_fd, size_t maxlen)
 {
 #ifdef HAVE_COPY_FILE_RANGE
@@ -130,6 +157,19 @@ static ssize_t php_io_linux_splice_from_pipe(int pipe_fd, int dest_fd, size_t ma
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
 
 	while (remaining > 0) {
+		int ready = php_io_linux_wait_for_data(src);
+		if (ready == 0) {
+			/* timeout */
+			break;
+		} else if (ready < 0) {
+			if (total_copied == 0) {
+				close(pipefd[0]);
+				close(pipefd[1]);
+				return -1;
+			}
+			break;
+		}
+
 		size_t to_copy = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
 		ssize_t result = splice(pipe_fd, NULL, dest_fd, NULL, to_copy, 0);
 
@@ -162,6 +202,19 @@ static ssize_t php_io_linux_splice_via_pipe(int src_fd, int dest_fd, size_t maxl
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
 
 	while (remaining > 0) {
+		int ready = php_io_linux_wait_for_data(src);
+		if (ready == 0) {
+			/* timeout */
+			break;
+		} else if (ready < 0) {
+			if (total_copied == 0) {
+				close(pipefd[0]);
+				close(pipefd[1]);
+				return -1;
+			}
+			break;
+		}
+
 		size_t to_copy = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
 
 		ssize_t in_pipe = splice(src_fd, NULL, pipefd[1], NULL, to_copy, 0);
