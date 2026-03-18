@@ -220,7 +220,7 @@ PHPAPI void php_add_session_var(zend_string *name)
 	}
 }
 
-PHPAPI zval* php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash)
+PHPAPI zval *php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash)
 {
 	IF_SESSION_VARS() {
 		zval *sess_var = Z_REFVAL(PS(http_session_vars));
@@ -230,7 +230,7 @@ PHPAPI zval* php_set_session_var(zend_string *name, zval *state_val, php_unseria
 	return NULL;
 }
 
-PHPAPI zval* php_get_session_var(zend_string *name)
+PHPAPI zval *php_get_session_var(zend_string *name)
 {
 	IF_SESSION_VARS() {
 		return zend_hash_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name);
@@ -238,7 +238,7 @@ PHPAPI zval* php_get_session_var(zend_string *name)
 	return NULL;
 }
 
-PHPAPI zval* php_get_session_var_str(const char *name, size_t name_len)
+PHPAPI zval *php_get_session_var_str(const char *name, size_t name_len)
 {
 	IF_SESSION_VARS() {
 		return zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name, name_len);
