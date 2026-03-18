@@ -75,8 +75,8 @@ static zend_result verify_bool_return_type_userland_calls(const zval* value)
 	}
 	if (!EG(exception)) {
 		zend_type_error("Session callback must have a return value of type bool, %s returned", zend_zval_value_name(value)); \
-    }
-    return FAILURE;
+	}
+	return FAILURE;
 }
 
 PS_OPEN_FUNC(user)

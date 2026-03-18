@@ -153,7 +153,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 {
 	char buf[MAXPATHLEN];
 #if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
-    struct stat sbuf = {0};
+	struct stat sbuf = {0};
 #endif
 	int ret;
 
@@ -230,7 +230,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks
-       data->last_key and reopen when it is needed. */
+	   data->last_key and reopen when it is needed. */
 	ps_files_open(data, key);
 	if (data->fd < 0) {
 		return FAILURE;

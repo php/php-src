@@ -267,7 +267,7 @@ static void php_session_track_init(void)
 static zend_string *php_session_encode(void)
 {
 	IF_SESSION_VARS() {
-        ZEND_ASSERT(PS(serializer));
+		ZEND_ASSERT(PS(serializer));
 		return PS(serializer)->encode();
 	} else {
 		php_error_docref(NULL, E_WARNING, "Cannot encode non-existent session");
@@ -284,7 +284,7 @@ static ZEND_COLD void php_session_cancel_decode(void)
 
 static zend_result php_session_decode(const zend_string *data)
 {
-    ZEND_ASSERT(PS(serializer));
+	ZEND_ASSERT(PS(serializer));
 	zend_result result = SUCCESS;
 	zend_try {
 		if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
@@ -786,38 +786,38 @@ static PHP_INI_MH(OnUpdateSidBits)
 
 static PHP_INI_MH(OnUpdateSessionGcProbability)
 {
-    SESSION_CHECK_ACTIVE_STATE;
-    SESSION_CHECK_OUTPUT_STATE;
+	SESSION_CHECK_ACTIVE_STATE;
+	SESSION_CHECK_OUTPUT_STATE;
 
-    zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
+	zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
 
-    if (tmp < 0) {
-        php_error_docref("session.gc_probability", E_WARNING, "session.gc_probability must be greater than or equal to 0");
-        return FAILURE;
-    }
+	if (tmp < 0) {
+		php_error_docref("session.gc_probability", E_WARNING, "session.gc_probability must be greater than or equal to 0");
+		return FAILURE;
+	}
 
-    zend_long *p = ZEND_INI_GET_ADDR();
-    *p = tmp;
+	zend_long *p = ZEND_INI_GET_ADDR();
+	*p = tmp;
 
-    return SUCCESS;
+	return SUCCESS;
 }
 
 static PHP_INI_MH(OnUpdateSessionDivisor)
 {
-    SESSION_CHECK_ACTIVE_STATE;
-    SESSION_CHECK_OUTPUT_STATE;
+	SESSION_CHECK_ACTIVE_STATE;
+	SESSION_CHECK_OUTPUT_STATE;
 
-    zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
+	zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
 
-    if (tmp <= 0) {
-        php_error_docref("session.gc_divisor", E_WARNING, "session.gc_divisor must be greater than 0");
-        return FAILURE;
-    }
+	if (tmp <= 0) {
+		php_error_docref("session.gc_divisor", E_WARNING, "session.gc_divisor must be greater than 0");
+		return FAILURE;
+	}
 
-    zend_long *p = ZEND_INI_GET_ADDR();
-    *p = tmp;
+	zend_long *p = ZEND_INI_GET_ADDR();
+	*p = tmp;
 
-    return SUCCESS;
+	return SUCCESS;
 }
 
 static PHP_INI_MH(OnUpdateRfc1867Freq)
@@ -2399,10 +2399,10 @@ PHP_FUNCTION(session_create_id)
 	}
 
 	if (prefix && ZSTR_LEN(prefix)) {
-        if (ZSTR_LEN(prefix) > PS_MAX_SID_LENGTH) {
-            zend_argument_value_error(1, "cannot be longer than %d characters", PS_MAX_SID_LENGTH);
-            RETURN_THROWS();
-        }
+		if (ZSTR_LEN(prefix) > PS_MAX_SID_LENGTH) {
+			zend_argument_value_error(1, "cannot be longer than %d characters", PS_MAX_SID_LENGTH);
+			RETURN_THROWS();
+		}
 		if (php_session_valid_key(ZSTR_VAL(prefix)) == FAILURE) {
 			/* E_ERROR raised for security reason. */
 			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
