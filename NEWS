@@ -72,6 +72,10 @@ PHP                                                                        NEWS
   . Clear session-local state disconnect-equivalent processing.
     (KentarouTakeda)
 
+- PGSQL:
+  . Enabled 64 bits support for pg_lo_truncate()/pg_lo_tell()
+    if the server supports it. (KentarouTakeda)
+
 - Phar:
   . Support reference values in Phar::mungServer(). (ndossche)
   . Invalid values now throw in Phar::mungServer() instead of being silently
@@ -139,11 +143,16 @@ PHP                                                                        NEWS
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
   . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)
+  . Fixed bug GH-21221 (Prevent closing of innerstream of php://temp stream).
+    (ilutov)
+  . Improved stream_socket_server() bind failure error reporting. (ilutov)
 
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.
     (ilutov)
   . Support minimum version for libzip dependency updated to 1.0.0.
     (David Carlier)
+  . Added ZipArchive::openString() method.
+    (Tim Starling, Soner Sayakci, Ghaith Olabi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

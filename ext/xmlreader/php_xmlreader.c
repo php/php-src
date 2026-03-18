@@ -471,9 +471,7 @@ static void php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_in
 	int retval;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = ZEND_THIS;
 
@@ -495,9 +493,7 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 	char *retchar = NULL;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = ZEND_THIS;
 
@@ -575,9 +571,7 @@ PHP_METHOD(XMLReader, close)
 	zval *id;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = ZEND_THIS;
 	intern = Z_XMLREADER_P(id);
@@ -827,9 +821,7 @@ PHP_METHOD(XMLReader, read)
 	int retval;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = ZEND_THIS;
 	intern = Z_XMLREADER_P(id);

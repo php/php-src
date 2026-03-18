@@ -14,10 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "php.h"
 #include "php_cli_process_title.h"
 #include "ps_title.h"

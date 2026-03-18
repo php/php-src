@@ -567,10 +567,7 @@ static zend_string *php_openssl_get_utf8_param(
 	char buf[64];
 	size_t len;
 	if (EVP_PKEY_get_utf8_string_param(pkey, param, buf, sizeof(buf), &len) > 0) {
-		zend_string *str = zend_string_alloc(len, 0);
-		memcpy(ZSTR_VAL(str), buf, len);
-		ZSTR_VAL(str)[len] = '\0';
-		return str;
+		return zend_string_init(buf, len, 0);
 	}
 	return NULL;
 }

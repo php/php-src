@@ -14,10 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "phpdbg_io.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)

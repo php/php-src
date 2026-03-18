@@ -1145,12 +1145,15 @@ struct _ir_block {
 	};
 	union {
 		uint32_t dom_depth;      /* depth from the root of the dominators tree */
-		uint32_t postnum;        /* used temporary during tree constructon     */
+		uint32_t postnum;        /* used temporary for iterative Post Ordering */
 	};
 	uint32_t     dom_child;      /* first dominated blocks                     */
 	uint32_t     dom_next_child; /* next dominated block (linked list)         */
 	uint32_t     loop_header;
-	uint32_t     loop_depth;
+	union {
+		uint32_t loop_depth;
+		uint32_t next_succ;      /* used temporary for iterative Post Ordering */
+	};
 };
 
 void ir_build_prev_refs(ir_ctx *ctx);

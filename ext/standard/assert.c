@@ -285,7 +285,6 @@ PHP_FUNCTION(assert_options)
 			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
-		break;
 
 	case PHP_ASSERT_BAIL:
 		oldint = ASSERTG(bail);
@@ -301,7 +300,6 @@ PHP_FUNCTION(assert_options)
 			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
-		break;
 
 	case PHP_ASSERT_WARNING:
 		oldint = ASSERTG(warning);
@@ -317,7 +315,6 @@ PHP_FUNCTION(assert_options)
 			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
-		break;
 
 	case PHP_ASSERT_CALLBACK:
 		if (Z_TYPE(ASSERTG(callback)) != IS_UNDEF) {
@@ -352,7 +349,6 @@ PHP_FUNCTION(assert_options)
 			zend_string_release_ex(key, 0);
 		}
 		RETURN_LONG(oldint);
-		break;
 
 	default:
 		zend_argument_value_error(1, "must be an ASSERT_* constant");
