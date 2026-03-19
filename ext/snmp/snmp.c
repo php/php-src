@@ -1637,7 +1637,7 @@ PHP_FUNCTION(snmp_read_mib)
 }
 /* }}} */
 
-/* {{{ Resets the MIB tree using the MIBDIRS, MIBS and MIBFILES environment variables. */
+/* {{{ Resets the MIB tree and set the mib directories to the provided mibdirs. */
 PHP_FUNCTION(snmp_init_mib)
 {
         zend_string *mibdirs = NULL;
@@ -1647,10 +1647,8 @@ PHP_FUNCTION(snmp_init_mib)
                 Z_PARAM_STR_OR_NULL(mibdirs)
         ZEND_PARSE_PARAMETERS_END();
 
-	// Destroy the old MIB tree and set the internal MIB directory list to NULL
 	shutdown_mib();
 	netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, mibdirs);
-	// Initialise the new MIB tree
 	init_mib();
 }
 /* }}} */
