@@ -181,7 +181,7 @@ function snmp_get_valueretrieval(): int {}
 
 function snmp_read_mib(string $filename): bool {}
 
-function snmp_init_mib(): void {}
+function snmp_init_mib(?string $mibdirs): void {}
 
 class SNMP
 {
