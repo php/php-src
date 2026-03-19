@@ -54,7 +54,6 @@ typedef struct _php_snmp_object {
 	int extended_index;
 	int dontprint_units;
 	int oid_output_format;
-	int mib_allow_underscores;
 	int snmp_errno;
 	int oid_increasing_check;
 	int exceptions_enabled;
