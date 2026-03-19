@@ -1395,6 +1395,12 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		objid_query.valueretrieval = snmp_object->valueretrieval;
 		glob_snmp_object.enum_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, snmp_object->enum_print);
+		glob_snmp_object.numeric_timeticks = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
+		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS, snmp_object->numeric_timeticks);
+		glob_snmp_object.extended_index = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX);
+		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX, snmp_object->extended_index);
+		glob_snmp_object.dontprint_units = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS);
+		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS, snmp_object->dontprint_units);
 		glob_snmp_object.quick_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, snmp_object->quick_print);
 		glob_snmp_object.oid_output_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
@@ -1413,6 +1419,9 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		snmp_session_free(&session);
 	} else {
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, glob_snmp_object.enum_print);
+		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS, glob_snmp_object.numeric_timeticks);
+		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX, glob_snmp_object.extended_index);
+		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS, glob_snmp_object.dontprint_units);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, glob_snmp_object.quick_print);
 		netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, glob_snmp_object.oid_output_format);
 	}
@@ -1489,6 +1498,48 @@ PHP_FUNCTION(snmp_set_enum_print)
 	}
 
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, (int) a1);
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ Print timetick values as integers */
+PHP_FUNCTION(snmp_set_numeric_timeticks)
+{
+	bool a1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS, (int) a1);
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ Use extended table format when printing tables */
+PHP_FUNCTION(snmp_set_extended_index)
+{
+	bool a1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX, (int) a1);
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ Use extended table format */
+PHP_FUNCTION(snmp_set_dontprint_units)
+{
+	bool a1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS, (int) a1);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1618,6 +1669,20 @@ PHP_FUNCTION(snmp_get_valueretrieval)
 }
 /* }}} */
 
+/* {{{ Allow underscores in MIBs. */
+PHP_FUNCTION(snmp_mib_allow_underscores)
+{
+	bool a1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_PARSE_LABEL, (int) a1);
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ Reads and parses a MIB file into the active MIB tree. */
 PHP_FUNCTION(snmp_read_mib)
 {
@@ -1674,6 +1739,9 @@ PHP_METHOD(SNMP, __construct)
 	snmp_object->max_oids = 0;
 	snmp_object->valueretrieval = SNMP_G(valueretrieval);
 	snmp_object->enum_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
+	snmp_object->numeric_timeticks = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
+	snmp_object->extended_index = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX);
+	snmp_object->dontprint_units = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS);
 	snmp_object->oid_output_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
 	snmp_object->quick_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT);
 	snmp_object->oid_increasing_check = true;
@@ -1988,6 +2056,9 @@ static int php_snmp_read_max_oids(php_snmp_object *snmp_object, zval *retval)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(oid_increasing_check)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(quick_print)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(enum_print)
+PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(numeric_timeticks)
+PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(extended_index)
+PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(dontprint_units)
 
 #define PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(name) \
 	static int php_snmp_read_##name(php_snmp_object *snmp_object, zval *retval) \
@@ -2053,6 +2124,9 @@ static int php_snmp_write_##name(php_snmp_object *snmp_object, zval *newval) \
 
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(quick_print)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(enum_print)
+PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(numeric_timeticks)
+PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(extended_index)
+PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(dontprint_units)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(oid_increasing_check)
 
 /* {{{ */
@@ -2105,6 +2179,9 @@ const php_snmp_prop_handler php_snmp_property_entries[] = {
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(valueretrieval),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(quick_print),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(enum_print),
+	PHP_SNMP_PROPERTY_ENTRY_RECORD(numeric_timeticks),
+	PHP_SNMP_PROPERTY_ENTRY_RECORD(extended_index),
+	PHP_SNMP_PROPERTY_ENTRY_RECORD(dontprint_units),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(oid_output_format),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(oid_increasing_check),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(exceptions_enabled),

@@ -1,5 +1,5 @@
 /* This is a generated file, edit snmp.stub.php instead.
- * Stub hash: e2451ac3ea0fa5eb1158e8b7252e61c6794d514f */
+ * Stub hash: f1a38e40e464dca05f9d5d84949fee121bbdc3ef */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -41,6 +41,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_quick_print, 0, 1, IS_T
 ZEND_END_ARG_INFO()
 
 #define arginfo_snmp_set_enum_print arginfo_snmp_set_quick_print
+
+#define arginfo_snmp_set_numeric_timeticks arginfo_snmp_set_quick_print
+
+#define arginfo_snmp_set_extended_index arginfo_snmp_set_quick_print
+
+#define arginfo_snmp_set_dontprint_units arginfo_snmp_set_quick_print
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_oid_output_format, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
@@ -110,6 +116,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_get_valueretrieval, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_snmp_mib_allow_underscores arginfo_snmp_set_quick_print
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_read_mib, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -171,6 +179,9 @@ ZEND_FUNCTION(snmpset);
 ZEND_FUNCTION(snmp_get_quick_print);
 ZEND_FUNCTION(snmp_set_quick_print);
 ZEND_FUNCTION(snmp_set_enum_print);
+ZEND_FUNCTION(snmp_set_numeric_timeticks);
+ZEND_FUNCTION(snmp_set_extended_index);
+ZEND_FUNCTION(snmp_set_dontprint_units);
 ZEND_FUNCTION(snmp_set_oid_output_format);
 ZEND_FUNCTION(snmp2_get);
 ZEND_FUNCTION(snmp2_getnext);
@@ -184,6 +195,7 @@ ZEND_FUNCTION(snmp3_real_walk);
 ZEND_FUNCTION(snmp3_set);
 ZEND_FUNCTION(snmp_set_valueretrieval);
 ZEND_FUNCTION(snmp_get_valueretrieval);
+ZEND_FUNCTION(snmp_mib_allow_underscores);
 ZEND_FUNCTION(snmp_read_mib);
 ZEND_METHOD(SNMP, __construct);
 ZEND_METHOD(SNMP, close);
@@ -205,6 +217,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(snmp_get_quick_print, arginfo_snmp_get_quick_print)
 	ZEND_FE(snmp_set_quick_print, arginfo_snmp_set_quick_print)
 	ZEND_FE(snmp_set_enum_print, arginfo_snmp_set_enum_print)
+	ZEND_FE(snmp_set_numeric_timeticks, arginfo_snmp_set_numeric_timeticks)
+	ZEND_FE(snmp_set_extended_index, arginfo_snmp_set_extended_index)
+	ZEND_FE(snmp_set_dontprint_units, arginfo_snmp_set_dontprint_units)
 	ZEND_FE(snmp_set_oid_output_format, arginfo_snmp_set_oid_output_format)
 	ZEND_RAW_FENTRY("snmp_set_oid_numeric_print", zif_snmp_set_oid_output_format, arginfo_snmp_set_oid_numeric_print, 0, NULL, NULL)
 	ZEND_FE(snmp2_get, arginfo_snmp2_get)
@@ -219,6 +234,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(snmp3_set, arginfo_snmp3_set)
 	ZEND_FE(snmp_set_valueretrieval, arginfo_snmp_set_valueretrieval)
 	ZEND_FE(snmp_get_valueretrieval, arginfo_snmp_get_valueretrieval)
+	ZEND_FE(snmp_mib_allow_underscores, arginfo_snmp_mib_allow_underscores)
 	ZEND_FE(snmp_read_mib, arginfo_snmp_read_mib)
 	ZEND_FE_END
 };
@@ -369,6 +385,24 @@ static zend_class_entry *register_class_SNMP(void)
 	zend_string *property_enum_print_name = zend_string_init("enum_print", sizeof("enum_print") - 1, true);
 	zend_declare_typed_property(class_entry, property_enum_print_name, &property_enum_print_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release_ex(property_enum_print_name, true);
+
+	zval property_numeric_timeticks_default_value;
+	ZVAL_UNDEF(&property_numeric_timeticks_default_value);
+	zend_string *property_numeric_timeticks_name = zend_string_init("numeric_timeticks", sizeof("numeric_timeticks") - 1, true);
+	zend_declare_typed_property(class_entry, property_numeric_timeticks_name, &property_numeric_timeticks_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property_numeric_timeticks_name, true);
+
+	zval property_extended_index_default_value;
+	ZVAL_UNDEF(&property_extended_index_default_value);
+	zend_string *property_extended_index_name = zend_string_init("extended_index", sizeof("extended_index") - 1, true);
+	zend_declare_typed_property(class_entry, property_extended_index_name, &property_extended_index_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property_extended_index_name, true);
+
+	zval property_dontprint_units_default_value;
+	ZVAL_UNDEF(&property_dontprint_units_default_value);
+	zend_string *property_dontprint_units_name = zend_string_init("dontprint_units", sizeof("dontprint_units") - 1, true);
+	zend_declare_typed_property(class_entry, property_dontprint_units_name, &property_dontprint_units_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property_dontprint_units_name, true);
 
 	zval property_oid_output_format_default_value;
 	ZVAL_UNDEF(&property_oid_output_format_default_value);

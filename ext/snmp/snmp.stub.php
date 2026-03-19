@@ -129,6 +129,12 @@ function snmp_set_quick_print(bool $enable): true {}
 
 function snmp_set_enum_print(bool $enable): true {}
 
+function snmp_set_numeric_timeticks(bool $enable): true {}
+
+function snmp_set_extended_index(bool $enable): true {}
+
+function snmp_set_dontprint_units(bool $enable): true {}
+
 function snmp_set_oid_output_format(int $format): true {}
 
 /** @alias snmp_set_oid_output_format */
@@ -179,6 +185,8 @@ function snmp_set_valueretrieval(int $method): true {}
 
 function snmp_get_valueretrieval(): int {}
 
+function snmp_mib_allow_underscores(bool $enable): true {}
+
 function snmp_read_mib(string $filename): bool {}
 
 class SNMP
@@ -215,6 +223,9 @@ class SNMP
     public int $valueretrieval;
     public bool $quick_print;
     public bool $enum_print;
+    public bool $numeric_timeticks;
+    public bool $extended_index;
+    public bool $dontprint_units;
     public int $oid_output_format;
     public bool $oid_increasing_check;
     public int $exceptions_enabled;
