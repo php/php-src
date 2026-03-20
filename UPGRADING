@@ -252,6 +252,8 @@ PHP 8.6 UPGRADE NOTES
 
 - JSON:
   . Improve performance of encoding arrays and objects.
+  . Improved performance of indentation generation in json_encode()
+    when using PHP_JSON_PRETTY_PRINT.
 
 - Standard:
   . Improved performance of array_fill_keys().
