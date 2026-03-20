@@ -102,12 +102,12 @@
 
 #if HAVE_VISIBILITY
 # if defined(WIN32)
-#  define file_public  __declspec(dllexport)
+#  define file_public
 #  ifndef file_protected
 #   define file_protected
 #  endif
 # else
-#  define file_public  __attribute__((__visibility__("default")))
+#  define file_public  __attribute__((__visibility__("hidden")))
 #  ifndef file_protected
 #   define file_protected __attribute__((__visibility__("hidden")))
 #  endif
