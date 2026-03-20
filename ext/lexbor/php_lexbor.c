@@ -22,6 +22,7 @@
 #include "php.h"
 #include "zend_globals.h"
 #include "ext/standard/info.h"
+#include "lexbor/core/base.h"
 #include "lexbor/core/types.h"
 #include "lexbor/core/lexbor.h"
 
@@ -53,7 +54,7 @@ static PHP_MINFO_FUNCTION(lexbor)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Lexbor support", "active");
-	php_info_print_table_row(2, "Lexbor version", LEXBOR_VERSION);
+	php_info_print_table_row(2, "Lexbor version", LEXBOR_VERSION_STRING);
 	php_info_print_table_end();
 }
 
