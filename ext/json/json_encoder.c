@@ -54,8 +54,17 @@ static inline void php_json_pretty_print_char(smart_str *buf, int options, char 
 static inline void php_json_pretty_print_indent(smart_str *buf, int options, const php_json_encoder *encoder) /* {{{ */
 {
 	if (options & PHP_JSON_PRETTY_PRINT) {
-		for (int i = 0; i < encoder->depth; ++i) {
-			smart_str_appendl(buf, "    ", 4);
+		static const char spaces[] =
+			"                                                                ";
+		size_t remaining = (size_t) encoder->depth * 4;
+
+		while (remaining >= sizeof(spaces) - 1) {
+			smart_str_appendl(buf, spaces, sizeof(spaces) - 1);
+			remaining -= sizeof(spaces) - 1;
+		}
+
+		if (remaining) {
+			smart_str_appendl(buf, spaces, remaining);
 		}
 	}
 }
