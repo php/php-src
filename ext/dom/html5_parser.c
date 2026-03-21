@@ -117,6 +117,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
 	php_dom_libxml_ns_mapper *ns_mapper = php_dom_ns_mapper_from_private(private_data);
     xmlNsPtr html_ns = php_dom_libxml_ns_mapper_ensure_html_ns(ns_mapper);
     xmlNsPtr xlink_ns = NULL;
+    xmlNsPtr xml_ns = NULL;
     xmlNsPtr prefixed_xmlns_ns = NULL;
 
     lexbor_array_obj_t work_list;
@@ -256,6 +257,12 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                         xlink_ns->_private = (void *) php_dom_ns_is_xlink_magic_token;
                     }
                     lxml_attr->ns = xlink_ns;
+                } else if (attr->node.ns == LXB_NS_XML) {
+                    if (xml_ns == NULL) {
+                        xml_ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, "xml", DOM_XML_NS_URI);
+                        xml_ns->_private = (void *) php_dom_ns_is_xml_magic_token;
+                    }
+                    lxml_attr->ns = xml_ns;
                 }
 
                 if (last_added_attr == NULL) {
