@@ -1033,7 +1033,6 @@ PHP_FUNCTION(socket_getsockname)
 				ZEND_TRY_ASSIGN_REF_LONG(objint, htons(sin6->sin6_port));
 			}
 			RETURN_TRUE;
-			break;
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
@@ -1044,14 +1043,12 @@ PHP_FUNCTION(socket_getsockname)
 				ZEND_TRY_ASSIGN_REF_LONG(objint, htons(sin->sin_port));
 			}
 			RETURN_TRUE;
-			break;
 
 		case AF_UNIX:
 			s_un = (struct sockaddr_un *) sa;
 
 			ZEND_TRY_ASSIGN_REF_STRING(addr, s_un->sun_path);
 			RETURN_TRUE;
-			break;
 #ifdef AF_PACKET
 		case AF_PACKET:
 			sll = (struct sockaddr_ll *) sa;
@@ -1067,7 +1064,6 @@ PHP_FUNCTION(socket_getsockname)
 				ZEND_TRY_ASSIGN_REF_LONG(objint, sll->sll_ifindex);
 			}
 			RETURN_TRUE;
-			break;
 #endif
 
 		default:
@@ -1123,7 +1119,6 @@ PHP_FUNCTION(socket_getpeername)
 			}
 
 			RETURN_TRUE;
-			break;
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
@@ -1135,14 +1130,12 @@ PHP_FUNCTION(socket_getpeername)
 			}
 
 			RETURN_TRUE;
-			break;
 
 		case AF_UNIX:
 			s_un = (struct sockaddr_un *) sa;
 
 			ZEND_TRY_ASSIGN_REF_STRING(arg2, s_un->sun_path);
 			RETURN_TRUE;
-			break;
 
 		default:
 			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
