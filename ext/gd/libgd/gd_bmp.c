@@ -695,6 +695,7 @@ static int bmp_read_direct(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, b
 		}
 		BMP_DEBUG(printf("Currently no bitfield support\n"));
 		return 1;
+		break;
 
 	case BMP_BI_RLE8:
 		if (info->depth != 8) {

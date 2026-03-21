@@ -1802,6 +1802,7 @@ gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, in
 	switch (src->interpolation_id) {
 		case GD_NEAREST_NEIGHBOUR:
 			return gdImageRotateNearestNeighbour(src, angle, bgcolor);
+			break;
 
 		case GD_BILINEAR_FIXED:
 		case GD_BICUBIC_FIXED:
