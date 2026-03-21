@@ -55,7 +55,7 @@ static inline void php_json_pretty_print_indent(smart_str *buf, int options, con
 {
     if (options & PHP_JSON_PRETTY_PRINT) {
         int depth = encoder->depth;
-        if (depth <= 2) {
+        if (depth <= 8) {
             int i;
             for (i = 0; i < depth; i++) {
                 smart_str_appendl(buf, "    ", 4);
