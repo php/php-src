@@ -1652,7 +1652,6 @@ PHPAPI zend_result php_session_start(void)
 		case php_session_active:
 			php_session_session_already_started_error(E_NOTICE, "Ignoring session_start() because a session has already been started");
 			return FAILURE;
-			break;
 
 		case php_session_disabled: {
 			const char *value = zend_ini_string(ZEND_STRL("session.save_handler"), false);

@@ -366,7 +366,6 @@ static const URI_CHAR * URI_FUNC(ParseIpFutLoop)(URI_TYPE(ParserState) * state,
 
         default:
             goto done_looping;
-            break;
         }
     }
 
@@ -1018,7 +1017,6 @@ static const URI_CHAR * URI_FUNC(ParseOwnHostUserInfoNz)(URI_TYPE(ParserState) *
 
         default:
             goto done_looping;
-            break;
         }
     }
 

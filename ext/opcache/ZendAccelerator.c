@@ -3323,7 +3323,6 @@ static zend_result accel_post_startup(void)
 				accel_startup_ok = false;
 				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - cannot reattach to exiting shared memory.");
 				return SUCCESS;
-				break;
 #if ENABLE_FILE_CACHE_FALLBACK
 			case ALLOC_FALLBACK:
 				zend_shared_alloc_lock();
@@ -3331,7 +3330,6 @@ static zend_result accel_post_startup(void)
 				fallback_process = true;
 				zend_shared_alloc_unlock();
 				goto file_cache_fallback;
-				break;
 #endif
 		}
 

@@ -574,14 +574,11 @@ PHP_FUNCTION(jddayofweek)
 	switch (mode) {
 	case CAL_DOW_LONG:
 		RETURN_STRING(daynamel);
-		break;
 	case CAL_DOW_SHORT:
 		RETURN_STRING(daynames);
-		break;
 	case CAL_DOW_DAYNO:
 	default:
 		RETURN_LONG(day);
-		break;
 	}
 }
 /* }}} */

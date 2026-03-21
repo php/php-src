@@ -774,22 +774,18 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 #ifdef F_OK
 				case FS_EXISTS:
 					RETURN_BOOL(VCWD_ACCESS(file_path_to_check, F_OK) == 0);
-					break;
 #endif
 #ifdef W_OK
 				case FS_IS_W:
 					RETURN_BOOL(VCWD_ACCESS(file_path_to_check, W_OK) == 0);
-					break;
 #endif
 #ifdef R_OK
 				case FS_IS_R:
 					RETURN_BOOL(VCWD_ACCESS(file_path_to_check, R_OK) == 0);
-					break;
 #endif
 #ifdef X_OK
 				case FS_IS_X:
 					RETURN_BOOL(VCWD_ACCESS(file_path_to_check, X_OK) == 0);
-					break;
 #endif
 			}
 		}

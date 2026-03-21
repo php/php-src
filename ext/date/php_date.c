@@ -4266,10 +4266,8 @@ PHP_FUNCTION(timezone_offset_get)
 			break;
 		case TIMELIB_ZONETYPE_OFFSET:
 			RETURN_LONG(tzobj->tzi.utc_offset);
-			break;
 		case TIMELIB_ZONETYPE_ABBR:
 			RETURN_LONG(tzobj->tzi.z.utc_offset + (tzobj->tzi.z.dst * 3600));
-			break;
 	}
 }
 /* }}} */
@@ -5545,10 +5543,8 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, bool calc_s
 		case SUNFUNCS_RET_STRING:
 			retstr = strpprintf(0, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
 			RETURN_NEW_STR(retstr);
-			break;
 		case SUNFUNCS_RET_DOUBLE:
 			RETURN_DOUBLE(N);
-			break;
 	}
 }
 /* }}} */

@@ -1620,7 +1620,6 @@ PHP_FUNCTION(xml_parser_set_option)
 		default:
 			zend_argument_value_error(2, "must be a XML_OPTION_* constant");
 			RETURN_THROWS();
-			break;
 	}
 
 	RETURN_TRUE;
@@ -1642,19 +1641,14 @@ PHP_FUNCTION(xml_parser_get_option)
 	switch (opt) {
 		case PHP_XML_OPTION_CASE_FOLDING:
 			RETURN_BOOL(parser->case_folding);
-			break;
 		case PHP_XML_OPTION_SKIP_TAGSTART:
 			RETURN_LONG(parser->toffset);
-			break;
 		case PHP_XML_OPTION_SKIP_WHITE:
 			RETURN_BOOL(parser->skipwhite);
-			break;
 		case PHP_XML_OPTION_PARSE_HUGE:
 			RETURN_BOOL(parser->parsehuge);
-			break;
 		case PHP_XML_OPTION_TARGET_ENCODING:
 			RETURN_STRING((char *)parser->target_encoding);
-			break;
 		default:
 			zend_argument_value_error(2, "must be a XML_OPTION_* constant");
 			RETURN_THROWS();

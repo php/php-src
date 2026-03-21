@@ -228,7 +228,6 @@ again:
 			}
 			struc = Z_REFVAL_P(struc);
 			goto again;
-			break;
 		default:
 			php_printf("%sUNKNOWN:0\n", COMMON);
 			break;
@@ -674,7 +673,6 @@ again:
 		case IS_REFERENCE:
 			struc = Z_REFVAL_P(struc);
 			goto again;
-			break;
 		default:
 			smart_str_appendl(buf, "NULL", 4);
 			break;

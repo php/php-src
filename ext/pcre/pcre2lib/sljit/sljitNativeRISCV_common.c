@@ -2584,7 +2584,6 @@ static sljit_ins get_jump_instruction(sljit_s32 type)
 	case SLJIT_ORDERED_GREATER_EQUAL:
 	case SLJIT_ORDERED:
 		return BEQ | RS1(OTHER_FLAG) | RS2(TMP_ZERO);
-		break;
 	case SLJIT_GREATER_EQUAL:
 	case SLJIT_LESS_EQUAL:
 	case SLJIT_SIG_GREATER_EQUAL:
