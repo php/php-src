@@ -1814,18 +1814,14 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 	switch (entry_type) {
 		case PHP_PG_FIELD_NAME:
 			RETURN_STRING(PQfname(pgsql_result, (int)field));
-			break;
 		case PHP_PG_FIELD_SIZE:
 			RETURN_LONG(PQfsize(pgsql_result, (int)field));
-			break;
 		case PHP_PG_FIELD_TYPE:
 			RETURN_STR(get_field_name(pg_result->conn, PQftype(pgsql_result, (int)field)));
-			break;
 		case PHP_PG_FIELD_TYPE_OID:
 
 			oid = PQftype(pgsql_result, (int)field);
 			PGSQL_RETURN_OID(oid);
-			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
@@ -4545,8 +4541,8 @@ PHP_FUNCTION(pg_flush)
 	}
 
 	switch (ret) {
-		case 0: RETURN_TRUE; break;
-		case 1: RETURN_LONG(0); break;
+		case 0: RETURN_TRUE;
+		case 1: RETURN_LONG(0);
 		default: RETURN_FALSE;
 	}
 }
