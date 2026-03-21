@@ -154,81 +154,97 @@ namespace
     /**
      * @var int
      * @cvalue INDEX_SIZE_ERR
+     * @link constant.-dom-index-size-err
      */
     const DOM_INDEX_SIZE_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue DOMSTRING_SIZE_ERR
+     * @link constant.-domstring-size-err
      */
     const DOMSTRING_SIZE_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue HIERARCHY_REQUEST_ERR
+     * @link constant.-dom-hierarchy-request-err
      */
     const DOM_HIERARCHY_REQUEST_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue WRONG_DOCUMENT_ERR
+     * @link constant.-dom-wrong-document-err
      */
     const DOM_WRONG_DOCUMENT_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue INVALID_CHARACTER_ERR
+     * @link constant.-dom-invalid-character-err
      */
     const DOM_INVALID_CHARACTER_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue NO_DATA_ALLOWED_ERR
+     * @link constant.-dom-no-data-allowed-err
      */
     const DOM_NO_DATA_ALLOWED_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue NO_MODIFICATION_ALLOWED_ERR
+     * @link constant.-dom-no-modification-allowed-err
      */
     const DOM_NO_MODIFICATION_ALLOWED_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue NOT_FOUND_ERR
+     * @link constant.-dom-not-found-err
      */
     const DOM_NOT_FOUND_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue NOT_SUPPORTED_ERR
+     * @link constant.-dom-not-supported-err
      */
     const DOM_NOT_SUPPORTED_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue INUSE_ATTRIBUTE_ERR
+     * @link constant.-dom-inuse-attribute-err
      */
     const DOM_INUSE_ATTRIBUTE_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue INVALID_STATE_ERR
+     * @link constant.-dom-invalid-state-err
      */
     const DOM_INVALID_STATE_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue SYNTAX_ERR
+     * @link constant.-dom-syntax-err
      */
     const DOM_SYNTAX_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue INVALID_MODIFICATION_ERR
+     * @link constant.-dom-invalid-modification-err
      */
     const DOM_INVALID_MODIFICATION_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue NAMESPACE_ERR
+     * @link constant.-dom-namespace-err
      */
     const DOM_NAMESPACE_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue INVALID_ACCESS_ERR
+     * @link constant.-dom-invalid-access-err
      */
     const DOM_INVALID_ACCESS_ERR = UNKNOWN;
     /**
      * @var int
      * @cvalue VALIDATION_ERR
+     * @link constant.-dom-validation-err
      */
     const DOM_VALIDATION_ERR = UNKNOWN;
 
