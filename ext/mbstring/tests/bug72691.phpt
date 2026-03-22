@@ -27,23 +27,48 @@ mb_ereg_search('\Z');
 var_dump(mb_ereg_search_getpos());
 var_dump(mb_ereg_search_getregs());
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
+
+Deprecated: Function mb_ereg_search() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
 int(0)
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
 array(1) {
   [0]=>
   string(0) ""
 }
+
+Deprecated: Function mb_ereg_search() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
 int(0)
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
 array(1) {
   [0]=>
   string(0) ""
 }
+
+Deprecated: Function mb_ereg_search() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
 int(3)
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
 array(1) {
   [0]=>
   string(3) "foo"
 }
+
+Deprecated: Function mb_ereg_search() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
 int(3)
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug72691.php on line %d
 array(1) {
   [0]=>
   string(0) ""

@@ -15,5 +15,6 @@ if (is_bool($res)) {
     var_dump($res);
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_eregi() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 ok

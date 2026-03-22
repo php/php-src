@@ -18,13 +18,16 @@ var_dump($a, $b, $c);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg2.php on line %d
 int(-1)
 int(-1)
 array(1) {
   [0]=>
   string(2) "-1"
 }
+
+Deprecated: Function mb_eregi() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg2.php on line %d
 int(-1)
 int(-1)
 array(1) {

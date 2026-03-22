@@ -19,7 +19,8 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
   echo $registers[2];
   echo "\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 1
 This is a nice and simple string
 is

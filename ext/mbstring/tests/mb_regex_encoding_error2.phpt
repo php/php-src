@@ -21,6 +21,8 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_regex_encoding() : error conditions ***
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_regex_encoding_error2.php on line 9
 mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "unknown" given

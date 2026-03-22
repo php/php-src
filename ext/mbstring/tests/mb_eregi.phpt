@@ -15,7 +15,14 @@ var_dump(mb_eregi('z', 'XYZ'));
 var_dump(mb_eregi('xyzp', 'XYZ'));
 var_dump(mb_eregi('ö', 'Öäü'));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_eregi.php on line %d
+
+Deprecated: Function mb_eregi() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_eregi.php on line %d
 bool(true)
+
+Deprecated: Function mb_eregi() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_eregi.php on line %d
 bool(false)
+
+Deprecated: Function mb_eregi() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_eregi.php on line %d
 bool(true)

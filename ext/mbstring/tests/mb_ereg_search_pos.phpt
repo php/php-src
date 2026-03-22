@@ -22,7 +22,12 @@ else{
     var_dump("false");
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_search_pos.php on line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_search_pos.php on line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_search_pos.php on line %d
 array(2) {
   [0]=>
   int(5)

@@ -15,7 +15,10 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
     mb_ereg($pattern, '中！', $m);
     var_dump($m);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %sbstring/tests/mb_ereg_dupnames.php on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_dupnames.php on line %d
 array(4) {
   [0]=>
   string(6) "中？"
@@ -26,6 +29,8 @@ array(4) {
   ["punct"]=>
   string(3) "？"
 }
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_dupnames.php on line %d
 array(4) {
   [0]=>
   string(6) "中！"

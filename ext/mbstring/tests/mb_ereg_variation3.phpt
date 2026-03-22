@@ -5,6 +5,12 @@ mbstring
 --SKIPIF--
 <?php
 function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build");
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+	switch ($errno) {
+	case E_DEPRECATED:
+		die("skip deprecated oniguruma");
+	}
+});
 version_compare(MB_ONIGURUMA_VERSION, '6.1.0', '>=') or die("skip requires oniguruma >= 6.1.0");
 ?>
 --FILE--

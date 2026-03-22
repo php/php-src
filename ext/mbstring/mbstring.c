@@ -54,6 +54,7 @@
 #include "mb_gpc.h"
 
 #ifdef HAVE_MBREGEX
+# include "zend_attributes.h"
 # include "php_mbregex.h"
 #endif
 

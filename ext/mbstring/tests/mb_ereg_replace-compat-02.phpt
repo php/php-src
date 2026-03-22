@@ -12,5 +12,6 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
   $a="abc123";
   echo mb_ereg_replace("123","",$a);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 abc

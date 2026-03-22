@@ -12,5 +12,6 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
   $a="This is a nice and simple string";
   echo mb_ereg_replace("^This","That",$a);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 That is a nice and simple string

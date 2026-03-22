@@ -17,5 +17,6 @@ try {
 } catch(Exception $e) {}
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg_replace_callback() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 DONE

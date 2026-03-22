@@ -14,5 +14,12 @@ function_exists('mb_regex_set_options') or die("skip\n");
     mb_regex_set_options( '' );
     print mb_ereg_replace(' -', '+', '- - - - -' );
 ?>
---EXPECT--
-+ + + + +-++++
+--EXPECTF--
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_regex_set_options.php on line %d
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_regex_set_options.php on line %d
++ + + + +
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_regex_set_options.php on line %d
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_regex_set_options.php on line %d
+-++++

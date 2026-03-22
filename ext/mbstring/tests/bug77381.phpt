@@ -14,14 +14,22 @@ var_dump(mb_ereg("0000\\"."\xf5","0"));
 var_dump(mb_ereg("(?i)FFF00000000000000000\xfd",""));
 ?>
 --EXPECTF--
-Warning: mb_ereg(): Pattern is not valid under UTF-8 encoding in %s on line %d
-bool(false)
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug77381.php on line %d
 
 Warning: mb_ereg(): Pattern is not valid under UTF-8 encoding in %s on line %d
 bool(false)
 
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug77381.php on line %d
+
 Warning: mb_ereg(): Pattern is not valid under UTF-8 encoding in %s on line %d
 bool(false)
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug77381.php on line %d
+
+Warning: mb_ereg(): Pattern is not valid under UTF-8 encoding in %s on line %d
+bool(false)
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug77381.php on line %d
 
 Warning: mb_ereg(): Pattern is not valid under UTF-8 encoding in %s on line %d
 bool(false)
