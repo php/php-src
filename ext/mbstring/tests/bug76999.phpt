@@ -20,19 +20,19 @@ try {
 var_dump(mb_regex_set_options());
 ?>
 --EXPECTF--
-Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug76999.php on line %d
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug76999.php on line %d
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 string(2) "pr"
 
-Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug76999.php on line %d
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 string(2) "mr"
 
-Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug76999.php on line %d
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 string(3) "imd"
 
-Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug76999.php on line %d
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 Option "a" is not supported
 
-Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug76999.php on line %d
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 string(2) "mr"

@@ -11,7 +11,7 @@ if (!function_exists('mb_ereg')) die('skip mb_ereg() not available');
 var_dump(mb_ereg("()0\xfc00000\xfc00000\xfc00000\xfc",""));
 ?>
 --EXPECTF--
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug77371.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 
 Warning: mb_ereg(): Pattern is not valid under UTF-8 encoding in %s on line %d
 bool(false)

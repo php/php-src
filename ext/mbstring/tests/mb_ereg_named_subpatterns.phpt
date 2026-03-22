@@ -17,9 +17,9 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
     var_dump($m);
 ?>
 --EXPECTF--
-Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_named_subpatterns.php on line %d
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_named_subpatterns.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 array(5) {
   [0]=>
   string(8) "  中国"
@@ -33,7 +33,7 @@ array(5) {
   string(6) "中国"
 }
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_named_subpatterns.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 array(5) {
   [0]=>
   string(3) "国"
@@ -47,7 +47,7 @@ array(5) {
   string(3) "国"
 }
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_named_subpatterns.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 array(3) {
   [0]=>
   string(8) "  中国"

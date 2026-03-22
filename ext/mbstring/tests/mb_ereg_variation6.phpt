@@ -76,13 +76,13 @@ echo "Done";
 --EXPECTF--
 *** Testing mb_ereg() : usage variations ***
 
-Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 Regex encoding set to utf-8
 
 --** Pattern is: \w+ **--
 -- ASCII String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -90,7 +90,7 @@ array(1) {
 }
 -- Multibyte String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -100,7 +100,7 @@ array(1) {
 --** Pattern is: \W+ **--
 -- ASCII String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -108,7 +108,7 @@ array(1) {
 }
 -- Multibyte String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -118,7 +118,7 @@ array(1) {
 --** Pattern is: \s+ **--
 -- ASCII String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -126,14 +126,14 @@ array(1) {
 }
 -- Multibyte String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(false)
 NULL
 
 --** Pattern is: \S+ **--
 -- ASCII String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -141,7 +141,7 @@ array(1) {
 }
 -- Multibyte String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -151,7 +151,7 @@ array(1) {
 --** Pattern is: \d+ **--
 -- ASCII String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -159,7 +159,7 @@ array(1) {
 }
 -- Multibyte String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -169,7 +169,7 @@ array(1) {
 --** Pattern is: \D+ **--
 -- ASCII String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -177,7 +177,7 @@ array(1) {
 }
 -- Multibyte String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -187,7 +187,7 @@ array(1) {
 --** Pattern is: \b **--
 -- ASCII String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -195,7 +195,7 @@ array(1) {
 }
 -- Multibyte String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -205,7 +205,7 @@ array(1) {
 --** Pattern is: \B **--
 -- ASCII String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -213,7 +213,7 @@ array(1) {
 }
 -- Multibyte String: --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/mb_ereg_variation6.php on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>

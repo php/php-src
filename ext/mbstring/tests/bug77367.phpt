@@ -12,7 +12,7 @@ mb_regex_encoding('UTF-8');
 var_dump(mb_split("\\w", "\xfc"));
 ?>
 --EXPECTF--
-Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug77367.php on line %d
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_split() is deprecated since 8.6, mbregex support end PHP 9.0 in %smbstring/tests/bug77367.php on line %d
+Deprecated: Function mb_split() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
 bool(false)
