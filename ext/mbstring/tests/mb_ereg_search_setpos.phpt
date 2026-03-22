@@ -36,76 +36,76 @@ foreach($positions as $pos) {
 }
 ?>
 --EXPECTF--
-Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
 
-Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
 * Position: 5 :
 
-Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(5)
 
 * Position: 20 :
 
-Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(20)
 
 * Position: 21 :
 
-Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(20)
 
 * Position: 25 :
 
-Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(20)
 
 * Position: 0 :
 
-Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(0)
 
 * Position: -5 :
 
-Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(15)
 
 * Position: -20 :
 
-Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(0)
 
 * Position: -30 :
 
-Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(0)

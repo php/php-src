@@ -14,6 +14,6 @@ var_dump( mb_ereg("^[^><]+$",$a) );
 var_dump( !!preg_match("/^[^><]+$/",$a) );
 ?>
 --EXPECTF--
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(false)
 bool(false)

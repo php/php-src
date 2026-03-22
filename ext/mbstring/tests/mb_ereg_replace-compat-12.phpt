@@ -12,5 +12,5 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
   echo mb_ereg_replace("^","z","abc123");
 ?>
 --EXPECTF--
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 zabc123

@@ -27,40 +27,40 @@ var_dump(mb_ereg_search('\Z'));
 var_dump(mb_ereg_search_getpos());
 ?>
 --EXPECTF--
-Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_ereg_search() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(0)
 
-Deprecated: Function mb_ereg_search() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(0)
 
-Deprecated: Function mb_ereg_search() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(3)
 
-Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 array(1) {
   [0]=>
   string(3) "foo"
 }
 
-Deprecated: Function mb_ereg_search() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(3)
 
-Deprecated: Function mb_ereg_search() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(3)

@@ -19,7 +19,7 @@ var_dump($a, $b, $c);
 echo "Done\n";
 ?>
 --EXPECTF--
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(-1)
 int(-1)
 array(1) {
@@ -27,7 +27,7 @@ array(1) {
   string(2) "-1"
 }
 
-Deprecated: Function mb_eregi() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 int(-1)
 int(-1)
 array(1) {

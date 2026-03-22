@@ -74,20 +74,20 @@ function base64_encode_var_dump($regs) {
 --EXPECTF--
 *** Testing mb_ereg() : basic functionality ***
 
-Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 Regex encoding set to utf-8
 
 **-- ASCII String --**
 -- Without $regs argument--
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 --With $regs argument --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 array(2) {
   [0]=>
@@ -96,7 +96,7 @@ array(2) {
   string(24) "VGhpcyBpcyBhbiBFbmdsaXM="
 }
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -106,14 +106,14 @@ array(1) {
 **-- Multibyte String --**
 -- Without $regs argument --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(false)
 -- With $regs argument --
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 array(3) {
   [0]=>
@@ -124,7 +124,7 @@ array(3) {
   string(8) "MTIzNA=="
 }
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(false)
 array(0) {
 }

@@ -60,14 +60,14 @@ function base64_encode_var_dump($regs) {
 --EXPECTF--
 *** Testing mb_ereg() : usage variations ***
 
-Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
 ASCII String without $regs arg:		
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 ASCII String with $regs arg:
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -75,11 +75,11 @@ array(1) {
 }
 
 Multibyte String without $regs arg:	
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 Multubyte String with $regs arg:
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 array(1) {
   [0]=>

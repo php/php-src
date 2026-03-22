@@ -61,10 +61,10 @@ echo "Done";
 --EXPECTF--
 *** Testing mb_ereg() : usage variations ***
 
-Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 Regex encoding set to utf-8
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 array(5) {
   [0]=>
@@ -79,7 +79,7 @@ array(5) {
   string(4) "ODk="
 }
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 array(5) {
   [0]=>

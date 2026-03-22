@@ -11,7 +11,7 @@ if (!function_exists('mb_split')) die('skip mb_split() not available');
 var_dump(mb_split("   \xfd",""));
 ?>
 --EXPECTF--
-Deprecated: Function mb_split() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line 2
+Deprecated: Function mb_split() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line 2
 
 Warning: mb_split(): Pattern is not valid under UTF-8 encoding in %s on line %d
 bool(false)

@@ -39,26 +39,26 @@ var_dump(mb_ereg_match($regex2, $string_mb));
 echo "Done";
 ?>
 --EXPECTF--
-Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 *** Testing mb_ereg_match() : basic functionality ***
 
 -- ASCII string 1 --
 
-Deprecated: Function mb_ereg_match() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_match() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
 -- ASCII string 2 --
 
-Deprecated: Function mb_ereg_match() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_match() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(false)
 
 -- Multibyte string 1 --
 
-Deprecated: Function mb_ereg_match() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_match() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(true)
 
 -- Multibyte string 2 --
 
-Deprecated: Function mb_ereg_match() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_match() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(false)
 Done

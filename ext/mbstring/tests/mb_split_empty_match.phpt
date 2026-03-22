@@ -12,9 +12,9 @@ mb_regex_set_options('m');
 var_dump(mb_split('^', "a\nb\nc"));
 ?>
 --EXPECTF--
-Deprecated: Function mb_regex_set_options() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_split() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_split() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 array(3) {
   [0]=>
   string(2) "a

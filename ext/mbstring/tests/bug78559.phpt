@@ -13,5 +13,5 @@ $str = hex2bin($str);
 var_dump(mb_eregi($str, $str));
 ?>
 --EXPECTF--
-Deprecated: Function mb_eregi() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(false)

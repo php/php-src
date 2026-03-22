@@ -14,5 +14,5 @@ var_dump(mb_ereg_replace("123","def\\",$a));
 
 ?>
 --EXPECTF--
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 string(7) "abcdef\"

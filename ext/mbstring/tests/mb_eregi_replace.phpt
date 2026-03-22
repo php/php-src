@@ -34,139 +34,139 @@ mb_regex_encoding('ISO-8859-1');
 echo do_translit("Пеар");
 ?>
 --EXPECTF--
-Deprecated: Function mb_regex_encoding() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_eregi_replace() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 Pear
 --CREDITS--
 Testfest Wuerzburg 2009-06-20 (modified by rui 2011-10-15)

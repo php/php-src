@@ -23,9 +23,9 @@ function_exists('mb_ereg_search_regs') or die("skip mb_ereg_search_regs() not av
 
 ?>
 --EXPECTF--
-Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 
-Deprecated: Function mb_ereg_search_regs() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_search_regs() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 array(1) {
   [0]=>
   string(4) "ов"

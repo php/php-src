@@ -25,7 +25,7 @@ foreach ($a as $args) {
 }
 ?>
 --EXPECTF--
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(false)
 array(3) {
   [0]=>
@@ -37,7 +37,7 @@ array(3) {
   }
 }
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 ValueError: mb_ereg(): Argument #1 ($pattern) must not be empty
 array(3) {
   [0]=>
@@ -48,7 +48,7 @@ array(3) {
   string(0) ""
 }
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 TypeError: mb_ereg(): Argument #1 ($pattern) must be of type string, array given
 array(3) {
   [0]=>
@@ -60,7 +60,7 @@ array(3) {
   string(0) ""
 }
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 TypeError: mb_ereg(): Argument #2 ($string) must be of type string, array given
 array(3) {
   [0]=>
@@ -72,7 +72,7 @@ array(3) {
   string(0) ""
 }
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, mbregex support end PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
 bool(false)
 array(3) {
   [0]=>
