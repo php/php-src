@@ -17,6 +17,7 @@
 */
 
 #include "zend.h"
+#include "zend_class_alias.h"
 #include "zend_API.h"
 #include "zend_autoload.h"
 #include "zend_hash.h"
@@ -44,7 +45,7 @@ static Bucket *autoload_find_registered_function(const HashTable *autoloader_tab
 	return NULL;
 }
 
-ZEND_API zend_class_entry *zend_perform_class_autoload(zend_string *class_name, zend_string *lc_name)
+ZEND_API zval *zend_perform_class_autoload(zend_string *class_name, zend_string *lc_name)
 {
 	if (!zend_class_autoload_functions) {
 		return NULL;
@@ -69,13 +70,17 @@ ZEND_API zend_class_entry *zend_perform_class_autoload(zend_string *class_name, 
 		if (EG(exception)) {
 			return NULL;
 		}
-		if (ZSTR_HAS_CE_CACHE(class_name) && ZSTR_GET_CE_CACHE(class_name)) {
-			return (zend_class_entry*)ZSTR_GET_CE_CACHE(class_name);
-		}
+		// if (ZSTR_HAS_CE_CACHE(class_name) && ZSTR_GET_CE_CACHE(class_name)) {
+		// 	return (zend_class_entry*)ZSTR_GET_CE_CACHE(class_name);
+		// }
 
-		zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), lc_name);
-		if (ce) {
-			return ce;
+		// zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), lc_name);
+		zval *ce_zv = zend_hash_find(EG(class_table), lc_name);
+		if (ce_zv) {
+			return ce_zv;
+			// zend_class_entry *ce;
+			// Z_CE_FROM_ZVAL_P(ce, ce_zv);
+			// return ce;
 		}
 
 		zend_hash_move_forward_ex(class_autoload_functions, &pos);
