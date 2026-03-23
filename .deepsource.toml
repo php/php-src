@@ -1,4 +1,9 @@
 version = 1
+
 [[analyzers]]
 name = "php"
+enabled = true
+
+[[transformers]]
+name = "php-cs-fixer"
 enabled = true
