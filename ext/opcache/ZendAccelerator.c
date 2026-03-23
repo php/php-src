@@ -1238,7 +1238,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 		/* pass */
 	} else {
 		const char *include_path = NULL, *cwd = NULL;
-		int include_path_len = 0, cwd_len = 0;
+		size_t include_path_len = 0, cwd_len = 0;
 		const zend_string *parent_script = NULL;
 
 		if (EXPECTED(ZCG(cwd_key_len))) {
@@ -1345,7 +1345,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 		char *key = ZSTR_VAL(ZCG(key));
 		memcpy(key, path, path_length);
 		key[path_length] = ':';
-		int key_length = path_length + 1;
+		size_t key_length = path_length + 1;
 		memcpy(key + key_length, cwd, cwd_len);
 		key_length += cwd_len;
 
