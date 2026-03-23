@@ -117,26 +117,37 @@ static ssize_t php_io_win_transmit_file(int src_fd, SOCKET dest_sock, size_t max
 		return -1;
 	}
 
-	LARGE_INTEGER file_pos;
+	LARGE_INTEGER file_pos, file_size;
 	file_pos.QuadPart = 0;
 	if (!SetFilePointerEx(file_handle, file_pos, &file_pos, FILE_CURRENT)) {
 		return -1;
 	}
 
-	DWORD bytes_to_send = (maxlen == PHP_IO_COPY_ALL)
-			? 0 : (DWORD) min(maxlen, MAXDWORD);
-
-	if (!TransmitFile(dest_sock, file_handle, bytes_to_send, 0, NULL, NULL, 0)) {
-		SetFilePointerEx(file_handle, file_pos, NULL, FILE_BEGIN);
+	if (!GetFileSizeEx(file_handle, &file_size)) {
 		return -1;
 	}
 
-	LARGE_INTEGER new_pos;
-	LARGE_INTEGER zero = {0};
-	if (SetFilePointerEx(file_handle, zero, &new_pos, FILE_CURRENT)) {
-		return (ssize_t)(new_pos.QuadPart - file_pos.QuadPart);
+	LONGLONG available = file_size.QuadPart - file_pos.QuadPart;
+	if (available <= 0) {
+		return 0;
 	}
-	return (ssize_t) bytes_to_send;
+
+	DWORD bytes_to_send;
+	if (maxlen == PHP_IO_COPY_ALL || (LONGLONG) maxlen >= available) {
+		bytes_to_send = (available > MAXDWORD) ? 0 : (DWORD) available;
+	} else {
+		bytes_to_send = (DWORD) maxlen;
+	}
+
+	if (!TransmitFile(dest_sock, file_handle, bytes_to_send, 0, NULL, NULL, 0)) {
+		return -1;
+	}
+
+	LARGE_INTEGER advance;
+	advance.QuadPart = (bytes_to_send == 0) ? available : bytes_to_send;
+	SetFilePointerEx(file_handle, advance, NULL, FILE_CURRENT);
+
+	return (ssize_t) advance.QuadPart;
 }
 
 ssize_t php_io_windows_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen)
