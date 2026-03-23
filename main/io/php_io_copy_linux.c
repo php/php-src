@@ -236,14 +236,19 @@ static ssize_t php_io_linux_splice_via_pipe(php_io_fd *src, int dest_fd, size_t 
 					if (drained <= 0) {
 						break;
 					}
-					ssize_t written = write(dest_fd, drain_buf, drained);
-					if (written <= 0) {
-						close(pipefd[0]);
-						close(pipefd[1]);
-						return total_copied > 0 ? (ssize_t) total_copied : -1;
+					ssize_t drain_written = 0;
+					while (drain_written < drained) {
+						ssize_t written = write(dest_fd, drain_buf + drain_written, drained - drain_written);
+						if (written <= 0) {
+							close(pipefd[0]);
+							close(pipefd[1]);
+							total_copied += drain_written;
+							return total_copied > 0 ? (ssize_t) total_copied : -1;
+						}
+						drain_written += written;
 					}
-					pipe_remaining -= written;
-					total_copied += written;
+					pipe_remaining -= drain_written;
+					total_copied += drain_written;
 				}
 				close(pipefd[0]);
 				close(pipefd[1]);
