@@ -646,7 +646,8 @@ ZEND_FUNCTION(get_class)
 
 /* {{{ Retrieves the "Late Static Binding" class name */
 ZEND_FUNCTION(get_called_class)
-{	ZEND_PARSE_PARAMETERS_NONE();
+{
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	const zend_class_entry *called_scope = zend_get_called_scope(execute_data);
 	if (!called_scope) {
