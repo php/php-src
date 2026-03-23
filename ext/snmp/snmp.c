@@ -1648,7 +1648,7 @@ PHP_FUNCTION(snmp_init_mib)
         ZEND_PARSE_PARAMETERS_END();
 
 	shutdown_mib();
-	netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, mibdirs);
+	netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, ZSTR_VAL(mibdirs));
 	init_mib();
 }
 /* }}} */
