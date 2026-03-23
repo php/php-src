@@ -575,28 +575,6 @@ static char * php_zipobj_get_zip_comment(ze_zip_object *obj, int *len) /* {{{ */
 }
 /* }}} */
 
-/* Add a string to the list of buffers to be released when the object is destroyed.*/
-static void php_zipobj_add_buffer(ze_zip_object *obj, zend_string *str) /* {{{ */
-{
-	size_t pos = obj->buffers_cnt++;
-	obj->buffers = safe_erealloc(obj->buffers, sizeof(*obj->buffers), obj->buffers_cnt, 0);
-	obj->buffers[pos] = zend_string_copy(str);
-}
-/* }}} */
-
-static void php_zipobj_release_buffers(ze_zip_object *obj) /* {{{ */
-{
-	if (obj->buffers_cnt > 0) {
-		for (size_t i = 0; i < obj->buffers_cnt; i++) {
-			zend_string_release(obj->buffers[i]);
-		}
-		efree(obj->buffers);
-		obj->buffers = NULL;
-	}
-	obj->buffers_cnt = 0;
-}
-/* }}} */
-
 /* Close and free the zip_t */
 static bool php_zipobj_close(ze_zip_object *obj) /* {{{ */
 {
@@ -629,8 +607,6 @@ static bool php_zipobj_close(ze_zip_object *obj) /* {{{ */
 		obj->filename = NULL;
 		obj->filename_len = 0;
 	}
-
-	php_zipobj_release_buffers(obj);
 
 	obj->za = NULL;
 	return success;
@@ -1531,10 +1507,12 @@ PHP_METHOD(ZipArchive, openString)
 
 	ze_zip_object *ze_obj = Z_ZIP_P(self);
 
+	php_zipobj_close(ze_obj);
+
 	zip_error_t err;
 	zip_error_init(&err);
 
-	zip_source_t * zip_source = zip_source_buffer_create(ZSTR_VAL(buffer), ZSTR_LEN(buffer), 0, &err);
+	zip_source_t * zip_source = php_zip_create_string_source(buffer, NULL, &err);
 
 	if (!zip_source) {
 		ze_obj->err_zip = zip_error_code_zip(&err);
@@ -1542,8 +1520,6 @@ PHP_METHOD(ZipArchive, openString)
 		zip_error_fini(&err);
 		RETURN_LONG(ze_obj->err_zip);
 	}
-
-	php_zipobj_close(ze_obj);
 
 	struct zip *intern = zip_open_from_source(zip_source, ZIP_RDONLY, &err);
 	if (!intern) {
@@ -1554,7 +1530,6 @@ PHP_METHOD(ZipArchive, openString)
 		RETURN_LONG(ze_obj->err_zip);
 	}
 
-	php_zipobj_add_buffer(ze_obj, buffer);
 	ze_obj->za = intern;
 	zip_error_fini(&err);
 	RETURN_TRUE;
@@ -1597,7 +1572,7 @@ PHP_METHOD(ZipArchive, close)
 }
 /* }}} */
 
-/* {{{ close the zip archive */
+/* {{{ get the number of entries */
 PHP_METHOD(ZipArchive, count)
 {
 	struct zip *intern;
@@ -1911,9 +1886,7 @@ PHP_METHOD(ZipArchive, addFromString)
 	ZIP_FROM_OBJECT(intern, self);
 
 	ze_obj = Z_ZIP_P(self);
-	php_zipobj_add_buffer(ze_obj, buffer);
-
-	zs = zip_source_buffer(intern, ZSTR_VAL(buffer), ZSTR_LEN(buffer), 0);
+	zs = php_zip_create_string_source(buffer, NULL, NULL);
 
 	if (zs == NULL) {
 		RETURN_FALSE;
