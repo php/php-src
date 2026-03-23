@@ -1644,7 +1644,7 @@ class FuncInfo {
     }
 
     public function getMethodSynopsisDocument(): ?string {
-        $REFSEC1_SEPERATOR = "\n\n ";
+        $REFSEC1_SEPARATOR = "\n\n ";
 
         $doc = new DOMDocument("1.0", "utf-8");
         $doc->formatOutput = true;
@@ -1654,7 +1654,7 @@ class FuncInfo {
 
         if ($this->isMethod()) {
             assert($this->name instanceof MethodName);
-            /* Namespaces are seperated by '-', '_' must be converted to '-' too.
+            /* Namespaces are separated by '-', '_' must be converted to '-' too.
              * Trim away the __ for magic methods */
             $id = strtolower(
                 str_replace('\\', '-', $this->name->className->__toString())
@@ -1683,7 +1683,7 @@ class FuncInfo {
         $refnamediv->appendChild($refpurpose);
 
         $refnamediv->appendChild(new DOMText("\n "));
-        $refentry->append($refnamediv, $REFSEC1_SEPERATOR);
+        $refentry->append($refnamediv, $REFSEC1_SEPARATOR);
 
         /* Creation of <refsect1 role="description"> */
         $descriptionRefSec = $this->generateRefSect1($doc, 'description');
@@ -1702,16 +1702,16 @@ class FuncInfo {
         $descriptionRefSec->appendChild($returnDescriptionPara);
 
         $descriptionRefSec->appendChild(new DOMText("\n "));
-        $refentry->append($descriptionRefSec, $REFSEC1_SEPERATOR);
+        $refentry->append($descriptionRefSec, $REFSEC1_SEPARATOR);
 
         /* Creation of <refsect1 role="parameters"> */
         $parametersRefSec = $this->getParameterSection($doc);
-        $refentry->append($parametersRefSec, $REFSEC1_SEPERATOR);
+        $refentry->append($parametersRefSec, $REFSEC1_SEPARATOR);
 
         /* Creation of <refsect1 role="returnvalues"> */
         if (!$this->name->isConstructor() && !$this->name->isDestructor()) {
             $returnRefSec = $this->getReturnValueSection($doc);
-            $refentry->append($returnRefSec, $REFSEC1_SEPERATOR);
+            $refentry->append($returnRefSec, $REFSEC1_SEPARATOR);
         }
 
         /* Creation of <refsect1 role="errors"> */
@@ -1731,14 +1731,14 @@ class FuncInfo {
         $errorsRefSec->appendChild($errorsDescriptionPara);
         $errorsRefSec->appendChild(new DOMText("\n "));
 
-        $refentry->append($errorsRefSec, $REFSEC1_SEPERATOR);
+        $refentry->append($errorsRefSec, $REFSEC1_SEPARATOR);
 
         /* Creation of <refsect1 role="changelog"> */
         $changelogRefSec = $this->getChangelogSection($doc);
-        $refentry->append($changelogRefSec, $REFSEC1_SEPERATOR);
+        $refentry->append($changelogRefSec, $REFSEC1_SEPARATOR);
 
         $exampleRefSec = $this->getExampleSection($doc, $id);
-        $refentry->append($exampleRefSec, $REFSEC1_SEPERATOR);
+        $refentry->append($exampleRefSec, $REFSEC1_SEPARATOR);
 
         /* Creation of <refsect1 role="notes"> */
         $notesRefSec = $this->generateRefSect1($doc, 'notes');
@@ -1751,7 +1751,7 @@ class FuncInfo {
         $noteTag->append("\n   ", $noteTagSimara, "\n  ");
         $notesRefSec->append($noteTag, "\n ");
 
-        $refentry->append($notesRefSec, $REFSEC1_SEPERATOR);
+        $refentry->append($notesRefSec, $REFSEC1_SEPARATOR);
 
         /* Creation of <refsect1 role="seealso"> */
         $seeAlsoRefSec = $this->generateRefSect1($doc, 'seealso');
