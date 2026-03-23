@@ -161,6 +161,10 @@ PHP 8.6 UPGRADE NOTES
 7. New Classes and Interfaces
 ========================================
 
+- Standard:
+  . enum SortDirection
+    RFC: https://wiki.php.net/rfc/sort_direction_enum
+
 ========================================
 8. Removed Extensions and SAPIs
 ========================================

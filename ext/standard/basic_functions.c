@@ -297,6 +297,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	assertion_error_ce = register_class_AssertionError(zend_ce_error);
 
 	rounding_mode_ce = register_class_RoundingMode();
+	sort_direction_ce = register_class_SortDirection();
 
 	BASIC_MINIT_SUBMODULE(var)
 	BASIC_MINIT_SUBMODULE(file)

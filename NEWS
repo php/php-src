@@ -141,6 +141,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-13204 (glob() fails if square bracket is in current directory).
     (ndossche)
   . Add array size maximum to array_diff(). (ndossche)
+  . Add enum SortDirection. (timwolla)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream

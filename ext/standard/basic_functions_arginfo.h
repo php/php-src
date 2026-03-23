@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: f5583557f058e4862750d1262296d7f59cb0eed0
+ * Stub hash: 749c71a6220260eb3fb593b982a9d97821e0539b
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -3978,6 +3978,17 @@ static void register_basic_functions_symbols(int module_number)
 	attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	ZVAL_STR_COPY(&attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[1].value, attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1_str);
 	attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+}
+
+static zend_class_entry *register_class_SortDirection(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("SortDirection", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Ascending", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Descending", NULL);
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class___PHP_Incomplete_Class(void)

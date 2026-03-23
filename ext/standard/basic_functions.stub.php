@@ -90,6 +90,11 @@ const SORT_NATURAL = UNKNOWN;
  */
 const SORT_FLAG_CASE = UNKNOWN;
 
+enum SortDirection {
+    case Ascending;
+    case Descending;
+}
+
 /**
  * @var int
  * @cvalue PHP_CASE_LOWER
