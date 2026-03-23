@@ -98,6 +98,12 @@ object(SNMP)#%d (%d) {
   bool(false)
   ["enum_print"]=>
   bool(false)
+  ["numeric_timeticks"]=>
+  bool(false)
+  ["extended_index"]=>
+  bool(false)
+  ["dontprint_units"]=>
+  bool(false)
   ["oid_output_format"]=>
   int(3)
   ["oid_increasing_check"]=>
@@ -123,6 +129,12 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["enum_print"]=>
   bool(true)
+  ["numeric_timeticks"]=>
+  bool(false)
+  ["extended_index"]=>
+  bool(false)
+  ["dontprint_units"]=>
+  bool(false)
   ["oid_output_format"]=>
   int(4)
   ["oid_increasing_check"]=>
@@ -148,6 +160,12 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["enum_print"]=>
   bool(true)
+  ["numeric_timeticks"]=>
+  bool(false)
+  ["extended_index"]=>
+  bool(false)
+  ["dontprint_units"]=>
+  bool(false)
   ["oid_output_format"]=>
   int(3)
   ["oid_increasing_check"]=>
@@ -178,6 +196,12 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["enum_print"]=>
   bool(true)
+  ["numeric_timeticks"]=>
+  bool(false)
+  ["extended_index"]=>
+  bool(false)
+  ["dontprint_units"]=>
+  bool(false)
   ["oid_output_format"]=>
   int(3)
   ["oid_increasing_check"]=>
