@@ -430,20 +430,18 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 
 	if (newdocp) {
 		if (ret_class) {
-			zend_string *curclass_name;
-			zend_class_entry *curce;
 			php_libxml_node_object *interndoc;
 
-			curce = Z_OBJCE_P(docp);
-			curclass_name = curce->name;
-			while (curce->parent != NULL) {
-				curce = curce->parent;
+			const zend_class_entry *current_ce = Z_OBJCE_P(docp);
+			const zend_string *current_class_name = current_ce->name;
+			while (current_ce->parent != NULL) {
+				current_ce = current_ce->parent;
 			}
 
-			if (!instanceof_function(ret_class, curce)) {
+			if (!instanceof_function(ret_class, current_ce)) {
 				xmlFreeDoc(newdocp);
 				zend_argument_type_error(2, "must be a class name compatible with %s, %s given",
-					ZSTR_VAL(curclass_name), ZSTR_VAL(ret_class->name)
+					ZSTR_VAL(current_class_name), ZSTR_VAL(ret_class->name)
 				);
 				RETURN_THROWS();
 			}
