@@ -360,12 +360,11 @@ HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type)
 {
 	mysqli_object *intern;
-	zend_class_entry *mysqli_base_class;
 	zend_object_handlers *handlers;
 
 	intern = zend_object_alloc(sizeof(mysqli_object), class_type);
 
-	mysqli_base_class = class_type;
+	const zend_class_entry *mysqli_base_class = class_type;
 	while (mysqli_base_class->type != ZEND_INTERNAL_CLASS &&
 		   mysqli_base_class->parent != NULL) {
 		mysqli_base_class = mysqli_base_class->parent;
