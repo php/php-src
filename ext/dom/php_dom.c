@@ -1496,7 +1496,7 @@ void dom_objects_free_storage(zend_object *object)
 
 static void dom_objects_set_class_ex(zend_class_entry *class_type, dom_object *intern)
 {
-	zend_class_entry *base_class = class_type;
+	const zend_class_entry *base_class = class_type;
 	while ((base_class->type != ZEND_INTERNAL_CLASS || base_class->info.internal.module->module_number != dom_module_entry.module_number) && base_class->parent != NULL) {
 		base_class = base_class->parent;
 	}
