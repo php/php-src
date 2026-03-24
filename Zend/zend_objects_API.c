@@ -127,20 +127,19 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_
 /* Store objects API */
 static ZEND_COLD zend_never_inline void ZEND_FASTCALL zend_objects_store_put_cold(zend_object *object)
 {
-	int handle;
 	uint32_t new_size = 2 * EG(objects_store).size;
 
 	EG(objects_store).object_buckets = (zend_object **) erealloc(EG(objects_store).object_buckets, new_size * sizeof(zend_object*));
 	/* Assign size after realloc, in case it fails */
 	EG(objects_store).size = new_size;
-	handle = EG(objects_store).top++;
+	uint32_t handle = EG(objects_store).top++;
 	object->handle = handle;
 	EG(objects_store).object_buckets[handle] = object;
 }
 
 ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object)
 {
-	int handle;
+	uint32_t handle;
 
 	/* When in shutdown sequence - do not reuse previously freed handles, to make sure
 	 * the dtors for newly created objects are called in zend_objects_store_call_destructors() loop
