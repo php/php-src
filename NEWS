@@ -65,6 +65,8 @@ PHP                                                                        NEWS
 - XSL:
   . Fix GH-21357 (XSLTProcessor works with DOMDocument, but fails with
     Dom\XMLDocument). (ndossche)
+  . Fixed bug GH-21496 (UAF in dom_objects_free_storage).
+    (David Carlier/ndossche)
 
 12 Mar 2026, PHP 8.4.19
 

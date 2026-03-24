@@ -167,7 +167,7 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	xsltStylesheetPtr sheetp;
 	bool clone_docu = false;
 	xmlNode *nodep = NULL;
-	zval *cloneDocu, rv, clone_zv;
+	zval *cloneDocu, rv, clone_zv, owner_zv;
 	zend_string *member;
 
 	id = ZEND_THIS;
@@ -175,10 +175,40 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		RETURN_THROWS();
 	}
 
+	nodep = php_libxml_import_node(docp);
+	if (nodep == NULL) {
+		zend_argument_type_error(1, "must be a valid XML node");
+		RETURN_THROWS();
+	}
+
+	if (Z_OBJ_HANDLER_P(docp, clone_obj) == NULL) {
+		zend_argument_type_error(1, "must be a cloneable node");
+		RETURN_THROWS();
+	}
+
+	ZVAL_UNDEF(&owner_zv);
+
+	/* For non-document nodes, resolve the ownerDocument and clone that
+	 * instead as xsltParseStylesheetProcess may free nodes in the document. */
+	if (nodep->type != XML_DOCUMENT_NODE && nodep->type != XML_HTML_DOCUMENT_NODE) {
+		if (nodep->doc == NULL) {
+			zend_argument_value_error(1, "must be part of a document");
+			RETURN_THROWS();
+		}
+
+		/* See dom_import_simplexml_common */
+
+		dom_object *nodeobj = (dom_object *) ((char *) Z_OBJ_P(docp) - Z_OBJ_HT_P(docp)->offset);
+
+		php_dom_create_object((xmlNodePtr) nodep->doc, &owner_zv, nodeobj);
+		docp = &owner_zv;
+	}
+
 	/* libxslt uses _private, so we must copy the imported
 	 * stylesheet document otherwise the node proxies will be a mess.
 	 * We will clone the object and detach the libxml internals later. */
 	zend_object *clone = Z_OBJ_HANDLER_P(docp, clone_obj)(Z_OBJ_P(docp));
+	zval_ptr_dtor(&owner_zv);
 	if (!clone) {
 		RETURN_THROWS();
 	}
