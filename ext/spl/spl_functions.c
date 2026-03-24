@@ -21,12 +21,12 @@
 #include "php.h"
 
 /* {{{ spl_add_class_name */
-void spl_add_class_name(zval *list, zend_class_entry *pce, int allow, int ce_flags)
+void spl_add_class_name(zval *list, const zend_class_entry *pce, int allow, int ce_flags)
 {
 	if (!allow || (allow > 0 && (pce->ce_flags & ce_flags)) || (allow < 0 && !(pce->ce_flags & ce_flags))) {
-		zval *tmp;
+		const zval *tmp = zend_hash_find(Z_ARRVAL_P(list), pce->name);
 
-		if ((tmp = zend_hash_find(Z_ARRVAL_P(list), pce->name)) == NULL) {
+		if (tmp == NULL) {
 			zval t;
 			ZVAL_STR_COPY(&t, pce->name);
 			zend_hash_add(Z_ARRVAL_P(list), pce->name, &t);
@@ -36,7 +36,7 @@ void spl_add_class_name(zval *list, zend_class_entry *pce, int allow, int ce_fla
 /* }}} */
 
 /* {{{ spl_add_interfaces */
-void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_flags)
+void spl_add_interfaces(zval *list, const zend_class_entry *pce, int allow, int ce_flags)
 {
 	if (pce->num_interfaces) {
 		ZEND_ASSERT(pce->ce_flags & ZEND_ACC_LINKED);
@@ -48,12 +48,10 @@ void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_fl
 /* }}} */
 
 /* {{{ spl_add_traits */
-void spl_add_traits(zval *list, zend_class_entry * pce, int allow, int ce_flags)
+void spl_add_traits(zval *list, const zend_class_entry *pce, int allow, int ce_flags)
 {
-	zend_class_entry *trait;
-
 	for (uint32_t num_traits = 0; num_traits < pce->num_traits; num_traits++) {
-		trait = zend_fetch_class_by_name(pce->trait_names[num_traits].name,
+		const zend_class_entry *trait = zend_fetch_class_by_name(pce->trait_names[num_traits].name,
 			pce->trait_names[num_traits].lc_name, ZEND_FETCH_CLASS_TRAIT);
 		ZEND_ASSERT(trait);
 		spl_add_class_name(list, trait, allow, ce_flags);
@@ -63,7 +61,7 @@ void spl_add_traits(zval *list, zend_class_entry * pce, int allow, int ce_flags)
 
 
 /* {{{ spl_add_classes */
-void spl_add_classes(zend_class_entry *pce, zval *list, bool sub, int allow, int ce_flags)
+void spl_add_classes(const zend_class_entry *pce, zval *list, bool sub, int allow, int ce_flags)
 {
 	ZEND_ASSERT(pce);
 	spl_add_class_name(list, pce, allow, ce_flags);

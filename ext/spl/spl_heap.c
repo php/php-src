@@ -412,7 +412,7 @@ static void spl_heap_object_free_storage(zend_object *object) /* {{{ */
 static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig) /* {{{ */
 {
 	spl_heap_object   *intern;
-	zend_class_entry  *parent = class_type;
+	const zend_class_entry  *parent = class_type;
 	int                inherited = 0;
 
 	intern = zend_object_alloc(sizeof(spl_heap_object), parent);
