@@ -974,7 +974,7 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			//??? TODO: try to avoid array duplication
 			ZVAL_ARR(&intern->array, zend_array_dup(Z_ARR_P(array)));
 
-			if (intern->is_child) {
+			if (intern->is_child && intern->bucket) {
 				Z_TRY_DELREF(intern->bucket->val);
 				/*
 				 * replace bucket->val with copied array, so the changes between
@@ -1016,6 +1016,10 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 	if (intern->ht_iter != (uint32_t)-1) {
 		zend_hash_iterator_del(intern->ht_iter);
 		intern->ht_iter = (uint32_t)-1;
+	}
+
+	if (intern->is_child) {
+		intern->bucket = NULL;
 	}
 
 	zval_ptr_dtor(&garbage);
