@@ -129,6 +129,8 @@ function snmp_set_quick_print(bool $enable): true {}
 
 function snmp_set_enum_print(bool $enable): true {}
 
+function snmp_set_numeric_index(bool $enable): true {}
+
 function snmp_set_numeric_timeticks(bool $enable): true {}
 
 function snmp_set_extended_index(bool $enable): true {}

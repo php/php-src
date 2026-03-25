@@ -1395,6 +1395,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		objid_query.valueretrieval = snmp_object->valueretrieval;
 		glob_snmp_object.enum_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, snmp_object->enum_print);
+		glob_snmp_object.numeric_index = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS);
+		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, snmp_object->numeric_index);
 		glob_snmp_object.numeric_timeticks = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS, snmp_object->numeric_timeticks);
 		glob_snmp_object.extended_index = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX);
@@ -1419,6 +1421,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		snmp_session_free(&session);
 	} else {
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, glob_snmp_object.enum_print);
+		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, glob_snmp_object.numeric_index);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS, glob_snmp_object.numeric_timeticks);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX, glob_snmp_object.extended_index);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS, glob_snmp_object.dontprint_units);
@@ -1498,6 +1501,20 @@ PHP_FUNCTION(snmp_set_enum_print)
 	}
 
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, (int) a1);
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ Print table index numerically */
+PHP_FUNCTION(snmp_set_numeric_index)
+{
+	bool a1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, (int) a1);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1739,6 +1756,7 @@ PHP_METHOD(SNMP, __construct)
 	snmp_object->max_oids = 0;
 	snmp_object->valueretrieval = SNMP_G(valueretrieval);
 	snmp_object->enum_print = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM);
+	snmp_object->numeric_index = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS);
 	snmp_object->numeric_timeticks = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
 	snmp_object->extended_index = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX);
 	snmp_object->dontprint_units = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS);
@@ -2056,6 +2074,7 @@ static int php_snmp_read_max_oids(php_snmp_object *snmp_object, zval *retval)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(oid_increasing_check)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(quick_print)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(enum_print)
+PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(numeric_index)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(numeric_timeticks)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(extended_index)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(dontprint_units)
@@ -2124,6 +2143,7 @@ static int php_snmp_write_##name(php_snmp_object *snmp_object, zval *newval) \
 
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(quick_print)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(enum_print)
+PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(numeric_index)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(numeric_timeticks)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(extended_index)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(dontprint_units)
@@ -2179,6 +2199,7 @@ const php_snmp_prop_handler php_snmp_property_entries[] = {
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(valueretrieval),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(quick_print),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(enum_print),
+	PHP_SNMP_PROPERTY_ENTRY_RECORD(numeric_index),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(numeric_timeticks),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(extended_index),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(dontprint_units),

@@ -1,5 +1,5 @@
 /* This is a generated file, edit snmp.stub.php instead.
- * Stub hash: f1a38e40e464dca05f9d5d84949fee121bbdc3ef */
+ * Stub hash: 89efd2d6c0694fcb719ea024d4fb47af37148770 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -41,6 +41,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_quick_print, 0, 1, IS_T
 ZEND_END_ARG_INFO()
 
 #define arginfo_snmp_set_enum_print arginfo_snmp_set_quick_print
+
+#define arginfo_snmp_set_numeric_index arginfo_snmp_set_quick_print
 
 #define arginfo_snmp_set_numeric_timeticks arginfo_snmp_set_quick_print
 
@@ -179,6 +181,7 @@ ZEND_FUNCTION(snmpset);
 ZEND_FUNCTION(snmp_get_quick_print);
 ZEND_FUNCTION(snmp_set_quick_print);
 ZEND_FUNCTION(snmp_set_enum_print);
+ZEND_FUNCTION(snmp_set_numeric_index);
 ZEND_FUNCTION(snmp_set_numeric_timeticks);
 ZEND_FUNCTION(snmp_set_extended_index);
 ZEND_FUNCTION(snmp_set_dontprint_units);
@@ -217,6 +220,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(snmp_get_quick_print, arginfo_snmp_get_quick_print)
 	ZEND_FE(snmp_set_quick_print, arginfo_snmp_set_quick_print)
 	ZEND_FE(snmp_set_enum_print, arginfo_snmp_set_enum_print)
+	ZEND_FE(snmp_set_numeric_index, arginfo_snmp_set_numeric_index)
 	ZEND_FE(snmp_set_numeric_timeticks, arginfo_snmp_set_numeric_timeticks)
 	ZEND_FE(snmp_set_extended_index, arginfo_snmp_set_extended_index)
 	ZEND_FE(snmp_set_dontprint_units, arginfo_snmp_set_dontprint_units)
