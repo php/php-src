@@ -98,8 +98,6 @@ object(SNMP)#%d (%d) {
   bool(false)
   ["enum_print"]=>
   bool(false)
-  ["numeric_index"]=>
-  bool(false)
   ["numeric_timeticks"]=>
   bool(false)
   ["extended_index"]=>
@@ -112,6 +110,8 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["exceptions_enabled"]=>
   int(0)
+  ["numeric_index"]=>
+  bool(false)
 }
 object(SNMP)#%d (%d) {
   ["info"]=>
@@ -131,8 +131,6 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["enum_print"]=>
   bool(true)
-  ["numeric_index"]=>
-  bool(false)
   ["numeric_timeticks"]=>
   bool(false)
   ["extended_index"]=>
@@ -145,6 +143,8 @@ object(SNMP)#%d (%d) {
   bool(false)
   ["exceptions_enabled"]=>
   int(0)
+  ["numeric_index"]=>
+  bool(false)
 }
 object(SNMP)#%d (%d) {
   ["info"]=>
@@ -164,8 +164,6 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["enum_print"]=>
   bool(true)
-  ["numeric_index"]=>
-  bool(false)
   ["numeric_timeticks"]=>
   bool(false)
   ["extended_index"]=>
@@ -178,6 +176,8 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["exceptions_enabled"]=>
   int(0)
+  ["numeric_index"]=>
+  bool(false)
 }
 bool(true)
 bool(true)
@@ -202,8 +202,6 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["enum_print"]=>
   bool(true)
-  ["numeric_index"]=>
-  bool(false)
   ["numeric_timeticks"]=>
   bool(false)
   ["extended_index"]=>
@@ -216,6 +214,8 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["exceptions_enabled"]=>
   int(0)
+  ["numeric_index"]=>
+  bool(false)
   ["123"]=>
   string(11) "param_value"
 }
