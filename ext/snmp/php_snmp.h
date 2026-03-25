@@ -50,6 +50,7 @@ typedef struct _php_snmp_object {
 	int valueretrieval;
 	int quick_print;
 	int enum_print;
+	int numeric_index;
 	int numeric_timeticks;
 	int extended_index;
 	int dontprint_units;
