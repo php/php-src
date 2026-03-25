@@ -4493,7 +4493,7 @@ PHP_FUNCTION(array_count_values)
 			if ((tmp = zend_hash_index_find(Z_ARRVAL_P(return_value), Z_LVAL_P(entry))) == NULL) {
 				zval data;
 				ZVAL_LONG(&data, 1);
-				zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), &data);
+				zend_hash_index_add(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), &data);
 			} else {
 				Z_LVAL_P(tmp)++;
 			}
@@ -4501,7 +4501,7 @@ PHP_FUNCTION(array_count_values)
 			if ((tmp = zend_symtable_find(Z_ARRVAL_P(return_value), Z_STR_P(entry))) == NULL) {
 				zval data;
 				ZVAL_LONG(&data, 1);
-				zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
+				zend_symtable_add(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 			} else {
 				Z_LVAL_P(tmp)++;
 			}
