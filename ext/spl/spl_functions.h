@@ -19,16 +19,6 @@
 
 #include "php.h"
 
-/* sub: whether to allow subclasses/interfaces
-   allow = 0: allow all classes and interfaces
-   allow > 0: allow all that match and mask ce_flags
-   allow < 0: disallow all that match and mask ce_flags
- */
-void spl_add_class_name(zval * list, const zend_class_entry *pce, int allow, int ce_flags);
-void spl_add_interfaces(zval * list, const zend_class_entry *pce, int allow, int ce_flags);
-void spl_add_traits(zval * list, const zend_class_entry *pce, int allow, int ce_flags);
-void spl_add_classes(const zend_class_entry *pce, zval *list, bool sub, int allow, int ce_flags);
-
 void spl_set_private_debug_info_property(const zend_class_entry *ce, const char *property, size_t property_len, HashTable *debug_info, zval *value);
 
 #endif /* PHP_FUNCTIONS_H */
