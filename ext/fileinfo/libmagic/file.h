@@ -635,9 +635,6 @@ size_t strlcpy(char *, const char *, size_t);
 #ifndef HAVE_STRLCAT
 size_t strlcat(char *, const char *, size_t);
 #endif
-#ifndef HAVE_STRCASESTR
-char *strcasestr(const char *, const char *);
-#endif
 #ifndef HAVE_GETLINE
 ssize_t getline(char **, size_t *, FILE *);
 ssize_t getdelim(char **, size_t *, int, FILE *);
