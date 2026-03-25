@@ -98,6 +98,8 @@ object(SNMP)#%d (%d) {
   bool(false)
   ["enum_print"]=>
   bool(false)
+  ["numeric_index"]=>
+  bool(false)
   ["numeric_timeticks"]=>
   bool(false)
   ["extended_index"]=>
@@ -129,6 +131,8 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["enum_print"]=>
   bool(true)
+  ["numeric_index"]=>
+  bool(false)
   ["numeric_timeticks"]=>
   bool(false)
   ["extended_index"]=>
@@ -160,6 +164,8 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["enum_print"]=>
   bool(true)
+  ["numeric_index"]=>
+  bool(false)
   ["numeric_timeticks"]=>
   bool(false)
   ["extended_index"]=>
@@ -196,6 +202,8 @@ object(SNMP)#%d (%d) {
   bool(true)
   ["enum_print"]=>
   bool(true)
+  ["numeric_index"]=>
+  bool(false)
   ["numeric_timeticks"]=>
   bool(false)
   ["extended_index"]=>
