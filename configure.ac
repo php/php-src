@@ -1182,6 +1182,38 @@ AS_VAR_IF([PHP_PEAR], [no],, [
     [pear])
 ])
 
+dnl PIE
+dnl ----------------------------------------------------------------------------
+
+PHP_HELP_SEPARATOR([PIE:])
+PHP_CONFIGURE_PART([Configuring PIE])
+
+dnl If CLI is disabled disable PIE.
+AS_VAR_IF([PHP_CLI], [no], [with_pie=no])
+
+PHP_ARG_WITH([pie],
+  [whether to install PIE],
+  [AS_HELP_STRING([[--with-pie[=DIR]]],
+    [Install PIE in DIR [PREFIX/lib/php]])],
+  [no],
+  [yes])
+
+AS_VAR_IF([PHP_PIE], [no],, [
+  install_pie=install-pie
+
+  AS_VAR_IF([PHP_PIE], [yes],
+    [AS_CASE([$PHP_LAYOUT],
+      [GNU], [PIE_INSTALLDIR=$datadir/pie],
+      [PIE_INSTALLDIR=$libdir/php])],
+    [PIE_INSTALLDIR=$PHP_PIE])
+
+  PHP_SUBST([PIE_INSTALLDIR])
+  PHP_ADD_BUILD_DIR([pie])
+  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/pie/Makefile.frag],
+    [$abs_srcdir/pie],
+    [pie])
+])
+
 dnl Configuring Zend and TSRM.
 dnl ----------------------------------------------------------------------------
 
@@ -1622,7 +1654,7 @@ else
 fi;
 
 all_targets="\$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
-install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install"
+install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $install_pie $pharcmd_install"
 
 PHP_SUBST([all_targets])
 PHP_SUBST([install_targets])
