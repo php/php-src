@@ -157,7 +157,7 @@ static int _gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression){
 	gdBMPPutInt(out, (compression ? BMP_BI_RLE8 : BMP_BI_RGB)); /* compression */
 	gdBMPPutInt(out, bitmap_size); /* image size */
 	gdBMPPutInt(out, 0); /* H resolution */
-	gdBMPPutInt(out, 0); /* V ressolution */
+	gdBMPPutInt(out, 0); /* V resolution */
 	gdBMPPutInt(out, im->colorsTotal); /* colours used */
 	gdBMPPutInt(out, 0); /* important colours */
 

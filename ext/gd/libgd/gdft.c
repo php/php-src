@@ -400,7 +400,7 @@ static void *fontFetch (char **error, void *key)
 	fontlist = gdEstrdup(a->fontlist);
 
 	/*
-	 * Must use gd_strtok_r becasuse strtok() isn't thread safe
+	 * Must use gd_strtok_r because strtok() isn't thread safe
 	 */
 	for (name = gd_strtok_r (fontlist, LISTSEPARATOR, &strtok_ptr); name; name = gd_strtok_r (0, LISTSEPARATOR, &strtok_ptr)) {
 		char *strtok_ptr_path;

@@ -113,7 +113,7 @@ typedef struct
 {
    double *Weights;  /* Normalized weights of neighboring pixels */
    int Left,Right;   /* Bounds of source pixels window */
-} ContributionType;  /* Contirbution information for a single pixel */
+} ContributionType;  /* Contribution information for a single pixel */
 
 typedef struct
 {
@@ -481,7 +481,7 @@ static double filter_hermite(const double x1)
 	return 0.0;
 }
 
-/* Trangle filter, default radius 1 */
+/* Triangle filter, default radius 1 */
 static double filter_triangle(const double x1)
 {
 	const double x = x1 < 0.0 ? -x1 : x1;
@@ -630,7 +630,7 @@ static double filter_welsh(const double x)
 #endif
 
 
-/* keep it for future usage for affine copy over an existing image, targetting fix for 2.2.2 */
+/* keep it for future usage for affine copy over an existing image, targeting fix for 2.2.2 */
 #if 0 
 /* Copied from upstream's libgd */
 static inline int _color_blend (const int dst, const int src)

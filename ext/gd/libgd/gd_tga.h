@@ -23,7 +23,7 @@ typedef struct oTga_ {
 	uint8_t alphabits;		// alpha bits (low 4bits of header 17)
 	uint8_t fliph;			// horizontal or vertical
 	uint8_t flipv;			// flip
-	char *ident;		// identifcation tag string
+	char *ident;		// identification tag string
 	int *bitmap;		// bitmap data
 
 } oTga;

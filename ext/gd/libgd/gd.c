@@ -3188,7 +3188,7 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 		const unsigned int sx = gdImageSX(src);
 
 		// Note: do not revert back to gdMalloc() below ; reason here,
-		// due to a bug with a certain memory_limit INI value treshold,
+		// due to a bug with a certain memory_limit INI value threshold,
 		// imagepalettetotruecolor crashes with even unrelated ZendMM allocations.
 		// See GH-17772 for a use case.
 		src->tpixels = (int **) gdCalloc(sy, sizeof(int *));

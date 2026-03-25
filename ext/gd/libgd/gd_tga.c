@@ -236,7 +236,7 @@ int read_image_tga( gdIOCtx *ctx, oTga *tga )
 	if (tga->imagetype != TGA_TYPE_RGB && tga->imagetype != TGA_TYPE_RGB_RLE)
 		return -1;
 
-	/*!	\brief Allocate memmory for image block
+	/*!	\brief Allocate memory for image block
 	 *  Allocate a chunk of memory for the image block to be passed into.
 	 */
 	tga->bitmap = (int *) gdMalloc(image_block_size * sizeof(int));
