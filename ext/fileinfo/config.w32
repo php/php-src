@@ -8,7 +8,7 @@ if (PHP_FILEINFO != 'no') {
 			encoding.c fsmagic.c funcs.c \
 			is_json.c is_tar.c is_simh.c magic.c print.c \
 			readcdf.c softmagic.c der.c \
-			strcasestr.c buffer.c is_csv.c";
+			buffer.c is_csv.c";
 
 	EXTENSION('fileinfo', 'fileinfo.c php_libmagic.c', true, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
 	ADD_EXTENSION_DEP('fileinfo', 'pcre');
