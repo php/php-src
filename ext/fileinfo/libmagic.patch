@@ -1727,7 +1727,7 @@ diff -u libmagic.orig/encoding.c libmagic/encoding.c
  }
 diff -u libmagic.orig/file.h libmagic/file.h
 --- libmagic.orig/file.h	2024-11-27 10:37:00.000000000 -0500
-+++ libmagic/file.h	2026-03-24 10:45:21.427536159 -0400
++++ libmagic/file.h	2026-03-25 08:13:23.336328498 -0400
 @@ -27,15 +27,13 @@
   */
  /*
@@ -1883,7 +1883,7 @@ diff -u libmagic.orig/file.h libmagic/file.h
  typedef struct {
  	char *buf;
  	size_t blen;
-@@ -649,19 +629,6 @@
+@@ -649,28 +629,12 @@
  extern file_protected const size_t file_nnames;
  #endif
  
@@ -1903,7 +1903,16 @@ diff -u libmagic.orig/file.h libmagic/file.h
  #ifndef HAVE_STRLCPY
  size_t strlcpy(char *, const char *, size_t);
  #endif
-@@ -681,31 +648,6 @@
+ #ifndef HAVE_STRLCAT
+ size_t strlcat(char *, const char *, size_t);
+ #endif
+-#ifndef HAVE_STRCASESTR
+-char *strcasestr(const char *, const char *);
+-#endif
+ #ifndef HAVE_GETLINE
+ ssize_t getline(char **, size_t *, FILE *);
+ ssize_t getdelim(char **, size_t *, int, FILE *);
+@@ -681,31 +645,6 @@
  #ifndef HAVE_ASCTIME_R
  char   *asctime_r(const struct tm *, char *);
  #endif
@@ -3066,7 +3075,7 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  	}
  	return file_getbuffer(ms);
 diff -u libmagic.orig/magic.h libmagic/magic.h
---- libmagic.orig/magic.h	2026-03-24 10:45:56.975553410 -0400
+--- libmagic.orig/magic.h	2026-03-25 08:16:04.280413419 -0400
 +++ libmagic/magic.h	2026-03-20 12:10:19.777614667 -0400
 @@ -47,8 +47,6 @@
  					   * extensions */
