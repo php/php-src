@@ -1727,7 +1727,7 @@ diff -u libmagic.orig/encoding.c libmagic/encoding.c
  }
 diff -u libmagic.orig/file.h libmagic/file.h
 --- libmagic.orig/file.h	2024-11-27 10:37:00.000000000 -0500
-+++ libmagic/file.h	2026-03-25 08:13:23.336328498 -0400
++++ libmagic/file.h	2026-03-25 16:14:40.128668705 -0400
 @@ -27,15 +27,13 @@
   */
  /*
@@ -1767,6 +1767,21 @@ diff -u libmagic.orig/file.h libmagic/file.h
  
  #define ENABLE_CONDITIONALS
  
+@@ -109,12 +102,12 @@
+ 
+ #if HAVE_VISIBILITY
+ # if defined(WIN32)
+-#  define file_public  __declspec(dllexport)
++#  define file_public
+ #  ifndef file_protected
+ #   define file_protected
+ #  endif
+ # else
+-#  define file_public  __attribute__((__visibility__("default")))
++#  define file_public  __attribute__((__visibility__("hidden")))
+ #  ifndef file_protected
+ #   define file_protected __attribute__((__visibility__("hidden")))
+ #  endif
 @@ -179,7 +172,7 @@
  #define MAXstring 128		/* max len of "string" types */
  
@@ -3075,7 +3090,7 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  	}
  	return file_getbuffer(ms);
 diff -u libmagic.orig/magic.h libmagic/magic.h
---- libmagic.orig/magic.h	2026-03-25 08:16:04.280413419 -0400
+--- libmagic.orig/magic.h	2026-03-25 16:14:49.284673536 -0400
 +++ libmagic/magic.h	2026-03-20 12:10:19.777614667 -0400
 @@ -47,8 +47,6 @@
  					   * extensions */
