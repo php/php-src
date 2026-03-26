@@ -1192,6 +1192,10 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 	DL_HANDLE handle;
 	zend_string *extension_dir = zend_ini_str_literal("extension_dir");
 
+	if (UNEXPECTED(zend_str_has_nul_byte(extension_dir))) {
+		phpdbg_error("extension_dir ini setting contains a nul byte");
+		return NULL;
+	}
 	if (strchr(*path, '/') != NULL || strchr(*path, DEFAULT_SLASH) != NULL) {
 		/* path is fine */
 	} else if (extension_dir && ZSTR_LEN(extension_dir) > 0) {
