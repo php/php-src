@@ -25,7 +25,7 @@
 #include "zend_dump.h"
 #include "zend_smart_str.h"
 
-void zend_dump_ht(HashTable *ht)
+void zend_dump_ht(const HashTable *ht)
 {
 	zend_ulong index;
 	zend_string *key;
@@ -190,7 +190,7 @@ static void zend_dump_range(const zend_ssa_range *r)
 	}
 }
 
-static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_instanceof, uint32_t dump_flags)
+static void zend_dump_type_info(uint32_t info, const zend_class_entry *ce, bool is_instanceof, uint32_t dump_flags)
 {
 	bool first = true;
 
@@ -482,7 +482,7 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 	}
 
 	if (ZEND_OP_IS_FRAMELESS_ICALL(opline->opcode)) {
-		zend_function *func = ZEND_FLF_FUNC(opline);
+		const zend_function *func = ZEND_FLF_FUNC(opline);
 		fprintf(stderr, "(%s)", ZSTR_VAL(func->common.function_name));
 	}
 
@@ -674,13 +674,13 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 	}
 
 	if (opline->op2_type == IS_CONST) {
-		zval *op = CRT_CONSTANT(opline->op2);
+		const zval *op = CRT_CONSTANT(opline->op2);
 		if (
 			opline->opcode == ZEND_SWITCH_LONG
 			|| opline->opcode == ZEND_SWITCH_STRING
 			|| opline->opcode == ZEND_MATCH
 		) {
-			HashTable *jumptable = Z_ARRVAL_P(op);
+			const HashTable *jumptable = Z_ARRVAL_P(op);
 			zend_string *key;
 			zend_ulong num_key;
 			zval *zv;
@@ -778,7 +778,7 @@ ZEND_API void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_
 {
 	int len = 0;
 	const zend_ssa *ssa = NULL;
-	zend_ssa_op *ssa_op = NULL;
+	const zend_ssa_op *ssa_op = NULL;
 
 	if (dump_flags & ZEND_DUMP_LINE_NUMBERS) {
 		fprintf(stderr, "L%04u ", opline->lineno);
@@ -800,7 +800,7 @@ ZEND_API void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_
 
 static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags)
 {
-	zend_basic_block *b = cfg->blocks + n;
+	const zend_basic_block *b = cfg->blocks + n;
 
 	if (n > 0) {
 		fprintf(stderr, "\n");
@@ -856,8 +856,8 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	fprintf(stderr, "\n");
 
 	if (b->predecessors_count) {
-		int *p = cfg->predecessors + b->predecessor_offset;
-		int *end = p + b->predecessors_count;
+		const int *p = cfg->predecessors + b->predecessor_offset;
+		const int *end = p + b->predecessors_count;
 
 		fprintf(stderr, "     ; from=(BB%d", *p);
 		for (p++; p < end; p++) {
@@ -867,9 +867,8 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	}
 
 	if (b->successors_count > 0) {
-		int s;
 		fprintf(stderr, "     ; to=(BB%d", b->successors[0]);
-		for (s = 1; s < b->successors_count; s++) {
+		for (int s = 1; s < b->successors_count; s++) {
 			fprintf(stderr, ", BB%d", b->successors[s]);
 		}
 		fprintf(stderr, ")\n");
@@ -900,16 +899,14 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 {
 	zend_dump_block_info(cfg, n, dump_flags);
 	if (ssa && ssa->blocks && ssa->blocks[n].phis) {
-		zend_ssa_phi *p = ssa->blocks[n].phis;
+		const zend_ssa_phi *p = ssa->blocks[n].phis;
 
 		do {
-			int j;
-
 			fprintf(stderr, "     ");
 			zend_dump_ssa_var(op_array, ssa, p->ssa_var, 0, p->var, dump_flags);
 			if (p->pi < 0) {
 				fprintf(stderr, " = Phi(");
-				for (j = 0; j < cfg->blocks[n].predecessors_count; j++) {
+				for (int j = 0; j < cfg->blocks[n].predecessors_count; j++) {
 					if (j > 0) {
 						fprintf(stderr, ", ");
 					}
@@ -949,7 +946,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 {
 	const zend_cfg *cfg = NULL;
 	const zend_ssa *ssa = NULL;
-	zend_func_info *func_info = NULL;
+	const zend_func_info *func_info = NULL;
 	uint32_t func_flags = 0;
 
 	if (dump_flags & (ZEND_DUMP_CFG|ZEND_DUMP_SSA)) {
@@ -1040,11 +1037,8 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 	}
 
 	if (cfg) {
-		int n;
-		zend_basic_block *b;
-
-		for (n = 0; n < cfg->blocks_count; n++) {
-			b = cfg->blocks + n;
+		for (int n = 0; n < cfg->blocks_count; n++) {
+			const zend_basic_block *b = cfg->blocks + n;
 			if (!(dump_flags & ZEND_DUMP_HIDE_UNREACHABLE) || (b->flags & ZEND_BB_REACHABLE)) {
 				const zend_op *opline;
 				const zend_op *end;
@@ -1180,13 +1174,11 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 
 void zend_dump_dominators(const zend_op_array *op_array, const zend_cfg *cfg)
 {
-	int j;
-
 	fprintf(stderr, "\nDOMINATORS-TREE for \"");
 	zend_dump_op_array_name(op_array);
 	fprintf(stderr, "\"\n");
-	for (j = 0; j < cfg->blocks_count; j++) {
-		zend_basic_block *b = cfg->blocks + j;
+	for (int j = 0; j < cfg->blocks_count; j++) {
+		const zend_basic_block *b = cfg->blocks + j;
 		if (b->flags & ZEND_BB_REACHABLE) {
 			zend_dump_block_info(cfg, j, 0);
 		}
@@ -1195,14 +1187,12 @@ void zend_dump_dominators(const zend_op_array *op_array, const zend_cfg *cfg)
 
 void zend_dump_ssa_variables(const zend_op_array *op_array, const zend_ssa *ssa, uint32_t dump_flags)
 {
-	int j;
-
 	if (ssa->vars) {
 		fprintf(stderr, "\nSSA Variable for \"");
 		zend_dump_op_array_name(op_array);
 		fprintf(stderr, "\"\n");
 
-		for (j = 0; j < ssa->vars_count; j++) {
+		for (int j = 0; j < ssa->vars_count; j++) {
 			fprintf(stderr, "    ");
 			zend_dump_ssa_var(op_array, ssa, j, IS_CV, ssa->vars[j].var, dump_flags);
 			if (ssa->vars[j].scc >= 0) {
@@ -1221,10 +1211,9 @@ void zend_dump_ssa_variables(const zend_op_array *op_array, const zend_ssa *ssa,
 static void zend_dump_var_set(const zend_op_array *op_array, const char *name, zend_bitset set)
 {
 	bool first = true;
-	uint32_t i;
 
 	fprintf(stderr, "    ; %s = {", name);
-	for (i = 0; i < op_array->last_var + op_array->T; i++) {
+	for (uint32_t i = 0; i < op_array->last_var + op_array->T; i++) {
 		if (zend_bitset_in(set, i)) {
 			if (first) {
 				first = false;
@@ -1239,12 +1228,11 @@ static void zend_dump_var_set(const zend_op_array *op_array, const char *name, z
 
 void zend_dump_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const zend_dfg *dfg)
 {
-	int j;
 	fprintf(stderr, "\nVariable Liveness for \"");
 	zend_dump_op_array_name(op_array);
 	fprintf(stderr, "\"\n");
 
-	for (j = 0; j < cfg->blocks_count; j++) {
+	for (int j = 0; j < cfg->blocks_count; j++) {
 		fprintf(stderr, "  BB%d:\n", j);
 		zend_dump_var_set(op_array, "def", DFG_BITSET(dfg->def, dfg->size, j));
 		zend_dump_var_set(op_array, "use", DFG_BITSET(dfg->use, dfg->size, j));
@@ -1255,17 +1243,16 @@ void zend_dump_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const zen
 
 void zend_dump_phi_placement(const zend_op_array *op_array, const zend_ssa *ssa)
 {
-	int j;
-	zend_ssa_block *ssa_blocks = ssa->blocks;
+	const zend_ssa_block *ssa_blocks = ssa->blocks;
 	int blocks_count = ssa->cfg.blocks_count;
 
 	fprintf(stderr, "\nSSA Phi() Placement for \"");
 	zend_dump_op_array_name(op_array);
 	fprintf(stderr, "\"\n");
-	for (j = 0; j < blocks_count; j++) {
+	for (int j = 0; j < blocks_count; j++) {
 		if (ssa_blocks && ssa_blocks[j].phis) {
-			zend_ssa_phi *p = ssa_blocks[j].phis;
-			int first = 1;
+			const zend_ssa_phi *p = ssa_blocks[j].phis;
+			bool first = true;
 
 			fprintf(stderr, "  BB%d:\n", j);
 			if (p->pi >= 0) {
@@ -1275,7 +1262,7 @@ void zend_dump_phi_placement(const zend_op_array *op_array, const zend_ssa *ssa)
 			}
 			do {
 				if (first) {
-					first = 0;
+					first = false;
 				} else {
 					fprintf(stderr, ", ");
 				}
