@@ -406,7 +406,7 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 				case BP_VAR_W: {
 				    zval value;
 					ZVAL_NULL(&value);
-					retval = zend_hash_index_update(ht, key.h, &value);
+					retval = zend_hash_index_add_new(ht, key.h, &value);
 			   }
 			}
 		}
