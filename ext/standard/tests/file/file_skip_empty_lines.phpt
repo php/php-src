@@ -43,6 +43,11 @@ var_dump($lines);
 file_put_contents($test_file, "\r\n");
 $lines = file($test_file, FILE_SKIP_EMPTY_LINES);
 var_dump($lines);
+
+file_put_contents($test_file, "\r\r\n\n");
+$lines = file($test_file, FILE_SKIP_EMPTY_LINES);
+var_dump($lines);
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . "/file_skip_empty_lines.tmp"); ?>
@@ -113,6 +118,8 @@ array(2) {
   string(5) "First"
   [1]=>
   string(6) "Second"
+}
+array(0) {
 }
 array(0) {
 }
