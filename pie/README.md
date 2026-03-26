@@ -3,7 +3,7 @@
 When building PHP, supply the `--with-pie` flag. This will attempt to download
 the latest stable version of PIE, using `curl`, `wget`, `fetch`, or a PHP script.
 
-By default it will download PIE to `$prefix/lib/php/pie`. You can change
+By default it will download PIE to `$prefix/bin/pie`. You can change
 the target path, e.g. `--with-pie=/usr/local/bin`, which will cause PIE to be
 downloaded to `/usr/local/bin/pie`.
 
