@@ -557,7 +557,6 @@ static void xml_add_to_info(xml_parser *parser, zend_string *name)
 	element = zend_hash_lookup(arr, name);
 
 	if (Z_TYPE_P(element) == IS_NULL) {
-		
 		array_init(element);
 	}
 
