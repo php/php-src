@@ -554,10 +554,11 @@ static void xml_add_to_info(xml_parser *parser, zend_string *name)
 	SEPARATE_ARRAY(Z_REFVAL(parser->info));
 	zend_array *arr = Z_ARRVAL_P(Z_REFVAL(parser->info));
 
-	if ((element = zend_hash_lookup(arr, name)) == NULL) {
-		zval values;
-		array_init(&values);
-		element = zend_hash_add(arr, name, &values);
+	element = zend_hash_lookup(arr, name);
+
+	if (Z_TYPE_P(element) == IS_NULL) {
+		
+		array_init(element);
 	}
 
 	add_next_index_long(element, parser->curtag);
