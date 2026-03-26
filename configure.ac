@@ -1203,8 +1203,8 @@ AS_VAR_IF([PHP_PIE], [no],, [
 
   AS_VAR_IF([PHP_PIE], [yes],
     [AS_CASE([$PHP_LAYOUT],
-      [GNU], [PIE_INSTALLDIR=$datadir/pie],
-      [PIE_INSTALLDIR=$libdir/php])],
+      [GNU], [PIE_INSTALLDIR=$bindir],
+      [PIE_INSTALLDIR=$bindir])],
     [PIE_INSTALLDIR=$PHP_PIE])
 
   PHP_SUBST([PIE_INSTALLDIR])
