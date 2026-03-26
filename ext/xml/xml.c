@@ -557,7 +557,7 @@ static void xml_add_to_info(xml_parser *parser, zend_string *name)
 	if ((element = zend_hash_find(arr, name)) == NULL) {
 		zval values;
 		array_init(&values);
-		element = zend_hash_update(arr, name, &values);
+		element = zend_hash_add(arr, name, &values);
 	}
 
 	add_next_index_long(element, parser->curtag);
