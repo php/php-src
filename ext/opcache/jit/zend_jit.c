@@ -138,9 +138,9 @@ static bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_ssa *
 
 	if (ssa->cfg.blocks[ssa->cfg.map[use]].loop_header > 0
 	 || (ssa->cfg.blocks[ssa->cfg.map[use]].flags & ZEND_BB_LOOP_HEADER)) {
-		int b = ssa->cfg.map[use];
+		uint32_t b = ssa->cfg.map[use];
 		int prev_use = ssa->vars[var].use_chain;
-		int def_block;
+		uint32_t def_block;
 
 		if (ssa->vars[var].definition >= 0) {
 			def_block =ssa->cfg.map[ssa->vars[var].definition];
@@ -1173,7 +1173,7 @@ static void zend_jit_allocate_registers(zend_jit_ctx *ctx, const zend_op_array *
 		for (i = 0; i < ssa->vars_count; i++) {
 			if (ssa->vars[i].definition_phi && !ssa->vars[i].no_val) {
 				zend_ssa_phi *phi = ssa->vars[i].definition_phi;
-				int k, src;
+				int src;
 
 				if (phi->pi >= 0) {
 					src = phi->sources[0];
@@ -1188,6 +1188,7 @@ static void zend_jit_allocate_registers(zend_jit_ctx *ctx, const zend_op_array *
 					}
 				} else {
 					int need_move = 0;
+					uint32_t k;
 
 					for (k = 0; k < ssa->cfg.blocks[phi->block].predecessors_count; k++) {
 						src = phi->sources[k];
@@ -1342,7 +1343,7 @@ static void zend_jit_allocate_registers(zend_jit_ctx *ctx, const zend_op_array *
 static int zend_jit_compute_post_order(zend_cfg *cfg, int start, int *post_order)
 {
 	int count = 0;
-	int b, n, *p;
+	int b, *p;
 	zend_basic_block *bb;
 	zend_worklist worklist;
 	ALLOCA_FLAG(use_heap)
@@ -1354,7 +1355,7 @@ static int zend_jit_compute_post_order(zend_cfg *cfg, int start, int *post_order
 next:
 		b = zend_worklist_peek(&worklist);
 		bb = &cfg->blocks[b];
-		n = bb->successors_count;
+		uint32_t n = bb->successors_count;
 		if (n > 0) {
 			p = bb->successors;
 			do {

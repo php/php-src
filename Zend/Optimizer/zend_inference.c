@@ -493,7 +493,7 @@ ZEND_API void zend_ssa_find_false_dependencies(const zend_op_array *op_array, co
 	const zend_ssa_op *ssa_ops = ssa->ops;
 	int ssa_vars_count = ssa->vars_count;
 	zend_bitset worklist;
-	int i, j, use;
+	int i, use;
 	const zend_ssa_phi *p;
 	ALLOCA_FLAG(use_heap);
 
@@ -527,7 +527,7 @@ ZEND_API void zend_ssa_find_false_dependencies(const zend_op_array *op_array, co
 					zend_bitset_incl(worklist, p->sources[0]);
 				}
 			} else {
-				for (j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
+				for (uint32_t j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
 					ZEND_ASSERT(p->sources[j] >= 0);
 					if (ssa->vars[p->sources[j]].no_val) {
 						ssa_vars[p->sources[j]].no_val = 0; /* used indirectly */
@@ -1076,7 +1076,6 @@ static bool zend_inference_calc_range(const zend_op_array *op_array, const zend_
 
 	if (ssa->vars[var].definition_phi) {
 		const zend_ssa_phi *p = ssa->vars[var].definition_phi;
-		int i;
 
 		tmp->underflow = 0;
 		tmp->min = ZEND_LONG_MAX;
@@ -1222,7 +1221,7 @@ static bool zend_inference_calc_range(const zend_op_array *op_array, const zend_
 				}
 			}
 		} else {
-			for (i = 0; i < ssa->cfg.blocks[p->block].predecessors_count; i++) {
+			for (uint32_t i = 0; i < ssa->cfg.blocks[p->block].predecessors_count; i++) {
 				ZEND_ASSERT(p->sources[i] >= 0);
 				if (ssa->var_info[p->sources[i]].has_range) {
 					/* union */
@@ -4192,7 +4191,7 @@ static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend
 	zend_ssa_var *ssa_vars = ssa->vars;
 	zend_ssa_var_info *ssa_var_info = ssa->var_info;
 	int ssa_vars_count = ssa->vars_count;
-	int i, j;
+	int j;
 	uint32_t tmp, worklist_len = zend_bitset_len(ssa_vars_count);
 	bool update_worklist = 1;
 	const zend_op **ssa_opcodes = NULL;
@@ -4236,6 +4235,7 @@ static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend
 				bool first = true;
 				bool is_instanceof = false;
 				zend_class_entry *ce = NULL;
+				uint32_t i;
 
 				tmp = 0;
 				for (i = 0; i < blocks[p->block].predecessors_count; i++) {
@@ -4261,7 +4261,7 @@ static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend
 				UPDATE_SSA_OBJ_TYPE(ce, ce ? is_instanceof : 0, j);
 			}
 		} else if (ssa_vars[j].definition >= 0) {
-			i = ssa_vars[j].definition;
+			int i = ssa_vars[j].definition;
 			if (_zend_update_type_info(op_array, ssa, script, worklist, op_array->opcodes + i, ssa->ops + i, NULL, optimization_level, true) == FAILURE) {
 				return FAILURE;
 			}
@@ -4562,9 +4562,8 @@ static void zend_func_return_info(const zend_op_array   *op_array,
 {
 	const zend_func_info *info = ZEND_FUNC_INFO(op_array);
 	const zend_ssa *ssa = &info->ssa;
-	int blocks_count = info->ssa.cfg.blocks_count;
+	uint32_t blocks_count = info->ssa.cfg.blocks_count;
 	const zend_basic_block *blocks = info->ssa.cfg.blocks;
-	int j;
 	uint32_t t1;
 	uint32_t tmp = 0;
 	zend_class_entry *tmp_ce = NULL;
@@ -4589,7 +4588,7 @@ static void zend_func_return_info(const zend_op_array   *op_array,
 			| MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF;
 	}
 
-	for (j = 0; j < blocks_count; j++) {
+	for (uint32_t j = 0; j < blocks_count; j++) {
 		if ((blocks[j].flags & ZEND_BB_REACHABLE) && blocks[j].len != 0) {
 			zend_op *opline = op_array->opcodes + blocks[j].start + blocks[j].len - 1;
 

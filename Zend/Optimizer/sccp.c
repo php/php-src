@@ -1832,7 +1832,7 @@ static void sccp_mark_feasible_successors(
 		zend_op *opline, zend_ssa_op *ssa_op) {
 	sccp_ctx *ctx = (sccp_ctx *) scdf;
 	zval *op1, zv;
-	int s;
+	uint32_t s;
 
 	/* We can't determine the branch target at compile-time for these */
 	switch (opline->opcode) {
@@ -2049,7 +2049,6 @@ static void sccp_visit_phi(scdf_ctx *scdf, const zend_ssa_phi *phi) {
 		zend_basic_block *block = &ssa->cfg.blocks[phi->block];
 		int *predecessors = &ssa->cfg.predecessors[block->predecessor_offset];
 
-		int i;
 		zval result;
 		MAKE_TOP(&result);
 #if SCP_DEBUG
@@ -2061,7 +2060,7 @@ static void sccp_visit_phi(scdf_ctx *scdf, const zend_ssa_phi *phi) {
 				join_phi_values(&result, &ctx->values[phi->sources[0]], ssa->vars[phi->ssa_var].escape_state != ESCAPE_STATE_NO_ESCAPE);
 			}
 		} else {
-			for (i = 0; i < block->predecessors_count; i++) {
+			for (uint32_t i = 0; i < block->predecessors_count; i++) {
 				ZEND_ASSERT(phi->sources[i] >= 0);
 				if (scdf_is_edge_feasible(scdf, predecessors[i], phi->block)) {
 #if SCP_DEBUG

@@ -868,7 +868,7 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 
 	if (b->successors_count > 0) {
 		fprintf(stderr, "     ; to=(BB%d", b->successors[0]);
-		for (int s = 1; s < b->successors_count; s++) {
+		for (uint32_t s = 1; s < b->successors_count; s++) {
 			fprintf(stderr, ", BB%d", b->successors[s]);
 		}
 		fprintf(stderr, ")\n");
@@ -906,7 +906,7 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 			zend_dump_ssa_var(op_array, ssa, p->ssa_var, 0, p->var, dump_flags);
 			if (p->pi < 0) {
 				fprintf(stderr, " = Phi(");
-				for (int j = 0; j < cfg->blocks[n].predecessors_count; j++) {
+				for (uint32_t j = 0; j < cfg->blocks[n].predecessors_count; j++) {
 					if (j > 0) {
 						fprintf(stderr, ", ");
 					}
@@ -1037,7 +1037,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 	}
 
 	if (cfg) {
-		for (int n = 0; n < cfg->blocks_count; n++) {
+		for (uint32_t n = 0; n < cfg->blocks_count; n++) {
 			const zend_basic_block *b = cfg->blocks + n;
 			if (!(dump_flags & ZEND_DUMP_HIDE_UNREACHABLE) || (b->flags & ZEND_BB_REACHABLE)) {
 				const zend_op *opline;
@@ -1177,7 +1177,7 @@ void zend_dump_dominators(const zend_op_array *op_array, const zend_cfg *cfg)
 	fprintf(stderr, "\nDOMINATORS-TREE for \"");
 	zend_dump_op_array_name(op_array);
 	fprintf(stderr, "\"\n");
-	for (int j = 0; j < cfg->blocks_count; j++) {
+	for (uint32_t j = 0; j < cfg->blocks_count; j++) {
 		const zend_basic_block *b = cfg->blocks + j;
 		if (b->flags & ZEND_BB_REACHABLE) {
 			zend_dump_block_info(cfg, j, 0);
@@ -1232,7 +1232,7 @@ void zend_dump_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const zen
 	zend_dump_op_array_name(op_array);
 	fprintf(stderr, "\"\n");
 
-	for (int j = 0; j < cfg->blocks_count; j++) {
+	for (uint32_t j = 0; j < cfg->blocks_count; j++) {
 		fprintf(stderr, "  BB%d:\n", j);
 		zend_dump_var_set(op_array, "def", DFG_BITSET(dfg->def, dfg->size, j));
 		zend_dump_var_set(op_array, "use", DFG_BITSET(dfg->use, dfg->size, j));
@@ -1244,12 +1244,12 @@ void zend_dump_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const zen
 void zend_dump_phi_placement(const zend_op_array *op_array, const zend_ssa *ssa)
 {
 	const zend_ssa_block *ssa_blocks = ssa->blocks;
-	int blocks_count = ssa->cfg.blocks_count;
+	uint32_t blocks_count = ssa->cfg.blocks_count;
 
 	fprintf(stderr, "\nSSA Phi() Placement for \"");
 	zend_dump_op_array_name(op_array);
 	fprintf(stderr, "\"\n");
-	for (int j = 0; j < blocks_count; j++) {
+	for (uint32_t j = 0; j < blocks_count; j++) {
 		if (ssa_blocks && ssa_blocks[j].phis) {
 			const zend_ssa_phi *p = ssa_blocks[j].phis;
 			bool first = true;

@@ -1478,8 +1478,7 @@ static void zend_jit_gen_phi(zend_jit_ctx *jit, zend_ssa_phi *phi)
 {
 	int dst_var = phi->ssa_var;
 	zend_basic_block *bb = &jit->ssa->cfg.blocks[phi->block];
-	int n = bb->predecessors_count;
-	int i;
+	uint32_t n = bb->predecessors_count;
 	ir_type type = (jit->ssa->var_info[phi->ssa_var].type & MAY_BE_LONG) ? IR_LONG : IR_DOUBLE;
 	ir_ref merge = jit->bb_start_ref[phi->block];
 	ir_ref ref;
@@ -1496,7 +1495,7 @@ static void zend_jit_gen_phi(zend_jit_ctx *jit, zend_ssa_phi *phi)
 	ref = ir_emit_N(&jit->ctx, IR_OPT(IR_PHI, type), n + 1);
 	ir_set_op(&jit->ctx, ref, 1, merge);
 
-	for (i = 0; i < n; i++) {
+	for (uint32_t i = 0; i < n; i++) {
 		int src_var = phi->sources[i];
 
 		ZEND_ASSERT(jit->ra[src_var].ref);
@@ -3497,7 +3496,7 @@ static void zend_jit_case_start(zend_jit_ctx *jit, int switch_b, int case_b, ir_
 
 static void _zend_jit_add_predecessor_ref(zend_jit_ctx *jit, int b, int pred, ir_ref ref)
 {
-	int i, *p;
+	int *p;
 	zend_basic_block *bb;
 	ir_ref *r, header;
 
@@ -3505,7 +3504,7 @@ static void _zend_jit_add_predecessor_ref(zend_jit_ctx *jit, int b, int pred, ir
 	bb = &jit->ssa->cfg.blocks[b];
 	p = &jit->ssa->cfg.predecessors[bb->predecessor_offset];
 	r = &jit->bb_edges[jit->bb_predecessors[b]];
-	for (i = 0; i < bb->predecessors_count; i++, p++, r++) {
+	for (uint32_t i = 0; i < bb->predecessors_count; i++, p++, r++) {
 		if (*p == pred) {
 			ZEND_ASSERT(*r == IR_UNUSED || *r == ref);
 			header = jit->bb_start_ref[b];
@@ -3720,14 +3719,14 @@ static void zend_jit_case_start(zend_jit_ctx *jit, int switch_b, int case_b, ir_
 static int zend_jit_bb_start(zend_jit_ctx *jit, int b)
 {
 	zend_basic_block *bb;
-	int i, n, *p, pred;
+	int *p, pred;
 	ir_ref ref, bb_start;
 
 	ZEND_ASSERT(JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE);
 	ZEND_ASSERT(b < jit->ssa->cfg.blocks_count);
 	bb = &jit->ssa->cfg.blocks[b];
 	ZEND_ASSERT((bb->flags & ZEND_BB_REACHABLE) != 0);
-	n = bb->predecessors_count;
+	uint32_t n = bb->predecessors_count;
 
 	if (n == 0) {
 		/* pass */
@@ -3797,6 +3796,7 @@ static int zend_jit_bb_start(zend_jit_ctx *jit, int b)
 			entry_path = ir_END();
 		}
 		pred_refs = (ir_ref *)do_alloca(sizeof(ir_ref) * n, use_heap);
+		uint32_t i;
 		for (i = 0, p = jit->ssa->cfg.predecessors + bb->predecessor_offset; i < n; p++, i++) {
 			pred = *p;
 			if (jit->bb_start_ref[pred]) {
@@ -16699,7 +16699,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 
 static int zend_jit_start(zend_jit_ctx *jit, const zend_op_array *op_array, zend_ssa *ssa)
 {
-	int i, count;
+	uint32_t i, count;
 	zend_basic_block *bb;
 
 	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) ? 0 : (IR_START_BR_TARGET|IR_ENTRY_BR_TARGET));
@@ -17692,7 +17692,9 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 	}
 
 	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
-		int def_block, use_block, b, use, j;
+		uint32_t def_block, use_block;
+		int b, use;
+		uint32_t j;
 		zend_basic_block *bb;
 		zend_ssa_phi *p;
 		bool ret = true;

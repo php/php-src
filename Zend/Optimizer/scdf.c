@@ -254,9 +254,8 @@ static uint32_t cleanup_loop_var_free_block(const scdf_ctx *scdf, const zend_bas
  * unreachable. Blocks already marked unreachable are not removed. */
 uint32_t scdf_remove_unreachable_blocks(const scdf_ctx *scdf) {
 	zend_ssa *ssa = scdf->ssa;
-	int i;
 	uint32_t removed_ops = 0;
-	for (i = 0; i < ssa->cfg.blocks_count; i++) {
+	for (uint32_t i = 0; i < ssa->cfg.blocks_count; i++) {
 		const zend_basic_block *block = &ssa->cfg.blocks[i];
 		if (!zend_bitset_in(scdf->executable_blocks, i) && (block->flags & ZEND_BB_REACHABLE)) {
 			if (!kept_alive_by_loop_var_free(scdf, block)) {
