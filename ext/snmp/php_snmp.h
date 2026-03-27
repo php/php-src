@@ -53,7 +53,7 @@ typedef struct _php_snmp_object {
 	int numeric_index;
 	int numeric_timeticks;
 	int extended_index;
-	int dontprint_units;
+	int dont_print_units;
 	int escape_quotes;
 	int print_hex_text;
 	int string_output_format;

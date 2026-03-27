@@ -1235,7 +1235,7 @@ static void save_snmplib_output_options(php_snmp_object *snmp_object)
 	snmp_object->numeric_index = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS);
 	snmp_object->numeric_timeticks = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS);
 	snmp_object->extended_index = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX);
-	snmp_object->dontprint_units = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS);
+	snmp_object->dont_print_units = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS);
 	snmp_object->escape_quotes = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ESCAPE_QUOTES);
 	snmp_object->print_hex_text = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT);
 	// Integers
@@ -1254,7 +1254,7 @@ static void set_snmplib_output_options(php_snmp_object *snmp_object)
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, snmp_object->numeric_index);
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NUMERIC_TIMETICKS, snmp_object->numeric_timeticks);
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_EXTENDED_INDEX, snmp_object->extended_index);
-	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS, snmp_object->dontprint_units);
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_PRINT_UNITS, snmp_object->dont_print_units);
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ESCAPE_QUOTES, snmp_object->escape_quotes);
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_HEX_TEXT, snmp_object->print_hex_text);
 	// Integers
@@ -2096,7 +2096,7 @@ PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(enum_print)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(numeric_index)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(numeric_timeticks)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(extended_index)
-PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(dontprint_units)
+PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(dont_print_units)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(escape_quotes)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(print_hex_text)
 
@@ -2169,7 +2169,7 @@ PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(enum_print)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(numeric_index)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(numeric_timeticks)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(extended_index)
-PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(dontprint_units)
+PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(dont_print_units)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(escape_quotes)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(print_hex_text)
 
@@ -2244,7 +2244,7 @@ const php_snmp_prop_handler php_snmp_property_entries[] = {
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(numeric_index),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(numeric_timeticks),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(extended_index),
-	PHP_SNMP_PROPERTY_ENTRY_RECORD(dontprint_units),
+	PHP_SNMP_PROPERTY_ENTRY_RECORD(dont_print_units),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(escape_quotes),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(print_hex_text),
 	PHP_SNMP_PROPERTY_ENTRY_RECORD(valueretrieval),
