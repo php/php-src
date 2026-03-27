@@ -91,6 +91,8 @@ typedef struct snmp_session php_snmp_session;
 	} \
 }
 
+static int mib_needs_reset;
+
 ZEND_DECLARE_MODULE_GLOBALS(snmp)
 static PHP_GINIT_FUNCTION(snmp);
 
@@ -1628,6 +1630,7 @@ PHP_FUNCTION(snmp_read_mib)
 		RETURN_THROWS();
 	}
 
+	mib_needs_reset = 1;
 	if (!read_mib(filename)) {
 		char *error = strerror(errno);
 		php_error_docref(NULL, E_WARNING, "Error while reading MIB file '%s': %s", filename, error);
@@ -1646,6 +1649,11 @@ PHP_FUNCTION(snmp_init_mib)
                 Z_PARAM_OPTIONAL
                 Z_PARAM_STR_OR_NULL(mibdirs)
         ZEND_PARSE_PARAMETERS_END();
+
+	// If the mibdirs has been changed, we need to reset the MIB tree at the end of the request
+        if (ZSTR_VAL(mibdirs) != null) {
+		mib_needs_reset = 1;
+	}
 
 	shutdown_mib();
 	netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, ZSTR_VAL(mibdirs));
@@ -2189,6 +2197,19 @@ PHP_MSHUTDOWN_FUNCTION(snmp)
 }
 /* }}} */
 
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
+static PHP_RSHUTDOWN_FUNCTION(snmp)
+{
+	if (mib_needs_reset) {
+		shutdown_mib();
+		netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, null);
+		init_mib();
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(snmp)
 {
@@ -2216,7 +2237,7 @@ zend_module_entry snmp_module_entry = {
 	PHP_MINIT(snmp),
 	PHP_MSHUTDOWN(snmp),
 	NULL,
-	NULL,
+	PHP_RSHUTDOWN(snmp),,
 	PHP_MINFO(snmp),
 	PHP_SNMP_VERSION,
 	PHP_MODULE_GLOBALS(snmp),
