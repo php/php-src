@@ -247,7 +247,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(void 
 			*(out++) = ']';
 			*out = '\0';
 
-			ZVAL_STR(retval, host_str);
+			ZVAL_NEW_STR(retval, host_str);
 		} else {
 			ZVAL_STRINGL(retval, uriparser_uri->hostText.first, get_text_range_length(&uriparser_uri->hostText));
 		}
@@ -382,7 +382,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(void 
 		}
 
 		*out = '\0';
-		ZVAL_STR(retval, str);
+		ZVAL_NEW_STR(retval, str);
 	} else if (uriparser_uri->absolutePath) {
 		ZVAL_CHAR(retval, '/');
 	} else {
