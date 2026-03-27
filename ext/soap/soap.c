@@ -1951,7 +1951,7 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, z
 			} else {
 				buffer = zend_string_copy(message);
 
-				/* Get output buffer and send as fault detials */
+				/* Get output buffer and send as fault details */
 				zval outbuflen;
 				if (php_output_get_length(&outbuflen) != FAILURE && Z_LVAL(outbuflen) != 0) {
 					php_output_get_contents(&outbuf);
@@ -2834,7 +2834,7 @@ PHP_METHOD(SoapClient, __doRequest)
 }
 /* }}} */
 
-/* {{{ Sets cookie thet will sent with SOAP request.
+/* {{{ Sets cookie that will sent with SOAP request.
    The call to this function will effect all following calls of SOAP methods.
    If value is not specified cookie is removed. */
 PHP_METHOD(SoapClient, __setCookie)

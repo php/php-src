@@ -3362,7 +3362,7 @@ cache_in_memory:
 
 			zend_hash_str_update_mem(SOAP_GLOBAL(mem_cache), uri,
 											uri_len, &p, sizeof(sdl_cache_bucket));
-			/* remove non-persitent sdl structure */
+			/* remove non-persistent sdl structure */
 			delete_sdl_impl(sdl);
 			/* and replace it with persistent one */
 			sdl = psdl;

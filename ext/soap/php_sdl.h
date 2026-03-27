@@ -166,7 +166,7 @@ struct _sdlContentModel {
 	union {
 		sdlTypePtr          element;      /* pointer to element */
 		sdlTypePtr          group;        /* pointer to group */
-		HashTable          *content;      /* array of sdlContentModel for sequnce,all,choice*/
+		HashTable          *content;      /* array of sdlContentModel for sequence,all,choice*/
 		char               *group_ref;    /* reference to group */
 	} u;
 };
