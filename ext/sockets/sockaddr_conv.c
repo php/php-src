@@ -67,7 +67,7 @@ bool php_set_common_addr(struct sockaddr *sin, int family, zend_string *string, 
 
 #ifdef HAVE_IPV6
 /* Sets addr by hostname, or by ip in string form (AF_INET6) */
-bool php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock) /* {{{ */
+bool php_set_inet6_addr(struct sockaddr_in6 *sin6, zend_string *string, php_socket *php_sock) /* {{{ */
 {
 	char *scope = strchr(ZSTR_VAL(string), '%');
 
