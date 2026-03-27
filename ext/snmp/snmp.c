@@ -2202,7 +2202,7 @@ static PHP_RSHUTDOWN_FUNCTION(snmp)
 {
 	if (mib_needs_reset) {
 		shutdown_mib();
-		netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, null);
+		netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, NULL);
 		init_mib();
 	}
 
