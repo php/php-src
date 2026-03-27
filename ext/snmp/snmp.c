@@ -91,6 +91,11 @@ typedef struct snmp_session php_snmp_session;
 	} \
 }
 
+static php_snmp_object saved_snmp_settings;
+static int saved_mib_allow_underscores;
+static int saved_mib_comment_term;
+static int saved_mib_replace;
+
 ZEND_DECLARE_MODULE_GLOBALS(snmp)
 static PHP_GINIT_FUNCTION(snmp);
 
@@ -2316,6 +2321,36 @@ PHP_MSHUTDOWN_FUNCTION(snmp)
 }
 /* }}} */
 
+/* {{{ PHP_INIT_FUNCTION */
+static PHP_RINIT_FUNCTION(snmp)
+{
+	// Save the output options
+	save_snmplib_output_options(&saved_snmp_settings);
+
+	// Save the MIB options
+	saved_mib_allow_underscores = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_PARSE_LABEL);
+	saved_mib_comment_term = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_COMMENT_TERM);
+	saved_mib_replace = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_REPLACE);
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
+static PHP_RSHUTDOWN_FUNCTION(snmp)
+{
+	// Restore the output options
+	set_snmplib_output_options(&saved_snmp_settings);
+
+	// Restore MIB options
+	netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_PARSE_LABEL, saved_mib_allow_underscores);
+	netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_COMMENT_TERM, saved_mib_comment_term);
+	netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_REPLACE, saved_mib_replace);
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(snmp)
 {
@@ -2342,8 +2377,8 @@ zend_module_entry snmp_module_entry = {
 	ext_functions,
 	PHP_MINIT(snmp),
 	PHP_MSHUTDOWN(snmp),
-	NULL,
-	NULL,
+	PHP_RINIT(snmp),
+	PHP_RSHUTDOWN(snmp),
 	PHP_MINFO(snmp),
 	PHP_SNMP_VERSION,
 	PHP_MODULE_GLOBALS(snmp),
