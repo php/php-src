@@ -4523,7 +4523,10 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 		}
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
+		zend_class_entry *scope = Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJCE(EX(This)) : Z_CE(EX(This));
+		bool ref_has_type_sources = ref ? ZEND_REF_HAS_TYPE_SOURCES(ref) : false;
+		if (UNEXPECTED(!zend_check_type_and_coerce_slow(&ret_info->type, retval_ptr, scope,
+			(EX(func)->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) || ref_has_type_sources, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -8917,7 +8920,13 @@ ZEND_VM_HOT_HANDLER(211, ZEND_TYPE_ASSERT, CONST, ANY, NUM)
 		uint16_t argno = opline->extended_value >> 16;
 		zend_arg_info *arginfo = &fbc->common.arg_info[argno - 1];
 
-		if (!zend_check_type(&arginfo->type, value, /* is_return_type */ false, /* is_internal */ true)) {
+		if (!zend_check_type_and_coerce(
+			&arginfo->type,
+			value,
+			EX(func)->common.scope,
+			(EX(func)->op_array.fn_flags & ZEND_ACC_STRICT_TYPES),
+			IS_CALLABLE_SUPPRESS_DEPRECATIONS)
+		) {
 			const char *param_name = get_function_arg_name(fbc, argno);
 			zend_string *expected = zend_type_to_string(arginfo->type);
 			zend_type_error("%s(): Argument #%d%s%s%s must be of type %s, %s given", ZSTR_VAL(fbc->common.function_name), argno, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : "", ZSTR_VAL(expected), zend_zval_value_name(value));
