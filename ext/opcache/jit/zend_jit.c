@@ -115,7 +115,7 @@ static zend_string *zend_jit_func_name(const zend_op_array *op_array);
 static bool zend_jit_needs_arg_dtor(const zend_function *func, uint32_t arg_num, zend_call_info *call_info);
 static bool zend_jit_supported_binary_op(uint8_t op, uint32_t op1_info, uint32_t op2_info);
 
-static bool dominates(const zend_basic_block *blocks, int a, int b) {
+static bool dominates(const zend_basic_block *blocks, uint32_t a, uint32_t b) {
 	while (blocks[b].level > blocks[a].level) {
 		b = blocks[b].idom;
 	}
