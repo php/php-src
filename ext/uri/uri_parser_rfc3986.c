@@ -238,15 +238,12 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(void 
 		if (uriparser_uri->hostData.ip6 != NULL || uriparser_uri->hostData.ipFuture.first != NULL) {
 			/* the textual representation of the host is always accessible in the .hostText field no matter what the host is */
 			const size_t host_len = get_text_range_length(&uriparser_uri->hostText);
-			zend_string *host_str = zend_string_alloc(host_len + 2, false);
-
-			char *out = ZSTR_VAL(host_str);
-
-			*(out++) = '[';
-			out = zend_mempcpy(out, uriparser_uri->hostText.first, host_len);
-			*(out++) = ']';
-			*out = '\0';
-
+			
+			zend_string *host_str = zend_string_concat3(
+				"[", 1,
+				uriparser_uri->hostText.first, host_len,
+				"]", 1
+			);
 			ZVAL_NEW_STR(retval, host_str);
 		} else {
 			ZVAL_STRINGL(retval, uriparser_uri->hostText.first, get_text_range_length(&uriparser_uri->hostText));
