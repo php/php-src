@@ -2237,7 +2237,7 @@ zend_module_entry snmp_module_entry = {
 	PHP_MINIT(snmp),
 	PHP_MSHUTDOWN(snmp),
 	NULL,
-	PHP_RSHUTDOWN(snmp),,
+	PHP_RSHUTDOWN(snmp),
 	PHP_MINFO(snmp),
 	PHP_SNMP_VERSION,
 	PHP_MODULE_GLOBALS(snmp),
