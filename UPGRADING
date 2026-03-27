@@ -264,5 +264,8 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of intval('+0b...', 2) and intval('0b...', 2).
   . Improved performance of str_split().
 
+- URI:
+  . Reduced allocations when reading RFC3986 IPv6/IPFuture hosts and paths.
+
 - Zip:
   . Avoid string copies in ZipArchive::addFromString().
