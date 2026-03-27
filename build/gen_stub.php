@@ -1280,8 +1280,8 @@ class FuncInfo {
     private bool $supportsCompileTimeEval;
     public readonly bool $verify;
     /** @var ArgInfo[] */
-    public readonly array $args;
-    public readonly ReturnInfo $return;
+    public /* readonly */ array $args;
+    public /* readonly */ ReturnInfo $return;
     private readonly int $numRequiredArgs;
     public readonly ?string $cond;
     public bool $isUndocumentable;
@@ -3371,9 +3371,9 @@ class ClassInfo {
     /** @var Name[] */
     private readonly array $implements;
     /** @var ConstInfo[] */
-    public readonly array $constInfos;
+    public /* readonly */ array $constInfos;
     /** @var PropertyInfo[] */
-    private readonly array $propertyInfos;
+    private /* readonly */ array $propertyInfos;
     /** @var FuncInfo[] */
     public array $funcInfos;
     /** @var EnumCaseInfo[] */
