@@ -2381,7 +2381,7 @@ static uint32_t replace_constant_operands(sccp_ctx *ctx) {
 
 	/* We iterate the variables backwards, so we can eliminate sequences like INIT_ROPE
 	 * and INIT_ARRAY. */
-	for (i = ssa->vars_count - 1; i >= op_array->last_var; i--) {
+	for (i = ssa->vars_count - 1; i >= (int)op_array->last_var; i--) {
 		zend_ssa_var *var = &ssa->vars[i];
 		zval *value;
 		int use;

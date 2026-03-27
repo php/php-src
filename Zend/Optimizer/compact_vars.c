@@ -23,7 +23,7 @@
 /* This pass removes all CVs and temporaries that are completely unused. It does *not* merge any CVs or TMPs.
  * This pass does not operate on SSA form anymore. */
 void zend_optimizer_compact_vars(zend_op_array *op_array) {
-	int i;
+	uint32_t i;
 
 	ALLOCA_FLAG(use_heap1);
 	ALLOCA_FLAG(use_heap2);

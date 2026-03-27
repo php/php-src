@@ -326,10 +326,8 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 	}
 
 	if (op_array->vars) {
-		int i;
-
 		ADD_SIZE(sizeof(zend_string*) * op_array->last_var);
-		for (i = 0; i < op_array->last_var; i++) {
+		for (uint32_t i = 0; i < op_array->last_var; i++) {
 			ADD_INTERNED_STRING(op_array->vars[i]);
 		}
 	}

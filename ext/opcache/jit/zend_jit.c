@@ -2915,9 +2915,7 @@ done:
 			left_frame = true;
 		}
 		if (!left_frame) {
-			int j;
-
-			for (j = 0 ; j < op_array->last_var; j++) {
+			for (uint32_t j = 0 ; j < op_array->last_var; j++) {
 				uint32_t info = zend_ssa_cv_info(op_array, ssa, j);
 
 				if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {

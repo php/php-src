@@ -1001,7 +1001,8 @@ ZEND_API zend_result zend_build_ssa(zend_arena **arena, const zend_script *scrip
 	uint32_t set_size;
 	zend_bitset def, in, phi;
 	int *var = NULL;
-	int i, j, k, changed;
+	int i, k, changed;
+	uint32_t j;
 	zend_dfg dfg;
 	ALLOCA_FLAG(dfg_use_heap)
 	ALLOCA_FLAG(var_use_heap)

@@ -4885,7 +4885,7 @@ static void zend_mark_cv_references(const zend_op_array *op_array, const zend_sc
 ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level) /* {{{ */
 {
 	zend_ssa_var_info *ssa_var_info;
-	int i;
+	uint32_t i;
 
 	if (!ssa->var_info) {
 		ssa->var_info = zend_arena_calloc(arena, ssa->vars_count, sizeof(zend_ssa_var_info));

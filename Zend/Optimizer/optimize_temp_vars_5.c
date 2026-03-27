@@ -43,7 +43,7 @@
 void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	uint32_t T = op_array->T;
-	int offset = op_array->last_var;
+	uint32_t offset = op_array->last_var;
 	uint32_t bitset_len;
 	zend_bitset taken_T;	/* T index in use */
 	zend_op **start_of_T;	/* opline where T is first used */

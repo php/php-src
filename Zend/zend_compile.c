@@ -539,7 +539,7 @@ static zend_always_inline uint32_t get_temporary_variable(void) /* {{{ */
 
 static uint32_t lookup_cv(zend_string *name) /* {{{ */{
 	zend_op_array *op_array = CG(active_op_array);
-	int i = 0;
+	uint32_t i = 0;
 	zend_ulong hash_value = zend_string_hash_val(name);
 
 	while (i < op_array->last_var) {
@@ -8486,9 +8486,8 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 		ZVAL_NULL(&zv);
 
 		{
-			int i;
-			for (i = 0; i < op_array->last_var; i++) {
-				if (zend_string_equals(op_array->vars[i], var_name)) {
+			for (uint32_t j = 0; j < op_array->last_var; j++) {
+				if (zend_string_equals(op_array->vars[j], var_name)) {
 					zend_error_noreturn_unchecked(E_COMPILE_ERROR,
 						"Cannot use lexical variable $%S as a parameter name", var_name);
 				}

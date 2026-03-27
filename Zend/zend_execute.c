@@ -4278,7 +4278,7 @@ ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table) /* {{{
 static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 {
 	zval *cv = EX_VAR_NUM(0);
-	int count = EX(func)->op_array.last_var;
+	uint32_t count = EX(func)->op_array.last_var;
 	while (EXPECTED(count != 0)) {
 		i_zval_ptr_dtor(cv);
 		cv++;

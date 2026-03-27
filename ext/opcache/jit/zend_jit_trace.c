@@ -661,7 +661,7 @@ static int zend_jit_trace_add_phis(zend_jit_trace_rec *trace_buffer, uint32_t ss
 {
 	const zend_op_array *op_array;
 	zend_jit_trace_rec *p;
-	int k, vars_count;
+	uint32_t vars_count;
 	zend_bitset use, def;
 	uint32_t build_flags = ZEND_SSA_RC_INFERENCE | ZEND_SSA_USE_CV_RESULTS;
 	uint32_t set_size;
@@ -712,7 +712,7 @@ static int zend_jit_trace_add_phis(zend_jit_trace_rec *trace_buffer, uint32_t ss
 	} else {
 		vars_count = op_array->last_var + op_array->T;
 	}
-	for (k = 0; k < vars_count; k++) {
+	for (uint32_t k = 0; k < vars_count; k++) {
 		if (zend_bitset_in(use, k)) {
 			zend_ssa_phi *phi = zend_arena_calloc(&CG(arena), 1,
 				ZEND_MM_ALIGNED_SIZE(sizeof(zend_ssa_phi)) +
@@ -7814,7 +7814,8 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 	const zend_op_array *op_array;
 	const zend_op *opline;
 	uint32_t level = 1 + trace_buffer[0].level;
-	int idx, len, i, v, vars_count, call_level;
+	int len, v;
+	uint32_t idx, i, vars_count, call_level;
 
 	ZEND_ASSERT(p->op == ZEND_JIT_TRACE_START);
 	op_array = p->op_array;

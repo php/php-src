@@ -681,9 +681,8 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	}
 
 	if (op_array->vars) {
-		int i;
 		op_array->vars = zend_shared_memdup_put_free(op_array->vars, sizeof(zend_string*) * op_array->last_var);
-		for (i = 0; i < op_array->last_var; i++) {
+		for (uint32_t i = 0; i < op_array->last_var; i++) {
 			zend_accel_store_interned_string(op_array->vars[i]);
 		}
 	}
