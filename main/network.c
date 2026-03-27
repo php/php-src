@@ -193,11 +193,11 @@ PHPAPI size_t php_network_getaddresses_ex(const char *host, int socktype, int fa
 
 	if ((ret = getaddrinfo(host, NULL, &hints, &res))) {
 # if defined(PHP_WIN32)
-		char *gai_error = php_win32_error_to_msg(n);
+		char *gai_error = php_win32_error_to_msg(ret);
 # elif defined(HAVE_GAI_STRERROR)
-		const char *gai_error = gai_strerror(n);
+		const char *gai_error = gai_strerror(ret);
 # else
-		const char *gai_error = php_gai_strerror(n)
+		const char *gai_error = php_gai_strerror(ret)
 # endif
 		if (error_string) {
 			/* free error string received during previous iteration (if any) */
