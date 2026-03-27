@@ -1,5 +1,5 @@
 /* This is a generated file, edit snmp.stub.php instead.
- * Stub hash: 89efd2d6c0694fcb719ea024d4fb47af37148770 */
+ * Stub hash: 0b5de7cff240601a238971eee230865017c52610 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -42,15 +42,18 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_snmp_set_enum_print arginfo_snmp_set_quick_print
 
-#define arginfo_snmp_set_numeric_index arginfo_snmp_set_quick_print
-
-#define arginfo_snmp_set_numeric_timeticks arginfo_snmp_set_quick_print
-
-#define arginfo_snmp_set_extended_index arginfo_snmp_set_quick_print
-
-#define arginfo_snmp_set_dontprint_units arginfo_snmp_set_quick_print
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_mib_option, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, enable, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_oid_output_format, 0, 1, IS_TRUE, 0)
+	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_snmp_set_output_option arginfo_snmp_set_mib_option
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_string_output, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -118,8 +121,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_get_valueretrieval, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_snmp_mib_allow_underscores arginfo_snmp_set_quick_print
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_read_mib, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -181,11 +182,10 @@ ZEND_FUNCTION(snmpset);
 ZEND_FUNCTION(snmp_get_quick_print);
 ZEND_FUNCTION(snmp_set_quick_print);
 ZEND_FUNCTION(snmp_set_enum_print);
-ZEND_FUNCTION(snmp_set_numeric_index);
-ZEND_FUNCTION(snmp_set_numeric_timeticks);
-ZEND_FUNCTION(snmp_set_extended_index);
-ZEND_FUNCTION(snmp_set_dontprint_units);
+ZEND_FUNCTION(snmp_set_mib_option);
 ZEND_FUNCTION(snmp_set_oid_output_format);
+ZEND_FUNCTION(snmp_set_output_option);
+ZEND_FUNCTION(snmp_set_string_output);
 ZEND_FUNCTION(snmp2_get);
 ZEND_FUNCTION(snmp2_getnext);
 ZEND_FUNCTION(snmp2_walk);
@@ -198,7 +198,6 @@ ZEND_FUNCTION(snmp3_real_walk);
 ZEND_FUNCTION(snmp3_set);
 ZEND_FUNCTION(snmp_set_valueretrieval);
 ZEND_FUNCTION(snmp_get_valueretrieval);
-ZEND_FUNCTION(snmp_mib_allow_underscores);
 ZEND_FUNCTION(snmp_read_mib);
 ZEND_METHOD(SNMP, __construct);
 ZEND_METHOD(SNMP, close);
@@ -220,11 +219,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(snmp_get_quick_print, arginfo_snmp_get_quick_print)
 	ZEND_FE(snmp_set_quick_print, arginfo_snmp_set_quick_print)
 	ZEND_FE(snmp_set_enum_print, arginfo_snmp_set_enum_print)
-	ZEND_FE(snmp_set_numeric_index, arginfo_snmp_set_numeric_index)
-	ZEND_FE(snmp_set_numeric_timeticks, arginfo_snmp_set_numeric_timeticks)
-	ZEND_FE(snmp_set_extended_index, arginfo_snmp_set_extended_index)
-	ZEND_FE(snmp_set_dontprint_units, arginfo_snmp_set_dontprint_units)
+	ZEND_FE(snmp_set_mib_option, arginfo_snmp_set_mib_option)
 	ZEND_FE(snmp_set_oid_output_format, arginfo_snmp_set_oid_output_format)
+	ZEND_FE(snmp_set_output_option, arginfo_snmp_set_output_option)
+	ZEND_FE(snmp_set_string_output, arginfo_snmp_set_string_output)
 	ZEND_RAW_FENTRY("snmp_set_oid_numeric_print", zif_snmp_set_oid_output_format, arginfo_snmp_set_oid_numeric_print, 0, NULL, NULL)
 	ZEND_FE(snmp2_get, arginfo_snmp2_get)
 	ZEND_FE(snmp2_getnext, arginfo_snmp2_getnext)
@@ -238,7 +236,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(snmp3_set, arginfo_snmp3_set)
 	ZEND_FE(snmp_set_valueretrieval, arginfo_snmp_set_valueretrieval)
 	ZEND_FE(snmp_get_valueretrieval, arginfo_snmp_get_valueretrieval)
-	ZEND_FE(snmp_mib_allow_underscores, arginfo_snmp_mib_allow_underscores)
 	ZEND_FE(snmp_read_mib, arginfo_snmp_read_mib)
 	ZEND_FE_END
 };
@@ -258,12 +255,26 @@ static const zend_function_entry class_SNMP_methods[] = {
 
 static void register_snmp_symbols(int module_number)
 {
+	REGISTER_LONG_CONSTANT("SNMP_MIB_ALLOW_UNDERSCORES", NETSNMP_DS_LIB_MIB_PARSE_LABEL, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_MIB_COMMENT_TERM", NETSNMP_DS_LIB_MIB_COMMENT_TERM, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_MIB_REPLACE", NETSNMP_DS_LIB_MIB_REPLACE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_SUFFIX", NETSNMP_OID_OUTPUT_SUFFIX, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_MODULE", NETSNMP_OID_OUTPUT_MODULE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_FULL", NETSNMP_OID_OUTPUT_FULL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_NUMERIC", NETSNMP_OID_OUTPUT_NUMERIC, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_UCD", NETSNMP_OID_OUTPUT_UCD, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_NONE", NETSNMP_OID_OUTPUT_NONE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_OUTPUT_NUMERIC_INDEX", NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_OUTPUT_ENUM_PRINT", NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_OUTPUT_ESCAPE_QUOTES", NETSNMP_DS_LIB_ESCAPE_QUOTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_OUTPUT_QUICK_PRINT", NETSNMP_DS_LIB_QUICK_PRINT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_OUTPUT_NUMERIC_TIMETICKS", NETSNMP_DS_LIB_NUMERIC_TIMETICKS, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_OUTPUT_PRINT_HEX_TEXT", NETSNMP_DS_LIB_PRINT_HEX_TEXT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_OUTPUT_DONT_PRINT_UNITS", NETSNMP_DS_LIB_DONT_PRINT_UNITS, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_OUTPUT_EXTENDED_INDEX", NETSNMP_DS_LIB_EXTENDED_INDEX, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_STRING_OUTPUT_GUESS", NETSNMP_STRING_OUTPUT_GUESS, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_STRING_OUTPUT_ASCII", NETSNMP_STRING_OUTPUT_ASCII, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SNMP_STRING_OUTPUT_HEX", NETSNMP_STRING_OUTPUT_HEX, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_VALUE_LIBRARY", SNMP_VALUE_LIBRARY, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_VALUE_PLAIN", SNMP_VALUE_PLAIN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_VALUE_OBJECT", SNMP_VALUE_OBJECT, CONST_PERSISTENT);

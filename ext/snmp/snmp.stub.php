@@ -4,6 +4,22 @@
 
 /**
  * @var int
+ * @cvalue NETSNMP_DS_LIB_MIB_PARSE_LABEL
+ */
+const SNMP_MIB_ALLOW_UNDERSCORES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NETSNMP_DS_LIB_MIB_COMMENT_TERM
+ */
+const SNMP_MIB_COMMENT_TERM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NETSNMP_DS_LIB_MIB_REPLACE
+ */
+const SNMP_MIB_REPLACE = UNKNOWN;
+
+/**
+ * @var int
  * @cvalue NETSNMP_OID_OUTPUT_SUFFIX
  */
 const SNMP_OID_OUTPUT_SUFFIX = UNKNOWN;
@@ -32,6 +48,63 @@ const SNMP_OID_OUTPUT_UCD = UNKNOWN;
  * @cvalue NETSNMP_OID_OUTPUT_NONE
  */
 const SNMP_OID_OUTPUT_NONE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS
+ */
+const SNMP_OUTPUT_NUMERIC_INDEX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM
+ */
+const SNMP_OUTPUT_ENUM_PRINT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NETSNMP_DS_LIB_ESCAPE_QUOTES
+ */
+const SNMP_OUTPUT_ESCAPE_QUOTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NETSNMP_DS_LIB_QUICK_PRINT
+ */
+const SNMP_OUTPUT_QUICK_PRINT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NETSNMP_DS_LIB_NUMERIC_TIMETICKS
+ */
+const SNMP_OUTPUT_NUMERIC_TIMETICKS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NETSNMP_DS_LIB_PRINT_HEX_TEXT
+ */
+const SNMP_OUTPUT_PRINT_HEX_TEXT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NETSNMP_DS_LIB_DONT_PRINT_UNITS
+ */
+const SNMP_OUTPUT_DONT_PRINT_UNITS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NETSNMP_DS_LIB_EXTENDED_INDEX
+ */
+const SNMP_OUTPUT_EXTENDED_INDEX = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue NETSNMP_STRING_OUTPUT_GUESS
+ */
+const SNMP_STRING_OUTPUT_GUESS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NETSNMP_STRING_OUTPUT_ASCII
+ */
+const SNMP_STRING_OUTPUT_ASCII = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NETSNMP_STRING_OUTPUT_HEX
+ */
+const SNMP_STRING_OUTPUT_HEX = UNKNOWN;
 
 /**
  * @var int
@@ -129,15 +202,13 @@ function snmp_set_quick_print(bool $enable): true {}
 
 function snmp_set_enum_print(bool $enable): true {}
 
-function snmp_set_numeric_index(bool $enable): true {}
-
-function snmp_set_numeric_timeticks(bool $enable): true {}
-
-function snmp_set_extended_index(bool $enable): true {}
-
-function snmp_set_dontprint_units(bool $enable): true {}
+function snmp_set_mib_option(int $option, bool $enable): void {}
 
 function snmp_set_oid_output_format(int $format): true {}
+
+function snmp_set_output_option(int $option, bool $enable): void {}
+
+function snmp_set_string_output(int $format): void {}
 
 /** @alias snmp_set_oid_output_format */
 function snmp_set_oid_numeric_print(int $format): true {}
@@ -186,8 +257,6 @@ function snmp3_set(
 function snmp_set_valueretrieval(int $method): true {}
 
 function snmp_get_valueretrieval(): int {}
-
-function snmp_mib_allow_underscores(bool $enable): true {}
 
 function snmp_read_mib(string $filename): bool {}
 
