@@ -1,5 +1,5 @@
 /* This is a generated file, edit snmp.stub.php instead.
- * Stub hash: 0b5de7cff240601a238971eee230865017c52610 */
+ * Stub hash: fb1c0abfcc7a2703d2a3e54a5ec47dfcbfcfa2e3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -53,7 +53,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_snmp_set_output_option arginfo_snmp_set_mib_option
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_string_output, 0, 1, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_string_output_format, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -185,7 +185,7 @@ ZEND_FUNCTION(snmp_set_enum_print);
 ZEND_FUNCTION(snmp_set_mib_option);
 ZEND_FUNCTION(snmp_set_oid_output_format);
 ZEND_FUNCTION(snmp_set_output_option);
-ZEND_FUNCTION(snmp_set_string_output);
+ZEND_FUNCTION(snmp_set_string_output_format);
 ZEND_FUNCTION(snmp2_get);
 ZEND_FUNCTION(snmp2_getnext);
 ZEND_FUNCTION(snmp2_walk);
@@ -222,7 +222,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(snmp_set_mib_option, arginfo_snmp_set_mib_option)
 	ZEND_FE(snmp_set_oid_output_format, arginfo_snmp_set_oid_output_format)
 	ZEND_FE(snmp_set_output_option, arginfo_snmp_set_output_option)
-	ZEND_FE(snmp_set_string_output, arginfo_snmp_set_string_output)
+	ZEND_FE(snmp_set_string_output_format, arginfo_snmp_set_string_output_format)
 	ZEND_RAW_FENTRY("snmp_set_oid_numeric_print", zif_snmp_set_oid_output_format, arginfo_snmp_set_oid_numeric_print, 0, NULL, NULL)
 	ZEND_FE(snmp2_get, arginfo_snmp2_get)
 	ZEND_FE(snmp2_getnext, arginfo_snmp2_getnext)

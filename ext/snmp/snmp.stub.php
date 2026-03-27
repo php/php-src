@@ -208,7 +208,7 @@ function snmp_set_oid_output_format(int $format): true {}
 
 function snmp_set_output_option(int $option, bool $enable): void {}
 
-function snmp_set_string_output(int $format): void {}
+function snmp_set_string_output_format(int $format): void {}
 
 /** @alias snmp_set_oid_output_format */
 function snmp_set_oid_numeric_print(int $format): true {}
