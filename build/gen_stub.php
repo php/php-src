@@ -54,6 +54,24 @@ if (!function_exists('array_any')) {
     }
 }
 
+if (function_exists('clone')) {
+    // Replace (\clone)(...) with \clone(...) once the minimally
+    // supported PHP version is 8.5.
+    define('clone', \clone(...));
+} else {
+    define(
+        'clone',
+        /**
+         * @template T
+         * @param T $o
+         * @return T
+         */
+        function (object $o): object {
+            return clone $o;
+        }
+    );
+}
+
 /**
  * @return FileInfo[]
  */
@@ -2184,9 +2202,7 @@ OUPUT_EXAMPLE
 
     public function __clone()
     {
-        foreach ($this->args as $key => $argInfo) {
-            $this->args[$key] = clone $argInfo;
-        }
+        $this->args = array_map((\clone)(...), $this->args);
         $this->return = clone $this->return;
     }
 }
@@ -4154,17 +4170,9 @@ class ClassInfo {
 
     public function __clone()
     {
-        foreach ($this->constInfos as $key => $constInfo) {
-            $this->constInfos[$key] = clone $constInfo;
-        }
-
-        foreach ($this->propertyInfos as $key => $propertyInfo) {
-            $this->propertyInfos[$key] = clone $propertyInfo;
-        }
-
-        foreach ($this->funcInfos as $key => $funcInfo) {
-            $this->funcInfos[$key] = clone $funcInfo;
-        }
+        $this->constInfos = array_map((\clone)(...), $this->constInfos);
+        $this->propertyInfos = array_map((\clone)(...), $this->propertyInfos);
+        $this->funcInfos = array_map((\clone)(...), $this->funcInfos);
     }
 
     /**
@@ -4275,17 +4283,9 @@ class FileInfo {
 
     public function __clone()
     {
-        foreach ($this->constInfos as $key => $constInfo) {
-            $this->constInfos[$key] = clone $constInfo;
-        }
-
-        foreach ($this->funcInfos as $key => $funcInfo) {
-            $this->funcInfos[$key] = clone $funcInfo;
-        }
-
-        foreach ($this->classInfos as $key => $classInfo) {
-            $this->classInfos[$key] = clone $classInfo;
-        }
+        $this->constInfos = array_map((\clone)(...), $this->constInfos);
+        $this->funcInfos = array_map((\clone)(...), $this->funcInfos);
+        $this->classInfos = array_map((\clone)(...), $this->classInfos);
     }
 
     private function getMinimumPhpVersionIdCompatibility(): ?int {
