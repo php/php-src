@@ -1997,12 +1997,13 @@ check_indirect:
 	return ref;
 }
 
-static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg_info)
+static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_arg_info *arg_info)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline = EX(opline);
+	const zend_class_entry *scope = EX(func)->common.scope;
 	bool ret = zend_check_user_type_slow(
-		&arg_info->type, arg, /* ref */ NULL, /* current_frame */ false);
+		&arg_info->type, arg, scope, ZEND_TYPE_CHECK_MODE_UNKNOWN_PRIOR_FRAME);
 	if (UNEXPECTED(!ret)) {
 		zend_verify_arg_error(EX(func), arg_info, opline->op1.num, arg);
 		return false;
@@ -2010,7 +2011,7 @@ static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg
 	return ret;
 }
 
-static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info)
+static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, const zend_arg_info *arg_info)
 {
     if (Z_TYPE_P(arg) == IS_NULL) {
 		ZEND_ASSERT(ZEND_TYPE_IS_SET(arg_info->type));
@@ -2019,7 +2020,7 @@ static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_a
 		}
 	}
 	if (UNEXPECTED(!zend_check_user_type_slow(
-			&arg_info->type, arg, /* ref */ NULL, /* current_frame */ true))) {
+			&arg_info->type, arg, NULL, ZEND_TYPE_CHECK_MODE_UNKNOWN_CURRENT_FRAME))) {
 		zend_verify_return_error((zend_function*)op_array, arg);
 	}
 }

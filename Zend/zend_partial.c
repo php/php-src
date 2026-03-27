@@ -580,8 +580,8 @@ static zend_ast *zp_compile_forwarding_call(
 				arg_info = NULL;
 			}
 			if (arg_info && ZEND_TYPE_IS_SET(arg_info->type)
-					&& UNEXPECTED(!zend_check_type_ex(&arg_info->type, &value,
-						/* current_frame */ true, /* is_internal */ false))) {
+					&& UNEXPECTED(!zend_check_type_and_coerce(&arg_info->type, &value,
+						function->common.scope, ZEND_TYPE_CHECK_MODE_UNKNOWN_CURRENT_FRAME, 0))) {
 				zend_string *need_msg = zend_type_to_string_resolved(arg_info->type,
 						function->common.scope);
 				zend_argument_type_error_ex(function, offset + 1,
@@ -1108,8 +1108,8 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 			arg_info = NULL;
 		}
 		if (arg_info && ZEND_TYPE_IS_SET(arg_info->type)
-				&& UNEXPECTED(!zend_check_type_ex(&arg_info->type, var,
-					/* current_frame */ true, /* is_internal */ false))) {
+				&& UNEXPECTED(!zend_check_type_and_coerce(&arg_info->type, var,
+					function->common.scope, ZEND_TYPE_CHECK_MODE_UNKNOWN_CURRENT_FRAME, 0))) {
 			zend_string *need_msg = zend_type_to_string_resolved(arg_info->type,
 					function->common.scope);
 			zend_argument_type_error_ex(function, offset + 1,
