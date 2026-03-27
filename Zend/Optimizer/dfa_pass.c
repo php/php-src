@@ -941,8 +941,9 @@ optimize_nop:
 							do {
 								backtracking_block_num--;
 							} while (backtracking_block_num >= 0
-								&& !(ssa->cfg.blocks[block_num].flags & ZEND_BB_REACHABLE));
+								&& !(ssa->cfg.blocks[backtracking_block_num].flags & ZEND_BB_REACHABLE));
 							if (backtracking_block_num >= 0) {
+								block_num = backtracking_block_num;
 								continue;
 							}
 						}
