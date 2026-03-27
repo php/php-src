@@ -240,10 +240,12 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(void 
 			const size_t host_len = get_text_range_length(&uriparser_uri->hostText);
 			zend_string *host_str = zend_string_alloc(host_len + 2, false);
 
-			ZSTR_VAL(host_str)[0] = '[';
-			memcpy(ZSTR_VAL(host_str) + 1, uriparser_uri->hostText.first, host_len);
-			ZSTR_VAL(host_str)[host_len + 1] = ']';
-			ZSTR_VAL(host_str)[host_len + 2] = '\0';
+			char *out = ZSTR_VAL(host_str);
+
+			*(out++) = '[';
+			out = zend_mempcpy(out, uriparser_uri->hostText.first, host_len);
+			*(out++) = ']';
+			*out = '\0';
 
 			ZVAL_STR(retval, host_str);
 		} else {
