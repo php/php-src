@@ -398,22 +398,22 @@ static bool variable_defined_or_used_in_range(zend_ssa *ssa, int var, int start,
 	return false;
 }
 
-int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
+static uint32_t zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 {
-	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
-	int removed_ops = 0;
+	const zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+	uint32_t removed_ops = 0;
 
 	if (func_info->callee_info) {
-		zend_call_info *call_info = func_info->callee_info;
+		const zend_call_info *call_info = func_info->callee_info;
 
 		do {
 			zend_op *op = call_info->caller_init_opline;
 
-			if ((op->opcode == ZEND_FRAMELESS_ICALL_2
-			  || (op->opcode == ZEND_FRAMELESS_ICALL_3 && (op + 1)->op1_type == IS_CONST))
-			 && call_info->callee_func
-			 && zend_string_equals_literal_ci(call_info->callee_func->common.function_name, "in_array")) {
-
+			if (
+				(op->opcode == ZEND_FRAMELESS_ICALL_2 || (op->opcode == ZEND_FRAMELESS_ICALL_3 && (op + 1)->op1_type == IS_CONST))
+				&& call_info->callee_func
+				&& zend_string_equals_literal_ci(call_info->callee_func->common.function_name, "in_array")
+			) {
 				bool strict = false;
 				bool has_opdata = op->opcode == ZEND_FRAMELESS_ICALL_3;
 				ZEND_ASSERT(!call_info->is_prototype);
@@ -428,7 +428,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 				 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op->op2.constant)) == IS_ARRAY) {
 					bool ok = true;
 
-					HashTable *src = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, op->op2.constant));
+					const HashTable *src = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, op->op2.constant));
 					HashTable *dst;
 					zval *val, tmp;
 					zend_ulong idx;
