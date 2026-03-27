@@ -1,5 +1,5 @@
 /* This is a generated file, edit snmp.stub.php instead.
- * Stub hash: fb1c0abfcc7a2703d2a3e54a5ec47dfcbfcfa2e3 */
+ * Stub hash: ff6206972e345da8a22b7d949a6dd4ca22bcb31d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -383,11 +383,11 @@ static zend_class_entry *register_class_SNMP(void)
 	zend_declare_typed_property(class_entry, property_max_oids_name, &property_max_oids_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
 	zend_string_release_ex(property_max_oids_name, true);
 
-	zval property_valueretrieval_default_value;
-	ZVAL_UNDEF(&property_valueretrieval_default_value);
-	zend_string *property_valueretrieval_name = zend_string_init("valueretrieval", sizeof("valueretrieval") - 1, true);
-	zend_declare_typed_property(class_entry, property_valueretrieval_name, &property_valueretrieval_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release_ex(property_valueretrieval_name, true);
+	zval property_oid_increasing_check_default_value;
+	ZVAL_UNDEF(&property_oid_increasing_check_default_value);
+	zend_string *property_oid_increasing_check_name = zend_string_init("oid_increasing_check", sizeof("oid_increasing_check") - 1, true);
+	zend_declare_typed_property(class_entry, property_oid_increasing_check_name, &property_oid_increasing_check_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property_oid_increasing_check_name, true);
 
 	zval property_quick_print_default_value;
 	ZVAL_UNDEF(&property_quick_print_default_value);
@@ -413,23 +413,41 @@ static zend_class_entry *register_class_SNMP(void)
 	zend_declare_typed_property(class_entry, property_extended_index_name, &property_extended_index_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release_ex(property_extended_index_name, true);
 
-	zval property_dontprint_units_default_value;
-	ZVAL_UNDEF(&property_dontprint_units_default_value);
-	zend_string *property_dontprint_units_name = zend_string_init("dontprint_units", sizeof("dontprint_units") - 1, true);
-	zend_declare_typed_property(class_entry, property_dontprint_units_name, &property_dontprint_units_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
-	zend_string_release_ex(property_dontprint_units_name, true);
+	zval property_dont_print_units_default_value;
+	ZVAL_UNDEF(&property_dont_print_units_default_value);
+	zend_string *property_dont_print_units_name = zend_string_init("dont_print_units", sizeof("dont_print_units") - 1, true);
+	zend_declare_typed_property(class_entry, property_dont_print_units_name, &property_dont_print_units_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property_dont_print_units_name, true);
+
+	zval property_escape_quotes_default_value;
+	ZVAL_UNDEF(&property_escape_quotes_default_value);
+	zend_string *property_escape_quotes_name = zend_string_init("escape_quotes", sizeof("escape_quotes") - 1, true);
+	zend_declare_typed_property(class_entry, property_escape_quotes_name, &property_escape_quotes_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property_escape_quotes_name, true);
+
+	zval property_print_hex_text_default_value;
+	ZVAL_UNDEF(&property_print_hex_text_default_value);
+	zend_string *property_print_hex_text_name = zend_string_init("print_hex_text", sizeof("print_hex_text") - 1, true);
+	zend_declare_typed_property(class_entry, property_print_hex_text_name, &property_print_hex_text_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property_print_hex_text_name, true);
+
+	zval property_valueretrieval_default_value;
+	ZVAL_UNDEF(&property_valueretrieval_default_value);
+	zend_string *property_valueretrieval_name = zend_string_init("valueretrieval", sizeof("valueretrieval") - 1, true);
+	zend_declare_typed_property(class_entry, property_valueretrieval_name, &property_valueretrieval_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(property_valueretrieval_name, true);
+
+	zval property_string_output_format_default_value;
+	ZVAL_UNDEF(&property_string_output_format_default_value);
+	zend_string *property_string_output_format_name = zend_string_init("string_output_format", sizeof("string_output_format") - 1, true);
+	zend_declare_typed_property(class_entry, property_string_output_format_name, &property_string_output_format_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(property_string_output_format_name, true);
 
 	zval property_oid_output_format_default_value;
 	ZVAL_UNDEF(&property_oid_output_format_default_value);
 	zend_string *property_oid_output_format_name = zend_string_init("oid_output_format", sizeof("oid_output_format") - 1, true);
 	zend_declare_typed_property(class_entry, property_oid_output_format_name, &property_oid_output_format_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_oid_output_format_name, true);
-
-	zval property_oid_increasing_check_default_value;
-	ZVAL_UNDEF(&property_oid_increasing_check_default_value);
-	zend_string *property_oid_increasing_check_name = zend_string_init("oid_increasing_check", sizeof("oid_increasing_check") - 1, true);
-	zend_declare_typed_property(class_entry, property_oid_increasing_check_name, &property_oid_increasing_check_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
-	zend_string_release_ex(property_oid_increasing_check_name, true);
 
 	zval property_exceptions_enabled_default_value;
 	ZVAL_UNDEF(&property_exceptions_enabled_default_value);

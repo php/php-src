@@ -291,14 +291,17 @@ class SNMP
     /** @readonly */
     public array $info;
     public ?int $max_oids;
-    public int $valueretrieval;
+    public bool $oid_increasing_check;
     public bool $quick_print;
     public bool $enum_print;
     public bool $numeric_timeticks;
     public bool $extended_index;
-    public bool $dontprint_units;
+    public bool $dont_print_units;
+    public bool $escape_quotes;
+    public bool $print_hex_text;
+    public int $valueretrieval;
+    public int $string_output_format;
     public int $oid_output_format;
-    public bool $oid_increasing_check;
     public int $exceptions_enabled;
 
     public function __construct(int $version, string $hostname, string $community, int $timeout = -1, int $retries = -1) {}
