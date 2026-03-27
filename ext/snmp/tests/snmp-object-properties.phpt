@@ -188,12 +188,12 @@ object(SNMP)#%d (%d) {
   bool(false)
   ["print_hex_text"]=>
   bool(false)
+  ["valueretrieval"]=>
+  int(1)
   ["string_output_format"]=>
   int(0)
   ["oid_output_format"]=>
   int(3)
-  ["valueretrieval"]=>
-  int(1)
   ["exceptions_enabled"]=>
   int(0)
 }
