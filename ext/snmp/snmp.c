@@ -1542,6 +1542,7 @@ PHP_FUNCTION(snmp_set_mib_option)
 		case NETSNMP_DS_LIB_MIB_COMMENT_TERM:
 		case NETSNMP_DS_LIB_MIB_REPLACE:
 			netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, a1, (int) a2);
+			break;
 		default:
 			zend_argument_value_error(1, "must be an SNMP_MIB_* constant");
 			RETURN_THROWS();
@@ -1563,6 +1564,7 @@ PHP_FUNCTION(snmp_set_string_output_format)
 		case NETSNMP_STRING_OUTPUT_ASCII:
 		case NETSNMP_STRING_OUTPUT_HEX:
 			netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT, a1);
+			break;
 		default:
 			zend_argument_value_error(1, "must be an SNMP_STRING_OUTPUT_* constant");
 			RETURN_THROWS();
@@ -1590,6 +1592,7 @@ PHP_FUNCTION(snmp_set_output_option)
 		case NETSNMP_DS_LIB_PRINT_BARE_VALUE:
 		case NETSNMP_DS_LIB_EXTENDED_INDEX:
 			netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, a1, (int) a2);
+			break;
 		default:
 			zend_argument_value_error(1, "must be an SNMP_OUTPUT_* constant");
 			RETURN_THROWS();
