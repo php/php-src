@@ -1,5 +1,5 @@
 /* This is a generated file, edit snmp.stub.php instead.
- * Stub hash: ff6206972e345da8a22b7d949a6dd4ca22bcb31d */
+ * Stub hash: fa515fbbf73123ccee764da8bd37ca7980d3e180 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -400,6 +400,12 @@ static zend_class_entry *register_class_SNMP(void)
 	zend_string *property_enum_print_name = zend_string_init("enum_print", sizeof("enum_print") - 1, true);
 	zend_declare_typed_property(class_entry, property_enum_print_name, &property_enum_print_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release_ex(property_enum_print_name, true);
+
+	zval property_numeric_index_default_value;
+	ZVAL_UNDEF(&property_numeric_index_default_value);
+	zend_string *property_numeric_index_name = zend_string_init("numeric_index", sizeof("numeric_index") - 1, true);
+	zend_declare_typed_property(class_entry, property_numeric_index_name, &property_numeric_index_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property_numeric_index_name, true);
 
 	zval property_numeric_timeticks_default_value;
 	ZVAL_UNDEF(&property_numeric_timeticks_default_value);

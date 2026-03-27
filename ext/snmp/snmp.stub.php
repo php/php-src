@@ -294,6 +294,7 @@ class SNMP
     public bool $oid_increasing_check;
     public bool $quick_print;
     public bool $enum_print;
+    public bool $numeric_index;
     public bool $numeric_timeticks;
     public bool $extended_index;
     public bool $dont_print_units;
