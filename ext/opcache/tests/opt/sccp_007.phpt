@@ -28,10 +28,9 @@ $_main:
 0000 RETURN int(1)
 
 foo:
-     ; (lines=4, args=1, vars=1, tmps=0)
+     ; (lines=3, args=1, vars=1, tmps=0)
      ; (after optimizer)
      ; %ssccp_007.php:2-9
 0000 CV0($x) = RECV 1
-0001 JMPZ CV0($x) 0002
-0002 ECHO string("0")
-0003 RETURN null
+0001 ECHO string("0")
+0002 RETURN null
