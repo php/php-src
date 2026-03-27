@@ -369,24 +369,19 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(void 
 
 		zend_string *str = zend_string_alloc(total_len, false);
 		char *out = ZSTR_VAL(str);
-		size_t pos = 0;
 
 		if (need_leading_slash) {
-			out[pos++] = '/';
+			*(out++) = '/';
 		}
 
 		for (const UriPathSegmentA *p = uriparser_uri->pathHead; p; p = p->next) {
-			const size_t len = get_text_range_length(&p->text);
-			if (len > 0) {
-				memcpy(out + pos, p->text.first, len);
-				pos += len;
-			}
+			out = zend_mempcpy(out, p->text.first, get_text_range_length(&p->text));
 			if (p->next) {
-				out[pos++] = '/';
+				*(out++) = '/';
 			}
 		}
 
-		out[total_len] = '\0';
+		*out = '\0';
 		ZVAL_STR(retval, str);
 	} else if (uriparser_uri->absolutePath) {
 		ZVAL_CHAR(retval, '/');
