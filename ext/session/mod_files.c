@@ -276,6 +276,9 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 	return SUCCESS;
 }
 
+/* Recursively remove expired session files. When dirdepth > 0 the
+ * cleanup descends into subdirectories up to that many levels before
+ * inspecting individual session files. */
 static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetime, size_t remaining_depth)
 {
 	DIR *dir;
@@ -297,42 +300,55 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 		return -1;
 	}
 
+	/* Prepare buffer (dirname never changes) */
 	memcpy(buf, ZSTR_VAL(dirname), ZSTR_LEN(dirname));
 	buf[ZSTR_LEN(dirname)] = PHP_DIR_SEPARATOR;
 
+	/* Only read the clock when we are about to compare mtimes at target depth */
 	if (remaining_depth == 0) {
 		time(&now);
 	}
 
 	while ((entry = readdir(dir))) {
+		/* skip . and .. */
 		if (entry->d_name[0] == '.' &&
 				(entry->d_name[1] == '\0' ||
 				 (entry->d_name[1] == '.' && entry->d_name[2] == '\0'))) {
 			continue;
 		}
-		if (remaining_depth == 0 && strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1) != 0) {
-			continue;
-		}
 		size_t entry_len = strlen(entry->d_name);
+		/* does it fit into our buffer? */
 		if (ZSTR_LEN(dirname) + 1 + entry_len >= MAXPATHLEN) {
 			continue;
 		}
+		/* create the full path and NUL-terminate it */
 		memcpy(buf + ZSTR_LEN(dirname) + 1, entry->d_name, entry_len);
 		buf[ZSTR_LEN(dirname) + 1 + entry_len] = '\0';
-		if (VCWD_STAT(buf, &sbuf) != 0) {
-			continue;
-		}
+
 		if (remaining_depth == 0) {
+			/* target depth: delete expired session files */
+			if (strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1) != 0) {
+				continue;
+			}
+			if (VCWD_STAT(buf, &sbuf) != 0) {
+				continue;
+			}
 			if ((now - sbuf.st_mtime) > maxlifetime) {
 				VCWD_UNLINK(buf);
 				nrdels++;
 			}
-		} else if (S_ISDIR(sbuf.st_mode)) {
-			zend_string *subdir = zend_string_init(buf, ZSTR_LEN(dirname) + 1 + entry_len, 0);
-			int n = ps_files_cleanup_dir(subdir, maxlifetime, remaining_depth - 1);
-			zend_string_release(subdir);
-			if (n >= 0) {
-				nrdels += n;
+		} else {
+			/* intermediate depth: recurse into subdirectories */
+			if (VCWD_STAT(buf, &sbuf) != 0) {
+				continue;
+			}
+			if (S_ISDIR(sbuf.st_mode)) {
+				zend_string *subdir = zend_string_init(buf, ZSTR_LEN(dirname) + 1 + entry_len, 0);
+				int n = ps_files_cleanup_dir(subdir, maxlifetime, remaining_depth - 1);
+				zend_string_release(subdir);
+				if (n >= 0) {
+					nrdels += n;
+				}
 			}
 		}
 	}
