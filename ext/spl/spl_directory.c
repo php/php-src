@@ -1471,12 +1471,9 @@ PHP_METHOD(RecursiveDirectoryIterator, getChildren)
 		size_t name_len = strlen(intern->u.dir.entry.d_name);
 		if (intern->u.dir.sub_path && ZSTR_LEN(intern->u.dir.sub_path)) {
 			zend_string *sub_path = zend_string_concat3(
-				ZSTR_VAL(intern->u.dir.sub_path),
-				ZSTR_LEN(intern->u.dir.sub_path),
-				&slash,
-				1,
-				intern->u.dir.entry.d_name,
-				name_len
+				ZSTR_VAL(intern->u.dir.sub_path), ZSTR_LEN(intern->u.dir.sub_path),
+				&slash, 1,
+				intern->u.dir.entry.d_name, name_len
 			);
 			subdir->u.dir.sub_path = sub_path;
 		} else {
