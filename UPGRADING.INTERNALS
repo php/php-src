@@ -74,6 +74,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     longer is a pointer, but a directly embedded HashTable struct.
   . Added a C23_ENUM() helper macro to define forward-compatible fixed-size
     enums.
+  . Introduced a new time-retrieval API zend_time_*.
 
 ========================
 2. Build system changes
