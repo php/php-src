@@ -112,14 +112,15 @@ static const char *ErrorMessages[] =
 #define PHP_WIN32_MAIL_DOT_PATTERN	"\n."
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
 
-static int SendText(char *RPath, const char *Subject, const char *mailTo, const char *data,
+static int SendText(_In_ const char *host, _In_ const char *RPath, const char *Subject, const char *mailTo, const char *data,
                     zend_string *headers, zend_string *headers_lc, char **error_message);
-static int MailConnect();
-static bool PostHeader(char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders);
+static int MailConnect(_In_ const char *host);
+static int PostHelo(char **error_message);
+static bool PostHeader(const char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders);
 static bool Post(LPCSTR msg);
 static int Ack(char **server_response);
-static unsigned long GetAddr(LPSTR szHost);
-static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
+static unsigned long GetAddr(const char *szHost);
+static int FormatEmailAddress(char* Buf, const char* EmailAddress, const char* FormatString);
 
 /* This function is meant to unify the headers passed to mail()
  * This means, use PCRE to transform single occurrences of \n or \r in \r\n
@@ -196,11 +197,6 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	if (host == NULL) {
 		*error = BAD_MAIL_HOST;
 		return FAILURE;
-	} else if (strlen(host) >= HOST_NAME_LEN) {
-		*error = BAD_MAIL_HOST;
-		return FAILURE;
-	} else {
-		strcpy(PW32G(mail_host), host);
 	}
 
 	if (headers) {
@@ -219,7 +215,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	if (INI_STR("sendmail_from")) {
 		RPath = estrdup(INI_STR("sendmail_from"));
 	} else if (headers_lc) {
-		int found = 0;
+		bool found = false;
 		const char *lookup = ZSTR_VAL(headers_lc);
 
 		while (lookup) {
@@ -236,7 +232,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 				}
 			}
 
-			found = 1;
+			found = true;
 
 			/* Real offset is memaddress from the original headers + difference of
 			 * string found in the lowercase headers + 5 characters to jump over
@@ -261,39 +257,19 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 		}
 	}
 
-	/* attempt to connect with mail host */
-	*error = MailConnect();
-	if (*error != 0) {
-		if (RPath) {
-			efree(RPath);
-		}
-		if (headers) {
-			zend_string_release(headers_trim);
-			zend_string_release(headers_lc);
-		}
-		/* 128 is safe here, the specifier in snprintf isn't longer than that */
-		*error_message = ecalloc(1, HOST_NAME_LEN + 128);
-		snprintf(*error_message, HOST_NAME_LEN + 128,
-			"Failed to connect to mailserver at \"%s\" port " ZEND_ULONG_FMT ", verify your \"SMTP\" "
-			"and \"smtp_port\" setting in php.ini or use ini_set()",
-			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
-		return FAILURE;
-	} else {
-		ret = SendText(RPath, Subject, mailTo, data, headers_trim, headers_lc, error_message);
-		TSMClose();
-		if (RPath) {
-			efree(RPath);
-		}
-		if (headers) {
-			zend_string_release(headers_trim);
-			zend_string_release(headers_lc);
-		}
-		if (ret != SUCCESS) {
-			*error = ret;
-			return FAILURE;
-		}
-		return SUCCESS;
+	 ret = SendText(host, RPath, Subject, mailTo, data, headers_trim, headers_lc, error_message);
+	TSMClose();
+	efree(RPath);
+
+	if (headers) {
+		zend_string_release(headers_trim);
+		zend_string_release(headers_lc);
 	}
+	if (ret != SUCCESS) {
+		*error = ret;
+		return FAILURE;
+	}
+	return SUCCESS;
 }
 
 //*********************************************************************
@@ -387,7 +363,7 @@ static char *find_address(char *list, char **state)
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static int SendText(char *RPath, const char *Subject, const char *mailTo, const char *data,
+static int SendText(_In_ const char *host, _In_ const char *RPath, const char *Subject, const char *mailTo, const char *data,
 			 zend_string *headers, zend_string *headers_lc, char **error_message)
 {
 	int res;
@@ -403,8 +379,6 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 		return (BAD_MSG_CONTENTS);
 	if (mailTo == NULL)
 		return (BAD_MSG_DESTINATION);
-	if (RPath == NULL)
-		return (BAD_MSG_RPATH);
 
 	/* simple checks for the mailto address */
 	/* have ampersand ? */
@@ -415,23 +389,21 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 		return (BAD_MSG_DESTINATION);
 	*/
 
-	snprintf(PW32G(mail_buffer), sizeof(PW32G(mail_buffer)), "HELO %s\r\n", PW32G(mail_local_host));
-
-	/* in the beginning of the dialog */
-	/* attempt reconnect if the first Post fail */
-	if (!Post(PW32G(mail_buffer))) {
-		int err = MailConnect();
-		if (0 != err) {
-			return (FAILED_TO_SEND);
-		}
-
-		if (!Post(PW32G(mail_buffer))) {
-			return (FAILED_TO_SEND);
-		}
+	/* attempt to connect with mail host */
+	res = MailConnect(host);
+	if (res != 0) {
+		/* 128 is safe here, the specifier in snprintf isn't longer than that */
+		*error_message = ecalloc(1, HOST_NAME_LEN + 128);
+		snprintf(*error_message, HOST_NAME_LEN + 128,
+			"Failed to connect to mailserver at \"%s\" port " ZEND_ULONG_FMT ", verify your \"SMTP\" "
+			"and \"smtp_port\" setting in php.ini or use ini_set()",
+			host, !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
+		return res;
 	}
-	if ((res = Ack(&server_response)) != SUCCESS) {
-		SMTP_ERROR_RESPONSE(server_response);
-		return (res);
+
+	res = PostHelo(error_message);
+	if (res != SUCCESS) {
+		return res;
 	}
 
 	SMTP_SKIP_SPACE(RPath);
@@ -647,6 +619,69 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 	return (SUCCESS);
 }
 
+static int PostHelo(char **error_message)
+{
+	size_t namelen;
+	struct hostent *ent;
+	IN_ADDR addr;
+#ifdef HAVE_IPV6
+	IN6_ADDR addr6;
+#endif
+	char mail_local_host[HOST_NAME_LEN];
+
+#if SENDMAIL_DEBUG
+	return 0;
+#endif
+
+	/* Get our own host name */
+	if (gethostname(mail_local_host, HOST_NAME_LEN)) {
+		return (FAILED_TO_GET_HOSTNAME);
+	}
+
+	ent = gethostbyname(mail_local_host);
+
+	if (!ent) {
+		return (FAILED_TO_GET_HOSTNAME);
+	}
+
+	namelen = strlen(ent->h_name);
+
+#ifdef HAVE_IPV6
+	if (inet_pton(AF_INET, ent->h_name, &addr) == 1 || inet_pton(AF_INET6, ent->h_name, &addr6) == 1)
+#else
+	if (inet_pton(AF_INET, ent->h_name, &addr) == 1)
+#endif
+	{
+		if (namelen + 2 >= HOST_NAME_LEN) {
+			return (FAILED_TO_GET_HOSTNAME);
+		}
+
+		strcpy(mail_local_host, "[");
+		strcpy(mail_local_host + 1, ent->h_name);
+		strcpy(mail_local_host + namelen + 1, "]");
+	} else {
+		if (namelen >= HOST_NAME_LEN) {
+			return (FAILED_TO_GET_HOSTNAME);
+		}
+
+		strcpy(mail_local_host, ent->h_name);
+	}
+
+	snprintf(PW32G(mail_buffer), sizeof(PW32G(mail_buffer)), "HELO %s\r\n", mail_local_host);
+
+	if (!Post(PW32G(mail_buffer))) {
+		return (FAILED_TO_SEND);
+	}
+
+	char *server_response = NULL;
+	int res = Ack(&server_response);
+	if (res != SUCCESS) {
+		SMTP_ERROR_RESPONSE(server_response);
+		return (res);
+	}
+	return SUCCESS;
+}
+
 //*********************************************************************
 // Name:  PostHeader
 // Input:       1) return path
@@ -658,7 +693,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static bool PostHeader(char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders)
+static bool PostHeader(const char *RPath, const char *Subject, const char *mailTo, zend_string *xheaders)
 {
 	/* Print message header according to RFC 822 */
 	/* Return-path, Received, Date, From, Subject, Sender, To, cc */
@@ -722,72 +757,20 @@ static bool PostHeader(char *RPath, const char *Subject, const char *mailTo, zen
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static int MailConnect()
+static int MailConnect(_In_ const char *host)
 {
 
-	int res, namelen;
+	int res;
 	short portnum;
-	struct hostent *ent;
-	IN_ADDR addr;
-#ifdef HAVE_IPV6
-	IN6_ADDR addr6;
-#endif
 	SOCKADDR_IN sock_in;
-
-#if SENDMAIL_DEBUG
-return 0;
-#endif
 
 	/* Create Socket */
 	if ((PW32G(mail_socket) = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
 		return (FAILED_TO_OBTAIN_SOCKET_HANDLE);
 	}
 
-	/* Get our own host name */
-	if (gethostname(PW32G(mail_local_host), HOST_NAME_LEN)) {
-		closesocket(PW32G(mail_socket));
-		return (FAILED_TO_GET_HOSTNAME);
-	}
-
-	ent = gethostbyname(PW32G(mail_local_host));
-
-	if (!ent) {
-		closesocket(PW32G(mail_socket));
-		return (FAILED_TO_GET_HOSTNAME);
-	}
-
-	namelen = (int)strlen(ent->h_name);
-
-#ifdef HAVE_IPV6
-	if (inet_pton(AF_INET, ent->h_name, &addr) == 1 || inet_pton(AF_INET6, ent->h_name, &addr6) == 1)
-#else
-	if (inet_pton(AF_INET, ent->h_name, &addr) == 1)
-#endif
-	{
-		if (namelen + 2 >= HOST_NAME_LEN) {
-			closesocket(PW32G(mail_socket));
-			return (FAILED_TO_GET_HOSTNAME);
-		}
-
-		strcpy(PW32G(mail_local_host), "[");
-		strcpy(PW32G(mail_local_host) + 1, ent->h_name);
-		strcpy(PW32G(mail_local_host) + namelen + 1, "]");
-	} else {
-		if (namelen >= HOST_NAME_LEN) {
-			closesocket(PW32G(mail_socket));
-			return (FAILED_TO_GET_HOSTNAME);
-		}
-
-		strcpy(PW32G(mail_local_host), ent->h_name);
-	}
-
 	/* Resolve the servers IP */
-	/*
-	if (!isdigit(PW32G(mail_host)[0])||!gethostbyname(PW32G(mail_host)))
-	{
-		return (FAILED_TO_RESOLVE_HOST);
-	}
-	*/
+	unsigned long server_addr = GetAddr(host);
 
 	portnum = (short) INI_INT("smtp_port");
 	if (!portnum) {
@@ -797,7 +780,7 @@ return 0;
 	/* Connect to server */
 	sock_in.sin_family = AF_INET;
 	sock_in.sin_port = htons(portnum);
-	sock_in.sin_addr.S_un.S_addr = GetAddr(PW32G(mail_host));
+	sock_in.sin_addr.S_un.S_addr = server_addr;
 
 	if (connect(PW32G(mail_socket), (LPSOCKADDR) & sock_in, sizeof(sock_in))) {
 		closesocket(PW32G(mail_socket));
@@ -904,7 +887,7 @@ again:
 
 
 //*********************************************************************
-// Name:  unsigned long GetAddr (LPSTR szHost)
+// Name:  unsigned long GetAddr (const char *szHost)
 // Input:
 // Output:
 // Description: Given a string, it will return an IP address.
@@ -915,7 +898,7 @@ again:
 // Author/Date:  jcar 20/9/96
 // History:
 //*********************************************************************
-static unsigned long GetAddr(LPSTR szHost)
+static unsigned long GetAddr(const char *szHost)
 {
 	LPHOSTENT lpstHost;
 	u_long lAddr = INADDR_ANY;
@@ -941,10 +924,10 @@ static unsigned long GetAddr(LPSTR szHost)
 } /* end GetAddr() */
 
 /* returns the contents of an angle-addr (caller needs to efree) or NULL */
-static char *get_angle_addr(char *address)
+static char *get_angle_addr(const char *address)
 {
 	bool in_quotes = 0;
-	char *p1 = address, *p2;
+	const char *p1 = address, *p2;
 
 	while ((p1 = strpbrk(p1, "<\"\\")) != NULL) {
 		if (*p1 == '\\' && in_quotes) {
@@ -994,7 +977,7 @@ static char *get_angle_addr(char *address)
 // Author/Date:  garretts 08/18/2009
 // History:
 //*********************************************************************
-static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString) {
+static int FormatEmailAddress(char* Buf, const char* EmailAddress, const char* FormatString) {
 	char *tmpAddress;
 	int result;
 
