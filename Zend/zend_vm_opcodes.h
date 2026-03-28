@@ -42,7 +42,7 @@ static const char *const zend_vm_kind_name[] = {
 /* HYBRID requires support for computed GOTO and global register variables*/
 #elif (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))
 # define ZEND_VM_KIND		ZEND_VM_KIND_HYBRID
-#elif defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && (defined(__x86_64__) || defined(__aarch64__))
+#elif defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && (defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__) || defined(_M_ARM64))
 # define ZEND_VM_KIND		ZEND_VM_KIND_TAILCALL
 #else
 # define ZEND_VM_KIND		ZEND_VM_KIND_CALL
@@ -57,12 +57,20 @@ static const char *const zend_vm_kind_name[] = {
 #if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 # define ZEND_OPCODE_HANDLER_CCONV    ZEND_PRESERVE_NONE
 # define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
+#elif ZEND_VM_KIND == ZEND_VM_KIND_CALL && defined(HAVE_PRESERVE_NONE)
+# define ZEND_OPCODE_HANDLER_CCONV    ZEND_PRESERVE_NONE
+# define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
 #elif ZEND_VM_KIND == ZEND_VM_KIND_CALL
 # define ZEND_OPCODE_HANDLER_CCONV    ZEND_FASTCALL
 # define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
 #endif
-#define ZEND_OPCODE_HANDLER_FUNC_CCONV    ZEND_FASTCALL
-#define ZEND_OPCODE_HANDLER_FUNC_CCONV_EX ZEND_FASTCALL
+#if defined(HAVE_PRESERVE_NONE)
+# define ZEND_OPCODE_HANDLER_FUNC_CCONV    ZEND_PRESERVE_NONE
+# define ZEND_OPCODE_HANDLER_FUNC_CCONV_EX ZEND_FASTCALL
+#else
+# define ZEND_OPCODE_HANDLER_FUNC_CCONV    ZEND_FASTCALL
+# define ZEND_OPCODE_HANDLER_FUNC_CCONV_EX ZEND_FASTCALL
+#endif
 
 #if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID
 typedef const void* zend_vm_opcode_handler_t;
