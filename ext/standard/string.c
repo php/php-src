@@ -2203,7 +2203,7 @@ PHP_FUNCTION(chunk_split)
 
 	if ((size_t)chunklen > ZSTR_LEN(str)) {
 		/* to maintain BC, we must return original string + ending */
-		result = result = zend_string_concat2(
+		result = zend_string_concat2(
 			ZSTR_VAL(str), ZSTR_LEN(str),
 			end, endlen
 		);
