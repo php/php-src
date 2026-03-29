@@ -709,7 +709,7 @@ int php_zip_glob(zend_string *spattern, zend_long flags, zval *return_value) /* 
 		return -1;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, (uint32_t)globbuf.gl_pathc);
 	for (size_t n = 0; n < globbuf.gl_pathc; n++) {
 		/* we need to do this every time since PHP_GLOB_ONLYDIR does not guarantee that
 		 * all directories will be filtered. GNU libc documentation states the
@@ -788,7 +788,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 			return -1;
 		}
 
-		array_init(return_value);
+		array_init_size(return_value, (uint32_t)files_cnt);
 
 		/* only the files, directories are ignored */
 		for (i = 0; i < files_cnt; i++) {
