@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
  */
 
-#define ZEND_ENUM_StreamErrorCode_USE_NAME_TABLE 1
+#define ZEND_ENUM_StreamErrorCode_USE_NAME_TABLE
 #include "php.h"
 #include "php_globals.h"
 #include "php_streams.h"
@@ -34,6 +34,62 @@ static zend_class_entry *php_ce_stream_exception;
 /* Forward declarations */
 static void php_stream_error_entry_free(php_stream_error_entry *entry);
 static bool php_stream_error_code_in_range(zval *this_zv, int start, int end);
+
+/* Helper to create a single StreamError object from an entry */
+static void php_stream_error_create_object(zval *zv, php_stream_error_entry *entry)
+{
+	object_init_ex(zv, php_ce_stream_error);
+
+	const char *case_name = NULL;
+	if (entry->code > 0 && entry->code <= ZEND_ENUM_StreamErrorCode_CASE_COUNT) {
+		case_name = zend_enum_StreamErrorCode_case_names[entry->code];
+	}
+	if (!case_name) {
+		case_name = "Generic";
+	}
+
+	zend_object *enum_obj = zend_enum_get_case_cstr(php_ce_stream_error_code, case_name);
+	ZEND_ASSERT(enum_obj != NULL);
+
+	zval code_enum;
+	ZVAL_OBJ_COPY(&code_enum, enum_obj);
+
+	zend_update_property(php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("code"), &code_enum);
+	zval_ptr_dtor(&code_enum);
+
+	zend_update_property_str(
+			php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("message"), entry->message);
+
+	zend_update_property_string(php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("wrapperName"),
+			entry->wrapper_name ? entry->wrapper_name : "");
+
+	zend_update_property_long(
+			php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("severity"), entry->severity);
+
+	zend_update_property_bool(
+			php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("terminating"), entry->terminating);
+
+	if (entry->param) {
+		zend_update_property_string(
+				php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("param"), entry->param);
+	} else {
+		zend_update_property_null(php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("param"));
+	}
+}
+
+/* Create array of StreamError objects from error chain */
+PHPAPI void php_stream_error_create_array(zval *zv, php_stream_error_entry *first)
+{
+	array_init(zv);
+
+	php_stream_error_entry *entry = first;
+	while (entry) {
+		zval error_obj;
+		php_stream_error_create_object(&error_obj, entry);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(zv), &error_obj);
+		entry = entry->next;
+	}
+}
 
 /* Context option helpers */
 
@@ -200,6 +256,34 @@ PHPAPI void php_stream_error_state_cleanup(void)
 	}
 }
 
+PHPAPI void php_stream_error_get_last(zval *return_value)
+{
+	php_stream_error_state *state = &FG(stream_error_state);
+
+	if (!state->stored_errors) {
+		ZVAL_EMPTY_ARRAY(return_value);
+		return;
+	}
+
+	php_stream_error_create_array(return_value, state->stored_errors->first_error);
+}
+
+PHPAPI void php_stream_error_clear_stored(void)
+{
+	php_stream_error_state *state = &FG(stream_error_state);
+
+	php_stream_stored_error *stored = state->stored_errors;
+	while (stored) {
+		php_stream_stored_error *next = stored->next;
+		php_stream_error_entry_free(stored->first_error);
+		efree(stored);
+		stored = next;
+	}
+
+	state->stored_errors = NULL;
+	state->stored_count = 0;
+}
+
 /* Error operation stack management */
 
 PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
@@ -269,7 +353,7 @@ static void php_stream_error_add(zend_enum_StreamErrorCode code, const char *wra
 
 /* Error reporting */
 
-static void php_stream_call_error_handler(zval *handler, zval *error_obj)
+static void php_stream_call_error_handler(zval *handler, zval *errors_array)
 {
 	zend_fcall_info_cache fcc;
 	char *is_callable_error = NULL;
@@ -284,7 +368,7 @@ static void php_stream_call_error_handler(zval *handler, zval *error_obj)
 
 	zval retval;
 
-	call_user_function(NULL, NULL, handler, &retval, 1, error_obj);
+	call_user_function(NULL, NULL, handler, &retval, 1, errors_array);
 
 	zval_ptr_dtor(&retval);
 }
@@ -295,21 +379,23 @@ static void php_stream_throw_exception_with_errors(php_stream_error_operation *o
 		return;
 	}
 
-	zval error_obj;
-	php_stream_error_create_object(&error_obj, op->first_error);
-
 	zval ex;
 	object_init_ex(&ex, php_ce_stream_exception);
 
+	/* Set message from first error */
 	zend_update_property_string(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("message"),
 			ZSTR_VAL(op->first_error->message));
 
+	/* Set code from first error */
 	zend_update_property_long(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("code"),
 			(zend_long) op->first_error->code);
 
-	zend_update_property(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("error"), &error_obj);
+	/* Build errors array and set it */
+	zval errors_array;
+	php_stream_error_create_array(&errors_array, op->first_error);
+	zend_update_property(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("errors"), &errors_array);
+	zval_ptr_dtor(&errors_array);
 
-	zval_ptr_dtor(&error_obj);
 	zend_throw_exception_object(&ex);
 }
 
@@ -343,16 +429,17 @@ static void php_stream_report_errors(php_stream_context *context, php_stream_err
 			break;
 	}
 
+	/* Call user error handler if set */
 	zval *handler
 			= context ? php_stream_context_get_option(context, "stream", "error_handler") : NULL;
 
 	if (handler) {
-		zval error_obj;
-		php_stream_error_create_object(&error_obj, op->first_error);
+		zval errors_array;
+		php_stream_error_create_array(&errors_array, op->first_error);
 
-		php_stream_call_error_handler(handler, &error_obj);
+		php_stream_call_error_handler(handler, &errors_array);
 
-		zval_ptr_dtor(&error_obj);
+		zval_ptr_dtor(&errors_array);
 	}
 }
 
@@ -390,6 +477,7 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 			php_stream_error_entry *prev = NULL;
 			php_stream_error_entry *to_store_first = NULL;
 			php_stream_error_entry *to_store_last = NULL;
+			uint32_t to_store_count = 0;
 			php_stream_error_entry *remaining_first = NULL;
 
 			while (entry) {
@@ -412,6 +500,7 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 						to_store_first = entry;
 					}
 					to_store_last = entry;
+					to_store_count++;
 				} else {
 					entry->next = NULL;
 					if (prev) {
@@ -428,6 +517,7 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 			if (to_store_first) {
 				php_stream_stored_error *stored = emalloc(sizeof(php_stream_stored_error));
 				stored->first_error = to_store_first;
+				stored->error_count = to_store_count;
 				stored->next = state->stored_errors;
 
 				state->stored_errors = stored;
@@ -800,123 +890,16 @@ PHPAPI void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper)
 	}
 }
 
-PHPAPI void php_stream_error_create_object(zval *zv, php_stream_error_entry *entry)
-{
-	if (!entry) {
-		ZVAL_NULL(zv);
-		return;
-	}
-
-	object_init_ex(zv, php_ce_stream_error);
-
-	const char *case_name = NULL;
-	if (entry->code > 0 && entry->code <= ZEND_ENUM_StreamErrorCode_CASE_COUNT) {
-		case_name = zend_enum_StreamErrorCode_case_names[entry->code];
-	}
-	if (!case_name) {
-		case_name = "Generic";
-	}
-
-	zend_object *enum_obj = zend_enum_get_case_cstr(php_ce_stream_error_code, case_name);
-	ZEND_ASSERT(enum_obj != NULL);
-
-	zval code_enum;
-	ZVAL_OBJ_COPY(&code_enum, enum_obj);
-
-	zend_update_property(php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("code"), &code_enum);
-	zval_ptr_dtor(&code_enum);
-
-	zend_update_property_str(
-			php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("message"), entry->message);
-
-	zend_update_property_string(php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("wrapperName"),
-			entry->wrapper_name ? entry->wrapper_name : "");
-
-	zend_update_property_long(
-			php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("severity"), entry->severity);
-
-	zend_update_property_bool(
-			php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("terminating"), entry->terminating);
-
-	if (entry->param) {
-		zend_update_property_string(
-				php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("param"), entry->param);
-	} else {
-		zend_update_property_null(php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("param"));
-	}
-
-	if (entry->next) {
-		zval next_error;
-		php_stream_error_create_object(&next_error, entry->next);
-		zend_update_property(php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("next"), &next_error);
-		zval_ptr_dtor(&next_error);
-	} else {
-		zend_update_property_null(php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("next"));
-	}
-}
-
-/* StreamError methods */
-
-PHP_METHOD(StreamError, hasCode)
-{
-	zval *search_code;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS(search_code, php_ce_stream_error_code)
-	ZEND_PARSE_PARAMETERS_END();
-
-	zval *current_error_zv = ZEND_THIS;
-
-	while (Z_TYPE_P(current_error_zv) == IS_OBJECT) {
-		zval *code_zv = zend_read_property(
-				php_ce_stream_error, Z_OBJ_P(current_error_zv), ZEND_STRL("code"), 1, NULL);
-
-		if (Z_TYPE_P(code_zv) == IS_OBJECT && Z_OBJ_P(code_zv) == Z_OBJ_P(search_code)) {
-			RETURN_TRUE;
-		}
-
-		current_error_zv = zend_read_property(
-				php_ce_stream_error, Z_OBJ_P(current_error_zv), ZEND_STRL("next"), 1, NULL);
-
-		if (Z_TYPE_P(current_error_zv) != IS_OBJECT) {
-			break;
-		}
-	}
-
-	RETURN_FALSE;
-}
-
-PHP_METHOD(StreamError, count)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	zend_long count = 1;
-	zval *current_error_zv = ZEND_THIS;
-
-	while (1) {
-		current_error_zv = zend_read_property(
-				php_ce_stream_error, Z_OBJ_P(current_error_zv), ZEND_STRL("next"), 1, NULL);
-
-		if (Z_TYPE_P(current_error_zv) != IS_OBJECT) {
-			break;
-		}
-
-		count++;
-	}
-
-	RETURN_LONG(count);
-}
-
 /* StreamException methods */
 
-PHP_METHOD(StreamException, getError)
+PHP_METHOD(StreamException, getErrors)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zval *error = zend_read_property(
-			php_ce_stream_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("error"), 1, NULL);
+	zval *errors = zend_read_property(
+			php_ce_stream_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), 1, NULL);
 
-	RETURN_COPY(error);
+	RETURN_COPY(errors);
 }
 
 /* StreamErrorCode range helpers - case_id based */

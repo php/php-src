@@ -1,5 +1,5 @@
 /* This is a generated file, edit stream_errors.stub.php instead.
- * Stub hash: 40c314c471a8fb600bbf219e96a31cec8590eb4a
+ * Stub hash: 9e4dc19314a34c3d07fbe013c7cabccefec4922d
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamErrorCode_isIoError, 0, 0, _IS_BOOL, 0)
@@ -23,14 +23,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_StreamErrorCode_isUserspaceError arginfo_class_StreamErrorCode_isIoError
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamError_hasCode, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, code, StreamErrorCode, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamError_count, 0, 0, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_StreamException_getError, 0, 0, StreamError, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamException_getErrors, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 static ZEND_METHOD(StreamErrorCode, isIoError);
@@ -43,9 +36,7 @@ static ZEND_METHOD(StreamErrorCode, isEncodingError);
 static ZEND_METHOD(StreamErrorCode, isResourceError);
 static ZEND_METHOD(StreamErrorCode, isLockError);
 static ZEND_METHOD(StreamErrorCode, isUserspaceError);
-static ZEND_METHOD(StreamError, hasCode);
-static ZEND_METHOD(StreamError, count);
-static ZEND_METHOD(StreamException, getError);
+static ZEND_METHOD(StreamException, getErrors);
 
 static const zend_function_entry class_StreamErrorCode_methods[] = {
 	ZEND_ME(StreamErrorCode, isIoError, arginfo_class_StreamErrorCode_isIoError, ZEND_ACC_PUBLIC)
@@ -61,14 +52,8 @@ static const zend_function_entry class_StreamErrorCode_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_StreamError_methods[] = {
-	ZEND_ME(StreamError, hasCode, arginfo_class_StreamError_hasCode, ZEND_ACC_PUBLIC)
-	ZEND_ME(StreamError, count, arginfo_class_StreamError_count, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_StreamException_methods[] = {
-	ZEND_ME(StreamException, getError, arginfo_class_StreamException_getError, ZEND_ACC_PUBLIC)
+	ZEND_ME(StreamException, getErrors, arginfo_class_StreamException_getErrors, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -265,7 +250,7 @@ static zend_class_entry *register_class_StreamError(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "StreamError", class_StreamError_methods);
+	INIT_CLASS_ENTRY(ce, "StreamError", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
 
 	zval property_code_default_value;
@@ -299,13 +284,6 @@ static zend_class_entry *register_class_StreamError(void)
 	zend_declare_typed_property(class_entry, property_param_name, &property_param_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release_ex(property_param_name, true);
 
-	zval property_next_default_value;
-	ZVAL_UNDEF(&property_next_default_value);
-	zend_string *property_next_name = zend_string_init("next", sizeof("next") - 1, true);
-	zend_string *property_next_class_StreamError = zend_string_init("StreamError", sizeof("StreamError")-1, 1);
-	zend_declare_typed_property(class_entry, property_next_name, &property_next_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_next_class_StreamError, 0, MAY_BE_NULL));
-	zend_string_release_ex(property_next_name, true);
-
 	return class_entry;
 }
 
@@ -316,12 +294,11 @@ static zend_class_entry *register_class_StreamException(zend_class_entry *class_
 	INIT_CLASS_ENTRY(ce, "StreamException", class_StreamException_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
-	zval property_error_default_value;
-	ZVAL_NULL(&property_error_default_value);
-	zend_string *property_error_name = zend_string_init("error", sizeof("error") - 1, true);
-	zend_string *property_error_class_StreamError = zend_string_init("StreamError", sizeof("StreamError")-1, 1);
-	zend_declare_typed_property(class_entry, property_error_name, &property_error_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_error_class_StreamError, 0, MAY_BE_NULL));
-	zend_string_release_ex(property_error_name, true);
+	zval property_errors_default_value;
+	ZVAL_EMPTY_ARRAY(&property_errors_default_value);
+	zend_string *property_errors_name = zend_string_init("errors", sizeof("errors") - 1, true);
+	zend_declare_typed_property(class_entry, property_errors_name, &property_errors_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+	zend_string_release_ex(property_errors_name, true);
 
 	return class_entry;
 }

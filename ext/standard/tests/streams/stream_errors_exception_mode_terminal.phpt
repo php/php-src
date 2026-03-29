@@ -15,8 +15,9 @@ try {
     echo "Caught: " . $e->getMessage() . "\n";
     echo "Code: " . $e->getCode() . "\n";
     
-    $error = $e->getError();
-    if ($error) {
+    $errors = $e->getErrors();
+    if (!empty($errors)) {
+        $error = $errors[0];
         echo "Wrapper: " . $error->wrapperName . "\n";
         echo "Error code name: " . $error->code->name . "\n";
     }

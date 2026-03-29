@@ -12,11 +12,11 @@ $context = stream_context_create([
 
 // First operation
 $stream1 = fopen('php://nonexistent1', 'r', false, $context);
-$error1 = stream_get_last_error();
+$error1 = stream_last_errors()[0];
 
 // Second operation
 $stream2 = fopen('php://nonexistent2', 'r', false, $context);
-$error2 = stream_get_last_error();
+$error2 = stream_last_errors()[0];
 
 // Should get the most recent error (second operation)
 if ($error2) {

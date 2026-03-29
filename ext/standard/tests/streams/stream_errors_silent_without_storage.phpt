@@ -12,8 +12,8 @@ $context = stream_context_create([
 
 $stream = fopen('php://nonexistent', 'r', false, $context);
 
-$error = stream_get_last_error();
-echo "Has error: " . ($error ? "yes" : "no") . "\n";
+$errors = stream_last_errors();
+echo "Has error: " . (!empty($error) ? "yes" : "no") . "\n";
 
 ?>
 --EXPECT--

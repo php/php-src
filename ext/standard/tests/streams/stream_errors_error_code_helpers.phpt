@@ -12,8 +12,9 @@ $context = stream_context_create([
 // Generate a network error
 $stream = fopen('php://nonexistent', 'r', false, $context);
 
-$error = stream_get_last_error();
-if ($error) {
+$errors = stream_last_errors();
+if (!empty($errors)) {
+    $error = $errors[0];
     echo "Is I/O error: " . ($error->code->isIoError() ? 'yes' : 'no') . "\n";
     echo "Is filesystem error: " . ($error->code->isFileSystemError() ? 'yes' : 'no') . "\n";
     echo "Is network error: " . ($error->code->isNetworkError() ? 'yes' : 'no') . "\n";

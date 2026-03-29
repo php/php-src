@@ -12,8 +12,8 @@ $context = stream_context_create([
 $stream = fopen('php://nonexistent', 'r', false, $context);
 var_dump($stream);
 
-$error = stream_get_last_error();
-if ($error) {
+$errors = stream_last_errors();
+foreach ($errors as $error) {
     echo "Has error: yes\n";
     echo "Error code: " . $error->code->name . "\n";
     echo "Error wrapper: " . $error->wrapperName . "\n";

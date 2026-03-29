@@ -634,25 +634,16 @@ PHP_FUNCTION(stream_get_wrappers)
 }
 /* }}} */
 
-/* Retrieves the last stored stream error */
-PHP_FUNCTION(stream_get_last_error)
+PHP_FUNCTION(stream_last_errors)
 {
-    ZEND_PARSE_PARAMETERS_NONE();
-    
-    /* Check if we have any stored errors */
-    if (!FG(stream_error_state).stored_errors) {
-        RETURN_NULL();
-    }
-    
-    /* Get the most recent stored error (head of list) */
-    php_stream_stored_error *stored = FG(stream_error_state).stored_errors;
-    
-    if (!stored->first_error) {
-        RETURN_NULL();
-    }
-    
-    /* Create StreamError object from the error chain */
-    php_stream_error_create_object(return_value, stored->first_error);
+	ZEND_PARSE_PARAMETERS_NONE();
+	php_stream_error_get_last(return_value);
+}
+
+PHP_FUNCTION(stream_clear_errors)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	php_stream_error_clear_stored();
 }
 
 /* {{{ stream_select related functions */

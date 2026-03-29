@@ -28,6 +28,7 @@ class TestStream {
 stream_wrapper_register('test', 'TestStream');
 
 function stream_test_errors($title, $contextOptions) {
+    stream_clear_errors();
     $context = stream_context_create($contextOptions);
     $stream = fopen('test://foo', 'r', false, $context);
     try {
@@ -43,22 +44,18 @@ function stream_test_errors($title, $contextOptions) {
         echo 'EXCEPTION: ' . $e->getMessage() . "\n";
     }
 
-    $error = stream_get_last_error();
-    if ($error) {
+    $errors = stream_last_errors();
+    if ($errors) {
+        $first = $errors[0];
         echo "Error details:\n";
-        echo "- Message: $error->message\n";
-        echo "- Code: " . $error->code->name . "\n";
-        echo "- Wrapper: $error->wrapperName\n";
-        echo "- Terminating: " . ($error->terminating ? 'yes' : 'no') . "\n";
-        echo "- Count: " . $error->count() . "\n";
-        
-        // Show all errors in chain
-        $current = $error;
-        $idx = 0;
-        while ($current) {
-            echo "  [$idx] " . $current->code->name . ": " . $current->message . "\n";
-            $current = $current->next;
-            $idx++;
+        echo "- Message: $first->message\n";
+        echo "- Code: " . $first->code->name . "\n";
+        echo "- Wrapper: $first->wrapperName\n";
+        echo "- Terminating: " . ($first->terminating ? 'yes' : 'no') . "\n";
+        echo "- Count: " . count($errors) . "\n";
+
+        foreach ($errors as $idx => $error) {
+            echo "  [$idx] " . $error->code->name . ": " . $error->message . "\n";
         }
     } else {
         echo "No errors stored\n";
@@ -149,10 +146,4 @@ Warning: fread(): TestStream::stream_read - read 10 bytes more data than request
 Warning: stream_select(): TestStream::stream_cast is not implemented! in %s on line %d
 
 Warning: stream_select(): Cannot represent a stream of type user-space as a select()able descriptor in %s on line %d
-Error details:
-- Message: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
-- Code: UserspaceInvalidReturn
-- Wrapper: user-space
-- Terminating: no
-- Count: 1
-  [0] UserspaceInvalidReturn: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
+No errors stored

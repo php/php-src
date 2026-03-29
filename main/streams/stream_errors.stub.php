@@ -151,16 +151,13 @@ final readonly class StreamError
     public int $severity;
     public bool $terminating;
     public ?string $param;
-    public ?StreamError $next;
-
-    public function hasCode(StreamErrorCode $code): bool {}
-
-    public function count(): int {}
 }
 
 class StreamException extends Exception
 {
-    private ?StreamError $error = null;
+    /** @var list<StreamError> */
+    private array $errors = [];
 
-    public function getError(): ?StreamError {}
+    /** @return list<StreamError> */
+    public function getErrors(): array {}
 }

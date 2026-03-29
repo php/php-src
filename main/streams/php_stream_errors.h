@@ -70,7 +70,7 @@ BEGIN_EXTERN_C()
 #define PHP_STREAM_ERROR_WRAPPER_NAME(_wrapper) \
 	(_wrapper ? _wrapper->wops->label : PHP_STREAM_ERROR_WRAPPER_DEFAULT_NAME)
 
-/* Error entry in chain */
+/* Error entry in chain (internal linked list) */
 typedef struct _php_stream_error_entry {
 	zend_string *message;
 	zend_enum_StreamErrorCode code;
@@ -92,6 +92,7 @@ typedef struct _php_stream_error_operation {
 /* Stored completed operation */
 typedef struct _php_stream_stored_error {
 	php_stream_error_entry *first_error;
+	uint32_t error_count;
 	struct _php_stream_stored_error *next;
 } php_stream_stored_error;
 
@@ -114,8 +115,11 @@ PHPAPI void php_stream_error_operation_abort(void);
 /* State cleanup function */
 PHPAPI void php_stream_error_state_cleanup(void);
 
-/* Error object creation */
-PHPAPI void php_stream_error_create_object(zval *zv, php_stream_error_entry *entry);
+/* Retrieve last stored errors as array of StreamError objects */
+PHPAPI void php_stream_error_get_last(zval *return_value);
+
+/* Clear all stored errors */
+PHPAPI void php_stream_error_clear_stored(void);
 
 /* Wrapper error reporting functions */
 PHPAPI void php_stream_wrapper_error_with_name(const char *wrapper_name,

@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 6afe0eea6b3b3190ae083bf03e99f2341147684e
+ * Stub hash: b824f606ebb1daf1ad8df828bfdbf0c9ae985630
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -1990,8 +1990,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_stream_get_wrappers arginfo_ob_list_handlers
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_stream_get_last_error, 0, 0, StreamError, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_stream_last_errors arginfo_ob_list_handlers
+
+#define arginfo_stream_clear_errors arginfo_flush
 
 #define arginfo_stream_get_transports arginfo_ob_list_handlers
 
@@ -2838,7 +2839,8 @@ ZEND_FUNCTION(stream_get_meta_data);
 ZEND_FUNCTION(stream_get_line);
 ZEND_FUNCTION(stream_resolve_include_path);
 ZEND_FUNCTION(stream_get_wrappers);
-ZEND_FUNCTION(stream_get_last_error);
+ZEND_FUNCTION(stream_last_errors);
+ZEND_FUNCTION(stream_clear_errors);
 ZEND_FUNCTION(stream_get_transports);
 ZEND_FUNCTION(stream_is_local);
 ZEND_FUNCTION(stream_isatty);
@@ -3447,7 +3449,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(stream_get_line, arginfo_stream_get_line)
 	ZEND_FE(stream_resolve_include_path, arginfo_stream_resolve_include_path)
 	ZEND_FE(stream_get_wrappers, arginfo_stream_get_wrappers)
-	ZEND_FE(stream_get_last_error, arginfo_stream_get_last_error)
+	ZEND_FE(stream_last_errors, arginfo_stream_last_errors)
+	ZEND_FE(stream_clear_errors, arginfo_stream_clear_errors)
 	ZEND_FE(stream_get_transports, arginfo_stream_get_transports)
 	ZEND_FE(stream_is_local, arginfo_stream_is_local)
 	ZEND_FE(stream_isatty, arginfo_stream_isatty)

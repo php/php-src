@@ -1,8 +1,8 @@
 /* This is a generated file, edit stream_errors.stub.php instead.
- * Stub hash: 40c314c471a8fb600bbf219e96a31cec8590eb4a */
+ * Stub hash: 9e4dc19314a34c3d07fbe013c7cabccefec4922d */
 
-#ifndef ZEND_STREAM_ERRORS_DECL_40c314c471a8fb600bbf219e96a31cec8590eb4a_H
-#define ZEND_STREAM_ERRORS_DECL_40c314c471a8fb600bbf219e96a31cec8590eb4a_H
+#ifndef ZEND_STREAM_ERRORS_DECL_9e4dc19314a34c3d07fbe013c7cabccefec4922d_H
+#define ZEND_STREAM_ERRORS_DECL_9e4dc19314a34c3d07fbe013c7cabccefec4922d_H
 
 typedef enum zend_enum_StreamErrorCode {
 	ZEND_ENUM_StreamErrorCode_None = 1,
@@ -180,4 +180,4 @@ typedef enum zend_enum_StreamErrorStore {
 	ZEND_ENUM_StreamErrorStore_All = 5,
 } zend_enum_StreamErrorStore;
 
-#endif /* ZEND_STREAM_ERRORS_DECL_40c314c471a8fb600bbf219e96a31cec8590eb4a_H */
+#endif /* ZEND_STREAM_ERRORS_DECL_9e4dc19314a34c3d07fbe013c7cabccefec4922d_H */
