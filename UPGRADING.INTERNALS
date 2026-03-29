@@ -74,6 +74,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     longer is a pointer, but a directly embedded HashTable struct.
   . Added a C23_ENUM() helper macro to define forward-compatible fixed-size
     enums.
+  . Extended php_stream_filter_ops with seek method.
 
 ========================
 2. Build system changes
