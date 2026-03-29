@@ -1229,9 +1229,7 @@ static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool snmp_session_set_security(struct snmp
 }
 /* }}} */
 
-/*
-* Save the snmplib state into the given php_snmp_object
-*/
+/* {{{ Save the snmplib state into the given php_snmp_object */
 static void save_snmplib_output_options(php_snmp_object *snmp_object)
 {
 	// Booleans
@@ -1247,10 +1245,9 @@ static void save_snmplib_output_options(php_snmp_object *snmp_object)
 	snmp_object->string_output_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT);
 	snmp_object->oid_output_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
 }
+/* }}} */
 
-/*
-* Set the snmplib output options using the given php_snmp_object
-*/
+/* {{{ Set the snmplib output options using the given php_snmp_object */
 static void set_snmplib_output_options(php_snmp_object *snmp_object)
 {
 	// Booleans
@@ -1266,6 +1263,7 @@ static void set_snmplib_output_options(php_snmp_object *snmp_object)
 	netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT, snmp_object->string_output_format);
 	netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, snmp_object->oid_output_format);
 }
+/* }}} */
 
 /* {{{ php_snmp
 *
@@ -1546,7 +1544,7 @@ PHP_FUNCTION(snmp_set_mib_option)
 		case NETSNMP_DS_LIB_MIB_PARSE_LABEL:
 		case NETSNMP_DS_LIB_MIB_COMMENT_TERM:
 		case NETSNMP_DS_LIB_MIB_REPLACE:
-			netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, a1, (int) a2);
+			netsnmp_ds_set_bool(NETSNMP_DS_LIBRARY_ID, a1, (int) a2);
 			break;
 		default:
 			zend_argument_value_error(1, "must be an SNMP_MIB_* constant");
@@ -1596,7 +1594,7 @@ PHP_FUNCTION(snmp_set_output_option)
 		case NETSNMP_DS_LIB_DONT_PRINT_UNITS:
 		case NETSNMP_DS_LIB_PRINT_BARE_VALUE:
 		case NETSNMP_DS_LIB_EXTENDED_INDEX:
-			netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, a1, (int) a2);
+			netsnmp_ds_set_bool(NETSNMP_DS_LIBRARY_ID, a1, (int) a2);
 			break;
 		default:
 			zend_argument_value_error(1, "must be an SNMP_OUTPUT_* constant");
