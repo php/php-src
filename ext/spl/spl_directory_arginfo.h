@@ -1,6 +1,8 @@
 /* This is a generated file, edit spl_directory.stub.php instead.
  * Stub hash: 802429d736404c2d66601f640942c827b6e6e94b */
 
+#include "zend_attributes.h"
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()

@@ -2,6 +2,8 @@
  * Stub hash: 245fb5b66e540814c8595a06182886aee3e32f2c
  * Has decl header: yes */
 
+#include "zend_attributes.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
