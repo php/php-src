@@ -151,7 +151,7 @@ static bool php_zip_extract_file(struct zip * za, char *dest, const char *file, 
 	new_state.cwd[0] = '\0';
 	new_state.cwd_length = 0;
 
-	/* Clean/normlize the path and then transform any path (absolute or relative)
+	/* Clean/normalize the path and then transform any path (absolute or relative)
 		 to a path relative to cwd (../../mydir/foo.txt > mydir/foo.txt)
 	 */
 	virtual_file_ex(&new_state, file, NULL, CWD_EXPAND);
