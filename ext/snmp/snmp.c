@@ -1643,15 +1643,15 @@ PHP_FUNCTION(snmp_read_mib)
 /* {{{ Resets the MIB tree and set the mib directories to the provided mibdirs. */
 PHP_FUNCTION(snmp_init_mib)
 {
-        zend_string *mibdirs = NULL;
+	zend_string *mibdirs = NULL;
 
-        ZEND_PARSE_PARAMETERS_START(0, 1)
-                Z_PARAM_OPTIONAL
-                Z_PARAM_STR_OR_NULL(mibdirs)
-        ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(mibdirs)
+	ZEND_PARSE_PARAMETERS_END();
 
 	// If the mibdirs has been changed, we need to reset the MIB tree at the end of the request
-        if (mibdirs != NULL) {
+	if (mibdirs != NULL) {
 		mib_needs_reset = 1;
 	}
 
