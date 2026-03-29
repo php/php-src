@@ -3556,7 +3556,7 @@ function stream_get_wrappers(): array {}
 
 /**
  * @refcount 1
- * @return list<StreamError>
+ * @return array<int, StreamError>
  */
 function stream_last_errors(): array {}
 

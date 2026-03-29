@@ -1,5 +1,5 @@
 /* This is a generated file, edit stream_errors.stub.php instead.
- * Stub hash: 9e4dc19314a34c3d07fbe013c7cabccefec4922d
+ * Stub hash: 65d3a47368993358ac8a4a41bc93dbff5677d3f5
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamErrorCode_isIoError, 0, 0, _IS_BOOL, 0)

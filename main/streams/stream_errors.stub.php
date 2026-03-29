@@ -155,9 +155,9 @@ final readonly class StreamError
 
 class StreamException extends Exception
 {
-    /** @var list<StreamError> */
+    /** @var array<int, StreamError> */
     private array $errors = [];
 
-    /** @return list<StreamError> */
+    /** @return array<int, StreamError> */
     public function getErrors(): array {}
 }
