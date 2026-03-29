@@ -3260,6 +3260,7 @@ class ClassInfo {
         private /* readonly */ array $propertyInfos,
         public array $funcInfos,
         private readonly array $enumCaseInfos,
+        private readonly bool $generateCNameTable,
         public readonly ?string $cond,
         public ?int $phpVersionIdMinimumCompatibility,
         public readonly bool $isUndocumentable,
@@ -3454,30 +3455,49 @@ class ClassInfo {
         if ($this->type !== "enum") {
             return '';
         }
-
+ 
         $code = '';
-
+ 
         if ($this->cond) {
             $code .= "#if {$this->cond}\n";
         }
-
+ 
         $cEnumName = 'zend_enum_' . str_replace('\\', '_', $this->name->toString());
-
+ 
         $code .= "typedef enum {$cEnumName} {\n";
-
+ 
         $i = 1;
         foreach ($this->enumCaseInfos as $case) {
             $cName = 'ZEND_ENUM_' . str_replace('\\', '_', $this->name->toString()) . '_' . $case->name;
             $code .= "\t{$cName} = {$i},\n";
             $i++;
         }
-
+ 
         $code .= "} {$cEnumName};\n";
+ 
+        $caseCount = count($this->enumCaseInfos);
+ 
+        if ($this->generateCNameTable && $caseCount > 0) {
+            $cPrefix = 'ZEND_ENUM_' . str_replace('\\', '_', $this->name->toString());
+            $useGuard = $cPrefix . '_USE_NAME_TABLE';
 
+            $code .= "\n#define {$cPrefix}_CASE_COUNT {$caseCount}\n";
+            $code .= "\n#ifdef {$useGuard}\n";
+            $code .= "static const char *{$cEnumName}_case_names[{$cPrefix}_CASE_COUNT + 1] = {\n";
+
+            foreach ($this->enumCaseInfos as $case) {
+                $cName = $cPrefix . '_' . $case->name;
+                $code .= "\t[{$cName}] = \"{$case->name}\",\n";
+            }
+
+            $code .= "};\n";
+            $code .= "#endif\n";
+        }
+ 
         if ($this->cond) {
             $code .= "#endif\n";
         }
-
+ 
         return $code;
     }
 
@@ -4996,6 +5016,7 @@ function parseClass(
     $isStrictProperties = array_key_exists('strict-properties', $tagMap);
     $isNotSerializable = array_key_exists('not-serializable', $tagMap);
     $isUndocumentable = $isUndocumentable || array_key_exists('undocumentable', $tagMap);
+    $generateCNameTable = array_key_exists('c-name-table', $tagMap);
     foreach ($tags as $tag) {
         if ($tag->name === 'alias') {
             $alias = $tag->getValue();
@@ -5057,6 +5078,7 @@ function parseClass(
         $properties,
         $methods,
         $enumCases,
+        $generateCNameTable,
         $cond,
         $minimumPhpVersionIdCompatibility,
         $isUndocumentable

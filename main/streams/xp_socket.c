@@ -116,7 +116,7 @@ retry:
 
 		if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
 			estr = php_socket_strerror(err, NULL, 0);
-			php_stream_warn(stream, STREAM_ERROR_CODE_NETWORK_SEND_FAILED,
+			php_stream_warn(stream, NetworkSendFailed,
 					"Send of %zu bytes failed with errno=%d %s", count, err, estr);
 			efree(estr);
 		}
@@ -453,7 +453,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 							xparam->inputs.addrlen);
 					if (xparam->outputs.returncode == -1) {
 						char *err = php_socket_strerror(php_socket_errno(), NULL, 0);
-						php_stream_warn(stream, STREAM_ERROR_CODE_NETWORK_SEND_FAILED, "%s", err);
+						php_stream_warn(stream, NetworkSendFailed, "%s", err);
 						efree(err);
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
@@ -613,7 +613,7 @@ static inline int parse_unix_address(php_stream *stream, php_stream_xport_param 
 		 * BUT, to get into this branch of code, the name is too long,
 		 * so we don't care. */
 		xparam->inputs.namelen = max_length;
-		php_stream_notice(stream, STREAM_ERROR_CODE_INVALID_PATH,
+		php_stream_notice(stream, InvalidPath,
 				"socket path exceeded the maximum allowed length of %lu bytes and was truncated",
 				max_length);
 	}

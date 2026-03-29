@@ -116,7 +116,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 				n = sizeof(wrapper_name) - 1;
 			PHP_STRLCPY(wrapper_name, protocol, sizeof(wrapper_name), n);
 
-			ERR_REPORT(STREAM_ERROR_CODE_WRAPPER_NOT_FOUND, error_string,
+			ERR_REPORT(WrapperNotFound, error_string,
 					"Unable to find the socket transport \"%s\" - did you forget to enable it when you configured PHP?",
 					wrapper_name);
 
@@ -127,7 +127,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	if (factory == NULL) {
 		/* should never happen */
 		php_stream_wrapper_warn(NULL, context, REPORT_ERRORS,
-			STREAM_ERROR_CODE_WRAPPER_NOT_FOUND, "Could not find a factory !?");
+			WrapperNotFound, "Could not find a factory !?");
 		return NULL;
 	}
 
@@ -148,7 +148,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 								flags & STREAM_XPORT_CONNECT_ASYNC ? 1 : 0,
 								timeout, &error_text, error_code)) {
 
-						ERR_RETURN(STREAM_ERROR_CODE_CONNECT_FAILED, error_string, error_text, "connect() failed: %s");
+						ERR_RETURN(ConnectFailed, error_string, error_text, "connect() failed: %s");
 
 						failed = true;
 					}
@@ -158,7 +158,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 				/* server */
 				if (flags & STREAM_XPORT_BIND) {
 					if (0 != php_stream_xport_bind(stream, name, namelen, &error_text)) {
-						ERR_RETURN(STREAM_ERROR_CODE_BIND_FAILED, error_string, error_text, "bind() failed: %s");
+						ERR_RETURN(BindFailed, error_string, error_text, "bind() failed: %s");
 						failed = true;
 					} else if (flags & STREAM_XPORT_LISTEN) {
 						zval *zbacklog = NULL;
@@ -169,7 +169,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 						}
 
 						if (0 != php_stream_xport_listen(stream, backlog, &error_text)) {
-							ERR_RETURN(STREAM_ERROR_CODE_LISTEN_FAILED, error_string, error_text, "listen() failed: %s");
+							ERR_RETURN(ListenFailed, error_string, error_text, "listen() failed: %s");
 							failed = true;
 						}
 					}
@@ -372,7 +372,7 @@ PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_cr
 		return param.outputs.returncode;
 	}
 
-	php_stream_warn_docref(stream, "streams.crypto", STREAM_ERROR_CODE_SSL_NOT_SUPPORTED,
+	php_stream_warn_docref(stream, "streams.crypto", SslNotSupported,
 		"This stream does not support SSL/crypto");
 
 	return ret;
@@ -393,7 +393,7 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate)
 		return param.outputs.returncode;
 	}
 
-	php_stream_warn_docref(stream, "streams.crypto", STREAM_ERROR_CODE_SSL_NOT_SUPPORTED,
+	php_stream_warn_docref(stream, "streams.crypto", SslNotSupported,
 		"This stream does not support SSL/crypto");
 
 	return ret;
@@ -416,7 +416,7 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
 	}
 
 	if (stream->readfilters.head) {
-		php_stream_warn(stream, STREAM_ERROR_CODE_FILTER_FAILED,
+		php_stream_warn(stream, FilterFailed,
 			"Cannot peek or fetch OOB data from a filtered stream");
 		return -1;
 	}
@@ -487,7 +487,7 @@ PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t b
 	oob = (flags & STREAM_OOB) == STREAM_OOB;
 
 	if ((oob || addr) && stream->writefilters.head) {
-		php_stream_warn(stream, STREAM_ERROR_CODE_FILTER_FAILED,
+		php_stream_warn(stream, FilterFailed,
 			"Cannot write OOB data, or data to a targeted address on a filtered stream");
 		return -1;
 	}

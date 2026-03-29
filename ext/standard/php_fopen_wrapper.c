@@ -159,7 +159,7 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 				php_stream_filter_append(&stream->readfilters, temp_filter);
 			} else {
 				php_stream_wrapper_warn_nt(NULL, PHP_STREAM_CONTEXT(stream), REPORT_ERRORS,
-					STREAM_ERROR_CODE_CREATE_FAILED,
+					CreateFailed,
 					"Unable to create filter (%s)", p);
 			}
 		}
@@ -168,7 +168,7 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 				php_stream_filter_append(&stream->writefilters, temp_filter);
 			} else {
 				php_stream_wrapper_warn_nt(NULL, PHP_STREAM_CONTEXT(stream), REPORT_ERRORS,
-					STREAM_ERROR_CODE_CREATE_FAILED,
+					CreateFailed,
 					"Unable to create filter (%s)", p);
 			}
 		}
@@ -224,7 +224,7 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
 				php_stream_wrapper_warn(wrapper, context, options,
-					STREAM_ERROR_CODE_DISABLED,
+					Disabled,
 					"URL file-access is disabled in the server configuration");
 			}
 			return NULL;
@@ -245,7 +245,7 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
 				php_stream_wrapper_warn(wrapper, context, options,
-					STREAM_ERROR_CODE_DISABLED,
+					Disabled,
 					"URL file-access is disabled in the server configuration");
 			}
 			return NULL;
@@ -306,7 +306,7 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		if (strcmp(sapi_module.name, "cli")) {
 			if (options & REPORT_ERRORS) {
 				php_stream_wrapper_warn(wrapper, context, options,
-					STREAM_ERROR_CODE_DISABLED,
+					Disabled,
 					"Direct access to file descriptors is only available from command-line PHP");
 			}
 			return NULL;
@@ -315,7 +315,7 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
 				php_stream_wrapper_warn(wrapper, context, options,
-					STREAM_ERROR_CODE_DISABLED,
+					Disabled,
 					"URL file-access is disabled in the server configuration");
 			}
 			return NULL;
@@ -325,7 +325,7 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		fildes_ori = ZEND_STRTOL(start, &end, 10);
 		if (end == start || *end != '\0') {
 			php_stream_wrapper_log_warn(wrapper, context, options,
-				STREAM_ERROR_CODE_INVALID_URL,
+				InvalidUrl,
 				"php://fd/ stream must be specified in the form php://fd/<orig fd>");
 			return NULL;
 		}
@@ -338,7 +338,7 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 
 		if (fildes_ori < 0 || fildes_ori >= dtablesize) {
 			php_stream_wrapper_log_warn(wrapper, context, options,
-				STREAM_ERROR_CODE_INVALID_PARAM,
+				InvalidParam,
 				"The file descriptors must be non-negative numbers smaller than %d", dtablesize);
 			return NULL;
 		}
@@ -346,7 +346,7 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		fd = dup((int)fildes_ori);
 		if (fd == -1) {
 			php_stream_wrapper_log_warn(wrapper, context, options,
-				STREAM_ERROR_CODE_DUP_FAILED,
+				DupFailed,
 				"Error duping file descriptor " ZEND_LONG_FMT "; possibly it doesn't exist: "
 				"[%d]: %s", fildes_ori, errno, strerror(errno));
 			return NULL;
@@ -396,7 +396,7 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 	} else {
 		/* invalid php://thingy */
 		php_stream_wrapper_warn(wrapper, context, options,
-				STREAM_ERROR_CODE_INVALID_URL, "Invalid php:// URL specified");
+				InvalidUrl, "Invalid php:// URL specified");
 		return NULL;
 	}
 

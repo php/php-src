@@ -365,7 +365,7 @@ static ssize_t php_stream_temp_write(php_stream *stream, const char *buf, size_t
 			php_stream *file = php_stream_fopen_temporary_file(ts->tmpdir, "php", NULL);
 			if (file == NULL) {
 				php_stream_wrapper_warn(NULL, PHP_STREAM_CONTEXT(stream), REPORT_ERRORS,
-						STREAM_ERROR_CODE_PERMISSION_DENIED,
+						PermissionDenied,
 						"Unable to create temporary file, Check permissions in temporary files directory.");
 				return 0;
 			}
@@ -494,7 +494,7 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret)
 	file = php_stream_fopen_tmpfile();
 	if (file == NULL) {
 		php_stream_wrapper_warn(NULL, PHP_STREAM_CONTEXT(stream), REPORT_ERRORS,
-				STREAM_ERROR_CODE_PERMISSION_DENIED, "Unable to create temporary file.");
+				PermissionDenied, "Unable to create temporary file.");
 		return FAILURE;
 	}
 
@@ -645,7 +645,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 
 	if ((comma = (char *) memchr(path, ',', dlen)) == NULL) {
 		php_stream_wrapper_log_warn(wrapper, context, options,
-				STREAM_ERROR_CODE_INVALID_URL, "rfc2397: no comma in URL");
+				InvalidUrl, "rfc2397: no comma in URL");
 		return NULL;
 	}
 
@@ -658,7 +658,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 
 		if (!semi && !sep) {
 			php_stream_wrapper_log_warn(wrapper, context, options,
-					STREAM_ERROR_CODE_INVALID_URL, "rfc2397: illegal media type");
+					InvalidUrl, "rfc2397: illegal media type");
 			return NULL;
 		}
 
@@ -674,7 +674,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		} else if (semi != path || mlen != sizeof(";base64")-1 || memcmp(path, ";base64", sizeof(";base64")-1)) { /* must be error since parameters are only allowed after mediatype */
 			zval_ptr_dtor(&meta);
 			php_stream_wrapper_log_warn(wrapper, context, options,
-					STREAM_ERROR_CODE_INVALID_URL, "rfc2397: illegal media type");
+					InvalidUrl, "rfc2397: illegal media type");
 			return NULL;
 		}
 		/* get parameters and potentially ';base64' */
@@ -688,7 +688,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 					/* must be error since parameters are only allowed after mediatype and we have no '=' sign */
 					zval_ptr_dtor(&meta);
 					php_stream_wrapper_log_warn(wrapper, context, options,
-							STREAM_ERROR_CODE_INVALID_PARAM, "rfc2397: illegal parameter");
+							InvalidParam, "rfc2397: illegal parameter");
 					return NULL;
 				}
 				base64 = 1;
@@ -709,7 +709,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		if (mlen) {
 			zval_ptr_dtor(&meta);
 			php_stream_wrapper_log_warn(wrapper, context, options,
-					STREAM_ERROR_CODE_INVALID_URL, "rfc2397: illegal URL");
+					InvalidUrl, "rfc2397: illegal URL");
 			return NULL;
 		}
 	} else {
@@ -726,7 +726,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		if (!base64_comma) {
 			zval_ptr_dtor(&meta);
 			php_stream_wrapper_log_warn(wrapper, context, options,
-					STREAM_ERROR_CODE_DECODING_FAILED, "rfc2397: unable to decode");
+					DecodingFailed, "rfc2397: unable to decode");
 			return NULL;
 		}
 		comma = ZSTR_VAL(base64_comma);

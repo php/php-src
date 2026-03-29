@@ -258,7 +258,7 @@ PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, 
 			b) no memory
 			-> lets bail
 		*/
-		php_stream_fatal(stream, STREAM_ERROR_CODE_CAST_FAILED, "fopencookie failed");
+		php_stream_fatal(stream, CastFailed, "fopencookie failed");
 		return FAILURE;
 #endif
 
@@ -298,7 +298,7 @@ PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, 
 
 	if (php_stream_is_filtered(stream) && castas != PHP_STREAM_AS_FD_FOR_SELECT) {
 		if (show_err) {
-			php_stream_warn(stream, STREAM_ERROR_CODE_CAST_NOT_SUPPORTED,
+			php_stream_warn(stream, CastNotSupported,
 				"Cannot cast a filtered stream on this system");
 		}
 		return FAILURE;
@@ -315,7 +315,7 @@ PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, 
 			"select()able descriptor"
 		};
 
-		php_stream_warn(stream, STREAM_ERROR_CODE_CAST_NOT_SUPPORTED,
+		php_stream_warn(stream, CastNotSupported,
 			"Cannot represent a stream of type %s as a %s", stream->ops->label, cast_names[castas]);
 	}
 
@@ -331,7 +331,7 @@ exit_success:
 		 * will be accessing the stream.  Emit a warning so that the end-user will
 		 * know that they should try something else */
 
-		php_stream_warn_nt(stream, STREAM_ERROR_CODE_BUFFERED_DATA_LOST,
+		php_stream_warn_nt(stream, BufferedDataLost,
 			ZEND_LONG_FMT " bytes of buffered data lost during stream conversion!",
 			(zend_long)(stream->writepos - stream->readpos));
 	}

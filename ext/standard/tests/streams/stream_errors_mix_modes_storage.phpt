@@ -46,9 +46,9 @@ function stream_test_errors($title, $contextOptions) {
     $error = stream_get_last_error();
     if ($error) {
         echo "Error details:\n";
-        echo "- Message: " . $error->message . "\n";
-        echo "- Code: " . $error->code->name . " (" . $error->code->value . ")\n";
-        echo "- Wrapper: " . $error->wrapperName . "\n";
+        echo "- Message: $error->message\n";
+        echo "- Code: " . $error->code->name . "\n";
+        echo "- Wrapper: $error->wrapperName\n";
         echo "- Terminating: " . ($error->terminating ? 'yes' : 'no') . "\n";
         echo "- Count: " . $error->count() . "\n";
         
@@ -106,7 +106,7 @@ stream_test_errors('AUTO ERROR', [
 ALL
 Error details:
 - Message: TestStream::stream_cast is not implemented!
-- Code: NotImplemented (70)
+- Code: NotImplemented
 - Wrapper: user-space
 - Terminating: yes
 - Count: 2
@@ -116,7 +116,7 @@ Error details:
 NON TERMINATING
 Error details:
 - Message: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
-- Code: UserspaceInvalidReturn (161)
+- Code: UserspaceInvalidReturn
 - Wrapper: user-space
 - Terminating: no
 - Count: 1
@@ -125,7 +125,7 @@ Error details:
 TERMINATING
 Error details:
 - Message: TestStream::stream_cast is not implemented!
-- Code: NotImplemented (70)
+- Code: NotImplemented
 - Wrapper: user-space
 - Terminating: yes
 - Count: 2
@@ -136,7 +136,7 @@ AUTO EXCEPTION
 EXCEPTION: TestStream::stream_cast is not implemented!
 Error details:
 - Message: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
-- Code: UserspaceInvalidReturn (161)
+- Code: UserspaceInvalidReturn
 - Wrapper: user-space
 - Terminating: no
 - Count: 1
@@ -151,7 +151,7 @@ Warning: stream_select(): TestStream::stream_cast is not implemented! in %s on l
 Warning: stream_select(): Cannot represent a stream of type user-space as a select()able descriptor in %s on line %d
 Error details:
 - Message: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
-- Code: UserspaceInvalidReturn (161)
+- Code: UserspaceInvalidReturn
 - Wrapper: user-space
 - Terminating: no
 - Count: 1
