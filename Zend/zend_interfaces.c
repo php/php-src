@@ -19,6 +19,7 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_interfaces.h"
+#include "zend_closures.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces_arginfo.h"
 #include "zend_property_hooks.h"
@@ -30,6 +31,7 @@ ZEND_API zend_class_entry *zend_ce_arrayaccess;
 ZEND_API zend_class_entry *zend_ce_serializable;
 ZEND_API zend_class_entry *zend_ce_countable;
 ZEND_API zend_class_entry *zend_ce_stringable;
+ZEND_API zend_class_entry *zend_ce_invokable;
 ZEND_API zend_class_entry *zend_ce_internal_iterator;
 
 static zend_object_handlers zend_internal_iterator_handlers;
@@ -646,6 +648,28 @@ ZEND_METHOD(InternalIterator, rewind) {
 	intern->iter->index = 0;
 }
 
+/* {{{ zend_implement_invokable */
+static int zend_implement_invokable(zend_class_entry *interface, zend_class_entry *class_type)
+{
+	if (class_type->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+		return SUCCESS;
+	}
+
+	/* Closure provides __invoke dynamically per-instance via get_method handler,
+	 * so it does not appear in the function table at registration time. */
+	if (class_type->__invoke
+		|| zend_hash_str_exists(&class_type->function_table, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME) - 1)
+		|| zend_string_equals_literal(class_type->name, "Closure")) {
+		return SUCCESS;
+	}
+
+	zend_error_noreturn(E_CORE_ERROR, "%s %s must have an __invoke() method to implement Invokable",
+		zend_get_object_type_uc(class_type),
+		ZSTR_VAL(class_type->name));
+	return FAILURE;
+}
+/* }}} */
+
 /* {{{ zend_register_interfaces */
 ZEND_API void zend_register_interfaces(void)
 {
@@ -667,6 +691,9 @@ ZEND_API void zend_register_interfaces(void)
 	zend_ce_countable = register_class_Countable();
 
 	zend_ce_stringable = register_class_Stringable();
+
+	zend_ce_invokable = register_class_Invokable();
+	zend_ce_invokable->interface_gets_implemented = zend_implement_invokable;
 
 	zend_ce_internal_iterator = register_class_InternalIterator(zend_ce_iterator);
 	zend_ce_internal_iterator->create_object = zend_internal_iterator_create;

@@ -730,7 +730,7 @@ ZEND_COLD ZEND_METHOD(Closure, __construct)
 
 void zend_register_closure_ce(void) /* {{{ */
 {
-	zend_ce_closure = register_class_Closure();
+	zend_ce_closure = register_class_Closure(zend_ce_invokable);
 	zend_ce_closure->create_object = zend_closure_new;
 	zend_ce_closure->default_object_handlers = &closure_handlers;
 

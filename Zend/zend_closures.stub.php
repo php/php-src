@@ -6,7 +6,7 @@
  * @strict-properties
  * @not-serializable
  */
-final class Closure
+final class Closure implements Invokable
 {
     private function __construct() {}
 

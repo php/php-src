@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_closures.stub.php instead.
- * Stub hash: e0626e52adb2d38dad1140c1a28cc7774cc84500 */
+ * Stub hash: 57f09f1725ded63cd58f37977a0572dd5e2394bc */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Closure___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -44,12 +44,13 @@ static const zend_function_entry class_Closure_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_Closure(void)
+static zend_class_entry *register_class_Closure(zend_class_entry *class_entry_Invokable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Closure", class_Closure_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	zend_class_implements(class_entry, 1, class_entry_Invokable);
 
 	return class_entry;
 }

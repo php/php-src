@@ -66,6 +66,10 @@ interface Stringable
     public function __toString(): string;
 }
 
+interface Invokable
+{
+}
+
 /**
  * @not-serializable
  */

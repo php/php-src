@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_interfaces.stub.php instead.
- * Stub hash: a9c915c11e5989d8c7cf2d704ada09ca765670c3 */
+ * Stub hash: c9744e70f6ebf8006926b777243891db07625111 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IteratorAggregate_getIterator, 0, 0, Traversable, 0)
 ZEND_END_ARG_INFO()
@@ -184,6 +184,16 @@ static zend_class_entry *register_class_Stringable(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Stringable", class_Stringable_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Invokable(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Invokable", NULL);
 	class_entry = zend_register_internal_interface(&ce);
 
 	return class_entry;

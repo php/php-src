@@ -8,7 +8,7 @@ class C {
     static function handleStatic() {}
 }
 
-class Invokable {
+class InvokableHandler {
     public function __invoke() {
     }
 }
@@ -46,8 +46,8 @@ echo "\nClosure\n";
 set_error_handler($f = function () {});
 var_dump(get_error_handler() === $f);
 
-echo "\nInvokable\n";
-set_error_handler($object = new Invokable());
+echo "\nInvokableHandler\n";
+set_error_handler($object = new InvokableHandler());
 var_dump(get_error_handler() === $object);
 
 echo "\nStable return value\n";
@@ -80,7 +80,7 @@ bool(true)
 Closure
 bool(true)
 
-Invokable
+InvokableHandler
 bool(true)
 
 Stable return value

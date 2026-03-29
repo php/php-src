@@ -2100,6 +2100,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 		ce->__call = NULL;
 		ce->__callstatic = NULL;
 		ce->__tostring = NULL;
+		ce->__invoke = NULL;
 		ce->__serialize = NULL;
 		ce->__unserialize = NULL;
 		ce->__debugInfo = NULL;
@@ -8534,6 +8535,23 @@ static void add_stringable_interface(zend_class_entry *ce) {
 		ZSTR_INIT_LITERAL("stringable", 0);
 }
 
+static void add_invokable_interface(zend_class_entry *ce) {
+	for (uint32_t i = 0; i < ce->num_interfaces; i++) {
+		if (zend_string_equals_literal(ce->interface_names[i].lc_name, "invokable")) {
+			/* Interface already explicitly implemented */
+			return;
+		}
+	}
+
+	ce->num_interfaces++;
+	ce->interface_names =
+		erealloc(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
+	ce->interface_names[ce->num_interfaces - 1].name =
+		ZSTR_INIT_LITERAL("Invokable", 0);
+	ce->interface_names[ce->num_interfaces - 1].lc_name =
+		ZSTR_INIT_LITERAL("invokable", 0);
+}
+
 static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, bool has_body) /* {{{ */
 {
 	zend_class_entry *ce = CG(active_class_entry);
@@ -8610,6 +8628,10 @@ static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string 
 	if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)
 			&& !(ce->ce_flags & ZEND_ACC_TRAIT)) {
 		add_stringable_interface(ce);
+	}
+	if (zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)
+			&& !(ce->ce_flags & ZEND_ACC_TRAIT)) {
+		add_invokable_interface(ce);
 	}
 
 	return lcname;

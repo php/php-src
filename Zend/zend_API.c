@@ -2889,6 +2889,8 @@ ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, c
 		ce->__callstatic = fptr;
 	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
 		ce->__tostring = fptr;
+	} else if (zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)) {
+		ce->__invoke = fptr;
 	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		ce->__debugInfo = fptr;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
@@ -3518,6 +3520,12 @@ static zend_class_entry *do_register_internal_class(const zend_class_entry *orig
 			&& "Should be registered before first class using __toString()");
 		zend_do_implement_interface(class_entry, zend_ce_stringable);
 	}
+	if (class_entry->__invoke && !zend_string_equals_literal(class_entry->name, "Invokable")
+			&& !(class_entry->ce_flags & ZEND_ACC_TRAIT)) {
+		ZEND_ASSERT(zend_ce_invokable
+			&& "Should be registered before first class using __invoke()");
+		zend_do_implement_interface(class_entry, zend_ce_invokable);
+	}
 	return class_entry;
 }
 /* }}} */
@@ -3559,6 +3567,12 @@ ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_inter
 		if (interface_entry == zend_ce_stringable
 				&& zend_class_implements_interface(class_entry, zend_ce_stringable)) {
 			/* Stringable is implemented automatically,
+			 * silently ignore an explicit implementation. */
+			continue;
+		}
+		if (interface_entry == zend_ce_invokable
+				&& zend_class_implements_interface(class_entry, zend_ce_invokable)) {
+			/* Invokable is implemented automatically,
 			 * silently ignore an explicit implementation. */
 			continue;
 		}

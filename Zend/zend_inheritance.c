@@ -491,12 +491,13 @@ static inheritance_status zend_is_class_subtype_of_type(
 		}
 	}
 
-	/* If the parent has 'callable' as a return type, then Closure satisfies the co-variant check */
+	/* If the parent has 'callable' as a return type, then Invokable satisfies the co-variant check */
 	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_CALLABLE) {
 		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
 		if (!fe_ce) {
 			have_unresolved = true;
-		} else if (fe_ce == zend_ce_closure) {
+		} else if (fe_ce == zend_ce_invokable
+				|| zend_class_implements_interface(fe_ce, zend_ce_invokable)) {
 			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
 		}
@@ -3722,6 +3723,19 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 									   sizeof(zend_class_entry *) * ce->num_interfaces, ce->type == ZEND_INTERNAL_CLASS);
 			ce->interfaces[ce->num_interfaces - 1] = zend_ce_stringable;
 			do_interface_implementation(ce, zend_ce_stringable);
+		}
+
+		/* Normally Invokable is added during compilation. However, if it is imported from a trait,
+		 * we need to explicitly add the interface here. */
+		if (ce->__invoke && !(ce->ce_flags & ZEND_ACC_TRAIT)
+			&& !zend_class_implements_interface(ce, zend_ce_invokable)) {
+			ZEND_ASSERT(ce->__invoke->common.fn_flags & ZEND_ACC_TRAIT_CLONE);
+			ce->ce_flags |= ZEND_ACC_RESOLVED_INTERFACES;
+			ce->num_interfaces++;
+			ce->interfaces = perealloc(ce->interfaces,
+									   sizeof(zend_class_entry *) * ce->num_interfaces, ce->type == ZEND_INTERNAL_CLASS);
+			ce->interfaces[ce->num_interfaces - 1] = zend_ce_invokable;
+			do_interface_implementation(ce, zend_ce_invokable);
 		}
 
 		zend_build_properties_info_table(ce);
