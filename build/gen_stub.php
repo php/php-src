@@ -4553,7 +4553,7 @@ class FileInfo {
         return $code;
     }
 
-    
+
     /**
      * @param array<string, ConstInfo> $allConstInfos
      * @return array{string, string}
@@ -4669,9 +4669,12 @@ class FileInfo {
                 . "#endif /* {$headerName} */\n";
         }
 
+        $shouldIncludeAttributes = preg_match('/zend_add_(class|function|parameter|property|class_constant|global_constant)_attribute\(/', $code);
+
         $code = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
             . " * Stub hash: $stubHash"
             . ($hasDeclFile ? "\n * Has decl header: yes */\n" : " */\n")
+            . ($shouldIncludeAttributes ? "\n#include \"zend_attributes.h\"\n" : "")
             . $code;
 
         return [$code, $declCode];
