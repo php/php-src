@@ -856,22 +856,13 @@ static zend_type_check_status zend_check_type_slow(
 
 	if (!strict_types) {
 		/* TODO: Move coercible checks here in PHP 9 when various type coercions have been removed? */
-		/* Stringable object pass a string type check */
-		// TODO: Need to fix GMP object
-		if (type_mask & MAY_BE_STRING && Z_TYPE_P(arg) == IS_OBJECT && Z_OBJCE_P(arg)->__tostring != NULL) {
-			return ZEND_TYPE_CHECK_MAY_COERCE;
-		}
 		/* Only scalar types may coerce to other scalar types */
-		if (Z_TYPE_P(arg) > IS_STRING || Z_TYPE_P(arg) <= IS_NULL) {
-			return ZEND_TYPE_CHECK_INVALID;
-		}
-
-		if (type_mask & (MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING)) {
+		if (type_mask & (MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_BOOL) && Z_TYPE_P(arg) > IS_NULL && Z_TYPE_P(arg) <= IS_STRING) {
 			return ZEND_TYPE_CHECK_MAY_COERCE;
 		}
-
-		/* Singleton true/false types may not be coerced into */
-		if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
+		/* Stringable object pass a string type check */
+		// TODO: Need to fix GMP and COM variant classes
+		if (Z_TYPE_P(arg) == IS_OBJECT && (type_mask & MAY_BE_STRING) && Z_OBJCE_P(arg)->__tostring != NULL) {
 			return ZEND_TYPE_CHECK_MAY_COERCE;
 		}
 	}
@@ -964,7 +955,7 @@ static bool zend_check_type_and_coerce(
 		return true;
 	}
 	if (status == ZEND_TYPE_CHECK_MAY_COERCE) {
-		return zend_coerce_weak_scalar_type_declaration(ZEND_TYPE_PURE_MASK(*type), arg);
+		return zend_coerce_weak_scalar_type_declaration(ZEND_TYPE_FULL_MASK(*type), arg);
 	}
 	return false;
 }
@@ -981,7 +972,7 @@ static bool zend_check_type_and_coerce_slow(
 		return true;
 	}
 	if (status == ZEND_TYPE_CHECK_MAY_COERCE) {
-		return zend_coerce_weak_scalar_type_declaration(ZEND_TYPE_PURE_MASK(*type), arg);
+		return zend_coerce_weak_scalar_type_declaration(ZEND_TYPE_FULL_MASK(*type), arg);
 	}
 	return false;
 }
