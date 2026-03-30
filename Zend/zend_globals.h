@@ -85,7 +85,7 @@ typedef enum {
 struct zend_err_buf {
 	uint32_t size;
 	uint32_t capacity;
-	zend_error_info *buf[1];
+	zend_error_info **errors;
 };
 
 struct _zend_compiler_globals {
@@ -305,7 +305,7 @@ struct _zend_executor_globals {
 	 * and their processing is delayed until zend_emit_recorded_errors()
 	 * is called or a fatal diagnostic is emitted. */
 	bool record_errors;
-	struct zend_err_buf *errors;
+	struct zend_err_buf errors;
 
 	/* Override filename or line number of thrown errors and exceptions */
 	zend_string *filename_override;
