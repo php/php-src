@@ -1346,7 +1346,7 @@ PHPDBG_COMMAND(dl) /* {{{ */
 		phpdbg_notice("Modules");
 		zend_hash_apply(&module_registry, (apply_func_t) add_module_info);
 	} else switch (param->type) {
-		case STR_PARAM:
+		case STR_PARAM: {
 #ifdef HAVE_LIBDL
 			zend_string *path = zend_string_init(param->str, param->len, false);
 
@@ -1363,6 +1363,7 @@ PHPDBG_COMMAND(dl) /* {{{ */
 			phpdbg_error("Cannot dynamically load %.*s - dynamic modules are not supported", (int) param->len, param->str);
 #endif
 			break;
+		}
 
 		phpdbg_default_switch_case();
 	}
