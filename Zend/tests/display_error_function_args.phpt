@@ -1,7 +1,7 @@
 --TEST--
 Displaying function arguments in errors
 --INI--
-display_error_function_args=On
+error_ignore_args=Off
 --FILE--
 <?php
 
@@ -14,7 +14,7 @@ unlink('/');
 $flags = ["salt" => "123456789012345678901" . chr(0), "cost" => 4];
 password_hash("test", PASSWORD_BCRYPT, $flags);
 
-ini_set("display_error_function_args", "Off");
+ini_set("error_ignore_args", "On");
 
 unlink('/');
 password_hash("test", PASSWORD_BCRYPT, $flags);

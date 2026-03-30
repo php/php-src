@@ -801,8 +801,8 @@ PHP_INI_BEGIN()
 
 	STD_PHP_INI_ENTRY_EX("display_errors",		"1",		PHP_INI_ALL,		OnUpdateDisplayErrors,	display_errors,			php_core_globals,	core_globals, display_errors_mode)
 	STD_PHP_INI_BOOLEAN("display_startup_errors",	"1",	PHP_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("display_error_function_args",	"0",	PHP_INI_ALL,		OnUpdateBool,			display_error_function_args,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("error_ignore_args",	"0",	PHP_INI_ALL,		OnUpdateBool,			error_ignore_args,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("expose_php",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("docref_root", 			"", 		PHP_INI_ALL,		OnUpdateString,			docref_root,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("docref_ext",				"",			PHP_INI_ALL,		OnUpdateString,			docref_ext,				php_core_globals,	core_globals)
@@ -1135,7 +1135,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	/* if we still have memory then format the origin */
 	if (is_function) {
 		zend_string *dynamic_params = NULL;
-		if (PG(display_error_function_args)) {
+		if (PG(error_ignore_args) == false) {
 			dynamic_params = zend_trace_current_function_args_string();
 		}
 		origin_len = spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, dynamic_params ? ZSTR_VAL(dynamic_params) : params);
