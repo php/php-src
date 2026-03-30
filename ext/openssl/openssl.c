@@ -218,9 +218,9 @@ void php_openssl_store_errors(void)
 	errors = OPENSSL_G(errors);
 
 	do {
-		errors->top = (errors->top + 1) % ERR_NUM_ERRORS;
+		errors->top = (errors->top + 1) % PHP_OPENSSL_ERR_BUFFER_SIZE;
 		if (errors->top == errors->bottom) {
-			errors->bottom = (errors->bottom + 1) % ERR_NUM_ERRORS;
+			errors->bottom = (errors->bottom + 1) % PHP_OPENSSL_ERR_BUFFER_SIZE;
 		}
 		errors->buffer[errors->top] = error_code;
 	} while ((error_code = ERR_get_error()));
@@ -4042,7 +4042,7 @@ PHP_FUNCTION(openssl_error_string)
 		RETURN_FALSE;
 	}
 
-	OPENSSL_G(errors)->bottom = (OPENSSL_G(errors)->bottom + 1) % ERR_NUM_ERRORS;
+	OPENSSL_G(errors)->bottom = (OPENSSL_G(errors)->bottom + 1) % PHP_OPENSSL_ERR_BUFFER_SIZE;
 	val = OPENSSL_G(errors)->buffer[OPENSSL_G(errors)->bottom];
 
 	if (val) {
