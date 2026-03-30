@@ -780,12 +780,75 @@ static bool zend_check_intersection_type_from_list(
 	return true;
 }
 
+/* Usually coerce_arg will be the same pointer as arg */
+static bool zend_coerce_weak_scalar_type_declaration(uint32_t type_mask, const zval *arg, zval *coerce_arg)
+{
+	zend_long lval;
+	double dval;
+
+	ZEND_ASSERT(!Z_ISREF_P(arg));
+	ZEND_ASSERT(!Z_ISREF_P(coerce_arg));
+	if (UNEXPECTED(Z_ISUNDEF_P(coerce_arg))) {
+		ZVAL_COPY(coerce_arg, arg);
+	}
+
+	/* Type preference order: int -> float -> string -> bool */
+	if (type_mask & MAY_BE_LONG) {
+		/* For an int|float union type and string value,
+		 * determine chosen type by is_numeric_string() semantics. */
+		if ((type_mask & MAY_BE_DOUBLE) && Z_TYPE_P(arg) == IS_STRING) {
+			uint8_t type = is_numeric_str_function(Z_STR_P(arg), &lval, &dval);
+			if (type == IS_LONG) {
+				zend_string_release(Z_STR_P(coerce_arg));
+				ZVAL_LONG(coerce_arg, lval);
+				return true;
+			}
+			if (type == IS_DOUBLE) {
+				zend_string_release(Z_STR_P(coerce_arg));
+				ZVAL_DOUBLE(coerce_arg, dval);
+				return true;
+			}
+		} else if (zend_parse_arg_long_weak(arg, &lval, 0)) {
+			zval_ptr_dtor(coerce_arg);
+			ZVAL_LONG(coerce_arg, lval);
+			return true;
+		} else if (UNEXPECTED(EG(exception))) {
+			return false;
+		}
+	}
+	if (type_mask & MAY_BE_DOUBLE) {
+		dval = zend_parse_arg_double_weak(arg, 0);
+		if (EXPECTED(!zend_isnan(dval))) {
+			zval_ptr_dtor(coerce_arg);
+			ZVAL_DOUBLE(coerce_arg, dval);
+			return true;
+		}
+	}
+	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(coerce_arg, 0)) {
+		/* on success "coerce_arg" is converted to IS_STRING */
+		return true;
+	}
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
+		zpp_parse_bool_status bval = zend_parse_arg_bool_weak(arg, 0);
+		if (UNEXPECTED(bval == ZPP_PARSE_BOOL_STATUS_ERROR)) {
+			return false;
+		}
+		zval_ptr_dtor(coerce_arg);
+		ZVAL_BOOL(coerce_arg, bval);
+		return true;
+	}
+	return false;
+}
+
 static zend_type_check_status zend_check_type_slow(
 	const zend_type *type,
 	const zval *arg,
 	const zend_class_entry *scope,
 	bool strict_types,
-	const uint32_t callable_check_flag /* This is needed to pass IS_CALLABLE_SUPPRESS_DEPRECATIONS for internal functions */
+	/* This is needed to pass IS_CALLABLE_SUPPRESS_DEPRECATIONS for internal functions */
+	const uint32_t callable_check_flag,
+	/* Usually the same pointer as arg */
+	zval *coerce_arg
 ) {
 	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		const zend_class_entry *arg_ce = Z_OBJCE_P(arg);
@@ -826,6 +889,10 @@ static zend_type_check_status zend_check_type_slow(
 
 	/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
 	if ((type_mask & MAY_BE_DOUBLE) && Z_TYPE_P(arg) == IS_LONG) {
+		if (coerce_arg) {
+			const double dval = (double)Z_LVAL_P(arg);
+			ZVAL_DOUBLE(coerce_arg, dval);
+		}
 		return ZEND_TYPE_CHECK_MAY_COERCE;
 	}
 	/* Need to suppress deprecation for internal functions, otherwise two deprecation notice would be emitted
@@ -844,10 +911,18 @@ static zend_type_check_status zend_check_type_slow(
 		return ZEND_TYPE_CHECK_VALID;
 	}
 
-	if (!strict_types) {
-		/* TODO: Move coercible checks here in PHP 9 when various type coercions have been removed? */
-		/* Only scalar types may coerce to other scalar types */
-		if (type_mask & (MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_BOOL) && Z_TYPE_P(arg) > IS_NULL && Z_TYPE_P(arg) <= IS_STRING) {
+	/* Only scalar types may coerce to other scalar types */
+	if (
+		!strict_types
+		&& Z_TYPE_P(arg) > IS_NULL
+		&& (type_mask & (MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_BOOL))
+	) {
+		if (coerce_arg) {
+			zend_type_check_status status = zend_coerce_weak_scalar_type_declaration(type_mask, arg, coerce_arg)
+				? ZEND_TYPE_CHECK_MAY_COERCE : ZEND_TYPE_CHECK_INVALID;
+			return status;
+		}
+		if (Z_TYPE_P(arg) <= IS_STRING) {
 			return ZEND_TYPE_CHECK_MAY_COERCE;
 		}
 		/* Stringable object pass a string type check */
@@ -859,78 +934,40 @@ static zend_type_check_status zend_check_type_slow(
 	return ZEND_TYPE_CHECK_INVALID;
 }
 
-static zend_type_check_status zend_check_type(
+static zend_always_inline zend_type_check_status zend_check_type_ex(
 	const zend_type *type,
 	const zval *arg,
 	const zend_class_entry *scope,
 	bool strict_types,
-	const uint32_t callable_check_flag /* This is needed to pass IS_CALLABLE_SUPPRESS_DEPRECATIONS for internal functions */
+	/* This is needed to pass IS_CALLABLE_SUPPRESS_DEPRECATIONS for internal functions */
+	const uint32_t callable_check_flag,
+	zval *coerce_arg
 ) {
 	if (UNEXPECTED(Z_ISREF_P(arg))) {
 		/* Cannot coerce typed references */
 		strict_types |= ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(arg));
-		arg = Z_REFVAL_P(arg);
+		if (arg == coerce_arg) {
+			arg = coerce_arg = Z_REFVAL_P(coerce_arg);
+		} else {
+			arg = Z_REFVAL_P(arg);
+		}
 	}
 
 	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(*type, Z_TYPE_P(arg)))) {
 		return ZEND_TYPE_CHECK_VALID;
 	}
-	return zend_check_type_slow(type, arg, scope, strict_types, callable_check_flag);
+	return zend_check_type_slow(type, arg, scope, strict_types, callable_check_flag, coerce_arg);
 }
 
-static bool zend_coerce_weak_scalar_type_declaration(uint32_t type_mask, zval *arg)
-{
-	zend_long lval;
-	double dval;
-
-	ZVAL_DEREF(arg);
-	/* arg should only be of type int, float, string, bool, or Stringable */
-	/* Type preference order: int -> float -> string -> bool */
-	if (type_mask & MAY_BE_LONG) {
-		/* For an int|float union type and string value,
-		 * determine chosen type by is_numeric_string() semantics. */
-		if ((type_mask & MAY_BE_DOUBLE) && Z_TYPE_P(arg) == IS_STRING) {
-			uint8_t type = is_numeric_str_function(Z_STR_P(arg), &lval, &dval);
-			if (type == IS_LONG) {
-				zend_string_release(Z_STR_P(arg));
-				ZVAL_LONG(arg, lval);
-				return true;
-			}
-			if (type == IS_DOUBLE) {
-				zend_string_release(Z_STR_P(arg));
-				ZVAL_DOUBLE(arg, dval);
-				return true;
-			}
-		} else if (zend_parse_arg_long_weak(arg, &lval, 0)) {
-			zval_ptr_dtor(arg);
-			ZVAL_LONG(arg, lval);
-			return true;
-		} else if (UNEXPECTED(EG(exception))) {
-			return false;
-		}
-	}
-	if (type_mask & MAY_BE_DOUBLE) {
-		dval = zend_parse_arg_double_weak(arg, 0);
-		if (EXPECTED(!zend_isnan(dval))) {
-			zval_ptr_dtor(arg);
-			ZVAL_DOUBLE(arg, dval);
-			return true;
-		}
-	}
-	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(arg, 0)) {
-		/* on success "arg" is converted to IS_STRING */
-		return true;
-	}
-	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
-		zpp_parse_bool_status bval = zend_parse_arg_bool_weak(arg, 0);
-		if (UNEXPECTED(bval == ZPP_PARSE_BOOL_STATUS_ERROR)) {
-			return false;
-		}
-		zval_ptr_dtor(arg);
-		ZVAL_BOOL(arg, bval);
-		return true;
-	}
-	return false;
+static zend_always_inline zend_type_check_status zend_check_type(
+	const zend_type *type,
+	const zval *arg,
+	const zend_class_entry *scope,
+	bool strict_types,
+	/* This is needed to pass IS_CALLABLE_SUPPRESS_DEPRECATIONS for internal functions */
+	const uint32_t callable_check_flag
+) {
+	return zend_check_type_ex(type, arg, scope, strict_types, callable_check_flag, NULL);
 }
 
 static bool zend_check_type_and_coerce(
@@ -938,16 +975,11 @@ static bool zend_check_type_and_coerce(
 	zval *arg,
 	const zend_class_entry *scope,
 	bool strict_types,
-	const uint32_t callable_check_flag /* This is needed to pass IS_CALLABLE_SUPPRESS_DEPRECATIONS for internal functions */
+	/* This is needed to pass IS_CALLABLE_SUPPRESS_DEPRECATIONS for internal functions */
+	const uint32_t callable_check_flag
 ) {
-	zend_type_check_status status = zend_check_type(type, arg, scope, strict_types, callable_check_flag);
-	if (EXPECTED(status == ZEND_TYPE_CHECK_VALID)) {
-		return true;
-	}
-	if (status == ZEND_TYPE_CHECK_MAY_COERCE) {
-		return zend_coerce_weak_scalar_type_declaration(ZEND_TYPE_FULL_MASK(*type), arg);
-	}
-	return false;
+	zend_type_check_status status = zend_check_type_ex(type, arg, scope, strict_types, callable_check_flag, arg);
+	return status != ZEND_TYPE_CHECK_INVALID;
 }
 
 static bool zend_check_type_and_coerce_slow(
@@ -955,16 +987,11 @@ static bool zend_check_type_and_coerce_slow(
 	zval *arg,
 	const zend_class_entry *scope,
 	bool strict_types,
-	const uint32_t callable_check_flag /* This is needed to pass IS_CALLABLE_SUPPRESS_DEPRECATIONS for internal functions */
+	/* This is needed to pass IS_CALLABLE_SUPPRESS_DEPRECATIONS for internal functions */
+	const uint32_t callable_check_flag
 ) {
-	zend_type_check_status status = zend_check_type_slow(type, arg, scope, strict_types, callable_check_flag);
-	if (EXPECTED(status == ZEND_TYPE_CHECK_VALID)) {
-		return true;
-	}
-	if (status == ZEND_TYPE_CHECK_MAY_COERCE) {
-		return zend_coerce_weak_scalar_type_declaration(ZEND_TYPE_FULL_MASK(*type), arg);
-	}
-	return false;
+	zend_type_check_status status = zend_check_type_slow(type, arg, scope, strict_types, callable_check_flag, arg);
+	return status != ZEND_TYPE_CHECK_INVALID;
 }
 
 ZEND_API bool zend_check_user_type_slow(
@@ -1001,14 +1028,8 @@ static zend_never_inline ZEND_COLD void zend_verify_property_type_error(const ze
 
 static zend_always_inline bool i_zend_verify_property_type(const zend_property_info *info, zval *property, bool strict)
 {
-	zend_type_check_status status = zend_check_type(&info->type, property, info->ce, strict, 0);
-	if (EXPECTED(status == ZEND_TYPE_CHECK_VALID)) {
-		return true;
-	}
-	if (
-		status == ZEND_TYPE_CHECK_MAY_COERCE
-		&& zend_coerce_weak_scalar_type_declaration(ZEND_TYPE_PURE_MASK(info->type), property)
-	) {
+	bool status = zend_check_type_and_coerce(&info->type, property, info->ce, strict, 0);
+	if (EXPECTED(status)) {
 		return true;
 	}
 
@@ -1191,7 +1212,7 @@ static zend_always_inline bool zend_verify_variadic_arg_type(
 }
 
 #if ZEND_DEBUG
-static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_check_type_for_internal_parameter(const zend_type *type, const zval *arg, zend_execute_data *call)
+static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_check_type_for_internal_parameter(const zend_type *type, const zval *arg, const zend_execute_data *call)
 {
 	if (UNEXPECTED(zend_check_type(
 		type,
@@ -3866,22 +3887,12 @@ static zend_never_inline ZEND_COLD void zend_throw_conflicting_coercion_error(co
 }
 
 static zend_always_inline zend_type_check_status i_zend_verify_type_assignable_zval(
-		const zend_property_info *info, const zval *zv, bool strict) {
-	//zend_type type = info->type;
-	//uint32_t type_mask;
-	//uint8_t zv_type = Z_TYPE_P(zv);
-
-	zend_type_check_status status = zend_check_type(&info->type, zv, info->ce, strict, 0);
-
-	/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
-	// TODO How to handle this in zend_check_type()?
-	//if (strict) {
-	//	if ((type_mask & MAY_BE_DOUBLE) && zv_type == IS_LONG) {
-	//		return -1;
-	//	}
-	//	return 0;
-	//}
-
+		const zend_property_info *info,
+		const zval *zv,
+		bool strict,
+		zval *coerced_value
+) {
+	zend_type_check_status status = zend_check_type_ex(&info->type, zv, info->ce, strict, 0, coerced_value);
 	return status;
 }
 
@@ -3897,10 +3908,12 @@ ZEND_API bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref,
 
 	ZEND_ASSERT(Z_TYPE_P(zv) != IS_REFERENCE);
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
-		zend_type_check_status result = i_zend_verify_type_assignable_zval(prop, zv, strict);
+		zval tmp;
+		ZVAL_UNDEF(&tmp);
+		zend_type_check_status result = i_zend_verify_type_assignable_zval(prop, zv, strict, &tmp);
 		if (result == ZEND_TYPE_CHECK_INVALID) {
-type_error:
 			zend_throw_ref_type_error_zval(prop, zv);
+			zval_ptr_dtor(&tmp);
 			zval_ptr_dtor(&coerced_value);
 			return 0;
 		}
@@ -3908,29 +3921,22 @@ type_error:
 		if (result == ZEND_TYPE_CHECK_MAY_COERCE) {
 			if (!first_prop) {
 				first_prop = prop;
-				ZVAL_COPY(&coerced_value, zv);
-				if (!zend_coerce_weak_scalar_type_declaration(
-						ZEND_TYPE_FULL_MASK(prop->type), &coerced_value)) {
-					goto type_error;
-				}
+				ZVAL_COPY(&coerced_value, &tmp);
+				zval_ptr_dtor(&tmp);
 			} else if (Z_ISUNDEF(coerced_value)) {
 				/* A previous property did not require coercion, but this one does,
 				 * so they are incompatible. */
+				zval_ptr_dtor(&tmp);
 				goto conflicting_coercion_error;
 			} else {
-				zval tmp;
-				ZVAL_COPY(&tmp, zv);
-				if (!zend_coerce_weak_scalar_type_declaration(ZEND_TYPE_FULL_MASK(prop->type), &tmp)) {
-					zval_ptr_dtor(&tmp);
-					goto type_error;
-				}
-				if (!zend_is_identical(&coerced_value, &tmp)) {
-					zval_ptr_dtor(&tmp);
+				bool is_identical = zend_is_identical(&coerced_value, &tmp);
+				zval_ptr_dtor(&tmp);
+				if (!is_identical) {
 					goto conflicting_coercion_error;
 				}
-				zval_ptr_dtor(&tmp);
 			}
 		} else {
+			ZEND_ASSERT(Z_ISUNDEF(tmp));
 			if (!first_prop) {
 				first_prop = prop;
 			} else if (!Z_ISUNDEF(coerced_value)) {
@@ -4008,26 +4014,22 @@ ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, ui
 ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(const zend_property_info *prop_info, zval *orig_val, bool strict, zend_verify_prop_assignable_by_ref_context context) {
 	zval *val = orig_val;
 	if (Z_ISREF_P(val) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(val))) {
-		int result;
-
 		val = Z_REFVAL_P(val);
-		result = i_zend_verify_type_assignable_zval(prop_info, val, strict);
-		if (result == ZEND_TYPE_CHECK_VALID) {
+		zval tmp;
+
+		ZVAL_UNDEF(&tmp);
+		zend_type_check_status result = i_zend_verify_type_assignable_zval(prop_info, val, strict, &tmp);
+		if (EXPECTED(result == ZEND_TYPE_CHECK_VALID)) {
+			ZEND_ASSERT(Z_ISUNDEF(tmp));
 			return true;
 		}
 
 		if (result == ZEND_TYPE_CHECK_MAY_COERCE) {
-			/* This is definitely an error, but we still need to determined why: Either because
-			 * the value is simply illegal for the type, or because or a conflicting coercion. */
-			zval tmp;
-			ZVAL_COPY(&tmp, val);
-			if (zend_coerce_weak_scalar_type_declaration(ZEND_TYPE_FULL_MASK(prop_info->type), &tmp)) {
-				const zend_property_info *ref_prop = ZEND_REF_FIRST_SOURCE(Z_REF_P(orig_val));
-				zend_throw_ref_type_error_type(ref_prop, prop_info, val);
-				zval_ptr_dtor(&tmp);
-				return false;
-			}
+			/* This is an error, because or a conflicting coercion. */
+			const zend_property_info *ref_prop = ZEND_REF_FIRST_SOURCE(Z_REF_P(orig_val));
+			zend_throw_ref_type_error_type(ref_prop, prop_info, val);
 			zval_ptr_dtor(&tmp);
+			return false;
 		}
 	} else {
 		ZVAL_DEREF(val);
