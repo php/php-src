@@ -1,5 +1,7 @@
 --TEST--
 php_user_filter with seek method - always seekable (stateless filter)
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 
