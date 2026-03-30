@@ -82,11 +82,11 @@ typedef enum {
 	ZEND_MEMOIZE_FETCH,
 } zend_memoize_mode;
 
-struct zend_err_buf {
+typedef struct zend_err_buf {
 	uint32_t size;
 	uint32_t capacity;
 	zend_error_info **errors;
-};
+} zend_err_buf;
 
 struct _zend_compiler_globals {
 	zend_stack loop_var_stack;
@@ -305,7 +305,7 @@ struct _zend_executor_globals {
 	 * and their processing is delayed until zend_emit_recorded_errors()
 	 * is called or a fatal diagnostic is emitted. */
 	bool record_errors;
-	struct zend_err_buf errors;
+	zend_err_buf errors;
 
 	/* Override filename or line number of thrown errors and exceptions */
 	zend_string *filename_override;

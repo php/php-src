@@ -643,7 +643,6 @@ static FILE *zend_fopen_wrapper(zend_string *filename, zend_string **opened_path
 }
 /* }}} */
 
-
 #ifdef ZTS
 static bool short_tags_default = true;
 static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
@@ -1446,9 +1445,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	zend_stack delayed_oplines_stack;
 	int type = orig_type & E_ALL;
 	bool orig_record_errors;
-	uint32_t orig_num_errors = 0;
-	uint32_t orig_cap_errors = 0;
-	zend_error_info **orig_errors = NULL;
+	zend_err_buf orig_errors_buf;
 	zend_result res;
 
 	/* If we're executing a function during SCCP, count any warnings that may be emitted,
@@ -1461,9 +1458,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 
 	/* Emit any delayed error before handling fatal error */
 	if ((type & E_FATAL_ERRORS) && !(type & E_DONT_BAIL) && EG(errors).size) {
-		uint32_t num_errors = EG(errors).size;
-		uint32_t cap_errors = EG(errors).capacity;
-		zend_error_info **errors = EG(errors).errors;
+		zend_err_buf errors_buf = EG(errors);
 		EG(errors).size = 0;
 
 		bool orig_record_errors = EG(record_errors);
@@ -1474,13 +1469,11 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		int orig_user_error_handler_error_reporting = EG(user_error_handler_error_reporting);
 		EG(user_error_handler_error_reporting) = 0;
 
-		zend_emit_recorded_errors_ex(num_errors, errors);
+		zend_emit_recorded_errors_ex(errors_buf.size, errors_buf.errors);
 
 		EG(user_error_handler_error_reporting) = orig_user_error_handler_error_reporting;
 		EG(record_errors) = orig_record_errors;
-		EG(errors).size = num_errors;
-		EG(errors).capacity = cap_errors;
-		EG(errors).errors = errors;
+		EG(errors) = errors_buf;
 	}
 
 	if (EG(record_errors)) {
@@ -1580,18 +1573,13 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 			orig_record_errors = EG(record_errors);
 			EG(record_errors) = false;
 
-			orig_num_errors = EG(errors).size;
-			orig_cap_errors = EG(errors).capacity;
-			orig_errors = EG(errors).errors;
+			orig_errors_buf = EG(errors);
 			memset(&EG(errors), 0, sizeof(EG(errors)));
 
 			res = call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params);
 
 			EG(record_errors) = orig_record_errors;
-
-			EG(errors).capacity = orig_cap_errors;
-			EG(errors).size = orig_num_errors;
-			EG(errors).errors = orig_errors;
+			EG(errors) = orig_errors_buf;
 
 			if (res == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
@@ -1805,15 +1793,17 @@ ZEND_API void zend_emit_recorded_errors(void)
 
 ZEND_API void zend_free_recorded_errors(void)
 {
+	if (!EG(errors).size) {
+		return;
+	}
+
 	for (uint32_t i = 0; i < EG(errors).size; i++) {
 		zend_error_info *info = EG(errors).errors[i];
 		zend_string_release(info->filename);
 		zend_string_release(info->message);
 		efree_size(info, sizeof(zend_error_info));
 	}
-	if (EG(errors).errors) {
-		efree(EG(errors).errors);
-	}
+	efree(EG(errors).errors);
 	memset(&EG(errors), 0, sizeof(EG(errors)));
 }
 
