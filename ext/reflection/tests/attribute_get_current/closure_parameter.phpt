@@ -5,14 +5,14 @@ ReflectionAttribute::getCurrent() for closure parameter
 
 #[Attribute]
 class Demo {
-	public function __construct( $args ) {
+	public function __construct($args) {
 		echo ReflectionAttribute::getCurrent();
 	}
 }
 
-$closure = static function ( #[Demo("closure param")] mixed $param ) {};
+$closure = static function (#[Demo("closure param")] mixed $param) {};
 
-$case = new ReflectionParameter( $closure, 'param' );
+$case = new ReflectionParameter($closure, 'param');
 echo $case;
 echo "\n";
 $case->getAttributes()[0]->newInstance();

@@ -5,7 +5,7 @@ ReflectionAttribute::getCurrent() for method parameter
 
 #[Attribute]
 class Demo {
-	public function __construct( $args ) {
+	public function __construct($args) {
 		echo ReflectionAttribute::getCurrent();
 	}
 }
@@ -18,7 +18,7 @@ class WithDemo {
 
 }
 
-$case = new ReflectionParameter( [ WithDemo::class, 'method' ], 'param' );
+$case = new ReflectionParameter([WithDemo::class, 'method'], 'param');
 echo $case;
 echo "\n";
 $case->getAttributes()[0]->newInstance();
