@@ -237,13 +237,12 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(void 
 	if (has_text_range(&uriparser_uri->hostText)) {
 		if (uriparser_uri->hostData.ip6 != NULL || uriparser_uri->hostData.ipFuture.first != NULL) {
 			/* the textual representation of the host is always accessible in the .hostText field no matter what the host is */
-			smart_str host_str = {0};
-
-			smart_str_appendc(&host_str, '[');
-			smart_str_appendl(&host_str, uriparser_uri->hostText.first, get_text_range_length(&uriparser_uri->hostText));
-			smart_str_appendc(&host_str, ']');
-
-			ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
+			zend_string *host_str = zend_string_concat3(
+				"[", 1,
+				uriparser_uri->hostText.first, get_text_range_length(&uriparser_uri->hostText),
+				"]", 1
+			);
+			ZVAL_NEW_STR(retval, host_str);
 		} else {
 			ZVAL_STRINGL(retval, uriparser_uri->hostText.first, get_text_range_length(&uriparser_uri->hostText));
 		}
@@ -349,20 +348,36 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(void 
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
 
 	if (uriparser_uri->pathHead != NULL) {
-		smart_str str = {0};
+		size_t total_len = 0;
+		const bool need_leading_slash = uriparser_uri->absolutePath || uriHasHostA(uriparser_uri);
 
-		if (uriparser_uri->absolutePath || uriHasHostA(uriparser_uri)) {
-			smart_str_appendc(&str, '/');
+		if (need_leading_slash) {
+			total_len++;
 		}
 
 		for (const UriPathSegmentA *p = uriparser_uri->pathHead; p; p = p->next) {
-			smart_str_appendl(&str, p->text.first, get_text_range_length(&p->text));
+			total_len += get_text_range_length(&p->text);
 			if (p->next) {
-				smart_str_appendc(&str, '/');
+				total_len++;
 			}
 		}
 
-		ZVAL_NEW_STR(retval, smart_str_extract(&str));
+		zend_string *str = zend_string_alloc(total_len, false);
+		char *out = ZSTR_VAL(str);
+
+		if (need_leading_slash) {
+			*(out++) = '/';
+		}
+
+		for (const UriPathSegmentA *p = uriparser_uri->pathHead; p; p = p->next) {
+			out = zend_mempcpy(out, p->text.first, get_text_range_length(&p->text));
+			if (p->next) {
+				*(out++) = '/';
+			}
+		}
+
+		*out = '\0';
+		ZVAL_NEW_STR(retval, str);
 	} else if (uriparser_uri->absolutePath) {
 		ZVAL_CHAR(retval, '/');
 	} else {

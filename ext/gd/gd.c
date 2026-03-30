@@ -764,19 +764,15 @@ PHP_FUNCTION(imagecolormatch)
 		case -1:
 			zend_argument_value_error(1, "must be TrueColor");
 			RETURN_THROWS();
-			break;
 		case -2:
 			zend_argument_value_error(2, "must be Palette");
 			RETURN_THROWS();
-			break;
 		case -3:
 			zend_argument_value_error(2, "must be the same size as argument #1 ($im1)");
 			RETURN_THROWS();
-			break;
 		case -4:
 			zend_argument_value_error(2, "must have at least one color");
 			RETURN_THROWS();
-			break;
 	}
 
 	RETURN_TRUE;

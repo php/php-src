@@ -80,7 +80,14 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
         $jobs['COMMUNITY']['matrix'] = version_compare($php_version, '8.4', '>=')
             ? ['type' => ['asan', 'verify_type_inference']]
             : ['type' => ['asan']];
-        $jobs['COMMUNITY']['config']['symfony_version'] = version_compare($php_version, '8.4', '>=') ? '8.1' : '7.4';
+        $jobs['COMMUNITY']['config']['symfony_version'] = match (true) {
+            version_compare($php_version, '8.3', '<=') => '7.4',
+            default => '',
+        };
+        $jobs['COMMUNITY']['config']['laravel_version'] = match (true) {
+            version_compare($php_version, '8.2', '<=') => '12.x',
+            default => '',
+        };
     }
     if (($all_jobs && $ref === 'master') || $test_coverage) {
         $jobs['COVERAGE'] = true;

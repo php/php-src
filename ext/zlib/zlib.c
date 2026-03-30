@@ -1239,13 +1239,11 @@ PHP_FUNCTION(deflate_add)
 			ZSTR_LEN(out) = (char *) ctx->Z.next_out - ZSTR_VAL(out);
 			ZSTR_VAL(out)[ZSTR_LEN(out)] = 0;
 			RETURN_STR(out);
-			break;
 		case Z_STREAM_END:
 			ZSTR_LEN(out) = (char *) ctx->Z.next_out - ZSTR_VAL(out);
 			ZSTR_VAL(out)[ZSTR_LEN(out)] = 0;
 			deflateReset(&ctx->Z);
 			RETURN_STR(out);
-			break;
 		default:
 			zend_string_release_ex(out, 0);
 			php_error_docref(NULL, E_WARNING, "zlib error (%s)", zError(status));

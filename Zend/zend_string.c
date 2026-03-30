@@ -477,9 +477,10 @@ ZEND_API zend_string *zend_string_concat2(
 	size_t len = str1_len + str2_len;
 	zend_string *res = zend_string_alloc(len, 0);
 
-	memcpy(ZSTR_VAL(res), str1, str1_len);
-	memcpy(ZSTR_VAL(res) + str1_len, str2, str2_len);
-	ZSTR_VAL(res)[len] = '\0';
+	char *p = ZSTR_VAL(res);
+	p = zend_mempcpy(p, str1, str1_len);
+	p = zend_mempcpy(p, str2, str2_len);
+	*p++ = '\0';
 
 	return res;
 }
@@ -492,10 +493,11 @@ ZEND_API zend_string *zend_string_concat3(
 	size_t len = str1_len + str2_len + str3_len;
 	zend_string *res = zend_string_alloc(len, 0);
 
-	memcpy(ZSTR_VAL(res), str1, str1_len);
-	memcpy(ZSTR_VAL(res) + str1_len, str2, str2_len);
-	memcpy(ZSTR_VAL(res) + str1_len + str2_len, str3, str3_len);
-	ZSTR_VAL(res)[len] = '\0';
+	char *p = ZSTR_VAL(res);
+	p = zend_mempcpy(p, str1, str1_len);
+	p = zend_mempcpy(p, str2, str2_len);
+	p = zend_mempcpy(p, str3, str3_len);
+	*p++ = '\0';
 
 	return res;
 }

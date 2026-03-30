@@ -106,10 +106,6 @@ PHPAPI zend_class_entry *reflection_fiber_ptr;
 PHPAPI zend_class_entry *reflection_constant_ptr;
 PHPAPI zend_class_entry *reflection_property_hook_type_ptr;
 
-/* Exception throwing macro */
-#define _DO_THROW(msg) \
-	zend_throw_exception(reflection_exception_ptr, msg, 0);
-
 #define GET_REFLECTION_OBJECT() do { \
 	intern = Z_REFLECTION_P(ZEND_THIS); \
 	if (intern->ptr == NULL) { \
@@ -195,7 +191,7 @@ static zend_always_inline uint32_t prop_get_flags(const property_reference *ref)
 
 static inline bool is_closure_invoke(const zend_class_entry *ce, const zend_string *lcname) {
 	return ce == zend_ce_closure
-		&& zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME);
+		&& zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
 }
 
 static zend_function *_copy_function(zend_function *fptr) /* {{{ */
@@ -616,7 +612,7 @@ static void _const_string(smart_str *str, const char *name, zval *value, const c
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		smart_str_append(str, ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED));
 	} else if (Z_TYPE_P(value) == IS_STRING) {
-		smart_str_appends(str, Z_STRVAL_P(value));
+		smart_str_append(str, Z_STR_P(value));
 	} else {
 		zend_string *tmp_value_str;
 		zend_string *value_str = zval_get_tmp_string(value, &tmp_value_str);
@@ -879,7 +875,7 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->internal_function.doc_comment));
 	}
 
-	smart_str_appendl(str, indent, strlen(indent));
+	smart_str_appends(str, indent);
 	smart_str_appends(str, fptr->common.fn_flags & ZEND_ACC_CLOSURE ? "Closure [ " : (fptr->common.scope ? "Method [ " : "Function [ "));
 	smart_str_appends(str, (fptr->type == ZEND_USER_FUNCTION) ? "<user" : "<internal");
 	if (fptr->common.fn_flags & ZEND_ACC_DEPRECATED) {
@@ -1658,7 +1654,7 @@ static zend_result get_parameter_default(zval *result, parameter_reference *para
 ZEND_METHOD(ReflectionClass, __clone)
 {
 	/* __clone() is private but this is reachable with reflection */
-	_DO_THROW("Cannot clone object using __clone()");
+	zend_throw_exception(reflection_exception_ptr, "Cannot clone object using __clone()", 0);
 }
 /* }}} */
 
@@ -2325,7 +2321,7 @@ ZEND_METHOD(ReflectionGenerator, __construct)
 
 #define REFLECTION_CHECK_VALID_GENERATOR(ex) \
 	if (!ex) { \
-		_DO_THROW("Cannot fetch information from a closed Generator"); \
+		zend_throw_exception(reflection_exception_ptr, "Cannot fetch information from a closed Generator", 0); \
 		RETURN_THROWS(); \
 	}
 
@@ -2505,7 +2501,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 				if (((classref = zend_hash_index_find(Z_ARRVAL_P(reference), 0)) == NULL)
 					|| ((method = zend_hash_index_find(Z_ARRVAL_P(reference), 1)) == NULL))
 				{
-					_DO_THROW("Expected array($object, $method) or array($classname, $method)");
+					zend_throw_exception(reflection_exception_ptr, "Expected array($object, $method) or array($classname, $method)", 0);
 					RETURN_THROWS();
 				}
 
@@ -2587,7 +2583,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 			}
 		}
 		if (position == -1) {
-			_DO_THROW("The parameter specified by its name could not be found");
+			zend_throw_exception(reflection_exception_ptr, "The parameter specified by its name could not be found", 0);
 			goto failure;
 		}
 	} else {
@@ -2596,7 +2592,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 			goto failure;
 		}
 		if (position >= num_args) {
-			_DO_THROW("The parameter specified by its offset could not be found");
+			zend_throw_exception(reflection_exception_ptr, "The parameter specified by its offset could not be found", 0);
 			goto failure;
 		}
 	}
@@ -3370,7 +3366,7 @@ ZEND_METHOD(ReflectionMethod, getClosure)
 		}
 
 		if (!instanceof_function(Z_OBJCE_P(obj), mptr->common.scope)) {
-			_DO_THROW("Given object is not an instance of the class this method was declared in");
+			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this method was declared in", 0);
 			RETURN_THROWS();
 		}
 
@@ -3440,23 +3436,36 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 			if (!variadic) {
 				efree(params);
 			}
-			_DO_THROW("Given object is not an instance of the class this method was declared in");
+			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this method was declared in", 0);
 			RETURN_THROWS();
 		}
 
 		/* For Closure::__invoke(), closures from different source locations have
-		 * different signatures, so we must reject those. However, closures created
-		 * from the same source (e.g. in a loop) share the same op_array and should
-		 * be allowed. Compare the underlying function pointer via op_array. */
+		 * different signatures, so we must reject those. */
 		if (obj_ce == zend_ce_closure && !Z_ISUNDEF(intern->obj)
 				&& Z_OBJ_P(object) != Z_OBJ(intern->obj)) {
 			const zend_function *orig_func = zend_get_closure_method_def(Z_OBJ(intern->obj));
 			const zend_function *given_func = zend_get_closure_method_def(Z_OBJ_P(object));
-			if (orig_func->op_array.opcodes != given_func->op_array.opcodes) {
+
+			bool same_closure = false;
+			/* Check if they are either both fake closures or they both are not. */
+			if ((orig_func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) == (given_func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
+				if (orig_func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+					/* For fake closures, scope and name must match. */
+					same_closure = orig_func->common.scope == given_func->common.scope
+						&& orig_func->common.function_name == given_func->common.function_name;
+				} else {
+					/* Otherwise the opcode structure must be identical. */
+					ZEND_ASSERT(orig_func->type == ZEND_USER_FUNCTION);
+					same_closure = orig_func->op_array.opcodes == given_func->op_array.opcodes;
+				}
+			}
+
+			if (!same_closure) {
 				if (!variadic) {
 					efree(params);
 				}
-				_DO_THROW("Given Closure is not the same as the reflected Closure");
+				zend_throw_exception(reflection_exception_ptr, "Given Closure is not the same as the reflected Closure", 0);
 				RETURN_THROWS();
 			}
 		}
@@ -4811,7 +4820,7 @@ ZEND_METHOD(ReflectionClass, getConstant)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	HashTable *constants_table;
+	const HashTable *constants_table;
 	zend_class_constant *c;
 	zend_string *name, *key;
 
@@ -5904,7 +5913,7 @@ ZEND_METHOD(ReflectionProperty, getValue)
 
 		/* TODO: Should this always use intern->ce? */
 		if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
-			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
 			RETURN_THROWS();
 		}
 
@@ -6012,7 +6021,7 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!instanceof_function(Z_OBJCE_P(object), intern->ce)) {
-		_DO_THROW("Given object is not an instance of the class this property was declared in");
+		zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
 		RETURN_THROWS();
 	}
 
@@ -6031,7 +6040,7 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 			intern->ce, Z_OBJ_P(object));
 
 	if (UNEXPECTED(prop && (prop->flags & ZEND_ACC_STATIC))) {
-		_DO_THROW("May not use getRawValue on static properties");
+		zend_throw_exception(reflection_exception_ptr, "May not use getRawValue on static properties", 0);
 		RETURN_THROWS();
 	}
 
@@ -6091,7 +6100,7 @@ ZEND_METHOD(ReflectionProperty, setRawValue)
 			intern->ce, Z_OBJ_P(object));
 
 	if (UNEXPECTED(prop && (prop->flags & ZEND_ACC_STATIC))) {
-		_DO_THROW("May not use setRawValue on static properties");
+		zend_throw_exception(reflection_exception_ptr, "May not use setRawValue on static properties", 0);
 		RETURN_THROWS();
 	}
 
@@ -6295,7 +6304,7 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 
 		/* TODO: Should this always use intern->ce? */
 		if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
-			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
 			RETURN_THROWS();
 		}
 
@@ -6683,11 +6692,11 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 	zend_property_info *prop = ref->prop;
 	if (prop && obj) {
 		if (prop->flags & ZEND_ACC_STATIC) {
-			_DO_THROW("null is expected as object argument for static properties");
+			zend_throw_exception(reflection_exception_ptr, "null is expected as object argument for static properties", 0);
 			RETURN_THROWS();
 		}
 		if (!instanceof_function(obj->ce, prop->ce)) {
-			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
 			RETURN_THROWS();
 		}
 		prop = reflection_property_get_effective_prop(ref, intern->ce, obj);
@@ -6789,11 +6798,11 @@ ZEND_METHOD(ReflectionProperty, isWritable)
 	zend_property_info *prop = ref->prop;
 	if (prop && obj) {
 		if (prop->flags & ZEND_ACC_STATIC) {
-			_DO_THROW("null is expected as object argument for static properties");
+			zend_throw_exception(reflection_exception_ptr, "null is expected as object argument for static properties", 0);
 			RETURN_THROWS();
 		}
 		if (!instanceof_function(obj->ce, prop->ce)) {
-			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
 			RETURN_THROWS();
 		}
 		prop = reflection_property_get_effective_prop(ref, intern->ce, obj);
@@ -7293,10 +7302,9 @@ ZEND_METHOD(ReflectionZendExtension, getCopyright)
 /* {{{     Dummy constructor -- always throws ReflectionExceptions. */
 ZEND_METHOD(ReflectionReference, __construct)
 {
-	_DO_THROW(
+	zend_throw_exception(reflection_exception_ptr,
 		"Cannot directly instantiate ReflectionReference. "
-		"Use ReflectionReference::fromArrayElement() instead"
-	);
+		"Use ReflectionReference::fromArrayElement() instead", 0);
 }
 /* }}} */
 
@@ -7331,7 +7339,7 @@ ZEND_METHOD(ReflectionReference, fromArrayElement)
 	}
 
 	if (!item) {
-		_DO_THROW("Array key not found");
+		zend_throw_exception(reflection_exception_ptr, "Array key not found", 0);
 		RETURN_THROWS();
 	}
 
@@ -7358,7 +7366,7 @@ ZEND_METHOD(ReflectionReference, getId)
 
 	intern = Z_REFLECTION_P(ZEND_THIS);
 	if (Z_TYPE(intern->obj) != IS_REFERENCE) {
-		_DO_THROW("Corrupted ReflectionReference object");
+		zend_throw_exception(reflection_exception_ptr, "Corrupted ReflectionReference object", 0);
 		RETURN_THROWS();
 	}
 
@@ -7382,13 +7390,13 @@ ZEND_METHOD(ReflectionReference, getId)
 
 ZEND_METHOD(ReflectionAttribute, __construct)
 {
-	_DO_THROW("Cannot directly instantiate ReflectionAttribute");
+	zend_throw_exception(reflection_exception_ptr, "Cannot directly instantiate ReflectionAttribute", 0);
 }
 
 ZEND_METHOD(ReflectionAttribute, __clone)
 {
 	/* __clone() is private but this is reachable with reflection */
-	_DO_THROW("Cannot clone object using __clone()");
+	zend_throw_exception(reflection_exception_ptr, "Cannot clone object using __clone()", 0);
 }
 
 /* {{{ Returns a string representation */
@@ -7895,7 +7903,7 @@ ZEND_METHOD(ReflectionFiber, getCallable)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (fiber == NULL || fiber->context.status == ZEND_FIBER_STATUS_DEAD) {
-		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated"); \
+		zend_throw_error(NULL, "Cannot fetch the callable from a fiber that has terminated");
 		RETURN_THROWS();
 	}
 

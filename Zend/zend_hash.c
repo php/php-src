@@ -1111,7 +1111,10 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 		if ((flag & (HASH_ADD_NEW|HASH_ADD_NEXT)) != (HASH_ADD_NEW|HASH_ADD_NEXT)
 		 && h < ht->nNumUsed) {
 			zv = ht->arPacked + h;
-			if (Z_TYPE_P(zv) != IS_UNDEF) {
+			if (flag & HASH_ADD_NEW) {
+				ZEND_ASSERT(Z_TYPE_P(zv) == IS_UNDEF);
+				goto convert_to_hash;
+			} else if (Z_TYPE_P(zv) != IS_UNDEF) {
 				if (flag & HASH_LOOKUP) {
 					return zv;
 				}
@@ -3209,7 +3212,7 @@ static zend_always_inline int zend_hash_compare_impl(const HashTable *ht1, const
 	return 0;
 }
 
-ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, bool ordered)
+ZEND_API int zend_hash_compare(HashTable *ht1, const HashTable *ht2, compare_func_t compar, bool ordered)
 {
 	int result;
 	IS_CONSISTENT(ht1);

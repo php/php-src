@@ -2511,11 +2511,9 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 				case STREAM_XPORT_CRYPTO_OP_SETUP:
 					cparam->outputs.returncode = php_openssl_setup_crypto(stream, sslsock, cparam);
 					return PHP_STREAM_OPTION_RETURN_OK;
-					break;
 				case STREAM_XPORT_CRYPTO_OP_ENABLE:
 					cparam->outputs.returncode = php_openssl_enable_crypto(stream, sslsock, cparam);
 					return PHP_STREAM_OPTION_RETURN_OK;
-					break;
 				default:
 					/* fall through */
 					break;

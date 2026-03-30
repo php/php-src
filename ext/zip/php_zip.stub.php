@@ -152,7 +152,7 @@ class ZipArchive implements Countable
     public const int FL_ENC_CP437 = UNKNOWN;
 
     /**
-     * Additionnal flags not from libzip
+     * Additional flags not from libzip
      * @cvalue ZIP_FL_OPEN_FILE_NOW
      */
     public const int FL_OPEN_FILE_NOW = UNKNOWN;
@@ -645,6 +645,8 @@ class ZipArchive implements Countable
 
     /** @tentative-return-type */
     public function open(string $filename, int $flags = 0): bool|int {}
+
+    public function openString(string $data): bool|int {}
 
     /**
      * @tentative-return-type

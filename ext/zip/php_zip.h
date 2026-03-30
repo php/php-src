@@ -36,7 +36,7 @@ extern zend_module_entry zip_module_entry;
 #define ZIP_LENGTH_TO_END 0
 #endif
 
-/* Additionnal flags not from libzip */
+/* Additional flags not from libzip */
 #define ZIP_FL_OPEN_FILE_NOW (1u<<30)
 
 #define PHP_ZIP_VERSION "1.22.8"
@@ -71,8 +71,8 @@ typedef struct _ze_zip_object {
 	zend_string **buffers;
 	HashTable *prop_handler;
 	char *filename;
-	int filename_len;
-	int buffers_cnt;
+	size_t filename_len;
+	size_t buffers_cnt;
 	zip_int64_t last_id;
 	int err_zip;
 	int err_sys;

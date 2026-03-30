@@ -29,11 +29,8 @@ echo "--- Unset cloneDocument ---\n";
 $xslt = new XSLTProcessor;
 $xslt->registerPHPFunctions();
 unset($xslt->cloneDocument);
-try {
-    $xslt->importStylesheet($xsl);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+$xslt->importStylesheet($xsl);
+echo $xslt->transformToXml($xml);
 
 echo "--- Unset doXInclude ---\n";
 
@@ -41,11 +38,7 @@ $xslt = new XSLTProcessor;
 $xslt->registerPHPFunctions();
 unset($xslt->doXInclude);
 $xslt->importStylesheet($xsl);
-try {
-    echo $xslt->transformToXml($xml);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+echo $xslt->transformToXml($xml);
 
 echo "--- Make properties references ---\n";
 
@@ -59,9 +52,13 @@ echo $xslt->transformToXml($xml);
 ?>
 --EXPECT--
 --- Unset cloneDocument ---
-Typed property XSLTProcessor::$cloneDocument must not be accessed before initialization
+Called test
+<?xml version="1.0"?>
+hello
 --- Unset doXInclude ---
-Typed property XSLTProcessor::$doXInclude must not be accessed before initialization
+Called test
+<?xml version="1.0"?>
+hello
 --- Make properties references ---
 Called test
 <?xml version="1.0"?>

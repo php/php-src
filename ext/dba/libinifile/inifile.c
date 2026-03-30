@@ -249,7 +249,7 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip) {
 		ln.key.group = estrdup(dba->next.key.group);
 	} else {
 		/* specific instance or not same key -> restart search */
-		/* the slow way: restart and seacrch */
+		/* the slow way: restart and search */
 		php_stream_rewind(dba->fp);
 		inifile_line_free(&dba->next);
 	}
@@ -471,7 +471,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 	 * 8) Append temporary stream
 	 */
 
-	assert(!append || (key->name && value)); /* missuse */
+	assert(!append || (key->name && value)); /* misuse */
 
 	/* 1 - 3 */
 	inifile_find_group(dba, key, &pos_grp_start);

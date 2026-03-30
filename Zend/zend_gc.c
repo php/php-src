@@ -1953,13 +1953,15 @@ static zend_never_inline void gc_call_destructors_in_fiber(void)
 	GC_G(dtor_idx) = GC_FIRST_ROOT;
 	GC_G(dtor_end) = GC_G(first_unused);
 
+	zend_object *exception = NULL;
+	remember_prev_exception(&exception);
+
 	if (UNEXPECTED(!fiber)) {
 		fiber = gc_create_destructor_fiber();
 	} else {
 		zend_fiber_resume(fiber, NULL, NULL);
 	}
 
-	zend_object *exception = NULL;
 	remember_prev_exception(&exception);
 
 	for (;;) {

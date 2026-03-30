@@ -455,7 +455,6 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 		case ttNone:
 			/* Execute statement preprocess SQL error */
 			return 0;
-			break;
 		}
 	}
 	return 1;

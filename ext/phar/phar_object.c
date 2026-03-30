@@ -46,9 +46,8 @@ static zend_class_entry *phar_ce_entry;
 
 static int phar_file_type(const HashTable *mimes, const char *file, char **mime_type) /* {{{ */
 {
-	char *ext;
 	phar_mime_type *mime;
-	ext = strrchr(file, '.');
+	const char *ext = strrchr(file, '.');
 	if (!ext) {
 		*mime_type = "text/plain";
 		/* no file extension = assume text/plain */
@@ -347,10 +346,9 @@ static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, 
 /* post-process REQUEST_URI and retrieve the actual request URI.  This is for
    cases like http://localhost/blah.phar/path/to/file.php/extra/stuff
    which calls "blah.phar" file "path/to/file.php" with PATH_INFO "/extra/stuff" */
-static void phar_postprocess_ru_web(const char *fname, size_t fname_len, const char *entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
+static void phar_postprocess_ru_web(char *fname, size_t fname_len, char *entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
 {
-	const char *e = entry + 1;
-	char *u = NULL, *u1 = NULL, *saveu = NULL;
+	char *e = entry + 1, *u1 = NULL, *u = NULL, *saveu = NULL;
 	size_t e_len = *entry_len - 1, u_len = 0;
 	phar_archive_data *pphar;
 

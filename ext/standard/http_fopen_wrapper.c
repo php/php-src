@@ -515,7 +515,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		}
 
 		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);
-		smart_str_appends(&header, ZSTR_VAL(resource->host));
+		smart_str_append(&header, resource->host);
 		smart_str_appendc(&header, ':');
 		smart_str_append_unsigned(&header, resource->port);
 		smart_str_appendl(&header, " HTTP/1.0\r\n", sizeof(" HTTP/1.0\r\n")-1);
@@ -630,7 +630,7 @@ finish:
 
 		/* file */
 		if (resource->path && ZSTR_LEN(resource->path)) {
-			smart_str_appends(&req_buf, ZSTR_VAL(resource->path));
+			smart_str_append(&req_buf, resource->path);
 		} else {
 			smart_str_appendc(&req_buf, '/');
 		}
@@ -638,7 +638,7 @@ finish:
 		/* query string */
 		if (resource->query) {
 			smart_str_appendc(&req_buf, '?');
-			smart_str_appends(&req_buf, ZSTR_VAL(resource->query));
+			smart_str_append(&req_buf, resource->query);
 		}
 	}
 
@@ -785,7 +785,7 @@ finish:
 	/* Send Host: header so name-based virtual hosts work */
 	if ((have_header & HTTP_HEADER_HOST) == 0) {
 		smart_str_appends(&req_buf, "Host: ");
-		smart_str_appends(&req_buf, ZSTR_VAL(resource->host));
+		smart_str_append(&req_buf, resource->host);
 		if ((use_ssl && resource->port != 443 && resource->port != 0) ||
 			(!use_ssl && resource->port != 80 && resource->port != 0)) {
 			smart_str_appendc(&req_buf, ':');
@@ -868,7 +868,7 @@ finish:
 			php_error_docref(NULL, E_NOTICE, "Content-type not specified assuming application/x-www-form-urlencoded");
 		}
 		smart_str_appends(&req_buf, "\r\n");
-		smart_str_appendl(&req_buf, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));
+		smart_str_append(&req_buf, Z_STR_P(tmpzval));
 	} else {
 		smart_str_appends(&req_buf, "\r\n");
 	}

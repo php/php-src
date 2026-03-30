@@ -46,8 +46,6 @@ $dir = __DIR__ . '/extract2/';
 @rmdir($dir . 'one/level');
 @rmdir($dir . 'one');
 @rmdir($dir);
-$dir = __DIR__ . '/extract1/';
-@rmdir($dir);
 ?>
 --EXPECTF--
 %sextract2%cfile1.txt

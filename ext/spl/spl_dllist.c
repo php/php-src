@@ -304,7 +304,7 @@ static void spl_dllist_object_free_storage(zend_object *object) /* {{{ */
 static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig) /* {{{ */
 {
 	spl_dllist_object *intern;
-	zend_class_entry  *parent = class_type;
+	const zend_class_entry *parent = class_type;
 	int                inherited = 0;
 
 	intern = zend_object_alloc(sizeof(spl_dllist_object), parent);
@@ -316,7 +316,7 @@ static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_
 	intern->traverse_position = 0;
 
 	if (orig) {
-		spl_dllist_object *other = spl_dllist_from_obj(orig);
+		const spl_dllist_object *other = spl_dllist_from_obj(orig);
 
 		if (clone_orig) {
 			intern->llist = spl_ptr_llist_init();

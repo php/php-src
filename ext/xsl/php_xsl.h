@@ -79,6 +79,8 @@ void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
 
 zval *xsl_prop_max_template_depth(zend_object *object);
 zval *xsl_prop_max_template_vars(zend_object *object);
+zval *xsl_prop_do_xinclude(zend_object *object);
+zval *xsl_prop_clone_document(zend_object *object);
 
 PHP_MINIT_FUNCTION(xsl);
 PHP_MSHUTDOWN_FUNCTION(xsl);

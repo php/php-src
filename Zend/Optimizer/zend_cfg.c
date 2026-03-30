@@ -35,7 +35,6 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 	zend_worklist_push(&work, b - cfg->blocks);
 
 	while (zend_worklist_len(&work)) {
-		int i;
 		b = cfg->blocks + zend_worklist_pop(&work);
 
 		b->flags |= ZEND_BB_REACHABLE;
@@ -44,7 +43,7 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 			continue;
 		}
 
-		for (i = 0; i < b->successors_count; i++) {
+		for (uint32_t i = 0; i < b->successors_count; i++) {
 			zend_basic_block *succ = blocks + b->successors[i];
 
 			if (b->len != 0) {
@@ -104,7 +103,7 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 }
 /* }}} */
 
-static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg, int start) /* {{{ */
+static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg, uint32_t start) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
 
@@ -113,14 +112,14 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 
 	if (op_array->last_try_catch) {
 		zend_basic_block *b;
-		int j, changed;
+		int changed;
 		uint32_t *block_map = cfg->map;
 
 		do {
 			changed = 0;
 
 			/* Add exception paths */
-			for (j = 0; j < op_array->last_try_catch; j++) {
+			for (uint32_t j = 0; j < op_array->last_try_catch; j++) {
 
 				/* check for jumps into the middle of try block */
 				b = blocks + block_map[op_array->try_catch_array[j].try_op];
@@ -202,7 +201,6 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 
 	if (cfg->flags & ZEND_FUNC_FREE_LOOP_VAR) {
 		zend_basic_block *b;
-		int j;
 		uint32_t *block_map = cfg->map;
 
 		/* Mark blocks that are unreachable, but free a loop var created in a reachable block. */
@@ -211,7 +209,7 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 				continue;
 			}
 
-			for (j = b->start; j < b->start + b->len; j++) {
+			for (uint32_t j = b->start; j < b->start + b->len; j++) {
 				zend_op *opline = &op_array->opcodes[j];
 				if (zend_optimizer_is_loop_var_free(opline)) {
 					zend_op *def_opline = zend_optimizer_get_loop_var_def(op_array, opline);
@@ -232,8 +230,8 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 void zend_cfg_remark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
-	int i;
-	int start = 0;
+	uint32_t i;
+	uint32_t start = 0;
 
 	for (i = 0; i < cfg->blocks_count; i++) {
 		if (blocks[i].flags & ZEND_BB_REACHABLE) {
@@ -593,13 +591,12 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 
 ZEND_API void zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 {
-	int j, s, edges;
 	zend_basic_block *b;
 	zend_basic_block *blocks = cfg->blocks;
 	zend_basic_block *end = blocks + cfg->blocks_count;
+	uint32_t edges = 0;
 	int *predecessors;
 
-	edges = 0;
 	for (b = blocks; b < end; b++) {
 		b->predecessors_count = 0;
 	}
@@ -608,7 +605,7 @@ ZEND_API void zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* 
 			b->successors_count = 0;
 			b->predecessors_count = 0;
 		} else {
-			for (s = 0; s < b->successors_count; s++) {
+			for (uint32_t s = 0; s < b->successors_count; s++) {
 				edges++;
 				blocks[b->successors[s]].predecessors_count++;
 			}
@@ -627,14 +624,13 @@ ZEND_API void zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* 
 		}
 	}
 
-	for (j = 0; j < cfg->blocks_count; j++) {
+	for (uint32_t j = 0; j < cfg->blocks_count; j++) {
 		if (blocks[j].flags & ZEND_BB_REACHABLE) {
 			/* SWITCH_STRING/LONG may have few identical successors */
-			for (s = 0; s < blocks[j].successors_count; s++) {
+			for (uint32_t s = 0; s < blocks[j].successors_count; s++) {
 				int duplicate = 0;
-				int p;
 
-				for (p = 0; p < s; p++) {
+				for (uint32_t p = 0; p < s; p++) {
 					if (blocks[j].successors[p] == blocks[j].successors[s]) {
 						duplicate = 1;
 						break;
@@ -654,16 +650,15 @@ ZEND_API void zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* 
 
 /* Computes a postorder numbering of the CFG */
 static void compute_postnum_recursive(
-		int *postnum, int *cur, const zend_cfg *cfg, int block_num) /* {{{ */
+		int *postnum, uint32_t *cur, const zend_cfg *cfg, int block_num) /* {{{ */
 {
-	int s;
 	zend_basic_block *block = &cfg->blocks[block_num];
 	if (postnum[block_num] != -1) {
 		return;
 	}
 
 	postnum[block_num] = -2; /* Marker for "currently visiting" */
-	for (s = 0; s < block->successors_count; s++) {
+	for (uint32_t s = 0; s < block->successors_count; s++) {
 		compute_postnum_recursive(postnum, cur, cfg, block->successors[s]);
 	}
 	postnum[block_num] = (*cur)++;
@@ -675,8 +670,9 @@ static void compute_postnum_recursive(
 ZEND_API void zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
-	int blocks_count = cfg->blocks_count;
-	int j, k, changed;
+	uint32_t blocks_count = cfg->blocks_count;
+	uint32_t j;
+	int changed;
 
 	if (cfg->blocks_count == 1) {
 		blocks[0].level = 0;
@@ -700,7 +696,7 @@ ZEND_API void zend_cfg_compute_dominators_tree(const zend_op_array *op_array, ze
 			if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 				continue;
 			}
-			for (k = 0; k < blocks[j].predecessors_count; k++) {
+			for (uint32_t k = 0; k < blocks[j].predecessors_count; k++) {
 				int pred = cfg->predecessors[blocks[j].predecessor_offset + k];
 
 				if (blocks[pred].idom >= 0) {
@@ -776,7 +772,7 @@ static bool dominates(zend_basic_block *blocks, int a, int b) /* {{{ */
 
 ZEND_API void zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
-	int i, j, k, n;
+	int i, j, n;
 	int time;
 	zend_basic_block *blocks = cfg->blocks;
 	int *entry_times, *exit_times;
@@ -890,7 +886,7 @@ ZEND_API void zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *c
 					continue;
 				}
 				blocks[j].loop_header = i;
-				for (k = 0; k < blocks[j].predecessors_count; k++) {
+				for (uint32_t k = 0; k < blocks[j].predecessors_count; k++) {
 					zend_worklist_push(&work, cfg->predecessors[blocks[j].predecessor_offset + k]);
 				}
 			}

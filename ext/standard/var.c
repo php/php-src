@@ -228,7 +228,6 @@ again:
 			}
 			struc = Z_REFVAL_P(struc);
 			goto again;
-			break;
 		default:
 			php_printf("%sUNKNOWN:0\n", COMMON);
 			break;
@@ -674,7 +673,6 @@ again:
 		case IS_REFERENCE:
 			struc = Z_REFVAL_P(struc);
 			goto again;
-			break;
 		default:
 			smart_str_appendl(buf, "NULL", 4);
 			break;
@@ -1244,7 +1242,7 @@ again:
 				 && Z_OBJ_HT_P(struc)->get_properties_for == NULL
 				 && Z_OBJ_HT_P(struc)->get_properties == zend_std_get_properties
 				 && !zend_object_is_lazy(Z_OBJ_P(struc))) {
-					/* Optimized version without rebulding properties HashTable */
+					/* Optimized version without rebuilding properties HashTable */
 					zend_object *obj = Z_OBJ_P(struc);
 					zend_class_entry *ce = obj->ce;
 					zend_property_info *prop_info;

@@ -47,6 +47,8 @@ PHP 8.6 UPGRADE NOTES
 - Standard:
   . Invalid mode values now throw in array_filter() instead of being silently
     defaulted to 0.
+  . Form feed (\f) is now added in the default trimmed characters of trim(),
+    rtrim() and ltrim(). RFC: https://wiki.php.net/rfc/trim_form_feed
 
 ========================================
 2. New Features
@@ -152,6 +154,9 @@ PHP 8.6 UPGRADE NOTES
     bound.
     RFC: https://wiki.php.net/rfc/clamp_v2
 
+- Zip:
+  . Added ZipArchive::openString() method.
+
 ========================================
 7. New Classes and Interfaces
 ========================================
@@ -241,12 +246,15 @@ PHP 8.6 UPGRADE NOTES
     creation of intermediate Closures, the overhead of calling userland
     callbacks from internal functions and providing for better insight for the
     JIT.
+  . The performance of the TAILCALL VM has been improved.
 
 - DOM:
   . Made splitText() faster and consume less memory.
 
 - JSON:
   . Improve performance of encoding arrays and objects.
+  . Improved performance of indentation generation in json_encode()
+    when using PHP_JSON_PRETTY_PRINT.
 
 - Standard:
   . Improved performance of array_fill_keys().
@@ -255,6 +263,9 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of array_walk().
   . Improved performance of intval('+0b...', 2) and intval('0b...', 2).
   . Improved performance of str_split().
+
+- URI:
+  . Reduced allocations when reading RFC3986 IPv6/IPFuture hosts and paths.
 
 - Zip:
   . Avoid string copies in ZipArchive::addFromString().

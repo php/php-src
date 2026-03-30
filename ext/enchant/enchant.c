@@ -346,12 +346,10 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 		case PHP_ENCHANT_MYSPELL:
 			enchant_broker_set_param(pbroker->pbroker, "enchant.myspell.dictionary.path", value);
 			RETURN_TRUE;
-			break;
 
 		case PHP_ENCHANT_ISPELL:
 			enchant_broker_set_param(pbroker->pbroker, "enchant.ispell.dictionary.path", value);
 			RETURN_TRUE;
-			break;
 
 		default:
 			RETURN_FALSE;

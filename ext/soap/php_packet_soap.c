@@ -31,7 +31,7 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 
 	ZVAL_NULL(return_value);
 
-	/* Response for one-way opearation */
+	/* Response for one-way operation */
 	if (buffer_size == 0) {
 		return true;
 	}

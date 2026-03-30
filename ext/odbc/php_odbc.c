@@ -1667,7 +1667,6 @@ PHP_FUNCTION(odbc_result)
 			}
 			ZSTR_VAL(field_str)[ZSTR_LEN(field_str)] = '\0';
 			RETURN_NEW_STR(field_str);
-			break;
 
 		default:
 			if (result->values[field_ind].vallen == SQL_NULL_DATA) {

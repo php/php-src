@@ -1185,7 +1185,7 @@ static void assemble_code_blocks(const zend_cfg *cfg, zend_op_array *op_array, z
 
 	/* rebuild map (just for printing) */
 	memset(cfg->map, -1, sizeof(int) * op_array->last);
-	for (int n = 0; n < cfg->blocks_count; n++) {
+	for (uint32_t n = 0; n < cfg->blocks_count; n++) {
 		if (cfg->blocks[n].flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
 			cfg->map[cfg->blocks[n].start] = n;
 		}
@@ -1493,7 +1493,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
  * defined. We won't apply some optimization patterns for such variables. */
 static void zend_t_usage(const zend_cfg *cfg, const zend_op_array *op_array, zend_bitset used_ext, zend_optimizer_ctx *ctx)
 {
-	int n;
+	uint32_t n;
 	zend_basic_block *block, *next_block;
 	uint32_t var_num;
 	uint32_t bitset_len;
@@ -1697,11 +1697,10 @@ static void zend_t_usage(const zend_cfg *cfg, const zend_op_array *op_array, zen
 
 static void zend_merge_blocks(const zend_op_array *op_array, const zend_cfg *cfg, uint32_t *opt_count)
 {
-	int i;
 	zend_basic_block *b, *bb;
 	zend_basic_block *prev = NULL;
 
-	for (i = 0; i < cfg->blocks_count; i++) {
+	for (uint32_t i = 0; i < cfg->blocks_count; i++) {
 		b = cfg->blocks + i;
 		if (b->flags & ZEND_BB_REACHABLE) {
 			if ((b->flags & ZEND_BB_FOLLOW) &&

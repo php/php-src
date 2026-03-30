@@ -347,6 +347,12 @@ static void zend_accel_do_delayed_early_binding(
 					: NULL;
 				if (parent_ce || (orig_ce->ce_flags & ZEND_ACC_LINKED)) {
 					ce = zend_try_early_bind(orig_ce, parent_ce, early_binding->lcname, zv);
+				} else if (ZSTR_LEN(early_binding->lc_parent_name) == 0) {
+					/* Parentless class: use the same binding path as the VM handler */
+					zval lcname_zv[2];
+					ZVAL_STR(&lcname_zv[0], early_binding->lcname);
+					ZVAL_STR(&lcname_zv[1], early_binding->rtd_key);
+					ce = zend_bind_class_in_slot(zv, lcname_zv, early_binding->lc_parent_name);
 				}
 			}
 			if (ce && early_binding->cache_slot != (uint32_t) -1) {

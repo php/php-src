@@ -211,6 +211,7 @@ static uint32_t IR_NEVER_INLINE ir_cfg_remove_dead_inputs(ir_ctx *ctx, uint32_t 
 				if (life_inputs) {
 					ir_remove_phis_inputs(ctx, &ctx->use_lists[bb->start], insn->inputs_count, life_inputs);
 					ir_mem_free(life_inputs);
+					life_inputs = NULL;
 				}
 			}
 		}
@@ -613,59 +614,64 @@ static int ir_remove_unreachable_blocks(ir_ctx *ctx)
 	return 1;
 }
 
-static void compute_postnum(const ir_ctx *ctx, uint32_t *cur, uint32_t b)
-{
-	uint32_t i, *p;
-	ir_block *bb = &ctx->cfg_blocks[b];
-
-	if (bb->postnum != 0) {
-		return;
-	}
-
-	if (bb->successors_count) {
-		bb->postnum = -1; /* Marker for "currently visiting" */
-		p = ctx->cfg_edges + bb->successors;
-		i = bb->successors_count;
-		do {
-			compute_postnum(ctx, cur, *p);
-			p++;
-		} while (--i);
-	}
-	bb->postnum = (*cur)++;
-}
-
 /* Computes dominator tree using algorithm from "A Simple, Fast Dominance Algorithm" by
  * Cooper, Harvey and Kennedy. */
 static IR_NEVER_INLINE int ir_build_dominators_tree_slow(ir_ctx *ctx)
 {
-	uint32_t blocks_count, b, postnum;
+	uint32_t blocks_count, b, postnum, i;
 	ir_block *blocks, *bb;
 	uint32_t *edges;
+	uint32_t *rpo = ir_mem_malloc((ctx->cfg_blocks_count + 1) * sizeof(uint32_t));
 	bool changed;
 
 	blocks = ctx->cfg_blocks;
 	edges  = ctx->cfg_edges;
 	blocks_count = ctx->cfg_blocks_count;
 
-	/* Clear the dominators tree */
-	for (b = 0, bb = &blocks[0]; b <= blocks_count; b++, bb++) {
-		bb->idom = 0;
-		bb->dom_depth = 0;
-		bb->dom_child = 0;
-		bb->dom_next_child = 0;
-	}
-
 	ctx->flags2 &= ~IR_NO_LOOPS;
 
 	postnum = 1;
-	compute_postnum(ctx, &postnum, 1);
+	ir_worklist work;
+	ir_worklist_init(&work, ctx->cfg_blocks_count + 1);
+	ir_worklist_push(&work, 1);
+	IR_ASSERT(blocks[1].next_succ == 0);
+	while (ir_worklist_len(&work)) {
+next:
+		b = ir_worklist_peek(&work);
+		bb = &blocks[b];
+		uint32_t n = bb->successors_count - bb->next_succ;
+		if (n) {
+			uint32_t *p = edges + bb->successors + bb->next_succ;
+			for (; n > 0; p++, n--) {
+				uint32_t succ = *p;
+				if (ir_worklist_push(&work, succ)) {
+					bb->next_succ = bb->successors_count - n + 1;
+					IR_ASSERT(blocks[succ].next_succ == 0);
+					goto next;
+				}
+			}
+		}
+
+		/* Start from bb->idom calculated by the fast dominators algorithm */
+		// bb->idom = 0;
+		bb->next_succ = 0;
+		rpo[postnum] = b;
+		bb->postnum = postnum++;
+		ir_worklist_pop(&work);
+	}
+	ir_worklist_free(&work);
+
+	IR_ASSERT(rpo[blocks_count] == 1);
 
 	/* Find immediate dominators by iterative fixed-point algorithm */
 	blocks[1].idom = 1;
 	do {
 		changed = 0;
+
 		/* Iterating in Reverse Post Order */
-		for (b = 2, bb = &blocks[2]; b <= blocks_count; b++, bb++) {
+		for (i = blocks_count - 1; i > 0; i--) {
+			b = rpo[i];
+			bb = &blocks[b];
 			IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
 			IR_ASSERT(bb->predecessors_count > 0);
 			if (bb->predecessors_count == 1) {
@@ -717,6 +723,8 @@ static IR_NEVER_INLINE int ir_build_dominators_tree_slow(ir_ctx *ctx)
 			}
 		}
 	} while (changed);
+
+	ir_mem_free(rpo);
 
 	/* Build dominators tree */
 	blocks[1].idom = 0;
@@ -771,7 +779,7 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 	blocks[1].idom = 1;
 	blocks[1].dom_depth = 0;
 
-	/* Iterating in Reverse Post Order */
+	/* Iterating in Reverse Post Order (relay on existing BB order and fall-back to slow algorithm) */
 	for (b = 2, bb = &blocks[2]; b <= blocks_count; b++, bb++) {
 		IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
 		IR_ASSERT(bb->predecessors_count > 0);
@@ -783,8 +791,8 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 		if (UNEXPECTED(idom >= b)) {
 			/* In rare cases, LOOP_BEGIN.op1 may be a back-edge. Skip back-edges. */
 			ctx->flags2 &= ~IR_NO_LOOPS;
-//			IR_ASSERT(k > 1 && "Wrong blocks order: BB is before its single predecessor");
 			if (UNEXPECTED(k <= 1)) {
+				// IR_ASSERT(k > 1 && "Wrong blocks order: BB is before its single predecessor");
 slow_case:
 				ir_list_free(&worklist);
 				return ir_build_dominators_tree_slow(ctx);
@@ -798,6 +806,7 @@ slow_case:
 					break;
 				}
 				if (UNEXPECTED(k == 0)) {
+					// IR_ASSERT(0 && "Wrong blocks order: BB is before all its predecessors");
 					goto slow_case;
 				}
 				ir_list_push(&worklist, idom);
@@ -828,13 +837,6 @@ slow_case:
 		bb->idom = idom;
 		idom_bb = &blocks[idom];
 		bb->dom_depth = idom_bb->dom_depth + 1;
-	}
-
-	/* Construct children lists sorted by block number */
-	for (b = blocks_count, bb = &blocks[b]; b >= 2; b--, bb--) {
-		ir_block *idom_bb = &blocks[bb->idom];
-		bb->dom_next_child = idom_bb->dom_child;
-		idom_bb->dom_child = b;
 	}
 
 	blocks[1].idom = 0;
@@ -874,8 +876,16 @@ slow_case:
 
 		if (UNEXPECTED(!complete)) {
 			ir_list_free(&worklist);
+			// TODO: this algorithm may be incorrect. Prove and/or switch to ir_build_dominators_tree_slow() ???
 			return ir_build_dominators_tree_iterative(ctx);
 		}
+	}
+
+	/* Construct children lists sorted by block number */
+	for (b = blocks_count, bb = &blocks[b]; b >= 2; b--, bb--) {
+		ir_block *idom_bb = &blocks[bb->idom];
+		bb->dom_next_child = idom_bb->dom_child;
+		idom_bb->dom_child = b;
 	}
 
 	ir_list_free(&worklist);
@@ -898,8 +908,6 @@ static int ir_build_dominators_tree_iterative(ir_ctx *ctx)
 	/* Clear the dominators tree, but keep already found dominators */
 	for (b = 0, bb = &blocks[0]; b <= blocks_count; b++, bb++) {
 		bb->dom_depth = 0;
-		bb->dom_child = 0;
-		bb->dom_next_child = 0;
 	}
 
 	/* Find immediate dominators by iterative fixed-point algorithm */
@@ -917,20 +925,20 @@ static int ir_build_dominators_tree_iterative(ir_ctx *ctx)
 			if (blocks[idom].idom == 0) {
 				while (1) {
 					k--;
+					if (UNEXPECTED(k == 0)) break;
 					p++;
 					idom = *p;
 					if (blocks[idom].idom > 0) {
 						break;
 					}
-					IR_ASSERT(k > 0);
 				}
+				if (UNEXPECTED(k == 0)) continue;
 			}
 			IR_ASSERT(k != 0);
 			while (--k > 0) {
 				uint32_t pred_b = *(++p);
 
 				if (blocks[pred_b].idom > 0) {
-					IR_ASSERT(blocks[pred_b].idom > 0);
 					while (idom != pred_b) {
 						while (pred_b > idom) {
 							pred_b = blocks[pred_b].idom;
@@ -1094,35 +1102,36 @@ int ir_find_loops(ir_ctx *ctx)
 	times = ir_mem_malloc((ctx->cfg_blocks_count + 1) * 3 * sizeof(uint32_t));
 	sorted_blocks = times + (ctx->cfg_blocks_count + 1) * 2;
 
+	ir_bitset visited = ir_bitset_malloc(ctx->cfg_blocks_count + 1);
 	ir_worklist_push(&work, 1);
-	ENTRY_TIME(1) = time++;
-
 	while (ir_worklist_len(&work)) {
-		ir_block *bb;
-
-		b = ir_worklist_peek(&work);
-
-		/* Visit successors of "b". */
 next:
-		bb = &blocks[b];
-		n = bb->successors_count;
-		if (n) {
-			uint32_t *p = edges + bb->successors;
+		b = ir_worklist_peek(&work);
+		ir_block *bb = &blocks[b];
 
+		if (!ir_bitset_in(visited, b)) {
+			ir_bitset_incl(visited, b);
+			ENTRY_TIME(b) = time++;
+		}
+
+		uint32_t n = bb->successors_count - bb->next_succ;
+		if (n) {
+			uint32_t *p = edges + bb->successors + bb->next_succ;
 			for (; n > 0; p++, n--) {
 				uint32_t succ = *p;
-
 				if (ir_worklist_push(&work, succ)) {
-					b = succ;
-					ENTRY_TIME(b) = time++;
+					bb->next_succ = bb->successors_count - n + 1;
+					IR_ASSERT(blocks[succ].next_succ == 0);
 					goto next;
 				}
 			}
 		}
 
+		bb->next_succ = 0;
 		EXIT_TIME(b) = time++;
 		ir_worklist_pop(&work);
 	}
+	ir_mem_free(visited);
 
 	/* Sort blocks by level, which is the opposite order in which we want to process them */
 	/* (Breadth First Search using "sorted_blocks" as a queue) */
