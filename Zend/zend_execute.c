@@ -739,9 +739,10 @@ static const zend_class_entry *resolve_single_class_type(
 	zend_string *name,
 	const zend_class_entry *scope) {
 	if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_SELF))) {
+		/* If we don't have a scope, returning the NULL pointer is fine as the error handling is done on the call site */
 		return scope;
 	} else if (UNEXPECTED(zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_PARENT)))) { // Parent as a type is extremely uncommon
-		return scope->parent;
+		return scope ? scope->parent : NULL;
 	} else {
 		return zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
 	}
@@ -779,44 +780,6 @@ static bool zend_check_intersection_type_from_list(
 	return true;
 }
 
-static bool zend_check_class_type(
-	const zend_type *type,
-	const zend_class_entry *arg_ce,
-	const zend_class_entry *scope
-) {
-	const zend_class_entry *ce;
-	if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
-		if (ZEND_TYPE_IS_INTERSECTION(*type)) {
-			return zend_check_intersection_type_from_list(ZEND_TYPE_LIST(*type), arg_ce, scope);
-		} else {
-			/* In a union type may be of simple atomic types or a DNF type */
-			const zend_type *list_type;
-			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
-				if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
-					if (zend_check_intersection_type_from_list(ZEND_TYPE_LIST(*list_type), arg_ce, scope)) {
-						return true;
-					}
-				} else {
-					ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
-					ce = zend_ce_from_type(list_type, scope);
-					/* Instance of a single type part of a union is sufficient to pass the type check */
-					if (ce && instanceof_function(arg_ce, ce)) {
-						return true;
-					}
-				}
-			} ZEND_TYPE_LIST_FOREACH_END();
-		}
-	} else {
-		ce = zend_ce_from_type(type, scope);
-		/* If we have a CE we check if it satisfies the type constraint,
-		 * otherwise it will check if a standard type satisfies it. */
-		if (ce && instanceof_function(arg_ce, ce)) {
-			return true;
-		}
-	}
-	return false;
-}
-
 static zend_type_check_status zend_check_type_slow(
 	const zend_type *type,
 	const zval *arg,
@@ -824,12 +787,39 @@ static zend_type_check_status zend_check_type_slow(
 	bool strict_types,
 	const uint32_t callable_check_flag /* This is needed to pass IS_CALLABLE_SUPPRESS_DEPRECATIONS for internal functions */
 ) {
-	if (
-		ZEND_TYPE_IS_COMPLEX(*type)
-		&& EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)
-		&& zend_check_class_type(type, Z_OBJCE_P(arg), scope)
-	) {
-		return ZEND_TYPE_CHECK_VALID;
+	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
+		const zend_class_entry *arg_ce = Z_OBJCE_P(arg);
+		if (EXPECTED(ZEND_TYPE_HAS_NAME(*type))) {
+			const zend_class_entry *ce = zend_ce_from_type(type, scope);
+			/* If we have a CE we check if it satisfies the type constraint,
+			 * otherwise it will check if a standard type satisfies it. */
+			if (ce && instanceof_function(arg_ce, ce)) {
+				return ZEND_TYPE_CHECK_VALID;
+			}
+		} else {
+			ZEND_ASSERT(ZEND_TYPE_HAS_LIST(*type));
+			if (ZEND_TYPE_IS_INTERSECTION(*type)) {
+				return zend_check_intersection_type_from_list(ZEND_TYPE_LIST(*type), arg_ce, scope)
+					? ZEND_TYPE_CHECK_VALID : ZEND_TYPE_CHECK_INVALID;
+			} else {
+				/* In a union type may be of simple atomic types or a DNF type */
+				const zend_type *list_type;
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
+					if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
+						if (zend_check_intersection_type_from_list(ZEND_TYPE_LIST(*list_type), arg_ce, scope)) {
+							return ZEND_TYPE_CHECK_VALID;
+						}
+					} else {
+						ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
+						const zend_class_entry *ce = zend_ce_from_type(list_type, scope);
+						/* Instance of a single type part of a union is sufficient to pass the type check */
+						if (ce && instanceof_function(arg_ce, ce)) {
+							return ZEND_TYPE_CHECK_VALID;
+						}
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+			}
+		}
 	}
 
 	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(*type);
