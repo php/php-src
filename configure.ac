@@ -1195,7 +1195,7 @@ PHP_ARG_WITH([pie],
   [whether to install PIE],
   [AS_HELP_STRING([[--with-pie[=DIR]]],
     [Install PIE in DIR [PREFIX/bin]])],
-  [no],
+  [yes],
   [yes])
 
 AS_VAR_IF([PHP_PIE], [no],, [
