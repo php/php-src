@@ -62,12 +62,13 @@ static zend_always_inline void zval_long_or_null_to_lexbor_str(zval *value, lexb
  */
 static const char *fill_errors(zval *errors)
 {
-	if (lexbor_parser.log == NULL || lexbor_plog_length(lexbor_parser.log) == 0) {
+	size_t log_len;
+	if (lexbor_parser.log == NULL || (log_len = lexbor_plog_length(lexbor_parser.log)) == 0) {
 		ZVAL_EMPTY_ARRAY(errors);
 		return NULL;
 	}
 
-	array_init(errors);
+	array_init_size(errors, log_len);
 	const char *result = NULL;
 
 	lexbor_plog_entry_t *lxb_error;

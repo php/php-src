@@ -257,7 +257,7 @@ static void spl_object_storage_addall(spl_SplObjectStorage *intern, spl_SplObjec
 static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend_object *orig) /* {{{ */
 {
 	spl_SplObjectStorage *intern;
-	zend_class_entry *parent = class_type;
+	const zend_class_entry *parent = class_type;
 
 	intern = zend_object_alloc(sizeof(spl_SplObjectStorage), parent);
 	intern->pos = 0;

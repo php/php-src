@@ -114,11 +114,11 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 	zend_module_entry *module_entry;
 	zend_module_entry *(*get_module)(void);
 	int error_type, slash_suffix = 0;
-	char *extension_dir;
+	const char *extension_dir;
 	char *err1, *err2;
 
 	if (type == MODULE_PERSISTENT) {
-		extension_dir = INI_STR("extension_dir");
+		extension_dir = zend_ini_string_literal("extension_dir");
 	} else {
 		extension_dir = PG(extension_dir);
 	}

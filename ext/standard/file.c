@@ -1450,7 +1450,6 @@ PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_
 		case -1:
 			/* non-statable stream */
 			goto safe_to_copy;
-			break;
 		case 0:
 			break;
 		default: /* failed to stat file, does not exist? */
@@ -1465,7 +1464,6 @@ PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_
 		case -1:
 			/* non-statable stream */
 			goto safe_to_copy;
-			break;
 		case 0:
 			break;
 		default: /* failed to stat file, does not exist? */
@@ -2148,18 +2146,14 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 		switch (ch) {
 			case '<':
 				return TOK_OPENTAG;
-				break;
 
 			case '>':
 				return TOK_CLOSETAG;
-				break;
 
 			case '=':
 				return TOK_EQUAL;
-				break;
 			case '/':
 				return TOK_SLASH;
-				break;
 
 			case '\'':
 			case '"':
@@ -2186,7 +2180,6 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 				}
 
 				return TOK_STRING;
-				break;
 
 			case '\n':
 			case '\r':
@@ -2195,7 +2188,6 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 
 			case ' ':
 				return TOK_SPACE;
-				break;
 
 			default:
 				if (isalnum(ch)) {

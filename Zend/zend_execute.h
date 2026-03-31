@@ -248,7 +248,7 @@ static zend_always_inline void zend_cast_zval_to_object(zval *result, zval *expr
 }
 
 static zend_always_inline void zend_cast_zval_to_array(zval *result, zval *expr, uint8_t op1_type) {
-	extern zend_class_entry *zend_ce_closure;
+	extern ZEND_API zend_class_entry *zend_ce_closure;
 	if (op1_type == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
 		if (Z_TYPE_P(expr) != IS_NULL) {
 			if (UNEXPECTED(Z_TYPE_P(expr) == IS_DOUBLE && zend_isnan(Z_DVAL_P(expr)))) {

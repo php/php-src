@@ -78,7 +78,7 @@ static zend_result zend_build_equi_escape_sets(int *parent, zend_op_array *op_ar
 	zend_ssa_var *ssa_vars = ssa->vars;
 	int ssa_vars_count = ssa->vars_count;
 	zend_ssa_phi *p;
-	int i, j;
+	int i;
 	int *size;
 	ALLOCA_FLAG(use_heap)
 
@@ -94,7 +94,7 @@ static zend_result zend_build_equi_escape_sets(int *parent, zend_op_array *op_ar
 			if (p->pi >= 0) {
 				union_find_unite(parent, size, i, p->sources[0]);
 			} else {
-				for (j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
+				for (uint32_t j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
 					union_find_unite(parent, size, i, p->sources[j]);
 				}
 			}

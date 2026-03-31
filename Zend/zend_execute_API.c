@@ -192,8 +192,7 @@ void init_executor(void) /* {{{ */
 	EG(get_gc_buffer).start = EG(get_gc_buffer).end = EG(get_gc_buffer).cur = NULL;
 
 	EG(record_errors) = false;
-	EG(num_errors) = 0;
-	EG(errors) = NULL;
+	memset(&EG(errors), 0, sizeof(EG(errors)));
 
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;

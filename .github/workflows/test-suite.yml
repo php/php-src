@@ -506,7 +506,8 @@ jobs:
       - name: Test Laravel
         if: ${{ !cancelled() }}
         run: |
-          git clone https://github.com/laravel/framework.git --depth=1
+          branch=${{ fromJson(inputs.branch).jobs.COMMUNITY.config.laravel_version }}
+          git clone https://github.com/laravel/framework.git --depth=1 ${branch:+--branch="$branch"}
           cd framework
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-req=php+
@@ -551,7 +552,8 @@ jobs:
       - name: Test Symfony
         if: ${{ !cancelled() }}
         run: |
-          git clone https://github.com/symfony/symfony.git --depth=1 --branch="${{ fromJson(inputs.branch).jobs.COMMUNITY.config.symfony_version }}"
+          branch=${{ fromJson(inputs.branch).jobs.COMMUNITY.config.symfony_version }}
+          git clone https://github.com/symfony/symfony.git --depth=1 ${branch:+--branch="$branch"}
           cd symfony
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-req=php+

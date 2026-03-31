@@ -594,10 +594,8 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	switch (opt) {
 		case PHP_BZ_ERRNO:
 			RETURN_LONG(errnum);
-			break;
 		case PHP_BZ_ERRSTR:
 			RETURN_STRING((char*)errstr);
-			break;
 		case PHP_BZ_ERRBOTH:
 			array_init(return_value);
 

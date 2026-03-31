@@ -350,7 +350,6 @@ static zend_always_inline void _zend_is_numeric(zval *return_value, zval *arg)
 		case IS_LONG:
 		case IS_DOUBLE:
 			RETURN_TRUE;
-			break;
 
 		case IS_STRING:
 			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 0)) {
@@ -362,7 +361,6 @@ static zend_always_inline void _zend_is_numeric(zval *return_value, zval *arg)
 
 		default:
 			RETURN_FALSE;
-			break;
 	}
 }
 
@@ -404,11 +402,9 @@ PHP_FUNCTION(is_scalar)
 		case IS_LONG:
 		case IS_STRING:
 			RETURN_TRUE;
-			break;
 
 		default:
 			RETURN_FALSE;
-			break;
 	}
 }
 /* }}} */

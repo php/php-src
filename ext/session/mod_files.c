@@ -103,7 +103,6 @@ const ps_module ps_mod_files = {
 	PS_MOD_UPDATE_TIMESTAMP(files)
 };
 
-
 static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const zend_string *key)
 {
 	const char *p;
@@ -153,7 +152,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 {
 	char buf[MAXPATHLEN];
 #if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
-    struct stat sbuf = {0};
+	struct stat sbuf = {0};
 #endif
 	int ret;
 
@@ -183,7 +182,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 #else
 		/* Check to make sure that the opened file is not outside of allowable dirs.
 		   This is not 100% safe but it's hard to do something better without O_NOFOLLOW */
-		if(PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf)) {
+		if (PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf)) {
 			return;
 		}
 		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, data->filemode);
@@ -230,7 +229,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks
-       data->last_key and reopen when it is needed. */
+	   data->last_key and reopen when it is needed. */
 	ps_files_open(data, key);
 	if (data->fd < 0) {
 		return FAILURE;
@@ -258,7 +257,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 			buf = wrote > -1 ? buf + wrote : 0;
 			to_write = wrote > -1 ? SESS_FILE_BUF_SIZE(ZSTR_LEN(val) - n) : 0;
 
-		} while(wrote > 0);
+		} while (wrote > 0);
 	}
 #else
 	n = write(data->fd, ZSTR_VAL(val), ZSTR_LEN(val));
@@ -346,9 +345,7 @@ static zend_result ps_files_key_exists(ps_files *data, const zend_string *key)
 	return SUCCESS;
 }
 
-
 #define PS_FILES_DATA ps_files *data = PS_GET_MOD_DATA()
-
 
 /*
  * Open save handler. Setup resources that are needed by the handler.
@@ -427,7 +424,6 @@ PS_OPEN_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Clean up opened resources.
  * PARAMETERS: PS_CLOSE_ARGS in php_session.h
@@ -455,7 +451,6 @@ PS_CLOSE_FUNC(files)
 
 	return SUCCESS;
 }
-
 
 /*
  * Read session data from opened resource.
@@ -508,7 +503,7 @@ PS_READ_FUNC(files)
 			buf = read_in > -1 ? buf + read_in : 0;
 			to_read = read_in > -1 ? SESS_FILE_BUF_SIZE(ZSTR_LEN(*val) - n) : 0;
 
-		} while(read_in > 0);
+		} while (read_in > 0);
 
 	}
 #else
@@ -531,7 +526,6 @@ PS_READ_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Write session data.
  * PARAMETERS: PS_WRITE_ARGS in php_session.h
@@ -546,7 +540,6 @@ PS_WRITE_FUNC(files)
 
 	return ps_files_write(data, key, val);
 }
-
 
 /*
  * Update session data modification/access time stamp.
@@ -582,7 +575,6 @@ PS_UPDATE_TIMESTAMP_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Delete session data.
  * PARAMETERS: PS_DESTROY_ARGS in php_session.h
@@ -617,7 +609,6 @@ PS_DESTROY_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Cleanup expired session data.
  * PARAMETERS: PS_GC_ARGS in php_session.h
@@ -645,7 +636,6 @@ PS_GC_FUNC(files)
 
 	return *nrdels;
 }
-
 
 /*
  * Create session ID.
@@ -684,11 +674,10 @@ PS_CREATE_SID_FUNC(files)
 				return NULL;
 			}
 		}
-	} while(!sid);
+	} while (!sid);
 
 	return sid;
 }
-
 
 /*
  * Check session ID existence for use_strict_mode support.

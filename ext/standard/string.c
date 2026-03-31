@@ -2203,10 +2203,10 @@ PHP_FUNCTION(chunk_split)
 
 	if ((size_t)chunklen > ZSTR_LEN(str)) {
 		/* to maintain BC, we must return original string + ending */
-		result = zend_string_safe_alloc(ZSTR_LEN(str), 1, endlen, 0);
-		memcpy(ZSTR_VAL(result), ZSTR_VAL(str), ZSTR_LEN(str));
-		memcpy(ZSTR_VAL(result) + ZSTR_LEN(str), end, endlen);
-		ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
+		result = zend_string_concat2(
+			ZSTR_VAL(str), ZSTR_LEN(str),
+			end, endlen
+		);
 		RETURN_NEW_STR(result);
 	}
 

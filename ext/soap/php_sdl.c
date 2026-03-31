@@ -3240,7 +3240,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		tmp = Z_CLIENT_USER_AGENT_P(this_ptr);
 		if (Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {
 			smart_str_appends(&headers, "User-Agent: ");
-			smart_str_appends(&headers, Z_STRVAL_P(tmp));
+			smart_str_append(&headers, Z_STR_P(tmp));
 			smart_str_appends(&headers, "\r\n");
 		}
 
@@ -3250,7 +3250,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 			zval str_proxy;
 			smart_str proxy = {0};
 			smart_str_appends(&proxy,"tcp://");
-			smart_str_appends(&proxy,Z_STRVAL_P(proxy_host));
+			smart_str_append(&proxy, Z_STR_P(proxy_host));
 			smart_str_appends(&proxy,":");
 			smart_str_append_long(&proxy,Z_LVAL_P(proxy_port));
 			ZVAL_STR(&str_proxy, smart_str_extract(&proxy));
@@ -3362,7 +3362,7 @@ cache_in_memory:
 
 			zend_hash_str_update_mem(SOAP_GLOBAL(mem_cache), uri,
 											uri_len, &p, sizeof(sdl_cache_bucket));
-			/* remove non-persitent sdl structure */
+			/* remove non-persistent sdl structure */
 			delete_sdl_impl(sdl);
 			/* and replace it with persistent one */
 			sdl = psdl;

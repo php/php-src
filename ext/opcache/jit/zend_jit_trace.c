@@ -258,14 +258,14 @@ static zend_string *zend_jit_trace_name(const zend_op_array *op_array, uint32_t 
 	smart_str_appendc(&buf, '$');
 	if (op_array->function_name) {
 		if (op_array->scope) {
-			smart_str_appendl(&buf, ZSTR_VAL(op_array->scope->name), ZSTR_LEN(op_array->scope->name));
+			smart_str_append(&buf, op_array->scope->name);
 			smart_str_appends(&buf, "::");
-			smart_str_appendl(&buf, ZSTR_VAL(op_array->function_name), ZSTR_LEN(op_array->function_name));
+			smart_str_append(&buf, op_array->function_name);
 		} else {
-			smart_str_appendl(&buf, ZSTR_VAL(op_array->function_name), ZSTR_LEN(op_array->function_name));
+			smart_str_append(&buf, op_array->function_name);
 		}
 	} else if (op_array->filename) {
-		smart_str_appendl(&buf, ZSTR_VAL(op_array->filename), ZSTR_LEN(op_array->filename));
+		smart_str_append(&buf, op_array->filename);
 	}
 	smart_str_appendc(&buf, '$');
 	smart_str_append_long(&buf, (zend_long)lineno);
@@ -3953,7 +3953,7 @@ static int zend_jit_find_ssa_var(const zend_op_array *op_array,
                                  uint32_t             opline_num,
                                  uint32_t             var_num)
 {
-	int ssa_var, j, b = ssa->cfg.map[opline_num];
+	int ssa_var, b = ssa->cfg.map[opline_num];
 	const zend_basic_block *bb = ssa->cfg.blocks + b;
 	const zend_ssa_phi *phi;
 	const zend_ssa_op *ssa_op;
@@ -3997,7 +3997,7 @@ static int zend_jit_find_ssa_var(const zend_op_array *op_array,
 
 	ZEND_WORKLIST_ALLOCA(&worklist, ssa->cfg.blocks_count, use_heap);
 
-	for (j = 0; j < bb->predecessors_count; j++) {
+	for (uint32_t j = 0; j < bb->predecessors_count; j++) {
 		b = ssa->cfg.predecessors[bb->predecessor_offset + j];
 		zend_worklist_push(&worklist, b);
 	}
@@ -4038,7 +4038,7 @@ static int zend_jit_find_ssa_var(const zend_op_array *op_array,
 		if (ssa_var >= 0) {
 			goto found;
 		}
-		for (j = 0; j < bb->predecessors_count; j++) {
+		for (uint32_t j = 0; j < bb->predecessors_count; j++) {
 			b = ssa->cfg.predecessors[bb->predecessor_offset + j];
 			zend_worklist_push(&worklist, b);
 		}

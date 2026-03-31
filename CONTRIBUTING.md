@@ -27,6 +27,7 @@ had several contributions accepted, commit privileges are often quickly granted.
 * [Git commit rules](#git-commit-rules)
 * [Copyright and license headers](#copyright-and-license-headers)
 * [NEWS file](#news)
+* [LLM usage in GitHub comments](#llm-usage-in-github-comments)
 
 ## Pull requests
 
@@ -536,6 +537,12 @@ been created.
 If for some reason a feature is introduced in a branch lower than master,
 although this is strictly prohibited by other policies, then the entry must
 also be in master.
+
+## LLM usage in GitHub comments
+
+When using LLMs to generate comments to maintainers for any purpose other than
+direct translation, we would highly appreciate it if you disclosed the relevant
+paragraphs as such via markdown quote.
 
 ## Thanks
 

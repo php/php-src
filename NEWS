@@ -17,6 +17,9 @@ PHP                                                                        NEWS
     ReflectionProperty::skipLazyInitialization after failed LazyProxy
     initialization). (Arnaud)
 
+- BCMath:
+  . Added NUL-byte validation to BCMath functions. (jorgsowa)
+
 - Date:
   . Update timelib to 2022.16. (Derick)
 
@@ -27,6 +30,7 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug GH-20679 (finfo_file() doesn't work on remote resources).
     (ndossche)
+  . Fixed bug #66095 (Hide libmagic dynamic symbols). (orlitzky)
 
 - Hash:
   . Upgrade xxHash to 0.8.2. (timwolla)
@@ -48,7 +52,7 @@ PHP                                                                        NEWS
     small value). (David Carlier)
 
 - Mail:
-  . Fixed bug GH-20862 (null pointer dereference in 
+  . Fixed bug GH-20862 (null pointer dereference in
     php_mail_detect_multiple_crlf via error_log (jordikroon)
 
 - Mbstring:
@@ -104,6 +108,8 @@ PHP                                                                        NEWS
 - Soap:
   . Soap::__setCookie() when cookie name is a digit is now not stored and
     represented as a string anymore but a int. (David Carlier)
+  . Fixed bug GH-21421 (SoapClient typemap property breaks engine assumptions).
+    (ndossche)
 
 - Sockets:
   . Added the TCP_USER_TIMEOUT constant for Linux to set the maximum time in
@@ -134,18 +140,21 @@ PHP                                                                        NEWS
     null destination). (David Carlier)
   . Fixed bug GH-13204 (glob() fails if square bracket is in current directory).
     (ndossche)
+  . Add array size maximum to array_diff(). (ndossche)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
     socket context options.
   . Added so_reuseaddr streams context socket option that allows disabling
-    address resuse.
+    address reuse.
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
   . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)
   . Fixed bug GH-21221 (Prevent closing of innerstream of php://temp stream).
     (ilutov)
   . Improved stream_socket_server() bind failure error reporting. (ilutov)
+  . Fixed bug #49874 (ftell() and fseek() inconsistency when using stream
+    filters). (Jakub Zelenka)
 
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.

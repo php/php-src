@@ -152,7 +152,7 @@ class ZipArchive implements Countable
     public const int FL_ENC_CP437 = UNKNOWN;
 
     /**
-     * Additionnal flags not from libzip
+     * Additional flags not from libzip
      * @cvalue ZIP_FL_OPEN_FILE_NOW
      */
     public const int FL_OPEN_FILE_NOW = UNKNOWN;

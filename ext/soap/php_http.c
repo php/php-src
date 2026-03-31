@@ -254,12 +254,12 @@ static php_stream* http_connect(zval* this_ptr, php_uri *uri, int use_ssl, php_s
 		}
 
 		smart_str_append_const(&soap_headers, "CONNECT ");
-		smart_str_appends(&soap_headers, ZSTR_VAL(uri->host));
+		smart_str_append(&soap_headers, uri->host);
 		smart_str_appendc(&soap_headers, ':');
 		smart_str_append_unsigned(&soap_headers, uri->port);
 		smart_str_append_const(&soap_headers, " HTTP/1.1\r\n");
 		smart_str_append_const(&soap_headers, "Host: ");
-		smart_str_appends(&soap_headers, ZSTR_VAL(uri->host));
+		smart_str_append(&soap_headers, uri->host);
 		if (uri->port != 80) {
 			smart_str_appendc(&soap_headers, ':');
 			smart_str_append_unsigned(&soap_headers, uri->port);
@@ -574,24 +574,24 @@ try_again:
 
 		smart_str_append_const(&soap_headers, "POST ");
 		if (use_proxy && !use_ssl) {
-			smart_str_appends(&soap_headers, ZSTR_VAL(uri->scheme));
+			smart_str_append(&soap_headers, uri->scheme);
 			smart_str_append_const(&soap_headers, "://");
-			smart_str_appends(&soap_headers, ZSTR_VAL(uri->host));
+			smart_str_append(&soap_headers, uri->host);
 			smart_str_appendc(&soap_headers, ':');
 			smart_str_append_unsigned(&soap_headers, uri->port);
 		}
 		if (uri->path) {
-			smart_str_appends(&soap_headers, ZSTR_VAL(uri->path));
+			smart_str_append(&soap_headers, uri->path);
 		} else {
 			smart_str_appendc(&soap_headers, '/');
 		}
 		if (uri->query) {
 			smart_str_appendc(&soap_headers, '?');
-			smart_str_appends(&soap_headers, ZSTR_VAL(uri->query));
+			smart_str_append(&soap_headers, uri->query);
 		}
 		if (uri->fragment) {
 			smart_str_appendc(&soap_headers, '#');
-			smart_str_appends(&soap_headers, ZSTR_VAL(uri->fragment));
+			smart_str_append(&soap_headers, uri->fragment);
 		}
 		if (http_1_1) {
 			smart_str_append_const(&soap_headers, " HTTP/1.1\r\n");
@@ -599,7 +599,7 @@ try_again:
 			smart_str_append_const(&soap_headers, " HTTP/1.0\r\n");
 		}
 		smart_str_append_const(&soap_headers, "Host: ");
-		smart_str_appends(&soap_headers, ZSTR_VAL(uri->host));
+		smart_str_append(&soap_headers, uri->host);
 		if (uri->port != (use_ssl?443:80)) {
 			smart_str_appendc(&soap_headers, ':');
 			smart_str_append_unsigned(&soap_headers, uri->port);
@@ -615,7 +615,7 @@ try_again:
 		if (Z_TYPE_P(tmp) == IS_STRING) {
 			if (Z_STRLEN_P(tmp) > 0) {
 				smart_str_append_const(&soap_headers, "User-Agent: ");
-				smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+				smart_str_append(&soap_headers, Z_STR_P(tmp));
 				smart_str_append_const(&soap_headers, "\r\n");
 			}
 		} else if (context &&
@@ -623,7 +623,7 @@ try_again:
 		           Z_TYPE_P(tmp) == IS_STRING) {
 			if (Z_STRLEN_P(tmp) > 0) {
 				smart_str_append_const(&soap_headers, "User-Agent: ");
-				smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+				smart_str_append(&soap_headers, Z_STR_P(tmp));
 				smart_str_append_const(&soap_headers, "\r\n");
 			}
 		} else if (FG(user_agent)) {
@@ -643,7 +643,7 @@ try_again:
 				Z_STRLEN_P(tmp) > 0
 			) {
 				smart_str_append_const(&soap_headers, "Content-Type: ");
-				smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+				smart_str_append(&soap_headers, Z_STR_P(tmp));
 			} else {
 				smart_str_append_const(&soap_headers, "Content-Type: application/soap+xml; charset=utf-8");
 			}
@@ -660,7 +660,7 @@ try_again:
 				Z_STRLEN_P(tmp) > 0
 			) {
 				smart_str_append_const(&soap_headers, "Content-Type: ");
-				smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+				smart_str_append(&soap_headers, Z_STR_P(tmp));
 				smart_str_append_const(&soap_headers, "\r\n");
 			} else {
 				smart_str_append_const(&soap_headers, "Content-Type: text/xml; charset=utf-8\r\n");
@@ -780,30 +780,30 @@ try_again:
 				make_digest(response, hash);
 
 				smart_str_append_const(&soap_headers, "Authorization: Digest username=\"");
-				smart_str_appendl(&soap_headers, Z_STRVAL_P(login), Z_STRLEN_P(login));
+				smart_str_append(&soap_headers, Z_STR_P(login));
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "realm", sizeof("realm")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_append_const(&soap_headers, "\", realm=\"");
-					smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+					smart_str_append(&soap_headers, Z_STR_P(tmp));
 				}
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "nonce", sizeof("nonce")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_append_const(&soap_headers, "\", nonce=\"");
-					smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+					smart_str_append(&soap_headers, Z_STR_P(tmp));
 				}
 				smart_str_append_const(&soap_headers, "\", uri=\"");
 				if (uri->path) {
-					smart_str_appends(&soap_headers, ZSTR_VAL(uri->path));
+					smart_str_append(&soap_headers, uri->path);
 				} else {
 					smart_str_appendc(&soap_headers, '/');
 				}
 				if (uri->query) {
 					smart_str_appendc(&soap_headers, '?');
-					smart_str_appends(&soap_headers, ZSTR_VAL(uri->query));
+					smart_str_append(&soap_headers, uri->query);
 				}
 				if (uri->fragment) {
 					smart_str_appendc(&soap_headers, '#');
-					smart_str_appends(&soap_headers, ZSTR_VAL(uri->fragment));
+					smart_str_append(&soap_headers, uri->fragment);
 				}
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "qop", sizeof("qop")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_STRING) {
@@ -819,12 +819,12 @@ try_again:
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "opaque", sizeof("opaque")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_append_const(&soap_headers, "\", opaque=\"");
-					smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+					smart_str_append(&soap_headers, Z_STR_P(tmp));
 				}
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "algorithm", sizeof("algorithm")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_append_const(&soap_headers, "\", algorithm=\"");
-					smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+					smart_str_append(&soap_headers, Z_STR_P(tmp));
 				}
 				smart_str_append_const(&soap_headers, "\"\r\n");
 			} else {
@@ -899,7 +899,7 @@ try_again:
 			ZVAL_STRINGL(Z_CLIENT_LAST_REQUEST_HEADERS_P(this_ptr),
 				ZSTR_VAL(soap_headers.s), ZSTR_LEN(soap_headers.s));
 		}
-		smart_str_appendl(&soap_headers, request->val, request->len);
+		smart_str_append(&soap_headers, request);
 		smart_str_0(&soap_headers);
 
 		err = php_stream_write(stream, ZSTR_VAL(soap_headers.s), ZSTR_LEN(soap_headers.s));

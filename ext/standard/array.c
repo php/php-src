@@ -620,7 +620,6 @@ PHP_FUNCTION(count)
 				cnt = php_count_recursive(Z_ARRVAL_P(array));
 			}
 			RETURN_LONG(cnt);
-			break;
 		case IS_OBJECT: {
 			zval retval;
 			/* first, we check if the handler is defined */
@@ -4494,7 +4493,7 @@ PHP_FUNCTION(array_count_values)
 			if ((tmp = zend_hash_index_find(Z_ARRVAL_P(return_value), Z_LVAL_P(entry))) == NULL) {
 				zval data;
 				ZVAL_LONG(&data, 1);
-				zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), &data);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), &data);
 			} else {
 				Z_LVAL_P(tmp)++;
 			}
@@ -4502,7 +4501,7 @@ PHP_FUNCTION(array_count_values)
 			if ((tmp = zend_symtable_find(Z_ARRVAL_P(return_value), Z_STR_P(entry))) == NULL) {
 				zval data;
 				ZVAL_LONG(&data, 1);
-				zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
+				zend_symtable_add_new(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 			} else {
 				Z_LVAL_P(tmp)++;
 			}
@@ -5741,7 +5740,7 @@ PHP_FUNCTION(array_diff)
 {
 	zval *args;
 	uint32_t argc, i;
-	uint32_t num;
+	uint64_t num;
 	HashTable exclude;
 	zval *value;
 	zend_string *str, *tmp_str, *key;
@@ -5829,6 +5828,11 @@ PHP_FUNCTION(array_diff)
 	if (num == 0) {
 		ZVAL_COPY(return_value, &args[0]);
 		return;
+	}
+
+	if (UNEXPECTED(num >= HT_MAX_SIZE)) {
+		zend_throw_error(NULL, "The total number of elements must be lower than %u", HT_MAX_SIZE);
+		RETURN_THROWS();
 	}
 
 	ZVAL_NULL(&dummy);

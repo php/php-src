@@ -54,6 +54,7 @@ static inline void php_json_pretty_print_char(smart_str *buf, int options, char 
 static inline void php_json_pretty_print_indent(smart_str *buf, int options, const php_json_encoder *encoder) /* {{{ */
 {
 	if (options & PHP_JSON_PRETTY_PRINT) {
+		smart_str_alloc(buf, encoder->depth * 4, 0);
 		for (int i = 0; i < encoder->depth; ++i) {
 			smart_str_appendl(buf, "    ", 4);
 		}

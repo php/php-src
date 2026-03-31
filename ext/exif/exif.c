@@ -4026,7 +4026,6 @@ static bool exif_scan_thumbnail(image_info_type *ImageInfo)
 			case M_EOI:
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Could not compute size of thumbnail");
 				return false;
-				break;
 
 			default:
 				/* just skip */

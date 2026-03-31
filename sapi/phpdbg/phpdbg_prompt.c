@@ -1190,19 +1190,20 @@ static void add_zendext_info(zend_extension *ext) /* {{{ */ {
 #ifdef HAVE_LIBDL
 PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char **name) /* {{{ */ {
 	DL_HANDLE handle;
-	char *extension_dir;
+	zend_string *extension_dir = zend_ini_str_literal("extension_dir");
 
-	extension_dir = INI_STR("extension_dir");
-
+	if (UNEXPECTED(zend_str_has_nul_byte(extension_dir))) {
+		phpdbg_error("extension_dir ini setting contains a nul byte");
+		return NULL;
+	}
 	if (strchr(*path, '/') != NULL || strchr(*path, DEFAULT_SLASH) != NULL) {
 		/* path is fine */
-	} else if (extension_dir && extension_dir[0]) {
+	} else if (extension_dir && ZSTR_LEN(extension_dir) > 0) {
 		char *libpath;
-		int extension_dir_len = strlen(extension_dir);
-		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
-			spprintf(&libpath, 0, "%s%s", extension_dir, *path); /* SAFE */
+		if (IS_SLASH(ZSTR_VAL(extension_dir)[ZSTR_LEN(extension_dir)-1])) {
+			spprintf(&libpath, 0, "%s%s", ZSTR_VAL(extension_dir), *path); /* SAFE */
 		} else {
-			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, *path); /* SAFE */
+			spprintf(&libpath, 0, "%s%c%s", ZSTR_VAL(extension_dir), DEFAULT_SLASH, *path); /* SAFE */
 		}
 		efree(*path);
 		*path = libpath;

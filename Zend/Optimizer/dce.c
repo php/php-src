@@ -571,7 +571,7 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *optimizer
 	} FOREACH_PHI_END();
 
 	/* Mark reachable instruction without side effects as dead */
-	int b = ssa->cfg.blocks_count;
+	uint32_t b = ssa->cfg.blocks_count;
 	while (b > 0) {
 		int	op_data = -1;
 

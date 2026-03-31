@@ -460,59 +460,65 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	out_left = in_len + 32; /* Avoid realloc() most cases */
 	out_size = 0;
 	bsz = out_left;
-	out_buf = zend_string_alloc(bsz, 0);
-	out_p = ZSTR_VAL(out_buf);
 
-	while (in_left > 0) {
-		result = iconv(cd, (ICONV_CONST char **) &in_p, &in_left, (char **) &out_p, &out_left);
-		out_size = bsz - out_left;
-		if (result == (size_t)(-1)) {
-			if (ignore_ilseq && errno == EILSEQ) {
-				if (in_left <= 1) {
-					result = 0;
-				} else {
-					errno = 0;
-					in_p++;
-					in_left--;
+	zend_try {
+		out_buf = zend_string_alloc(bsz, 0);
+		out_p = ZSTR_VAL(out_buf);
+
+		while (in_left > 0) {
+			result = iconv(cd, (ICONV_CONST char **) &in_p, &in_left, (char **) &out_p, &out_left);
+			out_size = bsz - out_left;
+			if (result == (size_t)(-1)) {
+				if (ignore_ilseq && errno == EILSEQ) {
+					if (in_left <= 1) {
+						result = 0;
+					} else {
+						errno = 0;
+						in_p++;
+						in_left--;
+						continue;
+					}
+				}
+
+				if (errno == E2BIG && in_left > 0) {
+					/* converted string is longer than out buffer */
+					bsz += in_len;
+
+					out_buf = zend_string_extend(out_buf, bsz, 0);
+					out_p = ZSTR_VAL(out_buf);
+					out_p += out_size;
+					out_left = bsz - out_size;
 					continue;
 				}
 			}
+			break;
+		}
 
-			if (errno == E2BIG && in_left > 0) {
-				/* converted string is longer than out buffer */
-				bsz += in_len;
+		if (result != (size_t)(-1)) {
+			/* flush the shift-out sequences */
+			for (;;) {
+				result = iconv(cd, NULL, NULL, (char **) &out_p, &out_left);
+				out_size = bsz - out_left;
 
-				out_buf = zend_string_extend(out_buf, bsz, 0);
-				out_p = ZSTR_VAL(out_buf);
-				out_p += out_size;
-				out_left = bsz - out_size;
-				continue;
+				if (result != (size_t)(-1)) {
+					break;
+				}
+
+				if (errno == E2BIG) {
+					bsz += 16;
+					out_buf = zend_string_extend(out_buf, bsz, 0);
+					out_p = ZSTR_VAL(out_buf);
+					out_p += out_size;
+					out_left = bsz - out_size;
+				} else {
+					break;
+				}
 			}
 		}
-		break;
-	}
-
-	if (result != (size_t)(-1)) {
-		/* flush the shift-out sequences */
-		for (;;) {
-		   	result = iconv(cd, NULL, NULL, (char **) &out_p, &out_left);
-			out_size = bsz - out_left;
-
-			if (result != (size_t)(-1)) {
-				break;
-			}
-
-			if (errno == E2BIG) {
-				bsz += 16;
-				out_buf = zend_string_extend(out_buf, bsz, 0);
-				out_p = ZSTR_VAL(out_buf);
-				out_p += out_size;
-				out_left = bsz - out_size;
-			} else {
-				break;
-			}
-		}
-	}
+	} zend_catch {
+		iconv_close(cd);
+		zend_bailout();
+	} zend_end_try();
 
 	iconv_close(cd);
 
@@ -685,58 +691,63 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 	errno = 0;
 	more = nbytes > 0 && len > 0;
 
-	for (in_p = str, in_left = nbytes, cnt = 0; more; ++cnt) {
-		out_p = buf;
-		out_left = sizeof(buf);
+	bool bailout = false;
+	zend_try {
+		for (in_p = str, in_left = nbytes, cnt = 0; more; ++cnt) {
+			out_p = buf;
+			out_left = sizeof(buf);
 
-		more = in_left > 0 && len > 0;
+			more = in_left > 0 && len > 0;
 
-		iconv(cd1, more ? (ICONV_CONST char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
-		if (out_left == sizeof(buf)) {
-			break;
-		}
-
-		if ((zend_long)cnt >= offset) {
-			if (cd2 == (iconv_t)NULL) {
-				cd2 = iconv_open(enc, GENERIC_SUPERSET_NAME);
-
-				if (cd2 == (iconv_t)(-1)) {
-					cd2 = (iconv_t)NULL;
-					if (errno == EINVAL) {
-						err = PHP_ICONV_ERR_WRONG_CHARSET;
-					} else {
-						err = PHP_ICONV_ERR_CONVERTER;
-					}
-					break;
-				}
-			}
-
-			if (_php_iconv_appendl(pretval, buf, sizeof(buf), cd2) != PHP_ICONV_ERR_SUCCESS) {
+			iconv(cd1, more ? (ICONV_CONST char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
+			if (out_left == sizeof(buf)) {
 				break;
 			}
-			--len;
+
+			if ((zend_long)cnt >= offset) {
+				if (cd2 == (iconv_t)NULL) {
+					cd2 = iconv_open(enc, GENERIC_SUPERSET_NAME);
+
+					if (cd2 == (iconv_t)(-1)) {
+						cd2 = (iconv_t)NULL;
+						if (errno == EINVAL) {
+							err = PHP_ICONV_ERR_WRONG_CHARSET;
+						} else {
+							err = PHP_ICONV_ERR_CONVERTER;
+						}
+						break;
+					}
+				}
+
+				if (_php_iconv_appendl(pretval, buf, sizeof(buf), cd2) != PHP_ICONV_ERR_SUCCESS) {
+					break;
+				}
+				--len;
+			}
+
 		}
 
-	}
+		switch (errno) {
+			case EINVAL:
+				err = PHP_ICONV_ERR_ILLEGAL_CHAR;
+				break;
 
-	switch (errno) {
-		case EINVAL:
-			err = PHP_ICONV_ERR_ILLEGAL_CHAR;
-			break;
+			case EILSEQ:
+				err = PHP_ICONV_ERR_ILLEGAL_SEQ;
+				break;
 
-		case EILSEQ:
-			err = PHP_ICONV_ERR_ILLEGAL_SEQ;
-			break;
-
-		case E2BIG:
-			break;
-	}
-	if (err == PHP_ICONV_ERR_SUCCESS) {
-		if (cd2 != (iconv_t)NULL) {
-			_php_iconv_appendl(pretval, NULL, 0, cd2);
+			case E2BIG:
+				break;
 		}
-		smart_str_0(pretval);
-	}
+		if (err == PHP_ICONV_ERR_SUCCESS) {
+			if (cd2 != (iconv_t)NULL) {
+				_php_iconv_appendl(pretval, NULL, 0, cd2);
+			}
+			smart_str_0(pretval);
+		}
+	} zend_catch {
+		bailout = true;
+	} zend_end_try();
 
 	if (cd1 != (iconv_t)NULL) {
 		iconv_close(cd1);
@@ -744,6 +755,9 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 
 	if (cd2 != (iconv_t)NULL) {
 		iconv_close(cd2);
+	}
+	if (bailout) {
+		zend_bailout();
 	}
 	return err;
 }
@@ -904,6 +918,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 {
 	php_iconv_err_t err = PHP_ICONV_ERR_SUCCESS;
 	iconv_t cd = (iconv_t)(-1), cd_pl = (iconv_t)(-1);
+	bool bailout = false;
 	size_t char_cnt = 0;
 	size_t out_charset_len;
 	size_t lfchars_len;
@@ -962,215 +977,219 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 		goto out;
 	}
 
-	buf = safe_emalloc(1, max_line_len, 5);
+	zend_try {
+		buf = safe_emalloc(1, max_line_len, 5);
 
-	char_cnt = max_line_len;
+		char_cnt = max_line_len;
 
-	_php_iconv_appendl(pretval, fname, fname_nbytes, cd_pl);
-	char_cnt -= fname_nbytes;
-	smart_str_appendl(pretval, ": ", sizeof(": ") - 1);
-	char_cnt -= 2;
-
-	in_p = fval;
-	in_left = fval_nbytes;
-
-	do {
-		size_t prev_in_left;
-		size_t out_size;
-		size_t encoded_word_min_len = sizeof("=\?\?X\?\?=")-1 + out_charset_len + (enc_scheme == PHP_ICONV_ENC_SCHEME_BASE64 ? 4 : 3);
-
-		if (char_cnt < encoded_word_min_len + lfchars_len + 1) {
-			/* lfchars must be encoded in ASCII here*/
-			smart_str_appendl(pretval, lfchars, lfchars_len);
-			smart_str_appendc(pretval, ' ');
-			char_cnt = max_line_len - 1;
-		}
-
-		smart_str_appendl(pretval, "=?", sizeof("=?") - 1);
+		_php_iconv_appendl(pretval, fname, fname_nbytes, cd_pl);
+		char_cnt -= fname_nbytes;
+		smart_str_appendl(pretval, ": ", sizeof(": ") - 1);
 		char_cnt -= 2;
-		smart_str_appendl(pretval, out_charset, out_charset_len);
-		char_cnt -= out_charset_len;
-		smart_str_appendc(pretval, '?');
-		char_cnt --;
 
-		switch (enc_scheme) {
-			case PHP_ICONV_ENC_SCHEME_BASE64: {
-				size_t ini_in_left;
-				const char *ini_in_p;
-				size_t out_reserved = 4;
+		in_p = fval;
+		in_left = fval_nbytes;
 
-				smart_str_appendc(pretval, 'B');
-				char_cnt--;
-				smart_str_appendc(pretval, '?');
-				char_cnt--;
+		do {
+			size_t prev_in_left;
+			size_t out_size;
+			size_t encoded_word_min_len = sizeof("=\?\?X\?\?=")-1 + out_charset_len + (enc_scheme == PHP_ICONV_ENC_SCHEME_BASE64 ? 4 : 3);
 
-				prev_in_left = ini_in_left = in_left;
-				ini_in_p = in_p;
+			if (char_cnt < encoded_word_min_len + lfchars_len + 1) {
+				/* lfchars must be encoded in ASCII here*/
+				smart_str_appendl(pretval, lfchars, lfchars_len);
+				smart_str_appendc(pretval, ' ');
+				char_cnt = max_line_len - 1;
+			}
 
-				out_size = (char_cnt - 2) / 4 * 3;
+			smart_str_appendl(pretval, "=?", sizeof("=?") - 1);
+			char_cnt -= 2;
+			smart_str_appendl(pretval, out_charset, out_charset_len);
+			char_cnt -= out_charset_len;
+			smart_str_appendc(pretval, '?');
+			char_cnt --;
 
-				for (;;) {
-					out_p = buf;
+			switch (enc_scheme) {
+				case PHP_ICONV_ENC_SCHEME_BASE64: {
+					size_t ini_in_left;
+					const char *ini_in_p;
+					size_t out_reserved = 4;
 
-					if (out_size <= out_reserved) {
-						err = PHP_ICONV_ERR_TOO_BIG;
-						goto out;
-					}
+					smart_str_appendc(pretval, 'B');
+					char_cnt--;
+					smart_str_appendc(pretval, '?');
+					char_cnt--;
 
-					out_left = out_size - out_reserved;
+					prev_in_left = ini_in_left = in_left;
+					ini_in_p = in_p;
 
-					if (iconv(cd, (ICONV_CONST char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
-						switch (errno) {
-							case EINVAL:
-								err = PHP_ICONV_ERR_ILLEGAL_CHAR;
-								goto out;
+					out_size = (char_cnt - 2) / 4 * 3;
 
-							case EILSEQ:
-								err = PHP_ICONV_ERR_ILLEGAL_SEQ;
-								goto out;
+					for (;;) {
+						out_p = buf;
 
-							case E2BIG:
-								if (prev_in_left == in_left) {
-									err = PHP_ICONV_ERR_TOO_BIG;
+						if (out_size <= out_reserved) {
+							err = PHP_ICONV_ERR_TOO_BIG;
+							goto out;
+						}
+
+						out_left = out_size - out_reserved;
+
+						if (iconv(cd, (ICONV_CONST char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+							switch (errno) {
+								case EINVAL:
+									err = PHP_ICONV_ERR_ILLEGAL_CHAR;
 									goto out;
-								}
-								break;
 
-							default:
+								case EILSEQ:
+									err = PHP_ICONV_ERR_ILLEGAL_SEQ;
+									goto out;
+
+								case E2BIG:
+									if (prev_in_left == in_left) {
+										err = PHP_ICONV_ERR_TOO_BIG;
+										goto out;
+									}
+									break;
+
+								default:
+									err = PHP_ICONV_ERR_UNKNOWN;
+									goto out;
+							}
+						}
+
+						out_left += out_reserved;
+
+						if (iconv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)-1) {
+							if (errno != E2BIG) {
 								err = PHP_ICONV_ERR_UNKNOWN;
 								goto out;
+							}
+						} else {
+							break;
 						}
-					}
 
-					out_left += out_reserved;
-
-					if (iconv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)-1) {
-						if (errno != E2BIG) {
+						if (iconv(cd, NULL, NULL, NULL, NULL) == (size_t)-1) {
 							err = PHP_ICONV_ERR_UNKNOWN;
 							goto out;
 						}
-					} else {
-						break;
+
+						out_reserved += 4;
+						in_left = ini_in_left;
+						in_p = ini_in_p;
 					}
+
+					prev_in_left = in_left;
+
+					encoded = php_base64_encode((unsigned char *) buf, (out_size - out_left));
+
+					if (char_cnt < ZSTR_LEN(encoded)) {
+						/* something went wrong! */
+						err = PHP_ICONV_ERR_UNKNOWN;
+						goto out;
+					}
+
+					smart_str_append(pretval, encoded);
+					char_cnt -= ZSTR_LEN(encoded);
+					smart_str_appendl(pretval, "?=", sizeof("?=") - 1);
+					char_cnt -= 2;
+
+					zend_string_release_ex(encoded, 0);
+					encoded = NULL;
+				} break; /* case PHP_ICONV_ENC_SCHEME_BASE64: */
+
+				case PHP_ICONV_ENC_SCHEME_QPRINT: {
+					size_t ini_in_left;
+					const char *ini_in_p;
+					const unsigned char *p;
+					size_t nbytes_required;
+
+					smart_str_appendc(pretval, 'Q');
+					char_cnt--;
+					smart_str_appendc(pretval, '?');
+					char_cnt--;
+
+					prev_in_left = ini_in_left = in_left;
+					ini_in_p = in_p;
+
+					for (out_size = (char_cnt - 2); out_size > 0;) {
+
+						nbytes_required = 0;
+
+						out_p = buf;
+						out_left = out_size;
+
+						if (iconv(cd, (ICONV_CONST char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+							switch (errno) {
+								case EINVAL:
+									err = PHP_ICONV_ERR_ILLEGAL_CHAR;
+									goto out;
+
+								case EILSEQ:
+									err = PHP_ICONV_ERR_ILLEGAL_SEQ;
+									goto out;
+
+								case E2BIG:
+									if (prev_in_left == in_left) {
+										err = PHP_ICONV_ERR_UNKNOWN;
+										goto out;
+									}
+									break;
+
+								default:
+									err = PHP_ICONV_ERR_UNKNOWN;
+									goto out;
+							}
+						}
+						if (iconv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)-1) {
+							if (errno != E2BIG) {
+								err = PHP_ICONV_ERR_UNKNOWN;
+								goto out;
+							}
+						}
+
+						for (p = (unsigned char *)buf; p < (unsigned char *)out_p; p++) {
+							nbytes_required += qp_table[*p];
+						}
+
+						if (nbytes_required <= char_cnt - 2) {
+							break;
+						}
+
+						out_size -= ((nbytes_required - (char_cnt - 2)) + 2) / 3;
+						in_left = ini_in_left;
+						in_p = ini_in_p;
+					}
+
+					for (p = (unsigned char *)buf; p < (unsigned char *)out_p; p++) {
+						if (qp_table[*p] == 1) {
+							smart_str_appendc(pretval, *(char *)p);
+							char_cnt--;
+						} else {
+							static const char qp_digits[] = "0123456789ABCDEF";
+							smart_str_appendc(pretval, '=');
+							smart_str_appendc(pretval, qp_digits[(*p >> 4) & 0x0f]);
+							smart_str_appendc(pretval, qp_digits[(*p & 0x0f)]);
+							char_cnt -= 3;
+						}
+					}
+
+					smart_str_appendl(pretval, "?=", sizeof("?=") - 1);
+					char_cnt -= 2;
 
 					if (iconv(cd, NULL, NULL, NULL, NULL) == (size_t)-1) {
 						err = PHP_ICONV_ERR_UNKNOWN;
 						goto out;
 					}
 
-					out_reserved += 4;
-					in_left = ini_in_left;
-					in_p = ini_in_p;
-				}
+				} break; /* case PHP_ICONV_ENC_SCHEME_QPRINT: */
+			}
+		} while (in_left > 0);
 
-				prev_in_left = in_left;
-
-				encoded = php_base64_encode((unsigned char *) buf, (out_size - out_left));
-
-				if (char_cnt < ZSTR_LEN(encoded)) {
-					/* something went wrong! */
-					err = PHP_ICONV_ERR_UNKNOWN;
-					goto out;
-				}
-
-				smart_str_appendl(pretval, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
-				char_cnt -= ZSTR_LEN(encoded);
-				smart_str_appendl(pretval, "?=", sizeof("?=") - 1);
-				char_cnt -= 2;
-
-				zend_string_release_ex(encoded, 0);
-				encoded = NULL;
-			} break; /* case PHP_ICONV_ENC_SCHEME_BASE64: */
-
-			case PHP_ICONV_ENC_SCHEME_QPRINT: {
-				size_t ini_in_left;
-				const char *ini_in_p;
-				const unsigned char *p;
-				size_t nbytes_required;
-
-				smart_str_appendc(pretval, 'Q');
-				char_cnt--;
-				smart_str_appendc(pretval, '?');
-				char_cnt--;
-
-				prev_in_left = ini_in_left = in_left;
-				ini_in_p = in_p;
-
-				for (out_size = (char_cnt - 2); out_size > 0;) {
-
-					nbytes_required = 0;
-
-					out_p = buf;
-					out_left = out_size;
-
-					if (iconv(cd, (ICONV_CONST char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
-						switch (errno) {
-							case EINVAL:
-								err = PHP_ICONV_ERR_ILLEGAL_CHAR;
-								goto out;
-
-							case EILSEQ:
-								err = PHP_ICONV_ERR_ILLEGAL_SEQ;
-								goto out;
-
-							case E2BIG:
-								if (prev_in_left == in_left) {
-									err = PHP_ICONV_ERR_UNKNOWN;
-									goto out;
-								}
-								break;
-
-							default:
-								err = PHP_ICONV_ERR_UNKNOWN;
-								goto out;
-						}
-					}
-					if (iconv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)-1) {
-						if (errno != E2BIG) {
-							err = PHP_ICONV_ERR_UNKNOWN;
-							goto out;
-						}
-					}
-
-					for (p = (unsigned char *)buf; p < (unsigned char *)out_p; p++) {
-						nbytes_required += qp_table[*p];
-					}
-
-					if (nbytes_required <= char_cnt - 2) {
-						break;
-					}
-
-					out_size -= ((nbytes_required - (char_cnt - 2)) + 2) / 3;
-					in_left = ini_in_left;
-					in_p = ini_in_p;
-				}
-
-				for (p = (unsigned char *)buf; p < (unsigned char *)out_p; p++) {
-					if (qp_table[*p] == 1) {
-						smart_str_appendc(pretval, *(char *)p);
-						char_cnt--;
-					} else {
-						static const char qp_digits[] = "0123456789ABCDEF";
-						smart_str_appendc(pretval, '=');
-						smart_str_appendc(pretval, qp_digits[(*p >> 4) & 0x0f]);
-						smart_str_appendc(pretval, qp_digits[(*p & 0x0f)]);
-						char_cnt -= 3;
-					}
-				}
-
-				smart_str_appendl(pretval, "?=", sizeof("?=") - 1);
-				char_cnt -= 2;
-
-				if (iconv(cd, NULL, NULL, NULL, NULL) == (size_t)-1) {
-					err = PHP_ICONV_ERR_UNKNOWN;
-					goto out;
-				}
-
-			} break; /* case PHP_ICONV_ENC_SCHEME_QPRINT: */
-		}
-	} while (in_left > 0);
-
-	smart_str_0(pretval);
+		smart_str_0(pretval);
+	} zend_catch {
+		bailout = true;
+	} zend_end_try();
 
 out:
 	if (cd != (iconv_t)(-1)) {
@@ -1185,6 +1204,9 @@ out:
 	if (buf != NULL) {
 		efree(buf);
 	}
+	if (bailout) {
+		zend_bailout();
+	}
 	return err;
 }
 /* }}} */
@@ -1193,6 +1215,7 @@ out:
 static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *str, size_t str_nbytes, const char *enc, const char **next_pos, int mode)
 {
 	php_iconv_err_t err = PHP_ICONV_ERR_SUCCESS;
+	bool bailout = false;
 
 	iconv_t cd = (iconv_t)(-1), cd_pl = (iconv_t)(-1);
 
@@ -1224,349 +1247,108 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 	}
 
 	p1 = str;
-	for (str_left = str_nbytes; str_left > 0; str_left--, p1++) {
-		int eos = 0;
+	zend_try {
+		for (str_left = str_nbytes; str_left > 0; str_left--, p1++) {
+			int eos = 0;
 
-		switch (scan_stat) {
-			case 0: /* expecting any character */
-				switch (*p1) {
-					case '\r': /* part of an EOL sequence? */
-						scan_stat = 7;
-						break;
-
-					case '\n':
-						scan_stat = 8;
-						break;
-
-					case '=': /* first letter of an encoded chunk */
-						encoded_word = p1;
-						scan_stat = 1;
-						break;
-
-					case ' ': case '\t': /* a chunk of whitespaces */
-						spaces = p1;
-						scan_stat = 11;
-						break;
-
-					default: /* first letter of a non-encoded word */
-						err = _php_iconv_appendc(pretval, *p1, cd_pl);
-						if (err != PHP_ICONV_ERR_SUCCESS) {
-							if (mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR) {
-								err = PHP_ICONV_ERR_SUCCESS;
-							} else {
-								goto out;
-							}
-						}
-						encoded_word = NULL;
-						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-							scan_stat = 12;
-						}
-						break;
-				}
-				break;
-
-			case 1: /* expecting a delimiter */
-				if (*p1 != '?') {
-					if (*p1 == '\r' || *p1 == '\n') {
-						--p1;
-					}
-					err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
-					if (err != PHP_ICONV_ERR_SUCCESS) {
-						goto out;
-					}
-					encoded_word = NULL;
-					if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-						scan_stat = 12;
-					} else {
-						scan_stat = 0;
-					}
-					break;
-				}
-				csname = p1 + 1;
-				scan_stat = 2;
-				break;
-
-			case 2: /* expecting a charset name */
-				switch (*p1) {
-					case '?': /* normal delimiter: encoding scheme follows */
-						scan_stat = 3;
-						break;
-
-					case '*': /* new style delimiter: locale id follows */
-						scan_stat = 10;
-						break;
-
-					case '\r': case '\n': /* not an encoded-word */
-						--p1;
-						_php_iconv_appendc(pretval, '=', cd_pl);
-						_php_iconv_appendc(pretval, '?', cd_pl);
-						err = _php_iconv_appendl(pretval, csname, (size_t)((p1 + 1) - csname), cd_pl);
-						if (err != PHP_ICONV_ERR_SUCCESS) {
-							goto out;
-						}
-						csname = NULL;
-						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-							scan_stat = 12;
-						}
-						else {
-							scan_stat = 0;
-						}
-						continue;
-				}
-				if (scan_stat != 2) {
-					char tmpbuf[80];
-
-					if (csname == NULL) {
-						err = PHP_ICONV_ERR_MALFORMED;
-						goto out;
-					}
-
-					csname_len = (size_t)(p1 - csname);
-
-					if (csname_len > sizeof(tmpbuf) - 1) {
-						if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
-							err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
-							if (err != PHP_ICONV_ERR_SUCCESS) {
-								goto out;
-							}
-							encoded_word = NULL;
-							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-								scan_stat = 12;
-							} else {
-								scan_stat = 0;
-							}
+			switch (scan_stat) {
+				case 0: /* expecting any character */
+					switch (*p1) {
+						case '\r': /* part of an EOL sequence? */
+							scan_stat = 7;
 							break;
-						} else {
-							err = PHP_ICONV_ERR_MALFORMED;
-							goto out;
-						}
-					}
 
-					memcpy(tmpbuf, csname, csname_len);
-					tmpbuf[csname_len] = '\0';
-
-					if (cd != (iconv_t)(-1)) {
-						iconv_close(cd);
-					}
-
-					cd = iconv_open(enc, tmpbuf);
-
-					if (cd == (iconv_t)(-1)) {
-						if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
-							/* Bad character set, but the user wants us to
-							 * press on. In this case, we'll just insert the
-							 * undecoded encoded word, since there isn't really
-							 * a more sensible behaviour available; the only
-							 * other options are to swallow the encoded word
-							 * entirely or decode it with an arbitrarily chosen
-							 * single byte encoding, both of which seem to have
-							 * a higher WTF factor than leaving it undecoded.
-							 *
-							 * Given this approach, we need to skip ahead to
-							 * the end of the encoded word. */
-							int qmarks = 2;
-							while (qmarks > 0 && str_left > 1) {
-								if (*(++p1) == '?') {
-									--qmarks;
-								}
-								--str_left;
-							}
-
-							/* Look ahead to check for the terminating = that
-							 * should be there as well; if it's there, we'll
-							 * also include that. If it's not, there isn't much
-							 * we can do at this point. */
-							if (*(p1 + 1) == '=') {
-								++p1;
-								if (str_left > 1) {
-									--str_left;
-								}
-							}
-
-							err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
-							if (err != PHP_ICONV_ERR_SUCCESS) {
-								goto out;
-							}
-
-							/* Let's go back and see if there are further
-							 * encoded words or bare content, and hope they
-							 * might actually have a valid character set. */
-							scan_stat = 12;
+						case '\n':
+							scan_stat = 8;
 							break;
-						} else {
-							if (errno == EINVAL) {
-								err = PHP_ICONV_ERR_WRONG_CHARSET;
-							} else {
-								err = PHP_ICONV_ERR_CONVERTER;
-							}
-							goto out;
-						}
-					}
-				}
-				break;
 
-			case 3: /* expecting a encoding scheme specifier */
-				switch (*p1) {
-					case 'b':
-					case 'B':
-						enc_scheme = PHP_ICONV_ENC_SCHEME_BASE64;
-						scan_stat = 4;
-						break;
-
-					case 'q':
-					case 'Q':
-						enc_scheme = PHP_ICONV_ENC_SCHEME_QPRINT;
-						scan_stat = 4;
-						break;
-
-					default:
-						if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
-							err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
-							if (err != PHP_ICONV_ERR_SUCCESS) {
-								goto out;
-							}
-							encoded_word = NULL;
-							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-								scan_stat = 12;
-							} else {
-								scan_stat = 0;
-							}
+						case '=': /* first letter of an encoded chunk */
+							encoded_word = p1;
+							scan_stat = 1;
 							break;
-						} else {
-							err = PHP_ICONV_ERR_MALFORMED;
-							goto out;
-						}
-				}
-				break;
 
-			case 4: /* expecting a delimiter */
-				if (*p1 != '?') {
-					if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
-						/* pass the entire chunk through the converter */
-						err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
-						if (err != PHP_ICONV_ERR_SUCCESS) {
-							goto out;
-						}
-						encoded_word = NULL;
-						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-							scan_stat = 12;
-						} else {
-							scan_stat = 0;
-						}
-						break;
-					} else {
-						err = PHP_ICONV_ERR_MALFORMED;
-						goto out;
-					}
-				}
-				encoded_text = p1 + 1;
-				scan_stat = 5;
-				break;
+						case ' ': case '\t': /* a chunk of whitespaces */
+							spaces = p1;
+							scan_stat = 11;
+							break;
 
-			case 5: /* expecting an encoded portion */
-				if (*p1 == '?') {
-					encoded_text_len = (size_t)(p1 - encoded_text);
-					scan_stat = 6;
-				}
-				break;
-
-			case 7: /* expecting a "\n" character */
-				if (*p1 == '\n') {
-					scan_stat = 8;
-				} else {
-					/* bare CR */
-					_php_iconv_appendc(pretval, '\r', cd_pl);
-					_php_iconv_appendc(pretval, *p1, cd_pl);
-					scan_stat = 0;
-				}
-				break;
-
-			case 8: /* checking whether the following line is part of a
-					   folded header */
-				if (*p1 != ' ' && *p1 != '\t') {
-					--p1;
-					str_left = 1; /* quit_loop */
-					break;
-				}
-				if (encoded_word == NULL) {
-					_php_iconv_appendc(pretval, ' ', cd_pl);
-				}
-				spaces = NULL;
-				scan_stat = 11;
-				break;
-
-			case 6: /* expecting a End-Of-Chunk character "=" */
-				if (*p1 != '=') {
-					if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
-						/* pass the entire chunk through the converter */
-						err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
-						if (err != PHP_ICONV_ERR_SUCCESS) {
-							goto out;
-						}
-						encoded_word = NULL;
-						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-							scan_stat = 12;
-						} else {
-							scan_stat = 0;
-						}
-						break;
-					} else {
-						err = PHP_ICONV_ERR_MALFORMED;
-						goto out;
-					}
-				}
-				scan_stat = 9;
-				if (str_left == 1) {
-					eos = 1;
-				} else {
-					break;
-				}
-				/* TODO might want to rearrange logic so this is more obvious */
-				ZEND_FALLTHROUGH;
-
-			case 9: /* choice point, seeing what to do next.*/
-				switch (*p1) {
-					default:
-						/* Handle non-RFC-compliant formats
-						 *
-						 * RFC2047 requires the character that comes right
-						 * after an encoded word (chunk) to be a whitespace,
-						 * while there are lots of broken implementations that
-						 * generate such malformed headers that don't fulfill
-						 * that requirement.
-						 */
-						if (!eos) {
-							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-								/* pass the entire chunk through the converter */
-								err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
-								if (err != PHP_ICONV_ERR_SUCCESS) {
+						default: /* first letter of a non-encoded word */
+							err = _php_iconv_appendc(pretval, *p1, cd_pl);
+							if (err != PHP_ICONV_ERR_SUCCESS) {
+								if (mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR) {
+									err = PHP_ICONV_ERR_SUCCESS;
+								} else {
 									goto out;
 								}
-								scan_stat = 12;
-								break;
 							}
+							encoded_word = NULL;
+							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+								scan_stat = 12;
+							}
+							break;
+					}
+					break;
+
+				case 1: /* expecting a delimiter */
+					if (*p1 != '?') {
+						if (*p1 == '\r' || *p1 == '\n') {
+							--p1;
 						}
-						ZEND_FALLTHROUGH;
+						err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
+						if (err != PHP_ICONV_ERR_SUCCESS) {
+							goto out;
+						}
+						encoded_word = NULL;
+						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+							scan_stat = 12;
+						} else {
+							scan_stat = 0;
+						}
+						break;
+					}
+					csname = p1 + 1;
+					scan_stat = 2;
+					break;
 
-					case '\r': case '\n': case ' ': case '\t': {
-						zend_string *decoded_text;
+				case 2: /* expecting a charset name */
+					switch (*p1) {
+						case '?': /* normal delimiter: encoding scheme follows */
+							scan_stat = 3;
+							break;
 
-						switch (enc_scheme) {
-							case PHP_ICONV_ENC_SCHEME_BASE64:
-								decoded_text = php_base64_decode((unsigned char*)encoded_text, encoded_text_len);
-								break;
+						case '*': /* new style delimiter: locale id follows */
+							scan_stat = 10;
+							break;
 
-							case PHP_ICONV_ENC_SCHEME_QPRINT:
-								decoded_text = php_quot_print_decode((unsigned char*)encoded_text, encoded_text_len, 1);
-								break;
-							default:
-								decoded_text = NULL;
-								break;
+						case '\r': case '\n': /* not an encoded-word */
+							--p1;
+							_php_iconv_appendc(pretval, '=', cd_pl);
+							_php_iconv_appendc(pretval, '?', cd_pl);
+							err = _php_iconv_appendl(pretval, csname, (size_t)((p1 + 1) - csname), cd_pl);
+							if (err != PHP_ICONV_ERR_SUCCESS) {
+								goto out;
+							}
+							csname = NULL;
+							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+								scan_stat = 12;
+							}
+							else {
+								scan_stat = 0;
+							}
+							continue;
+					}
+					if (scan_stat != 2) {
+						char tmpbuf[80];
+
+						if (csname == NULL) {
+							err = PHP_ICONV_ERR_MALFORMED;
+							goto out;
 						}
 
-						if (decoded_text == NULL) {
+						csname_len = (size_t)(p1 - csname);
+
+						if (csname_len > sizeof(tmpbuf) - 1) {
 							if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
-								/* pass the entire chunk through the converter */
 								err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
 								if (err != PHP_ICONV_ERR_SUCCESS) {
 									goto out;
@@ -1579,162 +1361,411 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 								}
 								break;
 							} else {
-								err = PHP_ICONV_ERR_UNKNOWN;
+								err = PHP_ICONV_ERR_MALFORMED;
 								goto out;
 							}
 						}
 
-						err = _php_iconv_appendl(pretval, ZSTR_VAL(decoded_text), ZSTR_LEN(decoded_text), cd);
-						if (err == PHP_ICONV_ERR_SUCCESS) {
-							err = _php_iconv_appendl(pretval, NULL, 0, cd);
-						}
-						zend_string_release_ex(decoded_text, 0);
+						memcpy(tmpbuf, csname, csname_len);
+						tmpbuf[csname_len] = '\0';
 
-						if (err != PHP_ICONV_ERR_SUCCESS) {
+						if (cd != (iconv_t)(-1)) {
+							iconv_close(cd);
+						}
+
+						cd = iconv_open(enc, tmpbuf);
+
+						if (cd == (iconv_t)(-1)) {
 							if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
-								/* pass the entire chunk through the converter */
-								err = _php_iconv_appendl(pretval, encoded_word, (size_t)(p1 - encoded_word), cd_pl);
-								encoded_word = NULL;
-								if (err != PHP_ICONV_ERR_SUCCESS) {
-									break;
+								/* Bad character set, but the user wants us to
+								 * press on. In this case, we'll just insert the
+								 * undecoded encoded word, since there isn't really
+								 * a more sensible behaviour available; the only
+								 * other options are to swallow the encoded word
+								 * entirely or decode it with an arbitrarily chosen
+								 * single byte encoding, both of which seem to have
+								 * a higher WTF factor than leaving it undecoded.
+								 *
+								 * Given this approach, we need to skip ahead to
+								 * the end of the encoded word. */
+								int qmarks = 2;
+								while (qmarks > 0 && str_left > 1) {
+									if (*(++p1) == '?') {
+										--qmarks;
+									}
+									--str_left;
 								}
-							} else {
-								goto out;
-							}
-						}
 
-						if (eos) { /* reached end-of-string. done. */
-							scan_stat = 0;
-							break;
-						}
+								/* Look ahead to check for the terminating = that
+								 * should be there as well; if it's there, we'll
+								 * also include that. If it's not, there isn't much
+								 * we can do at this point. */
+								if (*(p1 + 1) == '=') {
+									++p1;
+									if (str_left > 1) {
+										--str_left;
+									}
+								}
 
-						switch (*p1) {
-							case '\r': /* part of an EOL sequence? */
-								scan_stat = 7;
-								break;
+								err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
+								if (err != PHP_ICONV_ERR_SUCCESS) {
+									goto out;
+								}
 
-							case '\n':
-								scan_stat = 8;
-								break;
-
-							case '=': /* first letter of an encoded chunk */
-								scan_stat = 1;
-								break;
-
-							case ' ': case '\t': /* medial whitespaces */
-								spaces = p1;
-								scan_stat = 11;
-								break;
-
-							default: /* first letter of a non-encoded word */
-								_php_iconv_appendc(pretval, *p1, cd_pl);
+								/* Let's go back and see if there are further
+								 * encoded words or bare content, and hope they
+								 * might actually have a valid character set. */
 								scan_stat = 12;
 								break;
+							} else {
+								if (errno == EINVAL) {
+									err = PHP_ICONV_ERR_WRONG_CHARSET;
+								} else {
+									err = PHP_ICONV_ERR_CONVERTER;
+								}
+								goto out;
+							}
 						}
-					} break;
-				}
-				break;
+					}
+					break;
 
-			case 10: /* expects a language specifier. dismiss it for now */
-				if (*p1 == '?') {
-					scan_stat = 3;
-				}
-				break;
+				case 3: /* expecting a encoding scheme specifier */
+					switch (*p1) {
+						case 'b':
+						case 'B':
+							enc_scheme = PHP_ICONV_ENC_SCHEME_BASE64;
+							scan_stat = 4;
+							break;
 
-			case 11: /* expecting a chunk of whitespaces */
-				switch (*p1) {
-					case '\r': /* part of an EOL sequence? */
-						scan_stat = 7;
-						break;
+						case 'q':
+						case 'Q':
+							enc_scheme = PHP_ICONV_ENC_SCHEME_QPRINT;
+							scan_stat = 4;
+							break;
 
-					case '\n':
-						scan_stat = 8;
-						break;
+						default:
+							if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+								err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
+								if (err != PHP_ICONV_ERR_SUCCESS) {
+									goto out;
+								}
+								encoded_word = NULL;
+								if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+									scan_stat = 12;
+								} else {
+									scan_stat = 0;
+								}
+								break;
+							} else {
+								err = PHP_ICONV_ERR_MALFORMED;
+								goto out;
+							}
+					}
+					break;
 
-					case '=': /* first letter of an encoded chunk */
-						if (spaces != NULL && encoded_word == NULL) {
-							_php_iconv_appendl(pretval, spaces, (size_t)(p1 - spaces), cd_pl);
-							spaces = NULL;
-						}
-						encoded_word = p1;
-						scan_stat = 1;
-						break;
-
-					case ' ': case '\t':
-						break;
-
-					default: /* first letter of a non-encoded word */
-						if (spaces != NULL) {
-							_php_iconv_appendl(pretval, spaces, (size_t)(p1 - spaces), cd_pl);
-							spaces = NULL;
-						}
-						_php_iconv_appendc(pretval, *p1, cd_pl);
-						encoded_word = NULL;
-						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-							scan_stat = 12;
+				case 4: /* expecting a delimiter */
+					if (*p1 != '?') {
+						if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+							/* pass the entire chunk through the converter */
+							err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
+							if (err != PHP_ICONV_ERR_SUCCESS) {
+								goto out;
+							}
+							encoded_word = NULL;
+							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+								scan_stat = 12;
+							} else {
+								scan_stat = 0;
+							}
+							break;
 						} else {
-							scan_stat = 0;
+							err = PHP_ICONV_ERR_MALFORMED;
+							goto out;
 						}
-						break;
-				}
-				break;
+					}
+					encoded_text = p1 + 1;
+					scan_stat = 5;
+					break;
 
-			case 12: /* expecting a non-encoded word */
-				switch (*p1) {
-					case '\r': /* part of an EOL sequence? */
-						scan_stat = 7;
-						break;
+				case 5: /* expecting an encoded portion */
+					if (*p1 == '?') {
+						encoded_text_len = (size_t)(p1 - encoded_text);
+						scan_stat = 6;
+					}
+					break;
 
-					case '\n':
+				case 7: /* expecting a "\n" character */
+					if (*p1 == '\n') {
 						scan_stat = 8;
-						break;
+					} else {
+						/* bare CR */
+						_php_iconv_appendc(pretval, '\r', cd_pl);
+						_php_iconv_appendc(pretval, *p1, cd_pl);
+						scan_stat = 0;
+					}
+					break;
 
-					case ' ': case '\t':
-						spaces = p1;
-						scan_stat = 11;
+				case 8: /* checking whether the following line is part of a
+						   folded header */
+					if (*p1 != ' ' && *p1 != '\t') {
+						--p1;
+						str_left = 1; /* quit_loop */
 						break;
+					}
+					if (encoded_word == NULL) {
+						_php_iconv_appendc(pretval, ' ', cd_pl);
+					}
+					spaces = NULL;
+					scan_stat = 11;
+					break;
 
-					case '=': /* first letter of an encoded chunk */
-						if (!(mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+				case 6: /* expecting a End-Of-Chunk character "=" */
+					if (*p1 != '=') {
+						if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+							/* pass the entire chunk through the converter */
+							err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
+							if (err != PHP_ICONV_ERR_SUCCESS) {
+								goto out;
+							}
+							encoded_word = NULL;
+							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+								scan_stat = 12;
+							} else {
+								scan_stat = 0;
+							}
+							break;
+						} else {
+							err = PHP_ICONV_ERR_MALFORMED;
+							goto out;
+						}
+					}
+					scan_stat = 9;
+					if (str_left == 1) {
+						eos = 1;
+					} else {
+						break;
+					}
+					/* TODO might want to rearrange logic so this is more obvious */
+					ZEND_FALLTHROUGH;
+
+				case 9: /* choice point, seeing what to do next.*/
+					switch (*p1) {
+						default:
+							/* Handle non-RFC-compliant formats
+							 *
+							 * RFC2047 requires the character that comes right
+							 * after an encoded word (chunk) to be a whitespace,
+							 * while there are lots of broken implementations that
+							 * generate such malformed headers that don't fulfill
+							 * that requirement.
+							 */
+							if (!eos) {
+								if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+									/* pass the entire chunk through the converter */
+									err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
+									if (err != PHP_ICONV_ERR_SUCCESS) {
+										goto out;
+									}
+									scan_stat = 12;
+									break;
+								}
+							}
+							ZEND_FALLTHROUGH;
+
+						case '\r': case '\n': case ' ': case '\t': {
+							zend_string *decoded_text;
+
+							switch (enc_scheme) {
+								case PHP_ICONV_ENC_SCHEME_BASE64:
+									decoded_text = php_base64_decode((unsigned char*)encoded_text, encoded_text_len);
+									break;
+
+								case PHP_ICONV_ENC_SCHEME_QPRINT:
+									decoded_text = php_quot_print_decode((unsigned char*)encoded_text, encoded_text_len, 1);
+									break;
+								default:
+									decoded_text = NULL;
+									break;
+							}
+
+							if (decoded_text == NULL) {
+								if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+									/* pass the entire chunk through the converter */
+									err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
+									if (err != PHP_ICONV_ERR_SUCCESS) {
+										goto out;
+									}
+									encoded_word = NULL;
+									if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+										scan_stat = 12;
+									} else {
+										scan_stat = 0;
+									}
+									break;
+								} else {
+									err = PHP_ICONV_ERR_UNKNOWN;
+									goto out;
+								}
+							}
+
+							err = _php_iconv_appendl(pretval, ZSTR_VAL(decoded_text), ZSTR_LEN(decoded_text), cd);
+							if (err == PHP_ICONV_ERR_SUCCESS) {
+								err = _php_iconv_appendl(pretval, NULL, 0, cd);
+							}
+							zend_string_release_ex(decoded_text, 0);
+
+							if (err != PHP_ICONV_ERR_SUCCESS) {
+								if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+									/* pass the entire chunk through the converter */
+									err = _php_iconv_appendl(pretval, encoded_word, (size_t)(p1 - encoded_word), cd_pl);
+									encoded_word = NULL;
+									if (err != PHP_ICONV_ERR_SUCCESS) {
+										break;
+									}
+								} else {
+									goto out;
+								}
+							}
+
+							if (eos) { /* reached end-of-string. done. */
+								scan_stat = 0;
+								break;
+							}
+
+							switch (*p1) {
+								case '\r': /* part of an EOL sequence? */
+									scan_stat = 7;
+									break;
+
+								case '\n':
+									scan_stat = 8;
+									break;
+
+								case '=': /* first letter of an encoded chunk */
+									scan_stat = 1;
+									break;
+
+								case ' ': case '\t': /* medial whitespaces */
+									spaces = p1;
+									scan_stat = 11;
+									break;
+
+								default: /* first letter of a non-encoded word */
+									_php_iconv_appendc(pretval, *p1, cd_pl);
+									scan_stat = 12;
+									break;
+							}
+						} break;
+					}
+					break;
+
+				case 10: /* expects a language specifier. dismiss it for now */
+					if (*p1 == '?') {
+						scan_stat = 3;
+					}
+					break;
+
+				case 11: /* expecting a chunk of whitespaces */
+					switch (*p1) {
+						case '\r': /* part of an EOL sequence? */
+							scan_stat = 7;
+							break;
+
+						case '\n':
+							scan_stat = 8;
+							break;
+
+						case '=': /* first letter of an encoded chunk */
+							if (spaces != NULL && encoded_word == NULL) {
+								_php_iconv_appendl(pretval, spaces, (size_t)(p1 - spaces), cd_pl);
+								spaces = NULL;
+							}
 							encoded_word = p1;
 							scan_stat = 1;
 							break;
-						}
-						ZEND_FALLTHROUGH;
 
-					default:
-						_php_iconv_appendc(pretval, *p1, cd_pl);
-						break;
-				}
-				break;
-		}
-	}
-	switch (scan_stat) {
-		case 0: case 8: case 11: case 12:
-			break;
-		default:
-			if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
-				if (scan_stat == 1) {
-					_php_iconv_appendc(pretval, '=', cd_pl);
-				}
-				err = PHP_ICONV_ERR_SUCCESS;
-			} else {
-				err = PHP_ICONV_ERR_MALFORMED;
-				goto out;
+						case ' ': case '\t':
+							break;
+
+						default: /* first letter of a non-encoded word */
+							if (spaces != NULL) {
+								_php_iconv_appendl(pretval, spaces, (size_t)(p1 - spaces), cd_pl);
+								spaces = NULL;
+							}
+							_php_iconv_appendc(pretval, *p1, cd_pl);
+							encoded_word = NULL;
+							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+								scan_stat = 12;
+							} else {
+								scan_stat = 0;
+							}
+							break;
+					}
+					break;
+
+				case 12: /* expecting a non-encoded word */
+					switch (*p1) {
+						case '\r': /* part of an EOL sequence? */
+							scan_stat = 7;
+							break;
+
+						case '\n':
+							scan_stat = 8;
+							break;
+
+						case ' ': case '\t':
+							spaces = p1;
+							scan_stat = 11;
+							break;
+
+						case '=': /* first letter of an encoded chunk */
+							if (!(mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+								encoded_word = p1;
+								scan_stat = 1;
+								break;
+							}
+							ZEND_FALLTHROUGH;
+
+						default:
+							_php_iconv_appendc(pretval, *p1, cd_pl);
+							break;
+					}
+					break;
 			}
-	}
+		}
+		switch (scan_stat) {
+			case 0: case 8: case 11: case 12:
+				break;
+			default:
+				if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+					if (scan_stat == 1) {
+						_php_iconv_appendc(pretval, '=', cd_pl);
+					}
+					err = PHP_ICONV_ERR_SUCCESS;
+				} else {
+					err = PHP_ICONV_ERR_MALFORMED;
+					goto out;
+				}
+		}
 
-	if (next_pos != NULL) {
-		*next_pos = p1;
-	}
+		if (next_pos != NULL) {
+			*next_pos = p1;
+		}
 
-	smart_str_0(pretval);
+		smart_str_0(pretval);
+	} zend_catch {
+		bailout = true;
+	} zend_end_try();
+
 out:
 	if (cd != (iconv_t)(-1)) {
 		iconv_close(cd);
 	}
 	if (cd_pl != (iconv_t)(-1)) {
 		iconv_close(cd_pl);
+	}
+	if (bailout) {
+		zend_bailout();
 	}
 	return err;
 }
@@ -2554,6 +2585,33 @@ static php_stream_filter_status_t php_iconv_stream_filter_do_filter(
 }
 /* }}} */
 
+/* {{{ php_iconv_stream_filter_seek */
+static zend_result php_iconv_stream_filter_seek(
+		php_stream *stream,
+		php_stream_filter *filter,
+		zend_off_t offset,
+		int whence)
+{
+	php_iconv_stream_filter *self = (php_iconv_stream_filter *)Z_PTR(filter->abstract);
+
+	/* Reset stub buffer */
+	self->stub_len = 0;
+
+	/* Reset iconv conversion state by closing and reopening the converter */
+	iconv_close(self->cd);
+
+	self->cd = iconv_open(self->to_charset, self->from_charset);
+	if ((iconv_t)-1 == self->cd) {
+		php_error_docref(NULL, E_WARNING,
+				"iconv stream filter (\"%s\"=>\"%s\"): failed to reset conversion state",
+				self->from_charset, self->to_charset);
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ php_iconv_stream_filter_cleanup */
 static void php_iconv_stream_filter_cleanup(php_stream_filter *filter)
 {
@@ -2564,12 +2622,13 @@ static void php_iconv_stream_filter_cleanup(php_stream_filter *filter)
 
 static const php_stream_filter_ops php_iconv_stream_filter_ops = {
 	php_iconv_stream_filter_do_filter,
+	php_iconv_stream_filter_seek,
 	php_iconv_stream_filter_cleanup,
 	"convert.iconv.*"
 };
 
 /* {{{ php_iconv_stream_filter_create */
-static php_stream_filter *php_iconv_stream_filter_factory_create(const char *name, zval *params, uint8_t persistent)
+static php_stream_filter *php_iconv_stream_filter_factory_create(const char *name, zval *params, bool persistent)
 {
 	php_iconv_stream_filter *inst;
 	const char *from_charset = NULL, *to_charset = NULL;
@@ -2601,7 +2660,8 @@ static php_stream_filter *php_iconv_stream_filter_factory_create(const char *nam
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(&php_iconv_stream_filter_ops, inst, persistent);
+	return php_stream_filter_alloc(&php_iconv_stream_filter_ops, inst, persistent,
+			PSFS_SEEKABLE_START);
 }
 /* }}} */
 

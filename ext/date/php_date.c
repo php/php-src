@@ -4266,10 +4266,8 @@ PHP_FUNCTION(timezone_offset_get)
 			break;
 		case TIMELIB_ZONETYPE_OFFSET:
 			RETURN_LONG(tzobj->tzi.utc_offset);
-			break;
 		case TIMELIB_ZONETYPE_ABBR:
 			RETURN_LONG(tzobj->tzi.z.utc_offset + (tzobj->tzi.z.dst * 3600));
-			break;
 	}
 }
 /* }}} */
@@ -5480,18 +5478,18 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, bool calc_s
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (latitude_is_null) {
-		latitude = INI_FLT("date.default_latitude");
+		latitude = zend_ini_double_literal("date.default_latitude");
 	}
 
 	if (longitude_is_null) {
-		longitude = INI_FLT("date.default_longitude");
+		longitude = zend_ini_double_literal("date.default_longitude");
 	}
 
 	if (zenith_is_null) {
 		if (calc_sunset) {
-			zenith = INI_FLT("date.sunset_zenith");
+			zenith = zend_ini_double_literal("date.sunset_zenith");
 		} else {
-			zenith = INI_FLT("date.sunrise_zenith");
+			zenith = zend_ini_double_literal("date.sunrise_zenith");
 		}
 	}
 
@@ -5545,10 +5543,8 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, bool calc_s
 		case SUNFUNCS_RET_STRING:
 			retstr = strpprintf(0, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
 			RETURN_NEW_STR(retstr);
-			break;
 		case SUNFUNCS_RET_DOUBLE:
 			RETURN_DOUBLE(N);
-			break;
 	}
 }
 /* }}} */

@@ -144,6 +144,8 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 	}
 #endif
 
+XSL_DEFINE_PROP_ACCESSOR(do_xinclude, "doXInclude", 0)
+XSL_DEFINE_PROP_ACCESSOR(clone_document, "cloneDocument", 1)
 XSL_DEFINE_PROP_ACCESSOR(max_template_depth, "maxTemplateDepth", 2)
 XSL_DEFINE_PROP_ACCESSOR(max_template_vars, "maxTemplateVars", 3)
 

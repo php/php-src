@@ -764,19 +764,15 @@ PHP_FUNCTION(imagecolormatch)
 		case -1:
 			zend_argument_value_error(1, "must be TrueColor");
 			RETURN_THROWS();
-			break;
 		case -2:
 			zend_argument_value_error(2, "must be Palette");
 			RETURN_THROWS();
-			break;
 		case -3:
 			zend_argument_value_error(2, "must be the same size as argument #1 ($im1)");
 			RETURN_THROWS();
-			break;
 		case -4:
 			zend_argument_value_error(2, "must have at least one color");
 			RETURN_THROWS();
-			break;
 	}
 
 	RETURN_TRUE;
@@ -1599,7 +1595,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 
 #ifdef HAVE_GD_JPG
 			case PHP_GDIMG_TYPE_JPG:
-				ignore_warning = INI_INT("gd.jpeg_ignore_warning");
+				ignore_warning = zend_ini_bool_literal("gd.jpeg_ignore_warning");
 				im = gdImageCreateFromJpegEx(fp, ignore_warning);
 			break;
 #endif

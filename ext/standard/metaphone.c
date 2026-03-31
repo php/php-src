@@ -107,7 +107,7 @@ static zend_always_inline char encode(char c) {
 /*----------------------------- */
 
 /* I suppose I could have been using a character pointer instead of
- * accesssing the array directly... */
+ * accessing the array directly... */
 
 #define Convert_Raw(c) toupper(c)
 /* Look at the next letter in the word */
@@ -264,7 +264,7 @@ static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonem
 	for (; (curr_letter = Read_Raw_Curr_Letter) != '\0' &&
 		 (max_phonemes == 0 || Phone_Len < (size_t)max_phonemes);
 		 w_idx++) {
-		/* How many letters to skip because an eariler encoding handled
+		/* How many letters to skip because an earlier encoding handled
 		 * multiple letters */
 		unsigned short int skip_letter = 0;
 

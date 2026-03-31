@@ -1717,11 +1717,11 @@ PHPAPI bool append_user_shutdown_function(php_shutdown_function_entry *shutdown_
 
 ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini) /* {{{ */
 {
-	syntax_highlighter_ini->highlight_comment = INI_STR("highlight.comment");
-	syntax_highlighter_ini->highlight_default = INI_STR("highlight.default");
-	syntax_highlighter_ini->highlight_html    = INI_STR("highlight.html");
-	syntax_highlighter_ini->highlight_keyword = INI_STR("highlight.keyword");
-	syntax_highlighter_ini->highlight_string  = INI_STR("highlight.string");
+	syntax_highlighter_ini->highlight_comment = zend_ini_string_literal("highlight.comment");
+	syntax_highlighter_ini->highlight_default = zend_ini_string_literal("highlight.default");
+	syntax_highlighter_ini->highlight_html    = zend_ini_string_literal("highlight.html");
+	syntax_highlighter_ini->highlight_keyword = zend_ini_string_literal("highlight.keyword");
+	syntax_highlighter_ini->highlight_string  = zend_ini_string_literal("highlight.string");
 }
 /* }}} */
 
@@ -2029,17 +2029,16 @@ PHP_FUNCTION(ini_restore)
 PHP_FUNCTION(set_include_path)
 {
 	zend_string *new_value;
-	char *old_value;
 	zend_string *key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH_STR(new_value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	old_value = zend_ini_string("include_path", sizeof("include_path") - 1, 0);
+	zend_string *old_value = zend_ini_str_literal("include_path");
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
-		RETVAL_STRING(old_value);
+		RETVAL_STR_COPY(old_value);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2059,7 +2058,7 @@ PHP_FUNCTION(get_include_path)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_string *str = zend_ini_str("include_path", sizeof("include_path") - 1, 0);
+	zend_string *str = zend_ini_str_literal("include_path");
 
 	if (str == NULL) {
 		RETURN_FALSE;

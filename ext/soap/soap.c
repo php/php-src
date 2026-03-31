@@ -190,6 +190,7 @@ zend_class_entry* soap_var_class_entry;
 zend_class_entry *soap_url_class_entry;
 zend_class_entry *soap_sdl_class_entry;
 
+static zend_object_handlers soap_client_object_handlers;
 static zend_object_handlers soap_server_object_handlers;
 static zend_object_handlers soap_url_object_handlers;
 static zend_object_handlers soap_sdl_object_handlers;
@@ -201,8 +202,34 @@ typedef struct {
 	zend_object std;
 } soap_server_object;
 
+typedef struct {
+	HashTable *typemap;
+	zend_object std;
+} soap_client_object;
+
+static inline soap_client_object *soap_client_object_fetch(zend_object *obj) {
+	return (soap_client_object *) ((char *) obj - XtOffsetOf(soap_client_object, std));
+}
+
 static inline soap_server_object *soap_server_object_fetch(zend_object *obj) {
 	return (soap_server_object *) ((char *) obj - XtOffsetOf(soap_server_object, std));
+}
+
+static zend_object *soap_client_object_create(zend_class_entry *ce)
+{
+	soap_client_object *obj = zend_object_alloc(sizeof(soap_client_object), ce);
+	zend_object_std_init(&obj->std, ce);
+	object_properties_init(&obj->std, ce);
+	return &obj->std;
+}
+
+static void soap_client_object_free(zend_object *obj) {
+	soap_client_object *client_obj = soap_client_object_fetch(obj);
+	if (client_obj->typemap) {
+		zend_hash_destroy(client_obj->typemap);
+		FREE_HASHTABLE(client_obj->typemap);
+	}
+	zend_object_std_dtor(obj);
 }
 
 static zend_object *soap_server_object_create(zend_class_entry *ce)
@@ -503,6 +530,13 @@ PHP_MINIT_FUNCTION(soap)
 
 	/* Register SoapClient class */
 	soap_class_entry = register_class_SoapClient();
+	soap_class_entry->create_object = soap_client_object_create;
+	soap_class_entry->default_object_handlers = &soap_client_object_handlers;
+
+	memcpy(&soap_client_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	soap_client_object_handlers.offset = XtOffsetOf(soap_client_object, std);
+	soap_client_object_handlers.free_obj = soap_client_object_free;
+	soap_client_object_handlers.clone_obj = NULL;
 
 	/* Register SoapVar class */
 	soap_var_class_entry = register_class_SoapVar();
@@ -1661,7 +1695,7 @@ PHP_METHOD(SoapServer, handle)
 			sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
 		}
 
-		if (INI_INT("zlib.output_compression")) {
+		if (zend_ini_long_literal("zlib.output_compression")) {
 			sapi_add_header("Connection: close", sizeof("Connection: close")-1, 1);
 		} else {
 			snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", size);
@@ -1823,7 +1857,7 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 	if (use_http_error_status) {
 		sapi_add_header("HTTP/1.1 500 Internal Server Error", sizeof("HTTP/1.1 500 Internal Server Error")-1, 1);
 	}
-	if (INI_INT("zlib.output_compression")) {
+	if (zend_ini_long_literal("zlib.output_compression")) {
 		sapi_add_header("Connection: close", sizeof("Connection: close")-1, 1);
 	} else {
 		snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", size);
@@ -1917,7 +1951,7 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, z
 			} else {
 				buffer = zend_string_copy(message);
 
-				/* Get output buffer and send as fault detials */
+				/* Get output buffer and send as fault details */
 				zval outbuflen;
 				if (php_output_get_length(&outbuflen) != FAILURE && Z_LVAL(outbuflen) != 0) {
 					php_output_get_contents(&outbuf);
@@ -1993,6 +2027,7 @@ PHP_FUNCTION(is_soap_fault)
 /* SoapClient functions */
 
 /* {{{ SoapClient constructor */
+/* FIXME: double construct call will break this class */
 PHP_METHOD(SoapClient, __construct)
 {
 
@@ -2216,10 +2251,7 @@ PHP_METHOD(SoapClient, __construct)
 	}
 
 	if (typemap_ht) {
-		HashTable *typemap = soap_create_typemap(sdl, typemap_ht);
-		if (typemap) {
-			ZVAL_ARR(Z_CLIENT_TYPEMAP_P(this_ptr), typemap);
-		}
+		soap_client_object_fetch(Z_OBJ_P(this_ptr))->typemap = soap_create_typemap(sdl, typemap_ht);
 	}
 	SOAP_CLIENT_END_CODE();
 }
@@ -2347,10 +2379,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 		sdl = Z_SOAP_SDL_P(tmp)->sdl;
 	}
 
-	tmp = Z_CLIENT_TYPEMAP_P(this_ptr);
-	if (Z_TYPE_P(tmp) == IS_ARRAY) {
-		typemap = Z_ARR_P(tmp);
-	}
+	typemap = soap_client_object_fetch(Z_OBJ_P(this_ptr))->typemap;
 
 	clear_soap_fault(this_ptr);
 
@@ -2805,7 +2834,7 @@ PHP_METHOD(SoapClient, __doRequest)
 }
 /* }}} */
 
-/* {{{ Sets cookie thet will sent with SOAP request.
+/* {{{ Sets cookie that will sent with SOAP request.
    The call to this function will effect all following calls of SOAP methods.
    If value is not specified cookie is removed. */
 PHP_METHOD(SoapClient, __setCookie)
@@ -3372,7 +3401,7 @@ static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, c
 							smart_str_appends(&key, (char*)hdr_func->ns->href);
 							smart_str_appendc(&key, ':');
 						}
-						smart_str_appendl(&key, Z_STRVAL(h->function_name), Z_STRLEN(h->function_name));
+						smart_str_append(&key, Z_STR(h->function_name));
 						smart_str_0(&key);
 						if ((hdr = zend_hash_find_ptr(fnb->input.headers, key.s)) != NULL) {
 							h->hdr = hdr;
@@ -3609,14 +3638,14 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, const char *fu
 
 				tmp = Z_HEADER_NAMESPACE_P(hdr_ret);
 				if (Z_TYPE_P(tmp) == IS_STRING) {
-					smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+					smart_str_append(&key, Z_STR_P(tmp));
 					smart_str_appendc(&key, ':');
 					hdr_ns = Z_STRVAL_P(tmp);
 				}
 
 				tmp = Z_HEADER_NAME_P(hdr_ret);
 				if (Z_TYPE_P(tmp) == IS_STRING) {
-					smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+					smart_str_append(&key, Z_STR_P(tmp));
 					hdr_name = Z_STRVAL_P(tmp);
 				}
 				smart_str_0(&key);
@@ -3842,13 +3871,13 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, const char *fu
 
 						tmp = Z_HEADER_NAMESPACE_P(&h->retval);
 						if (Z_TYPE_P(tmp) == IS_STRING) {
-							smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+							smart_str_append(&key, Z_STR_P(tmp));
 							smart_str_appendc(&key, ':');
 							hdr_ns = Z_STRVAL_P(tmp);
 						}
 						tmp = Z_HEADER_NAME_P(&h->retval);
 						if (Z_TYPE_P(tmp) == IS_STRING) {
-							smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+							smart_str_append(&key, Z_STR_P(tmp));
 							hdr_name = Z_STRVAL_P(tmp);
 						}
 						smart_str_0(&key);
@@ -4084,9 +4113,9 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 					smart_str key = {0};
 					sdlSoapBindingFunctionHeaderPtr hdr;
 
-					smart_str_appendl(&key, Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+					smart_str_append(&key, Z_STR_P(ns));
 					smart_str_appendc(&key, ':');
-					smart_str_appendl(&key, Z_STRVAL_P(name), Z_STRLEN_P(name));
+					smart_str_append(&key, Z_STR_P(name));
 					smart_str_0(&key);
 					if ((hdr = zend_hash_find_ptr(hdrs, key.s)) != NULL) {
 						hdr_use = hdr->use;
@@ -4419,7 +4448,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 		smart_str_appendc(&spaces, ' ');
 	}
 	if (spaces.s) {
-		smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+		smart_str_append(buf, spaces.s);
 	}
 	switch (type->kind) {
 		case XSD_TYPEKIND_SIMPLE:
@@ -4558,7 +4587,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 					}
 					if (enc) {
 						if (spaces.s) {
-							smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+							smart_str_append(buf, spaces.s);
 						}
 						smart_str_appendc(buf, ' ');
 						smart_str_appends(buf, type->encode->details.type_str);
@@ -4573,7 +4602,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 
 					ZEND_HASH_FOREACH_PTR(type->attributes, attr) {
 						if (spaces.s) {
-							smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+							smart_str_append(buf, spaces.s);
 						}
 						smart_str_appendc(buf, ' ');
 						if (attr->encode && attr->encode->details.type_str) {
@@ -4587,7 +4616,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 					} ZEND_HASH_FOREACH_END();
 				}
 				if (spaces.s) {
-					smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+					smart_str_append(buf, spaces.s);
 				}
 				smart_str_appendc(buf, '}');
 			}
