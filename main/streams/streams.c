@@ -1396,9 +1396,11 @@ static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter
 static zend_result php_stream_filters_seek_all(php_stream *stream, bool is_start_seeking,
 		zend_off_t offset, int whence)
 {
-	if (php_stream_filters_seek(stream, stream->writefilters.head, is_start_seeking, offset, whence) == FAILURE) {
-		return FAILURE;
-	}
+	/* Write filters are not reset on seek. Their state tracks the
+	 * transformation of data written through them and is independent of the
+	 * stream's read/write position. Resetting them would break stateful write
+	 * filters (e.g. dechunk on php://temp) whose stream is seeked only to
+	 * re-read already-filtered output via stream_get_contents(). */
 	if (php_stream_filters_seek(stream, stream->readfilters.head, is_start_seeking, offset, whence) == FAILURE) {
 		return FAILURE;
 	}
@@ -1424,9 +1426,6 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 
 	if (stream->writefilters.head) {
 		_php_stream_flush(stream, 0);
-		if (!php_stream_are_filters_seekable(stream->writefilters.head, is_start_seeking)) {
-			return -1;
-		}
 	}
 	if (stream->readfilters.head && !php_stream_are_filters_seekable(stream->readfilters.head, is_start_seeking)) {
 		return -1;
