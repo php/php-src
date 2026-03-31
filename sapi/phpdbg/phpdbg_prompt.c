@@ -1196,7 +1196,7 @@ static const char *phpdbg_load_module_or_extension(zend_string **path, const cha
 		phpdbg_error("extension_dir ini setting contains a nul byte");
 		return NULL;
 	}
-	if (strchr(ZSTR_VAL(*path), '/') != NULL || strchr(ZSTR_VAL(*path), DEFAULT_SLASH) != NULL) {
+	if (memchr(ZSTR_VAL(*path), '/', ZSTR_LEN(*path)) != NULL || memchr(ZSTR_VAL(*path), '/', ZSTR_LEN(*path)) != NULL) {
 		/* path is fine */
 	} else if (extension_dir && ZSTR_LEN(extension_dir) > 0) {
 		zend_string *libpath;
