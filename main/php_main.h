@@ -89,6 +89,45 @@ PHPAPI bool php_tsrm_startup(void);
 #define PHP_OS_STR PHP_OS
 #endif
 
+#define _PHP_STRINGIFY(s) #s
+#define PHP_STRINGIFY(s) _PHP_STRINGIFY(s)
+
+#ifndef PHP_BUILD_COMPILER
+# if defined(__clang__)
+#  define PHP_BUILD_COMPILER "Clang " PHP_STRINGIFY(__clang_major__)
+# elif defined(__GNUC__)
+#  define PHP_BUILD_COMPILER "GCC " PHP_STRINGIFY(__GNUC__)
+# endif
+#endif
+
+#ifndef PHP_BUILD_ARCH
+# if defined(__x86_64__)
+#  define PHP_BUILD_ARCH "x64"
+# elif defined(__i386__)
+#  define PHP_BUILD_ARCH "x86"
+# elif defined(__aarch64__)
+#  define PHP_BUILD_ARCH "aarch64"
+# endif
+#endif
+
+#ifndef PHP_BUILD_OS
+# if defined(PHP_WIN32)
+#  define PHP_BUILD_OS "WINNT"
+# elif defined(__APPLE__)
+#  define PHP_BUILD_OS "Darwin"
+# elif defined(__linux__)
+#  define PHP_BUILD_OS "Linux"
+# elif defined(__FreeBSD__)
+#  define PHP_BUILD_OS "FreeBSD"
+# elif defined(__NetBSD__)
+#  define PHP_BUILD_OS "NetBSD"
+# elif defined(__OpenBSD__)
+#  define PHP_BUILD_OS "OpenBSD"
+#elif defined(__sun__)
+#  define PHP_BUILD_OS "Solaris"
+# endif
+#endif
+
 END_EXTERN_C()
 
 #endif
