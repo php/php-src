@@ -1051,9 +1051,15 @@ const ir_call_conv_dsc ir_call_conv_x86_64_preserve_none = {
 	IR_REG_XMM0, /* fp_ret_reg              */
 	IR_REG_RAX,  /* fp_varargs_reg          */
 	IR_REG_SCRATH_X86_64_PN,
+#ifdef _WIN32
+	(const int8_t[12]){IR_REG_R13, IR_REG_R14, IR_REG_R15, IR_REG_R12,
+	                   IR_REG_RDI, IR_REG_RSI, IR_REG_RDX, IR_REG_RCX, IR_REG_R8, IR_REG_R9,
+	                   IR_REG_R11, IR_REG_RAX},
+#else
 	(const int8_t[12]){IR_REG_R12, IR_REG_R13, IR_REG_R14, IR_REG_R15,
 	                   IR_REG_RDI, IR_REG_RSI, IR_REG_RDX, IR_REG_RCX, IR_REG_R8, IR_REG_R9,
 	                   IR_REG_R11, IR_REG_RAX},
+#endif
 	(const int8_t[8]){IR_REG_XMM0, IR_REG_XMM1, IR_REG_XMM2, IR_REG_XMM3,
 	                  IR_REG_XMM4, IR_REG_XMM5, IR_REG_XMM6, IR_REG_XMM7},
 	IR_REGSET(IR_REG_RBP),

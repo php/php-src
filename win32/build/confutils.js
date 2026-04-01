@@ -3496,7 +3496,14 @@ function toolset_setup_common_ldflags()
 
 	if (VS_TOOLSET) {
 		if (PHP_SECURITY_FLAGS == "yes") {
-			ADD_FLAG('LDFLAGS', "/GUARD:CF");
+			if (VCVERS >= 1944 && TARGET_ARCH === 'x64') {
+                // TODO: fix JIT with /guard:cf
+				var _cf = configure_subst.Item("CFLAGS");
+				configure_subst.Remove("CFLAGS");
+				configure_subst.Add("CFLAGS", _cf.replace(/\/guard:cf/g, ""));
+			} else {
+				ADD_FLAG('LDFLAGS', "/GUARD:CF");
+			}
 		}
 		if (PHP_VS_LINK_COMPAT != "no") {
 			// Allow compatible IL versions, do not require an exact match.
