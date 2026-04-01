@@ -1188,24 +1188,31 @@ static void add_zendext_info(zend_extension *ext) /* {{{ */ {
 /* }}} */
 
 #ifdef HAVE_LIBDL
-PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char **name) /* {{{ */ {
+static const char *phpdbg_load_module_or_extension(zend_string **path, const char **name) /* {{{ */ {
 	DL_HANDLE handle;
-	zend_string *extension_dir = zend_ini_str_literal("extension_dir");
+	const zend_string *extension_dir = zend_ini_str_literal("extension_dir");
 
 	if (UNEXPECTED(zend_str_has_nul_byte(extension_dir))) {
 		phpdbg_error("extension_dir ini setting contains a nul byte");
 		return NULL;
 	}
-	if (strchr(*path, '/') != NULL || strchr(*path, DEFAULT_SLASH) != NULL) {
+	if (memchr(ZSTR_VAL(*path), '/', ZSTR_LEN(*path)) != NULL || memchr(ZSTR_VAL(*path), '/', ZSTR_LEN(*path)) != NULL) {
 		/* path is fine */
 	} else if (extension_dir && ZSTR_LEN(extension_dir) > 0) {
-		char *libpath;
+		zend_string *libpath;
 		if (IS_SLASH(ZSTR_VAL(extension_dir)[ZSTR_LEN(extension_dir)-1])) {
-			spprintf(&libpath, 0, "%s%s", ZSTR_VAL(extension_dir), *path); /* SAFE */
+			libpath = zend_string_concat2(
+				ZSTR_VAL(extension_dir), ZSTR_LEN(extension_dir),
+				ZSTR_VAL(*path), ZSTR_LEN(*path)
+			);
 		} else {
-			spprintf(&libpath, 0, "%s%c%s", ZSTR_VAL(extension_dir), DEFAULT_SLASH, *path); /* SAFE */
+			libpath = zend_string_concat3(
+				ZSTR_VAL(extension_dir), ZSTR_LEN(extension_dir),
+				"/", 1,
+				ZSTR_VAL(*path), ZSTR_LEN(*path)
+			);
 		}
-		efree(*path);
+		zend_string_release_ex(*path, false);
 		*path = libpath;
 	} else {
 		phpdbg_error("Not a full path given or extension_dir ini setting is not set");
@@ -1213,7 +1220,7 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 		return NULL;
 	}
 
-	handle = DL_LOAD(*path);
+	handle = DL_LOAD(ZSTR_VAL(*path));
 
 	if (!handle) {
 #ifdef PHP_WIN32
@@ -1331,7 +1338,6 @@ quit:
 PHPDBG_COMMAND(dl) /* {{{ */
 {
 	const char *type, *name;
-	char *path;
 
 	if (!param || param->type == EMPTY_PARAM) {
 		phpdbg_notice("Zend extensions");
@@ -1340,23 +1346,24 @@ PHPDBG_COMMAND(dl) /* {{{ */
 		phpdbg_notice("Modules");
 		zend_hash_apply(&module_registry, (apply_func_t) add_module_info);
 	} else switch (param->type) {
-		case STR_PARAM:
+		case STR_PARAM: {
 #ifdef HAVE_LIBDL
-			path = estrndup(param->str, param->len);
+			zend_string *path = zend_string_init(param->str, param->len, false);
 
 			phpdbg_activate_err_buf(1);
 			if ((type = phpdbg_load_module_or_extension(&path, &name)) == NULL) {
-				phpdbg_error("Could not load %s, not found or invalid zend extension / module: %s", path, PHPDBG_G(err_buf).msg);
+				phpdbg_error("Could not load %s, not found or invalid zend extension / module: %s", ZSTR_VAL(path), PHPDBG_G(err_buf).msg);
 			} else {
-				phpdbg_notice("Successfully loaded the %s %s at path %s", type, name, path);
+				phpdbg_notice("Successfully loaded the %s %s at path %s", type, name, ZSTR_VAL(path));
 			}
 			phpdbg_activate_err_buf(0);
 			phpdbg_free_err_buf();
-			efree(path);
+			zend_string_release_ex(path, false);
 #else
 			phpdbg_error("Cannot dynamically load %.*s - dynamic modules are not supported", (int) param->len, param->str);
 #endif
 			break;
+		}
 
 		phpdbg_default_switch_case();
 	}

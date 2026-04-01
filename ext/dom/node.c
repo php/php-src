@@ -2132,7 +2132,7 @@ static void dom_relink_ns_decls_element(HashTable *links, xmlNodePtr node)
 
 				ns->_private = attr;
 				if (attr->prev) {
-					attr->prev = attr->next;
+					attr->prev->next = attr->next;
 				} else {
 					node->properties = attr->next;
 				}
