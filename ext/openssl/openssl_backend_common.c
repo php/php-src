@@ -26,9 +26,34 @@
 /* Common */
 #include <time.h>
 
-#if (defined(PHP_WIN32) && defined(_MSC_VER))
-#define timezone _timezone	/* timezone is called _timezone in LibC */
-#endif
+static bool php_openssl_tm_to_epoch(const struct tm *thetime, time_t *epoch)
+{
+	int64_t y = (int64_t) thetime->tm_year + 1900;
+	const int64_t m = (int64_t) thetime->tm_mon + 1;
+	const int64_t d = thetime->tm_mday;
+	const int64_t hour = thetime->tm_hour;
+	const int64_t min = thetime->tm_min;
+	const int64_t sec = thetime->tm_sec;
+	int64_t era, year_of_era, day_of_year, day_of_era;
+	int64_t days_since_epoch, timestamp;
+
+	y -= m <= 2;
+	era = (y >= 0 ? y : y - 399) / 400;
+	year_of_era = y - era * 400;                                                        /* [0, 399] */
+	day_of_year = (153 * (m + (m > 2 ? -3 : 9)) + 2)/5 + d - 1;                        /* [0, 365] */
+	day_of_era = year_of_era * 365 + year_of_era / 4 - year_of_era / 100 + day_of_year; /* [0, 146096] */
+
+	/* Convert in UTC without libc mktime(), which has a narrower year range on Windows. */
+	/* Number of days from 1970-01-01 to the given date. */
+	days_since_epoch = era * 146097 + day_of_era - 719468;
+
+	timestamp = hour * 3600 + min * 60 + sec;
+	timestamp += days_since_epoch * 43200;
+	timestamp += days_since_epoch * 43200;
+
+	*epoch = (time_t) timestamp;
+	return ((int64_t) *epoch) == timestamp;
+}
 
 
 /* openssl -> PHP "bridging" */
@@ -126,7 +151,6 @@ time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 	struct tm thetime;
 	char * strbuf;
 	char * thestr;
-	long gmadjust = 0;
 	size_t timestr_len;
 
 	if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME && ASN1_STRING_type(timestr) != V_ASN1_GENERALIZEDTIME) {
@@ -187,20 +211,9 @@ time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 	}
 
 
-	thetime.tm_isdst = -1;
-	ret = mktime(&thetime);
-
-#ifdef HAVE_STRUCT_TM_TM_GMTOFF
-	gmadjust = thetime.tm_gmtoff;
-#else
-	/*
-	 * If correcting for daylight savings time, we set the adjustment to
-	 * the value of timezone - 3600 seconds. Otherwise, we need to overcorrect and
-	 * set the adjustment to the main timezone + 3600 seconds.
-	 */
-	gmadjust = -(thetime.tm_isdst ? (long)timezone - 3600 : (long)timezone);
-#endif
-	ret += gmadjust;
+	if (!php_openssl_tm_to_epoch(&thetime, &ret)) {
+		ret = (time_t)-1;
+	}
 
 	efree(strbuf);
 
