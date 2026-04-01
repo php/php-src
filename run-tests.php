@@ -881,7 +881,8 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         }
         echo implode(',', $exts);
         PHP);
-    $extensionsNames = explode(',', shell_exec("$php_escaped $pass_options $info_params $no_file_cache \"$info_file\""));
+    $shellOutput = shell_exec("$php_escaped $pass_options $info_params $no_file_cache \"$info_file\"");
+    $extensionsNames = $shellOutput !== null && $shellOutput !== false ? explode(',', $shellOutput) : [];
     $exts_to_test = array_unique(remap_loaded_extensions_names($extensionsNames));
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
