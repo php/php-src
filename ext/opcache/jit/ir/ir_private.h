@@ -1047,7 +1047,6 @@ void ir_use_list_remove_one(ir_ctx *ctx, ir_ref def, ir_ref use);
 void ir_use_list_replace_all(ir_ctx *ctx, ir_ref def, ir_ref use, ir_ref new_use);
 void ir_use_list_replace_one(ir_ctx *ctx, ir_ref def, ir_ref use, ir_ref new_use);
 bool ir_use_list_add(ir_ctx *ctx, ir_ref def, ir_ref use);
-void ir_use_list_sort(ir_ctx *ctx, ir_ref def);
 
 IR_ALWAYS_INLINE ir_ref ir_next_control(const ir_ctx *ctx, ir_ref ref)
 {
@@ -1100,6 +1099,7 @@ void ir_iter_add_uses(ir_ctx *ctx, ir_ref ref, ir_bitqueue *worklist);
 void ir_iter_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref, ir_bitqueue *worklist);
 void ir_iter_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val, ir_bitqueue *worklist);
 void ir_iter_opt(ir_ctx *ctx, ir_bitqueue *worklist);
+void ir_iter_cleanup(ir_ctx *ctx);
 
 /*** IR Basic Blocks info ***/
 #define IR_IS_BB_START(op) \

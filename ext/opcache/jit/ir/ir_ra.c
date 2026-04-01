@@ -3190,6 +3190,7 @@ select_register:
 			return IR_REG_NONE;
 		}
 		if (split_pos >= blockPos[reg]) {
+try_next_available_register:
 			IR_REGSET_EXCL(available, reg);
 			if (IR_REGSET_IS_EMPTY(available)) {
 				fprintf(stderr, "LSRA Internal Error: Unsolvable conflict. Allocation is not possible\n");
@@ -3222,31 +3223,33 @@ select_register:
 				IR_LOG_LSRA_CONFLICT("      ---- Conflict with active", other, overlap);
 
 				split_pos = ir_last_use_pos_before(other, ival->range.start, IR_USE_MUST_BE_IN_REG | IR_USE_SHOULD_BE_IN_REG);
-				if (split_pos == 0) {
-					split_pos = ival->range.start;
-				}
-				split_pos = ir_find_optimal_split_position(ctx, other, split_pos, ival->range.start, 1);
-				if (split_pos > other->range.start) {
-					child = ir_split_interval_at(ctx, other, split_pos);
-					if (prev) {
-						prev->list_next = other->list_next;
+				if (split_pos) {
+					split_pos = ir_find_optimal_split_position(ctx, other, split_pos, ival->range.start, 1);
+					if (split_pos > other->range.start) {
+						child = ir_split_interval_at(ctx, other, split_pos);
+						if (prev) {
+							prev->list_next = other->list_next;
+						} else {
+							*active = other->list_next;
+						}
+						IR_LOG_LSRA("      ---- Finish", other, "");
 					} else {
-						*active = other->list_next;
+						goto try_next_available_register;
 					}
-					IR_LOG_LSRA("      ---- Finish", other, "");
 				} else {
 					child = other;
-					other->reg = IR_REG_NONE;
-					if (prev) {
-						prev->list_next = other->list_next;
-					} else {
-						*active = other->list_next;
-					}
-					IR_LOG_LSRA("      ---- Spill and Finish", other, " (it must not be in reg)");
 				}
 
 				split_pos = ir_first_use_pos_after(child, ival->range.start, IR_USE_MUST_BE_IN_REG | IR_USE_SHOULD_BE_IN_REG) - 1; // TODO: ???
 				if (split_pos > child->range.start && split_pos < child->end) {
+					if (child == other) {
+						other->reg = IR_REG_NONE;
+						if (prev) {
+							prev->list_next = other->list_next;
+						} else {
+							*active = other->list_next;
+						}
+					}
 					ir_live_pos opt_split_pos = ir_find_optimal_split_position(ctx, child, ival->range.start, split_pos, 1);
 					if (opt_split_pos > child->range.start) {
 						split_pos = opt_split_pos;
@@ -3259,6 +3262,8 @@ select_register:
 					// TODO: this may cause endless loop
 					ir_add_to_unhandled(unhandled, child);
 					IR_LOG_LSRA("      ---- Queue", child, "");
+				} else {
+					goto try_next_available_register;
 				}
 			}
 			break;

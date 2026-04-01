@@ -1443,24 +1443,6 @@ bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref ref)
 	}
 }
 
-static int ir_ref_cmp(const void *p1, const void *p2)
-{
-	return *(ir_ref*)p1 - *(ir_ref*)p2;
-}
-
-void ir_use_list_sort(ir_ctx *ctx, ir_ref ref)
-{
-	ir_use_list *use_list;
-	uint32_t n;
-
-	IR_ASSERT(ref > 0);
-	use_list = &ctx->use_lists[ref];
-	n = use_list->count;
-	if (n > 1) {
-		qsort(ctx->use_edges + use_list->refs, n, sizeof(ir_ref), ir_ref_cmp);
-	}
-}
-
 void ir_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref)
 {
 	int i, j, n, *p, use;

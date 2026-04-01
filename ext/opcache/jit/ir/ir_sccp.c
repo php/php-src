@@ -603,7 +603,7 @@ static IR_NEVER_INLINE void ir_sccp_analyze(const ir_ctx *ctx, ir_sccp_val *_val
 				bool may_benefit = 0;
 				bool has_top = 0;
 
-				if (_values[i].op != IR_TOP) {
+				if (_values[i].op != IR_TOP || insn->op == IR_COPY) {
 					may_benefit = 1;
 				}
 
@@ -987,6 +987,7 @@ static void ir_sccp_remove_if(ir_ctx *ctx, const ir_sccp_val *_values, ir_ref re
 		insn->optx = IR_OPTX(IR_END, IR_VOID, 1);
 		next_insn = &ctx->ir_base[dst];
 		next_insn->op = IR_BEGIN;
+		next_insn->op2 = IR_UNUSED;
 	}
 }
 
@@ -2726,7 +2727,16 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 					}
 
 					return 1;
-				} else if (cond->op != IR_OVERFLOW && insn->op2 <= cond_ref && insn->op3 <= cond_ref) {
+				} else if (insn->op2 <= cond_ref && insn->op3 <= cond_ref
+					&& cond->op != IR_OVERFLOW
+					// TODO: temporary disable IF-conversion for RLOAD.
+					// We don't track anti-dependencies in GCM and Local Scheduling.
+					// As result COND may be scheduled below the following RSTORE.
+					// See: https://github.com/dstogov/ir/issues/132
+					&& cond->op != IR_RLOAD
+					&& !((cond->op >= IR_EQ && cond->op <= IR_UNORDERED)
+					  && ((!IR_IS_CONST_REF(cond->op1) && ctx->ir_base[cond->op1].op == IR_RLOAD)
+					   || (!IR_IS_CONST_REF(cond->op2) && ctx->ir_base[cond->op2].op == IR_RLOAD)))) {
 					/* COND
 					 *
 					 *    prev                     prev
@@ -2968,9 +2978,11 @@ static bool ir_try_split_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqueue 
 
 						if_false->optx = IR_OPTX(IR_BEGIN, IR_VOID, 1);
 						if_false->op1 = end1_ref;
+						if_false->op2 = IR_UNUSED;
 
 						if_true->optx = IR_OPTX(IR_BEGIN, IR_VOID, 1);
 						if_true->op1 = end2_ref;
+						if_true->op2 = IR_UNUSED;
 
 						ir_bitqueue_add(worklist, if_false_ref);
 						ir_bitqueue_add(worklist, if_true_ref);
@@ -3008,6 +3020,7 @@ static bool ir_try_split_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqueue 
 
 						if_true->optx = IR_BEGIN;
 						if_true->op1 = IR_UNUSED;
+						if_true->op2 = IR_UNUSED;
 
 						ctx->flags2 &= ~IR_CFG_REACHABLE;
 
@@ -3157,9 +3170,11 @@ static bool ir_try_split_if_cmp(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqu
 
 							if_false->optx = IR_OPTX(IR_BEGIN, IR_VOID, 1);
 							if_false->op1 = end1_ref;
+							if_false->op2 = IR_UNUSED;
 
 							if_true->optx = IR_OPTX(IR_BEGIN, IR_VOID, 1);
 							if_true->op1 = end2_ref;
+							if_true->op2 = IR_UNUSED;
 
 							ir_bitqueue_add(worklist, if_false_ref);
 							ir_bitqueue_add(worklist, if_true_ref);
@@ -3201,6 +3216,7 @@ static bool ir_try_split_if_cmp(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqu
 
 							if_true->optx = IR_BEGIN;
 							if_true->op1 = IR_UNUSED;
+							if_true->op2 = IR_UNUSED;
 
 							ctx->flags2 &= ~IR_CFG_REACHABLE;
 
@@ -3487,7 +3503,9 @@ static void ir_iter_optimize_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqu
 		if_true = &ctx->ir_base[if_true_ref];
 		if_false = &ctx->ir_base[if_false_ref];
 		if_true->op = IR_BEGIN;
+		if_true->op2 = IR_UNUSED;
 		if_false->op = IR_BEGIN;
+		if_false->op2 = IR_UNUSED;
 		if (ir_ref_is_true(ctx, condition)) {
 			if_false->op1 = IR_UNUSED;
 			ir_use_list_remove_one(ctx, ref, if_false_ref);
@@ -3748,6 +3766,47 @@ remove_bitcast:
 			ir_iter_optimize_guard(ctx, i, insn, worklist);
 		}
 	}
+}
+
+void ir_iter_cleanup(ir_ctx *ctx)
+{
+	ir_bitqueue iter_worklist;
+	ir_bitqueue cfg_worklist;
+	ir_ref i, n;
+	ir_insn *insn;
+
+	ir_bitqueue_init(&cfg_worklist, ctx->insns_count);
+	ir_bitqueue_init(&iter_worklist, ctx->insns_count);
+
+	/* Remove unused nodes */
+	for (i = IR_UNUSED + 1, insn = ctx->ir_base + i; i < ctx->insns_count;) {
+		if (IR_IS_FOLDABLE_OP(insn->op)) {
+			if (insn->op != IR_NOP && ctx->use_lists[i].count == 0) {
+				ir_iter_remove_insn(ctx, i, &iter_worklist);
+			}
+		} else if (insn->op == IR_IF || insn->op == IR_MERGE) {
+			ir_bitqueue_add(&cfg_worklist, i);
+		}
+		n = insn->inputs_count;
+		n = ir_insn_inputs_to_len(n);
+		i += n;
+		insn += n;
+	}
+
+	while ((i = ir_bitqueue_pop(&iter_worklist)) >= 0) {
+		insn = &ctx->ir_base[i];
+		if (IR_IS_FOLDABLE_OP(insn->op)) {
+			if (ctx->use_lists[i].count == 0) {
+				ir_iter_remove_insn(ctx, i, &iter_worklist);
+			}
+		}
+	}
+
+	/* Cleanup Control Flow */
+	ir_iter_opt(ctx, &cfg_worklist);
+
+	ir_bitqueue_free(&iter_worklist);
+	ir_bitqueue_free(&cfg_worklist);
 }
 
 int ir_sccp(ir_ctx *ctx)
