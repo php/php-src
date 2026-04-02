@@ -79,7 +79,7 @@ function runSymfonyDemo(bool $jit): array {
     cloneRepo($dir, 'https://github.com/php/benchmarking-symfony-demo-2.2.3.git');
     runPhpCommand([$dir . '/bin/console', 'cache:clear']);
     runPhpCommand([$dir . '/bin/console', 'cache:warmup']);
-    return runValgrindPhpCgiCommand('symfony-demo', [$dir . '/public/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 50);
+    return runValgrindPhpCgiCommand('symfony-demo', [$dir . '/public/index.php'], cwd: $dir, jit: $jit, repeat: 100);
 }
 
 function runWordpress(bool $jit): array {
@@ -102,7 +102,7 @@ function runWordpress(bool $jit): array {
 
     // Warmup
     runPhpCommand([$dir . '/index.php'], $dir);
-    return runValgrindPhpCgiCommand('wordpress', [$dir . '/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 50);
+    return runValgrindPhpCgiCommand('wordpress', [$dir . '/index.php'], cwd: $dir, jit: $jit, repeat: 100);
 }
 
 function runPhpCommand(array $args, ?string $cwd = null): ProcessResult {
@@ -114,7 +114,6 @@ function runValgrindPhpCgiCommand(
     array $args,
     ?string $cwd = null,
     bool $jit = false,
-    int $warmup = 0,
     int $repeat = 1,
 ): array {
     global $phpCgi;
@@ -131,7 +130,7 @@ function runValgrindPhpCgiCommand(
         "--callgrind-out-file=$profileOut",
         '--',
         $phpCgi,
-        '-T' . ($warmup ? $warmup . ',' : '') . $repeat,
+        '-T' . $repeat,
         '-d max_execution_time=0',
         '-d opcache.enable=1',
         '-d opcache.jit=' . ($jit ? 'tracing' : 'disable'),
