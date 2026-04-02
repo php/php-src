@@ -714,11 +714,6 @@ const T_DOLLAR_OPEN_CURLY_BRACES = UNKNOWN;
 const T_CURLY_OPEN = UNKNOWN;
 /**
  * @var int
- * @cvalue T_PAAMAYIM_NEKUDOTAYIM
- */
-const T_PAAMAYIM_NEKUDOTAYIM = UNKNOWN;
-/**
- * @var int
  * @cvalue T_NS_SEPARATOR
  */
 const T_NS_SEPARATOR = UNKNOWN;
@@ -764,6 +759,6 @@ const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG = UNKNOWN;
 const T_BAD_CHARACTER = UNKNOWN;
 /**
  * @var int
- * @cvalue T_PAAMAYIM_NEKUDOTAYIM
+ * @cvalue T_DOUBLE_COLON
  */
 const T_DOUBLE_COLON = UNKNOWN;

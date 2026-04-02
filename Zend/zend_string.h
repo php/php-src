@@ -561,7 +561,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_OBJECT,                 "object") \
 	_(ZEND_STR_TYPE,                   "type") \
 	_(ZEND_STR_OBJECT_OPERATOR,        "->") \
-	_(ZEND_STR_PAAMAYIM_NEKUDOTAYIM,   "::") \
+	_(ZEND_STR_DOUBLE_COLON,   		   "::") \
 	_(ZEND_STR_ARGS,                   "args") \
 	_(ZEND_STR_ARGUMENTS,              "arguments") \
 	_(ZEND_STR_UNKNOWN,                "unknown") \

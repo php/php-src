@@ -8662,7 +8662,7 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 
 				if (CG(active_class_entry) && CG(active_class_entry)->name) {
 					class = CG(active_class_entry)->name;
-					separator = ZSTR_KNOWN(ZEND_STR_PAAMAYIM_NEKUDOTAYIM);
+					separator = ZSTR_KNOWN(ZEND_STR_DOUBLE_COLON);
 				}
 			}
 		}

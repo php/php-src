@@ -29,7 +29,7 @@ foreach ($matches['token_name'] as $tokenName) {
     $result .= "const $tokenName = UNKNOWN;\n";
 }
 
-$result .= "/**\n * @var int\n * @cvalue T_PAAMAYIM_NEKUDOTAYIM\n */\n";
+$result .= "/**\n * @var int\n * @cvalue T_DOUBLE_COLON\n */\n";
 $result .= "const T_DOUBLE_COLON = UNKNOWN;\n";
 
 file_put_contents($outfile_stub, $result);
@@ -71,8 +71,8 @@ foreach ($matches['token_name'] as $tokenName) {
     if ($tokenName === 'T_NOELSE' || $tokenName === 'T_ERROR') {
         continue;
     }
-    if ($tokenName === 'T_PAAMAYIM_NEKUDOTAYIM') {
-        $result .= "\t\tcase T_PAAMAYIM_NEKUDOTAYIM: return \"T_DOUBLE_COLON\";\n";
+    if ($tokenName === 'T_DOUBLE_COLON') {
+        $result .= "\t\tcase T_DOUBLE_COLON: return \"T_DOUBLE_COLON\";\n";
     } else {
         $result .= "\t\tcase $tokenName: return \"$tokenName\";\n";
     }

@@ -2787,7 +2787,7 @@ class StringBuilder {
         "class" => "ZEND_STR_CLASS",
         "object" => "ZEND_STR_OBJECT",
         "type" => "ZEND_STR_TYPE",
-        // ZEND_STR_OBJECT_OPERATOR and ZEND_STR_PAAMAYIM_NEKUDOTAYIM are
+        // ZEND_STR_OBJECT_OPERATOR and ZEND_STR_DOUBLE_COLON are
         // not valid variable names
         "args" => "ZEND_STR_ARGS",
         "unknown" => "ZEND_STR_UNKNOWN",

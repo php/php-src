@@ -185,60 +185,60 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_NS_C            "'__NAMESPACE__'"
 
 %token END 0 "end of file"
-%token T_ATTRIBUTE    "'#['"
-%token T_PLUS_EQUAL   "'+='"
-%token T_MINUS_EQUAL  "'-='"
-%token T_MUL_EQUAL    "'*='"
-%token T_DIV_EQUAL    "'/='"
-%token T_CONCAT_EQUAL "'.='"
-%token T_MOD_EQUAL    "'%='"
-%token T_AND_EQUAL    "'&='"
-%token T_OR_EQUAL     "'|='"
-%token T_XOR_EQUAL    "'^='"
-%token T_SL_EQUAL     "'<<='"
-%token T_SR_EQUAL     "'>>='"
-%token T_COALESCE_EQUAL "'??='"
-%token T_BOOLEAN_OR   "'||'"
-%token T_BOOLEAN_AND  "'&&'"
-%token T_IS_EQUAL     "'=='"
-%token T_IS_NOT_EQUAL "'!='"
-%token T_IS_IDENTICAL "'==='"
-%token T_IS_NOT_IDENTICAL "'!=='"
-%token T_IS_SMALLER_OR_EQUAL "'<='"
-%token T_IS_GREATER_OR_EQUAL "'>='"
-%token T_SPACESHIP "'<=>'"
-%token T_SL "'<<'"
-%token T_SR "'>>'"
-%token T_INC "'++'"
-%token T_DEC "'--'"
-%token T_INT_CAST    "'(int)'"
-%token T_DOUBLE_CAST "'(float)'"
-%token T_STRING_CAST "'(string)'"
-%token T_ARRAY_CAST  "'(array)'"
-%token T_OBJECT_CAST "'(object)'"
-%token T_BOOL_CAST   "'(bool)'"
-%token T_UNSET_CAST  "'(unset)'"
-%token T_VOID_CAST   "'(void)'"
-%token T_OBJECT_OPERATOR "'->'"
+%token T_ATTRIBUTE    			  "'#['"
+%token T_PLUS_EQUAL   			  "'+='"
+%token T_MINUS_EQUAL  			  "'-='"
+%token T_MUL_EQUAL    			  "'*='"
+%token T_DIV_EQUAL    			  "'/='"
+%token T_CONCAT_EQUAL 			  "'.='"
+%token T_MOD_EQUAL    			  "'%='"
+%token T_AND_EQUAL    			  "'&='"
+%token T_OR_EQUAL     			  "'|='"
+%token T_XOR_EQUAL    			  "'^='"
+%token T_SL_EQUAL     			  "'<<='"
+%token T_SR_EQUAL     			  "'>>='"
+%token T_COALESCE_EQUAL 		  "'??='"
+%token T_BOOLEAN_OR   			  "'||'"
+%token T_BOOLEAN_AND  			  "'&&'"
+%token T_IS_EQUAL     			  "'=='"
+%token T_IS_NOT_EQUAL 			  "'!='"
+%token T_IS_IDENTICAL 			  "'==='"
+%token T_IS_NOT_IDENTICAL 		  "'!=='"
+%token T_IS_SMALLER_OR_EQUAL      "'<='"
+%token T_IS_GREATER_OR_EQUAL      "'>='"
+%token T_SPACESHIP 				  "'<=>'"
+%token T_SL 					  "'<<'"
+%token T_SR 					  "'>>'"
+%token T_INC 					  "'++'"
+%token T_DEC 					  "'--'"
+%token T_INT_CAST    			  "'(int)'"
+%token T_DOUBLE_CAST 			  "'(float)'"
+%token T_STRING_CAST 			  "'(string)'"
+%token T_ARRAY_CAST  			  "'(array)'"
+%token T_OBJECT_CAST 			  "'(object)'"
+%token T_BOOL_CAST   			  "'(bool)'"
+%token T_UNSET_CAST  			  "'(unset)'"
+%token T_VOID_CAST   			  "'(void)'"
+%token T_OBJECT_OPERATOR 		  "'->'"
 %token T_NULLSAFE_OBJECT_OPERATOR "'?->'"
-%token T_DOUBLE_ARROW    "'=>'"
-%token T_COMMENT         "comment"
-%token T_DOC_COMMENT     "doc comment"
-%token T_OPEN_TAG        "open tag"
-%token T_OPEN_TAG_WITH_ECHO "'<?='"
-%token T_CLOSE_TAG       "'?>'"
-%token T_WHITESPACE      "whitespace"
-%token T_START_HEREDOC   "heredoc start"
-%token T_END_HEREDOC     "heredoc end"
+%token T_DOUBLE_ARROW    		  "'=>'"
+%token T_COMMENT         		  "comment"
+%token T_DOC_COMMENT     		  "doc comment"
+%token T_OPEN_TAG        		  "open tag"
+%token T_OPEN_TAG_WITH_ECHO 	  "'<?='"
+%token T_CLOSE_TAG       		  "'?>'"
+%token T_WHITESPACE      		  "whitespace"
+%token T_START_HEREDOC   		  "heredoc start"
+%token T_END_HEREDOC     		  "heredoc end"
 %token T_DOLLAR_OPEN_CURLY_BRACES "'${'"
-%token T_CURLY_OPEN      "'{$'"
-%token T_PAAMAYIM_NEKUDOTAYIM "'::'"
-%token T_NS_SEPARATOR    "'\\'"
-%token T_ELLIPSIS        "'...'"
-%token T_COALESCE        "'??'"
-%token T_POW             "'**'"
-%token T_POW_EQUAL       "'**='"
-%token T_PIPE         "'|>'"
+%token T_CURLY_OPEN      		  "'{$'"
+%token T_DOUBLE_COLON 	 		  "'::'"
+%token T_NS_SEPARATOR    		  "'\\'"
+%token T_ELLIPSIS        		  "'...'"
+%token T_COALESCE        		  "'??'"
+%token T_POW             		  "'**'"
+%token T_POW_EQUAL       		  "'**='"
+%token T_PIPE         			  "'|>'"
 /* We need to split the & token in two to avoid a shift/reduce conflict. For T1&$v and T1&T2,
  * with only one token lookahead, bison does not know whether to reduce T1 as a complete type,
  * or shift to continue parsing an intersection type. */
@@ -1064,7 +1064,7 @@ trait_method_reference:
 ;
 
 absolute_trait_method_reference:
-	class_name T_PAAMAYIM_NEKUDOTAYIM identifier
+	class_name T_DOUBLE_COLON identifier
 		{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, $1, $3); }
 ;
 
@@ -1455,9 +1455,9 @@ function_call:
 			if (zend_lex_tstring(&zv, $1) == FAILURE) { YYABORT; }
 			$$ = zend_ast_create(ZEND_AST_CALL, zend_ast_create_zval(&zv), $2);
 		}
-	|	class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
+	|	class_name T_DOUBLE_COLON member_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
-	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
+	|	variable_class_name T_DOUBLE_COLON member_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
 	|	callable_expr { $<num>$ = CG(zend_lineno); } argument_list {
 			$$ = zend_ast_create(ZEND_AST_CALL, $1, $3);
@@ -1519,19 +1519,19 @@ constant:
 	|	T_TRAIT_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_TRAIT_C); }
 	|	T_METHOD_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_METHOD_C); }
 	|	T_FUNC_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_FUNC_C); }
-	|	T_PROPERTY_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_PROPERTY_C); }
+	|	T_PROPERTY_C{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_PROPERTY_C); }
 	|	T_NS_C		{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_NS_C); }
 	|	T_CLASS_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_CLASS_C); }
 ;
 
 class_constant:
-		class_name T_PAAMAYIM_NEKUDOTAYIM identifier
+		class_name T_DOUBLE_COLON identifier
 			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
-	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier
+	|	variable_class_name T_DOUBLE_COLON identifier
 			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
-	|	class_name T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
+	|	class_name T_DOUBLE_COLON '{' expr '}'
 			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $4); }
-	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
+	|	variable_class_name T_DOUBLE_COLON '{' expr '}'
 			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $4); }
 ;
 
@@ -1597,9 +1597,9 @@ simple_variable:
 ;
 
 static_member:
-		class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
+		class_name T_DOUBLE_COLON simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
-	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
+	|	variable_class_name T_DOUBLE_COLON simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 ;
 
@@ -1612,9 +1612,9 @@ new_variable:
 			{ $$ = zend_ast_create(ZEND_AST_PROP, $1, $3); }
 	|	new_variable T_NULLSAFE_OBJECT_OPERATOR property_name
 			{ $$ = zend_ast_create(ZEND_AST_NULLSAFE_PROP, $1, $3); }
-	|	class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
+	|	class_name T_DOUBLE_COLON simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
-	|	new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable
+	|	new_variable T_DOUBLE_COLON simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 ;
 
