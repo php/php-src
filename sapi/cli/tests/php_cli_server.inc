@@ -25,7 +25,7 @@ function php_cli_server_start(
     }
 
     // XXX: This should ideally use the same INI overrides as run-tests
-    $cmd = [$php_executable, '-d', 'error_ignore_args=1', '-t', $doc_root, '-n', ...$cmd_args, '-S', 'localhost:0'];
+    $cmd = [$php_executable, '-d', 'error_include_args=0', '-t', $doc_root, '-n', ...$cmd_args, '-S', 'localhost:0'];
     if (!is_null($router)) {
         $cmd[] = $router;
     }
