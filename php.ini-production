@@ -753,21 +753,9 @@ doc_root =
 ; https://php.net/user-dir
 user_dir =
 
-; Directory in which the loadable extensions (modules) reside.
-; https://php.net/extension-dir
-;extension_dir = "./"
-; On windows:
-;extension_dir = "ext"
-
 ; Directory where the temporary files should be placed.
 ; Defaults to the system default (see sys_get_temp_dir)
 ;sys_temp_dir = "/tmp"
-
-; Whether or not to enable the dl() function.  The dl() function does NOT work
-; properly in multithreaded servers, such as IIS or Zeus, and is automatically
-; disabled on them.
-; https://php.net/enable-dl
-enable_dl = Off
 
 ; cgi.force_redirect is necessary to provide security running PHP as a CGI under
 ; most web servers.  Left undefined, PHP turns this on by default.  You can
@@ -889,6 +877,18 @@ default_socket_timeout = 60
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Dynamic Extensions ;
 ;;;;;;;;;;;;;;;;;;;;;;
+
+; Whether or not to enable the dl() function.  The dl() function does NOT work
+; properly in multithreaded servers, such as IIS or Zeus, and is automatically
+; disabled on them.
+; https://php.net/enable-dl
+enable_dl = Off
+
+; Directory in which the loadable extensions (modules) reside.
+; https://php.net/extension-dir
+;extension_dir = "./"
+; On windows:
+;extension_dir = "ext"
 
 ; If you wish to have an extension loaded automatically, use the following
 ; syntax:
