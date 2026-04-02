@@ -136,9 +136,15 @@ function runValgrindPhpCgiCommand(
     return ['instructions' => $instructions];
 }
 
+/**
+ * @return decimal-int-string
+ */
 function extractInstructionsFromValgrindOutput(string $output): string {
-    preg_match("(==[0-9]+== Events    : Ir\n==[0-9]+== Collected : (?<instructions>[0-9]+))", $output, $matches);
-    return $matches['instructions'] ?? throw new \Exception('Unexpected valgrind output');
+    if (!preg_match("(==[0-9]+== Events    : Ir\n==[0-9]+== Collected : (?<instructions>[0-9]+))", $output, $matches)) {
+        throw new \Exception('Unexpected valgrind output');
+    }
+
+    return $matches['instructions'];
 }
 
 main();
