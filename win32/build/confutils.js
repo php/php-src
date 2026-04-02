@@ -3367,7 +3367,7 @@ function toolset_setup_common_cflags()
 			AC_DEFINE('HAVE_PRESERVE_NONE', 1, 'Whether the compiler supports __preserve_none');
 		}
 	} else if (CLANG_TOOLSET) {
-		ADD_FLAG("CFLAGS", "-Wno-deprecated-declarations");
+		ADD_FLAG("CFLAGS", "-Wno-deprecated-declarations -Wno-microsoft-enum-forward-reference");
 		if (TARGET_ARCH == 'x86') {
 			ADD_FLAG('CFLAGS', '-m32');
 		} else {
