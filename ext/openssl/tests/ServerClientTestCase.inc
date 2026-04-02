@@ -101,7 +101,7 @@ class ServerClientTestCase
             $cmd = sprintf(
                 '%s %s "%s" %s',
                 // XXX: TEST_PHP_EXTRA_ARGS for run-test values won't work here?
-                PHP_BINARY, $ini ? "-n -c $ini -d error_ignore_args=1" : "",
+                PHP_BINARY, $ini ? "-n -c $ini -d error_include_args=0" : "",
                 __FILE__,
                 WORKER_ARGV_VALUE
             );
