@@ -32,6 +32,7 @@
 # endif
 #endif
 #include "userspace_arginfo.h"
+#include "zend_exceptions.h"
 
 static int le_protocols;
 
@@ -693,7 +694,27 @@ static int php_userstreamop_close(php_stream *stream, int close_handle)
 	assert(us != NULL);
 
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_CLOSE, false);
+
+	/* Reset currently thrown exception during call of close method. */
+	zend_object *old_exception = NULL;
+	const zend_op *old_opline_before_exception = NULL;
+	if (UNEXPECTED(EG(exception))) {
+		old_exception = EG(exception);
+		old_opline_before_exception = EG(opline_before_exception);
+		EG(exception) = NULL;
+	}
+
 	zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
+
+	if (UNEXPECTED(old_exception)) {
+		EG(opline_before_exception) = old_opline_before_exception;
+		if (EG(exception)) {
+			zend_exception_set_previous(EG(exception), old_exception);
+		} else {
+			EG(exception) = old_exception;
+		}
+	}
+
 	zend_string_release_ex(func_name, false);
 
 	zval_ptr_dtor(&retval);
