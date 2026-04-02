@@ -3428,12 +3428,9 @@ static zend_result pgsql_copy_from_query(PGconn *pgsql, PGresult *pgsql_result, 
 
 	int result;
 	if (ZSTR_LEN(tmp) > 0 && ZSTR_VAL(tmp)[ZSTR_LEN(tmp) - 1] != '\n') {
-		char *zquery = emalloc(ZSTR_LEN(tmp) + 2);
-		memcpy(zquery, ZSTR_VAL(tmp), ZSTR_LEN(tmp) + 1);
-		zquery[ZSTR_LEN(tmp)] = '\n';
-		zquery[ZSTR_LEN(tmp) + 1] = '\0';
-		result = PQputCopyData(pgsql, zquery, ZSTR_LEN(tmp) + 1);
-		efree(zquery);
+		zend_string *new_tmp = zend_string_concat2(ZSTR_VAL(tmp), ZSTR_LEN(tmp), "\n", 1);
+		result = PQputCopyData(pgsql, ZSTR_VAL(new_tmp), ZSTR_LEN(new_tmp));
+		zend_string_release(new_tmp);
 	} else {
 		result = PQputCopyData(pgsql, ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 	}
