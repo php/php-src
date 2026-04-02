@@ -2361,6 +2361,78 @@ static zend_class_entry *fixup_trait_scope(const zend_function *fn, zend_class_e
 	return fn->common.scope->ce_flags & ZEND_ACC_TRAIT ? ce : fn->common.scope;
 }
 
+static void zend_resolve_type(zend_type *type, const zend_class_entry *const ce)
+{
+	/* We are adding trait methods to another trait, delay resolution */
+	if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		return;
+	}
+	/* Only built-in types + static */
+	if (!ZEND_TYPE_IS_COMPLEX(*type)) {
+		return;
+	}
+	/* Intersection types cannot have un-resolved relative class types */
+	if (ZEND_TYPE_IS_INTERSECTION(*type)) {
+		return;
+	}
+
+	ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*type) || (ZEND_TYPE_HAS_LIST(*type)));
+	if (ZEND_TYPE_HAS_NAME(*type)) {
+		if (zend_string_equals_ci(ZEND_TYPE_NAME(*type), ZSTR_KNOWN(ZEND_STR_SELF))) {
+			ZEND_TYPE_SET_PTR(*type, zend_string_copy(ce->name));
+		} else if (zend_string_equals_ci(ZEND_TYPE_NAME(*type), ZSTR_KNOWN(ZEND_STR_PARENT))) {
+			if (!ce->parent) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use trait which has \"parent\" as a type when current class scope has no parent");
+			}
+
+			if (ce->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
+				ZEND_TYPE_SET_PTR(*type, zend_string_copy(ce->parent->name));
+			} else {
+				ZEND_TYPE_SET_PTR(*type, zend_string_copy(ce->parent_name));
+			}
+		}
+		return;
+	}
+
+	zend_type_list *union_type_list = ZEND_TYPE_LIST(*type);
+	zend_type *list_type;
+	ZEND_TYPE_LIST_FOREACH_MUTABLE(union_type_list, list_type) {
+		zend_resolve_type(list_type, ce);
+	} ZEND_TYPE_LIST_FOREACH_END();
+}
+
+static void zend_resolve_trait_relative_class_types(zend_function *const fn, const zend_class_entry *const ce)
+{
+	/* No type info */
+	if (!fn->common.arg_info) {
+		return;
+	}
+
+	bool has_return_type = fn->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE;
+	/* Variadic parameters are not counted as part of the standard number of arguments */
+	bool has_variadic_type = fn->common.fn_flags & ZEND_ACC_VARIADIC;
+	uint32_t num_args = fn->common.num_args + has_variadic_type;
+	size_t allocated_size = sizeof(zend_arg_info) * (has_return_type + num_args);
+
+	zend_arg_info *new_arg_infos = fn->common.arg_info - has_return_type;
+
+	/* We can allocate the arg_infos on the arena as the fn is also allocated on the arena */
+	if (fn->op_array.refcount && !(fn->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
+		new_arg_infos = safe_emalloc(num_args + has_return_type, sizeof(zend_arg_info), 0);
+	} else {
+		new_arg_infos = zend_arena_alloc(&CG(arena), allocated_size);
+	}
+	memcpy(new_arg_infos, fn->common.arg_info - has_return_type, allocated_size);
+	fn->common.arg_info = new_arg_infos + has_return_type;
+
+	for (uint32_t i = 0; i < num_args + has_return_type; i++) {
+		zend_type *type = &new_arg_infos[i].type;
+		zend_type_copy_ctor(type, true, ce->type == ZEND_INTERNAL_CLASS);
+		zend_resolve_type(type, ce);
+	}
+}
+
 static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_string *key, zend_function *fn) /* {{{ */
 {
 	zend_function *existing_fn = NULL;
@@ -2415,6 +2487,9 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 	/* Reassign method name, in case it is an alias. */
 	new_fn->common.function_name = name;
 	function_add_ref(new_fn);
+	if (new_fn->op_array.fn_flags2 & ZEND_ACC_RESOLVE_RELATIVE_TYPE) {
+		zend_resolve_trait_relative_class_types(new_fn, ce);
+	}
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_method(ce, fn, key);
 }
@@ -2959,6 +3034,8 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 			zend_type type = property_info->type;
 			/* Assumption: only userland classes can use traits, as such the type must be arena allocated */
 			zend_type_copy_ctor(&type, /* use arena */ true, /* persistent */ false);
+			/* Resolve possible self/parent types */
+			zend_resolve_type(&type, ce);
 			zend_property_info *new_prop = zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, type);
 
 			if (property_info->attributes) {
@@ -2988,6 +3065,10 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 						function_add_ref(new_fn);
 
 						zend_fixup_trait_method(new_fn, ce);
+
+						if (new_fn->op_array.fn_flags2 & ZEND_ACC_RESOLVE_RELATIVE_TYPE) {
+							zend_resolve_trait_relative_class_types(new_fn, ce);
+						}
 
 						hooks[j] = new_fn;
 					}

@@ -561,6 +561,30 @@ ZEND_API void zend_destroy_static_vars(zend_op_array *op_array)
 	}
 }
 
+static void zend_destroy_arg_infos_from_op_array(zend_op_array *op_array, bool free) {
+
+	uint32_t num_args = op_array->num_args;
+	zend_arg_info *arg_info = op_array->arg_info;
+
+	if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		arg_info--;
+		num_args++;
+	}
+	if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+		num_args++;
+	}
+	for (uint32_t i = 0 ; i < num_args; i++) {
+		if (arg_info[i].name) {
+			zend_string_release_ex(arg_info[i].name, 0);
+		}
+		zend_type_release(arg_info[i].type, /* persistent */ false);
+	}
+	if (free) {
+		efree(arg_info);
+	}
+	op_array->arg_info = NULL;
+}
+
 ZEND_API void destroy_op_array(zend_op_array *op_array)
 {
 	uint32_t i;
@@ -572,6 +596,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 
 	if (op_array->function_name) {
 		zend_string_release_ex(op_array->function_name, 0);
+	}
+
+	if (op_array->fn_flags2 & ZEND_ACC_RESOLVE_RELATIVE_TYPE) {
+		zend_destroy_arg_infos_from_op_array(op_array, op_array->refcount && !(op_array->fn_flags & ZEND_ACC_IMMUTABLE));
 	}
 
 	if (!op_array->refcount || --(*op_array->refcount) > 0) {
@@ -634,23 +662,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		}
 	}
 	if (op_array->arg_info) {
-		uint32_t num_args = op_array->num_args;
-		zend_arg_info *arg_info = op_array->arg_info;
-
-		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			arg_info--;
-			num_args++;
-		}
-		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
-			num_args++;
-		}
-		for (i = 0 ; i < num_args; i++) {
-			if (arg_info[i].name) {
-				zend_string_release_ex(arg_info[i].name, 0);
-			}
-			zend_type_release(arg_info[i].type, /* persistent */ false);
-		}
-		efree(arg_info);
+		zend_destroy_arg_infos_from_op_array(op_array, true);
 	}
 	if (op_array->static_variables) {
 		zend_array_destroy(op_array->static_variables);

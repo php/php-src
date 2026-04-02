@@ -416,7 +416,8 @@ typedef struct _zend_oparray_context {
 /* Function Flags 2 (fn_flags2) (unused: 0-31)            |     |     |     */
 /* ============================                           |     |     |     */
 /*                                                        |     |     |     */
-/* #define ZEND_ACC2_EXAMPLE             (1 << 0)         |  X  |     |     */
+/* method had self or parent type from trait              |     |     |     */
+#define ZEND_ACC_RESOLVE_RELATIVE_TYPE   (1 << 1) /*      |  X  |     |     */
 
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
 #define ZEND_ACC_PPP_SET_MASK  (ZEND_ACC_PUBLIC_SET | ZEND_ACC_PROTECTED_SET | ZEND_ACC_PRIVATE_SET)

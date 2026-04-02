@@ -11,5 +11,5 @@ class A {
 }
 ?>
 DONE
---EXPECT--
-DONE
+--EXPECTF--
+Fatal error: Cannot use trait which has "parent" as a type when current class scope has no parent in %s on line %d
