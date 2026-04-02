@@ -1,56 +1,11 @@
 /* This is a generated file, edit stream_errors.stub.php instead.
- * Stub hash: 65d3a47368993358ac8a4a41bc93dbff5677d3f5
+ * Stub hash: 3e9ee6f0fdd8ecf3ded82728487a9e774137036a
  * Has decl header: yes */
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamErrorCode_isIoError, 0, 0, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_StreamErrorCode_isFileSystemError arginfo_class_StreamErrorCode_isIoError
-
-#define arginfo_class_StreamErrorCode_isWrapperError arginfo_class_StreamErrorCode_isIoError
-
-#define arginfo_class_StreamErrorCode_isFilterError arginfo_class_StreamErrorCode_isIoError
-
-#define arginfo_class_StreamErrorCode_isCastError arginfo_class_StreamErrorCode_isIoError
-
-#define arginfo_class_StreamErrorCode_isNetworkError arginfo_class_StreamErrorCode_isIoError
-
-#define arginfo_class_StreamErrorCode_isEncodingError arginfo_class_StreamErrorCode_isIoError
-
-#define arginfo_class_StreamErrorCode_isResourceError arginfo_class_StreamErrorCode_isIoError
-
-#define arginfo_class_StreamErrorCode_isLockError arginfo_class_StreamErrorCode_isIoError
-
-#define arginfo_class_StreamErrorCode_isUserspaceError arginfo_class_StreamErrorCode_isIoError
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamException_getErrors, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-static ZEND_METHOD(StreamErrorCode, isIoError);
-static ZEND_METHOD(StreamErrorCode, isFileSystemError);
-static ZEND_METHOD(StreamErrorCode, isWrapperError);
-static ZEND_METHOD(StreamErrorCode, isFilterError);
-static ZEND_METHOD(StreamErrorCode, isCastError);
-static ZEND_METHOD(StreamErrorCode, isNetworkError);
-static ZEND_METHOD(StreamErrorCode, isEncodingError);
-static ZEND_METHOD(StreamErrorCode, isResourceError);
-static ZEND_METHOD(StreamErrorCode, isLockError);
-static ZEND_METHOD(StreamErrorCode, isUserspaceError);
 static ZEND_METHOD(StreamException, getErrors);
-
-static const zend_function_entry class_StreamErrorCode_methods[] = {
-	ZEND_ME(StreamErrorCode, isIoError, arginfo_class_StreamErrorCode_isIoError, ZEND_ACC_PUBLIC)
-	ZEND_ME(StreamErrorCode, isFileSystemError, arginfo_class_StreamErrorCode_isFileSystemError, ZEND_ACC_PUBLIC)
-	ZEND_ME(StreamErrorCode, isWrapperError, arginfo_class_StreamErrorCode_isWrapperError, ZEND_ACC_PUBLIC)
-	ZEND_ME(StreamErrorCode, isFilterError, arginfo_class_StreamErrorCode_isFilterError, ZEND_ACC_PUBLIC)
-	ZEND_ME(StreamErrorCode, isCastError, arginfo_class_StreamErrorCode_isCastError, ZEND_ACC_PUBLIC)
-	ZEND_ME(StreamErrorCode, isNetworkError, arginfo_class_StreamErrorCode_isNetworkError, ZEND_ACC_PUBLIC)
-	ZEND_ME(StreamErrorCode, isEncodingError, arginfo_class_StreamErrorCode_isEncodingError, ZEND_ACC_PUBLIC)
-	ZEND_ME(StreamErrorCode, isResourceError, arginfo_class_StreamErrorCode_isResourceError, ZEND_ACC_PUBLIC)
-	ZEND_ME(StreamErrorCode, isLockError, arginfo_class_StreamErrorCode_isLockError, ZEND_ACC_PUBLIC)
-	ZEND_ME(StreamErrorCode, isUserspaceError, arginfo_class_StreamErrorCode_isUserspaceError, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
 
 static const zend_function_entry class_StreamException_methods[] = {
 	ZEND_ME(StreamException, getErrors, arginfo_class_StreamException_getErrors, ZEND_ACC_PUBLIC)
@@ -59,7 +14,7 @@ static const zend_function_entry class_StreamException_methods[] = {
 
 static zend_class_entry *register_class_StreamErrorCode(void)
 {
-	zend_class_entry *class_entry = zend_register_internal_enum("StreamErrorCode", IS_UNDEF, class_StreamErrorCode_methods);
+	zend_class_entry *class_entry = zend_register_internal_enum("StreamErrorCode", IS_UNDEF, NULL);
 
 	zend_enum_add_case_cstr(class_entry, "None", NULL);
 

@@ -105,26 +105,6 @@ enum StreamErrorCode
     case UserspaceNotImplemented;
     case UserspaceInvalidReturn;
     case UserspaceCallFailed;
-
-    public function isIoError(): bool {}
-
-    public function isFileSystemError(): bool {}
-
-    public function isWrapperError(): bool {}
-
-    public function isFilterError(): bool {}
-
-    public function isCastError(): bool {}
-
-    public function isNetworkError(): bool {}
-
-    public function isEncodingError(): bool {}
-
-    public function isResourceError(): bool {}
-
-    public function isLockError(): bool {}
-
-    public function isUserspaceError(): bool {}
 }
 
 enum StreamErrorMode

@@ -33,7 +33,6 @@ static zend_class_entry *php_ce_stream_exception;
 
 /* Forward declarations */
 static void php_stream_error_entry_free(php_stream_error_entry *entry);
-static bool php_stream_error_code_in_range(zval *this_zv, int start, int end);
 
 /* Helper to create a single StreamError object from an entry */
 static void php_stream_error_create_object(zval *zv, php_stream_error_entry *entry)
@@ -900,82 +899,6 @@ PHP_METHOD(StreamException, getErrors)
 			php_ce_stream_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), 1, NULL);
 
 	RETURN_COPY(errors);
-}
-
-/* StreamErrorCode range helpers - case_id based */
-
-static bool php_stream_error_code_in_range(zval *this_zv, int start, int end)
-{
-	int case_id = zend_enum_fetch_case_id(Z_OBJ_P(this_zv));
-	return case_id >= start && case_id < end;
-}
-
-PHP_METHOD(StreamErrorCode, isIoError)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_BOOL(php_stream_error_code_in_range(ZEND_THIS, STREAM_EC_IO_START, STREAM_EC_IO_END));
-}
-
-PHP_METHOD(StreamErrorCode, isFileSystemError)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_BOOL(php_stream_error_code_in_range(ZEND_THIS, STREAM_EC_FS_START, STREAM_EC_FS_END));
-}
-
-PHP_METHOD(StreamErrorCode, isWrapperError)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_BOOL(php_stream_error_code_in_range(
-			ZEND_THIS, STREAM_EC_WRAPPER_START, STREAM_EC_WRAPPER_END));
-}
-
-PHP_METHOD(StreamErrorCode, isFilterError)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_BOOL(php_stream_error_code_in_range(
-			ZEND_THIS, STREAM_EC_FILTER_START, STREAM_EC_FILTER_END));
-}
-
-PHP_METHOD(StreamErrorCode, isCastError)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_BOOL(php_stream_error_code_in_range(
-			ZEND_THIS, STREAM_EC_CAST_START, STREAM_EC_CAST_END));
-}
-
-PHP_METHOD(StreamErrorCode, isNetworkError)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_BOOL(php_stream_error_code_in_range(
-			ZEND_THIS, STREAM_EC_NETWORK_START, STREAM_EC_NETWORK_END));
-}
-
-PHP_METHOD(StreamErrorCode, isEncodingError)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_BOOL(php_stream_error_code_in_range(
-			ZEND_THIS, STREAM_EC_ENCODING_START, STREAM_EC_ENCODING_END));
-}
-
-PHP_METHOD(StreamErrorCode, isResourceError)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_BOOL(php_stream_error_code_in_range(
-			ZEND_THIS, STREAM_EC_RESOURCE_START, STREAM_EC_RESOURCE_END));
-}
-
-PHP_METHOD(StreamErrorCode, isLockError)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_BOOL(php_stream_error_code_in_range(
-			ZEND_THIS, STREAM_EC_LOCK_START, STREAM_EC_LOCK_END));
-}
-
-PHP_METHOD(StreamErrorCode, isUserspaceError)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_BOOL(php_stream_error_code_in_range(
-			ZEND_THIS, STREAM_EC_USERSPACE_START, STREAM_EC_USERSPACE_END));
 }
 
 /* Module init */
