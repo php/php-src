@@ -2194,8 +2194,10 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	}
 
 	/* Disable the message box for assertions and errors.*/
-	_CrtSetReportMode(_CRT_ASSERT, 0);
-	_CrtSetReportMode(_CRT_ERROR, 0);
+	if (!IsDebuggerPresent()) {
+		_CrtSetReportMode(_CRT_ASSERT, 0);
+		_CrtSetReportMode(_CRT_ERROR, 0);
+	}
 #endif
 
 #ifdef ZTS
