@@ -139,7 +139,8 @@ function runValgrindPhpCgiCommand(
         '-d opcache.validate_timestamps=0',
         ...$args,
     ]);
-    $instructions = extractInstructionsFromValgrindOutput($process->stderr);
+    $totals = extractTotalsFromCallgrindFile($profileOut);
+    $instructions = $totals['Ir'];
     if ($repeat > 1) {
         $instructions = gmp_strval(gmp_div_q($instructions, $repeat));
     }
@@ -147,11 +148,22 @@ function runValgrindPhpCgiCommand(
 }
 
 /**
- * @return decimal-int-string
+ * @return non-empty-array<non-empty-string, decimal-int-string>
  */
-function extractInstructionsFromValgrindOutput(string $output): string {
-    preg_match("(==[0-9]+== Events    : Ir\n==[0-9]+== Collected : (?<instructions>[0-9]+))", $output, $matches);
-    return $matches['instructions'] ?? throw new \Exception('Unexpected valgrind output');
+function extractTotalsFromCallgrindFile(string $file): array {
+    $data = file_get_contents($file);
+
+    if (!preg_match_all('(\nevents:((?: +\w+)+)\n)', $data, $matchesAll, \PREG_SET_ORDER)) {
+        throw new \Exception('Unexpected callgrind data - "events" not found');
+    }
+    $events = preg_split('( +)', ltrim(array_last($matchesAll)[1]), -1, \PREG_SPLIT_NO_EMPTY);
+
+    if (!preg_match_all('(\ntotals:((?: +\w+)+)\n)', $data, $matchesAll, \PREG_SET_ORDER)) {
+        throw new \Exception('Unexpected callgrind data - "totals" not found');
+    }
+    $totals = preg_split('( +)', ltrim(array_last($matchesAll)[1]), -1, \PREG_SPLIT_NO_EMPTY);
+
+    return array_combine($events, $totals);
 }
 
 main();
