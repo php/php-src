@@ -562,11 +562,9 @@ static zend_string *xsl_create_parameter_key(uint32_t arg_num, const zend_string
 		return NULL;
 	}
 
-	zend_string *clark_str = zend_string_safe_alloc(1, ZSTR_LEN(name), 2 + ZSTR_LEN(namespace), false);
-	ZSTR_VAL(clark_str)[0] = '{';
-	memcpy(ZSTR_VAL(clark_str) + 1, ZSTR_VAL(namespace), ZSTR_LEN(namespace));
-	ZSTR_VAL(clark_str)[ZSTR_LEN(namespace) + 1] = '}';
-	memcpy(ZSTR_VAL(clark_str) + 2 + ZSTR_LEN(namespace), ZSTR_VAL(name), ZSTR_LEN(name) + 1 /* include '\0' */);
+	zend_string *clark_str = zend_string_concat2("{", 1, ZSTR_VAL(namespace), ZSTR_LEN(namespace));
+	clark_str = zend_string_concat2(ZSTR_VAL(clark_str), ZSTR_LEN(clark_str), "}", 1);
+	clark_str = zend_string_concat2(ZSTR_VAL(clark_str), ZSTR_LEN(clark_str), ZSTR_VAL(name), ZSTR_LEN(name));
 	return clark_str;
 }
 
