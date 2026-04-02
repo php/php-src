@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: f5583557f058e4862750d1262296d7f59cb0eed0
+ * Stub hash: 426cf6f68840941b614915fe566021802bb12abe
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -1823,6 +1823,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_select, 0, 4, MAY_BE_LONG
 	ZEND_ARG_TYPE_INFO(1, except, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, microseconds, IS_LONG, 1, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_create, 0, 0, 0)
@@ -1937,6 +1938,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_pair, 0, 3, MAY_BE
 	ZEND_ARG_TYPE_INFO(0, domain, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_LONG, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -1945,6 +1947,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_copy_to_stream, 0, 2, MAY
 	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_get_contents, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
@@ -1987,9 +1990,16 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_stream_get_wrappers arginfo_ob_list_handlers
 
+#define arginfo_stream_last_errors arginfo_ob_list_handlers
+
+#define arginfo_stream_clear_errors arginfo_flush
+
 #define arginfo_stream_get_transports arginfo_ob_list_handlers
 
-#define arginfo_stream_is_local arginfo_rewind
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_is_local, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
+ZEND_END_ARG_INFO()
 
 #define arginfo_stream_isatty arginfo_rewind
 
@@ -2829,6 +2839,8 @@ ZEND_FUNCTION(stream_get_meta_data);
 ZEND_FUNCTION(stream_get_line);
 ZEND_FUNCTION(stream_resolve_include_path);
 ZEND_FUNCTION(stream_get_wrappers);
+ZEND_FUNCTION(stream_last_errors);
+ZEND_FUNCTION(stream_clear_errors);
 ZEND_FUNCTION(stream_get_transports);
 ZEND_FUNCTION(stream_is_local);
 ZEND_FUNCTION(stream_isatty);
@@ -3437,6 +3449,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(stream_get_line, arginfo_stream_get_line)
 	ZEND_FE(stream_resolve_include_path, arginfo_stream_resolve_include_path)
 	ZEND_FE(stream_get_wrappers, arginfo_stream_get_wrappers)
+	ZEND_FE(stream_last_errors, arginfo_stream_last_errors)
+	ZEND_FE(stream_clear_errors, arginfo_stream_clear_errors)
 	ZEND_FE(stream_get_transports, arginfo_stream_get_transports)
 	ZEND_FE(stream_is_local, arginfo_stream_is_local)
 	ZEND_FE(stream_isatty, arginfo_stream_isatty)
