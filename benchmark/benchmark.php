@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/shared.php';
 
-foreach (array("mbstring", "sockets", "mysqli", "openssl", "gmp") as $ext) {
+foreach (array("mbstring", "sockets", "mysqli", "openssl") as $ext) {
     if (!extension_loaded($ext)) {
         throw new LogicException("Extension $ext is required.");
     }
@@ -131,14 +131,17 @@ function runValgrindPhpCgiCommand(
     ]);
     $instructions = extractInstructionsFromValgrindOutput($process->stderr);
     if ($repeat > 1) {
-        $instructions = gmp_strval(gmp_div_q($instructions, $repeat));
+        $instructions = intdiv($instructions, $repeat);
     }
     return ['instructions' => $instructions];
 }
 
-function extractInstructionsFromValgrindOutput(string $output): string {
-    preg_match("(==[0-9]+== Events    : Ir\n==[0-9]+== Collected : (?<instructions>[0-9]+))", $output, $matches);
-    return $matches['instructions'] ?? throw new \Exception('Unexpected valgrind output');
+function extractInstructionsFromValgrindOutput(string $output): int {
+    if (!preg_match("(==[0-9]+== Events    : Ir\n==[0-9]+== Collected : (?<instructions>[0-9]+))", $output, $matches)) {
+        throw new \Exception('Unexpected valgrind output');
+    }
+
+    return (int) $matches['instructions'];
 }
 
 main();
