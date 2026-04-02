@@ -604,7 +604,7 @@ static zend_never_inline ZEND_COLD zval *zend_wrong_assign_to_variable_reference
 	return zend_assign_to_variable_ex(variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num)
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num)
 {
 	const zend_execute_data *execute_data = EG(current_execute_data);
 	zend_string *func_name = get_function_or_method_name(EX(call)->func);
@@ -680,7 +680,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_erro
 	}
 }
 
-static ZEND_COLD void zend_verify_type_error_common(
+static zend_never_inline ZEND_COLD void zend_verify_type_error_common(
 		const zend_function *zf, const zend_arg_info *arg_info, const zval *value,
 		const char **fname, const char **fsep, const char **fclass,
 		zend_string **need_msg, const char **given_kind)
@@ -703,7 +703,7 @@ static ZEND_COLD void zend_verify_type_error_common(
 	}
 }
 
-ZEND_API ZEND_COLD void zend_verify_arg_error(
+ZEND_API zend_never_inline ZEND_COLD void zend_verify_arg_error(
 		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, const zval *value)
 {
 	const zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
@@ -880,7 +880,7 @@ static zend_never_inline ZEND_COLD void zend_magic_get_property_type_inconsisten
 	zend_string_release(type_str);
 }
 
-ZEND_COLD void zend_match_unhandled_error(const zval *value)
+zend_never_inline ZEND_COLD void zend_match_unhandled_error(const zval *value)
 {
 	zend_long max_len = EG(exception_string_param_max_len);
 	smart_str msg = {0};
@@ -900,35 +900,35 @@ ZEND_COLD void zend_match_unhandled_error(const zval *value)
 	smart_str_free(&msg);
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(
 		const zend_property_info *info) {
 	zend_readonly_property_modification_error_ex(
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error_ex(
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error_ex(
 		const char *class_name, const char *prop_name) {
 	zend_throw_error(NULL, "Cannot modify readonly property %s::$%s", class_name, prop_name);
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modification_error(const zend_property_info *info)
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modification_error(const zend_property_info *info)
 {
 	zend_throw_error(NULL, "Cannot indirectly modify readonly property %s::$%s",
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(const uint8_t type)
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(const uint8_t type)
 {
 	zend_type_error("Cannot use value of type %s as class constant name", zend_get_type_by_const(type));
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_property_error(const zend_property_info *info)
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_property_error(const zend_property_info *info)
 {
 	zend_throw_error(NULL, "Object was released while assigning to property %s::$%s",
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(
 	const zend_property_info *prop_info, const char *operation
 ) {
 	const zend_class_entry *scope;
@@ -1321,7 +1321,7 @@ ZEND_API bool zend_internal_call_should_throw(const zend_function *fbc, zend_exe
 	return 0;
 }
 
-ZEND_API ZEND_COLD void zend_internal_call_arginfo_violation(const zend_function *fbc)
+ZEND_API zend_never_inline ZEND_COLD void zend_internal_call_arginfo_violation(const zend_function *fbc)
 {
 	zend_error_noreturn(E_ERROR, "Arginfo / zpp mismatch during call of %s%s%s()",
 		fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
@@ -1392,7 +1392,7 @@ static void zend_verify_internal_func_info(const zend_function *fn, const zval *
 }
 #endif
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(const zend_execute_data *execute_data)
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(const zend_execute_data *execute_data)
 {
 	const zend_execute_data *ptr = EX(prev_execute_data);
 
@@ -1417,7 +1417,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(const zend_execute_
 	}
 }
 
-ZEND_API ZEND_COLD void zend_verify_return_error(const zend_function *zf, const zval *value)
+ZEND_API zend_never_inline ZEND_COLD void zend_verify_return_error(const zend_function *zf, const zval *value)
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
 	const char *fname, *fsep, *fclass;
@@ -1433,7 +1433,7 @@ ZEND_API ZEND_COLD void zend_verify_return_error(const zend_function *zf, const 
 	zend_string_release(need_msg);
 }
 
-ZEND_API ZEND_COLD void zend_verify_never_error(const zend_function *zf)
+ZEND_API zend_never_inline ZEND_COLD void zend_verify_never_error(const zend_function *zf)
 {
 	zend_string *func_name = get_function_or_method_name(zf);
 
@@ -1444,7 +1444,7 @@ ZEND_API ZEND_COLD void zend_verify_never_error(const zend_function *zf)
 }
 
 #if ZEND_DEBUG
-static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, const zval *value)
+static zend_never_inline ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, const zval *value)
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
 	const char *fname, *fsep, *fclass;
@@ -1458,7 +1458,7 @@ static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf,
 		fclass, fsep, fname, ZSTR_VAL(need_msg), given_msg);
 }
 
-static ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, const char *returned_msg, const char *returned_kind)
+static zend_never_inline ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, const char *returned_msg, const char *returned_kind)
 {
 	const char *fname = ZSTR_VAL(zf->common.function_name);
 	const char *fsep;
@@ -1497,7 +1497,7 @@ ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, zval *re
 }
 #endif
 
-static ZEND_COLD void zend_verify_missing_return_type(const zend_function *zf)
+static zend_never_inline ZEND_COLD void zend_verify_missing_return_type(const zend_function *zf)
 {
 	/* VERIFY_RETURN_TYPE is not emitted for "void" functions, so this is always an error. */
 	zend_verify_return_error(zf, NULL);
@@ -1754,7 +1754,7 @@ try_again:
 	return zval_get_long_func(dim, /* is_strict */ false);
 }
 
-ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
+ZEND_API zend_never_inline ZEND_COLD void zend_wrong_string_offset_error(void)
 {
 	const char *msg = NULL;
 	const zend_execute_data *execute_data = EG(current_execute_data);
@@ -2184,7 +2184,7 @@ static zend_property_info *zend_get_prop_not_accepting_double(zend_reference *re
 	return NULL;
 }
 
-static ZEND_COLD zend_long zend_throw_incdec_ref_error(const zend_property_info *error_prop OPLINE_DC)
+static zend_never_inline ZEND_COLD zend_long zend_throw_incdec_ref_error(const zend_property_info *error_prop OPLINE_DC)
 {
 	zend_string *type_str = zend_type_to_string(error_prop->type);
 	if (ZEND_IS_INCREMENT(opline->opcode)) {
@@ -2206,7 +2206,7 @@ static ZEND_COLD zend_long zend_throw_incdec_ref_error(const zend_property_info 
 	}
 }
 
-static ZEND_COLD zend_long zend_throw_incdec_prop_error(const zend_property_info *prop OPLINE_DC) {
+static zend_never_inline ZEND_COLD zend_long zend_throw_incdec_prop_error(const zend_property_info *prop OPLINE_DC) {
 	zend_string *type_str = zend_type_to_string(prop->type);
 	if (ZEND_IS_INCREMENT(opline->opcode)) {
 		zend_type_error("Cannot increment property %s::$%s of type %s past its maximal value",
@@ -3425,7 +3425,7 @@ num_key:
 	}
 }
 
-static ZEND_COLD void ZEND_FASTCALL zend_array_key_exists_error(
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_array_key_exists_error(
 		const zval *subject, const zval *key OPLINE_DC EXECUTE_DATA_DC)
 {
 	if (Z_TYPE_P(key) == IS_UNDEF) {
@@ -3894,7 +3894,7 @@ ZEND_API zval* ZEND_FASTCALL zend_fetch_static_property(zend_execute_data *ex, i
 	return result;
 }
 
-ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(const zend_property_info *prop1, const zend_property_info *prop2, const zval *zv) {
+ZEND_API zend_never_inline ZEND_COLD void zend_throw_ref_type_error_type(const zend_property_info *prop1, const zend_property_info *prop2, const zval *zv) {
 	zend_string *type1_str = zend_type_to_string(prop1->type);
 	zend_string *type2_str = zend_type_to_string(prop2->type);
 	zend_type_error("Reference with value of type %s held by property %s::$%s of type %s is not compatible with property %s::$%s of type %s",
@@ -3910,7 +3910,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(const zend_property_info 
 	zend_string_release(type2_str);
 }
 
-ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(const zend_property_info *prop, const zval *zv) {
+ZEND_API zend_never_inline ZEND_COLD void zend_throw_ref_type_error_zval(const zend_property_info *prop, const zval *zv) {
 	zend_string *type_str = zend_type_to_string(prop->type);
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s",
 		zend_zval_value_name(zv),
@@ -3921,7 +3921,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(const zend_property_info 
 	zend_string_release(type_str);
 }
 
-static ZEND_COLD void zend_throw_conflicting_coercion_error(const zend_property_info *prop1, const zend_property_info *prop2, const zval *zv) {
+static zend_never_inline ZEND_COLD void zend_throw_conflicting_coercion_error(const zend_property_info *prop1, const zend_property_info *prop2, const zval *zv) {
 	zend_string *type1_str = zend_type_to_string(prop1->type);
 	zend_string *type2_str = zend_type_to_string(prop2->type);
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s and property %s::$%s of type %s, as this would result in an inconsistent type conversion",
