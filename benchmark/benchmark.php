@@ -2,12 +2,6 @@
 
 require_once __DIR__ . '/shared.php';
 
-foreach (array("mbstring", "sockets", "mysqli", "openssl") as $ext) {
-    if (!extension_loaded($ext)) {
-        throw new LogicException("Extension $ext is required.");
-    }
-}
-
 $storeResult = ($argv[1] ?? 'false') === 'true';
 $phpCgi = $argv[2] ?? dirname(PHP_BINARY) . '/php-cgi';
 if (!file_exists($phpCgi)) {
@@ -27,18 +21,32 @@ function main() {
     if (false !== $branch = getenv('GITHUB_REF_NAME')) {
         $data['branch'] = $branch;
     }
+
     $data['Zend/bench.php'] = runBench(false);
     $data['Zend/bench.php JIT'] = runBench(true);
+
+    checkExtensions(['mbstring']);
     $data['Symfony Demo 2.2.3'] = runSymfonyDemo(false);
     $data['Symfony Demo 2.2.3 JIT'] = runSymfonyDemo(true);
+
+    checkExtensions(['mbstring', 'sockets', 'mysqli', 'openssl']);
     $data['Wordpress 6.2'] = runWordpress(false);
     $data['Wordpress 6.2 JIT'] = runWordpress(true);
+
     $result = json_encode($data, JSON_PRETTY_PRINT) . "\n";
 
     fwrite(STDOUT, $result);
 
     if ($storeResult) {
         storeResult($result);
+    }
+}
+
+function checkExtensions(array $extensions): void {
+    foreach ($extensions as $ext) {
+        if (!extension_loaded($ext)) {
+            throw new LogicException("Extension $ext is required.");
+        }
     }
 }
 
