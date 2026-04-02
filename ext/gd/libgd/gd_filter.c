@@ -1,6 +1,7 @@
 #include "gd.h"
 
 #include "gd_intern.h"
+#include "gd_errors.h"
 
 #ifdef _WIN32
 # include <windows.h>
@@ -8,6 +9,7 @@
 # include <unistd.h>
 #endif
 #include <stdlib.h>
+#include <math.h>
 #include <time.h>
 
 /* Filters function added on 2003/12
@@ -438,6 +440,24 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 			new_r = (new_r > 255.0f)? 255.0f : ((new_r < 0.0f)? 0.0f:new_r);
 			new_g = (new_g > 255.0f)? 255.0f : ((new_g < 0.0f)? 0.0f:new_g);
 			new_b = (new_b > 255.0f)? 255.0f : ((new_b < 0.0f)? 0.0f:new_b);
+
+			if (isnan(new_r)) {
+				gd_error("Matrix: invalid top-left filter");
+				gdImageDestroy(srcback);
+				return 0;
+			}
+
+			if (isnan(new_g)) {
+				gd_error("Matrix: invalid center filter");
+				gdImageDestroy(srcback);
+				return 0;
+			}
+
+			if (isnan(new_b)) {
+				gd_error("Matrix: invalid bottom-right filter");
+				gdImageDestroy(srcback);
+				return 0;
+			}
 
 			new_pxl = gdImageColorAllocateAlpha(src, (int)new_r, (int)new_g, (int)new_b, new_a);
 			if (new_pxl == -1) {
