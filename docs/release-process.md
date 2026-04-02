@@ -623,9 +623,6 @@ slightly different steps. We'll call attention where the steps differ.
     ./scripts/dev/makedist php-X.Y.Z
     ```
 
-    > 💬 **Hint** \
-    > Check if the PEAR files are updated (Phar).
-
     > 💡 **Tip** \
     > On some systems the behavior of GNU tar can default to produce POSIX
     > compliant archives with PAX headers. As not every application is

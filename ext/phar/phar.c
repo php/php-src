@@ -3453,8 +3453,6 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	php_info_print_table_end();
 
 	php_info_print_box_start(0);
-	PUTS("Phar based on pear/PHP_Archive, original concept by Davey Shafik.");
-	PUTS(!sapi_module.phpinfo_as_text?"<br />":"\n");
 	PUTS("Phar fully realized by Gregory Beaver and Marcus Boerger.");
 	PUTS(!sapi_module.phpinfo_as_text?"<br />":"\n");
 	PUTS("Portions of tar implementation Copyright (c) 2003-2009 Tim Kientzle.");
