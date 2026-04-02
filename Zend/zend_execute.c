@@ -4905,9 +4905,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 
 static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
 {
-	int i;
-
-	for (i = 0; i < EX(func)->op_array.last_live_range; i++) {
+	for (uint32_t i = 0; i < EX(func)->op_array.last_live_range; i++) {
 		const zend_live_range *range = &EX(func)->op_array.live_range[i];
 		if (range->start > op_num) {
 			/* further blocks will not be relevant... */
