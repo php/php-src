@@ -3319,7 +3319,11 @@ function toolset_setup_common_cflags()
 
 		var vc_ver = probe_binary(PATH_PROG('cl', null));
 		ADD_FLAG("CFLAGS"," -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions");
-	}
+
+        if (CLANGVERS >= 1900 && (TARGET_ARCH === 'x64' || TARGET_ARCH === 'arm64')) {
+            AC_DEFINE('HAVE_PRESERVE_NONE', 1, 'Whether the compiler supports __attribute__((preserve_none))');
+        }
+    }
 
 	if (!CLANG_TOOLSET) {
 		/* clang uses __builtin_*() instead */
