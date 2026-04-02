@@ -134,7 +134,7 @@ ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_l
 ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, uint8_t value_type, bool strict);
 ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *value, uint8_t value_type, bool strict, zend_refcounted **garbage_ptr);
 
-static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, uint8_t value_type)
+static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, const zval *value, uint8_t value_type)
 {
 	zend_refcounted *ref = NULL;
 
@@ -210,7 +210,7 @@ static zend_always_inline zval* zend_assign_to_variable_ex(zval *variable_ptr, z
 	return variable_ptr;
 }
 
-static zend_always_inline void zend_safe_assign_to_variable_noref(zval *variable_ptr, zval *value) {
+static zend_always_inline void zend_safe_assign_to_variable_noref(zval *variable_ptr, const zval *value) {
 	if (Z_REFCOUNTED_P(variable_ptr)) {
 		ZEND_ASSERT(Z_TYPE_P(variable_ptr) != IS_REFERENCE);
 		zend_refcounted *ref = Z_COUNTED_P(variable_ptr);
@@ -484,7 +484,7 @@ ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name);
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len);
 ZEND_API void ZEND_FASTCALL zend_init_func_run_time_cache(zend_op_array *op_array);
 
-ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *dim, int type);
+ZEND_API void zend_fetch_dimension_const(zval *result, const zval *container, zval *dim, int type);
 
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, uint32_t var);
 
