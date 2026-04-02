@@ -989,6 +989,8 @@ jobs:
         uses: ./.github/actions/setup-windows
       - name: Build
         run: .github/scripts/windows/build.bat
+      - name: Verify ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+        run: C:\obj\Release_TS\php.exe -r "if (ZEND_VM_KIND !== 'ZEND_VM_KIND_TAILCALL') { echo 'Expected ZEND_VM_KIND_TAILCALL, got ' . ZEND_VM_KIND . PHP_EOL; exit(1); }"
       - name: Test
         run: .github/scripts/windows/test.bat
   FREEBSD:
