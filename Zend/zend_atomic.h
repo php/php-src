@@ -68,7 +68,7 @@ typedef struct zend_atomic_int_s {
 
 BEGIN_EXTERN_C()
 
-#if (defined(ZEND_WIN32) || defined(HAVE_SYNC_ATOMICS)) && !defined(HAVE_C11_ATOMICS)
+#if defined(ZEND_WIN32) && !defined(HAVE_C11_ATOMICS)
 
 #ifndef InterlockedExchange8
 #define InterlockedExchange8 _InterlockedExchange8
