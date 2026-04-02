@@ -144,6 +144,8 @@ PHP 8.6 UPGRADE NOTES
   . ReflectionConstant::inNamespace()
   . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
     RFC: https://wiki.php.net/rfc/isreadable-iswriteable
+  . Added ReflectionParameter::getDocComment().
+    RFC: https://wiki.php.net/rfc/parameter-doccomments
 
 - Intl:
   . `grapheme_strrev()` returns strrev for grapheme cluster unit.

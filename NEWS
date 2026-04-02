@@ -100,6 +100,7 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed bug GH-21362 (ReflectionMethod::invoke/invokeArgs() did not verify
     Closure instance identity for Closure::__invoke()). (Ilia Alshanetsky)
+  . Added ReflectionParameter::getDocComment(). (chschneider)
 
 - Session:
   . Fixed bug 71162 (updateTimestamp never called when session data is empty).
