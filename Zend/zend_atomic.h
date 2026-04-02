@@ -39,7 +39,7 @@
  * and alignment purposes.
  */
 
-#if defined(ZEND_WIN32) || defined(HAVE_SYNC_ATOMICS)
+#if (defined(ZEND_WIN32) || defined(HAVE_SYNC_ATOMICS)) && !defined(HAVE_C11_ATOMICS)
 typedef struct zend_atomic_bool_s {
 	volatile char value;
 } zend_atomic_bool;
@@ -68,7 +68,7 @@ typedef struct zend_atomic_int_s {
 
 BEGIN_EXTERN_C()
 
-#ifdef ZEND_WIN32
+#if defined(ZEND_WIN32) && !defined(HAVE_C11_ATOMICS)
 
 #ifndef InterlockedExchange8
 #define InterlockedExchange8 _InterlockedExchange8
@@ -123,7 +123,7 @@ static zend_always_inline bool zend_atomic_int_compare_exchange_ex(zend_atomic_i
 	}
 }
 
-/* On this platform it is non-const due to Iterlocked API*/
+/* On this platform it is non-const due to Interlocked API */
 static zend_always_inline bool zend_atomic_bool_load_ex(zend_atomic_bool *obj) {
 	/* Or'ing with false won't change the value. */
 	return InterlockedOr8(&obj->value, false);
@@ -376,7 +376,7 @@ ZEND_API bool zend_atomic_int_compare_exchange(zend_atomic_int *obj, int *expect
 ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired);
 ZEND_API void zend_atomic_int_store(zend_atomic_int *obj, int desired);
 
-#if defined(ZEND_WIN32) || defined(HAVE_SYNC_ATOMICS)
+#if (defined(ZEND_WIN32) && !defined(HAVE_C11_ATOMICS)) || defined(HAVE_SYNC_ATOMICS)
 /* On these platforms it is non-const due to underlying APIs. */
 ZEND_API bool zend_atomic_bool_load(zend_atomic_bool *obj);
 ZEND_API int zend_atomic_int_load(zend_atomic_int *obj);
