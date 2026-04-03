@@ -695,7 +695,7 @@ static ZEND_COLD void zend_verify_type_error_common(
 		*fclass = "";
 	}
 
-	*need_msg = zend_type_to_string_resolved(arg_info->type, zf->common.scope);
+	*need_msg = zend_type_to_string_resolved(arg_info->type, zf->common.scope, /* TODO? */ NULL);
 
 	if (value) {
 		*given_kind = zend_zval_value_name(value);
@@ -1149,23 +1149,77 @@ static bool zend_check_intersection_type_from_list(
 	return true;
 }
 
+static bool zend_type_is_equal(zend_type given_type, zend_type constraint_type) {
+	if (ZEND_TYPE_PURE_MASK(given_type) != ZEND_TYPE_PURE_MASK(constraint_type)) {
+		return false;
+	}
+	if (ZEND_TYPE_HAS_NAME(given_type)) {
+		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(constraint_type));
+		return zend_string_equals(ZEND_TYPE_NAME(given_type), ZEND_TYPE_NAME(constraint_type));
+	} else if (ZEND_TYPE_HAS_LIST(given_type)) {
+		ZEND_ASSERT(ZEND_TYPE_HAS_LIST(constraint_type));
+		const zend_type_list *given_list_type = ZEND_TYPE_LIST(given_type);
+		const zend_type_list *constraint_list_type = ZEND_TYPE_LIST(constraint_type);
+		for (uint32_t list_type_index = 0; list_type_index < given_list_type->num_types; list_type_index++) {
+			zend_type inner_given_type = given_list_type->types[list_type_index];
+			zend_type inner_constraint_type = constraint_list_type->types[list_type_index];
+			if (!zend_type_is_equal(inner_given_type, inner_constraint_type)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	return true;
+}
+
 static zend_always_inline bool zend_check_type_slow(
 		const zend_type *type, zval *arg, const zend_reference *ref,
 		bool is_return_type, bool is_internal)
 {
 	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
-		zend_class_entry *ce;
+		const zend_class_entry *ce;
 		if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
-			if (ZEND_TYPE_IS_INTERSECTION(*type)) {
+			if (ZEND_TYPE_IS_NAME_WITH_GENERIC_TYPES(*type)) {
+				zend_ulong inner_type = 0;
+				bool is_ce = true;
+				const HashTable *bound_generic_types = NULL;
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), const zend_type *list_type) {
+					if (is_ce) {
+						is_ce = false;
+						ce = zend_fetch_ce_from_type(list_type);
+						if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce)) {
+							return false;
+						}
+						bound_generic_types = zend_hash_find_ptr_lc(Z_OBJCE_P(arg)->bound_types, ce->name);
+						if (!bound_generic_types
+							|| zend_hash_num_elements(bound_generic_types) != ce->num_generic_parameters
+							/* -1 because the class name must be excluded */
+							|| zend_hash_num_elements(bound_generic_types) != ZEND_TYPE_LIST(*type)->num_types-1
+						) {
+							return false;
+						}
+						continue;
+					}
+					ZEND_ASSERT(ce);
+					ZEND_ASSERT(bound_generic_types);
+					const zend_type *bound_type = zend_hash_index_find_ptr(bound_generic_types, inner_type++);
+					ZEND_ASSERT(bound_type);
+					if (!zend_type_is_equal(*list_type, *bound_type)) {
+						return false;
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+				/* TODO: Should this actually continue outside the loop */
+				return true;
+			} else if (ZEND_TYPE_IS_INTERSECTION(*type)) {
 				return zend_check_intersection_type_from_list(ZEND_TYPE_LIST(*type), Z_OBJCE_P(arg));
 			} else {
-				const zend_type *list_type;
-				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), const zend_type *list_type) {
 					if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
 						if (zend_check_intersection_type_from_list(ZEND_TYPE_LIST(*list_type), Z_OBJCE_P(arg))) {
 							return true;
 						}
 					} else {
+						/* TODO: Handle generic, or is this actually prevented ? */
 						ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
 						ce = zend_fetch_ce_from_type(list_type);
 						/* Instance of a single type part of a union is sufficient to pass the type check */
