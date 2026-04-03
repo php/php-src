@@ -289,7 +289,7 @@ U_CFUNC zval* collator_convert_string_to_double( zval* str, zval *rv )
 
 /* {{{ collator_convert_string_to_number_if_possible
  *
- * Convert string to numer.
+ * Convert string to number.
  *
  * @param  zval* str String to convert.
  *

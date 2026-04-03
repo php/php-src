@@ -80,7 +80,7 @@ static void transliterator_object_init( Transliterator_object* to )
 /* }}} */
 
 /* {{{ void transliterator_object_destroy( Transliterator_object* to )
- * Clean up mem allocted by internals of Transliterator_object
+ * Clean up mem allocated by internals of Transliterator_object
  */
 static void transliterator_object_destroy( Transliterator_object* to )
 {

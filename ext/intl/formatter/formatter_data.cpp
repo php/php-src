@@ -32,7 +32,7 @@ void formatter_data_init( formatter_data* nf_data )
 /* }}} */
 
 /* {{{ void formatter_data_free( formatter_data* nf_data )
- * Clean up mem allocted by internals of formatter_data
+ * Clean up mem allocated by internals of formatter_data
  */
 void formatter_data_free( formatter_data* nf_data )
 {

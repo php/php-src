@@ -254,7 +254,7 @@ static zend_off_t getStrrtokenPos(char* str, zend_off_t savedPos)
 		}
 	}
 	if(result < 1){
-		/* Just in case inavlid locale e.g. '-x-xyz' or '-sl_Latn' */
+		/* Just in case invalid locale e.g. '-x-xyz' or '-sl_Latn' */
 		result =-1;
 	}
 	return result;
@@ -362,7 +362,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , const char* t
 			if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
 				return zend_string_init(loc_name, strlen(loc_name), 0);
 			} else {
-				/* Since Grandfathered , no value , do nothing , retutn NULL */
+				/* Since Grandfathered , no value , do nothing , return NULL */
 				return NULL;
 			}
 		}
