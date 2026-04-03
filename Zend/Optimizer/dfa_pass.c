@@ -316,6 +316,53 @@ static inline bool can_elide_return_type_check(
 	return false;
 }
 
+static inline bool can_return_value_safely_be_coerced(
+	const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_op *ssa_op, zend_op *opline
+) {
+	const uint32_t return_type_mask = ZEND_TYPE_FULL_MASK(op_array->arg_info[-1].type);
+	const zend_ssa_var_info *use_info = &ssa->var_info[ssa_op->op1_use];
+
+	/* Type preference order: int -> float -> string -> bool */
+	/* Can always safely cast booleans to inter */
+	if (return_type_mask & MAY_BE_LONG) {
+		if (use_info->type & MAY_BE_BOOL) {
+			opline->opcode = ZEND_CAST;
+			opline->extended_value = IS_LONG;
+			return true;
+		}
+		return false;
+	}
+	if (return_type_mask & MAY_BE_DOUBLE) {
+		/* Can always safely cast booleans, and integers to float */
+		if (use_info->type & (MAY_BE_LONG|MAY_BE_BOOL)) {
+			opline->opcode = ZEND_CAST;
+			opline->extended_value = IS_DOUBLE;
+			return true;
+		}
+		return false;
+	}
+	/* Can always safely cast booleans, and integers to string,
+	 * float value must not be NAN */
+	if (return_type_mask & MAY_BE_STRING) {
+		if (use_info->type & (MAY_BE_LONG|MAY_BE_BOOL)) {
+			opline->opcode = ZEND_CAST;
+			opline->extended_value = IS_STRING;
+			return true;
+		}
+		return false;
+	}
+	return false;
+	if ((return_type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
+		/* Can always safely cast integers and strings to bool,
+		 * float value must not be NAN */
+		if (use_info->type & (MAY_BE_LONG|MAY_BE_STRING)) {
+			opline->opcode = ZEND_BOOL;
+			return true;
+		}
+		return false;
+	}
+}
+
 static bool opline_supports_assign_contraction(
 		zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, int src_var, uint32_t cv_var) {
 	if (opline->opcode == ZEND_NEW) {
@@ -1287,6 +1334,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 
 						MAKE_NOP(opline);
 						remove_nops = 1;
+					} else if (can_return_value_safely_be_coerced(op_array, ssa, &ssa->ops[op_1], opline)) {
+						continue;
 					}
 				}
 			}

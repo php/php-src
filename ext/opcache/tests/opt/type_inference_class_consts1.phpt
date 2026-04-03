@@ -73,7 +73,7 @@ Test1::getStaticFoo:
      ; (after optimizer)
      ; %s
 0000 T0 = FETCH_CLASS_CONSTANT (static) (exception) string("FOO")
-0001 VERIFY_RETURN_TYPE T0
+0001 CAST (long) T0
 0002 RETURN T0
 LIVE RANGES:
      0: 0001 - 0002 (tmp/var)
