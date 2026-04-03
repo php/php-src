@@ -272,7 +272,7 @@ char *alloca();
 # define ZEND_ATTRIBUTE_NODISCARD
 #endif
 
-#if ZEND_GCC_VERSION >= 3000
+#if ZEND_GCC_VERSION >= 3000 || __has_attribute(const)
 # define ZEND_ATTRIBUTE_CONST __attribute__((const))
 #else
 # define ZEND_ATTRIBUTE_CONST
@@ -314,7 +314,7 @@ char *alloca();
 # define ZEND_ATTRIBUTE_NONNULL_ARGS(...)
 #endif
 
-#if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
+#if (defined(__GNUC__) && ZEND_GCC_VERSION >= 4003) || __has_attribute(cold)
 # define ZEND_COLD __attribute__((cold))
 # ifdef __OPTIMIZE__
 #  define ZEND_OPT_SIZE  __attribute__((optimize("Os")))
@@ -329,7 +329,7 @@ char *alloca();
 # define ZEND_OPT_SPEED
 #endif
 
-#if defined(__GNUC__) && ZEND_GCC_VERSION >= 5000
+#if (defined(__GNUC__) && ZEND_GCC_VERSION >= 5000) || (__has_attribute(unused) && __has_attribute(cold))
 # define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((unused));
 # define ZEND_ATTRIBUTE_COLD_LABEL __attribute__((cold));
 #else
@@ -653,7 +653,7 @@ extern "C++" {
 #endif
 
 /* Do not use for conditional declaration of API functions! */
-#if defined(ZEND_INTRIN_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || (ZEND_GCC_VERSION >= 9000))
+#if defined(ZEND_INTRIN_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || defined(__clang__) || (ZEND_GCC_VERSION >= 9000))
 /* __builtin_cpu_supports has pclmul from gcc9 */
 # define ZEND_INTRIN_PCLMUL_FUNC_PROTO 1
 #elif defined(ZEND_INTRIN_PCLMUL_RESOLVER)
@@ -679,7 +679,7 @@ extern "C++" {
 #endif
 
 /* Do not use for conditional declaration of API functions! */
-#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || (ZEND_GCC_VERSION >= 9000))
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || defined(__clang__) || (ZEND_GCC_VERSION >= 9000))
 /* __builtin_cpu_supports has pclmul from gcc9 */
 # define ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PROTO 1
 #elif defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
