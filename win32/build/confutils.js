@@ -3397,7 +3397,7 @@ function toolset_setup_intrinsic_cflags()
 	/* From oldest to newest. */
 	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2", "avx", "avx2", "avx512");
 
-	if ("disabled" == PHP_NATIVE_INTRINSICS) {
+	if ("disabled" == PHP_NATIVE_INTRINSICS || "no" == PHP_NATIVE_INTRINSICS) {
 		return;
 	}
 
@@ -3409,7 +3409,7 @@ function toolset_setup_intrinsic_cflags()
 		return;
 	}
 
-	if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
+	if ("yes" == PHP_NATIVE_INTRINSICS) {
 		PHP_NATIVE_INTRINSICS = default_enabled;
 	}
 
