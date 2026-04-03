@@ -1,39 +1,61 @@
 --TEST--
-GH-10497: Allow direct modification of object stored in a constant
+GH-10497: Allow direct modification of object properties on constants
 --FILE--
 <?php
-const a = new stdClass;
-a->b = 42;
-var_dump(a->b);
 
-const obj = new stdClass;
-obj->foo = 'bar';
-obj->baz = 123;
-var_dump(obj->foo, obj->baz);
+const OBJ = new stdClass;
+OBJ->prop = 123;
+var_dump(OBJ->prop);
 
-const nested = new stdClass;
-nested->inner = new stdClass;
-nested->inner->value = 999;
-var_dump(nested->inner->value);
+OBJ->foo = 'bar';
+OBJ->baz = 456;
+var_dump(OBJ->foo, OBJ->baz);
 
-const readTest = new stdClass;
-readTest->prop = 'test';
-echo readTest->prop . "\n";
+OBJ->prop = 'overwritten';
+var_dump(OBJ->prop);
 
-var_dump(isset(readTest->prop));
-var_dump(empty(readTest->missing));
+OBJ->inner = new stdClass;
+OBJ->inner->value = 999;
+var_dump(OBJ->inner->value);
 
-const modTest = new stdClass;
-modTest->val = 1;
-modTest->val = 2;
-var_dump(modTest->val);
+OBJ->counter = 0;
+OBJ->counter++;
+OBJ->counter++;
+OBJ->counter--;
+var_dump(OBJ->counter);
+
+OBJ->str = 'hello';
+OBJ->str .= ' world';
+var_dump(OBJ->str);
+
+OBJ->temp = 'remove me';
+var_dump(isset(OBJ->temp));
+unset(OBJ->temp);
+var_dump(isset(OBJ->temp));
+
+var_dump(isset(OBJ->foo));
+var_dump(empty(OBJ->foo));
+var_dump(isset(OBJ->nonexistent));
+var_dump(empty(OBJ->nonexistent));
+
+function incr(&$v) { $v++; }
+OBJ->reftest = 10;
+incr(OBJ->reftest);
+var_dump(OBJ->reftest);
+
 ?>
 --EXPECT--
-int(42)
-string(3) "bar"
 int(123)
+string(3) "bar"
+int(456)
+string(11) "overwritten"
 int(999)
-test
+int(1)
+string(11) "hello world"
 bool(true)
+bool(false)
 bool(true)
-int(2)
+bool(false)
+bool(false)
+bool(true)
+int(11)
