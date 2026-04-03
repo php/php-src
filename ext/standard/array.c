@@ -6913,6 +6913,114 @@ PHP_FUNCTION(array_key_exists)
 }
 /* }}} */
 
+/* {{{ Helper function to get a nested value from array using dot notation */
+static zval* array_get_nested(HashTable *ht, const char *key, size_t key_len)
+{
+	const char *dot;
+	zval *current;
+
+	/* Find the first dot in the key */
+	dot = memchr(key, '.', key_len);
+
+	if (dot == NULL) {
+		/* No dot found, this is a simple key lookup */
+		zend_string *zkey = zend_string_init(key, key_len, 0);
+		current = zend_symtable_find(ht, zkey);
+		zend_string_release(zkey);
+		return current;
+	}
+
+	/* We have a dot, so we need to recurse */
+	size_t segment_len = dot - key;
+	zend_string *segment = zend_string_init(key, segment_len, 0);
+	current = zend_symtable_find(ht, segment);
+	zend_string_release(segment);
+
+	if (current == NULL || Z_TYPE_P(current) != IS_ARRAY) {
+		return NULL;
+	}
+
+	/* Recurse into the nested array with the remaining key */
+	return array_get_nested(Z_ARRVAL_P(current), dot + 1, key_len - segment_len - 1);
+}
+/* }}} */
+
+/* {{{ Retrieves a value from a deeply nested array using "dot" notation */
+PHP_FUNCTION(array_get)
+{
+	HashTable *ht;
+	zval *key = NULL;
+	zval *default_value = NULL;
+	zval *result;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_ARRAY_HT(ht)
+		Z_PARAM_ZVAL_OR_NULL(key)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(default_value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* If key is null, return the whole array */
+	if (key == NULL || Z_TYPE_P(key) == IS_NULL) {
+		ZVAL_ARR(return_value, zend_array_dup(ht));
+		return;
+	}
+
+	/* Handle string keys with dot notation */
+	if (Z_TYPE_P(key) == IS_STRING) {
+		result = array_get_nested(ht, Z_STRVAL_P(key), Z_STRLEN_P(key));
+
+		if (result != NULL) {
+			ZVAL_COPY(return_value, result);
+			return;
+		}
+	}
+	/* Handle integer keys (no dot notation support) */
+	else if (Z_TYPE_P(key) == IS_LONG) {
+		result = zend_hash_index_find(ht, Z_LVAL_P(key));
+
+		if (result != NULL) {
+			ZVAL_COPY(return_value, result);
+			return;
+		}
+	}
+
+	/* Key not found, return default value */
+	if (default_value != NULL) {
+		ZVAL_COPY(return_value, default_value);
+	} else {
+		RETVAL_NULL();
+	}
+}
+/* }}} */
+
+/* {{{ Checks whether a given item exists in an array using "dot" notation */
+PHP_FUNCTION(array_has)
+{
+	HashTable *ht;
+	zval *key;
+	zval *result;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY_HT(ht)
+		Z_PARAM_ZVAL(key)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* Handle string keys with dot notation */
+	if (Z_TYPE_P(key) == IS_STRING) {
+		result = array_get_nested(ht, Z_STRVAL_P(key), Z_STRLEN_P(key));
+		RETURN_BOOL(result != NULL);
+	}
+	/* Handle integer keys (no dot notation support) */
+	else if (Z_TYPE_P(key) == IS_LONG) {
+		RETURN_BOOL(zend_hash_index_exists(ht, Z_LVAL_P(key)));
+	}
+
+	/* Invalid key type */
+	RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ Split array into chunks */
 PHP_FUNCTION(array_chunk)
 {

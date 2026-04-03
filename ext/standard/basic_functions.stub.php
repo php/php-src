@@ -1910,6 +1910,16 @@ function key_exists($key, array $array): bool {}
 /**
  * @compile-time-eval
  */
+function array_get(array $array, string|int|null $key = null, mixed $default = null): mixed {}
+
+/**
+ * @compile-time-eval
+ */
+function array_has(array $array, string|int $key): bool {}
+
+/**
+ * @compile-time-eval
+ */
 function array_chunk(array $array, int $length, bool $preserve_keys = false): array {}
 
 /**
