@@ -3397,24 +3397,24 @@ function toolset_setup_intrinsic_cflags()
 	/* From oldest to newest. */
 	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2", "avx", "avx2", "avx512");
 
-	if (VS_TOOLSET) {
-		if ("disabled" == PHP_NATIVE_INTRINSICS) {
-			ERROR("Can't enable intrinsics, --with-codegen-arch passed with an incompatible option. ")
-		}
+	if ("disabled" == PHP_NATIVE_INTRINSICS) {
+		return;
+	}
 
-		if (TARGET_ARCH == 'arm64') {
-			/* arm64 supports neon */
-			configure_subst.Add("PHP_SIMD_SCALE", 'NEON');
-			/* all officially supported arm64 cpu supports crc32 (TODO: to be confirmed) */
-			AC_DEFINE('HAVE_ARCH64_CRC32', 1);
-			return;
-		}
+	if (TARGET_ARCH == 'arm64') {
+		/* arm64 supports neon */
+		configure_subst.Add("PHP_SIMD_SCALE", 'NEON');
+		/* all officially supported arm64 cpu supports crc32 (TODO: to be confirmed) */
+		AC_DEFINE('HAVE_ARCH64_CRC32', 1);
+		return;
+	}
 
-		if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
-			PHP_NATIVE_INTRINSICS = default_enabled;
-		}
+	if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
+		PHP_NATIVE_INTRINSICS = default_enabled;
+	}
 
-		if ("all" == PHP_NATIVE_INTRINSICS) {
+	if ("all" == PHP_NATIVE_INTRINSICS) {
+		if (VS_TOOLSET) {
 			var list = (new VBArray(avail.Keys())).toArray();
 
 			for (var i in list) {
@@ -3423,42 +3423,47 @@ function toolset_setup_intrinsic_cflags()
 
 			/* All means all. __AVX__, __AVX2__, and __AVX512*__ are defined by compiler. */
 			ADD_FLAG("CFLAGS","/arch:AVX512");
-			configure_subst.Add("PHP_SIMD_SCALE", "AVX512");
-		} else {
-			var list = PHP_NATIVE_INTRINSICS.split(",");
-			var j = 0;
-			for (var k = 0; k < scale.length; k++) {
-				for (var i = 0; i < list.length; i++) {
-					var it = list[i].toLowerCase();
-					if (scale[k] == it) {
-						j = k > j ? k : j;
-					} else if (!avail.Exists(it) && "avx512" != it && "avx2" != it && "avx" != it) {
-						WARNING("Unknown intrinsic name '" + it + "' ignored");
-					}
+		} else if (CLANG_TOOLSET) {
+			ADD_FLAG("CFLAGS","-mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl");
+		}
+		configure_subst.Add("PHP_SIMD_SCALE", "AVX512");
+	} else {
+		var list = PHP_NATIVE_INTRINSICS.split(",");
+		var j = 0;
+		for (var k = 0; k < scale.length; k++) {
+			for (var i = 0; i < list.length; i++) {
+				var it = list[i].toLowerCase();
+				if (scale[k] == it) {
+					j = k > j ? k : j;
+				} else if (!avail.Exists(it) && "avx512" != it && "avx2" != it && "avx" != it) {
+					WARNING("Unknown intrinsic name '" + it + "' ignored");
 				}
 			}
-			if (TARGET_ARCH == 'x86') {
-				/* SSE2 is currently the default on 32-bit. It could change later,
-					for now no need to pass it. But, if SSE only was chosen,
-					/arch:SSE is required. */
-				if ("sse" == scale[j]) {
-					ADD_FLAG("CFLAGS","/arch:SSE");
-				}
+		}
+		if (TARGET_ARCH == 'x86') {
+			/* SSE2 is currently the default on 32-bit. It could change later,
+				for now no need to pass it. But, if SSE only was chosen,
+				/arch:SSE is required. */
+			if ("sse" == scale[j]) {
+				ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:SSE" : "-msse");
 			}
-			configure_subst.Add("PHP_SIMD_SCALE", scale[j].toUpperCase());
-			/* There is no explicit way to enable intrinsics between SSE3 and SSE4.2.
-				The declared macros therefore won't affect the code generation,
-				but will enable the guarded code parts. */
-			if ("avx512" == scale[j]) {
-				ADD_FLAG("CFLAGS","/arch:AVX512");
-				j -= 3;
-			} else if ("avx2" == scale[j]) {
-				ADD_FLAG("CFLAGS","/arch:AVX2");
-				j -= 2;
-			} else if ("avx" == scale[j]) {
-				ADD_FLAG("CFLAGS","/arch:AVX");
-				j -= 1;
-			}
+		}
+		configure_subst.Add("PHP_SIMD_SCALE", scale[j].toUpperCase());
+		/* There is no explicit way to enable intrinsics between SSE3 and SSE4.2.
+			The declared macros therefore won't affect the code generation,
+			but will enable the guarded code parts. */
+		if ("avx512" == scale[j]) {
+			ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:AVX512" : "-mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl");
+			j -= 3;
+		} else if ("avx2" == scale[j]) {
+			ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:AVX2" : "-mavx2");
+			j -= 2;
+		} else if ("avx" == scale[j]) {
+			ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:AVX" : "-mavx");
+			j -= 1;
+		}
+		if (VS_TOOLSET) {
+			/* MSVC doesn't auto-define SSE macros; clang does with -m flags */
 			for (var i = 0; i <= j; i++) {
 				var it = scale[i];
 				AC_DEFINE(avail.Item(it), 1);
