@@ -1459,7 +1459,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 
 	if (*hstbuflen == 0) {
 		*hstbuflen = 1024;
-		*tmphstbuf = (char *)malloc (*hstbuflen);
+		*tmphstbuf = (char *)pemalloc(*hstbuflen, true);
 	}
 
 	while (( res =
@@ -1467,7 +1467,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */
 		*hstbuflen *= 2;
-		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
+		*tmphstbuf = (char *)perealloc(*tmphstbuf, *hstbuflen, true);
 	}
 
 	if (res != 0) {
@@ -1485,7 +1485,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 
 	if (*hstbuflen == 0) {
 		*hstbuflen = 1024;
-		*tmphstbuf = (char *)malloc (*hstbuflen);
+		*tmphstbuf = (char *)pemalloc(*hstbuflen, true);
 	}
 
 	while ((NULL == ( hp =
@@ -1493,7 +1493,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */
 		*hstbuflen *= 2;
-		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
+		*tmphstbuf = (char *)perealloc(*tmphstbuf, *hstbuflen, true);
 	}
 	return hp;
 }
@@ -1503,11 +1503,11 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 {
 	if (*hstbuflen == 0) {
 		*hstbuflen = sizeof(struct hostent_data);
-		*tmphstbuf = (char *)malloc (*hstbuflen);
+		*tmphstbuf = (char *)pemalloc(*hstbuflen, true);
 	} else {
 		if (*hstbuflen < sizeof(struct hostent_data)) {
 			*hstbuflen = sizeof(struct hostent_data);
-			*tmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
+			*tmphstbuf = (char *)perealloc(*tmphstbuf, *hstbuflen, true);
 		}
 	}
 	memset((void *)(*tmphstbuf),0,*hstbuflen);
