@@ -3397,7 +3397,7 @@ function toolset_setup_intrinsic_cflags()
 	/* From oldest to newest. */
 	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2", "avx", "avx2", "avx512");
 
-	if ("disabled" == PHP_NATIVE_INTRINSICS || "no" == PHP_NATIVE_INTRINSICS) {
+	if ("disabled" == PHP_NATIVE_INTRINSICS) {
 		return;
 	}
 
@@ -3409,7 +3409,8 @@ function toolset_setup_intrinsic_cflags()
 		return;
 	}
 
-	if ("yes" == PHP_NATIVE_INTRINSICS) {
+    // if --enable-native-intrisics is not specified, it's "no" - enable default
+	if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
 		PHP_NATIVE_INTRINSICS = default_enabled;
 	}
 
@@ -3449,9 +3450,6 @@ function toolset_setup_intrinsic_cflags()
 			}
 		}
 		configure_subst.Add("PHP_SIMD_SCALE", scale[j].toUpperCase());
-		/* There is no explicit way to enable intrinsics between SSE3 and SSE4.2.
-			The declared macros therefore won't affect the code generation,
-			but will enable the guarded code parts. */
 		if ("avx512" == scale[j]) {
 			ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:AVX512" : "-mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl");
 			j -= 3;
@@ -3463,10 +3461,23 @@ function toolset_setup_intrinsic_cflags()
 			j -= 1;
 		}
 		if (VS_TOOLSET) {
-			/* MSVC doesn't auto-define SSE macros; clang does with -m flags */
+			/* MSVC has no explicit way to enable intrinsics between SSE3 and SSE4.2.
+			   The declared macros won't affect code generation, but will enable
+			   the guarded code parts. */
 			for (var i = 0; i <= j; i++) {
 				var it = scale[i];
 				AC_DEFINE(avail.Item(it), 1);
+			}
+		} else if (CLANG_TOOLSET) {
+			/* clang supports -m flags for each SSE level and auto-defines
+			   the corresponding __SSE*__ macros. Pass the highest requested
+			   level; clang implicitly enables all lower levels. */
+			var clang_flag_map = {
+				"sse": "-msse", "sse2": "-msse2", "sse3": "-msse3",
+				"ssse3": "-mssse3", "sse4.1": "-msse4.1", "sse4.2": "-msse4.2"
+			};
+			if (clang_flag_map[scale[j]]) {
+				ADD_FLAG("CFLAGS", clang_flag_map[scale[j]]);
 			}
 		}
 	}
