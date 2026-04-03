@@ -175,7 +175,7 @@ TSRM_API bool tsrm_is_managed_thread(void);
 #define TSRMG_BULK_STATIC(id, type)	((type) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(id)])
 #define TSRMG_FAST_STATIC(offset, type, element)	(TSRMG_FAST_BULK_STATIC(offset, type)->element)
 #define TSRMG_FAST_BULK_STATIC(offset, type)	((type) (((char*) TSRMLS_CACHE)+(offset)))
-#if defined(__cplusplus) && defined(__clang__)
+#ifdef __cplusplus
 #define TSRMLS_MAIN_CACHE_EXTERN() extern "C" { extern TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR; }
 #define TSRMLS_CACHE_EXTERN() extern "C" { extern TSRM_TLS void *TSRMLS_CACHE; }
 #else
