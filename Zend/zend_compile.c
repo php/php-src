@@ -3177,6 +3177,28 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 
 		/* We will throw if $this doesn't exist, so there's no need to emit a JMP_NULL
 		 * check for a nullsafe access. */
+	} else if (obj_ast->kind == ZEND_AST_CONST
+			&& (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET
+				|| type == BP_VAR_FUNC_ARG)) {
+		zend_ast *name_ast = obj_ast->child[0];
+		bool is_fully_qualified;
+		zend_string *orig_name = zend_ast_get_str(name_ast);
+		zend_string *resolved_name = zend_resolve_const_name(
+			orig_name, name_ast->attr, &is_fully_qualified);
+
+		opline = zend_emit_op(&obj_node, ZEND_FETCH_CONSTANT, NULL, NULL);
+		opline->op2_type = IS_CONST;
+
+		if (is_fully_qualified || !FC(current_namespace)) {
+			opline->op1.num = 0;
+			opline->op2.constant = zend_add_const_name_literal(
+				resolved_name, false);
+		} else {
+			opline->op1.num = IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE;
+			opline->op2.constant = zend_add_const_name_literal(
+				resolved_name, true);
+		}
+		opline->extended_value = zend_alloc_cache_slot();
 	} else {
 		zend_short_circuiting_mark_inner(obj_ast);
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, false);
@@ -11307,7 +11329,7 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_const(znode *result, const zend_ast *ast, uint32_t type) /* {{{ */
+static void zend_compile_const(znode *result, const zend_ast *ast) /* {{{ */
 {
 	zend_ast *name_ast = ast->child[0];
 
@@ -11341,11 +11363,7 @@ static void zend_compile_const(znode *result, const zend_ast *ast, uint32_t type
 		return;
 	}
 
-	if (type == BP_VAR_R || type == BP_VAR_IS) {
-		opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, NULL);
-	} else {
-		opline = zend_emit_op(result, ZEND_FETCH_CONSTANT, NULL, NULL);
-	}
+	opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, NULL);
 	opline->op2_type = IS_CONST;
 
 	if (is_fully_qualified || !FC(current_namespace)) {
@@ -12219,7 +12237,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_array(result, ast);
 			return;
 		case ZEND_AST_CONST:
-			zend_compile_const(result, ast, BP_VAR_R);
+			zend_compile_const(result, ast);
 			return;
 		case ZEND_AST_CLASS_CONST:
 			zend_compile_class_const(result, ast);
@@ -12311,9 +12329,6 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 			return NULL;
 		case ZEND_AST_ASSIGN:
 			zend_compile_assign(result, ast, false, type);
-			return NULL;
-		case ZEND_AST_CONST:
-			zend_compile_const(result, ast, type);
 			return NULL;
 		default:
 			if (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) {
