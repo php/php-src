@@ -16,6 +16,7 @@
  *  +----------------------------------------------------------------------+
  */
 
+#include "Zend/zend_cpuinfo.h"
 #include "Zend/zend_types.h"
 #include "Zend/zend_type_info.h"
 #include "jit/ir/ir.h"
@@ -3396,7 +3397,7 @@ static void zend_jit_setup(bool reattached)
 	if (zend_cpu_supports_avx()) {
 		allowed_opt_flags |= ZEND_JIT_CPU_AVX;
 	}
-# if defined(PHP_HAVE_BUILTIN_CPU_SUPPORTS) && ((defined(__clang__) && (__clang_major__ >= 19)) || (!defined(__clang__) && defined(__GNUC__) && (ZEND_GCC_VERSION >= 11000)))
+# ifdef HAVE_ZEND_CPU_SUPPORTS_CLDEMOTE
 	if (zend_cpu_supports_cldemote()) {
 		default_mflags |= IR_X86_CLDEMOTE;
 	}

@@ -289,6 +289,7 @@ static inline int zend_cpu_supports_pclmul(void) {
 
 /* __builtin_cpu_supports has cldemote from gcc11 and clang 19 */
 #if defined(PHP_HAVE_BUILTIN_CPU_SUPPORTS) && ((defined(__clang__) && (__clang_major__ >= 19)) || (!defined(__clang__) && defined(__GNUC__) && (ZEND_GCC_VERSION >= 11000)))
+#define HAVE_ZEND_CPU_SUPPORTS_CLDEMOTE 1
 ZEND_NO_SANITIZE_ADDRESS
 static inline int zend_cpu_supports_cldemote(void) {
 #ifdef PHP_HAVE_BUILTIN_CPU_INIT
