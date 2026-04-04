@@ -148,6 +148,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
             ? ['include' => [
                 ['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true],
                 ['asan' => false, 'opcache' => false, 'x64' => false, 'zts' => false],
+                ['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true, 'clang' => true],
             ]]
             : ['include' => [['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true]]];
         $jobs['WINDOWS']['config'] = version_compare($php_version, '8.4', '>=')

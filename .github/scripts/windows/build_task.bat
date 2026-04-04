@@ -30,9 +30,13 @@ if %errorlevel% neq 0 exit /b 3
 
 if "%THREAD_SAFE%" equ "0" set ADD_CONF=%ADD_CONF% --disable-zts
 if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
+if "%CLANG_TOOLSET%" equ "1" set ADD_CONF=%ADD_CONF% --with-toolset=clang
 
 rem Some undefined behavior is reported on 32-bit, this should be fixed
 if "%PLATFORM%" == "x86" (
+	set CFLAGS=/W1
+) else if "%CLANG_TOOLSET%" equ "1" (
+	rem Clang is much stricter than MSVC, produces too many warnings that would fail the build with /WX
 	set CFLAGS=/W1
 ) else (
 	set CFLAGS=/W1 /WX
