@@ -144,18 +144,13 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
         $jobs['SOLARIS'] = true;
     }
     if ($all_jobs || !$no_jobs || $test_windows) {
-        $windows_include = $all_variations
-            ? [
+        $jobs['WINDOWS']['matrix'] = $all_variations
+            ? ['include' => [
                 ['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true],
                 ['asan' => false, 'opcache' => false, 'x64' => false, 'zts' => false],
-            ]
-            : [
-                ['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true],
-            ];
-        if ($all_variations || $test_windows) {
-            $windows_include[] = ['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true, 'clang' => true];
-        }
-        $jobs['WINDOWS']['matrix'] = ['include' => $windows_include];
+                ['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true, 'clang' => true]
+            ]]
+            : ['include' => [['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true]]];
         $jobs['WINDOWS']['config'] = version_compare($php_version, '8.4', '>=')
             ? ['vs_crt_version' => 'vs17']
             : ['vs_crt_version' => 'vs16'];
