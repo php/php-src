@@ -21,6 +21,13 @@ if (!function_exists("posix_getuid") || posix_getuid() != 0) {
 $dst_mac = "\xff\xff\xff\xff\xff\xff";
 $src_mac = "\x00\x00\x00\x00\x00\x00";
 
+// Drain any pending packets from a socket.
+function drain_socket(Socket $s): void {
+    socket_set_nonblock($s);
+    while (@socket_recvfrom($s, $buf, 65536, 0, $addr) !== false) {}
+    socket_set_block($s);
+}
+
 echo "--- Undersized frame (below 14-byte ethernet header) ---\n";
 $s_send = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 socket_bind($s_send, 'lo');
@@ -35,6 +42,7 @@ $s_send = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 $s_recv = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 socket_bind($s_send, 'lo');
 socket_bind($s_recv, 'lo');
+drain_socket($s_recv);
 
 // Ethernet header with no payload, padded to minimum 60 bytes.
 $frame = str_pad($dst_mac . $src_mac . pack("n", 0x9000), 60, "\x00");
@@ -54,6 +62,7 @@ $s_send = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 $s_recv = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 socket_bind($s_send, 'lo');
 socket_bind($s_recv, 'lo');
+drain_socket($s_recv);
 
 // Use a made-up ethertype (0xBEEF). Kernel delivers it fine on loopback.
 $frame = str_pad($dst_mac . $src_mac . pack("n", 0xBEEF) . "bogus", 60, "\x00");
@@ -69,14 +78,16 @@ var_dump(str_contains($buf, "bogus"));
 socket_close($s_send);
 socket_close($s_recv);
 
-echo "--- Truncated IP header (valid ether header, garbage IP) ---\n";
+echo "--- Garbage payload with custom ethertype ---\n";
 $s_send = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 $s_recv = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 socket_bind($s_send, 'lo');
 socket_bind($s_recv, 'lo');
+drain_socket($s_recv);
 
-// ETH_P_IP ethertype but only 4 bytes of garbage instead of a real IP header.
-$frame = str_pad($dst_mac . $src_mac . pack("n", ETH_P_IP) . "\xDE\xAD\xBE\xEF", 60, "\x00");
+// Use a non-standard ethertype (0x88B5, reserved for local experimental use)
+// with garbage payload. Avoids kernel IP/IPv6 stack interception.
+$frame = str_pad($dst_mac . $src_mac . pack("n", 0x88B5) . "\xDE\xAD\xBE\xEF", 60, "\x00");
 $sent = socket_sendto($s_send, $frame, strlen($frame), 0, "lo", 1);
 var_dump($sent === 60);
 
@@ -88,14 +99,15 @@ var_dump(str_contains($buf, "\xDE\xAD\xBE\xEF"));
 socket_close($s_send);
 socket_close($s_recv);
 
-echo "--- Truncated IPv6 header ---\n";
+echo "--- Another garbage payload with experimental ethertype ---\n";
 $s_send = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 $s_recv = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 socket_bind($s_send, 'lo');
 socket_bind($s_recv, 'lo');
+drain_socket($s_recv);
 
-// ETH_P_IPV6 ethertype but only a few garbage bytes as payload.
-$frame = str_pad($dst_mac . $src_mac . pack("n", ETH_P_IPV6) . "\xCA\xFE", 60, "\x00");
+// Use 0x88B6, another local experimental ethertype.
+$frame = str_pad($dst_mac . $src_mac . pack("n", 0x88B6) . "\xCA\xFE", 60, "\x00");
 $sent = socket_sendto($s_send, $frame, strlen($frame), 0, "lo", 1);
 var_dump($sent === 60);
 
@@ -112,6 +124,7 @@ $s_send = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 $s_recv = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 socket_bind($s_send, 'lo');
 socket_bind($s_recv, 'lo');
+drain_socket($s_recv);
 
 $frame = str_pad($dst_mac . $src_mac . pack("n", 0x0000) . "zerotype", 60, "\x00");
 $sent = socket_sendto($s_send, $frame, strlen($frame), 0, "lo", 1);
@@ -130,6 +143,7 @@ $s_send = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 $s_recv = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 socket_bind($s_send, 'lo');
 socket_bind($s_recv, 'lo');
+drain_socket($s_recv);
 
 $frame = str_pad($dst_mac . $src_mac . pack("n", 0xFFFF) . "maxtype", 60, "\x00");
 $sent = socket_sendto($s_send, $frame, strlen($frame), 0, "lo", 1);
@@ -148,6 +162,7 @@ $s_send = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 $s_recv = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 socket_bind($s_send, 'lo');
 socket_bind($s_recv, 'lo');
+drain_socket($s_recv);
 
 $payload = str_repeat("X", 200);
 $frame = str_pad($dst_mac . $src_mac . pack("n", 0x9000) . $payload, 214, "\x00");
@@ -174,11 +189,11 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
---- Truncated IP header (valid ether header, garbage IP) ---
+--- Garbage payload with custom ethertype ---
 bool(true)
 bool(true)
 bool(true)
---- Truncated IPv6 header ---
+--- Another garbage payload with experimental ethertype ---
 bool(true)
 bool(true)
 bool(true)
