@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.22
 
+- Date:
+  . Fixed bug GH-18422 (int overflow in php_date_llabs). (iliaal)
+
 - Intl:
   . Fix incorrect argument positions in out-of-bounds errors for
     IntlCalendar::set(), IntlCalendar::setDate(), IntlCalendar::setDateTime(),
