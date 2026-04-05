@@ -101,7 +101,8 @@ hashing, and interning helpers.
    -  -  ``ZSTR_KNOWN(ZEND_STR_const)``
 
       -  Gets an immutable, predefined string. Used for string common within PHP itself, e.g.
-         ``"class"``. See ``ZEND_KNOWN_STRINGS`` in ``Zend/zend_string.h``. This does not allocate memory.
+         ``"class"``. See ``ZEND_KNOWN_STRINGS`` in ``Zend/zend_string.h``. This does not allocate
+         memory.
 
    -  -  ``ZSTR_MAX_OVERHEAD``
       -  Maximum allocator/header overhead used by ``zend_string``.
@@ -116,13 +117,14 @@ hashing, and interning helpers.
       -  Description
 
    -  -  ``zend_string_realloc(s, l, p)``
+
       -  Changes the size of the string. If the string has a reference count greater than 1 or if
          the string is interned, a new string is created. You must always use the return value of
          this function, as the original array may have been moved to a new location in memory.
 
    -  -  ``zend_string_safe_realloc(s, n, m, l, p)``
-      -  Resizes a string to ``n * m + l`` bytes with overflow checks. Allocates a string of
-         length ``n * m + l``. This function is commonly useful for encoding changes. 
+      -  Resizes a string to ``n * m + l`` bytes with overflow checks. Allocates a string of length
+         ``n * m + l``. This function is commonly useful for encoding changes.
 
    -  -  ``zend_string_extend(s, l, p)``
       -  Extends a string to a larger length (``l >= ZSTR_LEN(s)``).
@@ -140,8 +142,8 @@ hashing, and interning helpers.
 
 .. [#persistent]
 
-   ``s`` = ``zend_string``, ``l`` = ``length``, ``p`` = ``persistent``,
-   ``n * m + l`` = checked size expression used for safe allocation/reallocation.
+   ``s`` = ``zend_string``, ``l`` = ``length``, ``p`` = ``persistent``, ``n * m + l`` = checked size
+   expression used for safe allocation/reallocation.
 
 As per php-src fashion, you are not supposed to access the ``zend_string`` fields directly. Instead,
 use the following macros. There are macros for both ``zend_string`` and ``zvals`` known to contain
@@ -175,10 +177,8 @@ strings.
 
    -  -  Macro
       -  Description
-
    -  -  ``ZSTR_IS_INTERNED(s)``
       -  Checks whether a string is interned.
-
    -  -  ``ZSTR_IS_VALID_UTF8(s)``
       -  Checks whether a string has the ``IS_STR_VALID_UTF8`` flag set.
 
@@ -196,9 +196,10 @@ strings.
       -  Returns the reference count. Interned strings always report ``1``.
 
    -  -  ``zend_string_addref(s)``
-      -  Increments the reference count of a non-interned string. the function that is used
-         most often by far is zend_string_copy(). This function not only increments the refcount,
-         but also returns the original string. This makes code more readable in practice.
+
+      -  Increments the reference count of a non-interned string. the function that is used most
+         often by far is zend_string_copy(). This function not only increments the refcount, but
+         also returns the original string. This makes code more readable in practice.
 
    -  -  ``zend_string_delref(s)``
       -  Decrements the reference count of a non-interned string.
@@ -211,14 +212,15 @@ strings.
          persistent or non-persistent. If it is persistent, ``p`` should be ``0``.
 
    -  -  ``zend_string_free(s)``
+
       -  Frees a non-interned string directly. The caller must ensure it is no longer shared.
-         Requires refcount 1 or immutable.You should avoid using these functions, as it is
-         easy to introduce critical bugs when some API changes from returning new strings to
-         reusing existing ones.
+         Requires refcount 1 or immutable.You should avoid using these functions, as it is easy to
+         introduce critical bugs when some API changes from returning new strings to reusing
+         existing ones.
 
    -  -  ``zend_string_efree(s)``
-      -  Similar to ``zend_string_free``. Frees a non-persistent, non-interned string
-         with ``efree``. Requires refcount 1 and not immutable.
+      -  Similar to ``zend_string_free``. Frees a non-persistent, non-interned string with
+         ``efree``. Requires refcount 1 and not immutable.
 
 There are various functions to compare strings.
 
@@ -227,43 +229,30 @@ There are various functions to compare strings.
 
    -  -  Function/Macro
       -  Description
-
    -  -  ``zend_string_equals(s1, s2)``
       -  Full equality check for two ``zend_string`` values.
-
    -  -  ``zend_string_equal_content(s1, s2)``
       -  Full equality check assuming both arguments are ``zend_string`` pointers.
-
    -  -  ``zend_string_equal_val(s1, s2)``
       -  Compares only the string payload bytes (caller must ensure equal lengths).
-
    -  -  ``zend_string_equals_cstr(s1, s2, l2)``
       -  Compares a ``zend_string`` with a ``char*`` buffer and explicit length.
-
    -  -  ``zend_string_equals_ci(s1, s2)``
       -  Case-insensitive full equality check.
-
    -  -  ``zend_string_equals_literal(str, literal)``
       -  Equality check against a string literal with compile-time literal length.
-
    -  -  ``zend_string_equals_literal_ci(str, literal)``
       -  Case-insensitive literal equality check.
-
    -  -  ``zend_string_starts_with(str, prefix)``
       -  Checks whether ``str`` begins with ``prefix``.
-
    -  -  ``zend_string_starts_with_cstr(str, prefix, prefix_length)``
       -  Prefix check against a ``char*`` buffer and explicit length.
-
    -  -  ``zend_string_starts_with_ci(str, prefix)``
       -  Case-insensitive prefix check for two ``zend_string`` values.
-
    -  -  ``zend_string_starts_with_cstr_ci(str, prefix, prefix_length)``
       -  Case-insensitive prefix check against a ``char*`` buffer.
-
    -  -  ``zend_string_starts_with_literal(str, prefix)``
       -  Prefix check against a string literal.
-
    -  -  ``zend_string_starts_with_literal_ci(str, prefix)``
       -  Case-insensitive prefix check against a string literal.
 
@@ -272,19 +261,14 @@ There are various functions to compare strings.
 
    -  -  Function/Macro
       -  Description
-
    -  -  ``zend_string_hash_func(s)``
       -  Computes and stores the hash for ``s``.
-
    -  -  ``zend_string_hash_val(s)``
       -  Returns the cached hash if available, otherwise computes it.
-
    -  -  ``zend_hash_func(str, len)``
       -  Computes a hash for a raw ``char*`` buffer.
-
    -  -  ``zend_inline_hash_func(str, len)``
       -  Inline implementation of PHP's string hashing routine for ``char*`` buffers.
-
    -  -  ``zend_string_forget_hash_val(s)``
       -  Clears cached hash/derived flags after string contents change.
 
@@ -293,19 +277,14 @@ There are various functions to compare strings.
 
    -  -  Macro
       -  Description
-
    -  -  ``ZSTR_COPYABLE_CONCAT_PROPERTIES``
       -  Bitmask of string flags that can be preserved when concatenating strings.
-
    -  -  ``ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(s)``
       -  Extracts copyable concatenation properties from one string.
-
    -  -  ``ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(s1, s2)``
       -  Extracts copyable properties shared by both input strings.
-
    -  -  ``ZSTR_COPY_CONCAT_PROPERTIES(out, in)``
       -  Copies concatenation properties from one input to the output string.
-
    -  -  ``ZSTR_COPY_CONCAT_PROPERTIES_BOTH(out, in1, in2)``
       -  Copies only properties that are set on both inputs.
 
@@ -314,13 +293,10 @@ There are various functions to compare strings.
 
    -  -  Macro
       -  Description
-
    -  -  ``ZSTR_ALLOCA_ALLOC(str, l, use_heap)``
       -  Allocates a temporary string buffer using ``do_alloca``.
-
    -  -  ``ZSTR_ALLOCA_INIT(str, s, l, use_heap)``
       -  Same as ``ZSTR_ALLOCA_ALLOC``, then copies data from ``s`` and appends ``'\0'``.
-
    -  -  ``ZSTR_ALLOCA_FREE(str, use_heap)``
       -  Frees memory previously allocated with ``ZSTR_ALLOCA_ALLOC`` / ``ZSTR_ALLOCA_INIT``.
 
@@ -329,34 +305,24 @@ There are various functions to compare strings.
 
    -  -  Function
       -  Description
-
    -  -  ``zend_new_interned_string(s)``
       -  Interns ``s`` if possible and returns the interned instance.
-
    -  -  ``zend_string_init_interned(str, len, p)``
       -  Creates or fetches an interned string from raw bytes.
-
    -  -  ``zend_string_init_existing_interned(str, len, p)``
       -  Returns an interned string only if it already exists; does not create a new one.
-
    -  -  ``zend_interned_string_find_permanent(s)``
       -  Looks up ``s`` in the permanent interned string storage.
-
    -  -  ``zend_interned_strings_init()``
       -  Initializes interned string storage during engine startup.
-
    -  -  ``zend_interned_strings_dtor()``
       -  Destroys interned string storage during engine shutdown.
-
    -  -  ``zend_interned_strings_activate()``
       -  Activates request-local interned string state.
-
    -  -  ``zend_interned_strings_deactivate()``
       -  Deactivates request-local interned string state.
-
    -  -  ``zend_interned_strings_set_request_storage_handlers(...)``
       -  Installs callbacks that customize request interned string storage behavior.
-
    -  -  ``zend_interned_strings_switch_storage(request)``
       -  Switches between request and persistent interned string storage backends.
 
