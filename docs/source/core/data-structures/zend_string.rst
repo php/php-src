@@ -89,7 +89,7 @@ hashing, and interning helpers.
    -  -  ``zend_string_concat2(s1, l1, s2, l2)``
       -  Creates a non-persistent string by concatenating two character buffers.
 
-   -  -  ``zend_string_concat3(...)``
+   -  -  ``zend_string_concat3(s1, l1, s2, l2, s3, l3)``
       -  Same as ``zend_string_concat2``, but for three character buffers.
 
    -  -  ``ZSTR_EMPTY_ALLOC()``
@@ -116,11 +116,13 @@ hashing, and interning helpers.
       -  Description
 
    -  -  ``zend_string_realloc(s, l, p)``
-      -  Resizes a string to length ``l``. May return a different pointer. If shared/interned, a new
-         allocation is created.
+      -  Changes the size of the string. If the string has a reference count greater than 1 or if
+         the string is interned, a new string is created. You must always use the return value of
+         this function, as the original array may have been moved to a new location in memory.
 
    -  -  ``zend_string_safe_realloc(s, n, m, l, p)``
-      -  Resizes a string to ``n * m + l`` bytes with overflow checks.
+      -  Resizes a string to ``n * m + l`` bytes with overflow checks. Allocates a string of
+         length ``n * m + l``. This function is commonly useful for encoding changes. 
 
    -  -  ``zend_string_extend(s, l, p)``
       -  Extends a string to a larger length (``l >= ZSTR_LEN(s)``).
@@ -194,7 +196,9 @@ strings.
       -  Returns the reference count. Interned strings always report ``1``.
 
    -  -  ``zend_string_addref(s)``
-      -  Increments the reference count of a non-interned string.
+      -  Increments the reference count of a non-interned string. the function that is used
+         most often by far is zend_string_copy(). This function not only increments the refcount,
+         but also returns the original string. This makes code more readable in practice.
 
    -  -  ``zend_string_delref(s)``
       -  Decrements the reference count of a non-interned string.
@@ -203,14 +207,18 @@ strings.
       -  Decreases the reference count and frees the string if it goes to 0.
 
    -  -  ``zend_string_release_ex(s, p)``
-      -  Like ``zend_string_release()``, but chooses the deallocator from ``p``. Use only if the
-         persistence mode is known by the caller.
+      -  Like ``zend_string_release()``, but allows you to specify whether the passed string is
+         persistent or non-persistent. If it is persistent, ``p`` should be ``0``.
 
    -  -  ``zend_string_free(s)``
       -  Frees a non-interned string directly. The caller must ensure it is no longer shared.
+         Requires refcount 1 or immutable.You should avoid using these functions, as it is
+         easy to introduce critical bugs when some API changes from returning new strings to
+         reusing existing ones.
 
    -  -  ``zend_string_efree(s)``
-      -  Frees a non-persistent, non-interned string with ``efree``.
+      -  Similar to ``zend_string_free``. Frees a non-persistent, non-interned string
+         with ``efree``. Requires refcount 1 and not immutable.
 
 There are various functions to compare strings.
 
@@ -314,7 +322,7 @@ There are various functions to compare strings.
       -  Same as ``ZSTR_ALLOCA_ALLOC``, then copies data from ``s`` and appends ``'\0'``.
 
    -  -  ``ZSTR_ALLOCA_FREE(str, use_heap)``
-      -  Frees memory previously allocated with ``ZSTR_ALLOCA_ALLOC``/``ZSTR_ALLOCA_INIT``.
+      -  Frees memory previously allocated with ``ZSTR_ALLOCA_ALLOC`` / ``ZSTR_ALLOCA_INIT``.
 
 .. list-table:: Interned string APIs
    :header-rows: 1
