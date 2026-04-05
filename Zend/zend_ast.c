@@ -2803,7 +2803,7 @@ simple_list:
 			smart_str_appends(str, " insteadof ");
 			zend_ast_export_ex(str, ast->child[1], 0, indent);
 			break;
-		case ZEND_AST_METHOD_REFERENCE:
+		case ZEND_AST_TRAIT_METHOD_REFERENCE:
 			if (ast->child[0]) {
 				zend_ast_export_name(str, ast->child[0], 0, indent);
 				smart_str_appends(str, "::");

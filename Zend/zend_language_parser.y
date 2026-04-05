@@ -1059,13 +1059,13 @@ trait_alias:
 
 trait_method_reference:
 		identifier
-			{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, NULL, $1); }
+			{ $$ = zend_ast_create(ZEND_AST_TRAIT_METHOD_REFERENCE, NULL, $1); }
 	|	absolute_trait_method_reference { $$ = $1; }
 ;
 
 absolute_trait_method_reference:
 	class_name T_PAAMAYIM_NEKUDOTAYIM identifier
-		{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, $1, $3); }
+		{ $$ = zend_ast_create(ZEND_AST_TRAIT_METHOD_REFERENCE, $1, $3); }
 ;
 
 method_body:

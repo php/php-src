@@ -84,6 +84,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     unused. If this behaviour is required fall back to the zend_ini_*
     functions.
   . The unused ZEND_AST_PARENT_PROPERTY_HOOK_CALL has been removed.
+  . ZEND_AST_METHOD_REFERENCE has been renamed to
+    ZEND_AST_TRAIT_METHOD_REFERENCE.
 
 ========================
 2. Build system changes
