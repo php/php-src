@@ -12135,7 +12135,6 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_METHOD_CALL:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:
 		case ZEND_AST_STATIC_CALL:
-		case ZEND_AST_PARENT_PROPERTY_HOOK_CALL:
 		case ZEND_AST_PIPE:
 			zend_compile_var(result, ast, BP_VAR_R, false);
 			return;
@@ -12291,9 +12290,6 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 			return zend_compile_static_prop(result, ast, type, by_ref, false);
 		case ZEND_AST_CALL:
 			zend_compile_call(result, ast, type);
-			return NULL;
-		case ZEND_AST_PARENT_PROPERTY_HOOK_CALL:
-			zend_compile_parent_property_hook_call(result, ast, type);
 			return NULL;
 		case ZEND_AST_METHOD_CALL:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:

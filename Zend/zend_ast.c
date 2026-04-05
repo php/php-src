@@ -2555,12 +2555,6 @@ simple_list:
 			smart_str_appendc(str, ')');
 			break;
 		}
-		case ZEND_AST_PARENT_PROPERTY_HOOK_CALL:
-			smart_str_append(str, Z_STR_P(zend_ast_get_zval(ast->child[0])));
-			smart_str_appendc(str, '(');
-			zend_ast_export_ex(str, ast->child[1], 0, indent);
-			smart_str_appendc(str, ')');
-			break;
 		case ZEND_AST_CALLABLE_CONVERT: {
 			zend_ast_fcc *fcc_ast = (zend_ast_fcc*)ast;
 			ast = fcc_ast->args;

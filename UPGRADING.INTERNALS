@@ -83,6 +83,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The INI_ORIG_{INT|STR|FLT|BOOL}() macros have been removed as they are
     unused. If this behaviour is required fall back to the zend_ini_*
     functions.
+  . The unused ZEND_AST_PARENT_PROPERTY_HOOK_CALL has been removed.
 
 ========================
 2. Build system changes
