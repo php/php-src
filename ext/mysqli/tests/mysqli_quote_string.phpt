@@ -44,6 +44,8 @@ if ($escaped !== "'foo\\0bar'") {
     printf("[003] Expected 'foo\\0bar', got %s\n", $escaped);
 }
 
+echo "=====================\n";
+
 // Test that the SQL injection is impossible with NO_BACKSLASH_ESCAPES mode
 $link->query('SET @@sql_mode="NO_BACKSLASH_ESCAPES"');
 
@@ -73,6 +75,7 @@ echo "done!";
 \' \ "
 '\" OR 1=1 -- foo'
 " OR 1=1 -- foo
+=====================
 '\'
 '"'
 ''''
