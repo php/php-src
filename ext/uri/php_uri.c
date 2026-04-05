@@ -788,7 +788,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 	zval tmp;
 	ZVAL_STR(&tmp, uri_str);
 
-	array_init(return_value);
+	array_init_size(return_value, 2);
 
 	zval arr;
 	array_init(&arr);
@@ -977,7 +977,7 @@ PHP_METHOD(Uri_WhatWg_Url, __serialize)
 	zval tmp;
 	ZVAL_STR(&tmp, uri_str);
 
-	array_init(return_value);
+	array_init_size(return_value, 2);
 
 	zval arr;
 	array_init(&arr);
