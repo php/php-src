@@ -149,6 +149,10 @@ PHP 8.6 UPGRADE NOTES
   . `grapheme_strrev()` returns strrev for grapheme cluster unit.
     RFC: https://wiki.php.net/rfc/grapheme_strrev
 
+- mysqli:
+  . Added `mysqli::quote_string()` and `mysqli_quote_string()`.
+    RFC: https://wiki.php.net/rfc/mysqli_quote_string
+
 - Standard:
   . `clamp()` returns the given value if in range, else return the nearest
     bound.
