@@ -109,12 +109,16 @@ function runValgrindPhpCgiCommand(
 ): array {
     global $phpCgi;
 
+    // ASLR can cause a lot of noise due to missed sse opportunities for memcpy and other operations
+    $aslrDisable = checkPersonalityAslrDisablePermission();
+
     $profileOut = __DIR__ . "/profiles/callgrind.out.$name";
     if ($jit) {
         $profileOut .= '.jit';
     }
 
     $process = runCommand([
+        ...($aslrDisable ? ['setarch', '--addr-no-randomize'] : []),
         'valgrind',
         '--tool=callgrind',
         '--dump-instr=yes',
