@@ -56,7 +56,7 @@ gcovr-html:
 	@echo "Generating gcovr HTML"
 	@rm -rf gcovr_html/
 	@mkdir gcovr_html
-	gcovr -sr . -o gcovr_html/index.html --html --html-details \
+	gcovr -sr . -o gcovr_html/index.html --html --html-details --exclude-unreachable-branches --exclude-throw-branches \
 		$(foreach pattern, $(GCOVR_EXCLUDE_LINES_BY_PATTERNS), --exclude-lines-by-pattern $(pattern)) \
 		$(foreach lib, $(GCOVR_EXCLUDES), -e $(lib))
 
