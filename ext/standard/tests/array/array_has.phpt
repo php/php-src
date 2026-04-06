@@ -41,6 +41,15 @@ var_dump(array_has($users, 'users.0.name'));
 var_dump(array_has($users, 'users.1.age'));
 var_dump(array_has($users, 'users.2.name'));
 
+// Test with array key (equivalent to dot notation)
+var_dump(array_has($array, ['product', 'name']));
+var_dump(array_has($simple, ['name']));
+var_dump(array_has($users, ['users', 0, 'name']));
+var_dump(array_has($array, ['product', 'missing']));
+
+// Test with invalid segment type in array key
+var_dump(array_has($array, ['product', new stdClass()]));
+
 echo "Done";
 ?>
 --EXPECT--
@@ -53,6 +62,11 @@ bool(false)
 bool(true)
 bool(true)
 bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
 bool(true)
 bool(true)
 bool(false)

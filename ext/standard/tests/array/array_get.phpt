@@ -42,6 +42,15 @@ $users = ['users' => [['name' => 'Alice'], ['name' => 'Bob']]];
 var_dump(array_get($users, 'users.0.name'));
 var_dump(array_get($users, 'users.1.age', 70));
 
+// Test with array key (equivalent to dot notation)
+var_dump(array_get($array, ['products', 'desk', 'price']));
+var_dump(array_get($simple, ['name']));
+var_dump(array_get($users, ['users', 0, 'name']));
+var_dump(array_get($array, ['products', 'chair', 'price'], 75));
+
+// Test with invalid segment type in array key
+var_dump(array_get($array, ['products', new stdClass(), 'price'], 'invalid'));
+
 echo "Done";
 ?>
 --EXPECT--
@@ -60,4 +69,9 @@ int(50)
 NULL
 string(5) "Alice"
 int(70)
+int(100)
+string(4) "John"
+string(5) "Alice"
+int(75)
+string(7) "invalid"
 Done
