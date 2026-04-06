@@ -24,6 +24,8 @@
 #define COOKIE_SAMESITE    "; SameSite="
 #define COOKIE_PARTITIONED "; Partitioned"
 
+PHPAPI bool php_is_valid_samesite_value(zend_string *value);
+
 extern PHP_RINIT_FUNCTION(head);
 
 PHPAPI bool php_header(void);
