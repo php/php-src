@@ -80,5 +80,5 @@ bool(false)
 
 Warning: SNMP::setSecurity(): Error generating a key for privacy pass phrase 'ty': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)
-Bad engine ID value 'dsa'
+SNMP::setSecurity(): Argument #7 ($contextEngineId) must be a valid context engine ID
 bool(true)

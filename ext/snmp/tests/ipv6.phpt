@@ -30,4 +30,4 @@ try {
 ?>
 --EXPECTF--
 string(%d) "%s"
-Malformed IPv6 address, closing square bracket missing
+snmpget(): Argument #1 ($hostname) has a malformed IPv6 address, closing square bracket missing

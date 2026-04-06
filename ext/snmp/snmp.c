@@ -655,7 +655,8 @@ static void php_free_objid_query(struct objid_query *objid_query, HashTable* oid
 */
 static bool php_snmp_parse_oid(
 	zval *object, int st, struct objid_query *objid_query, zend_string *oid_str, HashTable *oid_ht,
-	zend_string *type_str, HashTable *type_ht, zend_string *value_str, HashTable *value_ht
+	zend_string *type_str, HashTable *type_ht, zend_string *value_str, HashTable *value_ht,
+	uint32_t oid_argument_offset, uint32_t type_argument_offset, uint32_t value_argument_offset
 ) {
 	char *pptr;
 	uint32_t idx_type = 0, idx_value = 0;
@@ -682,7 +683,7 @@ static bool php_snmp_parse_oid(
 			ZEND_ASSERT(type_str && value_str);
 
 			if (ZSTR_LEN(type_str) != 1) {
-				zend_value_error("Type must be a single character");
+				zend_argument_value_error(type_argument_offset, "must be a single character");
 				efree(objid_query->vars);
 				return false;
 			}
@@ -693,7 +694,7 @@ static bool php_snmp_parse_oid(
 		objid_query->count++;
 	} else if (oid_ht) { /* we got objid array */
 		if (zend_hash_num_elements(oid_ht) == 0) {
-			zend_value_error("Array of object IDs must not be empty");
+			zend_argument_value_error(oid_argument_offset, "must not be empty when passed as an array");
 			return false;
 		}
 		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);
@@ -738,14 +739,14 @@ static bool php_snmp_parse_oid(
 						char ptype = *ZSTR_VAL(type);
 						zend_string_release(type);
 						if (len != 1) {
-							zend_value_error("Type must be a single character");
+							zend_argument_value_error(type_argument_offset, "must be a single character");
 							php_free_objid_query(objid_query, oid_ht, value_ht, st);
 							return false;
 						}
 						objid_query->vars[objid_query->count].type = ptype;
 						idx_type++;
 					} else {
-						zend_value_error("'%s': no type set", ZSTR_VAL(tmp));
+						zend_argument_value_error(type_argument_offset, "must contain a type for object ID '%s'", ZSTR_VAL(tmp));
 						php_free_objid_query(objid_query, oid_ht, value_ht, st);
 						return false;
 					}
@@ -780,7 +781,7 @@ static bool php_snmp_parse_oid(
 						objid_query->vars[objid_query->count].value = ZSTR_VAL(tmp);
 						idx_value++;
 					} else {
-						zend_value_error("'%s': no value set", ZSTR_VAL(tmp));
+						zend_argument_value_error(value_argument_offset, "must contain a value for object ID '%s'", ZSTR_VAL(tmp));
 						php_free_objid_query(objid_query, oid_ht, value_ht, st);
 						return false;
 					}
@@ -827,7 +828,7 @@ static bool php_snmp_parse_oid(
 /* {{{ snmp_session_init
 	allocates memory for session and session->peername, caller should free it manually using snmp_session_free() and efree()
 */
-static bool snmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries, int timeout_argument_offset)
+static bool snmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries, int hostname_argument_offset, int timeout_argument_offset)
 {
 	php_snmp_session *session;
 	char *pptr, *host_ptr;
@@ -842,22 +843,22 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 	ZEND_ASSERT(community != NULL);
 
 	if (zend_str_has_nul_byte(hostname)) {
-		zend_argument_value_error(2, "must not contain any null bytes");
+		zend_argument_value_error(hostname_argument_offset, "must not contain any null bytes");
 		return false;
 	}
 
 	if (ZSTR_LEN(hostname) >= MAX_NAME_LEN) {
-		zend_argument_value_error(2, "length must be lower than %d", MAX_NAME_LEN);
+		zend_argument_value_error(hostname_argument_offset, "length must be lower than %d", MAX_NAME_LEN);
 		return false;
 	}
 
 	if (zend_str_has_nul_byte(community)) {
-		zend_argument_value_error(3, "must not contain any null bytes");
+		zend_argument_value_error(hostname_argument_offset + 1, "must not contain any null bytes");
 		return false;
 	}
 
 	if (ZSTR_LEN(community) == 0) {
-		zend_argument_must_not_be_empty_error(3);
+		zend_argument_must_not_be_empty_error(hostname_argument_offset + 1);
 		return false;
 	}
 
@@ -899,14 +900,14 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 				char *pport = pptr + 2;
 				tmp_port = atoi(pport);
 				if (tmp_port < 0 || tmp_port > USHRT_MAX) {
-					zend_argument_value_error(2, "remote port must be between 0 and %u", USHRT_MAX);
+					zend_argument_value_error(hostname_argument_offset, "remote port must be between 0 and %u", USHRT_MAX);
 					return false;
 				}
 				remote_port = (unsigned short)tmp_port;
 			}
 			*pptr = '\0';
 		} else {
-			zend_value_error("Malformed IPv6 address, closing square bracket missing");
+			zend_argument_value_error(hostname_argument_offset, "has a malformed IPv6 address, closing square bracket missing");
 			return false;
 		}
 	} else { /* IPv4 address */
@@ -914,7 +915,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 			char *pport = pptr + 1;
 			tmp_port = atoi(pport);
 			if (tmp_port < 0 || tmp_port > USHRT_MAX) {
-				zend_argument_value_error(2, "remote port must be between 0 and %u", USHRT_MAX);
+				zend_argument_value_error(hostname_argument_offset, "remote port must be between 0 and %u", USHRT_MAX);
 				return false;
 			}
 			remote_port = (unsigned short)tmp_port;
@@ -1123,13 +1124,13 @@ static ZEND_ATTRIBUTE_NONNULL bool snmp_session_gen_sec_key(struct snmp_session 
 /* }}} */
 
 /* {{{ Set context Engine Id in the snmpv3 session */
-static bool snmp_session_set_contextEngineID(struct snmp_session *s, zend_string * contextEngineID)
+static bool snmp_session_set_contextEngineID(struct snmp_session *s, zend_string * contextEngineID, uint32_t contextEngineID_argument_offset)
 {
 	size_t	ebuf_len = 32, eout_len = 0;
 	uint8_t	*ebuf = (uint8_t *) emalloc(ebuf_len);
 
 	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, ZSTR_VAL(contextEngineID))) {
-		zend_value_error("Bad engine ID value '%s'", ZSTR_VAL(contextEngineID));
+		zend_argument_value_error(contextEngineID_argument_offset, "must be a valid context engine ID");
 		efree(ebuf);
 		return false;
 	}
@@ -1148,7 +1149,7 @@ static bool snmp_session_set_contextEngineID(struct snmp_session *s, zend_string
 static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool snmp_session_set_security(struct snmp_session *session, zend_string *sec_level,
 	zend_string *auth_protocol, zend_string *auth_passphrase, zend_string *priv_protocol,
 	zend_string *priv_passphrase, zend_string *contextName, zend_string *contextEngineID,
-	uint32_t auth_protocol_argnum)
+	uint32_t auth_protocol_argnum, uint32_t contextEngineID_argument_offset)
 {
 
 	/* Setting the security level. */
@@ -1214,7 +1215,7 @@ static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool snmp_session_set_security(struct snmp
 	}
 
 	/* Setting contextEngineIS if specified */
-	if (contextEngineID && ZSTR_LEN(contextEngineID) && !snmp_session_set_contextEngineID(session, contextEngineID)) {
+	if (contextEngineID && ZSTR_LEN(contextEngineID) && !snmp_session_set_contextEngineID(session, contextEngineID, contextEngineID_argument_offset)) {
 		/* Warning message sent already, just bail out */
 		return false;
 	}
@@ -1242,6 +1243,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	php_snmp_session *session;
 	int session_less_mode = (getThis() == NULL);
 	int timeout_argument_offset = -1;
+	uint32_t oid_argument_offset = 1, type_argument_offset = 0, value_argument_offset = 0;
 	php_snmp_object *snmp_object;
 	php_snmp_object glob_snmp_object;
 
@@ -1270,6 +1272,9 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				ZEND_PARSE_PARAMETERS_END();
 
 				timeout_argument_offset = 10;
+				oid_argument_offset = 8;
+				type_argument_offset = 9;
+				value_argument_offset = 10;
 			} else {
 				/* SNMP_CMD_GET
 				 * SNMP_CMD_GETNEXT
@@ -1290,6 +1295,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				ZEND_PARSE_PARAMETERS_END();
 
 				timeout_argument_offset = 9;
+				oid_argument_offset = 8;
 			}
 		} else {
 			if (st & SNMP_CMD_SET) {
@@ -1305,6 +1311,9 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				ZEND_PARSE_PARAMETERS_END();
 
 				timeout_argument_offset = 6;
+				oid_argument_offset = 3;
+				type_argument_offset = 4;
+				value_argument_offset = 5;
 			} else {
 				/* SNMP_CMD_GET
 				 * SNMP_CMD_GETNEXT
@@ -1320,6 +1329,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				ZEND_PARSE_PARAMETERS_END();
 
 				timeout_argument_offset = 4;
+				oid_argument_offset = 3;
 			}
 		}
 	} else {
@@ -1329,6 +1339,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
 				Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
 			ZEND_PARSE_PARAMETERS_END();
+			type_argument_offset = 2;
+			value_argument_offset = 3;
 		} else if (st & SNMP_CMD_WALK) {
 			ZEND_PARSE_PARAMETERS_START(1, 4)
 				Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
@@ -1358,17 +1370,18 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		}
 	}
 
-	if (!php_snmp_parse_oid(getThis(), st, &objid_query, oid_str, oid_ht, type_str, type_ht, value_str, value_ht)) {
+	if (!php_snmp_parse_oid(getThis(), st, &objid_query, oid_str, oid_ht, type_str, type_ht, value_str, value_ht,
+			oid_argument_offset, type_argument_offset, value_argument_offset)) {
 		RETURN_FALSE;
 	}
 
 	if (session_less_mode) {
-		if (!snmp_session_init(&session, version, a1, a2, timeout, retries, timeout_argument_offset)) {
+		if (!snmp_session_init(&session, version, a1, a2, timeout, retries, 1, timeout_argument_offset)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 			snmp_session_free(&session);
 			RETURN_FALSE;
 		}
-		if (version == SNMP_VERSION_3 && !snmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL, 4)) {
+		if (version == SNMP_VERSION_3 && !snmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL, 4, 0)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 			snmp_session_free(&session);
 			/* Warning message sent already, just bail out */
@@ -1663,7 +1676,7 @@ PHP_METHOD(SNMP, __construct)
 		snmp_session_free(&(snmp_object->session));
 	}
 
-	if (!snmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries, 4)) {
+	if (!snmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries, 2, 4)) {
 		return;
 	}
 	snmp_object->max_oids = 0;
@@ -1737,7 +1750,7 @@ PHP_METHOD(SNMP, setSecurity)
 		RETURN_THROWS();
 	}
 
-	if (!snmp_session_set_security(snmp_object->session, a1, a2, a3, a4, a5, a6, a7, 2)) {
+	if (!snmp_session_set_security(snmp_object->session, a1, a2, a3, a4, a5, a6, a7, 2, 7)) {
 		/* Warning message sent already, just bail out */
 		RETURN_FALSE;
 	}
