@@ -314,18 +314,6 @@ There are various functions to compare strings.
    -  -  ``zend_interned_strings_switch_storage(request)``
       -  Switches between request and persistent interned string storage backends.
 
-.. list-table:: Stack allocation helper macros
-   :header-rows: 1
-
-   -  -  Macro
-      -  Description
-   -  -  ``ZSTR_ALLOCA_ALLOC(str, l, use_heap)``
-      -  Allocates a temporary string buffer using ``do_alloca``.
-   -  -  ``ZSTR_ALLOCA_INIT(str, s, l, use_heap)``
-      -  Same as ``ZSTR_ALLOCA_ALLOC``, then copies data from ``s`` and appends ``'\0'``.
-   -  -  ``ZSTR_ALLOCA_FREE(str, use_heap)``
-      -  Frees memory previously allocated with ``ZSTR_ALLOCA_ALLOC`` / ``ZSTR_ALLOCA_INIT``.
-
 ******************
  Interned strings
 ******************
@@ -360,3 +348,17 @@ gets a bit more complicated. During requests, no interned strings are actually c
 this is delayed until the script is persisted to shared memory. This means that
 ``zend_new_interned_string`` may not actually return an interned string if opcache is enabled.
 Usually you don't have to worry about this.
+
+Also, here are some API helpers that might be useful in stack allocation.
+
+.. list-table:: Stack allocation helper macros
+   :header-rows: 1
+
+   -  -  Macro
+      -  Description
+   -  -  ``ZSTR_ALLOCA_ALLOC(str, l, use_heap)``
+      -  Allocates a temporary string buffer using ``do_alloca``.
+   -  -  ``ZSTR_ALLOCA_INIT(str, s, l, use_heap)``
+      -  Same as ``ZSTR_ALLOCA_ALLOC``, then copies data from ``s`` and appends ``'\0'``.
+   -  -  ``ZSTR_ALLOCA_FREE(str, use_heap)``
+      -  Frees memory previously allocated with ``ZSTR_ALLOCA_ALLOC`` / ``ZSTR_ALLOCA_INIT``.
