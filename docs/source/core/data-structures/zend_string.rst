@@ -288,18 +288,6 @@ There are various functions to compare strings.
    -  -  ``ZSTR_COPY_CONCAT_PROPERTIES_BOTH(out, in1, in2)``
       -  Copies only properties that are set on both inputs.
 
-.. list-table:: Stack allocation helper macros
-   :header-rows: 1
-
-   -  -  Macro
-      -  Description
-   -  -  ``ZSTR_ALLOCA_ALLOC(str, l, use_heap)``
-      -  Allocates a temporary string buffer using ``do_alloca``.
-   -  -  ``ZSTR_ALLOCA_INIT(str, s, l, use_heap)``
-      -  Same as ``ZSTR_ALLOCA_ALLOC``, then copies data from ``s`` and appends ``'\0'``.
-   -  -  ``ZSTR_ALLOCA_FREE(str, use_heap)``
-      -  Frees memory previously allocated with ``ZSTR_ALLOCA_ALLOC`` / ``ZSTR_ALLOCA_INIT``.
-
 .. list-table:: Interned string APIs
    :header-rows: 1
 
@@ -325,6 +313,18 @@ There are various functions to compare strings.
       -  Installs callbacks that customize request interned string storage behavior.
    -  -  ``zend_interned_strings_switch_storage(request)``
       -  Switches between request and persistent interned string storage backends.
+
+.. list-table:: Stack allocation helper macros
+   :header-rows: 1
+
+   -  -  Macro
+      -  Description
+   -  -  ``ZSTR_ALLOCA_ALLOC(str, l, use_heap)``
+      -  Allocates a temporary string buffer using ``do_alloca``.
+   -  -  ``ZSTR_ALLOCA_INIT(str, s, l, use_heap)``
+      -  Same as ``ZSTR_ALLOCA_ALLOC``, then copies data from ``s`` and appends ``'\0'``.
+   -  -  ``ZSTR_ALLOCA_FREE(str, use_heap)``
+      -  Frees memory previously allocated with ``ZSTR_ALLOCA_ALLOC`` / ``ZSTR_ALLOCA_INIT``.
 
 ******************
  Interned strings
