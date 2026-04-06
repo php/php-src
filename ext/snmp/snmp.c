@@ -1650,14 +1650,9 @@ PHP_METHOD(SNMP, __construct)
 
 	snmp_object = Z_SNMP_P(object);
 
-	ZEND_PARSE_PARAMETERS_START(3, 5)
-		Z_PARAM_LONG(version)
-		Z_PARAM_PATH_STR(a1)
-		Z_PARAM_PATH_STR(a2)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(timeout)
-		Z_PARAM_LONG(retries)
-	ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lPP|ll", &version, &a1, &a2, &timeout, &retries) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	switch (version) {
 		case SNMP_VERSION_1:
