@@ -89,7 +89,7 @@ hashing, and interning helpers.
    -  -  ``zend_string_concat2(s1, l1, s2, l2)``
       -  Creates a non-persistent string by concatenating two character buffers.
 
-   -  -  ``zend_string_concat3(s1, l1, s2, l2, s3, l3)``
+   -  -  ``zend_string_concat3(...)``
       -  Same as ``zend_string_concat2``, but for three character buffers.
 
    -  -  ``ZSTR_EMPTY_ALLOC()``
