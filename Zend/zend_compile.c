@@ -2971,7 +2971,6 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, const zend_ast *ast
 
 		opline->extended_value = ZEND_FETCH_GLOBAL;
 	} else {
-		// TODO: Have a test case for this?
 		if (name_node.op_type == IS_CONST
 			&& type == BP_VAR_R
 			&& zend_string_equals_literal(Z_STR(name_node.u.constant), "http_response_header")) {
