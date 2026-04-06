@@ -109,7 +109,7 @@ function runValgrindPhpCgiCommand(
 ): array {
     global $phpCgi;
 
-    // ASLR can cause a lot of noise due to missed sse opportunities for memcpy and other operations
+    // ASLR can cause a lot of noise due to missed SSE opportunities for memcpy and other operations
     $aslrDisable = checkPersonalityAslrDisablePermission();
 
     $profileOut = __DIR__ . "/profiles/callgrind.out.$name";
