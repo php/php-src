@@ -842,18 +842,8 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 	ZEND_ASSERT(hostname != NULL);
 	ZEND_ASSERT(community != NULL);
 
-	if (zend_str_has_nul_byte(hostname)) {
-		zend_argument_value_error(hostname_argument_offset, "must not contain any null bytes");
-		return false;
-	}
-
 	if (ZSTR_LEN(hostname) >= MAX_NAME_LEN) {
 		zend_argument_value_error(hostname_argument_offset, "length must be lower than %d", MAX_NAME_LEN);
-		return false;
-	}
-
-	if (zend_str_has_nul_byte(community)) {
-		zend_argument_value_error(hostname_argument_offset + 1, "must not contain any null bytes");
 		return false;
 	}
 
@@ -1145,7 +1135,10 @@ static bool snmp_session_set_contextEngineID(struct snmp_session *s, zend_string
 }
 /* }}} */
 
-/* {{{ Set all snmpv3-related security options */
+/* {{{ Set all snmpv3-related security options
+ * auth_protocol_argnum and contextEngineID_argument_offset are the userland
+ * argument numbers used for error reporting.
+ */
 static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool snmp_session_set_security(struct snmp_session *session, zend_string *sec_level,
 	zend_string *auth_protocol, zend_string *auth_passphrase, zend_string *priv_protocol,
 	zend_string *priv_passphrase, zend_string *contextName, zend_string *contextEngineID,
@@ -1256,8 +1249,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		if (version == SNMP_VERSION_3) {
 			if (st & SNMP_CMD_SET) {
 				ZEND_PARSE_PARAMETERS_START(10, 12)
-					Z_PARAM_STR(a1)
-					Z_PARAM_STR(a2)
+					Z_PARAM_PATH_STR(a1)
+					Z_PARAM_PATH_STR(a2)
 					Z_PARAM_STR(a3)
 					Z_PARAM_STR(a4)
 					Z_PARAM_STR(a5)
@@ -1281,8 +1274,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				 * SNMP_CMD_WALK
 				 */
 				ZEND_PARSE_PARAMETERS_START(8, 10)
-					Z_PARAM_STR(a1)
-					Z_PARAM_STR(a2)
+					Z_PARAM_PATH_STR(a1)
+					Z_PARAM_PATH_STR(a2)
 					Z_PARAM_STR(a3)
 					Z_PARAM_STR(a4)
 					Z_PARAM_STR(a5)
@@ -1300,8 +1293,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		} else {
 			if (st & SNMP_CMD_SET) {
 				ZEND_PARSE_PARAMETERS_START(5, 7)
-					Z_PARAM_STR(a1)
-					Z_PARAM_STR(a2)
+					Z_PARAM_PATH_STR(a1)
+					Z_PARAM_PATH_STR(a2)
 					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
 					Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
@@ -1320,8 +1313,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				 * SNMP_CMD_WALK
 				 */
 				ZEND_PARSE_PARAMETERS_START(3, 5)
-					Z_PARAM_STR(a1)
-					Z_PARAM_STR(a2)
+					Z_PARAM_PATH_STR(a1)
+					Z_PARAM_PATH_STR(a2)
 					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
@@ -1384,7 +1377,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		if (version == SNMP_VERSION_3 && !snmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL, 4, 0)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 			snmp_session_free(&session);
-			/* Warning message sent already, just bail out */
+			/* An error has already been emitted, just bail out. */
 			RETURN_FALSE;
 		}
 	} else {
@@ -1657,9 +1650,14 @@ PHP_METHOD(SNMP, __construct)
 
 	snmp_object = Z_SNMP_P(object);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lSS|ll", &version, &a1, &a2, &timeout, &retries) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_LONG(version)
+		Z_PARAM_PATH_STR(a1)
+		Z_PARAM_PATH_STR(a2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(timeout)
+		Z_PARAM_LONG(retries)
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch (version) {
 		case SNMP_VERSION_1:
@@ -1750,8 +1748,9 @@ PHP_METHOD(SNMP, setSecurity)
 		RETURN_THROWS();
 	}
 
+	/* authProtocol is argument #2 and contextEngineId is argument #7. */
 	if (!snmp_session_set_security(snmp_object->session, a1, a2, a3, a4, a5, a6, a7, 2, 7)) {
-		/* Warning message sent already, just bail out */
+		/* An error has already been emitted, just bail out. */
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
