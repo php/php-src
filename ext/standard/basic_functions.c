@@ -1283,9 +1283,9 @@ static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
 	zend_string *key;
 	zval *zv;
 
-	ZEND_HASH_FOREACH_KEY_VAL(hash, h, key, zv)
+	ZEND_HASH_FOREACH_KEY_VAL(hash, h, key, zv) {
 		add_config_entry(h, key, zv, return_value);
-	ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

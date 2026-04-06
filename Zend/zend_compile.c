@@ -7472,15 +7472,15 @@ static void zend_are_intersection_types_redundant(const zend_type left_type, con
 
 	unsigned int sum = 0;
 	const zend_type *outer_type;
-	ZEND_TYPE_LIST_FOREACH(smaller_type_list, outer_type)
+	ZEND_TYPE_LIST_FOREACH(smaller_type_list, outer_type) {
 		const zend_type *inner_type;
-		ZEND_TYPE_LIST_FOREACH(larger_type_list, inner_type)
+		ZEND_TYPE_LIST_FOREACH(larger_type_list, inner_type) {
 			if (zend_string_equals_ci(ZEND_TYPE_NAME(*inner_type), ZEND_TYPE_NAME(*outer_type))) {
 				sum++;
 				break;
 			}
-		ZEND_TYPE_LIST_FOREACH_END();
-	ZEND_TYPE_LIST_FOREACH_END();
+		} ZEND_TYPE_LIST_FOREACH_END();
+	} ZEND_TYPE_LIST_FOREACH_END();
 
 	if (sum == smaller_type_list->num_types) {
 		zend_string *smaller_type_str;
@@ -7508,14 +7508,14 @@ static void zend_is_intersection_type_redundant_by_single_type(const zend_type i
 	ZEND_ASSERT(!ZEND_TYPE_IS_INTERSECTION(single_type));
 
 	const zend_type *single_intersection_type = NULL;
-	ZEND_TYPE_FOREACH(intersection_type, single_intersection_type)
+	ZEND_TYPE_FOREACH(intersection_type, single_intersection_type) {
 		if (zend_string_equals_ci(ZEND_TYPE_NAME(*single_intersection_type), ZEND_TYPE_NAME(single_type))) {
 			zend_string *single_type_str = zend_type_to_string(single_type);
 			zend_string *complete_type = zend_type_to_string(intersection_type);
 			zend_error_noreturn(E_COMPILE_ERROR, "Type %s is redundant as it is more restrictive than type %s",
 					ZSTR_VAL(complete_type), ZSTR_VAL(single_type_str));
 		}
-	ZEND_TYPE_FOREACH_END();
+	} ZEND_TYPE_FOREACH_END();
 }
 
 /* Used by both intersection and union types prior to transforming the type list to a full zend_type */
@@ -8465,7 +8465,7 @@ static void compile_implicit_lexical_binds(
 		op_array->static_variables = zend_new_array(8);
 	}
 
-	ZEND_HASH_MAP_FOREACH_STR_KEY(&info->uses, var_name)
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&info->uses, var_name) {
 		zval *value = zend_hash_add(
 			op_array->static_variables, var_name, &EG(uninitialized_zval));
 		uint32_t offset = (uint32_t)((char*)value - (char*)op_array->static_variables->arData);
@@ -8474,7 +8474,7 @@ static void compile_implicit_lexical_binds(
 		opline->op2_type = IS_CV;
 		opline->op2.var = lookup_cv(var_name);
 		opline->extended_value = offset | ZEND_BIND_IMPLICIT;
-	ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 
 static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
@@ -8514,11 +8514,11 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 static void zend_compile_implicit_closure_uses(const closure_info *info)
 {
 	zend_string *var_name;
-	ZEND_HASH_MAP_FOREACH_STR_KEY(&info->uses, var_name)
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&info->uses, var_name) {
 		zval zv;
 		ZVAL_NULL(&zv);
 		zend_compile_static_var_common(var_name, &zv, ZEND_BIND_IMPLICIT);
-	ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 
 static void add_stringable_interface(zend_class_entry *ce) {
