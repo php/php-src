@@ -600,8 +600,9 @@ static zend_never_inline ZEND_COLD zval *zend_wrong_assign_to_variable_reference
 		return &EG(uninitialized_zval);
 	}
 
+	zval tmp;
+	ZVAL_COPY(&tmp, value_ptr);
 	/* Use IS_TMP_VAR instead of IS_VAR to avoid ISREF check */
-	Z_TRY_ADDREF_P(value_ptr);
 	return zend_assign_to_variable_ex(variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }
 
@@ -730,7 +731,10 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 	zend_string_release(need_msg);
 }
 
-static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
+/* 'coerced_value' maybe a previous coercion of 'arg'. If it has the required
+ * type, it is assumed that coercion would have the same result, so it is copied
+ * to 'arg' without attempting coercion. */
+static zend_always_inline bool zend_verify_weak_scalar_type_hint_impl(uint32_t type_mask, zval *arg, zval *coerced_value)
 {
 	zend_long lval;
 	double dval;
@@ -753,6 +757,10 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 				ZVAL_DOUBLE(arg, dval);
 				return true;
 			}
+		} else if (coerced_value && Z_TYPE_P(coerced_value) == IS_LONG) {
+			zval_ptr_dtor(arg);
+			ZVAL_LONG(arg, Z_LVAL_P(coerced_value));
+			return true;
 		} else if (zend_parse_arg_long_weak(arg, &lval, 0)) {
 			zval_ptr_dtor(arg);
 			ZVAL_LONG(arg, lval);
@@ -761,21 +769,53 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 			return false;
 		}
 	}
-	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, 0)) {
-		zval_ptr_dtor(arg);
-		ZVAL_DOUBLE(arg, dval);
-		return true;
+	if (type_mask & MAY_BE_DOUBLE) {
+		if (coerced_value && Z_TYPE_P(coerced_value) == IS_DOUBLE) {
+			zval_ptr_dtor(arg);
+			ZVAL_DOUBLE(arg, Z_DVAL_P(coerced_value));
+			return true;
+		}
+		if (zend_parse_arg_double_weak(arg, &dval, 0)) {
+			zval_ptr_dtor(arg);
+			ZVAL_DOUBLE(arg, dval);
+			return true;
+		}
 	}
-	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(arg, &str, 0)) {
-		/* on success "arg" is converted to IS_STRING */
-		return true;
+	if (type_mask & MAY_BE_STRING) {
+		if (coerced_value && Z_TYPE_P(coerced_value) == IS_STRING) {
+			zval_ptr_dtor(arg);
+			ZVAL_STR_COPY(arg, Z_STR_P(coerced_value));
+			return true;
+		}
+		if (zend_parse_arg_str_weak(arg, &str, 0)) {
+			/* on success "arg" is converted to IS_STRING */
+			return true;
+		}
 	}
-	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval, 0)) {
-		zval_ptr_dtor(arg);
-		ZVAL_BOOL(arg, bval);
-		return true;
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
+		if (coerced_value && (Z_TYPE_P(coerced_value) == IS_TRUE || Z_TYPE_P(coerced_value) == IS_FALSE)) {
+			zval_ptr_dtor(arg);
+			ZVAL_BOOL(arg, Z_LVAL_P(coerced_value));
+			return true;
+		}
+		if (zend_parse_arg_bool_weak(arg, &bval, 0)) {
+			/* on success "arg" is converted to IS_BOOL */
+			zval_ptr_dtor(arg);
+			ZVAL_BOOL(arg, bval);
+			return true;
+		}
 	}
 	return false;
+}
+
+static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
+{
+	return zend_verify_weak_scalar_type_hint_impl(type_mask, arg, NULL);
+}
+
+static bool zend_verify_weak_scalar_type_hint_ex(uint32_t type_mask, zval *arg, zval *coerced_value)
+{
+	return zend_verify_weak_scalar_type_hint_impl(type_mask, arg, coerced_value);
 }
 
 #if ZEND_DEBUG
@@ -3975,13 +4015,19 @@ ZEND_API bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref,
 	ZVAL_UNDEF(&coerced_value);
 
 	ZEND_ASSERT(Z_TYPE_P(zv) != IS_REFERENCE);
-	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
+
+	bool was_iterated = ZEND_REF_TYPE_SOURCES_ITERATED(ref);
+	if (!was_iterated) {
+		ZEND_REF_SET_TYPE_SOURCES_ITERATED(ref);
+	}
+
+	ZEND_REF_FOREACH_TYPE_SOURCES_CONCURRENT(ref, prop) {
 		int result = i_zend_verify_type_assignable_zval(prop, zv, strict);
 		if (result == 0) {
 type_error:
 			zend_throw_ref_type_error_zval(prop, zv);
 			zval_ptr_dtor(&coerced_value);
-			return 0;
+			goto fail;
 		}
 
 		if (result < 0) {
@@ -3999,7 +4045,7 @@ type_error:
 			} else {
 				zval tmp;
 				ZVAL_COPY(&tmp, zv);
-				if (!zend_verify_weak_scalar_type_hint(ZEND_TYPE_FULL_MASK(prop->type), &tmp)) {
+				if (!zend_verify_weak_scalar_type_hint_ex(ZEND_TYPE_FULL_MASK(prop->type), &tmp, &coerced_value)) {
 					zval_ptr_dtor(&tmp);
 					goto type_error;
 				}
@@ -4018,10 +4064,17 @@ type_error:
 conflicting_coercion_error:
 				zend_throw_conflicting_coercion_error(first_prop, prop, zv);
 				zval_ptr_dtor(&coerced_value);
-				return 0;
+				goto fail;
 			}
 		}
 	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+
+	if (!was_iterated) {
+		ZEND_REF_UNSET_TYPE_SOURCES_ITERATED(ref);
+		if (ZEND_REF_TYPE_SOURCES_DIRTY(ref)) {
+			ZEND_REF_CLEANUP_TYPE_SOURCES(ref);
+		}
+	}
 
 	if (!Z_ISUNDEF(coerced_value)) {
 		zval_ptr_dtor(zv);
@@ -4029,6 +4082,16 @@ conflicting_coercion_error:
 	}
 
 	return 1;
+
+fail:
+	if (!was_iterated) {
+		ZEND_REF_UNSET_TYPE_SOURCES_ITERATED(ref);
+		if (ZEND_REF_TYPE_SOURCES_DIRTY(ref)) {
+			ZEND_REF_CLEANUP_TYPE_SOURCES(ref);
+		}
+	}
+
+	return 0;
 }
 
 static zend_always_inline void i_zval_ptr_dtor_noref(zval *zval_ptr) {
@@ -4051,7 +4114,23 @@ ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *orig_value,
 	}
 
 	ZVAL_COPY(&value, orig_value);
+
+	/* variable_ptr may be modified by zend_verify_ref_assignable_zval() */
+	zend_reference *variable_ref = Z_REF_P(variable_ptr);
+	GC_ADDREF(variable_ref);
+
 	ret = zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), &value, strict);
+
+	if (UNEXPECTED(GC_DELREF(variable_ref) == 0)) {
+		if (Z_REFCOUNTED(variable_ref->val)) {
+			*garbage_ptr = Z_COUNTED(variable_ref->val);
+		}
+		efree_size(variable_ref, sizeof(zend_reference));
+		zval_ptr_dtor(&value);
+		variable_ptr = &EG(uninitialized_zval);
+		goto out;
+	}
+
 	variable_ptr = Z_REFVAL_P(variable_ptr);
 	if (EXPECTED(ret)) {
 		if (Z_REFCOUNTED_P(variable_ptr)) {
@@ -4061,6 +4140,7 @@ ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *orig_value,
 	} else {
 		zval_ptr_dtor_nogc(&value);
 	}
+out:
 	if (value_type & (IS_VAR|IS_TMP_VAR)) {
 		if (UNEXPECTED(ref)) {
 			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -4132,15 +4212,15 @@ ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(const zend_proper
 ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop)
 {
 	zend_property_info_list *list;
-	if (source_list->ptr == NULL) {
-		source_list->ptr = prop;
+	if (ZEND_PROPERTY_INFO_SOURCE_TO_PTR(source_list->ptr) == NULL) {
+		ZEND_PROPERTY_INFO_SOURCE_SET_PTR(source_list, prop);
 		return;
 	}
 
 	list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
 	if (!ZEND_PROPERTY_INFO_SOURCE_IS_LIST(source_list->list)) {
 		list = emalloc(sizeof(zend_property_info_list) + (4 - 1) * sizeof(zend_property_info *));
-		list->ptr[0] = source_list->ptr;
+		list->ptr[0] = ZEND_PROPERTY_INFO_SOURCE_TO_PTR(source_list->ptr);
 		list->num_allocated = 4;
 		list->num = 1;
 	} else if (list->num_allocated == list->num) {
@@ -4149,7 +4229,7 @@ ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_l
 	}
 
 	list->ptr[list->num++] = prop;
-	source_list->list = ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(list);
+	ZEND_PROPERTY_INFO_SOURCE_SET_LIST(source_list, list);
 }
 
 ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, const zend_property_info *prop)
@@ -4157,17 +4237,22 @@ ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_l
 	zend_property_info_list *list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
 	zend_property_info **ptr, **end;
 
+	/* In case the list is being iterated, we make sure to not free it or to
+	 * reuse slots. Single-ptr lists can still be updated, as this can be
+	 * detected during iteration. */
+	bool iterated = ZEND_PROPERTY_INFO_SOURCE_IS_ITERATED(source_list);
+
 	ZEND_ASSERT(prop);
 	if (!ZEND_PROPERTY_INFO_SOURCE_IS_LIST(source_list->list)) {
-		ZEND_ASSERT(source_list->ptr == prop);
-		source_list->ptr = NULL;
+		ZEND_ASSERT(ZEND_PROPERTY_INFO_SOURCE_TO_PTR(source_list->ptr) == prop);
+		ZEND_PROPERTY_INFO_SOURCE_SET_PTR(source_list, NULL);
 		return;
 	}
 
-	if (list->num == 1) {
+	if (list->num == 1 && !iterated) {
 		ZEND_ASSERT(*list->ptr == prop);
 		efree(list);
-		source_list->ptr = NULL;
+		ZEND_PROPERTY_INFO_SOURCE_SET_PTR(source_list, NULL);
 		return;
 	}
 
@@ -4180,12 +4265,71 @@ ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_l
 	}
 	ZEND_ASSERT(*ptr == prop);
 
+	if (iterated) {
+		*ptr = NULL;
+		ZEND_PROPERTY_INFO_SOURCE_SET_DIRTY(source_list);
+		return;
+	}
+
 	/* Copy the last list element into the deleted slot. */
 	*ptr = list->ptr[--list->num];
 
 	if (list->num >= 4 && list->num * 4 == list->num_allocated) {
 		list->num_allocated = list->num * 2;
-		source_list->list = ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(erealloc(list, sizeof(zend_property_info_list) + (list->num_allocated - 1) * sizeof(zend_property_info *)));
+		ZEND_PROPERTY_INFO_SOURCE_SET_LIST(source_list, erealloc(list, sizeof(zend_property_info_list) + (list->num_allocated - 1) * sizeof(zend_property_info *)));
+	}
+}
+
+ZEND_API void ZEND_FASTCALL zend_ref_cleanup_type_sources(zend_property_info_source_list *source_list)
+{
+	ZEND_ASSERT(!ZEND_PROPERTY_INFO_SOURCE_IS_ITERATED(source_list));
+
+	ZEND_PROPERTY_INFO_SOURCE_UNSET_DIRTY(source_list);
+
+	if (!ZEND_PROPERTY_INFO_SOURCE_IS_LIST(source_list->list)) {
+		return;
+	}
+
+	/* Compact list by removing null slots, realloc down if necessary */
+
+	zend_property_info_list *list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
+
+	size_t actual_num = 0;
+	zend_property_info **p = &list->ptr[0];
+	zend_property_info **end = p + list->num;
+
+	while (p < end && *p) {
+		p++;
+		actual_num++;
+	}
+
+	for (zend_property_info **q = p + 1; q < end; q++) {
+		if (*q) {
+			*p = *q;
+			p++;
+			actual_num++;
+		}
+	}
+
+	if (actual_num == 0) {
+		ZEND_PROPERTY_INFO_SOURCE_SET_PTR(source_list, NULL);
+		efree(list);
+		return;
+	}
+
+	if (actual_num == 1) {
+		ZEND_PROPERTY_INFO_SOURCE_SET_PTR(source_list, list->ptr[0]);
+		efree(list);
+		return;
+	}
+
+	list->num = actual_num;
+
+	if (list->num * 4 <= list->num_allocated) {
+		while (list->num_allocated > list->num * 4) {
+			list->num_allocated /= 2;
+		}
+		ZEND_PROPERTY_INFO_SOURCE_SET_LIST(source_list, erealloc(list, sizeof(zend_property_info_list) + (list->num_allocated - 1) * sizeof(zend_property_info *)));
 	}
 }
 

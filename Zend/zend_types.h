@@ -586,13 +586,53 @@ typedef struct {
 } zend_property_info_list;
 
 typedef union {
-	struct _zend_property_info *ptr;
-	uintptr_t list;
+	uintptr_t ptr;  /* zend_property_info* | ZEND_PROPERTY_INFO_SOURCE_FLAGS */
+	uintptr_t list; /* zend_property_info_list* | ZEND_PROPERTY_INFO_SOURCE_FLAGS */
 } zend_property_info_source_list;
 
-#define ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(list) (0x1 | (uintptr_t) (list))
-#define ZEND_PROPERTY_INFO_SOURCE_TO_LIST(list) ((zend_property_info_list *) ((list) & ~0x1))
-#define ZEND_PROPERTY_INFO_SOURCE_IS_LIST(list) ((list) & 0x1)
+#define ZEND_PROPERTY_INFO_SOURCE_IS_LIST_FLAG     (1<<0)
+#define ZEND_PROPERTY_INFO_SOURCE_IS_ITERATED_FLAG (1<<1) /* zend_property_info_source_list is being iterated */
+#define ZEND_PROPERTY_INFO_SOURCE_IS_DIRTY_FLAG    (1<<2) /* zend_property_info_source_list was modified while being iterated, and needs cleanup */
+#define ZEND_PROPERTY_INFO_SOURCE_FLAGS (ZEND_PROPERTY_INFO_SOURCE_IS_LIST_FLAG|ZEND_PROPERTY_INFO_SOURCE_IS_ITERATED_FLAG|ZEND_PROPERTY_INFO_SOURCE_IS_DIRTY_FLAG)
+
+#define ZEND_PROPERTY_INFO_SOURCE_SET_LIST(_source_list, _list) do { \
+		zend_property_info_source_list *__source_list = (_source_list); \
+		zend_property_info_list *__list = (_list); \
+		ZEND_ASSERT(!((uintptr_t)__list & ZEND_PROPERTY_INFO_SOURCE_FLAGS)); \
+		__source_list->list = (uintptr_t)__list \
+				| ZEND_PROPERTY_INFO_SOURCE_IS_LIST_FLAG \
+				| (__source_list->list & (ZEND_PROPERTY_INFO_SOURCE_IS_ITERATED_FLAG|ZEND_PROPERTY_INFO_SOURCE_IS_DIRTY_FLAG)); \
+	} while (0)
+
+#define ZEND_PROPERTY_INFO_SOURCE_SET_PTR(_source_list, _ptr) do { \
+		zend_property_info_source_list *__source_list = (_source_list); \
+		zend_property_info *__ptr = (_ptr); \
+		ZEND_ASSERT(!((uintptr_t)__ptr & ZEND_PROPERTY_INFO_SOURCE_FLAGS)); \
+		__source_list->ptr = (uintptr_t)__ptr \
+				| (__source_list->ptr & ZEND_PROPERTY_INFO_SOURCE_IS_ITERATED_FLAG); \
+	} while (0)
+
+#define ZEND_PROPERTY_INFO_SOURCE_SET_ITERATED(_source_list) do { \
+		(_source_list)->ptr |= ZEND_PROPERTY_INFO_SOURCE_IS_ITERATED_FLAG; \
+	} while (0)
+
+#define ZEND_PROPERTY_INFO_SOURCE_UNSET_ITERATED(_source_list) do { \
+		(_source_list)->ptr &= ~ZEND_PROPERTY_INFO_SOURCE_IS_ITERATED_FLAG; \
+	} while (0)
+
+#define ZEND_PROPERTY_INFO_SOURCE_SET_DIRTY(_source_list) do { \
+		(_source_list)->ptr |= ZEND_PROPERTY_INFO_SOURCE_IS_DIRTY_FLAG; \
+	} while (0)
+
+#define ZEND_PROPERTY_INFO_SOURCE_UNSET_DIRTY(_source_list) do { \
+		(_source_list)->ptr &= ~ZEND_PROPERTY_INFO_SOURCE_IS_DIRTY_FLAG; \
+	} while (0)
+
+#define ZEND_PROPERTY_INFO_SOURCE_TO_LIST(list) ((zend_property_info_list *) ((list) & ~ZEND_PROPERTY_INFO_SOURCE_FLAGS))
+#define ZEND_PROPERTY_INFO_SOURCE_TO_PTR(list) ((zend_property_info *) (((uintptr_t)(list)) & ~ZEND_PROPERTY_INFO_SOURCE_FLAGS))
+#define ZEND_PROPERTY_INFO_SOURCE_IS_LIST(list) ((list) & ZEND_PROPERTY_INFO_SOURCE_IS_LIST_FLAG)
+#define ZEND_PROPERTY_INFO_SOURCE_IS_ITERATED(source_list) ((source_list)->ptr & ZEND_PROPERTY_INFO_SOURCE_IS_ITERATED_FLAG)
+#define ZEND_PROPERTY_INFO_SOURCE_IS_DIRTY(source_list) ((source_list)->ptr & ZEND_PROPERTY_INFO_SOURCE_IS_DIRTY_FLAG)
 
 struct _zend_reference {
 	zend_refcounted_h              gc;
@@ -1214,7 +1254,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		(zend_reference *) emalloc(sizeof(zend_reference));		\
 		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = GC_REFERENCE;						\
-		_ref->sources.ptr = NULL;									\
+		_ref->sources.ptr = 0;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
@@ -1225,7 +1265,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = GC_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
-		_ref->sources.ptr = NULL;									\
+		_ref->sources.ptr = 0;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
@@ -1237,7 +1277,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_SET_REFCOUNT(_ref, (refcount));						\
 		GC_TYPE_INFO(_ref) = GC_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, _z);						\
-		_ref->sources.ptr = NULL;									\
+		_ref->sources.ptr = 0;									\
 		Z_REF_P(_z) = _ref;										\
 		Z_TYPE_INFO_P(_z) = IS_REFERENCE_EX;					\
 	} while (0)
@@ -1249,7 +1289,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_TYPE_INFO(_ref) = GC_REFERENCE |						\
 			(GC_PERSISTENT << GC_FLAGS_SHIFT);					\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
-		_ref->sources.ptr = NULL;									\
+		_ref->sources.ptr = 0;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
