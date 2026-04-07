@@ -6914,7 +6914,7 @@ PHP_FUNCTION(array_key_exists)
 /* }}} */
 
 /* {{{ Helper function to get a nested value from array using an array of segments */
-static zval* array_get_nested(HashTable *ht, HashTable *segments)
+static zval* array_get_nested_from_hash(HashTable *ht, HashTable *segments)
 {
 	zval *segment_val;
 	zval *current;
@@ -6964,6 +6964,58 @@ static zval* array_get_nested(HashTable *ht, HashTable *segments)
 }
 /* }}} */
 
+/* {{{ Helper function to get a nested value from array using dot notation string */
+static zval* array_get_nested_from_string(HashTable *ht, const char *key, size_t key_len)
+{
+	const char *segment_start;
+	const char *dot;
+	size_t segment_len;
+	size_t remaining_len;
+	zval *current;
+	HashTable *current_ht;
+	zend_string *segment;
+
+	current_ht = ht;
+	segment_start = key;
+	remaining_len = key_len;
+
+	/* Iterate through each dot-separated segment */
+	while (remaining_len > 0) {
+		/* Find the next dot */
+		dot = memchr(segment_start, '.', remaining_len);
+
+		if (dot == NULL) {
+			/* Last segment */
+			segment_len = remaining_len;
+		} else {
+			segment_len = dot - segment_start;
+		}
+
+		/* Look up the current segment */
+		segment = zend_string_init(segment_start, segment_len, 0);
+		current = zend_symtable_find(current_ht, segment);
+		zend_string_release(segment);
+
+		/* If this is the last segment, return the result */
+		if (dot == NULL) {
+			return current;
+		}
+
+		/* Check if the segment exists and is an array for next iteration */
+		if (current == NULL || Z_TYPE_P(current) != IS_ARRAY) {
+			return NULL;
+		}
+
+		/* Move to the next segment */
+		current_ht = Z_ARRVAL_P(current);
+		segment_start = dot + 1;
+		remaining_len = remaining_len - segment_len - 1;
+	}
+
+	return NULL;
+}
+/* }}} */
+
 /* {{{ Retrieves a value from a deeply nested array using "dot" notation */
 PHP_FUNCTION(array_get)
 {
@@ -6971,7 +7023,6 @@ PHP_FUNCTION(array_get)
 	zval *key = NULL;
 	zval *default_value = NULL;
 	zval *result;
-	zval segments_array;
 	HashTable *ht;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -6988,41 +7039,42 @@ PHP_FUNCTION(array_get)
 
 	ht = Z_ARRVAL_P(array);
 
-	/* Handle array keys (array of segments) */
-	if (Z_TYPE_P(key) == IS_ARRAY) {
-		result = array_get_nested(ht, Z_ARRVAL_P(key));
+	switch (Z_TYPE_P(key)) {
+		case IS_ARRAY:
+			/* Handle array keys (array of segments) */
+			result = array_get_nested_from_hash(ht, Z_ARRVAL_P(key));
 
-		if (result != NULL) {
-			RETURN_COPY(result);
-		}
-	}
-	/* Handle string keys with dot notation - convert to array of segments */
-	else if (Z_TYPE_P(key) == IS_STRING) {
-		/* Use php_explode to split the string by '.' */
-		zend_string *delim = ZSTR_CHAR('.');
-		array_init(&segments_array);
-		php_explode(delim, Z_STR_P(key), &segments_array, ZEND_LONG_MAX);
+			if (result != NULL) {
+				RETURN_COPY_DEREF(result);
+			}
+			break;
 
-		result = array_get_nested(ht, Z_ARRVAL(segments_array));
+		case IS_STRING:
+			/* Handle string keys with dot notation */
+			result = array_get_nested_from_string(ht, Z_STRVAL_P(key), Z_STRLEN_P(key));
 
-		zval_ptr_dtor(&segments_array);
+			if (result != NULL) {
+				RETURN_COPY_DEREF(result);
+			}
+			break;
 
-		if (result != NULL) {
-			RETURN_COPY(result);
-		}
-	}
-	/* Handle integer keys (simple lookup) */
-	else if (Z_TYPE_P(key) == IS_LONG) {
-		result = zend_hash_index_find(ht, Z_LVAL_P(key));
+		case IS_LONG:
+			/* Handle integer keys (simple lookup) */
+			result = zend_hash_index_find(ht, Z_LVAL_P(key));
 
-		if (result != NULL) {
-			RETURN_COPY(result);
-		}
+			if (result != NULL) {
+				RETURN_COPY_DEREF(result);
+			}
+			break;
+
+		default:
+			zend_argument_type_error(2, "must be of type string|int|array, %s given", zend_zval_value_name(key));
+			RETURN_THROWS();
 	}
 
 	/* Key not found, return default value */
 	if (default_value != NULL) {
-		RETURN_COPY(default_value);
+		RETURN_COPY_DEREF(default_value);
 	}
 }
 /* }}} */
@@ -7033,7 +7085,6 @@ PHP_FUNCTION(array_has)
 	zval *array;
 	zval *key;
 	zval *result;
-	zval segments_array;
 	HashTable *ht;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
@@ -7043,27 +7094,25 @@ PHP_FUNCTION(array_has)
 
 	ht = Z_ARRVAL_P(array);
 
-	/* Handle array keys (array of segments) */
-	if (Z_TYPE_P(key) == IS_ARRAY) {
-		result = array_get_nested(ht, Z_ARRVAL_P(key));
-		RETURN_BOOL(result != NULL);
+	switch (Z_TYPE_P(key)) {
+		case IS_ARRAY:
+			/* Handle array keys (array of segments) */
+			result = array_get_nested_from_hash(ht, Z_ARRVAL_P(key));
+			RETURN_BOOL(result != NULL);
+
+		case IS_STRING:
+			/* Handle string keys with dot notation */
+			result = array_get_nested_from_string(ht, Z_STRVAL_P(key), Z_STRLEN_P(key));
+			RETURN_BOOL(result != NULL);
+
+		case IS_LONG:
+			/* Handle integer keys (simple lookup) */
+			RETURN_BOOL(zend_hash_index_exists(ht, Z_LVAL_P(key)));
+
+		default:
+			zend_argument_type_error(2, "must be of type string|int|array, %s given", zend_zval_value_name(key));
+			RETURN_THROWS();
 	}
-	/* Handle string keys with dot notation - convert to array of segments */
-	if (Z_TYPE_P(key) == IS_STRING) {
-		/* Use php_explode to split the string by '.' */
-		zend_string *delim = ZSTR_CHAR('.');
-		array_init(&segments_array);
-		php_explode(delim, Z_STR_P(key), &segments_array, ZEND_LONG_MAX);
-
-		result = array_get_nested(ht, Z_ARRVAL(segments_array));
-
-		zval_ptr_dtor(&segments_array);
-		RETURN_BOOL(result != NULL);
-	}
-
-	/* Handle integer keys (simple lookup) */
-	ZEND_ASSERT(Z_TYPE_P(key) == IS_LONG);
-	RETURN_BOOL(zend_hash_index_exists(ht, Z_LVAL_P(key)));
 }
 /* }}} */
 
