@@ -3825,7 +3825,7 @@ static zend_always_inline bool zend_is_callable_check_func(const zval *callable,
 		}
 		if (EXPECTED(func != NULL)) {
 			fcc->function_handler = func;
-			return 1;
+			return true;
 		}
 	}
 
@@ -4126,7 +4126,7 @@ again:
 
 			if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
 				fcc->called_scope = fcc->calling_scope;
-				return 1;
+				return true;
 			}
 
 check_func:
@@ -4140,26 +4140,26 @@ check_func:
 			{
 				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) != 2) {
 					if (error) *error = estrdup("array callback must have exactly two members");
-					return 0;
+					return false;
 				}
 
 				zval *obj = zend_hash_index_find(Z_ARRVAL_P(callable), 0);
 				zval *method = zend_hash_index_find(Z_ARRVAL_P(callable), 1);
 				if (!obj || !method) {
 					if (error) *error = estrdup("array callback has to contain indices 0 and 1");
-					return 0;
+					return false;
 				}
 
 				ZVAL_DEREF(obj);
 				if (Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) {
 					if (error) *error = estrdup("first array member is not a valid class name or object");
-					return 0;
+					return false;
 				}
 
 				ZVAL_DEREF(method);
 				if (Z_TYPE_P(method) != IS_STRING) {
 					if (error) *error = estrdup("second array member is not a valid method");
-					return 0;
+					return false;
 				}
 
 				if (Z_TYPE_P(obj) == IS_STRING) {
@@ -4192,16 +4192,16 @@ check_func:
 				if (fcc == &fcc_local) {
 					zend_release_fcall_info_cache(fcc);
 				}
-				return 1;
+				return true;
 			}
 			if (error) *error = estrdup("no array or string given");
-			return 0;
+			return false;
 		case IS_REFERENCE:
 			callable = Z_REFVAL_P(callable);
 			goto again;
 		default:
 			if (error) *error = estrdup("no array or string given");
-			return 0;
+			return false;
 	}
 }
 /* }}} */
@@ -5187,11 +5187,11 @@ ZEND_API bool zend_is_iterable(const zval *iterable) /* {{{ */
 {
 	switch (Z_TYPE_P(iterable)) {
 		case IS_ARRAY:
-			return 1;
+			return true;
 		case IS_OBJECT:
 			return zend_class_implements_interface(Z_OBJCE_P(iterable), zend_ce_traversable);
 		default:
-			return 0;
+			return false;
 	}
 }
 /* }}} */
@@ -5200,15 +5200,15 @@ ZEND_API bool zend_is_countable(const zval *countable) /* {{{ */
 {
 	switch (Z_TYPE_P(countable)) {
 		case IS_ARRAY:
-			return 1;
+			return true;
 		case IS_OBJECT:
 			if (Z_OBJ_HT_P(countable)->count_elements) {
-				return 1;
+				return true;
 			}
 
 			return zend_class_implements_interface(Z_OBJCE_P(countable), zend_ce_countable);
 		default:
-			return 0;
+			return false;
 	}
 }
 /* }}} */
