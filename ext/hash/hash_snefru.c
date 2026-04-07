@@ -214,5 +214,6 @@ const php_hash_ops php_hash_snefru_ops = {
 	32,
 	32,
 	sizeof(PHP_SNEFRU_CTX),
-	1
+	1,
+	0
 };

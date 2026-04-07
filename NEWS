@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.24
 
+- Hash:
+  . Fixed bug GH-18173 (ext/hash relies on implementation-defined malloc
+    alignment). (iliaal)
+
 - Intl:
   . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
     fallback locale when a language tag cannot be canonicalized. (Weilin Du)
