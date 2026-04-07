@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.5
+09 Apr 2026, PHP 8.5.5
 
 - Core:
   . Fixed bug GH-20672 (Incorrect property_info sizing for locally shadowed
