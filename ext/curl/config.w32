@@ -24,7 +24,10 @@ if (PHP_CURL != "no") {
 		(ver_num <= parseInt("0x073b00") || ver_num > parseInt("0x073b00") &&
 			CHECK_LIB("normaliz.lib", "curl", PHP_CURL) &&
 			CHECK_LIB("libssh2.lib", "curl", PHP_CURL) &&
-			CHECK_LIB("nghttp2.lib", "curl", PHP_CURL))
+			CHECK_LIB("nghttp2.lib", "curl", PHP_CURL) &&
+			CHECK_LIB("brotlidec.lib", "curl", PHP_CURL) &&
+			CHECK_LIB("brotlicommon.lib", "curl", PHP_CURL) &&
+			CHECK_LIB("libzstd.lib", "curl", PHP_CURL))
 		) {
 		EXTENSION("curl", "interface.c multi.c share.c curl_file.c");
 		AC_DEFINE('HAVE_CURL', 1, 'Have cURL library');
