@@ -432,7 +432,7 @@ PHP_FUNCTION(xmlwriter_write_element)
 }
 /* }}} */
 
-/* {{{ Write full namesapced element tag - returns FALSE on error */
+/* {{{ Write full namespaced element tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_element_ns)
 {
 	xmlTextWriterPtr ptr;

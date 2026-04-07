@@ -755,7 +755,7 @@ PHP_METHOD(XMLReader, moveToAttributeNo)
 }
 /* }}} */
 
-/* {{{ Positions reader at attribute spcified by name and namespaceURI.
+/* {{{ Positions reader at attribute specified by name and namespaceURI.
 Returns TRUE on success and FALSE on failure */
 PHP_METHOD(XMLReader, moveToAttributeNs)
 {
