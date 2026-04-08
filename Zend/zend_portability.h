@@ -653,8 +653,8 @@ extern "C++" {
 #endif
 
 /* Do not use for conditional declaration of API functions! */
-#if defined(ZEND_INTRIN_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || defined(__clang__) || (ZEND_GCC_VERSION >= 9000))
-/* __builtin_cpu_supports has pclmul from gcc9 */
+#if defined(ZEND_INTRIN_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || (defined(__clang__) && __clang_major__ >= 19) || (ZEND_GCC_VERSION >= 9000))
+/* __builtin_cpu_supports has pclmul from gcc9 and clang 19 */
 # define ZEND_INTRIN_PCLMUL_FUNC_PROTO 1
 #elif defined(ZEND_INTRIN_PCLMUL_RESOLVER)
 # define ZEND_INTRIN_PCLMUL_FUNC_PTR 1
@@ -679,8 +679,8 @@ extern "C++" {
 #endif
 
 /* Do not use for conditional declaration of API functions! */
-#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || defined(__clang__) || (ZEND_GCC_VERSION >= 9000))
-/* __builtin_cpu_supports has pclmul from gcc9 */
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || (defined(__clang__) && __clang_major__ >= 19) || (ZEND_GCC_VERSION >= 9000))
+/* __builtin_cpu_supports has pclmul from gcc9 and clang 19 */
 # define ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PROTO 1
 #elif defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
 # define ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PTR 1
