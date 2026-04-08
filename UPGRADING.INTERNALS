@@ -88,6 +88,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     ZEND_AST_TRAIT_METHOD_REFERENCE.
   . The EMPTY_SWITCH_DEFAULT_CASE() macro has been removed. Use
     default: ZEND_UNREACHABLE(); instead.
+  . Introduced a new time-retrieval API zend_time_*.
 
 ========================
 2. Build system changes
