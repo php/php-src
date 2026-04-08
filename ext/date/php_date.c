@@ -3288,7 +3288,7 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{
 	php_date_obj *dateobj;
 	timelib_time *tmp_time;
 	timelib_error_container *err = NULL;
-	timelib_sll		 rel_h, rel_i, rel_s, rel_us;
+	timelib_sll rel_h, rel_i, rel_s, rel_us;
 
 	dateobj = Z_PHPDATE_P(object);
 
@@ -3357,10 +3357,8 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{
 
 	timelib_time_dtor(tmp_time);
 
-	/* Strip relative h/i/s/us before timelib_update_ts() so that
-	 * do_adjust_relative() does not add them to wall-clock fields.
-	 * Wall-clock addition breaks at DST boundaries; SSE arithmetic
-	 * (applied below) is always correct. */
+	/* do_adjust_relative() applies h/i/s as wall-clock, which breaks across
+	 * DST. Strip them before timelib_update_ts and re-apply via SSE below. */
 	rel_h  = dateobj->time->relative.h;
 	rel_i  = dateobj->time->relative.i;
 	rel_s  = dateobj->time->relative.s;
@@ -3373,34 +3371,21 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{
 	timelib_update_ts(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
 
-	/* Fold microsecond overflow into seconds so that the seconds
-	 * component goes through SSE arithmetic, not wall-clock.
-	 * Matches timelib_add_wall()'s do_range_limit() call
-	 * (interval.c:317). */
-	if (rel_us >= 1000000 || rel_us <= -1000000) {
-		rel_s  += rel_us / 1000000;
-		rel_us  = rel_us % 1000000;
+	/* Normalize microseconds: fold full seconds into rel_s, keep rel_us >= 0 */
+	rel_s  += rel_us / 1000000;
+	rel_us  = rel_us % 1000000;
+	if (rel_us < 0) {
+		rel_s--;
+		rel_us += 1000000;
 	}
 
-	/* Apply h/i/s via SSE (Unix timestamp) arithmetic, matching
-	 * the approach in timelib_add_wall() (interval.c:312). */
-	if (rel_h || rel_i || rel_s) {
-		dateobj->time->sse +=
-			timelib_hms_to_seconds(rel_h, rel_i, rel_s);
-		timelib_update_from_sse(dateobj->time);
+	dateobj->time->sse += timelib_hms_to_seconds(rel_h, rel_i, rel_s);
+	dateobj->time->us  += rel_us;
+	if (dateobj->time->us >= 1000000) {
+		dateobj->time->us -= 1000000;
+		dateobj->time->sse++;
 	}
-
-	/* Apply remaining sub-second microseconds. After the above
-	 * normalization rel_us is in (-1000000, 1000000), so the
-	 * cascade into seconds is at most +/-1s -- safe to go through
-	 * wall-clock normalize + update_ts (have_relative is already
-	 * cleared by the first timelib_update_ts call). */
-	if (rel_us) {
-		dateobj->time->us += rel_us;
-		timelib_do_normalize(dateobj->time);
-		timelib_update_ts(dateobj->time, NULL);
-		timelib_update_from_sse(dateobj->time);
-	}
+	timelib_update_from_sse(dateobj->time);
 
 	dateobj->time->have_relative = 0;
 	memset(&dateobj->time->relative, 0, sizeof(dateobj->time->relative));
