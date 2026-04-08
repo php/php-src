@@ -1,12 +1,17 @@
 #include <stdio.h>
 #include <dlfcn.h>
+#if __STDC_NO_THREADS__
+# define thread_local _Thread_local
+#else
+# include <threads.h>
+#endif
 
 #ifdef NO_SURPLUS
 # include "def-vars.h"
 DEF_VARS(main);
 #endif
 
-__thread int some_tls_var;
+thread_local int some_tls_var;
 
 #ifndef DL_DECL
 int decl(void);
