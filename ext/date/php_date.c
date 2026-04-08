@@ -3288,6 +3288,7 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{
 	php_date_obj *dateobj;
 	timelib_time *tmp_time;
 	timelib_error_container *err = NULL;
+	timelib_sll rel_h, rel_i, rel_s, rel_us;
 
 	dateobj = Z_PHPDATE_P(object);
 
@@ -3356,8 +3357,36 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{
 
 	timelib_time_dtor(tmp_time);
 
+	/* do_adjust_relative() applies h/i/s as wall-clock, which breaks across
+	 * DST. Strip them before timelib_update_ts and re-apply via SSE below. */
+	rel_h  = dateobj->time->relative.h;
+	rel_i  = dateobj->time->relative.i;
+	rel_s  = dateobj->time->relative.s;
+	rel_us = dateobj->time->relative.us;
+	dateobj->time->relative.h  = 0;
+	dateobj->time->relative.i  = 0;
+	dateobj->time->relative.s  = 0;
+	dateobj->time->relative.us = 0;
+
 	timelib_update_ts(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
+
+	/* Normalize microseconds: fold full seconds into rel_s, keep rel_us >= 0 */
+	rel_s  += rel_us / 1000000;
+	rel_us  = rel_us % 1000000;
+	if (rel_us < 0) {
+		rel_s--;
+		rel_us += 1000000;
+	}
+
+	dateobj->time->sse += timelib_hms_to_seconds(rel_h, rel_i, rel_s);
+	dateobj->time->us  += rel_us;
+	if (dateobj->time->us >= 1000000) {
+		dateobj->time->us -= 1000000;
+		dateobj->time->sse++;
+	}
+	timelib_update_from_sse(dateobj->time);
+
 	dateobj->time->have_relative = 0;
 	memset(&dateobj->time->relative, 0, sizeof(dateobj->time->relative));
 
