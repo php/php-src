@@ -2142,6 +2142,10 @@ PHP_METHOD(SplFileObject, next)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval)) {
+		spl_filesystem_file_read_line(ZEND_THIS, intern, true);
+	}
+
 	spl_filesystem_file_free_line(intern);
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
 		spl_filesystem_file_read_line(ZEND_THIS, intern, true);
