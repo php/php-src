@@ -304,11 +304,6 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 	memcpy(buf, ZSTR_VAL(dirname), ZSTR_LEN(dirname));
 	buf[ZSTR_LEN(dirname)] = PHP_DIR_SEPARATOR;
 
-	/* Only read the clock when we are about to compare mtimes at target depth */
-	if (remaining_depth == 0) {
-		time(&now);
-	}
-
 	while ((entry = readdir(dir))) {
 		/* skip . and .. */
 		if (entry->d_name[0] == '.' &&
@@ -333,6 +328,7 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 			if (VCWD_STAT(buf, &sbuf) != 0) {
 				continue;
 			}
+			time(&now);
 			if ((now - sbuf.st_mtime) > maxlifetime) {
 				VCWD_UNLINK(buf);
 				nrdels++;
