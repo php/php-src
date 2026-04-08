@@ -597,7 +597,12 @@ PHP_FUNCTION(ip2long)
 		Z_PARAM_PATH(addr, addr_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (addr_len == 0 || inet_pton(AF_INET, addr, &ip) != 1) {
+	if (addr_len == 0) {
+		zend_argument_must_not_be_empty_error(1);
+		RETURN_THROWS();
+	}
+
+	if (inet_pton(AF_INET, addr, &ip) != 1) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(ntohl(ip.s_addr));
@@ -1159,8 +1164,8 @@ PHP_FUNCTION(time_nanosleep)
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-	if (tv_nsec < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
+	if (tv_nsec < 0 || tv_nsec > 999999999) {
+		zend_argument_value_error(2, "must be between 0 and 999999999");
 		RETURN_THROWS();
 	}
 
@@ -1174,10 +1179,8 @@ PHP_FUNCTION(time_nanosleep)
 		add_assoc_long_ex(return_value, "seconds", sizeof("seconds")-1, php_rem.tv_sec);
 		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds")-1, php_rem.tv_nsec);
 		return;
-	} else if (errno == EINVAL) {
-		zend_value_error("Nanoseconds was not in the range 0 to 999 999 999 or seconds was negative");
-		RETURN_THROWS();
 	}
+	ZEND_ASSERT(errno != EINVAL);
 
 	RETURN_FALSE;
 }
@@ -2095,7 +2098,7 @@ PHP_FUNCTION(connection_aborted)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_LONG(PG(connection_status) & PHP_CONNECTION_ABORTED);
+	RETURN_BOOL(PG(connection_status) & PHP_CONNECTION_ABORTED);
 }
 /* }}} */
 
@@ -2113,14 +2116,14 @@ PHP_FUNCTION(ignore_user_abort)
 {
 	bool arg = 0;
 	bool arg_is_null = 1;
-	int old_setting;
+	bool old_setting;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL_OR_NULL(arg, arg_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	old_setting = (unsigned short)PG(ignore_user_abort);
+	old_setting = PG(ignore_user_abort);
 
 	if (!arg_is_null) {
 		zend_string *key = ZSTR_INIT_LITERAL("ignore_user_abort", 0);
@@ -2128,7 +2131,7 @@ PHP_FUNCTION(ignore_user_abort)
 		zend_string_release_ex(key, 0);
 	}
 
-	RETURN_LONG(old_setting);
+	RETURN_BOOL(old_setting);
 }
 /* }}} */
 
