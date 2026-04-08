@@ -43,7 +43,7 @@ typedef struct _zend_gc_status {
 	zend_hrtime_t free_time;
 } zend_gc_status;
 
-ZEND_API extern int (*gc_collect_cycles)(void);
+ZEND_API extern int (*gc_collect_cycles)(int run_flags);
 
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref);
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref);
@@ -61,7 +61,7 @@ void gc_bench_print(void);
 #endif
 
 /* The default implementation of the gc_collect_cycles callback. */
-ZEND_API int  zend_gc_collect_cycles(void);
+ZEND_API int  zend_gc_collect_cycles(int run_flags);
 
 ZEND_API void zend_gc_get_status(zend_gc_status *status);
 
@@ -69,6 +69,9 @@ void gc_init(void);
 void gc_globals_ctor(void);
 void gc_globals_dtor(void);
 void gc_reset(void);
+
+void gc_run_from_interrupt(void);
+void gc_run_from_fcall_interrupt(void);
 
 #ifdef ZTS
 size_t zend_gc_globals_size(void);
