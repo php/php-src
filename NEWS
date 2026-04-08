@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.20
+09 Apr 2026, PHP 8.4.20
 
 - Bz2:
   . Fix truncation of total output size causing erroneous errors. (ndossche)
