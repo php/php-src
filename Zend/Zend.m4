@@ -475,7 +475,11 @@ dnl
 AC_DEFUN([ZEND_CHECK_PRESERVE_NONE], [dnl
   AC_CACHE_CHECK([for preserve_none calling convention],
    [php_cv_preserve_none],
-   [AC_RUN_IFELSE([AC_LANG_SOURCE([[
+   [dnl preserve_none crashes Clang with AddressSanitizer due to an LLVM bug:
+    dnl https://github.com/llvm/llvm-project/issues/95928
+    AS_IF([test "$PHP_ADDRESS_SANITIZER" = "yes"],
+      [php_cv_preserve_none=no],
+      [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
 #include <stdint.h>
 
@@ -566,7 +570,7 @@ int main(void) {
 }]])],
     [php_cv_preserve_none=yes],
     [php_cv_preserve_none=no],
-    [php_cv_preserve_none=no])
+    [php_cv_preserve_none=no])])
   ])
   AS_VAR_IF([php_cv_preserve_none], [yes], [
     AC_DEFINE([HAVE_PRESERVE_NONE], [1],
