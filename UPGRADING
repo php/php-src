@@ -134,6 +134,8 @@ PHP 8.6 UPGRADE NOTES
 - Standard:
   . pathinfo() now raises a ValueError when an invalid $flag argument
     value is passed.
+  . scandir() now raises a ValueError when an invalid $sorting_order
+    argument value is passed.
 
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the

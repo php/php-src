@@ -591,7 +591,7 @@ PHP_FUNCTION(scandir)
 	} else if (flags == PHP_SCANDIR_SORT_DESCENDING) {
 		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasortr);
 	} else {
-		zend_argument_value_error(2, "must be one of the SCANDIR_SORT_ASCENDING, SCANDIR_SORT_DESCENDING and SCANDIR_SORT_NONE constants");
+		zend_argument_value_error(2, "must be one of the SCANDIR_SORT_ASCENDING, SCANDIR_SORT_DESCENDING, or SCANDIR_SORT_NONE constants");
 		RETURN_THROWS();
     }
 
