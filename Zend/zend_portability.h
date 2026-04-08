@@ -329,7 +329,7 @@ char *alloca();
 # define ZEND_OPT_SPEED
 #endif
 
-#if (defined(__GNUC__) && ZEND_GCC_VERSION >= 5000) || (__has_attribute(unused) && __has_attribute(cold))
+#if (defined(__GNUC__) && ZEND_GCC_VERSION >= 5000)
 # define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((unused));
 # define ZEND_ATTRIBUTE_COLD_LABEL __attribute__((cold));
 #else
