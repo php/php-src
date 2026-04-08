@@ -153,6 +153,12 @@ static bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array
 
 static bool php_password_bcrypt_verify(const zend_string *password, const zend_string *hash) {
 	int status = 0;
+
+	/* password_hash() already rejects NUL bytes for bcrypt inputs. */
+	if (memchr(ZSTR_VAL(password), '\0', ZSTR_LEN(password))) {
+		return false;
+	}
+
 	zend_string *ret = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
 
 	if (!ret) {
