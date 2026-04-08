@@ -1851,9 +1851,8 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 			php_error_docref(NULL, E_WARNING, "Supplied session stream must be an SSL enabled stream");
 		} else if (((php_openssl_netstream_data_t*)cparam->inputs.session->abstract)->ssl_handle == NULL) {
 			php_error_docref(NULL, E_WARNING, "Supplied SSL session stream is not initialized");
-		} else if (SSL_copy_session_id(sslsock->ssl_handle, ((php_openssl_netstream_data_t*)cparam->inputs.session->abstract)->ssl_handle) != 1) {
-			php_openssl_store_errors();
-			php_error_docref(NULL, E_WARNING, "Failed to copy SSL session");
+		} else {
+			SSL_copy_session_id(sslsock->ssl_handle, ((php_openssl_netstream_data_t*)cparam->inputs.session->abstract)->ssl_handle);
 		}
 	}
 

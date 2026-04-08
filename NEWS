@@ -28,6 +28,8 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fix a bunch of memory leaks and crashes on edge cases. (ndossche)
+  . Fixed bug GH-18988 (Check various unchecked error-prone OpenSSL function
+    return values). (alexandre-daubois)
 
 - SPL:
   . Fixed bug GH-21499 (RecursiveArrayIterator getChildren UAF after parent

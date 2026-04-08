@@ -1303,7 +1303,6 @@ PHP_MINIT_FUNCTION(openssl)
 #endif
 	if (OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL) != 1) {
 		php_error_docref(NULL, E_WARNING, "Failed to initialize OpenSSL");
-		return FAILURE;
 	}
 #endif
 
@@ -2330,10 +2329,7 @@ static STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 	while (sk_X509_INFO_num(sk)) {
 		xi=sk_X509_INFO_shift(sk);
 		if (xi->x509 != NULL) {
-			if (sk_X509_push(stack,xi->x509) == 0) {
-				php_openssl_store_errors();
-				X509_free(xi->x509);
-			}
+			sk_X509_push(stack,xi->x509);
 			xi->x509=NULL;
 		}
 		X509_INFO_free(xi);
