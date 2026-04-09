@@ -1813,21 +1813,24 @@ static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bo
 	}
 
 	if (!buf) {
-		intern->u.file.current_line = ZSTR_EMPTY_ALLOC();
-	} else {
-		if (!csv && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
-			if (line_len > 0 && buf[line_len - 1] == '\n') {
-				line_len--;
-				if (line_len > 0 && buf[line_len - 1] == '\r') {
-					line_len--;
-				}
-				buf[line_len] = '\0';
-			}
+		if (!silent) {
+			spl_filesystem_file_cannot_read(intern);
 		}
-
-		intern->u.file.current_line = zend_string_init(buf, line_len, /* persistent */ false);
-		efree(buf);
+		return FAILURE;
 	}
+
+	if (!csv && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
+		if (line_len > 0 && buf[line_len - 1] == '\n') {
+			line_len--;
+			if (line_len > 0 && buf[line_len - 1] == '\r') {
+				line_len--;
+			}
+			buf[line_len] = '\0';
+		}
+	}
+
+	intern->u.file.current_line = zend_string_init(buf, line_len, /* persistent */ false);
+	efree(buf);
 	intern->u.file.current_line_num += line_add;
 
 	return SUCCESS;
@@ -2144,7 +2147,9 @@ PHP_METHOD(SplFileObject, next)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval)) {
-		spl_filesystem_file_read_line(ZEND_THIS, intern, true);
+		if (spl_filesystem_file_read_line(ZEND_THIS, intern, true) == FAILURE) {
+			return;
+		}
 	}
 
 	spl_filesystem_file_free_line(intern);
@@ -2634,7 +2639,7 @@ PHP_METHOD(SplFileObject, seek)
 
 	for (i = 0; i < line_pos; i++) {
 		if (spl_filesystem_file_read_line(ZEND_THIS, intern, true) == FAILURE) {
-			return;
+			break;
 		}
 	}
 	if (line_pos > 0 && !SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
@@ -2653,9 +2658,8 @@ PHP_METHOD(SplFileObject, __toString)
 
 	if (!intern->u.file.current_line) {
 		ZEND_ASSERT(Z_ISUNDEF(intern->u.file.current_zval));
-		zend_result result = spl_filesystem_file_read_line(ZEND_THIS, intern, false);
-		if (UNEXPECTED(result != SUCCESS)) {
-			RETURN_THROWS();
+		if (spl_filesystem_file_read_line(ZEND_THIS, intern, true) == FAILURE) {
+			RETURN_EMPTY_STRING();
 		}
 	}
 
