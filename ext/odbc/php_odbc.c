@@ -1343,8 +1343,10 @@ static void php_odbc_fetch(INTERNAL_FUNCTION_PARAMETERS, bool return_array, php_
 	CHECK_ODBC_RESULT(result);
 
 	if (!pv_row_is_null && pv_row < 1) {
-		php_error_docref(NULL, E_WARNING, "Last argument ($row) must be greater than or equal to 1");
-		RETURN_FALSE;
+		/* row arg no differs between callers */
+		zend_argument_value_error(pv_res_arr == return_value ? 2 : 3,
+				"must be greater than or equal to 1");
+		RETURN_THROWS();
 	}
 
 	if (result->numcols == 0) {
