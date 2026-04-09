@@ -1,5 +1,5 @@
 /* This is a generated file, edit snmp.stub.php instead.
- * Stub hash: e2451ac3ea0fa5eb1158e8b7252e61c6794d514f */
+ * Stub hash: 20039fa88cb9f8a861bf3bf3e2e5e291e50c6a12 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -266,7 +266,7 @@ static zend_class_entry *register_class_SNMP(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SNMP", class_SNMP_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_VERSION_1_value;
 	ZVAL_LONG(&const_VERSION_1_value, SNMP_VERSION_1);
