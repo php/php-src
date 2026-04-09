@@ -641,7 +641,7 @@ static PHP_INI_MH(OnUpdateSaveDir)
 
 	/* Only do the open_basedir check at runtime */
 	if (stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) {
-		if (memchr(ZSTR_VAL(new_value), '\0', ZSTR_LEN(new_value)) != NULL) {
+		if (zend_str_has_nul_byte(new_value)) {
 			return FAILURE;
 		}
 
