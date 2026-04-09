@@ -1513,7 +1513,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 
 	call->prev_execute_data = execute_data;
 	execute_data = call;
-	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+	i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 	LOAD_OPLINE_EX();
 
 
@@ -1539,7 +1539,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 
 	call->prev_execute_data = execute_data;
 	execute_data = call;
-	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+	i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 	LOAD_OPLINE_EX();
 
 
@@ -1565,7 +1565,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 
 	call->prev_execute_data = execute_data;
 	execute_data = call;
-	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+	i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 	LOAD_OPLINE_EX();
 	SAVE_OPLINE();
 	zend_observer_fcall_begin_specialized(execute_data, false);
@@ -54265,7 +54265,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_UCA
 
 	call->prev_execute_data = execute_data;
 	execute_data = call;
-	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+	i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 	LOAD_OPLINE_EX();
 
 
@@ -54291,7 +54291,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_UCA
 
 	call->prev_execute_data = execute_data;
 	execute_data = call;
-	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+	i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 	LOAD_OPLINE_EX();
 
 
@@ -54317,7 +54317,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_UC
 
 	call->prev_execute_data = execute_data;
 	execute_data = call;
-	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+	i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 	LOAD_OPLINE_EX();
 	SAVE_OPLINE();
 	zend_observer_fcall_begin_specialized(execute_data, false);

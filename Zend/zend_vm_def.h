@@ -4209,7 +4209,7 @@ ZEND_VM_HOT_HANDLER(130, ZEND_DO_UCALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 
 	call->prev_execute_data = execute_data;
 	execute_data = call;
-	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+	i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 	LOAD_OPLINE_EX();
 	ZEND_OBSERVER_SAVE_OPLINE();
 	ZEND_OBSERVER_FCALL_BEGIN(execute_data);
