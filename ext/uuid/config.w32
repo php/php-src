@@ -1,0 +1,7 @@
+EXTENSION("uuid", "php_uuid.c", false /* never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+
+ADD_FLAG("CFLAGS_UUID", "/D UUID_STATIC_BUILD");
+
+ADD_EXTENSION_DEP("uuid", "date");
+ADD_EXTENSION_DEP("uuid", "random");
+PHP_INSTALL_HEADERS("ext/uuid", "php_uuid.h uuidv7-h/uuidv7.h");

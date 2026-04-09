@@ -512,6 +512,12 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               8.5.0
 -------------------------------------------------------------------------------
+EXTENSION:           uuid
+PRIMARY MAINTAINER   Máté Kocsis <kocsismate@php.net> (2026 - 2026)
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               8.6.0
+-------------------------------------------------------------------------------
 EXTENSION:           zip
 PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net> (2006 - 2011)
                      Remi Collet <remi@php.net> (2013-2020)

@@ -1,0 +1,7 @@
+X-Powered-By: PHP/%v
+Content-type: text/html; charset=UTF-8
+
+object(Uuid\UuidV7)#%d (%d) {
+  ["uuid"]=>
+  string(36) "%s-%s-%s-%s-%s"
+}
