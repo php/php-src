@@ -573,6 +573,12 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			}
 
 			S->result = PQgetResult(S->H->server);
+			if (!S->result) {
+				S->is_running_unbuffered = false;
+				stmt->row_count = 0;
+				S->current_row = 0;
+				return 0;
+			}
 			status = PQresultStatus(S->result);
 
 			if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK && status != PGRES_SINGLE_TUPLE) {
