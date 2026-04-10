@@ -54,9 +54,15 @@ static void php_replace_controlchars(char *str, size_t len)
 
 	ZEND_ASSERT(str != NULL);
 
+	/* Replace ASCII C0 control chars (0x00..0x1F) and DEL (0x7F). An inline
+	 * comparison is used instead of iscntrl() because (a) it avoids the
+	 * per-byte locale lookup through __ctype_b_loc(), and (b) URL components
+	 * are bytes, not locale-dependent text, so the C-locale semantics are
+	 * what we want regardless of the process locale. The compiler can also
+	 * auto-vectorize this simple form. */
 	while (s < e) {
-		if (iscntrl(*s)) {
-			*s='_';
+		if (UNEXPECTED(*s < 0x20 || *s == 0x7f)) {
+			*s = '_';
 		}
 		s++;
 	}
@@ -104,7 +110,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 		while (p < e) {
 			/* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
 			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
-				if (e + 1 < ue && e < binary_strcspn(s, ue, "?#")) {
+				if (*s != '/' && e + 1 < ue && e < binary_strcspn(s, ue, "?#")) {
 					goto parse_port;
 				} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 					s += 2;
