@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-21478 (Forward property operations to real instance for
     initialized lazy proxies). (iliaal)
   . Fixed bug GH-21605 (Missing addref for Countable::count()). (ilutov)
+  . Fixed bug GH-21699 (Assertion failure in shutdown_executor when resolving
+    self::/parent::/static:: callables if the error handler throws).
 
 - Curl:
   . Add support for brotli and zstd on Windows. (Shivam Mathur)
