@@ -252,13 +252,13 @@ void whiteSpace_collapse(xmlChar* str)
 
 static encodePtr find_encoder_by_type_name(sdlPtr sdl, const char *type)
 {
-	size_t type_len = strlen(type);
 
 	if (sdl && sdl->encoders) {
 		encodePtr enc;
 
 		ZEND_HASH_FOREACH_PTR(sdl->encoders, enc)  {
 			if (type[0] == '{') {
+				size_t type_len = strlen(type);
 				if (enc->details.clark_notation
 					&& zend_string_equals_cstr(enc->details.clark_notation, type, type_len)) {
 					return enc;
