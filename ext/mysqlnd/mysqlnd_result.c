@@ -722,9 +722,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 
 	if (ret == FAIL) {
 		COPY_CLIENT_ERROR(&set->error_info, row_packet.error_info);
-	} else {
-		/* libmysql's documentation says it should be so for SELECT statements */
-		UPSERT_STATUS_SET_AFFECTED_ROWS(conn->upsert_status, set->row_count);
 	}
 	DBG_INF_FMT("ret=%s row_count=%u warnings=%u server_status=%u",
 				ret == PASS? "PASS":"FAIL",
@@ -1012,10 +1009,10 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 			  hashing of the column name, which is not needed as it can be precomputed.
 			*/
 			Z_TRY_ADDREF_P(data);
-			if (meta->fields[i].is_numeric == FALSE) {
-				zend_hash_update(row_ht, meta->fields[i].sname, data);
+			if (field->is_numeric == FALSE) {
+				zend_hash_update(row_ht, field->sname, data);
 			} else {
-				zend_hash_index_update(row_ht, meta->fields[i].num_key, data);
+				zend_hash_index_update(row_ht, field->num_key, data);
 			}
 		}
 
