@@ -636,14 +636,14 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
-		globfree(&globbuf);
+		php_globfree(&globbuf);
 		return 0;
 	}
 
 	/* we assume that any glob pattern will match files from one directory only
 	   so checking the dirname of the first match should be sufficient */
 	if (ZIP_OPENBASEDIR_CHECKPATH(globbuf.gl_pathv[0])) {
-		globfree(&globbuf);
+		php_globfree(&globbuf);
 		return -1;
 	}
 
