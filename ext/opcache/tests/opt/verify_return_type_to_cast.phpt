@@ -118,7 +118,7 @@ boolToInt:
      ; (after optimizer)
      ; %s:19-21
 0000 CV0($v) = RECV 1
-0001 CAST (long) CV0($v)
+0001 VERIFY_RETURN_TYPE CV0($v)
 0002 RETURN CV0($v)
 
 strToFloat:
@@ -134,7 +134,7 @@ intToFloat:
      ; (after optimizer)
      ; %s:26-28
 0000 CV0($v) = RECV 1
-0001 CAST (double) CV0($v)
+0001 VERIFY_RETURN_TYPE CV0($v)
 0002 RETURN CV0($v)
 
 boolToFloat:
@@ -142,7 +142,7 @@ boolToFloat:
      ; (after optimizer)
      ; %s:29-31
 0000 CV0($v) = RECV 1
-0001 CAST (double) CV0($v)
+0001 VERIFY_RETURN_TYPE CV0($v)
 0002 RETURN CV0($v)
 
 floatToString:
@@ -158,7 +158,7 @@ intToString:
      ; (after optimizer)
      ; %s:36-38
 0000 CV0($v) = RECV 1
-0001 CAST (string) CV0($v)
+0001 VERIFY_RETURN_TYPE CV0($v)
 0002 RETURN CV0($v)
 
 boolToString:
@@ -166,7 +166,7 @@ boolToString:
      ; (after optimizer)
      ; %s:39-41
 0000 CV0($v) = RECV 1
-0001 CAST (string) CV0($v)
+0001 VERIFY_RETURN_TYPE CV0($v)
 0002 RETURN CV0($v)
 
 floatToUnion:
@@ -182,7 +182,7 @@ intToUnion:
      ; (after optimizer)
      ; %s:46-48
 0000 CV0($v) = RECV 1
-0001 CAST (double) CV0($v)
+0001 VERIFY_RETURN_TYPE CV0($v)
 0002 RETURN CV0($v)
 
 boolToUnion:
@@ -190,7 +190,7 @@ boolToUnion:
      ; (after optimizer)
      ; %s:49-51
 0000 CV0($v) = RECV 1
-0001 CAST (long) CV0($v)
+0001 VERIFY_RETURN_TYPE CV0($v)
 0002 RETURN CV0($v)
 
 stringToUnion:

@@ -57,7 +57,7 @@ Test4::getSelfA:
      ; (after optimizer)
      ; %s
 0000 T0 = FETCH_CLASS_CONSTANT (self) (exception) string("A")
-0001 CAST (long) T0
+0001 VERIFY_RETURN_TYPE T0
 0002 RETURN T0
 LIVE RANGES:
      0: 0001 - 0002 (tmp/var)
@@ -67,7 +67,7 @@ Test4::getSelfB:
      ; (after optimizer)
      ; %s
 0000 T0 = FETCH_CLASS_CONSTANT (self) (exception) string("B")
-0001 CAST (long) T0
+0001 VERIFY_RETURN_TYPE T0
 0002 RETURN T0
 LIVE RANGES:
      0: 0001 - 0002 (tmp/var)
@@ -77,7 +77,7 @@ Test4::getStaticA:
      ; (after optimizer)
      ; %s
 0000 T0 = FETCH_CLASS_CONSTANT (static) (exception) string("A")
-0001 CAST (long) T0
+0001 VERIFY_RETURN_TYPE T0
 0002 RETURN T0
 LIVE RANGES:
      0: 0001 - 0002 (tmp/var)
@@ -87,7 +87,7 @@ Test4::getStaticB:
      ; (after optimizer)
      ; %s
 0000 T0 = FETCH_CLASS_CONSTANT (static) (exception) string("B")
-0001 CAST (long) T0
+0001 VERIFY_RETURN_TYPE T0
 0002 RETURN T0
 LIVE RANGES:
      0: 0001 - 0002 (tmp/var)
