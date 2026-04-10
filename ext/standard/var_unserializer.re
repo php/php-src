@@ -227,6 +227,93 @@ static zval *var_access(php_unserialize_data_t *var_hashx, zend_long id)
 	return var_hash->data[id];
 }
 
+/* Invoke the deferred __wakeup / __unserialize call queued on a single
+ * var_dtor_hash slot, if any. Clears the slot's Z_EXTRA marker so the same
+ * slot won't be processed twice if the var hash is walked again later.
+ *
+ * delayed_call_failed is shared state across a drain loop: once any call
+ * fails, subsequent slots are marked IS_OBJ_DESTRUCTOR_CALLED instead of
+ * invoked. */
+static void var_drain_entry(var_dtor_entries *var_dtor_hash, zend_long i, bool *delayed_call_failed)
+{
+	zval *zv = &var_dtor_hash->data[i];
+
+	if (Z_EXTRA_P(zv) == VAR_WAKEUP_FLAG) {
+		Z_EXTRA_P(zv) = 0;
+		if (!*delayed_call_failed) {
+			zval retval;
+			zend_fcall_info fci;
+			zend_fcall_info_cache fci_cache;
+
+			ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
+
+			fci.size = sizeof(fci);
+			fci.object = Z_OBJ_P(zv);
+			fci.retval = &retval;
+			fci.param_count = 0;
+			fci.params = NULL;
+			fci.named_params = NULL;
+			ZVAL_UNDEF(&fci.function_name);
+
+			fci_cache.function_handler = zend_hash_find_ptr(
+				&fci.object->ce->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP));
+			fci_cache.object = fci.object;
+			fci_cache.called_scope = fci.object->ce;
+
+			BG(serialize_lock)++;
+			if (zend_call_function(&fci, &fci_cache) == FAILURE || Z_ISUNDEF(retval)) {
+				*delayed_call_failed = 1;
+				GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
+			}
+			BG(serialize_lock)--;
+
+			zval_ptr_dtor(&retval);
+		} else {
+			GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
+		}
+	} else if (Z_EXTRA_P(zv) == VAR_UNSERIALIZE_FLAG) {
+		Z_EXTRA_P(zv) = 0;
+		if (!*delayed_call_failed) {
+			zval param;
+			ZVAL_COPY(&param, &var_dtor_hash->data[i + 1]);
+
+			BG(serialize_lock)++;
+			zend_call_known_instance_method_with_1_params(
+				Z_OBJCE_P(zv)->__unserialize, Z_OBJ_P(zv), NULL, &param);
+			if (EG(exception)) {
+				*delayed_call_failed = 1;
+				GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
+			}
+			BG(serialize_lock)--;
+			zval_ptr_dtor(&param);
+		} else {
+			GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
+		}
+	}
+}
+
+/* Drain queued __wakeup / __unserialize calls without freeing the var hash.
+ * Used on the failure path of unserialize() to ensure deferred wakeups run
+ * before any destructors of the partially-unserialized return value are
+ * invoked, so that __wakeup-based input validation can still apply its
+ * post-conditions before sibling objects observe the half-built state.
+ *
+ * After this returns, the VAR_WAKEUP_FLAG / VAR_UNSERIALIZE_FLAG markers are
+ * cleared on every entry that was processed, so a subsequent var_destroy()
+ * call will not re-invoke the same delayed calls. */
+PHPAPI void var_invoke_delayed_calls(php_unserialize_data_t *var_hashx)
+{
+	var_dtor_entries *var_dtor_hash = (*var_hashx)->first_dtor;
+	bool delayed_call_failed = 0;
+
+	while (var_dtor_hash) {
+		for (zend_long i = 0; i < var_dtor_hash->used_slots; i++) {
+			var_drain_entry(var_dtor_hash, i, &delayed_call_failed);
+		}
+		var_dtor_hash = var_dtor_hash->next;
+	}
+}
+
 PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 {
 	void *next;
@@ -247,65 +334,11 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 
 	while (var_dtor_hash) {
 		for (i = 0; i < var_dtor_hash->used_slots; i++) {
-			zval *zv = &var_dtor_hash->data[i];
 #if VAR_ENTRIES_DBG
 			fprintf(stderr, "var_destroy dtor(%p, %ld)\n", &var_dtor_hash->data[i], Z_REFCOUNT_P(&var_dtor_hash->data[i]));
 #endif
-
-			if (Z_EXTRA_P(zv) == VAR_WAKEUP_FLAG) {
-				/* Perform delayed __wakeup calls */
-				if (!delayed_call_failed) {
-					zval retval;
-					zend_fcall_info fci;
-					zend_fcall_info_cache fci_cache;
-
-					ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
-
-					fci.size = sizeof(fci);
-					fci.object = Z_OBJ_P(zv);
-					fci.retval = &retval;
-					fci.param_count = 0;
-					fci.params = NULL;
-					fci.named_params = NULL;
-					ZVAL_UNDEF(&fci.function_name);
-
-					fci_cache.function_handler = zend_hash_find_ptr(
-						&fci.object->ce->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP));
-					fci_cache.object = fci.object;
-					fci_cache.called_scope = fci.object->ce;
-
-					BG(serialize_lock)++;
-					if (zend_call_function(&fci, &fci_cache) == FAILURE || Z_ISUNDEF(retval)) {
-						delayed_call_failed = 1;
-						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
-					}
-					BG(serialize_lock)--;
-
-					zval_ptr_dtor(&retval);
-				} else {
-					GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
-				}
-			} else if (Z_EXTRA_P(zv) == VAR_UNSERIALIZE_FLAG) {
-				/* Perform delayed __unserialize calls */
-				if (!delayed_call_failed) {
-					zval param;
-					ZVAL_COPY(&param, &var_dtor_hash->data[i + 1]);
-
-					BG(serialize_lock)++;
-					zend_call_known_instance_method_with_1_params(
-						Z_OBJCE_P(zv)->__unserialize, Z_OBJ_P(zv), NULL, &param);
-					if (EG(exception)) {
-						delayed_call_failed = 1;
-						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
-					}
-					BG(serialize_lock)--;
-					zval_ptr_dtor(&param);
-				} else {
-					GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
-				}
-			}
-
-			i_zval_ptr_dtor(zv);
+			var_drain_entry(var_dtor_hash, i, &delayed_call_failed);
+			i_zval_ptr_dtor(&var_dtor_hash->data[i]);
 		}
 		next = var_dtor_hash->next;
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
