@@ -2698,6 +2698,8 @@ static void zend_emit_return_type_check(
 		}
 
 		opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
+		/* Store pure type mask in extended_value */
+		opline->extended_value = ZEND_TYPE_PURE_MASK(type);
 		if (expr && expr->op_type == IS_CONST) {
 			opline->result_type = expr->op_type = IS_TMP_VAR;
 			opline->result.var = expr->u.op.var = get_temporary_variable();
