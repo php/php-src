@@ -967,40 +967,6 @@ PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset
 /* }}} */
 
 
-static struct st_mysqlnd_plugin_charsets mysqlnd_plugin_charsets_plugin =
-{
-	{
-		MYSQLND_PLUGIN_API_VERSION,
-		"charsets",
-		MYSQLND_VERSION_ID,
-		PHP_MYSQLND_VERSION,
-		"Modified BSD License (BSD-3-Clause)",
-		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uw@php.net>, Georg Richter <georg@php.net>",
-		{
-			NULL, /* no statistics , will be filled later if there are some */
-			NULL, /* no statistics */
-		},
-		{
-			NULL /* plugin shutdown */
-		}
-	},
-	{/* methods */
-		mysqlnd_find_charset_nr,
-		mysqlnd_find_charset_name,
-		mysqlnd_cset_escape_quotes,
-		mysqlnd_cset_escape_slashes
-	}
-};
-
-
-/* {{{ mysqlnd_charsets_plugin_register */
-void
-mysqlnd_charsets_plugin_register(void)
-{
-	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_charsets_plugin);
-}
-/* }}} */
-
 #if MYSQLND_CHARSETS_SANITY_CHECK
 void mysqlnd_charsets_sanity_check(void)
 {
