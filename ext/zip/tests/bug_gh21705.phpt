@@ -19,7 +19,7 @@ $index = $zip->locateName('bar.txt');
 $zip->deleteName('bar.txt');
 
 var_dump($zip->getFromName('bar.txt', 0, ZipArchive::FL_UNCHANGED));
-var_dump($zip->getFromIndex($index, 0, ZipArchive::FL_UNCHANGED)); // the ZipArchive::FL_UNCHANGED is ignored
+var_dump($zip->getFromIndex($index, 0, ZipArchive::FL_UNCHANGED));
 
 $zip->close();
 @unlink($name);
