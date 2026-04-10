@@ -1409,7 +1409,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 	php_unserialize_data_t var_hash;
 	zval *retval;
 	HashTable *class_hash = NULL, *prev_class_hash;
-	zend_long prev_max_depth, prev_cur_depth;
+	zend_long prev_max_depth, prev_cur_depth, delayed_calls_mark;
 
 	if (buf_len == 0) {
 		RETURN_FALSE;
@@ -1480,6 +1480,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 		}
 	}
 
+	delayed_calls_mark = var_delayed_calls_mark(&var_hash);
 	if (BG(unserialize).level > 1) {
 		retval = var_tmp_var(&var_hash);
 	} else {
@@ -1490,6 +1491,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 			php_error_docref(NULL, E_WARNING, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
 				(zend_long)((char*)p - buf), buf_len);
 		}
+		var_invoke_delayed_calls(&var_hash, delayed_calls_mark);
 		if (BG(unserialize).level <= 1) {
 			zval_ptr_dtor(return_value);
 		}
