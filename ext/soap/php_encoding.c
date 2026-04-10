@@ -252,7 +252,6 @@ void whiteSpace_collapse(xmlChar* str)
 
 static encodePtr find_encoder_by_type_name(sdlPtr sdl, const char *type)
 {
-
 	if (sdl && sdl->encoders) {
 		encodePtr enc;
 		size_t type_len = strlen(type);
