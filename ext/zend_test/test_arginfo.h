@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 9a23b7d5305982930579428a345ded725ff5145f
+ * Stub hash: dcb089a336c6c3e6c685762057dcedcb393508a7
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -1375,6 +1375,27 @@ static zend_class_entry *register_class_ZendTestNS2_Foo(void)
 	zend_type property_unionProp_type = ZEND_TYPE_INIT_UNION(property_unionProp_type_list, 0);
 	zend_declare_typed_property(class_entry, property_unionProp_name, &property_unionProp_default_value, ZEND_ACC_PUBLIC, NULL, property_unionProp_type);
 	zend_string_release_ex(property_unionProp_name, true);
+
+	zval property_fooAlias_default_value;
+	ZVAL_UNDEF(&property_fooAlias_default_value);
+	zend_string *property_fooAlias_name = zend_string_init("fooAlias", sizeof("fooAlias") - 1, true);
+	zend_string *property_fooAlias_class_ZendTestNS_Foo = zend_string_init("ZendTestNS\\Foo", sizeof("ZendTestNS\\Foo")-1, 1);
+	zend_declare_typed_property(class_entry, property_fooAlias_name, &property_fooAlias_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_fooAlias_class_ZendTestNS_Foo, 0, 0));
+	zend_string_release_ex(property_fooAlias_name, true);
+
+	zval property_unlProp_default_value;
+	ZVAL_UNDEF(&property_unlProp_default_value);
+	zend_string *property_unlProp_name = zend_string_init("unlProp", sizeof("unlProp") - 1, true);
+	zend_string *property_unlProp_class_ZendTestNS_UnlikelyCompileError = zend_string_init("ZendTestNS\\\125nlikelyCompileError", sizeof("ZendTestNS\\\125nlikelyCompileError")-1, 1);
+	zend_declare_typed_property(class_entry, property_unlProp_name, &property_unlProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_unlProp_class_ZendTestNS_UnlikelyCompileError, 0, 0));
+	zend_string_release_ex(property_unlProp_name, true);
+
+	zval property_notUnlProp_default_value;
+	ZVAL_UNDEF(&property_notUnlProp_default_value);
+	zend_string *property_notUnlProp_name = zend_string_init("notUnlProp", sizeof("notUnlProp") - 1, true);
+	zend_string *property_notUnlProp_class_ZendTestNS_NotUnlikelyCompileError = zend_string_init("ZendTestNS\\\116otUnlikelyCompileError", sizeof("ZendTestNS\\\116otUnlikelyCompileError")-1, 1);
+	zend_declare_typed_property(class_entry, property_notUnlProp_name, &property_notUnlProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_notUnlProp_class_ZendTestNS_NotUnlikelyCompileError, 0, 0));
+	zend_string_release_ex(property_notUnlProp_name, true);
 
 	return class_entry;
 }

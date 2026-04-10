@@ -380,6 +380,10 @@ namespace ZendTestNS {
 
 namespace ZendTestNS2 {
 
+    use ZendTestNS\Foo as FooAlias;
+    use ZendTestNS\UnlikelyCompileError;
+    use ZendTestNS\{NotUnlikelyCompileError};
+
     /** @var string */
     const ZEND_CONSTANT_A = "namespaced";
 
@@ -387,6 +391,9 @@ namespace ZendTestNS2 {
         public ZendSubNS\Foo $foo;
         public ZendSubNS\Foo&\ZendTestNS\Bar $intersectionProp;
         public ZendSubNS\Foo|\ZendTestNS\Bar $unionProp;
+        public FooAlias $fooAlias;
+        public UnlikelyCompileError $unlProp;
+        public NotUnlikelyCompileError $notUnlProp;
 
         public function method(): void {}
     }

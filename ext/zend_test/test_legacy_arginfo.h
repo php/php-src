@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 9a23b7d5305982930579428a345ded725ff5145f
+ * Stub hash: dcb089a336c6c3e6c685762057dcedcb393508a7
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, 0)
@@ -1095,6 +1095,24 @@ static zend_class_entry *register_class_ZendTestNS2_Foo(void)
 	zend_string *property_unionProp_name = zend_string_init("unionProp", sizeof("unionProp") - 1, true);
 	zend_declare_property_ex(class_entry, property_unionProp_name, &property_unionProp_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release_ex(property_unionProp_name, true);
+
+	zval property_fooAlias_default_value;
+	ZVAL_NULL(&property_fooAlias_default_value);
+	zend_string *property_fooAlias_name = zend_string_init("fooAlias", sizeof("fooAlias") - 1, true);
+	zend_declare_property_ex(class_entry, property_fooAlias_name, &property_fooAlias_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release_ex(property_fooAlias_name, true);
+
+	zval property_unlProp_default_value;
+	ZVAL_NULL(&property_unlProp_default_value);
+	zend_string *property_unlProp_name = zend_string_init("unlProp", sizeof("unlProp") - 1, true);
+	zend_declare_property_ex(class_entry, property_unlProp_name, &property_unlProp_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release_ex(property_unlProp_name, true);
+
+	zval property_notUnlProp_default_value;
+	ZVAL_NULL(&property_notUnlProp_default_value);
+	zend_string *property_notUnlProp_name = zend_string_init("notUnlProp", sizeof("notUnlProp") - 1, true);
+	zend_declare_property_ex(class_entry, property_notUnlProp_name, &property_notUnlProp_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release_ex(property_notUnlProp_name, true);
 
 	return class_entry;
 }
