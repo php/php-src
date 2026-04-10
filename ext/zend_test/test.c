@@ -69,6 +69,7 @@ static zend_class_entry *zend_test_forbid_dynamic_call;
 static zend_class_entry *zend_test_ns_foo_class;
 static zend_class_entry *zend_test_ns_unlikely_compile_error_class;
 static zend_class_entry *zend_test_ns_not_unlikely_compile_error_class;
+static zend_class_entry *zend_test_ns_bar_class;
 static zend_class_entry *zend_test_ns2_foo_class;
 static zend_class_entry *zend_test_ns2_ns_foo_class;
 static zend_class_entry *zend_test_unit_enum;
@@ -1571,6 +1572,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
 	zend_test_ns_unlikely_compile_error_class = register_class_ZendTestNS_UnlikelyCompileError();
 	zend_test_ns_not_unlikely_compile_error_class = register_class_ZendTestNS_NotUnlikelyCompileError();
+	zend_test_ns_bar_class = register_class_ZendTestNS_Bar();
 	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
 	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
 

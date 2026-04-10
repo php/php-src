@@ -2375,8 +2375,8 @@ abstract class VariableLike
                     $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->num_types = $classTypeCount;\n";
 
                     foreach ($arginfoType->classTypes as $k => $classType) {
-                        $escapedClassName = $classType->toEscapedName();
-                        $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$escapedClassName}, 0, 0);\n";
+                        $varEscapedClassName = $classType->toVarEscapedName();
+                        $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName}, 0, 0);\n";
                     }
 
                     $typeMaskCode = $this->type->toArginfoType()->toTypeMask();

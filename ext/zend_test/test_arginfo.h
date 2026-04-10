@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 46178f5fa88681da91d831250f2f00c45e914624
+ * Stub hash: 9a23b7d5305982930579428a345ded725ff5145f
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -1294,6 +1294,16 @@ static zend_class_entry *register_class_ZendTestNS_Foo(void)
 	return class_entry;
 }
 
+static zend_class_entry *register_class_ZendTestNS_Bar(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS", "Bar", NULL);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
 static zend_class_entry *register_class_ZendTestNS_UnlikelyCompileError(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -1339,6 +1349,32 @@ static zend_class_entry *register_class_ZendTestNS2_Foo(void)
 	zend_string *property_foo_class_ZendTestNS2_ZendSubNS_Foo = zend_string_init("ZendTestNS2\\ZendSubNS\\Foo", sizeof("ZendTestNS2\\ZendSubNS\\Foo")-1, 1);
 	zend_declare_typed_property(class_entry, property_foo_name, &property_foo_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_foo_class_ZendTestNS2_ZendSubNS_Foo, 0, 0));
 	zend_string_release_ex(property_foo_name, true);
+
+	zval property_intersectionProp_default_value;
+	ZVAL_UNDEF(&property_intersectionProp_default_value);
+	zend_string *property_intersectionProp_name = zend_string_init("intersectionProp", sizeof("intersectionProp") - 1, true);
+	zend_string *property_intersectionProp_class_ZendTestNS2_ZendSubNS_Foo = zend_string_init("ZendTestNS2\\ZendSubNS\\Foo", sizeof("ZendTestNS2\\ZendSubNS\\Foo") - 1, 1);
+	zend_string *property_intersectionProp_class_ZendTestNS_Bar = zend_string_init("ZendTestNS\\Bar", sizeof("ZendTestNS\\Bar") - 1, 1);
+	zend_type_list *property_intersectionProp_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	property_intersectionProp_type_list->num_types = 2;
+	property_intersectionProp_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(property_intersectionProp_class_ZendTestNS2_ZendSubNS_Foo, 0, 0);
+	property_intersectionProp_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_intersectionProp_class_ZendTestNS_Bar, 0, 0);
+	zend_type property_intersectionProp_type = ZEND_TYPE_INIT_INTERSECTION(property_intersectionProp_type_list, 0);
+	zend_declare_typed_property(class_entry, property_intersectionProp_name, &property_intersectionProp_default_value, ZEND_ACC_PUBLIC, NULL, property_intersectionProp_type);
+	zend_string_release_ex(property_intersectionProp_name, true);
+
+	zval property_unionProp_default_value;
+	ZVAL_UNDEF(&property_unionProp_default_value);
+	zend_string *property_unionProp_name = zend_string_init("unionProp", sizeof("unionProp") - 1, true);
+	zend_string *property_unionProp_class_ZendTestNS2_ZendSubNS_Foo = zend_string_init("ZendTestNS2\\ZendSubNS\\Foo", sizeof("ZendTestNS2\\ZendSubNS\\Foo") - 1, 1);
+	zend_string *property_unionProp_class_ZendTestNS_Bar = zend_string_init("ZendTestNS\\Bar", sizeof("ZendTestNS\\Bar") - 1, 1);
+	zend_type_list *property_unionProp_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	property_unionProp_type_list->num_types = 2;
+	property_unionProp_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(property_unionProp_class_ZendTestNS2_ZendSubNS_Foo, 0, 0);
+	property_unionProp_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_unionProp_class_ZendTestNS_Bar, 0, 0);
+	zend_type property_unionProp_type = ZEND_TYPE_INIT_UNION(property_unionProp_type_list, 0);
+	zend_declare_typed_property(class_entry, property_unionProp_name, &property_unionProp_default_value, ZEND_ACC_PUBLIC, NULL, property_unionProp_type);
+	zend_string_release_ex(property_unionProp_name, true);
 
 	return class_entry;
 }
