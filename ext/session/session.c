@@ -711,6 +711,10 @@ static PHP_INI_MH(OnUpdateCookieLifetime)
 		php_error_docref(NULL, E_WARNING, "CookieLifetime cannot be negative");
 		return FAILURE;
 	} else if (v > maxcookie) {
+		php_error_docref(NULL, E_WARNING, "CookieLifetime value too large, value was set to the maximum of " ZEND_LONG_FMT, maxcookie);
+		zend_long *p = ZEND_INI_GET_ADDR();
+		*p = maxcookie;
+		entry->value = zend_long_to_str(maxcookie);
 		return SUCCESS;
 	}
 

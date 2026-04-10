@@ -6,8 +6,11 @@ session
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
+ob_start();
 session_set_cookie_params(PHP_INT_MAX, '/', null, false, true);
 echo "DONE";
+ob_end_flush();
 ?>
---EXPECT--
+--EXPECTF--
+Warning: session_set_cookie_params(): CookieLifetime value too large, value was set to the maximum of %d in %s on line %d
 DONE
