@@ -22,7 +22,7 @@ echo "*** Testing session_get_cookie_params() : basic functionality ***\n";
 var_dump(session_get_cookie_params());
 var_dump(session_set_cookie_params(3600, "/path", "blah", FALSE, FALSE));
 var_dump(session_get_cookie_params());
-var_dump(session_set_cookie_params(1234567890, "/guff", "foo", TRUE, TRUE));
+var_dump(session_set_cookie_params(1000000000, "/guff", "foo", TRUE, TRUE));
 var_dump(session_get_cookie_params());
 var_dump(session_set_cookie_params([
   "lifetime" => 123,
@@ -40,7 +40,7 @@ var_dump(session_get_cookie_params());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_get_cookie_params() : basic functionality ***
 array(7) {
   ["lifetime"]=>
@@ -78,7 +78,7 @@ array(7) {
 bool(true)
 array(7) {
   ["lifetime"]=>
-  int(%d)
+  int(1000000000)
   ["path"]=>
   string(5) "/guff"
   ["domain"]=>
