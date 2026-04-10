@@ -27,4 +27,4 @@ echo "After current+fgets: key=" . $file->key() . " current=" . trim($file->curr
 --EXPECT--
 After rewind+fgets: key=1 current=line 1
 After rewind+fgets+fgets: key=2 current=line 2
-After current+fgets: key=1 current=line 2
+After current+fgets: key=1 current=line 1

@@ -2096,11 +2096,17 @@ PHP_METHOD(SplFileObject, fgets)
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	if (spl_filesystem_file_read_ex(intern, /* silent */ false, /* line_add */ 1, /* csv */ false) == FAILURE) {
-		RETURN_THROWS();
+	if (intern->u.file.current_line) {
+		RETVAL_STR_COPY(intern->u.file.current_line);
+		spl_filesystem_file_free_line(intern);
+		intern->u.file.current_line_num++;
+	} else {
+		if (spl_filesystem_file_read_ex(intern, /* silent */ false, /* line_add */ 1, /* csv */ false) == FAILURE) {
+			RETURN_THROWS();
+		}
+		RETVAL_STR_COPY(intern->u.file.current_line);
+		spl_filesystem_file_free_line(intern);
 	}
-	RETVAL_STR_COPY(intern->u.file.current_line);
-	spl_filesystem_file_free_line(intern);
 } /* }}} */
 
 /* {{{ Return current line from file */
