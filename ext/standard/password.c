@@ -181,11 +181,6 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	zval *zcost;
 	zend_long cost = PHP_PASSWORD_BCRYPT_COST;
 
-	if (zend_str_has_nul_byte(password)) {
-		zend_value_error("Bcrypt password must not contain null character");
-		return NULL;
-	}
-
 	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
 		cost = zval_get_long(zcost);
 	}
@@ -620,10 +615,6 @@ PHP_FUNCTION(password_verify)
 	ZEND_PARSE_PARAMETERS_END();
 
 	algo = php_password_algo_identify(hash);
-	if (algo == &php_password_algo_bcrypt && zend_str_has_nul_byte(password)) {
-		RETURN_FALSE;
-	}
-
 	RETURN_BOOL(algo && (!algo->verify || algo->verify(password, hash)));
 }
 /* }}} */

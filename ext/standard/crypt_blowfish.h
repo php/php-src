@@ -17,7 +17,9 @@
 #ifndef _CRYPT_BLOWFISH_H
 #define _CRYPT_BLOWFISH_H
 
-extern char *php_crypt_blowfish_rn(const char *key, const char *setting,
-	char *output, int size);
+#include <stddef.h>
+
+extern char *php_crypt_blowfish_rn(const char *key, size_t key_len,
+	const char *setting, char *output, int size);
 
 #endif
