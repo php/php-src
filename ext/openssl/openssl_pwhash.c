@@ -331,7 +331,7 @@ PHP_FUNCTION(openssl_password_hash)
 		Z_PARAM_ARRAY_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (strcmp(ZSTR_VAL(algo), "argon2i") && strcmp(ZSTR_VAL(algo), "argon2id")) {
+	if (!zend_string_equals_literal(algo, "argon2i") && !zend_string_equals_literal(algo, "argon2id")) {
 		zend_argument_value_error(1, "must be a valid password openssl hashing algorithm");
 		RETURN_THROWS();
 	}
@@ -357,7 +357,7 @@ PHP_FUNCTION(openssl_password_verify)
 		Z_PARAM_STR(digest)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (strcmp(ZSTR_VAL(algo), "argon2i") && strcmp(ZSTR_VAL(algo), "argon2id")) {
+	if (!zend_string_equals_literal(algo, "argon2i") && !zend_string_equals_literal(algo, "argon2id")) {
 		zend_argument_value_error(1, "must be a valid password openssl hashing algorithm");
 		RETURN_THROWS();
 	}
