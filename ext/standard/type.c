@@ -151,8 +151,7 @@ PHP_FUNCTION(intval)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(num) != IS_STRING || base == 10) {
-		RETVAL_LONG(zval_get_long(num));
-		return;
+		RETURN_LONG(zval_get_long(num));
 	}
 
 
