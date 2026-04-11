@@ -4577,27 +4577,6 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_VERIFY_RETURN_TYPE, (((res_info & MAY_BE_REF)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_VERIFY_RETURN_TYPE, (((res_info & MAY_BE_REF) == 0) && (op1_info == MAY_BE_DOUBLE || op1_info == MAY_BE_STRING)), ZEND_VERIFY_RETURN_TYPE_FOR_STRING_AND_DOUBLE, CONST|TMPVAR|CV, UNUSED)
-{
-	USE_OPLINE
-	zval *retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	if (OP1_TYPE == IS_CONST) {
-		ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
-		retval_ptr = EX_VAR(opline->result.var);
-	}
-	uint32_t pure_type_mask = opline->extended_value;
-
-	if (EXPECTED(ZEND_TYPE_MASK_CONTAINS_CODE(pure_type_mask, Z_TYPE_P(retval_ptr)))) {
-		ZEND_VM_NEXT_OPCODE();
-	} else if (EXPECTED(zend_verify_scalar_type_hint(pure_type_mask, retval_ptr, EX_USES_STRICT_TYPES(), /* is_internal*/ false))) {
-		ZEND_VM_NEXT_OPCODE();
-	} else {
-		SAVE_OPLINE();
-		zend_verify_return_error(EX(func), retval_ptr);
-		HANDLE_EXCEPTION();
-	}
-}
-
 ZEND_VM_COLD_HANDLER(201, ZEND_VERIFY_NEVER_TYPE, UNUSED, UNUSED)
 {
 	SAVE_OPLINE();
