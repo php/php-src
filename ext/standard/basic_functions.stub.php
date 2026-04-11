@@ -1910,12 +1910,12 @@ function key_exists($key, array $array): bool {}
 /**
  * @compile-time-eval
  */
-function array_get(array $array, string|int|array|null $key = null, mixed $default = null): mixed {}
+function array_get(array $array, array $path, mixed $default = null): mixed {}
 
 /**
  * @compile-time-eval
  */
-function array_has(array $array, string|int|array $key): bool {}
+function array_has(array $array, array $path): bool {}
 
 /**
  * @compile-time-eval
