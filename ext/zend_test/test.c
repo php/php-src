@@ -58,7 +58,11 @@ static zend_class_entry *zend_test_gen_stub_flag_compatibility_test;
 static zend_class_entry *zend_attribute_test_class;
 static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_trait_for_internal_class;
+static zend_class_entry *zend_test_trait_for_internal_class2;
+static zend_class_entry *zend_test_trait_with_union_prop;
 static zend_class_entry *zend_test_class_with_trait;
+static zend_class_entry *zend_test_class_with_multiple_traits;
+static zend_class_entry *zend_test_class_with_union_type_trait;
 static zend_class_entry *zend_test_not_a_trait_for_internal_traits;
 static zend_class_entry *zend_test_internal_traits_driver;
 static zend_class_entry *zend_test_attribute;
@@ -1244,6 +1248,12 @@ static ZEND_METHOD(_ZendTestTraitForInternalClass, traitMethod)
 	RETURN_LONG(789);
 }
 
+static ZEND_METHOD(_ZendTestTraitForInternalClass2, traitMethod2)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_LONG(101);
+}
+
 static ZEND_FUNCTION(zend_test_use_internal_traits_zero)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1561,7 +1571,11 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_trait = register_class__ZendTestTrait();
 	zend_test_trait_for_internal_class = register_class__ZendTestTraitForInternalClass();
+	zend_test_trait_for_internal_class2 = register_class__ZendTestTraitForInternalClass2();
+	zend_test_trait_with_union_prop = register_class__ZendTestTraitWithUnionProp();
 	zend_test_class_with_trait = register_class__ZendTestClassWithTrait(zend_test_trait_for_internal_class);
+	zend_test_class_with_multiple_traits = register_class__ZendTestClassWithMultipleTraits(zend_test_trait_for_internal_class, zend_test_trait_for_internal_class2);
+	zend_test_class_with_union_type_trait = register_class__ZendTestClassWithUnionTypeTrait(zend_test_trait_with_union_prop);
 	zend_test_not_a_trait_for_internal_traits = register_class__ZendTestNotATraitForInternalTraits();
 	zend_test_internal_traits_driver = register_class__ZendTestInternalTraitsDriver();
 

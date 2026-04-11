@@ -45,9 +45,35 @@ namespace {
         public function traitMethod(): int {}
     }
 
+    trait _ZendTestTraitForInternalClass2
+    {
+        /** @var int */
+        public const ZEND_TRAIT_CONST2 = 321;
+
+        public static int $staticTraitProp = 999;
+
+        public function traitMethod2(): int {}
+    }
+
+    trait _ZendTestTraitWithUnionProp
+    {
+        public int|string $unionProp = 42;
+    }
+
     class _ZendTestClassWithTrait
     {
         use _ZendTestTraitForInternalClass;
+    }
+
+    class _ZendTestClassWithMultipleTraits
+    {
+        use _ZendTestTraitForInternalClass;
+        use _ZendTestTraitForInternalClass2;
+    }
+
+    class _ZendTestClassWithUnionTypeTrait
+    {
+        use _ZendTestTraitWithUnionProp;
     }
 
     class _ZendTestNotATraitForInternalTraits {}
