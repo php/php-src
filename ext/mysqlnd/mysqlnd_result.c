@@ -1001,13 +1001,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 			}
 		}
 		if (flags & MYSQLND_FETCH_ASSOC) {
-			/* zend_hash_quick_update needs length + trailing zero */
-			/* QQ: Error handling ? */
-			/*
-			  zend_hash_quick_update does not check, as add_assoc_zval_ex do, whether
-			  the index is a numeric and convert it to it. This however means constant
-			  hashing of the column name, which is not needed as it can be precomputed.
-			*/
 			Z_TRY_ADDREF_P(data);
 			if (field->is_numeric == FALSE) {
 				zend_hash_update(row_ht, field->sname, data);
