@@ -51,7 +51,7 @@ static inline int php_spawn_addchdir(
     posix_spawn_file_actions_t *factions,
     const char *cwd
 ) {
-#if defined(__APPLE__)
+#if defined(__APPLE__) && defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR)
     if (__builtin_available(macOS 26.0, *)) {
         return posix_spawn_file_actions_addchdir(factions, cwd);
     } else {
