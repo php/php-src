@@ -47,11 +47,26 @@
 #define USE_POSIX_SPAWN
 
 /* The non-_np variant is in macOS 26 (and _np deprecated) */
-#ifdef HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR
-#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir
+static inline int php_spawn_addchdir(
+    posix_spawn_file_actions_t *factions,
+    const char *cwd
+) {
+#if defined(__APPLE__)
+    if (__builtin_available(macOS 26.0, *)) {
+        return posix_spawn_file_actions_addchdir(factions, cwd);
+    } else {
+        return posix_spawn_file_actions_addchdir_np(factions, cwd);
+    }
+#elif defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR)
+    return posix_spawn_file_actions_addchdir(factions, cwd);
 #else
-#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir_np
+    return posix_spawn_file_actions_addchdir_np(factions, cwd);
 #endif
+}
+
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR(f, d) \
+    php_spawn_addchdir((f), (d))
+
 #endif
 
 /* This symbol is defined in ext/standard/config.m4.
