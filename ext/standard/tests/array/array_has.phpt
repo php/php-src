@@ -34,6 +34,17 @@ var_dump(array_has($withNull, ['key']));
 // Test with invalid segment type in array path
 var_dump(array_has($array, ['product', new stdClass()]));
 
+// Test with reference to an array in the path
+$array2 = ['world'];
+$array_with_ref = ['hello' => &$array2];
+var_dump(array_has($array_with_ref, ['hello', 0]));
+
+// Test with path segment that is a reference
+$key1 = 'product';
+$key2 = 'name';
+$path_with_refs = [&$key1, &$key2];
+var_dump(array_has($array, $path_with_refs));
+
 echo "Done";
 ?>
 --EXPECT--
@@ -48,4 +59,6 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
+bool(true)
+bool(true)
 Done

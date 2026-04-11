@@ -6917,23 +6917,17 @@ PHP_FUNCTION(array_key_exists)
 static zval* array_get_nested(HashTable *ht, HashTable *path)
 {
 	zval *segment_val;
-	zval *current;
-	HashTable *current_ht;
-	uint32_t idx;
-	uint32_t num_segments;
-
-	current_ht = ht;
-	num_segments = zend_hash_num_elements(path);
+	zval *current = NULL;
+	HashTable *current_ht = ht;
+	uint32_t num_segments = zend_hash_num_elements(path);
+	uint32_t segment_index = 0;
 
 	/* Iterate through each segment in the path array */
-	for (idx = 0; idx < num_segments; idx++) {
-		/* Get the segment at the current index */
-		segment_val = zend_hash_index_find(path, idx);
+	ZEND_HASH_FOREACH_VAL(path, segment_val) {
+		segment_index++;
 
-		if (segment_val == NULL) {
-			/* Missing segment in array */
-			return NULL;
-		}
+		/* Dereference segment if it's a reference */
+		ZVAL_DEREF(segment_val);
 
 		/* Segment must be a string or int */
 		if (Z_TYPE_P(segment_val) == IS_STRING) {
@@ -6945,22 +6939,27 @@ static zval* array_get_nested(HashTable *ht, HashTable *path)
 			return NULL;
 		}
 
-		/* If this is the last segment, return the result */
-		if (idx == num_segments - 1) {
-			return current;
-		}
-
-		/* Check if the segment exists and is an array for next iteration */
-		if (current == NULL || Z_TYPE_P(current) != IS_ARRAY) {
+		/* If segment not found, return NULL */
+		if (current == NULL) {
 			return NULL;
 		}
 
-		/* Move to the next level */
-		current_ht = Z_ARRVAL_P(current);
-	}
+		/* Dereference if it's a reference */
+		ZVAL_DEREF(current);
 
-	/* Empty path array */
-	return NULL;
+		/* If current is not an array and we're not at the last segment,
+		 * we can't continue traversing the path */
+		if (Z_TYPE_P(current) != IS_ARRAY && segment_index < num_segments) {
+			return NULL;
+		}
+
+		/* Update current_ht for next iteration if it's an array */
+		if (Z_TYPE_P(current) == IS_ARRAY) {
+			current_ht = Z_ARRVAL_P(current);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return current;
 }
 /* }}} */
 
@@ -6970,7 +6969,6 @@ PHP_FUNCTION(array_get)
 	zval *array;
 	zval *path;
 	zval *default_value = NULL;
-	zval *result;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ARRAY(array)
@@ -6979,7 +6977,7 @@ PHP_FUNCTION(array_get)
 		Z_PARAM_ZVAL(default_value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	result = array_get_nested(Z_ARRVAL_P(array), Z_ARRVAL_P(path));
+	zval *result = array_get_nested(Z_ARRVAL_P(array), Z_ARRVAL_P(path));
 
 	if (result != NULL) {
 		RETURN_COPY_DEREF(result);
@@ -6987,7 +6985,7 @@ PHP_FUNCTION(array_get)
 
 	/* Path not found, return default value */
 	if (default_value != NULL) {
-		RETURN_COPY_DEREF(default_value);
+		RETURN_COPY(default_value);
 	}
 }
 /* }}} */
@@ -6997,14 +6995,13 @@ PHP_FUNCTION(array_has)
 {
 	zval *array;
 	zval *path;
-	zval *result;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY(array)
 		Z_PARAM_ARRAY(path)
 	ZEND_PARSE_PARAMETERS_END();
 
-	result = array_get_nested(Z_ARRVAL_P(array), Z_ARRVAL_P(path));
+	zval *result = array_get_nested(Z_ARRVAL_P(array), Z_ARRVAL_P(path));
 
 	RETURN_BOOL(result != NULL);
 }

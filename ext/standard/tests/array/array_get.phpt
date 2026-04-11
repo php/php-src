@@ -48,6 +48,17 @@ var_dump($result_with_ref_default);
 $default_value = 'changed';
 var_dump($result_with_ref_default); // Should still be 'default' (not affected by reference change)
 
+// Test with reference to an array in the path
+$array2 = ['world'];
+$array_with_ref = ['hello' => &$array2];
+var_dump(array_get($array_with_ref, ['hello', 0]));
+
+// Test with path segment that is a reference
+$key1 = 'products';
+$key2 = 'desk';
+$path_with_refs = [&$key1, &$key2, 'price'];
+var_dump(array_get($array, $path_with_refs));
+
 echo "Done";
 ?>
 --EXPECT--
@@ -65,4 +76,6 @@ string(8) "original"
 string(8) "original"
 string(7) "default"
 string(7) "default"
+string(5) "world"
+int(100)
 Done
