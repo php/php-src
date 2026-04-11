@@ -5660,7 +5660,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 				if (opt & PGSQL_DML_ESCAPE) {
 					int error;
 					char *tmp = safe_emalloc(Z_STRLEN_P(val), 2, 1);
-					size_t new_len = PQescapeStringConn(pg_link, tmp, Z_STRVAL_P(val), Z_STRLEN_P(val), &error);
+					PQescapeStringConn(pg_link, tmp, Z_STRVAL_P(val), Z_STRLEN_P(val), &error);
 					if (error) {
 						php_error_docref(NULL, E_NOTICE, "Failed to escape field '%s' value", ZSTR_VAL(fld));
 						efree(tmp);
@@ -5843,7 +5843,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 				if (opt & PGSQL_DML_ESCAPE) {
 					int error;
 					char *tmp = (char *)safe_emalloc(Z_STRLEN_P(val), 2, 1);
-					size_t new_len = PQescapeStringConn(pg_link, tmp, Z_STRVAL_P(val), Z_STRLEN_P(val), &error);
+					PQescapeStringConn(pg_link, tmp, Z_STRVAL_P(val), Z_STRLEN_P(val), &error);
 					if (error) {
 						php_error_docref(NULL, E_NOTICE, "Failed to escape field '%s' value", ZSTR_VAL(fld));
 						efree(tmp);
