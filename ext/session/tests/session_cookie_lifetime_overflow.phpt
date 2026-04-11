@@ -17,7 +17,7 @@ var_dump(ini_get("session.cookie_lifetime"));
 ini_set("session.cookie_lifetime", PHP_INT_MAX);
 $val = (int) ini_get("session.cookie_lifetime");
 var_dump($val < PHP_INT_MAX); // clamped, not PHP_INT_MAX
-var_dump($val > 0); // positive
+var_dump($val > 0);
 
 // Valid values still work after clamping
 ini_set("session.cookie_lifetime", 200);

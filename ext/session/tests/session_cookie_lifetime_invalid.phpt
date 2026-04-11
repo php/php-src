@@ -13,19 +13,19 @@ ini_set("session.cookie_lifetime", 100);
 
 // Float strings are rejected
 ini_set("session.cookie_lifetime", "1.5");
-var_dump(ini_get("session.cookie_lifetime")); // unchanged
+var_dump(ini_get("session.cookie_lifetime"));
 
 // Non-numeric strings are rejected
 ini_set("session.cookie_lifetime", "abc");
-var_dump(ini_get("session.cookie_lifetime")); // unchanged
+var_dump(ini_get("session.cookie_lifetime"));
 
 // Negative values are rejected
 ini_set("session.cookie_lifetime", -1);
-var_dump(ini_get("session.cookie_lifetime")); // unchanged
+var_dump(ini_get("session.cookie_lifetime"));
 
 // Negative overflow strings are rejected
 ini_set("session.cookie_lifetime", "-99999999999999999999");
-var_dump(ini_get("session.cookie_lifetime")); // unchanged
+var_dump(ini_get("session.cookie_lifetime"));
 
 ob_end_flush();
 ?>
