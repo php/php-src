@@ -596,11 +596,13 @@ static void BF_set_key(const char *key, size_t key_len, BF_key expanded,
  * chars 2, 3, 4 in each four-char block, we set bit 7 of "sign" if sign
  * extension in tmp[1] occurs. Once this flag is set, it remains set.
  */
-			if (j)
+			if (j) {
 				sign |= tmp[1] & 0x80;
+			}
 			key_pos++;
-			if (key_pos > key_len)
+			if (key_pos > key_len) {
 				key_pos = 0;
+			}
 		}
 		diff |= tmp[0] ^ tmp[1]; /* Non-zero on any differences */
 

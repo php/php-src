@@ -67,7 +67,7 @@ PHP_MSHUTDOWN_FUNCTION(crypt) /* {{{ */
 }
 /* }}} */
 
-PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, bool quiet)
+PHPAPI zend_string *php_crypt(const char *password, size_t pass_len, const char *salt, int salt_len, bool quiet)
 {
 	char *crypt_res;
 	zend_string *result;
@@ -220,7 +220,7 @@ PHP_FUNCTION(crypt)
 	salt_in_len = MIN(PHP_MAX_SALT_LEN, salt_in_len);
 	salt[salt_in_len] = '\0';
 
-	if ((result = php_crypt(str, (int)str_len, salt, (int)salt_in_len, 0)) == NULL) {
+	if ((result = php_crypt(str, str_len, salt, (int)salt_in_len, 0)) == NULL) {
 		if (salt[0] == '*' && salt[1] == '0') {
 			RETURN_STRING("*1");
 		} else {
