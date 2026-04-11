@@ -242,7 +242,7 @@ static lxb_status_t serialize_to_smart_str_callback(const lxb_char_t *data, size
 	smart_str *uri_str = ctx;
 
 	if (data != NULL && length > 0) {
-		smart_str_appendl(uri_str, (const char *) data, length);
+		smart_str_appends(uri_str, (const char *) data);
 	}
 
 	return LXB_STATUS_OK;

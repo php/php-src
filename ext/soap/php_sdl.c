@@ -3283,7 +3283,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 
 		ZVAL_DOUBLE(&http_version, 1.1);
 		php_stream_context_set_option(context, "http", "protocol_version", &http_version);
-		smart_str_appendl(&headers, "Connection: close\r\n", sizeof("Connection: close\r\n")-1);
+		smart_str_appends(&headers, "Connection: close\r\n");
 	}
 
 	if (headers.s && ZSTR_LEN(headers.s) > 0) {

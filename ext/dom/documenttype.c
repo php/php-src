@@ -147,7 +147,7 @@ zend_result dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
 				xmlNodeDumpOutput (buff, NULL, cur, 0, 0, NULL);
 				xmlOutputBufferFlush(buff);
 
-				smart_str_appendl(&ret_buf, (const char *) xmlOutputBufferGetContent(buff), xmlOutputBufferGetSize(buff));
+				smart_str_appends(&ret_buf, (const char *) xmlOutputBufferGetContent(buff));
 
 				(void)xmlOutputBufferClose(buff);
 			}

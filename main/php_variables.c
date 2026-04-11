@@ -431,7 +431,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 			ssize_t len = php_stream_read(s, buf, SAPI_POST_HANDLER_BUFSIZ);
 
 			if (len > 0) {
-				smart_str_appendl(&post_data.str, buf, len);
+				smart_str_appends(&post_data.str, buf);
 
 				if (SUCCESS != add_post_vars(arr, &post_data, 0)) {
 					smart_str_free(&post_data.str);

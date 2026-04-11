@@ -357,7 +357,7 @@ PHP_MINFO_FUNCTION(apache)
 			smart_str_appendc(&tmp1, ' ');
 		}
 		if ((p = strchr(s, '.'))) {
-			smart_str_appendl(&tmp1, s, (p - s));
+			smart_str_appends(&tmp1, s);
 		} else {
 			smart_str_appends(&tmp1, s);
 		}

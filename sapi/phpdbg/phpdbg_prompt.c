@@ -454,7 +454,7 @@ PHPDBG_COMMAND(stdin)
 			do {
 				if (buf == nl + seplen) {
 					if (!memcmp(sep, nl, seplen) && (*buf == '\n' || (*buf == '\r' && buf[1] == '\n'))) {
-						smart_str_appendl(&code, PHPDBG_G(input_buffer), nl - PHPDBG_G(input_buffer));
+						smart_str_appends(&code, PHPDBG_G(input_buffer));
 						memmove(PHPDBG_G(input_buffer), ++buf, --PHPDBG_G(input_buflen));
 						goto exec_code;
 					}
@@ -465,15 +465,15 @@ PHPDBG_COMMAND(stdin)
 				buf++;
 			} while (--PHPDBG_G(input_buflen));
 			if (buf != nl && buf <= nl + seplen) {
-				smart_str_appendl(&code, PHPDBG_G(input_buffer), nl - PHPDBG_G(input_buffer));
+				smart_str_appends(&code, PHPDBG_G(input_buffer));
 				PHPDBG_G(input_buflen) = buf - nl;
 				memmove(PHPDBG_G(input_buffer), nl, PHPDBG_G(input_buflen));
 			} else {
 				PHPDBG_G(input_buflen) = 0;
-				smart_str_appendl(&code, PHPDBG_G(input_buffer), buf - PHPDBG_G(input_buffer));
+				smart_str_appends(&code, PHPDBG_G(input_buffer));
 			}
 		} else {
-			smart_str_appendl(&code, PHPDBG_G(input_buffer), PHPDBG_G(input_buflen));
+			smart_str_appends(&code, PHPDBG_G(input_buffer));
 			PHPDBG_G(input_buflen) = 0;
 		}
 	} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, PHPDBG_G(input_buffer) + PHPDBG_G(input_buflen), PHPDBG_MAX_CMD - PHPDBG_G(input_buflen), -1)) > 0);

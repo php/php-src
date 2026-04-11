@@ -724,7 +724,7 @@ static inline void mb_regex_substitute(
 		clen = (int) php_mb_mbchar_bytes(p, enc);
 		if (clen != 1 || p == eos || p[0] != '\\') {
 			/* skip anything that's not an ascii backslash */
-			smart_str_appendl(pbuf, p, clen);
+			smart_str_appends(pbuf, p);
 			p += clen;
 			continue;
 		}
@@ -732,7 +732,7 @@ static inline void mb_regex_substitute(
 		clen = (int) php_mb_mbchar_bytes(++p, enc);
 		if (clen != 1 || p == eos) {
 			/* skip backslash followed by multibyte char */
-			smart_str_appendl(pbuf, sp, p - sp);
+			smart_str_appends(pbuf, sp);
 			continue;
 		}
 		no = -1;
@@ -751,7 +751,7 @@ static inline void mb_regex_substitute(
 					 * and abort the whole replace operation.
 					 */
 					p++;
-					smart_str_appendl(pbuf, sp, p - sp);
+					smart_str_appends(pbuf, sp);
 					continue;
 				}
 				no = p[0] - '0';
@@ -763,7 +763,7 @@ static inline void mb_regex_substitute(
 				if (clen != 1 || p == eos || (p[0] != '<' && p[0] != '\'')) {
 					/* not a backref delimiter */
 					p += clen;
-					smart_str_appendl(pbuf, sp, p - sp);
+					smart_str_appends(pbuf, sp);
 					continue;
 				}
 				/* try to consume everything until next delimiter */
@@ -785,14 +785,14 @@ static inline void mb_regex_substitute(
 				p = name_end + 1;
 				if (name_end - name < 1 || name_end >= eos) {
 					/* the backref was empty or we failed to find the end delimiter */
-					smart_str_appendl(pbuf, sp, p - sp);
+					smart_str_appends(pbuf, sp);
 					continue;
 				}
 				/* we have either a name or a number */
 				if (maybe_num) {
 					if (!onig_noname_group_capture_is_active(regexp)) {
 						/* see above note on mixing numbered & named backrefs */
-						smart_str_appendl(pbuf, sp, p - sp);
+						smart_str_appends(pbuf, sp);
 						continue;
 					}
 					if (name_end - name == 1) {
@@ -813,21 +813,21 @@ static inline void mb_regex_substitute(
 				/* We're not treating \ as an escape character and will interpret something like
 				 * \\1 as \ followed by \1, rather than \\ followed by 1. This is because this
 				 * function has not supported escaping of backslashes historically. */
-				smart_str_appendl(pbuf, sp, p - sp);
+				smart_str_appends(pbuf, sp);
 				continue;
 		}
 		if (no < 0 || no >= regs->num_regs) {
 			/* invalid group number reference, keep the escape sequence in the output */
-			smart_str_appendl(pbuf, sp, p - sp);
+			smart_str_appends(pbuf, sp);
 			continue;
 		}
 		if (regs->beg[no] >= 0 && regs->beg[no] < regs->end[no] && (size_t)regs->end[no] <= subject_len) {
-			smart_str_appendl(pbuf, subject + regs->beg[no], regs->end[no] - regs->beg[no]);
+			smart_str_appends(pbuf, subject + regs->beg[no]);
 		}
 	}
 
 	if (p < eos) {
-		smart_str_appendl(pbuf, p, eos - p);
+		smart_str_appends(pbuf, p);
 	}
 }
 /* }}} */
@@ -1073,7 +1073,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		}
 		if (err >= 0) {
 			/* copy the part of the string before the match */
-			smart_str_appendl(&out_buf, (char *)pos, (size_t)((OnigUChar *)(string + regs->beg[0]) - pos));
+			smart_str_appends(&out_buf, (char *)pos);
 
 			if (!is_callable) {
 				mb_regex_substitute(pbuf, string, string_len, replace, replace_len, re, regs, enc);
@@ -1115,14 +1115,14 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				pos = (OnigUChar *)string + n;
 			} else {
 				if (pos < string_lim) {
-					smart_str_appendl(&out_buf, (char *)pos, 1);
+					smart_str_appends(&out_buf, (char *)pos);
 				}
 				pos++;
 			}
 		} else { /* nomatch */
 			/* stick that last bit of string on our output */
 			if (string_lim - pos > 0) {
-				smart_str_appendl(&out_buf, (char *)pos, string_lim - pos);
+				smart_str_appends(&out_buf, (char *)pos);
 			}
 		}
 		onig_region_free(regs, 0);

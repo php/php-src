@@ -835,7 +835,7 @@ PHP_METHOD(SplObjectStorage, serialize)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	/* storage */
-	smart_str_appendl(&buf, "x:", 2);
+	smart_str_appends(&buf, "x:");
 	ZVAL_LONG(&flags, zend_hash_num_elements(&intern->storage));
 	php_var_serialize(&buf, &flags, &var_hash);
 
@@ -864,7 +864,7 @@ PHP_METHOD(SplObjectStorage, serialize)
 	}
 
 	/* members */
-	smart_str_appendl(&buf, "m:", 2);
+	smart_str_appends(&buf, "m:");
 
 	ZVAL_ARR(&members, zend_array_dup(zend_std_get_properties(Z_OBJ_P(ZEND_THIS))));
 	php_var_serialize(&buf, &members, &var_hash); /* finishes the string */

@@ -516,7 +516,7 @@ PHP_METHOD(DOMXPath, quote) {
 			const size_t bytes_until_quote = MAX(distance_to_single_quote, distance_to_double_quote);
 			const char quote_method = (distance_to_single_quote > distance_to_double_quote) ? '\'' : '"';
 			smart_str_appendc(&output, quote_method);
-			smart_str_appendl(&output, ptr, bytes_until_quote);
+			smart_str_appends(&output, ptr);
 			smart_str_appendc(&output, quote_method);
 			ptr += bytes_until_quote;
 			smart_str_appendc(&output, ',');

@@ -41,12 +41,12 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 	} else {
 		/* Numeric key */
 		if (num_prefix) {
-			smart_str_appendl(form_str, num_prefix, num_prefix_len);
+			smart_str_appends(form_str, num_prefix);
 		}
 		smart_str_append_long(form_str, index_int);
 	}
 	if (key_prefix) {
-		smart_str_appendl(form_str, "%5D", strlen("%5D"));
+		smart_str_appends(form_str, "%5D");
 	}
 	smart_str_appendc(form_str, '=');
 

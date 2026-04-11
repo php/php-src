@@ -680,7 +680,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	ZEND_PARSE_PARAMETERS_END();
 
 	smart_str_appends(&str, "pgsql");
-	smart_str_appendl(&str, connstring, connstring_len);
+	smart_str_appends(&str, connstring);
 	smart_str_appendc(&str, '_');
 	/* make sure that the PGSQL_CONNECT_FORCE_NEW bit is not part of the hash so that subsequent
 	 * connections can re-use this connection. See bug #39979. */
@@ -4598,7 +4598,7 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 		return FAILURE;
 	}
 	if (new_len) {
-		smart_str_appendl(&querystr, escaped, new_len);
+		smart_str_appends(&querystr, escaped);
 	}
 	efree(escaped);
 
@@ -4614,7 +4614,7 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 		return FAILURE;
 	}
 	if (new_len) {
-		smart_str_appendl(&querystr, escaped, new_len);
+		smart_str_appends(&querystr, escaped);
 	}
 	efree(escaped);
 
@@ -5559,7 +5559,7 @@ static inline zend_result build_tablename(smart_str *querystr, PGconn *pg_link, 
 	size_t len = dot ? dot - ZSTR_VAL(table) : ZSTR_LEN(table);
 
 	if (_php_pgsql_identifier_is_escaped(ZSTR_VAL(table), len)) {
-		smart_str_appendl(querystr, ZSTR_VAL(table), len);
+		smart_str_appends(querystr, ZSTR_VAL(table));
 	} else {
 		char *escaped = PQescapeIdentifier(pg_link, ZSTR_VAL(table), len);
 		if (escaped == NULL) {
@@ -5575,7 +5575,7 @@ static inline zend_result build_tablename(smart_str *querystr, PGconn *pg_link, 
 		/* "schema"."table" format */
 		if (_php_pgsql_identifier_is_escaped(after_dot, len)) {
 			smart_str_appendc(querystr, '.');
-			smart_str_appendl(querystr, after_dot, len);
+			smart_str_appends(querystr, after_dot);
 		} else {
 			char *escaped = PQescapeIdentifier(pg_link, after_dot, len);
 			if (escaped == NULL) {
@@ -5667,7 +5667,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 						goto cleanup;
 					}
 					smart_str_appendc(&querystr, '\'');
-					smart_str_appendl(&querystr, tmp, new_len);
+					smart_str_appends(&querystr, tmp);
 					smart_str_appendc(&querystr, '\'');
 					efree(tmp);
 				} else {
@@ -5681,7 +5681,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 				smart_str_append_double(&querystr, Z_DVAL_P(val), 6, false);
 				break;
 			case IS_NULL:
-				smart_str_appendl(&querystr, "NULL", sizeof("NULL")-1);
+				smart_str_appends(&querystr, "NULL");
 				break;
 			default:
 				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_value_name(val));
@@ -5850,7 +5850,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 						return -1;
 					}
 					smart_str_appendc(querystr, '\'');
-					smart_str_appendl(querystr, tmp, new_len);
+					smart_str_appends(querystr, tmp);
 					smart_str_appendc(querystr, '\'');
 					efree(tmp);
 				} else {
@@ -5865,13 +5865,13 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 				}
 				break;
 			case IS_NULL:
-				smart_str_appendl(querystr, "NULL", sizeof("NULL")-1);
+				smart_str_appends(querystr, "NULL");
 				break;
 			default:
 				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_value_name(val));
 				return -1;
 		}
-		smart_str_appendl(querystr, pad, pad_len);
+		smart_str_appends(querystr, pad);
 	} ZEND_HASH_FOREACH_END();
 	if (querystr->s) {
 		ZSTR_LEN(querystr->s) -= pad_len;

@@ -44,14 +44,14 @@ static zend_result dom_inner_html_write_string(void *application_data, const cha
 static zend_result dom_inner_html_write_string_len(void *application_data, const char *buf, size_t len)
 {
 	smart_str *output = application_data;
-	smart_str_appendl(output, buf, len);
+	smart_str_appends(output, buf);
 	return SUCCESS;
 }
 
 static int dom_write_smart_str(void *context, const char *buffer, int len)
 {
 	smart_str *str = context;
-	smart_str_appendl(str, buffer, len);
+	smart_str_appends(str, buffer);
 	return len;
 }
 

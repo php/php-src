@@ -1215,7 +1215,7 @@ fail_general:
 
 static zend_result dom_write_output_smart_str(void *ctx, const char *buf, size_t size)
 {
-	smart_str_appendl((smart_str *) ctx, buf, size);
+	smart_str_appends((smart_str *) ctx, buf);
 	return SUCCESS;
 }
 

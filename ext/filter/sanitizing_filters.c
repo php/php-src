@@ -39,8 +39,8 @@ static void php_filter_encode_html(zval *value, const unsigned char *chars)
 
 	while (s < e) {
 		if (chars[*s]) {
-			smart_str_appendl(&str, (const char *) last_output, s - last_output);
-			smart_str_appendl(&str, "&#", 2);
+			smart_str_appends(&str, (const char *) last_output);
+			smart_str_appends(&str, "&#");
 			smart_str_append_unsigned(&str, (zend_ulong)*s);
 			smart_str_appendc(&str, ';');
 			last_output = s + 1;
@@ -48,7 +48,7 @@ static void php_filter_encode_html(zval *value, const unsigned char *chars)
 		s++;
 	}
 
-	smart_str_appendl(&str, (const char *) last_output, s - last_output);
+	smart_str_appends(&str, (const char *) last_output);
 
 	zval_ptr_dtor(value);
 	ZVAL_NEW_STR(value, smart_str_extract(&str));

@@ -56,7 +56,7 @@ static inline void php_json_pretty_print_indent(smart_str *buf, int options, con
 	if (options & PHP_JSON_PRETTY_PRINT) {
 		smart_str_alloc(buf, encoder->depth * 4, 0);
 		for (int i = 0; i < encoder->depth; ++i) {
-			smart_str_appendl(buf, "    ", 4);
+			smart_str_appends(buf, "    ");
 		}
 	}
 }
@@ -89,7 +89,7 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 		num[len++] = '0';
 		num[len] = '\0';
 	}
-	smart_str_appendl(buf, num, len);
+	smart_str_appends(buf, num);
 }
 /* }}} */
 
@@ -116,7 +116,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 	if (php_json_check_stack_limit()) {
 		encoder->error_code = PHP_JSON_ERROR_DEPTH;
 		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-			smart_str_appendl(buf, "null", 4);
+			smart_str_appends(buf, "null");
 		}
 		return FAILURE;
 	}
@@ -137,7 +137,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 
 		if (GC_IS_RECURSIVE(obj)) {
 			encoder->error_code = PHP_JSON_ERROR_RECURSION;
-			smart_str_appendl(buf, "null", 4);
+			smart_str_appends(buf, "null");
 			return FAILURE;
 		}
 
@@ -169,7 +169,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 					(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) &&
 					buf->s) {
 				ZSTR_LEN(buf->s) -= 4;
-				smart_str_appendl(buf, "\"\"", 2);
+				smart_str_appends(buf, "\"\"");
 			}
 
 			smart_str_appendc(buf, ':');
@@ -220,7 +220,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 
 	if (recursion_rc && GC_IS_RECURSIVE(recursion_rc)) {
 		encoder->error_code = PHP_JSON_ERROR_RECURSION;
-		smart_str_appendl(buf, "null", 4);
+		smart_str_appends(buf, "null");
 		zend_release_properties(prop_ht);
 		return FAILURE;
 	}
@@ -284,7 +284,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 							(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) &&
 							buf->s) {
 						ZSTR_LEN(buf->s) -= 4;
-						smart_str_appendl(buf, "\"\"", 2);
+						smart_str_appends(buf, "\"\"");
 					}
 				} else {
 					php_json_pretty_print_char(buf, options, '\n');
@@ -356,7 +356,7 @@ zend_result php_json_escape_string(
 	char *dst;
 
 	if (len == 0) {
-		smart_str_appendl(buf, "\"\"", 2);
+		smart_str_appends(buf, "\"\"");
 		return SUCCESS;
 	}
 
@@ -394,12 +394,12 @@ zend_result php_json_escape_string(
 			pos++;
 			len--;
 			if (len == 0) {
-				smart_str_appendl(buf, s, pos);
+				smart_str_appends(buf, s);
 				break;
 			}
 		} else {
 			if (pos) {
-				smart_str_appendl(buf, s, pos);
+				smart_str_appends(buf, s);
 				s += pos;
 				pos = 0;
 			}
@@ -415,15 +415,15 @@ zend_result php_json_escape_string(
 					} else if (options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
 						/* Use Unicode character 'REPLACEMENT CHARACTER' (U+FFFD) */
 						if (options & PHP_JSON_UNESCAPED_UNICODE) {
-							smart_str_appendl(buf, "\xef\xbf\xbd", 3);
+							smart_str_appends(buf, "\xef\xbf\xbd");
 						} else {
-							smart_str_appendl(buf, "\\ufffd", 6);
+							smart_str_appends(buf, "\\ufffd");
 						}
 					} else {
 						ZSTR_LEN(buf->s) = checkpoint;
 						encoder->error_code = PHP_JSON_ERROR_UTF8;
 						if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-							smart_str_appendl(buf, "null", 4);
+							smart_str_appends(buf, "null");
 						}
 						return FAILURE;
 					}
@@ -434,7 +434,7 @@ zend_result php_json_escape_string(
 				} else if ((options & PHP_JSON_UNESCAPED_UNICODE)
 				    && ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
 						|| us < 0x2028 || us > 0x2029)) {
-					smart_str_appendl(buf, s, pos);
+					smart_str_appends(buf, s);
 				} else {
 					/* From http://en.wikipedia.org/wiki/UTF16 */
 					if (us >= 0x10000) {
@@ -468,47 +468,47 @@ zend_result php_json_escape_string(
 				switch (us) {
 					case '"':
 						if (options & PHP_JSON_HEX_QUOT) {
-							smart_str_appendl(buf, "\\u0022", 6);
+							smart_str_appends(buf, "\\u0022");
 						} else {
-							smart_str_appendl(buf, "\\\"", 2);
+							smart_str_appends(buf, "\\\"");
 						}
 						break;
 
 					case '\\':
-						smart_str_appendl(buf, "\\\\", 2);
+						smart_str_appends(buf, "\\\\");
 						break;
 
 					case '/':
 						if (options & PHP_JSON_UNESCAPED_SLASHES) {
 							smart_str_appendc(buf, '/');
 						} else {
-							smart_str_appendl(buf, "\\/", 2);
+							smart_str_appends(buf, "\\/");
 						}
 						break;
 
 					case '\b':
-						smart_str_appendl(buf, "\\b", 2);
+						smart_str_appends(buf, "\\b");
 						break;
 
 					case '\f':
-						smart_str_appendl(buf, "\\f", 2);
+						smart_str_appends(buf, "\\f");
 						break;
 
 					case '\n':
-						smart_str_appendl(buf, "\\n", 2);
+						smart_str_appends(buf, "\\n");
 						break;
 
 					case '\r':
-						smart_str_appendl(buf, "\\r", 2);
+						smart_str_appends(buf, "\\r");
 						break;
 
 					case '\t':
-						smart_str_appendl(buf, "\\t", 2);
+						smart_str_appends(buf, "\\t");
 						break;
 
 					case '<':
 						if (options & PHP_JSON_HEX_TAG) {
-							smart_str_appendl(buf, "\\u003C", 6);
+							smart_str_appends(buf, "\\u003C");
 						} else {
 							smart_str_appendc(buf, '<');
 						}
@@ -516,7 +516,7 @@ zend_result php_json_escape_string(
 
 					case '>':
 						if (options & PHP_JSON_HEX_TAG) {
-							smart_str_appendl(buf, "\\u003E", 6);
+							smart_str_appends(buf, "\\u003E");
 						} else {
 							smart_str_appendc(buf, '>');
 						}
@@ -524,7 +524,7 @@ zend_result php_json_escape_string(
 
 					case '&':
 						if (options & PHP_JSON_HEX_AMP) {
-							smart_str_appendl(buf, "\\u0026", 6);
+							smart_str_appends(buf, "\\u0026");
 						} else {
 							smart_str_appendc(buf, '&');
 						}
@@ -532,7 +532,7 @@ zend_result php_json_escape_string(
 
 					case '\'':
 						if (options & PHP_JSON_HEX_APOS) {
-							smart_str_appendl(buf, "\\u0027", 6);
+							smart_str_appends(buf, "\\u0027");
 						} else {
 							smart_str_appendc(buf, '\'');
 						}
@@ -572,7 +572,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zend_obje
 	if (ZEND_GUARD_IS_RECURSIVE(guard, JSON)) {
 		encoder->error_code = PHP_JSON_ERROR_RECURSION;
 		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-			smart_str_appendl(buf, "null", 4);
+			smart_str_appends(buf, "null");
 		}
 		return FAILURE;
 	}
@@ -585,7 +585,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zend_obje
 	/* An exception has occurred */
 	if (Z_TYPE(retval) == IS_UNDEF) {
 		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-			smart_str_appendl(buf, "null", 4);
+			smart_str_appends(buf, "null");
 		}
 		ZEND_GUARD_UNPROTECT_RECURSION(guard, JSON);
 		return FAILURE;
@@ -625,14 +625,14 @@ again:
 	switch (Z_TYPE_P(val))
 	{
 		case IS_NULL:
-			smart_str_appendl(buf, "null", 4);
+			smart_str_appends(buf, "null");
 			break;
 
 		case IS_TRUE:
-			smart_str_appendl(buf, "true", 4);
+			smart_str_appends(buf, "true");
 			break;
 		case IS_FALSE:
-			smart_str_appendl(buf, "false", 5);
+			smart_str_appends(buf, "false");
 			break;
 
 		case IS_LONG:
@@ -678,7 +678,7 @@ again:
 		default:
 			encoder->error_code = PHP_JSON_ERROR_UNSUPPORTED_TYPE;
 			if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-				smart_str_appendl(buf, "null", 4);
+				smart_str_appends(buf, "null");
 			}
 			return FAILURE;
 	}

@@ -254,7 +254,7 @@ PHP_METHOD(Dom_XMLDocument, createFromFile)
 static int php_new_dom_write_smart_str(void *context, const char *buffer, int len)
 {
 	smart_str *str = context;
-	smart_str_appendl(str, buffer, len);
+	smart_str_appends(str, buffer);
 	return len;
 }
 

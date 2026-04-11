@@ -133,7 +133,7 @@ static void http_context_add_header(const char *s,
 				 name_len != sizeof("proxy-authorization")-1 ||
 				 strncasecmp(s, "proxy-authorization", sizeof("proxy-authorization")-1) != 0)) {
 				/* add header */
-				smart_str_appendl(soap_headers, s, p-s);
+				smart_str_appends(soap_headers, s);
 				smart_str_append_const(soap_headers, "\r\n");
 			}
 		}
@@ -810,12 +810,12 @@ try_again:
 					/* TODO: Support for qop=auth-int */
 					smart_str_append_const(&soap_headers, "\", qop=auth");
 					smart_str_append_const(&soap_headers, ", nc=");
-					smart_str_appendl(&soap_headers, nc, 8);
+					smart_str_appends(&soap_headers, nc);
 					smart_str_append_const(&soap_headers, ", cnonce=\"");
-					smart_str_appendl(&soap_headers, cnonce, 8);
+					smart_str_appends(&soap_headers, cnonce);
 				}
 				smart_str_append_const(&soap_headers, "\", response=\"");
-				smart_str_appendl(&soap_headers, response, 32);
+				smart_str_appends(&soap_headers, response);
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "opaque", sizeof("opaque")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_append_const(&soap_headers, "\", opaque=\"");

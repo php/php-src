@@ -71,7 +71,7 @@ static FILE *pager_pipe = NULL;
 static size_t readline_shell_write(const char *str, size_t str_length) /* {{{ */
 {
 	if (CLIR_G(prompt_str)) {
-		smart_str_appendl(CLIR_G(prompt_str), str, str_length);
+		smart_str_appends(CLIR_G(prompt_str), str);
 		return str_length;
 	}
 

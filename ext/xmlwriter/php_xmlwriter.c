@@ -868,7 +868,7 @@ PHP_METHOD(XMLWriter, toUri)
 static int xml_writer_stream_write_memory(void *context, const char *buffer, int len)
 {
 	smart_str *output = context;
-	smart_str_appendl(output, buffer, len);
+	smart_str_appends(output, buffer);
 	return len;
 }
 

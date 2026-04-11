@@ -550,7 +550,7 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers) /* {{
 
 	if (SG(sapi_headers).http_status_line) {
 		smart_str_appends(&buffer, SG(sapi_headers).http_status_line);
-		smart_str_appendl(&buffer, "\r\n", 2);
+		smart_str_appends(&buffer, "\r\n");
 	} else {
 		append_http_status_line(&buffer, client->request.protocol_version, SG(sapi_headers).http_response_code, 0);
 	}
@@ -560,12 +560,12 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers) /* {{
 	h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 	while (h) {
 		if (h->header_len) {
-			smart_str_appendl(&buffer, h->header, h->header_len);
-			smart_str_appendl(&buffer, "\r\n", 2);
+			smart_str_appends(&buffer, h->header);
+			smart_str_appends(&buffer, "\r\n");
 		}
 		h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 	}
-	smart_str_appendl(&buffer, "\r\n", 2);
+	smart_str_appends(&buffer, "\r\n");
 
 	php_cli_server_client_send_through(client, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
 
