@@ -182,7 +182,6 @@ typedef struct st_mysqlnd_charset
 	const char		*collation;
 	unsigned int	char_minlen;
 	unsigned int	char_maxlen;
-	const char		*comment;
 	short			mb_charlen;
 	short			mb_valid;
 	unsigned int    lowest_mb_byte;

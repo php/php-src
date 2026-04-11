@@ -1,5 +1,6 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: f98ede068cef2b4a2fe4a423d18fed1748c22b29 */
+ * Stub hash: 7dad50cbf54bd7543565c10e433df73ba48af5a2
+ * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_use_internal_traits_zero, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()

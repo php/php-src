@@ -168,7 +168,7 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 	void *data;
 	uint32_t nSize = ht->nTableSize;
 
-	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
+	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize) != 0);
 
 	if (UNEXPECTED(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)) {
 		data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), 1);
@@ -350,7 +350,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
 	uint32_t i;
 	uint32_t nSize = ht->nTableSize;
 
-	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
+	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize) != 0);
 
 	HT_ASSERT_RC1(ht);
 	// Alloc before assign to avoid inconsistencies on OOM
@@ -398,7 +398,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool
 
 	if (nSize == 0) return;
 
-	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
+	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize) != 0);
 
 	if (UNEXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 		if (nSize > ht->nTableSize) {
@@ -1111,7 +1111,10 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 		if ((flag & (HASH_ADD_NEW|HASH_ADD_NEXT)) != (HASH_ADD_NEW|HASH_ADD_NEXT)
 		 && h < ht->nNumUsed) {
 			zv = ht->arPacked + h;
-			if (Z_TYPE_P(zv) != IS_UNDEF) {
+			if (flag & HASH_ADD_NEW) {
+				ZEND_ASSERT(Z_TYPE_P(zv) == IS_UNDEF);
+				goto convert_to_hash;
+			} else if (Z_TYPE_P(zv) != IS_UNDEF) {
 				if (flag & HASH_LOOKUP) {
 					return zv;
 				}
@@ -1324,7 +1327,7 @@ static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)
 		uint32_t nSize = ht->nTableSize + ht->nTableSize;
 		Bucket *old_buckets = ht->arData;
 
-		ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
+		ZEND_ASSERT(HT_SIZE_TO_MASK(nSize) != 0);
 
 		new_data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 		ht->nTableSize = nSize;
@@ -3209,7 +3212,7 @@ static zend_always_inline int zend_hash_compare_impl(const HashTable *ht1, const
 	return 0;
 }
 
-ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, bool ordered)
+ZEND_API int zend_hash_compare(HashTable *ht1, const HashTable *ht2, compare_func_t compar, bool ordered)
 {
 	int result;
 	IS_CONSISTENT(ht1);

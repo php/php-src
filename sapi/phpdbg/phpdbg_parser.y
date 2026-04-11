@@ -16,7 +16,6 @@ typedef void* yyscan_t;
 
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
-#include "phpdbg_cmd.h"
 #include "phpdbg_prompt.h"
 
 #include "phpdbg_parser.h"

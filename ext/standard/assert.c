@@ -79,7 +79,7 @@ static PHP_INI_MH(OnChangeCallback) /* {{{ */
 
 static PHP_INI_MH(OnUpdateActiveBool)
 {
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	if (php_must_emit_ini_deprecation(stage) && !*p) {
 		php_error_docref(NULL, E_DEPRECATED, "assert.active INI setting is deprecated");
@@ -89,7 +89,7 @@ static PHP_INI_MH(OnUpdateActiveBool)
 
 static PHP_INI_MH(OnUpdateBailBool)
 {
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	if (php_must_emit_ini_deprecation(stage) && *p) {
 		php_error_docref(NULL, E_DEPRECATED, "assert.bail INI setting is deprecated");
@@ -99,7 +99,7 @@ static PHP_INI_MH(OnUpdateBailBool)
 
 static PHP_INI_MH(OnUpdateExceptionBool)
 {
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	if (php_must_emit_ini_deprecation(stage) && !*p) {
 		php_error_docref(NULL, E_DEPRECATED, "assert.exception INI setting is deprecated");
@@ -110,7 +110,7 @@ static PHP_INI_MH(OnUpdateExceptionBool)
 
 static PHP_INI_MH(OnUpdateWarningBool)
 {
-	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	if (php_must_emit_ini_deprecation(stage) && !*p) {
 		php_error_docref(NULL, E_DEPRECATED, "assert.warning INI setting is deprecated");
@@ -285,7 +285,6 @@ PHP_FUNCTION(assert_options)
 			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
-		break;
 
 	case PHP_ASSERT_BAIL:
 		oldint = ASSERTG(bail);
@@ -301,7 +300,6 @@ PHP_FUNCTION(assert_options)
 			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
-		break;
 
 	case PHP_ASSERT_WARNING:
 		oldint = ASSERTG(warning);
@@ -317,7 +315,6 @@ PHP_FUNCTION(assert_options)
 			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
-		break;
 
 	case PHP_ASSERT_CALLBACK:
 		if (Z_TYPE(ASSERTG(callback)) != IS_UNDEF) {
@@ -352,7 +349,6 @@ PHP_FUNCTION(assert_options)
 			zend_string_release_ex(key, 0);
 		}
 		RETURN_LONG(oldint);
-		break;
 
 	default:
 		zend_argument_value_error(1, "must be an ASSERT_* constant");

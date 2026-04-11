@@ -36,10 +36,10 @@ extern zend_module_entry zip_module_entry;
 #define ZIP_LENGTH_TO_END 0
 #endif
 
-/* Additionnal flags not from libzip */
+/* Additional flags not from libzip */
 #define ZIP_FL_OPEN_FILE_NOW (1u<<30)
 
-#define PHP_ZIP_VERSION "1.22.7"
+#define PHP_ZIP_VERSION "1.22.8"
 
 #ifdef HAVE_LIBZIP_VERSION
 #define LIBZIP_VERSION_STR zip_libzip_version()
@@ -68,11 +68,9 @@ typedef struct _ze_zip_read_rsrc {
 /* Extends zend object */
 typedef struct _ze_zip_object {
 	struct zip *za;
-	zend_string **buffers;
 	HashTable *prop_handler;
 	char *filename;
-	int filename_len;
-	int buffers_cnt;
+	size_t filename_len;
 	zip_int64_t last_id;
 	int err_zip;
 	int err_sys;
@@ -95,6 +93,8 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper, const char *path,
 php_stream *php_stream_zip_open(struct zip *arch, struct zip_stat *sb, const char *mode, zip_flags_t flags STREAMS_DC);
 
 extern const php_stream_wrapper php_stream_zip_wrapper;
+
+zip_source_t * php_zip_create_string_source(zend_string *str, zend_string **dest, zip_error_t *err);
 
 #define LIBZIP_ATLEAST(m,n,p) (((m<<16) + (n<<8) + p) <= ((LIBZIP_VERSION_MAJOR<<16) + (LIBZIP_VERSION_MINOR<<8) + LIBZIP_VERSION_MICRO))
 

@@ -1341,15 +1341,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			}
 			break;
 		}
-		case DIT_AppendIterator:
-			if (zend_parse_parameters_none() == FAILURE) {
-				return NULL;
-			}
-			intern->dit_type = DIT_AppendIterator;
-			object_init_ex(&intern->u.append.zarrayit, spl_ce_ArrayIterator);
-			zend_call_method_with_0_params(Z_OBJ(intern->u.append.zarrayit), spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL);
-			intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
-			return intern;
 		case DIT_RegexIterator:
 		case DIT_RecursiveRegexIterator: {
 			zend_string *regex;
@@ -2814,7 +2805,21 @@ static void spl_append_it_next(spl_dual_it_object *intern) /* {{{ */
 /* {{{ Create an AppendIterator */
 PHP_METHOD(AppendIterator, __construct)
 {
-	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_AppendIterator, zend_ce_iterator, DIT_AppendIterator);
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	spl_dual_it_object *intern = Z_SPLDUAL_IT_P(ZEND_THIS);
+
+	/* TODO: This should be converted to a normal Error as this is triggered when calling the constructor twice */
+	if (intern->dit_type != DIT_Unknown) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s::getIterator() must be called exactly once per instance", ZSTR_VAL(spl_ce_AppendIterator->name));
+		RETURN_THROWS();
+	}
+
+	intern->dit_type = DIT_AppendIterator;
+	object_init_ex(&intern->u.append.zarrayit, spl_ce_ArrayIterator);
+	zend_call_method_with_0_params(Z_OBJ(intern->u.append.zarrayit), spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL);
+	intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
+
 } /* }}} */
 
 /* {{{ Append an iterator */

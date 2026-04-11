@@ -1,5 +1,6 @@
 /* This is a generated file, edit php_reflection.stub.php instead.
- * Stub hash: fd645a0b0db39d94ca25b39ffe64d7f05bad6bea */
+ * Stub hash: c80946cc8c8215bb6527e09bb71b3a97a76a6a98
+ * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -472,6 +473,13 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionProperty_isFinal arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionProperty_isReadable, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, scope, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, object, IS_OBJECT, 1, "null")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionProperty_isWritable arginfo_class_ReflectionProperty_isReadable
+
 #define arginfo_class_ReflectionClassConstant___clone arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClassConstant___construct, 0, 0, 2)
@@ -517,6 +525,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionParameter___construct, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionParameter___toString arginfo_class_ReflectionFunction___toString
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionParameter_getDocComment, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionParameter_getName arginfo_class_ReflectionFunctionAbstract_getName
 
@@ -702,6 +713,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionConstant_getName arginfo_class_ReflectionFunction___toString
 
+#define arginfo_class_ReflectionConstant_inNamespace arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
 #define arginfo_class_ReflectionConstant_getNamespaceName arginfo_class_ReflectionFunction___toString
 
 #define arginfo_class_ReflectionConstant_getShortName arginfo_class_ReflectionFunction___toString
@@ -711,13 +724,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionConstant_isDeprecated arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionConstant_getFileName, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionConstant_getFileName arginfo_class_ReflectionParameter_getDocComment
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionConstant_getExtension, 0, 0, ReflectionExtension, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ReflectionConstant_getExtensionName arginfo_class_ReflectionConstant_getFileName
+#define arginfo_class_ReflectionConstant_getExtensionName arginfo_class_ReflectionParameter_getDocComment
 
 #define arginfo_class_ReflectionConstant___toString arginfo_class_ReflectionFunction___toString
 
@@ -891,6 +903,8 @@ ZEND_METHOD(ReflectionProperty, getHooks);
 ZEND_METHOD(ReflectionProperty, hasHook);
 ZEND_METHOD(ReflectionProperty, getHook);
 ZEND_METHOD(ReflectionProperty, isFinal);
+ZEND_METHOD(ReflectionProperty, isReadable);
+ZEND_METHOD(ReflectionProperty, isWritable);
 ZEND_METHOD(ReflectionClassConstant, __construct);
 ZEND_METHOD(ReflectionClassConstant, __toString);
 ZEND_METHOD(ReflectionClassConstant, getName);
@@ -909,6 +923,7 @@ ZEND_METHOD(ReflectionClassConstant, hasType);
 ZEND_METHOD(ReflectionClassConstant, getType);
 ZEND_METHOD(ReflectionParameter, __construct);
 ZEND_METHOD(ReflectionParameter, __toString);
+ZEND_METHOD(ReflectionParameter, getDocComment);
 ZEND_METHOD(ReflectionParameter, getName);
 ZEND_METHOD(ReflectionParameter, isPassedByReference);
 ZEND_METHOD(ReflectionParameter, canBePassedByValue);
@@ -984,6 +999,7 @@ ZEND_METHOD(ReflectionFiber, getCallable);
 ZEND_METHOD(ReflectionFiber, getTrace);
 ZEND_METHOD(ReflectionConstant, __construct);
 ZEND_METHOD(ReflectionConstant, getName);
+ZEND_METHOD(ReflectionConstant, inNamespace);
 ZEND_METHOD(ReflectionConstant, getNamespaceName);
 ZEND_METHOD(ReflectionConstant, getShortName);
 ZEND_METHOD(ReflectionConstant, getValue);
@@ -1194,6 +1210,8 @@ static const zend_function_entry class_ReflectionProperty_methods[] = {
 	ZEND_ME(ReflectionProperty, hasHook, arginfo_class_ReflectionProperty_hasHook, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getHook, arginfo_class_ReflectionProperty_getHook, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isFinal, arginfo_class_ReflectionProperty_isFinal, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isReadable, arginfo_class_ReflectionProperty_isReadable, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isWritable, arginfo_class_ReflectionProperty_isWritable, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1222,6 +1240,7 @@ static const zend_function_entry class_ReflectionParameter_methods[] = {
 	ZEND_RAW_FENTRY("__clone", zim_ReflectionClass___clone, arginfo_class_ReflectionParameter___clone, ZEND_ACC_PRIVATE, NULL, NULL)
 	ZEND_ME(ReflectionParameter, __construct, arginfo_class_ReflectionParameter___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, __toString, arginfo_class_ReflectionParameter___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, getDocComment, arginfo_class_ReflectionParameter_getDocComment, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, getName, arginfo_class_ReflectionParameter_getName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, isPassedByReference, arginfo_class_ReflectionParameter_isPassedByReference, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, canBePassedByValue, arginfo_class_ReflectionParameter_canBePassedByValue, ZEND_ACC_PUBLIC)
@@ -1354,6 +1373,7 @@ static const zend_function_entry class_ReflectionFiber_methods[] = {
 static const zend_function_entry class_ReflectionConstant_methods[] = {
 	ZEND_ME(ReflectionConstant, __construct, arginfo_class_ReflectionConstant___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionConstant, getName, arginfo_class_ReflectionConstant_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionConstant, inNamespace, arginfo_class_ReflectionConstant_inNamespace, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionConstant, getNamespaceName, arginfo_class_ReflectionConstant_getNamespaceName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionConstant, getShortName, arginfo_class_ReflectionConstant_getShortName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionConstant, getValue, arginfo_class_ReflectionConstant_getValue, ZEND_ACC_PUBLIC)

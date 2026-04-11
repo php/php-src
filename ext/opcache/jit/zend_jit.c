@@ -115,7 +115,7 @@ static zend_string *zend_jit_func_name(const zend_op_array *op_array);
 static bool zend_jit_needs_arg_dtor(const zend_function *func, uint32_t arg_num, zend_call_info *call_info);
 static bool zend_jit_supported_binary_op(uint8_t op, uint32_t op1_info, uint32_t op2_info);
 
-static bool dominates(const zend_basic_block *blocks, int a, int b) {
+static bool dominates(const zend_basic_block *blocks, uint32_t a, uint32_t b) {
 	while (blocks[b].level > blocks[a].level) {
 		b = blocks[b].idom;
 	}
@@ -138,9 +138,9 @@ static bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_ssa *
 
 	if (ssa->cfg.blocks[ssa->cfg.map[use]].loop_header > 0
 	 || (ssa->cfg.blocks[ssa->cfg.map[use]].flags & ZEND_BB_LOOP_HEADER)) {
-		int b = ssa->cfg.map[use];
+		uint32_t b = ssa->cfg.map[use];
 		int prev_use = ssa->vars[var].use_chain;
-		int def_block;
+		uint32_t def_block;
 
 		if (ssa->vars[var].definition >= 0) {
 			def_block =ssa->cfg.map[ssa->vars[var].definition];
@@ -880,13 +880,13 @@ static zend_string *zend_jit_func_name(const zend_op_array *op_array)
 	if (op_array->function_name) {
 		smart_str_appends(&buf, JIT_PREFIX);
 		if (op_array->scope) {
-			smart_str_appendl(&buf, ZSTR_VAL(op_array->scope->name), ZSTR_LEN(op_array->scope->name));
+			smart_str_append(&buf, op_array->scope->name);
 			smart_str_appends(&buf, "::");
 		}
-		smart_str_appendl(&buf, ZSTR_VAL(op_array->function_name), ZSTR_LEN(op_array->function_name));
+		smart_str_append(&buf, op_array->function_name);
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 			smart_str_appends(&buf, ":");
-			smart_str_appendl(&buf, ZSTR_VAL(op_array->filename), ZSTR_LEN(op_array->filename));
+			smart_str_append(&buf, op_array->filename);
 			smart_str_appends(&buf, ":");
 			smart_str_append_long(&buf, op_array->line_start);
 		}
@@ -894,7 +894,7 @@ static zend_string *zend_jit_func_name(const zend_op_array *op_array)
 		return buf.s;
 	} else if (op_array->filename) {
 		smart_str_appends(&buf, JIT_PREFIX);
-		smart_str_appendl(&buf, ZSTR_VAL(op_array->filename), ZSTR_LEN(op_array->filename));
+		smart_str_append(&buf, op_array->filename);
 		smart_str_0(&buf);
 		return buf.s;
 	} else {
@@ -1173,7 +1173,7 @@ static void zend_jit_allocate_registers(zend_jit_ctx *ctx, const zend_op_array *
 		for (i = 0; i < ssa->vars_count; i++) {
 			if (ssa->vars[i].definition_phi && !ssa->vars[i].no_val) {
 				zend_ssa_phi *phi = ssa->vars[i].definition_phi;
-				int k, src;
+				int src;
 
 				if (phi->pi >= 0) {
 					src = phi->sources[0];
@@ -1188,6 +1188,7 @@ static void zend_jit_allocate_registers(zend_jit_ctx *ctx, const zend_op_array *
 					}
 				} else {
 					int need_move = 0;
+					uint32_t k;
 
 					for (k = 0; k < ssa->cfg.blocks[phi->block].predecessors_count; k++) {
 						src = phi->sources[k];
@@ -1342,7 +1343,7 @@ static void zend_jit_allocate_registers(zend_jit_ctx *ctx, const zend_op_array *
 static int zend_jit_compute_post_order(zend_cfg *cfg, int start, int *post_order)
 {
 	int count = 0;
-	int b, n, *p;
+	int b, *p;
 	zend_basic_block *bb;
 	zend_worklist worklist;
 	ALLOCA_FLAG(use_heap)
@@ -1354,7 +1355,7 @@ static int zend_jit_compute_post_order(zend_cfg *cfg, int start, int *post_order
 next:
 		b = zend_worklist_peek(&worklist);
 		bb = &cfg->blocks[b];
-		n = bb->successors_count;
+		uint32_t n = bb->successors_count;
 		if (n > 0) {
 			p = bb->successors;
 			do {
@@ -1410,7 +1411,7 @@ static bool zend_jit_supported_binary_op(uint8_t op, uint32_t op1_info, uint32_t
 			return (op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG);
 		case ZEND_CONCAT:
 			return (op1_info & MAY_BE_STRING) && (op2_info & MAY_BE_STRING);
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -2890,7 +2891,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					if (i == end
 					 && (opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
 						/* smart branch split across basic blocks */
-						if (!zend_jit_set_cond(&ctx, opline + 2, opline->result.var)) {
+						if (!zend_jit_set_cond(&ctx, opline, opline + 2, opline->result.var)) {
 							goto jit_failure;
 						}
 					}

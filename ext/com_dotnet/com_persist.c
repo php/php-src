@@ -319,9 +319,7 @@ CPH_METHOD(GetCurFileName)
 	OLECHAR *olename = NULL;
 	CPH_FETCH();
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	CPH_NO_OBJ();
 
@@ -457,9 +455,7 @@ CPH_METHOD(GetMaxStreamSize)
 	ULARGE_INTEGER size;
 	CPH_FETCH();
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	CPH_NO_OBJ();
 
@@ -491,9 +487,7 @@ CPH_METHOD(InitNew)
 	HRESULT res;
 	CPH_FETCH();
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	CPH_NO_OBJ();
 

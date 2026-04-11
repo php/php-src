@@ -120,7 +120,7 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS);
 /* End Section filters declarations */
 static gdImagePtr _php_image_create_from_string(zend_string *Data, const char *tn, gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn, gdImagePtr (*func_p)(FILE *), gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn);
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type);
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream);
 static gdIOCtx *create_output_context(zval *to_zval, uint32_t arg_num);
 static int _php_image_type(zend_string *data);
@@ -640,7 +640,20 @@ PHP_FUNCTION(imagesetstyle)
 	stylearr = safe_emalloc(num_styles, sizeof(int), 0);
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(styles), item) {
-		stylearr[index++] = zval_get_long(item);
+		bool failed = false;
+		ZVAL_DEREF(item);
+		zend_long tmp = zval_try_get_long(item, &failed);
+		if (failed) {
+			efree(stylearr);
+			zend_argument_type_error(2, "must only have elements of type int, %s given", zend_zval_type_name(item));
+			RETURN_THROWS();
+		}
+		if (ZEND_LONG_EXCEEDS_INT(tmp)) {
+			efree(stylearr);
+			zend_argument_value_error(2, "elements must be between %d and %d", INT_MIN, INT_MAX);
+			RETURN_THROWS();
+		}
+		stylearr[index++] = (int) tmp;
 	} ZEND_HASH_FOREACH_END();
 
 	gdImageSetStyle(im, stylearr, index);
@@ -764,19 +777,15 @@ PHP_FUNCTION(imagecolormatch)
 		case -1:
 			zend_argument_value_error(1, "must be TrueColor");
 			RETURN_THROWS();
-			break;
 		case -2:
 			zend_argument_value_error(2, "must be Palette");
 			RETURN_THROWS();
-			break;
 		case -3:
 			zend_argument_value_error(2, "must be the same size as argument #1 ($im1)");
 			RETURN_THROWS();
-			break;
 		case -4:
 			zend_argument_value_error(2, "must have at least one color");
 			RETURN_THROWS();
-			break;
 	}
 
 	RETURN_TRUE;
@@ -1599,7 +1608,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 
 #ifdef HAVE_GD_JPG
 			case PHP_GDIMG_TYPE_JPG:
-				ignore_warning = INI_INT("gd.jpeg_ignore_warning");
+				ignore_warning = zend_ini_bool_literal("gd.jpeg_ignore_warning");
 				im = gdImageCreateFromJpegEx(fp, ignore_warning);
 			break;
 #endif
@@ -1729,7 +1738,7 @@ PHP_FUNCTION(imagecreatefromtga)
 /* }}} */
 
 /* {{{ _php_image_output */
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn)
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type)
 {
 	zval *imgind;
 	char *file = NULL;
@@ -1750,7 +1759,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, cons
 				RETURN_THROWS();
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	/* quality must fit in an int */
@@ -1780,7 +1789,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, cons
 				}
 				gdImageGd2(im, fp, quality, type);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 		fflush(fp);
 		fclose(fp);
@@ -1806,7 +1815,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, cons
 				}
 				gdImageGd2(im, tmp, quality, type);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 
 		fseek(tmp, 0, SEEK_SET);
@@ -2102,14 +2111,14 @@ PHP_FUNCTION(imagewbmp)
 /* {{{ Output GD image to browser or file */
 PHP_FUNCTION(imagegd)
 {
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD, "GD");
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD);
 }
 /* }}} */
 
 /* {{{ Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
 {
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2");
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2);
 }
 /* }}} */
 
@@ -3599,7 +3608,20 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 		colors = safe_emalloc(num_colors, sizeof(int), 0);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hash_colors), color) {
-			*(colors + i++) = (int) zval_get_long(color);
+			bool failed = false;
+			ZVAL_DEREF(color);
+			zend_long tmp = zval_try_get_long(color, &failed);
+			if (failed) {
+				efree(colors);
+				zend_argument_type_error(5, "must be of type int, %s given", zend_zval_type_name(color));
+				RETURN_THROWS();
+			}
+			if (tmp < 0 || ZEND_LONG_INT_OVFL(tmp)) {
+				efree(colors);
+				zend_argument_value_error(5, "value must be between 0 and %d", INT_MAX);
+				RETURN_THROWS();
+			}
+			colors[i++] = (int) tmp;
 		} ZEND_HASH_FOREACH_END();
 
 		RETVAL_BOOL(gdImageScatterColor(im, (int)scatter_sub, (int)scatter_plus, colors, num_colors));
@@ -3767,6 +3789,23 @@ PHP_FUNCTION(imageantialias)
 }
 /* }}} */
 
+static bool php_gd_zval_try_get_c_int(zval *tmp, const char *field, int *res) {
+	zend_long r;
+	bool failed = false;
+	ZVAL_DEREF(tmp);
+	r = zval_try_get_long(tmp, &failed);
+	if (failed) {
+		zend_argument_type_error(2, "\"%s\" key must be of type int, %s given", field, zend_zval_type_name(tmp));
+		return false;
+	}
+	if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(r))) {
+		zend_argument_value_error(2, "\"%s\" key must be between %d and %d", field, INT_MIN, INT_MAX);
+		return false;
+	}
+	*res = (int)r;
+	return true;
+}
+
 /* {{{ Crop an image using the given coordinates and size, x, y, width and height. */
 PHP_FUNCTION(imagecrop)
 {
@@ -3785,28 +3824,36 @@ PHP_FUNCTION(imagecrop)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") -1)) != NULL) {
-		rect.x = zval_get_long(tmp);
+		if (!php_gd_zval_try_get_c_int(tmp, "x", &rect.x)) {
+			RETURN_THROWS();
+		}
 	} else {
 		zend_argument_value_error(2, "must have an \"x\" key");
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
-		rect.y = zval_get_long(tmp);
+		if (!php_gd_zval_try_get_c_int(tmp, "y", &rect.y)) {
+			RETURN_THROWS();
+		}
 	} else {
 		zend_argument_value_error(2, "must have a \"y\" key");
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
-		rect.width = zval_get_long(tmp);
+		if (!php_gd_zval_try_get_c_int(tmp, "width", &rect.width)) {
+			RETURN_THROWS();
+		}
 	} else {
 		zend_argument_value_error(2, "must have a \"width\" key");
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
-		rect.height = zval_get_long(tmp);
+		if (!php_gd_zval_try_get_c_int(tmp, "height", &rect.height)) {
+			RETURN_THROWS();
+		}
 	} else {
 		zend_argument_value_error(2, "must have a \"height\" key");
 		RETURN_THROWS();

@@ -43,7 +43,7 @@ object(Dom\DocumentType)#3 (19) {
   ["nodeName"]=>
   string(5) "qname"
   ["baseURI"]=>
-  NULL
+  string(11) "about:blank"
   ["isConnected"]=>
   bool(false)
   ["parentNode"]=>
@@ -86,7 +86,7 @@ object(Dom\DocumentType)#2 (19) {
   ["nodeName"]=>
   string(5) "qname"
   ["baseURI"]=>
-  NULL
+  string(11) "about:blank"
   ["isConnected"]=>
   bool(false)
   ["parentNode"]=>
@@ -129,7 +129,7 @@ object(Dom\DocumentType)#1 (19) {
   ["nodeName"]=>
   string(5) "qname"
   ["baseURI"]=>
-  NULL
+  string(11) "about:blank"
   ["isConnected"]=>
   bool(false)
   ["parentNode"]=>
@@ -172,7 +172,7 @@ object(Dom\DocumentType)#4 (19) {
   ["nodeName"]=>
   string(5) "qname"
   ["baseURI"]=>
-  NULL
+  string(11) "about:blank"
   ["isConnected"]=>
   bool(false)
   ["parentNode"]=>

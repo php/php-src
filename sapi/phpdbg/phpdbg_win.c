@@ -35,7 +35,7 @@ int phpdbg_exception_handler_win32(EXCEPTION_POINTERS *xp) {
 				return EXCEPTION_CONTINUE_EXECUTION;
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	return EXCEPTION_CONTINUE_SEARCH;

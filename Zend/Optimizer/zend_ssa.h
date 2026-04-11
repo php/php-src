@@ -66,7 +66,7 @@ struct _zend_ssa_phi {
 	zend_ssa_pi_constraint constraint;    /* e-SSA Pi constraint */
 	int                    var;           /* Original CV, VAR or TMP variable index */
 	int                    ssa_var;       /* SSA variable index */
-	int                    block;         /* current BB index */
+	uint32_t               block;         /* current BB index */
 	bool                   has_range_constraint;
 	zend_ssa_phi         **use_chains;
 	zend_ssa_phi          *sym_use_chain;
@@ -155,7 +155,7 @@ void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa_op);
 void zend_ssa_remove_instr(const zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op);
 void zend_ssa_remove_phi(const zend_ssa *ssa, zend_ssa_phi *phi);
 void zend_ssa_remove_uses_of_var(const zend_ssa *ssa, int var_num);
-void zend_ssa_remove_block(const zend_op_array *op_array, zend_ssa *ssa, int b);
+void zend_ssa_remove_block(const zend_op_array *op_array, zend_ssa *ssa, uint32_t b);
 void zend_ssa_rename_var_uses(zend_ssa *ssa, int old_var, int new_var, bool update_types);
 void zend_ssa_remove_block_from_cfg(zend_ssa *ssa, int b);
 
@@ -207,8 +207,7 @@ static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(const zend_ssa *ss
 	if (p->pi >= 0) {
 		return p->use_chains[0];
 	} else {
-		int j;
-		for (j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
+		for (uint32_t j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
 			if (p->sources[j] == var) {
 				return p->use_chains[j];
 			}
@@ -285,7 +284,7 @@ static zend_always_inline void zend_ssa_rename_defs_of_instr(zend_ssa *ssa, zend
 
 #define FOREACH_PHI_SOURCE(phi, source) do { \
 	zend_ssa_phi *_phi = (phi); \
-	int _i, _end = NUM_PHI_SOURCES(phi); \
+	uint32_t _i, _end = NUM_PHI_SOURCES(phi); \
 	for (_i = 0; _i < _end; _i++) { \
 		ZEND_ASSERT(_phi->sources[_i] >= 0); \
 		source = _phi->sources[_i];
@@ -294,8 +293,7 @@ static zend_always_inline void zend_ssa_rename_defs_of_instr(zend_ssa *ssa, zend
 } while (0)
 
 #define FOREACH_PHI(phi) do { \
-	int _i; \
-	for (_i = 0; _i < ssa->cfg.blocks_count; _i++) { \
+	for (uint32_t _i = 0; _i < ssa->cfg.blocks_count; _i++) { \
 		phi = ssa->blocks[_i].phis; \
 		for (; phi; phi = phi->next) {
 #define FOREACH_PHI_END() \
@@ -304,8 +302,7 @@ static zend_always_inline void zend_ssa_rename_defs_of_instr(zend_ssa *ssa, zend
 } while (0)
 
 #define FOREACH_BLOCK(block) do { \
-	int _i; \
-	for (_i = 0; _i < ssa->cfg.blocks_count; _i++) { \
+	for (uint32_t _i = 0; _i < ssa->cfg.blocks_count; _i++) { \
 		(block) = &ssa->cfg.blocks[_i]; \
 		if (!((block)->flags & ZEND_BB_REACHABLE)) { \
 			continue; \

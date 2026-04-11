@@ -18,6 +18,7 @@
 #define PHP_REFLECTION_H
 
 #include "php.h"
+#include "php_reflection_decl.h"
 
 extern zend_module_entry reflection_module_entry;
 #define phpext_reflection_ptr &reflection_module_entry

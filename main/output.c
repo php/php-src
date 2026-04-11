@@ -609,7 +609,6 @@ PHPAPI zend_result php_output_handler_conflict_register(const char *name, size_t
 
 	if (!EG(current_module)) {
 		zend_error_noreturn(E_ERROR, "Cannot register an output handler conflict outside of MINIT");
-		return FAILURE;
 	}
 	str = zend_string_init_interned(name, name_len, 1);
 	zend_hash_update_ptr(&php_output_handler_conflicts, str, check_func);
@@ -626,7 +625,6 @@ PHPAPI zend_result php_output_handler_reverse_conflict_register(const char *name
 
 	if (!EG(current_module)) {
 		zend_error_noreturn(E_ERROR, "Cannot register a reverse output handler conflict outside of MINIT");
-		return FAILURE;
 	}
 
 	if (NULL != (rev_ptr = zend_hash_str_find_ptr(&php_output_handler_reverse_conflicts, name, name_len))) {
@@ -663,7 +661,6 @@ PHPAPI zend_result php_output_handler_alias_register(const char *name, size_t na
 
 	if (!EG(current_module)) {
 		zend_error_noreturn(E_ERROR, "Cannot register an output handler alias outside of MINIT");
-		return FAILURE;
 	}
 	str = zend_string_init_interned(name, name_len, 1);
 	zend_hash_update_ptr(&php_output_handler_aliases, str, func);
@@ -1396,9 +1393,7 @@ PHP_FUNCTION(ob_start)
 /* {{{ Flush (send) contents of the output buffer. The last buffer content is sent to next buffer */
 PHP_FUNCTION(ob_flush)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!OG(active)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to flush buffer. No buffer to flush");
@@ -1416,9 +1411,7 @@ PHP_FUNCTION(ob_flush)
 /* {{{ Clean (delete) the current output buffer */
 PHP_FUNCTION(ob_clean)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!OG(active)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer. No buffer to delete");
@@ -1436,9 +1429,7 @@ PHP_FUNCTION(ob_clean)
 /* {{{ Flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_flush)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!OG(active)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete and flush buffer. No buffer to delete or flush");
@@ -1452,9 +1443,7 @@ PHP_FUNCTION(ob_end_flush)
 /* {{{ Clean the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_clean)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!OG(active)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer. No buffer to delete");
@@ -1468,9 +1457,7 @@ PHP_FUNCTION(ob_end_clean)
 /* {{{ Get current buffer contents, flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_get_flush)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_output_get_contents(return_value) == FAILURE) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete and flush buffer. No buffer to delete or flush");
@@ -1486,9 +1473,7 @@ PHP_FUNCTION(ob_get_flush)
 /* {{{ Get current buffer contents and delete current output buffer */
 PHP_FUNCTION(ob_get_clean)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if(!OG(active)) {
 		RETURN_FALSE;
@@ -1508,9 +1493,7 @@ PHP_FUNCTION(ob_get_clean)
 /* {{{ Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_output_get_contents(return_value) == FAILURE) {
 		RETURN_FALSE;
@@ -1521,9 +1504,7 @@ PHP_FUNCTION(ob_get_contents)
 /* {{{ Return the nesting level of the output buffer */
 PHP_FUNCTION(ob_get_level)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(php_output_get_level());
 }
@@ -1532,9 +1513,7 @@ PHP_FUNCTION(ob_get_level)
 /* {{{ Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_output_get_length(return_value) == FAILURE) {
 		RETURN_FALSE;
@@ -1545,9 +1524,7 @@ PHP_FUNCTION(ob_get_length)
 /* {{{ List all output_buffers in an array */
 PHP_FUNCTION(ob_list_handlers)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -1598,9 +1575,7 @@ PHP_FUNCTION(ob_implicit_flush)
 /* {{{ Reset(clear) URL rewriter values */
 PHP_FUNCTION(output_reset_rewrite_vars)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_url_scanner_reset_vars() == SUCCESS) {
 		RETURN_TRUE;

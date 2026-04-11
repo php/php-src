@@ -37,19 +37,14 @@ static const UNormalizer2 *intl_get_normalizer(zend_long form, UErrorCode *err)
 	{
 		case NORMALIZER_FORM_C:
 			return unorm2_getNFCInstance(err);
-			break;
 		case NORMALIZER_FORM_D:
 			return unorm2_getNFDInstance(err);
-			break;
 		case NORMALIZER_FORM_KC:
 			return unorm2_getNFKCInstance(err);
-			break;
 		case NORMALIZER_FORM_KD:
 			return unorm2_getNFKDInstance(err);
-			break;
 		case NORMALIZER_FORM_KC_CF:
 			return unorm2_getNFKCCasefoldInstance(err);
-			break;
 	}
 
 	*err = U_ILLEGAL_ARGUMENT_ERROR;

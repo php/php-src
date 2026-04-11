@@ -9,6 +9,7 @@ Simone Gentili (sensorario@gmail.com)
 <?php
 if(!function_exists('proc_nice')) die("skip. proc_nice not available ");
 if(substr(strtoupper(PHP_OS), 0, 3) == 'WIN') die('skip. not for Windows');
+if(PHP_OS_FAMILY === 'Solaris') die('skip Solaris has different nice levels');
 exec('ps -p 1 -o "pid,nice"', $output, $exit_code);
 if ($exit_code !== 0) {
     die("skip ps -p is not available");

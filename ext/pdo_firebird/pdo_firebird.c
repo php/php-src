@@ -106,9 +106,7 @@ PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 
 PHP_METHOD(Pdo_Firebird, getApiVersion)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(FB_API_VER);
 }

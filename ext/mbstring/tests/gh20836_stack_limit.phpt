@@ -12,7 +12,7 @@ if (getenv('SKIP_ASAN')) {
 }
 ?>
 --INI--
-zend.max_allowed_stack_size=128K
+zend.max_allowed_stack_size=256K
 --FILE--
 <?php
 

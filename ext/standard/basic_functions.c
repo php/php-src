@@ -102,7 +102,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
 #include "zend_globals.h"
-#include "php_globals.h"
 #include "SAPI.h"
 #include "php_ticks.h"
 
@@ -141,6 +140,7 @@ static void user_shutdown_function_dtor(zval *zv);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
 
 static const zend_module_dep standard_deps[] = { /* {{{ */
+	ZEND_MOD_REQUIRED("random")
 	ZEND_MOD_REQUIRED("uri")
 	ZEND_MOD_OPTIONAL("session")
 	ZEND_MOD_END
@@ -297,6 +297,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	assertion_error_ce = register_class_AssertionError(zend_ce_error);
 
 	rounding_mode_ce = register_class_RoundingMode();
+	sort_direction_ce = register_class_SortDirection();
 
 	BASIC_MINIT_SUBMODULE(var)
 	BASIC_MINIT_SUBMODULE(file)
@@ -1282,9 +1283,9 @@ static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
 	zend_string *key;
 	zval *zv;
 
-	ZEND_HASH_FOREACH_KEY_VAL(hash, h, key, zv)
+	ZEND_HASH_FOREACH_KEY_VAL(hash, h, key, zv) {
 		add_config_entry(h, key, zv, return_value);
-	ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -1369,7 +1370,7 @@ PHPAPI zend_result _php_error_log(int opt_err, const zend_string *message, const
 			return FAILURE;
 
 		case 3:		/*save to a file */
-			stream = php_stream_open_wrapper(ZSTR_VAL(opt), "a", REPORT_ERRORS, NULL);
+			stream = php_stream_open_wrapper(opt ? ZSTR_VAL(opt) : NULL, "a", REPORT_ERRORS, NULL);
 			if (!stream) {
 				return FAILURE;
 			}
@@ -1717,11 +1718,11 @@ PHPAPI bool append_user_shutdown_function(php_shutdown_function_entry *shutdown_
 
 ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini) /* {{{ */
 {
-	syntax_highlighter_ini->highlight_comment = INI_STR("highlight.comment");
-	syntax_highlighter_ini->highlight_default = INI_STR("highlight.default");
-	syntax_highlighter_ini->highlight_html    = INI_STR("highlight.html");
-	syntax_highlighter_ini->highlight_keyword = INI_STR("highlight.keyword");
-	syntax_highlighter_ini->highlight_string  = INI_STR("highlight.string");
+	syntax_highlighter_ini->highlight_comment = zend_ini_string_literal("highlight.comment");
+	syntax_highlighter_ini->highlight_default = zend_ini_string_literal("highlight.default");
+	syntax_highlighter_ini->highlight_html    = zend_ini_string_literal("highlight.html");
+	syntax_highlighter_ini->highlight_keyword = zend_ini_string_literal("highlight.keyword");
+	syntax_highlighter_ini->highlight_string  = zend_ini_string_literal("highlight.string");
 }
 /* }}} */
 
@@ -1745,7 +1746,10 @@ PHP_FUNCTION(highlight_file)
 	}
 
 	if (i) {
-		php_output_start_default();
+		if (UNEXPECTED(php_output_start_default() != SUCCESS)) {
+			zend_throw_error(NULL, "Unable to start output handler");
+			RETURN_THROWS();
+		}
 	}
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
@@ -1780,7 +1784,10 @@ PHP_FUNCTION(php_strip_whitespace)
 		Z_PARAM_PATH_STR(filename)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_output_start_default();
+	if (UNEXPECTED(php_output_start_default() != SUCCESS)) {
+		zend_throw_error(NULL, "Unable to start output handler");
+		RETURN_THROWS();
+	}
 
 	zend_stream_init_filename_ex(&file_handle, filename);
 	zend_save_lexical_state(&original_lex_state);
@@ -1817,7 +1824,10 @@ PHP_FUNCTION(highlight_string)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (i) {
-		php_output_start_default();
+		if (UNEXPECTED(php_output_start_default() != SUCCESS)) {
+			zend_throw_error(NULL, "Unable to start output handler");
+			RETURN_THROWS();
+		}
 	}
 
 	EG(error_reporting) = E_ERROR;
@@ -2020,17 +2030,16 @@ PHP_FUNCTION(ini_restore)
 PHP_FUNCTION(set_include_path)
 {
 	zend_string *new_value;
-	char *old_value;
 	zend_string *key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH_STR(new_value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	old_value = zend_ini_string("include_path", sizeof("include_path") - 1, 0);
+	zend_string *old_value = zend_ini_str_literal("include_path");
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
-		RETVAL_STRING(old_value);
+		RETVAL_STR_COPY(old_value);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2050,7 +2059,7 @@ PHP_FUNCTION(get_include_path)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_string *str = zend_ini_str("include_path", sizeof("include_path") - 1, 0);
+	zend_string *str = zend_ini_str_literal("include_path");
 
 	if (str == NULL) {
 		RETURN_FALSE;

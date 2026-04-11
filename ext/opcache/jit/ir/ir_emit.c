@@ -5,6 +5,10 @@
  * Authors: Dmitry Stogov <dmitry@php.net>
  */
 
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
+
 #include "ir.h"
 
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
@@ -971,7 +975,7 @@ int ir_match(ir_ctx *ctx)
 	return 1;
 }
 
-int32_t ir_get_spill_slot_offset(ir_ctx *ctx, ir_ref ref)
+int32_t ir_get_spill_slot_offset(const ir_ctx *ctx, ir_ref ref)
 {
 	int32_t offset;
 

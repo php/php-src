@@ -1944,7 +1944,7 @@ static void remember_prev_exception(zend_object **prev_exception)
 	}
 }
 
-static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
+static zend_never_inline void gc_call_destructors_in_fiber(void)
 {
 	ZEND_ASSERT(!GC_G(dtor_fiber_running));
 
@@ -1953,13 +1953,15 @@ static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 	GC_G(dtor_idx) = GC_FIRST_ROOT;
 	GC_G(dtor_end) = GC_G(first_unused);
 
+	zend_object *exception = NULL;
+	remember_prev_exception(&exception);
+
 	if (UNEXPECTED(!fiber)) {
 		fiber = gc_create_destructor_fiber();
 	} else {
 		zend_fiber_resume(fiber, NULL, NULL);
 	}
 
-	zend_object *exception = NULL;
 	remember_prev_exception(&exception);
 
 	for (;;) {
@@ -2093,7 +2095,7 @@ rerun_gc:
 			if (EXPECTED(!EG(active_fiber))) {
 				gc_call_destructors(GC_FIRST_ROOT, end, NULL);
 			} else {
-				gc_call_destructors_in_fiber(end);
+				gc_call_destructors_in_fiber();
 			}
 			GC_G(dtor_time) += zend_hrtime() - dtor_start_time;
 

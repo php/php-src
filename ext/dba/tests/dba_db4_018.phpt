@@ -28,7 +28,7 @@ $db_file2 = dba_popen($db_filename, 'n', 'flatfile');
 if ($db_file1 === $db_file2) {
     echo "objects are the same\n";
 } else {
-    echo "object are different\n";
+    echo "objects are different\n";
 }
 
 

@@ -1,5 +1,6 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 1a1667a5c59111f096a758d5bb4aa7cf3ec09cfe */
+ * Stub hash: a846d7e3dd1f1cebd8c6257132c97b3758067127
+ * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -345,7 +346,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_filter, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, callback, IS_CALLABLE, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "ARRAY_FILTER_USE_VALUE")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_find, 0, 2, IS_MIXED, 0)
@@ -838,7 +839,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trim, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, characters, IS_STRING, 0, "\" \\n\\r\\t\\v\\x00\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, characters, IS_STRING, 0, "\" \\f\\n\\r\\t\\v\\x00\"")
 ZEND_END_ARG_INFO()
 
 #define arginfo_rtrim arginfo_trim
@@ -3530,6 +3531,7 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CASE_UPPER", PHP_CASE_UPPER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("COUNT_NORMAL", PHP_COUNT_NORMAL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("COUNT_RECURSIVE", PHP_COUNT_RECURSIVE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_VALUE", ARRAY_FILTER_USE_VALUE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_BOTH", ARRAY_FILTER_USE_BOTH, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_KEY", ARRAY_FILTER_USE_KEY, CONST_PERSISTENT);
 	zend_constant *const_ASSERT_ACTIVE = REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", PHP_ASSERT_ACTIVE, CONST_PERSISTENT | CONST_DEPRECATED);
@@ -3976,6 +3978,17 @@ static void register_basic_functions_symbols(int module_number)
 	attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	ZVAL_STR_COPY(&attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[1].value, attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1_str);
 	attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+}
+
+static zend_class_entry *register_class_SortDirection(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("SortDirection", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Ascending", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Descending", NULL);
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class___PHP_Incomplete_Class(void)

@@ -17,6 +17,8 @@
 #ifndef PHP_URI_COMMON_H
 #define PHP_URI_COMMON_H
 
+#include "php_uri_decl.h"
+
 extern zend_class_entry *php_uri_ce_rfc3986_uri;
 extern zend_class_entry *php_uri_ce_whatwg_url;
 extern zend_class_entry *php_uri_ce_comparison_mode;
@@ -180,7 +182,7 @@ static inline const php_uri_property_handler *php_uri_parser_property_handler_by
 			return &parser->property_handler.query;
 		case PHP_URI_PROPERTY_NAME_FRAGMENT:
 			return &parser->property_handler.fragment;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 

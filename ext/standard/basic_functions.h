@@ -27,6 +27,8 @@
 
 #include "url_scanner_ex.h"
 
+#include "basic_functions_decl.h"
+
 #if defined(_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif

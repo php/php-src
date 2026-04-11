@@ -16,8 +16,16 @@ on:
         options:
           - "0"
           - "1"
-      instruction_count:
-        description: 'Whether Valgrind instruction count should be measured'
+      collect_extended_perf_stats:
+        description: 'Whether to collect extended perf stats as artifacts'
+        required: true
+        default: "0"
+        type: choice
+        options:
+          - "0"
+          - "1"
+      debug_environment:
+        description: 'Whether to collect environment debug logs as artifacts'
         required: true
         default: "0"
         type: choice
@@ -50,7 +58,8 @@ jobs:
       BASELINE_COMMIT: "d5f6e56610c729710073350af318c4ea1b292cfe"
       ID: "master"
       JIT: "1"
-      INSTRUCTION_COUNT: "0"
+      COLLECT_EXTENDED_PERF_STATS: "0"
+      DEBUG_ENVIRONMENT: "0"
       RUN_MICRO_BENCH: "0"
       YEAR: ""
     steps:
@@ -81,13 +90,14 @@ jobs:
             echo "ID=benchmarked" >> $GITHUB_ENV
 
             echo "JIT=${{ inputs.jit }}" >> $GITHUB_ENV
-            echo "INSTRUCTION_COUNT=${{ inputs.instruction_count }}" >> $GITHUB_ENV
+            echo "COLLECT_EXTENDED_PERF_STATS=${{ inputs.collect_extended_perf_stats }}" >> $GITHUB_ENV
+            echo "DEBUG_ENVIRONMENT=${{ inputs.debug_environment }}" >> $GITHUB_ENV
             echo "RUN_MICRO_BENCH=${{ inputs.run_micro_bench }}" >> $GITHUB_ENV
           fi
 
       - name: Install dependencies
         run: |
-          set -ex
+          set -e
           sudo apt-get update
           sudo apt-get install gpg
 
@@ -250,7 +260,8 @@ jobs:
           cp ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini.dist ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
           sed -i "s|INFRA_DOCKER_REGISTRY=public.ecr.aws/abcdefgh|INFRA_DOCKER_REGISTRY=${{ secrets.PHP_VERSION_BENCHMARK_DOCKER_REGISTRY }}|g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
           sed -i "s|INFRA_WORKSPACE=|INFRA_WORKSPACE=$WORKSPACE|g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
-          sed -i "s/INFRA_MEASURE_INSTRUCTION_COUNT=0/INFRA_MEASURE_INSTRUCTION_COUNT=${{ env.INSTRUCTION_COUNT }}/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+          sed -i "s/INFRA_COLLECT_EXTENDED_PERF_STATS=0/INFRA_COLLECT_EXTENDED_PERF_STATS=${{ env.COLLECT_EXTENDED_PERF_STATS }}/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+          sed -i "s/INFRA_DEBUG_ENVIRONMENT=0/INFRA_DEBUG_ENVIRONMENT=${{ env.DEBUG_ENVIRONMENT }}/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
 
           cp ./php-version-benchmarks/build/infrastructure/config/aws.tfvars.dist ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
           sed -i 's/access_key = ""/access_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_ACCESS_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
@@ -266,11 +277,26 @@ jobs:
           sed -i 's|extra_title = ""|extra_title = "Changeset"|g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
           sed -i "s|extra_text = \"\"|extra_text = \"$CHANGESET_URL\"|g" ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
       - name: Run benchmark
-        run: ./php-version-benchmarks/benchmark.sh run aws
-      - name: Store results
+        run: |
+          set -e
+          
+          ./php-version-benchmarks/benchmark.sh run aws
+          
+          echo "NEWEST_RESULT_DIRECTORY=$(ls -td ${{ github.workspace }}/php-version-benchmarks/docs/results/${{ env.YEAR }}/*/ | head -1)" >> $GITHUB_ENV
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v6
+        with:
+          name: results
+          path: |
+            ./php-version-benchmarks/tmp/results/${{ env.YEAR }}/**/*
+          retention-days: 30
+      - name: Commit results
         if: github.repository == 'php/php-src' && github.event_name != 'workflow_dispatch'
         run: |
           set -ex
+
+          sed -i "s|#ARTIFACT_URL#|${{ steps.upload.outputs.artifact-url }}|g" "${NEWEST_RESULT_DIRECTORY}result.md"
 
           cd ./php-version-benchmarks/docs/results
           git pull --autostash
@@ -284,20 +310,10 @@ jobs:
           fi
           git commit -m "Add result for ${{ github.repository }}@${{ github.sha }}"
           git push
-      - name: Upload artifacts
-        id: upload
-        uses: actions/upload-artifact@v6
-        with:
-          name: results
-          path: |
-            ./php-version-benchmarks/tmp/results/${{ env.YEAR }}/**/*
-          retention-days: 30
       - name: Comment results
         if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ./php-version-benchmarks/tmp/php_${{ env.ID }}
-          NEWEST_RESULT_DIRECTORY=$(ls -td ${{ github.workspace }}/php-version-benchmarks/docs/results/${{ env.YEAR }}/*/ | head -1)
-          sed -i "s|#ARTIFACT_URL#|${{ steps.upload.outputs.artifact-url }}|g" "${NEWEST_RESULT_DIRECTORY}result.md"
           gh pr comment ${{ inputs.pull_request }} --body-file "${NEWEST_RESULT_DIRECTORY}result.md" --repo ${{ github.repository }}

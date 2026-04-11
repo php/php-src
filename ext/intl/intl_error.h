@@ -37,7 +37,7 @@ void        intl_error_set( intl_error* err, UErrorCode code, const char* msg);
 UErrorCode  intl_error_get_code( intl_error* err );
 zend_string* intl_error_get_message( intl_error* err );
 
-// Wrappers to synchonize object's and global error structures.
+// Wrappers to synchronize object's and global error structures.
 void        intl_errors_reset( intl_error* err );
 void        intl_errors_set_custom_msg( intl_error* err, const char* msg);
 void        intl_errors_set_code( intl_error* err, UErrorCode err_code );

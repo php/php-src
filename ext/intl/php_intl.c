@@ -115,7 +115,7 @@ char* canonicalize_locale_string(const char* locale) {
 
 static PHP_INI_MH(OnUpdateErrorLevel)
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (*p) {
 		php_error_docref("session.configuration", E_DEPRECATED,

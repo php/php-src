@@ -24,7 +24,7 @@ $sheet = Dom\XMLDocument::createFromString(<<<XML
 XML);
 
 // Make sure it will auto-register urn:test
-$sheet->documentElement->append($sheet->createElementNS('urn:test', 'test:dummy'));
+$sheet->documentElement->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:test', 'urn:test');
 
 $input = Dom\XMLDocument::createFromString(<<<XML
 <root>

@@ -641,7 +641,7 @@ static int is_port_number(const char *bindpath)
 
 int fcgi_listen(const char *path, int backlog)
 {
-	char     *s;
+	const char *s;
 	int       tcp = 0;
 	char      host[MAXPATHLEN];
 	short     port = 0;

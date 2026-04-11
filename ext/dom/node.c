@@ -138,7 +138,7 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 		case XML_TEXT_NODE:
 			ZVAL_STRING(retval, "#text");
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return SUCCESS;
@@ -294,7 +294,18 @@ zend_result dom_node_child_nodes_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	object_init_ex(retval, dom_get_nodelist_ce(php_dom_follow_spec_intern(obj)));
+	object_init_ex(retval, dom_get_nodelist_ce(false));
+	dom_object *intern = Z_DOMOBJ_P(retval);
+	php_dom_create_obj_map(obj, intern, NULL, NULL, NULL, &php_dom_obj_map_child_nodes);
+
+	return SUCCESS;
+}
+
+zend_result dom_modern_node_child_nodes_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+
+	object_init_ex(retval, dom_get_nodelist_ce(true));
 	dom_object *intern = Z_DOMOBJ_P(retval);
 	php_dom_create_obj_map(obj, intern, NULL, NULL, NULL, &php_dom_obj_map_child_nodes);
 
@@ -666,14 +677,25 @@ zend_result dom_node_base_uri_read(dom_object *obj, zval *retval)
 		ZVAL_STRING(retval, (const char *) baseuri);
 		xmlFree(baseuri);
 	} else {
-		if (php_dom_follow_spec_intern(obj)) {
-			if (nodep->doc->URL) {
-				ZVAL_STRING(retval, (const char *) nodep->doc->URL);
-			} else {
-				ZVAL_STRING(retval, "about:blank");
-			}
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+zend_result dom_modern_node_base_uri_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+
+	xmlChar *baseuri = xmlNodeGetBase(nodep->doc, nodep);
+	if (baseuri) {
+		ZVAL_STRING(retval, (const char *) baseuri);
+		xmlFree(baseuri);
+	} else {
+		if (nodep->doc && nodep->doc->URL) {
+			ZVAL_STRING(retval, (const char *) nodep->doc->URL);
 		} else {
-			ZVAL_NULL(retval);
+			ZVAL_STRING(retval, "about:blank");
 		}
 	}
 
@@ -2110,7 +2132,7 @@ static void dom_relink_ns_decls_element(HashTable *links, xmlNodePtr node)
 
 				ns->_private = attr;
 				if (attr->prev) {
-					attr->prev = attr->next;
+					attr->prev->next = attr->next;
 				} else {
 					node->properties = attr->next;
 				}
@@ -2241,7 +2263,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		}
 
 		zend_hash_init(&links, 0, NULL, NULL, false);
-		dom_relink_ns_decls(&links, xmlDocGetRootElement(docp));
+		xmlNodePtr root_element = xmlDocGetRootElement(docp);
+
+		if (root_element) {
+			dom_relink_ns_decls(&links, root_element);
+		}
 	} else if (!docp) {
 		/* Note: not triggerable with modern DOM */
 		zend_throw_error(NULL, "Node must be associated with a document");

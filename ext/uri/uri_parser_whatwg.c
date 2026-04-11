@@ -62,12 +62,13 @@ static zend_always_inline void zval_long_or_null_to_lexbor_str(zval *value, lexb
  */
 static const char *fill_errors(zval *errors)
 {
-	if (lexbor_parser.log == NULL || lexbor_plog_length(lexbor_parser.log) == 0) {
+	size_t log_len;
+	if (lexbor_parser.log == NULL || (log_len = lexbor_plog_length(lexbor_parser.log)) == 0) {
 		ZVAL_EMPTY_ARRAY(errors);
 		return NULL;
 	}
 
-	array_init(errors);
+	array_init_size(errors, log_len);
 	const char *result = NULL;
 
 	lexbor_plog_entry_t *lxb_error;
@@ -195,7 +196,7 @@ static const char *fill_errors(zval *errors)
 				error_str = "FileInvalidWindowsDriveLetterHost";
 				ZVAL_FALSE(&failure);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 
 		zval error_type;
@@ -373,7 +374,7 @@ static zend_result php_uri_parser_whatwg_host_read(void *uri, php_uri_component_
 			case PHP_URI_COMPONENT_READ_MODE_RAW:
 				ZVAL_STRINGL(retval, (const char *) lexbor_uri->host.u.domain.data, lexbor_uri->host.u.domain.length);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 	} else {
 		ZVAL_NULL(retval);
@@ -614,7 +615,7 @@ static zend_string *php_uri_parser_whatwg_to_string(void *uri, php_uri_recomposi
 		case PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII:
 			lxb_url_serialize(lexbor_uri, serialize_to_smart_str_callback, &uri_str, exclude_fragment);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	return smart_str_extract(&uri_str);

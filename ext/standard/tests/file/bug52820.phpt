@@ -45,22 +45,18 @@ echo "\nDone.\n";
 --EXPECTREGEX--
 temp stream \(close after\):
 About to rewind!
-(\* processing: file:\/\/\/i_dont_exist\/\n)?\* (Couldn't|Could not) open file \/i_dont_exist\/
-\* [Cc]losing connection( #?-?\d+)?
+(\* processing: file:\/\/\/i_dont_exist\/\n)?\* (Couldn't|Could not) open file \/i_dont_exist\/(\n\* [Cc]losing connection( #?-?\d+)?)?
 
 memory stream \(close after\):
 About to rewind!
-(\* processing: file:\/\/\/i_dont_exist\/\n)?\* (Couldn't|Could not) open file \/i_dont_exist\/
-\* [Cc]losing connection( #?-?\d+)?
+(\* processing: file:\/\/\/i_dont_exist\/\n)?\* (Couldn't|Could not) open file \/i_dont_exist\/(\n\* [Cc]losing connection( #?-?\d+)?)?
 
 temp stream \(leak\):
 About to rewind!
-(\* processing: file:\/\/\/i_dont_exist\/\n)?\* (Couldn't|Could not) open file \/i_dont_exist\/
-\* [Cc]losing connection( #?-?\d+)?
+(\* processing: file:\/\/\/i_dont_exist\/\n)?\* (Couldn't|Could not) open file \/i_dont_exist\/(\n\* [Cc]losing connection( #?-?\d+)?)?
 
 memory stream \(leak\):
 About to rewind!
-(\* processing: file:\/\/\/i_dont_exist\/\n)?\* (Couldn't|Could not) open file \/i_dont_exist\/
-\* [Cc]losing connection( #?-?\d+)?
+(\* processing: file:\/\/\/i_dont_exist\/\n)?\* (Couldn't|Could not) open file \/i_dont_exist\/(\n\* [Cc]losing connection( #?-?\d+)?)?
 
 Done\.

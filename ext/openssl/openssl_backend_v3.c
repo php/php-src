@@ -454,6 +454,9 @@ EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 		}
 		EVP_PKEY_CTX_free(ctx);
 		ctx = EVP_PKEY_CTX_new(param_key, NULL);
+		if (!ctx) {
+			goto cleanup;
+		}
 	}
 
 	if (EVP_PKEY_check(ctx) || EVP_PKEY_public_check_quick(ctx)) {
@@ -567,10 +570,7 @@ static zend_string *php_openssl_get_utf8_param(
 	char buf[64];
 	size_t len;
 	if (EVP_PKEY_get_utf8_string_param(pkey, param, buf, sizeof(buf), &len) > 0) {
-		zend_string *str = zend_string_alloc(len, 0);
-		memcpy(ZSTR_VAL(str), buf, len);
-		ZSTR_VAL(str)[len] = '\0';
-		return str;
+		return zend_string_init(buf, len, 0);
 	}
 	return NULL;
 }

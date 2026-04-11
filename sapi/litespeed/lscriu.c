@@ -73,7 +73,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <dlfcn.h>
-#include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>

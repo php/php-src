@@ -35,8 +35,7 @@ static bool dominates(const zend_basic_block *blocks, int a, int b) {
 static bool will_rejoin(
 		const zend_cfg *cfg, const zend_dfg *dfg, const zend_basic_block *block,
 		int other_successor, int exclude, int var) {
-	int i;
-	for (i = 0; i < block->predecessors_count; i++) {
+	for (uint32_t i = 0; i < block->predecessors_count; i++) {
 		int predecessor = cfg->predecessors[block->predecessor_offset + i];
 		if (predecessor == exclude) {
 			continue;
@@ -243,8 +242,8 @@ static void place_essa_pis(
 		zend_arena **arena, const zend_script *script, const zend_op_array *op_array,
 		uint32_t build_flags, const zend_ssa *ssa, const zend_dfg *dfg) /* {{{ */ {
 	const zend_basic_block *blocks = ssa->cfg.blocks;
-	int j, blocks_count = ssa->cfg.blocks_count;
-	for (j = 0; j < blocks_count; j++) {
+	uint32_t blocks_count = ssa->cfg.blocks_count;
+	for (uint32_t j = 0; j < blocks_count; j++) {
 		zend_ssa_phi *pi;
 		zend_op *opline = op_array->opcodes + blocks[j].start + blocks[j].len - 1;
 		int bt; /* successor block number if a condition is true */
@@ -823,7 +822,6 @@ static void zend_ssa_rename_in_block(const zend_op_array *op_array, uint32_t bui
 	const zend_ssa_block *ssa_blocks = ssa->blocks;
 	zend_ssa_op *ssa_ops = ssa->ops;
 	int ssa_vars_count = ssa->vars_count;
-	int i, j;
 	const zend_op *opline, *end;
 
 	if (ssa_blocks[n].phis) {
@@ -853,7 +851,7 @@ static void zend_ssa_rename_in_block(const zend_op_array *op_array, uint32_t bui
 			&& ((end-1)->opcode == ZEND_FE_FETCH_R || (end-1)->opcode == ZEND_FE_FETCH_RW)
 			&& (end-1)->op2_type == IS_CV
 		? &ssa_ops[blocks[n].start + blocks[n].len - 1] : NULL;
-	for (i = 0; i < blocks[n].successors_count; i++) {
+	for (uint32_t i = 0; i < blocks[n].successors_count; i++) {
 		int succ = blocks[n].successors[i];
 		zend_ssa_phi *p;
 		for (p = ssa_blocks[succ].phis; p; p = p->next) {
@@ -867,7 +865,7 @@ static void zend_ssa_rename_in_block(const zend_op_array *op_array, uint32_t bui
 						p->constraint.range.max_ssa_var = var[p->constraint.range.max_var];
 					}
 				}
-				for (j = 0; j < blocks[succ].predecessors_count; j++) {
+				for (uint32_t j = 0; j < blocks[succ].predecessors_count; j++) {
 					p->sources[j] = var[p->var];
 				}
 				if (p->ssa_var < 0) {
@@ -876,6 +874,7 @@ static void zend_ssa_rename_in_block(const zend_op_array *op_array, uint32_t bui
 				}
 			} else if (p->pi < 0) {
 				/* Normal Phi */
+				uint32_t j;
 				for (j = 0; j < blocks[succ].predecessors_count; j++)
 					if (ssa->cfg.predecessors[blocks[succ].predecessor_offset + j] == n) {
 						break;
@@ -893,6 +892,7 @@ static void zend_ssa_rename_in_block(const zend_op_array *op_array, uint32_t bui
 				zend_ssa_phi *q = p->next;
 				while (q) {
 					if (q->pi < 0 && q->var == p->var) {
+						uint32_t j;
 						for (j = 0; j < blocks[succ].predecessors_count; j++) {
 							if (ssa->cfg.predecessors[blocks[succ].predecessor_offset + j] == n) {
 								break;
@@ -997,11 +997,11 @@ ZEND_API zend_result zend_build_ssa(zend_arena **arena, const zend_script *scrip
 {
 	const zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_block *ssa_blocks;
-	int blocks_count = ssa->cfg.blocks_count;
+	uint32_t blocks_count = ssa->cfg.blocks_count;
 	uint32_t set_size;
 	zend_bitset def, in, phi;
 	int *var = NULL;
-	int i, j, k, changed;
+	int i, j, changed;
 	zend_dfg dfg;
 	ALLOCA_FLAG(dfg_use_heap)
 	ALLOCA_FLAG(var_use_heap)
@@ -1056,7 +1056,7 @@ ZEND_API zend_result zend_build_ssa(zend_arena **arena, const zend_script *scrip
 					   register allocator depends on this property.  */
 					zend_bitset_union(phi_j, in + (j * set_size), set_size);
 				} else {
-					for (k = 0; k < blocks[j].predecessors_count; k++) {
+					for (uint32_t k = 0; k < blocks[j].predecessors_count; k++) {
 						i = ssa->cfg.predecessors[blocks[j].predecessor_offset + k];
 						while (i != -1 && i != blocks[j].idom) {
 							zend_bitset_union_with_intersection(
@@ -1223,9 +1223,7 @@ ZEND_API void zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_
 					}
 				}
 			} else {
-				int j;
-
-				for (j = 0; j < ssa->cfg.blocks[i].predecessors_count; j++) {
+				for (uint32_t j = 0; j < ssa->cfg.blocks[i].predecessors_count; j++) {
 					zend_ssa_phi *p;
 
 					ZEND_ASSERT(phi->sources[j] >= 0);
@@ -1374,8 +1372,7 @@ static inline zend_ssa_phi **zend_ssa_next_use_phi_ptr(const zend_ssa *ssa, int 
 	if (p->pi >= 0) {
 		return &p->use_chains[0];
 	} else {
-		int j;
-		for (j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
+		for (uint32_t j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
 			if (p->sources[j] == var) {
 				return &p->use_chains[j];
 			}
@@ -1438,9 +1435,9 @@ void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa_op) /* {{{ */
 }
 /* }}} */
 
-static inline void zend_ssa_remove_phi_source(const zend_ssa *ssa, const zend_ssa_phi *phi, int pred_offset, int predecessors_count) /* {{{ */
+static inline void zend_ssa_remove_phi_source(const zend_ssa *ssa, const zend_ssa_phi *phi, int pred_offset, uint32_t predecessors_count) /* {{{ */
 {
-	int j, var_num = phi->sources[pred_offset];
+	int var_num = phi->sources[pred_offset];
 	zend_ssa_phi *next_phi = phi->use_chains[pred_offset];
 
 	predecessors_count--;
@@ -1451,7 +1448,7 @@ static inline void zend_ssa_remove_phi_source(const zend_ssa *ssa, const zend_ss
 
 	/* Check if they same var is used in a different phi operand as well, in this case we don't
 	 * need to adjust the use chain (but may have to move the next pointer). */
-	for (j = 0; j < predecessors_count; j++) {
+	for (uint32_t j = 0; j < predecessors_count; j++) {
 		if (phi->sources[j] == var_num) {
 			if (j < pred_offset) {
 				ZEND_ASSERT(next_phi == NULL);
@@ -1485,8 +1482,8 @@ void zend_ssa_remove_uses_of_var(const zend_ssa *ssa, int var_num) /* {{{ */
 	zend_ssa_phi *phi;
 	int use;
 	FOREACH_PHI_USE(var, phi) {
-		int i, end = NUM_PHI_SOURCES(phi);
-		for (i = 0; i < end; i++) {
+		uint32_t end = NUM_PHI_SOURCES(phi);
+		for (uint32_t i = 0; i < end; i++) {
 			if (phi->sources[i] == var_num) {
 				phi->use_chains[i] = NULL;
 			}
@@ -1517,13 +1514,12 @@ void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to) /* {{{ */
 	zend_basic_block *next_block = &ssa->cfg.blocks[to];
 	const zend_ssa_block *next_ssa_block = &ssa->blocks[to];
 	zend_ssa_phi *phi;
-	int j;
 
 	/* Find at which predecessor offset this block is referenced */
 	int pred_offset = -1;
 	int *predecessors = &ssa->cfg.predecessors[next_block->predecessor_offset];
 
-	for (j = 0; j < next_block->predecessors_count; j++) {
+	for (uint32_t j = 0; j < next_block->predecessors_count; j++) {
 		if (predecessors[j] == from) {
 			pred_offset = j;
 			break;
@@ -1558,7 +1554,7 @@ void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to) /* {{{ */
 }
 /* }}} */
 
-void zend_ssa_remove_block(const zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{ */
+void zend_ssa_remove_block(const zend_op_array *op_array, zend_ssa *ssa, uint32_t i) /* {{{ */
 {
 	zend_basic_block *block = &ssa->cfg.blocks[i];
 	const zend_ssa_block *ssa_block = &ssa->blocks[i];
@@ -1591,7 +1587,8 @@ void zend_ssa_remove_block_from_cfg(zend_ssa *ssa, int i) /* {{{ */
 {
 	zend_basic_block *block = &ssa->cfg.blocks[i];
 	int *predecessors;
-	int j, s;
+	int j;
+	uint32_t s;
 
 	for (s = 0; s < block->successors_count; s++) {
 		zend_ssa_remove_predecessor(ssa, i, block->successors[s]);
@@ -1722,7 +1719,7 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 
 	/* Update phi use chains */
 	FOREACH_PHI_USE(old_var, phi) {
-		int j;
+		uint32_t j;
 		bool after_first_new_source = false;
 
 		/* If the phi already uses the new var, find its use chain, as we may

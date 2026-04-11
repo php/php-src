@@ -105,6 +105,7 @@ PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclos
 	php_stream *orig = enclosed->enclosing_stream;
 
 	php_stream_auto_cleanup(enclosed);
+	enclosed->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	enclosed->enclosing_stream = enclosing;
 	return orig;
 }
@@ -1361,6 +1362,52 @@ PHPAPI zend_off_t _php_stream_tell(const php_stream *stream)
 	return stream->position;
 }
 
+static bool php_stream_are_filters_seekable(php_stream_filter *filter, bool is_start_seeking)
+{
+	while (filter) {
+		if (filter->seekable == PSFS_SEEKABLE_NEVER) {
+			php_error_docref(NULL, E_WARNING, "Stream filter %s is never seekable", filter->fops->label);
+			return false;
+		}
+		if (!is_start_seeking && filter->seekable == PSFS_SEEKABLE_START) {
+			php_error_docref(NULL, E_WARNING, "Stream filter %s is seekable only to start position", filter->fops->label);
+			return false;
+		}
+		filter = filter->next;
+	}
+	return true;
+}
+
+static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter *filter,
+		bool is_start_seeking, zend_off_t offset, int whence)
+{
+	while (filter) {
+		if (((filter->seekable == PSFS_SEEKABLE_START && is_start_seeking) ||
+				filter->seekable == PSFS_SEEKABLE_CHECK) &&
+				filter->fops->seek(stream, filter, offset, whence) == FAILURE) {
+			php_error_docref(NULL, E_WARNING, "Stream filter seeking for %s failed", filter->fops->label);
+			return FAILURE;
+		}
+		filter = filter->next;
+	}
+	return SUCCESS;
+}
+
+static zend_result php_stream_filters_seek_all(php_stream *stream, bool is_start_seeking,
+		zend_off_t offset, int whence)
+{
+	if (php_stream_filters_seek(stream, stream->writefilters.head, is_start_seeking, offset, whence) == FAILURE) {
+		return FAILURE;
+	}
+	if (php_stream_filters_seek(stream, stream->readfilters.head, is_start_seeking, offset, whence) == FAILURE) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
+
+
 PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 {
 	if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
@@ -1373,6 +1420,18 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 		}
 	}
 
+	bool is_start_seeking = whence == SEEK_SET && offset == 0;
+
+	if (stream->writefilters.head) {
+		_php_stream_flush(stream, 0);
+		if (!php_stream_are_filters_seekable(stream->writefilters.head, is_start_seeking)) {
+			return -1;
+		}
+	}
+	if (stream->readfilters.head && !php_stream_are_filters_seekable(stream->readfilters.head, is_start_seeking)) {
+		return -1;
+	}
+
 	/* handle the case where we are in the buffer */
 	if ((stream->flags & PHP_STREAM_FLAG_NO_BUFFER) == 0) {
 		switch(whence) {
@@ -1382,7 +1441,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 					stream->position += offset;
 					stream->eof = 0;
 					stream->fatal_error = 0;
-					return 0;
+					return php_stream_filters_seek_all(stream, is_start_seeking, offset, whence) == SUCCESS ? 0 : -1;
 				}
 				break;
 			case SEEK_SET:
@@ -1392,7 +1451,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 					stream->position = offset;
 					stream->eof = 0;
 					stream->fatal_error = 0;
-					return 0;
+					return php_stream_filters_seek_all(stream, is_start_seeking, offset, whence) == SUCCESS ? 0 : -1;
 				}
 				break;
 		}
@@ -1401,11 +1460,6 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 
 	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
 		int ret;
-
-		if (stream->writefilters.head) {
-			_php_stream_flush(stream, 0);
-		}
-
 		switch(whence) {
 			case SEEK_CUR:
 				ZEND_ASSERT(stream->position >= 0);
@@ -1432,7 +1486,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 			/* invalidate the buffer contents */
 			stream->readpos = stream->writepos = 0;
 
-			return ret;
+			return php_stream_filters_seek_all(stream, is_start_seeking, offset, whence) == SUCCESS ? ret : -1;
 		}
 		/* else the stream has decided that it can't support seeking after all;
 		 * fall through to attempt emulation */

@@ -370,9 +370,7 @@ static int date_object_compare_timezone(zval *tz1, zval *tz2);
 
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
-	STANDARD_MODULE_HEADER_EX,
-	NULL,
-	NULL,
+	STANDARD_MODULE_HEADER,
 	"date",                     /* extension name */
 	ext_functions,              /* function list */
 	PHP_MINIT(date),            /* process startup */
@@ -797,13 +795,24 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 							  case TIMELIB_ZONETYPE_ABBR:
 								  length = slprintf(buffer, sizeof(buffer), "%s", offset->abbr);
 								  break;
-							  case TIMELIB_ZONETYPE_OFFSET:
-								  length = slprintf(buffer, sizeof(buffer), "%c%02d:%02d",
-												((offset->offset < 0) ? '-' : '+'),
-												abs(offset->offset / 3600),
-												abs((offset->offset % 3600) / 60)
-										   );
+							  case TIMELIB_ZONETYPE_OFFSET: {
+								  int seconds = offset->offset % 60;
+								  if (seconds == 0) {
+								      length = slprintf(buffer, sizeof(buffer), "%c%02d:%02d",
+								      				((offset->offset < 0) ? '-' : '+'),
+								      				abs(offset->offset / 3600),
+								      				abs((offset->offset % 3600) / 60)
+								      		   );
+								  } else {
+								      length = slprintf(buffer, sizeof(buffer), "%c%02d:%02d:%02d",
+								      				((offset->offset < 0) ? '-' : '+'),
+								      				abs(offset->offset / 3600),
+								      				abs((offset->offset % 3600) / 60),
+													abs(seconds)
+								      		   );
+								  }
 								  break;
+							  }
 						  }
 					  }
 					  break;
@@ -1894,6 +1903,32 @@ static HashTable *date_object_get_gc_timezone(zend_object *object, zval **table,
 	return zend_std_get_properties(object);
 } /* }}} */
 
+static zend_string *date_create_tz_offset_str(timelib_sll offset)
+{
+	int seconds = offset % 60;
+	size_t size;
+	const char *format;
+
+	if (seconds == 0) {
+		size = sizeof("+05:00");
+		format = "%c%02d:%02d";
+	} else {
+		size = sizeof("+05:00:01");
+		format = "%c%02d:%02d:%02d";
+	}
+
+	zend_string *tmpstr = zend_string_alloc(size - 1, 0);
+
+	/* Note: if seconds == 0, the seconds argument will be excessive and therefore ignored. */
+	ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), size, format,
+		offset < 0 ? '-' : '+',
+		abs((int)(offset / 3600)),
+		abs((int)(offset % 3600) / 60),
+		abs(seconds));
+
+	return tmpstr;
+}
+
 static void date_object_to_hash(php_date_obj *dateobj, HashTable *props)
 {
 	zval zv;
@@ -1911,17 +1946,8 @@ static void date_object_to_hash(php_date_obj *dateobj, HashTable *props)
 			case TIMELIB_ZONETYPE_ID:
 				ZVAL_STRING(&zv, dateobj->time->tz_info->name);
 				break;
-			case TIMELIB_ZONETYPE_OFFSET: {
-				zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
-				int utc_offset = dateobj->time->z;
-
-				ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
-					utc_offset < 0 ? '-' : '+',
-					abs(utc_offset / 3600),
-					abs(((utc_offset % 3600) / 60)));
-
-				ZVAL_NEW_STR(&zv, tmpstr);
-				}
+			case TIMELIB_ZONETYPE_OFFSET:
+				ZVAL_NEW_STR(&zv, date_create_tz_offset_str(dateobj->time->z));
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
 				ZVAL_STRING(&zv, dateobj->time->tz_abbr);
@@ -2023,7 +2049,7 @@ static int date_object_compare_timezone(zval *tz1, zval *tz2) /* {{{ */
 			return strcmp(o1->tzi.z.abbr, o2->tzi.z.abbr) ? 1 : 0;
 		case TIMELIB_ZONETYPE_ID:
 			return strcmp(o1->tzi.tz->name, o2->tzi.tz->name) ? 1 : 0;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 } /* }}} */
 
@@ -2033,29 +2059,8 @@ static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)
 		case TIMELIB_ZONETYPE_ID:
 			ZVAL_STRING(zv, tzobj->tzi.tz->name);
 			break;
-		case TIMELIB_ZONETYPE_OFFSET: {
-			timelib_sll utc_offset = tzobj->tzi.utc_offset;
-			int seconds = utc_offset % 60;
-			size_t size;
-			const char *format;
-			if (seconds == 0) {
-				size = sizeof("+05:00");
-				format = "%c%02d:%02d";
-			} else {
-				size = sizeof("+05:00:01");
-				format = "%c%02d:%02d:%02d";
-			}
-			zend_string *tmpstr = zend_string_alloc(size - 1, 0);
-
-			/* Note: if seconds == 0, the seconds argument will be excessive and therefore ignored. */
-			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), size, format,
-				utc_offset < 0 ? '-' : '+',
-				abs((int)(utc_offset / 3600)),
-				abs((int)(utc_offset % 3600) / 60),
-				abs(seconds));
-
-			ZVAL_NEW_STR(zv, tmpstr);
-			}
+		case TIMELIB_ZONETYPE_OFFSET:
+			ZVAL_NEW_STR(zv, date_create_tz_offset_str(tzobj->tzi.utc_offset));
 			break;
 		case TIMELIB_ZONETYPE_ABBR:
 			ZVAL_STRING(zv, tzobj->tzi.z.abbr);
@@ -2739,7 +2744,7 @@ PHP_METHOD(DateTime, createFromTimestamp)
 			}
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	RETURN_OBJ(Z_OBJ(new_object));
@@ -2820,7 +2825,7 @@ PHP_METHOD(DateTimeImmutable, createFromTimestamp)
 			}
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	RETURN_OBJ(Z_OBJ(new_object));
@@ -4261,10 +4266,8 @@ PHP_FUNCTION(timezone_offset_get)
 			break;
 		case TIMELIB_ZONETYPE_OFFSET:
 			RETURN_LONG(tzobj->tzi.utc_offset);
-			break;
 		case TIMELIB_ZONETYPE_ABBR:
 			RETURN_LONG(tzobj->tzi.z.utc_offset + (tzobj->tzi.z.dst * 3600));
-			break;
 	}
 }
 /* }}} */
@@ -5475,18 +5478,18 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, bool calc_s
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (latitude_is_null) {
-		latitude = INI_FLT("date.default_latitude");
+		latitude = zend_ini_double_literal("date.default_latitude");
 	}
 
 	if (longitude_is_null) {
-		longitude = INI_FLT("date.default_longitude");
+		longitude = zend_ini_double_literal("date.default_longitude");
 	}
 
 	if (zenith_is_null) {
 		if (calc_sunset) {
-			zenith = INI_FLT("date.sunset_zenith");
+			zenith = zend_ini_double_literal("date.sunset_zenith");
 		} else {
-			zenith = INI_FLT("date.sunrise_zenith");
+			zenith = zend_ini_double_literal("date.sunrise_zenith");
 		}
 	}
 
@@ -5540,10 +5543,8 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, bool calc_s
 		case SUNFUNCS_RET_STRING:
 			retstr = strpprintf(0, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
 			RETURN_NEW_STR(retstr);
-			break;
 		case SUNFUNCS_RET_DOUBLE:
 			RETURN_DOUBLE(N);
-			break;
 	}
 }
 /* }}} */
@@ -5749,7 +5750,7 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, con
 			php_date_obj *date_obj;
 			date_obj = Z_PHPDATE_P(ht_entry);
 
-			if (!date_obj->time) {
+			if (!date_obj->time || !period_obj->start_ce) {
 				return false;
 			}
 
@@ -5770,7 +5771,7 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, con
 			php_date_obj *date_obj;
 			date_obj = Z_PHPDATE_P(ht_entry);
 
-			if (!date_obj->time) {
+			if (!date_obj->time || !period_obj->start_ce) {
 				return false;
 			}
 
@@ -5968,7 +5969,7 @@ static int date_period_has_property(zend_object *object, zend_string *name, int 
 				return 0;
 			case ZEND_PROPERTY_EXISTS:
 				return 1;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 	}
 

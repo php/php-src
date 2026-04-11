@@ -412,7 +412,7 @@ static void spl_heap_object_free_storage(zend_object *object) /* {{{ */
 static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig) /* {{{ */
 {
 	spl_heap_object   *intern;
-	zend_class_entry  *parent = class_type;
+	const zend_class_entry  *parent = class_type;
 	int                inherited = 0;
 
 	intern = zend_object_alloc(sizeof(spl_heap_object), parent);
@@ -938,7 +938,7 @@ static void spl_heap_it_move_forward(zend_object_iterator *iter) /* {{{ */
 {
 	spl_heap_object *object = Z_SPLHEAP_P(&iter->data);
 
-	if (UNEXPECTED(spl_heap_consistency_validations(object, false) != SUCCESS)) {
+	if (UNEXPECTED(spl_heap_consistency_validations(object, true) != SUCCESS)) {
 		return;
 	}
 
@@ -964,6 +964,10 @@ PHP_METHOD(SplHeap, next)
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (UNEXPECTED(spl_heap_consistency_validations(intern, true) != SUCCESS)) {
+		RETURN_THROWS();
+	}
 
 	spl_ptr_heap_delete_top(intern->heap, NULL, ZEND_THIS);
 }

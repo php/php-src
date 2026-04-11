@@ -106,7 +106,10 @@
 # define ZEND_ASSUME(c)
 #endif
 
-#if ZEND_DEBUG
+#ifdef HAVE_GCOV
+/* Disable assert() when compiling with gcov to avoid untested branch warning. */
+# define ZEND_ASSERT(c) ((void)sizeof(c))
+#elif ZEND_DEBUG
 # define ZEND_ASSERT(c)	assert(c)
 #else
 # define ZEND_ASSERT(c) ZEND_ASSUME(c)
@@ -134,10 +137,6 @@
 # define ZEND_FALLTHROUGH ((void)0)
 #endif
 
-/* Only use this macro if you know for sure that all of the switches values
-   are covered by its case statements */
-#define EMPTY_SWITCH_DEFAULT_CASE() default: ZEND_UNREACHABLE(); break;
-
 #if defined(__GNUC__) && __GNUC__ >= 4
 # define ZEND_IGNORE_VALUE(x) (({ __typeof__ (x) __x = (x); (void) __x; }))
 #else
@@ -145,6 +144,19 @@
 #endif
 
 #define zend_quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
+
+/* Define an enum with a fixed underlying type as C23_ENUM(name, underlying_type) { }. */
+#if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
+# define C23_ENUM(name, underlying_type) \
+    enum name: underlying_type; \
+    typedef enum name name; \
+    enum name: underlying_type
+#else
+# define C23_ENUM(name, underlying_type) \
+    enum name; \
+    typedef underlying_type name; \
+    enum name
+#endif
 
 /* all HAVE_XXX test have to be after the include of zend_config above */
 

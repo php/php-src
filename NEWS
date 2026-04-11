@@ -11,6 +11,14 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #429429090 (Failed assertion on unset() with uninitialized
     container). (ilutov)
   . Fixed GH-20564 (Don't call autoloaders with pending exception). (ilutov)
+  . Fix deprecation now showing when accessing null key of an array with JIT.
+    (alexandre-daubois)
+  . Fixed bug GH-20174 (Assertion failure in
+    ReflectionProperty::skipLazyInitialization after failed LazyProxy
+    initialization). (Arnaud)
+
+- BCMath:
+  . Added NUL-byte validation to BCMath functions. (jorgsowa)
 
 - Date:
   . Update timelib to 2022.16. (Derick)
@@ -22,6 +30,11 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug GH-20679 (finfo_file() doesn't work on remote resources).
     (ndossche)
+  . Fixed bug #66095 (Hide libmagic dynamic symbols). (orlitzky)
+
+- GD:
+  . imagesetstyle()/imagefilter()/imagecrop() check array argument entries
+    types. (David Carlier)
 
 - Hash:
   . Upgrade xxHash to 0.8.2. (timwolla)
@@ -32,6 +45,7 @@ PHP                                                                        NEWS
     (BogdanUngureanu)
   . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
     suggests missing constants). (DanielEScherzer)
+  . Added grapheme_strrev (Yuya Hamada)
 
 - JSON:
   . Enriched JSON last error / exception message with error location.
@@ -42,7 +56,7 @@ PHP                                                                        NEWS
     small value). (David Carlier)
 
 - Mail:
-  . Fixed bug GH-20862 (null pointer dereference in 
+  . Fixed bug GH-20862 (null pointer dereference in
     php_mail_detect_multiple_crlf via error_log (jordikroon)
 
 - Mbstring:
@@ -51,6 +65,11 @@ PHP                                                                        NEWS
   . Added GB18030-2022 to default encoding list for zh-CN. (HeRaNO)
   . Fixed bug GH-20836 (Stack overflow in mb_convert_variables with
     recursive array references). (alexandre-daubois)
+  . Fixed bug GH-21223; mb_guess_encoding no longer crashes when passed huge
+    list of candidate encodings (with 200,000+ entries). (Jordi Kroon)
+
+- Mysqli:
+  . Added mysqli_quote_string() and mysqli::quote_string(). (Kamil Tekiela)
 
 - Opcache:
   . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
@@ -64,6 +83,10 @@ PHP                                                                        NEWS
   . Clear session-local state disconnect-equivalent processing.
     (KentarouTakeda)
 
+- PGSQL:
+  . Enabled 64 bits support for pg_lo_truncate()/pg_lo_tell()
+    if the server supports it. (KentarouTakeda)
+
 - Phar:
   . Support reference values in Phar::mungServer(). (ndossche)
   . Invalid values now throw in Phar::mungServer() instead of being silently
@@ -73,21 +96,39 @@ PHP                                                                        NEWS
   . Mark Phar::buildFromIterator() base directory argument as a path.
     (ndossche)
 
+- Posix:
+  . Added validity check to the flags argument for posix_access(). (arshidkv12)
+
 - Reflection:
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
+  . Added ReflectionConstant::inNamespace(). (Khaled Alam)
+  . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
+    (ilutov)
+  . Fixed bug GH-21362 (ReflectionMethod::invoke/invokeArgs() did not verify
+    Closure instance identity for Closure::__invoke()). (Ilia Alshanetsky)
+  . Added ReflectionParameter::getDocComment(). (chschneider)
+
+- Session:
+  . Fixed bug 71162 (updateTimestamp never called when session data is empty).
+    (Girgias)
 
 - Soap:
-  . Soap::__setCookie() when cookie name is a digit is now not stored and represented
-    as a string anymore but a int. (David Carlier)
+  . Soap::__setCookie() when cookie name is a digit is now not stored and
+    represented as a string anymore but a int. (David Carlier)
+  . Fixed bug GH-21421 (SoapClient typemap property breaks engine assumptions).
+    (ndossche)
 
 - Sockets:
-  . Added the TCP_USER_TIMEOUT constant for Linux to set the maximum time in milliseconds
-    transmitted data can remain unacknowledged. (James Lucas)
+  . Added the TCP_USER_TIMEOUT constant for Linux to set the maximum time in
+    milliseconds transmitted data can remain unacknowledged. (James Lucas)
   . Added AF_UNSPEC support for sock_addrinfo_lookup() as a sole umbrella for
     AF_INET* family only. (David Carlier)
-  . Fixed GH-20532 (socket_addrinfo_lookup gives the error code with a new optional
-    parameter). (David Carlier)
+  . Fixed GH-20532 (socket_addrinfo_lookup gives the error code with a new
+    optional parameter). (David Carlier)
+
+- Sodium:
+  . Added support for libsodium 1.0.21 IPcrypt and XOF APIs. (jedisct1)
 
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
@@ -99,20 +140,43 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
+  . Added form feed (\f) in the default trimmed characters of trim(), rtrim()
+    and ltrim(). (Weilin Du)
+  . Invalid mode values now throw in array_filter() instead of being silently
+    defaulted to 0. (Jorg Sowa)
+  . Fixed bug GH-21058 (error_log() crashes with message_type 3 and
+    null destination). (David Carlier)
+  . Fixed bug GH-13204 (glob() fails if square bracket is in current directory).
+    (ndossche)
+  . Add array size maximum to array_diff(). (ndossche)
+  . Add enum SortDirection. (timwolla)
+  . pathinfo() raises a ValueError with an invalid $flags argument.
+    (David Carlier)
+  . Passing an invalid flag value to the second argument of scandir() will now
+    throw a ValueError. (alexandre-daubois)
+  . array_change_key_case() now raises a ValueError when an invalid $case
+    argument value is passed. (Girgias)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
     socket context options.
   . Added so_reuseaddr streams context socket option that allows disabling
-    address resuse.
+    address reuse.
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
   . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)
+  . Fixed bug GH-21221 (Prevent closing of innerstream of php://temp stream).
+    (ilutov)
+  . Improved stream_socket_server() bind failure error reporting. (ilutov)
+  . Fixed bug #49874 (ftell() and fseek() inconsistency when using stream
+    filters). (Jakub Zelenka)
 
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.
     (ilutov)
   . Support minimum version for libzip dependency updated to 1.0.0.
     (David Carlier)
+  . Added ZipArchive::openString() method.
+    (Tim Starling, Soner Sayakci, Ghaith Olabi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

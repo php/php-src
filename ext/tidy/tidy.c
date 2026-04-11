@@ -705,7 +705,7 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 			node = tidyGetBody(obj->ptdoc->doc);
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	if (!node) {
@@ -757,7 +757,7 @@ static bool php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value,
 			}
 			uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &lval, &dval, true);
 			if (type == IS_DOUBLE) {
-				lval = zend_dval_to_lval_cap(dval, str);
+				lval = zend_dval_to_lval_cap(dval);
 				type = IS_LONG;
 			}
 			if (type == IS_LONG) {
@@ -873,7 +873,7 @@ static PHP_RINIT_FUNCTION(tidy)
 
 static PHP_RSHUTDOWN_FUNCTION(tidy)
 {
-	TG(clean_output) = INI_ORIG_BOOL("tidy.clean_output");
+	TG(clean_output) = zend_ini_parse_bool(zend_ini_str(ZEND_STRL("tidy.clean_output"), /* orig */ true));
 
 	return SUCCESS;
 }

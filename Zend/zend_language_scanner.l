@@ -591,7 +591,7 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 	return SUCCESS;
 }
 
-static zend_op_array *zend_compile(int type)
+static zend_op_array *zend_compile(zend_function_type type)
 {
 	zend_op_array *op_array = NULL;
 	bool original_in_compilation = CG(in_compilation);

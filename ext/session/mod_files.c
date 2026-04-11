@@ -103,7 +103,6 @@ const ps_module ps_mod_files = {
 	PS_MOD_UPDATE_TIMESTAMP(files)
 };
 
-
 static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const zend_string *key)
 {
 	const char *p;
@@ -153,7 +152,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 {
 	char buf[MAXPATHLEN];
 #if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
-    struct stat sbuf = {0};
+	struct stat sbuf = {0};
 #endif
 	int ret;
 
@@ -183,7 +182,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 #else
 		/* Check to make sure that the opened file is not outside of allowable dirs.
 		   This is not 100% safe but it's hard to do something better without O_NOFOLLOW */
-		if(PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf)) {
+		if (PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf)) {
 			return;
 		}
 		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, data->filemode);
@@ -230,7 +229,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks
-       data->last_key and reopen when it is needed. */
+	   data->last_key and reopen when it is needed. */
 	ps_files_open(data, key);
 	if (data->fd < 0) {
 		return FAILURE;
@@ -258,7 +257,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 			buf = wrote > -1 ? buf + wrote : 0;
 			to_write = wrote > -1 ? SESS_FILE_BUF_SIZE(ZSTR_LEN(val) - n) : 0;
 
-		} while(wrote > 0);
+		} while (wrote > 0);
 	}
 #else
 	n = write(data->fd, ZSTR_VAL(val), ZSTR_LEN(val));
@@ -277,7 +276,10 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 	return SUCCESS;
 }
 
-static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetime)
+/* Recursively remove expired session files. When dirdepth > 0 the
+ * cleanup descends into subdirectories up to that many levels before
+ * inspecting individual session files. */
+static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetime, size_t remaining_depth)
 {
 	DIR *dir;
 	struct dirent *entry;
@@ -292,8 +294,6 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 		return -1;
 	}
 
-	time(&now);
-
 	if (ZSTR_LEN(dirname) >= MAXPATHLEN) {
 		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: dirname(%s) is too long", ZSTR_VAL(dirname));
 		closedir(dir);
@@ -305,31 +305,52 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 	buf[ZSTR_LEN(dirname)] = PHP_DIR_SEPARATOR;
 
 	while ((entry = readdir(dir))) {
-		/* does the file start with our prefix? */
-		if (!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1)) {
-			size_t entry_len = strlen(entry->d_name);
+		/* skip . and .. */
+		if (entry->d_name[0] == '.' &&
+				(entry->d_name[1] == '\0' ||
+				 (entry->d_name[1] == '.' && entry->d_name[2] == '\0'))) {
+			continue;
+		}
+		size_t entry_len = strlen(entry->d_name);
+		/* does it fit into our buffer? */
+		if (ZSTR_LEN(dirname) + 1 + entry_len >= MAXPATHLEN) {
+			continue;
+		}
+		/* create the full path and NUL-terminate it */
+		memcpy(buf + ZSTR_LEN(dirname) + 1, entry->d_name, entry_len);
+		buf[ZSTR_LEN(dirname) + 1 + entry_len] = '\0';
 
-			/* does it fit into our buffer? */
-			if (entry_len + ZSTR_LEN(dirname) + 2 < MAXPATHLEN) {
-				/* create the full path.. */
-				memcpy(buf + ZSTR_LEN(dirname) + 1, entry->d_name, entry_len);
-
-				/* NUL terminate it and */
-				buf[ZSTR_LEN(dirname) + entry_len + 1] = '\0';
-
-				/* check whether its last access was more than maxlifetime ago */
-				if (VCWD_STAT(buf, &sbuf) == 0 &&
-						(now - sbuf.st_mtime) > maxlifetime) {
-					VCWD_UNLINK(buf);
-					nrdels++;
+		if (remaining_depth == 0) {
+			/* target depth: delete expired session files */
+			if (strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1) != 0) {
+				continue;
+			}
+			if (VCWD_STAT(buf, &sbuf) != 0) {
+				continue;
+			}
+			time(&now);
+			if ((now - sbuf.st_mtime) > maxlifetime) {
+				VCWD_UNLINK(buf);
+				nrdels++;
+			}
+		} else {
+			/* intermediate depth: recurse into subdirectories */
+			if (VCWD_STAT(buf, &sbuf) != 0) {
+				continue;
+			}
+			if (S_ISDIR(sbuf.st_mode)) {
+				zend_string *subdir = zend_string_init(buf, ZSTR_LEN(dirname) + 1 + entry_len, 0);
+				int n = ps_files_cleanup_dir(subdir, maxlifetime, remaining_depth - 1);
+				zend_string_release(subdir);
+				if (n >= 0) {
+					nrdels += n;
 				}
 			}
 		}
 	}
 
 	closedir(dir);
-
-	return (nrdels);
+	return nrdels;
 }
 
 static zend_result ps_files_key_exists(ps_files *data, const zend_string *key)
@@ -346,9 +367,7 @@ static zend_result ps_files_key_exists(ps_files *data, const zend_string *key)
 	return SUCCESS;
 }
 
-
 #define PS_FILES_DATA ps_files *data = PS_GET_MOD_DATA()
-
 
 /*
  * Open save handler. Setup resources that are needed by the handler.
@@ -369,19 +388,22 @@ PS_OPEN_FUNC(files)
 	int argc = 0;
 	size_t dirdepth = 0;
 	int filemode = 0600;
+	const char *used_save_path;
 
-	if (*save_path == '\0') {
+	if (ZSTR_LEN(save_path) == 0) {
 		/* if save path is an empty string, determine the temporary dir */
-		save_path = php_get_temporary_directory();
+		used_save_path = php_get_temporary_directory();
 
-		if (php_check_open_basedir(save_path)) {
+		if (php_check_open_basedir(used_save_path)) {
 			return FAILURE;
 		}
+	} else {
+		used_save_path = ZSTR_VAL(save_path);
 	}
 
 	/* split up input parameter */
-	last = save_path;
-	p = strchr(save_path, ';');
+	last = used_save_path;
+	p = strchr(used_save_path, ';');
 	while (p) {
 		argv[argc++] = last;
 		last = ++p;
@@ -407,14 +429,14 @@ PS_OPEN_FUNC(files)
 			return FAILURE;
 		}
 	}
-	save_path = argv[argc - 1];
+	used_save_path = argv[argc - 1];
 
 	data = ecalloc(1, sizeof(*data));
 
 	data->fd = -1;
 	data->dirdepth = dirdepth;
 	data->filemode = filemode;
-	data->basedir = zend_string_init(save_path, strlen(save_path), /* persistent */ false);
+	data->basedir = zend_string_init(used_save_path, strlen(used_save_path), /* persistent */ false);
 
 	if (PS_GET_MOD_DATA()) {
 		ps_close_files(mod_data);
@@ -423,7 +445,6 @@ PS_OPEN_FUNC(files)
 
 	return SUCCESS;
 }
-
 
 /*
  * Clean up opened resources.
@@ -452,7 +473,6 @@ PS_CLOSE_FUNC(files)
 
 	return SUCCESS;
 }
-
 
 /*
  * Read session data from opened resource.
@@ -486,7 +506,7 @@ PS_READ_FUNC(files)
 		return SUCCESS;
 	}
 
-	*val = zend_string_alloc(sbuf.st_size, 0);
+	*val = zend_string_alloc(sbuf.st_size, false);
 
 #ifdef HAVE_PREAD
 	n = pread(data->fd, ZSTR_VAL(*val), ZSTR_LEN(*val), 0);
@@ -505,7 +525,7 @@ PS_READ_FUNC(files)
 			buf = read_in > -1 ? buf + read_in : 0;
 			to_read = read_in > -1 ? SESS_FILE_BUF_SIZE(ZSTR_LEN(*val) - n) : 0;
 
-		} while(read_in > 0);
+		} while (read_in > 0);
 
 	}
 #else
@@ -519,7 +539,7 @@ PS_READ_FUNC(files)
 		} else {
 			php_error_docref(NULL, E_WARNING, "Read returned less bytes than requested");
 		}
-		zend_string_release_ex(*val, 0);
+		zend_string_release_ex(*val, false);
 		*val =  ZSTR_EMPTY_ALLOC();
 		return FAILURE;
 	}
@@ -527,7 +547,6 @@ PS_READ_FUNC(files)
 	ZSTR_VAL(*val)[ZSTR_LEN(*val)] = '\0';
 	return SUCCESS;
 }
-
 
 /*
  * Write session data.
@@ -543,7 +562,6 @@ PS_WRITE_FUNC(files)
 
 	return ps_files_write(data, key, val);
 }
-
 
 /*
  * Update session data modification/access time stamp.
@@ -579,7 +597,6 @@ PS_UPDATE_TIMESTAMP_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Delete session data.
  * PARAMETERS: PS_DESTROY_ARGS in php_session.h
@@ -614,7 +631,6 @@ PS_DESTROY_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Cleanup expired session data.
  * PARAMETERS: PS_GC_ARGS in php_session.h
@@ -630,19 +646,10 @@ PS_GC_FUNC(files)
 {
 	PS_FILES_DATA;
 
-	/* We don't perform any cleanup, if dirdepth is larger than 0.
-	   we return SUCCESS, since all cleanup should be handled by
-	   an external entity (i.e. find -ctime x | xargs rm) */
-
-	if (data->dirdepth == 0) {
-		*nrdels = ps_files_cleanup_dir(data->basedir, maxlifetime);
-	} else {
-		*nrdels = -1; // Cannot process multiple depth save dir
-	}
+	*nrdels = ps_files_cleanup_dir(data->basedir, maxlifetime, data->dirdepth);
 
 	return *nrdels;
 }
-
 
 /*
  * Create session ID.
@@ -675,17 +682,16 @@ PS_CREATE_SID_FUNC(files)
 		/* Check collision */
 		/* FIXME: mod_data(data) should not be NULL (User handler could be NULL) */
 		if (data && ps_files_key_exists(data, sid) == SUCCESS) {
-			zend_string_release_ex(sid, 0);
+			zend_string_release_ex(sid, false);
 			sid = NULL;
 			if (--maxfail < 0) {
 				return NULL;
 			}
 		}
-	} while(!sid);
+	} while (!sid);
 
 	return sid;
 }
-
 
 /*
  * Check session ID existence for use_strict_mode support.

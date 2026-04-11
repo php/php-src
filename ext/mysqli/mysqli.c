@@ -32,7 +32,6 @@
 #include "zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
 #include "zend_interfaces.h"
-#include "zend_attributes.h"
 #include "mysqli_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)
@@ -326,7 +325,7 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 				}
 				break;
 			}
-			EMPTY_SWITCH_DEFAULT_CASE();
+			default: ZEND_UNREACHABLE();
 		}
 	} else {
 		has_property = zend_std_has_property(object, name, has_set_exists, cache_slot);
@@ -361,12 +360,11 @@ HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type)
 {
 	mysqli_object *intern;
-	zend_class_entry *mysqli_base_class;
 	zend_object_handlers *handlers;
 
 	intern = zend_object_alloc(sizeof(mysqli_object), class_type);
 
-	mysqli_base_class = class_type;
+	const zend_class_entry *mysqli_base_class = class_type;
 	while (mysqli_base_class->type != ZEND_INTERNAL_CLASS &&
 		   mysqli_base_class->parent != NULL) {
 		mysqli_base_class = mysqli_base_class->parent;
@@ -724,9 +722,7 @@ PHP_METHOD(mysqli_result, __construct)
 
 PHP_METHOD(mysqli_result, getIterator)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }

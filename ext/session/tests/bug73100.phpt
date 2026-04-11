@@ -24,5 +24,5 @@ bool(true)
 
 Warning: session_module_name(): Session save handler module cannot be changed when a session is active (started from %s on line %d) in %s on line %d
 bool(true)
-session_module_name(): Argument #1 ($module) cannot be "user"
+session_module_name(): Argument #1 ($module) must not be "user"
 ===DONE===

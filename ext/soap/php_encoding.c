@@ -278,7 +278,7 @@ static bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 		if (Z_TYPE_P(data) == IS_OBJECT) {
 			data = (zval*)Z_OBJ_P(data);
 		}
-		if ((node_ptr = zend_hash_index_find_ptr(SOAP_GLOBAL(ref_map), (zend_ulong)data)) != NULL) {
+		if ((node_ptr = zend_hash_index_find_ptr(SOAP_GLOBAL(ref_map), (zend_ulong)(uintptr_t)data)) != NULL) {
 			xmlAttrPtr attr = node_ptr->properties;
 			char *id;
 			smart_str prefix = {0};
@@ -324,7 +324,7 @@ static bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 			smart_str_free(&prefix);
 			return true;
 		} else {
-			zend_hash_index_update_ptr(SOAP_GLOBAL(ref_map), (zend_ulong)data, node);
+			zend_hash_index_update_ptr(SOAP_GLOBAL(ref_map), (zend_ulong)(uintptr_t)data, node);
 		}
 	}
 	return false;
@@ -335,7 +335,7 @@ static bool soap_check_xml_ref(zval *data, xmlNodePtr node)
 	zval *data_ptr;
 
 	if (SOAP_GLOBAL(ref_map)) {
-		if ((data_ptr = zend_hash_index_find(SOAP_GLOBAL(ref_map), (zend_ulong)node)) != NULL) {
+		if ((data_ptr = zend_hash_index_find(SOAP_GLOBAL(ref_map), (zend_ulong)(uintptr_t)node)) != NULL) {
 			if (!Z_REFCOUNTED_P(data) ||
 			    !Z_REFCOUNTED_P(data_ptr) ||
 			    Z_COUNTED_P(data) != Z_COUNTED_P(data_ptr)) {
@@ -351,7 +351,7 @@ static bool soap_check_xml_ref(zval *data, xmlNodePtr node)
 static void soap_add_xml_ref(zval *data, xmlNodePtr node)
 {
 	if (SOAP_GLOBAL(ref_map)) {
-		zend_hash_index_update(SOAP_GLOBAL(ref_map), (zend_ulong)node, data);
+		zend_hash_index_update(SOAP_GLOBAL(ref_map), (zend_ulong)(uintptr_t)node, data);
 	}
 }
 
@@ -2439,13 +2439,7 @@ iterator_failed_to_get:
 		if (style == SOAP_ENCODED) {
 			if (soap_version == SOAP_1_1) {
 				smart_str_0(&array_type);
-#if defined(__GNUC__) && __GNUC__ >= 11
-				ZEND_DIAGNOSTIC_IGNORED_START("-Wstringop-overread")
-#endif
-				bool is_xsd_any_type = strcmp(ZSTR_VAL(array_type.s),"xsd:anyType") == 0;
-#if defined(__GNUC__) && __GNUC__ >= 11
-				ZEND_DIAGNOSTIC_IGNORED_END
-#endif
+				bool is_xsd_any_type = zend_string_equals_literal(array_type.s, "xsd:anyType");
 				if (is_xsd_any_type) {
 					smart_str_free(&array_type);
 					smart_str_appendl(&array_type,"xsd:ur-type",sizeof("xsd:ur-type")-1);
@@ -2529,19 +2523,20 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		xmlNsPtr nsptr;
 
 		parse_namespace(attr->children->content, &type, &ns);
+		char *type_dup = estrdup(type);
 		nsptr = xmlSearchNs(attr->doc, attr->parent, BAD_CAST(ns));
 
-		end = strrchr(type,'[');
+		end = strrchr(type_dup,'[');
 		if (end) {
 			*end = '\0';
 			dimension = calc_dimension(end+1);
 			dims = get_position(dimension, end+1);
 		}
 		if (nsptr != NULL) {
-			enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, type);
+			enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, type_dup);
 		}
 		if (ns) {efree(ns);}
-
+		if (type_dup) efree(type_dup);
 	} else if ((attr = get_soap_enc_attribute(data->properties,"itemType")) &&
 	    attr->children &&
 	    attr->children->content) {
@@ -2953,9 +2948,9 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 			labs(ta->tm_gmtoff / 3600), labs( (ta->tm_gmtoff % 3600) / 60 ));
 #else
 # if defined(__CYGWIN__) || (defined(PHP_WIN32) && defined(_MSC_VER))
-		snprintf(tzbuf, sizeof(tzbuf), "%c%02d:%02d", ((ta->tm_isdst ? _timezone - 3600:_timezone)>0)?'-':'+', abs((ta->tm_isdst ? _timezone - 3600 : _timezone) / 3600), abs(((ta->tm_isdst ? _timezone - 3600 : _timezone) % 3600) / 60));
+		snprintf(tzbuf, sizeof(tzbuf), "%c%02ld:%02ld", ((ta->tm_isdst ? _timezone - 3600:_timezone)>0)?'-':'+', labs((ta->tm_isdst ? _timezone - 3600 : _timezone) / 3600), labs(((ta->tm_isdst ? _timezone - 3600 : _timezone) % 3600) / 60));
 # else
-		snprintf(tzbuf, sizeof(tzbuf), "%c%02d:%02d", ((ta->tm_isdst ? timezone - 3600:timezone)>0)?'-':'+', abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), abs(((ta->tm_isdst ? timezone - 3600 : timezone) % 3600) / 60));
+		snprintf(tzbuf, sizeof(tzbuf), "%c%02ld:%02ld", ((ta->tm_isdst ? timezone - 3600:timezone)>0)?'-':'+', labs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), labs(((ta->tm_isdst ? timezone - 3600 : timezone) % 3600) / 60));
 # endif
 #endif
 		if (strcmp(tzbuf,"+00:00") == 0) {

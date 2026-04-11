@@ -35,30 +35,29 @@ var_dump($res1);
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=18, args=0, vars=2, tmps=%d)
+     ; (lines=17, args=0, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s:1-27
-0000 V2 = NEW 0 string("Other")
+0000 T2 = NEW 0 string("Other")
 0001 DO_FCALL
-0002 ASSIGN CV0($o) V2
+0002 ASSIGN CV0($o) T2
 0003 INIT_FCALL 1 %d string("_test1")
 0004 SEND_VAL int(5) 1
 0005 T2 = DO_UCALL
 0006 INIT_METHOD_CALL 1 CV0($o) string("foo")
 0007 SEND_VAL_EX T2 1
-0008 V3 = DO_FCALL
-0009 T2 = QM_ASSIGN V3
-0010 INIT_STATIC_METHOD_CALL 1 string("Other") string("bar")
-0011 SEND_VAL T2 1
-0012 V2 = DO_UCALL
-0013 ASSIGN CV1($res1) V2
-0014 INIT_FCALL 1 %d string("var_dump")
-0015 SEND_VAR CV1($res1) 1
-0016 DO_ICALL
-0017 RETURN int(1)
+0008 T2 = DO_FCALL
+0009 INIT_STATIC_METHOD_CALL 1 string("Other") string("bar")
+0010 SEND_VAL T2 1
+0011 T2 = DO_UCALL
+0012 ASSIGN CV1($res1) T2
+0013 INIT_FCALL 1 %d string("var_dump")
+0014 SEND_VAR CV1($res1) 1
+0015 DO_ICALL
+0016 RETURN int(1)
 LIVE RANGES:
      2: 0001 - 0002 (new)
-     2: 0010 - 0011 (tmp/var)
+     2: 0009 - 0010 (tmp/var)
 
 _test1:
      ; (lines=4, args=1, vars=1, tmps=%d)

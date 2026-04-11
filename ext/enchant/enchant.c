@@ -264,9 +264,7 @@ PHP_FUNCTION(enchant_broker_init)
 	enchant_broker *broker;
 	EnchantBroker *pbroker;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	pbroker = enchant_broker_init();
 	if (pbroker) {
@@ -348,12 +346,10 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 		case PHP_ENCHANT_MYSPELL:
 			enchant_broker_set_param(pbroker->pbroker, "enchant.myspell.dictionary.path", value);
 			RETURN_TRUE;
-			break;
 
 		case PHP_ENCHANT_ISPELL:
 			enchant_broker_set_param(pbroker->pbroker, "enchant.ispell.dictionary.path", value);
 			RETURN_TRUE;
-			break;
 
 		default:
 			RETURN_FALSE;

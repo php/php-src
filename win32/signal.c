@@ -131,10 +131,7 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 	if (!ZEND_FCI_INITIALIZED(fci)) {
 		zval_ptr_dtor(&ctrl_handler);
 		ZVAL_UNDEF(&ctrl_handler);
-		if (!SetConsoleCtrlHandler(NULL, add)) {
-			RETURN_FALSE;
-		}
-		RETURN_TRUE;
+		RETURN_BOOL(SetConsoleCtrlHandler(NULL, add));
 	}
 
 	if (!SetConsoleCtrlHandler(NULL, FALSE) || !SetConsoleCtrlHandler(php_win32_signal_system_ctrl_handler, add)) {

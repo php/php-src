@@ -216,13 +216,13 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket)
  * match. If that fails, we try "convert.charset.*", then "convert.*"
  * This means that we don't need to clog up the hashtable with a zillion
  * charsets (for example) but still be able to provide them all as filters */
-PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
+PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
 	const php_stream_filter_factory *factory = NULL;
 	php_stream_filter *filter = NULL;
 	size_t n;
-	char *period;
+	const char *period;
 
 	n = strlen(filtername);
 
@@ -234,17 +234,17 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 
 		wildname = safe_emalloc(1, n, 3);
 		memcpy(wildname, filtername, n+1);
-		period = wildname + (period - filtername);
-		while (period && !filter) {
-			ZEND_ASSERT(period[0] == '.');
-			period[1] = '*';
-			period[2] = '\0';
+		char *new_period = wildname + (period - filtername);
+		while (new_period && !filter) {
+			ZEND_ASSERT(new_period[0] == '.');
+			new_period[1] = '*';
+			new_period[2] = '\0';
 			if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, wildname, strlen(wildname)))) {
 				filter = factory->create_filter(filtername, filterparams, persistent);
 			}
 
-			*period = '\0';
-			period = strrchr(wildname, '.');
+			*new_period = '\0';
+			new_period = strrchr(wildname, '.');
 		}
 		efree(wildname);
 	}
@@ -260,7 +260,8 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	return filter;
 }
 
-PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC)
+PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops,
+		void *abstract, bool persistent, php_stream_filter_seekable_t seekable STREAMS_DC)
 {
 	php_stream_filter *filter;
 
@@ -268,6 +269,7 @@ PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *
 	memset(filter, 0, sizeof(php_stream_filter));
 
 	filter->fops = fops;
+	filter->seekable = seekable;
 	Z_PTR(filter->abstract) = abstract;
 	filter->is_persistent = persistent;
 

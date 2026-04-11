@@ -858,9 +858,7 @@ PHP_FUNCTION(hash_algos)
 {
 	zend_string *str;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	ZEND_HASH_MAP_FOREACH_STR_KEY(&php_hash_hashtable, str) {
@@ -875,9 +873,7 @@ PHP_FUNCTION(hash_hmac_algos)
 	zend_string *str;
 	const php_hash_ops *ops;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&php_hash_hashtable, str, ops) {
@@ -1260,9 +1256,7 @@ PHP_FUNCTION(mhash_get_hash_name)
 /* {{{ Gets the number of available hashes */
 PHP_FUNCTION(mhash_count)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_LONG(MHASH_NUM_ALGOS - 1);
 }
 /* }}} */
@@ -1463,9 +1457,7 @@ PHP_METHOD(HashContext, __serialize)
 	zend_long magic = 0;
 	zval tmp;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 

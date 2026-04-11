@@ -659,6 +659,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 					SERIALIZE_STR(p->name);
 				}
 				zend_file_cache_serialize_type(&p->type, script, info, buf);
+				SERIALIZE_STR(p->doc_comment);
 				p++;
 			}
 		}
@@ -1562,6 +1563,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					UNSERIALIZE_STR(p->name);
 				}
 				zend_file_cache_unserialize_type(&p->type, (op_array->fn_flags & ZEND_ACC_CLOSURE) ? NULL : op_array->scope, script, buf);
+				UNSERIALIZE_STR(p->doc_comment);
 				p++;
 			}
 		}

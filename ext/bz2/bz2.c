@@ -402,7 +402,7 @@ unsupported_mode:
 					RETURN_FALSE;
 				}
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE();
+			default: ZEND_UNREACHABLE();
 		}
 
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_FD, (void *) &fd, REPORT_ERRORS)) {
@@ -537,18 +537,17 @@ PHP_FUNCTION(bzdecompress)
 	while ((error = BZ2_bzDecompress(&bzs)) == BZ_OK && bzs.avail_in > 0) {
 		/* compression is better then 2:1, need to allocate more memory */
 		bzs.avail_out = source_len;
-		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
+		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
 		if (UNEXPECTED(size > SIZE_MAX)) {
 			/* no reason to continue if we're going to drop it anyway */
 			break;
 		}
-
 		dest = zend_string_safe_realloc(dest, 1, bzs.avail_out+1, (size_t) size, 0);
 		bzs.next_out = ZSTR_VAL(dest) + size;
 	}
 
 	if (error == BZ_STREAM_END || error == BZ_OK) {
-		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
+		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
 		if (UNEXPECTED(size > SIZE_MAX)) {
 			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zu", SIZE_MAX);
 			zend_string_efree(dest);
@@ -595,10 +594,8 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	switch (opt) {
 		case PHP_BZ_ERRNO:
 			RETURN_LONG(errnum);
-			break;
 		case PHP_BZ_ERRSTR:
 			RETURN_STRING((char*)errstr);
-			break;
 		case PHP_BZ_ERRBOTH:
 			array_init(return_value);
 

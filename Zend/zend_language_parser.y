@@ -821,9 +821,9 @@ parameter:
 			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, NULL,
 					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL, $7); }
 	|	optional_cpp_modifiers optional_type_without_static
-		is_reference is_variadic T_VARIABLE backup_doc_comment '=' expr optional_property_hook_list
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, $8,
-					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL, $9); }
+		is_reference is_variadic T_VARIABLE '=' expr backup_doc_comment optional_property_hook_list
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, $7,
+					NULL, $8 ? zend_ast_create_zval_from_str($8) : NULL, $9); }
 ;
 
 optional_type_without_static:
@@ -1059,13 +1059,13 @@ trait_alias:
 
 trait_method_reference:
 		identifier
-			{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, NULL, $1); }
+			{ $$ = zend_ast_create(ZEND_AST_TRAIT_METHOD_REFERENCE, NULL, $1); }
 	|	absolute_trait_method_reference { $$ = $1; }
 ;
 
 absolute_trait_method_reference:
 	class_name T_PAAMAYIM_NEKUDOTAYIM identifier
-		{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, $1, $3); }
+		{ $$ = zend_ast_create(ZEND_AST_TRAIT_METHOD_REFERENCE, $1, $3); }
 ;
 
 method_body:

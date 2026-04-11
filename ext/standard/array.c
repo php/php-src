@@ -60,6 +60,7 @@
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(array)
+PHPAPI zend_class_entry *sort_direction_ce;
 
 /* {{{ php_array_init_globals */
 static void php_array_init_globals(zend_array_globals *array_globals)
@@ -620,7 +621,6 @@ PHP_FUNCTION(count)
 				cnt = php_count_recursive(Z_ARRVAL_P(array));
 			}
 			RETURN_LONG(cnt);
-			break;
 		case IS_OBJECT: {
 			zval retval;
 			/* first, we check if the handler is defined */
@@ -1527,7 +1527,7 @@ PHP_FUNCTION(array_walk_recursive)
  * 0 = return boolean
  * 1 = return key
  */
-static inline void _php_search_array(zval *return_value, zval *value, zval *array, bool strict, int behavior) /* {{{ */
+static zend_always_inline void _php_search_array(zval *return_value, zval *value, zval *array, bool strict, int behavior) /* {{{ */
 {
 	zval *entry; /* pointer to array entry */
 	zend_ulong num_idx;
@@ -2818,7 +2818,7 @@ static uint8_t php_range_process_input(const zval *input, uint32_t arg_num, zend
 			*dval = 0.0;
 			return IS_STRING;
 		}
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -4494,7 +4494,7 @@ PHP_FUNCTION(array_count_values)
 			if ((tmp = zend_hash_index_find(Z_ARRVAL_P(return_value), Z_LVAL_P(entry))) == NULL) {
 				zval data;
 				ZVAL_LONG(&data, 1);
-				zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), &data);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), &data);
 			} else {
 				Z_LVAL_P(tmp)++;
 			}
@@ -4502,7 +4502,7 @@ PHP_FUNCTION(array_count_values)
 			if ((tmp = zend_symtable_find(Z_ARRVAL_P(return_value), Z_STR_P(entry))) == NULL) {
 				zval data;
 				ZVAL_LONG(&data, 1);
-				zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
+				zend_symtable_add_new(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 			} else {
 				Z_LVAL_P(tmp)++;
 			}
@@ -4799,7 +4799,7 @@ PHP_FUNCTION(array_change_key_case)
 	zend_string *string_key;
 	zend_string *new_key;
 	zend_ulong num_key;
-	zend_long change_to_upper=0;
+	zend_long change_to_upper = PHP_CASE_LOWER;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY(array)
@@ -4807,13 +4807,18 @@ PHP_FUNCTION(array_change_key_case)
 		Z_PARAM_LONG(change_to_upper)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (change_to_upper != PHP_CASE_LOWER && change_to_upper != PHP_CASE_UPPER) {
+		zend_argument_value_error(2, "must be either CASE_LOWER or CASE_UPPER");
+		RETURN_THROWS();
+	}
+
 	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(array)));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, entry) {
 		if (!string_key) {
 			entry = zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry);
 		} else {
-			if (change_to_upper) {
+			if (change_to_upper == PHP_CASE_UPPER) {
 				new_key = zend_string_toupper(string_key);
 			} else {
 				new_key = zend_string_tolower(string_key);
@@ -5741,7 +5746,7 @@ PHP_FUNCTION(array_diff)
 {
 	zval *args;
 	uint32_t argc, i;
-	uint32_t num;
+	uint64_t num;
 	HashTable exclude;
 	zval *value;
 	zend_string *str, *tmp_str, *key;
@@ -5829,6 +5834,11 @@ PHP_FUNCTION(array_diff)
 	if (num == 0) {
 		ZVAL_COPY(return_value, &args[0]);
 		return;
+	}
+
+	if (UNEXPECTED(num >= HT_MAX_SIZE)) {
+		zend_throw_error(NULL, "The total number of elements must be lower than %u", HT_MAX_SIZE);
+		RETURN_THROWS();
 	}
 
 	ZVAL_NULL(&dummy);
@@ -6453,7 +6463,7 @@ PHP_FUNCTION(array_filter)
 	zval args[2];
 	zval retval;
 	bool have_callback = 0;
-	zend_long use_type = 0;
+	zend_long use_type = ARRAY_FILTER_USE_VALUE;
 	zend_string *string_key;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache;
@@ -6466,9 +6476,18 @@ PHP_FUNCTION(array_filter)
 		Z_PARAM_LONG(use_type)
 	ZEND_PARSE_PARAMETERS_END();
 
+	switch (use_type) {
+		case ARRAY_FILTER_USE_VALUE:
+		case ARRAY_FILTER_USE_BOTH:
+		case ARRAY_FILTER_USE_KEY:
+			break;
+		default:
+			zend_argument_value_error(3, "must be one of ARRAY_FILTER_USE_VALUE, ARRAY_FILTER_USE_KEY, or ARRAY_FILTER_USE_BOTH");
+		RETURN_THROWS();
+	}
+
 	if (zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
-		RETVAL_EMPTY_ARRAY();
-		return;
+		RETURN_EMPTY_ARRAY();
 	}
 	array_init(return_value);
 
@@ -6486,7 +6505,7 @@ PHP_FUNCTION(array_filter)
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, operand) {
 		if (have_callback) {
-			if (use_type) {
+			if (use_type != ARRAY_FILTER_USE_VALUE) {
 				/* Set up the key */
 				if (!string_key) {
 					ZVAL_LONG(key, num_key);

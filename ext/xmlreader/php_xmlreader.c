@@ -102,7 +102,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 		case IS_LONG:
 			ZVAL_LONG(rv, retint);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	return SUCCESS;
@@ -471,9 +471,7 @@ static void php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_in
 	int retval;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = ZEND_THIS;
 
@@ -495,9 +493,7 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 	char *retchar = NULL;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = ZEND_THIS;
 
@@ -575,9 +571,7 @@ PHP_METHOD(XMLReader, close)
 	zval *id;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = ZEND_THIS;
 	intern = Z_XMLREADER_P(id);
@@ -761,7 +755,7 @@ PHP_METHOD(XMLReader, moveToAttributeNo)
 }
 /* }}} */
 
-/* {{{ Positions reader at attribute spcified by name and namespaceURI.
+/* {{{ Positions reader at attribute specified by name and namespaceURI.
 Returns TRUE on success and FALSE on failure */
 PHP_METHOD(XMLReader, moveToAttributeNs)
 {
@@ -827,9 +821,7 @@ PHP_METHOD(XMLReader, read)
 	int retval;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = ZEND_THIS;
 	intern = Z_XMLREADER_P(id);

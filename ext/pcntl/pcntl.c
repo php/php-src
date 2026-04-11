@@ -185,12 +185,8 @@ ZEND_GET_MODULE(pcntl)
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
-#ifdef HAVE_STRUCT_SIGINFO_T
 static void pcntl_signal_handler(int, siginfo_t*, void*);
 static void pcntl_siginfo_to_zval(int, siginfo_t*, zval*);
-#else
-static void pcntl_signal_handler(int);
-#endif
 static void pcntl_signal_dispatch(void);
 static void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer);
 static void pcntl_interrupt_function(zend_execute_data *execute_data);
@@ -212,7 +208,7 @@ PHP_RINIT_FUNCTION(pcntl)
 	PCNTL_G(last_error) = 0;
 	PCNTL_G(num_signals) = NSIG;
 #ifdef SIGRTMAX
-	/* At least FreeBSD reports an incorrecrt NSIG that does not include realtime signals.
+	/* At least FreeBSD reports an incorrect NSIG that does not include realtime signals.
 	 * As SIGRTMAX may be a dynamic value, adjust the value in INIT. */
 	if (NSIG < SIGRTMAX + 1) {
 		PCNTL_G(num_signals) = SIGRTMAX + 1;
@@ -240,7 +236,7 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 	/* Reset all signals to their default disposition */
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(&PCNTL_G(php_signal_table), signo, handle) {
 		if (Z_TYPE_P(handle) != IS_LONG || Z_LVAL_P(handle) != (zend_long)SIG_DFL) {
-			php_signal(signo, (Sigfunc *)(zend_long)SIG_DFL, 0);
+			php_signal(signo, (Sigfunc *)(zend_long)SIG_DFL, false);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -313,6 +309,11 @@ PHP_FUNCTION(pcntl_alarm)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(seconds);
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (seconds < 0 || seconds > UINT_MAX) {
+		zend_argument_value_error(1, "must be between 0 and %u", UINT_MAX);
+		RETURN_THROWS();
+	}
 
 	RETURN_LONG((zend_long) alarm(seconds));
 }
@@ -830,7 +831,7 @@ PHP_FUNCTION(pcntl_signal)
 			zend_argument_value_error(2, "must be either SIG_DFL or SIG_IGN when an integer value is given");
 			RETURN_THROWS();
 		}
-		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == (void *)SIG_ERR) {
+		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), restart_syscalls) == (void *)SIG_ERR) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
@@ -846,15 +847,16 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_THROWS();
 	}
 
-	/* Add the function name to our signal table */
-	handle = zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
-	Z_TRY_ADDREF_P(handle);
-
+	/* Register with the OS first so that on failure we don't record a handler that was never installed */
 	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (void *)SIG_ERR) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
 	}
+
+	/* Add the function name to our signal table */
+	handle = zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
+	Z_TRY_ADDREF_P(handle);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -869,17 +871,8 @@ PHP_FUNCTION(pcntl_signal_get_handler)
 		Z_PARAM_LONG(signo)
 	ZEND_PARSE_PARAMETERS_END();
 
-	// note: max signal on mac is SIGUSR2 (31), no real time signals.
-	int sigmax = NSIG - 1;
-#if defined(SIGRTMAX)
-	// oddily enough, NSIG on freebsd reports only 32 whereas SIGRTMIN starts at 65.
-	if (sigmax < SIGRTMAX) {
-		sigmax = SIGRTMAX;
-	}
-#endif
-
-	if (signo < 1 || signo > sigmax) {
-		zend_argument_value_error(1, "must be between 1 and %d", sigmax);
+	if (signo < 1 || signo >= PCNTL_G(num_signals)) {
+		zend_argument_value_error(1, "must be between 1 and %d", PCNTL_G(num_signals) - 1);
 		RETURN_THROWS();
 	}
 
@@ -1010,8 +1003,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 /* }}} */
 #endif
 
-#ifdef HAVE_STRUCT_SIGINFO_T
-# ifdef HAVE_SIGWAITINFO
+#ifdef HAVE_SIGWAITINFO
 
 /* {{{ Synchronously wait for queued signals */
 PHP_FUNCTION(pcntl_sigwaitinfo)
@@ -1053,8 +1045,9 @@ PHP_FUNCTION(pcntl_sigwaitinfo)
 	RETURN_LONG(signal_no);
 }
 /* }}} */
-# endif
-# ifdef HAVE_SIGTIMEDWAIT
+#endif
+
+#ifdef HAVE_SIGTIMEDWAIT
 /* {{{ Wait for queued signals */
 PHP_FUNCTION(pcntl_sigtimedwait)
 {
@@ -1116,7 +1109,7 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 	RETURN_LONG(signal_no);
 }
 /* }}} */
-# endif
+#endif
 
 static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_siginfo) /* {{{ */
 {
@@ -1152,7 +1145,7 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 			case SIGFPE:
 			case SIGSEGV:
 			case SIGBUS:
-				add_assoc_double_ex(user_siginfo, "addr", sizeof("addr")-1, (zend_long)siginfo->si_addr);
+				add_assoc_long_ex(user_siginfo, "addr", sizeof("addr")-1, (zend_long)siginfo->si_addr);
 				break;
 #if defined(SIGPOLL) && !defined(__CYGWIN__)
 			case SIGPOLL:
@@ -1186,7 +1179,6 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 	}
 }
 /* }}} */
-#endif
 
 #ifdef HAVE_GETPRIORITY
 /* {{{ Get the priority of any process */
@@ -1328,11 +1320,7 @@ PHP_FUNCTION(pcntl_strerror)
 /* }}} */
 
 /* Our custom signal handler that calls the appropriate php_function */
-#ifdef HAVE_STRUCT_SIGINFO_T
 static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
-#else
-static void pcntl_signal_handler(int signo)
-#endif
 {
 	struct php_pcntl_pending_signal *psig = PCNTL_G(spares);
 	if (!psig) {
@@ -1344,9 +1332,7 @@ static void pcntl_signal_handler(int signo)
 	psig->signo = signo;
 	psig->next = NULL;
 
-#ifdef HAVE_STRUCT_SIGINFO_T
 	psig->siginfo = *siginfo;
-#endif
 
 	/* the head check is important, as the tick handler cannot atomically clear both
 	 * the head and tail */
@@ -1391,28 +1377,35 @@ void pcntl_signal_dispatch(void)
 
 	queue = PCNTL_G(head);
 	PCNTL_G(head) = NULL; /* simple stores are atomic */
+	PCNTL_G(tail) = NULL;
 
 	/* Allocate */
 	while (queue) {
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
 				ZVAL_LONG(&params[0], queue->signo);
-#ifdef HAVE_STRUCT_SIGINFO_T
 				array_init(&params[1]);
 				pcntl_siginfo_to_zval(queue->signo, &queue->siginfo, &params[1]);
-#else
-				ZVAL_NULL(&params[1]);
-#endif
 
 				/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
 				call_user_function(NULL, NULL, handle, &retval, 2, params);
 				zval_ptr_dtor(&retval);
-#ifdef HAVE_STRUCT_SIGINFO_T
 				zval_ptr_dtor(&params[1]);
-#endif
+
+				if (EG(exception)) {
+					break;
+				}
 			}
 		}
 
+		next = queue->next;
+		queue->next = PCNTL_G(spares);
+		PCNTL_G(spares) = queue;
+		queue = next;
+	}
+
+	/* drain the remaining in case of exception thrown */
+	while (queue) {
 		next = queue->next;
 		queue->next = PCNTL_G(spares);
 		PCNTL_G(spares) = queue;
@@ -1472,7 +1465,6 @@ PHP_FUNCTION(pcntl_unshare)
 			case EINVAL:
 				zend_argument_value_error(1, "must be a combination of CLONE_* flags, or at least one flag is unsupported by the kernel");
 				RETURN_THROWS();
-				break;
 #endif
 #ifdef ENOMEM
 			case ENOMEM:
@@ -1631,7 +1623,7 @@ PHP_FUNCTION(pcntl_setns)
 
 	pid = pid_is_null ? getpid() : pid;
 	fd = syscall(SYS_pidfd_open, pid, 0);
-	if (errno) {
+	if (fd == -1) {
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case EINVAL:
@@ -1657,11 +1649,12 @@ PHP_FUNCTION(pcntl_setns)
 		RETURN_FALSE;
 	}
 	ret = setns(fd, (int)nstype);
+	int setns_errno = errno;
 	close(fd);
 
 	if (ret == -1) {
-		PCNTL_G(last_error) = errno;
-		switch (errno) {
+		PCNTL_G(last_error) = setns_errno;
+		switch (setns_errno) {
 			case ESRCH:
 				zend_argument_value_error(1, "process no longer available (" ZEND_LONG_FMT ")", pid);
 				RETURN_THROWS();
@@ -1671,11 +1664,11 @@ PHP_FUNCTION(pcntl_setns)
 				RETURN_THROWS();
 
 			case EPERM:
-				php_error_docref(NULL, E_WARNING, "Error %d: No required capability for this process", errno);
+				php_error_docref(NULL, E_WARNING, "Error %d: No required capability for this process", setns_errno);
 				break;
 
 			default:
-			        php_error_docref(NULL, E_WARNING, "Error %d", errno);
+			        php_error_docref(NULL, E_WARNING, "Error %d", setns_errno);
 		}
 		RETURN_FALSE;
 	} else {
@@ -1781,6 +1774,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 
 		if (cpu < 0 || cpu >= maxcpus) {
 			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
+			PCNTL_CPU_DESTROY(mask);
 			RETURN_THROWS();
 		}
 
@@ -1823,22 +1817,22 @@ PHP_FUNCTION(pcntl_getcpu)
 #endif
 
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
-static qos_class_t qos_zval_to_lval(const zval *qos_obj)
+static qos_class_t qos_enum_to_pthread(zend_enum_Pcntl_QosClass entry)
 {
-	qos_class_t qos_class = QOS_CLASS_DEFAULT;
-	zend_string *entry = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(qos_obj)));
-
-	if (zend_string_equals_literal(entry, "UserInteractive")) {
-		qos_class = QOS_CLASS_USER_INTERACTIVE;
-	} else if (zend_string_equals_literal(entry, "UserInitiated")) {
-		qos_class = QOS_CLASS_USER_INITIATED;
-	} else if (zend_string_equals_literal(entry, "Utility")) {
-		qos_class = QOS_CLASS_UTILITY;
-	} else if (zend_string_equals_literal(entry, "Background")) {
-		qos_class = QOS_CLASS_BACKGROUND;
+	switch (entry) {
+	case ZEND_ENUM_Pcntl_QosClass_UserInteractive:
+		return QOS_CLASS_USER_INTERACTIVE;
+	case ZEND_ENUM_Pcntl_QosClass_UserInitiated:
+		return QOS_CLASS_USER_INITIATED;
+	case ZEND_ENUM_Pcntl_QosClass_Utility:
+		return QOS_CLASS_UTILITY;
+	case ZEND_ENUM_Pcntl_QosClass_Background:
+		return QOS_CLASS_BACKGROUND;
+	case ZEND_ENUM_Pcntl_QosClass_Default:
+		return QOS_CLASS_DEFAULT;
 	}
 
-	return qos_class;
+	ZEND_UNREACHABLE();
 }
 
 static zend_object *qos_lval_to_zval(qos_class_t qos_class)
@@ -1886,13 +1880,13 @@ PHP_FUNCTION(pcntl_getqos_class)
 
 PHP_FUNCTION(pcntl_setqos_class)
 {
-	zval *qos_obj;
+	zend_enum_Pcntl_QosClass qos;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS(qos_obj, QosClass_ce)
+		Z_PARAM_ENUM(qos, QosClass_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	qos_class_t qos_class = qos_zval_to_lval(qos_obj);
+	qos_class_t qos_class = qos_enum_to_pthread(qos);
 
 	if (UNEXPECTED(pthread_set_qos_class_self_np((qos_class_t)qos_class, 0) != 0))
 	{

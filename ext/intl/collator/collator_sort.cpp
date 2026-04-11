@@ -380,7 +380,7 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 	if( !hash || zend_hash_num_elements( hash ) == 0 )
 		RETURN_TRUE;
 
-	/* Create bufers */
+	/* Create buffers */
 	sortKeyBuf     = reinterpret_cast<char *>(ecalloc( sortKeyBufSize,     sizeof( char    ) ));
 	sortKeyIndxBuf = reinterpret_cast<collator_sort_key_index_t *>(ecalloc( sortKeyIndxBufSize, sizeof( uint8_t ) ));
 	utf16_buf      = eumalloc( utf16_buf_size );

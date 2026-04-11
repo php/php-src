@@ -118,12 +118,11 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 	size_t path_len = strlen(stream->orig_path);
 	char file_dirname[MAXPATHLEN];
 	struct zip *za;
-	char *fragment;
 	size_t fragment_len;
 	int err;
 	zend_string *file_basename;
 
-	fragment = strchr(path, '#');
+	const char *fragment = strchr(path, '#');
 	if (!fragment) {
 		return -1;
 	}
@@ -177,8 +176,10 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 		ssb->sb.st_ctime = sb.mtime;
 		ssb->sb.st_nlink = 1;
 		ssb->sb.st_rdev = -1;
-#ifndef PHP_WIN32
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 		ssb->sb.st_blksize = -1;
+#endif
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 		ssb->sb.st_blocks = -1;
 #endif
 		ssb->sb.st_ino = -1;
@@ -279,14 +280,13 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 
 	struct zip *za;
 	struct zip_file *zf = NULL;
-	char *fragment;
 	size_t fragment_len;
 	int err;
 
 	php_stream *stream = NULL;
 	struct php_zip_stream_data_t *self;
 
-	fragment = strchr(path, '#');
+	const char *fragment = strchr(path, '#');
 	if (!fragment) {
 		return NULL;
 	}

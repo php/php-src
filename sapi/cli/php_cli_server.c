@@ -44,7 +44,6 @@
 #include <unistd.h>
 #endif
 
-#include <signal.h>
 #include <locale.h>
 
 #ifdef HAVE_DLFCN_H
@@ -402,9 +401,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
 	php_cli_server_client *client;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	client = SG(server_context);
 
@@ -443,9 +440,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);
@@ -2653,7 +2648,7 @@ static zend_result php_cli_server_recv_event_read_request(php_cli_server *server
 		case 0:
 			php_cli_server_poller_add(&server->poller, POLLIN, client->sock);
 			return SUCCESS;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	/* Under ASAN the compiler somehow doesn't realise that the switch block always returns */
 	return FAILURE;

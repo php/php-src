@@ -393,7 +393,7 @@ typeof_op_failure: ;
 		case ZEND_SR:
 			op_sigil = ">>";
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	zend_type_error("Unsupported operand types: %s %s %s", zend_zval_type_name(op1), op_sigil, zend_zval_type_name(op2));
 	return FAILURE;
@@ -929,7 +929,7 @@ ZEND_FUNCTION(gmp_div_qr)
 		case GMP_ROUND_MINUSINF:
 			mpz_fdiv_qr(gmpnum_result1, gmpnum_result2, gmpnum_a, gmpnum_b);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 

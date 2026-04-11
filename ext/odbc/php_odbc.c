@@ -823,9 +823,7 @@ PHP_FUNCTION(odbc_close_all)
 {
 	zval *zv;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	/* Loop through the link list, now close all links and their results */
 	ZEND_HASH_FOREACH_VAL(&ODBCG(connections), zv) {
@@ -1669,7 +1667,6 @@ PHP_FUNCTION(odbc_result)
 			}
 			ZSTR_VAL(field_str)[ZSTR_LEN(field_str)] = '\0';
 			RETURN_NEW_STR(field_str);
-			break;
 
 		default:
 			if (result->values[field_ind].vallen == SQL_NULL_DATA) {

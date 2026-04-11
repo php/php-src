@@ -8,28 +8,29 @@ if (PHP_GD != "no") {
 	if (
 		CHECK_LIB("libjpeg_a.lib;libjpeg.lib", "gd", PHP_GD) &&
 		CHECK_LIB("freetype_a.lib;freetype.lib", "gd", PHP_GD) &&
-		CHECK_HEADER_ADD_INCLUDE("ft2build.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\freetype2;" + PHP_PHP_BUILD + "\\include\\freetype") &&
+		CHECK_HEADER("ft2build.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\freetype2;" + PHP_PHP_BUILD + "\\include\\freetype") &&
 		CHECK_LIB("libpng_a.lib;libpng.lib", "gd", PHP_GD) &&
-		CHECK_HEADER_ADD_INCLUDE("gd.h", "CFLAGS_GD", PHP_GD + ";ext\\gd\\libgd") &&
-		(CHECK_HEADER_ADD_INCLUDE("png.h", "CFLAGS_GD", PHP_GD +  ";" + PHP_PHP_BUILD + "\\include\\libpng16") ||
-		CHECK_HEADER_ADD_INCLUDE("png.h", "CFLAGS_GD", PHP_GD +  ";" + PHP_PHP_BUILD + "\\include\\libpng15") ||
-		CHECK_HEADER_ADD_INCLUDE("png.h", "CFLAGS_GD", PHP_GD +  ";" + PHP_PHP_BUILD + "\\include\\libpng12")) &&
+		CHECK_HEADER("gd.h", "CFLAGS_GD", PHP_GD + ";ext\\gd\\libgd") &&
+		(CHECK_HEADER("png.h", "CFLAGS_GD", PHP_GD +  ";" + PHP_PHP_BUILD + "\\include\\libpng16") ||
+		CHECK_HEADER("png.h", "CFLAGS_GD", PHP_GD +  ";" + PHP_PHP_BUILD + "\\include\\libpng15") ||
+		CHECK_HEADER("png.h", "CFLAGS_GD", PHP_GD +  ";" + PHP_PHP_BUILD + "\\include\\libpng12")) &&
 		(CHECK_LIB("libiconv_a.lib;libiconv.lib", "gd", PHP_GD) || CHECK_LIB("iconv_a.lib;iconv.lib", "gd", PHP_GD)) &&
-		 CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_GD", PHP_GD) &&
+		 CHECK_HEADER("iconv.h", "CFLAGS_GD", PHP_GD) &&
 		SETUP_ZLIB_LIB("gd", PHP_GD) &&
-		CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS", "..\\zlib;" + php_usual_include_suspects)
+		CHECK_HEADER("zlib.h", "CFLAGS", "..\\zlib;" + php_usual_include_suspects)
 		) {
+			AC_DEFINE('HAVE_ICONV_H', 1, 'Define to 1 if you have the <iconv.h> header');
 
 		if (CHECK_LIB("libXpm_a.lib", "gd", PHP_GD) &&
-			CHECK_HEADER_ADD_INCLUDE("xpm.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\X11")
+			CHECK_HEADER("xpm.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\X11")
 		) {
 			AC_DEFINE('HAVE_XPM', 1, "Define to 1 if you have the xpm library.");
 			AC_DEFINE('HAVE_GD_XPM', 1, "Define to 1 if gd extension has XPM support.");
 		}
 		if (PHP_LIBWEBP != "no") {
 			if ((CHECK_LIB("libwebp_a.lib", "gd", PHP_GD) || CHECK_LIB("libwebp.lib", "gd", PHP_GD)) &&
-				CHECK_HEADER_ADD_INCLUDE("decode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp") &&
-				CHECK_HEADER_ADD_INCLUDE("encode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp")) {
+				CHECK_HEADER("decode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp") &&
+				CHECK_HEADER("encode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp")) {
 				AC_DEFINE("HAVE_LIBWEBP", 1, "Define to 1 if you have the libwebp library.");
 				AC_DEFINE("HAVE_GD_WEBP", 1, "Define to 1 if gd extension has WebP support.");
 			} else {
@@ -39,10 +40,10 @@ if (PHP_GD != "no") {
 		if (PHP_LIBAVIF != "no") {
 			if (CHECK_LIB("avif_a.lib", "gd", PHP_GD) &&
 				CHECK_LIB("aom_a.lib", "gd", PHP_GD) &&
-				CHECK_HEADER_ADD_INCLUDE("avif.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\avif")) {
+				CHECK_HEADER("avif.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\avif")) {
 				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBAVIF /D HAVE_GD_AVIF");
 			} else if (CHECK_LIB("avif.lib", "gd", PHP_GD) &&
-				CHECK_HEADER_ADD_INCLUDE("avif.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\avif")) {
+				CHECK_HEADER("avif.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\avif")) {
 				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBAVIF /D HAVE_GD_AVIF");
 			} else {
 				WARNING("libavif not enabled; libraries and headers not found");

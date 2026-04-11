@@ -40,7 +40,7 @@ no way to pass ownership of the string without it being copied.
   unless the error is due to bad arguments, in which case only the global error
   should be set.
 
-Objects store an intl_error structed in their private data. For instance:
+Objects store an intl_error in their private data. For instance:
 
 ```c
 typedef struct {
@@ -59,7 +59,7 @@ void intl_errors_set_code(intl_error* err, UErrorCode err_code);
 void intl_errors_set(intl_error* err, UErrorCode code, char* msg, int copyMsg);
 ```
 
-by passing a pointer to the object's `intl_error` structed as the first parameter.
+by passing a pointer to the object's `intl_error` as the first parameter.
 Node the extra `s` in the functions' names (`errors`, not `error`).
 
 Static methods should only set the global error.

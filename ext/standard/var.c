@@ -228,7 +228,6 @@ again:
 			}
 			struc = Z_REFVAL_P(struc);
 			goto again;
-			break;
 		default:
 			php_printf("%sUNKNOWN:0\n", COMMON);
 			break;
@@ -674,7 +673,6 @@ again:
 		case IS_REFERENCE:
 			struc = Z_REFVAL_P(struc);
 			goto again;
-			break;
 		default:
 			smart_str_appendl(buf, "NULL", 4);
 			break;
@@ -940,7 +938,7 @@ static int php_var_serialize_get_sleep_props(
 
 		priv_name = zend_mangle_property_name(
 			ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
-			ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+			ZSTR_VAL(name), ZSTR_LEN(name), ce->type == ZEND_INTERNAL_CLASS);
 		if (php_var_serialize_try_add_sleep_prop(ht, props, priv_name, name, struc) == SUCCESS) {
 			zend_tmp_string_release(tmp_name);
 			zend_string_release(priv_name);
@@ -955,7 +953,7 @@ static int php_var_serialize_get_sleep_props(
 		}
 
 		prot_name = zend_mangle_property_name(
-			"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+			"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type == ZEND_INTERNAL_CLASS);
 		if (php_var_serialize_try_add_sleep_prop(ht, props, prot_name, name, struc) == SUCCESS) {
 			zend_tmp_string_release(tmp_name);
 			zend_string_release(prot_name);
@@ -1244,7 +1242,7 @@ again:
 				 && Z_OBJ_HT_P(struc)->get_properties_for == NULL
 				 && Z_OBJ_HT_P(struc)->get_properties == zend_std_get_properties
 				 && !zend_object_is_lazy(Z_OBJ_P(struc))) {
-					/* Optimized version without rebulding properties HashTable */
+					/* Optimized version without rebuilding properties HashTable */
 					zend_object *obj = Z_OBJ_P(struc);
 					zend_class_entry *ce = obj->ce;
 					zend_property_info *prop_info;

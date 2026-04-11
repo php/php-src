@@ -3190,6 +3190,7 @@ select_register:
 			return IR_REG_NONE;
 		}
 		if (split_pos >= blockPos[reg]) {
+try_next_available_register:
 			IR_REGSET_EXCL(available, reg);
 			if (IR_REGSET_IS_EMPTY(available)) {
 				fprintf(stderr, "LSRA Internal Error: Unsolvable conflict. Allocation is not possible\n");
@@ -3222,31 +3223,33 @@ select_register:
 				IR_LOG_LSRA_CONFLICT("      ---- Conflict with active", other, overlap);
 
 				split_pos = ir_last_use_pos_before(other, ival->range.start, IR_USE_MUST_BE_IN_REG | IR_USE_SHOULD_BE_IN_REG);
-				if (split_pos == 0) {
-					split_pos = ival->range.start;
-				}
-				split_pos = ir_find_optimal_split_position(ctx, other, split_pos, ival->range.start, 1);
-				if (split_pos > other->range.start) {
-					child = ir_split_interval_at(ctx, other, split_pos);
-					if (prev) {
-						prev->list_next = other->list_next;
+				if (split_pos) {
+					split_pos = ir_find_optimal_split_position(ctx, other, split_pos, ival->range.start, 1);
+					if (split_pos > other->range.start) {
+						child = ir_split_interval_at(ctx, other, split_pos);
+						if (prev) {
+							prev->list_next = other->list_next;
+						} else {
+							*active = other->list_next;
+						}
+						IR_LOG_LSRA("      ---- Finish", other, "");
 					} else {
-						*active = other->list_next;
+						goto try_next_available_register;
 					}
-					IR_LOG_LSRA("      ---- Finish", other, "");
 				} else {
 					child = other;
-					other->reg = IR_REG_NONE;
-					if (prev) {
-						prev->list_next = other->list_next;
-					} else {
-						*active = other->list_next;
-					}
-					IR_LOG_LSRA("      ---- Spill and Finish", other, " (it must not be in reg)");
 				}
 
 				split_pos = ir_first_use_pos_after(child, ival->range.start, IR_USE_MUST_BE_IN_REG | IR_USE_SHOULD_BE_IN_REG) - 1; // TODO: ???
 				if (split_pos > child->range.start && split_pos < child->end) {
+					if (child == other) {
+						other->reg = IR_REG_NONE;
+						if (prev) {
+							prev->list_next = other->list_next;
+						} else {
+							*active = other->list_next;
+						}
+					}
 					ir_live_pos opt_split_pos = ir_find_optimal_split_position(ctx, child, ival->range.start, split_pos, 1);
 					if (opt_split_pos > child->range.start) {
 						split_pos = opt_split_pos;
@@ -3259,6 +3262,8 @@ select_register:
 					// TODO: this may cause endless loop
 					ir_add_to_unhandled(unhandled, child);
 					IR_LOG_LSRA("      ---- Queue", child, "");
+				} else {
+					goto try_next_available_register;
 				}
 			}
 			break;
@@ -3761,14 +3766,13 @@ static void ir_set_fused_reg(ir_ctx *ctx, ir_ref root, ir_ref ref_and_op, int8_t
 {
 	char key[10];
 
-	IR_ASSERT(reg != IR_REG_NONE);
 	if (!ctx->fused_regs) {
 		ctx->fused_regs = ir_mem_malloc(sizeof(ir_strtab));
 		ir_strtab_init(ctx->fused_regs, 8, 128);
 	}
 	memcpy(key, &root, sizeof(ir_ref));
 	memcpy(key + 4, &ref_and_op, sizeof(ir_ref));
-	ir_strtab_lookup(ctx->fused_regs, key, 8, 0x10000000 | reg);
+	ir_strtab_lookup(ctx->fused_regs, key, 8, 0x10000000 | (uint8_t)reg);
 }
 
 static void assign_regs(ir_ctx *ctx)
@@ -3874,93 +3878,88 @@ static void assign_regs(ir_ctx *ctx)
 										}
 										prev_use_ref = ref;
 									}
-								} else if ((!prev_use_ref || ctx->cfg_map[prev_use_ref] != ctx->cfg_map[ref])
-								 && needs_spill_reload(ctx, ival, ctx->cfg_map[ref], available)) {
-									if (!(use_pos->flags & IR_USE_MUST_BE_IN_REG)
-									 && use_pos->hint != reg
-//									 && ctx->ir_base[ref].op != IR_CALL
-//									 && ctx->ir_base[ref].op != IR_TAILCALL) {
-									 && ctx->ir_base[ref].op != IR_SNAPSHOT
-									 && !needs_spill_load(ctx, ival, use_pos)) {
-										/* fuse spill load (valid only when register is not reused) */
-										reg = IR_REG_NONE;
-										if (use_pos->next
-										 && use_pos->op_num == 1
-										 && use_pos->next->pos == use_pos->pos
-										 && !(use_pos->next->flags & IR_USE_MUST_BE_IN_REG)) {
-											/* Support for R2 = BINOP(R1, R1) */
-											if (use_pos->hint_ref < 0) {
-												ref = -use_pos->hint_ref;
+								} else {
+									if ((!prev_use_ref || ctx->cfg_map[prev_use_ref] != ctx->cfg_map[ref])
+									 && needs_spill_reload(ctx, ival, ctx->cfg_map[ref], available)) {
+										if (!(use_pos->flags & IR_USE_MUST_BE_IN_REG)
+										 && use_pos->hint != reg
+//										 && ctx->ir_base[ref].op != IR_CALL
+//										 && ctx->ir_base[ref].op != IR_TAILCALL) {
+										 && ctx->ir_base[ref].op != IR_SNAPSHOT
+										 && !needs_spill_load(ctx, ival, use_pos)) {
+											/* fuse spill load (valid only when register is not reused) */
+											reg = IR_REG_NONE;
+											if (use_pos->next
+											 && use_pos->op_num == 1
+											 && use_pos->next->pos == use_pos->pos
+											 && !(use_pos->next->flags & IR_USE_MUST_BE_IN_REG)) {
+												/* Support for R2 = BINOP(R1, R1) */
+												if (use_pos->hint_ref < 0) {
+													ref = -use_pos->hint_ref;
+												}
+												ir_set_alocated_reg(ctx, ref, use_pos->op_num, reg);
+												use_pos = use_pos->next;
 											}
-											ir_set_alocated_reg(ctx, ref, use_pos->op_num, reg);
-											use_pos = use_pos->next;
+										} else {
+											if (top_ival->flags & IR_LIVE_INTERVAL_SPILL_SPECIAL) {
+												reg |= IR_REG_SPILL_SPECIAL;
+											} else {
+												reg |= IR_REG_SPILL_LOAD;
+											}
+											if (ctx->ir_base[ref].op != IR_SNAPSHOT && !(use_pos->flags & IR_PHI_USE)) {
+												uint32_t use_b = ctx->cfg_map[ref];
+
+												if (ir_ival_covers(ival, IR_SAVE_LIVE_POS_FROM_REF(ctx->cfg_blocks[use_b].end))) {
+													ir_bitset_incl(available, use_b);
+												}
+												prev_use_ref = ref;
+											}
 										}
 									} else {
-										if (top_ival->flags & IR_LIVE_INTERVAL_SPILL_SPECIAL) {
-											reg |= IR_REG_SPILL_SPECIAL;
-										} else {
-											reg |= IR_REG_SPILL_LOAD;
-										}
-										if (ctx->ir_base[ref].op != IR_SNAPSHOT && !(use_pos->flags & IR_PHI_USE)) {
-											uint32_t use_b = ctx->cfg_map[ref];
+										/* reuse register without spill load */
+									}
 
-											if (ir_ival_covers(ival, IR_SAVE_LIVE_POS_FROM_REF(ctx->cfg_blocks[use_b].end))) {
-												ir_bitset_incl(available, use_b);
+									if (use_pos->hint_ref < 0) {
+										if (use_pos->flags & IR_PHI_USE) {
+											IR_ASSERT(use_pos->hint_ref < 0);
+											IR_ASSERT(ctx->vregs[-use_pos->hint_ref]);
+											IR_ASSERT(ctx->live_intervals[ctx->vregs[-use_pos->hint_ref]]);
+											if (ctx->live_intervals[ctx->vregs[-use_pos->hint_ref]]->flags & IR_LIVE_INTERVAL_SPILLED) {
+												/* Spilled PHI var is passed through memory */
+												reg = IR_REG_NONE;
 											}
-											prev_use_ref = ref;
-										}
-									}
-									if (use_pos->hint_ref < 0
-									 && (old_reg = ir_get_alocated_reg(ctx, -use_pos->hint_ref, use_pos->op_num)) != IR_REG_NONE) {
-										if (top_ival->flags & IR_LIVE_INTERVAL_SPILL_SPECIAL) {
-											reg |= IR_REG_SPILL_SPECIAL;
 										} else {
-											reg |= IR_REG_SPILL_LOAD;
-										}
-										if (reg != old_reg) {
 											IR_ASSERT(ctx->rules[-use_pos->hint_ref] & IR_FUSED);
-											ctx->rules[-use_pos->hint_ref] |= IR_FUSED_REG;
-											ir_set_fused_reg(ctx, ref, -use_pos->hint_ref * sizeof(ir_ref) + use_pos->op_num, reg);
-											use_pos = use_pos->next;
-											continue;
+											old_reg = ir_get_alocated_reg(ctx, -use_pos->hint_ref, use_pos->op_num);
+											if ((old_reg != IR_REG_NONE && reg != old_reg) || reg == IR_REG_NONE) {
+												ctx->rules[-use_pos->hint_ref] |= IR_FUSED_REG;
+												ir_set_fused_reg(ctx, ref, -use_pos->hint_ref * sizeof(ir_ref) + use_pos->op_num, reg);
+												use_pos = use_pos->next;
+												continue;
+											}
 										}
+										ref = -use_pos->hint_ref;
 									}
-								} else if (use_pos->flags & IR_PHI_USE) {
-									IR_ASSERT(use_pos->hint_ref < 0);
-									IR_ASSERT(ctx->vregs[-use_pos->hint_ref]);
-									IR_ASSERT(ctx->live_intervals[ctx->vregs[-use_pos->hint_ref]]);
-									if (ctx->live_intervals[ctx->vregs[-use_pos->hint_ref]]->flags & IR_LIVE_INTERVAL_SPILLED) {
-										/* Spilled PHI var is passed through memory */
-										reg = IR_REG_NONE;
-									}
-								} else if (use_pos->hint_ref < 0
-										&& (old_reg = ir_get_alocated_reg(ctx, -use_pos->hint_ref, use_pos->op_num)) != IR_REG_NONE) {
-									if (reg != old_reg) {
-										IR_ASSERT(ctx->rules[-use_pos->hint_ref] & IR_FUSED);
-										ctx->rules[-use_pos->hint_ref] |= IR_FUSED_REG;
-										ir_set_fused_reg(ctx, ref, -use_pos->hint_ref * sizeof(ir_ref) + use_pos->op_num, reg);
-										use_pos = use_pos->next;
-										continue;
-									}
-								} else {
-									/* reuse register without spill load */
 								}
-								if (use_pos->hint_ref < 0) {
-									ref = -use_pos->hint_ref;
-								}
+
 								ir_set_alocated_reg(ctx, ref, use_pos->op_num, reg);
 
 								use_pos = use_pos->next;
 							}
-						} else if (!(top_ival->flags & IR_LIVE_INTERVAL_SPILL_SPECIAL)) {
+						} else {
 							use_pos = ival->use_pos;
 							while (use_pos) {
 								ref = IR_LIVE_POS_TO_REF(use_pos->pos);
-								if (ctx->ir_base[ref].op == IR_SNAPSHOT) {
+								if (ctx->ir_base[ref].op == IR_SNAPSHOT
+								 && !(top_ival->flags & IR_LIVE_INTERVAL_SPILL_SPECIAL)) {
 									IR_ASSERT(use_pos->hint_ref >= 0);
 									/* A reference to a CPU spill slot */
 									reg = IR_REG_SPILL_STORE | IR_REG_STACK_POINTER;
 									ir_set_alocated_reg(ctx, ref, use_pos->op_num, reg);
+								} else if (use_pos->hint_ref < 0 && !(use_pos->flags & IR_PHI_USE)) {
+									IR_ASSERT(ctx->rules[-use_pos->hint_ref] & IR_FUSED);
+									ctx->rules[-use_pos->hint_ref] |= IR_FUSED_REG;
+									ir_set_fused_reg(ctx, ref, -use_pos->hint_ref * sizeof(ir_ref) + use_pos->op_num, IR_REG_NONE);
 								}
 								use_pos = use_pos->next;
 							}

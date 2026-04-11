@@ -26,16 +26,6 @@ require_once 'skipifconnectfailure.inc';
     $fields = mysqli_fetch_fields($res);
     foreach ($fields as $k => $field) {
         var_dump($field);
-        switch ($k) {
-            case 1:
-                /* label column, result set charset */
-                if ($field->charsetnr != $charsetInfo->number) {
-                    printf("[004] Expecting charset %s/%d got %d\n",
-                        $charsetInfo->charset,
-                        $charsetInfo->number, $field->charsetnr);
-                }
-                break;
-        }
     }
 
     mysqli_free_result($res);

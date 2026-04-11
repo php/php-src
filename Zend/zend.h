@@ -144,8 +144,13 @@ struct _zend_inheritance_cache_entry {
 	zend_class_entry             *traits_and_interfaces[1];
 };
 
+C23_ENUM(zend_class_type, uint8_t) {
+	ZEND_INTERNAL_CLASS = 1,
+	ZEND_USER_CLASS = 2,
+};
+
 struct _zend_class_entry {
-	char type;
+	zend_class_type type;
 	zend_string *name;
 	/* class_entry or string depending on ZEND_ACC_LINKED */
 	union {
@@ -276,7 +281,9 @@ typedef size_t (*zend_write_func_t)(const char *str, size_t str_length);
 		EG(bailout) = &__bailout;								\
 		if (SETJMP(__bailout)==0) {
 #define zend_catch												\
+			ZEND_ASSERT(EG(bailout) == &__bailout);				\
 		} else {												\
+			ZEND_ASSERT(EG(bailout) == &__bailout);				\
 			EG(bailout) = __orig_bailout;
 #define zend_end_try()											\
 		}														\

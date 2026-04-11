@@ -254,7 +254,7 @@ static zend_off_t getStrrtokenPos(char* str, zend_off_t savedPos)
 		}
 	}
 	if(result < 1){
-		/* Just in case inavlid locale e.g. '-x-xyz' or '-sl_Latn' */
+		/* Just in case invalid locale e.g. '-x-xyz' or '-sl_Latn' */
 		result =-1;
 	}
 	return result;
@@ -362,7 +362,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , const char* t
 			if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
 				return zend_string_init(loc_name, strlen(loc_name), 0);
 			} else {
-				/* Since Grandfathered , no value , do nothing , retutn NULL */
+				/* Since Grandfathered , no value , do nothing , return NULL */
 				return NULL;
 			}
 		}
@@ -815,7 +815,7 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, const char
 			/* not lang or grandfathered tag */
 			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
 		}
-		smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
+		smart_str_append(loc_name, Z_STR_P(ele_value));
 		return SUCCESS;
 	}
 
@@ -853,7 +853,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 			add_prefix( loc_name , key_name);
 
 			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-			smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
+			smart_str_append(loc_name, Z_STR_P(ele_value));
 			return SUCCESS;
 		} else if(Z_TYPE_P(ele_value) == IS_ARRAY ) {
 			HashTable *arr = Z_ARRVAL_P(ele_value);
@@ -868,7 +868,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 					add_prefix(loc_name , key_name);
 				}
 				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-				smart_str_appendl(loc_name, Z_STRVAL_P(data) , Z_STRLEN_P(data));
+				smart_str_append(loc_name, Z_STR_P(data));
 			} ZEND_HASH_FOREACH_END();
 			return SUCCESS;
 		} else {
@@ -902,7 +902,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 					add_prefix(loc_name , cur_key_name);
 				}
 				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-				smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
+				smart_str_append(loc_name, Z_STR_P(ele_value));
 			}
 		} /* end of for */
 	} /* end of else */

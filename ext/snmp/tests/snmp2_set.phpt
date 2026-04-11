@@ -128,14 +128,22 @@ var_dump((snmpget($hostname, $communityWrite, $oid1, $timeout, $retries) === $ol
 var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $oldvalue2));
 
 echo "Multiple OID, single type in array, multiple value\n";
-$z = snmp2_set($hostname, $communityWrite, array($oid1, $oid2), array('s'), array($newvalue1, $newvalue2), $timeout, $retries);
-var_dump($z);
+try {
+    $z = snmp2_set($hostname, $communityWrite, array($oid1, $oid2), array('s'), array($newvalue1, $newvalue2), $timeout, $retries);
+    var_dump($z);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump((snmpget($hostname, $communityWrite, $oid1, $timeout, $retries) === $oldvalue1));
 var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $oldvalue2));
 
 echo "Multiple OID & type, single value in array\n";
-$z = snmp2_set($hostname, $communityWrite, array($oid1, $oid2), array('s', 's'), array($newvalue1), $timeout, $retries);
-var_dump($z);
+try {
+    $z = snmp2_set($hostname, $communityWrite, array($oid1, $oid2), array('s', 's'), array($newvalue1), $timeout, $retries);
+    var_dump($z);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump((snmpget($hostname, $communityWrite, $oid1, $timeout, $retries) === $oldvalue1));
 var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $oldvalue2));
 
@@ -167,7 +175,7 @@ var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $ol
 --EXPECTF--
 Check error handing
 No type & no value (timeout & retries instead)
-Type must be a single character
+snmp2_set(): Argument #4 ($type) must be a single character
 No value (timeout instead), retries instead of timeout
 
 Warning: snmp2_set(): Could not add variable: OID='%s' type='q' value='%i': Bad variable type ("q") in %s on line %d
@@ -216,23 +224,19 @@ Value must be of type string when object ID is a string
 bool(true)
 bool(true)
 Multiple OID, 1st wrong type
-Type must be a single character
+snmp2_set(): Argument #4 ($type) must be a single character
 bool(true)
 bool(true)
 Multiple OID, 2nd wrong type
-Type must be a single character
+snmp2_set(): Argument #4 ($type) must be a single character
 bool(true)
 bool(true)
 Multiple OID, single type in array, multiple value
-
-Warning: snmp2_set(): '%s': no type set in %s on line %d
-bool(false)
+snmp2_set(): Argument #4 ($type) must contain a type for object ID 'SNMPv2-MIB::sysLocation.0'
 bool(true)
 bool(true)
 Multiple OID & type, single value in array
-
-Warning: snmp2_set(): '%s': no value set in %s on line %d
-bool(false)
+snmp2_set(): Argument #5 ($value) must contain a value for object ID 'SNMPv2-MIB::sysLocation.0'
 bool(true)
 bool(true)
 Multiple OID, 1st bogus, single type, multiple value

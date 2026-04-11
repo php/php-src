@@ -45,7 +45,7 @@ static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend
 	}
 }
 
-void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size)
+void init_op_array(zend_op_array *op_array, zend_function_type type, int initial_ops_size)
 {
 	op_array->type = type;
 	op_array->arg_flags[0] = 0;
@@ -654,6 +654,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		for (i = 0 ; i < num_args; i++) {
 			if (arg_info[i].name) {
 				zend_string_release_ex(arg_info[i].name, 0);
+			}
+			if (arg_info[i].doc_comment) {
+				zend_string_release_ex(arg_info[i].doc_comment, 0);
 			}
 			zend_type_release(arg_info[i].type, /* persistent */ false);
 		}

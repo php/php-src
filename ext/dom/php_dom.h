@@ -54,6 +54,7 @@ extern zend_module_entry dom_module_entry;
 #include "xpath_callbacks.h"
 #include "zend_exceptions.h"
 #include "dom_ce.h"
+#include "php_dom_decl.h"
 
 /* DOM API_VERSION, please bump it up, if you change anything in the API
     therefore it's easier for the script-programmers to check, what's working how

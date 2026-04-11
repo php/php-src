@@ -151,7 +151,7 @@ static bool php_zip_extract_file(struct zip * za, char *dest, const char *file, 
 	new_state.cwd[0] = '\0';
 	new_state.cwd_length = 0;
 
-	/* Clean/normlize the path and then transform any path (absolute or relative)
+	/* Clean/normalize the path and then transform any path (absolute or relative)
 		 to a path relative to cwd (../../mydir/foo.txt > mydir/foo.txt)
 	 */
 	virtual_file_ex(&new_state, file, NULL, CWD_EXPAND);
@@ -575,6 +575,44 @@ static char * php_zipobj_get_zip_comment(ze_zip_object *obj, int *len) /* {{{ */
 }
 /* }}} */
 
+/* Close and free the zip_t */
+static bool php_zipobj_close(ze_zip_object *obj) /* {{{ */
+{
+	struct zip *intern = obj->za;
+	bool success = false;
+
+	if (intern) {
+		int err = zip_close(intern);
+		if (err) {
+			php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
+			/* Save error for property reader */
+			zip_error_t *ziperr = zip_get_error(intern);
+			obj->err_zip = zip_error_code_zip(ziperr);
+			obj->err_sys = zip_error_code_system(ziperr);
+			zip_error_fini(ziperr);
+			zip_discard(intern);
+		} else {
+			obj->err_zip = 0;
+			obj->err_sys = 0;
+		}
+		success = !err;
+	}
+
+	/* if we have a filename, we need to free it */
+	if (obj->filename) {
+		/* clear cache as empty zip are not created but deleted */
+		php_clear_stat_cache(1, obj->filename, obj->filename_len);
+
+		efree(obj->filename);
+		obj->filename = NULL;
+		obj->filename_len = 0;
+	}
+
+	obj->za = NULL;
+	return success;
+}
+/* }}} */
+
 int php_zip_glob(zend_string *spattern, zend_long flags, zval *return_value) /* {{{ */
 {
 	int cwd_skip = 0;
@@ -638,16 +676,18 @@ int php_zip_glob(zend_string *spattern, zend_long flags, zval *return_value) /* 
 
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
+		php_globfree(&globbuf);
 		return 0;
 	}
 
 	/* we assume that any glob pattern will match files from one directory only
 	   so checking the dirname of the first match should be sufficient */
 	if (ZIP_OPENBASEDIR_CHECKPATH(globbuf.gl_pathv[0])) {
+		php_globfree(&globbuf);
 		return -1;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, (uint32_t)globbuf.gl_pathc);
 	for (size_t n = 0; n < globbuf.gl_pathc; n++) {
 		/* we need to do this every time since PHP_GLOB_ONLYDIR does not guarantee that
 		 * all directories will be filtered. GNU libc documentation states the
@@ -726,7 +766,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 			return -1;
 		}
 
-		array_init(return_value);
+		array_init_size(return_value, (uint32_t)files_cnt);
 
 		/* only the files, directories are ignored */
 		for (i = 0; i < files_cnt; i++) {
@@ -1021,21 +1061,8 @@ static void php_zip_object_dtor(zend_object *object)
 static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 {
 	ze_zip_object * intern = php_zip_fetch_object(object);
-	int i;
 
-	if (intern->za) {
-		if (zip_close(intern->za) != 0) {
-			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
-			zip_discard(intern->za);
-		}
-	}
-
-	if (intern->buffers_cnt>0) {
-		for (i=0; i<intern->buffers_cnt; i++) {
-			zend_string_release(intern->buffers[i]);
-		}
-		efree(intern->buffers);
-	}
+	php_zipobj_close(intern);
 
 #ifdef HAVE_PROGRESS_CALLBACK
 	/* if not properly called by libzip */
@@ -1047,12 +1074,7 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 	php_zip_cancel_callback_free(intern);
 #endif
 
-	intern->za = NULL;
 	zend_object_std_dtor(&intern->zo);
-
-	if (intern->filename) {
-		efree(intern->filename);
-	}
 }
 /* }}} */
 
@@ -1372,12 +1394,10 @@ static void php_zip_entry_get_info(INTERNAL_FUNCTION_PARAMETERS, int opt) /* {{{
 					RETURN_STRING("imploded");
 				case 7:
 					RETURN_STRING("tokenized");
-					break;
 				case 8:
 					RETURN_STRING("deflated");
 				case 9:
 					RETURN_STRING("deflatedX");
-					break;
 				case 10:
 					RETURN_STRING("implodedX");
 				default:
@@ -1448,26 +1468,11 @@ PHP_METHOD(ZipArchive, open)
 		RETURN_FALSE;
 	}
 
-	if (ze_obj->za) {
-		/* we already have an opened zip, free it */
-		if (zip_close(ze_obj->za) != 0) {
-			php_error_docref(NULL, E_WARNING, "Empty string as source");
-			efree(resolved_path);
-			RETURN_FALSE;
-		}
-		ze_obj->za = NULL;
-	}
-	if (ze_obj->filename) {
-		efree(ze_obj->filename);
-		ze_obj->filename = NULL;
-	}
+	/* If we already have an opened zip, free it */
+	php_zipobj_close(ze_obj);
 
 	/* open for write without option to empty the archive */
-#ifdef ZIP_RDONLY
 	if ((flags & (ZIP_TRUNCATE | ZIP_RDONLY)) == 0) {
-#else
-	if ((flags & ZIP_TRUNCATE) == 0) {
-#endif
 		zend_stat_t st = {0};
 
 		/* exists and is empty */
@@ -1488,6 +1493,47 @@ PHP_METHOD(ZipArchive, open)
 	ze_obj->filename = resolved_path;
 	ze_obj->filename_len = strlen(resolved_path);
 	ze_obj->za = intern;
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ Create new read-only zip using given string */
+PHP_METHOD(ZipArchive, openString)
+{
+	zend_string *buffer;
+	zval *self = ZEND_THIS;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &buffer) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	ze_zip_object *ze_obj = Z_ZIP_P(self);
+
+	php_zipobj_close(ze_obj);
+
+	zip_error_t err;
+	zip_error_init(&err);
+
+	zip_source_t * zip_source = php_zip_create_string_source(buffer, NULL, &err);
+
+	if (!zip_source) {
+		ze_obj->err_zip = zip_error_code_zip(&err);
+		ze_obj->err_sys = zip_error_code_system(&err);
+		zip_error_fini(&err);
+		RETURN_LONG(ze_obj->err_zip);
+	}
+
+	struct zip *intern = zip_open_from_source(zip_source, ZIP_RDONLY, &err);
+	if (!intern) {
+		ze_obj->err_zip = zip_error_code_zip(&err);
+		ze_obj->err_sys = zip_error_code_system(&err);
+		zip_error_fini(&err);
+		zip_source_free(zip_source);
+		RETURN_LONG(ze_obj->err_zip);
+	}
+
+	ze_obj->za = intern;
+	zip_error_fini(&err);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1519,55 +1565,23 @@ PHP_METHOD(ZipArchive, close)
 {
 	struct zip *intern;
 	zval *self = ZEND_THIS;
-	ze_zip_object *ze_obj;
-	int err;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	ze_obj = Z_ZIP_P(self);
-
-	err = zip_close(intern);
-	if (err) {
-		php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
-		/* Save error for property reader */
-		zip_error_t *ziperr;
-
-		ziperr = zip_get_error(intern);
-		ze_obj->err_zip = zip_error_code_zip(ziperr);
-		ze_obj->err_sys = zip_error_code_system(ziperr);
-		zip_error_fini(ziperr);
-		zip_discard(intern);
-	} else {
-		ze_obj->err_zip = 0;
-		ze_obj->err_sys = 0;
-	}
-
-	/* clear cache as empty zip are not created but deleted */
-	php_clear_stat_cache(1, ze_obj->filename, ze_obj->filename_len);
-
-	efree(ze_obj->filename);
-	ze_obj->filename = NULL;
-	ze_obj->filename_len = 0;
-	ze_obj->za = NULL;
-
-	RETURN_BOOL(!err);
+	RETURN_BOOL(php_zipobj_close(Z_ZIP_P(self)));
 }
 /* }}} */
 
-/* {{{ close the zip archive */
+/* {{{ get the number of entries */
 PHP_METHOD(ZipArchive, count)
 {
 	struct zip *intern;
 	zval *self = ZEND_THIS;
 	zip_int64_t num;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZIP_FROM_OBJECT(intern, self);
 
@@ -1582,9 +1596,7 @@ PHP_METHOD(ZipArchive, clearError)
 	zval *self = ZEND_THIS;
 	ze_zip_object *ze_obj;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ze_obj = Z_ZIP_P(self); /* not ZIP_FROM_OBJECT as we can use saved error after close */
 	if (ze_obj->za) {
@@ -1602,9 +1614,7 @@ PHP_METHOD(ZipArchive, getStatusString)
 	zval *self = ZEND_THIS;
 	ze_zip_object *ze_obj;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ze_obj = Z_ZIP_P(self); /* not ZIP_FROM_OBJECT as we can use saved error after close */
 
@@ -1868,7 +1878,6 @@ PHP_METHOD(ZipArchive, addFromString)
 	size_t name_len;
 	ze_zip_object *ze_obj;
 	struct zip_source *zs;
-	int pos = 0;
 	zend_long flags = ZIP_FL_OVERWRITE;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS|l",
@@ -1879,17 +1888,7 @@ PHP_METHOD(ZipArchive, addFromString)
 	ZIP_FROM_OBJECT(intern, self);
 
 	ze_obj = Z_ZIP_P(self);
-	if (ze_obj->buffers_cnt) {
-		ze_obj->buffers = safe_erealloc(ze_obj->buffers, sizeof(*ze_obj->buffers), (ze_obj->buffers_cnt + 1), 0);
-		pos = ze_obj->buffers_cnt++;
-	} else {
-		ze_obj->buffers = emalloc(sizeof(*ze_obj->buffers));
-		ze_obj->buffers_cnt++;
-		pos = 0;
-	}
-	ze_obj->buffers[pos] = zend_string_copy(buffer);
-
-	zs = zip_source_buffer(intern, ZSTR_VAL(buffer), ZSTR_LEN(buffer), 0);
+	zs = php_zip_create_string_source(buffer, NULL, NULL);
 
 	if (zs == NULL) {
 		RETURN_FALSE;
@@ -2657,9 +2656,7 @@ PHP_METHOD(ZipArchive, unchangeAll)
 	struct zip *intern;
 	zval *self = ZEND_THIS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZIP_FROM_OBJECT(intern, self);
 
@@ -2673,9 +2670,7 @@ PHP_METHOD(ZipArchive, unchangeArchive)
 	struct zip *intern;
 	zval *self = ZEND_THIS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZIP_FROM_OBJECT(intern, self);
 

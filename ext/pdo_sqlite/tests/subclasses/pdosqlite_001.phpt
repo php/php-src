@@ -9,8 +9,8 @@ $db = new Pdo\Sqlite('sqlite::memory:');
 
 $db->query('CREATE TABLE pdosqlite_001 (id INT AUTO INCREMENT, name TEXT)');
 
-$db->query('INSERT INTO pdosqlite_001 VALUES (NULL, "PHP")');
-$db->query('INSERT INTO pdosqlite_001 VALUES (NULL, "PHP6")');
+$db->query("INSERT INTO pdosqlite_001 VALUES (NULL, 'PHP')");
+$db->query("INSERT INTO pdosqlite_001 VALUES (NULL, 'PHP6')");
 
 $db->createFunction('testing', function($v) { return strtolower($v); }, 1, Pdo\Sqlite::DETERMINISTIC);
 

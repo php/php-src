@@ -364,6 +364,7 @@ lxb_html_tokenizer_state_script_data_end_tag_name(lxb_html_tokenizer_t *tkz,
                 if (lexbor_str_res_alpha_character[*data]
                     == LEXBOR_STR_RES_SLIP)
                 {
+                    lxb_html_tokenizer_state_append_data_m(tkz, data);
                     goto anything_else;
                 }
 

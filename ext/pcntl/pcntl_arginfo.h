@@ -1,5 +1,6 @@
 /* This is a generated file, edit pcntl.stub.php instead.
- * Stub hash: 5e4b066d70fa264c7de3ba4b2113369c34c33e43 */
+ * Stub hash: 04e7b30c6fb23cf6ce6bc26fe094fd5b4dbfe826
+ * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -48,7 +49,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_sigprocmask, 0, 2, _IS_BOO
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
+#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigwaitinfo, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, signals, IS_ARRAY, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
@@ -184,7 +185,7 @@ ZEND_FUNCTION(pcntl_signal_dispatch);
 #if defined(HAVE_SIGPROCMASK)
 ZEND_FUNCTION(pcntl_sigprocmask);
 #endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
+#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 ZEND_FUNCTION(pcntl_sigwaitinfo);
 ZEND_FUNCTION(pcntl_sigtimedwait);
 #endif
@@ -245,7 +246,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_SIGPROCMASK)
 	ZEND_FE(pcntl_sigprocmask, arginfo_pcntl_sigprocmask)
 #endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
+#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	ZEND_FE(pcntl_sigwaitinfo, arginfo_pcntl_sigwaitinfo)
 	ZEND_FE(pcntl_sigtimedwait, arginfo_pcntl_sigtimedwait)
 #endif

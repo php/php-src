@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
 
 /* array.c */
 
@@ -87,6 +90,11 @@ const SORT_NATURAL = UNKNOWN;
  */
 const SORT_FLAG_CASE = UNKNOWN;
 
+enum SortDirection {
+    case Ascending;
+    case Descending;
+}
+
 /**
  * @var int
  * @cvalue PHP_CASE_LOWER
@@ -109,6 +117,11 @@ const COUNT_NORMAL = UNKNOWN;
  */
 const COUNT_RECURSIVE = UNKNOWN;
 
+/**
+ * @var int
+ * @cvalue ARRAY_FILTER_USE_VALUE
+ */
+const ARRAY_FILTER_USE_VALUE = UNKNOWN;
 /**
  * @var int
  * @cvalue ARRAY_FILTER_USE_BOTH
@@ -1866,7 +1879,7 @@ function array_product(array $array): int|float {}
 
 function array_reduce(array $array, callable $callback, mixed $initial = null): mixed {}
 
-function array_filter(array $array, ?callable $callback = null, int $mode = 0): array {}
+function array_filter(array $array, ?callable $callback = null, int $mode = ARRAY_FILTER_USE_VALUE): array {}
 
 function array_find(array $array, callable $callback): mixed {}
 
@@ -2310,16 +2323,16 @@ function strcoll(string $string1, string $string2): int {}
  * @frameless-function {"arity": 1}
  * @frameless-function {"arity": 2}
  */
-function trim(string $string, string $characters = " \n\r\t\v\0"): string {}
+function trim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /** @compile-time-eval */
-function rtrim(string $string, string $characters = " \n\r\t\v\0"): string {}
+function rtrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /** @alias rtrim */
-function chop(string $string, string $characters = " \n\r\t\v\0"): string {}
+function chop(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /** @compile-time-eval */
-function ltrim(string $string, string $characters = " \n\r\t\v\0"): string {}
+function ltrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /**
  * @compile-time-eval

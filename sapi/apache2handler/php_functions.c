@@ -41,7 +41,6 @@
 #include "http_log.h"
 #include "http_main.h"
 #include "util_script.h"
-#include "http_core.h"
 #include "ap_mpm.h"
 #ifndef PHP_WIN32
 #include "unixd.h"
@@ -173,19 +172,17 @@ PHP_FUNCTION(apache_request_headers)
 	const apr_array_header_t *arr;
 	char *key, *val;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
 	ctx = SG(server_context);
 	arr = apr_table_elts(ctx->r->headers_in);
 
-	APR_ARRAY_FOREACH_OPEN(arr, key, val)
+	APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 		if (!val) val = "";
 		add_assoc_string(return_value, key, val);
-	APR_ARRAY_FOREACH_CLOSE()
+	} APR_ARRAY_FOREACH_CLOSE();
 }
 /* }}} */
 
@@ -196,19 +193,17 @@ PHP_FUNCTION(apache_response_headers)
 	const apr_array_header_t *arr;
 	char *key, *val;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
 	ctx = SG(server_context);
 	arr = apr_table_elts(ctx->r->headers_out);
 
-	APR_ARRAY_FOREACH_OPEN(arr, key, val)
+	APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 		if (!val) val = "";
 		add_assoc_string(return_value, key, val);
-	APR_ARRAY_FOREACH_CLOSE()
+	} APR_ARRAY_FOREACH_CLOSE();
 }
 /* }}} */
 
@@ -416,12 +411,12 @@ PHP_MINFO_FUNCTION(apache)
 		SECTION("Apache Environment");
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
-		APR_ARRAY_FOREACH_OPEN(arr, key, val)
+		APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 			if (!val) {
 				val = "";
 			}
 			php_info_print_table_row(2, key, val);
-		APR_ARRAY_FOREACH_CLOSE()
+		} APR_ARRAY_FOREACH_CLOSE();
 
 		php_info_print_table_end();
 
@@ -431,21 +426,21 @@ PHP_MINFO_FUNCTION(apache)
 		php_info_print_table_row(2, "HTTP Request", ((php_struct *) SG(server_context))->r->the_request);
 
 		arr = apr_table_elts(((php_struct *) SG(server_context))->r->headers_in);
-		APR_ARRAY_FOREACH_OPEN(arr, key, val)
+		APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 			if (!val) {
 				val = "";
 			}
 		        php_info_print_table_row(2, key, val);
-		APR_ARRAY_FOREACH_CLOSE()
+		} APR_ARRAY_FOREACH_CLOSE();
 
 		php_info_print_table_colspan_header(2, "HTTP Response Headers");
 		arr = apr_table_elts(((php_struct *) SG(server_context))->r->headers_out);
-		APR_ARRAY_FOREACH_OPEN(arr, key, val)
+		APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 			if (!val) {
 				val = "";
 			}
 		        php_info_print_table_row(2, key, val);
-		APR_ARRAY_FOREACH_CLOSE()
+		} APR_ARRAY_FOREACH_CLOSE();
 
 		php_info_print_table_end();
 	}

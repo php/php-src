@@ -35,7 +35,7 @@
 #include <fcntl.h>
 #endif
 
-#ifdef HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NP
+#if defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NP) || defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR)
 /* Only defined on glibc >= 2.29, FreeBSD CURRENT, musl >= 1.1.24,
  * MacOS Catalina or later..
  * It should be possible to modify this so it is also
@@ -45,6 +45,13 @@
  */
 #include <spawn.h>
 #define USE_POSIX_SPAWN
+
+/* The non-_np variant is in macOS 26 (and _np deprecated) */
+#ifdef HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir
+#else
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir_np
+#endif
 #endif
 
 /* This symbol is defined in ext/standard/config.m4.
@@ -1017,7 +1024,7 @@ static zend_result redirect_proc_descriptor(descriptorspec_item *desc, int targe
 			case 0: redirect_to = GetStdHandle(STD_INPUT_HANDLE); break;
 			case 1: redirect_to = GetStdHandle(STD_OUTPUT_HANDLE); break;
 			case 2: redirect_to = GetStdHandle(STD_ERROR_HANDLE); break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 #endif
 	}
@@ -1394,9 +1401,9 @@ PHP_FUNCTION(proc_open)
 	}
 
 	if (cwd) {
-		r = posix_spawn_file_actions_addchdir_np(&factions, cwd);
+		r = POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR(&factions, cwd);
 		if (r != 0) {
-			php_error_docref(NULL, E_WARNING, "posix_spawn_file_actions_addchdir_np() failed: %s", strerror(r));
+			php_error_docref(NULL, E_WARNING, ZEND_TOSTR(POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR) "() failed: %s", strerror(r));
 		}
 	}
 

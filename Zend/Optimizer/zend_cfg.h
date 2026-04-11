@@ -44,8 +44,8 @@ typedef struct _zend_basic_block {
 	uint32_t          flags;
 	uint32_t          start;              /* first opcode number         */
 	uint32_t          len;                /* number of opcodes           */
-	int               successors_count;   /* number of successors        */
-	int               predecessors_count; /* number of predecessors      */
+	uint32_t          successors_count;   /* number of successors        */
+	uint32_t          predecessors_count; /* number of predecessors      */
 	int               predecessor_offset; /* offset of 1-st predecessor, or -1 */
 	int               idom;               /* immediate dominator block, or -1  */
 	int               loop_header;        /* closest loop header, or -1  */
@@ -82,8 +82,8 @@ typedef struct _zend_basic_block {
 */
 
 typedef struct _zend_cfg {
-	int               blocks_count;       /* number of basic blocks      */
-	int               edges_count;        /* number of edges             */
+	uint32_t          blocks_count;       /* number of basic blocks      */
+	uint32_t          edges_count;        /* number of edges             */
 	zend_basic_block *blocks;             /* array of basic blocks       */
 	int              *predecessors;
 	uint32_t         *map;

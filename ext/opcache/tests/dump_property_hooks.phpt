@@ -39,9 +39,9 @@ $_main:
      ; (lines=10, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %sdump_property_hooks.php:1-22
-0000 V1 = NEW 0 string("A")
+0000 T1 = NEW 0 string("A")
 0001 DO_FCALL
-0002 ASSIGN CV0($a) V1
+0002 ASSIGN CV0($a) T1
 0003 INIT_FCALL 1 %d string("var_dump")
 0004 T1 = FETCH_OBJ_R CV0($a) string("prop")
 0005 SEND_VAL T1 1

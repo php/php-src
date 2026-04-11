@@ -235,7 +235,7 @@ and not in the INI section. This is because of the order in which settings are c
 
    date_default_timezone_set() -> TZ environmental -> INI setting -> System Setting
 
-If a TZ environmental varaibale is found the INI setting will be ignored.
+If a TZ environmental variable is found the INI setting will be ignored.
 
 Tests that run, or only have have matching EXPECT output, on 32bit platforms can use a SKIPIF
 section like:

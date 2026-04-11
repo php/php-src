@@ -504,10 +504,8 @@ void php_openssl_set_cert_locations(zval *return_value)
 	add_assoc_string(return_value, "default_cert_dir_env", (char *) X509_get_default_cert_dir_env());
 	add_assoc_string(return_value, "default_private_dir", (char *) X509_get_default_private_dir());
 	add_assoc_string(return_value, "default_default_cert_area", (char *) X509_get_default_cert_area());
-	add_assoc_string(return_value, "ini_cafile",
-		zend_ini_string("openssl.cafile", sizeof("openssl.cafile")-1, 0));
-	add_assoc_string(return_value, "ini_capath",
-		zend_ini_string("openssl.capath", sizeof("openssl.capath")-1, 0));
+	add_assoc_str(return_value, "ini_cafile", zend_string_copy(zend_ini_str_literal("openssl.cafile")));
+	add_assoc_str(return_value, "ini_capath", zend_string_copy(zend_ini_str_literal("openssl.capath")));
 }
 
 X509 *php_openssl_x509_from_str(
@@ -692,21 +690,13 @@ STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 	X509_INFO *xi;
 	char cert_path[MAXPATHLEN];
 
-	if(!(stack = sk_X509_new_null())) {
-		php_openssl_store_errors();
-		php_error_docref(NULL, E_ERROR, "Memory allocation failure");
-		goto end;
-	}
-
 	if (!php_openssl_check_path(cert_file, cert_file_len, cert_path, arg_num)) {
-		sk_X509_free(stack);
 		goto end;
 	}
 
 	if (!(in = BIO_new_file(cert_path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY)))) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Error opening the file, %s", cert_path);
-		sk_X509_free(stack);
 		goto end;
 	}
 
@@ -714,7 +704,11 @@ STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 	if (!(sk = php_openssl_pem_read_bio_x509_info(in))) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Error reading the file, %s", cert_path);
-		sk_X509_free(stack);
+		goto end;
+	}
+
+	if(!(stack = sk_X509_new_reserve(NULL, sk_X509_INFO_num(sk)))) {
+		php_openssl_store_errors();
 		goto end;
 	}
 
@@ -752,6 +746,7 @@ int php_openssl_check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedch
 		return 0;
 	}
 	if (!X509_STORE_CTX_init(csc, ctx, x, untrustedchain)) {
+		X509_STORE_CTX_free(csc);
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Certificate store initialization failed");
 		return 0;
@@ -864,6 +859,9 @@ STACK_OF(X509) *php_openssl_array_to_X509_sk(zval * zcerts, uint32_t arg_num, co
 	bool free_cert;
 
 	sk = sk_X509_new_null();
+	if (sk == NULL) {
+		goto clean_exit;
+	}
 
 	/* get certs */
 	if (Z_TYPE_P(zcerts) == IS_ARRAY) {
@@ -883,7 +881,10 @@ STACK_OF(X509) *php_openssl_array_to_X509_sk(zval * zcerts, uint32_t arg_num, co
 				}
 
 			}
-			sk_X509_push(sk, cert);
+			if (sk_X509_push(sk, cert) <= 0) {
+				X509_free(cert);
+				goto push_fail_exit;
+			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* a single certificate */
@@ -901,11 +902,20 @@ STACK_OF(X509) *php_openssl_array_to_X509_sk(zval * zcerts, uint32_t arg_num, co
 				goto clean_exit;
 			}
 		}
-		sk_X509_push(sk, cert);
+		if (sk_X509_push(sk, cert) <= 0) {
+			X509_free(cert);
+			goto push_fail_exit;
+		}
 	}
 
 clean_exit:
 	return sk;
+
+push_fail_exit:
+	php_openssl_store_errors();
+	php_openssl_sk_X509_free(sk);
+	sk = NULL;
+	goto clean_exit;
 }
 
 zend_result php_openssl_csr_add_subj_entry(zval *item, X509_NAME *subj, int nid)
@@ -1078,13 +1088,15 @@ zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ * csr, 
 				}
 			}
 		}
+
+		if (!X509_REQ_set_pubkey(csr, req->priv_key)) {
+			php_openssl_store_errors();
+		}
 	} else {
 		php_openssl_store_errors();
+		return FAILURE;
 	}
 
-	if (!X509_REQ_set_pubkey(csr, req->priv_key)) {
-		php_openssl_store_errors();
-	}
 	return SUCCESS;
 }
 
@@ -1433,7 +1445,10 @@ static const char *php_openssl_get_evp_pkey_name(int key_type) {
 
 EVP_PKEY *php_openssl_generate_private_key(struct php_x509_request * req)
 {
-	if (req->priv_key_bits < MIN_KEY_LENGTH) {
+	if ((req->priv_key_type == OPENSSL_KEYTYPE_RSA ||
+			req->priv_key_type == OPENSSL_KEYTYPE_DH ||
+			req->priv_key_type == OPENSSL_KEYTYPE_DSA) &&
+			req->priv_key_bits < MIN_KEY_LENGTH) {
 		php_error_docref(NULL, E_WARNING, "Private key length must be at least %d bits, configured to %d",
 			MIN_KEY_LENGTH, req->priv_key_bits);
 		return NULL;
@@ -1505,7 +1520,7 @@ EVP_PKEY *php_openssl_generate_private_key(struct php_x509_request * req)
 		case EVP_PKEY_ED448:
 			break;
 #endif
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 		}
 
 		if (EVP_PKEY_paramgen(ctx, &params) <= 0) {
