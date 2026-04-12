@@ -624,44 +624,46 @@ ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_long_slow(const zval *arg, zend_l
 	return zend_parse_arg_long_weak(arg, dest, arg_num);
 }
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, double *dest, uint32_t arg_num) /* {{{ */
+ZEND_API double ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, uint32_t arg_num) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
-		*dest = (double)Z_LVAL_P(arg);
+		return Z_LVAL_P(arg);
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		zend_long l;
+		double dval;
 		uint8_t type;
 
-		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), &l, dest)) != IS_DOUBLE)) {
+		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), &l, &dval)) != IS_DOUBLE)) {
 			if (EXPECTED(type != 0)) {
-				*dest = (double)(l);
+				return (double)(l);
 			} else {
-				return 0;
+				return NAN;
 			}
+		} else {
+			return dval;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
 		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("float", arg_num)) {
-			return 0;
+			return NAN;
 		}
-		*dest = 0.0;
+		return 0.0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
-		*dest = 1.0;
+		return 1.0;
 	} else {
-		return 0;
+		return NAN;
 	}
-	return 1;
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_slow(const zval *arg, double *dest, uint32_t arg_num) /* {{{ */
+ZEND_API double ZEND_FASTCALL zend_parse_arg_double_slow(const zval *arg, uint32_t arg_num) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		/* SSTH Exception: IS_LONG may be accepted instead as IS_DOUBLE */
-		*dest = (double)Z_LVAL_P(arg);
+		return (double)Z_LVAL_P(arg);
 	} else if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
-		return 0;
+		return NAN;
 	}
-	return zend_parse_arg_double_weak(arg, dest, arg_num);
+	return zend_parse_arg_double_weak(arg, arg_num);
 }
 /* }}} */
 

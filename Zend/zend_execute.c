@@ -759,10 +759,13 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 			return false;
 		}
 	}
-	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, 0)) {
-		zval_ptr_dtor(arg);
-		ZVAL_DOUBLE(arg, dval);
-		return true;
+	if (type_mask & MAY_BE_DOUBLE) {
+		dval = zend_parse_arg_double_weak(arg, 0);
+		if (EXPECTED(!zend_isnan(dval))) {
+			zval_ptr_dtor(arg);
+			ZVAL_DOUBLE(arg, dval);
+			return true;
+		}
 	}
 	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(arg, 0)) {
 		/* on success "arg" is converted to IS_STRING */
@@ -792,7 +795,6 @@ static bool can_convert_to_string(const zval *zv) {
 static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, const zval *arg)
 {
 	zend_long lval;
-	double dval;
 	bool bval;
 
 	/* Pass (uint32_t)-1 as arg_num to indicate to ZPP not to emit any deprecation notice,
@@ -800,7 +802,7 @@ static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, 
 	if ((type_mask & MAY_BE_LONG) && zend_parse_arg_long_weak(arg, &lval, (uint32_t)-1)) {
 		return true;
 	}
-	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, (uint32_t)-1)) {
+	if ((type_mask & MAY_BE_DOUBLE) && !zend_isnan(zend_parse_arg_double_weak(arg, (uint32_t)-1))) {
 		return true;
 	}
 	if ((type_mask & MAY_BE_STRING) && can_convert_to_string(arg)) {
