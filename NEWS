@@ -31,6 +31,10 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fix a bunch of memory leaks and crashes on edge cases. (ndossche)
 
+- Random:
+  . Fixed bug GH-21731 (Random\Engine\Xoshiro256StarStar::__unserialize()
+    accepts all-zero state). (iliaal)
+
 - SPL:
   . Fixed bug GH-21499 (RecursiveArrayIterator getChildren UAF after parent
     free). (Girgias)
