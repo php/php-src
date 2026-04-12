@@ -6047,8 +6047,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		strict = EX_USES_STRICT_TYPES();
 		do {
 			if (EXPECTED(!strict)) {
-				zend_string *str;
 				zval tmp;
+				zend_string *str;
 
 				if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
 					zend_error(E_DEPRECATED,
@@ -6061,7 +6061,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 				}
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str, 1)) {
+				if ((str = zend_parse_arg_str_weak(&tmp, 1)) != NULL) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
@@ -18131,8 +18131,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_STRLEN_SPEC_T
 		strict = EX_USES_STRICT_TYPES();
 		do {
 			if (EXPECTED(!strict)) {
-				zend_string *str;
 				zval tmp;
+				zend_string *str;
 
 				if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
 					zend_error(E_DEPRECATED,
@@ -18145,7 +18145,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_STRLEN_SPEC_T
 				}
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str, 1)) {
+				if ((str = zend_parse_arg_str_weak(&tmp, 1)) != NULL) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
@@ -40722,8 +40722,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_STRLEN_SPEC_C
 		strict = EX_USES_STRICT_TYPES();
 		do {
 			if (EXPECTED(!strict)) {
-				zend_string *str;
 				zval tmp;
+				zend_string *str;
 
 				if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
 					zend_error(E_DEPRECATED,
@@ -40736,7 +40736,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_STRLEN_SPEC_C
 				}
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str, 1)) {
+				if ((str = zend_parse_arg_str_weak(&tmp, 1)) != NULL) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
@@ -58683,8 +58683,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_STRLE
 		strict = EX_USES_STRICT_TYPES();
 		do {
 			if (EXPECTED(!strict)) {
-				zend_string *str;
 				zval tmp;
+				zend_string *str;
 
 				if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
 					zend_error(E_DEPRECATED,
@@ -58697,7 +58697,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_STRLE
 				}
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str, 1)) {
+				if ((str = zend_parse_arg_str_weak(&tmp, 1)) != NULL) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
@@ -70665,8 +70665,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_STRLEN_SPEC_TMP_TA
 		strict = EX_USES_STRICT_TYPES();
 		do {
 			if (EXPECTED(!strict)) {
-				zend_string *str;
 				zval tmp;
+				zend_string *str;
 
 				if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
 					zend_error(E_DEPRECATED,
@@ -70679,7 +70679,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_STRLEN_SPEC_TMP_TA
 				}
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str, 1)) {
+				if ((str = zend_parse_arg_str_weak(&tmp, 1)) != NULL) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
@@ -93156,8 +93156,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_STRLEN_SPEC_CV_TAI
 		strict = EX_USES_STRICT_TYPES();
 		do {
 			if (EXPECTED(!strict)) {
-				zend_string *str;
 				zval tmp;
+				zend_string *str;
 
 				if (UNEXPECTED(Z_TYPE_P(value) == IS_NULL)) {
 					zend_error(E_DEPRECATED,
@@ -93170,7 +93170,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_STRLEN_SPEC_CV_TAI
 				}
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str, 1)) {
+				if ((str = zend_parse_arg_str_weak(&tmp, 1)) != NULL) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
