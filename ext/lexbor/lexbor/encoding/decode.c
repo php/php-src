@@ -2907,42 +2907,51 @@ lxb_encoding_decode_valid_utf_8_single(const lxb_char_t **data,
     else if ((*p & 0xe0) == 0xc0) {
         /* 110xxxxx 10xxxxxx */
 
-        if (end - p < 2) {
-            *data = end;
+        if (*p < 0xC2 || end - p < 2 || (p[1] & 0xC0) != 0x80) {
+            (*data) = (end - p < 2) ? end : *data + 1;
             return LXB_ENCODING_DECODE_ERROR;
         }
 
-        cp  = (p[0] ^ (0xC0 & p[0])) << 6;
-        cp |= (p[1] ^ (0x80 & p[1]));
+        cp  = (*p & 0x1F) << 6;
+        cp |= (p[1] & 0x3F);
 
         (*data) += 2;
     }
     else if ((*p & 0xf0) == 0xe0) {
         /* 1110xxxx 10xxxxxx 10xxxxxx */
 
-        if (end - p < 3) {
-            *data = end;
+        if (end - p < 3
+            || (p[1] & 0xC0) != 0x80 || (p[2] & 0xC0) != 0x80
+            || (*p == 0xE0 && p[1] < 0xA0)
+            || (*p == 0xED && p[1] > 0x9F))
+        {
+            (*data) = (end - p < 3) ? end : *data + 1;
             return LXB_ENCODING_DECODE_ERROR;
         }
 
-        cp  = (p[0] ^ (0xE0 & p[0])) << 12;
-        cp |= (p[1] ^ (0x80 & p[1])) << 6;
-        cp |= (p[2] ^ (0x80 & p[2]));
+        cp  = (*p & 0x0F) << 12;
+        cp |= (p[1] & 0x3F) << 6;
+        cp |= (p[2] & 0x3F);
 
         (*data) += 3;
     }
     else if ((*p & 0xf8) == 0xf0) {
         /* 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx */
 
-        if (end - p < 4) {
-            *data = end;
+        if (*p > 0xF4 || end - p < 4
+            || (p[1] & 0xC0) != 0x80 || (p[2] & 0xC0) != 0x80
+            || (p[3] & 0xC0) != 0x80
+            || (*p == 0xF0 && p[1] < 0x90)
+            || (*p == 0xF4 && p[1] > 0x8F))
+        {
+            (*data) = (end - p < 4) ? end : *data + 1;
             return LXB_ENCODING_DECODE_ERROR;
         }
 
-        cp  = (p[0] ^ (0xF0 & p[0])) << 18;
-        cp |= (p[1] ^ (0x80 & p[1])) << 12;
-        cp |= (p[2] ^ (0x80 & p[2])) << 6;
-        cp |= (p[3] ^ (0x80 & p[3]));
+        cp  = (*p & 0x07) << 18;
+        cp |= (p[1] & 0x3F) << 12;
+        cp |= (p[2] & 0x3F) << 6;
+        cp |= (p[3] & 0x3F);
 
         (*data) += 4;
     }
