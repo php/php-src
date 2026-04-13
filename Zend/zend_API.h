@@ -2179,10 +2179,10 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 
 /* Inlined implementations shared by new and old parameter parsing APIs */
 
-typedef enum ZPP_PARSE_BOOL_STATUS {
-	ZPP_PARSE_AS_FALSE = 0,
-	ZPP_PARSE_AS_TRUE = 1,
-	ZPP_PARSE_ERROR = 2,
+typedef enum zpp_parse_bool_status {
+	ZPP_PARSE_BOOL_STATUS_FALSE = 0,
+	ZPP_PARSE_BOOL_STATUS_TRUE = 1,
+	ZPP_PARSE_BOOL_STATUS_ERROR = 2,
 } zpp_parse_bool_status;
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null);
@@ -2221,7 +2221,7 @@ static zend_always_inline bool zend_parse_arg_bool_ex(const zval *arg, bool *des
 		} else {
 			result = zend_parse_arg_bool_slow(arg, arg_num);
 		}
-		if (UNEXPECTED(result == ZPP_PARSE_ERROR)) {
+		if (UNEXPECTED(result == ZPP_PARSE_BOOL_STATUS_ERROR)) {
 			return false;
 		}
 		*dest = result;
@@ -2307,19 +2307,14 @@ static zend_always_inline bool zend_parse_arg_str_ex(zval *arg, zend_string **de
 	} else if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 		*dest = NULL;
 	} else {
-		zend_string *str;
 		if (frameless) {
-			str = zend_flf_parse_arg_str_slow(arg, arg_num);
+			*dest = zend_flf_parse_arg_str_slow(arg, arg_num);
 		} else {
-			str = zend_parse_arg_str_slow(arg, arg_num);
+			*dest = zend_parse_arg_str_slow(arg, arg_num);
 		}
-		if (str) {
-			*dest = str;
-		} else {
-			return 0;
-		}
+		return *dest != NULL;
 	}
-	return 1;
+	return true;
 }
 
 static zend_always_inline bool zend_parse_arg_str(zval *arg, zend_string **dest, bool check_null, uint32_t arg_num)

@@ -772,7 +772,7 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 	}
 	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
 		zpp_parse_bool_status bval = zend_parse_arg_bool_weak(arg, 0);
-		if (UNEXPECTED(bval == ZPP_PARSE_ERROR)) {
+		if (UNEXPECTED(bval == ZPP_PARSE_BOOL_STATUS_ERROR)) {
 			return false;
 		}
 		zval_ptr_dtor(arg);
@@ -810,7 +810,7 @@ static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, 
 	if ((type_mask & MAY_BE_STRING) && can_convert_to_string(arg)) {
 		return true;
 	}
-	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, (uint32_t)-1) != ZPP_PARSE_ERROR) {
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, (uint32_t)-1) != ZPP_PARSE_BOOL_STATUS_ERROR) {
 		return true;
 	}
 	return false;
