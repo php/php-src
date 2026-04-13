@@ -47,24 +47,17 @@
 #define USE_POSIX_SPAWN
 
 /* The non-_np variant is in macOS 26 (and _np deprecated) */
-#if defined(__APPLE__) && defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR) && \
-    defined(MAC_OS_X_VERSION_MIN_REQUIRED) && MAC_OS_X_VERSION_MIN_REQUIRED >= 260000
-    #define USE_ADDCHDIR posix_spawn_file_actions_addchdir
+# if defined(MAC_OS_X_VERSION_MIN_REQUIRED) && MAC_OS_X_VERSION_MIN_REQUIRED >= 260000
+	#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir
+# else
+	#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir_np
+# endif
+#elif defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR)
+	#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir
 #else
-    #define USE_ADDCHDIR posix_spawn_file_actions_addchdir_np
+	#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir_np
 #endif
 
-static inline int php_spawn_addchdir(
-    posix_spawn_file_actions_t *factions,
-    const char *cwd
-) {
-    return USE_ADDCHDIR(factions, cwd);
-}
-
-#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR(f, d) \
-    php_spawn_addchdir((f), (d))
-
-#endif
 
 /* This symbol is defined in ext/standard/config.m4.
  * Essentially, it is set if you HAVE_FORK || PHP_WIN32
