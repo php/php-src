@@ -1,7 +1,7 @@
 /* This is a generated file, edit php_uuid.stub.php instead.
- * Stub hash: 9790e590a93d0655813a42ff74b424942df03628 */
+ * Stub hash: 441fb7588f8f1f43517242156d1d18453f08bea6 */
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uuid_UuidV7_parse, 0, 1, IS_STATIC, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uuid_UuidV7_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uuid, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -10,7 +10,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uuid_UuidV7_generate, 0, 0
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, randomEngine, Random\\Engine, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uuid_UuidV7___construct, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uuid_UuidV7___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, uuid, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uuid_UuidV7_toBytes, 0, 0, IS_STRING, 0)
@@ -44,7 +45,7 @@ ZEND_METHOD(Uuid_UuidV7, __debugInfo);
 static const zend_function_entry class_Uuid_UuidV7_methods[] = {
 	ZEND_ME(Uuid_UuidV7, parse, arginfo_class_Uuid_UuidV7_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Uuid_UuidV7, generate, arginfo_class_Uuid_UuidV7_generate, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(Uuid_UuidV7, __construct, arginfo_class_Uuid_UuidV7___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(Uuid_UuidV7, __construct, arginfo_class_Uuid_UuidV7___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uuid_UuidV7, toBytes, arginfo_class_Uuid_UuidV7_toBytes, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uuid_UuidV7, toString, arginfo_class_Uuid_UuidV7_toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uuid_UuidV7, equals, arginfo_class_Uuid_UuidV7_equals, ZEND_ACC_PUBLIC)

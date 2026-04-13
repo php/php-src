@@ -5,11 +5,11 @@
 namespace Uuid {
     final readonly class UuidV7
     {
-        public static function parse(string $uuid): static {}
+        public static function parse(string $uuid): ?static {}
 
         public static function generate(?\DateTimeImmutable $datetime = null, ?\Random\Engine $randomEngine = null): static {}
 
-        private function __construct() {}
+        public function __construct(string $uuid) {}
 
         public function toBytes(): string {}
 

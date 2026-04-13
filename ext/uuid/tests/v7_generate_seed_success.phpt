@@ -14,5 +14,5 @@ var_dump($uuid);
 --EXPECTF--
 object(Uuid\UuidV7)#%s (%s) {
   ["uuid"]=>
-  string(36) "019b76da-a800-7819-8e76-39652553744d"
+  string(36) "019b76da-a800-7899-8ef6-b965a5d3744d"
 }

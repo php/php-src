@@ -50,11 +50,24 @@ static inline php_uuid_v7_object *php_uuid_v7_object_from_obj(zend_object *objec
 
 #define Z_UUID_V7_OBJECT_P(zv) php_uuid_v7_object_from_obj(Z_OBJ_P((zv)))
 
+static zend_always_inline bool php_uuid_v7_is_valid(const php_uuid_v7 uuid)
+{
+	return (uuid[6] & 0xf0) == 0x70 && (uuid[8] & 0xc0) == 0x80;
+}
+
 ZEND_ATTRIBUTE_NONNULL_ARGS(1) PHPAPI zend_result php_uuid_v7_parse(const zend_string *uuid_str, php_uuid_v7 uuid)
 {
 	int result = uuidv7_from_string(ZSTR_VAL(uuid_str), uuid);
+	if (result != 0) {
+		return FAILURE;
+	}
 
-	return result == 0 ? SUCCESS : FAILURE;
+	return php_uuid_v7_is_valid(uuid) ? SUCCESS : FAILURE;
+}
+
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_string *php_uuid_v7_to_bytes(const uint8_t *uuid)
+{
+	return zend_string_init((const char *) uuid, 16, false);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_string *php_uuid_v7_to_string(const uint8_t *uuid)
@@ -90,12 +103,12 @@ PHP_METHOD(Uuid_UuidV7, parse)
 	object_init_ex(return_value, Z_CE_P(ZEND_THIS));
 	php_uuid_v7_object *uuid_object = Z_UUID_V7_OBJECT_P(return_value);
 
-	if (uuidv7_from_string(ZSTR_VAL(uuid_str), uuid_object->uuid) == FAILURE) {
-		zend_throw_exception(NULL, "The specified UUID v7 is malformed", 0);
-		RETURN_THROWS();
+	if (php_uuid_v7_parse(uuid_str, uuid_object->uuid) == FAILURE) {
+		zval_ptr_dtor(return_value);
+		RETURN_NULL();
 	}
 
-	uuid_object->is_initialized = false;
+	uuid_object->is_initialized = true;
 }
 
 PHP_METHOD(Uuid_UuidV7, generate)
@@ -113,7 +126,10 @@ PHP_METHOD(Uuid_UuidV7, generate)
 
 	uint64_t unix_time_ms;
 	if (datetime_object == NULL) {
-		unix_time_ms = zend_time_mono_fallback_nsec() / 1000000;
+		struct timespec ts;
+		zend_time_real_spec(&ts);
+
+		unix_time_ms = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 	} else {
 		php_date_obj *datetime = php_date_obj_from_obj(datetime_object);
 		if (!datetime->time) {
@@ -132,17 +148,17 @@ PHP_METHOD(Uuid_UuidV7, generate)
 		unix_time_ms = (uint64_t) Z_LVAL(zv_timestamp) * 1000;
 	}
 
-	php_random_algo_with_state random_algo;
+	php_random_algo_with_state random_engine;
 	if (random_engine_object == NULL) {
-		random_algo = php_random_default_engine();
+		random_engine.algo = &php_random_algo_secure;
+		random_engine.state = NULL;
 	} else {
-		php_random_engine *random_engine = php_random_engine_from_obj(random_engine_object);
-		random_algo = random_engine->engine;
+		random_engine = php_random_engine_from_obj(random_engine_object)->engine;
 	}
 
 	uint8_t random_bytes[10];
 	for (int i = 0; i < 10; i++) {
-		random_bytes[i] = php_random_range(random_algo, 0, 127);
+		random_bytes[i] = php_random_range(random_engine, 0, 255);
 	}
 
 	int8_t result = uuidv7_generate(uuid_object->uuid, unix_time_ms, random_bytes, NULL);
@@ -156,11 +172,13 @@ PHP_METHOD(Uuid_UuidV7, generate)
 		case UUIDV7_STATUS_TIMESTAMP_INC:
 			ZEND_FALLTHROUGH;
 		case UUIDV7_STATUS_CLOCK_ROLLBACK:
-			ZEND_FALLTHROUGH;
-		case UUIDV7_STATUS_ERR_TIMESTAMP:
-			ZEND_FALLTHROUGH;
-		case UUIDV7_STATUS_ERR_TIMESTAMP_OVERFLOW:
 			break;
+		case UUIDV7_STATUS_ERR_TIMESTAMP:
+			zend_throw_error(NULL, "The generated UUID v7 timestamp is out of range");
+			RETURN_THROWS();
+		case UUIDV7_STATUS_ERR_TIMESTAMP_OVERFLOW:
+			zend_throw_error(NULL, "The generated UUID v7 timestamp overflowed");
+			RETURN_THROWS();
 		default: ZEND_UNREACHABLE();
 	}
 
@@ -169,9 +187,20 @@ PHP_METHOD(Uuid_UuidV7, generate)
 
 PHP_METHOD(Uuid_UuidV7, __construct)
 {
-	ZEND_PARSE_PARAMETERS_NONE();
+	zend_string *uuid_str;
 
-	zend_throw_error(NULL, "Cannot directly construct %s, use the static factory methods instead", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(uuid_str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_uuid_v7_object *uuid_object = Z_UUID_V7_OBJECT_P(ZEND_THIS);
+
+	if (php_uuid_v7_parse(uuid_str, uuid_object->uuid) == FAILURE) {
+		zend_throw_exception(NULL, "The specified UUID v7 is malformed", 0);
+		RETURN_THROWS();
+	}
+
+	uuid_object->is_initialized = true;
 }
 
 PHP_METHOD(Uuid_UuidV7, equals)
@@ -209,7 +238,7 @@ PHP_METHOD(Uuid_UuidV7, toBytes)
 
 	php_uuid_v7_object *uuid_object = Z_UUID_V7_OBJECT_P(ZEND_THIS);
 
-	RETURN_STR(php_uuid_v7_to_string(uuid_object->uuid));
+	RETURN_STR(php_uuid_v7_to_bytes(uuid_object->uuid));
 }
 
 PHP_METHOD(Uuid_UuidV7, toString)
@@ -302,6 +331,8 @@ PHP_METHOD(Uuid_UuidV7, __unserialize)
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uuid_object->std.ce->name));
 		RETURN_THROWS();
 	}
+
+	uuid_object->is_initialized = true;
 }
 
 PHP_METHOD(Uuid_UuidV7, __debugInfo)
@@ -343,6 +374,7 @@ ZEND_ATTRIBUTE_NONNULL zend_object *php_uuid_v7_object_handler_clone(zend_object
 	php_uuid_v7_object *new_uuid_object = php_uuid_v7_object_from_obj(object->ce->create_object(object->ce));
 
 	memcpy(new_uuid_object->uuid, uuid_object->uuid, sizeof(php_uuid_v7));
+	new_uuid_object->is_initialized = true;
 	zend_objects_clone_members(&new_uuid_object->std, &uuid_object->std);
 
 	return &new_uuid_object->std;
