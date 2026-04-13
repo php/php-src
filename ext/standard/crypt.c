@@ -67,7 +67,7 @@ PHP_MSHUTDOWN_FUNCTION(crypt) /* {{{ */
 }
 /* }}} */
 
-PHPAPI zend_string *php_crypt(const char *password, size_t pass_len, const char *salt, int salt_len, bool quiet)
+PHPAPI zend_string *php_crypt(const char *password, size_t pass_len, const char *salt, size_t salt_len, bool quiet)
 {
 	char *crypt_res;
 	zend_string *result;
