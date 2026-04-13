@@ -30,14 +30,14 @@ var_dump(ini_get("session.cookie_lifetime"));
 ob_end_flush();
 ?>
 --EXPECTF--
-Warning: ini_set(): CookieLifetime must be an integer in %s on line %d
+Warning: ini_set(): session.cookie_lifetime must be an integer in %s on line %d
 string(3) "100"
 
-Warning: ini_set(): Invalid value for CookieLifetime in %s on line %d
+Warning: ini_set(): session.cookie_lifetime must be an integer in %s on line %d
 string(3) "100"
 
-Warning: ini_set(): CookieLifetime cannot be negative in %s on line %d
+Warning: ini_set(): session.cookie_lifetime must be between 0 and %d in %s on line %d
 string(3) "100"
 
-Warning: ini_set(): CookieLifetime cannot be negative in %s on line %d
+Warning: ini_set(): session.cookie_lifetime must be between 0 and %d in %s on line %d
 string(3) "100"

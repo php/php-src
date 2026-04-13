@@ -28,7 +28,7 @@ ob_end_flush();
 --EXPECTF--
 string(3) "100"
 
-Warning: ini_set(): CookieLifetime value too large, value was set to the maximum of %d in %s on line %d
+Warning: ini_set(): session.cookie_lifetime must be between 0 and %d, value clamped to maximum in %s on line %d
 bool(true)
 bool(true)
 string(3) "200"

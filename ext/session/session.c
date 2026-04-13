@@ -709,19 +709,19 @@ static PHP_INI_MH(OnUpdateCookieLifetime)
 	zend_long lval = 0;
 	int oflow = 0;
 	uint8_t type = is_numeric_string_ex(ZSTR_VAL(new_value), ZSTR_LEN(new_value), &lval, NULL, false, &oflow, NULL);
-	if (type == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid value for CookieLifetime");
-		return FAILURE;
-	} else if (type == IS_DOUBLE && oflow == 0) {
-		php_error_docref(NULL, E_WARNING, "CookieLifetime must be an integer");
+	if (UNEXPECTED(type != IS_LONG)) {
+		if (oflow != 0) {
+			php_error_docref(NULL, E_WARNING, "session.cookie_lifetime must be between 0 and " ZEND_LONG_FMT, maxcookie);
+		} else {
+			php_error_docref(NULL, E_WARNING, "session.cookie_lifetime must be an integer");
+		}
 		return FAILURE;
 	}
-	zend_long v = lval;
-	if (oflow < 0 || v < 0) {
-		php_error_docref(NULL, E_WARNING, "CookieLifetime cannot be negative");
+	if (lval < 0) {
+		php_error_docref(NULL, E_WARNING, "session.cookie_lifetime must be between 0 and " ZEND_LONG_FMT, maxcookie);
 		return FAILURE;
-	} else if (oflow > 0 || v > maxcookie) {
-		php_error_docref(NULL, E_WARNING, "CookieLifetime value too large, value was set to the maximum of " ZEND_LONG_FMT, maxcookie);
+	} else if (lval > maxcookie) {
+		php_error_docref(NULL, E_WARNING, "session.cookie_lifetime must be between 0 and " ZEND_LONG_FMT ", value clamped to maximum", maxcookie);
 		zend_long *p = ZEND_INI_GET_ADDR();
 		*p = maxcookie;
 		entry->value = zend_long_to_str(maxcookie);

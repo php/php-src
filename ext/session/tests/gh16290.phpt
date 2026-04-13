@@ -12,5 +12,5 @@ echo "DONE";
 ob_end_flush();
 ?>
 --EXPECTF--
-Warning: session_set_cookie_params(): CookieLifetime value too large, value was set to the maximum of %d in %s on line %d
+Warning: session_set_cookie_params(): session.cookie_lifetime must be between 0 and %d, value clamped to maximum in %s on line %d
 DONE
