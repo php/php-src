@@ -591,8 +591,8 @@ PHPAPI size_t php_url_decode_ex(char *dest, const char *src, size_t src_len)
 		if (*data == '+') {
 			*dest = ' ';
 		}
-		else if (*data == '%' && src_len >= 2 && isxdigit((int) *(data + 1))
-				 && isxdigit((int) *(data + 2))) {
+		else if (*data == '%' && src_len >= 2 && isxdigit((unsigned char) *(data + 1))
+				 && isxdigit((unsigned char) *(data + 2))) {
 			*dest = (char) php_htoi(data + 1);
 			data += 2;
 			src_len -= 2;
@@ -664,8 +664,8 @@ PHPAPI size_t php_raw_url_decode_ex(char *dest, const char *src, size_t src_len)
 	const char *data = src;
 
 	while (src_len--) {
-		if (*data == '%' && src_len >= 2 && isxdigit((int) *(data + 1))
-			&& isxdigit((int) *(data + 2))) {
+		if (*data == '%' && src_len >= 2 && isxdigit((unsigned char) *(data + 1))
+			&& isxdigit((unsigned char) *(data + 2))) {
 			*dest = (char) php_htoi(data + 1);
 			data += 2;
 			src_len -= 2;
