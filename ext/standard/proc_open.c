@@ -47,21 +47,18 @@
 #define USE_POSIX_SPAWN
 
 /* The non-_np variant is in macOS 26 (and _np deprecated) */
+#if defined(__APPLE__) && defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR) && \
+    defined(MAC_OS_X_VERSION_MIN_REQUIRED) && MAC_OS_X_VERSION_MIN_REQUIRED >= 260000
+    #define USE_ADDCHDIR posix_spawn_file_actions_addchdir
+#else
+    #define USE_ADDCHDIR posix_spawn_file_actions_addchdir_np
+#endif
+
 static inline int php_spawn_addchdir(
     posix_spawn_file_actions_t *factions,
     const char *cwd
 ) {
-#if defined(__APPLE__) && defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR)
-    if (__builtin_available(macOS 26.0, *)) {
-        return posix_spawn_file_actions_addchdir(factions, cwd);
-    } else {
-        return posix_spawn_file_actions_addchdir_np(factions, cwd);
-    }
-#elif defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR)
-    return posix_spawn_file_actions_addchdir(factions, cwd);
-#else
-    return posix_spawn_file_actions_addchdir_np(factions, cwd);
-#endif
+    return USE_ADDCHDIR(factions, cwd);
 }
 
 #define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR(f, d) \
