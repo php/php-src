@@ -2,8 +2,9 @@
 password_* handles bcrypt passwords containing null bytes
 --SKIPIF--
 <?php
-$setting = '$2y$05$CCCCCCCCCCCCCCCCCCCCC.';
-if (crypt("foo\0bar", $setting) === crypt("foo", $setting)) {
+$password = "foo\0bar";
+$hash = password_hash($password, PASSWORD_BCRYPT);
+if (!is_string($hash) || !password_verify($password, $hash) || password_verify("foo", $hash)) {
     die("skip bcrypt backend truncates NUL bytes");
 }
 ?>

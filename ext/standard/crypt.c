@@ -67,7 +67,7 @@ PHP_MSHUTDOWN_FUNCTION(crypt) /* {{{ */
 }
 /* }}} */
 
-PHPAPI zend_string *php_crypt(const char *password, size_t pass_len, const char *salt, size_t salt_len, bool quiet)
+PHPAPI zend_string *php_crypt(const char *password, size_t pass_len, const char *salt, int salt_len, bool quiet)
 {
 	char *crypt_res;
 	zend_string *result;
@@ -206,8 +206,8 @@ PHP_FUNCTION(crypt)
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STRING(str, str_len)
-		Z_PARAM_STRING(salt_in, salt_in_len)
+		Z_PARAM_PATH(str, str_len)
+		Z_PARAM_PATH(salt_in, salt_in_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';

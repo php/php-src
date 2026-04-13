@@ -2,9 +2,18 @@
 Bug #62443 Crypt SHA256/512 Segfaults With Malformed Salt
 --FILE--
 <?php
-crypt("foo", '$5$'.chr(0).'abc');
-crypt("foo", '$6$'.chr(0).'abc');
-echo "OK!";
+try {
+    crypt("foo", '$5$'.chr(0).'abc');
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    crypt("foo", '$6$'.chr(0).'abc');
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
-OK!
+crypt(): Argument #2 ($salt) must not contain any null bytes
+crypt(): Argument #2 ($salt) must not contain any null bytes
