@@ -1,5 +1,7 @@
 --TEST--
 Passing invalid string to Phar::mungServer()
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 
