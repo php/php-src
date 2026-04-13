@@ -828,7 +828,7 @@ static bool php_snmp_parse_oid(
 /* {{{ snmp_session_init
 	allocates memory for session and session->peername, caller should free it manually using snmp_session_free() and efree()
 */
-static bool snmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries, int hostname_arg_num, int timeout_arg_num)
+static bool snmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries, uint32_t hostname_arg_num, uint32_t timeout_arg_num)
 {
 	php_snmp_session *session;
 	char *pptr, *host_ptr;
@@ -852,7 +852,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 		return false;
 	}
 
-	if (timeout_arg_num != -1) {
+	if (timeout_arg_num != 0) {
 		if (timeout < -1 || timeout > LONG_MAX) {
 			zend_argument_value_error(timeout_arg_num, "must be between -1 and %ld", LONG_MAX);
 			return false;
@@ -1228,14 +1228,16 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 {
 	zend_string *oid_str, *type_str = NULL, *value_str = NULL;
 	HashTable *oid_ht, *type_ht = NULL, *value_ht = NULL;
-	zend_string *a1 = NULL, *a2 = NULL, *a3 = NULL, *a4 = NULL, *a5 = NULL, *a6 = NULL, *a7 = NULL;
+	zend_string *hostname = NULL, *community_or_security_name = NULL;
+	zend_string *security_level = NULL, *auth_protocol = NULL, *auth_passphrase = NULL;
+	zend_string *privacy_protocol = NULL, *privacy_passphrase = NULL;
 	bool use_orignames = 0, suffix_keys = 0;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
 	zend_long retries = SNMP_DEFAULT_RETRIES;
 	struct objid_query objid_query;
 	php_snmp_session *session;
 	int session_less_mode = (getThis() == NULL);
-	int timeout_arg_num = -1;
+	uint32_t timeout_arg_num = 0;
 	uint32_t oid_arg_num = 1, type_arg_num = 0, value_arg_num = 0;
 	php_snmp_object *snmp_object;
 	php_snmp_object glob_snmp_object;
@@ -1249,13 +1251,13 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		if (version == SNMP_VERSION_3) {
 			if (st & SNMP_CMD_SET) {
 				ZEND_PARSE_PARAMETERS_START(10, 12)
-					Z_PARAM_PATH_STR(a1)
-					Z_PARAM_PATH_STR(a2)
-					Z_PARAM_STR(a3)
-					Z_PARAM_STR(a4)
-					Z_PARAM_STR(a5)
-					Z_PARAM_STR(a6)
-					Z_PARAM_STR(a7)
+					Z_PARAM_PATH_STR(hostname)
+					Z_PARAM_PATH_STR(community_or_security_name)
+					Z_PARAM_STR(security_level)
+					Z_PARAM_STR(auth_protocol)
+					Z_PARAM_STR(auth_passphrase)
+					Z_PARAM_STR(privacy_protocol)
+					Z_PARAM_STR(privacy_passphrase)
 					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
 					Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
@@ -1274,13 +1276,13 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				 * SNMP_CMD_WALK
 				 */
 				ZEND_PARSE_PARAMETERS_START(8, 10)
-					Z_PARAM_PATH_STR(a1)
-					Z_PARAM_PATH_STR(a2)
-					Z_PARAM_STR(a3)
-					Z_PARAM_STR(a4)
-					Z_PARAM_STR(a5)
-					Z_PARAM_STR(a6)
-					Z_PARAM_STR(a7)
+					Z_PARAM_PATH_STR(hostname)
+					Z_PARAM_PATH_STR(community_or_security_name)
+					Z_PARAM_STR(security_level)
+					Z_PARAM_STR(auth_protocol)
+					Z_PARAM_STR(auth_passphrase)
+					Z_PARAM_STR(privacy_protocol)
+					Z_PARAM_STR(privacy_passphrase)
 					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
@@ -1293,8 +1295,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		} else {
 			if (st & SNMP_CMD_SET) {
 				ZEND_PARSE_PARAMETERS_START(5, 7)
-					Z_PARAM_PATH_STR(a1)
-					Z_PARAM_PATH_STR(a2)
+					Z_PARAM_PATH_STR(hostname)
+					Z_PARAM_PATH_STR(community_or_security_name)
 					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
 					Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
@@ -1313,8 +1315,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				 * SNMP_CMD_WALK
 				 */
 				ZEND_PARSE_PARAMETERS_START(3, 5)
-					Z_PARAM_PATH_STR(a1)
-					Z_PARAM_PATH_STR(a2)
+					Z_PARAM_PATH_STR(hostname)
+					Z_PARAM_PATH_STR(community_or_security_name)
 					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
@@ -1369,12 +1371,12 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	}
 
 	if (session_less_mode) {
-		if (!snmp_session_init(&session, version, a1, a2, timeout, retries, 1, timeout_arg_num)) {
+		if (!snmp_session_init(&session, version, hostname, community_or_security_name, timeout, retries, 1, timeout_arg_num)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 			snmp_session_free(&session);
 			RETURN_FALSE;
 		}
-		if (version == SNMP_VERSION_3 && !snmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL, 4, 0)) {
+		if (version == SNMP_VERSION_3 && !snmp_session_set_security(session, security_level, auth_protocol, auth_passphrase, privacy_protocol, privacy_passphrase, NULL, NULL, 4, 0)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 			snmp_session_free(&session);
 			/* An error has already been emitted, just bail out. */
