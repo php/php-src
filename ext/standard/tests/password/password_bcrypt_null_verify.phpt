@@ -1,25 +1,14 @@
 --TEST--
-password_* handles bcrypt passwords containing null bytes
---SKIPIF--
-<?php
-$password = "foo\0bar";
-$hash = password_hash($password, PASSWORD_BCRYPT);
-if (!is_string($hash) || !password_verify($password, $hash) || password_verify("foo", $hash)) {
-    die("skip bcrypt backend truncates NUL bytes");
-}
-?>
+password_verify() rejects bcrypt passwords containing null bytes
 --FILE--
 <?php
-$password = "foo\0bar";
-$hash = password_hash($password, PASSWORD_BCRYPT);
+$hash = password_hash("foo", PASSWORD_BCRYPT);
 
-var_dump($hash !== false);
-var_dump(password_verify($password, $hash));
 var_dump(password_verify("foo", $hash));
-var_dump(password_verify("foo\0baz", $hash));
+var_dump(password_verify("foo\0bar", $hash));
+var_dump(password_verify("\0foo", $hash));
 ?>
 --EXPECT--
-bool(true)
 bool(true)
 bool(false)
 bool(false)
