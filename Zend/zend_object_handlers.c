@@ -563,7 +563,7 @@ ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_st
 			if (!(property_info->flags & ZEND_ACC_PRIVATE)) {
 				/* we we're looking for a private prop but found a non private one of the same name */
 				return FAILURE;
-			} else if (!zend_string_equals(prop_info_name, property_info->name)) {
+			} else if (strcmp(ZSTR_VAL(prop_info_name)+1, ZSTR_VAL(property_info->name)+1)) {
 				/* we we're looking for a private prop but found a private one of the same name but another class */
 				return FAILURE;
 			}
