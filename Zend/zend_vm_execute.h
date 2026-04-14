@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -1322,8 +1321,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 		if (should_throw) {
 			zend_internal_call_arginfo_violation(call->func);
 		}
-		ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, ret));
+		if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			bool result = zend_verify_internal_return_type(call->func, ret);
+			ZEND_ASSERT(result);
+		}
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
@@ -1388,8 +1389,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 		if (should_throw) {
 			zend_internal_call_arginfo_violation(call->func);
 		}
-		ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, ret));
+		if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			bool result = zend_verify_internal_return_type(call->func, ret);
+			ZEND_ASSERT(result);
+		}
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
@@ -1454,8 +1457,10 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		if (should_throw) {
 			zend_internal_call_arginfo_violation(call->func);
 		}
-		ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, ret));
+		if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			bool result = zend_verify_internal_return_type(call->func, ret);
+			ZEND_ASSERT(result);
+		}
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
@@ -1636,8 +1641,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -1750,8 +1757,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -1863,8 +1872,10 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -1995,8 +2006,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -2126,8 +2139,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -2254,8 +2269,10 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -3639,8 +3656,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALL_TRAMPOLI
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -3783,8 +3802,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALL_TRAMPOLI
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -11765,7 +11786,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 				zval retval;
 
 				zend_function *count_fn = zend_hash_find_ptr(&zobj->ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
+				GC_ADDREF(zobj);
 				zend_call_known_instance_method_with_0_params(count_fn, zobj, &retval);
+				OBJ_RELEASE(zobj);
 				count = zval_get_long(&retval);
 				zval_ptr_dtor(&retval);
 				break;
@@ -18232,7 +18255,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_CLASS_N
 			}
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), called_scope->name);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -21965,7 +21988,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_COUNT_SPEC_TM
 				zval retval;
 
 				zend_function *count_fn = zend_hash_find_ptr(&zobj->ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
+				GC_ADDREF(zobj);
 				zend_call_known_instance_method_with_0_params(count_fn, zobj, &retval);
+				OBJ_RELEASE(zobj);
 				count = zval_get_long(&retval);
 				zval_ptr_dtor(&retval);
 				break;
@@ -32825,7 +32850,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_CLASS_N
 			}
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), called_scope->name);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -40825,7 +40850,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_CLASS_N
 			}
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), called_scope->name);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -49894,7 +49919,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_COUNT_SPEC_CV
 				zval retval;
 
 				zend_function *count_fn = zend_hash_find_ptr(&zobj->ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
+				GC_ADDREF(zobj);
 				zend_call_known_instance_method_with_0_params(count_fn, zobj, &retval);
+				OBJ_RELEASE(zobj);
 				count = zval_get_long(&retval);
 				zval_ptr_dtor(&retval);
 				break;
@@ -54046,8 +54073,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_ICA
 		if (should_throw) {
 			zend_internal_call_arginfo_violation(call->func);
 		}
-		ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, ret));
+		if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			bool result = zend_verify_internal_return_type(call->func, ret);
+			ZEND_ASSERT(result);
+		}
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
@@ -54112,8 +54141,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_ICA
 		if (should_throw) {
 			zend_internal_call_arginfo_violation(call->func);
 		}
-		ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, ret));
+		if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			bool result = zend_verify_internal_return_type(call->func, ret);
+			ZEND_ASSERT(result);
+		}
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
@@ -54178,8 +54209,10 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_IC
 		if (should_throw) {
 			zend_internal_call_arginfo_violation(call->func);
 		}
-		ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, ret));
+		if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			bool result = zend_verify_internal_return_type(call->func, ret);
+			ZEND_ASSERT(result);
+		}
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
@@ -54360,8 +54393,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -54474,8 +54509,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -54587,8 +54624,10 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FC
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -54719,8 +54758,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -54850,8 +54891,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -54978,8 +55021,10 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FC
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -56247,8 +56292,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALL_TRAMPOLINE_SP
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -56391,8 +56438,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALL_TRAMPOLINE_SP
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
@@ -64271,7 +64320,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_COUNT
 				zval retval;
 
 				zend_function *count_fn = zend_hash_find_ptr(&zobj->ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
+				GC_ADDREF(zobj);
 				zend_call_known_instance_method_with_0_params(count_fn, zobj, &retval);
+				OBJ_RELEASE(zobj);
 				count = zval_get_long(&retval);
 				zval_ptr_dtor(&retval);
 				break;
@@ -70738,7 +70789,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_CLASS_NAME_S
 			}
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), called_scope->name);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -74371,7 +74422,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_COUNT_SPEC_TMP_UNU
 				zval retval;
 
 				zend_function *count_fn = zend_hash_find_ptr(&zobj->ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
+				GC_ADDREF(zobj);
 				zend_call_known_instance_method_with_0_params(count_fn, zobj, &retval);
+				OBJ_RELEASE(zobj);
 				count = zval_get_long(&retval);
 				zval_ptr_dtor(&retval);
 				break;
@@ -85231,7 +85284,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_CLASS_NAME_S
 			}
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), called_scope->name);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -93231,7 +93284,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_CLASS_NAME_S
 			}
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), called_scope->name);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -102198,7 +102251,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_COUNT_SPEC_CV_UNUS
 				zval retval;
 
 				zend_function *count_fn = zend_hash_find_ptr(&zobj->ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
+				GC_ADDREF(zobj);
 				zend_call_known_instance_method_with_0_params(count_fn, zobj, &retval);
+				OBJ_RELEASE(zobj);
 				count = zval_get_long(&retval);
 				zval_ptr_dtor(&retval);
 				break;
@@ -122749,7 +122804,7 @@ static void init_opcode_serialiser(void)
 	Z_TYPE_INFO(tmp) = IS_LONG;
 	for (i = 0; i < zend_handlers_count; i++) {
 		Z_LVAL(tmp) = i;
-		zend_hash_index_add(zend_handlers_table, (zend_long)(uintptr_t)zend_opcode_handlers[i], &tmp);
+		zend_hash_index_add(zend_handlers_table, (zend_ulong)(uintptr_t)zend_opcode_handlers[i], &tmp);
 	}
 }
 
@@ -122760,7 +122815,7 @@ ZEND_API void ZEND_FASTCALL zend_serialize_opcode_handler(zend_op *op)
 	if (!zend_handlers_table) {
 		init_opcode_serialiser();
 	}
-	zv = zend_hash_index_find(zend_handlers_table, (zend_long)(uintptr_t)op->handler);
+	zv = zend_hash_index_find(zend_handlers_table, (zend_ulong)(uintptr_t)op->handler);
 	ZEND_ASSERT(zv != NULL);
 	op->handler = (zend_vm_opcode_handler_t)(uintptr_t)Z_LVAL_P(zv);
 }
@@ -122778,7 +122833,7 @@ ZEND_API const void* ZEND_FASTCALL zend_get_opcode_handler_func(const zend_op *o
 	if (!zend_handlers_table) {
 		init_opcode_serialiser();
 	}
-	zv = zend_hash_index_find(zend_handlers_table, (zend_long)(uintptr_t)op->handler);
+	zv = zend_hash_index_find(zend_handlers_table, (zend_ulong)(uintptr_t)op->handler);
 	ZEND_ASSERT(zv != NULL);
 	return zend_opcode_handler_funcs[Z_LVAL_P(zv)];
 #elif ZEND_VM_KIND == ZEND_VM_KIND_CALL

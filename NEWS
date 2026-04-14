@@ -32,6 +32,10 @@ PHP                                                                        NEWS
     (ndossche)
   . Fixed bug #66095 (Hide libmagic dynamic symbols). (orlitzky)
 
+- GD:
+  . imagesetstyle()/imagefilter()/imagecrop() check array argument entries
+    types. (David Carlier)
+
 - Hash:
   . Upgrade xxHash to 0.8.2. (timwolla)
 
@@ -63,6 +67,9 @@ PHP                                                                        NEWS
     recursive array references). (alexandre-daubois)
   . Fixed bug GH-21223; mb_guess_encoding no longer crashes when passed huge
     list of candidate encodings (with 200,000+ entries). (Jordi Kroon)
+
+- Mysqli:
+  . Added mysqli_quote_string() and mysqli::quote_string(). (Kamil Tekiela)
 
 - Opcache:
   . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
@@ -126,6 +133,8 @@ PHP                                                                        NEWS
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
+  . Fix bugs GH-8561, GH-8562, GH-8563, and GH-8564 (Fixing various
+    SplFileObject iterator desync bugs). (iliaal)
 
 - Sqlite3:
   . Fix NUL byte truncation in sqlite3 TEXT column handling. (ndossche)
@@ -142,6 +151,13 @@ PHP                                                                        NEWS
   . Fixed bug GH-13204 (glob() fails if square bracket is in current directory).
     (ndossche)
   . Add array size maximum to array_diff(). (ndossche)
+  . Add enum SortDirection. (timwolla)
+  . pathinfo() raises a ValueError with an invalid $flags argument.
+    (David Carlier)
+  . Passing an invalid flag value to the second argument of scandir() will now
+    throw a ValueError. (alexandre-daubois)
+  . array_change_key_case() now raises a ValueError when an invalid $case
+    argument value is passed. (Girgias)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream

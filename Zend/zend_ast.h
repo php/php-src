@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Bob Weinand <bwoebi@php.net>                                |
    |          Dmitry Stogov <dmitry@php.net>                              |
@@ -144,7 +143,7 @@ enum _zend_ast_kind {
 	ZEND_AST_DECLARE,
 	ZEND_AST_USE_TRAIT,
 	ZEND_AST_TRAIT_PRECEDENCE,
-	ZEND_AST_METHOD_REFERENCE,
+	ZEND_AST_TRAIT_METHOD_REFERENCE,
 	ZEND_AST_NAMESPACE,
 	ZEND_AST_USE_ELEM,
 	ZEND_AST_TRAIT_ALIAS,
@@ -153,7 +152,6 @@ enum _zend_ast_kind {
 	ZEND_AST_MATCH,
 	ZEND_AST_MATCH_ARM,
 	ZEND_AST_NAMED_ARG,
-	ZEND_AST_PARENT_PROPERTY_HOOK_CALL,
 	ZEND_AST_PIPE,
 
 	/* 3 child nodes */

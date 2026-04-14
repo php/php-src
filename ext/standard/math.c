@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Jim Winstead <jimw@php.net>                                 |
    |          Stig Sæther Bakken <ssb@php.net>                            |
@@ -152,7 +150,7 @@ static inline double php_round_helper(double integral, double value, double expo
 
 			return integral;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	// FIXME: GCC bug, branch is considered reachable.
 	ZEND_UNREACHABLE();
@@ -261,7 +259,7 @@ PHP_FUNCTION(abs)
 			}
 		case IS_DOUBLE:
 			RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -280,7 +278,7 @@ PHP_FUNCTION(ceil)
 			RETURN_DOUBLE(zval_get_double(value));
 		case IS_DOUBLE:
 			RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -299,7 +297,7 @@ PHP_FUNCTION(floor)
 			RETURN_DOUBLE(zval_get_double(value));
 		case IS_DOUBLE:
 			RETURN_DOUBLE(floor(Z_DVAL_P(value)));
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -382,7 +380,7 @@ PHP_FUNCTION(round)
 		case IS_DOUBLE:
 			RETURN_DOUBLE(_php_math_round(zval_get_double(value), (int)places, (int)mode));
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -1437,7 +1435,7 @@ PHP_FUNCTION(number_format)
 			}
 			RETURN_STR(_php_math_number_format_ex(Z_DVAL_P(num), dec_int, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */

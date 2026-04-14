@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend JIT                                                             |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -5218,7 +5216,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 							 && ssa->vars[ssa_op->op2_def].use_chain < 0
 							 && !ssa->vars[ssa_op->op2_def].phi_use_chain) {
 								if (!zend_jit_store_type(&ctx, var_num, type)) {
-									return 0;
+									goto jit_failure;
 								}
 								SET_STACK_TYPE(stack, var_num, type, 1);
 							}
@@ -5271,7 +5269,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 							 && ssa->vars[ssa_op->op1_def].use_chain < 0
 							 && !ssa->vars[ssa_op->op1_def].phi_use_chain) {
 								if (!zend_jit_store_type(&ctx, var_num, type)) {
-									return 0;
+									goto jit_failure;
 								}
 								SET_STACK_TYPE(stack, var_num, type, 1);
 							}
@@ -5368,7 +5366,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 							 && ssa->vars[ssa_op->op1_def].use_chain < 0
 							 && !ssa->vars[ssa_op->op1_def].phi_use_chain) {
 								if (!zend_jit_store_type(&ctx, var_num, type)) {
-									return 0;
+									goto jit_failure;
 								}
 								SET_STACK_TYPE(stack, var_num, type, 1);
 							}
@@ -6627,7 +6625,7 @@ done:
 											var_num = EX_VAR_TO_NUM(var_num);
 
 											if (!zend_jit_store_type(&ctx, var_num, type)) {
-												return 0;
+												goto jit_failure;
 											}
 											SET_STACK_TYPE(stack, var_num, type, 1);
 										}
@@ -7266,7 +7264,7 @@ done:
 				 && type != STACK_MEM_TYPE(stack, i)
 				 && zend_jit_trace_must_store_type(op_array, op_array_ssa, opline - op_array->opcodes, i, type)) {
 					if (!zend_jit_store_type(jit, i, type)) {
-						return 0;
+						goto jit_failure;
 					}
 					SET_STACK_TYPE(stack, i, type, 1);
 				}
@@ -7387,11 +7385,11 @@ jit_failure:
 		zend_string_release(name);
 	}
 
+jit_cleanup:;
 	} zend_catch {
 		do_bailout = 1;
 	}  zend_end_try();
 
-jit_cleanup:
 	/* Clean up used op_arrays */
 	while (num_op_arrays > 0) {
 		op_array = op_arrays[--num_op_arrays];

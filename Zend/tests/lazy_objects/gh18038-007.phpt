@@ -36,6 +36,5 @@ var_dump(isset($real->prop['']));
 --EXPECT--
 init
 string(21) "RealInstance::__isset"
-string(14) "Proxy::__isset"
 bool(false)
 bool(false)

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
@@ -805,7 +803,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opcode(const char *name, size_t name_len) 
 
 PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline) /* {{{ */
 {
-	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline)) {
+	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong)(uintptr_t) opline)) {
 		phpdbg_breakline_t new_break;
 
 		PHPDBG_G(flags) |= PHPDBG_HAS_OPLINE_BP;
@@ -814,7 +812,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline) /* {
 		new_break.opline = (zend_ulong) opline;
 		new_break.base = NULL;
 
-		zend_hash_index_update_mem(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline, &new_break, sizeof(phpdbg_breakline_t));
+		zend_hash_index_update_mem(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong)(uintptr_t) opline, &new_break, sizeof(phpdbg_breakline_t));
 
 		phpdbg_notice("Breakpoint #%d added at #"ZEND_ULONG_FMT, new_break.id, new_break.opline);
 		PHPDBG_BREAK_MAPPING(new_break.id, &PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
@@ -1002,7 +1000,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_pt
 {
 	phpdbg_breakline_t *brake;
 
-	if ((brake = zend_hash_index_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline)) && brake->base) {
+	if ((brake = zend_hash_index_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong)(uintptr_t) opline)) && brake->base) {
 		return (phpdbg_breakbase_t *)brake->base;
 	}
 

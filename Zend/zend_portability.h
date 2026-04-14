@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -106,7 +105,10 @@
 # define ZEND_ASSUME(c)
 #endif
 
-#if ZEND_DEBUG
+#ifdef HAVE_GCOV
+/* Disable assert() when compiling with gcov to avoid untested branch warning. */
+# define ZEND_ASSERT(c) ((void)sizeof(c))
+#elif ZEND_DEBUG
 # define ZEND_ASSERT(c)	assert(c)
 #else
 # define ZEND_ASSERT(c) ZEND_ASSUME(c)
@@ -133,10 +135,6 @@
 #else
 # define ZEND_FALLTHROUGH ((void)0)
 #endif
-
-/* Only use this macro if you know for sure that all of the switches values
-   are covered by its case statements */
-#define EMPTY_SWITCH_DEFAULT_CASE() default: ZEND_UNREACHABLE(); break;
 
 #if defined(__GNUC__) && __GNUC__ >= 4
 # define ZEND_IGNORE_VALUE(x) (({ __typeof__ (x) __x = (x); (void) __x; }))

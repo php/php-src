@@ -413,10 +413,15 @@ jobs:
         with:
           enableOpcache: true
           jitType: tracing
-      - uses: codecov/codecov-action@v5
+      - name: Generate coverage report
+        if: ${{ !cancelled() }}
+        run: make gcovr-xml
+      - uses: codecov/codecov-action@v6
         if: ${{ !cancelled() }}
         with:
+          disable_search: true
           fail_ci_if_error: true
+          files: gcovr.xml
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
   COMMUNITY:

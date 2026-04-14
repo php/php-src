@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Vadim Savchuk <vsavchuk@productengine.com>                  |
    |          Dmitry Lakhtyuk <dlakhtyuk@productengine.com>               |
@@ -380,7 +380,7 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 	if( !hash || zend_hash_num_elements( hash ) == 0 )
 		RETURN_TRUE;
 
-	/* Create bufers */
+	/* Create buffers */
 	sortKeyBuf     = reinterpret_cast<char *>(ecalloc( sortKeyBufSize,     sizeof( char    ) ));
 	sortKeyIndxBuf = reinterpret_cast<collator_sort_key_index_t *>(ecalloc( sortKeyIndxBufSize, sizeof( uint8_t ) ));
 	utf16_buf      = eumalloc( utf16_buf_size );

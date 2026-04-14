@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Jakub Zelenka <bukka@php.net>                               |
    +----------------------------------------------------------------------+
@@ -746,6 +744,7 @@ int php_openssl_check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedch
 		return 0;
 	}
 	if (!X509_STORE_CTX_init(csc, ctx, x, untrustedchain)) {
+		X509_STORE_CTX_free(csc);
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Certificate store initialization failed");
 		return 0;
@@ -1087,13 +1086,15 @@ zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ * csr, 
 				}
 			}
 		}
+
+		if (!X509_REQ_set_pubkey(csr, req->priv_key)) {
+			php_openssl_store_errors();
+		}
 	} else {
 		php_openssl_store_errors();
+		return FAILURE;
 	}
 
-	if (!X509_REQ_set_pubkey(csr, req->priv_key)) {
-		php_openssl_store_errors();
-	}
 	return SUCCESS;
 }
 
@@ -1517,7 +1518,7 @@ EVP_PKEY *php_openssl_generate_private_key(struct php_x509_request * req)
 		case EVP_PKEY_ED448:
 			break;
 #endif
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 		}
 
 		if (EVP_PKEY_paramgen(ctx, &params) <= 0) {

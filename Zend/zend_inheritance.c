@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -537,7 +536,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 						return INHERITANCE_SUCCESS;
 					}
 					continue;
-				EMPTY_SWITCH_DEFAULT_CASE();
+				default: ZEND_UNREACHABLE();
 			}
 		}
 
@@ -3308,7 +3307,7 @@ static void check_unrecoverable_load_failure(const zend_class_entry *ce) {
 	 * a dependence on the inheritance hierarchy of this specific class. Instead we fall back to
 	 * a fatal error, as would happen if we did not allow exceptions in the first place. */
 	if (CG(unlinked_uses)
-			&& zend_hash_index_del(CG(unlinked_uses), (zend_long)(uintptr_t)ce) == SUCCESS) {
+			&& zend_hash_index_del(CG(unlinked_uses), (zend_ulong)(uintptr_t)ce) == SUCCESS) {
 		zend_exception_uncaught_error(
 			"During inheritance of %s with variance dependencies", ZSTR_VAL(ce->name));
 	}
@@ -3603,7 +3602,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		}
 
 		if (CG(unlinked_uses)) {
-			zend_hash_index_del(CG(unlinked_uses), (zend_long)(uintptr_t) ce);
+			zend_hash_index_del(CG(unlinked_uses), (zend_ulong)(uintptr_t) ce);
 		}
 
 		orig_linking_class = CG(current_linking_class);

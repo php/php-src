@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Jakub Zelenka <bukka@php.net>                               |
    +----------------------------------------------------------------------+
@@ -140,7 +138,14 @@ static bool php_openssl_pkey_init_dsa_data(DSA *dsa, zval *data, bool *is_privat
 	OPENSSL_PKEY_SET_BN(data, p);
 	OPENSSL_PKEY_SET_BN(data, q);
 	OPENSSL_PKEY_SET_BN(data, g);
-	if (!p || !q || !g || !DSA_set0_pqg(dsa, p, q, g)) {
+	if (!p || !q || !g) {
+		BN_free(p);
+		BN_free(q);
+		BN_free(g);
+		return false;
+	}
+
+	if (!DSA_set0_pqg(dsa, p, q, g)) {
 		return false;
 	}
 
@@ -201,7 +206,12 @@ static bool php_openssl_pkey_init_dh_data(DH *dh, zval *data, bool *is_private)
 	OPENSSL_PKEY_SET_BN(data, p);
 	OPENSSL_PKEY_SET_BN(data, q);
 	OPENSSL_PKEY_SET_BN(data, g);
-	if (!p || !g || !DH_set0_pqg(dh, p, q, g)) {
+	if (!p || !q) {
+		BN_free(p);
+		return false;
+	}
+
+	if (!DH_set0_pqg(dh, p, q, g)) {
 		return false;
 	}
 
@@ -214,6 +224,10 @@ static bool php_openssl_pkey_init_dh_data(DH *dh, zval *data, bool *is_private)
 	if (priv_key) {
 		pub_key = php_openssl_dh_pub_from_priv(priv_key, g, p);
 		if (pub_key == NULL) {
+			BN_free(p);
+			BN_free(q);
+			BN_free(g);
+			BN_free(priv_key);
 			return false;
 		}
 		return DH_set0_key(dh, pub_key, priv_key);
@@ -261,6 +275,9 @@ static bool php_openssl_pkey_init_ec_data(EC_KEY *eckey, zval *data, bool *is_pr
 	EC_POINT *point_q = NULL;
 	EC_GROUP *group = NULL;
 	BN_CTX *bctx = BN_CTX_new();
+	if (!bctx) {
+		goto clean_exit;
+	}
 
 	*is_private = false;
 

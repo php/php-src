@@ -31,14 +31,6 @@ Warning: Undefined variable $a in %s on line %d
 
 Warning: Undefined variable $v in %s on line %d
 
-Notice: Indirect modification of overloaded property A::$b has no effect in %s on line %d
-
-Warning: Undefined variable $x in %s on line %d
-
-Notice: Object of class stdClass could not be converted to int in %s on line %d
-
-Warning: Undefined variable $v in %s on line %d
-
 Notice: Indirect modification of overloaded property A::$f has no effect in %s on line %d
 
 Fatal error: Uncaught Error: Cannot assign by reference to overloaded object in %s:%d

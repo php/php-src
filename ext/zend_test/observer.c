@@ -1,16 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
-  +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
 */
 
@@ -334,7 +330,8 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 	}
 	if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_ACTIVATE && stage != PHP_INI_STAGE_DEACTIVATE && stage != PHP_INI_STAGE_SHUTDOWN) {
 		ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
-			if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
+			if ((func = zend_hash_find_ptr(EG(function_table), funcname))
+					&& RUN_TIME_CACHE(&func->common)) {
 				void *old_handler;
 				zend_observer_remove_begin_handler(func, observer_begin, (zend_observer_fcall_begin_handler *)&old_handler);
 				zend_observer_remove_end_handler(func, observer_end, (zend_observer_fcall_end_handler *)&old_handler);
@@ -357,7 +354,11 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 		zend_string_release(str);
 		if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_ACTIVATE && stage != PHP_INI_STAGE_DEACTIVATE && stage != PHP_INI_STAGE_SHUTDOWN) {
 			ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
-				if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
+				if ((func = zend_hash_find_ptr(EG(function_table), funcname))
+						&& RUN_TIME_CACHE(&func->common) && *ZEND_OBSERVER_DATA(func)) {
+					void *old_handler;
+					zend_observer_remove_begin_handler(func, observer_begin, (zend_observer_fcall_begin_handler *)&old_handler);
+					zend_observer_remove_end_handler(func, observer_end, (zend_observer_fcall_end_handler *)&old_handler);
 					zend_observer_add_begin_handler(func, observer_begin);
 					zend_observer_add_end_handler(func, observer_end);
 				}

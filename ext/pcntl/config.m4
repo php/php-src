@@ -68,9 +68,6 @@ int main(void) {
     [AC_DEFINE([HAVE_SCHED_GETCPU], [1],
       [Define to 1 if the 'sched_getcpu' function is properly supported.])])
 
-  AC_CHECK_TYPE([siginfo_t], [PCNTL_CFLAGS="-DHAVE_STRUCT_SIGINFO_T"],,
-    [#include <signal.h>])
-
   PHP_NEW_EXTENSION([pcntl],
     [pcntl.c php_signal.c],
     [$ext_shared],

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Jason Greene <jason@inetgurus.net>                           |
    +----------------------------------------------------------------------+
@@ -185,12 +183,8 @@ ZEND_GET_MODULE(pcntl)
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
-#ifdef HAVE_STRUCT_SIGINFO_T
 static void pcntl_signal_handler(int, siginfo_t*, void*);
 static void pcntl_siginfo_to_zval(int, siginfo_t*, zval*);
-#else
-static void pcntl_signal_handler(int);
-#endif
 static void pcntl_signal_dispatch(void);
 static void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer);
 static void pcntl_interrupt_function(zend_execute_data *execute_data);
@@ -240,7 +234,7 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 	/* Reset all signals to their default disposition */
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(&PCNTL_G(php_signal_table), signo, handle) {
 		if (Z_TYPE_P(handle) != IS_LONG || Z_LVAL_P(handle) != (zend_long)SIG_DFL) {
-			php_signal(signo, (Sigfunc *)(zend_long)SIG_DFL, 0);
+			php_signal(signo, (Sigfunc *)(zend_long)SIG_DFL, false);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -835,7 +829,7 @@ PHP_FUNCTION(pcntl_signal)
 			zend_argument_value_error(2, "must be either SIG_DFL or SIG_IGN when an integer value is given");
 			RETURN_THROWS();
 		}
-		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == (void *)SIG_ERR) {
+		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), restart_syscalls) == (void *)SIG_ERR) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
@@ -1007,8 +1001,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 /* }}} */
 #endif
 
-#ifdef HAVE_STRUCT_SIGINFO_T
-# ifdef HAVE_SIGWAITINFO
+#ifdef HAVE_SIGWAITINFO
 
 /* {{{ Synchronously wait for queued signals */
 PHP_FUNCTION(pcntl_sigwaitinfo)
@@ -1050,8 +1043,9 @@ PHP_FUNCTION(pcntl_sigwaitinfo)
 	RETURN_LONG(signal_no);
 }
 /* }}} */
-# endif
-# ifdef HAVE_SIGTIMEDWAIT
+#endif
+
+#ifdef HAVE_SIGTIMEDWAIT
 /* {{{ Wait for queued signals */
 PHP_FUNCTION(pcntl_sigtimedwait)
 {
@@ -1113,7 +1107,7 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 	RETURN_LONG(signal_no);
 }
 /* }}} */
-# endif
+#endif
 
 static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_siginfo) /* {{{ */
 {
@@ -1183,7 +1177,6 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 	}
 }
 /* }}} */
-#endif
 
 #ifdef HAVE_GETPRIORITY
 /* {{{ Get the priority of any process */
@@ -1325,11 +1318,7 @@ PHP_FUNCTION(pcntl_strerror)
 /* }}} */
 
 /* Our custom signal handler that calls the appropriate php_function */
-#ifdef HAVE_STRUCT_SIGINFO_T
 static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
-#else
-static void pcntl_signal_handler(int signo)
-#endif
 {
 	struct php_pcntl_pending_signal *psig = PCNTL_G(spares);
 	if (!psig) {
@@ -1341,9 +1330,7 @@ static void pcntl_signal_handler(int signo)
 	psig->signo = signo;
 	psig->next = NULL;
 
-#ifdef HAVE_STRUCT_SIGINFO_T
 	psig->siginfo = *siginfo;
-#endif
 
 	/* the head check is important, as the tick handler cannot atomically clear both
 	 * the head and tail */
@@ -1395,19 +1382,14 @@ void pcntl_signal_dispatch(void)
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
 				ZVAL_LONG(&params[0], queue->signo);
-#ifdef HAVE_STRUCT_SIGINFO_T
 				array_init(&params[1]);
 				pcntl_siginfo_to_zval(queue->signo, &queue->siginfo, &params[1]);
-#else
-				ZVAL_NULL(&params[1]);
-#endif
 
 				/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
 				call_user_function(NULL, NULL, handle, &retval, 2, params);
 				zval_ptr_dtor(&retval);
-#ifdef HAVE_STRUCT_SIGINFO_T
 				zval_ptr_dtor(&params[1]);
-#endif
+
 				if (EG(exception)) {
 					break;
 				}

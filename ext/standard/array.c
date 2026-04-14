@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -60,6 +58,7 @@
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(array)
+PHPAPI zend_class_entry *sort_direction_ce;
 
 /* {{{ php_array_init_globals */
 static void php_array_init_globals(zend_array_globals *array_globals)
@@ -2817,7 +2816,7 @@ static uint8_t php_range_process_input(const zval *input, uint32_t arg_num, zend
 			*dval = 0.0;
 			return IS_STRING;
 		}
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -4798,7 +4797,7 @@ PHP_FUNCTION(array_change_key_case)
 	zend_string *string_key;
 	zend_string *new_key;
 	zend_ulong num_key;
-	zend_long change_to_upper=0;
+	zend_long change_to_upper = PHP_CASE_LOWER;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY(array)
@@ -4806,13 +4805,18 @@ PHP_FUNCTION(array_change_key_case)
 		Z_PARAM_LONG(change_to_upper)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (change_to_upper != PHP_CASE_LOWER && change_to_upper != PHP_CASE_UPPER) {
+		zend_argument_value_error(2, "must be either CASE_LOWER or CASE_UPPER");
+		RETURN_THROWS();
+	}
+
 	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(array)));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, entry) {
 		if (!string_key) {
 			entry = zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry);
 		} else {
-			if (change_to_upper) {
+			if (change_to_upper == PHP_CASE_UPPER) {
 				new_key = zend_string_toupper(string_key);
 			} else {
 				new_key = zend_string_tolower(string_key);

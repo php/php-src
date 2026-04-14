@@ -11,7 +11,7 @@ if (!defined('Pdo\Sqlite::DETERMINISTIC')) die('skip system sqlite is too old');
 // This test was copied from the pdo_sqlite test for sqliteCreateCollation
 $db = new Pdo\Sqlite('sqlite::memory:');
 $db->query('CREATE TABLE test_pdo_sqlite_createfunction_with_flags (id INT AUTO INCREMENT, name TEXT)');
-$db->query('INSERT INTO test_pdo_sqlite_createfunction_with_flags VALUES (NULL, "PHP"), (NULL, "PHP6")');
+$db->query("INSERT INTO test_pdo_sqlite_createfunction_with_flags VALUES (NULL, 'PHP'), (NULL, 'PHP6')");
 
 $db->createFunction('testing', function($v) { return strtolower($v); }, 1, Pdo\Sqlite::DETERMINISTIC);
 

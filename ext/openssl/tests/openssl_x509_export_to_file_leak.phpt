@@ -5,7 +5,7 @@ openssl
 --FILE--
 <?php
 
-$path = "file://" . __DIR__ . "/sni_server_ca.pem";
+$path = "file://" . __DIR__ . "/cert.crt";
 var_dump(openssl_x509_export_to_file($path, str_repeat("a", 10000)));
 
 ?>

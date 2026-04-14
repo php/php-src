@@ -3,15 +3,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -1059,13 +1058,13 @@ trait_alias:
 
 trait_method_reference:
 		identifier
-			{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, NULL, $1); }
+			{ $$ = zend_ast_create(ZEND_AST_TRAIT_METHOD_REFERENCE, NULL, $1); }
 	|	absolute_trait_method_reference { $$ = $1; }
 ;
 
 absolute_trait_method_reference:
 	class_name T_PAAMAYIM_NEKUDOTAYIM identifier
-		{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, $1, $3); }
+		{ $$ = zend_ast_create(ZEND_AST_TRAIT_METHOD_REFERENCE, $1, $3); }
 ;
 
 method_body:

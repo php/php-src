@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Marcus Boerger <helly@php.net>                              |
    |          Etienne Kneuss <colder@php.net>                             |
@@ -241,11 +239,25 @@ static zend_result spl_object_storage_detach(spl_SplObjectStorage *intern, zend_
 	return ret;
 } /* }}}*/
 
+/* TODO: make this an official Zend API? */
+#define SPL_SAFE_HASH_FOREACH_PTR(_ht, _ptr) do { \
+		const HashTable *__ht = (_ht); \
+		zval *_z = __ht->arPacked; \
+		for (uint32_t _idx = 0; _idx < __ht->nNumUsed; _idx++, _z = ZEND_HASH_ELEMENT(__ht, _idx)) { \
+			if (UNEXPECTED(Z_ISUNDEF_P(_z))) continue; \
+			_ptr = Z_PTR_P(_z);
+
 static void spl_object_storage_addall(spl_SplObjectStorage *intern, spl_SplObjectStorage *other) { /* {{{ */
 	spl_SplObjectStorageElement *element;
 
-	ZEND_HASH_FOREACH_PTR(&other->storage, element) {
-		spl_object_storage_attach(intern, element->obj, &element->inf);
+	SPL_SAFE_HASH_FOREACH_PTR(&other->storage, element) {
+		zval zv;
+		zend_object *obj = element->obj;
+		GC_ADDREF(obj);
+		ZVAL_COPY(&zv, &element->inf);
+		spl_object_storage_attach(intern, obj, &zv);
+		zval_ptr_dtor(&zv);
+		OBJ_RELEASE(obj);
 	} ZEND_HASH_FOREACH_END();
 
 	intern->index = 0;
@@ -626,10 +638,13 @@ PHP_METHOD(SplObjectStorage, removeAllExcept)
 
 	other = Z_SPLOBJSTORAGE_P(obj);
 
-	ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
-		if (!spl_object_storage_contains(other, element->obj)) {
-			spl_object_storage_detach(intern, element->obj);
+	SPL_SAFE_HASH_FOREACH_PTR(&intern->storage, element) {
+		zend_object *elem_obj = element->obj;
+		GC_ADDREF(elem_obj);
+		if (!spl_object_storage_contains(other, elem_obj)) {
+			spl_object_storage_detach(intern, elem_obj);
 		}
+		OBJ_RELEASE(elem_obj);
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);

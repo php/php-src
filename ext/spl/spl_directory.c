@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
@@ -1813,21 +1811,24 @@ static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bo
 	}
 
 	if (!buf) {
-		intern->u.file.current_line = ZSTR_EMPTY_ALLOC();
-	} else {
-		if (!csv && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
-			if (line_len > 0 && buf[line_len - 1] == '\n') {
-				line_len--;
-				if (line_len > 0 && buf[line_len - 1] == '\r') {
-					line_len--;
-				}
-				buf[line_len] = '\0';
-			}
+		if (!silent) {
+			spl_filesystem_file_cannot_read(intern);
 		}
-
-		intern->u.file.current_line = zend_string_init(buf, line_len, /* persistent */ false);
-		efree(buf);
+		return FAILURE;
 	}
+
+	if (!csv && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
+		if (line_len > 0 && buf[line_len - 1] == '\n') {
+			line_len--;
+			if (line_len > 0 && buf[line_len - 1] == '\r') {
+				line_len--;
+			}
+			buf[line_len] = '\0';
+		}
+	}
+
+	intern->u.file.current_line = zend_string_init(buf, line_len, /* persistent */ false);
+	efree(buf);
 	intern->u.file.current_line_num += line_add;
 
 	return SUCCESS;
@@ -2093,10 +2094,17 @@ PHP_METHOD(SplFileObject, fgets)
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	if (spl_filesystem_file_read_ex(intern, /* silent */ false, /* line_add */ 1, /* csv */ false) == FAILURE) {
-		RETURN_THROWS();
+	if (intern->u.file.current_line) {
+		RETVAL_STR_COPY(intern->u.file.current_line);
+		spl_filesystem_file_free_line(intern);
+		intern->u.file.current_line_num++;
+	} else {
+		if (spl_filesystem_file_read_ex(intern, /* silent */ false, /* line_add */ 1, /* csv */ false) == FAILURE) {
+			RETURN_THROWS();
+		}
+		RETVAL_STR_COPY(intern->u.file.current_line);
+		spl_filesystem_file_free_line(intern);
 	}
-	RETURN_STR_COPY(intern->u.file.current_line);
 } /* }}} */
 
 /* {{{ Return current line from file */
@@ -2141,6 +2149,12 @@ PHP_METHOD(SplFileObject, next)
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 
 	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval)) {
+		if (spl_filesystem_file_read_line(ZEND_THIS, intern, true) == FAILURE) {
+			return;
+		}
+	}
 
 	spl_filesystem_file_free_line(intern);
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
@@ -2629,7 +2643,7 @@ PHP_METHOD(SplFileObject, seek)
 
 	for (i = 0; i < line_pos; i++) {
 		if (spl_filesystem_file_read_line(ZEND_THIS, intern, true) == FAILURE) {
-			return;
+			break;
 		}
 	}
 	if (line_pos > 0 && !SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
@@ -2648,9 +2662,8 @@ PHP_METHOD(SplFileObject, __toString)
 
 	if (!intern->u.file.current_line) {
 		ZEND_ASSERT(Z_ISUNDEF(intern->u.file.current_zval));
-		zend_result result = spl_filesystem_file_read_line(ZEND_THIS, intern, false);
-		if (UNEXPECTED(result != SUCCESS)) {
-			RETURN_THROWS();
+		if (spl_filesystem_file_read_line(ZEND_THIS, intern, true) == FAILURE) {
+			RETURN_EMPTY_STRING();
 		}
 	}
 

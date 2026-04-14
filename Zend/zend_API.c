@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -126,7 +125,7 @@ ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
 			return "mixed";
 		case _IS_NUMBER:
 			return "int|float";
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -262,7 +261,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code,
 		case ZPP_ERROR_FAILURE:
 			ZEND_ASSERT(EG(exception) && "Should have produced an error already");
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -3770,6 +3769,10 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 		if (error) zend_spprintf(error, 0, "class \"%.*s\" not found", (int)name_len, ZSTR_VAL(name));
 	}
 	ZSTR_ALLOCA_FREE(lcname, use_heap);
+	/* User error handlers may throw from deprecations above; do not report callable as valid. */
+	if (UNEXPECTED(EG(exception))) {
+		return false;
+	}
 	return ret;
 }
 /* }}} */
@@ -4031,7 +4034,7 @@ get_function_via_handler:
 }
 /* }}} */
 
-ZEND_API zend_string *zend_get_callable_name_ex(zval *callable, const zend_object *object) /* {{{ */
+ZEND_API zend_string *zend_get_callable_name_ex(const zval *callable, const zend_object *object) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(callable)) {
@@ -4089,7 +4092,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API zend_string *zend_get_callable_name(zval *callable) /* {{{ */
+ZEND_API zend_string *zend_get_callable_name(const zval *callable) /* {{{ */
 {
 	return zend_get_callable_name_ex(callable, NULL);
 }
@@ -4206,7 +4209,7 @@ check_func:
 }
 /* }}} */
 
-ZEND_API bool zend_is_callable_ex(zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error) /* {{{ */
+ZEND_API bool zend_is_callable_ex(const zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error) /* {{{ */
 {
 	/* Determine callability at the first parent user frame. */
 	const zend_execute_data *frame = EG(current_execute_data);
@@ -4221,13 +4224,13 @@ ZEND_API bool zend_is_callable_ex(zval *callable, zend_object *object, uint32_t 
 	return ret;
 }
 
-ZEND_API bool zend_is_callable(zval *callable, uint32_t check_flags, zend_string **callable_name) /* {{{ */
+ZEND_API bool zend_is_callable(const zval *callable, uint32_t check_flags, zend_string **callable_name) /* {{{ */
 {
 	return zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, NULL);
 }
 /* }}} */
 
-ZEND_API zend_result zend_fcall_info_init(zval *callable, uint32_t check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_string **callable_name, char **error) /* {{{ */
+ZEND_API zend_result zend_fcall_info_init(const zval *callable, uint32_t check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_string **callable_name, char **error) /* {{{ */
 {
 	if (!zend_is_callable_ex(callable, NULL, check_flags, callable_name, fcc, error)) {
 		return FAILURE;

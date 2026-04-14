@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Andi Gutmans <andi@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -195,7 +193,7 @@ static void bc_pow_err(bc_raise_status status, uint32_t arg_num)
 				zend_argument_value_error(arg_num, "exponent is too large, the number of digits overflowed");
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -573,7 +571,7 @@ PHP_FUNCTION(bcpowmod)
 		case OK:
 			RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	cleanup: {
@@ -1306,7 +1304,7 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 				goto fail;
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	if (Z_TYPE_P(op1) != IS_OBJECT) {
@@ -1492,7 +1490,7 @@ static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opco
 				goto fail;
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	if (num_obj == NULL) {
@@ -1652,7 +1650,7 @@ PHP_METHOD(BcMath_Number, powmod)
 			goto cleanup;
 		case OK:
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	bc_rm_trailing_zeros(ret);

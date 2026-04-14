@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -138,7 +136,7 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 		case XML_TEXT_NODE:
 			ZVAL_STRING(retval, "#text");
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return SUCCESS;
@@ -2263,7 +2261,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		}
 
 		zend_hash_init(&links, 0, NULL, NULL, false);
-		dom_relink_ns_decls(&links, xmlDocGetRootElement(docp));
+		xmlNodePtr root_element = xmlDocGetRootElement(docp);
+
+		if (root_element) {
+			dom_relink_ns_decls(&links, root_element);
+		}
 	} else if (!docp) {
 		/* Note: not triggerable with modern DOM */
 		zend_throw_error(NULL, "Node must be associated with a document");

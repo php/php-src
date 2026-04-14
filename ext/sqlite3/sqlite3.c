@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Scott MacVicar <scottmac@php.net>                           |
    +----------------------------------------------------------------------+
@@ -38,7 +36,7 @@ ZEND_DECLARE_MODULE_GLOBALS(sqlite3)
 static PHP_GINIT_FUNCTION(sqlite3);
 static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, const char *arg2, const char *arg3, const char *arg4);
 static void sqlite3_param_dtor(zval *data);
-static int php_sqlite3_compare_stmt_free(php_sqlite3_stmt **stmt_obj_ptr, sqlite3_stmt *statement);
+static int php_sqlite3_compare_stmt_free(php_sqlite3_stmt **stmt_obj_ptr, php_sqlite3_stmt *statement);
 static zend_always_inline void php_sqlite3_fetch_one(int n_cols, php_sqlite3_result *result_obj, zend_long mode, zval *result);
 
 #define SQLITE3_CHECK_INITIALIZED(db_obj, member, class_name) \
@@ -2120,7 +2118,7 @@ PHP_METHOD(SQLite3Result, finalize)
 
 	/* We need to finalize an internal statement */
 	if (!result_obj->is_prepared_statement) {
-		zend_llist_del_element(&(result_obj->db_obj->free_list), &result_obj->stmt_obj,
+		zend_llist_del_element(&(result_obj->db_obj->free_list), result_obj->stmt_obj,
 			(int (*)(void *, void *)) php_sqlite3_compare_stmt_free);
 	} else {
 		sqlite3_reset(result_obj->stmt_obj->stmt);
@@ -2235,9 +2233,9 @@ static void php_sqlite3_free_list_dtor(void **item)
 }
 /* }}} */
 
-static int php_sqlite3_compare_stmt_free(php_sqlite3_stmt **stmt_obj_ptr, sqlite3_stmt *statement ) /* {{{ */
+static int php_sqlite3_compare_stmt_free(php_sqlite3_stmt **stmt_obj_ptr, php_sqlite3_stmt *statement ) /* {{{ */
 {
-	return ((*stmt_obj_ptr)->initialised && statement == (*stmt_obj_ptr)->stmt);
+	return ((*stmt_obj_ptr)->initialised && statement == *stmt_obj_ptr);
 }
 /* }}} */
 
@@ -2351,7 +2349,7 @@ static void php_sqlite3_stmt_object_free_storage(zend_object *object) /* {{{ */
 	}
 
 	if (intern->initialised) {
-		zend_llist_del_element(&(intern->db_obj->free_list), intern->stmt,
+		zend_llist_del_element(&(intern->db_obj->free_list), intern,
 			(int (*)(void *, void *)) php_sqlite3_compare_stmt_free);
 	}
 

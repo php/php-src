@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Jim Winstead <jimw@php.net>                                 |
@@ -546,6 +544,10 @@ finish:
 		smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
 
 		if (php_stream_write(stream, ZSTR_VAL(header.s), ZSTR_LEN(header.s)) != ZSTR_LEN(header.s)) {
+			if (reset_ssl_peer_name) {
+				php_stream_context_unset_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name");
+			}
+
 			php_stream_wrapper_log_error(wrapper, options, "Cannot connect to HTTPS server through proxy");
 			php_stream_close(stream);
 			stream = NULL;
@@ -567,16 +569,18 @@ finish:
 
 		/* enable SSL transport layer */
 		if (stream) {
+			php_stream_context *old_context = PHP_STREAM_CONTEXT(stream);
+
 			if (php_stream_xport_crypto_setup(stream, STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL) < 0 ||
 			    php_stream_xport_crypto_enable(stream, 1) < 0) {
 				php_stream_wrapper_log_error(wrapper, options, "Cannot connect to HTTPS server through proxy");
 				php_stream_close(stream);
 				stream = NULL;
 			}
-		}
 
-		if (reset_ssl_peer_name) {
-			php_stream_context_unset_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name");
+			if (reset_ssl_peer_name) {
+				php_stream_context_unset_option(old_context, "ssl", "peer_name");
+			}
 		}
 	}
 

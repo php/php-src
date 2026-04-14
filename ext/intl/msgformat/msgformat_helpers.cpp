@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Stanislav Malyshev <stas@zend.com>                          |
    +----------------------------------------------------------------------+
@@ -411,7 +411,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 		   int32_t len = u_sprintf(temp, "%u", (uint32_t)num_index);
 		   key.append(temp, len);
 
-		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, (zend_ulong)num_index);
+		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, num_index);
 		} else { //string; assumed to be in UTF-8
 			intl_stringFromChar(key, ZSTR_VAL(str_index), ZSTR_LEN(str_index), &err.code);
 

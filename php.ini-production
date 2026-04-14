@@ -1388,13 +1388,6 @@ session.gc_divisor = 1000
 ; https://php.net/session.gc-maxlifetime
 session.gc_maxlifetime = 1440
 
-; NOTE: If you are using the subdirectory option for storing session files
-;       (see session.save_path above), then garbage collection does *not*
-;       happen automatically.  You will need to do your own garbage
-;       collection through a shell script, cron entry, or some other method.
-;       For example, the following script is the equivalent of setting
-;       session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
-;          find /path/to/sessions -cmin +24 -type f | xargs rm
 
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
 ; HTTP_REFERER has to contain this substring for the session to be

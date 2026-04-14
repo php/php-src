@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Stanislav Malyshev <stas@php.net>                            |
    +----------------------------------------------------------------------+
@@ -393,7 +391,7 @@ typeof_op_failure: ;
 		case ZEND_SR:
 			op_sigil = ">>";
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	zend_type_error("Unsupported operand types: %s %s %s", zend_zval_type_name(op1), op_sigil, zend_zval_type_name(op2));
 	return FAILURE;
@@ -929,7 +927,7 @@ ZEND_FUNCTION(gmp_div_qr)
 		case GMP_ROUND_MINUSINF:
 			mpz_fdiv_qr(gmpnum_result1, gmpnum_result2, gmpnum_a, gmpnum_b);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 

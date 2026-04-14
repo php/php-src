@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Derick Rethans <derick@derickrethans.nl>                    |
    +----------------------------------------------------------------------+
@@ -2049,7 +2047,7 @@ static int date_object_compare_timezone(zval *tz1, zval *tz2) /* {{{ */
 			return strcmp(o1->tzi.z.abbr, o2->tzi.z.abbr) ? 1 : 0;
 		case TIMELIB_ZONETYPE_ID:
 			return strcmp(o1->tzi.tz->name, o2->tzi.tz->name) ? 1 : 0;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 } /* }}} */
 
@@ -2744,7 +2742,7 @@ PHP_METHOD(DateTime, createFromTimestamp)
 			}
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	RETURN_OBJ(Z_OBJ(new_object));
@@ -2825,7 +2823,7 @@ PHP_METHOD(DateTimeImmutable, createFromTimestamp)
 			}
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	RETURN_OBJ(Z_OBJ(new_object));
@@ -5969,7 +5967,7 @@ static int date_period_has_property(zend_object *object, zend_string *name, int 
 				return 0;
 			case ZEND_PROPERTY_EXISTS:
 				return 1;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 	}
 

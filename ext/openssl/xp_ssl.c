@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Wez Furlong <wez@thebrainroom.com>                          |
   |          Daniel Lowrey <rdlowrey@php.net>                            |
@@ -127,10 +125,6 @@
 	} while (0)
 #define GET_VER_OPT_LONG(_name, _num) \
 	if (GET_VER_OPT(_name)) _num = zval_get_long(val)
-
-/* Used for peer verification in windows */
-#define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) \
-	ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
 
 #ifdef HAVE_IPV6
 /* Used for IPv6 Address peer verification */
@@ -415,7 +409,7 @@ static bool php_openssl_x509_fingerprint_match(X509 *peer, zval *val)
 
 static bool php_openssl_matches_wildcard_name(const char *subjectname, const char *certname) /* {{{ */
 {
-	char *wildcard = NULL;
+	const char *wildcard = NULL;
 	ptrdiff_t prefix_len;
 	size_t suffix_len, subject_len;
 
@@ -474,7 +468,10 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 		GENERAL_NAME *san = sk_GENERAL_NAME_value(alt_names, i);
 
 		if (san->type == GEN_DNS) {
-			ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName);
+			if (ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName) < 0) {
+				/* TODO: warn ? */
+				continue;
+			}
 			if ((size_t)ASN1_STRING_length(san->d.dNSName) != strlen((const char*)cert_name)) {
 				OPENSSL_free(cert_name);
 				/* prevent null-byte poisoning*/
@@ -857,8 +854,9 @@ static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *c
 		buffer_active = 0;
 		if (cert && X509_STORE_add_cert(cert_store, cert)) {
 			++certs_added;
-			X509_free(cert);
 		}
+		/* TODO: notify user when adding certificate failed? */
+		X509_free(cert);
 		goto cert_start;
 	}
 
@@ -1303,6 +1301,10 @@ static SSL_CTX *php_openssl_create_sni_server_ctx(char *cert_path, char *key_pat
 	/* The hello method is not inherited by SSL structs when assigning a new context
 	 * inside the SNI callback, so the just use SSLv23 */
 	SSL_CTX *ctx = SSL_CTX_new(SSLv23_server_method());
+	if (!ctx) {
+		php_error_docref(NULL, E_WARNING, "Failed to create the SSL context");
+		return NULL;
+	}
 
 	if (SSL_CTX_use_certificate_chain_file(ctx, cert_path) != 1) {
 		php_error_docref(NULL, E_WARNING,
@@ -1508,7 +1510,7 @@ static unsigned char *php_openssl_alpn_protos_parse(unsigned short *outlen, cons
 		return NULL;
 	}
 
-	out = emalloc(strlen(in) + 1);
+	out = emalloc(len + 1);
 
 	for (i = 0; i <= len; ++i) {
 		if (i == len || in[i] == ',') {
@@ -1687,7 +1689,8 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 
 	sslsock->ssl_handle = SSL_new(sslsock->ctx);
 
-	if (sslsock->ssl_handle == NULL) {
+	if (sslsock->ssl_handle == NULL
+		|| !SSL_set_ex_data(sslsock->ssl_handle, php_openssl_get_ssl_stream_data_index(), stream)) {
 		php_error_docref(NULL, E_WARNING, "SSL handle creation failure");
 		SSL_CTX_free(sslsock->ctx);
 		sslsock->ctx = NULL;
@@ -1698,8 +1701,6 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 		}
 #endif
 		return FAILURE;
-	} else {
-		SSL_set_ex_data(sslsock->ssl_handle, php_openssl_get_ssl_stream_data_index(), stream);
 	}
 
 	if (!SSL_set_fd(sslsock->ssl_handle, sslsock->s.socket)) {

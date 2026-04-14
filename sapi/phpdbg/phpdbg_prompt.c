@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
@@ -591,7 +589,7 @@ int phpdbg_skip_line_helper(void) /* {{{ */ {
 		 || opline->opcode == ZEND_YIELD
 		 || opline->opcode == ZEND_YIELD_FROM
 		) {
-			zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
+			zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong)(uintptr_t) opline, (void *) opline);
 		}
 	} while (++opline < op_array->opcodes + op_array->last);
 
@@ -633,7 +631,7 @@ static void phpdbg_seek_to_end(void) /* {{{ */ {
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:
-				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
+				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong)(uintptr_t) opline, (void *) opline);
 		}
 	} while (++opline < op_array->opcodes + op_array->last);
 }
@@ -647,7 +645,7 @@ PHPDBG_COMMAND(finish) /* {{{ */
 	}
 
 	phpdbg_seek_to_end();
-	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
+	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong)(uintptr_t) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
 		zend_hash_clean(&PHPDBG_G(seek));
 	} else {
 		PHPDBG_G(flags) |= PHPDBG_IN_FINISH;
@@ -664,7 +662,7 @@ PHPDBG_COMMAND(leave) /* {{{ */
 	}
 
 	phpdbg_seek_to_end();
-	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
+	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong)(uintptr_t) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
 		zend_hash_clean(&PHPDBG_G(seek));
 		phpdbg_notice("Already at the end of the function");
 		return SUCCESS;

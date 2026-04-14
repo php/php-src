@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Stig Venaas <venaas@php.net>                                |
    |          Wez Furlong <wez@thebrainroom.com>                          |
@@ -562,14 +560,11 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 
 	bio_out = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 	if (bio_out) {
-		if (!notext && !X509_print(bio_out, cert)) {
+		if ((notext || X509_print(bio_out, cert)) && PEM_write_bio_X509(bio_out, cert)) {
+			RETVAL_TRUE;
+		} else {
 			php_openssl_store_errors();
 		}
-		if (!PEM_write_bio_X509(bio_out, cert)) {
-			php_openssl_store_errors();
-		}
-
-		RETVAL_TRUE;
 	} else {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Error opening file %s", file_path);
@@ -864,8 +859,7 @@ PHP_FUNCTION(openssl_x509_export)
 	}
 	if (!notext && !X509_print(bio_out, cert)) {
 		php_openssl_store_errors();
-	}
-	if (PEM_write_bio_X509(bio_out, cert)) {
+	} else if (PEM_write_bio_X509(bio_out, cert)) {
 		BUF_MEM *bio_buf;
 
 		BIO_get_mem_ptr(bio_out, &bio_buf);
@@ -1102,7 +1096,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	for (i = 0; i < X509_PURPOSE_get_count(); i++) {
 		int id, purpset;
 		char * pname;
-		X509_PURPOSE * purp;
+		const X509_PURPOSE * purp;
 		zval subsub;
 
 		array_init(&subsub);
@@ -1156,7 +1150,7 @@ PHP_FUNCTION(openssl_x509_parse)
 				goto err_subitem;
 			}
 		}
-		else if (X509V3_EXT_print(bio_out, extension, 0, 0)) {
+		else if (X509V3_EXT_print(bio_out, extension, 0, 0) > 0) {
 			BIO_get_mem_ptr(bio_out, &bio_buf);
 			add_assoc_stringl(&subitem, extname, bio_buf->data, bio_buf->length);
 		} else {
@@ -1177,6 +1171,7 @@ PHP_FUNCTION(openssl_x509_parse)
 
 err_subitem:
 	zval_ptr_dtor(&subitem);
+	zval_ptr_dtor(&critext);
 err:
 	zend_array_destroy(Z_ARR_P(return_value));
 	if (cert_str) {
@@ -1452,7 +1447,7 @@ PHP_FUNCTION(openssl_pkcs12_export)
 
 	if (p12 != NULL) {
 		bio_out = BIO_new(BIO_s_mem());
-		if (i2d_PKCS12_bio(bio_out, p12)) {
+		if (bio_out && i2d_PKCS12_bio(bio_out, p12)) {
 			BUF_MEM *bio_buf;
 
 			BIO_get_mem_ptr(bio_out, &bio_buf);
@@ -1517,7 +1512,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 		if (cert) {
 			bio_out = BIO_new(BIO_s_mem());
-			if (PEM_write_bio_X509(bio_out, cert)) {
+			if (bio_out && PEM_write_bio_X509(bio_out, cert)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
@@ -1530,6 +1525,10 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 		if (pkey) {
 			bio_out = BIO_new(BIO_s_mem());
+			if (!bio_out) {
+				goto cleanup;
+			}
+
 			if (PEM_write_bio_PrivateKey(bio_out, pkey, NULL, NULL, 0, 0, NULL)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
@@ -1544,13 +1543,16 @@ PHP_FUNCTION(openssl_pkcs12_read)
 		cert_num = sk_X509_num(ca);
 		if (ca && cert_num) {
 			array_init(&zextracerts);
+			bio_out = BIO_new(BIO_s_mem());
+			if (!bio_out) {
+				goto cleanup;
+			}
 
 			for (i = 0; i < cert_num; i++) {
 				zval zextracert;
 				X509* aCA = sk_X509_pop(ca);
 				if (!aCA) break;
 
-				bio_out = BIO_new(BIO_s_mem());
 				if (PEM_write_bio_X509(bio_out, aCA)) {
 					BUF_MEM *bio_buf;
 					BIO_get_mem_ptr(bio_out, &bio_buf);
@@ -1558,9 +1560,10 @@ PHP_FUNCTION(openssl_pkcs12_read)
 					add_index_zval(&zextracerts, i, &zextracert);
 				}
 
+				(void)BIO_reset(bio_out);
 				X509_free(aCA);
-				BIO_free(bio_out);
 			}
+			BIO_free(bio_out);
 
 			sk_X509_free(ca);
 			add_assoc_zval(zout, "extracerts", &zextracerts);
@@ -1619,9 +1622,9 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	bio_out = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 	if (bio_out != NULL) {
 		if (!notext && !X509_REQ_print(bio_out, csr)) {
+			/* TODO: warn? */
 			php_openssl_store_errors();
-		}
-		if (!PEM_write_bio_X509_REQ(bio_out, csr)) {
+		} else if (!PEM_write_bio_X509_REQ(bio_out, csr)) {
 			php_error_docref(NULL, E_WARNING, "Error writing PEM to file %s", file_path);
 			php_openssl_store_errors();
 		} else {
@@ -1670,9 +1673,7 @@ PHP_FUNCTION(openssl_csr_export)
 	bio_out = BIO_new(BIO_s_mem());
 	if (!notext && !X509_REQ_print(bio_out, csr)) {
 		php_openssl_store_errors();
-	}
-
-	if (PEM_write_bio_X509_REQ(bio_out, csr)) {
+	} else if (PEM_write_bio_X509_REQ(bio_out, csr)) {
 		BUF_MEM *bio_buf;
 
 		BIO_get_mem_ptr(bio_out, &bio_buf);
@@ -1812,10 +1813,17 @@ PHP_FUNCTION(openssl_csr_sign)
 			goto cleanup;
 		}
 	} else {
-		PHP_OPENSSL_ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
+		if (!PHP_OPENSSL_ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial)) {
+			php_openssl_store_errors();
+			php_error_docref(NULL, E_WARNING, "Error setting serial number");
+			goto cleanup;
+		}
 	}
 
-	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
+	if (!X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr))) {
+		php_openssl_store_errors();
+		goto cleanup;
+	}
 
 	if (cert == NULL) {
 		cert = new_cert;
@@ -1824,8 +1832,11 @@ PHP_FUNCTION(openssl_csr_sign)
 		php_openssl_store_errors();
 		goto cleanup;
 	}
-	X509_gmtime_adj(X509_getm_notBefore(new_cert), 0);
-	X509_gmtime_adj(X509_getm_notAfter(new_cert), 60*60*24*num_days);
+	if (!X509_gmtime_adj(X509_getm_notBefore(new_cert), 0)
+		|| !X509_gmtime_adj(X509_getm_notAfter(new_cert), 60*60*24*num_days)) {
+		php_openssl_store_errors();
+		goto cleanup;
+	}
 	i = X509_set_pubkey(new_cert, key);
 	if (!i) {
 		php_openssl_store_errors();
@@ -2215,6 +2226,10 @@ PHP_FUNCTION(openssl_pkey_export)
 
 	if (PHP_SSL_REQ_PARSE(&req, args) == SUCCESS) {
 		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			php_openssl_store_errors();
+			goto cleanup;
+		}
 
 		if (passphrase && req.priv_key_encrypt) {
 			if (req.priv_key_encrypt_cipher) {
@@ -2243,6 +2258,7 @@ PHP_FUNCTION(openssl_pkey_export)
 			php_openssl_store_errors();
 		}
 	}
+cleanup:
 	EVP_PKEY_free(key);
 	BIO_free(bio_out);
 	PHP_SSL_REQ_DISPOSE(&req);
@@ -2318,7 +2334,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 	EVP_PKEY *pkey = Z_OPENSSL_PKEY_P(key)->pkey;
 
 	BIO *out = BIO_new(BIO_s_mem());
-	if (!PEM_write_bio_PUBKEY(out, pkey)) {
+	if (!out || !PEM_write_bio_PUBKEY(out, pkey)) {
 		BIO_free(out);
 		php_openssl_store_errors();
 		RETURN_FALSE;
@@ -2459,12 +2475,14 @@ PHP_FUNCTION(openssl_pbkdf2)
 
 	if (PKCS5_PBKDF2_HMAC(password, (int)password_len, (unsigned char *)salt, (int)salt_len, (int)iterations, digest, (int)key_length, (unsigned char*)ZSTR_VAL(out_buffer)) == 1) {
 		ZSTR_VAL(out_buffer)[key_length] = 0;
-		RETURN_NEW_STR(out_buffer);
+		RETVAL_NEW_STR(out_buffer);
 	} else {
 		php_openssl_store_errors();
 		zend_string_release_ex(out_buffer, 0);
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+
+	php_openssl_release_evp_md(digest);
 }
 /* }}} */
 
@@ -2811,33 +2829,41 @@ PHP_FUNCTION(openssl_pkcs7_read)
 	}
 
 	if (certs != NULL) {
+		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			goto clean_exit;
+		}
 		for (i = 0; i < sk_X509_num(certs); i++) {
 			X509* ca = sk_X509_value(certs, i);
 
-			bio_out = BIO_new(BIO_s_mem());
-			if (bio_out && PEM_write_bio_X509(bio_out, ca)) {
+			if (PEM_write_bio_X509(bio_out, ca)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
 			}
-			BIO_free(bio_out);
+			(void)BIO_reset(bio_out);
 		}
+		BIO_free(bio_out);
 	}
 
 	if (crls != NULL) {
+		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			goto clean_exit;
+		}
 		for (i = 0; i < sk_X509_CRL_num(crls); i++) {
 			X509_CRL* crl = sk_X509_CRL_value(crls, i);
 
-			bio_out = BIO_new(BIO_s_mem());
-			if (bio_out && PEM_write_bio_X509_CRL(bio_out, crl)) {
+			if (PEM_write_bio_X509_CRL(bio_out, crl)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
 			}
-			BIO_free(bio_out);
+			(void)BIO_reset(bio_out);
 		}
+		BIO_free(bio_out);
 	}
 
 	RETVAL_TRUE;
@@ -3478,33 +3504,43 @@ PHP_FUNCTION(openssl_cms_read)
 	}
 
 	if (certs != NULL) {
+		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			goto clean_exit;
+		}
+
 		for (i = 0; i < sk_X509_num(certs); i++) {
 			X509* ca = sk_X509_value(certs, i);
 
-			bio_out = BIO_new(BIO_s_mem());
-			if (bio_out && PEM_write_bio_X509(bio_out, ca)) {
+			if (PEM_write_bio_X509(bio_out, ca)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
 			}
-			BIO_free(bio_out);
+			(void)BIO_reset(bio_out);
 		}
+		BIO_free(bio_out);
 	}
 
 	if (crls != NULL) {
+		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			goto clean_exit;
+		}
+
 		for (i = 0; i < sk_X509_CRL_num(crls); i++) {
 			X509_CRL* crl = sk_X509_CRL_value(crls, i);
 
-			bio_out = BIO_new(BIO_s_mem());
-			if (bio_out && PEM_write_bio_X509_CRL(bio_out, crl)) {
+			if (PEM_write_bio_X509_CRL(bio_out, crl)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
 			}
-			BIO_free(bio_out);
+			(void)BIO_reset(bio_out);
 		}
+		BIO_free(bio_out);
 	}
 
 	RETVAL_TRUE;
@@ -4381,18 +4417,20 @@ PHP_FUNCTION(openssl_open)
 	cipher = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto out_pkey;
 	}
 
 	cipher_iv_len = EVP_CIPHER_iv_length(cipher);
 	if (cipher_iv_len > 0) {
 		if (!iv) {
 			zend_argument_value_error(6, "cannot be null for the chosen cipher algorithm");
-			RETURN_THROWS();
+			goto out_pkey;
 		}
 		if ((size_t)cipher_iv_len != iv_len) {
 			php_error_docref(NULL, E_WARNING, "IV length is invalid");
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			goto out_pkey;
 		}
 		iv_buf = (unsigned char *)iv;
 	} else {
@@ -4414,8 +4452,9 @@ PHP_FUNCTION(openssl_open)
 	}
 
 	efree(buf);
-	EVP_PKEY_free(pkey);
 	EVP_CIPHER_CTX_free(ctx);
+out_pkey:
+	EVP_PKEY_free(pkey);
 }
 /* }}} */
 
@@ -4495,7 +4534,8 @@ PHP_FUNCTION(openssl_digest)
 	sigbuf = zend_string_alloc(siglen, 0);
 
 	md_ctx = EVP_MD_CTX_create();
-	if (EVP_DigestInit(md_ctx, mdtype) &&
+	if (md_ctx &&
+			EVP_DigestInit(md_ctx, mdtype) &&
 			EVP_DigestUpdate(md_ctx, (unsigned char *)data, data_len) &&
 			EVP_DigestFinal (md_ctx, (unsigned char *)ZSTR_VAL(sigbuf), &siglen)) {
 		if (raw_output) {
