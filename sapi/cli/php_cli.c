@@ -1042,13 +1042,25 @@ do_repeat:
 				}
 
 				ZVAL_STRING(&arg, reflection_what);
-				object_init_ex(&ref, pce);
 
 				memset(&execute_data, 0, sizeof(zend_execute_data));
 				execute_data.func = (zend_function *) &zend_pass_function;
 				EG(current_execute_data) = &execute_data;
-				zend_call_known_instance_method_with_1_params(
-					pce->constructor, Z_OBJ(ref), NULL, &arg);
+				// Avoid deprecation warnings from ReflectionMethod::__construct()
+				// with one argument
+				if (pce == reflection_method_ptr) {
+					zend_function *create_from_method = zend_hash_str_find_ptr(
+						&(pce->function_table),
+						"createfrommethodname",
+						strlen( "createFromMethodName" )
+					);
+					zend_call_known_function(
+						create_from_method, NULL, pce, &ref, 1, &arg, NULL);
+				} else {
+					object_init_ex(&ref, pce);
+					zend_call_known_instance_method_with_1_params(
+						pce->constructor, Z_OBJ(ref), NULL, &arg);
+				}
 
 				if (EG(exception)) {
 					zval rv;

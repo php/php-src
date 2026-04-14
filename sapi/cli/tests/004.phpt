@@ -32,9 +32,7 @@ string(155) "Function [ <internal:standard> function phpinfo ] {
 }
 
 "
-string(371) "
-Deprecated: Calling ReflectionMethod::__construct() with 1 argument is deprecated, use ReflectionMethod::createFromMethodName() instead in Unknown on line 0
-Method [ <internal:Reflection, ctor> public method __construct ] {
+string(213) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> object|string $objectOrMethod ]
@@ -43,8 +41,6 @@ Method [ <internal:Reflection, ctor> public method __construct ] {
 }
 
 "
-string(219) "
-Deprecated: Calling ReflectionMethod::__construct() with 1 argument is deprecated, use ReflectionMethod::createFromMethodName() instead in Unknown on line 0
-Exception: Method ReflectionMethod::missing() does not exist
+string(61) "Exception: Method ReflectionMethod::missing() does not exist
 "
 Done
