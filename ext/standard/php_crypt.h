@@ -19,9 +19,7 @@
 #ifndef PHP_CRYPT_H
 #define PHP_CRYPT_H
 
-#include <stddef.h>
-
-PHPAPI zend_string *php_crypt(const char *password, size_t pass_len, const char *salt, int salt_len, bool quiet);
+PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, bool quiet);
 PHP_MINIT_FUNCTION(crypt);
 PHP_MSHUTDOWN_FUNCTION(crypt);
 PHP_RINIT_FUNCTION(crypt);

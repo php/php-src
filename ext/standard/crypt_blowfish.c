@@ -530,10 +530,10 @@ static void BF_swap(BF_word *x, int count)
 		*(ptr - 1) = R; \
 	} while (ptr < &data.ctx.S[3][0xFF]);
 
-static void BF_set_key(const char *key, size_t key_len, BF_key expanded,
-	BF_key initial, unsigned char flags)
+static void BF_set_key(const char *key, BF_key expanded, BF_key initial,
+	unsigned char flags)
 {
-	size_t key_pos = 0;
+	const char *ptr = key;
 	unsigned int bug, i, j;
 	BF_word safety, sign, diff, tmp[2];
 
@@ -559,7 +559,8 @@ static void BF_set_key(const char *key, size_t key_len, BF_key expanded,
  * information - that is, we mostly use fixed-cost bitwise operations instead
  * of branches or table lookups. (One conditional branch based on password
  * length remains. It is not part of the bug aftermath, though, and is
- * difficult and possibly unreasonable to avoid here.)
+ * difficult and possibly unreasonable to avoid given the use of C strings by
+ * the caller, which results in similar timing leaks anyway.)
  *
  * For actual implementation, we set an array index in the variable "bug"
  * (0 means no bug, 1 means sign extension bug emulation) and a flag in the
@@ -576,33 +577,25 @@ static void BF_set_key(const char *key, size_t key_len, BF_key expanded,
 
 	sign = diff = 0;
 
-	/*
-	 * bcrypt cycles over the password bytes plus a trailing NUL terminator.
-	 * The explicit length keeps embedded NUL bytes significant while
-	 * preserving the historical behavior for ordinary C strings.
-	 */
 	for (i = 0; i < BF_N + 2; i++) {
 		tmp[0] = tmp[1] = 0;
 		for (j = 0; j < 4; j++) {
-			unsigned char c = key_pos < key_len ? (unsigned char) key[key_pos] : 0;
-
 			tmp[0] <<= 8;
-			tmp[0] |= c; /* correct */
+			tmp[0] |= (unsigned char)*ptr; /* correct */
 			tmp[1] <<= 8;
-			tmp[1] |= (BF_word_signed)(signed char)c; /* bug */
+			tmp[1] |= (BF_word_signed)(signed char)*ptr; /* bug */
 /*
  * Sign extension in the first char has no effect - nothing to overwrite yet,
  * and those extra 24 bits will be fully shifted out of the 32-bit word. For
  * chars 2, 3, 4 in each four-char block, we set bit 7 of "sign" if sign
  * extension in tmp[1] occurs. Once this flag is set, it remains set.
  */
-			if (j) {
+			if (j)
 				sign |= tmp[1] & 0x80;
-			}
-			key_pos++;
-			if (key_pos > key_len) {
-				key_pos = 0;
-			}
+			if (!*ptr)
+				ptr = key;
+			else
+				ptr++;
 		}
 		diff |= tmp[0] ^ tmp[1]; /* Non-zero on any differences */
 
@@ -643,7 +636,7 @@ static const unsigned char flags_by_subtype[26] =
 	{2, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 0};
 
-static char *BF_crypt(const char *key, size_t key_len, const char *setting,
+static char *BF_crypt(const char *key, const char *setting,
 	char *output, int size,
 	BF_word min)
 {
@@ -686,7 +679,7 @@ static char *BF_crypt(const char *key, size_t key_len, const char *setting,
 	}
 	BF_swap(data.binary.salt, 4);
 
-	BF_set_key(key, key_len, data.expanded_key, data.ctx.P,
+	BF_set_key(key, data.expanded_key, data.ctx.P,
 	    flags_by_subtype[(unsigned int)(unsigned char)setting[2] - 'a']);
 
 	memcpy(data.ctx.S, BF_init_state.S, sizeof(data.ctx.S));
@@ -807,10 +800,10 @@ static int _crypt_output_magic(const char *setting, char *output, int size)
  * The performance cost of this quick self-test is around 0.6% at the "$2a$08"
  * setting.
  */
-char *php_crypt_blowfish_rn(const char *key, size_t key_len,
-	const char *setting, char *output, int size)
+char *php_crypt_blowfish_rn(const char *key, const char *setting,
+	char *output, int size)
 {
-	static const char test_key[] = "8b \xd0\xc1\xd2\xcf\xcc\xd8";
+	const char *test_key = "8b \xd0\xc1\xd2\xcf\xcc\xd8";
 	const char *test_setting = "$2a$00$abcdefghijklmnopqrstuu";
 	static const char * const test_hashes[2] =
 		{"i1D709vfamulimlGcq0qq3UvuUasvEa\0\x55", /* 'a', 'b', 'y' */
@@ -826,7 +819,7 @@ char *php_crypt_blowfish_rn(const char *key, size_t key_len,
 
 /* Hash the supplied password */
 	_crypt_output_magic(setting, output, size);
-	retval = BF_crypt(key, key_len, setting, output, size, 16);
+	retval = BF_crypt(key, setting, output, size, 16);
 	save_errno = errno;
 
 /*
@@ -845,17 +838,17 @@ char *php_crypt_blowfish_rn(const char *key, size_t key_len,
 	}
 	memset(buf.o, 0x55, sizeof(buf.o));
 	buf.o[sizeof(buf.o) - 1] = 0;
-	p = BF_crypt(test_key, sizeof(test_key) - 1, buf.s, buf.o, sizeof(buf.o) - (1 + 1), 1);
+	p = BF_crypt(test_key, buf.s, buf.o, sizeof(buf.o) - (1 + 1), 1);
 
 	ok = (p == buf.o &&
 	    !memcmp(p, buf.s, 7 + 22) &&
 	    !memcmp(p + (7 + 22), test_hash, 31 + 1 + 1 + 1));
 
 	{
-		static const char k[] = "\xff\xa3" "34" "\xff\xff\xff\xa3" "345";
+		const char *k = "\xff\xa3" "34" "\xff\xff\xff\xa3" "345";
 		BF_key ae, ai, ye, yi;
-		BF_set_key(k, sizeof(k) - 1, ae, ai, 2); /* $2a$ */
-		BF_set_key(k, sizeof(k) - 1, ye, yi, 4); /* $2y$ */
+		BF_set_key(k, ae, ai, 2); /* $2a$ */
+		BF_set_key(k, ye, yi, 4); /* $2y$ */
 		ai[0] ^= 0x10000; /* undo the safety (for comparison) */
 		ok = ok && ai[0] == 0xdb9c59bc && ye[17] == 0x33343500 &&
 		    !memcmp(ae, ye, sizeof(ae)) &&

@@ -153,7 +153,12 @@ static bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array
 
 static bool php_password_bcrypt_verify(const zend_string *password, const zend_string *hash) {
 	int status = 0;
-	zend_string *ret = php_crypt(ZSTR_VAL(password), ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
+
+	if (zend_str_has_nul_byte(password)) {
+		return false;
+	}
+
+	zend_string *ret = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
 
 	if (!ret) {
 		return false;
@@ -181,6 +186,11 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	zval *zcost;
 	zend_long cost = PHP_PASSWORD_BCRYPT_COST;
 
+	if (zend_str_has_nul_byte(password)) {
+		zend_value_error("Bcrypt password must not contain null character");
+		return NULL;
+	}
+
 	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
 		cost = zval_get_long(zcost);
 	}
@@ -201,7 +211,7 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	zend_string_release_ex(salt, 0);
 
 	/* This cast is safe, since both values are defined here in code and cannot overflow */
-	result = php_crypt(ZSTR_VAL(password), ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
+	result = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
 	zend_string_release_ex(hash, 0);
 
 	if (!result) {
