@@ -713,19 +713,13 @@ static PHP_INI_MH(OnUpdateCookieLifetime)
 		if (oflow != 0) {
 			php_error_docref(NULL, E_WARNING, "session.cookie_lifetime must be between 0 and " ZEND_LONG_FMT, maxcookie);
 		} else {
-			php_error_docref(NULL, E_WARNING, "session.cookie_lifetime must be an integer");
+			php_error_docref(NULL, E_WARNING, "session.cookie_lifetime must be of type int");
 		}
 		return FAILURE;
 	}
-	if (lval < 0) {
+	if (lval < 0 || lval > maxcookie) {
 		php_error_docref(NULL, E_WARNING, "session.cookie_lifetime must be between 0 and " ZEND_LONG_FMT, maxcookie);
 		return FAILURE;
-	} else if (lval > maxcookie) {
-		php_error_docref(NULL, E_WARNING, "session.cookie_lifetime must be between 0 and " ZEND_LONG_FMT ", value clamped to maximum", maxcookie);
-		zend_long *p = ZEND_INI_GET_ADDR();
-		*p = maxcookie;
-		entry->value = zend_long_to_str(maxcookie);
-		return SUCCESS;
 	}
 
 	return OnUpdateLongGEZero(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
