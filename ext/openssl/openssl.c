@@ -2847,6 +2847,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 		zout = zend_try_array_init(zout);
 		if (!zout) {
+			sk_X509_pop_free(ca, X509_free);
 			goto cleanup;
 		}
 
@@ -2898,7 +2899,6 @@ PHP_FUNCTION(openssl_pkcs12_read)
 			}
 
 			sk_X509_free(ca);
-			ca = NULL;
 			add_assoc_zval(zout, "extracerts", &zextracerts);
 		}
 
@@ -2915,15 +2915,6 @@ cleanup:
 	}
 	if (p12) {
 		PKCS12_free(p12);
-	}
-	int cert_num = sk_X509_num(ca);
-	if (ca && cert_num) {
-		for (i = 0; i < cert_num; i++) {
-			X509* aCA = sk_X509_pop(ca);
-			if (!aCA) break;
-			X509_free(aCA);
-		}
-		sk_X509_free(ca);
 	}
 }
 /* }}} */
