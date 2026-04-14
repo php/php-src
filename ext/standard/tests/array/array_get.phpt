@@ -30,7 +30,11 @@ var_dump(array_get($users, ['users', 1, 'name']));
 var_dump(array_get($array, ['products', 'chair', 'price'], 75));
 
 // Test with invalid segment type in array path
-var_dump(array_get($array, ['products', new stdClass(), 'price'], 'invalid'));
+try {
+	var_dump(array_get($array, ['products', new stdClass(), 'price'], 'invalid'));
+} catch (TypeError $e) {
+	echo $e->getMessage() . "\n";
+}
 
 // Test with references - ensure returned value is a copy, not a reference
 $ref_array = ['data' => ['value' => 'original']];
@@ -71,7 +75,7 @@ NULL
 string(5) "Alice"
 string(3) "Bob"
 int(75)
-string(7) "invalid"
+Path segment must be of type string|int, stdClass given
 string(8) "original"
 string(8) "original"
 string(7) "default"

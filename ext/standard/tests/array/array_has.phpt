@@ -32,7 +32,11 @@ $withNull = ['key' => null];
 var_dump(array_has($withNull, ['key']));
 
 // Test with invalid segment type in array path
-var_dump(array_has($array, ['product', new stdClass()]));
+try {
+	var_dump(array_has($array, ['product', new stdClass()]));
+} catch (TypeError $e) {
+	echo $e->getMessage() . "\n";
+}
 
 // Test with reference to an array in the path
 $array2 = ['world'];
@@ -58,7 +62,7 @@ bool(true)
 bool(true)
 bool(false)
 bool(true)
-bool(false)
+Path segment must be of type string|int, stdClass given
 bool(true)
 bool(true)
 Done

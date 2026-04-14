@@ -6935,7 +6935,8 @@ static zval* array_get_nested(HashTable *ht, HashTable *path)
 		} else if (Z_TYPE_P(segment_val) == IS_LONG) {
 			current = zend_hash_index_find(current_ht, Z_LVAL_P(segment_val));
 		} else {
-			/* Invalid segment type */
+			/* Invalid segment type - throw TypeError */
+			zend_type_error("Path segment must be of type string|int, %s given", zend_zval_value_name(segment_val));
 			return NULL;
 		}
 
@@ -6979,6 +6980,10 @@ PHP_FUNCTION(array_get)
 
 	zval *result = array_get_nested(Z_ARRVAL_P(array), Z_ARRVAL_P(path));
 
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
 	if (result != NULL) {
 		RETURN_COPY_DEREF(result);
 	}
@@ -7002,6 +7007,10 @@ PHP_FUNCTION(array_has)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zval *result = array_get_nested(Z_ARRVAL_P(array), Z_ARRVAL_P(path));
+
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
 
 	RETURN_BOOL(result != NULL);
 }
