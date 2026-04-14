@@ -2217,21 +2217,12 @@ zend_result phar_split_fname(const char *filename, size_t filename_len, char **a
 	if (entry) {
 		if (ext_str[ext_len]) {
 			size_t computed_entry_len = filename_len - *arch_len;
-#ifdef PHP_WIN32
-			/* TODO: can we handle the unixify path in phar_fix_filepath() directly ? */
-			char *fixed_path_for_windows = estrndup(ext_str+ext_len, computed_entry_len);
-			phar_unixify_path_separators(fixed_path_for_windows, computed_entry_len);
-			zend_string *entry_str = phar_fix_filepath(fixed_path_for_windows, computed_entry_len, false);
-			*entry = estrndup(ZSTR_VAL(entry_str), ZSTR_LEN(entry_str));
-			*entry_len = ZSTR_LEN(entry_str);
-			zend_string_release_ex(entry_str, false);
-			efree(fixed_path_for_windows);
-#else
+			/* We don't need to unixify the path on Windows,
+			 * as ext_str is derived from filename that was already unixify */
 			zend_string *entry_str = phar_fix_filepath(ext_str+ext_len, computed_entry_len, false);
 			*entry = estrndup(ZSTR_VAL(entry_str), ZSTR_LEN(entry_str));
 			*entry_len = ZSTR_LEN(entry_str);
 			zend_string_release_ex(entry_str, false);
-#endif
 		} else {
 			*entry_len = 1;
 			*entry = estrndup("/", 1);
