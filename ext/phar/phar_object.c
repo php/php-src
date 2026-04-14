@@ -403,33 +403,27 @@ static void phar_postprocess_ru_web(char *fname, size_t fname_len, char *entry, 
  */
 PHP_METHOD(Phar, running)
 {
-	zend_string *fname;
-	char *arch;
-	size_t arch_len;
 	bool retphar = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &retphar) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	fname = zend_get_executed_filename_ex();
+	const zend_string *fname = zend_get_executed_filename_ex();
 	if (!fname) {
 		RETURN_EMPTY_STRING();
 	}
 
-	if (
-		zend_string_starts_with_literal_ci(fname, "phar://")
-		&& SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, 2, 0)
-	) {
-		if (retphar) {
-			RETVAL_STRINGL(ZSTR_VAL(fname), arch_len + 7);
-			efree(arch);
-			return;
-		} else {
-			// TODO: avoid reallocation ???
-			RETVAL_STRINGL(arch, arch_len);
-			efree(arch);
-			return;
+	if (zend_string_starts_with_literal_ci(fname, "phar://")) {
+		zend_string *arch = phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 2, 0);
+		if (arch) {
+			if (retphar) {
+				RETVAL_STRINGL(ZSTR_VAL(fname), ZSTR_LEN(arch) + 7);
+				zend_string_release_ex(arch, false);
+				return;
+			} else {
+				RETURN_STR(arch);
+			}
 		}
 	}
 
@@ -444,8 +438,8 @@ PHP_METHOD(Phar, running)
  */
 PHP_METHOD(Phar, mount)
 {
-	char *fname, *arch = NULL, *path, *actual;
-	size_t fname_len, arch_len;
+	char *fname, *path, *actual;
+	size_t fname_len;
 	size_t path_len, actual_len;
 	phar_archive_data *pphar;
 #ifdef PHP_WIN32
@@ -477,31 +471,29 @@ PHP_METHOD(Phar, mount)
 #endif
 
 	zend_string *entry = NULL;
-	if (fname_len > 7 && !memcmp(fname, "phar://", 7) && SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, NULL, 2, 0)) {
+	zend_string *arch = NULL;
+	if (fname_len > 7 && !memcmp(fname, "phar://", 7) && (arch = phar_split_fname(fname, fname_len, NULL, 2, 0))) {
 		if (path_len > 7 && !memcmp(path, "phar://", 7)) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Can only mount internal paths within a phar archive, use a relative path instead of \"%s\"", path);
-			efree(arch);
+			zend_string_release_ex(arch, false);
 			goto finish;
 		}
 carry_on2:
-		if (NULL == (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), arch, arch_len))) {
-			if (PHAR_G(manifest_cached) && NULL != (pphar = zend_hash_str_find_ptr(&cached_phars, arch, arch_len))) {
+		if (NULL == (pphar = zend_hash_find_ptr(&(PHAR_G(phar_fname_map)), arch))) {
+			if (PHAR_G(manifest_cached) && NULL != (pphar = zend_hash_find_ptr(&cached_phars, arch))) {
 				if (SUCCESS == phar_copy_on_write(&pphar)) {
 					goto carry_on;
 				}
 			}
 
-			zend_throw_exception_ex(phar_ce_PharException, 0, "%s is not a phar archive, cannot mount", arch);
-
-			if (arch) {
-				efree(arch);
-			}
+			zend_throw_exception_ex(phar_ce_PharException, 0, "%s is not a phar archive, cannot mount", ZSTR_VAL(arch));
+			zend_string_release_ex(arch, false);
 
 			goto finish;
 		}
 carry_on:
 		if (SUCCESS != phar_mount_entry(pphar, actual, actual_len, path, path_len)) {
-			zend_throw_exception_ex(phar_ce_PharException, 0, "Mounting of %s to %s within phar %s failed", path, actual, arch);
+			zend_throw_exception_ex(phar_ce_PharException, 0, "Mounting of %s to %s within phar %s failed", path, actual, ZSTR_VAL(arch));
 		}
 
 		if (entry && path == ZSTR_VAL(entry)) {
@@ -509,7 +501,7 @@ carry_on:
 		}
 
 		if (arch) {
-			efree(arch);
+			zend_string_release_ex(arch, false);
 		}
 
 		goto finish;
@@ -521,7 +513,7 @@ carry_on:
 		}
 
 		goto carry_on;
-	} else if (SUCCESS == phar_split_fname(path, path_len, &arch, &arch_len, &entry, 2, 0)) {
+	} else if ((arch = phar_split_fname(path, path_len, &entry, 2, 0))) {
 		path = ZSTR_VAL(entry);
 		path_len = ZSTR_LEN(entry);
 		goto carry_on2;
@@ -1077,9 +1069,8 @@ static const spl_other_handler phar_spl_foreign_handler = {
  */
 PHP_METHOD(Phar, __construct)
 {
-	char *fname, *alias = NULL, *error, *arch = NULL, *save_fname;
+	char *fname, *alias = NULL, *error, *save_fname;
 	size_t fname_len, alias_len = 0;
-	size_t arch_len;
 	bool is_data;
 	zend_long flags = SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS;
 	zend_long format = 0;
@@ -1108,27 +1099,21 @@ PHP_METHOD(Phar, __construct)
 
 	save_fname = fname;
 	zend_string *entry = NULL;
-	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, !is_data, 2)) {
+#ifdef PHP_WIN32
+	phar_unixify_path_separators(fname, fname_len);
+#endif
+	zend_string *arch = phar_split_fname(fname, fname_len, &entry, !is_data, 2);
+	if (arch) {
 		/* use arch (the basename for the archive) for fname instead of fname */
 		/* this allows support for RecursiveDirectoryIterator of subdirectories */
-#ifdef PHP_WIN32
-		phar_unixify_path_separators(arch, arch_len);
-#endif
-		fname = arch;
-		fname_len = arch_len;
-#ifdef PHP_WIN32
-	} else {
-		arch = estrndup(fname, fname_len);
-		arch_len = fname_len;
-		fname = arch;
-		phar_unixify_path_separators(arch, arch_len);
-#endif
+		fname = ZSTR_VAL(arch);
+		fname_len = ZSTR_LEN(arch);
 	}
 
 	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, is_data, REPORT_ERRORS, &phar_data, &error) == FAILURE) {
 
-		if (fname == arch && fname != save_fname) {
-			efree(arch);
+		if (arch && fname == ZSTR_VAL(arch) && fname != save_fname) {
+			zend_string_release_ex(arch, false);
 			fname = save_fname;
 		}
 
@@ -1153,8 +1138,8 @@ PHP_METHOD(Phar, __construct)
 		phar_data->is_tar = false;
 	}
 
-	if (fname == arch) {
-		efree(arch);
+	if (arch && fname == ZSTR_VAL(arch)) {
+		zend_string_release_ex(arch, false);
 		fname = save_fname;
 	}
 
@@ -1260,9 +1245,8 @@ PHP_METHOD(Phar, getSupportedCompression)
 /* {{{ Completely remove a phar archive from memory and disk */
 PHP_METHOD(Phar, unlinkArchive)
 {
-	char *fname, *error, *arch;
+	char *fname, *error;
 	size_t fname_len;
-	size_t arch_len;
 	phar_archive_data *phar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
@@ -1284,19 +1268,17 @@ PHP_METHOD(Phar, unlinkArchive)
 		RETURN_THROWS();
 	}
 
-	zend_string *zend_file_name = zend_get_executed_filename_ex();
-
-	if (
-		zend_file_name
-		&& zend_string_starts_with_literal_ci(zend_file_name, "phar://")
-		&& SUCCESS == phar_split_fname(ZSTR_VAL(zend_file_name), ZSTR_LEN(zend_file_name), &arch, &arch_len, NULL, 2, 0)
-	) {
-		if (arch_len == fname_len && !memcmp(arch, fname, arch_len)) {
-			zend_throw_exception_ex(phar_ce_PharException, 0, "phar archive \"%s\" cannot be unlinked from within itself", fname);
-			efree(arch);
-			RETURN_THROWS();
+	const zend_string *zend_file_name = zend_get_executed_filename_ex();
+	if (zend_file_name && zend_string_starts_with_literal_ci(zend_file_name, "phar://")) {
+		zend_string *arch = phar_split_fname(ZSTR_VAL(zend_file_name), ZSTR_LEN(zend_file_name), NULL, 2, 0);
+		if (arch) {
+			if (ZSTR_LEN(arch) == fname_len && !memcmp(ZSTR_VAL(arch), fname, ZSTR_LEN(arch))) {
+				zend_string_release_ex(arch, false);
+				zend_throw_exception_ex(phar_ce_PharException, 0, "phar archive \"%s\" cannot be unlinked from within itself", fname);
+				RETURN_THROWS();
+			}
+			zend_string_release_ex(arch, false);
 		}
-		efree(arch);
 	}
 
 	if (phar->is_persistent) {
@@ -4395,9 +4377,8 @@ PHP_METHOD(Phar, extractTo)
 /* {{{ Construct a Phar entry object */
 PHP_METHOD(PharFileInfo, __construct)
 {
-	char *fname, *arch, *error;
+	char *fname, *error;
 	size_t fname_len;
-	size_t arch_len;
 	phar_entry_object *entry_obj;
 	phar_archive_data *phar_data;
 	zval arg1;
@@ -4413,15 +4394,22 @@ PHP_METHOD(PharFileInfo, __construct)
 		RETURN_THROWS();
 	}
 
-	zend_string *entry = NULL;
-	if (fname_len < 7 || memcmp(fname, "phar://", 7) || phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, 2, 0) == FAILURE) {
+	if (fname_len < 7 || memcmp(fname, "phar://", 7)) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0,
 			"'%s' is not a valid phar archive URL (must have at least phar://filename.phar)", fname);
 		RETURN_THROWS();
 	}
 
-	if (phar_open_from_filename(arch, arch_len, NULL, 0, REPORT_ERRORS, &phar_data, &error) == FAILURE) {
-		efree(arch);
+	zend_string *entry = NULL;
+	zend_string *arch = phar_split_fname(fname, fname_len, &entry, 2, 0);
+	if (!arch) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0,
+			"'%s' is not a valid phar archive URL (must have at least phar://filename.phar)", fname);
+		RETURN_THROWS();
+	}
+
+	if (phar_open_from_filename(ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, REPORT_ERRORS, &phar_data, &error) == FAILURE) {
+		zend_string_release_ex(arch, false);
 		efree(entry);
 		if (error) {
 			zend_throw_exception_ex(spl_ce_RuntimeException, 0,
@@ -4437,14 +4425,15 @@ PHP_METHOD(PharFileInfo, __construct)
 	phar_entry_info *entry_info = phar_get_entry_info_dir(phar_data, ZSTR_VAL(entry), ZSTR_LEN(entry), 1, &error, true);
 	if (UNEXPECTED(!entry_info)) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0,
-		"Cannot access phar file entry '%s' in archive '%s'%s%s", ZSTR_VAL(entry), arch, error ? ", " : "", error ? error : "");
+			"Cannot access phar file entry '%s' in archive '%s'%s%s",
+			ZSTR_VAL(entry), ZSTR_VAL(arch), error ? ", " : "", error ? error : "");
 		zend_string_release_ex(entry, false);
-		efree(arch);
+		zend_string_release_ex(arch, false);
 		RETURN_THROWS();
 	}
 
 	zend_string_release_ex(entry, false);
-	efree(arch);
+	zend_string_release_ex(arch, false);
 
 	entry_obj->entry = entry_info;
 	if (!entry_info->is_persistent && !entry_info->is_temp_dir) {

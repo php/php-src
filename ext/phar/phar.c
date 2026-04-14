@@ -2164,7 +2164,7 @@ last_time:
  *
  * This is used by phar_parse_url()
  */
-zend_result phar_split_fname(const char *filename, size_t filename_len, char **arch, size_t *arch_len, zend_string **entry, int executable, int for_create) /* {{{ */
+zend_string* phar_split_fname_ex(const char *filename, size_t filename_len, zend_string **entry, int executable, int for_create, const char **error) /* {{{ */
 {
 	const char *ext_str;
 #ifdef PHP_WIN32
@@ -2172,8 +2172,11 @@ zend_result phar_split_fname(const char *filename, size_t filename_len, char **a
 #endif
 	size_t ext_len;
 
+	if (error) {
+		*error = NULL;
+	}
 	if (zend_char_has_nul_byte(filename, filename_len)) {
-		return FAILURE;
+		return NULL;
 	}
 
 	if (!strncasecmp(filename, "phar://", 7)) {
@@ -2191,12 +2194,12 @@ zend_result phar_split_fname(const char *filename, size_t filename_len, char **a
 #endif
 	if (phar_detect_phar_fname_ext(filename, filename_len, &ext_str, &ext_len, executable, for_create, false) == FAILURE) {
 		if (ext_len != -1) {
-			if (!ext_str) {
+			if (!ext_str && error) {
 				/* no / detected, restore arch for error message */
 #ifdef PHP_WIN32
-				*arch = save;
+				*error = save;
 #else
-				*arch = (char*)filename;
+				*error = filename;
 #endif
 			}
 
@@ -2205,19 +2208,19 @@ zend_result phar_split_fname(const char *filename, size_t filename_len, char **a
 				efree((char *)filename);
 			}
 #endif
-			return FAILURE;
+			return NULL;
 		}
 
 		ext_len = 0;
 		/* no extension detected - instead we are dealing with an alias */
 	}
 
-	*arch_len = ext_str - filename + ext_len;
-	*arch = estrndup(filename, *arch_len);
+	size_t arch_len = ext_str - filename + ext_len;
+	zend_string *arch = zend_string_init(filename, arch_len, false);
 
 	if (entry) {
 		if (ext_str[ext_len]) {
-			size_t computed_entry_len = filename_len - *arch_len;
+			size_t computed_entry_len = filename_len - arch_len;
 			/* We don't need to unixify the path on Windows,
 			 * as ext_str is derived from filename that was already unixify */
 			*entry = phar_fix_filepath(ext_str+ext_len, computed_entry_len, false);
@@ -2232,9 +2235,13 @@ zend_result phar_split_fname(const char *filename, size_t filename_len, char **a
 	}
 #endif
 
-	return SUCCESS;
+	return arch;
 }
 /* }}} */
+
+zend_string* phar_split_fname(const char *filename, size_t filename_len, zend_string **entry, int executable, int for_create) {
+	return phar_split_fname_ex(filename, filename_len, entry, executable, for_create, NULL);
+}
 
 /**
  * Invoked when a user calls Phar::mapPhar() from within an executing .phar

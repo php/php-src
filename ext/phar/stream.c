@@ -58,8 +58,7 @@ const php_stream_wrapper php_stream_phar_wrapper = {
 php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options) /* {{{ */
 {
 	php_url *resource;
-	char *arch = NULL, *error;
-	size_t arch_len;
+	char *error;
 
 	if (strncasecmp(filename, "phar://", 7)) {
 		return NULL;
@@ -70,12 +69,14 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 		}
 		return NULL;
 	}
+
 	zend_string *entry = NULL;
-	if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, 2, (mode[0] == 'w' ? 2 : 0)) == FAILURE) {
+	const char *arch_error = NULL;
+	zend_string *arch = phar_split_fname_ex(filename, strlen(filename), &entry, 2, (mode[0] == 'w' ? 2 : 0), &arch_error);
+	if (!arch) {
 		if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-			if (arch && !entry) {
-				php_stream_wrapper_log_error(wrapper, options, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", filename, arch);
-				arch = NULL;
+			if (arch_error && !entry) {
+				php_stream_wrapper_log_error(wrapper, options, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", filename, arch_error);
 			} else {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: invalid url or non-existent phar \"%s\"", filename);
 			}
@@ -84,8 +85,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	}
 	resource = ecalloc(1, sizeof(php_url));
 	resource->scheme = ZSTR_INIT_LITERAL("phar", 0);
-	resource->host = zend_string_init(arch, arch_len, 0);
-	efree(arch);
+	resource->host = arch;
 	resource->path = entry;
 
 #ifdef MBO_0

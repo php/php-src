@@ -266,8 +266,8 @@ zend_result phar_mount_entry(phar_archive_data *phar, const char *filename, size
 zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data **pphar) /* {{{ */
 {
 	zend_string *ret;
-	char *path, *arch;
-	size_t arch_len;
+	char *path;
+	zend_string *arch;
 	phar_archive_data *phar;
 
 	if (pphar) {
@@ -294,19 +294,22 @@ zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data 
 		&& ZSTR_LEN(fname) - length_phar_protocol >= PHAR_G(last_phar_name_len)
 		&& !memcmp(ZSTR_VAL(fname) + length_phar_protocol, PHAR_G(last_phar_name), PHAR_G(last_phar_name_len))
 	) {
-		arch = estrndup(PHAR_G(last_phar_name), PHAR_G(last_phar_name_len));
-		arch_len = PHAR_G(last_phar_name_len);
+		arch = zend_string_init(PHAR_G(last_phar_name), PHAR_G(last_phar_name_len), false);
 		phar = PHAR_G(last_phar);
 		goto splitted;
 	}
 
-	if (!is_file_a_phar_wrapper || SUCCESS != phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, 1, 0)) {
+	if (!is_file_a_phar_wrapper) {
+		return NULL;
+	}
+	arch = phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 1, 0);
+	if (!arch) {
 		return NULL;
 	}
 
 	if (*ZSTR_VAL(filename) == '.') {
-		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
-			efree(arch);
+		if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL)) {
+			zend_string_release_ex(arch, false);
 			return NULL;
 		}
 splitted:
@@ -319,42 +322,43 @@ splitted:
 			if (zend_hash_str_exists(&(phar->manifest), ZSTR_VAL(test) + 1, ZSTR_LEN(test) - 1)) {
 				ret = zend_string_concat3(
 					"phar://", strlen("phar://"),
-					arch, arch_len,
+					ZSTR_VAL(arch), ZSTR_LEN(arch),
 					ZSTR_VAL(test), ZSTR_LEN(test)
 				);
 				zend_string_release_ex(test, false);
-				efree(arch);
+				zend_string_release_ex(arch, false);
 				return ret;
 			}
 		} else {
 			if (zend_hash_exists(&(phar->manifest), test)) {
-				ret = strpprintf(0, "phar://%s/%s", arch, ZSTR_VAL(test));
+				ret = strpprintf(0, "phar://%s/%s", ZSTR_VAL(arch), ZSTR_VAL(test));
 				zend_string_release_ex(test, false);
-				efree(arch);
+				zend_string_release_ex(arch, false);
 				return ret;
 			}
 		}
 		zend_string_release_ex(test, false);
 	}
 
-	spprintf(&path, MAXPATHLEN + 1 + strlen(PG(include_path)), "phar://%s/%s%c%s", arch, PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
-	efree(arch);
+	spprintf(&path, MAXPATHLEN + 1 + strlen(PG(include_path)), "phar://%s/%s%c%s", ZSTR_VAL(arch), PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
+	zend_string_release_ex(arch, false);
 	ret = php_resolve_path(ZSTR_VAL(filename), ZSTR_LEN(filename), path);
 	efree(path);
 
 	if (ret && zend_string_starts_with_literal_ci(ret, "phar://")) {
 		/* found phar:// */
-		if (SUCCESS != phar_split_fname(ZSTR_VAL(ret), ZSTR_LEN(ret), &arch, &arch_len, NULL, 1, 0)) {
+		arch = phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 1, 0);
+		if (!arch) {
 			return ret;
 		}
 
-		*pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), arch, arch_len);
+		*pphar = zend_hash_find_ptr(&(PHAR_G(phar_fname_map)), arch);
 
 		if (!*pphar && PHAR_G(manifest_cached)) {
-			*pphar = zend_hash_str_find_ptr(&cached_phars, arch, arch_len);
+			*pphar = zend_hash_find_ptr(&cached_phars, arch);
 		}
 
-		efree(arch);
+		zend_string_release_ex(arch, false);
 	}
 
 	return ret;
