@@ -6965,7 +6965,7 @@ static zval* array_get_nested(HashTable *ht, HashTable *path)
 /* }}} */
 
 /* {{{ Retrieves a value from a deeply nested array using an array path */
-PHP_FUNCTION(array_get)
+PHP_FUNCTION(array_get_path)
 {
 	zval *array;
 	zval *path;
@@ -6996,7 +6996,7 @@ PHP_FUNCTION(array_get)
 /* }}} */
 
 /* {{{ Checks whether a given item exists in an array using an array path */
-PHP_FUNCTION(array_has)
+PHP_FUNCTION(array_has_path)
 {
 	zval *array;
 	zval *path;
