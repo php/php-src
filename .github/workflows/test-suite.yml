@@ -962,35 +962,6 @@ jobs:
         run: .github/scripts/windows/build.bat
       - name: Test
         run: .github/scripts/windows/test.bat
-  WINDOWS_CLANG:
-    if: ${{ fromJson(inputs.branch).jobs.WINDOWS }}
-    name: "WINDOWS_X64_ZTS_CLANG"
-    runs-on: windows-2022
-    env:
-      PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
-      PHP_BUILD_OBJ_DIR: C:\obj
-      PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.5.0
-      PHP_BUILD_CRT: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.vs_crt_version }}
-      PLATFORM: x64
-      THREAD_SAFE: "1"
-      INTRINSICS: "AVX2"
-      PARALLEL: -j2
-      OPCACHE: "1"
-      CLANG_TOOLSET: "1"
-    steps:
-      - name: git config
-        run: git config --global core.autocrlf false && git config --global core.eol lf
-      - name: git checkout
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ fromJson(inputs.branch).ref }}
-      - name: Setup
-        uses: ./.github/actions/setup-windows
-      - name: Build
-        run: .github/scripts/windows/build.bat
-      - name: Test
-        run: .github/scripts/windows/test.bat
   FREEBSD:
     if: ${{ fromJson(inputs.branch).jobs.FREEBSD }}
     strategy:
