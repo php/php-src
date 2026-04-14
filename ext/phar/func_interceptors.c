@@ -555,7 +555,7 @@ notfound:
 				/* clean path without cwd */
 				entry = phar_fix_filepath(entry, &entry_len, true);
 				data = zend_hash_str_find_ptr(&(phar->manifest), entry + 1, entry_len - 1);
-				if (!data) {
+				if (data) {
 					PHAR_G(cwd) = save;
 					PHAR_G(cwd_len) = save_len;
 					efree(entry);
