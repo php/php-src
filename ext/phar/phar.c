@@ -2059,31 +2059,29 @@ static bool php_check_dots(const char *element, size_t n) /* {{{ */
 /**
  * Remove .. and . references within a phar filename
  */
-char *phar_fix_filepath(char *path, size_t *new_len, bool use_cwd) /* {{{ */
+zend_string* phar_fix_filepath(const char *path, size_t path_length, bool use_cwd) /* {{{ */
 {
-	char *newpath;
-	size_t newpath_len;
-	char *ptr;
-	char *tok;
-	size_t ptr_length, path_length = *new_len;
+	zend_string *new_path;
+	size_t new_path_len;
+	size_t ptr_length;
 
-	if (PHAR_G(cwd_len) && use_cwd && path_length > 2 && path[0] == '.' && path[1] == '/') {
-		newpath_len = PHAR_G(cwd_len);
-		newpath = emalloc(strlen(path) + newpath_len + 1);
-		memcpy(newpath, PHAR_G(cwd), newpath_len);
+	if (use_cwd && PHAR_G(cwd_len) && path_length > 2 && path[0] == '.' && path[1] == '/') {
+		new_path = zend_string_alloc(path_length + path_length + 1, false);
+		new_path_len = PHAR_G(cwd_len);
+		memcpy(ZSTR_VAL(new_path), PHAR_G(cwd), PHAR_G(cwd_len));
 	} else {
-		newpath = emalloc(strlen(path) + 2);
-		newpath[0] = '/';
-		newpath_len = 1;
+		new_path = zend_string_alloc(path_length + 2, false);
+		ZSTR_VAL(new_path)[0] = '/';
+		new_path_len = 1;
 	}
 
-	ptr = path;
+	const char *ptr = path;
 
 	if (*ptr == '/') {
 		++ptr;
 	}
 
-	tok = ptr;
+	const char *tok = ptr;
 
 	do {
 		ptr = memchr(ptr, '/', path_length - (ptr - path));
@@ -2093,46 +2091,42 @@ char *phar_fix_filepath(char *path, size_t *new_len, bool use_cwd) /* {{{ */
 		switch (path_length - (tok - path)) {
 			case 1:
 				if (*tok == '.') {
-					efree(path);
-					*new_len = 1;
-					efree(newpath);
-					return estrndup("/", 1);
+					zend_string_release_ex(new_path, false);
+					return ZSTR_CHAR('/');
 				}
 				break;
 			case 2:
 				if (tok[0] == '.' && tok[1] == '.') {
-					efree(path);
-					*new_len = 1;
-					efree(newpath);
-					return estrndup("/", 1);
+					zend_string_release_ex(new_path, false);
+					return ZSTR_CHAR('/');
 				}
 		}
-		efree(newpath);
-		return path;
+		zend_string_release_ex(new_path, false);
+		return zend_string_init(path, path_length, false);
 	}
 
 	while (ptr) {
 		ptr_length = ptr - tok;
 last_time:
 		if (IS_DIRECTORY_UP(tok, ptr_length)) {
-			while (newpath_len > 1 && !IS_BACKSLASH(newpath[newpath_len - 1])) {
-				newpath_len--;
+			while (new_path_len > 1 && !IS_BACKSLASH(ZSTR_VAL(new_path)[new_path_len - 1])) {
+				new_path_len--;
 			}
 
-			if (newpath[0] != '/') {
-				newpath[newpath_len] = '\0';
-			} else if (newpath_len > 1) {
-				--newpath_len;
+			if (ZSTR_VAL(new_path)[0] != '/') {
+				ZSTR_VAL(new_path)[new_path_len] = '\0';
+			} else if (new_path_len > 1) {
+				--new_path_len;
 			}
 		} else if (!IS_DIRECTORY_CURRENT(tok, ptr_length)) {
-			if (newpath_len > 1) {
-				newpath[newpath_len++] = '/';
-				memcpy(newpath + newpath_len, tok, ptr_length+1);
+			if (new_path_len > 1) {
+				ZSTR_VAL(new_path)[new_path_len++] = '/';
+				memcpy(ZSTR_VAL(new_path) + new_path_len, tok, ptr_length+1);
 			} else {
-				memcpy(newpath + newpath_len, tok, ptr_length+1);
+				memcpy(ZSTR_VAL(new_path) + new_path_len, tok, ptr_length+1);
 			}
 
-			newpath_len += ptr_length;
+			new_path_len += ptr_length;
 		}
 
 		if (ptr == path + path_length) {
@@ -2152,10 +2146,8 @@ last_time:
 		}
 	}
 
-	efree(path);
-	*new_len = newpath_len;
-	newpath[newpath_len] = '\0';
-	return erealloc(newpath, newpath_len + 1);
+	ZSTR_VAL(new_path)[new_path_len] = '\0';
+	return zend_string_realloc(new_path, new_path_len, false);
 }
 /* }}} */
 
@@ -2224,12 +2216,22 @@ zend_result phar_split_fname(const char *filename, size_t filename_len, char **a
 
 	if (entry) {
 		if (ext_str[ext_len]) {
-			*entry_len = filename_len - *arch_len;
-			*entry = estrndup(ext_str+ext_len, *entry_len);
-	#ifdef PHP_WIN32
-			phar_unixify_path_separators(*entry, *entry_len);
-	#endif
-			*entry = phar_fix_filepath(*entry, entry_len, 0);
+			size_t computed_entry_len = filename_len - *arch_len;
+#ifdef PHP_WIN32
+			/* TODO: can we handle the unixify path in phar_fix_filepath() directly ? */
+			char *fixed_path_for_windows = estrndup(ext_str+ext_len, computed_entry_len);
+			phar_unixify_path_separators(fixed_path_for_windows, computed_entry_len);
+			zend_string *entry_str = phar_fix_filepath(fixed_path_for_windows, computed_entry_len, false);
+			*entry = estrndup(ZSTR_VAL(entry_str), ZSTR_LEN(entry_str));
+			*entry_len = ZSTR_LEN(entry_str);
+			zend_string_release_ex(entry_str, false);
+			efree(fixed_path_for_windows);
+#else
+			zend_string *entry_str = phar_fix_filepath(ext_str+ext_len, computed_entry_len, false);
+			*entry = estrndup(ZSTR_VAL(entry_str), ZSTR_LEN(entry_str));
+			*entry_len = ZSTR_LEN(entry_str);
+			zend_string_release_ex(entry_str, false);
+#endif
 		} else {
 			*entry_len = 1;
 			*entry = estrndup("/", 1);

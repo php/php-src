@@ -266,7 +266,7 @@ zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t fil
 zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data **pphar) /* {{{ */
 {
 	zend_string *ret;
-	char *path, *arch, *test;
+	char *path, *arch;
 	size_t arch_len;
 	phar_archive_data *phar;
 
@@ -305,8 +305,6 @@ zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data 
 	}
 
 	if (*ZSTR_VAL(filename) == '.') {
-		size_t try_len;
-
 		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 			efree(arch);
 			return NULL;
@@ -316,25 +314,27 @@ splitted:
 			*pphar = phar;
 		}
 
-		try_len = ZSTR_LEN(filename);
-		test = phar_fix_filepath(estrndup(ZSTR_VAL(filename), ZSTR_LEN(filename)), &try_len, true);
-
-		if (*test == '/') {
-			if (zend_hash_str_exists(&(phar->manifest), test + 1, try_len - 1)) {
-				ret = strpprintf(0, "phar://%s%s", arch, test);
+		zend_string *test = phar_fix_filepath(ZSTR_VAL(filename), ZSTR_LEN(filename), true);
+		if (ZSTR_VAL(test)[0] == '/') {
+			if (zend_hash_str_exists(&(phar->manifest), ZSTR_VAL(test) + 1, ZSTR_LEN(test) - 1)) {
+				ret = zend_string_concat3(
+					"phar://", strlen("phar://"),
+					arch, arch_len,
+					ZSTR_VAL(test), ZSTR_LEN(test)
+				);
+				zend_string_release_ex(test, false);
 				efree(arch);
-				efree(test);
 				return ret;
 			}
 		} else {
-			if (zend_hash_str_exists(&(phar->manifest), test, try_len)) {
-				ret = strpprintf(0, "phar://%s/%s", arch, test);
+			if (zend_hash_exists(&(phar->manifest), test)) {
+				ret = strpprintf(0, "phar://%s/%s", arch, ZSTR_VAL(test));
+				zend_string_release_ex(test, false);
 				efree(arch);
-				efree(test);
 				return ret;
 			}
 		}
-		efree(test);
+		zend_string_release_ex(test, false);
 	}
 
 	spprintf(&path, MAXPATHLEN + 1 + strlen(PG(include_path)), "phar://%s/%s%c%s", arch, PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
