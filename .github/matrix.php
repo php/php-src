@@ -146,7 +146,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     if ($all_jobs || !$no_jobs || $test_windows) {
         $matrix = [['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true]];
         if ($all_variations) {
-            $matrix[] = ['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true],
+            $matrix[] = ['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true];
             $matrix[] = ['asan' => false, 'opcache' => false, 'x64' => false, 'zts' => false];
             if (version_compare($php_version, '8.5', '>=')) {
                 $matrix[] = ['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true, 'clang' => true];
