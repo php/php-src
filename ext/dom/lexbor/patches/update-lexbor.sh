@@ -10,9 +10,6 @@ LEXBOR_DIR="$LEXBOR_BASE/lexbor"
 LEXBOR_TMP_DIR="$LEXBOR_BASE/lexbor_tmp"
 LEXBOR_COMPONENTS=(core css dom encoding html ns ports selectors tag)
 LEXBOR_PRESERVED_FILES=(
-    html/style.c
-    html/style.h
-    html/tree/insertion_mode/in_select_in_table.c
     selectors-adapted/selectors.c
     selectors-adapted/selectors.h
 )
