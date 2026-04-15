@@ -58,8 +58,8 @@ const php_stream_wrapper php_stream_phar_wrapper = {
 php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options) /* {{{ */
 {
 	php_url *resource;
-	char *arch = NULL, *entry = NULL, *error;
-	size_t arch_len, entry_len;
+	char *arch = NULL, *error;
+	size_t arch_len;
 
 	if (strncasecmp(filename, "phar://", 7)) {
 		return NULL;
@@ -70,7 +70,8 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 		}
 		return NULL;
 	}
-	if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len, 2, (mode[0] == 'w' ? 2 : 0)) == FAILURE) {
+	zend_string *entry = NULL;
+	if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, 2, (mode[0] == 'w' ? 2 : 0)) == FAILURE) {
 		if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
 			if (arch && !entry) {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", filename, arch);
@@ -85,8 +86,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	resource->scheme = ZSTR_INIT_LITERAL("phar", 0);
 	resource->host = zend_string_init(arch, arch_len, 0);
 	efree(arch);
-	resource->path = zend_string_init(entry, entry_len, 0);
-	efree(entry);
+	resource->path = entry;
 
 #ifdef MBO_0
 		if (resource) {

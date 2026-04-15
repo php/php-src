@@ -48,7 +48,7 @@ PHP_FUNCTION(phar_opendir) /* {{{ */
 			goto skip_phar;
 		}
 
-		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, NULL, 2, 0)) {
+		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, 2, 0)) {
 			php_stream_context *context = NULL;
 			php_stream *stream;
 			char *name;
@@ -94,7 +94,7 @@ static zend_string* phar_get_name_for_relative_paths(zend_string *filename, bool
 		return NULL;
 	}
 
-	if (FAILURE == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, NULL, 2, 0)) {
+	if (FAILURE == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, 2, 0)) {
 		return NULL;
 	}
 
@@ -496,7 +496,7 @@ static void phar_file_stat(const char *filename, size_t filename_length, int typ
 			phar = PHAR_G(last_phar);
 			goto splitted;
 		}
-		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, NULL, 2, 0)) {
+		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, 2, 0)) {
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 				efree(arch);
@@ -737,7 +737,7 @@ PHP_FUNCTION(phar_is_file) /* {{{ */
 			goto skip_phar;
 		}
 
-		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, NULL, 2, 0)) {
+		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, 2, 0)) {
 			phar_archive_data *phar;
 
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
@@ -795,7 +795,7 @@ PHP_FUNCTION(phar_is_link) /* {{{ */
 			goto skip_phar;
 		}
 
-		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, NULL, 2, 0)) {
+		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, 2, 0)) {
 			phar_archive_data *phar;
 
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */

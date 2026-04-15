@@ -350,7 +350,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	php_url *resource = NULL;
 
 	/* pre-readonly check, we need to know if this is a data phar */
-	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, NULL, NULL, 2, 2)) {
+	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, NULL, 2, 2)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\", no phar archive specified", url_from);
 		return 0;
 	}
@@ -476,7 +476,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	php_url *resource = NULL;
 
 	/* pre-readonly check, we need to know if this is a data phar */
-	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, NULL, NULL, 2, 2)) {
+	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, NULL, 2, 2)) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\", no phar archive specified, or phar archive does not exist", url);
 		return 0;
 	}

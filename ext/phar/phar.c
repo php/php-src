@@ -2163,7 +2163,7 @@ last_time:
  *
  * This is used by phar_parse_url()
  */
-zend_result phar_split_fname(const char *filename, size_t filename_len, char **arch, size_t *arch_len, char **entry, size_t *entry_len, int executable, int for_create) /* {{{ */
+zend_result phar_split_fname(const char *filename, size_t filename_len, char **arch, size_t *arch_len, zend_string **entry, int executable, int for_create) /* {{{ */
 {
 	const char *ext_str;
 #ifdef PHP_WIN32
@@ -2219,13 +2219,9 @@ zend_result phar_split_fname(const char *filename, size_t filename_len, char **a
 			size_t computed_entry_len = filename_len - *arch_len;
 			/* We don't need to unixify the path on Windows,
 			 * as ext_str is derived from filename that was already unixify */
-			zend_string *entry_str = phar_fix_filepath(ext_str+ext_len, computed_entry_len, false);
-			*entry = estrndup(ZSTR_VAL(entry_str), ZSTR_LEN(entry_str));
-			*entry_len = ZSTR_LEN(entry_str);
-			zend_string_release_ex(entry_str, false);
+			*entry = phar_fix_filepath(ext_str+ext_len, computed_entry_len, false);
 		} else {
-			*entry_len = 1;
-			*entry = estrndup("/", 1);
+			*entry = ZSTR_CHAR('/');
 		}
 	}
 
