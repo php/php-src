@@ -3396,7 +3396,7 @@ function toolset_setup_intrinsic_cflags()
 	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2", "avx", "avx2", "avx512");
 
 	if ("disabled" == PHP_NATIVE_INTRINSICS) {
-		return;
+        ERROR("Can't enable intrinsics, --with-codegen-arch passed with an incompatible option. ")
 	}
 
 	if (TARGET_ARCH == 'arm64') {
