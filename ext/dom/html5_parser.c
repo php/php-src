@@ -448,7 +448,7 @@ void lexbor_libxml2_bridge_report_errors(
                 tree_error,
                 tree_error->line + 1,
                 tree_error->column + 1,
-                tree_error->end - tree_error->begin
+                tree_error->length
             );
         }
         index++;
