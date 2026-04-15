@@ -1179,20 +1179,29 @@ PHP_METHOD(Phar, __construct)
 	phar_obj->archive = phar_data;
 	phar_obj->spl.oth_handler = &phar_spl_foreign_handler;
 
+	zend_string *file_name_for_recursive_director_iterator_constructor;
 	if (entry) {
-		fname_len = spprintf(&fname, 0, "phar://%s%s", phar_data->fname, entry);
+		file_name_for_recursive_director_iterator_constructor = zend_string_concat3(
+			ZEND_STRL("phar://"),
+			phar_data->fname, phar_data->fname_len,
+			entry, entry_len
+		);
 		efree(entry);
 	} else {
-		fname_len = spprintf(&fname, 0, "phar://%s", phar_data->fname);
+		file_name_for_recursive_director_iterator_constructor = zend_string_concat2(
+			ZEND_STRL("phar://"),
+			phar_data->fname, phar_data->fname_len
+		);
 	}
 
-	ZVAL_STRINGL(&arg1, fname, fname_len);
+	ZVAL_STR(&arg1, file_name_for_recursive_director_iterator_constructor);
 	ZVAL_LONG(&arg2, flags);
 
 	zend_call_known_instance_method_with_2_params(spl_ce_RecursiveDirectoryIterator->constructor,
 		Z_OBJ_P(ZEND_THIS), NULL, &arg1, &arg2);
 
-	zval_ptr_dtor(&arg1);
+	/* Freeing arg1 */
+	zend_string_release_ex(file_name_for_recursive_director_iterator_constructor, false);
 
 	if (!phar_data->is_persistent) {
 		phar_obj->archive->is_data = is_data;
@@ -1202,7 +1211,6 @@ PHP_METHOD(Phar, __construct)
 	}
 
 	phar_obj->spl.info_class = phar_ce_entry;
-	efree(fname);
 }
 /* }}} */
 
