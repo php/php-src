@@ -4,7 +4,7 @@ set -e
 
 PATCHES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LEXBOR_REPO="https://github.com/lexbor/lexbor"
-LEXBOR_REF="49982b5874aa7d5d79e8a15654fbabc2efb9dc90"
+LEXBOR_REF="v2.7.0"
 LEXBOR_BASE="$(cd "$PATCHES_DIR/.." && pwd)"
 LEXBOR_DIR="$LEXBOR_BASE/lexbor"
 LEXBOR_TMP_DIR="$LEXBOR_BASE/lexbor_tmp"
