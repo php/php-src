@@ -12,6 +12,10 @@ PHP                                                                        NEWS
     self::/parent::/static:: callables if the error handler throws). (macoaure)
   . Fixed bug GH-21603 (Missing addref for __unset). (ilutov)
 
+- CLI:
+  . Fixed bug GH-21754 (`--rf` command line option with a method triggers
+    ext/reflection deprecation warnings). (DanielEScherzer)
+
 - Curl:
   . Add support for brotli and zstd on Windows. (Shivam Mathur)
 
