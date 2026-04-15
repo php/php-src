@@ -1,4 +1,4 @@
-From fbb1e8945c4b12d43e7fddc3c34670b5792e2dca Mon Sep 17 00:00:00 2001
+From 2f2c63330fcbf5ec0efd0e46d381fcb14a08fa0a Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Sun, 7 Jan 2024 21:59:28 +0100
 Subject: [PATCH 6/6] Patch out unused CSS style code
@@ -10,10 +10,10 @@ Subject: [PATCH 6/6] Patch out unused CSS style code
  3 files changed, 12 insertions(+), 4 deletions(-)
 
 diff --git a/source/lexbor/css/rule.h b/source/lexbor/css/rule.h
-index 7cc4f0b..bd191f9 100644
+index 308dced..d192a01 100644
 --- a/source/lexbor/css/rule.h
 +++ b/source/lexbor/css/rule.h
-@@ -339,6 +339,7 @@ lxb_css_rule_ref_dec(lxb_css_rule_t *rule)
+@@ -361,6 +361,7 @@ lxb_css_rule_ref_dec(lxb_css_rule_t *rule)
  lxb_inline void
  lxb_css_rule_ref_dec_destroy(lxb_css_rule_t *rule)
  {
@@ -21,7 +21,7 @@ index 7cc4f0b..bd191f9 100644
      if (rule->ref_count > 0) {
          rule->ref_count--;
      }
-@@ -346,6 +347,7 @@ lxb_css_rule_ref_dec_destroy(lxb_css_rule_t *rule)
+@@ -368,6 +369,7 @@ lxb_css_rule_ref_dec_destroy(lxb_css_rule_t *rule)
      if (rule->ref_count == 0) {
          (void) lxb_css_rule_destroy(rule, true);
      }
@@ -30,10 +30,10 @@ index 7cc4f0b..bd191f9 100644
  
  lxb_inline void
 diff --git a/source/lexbor/style/dom/interfaces/document.c b/source/lexbor/style/dom/interfaces/document.c
-index 8a63e8e..f885dc3 100644
+index 2e6249f..69177d2 100644
 --- a/source/lexbor/style/dom/interfaces/document.c
 +++ b/source/lexbor/style/dom/interfaces/document.c
-@@ -280,6 +280,7 @@ lxb_status_t
+@@ -283,6 +283,7 @@ lxb_status_t
  lxb_dom_document_stylesheet_apply(lxb_dom_document_t *document,
                                    lxb_css_stylesheet_t *sst)
  {
@@ -41,7 +41,7 @@ index 8a63e8e..f885dc3 100644
      lxb_status_t status = LXB_STATUS_OK;
      lxb_css_rule_t *rule;
      lxb_css_rule_list_t *list;
-@@ -310,7 +311,7 @@ lxb_dom_document_stylesheet_apply(lxb_dom_document_t *document,
+@@ -313,7 +314,7 @@ lxb_dom_document_stylesheet_apply(lxb_dom_document_t *document,
  
          rule = rule->next;
      }
@@ -50,7 +50,7 @@ index 8a63e8e..f885dc3 100644
      return LXB_STATUS_OK;
  }
  
-@@ -329,6 +330,7 @@ lxb_status_t
+@@ -332,6 +333,7 @@ lxb_status_t
  lxb_dom_document_stylesheet_remove(lxb_dom_document_t *document,
                                     lxb_css_stylesheet_t *sst)
  {
@@ -58,7 +58,7 @@ index 8a63e8e..f885dc3 100644
      size_t i, length;
      lxb_status_t status = LXB_STATUS_OK;
      lxb_css_rule_t *rule;
-@@ -372,13 +374,14 @@ lxb_dom_document_stylesheet_remove(lxb_dom_document_t *document,
+@@ -375,13 +377,14 @@ lxb_dom_document_stylesheet_remove(lxb_dom_document_t *document,
              length = lexbor_array_length(document->css->stylesheets);
          }
      }
@@ -74,7 +74,7 @@ index 8a63e8e..f885dc3 100644
      lxb_status_t status = LXB_STATUS_OK;
      lxb_css_rule_t *rule;
      lexbor_array_t *ssts;
-@@ -413,7 +416,7 @@ lxb_dom_document_element_styles_attach(lxb_dom_element_t *element)
+@@ -416,7 +419,7 @@ lxb_dom_document_element_styles_attach(lxb_dom_element_t *element)
              rule = rule->next;
          }
      }
@@ -83,7 +83,7 @@ index 8a63e8e..f885dc3 100644
      return LXB_STATUS_OK;
  }
  
-@@ -521,6 +524,7 @@ lxb_dom_document_style_attach_cb(lxb_dom_node_t *node,
+@@ -526,6 +529,7 @@ lxb_dom_document_style_attach_cb(lxb_dom_node_t *node,
  lxb_status_t
  lxb_document_apply_stylesheets(lxb_dom_document_t *document)
  {
@@ -91,7 +91,7 @@ index 8a63e8e..f885dc3 100644
      size_t i, length;
      lxb_status_t status;
      lxb_css_stylesheet_t *sst;
-@@ -539,6 +543,6 @@ lxb_document_apply_stylesheets(lxb_dom_document_t *document)
+@@ -544,6 +548,6 @@ lxb_document_apply_stylesheets(lxb_dom_document_t *document)
              return status;
          }
      }
@@ -100,7 +100,7 @@ index 8a63e8e..f885dc3 100644
      return LXB_STATUS_OK;
  }
 diff --git a/source/lexbor/style/html/interfaces/document.h b/source/lexbor/style/html/interfaces/document.h
-index 0307cd9..127c4cd 100644
+index 90c3aec..8d9899e 100644
 --- a/source/lexbor/style/html/interfaces/document.h
 +++ b/source/lexbor/style/html/interfaces/document.h
 @@ -134,6 +134,7 @@ lxb_html_document_stylesheet_destroy_all(lxb_html_document_t *document,
@@ -117,8 +117,8 @@ index 0307cd9..127c4cd 100644
  }
 +#endif
  
- lxb_inline lxb_status_t
- lxb_html_document_apply_stylesheets(lxb_html_document_t *document)
+ /*
+  * No inline functions for ABI.
 -- 
-2.49.0
+2.51.2
 

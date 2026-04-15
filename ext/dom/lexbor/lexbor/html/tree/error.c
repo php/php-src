@@ -24,8 +24,7 @@ lxb_html_tree_error_add(lexbor_array_obj_t *parse_errors,
     entry->id = id;
     entry->line = token->line;
     entry->column = token->column;
-    entry->begin = token->begin;
-    entry->end = token->end;
+    entry->length = token->end - token->begin;
 
     return entry;
 }

@@ -111,8 +111,7 @@ typedef struct {
     lxb_html_tree_error_id_t id;
     size_t                   line;
     size_t                   column;
-    const lxb_char_t         *begin;
-    const lxb_char_t         *end;
+    size_t                   length;
 }
 lxb_html_tree_error_t;
 

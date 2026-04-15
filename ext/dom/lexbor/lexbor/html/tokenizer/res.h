@@ -4946,4 +4946,5 @@ static const lexbor_sbst_entry_static_t lxb_html_tokenizer_res_entities_sbst[] =
 	{0x66, {0}, 0, 0, 0, 9853}, {0x3b, "\xf0\x9d\x95\xaa", 4, 0, 0, 0}
 };
 
+
 #endif /* LXB_HTML_TOKENIZER_RES */
