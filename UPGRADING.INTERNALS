@@ -118,6 +118,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added ZEND_CONTAINER_OF().
   . The OPENBASEDIR_CHECKPATH() compatibility macro has been removed, instead
     use php_check_open_basedir() directly.
+  . Added zend_reflection_property_set_raw_value_without_lazy_initialization(),
+    zend_reflection_property_set_raw_value() to expose the functionality of
+    ReflectionProperty::setRawValueWithoutLazyInitialization() and
+    ReflectionProperty::setRawValue() to C extensions.
 
 ========================
 2. Build system changes
