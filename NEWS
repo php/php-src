@@ -52,6 +52,10 @@ PHP                                                                        NEWS
   . Fix GH-22854: Fixed failed assertion when accessing mysqli property after
     failed reconnection. (Kamil Tekiela)
 
+- Mysqlnd:
+  . Fixed memory leak when closing a prepared statement after its connection
+    was killed. (Kamil Tekiela)
+
 - Opcache:
   . Fixed OSS-Fuzz #546798343 (Heap-buffer-overflow in optimizer with
     FCCs and inlining). (ndossche)

@@ -116,7 +116,6 @@ void php_clear_stmt_bind(MY_STMT *stmt)
 	if (stmt->stmt) {
 		if (mysqli_stmt_close(stmt->stmt, true)) {
 			php_error_docref(NULL, E_WARNING, "Error occurred while closing statement");
-			return;
 		}
 	}
 
