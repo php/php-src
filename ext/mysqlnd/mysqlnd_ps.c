@@ -1795,7 +1795,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, bo
 			ret = conn->command->stmt_close(conn, stmt_id);
 			if (ret == FAIL) {
 				COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
-				DBG_RETURN(FAIL);
+				/* Don't return early - continue with cleanup to prevent memory leaks */
 			}
 		}
 	}
