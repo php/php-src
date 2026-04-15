@@ -14,7 +14,7 @@ foreach ($vals as $val) {
 }
 ?>
 --EXPECTF--
-Deprecated: Function mb_split() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_split() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 array(4) {
   [0]=>
   string(0) ""
@@ -26,7 +26,7 @@ array(4) {
   string(0) ""
 }
 
-Deprecated: Function mb_split() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_split() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 array(4) {
   [0]=>
   string(0) ""
@@ -38,7 +38,7 @@ array(4) {
   string(0) ""
 }
 
-Deprecated: Function mb_split() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_split() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 array(4) {
   [0]=>
   string(0) ""
@@ -50,13 +50,13 @@ array(4) {
   string(0) ""
 }
 
-Deprecated: Function mb_split() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_split() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 array(1) {
   [0]=>
   string(3) "123"
 }
 
-Deprecated: Function mb_split() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_split() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 array(1) {
   [0]=>
   string(3) "123"

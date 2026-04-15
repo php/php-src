@@ -13,5 +13,5 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
   echo mb_ereg_replace("123",'def\1ghi',$a);
 ?>
 --EXPECTF--
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 abcdef\1ghi

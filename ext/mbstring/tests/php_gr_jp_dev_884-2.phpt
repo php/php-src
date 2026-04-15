@@ -14,10 +14,10 @@ var_dump(mb_ereg_replace("C*$", "Z", "ABC"));
 var_dump(preg_replace("/C*$/", "Z", "ABC"));
 ?>
 --EXPECTF--
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(4) "ABZZ"
 string(4) "ABZZ"
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(4) "ABZZ"
 string(4) "ABZZ"

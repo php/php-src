@@ -20,7 +20,7 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
   echo "\n";
 ?>
 --EXPECTF--
-Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 1
 This is a nice and simple string
 is

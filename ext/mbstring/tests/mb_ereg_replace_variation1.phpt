@@ -49,56 +49,56 @@ echo "Done";
 
 -- Iteration 1 --
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(10) "string_val"
 
 -- Iteration 2 --
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(10) "string_val"
 
 -- Iteration 3 --
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(10) "string_val"
 
 -- Iteration 4 --
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(10) "string_val"
 
 -- Iteration 5 --
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(10) "string_val"
 
 -- Iteration 6 --
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(10) "string_val"
 
 -- Iteration 7 --
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(10) "string_val"
 
 -- Iteration 8 --
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(10) "string_val"
 
 -- Iteration 9 --
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(10) "string_val"
 
 -- Iteration 10 --
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 11 --
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(10) "string_val"
 Done

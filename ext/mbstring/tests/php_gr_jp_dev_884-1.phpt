@@ -15,5 +15,5 @@ var_dump(mb_ereg_replace(".*", "b", "a"));
 --EXPECTF--
 string(2) "bb"
 
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(2) "bb"

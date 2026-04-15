@@ -20,5 +20,5 @@ try {
 
 ?>
 --EXPECTF--
-Deprecated: Function mb_ereg_replace() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 Option "e" is not supported

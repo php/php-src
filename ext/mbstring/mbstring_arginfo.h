@@ -1,5 +1,5 @@
 /* This is a generated file, edit mbstring.stub.php instead.
- * Stub hash: 04d77076c54e3a1a2730a6f86ea92ecfae541e20 */
+ * Stub hash: f02c317efd6814f902ea75c9d222893713546845 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_language, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, language, IS_STRING, 1, "null")
@@ -453,7 +453,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_regex_encoding_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_regex_encoding_0->args[0].value, attribute_Deprecated_func_mb_regex_encoding_0_arg0_str);
 	attribute_Deprecated_func_mb_regex_encoding_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_regex_encoding_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_regex_encoding_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_regex_encoding_0->args[1].value, attribute_Deprecated_func_mb_regex_encoding_0_arg1_str);
 	attribute_Deprecated_func_mb_regex_encoding_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -461,7 +461,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_ereg_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_0->args[0].value, attribute_Deprecated_func_mb_ereg_0_arg0_str);
 	attribute_Deprecated_func_mb_ereg_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_ereg_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_ereg_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_0->args[1].value, attribute_Deprecated_func_mb_ereg_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -469,7 +469,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_eregi_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_eregi_0->args[0].value, attribute_Deprecated_func_mb_eregi_0_arg0_str);
 	attribute_Deprecated_func_mb_eregi_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_eregi_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_eregi_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_eregi_0->args[1].value, attribute_Deprecated_func_mb_eregi_0_arg1_str);
 	attribute_Deprecated_func_mb_eregi_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -477,7 +477,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_ereg_replace_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_replace_0->args[0].value, attribute_Deprecated_func_mb_ereg_replace_0_arg0_str);
 	attribute_Deprecated_func_mb_ereg_replace_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_ereg_replace_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_ereg_replace_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_replace_0->args[1].value, attribute_Deprecated_func_mb_ereg_replace_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_replace_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -485,7 +485,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_eregi_replace_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_eregi_replace_0->args[0].value, attribute_Deprecated_func_mb_eregi_replace_0_arg0_str);
 	attribute_Deprecated_func_mb_eregi_replace_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_eregi_replace_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_eregi_replace_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_eregi_replace_0->args[1].value, attribute_Deprecated_func_mb_eregi_replace_0_arg1_str);
 	attribute_Deprecated_func_mb_eregi_replace_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -493,7 +493,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_ereg_replace_callback_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_replace_callback_0->args[0].value, attribute_Deprecated_func_mb_ereg_replace_callback_0_arg0_str);
 	attribute_Deprecated_func_mb_ereg_replace_callback_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_ereg_replace_callback_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_ereg_replace_callback_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_replace_callback_0->args[1].value, attribute_Deprecated_func_mb_ereg_replace_callback_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_replace_callback_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -501,7 +501,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_split_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_split_0->args[0].value, attribute_Deprecated_func_mb_split_0_arg0_str);
 	attribute_Deprecated_func_mb_split_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_split_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_split_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_split_0->args[1].value, attribute_Deprecated_func_mb_split_0_arg1_str);
 	attribute_Deprecated_func_mb_split_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -509,7 +509,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_ereg_match_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_match_0->args[0].value, attribute_Deprecated_func_mb_ereg_match_0_arg0_str);
 	attribute_Deprecated_func_mb_ereg_match_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_ereg_match_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_ereg_match_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_match_0->args[1].value, attribute_Deprecated_func_mb_ereg_match_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_match_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -517,7 +517,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_ereg_search_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_0_arg0_str);
 	attribute_Deprecated_func_mb_ereg_search_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_ereg_search_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -525,7 +525,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_ereg_search_pos_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_pos_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_pos_0_arg0_str);
 	attribute_Deprecated_func_mb_ereg_search_pos_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_pos_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_ereg_search_pos_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_pos_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_pos_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_pos_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -533,7 +533,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_ereg_search_regs_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_regs_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_regs_0_arg0_str);
 	attribute_Deprecated_func_mb_ereg_search_regs_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_regs_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_ereg_search_regs_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_regs_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_regs_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_regs_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -541,7 +541,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_ereg_search_init_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_init_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_init_0_arg0_str);
 	attribute_Deprecated_func_mb_ereg_search_init_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_init_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_ereg_search_init_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_init_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_init_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_init_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -549,7 +549,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_ereg_search_getregs_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_getregs_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_getregs_0_arg0_str);
 	attribute_Deprecated_func_mb_ereg_search_getregs_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_getregs_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_ereg_search_getregs_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_getregs_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_getregs_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_getregs_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -557,7 +557,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_ereg_search_getpos_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_getpos_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_getpos_0_arg0_str);
 	attribute_Deprecated_func_mb_ereg_search_getpos_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_getpos_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_ereg_search_getpos_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_getpos_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_getpos_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_getpos_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -565,7 +565,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_ereg_search_setpos_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_setpos_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_setpos_0_arg0_str);
 	attribute_Deprecated_func_mb_ereg_search_setpos_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_setpos_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_ereg_search_setpos_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_setpos_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_setpos_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_setpos_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
@@ -573,7 +573,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mb_regex_set_options_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_regex_set_options_0->args[0].value, attribute_Deprecated_func_mb_regex_set_options_0_arg0_str);
 	attribute_Deprecated_func_mb_regex_set_options_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_mb_regex_set_options_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_func_mb_regex_set_options_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_regex_set_options_0->args[1].value, attribute_Deprecated_func_mb_regex_set_options_0_arg1_str);
 	attribute_Deprecated_func_mb_regex_set_options_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 #endif
@@ -583,7 +583,7 @@ static void register_mbstring_symbols(int module_number)
 	zend_string *attribute_Deprecated_const_MB_ONIGURUMA_VERSION_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
 	ZVAL_STR(&attribute_Deprecated_const_MB_ONIGURUMA_VERSION_0->args[0].value, attribute_Deprecated_const_MB_ONIGURUMA_VERSION_0_arg0_str);
 	attribute_Deprecated_const_MB_ONIGURUMA_VERSION_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_const_MB_ONIGURUMA_VERSION_0_arg1_str = zend_string_init("Oniguruma functions support ends PHP 9.0", strlen("Oniguruma functions support ends PHP 9.0"), 1);
+	zend_string *attribute_Deprecated_const_MB_ONIGURUMA_VERSION_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_const_MB_ONIGURUMA_VERSION_0->args[1].value, attribute_Deprecated_const_MB_ONIGURUMA_VERSION_0_arg1_str);
 	attribute_Deprecated_const_MB_ONIGURUMA_VERSION_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 #endif

@@ -16,9 +16,9 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
     var_dump($m);
 ?>
 --EXPECTF--
-Deprecated: Function mb_regex_encoding() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 array(4) {
   [0]=>
   string(6) "中？"
@@ -30,7 +30,7 @@ array(4) {
   string(3) "？"
 }
 
-Deprecated: Function mb_ereg() is deprecated since 8.6, Oniguruma functions support ends PHP 9.0 in %s on line %d
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 array(4) {
   [0]=>
   string(6) "中！"
