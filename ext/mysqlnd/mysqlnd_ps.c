@@ -1752,6 +1752,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, bo
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
 	MYSQLND_CONN_DATA * conn = stmt? stmt->conn : NULL;
 	enum_mysqlnd_collected_stats statistic = STAT_LAST;
+	enum_func_status ret = PASS;
 
 	DBG_ENTER("mysqlnd_stmt::close_on_server");
 	if (!stmt || !conn) {
@@ -1789,7 +1790,6 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, bo
 														STAT_FREE_RESULT_EXPLICIT);
 
 		if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
-			enum_func_status ret = FAIL;
 			const size_t stmt_id = stmt->stmt_id;
 
 			ret = conn->command->stmt_close(conn, stmt_id);
@@ -1825,7 +1825,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, bo
 		stmt->conn = NULL;
 	}
 
-	DBG_RETURN(PASS);
+	DBG_RETURN(ret);
 }
 /* }}} */
 
