@@ -2770,6 +2770,11 @@ static bool do_trait_constant_check(
 
 	zend_class_constant *existing_constant = Z_PTR_P(zv);
 
+	if (UNEXPECTED(ZEND_CLASS_CONST_FLAGS(existing_constant) & ZEND_CLASS_CONST_IS_CASE)) {
+		emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+		return false;
+	}
+
 	if ((ZEND_CLASS_CONST_FLAGS(trait_constant) & flags_mask) != (ZEND_CLASS_CONST_FLAGS(existing_constant) & flags_mask)) {
 		emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
 		return false;
