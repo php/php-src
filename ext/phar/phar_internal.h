@@ -149,7 +149,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	char*       last_phar_name;
 	uint32_t    last_phar_name_len;
 	uint32_t    last_alias_len;
-	char*       last_alias;
+	const char* last_alias;
 	phar_archive_data* last_phar;
 	HashTable mime_types;
 ZEND_END_MODULE_GLOBALS(phar)
@@ -398,7 +398,7 @@ static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
 }
 /* }}} */
 
-static inline bool phar_entry_can_remove(phar_entry_info *entry)
+static inline bool phar_entry_can_remove(const phar_entry_info *entry)
 {
 	return entry->fp_refcount == 0 && entry->fileinfo_lock_count == 0;
 }
@@ -413,9 +413,9 @@ zend_result phar_open_from_filename(char *fname, size_t fname_len, char *alias, 
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(3) zend_result phar_open_executed_filename(char *alias, size_t alias_len, char **error);
-zend_result phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len);
-zend_result phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error);
-zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error);
+zend_result phar_free_alias(const phar_archive_data *phar);
+zend_result phar_get_archive(phar_archive_data **archive, const char *fname, size_t fname_len, const char *alias, size_t alias_len, char **error);
+zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, const char *fname, char **signature, size_t *signature_len, char **error);
 ZEND_ATTRIBUTE_NONNULL zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error);
 
 /* utility functions */
@@ -424,8 +424,8 @@ const char *phar_decompress_filter(const phar_entry_info *entry, bool return_unk
 const char *phar_compress_filter(const phar_entry_info *entry, bool return_unknown);
 
 /* void phar_remove_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len); */
-void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len);
-zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, char *path, size_t path_len);
+void phar_add_virtual_dirs(phar_archive_data *phar, const char *filename, size_t filename_len);
+zend_result phar_mount_entry(phar_archive_data *phar, const char *filename, size_t filename_len, char *path, size_t path_len);
 zend_string *phar_find_in_include_path(zend_string *file, phar_archive_data **pphar);
 zend_string* phar_fix_filepath(const char *path, size_t path_length, bool use_cwd);
 ZEND_ATTRIBUTE_NONNULL phar_entry_info * phar_open_jit(const phar_archive_data *phar, phar_entry_info *entry, char **error);
@@ -448,12 +448,12 @@ zend_result phar_copy_on_write(phar_archive_data **pphar);
 
 /* tar functions in tar.c */
 bool phar_is_tar(const char *buf, const char *fname);
-zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, uint32_t compression, char **error);
+zend_result phar_parse_tarfile(php_stream* fp, const char *fname, size_t fname_len, const char *alias, size_t alias_len, phar_archive_data** pphar, uint32_t compression, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error);
 
 /* zip functions in zip.c */
-zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, char **error);
+zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_len, const char *alias, size_t alias_len, phar_archive_data** pphar, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *archive, zend_string *user_stub, bool is_default_stub, char **error);
 
@@ -470,7 +470,7 @@ void phar_entry_delref(phar_entry_data *idata);
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t path_len, char **error, bool security);
 phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, bool security);
 ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security, uint32_t timestamp);
-ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security);
+ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, const char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *archive, zend_string *user_stub, bool is_default_stub, char **error);
 ZEND_ATTRIBUTE_NONNULL int phar_flush(phar_archive_data *archive, char **error);
 zend_result phar_detect_phar_fname_ext(const char *filename, size_t filename_len, const char **ext_str, size_t *ext_len, int executable, int for_create, bool is_complete);

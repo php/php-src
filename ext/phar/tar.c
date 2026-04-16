@@ -197,7 +197,7 @@ static zend_result phar_tar_process_metadata(phar_entry_info *entry, php_stream 
 }
 /* }}} */
 
-zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, uint32_t compression, char **error) /* {{{ */
+zend_result phar_parse_tarfile(php_stream* fp, const char *fname, size_t fname_len, const char *alias, size_t alias_len, phar_archive_data** pphar, uint32_t compression, char **error) /* {{{ */
 {
 	char buf[512], *actual_alias = NULL, *p;
 	phar_entry_info entry = {0};
@@ -663,7 +663,7 @@ next:
 		myphar->is_temporary_alias = 0;
 
 		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar->alias_len))) {
-			if (SUCCESS != phar_free_alias(fd_ptr, actual_alias, myphar->alias_len)) {
+			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
 				}
@@ -678,7 +678,7 @@ next:
 
 		if (alias_len) {
 			if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-				if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
+				if (SUCCESS != phar_free_alias(fd_ptr)) {
 					if (error) {
 						spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
 					}

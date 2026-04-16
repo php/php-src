@@ -1313,7 +1313,8 @@ PHP_METHOD(Phar, unlinkArchive)
 
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
-	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+	PHAR_G(last_alias) = NULL;
+	PHAR_G(last_phar_name) = NULL;
 
 	phar_archive_delref(phar);
 	unlink(fname);
@@ -2216,7 +2217,8 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
-	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+	PHAR_G(last_alias) = NULL;
+	PHAR_G(last_phar_name) = NULL;
 
 	php_stream *tmp_fp = php_stream_fopen_tmpfile();
 	if (tmp_fp == NULL) {
@@ -2688,7 +2690,8 @@ PHP_METHOD(Phar, setAlias)
 
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
-	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+	PHAR_G(last_alias) = NULL;
+	PHAR_G(last_phar_name) = NULL;
 
 	if (phar_obj->archive->is_data) {
 		if (phar_obj->archive->is_tar) {
@@ -2705,7 +2708,7 @@ PHP_METHOD(Phar, setAlias)
 		RETURN_TRUE;
 	}
 	if (NULL != (fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), new_alias))) {
-		if (SUCCESS != phar_free_alias(fd_ptr, ZSTR_VAL(new_alias), ZSTR_LEN(new_alias))) {
+		if (SUCCESS != phar_free_alias(fd_ptr)) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "alias \"%s\" is already used for archive \"%s\" and cannot be used for other archives", ZSTR_VAL(new_alias), fd_ptr->fname);
 			RETURN_THROWS();
 		}

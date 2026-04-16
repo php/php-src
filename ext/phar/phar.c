@@ -256,7 +256,8 @@ bool phar_archive_delref(phar_archive_data *phar) /* {{{ */
 	} else if (!phar->refcount) {
 		/* invalidate phar cache */
 		PHAR_G(last_phar) = NULL;
-		PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+		PHAR_G(last_alias) = NULL;
+		PHAR_G(last_phar_name) = NULL;
 
 		/* This is a new phar that has perhaps had an alias/metadata set, but has never been flushed. */
 		bool remove_fname_cache = !zend_hash_num_elements(&phar->manifest);
@@ -1263,7 +1264,7 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 		}
 
 		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-			if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
+			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				signature = NULL;
 				fp = NULL;
 				MAPPHAR_FAIL("Cannot open archive \"%s\", alias is already in use by existing archive");
@@ -1462,7 +1463,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 		phar_archive_data *fd_ptr;
 
 		if (alias && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-			if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
+			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				spprintf(error, 4096, "phar error: phar \"%s\" cannot set alias \"%s\", already in use by another phar archive", mydata->fname, alias);
 
 				zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
@@ -3333,7 +3334,8 @@ void phar_request_initialize(void) /* {{{ */
 	if (!PHAR_G(request_init))
 	{
 		PHAR_G(last_phar) = NULL;
-		PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+		PHAR_G(last_alias) = NULL;
+		PHAR_G(last_phar_name) = NULL;
 		PHAR_G(has_bz2) = zend_hash_str_exists(&module_registry, "bz2", sizeof("bz2")-1);
 		PHAR_G(has_zlib) = zend_hash_str_exists(&module_registry, "zlib", sizeof("zlib")-1);
 		PHAR_G(request_init) = 1;
