@@ -475,8 +475,6 @@ static void phar_file_stat(const char *filename, size_t filename_length, int typ
 	}
 
 	if (!IS_ABSOLUTE_PATH(filename, filename_length) && !strstr(filename, "://")) {
-		char *arch;
-		size_t arch_len;
 		zend_string *fname;
 		zend_stat_t sb = {0};
 		phar_archive_data *phar;
@@ -490,16 +488,17 @@ static void phar_file_stat(const char *filename, size_t filename_length, int typ
 		}
 
 		if (PHAR_G(last_phar) && ZSTR_LEN(fname) - 7 >= PHAR_G(last_phar_name_len) && !memcmp(ZSTR_VAL(fname) + 7, PHAR_G(last_phar_name), PHAR_G(last_phar_name_len))) {
-			arch = estrndup(PHAR_G(last_phar_name), PHAR_G(last_phar_name_len));
-			arch_len = PHAR_G(last_phar_name_len);
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			phar = PHAR_G(last_phar);
 			goto splitted;
 		}
+		char *arch;
+		size_t arch_len;
 		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, 2, 0)) {
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
-			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
-				efree(arch);
+			zend_result has_archive = phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL);
+			efree(arch);
+			if (FAILURE == has_archive) {
 				goto skip_phar;
 			}
 splitted:;
@@ -520,7 +519,6 @@ splitted:;
 			}
 			if (zend_hash_exists(&(phar->virtual_dirs), entry)) {
 				zend_string_release_ex(entry, false);
-				efree(arch);
 				if (IS_EXISTS_CHECK(type)) {
 					RETURN_TRUE;
 				}
@@ -550,7 +548,6 @@ notfound:
 					PHAR_G(cwd_len) = save_len;
 					zend_string_release_ex(entry, false);
 					if (IS_EXISTS_CHECK(type)) {
-						efree(arch);
 						RETURN_TRUE;
 					}
 					goto stat_entry;
@@ -559,7 +556,6 @@ notfound:
 					PHAR_G(cwd) = save;
 					PHAR_G(cwd_len) = save_len;
 					zend_string_release_ex(entry, false);
-					efree(arch);
 					if (IS_EXISTS_CHECK(type)) {
 						RETURN_TRUE;
 					}
@@ -574,7 +570,6 @@ notfound:
 				PHAR_G(cwd) = save;
 				PHAR_G(cwd_len) = save_len;
 				zend_string_release_ex(entry, false);
-				efree(arch);
 				/* Error Occurred */
 				if (!IS_EXISTS_CHECK(type)) {
 					php_error_docref(NULL, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", filename);
@@ -582,7 +577,6 @@ notfound:
 				RETURN_FALSE;
 			}
 stat_entry:
-			efree(arch);
 			if (!data->is_dir) {
 				sb.st_size = data->uncompressed_filesize;
 				sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
