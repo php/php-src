@@ -2354,7 +2354,17 @@ abstract class VariableLike
             $flags = "ZEND_ACC_PRIVATE";
         }
 
-        return new VersionFlags([$flags]);
+        $versionFlags = new VersionFlags([$flags]);
+
+        if ($this->flags & Modifiers::PUBLIC_SET) {
+            $versionFlags->addForVersionsAbove("ZEND_ACC_PUBLIC_SET", PHP_84_VERSION_ID);
+        } elseif ($this->flags & Modifiers::PROTECTED_SET) {
+            $versionFlags->addForVersionsAbove("ZEND_ACC_PROTECTED_SET", PHP_84_VERSION_ID);
+        } elseif ($this->flags & Modifiers::PRIVATE_SET) {
+            $versionFlags->addForVersionsAbove("ZEND_ACC_PRIVATE_SET", PHP_84_VERSION_ID);
+        }
+
+        return $versionFlags;
     }
 
     protected function getTypeCode(string $variableLikeName, string &$code): string
