@@ -34,6 +34,15 @@ void zend_accel_hash_clean(zend_accel_hash *accel_hash)
 	accel_hash->num_entries = 0;
 	accel_hash->num_direct_entries = 0;
 	memset(accel_hash->hash_table, 0, sizeof(zend_accel_hash_entry *)*accel_hash->max_num_entries);
+
+	/* publish the cleared table on weak-memory arches before readers can see the next insert (GH-8739) */
+#if defined(ZEND_WIN32)
+	MemoryBarrier();
+#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
+	__atomic_thread_fence(__ATOMIC_SEQ_CST);
+#elif defined(__GNUC__)
+	__sync_synchronize();
+#endif
 }
 
 void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size)
