@@ -1115,7 +1115,7 @@ alias_success:
 		if (my_realpath) {
 			size_t my_realpath_len = strlen(my_realpath);
 #ifdef PHP_WIN32
-			phar_unixify_path_separators(my_realpath, my_realpath);
+			phar_unixify_path_separators(my_realpath, my_realpath_len);
 #endif
 			fname_len = my_realpath_len;
 			fname = my_realpath;
