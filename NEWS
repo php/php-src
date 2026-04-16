@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Curl:
   . Add support for brotli and zstd on Windows. (Shivam Mathur)
 
+- OPcache:
+  . Fixed bug GH-8739 (opcache_reset()/opcache_invalidate() race causes
+    zend_mm_heap corrupted under concurrent load in ZTS and FPM). (superdav42)
+
 15 Jan 2026, PHP 8.3.30
 
 - Core:

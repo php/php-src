@@ -51,9 +51,51 @@
 #include "zend_extensions.h"
 #include "zend_compile.h"
 
+#include <stdint.h>
+
 #include "Optimizer/zend_optimizer.h"
 #include "zend_accelerator_hash.h"
 #include "zend_accelerator_debug.h"
+
+/* Maximum number of concurrent readers tracked for epoch-based reclamation.
+ * Each slot is padded to a cache line to avoid false sharing.
+ * This limits the number of concurrent threads (ZTS) or processes (FPM)
+ * that can be tracked. Excess readers degrade to the legacy flock-based path. */
+#define ACCEL_EPOCH_MAX_SLOTS 256
+
+/* Sentinel value meaning "this slot is not in an active request" */
+#define ACCEL_EPOCH_INACTIVE  UINT64_MAX
+
+/* Sentinel value meaning "no slot has been assigned to this thread/process" */
+#define ACCEL_EPOCH_NO_SLOT   (-1)
+
+/*
+ * Portable 64-bit atomic operations for epoch tracking.
+ * These use compiler builtins matching the patterns in Zend/zend_atomic.h,
+ * extended to uint64_t which zend_atomic.h does not cover.
+ */
+#if defined(ZEND_WIN32)
+# define ACCEL_ATOMIC_LOAD_64(ptr)       InterlockedCompareExchange64((volatile LONG64 *)(ptr), 0, 0)
+# define ACCEL_ATOMIC_STORE_64(ptr, val) InterlockedExchange64((volatile LONG64 *)(ptr), (LONG64)(val))
+# define ACCEL_ATOMIC_INC_64(ptr)        InterlockedIncrement64((volatile LONG64 *)(ptr))
+#elif defined(__clang__) && __has_feature(c_atomic)
+# define ACCEL_ATOMIC_LOAD_64(ptr)       __c11_atomic_load((_Atomic(uint64_t) *)(ptr), __ATOMIC_ACQUIRE)
+# define ACCEL_ATOMIC_STORE_64(ptr, val) __c11_atomic_store((_Atomic(uint64_t) *)(ptr), (uint64_t)(val), __ATOMIC_RELEASE)
+# define ACCEL_ATOMIC_INC_64(ptr)        (__c11_atomic_fetch_add((_Atomic(uint64_t) *)(ptr), 1, __ATOMIC_SEQ_CST) + 1)
+#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
+# define ACCEL_ATOMIC_LOAD_64(ptr)       __atomic_load_n((volatile uint64_t *)(ptr), __ATOMIC_ACQUIRE)
+# define ACCEL_ATOMIC_STORE_64(ptr, val) __atomic_store_n((volatile uint64_t *)(ptr), (uint64_t)(val), __ATOMIC_RELEASE)
+# define ACCEL_ATOMIC_INC_64(ptr)        __atomic_add_fetch((volatile uint64_t *)(ptr), 1, __ATOMIC_SEQ_CST)
+#elif defined(__GNUC__)
+# define ACCEL_ATOMIC_LOAD_64(ptr)       __sync_fetch_and_or((volatile uint64_t *)(ptr), 0)
+# define ACCEL_ATOMIC_STORE_64(ptr, val) do { __sync_synchronize(); *(volatile uint64_t *)(ptr) = (uint64_t)(val); __sync_synchronize(); } while (0)
+# define ACCEL_ATOMIC_INC_64(ptr)        __sync_add_and_fetch((volatile uint64_t *)(ptr), 1)
+#else
+/* Fallback: volatile without barriers. Correct on x86 TSO; may need fence on ARM. */
+# define ACCEL_ATOMIC_LOAD_64(ptr)       (*(volatile uint64_t *)(ptr))
+# define ACCEL_ATOMIC_STORE_64(ptr, val) (*(volatile uint64_t *)(ptr) = (uint64_t)(val))
+# define ACCEL_ATOMIC_INC_64(ptr)        (++(*(volatile uint64_t *)(ptr)))
+#endif
 
 #ifndef PHPAPI
 # ifdef ZEND_WIN32
@@ -115,6 +157,14 @@ typedef struct _zend_early_binding {
 	zend_string *lc_parent_name;
 	uint32_t cache_slot;
 } zend_early_binding;
+
+/* Per-thread/process epoch slot for safe reclamation.
+ * Padded to a full cache line (64 bytes) to prevent false sharing
+ * between concurrently-active reader threads/processes. */
+typedef struct _zend_accel_epoch_slot {
+	volatile uint64_t epoch;  /* Current epoch or ACCEL_EPOCH_INACTIVE */
+	char padding[56];         /* Pad to 64-byte cache line */
+} zend_accel_epoch_slot;
 
 typedef struct _zend_persistent_script {
 	zend_script    script;
@@ -216,6 +266,9 @@ typedef struct _zend_accel_globals {
 #ifndef ZEND_WIN32
 	zend_ulong              root_hash;
 #endif
+	/* Epoch-based reclamation: per-thread/process state */
+	int                     epoch_slot;       /* Index into ZCSG(epoch_slots), or ACCEL_EPOCH_NO_SLOT */
+	uint64_t                local_epoch;      /* Snapshot of global epoch at request start */
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	zend_persistent_script *current_persistent_script;
@@ -273,6 +326,13 @@ typedef struct _zend_accel_shared_globals {
 	void *jit_traces;
 	const void **jit_exit_groups;
 
+	/* Epoch-based reclamation for safe opcache_reset()/invalidate() (GH#8739) */
+	volatile uint64_t current_epoch;
+	volatile uint64_t drain_epoch;
+	volatile bool     reset_deferred;
+	volatile int32_t  epoch_slot_next;
+	zend_accel_epoch_slot epoch_slots[ACCEL_EPOCH_MAX_SLOTS];
+
 	/* Interned Strings Support (must be the last element) */
 	zend_string_table interned_strings;
 } zend_accel_shared_globals;
@@ -318,6 +378,13 @@ void accelerator_shm_read_unlock(void);
 
 zend_string *accel_make_persistent_key(zend_string *path);
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
+
+/* Epoch-based reclamation API */
+void accel_epoch_init(void);
+void accel_epoch_enter(void);
+void accel_epoch_leave(void);
+bool accel_deferred_reset_pending(void);
+void accel_try_complete_deferred_reset(void);
 
 #define IS_ACCEL_INTERNED(str) \
 	((char*)(str) >= (char*)ZCSG(interned_strings).start && (char*)(str) < (char*)ZCSG(interned_strings).top)

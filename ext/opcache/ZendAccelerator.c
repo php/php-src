@@ -132,6 +132,8 @@ static zend_result (*orig_post_startup_cb)(void);
 
 static zend_result accel_post_startup(void);
 static zend_result accel_finish_startup(void);
+static void zend_reset_cache_vars(void);
+static void accel_interned_strings_restore_state(void);
 
 static void preload_shutdown(void);
 static void preload_activate(void);
@@ -396,6 +398,147 @@ static inline void accel_unlock_all(void)
 		zend_accel_error(ACCEL_LOG_DEBUG, "UnlockAll:  %s (%d)", strerror(errno), errno);
 	}
 #endif
+}
+
+/* ====================================================================
+ * Epoch-based reclamation (EBR) for safe opcache_reset()/invalidate()
+ *
+ * Solves: php-src#8739, #14471, #18517, frankenphp#1737, #2265, #2170
+ *
+ * Design:
+ *   - Readers (per-request) publish their epoch on enter, clear on leave.
+ *     Cost: two atomic stores per request. No locks.
+ *   - Writers (opcache_reset) increment the global epoch and defer the
+ *     actual cleanup until all pre-epoch readers have completed.
+ *   - This guarantees that no reader holds a pointer to shared memory
+ *     that is about to be reclaimed.
+ * ==================================================================== */
+
+void accel_epoch_init(void)
+{
+	int i;
+
+	ZCSG(current_epoch) = 1;
+	ZCSG(drain_epoch) = 0;
+	ZCSG(reset_deferred) = false;
+	ZCSG(epoch_slot_next) = 0;
+
+	for (i = 0; i < ACCEL_EPOCH_MAX_SLOTS; i++) {
+		ZCSG(epoch_slots)[i].epoch = ACCEL_EPOCH_INACTIVE;
+	}
+}
+
+static int accel_epoch_alloc_slot(void)
+{
+	int slot;
+
+#if defined(ZEND_WIN32)
+	slot = (int)InterlockedIncrement((volatile LONG *)&ZCSG(epoch_slot_next)) - 1;
+#elif defined(__GNUC__)
+	slot = __atomic_fetch_add(&ZCSG(epoch_slot_next), 1, __ATOMIC_SEQ_CST);
+#else
+	slot = ZCSG(epoch_slot_next)++;
+#endif
+
+	if (slot >= ACCEL_EPOCH_MAX_SLOTS) {
+		return ACCEL_EPOCH_NO_SLOT;
+	}
+	return slot;
+}
+
+void accel_epoch_enter(void)
+{
+	int slot = ZCG(epoch_slot);
+
+	if (UNEXPECTED(slot == ACCEL_EPOCH_NO_SLOT)) {
+		slot = accel_epoch_alloc_slot();
+		ZCG(epoch_slot) = slot;
+	}
+
+	if (EXPECTED(slot >= 0 && slot < ACCEL_EPOCH_MAX_SLOTS)) {
+		uint64_t epoch = ACCEL_ATOMIC_LOAD_64(&ZCSG(current_epoch));
+		ZCG(local_epoch) = epoch;
+		ACCEL_ATOMIC_STORE_64(&ZCSG(epoch_slots)[slot].epoch, epoch);
+	}
+}
+
+void accel_epoch_leave(void)
+{
+	int slot = ZCG(epoch_slot);
+
+	if (EXPECTED(slot >= 0 && slot < ACCEL_EPOCH_MAX_SLOTS)) {
+		ACCEL_ATOMIC_STORE_64(&ZCSG(epoch_slots)[slot].epoch, ACCEL_EPOCH_INACTIVE);
+	}
+}
+
+static uint64_t accel_min_active_epoch(void)
+{
+	uint64_t min_epoch = ACCEL_EPOCH_INACTIVE;
+	int i;
+
+	for (i = 0; i < ACCEL_EPOCH_MAX_SLOTS; i++) {
+		uint64_t e = ACCEL_ATOMIC_LOAD_64(&ZCSG(epoch_slots)[i].epoch);
+		if (e < min_epoch) {
+			min_epoch = e;
+		}
+	}
+	return min_epoch;
+}
+
+bool accel_deferred_reset_pending(void)
+{
+	return ZCSG(reset_deferred);
+}
+
+void accel_try_complete_deferred_reset(void)
+{
+	uint64_t drain_epoch;
+	uint64_t min_epoch;
+
+	if (!ZCSG(reset_deferred)) {
+		return;
+	}
+
+	drain_epoch = ACCEL_ATOMIC_LOAD_64(&ZCSG(drain_epoch));
+	min_epoch = accel_min_active_epoch();
+
+	if (min_epoch > drain_epoch) {
+		zend_shared_alloc_lock();
+
+		if (ZCSG(reset_deferred)) {
+			zend_accel_error(ACCEL_LOG_DEBUG, "Completing deferred opcache reset (drain_epoch=%" PRIu64 ", min_active=%" PRIu64 ")",
+				drain_epoch, min_epoch);
+
+			zend_map_ptr_reset();
+			zend_reset_cache_vars();
+			zend_accel_hash_clean(&ZCSG(hash));
+
+			if (ZCG(accel_directives).interned_strings_buffer) {
+				accel_interned_strings_restore_state();
+			}
+
+			zend_shared_alloc_restore_state();
+
+			if (ZCSG(preload_script)) {
+				preload_restart();
+			}
+
+#ifdef HAVE_JIT
+			zend_jit_restart();
+#endif
+
+			ZCSG(accelerator_enabled) = ZCSG(cache_status_before_restart);
+			if (ZCSG(last_restart_time) < ZCG(request_time)) {
+				ZCSG(last_restart_time) = ZCG(request_time);
+			} else {
+				ZCSG(last_restart_time)++;
+			}
+
+			ZCSG(reset_deferred) = false;
+		}
+
+		zend_shared_alloc_unlock();
+	}
 }
 
 /* Interned strings support */
@@ -2671,11 +2814,24 @@ zend_result accel_activate(INIT_FUNC_ARGS)
 		ZCG(counted) = false;
 	}
 
+	/* Enter the current epoch BEFORE checking for pending restart.
+	 * This ensures that if a reset is initiated after this point,
+	 * the deferred-reset logic will wait for us to leave. */
+	accel_epoch_enter();
+
+	/* Check if a deferred reset from a previous opcache_reset() can
+	 * now be completed (all pre-epoch readers have finished). */
+	if (ZCSG(reset_deferred)) {
+		accel_try_complete_deferred_reset();
+	}
+
 	if (ZCSG(restart_pending)) {
 		zend_shared_alloc_lock();
 		if (ZCSG(restart_pending)) { /* check again, to ensure that the cache wasn't already cleaned by another process */
 			if (accel_is_inactive()) {
-				zend_accel_error(ACCEL_LOG_DEBUG, "Restarting!");
+				/* All processes/threads are inactive (legacy flock check).
+				 * We can do the cleanup immediately. */
+				zend_accel_error(ACCEL_LOG_DEBUG, "Restarting! (immediate — no active readers)");
 				ZCSG(restart_pending) = false;
 				switch ZCSG(restart_reason) {
 					case ACCEL_RESTART_OOM:
@@ -2714,6 +2870,31 @@ zend_result accel_activate(INIT_FUNC_ARGS)
 					ZCSG(last_restart_time)++;
 				}
 				accel_restart_leave();
+			} else if (!ZCSG(reset_deferred)) {
+				/* Readers are still active. Defer the actual cleanup to a
+				 * future request end, after all current readers have left.
+				 * This is the core of the epoch-based reclamation approach. */
+				zend_accel_error(ACCEL_LOG_DEBUG, "Deferring opcache restart (active readers detected)");
+				ZCSG(restart_pending) = false;
+
+				switch ZCSG(restart_reason) {
+					case ACCEL_RESTART_OOM:
+						ZCSG(oom_restarts)++;
+						break;
+					case ACCEL_RESTART_HASH:
+						ZCSG(hash_restarts)++;
+						break;
+					case ACCEL_RESTART_USER:
+						ZCSG(manual_restarts)++;
+						break;
+				}
+
+				ACCEL_ATOMIC_STORE_64(&ZCSG(drain_epoch), ACCEL_ATOMIC_LOAD_64(&ZCSG(current_epoch)));
+				ACCEL_ATOMIC_INC_64(&ZCSG(current_epoch));
+
+				ZCSG(cache_status_before_restart) = ZCSG(accelerator_enabled);
+				ZCSG(accelerator_enabled) = false;
+				ZCSG(reset_deferred) = true;
 			}
 		}
 		zend_shared_alloc_unlock();
@@ -2766,6 +2947,18 @@ zend_result accel_post_deactivate(void)
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return SUCCESS;
+	}
+
+	/* Leave the epoch — this thread/process no longer holds references
+	 * to shared OPcache data. */
+	accel_epoch_leave();
+
+	/* If a deferred reset is pending, check if we were the last reader
+	 * from the old epoch. If so, complete the reset now. */
+	if (!file_cache_only && accel_shared_globals && ZCSG(reset_deferred)) {
+		SHM_UNPROTECT();
+		accel_try_complete_deferred_reset();
+		SHM_PROTECT();
 	}
 
 	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
@@ -2911,6 +3104,9 @@ static zend_result zend_accel_init_shm(void)
 
 	zend_reset_cache_vars();
 
+	/* Initialize epoch-based reclamation tracking */
+	accel_epoch_init();
+
 	ZCSG(oom_restarts) = 0;
 	ZCSG(hash_restarts) = 0;
 	ZCSG(manual_restarts) = 0;
@@ -2937,6 +3133,7 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
 	accel_globals->key = zend_string_alloc(ZCG_KEY_LEN, true);
 	GC_MAKE_PERSISTENT_LOCAL(accel_globals->key);
+	accel_globals->epoch_slot = ACCEL_EPOCH_NO_SLOT;
 }
 
 static void accel_globals_dtor(zend_accel_globals *accel_globals)

@@ -34,6 +34,14 @@ void zend_accel_hash_clean(zend_accel_hash *accel_hash)
 	accel_hash->num_entries = 0;
 	accel_hash->num_direct_entries = 0;
 	memset(accel_hash->hash_table, 0, sizeof(zend_accel_hash_entry *)*accel_hash->max_num_entries);
+
+	/* Full memory barrier to ensure the zeroed hash table is visible to all
+	 * threads/processes before any new entries are written. */
+#if defined(ZEND_WIN32)
+	MemoryBarrier();
+#elif defined(__GNUC__)
+	__atomic_thread_fence(__ATOMIC_SEQ_CST);
+#endif
 }
 
 void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size)
