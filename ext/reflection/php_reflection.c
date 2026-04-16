@@ -6743,8 +6743,7 @@ handle_magic_get:
 	}
 
 	if (prop->flags & ZEND_ACC_VIRTUAL) {
-		ZEND_ASSERT(prop->hooks);
-		if (!prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
+		if (prop->hooks && !prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
 			RETURN_FALSE;
 		}
 	} else if (obj && (!prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_GET])) {
@@ -6836,8 +6835,7 @@ handle_magic_set:
 	}
 
 	if (prop->flags & ZEND_ACC_VIRTUAL) {
-		ZEND_ASSERT(prop->hooks);
-		if (!prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+		if (prop->hooks && !prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
 			RETURN_FALSE;
 		}
 	} else if (obj && (prop->flags & ZEND_ACC_READONLY)) {
