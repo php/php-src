@@ -136,6 +136,8 @@ static zend_result (*orig_post_startup_cb)(void);
 
 static zend_result accel_post_startup(void);
 static zend_result accel_finish_startup(void);
+static void zend_reset_cache_vars(void);
+static void accel_interned_strings_restore_state(void);
 
 static void preload_shutdown(void);
 static void preload_activate(void);
@@ -400,6 +402,228 @@ static inline void accel_unlock_all(void)
 		zend_accel_error(ACCEL_LOG_DEBUG, "UnlockAll:  %s (%d)", strerror(errno), errno);
 	}
 #endif
+}
+
+/* ============================================================
+ * Epoch-based reclamation (EBR) for safe opcache_reset()/invalidate()
+ *
+ * Background:
+ *   ZCSG(hash) and the interned strings buffer are read lock-free by
+ *   reader threads, but mutated destructively by opcache_reset()/
+ *   opcache_invalidate() (memset of hash, restore of interned strings).
+ *   This causes zend_mm_heap corruption under concurrent load: a reader
+ *   that obtained a pointer just before the writer ran may follow it
+ *   after the writer freed/zeroed the underlying memory (GH-8739,
+ *   GH-14471, GH-18517).
+ *
+ * Approach:
+ *   Readers publish their "epoch" on request start (one atomic store)
+ *   and clear it on request end (one atomic store). Writers do not
+ *   immediately reclaim memory; instead they bump the global epoch and
+ *   defer the destructive cleanup until every reader that was active
+ *   when the writer ran has completed its request. This is the same
+ *   pattern used by RCU in the Linux kernel and by Crossbeam in Rust.
+ *
+ * Constraints satisfied:
+ *   - Lock-free reads preserved: the per-request cost is two cache-line
+ *     padded atomic stores. Readers never block on writers.
+ *   - Bounded delay: deferred cleanup completes as soon as all readers
+ *     active at write time finish their requests.
+ *   - Safe under slot exhaustion: readers that fail to obtain a per-
+ *     reader slot increment ZCSG(epoch_overflow_active) instead, which
+ *     unconditionally blocks deferred reclamation while non-zero.
+ * ============================================================ */
+
+void accel_epoch_init(void)
+{
+	int i;
+
+	/* Start at epoch 1 so that drain_epoch=0 is a sentinel meaning
+	 * "no reset has ever been deferred". */
+	ZCSG(current_epoch) = 1;
+	ZCSG(drain_epoch) = 0;
+	ZCSG(reset_deferred) = false;
+	ZCSG(epoch_slot_next) = 0;
+	ZCSG(epoch_overflow_active) = 0;
+
+	for (i = 0; i < ACCEL_EPOCH_MAX_SLOTS; i++) {
+		ZCSG(epoch_slots)[i].epoch = ACCEL_EPOCH_INACTIVE;
+	}
+}
+
+static int32_t accel_epoch_alloc_slot(void)
+{
+	/* Atomically claim the next slot. Once a slot is claimed, it stays
+	 * with this thread/process for the lifetime of the SHM segment.
+	 * If the per-slot pool is exhausted, return SLOT_OVERFLOW so the
+	 * caller can fall back to the aggregate overflow counter. */
+	int32_t slot;
+
+#if defined(ZEND_WIN32)
+	slot = (int32_t)InterlockedIncrement((volatile LONG *)&ZCSG(epoch_slot_next)) - 1;
+#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
+	slot = __atomic_fetch_add(&ZCSG(epoch_slot_next), 1, __ATOMIC_SEQ_CST);
+#elif defined(__GNUC__)
+	slot = __sync_fetch_and_add(&ZCSG(epoch_slot_next), 1);
+#else
+	slot = ZCSG(epoch_slot_next)++;
+#endif
+
+	if (slot < 0 || slot >= ACCEL_EPOCH_MAX_SLOTS) {
+		return ACCEL_EPOCH_SLOT_OVERFLOW;
+	}
+	return slot;
+}
+
+void accel_epoch_enter(void)
+{
+	int32_t slot = ZCG(epoch_slot);
+
+	if (UNEXPECTED(slot == ACCEL_EPOCH_SLOT_UNASSIGNED)) {
+		slot = accel_epoch_alloc_slot();
+		ZCG(epoch_slot) = slot;
+	}
+
+	if (EXPECTED(slot >= 0)) {
+		uint64_t epoch = ACCEL_ATOMIC_LOAD_64(&ZCSG(current_epoch));
+		ZCG(local_epoch) = epoch;
+		/* Release-store: ensures any subsequent reads of shared OPcache
+		 * data are seen as part of this published epoch. */
+		ACCEL_ATOMIC_STORE_64(&ZCSG(epoch_slots)[slot].epoch, epoch);
+	} else {
+		/* Slot allocation failed (overflow). Track this reader via the
+		 * aggregate counter so deferred reclamation knows to wait. */
+		ACCEL_ATOMIC_INC_32(&ZCSG(epoch_overflow_active));
+		ZCG(local_epoch) = 0;
+	}
+}
+
+void accel_epoch_leave(void)
+{
+	int32_t slot = ZCG(epoch_slot);
+
+	if (EXPECTED(slot >= 0)) {
+		ACCEL_ATOMIC_STORE_64(&ZCSG(epoch_slots)[slot].epoch, ACCEL_EPOCH_INACTIVE);
+	} else if (slot == ACCEL_EPOCH_SLOT_OVERFLOW) {
+		ACCEL_ATOMIC_DEC_32(&ZCSG(epoch_overflow_active));
+	}
+	/* SLOT_UNASSIGNED: enter() was never called for this thread/process
+	 * (e.g. file_cache_only path); nothing to release. */
+}
+
+static uint64_t accel_min_active_epoch(void)
+{
+	uint64_t min_epoch = ACCEL_EPOCH_INACTIVE;
+	int i;
+
+	for (i = 0; i < ACCEL_EPOCH_MAX_SLOTS; i++) {
+		uint64_t e = ACCEL_ATOMIC_LOAD_64(&ZCSG(epoch_slots)[i].epoch);
+		if (e < min_epoch) {
+			min_epoch = e;
+		}
+	}
+	return min_epoch;
+}
+
+bool accel_deferred_reset_pending(void)
+{
+	return ZCSG(reset_deferred);
+}
+
+void accel_try_complete_deferred_reset(void)
+{
+	uint64_t drain_epoch;
+	uint64_t min_epoch;
+	uint32_t overflow;
+
+	/* Lock-free fast-path check: if no reset is deferred, return
+	 * immediately. The check is racy but correct — the worst case is
+	 * that we miss completing a just-deferred reset on this request,
+	 * and the next request picks it up. */
+	if (!ZCSG(reset_deferred)) {
+		return;
+	}
+
+	/* Defensive: if this thread is already holding the SHM lock (e.g.
+	 * because we are nested inside the existing restart_pending path or
+	 * a leftover lock from an earlier failure), skip — re-entering
+	 * zend_shared_alloc_lock() would assert in debug builds. The next
+	 * request boundary will retry. */
+	if (ZCG(locked)) {
+		return;
+	}
+
+	overflow = ACCEL_ATOMIC_LOAD_32(&ZCSG(epoch_overflow_active));
+	if (overflow > 0) {
+		/* At least one reader exists that we cannot precisely track.
+		 * It may hold pointers into shared memory we are about to
+		 * reclaim, so we must wait until it leaves. */
+		return;
+	}
+
+	drain_epoch = ACCEL_ATOMIC_LOAD_64(&ZCSG(drain_epoch));
+	min_epoch = accel_min_active_epoch();
+
+	if (min_epoch <= drain_epoch) {
+		/* Some pre-drain reader is still publishing an old epoch. */
+		return;
+	}
+
+	/* All pre-drain readers have left and no overflow readers are
+	 * active. Take the SHM lock and complete the cleanup. The lock
+	 * also serializes us against any other thread that may be racing
+	 * to complete the same deferred reset. */
+	zend_shared_alloc_lock();
+
+	if (ZCSG(reset_deferred)) {
+		/* Re-check overflow under the SHM lock. A new overflow reader
+		 * could have entered between our load and acquiring the lock,
+		 * but new readers always observe current_epoch (which is >
+		 * drain_epoch), so they are not at risk from the cleanup we
+		 * are about to perform. The overflow check above was therefore
+		 * sufficient — but the re-check on min_active_epoch protects
+		 * against any readers that published drain_epoch since then. */
+		min_epoch = accel_min_active_epoch();
+		if (min_epoch > ACCEL_ATOMIC_LOAD_64(&ZCSG(drain_epoch))) {
+			zend_accel_error(ACCEL_LOG_DEBUG,
+				"Completing deferred opcache reset (drain_epoch=%" PRIu64
+				", min_active_epoch=%" PRIu64 ")",
+				drain_epoch, min_epoch);
+
+			accel_restart_enter();
+
+			zend_map_ptr_reset();
+			zend_reset_cache_vars();
+			zend_accel_hash_clean(&ZCSG(hash));
+
+			if (ZCG(accel_directives).interned_strings_buffer) {
+				accel_interned_strings_restore_state();
+			}
+
+			zend_shared_alloc_restore_state();
+
+			if (ZCSG(preload_script)) {
+				preload_restart();
+			}
+
+#ifdef HAVE_JIT
+			zend_jit_restart();
+#endif
+
+			ZCSG(accelerator_enabled) = ZCSG(cache_status_before_restart);
+			if (ZCSG(last_restart_time) < ZCG(request_time)) {
+				ZCSG(last_restart_time) = ZCG(request_time);
+			} else {
+				ZCSG(last_restart_time)++;
+			}
+
+			ZCSG(reset_deferred) = false;
+
+			accel_restart_leave();
+		}
+	}
+
+	zend_shared_alloc_unlock();
 }
 
 /* Interned strings support */
@@ -2692,6 +2916,19 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 		ZCG(counted) = false;
 	}
 
+	/* Epoch-based reclamation (GH-8739): publish this reader's epoch
+	 * BEFORE any check or use of shared OPcache data. If a writer
+	 * subsequently defers a reset, our published epoch ensures it
+	 * waits for us to leave before reclaiming any memory we may have
+	 * read. */
+	accel_epoch_enter();
+
+	/* If a previous reset is awaiting reader drain, attempt to complete
+	 * it now. Safe because our just-published epoch is > drain_epoch. */
+	if (UNEXPECTED(ZCSG(reset_deferred))) {
+		accel_try_complete_deferred_reset();
+	}
+
 	if (ZCSG(restart_pending)) {
 		zend_shared_alloc_lock();
 		if (ZCSG(restart_pending)) { /* check again, to ensure that the cache wasn't already cleaned by another process */
@@ -2735,6 +2972,43 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 					ZCSG(last_restart_time)++;
 				}
 				accel_restart_leave();
+			} else if (!ZCSG(reset_deferred)) {
+				/* Active readers detected (legacy flock check is non-empty)
+				 * AND no reset is already deferred. Convert the pending
+				 * restart into a deferred reset: bump the global epoch
+				 * (so new readers publish a higher epoch and won't be
+				 * waited on), record drain_epoch, and disable the cache
+				 * until cleanup completes. The actual hash/SHM cleanup
+				 * happens in accel_try_complete_deferred_reset() called
+				 * from the next request boundary, after all readers from
+				 * the old epoch have left. (GH-8739) */
+				zend_accel_error(ACCEL_LOG_DEBUG,
+					"Deferring opcache restart: active readers detected");
+				ZCSG(restart_pending) = false;
+
+				switch ZCSG(restart_reason) {
+					case ACCEL_RESTART_OOM:
+						ZCSG(oom_restarts)++;
+						break;
+					case ACCEL_RESTART_HASH:
+						ZCSG(hash_restarts)++;
+						break;
+					case ACCEL_RESTART_USER:
+						ZCSG(manual_restarts)++;
+						break;
+				}
+
+				/* Record drain_epoch as the CURRENT epoch (the one we
+				 * and any other active reader published). Then bump
+				 * current_epoch so subsequent readers publish a higher
+				 * epoch and don't block the eventual cleanup. */
+				ACCEL_ATOMIC_STORE_64(&ZCSG(drain_epoch),
+					ACCEL_ATOMIC_LOAD_64(&ZCSG(current_epoch)));
+				ACCEL_ATOMIC_INC_64(&ZCSG(current_epoch));
+
+				ZCSG(cache_status_before_restart) = ZCSG(accelerator_enabled);
+				ZCSG(accelerator_enabled) = false;
+				ZCSG(reset_deferred) = true;
 			}
 		}
 		zend_shared_alloc_unlock();
@@ -2787,6 +3061,22 @@ zend_result accel_post_deactivate(void)
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return SUCCESS;
+	}
+
+	/* Leave the epoch — this thread/process no longer holds references
+	 * to shared OPcache data. Must happen BEFORE attempting to complete
+	 * a deferred reset, so our own slot doesn't block the drain check. */
+	if (!file_cache_only && accel_shared_globals) {
+		SHM_UNPROTECT();
+		accel_epoch_leave();
+
+		/* If a deferred reset is pending, this may be the request that
+		 * completes the drain. Try it now to keep latency low — the
+		 * try_complete function is a no-op if drain isn't yet complete. */
+		if (UNEXPECTED(ZCSG(reset_deferred))) {
+			accel_try_complete_deferred_reset();
+		}
+		SHM_PROTECT();
 	}
 
 	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
@@ -2936,6 +3226,11 @@ static zend_result zend_accel_init_shm(void)
 
 	zend_reset_cache_vars();
 
+	/* Initialize epoch-based reclamation tracking. Must happen after the
+	 * memset of accel_shared_globals so we don't immediately overwrite
+	 * the values. (GH-8739) */
+	accel_epoch_init();
+
 	ZCSG(oom_restarts) = 0;
 	ZCSG(hash_restarts) = 0;
 	ZCSG(manual_restarts) = 0;
@@ -2962,6 +3257,9 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
 	accel_globals->key = zend_string_alloc(ZCG_KEY_LEN, true);
 	GC_MAKE_PERSISTENT_LOCAL(accel_globals->key);
+	/* No epoch slot has been allocated to this thread/process yet. The
+	 * first call to accel_epoch_enter() will atomically claim one. */
+	accel_globals->epoch_slot = ACCEL_EPOCH_SLOT_UNASSIGNED;
 }
 
 static void accel_globals_dtor(zend_accel_globals *accel_globals)

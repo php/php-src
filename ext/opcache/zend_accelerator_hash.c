@@ -34,6 +34,20 @@ void zend_accel_hash_clean(zend_accel_hash *accel_hash)
 	accel_hash->num_entries = 0;
 	accel_hash->num_direct_entries = 0;
 	memset(accel_hash->hash_table, 0, sizeof(zend_accel_hash_entry *)*accel_hash->max_num_entries);
+
+	/* Full memory barrier ensures the zeroed hash table and counters are
+	 * globally visible before any subsequent insert by this writer can
+	 * race with another reader. Combined with the epoch-based reclamation
+	 * in ZendAccelerator.c, this prevents readers from following a stale
+	 * pointer obtained between the lookup and the use of the result.
+	 * (GH-8739) */
+#if defined(ZEND_WIN32)
+	MemoryBarrier();
+#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
+	__atomic_thread_fence(__ATOMIC_SEQ_CST);
+#elif defined(__GNUC__)
+	__sync_synchronize();
+#endif
 }
 
 void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size)
