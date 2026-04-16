@@ -1099,9 +1099,7 @@ PHP_METHOD(Phar, __construct)
 
 	save_fname = fname;
 	zend_string *entry = NULL;
-#ifdef PHP_WIN32
-	phar_unixify_path_separators(fname, fname_len);
-#endif
+	/* phar_split_fname() will unixify the path */
 	zend_string *arch = phar_split_fname(fname, fname_len, &entry, !is_data, 2);
 	if (arch) {
 		/* use arch (the basename for the archive) for fname instead of fname */
