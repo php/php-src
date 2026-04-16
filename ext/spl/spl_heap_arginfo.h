@@ -180,7 +180,6 @@ static zend_class_entry *register_class_SplPriorityQueue(zend_class_entry *class
 
 	INIT_CLASS_ENTRY(ce, "SplPriorityQueue", class_SplPriorityQueue_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
-	zend_class_implements(class_entry, 2, class_entry_Iterator, class_entry_Countable);
 
 	zval const_EXTR_BOTH_value;
 	ZVAL_LONG(&const_EXTR_BOTH_value, SPL_PQUEUE_EXTR_BOTH);
@@ -200,6 +199,9 @@ static zend_class_entry *register_class_SplPriorityQueue(zend_class_entry *class
 	zend_declare_typed_class_constant(class_entry, const_EXTR_DATA_name, &const_EXTR_DATA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_EXTR_DATA_name, true);
 
+	zend_build_properties_info_table(class_entry);
+	zend_class_implements(class_entry, 2, class_entry_Iterator, class_entry_Countable);
+
 	return class_entry;
 }
 
@@ -209,6 +211,8 @@ static zend_class_entry *register_class_SplHeap(zend_class_entry *class_entry_It
 
 	INIT_CLASS_ENTRY(ce, "SplHeap", class_SplHeap_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_ABSTRACT);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 2, class_entry_Iterator, class_entry_Countable);
 
 	return class_entry;
@@ -219,7 +223,10 @@ static zend_class_entry *register_class_SplMinHeap(zend_class_entry *class_entry
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplMinHeap", class_SplMinHeap_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplHeap, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_SplHeap, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -229,7 +236,10 @@ static zend_class_entry *register_class_SplMaxHeap(zend_class_entry *class_entry
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplMaxHeap", class_SplMaxHeap_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplHeap, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_SplHeap, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

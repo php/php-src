@@ -484,6 +484,8 @@ static zend_class_entry *register_class_tidy(void)
 	ZVAL_NULL(&property_value_default_value);
 	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_VALUE), &property_value_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -539,6 +541,8 @@ static zend_class_entry *register_class_tidyNode(void)
 	zend_string *property_child_name = zend_string_init("child", sizeof("child") - 1, true);
 	zend_declare_typed_property(class_entry, property_child_name, &property_child_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
 	zend_string_release_ex(property_child_name, true);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

@@ -388,6 +388,8 @@ static zend_class_entry *register_class_SNMP(void)
 	zend_declare_typed_property(class_entry, property_exceptions_enabled_name, &property_exceptions_enabled_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_exceptions_enabled_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -396,7 +398,10 @@ static zend_class_entry *register_class_SNMPException(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SNMPException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_RuntimeException, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

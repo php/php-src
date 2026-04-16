@@ -152,7 +152,6 @@ static zend_class_entry *register_class_SplDoublyLinkedList(zend_class_entry *cl
 
 	INIT_CLASS_ENTRY(ce, "SplDoublyLinkedList", class_SplDoublyLinkedList_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
-	zend_class_implements(class_entry, 4, class_entry_Iterator, class_entry_Countable, class_entry_ArrayAccess, class_entry_Serializable);
 
 	zval const_IT_MODE_LIFO_value;
 	ZVAL_LONG(&const_IT_MODE_LIFO_value, SPL_DLLIST_IT_LIFO);
@@ -178,6 +177,9 @@ static zend_class_entry *register_class_SplDoublyLinkedList(zend_class_entry *cl
 	zend_declare_typed_class_constant(class_entry, const_IT_MODE_KEEP_name, &const_IT_MODE_KEEP_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_IT_MODE_KEEP_name, true);
 
+	zend_build_properties_info_table(class_entry);
+	zend_class_implements(class_entry, 4, class_entry_Iterator, class_entry_Countable, class_entry_ArrayAccess, class_entry_Serializable);
+
 	return class_entry;
 }
 
@@ -186,7 +188,10 @@ static zend_class_entry *register_class_SplQueue(zend_class_entry *class_entry_S
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplQueue", class_SplQueue_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplDoublyLinkedList, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_SplDoublyLinkedList, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -196,7 +201,10 @@ static zend_class_entry *register_class_SplStack(zend_class_entry *class_entry_S
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplStack", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplDoublyLinkedList, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_SplDoublyLinkedList, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

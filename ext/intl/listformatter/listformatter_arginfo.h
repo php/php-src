@@ -95,5 +95,7 @@ static zend_class_entry *register_class_IntlListFormatter(void)
 	zend_string_release_ex(const_WIDTH_NARROW_name, true);
 #endif
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

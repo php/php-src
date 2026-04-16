@@ -200,7 +200,6 @@ static zend_class_entry *register_class_BcMath_Number(zend_class_entry *class_en
 
 	INIT_NS_CLASS_ENTRY(ce, "BcMath", "Number", class_BcMath_Number_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_READONLY_CLASS);
-	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 	zval property_value_default_value;
 	ZVAL_UNDEF(&property_value_default_value);
@@ -211,6 +210,9 @@ static zend_class_entry *register_class_BcMath_Number(zend_class_entry *class_en
 	zend_string *property_scale_name = zend_string_init("scale", sizeof("scale") - 1, true);
 	zend_declare_typed_property(class_entry, property_scale_name, &property_scale_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_scale_name, true);
+
+	zend_build_properties_info_table(class_entry);
+	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 	return class_entry;
 }

@@ -292,6 +292,8 @@ static zend_class_entry *register_class_variant(void)
 	INIT_CLASS_ENTRY(ce, "variant", class_variant_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -300,7 +302,10 @@ static zend_class_entry *register_class_com(zend_class_entry *class_entry_varian
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "com", class_com_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_variant, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_variant, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -311,7 +316,10 @@ static zend_class_entry *register_class_dotnet(zend_class_entry *class_entry_var
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "dotnet", class_dotnet_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_variant, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_variant, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -324,6 +332,8 @@ static zend_class_entry *register_class_com_safearray_proxy(void)
 	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -332,7 +342,10 @@ static zend_class_entry *register_class_com_exception(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "com_exception", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_FINAL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Exception, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

@@ -68,7 +68,6 @@ static zend_class_entry *register_class_PhpToken(zend_class_entry *class_entry_S
 
 	INIT_CLASS_ENTRY(ce, "PhpToken", class_PhpToken_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
-	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 	zval property_id_default_value;
 	ZVAL_UNDEF(&property_id_default_value);
@@ -91,6 +90,9 @@ static zend_class_entry *register_class_PhpToken(zend_class_entry *class_entry_S
 	zend_string *property_pos_name = zend_string_init("pos", sizeof("pos") - 1, true);
 	zend_declare_typed_property(class_entry, property_pos_name, &property_pos_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_pos_name, true);
+
+	zend_build_properties_info_table(class_entry);
+	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 	return class_entry;
 }

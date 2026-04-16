@@ -391,5 +391,7 @@ static zend_class_entry *register_class_stdClass(void)
 	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_stdClass_0, 0);
 	zend_string_release_ex(attribute_name_AllowDynamicProperties_class_stdClass_0, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

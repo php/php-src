@@ -60,6 +60,8 @@ static zend_class_entry *register_class_ResourceBundle(zend_class_entry *class_e
 
 	INIT_CLASS_ENTRY(ce, "ResourceBundle", class_ResourceBundle_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
 
 	return class_entry;

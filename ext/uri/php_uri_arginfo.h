@@ -317,7 +317,10 @@ static zend_class_entry *register_class_Uri_UriException(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Uri", "UriException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Exception, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -327,7 +330,10 @@ static zend_class_entry *register_class_Uri_UriError(zend_class_entry *class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Uri", "UriError", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Error, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -337,7 +343,10 @@ static zend_class_entry *register_class_Uri_InvalidUriException(zend_class_entry
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Uri", "InvalidUriException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Uri_UriException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Uri_UriException, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -349,6 +358,8 @@ static zend_class_entry *register_class_Uri_UriComparisonMode(void)
 	zend_enum_add_case_cstr(class_entry, "IncludeFragment", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "ExcludeFragment", NULL);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -363,6 +374,8 @@ static zend_class_entry *register_class_Uri_Rfc3986_Uri(void)
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withuserinfo", sizeof("withuserinfo") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -371,13 +384,16 @@ static zend_class_entry *register_class_Uri_WhatWg_InvalidUrlException(zend_clas
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Uri\\WhatWg", "InvalidUrlException", class_Uri_WhatWg_InvalidUrlException_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Uri_InvalidUriException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	zval property_errors_default_value;
 	ZVAL_UNDEF(&property_errors_default_value);
 	zend_string *property_errors_name = zend_string_init("errors", sizeof("errors") - 1, true);
 	zend_declare_typed_property(class_entry, property_errors_name, &property_errors_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
 	zend_string_release_ex(property_errors_name, true);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Uri_InvalidUriException, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -444,6 +460,8 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlValidationErrorType(void)
 
 	zend_enum_add_case_cstr(class_entry, "FileInvalidWindowsDriveLetterHost", NULL);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -471,6 +489,8 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlValidationError(void)
 	zend_declare_typed_property(class_entry, property_failure_name, &property_failure_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release_ex(property_failure_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -483,6 +503,8 @@ static zend_class_entry *register_class_Uri_WhatWg_Url(void)
 
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withpassword", sizeof("withpassword") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

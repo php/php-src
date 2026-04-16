@@ -565,5 +565,7 @@ static zend_class_entry *register_class_PDO(void)
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "connect", sizeof("connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

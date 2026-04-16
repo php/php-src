@@ -138,13 +138,15 @@ static zend_class_entry *register_class_PDOStatement(zend_class_entry *class_ent
 
 	INIT_CLASS_ENTRY(ce, "PDOStatement", class_PDOStatement_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
-	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	zval property_queryString_default_value;
 	ZVAL_UNDEF(&property_queryString_default_value);
 	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, true);
 	zend_declare_typed_property(class_entry, property_queryString_name, &property_queryString_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release_ex(property_queryString_name, true);
+
+	zend_build_properties_info_table(class_entry);
+	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	return class_entry;
 }
@@ -161,6 +163,8 @@ static zend_class_entry *register_class_PDORow(void)
 	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, true);
 	zend_declare_typed_property(class_entry, property_queryString_name, &property_queryString_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release_ex(property_queryString_name, true);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

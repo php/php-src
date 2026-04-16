@@ -11,7 +11,7 @@ static zend_class_entry *register_class_Pdo_Odbc(zend_class_entry *class_entry_P
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Odbc", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_PDO, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_ATTR_USE_CURSOR_LIBRARY_value;
 	ZVAL_LONG(&const_ATTR_USE_CURSOR_LIBRARY_value, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY);
@@ -42,6 +42,9 @@ static zend_class_entry *register_class_Pdo_Odbc(zend_class_entry *class_entry_P
 	zend_string *const_SQL_USE_ODBC_name = zend_string_init_interned("SQL_USE_ODBC", sizeof("SQL_USE_ODBC") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_SQL_USE_ODBC_name, &const_SQL_USE_ODBC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_SQL_USE_ODBC_name, true);
+
+	zend_do_inheritance_ex(class_entry, class_entry_PDO, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

@@ -53,6 +53,8 @@ static zend_class_entry *register_class_DoOperationNoCast(void)
 	zend_declare_typed_property(class_entry, property_val_name, &property_val_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_val_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -68,6 +70,8 @@ static zend_class_entry *register_class_LongCastableNoOperations(void)
 	zend_string *property_val_name = zend_string_init("val", sizeof("val") - 1, true);
 	zend_declare_typed_property(class_entry, property_val_name, &property_val_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_val_name, true);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -85,6 +89,8 @@ static zend_class_entry *register_class_FloatCastableNoOperations(void)
 	zend_declare_typed_property(class_entry, property_val_name, &property_val_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE));
 	zend_string_release_ex(property_val_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -100,6 +106,8 @@ static zend_class_entry *register_class_NumericCastableNoOperations(void)
 	zend_string *property_val_name = zend_string_init("val", sizeof("val") - 1, true);
 	zend_declare_typed_property(class_entry, property_val_name, &property_val_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_DOUBLE));
 	zend_string_release_ex(property_val_name, true);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -158,6 +166,8 @@ static zend_class_entry *register_class_DimensionHandlersNoArrayAccess(void)
 	zend_string *property_offset_name = zend_string_init("offset", sizeof("offset") - 1, true);
 	zend_declare_typed_property(class_entry, property_offset_name, &property_offset_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 	zend_string_release_ex(property_offset_name, true);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

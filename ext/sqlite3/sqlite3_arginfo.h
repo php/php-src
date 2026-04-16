@@ -312,7 +312,10 @@ static zend_class_entry *register_class_SQLite3Exception(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SQLite3Exception", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Exception, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -548,6 +551,8 @@ static zend_class_entry *register_class_SQLite3(void)
 	zend_string_release_ex(const_RECURSIVE_name, true);
 #endif
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -578,6 +583,8 @@ static zend_class_entry *register_class_SQLite3Stmt(void)
 	zend_string_release_ex(const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_name, true);
 #endif
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -587,6 +594,8 @@ static zend_class_entry *register_class_SQLite3Result(void)
 
 	INIT_CLASS_ENTRY(ce, "SQLite3Result", class_SQLite3Result_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

@@ -58,5 +58,7 @@ static zend_class_entry *register_class_COMPersistHelper(void)
 	INIT_CLASS_ENTRY(ce, "COMPersistHelper", class_COMPersistHelper_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

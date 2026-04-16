@@ -136,7 +136,10 @@ static zend_class_entry *register_class_Filter_FilterException(zend_class_entry 
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Filter", "FilterException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Exception, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -146,7 +149,10 @@ static zend_class_entry *register_class_Filter_FilterFailedException(zend_class_
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Filter", "FilterFailedException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Filter_FilterException, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Filter_FilterException, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

@@ -1014,6 +1014,8 @@ static zend_class_entry *register_class_CurlHandle(void)
 	INIT_CLASS_ENTRY(ce, "CurlHandle", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -1024,6 +1026,8 @@ static zend_class_entry *register_class_CurlMultiHandle(void)
 	INIT_CLASS_ENTRY(ce, "CurlMultiHandle", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -1033,6 +1037,8 @@ static zend_class_entry *register_class_CurlShareHandle(void)
 
 	INIT_CLASS_ENTRY(ce, "CurlShareHandle", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -1049,6 +1055,8 @@ static zend_class_entry *register_class_CurlSharePersistentHandle(void)
 	zend_string *property_options_name = zend_string_init("options", sizeof("options") - 1, true);
 	zend_declare_typed_property(class_entry, property_options_name, &property_options_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
 	zend_string_release_ex(property_options_name, true);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

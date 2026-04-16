@@ -70,5 +70,7 @@ static zend_class_entry *register_class_Directory(void)
 	zend_declare_typed_property(class_entry, property_handle_name, &property_handle_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 	zend_string_release_ex(property_handle_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

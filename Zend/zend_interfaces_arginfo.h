@@ -124,6 +124,8 @@ static zend_class_entry *register_class_Traversable(void)
 	INIT_CLASS_ENTRY(ce, "Traversable", NULL);
 	class_entry = zend_register_internal_interface(&ce);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -133,6 +135,8 @@ static zend_class_entry *register_class_IteratorAggregate(zend_class_entry *clas
 
 	INIT_CLASS_ENTRY(ce, "IteratorAggregate", class_IteratorAggregate_methods);
 	class_entry = zend_register_internal_interface(&ce);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 1, class_entry_Traversable);
 
 	return class_entry;
@@ -144,6 +148,8 @@ static zend_class_entry *register_class_Iterator(zend_class_entry *class_entry_T
 
 	INIT_CLASS_ENTRY(ce, "Iterator", class_Iterator_methods);
 	class_entry = zend_register_internal_interface(&ce);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 1, class_entry_Traversable);
 
 	return class_entry;
@@ -156,6 +162,8 @@ static zend_class_entry *register_class_ArrayAccess(void)
 	INIT_CLASS_ENTRY(ce, "ArrayAccess", class_ArrayAccess_methods);
 	class_entry = zend_register_internal_interface(&ce);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -165,6 +173,8 @@ static zend_class_entry *register_class_Serializable(void)
 
 	INIT_CLASS_ENTRY(ce, "Serializable", class_Serializable_methods);
 	class_entry = zend_register_internal_interface(&ce);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -176,6 +186,8 @@ static zend_class_entry *register_class_Countable(void)
 	INIT_CLASS_ENTRY(ce, "Countable", class_Countable_methods);
 	class_entry = zend_register_internal_interface(&ce);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -186,6 +198,8 @@ static zend_class_entry *register_class_Stringable(void)
 	INIT_CLASS_ENTRY(ce, "Stringable", class_Stringable_methods);
 	class_entry = zend_register_internal_interface(&ce);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -195,6 +209,8 @@ static zend_class_entry *register_class_InternalIterator(zend_class_entry *class
 
 	INIT_CLASS_ENTRY(ce, "InternalIterator", class_InternalIterator_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
 
 	return class_entry;

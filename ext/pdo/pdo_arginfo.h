@@ -16,7 +16,7 @@ static zend_class_entry *register_class_PDOException(zend_class_entry *class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PDOException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_code_default_value;
 	ZVAL_LONG(&property_code_default_value, 0);
@@ -27,6 +27,9 @@ static zend_class_entry *register_class_PDOException(zend_class_entry *class_ent
 	zend_string *property_errorInfo_name = zend_string_init("errorInfo", sizeof("errorInfo") - 1, true);
 	zend_declare_typed_property(class_entry, property_errorInfo_name, &property_errorInfo_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
 	zend_string_release_ex(property_errorInfo_name, true);
+
+	zend_do_inheritance_ex(class_entry, class_entry_RuntimeException, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

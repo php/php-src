@@ -609,7 +609,10 @@ static zend_class_entry *register_class_PharException(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PharException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Exception, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -619,8 +622,7 @@ static zend_class_entry *register_class_Phar(zend_class_entry *class_entry_Recur
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Phar", class_Phar_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RecursiveDirectoryIterator, 0);
-	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval const_BZ2_value;
 	ZVAL_LONG(&const_BZ2_value, PHAR_ENT_COMPRESSED_BZ2);
@@ -718,6 +720,10 @@ static zend_class_entry *register_class_Phar(zend_class_entry *class_entry_Recur
 	zend_declare_typed_class_constant(class_entry, const_SHA512_name, &const_SHA512_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_SHA512_name, true);
 
+	zend_do_inheritance_ex(class_entry, class_entry_RecursiveDirectoryIterator, 0);
+	zend_build_properties_info_table(class_entry);
+	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
+
 	return class_entry;
 }
 
@@ -726,7 +732,10 @@ static zend_class_entry *register_class_PharData(zend_class_entry *class_entry_R
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PharData", class_PharData_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RecursiveDirectoryIterator, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_RecursiveDirectoryIterator, 0);
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
 
 	return class_entry;
@@ -737,7 +746,10 @@ static zend_class_entry *register_class_PharFileInfo(zend_class_entry *class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PharFileInfo", class_PharFileInfo_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplFileInfo, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_SplFileInfo, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

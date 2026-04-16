@@ -209,6 +209,8 @@ static zend_class_entry *register_class_FFI(void)
 	zend_declare_typed_class_constant(class_entry, const___BIGGEST_ALIGNMENT___name, &const___BIGGEST_ALIGNMENT___value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const___BIGGEST_ALIGNMENT___name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -218,6 +220,8 @@ static zend_class_entry *register_class_FFI_CData(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "FFI", "CData", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -459,6 +463,8 @@ static zend_class_entry *register_class_FFI_CType(void)
 	zend_declare_typed_class_constant(class_entry, const_ABI_VECTORCALL_name, &const_ABI_VECTORCALL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_ABI_VECTORCALL_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -467,7 +473,10 @@ static zend_class_entry *register_class_FFI_Exception(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "FFI", "Exception", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_do_inheritance_ex(class_entry, class_entry_Error, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -477,7 +486,10 @@ static zend_class_entry *register_class_FFI_ParserException(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "FFI", "ParserException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_FFI_Exception, ZEND_ACC_FINAL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+
+	zend_do_inheritance_ex(class_entry, class_entry_FFI_Exception, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

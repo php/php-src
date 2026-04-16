@@ -158,6 +158,8 @@ static zend_class_entry *register_class_Attribute(void)
 	zend_string_release_ex(attribute_name_Attribute_class_Attribute_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_Attribute_0->args[0].value, ZEND_ATTRIBUTE_TARGET_CLASS);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -172,6 +174,8 @@ static zend_class_entry *register_class_ReturnTypeWillChange(void)
 	zend_attribute *attribute_Attribute_class_ReturnTypeWillChange_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ReturnTypeWillChange_0, 1);
 	zend_string_release_ex(attribute_name_Attribute_class_ReturnTypeWillChange_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_ReturnTypeWillChange_0->args[0].value, ZEND_ATTRIBUTE_TARGET_METHOD);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -188,6 +192,8 @@ static zend_class_entry *register_class_AllowDynamicProperties(void)
 	zend_string_release_ex(attribute_name_Attribute_class_AllowDynamicProperties_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_AllowDynamicProperties_0->args[0].value, ZEND_ATTRIBUTE_TARGET_CLASS);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -203,6 +209,8 @@ static zend_class_entry *register_class_SensitiveParameter(void)
 	zend_string_release_ex(attribute_name_Attribute_class_SensitiveParameter_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_SensitiveParameter_0->args[0].value, ZEND_ATTRIBUTE_TARGET_PARAMETER);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -216,6 +224,8 @@ static zend_class_entry *register_class_SensitiveParameterValue(void)
 	zval property_value_default_value;
 	ZVAL_UNDEF(&property_value_default_value);
 	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_VALUE), &property_value_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -231,6 +241,8 @@ static zend_class_entry *register_class_Override(void)
 	zend_attribute *attribute_Attribute_class_Override_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Override_0, 1);
 	zend_string_release_ex(attribute_name_Attribute_class_Override_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_Override_0->args[0].value, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_PROPERTY);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -255,6 +267,8 @@ static zend_class_entry *register_class_Deprecated(void)
 	zend_string_release_ex(attribute_name_Attribute_class_Deprecated_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_Deprecated_0->args[0].value, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_CLASS_CONST | ZEND_ATTRIBUTE_TARGET_CONST | ZEND_ATTRIBUTE_TARGET_CLASS);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -274,6 +288,8 @@ static zend_class_entry *register_class_NoDiscard(void)
 	zend_string_release_ex(attribute_name_Attribute_class_NoDiscard_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_NoDiscard_0->args[0].value, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -288,6 +304,8 @@ static zend_class_entry *register_class_DelayedTargetValidation(void)
 	zend_attribute *attribute_Attribute_class_DelayedTargetValidation_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_DelayedTargetValidation_0, 1);
 	zend_string_release_ex(attribute_name_Attribute_class_DelayedTargetValidation_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_DelayedTargetValidation_0->args[0].value, ZEND_ATTRIBUTE_TARGET_ALL);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }

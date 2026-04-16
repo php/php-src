@@ -4307,5 +4307,7 @@ static zend_class_entry *register_class_IntlChar(void)
 	zend_declare_typed_class_constant(class_entry, const_FOLD_CASE_EXCLUDE_SPECIAL_I_name, &const_FOLD_CASE_EXCLUDE_SPECIAL_I_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_FOLD_CASE_EXCLUDE_SPECIAL_I_name, true);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

@@ -188,6 +188,8 @@ static zend_class_entry *register_class_IntlIterator(zend_class_entry *class_ent
 
 	INIT_CLASS_ENTRY(ce, "IntlIterator", class_IntlIterator_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
 
 	return class_entry;

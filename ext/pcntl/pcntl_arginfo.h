@@ -676,5 +676,7 @@ static zend_class_entry *register_class_Pcntl_QosClass(void)
 
 	zend_enum_add_case_cstr(class_entry, "Background", NULL);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }

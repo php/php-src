@@ -27,10 +27,10 @@ array(2) {
   int(2)
 }
 array(3) {
+  ["CHILD_ARRAYS_ONLY"]=>
+  int(4)
   ["STD_PROP_LIST"]=>
   int(1)
   ["ARRAY_AS_PROPS"]=>
   int(2)
-  ["CHILD_ARRAYS_ONLY"]=>
-  int(4)
 }

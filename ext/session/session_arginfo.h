@@ -238,6 +238,8 @@ static zend_class_entry *register_class_SessionHandlerInterface(void)
 	INIT_CLASS_ENTRY(ce, "SessionHandlerInterface", class_SessionHandlerInterface_methods);
 	class_entry = zend_register_internal_interface(&ce);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -247,6 +249,8 @@ static zend_class_entry *register_class_SessionIdInterface(void)
 
 	INIT_CLASS_ENTRY(ce, "SessionIdInterface", class_SessionIdInterface_methods);
 	class_entry = zend_register_internal_interface(&ce);
+
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
@@ -258,6 +262,8 @@ static zend_class_entry *register_class_SessionUpdateTimestampHandlerInterface(v
 	INIT_CLASS_ENTRY(ce, "SessionUpdateTimestampHandlerInterface", class_SessionUpdateTimestampHandlerInterface_methods);
 	class_entry = zend_register_internal_interface(&ce);
 
+	zend_build_properties_info_table(class_entry);
+
 	return class_entry;
 }
 
@@ -267,6 +273,8 @@ static zend_class_entry *register_class_SessionHandler(zend_class_entry *class_e
 
 	INIT_CLASS_ENTRY(ce, "SessionHandler", class_SessionHandler_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zend_build_properties_info_table(class_entry);
 	zend_class_implements(class_entry, 2, class_entry_SessionHandlerInterface, class_entry_SessionIdInterface);
 
 	return class_entry;

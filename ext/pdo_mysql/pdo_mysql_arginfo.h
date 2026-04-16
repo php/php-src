@@ -16,7 +16,7 @@ static zend_class_entry *register_class_Pdo_Mysql(zend_class_entry *class_entry_
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Mysql", class_Pdo_Mysql_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_PDO, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_ATTR_USE_BUFFERED_QUERY_value;
 	ZVAL_LONG(&const_ATTR_USE_BUFFERED_QUERY_value, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY);
@@ -139,6 +139,9 @@ static zend_class_entry *register_class_Pdo_Mysql(zend_class_entry *class_entry_
 	zend_declare_typed_class_constant(class_entry, const_ATTR_LOCAL_INFILE_DIRECTORY_name, &const_ATTR_LOCAL_INFILE_DIRECTORY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_ATTR_LOCAL_INFILE_DIRECTORY_name, true);
 #endif
+
+	zend_do_inheritance_ex(class_entry, class_entry_PDO, 0);
+	zend_build_properties_info_table(class_entry);
 
 	return class_entry;
 }
