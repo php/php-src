@@ -2761,7 +2761,7 @@ static void emit_trait_constant_enum_case_conflict_error(
 	const zend_class_entry *ce, const zend_class_constant *trait_constant, zend_string *name
 ) {
 	zend_error_noreturn(E_COMPILE_ERROR,
-		"Cannot use trait %s, because constant %s conflicts with enum case %s::%s",
+		"Cannot use trait %s, because %s::%s conflicts with enum case %s::%s",
 		ZSTR_VAL(trait_constant->ce->name),
 		ZSTR_VAL(name),
 		ZSTR_VAL(ce->name),

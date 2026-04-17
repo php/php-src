@@ -16,4 +16,4 @@ enum Direction {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use trait X, because constant Up conflicts with enum case Direction::Up in %s on line %d
+Fatal error: Cannot use trait X, because X::Up conflicts with enum case Direction::Up in %s on line %d
