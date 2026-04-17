@@ -16,4 +16,4 @@ enum Direction {
 
 ?>
 --EXPECTF--
-Fatal error: Direction and X define the same constant (Up) in the composition of Direction. However, the definition differs and is considered incompatible. Class was composed in %s on line %d
+Fatal error: Cannot use trait X, because constant Up conflicts with enum case Direction::Up in %s on line %d
