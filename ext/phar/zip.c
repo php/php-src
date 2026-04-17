@@ -234,9 +234,9 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 	uint16_t i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
-	char *ext, *actual_alias = NULL;
+	char *ext = NULL;
 	char *metadata = NULL;
-
+	zend_string *actual_alias = NULL;
 	size = php_stream_tell(fp);
 
 	if (size > sizeof(locator) + 65536) {
@@ -343,7 +343,10 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 	entry.fp_type = PHAR_FP;
 	entry.is_persistent = mydata->is_persistent;
 #define PHAR_ZIP_FAIL(errmsg) \
-			efree(actual_alias); \
+			 if (actual_alias) { \
+				zend_string_release_ex(actual_alias, 0); \
+				actual_alias = NULL; \
+			} \
 			zend_hash_destroy(&mydata->manifest); \
 			HT_INVALIDATE(&mydata->manifest); \
 			zend_hash_destroy(&mydata->mounted_dirs); \
@@ -602,7 +605,7 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 			ZVAL_UNDEF(&entry.metadata_tracker.val);
 		}
 
-		if (!actual_alias && zend_string_equals_literal(entry.filename, ".phar/alias.txt")) {
+		if (actual_alias == NULL && zend_string_equals_literal(entry.filename, ".phar/alias.txt")) {
 			php_stream_filter *filter;
 
 			/* archive alias found */
@@ -628,19 +631,7 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 
 				php_stream_filter_append(&fp->readfilters, filter);
 
-				// TODO: refactor to avoid reallocation ???
-//???			entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)
-				{
-					zend_string *str = php_stream_copy_to_mem(fp, entry.uncompressed_filesize, 0);
-					if (str) {
-						entry.uncompressed_filesize = ZSTR_LEN(str);
-						actual_alias = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
-						zend_string_release_ex(str, 0);
-					} else {
-						actual_alias = NULL;
-						entry.uncompressed_filesize = 0;
-					}
-				}
+				actual_alias = php_stream_copy_to_mem(fp, entry.uncompressed_filesize, 0);
 
 				if (!entry.uncompressed_filesize) {
 					php_stream_filter_remove(filter, 1);
@@ -660,20 +651,7 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 				}
 
 				php_stream_filter_append(&fp->readfilters, filter);
-
-				// TODO: refactor to avoid reallocation ???
-//???			entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)
-				{
-					zend_string *str = php_stream_copy_to_mem(fp, entry.uncompressed_filesize, 0);
-					if (str) {
-						entry.uncompressed_filesize = ZSTR_LEN(str);
-						actual_alias = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
-						zend_string_release_ex(str, 0);
-					} else {
-						actual_alias = NULL;
-						entry.uncompressed_filesize = 0;
-					}
-				}
+				actual_alias = php_stream_copy_to_mem(fp, entry.uncompressed_filesize, 0);
 
 				if (!entry.uncompressed_filesize) {
 					php_stream_filter_remove(filter, 1);
@@ -684,19 +662,7 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 				php_stream_filter_flush(filter, 1);
 				php_stream_filter_remove(filter, 1);
 			} else {
-				// TODO: refactor to avoid reallocation ???
-//???			entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)
-				{
-					zend_string *str = php_stream_copy_to_mem(fp, entry.uncompressed_filesize, 0);
-					if (str) {
-						entry.uncompressed_filesize = ZSTR_LEN(str);
-						actual_alias = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
-						zend_string_release_ex(str, 0);
-					} else {
-						actual_alias = NULL;
-						entry.uncompressed_filesize = 0;
-					}
-				}
+				actual_alias = php_stream_copy_to_mem(fp, entry.uncompressed_filesize, 0);
 
 				if (!entry.uncompressed_filesize) {
 					zend_string_release_ex(entry.filename, entry.is_persistent);
@@ -727,35 +693,38 @@ zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, ch
 
 	zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len, mydata);
 
-	if (actual_alias) {
+	if (actual_alias != NULL) {
 		phar_archive_data *fd_ptr;
 
-		if (!phar_validate_alias(actual_alias, mydata->alias_len)) {
+		if (!phar_validate_alias(ZSTR_VAL(actual_alias), ZSTR_LEN(actual_alias))) {
 			if (error) {
-				spprintf(error, 4096, "phar error: invalid alias \"%s\" in zip-based phar \"%s\"", actual_alias, fname);
+				spprintf(error, 4096, "phar error: invalid alias \"%s\" in zip-based phar \"%s\"", ZSTR_VAL(actual_alias), fname);
 			}
-			efree(actual_alias);
+			zend_string_release_ex(actual_alias, 0);
 			zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
 			return FAILURE;
 		}
 
 		mydata->is_temporary_alias = 0;
 
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias, mydata->alias_len))) {
-			if (SUCCESS != phar_free_alias(fd_ptr, actual_alias, mydata->alias_len)) {
+		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), ZSTR_VAL(actual_alias), ZSTR_LEN(actual_alias)))) {
+			if (SUCCESS != phar_free_alias(fd_ptr, ZSTR_VAL(actual_alias), ZSTR_LEN(actual_alias))) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add zip-based phar \"%s\" with implicit alias, alias is already in use", fname);
 				}
-				efree(actual_alias);
+				zend_string_release_ex(actual_alias, 0);
 				zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
 				return FAILURE;
 			}
 		}
 
-		mydata->alias = entry.is_persistent ? pestrndup(actual_alias, mydata->alias_len, 1) : actual_alias;
-
+			
 		if (entry.is_persistent) {
-			efree(actual_alias);
+			mydata->alias = pestrndup(ZSTR_VAL(actual_alias), ZSTR_LEN(actual_alias), 1);
+			zend_string_release_ex(actual_alias, 0);
+		} else {
+			mydata->alias = estrndup(ZSTR_VAL(actual_alias), ZSTR_LEN(actual_alias));
+			zend_string_release_ex(actual_alias, 0);
 		}
 
 		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), mydata->alias, mydata->alias_len, mydata);
