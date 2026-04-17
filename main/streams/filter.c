@@ -75,7 +75,9 @@ PHPAPI php_stream_bucket *php_stream_bucket_new(const php_stream *stream, char *
 	if (is_persistent && !buf_persistent) {
 		/* all data in a persistent bucket must also be persistent */
 		bucket->buf = pemalloc(buflen, true);
-		memcpy(bucket->buf, buf, buflen);
+		if (EXPECTED(buflen > 0 && buf != NULL)) {
+			memcpy(bucket->buf, buf, buflen);
+		}
 		bucket->buflen = buflen;
 		bucket->own_buf = true;
 	} else {
