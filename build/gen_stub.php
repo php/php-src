@@ -2460,6 +2460,17 @@ abstract class VariableLike
             $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private"));
         }
+
+        if ($this->flags & Modifiers::PUBLIC_SET) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "public(set)"));
+        } elseif ($this->flags & Modifiers::PROTECTED_SET) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "protected(set)"));
+        } elseif ($this->flags & Modifiers::PRIVATE_SET) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private(set)"));
+        }
     }
 
 }
