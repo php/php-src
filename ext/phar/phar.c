@@ -2,15 +2,13 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Gregory Beaver <cellog@php.net>                             |
   |          Marcus Boerger <helly@php.net>                              |
@@ -258,7 +256,8 @@ bool phar_archive_delref(phar_archive_data *phar) /* {{{ */
 	} else if (!phar->refcount) {
 		/* invalidate phar cache */
 		PHAR_G(last_phar) = NULL;
-		PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+		PHAR_G(last_alias) = NULL;
+		PHAR_G(last_phar_name) = NULL;
 
 		/* This is a new phar that has perhaps had an alias/metadata set, but has never been flushed. */
 		bool remove_fname_cache = !zend_hash_num_elements(&phar->manifest);
@@ -1265,7 +1264,7 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 		}
 
 		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-			if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
+			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				signature = NULL;
 				fp = NULL;
 				MAPPHAR_FAIL("Cannot open archive \"%s\", alias is already in use by existing archive");
@@ -1464,7 +1463,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 		phar_archive_data *fd_ptr;
 
 		if (alias && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-			if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
+			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				spprintf(error, 4096, "phar error: phar \"%s\" cannot set alias \"%s\", already in use by another phar archive", mydata->fname, alias);
 
 				zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
@@ -2061,31 +2060,29 @@ static bool php_check_dots(const char *element, size_t n) /* {{{ */
 /**
  * Remove .. and . references within a phar filename
  */
-char *phar_fix_filepath(char *path, size_t *new_len, bool use_cwd) /* {{{ */
+zend_string* phar_fix_filepath(const char *path, size_t path_length, bool use_cwd) /* {{{ */
 {
-	char *newpath;
-	size_t newpath_len;
-	char *ptr;
-	char *tok;
-	size_t ptr_length, path_length = *new_len;
+	zend_string *new_path;
+	size_t new_path_len;
+	size_t ptr_length;
 
-	if (PHAR_G(cwd_len) && use_cwd && path_length > 2 && path[0] == '.' && path[1] == '/') {
-		newpath_len = PHAR_G(cwd_len);
-		newpath = emalloc(strlen(path) + newpath_len + 1);
-		memcpy(newpath, PHAR_G(cwd), newpath_len);
+	if (use_cwd && PHAR_G(cwd_len) && path_length > 2 && path[0] == '.' && path[1] == '/') {
+		new_path = zend_string_alloc(path_length + path_length + 1, false);
+		new_path_len = PHAR_G(cwd_len);
+		memcpy(ZSTR_VAL(new_path), PHAR_G(cwd), PHAR_G(cwd_len));
 	} else {
-		newpath = emalloc(strlen(path) + 2);
-		newpath[0] = '/';
-		newpath_len = 1;
+		new_path = zend_string_alloc(path_length + 2, false);
+		ZSTR_VAL(new_path)[0] = '/';
+		new_path_len = 1;
 	}
 
-	ptr = path;
+	const char *ptr = path;
 
 	if (*ptr == '/') {
 		++ptr;
 	}
 
-	tok = ptr;
+	const char *tok = ptr;
 
 	do {
 		ptr = memchr(ptr, '/', path_length - (ptr - path));
@@ -2095,46 +2092,42 @@ char *phar_fix_filepath(char *path, size_t *new_len, bool use_cwd) /* {{{ */
 		switch (path_length - (tok - path)) {
 			case 1:
 				if (*tok == '.') {
-					efree(path);
-					*new_len = 1;
-					efree(newpath);
-					return estrndup("/", 1);
+					zend_string_release_ex(new_path, false);
+					return ZSTR_CHAR('/');
 				}
 				break;
 			case 2:
 				if (tok[0] == '.' && tok[1] == '.') {
-					efree(path);
-					*new_len = 1;
-					efree(newpath);
-					return estrndup("/", 1);
+					zend_string_release_ex(new_path, false);
+					return ZSTR_CHAR('/');
 				}
 		}
-		efree(newpath);
-		return path;
+		zend_string_release_ex(new_path, false);
+		return zend_string_init(path, path_length, false);
 	}
 
 	while (ptr) {
 		ptr_length = ptr - tok;
 last_time:
 		if (IS_DIRECTORY_UP(tok, ptr_length)) {
-			while (newpath_len > 1 && !IS_BACKSLASH(newpath[newpath_len - 1])) {
-				newpath_len--;
+			while (new_path_len > 1 && !IS_BACKSLASH(ZSTR_VAL(new_path)[new_path_len - 1])) {
+				new_path_len--;
 			}
 
-			if (newpath[0] != '/') {
-				newpath[newpath_len] = '\0';
-			} else if (newpath_len > 1) {
-				--newpath_len;
+			if (ZSTR_VAL(new_path)[0] != '/') {
+				ZSTR_VAL(new_path)[new_path_len] = '\0';
+			} else if (new_path_len > 1) {
+				--new_path_len;
 			}
 		} else if (!IS_DIRECTORY_CURRENT(tok, ptr_length)) {
-			if (newpath_len > 1) {
-				newpath[newpath_len++] = '/';
-				memcpy(newpath + newpath_len, tok, ptr_length+1);
+			if (new_path_len > 1) {
+				ZSTR_VAL(new_path)[new_path_len++] = '/';
+				memcpy(ZSTR_VAL(new_path) + new_path_len, tok, ptr_length+1);
 			} else {
-				memcpy(newpath + newpath_len, tok, ptr_length+1);
+				memcpy(ZSTR_VAL(new_path) + new_path_len, tok, ptr_length+1);
 			}
 
-			newpath_len += ptr_length;
+			new_path_len += ptr_length;
 		}
 
 		if (ptr == path + path_length) {
@@ -2154,10 +2147,8 @@ last_time:
 		}
 	}
 
-	efree(path);
-	*new_len = newpath_len;
-	newpath[newpath_len] = '\0';
-	return erealloc(newpath, newpath_len + 1);
+	ZSTR_VAL(new_path)[new_path_len] = '\0';
+	return zend_string_realloc(new_path, new_path_len, false);
 }
 /* }}} */
 
@@ -2173,7 +2164,7 @@ last_time:
  *
  * This is used by phar_parse_url()
  */
-zend_result phar_split_fname(const char *filename, size_t filename_len, char **arch, size_t *arch_len, char **entry, size_t *entry_len, int executable, int for_create) /* {{{ */
+zend_result phar_split_fname(const char *filename, size_t filename_len, char **arch, size_t *arch_len, zend_string **entry, int executable, int for_create) /* {{{ */
 {
 	const char *ext_str;
 #ifdef PHP_WIN32
@@ -2226,15 +2217,12 @@ zend_result phar_split_fname(const char *filename, size_t filename_len, char **a
 
 	if (entry) {
 		if (ext_str[ext_len]) {
-			*entry_len = filename_len - *arch_len;
-			*entry = estrndup(ext_str+ext_len, *entry_len);
-	#ifdef PHP_WIN32
-			phar_unixify_path_separators(*entry, *entry_len);
-	#endif
-			*entry = phar_fix_filepath(*entry, entry_len, 0);
+			size_t computed_entry_len = filename_len - *arch_len;
+			/* We don't need to unixify the path on Windows,
+			 * as ext_str is derived from filename that was already unixify */
+			*entry = phar_fix_filepath(ext_str+ext_len, computed_entry_len, false);
 		} else {
-			*entry_len = 1;
-			*entry = estrndup("/", 1);
+			*entry = ZSTR_CHAR('/');
 		}
 	}
 
@@ -3346,7 +3334,8 @@ void phar_request_initialize(void) /* {{{ */
 	if (!PHAR_G(request_init))
 	{
 		PHAR_G(last_phar) = NULL;
-		PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+		PHAR_G(last_alias) = NULL;
+		PHAR_G(last_phar_name) = NULL;
 		PHAR_G(has_bz2) = zend_hash_str_exists(&module_registry, "bz2", sizeof("bz2")-1);
 		PHAR_G(has_zlib) = zend_hash_str_exists(&module_registry, "zlib", sizeof("zlib")-1);
 		PHAR_G(request_init) = 1;

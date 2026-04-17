@@ -3,15 +3,13 @@
   | phar php single-file executable PHP extension                        |
   | utility functions                                                    |
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Gregory Beaver <cellog@php.net>                             |
   |          Marcus Boerger <helly@php.net>                              |
@@ -36,7 +34,7 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #else
-static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type);
+static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, zend_off_t end, const char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type);
 #endif
 
 /* for links to relative location, prepend cwd of the entry */
@@ -190,7 +188,7 @@ int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_of
 /* }}} */
 
 /* mount an absolute path or uri to a path internal to the phar archive */
-zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, char *path, size_t path_len) /* {{{ */
+zend_result phar_mount_entry(phar_archive_data *phar, const char *filename, size_t filename_len, char *path, size_t path_len) /* {{{ */
 {
 	phar_entry_info entry = {0};
 	php_stream_statbuf ssb;
@@ -268,7 +266,7 @@ zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t fil
 zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data **pphar) /* {{{ */
 {
 	zend_string *ret;
-	char *path, *arch, *test;
+	char *path, *arch;
 	size_t arch_len;
 	phar_archive_data *phar;
 
@@ -302,13 +300,11 @@ zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data 
 		goto splitted;
 	}
 
-	if (!is_file_a_phar_wrapper || SUCCESS != phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, NULL, 1, 0)) {
+	if (!is_file_a_phar_wrapper || SUCCESS != phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, NULL, 1, 0)) {
 		return NULL;
 	}
 
 	if (*ZSTR_VAL(filename) == '.') {
-		size_t try_len;
-
 		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 			efree(arch);
 			return NULL;
@@ -318,25 +314,27 @@ splitted:
 			*pphar = phar;
 		}
 
-		try_len = ZSTR_LEN(filename);
-		test = phar_fix_filepath(estrndup(ZSTR_VAL(filename), ZSTR_LEN(filename)), &try_len, 1);
-
-		if (*test == '/') {
-			if (zend_hash_str_exists(&(phar->manifest), test + 1, try_len - 1)) {
-				ret = strpprintf(0, "phar://%s%s", arch, test);
+		zend_string *test = phar_fix_filepath(ZSTR_VAL(filename), ZSTR_LEN(filename), true);
+		if (ZSTR_VAL(test)[0] == '/') {
+			if (zend_hash_str_exists(&(phar->manifest), ZSTR_VAL(test) + 1, ZSTR_LEN(test) - 1)) {
+				ret = zend_string_concat3(
+					"phar://", strlen("phar://"),
+					arch, arch_len,
+					ZSTR_VAL(test), ZSTR_LEN(test)
+				);
+				zend_string_release_ex(test, false);
 				efree(arch);
-				efree(test);
 				return ret;
 			}
 		} else {
-			if (zend_hash_str_exists(&(phar->manifest), test, try_len)) {
-				ret = strpprintf(0, "phar://%s/%s", arch, test);
+			if (zend_hash_exists(&(phar->manifest), test)) {
+				ret = strpprintf(0, "phar://%s/%s", arch, ZSTR_VAL(test));
+				zend_string_release_ex(test, false);
 				efree(arch);
-				efree(test);
 				return ret;
 			}
 		}
-		efree(test);
+		zend_string_release_ex(test, false);
 	}
 
 	spprintf(&path, MAXPATHLEN + 1 + strlen(PG(include_path)), "phar://%s/%s%c%s", arch, PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
@@ -346,7 +344,7 @@ splitted:
 
 	if (ret && zend_string_starts_with_literal_ci(ret, "phar://")) {
 		/* found phar:// */
-		if (SUCCESS != phar_split_fname(ZSTR_VAL(ret), ZSTR_LEN(ret), &arch, &arch_len, NULL, NULL, 1, 0)) {
+		if (SUCCESS != phar_split_fname(ZSTR_VAL(ret), ZSTR_LEN(ret), &arch, &arch_len, NULL, 1, 0)) {
 			return ret;
 		}
 
@@ -464,7 +462,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result phar_separate_entry_fp(phar_entry_info
  * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
  * assumed that the file pointer, if present, is opened for reading
  */
-ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, const char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
@@ -931,7 +929,7 @@ ZEND_ATTRIBUTE_NONNULL phar_entry_info * phar_open_jit(const phar_archive_data *
 }
 /* }}} */
 
-zend_result phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len) /* {{{ */
+zend_result phar_free_alias(const phar_archive_data *phar) /* {{{ */
 {
 	if (phar->refcount || phar->is_persistent) {
 		return FAILURE;
@@ -944,7 +942,8 @@ zend_result phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_l
 
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
-	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+	PHAR_G(last_alias) = NULL;
+	PHAR_G(last_phar_name) = NULL;
 
 	return SUCCESS;
 }
@@ -954,11 +953,10 @@ zend_result phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_l
  * Looks up a phar archive in the filename map, connecting it to the alias
  * (if any) or returns null
  */
-zend_result phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error) /* {{{ */
+zend_result phar_get_archive(phar_archive_data **archive, const char *fname, size_t fname_len, const char *alias, size_t alias_len, char **error) /* {{{ */
 {
 	phar_archive_data *fd, *fd_ptr;
-	char *my_realpath, *save;
-	size_t save_len;
+	char *my_realpath;
 
 	phar_request_initialize();
 
@@ -1005,7 +1003,7 @@ alias_success:
 				if (error) {
 					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, fd_ptr->fname, fname);
 				}
-				if (SUCCESS == phar_free_alias(fd_ptr, alias, alias_len)) {
+				if (SUCCESS == phar_free_alias(fd_ptr)) {
 					if (error) {
 						efree(*error);
 						*error = NULL;
@@ -1031,8 +1029,8 @@ alias_success:
 	}
 
 	my_realpath = NULL;
-	save = fname;
-	save_len = fname_len;
+	const char *save = fname;
+	size_t save_len = fname_len;
 
 	if (fname && fname_len) {
 		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len))) {
@@ -1115,14 +1113,15 @@ alias_success:
 		my_realpath = expand_filepath(fname, my_realpath);
 
 		if (my_realpath) {
-			fname_len = strlen(my_realpath);
+			size_t my_realpath_len = strlen(my_realpath);
+#ifdef PHP_WIN32
+			phar_unixify_path_separators(my_realpath, my_realpath_len);
+#endif
+			fname_len = my_realpath_len;
 			fname = my_realpath;
 		} else {
 			return FAILURE;
 		}
-#ifdef PHP_WIN32
-		phar_unixify_path_separators(fname, fname_len);
-#endif
 
 		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len))) {
 realpath_success:
@@ -1384,7 +1383,7 @@ static int phar_hex_str(const char *digest, size_t digest_len, char **signature)
 /* }}} */
 
 #ifndef PHAR_HAVE_OPENSSL
-static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type) /* {{{ */
+static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, zend_off_t end, const char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type) /* {{{ */
 {
 	zval retval, zp[4];
 	zend_string *str;
@@ -1475,7 +1474,7 @@ static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, ze
 /* }}} */
 #endif /* #ifndef PHAR_HAVE_OPENSSL */
 
-zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error) /* {{{ */
+zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, const char *fname, char **signature, size_t *signature_len, char **error) /* {{{ */
 {
 	size_t read_size, len;
 	zend_off_t read_len;
@@ -1961,7 +1960,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_create_signature(phar_archive_data *phar
 /* }}} */
 
 // TODO: convert this to zend_string too
-void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len) /* {{{ */
+void phar_add_virtual_dirs(phar_archive_data *phar, const char *filename, size_t filename_len) /* {{{ */
 {
 	const char *s;
 	zend_string *str;
@@ -2076,7 +2075,8 @@ zend_result phar_copy_on_write(phar_archive_data **pphar) /* {{{ */
 	newpphar = Z_PTR_P(pzv);
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
-	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+	PHAR_G(last_alias) = NULL;
+	PHAR_G(last_phar_name) = NULL;
 
 	if (newpphar->alias_len && NULL == zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), newpphar->alias, newpphar->alias_len, newpphar)) {
 		zend_hash_str_del(&(PHAR_G(phar_fname_map)), (*pphar)->fname, (*pphar)->fname_len);

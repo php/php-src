@@ -24,7 +24,7 @@ if (PHP_LDAP != "no") {
 		AC_DEFINE('HAVE_LDAP_WHOAMI_S', 1);
 		AC_DEFINE('HAVE_LDAP_REFRESH_S', 1);
 		AC_DEFINE('HAVE_LDAP_EXTENDED_OPERATION', 1);
-
+		AC_DEFINE('HAVE_3ARG_SETREBINDPROC', 1);
 	} else {
 		WARNING("ldap not enabled; libraries and headers not found");
 	}

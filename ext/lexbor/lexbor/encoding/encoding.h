@@ -27,9 +27,18 @@ extern "C" {
 LXB_API const lxb_encoding_data_t *
 lxb_encoding_data_by_pre_name(const lxb_char_t *name, size_t length);
 
+LXB_API lxb_encoding_t
+lxb_encoding_prescan_validate(const lxb_char_t *name, size_t length);
+
+LXB_API const lxb_encoding_data_t *
+lxb_encoding_data_prescan_validate(const lxb_char_t *name, size_t length);
+
 /*
  * To skip BOM.
  */
+LXB_API lxb_encoding_t
+lxb_encoding_bom_sniff(const lxb_char_t *begin, size_t length);
+
 LXB_API void
 lxb_encoding_utf_8_skip_bom(const lxb_char_t **begin, size_t *length);
 
@@ -39,6 +48,20 @@ lxb_encoding_utf_16be_skip_bom(const lxb_char_t **begin, size_t *length);
 LXB_API void
 lxb_encoding_utf_16le_skip_bom(const lxb_char_t **begin, size_t *length);
 
+/*
+ * Encoding data.
+ */
+LXB_API const lxb_encoding_data_t *
+lxb_encoding_data_by_name(const lxb_char_t *name, size_t length);
+
+LXB_API const lxb_encoding_data_t *
+lxb_encoding_data(lxb_encoding_t encoding);
+
+LXB_API lxb_encoding_encode_f
+lxb_encoding_encode_function(lxb_encoding_t encoding);
+
+LXB_API lxb_encoding_decode_f
+lxb_encoding_decode_function(lxb_encoding_t encoding);
 
 /*
  * Inline functions
@@ -305,54 +328,6 @@ lxb_encoding_decode_finish_single(lxb_encoding_decode_t *decode)
 /*
  * Encoding data.
  */
-lxb_inline const lxb_encoding_data_t *
-lxb_encoding_data_by_name(const lxb_char_t *name, size_t length)
-{
-    const lexbor_shs_entry_t *entry;
-
-    if (length == 0) {
-        return NULL;
-    }
-
-    entry = lexbor_shs_entry_get_lower_static(lxb_encoding_res_shs_entities,
-                                              name, length);
-    if (entry == NULL) {
-        return NULL;
-    }
-
-    return (const lxb_encoding_data_t *) entry->value;
-}
-
-lxb_inline const lxb_encoding_data_t *
-lxb_encoding_data(lxb_encoding_t encoding)
-{
-    if (encoding >= LXB_ENCODING_LAST_ENTRY) {
-        return NULL;
-    }
-
-    return &lxb_encoding_res_map[encoding];
-}
-
-lxb_inline lxb_encoding_encode_f
-lxb_encoding_encode_function(lxb_encoding_t encoding)
-{
-    if (encoding >= LXB_ENCODING_LAST_ENTRY) {
-        return NULL;
-    }
-
-    return lxb_encoding_res_map[encoding].encode;
-}
-
-lxb_inline lxb_encoding_decode_f
-lxb_encoding_decode_function(lxb_encoding_t encoding)
-{
-    if (encoding >= LXB_ENCODING_LAST_ENTRY) {
-        return NULL;
-    }
-
-    return lxb_encoding_res_map[encoding].decode;
-}
-
 lxb_inline lxb_status_t
 lxb_encoding_data_call_encode(lxb_encoding_data_t *encoding_data, lxb_encoding_encode_t *ctx,
                               const lxb_codepoint_t **cp, const lxb_codepoint_t *end)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Alexander Borisov
+ * Copyright (C) 2021-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -38,10 +38,9 @@ lxb_css_syntax_anb_state_ident_data(lxb_css_parser_t *parser,
 
 
 static const lxb_css_syntax_cb_pipe_t lxb_css_syntax_anb_pipe = {
-    .state = lxb_css_syntax_anb_state,
-    .block = NULL,
-    .failed = lxb_css_state_failed,
-    .end = lxb_css_syntax_anb_end
+    .prelude = lxb_css_syntax_anb_state,
+    .cb.failed = lxb_css_state_failed,
+    .cb.end = lxb_css_syntax_anb_end
 };
 
 
@@ -66,8 +65,8 @@ lxb_css_syntax_anb_parse(lxb_css_parser_t *parser,
 
     lxb_css_parser_buffer_set(parser, data, length);
 
-    rule = lxb_css_syntax_parser_pipe_push(parser, NULL,
-                                           &lxb_css_syntax_anb_pipe, &anb,
+    rule = lxb_css_syntax_parser_pipe_push(parser, &lxb_css_syntax_anb_pipe,
+                                           NULL, &anb,
                                            LXB_CSS_SYNTAX_TOKEN_UNDEF);
     if (rule == NULL) {
         return anb;

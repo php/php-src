@@ -22,15 +22,23 @@ PHP_NEW_EXTENSION([lexbor], m4_normalize([
     $LEXBOR_DIR/core/shs.c
     $LEXBOR_DIR/core/str.c
     $LEXBOR_DIR/core/strtod.c
+    $LEXBOR_DIR/css/at_rule.c
+    $LEXBOR_DIR/css/at_rule/state.c
+    $LEXBOR_DIR/css/blank.c
     $LEXBOR_DIR/css/css.c
+    $LEXBOR_DIR/css/declaration.c
     $LEXBOR_DIR/css/log.c
     $LEXBOR_DIR/css/parser.c
+    $LEXBOR_DIR/css/property.c
+    $LEXBOR_DIR/css/property/state.c
+    $LEXBOR_DIR/css/rule.c
     $LEXBOR_DIR/css/selectors/pseudo_state.c
     $LEXBOR_DIR/css/selectors/pseudo.c
     $LEXBOR_DIR/css/selectors/selector.c
     $LEXBOR_DIR/css/selectors/selectors.c
     $LEXBOR_DIR/css/selectors/state.c
     $LEXBOR_DIR/css/state.c
+    $LEXBOR_DIR/css/stylesheet.c
     $LEXBOR_DIR/css/syntax/anb.c
     $LEXBOR_DIR/css/syntax/parser.c
     $LEXBOR_DIR/css/syntax/state.c
@@ -38,6 +46,8 @@ PHP_NEW_EXTENSION([lexbor], m4_normalize([
     $LEXBOR_DIR/css/syntax/token.c
     $LEXBOR_DIR/css/syntax/tokenizer.c
     $LEXBOR_DIR/css/syntax/tokenizer/error.c
+    $LEXBOR_DIR/css/unit.c
+    $LEXBOR_DIR/css/value.c
     $LEXBOR_DIR/dom/interface.c
     $LEXBOR_DIR/dom/interfaces/attr.c
     $LEXBOR_DIR/dom/interfaces/cdata_section.c
@@ -113,7 +123,9 @@ PHP_NEW_EXTENSION([lexbor], m4_normalize([
     $LEXBOR_DIR/html/interfaces/progress_element.c
     $LEXBOR_DIR/html/interfaces/quote_element.c
     $LEXBOR_DIR/html/interfaces/script_element.c
+    $LEXBOR_DIR/html/interfaces/search_element.c
     $LEXBOR_DIR/html/interfaces/select_element.c
+    $LEXBOR_DIR/html/interfaces/selectedcontent_element.c
     $LEXBOR_DIR/html/interfaces/slot_element.c
     $LEXBOR_DIR/html/interfaces/source_element.c
     $LEXBOR_DIR/html/interfaces/span_element.c
@@ -134,6 +146,7 @@ PHP_NEW_EXTENSION([lexbor], m4_normalize([
     $LEXBOR_DIR/html/interfaces/video_element.c
     $LEXBOR_DIR/html/interfaces/window.c
     $LEXBOR_DIR/html/parser.c
+    $LEXBOR_DIR/html/tag.c
     $LEXBOR_DIR/html/token_attr.c
     $LEXBOR_DIR/html/token.c
     $LEXBOR_DIR/html/tokenizer.c
@@ -163,8 +176,6 @@ PHP_NEW_EXTENSION([lexbor], m4_normalize([
     $LEXBOR_DIR/html/tree/insertion_mode/in_head_noscript.c
     $LEXBOR_DIR/html/tree/insertion_mode/in_head.c
     $LEXBOR_DIR/html/tree/insertion_mode/in_row.c
-    $LEXBOR_DIR/html/tree/insertion_mode/in_select_in_table.c
-    $LEXBOR_DIR/html/tree/insertion_mode/in_select.c
     $LEXBOR_DIR/html/tree/insertion_mode/in_table_body.c
     $LEXBOR_DIR/html/tree/insertion_mode/in_table_text.c
     $LEXBOR_DIR/html/tree/insertion_mode/in_table.c
@@ -186,6 +197,8 @@ PHP_NEW_EXTENSION([lexbor], m4_normalize([
 PHP_ADD_BUILD_DIR([
   $ext_builddir/
   $ext_builddir/$LEXBOR_DIR/core
+  $ext_builddir/$LEXBOR_DIR/css/at_rule
+  $ext_builddir/$LEXBOR_DIR/css/property
   $ext_builddir/$LEXBOR_DIR/css/selectors
   $ext_builddir/$LEXBOR_DIR/css/syntax/tokenizer
   $ext_builddir/$LEXBOR_DIR/css/tokenizer

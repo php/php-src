@@ -59,6 +59,18 @@ PHP 8.6 UPGRADE NOTES
     with empty data (e.g. to destroy the session) should implement the same
     logic in their updateTimestamp() method.
 
+- SPL:
+  . SplFileObject::next() now advances the stream when no prior current()
+    call has cached a line. A subsequent current() call returns the new
+    line rather than the previous one.
+  . SplFileObject::fgets() no longer caches the returned line for
+    subsequent current() calls. current() now re-reads from the current
+    stream position instead of returning the line fgets() just returned.
+  . SplFileObject::next() past EOF no longer increments key() without
+    bound. SplFileObject::seek() past EOF now produces the same key()
+    value as SplTempFileObject; the two previously returned different
+    values.
+
 - Standard:
   . Form feed (\f) is now added in the default trimmed characters of trim(),
     rtrim() and ltrim(). RFC: https://wiki.php.net/rfc/trim_form_feed

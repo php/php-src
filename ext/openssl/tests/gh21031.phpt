@@ -23,33 +23,11 @@ $serverCode = <<<'CODE'
     $server = stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $serverFlags, $ctx);
     phpt_notify_server_start($server);
 
-    $conn = stream_socket_accept($server, 3);
-    fclose($conn);
-
-    phpt_wait();
-CODE;
-
-$proxyCode = <<<'CODE'
-    $flags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
-    $server = stream_socket_server("tcp://127.0.0.1:0", $errornum, $errorstr, $flags);
-    phpt_notify_server_start($server);
-
-    $upstream = stream_socket_client("tcp://{{ ADDR }}", $errornum, $errorstr, 30, STREAM_CLIENT_CONNECT);
-    stream_set_blocking($upstream, false);
-
-    $conn = stream_socket_accept($server);
-    stream_set_blocking($conn, true);
-
-    // reading CONNECT request headers
-    while (($line = fgets($conn)) !== false) {
-        if (rtrim($line) === '') break; // empty line means end of headers
+    $conn = stream_socket_accept($server, 10);
+    if ($conn) {
+        fclose($conn);
     }
 
-    // successful CONNECT response
-    fwrite($conn, "HTTP/1.0 200 Connection established\r\n\r\n");
-
-    fclose($conn);
-    fclose($upstream);
     phpt_wait();
 CODE;
 
@@ -67,15 +45,11 @@ $clientCode = <<<'CODE'
 
     var_dump(@file_get_contents("https://cs.php.net/", false, $clientCtx));
 
-    phpt_notify('proxy');
-    phpt_notify('server');
+    phpt_notify();
 CODE;
 
 include 'ServerClientTestCase.inc';
-ServerClientTestCase::getInstance()->run($clientCode, [
-    'server' => $serverCode,
-    'proxy' => $proxyCode,
-]);
+ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--
 bool(false)
