@@ -578,7 +578,7 @@ stat_entry:
 			if (!data->is_dir) {
 				sb.st_size = data->uncompressed_filesize;
 				sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
-				if (data->link) {
+				if (data->symlink) {
 					sb.st_mode |= S_IFREG|S_IFLNK; /* regular file */
 				} else {
 					sb.st_mode |= S_IFREG; /* regular file */
@@ -591,7 +591,7 @@ stat_entry:
 				sb.st_size = 0;
 				sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
 				sb.st_mode |= S_IFDIR; /* regular directory */
-				if (data->link) {
+				if (data->symlink) {
 					sb.st_mode |= S_IFLNK;
 				}
 				/* timestamp is just the timestamp when this was added to the phar */
@@ -803,7 +803,7 @@ PHP_FUNCTION(phar_is_link) /* {{{ */
 				}
 				zend_string_release_ex(entry, false);
 				if (etemp) {
-					RETURN_BOOL(etemp->link);
+					RETURN_BOOL(etemp->symlink);
 				}
 			}
 			RETURN_FALSE;

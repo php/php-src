@@ -492,8 +492,8 @@ bail:
 			entry.is_dir = 0;
 		}
 
-		entry.link = NULL;
-		/* link field is null-terminated unless it has 100 non-null chars.
+		entry.symlink = NULL;
+		/* linkname field is null-terminated unless it has 100 non-null chars.
 		 * Thus we cannot use strlen. */
 		linkname_len = zend_strnlen(hdr->linkname, 100);
 		if (entry.tar_type == TAR_LINK) {
@@ -506,9 +506,9 @@ bail:
 				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
-			entry.link = estrndup(hdr->linkname, linkname_len);
+			entry.symlink = zend_string_init(hdr->linkname, linkname_len, false);
 		} else if (entry.tar_type == TAR_SYMLINK) {
-			entry.link = estrndup(hdr->linkname, linkname_len);
+			entry.symlink = zend_string_init(hdr->linkname, linkname_len, false);
 		}
 		phar_set_inode(&entry);
 
@@ -779,10 +779,10 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 	/* calc checksum */
 	header.typeflag = entry->tar_type;
 
-	if (entry->link) {
-		if (strlcpy(header.linkname, entry->link, sizeof(header.linkname)) >= sizeof(header.linkname)) {
+	if (entry->symlink) {
+		if (strlcpy(header.linkname, ZSTR_VAL(entry->symlink), sizeof(header.linkname)) >= sizeof(header.linkname)) {
 			if (fp->error) {
-				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, link \"%s\" is too long for format", entry->phar->fname, entry->link);
+				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, link \"%s\" is too long for format", entry->phar->fname, ZSTR_VAL(entry->symlink));
 			}
 			return ZEND_HASH_APPLY_STOP;
 		}

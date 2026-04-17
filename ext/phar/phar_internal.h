@@ -217,7 +217,7 @@ typedef struct _phar_entry_info {
 	unsigned int             fileinfo_lock_count;
 	char                     *tmp;
 	phar_archive_data        *phar;
-	char                     *link; /* symbolic link to another file */
+	zend_string              *symlink;
 	char                     tar_type;
 	/* position in the manifest */
 	uint32_t                     manifest_pos;

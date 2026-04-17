@@ -38,50 +38,50 @@ static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, ze
 #endif
 
 /* for links to relative location, prepend cwd of the entry */
-static char *phar_get_link_location(phar_entry_info *entry) /* {{{ */
+static zend_string *phar_get_link_location(phar_entry_info *entry) /* {{{ */
 {
-	char *p, *ret = NULL;
+	ZEND_ASSERT(entry->symlink);
 
-	ZEND_ASSERT(entry->link);
-
-	if (entry->link[0] == '/') {
-		return estrdup(entry->link + 1);
+	if (ZSTR_VAL(entry->symlink)[0] == '/') {
+		return zend_string_init(ZSTR_VAL(entry->symlink) + 1, ZSTR_LEN(entry->symlink) - 1, false);
 	}
-	p = strrchr(ZSTR_VAL(entry->filename), '/');
+	const char *p = strrchr(ZSTR_VAL(entry->filename), '/');
 	if (p) {
 		/* Important: don't modify the original `p` data because it is a shared string. */
 		zend_string *new_name = zend_string_init(ZSTR_VAL(entry->filename), p - ZSTR_VAL(entry->filename), false);
-		spprintf(&ret, 0, "%s/%s", ZSTR_VAL(new_name), entry->link);
+		zend_string *location = zend_string_concat3(
+			ZSTR_VAL(new_name), ZSTR_LEN(new_name),
+			ZEND_STRL("/"),
+			ZSTR_VAL(entry->symlink), ZSTR_LEN(entry->symlink)
+		);
 		zend_string_release(entry->filename);
 		entry->filename = new_name;
-		return ret;
+		return location;
 	}
-	return entry->link;
+	return zend_string_copy(entry->symlink);
 }
 /* }}} */
 
 phar_entry_info *phar_get_link_source(phar_entry_info *entry) /* {{{ */
 {
 	phar_entry_info *link_entry;
-	char *link;
 
-	if (!entry->link) {
+	if (!entry->symlink) {
 		return entry;
 	}
 
-	link = phar_get_link_location(entry);
-	if (NULL != (link_entry = zend_hash_str_find_ptr(&(entry->phar->manifest), entry->link, strlen(entry->link))) ||
-		NULL != (link_entry = zend_hash_str_find_ptr(&(entry->phar->manifest), link, strlen(link)))) {
-		if (link != entry->link) {
-			efree(link);
-		}
+	link_entry = zend_hash_find_ptr(&(entry->phar->manifest), entry->symlink);
+	if (link_entry) {
 		return phar_get_link_source(link_entry);
-	} else {
-		if (link != entry->link) {
-			efree(link);
-		}
-		return NULL;
 	}
+
+	zend_string *link = phar_get_link_location(entry);
+	link_entry = zend_hash_find_ptr(&(entry->phar->manifest), link);
+	zend_string_release(link);
+	if (link_entry) {
+		return phar_get_link_source(link_entry);
+	}
+	return NULL;
 }
 /* }}} */
 
@@ -96,7 +96,7 @@ static php_stream *phar_get_entrypufp(const phar_entry_info *entry)
 /* retrieve a phar_entry_info's current file pointer for reading contents */
 php_stream *phar_get_efp(phar_entry_info *entry, bool follow_links) /* {{{ */
 {
-	if (follow_links && entry->link) {
+	if (follow_links && entry->symlink) {
 		phar_entry_info *link_entry = phar_get_link_source(entry);
 
 		if (link_entry && link_entry != entry) {
@@ -387,9 +387,9 @@ static ZEND_ATTRIBUTE_NONNULL zend_result phar_create_writeable_entry(phar_archi
 	}
 
 	/* open a new temp file for writing */
-	if (entry->link) {
-		efree(entry->link);
-		entry->link = NULL;
+	if (entry->symlink) {
+		zend_string_release(entry->symlink);
+		entry->symlink = NULL;
 		entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
 	}
 
@@ -444,9 +444,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result phar_separate_entry_fp(phar_entry_info
 		return FAILURE;
 	}
 
-	if (entry->link) {
-		efree(entry->link);
-		entry->link = NULL;
+	if (entry->symlink) {
+		zend_string_release(entry->symlink);
+		entry->symlink = NULL;
 		entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
 	}
 
@@ -559,9 +559,9 @@ really_get_entry:
 		}
 	} else {
 		if (for_write) {
-			if (entry->link) {
-				efree(entry->link);
-				entry->link = NULL;
+			if (entry->symlink) {
+				zend_string_release(entry->symlink);
+				entry->symlink = NULL;
 				entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
 			}
 
@@ -586,7 +586,7 @@ really_get_entry:
 	(*ret)->phar = phar;
 	(*ret)->internal_file = entry;
 	(*ret)->fp = phar_get_efp(entry, true);
-	if (entry->link) {
+	if (entry->symlink) {
 		phar_entry_info *link = phar_get_link_source(entry);
 		if(!link) {
 			efree(*ret);
@@ -740,9 +740,9 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_copy_entry_fp(phar_entry_info *source, p
 		return FAILURE;
 	}
 
-	if (dest->link) {
-		efree(dest->link);
-		dest->link = NULL;
+	if (dest->symlink) {
+		zend_string_release(dest->symlink);
+		dest->symlink = NULL;
 		dest->tar_type = (dest->is_tar ? TAR_FILE : '\0');
 	}
 
@@ -807,7 +807,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_open_entry_fp(phar_entry_info *entry, ch
 	php_stream *ufp;
 	phar_entry_data dummy;
 
-	if (follow_links && entry->link) {
+	if (follow_links && entry->symlink) {
 		phar_entry_info *link_entry = phar_get_link_source(entry);
 		if (link_entry && link_entry != entry) {
 			return phar_open_entry_fp(link_entry, error, true);
@@ -1995,8 +1995,8 @@ static int phar_update_cached_entry(zval *data, void *argument) /* {{{ */
 
 	entry->phar = (phar_archive_data *)argument;
 
-	if (entry->link) {
-		entry->link = estrdup(entry->link);
+	if (entry->symlink) {
+		zend_string_addref(entry->symlink);
 	}
 
 	if (entry->tmp) {

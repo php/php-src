@@ -1902,7 +1902,7 @@ static zend_result phar_copy_file_contents(phar_entry_info *entry, php_stream *f
 	char *error;
 	zend_off_t offset;
 
-	ZEND_ASSERT(!entry->link);
+	ZEND_ASSERT(!entry->symlink);
 
 	if (FAILURE == phar_open_entry_fp(entry, &error, true)) {
 		if (error) {
@@ -2243,8 +2243,8 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 
 		newentry = *entry;
 
-		if (newentry.link) {
-			newentry.link = estrdup(newentry.link);
+		if (newentry.symlink) {
+			zend_string_addref(newentry.symlink);
 			goto no_copy;
 		}
 

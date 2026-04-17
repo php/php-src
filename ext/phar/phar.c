@@ -374,9 +374,9 @@ void destroy_phar_manifest_entry_int(phar_entry_info *entry) /* {{{ */
 
 	zend_string_release_ex(entry->filename, entry->is_persistent);
 
-	if (entry->link) {
-		pefree(entry->link, entry->is_persistent);
-		entry->link = 0;
+	if (entry->symlink) {
+		zend_string_release_ex(entry->symlink, entry->is_persistent);
+		entry->symlink = NULL;
 	}
 
 	if (entry->tmp) {

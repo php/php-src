@@ -368,7 +368,7 @@ static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* 
 	ssize_t got;
 	phar_entry_info *entry;
 
-	if (data->internal_file->link) {
+	if (data->internal_file->symlink) {
 		entry = phar_get_link_source(data->internal_file);
 	} else {
 		entry = data->internal_file;
@@ -400,7 +400,7 @@ static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, z
 	int res;
 	zend_ulong temp;
 
-	if (data->internal_file->link) {
+	if (data->internal_file->symlink) {
 		entry = phar_get_link_source(data->internal_file);
 	} else {
 		entry = data->internal_file;
@@ -838,7 +838,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		entry->is_deleted = 1;
 		entry->fp = NULL;
 		ZVAL_UNDEF(&entry->metadata_tracker.val);
-		entry->link = entry->tmp = NULL;
+		entry->symlink = NULL;
+		entry->tmp = NULL;
 		source = entry;
 
 		/* add to the manifest, and then store the pointer to the new guy in entry
