@@ -27,6 +27,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-21593 (Borked function JIT JMPNZ smart branch). (ilutov)
   . Fixed bug GH-21460 (COND optimization regression). (Dmitry, Arnaud)
   . Fixed faulty returns out of zend_try block in zend_jit_trace(). (ilutov)
+  . Fixed bug GH-21770 (Infinite recursion in property hook getter in opcache
+    preloaded trait). (iliaal)
 
 - OpenSSL:
   . Fix a bunch of memory leaks and crashes on edge cases. (ndossche)
