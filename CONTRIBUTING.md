@@ -356,18 +356,18 @@ Having said that, here are the organizational rules:
    `--enable-zts` switch to ensure your code handles TSRM correctly and doesn't
    break for those who need that.
 
-The master branch is an active development branch for PHP 8.6, which is open for
-backwards incompatible changes and major internal API changes.
+The master branch is an active development branch for the newest version of PHP,
+which is open for backwards incompatible changes and major internal API changes.
 
-For PHP-X.Y branches, they are used to release the PHP X.Y.x series. Please see
+For PHP-X.Y branches, they are used to release the PHP X.Y.z series. Please see
 the [supported versions page](https://www.php.net/supported-versions.php) to get
 the status of each version.
 
-If a version is described as "Active support" it, the corresponding branch is a
+If a version is described as "Active support", the corresponding branch is a
 current stable version and is open for bugfixes only. If a version is described
-as "Security fixes only" it, the corresponding branch is an old stable version
-and is open for security fixes only. If a version is described as "End of life"
-it, the corresponding branch is closed.
+as "Security fixes only", the corresponding branch is an old stable version
+and is open for security fixes only. If a version is described as "End of life",
+the corresponding branch is closed.
 
 Note that PHP-X.Y.Z branches are used for the release managers for tagging the
 releases, hence they are closed to the general public
