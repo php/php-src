@@ -84,7 +84,11 @@ PHP_FUNCTION(linkinfo)
 		Z_PARAM_PATH(link, link_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	// TODO Check for empty string
+	if (UNEXPECTED(link_len == 0)) {
+		php_error_docref(NULL, E_WARNING, "%s", strerror(ENOENT));
+		RETURN_LONG(Z_L(-1));
+	}
+
 	dirname = estrndup(link, link_len);
 	zend_dirname(dirname, link_len);
 
