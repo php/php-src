@@ -370,7 +370,7 @@ and is open for security fixes only. If a version is described as "End of life",
 the corresponding branch is closed.
 
 Note that PHP-X.Y.Z branches are used for the release managers for tagging the
-releases, hence they are closed to the general public
+releases, hence they are closed to the general public.
 
 The next few rules are more of a technical nature:
 
