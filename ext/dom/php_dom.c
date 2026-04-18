@@ -425,8 +425,12 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 		}
 
 		if (UNEXPECTED(!hnd->write_func)) {
-			ZEND_ASSERT(prop && (prop->flags & ZEND_ACC_PPP_SET_MASK));
-			zend_asymmetric_visibility_property_modification_error(prop, "modify");
+			if (prop && (prop->flags & ZEND_ACC_PPP_SET_MASK) &&
+			    !zend_asymmetric_property_has_set_access(prop)) {
+				zend_asymmetric_visibility_property_modification_error(prop, "modify");
+			} else {
+				zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+			}
 			return &EG(error_zval);
 		}
 
