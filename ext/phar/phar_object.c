@@ -3591,6 +3591,11 @@ PHP_METHOD(Phar, offsetGet)
 	if (!(entry = phar_get_entry_info_dir(phar_obj->archive, ZSTR_VAL(file_name), ZSTR_LEN(file_name), 1, &error, 0))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist%s%s", ZSTR_VAL(file_name), error?", ":"", error?error:"");
 	} else {
+		if (entry->is_temp_dir) {
+			efree(entry->filename);
+			efree(entry);
+		}
+
 		if (zend_string_equals_literal(file_name, ".phar/stub.php")) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot get stub \".phar/stub.php\" directly in phar \"%s\", use getStub", phar_obj->archive->fname);
 			RETURN_THROWS();
@@ -3604,11 +3609,6 @@ PHP_METHOD(Phar, offsetGet)
 		if (zend_string_starts_with_literal(file_name, ".phar")) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot directly get any files or directories in magic \".phar\" directory");
 			RETURN_THROWS();
-		}
-
-		if (entry->is_temp_dir) {
-			efree(entry->filename);
-			efree(entry);
 		}
 
 		zend_string *sfname = strpprintf(0, "phar://%s/%s", phar_obj->archive->fname, ZSTR_VAL(file_name));
