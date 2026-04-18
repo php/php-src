@@ -356,30 +356,11 @@ Having said that, here are the organizational rules:
    `--enable-zts` switch to ensure your code handles TSRM correctly and doesn't
    break for those who need that.
 
-Currently, we have the following branches in use:
+For an up-to-date list of branches and their purposes, please see the
+[supported versions page](https://www.php.net/supported-versions.php).
 
-| Branch    |           |
-| --------- | --------- |
-| master    | Active development branch for PHP 8.6, which is open for backwards incompatible changes and major internal API changes. |
-| PHP-8.5   | Is used to release the PHP 8.5.x series. This is a current stable version and is open for bugfixes only. |
-| PHP-8.4   | Is used to release the PHP 8.4.x series. This is a current stable version and is open for bugfixes only. |
-| PHP-8.3   | Is used to release the PHP 8.3.x series. This is an old stable version and is open for security fixes only. |
-| PHP-8.2   | Is used to release the PHP 8.2.x series. This is an old stable version and is open for security fixes only. |
-| PHP-8.1   | This branch is closed. |
-| PHP-8.0   | This branch is closed. |
-| PHP-7.4   | This branch is closed. |
-| PHP-7.3   | This branch is closed. |
-| PHP-7.2   | This branch is closed. |
-| PHP-7.1   | This branch is closed. |
-| PHP-7.0   | This branch is closed. |
-| PHP-5.6   | This branch is closed. |
-| PHP-5.5   | This branch is closed. |
-| PHP-5.4   | This branch is closed. |
-| PHP-5.3   | This branch is closed. |
-| PHP-5.2   | This branch is closed. |
-| PHP-5.1   | This branch is closed. |
-| PHP-4.4   | This branch is closed. |
-| PHP-X.Y.Z | These branches are used for the release managers for tagging the releases, hence they are closed to the general public. |
+Note that PHP-X.Y.Z branches are used for the release managers for tagging the
+releases, hence they are closed to the general public
 
 The next few rules are more of a technical nature:
 
