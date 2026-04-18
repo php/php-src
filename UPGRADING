@@ -19,6 +19,16 @@ PHP 8.6 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- DOM:
+  . Properties previously documented as @readonly (e.g. DOMNode::$nodeType,
+    DOMDocument::$xmlEncoding, DOMEntity::$actualEncoding, ::$encoding,
+    ::$version) are now declared with asymmetric visibility
+    (public private(set)). Attempts to write to them from outside the
+    class now raise "Cannot modify private(set) property <class>::$<prop>
+    from global scope" instead of the prior readonly modification error.
+    ReflectionProperty::isWritable() also reports these properties
+    accurately.
+
 - GD:
   . imagesetstyle(), imagefilter() and imagecrop() filter their
     array arguments types/values and raise a TypeError/ValueError

@@ -26,6 +26,11 @@ PHP                                                                        NEWS
 - DOM:
   . Removed LIBXML_XINCLUDE from valid options for XMLDocument,
     as it was a no-op. (ndossche)
+  . Readonly DOM properties are now declared with asymmetric visibility
+    (public private(set)). ReflectionProperty::isWritable() reports them
+    correctly, and external writes raise "Cannot modify private(set)
+    property" instead of the previous readonly modification error.
+    (David Carlier)
 
 - Fileinfo:
   . Fixed bug GH-20679 (finfo_file() doesn't work on remote resources).
