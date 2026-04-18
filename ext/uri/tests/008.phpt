@@ -39,12 +39,12 @@ function callWhatWgGetters($url)
     var_dump($url->getFragment());
 }
 
-$uri = Uri\Rfc3986\Uri::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
+$uri = Uri\Rfc3986\Uri::parse("https://username:password@www.example.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
 callRfc3986Getters($uri);
 
 echo "\n";
 
-$url = Uri\WhatWg\Url::parse("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
+$url = Uri\WhatWg\Url::parse("https://username:password@www.example.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
 callWhatWgGetters($url);
 
 ?>
@@ -57,8 +57,8 @@ string(8) "password"
 string(8) "password"
 string(17) "username:password"
 string(17) "username:password"
-string(14) "www.google.com"
-string(14) "www.google.com"
+string(15) "www.example.com"
+string(15) "www.example.com"
 int(8080)
 string(30) "/pathname1/pathname2/pathname3"
 string(30) "/pathname1/pathname2/pathname3"
@@ -70,8 +70,8 @@ string(11) "hash-exists"
 string(5) "https"
 string(8) "username"
 string(8) "password"
-string(14) "www.google.com"
-string(14) "www.google.com"
+string(15) "www.example.com"
+string(15) "www.example.com"
 int(8080)
 string(30) "/pathname1/pathname2/pathname3"
 string(10) "query=true"
