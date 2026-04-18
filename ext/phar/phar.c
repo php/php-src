@@ -886,6 +886,14 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 
 				sig_ptr = sig_buf;
 				PHAR_GET_32(sig_ptr, signature_len);
+				if (signature_len > 1024 * 1024) {
+					efree(savebuf);
+					php_stream_close(fp);
+					if (error) {
+						spprintf(error, 0, "phar \"%s\" openssl signature length is too large", fname);
+					}
+					return FAILURE;
+				}
 				sig = (char *) emalloc(signature_len);
 				whence = signature_len + 4;
 				whence = -whence;
