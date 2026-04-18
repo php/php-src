@@ -2,8 +2,6 @@
 phar: is_link() intercept correctly delegates for non-symlink phar entries
 --EXTENSIONS--
 phar
---SKIPIF--
-<?php if (defined('PHP_WINDOWS_VERSION_MAJOR')) die("skip"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=0
