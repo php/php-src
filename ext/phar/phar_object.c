@@ -649,6 +649,9 @@ PHP_METHOD(Phar, webPhar)
 			char *testit;
 
 			testit = sapi_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1);
+			if (!testit) {
+				goto finish;
+			}
 			if (!(pt = strstr(testit, basename))) {
 				efree(testit);
 				goto finish;
