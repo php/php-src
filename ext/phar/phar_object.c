@@ -4282,6 +4282,34 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 		return SUCCESS;
 	}
 
+	const char *last_sep = zend_memrchr(fullpath + dest_len + 1, '/', len - dest_len - 1);
+	if (last_sep) {
+		char parent_path[MAXPATHLEN];
+		char resolved[MAXPATHLEN];
+		char resolved_dest[MAXPATHLEN];
+		size_t parent_len = last_sep - fullpath;
+		ZEND_ASSERT(parent_len < MAXPATHLEN);
+		if (!VCWD_REALPATH(dest, resolved_dest)) {
+			spprintf(error, 4096, "Cannot extract \"%s\", could not resolve destination directory", entry->filename);
+			efree(fullpath);
+			return FAILURE;
+		}
+		memcpy(parent_path, fullpath, parent_len);
+		parent_path[parent_len] = '\0';
+		if (!VCWD_REALPATH(parent_path, resolved)) {
+			spprintf(error, 4096, "Cannot extract \"%s\", could not resolve parent directory", entry->filename);
+			efree(fullpath);
+			return FAILURE;
+		}
+		size_t resolved_dest_len = strlen(resolved_dest);
+		if (strncmp(resolved, resolved_dest, resolved_dest_len) != 0 ||
+				(!IS_SLASH(resolved[resolved_dest_len]) && resolved[resolved_dest_len] != '\0')) {
+			spprintf(error, 4096, "Cannot extract \"%s\", symlink traversal detected", entry->filename);
+			efree(fullpath);
+			return FAILURE;
+		}
+	}
+
 	fp = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS, NULL);
 
 	if (!fp) {
