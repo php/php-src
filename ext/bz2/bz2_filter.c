@@ -35,6 +35,8 @@ typedef struct _php_bz2_filter_data {
 	char *outbuf;
 	size_t inbuf_len;
 	size_t outbuf_len;
+	size_t max_output;
+	size_t total_output;
 
 	enum strm_status status;              /* Decompress option */
 	unsigned int small_footprint : 1;     /* Decompress option */
@@ -137,6 +139,12 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				php_stream_bucket *out_bucket;
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
+				data->total_output += bucketlen;
+				if (data->max_output && data->total_output > data->max_output) {
+					php_error_docref(NULL, E_NOTICE, "bzip2.decompress: decompressed output exceeded max_output");
+					php_stream_bucket_delref(bucket);
+					return PSFS_ERR_FATAL;
+				}
 				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
 				php_stream_bucket_append(buckets_out, out_bucket);
 				data->strm.avail_out = data->outbuf_len;
@@ -160,6 +168,11 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
+				data->total_output += bucketlen;
+				if (data->max_output && data->total_output > data->max_output) {
+					php_error_docref(NULL, E_NOTICE, "bzip2.decompress: decompressed output exceeded max_output");
+					return PSFS_ERR_FATAL;
+				}
 				bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
 				php_stream_bucket_append(buckets_out, bucket);
 				data->strm.avail_out = data->outbuf_len;
@@ -341,6 +354,16 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 
 				if ((tmpzval = zend_hash_str_find_ind(ht, "concatenated", sizeof("concatenated")-1))) {
 					data->expect_concatenated = zend_is_true(tmpzval);
+					tmpzval = NULL;
+				}
+
+				if ((tmpzval = zend_hash_str_find_ind(ht, "max_output", sizeof("max_output")-1))) {
+					zend_long tmp = zval_get_long(tmpzval);
+					if (tmp <= 0) {
+						php_error_docref(NULL, E_WARNING, "Invalid parameter given for max_output (" ZEND_LONG_FMT ")", tmp);
+					} else {
+						data->max_output = (size_t)tmp;
+					}
 					tmpzval = NULL;
 				}
 

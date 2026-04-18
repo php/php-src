@@ -26,6 +26,8 @@ typedef struct _php_zlib_filter_data {
 	size_t inbuf_len;
 	unsigned char *outbuf;
 	size_t outbuf_len;
+	size_t max_output;
+	size_t total_output;
 	int persistent;
 	bool finished; /* for zlib.deflate: signals that no flush is pending */
 } php_zlib_filter_data;
@@ -105,6 +107,12 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				php_stream_bucket *out_bucket;
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
+				data->total_output += bucketlen;
+				if (data->max_output && data->total_output > data->max_output) {
+					php_error_docref(NULL, E_NOTICE, "zlib.inflate: decompressed output exceeded max_output");
+					php_stream_bucket_delref(bucket);
+					return PSFS_ERR_FATAL;
+				}
 				out_bucket = php_stream_bucket_new(
 					stream, estrndup((char *) data->outbuf, bucketlen), bucketlen, 1, 0);
 				php_stream_bucket_append(buckets_out, out_bucket);
@@ -126,6 +134,11 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
+				data->total_output += bucketlen;
+				if (data->max_output && data->total_output > data->max_output) {
+					php_error_docref(NULL, E_NOTICE, "zlib.inflate: decompressed output exceeded max_output");
+					return PSFS_ERR_FATAL;
+				}
 				bucket = php_stream_bucket_new(
 					stream, estrndup((char *) data->outbuf, bucketlen), bucketlen, 1, 0);
 				php_stream_bucket_append(buckets_out, bucket);
@@ -319,17 +332,26 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 	if (strcasecmp(filtername, "zlib.inflate") == 0) {
 		int windowBits = -MAX_WBITS;
 
-		if (filterparams) {
+		if (filterparams && (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT)) {
+			HashTable *ht = HASH_OF(filterparams);
 			zval *tmpzval;
 
-			if ((Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) &&
-				(tmpzval = zend_hash_str_find_ind(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
+			if ((tmpzval = zend_hash_str_find_ind(ht, "window", sizeof("window") - 1))) {
 				/* log-2 base of history window (9 - 15) */
 				zend_long tmp = zval_get_long(tmpzval);
 				if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 32) {
 					php_error_docref(NULL, E_WARNING, "Invalid parameter given for window size (" ZEND_LONG_FMT ")", tmp);
 				} else {
 					windowBits = tmp;
+				}
+			}
+
+			if ((tmpzval = zend_hash_str_find_ind(ht, "max_output", sizeof("max_output") - 1))) {
+				zend_long tmp = zval_get_long(tmpzval);
+				if (tmp <= 0) {
+					php_error_docref(NULL, E_WARNING, "Invalid parameter given for max_output (" ZEND_LONG_FMT ")", tmp);
+				} else {
+					data->max_output = (size_t)tmp;
 				}
 			}
 		}

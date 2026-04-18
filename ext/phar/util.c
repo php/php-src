@@ -908,7 +908,15 @@ zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_
 	ufp = phar_get_entrypufp(entry);
 
 	if ((filtername = phar_decompress_filter(entry, 0)) != NULL) {
-		filter = php_stream_filter_create(filtername, NULL, 0);
+		if (entry->uncompressed_filesize) {
+			zval filterparams;
+			array_init(&filterparams);
+			add_assoc_long(&filterparams, "max_output", (zend_long) entry->uncompressed_filesize);
+			filter = php_stream_filter_create(filtername, &filterparams, 0);
+			zval_ptr_dtor(&filterparams);
+		} else {
+			filter = php_stream_filter_create(filtername, NULL, 0);
+		}
 	} else {
 		filter = NULL;
 	}
