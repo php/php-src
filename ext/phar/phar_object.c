@@ -3681,11 +3681,13 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 				size_t written_len = php_stream_write(data->fp, ZSTR_VAL(content), ZSTR_LEN(content));
 				if (written_len != contents_len) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s could not be written to", filename);
+					phar_entry_delref(data);
 					goto finish;
 				}
 			} else {
 				if (!(php_stream_from_zval_no_verify(contents_file, zresource))) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s could not be written to", filename);
+					phar_entry_delref(data);
 					goto finish;
 				}
 				php_stream_copy_to_stream_ex(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);
