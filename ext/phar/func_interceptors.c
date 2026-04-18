@@ -932,6 +932,7 @@ void phar_intercept_functions_shutdown(void)
 	PHAR_RELEASE(fopen);
 	PHAR_RELEASE(file_get_contents);
 	PHAR_RELEASE(is_file);
+	PHAR_RELEASE(is_link);
 	PHAR_RELEASE(is_dir);
 	PHAR_RELEASE(opendir);
 	PHAR_RELEASE(file_exists);
