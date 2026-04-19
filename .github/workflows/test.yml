@@ -4,18 +4,18 @@ on:
     paths-ignore: &ignore_paths
       - docs/**
       - docs-old/**
+      - CONTRIBUTING.md
+      - CODING_STANDARDS.md
+      - EXTENSIONS
+      - LICENSE
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
-      - EXTENSIONS
-      - LICENSE
       - SECURITY.md
       - '**/*.md'
       - '**/*.rst'
       - '**/CREDITS'
       - '**/README.*'
-      - CONTRIBUTING.md
-      - CODING_STANDARDS.md
       - .github/CODEOWNERS
       - .github/ISSUE_TEMPLATE/**
       - .cirrus.yml
