@@ -12,6 +12,7 @@ on:
       - SECURITY.md
       - '**/*.md'
       - '**/*.rst'
+      - '**/CREDITS'
       - '**/README.*'
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
