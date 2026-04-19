@@ -85,8 +85,8 @@ PHP_FUNCTION(linkinfo)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(link_len == 0)) {
-		php_error_docref(NULL, E_WARNING, "%s", strerror(ENOENT));
-		RETURN_LONG(Z_L(-1));
+		zend_argument_must_not_be_empty_error(1);
+		RETURN_THROWS();
 	}
 
 	dirname = estrndup(link, link_len);
