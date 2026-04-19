@@ -61,7 +61,6 @@ Warning: symlink(): %s in %s on line %d
 bool(false)
 
 *** Testing linkinfo() for error conditions ***
-
 linkinfo(): Argument #1 ($path) must not be empty
 linkinfo(): Argument #1 ($path) must not be empty
 Done
