@@ -158,6 +158,8 @@ PHP                                                                        NEWS
     throw a ValueError. (alexandre-daubois)
   . array_change_key_case() now raises a ValueError when an invalid $case
     argument value is passed. (Girgias)
+  . linkinfo() now raises a ValueError when the argument is an empty string.
+    (Weilin Du)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
