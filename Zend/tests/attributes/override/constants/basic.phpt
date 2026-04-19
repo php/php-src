@@ -37,6 +37,11 @@ enum E implements I {
     public const I = 'I';
 }
 
+enum WithCase implements I {
+    #[\Override]
+    case I;
+}
+
 echo "Done";
 
 ?>
