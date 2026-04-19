@@ -9819,6 +9819,14 @@ static void zend_compile_enum_case(zend_ast *ast)
 		if (deprecated) {
 			ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_DEPRECATED;
 		}
+
+		const zend_attribute *override = zend_get_attribute_str(c->attributes, "override", sizeof("override") - 1);
+		if (override) {
+			ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_OVERRIDE;
+			/* We need to be able to remove the flag */
+			enum_class->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
+			enum_class->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+		}
 	}
 }
 
