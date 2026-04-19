@@ -44,9 +44,9 @@ try {
 string(14) ""A", "B", "C"
 "
 string(13) ""D", "E", "F""
-Cannot read from file php://temp
+string(0) ""
 --- Use csv control ---
 string(14) ""A", "B", "C"
 "
 string(13) ""D", "E", "F""
-Cannot read from file php://temp
+string(0) ""

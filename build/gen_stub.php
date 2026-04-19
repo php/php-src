@@ -27,6 +27,7 @@ const PHP_82_VERSION_ID = 80200;
 const PHP_83_VERSION_ID = 80300;
 const PHP_84_VERSION_ID = 80400;
 const PHP_85_VERSION_ID = 80500;
+const PHP_86_VERSION_ID = 80600;
 const ALL_PHP_VERSION_IDS = [
     PHP_70_VERSION_ID,
     PHP_80_VERSION_ID,
@@ -35,6 +36,7 @@ const ALL_PHP_VERSION_IDS = [
     PHP_83_VERSION_ID,
     PHP_84_VERSION_ID,
     PHP_85_VERSION_ID,
+    PHP_86_VERSION_ID,
 ];
 
 // file_put_contents() but with a success message printed after saving
@@ -2355,7 +2357,17 @@ abstract class VariableLike
             $flags = "ZEND_ACC_PRIVATE";
         }
 
-        return new VersionFlags([$flags]);
+        $versionFlags = new VersionFlags([$flags]);
+
+        if ($this->flags & Modifiers::PUBLIC_SET) {
+            $versionFlags->addForVersionsAbove("ZEND_ACC_PUBLIC_SET", PHP_84_VERSION_ID);
+        } elseif ($this->flags & Modifiers::PROTECTED_SET) {
+            $versionFlags->addForVersionsAbove("ZEND_ACC_PROTECTED_SET", PHP_84_VERSION_ID);
+        } elseif ($this->flags & Modifiers::PRIVATE_SET) {
+            $versionFlags->addForVersionsAbove("ZEND_ACC_PRIVATE_SET", PHP_84_VERSION_ID);
+        }
+
+        return $versionFlags;
     }
 
     protected function getTypeCode(string $variableLikeName, string &$code): string
@@ -2376,8 +2388,8 @@ abstract class VariableLike
                     $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->num_types = $classTypeCount;\n";
 
                     foreach ($arginfoType->classTypes as $k => $classType) {
-                        $escapedClassName = $classType->toEscapedName();
-                        $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$escapedClassName}, 0, 0);\n";
+                        $varEscapedClassName = $classType->toVarEscapedName();
+                        $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName}, 0, 0);\n";
                     }
 
                     $typeMaskCode = $this->type->toArginfoType()->toTypeMask();
@@ -2450,6 +2462,17 @@ abstract class VariableLike
         } elseif ($this->flags & Modifiers::PRIVATE) {
             $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private"));
+        }
+
+        if ($this->flags & Modifiers::PUBLIC_SET) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "public(set)"));
+        } elseif ($this->flags & Modifiers::PROTECTED_SET) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "protected(set)"));
+        } elseif ($this->flags & Modifiers::PRIVATE_SET) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private(set)"));
         }
     }
 
@@ -2901,6 +2924,11 @@ class StringBuilder {
         '8.5' => 'ZEND_STR_8_DOT_5',
     ];
 
+    // NEW in 8.6
+    private const PHP_86_KNOWN = [
+        "arguments" => "ZEND_STR_ARGUMENTS",
+    ];
+
     /**
      * Get an array of three strings:
      *   - declaration of zend_string, if needed, or empty otherwise
@@ -2939,6 +2967,10 @@ class StringBuilder {
         }
         $include = self::PHP_80_KNOWN;
         switch ($minPhp) {
+            case PHP_86_VERSION_ID:
+                $include = array_merge($include, self::PHP_86_KNOWN);
+                // Intentional fall through
+
             case PHP_85_VERSION_ID:
                 $include = array_merge($include, self::PHP_85_KNOWN);
                 // Intentional fall through
@@ -4144,7 +4176,8 @@ class FileInfo {
                     throw new Exception(
                         "Legacy PHP version must be one of: \"" . PHP_70_VERSION_ID . "\" (PHP 7.0), \"" . PHP_80_VERSION_ID . "\" (PHP 8.0), " .
                         "\"" . PHP_81_VERSION_ID . "\" (PHP 8.1), \"" . PHP_82_VERSION_ID . "\" (PHP 8.2), \"" . PHP_83_VERSION_ID . "\" (PHP 8.3), " .
-                        "\"" . PHP_84_VERSION_ID . "\" (PHP 8.4), \"" . PHP_85_VERSION_ID . "\" (PHP 8.5), \"" . $tag->value . "\" provided"
+                        "\"" . PHP_84_VERSION_ID . "\" (PHP 8.4), \"" . PHP_85_VERSION_ID . "\" (PHP 8.5), \"" . PHP_86_VERSION_ID . "\" (PHP 8.6), " .
+                        $tag->value . "\" provided"
                     );
                 }
 
@@ -4275,6 +4308,11 @@ class FileInfo {
 
             if ($stmt instanceof Stmt\Namespace_) {
                 $this->handleStatements($stmt->stmts, $prettyPrinter);
+                continue;
+            }
+
+            if ($stmt instanceof Stmt\Use_ || $stmt instanceof Stmt\GroupUse) {
+                // use statements are resolved by NameResolver before this point
                 continue;
             }
 

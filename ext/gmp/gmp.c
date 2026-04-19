@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Stanislav Malyshev <stas@php.net>                            |
    +----------------------------------------------------------------------+
@@ -1094,8 +1092,10 @@ ZEND_FUNCTION(gmp_fact)
 		RETURN_THROWS();
 	}
 
-	// TODO: Check that we don't an int that is larger than an unsigned long?
-	// Could use mpz_fits_slong_p() if we revert to using mpz_get_si()
+	if (!mpz_fits_ulong_p(gmpnum)) {
+		zend_argument_value_error(1, "must be between 0 and %lu", ULONG_MAX);
+		RETURN_THROWS();
+	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
 	mpz_fac_ui(gmpnum_result, mpz_get_ui(gmpnum));

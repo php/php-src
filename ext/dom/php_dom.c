@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -414,11 +412,6 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 	const dom_prop_handler *hnd = dom_get_prop_handler(obj, name, cache_slot);
 
 	if (hnd) {
-		if (UNEXPECTED(!hnd->write_func)) {
-			zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
-			return &EG(error_zval);
-		}
-
 		zend_property_info *prop = NULL;
 		if (cache_slot) {
 			ZEND_ASSERT(*cache_slot == obj->prop_handler);
@@ -429,6 +422,16 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 			if (cache_slot) {
 				*(cache_slot + 2) = prop;
 			}
+		}
+
+		if (UNEXPECTED(!hnd->write_func)) {
+			if (prop && (prop->flags & ZEND_ACC_PPP_SET_MASK) &&
+			    !zend_asymmetric_property_has_set_access(prop)) {
+				zend_asymmetric_visibility_property_modification_error(prop, "modify");
+			} else {
+				zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+			}
+			return &EG(error_zval);
 		}
 
 		ZEND_ASSERT(prop && ZEND_TYPE_IS_SET(prop->type));

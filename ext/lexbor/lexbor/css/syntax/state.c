@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2025 Alexander Borisov
+ * Copyright (C) 2018-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -14,12 +14,11 @@
 #include "lexbor/css/syntax/syntax.h"
 #include "lexbor/css/syntax/tokenizer/error.h"
 
-#define LXB_CSS_SYNTAX_RES_NAME_MAP
 #include "lexbor/css/syntax/res.h"
 
-#define LEXBOR_STR_RES_MAP_HEX
-#include "lexbor/core/str_res.h"
-
+#ifndef LEXBOR_DISABLE_INTERNAL_EXTERN
+    LXB_EXTERN const lxb_char_t lexbor_str_res_map_hex[256];
+#endif
 
 #define LXB_CSS_SYNTAX_ERROR_CODEPOINT 0x1FFFFF
 
@@ -1101,7 +1100,9 @@ lxb_css_syntax_state_consume_numeric(lxb_css_syntax_tokenizer_t *tkz,
 
     /* U+0030 DIGIT ZERO (0) and U+0039 DIGIT NINE (9) */
     do {
-        e_digit = (*data - 0x30) + e_digit * 0x0A;
+        if (e_digit < INT_MAX / 10) {
+            e_digit = (*data - 0x30) + e_digit * 0x0A;
+        }
 
         data += 1;
 
@@ -1523,7 +1524,7 @@ lxb_css_syntax_state_url(lxb_css_syntax_tokenizer_t *tkz,
                 lxb_css_syntax_tokenizer_error_add(tkz->parse_errors, data,
                                         LXB_CSS_SYNTAX_TOKENIZER_ERROR_EOINUR);
 
-                return lxb_css_syntax_state_string_set(tkz, token, data);
+                goto done;
 
             default:
                 if (*data >= 0x80) {

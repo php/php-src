@@ -18,8 +18,5 @@ $file->rewind();
 var_dump($file->fgetcsv());
 ?>
 --EXPECT--
-array(1) {
-  [0]=>
-  NULL
-}
+bool(false)
 bool(false)

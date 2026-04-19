@@ -2,15 +2,13 @@
   +----------------------------------------------------------------------+
   | phar:// stream wrapper support                                       |
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Gregory Beaver <cellog@php.net>                             |
   |          Marcus Boerger <helly@php.net>                              |
@@ -60,8 +58,7 @@ const php_stream_wrapper php_stream_phar_wrapper = {
 php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options) /* {{{ */
 {
 	php_url *resource;
-	char *arch = NULL, *entry = NULL, *error;
-	size_t arch_len, entry_len;
+	char *error;
 
 	if (strncasecmp(filename, "phar://", 7)) {
 		return NULL;
@@ -72,11 +69,14 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 		}
 		return NULL;
 	}
-	if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len, 2, (mode[0] == 'w' ? 2 : 0)) == FAILURE) {
+
+	zend_string *entry = NULL;
+	const char *arch_error = NULL;
+	zend_string *arch = phar_split_fname_ex(filename, strlen(filename), &entry, 2, (mode[0] == 'w' ? 2 : 0), &arch_error);
+	if (!arch) {
 		if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-			if (arch && !entry) {
-				php_stream_wrapper_log_error(wrapper, options, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", filename, arch);
-				arch = NULL;
+			if (arch_error && !entry) {
+				php_stream_wrapper_log_error(wrapper, options, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", filename, arch_error);
 			} else {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: invalid url or non-existent phar \"%s\"", filename);
 			}
@@ -85,10 +85,8 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	}
 	resource = ecalloc(1, sizeof(php_url));
 	resource->scheme = ZSTR_INIT_LITERAL("phar", 0);
-	resource->host = zend_string_init(arch, arch_len, 0);
-	efree(arch);
-	resource->path = zend_string_init(entry, entry_len, 0);
-	efree(entry);
+	resource->host = arch;
+	resource->path = entry;
 
 #ifdef MBO_0
 		if (resource) {
@@ -370,7 +368,7 @@ static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* 
 	ssize_t got;
 	phar_entry_info *entry;
 
-	if (data->internal_file->link) {
+	if (data->internal_file->symlink) {
 		entry = phar_get_link_source(data->internal_file);
 	} else {
 		entry = data->internal_file;
@@ -402,7 +400,7 @@ static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, z
 	int res;
 	zend_ulong temp;
 
-	if (data->internal_file->link) {
+	if (data->internal_file->symlink) {
 		entry = phar_get_link_source(data->internal_file);
 	} else {
 		entry = data->internal_file;
@@ -840,7 +838,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		entry->is_deleted = 1;
 		entry->fp = NULL;
 		ZVAL_UNDEF(&entry->metadata_tracker.val);
-		entry->link = entry->tmp = NULL;
+		entry->symlink = NULL;
+		entry->tmp = NULL;
 		source = entry;
 
 		/* add to the manifest, and then store the pointer to the new guy in entry

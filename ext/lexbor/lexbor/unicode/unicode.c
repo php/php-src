@@ -451,7 +451,7 @@ lxb_unicode_normalize_body(lxb_unicode_normalizer_t *uc, const void *data,
                     uc->starter = p;
                     uc->ican = p;
 
-                    if (p - buf >= uc->flush_cp) {
+                    if (lxb_size(p - buf) >= uc->flush_cp) {
                         if (!is_cp) {
                             status = lxb_unicode_flush(uc, cb->cb, ctx);
                         }
@@ -887,7 +887,7 @@ lxb_unicode_entry(lxb_codepoint_t cp)
         return &lxb_unicode_entries[0];
     }
 
-    if (cp < 205744) {
+    if (cp < 210042) {
         if (cp < 83527) {
             if (cp < 57345) {
                 return &lxb_unicode_entries[lxb_unicode_table_map_0_57345[cp - 0]];
@@ -897,11 +897,11 @@ lxb_unicode_entry(lxb_codepoint_t cp)
             }
         }
         else if (cp >= 90368) {
-            if (cp < 101641) {
-                return &lxb_unicode_entries[lxb_unicode_table_map_90368_101641[cp - 90368]];
+            if (cp < 101875) {
+                return &lxb_unicode_entries[lxb_unicode_table_map_90368_101875[cp - 90368]];
             }
             else if (cp >= 110576) {
-                return &lxb_unicode_entries[lxb_unicode_table_map_110576_205744[cp - 110576]];
+                return &lxb_unicode_entries[lxb_unicode_table_map_110576_210042[cp - 110576]];
             }
         }
     }

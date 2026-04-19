@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Alexander Borisov
+ * Copyright (C) 2018-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -90,6 +90,18 @@ typedef enum {
     LXB_HTML_RULES_ERROR_DOTOAFFRMO,
     /* doctype-token-foreign-content-mode */
     LXB_HTML_RULES_ERROR_DOTOFOCOMO,
+    /* select-in-scope */
+    LXB_HTML_RULES_ERROR_SEINSC,
+    /* fragment-parsing-select-in-context-parse-input */
+    LXB_HTML_RULES_ERROR_FRPASEINCOPAIN,
+    /* fragment-parsing-select-in-context-parse-select */
+    LXB_HTML_RULES_ERROR_FRPASEINCOPASE,
+    /* hr-parsing-select-option-optgroup-in-scope */
+    LXB_HTML_RULES_ERROR_HRPASEOPOPINSC,
+    /* option-parsing-option-in-scope */
+    LXB_HTML_RULES_ERROR_OPPAOPINSC,
+    /* optgroup-parsing-option-optgroup-in-scope */
+    LXB_HTML_RULES_ERROR_OPPAOPOPINSC,
 
     LXB_HTML_RULES_ERROR_LAST_ENTRY
 }
@@ -108,10 +120,12 @@ LXB_API lxb_html_tree_error_t *
 lxb_html_tree_error_add(lexbor_array_obj_t *parse_errors,
                         lxb_html_token_t *token, lxb_html_tree_error_id_t id);
 
+LXB_API const lxb_char_t *
+lxb_html_tree_error_to_string(lxb_html_tree_error_id_t id, size_t *len);
+
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
 #endif /* LEXBOR_HTML_TREE_ERROR_H */
-

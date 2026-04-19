@@ -26,6 +26,11 @@ PHP                                                                        NEWS
 - DOM:
   . Removed LIBXML_XINCLUDE from valid options for XMLDocument,
     as it was a no-op. (ndossche)
+  . Readonly DOM properties are now declared with asymmetric visibility
+    (public private(set)). ReflectionProperty::isWritable() reports them
+    correctly, and external writes raise "Cannot modify private(set)
+    property" instead of the previous readonly modification error.
+    (David Carlier)
 
 - Fileinfo:
   . Fixed bug GH-20679 (finfo_file() doesn't work on remote resources).
@@ -35,6 +40,9 @@ PHP                                                                        NEWS
 - GD:
   . imagesetstyle()/imagefilter()/imagecrop() check array argument entries
     types. (David Carlier)
+
+- GMP:
+  . gmp_fact() reject values larger than unsigned long. (David Carlier)
 
 - Hash:
   . Upgrade xxHash to 0.8.2. (timwolla)
@@ -133,6 +141,8 @@ PHP                                                                        NEWS
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
+  . Fix bugs GH-8561, GH-8562, GH-8563, and GH-8564 (Fixing various
+    SplFileObject iterator desync bugs). (iliaal)
 
 - Sqlite3:
   . Fix NUL byte truncation in sqlite3 TEXT column handling. (ndossche)

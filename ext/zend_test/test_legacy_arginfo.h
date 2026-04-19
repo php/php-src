@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 0b6e371180dc4313152afa80f7736abeecf3bc11
+ * Stub hash: b46026edf6f5c15f6b1a30a9d1e97c54ce8bfebe
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_use_internal_traits_zero, 0, 0, 0)
@@ -1201,6 +1201,16 @@ static zend_class_entry *register_class_ZendTestNS_Foo(void)
 	return class_entry;
 }
 
+static zend_class_entry *register_class_ZendTestNS_Bar(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS", "Bar", NULL);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
 static zend_class_entry *register_class_ZendTestNS_UnlikelyCompileError(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -1245,6 +1255,36 @@ static zend_class_entry *register_class_ZendTestNS2_Foo(void)
 	zend_string *property_foo_name = zend_string_init("foo", sizeof("foo") - 1, true);
 	zend_declare_property_ex(class_entry, property_foo_name, &property_foo_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release_ex(property_foo_name, true);
+
+	zval property_intersectionProp_default_value;
+	ZVAL_NULL(&property_intersectionProp_default_value);
+	zend_string *property_intersectionProp_name = zend_string_init("intersectionProp", sizeof("intersectionProp") - 1, true);
+	zend_declare_property_ex(class_entry, property_intersectionProp_name, &property_intersectionProp_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release_ex(property_intersectionProp_name, true);
+
+	zval property_unionProp_default_value;
+	ZVAL_NULL(&property_unionProp_default_value);
+	zend_string *property_unionProp_name = zend_string_init("unionProp", sizeof("unionProp") - 1, true);
+	zend_declare_property_ex(class_entry, property_unionProp_name, &property_unionProp_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release_ex(property_unionProp_name, true);
+
+	zval property_fooAlias_default_value;
+	ZVAL_NULL(&property_fooAlias_default_value);
+	zend_string *property_fooAlias_name = zend_string_init("fooAlias", sizeof("fooAlias") - 1, true);
+	zend_declare_property_ex(class_entry, property_fooAlias_name, &property_fooAlias_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release_ex(property_fooAlias_name, true);
+
+	zval property_unlProp_default_value;
+	ZVAL_NULL(&property_unlProp_default_value);
+	zend_string *property_unlProp_name = zend_string_init("unlProp", sizeof("unlProp") - 1, true);
+	zend_declare_property_ex(class_entry, property_unlProp_name, &property_unlProp_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release_ex(property_unlProp_name, true);
+
+	zval property_notUnlProp_default_value;
+	ZVAL_NULL(&property_notUnlProp_default_value);
+	zend_string *property_notUnlProp_name = zend_string_init("notUnlProp", sizeof("notUnlProp") - 1, true);
+	zend_declare_property_ex(class_entry, property_notUnlProp_name, &property_notUnlProp_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release_ex(property_notUnlProp_name, true);
 
 	return class_entry;
 }

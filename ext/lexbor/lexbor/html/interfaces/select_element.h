@@ -26,6 +26,8 @@ lxb_html_select_element_interface_create(lxb_html_document_t *document);
 LXB_API lxb_html_select_element_t *
 lxb_html_select_element_interface_destroy(lxb_html_select_element_t *select_element);
 
+LXB_API lxb_html_selectedcontent_element_t *
+lxb_html_select_get_enabled_selectedcontent(lxb_html_select_element_t *el);
 
 #ifdef __cplusplus
 } /* extern "C" */

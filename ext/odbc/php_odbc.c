@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@php.net>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
@@ -1342,12 +1340,11 @@ static void php_odbc_fetch(INTERNAL_FUNCTION_PARAMETERS, bool return_array, php_
 	result = Z_ODBC_RESULT_P(pv_res);
 	CHECK_ODBC_RESULT(result);
 
-	/* TODO deprecate $row argument values less than 1 after PHP 8.4
-	 * for functions other than odbc_fetch_row (see GH-13910)
-	 */
-	if (!result_type && !pv_row_is_null && pv_row < 1) {
-		php_error_docref(NULL, E_WARNING, "Argument #3 ($row) must be greater than or equal to 1");
-		RETURN_FALSE;
+	if (!pv_row_is_null && pv_row < 1) {
+		/* row arg no differs between callers */
+		zend_argument_value_error(pv_res_arr == return_value ? 2 : 3,
+				"must be greater than or equal to 1");
+		RETURN_THROWS();
 	}
 
 	if (result->numcols == 0) {

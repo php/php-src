@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2025 Alexander Borisov
+ * Copyright (C) 2023-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -14,14 +14,14 @@
 #include "lexbor/core/swar.h"
 #include "lexbor/unicode/idna.h"
 
-#define LEXBOR_STR_RES_MAP_LOWERCASE
-#define LEXBOR_STR_RES_ALPHANUMERIC_CHARACTER
-#define LEXBOR_STR_RES_ALPHA_CHARACTER
-#define LEXBOR_STR_RES_CHAR_TO_TWO_HEX_VALUE
-#define LEXBOR_STR_RES_MAP_HEX
-#define LEXBOR_STR_RES_MAP_NUM
-#include "lexbor/core/str_res.h"
-
+#ifndef LEXBOR_DISABLE_INTERNAL_EXTERN
+    LXB_EXTERN const lxb_char_t lexbor_str_res_map_lowercase[256];
+    LXB_EXTERN const size_t     lexbor_str_res_alphanumeric_character[256];
+    LXB_EXTERN const size_t     lexbor_str_res_alpha_character[256];
+    LXB_EXTERN const char       *lexbor_str_res_char_to_two_hex_value[257];
+    LXB_EXTERN const lxb_char_t lexbor_str_res_map_num[256];
+    LXB_EXTERN const lxb_char_t lexbor_str_res_map_hex[256];
+#endif
 
 #define LXB_URL_BUFFER_SIZE 4096
 #define LXB_URL_BUFFER_NUM_SIZE 128
