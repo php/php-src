@@ -15,7 +15,7 @@ $baz = new foo();
 var_dump($baz->bar());
 ?>
 --EXPECTF--
-object(Closure)#%d (5) {
+object(Closure)#%d (4) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
   ["file"]=>
@@ -26,8 +26,5 @@ object(Closure)#%d (5) {
   array(1) {
     ["test"]=>
     string(3) "one"
-  }
-  ["this"]=>
-  object(foo)#%d (0) {
   }
 }

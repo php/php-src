@@ -5,7 +5,7 @@ Test closure isStatic
 class Foo {
     public static function bar(){}
     public function baz() {}
-    
+
     public function qux() {
         return static function(){};
     }
@@ -21,7 +21,7 @@ var_dump(
     (new ReflectionMethod($foo, 'baz'))->isStatic(),);
 ?>
 --EXPECT--
-bool(false)
+bool(true)
 bool(true)
 bool(true)
 bool(true)

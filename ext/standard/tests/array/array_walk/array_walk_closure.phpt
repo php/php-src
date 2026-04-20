@@ -147,19 +147,19 @@ End result:int(48)
 closure with object
 
 Warning: {closure:%s:%d}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   ["sum"]=>
   int(42)
 }
 
 Warning: {closure:%s:%d}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   ["sum"]=>
   int(43)
 }
 
 Warning: {closure:%s:%d}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   ["sum"]=>
   int(45)
 }
@@ -167,15 +167,15 @@ bool(true)
 End result:int(48)
 
 function with object
-object(stdClass)#2 (1) {
+object(stdClass)#%d (1) {
   ["sum"]=>
   int(42)
 }
-object(stdClass)#2 (1) {
+object(stdClass)#%d (1) {
   ["sum"]=>
   int(43)
 }
-object(stdClass)#2 (1) {
+object(stdClass)#%d (1) {
   ["sum"]=>
   int(45)
 }

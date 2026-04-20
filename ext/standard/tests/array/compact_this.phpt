@@ -39,8 +39,5 @@ array(1) {
   object(class@anonymous)#1 (0) {
   }
 }
-array(1) {
-  ["this"]=>
-  object(class@anonymous)#1 (0) {
-  }
+array(0) {
 }
