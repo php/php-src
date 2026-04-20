@@ -32,11 +32,6 @@ try {
 } catch (ValueError $e) {
     echo $e->getMessage() . "\n";
 }
-try {
-    var_dump(linkinfo(false));  // boolean false as linkname
-} catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
-}
 
 echo "Done\n";
 ?>
@@ -61,6 +56,5 @@ Warning: symlink(): %s in %s on line %d
 bool(false)
 
 *** Testing linkinfo() for error conditions ***
-linkinfo(): Argument #1 ($path) must not be empty
 linkinfo(): Argument #1 ($path) must not be empty
 Done

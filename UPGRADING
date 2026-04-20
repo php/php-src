@@ -78,6 +78,7 @@ PHP 8.6 UPGRADE NOTES
     argument value is passed.
   . array_change_key_case() now raises a ValueError when an invalid $case
     argument value is passed.
+  . linkinfo() now raises a ValueError when the $path argument is empty.
   . pathinfo() now raises a ValueError when an invalid $flag
     argument value is passed.
   . scandir() now raises a ValueError when an invalid $sorting_order
