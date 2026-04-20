@@ -6013,9 +6013,9 @@ ZEND_METHOD(ReflectionProperty, setValue)
  * 'scope' on 'object'. The result may be different from 'ref->prop' when the
  * property is overridden on 'object' and was not private in 'scope'.
  * The effective prop may add hooks or change flags. */
-static const zend_property_info *reflection_property_get_effective_prop(
-		const zend_property_info *prop, zend_string *unmangled_name,
-		const zend_class_entry *scope, zend_object *object) {
+static zend_property_info *reflection_property_get_effective_prop(
+		zend_property_info *prop, zend_string *unmangled_name,
+		zend_class_entry *scope, zend_object *object) {
 	if (scope != object->ce && !(prop && (prop->flags & ZEND_ACC_PRIVATE))) {
 		prop = zend_hash_find_ptr(&object->ce->properties_info, unmangled_name);
 	}
@@ -6050,7 +6050,7 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 		}
 	}
 
-	const zend_property_info *prop = reflection_property_get_effective_prop(ref->prop,
+	zend_property_info *prop = reflection_property_get_effective_prop(ref->prop,
 			ref->unmangled_name, intern->ce, Z_OBJ_P(object));
 
 	if (UNEXPECTED(prop && (prop->flags & ZEND_ACC_STATIC))) {
@@ -6081,9 +6081,9 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 	}
 }
 
-static void zend_reflection_property_set_raw_value_ex(const zend_property_info *prop,
+static void zend_reflection_property_set_raw_value_ex(zend_property_info *prop,
 		zend_string *unmangled_name, void *cache_slot[3],
-		const zend_class_entry *scope, zend_object *object, zval *value)
+		zend_class_entry *scope, zend_object *object, zval *value)
 {
 	ZEND_ASSERT(!prop || !(prop->flags & ZEND_ACC_STATIC));
 
@@ -6098,9 +6098,9 @@ static void zend_reflection_property_set_raw_value_ex(const zend_property_info *
 	}
 }
 
-PHPAPI void zend_reflection_property_set_raw_value(const zend_property_info *prop,
+PHPAPI void zend_reflection_property_set_raw_value(zend_property_info *prop,
 		zend_string *unmangled_name, void *cache_slot[3],
-		const zend_class_entry *scope, zend_object *object, zval *value)
+		zend_class_entry *scope, zend_object *object, zval *value)
 {
 	prop = reflection_property_get_effective_prop(prop,
 			unmangled_name, scope, object);
@@ -6133,8 +6133,8 @@ ZEND_METHOD(ReflectionProperty, setRawValue)
 }
 
 static zend_result reflection_property_check_lazy_compatible(
-		const zend_property_info *prop, zend_string *unmangled_name,
-		const zend_class_entry *scope, zend_object *object, const char *method)
+		zend_property_info *prop, zend_string *unmangled_name,
+		zend_class_entry *scope, zend_object *object, const char *method)
 {
 	if (!prop) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -6175,8 +6175,8 @@ static zend_result reflection_property_check_lazy_compatible(
 }
 
 PHPAPI void zend_reflection_property_set_raw_value_without_lazy_initialization(
-		const zend_property_info *prop, zend_string *unmangled_name,
-		void *cache_slot[3], const zend_class_entry *scope,
+		zend_property_info *prop, zend_string *unmangled_name,
+		void *cache_slot[3], zend_class_entry *scope,
 		zend_object *object, zval *value)
 {
 	while (zend_object_is_lazy_proxy(object)
@@ -6724,7 +6724,7 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	const zend_property_info *prop = ref->prop;
+	zend_property_info *prop = ref->prop;
 	if (prop && obj) {
 		if (prop->flags & ZEND_ACC_STATIC) {
 			zend_throw_exception(reflection_exception_ptr, "null is expected as object argument for static properties", 0);
@@ -6831,7 +6831,7 @@ ZEND_METHOD(ReflectionProperty, isWritable)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	const zend_property_info *prop = ref->prop;
+	zend_property_info *prop = ref->prop;
 	if (prop && obj) {
 		if (prop->flags & ZEND_ACC_STATIC) {
 			zend_throw_exception(reflection_exception_ptr, "null is expected as object argument for static properties", 0);

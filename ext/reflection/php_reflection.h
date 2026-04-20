@@ -55,14 +55,14 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object);
  * cache_slot can be used again with the same 'unmangled_name' and 'scope'.
  * Must be zeroed on first use. May be NULL. */
 PHPAPI void zend_reflection_property_set_raw_value(
-		const zend_property_info *prop, zend_string *unmangled_name,
-		void *cache_slot[3], const zend_class_entry *scope,
+		zend_property_info *prop, zend_string *unmangled_name,
+		void *cache_slot[3], zend_class_entry *scope,
 		zend_object *object, zval *value);
 
 /* Same as zend_reflection_property_set_raw_value(), but skips lazy object initialization. */
 PHPAPI void zend_reflection_property_set_raw_value_without_lazy_initialization(
-		const zend_property_info *prop, zend_string *unmangled_name,
-		void *cache_slot[3], const zend_class_entry *scope,
+		zend_property_info *prop, zend_string *unmangled_name,
+		void *cache_slot[3], zend_class_entry *scope,
 		zend_object *object, zval *value);
 
 END_EXTERN_C()
