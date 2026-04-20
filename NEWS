@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-21699 (Assertion failure in shutdown_executor when resolving
     self::/parent::/static:: callables if the error handler throws). (macoaure)
   . Fixed bug GH-21603 (Missing addref for __unset). (ilutov)
+  . Fixed bug GH-21760 (Trait with class constant name conflict against
+    enum case causes SEGV). (Pratik Bhujel)
 
 - CLI:
   . Fixed bug GH-21754 (`--rf` command line option with a method triggers
