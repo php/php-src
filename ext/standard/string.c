@@ -1342,11 +1342,10 @@ PHP_FUNCTION(str_decrement)
 static bool _is_basename_start(const char *start, const char *pos)
 {
 	if (pos - start >= 1
-	    && *(pos-1) != '/'
-	    && *(pos-1) != '\\') {
+	    && !IS_SLASH(*(pos-1))) {
 		if (pos - start == 1) {
 			return true;
-		} else if (*(pos-2) == '/' || *(pos-2) == '\\') {
+		} else if (IS_SLASH(*(pos-2))) {
 			return true;
 		} else if (*(pos-2) == ':'
 			&& _is_basename_start(start, pos - 2)) {
@@ -1369,8 +1368,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, 
 		/* Strip trailing slashes */
 		while (basename_end >= s
 #ifdef PHP_WIN32
-			&& (*basename_end == '/'
-				|| *basename_end == '\\'
+			&& (IS_SLASH(*basename_end)
 				|| (*basename_end == ':'
 					&& _is_basename_start(s, basename_end)))) {
 #else
@@ -1387,8 +1385,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, 
 		basename_end++;
 		while (basename_start > s
 #ifdef PHP_WIN32
-			&& *(basename_start-1) != '/'
-			&& *(basename_start-1) != '\\') {
+			&& !IS_SLASH(*(basename_start-1))) {
 
 			if (*(basename_start-1) == ':' &&
 				_is_basename_start(s, basename_start - 1)) {
@@ -1414,7 +1411,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, 
 					goto quit_loop;
 				case 1:
 #ifdef PHP_WIN32
-					if (*s == '/' || *s == '\\') {
+					if (IS_SLASH(*s)) {
 #else
 					if (*s == '/') {
 #endif
