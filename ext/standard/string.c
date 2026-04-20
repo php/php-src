@@ -1342,7 +1342,7 @@ PHP_FUNCTION(str_decrement)
 static bool _is_basename_start(const char *start, const char *pos)
 {
 	if (pos - start >= 1
-	    && !IS_SLASH(*(pos-1))) {
+		&& !IS_SLASH(*(pos-1))) {
 		if (pos - start == 1) {
 			return true;
 		} else if (IS_SLASH(*(pos-2))) {
