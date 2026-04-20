@@ -274,7 +274,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 
 				if (key && key_len > 0) {
 					/* Strip any trailing slashes */
-					while (key_len > 0 && (key[key_len - 1] == '/' || key[key_len - 1] == '\\')) {
+					while (key_len > 0 && IS_SLASH(key[key_len - 1])) {
 						key_len--;
 						key[key_len] = 0;
 					}
