@@ -10,7 +10,6 @@ on:
       - UPGRADING.INTERNALS
       - '**/*.md'
       - '**/*.rst'
-      - '**/CREDITS'
       - .github/CODEOWNERS
       - .github/ISSUE_TEMPLATE/**
       - .cirrus.yml
