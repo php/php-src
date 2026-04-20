@@ -1250,7 +1250,10 @@ static void init_request_info(fcgi_request *request)
 			 */
 			if (script_path_translated &&
 				(script_path_translated_len = strlen(script_path_translated)) > 0 &&
-				(IS_SLASH(script_path_translated[script_path_translated_len-1]) ||
+				(script_path_translated[script_path_translated_len-1] == '/' ||
+#ifdef PHP_WIN32
+				script_path_translated[script_path_translated_len-1] == '\\' ||
+#endif
 				(real_path = tsrm_realpath(script_path_translated, NULL)) == NULL)
 			) {
 				char *pt = estrndup(script_path_translated, script_path_translated_len);
