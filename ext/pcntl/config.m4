@@ -10,7 +10,7 @@ if test "$PHP_PCNTL" != "no"; then
   done
 
   AC_CHECK_FUNCS(m4_normalize([
-    forkx
+    execveat
     getcpuid
     getpriority
     pset_bind
