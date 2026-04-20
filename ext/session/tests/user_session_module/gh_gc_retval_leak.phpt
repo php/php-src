@@ -17,7 +17,7 @@ session_set_save_handler(
     function(string $id): string|false { return ""; },
     function(string $id, string $data) { return true; },
     function(string $id) { return true; },
-    function(int $max) { return str_repeat("x", 100); }
+    function(int $max) { return str_repeat("x", random_int(100, 100)); }
 );
 
 session_start();
