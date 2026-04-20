@@ -3,12 +3,16 @@ on:
   push:
     paths-ignore: &ignore_paths
       - docs/**
+      - EXTENSIONS
+      - LICENSE
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
-      - '**/README.*'
-      - CONTRIBUTING.md
-      - CODING_STANDARDS.md
+      - '**/*.md'
+      - '**/*.rst'
+      - '**/CREDITS'
+      - .github/CODEOWNERS
+      - .github/ISSUE_TEMPLATE/**
       - .cirrus.yml
       - .circleci/**
     branches:
