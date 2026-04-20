@@ -3565,7 +3565,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 	) {
 		size_t prefix_len = (ZSTR_VAL(file_name)[0] == '/') + sizeof(".phar")-1;
 		char next_char = ZSTR_VAL(file_name)[prefix_len];
-		if (IS_SLASH(next_char) || next_char == '\0') {
+		if (next_char == '/' || next_char == '\\' || next_char == '\0') {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create any files in magic \".phar\" directory");
 			return;
 		}
