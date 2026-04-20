@@ -5219,6 +5219,22 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	return SUCCESS;
 }
 
+static zend_result zend_compile_func_array(znode *result, zend_ast_list *args)
+{
+	zend_ast *array = zend_ast_create_list(0, ZEND_AST_ARRAY);
+	for (uint32_t i = 0; i < args->children; i++) {
+		zend_ast *arg = args->child[i];
+		if (arg->kind == ZEND_AST_NAMED_ARG) {
+			array = zend_ast_list_add(array, zend_ast_create(ZEND_AST_ARRAY_ELEM, arg->child[1], arg->child[0]));
+		} else {
+			array = zend_ast_list_add(array, zend_ast_create(ZEND_AST_ARRAY_ELEM, arg, NULL));
+		}
+	}
+	zend_compile_expr(result, array);
+
+	return SUCCESS;
+}
+
 static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *lcname, zend_ast_list *args, uint32_t type, uint32_t lineno) /* {{{ */
 {
 	if (zend_string_equals_literal(lcname, "strlen")) {
@@ -5293,6 +5309,8 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 		return zend_compile_func_clone(result, args);
 	} else if (zend_string_equals_literal(lcname, "array_map")) {
 		return zend_compile_func_array_map(result, args, lcname, lineno);
+	} else if (zend_string_equals_literal(lcname, "array")) {
+		return zend_compile_func_array(result, args);
 	} else {
 		return FAILURE;
 	}
