@@ -1,4 +1,4 @@
-From de74c24d95342280266ebdac6f8dabc70ccfacab Mon Sep 17 00:00:00 2001
+From 46fc776449252e74795569759a19d13857a59069 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Thu, 24 Aug 2023 22:57:48 +0200
 Subject: [PATCH 3/6] Patch utilities and data structure to be able to generate
@@ -8,10 +8,10 @@ Changed the generation script to check if everything fits in 32-bits.
 And change the actual field types to 32-bits. This decreases the hash
 tables in size.
 ---
- source/lexbor/core/shs.h             |   4 +-
- utils/lexbor/encoding/single-byte.py |   2 +-
- utils/lexbor/lexbor/LXB.py           |  12 +-
- 3 files changed, 12 insertions(+), 6 deletions(-)
+ source/lexbor/core/shs.h             |  4 ++--
+ utils/lexbor/encoding/single-byte.py |  4 ++--
+ utils/lexbor/lexbor/LXB.py           | 12 +++++++++---
+ 3 files changed, 13 insertions(+), 7 deletions(-)
 
 diff --git a/source/lexbor/core/shs.h b/source/lexbor/core/shs.h
 index 7a63a07..c84dfaa 100644
@@ -30,7 +30,7 @@ index 7a63a07..c84dfaa 100644
  lexbor_shs_hash_t;
  
 diff --git a/utils/lexbor/encoding/single-byte.py b/utils/lexbor/encoding/single-byte.py
-index 9a85d54..ec2023c 100755
+index d7d1bb2..5420c16 100755
 --- a/utils/lexbor/encoding/single-byte.py
 +++ b/utils/lexbor/encoding/single-byte.py
 @@ -128,7 +128,7 @@ class SingleByte:
@@ -42,6 +42,15 @@ index 9a85d54..ec2023c 100755
  
          return hash_key.create(rate = 1)
  
+@@ -161,7 +161,7 @@ def toHex(s):
+     lst = []
+ 
+     for ch in bytes(s, 'utf-8'):
+-        hv = hex(ch).replace('0x', '\\\\x')
++        hv = hex(ch).replace('0x', '\\x')
+         lst.append("'{}'".format(hv))
+ 
+     return ', '.join(lst)
 diff --git a/utils/lexbor/lexbor/LXB.py b/utils/lexbor/lexbor/LXB.py
 index 3e75812..2370c66 100755
 --- a/utils/lexbor/lexbor/LXB.py
@@ -84,5 +93,5 @@ index 3e75812..2370c66 100755
          result.append("};")
  
 -- 
-2.49.0
+2.51.2
 

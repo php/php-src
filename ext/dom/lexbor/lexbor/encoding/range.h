@@ -23,8 +23,9 @@ extern "C" {
 
 #define LXB_ENCODING_RANGE_INDEX_GB18030_SIZE 207
 
-
+#ifndef LEXBOR_DISABLE_INTERNAL_EXTERN
 LXB_EXTERN const lxb_encoding_range_index_t lxb_encoding_range_index_gb18030[207];
+#endif /* !LEXBOR_DISABLE_INTERNAL_EXTERN */
 
 
 #ifdef __cplusplus

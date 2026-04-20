@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Alexander Borisov
+ * Copyright (C) 2019-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -7,6 +7,31 @@
 #include "lexbor/html/encoding.h"
 
 #include "lexbor/core/str.h"
+
+
+typedef struct {
+    lexbor_str_t alias;
+    lexbor_str_t name;
+}
+lxb_html_encoding_name_t;
+
+static const lxb_html_encoding_name_t lxb_html_encoding_names[] = {
+    /* UTF-16BE */
+    { lexbor_str("unicodefffe"),     lexbor_str("UTF-8") },
+    { lexbor_str("utf-16be"),        lexbor_str("UTF-8") },
+
+    /* UTF-16LE */
+    { lexbor_str("csunicode"),       lexbor_str("UTF-8") },
+    { lexbor_str("iso-10646-ucs-2"), lexbor_str("UTF-8") },
+    { lexbor_str("ucs-2"),           lexbor_str("UTF-8") },
+    { lexbor_str("unicode"),         lexbor_str("UTF-8") },
+    { lexbor_str("unicodefeff"),     lexbor_str("UTF-8") },
+    { lexbor_str("utf-16"),          lexbor_str("UTF-8") },
+    { lexbor_str("utf-16le"),        lexbor_str("UTF-8") },
+
+    /* x-user-defined */
+    { lexbor_str("x-user-defined"),  lexbor_str("windows-1252") }
+};
 
 
 static const lxb_char_t *
@@ -97,6 +122,73 @@ lxb_html_encoding_destroy(lxb_html_encoding_t *em, bool self_destroy)
     }
 
     return em;
+}
+
+const lxb_char_t *
+lxb_html_encoding_prescan(lxb_html_encoding_t *em, const lxb_char_t *data,
+                          const lxb_char_t *end, size_t *out_length)
+{
+    size_t len, length;
+    lxb_status_t status;
+    lxb_html_encoding_entry_t *entry;
+    const lxb_html_encoding_name_t *name;
+
+    static const lexbor_str_t lxb_html_encoding_utf_16le = lexbor_str("UTF-16LE");
+    static const lexbor_str_t lxb_html_encoding_utf_16be = lexbor_str("UTF-16BE");
+
+    len = end - data;
+
+    /* Prescan for UTF-16 XML declarations: If position points to. */
+    if (len >= 6) {
+        if (data[0] == 0x3C && data[1] == 0x00 && data[2] == 0x3F
+            && data[3] == 0x00 && data[4] == 0x78 && data[5] == 0x00)
+        {
+            *out_length = lxb_html_encoding_utf_16le.length;
+            return lxb_html_encoding_utf_16le.data;
+        }
+
+        if (data[0] == 0x00 && data[1] == 0x3C && data[2] == 0x00
+            && data[3] == 0x3F && data[4] == 0x00 && data[5] == 0x78)
+        {
+            *out_length = lxb_html_encoding_utf_16be.length;
+            return lxb_html_encoding_utf_16be.data;
+        }
+    }
+
+    status = lxb_html_encoding_determine(em, data, end);
+    if (status != LXB_STATUS_OK) {
+        goto EMPTY;
+    }
+
+    if (lxb_html_encoding_meta_length(em) == 0) {
+        goto EMPTY;
+    }
+
+    entry = lxb_html_encoding_meta_entry(em, 0);
+    len = entry->end - entry->name;
+    length = sizeof(lxb_html_encoding_names) / sizeof(lxb_html_encoding_name_t);
+
+    for (size_t i = 0; i < length; i++) {
+        name = &lxb_html_encoding_names[i];
+
+        if (len == name->alias.length
+            && lexbor_str_data_ncasecmp(entry->name, name->alias.data,
+                                        name->alias.length))
+        {
+            *out_length = lxb_html_encoding_names[i].name.length;
+            return lxb_html_encoding_names[i].name.data;
+        }
+    }
+
+    *out_length = entry->end - entry->name;
+
+    return entry->name;
+
+EMPTY:
+
+    *out_length = 0;
+
+    return NULL;
 }
 
 lxb_status_t
@@ -381,12 +473,12 @@ lxb_html_encoding_content(const lxb_char_t *data, const lxb_char_t *end,
 
         for (; data < end; data++) {
             if (*data == **name_end) {
-                break;
+                *name_end = data;
+                goto done;
             }
         }
 
-        *name_end = data;
-        goto done;
+        return NULL;
     }
 
     name = data;

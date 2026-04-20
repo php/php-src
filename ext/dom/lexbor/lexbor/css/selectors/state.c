@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Alexander Borisov
+ * Copyright (C) 2020-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -1557,8 +1557,8 @@ lxb_css_selectors_state_pseudo_class_function(lxb_css_parser_t *parser,
     selectors->comb_default = func->combinator;
     selectors->parent = selector;
 
-    rule = lxb_css_syntax_parser_function_push(parser, token, success,
-                                               &func->cb, selectors->list_last);
+    rule = lxb_css_syntax_consume_function(parser, token, &func->cb,
+                                           success, selectors->list_last);
     if (rule == NULL) {
         goto failed;
     }
@@ -1663,8 +1663,8 @@ lxb_css_selectors_state_pseudo_element_function(lxb_css_parser_t *parser,
     selectors->comb_default = func->combinator;
     selectors->parent = selector;
 
-    rule = lxb_css_syntax_parser_function_push(parser, token, success,
-                                               &func->cb, selectors->list_last);
+    rule = lxb_css_syntax_consume_function(parser, token, &func->cb,
+                                           success, selectors->list_last);
     if (rule == NULL) {
         (void) lxb_css_parser_memory_fail(parser);
         return parser->status;
@@ -1711,7 +1711,7 @@ lxb_css_selectors_state_function_end(lxb_css_parser_t *parser,
     lxb_css_selectors_t *selectors = parser->selectors;
 
     if (token->type == LXB_CSS_SYNTAX_TOKEN__EOF) {
-        (void) lxb_css_log_format(parser->log, LXB_CSS_LOG_ERROR,
+        (void) lxb_css_log_format(parser->log, LXB_CSS_LOG_SYNTAX_ERROR,
                                   "%s. End Of File in pseudo function",
                                   lxb_css_selectors_module_name);
     }
@@ -1737,7 +1737,7 @@ empty:
         return LXB_STATUS_OK;
     }
 
-    (void) lxb_css_log_format(parser->log, LXB_CSS_LOG_ERROR,
+    (void) lxb_css_log_format(parser->log, LXB_CSS_LOG_SYNTAX_ERROR,
                               "%s. Pseudo function can't be empty: %S()",
                               lxb_css_selectors_module_name, &selector->name);
 
@@ -1783,7 +1783,7 @@ lxb_css_selectors_state_forgiving_cb(lxb_css_parser_t *parser,
     lxb_css_parser_set_ok(parser);
 
     if (token->type == LXB_CSS_SYNTAX_TOKEN__EOF) {
-        (void) lxb_css_log_format(parser->log, LXB_CSS_LOG_ERROR,
+        (void) lxb_css_log_format(parser->log, LXB_CSS_LOG_SYNTAX_ERROR,
                                   "%s. End Of File in pseudo function",
                                   lxb_css_selectors_module_name);
     }
@@ -1814,7 +1814,7 @@ empty:
         return LXB_STATUS_OK;
     }
 
-    (void) lxb_css_log_format(parser->log, LXB_CSS_LOG_ERROR,
+    (void) lxb_css_log_format(parser->log, LXB_CSS_LOG_SYNTAX_ERROR,
                               "%s. Pseudo function can't be empty: %S()",
                               lxb_css_selectors_module_name, &selector->name);
 

@@ -11,16 +11,18 @@
 #include "lexbor/html/interfaces/style_element.h"
 #include "lexbor/html/node.h"
 #include "lexbor/html/parser.h"
+#include "lexbor/html/tokenizer.h"
 
 #include "lexbor/tag/tag.h"
 
 #include "lexbor/dom/interfaces/text.h"
 #include "lexbor/dom/interfaces/element.h"
 
-#define LXB_HTML_TAG_RES_DATA
-#define LXB_HTML_TAG_RES_SHS_DATA
-#include "lexbor/html/tag_res.h"
 
+#ifndef LEXBOR_DISABLE_INTERNAL_EXTERN
+    LXB_EXTERN lxb_html_tag_category_t lxb_html_tag_res_cats[LXB_TAG__LAST_ENTRY][LXB_NS__LAST_ENTRY];
+    LXB_EXTERN lxb_html_tag_fixname_t lxb_html_tag_res_fixname_svg[LXB_TAG__LAST_ENTRY];
+#endif
 
 lxb_status_t
 lxb_html_parse_chunk_prepare(lxb_html_parser_t *parser,
@@ -34,7 +36,7 @@ lxb_html_document_title_walker(lxb_dom_node_t *node, void *ctx);
 
 
 lxb_inline lxb_dom_interface_t *
-lxb_html_document_interface_create_wrapper(lxb_dom_document_t *document,
+lxb_html_document_interface_create_handler(lxb_dom_document_t *document,
                                            lxb_tag_id_t tag_id, lxb_ns_id_t ns)
 {
     return lxb_html_interface_create(lxb_html_interface_document(document),
@@ -60,7 +62,7 @@ lxb_html_document_interface_create(lxb_html_document_t *document)
     }
 
     status = lxb_dom_document_init(doc, lxb_dom_interface_document(document),
-                                   lxb_html_document_interface_create_wrapper,
+                                   lxb_html_document_interface_create_handler,
                                    lxb_html_interface_clone,
                                    lxb_html_interface_destroy,
                                    LXB_DOM_DOCUMENT_DTYPE_HTML, LXB_NS_HTML);
@@ -267,6 +269,7 @@ lxb_html_document_parser_prepare(lxb_html_document_t *document)
 {
     lxb_status_t status;
     lxb_dom_document_t *doc;
+    lxb_html_parser_t *parser;
 
     doc = lxb_dom_interface_document(document);
 
@@ -278,6 +281,10 @@ lxb_html_document_parser_prepare(lxb_html_document_t *document)
             lxb_html_parser_destroy(doc->parser);
             return status;
         }
+
+        parser = doc->parser;
+
+        lxb_html_tokenizer_keep_duplicate_set(parser->tkz, true);
     }
     else if (lxb_html_parser_state(doc->parser) != LXB_HTML_PARSER_STATE_BEGIN) {
         lxb_html_parser_clean(doc->parser);

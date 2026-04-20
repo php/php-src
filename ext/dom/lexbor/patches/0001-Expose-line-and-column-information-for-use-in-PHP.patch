@@ -1,4 +1,4 @@
-From 4c133fe5adfe4b8ccdd8b014d884b685143b9e66 Mon Sep 17 00:00:00 2001
+From 0cd2add6c46400b808329442f81451b369863983 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Sat, 26 Aug 2023 15:08:59 +0200
 Subject: [PATCH 1/6] Expose line and column information for use in PHP
@@ -15,10 +15,10 @@ Subject: [PATCH 1/6] Expose line and column information for use in PHP
  8 files changed, 48 insertions(+), 5 deletions(-)
 
 diff --git a/source/lexbor/dom/interfaces/node.h b/source/lexbor/dom/interfaces/node.h
-index b052cf5..b5d2c50 100644
+index 6c74ac5..b95373c 100644
 --- a/source/lexbor/dom/interfaces/node.h
 +++ b/source/lexbor/dom/interfaces/node.h
-@@ -83,6 +83,8 @@ struct lxb_dom_node {
+@@ -86,6 +86,8 @@ struct lxb_dom_node {
  
      lxb_dom_node_type_t    type;
  
@@ -41,10 +41,10 @@ index 79accd0..0b7f4fd 100644
      const lxb_char_t      *text_start;
      const lxb_char_t      *text_end;
 diff --git a/source/lexbor/html/tokenizer.c b/source/lexbor/html/tokenizer.c
-index 741bced..0bd9aec 100644
+index 22b88ed..1d9f378 100644
 --- a/source/lexbor/html/tokenizer.c
 +++ b/source/lexbor/html/tokenizer.c
-@@ -91,6 +91,7 @@ lxb_html_tokenizer_init(lxb_html_tokenizer_t *tkz)
+@@ -92,6 +92,7 @@ lxb_html_tokenizer_init(lxb_html_tokenizer_t *tkz)
  
      tkz->pos = tkz->start;
      tkz->end = tkz->start + LXB_HTML_TKZ_TEMP_SIZE;
@@ -52,7 +52,7 @@ index 741bced..0bd9aec 100644
  
      tkz->tree = NULL;
      tkz->tags = NULL;
-@@ -152,6 +153,8 @@ lxb_html_tokenizer_inherit(lxb_html_tokenizer_t *tkz_to,
+@@ -153,6 +154,8 @@ lxb_html_tokenizer_inherit(lxb_html_tokenizer_t *tkz_to,
      tkz_to->start = tkz_from->start;
      tkz_to->end = tkz_from->end;
      tkz_to->pos = tkz_to->start;
@@ -61,7 +61,7 @@ index 741bced..0bd9aec 100644
  
      return LXB_STATUS_OK;
  }
-@@ -312,7 +315,26 @@ lxb_html_tokenizer_chunk(lxb_html_tokenizer_t *tkz, const lxb_char_t *data,
+@@ -571,7 +574,26 @@ lxb_html_tokenizer_chunk(lxb_html_tokenizer_t *tkz, const lxb_char_t *data,
      tkz->last = end;
  
      while (data < end) {
@@ -90,10 +90,10 @@ index 741bced..0bd9aec 100644
  
      return tkz->status;
 diff --git a/source/lexbor/html/tokenizer.h b/source/lexbor/html/tokenizer.h
-index ba9602f..74bb55e 100644
+index 12b7c81..aa1ac37 100644
 --- a/source/lexbor/html/tokenizer.h
 +++ b/source/lexbor/html/tokenizer.h
-@@ -73,6 +73,8 @@ struct lxb_html_tokenizer {
+@@ -79,6 +79,8 @@ struct lxb_html_tokenizer {
      const lxb_char_t                 *end;
      const lxb_char_t                 *begin;
      const lxb_char_t                 *last;
@@ -103,7 +103,7 @@ index ba9602f..74bb55e 100644
      /* Entities */
      const lexbor_sbst_entry_static_t *entity;
 diff --git a/source/lexbor/html/tokenizer/state.h b/source/lexbor/html/tokenizer/state.h
-index 17939b9..5b095b4 100644
+index 5e91444..52eaa9a 100644
 --- a/source/lexbor/html/tokenizer/state.h
 +++ b/source/lexbor/html/tokenizer/state.h
 @@ -90,6 +90,8 @@ extern "C" {
@@ -116,10 +116,10 @@ index 17939b9..5b095b4 100644
      while (0)
  
 diff --git a/source/lexbor/html/tree.c b/source/lexbor/html/tree.c
-index ece26e9..91bfd17 100644
+index 062ea56..3f4c18d 100644
 --- a/source/lexbor/html/tree.c
 +++ b/source/lexbor/html/tree.c
-@@ -427,6 +427,9 @@ lxb_html_tree_create_element_for_token(lxb_html_tree_t *tree,
+@@ -431,6 +431,9 @@ lxb_html_tree_create_element_for_token(lxb_html_tree_t *tree,
          return NULL;
      }
  
@@ -129,7 +129,7 @@ index ece26e9..91bfd17 100644
      lxb_status_t status;
      lxb_dom_element_t *element = lxb_dom_interface_element(node);
  
-@@ -763,6 +766,11 @@ lxb_html_tree_insert_character_for_data(lxb_html_tree_t *tree,
+@@ -767,6 +770,11 @@ lxb_html_tree_insert_character_for_data(lxb_html_tree_t *tree,
  
      lxb_dom_interface_text(text)->char_data.data = *str;
  
@@ -141,7 +141,7 @@ index ece26e9..91bfd17 100644
      if (ret_node != NULL) {
          *ret_node = text;
      }
-@@ -802,6 +810,9 @@ lxb_html_tree_insert_comment(lxb_html_tree_t *tree,
+@@ -806,6 +814,9 @@ lxb_html_tree_insert_comment(lxb_html_tree_t *tree,
          return NULL;
      }
  
@@ -152,10 +152,10 @@ index ece26e9..91bfd17 100644
                                              tree->document->dom_document.text);
      if (tree->status != LXB_STATUS_OK) {
 diff --git a/source/lexbor/html/tree/error.c b/source/lexbor/html/tree/error.c
-index e6e43f4..88ad8c4 100644
+index ffdc55c..ef36eab 100644
 --- a/source/lexbor/html/tree/error.c
 +++ b/source/lexbor/html/tree/error.c
-@@ -21,8 +21,9 @@ lxb_html_tree_error_add(lexbor_array_obj_t *parse_errors,
+@@ -22,8 +22,9 @@ lxb_html_tree_error_add(lexbor_array_obj_t *parse_errors,
      }
  
      entry->id = id;
@@ -168,10 +168,10 @@ index e6e43f4..88ad8c4 100644
      return entry;
  }
 diff --git a/source/lexbor/html/tree/error.h b/source/lexbor/html/tree/error.h
-index 2fd06cb..ed1859f 100644
+index 7a212af..b186772 100644
 --- a/source/lexbor/html/tree/error.h
 +++ b/source/lexbor/html/tree/error.h
-@@ -97,8 +97,9 @@ lxb_html_tree_error_id_t;
+@@ -109,8 +109,9 @@ lxb_html_tree_error_id_t;
  
  typedef struct {
      lxb_html_tree_error_id_t id;
@@ -184,5 +184,5 @@ index 2fd06cb..ed1859f 100644
  lxb_html_tree_error_t;
  
 -- 
-2.49.0
+2.51.2
 

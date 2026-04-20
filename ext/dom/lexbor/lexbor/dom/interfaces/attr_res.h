@@ -63,6 +63,8 @@ static const lxb_dom_attr_data_t lxb_dom_attr_res_data_default[LXB_DOM_ATTR__LAS
      LXB_DOM_ATTR_IS, 1, true},
     {{.u.short_str = "maxlength", .length = 9, .next = NULL},
      LXB_DOM_ATTR_MAXLENGTH, 1, true},
+    {{.u.short_str = "multiple", .length = 8, .next = NULL},
+     LXB_DOM_ATTR_MULTIPLE, 1, true},
     {{.u.short_str = "placeholder", .length = 11, .next = NULL},
      LXB_DOM_ATTR_PLACEHOLDER, 1, true},
     {{.u.short_str = "pool", .length = 4, .next = NULL},
@@ -127,7 +129,7 @@ static const lexbor_shs_entry_t lxb_dom_attr_res_shs_data[40] =
     {"is", (void *) &lxb_dom_attr_res_data_default[LXB_DOM_ATTR_IS], 2, 0}, 
     {"type", (void *) &lxb_dom_attr_res_data_default[LXB_DOM_ATTR_TYPE], 4, 0}, 
     {"title", (void *) &lxb_dom_attr_res_data_default[LXB_DOM_ATTR_TITLE], 5, 0}, 
-    {NULL, NULL, 0, 0}, 
+    {"multiple", (void *) &lxb_dom_attr_res_data_default[LXB_DOM_ATTR_MULTIPLE], 8, 0}, 
     {"for", (void *) &lxb_dom_attr_res_data_default[LXB_DOM_ATTR_FOR], 3, 0}, 
     {"face", (void *) &lxb_dom_attr_res_data_default[LXB_DOM_ATTR_FACE], 4, 22}, 
     {"alt", (void *) &lxb_dom_attr_res_data_default[LXB_DOM_ATTR_ALT], 3, 23}, 
@@ -135,7 +137,7 @@ static const lexbor_shs_entry_t lxb_dom_attr_res_shs_data[40] =
     {"charset", (void *) &lxb_dom_attr_res_data_default[LXB_DOM_ATTR_CHARSET], 7, 26}, 
     {"maxlength", (void *) &lxb_dom_attr_res_data_default[LXB_DOM_ATTR_MAXLENGTH], 9, 0}, 
     {NULL, NULL, 0, 0}, 
-    {"checked", (void *) &lxb_dom_attr_res_data_default[LXB_DOM_ATTR_CHECKED], 7, 0}, 
+    {"checked", (void *) &lxb_dom_attr_res_data_default[LXB_DOM_ATTR_CHECKED], 7, 30}, 
     {NULL, NULL, 0, 0}
 };
 
