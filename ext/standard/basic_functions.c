@@ -739,13 +739,8 @@ PHP_FUNCTION(putenv)
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(setting, setting_len)
+		Z_PARAM_PATH(setting, setting_len)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (UNEXPECTED(zend_char_has_nul_byte(setting, setting_len))) {
-		zend_argument_value_error(1, "must not contain any null bytes");
-		RETURN_THROWS();
-	}
 
 	if (setting_len == 0 || setting[0] == '=') {
 		zend_argument_value_error(1, "must have a valid syntax");
