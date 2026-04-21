@@ -696,7 +696,7 @@ PHP_FUNCTION(getenv)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(str, str_len)
+		Z_PARAM_PATH_OR_NULL(str, str_len)
 		Z_PARAM_BOOL(local_only)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -704,11 +704,6 @@ PHP_FUNCTION(getenv)
 		array_init(return_value);
 		php_load_environment_variables(return_value);
 		return;
-	}
-
-	if (UNEXPECTED(memchr(str, '\0', str_len) != NULL)) {
-		zend_argument_value_error(1, "must not contain any null bytes");
-		RETURN_THROWS();
 	}
 
 	if (!local_only) {
@@ -747,7 +742,7 @@ PHP_FUNCTION(putenv)
 		Z_PARAM_STRING(setting, setting_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(memchr(setting, '\0', setting_len) != NULL)) {
+	if (UNEXPECTED(zend_char_has_nul_byte(setting, setting_len))) {
 		zend_argument_value_error(1, "must not contain any null bytes");
 		RETURN_THROWS();
 	}
