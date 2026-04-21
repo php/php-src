@@ -493,14 +493,16 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, co
 	}
 really_get_entry:
 	if (allow_dir) {
-		if ((entry = phar_get_entry_info_dir(phar, path, path_len, allow_dir, for_create && !PHAR_G(readonly) && !phar->is_data ? NULL : error, security)) == NULL) {
+		entry = phar_get_entry_info_dir(phar, path, path_len, allow_dir, for_create && !PHAR_G(readonly) && !phar->is_data ? NULL : error, security);
+		if (!entry) {
 			if (for_create && (!PHAR_G(readonly) || phar->is_data)) {
 				return SUCCESS;
 			}
 			return FAILURE;
 		}
 	} else {
-		if ((entry = phar_get_entry_info(phar, path, path_len, for_create && !PHAR_G(readonly) && !phar->is_data ? NULL : error, security)) == NULL) {
+		entry = phar_get_entry_info(phar, path, path_len, for_create && !PHAR_G(readonly) && !phar->is_data ? NULL : error, security);
+		if (!entry) {
 			if (for_create && (!PHAR_G(readonly) || phar->is_data)) {
 				return SUCCESS;
 			}
@@ -612,7 +614,7 @@ really_get_entry:
 ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security, uint32_t timestamp) /* {{{ */
 {
 	phar_archive_data *phar;
-	phar_entry_info *entry, etemp;
+	phar_entry_info etemp;
 	phar_entry_data *ret;
 	const char *pcr_error;
 	char is_dir;
@@ -682,7 +684,8 @@ ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fnam
 		etemp.tar_type = etemp.is_dir ? TAR_DIR : TAR_FILE;
 	}
 
-	if (NULL == (entry = zend_hash_add_mem(&phar->manifest, etemp.filename, &etemp, sizeof(phar_entry_info)))) {
+	phar_entry_info *entry = zend_hash_add_mem(&phar->manifest, etemp.filename, &etemp, sizeof(phar_entry_info));
+	if (!entry) {
 		php_stream_close(etemp.fp);
 		spprintf(error, 0, "phar error: unable to add new entry \"%s\" to phar \"%s\"",
 			ZSTR_VAL(etemp.filename), phar->fname);
@@ -1001,7 +1004,8 @@ zend_result phar_get_archive(phar_archive_data **archive, const char *fname, siz
 	}
 
 	if (alias && alias_len) {
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
+		fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len);
+		if (fd_ptr) {
 alias_success:
 			if (fname && (fname_len != fd_ptr->fname_len || strncmp(fname, fd_ptr->fname, fname_len))) {
 				if (error) {
@@ -1037,7 +1041,8 @@ alias_success:
 	size_t save_len = fname_len;
 
 	if (fname && fname_len) {
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len))) {
+		fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len);
+		if (fd_ptr) {
 			*archive = fd_ptr;
 			fd = fd_ptr;
 
@@ -1089,7 +1094,8 @@ alias_success:
 			return SUCCESS;
 		}
 
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), save, save_len))) {
+		fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), save, save_len);
+		if (fd_ptr) {
 			fd = *archive = fd_ptr;
 
 			PHAR_G(last_phar) = fd;
@@ -1127,7 +1133,8 @@ alias_success:
 			return FAILURE;
 		}
 
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len))) {
+		fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len);
+		if (fd_ptr) {
 realpath_success:
 			*archive = fd_ptr;
 			fd = fd_ptr;
@@ -1215,7 +1222,6 @@ phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t
 phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, bool security) /* {{{ */
 {
 	const char *pcr_error;
-	phar_entry_info *entry;
 	bool is_dir;
 
 #ifdef PHP_WIN32
@@ -1260,7 +1266,8 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 		path_len--;
 	}
 
-	if (NULL != (entry = zend_hash_str_find_ptr(&phar->manifest, path, path_len))) {
+	phar_entry_info *entry = zend_hash_str_find_ptr(&phar->manifest, path, path_len);
+	if (entry) {
 		if (entry->is_deleted) {
 			/* entry is deleted, but has not been flushed to disk yet */
 			return NULL;
@@ -1304,7 +1311,8 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 				size_t test_len;
 				php_stream_statbuf ssb;
 
-				if (NULL == (entry = zend_hash_find_ptr(&phar->manifest, str_key))) {
+				entry = zend_hash_find_ptr(&phar->manifest, str_key);
+				if (!entry) {
 					if (error) {
 						spprintf(error, 4096, "phar internal error: mounted path \"%s\" could not be retrieved from manifest", ZSTR_VAL(str_key));
 					}
@@ -1353,7 +1361,8 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 
 				efree(test);
 
-				if (NULL == (entry = zend_hash_str_find_ptr(&phar->manifest, path, path_len))) {
+				entry = zend_hash_str_find_ptr(&phar->manifest, path, path_len);
+				if (!entry) {
 					if (error) {
 						spprintf(error, 4096, "phar error: path \"%s\" exists as file \"%s\" and could not be retrieved after being mounted", path, test);
 					}
@@ -1522,17 +1531,22 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 			pfp = php_stream_open_wrapper(pfile, "rb", 0, NULL);
 			efree(pfile);
 
-			if (!pfp || !(pubkey = php_stream_copy_to_mem(pfp, PHP_STREAM_COPY_ALL, 0)) || !ZSTR_LEN(pubkey)) {
-				if (pfp) {
-					php_stream_close(pfp);
-				}
+			if (!pfp) {
 				if (error) {
 					*error = estrdup("openssl public key could not be read");
 				}
 				return FAILURE;
 			}
 
+			pubkey = php_stream_copy_to_mem(pfp, PHP_STREAM_COPY_ALL, 0);
 			php_stream_close(pfp);
+			if (!pubkey || !ZSTR_LEN(pubkey)) {
+				if (error) {
+					*error = estrdup("openssl public key could not be read");
+				}
+				return FAILURE;
+			}
+
 #ifndef PHAR_HAVE_OPENSSL
 			tempsig = sig_len;
 

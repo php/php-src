@@ -163,11 +163,11 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	char *internal_file;
 	char *error;
 	HashTable *pharcontext;
-	php_url *resource = NULL;
 	php_stream *fpf;
 	zval *pzoption, *metadata;
 
-	if ((resource = phar_parse_url(wrapper, path, mode, options)) == NULL) {
+	php_url *resource = phar_parse_url(wrapper, path, mode, options);
+	if (!resource) {
 		return NULL;
 	}
 
@@ -320,7 +320,7 @@ idata_error:
 	}
 
 	if (!PHAR_G(cwd_init) && (options & STREAM_OPEN_FOR_INCLUDE)) {
-		char *entry = ZSTR_VAL(idata->internal_file->filename), *cwd;
+		const char *entry = ZSTR_VAL(idata->internal_file->filename), *cwd;
 
 		PHAR_G(cwd_init) = 1;
 		if ((idata->phar->is_tar || idata->phar->is_zip) && zend_string_equals_literal(idata->internal_file->filename, ".phar/stub.php")) {
@@ -556,13 +556,12 @@ static int phar_stream_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int flags,
 				  php_stream_statbuf *ssb, php_stream_context *context) /* {{{ */
 {
-	php_url *resource = NULL;
 	char *internal_file;
 	phar_archive_data *phar;
-	phar_entry_info *entry;
 	size_t internal_file_len;
 
-	if ((resource = phar_parse_url(wrapper, url, "r", flags|PHP_STREAM_URL_STAT_QUIET)) == NULL) {
+	php_url *resource = phar_parse_url(wrapper, url, "r", flags|PHP_STREAM_URL_STAT_QUIET);
+	if (!resource) {
 		return FAILURE;
 	}
 
@@ -597,7 +596,8 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	}
 	internal_file_len = strlen(internal_file);
 	/* search through the manifest of files, and if we have an exact match, it's a file */
-	if (NULL != (entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len))) {
+	phar_entry_info *entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len);
+	if (entry) {
 		phar_dostat(phar, entry, ssb, false);
 		php_url_free(resource);
 		return SUCCESS;
@@ -636,7 +636,9 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 					goto free_resource;
 				}
 				efree(test);
-				if (NULL == (entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len))) {
+
+				entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len);
+				if (!entry) {
 					goto free_resource;
 				}
 				phar_dostat(phar, entry, ssb, false);
@@ -656,13 +658,13 @@ free_resource:
  */
 static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context) /* {{{ */
 {
-	php_url *resource;
 	char *internal_file, *error;
 	size_t internal_file_len;
 	phar_entry_data *idata;
 	phar_archive_data *pphar;
 
-	if ((resource = phar_parse_url(wrapper, url, "rb", options)) == NULL) {
+	php_url *resource = phar_parse_url(wrapper, url, "rb", options);
+	if (!resource) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: unlink failed");
 		return 0;
 	}
@@ -728,16 +730,15 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 
 static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context) /* {{{ */
 {
-	php_url *resource_from, *resource_to;
 	char *error;
 	phar_archive_data *phar, *pfrom, *pto;
-	phar_entry_info *entry;
 	bool is_dir = false;
 	bool is_modified = false;
 
 	error = NULL;
 
-	if ((resource_from = phar_parse_url(wrapper, url_from, "wb", options|PHP_STREAM_URL_STAT_QUIET)) == NULL) {
+	php_url *resource_from = phar_parse_url(wrapper, url_from, "wb", options|PHP_STREAM_URL_STAT_QUIET);
+	if (!resource_from) {
 		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid or non-writable url \"%s\"", url_from, url_to, url_from);
 		return 0;
 	}
@@ -753,7 +754,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		return 0;
 	}
 
-	if ((resource_to = phar_parse_url(wrapper, url_to, "wb", options|PHP_STREAM_URL_STAT_QUIET)) == NULL) {
+	php_url *resource_to = phar_parse_url(wrapper, url_to, "wb", options|PHP_STREAM_URL_STAT_QUIET);
+	if (!resource_to) {
 		php_url_free(resource_from);
 		php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid or non-writable url \"%s\"", url_from, url_to, url_to);
 		return 0;
@@ -822,7 +824,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		return 0;
 	}
 
-	if (NULL != (entry = zend_hash_str_find_ptr(&(phar->manifest), ZSTR_VAL(resource_from->path)+1, ZSTR_LEN(resource_from->path)-1))) {
+	phar_entry_info *entry = zend_hash_str_find_ptr(&(phar->manifest), ZSTR_VAL(resource_from->path)+1, ZSTR_LEN(resource_from->path)-1);
+	if (entry) {
 		phar_entry_info new, *source;
 
 		/* perform rename magic */

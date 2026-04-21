@@ -658,11 +658,9 @@ next:
 	myphar = actual;
 
 	if (actual_alias) {
-		phar_archive_data *fd_ptr;
-
 		myphar->is_temporary_alias = 0;
-
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar->alias_len))) {
+		phar_archive_data *fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar->alias_len);
+		if (fd_ptr) {
 			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
@@ -674,10 +672,9 @@ next:
 
 		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar->alias_len, myphar);
 	} else {
-		phar_archive_data *fd_ptr;
-
 		if (alias_len) {
-			if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
+			phar_archive_data *fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len);
+			if (fd_ptr) {
 				if (SUCCESS != phar_free_alias(fd_ptr)) {
 					if (error) {
 						spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
@@ -909,7 +906,7 @@ ZEND_ATTRIBUTE_NONNULL static int phar_tar_setupmetadata(zval *zv, void *argumen
 {
 	struct _phar_pass_tar_info *i = (struct _phar_pass_tar_info *)argument;
 	char **error = i->error;
-	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv), *metadata, newentry = {0};
+	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv), newentry = {0};
 
 	if (zend_string_starts_with_literal(entry->filename, ".phar/.metadata")) {
 		if (zend_string_equals_literal(entry->filename, ".phar/.metadata.bin")) {
@@ -937,7 +934,8 @@ ZEND_ATTRIBUTE_NONNULL static int phar_tar_setupmetadata(zval *zv, void *argumen
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
-	if (NULL != (metadata = zend_hash_find_ptr(&entry->phar->manifest, lookfor))) {
+	phar_entry_info *metadata = zend_hash_find_ptr(&entry->phar->manifest, lookfor);
+	if (metadata) {
 		int ret;
 		ret = phar_tar_setmetadata(&entry->metadata_tracker, metadata, error);
 		zend_string_efree(lookfor);
@@ -949,7 +947,8 @@ ZEND_ATTRIBUTE_NONNULL static int phar_tar_setupmetadata(zval *zv, void *argumen
 	newentry.tar_type = TAR_FILE;
 	newentry.is_tar = 1;
 
-	if (NULL == (metadata = zend_hash_add_mem(&entry->phar->manifest, lookfor, &newentry, sizeof(phar_entry_info)))) {
+	metadata = zend_hash_add_mem(&entry->phar->manifest, lookfor, &newentry, sizeof(phar_entry_info));
+	if (!metadata) {
 		zend_string_efree(lookfor);
 		spprintf(error, 0, "phar tar error: unable to add magic metadata file to manifest for file \"%s\"", ZSTR_VAL(entry->filename));
 		return ZEND_HASH_APPLY_STOP;
@@ -1104,8 +1103,8 @@ nostub:
 	pass.free_ufp = true;
 
 	if (phar_metadata_tracker_has_data(&phar->metadata_tracker, phar->is_persistent)) {
-		phar_entry_info *mentry;
-		if (NULL != (mentry = zend_hash_str_find_ptr(&(phar->manifest), ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1))) {
+		phar_entry_info *mentry = zend_hash_str_find_ptr(&(phar->manifest), ZEND_STRL(".phar/.metadata.bin"));
+		if (mentry) {
 			if (ZEND_HASH_APPLY_KEEP != phar_tar_setmetadata(&phar->metadata_tracker, mentry, error)) {
 				if (must_close_old_file) {
 					php_stream_close(oldfile);
@@ -1120,7 +1119,8 @@ nostub:
 			newentry.tar_type = TAR_FILE;
 			newentry.is_tar = 1;
 
-			if (NULL == (mentry = zend_hash_add_mem(&phar->manifest, newentry.filename, &newentry, sizeof(phar_entry_info)))) {
+			mentry = zend_hash_add_mem(&phar->manifest, newentry.filename, &newentry, sizeof(phar_entry_info));
+			if (!mentry) {
 				zend_string_efree(newentry.filename);
 				spprintf(error, 0, "phar tar error: unable to add magic metadata file to manifest for phar archive \"%s\"", phar->fname);
 				if (must_close_old_file) {

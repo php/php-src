@@ -1263,7 +1263,8 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 			MAPPHAR_FAIL("Cannot open archive \"%s\", invalid alias");
 		}
 
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
+		fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len);
+		if (fd_ptr) {
 			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				signature = NULL;
 				fp = NULL;
@@ -1460,10 +1461,9 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 		/* assume tar format, PharData can specify other */
 		mydata->is_tar = 1;
 	} else {
-		phar_archive_data *fd_ptr;
-
-		if (alias && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
-			if (SUCCESS != phar_free_alias(fd_ptr)) {
+		if (alias) {
+			const phar_archive_data *fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len);
+			if (fd_ptr && SUCCESS != phar_free_alias(fd_ptr)) {
 				spprintf(error, 4096, "phar error: phar \"%s\" cannot set alias \"%s\", already in use by another phar archive", mydata->fname, alias);
 
 				zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
@@ -1669,14 +1669,14 @@ static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_l
 				continue;
 			} else if (!memcmp(pos, bz_magic, 3)) {
 				php_stream_filter *filter;
-				php_stream *temp;
 
 				if (!PHAR_G(has_bz2)) {
 					MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\" to temporary file, enable bz2 extension in php.ini")
 				}
 
 				/* entire file is bzip-compressed, uncompress to temporary file */
-				if (!(temp = php_stream_fopen_tmpfile())) {
+				php_stream *temp = php_stream_fopen_tmpfile();
+				if (!temp) {
 					MAPPHAR_ALLOC_FAIL("unable to create temporary file for decompression of bzipped phar archive \"%s\"")
 				}
 
@@ -1750,10 +1750,10 @@ static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_l
 static zend_result phar_analyze_path(const char *fname, const char *ext, size_t ext_len, int for_create) /* {{{ */
 {
 	php_stream_statbuf ssb;
-	char *realpath;
 	char *filename = estrndup(fname, (ext - fname) + ext_len);
 
-	if ((realpath = expand_filepath(filename, NULL))) {
+	char *realpath = expand_filepath(filename, NULL);
+	if (realpath) {
 #ifdef PHP_WIN32
 		phar_unixify_path_separators(realpath, strlen(realpath));
 #endif
@@ -1800,7 +1800,8 @@ static zend_result phar_analyze_path(const char *fname, const char *ext, size_t 
 
 		if (SUCCESS != php_stream_stat_path((char *) filename, &ssb)) {
 			if (!slash) {
-				if (!(realpath = expand_filepath(filename, NULL))) {
+				realpath = expand_filepath(filename, NULL);
+				if (!realpath) {
 					efree(filename);
 					return FAILURE;
 				}
@@ -1943,7 +1944,8 @@ zend_result phar_detect_phar_fname_ext(const char *filename, size_t filename_len
 		phar_archive_data *pphar;
 
 		if (is_complete) {
-			if (NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), (char *) filename, filename_len))) {
+			pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), filename, filename_len);
+			if (pphar) {
 				*ext_str = filename + (filename_len - pphar->ext_len);
 woohoo:
 				*ext_len = pphar->ext_len;
@@ -1963,7 +1965,8 @@ woohoo:
 				return FAILURE;
 			}
 
-			if (PHAR_G(manifest_cached) && NULL != (pphar = zend_hash_str_find_ptr(&cached_phars, (char *) filename, filename_len))) {
+			pphar = PHAR_G(manifest_cached) ? zend_hash_str_find_ptr(&cached_phars, filename, filename_len) : NULL;
+			if (pphar) {
 				*ext_str = filename + (filename_len - pphar->ext_len);
 				goto woohoo;
 			}

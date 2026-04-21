@@ -106,7 +106,8 @@ static zend_string* phar_get_name_for_relative_paths(zend_string *filename, bool
 
 	zend_string *name = NULL;
 	if (using_include_path) {
-		if (!(name = phar_find_in_include_path(filename, NULL))) {
+		name = phar_find_in_include_path(filename, NULL);
+		if (!name) {
 			/* this file is not in the phar, use the original path */
 			zend_string_release_ex(arch, false);
 			return NULL;
@@ -841,7 +842,8 @@ void phar_release_functions(void)
 /* {{{ void phar_intercept_functions_init(void) */
 #define PHAR_INTERCEPT(func) \
 	PHAR_G(orig_##func) = NULL; \
-	if (NULL != (orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1))) { \
+	orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1); \
+	if (orig) { \
 		PHAR_G(orig_##func) = orig->internal_function.handler; \
 		orig->internal_function.handler = PHP_FN(phar_##func); \
 	}

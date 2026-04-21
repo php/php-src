@@ -726,7 +726,6 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 	zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len, mydata);
 
 	if (actual_alias) {
-		phar_archive_data *fd_ptr;
 
 		if (!phar_validate_alias(actual_alias, mydata->alias_len)) {
 			if (error) {
@@ -739,7 +738,8 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 
 		mydata->is_temporary_alias = 0;
 
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias, mydata->alias_len))) {
+		phar_archive_data *fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias, mydata->alias_len);
+		if (fd_ptr) {
 			if (SUCCESS != phar_free_alias(fd_ptr)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add zip-based phar \"%s\" with implicit alias, alias is already in use", fname);
@@ -758,10 +758,9 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 
 		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), mydata->alias, mydata->alias_len, mydata);
 	} else {
-		phar_archive_data *fd_ptr;
-
 		if (alias_len) {
-			if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
+			phar_archive_data *fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len);
+			if (fd_ptr) {
 				if (SUCCESS != phar_free_alias(fd_ptr)) {
 					if (error) {
 						spprintf(error, 4096, "phar error: Unable to add zip-based phar \"%s\" with explicit alias, alias is already in use", fname);

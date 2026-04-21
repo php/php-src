@@ -247,11 +247,11 @@ static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const Has
  */
 php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
 {
-	php_url *resource = NULL;
 	char *error;
 	phar_archive_data *phar;
 
-	if ((resource = phar_parse_url(wrapper, path, mode, options)) == NULL) {
+	php_url *resource = phar_parse_url(wrapper, path, mode, options);
+	if (!resource) {
 		php_stream_wrapper_log_error(wrapper, options, "phar url \"%s\" is unknown", path);
 		return NULL;
 	}
@@ -343,7 +343,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
  */
 int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mode, int options, php_stream_context *context) /* {{{ */
 {
-	phar_entry_info entry, *e;
+	phar_entry_info entry;
 	phar_archive_data *phar = NULL;
 	char *error;
 	php_url *resource = NULL;
@@ -390,7 +390,8 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		return 0;
 	}
 
-	if ((e = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 2, &error, true))) {
+	phar_entry_info *e = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1, 2, &error, true);
+	if (e) {
 		/* directory exists, or is a subdirectory of an existing file */
 		if (e->is_temp_dir) {
 			zend_string_efree(e->filename);
@@ -444,7 +445,8 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	entry.flags = PHAR_ENT_PERM_DEF_DIR;
 	entry.old_flags = PHAR_ENT_PERM_DEF_DIR;
 
-	if (NULL == zend_hash_add_mem(&phar->manifest, entry.filename, &entry, sizeof(phar_entry_info))) {
+	void *had_been_added = zend_hash_add_mem(&phar->manifest, entry.filename, &entry, sizeof(phar_entry_info));
+	if (!had_been_added) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", adding to manifest failed", ZSTR_VAL(entry.filename), phar->fname);
 		zend_string_efree(entry.filename);
 		return 0;
@@ -469,10 +471,8 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
  */
 int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context) /* {{{ */
 {
-	phar_entry_info *entry;
 	phar_archive_data *phar = NULL;
 	char *error;
-	php_url *resource = NULL;
 
 	/* pre-readonly check, we need to know if this is a data phar */
 	zend_string *arch = phar_split_fname(url, strlen(url), NULL, 2, 2);
@@ -492,7 +492,8 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 		return 0;
 	}
 
-	if ((resource = phar_parse_url(wrapper, url, "w", options)) == NULL) {
+	php_url *resource = phar_parse_url(wrapper, url, "w", options);
+	if (!resource) {
 		return 0;
 	}
 
@@ -518,7 +519,8 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 
 	size_t path_len = ZSTR_LEN(resource->path) - 1;
 
-	if (!(entry = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, path_len, 2, &error, true))) {
+	phar_entry_info *entry = phar_get_entry_info_dir(phar, ZSTR_VAL(resource->path) + 1, path_len, 2, &error, true);
+	if (!entry) {
 		if (error) {
 			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(resource->path)+1, ZSTR_VAL(resource->host), error);
 			efree(error);
