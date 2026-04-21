@@ -337,15 +337,12 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 			wmask=S_IWGRP;
 			xmask=S_IXGRP;
 		} else {
-			int   groups, n, i;
-			gid_t *gids;
-
-			groups = getgroups(0, NULL);
-			if(groups > 0) {
-				gids=(gid_t *)safe_emalloc(groups, sizeof(gid_t), 0);
-				n=getgroups(groups, gids);
-				for(i=0;i<n;++i){
-					if(stat_sb->st_gid==gids[i]) {
+			int groups = getgroups(0, NULL);
+			if (groups > 0) {
+				gid_t *gids = safe_emalloc(groups, sizeof(gid_t), 0);
+				int n = getgroups(groups, gids);
+				for(int i = 0; i < n; ++i){
+					if (stat_sb->st_gid==gids[i]) {
 						rmask=S_IRGRP;
 						wmask=S_IWGRP;
 						xmask=S_IXGRP;

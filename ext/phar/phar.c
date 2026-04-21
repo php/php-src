@@ -91,7 +91,7 @@ HashTable cached_alias;
 static void phar_split_cache_list(void) /* {{{ */
 {
 	char *tmp;
-	char *key, *lasts, *end;
+	char *key, *lasts;
 	char ds[2];
 	phar_archive_data *phar;
 	uint32_t i = 0;
@@ -124,7 +124,7 @@ static void phar_split_cache_list(void) /* {{{ */
 			key;
 			key = php_strtok_r(NULL, ds, &lasts)) {
 		size_t len;
-		end = strchr(key, DEFAULT_DIR_SEPARATOR);
+		const char *end = strchr(key, DEFAULT_DIR_SEPARATOR);
 		if (end) {
 			len = end - key;
 		} else {

@@ -319,10 +319,9 @@ static void phar_do_403(void) /* {{{ */
 static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, zend_string *f404) /* {{{ */
 {
 	sapi_header_line ctr = {0};
-	phar_entry_info	*info;
 
 	if (phar && f404 && ZSTR_LEN(f404)) {
-		info = phar_get_entry_info(phar, ZSTR_VAL(f404), ZSTR_LEN(f404), NULL, true);
+		phar_entry_info	*info = phar_get_entry_info(phar, ZSTR_VAL(f404), ZSTR_LEN(f404), NULL, true);
 
 		if (info) {
 			/* Status doesn't matter, we're exiting anyway. */
@@ -344,7 +343,7 @@ static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, 
 /* post-process REQUEST_URI and retrieve the actual request URI.  This is for
    cases like http://localhost/blah.phar/path/to/file.php/extra/stuff
    which calls "blah.phar" file "path/to/file.php" with PATH_INFO "/extra/stuff" */
-static void phar_postprocess_ru_web(char *fname, size_t fname_len, char *entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
+static void phar_postprocess_ru_web(const char *fname, size_t fname_len, char *entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
 {
 	char *e = entry + 1, *u1 = NULL, *u = NULL, *saveu = NULL;
 	size_t e_len = *entry_len - 1, u_len = 0;
