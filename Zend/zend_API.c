@@ -511,13 +511,13 @@ static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32
 
 ZEND_API zpp_parse_bool_status ZEND_FASTCALL zend_parse_arg_bool_weak(const zval *arg, uint32_t arg_num) /* {{{ */
 {
-	if (UNEXPECTED(Z_TYPE_P(arg) > IS_STRING)) {
-		return ZPP_PARSE_BOOL_STATUS_ERROR;
+	if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("bool", arg_num)) {
+			return ZPP_PARSE_BOOL_STATUS_ERROR;
+		}
+		return zend_is_true(arg);
 	}
-	if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("bool", arg_num)) {
-		return ZPP_PARSE_BOOL_STATUS_ERROR;
-	}
-	return zend_is_true(arg);
+	return ZPP_PARSE_BOOL_STATUS_ERROR;
 }
 /* }}} */
 
