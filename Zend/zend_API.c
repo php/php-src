@@ -3045,7 +3045,6 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		internal_function->prop_info = NULL;
 		internal_function->attributes = NULL;
 		internal_function->frameless_function_infos = ptr->frameless_function_infos;
-		internal_function->fn_flags2 = 0;
 		if (EG(active)) { // at run-time: this ought to only happen if registered with dl() or somehow temporarily at runtime
 			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
 		} else {
@@ -3055,7 +3054,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, NULL);
 #endif
 		}
-		if (ptr->flags) {
+		if (ptr->flags & UINT32_MAX) {
 			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {
 				if (ptr->flags != ZEND_ACC_DEPRECATED && scope) {
 					zend_error(error_type, "Invalid access level for %s::%s() - access must be exactly one of public, protected or private", ZSTR_VAL(scope->name), ptr->fname);
@@ -3067,6 +3066,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		} else {
 			internal_function->fn_flags = ZEND_ACC_PUBLIC;
 		}
+		internal_function->fn_flags2 = ptr->flags >> 32;
 
 		if (ptr->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)ptr->arg_info;

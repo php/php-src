@@ -36,7 +36,7 @@ typedef struct _zend_function_entry {
 	zif_handler handler;
 	const struct _zend_internal_arg_info *arg_info;
 	uint32_t num_args;
-	uint32_t flags;
+	uint64_t flags;
 	const zend_frameless_function_info *frameless_function_infos;
 	const char *doc_comment;
 } zend_function_entry;
@@ -73,6 +73,8 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_NAMED_FUNCTION(name)		void ZEND_FASTCALL name(INTERNAL_FUNCTION_PARAMETERS)
 #define ZEND_FUNCTION(name)				ZEND_NAMED_FUNCTION(zif_##name)
 #define ZEND_METHOD(classname, name)	ZEND_NAMED_FUNCTION(zim_##classname##_##name)
+
+#define ZEND_FENTRY_FLAGS(flags, flags2) (((uint64_t)flags) | ((uint64_t)flags2 << 32))
 
 #define ZEND_FENTRY(zend_name, name, arg_info, flags)	{ #zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags, NULL, NULL },
 
