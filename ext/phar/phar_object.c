@@ -2631,7 +2631,7 @@ PHP_METHOD(Phar, getAlias)
 
 	PHAR_ARCHIVE_OBJECT();
 
-	if (phar_obj->archive->alias && phar_obj->archive->alias != phar_obj->archive->fname) {
+	if (phar_obj->archive->alias) {
 		RETURN_STRINGL(phar_obj->archive->alias, phar_obj->archive->alias_len);
 	}
 }
