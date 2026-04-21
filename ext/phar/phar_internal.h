@@ -245,9 +245,9 @@ typedef struct _phar_entry_info {
 struct _phar_archive_data {
 	char                     *fname;
 	uint32_t                 fname_len;
-	/* for phar_detect_fname_ext, this stores the location of the file extension within fname */
+	/* The ext field stores the location of the file extension from the fname field, and thus should never be freed. */
 	uint32_t                 ext_len;
-	char                     *ext;
+	const char               *ext;
 	char                     *alias;
 	uint32_t                 alias_len;
 	char                     version[12];
