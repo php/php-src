@@ -87,7 +87,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --EXPECT--
 mysqli_stmt object is not fully initialized
-The result set buffer is empty
+No result set associated with the statement
 int(3)
 int(1)
 int(1)
