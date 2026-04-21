@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: dcb089a336c6c3e6c685762057dcedcb393508a7
+ * Stub hash: e1fb73f5a5f455a3a1eb871e670f26b671da0407
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -590,8 +590,16 @@ static const zend_function_entry class_ZendTestChildClassWithMethodWithParameter
 };
 
 static const zend_function_entry class_ZendTestForbidDynamicCall_methods[] = {
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_ME(ZendTestForbidDynamicCall, call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_FENTRY_FLAGS(ZEND_ACC_PUBLIC, ZEND_ACC2_FORBID_DYN_CALLS))
+#elif (PHP_VERSION_ID >= 80000)
 	ZEND_ME(ZendTestForbidDynamicCall, call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_ACC_PUBLIC)
+#endif
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_ME(ZendTestForbidDynamicCall, callStatic, arginfo_class_ZendTestForbidDynamicCall_callStatic, ZEND_FENTRY_FLAGS(ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, ZEND_ACC2_FORBID_DYN_CALLS))
+#elif (PHP_VERSION_ID >= 80000)
 	ZEND_ME(ZendTestForbidDynamicCall, callStatic, arginfo_class_ZendTestForbidDynamicCall_callStatic, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+#endif
 	ZEND_FE_END
 };
 

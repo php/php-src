@@ -1304,6 +1304,7 @@ class FuncInfo {
         public ?FunctionOrMethodName $alias,
         private readonly bool $isDeprecated,
         private bool $supportsCompileTimeEval,
+        private bool $forbidDynamicCalls,
         public readonly bool $verify,
         public /* readonly */ array $args,
         public /* readonly */ ReturnInfo $return,
@@ -1609,6 +1610,10 @@ class FuncInfo {
             static fn (AttributeInfo $attr): bool => $attr->class === "NoDiscard"
         )) {
             $flags->addForVersionsAbove("ZEND_ACC_NODISCARD", PHP_85_VERSION_ID);
+        }
+
+        if ($this->forbidDynamicCalls) {
+            $flags->addForVersionsAbove("ZEND_ACC2_FORBID_DYN_CALLS", PHP_86_VERSION_ID);
         }
 
         return $flags;
@@ -4797,6 +4802,7 @@ function parseFunctionLike(
         $alias = null;
         $isDeprecated = false;
         $supportsCompileTimeEval = false;
+        $forbidDynamicCalls = false;
         $verify = true;
         $docReturnType = null;
         $tentativeReturnType = false;
@@ -4812,6 +4818,7 @@ function parseFunctionLike(
             $verify = !array_key_exists('no-verify', $tagMap);
             $tentativeReturnType = array_key_exists('tentative-return-type', $tagMap);
             $supportsCompileTimeEval = array_key_exists('compile-time-eval', $tagMap);
+            $forbidDynamicCalls = array_key_exists('forbid-dynamic-calls', $tagMap);
             $isUndocumentable = $isUndocumentable || array_key_exists('undocumentable', $tagMap);
 
             foreach ($tags as $tag) {
@@ -4944,6 +4951,7 @@ function parseFunctionLike(
             $alias,
             $isDeprecated,
             $supportsCompileTimeEval,
+            $forbidDynamicCalls,
             $verify,
             $args,
             $return,

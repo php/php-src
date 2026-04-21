@@ -1652,6 +1652,7 @@ function extract(array &$array, int $flags = EXTR_OVERWRITE, string $prefix = ""
  * @param array|string $var_names
  * @return array<string, mixed|ref>
  * @refcount 1
+ * @forbid-dynamic-calls
  */
 function compact($var_name, ...$var_names): array {}
 

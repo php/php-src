@@ -1328,6 +1328,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
+		if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+			ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+		}
 	}
 #endif
 
@@ -1396,6 +1399,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
+		if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+			ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+		}
 	}
 #endif
 
@@ -1464,6 +1470,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
+		if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+			ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+		}
 	}
 #endif
 	zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
@@ -1648,6 +1657,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -1764,6 +1776,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -1879,6 +1894,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -2013,6 +2031,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -2146,6 +2167,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -2276,6 +2300,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -3663,6 +3690,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALL_TRAMPOLI
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 #endif
 
@@ -3809,6 +3839,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALL_TRAMPOLI
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 #endif
 		zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
@@ -54080,6 +54113,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_ICA
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
+		if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+			ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+		}
 	}
 #endif
 
@@ -54148,6 +54184,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_ICA
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
+		if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+			ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+		}
 	}
 #endif
 
@@ -54216,6 +54255,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_IC
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
+		if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+			ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+		}
 	}
 #endif
 	zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
@@ -54400,6 +54442,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -54516,6 +54561,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -54631,6 +54679,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FC
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -54765,6 +54816,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -54898,6 +54952,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -55028,6 +55085,9 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FC
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -56299,6 +56359,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALL_TRAMPOLINE_SP
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 #endif
 
@@ -56445,6 +56508,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALL_TRAMPOLINE_SP
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC) {
+				ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+			}
 		}
 #endif
 		zend_observer_fcall_end(call, EG(exception) ? NULL : ret);

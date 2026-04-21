@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 85603c0acd3b8580cbff782a53c9b1453943684f
+ * Stub hash: 36b71aa7bbfe478a5e4af400b2822a77067efa2f
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -2944,8 +2944,16 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(array_walk_recursive, arginfo_array_walk_recursive)
 	ZEND_RAW_FENTRY("in_array", zif_in_array, arginfo_in_array, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_in_array, NULL)
 	ZEND_RAW_FENTRY("array_search", zif_array_search, arginfo_array_search, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
-	ZEND_FE(extract, arginfo_extract)
-	ZEND_FE(compact, arginfo_compact)
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_RAW_FENTRY("extract", zif_extract, arginfo_extract, ZEND_FENTRY_FLAGS(0, ZEND_ACC2_FORBID_DYN_CALLS), NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("extract", zif_extract, arginfo_extract, 0, NULL, NULL)
+#endif
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_RAW_FENTRY("compact", zif_compact, arginfo_compact, ZEND_FENTRY_FLAGS(0, ZEND_ACC2_FORBID_DYN_CALLS), NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("compact", zif_compact, arginfo_compact, 0, NULL, NULL)
+#endif
 	ZEND_FE(array_fill, arginfo_array_fill)
 	ZEND_FE(array_fill_keys, arginfo_array_fill_keys)
 	ZEND_FE(range, arginfo_range)

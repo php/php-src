@@ -187,7 +187,9 @@ namespace {
     }
 
     final class ZendTestForbidDynamicCall {
+        /** @forbid-dynamic-calls */
         public function call(): void {}
+        /** @forbid-dynamic-calls */
         public static function callStatic(): void {}
     }
 

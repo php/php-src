@@ -18,11 +18,16 @@ function die(string|int $status = 0): never {}
 /** @refcount 1 */
 function zend_version(): string {}
 
+/** @forbid-dynamic-calls */
 function func_num_args(): int {}
 
+/** @forbid-dynamic-calls */
 function func_get_arg(int $position): mixed {}
 
-/** @return array<int, mixed> */
+/**
+ * @return array<int, mixed>
+ * @forbid-dynamic-calls
+ */
 function func_get_args(): array {}
 
 function strlen(string $string): int {}
@@ -156,6 +161,7 @@ function get_defined_functions(bool $exclude_disabled = true): array {}
 /**
  * @return array<string, mixed|ref>
  * @refcount 1
+ * @forbid-dynamic-calls
  */
 function get_defined_vars(): array {}
 

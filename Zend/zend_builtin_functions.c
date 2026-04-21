@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "php_version.h"
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_attributes.h"
