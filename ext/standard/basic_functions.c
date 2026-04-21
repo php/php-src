@@ -706,6 +706,11 @@ PHP_FUNCTION(getenv)
 		return;
 	}
 
+	if (UNEXPECTED(memchr(str, '\0', str_len) != NULL)) {
+		zend_argument_value_error(1, "must not contain any null bytes");
+		RETURN_THROWS();
+	}
+
 	if (!local_only) {
 		/* SAPI method returns an emalloc()'d string */
 		char *ptr = sapi_getenv(str, str_len);
@@ -742,7 +747,7 @@ PHP_FUNCTION(putenv)
 		Z_PARAM_STRING(setting, setting_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (memchr(setting, '\0', setting_len) != NULL) {
+	if (UNEXPECTED(memchr(setting, '\0', setting_len) != NULL)) {
 		zend_argument_value_error(1, "must not contain any null bytes");
 		RETURN_THROWS();
 	}

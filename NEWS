@@ -170,6 +170,8 @@ PHP                                                                        NEWS
     argument value is passed. (Girgias)
   . linkinfo() now raises a ValueError when the argument is an empty string.
     (Weilin Du)
+  . getenv() now raises a ValueError when the $name argument contains null
+    bytes. (Weilin Du)
   . putenv() now raises a ValueError when the $assignment argument contains
     null bytes. (Weilin Du)
 
