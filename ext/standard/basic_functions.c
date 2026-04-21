@@ -742,6 +742,11 @@ PHP_FUNCTION(putenv)
 		Z_PARAM_STRING(setting, setting_len)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (memchr(setting, '\0', setting_len) != NULL) {
+		zend_argument_value_error(1, "must not contain any null bytes");
+		RETURN_THROWS();
+	}
+
 	if (setting_len == 0 || setting[0] == '=') {
 		zend_argument_value_error(1, "must have a valid syntax");
 		RETURN_THROWS();
