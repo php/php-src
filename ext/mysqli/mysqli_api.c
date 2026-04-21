@@ -1489,7 +1489,11 @@ PHP_FUNCTION(mysqli_stmt_data_seek)
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
 	if (!stmt->stmt->data || !stmt->stmt->data->result || !stmt->stmt->data->result->stored_data) {
-		zend_throw_error(NULL, "No result set associated with the statement");
+		if (hasThis()) {
+			zend_throw_error(NULL, "mysqli_stmt::data_seek(): No result set associated with the statement");
+		} else {
+			zend_throw_error(NULL, "mysqli_stmt_data_seek(): No result set associated with the statement");
+		}
 		RETURN_THROWS();
 	}
 
