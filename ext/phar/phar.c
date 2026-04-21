@@ -192,7 +192,7 @@ PHP_INI_END()
  */
 void phar_destroy_phar_data(phar_archive_data *phar) /* {{{ */
 {
-	if (phar->alias && phar->alias != phar->fname) {
+	if (phar->alias) {
 		pefree(phar->alias, phar->is_persistent);
 		phar->alias = NULL;
 	}
