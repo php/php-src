@@ -314,15 +314,14 @@ char *alloca();
 
 #if (defined(__GNUC__) && ZEND_GCC_VERSION >= 4003) || __has_attribute(cold)
 # define ZEND_COLD __attribute__((cold))
-# ifdef __OPTIMIZE__
-#  define ZEND_OPT_SIZE  __attribute__((optimize("Os")))
-#  define ZEND_OPT_SPEED __attribute__((optimize("Ofast")))
-# else
-#  define ZEND_OPT_SIZE
-#  define ZEND_OPT_SPEED
-# endif
 #else
 # define ZEND_COLD
+#endif
+
+#if ((defined(__GNUC__) && ZEND_GCC_VERSION >= 4003) || __has_attribute(optimize)) && defined(__OPTIMIZE__)
+# define ZEND_OPT_SIZE  __attribute__((optimize("Os")))
+# define ZEND_OPT_SPEED __attribute__((optimize("Ofast")))
+#else
 # define ZEND_OPT_SIZE
 # define ZEND_OPT_SPEED
 #endif
