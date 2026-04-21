@@ -1,0 +1,7 @@
+X-Powered-By: PHP/%v
+Content-type: text/html; charset=UTF-8
+
+object(Symfony\Component\Uid\UuidV7)#%d (%d) {
+  ["uid":protected]=>
+  string(36) "%s-%s-%s-%s-%s"
+}

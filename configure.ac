@@ -547,6 +547,7 @@ AC_CHECK_FUNCS(m4_normalize([
   asctime_r
   asprintf
   chroot
+  clock_gettime
   ctime_r
   explicit_memset
   fdatasync
@@ -598,6 +599,7 @@ AC_CHECK_FUNCS(m4_normalize([
   strptime
   strtok_r
   symlink
+  timespec_get
   tzset
   unsetenv
   usleep
@@ -1754,6 +1756,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_generators.c
     zend_hash.c
     zend_highlight.c
+    zend_time.c
     zend_hrtime.c
     zend_inheritance.c
     zend_ini_parser.c
