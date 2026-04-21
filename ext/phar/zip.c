@@ -308,21 +308,23 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 		ZVAL_UNDEF(&mydata->metadata_tracker.val);
 	}
 
-	mydata->fname = pestrndup(fname, fname_len, mydata->is_persistent);
+	mydata->fname = zend_string_init(fname, fname_len, mydata->is_persistent);
+	if (mydata->is_persistent) {
+		GC_MAKE_PERSISTENT_LOCAL(mydata->fname);
+	}
 #ifdef PHP_WIN32
-	phar_unixify_path_separators(mydata->fname, fname_len);
+	phar_unixify_path_separators(ZSTR_VAL(mydata->fname), ZSTR_LEN(mydata->fname));
 #endif
 	mydata->is_zip = 1;
-	mydata->fname_len = fname_len;
-	ext = strrchr(mydata->fname, '/');
+	ext = strrchr(ZSTR_VAL(mydata->fname), '/');
 
 	if (ext) {
-		mydata->ext = memchr(ext, '.', (mydata->fname + fname_len) - ext);
+		mydata->ext = memchr(ext, '.', (ZSTR_VAL(mydata->fname) + ZSTR_LEN(mydata->fname)) - ext);
 		if (mydata->ext == ext) {
-			mydata->ext = memchr(ext + 1, '.', (mydata->fname + fname_len) - ext - 1);
+			mydata->ext = memchr(ext + 1, '.', (ZSTR_VAL(mydata->fname) + ZSTR_LEN(mydata->fname)) - ext - 1);
 		}
 		if (mydata->ext) {
-			mydata->ext_len = (mydata->fname + fname_len) - mydata->ext;
+			mydata->ext_len = (ZSTR_VAL(mydata->fname) + ZSTR_LEN(mydata->fname)) - mydata->ext;
 		}
 	}
 
@@ -354,9 +356,9 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 				efree(mydata->signature); \
 			} \
 			if (error) { \
-				spprintf(error, 4096, "phar error: %s in zip-based phar \"%s\"", errmsg, mydata->fname); \
+				spprintf(error, 4096, "phar error: %s in zip-based phar \"%s\"", errmsg, ZSTR_VAL(mydata->fname)); \
 			} \
-			pefree(mydata->fname, mydata->is_persistent); \
+			zend_string_release_ex(mydata->fname, mydata->is_persistent); \
 			if (mydata->alias) { \
 				pefree(mydata->alias, mydata->is_persistent); \
 			} \
@@ -723,7 +725,7 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 
 	mydata->fp = fp;
 
-	zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len, mydata);
+	zend_hash_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, mydata);
 
 	if (actual_alias) {
 
@@ -732,7 +734,7 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 				spprintf(error, 4096, "phar error: invalid alias \"%s\" in zip-based phar \"%s\"", actual_alias, fname);
 			}
 			efree(actual_alias);
-			zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
+			zend_hash_del(&(PHAR_G(phar_fname_map)), mydata->fname);
 			return FAILURE;
 		}
 
@@ -745,7 +747,7 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 					spprintf(error, 4096, "phar error: Unable to add zip-based phar \"%s\" with implicit alias, alias is already in use", fname);
 				}
 				efree(actual_alias);
-				zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
+				zend_hash_del(&(PHAR_G(phar_fname_map)), mydata->fname);
 				return FAILURE;
 			}
 		}
@@ -765,7 +767,7 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 					if (error) {
 						spprintf(error, 4096, "phar error: Unable to add zip-based phar \"%s\" with explicit alias, alias is already in use", fname);
 					}
-					zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
+					zend_hash_del(&(PHAR_G(phar_fname_map)), mydata->fname);
 					return FAILURE;
 				}
 			}
@@ -774,7 +776,7 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 			mydata->alias = pestrndup(alias, alias_len, mydata->is_persistent);
 			mydata->alias_len = alias_len;
 		} else {
-			mydata->alias = pestrndup(mydata->fname, fname_len, mydata->is_persistent);
+			mydata->alias = pestrndup(ZSTR_VAL(mydata->fname), ZSTR_LEN(mydata->fname), mydata->is_persistent);
 			mydata->alias_len = fname_len;
 		}
 
@@ -914,7 +916,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		}
 
 		if (FAILURE == phar_open_entry_fp(entry, p->error, false)) {
-			spprintf(p->error, 0, "unable to open file contents of file \"%s\" in zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to open file contents of file \"%s\" in zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 
@@ -925,7 +927,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		}
 
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, false)) {
-			spprintf(p->error, 0, "unable to seek to start of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to seek to start of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 
@@ -950,9 +952,9 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 
 		if (!filter) {
 			if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
-				spprintf(p->error, 0, "unable to gzip compress file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+				spprintf(p->error, 0, "unable to gzip compress file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			} else {
-				spprintf(p->error, 0, "unable to bzip2 compress file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+				spprintf(p->error, 0, "unable to bzip2 compress file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			}
 			return ZEND_HASH_APPLY_STOP;
 		}
@@ -964,7 +966,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 
 		if (!entry->cfp) {
 			php_stream_filter_free(filter);
-			spprintf(p->error, 0, "unable to create temporary file for file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to create temporary file for file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 
@@ -972,7 +974,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, false)) {
 			php_stream_filter_free(filter);
-			spprintf(p->error, 0, "unable to seek to start of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to seek to start of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 
@@ -980,7 +982,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 
 		if (SUCCESS != php_stream_copy_to_stream_ex(efp, entry->cfp, entry->uncompressed_filesize, NULL)) {
 			php_stream_filter_remove(filter, 1);
-			spprintf(p->error, 0, "unable to copy compressed file contents of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to copy compressed file contents of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 
@@ -1003,7 +1005,7 @@ is_compressed:
 		PHAR_SET_32(local.compsize, entry->compressed_filesize);
 		if (p->old) {
 			if (-1 == php_stream_seek(p->old, entry->offset_abs, SEEK_SET)) {
-				spprintf(p->error, 0, "unable to seek to start of file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+				spprintf(p->error, 0, "unable to seek to start of file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 				return ZEND_HASH_APPLY_STOP;
 			}
 		}
@@ -1022,61 +1024,61 @@ continue_dir:
 	offset = entry->header_offset + sizeof(local) + ZSTR_LEN(entry->filename) + (entry->is_dir ? 1 : 0) + sizeof(perms);
 
 	if (sizeof(local) != php_stream_write(p->filefp, (char *)&local, sizeof(local))) {
-		spprintf(p->error, 0, "unable to write local file header of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+		spprintf(p->error, 0, "unable to write local file header of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 		return ZEND_HASH_APPLY_STOP;
 	}
 
 	if (sizeof(central) != php_stream_write(p->centralfp, (char *)&central, sizeof(central))) {
-		spprintf(p->error, 0, "unable to write central directory entry for file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+		spprintf(p->error, 0, "unable to write central directory entry for file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 		return ZEND_HASH_APPLY_STOP;
 	}
 
 	if (entry->is_dir) {
 		if (ZSTR_LEN(entry->filename) != php_stream_write(p->filefp, ZSTR_VAL(entry->filename), ZSTR_LEN(entry->filename))) {
-			spprintf(p->error, 0, "unable to write filename to local directory entry for directory \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to write filename to local directory entry for directory \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 
 		if (1 != php_stream_write(p->filefp, "/", 1)) {
-			spprintf(p->error, 0, "unable to write filename to local directory entry for directory \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to write filename to local directory entry for directory \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 
 		if (ZSTR_LEN(entry->filename) != php_stream_write(p->centralfp, ZSTR_VAL(entry->filename), ZSTR_LEN(entry->filename))) {
-			spprintf(p->error, 0, "unable to write filename to central directory entry for directory \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to write filename to central directory entry for directory \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 
 		if (1 != php_stream_write(p->centralfp, "/", 1)) {
-			spprintf(p->error, 0, "unable to write filename to central directory entry for directory \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to write filename to central directory entry for directory \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 	} else {
 		if (ZSTR_LEN(entry->filename) != php_stream_write(p->filefp, ZSTR_VAL(entry->filename), ZSTR_LEN(entry->filename))) {
-			spprintf(p->error, 0, "unable to write filename to local directory entry for file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to write filename to local directory entry for file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 
 		if (ZSTR_LEN(entry->filename) != php_stream_write(p->centralfp, ZSTR_VAL(entry->filename), ZSTR_LEN(entry->filename))) {
-			spprintf(p->error, 0, "unable to write filename to central directory entry for file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to write filename to central directory entry for file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 	}
 
 	if (sizeof(perms) != php_stream_write(p->filefp, (char *)&perms, sizeof(perms))) {
-		spprintf(p->error, 0, "unable to write local extra permissions file header of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+		spprintf(p->error, 0, "unable to write local extra permissions file header of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 		return ZEND_HASH_APPLY_STOP;
 	}
 
 	if (sizeof(perms) != php_stream_write(p->centralfp, (char *)&perms, sizeof(perms))) {
-		spprintf(p->error, 0, "unable to write central extra permissions file header of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+		spprintf(p->error, 0, "unable to write central extra permissions file header of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 		return ZEND_HASH_APPLY_STOP;
 	}
 
 	if (!not_really_modified && entry->is_modified) {
 		if (entry->cfp) {
 			if (SUCCESS != php_stream_copy_to_stream_ex(entry->cfp, p->filefp, entry->compressed_filesize, NULL)) {
-				spprintf(p->error, 0, "unable to write compressed contents of file \"%s\" in zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+				spprintf(p->error, 0, "unable to write compressed contents of file \"%s\" in zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 				return ZEND_HASH_APPLY_STOP;
 			}
 
@@ -1090,7 +1092,7 @@ continue_dir:
 			phar_seek_efp(entry, 0, SEEK_SET, 0, false);
 
 			if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, false), p->filefp, entry->uncompressed_filesize, NULL)) {
-				spprintf(p->error, 0, "unable to write contents of file \"%s\" in zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+				spprintf(p->error, 0, "unable to write contents of file \"%s\" in zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 				return ZEND_HASH_APPLY_STOP;
 			}
 		}
@@ -1116,7 +1118,7 @@ continue_dir:
 		}
 
 		if (!entry->is_dir && entry->compressed_filesize && SUCCESS != php_stream_copy_to_stream_ex(p->old, p->filefp, entry->compressed_filesize, NULL)) {
-			spprintf(p->error, 0, "unable to copy contents of file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to copy contents of file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 	}
@@ -1127,7 +1129,7 @@ continue_dir:
 
 	if (entry->metadata_tracker.str) {
 		if (ZSTR_LEN(entry->metadata_tracker.str) != php_stream_write(p->centralfp, ZSTR_VAL(entry->metadata_tracker.str), ZSTR_LEN(entry->metadata_tracker.str))) {
-			spprintf(p->error, 0, "unable to write metadata as file comment for file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), entry->phar->fname);
+			spprintf(p->error, 0, "unable to write metadata as file comment for file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 	}
@@ -1195,7 +1197,7 @@ static zend_result phar_zip_applysignature(phar_archive_data *phar, struct _phar
 		if (Z_UL(8) != php_stream_write(entry.fp, sigbuf, 8) || signature_length != php_stream_write(entry.fp, signature, signature_length)) {
 			efree(signature);
 			if (pass->error) {
-				spprintf(pass->error, 0, "phar error: unable to write signature to zip-based phar %s", phar->fname);
+				spprintf(pass->error, 0, "phar error: unable to write signature to zip-based phar %s", ZSTR_VAL(phar->fname));
 			}
 
 			php_stream_close(newfile);
@@ -1240,7 +1242,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *phar, ze
 	entry.fp_type = PHAR_MOD;
 
 	if (phar->is_persistent) {
-		spprintf(error, 0, "internal error: attempt to flush cached zip-based phar \"%s\"", phar->fname);
+		spprintf(error, 0, "internal error: attempt to flush cached zip-based phar \"%s\"", ZSTR_VAL(phar->fname));
 		return EOF;
 	}
 
@@ -1257,7 +1259,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *phar, ze
 		}
 		if (phar->alias_len != php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
 			php_stream_close(entry.fp);
-			spprintf(error, 0, "unable to set alias in zip-based phar \"%s\"", phar->fname);
+			spprintf(error, 0, "unable to set alias in zip-based phar \"%s\"", ZSTR_VAL(phar->fname));
 			return EOF;
 		}
 
@@ -1271,7 +1273,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *phar, ze
 
 	/* register alias */
 	if (phar->alias_len) {
-		if (FAILURE == phar_get_archive(&phar, phar->fname, phar->fname_len, phar->alias, phar->alias_len, error)) {
+		if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(phar->fname), ZSTR_LEN(phar->fname), phar->alias, phar->alias_len, error)) {
 			return EOF;
 		}
 	}
@@ -1281,7 +1283,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *phar, ze
 		const char *pos = php_stristr(ZSTR_VAL(user_stub), halt_stub, ZSTR_LEN(user_stub), strlen(halt_stub));
 
 		if (pos == NULL) {
-			spprintf(error, 0, "illegal stub for zip-based phar \"%s\"", phar->fname);
+			spprintf(error, 0, "illegal stub for zip-based phar \"%s\"", ZSTR_VAL(phar->fname));
 			return EOF;
 		}
 
@@ -1300,7 +1302,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *phar, ze
 			len != php_stream_write(entry.fp, ZSTR_VAL(user_stub), len)
 			|| end_sequence_len != php_stream_write(entry.fp, end_sequence, end_sequence_len)
 		) {
-			spprintf(error, 0, "unable to create stub from string in new zip-based phar \"%s\"", phar->fname);
+			spprintf(error, 0, "unable to create stub from string in new zip-based phar \"%s\"", ZSTR_VAL(phar->fname));
 			php_stream_close(entry.fp);
 			return EOF;
 		}
@@ -1317,7 +1319,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *phar, ze
 		}
 		if (sizeof(newstub)-1 != php_stream_write(entry.fp, newstub, sizeof(newstub)-1)) {
 			php_stream_close(entry.fp);
-			spprintf(error, 0, "unable to %s stub in%szip-based phar \"%s\", failed", user_stub ? "overwrite" : "create", user_stub ? " " : " new ", phar->fname);
+			spprintf(error, 0, "unable to %s stub in%szip-based phar \"%s\", failed", user_stub ? "overwrite" : "create", user_stub ? " " : " new ", ZSTR_VAL(phar->fname));
 			return EOF;
 		}
 
@@ -1329,7 +1331,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *phar, ze
 				if (NULL == zend_hash_add_mem(&phar->manifest, entry.filename, &entry, sizeof(phar_entry_info))) {
 					php_stream_close(entry.fp);
 					zend_string_efree(entry.filename);
-					spprintf(error, 0, "unable to create stub in zip-based phar \"%s\"", phar->fname);
+					spprintf(error, 0, "unable to create stub in zip-based phar \"%s\"", ZSTR_VAL(phar->fname));
 					return EOF;
 				}
 			} else {
@@ -1346,7 +1348,7 @@ nostub:
 		must_close_old_file = false;
 		php_stream_rewind(oldfile);
 	} else {
-		oldfile = php_stream_open_wrapper(phar->fname, "rb", 0, NULL);
+		oldfile = php_stream_open_wrapper(ZSTR_VAL(phar->fname), "rb", 0, NULL);
 		must_close_old_file = oldfile != NULL;
 	}
 
@@ -1362,7 +1364,7 @@ fperror:
 		if (must_close_old_file) {
 			php_stream_close(oldfile);
 		}
-		spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to open temporary file", phar->fname);
+		spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to open temporary file", ZSTR_VAL(phar->fname));
 		return EOF;
 	}
 
@@ -1392,7 +1394,7 @@ fperror:
 	phar_metadata_tracker_try_ensure_has_serialized_data(&phar->metadata_tracker, phar->is_persistent);
 	if (pass_error
 	 || FAILURE == phar_zip_applysignature(phar, &pass)) {
-		spprintf(error, 4096, "phar zip flush of \"%s\" failed: %s", phar->fname, pass_error);
+		spprintf(error, 4096, "phar zip flush of \"%s\" failed: %s", ZSTR_VAL(phar->fname), pass_error);
 		efree(pass_error);
 nopasserror:
 		php_stream_close(pass.centralfp);
@@ -1415,7 +1417,7 @@ nocentralerror:
 		size_t clen;
 		zend_result ret = php_stream_copy_to_stream_ex(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL, &clen);
 		if (SUCCESS != ret || clen != cdir_size) {
-			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write central-directory", phar->fname);
+			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write central-directory", ZSTR_VAL(phar->fname));
 			goto nopasserror;
 		}
 	}
@@ -1428,17 +1430,17 @@ nocentralerror:
 		PHAR_SET_16(eocd.comment_len, ZSTR_LEN(phar->metadata_tracker.str));
 
 		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
-			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write end of central-directory", phar->fname);
+			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write end of central-directory", ZSTR_VAL(phar->fname));
 			goto nocentralerror;
 		}
 
 		if (ZSTR_LEN(phar->metadata_tracker.str) != php_stream_write(pass.filefp, ZSTR_VAL(phar->metadata_tracker.str), ZSTR_LEN(phar->metadata_tracker.str))) {
-			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write metadata to zip comment", phar->fname);
+			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write metadata to zip comment", ZSTR_VAL(phar->fname));
 			goto nocentralerror;
 		}
 	} else {
 		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
-			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write end of central-directory", phar->fname);
+			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write end of central-directory", ZSTR_VAL(phar->fname));
 			goto nocentralerror;
 		}
 	}
@@ -1461,13 +1463,13 @@ nocentralerror:
 		/* deferred flush */
 		phar->fp = pass.filefp;
 	} else {
-		phar->fp = php_stream_open_wrapper(phar->fname, "w+b", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
+		phar->fp = php_stream_open_wrapper(ZSTR_VAL(phar->fname), "w+b", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 		if (!phar->fp) {
 			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			phar->fp = pass.filefp;
-			spprintf(error, 4096, "unable to open new phar \"%s\" for writing", phar->fname);
+			spprintf(error, 4096, "unable to open new phar \"%s\" for writing", ZSTR_VAL(phar->fname));
 			return EOF;
 		}
 		php_stream_rewind(pass.filefp);

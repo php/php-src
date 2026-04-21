@@ -447,7 +447,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 
 	void *had_been_added = zend_hash_add_mem(&phar->manifest, entry.filename, &entry, sizeof(phar_entry_info));
 	if (!had_been_added) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", adding to manifest failed", ZSTR_VAL(entry.filename), phar->fname);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", adding to manifest failed", ZSTR_VAL(entry.filename), ZSTR_VAL(phar->fname));
 		zend_string_efree(entry.filename);
 		return 0;
 	}
@@ -455,7 +455,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	phar_flush(phar, &error);
 
 	if (error) {
-		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(entry.filename), phar->fname, error);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(entry.filename), ZSTR_VAL(phar->fname), error);
 		zend_hash_del(&phar->manifest, entry.filename);
 		efree(error);
 		return 0;
@@ -576,7 +576,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 		phar_flush(phar, &error);
 
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(entry->filename), phar->fname, error);
+			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", ZSTR_VAL(entry->filename), ZSTR_VAL(phar->fname), error);
 			php_url_free(resource);
 			efree(error);
 			return 0;

@@ -227,7 +227,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			}
 		}
 		if (opened_path) {
-			*opened_path = zend_strpprintf_unchecked(MAXPATHLEN, "phar://%s/%S", idata->phar->fname, idata->internal_file->filename);
+			*opened_path = zend_strpprintf_unchecked(MAXPATHLEN, "phar://%S/%S", idata->phar->fname, idata->internal_file->filename);
 		}
 		return fpf;
 	} else {
@@ -245,7 +245,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				}
 				efree(internal_file);
 				if (opened_path) {
-					*opened_path = strpprintf(MAXPATHLEN, "%s", phar->fname);
+					*opened_path = zend_string_copy(phar->fname);
 				}
 				php_url_free(resource);
 				goto phar_stub;
@@ -281,7 +281,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				++(entry->fp_refcount);
 				php_url_free(resource);
 				if (opened_path) {
-					*opened_path = strpprintf(MAXPATHLEN, "%s", phar->fname);
+					*opened_path = zend_string_copy(phar->fname);
 				}
 				efree(internal_file);
 				goto phar_stub;
@@ -303,7 +303,7 @@ idata_error:
 	}
 	php_url_free(resource);
 #ifdef MBO_0
-		fprintf(stderr, "Pharname:   %s\n", idata->phar->fname);
+		fprintf(stderr, "Pharname:   %s\n", ZSTR_VAL(idata->phar->fname));
 		fprintf(stderr, "Filename:   %s\n", internal_file);
 		fprintf(stderr, "Entry:      %s\n", ZSTR_VAL(idata->internal_file->filename));
 		fprintf(stderr, "Size:       %u\n", idata->internal_file->uncompressed_filesize);
@@ -336,7 +336,7 @@ idata_error:
 		}
 	}
 	if (opened_path) {
-		*opened_path = zend_strpprintf_unchecked(MAXPATHLEN, "phar://%s/%S", idata->phar->fname, idata->internal_file->filename);
+		*opened_path = zend_strpprintf_unchecked(MAXPATHLEN, "phar://%S/%S", idata->phar->fname, idata->internal_file->filename);
 	}
 	efree(internal_file);
 phar_stub:
@@ -443,7 +443,7 @@ static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t cou
 
 	php_stream_seek(data->fp, data->position + data->zero, SEEK_SET);
 	if (count != php_stream_write(data->fp, buf, count)) {
-		php_stream_wrapper_log_error(stream->wrapper, stream->flags, "phar error: Could not write %zu characters to \"%s\" in phar \"%s\"", count, ZSTR_VAL(data->internal_file->filename), data->phar->fname);
+		php_stream_wrapper_log_error(stream->wrapper, stream->flags, "phar error: Could not write %zu characters to \"%s\" in phar \"%s\"", count, ZSTR_VAL(data->internal_file->filename), ZSTR_VAL(data->phar->fname));
 		return -1;
 	}
 	data->position = php_stream_tell(data->fp) - data->zero;

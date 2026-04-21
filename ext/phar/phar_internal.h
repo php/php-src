@@ -146,8 +146,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	char        *openssl_privatekey;
 	uint32_t    openssl_privatekey_len;
 	/* phar_get_archive cache */
-	const char  *last_phar_name;
-	uint32_t    last_phar_name_len;
+	const zend_string *last_phar_name;
 	uint32_t    last_alias_len;
 	const char* last_alias;
 	phar_archive_data* last_phar;
@@ -243,8 +242,7 @@ typedef struct _phar_entry_info {
 
 /* information about a phar file (the archive itself) */
 struct _phar_archive_data {
-	char                     *fname;
-	uint32_t                 fname_len;
+	zend_string             *fname;
 	/* The ext field stores the location of the file extension from the fname field, and thus should never be freed. */
 	uint32_t                 ext_len;
 	const char               *ext;
@@ -380,21 +378,20 @@ static inline bool phar_validate_alias(const char *alias, size_t alias_len) /* {
 
 static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
 {
-	char tmp[MAXPATHLEN];
-	size_t tmp_len;
-	size_t len1, len2;
-
-	tmp_len = MIN(MAXPATHLEN, ZSTR_LEN(entry->filename) + entry->phar->fname_len);
-
-	len1 = MIN(entry->phar->fname_len, tmp_len);
 	if (entry->phar->fname) {
-		memcpy(tmp, entry->phar->fname, len1);
+		char tmp[MAXPATHLEN];
+		size_t tmp_len = MIN(MAXPATHLEN, ZSTR_LEN(entry->filename) + ZSTR_LEN(entry->phar->fname));
+
+		size_t len1 = MIN(ZSTR_LEN(entry->phar->fname), tmp_len);
+		memcpy(tmp, ZSTR_VAL(entry->phar->fname), len1);
+
+		size_t len2 = MIN(tmp_len - len1, ZSTR_LEN(entry->filename));
+		memcpy(tmp + len1, entry->filename, len2);
+
+		entry->inode = (unsigned short) zend_hash_func(tmp, tmp_len);
+	} else {
+		entry->inode = (unsigned short) zend_string_hash_func(entry->filename);
 	}
-
-	len2 = MIN(tmp_len - len1, ZSTR_LEN(entry->filename));
-	memcpy(tmp + len1, entry->filename, len2);
-
-	entry->inode = (unsigned short) zend_hash_func(tmp, tmp_len);
 }
 /* }}} */
 

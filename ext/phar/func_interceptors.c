@@ -483,7 +483,7 @@ static void phar_file_stat(const char *filename, size_t filename_length, int typ
 			goto skip_phar;
 		}
 
-		if (PHAR_G(last_phar) && ZSTR_LEN(fname) - 7 >= PHAR_G(last_phar_name_len) && !memcmp(ZSTR_VAL(fname) + 7, PHAR_G(last_phar_name), PHAR_G(last_phar_name_len))) {
+		if (PHAR_G(last_phar) && ZSTR_LEN(fname) - 7 >= ZSTR_LEN(PHAR_G(last_phar_name)) && !memcmp(ZSTR_VAL(fname) + 7, ZSTR_VAL(PHAR_G(last_phar_name)), ZSTR_LEN(PHAR_G(last_phar_name)))) {
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			phar = PHAR_G(last_phar);
 			goto splitted;

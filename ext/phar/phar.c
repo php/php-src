@@ -198,7 +198,7 @@ void phar_destroy_phar_data(phar_archive_data *phar) /* {{{ */
 	}
 
 	if (phar->fname) {
-		pefree(phar->fname, phar->is_persistent);
+		zend_string_release_ex(phar->fname, phar->is_persistent);
 		phar->fname = NULL;
 	}
 
@@ -249,7 +249,7 @@ bool phar_archive_delref(phar_archive_data *phar) /* {{{ */
 
 	if (--phar->refcount < 0) {
 		if (PHAR_G(request_done)
-		|| zend_hash_str_del(&(PHAR_G(phar_fname_map)), phar->fname, phar->fname_len) != SUCCESS) {
+		|| zend_hash_del(&(PHAR_G(phar_fname_map)), phar->fname) != SUCCESS) {
 			phar_destroy_phar_data(phar);
 		}
 		return true;
@@ -279,7 +279,7 @@ bool phar_archive_delref(phar_archive_data *phar) /* {{{ */
 		}
 
 		if (remove_fname_cache) {
-			if (zend_hash_str_del(&(PHAR_G(phar_fname_map)), phar->fname, phar->fname_len) != SUCCESS) {
+			if (zend_hash_del(&(PHAR_G(phar_fname_map)), phar->fname) != SUCCESS) {
 				phar_destroy_phar_data(phar);
 			}
 			return true;
@@ -505,8 +505,7 @@ static zend_result phar_open_parsed_phar(char *fname, size_t fname_len, char *al
 	}
 #endif
 	if (SUCCESS == phar_get_archive(&phar, fname, fname_len, alias, alias_len, error)
-		&& ((alias && fname_len == phar->fname_len
-		&& !strncmp(fname, phar->fname, fname_len)) || !alias)
+		&& ((alias && zend_string_equals_cstr(phar->fname, fname, fname_len)) || !alias)
 	) {
 #ifdef PHP_WIN32
 		if (fname != save_fname) {
@@ -1111,11 +1110,13 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 		zend_get_hash_value, NULL, mydata->is_persistent);
 	zend_hash_init(&mydata->virtual_dirs, manifest_count * 2,
 		zend_get_hash_value, NULL, mydata->is_persistent);
-	mydata->fname = pestrndup(fname, fname_len, mydata->is_persistent);
+	mydata->fname = zend_string_init(fname, fname_len, mydata->is_persistent);
+	if (mydata->is_persistent) {
+		GC_MAKE_PERSISTENT_LOCAL(mydata->fname);
+	}
 #ifdef PHP_WIN32
-	phar_unixify_path_separators(mydata->fname, fname_len);
+	phar_unixify_path_separators(ZSTR_VAL(mydata->fname), ZSTR_LEN(mydata->fname));
 #endif
-	mydata->fname_len = fname_len;
 	offset = halt_offset + manifest_len + 4;
 	memset(&entry, 0, sizeof(phar_entry_info));
 	entry.phar = mydata;
@@ -1230,22 +1231,22 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 	snprintf(mydata->version, sizeof(mydata->version), "%u.%u.%u", manifest_ver >> 12, (manifest_ver >> 8) & 0xF, (manifest_ver >> 4) & 0xF);
 	mydata->halt_offset = halt_offset;
 	mydata->flags = manifest_flags;
-	endbuffer = strrchr(mydata->fname, '/');
+	endbuffer = strrchr(ZSTR_VAL(mydata->fname), '/');
 
 	if (endbuffer) {
-		mydata->ext = memchr(endbuffer, '.', (mydata->fname + fname_len) - endbuffer);
+		mydata->ext = memchr(endbuffer, '.', (ZSTR_VAL(mydata->fname) + ZSTR_LEN(mydata->fname)) - endbuffer);
 		if (mydata->ext == endbuffer) {
-			mydata->ext = memchr(endbuffer + 1, '.', (mydata->fname + fname_len) - endbuffer - 1);
+			mydata->ext = memchr(endbuffer + 1, '.', (ZSTR_VAL(mydata->fname) + ZSTR_LEN(mydata->fname)) - endbuffer - 1);
 		}
 		if (mydata->ext) {
-			mydata->ext_len = (mydata->fname + mydata->fname_len) - mydata->ext;
+			mydata->ext_len = (ZSTR_VAL(mydata->fname) + ZSTR_LEN(mydata->fname)) - mydata->ext;
 		}
 	}
 
 	mydata->alias = alias ?
 		pestrndup(alias, alias_len, mydata->is_persistent) :
-		pestrndup(mydata->fname, fname_len, mydata->is_persistent);
-	mydata->alias_len = alias ? alias_len : fname_len;
+		pestrndup(ZSTR_VAL(mydata->fname), ZSTR_LEN(mydata->fname), mydata->is_persistent);
+	mydata->alias_len = alias ? alias_len : ZSTR_LEN(mydata->fname);
 	mydata->sig_flags = sig_flags;
 	mydata->fp = fp;
 	mydata->sig_len = sig_len;
@@ -1284,12 +1285,12 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 	}
 
 	if (mydata->is_persistent) {
-		str = zend_string_init_interned(mydata->fname, fname_len, 1);
+		str = zend_string_init_interned(ZSTR_VAL(mydata->fname), ZSTR_LEN(mydata->fname), true);
+		zend_hash_add_ptr(&(PHAR_G(phar_fname_map)), str, mydata);
+		zend_string_release(str);
 	} else {
-		str = zend_string_init(mydata->fname, fname_len, 0);
+		zend_hash_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, mydata);
 	}
-	zend_hash_add_ptr(&(PHAR_G(phar_fname_map)), str, mydata);
-	zend_string_release(str);
 	efree(savebuf);
 
 	if (pphar) {
@@ -1418,24 +1419,25 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 
 	/* set up our manifest */
 	phar_archive_data *mydata = ecalloc(1, sizeof(phar_archive_data));
-	mydata->fname = expand_filepath(fname, NULL);
-	if (mydata->fname == NULL) {
+	/* TODO: prevent reallocation via a new expand_filepath() API? */
+	char *new_fname = expand_filepath(fname, NULL);
+	if (new_fname == NULL) {
 		efree(mydata);
 		return FAILURE;
 	}
-	fname_len = strlen(mydata->fname);
+	size_t new_fname_len = strlen(new_fname);
 #ifdef PHP_WIN32
-	phar_unixify_path_separators(mydata->fname, fname_len);
+	phar_unixify_path_separators(new_fname, new_fname_len);
 #endif
-	p = strrchr(mydata->fname, '/');
+	p = strrchr(new_fname, '/');
 
 	if (p) {
-		mydata->ext = memchr(p, '.', (mydata->fname + fname_len) - p);
+		mydata->ext = memchr(p, '.', (new_fname + new_fname_len) - p);
 		if (mydata->ext == p) {
-			mydata->ext = memchr(p + 1, '.', (mydata->fname + fname_len) - p - 1);
+			mydata->ext = memchr(p + 1, '.', (new_fname + new_fname_len) - p - 1);
 		}
 		if (mydata->ext) {
-			mydata->ext_len = (mydata->fname + fname_len) - mydata->ext;
+			mydata->ext_len = (new_fname + new_fname_len) - mydata->ext;
 		}
 	}
 
@@ -1445,14 +1447,15 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 		zend_get_hash_value, NULL, 0);
 	zend_hash_init(&mydata->virtual_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, mydata->is_persistent);
-	mydata->fname_len = fname_len;
+	mydata->fname = zend_string_init(new_fname, new_fname_len, false);
+	efree(new_fname);
 	snprintf(mydata->version, sizeof(mydata->version), "%s", PHP_PHAR_API_VERSION);
 	mydata->is_temporary_alias = alias ? 0 : 1;
 	mydata->fp = NULL;
 	mydata->is_writeable = 1;
 	mydata->is_brandnew = 1;
 	phar_request_initialize();
-	zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len, mydata);
+	zend_hash_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, mydata);
 
 	if (is_data) {
 		alias = NULL;
@@ -1464,9 +1467,9 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 		if (alias) {
 			const phar_archive_data *fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len);
 			if (fd_ptr && SUCCESS != phar_free_alias(fd_ptr)) {
-				spprintf(error, 4096, "phar error: phar \"%s\" cannot set alias \"%s\", already in use by another phar archive", mydata->fname, alias);
+				spprintf(error, 4096, "phar error: phar \"%s\" cannot set alias \"%s\", already in use by another phar archive", ZSTR_VAL(mydata->fname), alias);
 
-				zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
+				zend_hash_del(&(PHAR_G(phar_fname_map)), mydata->fname);
 
 				*pphar = NULL;
 
@@ -1475,8 +1478,8 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 		}
 
 		ZEND_ASSERT(!mydata->is_persistent);
-		mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(mydata->fname, fname_len);
-		mydata->alias_len = alias ? alias_len : fname_len;
+		mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(ZSTR_VAL(mydata->fname), ZSTR_LEN(mydata->fname));
+		mydata->alias_len = alias ? alias_len : ZSTR_LEN(mydata->fname);
 	}
 
 	if (alias_len && alias) {
@@ -1485,7 +1488,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 				spprintf(error, 0, "archive \"%s\" cannot be associated with alias \"%s\", already in use", fname, alias);
 			}
 
-			zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
+			zend_hash_del(&(PHAR_G(phar_fname_map)), mydata->fname);
 
 			*pphar = NULL;
 
@@ -2318,14 +2321,14 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_postprocess_file(phar_entry_data *idata,
 
 		if (!stream) {
 			spprintf(error, 0, "phar error: unable to open zip-based phar archive \"%s\" to verify local file header for file \"%s\"",
-				idata->phar->fname, ZSTR_VAL(entry->filename));
+				ZSTR_VAL(idata->phar->fname), ZSTR_VAL(entry->filename));
 			return FAILURE;
 		}
 		php_stream_seek(stream, entry->header_offset, SEEK_SET);
 
 		if (sizeof(local) != php_stream_read(stream, (char *) &local, sizeof(local))) {
 			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot read local file header for file \"%s\")",
-				idata->phar->fname, ZSTR_VAL(entry->filename));
+				ZSTR_VAL(idata->phar->fname), ZSTR_VAL(entry->filename));
 			return FAILURE;
 		}
 
@@ -2339,7 +2342,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_postprocess_file(phar_entry_data *idata,
 			if (sizeof(desc) != php_stream_read(stream,
 							    (char *) &desc, sizeof(desc))) {
 				spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot read local data descriptor for file \"%s\")",
-					idata->phar->fname, ZSTR_VAL(entry->filename));
+					ZSTR_VAL(idata->phar->fname), ZSTR_VAL(entry->filename));
 				return FAILURE;
 			}
 			if (desc.signature[0] == 'P' && desc.signature[1] == 'K') {
@@ -2352,7 +2355,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_postprocess_file(phar_entry_data *idata,
 		/* verify local header */
 		if (ZSTR_LEN(entry->filename) != PHAR_ZIP_16(local.filename_len) || entry->crc32 != PHAR_ZIP_32(local.crc32) || entry->uncompressed_filesize != PHAR_ZIP_32(local.uncompsize) || entry->compressed_filesize != PHAR_ZIP_32(local.compsize)) {
 			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (local header of file \"%s\" does not match central directory)",
-				idata->phar->fname, ZSTR_VAL(entry->filename));
+				ZSTR_VAL(idata->phar->fname), ZSTR_VAL(entry->filename));
 			return FAILURE;
 		}
 
@@ -2381,7 +2384,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_postprocess_file(phar_entry_data *idata,
 		return SUCCESS;
 	} else {
 		spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")",
-			idata->phar->fname, ZSTR_VAL(entry->filename));
+			ZSTR_VAL(idata->phar->fname), ZSTR_VAL(entry->filename));
 		return FAILURE;
 	}
 }
@@ -2493,7 +2496,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 	php_stream *shared_cfp = NULL;
 
 	if (phar->is_persistent) {
-		spprintf(error, 0, "internal error: attempt to flush cached zip-based phar \"%s\"", phar->fname);
+		spprintf(error, 0, "internal error: attempt to flush cached zip-based phar \"%s\"", ZSTR_VAL(phar->fname));
 		return EOF;
 	}
 
@@ -2522,7 +2525,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 		must_close_old_file = false;
 		php_stream_rewind(oldfile);
 	} else {
-		oldfile = php_stream_open_wrapper(phar->fname, "rb", 0, NULL);
+		oldfile = php_stream_open_wrapper(ZSTR_VAL(phar->fname), "rb", 0, NULL);
 		must_close_old_file = oldfile != NULL;
 	}
 	newfile = php_stream_fopen_tmpfile();
@@ -2542,7 +2545,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
-			spprintf(error, 0, "illegal stub for phar \"%s\" (__HALT_COMPILER(); is missing)", phar->fname);
+			spprintf(error, 0, "illegal stub for phar \"%s\" (__HALT_COMPILER(); is missing)", ZSTR_VAL(phar->fname));
 			return EOF;
 		}
 
@@ -2558,7 +2561,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
-			spprintf(error, 0, "unable to create stub from string in new phar \"%s\"", phar->fname);
+			spprintf(error, 0, "unable to create stub from string in new phar \"%s\"", ZSTR_VAL(phar->fname));
 			return EOF;
 		}
 		phar->halt_offset = len + end_sequence_len;
@@ -2580,9 +2583,9 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 			}
 			php_stream_close(newfile);
 			if (new_stub) {
-				spprintf(error, 0, "unable to create stub in new phar \"%s\"", phar->fname);
+				spprintf(error, 0, "unable to create stub in new phar \"%s\"", ZSTR_VAL(phar->fname));
 			} else {
-				spprintf(error, 0, "unable to copy stub of old phar to new phar \"%s\"", phar->fname);
+				spprintf(error, 0, "unable to copy stub of old phar to new phar \"%s\"", ZSTR_VAL(phar->fname));
 			}
 			if (new_stub) {
 				zend_string_free(new_stub);
@@ -2680,7 +2683,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
-			spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
+			spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(phar->fname));
 			return EOF;
 		}
 		newcrc32 = php_crc32_bulk_init();
@@ -2701,7 +2704,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 			spprintf(error, 0, "unable to %s compress file \"%s\" to new phar \"%s\"",
 				entry->flags & PHAR_ENT_COMPRESSED_GZ ? "gzip" : "bzip2",
 				ZSTR_VAL(entry->filename),
-				phar->fname);
+				ZSTR_VAL(phar->fname));
 			return EOF;
 		}
 
@@ -2732,7 +2735,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 			}
 			php_stream_close(newfile);
 			spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"",
-				ZSTR_VAL(entry->filename), phar->fname);
+				ZSTR_VAL(entry->filename), ZSTR_VAL(phar->fname));
 			goto cleanup;
 		}
 		php_stream_filter_append((&entry->cfp->writefilters), filter);
@@ -2743,7 +2746,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 			}
 			php_stream_close(newfile);
 			spprintf(error, 0, "unable to copy compressed file contents of file \"%s\" while creating new phar \"%s\"",
-				ZSTR_VAL(entry->filename), phar->fname);
+				ZSTR_VAL(entry->filename), ZSTR_VAL(phar->fname));
 			goto cleanup;
 		}
 		php_stream_filter_flush(filter, 1);
@@ -2803,7 +2806,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 		php_stream_close(newfile);
 		phar->alias_len = restore_alias_len;
 
-		spprintf(error, 0, "unable to write manifest header of new phar \"%s\"", phar->fname);
+		spprintf(error, 0, "unable to write manifest header of new phar \"%s\"", ZSTR_VAL(phar->fname));
 
 		goto cleanup;
 	}
@@ -2822,7 +2825,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 		php_stream_close(newfile);
 		phar->alias_len = restore_alias_len;
 
-		spprintf(error, 0, "unable to write manifest meta-data of new phar \"%s\"", phar->fname);
+		spprintf(error, 0, "unable to write manifest meta-data of new phar \"%s\"", ZSTR_VAL(phar->fname));
 
 		goto cleanup;
 	}
@@ -2854,9 +2857,9 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 			}
 			php_stream_close(newfile);
 			if (entry->is_dir) {
-				spprintf(error, 0, "unable to write filename of directory \"%s\" to manifest of new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
+				spprintf(error, 0, "unable to write filename of directory \"%s\" to manifest of new phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(phar->fname));
 			} else {
-				spprintf(error, 0, "unable to write filename of file \"%s\" to manifest of new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
+				spprintf(error, 0, "unable to write filename of file \"%s\" to manifest of new phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(phar->fname));
 			}
 			goto cleanup;
 		}
@@ -2888,7 +2891,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 
 			php_stream_close(newfile);
 
-			spprintf(error, 0, "unable to write temporary manifest of file \"%s\" to manifest of new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
+			spprintf(error, 0, "unable to write temporary manifest of file \"%s\" to manifest of new phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(phar->fname));
 
 			goto cleanup;
 		}
@@ -2925,7 +2928,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 					php_stream_close(oldfile);
 				}
 				php_stream_close(newfile);
-				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
+				spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(phar->fname));
 				goto cleanup;
 			}
 		}
@@ -2935,7 +2938,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
-			spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
+			spprintf(error, 0, "unable to seek to start of file \"%s\" while creating new phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(phar->fname));
 			goto cleanup;
 		}
 
@@ -2949,7 +2952,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 
 			php_stream_close(newfile);
 
-			spprintf(error, 0, "unable to write contents of file \"%s\" to new phar \"%s\"", ZSTR_VAL(entry->filename), phar->fname);
+			spprintf(error, 0, "unable to write contents of file \"%s\" to new phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(phar->fname));
 
 			goto cleanup;
 		}
@@ -3053,10 +3056,10 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 		/* deferred flush */
 		phar->fp = newfile;
 	} else {
-		phar->fp = php_stream_open_wrapper(phar->fname, "w+b", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
+		phar->fp = php_stream_open_wrapper(ZSTR_VAL(phar->fname), "w+b", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 		if (!phar->fp) {
 			phar->fp = newfile;
-			spprintf(error, 4096, "unable to open new phar \"%s\" for writing", phar->fname);
+			spprintf(error, 4096, "unable to open new phar \"%s\" for writing", ZSTR_VAL(phar->fname));
 			return EOF;
 		}
 
@@ -3070,7 +3073,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 			zend_array_destroy(Z_ARR(filterparams));
 
 			if (!filter) {
-				spprintf(error, 4096, "unable to compress all contents of phar \"%s\" using zlib, PHP versions older than 5.2.6 have a buggy zlib", phar->fname);
+				spprintf(error, 4096, "unable to compress all contents of phar \"%s\" using zlib, PHP versions older than 5.2.6 have a buggy zlib", ZSTR_VAL(phar->fname));
 				return EOF;
 			}
 
@@ -3098,7 +3101,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 	}
 
 	if (-1 == php_stream_seek(phar->fp, phar->halt_offset, SEEK_SET)) {
-		spprintf(error, 0, "unable to seek to __HALT_COMPILER(); in new phar \"%s\"", phar->fname);
+		spprintf(error, 0, "unable to seek to __HALT_COMPILER(); in new phar \"%s\"", ZSTR_VAL(phar->fname));
 		return EOF;
 	}
 
