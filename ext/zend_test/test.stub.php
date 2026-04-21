@@ -35,6 +35,54 @@ namespace {
         public const DUMMY = 0;
     }
 
+    trait _ZendTestTraitForInternalClass
+    {
+        /** @var int */
+        public const ZEND_TRAIT_CONST = 123;
+
+        public int $traitProp = 456;
+
+        public function traitMethod(): int {}
+    }
+
+    trait _ZendTestTraitForInternalClass2
+    {
+        /** @var int */
+        public const ZEND_TRAIT_CONST2 = 321;
+
+        public static int $staticTraitProp = 999;
+
+        public function traitMethod2(): int {}
+    }
+
+    trait _ZendTestTraitWithUnionProp
+    {
+        public int|string $unionProp = 42;
+    }
+
+    class _ZendTestClassWithTrait
+    {
+        use _ZendTestTraitForInternalClass;
+    }
+
+    class _ZendTestClassWithMultipleTraits
+    {
+        use _ZendTestTraitForInternalClass;
+        use _ZendTestTraitForInternalClass2;
+    }
+
+    class _ZendTestClassWithUnionTypeTrait
+    {
+        use _ZendTestTraitWithUnionProp;
+    }
+
+    class _ZendTestNotATraitForInternalTraits {}
+
+    class _ZendTestInternalTraitsDriver {}
+
+    function zend_test_use_internal_traits_zero(): void {}
+    function zend_test_use_internal_traits_not_trait(): void {}
+
     /** @alias _ZendTestClassAlias */
     class _ZendTestClass implements _ZendTestInterface {
         public const mixed TYPED_CLASS_CONST1 = [];
