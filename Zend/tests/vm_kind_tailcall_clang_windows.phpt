@@ -1,8 +1,9 @@
 --TEST--
-Tailcall VM is selected when compiled with Clang >= 19 on Windows
+Tailcall VM is selected when compiled with Clang >= 19 on Windows x64
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY !== 'Windows') die('skip Windows only');
+if (php_uname('m') !== 'AMD64') die('skip x64 only');
 
 ob_start();
 phpinfo(INFO_GENERAL);
