@@ -146,7 +146,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	char        *openssl_privatekey;
 	uint32_t    openssl_privatekey_len;
 	/* phar_get_archive cache */
-	char*       last_phar_name;
+	const char  *last_phar_name;
 	uint32_t    last_phar_name_len;
 	uint32_t    last_alias_len;
 	const char* last_alias;
