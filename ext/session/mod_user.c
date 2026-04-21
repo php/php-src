@@ -214,6 +214,7 @@ PS_GC_FUNC(user)
 		/* Anything else is some kind of error */
 		*nrdels = -1; // Error
 	}
+	zval_ptr_dtor(&retval);
 	return *nrdels;
 }
 

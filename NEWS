@@ -170,6 +170,8 @@ PHP                                                                        NEWS
     argument value is passed. (Girgias)
   . linkinfo() now raises a ValueError when the argument is an empty string.
     (Weilin Du)
+  . getenv() and putenv() now raises a ValueError when the first argument
+    contains null bytes. (Weilin Du)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream

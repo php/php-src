@@ -88,6 +88,8 @@ PHP 8.6 UPGRADE NOTES
     argument value is passed.
   . array_change_key_case() now raises a ValueError when an invalid $case
     argument value is passed.
+  . getenv() and putenv() now raises a ValueError when the first argument
+    contains null bytes.
   . linkinfo() now raises a ValueError when the $path argument is empty.
   . pathinfo() now raises a ValueError when an invalid $flag
     argument value is passed.

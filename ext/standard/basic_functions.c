@@ -696,7 +696,7 @@ PHP_FUNCTION(getenv)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(str, str_len)
+		Z_PARAM_PATH_OR_NULL(str, str_len)
 		Z_PARAM_BOOL(local_only)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -739,7 +739,7 @@ PHP_FUNCTION(putenv)
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(setting, setting_len)
+		Z_PARAM_PATH(setting, setting_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (setting_len == 0 || setting[0] == '=') {
