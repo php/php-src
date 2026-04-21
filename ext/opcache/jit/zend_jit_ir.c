@@ -3314,6 +3314,27 @@ static PRUNTIME_FUNCTION zend_jit_unwind_callback(DWORD64 pc, PVOID context)
 
 static void zend_jit_setup_unwinder(void)
 {
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+	/* TAILCALL VM: fixed_save_regset=0, no registers pushed in prologue.
+	 * fixed_stack_frame_size=40, fixed_call_stack_size=48 (16+IR_SHADOW_ARGS).
+	 * Prologue is: sub rsp, 0x58 (88 bytes = 40+48). */
+	static const unsigned char uw_data[] = {
+		0x01, // Version=1, Flags=0
+		0x04, // Size of prolog (sub rsp,imm8 = 4 bytes: 48 83 ec 58)
+		0x01, // Count of unwind codes
+		0x00, // Frame Register=none
+		0x04, 0xa2, // offset 4: UWOP_ALLOC_SMALL info=10, alloc=(10+1)*8=88
+		0x00, 0x00, // padding
+	};
+	/* Exit call variant: base 88 + 304 (shadow+GP+FP+padding) = 392 (0x188) */
+	static const unsigned char uw_data_exitcall[] = {
+		0x01, // Version=1, Flags=0
+		0x07, // Size of prolog (sub rsp,imm32 = 7 bytes: 48 81 ec 88 01 00 00)
+		0x02, // Count of unwind codes
+		0x00, // Frame Register=none
+		0x07, 0x01, 0x31, 0x00, // offset 7: UWOP_ALLOC_LARGE info=0, size/8=49, alloc=392
+	};
+#else
 	/* Hardcoded SEH unwind data for JIT-ed PHP functions with "fixed stack frame" */
 	static const unsigned char uw_data[] = {
 		0x01, // UBYTE: 3 Version , UBYTE: 5 Flags
@@ -3348,6 +3369,7 @@ static void zend_jit_setup_unwinder(void)
 		0x02, 0x50, // 1: pushq %rbp
 		0x01, 0x30, // 0: pushq %rbx
 	};
+#endif
 
 	zend_jit_uw_func = (PRUNTIME_FUNCTION)*dasm_ptr;
 	*dasm_ptr = (char*)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(sizeof(RUNTIME_FUNCTION) * 4 +
