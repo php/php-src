@@ -967,16 +967,17 @@ PHP_METHOD(Phar, mapPhar)
 /* {{{ Loads any phar archive with an alias */
 PHP_METHOD(Phar, loadPhar)
 {
-	char *fname, *alias = NULL, *error;
-	size_t fname_len, alias_len = 0;
+	zend_string *fname;
+	char *alias = NULL, *error;
+	size_t alias_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|s!", &fname, &fname_len, &alias, &alias_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|s!", &fname, &alias, &alias_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	phar_request_initialize();
 
-	RETVAL_BOOL(phar_open_from_filename(fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, &error) == SUCCESS);
+	RETVAL_BOOL(phar_open_from_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, REPORT_ERRORS, NULL, &error) == SUCCESS);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
