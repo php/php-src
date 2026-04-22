@@ -1346,7 +1346,7 @@ static zend_always_inline void phar_call_method_with_unwrap(zend_object *obj, co
 }
 
 /* This is the same as phar_get_or_create_entry_data(), but allows overriding metadata via SplFileInfo. */
-static phar_entry_data *phar_build_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, char **error, zval *file_info)
+static phar_entry_data *phar_build_entry_data(zend_string *fname, char *path, size_t path_len, char **error, zval *file_info)
 {
 	uint32_t timestamp;
 
@@ -1372,7 +1372,7 @@ static phar_entry_data *phar_build_entry_data(char *fname, size_t fname_len, cha
 		timestamp = time(NULL);
 	}
 
-	return phar_get_or_create_entry_data(fname, fname_len, path, path_len, "w+b", 0, error, true, timestamp);
+	return phar_get_or_create_entry_data(ZSTR_VAL(fname), ZSTR_LEN(fname), path, path_len, "w+b", 0, error, true, timestamp);
 }
 
 static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
@@ -1635,7 +1635,7 @@ after_open_fp:
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
-	data = phar_build_entry_data(ZSTR_VAL(phar_obj->archive->fname), ZSTR_LEN(phar_obj->archive->fname), str_key, str_key_len, &error, value);
+	data = phar_build_entry_data(phar_obj->archive->fname, str_key, str_key_len, &error, value);
 	if (!data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s cannot be created: %s", str_key, error);
 		efree(error);
