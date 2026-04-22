@@ -1363,32 +1363,32 @@ check_file:
 		return phar_open_or_create_tar(fname, alias, alias_len, is_data, options, pphar, error);
 	}
 
-	return phar_create_or_parse_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, is_data, options, pphar, error);
+	return phar_create_or_parse_filename(fname, alias, alias_len, is_data, options, pphar, error);
 }
 /* }}} */
 
 static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, char **error);
 
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 6, 7) zend_result phar_create_or_parse_filename(zend_string *fname, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	php_stream *fp;
 	zend_string *actual = NULL;
+	zend_string *save_fname = fname;
 	char *p;
 
-	if (php_check_open_basedir(fname)) {
+	if (php_check_open_basedir(ZSTR_VAL(fname))) {
 		return FAILURE;
 	}
 
 	/* first open readonly so it won't be created if not present */
-	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, &actual);
+	fp = php_stream_open_wrapper(ZSTR_VAL(fname), "rb", IGNORE_URL|STREAM_MUST_SEEK|0, &actual);
 
 	if (actual) {
-		fname = ZSTR_VAL(actual);
-		fname_len = ZSTR_LEN(actual);
+		fname = actual;
 	}
 
 	if (fp) {
-		if (phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, error) == SUCCESS) {
+		if (phar_open_from_fp(fp, ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, options, pphar, error) == SUCCESS) {
 			if ((*pphar)->is_data || !PHAR_G(readonly)) {
 				(*pphar)->is_writeable = 1;
 			}
@@ -1407,11 +1407,12 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 
 	if (actual) {
 		zend_string_release_ex(actual, 0);
+		fname = save_fname;
 	}
 
 	if (PHAR_G(readonly) && !is_data) {
 		if (options & REPORT_ERRORS) {
-			spprintf(error, 0, "creating archive \"%s\" disabled by the php.ini setting phar.readonly", fname);
+			spprintf(error, 0, "creating archive \"%s\" disabled by the php.ini setting phar.readonly", ZSTR_VAL(fname));
 		}
 		return FAILURE;
 	}
@@ -1419,7 +1420,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 	/* set up our manifest */
 	phar_archive_data *mydata = ecalloc(1, sizeof(phar_archive_data));
 	/* TODO: prevent reallocation via a new expand_filepath() API? */
-	char *new_fname = expand_filepath(fname, NULL);
+	char *new_fname = expand_filepath(ZSTR_VAL(fname), NULL);
 	if (new_fname == NULL) {
 		efree(mydata);
 		return FAILURE;
@@ -1484,7 +1485,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(c
 	if (alias_len && alias) {
 		if (NULL == zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, mydata)) {
 			if (options & REPORT_ERRORS) {
-				spprintf(error, 0, "archive \"%s\" cannot be associated with alias \"%s\", already in use", fname, alias);
+				spprintf(error, 0, "archive \"%s\" cannot be associated with alias \"%s\", already in use", ZSTR_VAL(fname), alias);
 			}
 
 			zend_hash_del(&(PHAR_G(phar_fname_map)), mydata->fname);

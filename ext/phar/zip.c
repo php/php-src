@@ -797,7 +797,7 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 6, 7) zend_result phar_open_or_create_zip(zend_string *fname, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	phar_archive_data *phar;
-	zend_result ret = phar_create_or_parse_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, is_data, options, &phar, error);
+	zend_result ret = phar_create_or_parse_filename(fname, alias, alias_len, is_data, options, &phar, error);
 
 	if (FAILURE == ret) {
 		return FAILURE;
