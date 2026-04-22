@@ -794,10 +794,10 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 /**
  * Create or open a zip-based phar for writing
  */
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 6, 7) zend_result phar_open_or_create_zip(zend_string *fname, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	phar_archive_data *phar;
-	zend_result ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error);
+	zend_result ret = phar_create_or_parse_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, is_data, options, &phar, error);
 
 	if (FAILURE == ret) {
 		return FAILURE;
@@ -818,7 +818,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_open_or_create_zip(char *f
 	}
 
 	/* we've reached here - the phar exists and is a regular phar */
-	spprintf(error, 4096, "phar zip error: phar \"%s\" already exists as a regular phar and must be deleted from disk prior to creating as a zip-based phar", fname);
+	spprintf(error, 4096, "phar zip error: phar \"%s\" already exists as a regular phar and must be deleted from disk prior to creating as a zip-based phar", ZSTR_VAL(fname));
 
 	return FAILURE;
 }

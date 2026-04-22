@@ -1355,7 +1355,7 @@ check_file:
 
 	if (ext_len > 3 && (z = memchr(ext_str, 'z', ext_len)) && ((ext_str + ext_len) - z >= 2) && !memcmp(z + 1, "ip", 2)) {
 		/* assume zip-based phar */
-		return phar_open_or_create_zip(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, is_data, options, pphar, error);
+		return phar_open_or_create_zip(fname, alias, alias_len, is_data, options, pphar, error);
 	}
 
 	if (ext_len > 3 && (z = memchr(ext_str, 't', ext_len)) && ((ext_str + ext_len) - z >= 2) && !memcmp(z + 1, "ar", 2)) {
