@@ -1081,8 +1081,9 @@ static const spl_other_handler phar_spl_foreign_handler = {
  */
 PHP_METHOD(Phar, __construct)
 {
-	char *fname, *alias = NULL, *error, *save_fname;
-	size_t fname_len, alias_len = 0;
+	zend_string *fname;
+	char *alias = NULL, *error;
+	size_t alias_len = 0;
 	bool is_data;
 	zend_long flags = SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS;
 	zend_long format = 0;
@@ -1095,11 +1096,11 @@ PHP_METHOD(Phar, __construct)
 	is_data = instanceof_function(Z_OBJCE_P(ZEND_THIS), phar_ce_data);
 
 	if (is_data) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|ls!l", &fname, &fname_len, &flags, &alias, &alias_len, &format) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|ls!l", &fname, &flags, &alias, &alias_len, &format) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|ls!", &fname, &fname_len, &flags, &alias, &alias_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|ls!", &fname, &flags, &alias, &alias_len) == FAILURE) {
 			RETURN_THROWS();
 		}
 	}
@@ -1109,23 +1110,22 @@ PHP_METHOD(Phar, __construct)
 		RETURN_THROWS();
 	}
 
-	save_fname = fname;
 	zend_string *entry = NULL;
 	/* phar_split_fname() will unixify the path */
-	zend_string *arch = phar_split_fname(fname, fname_len, &entry, !is_data, 2);
+	zend_string *arch = phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &entry, !is_data, 2);
 	if (arch) {
 		/* use arch (the basename for the archive) for fname instead of fname */
 		/* this allows support for RecursiveDirectoryIterator of subdirectories */
-		fname = ZSTR_VAL(arch);
-		fname_len = ZSTR_LEN(arch);
+		fname = arch;
 	}
 
-	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, is_data, REPORT_ERRORS, &phar_data, &error) == FAILURE) {
+	zend_result phar_status = phar_open_or_create_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, is_data, REPORT_ERRORS, &phar_data, &error);
 
-		if (arch && fname == ZSTR_VAL(arch) && fname != save_fname) {
-			zend_string_release_ex(arch, false);
-			fname = save_fname;
-		}
+	if (arch) {
+		zend_string_release_ex(arch, false);
+	}
+
+	if (phar_status == FAILURE) {
 
 		if (entry) {
 			zend_string_release_ex(entry, false);
@@ -1146,11 +1146,6 @@ PHP_METHOD(Phar, __construct)
 	if (is_data && phar_data->is_tar && phar_data->is_brandnew && format == PHAR_FORMAT_ZIP) {
 		phar_data->is_zip = true;
 		phar_data->is_tar = false;
-	}
-
-	if (arch && fname == ZSTR_VAL(arch)) {
-		zend_string_release_ex(arch, false);
-		fname = save_fname;
 	}
 
 	if ((is_data && !phar_data->is_data) || (!is_data && phar_data->is_data)) {
