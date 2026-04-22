@@ -401,7 +401,7 @@ static void php_hash_do_hash(
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(ops->digest_size, 2, 0, 0);
 
-		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
+		zend_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
 		ZSTR_VAL(hex_digest)[2 * ops->digest_size] = 0;
 		zend_string_efree(digest);
 		RETURN_NEW_STR(hex_digest);
@@ -558,7 +558,7 @@ static void php_hash_do_hash_hmac(
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(ops->digest_size, 2, 0, 0);
 
-		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
+		zend_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
 		ZSTR_VAL(hex_digest)[2 * ops->digest_size] = 0;
 		zend_string_efree(digest);
 		RETURN_NEW_STR(hex_digest);
@@ -819,7 +819,7 @@ PHP_FUNCTION(hash_final)
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(digest_len, 2, 0, 0);
 
-		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), digest_len);
+		zend_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), digest_len);
 		ZSTR_VAL(hex_digest)[2 * digest_len] = 0;
 		zend_string_efree(digest);
 		RETURN_NEW_STR(hex_digest);
@@ -1089,7 +1089,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	if (raw_output) {
 		memcpy(ZSTR_VAL(returnval), result, length);
 	} else {
-		php_hash_bin2hex(ZSTR_VAL(returnval), result, digest_length);
+		zend_bin2hex(ZSTR_VAL(returnval), result, digest_length);
 	}
 	ZSTR_VAL(returnval)[length] = 0;
 	efree(result);
