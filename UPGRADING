@@ -95,6 +95,8 @@ PHP 8.6 UPGRADE NOTES
     argument value is passed.
   . scandir() now raises a ValueError when an invalid $sorting_order
     argument value is passed.
+  . strptime() now raises a ValueError when the $timestamp or $format
+    argument contains null bytes.
 
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the

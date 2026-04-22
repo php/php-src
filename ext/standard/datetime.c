@@ -38,8 +38,8 @@ PHP_FUNCTION(strptime)
 	char      *unparsed_part;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STRING(ts, ts_length)
-		Z_PARAM_STRING(format, format_length)
+		Z_PARAM_PATH(ts, ts_length)
+		Z_PARAM_PATH(format, format_length)
 	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&parsed_time, 0, sizeof(parsed_time));
