@@ -686,27 +686,6 @@ static uint32_t zp_compute_num_required(zend_function *function,
 	return num_required;
 }
 
-/* Functions that do not allow to be called dynamically */
-static const zend_known_string_id zp_non_dynamic_call_funcs[] = {
-	ZEND_STR_COMPACT,
-	ZEND_STR_EXTRACT,
-	ZEND_STR_FUNC_GET_ARG,
-	ZEND_STR_FUNC_GET_ARGS,
-	ZEND_STR_FUNC_NUM_ARGS,
-	ZEND_STR_GET_DEFINED_VARS,
-};
-
-static bool zp_is_non_dynamic_call_func(zend_function *function)
-{
-	for (size_t i = 0; i < sizeof(zp_non_dynamic_call_funcs) / sizeof(zp_non_dynamic_call_funcs[0]); i++) {
-		if (zend_string_equals(function->common.function_name, ZSTR_KNOWN(zp_non_dynamic_call_funcs[i]))) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
 /* Compile PFA to an op_array */
 static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
@@ -717,7 +696,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 
 	zend_op_array *op_array = NULL;
 
-	if (UNEXPECTED(zp_is_non_dynamic_call_func(function))) {
+	if (UNEXPECTED(function->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS)) {
 		zend_throw_error(NULL, "Cannot call %.*s() dynamically",
 			(int) ZSTR_LEN(function->common.function_name), ZSTR_VAL(function->common.function_name));
 		return NULL;
