@@ -611,7 +611,7 @@ really_get_entry:
 /**
  * Create a new dummy file slot within a writeable phar for a newly created file
  */
-ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security, uint32_t timestamp) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(zend_string *fname, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security, uint32_t timestamp) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info etemp;
@@ -625,11 +625,11 @@ ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fnam
 
 	is_dir = (path_len && path[path_len - 1] == '/') ? 1 : 0;
 
-	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error)) {
+	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 0, error)) {
 		return NULL;
 	}
 
-	if (FAILURE == phar_get_entry_data(&ret, fname, fname_len, path, path_len, mode, allow_dir, error, security)) {
+	if (FAILURE == phar_get_entry_data(&ret, ZSTR_VAL(fname), ZSTR_LEN(fname), path, path_len, mode, allow_dir, error, security)) {
 		return NULL;
 	} else if (ret) {
 		return ret;
@@ -641,7 +641,7 @@ ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fnam
 	}
 
 	if (phar->is_persistent && FAILURE == phar_copy_on_write(&phar)) {
-		spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be created, could not make cached phar writeable", path, fname);
+		spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be created, could not make cached phar writeable", path, ZSTR_VAL(fname));
 		return NULL;
 	}
 

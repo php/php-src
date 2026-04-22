@@ -1368,7 +1368,7 @@ static phar_entry_data *phar_build_entry_data(zend_string *fname, char *path, si
 		timestamp = time(NULL);
 	}
 
-	return phar_get_or_create_entry_data(ZSTR_VAL(fname), ZSTR_LEN(fname), path, path_len, "w+b", 0, error, true, timestamp);
+	return phar_get_or_create_entry_data(fname, path, path_len, "w+b", 0, error, true, timestamp);
 }
 
 static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
@@ -3593,7 +3593,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 	}
 #endif
 
-	phar_entry_data *data = phar_get_or_create_entry_data(ZSTR_VAL((*pphar)->fname), ZSTR_LEN((*pphar)->fname), filename, filename_len, "w+b", 0, &error, true, time(NULL));
+	phar_entry_data *data = phar_get_or_create_entry_data((*pphar)->fname, filename, filename_len, "w+b", 0, &error, true, time(NULL));
 	if (!data) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist and cannot be created: %s", filename, error);
@@ -3668,7 +3668,7 @@ static void phar_mkdir(phar_archive_data **pphar, zend_string *dir_name)
 	char *error;
 
 	phar_entry_data *data = phar_get_or_create_entry_data(
-		ZSTR_VAL((*pphar)->fname), ZSTR_LEN((*pphar)->fname),
+		(*pphar)->fname,
 		ZSTR_VAL(dir_name), ZSTR_LEN(dir_name),
 		"w+b", 2, &error, true,
 		time(NULL)
