@@ -55,4 +55,4 @@ $workdir = __DIR__.'/getPathname_wrong_type';
 --EXPECTF--
 [ Found: %scontent%chello.txt ]
 [getPathname]
-getPathname() must return a string
+MyGlobIterator::getPathname(): Return value must be of type string, int returned

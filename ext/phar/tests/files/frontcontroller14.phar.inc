@@ -9,10 +9,13 @@ $a->setStub('<?php
 function s($a)
 {
     return "/html/index.php";
+}try {
+    Phar::interceptFileFuncs();
+    Phar::mungServer(array("PHP_SELF", "REQUEST_URI"));
+    Phar::webPhar("whatever", "/html/index.php", null, array(), "s");
+} catch (Throwable $e) {
+    die($e::class . ": " . $e->getMessage() . "\n");
 }
-Phar::interceptFileFuncs();
-Phar::mungServer(array("PHP_SELF", "REQUEST_URI"));
-Phar::webPhar("whatever", "/html/index.php", null, array(), "s");
 echo "oops did not run\n";
 var_dump($_ENV, $_SERVER);
 __HALT_COMPILER();');

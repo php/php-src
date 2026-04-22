@@ -6,9 +6,9 @@ echo "hi";
 ';
 $a->setStub('<?php
 try {
-Phar::webPhar("test.phar", "/index.php", null, array(), array("fail", "here"));
-} catch (TypeError|Exception $e) {
-die($e->getMessage() . "\n");
+	Phar::webPhar("test.phar", "/index.php", null, array(), array("fail", "here"));
+} catch (Throwable $e) {
+	die($e::class . ": " . $e->getMessage() . "\n");
 }
 echo "oops did not run\n";
 var_dump($_ENV, $_SERVER);

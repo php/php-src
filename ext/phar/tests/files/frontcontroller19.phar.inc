@@ -15,9 +15,9 @@ echo "another.php\n";
 $a->setStub('<?php
 set_include_path("phar://" . __FILE__);
 try {
-Phar::webPhar("test.phar", "/start/index.php");
-} catch (Exception $e) {
-die($e->getMessage() . "\n");
+	Phar::webPhar("test.phar", "/start/index.php");
+} catch (Throwable $e) {
+	die($e::class . ": " . $e->getMessage() . "\n");
 }
 echo "oops did not run\n";
 var_dump($_ENV, $_SERVER);

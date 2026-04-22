@@ -39,9 +39,9 @@ var_dump($b->isFileFormat(Phar::PHAR));
 var_dump($b->isCompressed() == Phar::BZ2);
 // additional code coverage
 try {
-$b->isFileFormat(25);
-} catch (Exception $e) {
-echo $e->getMessage(),"\n";
+	$b->isFileFormat(25);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--
@@ -54,4 +54,4 @@ string(9) "it worked"
 string(%d) "phar://%sphar_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
-Unknown file format specified
+ValueError: Phar::isFileFormat(): Argument #1 ($format) must be one of Phar::PHAR, Phar::TAR, or Phar::ZIP

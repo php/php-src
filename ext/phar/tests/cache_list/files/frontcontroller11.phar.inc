@@ -12,8 +12,12 @@ var_dump($_SERVER["PHAR_SCRIPT_FILENAME"]);
 var_dump($_SERVER["PHAR_REQUEST_URI"]);
 ';
 $a->setStub('<?php
-Phar::mungServer(array(array(), "SCRIPT_NAME", "SCRIPT_FILENAME", "REQUEST_URI"));
-Phar::webPhar();
+try {
+	Phar::mungServer(array(array(), "SCRIPT_NAME", "SCRIPT_FILENAME", "REQUEST_URI"));
+	Phar::webPhar();
+} catch (Throwable $e) {
+	die($e::class . ": " . $e->getMessage() . "\n");
+}
 echo "oops did not run\n";
 var_dump($_ENV, $_SERVER);
 __HALT_COMPILER();');

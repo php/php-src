@@ -5,7 +5,11 @@ $a['a.php'] = 'hio';
 $a['a.jpg'] = 'hio';
 $a['a.phps'] = '<?php function hio(){}';
 $a->setStub('<?php
-Phar::webPhar("whatever", "a.php");
+try {
+	Phar::webPhar("whatever", "a.php");
+} catch (Throwable $e) {
+	die($e::class . ": " . $e->getMessage() . "\n");
+}
 echo "oops did not run\n";
 var_dump($_ENV, $_SERVER);
 __HALT_COMPILER();');

@@ -26,14 +26,16 @@ var_dump(is_dir($outDir.DIRECTORY_SEPARATOR.'dirAB'));
 try {
   $pharB->extractTo($outDir, 'dirX/', true);
   echo 'failed to throw expected exception';
-} catch (PharException $ex) {
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 // should also not be able to pull out /, because paths are not "rooted" that way
 try {
   $pharB->extractTo($outDir, '/', true);
   echo 'failed to throw expected exception';
-} catch (PharException $ex) {
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 // should be able to do by array, too
@@ -45,7 +47,8 @@ try {
   $pharB = new Phar($phar);
   $pharB->extractTo($outDir, [ 'dirA/', 'dirX/' ], true);
   echo 'failed to throw expected exception';
-} catch (PharException $ex) {
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 echo 'done';
@@ -63,8 +66,11 @@ foreach ($iter as $value) {
     $value->isFile() ? unlink($value) : rmdir($value);
 }
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 bool(true)
 bool(false)
+PharException: phar error: attempted to extract non-existent file or directory "dirX/" from phar "%sbug54289/test.phar"
+PharException: phar error: attempted to extract non-existent file or directory "/" from phar "%sbug54289/test.phar"
+PharException: phar error: attempted to extract non-existent file or directory "dirX/" from phar "%sbug54289/test.phar"
 done

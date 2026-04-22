@@ -22,8 +22,8 @@ echo "==========================================================================
 try {
     $phar->setDefaultStub();
     $phar->stopBuffering();
-} catch(Exception $e) {
-    echo $e->getMessage(). "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 var_dump($phar->getStub());
@@ -33,14 +33,14 @@ echo "==========================================================================
 
 try {
     $phar->setDefaultStub('my/custom/thingy.php');
-} catch(ValueError $e) {
-    echo $e->getMessage(). "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 try {
     $phar->stopBuffering();
-} catch(Exception $e) {
-    echo $e->getMessage(). "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 var_dump($phar->getStub());
 
@@ -50,14 +50,14 @@ echo "==========================================================================
 
 try {
     $phar->setDefaultStub('my/custom/thingy.php', 'the/web.php');
-} catch(ValueError $e) {
-    echo $e->getMessage(). "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 try {
     $phar->stopBuffering();
-} catch(Exception $e) {
-    echo $e->getMessage(). "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 var_dump($phar->getStub());
@@ -76,11 +76,11 @@ string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
 ============================================================================
 ============================================================================
-Phar::setDefaultStub(): Argument #1 ($index) must be null for a tar- or zip-based phar stub, string given
+ValueError: Phar::setDefaultStub(): Argument #1 ($index) must be null for a tar- or zip-based phar stub, string given
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
 ============================================================================
 ============================================================================
-Phar::setDefaultStub(): Argument #1 ($index) must be null for a tar- or zip-based phar stub, string given
+ValueError: Phar::setDefaultStub(): Argument #1 ($index) must be null for a tar- or zip-based phar stub, string given
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"

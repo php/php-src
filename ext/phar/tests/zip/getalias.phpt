@@ -33,8 +33,8 @@ var_dump($phar->getAlias());
 // check that alias can't be set manually
 try {
     $phar['.phar/alias.txt'] = 'pinocchio';
-} catch (Exception $e) {
-    echo $e->getMessage()."\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 var_dump($phar->getAlias());
 
@@ -53,6 +53,6 @@ string(%d) "%sgetalias.phar.zip"
 string(%d) "%sgetalias.phar.zip"
 string(13) "jiminycricket"
 string(13) "jiminycricket"
-Cannot set alias ".phar/alias.txt" directly in phar "%sgetalias.phar.zip", use setAlias
+ValueError: Phar::offsetSet(): Argument #1 ($localName) must not be ".phar/alias.txt", use Phar::setAlias() instead
 string(13) "jiminycricket"
 string(9) "pinocchio"

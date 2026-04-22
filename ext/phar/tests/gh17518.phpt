@@ -19,5 +19,5 @@ try {
 <?php
 @unlink(__DIR__.'/gh17518.phar.php');
 ?>
---EXPECTF--
-PharException: phar error: attempted to extract non-existent file or directory "" from phar "%sgh17518.phar.php"
+--EXPECT--
+ValueError: Phar::extractTo(): Argument #2 ($files) must not be empty

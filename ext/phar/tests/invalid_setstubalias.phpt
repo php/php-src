@@ -12,29 +12,29 @@ $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 $p = new Phar($fname);
 try {
     $p['.phar/stub.php'] = 'hi';
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 try {
     $p['.phar/alias.txt'] = 'hi';
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 $p = new Phar($fname2);
 try {
     $p['.phar/stub.php'] = 'hi';
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 try {
     $p['.phar/alias.txt'] = 'hi';
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 ?>
---EXPECTF--
-Cannot set stub ".phar/stub.php" directly in phar "%sinvalid_setstubalias.phar.tar", use setStub
-Cannot set alias ".phar/alias.txt" directly in phar "%sinvalid_setstubalias.phar.tar", use setAlias
-Cannot set stub ".phar/stub.php" directly in phar "%sinvalid_setstubalias.phar.zip", use setStub
-Cannot set alias ".phar/alias.txt" directly in phar "%sinvalid_setstubalias.phar.zip", use setAlias
+--EXPECT--
+ValueError: Phar::offsetSet(): Argument #1 ($localName) must not be ".phar/stub.php", use Phar::setStub() instead
+ValueError: Phar::offsetSet(): Argument #1 ($localName) must not be ".phar/alias.txt", use Phar::setAlias() instead
+ValueError: Phar::offsetSet(): Argument #1 ($localName) must not be ".phar/stub.php", use Phar::setStub() instead
+ValueError: Phar::offsetSet(): Argument #1 ($localName) must not be ".phar/alias.txt", use Phar::setAlias() instead

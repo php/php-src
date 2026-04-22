@@ -8,10 +8,10 @@ phar
 $str = 'invalid';
 try {
     Phar::mungServer([&$str]);
-} catch (PharException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 ?>
 --EXPECT--
-Invalid value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME
+ValueError: Phar::mungServer(): Argument #1 ($variables) must only contain elements with the following values "PHP_SELF", "REQUEST_URI", "SCRIPT_FILENAME", or "SCRIPT_NAME"

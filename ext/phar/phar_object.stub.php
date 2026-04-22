@@ -123,7 +123,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function delMetadata(): true {}
 
     /** @tentative-return-type */
-    public function extractTo(string $directory, array|string|null $files = null, bool $overwrite = false): bool {}
+    public function extractTo(string $directory, array|string|null $files = null, bool $overwrite = false): true {}
 
     /** @tentative-return-type */
     public function getAlias(): ?string {}
@@ -345,7 +345,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @tentative-return-type
      * @implementation-alias Phar::extractTo
      */
-    public function extractTo(string $directory, array|string|null $files = null, bool $overwrite = false): bool {}
+    public function extractTo(string $directory, array|string|null $files = null, bool $overwrite = false): true {}
 
     /**
      * @tentative-return-type

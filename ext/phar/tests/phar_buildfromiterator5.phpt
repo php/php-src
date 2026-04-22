@@ -39,14 +39,12 @@ try {
     chdir(__DIR__);
     $phar = new Phar(__DIR__ . '/buildfromiterator5.phar');
     var_dump($phar->buildFromIterator(new myIterator(array('a' => new stdClass))));
-} catch (Exception $e) {
-    var_dump(get_class($e));
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 rewind
 valid
 current
-%s(24) "UnexpectedValueException"
-Iterator myIterator returned an invalid value (must return a string, a stream, or an SplFileInfo object)
+TypeError: Iterator myIterator return value must be of type string|object|resource, stdClass returned

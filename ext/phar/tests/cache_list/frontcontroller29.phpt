@@ -13,9 +13,5 @@ PATH_INFO=/fatalerror.phps
 files/frontcontroller8.phar
 --EXPECTHEADERS--
 Content-type: text/html; charset=UTF-8
---EXPECTF--
-Fatal error: Uncaught Error: Call to undefined function oopsie_daisy() in phar://%sfatalerror.phps:1
-Stack trace:
-#0 %s(%d): Phar::webPhar('whatever', 'index.php', '404.php', Array)
-#1 {main}
-  thrown in phar://%sfatalerror.phps on line 1
+--EXPECT--
+Error: Call to undefined function oopsie_daisy()

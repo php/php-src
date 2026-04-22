@@ -16,33 +16,30 @@ $ename = '/error/..';
 $p = new Phar($fname);
 $p[$iname] = "foobar\n";
 
-try
-{
+try {
     $p[$ename] = "foobar\n";
-}
-catch(Exception $e)
-{
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 include($pname . $iname);
 
 // extra coverage
 try {
-$p['.phar/oops'] = 'hi';
-} catch (Exception $e) {
-echo $e->getMessage(),"\n";
+	$p['.phar/oops'] = 'hi';
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 try {
-$a = $p['.phar/stub.php'];
-} catch (Exception $e) {
-echo $e->getMessage(),"\n";
+	$a = $p['.phar/stub.php'];
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
-Entry /error/.. does not exist and cannot be created: phar error: invalid path "/error/.." contains upper directory reference
+BadMethodCallException: Entry /error/.. does not exist and cannot be created: phar error: invalid path "/error/.." contains upper directory reference
 foobar
-Cannot set any files or directories in magic ".phar" directory
-Entry .phar/stub.php does not exist
+ValueError: Phar::offsetSet(): Argument #1 ($localName) must not start with ".phar"
+BadMethodCallException: Entry .phar/stub.php does not exist

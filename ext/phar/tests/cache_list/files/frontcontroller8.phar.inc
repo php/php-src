@@ -12,7 +12,11 @@ $a['unknown.ext'] = '<?php var_dump("hi");';
 $a['bigfile.txt'] = str_repeat('a', 8193);
 $a['fatalerror.phps'] = '<?php oopsie_daisy();';
 $a->setStub('<?php
-Phar::webPhar("whatever", "index.php", "404.php", array("jpg" => "foo/bar", "phps" => Phar::PHP, "php" => Phar::PHPS));
+try {
+	Phar::webPhar("whatever", "index.php", "404.php", array("jpg" => "foo/bar", "phps" => Phar::PHP, "php" => Phar::PHPS));
+} catch (Throwable $e) {
+	die($e::class . ": " . $e->getMessage() . "\n");
+}
 echo "oops did not run\n";
 var_dump($_ENV, $_SERVER);
 __HALT_COMPILER();');

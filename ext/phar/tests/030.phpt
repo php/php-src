@@ -27,9 +27,9 @@ require $pname . '/a.php';
 $p = new Phar($fname);
 var_dump(isset($p['.phar/test']));
 try {
-$p['.phar/test'];
-} catch (Exception $e) {
-echo $e->getMessage(),"\n";
+	$p['.phar/test'];
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--
@@ -43,4 +43,4 @@ This is b/c
 This is b/d
 This is e
 bool(false)
-Cannot directly get any files or directories in magic ".phar" directory
+ValueError: Phar::offsetGet(): Argument #1 ($localName) must not start with ".phar"

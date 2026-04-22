@@ -11,7 +11,11 @@ function s($a)
     if (isset($b[$a])) return $b[$a];
     return $a;
 }
-Phar::webPhar("whatever", "/index.php", null, array(), "s");
+try {
+    Phar::webPhar("whatever", "/index.php", null, array(), "s");
+} catch (Throwable $e) {
+    die($e::class . ": " . $e->getMessage() . "\n");
+}
 echo "oops did not run\n";
 var_dump($_ENV, $_SERVER);
 __HALT_COMPILER();');

@@ -39,15 +39,13 @@ try {
     chdir(__DIR__);
     $phar = new Phar(__DIR__ . '/buildfromiterator.phar.zip');
     var_dump($phar->buildFromIterator(new myIterator(array(basename(__FILE__, 'php') . 'phpt'))));
-} catch (Exception $e) {
-    var_dump(get_class($e));
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 rewind
 valid
 current
 key
-%s(24) "UnexpectedValueException"
-Iterator myIterator returned an invalid key (must return a string)
+TypeError: Iterator myIterator must return a key of type string, int returned

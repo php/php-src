@@ -37,8 +37,7 @@ static zend_class_entry *phar_ce_entry;
 #define PHAR_ARCHIVE_OBJECT() \
 	phar_archive_object *phar_obj = PHAR_FETCH_INTERNAL(); \
 	if (!phar_obj->archive) { \
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
-			"Cannot call method on an uninitialized Phar object"); \
+		zend_throw_error(NULL, "Phar object is uninitialized"); \
 		RETURN_THROWS(); \
 	}
 
@@ -722,8 +721,8 @@ PHP_METHOD(Phar, webPhar)
 				phar_do_403();
 				goto cleanup_skip_entry;
 			default:
+				zend_type_error("Rewrite callback return value must be of type string|false, %s returned", zend_zval_value_name(&retval));
 				zval_ptr_dtor(&retval);
-				zend_throw_exception_ex(phar_ce_PharException, 0, "phar error: rewrite callback must return a string or false");
 				goto cleanup_skip_entry;
 		}
 	}
@@ -813,7 +812,7 @@ PHP_METHOD(Phar, webPhar)
 							mime_type = "";
 							code = Z_LVAL_P(val);
 						} else {
-							zend_throw_exception_ex(phar_ce_PharException, 0, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
+							zend_argument_value_error(4, "mime type specifier must be one of Phar::PHP or Phar::PHPS");
 							goto cleanup;
 						}
 						break;
@@ -822,7 +821,7 @@ PHP_METHOD(Phar, webPhar)
 						code = PHAR_MIME_OTHER;
 						break;
 					default:
-						zend_throw_exception_ex(phar_ce_PharException, 0, "Unknown mime type specifier used (not a string or int), only Phar::PHP, Phar::PHPS and a mime type string are allowed");
+						zend_argument_type_error(4, "mime type specifier must be of type string|int, %s given", zend_zval_value_name(val));
 						goto cleanup;
 				}
 			}
@@ -870,12 +869,12 @@ PHP_METHOD(Phar, mungServer)
 	}
 
 	if (!zend_hash_num_elements(Z_ARRVAL_P(mungvalues))) {
-		zend_throw_exception_ex(phar_ce_PharException, 0, "No values passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(mungvalues)) > 4) {
-		zend_throw_exception_ex(phar_ce_PharException, 0, "Too many values passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
+		zend_argument_value_error(1, "must have at most 4 elements");
 		RETURN_THROWS();
 	}
 
@@ -884,7 +883,7 @@ PHP_METHOD(Phar, mungServer)
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(mungvalues), data) {
 		ZVAL_DEREF(data);
 		if (Z_TYPE_P(data) != IS_STRING) {
-			zend_throw_exception_ex(phar_ce_PharException, 0, "Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
+			zend_argument_type_error(1, "must be an array of strings, %s given", zend_zval_value_name(data));
 			RETURN_THROWS();
 		}
 
@@ -897,7 +896,7 @@ PHP_METHOD(Phar, mungServer)
 		} else if (zend_string_equals_literal(Z_STR_P(data), "SCRIPT_FILENAME")) {
 			PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_SCRIPT_FILENAME;
 		} else {
-			zend_throw_exception_ex(phar_ce_PharException, 0, "Invalid value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
+			zend_argument_value_error(1, "must only contain elements with the following values \"PHP_SELF\", \"REQUEST_URI\", \"SCRIPT_FILENAME\", or \"SCRIPT_NAME\"");
 			RETURN_THROWS();
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1105,7 +1104,7 @@ PHP_METHOD(Phar, __construct)
 	}
 
 	if (phar_obj->archive) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot call constructor twice");
+		zend_throw_error(NULL, "Cannot call constructor twice");
 		RETURN_THROWS();
 	}
 
@@ -1264,7 +1263,7 @@ PHP_METHOD(Phar, unlinkArchive)
 	}
 
 	if (!fname_len) {
-		zend_throw_exception_ex(phar_ce_PharException, 0, "Unknown phar archive \"\"");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1401,7 +1400,8 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 
 	if (!value) {
 		/* failure in get_current_data */
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned no value", ZSTR_VAL(ce->name));
+		/* This should never happen without an exception */
+		zend_throw_error(NULL, "Iterator %s returned no value", ZSTR_VAL(ce->name));
 		return ZEND_HASH_APPLY_STOP;
 	}
 
@@ -1412,7 +1412,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 			php_stream_from_zval_no_verify(fp, value);
 
 			if (!fp) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Iterator %s returned an invalid stream handle", ZSTR_VAL(ce->name));
+				zend_type_error("Iterator %s return value must be a valid stream handle", ZSTR_VAL(ce->name));
 				return ZEND_HASH_APPLY_STOP;
 			}
 
@@ -1426,7 +1426,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 
 				if (Z_TYPE(key) != IS_STRING) {
 					zval_ptr_dtor(&key);
-					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
+					zend_type_error("Iterator %s must return a key of type string, %s returned", ZSTR_VAL(ce->name), zend_zval_value_name(&key));
 					return ZEND_HASH_APPLY_STOP;
 				}
 
@@ -1436,7 +1436,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				save = str_key;
 				zval_ptr_dtor_str(&key);
 			} else {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
+				zend_type_error("Iterator %s must return a key of type string, none returned", ZSTR_VAL(ce->name));
 				return ZEND_HASH_APPLY_STOP;
 			}
 
@@ -1461,7 +1461,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 					phar_call_method_with_unwrap(Z_OBJ_P(value), "getPathname", &rv);
 
 					if (UNEXPECTED(Z_TYPE(rv) != IS_STRING)) {
-						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "getPathname() must return a string");
+						zend_type_error("%s::getPathname(): Return value must be of type string, %s returned", ZSTR_VAL(Z_OBJCE_P(value)->name), zend_zval_value_name(&rv));
 						return ZEND_HASH_APPLY_STOP;
 					}
 					tmp_dir_str = Z_STR(rv);
@@ -1508,7 +1508,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 			}
 			ZEND_FALLTHROUGH;
 		default:
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid value (must return a string, a stream, or an SplFileInfo object)", ZSTR_VAL(ce->name));
+			zend_type_error("Iterator %s return value must be of type string|object|resource, %s returned", ZSTR_VAL(ce->name), zend_zval_value_name(value));
 			return ZEND_HASH_APPLY_STOP;
 	}
 
@@ -1567,8 +1567,8 @@ phar_spl_fileinfo:
 			}
 
 			if (Z_TYPE(key) != IS_STRING) {
+				zend_type_error("Iterator %s must return a key of type string, %s returned", ZSTR_VAL(ce->name), zend_zval_value_name(&key));
 				zval_ptr_dtor(&key);
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
 				return ZEND_HASH_APPLY_STOP;
 			}
 
@@ -1578,7 +1578,7 @@ phar_spl_fileinfo:
 			save = str_key;
 			zval_ptr_dtor_str(&key);
 		} else {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (must return a string)", ZSTR_VAL(ce->name));
+			zend_type_error("Iterator %s must return a key of type string, none returned", ZSTR_VAL(ce->name));
 			return ZEND_HASH_APPLY_STOP;
 		}
 	}
@@ -1905,7 +1905,7 @@ PHP_METHOD(Phar, isFileFormat)
 		case PHAR_FORMAT_PHAR:
 			RETURN_BOOL(!phar_obj->archive->is_tar && !phar_obj->archive->is_zip);
 		default:
-			zend_throw_exception_ex(phar_ce_PharException, 0, "Unknown file format specified");
+			zend_argument_value_error(1, "must be one of Phar::PHAR, Phar::TAR, or Phar::ZIP");
 	}
 }
 /* }}} */
@@ -2370,8 +2370,7 @@ PHP_METHOD(Phar, convertToExecutable)
 		case PHAR_FORMAT_ZIP:
 			break;
 		default:
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-				"Unknown file format specified, please pass one of Phar::PHAR, Phar::TAR or Phar::ZIP");
+			zend_argument_value_error(1, "must be one of Phar::PHAR, Phar::TAR, or Phar::ZIP");
 			RETURN_THROWS();
 	}
 
@@ -2382,13 +2381,12 @@ PHP_METHOD(Phar, convertToExecutable)
 		case 9021976: /* Retained for BC */
 			flags = phar_obj->archive->flags & PHAR_FILE_COMPRESSION_MASK;
 			break;
-		case 0:
+		case PHAR_ENT_COMPRESSED_NONE:
 			flags = PHAR_FILE_COMPRESSED_NONE;
 			break;
 		case PHAR_ENT_COMPRESSED_GZ:
 			if (format == PHAR_FORMAT_ZIP) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-					"Cannot compress entire archive with gzip, zip archives do not support whole-archive compression");
+				zend_argument_value_error(2, "must not be Phar::GZ when argument #1 is Phar::ZIP, as ZIP archives do not support whole-archive compression");
 				RETURN_THROWS();
 			}
 
@@ -2402,8 +2400,7 @@ PHP_METHOD(Phar, convertToExecutable)
 			break;
 		case PHAR_ENT_COMPRESSED_BZ2:
 			if (format == PHAR_FORMAT_ZIP) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-					"Cannot compress entire archive with bz2, zip archives do not support whole-archive compression");
+				zend_argument_value_error(2, "must not be Phar::BZ2 when argument #1 is Phar::ZIP, as ZIP archives do not support whole-archive compression");
 				RETURN_THROWS();
 			}
 
@@ -2416,8 +2413,7 @@ PHP_METHOD(Phar, convertToExecutable)
 			flags = PHAR_FILE_COMPRESSED_BZ2;
 			break;
 		default:
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-				"Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2");
+			zend_argument_value_error(2, "must be one of Phar::NONE, Phar::GZ, or Phar::BZ2");
 			RETURN_THROWS();
 		}
 	}
@@ -2479,8 +2475,7 @@ PHP_METHOD(Phar, convertToData)
 		case PHAR_FORMAT_ZIP:
 			break;
 		default:
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-				"Unknown file format specified, please pass one of Phar::TAR or Phar::ZIP");
+			zend_argument_value_error(1, "must be one of Phar::TAR or Phar::ZIP");
 			RETURN_THROWS();
 	}
 
@@ -2491,13 +2486,12 @@ PHP_METHOD(Phar, convertToData)
 		case 9021976: /* Retained for BC */
 			flags = phar_obj->archive->flags & PHAR_FILE_COMPRESSION_MASK;
 			break;
-		case 0:
+		case PHAR_ENT_COMPRESSED_NONE:
 			flags = PHAR_FILE_COMPRESSED_NONE;
 			break;
 		case PHAR_ENT_COMPRESSED_GZ:
 			if (format == PHAR_FORMAT_ZIP) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-					"Cannot compress entire archive with gzip, zip archives do not support whole-archive compression");
+				zend_argument_value_error(2, "must not be Phar::GZ when argument #1 is Phar::ZIP, as ZIP archives do not support whole-archive compression");
 				RETURN_THROWS();
 			}
 
@@ -2511,8 +2505,7 @@ PHP_METHOD(Phar, convertToData)
 			break;
 		case PHAR_ENT_COMPRESSED_BZ2:
 			if (format == PHAR_FORMAT_ZIP) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-					"Cannot compress entire archive with bz2, zip archives do not support whole-archive compression");
+				zend_argument_value_error(2, "must not be Phar::BZ2 when argument #1 is Phar::ZIP, as ZIP archives do not support whole-archive compression");
 				RETURN_THROWS();
 			}
 
@@ -2525,8 +2518,7 @@ PHP_METHOD(Phar, convertToData)
 			flags = PHAR_FILE_COMPRESSED_BZ2;
 			break;
 		default:
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-				"Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2");
+			zend_argument_value_error(2, "must be one of Phar::NONE, Phar::GZ, or Phar::BZ2");
 			RETURN_THROWS();
 		}
 	}
@@ -3034,8 +3026,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 			}
 			break;
 		default:
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-				"Unknown signature algorithm specified");
+			zend_argument_value_error(1, "must be one of Phar::SHA256, Phar::SHA512, Phar::SHA1, Phar::MD5, Phar::OPENSSL, Phar::OPENSSL_SHA256, or Phar::OPENSSL_SHA512");
 	}
 }
 /* }}} */
@@ -3186,7 +3177,7 @@ PHP_METHOD(Phar, compress)
 	}
 
 	switch (method) {
-		case 0:
+		case PHAR_ENT_COMPRESSED_NONE:
 			flags = PHAR_FILE_COMPRESSED_NONE;
 			break;
 		case PHAR_ENT_COMPRESSED_GZ:
@@ -3207,8 +3198,7 @@ PHP_METHOD(Phar, compress)
 			flags = PHAR_FILE_COMPRESSED_BZ2;
 			break;
 		default:
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-				"Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2");
+			zend_argument_value_error(1, "must be one of Phar::NONE, Phar::GZ, or Phar::BZ2");
 			RETURN_THROWS();
 	}
 
@@ -3306,8 +3296,7 @@ PHP_METHOD(Phar, compressFiles)
 			flags = PHAR_ENT_COMPRESSED_BZ2;
 			break;
 		default:
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-				"Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2");
+			zend_argument_value_error(2, "must be one of Phar::GZ or Phar::BZ2");
 			RETURN_THROWS();
 	}
 
@@ -3535,17 +3524,17 @@ PHP_METHOD(Phar, offsetGet)
 		}
 
 		if (zend_string_equals_literal(file_name, ".phar/stub.php")) {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot get stub \".phar/stub.php\" directly in phar \"%s\", use getStub", phar_obj->archive->fname);
+			zend_argument_value_error(1, "must not be \".phar/stub.php\", use Phar::getStub() instead");
 			RETURN_THROWS();
 		}
 
 		if (zend_string_equals_literal(file_name, ".phar/alias.txt")) {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot get alias \".phar/alias.txt\" directly in phar \"%s\", use getAlias", phar_obj->archive->fname);
+			zend_argument_value_error(1, "must not be \".phar/alias.txt\", use Phar::getAlias() instead");
 			RETURN_THROWS();
 		}
 
 		if (zend_string_starts_with_literal(file_name, ".phar")) {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot directly get any files or directories in magic \".phar\" directory");
+			zend_argument_value_error(1, "must not start with \".phar\"");
 			RETURN_THROWS();
 		}
 
@@ -3581,6 +3570,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 		size_t prefix_len = (ZSTR_VAL(file_name)[0] == '/') + sizeof(".phar")-1;
 		char next_char = ZSTR_VAL(file_name)[prefix_len];
 		if (next_char == '/' || next_char == '\\' || next_char == '\0') {
+			/* TODO: handle this on call sites? */
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create any files in magic \".phar\" directory");
 			return;
 		}
@@ -3722,17 +3712,17 @@ PHP_METHOD(Phar, offsetSet)
 	}
 
 	if (zend_string_equals_literal(file_name, ".phar/stub.php")) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot set stub \".phar/stub.php\" directly in phar \"%s\", use setStub", phar_obj->archive->fname);
+		zend_argument_value_error(1, "must not be \".phar/stub.php\", use Phar::setStub() instead");
 		RETURN_THROWS();
 	}
 
 	if (zend_string_equals_literal(file_name, ".phar/alias.txt")) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot set alias \".phar/alias.txt\" directly in phar \"%s\", use setAlias", phar_obj->archive->fname);
+		zend_argument_value_error(1, "must not be \".phar/alias.txt\", use Phar::setAlias() instead");
 		RETURN_THROWS();
 	}
 
 	if (zend_string_starts_with_literal(file_name, ".phar")) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot set any files or directories in magic \".phar\" directory");
+		zend_argument_value_error(1, "must not start with \".phar\"");
 		RETURN_THROWS();
 	}
 
@@ -3799,7 +3789,7 @@ PHP_METHOD(Phar, addEmptyDir)
 	PHAR_ARCHIVE_OBJECT();
 
 	if (zend_string_starts_with_literal(dir_name, ".phar")) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create a directory in magic \".phar\" directory");
+		zend_argument_value_error(1, "must not start with \".phar\"");
 		RETURN_THROWS();
 	}
 
@@ -4313,26 +4303,31 @@ PHP_METHOD(Phar, extractTo)
 
 	PHAR_ARCHIVE_OBJECT();
 
+	if (UNEXPECTED(ZSTR_LEN(path_to) == 0)) {
+		zend_argument_must_not_be_empty_error(1);
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(ZSTR_LEN(path_to) >= MAXPATHLEN)) {
+		zend_argument_value_error(1, "must be less than %d bytes", MAXPATHLEN);
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED((files_ht && zend_hash_num_elements(files_ht) == 0) || (filename && ZSTR_LEN(filename) == 0))) {
+		zend_argument_must_not_be_empty_error(2);
+		RETURN_THROWS();
+	}
+
 	fp = php_stream_open_wrapper(phar_obj->archive->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK, NULL);
 
 	if (!fp) {
+		/* TODO: This error message is nonsensical */
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
 			"Invalid argument, %s cannot be found", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
 
 	php_stream_close(fp);
-
-	if (ZSTR_LEN(path_to) == 0) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
-			"Invalid argument, extraction path must be non-zero length");
-		RETURN_THROWS();
-	}
-
-	if (ZSTR_LEN(path_to) >= MAXPATHLEN) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Cannot extract to \"%.50s...\", destination directory is too long for filesystem", ZSTR_VAL(path_to));
-		RETURN_THROWS();
-	}
 
 	if (php_stream_stat_path(ZSTR_VAL(path_to), &ssb) < 0) {
 		ret = php_stream_mkdir(ZSTR_VAL(path_to), 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
@@ -4348,15 +4343,10 @@ PHP_METHOD(Phar, extractTo)
 	}
 
 	if (files_ht) {
-		if (zend_hash_num_elements(files_ht) == 0) {
-			RETURN_FALSE;
-		}
-
 		ZEND_HASH_FOREACH_VAL(files_ht, zval_file) {
 			ZVAL_DEREF(zval_file);
 			if (IS_STRING != Z_TYPE_P(zval_file)) {
-				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
-					"Invalid argument, array of filenames to extract contains non-string value");
+				zend_argument_type_error(2, "must be an array of strings, %s given", zend_zval_value_name(zval_file));
 				RETURN_THROWS();
 			}
 			switch (extract_helper(phar_obj->archive, Z_STR_P(zval_file), path_to, overwrite, &error)) {
@@ -4407,11 +4397,12 @@ PHP_METHOD(PharFileInfo, __construct)
 	entry_obj = PHAR_FETCH_INTERNAL();
 
 	if (entry_obj->entry) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot call constructor twice");
+		zend_throw_error(NULL, "Cannot call constructor twice");
 		RETURN_THROWS();
 	}
 
 	if (fname_len < 7 || memcmp(fname, "phar://", 7)) {
+		/* TODO Transform this into a ValueError after wording has been figured out */
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0,
 			"'%s' is not a valid phar archive URL (must have at least phar://filename.phar)", fname);
 		RETURN_THROWS();
@@ -4420,6 +4411,7 @@ PHP_METHOD(PharFileInfo, __construct)
 	zend_string *entry = NULL;
 	zend_string *arch = phar_split_fname(fname, fname_len, &entry, 2, 0);
 	if (!arch) {
+		/* TODO Transform this into a ValueError after wording has been figured out */
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0,
 			"'%s' is not a valid phar archive URL (must have at least phar://filename.phar)", fname);
 		RETURN_THROWS();
@@ -4473,8 +4465,7 @@ PHP_METHOD(PharFileInfo, __construct)
 	phar_entry_object *entry_obj = PHAR_FETCH_INTERNAL(); \
 	if (!entry_obj->entry) { \
 		if (throw) { \
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, \
-				"Cannot call method on an uninitialized PharFileInfo object"); \
+			zend_throw_error(NULL, "PharFileInfo object is uninitialized"); \
 		} \
 		return; \
 	}
@@ -4543,7 +4534,7 @@ PHP_METHOD(PharFileInfo, isCompressed)
 		case PHAR_ENT_COMPRESSED_BZ2:
 			RETURN_BOOL(entry_obj->entry->flags & PHAR_ENT_COMPRESSED_BZ2);
 		default:
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unknown compression type specified");
+			zend_argument_value_error(1, "must be one of Phar::GZ or Phar::BZ2");
 			RETURN_THROWS();
 	}
 }
@@ -4944,7 +4935,7 @@ PHP_METHOD(PharFileInfo, compress)
 			entry_obj->entry->flags |= PHAR_ENT_COMPRESSED_BZ2;
 			break;
 		default:
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Unknown compression type specified");
+			zend_argument_value_error(1, "must be one of Phar::GZ or Phar::BZ2");
 			RETURN_THROWS();
 	}
 
@@ -5024,6 +5015,7 @@ PHP_METHOD(PharFileInfo, decompress)
 			compression_type = "bz2";
 			break;
 		default:
+			/* TODO This should be impossible */
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
 				"Cannot decompress file compressed with unknown compression type");
 			RETURN_THROWS();

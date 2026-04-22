@@ -59,5 +59,5 @@ $workdir = __DIR__.'/getPathname_exception';
 [ Found: %shello.txt ]
 [getPathname]
 string(%d) "%shello.txt"
-getPathname() must return a string
+MyGlobIterator::getPathname(): Return value must be of type string, null returned
 Previous: exception in getPathname()

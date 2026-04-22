@@ -17,4 +17,4 @@ Content-type: text/html; charset=UTF-8
 --FILE_EXTERNAL--
 files/frontcontroller18.phar
 --EXPECT--
-phar error: rewrite callback must return a string or false
+TypeError: Rewrite callback return value must be of type string|false, null returned

@@ -9,7 +9,7 @@ PATH_INFO=/fronk.gronk
 --FILE_EXTERNAL--
 files/frontcontroller9.phar.tar
 --EXPECTF--
-Fatal error: Uncaught PharException: No values passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME in %sfrontcontroller18.phar.php:2
+Fatal error: Uncaught ValueError: Phar::mungServer(): Argument #1 ($variables) must not be empty in %sfrontcontroller18.phar.php:2
 Stack trace:
 #0 %sfrontcontroller18.phar.php(2): Phar::mungServer(Array)
 #1 {main}

@@ -1,5 +1,5 @@
 /* This is a generated file, edit phar_object.stub.php instead.
- * Stub hash: 031dc8f07d2d9bac4a5f82f4ac2c5b3da5995405 */
+ * Stub hash: 2e8cb4e6309c2edf7b0d931c3bc2612e68e256e1 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -77,7 +77,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Phar_delMetadata arginfo_class_Phar_decompressFiles
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_extractTo, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_extractTo, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, files, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, overwrite, _IS_BOOL, 0, "false")

@@ -21,21 +21,17 @@ class MyPhar extends Phar
     }
 }
 
-try
-{
+try {
     $phar = new MyPhar();
     var_dump($phar->getVersion());
-}
-catch (LogicException $e)
-{
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 try {
     $phar = new Phar('test.phar');
     $phar->__construct('oops');
-} catch (LogicException $e)
-{
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 ?>
@@ -47,5 +43,5 @@ __halt_compiler();
 --EXPECT--
 string(5) "1.0.0"
 int(5)
-string(50) "Cannot call method on an uninitialized Phar object"
-string(29) "Cannot call constructor twice"
+Error: Phar object is uninitialized
+Error: Cannot call constructor twice
