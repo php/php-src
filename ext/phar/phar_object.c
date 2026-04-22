@@ -1120,7 +1120,7 @@ PHP_METHOD(Phar, __construct)
 		fname = arch;
 	}
 
-	zend_result phar_status = phar_open_or_create_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, is_data, REPORT_ERRORS, &phar_data, &error);
+	zend_result phar_status = phar_open_or_create_filename(fname, alias, alias_len, is_data, REPORT_ERRORS, &phar_data, &error);
 
 	if (arch) {
 		zend_string_release_ex(arch, false);

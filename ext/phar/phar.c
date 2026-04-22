@@ -1303,7 +1303,7 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 /**
  * Create or open a phar for writing
  */
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 6, 7) zend_result phar_open_or_create_filename(zend_string *fname, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	const char *ext_str, *z;
 	char *my_error;
@@ -1315,31 +1315,31 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_open_or_create_filename(ch
 	*error = NULL;
 
 	/* first try to open an existing file */
-	if (phar_detect_phar_fname_ext(fname, fname_len, &ext_str, &ext_len, !is_data, 0, true) == SUCCESS) {
+	if (phar_detect_phar_fname_ext(ZSTR_VAL(fname), ZSTR_LEN(fname), &ext_str, &ext_len, !is_data, 0, true) == SUCCESS) {
 		goto check_file;
 	}
 
 	/* next try to create a new file */
-	if (FAILURE == phar_detect_phar_fname_ext(fname, fname_len, &ext_str, &ext_len, !is_data, 1, true)) {
+	if (FAILURE == phar_detect_phar_fname_ext(ZSTR_VAL(fname), ZSTR_LEN(fname), &ext_str, &ext_len, !is_data, 1, true)) {
 		if (ext_len == -2) {
-			spprintf(error, 0, "Cannot create a phar archive from a URL like \"%s\". Phar objects can only be created from local files", fname);
+			spprintf(error, 0, "Cannot create a phar archive from a URL like \"%s\". Phar objects can only be created from local files", ZSTR_VAL(fname));
 		} else {
-			spprintf(error, 0, "Cannot create phar '%s', file extension (or combination) not recognised or the directory does not exist", fname);
+			spprintf(error, 0, "Cannot create phar '%s', file extension (or combination) not recognised or the directory does not exist", ZSTR_VAL(fname));
 		}
 		return FAILURE;
 	}
 check_file:
-	if (phar_open_parsed_phar(fname, fname_len, alias, alias_len, is_data, options, test, &my_error) == SUCCESS) {
+	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, is_data, options, test, &my_error) == SUCCESS) {
 		*pphar = *test;
 
 		if ((*test)->is_data && !(*test)->is_tar && !(*test)->is_zip) {
-			spprintf(error, 0, "Cannot open '%s' as a PharData object. Use Phar::__construct() for executable archives", fname);
+			spprintf(error, 0, "Cannot open '%s' as a PharData object. Use Phar::__construct() for executable archives", ZSTR_VAL(fname));
 			return FAILURE;
 		}
 
 		if (PHAR_G(readonly) && !(*test)->is_data && ((*test)->is_tar || (*test)->is_zip)) {
 			if (!zend_hash_str_exists(&((*test)->manifest), ZEND_STRL(".phar/stub.php"))) {
-				spprintf(error, 0, "'%s' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive", fname);
+				spprintf(error, 0, "'%s' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive", ZSTR_VAL(fname));
 				return FAILURE;
 			}
 		}
@@ -1355,15 +1355,15 @@ check_file:
 
 	if (ext_len > 3 && (z = memchr(ext_str, 'z', ext_len)) && ((ext_str + ext_len) - z >= 2) && !memcmp(z + 1, "ip", 2)) {
 		/* assume zip-based phar */
-		return phar_open_or_create_zip(fname, fname_len, alias, alias_len, is_data, options, pphar, error);
+		return phar_open_or_create_zip(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, is_data, options, pphar, error);
 	}
 
 	if (ext_len > 3 && (z = memchr(ext_str, 't', ext_len)) && ((ext_str + ext_len) - z >= 2) && !memcmp(z + 1, "ar", 2)) {
 		/* assume tar-based phar */
-		return phar_open_or_create_tar(fname, fname_len, alias, alias_len, is_data, options, pphar, error);
+		return phar_open_or_create_tar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, is_data, options, pphar, error);
 	}
 
-	return phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, pphar, error);
+	return phar_create_or_parse_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, is_data, options, pphar, error);
 }
 /* }}} */
 
