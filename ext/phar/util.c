@@ -466,7 +466,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result phar_separate_entry_fp(phar_entry_info
  * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
  * assumed that the file pointer, if present, is opened for reading
  */
-ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, const char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, const zend_string *fname, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
@@ -478,17 +478,17 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, co
 	*ret = NULL;
 	*error = NULL;
 
-	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error)) {
+	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 0, error)) {
 		return FAILURE;
 	}
 
 	if (for_write && PHAR_G(readonly) && !phar->is_data) {
-		spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, disabled by ini setting", path, fname);
+		spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, disabled by ini setting", path, ZSTR_VAL(fname));
 		return FAILURE;
 	}
 
 	if (!path_len) {
-		spprintf(error, 4096, "phar error: file \"\" in phar \"%s\" must not be empty", fname);
+		spprintf(error, 4096, "phar error: file \"\" in phar \"%s\" must not be empty", ZSTR_VAL(fname));
 		return FAILURE;
 	}
 really_get_entry:
@@ -512,7 +512,7 @@ really_get_entry:
 
 	if (for_write && phar->is_persistent) {
 		if (FAILURE == phar_copy_on_write(&phar)) {
-			spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, could not make cached phar writeable", path, fname);
+			spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, could not make cached phar writeable", path, ZSTR_VAL(fname));
 			return FAILURE;
 		} else {
 			goto really_get_entry;
@@ -520,12 +520,12 @@ really_get_entry:
 	}
 
 	if (entry->is_modified && !for_write) {
-		spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for reading, writable file pointers are open", path, fname);
+		spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for reading, writable file pointers are open", path, ZSTR_VAL(fname));
 		return FAILURE;
 	}
 
 	if (entry->fp_refcount && for_write) {
-		spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, readable file pointers are open", path, fname);
+		spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, readable file pointers are open", path, ZSTR_VAL(fname));
 		return FAILURE;
 	}
 
@@ -629,7 +629,7 @@ ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(zend_strin
 		return NULL;
 	}
 
-	if (FAILURE == phar_get_entry_data(&ret, ZSTR_VAL(fname), ZSTR_LEN(fname), path, path_len, mode, allow_dir, error, security)) {
+	if (FAILURE == phar_get_entry_data(&ret, fname, path, path_len, mode, allow_dir, error, security)) {
 		return NULL;
 	} else if (ret) {
 		return ret;

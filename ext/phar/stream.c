@@ -240,7 +240,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				return NULL;
 			}
 			if (phar->is_tar || phar->is_zip) {
-				if ((FAILURE == phar_get_entry_data(&idata, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), ".phar/stub.php", sizeof(".phar/stub.php")-1, "r", 0, &error, false)) || !idata) {
+				if ((FAILURE == phar_get_entry_data(&idata, resource->host, ".phar/stub.php", sizeof(".phar/stub.php")-1, "r", 0, &error, false)) || !idata) {
 					goto idata_error;
 				}
 				efree(internal_file);
@@ -288,7 +288,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			}
 		}
 		/* read-only access is allowed to magic files in .phar directory */
-		if ((FAILURE == phar_get_entry_data(&idata, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, strlen(internal_file), "r", 0, &error, false)) || !idata) {
+		if ((FAILURE == phar_get_entry_data(&idata, resource->host, internal_file, strlen(internal_file), "r", 0, &error, false)) || !idata) {
 idata_error:
 			if (error) {
 				php_stream_wrapper_log_error(wrapper, options, "%s", error);
@@ -694,7 +694,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	/* need to copy to strip leading "/", will get touched again */
 	internal_file = estrndup(ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1);
 	internal_file_len = ZSTR_LEN(resource->path) - 1;
-	if (FAILURE == phar_get_entry_data(&idata, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, internal_file_len, "r", 0, &error, true)) {
+	if (FAILURE == phar_get_entry_data(&idata, resource->host, internal_file, internal_file_len, "r", 0, &error, true)) {
 		/* constraints of fp refcount were not met */
 		if (error) {
 			php_stream_wrapper_log_error(wrapper, options, "unlink of \"%s\" failed: %s", url, error);
