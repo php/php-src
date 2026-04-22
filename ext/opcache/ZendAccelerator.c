@@ -52,7 +52,6 @@
 #include "ext/standard/basic_functions.h"
 
 #ifdef ZEND_WIN32
-# include "ext/hash/php_hash.h"
 # include "ext/standard/md5.h"
 #endif
 
@@ -2534,7 +2533,7 @@ static zend_result accel_gen_uname_id(void)
 	PHP_MD5Update(&ctx, (void *) uname, (unsize - 1) * sizeof(wchar_t));
 	PHP_MD5Update(&ctx, ZCG(accel_directives).cache_id, strlen(ZCG(accel_directives).cache_id));
 	PHP_MD5Final(digest, &ctx);
-	php_hash_bin2hex(accel_uname_id, digest, sizeof digest);
+	zend_bin2hex(accel_uname_id, digest, sizeof digest);
 	return SUCCESS;
 }
 #endif

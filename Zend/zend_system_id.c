@@ -19,7 +19,6 @@
 #include "zend_system_id.h"
 #include "zend_extensions.h"
 #include "ext/standard/md5.h"
-#include "ext/hash/php_hash.h"
 
 ZEND_API char zend_system_id[32];
 
@@ -90,6 +89,6 @@ void zend_finalize_system_id(void)
 	}
 
 	PHP_MD5Final(digest, &context);
-	php_hash_bin2hex(zend_system_id, digest, sizeof digest);
+	zend_bin2hex(zend_system_id, digest, sizeof digest);
 	finalized = 1;
 }

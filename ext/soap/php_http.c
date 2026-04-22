@@ -17,7 +17,6 @@
 */
 
 #include "php_soap.h"
-#include "ext/hash/php_hash.h" /* For php_hash_bin2hex() */
 #include "ext/uri/php_uri.h"
 
 static char *get_http_header_value_nodup(char *headers, char *type, size_t *len);
@@ -699,7 +698,7 @@ try_again:
 					return FALSE;
 				}
 
-				php_hash_bin2hex(cnonce, nonce, sizeof(nonce));
+				zend_bin2hex(cnonce, nonce, sizeof(nonce));
 				cnonce[32] = 0;
 
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "nc", sizeof("nc")-1)) != NULL &&

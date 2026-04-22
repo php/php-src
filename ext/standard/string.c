@@ -51,31 +51,10 @@
 
 #include "zend_simd.h"
 
-/* this is read-only, so it's ok */
-ZEND_SET_ALIGNED(16, static const char hexconvtab[]) = "0123456789abcdef";
-
 /* localeconv mutex */
 #ifdef ZTS
 static MUTEX_T locale_mutex = NULL;
 #endif
-
-/* {{{ php_bin2hex */
-static zend_string *php_bin2hex(const unsigned char *old, const size_t oldlen)
-{
-	zend_string *result;
-	size_t i, j;
-
-	result = zend_string_safe_alloc(oldlen, 2 * sizeof(char), 0, 0);
-
-	for (i = j = 0; i < oldlen; i++) {
-		ZSTR_VAL(result)[j++] = hexconvtab[old[i] >> 4];
-		ZSTR_VAL(result)[j++] = hexconvtab[old[i] & 15];
-	}
-	ZSTR_VAL(result)[j] = '\0';
-
-	return result;
-}
-/* }}} */
 
 /* {{{ php_hex2bin */
 static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
@@ -164,7 +143,7 @@ PHP_FUNCTION(bin2hex)
 		Z_PARAM_STR(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	result = php_bin2hex((unsigned char *)ZSTR_VAL(data), ZSTR_LEN(data));
+	result = zend_bin2hex_str((unsigned char *) ZSTR_VAL(data), ZSTR_LEN(data));
 
 	RETURN_STR(result);
 }
