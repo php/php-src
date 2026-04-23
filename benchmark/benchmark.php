@@ -2,11 +2,7 @@
 
 require_once __DIR__ . '/shared.php';
 
-foreach (array("mbstring", "sockets", "mysqli", "openssl", "gmp") as $ext) {
-    if (!extension_loaded($ext)) {
-        throw new LogicException("Extension $ext is required.");
-    }
-}
+checkExtensions(['gmp']);
 
 $storeResult = ($argv[1] ?? 'false') === 'true';
 $phpCgi = $argv[2] ?? dirname(PHP_BINARY) . '/php-cgi';
@@ -27,18 +23,32 @@ function main() {
     if (false !== $branch = getenv('GITHUB_REF_NAME')) {
         $data['branch'] = $branch;
     }
+
     $data['Zend/bench.php'] = runBench(false);
     $data['Zend/bench.php JIT'] = runBench(true);
+
+    checkExtensions(['mbstring']);
     $data['Symfony Demo 2.2.3'] = runSymfonyDemo(false);
     $data['Symfony Demo 2.2.3 JIT'] = runSymfonyDemo(true);
+
+    checkExtensions(['mbstring', 'sockets', 'mysqli', 'openssl']);
     $data['Wordpress 6.2'] = runWordpress(false);
     $data['Wordpress 6.2 JIT'] = runWordpress(true);
+
     $result = json_encode($data, JSON_PRETTY_PRINT) . "\n";
 
     fwrite(STDOUT, $result);
 
     if ($storeResult) {
         storeResult($result);
+    }
+}
+
+function checkExtensions(array $extensions): void {
+    foreach ($extensions as $ext) {
+        if (!extension_loaded($ext)) {
+            throw new LogicException("Extension $ext is required.");
+        }
     }
 }
 
@@ -69,7 +79,7 @@ function runSymfonyDemo(bool $jit): array {
     cloneRepo($dir, 'https://github.com/php/benchmarking-symfony-demo-2.2.3.git');
     runPhpCommand([$dir . '/bin/console', 'cache:clear']);
     runPhpCommand([$dir . '/bin/console', 'cache:warmup']);
-    return runValgrindPhpCgiCommand('symfony-demo', [$dir . '/public/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 50);
+    return runValgrindPhpCgiCommand('symfony-demo', [$dir . '/public/index.php'], cwd: $dir, jit: $jit, repeat: 100);
 }
 
 function runWordpress(bool $jit): array {
@@ -92,7 +102,7 @@ function runWordpress(bool $jit): array {
 
     // Warmup
     runPhpCommand([$dir . '/index.php'], $dir);
-    return runValgrindPhpCgiCommand('wordpress', [$dir . '/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 50);
+    return runValgrindPhpCgiCommand('wordpress', [$dir . '/index.php'], cwd: $dir, jit: $jit, repeat: 100);
 }
 
 function runPhpCommand(array $args, ?string $cwd = null): ProcessResult {
@@ -104,14 +114,13 @@ function runValgrindPhpCgiCommand(
     array $args,
     ?string $cwd = null,
     bool $jit = false,
-    int $warmup = 0,
     int $repeat = 1,
 ): array {
     global $phpCgi;
 
     $profileOut = __DIR__ . "/profiles/callgrind.out.$name";
     if ($jit) {
-        $profileOut .= '.jit';
+        $profileOut .= '-jit';
     }
 
     $process = runCommand([
@@ -121,7 +130,7 @@ function runValgrindPhpCgiCommand(
         "--callgrind-out-file=$profileOut",
         '--',
         $phpCgi,
-        '-T' . ($warmup ? $warmup . ',' : '') . $repeat,
+        '-T' . $repeat,
         '-d max_execution_time=0',
         '-d opcache.enable=1',
         '-d opcache.jit=' . ($jit ? 'tracing' : 'disable'),
@@ -129,16 +138,51 @@ function runValgrindPhpCgiCommand(
         '-d opcache.validate_timestamps=0',
         ...$args,
     ]);
-    $instructions = extractInstructionsFromValgrindOutput($process->stderr);
-    if ($repeat > 1) {
-        $instructions = gmp_strval(gmp_div_q($instructions, $repeat));
+
+    // collect metrics for startup, each benchmark run and shutdown
+    $totalsAll = [];
+    foreach (['startup' => 1, ...range(2, $repeat + 1), 'shutdown' => ''] as $phase => $fileSuffix) {
+        $profileOutSpecific = $profileOut . '.' . $phase;
+        if (!rename($profileOut . ($fileSuffix === '' ? '' : '.' . $fileSuffix), $profileOutSpecific)) {
+            throw new \Exception('Expected callgrind file "' . $profileOutSpecific . '" does not exist');
+        }
+
+        $totalsAll[$phase] = extractTotalsFromCallgrindFile($profileOutSpecific);
     }
-    return ['instructions' => $instructions];
+
+    // mimic original logged "instructions" meaning:
+    // - the startup was not counted (only if repeats > 1)
+    // - repeats were counted without warmup, ie. only the last 50% repeats were counted
+    // - the shutdown was never counted
+    $warmTotals = array_map(static fn () => '0', array_first($totalsAll));
+    foreach ($repeat === 1 ? ['startup', 0] : range(intdiv($repeat, 2), $repeat - 1) as $phase) {
+        foreach ($totalsAll[$phase] as $kEvent => $v) {
+            $warmTotals[$kEvent] = gmp_strval(gmp_add($warmTotals[$kEvent], $v));
+        }
+    }
+    $instructions = gmp_strval(gmp_div_q($warmTotals['Ir'], intdiv($repeat + 1, 2)));
+    $res = ['instructions' => $instructions];
+
+    return $res;
 }
 
-function extractInstructionsFromValgrindOutput(string $output): string {
-    preg_match("(==[0-9]+== Events    : Ir\n==[0-9]+== Collected : (?<instructions>[0-9]+))", $output, $matches);
-    return $matches['instructions'] ?? throw new \Exception('Unexpected valgrind output');
+/**
+ * @return non-empty-array<non-empty-string, decimal-int-string>
+ */
+function extractTotalsFromCallgrindFile(string $file): array {
+    $data = file_get_contents($file);
+
+    if (!preg_match_all('(\nevents:((?: +\w+)+)\n)', $data, $matchesAll, \PREG_SET_ORDER)) {
+        throw new \Exception('Unexpected callgrind data - "events" not found');
+    }
+    $events = preg_split('( +)', ltrim(array_last($matchesAll)[1]), -1, \PREG_SPLIT_NO_EMPTY);
+
+    if (!preg_match_all('(\ntotals:((?: +\w+)+)\n)', $data, $matchesAll, \PREG_SET_ORDER)) {
+        throw new \Exception('Unexpected callgrind data - "totals" not found');
+    }
+    $totals = preg_split('( +)', ltrim(array_last($matchesAll)[1]), -1, \PREG_SPLIT_NO_EMPTY);
+
+    return array_combine($events, $totals);
 }
 
 main();
