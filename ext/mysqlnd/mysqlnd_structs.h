@@ -306,6 +306,7 @@ typedef enum_func_status (*func_mysqlnd_execute_com_set_option)(MYSQLND_CONN_DAT
 typedef enum_func_status (*func_mysqlnd_execute_com_debug)(MYSQLND_CONN_DATA * const conn);
 typedef enum_func_status (*func_mysqlnd_execute_com_init_db)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING db);
 typedef enum_func_status (*func_mysqlnd_execute_com_ping)(MYSQLND_CONN_DATA * const conn);
+typedef enum_func_status (*func_mysqlnd_execute_com_reset_connection)(MYSQLND_CONN_DATA * const conn);
 typedef enum_func_status (*func_mysqlnd_execute_com_statistics)(MYSQLND_CONN_DATA * const conn, zend_string ** message);
 typedef enum_func_status (*func_mysqlnd_execute_com_process_kill)(MYSQLND_CONN_DATA * const conn, const unsigned int process_id, const bool read_response);
 typedef enum_func_status (*func_mysqlnd_execute_com_refresh)(MYSQLND_CONN_DATA * const conn, const uint8_t options);
@@ -344,6 +345,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command)
 	func_mysqlnd_execute_com_stmt_close stmt_close;
 	func_mysqlnd_execute_com_enable_ssl enable_ssl;
 	func_mysqlnd_execute_com_handshake handshake;
+	func_mysqlnd_execute_com_reset_connection reset_connection;
 };
 
 
@@ -482,7 +484,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__free_reference)(MYSQLND_CONN_
 typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_do_request)(MYSQLND_CONN_DATA * const conn, const enum php_mysqlnd_server_command command, const zend_uchar * const arg, const size_t arg_len, const bool silent, const bool ignore_upsert_status);
 typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_handle_response)(MYSQLND_CONN_DATA * const conn, const enum mysqlnd_packet_type ok_packet, const bool silent, const enum php_mysqlnd_server_command command, const bool ignore_upsert_status);
 
-typedef void				(*func_mysqlnd_conn_data__restart_psession)(MYSQLND_CONN_DATA * conn);
+typedef enum_func_status	(*func_mysqlnd_conn_data__restart_psession)(MYSQLND_CONN_DATA * conn);
 typedef void				(*func_mysqlnd_conn_data__end_psession)(MYSQLND_CONN_DATA * conn);
 typedef enum_func_status	(*func_mysqlnd_conn_data__send_close)(MYSQLND_CONN_DATA * conn);
 

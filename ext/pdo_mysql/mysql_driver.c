@@ -603,9 +603,15 @@ static zend_result pdo_mysql_check_liveness(pdo_dbh_t *dbh)
 	PDO_DBG_ENTER("pdo_mysql_check_liveness");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 
+#ifdef PDO_USE_MYSQLND
+	if (mysqlnd_restart_psession(H->server)) {
+		PDO_DBG_RETURN(FAILURE);
+	}
+#else
 	if (mysql_ping(H->server)) {
 		PDO_DBG_RETURN(FAILURE);
 	}
+#endif
 	PDO_DBG_RETURN(SUCCESS);
 }
 /* }}} */
@@ -724,11 +730,6 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		pdo_mysql_error(dbh);
 		goto cleanup;
 	}
-#ifdef PDO_USE_MYSQLND
-	if (dbh->is_persistent) {
-		mysqlnd_restart_psession(H->server);
-	}
-#endif
 
 	dbh->driver_data = H;
 
