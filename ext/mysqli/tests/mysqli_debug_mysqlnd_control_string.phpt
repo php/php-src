@@ -57,7 +57,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
         return trim(substr(file_get_contents($trace_file), 0, 100024));
     }
 
-    $trace_file = sprintf('%s%s%s', sys_get_temp_dir(), DIRECTORY_SEPARATOR, 'mysqli_debug_phpt.trace');
+    $trace_file = tempnam(sys_get_temp_dir(), "mysqli_debug_phpt");
 
     $trace = try_control_string($link, 't:O,' . $trace_file, $trace_file, 10);
     if (!strstr($trace, 'SELECT * FROM test') && !strstr($trace, 'mysql_real_query'))
@@ -218,5 +218,5 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     require_once 'clean_table.inc';
 ?>
 --EXPECTF--
-[083][control string 'n:O,%smysqli_debug_phpt.trace'] Trace file has not been written.
+[083][control string 'n:O,%s'] Trace file has not been written.
 done%s
