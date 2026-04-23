@@ -21,7 +21,7 @@
 
 static char **limit_extensions = NULL;
 
-static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage) /* {{{ */
+int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	zend_string *duplicate;
