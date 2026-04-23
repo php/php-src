@@ -91,6 +91,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Functions using zend_forbid_dynamic_call() *must* be flagged with
     ZEND_ACC2_FORBID_DYN_CALLS (@forbid-dynamic-calls in stubs). In debug
     builds, failing to include that flag will lead to assertion failures.
+  . The ZEND_RESULT_CODE type has been removed. Use zend_result directly.
 
 ========================
 2. Build system changes

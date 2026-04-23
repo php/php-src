@@ -54,12 +54,10 @@
 
 typedef unsigned char zend_uchar;
 
-typedef enum {
+typedef enum zend_result {
   SUCCESS =  0,
   FAILURE = -1,		/* this MUST stay a negative number, or it may affect functions! */
-} ZEND_RESULT_CODE;
-
-typedef ZEND_RESULT_CODE zend_result;
+} zend_result;
 
 /* This constant is deprecated, use SIZE_MAX instead */
 #define ZEND_SIZE_MAX SIZE_MAX
