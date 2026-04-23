@@ -197,4 +197,8 @@ PHP                                                                        NEWS
   . Added ZipArchive::openString() method.
     (Tim Starling, Soner Sayakci, Ghaith Olabi)
 
+- Zlib:
+  . deflate_init() now raises a TypeError when the "strategy" element 
+    in $options is not of type int. (Weilin Du)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
