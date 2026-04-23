@@ -82,6 +82,9 @@ PHP 8.6 UPGRADE NOTES
     values.
 
 - Standard:
+  . Stateful stream filters (e.g. "dechunk", "consumed", "convert.*") now
+    reset their internal state when the stream is sought to position 0.
+    See bug #49874.
   . Form feed (\f) is now added in the default trimmed characters of trim(),
     rtrim() and ltrim(). RFC: https://wiki.php.net/rfc/trim_form_feed
   . array_filter() now raises a ValueError when an invalid $mode
