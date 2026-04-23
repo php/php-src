@@ -22,7 +22,7 @@ $inputs = array('SJIS' => $sjis_string,
 foreach ($inputs as $lang => $input) {
     echo "\nLanguage: $lang\n";
     echo "-- Base 64: --\n";
-    mb_internal_encoding($lang);
+    ini_set('internal_encoding', $lang);
     $outEncoding = "UTF-8";
     var_dump(mb_encode_mimeheader($input, $outEncoding, 'B'));
     echo "-- Quoted-Printable --\n";

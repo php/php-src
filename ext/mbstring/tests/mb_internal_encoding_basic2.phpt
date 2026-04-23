@@ -29,7 +29,7 @@ var_dump(mb_internal_encoding());    //check internal encoding is now set to UTF
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_internal_encoding() : basic functionality ***
 string(0) ""
 string(10) "ISO-8859-1"
@@ -38,7 +38,13 @@ string(10) "ISO-8859-1"
 string(0) ""
 string(0) ""
 string(0) ""
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 string(10) "ISO-8859-1"
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 bool(true)
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 string(5) "UTF-8"
 Done

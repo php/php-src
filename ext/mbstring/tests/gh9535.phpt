@@ -2,6 +2,8 @@
 GH-9535 (mb_strcut(): The behavior of mb_strcut in mbstring has been changed in PHP8.1)
 --EXTENSIONS--
 mbstring
+--INI--
+error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
 $encodings = [

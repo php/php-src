@@ -24,7 +24,7 @@ foreach ($english as $lang => $input) {
     var_dump(mb_encode_mimeheader($input, 'UTF-8', 'Q'));
 }
 
-mb_internal_encoding('utf-8');
+ini_set('internal_encoding', 'utf-8');
 
 foreach ($nonEnglish as $lang => $input) {
     echo "\nLanguage: $lang\n";

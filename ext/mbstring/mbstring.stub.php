@@ -55,6 +55,7 @@ const MB_CASE_FOLD_SIMPLE = UNKNOWN;
 function mb_language(?string $language = null): string|bool {}
 
 /** @refcount 1 */
+ #[\Deprecated(since: '8.5', message: 'use internal_encoding INI settings instead')]
 function mb_internal_encoding(?string $encoding = null): string|bool {}
 
 /**
@@ -64,6 +65,7 @@ function mb_internal_encoding(?string $encoding = null): string|bool {}
 function mb_http_input(?string $type = null): array|string|false {}
 
 /** @refcount 1 */
+#[\Deprecated(since: '8.5', message: 'use output_encoding INI settings instead')]
 function mb_http_output(?string $encoding = null): string|bool {}
 
 /**
