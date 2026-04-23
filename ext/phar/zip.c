@@ -1271,7 +1271,8 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *phar, ze
 
 	/* register alias */
 	if (phar->alias_len) {
-		if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(phar->fname), ZSTR_LEN(phar->fname), phar->alias, phar->alias_len, error)) {
+		phar = phar_get_archive(ZSTR_VAL(phar->fname), ZSTR_LEN(phar->fname), phar->alias, phar->alias_len, error);
+		if (!phar) {
 			return EOF;
 		}
 	}

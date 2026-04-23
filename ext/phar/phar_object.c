@@ -752,8 +752,8 @@ PHP_METHOD(Phar, webPhar)
 			entry_len = sizeof("/index.php")-1;
 		}
 
-		if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
-			(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
+		phar = phar_get_archive(fname, fname_len, NULL, 0, NULL);
+		if (!phar || (info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
 			phar_do_404(phar, fname, fname_len, f404);
 		} else {
 			char *tmp = NULL, sa = '\0';
@@ -793,8 +793,8 @@ PHP_METHOD(Phar, webPhar)
 		goto cleanup_skip_entry;
 	}
 
-	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
-		(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
+	phar = phar_get_archive(fname, fname_len, NULL, 0, NULL);
+	if (!phar || (info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
 		phar_do_404(phar, fname, fname_len, f404);
 		goto cleanup;
 	}

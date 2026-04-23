@@ -309,7 +309,8 @@ zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data 
 	}
 
 	if (*ZSTR_VAL(filename) == '.') {
-		if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL)) {
+		phar = phar_get_archive(ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL);
+		if (!phar) {
 			zend_string_release_ex(arch, false);
 			return NULL;
 		}
@@ -469,7 +470,6 @@ ZEND_ATTRIBUTE_NONNULL static zend_result phar_separate_entry_fp(phar_entry_info
  */
 ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, const zend_string *fname, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security) /* {{{ */
 {
-	phar_archive_data *phar;
 	phar_entry_info *entry;
 	bool for_write  = mode[0] != 'r' || mode[1] == '+';
 	bool for_append = mode[0] == 'a';
@@ -479,7 +479,8 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, co
 	*ret = NULL;
 	*error = NULL;
 
-	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 0, error)) {
+	phar_archive_data *phar = phar_get_archive(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 0, error);
+	if (!phar) {
 		return FAILURE;
 	}
 
@@ -614,7 +615,6 @@ really_get_entry:
  */
 ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(zend_string *fname, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security, uint32_t timestamp) /* {{{ */
 {
-	phar_archive_data *phar;
 	phar_entry_info etemp;
 	phar_entry_data *ret;
 	const char *pcr_error;
@@ -626,7 +626,8 @@ ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(zend_strin
 
 	is_dir = (path_len && path[path_len - 1] == '/') ? 1 : 0;
 
-	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 0, error)) {
+	phar_archive_data *phar = phar_get_archive(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 0, error);
+	if (!phar) {
 		return NULL;
 	}
 
@@ -961,9 +962,9 @@ zend_result phar_free_alias(const phar_archive_data *phar) /* {{{ */
  * Looks up a phar archive in the filename map, connecting it to the alias
  * (if any) or returns null
  */
-zend_result phar_get_archive(phar_archive_data **archive, const char *fname, size_t fname_len, const char *alias, size_t alias_len, char **error) /* {{{ */
+phar_archive_data* phar_get_archive(const char *fname, size_t fname_len, const char *alias, size_t alias_len, char **error) /* {{{ */
 {
-	phar_archive_data *fd_ptr;
+	phar_archive_data *archive;
 
 	phar_request_initialize();
 
@@ -971,142 +972,132 @@ zend_result phar_get_archive(phar_archive_data **archive, const char *fname, siz
 		*error = NULL;
 	}
 
-	*archive = NULL;
-
 	if (PHAR_G(last_phar) && zend_string_equals_cstr(PHAR_G(last_phar_name), fname, fname_len)) {
-		*archive = PHAR_G(last_phar);
+		archive = PHAR_G(last_phar);
 		if (alias && alias_len) {
 
 			if (!PHAR_G(last_phar)->is_temporary_alias && (alias_len != PHAR_G(last_phar)->alias_len || memcmp(PHAR_G(last_phar)->alias, alias, alias_len))) {
 				if (error) {
 					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(PHAR_G(last_phar)->fname), fname);
 				}
-				*archive = NULL;
-				return FAILURE;
+				return NULL;
 			}
 
 			if (PHAR_G(last_phar)->alias_len && zend_hash_str_exists(&(PHAR_G(phar_alias_map)), PHAR_G(last_phar)->alias, PHAR_G(last_phar)->alias_len)) {
 				zend_hash_str_del(&(PHAR_G(phar_alias_map)), PHAR_G(last_phar)->alias, PHAR_G(last_phar)->alias_len);
 			}
 
-			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, *archive);
+			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, archive);
 			PHAR_G(last_alias) = alias;
 			PHAR_G(last_alias_len) = alias_len;
 		}
 
-		return SUCCESS;
+		return archive;
 	}
 
 	if (alias && alias_len) {
 		/* If the alias stored in the last_phar cache matches, just use it directly */
 		if (PHAR_G(last_phar) && alias_len == PHAR_G(last_alias_len) && !memcmp(alias, PHAR_G(last_alias), alias_len)) {
-			fd_ptr = PHAR_G(last_phar);
+			archive = PHAR_G(last_phar);
 		} else {
-			fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len);
+			archive = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len);
 		}
 
 		/* If we didn't find the alias, check in the cached manifest to see if we can find it */
-		if (!fd_ptr && PHAR_G(manifest_cached)) {
-			fd_ptr = zend_hash_str_find_ptr(&cached_alias, alias, alias_len);
+		if (!archive && PHAR_G(manifest_cached)) {
+			archive = zend_hash_str_find_ptr(&cached_alias, alias, alias_len);
 		}
 
-		if (fd_ptr) {
-			if (!zend_string_equals_cstr(fd_ptr->fname, fname, fname_len)) {
+		if (archive) {
+			if (!zend_string_equals_cstr(archive->fname, fname, fname_len)) {
 				if (error) {
-					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(fd_ptr->fname), fname);
+					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(archive->fname), fname);
 				}
-				if (SUCCESS == phar_free_alias(fd_ptr)) {
+				if (SUCCESS == phar_free_alias(archive)) {
 					if (error) {
 						efree(*error);
 						*error = NULL;
 					}
 				}
-				return FAILURE;
+				return NULL;
 			}
 
-			*archive = fd_ptr;
-			PHAR_G(last_phar) = fd_ptr;
-			PHAR_G(last_phar_name) = fd_ptr->fname;
+			PHAR_G(last_phar) = archive;
+			PHAR_G(last_phar_name) = archive->fname;
 			PHAR_G(last_alias) = alias;
 			PHAR_G(last_alias_len) = alias_len;
 
-			return SUCCESS;
+			return archive;
 		}
 	}
 
 	if (fname && fname_len) {
-		fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len);
-		if (fd_ptr) {
-			*archive = fd_ptr;
-
+		archive = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len);
+		if (archive) {
 			if (alias && alias_len) {
-				if (!fd_ptr->is_temporary_alias && (alias_len != fd_ptr->alias_len || memcmp(fd_ptr->alias, alias, alias_len))) {
+				if (!archive->is_temporary_alias && (alias_len != archive->alias_len || memcmp(archive->alias, alias, alias_len))) {
 					if (error) {
-						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(fd_ptr->fname), fname);
+						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(archive->fname), fname);
 					}
-					return FAILURE;
+					return NULL;
 				}
 
-				if (fd_ptr->alias_len && zend_hash_str_exists(&(PHAR_G(phar_alias_map)), fd_ptr->alias, fd_ptr->alias_len)) {
-					zend_hash_str_del(&(PHAR_G(phar_alias_map)), fd_ptr->alias, fd_ptr->alias_len);
+				if (archive->alias_len && zend_hash_str_exists(&(PHAR_G(phar_alias_map)), archive->alias, archive->alias_len)) {
+					zend_hash_str_del(&(PHAR_G(phar_alias_map)), archive->alias, archive->alias_len);
 				}
 
-				zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, fd_ptr);
+				zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, archive);
 			}
 
-			PHAR_G(last_phar) = fd_ptr;
-			PHAR_G(last_phar_name) = fd_ptr->fname;
-			PHAR_G(last_alias) = fd_ptr->alias;
-			PHAR_G(last_alias_len) = fd_ptr->alias_len;
+			PHAR_G(last_phar) = archive;
+			PHAR_G(last_phar_name) = archive->fname;
+			PHAR_G(last_alias) = archive->alias;
+			PHAR_G(last_alias_len) = archive->alias_len;
 
-			return SUCCESS;
+			return archive;
 		}
 
-		if (PHAR_G(manifest_cached) && NULL != (fd_ptr = zend_hash_str_find_ptr(&cached_phars, fname, fname_len))) {
-			*archive = fd_ptr;
-
+		if (PHAR_G(manifest_cached) && NULL != (archive = zend_hash_str_find_ptr(&cached_phars, fname, fname_len))) {
 			/* this could be problematic - alias should never be different from manifest alias
 			   for cached phars */
-			if (!fd_ptr->is_temporary_alias && alias && alias_len) {
-				if (alias_len != fd_ptr->alias_len || memcmp(fd_ptr->alias, alias, alias_len)) {
+			if (!archive->is_temporary_alias && alias && alias_len) {
+				if (alias_len != archive->alias_len || memcmp(archive->alias, alias, alias_len)) {
 					if (error) {
-						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(fd_ptr->fname), fname);
+						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(archive->fname), fname);
 					}
-					return FAILURE;
+					return NULL;
 				}
 			}
 
-			PHAR_G(last_phar) = fd_ptr;
-			PHAR_G(last_phar_name) = fd_ptr->fname;
-			PHAR_G(last_alias) = fd_ptr->alias;
-			PHAR_G(last_alias_len) = fd_ptr->alias_len;
+			PHAR_G(last_phar) = archive;
+			PHAR_G(last_phar_name) = archive->fname;
+			PHAR_G(last_alias) = archive->alias;
+			PHAR_G(last_alias_len) = archive->alias_len;
 
-			return SUCCESS;
+			return archive;
 		}
 
-		fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), fname, fname_len);
+		archive = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), fname, fname_len);
 
 		/* If we didn't find the fname in the alias map, check in the cached manifest to see if we can find it */
-		if (!fd_ptr && PHAR_G(manifest_cached)) {
-			fd_ptr = zend_hash_str_find_ptr(&cached_alias, fname, fname_len);
+		if (!archive && PHAR_G(manifest_cached)) {
+			archive = zend_hash_str_find_ptr(&cached_alias, fname, fname_len);
 		}
 
-		if (fd_ptr) {
-			*archive = fd_ptr;
+		if (archive) {
+			PHAR_G(last_phar) = archive;
+			PHAR_G(last_phar_name) = archive->fname;
+			PHAR_G(last_alias) = archive->alias;
+			PHAR_G(last_alias_len) = archive->alias_len;
 
-			PHAR_G(last_phar) = fd_ptr;
-			PHAR_G(last_phar_name) = fd_ptr->fname;
-			PHAR_G(last_alias) = fd_ptr->alias;
-			PHAR_G(last_alias_len) = fd_ptr->alias_len;
-
-			return SUCCESS;
+			return archive;
 		}
 
 		/* not found, try converting \ to / */
 		char *my_realpath = expand_filepath(fname, NULL);
 
 		if (UNEXPECTED(!my_realpath)) {
-			return FAILURE;
+			return NULL;
 		}
 
 		size_t my_realpath_len = strlen(my_realpath);
@@ -1114,31 +1105,29 @@ zend_result phar_get_archive(phar_archive_data **archive, const char *fname, siz
 		phar_unixify_path_separators(my_realpath, my_realpath_len);
 #endif
 
-		fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), my_realpath, my_realpath_len);
+		archive = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), my_realpath, my_realpath_len);
 
 		/* If we didn't find the path in the fname map, check in the cached manifest to see if we can find it */
-		if (!fd_ptr && PHAR_G(manifest_cached)) {
-			fd_ptr = zend_hash_str_find_ptr(&cached_phars, my_realpath, my_realpath_len);
+		if (!archive && PHAR_G(manifest_cached)) {
+			archive = zend_hash_str_find_ptr(&cached_phars, my_realpath, my_realpath_len);
 		}
 		efree(my_realpath);
 
-		if (fd_ptr) {
-			*archive = fd_ptr;
-
+		if (archive) {
 			if (alias && alias_len) {
-				zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, fd_ptr);
+				zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, archive);
 			}
 
-			PHAR_G(last_phar) = fd_ptr;
-			PHAR_G(last_phar_name) = fd_ptr->fname;
-			PHAR_G(last_alias) = fd_ptr->alias;
-			PHAR_G(last_alias_len) = fd_ptr->alias_len;
+			PHAR_G(last_phar) = archive;
+			PHAR_G(last_phar_name) = archive->fname;
+			PHAR_G(last_alias) = archive->alias;
+			PHAR_G(last_alias_len) = archive->alias_len;
 
-			return SUCCESS;
+			return archive;
 		}
 	}
 
-	return FAILURE;
+	return NULL;
 }
 /* }}} */
 

@@ -98,8 +98,8 @@ static zend_string* phar_get_name_for_relative_paths(zend_string *filename, bool
 
 	/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 	/* retrieving a file defaults to within the current directory, so use this if possible */
-	phar_archive_data *phar;
-	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL)) {
+	phar_archive_data *phar = phar_get_archive(ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL);
+	if (!phar) {
 		zend_string_release_ex(arch, false);
 		return NULL;
 	}
@@ -492,9 +492,9 @@ static void phar_file_stat(const char *filename, size_t filename_length, int typ
 		zend_string *arch = phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 2, 0);
 		if (arch) {
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
-			zend_result has_archive = phar_get_archive(&phar, ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL);
+			phar = phar_get_archive(ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL);
 			zend_string_release_ex(arch, false);
-			if (FAILURE == has_archive) {
+			if (!phar) {
 				goto skip_phar;
 			}
 splitted:;
@@ -727,13 +727,13 @@ PHP_FUNCTION(phar_is_file) /* {{{ */
 
 		zend_string *arch = phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 2, 0);
 		if (arch) {
-			phar_archive_data *phar;
+			;
 
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			/* retrieving a file within the current directory, so use this if possible */
-			zend_result has_archive = phar_get_archive(&phar, ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL);
+			phar_archive_data *phar = phar_get_archive(ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL);
 			zend_string_release_ex(arch, false);
-			if (has_archive == SUCCESS) {
+			if (phar) {
 				phar_entry_info *etemp;
 
 				zend_string *entry = phar_fix_filepath(filename, filename_len, true);
@@ -784,13 +784,11 @@ PHP_FUNCTION(phar_is_link) /* {{{ */
 
 		zend_string *arch = phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 2, 0);
 		if (arch) {
-			phar_archive_data *phar;
-
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			/* retrieving a file within the current directory, so use this if possible */
-			zend_result has_archive = phar_get_archive(&phar, ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL);
+			phar_archive_data *phar = phar_get_archive(ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL);
 			zend_string_release_ex(arch, false);
-			if (has_archive == SUCCESS) {
+			if (phar) {
 				phar_entry_info *etemp;
 
 				zend_string *entry = phar_fix_filepath(filename, filename_len, true);
