@@ -412,7 +412,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 6, 7) zend_result phar_create_or_parse_filename(z
 ZEND_ATTRIBUTE_NONNULL_ARGS(3) zend_result phar_open_executed_filename(char *alias, size_t alias_len, char **error);
 zend_result phar_free_alias(const phar_archive_data *phar);
 zend_result phar_get_archive(phar_archive_data **archive, const char *fname, size_t fname_len, const char *alias, size_t alias_len, char **error);
-zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, const char *fname, char **signature, size_t *signature_len, char **error);
+zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, const char *sig, size_t sig_len, const char *fname, char **signature, size_t *signature_len, char **error);
 ZEND_ATTRIBUTE_NONNULL zend_string* phar_create_signature(phar_archive_data *phar, php_stream *fp, char **error);
 
 /* utility functions */
