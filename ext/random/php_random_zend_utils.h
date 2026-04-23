@@ -20,7 +20,7 @@
 # include "php_random.h"
 # include "zend.h"
 
-typedef struct _php_random_bytes_insecure_state_for_zend {
+typedef struct php_random_bytes_insecure_state_for_zend {
 	bool initialized;
 	php_random_status_state_xoshiro256starstar xoshiro256starstar_state;
 } php_random_bytes_insecure_state_for_zend;
