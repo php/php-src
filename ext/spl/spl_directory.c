@@ -2099,7 +2099,11 @@ PHP_METHOD(SplFileObject, fgets)
 		spl_filesystem_file_free_line(intern);
 		intern->u.file.current_line_num++;
 	} else {
-		if (spl_filesystem_file_read_ex(intern, /* silent */ false, /* line_add */ 1, /* csv */ false) == FAILURE) {
+		if (spl_filesystem_file_read_ex(intern, /* silent */ true, /* line_add */ 1, /* csv */ false) == FAILURE) {
+			if (php_stream_eof(intern->u.file.stream)) {
+				RETURN_EMPTY_STRING();
+			}
+			spl_filesystem_file_cannot_read(intern);
 			RETURN_THROWS();
 		}
 		RETVAL_STR_COPY(intern->u.file.current_line);
