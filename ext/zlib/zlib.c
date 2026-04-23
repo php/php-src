@@ -1115,8 +1115,14 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("strategy"))) != NULL) {
+		bool failed = false;
+
 		ZVAL_DEINDIRECT(option_buffer);
-		strategy = zval_get_long(option_buffer);
+		strategy = zval_try_get_long(option_buffer, &failed);
+		if (UNEXPECTED(failed)) {
+			zend_argument_type_error(2, "\"strategy\" option must be of type int, %s given", zend_zval_value_name(option_buffer));
+			RETURN_THROWS();
+		}
 	}
 	switch (strategy) {
 		case Z_FILTERED:
