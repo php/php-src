@@ -229,7 +229,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source, zend_ulong data_s
 			}
 		}
 
-		while (i < data_source_len && isspace(data_source[i])) {
+		while (i < data_source_len && isspace((unsigned char)data_source[i])) {
 			i++;
 		}
 

@@ -784,7 +784,7 @@ static inline void mb_regex_substitute(
 						continue;
 					}
 					if (name_end[0] == delim) break;
-					if (maybe_num && !isdigit(name_end[0])) maybe_num = 0;
+					if (maybe_num && !isdigit((unsigned char)name_end[0])) maybe_num = 0;
 					name_end++;
 				}
 				p = name_end + 1;

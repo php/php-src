@@ -629,7 +629,7 @@ static char *php_mb_rfc1867_getword(const zend_encoding *encoding, char **line, 
 
 static char *php_mb_rfc1867_getword_conf(const zend_encoding *encoding, char *str) /* {{{ */
 {
-	while (*str && isspace(*(unsigned char *)str)) {
+	while (*str && isspace((unsigned char)*str)) {
 		++str;
 	}
 
@@ -645,7 +645,7 @@ static char *php_mb_rfc1867_getword_conf(const zend_encoding *encoding, char *st
 	} else {
 		char *strend = str;
 
-		while (*strend && !isspace(*(unsigned char *)strend)) {
+		while (*strend && !isspace((unsigned char)*strend)) {
 			++strend;
 		}
 		return php_mb_rfc1867_substring_conf(encoding, str, strend - str, 0);

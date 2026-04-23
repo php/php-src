@@ -148,7 +148,7 @@ bool pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 					stmt->columns[col].name = zend_string_separate(orig_name, 0);
 					char *s = ZSTR_VAL(stmt->columns[col].name);
 					while (*s != '\0') {
-						*s = toupper(*s);
+						*s = toupper((unsigned char)*s);
 						s++;
 					}
 					break;
