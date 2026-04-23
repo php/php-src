@@ -1655,9 +1655,6 @@ after_open_fp:
 		return ZEND_HASH_APPLY_STOP;
 
 	} else {
-		if (error) {
-			efree(error);
-		}
 		/* convert to PHAR_UFP */
 		if (data->internal_file->fp_type == PHAR_MOD) {
 			php_stream_close(data->internal_file->fp);
@@ -3603,10 +3600,6 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 		}
 		goto finish;
 	} else {
-		if (error) {
-			efree(error);
-		}
-
 		if (!data->internal_file->is_dir) {
 			size_t contents_len = 0;
 			if (content) {
@@ -3683,10 +3676,6 @@ static void phar_mkdir(phar_archive_data **pphar, zend_string *dir_name)
 
 		return;
 	} else {
-		if (error) {
-			efree(error);
-		}
-
 		/* check for copy on write */
 		if (data->phar != *pphar) {
 			*pphar = data->phar;

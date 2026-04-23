@@ -287,10 +287,6 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		return NULL;
 	}
 
-	if (error) {
-		efree(error);
-	}
-
 	if (zend_string_equals(resource->path, ZSTR_CHAR('/'))) {
 		/* root directory requested */
 		php_url_free(resource);

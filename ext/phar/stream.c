@@ -200,9 +200,6 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			php_url_free(resource);
 			return NULL;
 		}
-		if (error) {
-			efree(error);
-		}
 		fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 		php_url_free(resource);
 		efree(internal_file);
@@ -705,9 +702,6 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 		efree(internal_file);
 		php_url_free(resource);
 		return 0;
-	}
-	if (error) {
-		efree(error);
 	}
 	if (idata->internal_file->fp_refcount > 1) {
 		/* more than just our fp resource is open for this file */
