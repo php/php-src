@@ -102,8 +102,8 @@ PHP 8.6 UPGRADE NOTES
     a string.
 
 - Zlib:
-  . deflate_init() now raises a TypeError when the "strategy" element 
-    in $options is not of type int.
+  . deflate_init() now raises a TypeError when the value for option
+    "strategy" is not of type int.
 
 ========================================
 2. New Features

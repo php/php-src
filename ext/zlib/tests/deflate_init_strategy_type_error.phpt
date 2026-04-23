@@ -13,4 +13,4 @@ try {
 
 ?>
 --EXPECT--
-deflate_init(): Argument #2 ($options) the "strategy" element in $options must be of type int, array given
+deflate_init(): Argument #2 ($options) the value for option "strategy" must be of type int, array given

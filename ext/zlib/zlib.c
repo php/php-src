@@ -1120,7 +1120,7 @@ PHP_FUNCTION(deflate_init)
 		ZVAL_DEINDIRECT(option_buffer);
 		strategy = zval_try_get_long(option_buffer, &failed);
 		if (UNEXPECTED(failed)) {
-			zend_argument_type_error(2, "the \"strategy\" element in $options must be of type int, %s given", zend_zval_value_name(option_buffer));
+			zend_argument_type_error(2, "the value for option \"strategy\" must be of type int, %s given", zend_zval_value_name(option_buffer));
 			RETURN_THROWS();
 		}
 	}
