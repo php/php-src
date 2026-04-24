@@ -199,6 +199,7 @@ PHP                                                                        NEWS
 
 - Zlib:
   . deflate_init() now raises a TypeError when the value for option
-    "strategy" is not of type int. (Weilin Du)
+    "level", "memory", "window", or "strategy" is not of type int.
+    (Weilin Du)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
