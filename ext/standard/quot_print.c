@@ -210,8 +210,8 @@ PHP_FUNCTION(quoted_printable_decode)
 		switch (str_in[i]) {
 		case '=':
 			if (str_in[i + 1] && str_in[i + 2] &&
-				isxdigit((int) str_in[i + 1]) &&
-				isxdigit((int) str_in[i + 2]))
+				isxdigit((unsigned char) str_in[i + 1]) &&
+				isxdigit((unsigned char) str_in[i + 2]))
 			{
 				ZSTR_VAL(str_out)[j++] = (php_hex2int((int) str_in[i + 1]) << 4)
 						+ php_hex2int((int) str_in[i + 2]);
