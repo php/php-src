@@ -81,40 +81,16 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 			char *q = NULL;
 			PGTransactionStatusType tstatus = PQtransactionStatus(H->server);
 
-			switch (tstatus) {
-			case PQTRANS_ACTIVE:
-			case PQTRANS_INERROR:
-			case PQTRANS_UNKNOWN:
-				res = NULL;
-				break;
-			case PQTRANS_INTRANS:
-				spprintf(&q, 0, 
-					"SAVEPOINT pdo_pgsql_deallocate_%s;"
-					"DEALLOCATE %s;"
-					"RELEASE SAVEPOINT pdo_pgsql_deallocate_%s",
-					S->stmt_name,
-					S->stmt_name,
-					S->stmt_name);
-				res = PQexec(H->server, q);
-				efree(q);
-				if (res && PQresultStatus(res) != PGRES_COMMAND_OK) {
-					spprintf(&q, 0,
-						"ROLLBACK TO SAVEPOINT pdo_pgsql_deallocate_%s;"
-						"RELEASE SAVEPOINT pdo_pgsql_deallocate_%s",
-						S->stmt_name,
-						S->stmt_name);
-					PGresult *rollres;
-					PQclear(res);
-					rollres = PQexec(H->server, q);
-					res = rollres;
-					efree(q);
-				}
-				break;
-			default:
+			if (tstatus == PQTRANS_IDLE) {
 				spprintf(&q, 0, "DEALLOCATE %s", S->stmt_name);
 				res = PQexec(H->server, q);
 				efree(q);
-				break;
+			} else {
+				/* Inside a transaction, already aborted, or connection is unusable:
+				 * skip DEALLOCATE. On servers that reject it (e.g. Aurora DSQL) it
+				 * would poison the transaction (GH-21869); on any server the server
+				 * frees the prepared statement when the transaction ends. */
+				res = NULL;
 			}
 #else
 			res = PQclosePrepared(H->server, S->stmt_name);
