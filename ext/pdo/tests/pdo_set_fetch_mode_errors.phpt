@@ -82,7 +82,7 @@ ValueError: PDOStatement::setFetchMode(): Argument #1 ($mode) cannot use PDO::FE
 Mode: 15
 ValueError: PDOStatement::setFetchMode(): Argument #1 ($mode) cannot use PDO::FETCH_CLASSTYPE, PDO::FETCH_PROPS_LATE, or PDO::FETCH_SERIALIZE fetch flags with a fetch mode other than PDO::FETCH_CLASS
 Mode: 16
-bool(true)
+ValueError: PDOStatement::setFetchMode(): Argument #1 ($mode) cannot use PDO::FETCH_CLASSTYPE, PDO::FETCH_PROPS_LATE, or PDO::FETCH_SERIALIZE fetch flags with a fetch mode other than PDO::FETCH_CLASS
 ValueError: PDOStatement::setFetchMode(): Argument #1 ($mode) cannot use PDO::FETCH_CLASSTYPE, PDO::FETCH_PROPS_LATE, or PDO::FETCH_SERIALIZE fetch flags with a fetch mode other than PDO::FETCH_CLASS
 ValueError: PDOStatement::setFetchMode(): Argument #1 ($mode) must be a bitmask of PDO::FETCH_* constants
 ValueError: PDOStatement::setFetchMode(): Argument #1 ($mode) PDO::FETCH_FUNC can only be used with PDOStatement::fetchAll()
