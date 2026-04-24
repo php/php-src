@@ -76,6 +76,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23444 (ODBC_ATTR_ASSUME_UTF8 corrupts Unicode data outside
     Windows). (Calvin Buckley, Lazizbek Ergashev)
 
+- PDO Sqlite:
+  . Fixed bug GH-20214 (PDO::FETCH_DEFAULT unexpected behavior with
+    PDOStatement::setFetchMode). (SakiTakamachi)
+
 - Phar:
   . Fixed bug GH-23418 (Use-after-free when looking up mounted directories).
     (Weilin Du)
