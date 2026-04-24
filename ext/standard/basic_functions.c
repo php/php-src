@@ -2479,6 +2479,16 @@ PHP_FUNCTION(parse_ini_file)
 		RETURN_THROWS();
 	}
 
+	switch (scanner_mode) {
+		case ZEND_INI_SCANNER_NORMAL:
+		case ZEND_INI_SCANNER_RAW:
+		case ZEND_INI_SCANNER_TYPED:
+			break;
+		default:
+			zend_argument_value_error(3, "must be one of INI_SCANNER_NORMAL, INI_SCANNER_RAW, or INI_SCANNER_TYPED");
+		RETURN_THROWS();
+	}
+
 	/* Set callback function */
 	if (process_sections) {
 		ZVAL_UNDEF(&BG(active_ini_file_section));
@@ -2514,6 +2524,16 @@ PHP_FUNCTION(parse_ini_string)
 		Z_PARAM_BOOL(process_sections)
 		Z_PARAM_LONG(scanner_mode)
 	ZEND_PARSE_PARAMETERS_END();
+
+	switch (scanner_mode) {
+		case ZEND_INI_SCANNER_NORMAL:
+		case ZEND_INI_SCANNER_RAW:
+		case ZEND_INI_SCANNER_TYPED:
+			break;
+		default:
+			zend_argument_value_error(3, "must be one of INI_SCANNER_NORMAL, INI_SCANNER_RAW, or INI_SCANNER_TYPED");
+		RETURN_THROWS();
+	}
 
 	if (INT_MAX - str_len < ZEND_MMAP_AHEAD) {
 		RETVAL_FALSE;

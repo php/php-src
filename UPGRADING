@@ -95,6 +95,8 @@ PHP 8.6 UPGRADE NOTES
     argument value is passed.
   . scandir() now raises a ValueError when an invalid $sorting_order
     argument value is passed.
+  . parse_ini_file() and parse_ini_string() now raise a ValueError when
+    an invalid $scanner_mode argument value is passed.
 
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the
