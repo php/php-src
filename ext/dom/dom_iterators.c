@@ -70,6 +70,15 @@ xmlNodePtr create_notation(xmlDtdPtr parent_dtd, const xmlChar *name, const xmlC
 }
 /* }}} */
 
+void dom_free_notation(xmlEntityPtr entity) /* {{{ */
+{
+	xmlFree((xmlChar *) entity->name);
+	xmlFree((xmlChar *) entity->ExternalID);
+	xmlFree((xmlChar *) entity->SystemID);
+	xmlFree(entity);
+}
+/* }}} */
+
 xmlNodePtr php_dom_libxml_hash_iter(xmlHashTable *ht, int index)
 {
 	int htsize;

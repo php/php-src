@@ -1486,7 +1486,13 @@ void dom_objects_free_storage(zend_object *object)
 	if (ptr != NULL && ptr->node != NULL) {
 		xmlNodePtr node = ptr->node;
 
-		if (node->type != XML_DOCUMENT_NODE && node->type != XML_HTML_DOCUMENT_NODE) {
+		if (node->type == XML_NOTATION_NODE) {
+			int refcount = php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
+			php_libxml_decrement_doc_ref((php_libxml_node_object *) intern);
+			if (refcount == 0) {
+				dom_free_notation((xmlEntityPtr) node);
+			}
+		} else if (node->type != XML_DOCUMENT_NODE && node->type != XML_HTML_DOCUMENT_NODE) {
 			php_libxml_node_decrement_resource((php_libxml_node_object *) intern);
 		} else {
 			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
