@@ -160,6 +160,8 @@ PHP                                                                        NEWS
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
+  . Fixed bug GH-21831 (SplObjectStorage::removeAllExcept() use-after-free
+    with re-entrant getHash()). (Pratik Bhujel)
   . Fix bugs GH-8561, GH-8562, GH-8563, and GH-8564 (Fixing various
     SplFileObject iterator desync bugs). (iliaal)
 

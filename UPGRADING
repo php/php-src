@@ -77,6 +77,8 @@ PHP 8.6 UPGRADE NOTES
     logic in their updateTimestamp() method.
 
 - SPL:
+  . SplObjectStorage::getHash() implementations may no longer mutate any
+    SplObjectStorage instance. Attempting to do so now throws an Error.
   . SplFileObject::next() now advances the stream when no prior current()
     call has cached a line. A subsequent current() call returns the new
     line rather than the previous one.
