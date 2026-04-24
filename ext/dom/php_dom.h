@@ -125,7 +125,7 @@ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);
 bool dom_node_is_read_only(const xmlNode *node);
 bool dom_node_children_valid(const xmlNode *node);
-xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
+xmlNodePtr create_notation(xmlDtdPtr parent_dtd, const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
 xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce);

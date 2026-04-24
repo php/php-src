@@ -176,7 +176,8 @@ static void dom_map_get_notation_item(dom_nnodemap_object *map, zend_long index,
 	xmlNodePtr node = map->ht ? php_dom_libxml_hash_iter(map->ht, index) : NULL;
 	if (node) {
 		xmlNotation *notation = (xmlNotation *) node;
-		node = create_notation(notation->name, notation->PublicID, notation->SystemID);
+		xmlDtdPtr dtd = (xmlDtdPtr) dom_object_get_node(map->baseobj);
+		node = create_notation(dtd, notation->name, notation->PublicID, notation->SystemID);
 	}
 	dom_ret_node_to_zobj(map, node, return_value);
 }
@@ -504,7 +505,8 @@ static xmlNodePtr dom_map_get_ns_named_item_notation(dom_nnodemap_object *map, c
 {
 	xmlNotationPtr notation = xmlHashLookup(map->ht, BAD_CAST ZSTR_VAL(named));
 	if (notation) {
-		return create_notation(notation->name, notation->PublicID, notation->SystemID);
+		xmlDtdPtr dtd = (xmlDtdPtr) dom_object_get_node(map->baseobj);
+		return create_notation(dtd, notation->name, notation->PublicID, notation->SystemID);
 	}
 	return NULL;
 }
