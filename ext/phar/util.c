@@ -264,18 +264,12 @@ zend_result phar_mount_entry(phar_archive_data *phar, const char *filename, size
 }
 /* }}} */
 
-zend_string *phar_find_in_include_path(const zend_string *filename, phar_archive_data **pphar) /* {{{ */
+zend_string *phar_find_in_include_path(const zend_string *filename) /* {{{ */
 {
 	zend_string *ret;
 	char *path;
 	zend_string *arch;
 	phar_archive_data *phar;
-
-	if (pphar) {
-		*pphar = NULL;
-	} else {
-		pphar = &phar;
-	}
 
 	if (!zend_is_executing() || !PHAR_G(cwd)) {
 		return NULL;
@@ -314,11 +308,7 @@ zend_string *phar_find_in_include_path(const zend_string *filename, phar_archive
 			zend_string_release_ex(arch, false);
 			return NULL;
 		}
-splitted:
-		if (pphar) {
-			*pphar = phar;
-		}
-
+splitted:;
 		zend_string *test = phar_fix_filepath(ZSTR_VAL(filename), ZSTR_LEN(filename), true);
 		if (ZSTR_VAL(test)[0] == '/') {
 			if (zend_hash_str_exists(&(phar->manifest), ZSTR_VAL(test) + 1, ZSTR_LEN(test) - 1)) {
@@ -346,22 +336,6 @@ splitted:
 	zend_string_release_ex(arch, false);
 	ret = php_resolve_path(ZSTR_VAL(filename), ZSTR_LEN(filename), path);
 	efree(path);
-
-	if (ret && zend_string_starts_with_literal_ci(ret, "phar://")) {
-		/* found phar:// */
-		arch = phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 1, 0);
-		if (!arch) {
-			return ret;
-		}
-
-		*pphar = zend_hash_find_ptr(&(PHAR_G(phar_fname_map)), arch);
-
-		if (!*pphar && PHAR_G(manifest_cached)) {
-			*pphar = zend_hash_find_ptr(&cached_phars, arch);
-		}
-
-		zend_string_release_ex(arch, false);
-	}
 
 	return ret;
 }

@@ -423,7 +423,7 @@ const char *phar_compress_filter(const phar_entry_info *entry, bool return_unkno
 /* void phar_remove_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len); */
 void phar_add_virtual_dirs(phar_archive_data *phar, const char *filename, size_t filename_len);
 zend_result phar_mount_entry(phar_archive_data *phar, const char *filename, size_t filename_len, char *path, size_t path_len);
-zend_string *phar_find_in_include_path(const zend_string *file, phar_archive_data **pphar);
+	zend_string *phar_find_in_include_path(const zend_string *file);
 zend_string* phar_fix_filepath(const char *path, size_t path_length, bool use_cwd);
 ZEND_ATTRIBUTE_NONNULL phar_entry_info * phar_open_jit(const phar_archive_data *phar, phar_entry_info *entry, char **error);
 void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker, uint32_t zip_metadata_len, bool persistent);
