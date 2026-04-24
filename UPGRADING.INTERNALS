@@ -92,6 +92,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     ZEND_ACC2_FORBID_DYN_CALLS (@forbid-dynamic-calls in stubs). In debug
     builds, failing to include that flag will lead to assertion failures.
   . The ZEND_RESULT_CODE type has been removed. Use zend_result directly.
+  . The zend_parse_parameters_none_throw(), zend_parse_parameters_throw(),
+    and ZEND_PARSE_PARAMS_THROW have been removed due to being misleading,
+    since ZPP always throws, unless ZEND_PARSE_PARAMS_QUIET is given. Use
+    the non-throw versions.
 
 ========================
 2. Build system changes
