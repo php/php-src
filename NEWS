@@ -180,6 +180,8 @@ PHP                                                                        NEWS
     (Weilin Du)
   . getenv() and putenv() now raises a ValueError when the first argument
     contains null bytes. (Weilin Du)
+  . proc_open() now raises a ValueError when the $cwd argument contains
+    null bytes. (Weilin Du)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
