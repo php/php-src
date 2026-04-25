@@ -1487,7 +1487,7 @@ void dom_objects_free_storage(zend_object *object)
 		xmlNodePtr node = ptr->node;
 
 		if (node->type == XML_NOTATION_NODE) {
-			int refcount = php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
+			unsigned int refcount = php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
 			php_libxml_decrement_doc_ref((php_libxml_node_object *) intern);
 			if (refcount == 0) {
 				dom_free_notation((xmlEntityPtr) node);

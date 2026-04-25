@@ -4,30 +4,49 @@ Dom\XMLDocument: Dom\Notation nodes are connected to their document and doctype
 dom
 --FILE--
 <?php
-$xml = <<<XML
+$cases = [
+    'GIF' => '<!NOTATION GIF SYSTEM "image/gif">',
+    'JPEG' => '<!NOTATION JPEG PUBLIC "-//W3C//NOTATION JPEG//EN" "image/jpeg">',
+    'HTML' => '<!NOTATION HTML PUBLIC "-//W3C//NOTATION HTML//EN">',
+];
+
+foreach ($cases as $name => $declaration) {
+    $xml = <<<XML
 <!DOCTYPE root [
-    <!NOTATION GIF SYSTEM "image/gif">
-    <!NOTATION JPEG PUBLIC "-//W3C//NOTATION JPEG//EN" "image/jpeg">
-    <!NOTATION HTML PUBLIC "-//W3C//NOTATION HTML//EN">
+    $declaration
 ]>
 <root/>
 XML;
 
-$dom = Dom\XMLDocument::createFromString($xml);
-$doctype = $dom->doctype;
-$notations = $doctype->notations;
+    $dom = Dom\XMLDocument::createFromString($xml);
+    $doctype = $dom->doctype;
+    $notations = $doctype->notations;
 
-// Make notations deterministic by name, as the order of notations in the map is not guaranteed
-foreach (['GIF', 'JPEG', 'HTML'] as $name) {
     echo "=== $name ===\n";
-    $notation = $notations->getNamedItem($name);
-    var_dump($notation->nodeName);
-    var_dump($notation->textContent);
-    var_dump($notation->nodeValue);
-    var_dump($notation->isConnected);
-    var_dump($notation->ownerDocument === $dom);
-    var_dump($notation->parentNode === $doctype);
-    var_dump($notation->parentElement);
+
+    $namedNotation = $notations->getNamedItem($name);
+    foreach ($notations as $iteratedNotation) {
+        // getNamedItem
+        var_dump($namedNotation->nodeName);
+        var_dump($namedNotation->textContent);
+        var_dump($namedNotation->nodeValue);
+        var_dump($namedNotation->isConnected);
+        var_dump($namedNotation->ownerDocument === $dom);
+        var_dump($namedNotation->parentNode === $doctype);
+        var_dump($namedNotation->parentElement);
+
+        // iteration
+        var_dump($iteratedNotation->nodeName);
+        var_dump($iteratedNotation->textContent);
+        var_dump($iteratedNotation->nodeValue);
+        var_dump($iteratedNotation->isConnected);
+        var_dump($iteratedNotation->ownerDocument === $dom);
+        var_dump($iteratedNotation->parentNode === $doctype);
+        var_dump($iteratedNotation->parentElement);
+
+        // wiring
+        var_dump($namedNotation->nodeName === $iteratedNotation->nodeName);
+    }
 }
 ?>
 --EXPECT--
@@ -39,6 +58,14 @@ bool(true)
 bool(true)
 bool(true)
 NULL
+string(3) "GIF"
+NULL
+NULL
+bool(true)
+bool(true)
+bool(true)
+NULL
+bool(true)
 === JPEG ===
 string(4) "JPEG"
 NULL
@@ -47,6 +74,14 @@ bool(true)
 bool(true)
 bool(true)
 NULL
+string(4) "JPEG"
+NULL
+NULL
+bool(true)
+bool(true)
+bool(true)
+NULL
+bool(true)
 === HTML ===
 string(4) "HTML"
 NULL
@@ -55,3 +90,11 @@ bool(true)
 bool(true)
 bool(true)
 NULL
+string(4) "HTML"
+NULL
+NULL
+bool(true)
+bool(true)
+bool(true)
+NULL
+bool(true)
