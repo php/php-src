@@ -359,6 +359,7 @@ struct php_openssl_cipher_mode {
 	bool set_tag_length_always;
 	bool set_tag_length_when_encrypting;
 	bool aad_supports_vector;
+	bool aead_fixed_iv_len;
 	int aead_get_tag_flag;
 	int aead_set_tag_flag;
 	int aead_ivlen_flag;
