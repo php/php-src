@@ -32,23 +32,24 @@ $process = proc_open($cmd, $descriptors, $pipes);
 
 function read_from_pipe($pipe) {
     /* The child may not have flushed by the time we read, and a PTY pipe can
-     * return partial data across reads. Wait for data with stream_select and
-     * loop until EOF or a generous wall-clock timeout. */
+     * return partial data across reads. Loop until stream_select reports no
+     * data within 1s (PTY EOF) or a 5s wall-clock deadline. Don't call
+     * feof() on a PTY pipe: it can trigger an underlying read that returns
+     * EIO when the slave side has closed, surfacing an unwanted Notice. */
     stream_set_blocking($pipe, false);
     $result = '';
-    $deadline = microtime(true) + 10.0;
+    $deadline = microtime(true) + 5.0;
     while (microtime(true) < $deadline) {
         $r = [$pipe];
         $w = $e = null;
-        if (@stream_select($r, $w, $e, 1) > 0) {
-            $chunk = fread($pipe, 1000);
-            if ($chunk !== false && $chunk !== '') {
-                $result .= $chunk;
-            }
-        }
-        if (feof($pipe)) {
+        if (@stream_select($r, $w, $e, 1) <= 0) {
             break;
         }
+        $chunk = @fread($pipe, 1000);
+        if ($chunk === false || $chunk === '') {
+            break;
+        }
+        $result .= $chunk;
     }
     return $result;
 }
