@@ -149,6 +149,8 @@ PHP                                                                        NEWS
     especially UTF-8. (Nicolas Grekas)
   . Improved performance of htmlspecialchars() when nothing needs encoding.
     (Nicolas Grekas)
+  . Fixed bug GH-18542 (unserialize() does not respect class_alias() for
+    private properties). (Hakan Özdemir)
 
 - URI:
   . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
