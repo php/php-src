@@ -1668,6 +1668,16 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 			mode->is_single_run_aead = cipher_mode == EVP_CIPH_CCM_MODE;
 			mode->aad_supports_vector = cipher_mode == EVP_CIPH_SIV_MODE;
 			break;
+		/* AES-GCM-SIV (RFC 8452) is exposed by OpenSSL providers (>= 3.2)
+		 * and uses the standard EVP_CTRL_AEAD_*_TAG controls. Unlike
+		 * EVP_CIPH_SIV_MODE (RFC 5297), it takes a single AAD input, so
+		 * aad_supports_vector stays false. LibreSSL does not currently
+		 * define this constant. */
+#ifdef EVP_CIPH_GCM_SIV_MODE
+		case EVP_CIPH_GCM_SIV_MODE:
+			php_openssl_set_aead_flags(mode);
+			break;
+#endif
 #ifdef NID_chacha20_poly1305
 		default:
 			if (EVP_CIPHER_nid(cipher_type) == NID_chacha20_poly1305) {
