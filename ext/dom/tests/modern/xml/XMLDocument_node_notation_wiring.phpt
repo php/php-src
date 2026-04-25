@@ -45,8 +45,8 @@ XML;
         var_dump($iteratedNotation->parentElement);
 
         // wiring
-// getNamedItem and iteration each allocate a fresh Notation instance                                                                                                 
-  var_dump($namedNotation !== $iteratedNotation);
+        // getNamedItem and iteration each allocate a fresh Notation instance                                                                                                 
+        var_dump($namedNotation !== $iteratedNotation);
     }
 }
 ?>
