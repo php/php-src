@@ -6922,22 +6922,31 @@ static zval* array_get_nested(HashTable *ht, HashTable *path)
 	uint32_t num_segments = zend_hash_num_elements(path);
 	uint32_t segment_index = 0;
 
-	/* Iterate through each segment in the path array */
+	/* First pass: validate all path segments are valid types */
+	ZEND_HASH_FOREACH_VAL(path, segment_val) {
+		/* Dereference segment if it's a reference */
+		ZVAL_DEREF(segment_val);
+
+		/* Segment must be a string or int */
+		if (Z_TYPE_P(segment_val) != IS_STRING && Z_TYPE_P(segment_val) != IS_LONG) {
+			/* Invalid segment type - throw TypeError */
+			zend_type_error("Path segment must be of type string|int, %s given", zend_zval_value_name(segment_val));
+			return NULL;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	/* Second pass: traverse the array using the validated path */
 	ZEND_HASH_FOREACH_VAL(path, segment_val) {
 		segment_index++;
 
 		/* Dereference segment if it's a reference */
 		ZVAL_DEREF(segment_val);
 
-		/* Segment must be a string or int */
+		/* Look up the segment (already validated to be string or int) */
 		if (Z_TYPE_P(segment_val) == IS_STRING) {
 			current = zend_symtable_find(current_ht, Z_STR_P(segment_val));
-		} else if (Z_TYPE_P(segment_val) == IS_LONG) {
-			current = zend_hash_index_find(current_ht, Z_LVAL_P(segment_val));
 		} else {
-			/* Invalid segment type - throw TypeError */
-			zend_type_error("Path segment must be of type string|int, %s given", zend_zval_value_name(segment_val));
-			return NULL;
+			current = zend_hash_index_find(current_ht, Z_LVAL_P(segment_val));
 		}
 
 		/* If segment not found, return NULL */

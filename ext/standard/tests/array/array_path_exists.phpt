@@ -38,6 +38,14 @@ try {
 	echo $e->getMessage() . "\n";
 }
 
+// Test with invalid segment type even when path doesn't exist
+$empty_array = [];
+try {
+	var_dump(array_path_exists($empty_array, ['foo', 'bar', new stdClass()]));
+} catch (TypeError $e) {
+	echo $e->getMessage() . "\n";
+}
+
 // Test with reference to an array in the path
 $array2 = ['world'];
 $array_with_ref = ['hello' => &$array2];
@@ -62,6 +70,7 @@ bool(true)
 bool(true)
 bool(false)
 bool(true)
+Path segment must be of type string|int, stdClass given
 Path segment must be of type string|int, stdClass given
 bool(true)
 bool(true)

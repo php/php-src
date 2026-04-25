@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 484f95966ba7e9f8d0907ef4d81c61435d3ff206
+ * Stub hash: c4239cc774245794a9c54810717ae78e2b8489b1
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -376,15 +376,15 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_key_exists arginfo_array_key_exists
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_get, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_path_get, 0, 2, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_MASK(0, key, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, "null")
+	ZEND_ARG_TYPE_INFO(0, path, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, default, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_has, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_path_exists, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_MASK(0, key, MAY_BE_STRING|MAY_BE_LONG, NULL)
+	ZEND_ARG_TYPE_INFO(0, path, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_chunk, 0, 2, IS_ARRAY, 0)
@@ -2417,8 +2417,8 @@ ZEND_FUNCTION(array_any);
 ZEND_FUNCTION(array_all);
 ZEND_FUNCTION(array_map);
 ZEND_FUNCTION(array_key_exists);
-ZEND_FUNCTION(array_get);
-ZEND_FUNCTION(array_has);
+ZEND_FUNCTION(array_path_get);
+ZEND_FUNCTION(array_path_exists);
 ZEND_FUNCTION(array_chunk);
 ZEND_FUNCTION(array_combine);
 ZEND_FUNCTION(array_is_list);
@@ -3022,8 +3022,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(array_map, arginfo_array_map)
 	ZEND_RAW_FENTRY("array_key_exists", zif_array_key_exists, arginfo_array_key_exists, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("key_exists", zif_array_key_exists, arginfo_key_exists, 0, NULL, NULL)
-	ZEND_RAW_FENTRY("array_get", zif_array_get, arginfo_array_get, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
-	ZEND_RAW_FENTRY("array_has", zif_array_has, arginfo_array_has, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("array_path_get", zif_array_path_get, arginfo_array_path_get, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("array_path_exists", zif_array_path_exists, arginfo_array_path_exists, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_chunk", zif_array_chunk, arginfo_array_chunk, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_combine", zif_array_combine, arginfo_array_combine, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_is_list", zif_array_is_list, arginfo_array_is_list, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)

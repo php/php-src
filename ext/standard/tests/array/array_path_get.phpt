@@ -36,6 +36,14 @@ try {
 	echo $e->getMessage() . "\n";
 }
 
+// Test with invalid segment type even when path doesn't exist
+$empty_array = [];
+try {
+	var_dump(array_path_get($empty_array, ['foo', 'bar', new stdClass()], 'default'));
+} catch (TypeError $e) {
+	echo $e->getMessage() . "\n";
+}
+
 // Test with references - ensure returned value is a copy, not a reference
 $ref_array = ['data' => ['value' => 'original']];
 $ref =& $ref_array['data']['value'];
@@ -75,6 +83,7 @@ NULL
 string(5) "Alice"
 string(3) "Bob"
 int(75)
+Path segment must be of type string|int, stdClass given
 Path segment must be of type string|int, stdClass given
 string(8) "original"
 string(8) "original"
