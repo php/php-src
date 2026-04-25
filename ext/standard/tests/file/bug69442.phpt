@@ -31,13 +31,24 @@ $pipes = array();
 $process = proc_open($cmd, $descriptors, $pipes);
 
 function read_from_pipe($pipe) {
-    $result = fread($pipe, 1000);
-    /* We can't guarantee that everything written to the pipe will be returned by a single call
-     *   to fread(), even if it was written with a single syscall and the number of bytes written
-     *   was small */
-    $again  = @fread($pipe, 1000);
-    if ($again) {
-        $result .= $again;
+    /* The child may not have flushed by the time we read, and a PTY pipe can
+     * return partial data across reads. Wait for data with stream_select and
+     * loop until EOF or a generous wall-clock timeout. */
+    stream_set_blocking($pipe, false);
+    $result = '';
+    $deadline = microtime(true) + 10.0;
+    while (microtime(true) < $deadline) {
+        $r = [$pipe];
+        $w = $e = null;
+        if (@stream_select($r, $w, $e, 1) > 0) {
+            $chunk = fread($pipe, 1000);
+            if ($chunk !== false && $chunk !== '') {
+                $result .= $chunk;
+            }
+        }
+        if (feof($pipe)) {
+            break;
+        }
     }
     return $result;
 }
