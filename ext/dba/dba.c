@@ -95,38 +95,41 @@ static zend_string* php_dba_make_key(const HashTable *key)
 	zval *group, *name;
 	zend_string *group_str, *name_str;
 	HashPosition pos;
+	int i = 0;
 
 	if (zend_hash_num_elements(key) != 2) {
 		zend_argument_error(NULL, 1, "must have exactly two elements: \"key\" and \"name\"");
 		return NULL;
 	}
 
-	// TODO: Use ZEND_HASH_FOREACH_VAL() API?
-	zend_hash_internal_pointer_reset_ex(key, &pos);
-	group = zend_hash_get_current_data_ex(key, &pos);
-	group_str = zval_try_get_string(group);
-	if (!group_str) {
-		return NULL;
-	}
+    ZEND_HASH_FOREACH_VAL(key, group) {
+        zend_string *tmp = zval_try_get_string(group);
+        if (!tmp) {
+            if (group_str) zend_string_release(group_str);
+            return NULL;
+        }
 
-	zend_hash_move_forward_ex(key, &pos);
-	name = zend_hash_get_current_data_ex(key, &pos);
-	name_str = zval_try_get_string(name);
-	if (!name_str) {
-		zend_string_release_ex(group_str, false);
-		return NULL;
-	}
+        if (i == 0) {
+            group_str = tmp;
+        } else {
+            name_str = tmp;
+        }
 
-	// TODO: Check ZSTR_LEN(name) != 0
-	if (ZSTR_LEN(group_str) == 0) {
-		zend_string_release_ex(group_str, false);
-		return name_str;
-	}
+        i++;
+    } ZEND_HASH_FOREACH_END();
 
-	zend_string *key_str = zend_strpprintf(0, "[%s]%s", ZSTR_VAL(group_str), ZSTR_VAL(name_str));
-	zend_string_release_ex(group_str, false);
-	zend_string_release_ex(name_str, false);
-	return key_str;
+    if (ZSTR_LEN(group_str) == 0) {
+        zend_string_release(group_str);
+        return name_str;
+    }
+
+    zend_string *key_str = zend_strpprintf(0, "[%s]%s",
+        ZSTR_VAL(group_str), ZSTR_VAL(name_str));
+
+    zend_string_release(group_str);
+    zend_string_release(name_str);
+
+    return key_str;
 }
 /* }}} */
 
