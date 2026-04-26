@@ -118,7 +118,7 @@ static zend_string* php_dba_make_key(const HashTable *key)
 
     if (ZSTR_LEN(group_str) == 0) {
         zend_string_release(group_str);
-        return name_str; // ownership transferred
+        return name_str;  
     }
 
     zend_string *key_str = zend_strpprintf(
