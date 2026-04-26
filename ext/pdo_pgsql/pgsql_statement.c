@@ -86,10 +86,9 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 				res = PQexec(H->server, q);
 				efree(q);
 			} else {
-				/* Inside a transaction, already aborted, or connection is unusable:
-				 * skip DEALLOCATE. On servers that reject it (e.g. Aurora DSQL) it
-				 * would poison the transaction (GH-21869); on any server the server
-				 * frees the prepared statement when the transaction ends. */
+				/* Outside PQTRANS_IDLE, skip DEALLOCATE: on libpq < 17 some servers
+				 * (e.g. Aurora DSQL) reject it and poison the tx (GH-21869). The
+				 * statement is session-scoped, so it's freed on disconnect. */
 				res = NULL;
 			}
 #else
