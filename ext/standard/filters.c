@@ -63,7 +63,8 @@ static const php_stream_filter_ops strfilter_rot13_ops = {
 
 static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent, PSFS_SEEKABLE_ALWAYS);
+	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent,
+			PSFS_SEEKABLE_ALWAYS, PSFS_SEEKABLE_ALWAYS);
 }
 
 static const php_stream_filter_factory strfilter_rot13_factory = {
@@ -147,12 +148,14 @@ static const php_stream_filter_ops strfilter_tolower_ops = {
 
 static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent, PSFS_SEEKABLE_ALWAYS);
+	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent,
+			PSFS_SEEKABLE_ALWAYS, PSFS_SEEKABLE_ALWAYS);
 }
 
 static php_stream_filter *strfilter_tolower_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent, PSFS_SEEKABLE_ALWAYS);
+	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent,
+			PSFS_SEEKABLE_ALWAYS, PSFS_SEEKABLE_ALWAYS);
 }
 
 static const php_stream_filter_factory strfilter_toupper_factory = {
@@ -1634,7 +1637,7 @@ static const php_stream_filter_ops strfilter_convert_ops = {
 static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	php_convert_filter *inst;
-
+	php_stream_filter_seekable_t write_seekable;
 	const char *dot;
 	int conv_mode = 0;
 
@@ -1647,6 +1650,10 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 		return NULL;
 	}
 	++dot;
+
+	if (php_stream_filter_parse_write_seek_mode(filterparams, &write_seekable) == FAILURE) {
+		return NULL;
+	}
 
 	inst = pemalloc(sizeof(php_convert_filter), persistent);
 
@@ -1667,7 +1674,7 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent, PSFS_SEEKABLE_START);
+	return php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent, PSFS_SEEKABLE_START, write_seekable);
 }
 
 static const php_stream_filter_factory strfilter_convert_factory = {
@@ -1761,7 +1768,7 @@ static php_stream_filter *consumed_filter_create(const char *filtername, zval *f
 	data->offset = ~0;
 	fops = &consumed_filter_ops;
 
-	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START, PSFS_SEEKABLE_ALWAYS);
 }
 
 static const php_stream_filter_factory consumed_filter_factory = {
@@ -1992,7 +1999,7 @@ static php_stream_filter *chunked_filter_create(const char *filtername, zval *fi
 	data->persistent = persistent;
 	fops = &chunked_filter_ops;
 
-	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START, PSFS_SEEKABLE_ALWAYS);
 }
 
 static const php_stream_filter_factory chunked_filter_factory = {

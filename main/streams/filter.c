@@ -259,7 +259,8 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 }
 
 PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops,
-		void *abstract, bool persistent, php_stream_filter_seekable_t seekable STREAMS_DC)
+		void *abstract, bool persistent, php_stream_filter_seekable_t read_seekable,
+		php_stream_filter_seekable_t write_seekable STREAMS_DC)
 {
 	php_stream_filter *filter;
 
@@ -267,11 +268,58 @@ PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *
 	memset(filter, 0, sizeof(php_stream_filter));
 
 	filter->fops = fops;
-	filter->seekable = seekable;
+	filter->read_seekable = read_seekable;
+	filter->write_seekable = write_seekable;
 	Z_PTR(filter->abstract) = abstract;
 	filter->is_persistent = persistent;
 
 	return filter;
+}
+
+PHPAPI zend_result php_stream_filter_parse_write_seek_mode(
+		zval *filterparams,
+		php_stream_filter_seekable_t *write_seekable)
+{
+	*write_seekable = PSFS_SEEKABLE_ALWAYS;
+
+	if (filterparams == NULL) {
+		return SUCCESS;
+	}
+	if (Z_TYPE_P(filterparams) != IS_ARRAY && Z_TYPE_P(filterparams) != IS_OBJECT) {
+		return SUCCESS;
+	}
+
+	zval *tmp = zend_hash_str_find_ind(HASH_OF(filterparams),
+			"write_seek_mode", sizeof("write_seek_mode") - 1);
+	if (tmp == NULL) {
+		return SUCCESS;
+	}
+
+	zend_string *tmp_str;
+	zend_string *str = zval_get_tmp_string(tmp, &tmp_str);
+	zend_result result = SUCCESS;
+
+	if (zend_string_equals_literal(str, "preserve")) {
+		*write_seekable = PSFS_SEEKABLE_ALWAYS;
+	} else if (zend_string_equals_literal(str, "reset")) {
+		*write_seekable = PSFS_SEEKABLE_START;
+	} else if (zend_string_equals_literal(str, "strict")) {
+		*write_seekable = PSFS_SEEKABLE_NEVER;
+	} else {
+		php_error_docref(NULL, E_WARNING,
+			"\"write_seek_mode\" filter parameter must be one of "
+			"\"preserve\", \"reset\", or \"strict\"");
+		result = FAILURE;
+	}
+
+	zend_tmp_string_release(tmp_str);
+	return result;
+}
+
+PHPAPI int php_stream_filter_get_chain_type(php_stream *stream, php_stream_filter *filter)
+{
+	return filter->chain == &stream->readfilters ?
+			PHP_STREAM_FILTER_READ : PHP_STREAM_FILTER_WRITE;
 }
 
 PHPAPI void php_stream_filter_free(php_stream_filter *filter)
