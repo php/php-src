@@ -92,39 +92,39 @@ ZEND_GET_MODULE(dba)
 /* {{{ php_dba_make_key */
 static zend_string* php_dba_make_key(const HashTable *key)
 {
-	zval *group, *name;
-	zend_string *group_str, *name_str;
-	HashPosition pos;
-	int i = 0;
+    zval *zv;
+    zend_string *group_str = NULL, *name_str = NULL;
+    int i = 0;
 
-	if (zend_hash_num_elements(key) != 2) {
-		zend_argument_error(NULL, 1, "must have exactly two elements: \"key\" and \"name\"");
-		return NULL;
-	}
+    if (zend_hash_num_elements(key) != 2) {
+        zend_argument_error(NULL, 1, "must have exactly two elements: \"key\" and \"name\"");
+        return NULL;
+    }
 
-    ZEND_HASH_FOREACH_VAL(key, group) {
-        zend_string *tmp = zval_try_get_string(group);
+    ZEND_HASH_FOREACH_VAL(key, zv) {
+        zend_string *tmp = zval_try_get_string(zv);
         if (!tmp) {
             if (group_str) zend_string_release(group_str);
+            if (name_str) zend_string_release(name_str);
             return NULL;
         }
 
-        if (i == 0) {
+        if (i++ == 0) {
             group_str = tmp;
         } else {
             name_str = tmp;
         }
-
-        i++;
     } ZEND_HASH_FOREACH_END();
 
     if (ZSTR_LEN(group_str) == 0) {
         zend_string_release(group_str);
-        return name_str;
+        return name_str; // ownership transferred
     }
 
-    zend_string *key_str = zend_strpprintf(0, "[%s]%s",
-        ZSTR_VAL(group_str), ZSTR_VAL(name_str));
+    zend_string *key_str = zend_strpprintf(
+        0, "[%s]%s",
+        ZSTR_VAL(group_str), ZSTR_VAL(name_str)
+    );
 
     zend_string_release(group_str);
     zend_string_release(name_str);
