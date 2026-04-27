@@ -3,16 +3,16 @@ metaphone() tests
 --FILE--
 <?php
 
-var_dump(metaphone(""));
-var_dump(metaphone(-1));
+var_dump(@metaphone(""));
+var_dump(@metaphone(-1));
 
 try {
-    var_dump(metaphone("valid phrase", -1));
+    var_dump(@metaphone("valid phrase", -1));
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump(metaphone("valid phrase", 0));
-var_dump(metaphone("valid phrase", 10000));
+var_dump(@metaphone("valid phrase", 0));
+var_dump(@metaphone("valid phrase", 10000));
 
 $array = array(
 "They fell forward, grovelling heedlessly on the cold earth.",
@@ -22,7 +22,7 @@ $array = array(
 );
 
 foreach($array as $str) {
-    var_dump(metaphone($str));
+    var_dump(@metaphone($str));
 }
 
 echo "Done\n";

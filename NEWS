@@ -636,6 +636,7 @@ PHP                                                                        NEWS
     (Weilin Du)
   . getenv() and putenv() now raises a ValueError when the first argument
     contains NUL bytes. (Weilin Du)
+  . metaphone() is now deprecated. (Weilin Du)
   . dl() now raises a ValueError when the $extension_filename argument contains
     NUL bytes. (Weilin Du)
   . openlog() now raises a ValueError when the $prefix argument contains NUL

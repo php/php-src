@@ -3,9 +3,9 @@ Bug #47443 (metaphone('scratch') returns wrong result)
 --FILE--
 <?php
 
-var_dump(metaphone("scratch"));
-var_dump(metaphone("scrath"));
-var_dump(metaphone("scratc"));
+var_dump(@metaphone("scratch"));
+var_dump(@metaphone("scrath"));
+var_dump(@metaphone("scratc"));
 
 ?>
 --EXPECT--
