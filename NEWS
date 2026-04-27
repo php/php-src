@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.22
 
+- mysqli:
+  . Fixed failed assertion when accessing mysqli property after failed
+    reconnection. (Kamil Tekiela)
+
 
 07 May 2026, PHP 8.4.21
 
