@@ -270,6 +270,14 @@ static void zend_std_call_issetter(zend_object *zobj, zend_string *prop_name, zv
 }
 /* }}} */
 
+static void zend_std_call_existser(zend_object *zobj, zend_string *prop_name, zval *retval) /* {{{ */
+{
+	zval member;
+	ZVAL_STR(&member, prop_name);
+	zend_call_known_instance_method_with_1_params(zobj->ce->__exists, zobj, retval, &member);
+}
+/* }}} */
+
 
 static zend_always_inline bool is_derived_class(const zend_class_entry *child_class, const zend_class_entry *parent_class) /* {{{ */
 {
@@ -894,14 +902,15 @@ try_again:
 
 	/* For initialized lazy proxies: if the real instance's magic method
 	 * guard is already set for this property, we are inside a recursive
-	 * call from the real instance's __get/__isset. Forward directly to
-	 * the real instance to avoid double invocation. (GH-21478) */
+	 * call from the real instance's __get/__isset/__exists. Forward
+	 * directly to the real instance to avoid double invocation.
+	 * (GH-21478) */
 	if (UNEXPECTED(zend_object_is_lazy_proxy(zobj)
 			&& zend_lazy_object_initialized(zobj))) {
 		zend_object *instance = zend_lazy_object_get_instance(zobj);
 		if (instance->ce->ce_flags & ZEND_ACC_USE_GUARDS) {
 			uint32_t *instance_guard = zend_get_property_guard(instance, name);
-			uint32_t guard_type = ((type == BP_VAR_IS) && zobj->ce->__isset)
+			uint32_t guard_type = ((type == BP_VAR_IS) && (zobj->ce->__exists || zobj->ce->__isset))
 				? IN_ISSET : IN_GET;
 			if ((*instance_guard) & guard_type) {
 				retval = zend_std_read_property(instance, name, type, cache_slot, rv);
@@ -914,8 +923,63 @@ try_again:
 		}
 	}
 
-	/* magic isset */
-	if ((type == BP_VAR_IS) && zobj->ce->__isset) {
+	/* magic exists (when defined, preferred over __isset for `??`) */
+	if ((type == BP_VAR_IS) && zobj->ce->__exists) {
+		zval tmp_result;
+		guard = zend_get_property_guard(zobj, name);
+
+		if (!((*guard) & IN_ISSET)) {
+			GC_ADDREF(zobj);
+
+			*guard |= IN_ISSET;
+			zend_std_call_existser(zobj, name, &tmp_result);
+			*guard &= ~IN_ISSET;
+
+			if (!zend_is_true(&tmp_result)) {
+				retval = &EG(uninitialized_zval);
+				OBJ_RELEASE(zobj);
+				zval_ptr_dtor(&tmp_result);
+				goto exit;
+			}
+
+			zval_ptr_dtor(&tmp_result);
+
+			/* __exists() may have materialised the property by writing
+			 * into the property table. Re-check it before deferring to
+			 * __get(), so the freshly-written value is returned directly
+			 * without a redundant __get() call. The value is copied into
+			 * `rv` because the property table can be freed by the
+			 * OBJ_RELEASE below (e.g. when __exists() drops the last
+			 * external reference to the object). */
+			if (IS_VALID_PROPERTY_OFFSET(property_offset)) {
+				retval = OBJ_PROP(zobj, property_offset);
+				if (Z_TYPE_P(retval) != IS_UNDEF) {
+					ZVAL_COPY(rv, retval);
+					retval = rv;
+					OBJ_RELEASE(zobj);
+					goto exit;
+				}
+			} else if (IS_DYNAMIC_PROPERTY_OFFSET(property_offset)) {
+				if (zobj->properties != NULL) {
+					retval = zend_hash_find(zobj->properties, name);
+					if (retval) {
+						ZVAL_COPY(rv, retval);
+						retval = rv;
+						OBJ_RELEASE(zobj);
+						goto exit;
+					}
+				}
+			}
+			retval = &EG(uninitialized_zval);
+
+			if (zobj->ce->__get && !((*guard) & IN_GET)) {
+				goto call_getter;
+			}
+			OBJ_RELEASE(zobj);
+		} else if (zobj->ce->__get && !((*guard) & IN_GET)) {
+			goto call_getter_addref;
+		}
+	} else if ((type == BP_VAR_IS) && zobj->ce->__isset) {
 		zval tmp_result;
 		guard = zend_get_property_guard(zobj, name);
 
@@ -1021,7 +1085,7 @@ uninit_error:
 			if (UNEXPECTED(guard && (instance->ce->ce_flags & ZEND_ACC_USE_GUARDS))) {
 				/* Find which guard was used on zobj, so we can set the same
 				 * guard on instance. */
-				uint32_t guard_type = (type == BP_VAR_IS) && zobj->ce->__isset
+				uint32_t guard_type = (type == BP_VAR_IS) && (zobj->ce->__exists || zobj->ce->__isset)
 					? IN_ISSET : IN_GET;
 				guard = zend_get_property_guard(instance, name);
 				if (!((*guard) & guard_type)) {
@@ -2484,9 +2548,10 @@ found:
 		goto exit;
 	}
 
-	/* For initialized lazy proxies: if the real instance's __isset guard
-	 * is already set, we are inside a recursive call from the real
-	 * instance's __isset. Forward directly to avoid double invocation. */
+	/* For initialized lazy proxies: if the real instance's __isset/__exists
+	 * guard is already set, we are inside a recursive call from the real
+	 * instance's __isset/__exists. Forward directly to avoid double
+	 * invocation. */
 	if (UNEXPECTED(zend_object_is_lazy_proxy(zobj)
 			&& zend_lazy_object_initialized(zobj))) {
 		zend_object *instance = zend_lazy_object_get_instance(zobj);
@@ -2498,7 +2563,7 @@ found:
 		}
 	}
 
-	if (!zobj->ce->__isset) {
+	if (!zobj->ce->__exists && !zobj->ce->__isset) {
 		goto lazy_init;
 	}
 
@@ -2508,15 +2573,33 @@ found:
 
 		if (!((*guard) & IN_ISSET)) {
 			zval rv;
+			bool use_exists = zobj->ce->__exists != NULL;
 
-			/* have issetter - try with it! */
 			GC_ADDREF(zobj);
-			(*guard) |= IN_ISSET; /* prevent circular getting */
-			zend_std_call_issetter(zobj, name, &rv);
+			(*guard) |= IN_ISSET; /* prevent recursion */
+			if (use_exists) {
+				zend_std_call_existser(zobj, name, &rv);
+			} else {
+				zend_std_call_issetter(zobj, name, &rv);
+			}
 			result = zend_is_true(&rv);
 			zval_ptr_dtor(&rv);
-			if (has_set_exists == ZEND_PROPERTY_NOT_EMPTY && result) {
-				/* GH-12695, see above. */
+
+			/* When the existence check returned true, we may need to
+			 * consult the actual value:
+			 *   - empty(): always (for truthiness).
+			 *   - isset() with __exists: yes, apply non-null check
+			 *     (preserves the documented `isset() <=> ??` equivalence
+			 *     and disambiguates "set to null" from "missing").
+			 *   - isset() with __isset: trust the bool. */
+			bool consult_value = result && !EG(exception)
+				&& (has_set_exists == ZEND_PROPERTY_NOT_EMPTY
+					|| (use_exists && has_set_exists == ZEND_PROPERTY_ISSET));
+
+			if (consult_value) {
+				/* GH-12695: the existence check may have materialised the
+				 * property by writing into the property table. Re-check it
+				 * before deferring to __get(). */
 				zval *prop = NULL;
 				if (IS_VALID_PROPERTY_OFFSET(property_offset)) {
 					prop = OBJ_PROP(zobj, property_offset);
@@ -2528,14 +2611,25 @@ found:
 					prop = zend_hash_find(zobj->properties, name);
 				}
 				if (prop) {
-					result = i_zend_is_true(prop);
-				} else if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
+					if (has_set_exists == ZEND_PROPERTY_NOT_EMPTY) {
+						result = i_zend_is_true(prop);
+					} else {
+						ZVAL_DEREF(prop);
+						result = Z_TYPE_P(prop) != IS_NULL;
+					}
+				} else if (zobj->ce->__get && !((*guard) & IN_GET)) {
 					(*guard) |= IN_GET;
 					zend_std_call_getter(zobj, name, &rv);
 					(*guard) &= ~IN_GET;
-					result = i_zend_is_true(&rv);
+					if (has_set_exists == ZEND_PROPERTY_NOT_EMPTY) {
+						result = i_zend_is_true(&rv);
+					} else {
+						result = Z_TYPE(rv) != IS_NULL
+							&& (Z_TYPE(rv) != IS_REFERENCE || Z_TYPE_P(Z_REFVAL(rv)) != IS_NULL);
+					}
 					zval_ptr_dtor(&rv);
 				} else {
+					/* No __get available; treat the value as null. */
 					result = false;
 				}
 			}
@@ -2558,7 +2652,7 @@ lazy_init:
 				goto exit;
 			}
 
-			if (UNEXPECTED(zobj->ce->__isset)) {
+			if (UNEXPECTED(zobj->ce->__exists || zobj->ce->__isset)) {
 				uint32_t *guard = zend_get_property_guard(zobj, name);
 				if (!((*guard) & IN_ISSET)) {
 					(*guard) |= IN_ISSET;

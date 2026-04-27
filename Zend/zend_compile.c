@@ -2099,6 +2099,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 		ce->__set = NULL;
 		ce->__unset = NULL;
 		ce->__isset = NULL;
+		ce->__exists = NULL;
 		ce->__call = NULL;
 		ce->__callstatic = NULL;
 		ce->__tostring = NULL;

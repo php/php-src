@@ -1260,6 +1260,12 @@ void zend_update_parent_ce(zend_class_entry *ce)
 			ce->__isset = tmp;
 		}
 	}
+	if (ce->__exists) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__exists);
+		if (tmp != NULL) {
+			ce->__exists = tmp;
+		}
+	}
 	if (ce->__unset) {
 		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__unset);
 		if (tmp != NULL) {

@@ -155,6 +155,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (EXPECTED(!ce->__isset)) {
 		ce->__isset = parent->__isset;
 	}
+	if (EXPECTED(!ce->__exists)) {
+		ce->__exists = parent->__exists;
+	}
 	if (EXPECTED(!ce->__call)) {
 		ce->__call = parent->__call;
 	}
@@ -3389,6 +3392,7 @@ static zend_class_entry *zend_lazy_class_load(const zend_class_entry *pce)
 			zend_update_inherited_handler(__set);
 			zend_update_inherited_handler(__call);
 			zend_update_inherited_handler(__isset);
+			zend_update_inherited_handler(__exists);
 			zend_update_inherited_handler(__unset);
 			zend_update_inherited_handler(__tostring);
 			zend_update_inherited_handler(__callstatic);

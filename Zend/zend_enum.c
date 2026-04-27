@@ -99,6 +99,7 @@ static void zend_verify_enum_magic_methods(const zend_class_entry *ce)
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__set, "__set");
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unset, "__unset");
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__isset, "__isset");
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__exists, "__exists");
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__tostring, "__toString");
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__serialize, "__serialize");
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unserialize, "__unserialize");

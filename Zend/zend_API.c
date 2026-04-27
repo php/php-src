@@ -2803,6 +2803,20 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_STRING);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_BOOL);
+	} else if (zend_string_equals_literal(lcname, ZEND_EXISTS_FUNC_NAME)) {
+		zend_check_magic_method_args(1, ce, fptr, error_type);
+		zend_check_magic_method_non_static(ce, fptr, error_type);
+		zend_check_magic_method_public(ce, fptr);
+		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_STRING);
+		/* Unlike __isset, __exists is a new magic method so the return
+		 * type must be declared. Parameter typing follows the regular
+		 * variance rules and may be omitted or widened in subclasses,
+		 * mirroring __isset. */
+		if (!(fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+			zend_error(error_type, "%s::%s(): Return type must be bool",
+				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+		}
+		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_BOOL);
 	} else if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
 		zend_check_magic_method_args(2, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
@@ -2887,6 +2901,9 @@ ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, c
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
 		ce->__isset = fptr;
+		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
+	} else if (zend_string_equals_literal(lcname, ZEND_EXISTS_FUNC_NAME)) {
+		ce->__exists = fptr;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
 		ce->__callstatic = fptr;
