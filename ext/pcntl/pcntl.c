@@ -1549,7 +1549,7 @@ PHP_FUNCTION(pcntl_forkx)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (flags < FORK_NOSIGCHLD || flags > FORK_WAITPID) {
+	if (flags & ~(FORK_NOSIGCHLD | FORK_WAITPID)) {
 		zend_argument_value_error(1, "must be FORK_NOSIGCHLD or FORK_WAITPID");
 		RETURN_THROWS();
 	}
