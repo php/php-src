@@ -11247,10 +11247,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		}
 
 		SAVE_OPLINE();
-		zend_class_entry *scope = Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJCE(EX(This)) : Z_CE(EX(This));
-		bool ref_has_type_sources = ref ? ZEND_REF_HAS_TYPE_SOURCES(ref) : false;
-		if (UNEXPECTED(!zend_check_type_and_coerce_slow(&ret_info->type, retval_ptr, scope,
-			(EX(func)->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) || ref_has_type_sources, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -21559,10 +21556,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		}
 
 		SAVE_OPLINE();
-		zend_class_entry *scope = Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJCE(EX(This)) : Z_CE(EX(This));
-		bool ref_has_type_sources = ref ? ZEND_REF_HAS_TYPE_SOURCES(ref) : false;
-		if (UNEXPECTED(!zend_check_type_and_coerce_slow(&ret_info->type, retval_ptr, scope,
-			(EX(func)->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) || ref_has_type_sources, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -29607,10 +29601,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		}
 
 		SAVE_OPLINE();
-		zend_class_entry *scope = Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJCE(EX(This)) : Z_CE(EX(This));
-		bool ref_has_type_sources = ref ? ZEND_REF_HAS_TYPE_SOURCES(ref) : false;
-		if (UNEXPECTED(!zend_check_type_and_coerce_slow(&ret_info->type, retval_ptr, scope,
-			(EX(func)->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) || ref_has_type_sources, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -36997,10 +36988,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		}
 
 		SAVE_OPLINE();
-		zend_class_entry *scope = Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJCE(EX(This)) : Z_CE(EX(This));
-		bool ref_has_type_sources = ref ? ZEND_REF_HAS_TYPE_SOURCES(ref) : false;
-		if (UNEXPECTED(!zend_check_type_and_coerce_slow(&ret_info->type, retval_ptr, scope,
-			(EX(func)->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) || ref_has_type_sources, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -49209,10 +49197,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		}
 
 		SAVE_OPLINE();
-		zend_class_entry *scope = Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJCE(EX(This)) : Z_CE(EX(This));
-		bool ref_has_type_sources = ref ? ZEND_REF_HAS_TYPE_SOURCES(ref) : false;
-		if (UNEXPECTED(!zend_check_type_and_coerce_slow(&ret_info->type, retval_ptr, scope,
-			(EX(func)->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) || ref_has_type_sources, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -63824,10 +63809,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIF
 		}
 
 		SAVE_OPLINE();
-		zend_class_entry *scope = Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJCE(EX(This)) : Z_CE(EX(This));
-		bool ref_has_type_sources = ref ? ZEND_REF_HAS_TYPE_SOURCES(ref) : false;
-		if (UNEXPECTED(!zend_check_type_and_coerce_slow(&ret_info->type, retval_ptr, scope,
-			(EX(func)->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) || ref_has_type_sources, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -74036,10 +74018,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		}
 
 		SAVE_OPLINE();
-		zend_class_entry *scope = Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJCE(EX(This)) : Z_CE(EX(This));
-		bool ref_has_type_sources = ref ? ZEND_REF_HAS_TYPE_SOURCES(ref) : false;
-		if (UNEXPECTED(!zend_check_type_and_coerce_slow(&ret_info->type, retval_ptr, scope,
-			(EX(func)->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) || ref_has_type_sources, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -82084,10 +82063,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		}
 
 		SAVE_OPLINE();
-		zend_class_entry *scope = Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJCE(EX(This)) : Z_CE(EX(This));
-		bool ref_has_type_sources = ref ? ZEND_REF_HAS_TYPE_SOURCES(ref) : false;
-		if (UNEXPECTED(!zend_check_type_and_coerce_slow(&ret_info->type, retval_ptr, scope,
-			(EX(func)->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) || ref_has_type_sources, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -89474,10 +89450,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		}
 
 		SAVE_OPLINE();
-		zend_class_entry *scope = Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJCE(EX(This)) : Z_CE(EX(This));
-		bool ref_has_type_sources = ref ? ZEND_REF_HAS_TYPE_SOURCES(ref) : false;
-		if (UNEXPECTED(!zend_check_type_and_coerce_slow(&ret_info->type, retval_ptr, scope,
-			(EX(func)->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) || ref_has_type_sources, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -101584,10 +101557,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		}
 
 		SAVE_OPLINE();
-		zend_class_entry *scope = Z_TYPE(EX(This)) == IS_OBJECT ? Z_OBJCE(EX(This)) : Z_CE(EX(This));
-		bool ref_has_type_sources = ref ? ZEND_REF_HAS_TYPE_SOURCES(ref) : false;
-		if (UNEXPECTED(!zend_check_type_and_coerce_slow(&ret_info->type, retval_ptr, scope,
-			(EX(func)->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) || ref_has_type_sources, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}

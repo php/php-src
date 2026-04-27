@@ -739,9 +739,21 @@ static const zend_class_entry *resolve_single_class_type(
 	zend_string *name,
 	const zend_class_entry *scope) {
 	if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_SELF))) {
+		/* We don't fetch the scope in the ZEND_VERIFY_RETURN_TYPE VM opcode, thus fetch it here
+		 * This is an OK tradeoff as for class methods self/parent types are resolved at compile time
+		 * Therefore, we only hit this for trait methods and unbound closures */
+		if (!scope) {
+			scope = zend_get_executed_scope();
+		}
 		/* If we don't have a scope, returning the NULL pointer is fine as the error handling is done on the call site */
 		return scope;
-	} else if (UNEXPECTED(zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_PARENT)))) { // Parent as a type is extremely uncommon
+	} else if (UNEXPECTED(zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_PARENT)))) { /* Parent as a type is extremely uncommon */
+		/* We don't fetch the scope in the ZEND_VERIFY_RETURN_TYPE VM opcode, thus fetch it here
+		 * This is an OK tradeoff as for class methods self/parent types are resolved at compile time
+		 * Therefore, we only hit this for trait methods and unbound closures */
+		if (!scope) {
+			scope = zend_get_executed_scope();
+		}
 		return scope ? scope->parent : NULL;
 	} else {
 		return zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
@@ -899,14 +911,18 @@ static zend_type_check_status zend_check_type_slow(
 		zend_is_callable(arg, callable_check_flag, NULL)) {
 		return ZEND_TYPE_CHECK_VALID;
 	}
-	/* TODO: move to return type check? */
+
+	/* Although static is most commonly used as a return type, it can also be used as a class constant type */
 	if (
-		(type_mask & MAY_BE_STATIC)
-		&& scope != NULL
+		(ZEND_TYPE_FULL_MASK(*type) & MAY_BE_STATIC)
 		&& Z_TYPE_P(arg) == IS_OBJECT
-		&& instanceof_function(Z_OBJCE_P(arg), scope)
 	) {
-		return ZEND_TYPE_CHECK_VALID;
+		if (!scope) {
+			scope = zend_get_called_scope(EG(current_execute_data));
+		}
+		if (EXPECTED(scope) && instanceof_function(Z_OBJCE_P(arg), scope)) {
+			return ZEND_TYPE_CHECK_VALID;
+		}
 	}
 
 	/* Only scalar types may coerce to other scalar types */
@@ -988,6 +1004,15 @@ static bool zend_check_type_and_coerce_slow(
 ) {
 	zend_type_check_status status = zend_check_type_slow(type, arg, scope, strict_types, callable_check_flag, arg);
 	return status != ZEND_TYPE_CHECK_INVALID;
+}
+
+static bool zend_check_return_type_slow(
+	const zend_type *type,
+	zval *arg,
+	const zend_reference *ref
+) {
+	bool strict_types = ZEND_RET_USES_STRICT_TYPES() || (ref && ZEND_REF_HAS_TYPE_SOURCES(ref));
+	return zend_check_type_and_coerce(type, arg, NULL, strict_types, 0);
 }
 
 ZEND_API bool zend_check_user_type_slow(
