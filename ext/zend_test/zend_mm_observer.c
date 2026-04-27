@@ -71,8 +71,8 @@ static PHP_INI_MH(OnUpdateZendTestMMObserverEnabled)
 
 	int int_value = zend_ini_parse_bool(new_value);
 
-	// Only toggle observer during runtime (ini_set during active request)
-	// RINIT/RSHUTDOWN handle initialization and cleanup
+	/* Only toggle observer during runtime (ini_set during active request).
+	 * RINIT/RSHUTDOWN handle initialization and cleanup. */
 	if (stage == PHP_INI_STAGE_RUNTIME) {
 		if (int_value == 1) {
 			if (ZT_G(observer) == NULL) {
