@@ -9,7 +9,7 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
 	switch ($errno) {
 	case E_DEPRECATED:
 		if (str_contains($errfile, "skip.php")) {
-			die("skip deprecated oniguruma");
+			return;
 		}
 	}
 });
@@ -22,7 +22,14 @@ version_compare(MB_ONIGURUMA_VERSION, '6.9.4', '>=') or die("skip requires onigu
     mb_ereg_search('(?<wsp>\s*)(?<word>\w+)(?<punct>[？！])');
     var_dump(mb_ereg_search_getregs());
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg_search() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 array(7) {
   [0]=>
   string(11) "  中国？"

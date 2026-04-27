@@ -9,7 +9,7 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
 	switch ($errno) {
 	case E_DEPRECATED:
 		if (str_contains($errfile, "skip.php")) {
-			die("skip deprecated oniguruma");
+			return;
 		}
 	}
 });
