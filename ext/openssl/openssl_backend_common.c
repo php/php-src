@@ -1654,7 +1654,7 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 	switch (cipher_mode) {
 		case EVP_CIPH_GCM_MODE:
 		case EVP_CIPH_CCM_MODE:
-		/* We check for EVP_CIPH_SIV_MODE and EVP_CIPH_SIV_MODE, because LibreSSL does not support it. */
+		/* We check for EVP_CIPH_SIV_MODE and EVP_CIPH_SIV_MODE, because older OpenSSL and LibreSSL do not support them. */
 #ifdef EVP_CIPH_SIV_MODE
 		case EVP_CIPH_SIV_MODE:
 #endif
@@ -1667,7 +1667,9 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 			php_openssl_set_aead_flags(mode);
 			mode->set_tag_length_when_encrypting = cipher_mode == EVP_CIPH_CCM_MODE;
 			mode->is_single_run_aead = cipher_mode == EVP_CIPH_CCM_MODE;
+#ifdef EVP_CIPH_SIV_MODE
 			mode->aad_supports_vector = cipher_mode == EVP_CIPH_SIV_MODE;
+#endif
 			break;
 #ifdef NID_chacha20_poly1305
 		default:
