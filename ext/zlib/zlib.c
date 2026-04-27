@@ -854,12 +854,12 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 	return true;
 }
 
-static bool zlib_get_long_option(HashTable *options, const char *option_name, size_t option_name_len, zend_long *value)
+ZEND_ATTRIBUTE_NONNULL static bool zlib_get_long_option(HashTable *options, const char *option_name, size_t option_name_len, zend_long *value)
 {
-	zval *option_buffer;
 	bool failed = false;
+	zval *option_buffer = zend_hash_str_find(options, option_name, option_name_len);
 
-	if (!options || (option_buffer = zend_hash_str_find(options, option_name, option_name_len)) == NULL) {
+	if (!option_buffer) {
 		return true;
 	}
 
@@ -1103,7 +1103,7 @@ PHP_FUNCTION(deflate_init)
 	zend_long encoding, level = -1, memory = 8, window = 15, strategy = Z_DEFAULT_STRATEGY;
 	char *dict = NULL;
 	size_t dictlen = 0;
-	HashTable *options = NULL;
+	HashTable *options = (HashTable*)&zend_empty_array;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
 		RETURN_THROWS();
