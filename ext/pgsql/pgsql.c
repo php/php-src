@@ -2129,6 +2129,11 @@ PHP_FUNCTION(pg_fetch_object)
 		ce = zend_standard_class_def;
 	}
 
+	zend_result obj_initialized = object_init_ex(return_value, ce);
+	if (UNEXPECTED(obj_initialized == FAILURE)) {
+		RETURN_THROWS();
+	}
+
 	if (!ce->constructor && ctor_params && zend_hash_num_elements(ctor_params) > 0) {
 		zend_argument_value_error(3,
 			"must be empty when the specified class (%s) does not have a constructor",
@@ -2140,15 +2145,9 @@ PHP_FUNCTION(pg_fetch_object)
 	zval dataset;
 	if (UNEXPECTED(!php_pgsql_fetch_hash(&dataset, result, row, row_is_null, PGSQL_ASSOC))) {
 		/* Either an exception is thrown, or we return false */
-		RETURN_FALSE;
-	}
-
-	// TODO: Check CE is an instantiable class earlier?
-	zend_result obj_initialized = object_init_ex(return_value, ce);
-	if (UNEXPECTED(obj_initialized == FAILURE)) {
-		zval_ptr_dtor(&dataset);
 		RETURN_THROWS();
 	}
+
 	if (!ce->default_properties_count && !ce->__set) {
 		Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
 	} else {
