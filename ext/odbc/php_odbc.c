@@ -761,9 +761,9 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 	RETCODE rc;
 	zval *pv_conn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pv_conn, odbc_connection_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+        ZEND_PARSE_PARAMETERS_START(1, 1)
+                Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+        ZEND_PARSE_PARAMETERS_END();
 
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
@@ -1128,9 +1128,9 @@ PHP_FUNCTION(odbc_cursor)
 	odbc_result *result;
 	RETCODE rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pv_res, odbc_result_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+        ZEND_PARSE_PARAMETERS_START(1, 1)
+                Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+        ZEND_PARSE_PARAMETERS_END();
 
 	result = Z_ODBC_RESULT_P(pv_res);
 	CHECK_ODBC_RESULT(result);
@@ -1858,9 +1858,9 @@ PHP_FUNCTION(odbc_free_result)
 	zval *pv_res;
 	odbc_result *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pv_res, odbc_result_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+        ZEND_PARSE_PARAMETERS_START(1, 1)
+                Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+        ZEND_PARSE_PARAMETERS_END();
 
 	result = Z_ODBC_RESULT_P(pv_res);
 	CHECK_ODBC_RESULT(result);
@@ -2177,9 +2177,9 @@ PHP_FUNCTION(odbc_close)
 	zval *pv_conn;
 	odbc_link *link;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pv_conn, odbc_connection_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+        ZEND_PARSE_PARAMETERS_START(1, 1)
+                Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+        ZEND_PARSE_PARAMETERS_END();
 
 	link = Z_ODBC_LINK_P(pv_conn);
 	odbc_connection *connection = Z_ODBC_CONNECTION_P(pv_conn);
@@ -2200,9 +2200,9 @@ PHP_FUNCTION(odbc_num_rows)
 	SQLLEN rows;
 	zval *pv_res;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pv_res, odbc_result_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+        ZEND_PARSE_PARAMETERS_START(1, 1)
+                Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+        ZEND_PARSE_PARAMETERS_END();
 
 	result = Z_ODBC_RESULT_P(pv_res);
 	CHECK_ODBC_RESULT(result);
@@ -2219,9 +2219,9 @@ PHP_FUNCTION(odbc_next_result)
 	zval *pv_res;
 	int rc, i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pv_res, odbc_result_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+        ZEND_PARSE_PARAMETERS_START(1, 1)
+                Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+        ZEND_PARSE_PARAMETERS_END();
 
 	result = Z_ODBC_RESULT_P(pv_res);
 	CHECK_ODBC_RESULT(result);
@@ -2265,9 +2265,9 @@ PHP_FUNCTION(odbc_num_fields)
 	odbc_result *result;
 	zval *pv_res;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pv_res, odbc_result_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+        ZEND_PARSE_PARAMETERS_START(1, 1)
+                Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+        ZEND_PARSE_PARAMETERS_END();
 
 	result = Z_ODBC_RESULT_P(pv_res);
 	CHECK_ODBC_RESULT(result);
