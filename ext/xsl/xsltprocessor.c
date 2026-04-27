@@ -350,6 +350,9 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	php_libxml_increment_doc_ref(intern->doc, doc);
 
 	ctxt = xsltNewTransformContext(style, doc);
+	if (UNEXPECTED(ctxt == NULL)) {
+		goto out;
+	}
 	ctxt->_private = (void *) intern;
 
 	if (intern->parameter) {
