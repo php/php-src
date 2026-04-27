@@ -75,8 +75,16 @@ PHPAPI bool php_odbc_connstr_should_quote(const char *str)
  */
 PHPAPI size_t php_odbc_connstr_estimate_quote_length(const char *in_str)
 {
-	/* Assume all '}'. Include '{,' '}', and the null terminator too */
-	return (strlen(in_str) * 2) + 3;
+	/* Start with including the quotes ({}) and the null terminator */
+	size_t size = 3;
+	/* Scan the string like strlen, doubling each } character. */
+	while (*in_str) {
+		size++;
+		if (*in_str++ == '}') {
+			size++;
+		}
+	}
+	return size;
 }
 
 /**
