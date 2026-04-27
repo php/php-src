@@ -1951,9 +1951,9 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 				if (use_uid_arg) {
 					should_quote_uid = !php_odbc_connstr_is_quoted(uid) && php_odbc_connstr_should_quote(uid);
 					if (should_quote_uid) {
-						size_t estimated_length = php_odbc_connstr_estimate_quote_length(uid);
-						uid_quoted = emalloc(estimated_length);
-						php_odbc_connstr_quote(uid_quoted, uid, estimated_length);
+						size_t quoted_length = php_odbc_connstr_get_quoted_length(uid);
+						uid_quoted = emalloc(quoted_length);
+						php_odbc_connstr_quote(uid_quoted, uid, quoted_length);
 					} else {
 						uid_quoted = uid;
 					}
@@ -1966,9 +1966,9 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 				if (use_pwd_arg) {
 					should_quote_pwd = !php_odbc_connstr_is_quoted(pwd) && php_odbc_connstr_should_quote(pwd);
 					if (should_quote_pwd) {
-						size_t estimated_length = php_odbc_connstr_estimate_quote_length(pwd);
-						pwd_quoted = emalloc(estimated_length);
-						php_odbc_connstr_quote(pwd_quoted, pwd, estimated_length);
+						size_t quoted_length = php_odbc_connstr_get_quoted_length(pwd);
+						pwd_quoted = emalloc(quoted_length);
+						php_odbc_connstr_quote(pwd_quoted, pwd, quoted_length);
 					} else {
 						pwd_quoted = pwd;
 					}

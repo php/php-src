@@ -71,9 +71,9 @@ PHPAPI bool php_odbc_connstr_should_quote(const char *str)
 }
 
 /**
- * Estimates the worst-case scenario for a quoted version of a string's size.
+ * Gets the length of a string after it has been quoted.
  */
-PHPAPI size_t php_odbc_connstr_estimate_quote_length(const char *in_str)
+PHPAPI size_t php_odbc_connstr_get_quoted_length(const char *in_str)
 {
 	/* Start with including the quotes ({}) and the null terminator */
 	size_t size = 3;

@@ -16,5 +16,5 @@
 
 PHPAPI bool php_odbc_connstr_is_quoted(const char *str);
 PHPAPI bool php_odbc_connstr_should_quote(const char *str);
-PHPAPI size_t php_odbc_connstr_estimate_quote_length(const char *in_str);
+PHPAPI size_t php_odbc_connstr_get_quoted_length(const char *in_str);
 PHPAPI size_t php_odbc_connstr_quote(char *out_str, const char *in_str, size_t out_str_size);
