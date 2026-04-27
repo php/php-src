@@ -140,6 +140,12 @@ static void xsl_add_ns_def(xmlNodePtr node)
 				ns->type = XML_LOCAL_NAMESPACE;
 				ns->href = should_free ? attr_value : xmlStrdup(attr_value);
 				ns->prefix = attr->ns->prefix ? xmlStrdup(attr->name) : NULL;
+
+				if (UNEXPECTED(ns->href == NULL || (attr->ns->prefix != NULL && ns->prefix == NULL))) {
+					xmlFreeNs(ns);
+					return;
+				}
+
 				ns->next = node->nsDef;
 				node->nsDef = ns;
 			}
