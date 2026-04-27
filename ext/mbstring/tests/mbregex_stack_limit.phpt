@@ -8,7 +8,9 @@ if (!function_exists('mb_ereg')) die('skip mb_ereg not available');
 set_error_handler(function($errno, $errstr, $errfile, $errline) {
 	switch ($errno) {
 	case E_DEPRECATED:
-		die("skip deprecated oniguruma");
+		if (str_contains($errfile, "skip.php")) {
+			die("skip deprecated oniguruma");
+		}
 	}
 });
 if (version_compare(MB_ONIGURUMA_VERSION, '6.9.3') < 0) {
@@ -30,8 +32,13 @@ var_dump(mb_ereg('\\s+$', $s));
 
 echo 'OK';
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(false)
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(false)
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
 OK
