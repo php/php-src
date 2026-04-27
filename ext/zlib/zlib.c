@@ -863,6 +863,7 @@ ZEND_ATTRIBUTE_NONNULL static bool zlib_get_long_option(HashTable *options, cons
 		return true;
 	}
 
+	/* The |H ZPP specifier may leave HashTable entries wrapped in IS_INDIRECT. */
 	ZVAL_DEINDIRECT(option_buffer);
 	*value = zval_try_get_long(option_buffer, &failed);
 	if (UNEXPECTED(failed)) {
