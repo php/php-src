@@ -547,8 +547,10 @@ PHP_METHOD(XSLTProcessor, transformToXml)
 	ret = -1;
 	if (newdocp) {
 		ret = xsltSaveResultToString(&doc_txt_ptr, &doc_txt_len, newdocp, sheetp);
-		if (doc_txt_ptr && doc_txt_len) {
-			RETVAL_STRINGL((char *) doc_txt_ptr, doc_txt_len);
+		if (doc_txt_ptr) {
+			if (doc_txt_len > 0) {
+				RETVAL_STRINGL((char *) doc_txt_ptr, doc_txt_len);
+			}
 			xmlFree(doc_txt_ptr);
 		}
 		xmlFreeDoc(newdocp);
