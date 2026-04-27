@@ -6371,69 +6371,35 @@ static void php_array_binop(INTERNAL_FUNCTION_PARAMETERS, const char *op_name, b
 
 	if (op == add_function) {
 		zval *entry;
-		if (HT_IS_PACKED(input)) {
-			ZEND_HASH_PACKED_FOREACH_VAL(input, entry) {
-				if (EXPECTED(Z_TYPE_P(entry) == IS_LONG) && EXPECTED(Z_TYPE_P(return_value) == IS_LONG)) {
-					fast_long_add_function(return_value, return_value, entry);
-					continue;
-				}
-				php_array_binop_apply(return_value, entry, op_name, op);
-			} ZEND_HASH_FOREACH_END();
-		} else {
-			ZEND_HASH_MAP_FOREACH_VAL(input, entry) {
-				if (EXPECTED(Z_TYPE_P(entry) == IS_LONG) && EXPECTED(Z_TYPE_P(return_value) == IS_LONG)) {
-					fast_long_add_function(return_value, return_value, entry);
-					continue;
-				}
-				php_array_binop_apply(return_value, entry, op_name, op);
-			} ZEND_HASH_FOREACH_END();
-		}
+		ZEND_HASH_FOREACH_VAL(input, entry) {
+			if (EXPECTED(Z_TYPE_P(entry) == IS_LONG) && EXPECTED(Z_TYPE_P(return_value) == IS_LONG)) {
+				fast_long_add_function(return_value, return_value, entry);
+				continue;
+			}
+			php_array_binop_apply(return_value, entry, op_name, op);
+		} ZEND_HASH_FOREACH_END();
 	} else if (op == mul_function) {
 		zval *entry;
-		if (HT_IS_PACKED(input)) {
-			ZEND_HASH_PACKED_FOREACH_VAL(input, entry) {
-				if (EXPECTED(Z_TYPE_P(entry) == IS_LONG) && EXPECTED(Z_TYPE_P(return_value) == IS_LONG)) {
-					zend_long lval;
-					double dval;
-					int overflow;
-					ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(return_value), Z_LVAL_P(entry), lval, dval, overflow);
-					if (UNEXPECTED(overflow)) {
-						ZVAL_DOUBLE(return_value, dval);
-					} else {
-						Z_LVAL_P(return_value) = lval;
-					}
-					continue;
+		ZEND_HASH_FOREACH_VAL(input, entry) {
+			if (EXPECTED(Z_TYPE_P(entry) == IS_LONG) && EXPECTED(Z_TYPE_P(return_value) == IS_LONG)) {
+				zend_long lval;
+				double dval;
+				int overflow;
+				ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(return_value), Z_LVAL_P(entry), lval, dval, overflow);
+				if (UNEXPECTED(overflow)) {
+					ZVAL_DOUBLE(return_value, dval);
+				} else {
+					Z_LVAL_P(return_value) = lval;
 				}
-				php_array_binop_apply(return_value, entry, op_name, op);
-			} ZEND_HASH_FOREACH_END();
-		} else {
-			ZEND_HASH_MAP_FOREACH_VAL(input, entry) {
-				if (EXPECTED(Z_TYPE_P(entry) == IS_LONG) && EXPECTED(Z_TYPE_P(return_value) == IS_LONG)) {
-					zend_long lval;
-					double dval;
-					int overflow;
-					ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(return_value), Z_LVAL_P(entry), lval, dval, overflow);
-					if (UNEXPECTED(overflow)) {
-						ZVAL_DOUBLE(return_value, dval);
-					} else {
-						Z_LVAL_P(return_value) = lval;
-					}
-					continue;
-				}
-				php_array_binop_apply(return_value, entry, op_name, op);
-			} ZEND_HASH_FOREACH_END();
-		}
+				continue;
+			}
+			php_array_binop_apply(return_value, entry, op_name, op);
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		zval *entry;
-		if (HT_IS_PACKED(input)) {
-			ZEND_HASH_PACKED_FOREACH_VAL(input, entry) {
-				php_array_binop_apply(return_value, entry, op_name, op);
-			} ZEND_HASH_FOREACH_END();
-		} else {
-			ZEND_HASH_MAP_FOREACH_VAL(input, entry) {
-				php_array_binop_apply(return_value, entry, op_name, op);
-			} ZEND_HASH_FOREACH_END();
-		}
+		ZEND_HASH_FOREACH_VAL(input, entry) {
+			php_array_binop_apply(return_value, entry, op_name, op);
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 
