@@ -649,6 +649,15 @@ PHP_RSHUTDOWN_FUNCTION(pgsql)
 		PGG(default_link) = NULL;
 	}
 
+	zval *pgsql_link;
+
+	ZEND_HASH_FOREACH_VAL(&PGG(connections), pgsql_link) {
+        pgsql_link_handle *link = Z_PGSQL_LINK_P(pgsql_link);
+        if (link) {
+            pgsql_meta_cache_destroy(&link->meta_cache);
+        }
+    } ZEND_HASH_FOREACH_END();
+
 	zend_hash_destroy(&PGG(field_oids));
 	zend_hash_destroy(&PGG(table_oids));
 	/* clean up persistent connection */
