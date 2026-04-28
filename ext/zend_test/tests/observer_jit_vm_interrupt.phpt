@@ -26,6 +26,8 @@ if (ini_get('opcache.jit') === false) die('skip JIT not available');
 <?php
 namespace ZendTestJitInterrupt;
 
+// Keep the callee in a separate file so the caller uses
+// INIT_NS_FCALL_BY_NAME/DO_FCALL_BY_NAME, not INIT_FCALL/DO_UCALL.
 require __DIR__ . '/observer_jit_vm_interrupt.inc';
 
 function drive_probe(int $n): int
