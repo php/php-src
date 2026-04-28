@@ -877,7 +877,7 @@ static int bcmath_number_compare(zval *op1, zval *op2);
 
 static zend_always_inline bcmath_number_obj_t *get_bcmath_number_from_obj(const zend_object *obj)
 {
-	return (bcmath_number_obj_t*)((char*)(obj) - offsetof(bcmath_number_obj_t, std));
+	return ZEND_CONTAINER_OF(obj, bcmath_number_obj_t, std);
 }
 
 static zend_always_inline bcmath_number_obj_t *get_bcmath_number_from_zval(const zval *zv)

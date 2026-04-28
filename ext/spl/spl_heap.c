@@ -71,7 +71,7 @@ typedef struct _spl_pqueue_elem {
 } spl_pqueue_elem;
 
 static inline spl_heap_object *spl_heap_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_heap_object*)((char*)(obj) - offsetof(spl_heap_object, std));
+	return ZEND_CONTAINER_OF(obj, spl_heap_object, std);
 }
 /* }}} */
 

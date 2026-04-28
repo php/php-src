@@ -206,11 +206,11 @@ typedef struct {
 } soap_client_object;
 
 static inline soap_client_object *soap_client_object_fetch(zend_object *obj) {
-	return (soap_client_object *) ((char *) obj - offsetof(soap_client_object, std));
+	return ZEND_CONTAINER_OF(obj, soap_client_object, std);
 }
 
 static inline soap_server_object *soap_server_object_fetch(zend_object *obj) {
-	return (soap_server_object *) ((char *) obj - offsetof(soap_server_object, std));
+	return ZEND_CONTAINER_OF(obj, soap_server_object, std);
 }
 
 static zend_object *soap_client_object_create(zend_class_entry *ce)
@@ -288,7 +288,7 @@ static zend_result soap_url_cast_object(zend_object *obj, zval *result, int type
 
 static inline soap_sdl_object *soap_sdl_object_fetch(zend_object *obj)
 {
-	return (soap_sdl_object *) ((char *) obj - offsetof(soap_sdl_object, std));
+	return ZEND_CONTAINER_OF(obj, soap_sdl_object, std);
 }
 
 #define Z_SOAP_SDL_P(zv) soap_sdl_object_fetch(Z_OBJ_P(zv))

@@ -337,7 +337,7 @@ static zend_result dba_connection_cast_object(zend_object *obj, zval *result, in
 
 static inline dba_connection *dba_connection_from_obj(zend_object *obj)
 {
-	return (dba_connection *)((char *)(obj) - offsetof(dba_connection, std));
+	return ZEND_CONTAINER_OF(obj, dba_connection, std);
 }
 
 #define Z_DBA_CONNECTION_P(zv) dba_connection_from_obj(Z_OBJ_P(zv))

@@ -49,7 +49,7 @@
 zend_class_entry *curl_multi_ce;
 
 static inline php_curlm *curl_multi_from_obj(zend_object *obj) {
-	return (php_curlm *)((char *)(obj) - offsetof(php_curlm, std));
+	return ZEND_CONTAINER_OF(obj, php_curlm, std);
 }
 
 #define Z_CURL_MULTI_P(zv) curl_multi_from_obj(Z_OBJ_P(zv))

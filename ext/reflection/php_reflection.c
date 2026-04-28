@@ -175,7 +175,7 @@ typedef struct {
 } reflection_object;
 
 static inline reflection_object *reflection_object_from_obj(zend_object *obj) {
-	return (reflection_object*)((char*)(obj) - offsetof(reflection_object, zo));
+	return ZEND_CONTAINER_OF(obj, reflection_object, zo);
 }
 
 #define Z_REFLECTION_P(zv)  reflection_object_from_obj(Z_OBJ_P((zv)))

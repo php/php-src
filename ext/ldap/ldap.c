@@ -101,7 +101,7 @@ ZEND_GET_MODULE(ldap)
 #endif
 
 static inline ldap_linkdata *ldap_link_from_obj(zend_object *obj) {
-	return (ldap_linkdata *)((char *)(obj) - offsetof(ldap_linkdata, std));
+	return ZEND_CONTAINER_OF(obj, ldap_linkdata, std);
 }
 
 #define Z_LDAP_LINK_P(zv) ldap_link_from_obj(Z_OBJ_P(zv))
@@ -148,7 +148,7 @@ static void ldap_link_free_obj(zend_object *obj)
 }
 
 static inline ldap_resultdata *ldap_result_from_obj(zend_object *obj) {
-	return (ldap_resultdata *)((char *)(obj) - offsetof(ldap_resultdata, std));
+	return ZEND_CONTAINER_OF(obj, ldap_resultdata, std);
 }
 
 #define Z_LDAP_RESULT_P(zv) ldap_result_from_obj(Z_OBJ_P(zv))
@@ -185,7 +185,7 @@ static void ldap_result_free_obj(zend_object *obj)
 }
 
 static inline ldap_result_entry *ldap_result_entry_from_obj(zend_object *obj) {
-	return (ldap_result_entry *)((char *)(obj) - offsetof(ldap_result_entry, std));
+	return ZEND_CONTAINER_OF(obj, ldap_result_entry, std);
 }
 
 #define Z_LDAP_RESULT_ENTRY_P(zv) ldap_result_entry_from_obj(Z_OBJ_P(zv))

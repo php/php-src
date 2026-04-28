@@ -105,7 +105,7 @@ struct _PHPTidyObj {
 };
 
 static inline PHPTidyObj *php_tidy_fetch_object(zend_object *obj) {
-	return (PHPTidyObj *)((char*)(obj) - offsetof(PHPTidyObj, std));
+	return ZEND_CONTAINER_OF(obj, PHPTidyObj, std);
 }
 
 #define Z_TIDY_P(zv) php_tidy_fetch_object(Z_OBJ_P((zv)))
