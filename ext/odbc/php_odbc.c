@@ -636,7 +636,7 @@ void php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zend_long flag;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
 		Z_PARAM_LONG(flag)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -763,7 +763,7 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 	zval *pv_conn;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
@@ -788,7 +788,7 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 	zend_long pv_num;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
 		Z_PARAM_LONG(pv_num)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -865,7 +865,7 @@ PHP_FUNCTION(odbc_prepare)
 	SQLUINTEGER      scrollopts;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_STRING(query, query_len)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -979,7 +979,7 @@ PHP_FUNCTION(odbc_execute)
 	RETCODE rc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT(pv_param_ht)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1134,7 +1134,7 @@ PHP_FUNCTION(odbc_cursor)
 	RETCODE rc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	result = Z_ODBC_RESULT_P(pv_res);
@@ -1189,7 +1189,7 @@ PHP_FUNCTION(odbc_data_source)
 	SQLSMALLINT len1=0, len2=0, fetch_type;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-	        Z_PARAM_OBJECT_OF_CLASS(zv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(zv_conn, odbc_connection_ce)
 		Z_PARAM_LONG(zv_fetch_type)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -1248,7 +1248,7 @@ PHP_FUNCTION(odbc_exec)
 	SQLUINTEGER      scrollopts;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_STRING(query, query_len)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -1868,7 +1868,7 @@ PHP_FUNCTION(odbc_free_result)
 	odbc_result *result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	result = Z_ODBC_RESULT_P(pv_res);
@@ -2187,7 +2187,7 @@ PHP_FUNCTION(odbc_close)
 	odbc_link *link;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	link = Z_ODBC_LINK_P(pv_conn);
@@ -2210,7 +2210,7 @@ PHP_FUNCTION(odbc_num_rows)
 	zval *pv_res;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	result = Z_ODBC_RESULT_P(pv_res);
@@ -2229,7 +2229,7 @@ PHP_FUNCTION(odbc_next_result)
 	int rc, i;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	result = Z_ODBC_RESULT_P(pv_res);
@@ -2275,7 +2275,7 @@ PHP_FUNCTION(odbc_num_fields)
 	zval *pv_res;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	result = Z_ODBC_RESULT_P(pv_res);
@@ -2293,7 +2293,7 @@ PHP_FUNCTION(odbc_field_name)
 	zend_long pv_num;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
 		Z_PARAM_LONG(pv_num)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -2329,7 +2329,7 @@ PHP_FUNCTION(odbc_field_type)
 	zend_long		pv_num;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
 		Z_PARAM_LONG(pv_num)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -2379,7 +2379,7 @@ PHP_FUNCTION(odbc_field_num)
 	zval *pv_res;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
 		Z_PARAM_STRING(fname, fname_len)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -2415,7 +2415,7 @@ PHP_FUNCTION(odbc_autocommit)
 	bool pv_onoff_is_null = true;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL_OR_NULL(pv_onoff, pv_onoff_is_null)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2466,7 +2466,7 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-	        Z_PARAM_OBJECT_OF_CLASS(pv_handle, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_handle, odbc_connection_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (pv_handle) {
@@ -2520,7 +2520,7 @@ PHP_FUNCTION(odbc_setoption)
 	zend_long pv_which, pv_opt, pv_val;
 
 	ZEND_PARSE_PARAMETERS_START(4, 4)
-	        Z_PARAM_OBJECT(pv_handle)
+		Z_PARAM_OBJECT(pv_handle)
 		Z_PARAM_LONG(pv_which)
 		Z_PARAM_LONG(pv_opt)
 		Z_PARAM_LONG(pv_val)
@@ -2583,7 +2583,7 @@ PHP_FUNCTION(odbc_tables)
 	RETCODE rc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 5)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_OR_NULL(cat, cat_len)
 		Z_PARAM_STRING_OR_NULL(schema, schema_len)
@@ -2652,7 +2652,7 @@ PHP_FUNCTION(odbc_columns)
 	RETCODE rc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 5)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_OR_NULL(cat, cat_len)
 		Z_PARAM_STRING_OR_NULL(schema, schema_len)
@@ -2723,7 +2723,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	RETCODE rc;
 
 	ZEND_PARSE_PARAMETERS_START(5, 5)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_STRING_OR_NULL(cat, cat_len)
 		Z_PARAM_STRING(schema, schema_len)
 		Z_PARAM_STRING(table, table_len)
@@ -2786,7 +2786,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 	RETCODE rc;
 
 	ZEND_PARSE_PARAMETERS_START(7, 7)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_STRING_OR_NULL(pcat, pcat_len)
 		Z_PARAM_STRING(pschema, pschema_len)
 		Z_PARAM_STRING(ptable, ptable_len)
@@ -2865,7 +2865,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	SQLSMALLINT data_type;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(pv_data_type)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2924,7 +2924,7 @@ PHP_FUNCTION(odbc_primarykeys)
 	RETCODE rc;
 
 	ZEND_PARSE_PARAMETERS_START(4, 4)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_STRING_OR_NULL(cat, cat_len)
 		Z_PARAM_STRING(schema, schema_len)
 		Z_PARAM_STRING(table, table_len)
@@ -2985,7 +2985,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	RETCODE rc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 5)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_STRING_OR_NULL(cat, cat_len)
 		Z_PARAM_STRING_OR_NULL(schema, schema_len)
 		Z_PARAM_STRING_OR_NULL(proc, proc_len)
@@ -3048,7 +3048,7 @@ PHP_FUNCTION(odbc_procedures)
 	RETCODE rc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_STRING_OR_NULL(cat, cat_len)
 		Z_PARAM_STRING_OR_NULL(schema, schema_len)
 		Z_PARAM_STRING_OR_NULL(proc, proc_len)
@@ -3111,7 +3111,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 	RETCODE rc;
 
 	ZEND_PARSE_PARAMETERS_START(7, 7)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_LONG(vtype)
 		Z_PARAM_STRING_OR_NULL(cat, cat_len)
 		Z_PARAM_STRING(schema, schema_len)
@@ -3183,7 +3183,7 @@ PHP_FUNCTION(odbc_statistics)
 	RETCODE rc;
 
 	ZEND_PARSE_PARAMETERS_START(6, 6)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_STRING_OR_NULL(cat, cat_len)
 		Z_PARAM_STRING(schema, schema_len)
 		Z_PARAM_STRING(name, name_len)
@@ -3251,7 +3251,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 	RETCODE rc;
 
 	ZEND_PARSE_PARAMETERS_START(4, 4)
-	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
+		Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_STRING_OR_NULL(cat, cat_len)
 		Z_PARAM_STRING(schema, schema_len)
 		Z_PARAM_STRING(table, table_len)
