@@ -152,7 +152,7 @@ static zend_class_entry *pgsql_link_ce, *pgsql_result_ce, *pgsql_lob_ce;
 static zend_object_handlers pgsql_link_object_handlers, pgsql_result_object_handlers, pgsql_lob_object_handlers;
 
 static inline pgsql_link_handle *pgsql_link_from_obj(zend_object *obj) {
-	return (pgsql_link_handle *)((char *)(obj) - XtOffsetOf(pgsql_link_handle, std));
+	return (pgsql_link_handle *)((char *)(obj) - offsetof(pgsql_link_handle, std));
 }
 
 #define Z_PGSQL_LINK_P(zv) pgsql_link_from_obj(Z_OBJ_P(zv))
@@ -208,7 +208,7 @@ static void pgsql_link_free_obj(zend_object *obj)
 }
 
 static inline pgsql_result_handle *pgsql_result_from_obj(zend_object *obj) {
-	return (pgsql_result_handle *)((char *)(obj) - XtOffsetOf(pgsql_result_handle, std));
+	return (pgsql_result_handle *)((char *)(obj) - offsetof(pgsql_result_handle, std));
 }
 
 #define Z_PGSQL_RESULT_P(zv) pgsql_result_from_obj(Z_OBJ_P(zv))
@@ -245,7 +245,7 @@ static void pgsql_result_free_obj(zend_object *obj)
 }
 
 static inline pgLofp *pgsql_lob_from_obj(zend_object *obj) {
-	return (pgLofp *)((char *)(obj) - XtOffsetOf(pgLofp, std));
+	return (pgLofp *)((char *)(obj) - offsetof(pgLofp, std));
 }
 
 #define Z_PGSQL_LOB_P(zv) pgsql_lob_from_obj(Z_OBJ_P(zv))
@@ -574,7 +574,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	pgsql_link_ce->default_object_handlers = &pgsql_link_object_handlers;
 
 	memcpy(&pgsql_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pgsql_link_object_handlers.offset = XtOffsetOf(pgsql_link_handle, std);
+	pgsql_link_object_handlers.offset = offsetof(pgsql_link_handle, std);
 	pgsql_link_object_handlers.free_obj = pgsql_link_free_obj;
 	pgsql_link_object_handlers.get_constructor = pgsql_link_get_constructor;
 	pgsql_link_object_handlers.clone_obj = NULL;
@@ -585,7 +585,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	pgsql_result_ce->default_object_handlers = &pgsql_result_object_handlers;
 
 	memcpy(&pgsql_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pgsql_result_object_handlers.offset = XtOffsetOf(pgsql_result_handle, std);
+	pgsql_result_object_handlers.offset = offsetof(pgsql_result_handle, std);
 	pgsql_result_object_handlers.free_obj = pgsql_result_free_obj;
 	pgsql_result_object_handlers.get_constructor = pgsql_result_get_constructor;
 	pgsql_result_object_handlers.clone_obj = NULL;
@@ -596,7 +596,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	pgsql_lob_ce->default_object_handlers = &pgsql_lob_object_handlers;
 
 	memcpy(&pgsql_lob_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pgsql_lob_object_handlers.offset = XtOffsetOf(pgLofp, std);
+	pgsql_lob_object_handlers.offset = offsetof(pgLofp, std);
 	pgsql_lob_object_handlers.free_obj = pgsql_lob_free_obj;
 	pgsql_lob_object_handlers.get_constructor = pgsql_lob_get_constructor;
 	pgsql_lob_object_handlers.clone_obj = NULL;
@@ -1228,7 +1228,7 @@ PHP_FUNCTION(pg_query)
 
 /* The char pointer MUST refer to the char* of a zend_string struct */
 static void php_pgsql_zend_string_release_from_char_pointer(char *ptr) {
-	zend_string_release((zend_string*) (ptr - XtOffsetOf(zend_string, val)));
+	zend_string_release((zend_string*) (ptr - offsetof(zend_string, val)));
 }
 
 static void _php_pgsql_free_params(char **params, uint32_t num_params)

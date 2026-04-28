@@ -53,7 +53,7 @@ typedef struct {
 
 
 static inline IntlIterator_object *php_intl_iterator_fetch_object(zend_object *obj) {
-	return (IntlIterator_object *)((char*)(obj) - XtOffsetOf(IntlIterator_object, zo));
+	return (IntlIterator_object *)((char*)(obj) - offsetof(IntlIterator_object, zo));
 }
 #define Z_INTL_ITERATOR_P(zv) php_intl_iterator_fetch_object(Z_OBJ_P(zv))
 

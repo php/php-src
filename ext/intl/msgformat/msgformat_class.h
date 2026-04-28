@@ -32,7 +32,7 @@ typedef struct {
 
 
 static inline MessageFormatter_object *php_intl_messageformatter_fetch_object(zend_object *obj) {
-	return (MessageFormatter_object *)((char*)(obj) - XtOffsetOf(MessageFormatter_object, zo));
+	return (MessageFormatter_object *)((char*)(obj) - offsetof(MessageFormatter_object, zo));
 }
 #define Z_INTL_MESSAGEFORMATTER_P(zv) php_intl_messageformatter_fetch_object(Z_OBJ_P(zv))
 

@@ -222,7 +222,7 @@ PHP_MINIT_FUNCTION(xml)
 	xml_parser_ce->default_object_handlers = &xml_parser_object_handlers;
 
 	memcpy(&xml_parser_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	xml_parser_object_handlers.offset = XtOffsetOf(xml_parser, std);
+	xml_parser_object_handlers.offset = offsetof(xml_parser, std);
 	xml_parser_object_handlers.free_obj = xml_parser_free_obj;
 	xml_parser_object_handlers.get_gc = xml_parser_get_gc;
 	xml_parser_object_handlers.get_constructor = xml_parser_get_constructor;
@@ -296,7 +296,7 @@ static void xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encodin
 /* }}} */
 
 static inline xml_parser *xml_parser_from_obj(zend_object *obj) {
-	return (xml_parser *)((char *)(obj) - XtOffsetOf(xml_parser, std));
+	return (xml_parser *)((char *)(obj) - offsetof(xml_parser, std));
 }
 
 #define Z_XMLPARSER_P(zv) xml_parser_from_obj(Z_OBJ_P(zv))

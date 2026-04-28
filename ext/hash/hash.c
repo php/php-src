@@ -1652,7 +1652,7 @@ PHP_MINIT_FUNCTION(hash)
 
 	memcpy(&php_hashcontext_handlers, &std_object_handlers,
 	       sizeof(zend_object_handlers));
-	php_hashcontext_handlers.offset = XtOffsetOf(php_hashcontext_object, std);
+	php_hashcontext_handlers.offset = offsetof(php_hashcontext_object, std);
 	php_hashcontext_handlers.free_obj = php_hashcontext_free;
 	php_hashcontext_handlers.clone_obj = php_hashcontext_clone;
 

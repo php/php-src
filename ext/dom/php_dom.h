@@ -68,7 +68,7 @@ typedef struct dom_xpath_object {
 
 static inline dom_xpath_object *php_xpath_obj_from_obj(zend_object *obj) {
 	return (dom_xpath_object*)((char*)(obj)
-		- XtOffsetOf(dom_xpath_object, dom) - XtOffsetOf(dom_object, std));
+		- offsetof(dom_xpath_object, dom) - offsetof(dom_object, std));
 }
 
 #define Z_XPATHOBJ_P(zv)  php_xpath_obj_from_obj(Z_OBJ_P((zv)))
@@ -94,7 +94,7 @@ struct php_dom_libxml_ns_mapper;
 typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
 
 static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zend_object *obj) {
-	return (dom_object_namespace_node*)((char*)(obj) - XtOffsetOf(dom_object_namespace_node, dom.std));
+	return (dom_object_namespace_node*)((char*)(obj) - offsetof(dom_object_namespace_node, dom.std));
 }
 
 #include "domexception.h"

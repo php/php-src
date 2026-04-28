@@ -175,7 +175,7 @@ typedef struct {
 } reflection_object;
 
 static inline reflection_object *reflection_object_from_obj(zend_object *obj) {
-	return (reflection_object*)((char*)(obj) - XtOffsetOf(reflection_object, zo));
+	return (reflection_object*)((char*)(obj) - offsetof(reflection_object, zo));
 }
 
 #define Z_REFLECTION_P(zv)  reflection_object_from_obj(Z_OBJ_P((zv)))
@@ -8159,7 +8159,7 @@ ZEND_METHOD(ReflectionConstant, __toString)
 PHP_MINIT_FUNCTION(reflection) /* {{{ */
 {
 	memcpy(&reflection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	reflection_object_handlers.offset = XtOffsetOf(reflection_object, zo);
+	reflection_object_handlers.offset = offsetof(reflection_object, zo);
 	reflection_object_handlers.free_obj = reflection_free_objects_storage;
 	reflection_object_handlers.clone_obj = NULL;
 	reflection_object_handlers.write_property = _reflection_write_property;

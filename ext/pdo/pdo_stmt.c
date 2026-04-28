@@ -2420,7 +2420,7 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_ce->default_object_handlers = &pdo_dbstmt_object_handlers;
 
 	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pdo_dbstmt_object_handlers.offset = XtOffsetOf(pdo_stmt_t, std);
+	pdo_dbstmt_object_handlers.offset = offsetof(pdo_stmt_t, std);
 	pdo_dbstmt_object_handlers.free_obj = pdo_dbstmt_free_storage;
 	pdo_dbstmt_object_handlers.write_property = dbstmt_prop_write;
 	pdo_dbstmt_object_handlers.unset_property = dbstmt_prop_delete;
@@ -2434,7 +2434,7 @@ void pdo_stmt_init(void)
 	pdo_row_ce->default_object_handlers = &pdo_row_object_handlers;
 
 	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pdo_row_object_handlers.offset = XtOffsetOf(pdo_row_t, std);
+	pdo_row_object_handlers.offset = offsetof(pdo_row_t, std);
 	pdo_row_object_handlers.free_obj = pdo_row_free_storage;
 	pdo_row_object_handlers.clone_obj = NULL;
 	pdo_row_object_handlers.get_property_ptr_ptr = pdo_row_get_property_ptr_ptr;

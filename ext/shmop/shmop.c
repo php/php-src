@@ -70,7 +70,7 @@ static zend_object_handlers shmop_object_handlers;
 
 static inline php_shmop *shmop_from_obj(zend_object *obj)
 {
-	return (php_shmop *)((char *)(obj) - XtOffsetOf(php_shmop, std));
+	return (php_shmop *)((char *)(obj) - offsetof(php_shmop, std));
 }
 
 #define Z_SHMOP_P(zv) shmop_from_obj(Z_OBJ_P(zv))
@@ -108,7 +108,7 @@ PHP_MINIT_FUNCTION(shmop)
 	shmop_ce->default_object_handlers = &shmop_object_handlers;
 
 	memcpy(&shmop_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	shmop_object_handlers.offset = XtOffsetOf(php_shmop, std);
+	shmop_object_handlers.offset = offsetof(php_shmop, std);
 	shmop_object_handlers.free_obj = shmop_free_obj;
 	shmop_object_handlers.get_constructor = shmop_get_constructor;
 	shmop_object_handlers.clone_obj = NULL;

@@ -745,7 +745,7 @@ PHP_MINIT_FUNCTION(random)
 	random_ce_Random_Engine_Mt19937->create_object = php_random_engine_mt19937_new;
 	random_ce_Random_Engine_Mt19937->default_object_handlers = &random_engine_mt19937_object_handlers;
 	memcpy(&random_engine_mt19937_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	random_engine_mt19937_object_handlers.offset = XtOffsetOf(php_random_engine, std);
+	random_engine_mt19937_object_handlers.offset = offsetof(php_random_engine, std);
 	random_engine_mt19937_object_handlers.free_obj = php_random_engine_common_free_object;
 	random_engine_mt19937_object_handlers.clone_obj = php_random_engine_common_clone_object;
 
@@ -754,7 +754,7 @@ PHP_MINIT_FUNCTION(random)
 	random_ce_Random_Engine_PcgOneseq128XslRr64->create_object = php_random_engine_pcgoneseq128xslrr64_new;
 	random_ce_Random_Engine_PcgOneseq128XslRr64->default_object_handlers = &random_engine_pcgoneseq128xslrr64_object_handlers;
 	memcpy(&random_engine_pcgoneseq128xslrr64_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	random_engine_pcgoneseq128xslrr64_object_handlers.offset = XtOffsetOf(php_random_engine, std);
+	random_engine_pcgoneseq128xslrr64_object_handlers.offset = offsetof(php_random_engine, std);
 	random_engine_pcgoneseq128xslrr64_object_handlers.free_obj = php_random_engine_common_free_object;
 	random_engine_pcgoneseq128xslrr64_object_handlers.clone_obj = php_random_engine_common_clone_object;
 
@@ -763,7 +763,7 @@ PHP_MINIT_FUNCTION(random)
 	random_ce_Random_Engine_Xoshiro256StarStar->create_object = php_random_engine_xoshiro256starstar_new;
 	random_ce_Random_Engine_Xoshiro256StarStar->default_object_handlers = &random_engine_xoshiro256starstar_object_handlers;
 	memcpy(&random_engine_xoshiro256starstar_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	random_engine_xoshiro256starstar_object_handlers.offset = XtOffsetOf(php_random_engine, std);
+	random_engine_xoshiro256starstar_object_handlers.offset = offsetof(php_random_engine, std);
 	random_engine_xoshiro256starstar_object_handlers.free_obj = php_random_engine_common_free_object;
 	random_engine_xoshiro256starstar_object_handlers.clone_obj = php_random_engine_common_clone_object;
 
@@ -772,7 +772,7 @@ PHP_MINIT_FUNCTION(random)
 	random_ce_Random_Engine_Secure->create_object = php_random_engine_secure_new;
 	random_ce_Random_Engine_Secure->default_object_handlers = &random_engine_secure_object_handlers;
 	memcpy(&random_engine_secure_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	random_engine_secure_object_handlers.offset = XtOffsetOf(php_random_engine, std);
+	random_engine_secure_object_handlers.offset = offsetof(php_random_engine, std);
 	random_engine_secure_object_handlers.free_obj = php_random_engine_common_free_object;
 	random_engine_secure_object_handlers.clone_obj = NULL;
 
@@ -781,7 +781,7 @@ PHP_MINIT_FUNCTION(random)
 	random_ce_Random_Randomizer->create_object = php_random_randomizer_new;
 	random_ce_Random_Randomizer->default_object_handlers = &random_randomizer_object_handlers;
 	memcpy(&random_randomizer_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	random_randomizer_object_handlers.offset = XtOffsetOf(php_random_randomizer, std);
+	random_randomizer_object_handlers.offset = offsetof(php_random_randomizer, std);
 	random_randomizer_object_handlers.free_obj = randomizer_free_obj;
 	random_randomizer_object_handlers.clone_obj = NULL;
 

@@ -59,7 +59,7 @@ static HashTable *php_dom_libxml_ns_mapper_ensure_prefix_map(php_dom_libxml_ns_m
 		zend_hash_add_new(&mapper->uri_to_prefix_map, *uri, &zv_prefix_map);
 	} else {
 		/* cast to Bucket* only works if this holds, I would prefer a static assert but we're stuck at C99. */
-		ZEND_ASSERT(XtOffsetOf(Bucket, val) == 0);
+		ZEND_ASSERT(offsetof(Bucket, val) == 0);
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_ARRAY);
 		Bucket *bucket = (Bucket *) zv;
 		/* Make sure we take the value from the key string that lives long enough. */

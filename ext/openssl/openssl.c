@@ -386,7 +386,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_certificate_ce->default_object_handlers = &php_openssl_certificate_object_handlers;
 
 	memcpy(&php_openssl_certificate_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	php_openssl_certificate_object_handlers.offset = XtOffsetOf(php_openssl_certificate_object, std);
+	php_openssl_certificate_object_handlers.offset = offsetof(php_openssl_certificate_object, std);
 	php_openssl_certificate_object_handlers.free_obj = php_openssl_certificate_free_obj;
 	php_openssl_certificate_object_handlers.get_constructor = php_openssl_certificate_get_constructor;
 	php_openssl_certificate_object_handlers.clone_obj = NULL;
@@ -397,7 +397,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_request_ce->default_object_handlers = &php_openssl_request_object_handlers;
 
 	memcpy(&php_openssl_request_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	php_openssl_request_object_handlers.offset = XtOffsetOf(php_openssl_request_object, std);
+	php_openssl_request_object_handlers.offset = offsetof(php_openssl_request_object, std);
 	php_openssl_request_object_handlers.free_obj = php_openssl_request_free_obj;
 	php_openssl_request_object_handlers.get_constructor = php_openssl_request_get_constructor;
 	php_openssl_request_object_handlers.clone_obj = NULL;
@@ -408,7 +408,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_pkey_ce->default_object_handlers = &php_openssl_pkey_object_handlers;
 
 	memcpy(&php_openssl_pkey_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	php_openssl_pkey_object_handlers.offset = XtOffsetOf(php_openssl_pkey_object, std);
+	php_openssl_pkey_object_handlers.offset = offsetof(php_openssl_pkey_object, std);
 	php_openssl_pkey_object_handlers.free_obj = php_openssl_pkey_free_obj;
 	php_openssl_pkey_object_handlers.get_constructor = php_openssl_pkey_get_constructor;
 	php_openssl_pkey_object_handlers.clone_obj = NULL;

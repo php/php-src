@@ -357,7 +357,7 @@ PHP_MINIT_FUNCTION(curl)
 	curl_ce->default_object_handlers = &curl_object_handlers;
 
 	memcpy(&curl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	curl_object_handlers.offset = XtOffsetOf(php_curl, std);
+	curl_object_handlers.offset = offsetof(php_curl, std);
 	curl_object_handlers.free_obj = curl_free_obj;
 	curl_object_handlers.get_gc = curl_get_gc;
 	curl_object_handlers.get_constructor = curl_get_constructor;

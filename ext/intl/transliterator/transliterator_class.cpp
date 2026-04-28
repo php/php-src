@@ -167,7 +167,7 @@ U_CFUNC void transliterator_register_Transliterator_class( void )
 	Transliterator_ce_ptr->create_object = Transliterator_object_create;
 	Transliterator_ce_ptr->default_object_handlers = &Transliterator_handlers;
 	memcpy( &Transliterator_handlers, &std_object_handlers, sizeof Transliterator_handlers );
-	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
+	Transliterator_handlers.offset = offsetof(Transliterator_object, zo);
 	Transliterator_handlers.free_obj = Transliterator_objects_free;
 	Transliterator_handlers.clone_obj = Transliterator_clone_obj;
 }

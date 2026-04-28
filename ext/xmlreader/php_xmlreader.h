@@ -45,7 +45,7 @@ typedef struct _xmlreader_object {
 } xmlreader_object;
 
 static inline xmlreader_object *php_xmlreader_fetch_object(zend_object *obj) {
-	return (xmlreader_object *)((char*)(obj) - XtOffsetOf(xmlreader_object, std));
+	return (xmlreader_object *)((char*)(obj) - offsetof(xmlreader_object, std));
 }
 
 #define Z_XMLREADER_P(zv) php_xmlreader_fetch_object(Z_OBJ_P((zv)))

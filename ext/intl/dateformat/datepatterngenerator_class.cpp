@@ -106,7 +106,7 @@ void dateformat_register_IntlDatePatternGenerator_class( void )
 
 	memcpy(&IntlDatePatternGenerator_handlers, &std_object_handlers,
 		sizeof IntlDatePatternGenerator_handlers);
-	IntlDatePatternGenerator_handlers.offset = XtOffsetOf(IntlDatePatternGenerator_object, zo);
+	IntlDatePatternGenerator_handlers.offset = offsetof(IntlDatePatternGenerator_object, zo);
 	IntlDatePatternGenerator_handlers.clone_obj = IntlDatePatternGenerator_object_clone;
 	IntlDatePatternGenerator_handlers.free_obj = IntlDatePatternGenerator_object_free;
 }

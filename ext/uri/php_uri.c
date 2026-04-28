@@ -1074,7 +1074,7 @@ static PHP_MINIT_FUNCTION(uri)
 	php_uri_ce_rfc3986_uri->create_object = php_uri_object_create_rfc3986;
 	php_uri_ce_rfc3986_uri->default_object_handlers = &object_handlers_rfc3986_uri;
 	memcpy(&object_handlers_rfc3986_uri, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	object_handlers_rfc3986_uri.offset = XtOffsetOf(php_uri_object, std);
+	object_handlers_rfc3986_uri.offset = offsetof(php_uri_object, std);
 	object_handlers_rfc3986_uri.free_obj = php_uri_object_handler_free;
 	object_handlers_rfc3986_uri.clone_obj = php_uri_object_handler_clone;
 
@@ -1082,7 +1082,7 @@ static PHP_MINIT_FUNCTION(uri)
 	php_uri_ce_whatwg_url->create_object = php_uri_object_create_whatwg;
 	php_uri_ce_whatwg_url->default_object_handlers = &object_handlers_whatwg_uri;
 	memcpy(&object_handlers_whatwg_uri, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	object_handlers_whatwg_uri.offset = XtOffsetOf(php_uri_object, std);
+	object_handlers_whatwg_uri.offset = offsetof(php_uri_object, std);
 	object_handlers_whatwg_uri.free_obj = php_uri_object_handler_free;
 	object_handlers_whatwg_uri.clone_obj = php_uri_object_handler_clone;
 

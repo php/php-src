@@ -37,7 +37,7 @@ typedef struct {
 } IntlNumberRangeFormatter_object;
 
 static inline IntlNumberRangeFormatter_object *php_intl_numberrangeformatter_fetch_object(zend_object *obj) {
-    return (IntlNumberRangeFormatter_object *)((char*)(obj) - XtOffsetOf(IntlNumberRangeFormatter_object, zo));
+    return (IntlNumberRangeFormatter_object *)((char*)(obj) - offsetof(IntlNumberRangeFormatter_object, zo));
 }
 
 #define Z_INTL_RANGEFORMATTER_P(zv) php_intl_numberrangeformatter_fetch_object(Z_OBJ_P(zv))

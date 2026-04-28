@@ -137,14 +137,14 @@ static zend_object_handlers spl_handlers_rec_it_it;
 static zend_object_handlers spl_handlers_dual_it;
 
 static inline spl_recursive_it_object *spl_recursive_it_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_recursive_it_object*)((char*)(obj) - XtOffsetOf(spl_recursive_it_object, std));
+	return (spl_recursive_it_object*)((char*)(obj) - offsetof(spl_recursive_it_object, std));
 }
 /* }}} */
 
 #define Z_SPLRECURSIVE_IT_P(zv)  spl_recursive_it_from_obj(Z_OBJ_P((zv)))
 
 static inline spl_dual_it_object *spl_dual_it_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_dual_it_object*)((char*)(obj) - XtOffsetOf(spl_dual_it_object, std));
+	return (spl_dual_it_object*)((char*)(obj) - offsetof(spl_dual_it_object, std));
 } /* }}} */
 
 #define Z_SPLDUAL_IT_P(zv)  spl_dual_it_from_obj(Z_OBJ_P((zv)))
@@ -3134,14 +3134,14 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	spl_ce_RecursiveIteratorIterator->get_iterator = spl_recursive_it_get_iterator;
 
 	memcpy(&spl_handlers_rec_it_it, &std_object_handlers, sizeof(zend_object_handlers));
-	spl_handlers_rec_it_it.offset = XtOffsetOf(spl_recursive_it_object, std);
+	spl_handlers_rec_it_it.offset = offsetof(spl_recursive_it_object, std);
 	spl_handlers_rec_it_it.get_method = spl_recursive_it_get_method;
 	spl_handlers_rec_it_it.clone_obj = NULL;
 	spl_handlers_rec_it_it.free_obj = spl_RecursiveIteratorIterator_free_storage;
 	spl_handlers_rec_it_it.get_gc = spl_RecursiveIteratorIterator_get_gc;
 
 	memcpy(&spl_handlers_dual_it, &std_object_handlers, sizeof(zend_object_handlers));
-	spl_handlers_dual_it.offset = XtOffsetOf(spl_dual_it_object, std);
+	spl_handlers_dual_it.offset = offsetof(spl_dual_it_object, std);
 	spl_handlers_dual_it.get_method = spl_dual_it_get_method;
 	spl_handlers_dual_it.clone_obj = NULL;
 	spl_handlers_dual_it.free_obj = spl_dual_it_free_storage;

@@ -115,7 +115,7 @@ static zend_always_inline zend_string *ZSTR_KNOWN(size_t idx) {
 	return zend_known_strings[idx];
 }
 
-#define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
+#define _ZSTR_HEADER_SIZE offsetof(zend_string, val)
 
 #define _ZSTR_STRUCT_SIZE(len) (_ZSTR_HEADER_SIZE + len + 1)
 

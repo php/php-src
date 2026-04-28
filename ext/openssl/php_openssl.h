@@ -162,7 +162,7 @@ typedef struct _php_openssl_certificate_object {
 extern zend_class_entry *php_openssl_certificate_ce;
 
 static inline php_openssl_certificate_object *php_openssl_certificate_from_obj(zend_object *obj) {
-	return (php_openssl_certificate_object *)((char *)(obj) - XtOffsetOf(php_openssl_certificate_object, std));
+	return (php_openssl_certificate_object *)((char *)(obj) - offsetof(php_openssl_certificate_object, std));
 }
 
 #define Z_OPENSSL_CERTIFICATE_P(zv) php_openssl_certificate_from_obj(Z_OBJ_P(zv))
@@ -177,7 +177,7 @@ typedef struct _php_openssl_x509_request_object {
 } php_openssl_request_object;
 
 static inline php_openssl_request_object *php_openssl_request_from_obj(zend_object *obj) {
-	return (php_openssl_request_object *)((char *)(obj) - XtOffsetOf(php_openssl_request_object, std));
+	return (php_openssl_request_object *)((char *)(obj) - offsetof(php_openssl_request_object, std));
 }
 
 #define Z_OPENSSL_REQUEST_P(zv) php_openssl_request_from_obj(Z_OBJ_P(zv))
@@ -193,7 +193,7 @@ typedef struct _php_openssl_pkey_object {
 } php_openssl_pkey_object;
 
 static inline php_openssl_pkey_object *php_openssl_pkey_from_obj(zend_object *obj) {
-	return (php_openssl_pkey_object *)((char *)(obj) - XtOffsetOf(php_openssl_pkey_object, std));
+	return (php_openssl_pkey_object *)((char *)(obj) - offsetof(php_openssl_pkey_object, std));
 }
 
 #define Z_OPENSSL_PKEY_P(zv) php_openssl_pkey_from_obj(Z_OBJ_P(zv))

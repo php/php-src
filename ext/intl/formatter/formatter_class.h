@@ -34,7 +34,7 @@ typedef struct {
 } NumberFormatter_object;
 
 static inline NumberFormatter_object *php_intl_number_format_fetch_object(zend_object *obj) {
-	return (NumberFormatter_object *)((char*)(obj) - XtOffsetOf(NumberFormatter_object, zo));
+	return (NumberFormatter_object *)((char*)(obj) - offsetof(NumberFormatter_object, zo));
 }
 #define Z_INTL_NUMBERFORMATTER_P(zv) php_intl_number_format_fetch_object(Z_OBJ_P(zv))
 

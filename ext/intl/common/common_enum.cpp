@@ -294,7 +294,7 @@ U_CFUNC void intl_register_common_symbols(int module_number)
 
 	memcpy(&IntlIterator_handlers, &std_object_handlers,
 		sizeof IntlIterator_handlers);
-	IntlIterator_handlers.offset = XtOffsetOf(IntlIterator_object, zo);
+	IntlIterator_handlers.offset = offsetof(IntlIterator_object, zo);
 	IntlIterator_handlers.clone_obj = NULL;
 	IntlIterator_handlers.dtor_obj = IntlIterator_objects_dtor;
 	IntlIterator_handlers.free_obj = IntlIterator_objects_free;

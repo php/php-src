@@ -780,7 +780,7 @@ static bool zend_optimizer_ignore_class(zval *ce_zv, const zend_string *filename
 		if (CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE) {
 			return true;
 		}
-		const Bucket *ce_bucket = (const Bucket*)((uintptr_t)ce_zv - XtOffsetOf(Bucket, val));
+		const Bucket *ce_bucket = (const Bucket*)((uintptr_t)ce_zv - offsetof(Bucket, val));
 		size_t offset = ce_bucket - EG(class_table)->arData;
 		if (offset < EG(persistent_classes_count)) {
 			return false;
@@ -801,7 +801,7 @@ static bool zend_optimizer_ignore_function(zval *fbc_zv, const zend_string *file
 			if (CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE) {
 				return true;
 			}
-			const Bucket *fbc_bucket = (const Bucket*)((uintptr_t)fbc_zv - XtOffsetOf(Bucket, val));
+			const Bucket *fbc_bucket = (const Bucket*)((uintptr_t)fbc_zv - offsetof(Bucket, val));
 			size_t offset = fbc_bucket - EG(function_table)->arData;
 			if (offset < EG(persistent_functions_count)) {
 				return false;

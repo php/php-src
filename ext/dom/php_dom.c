@@ -792,7 +792,7 @@ HashTable *dom_xpath_get_gc(zend_object *object, zval **table, int *n);
 PHP_MINIT_FUNCTION(dom)
 {
 	memcpy(&dom_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	dom_object_handlers.offset = XtOffsetOf(dom_object, std);
+	dom_object_handlers.offset = offsetof(dom_object, std);
 	dom_object_handlers.free_obj = dom_objects_free_storage;
 	dom_object_handlers.read_property = dom_read_property;
 	dom_object_handlers.write_property = dom_write_property;
@@ -837,12 +837,12 @@ PHP_MINIT_FUNCTION(dom)
 	dom_html_collection_object_handlers.get_gc = dom_html_collection_get_gc;
 
 	memcpy(&dom_object_namespace_node_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
-	dom_object_namespace_node_handlers.offset = XtOffsetOf(dom_object_namespace_node, dom.std);
+	dom_object_namespace_node_handlers.offset = offsetof(dom_object_namespace_node, dom.std);
 	dom_object_namespace_node_handlers.free_obj = dom_object_namespace_node_free_storage;
 	dom_object_namespace_node_handlers.clone_obj = dom_object_namespace_node_clone_obj;
 
 	memcpy(&dom_token_list_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
-	dom_token_list_object_handlers.offset = XtOffsetOf(dom_token_list_object, dom.std);
+	dom_token_list_object_handlers.offset = offsetof(dom_token_list_object, dom.std);
 	dom_token_list_object_handlers.free_obj = dom_token_list_free_obj;
 	/* The Web IDL (Web Interface Description Language - https://webidl.spec.whatwg.org) has the [SameObject] constraint
 	 * for this object, which is incompatible with cloning because it imposes that there is only one instance
@@ -1333,7 +1333,7 @@ PHP_MINIT_FUNCTION(dom)
 
 #ifdef LIBXML_XPATH_ENABLED
 	memcpy(&dom_xpath_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
-	dom_xpath_object_handlers.offset = XtOffsetOf(dom_xpath_object, dom) + XtOffsetOf(dom_object, std);
+	dom_xpath_object_handlers.offset = offsetof(dom_xpath_object, dom) + offsetof(dom_object, std);
 	dom_xpath_object_handlers.free_obj = dom_xpath_objects_free_storage;
 	dom_xpath_object_handlers.get_gc = dom_xpath_get_gc;
 	dom_xpath_object_handlers.clone_obj = NULL;
@@ -1570,7 +1570,7 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 
 /* The char pointer MUST refer to the char* of a zend_string struct */
 static void dom_zend_string_release_from_char_pointer(xmlChar *ptr) {
-	zend_string_release((zend_string*) (ptr - XtOffsetOf(zend_string, val)));
+	zend_string_release((zend_string*) (ptr - offsetof(zend_string, val)));
 }
 
 void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */

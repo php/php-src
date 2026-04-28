@@ -82,7 +82,7 @@ typedef struct _ze_zip_object {
 } ze_zip_object;
 
 static inline ze_zip_object *php_zip_fetch_object(zend_object *obj) {
-	return (ze_zip_object *)((char*)(obj) - XtOffsetOf(ze_zip_object, zo));
+	return (ze_zip_object *)((char*)(obj) - offsetof(ze_zip_object, zo));
 }
 
 #define Z_ZIP_P(zv) php_zip_fetch_object(Z_OBJ_P((zv)))

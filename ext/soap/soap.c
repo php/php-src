@@ -206,11 +206,11 @@ typedef struct {
 } soap_client_object;
 
 static inline soap_client_object *soap_client_object_fetch(zend_object *obj) {
-	return (soap_client_object *) ((char *) obj - XtOffsetOf(soap_client_object, std));
+	return (soap_client_object *) ((char *) obj - offsetof(soap_client_object, std));
 }
 
 static inline soap_server_object *soap_server_object_fetch(zend_object *obj) {
-	return (soap_server_object *) ((char *) obj - XtOffsetOf(soap_server_object, std));
+	return (soap_server_object *) ((char *) obj - offsetof(soap_server_object, std));
 }
 
 static zend_object *soap_client_object_create(zend_class_entry *ce)
@@ -288,7 +288,7 @@ static zend_result soap_url_cast_object(zend_object *obj, zval *result, int type
 
 static inline soap_sdl_object *soap_sdl_object_fetch(zend_object *obj)
 {
-	return (soap_sdl_object *) ((char *) obj - XtOffsetOf(soap_sdl_object, std));
+	return (soap_sdl_object *) ((char *) obj - offsetof(soap_sdl_object, std));
 }
 
 #define Z_SOAP_SDL_P(zv) soap_sdl_object_fetch(Z_OBJ_P(zv))
@@ -532,7 +532,7 @@ PHP_MINIT_FUNCTION(soap)
 	soap_class_entry->default_object_handlers = &soap_client_object_handlers;
 
 	memcpy(&soap_client_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	soap_client_object_handlers.offset = XtOffsetOf(soap_client_object, std);
+	soap_client_object_handlers.offset = offsetof(soap_client_object, std);
 	soap_client_object_handlers.free_obj = soap_client_object_free;
 	soap_client_object_handlers.clone_obj = NULL;
 
@@ -545,7 +545,7 @@ PHP_MINIT_FUNCTION(soap)
 	soap_server_class_entry->default_object_handlers = &soap_server_object_handlers;
 
 	memcpy(&soap_server_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	soap_server_object_handlers.offset = XtOffsetOf(soap_server_object, std);
+	soap_server_object_handlers.offset = offsetof(soap_server_object, std);
 	soap_server_object_handlers.free_obj = soap_server_object_free;
 	soap_server_object_handlers.clone_obj = NULL;
 
@@ -562,7 +562,7 @@ PHP_MINIT_FUNCTION(soap)
 	soap_url_class_entry->default_object_handlers = &soap_url_object_handlers;
 
 	memcpy(&soap_url_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	soap_url_object_handlers.offset = XtOffsetOf(soap_url_object, std);
+	soap_url_object_handlers.offset = offsetof(soap_url_object, std);
 	soap_url_object_handlers.free_obj = soap_url_object_free;
 	soap_url_object_handlers.get_constructor = soap_url_object_get_constructor;
 	soap_url_object_handlers.clone_obj = NULL;
@@ -574,7 +574,7 @@ PHP_MINIT_FUNCTION(soap)
 	soap_sdl_class_entry->default_object_handlers = &soap_sdl_object_handlers;
 
 	memcpy(&soap_sdl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	soap_sdl_object_handlers.offset = XtOffsetOf(soap_sdl_object, std);
+	soap_sdl_object_handlers.offset = offsetof(soap_sdl_object, std);
 	soap_sdl_object_handlers.free_obj = soap_sdl_object_free;
 	soap_sdl_object_handlers.get_constructor = soap_sdl_object_get_constructor;
 	soap_sdl_object_handlers.clone_obj = NULL;

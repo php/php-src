@@ -2631,7 +2631,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	ce_SimpleXMLElement->get_iterator = php_sxe_get_iterator;
 
 	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);
+	sxe_object_handlers.offset = offsetof(php_sxe_object, zo);
 	sxe_object_handlers.free_obj = sxe_object_free_storage;
 	sxe_object_handlers.clone_obj = sxe_object_clone;
 	sxe_object_handlers.read_property = sxe_property_read;

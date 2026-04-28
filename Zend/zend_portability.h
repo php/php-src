@@ -430,10 +430,6 @@ char *alloca();
 # define UNEXPECTED(condition) (condition)
 #endif
 
-#ifndef XtOffsetOf
-# define XtOffsetOf(s_type, field) offsetof(s_type, field)
-#endif
-
 #ifndef ZEND_WIN32
 # define SETJMP(a) sigsetjmp(a, 0)
 # define LONGJMP(a,b) siglongjmp(a, b)

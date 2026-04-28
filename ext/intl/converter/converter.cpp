@@ -37,7 +37,7 @@ typedef struct _php_converter_object {
 
 
 static inline php_converter_object *php_converter_fetch_object(zend_object *obj) {
-	return (php_converter_object *)((char*)(obj) - XtOffsetOf(php_converter_object, obj));
+	return (php_converter_object *)((char*)(obj) - offsetof(php_converter_object, obj));
 }
 #define Z_INTL_CONVERTER_P(zv) php_converter_fetch_object(Z_OBJ_P(zv))
 
@@ -975,7 +975,7 @@ U_CFUNC int php_converter_minit(INIT_FUNC_ARGS) {
 	php_converter_ce->create_object = php_converter_create_object;
 	php_converter_ce->default_object_handlers = &php_converter_object_handlers;
 	memcpy(&php_converter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
+	php_converter_object_handlers.offset = offsetof(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
 	php_converter_object_handlers.free_obj = php_converter_free_object;
 

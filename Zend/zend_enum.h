@@ -36,7 +36,7 @@ typedef struct zend_enum_obj {
 
 static inline zend_enum_obj *zend_enum_obj_from_obj(zend_object *zobj) {
 	ZEND_ASSERT(zobj->ce->ce_flags & ZEND_ACC_ENUM);
-	return (zend_enum_obj*)((char*)(zobj) - XtOffsetOf(zend_enum_obj, std));
+	return (zend_enum_obj*)((char*)(zobj) - offsetof(zend_enum_obj, std));
 }
 
 void zend_enum_startup(void);

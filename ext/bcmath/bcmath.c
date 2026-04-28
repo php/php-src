@@ -877,7 +877,7 @@ static int bcmath_number_compare(zval *op1, zval *op2);
 
 static zend_always_inline bcmath_number_obj_t *get_bcmath_number_from_obj(const zend_object *obj)
 {
-	return (bcmath_number_obj_t*)((char*)(obj) - XtOffsetOf(bcmath_number_obj_t, std));
+	return (bcmath_number_obj_t*)((char*)(obj) - offsetof(bcmath_number_obj_t, std));
 }
 
 static zend_always_inline bcmath_number_obj_t *get_bcmath_number_from_zval(const zval *zv)
@@ -1024,7 +1024,7 @@ static void bcmath_number_register_class(void)
 	bcmath_number_ce->default_object_handlers = &bcmath_number_obj_handlers;
 
 	memcpy(&bcmath_number_obj_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	bcmath_number_obj_handlers.offset = XtOffsetOf(bcmath_number_obj_t, std);
+	bcmath_number_obj_handlers.offset = offsetof(bcmath_number_obj_t, std);
 	bcmath_number_obj_handlers.free_obj = bcmath_number_free;
 	bcmath_number_obj_handlers.clone_obj = bcmath_number_clone;
 	bcmath_number_obj_handlers.do_operation = bcmath_number_do_operation;

@@ -1754,7 +1754,7 @@ static void date_register_classes(void) /* {{{ */
 	date_ce_date->create_object = date_object_new_date;
 	date_ce_date->default_object_handlers = &date_object_handlers_date;
 	memcpy(&date_object_handlers_date, &std_object_handlers, sizeof(zend_object_handlers));
-	date_object_handlers_date.offset = XtOffsetOf(php_date_obj, std);
+	date_object_handlers_date.offset = offsetof(php_date_obj, std);
 	date_object_handlers_date.free_obj = date_object_free_storage_date;
 	date_object_handlers_date.clone_obj = date_object_clone_date;
 	date_object_handlers_date.compare = date_object_compare_date;
@@ -1774,7 +1774,7 @@ static void date_register_classes(void) /* {{{ */
 	date_ce_timezone->create_object = date_object_new_timezone;
 	date_ce_timezone->default_object_handlers = &date_object_handlers_timezone;
 	memcpy(&date_object_handlers_timezone, &std_object_handlers, sizeof(zend_object_handlers));
-	date_object_handlers_timezone.offset = XtOffsetOf(php_timezone_obj, std);
+	date_object_handlers_timezone.offset = offsetof(php_timezone_obj, std);
 	date_object_handlers_timezone.free_obj = date_object_free_storage_timezone;
 	date_object_handlers_timezone.clone_obj = date_object_clone_timezone;
 	date_object_handlers_timezone.get_properties_for = date_object_get_properties_for_timezone;
@@ -1786,7 +1786,7 @@ static void date_register_classes(void) /* {{{ */
 	date_ce_interval->create_object = date_object_new_interval;
 	date_ce_interval->default_object_handlers = &date_object_handlers_interval;
 	memcpy(&date_object_handlers_interval, &std_object_handlers, sizeof(zend_object_handlers));
-	date_object_handlers_interval.offset = XtOffsetOf(php_interval_obj, std);
+	date_object_handlers_interval.offset = offsetof(php_interval_obj, std);
 	date_object_handlers_interval.free_obj = date_object_free_storage_interval;
 	date_object_handlers_interval.clone_obj = date_object_clone_interval;
 	date_object_handlers_interval.has_property = date_interval_has_property;
@@ -1802,7 +1802,7 @@ static void date_register_classes(void) /* {{{ */
 	date_ce_period->default_object_handlers = &date_object_handlers_period;
 	date_ce_period->get_iterator = date_object_period_get_iterator;
 	memcpy(&date_object_handlers_period, &std_object_handlers, sizeof(zend_object_handlers));
-	date_object_handlers_period.offset = XtOffsetOf(php_period_obj, std);
+	date_object_handlers_period.offset = offsetof(php_period_obj, std);
 	date_object_handlers_period.free_obj = date_object_free_storage_period;
 	date_object_handlers_period.clone_obj = date_object_clone_period;
 	date_object_handlers_period.get_gc = date_object_get_gc_period;

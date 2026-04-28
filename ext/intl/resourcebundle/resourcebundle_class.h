@@ -36,7 +36,7 @@ typedef struct {
 } ResourceBundle_object;
 
 static inline ResourceBundle_object *php_intl_resourcebundle_fetch_object(zend_object *obj) {
-	return (ResourceBundle_object *)((char*)(obj) - XtOffsetOf(ResourceBundle_object, zend));
+	return (ResourceBundle_object *)((char*)(obj) - offsetof(ResourceBundle_object, zend));
 }
 #define Z_INTL_RESOURCEBUNDLE_P(zv) php_intl_resourcebundle_fetch_object(Z_OBJ_P(zv))
 

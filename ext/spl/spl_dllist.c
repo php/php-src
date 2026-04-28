@@ -86,7 +86,7 @@ struct _spl_dllist_it {
 };
 
 static inline spl_dllist_object *spl_dllist_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_dllist_object*)((char*)(obj) - XtOffsetOf(spl_dllist_object, std));
+	return (spl_dllist_object*)((char*)(obj) - offsetof(spl_dllist_object, std));
 }
 /* }}} */
 
@@ -1207,7 +1207,7 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 
 	memcpy(&spl_handler_SplDoublyLinkedList, &std_object_handlers, sizeof(zend_object_handlers));
 
-	spl_handler_SplDoublyLinkedList.offset = XtOffsetOf(spl_dllist_object, std);
+	spl_handler_SplDoublyLinkedList.offset = offsetof(spl_dllist_object, std);
 	spl_handler_SplDoublyLinkedList.clone_obj = spl_dllist_object_clone;
 	spl_handler_SplDoublyLinkedList.count_elements = spl_dllist_object_count_elements;
 	spl_handler_SplDoublyLinkedList.get_gc = spl_dllist_object_get_gc;

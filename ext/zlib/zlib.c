@@ -48,7 +48,7 @@ zend_class_entry *inflate_context_ce;
 static zend_object_handlers inflate_context_object_handlers;
 
 static inline php_zlib_context *inflate_context_from_obj(zend_object *obj) {
-	return (php_zlib_context *)((char *)(obj) - XtOffsetOf(php_zlib_context, std));
+	return (php_zlib_context *)((char *)(obj) - offsetof(php_zlib_context, std));
 }
 
 #define Z_INFLATE_CONTEXT_P(zv) inflate_context_from_obj(Z_OBJ_P(zv))
@@ -86,7 +86,7 @@ zend_class_entry *deflate_context_ce;
 static zend_object_handlers deflate_context_object_handlers;
 
 static inline php_zlib_context *deflate_context_from_obj(zend_object *obj) {
-	return (php_zlib_context *)((char *)(obj) - XtOffsetOf(php_zlib_context, std));
+	return (php_zlib_context *)((char *)(obj) - offsetof(php_zlib_context, std));
 }
 
 #define Z_DEFLATE_CONTEXT_P(zv) deflate_context_from_obj(Z_OBJ_P(zv))
@@ -1342,7 +1342,7 @@ static PHP_MINIT_FUNCTION(zlib)
 	inflate_context_ce->default_object_handlers = &inflate_context_object_handlers;
 
 	memcpy(&inflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	inflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
+	inflate_context_object_handlers.offset = offsetof(php_zlib_context, std);
 	inflate_context_object_handlers.free_obj = inflate_context_free_obj;
 	inflate_context_object_handlers.get_constructor = inflate_context_get_constructor;
 	inflate_context_object_handlers.clone_obj = NULL;
@@ -1353,7 +1353,7 @@ static PHP_MINIT_FUNCTION(zlib)
 	deflate_context_ce->default_object_handlers = &deflate_context_object_handlers;
 
 	memcpy(&deflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	deflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
+	deflate_context_object_handlers.offset = offsetof(php_zlib_context, std);
 	deflate_context_object_handlers.free_obj = deflate_context_free_obj;
 	deflate_context_object_handlers.get_constructor = deflate_context_get_constructor;
 	deflate_context_object_handlers.clone_obj = NULL;
