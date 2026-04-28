@@ -1195,6 +1195,7 @@ PHP_FUNCTION(pg_query)
 		FREE_HASHTABLE(link->meta_cache);
 		link->meta_cache = NULL;
 	}
+
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 		leftover = true;
@@ -1323,6 +1324,13 @@ PHP_FUNCTION(pg_query_params)
 		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
 		RETURN_FALSE;
 	}
+
+	if (link->meta_cache) {
+		zend_hash_destroy(link->meta_cache);
+		FREE_HASHTABLE(link->meta_cache);
+		link->meta_cache = NULL;
+	}
+
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 		leftover = true;
@@ -1418,6 +1426,11 @@ PHP_FUNCTION(pg_prepare)
 		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
 		RETURN_FALSE;
 	}
+	if (link->meta_cache) {
+		zend_hash_destroy(link->meta_cache);
+		FREE_HASHTABLE(link->meta_cache);
+		link->meta_cache = NULL;
+	}
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 		leftover = true;
@@ -1505,6 +1518,11 @@ PHP_FUNCTION(pg_execute)
 	if (PQsetnonblocking(pgsql, 0)) {
 		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
 		RETURN_FALSE;
+	}
+	if (link->meta_cache) {
+		zend_hash_destroy(link->meta_cache);
+		FREE_HASHTABLE(link->meta_cache);
+		link->meta_cache = NULL;
 	}
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
@@ -1710,6 +1728,25 @@ static zend_string *get_field_name(PGconn *pgsql, Oid oid)
 
 	PQclear(result);
 	return ret;
+}
+
+static pgsql_link_handle *pgsql_get_link_from_conn(PGconn *conn)
+{
+    zval *pgsql_link;
+
+    if (!conn) {
+        return NULL;
+    }
+
+    ZEND_HASH_FOREACH_VAL(&PGG(connections), pgsql_link) {
+        pgsql_link_handle *link = Z_PGSQL_LINK_P(pgsql_link);
+
+        if (link && link->conn == conn) {
+            return link;
+        }
+    } ZEND_HASH_FOREACH_END();
+
+    return NULL;
 }
 
 /* Returns the name of the table field belongs to, or table's oid if oid_only is true */
@@ -3992,6 +4029,12 @@ PHP_FUNCTION(pg_send_query)
 		RETURN_FALSE;
 	}
 
+	if (link->meta_cache) {
+		zend_hash_destroy(link->meta_cache);
+		FREE_HASHTABLE(link->meta_cache);
+		link->meta_cache = NULL;
+	}
+
 	if (_php_pgsql_link_has_results(pgsql)) {
 		php_error_docref(NULL, E_NOTICE,
 			"There are results on this connection. Call pg_get_result() until it returns FALSE");
@@ -4064,6 +4107,12 @@ PHP_FUNCTION(pg_send_query_params)
 	if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
 		RETURN_FALSE;
+	}
+
+	if (link->meta_cache) {
+		zend_hash_destroy(link->meta_cache);
+		FREE_HASHTABLE(link->meta_cache);
+		link->meta_cache = NULL;
 	}
 
 	if (_php_pgsql_link_has_results(pgsql)) {
@@ -4146,6 +4195,12 @@ PHP_FUNCTION(pg_send_prepare)
 		RETURN_FALSE;
 	}
 
+	if (link->meta_cache) {
+		zend_hash_destroy(link->meta_cache);
+		FREE_HASHTABLE(link->meta_cache);
+		link->meta_cache = NULL;
+	}
+
 	if (_php_pgsql_link_has_results(pgsql)) {
 		php_error_docref(NULL, E_NOTICE,
 			"There are results on this connection. Call pg_get_result() until it returns FALSE");
@@ -4219,6 +4274,12 @@ PHP_FUNCTION(pg_send_execute)
 	if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
 		RETURN_FALSE;
+	}
+
+	if (link->meta_cache) {
+		zend_hash_destroy(link->meta_cache);
+		FREE_HASHTABLE(link->meta_cache);
+		link->meta_cache = NULL;
 	}
 
 	if (_php_pgsql_link_has_results(pgsql)) {
@@ -4552,7 +4613,6 @@ PHP_FUNCTION(pg_flush)
 
 /* {{{ php_pgsql_meta_data
  * table_name must not be empty
- * TODO: Add meta_data cache for better performance
  */
 PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string *table_name, zval *meta, bool extended)
 {
@@ -4564,7 +4624,6 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 	int i, num_rows, err;
 	zval elem;
 	pgsql_link_handle *link;
-	link = FETCH_DEFAULT_LINK_NO_WARNING();
 
 	ZEND_ASSERT(ZSTR_LEN(table_name) != 0);
 
@@ -4634,6 +4693,8 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 	smart_str_appends(&querystr, "' ORDER BY a.attnum;");
 	smart_str_0(&querystr);
 	efree(src);
+
+	link = pgsql_get_link_from_conn(pg_link);
 
 	if (link && link->meta_cache) {
 		zval *meta_cache = zend_hash_find(link->meta_cache, querystr.s);
