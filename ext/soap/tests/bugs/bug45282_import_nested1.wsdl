@@ -1,0 +1,7 @@
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             targetNamespace="http://wssmcommupper/x"
+             xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <message name="reportHealthView">
+    <part name="number" type="xs:int"/>
+  </message>
+</definitions>
