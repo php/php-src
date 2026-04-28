@@ -171,6 +171,15 @@ static zend_function *pgsql_link_get_constructor(zend_object *object) {
 	return NULL;
 }
 
+static inline void pgsql_meta_cache_destroy(HashTable **cache)
+{
+	if (*cache) {
+		zend_hash_destroy(*cache);
+		FREE_HASHTABLE(*cache);
+		*cache = NULL;
+	}
+}
+
 static void pgsql_link_free(pgsql_link_handle *link)
 {
 	PGresult *res;
@@ -194,11 +203,9 @@ static void pgsql_link_free(pgsql_link_handle *link)
 		FREE_HASHTABLE(link->notices);
 		link->notices = NULL;
 	}
-	if (link->meta_cache) {
-		zend_hash_destroy(link->meta_cache);
-		FREE_HASHTABLE(link->meta_cache);
-		link->meta_cache = NULL;
-	}
+	
+	pgsql_meta_cache_destroy(&link->meta_cache);
+
 }
 
 static void pgsql_link_free_obj(zend_object *obj)
@@ -1190,11 +1197,7 @@ PHP_FUNCTION(pg_query)
 		RETURN_FALSE;
 	}
 
-	if (link->meta_cache) {
-		zend_hash_destroy(link->meta_cache);
-		FREE_HASHTABLE(link->meta_cache);
-		link->meta_cache = NULL;
-	}
+	pgsql_meta_cache_destroy(&link->meta_cache);
 
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
@@ -1325,11 +1328,7 @@ PHP_FUNCTION(pg_query_params)
 		RETURN_FALSE;
 	}
 
-	if (link->meta_cache) {
-		zend_hash_destroy(link->meta_cache);
-		FREE_HASHTABLE(link->meta_cache);
-		link->meta_cache = NULL;
-	}
+	pgsql_meta_cache_destroy(&link->meta_cache);
 
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
@@ -1426,11 +1425,9 @@ PHP_FUNCTION(pg_prepare)
 		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
 		RETURN_FALSE;
 	}
-	if (link->meta_cache) {
-		zend_hash_destroy(link->meta_cache);
-		FREE_HASHTABLE(link->meta_cache);
-		link->meta_cache = NULL;
-	}
+	
+	pgsql_meta_cache_destroy(&link->meta_cache);
+
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 		leftover = true;
@@ -1519,11 +1516,9 @@ PHP_FUNCTION(pg_execute)
 		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
 		RETURN_FALSE;
 	}
-	if (link->meta_cache) {
-		zend_hash_destroy(link->meta_cache);
-		FREE_HASHTABLE(link->meta_cache);
-		link->meta_cache = NULL;
-	}
+	
+	pgsql_meta_cache_destroy(&link->meta_cache);
+
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 		leftover = true;
@@ -4029,11 +4024,7 @@ PHP_FUNCTION(pg_send_query)
 		RETURN_FALSE;
 	}
 
-	if (link->meta_cache) {
-		zend_hash_destroy(link->meta_cache);
-		FREE_HASHTABLE(link->meta_cache);
-		link->meta_cache = NULL;
-	}
+	pgsql_meta_cache_destroy(&link->meta_cache);
 
 	if (_php_pgsql_link_has_results(pgsql)) {
 		php_error_docref(NULL, E_NOTICE,
@@ -4108,12 +4099,8 @@ PHP_FUNCTION(pg_send_query_params)
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
 		RETURN_FALSE;
 	}
-
-	if (link->meta_cache) {
-		zend_hash_destroy(link->meta_cache);
-		FREE_HASHTABLE(link->meta_cache);
-		link->meta_cache = NULL;
-	}
+	
+	pgsql_meta_cache_destroy(&link->meta_cache);
 
 	if (_php_pgsql_link_has_results(pgsql)) {
 		php_error_docref(NULL, E_NOTICE,
@@ -4195,11 +4182,7 @@ PHP_FUNCTION(pg_send_prepare)
 		RETURN_FALSE;
 	}
 
-	if (link->meta_cache) {
-		zend_hash_destroy(link->meta_cache);
-		FREE_HASHTABLE(link->meta_cache);
-		link->meta_cache = NULL;
-	}
+	pgsql_meta_cache_destroy(&link->meta_cache);
 
 	if (_php_pgsql_link_has_results(pgsql)) {
 		php_error_docref(NULL, E_NOTICE,
@@ -4276,11 +4259,7 @@ PHP_FUNCTION(pg_send_execute)
 		RETURN_FALSE;
 	}
 
-	if (link->meta_cache) {
-		zend_hash_destroy(link->meta_cache);
-		FREE_HASHTABLE(link->meta_cache);
-		link->meta_cache = NULL;
-	}
+	pgsql_meta_cache_destroy(&link->meta_cache);
 
 	if (_php_pgsql_link_has_results(pgsql)) {
 		php_error_docref(NULL, E_NOTICE,
@@ -6186,16 +6165,13 @@ PHP_FUNCTION(pg_delete)
 	CHECK_PGSQL_LINK(link);
 	pg_link = link->conn;
 
+	pgsql_meta_cache_destroy(&link->meta_cache);
+
 	if (php_pgsql_flush_query(pg_link)) {
 		php_error_docref(NULL, E_NOTICE, "Detected unhandled result(s) in connection");
 	}
 	if (php_pgsql_delete(pg_link, table, ids, option, &sql) == FAILURE) {
 		RETURN_FALSE;
-	}
-	if (link->meta_cache) {
-		zend_hash_destroy(link->meta_cache);
-		FREE_HASHTABLE(link->meta_cache);
-		link->meta_cache = NULL;
 	}
 	if (option & PGSQL_DML_STRING) {
 		RETURN_STR(sql);
