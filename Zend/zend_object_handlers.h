@@ -204,7 +204,7 @@ typedef zend_result (*zend_object_do_operation_t)(uint8_t opcode, zval *result, 
 
 struct _zend_object_handlers {
 	/* offset of real object header (usually zero) */
-	int										offset;
+	size_t										offset;
 	/* object handlers */
 	zend_object_free_obj_t					free_obj;             /* required */
 	zend_object_dtor_obj_t					dtor_obj;             /* required */
