@@ -16,7 +16,7 @@ $exceptions = array(
 );
 
 foreach ($exceptions as $letter) {
-    printf("%s => %s\n", $letter, metaphone($letter));
+    printf("%s => %s\n", $letter, @metaphone($letter));
 }
 
 ?>

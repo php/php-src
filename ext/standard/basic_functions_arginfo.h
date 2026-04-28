@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 36b71aa7bbfe478a5e4af400b2822a77067efa2f
+ * Stub hash: 98e3535dd6c306b2198f2fe4635820cf65685093
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -3121,7 +3121,7 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE(inet_ntop, arginfo_inet_ntop)
 	ZEND_FE(inet_pton, arginfo_inet_pton)
-	ZEND_FE(metaphone, arginfo_metaphone)
+	ZEND_RAW_FENTRY("metaphone", zif_metaphone, arginfo_metaphone, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(header, arginfo_header)
 	ZEND_FE(header_remove, arginfo_header_remove)
 	ZEND_FE(setrawcookie, arginfo_setrawcookie)
@@ -3925,6 +3925,11 @@ static void register_basic_functions_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_strptime_0->args[1].value, attribute_Deprecated_func_strptime_0_arg1_str);
 	attribute_Deprecated_func_strptime_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 #endif
+
+	zend_attribute *attribute_Deprecated_func_metaphone_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "metaphone", sizeof("metaphone") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	zend_string *attribute_Deprecated_func_metaphone_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_metaphone_0->args[0].value, attribute_Deprecated_func_metaphone_0_arg0_str);
+	attribute_Deprecated_func_metaphone_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_assert_options_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "assert_options", sizeof("assert_options") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	ZVAL_STR(&attribute_Deprecated_func_assert_options_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
