@@ -8,9 +8,9 @@ dom
 $xml = <<<XML
 <root>
   <a/>
-  <div class="foo" xml:id="div1">
-    <div xml:id="div2">
-      <div class="bar" xml:id="div3"/>
+  <div class="foo" id="div1">
+    <div id="div2">
+      <div class="bar" id="div3"/>
     </div>
   </div>
 </root>
@@ -20,7 +20,7 @@ $dom = DOM\XMLDocument::createFromString($xml);
 
 function test($el, $selector) {
   echo "--- Selector: $selector ---\n";
-  var_dump($el->closest($selector)?->getAttribute('xml:id'));
+  var_dump($el->closest($selector)?->getAttribute('id'));
 }
 
 test($dom->getElementById('div3'), 'div');
