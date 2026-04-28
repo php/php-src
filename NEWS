@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.21
+?? ??? ????, PHP 8.4.22
+
+
+07 May 2026, PHP 8.4.21
 
 - Core:
   . Fixed bug GH-19983 (GC assertion failure with fibers, generators and
@@ -8,6 +11,15 @@ PHP                                                                        NEWS
   . Fixed bug GH-21478 (Forward property operations to real instance for
     initialized lazy proxies). (iliaal)
   . Fixed bug GH-21605 (Missing addref for Countable::count()). (ilutov)
+  . Fixed bug GH-21699 (Assertion failure in shutdown_executor when resolving
+    self::/parent::/static:: callables if the error handler throws). (macoaure)
+  . Fixed bug GH-21603 (Missing addref for __unset). (ilutov)
+  . Fixed bug GH-21760 (Trait with class constant name conflict against
+    enum case causes SEGV). (Pratik Bhujel)
+
+- CLI:
+  . Fixed bug GH-21754 (`--rf` command line option with a method triggers
+    ext/reflection deprecation warnings). (DanielEScherzer)
 
 - Curl:
   . Add support for brotli and zstd on Windows. (Shivam Mathur)
@@ -15,6 +27,11 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-21566 (Dom\XMLDocument::C14N() emits duplicate xmlns
     declarations after setAttributeNS()). (David Carlier)
+  . Fixed bug GH-21688 (segmentation fault on empty HTMLDocument).
+    (David Carlier)
+  . Upgrade to lexbor v2.7.0. (ndossche, ilutov)
+  . Fixed bug GH-21544 (Dom\XMLDocument::C14N*( drops namespace declarations
+    on DOM-built documents). (David Carlier, ndossche)
 
 - Iconv:
   . Fixed bug GH-17399 (iconv memory leak on bailout). (iliaal)
@@ -29,6 +46,25 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fix a bunch of memory leaks and crashes on edge cases. (ndossche)
 
+- Phar:
+  . Restore is_link handler in phar_intercept_functions_shutdown. (iliaal)
+  . Fixed bug GH-21797 (phar: NULL dereference in Phar::webPhar() when
+    SCRIPT_NAME is absent from SAPI environment). (iliaal)
+  . Fix memory leak in Phar::offsetGet(). (iliaal)
+  . Fix memory leak in phar_add_file(). (iliaal)
+  . Fixed bug GH-21799 (phar: propagate phar_stream_flush return value from
+    phar_stream_close). (iliaal)
+  . Fix memory leak in phar_verify_signature() when md_ctx is invalid.
+    (JarneClauw)
+
+- Random:
+  . Fixed bug GH-21731 (Random\Engine\Xoshiro256StarStar::__unserialize()
+    accepts all-zero state). (iliaal)
+
+- Session:
+  . Fixed memory leak when session GC callback return a refcounted value.
+    (jorgsowa)
+
 - SPL:
   . Fixed bug GH-21499 (RecursiveArrayIterator getChildren UAF after parent
     free). (Girgias)
@@ -41,6 +77,10 @@ PHP                                                                        NEWS
 
 - XSL:
   . Fixed bug GH-21600 (Segfault on module shutdown). (David Carlier)
+
+- Zip:
+  . Fixed bug GH-21698 (memory leak with ZipArchive::addGlob()
+    early return statements). (David Carlier)
 
 09 Apr 2026, PHP 8.4.20
 

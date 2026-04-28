@@ -710,7 +710,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 					str = zend_string_realloc(str, used + 256, 0);
 					memcpy(ZSTR_VAL(str) + used, buf2, 256);
 					used = used + 255;
-				} else if (rc==SQL_SUCCESS) {
+				} else if (rc == SQL_SUCCESS && C->fetched_len != 0) {
 					str = zend_string_realloc(str, used + C->fetched_len, 0);
 					memcpy(ZSTR_VAL(str) + used, buf2, C->fetched_len);
 					used = used + C->fetched_len;

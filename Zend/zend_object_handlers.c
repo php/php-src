@@ -1653,9 +1653,11 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 		}
 		if (!((*guard) & IN_UNSET)) {
 			/* have unsetter - try with it! */
+			GC_ADDREF(zobj);
 			(*guard) |= IN_UNSET; /* prevent circular unsetting */
 			zend_std_call_unsetter(zobj, name);
 			(*guard) &= ~IN_UNSET;
+			OBJ_RELEASE(zobj);
 			return;
 		} else if (UNEXPECTED(IS_WRONG_PROPERTY_OFFSET(property_offset))) {
 			/* Trigger the correct error */

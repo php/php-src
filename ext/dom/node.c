@@ -2103,33 +2103,72 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 }
 /* }}} end dom_node_lookup_namespace_uri */
 
+/* Allocate, track and prepend a temporary nsDef entry for C14N.
+ * Returns the new xmlNsPtr for the caller to fill in href/prefix/_private,
+ * or NULL on allocation failure. */
+static xmlNsPtr dom_alloc_ns_decl(HashTable *links, xmlNodePtr node)
+{
+	xmlNsPtr ns = xmlMalloc(sizeof(*ns));
+	if (!ns) {
+		return NULL;
+	}
+
+	zval *zv = zend_hash_index_lookup(links, (zend_ulong) node);
+	if (Z_ISNULL_P(zv)) {
+		ZVAL_LONG(zv, 1);
+	} else {
+		Z_LVAL_P(zv)++;
+	}
+
+	memset(ns, 0, sizeof(*ns));
+	ns->type = XML_LOCAL_NAMESPACE;
+	ns->next = node->nsDef;
+	node->nsDef = ns;
+
+	return ns;
+}
+
+/* Mint a temporary nsDef entry so C14N finds namespaces that live on node->ns
+ * but have no matching xmlns attribute (typical for createElementNS). */
+static void dom_add_synthetic_ns_decl(HashTable *links, xmlNodePtr node, xmlNsPtr src_ns)
+{
+	xmlNsPtr ns = dom_alloc_ns_decl(links, node);
+	if (!ns) {
+		return;
+	}
+
+	ns->href = xmlStrdup(src_ns->href);
+	ns->prefix = src_ns->prefix ? xmlStrdup(src_ns->prefix) : NULL;
+}
+
+/* Same, but for attribute namespaces, which may collide by prefix with the
+ * element's own ns or with a sibling attribute's ns. */
+static void dom_add_synthetic_ns_decl_for_attr(HashTable *links, xmlNodePtr node, xmlNsPtr src_ns)
+{
+	for (xmlNsPtr existing = node->nsDef; existing; existing = existing->next) {
+		if (xmlStrEqual(existing->prefix, src_ns->prefix)) {
+			return;
+		}
+	}
+
+	dom_add_synthetic_ns_decl(links, node, src_ns);
+}
+
 static void dom_relink_ns_decls_element(HashTable *links, xmlNodePtr node)
 {
 	if (node->type == XML_ELEMENT_NODE) {
 		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
 			if (php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
-				xmlNsPtr ns = xmlMalloc(sizeof(*ns));
+				xmlNsPtr ns = dom_alloc_ns_decl(links, node);
 				if (!ns) {
 					return;
-				}
-
-				zval *zv = zend_hash_index_lookup(links, (zend_ulong) node);
-				if (Z_ISNULL_P(zv)) {
-					ZVAL_LONG(zv, 1);
-				} else {
-					Z_LVAL_P(zv)++;
 				}
 
 				bool should_free;
 				xmlChar *attr_value = php_libxml_attr_value(attr, &should_free);
 
-				memset(ns, 0, sizeof(*ns));
-				ns->type = XML_LOCAL_NAMESPACE;
 				ns->href = should_free ? attr_value : xmlStrdup(attr_value);
 				ns->prefix = attr->ns->prefix ? xmlStrdup(attr->name) : NULL;
-				ns->next = node->nsDef;
-				node->nsDef = ns;
-
 				ns->_private = attr;
 				if (attr->prev) {
 					attr->prev->next = attr->next;
@@ -2150,6 +2189,14 @@ static void dom_relink_ns_decls_element(HashTable *links, xmlNodePtr node)
 			 * can return the current namespace. */
 			zend_hash_index_add_new_ptr(links, (zend_ulong) node | 1, node->ns);
 			node->ns = xmlSearchNs(node->doc, node, NULL);
+		} else if (node->ns) {
+			dom_add_synthetic_ns_decl(links, node, node->ns);
+		}
+
+		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
+			if (attr->ns && !php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
+				dom_add_synthetic_ns_decl_for_attr(links, node, attr->ns);
+			}
 		}
 	}
 }
@@ -2179,13 +2226,15 @@ static void dom_unlink_ns_decls(HashTable *links)
 				node->nsDef = ns->next;
 
 				xmlAttrPtr attr = ns->_private;
-				if (attr->prev) {
-					attr->prev->next = attr;
-				} else {
-					node->properties = attr;
-				}
-				if (attr->next) {
-					attr->next->prev = attr;
+				if (attr) {
+					if (attr->prev) {
+						attr->prev->next = attr;
+					} else {
+						node->properties = attr;
+					}
+					if (attr->next) {
+						attr->next->prev = attr;
+					}
 				}
 
 				xmlFreeNs(ns);
@@ -2263,7 +2312,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		}
 
 		zend_hash_init(&links, 0, NULL, NULL, false);
-		dom_relink_ns_decls(&links, xmlDocGetRootElement(docp));
+		xmlNodePtr root_element = xmlDocGetRootElement(docp);
+
+		if (root_element) {
+			dom_relink_ns_decls(&links, root_element);
+		}
 	} else if (!docp) {
 		/* Note: not triggerable with modern DOM */
 		zend_throw_error(NULL, "Node must be associated with a document");

@@ -413,10 +413,15 @@ jobs:
         with:
           enableOpcache: true
           jitType: tracing
+      - name: Generate coverage report
+        if: ${{ !cancelled() }}
+        run: make gcovr-xml
       - uses: codecov/codecov-action@v6
         if: ${{ !cancelled() }}
         with:
+          disable_search: true
           fail_ci_if_error: true
+          files: gcovr.xml
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
   COMMUNITY:
@@ -935,7 +940,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.WINDOWS.matrix }}
-    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}"
+    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}${{ matrix.clang && '_CLANG' || ''}}"
     runs-on: windows-2022
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
@@ -949,6 +954,7 @@ jobs:
       PARALLEL: -j2
       OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
       ASAN: "${{ matrix.asan && '1' || '0' }}"
+      CLANG_TOOLSET: "${{ matrix.clang && '1' || '0' }}"
     steps:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf

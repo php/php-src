@@ -357,11 +357,11 @@ phar_stub:
 static int phar_stream_close(php_stream *stream, int close_handle) /* {{{ */
 {
 	/* for some reasons phar needs to be flushed even if there is no write going on */
-	phar_stream_flush(stream);
+	int ret = phar_stream_flush(stream);
 
 	phar_entry_delref((phar_entry_data *)stream->abstract);
 
-	return 0;
+	return ret;
 }
 /* }}} */
 

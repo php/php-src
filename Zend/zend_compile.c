@@ -5203,7 +5203,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		}
 
 		zval_ptr_dtor(&name_node.u.constant);
-		ZVAL_NEW_STR(&name_node.u.constant, lcname);
+		ZVAL_STR(&name_node.u.constant, lcname);
 
 		opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
 		opline->result.num = zend_alloc_cache_slot();

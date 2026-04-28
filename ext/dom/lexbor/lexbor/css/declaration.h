@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Alexander Borisov
+ * Copyright (C) 2022-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -15,19 +15,14 @@ extern "C" {
 #include "lexbor/core/mraw.h"
 
 
-LXB_API lxb_status_t
-lxb_css_declaration_list_prepare(lxb_css_parser_t *parser,
-                                 lxb_css_memory_t *mem);
+LXB_API lxb_css_rule_declaration_t *
+lxb_css_declaration_create(lxb_css_parser_t *parser,
+                           const lxb_char_t *name, size_t length,
+                           const lxb_css_entry_data_t **out_entry);
+
 
 LXB_API lxb_css_rule_declaration_list_t *
-lxb_css_declaration_list_process(lxb_css_parser_t *parser,
-                                 const lxb_char_t *data, size_t length);
-
-LXB_API void
-lxb_css_declaration_list_finish(lxb_css_parser_t *parser);
-
-LXB_API lxb_css_rule_declaration_list_t *
-lxb_css_declaration_list_parse(lxb_css_parser_t *parser, lxb_css_memory_t *mem,
+lxb_css_declaration_list_parse(lxb_css_parser_t *parser,
                                const lxb_char_t *data, size_t length);
 
 

@@ -649,6 +649,9 @@ PHP_METHOD(Phar, webPhar)
 			char *testit;
 
 			testit = sapi_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1);
+			if (!testit) {
+				goto finish;
+			}
 			if (!(pt = strstr(testit, basename))) {
 				efree(testit);
 				goto finish;
@@ -3591,6 +3594,11 @@ PHP_METHOD(Phar, offsetGet)
 	if (!(entry = phar_get_entry_info_dir(phar_obj->archive, ZSTR_VAL(file_name), ZSTR_LEN(file_name), 1, &error, 0))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist%s%s", ZSTR_VAL(file_name), error?", ":"", error?error:"");
 	} else {
+		if (entry->is_temp_dir) {
+			efree(entry->filename);
+			efree(entry);
+		}
+
 		if (zend_string_equals_literal(file_name, ".phar/stub.php")) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot get stub \".phar/stub.php\" directly in phar \"%s\", use getStub", phar_obj->archive->fname);
 			RETURN_THROWS();
@@ -3604,11 +3612,6 @@ PHP_METHOD(Phar, offsetGet)
 		if (zend_string_starts_with_literal(file_name, ".phar")) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot directly get any files or directories in magic \".phar\" directory");
 			RETURN_THROWS();
-		}
-
-		if (entry->is_temp_dir) {
-			efree(entry->filename);
-			efree(entry);
 		}
 
 		zend_string *sfname = strpprintf(0, "phar://%s/%s", phar_obj->archive->fname, ZSTR_VAL(file_name));
@@ -3681,11 +3684,13 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 				size_t written_len = php_stream_write(data->fp, ZSTR_VAL(content), ZSTR_LEN(content));
 				if (written_len != contents_len) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s could not be written to", filename);
+					phar_entry_delref(data);
 					goto finish;
 				}
 			} else {
 				if (!(php_stream_from_zval_no_verify(contents_file, zresource))) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s could not be written to", filename);
+					phar_entry_delref(data);
 					goto finish;
 				}
 				php_stream_copy_to_stream_ex(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);

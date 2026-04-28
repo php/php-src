@@ -304,6 +304,7 @@ function main(): void
         'zend.exception_ignore_args=0',
         'zend.exception_string_param_max_len=15',
         'short_open_tag=0',
+        'date.timezone=UTC',
     ];
 
     $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';

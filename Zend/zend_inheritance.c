@@ -2757,6 +2757,19 @@ static void emit_incompatible_trait_constant_error(
 	);
 }
 
+static void emit_trait_constant_enum_case_conflict_error(
+	const zend_class_entry *ce, const zend_class_constant *trait_constant, zend_string *name
+) {
+	zend_error_noreturn(E_COMPILE_ERROR,
+		"Cannot use trait %s, because %s::%s conflicts with enum case %s::%s",
+		ZSTR_VAL(trait_constant->ce->name),
+		ZSTR_VAL(trait_constant->ce->name),
+		ZSTR_VAL(name),
+		ZSTR_VAL(ce->name),
+		ZSTR_VAL(name)
+	);
+}
+
 static bool do_trait_constant_check(
 	zend_class_entry *ce, zend_class_constant *trait_constant, zend_string *name, zend_class_entry **traits, size_t current_trait
 ) {
@@ -2769,6 +2782,11 @@ static bool do_trait_constant_check(
 	}
 
 	zend_class_constant *existing_constant = Z_PTR_P(zv);
+
+	if (UNEXPECTED(ZEND_CLASS_CONST_FLAGS(existing_constant) & ZEND_CLASS_CONST_IS_CASE)) {
+		emit_trait_constant_enum_case_conflict_error(ce, trait_constant, name);
+		return false;
+	}
 
 	if ((ZEND_CLASS_CONST_FLAGS(trait_constant) & flags_mask) != (ZEND_CLASS_CONST_FLAGS(existing_constant) & flags_mask)) {
 		emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);

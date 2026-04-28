@@ -80,6 +80,12 @@ typedef struct {
 }
 lxb_css_selector_anb_of_t;
 
+typedef struct {
+    lexbor_str_t str;
+    bool         insensitive;
+}
+lxb_css_selector_contains_t;
+
 struct lxb_css_selector {
     lxb_css_selector_type_t       type;
     lxb_css_selector_combinator_t combinator;

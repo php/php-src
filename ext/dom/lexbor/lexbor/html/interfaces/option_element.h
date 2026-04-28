@@ -27,6 +27,13 @@ LXB_API lxb_html_option_element_t *
 lxb_html_option_element_interface_destroy(lxb_html_option_element_t *option_element);
 
 
+LXB_API lxb_dom_exception_code_t
+lxb_html_option_maybe_clone_to_selectedcontent(lxb_html_option_element_t *option);
+
+LXB_API bool
+lxb_html_option_element_selectedness(lxb_html_option_element_t *option);
+
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
