@@ -779,6 +779,9 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		link->notices = NULL;
 		link->meta_cache = NULL;
 		link->persistent = 1;
+		
+		zend_hash_update(&PGG(connections), str.s, return_value);
+
 	} else { /* Non persistent connection */
 		zval *index_ptr;
 
