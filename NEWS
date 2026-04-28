@@ -81,6 +81,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
     and a proxy set). (ndossche)
 
+- URI:
+  . Fixed CVE-2026-42371 (uriparser before 1.0.1 has numeric truncation in
+    text range comparison). (CVE-2026-42371) (Joshua W. Windle)
+
 26 Mar 2026, PHP 8.5.5
 
 - Core:
