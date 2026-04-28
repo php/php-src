@@ -387,6 +387,8 @@ char *alloca();
 #define ZEND_ELEMENT_COUNT(m)
 #endif
 
+#define ZEND_CONTAINER_OF(ptr, Type, member) ((Type*)((char*)(1 ? (ptr) : &((Type*)0)->member) - offsetof(Type, member)))
+
 #ifdef HAVE_BUILTIN_CONSTANT_P
 # define ZEND_CONST_COND(_condition, _default) \
 	(__builtin_constant_p(_condition) ? (_condition) : (_default))
