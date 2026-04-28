@@ -524,8 +524,16 @@ ZEND_API const char *zend_get_type_by_const(int type);
 #define DLEXPORT
 #endif
 
-#define array_init(arg)				ZVAL_ARR((arg), zend_new_array(0))
-#define array_init_size(arg, size)	ZVAL_ARR((arg), zend_new_array(size))
+static zend_always_inline void array_init_size(zval *arg, uint32_t size)
+{
+	ZVAL_ARR(arg, zend_new_array(size));
+}
+
+static zend_always_inline void array_init(zval *arg)
+{
+	array_init_size(arg, 0);
+}
+
 ZEND_API void object_init(zval *arg);
 ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *ce);
 ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params);
