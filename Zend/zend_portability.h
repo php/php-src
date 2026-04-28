@@ -130,7 +130,9 @@
 #endif
 
 /* pseudo fallthrough keyword; */
-#if defined(__GNUC__) && __GNUC__ >= 7
+#if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
+# define ZEND_FALLTHROUGH [[fallthrough]]
+#elif defined(__GNUC__) && __GNUC__ >= 7
 # define ZEND_FALLTHROUGH __attribute__((__fallthrough__))
 #else
 # define ZEND_FALLTHROUGH ((void)0)
