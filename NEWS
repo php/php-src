@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.22
 
+- Standard:
+  . Fixed bug GH-21689 (version_compare() incorrectly handles versions ending
+    with a dot). (timwolla)
 
 07 May 2026, PHP 8.4.21
 
