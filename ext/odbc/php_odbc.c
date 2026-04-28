@@ -2864,7 +2864,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	RETCODE rc;
 	SQLSMALLINT data_type;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 	        Z_PARAM_OBJECT_OF_CLASS(pv_conn, odbc_connection_ce)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(pv_data_type)
