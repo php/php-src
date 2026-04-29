@@ -885,16 +885,14 @@ PHP_FUNCTION(inflate_init)
 	zend_long encoding, window = 15;
 	char *dict = NULL;
 	size_t dictlen = 0;
-	HashTable *options = NULL;
-	zval *option_buffer;
+	HashTable *options = (HashTable *) &zend_empty_array;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
 		RETURN_THROWS();
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("window"))) != NULL) {
-		ZVAL_DEINDIRECT(option_buffer);
-		window = zval_get_long(option_buffer);
+	if (!zlib_get_long_option(options, ZEND_STRL("window"), &window)) {
+		RETURN_THROWS();
 	}
 	if (window < 8 || window > 15) {
 		zend_value_error("zlib window size (logarithm) (" ZEND_LONG_FMT ") must be within 8..15", window);

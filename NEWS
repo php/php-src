@@ -207,5 +207,7 @@ PHP                                                                        NEWS
   . deflate_init() now raises a TypeError when the value for option
     "level", "memory", "window", or "strategy" is not of type int.
     (Weilin Du)
+  . inflate_init() now raises a TypeError when the value for option
+    "window" is not of type int. (Weilin Du)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
