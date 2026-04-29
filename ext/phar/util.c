@@ -264,7 +264,7 @@ zend_result phar_mount_entry(phar_archive_data *phar, const char *filename, size
 }
 /* }}} */
 
-zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data **pphar) /* {{{ */
+zend_string *phar_find_in_include_path(const zend_string *filename, phar_archive_data **pphar) /* {{{ */
 {
 	zend_string *ret;
 	char *path;

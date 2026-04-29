@@ -364,7 +364,7 @@ static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* 
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	ssize_t got;
-	phar_entry_info *entry;
+	const phar_entry_info *entry;
 
 	if (data->internal_file->symlink) {
 		entry = phar_get_link_source(data->internal_file);
@@ -394,7 +394,7 @@ static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* 
 static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
-	phar_entry_info *entry;
+	const phar_entry_info *entry;
 	int res;
 	zend_ulong temp;
 
@@ -462,7 +462,7 @@ static int phar_stream_flush(php_stream *stream) /* {{{ */
 {
 	char *error;
 	int ret;
-	phar_entry_data *data = (phar_entry_data *) stream->abstract;
+	const phar_entry_data *data = stream->abstract;
 
 	if (data->internal_file->is_modified) {
 		data->internal_file->timestamp = time(0);
@@ -536,7 +536,7 @@ void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_stat
  */
 static int phar_stream_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ */
 {
-	phar_entry_data *data = (phar_entry_data *)stream->abstract;
+	const phar_entry_data *data = stream->abstract;
 
 	/* If ssb is NULL then someone is misbehaving */
 	if (!ssb) {
@@ -659,7 +659,6 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	char *internal_file, *error;
 	size_t internal_file_len;
 	phar_entry_data *idata;
-	phar_archive_data *pphar;
 
 	php_url *resource = phar_parse_url(wrapper, url, "rb", options);
 	if (!resource) {
@@ -682,7 +681,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 
 	phar_request_initialize();
 
-	pphar = zend_hash_find_ptr(&(PHAR_G(phar_fname_map)), resource->host);
+	const phar_archive_data *pphar = zend_hash_find_ptr(&(PHAR_G(phar_fname_map)), resource->host);
 	if (PHAR_G(readonly) && (!pphar || !pphar->is_data)) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options, "phar error: write operations disabled by the php.ini setting phar.readonly");

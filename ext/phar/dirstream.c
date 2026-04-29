@@ -300,7 +300,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 
 	const char *internal_file = ZSTR_VAL(resource->path) + 1; /* strip leading "/" */
 	size_t internal_file_len = ZSTR_LEN(resource->path) - 1;
-	phar_entry_info *entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len);
+	const phar_entry_info *entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len);
 	php_stream *ret;
 
 	if (NULL != entry && !entry->is_dir) {
