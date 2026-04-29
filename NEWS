@@ -181,7 +181,7 @@ PHP                                                                        NEWS
   . getenv() and putenv() now raises a ValueError when the first argument
     contains null bytes. (Weilin Du)
   . Improved explode() ValueError message when $separator is empty; suggests
-    using str_split() or mb_str_split(). (diegoasales)
+    str_split() or mb_str_split(). (diegoasales)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream

@@ -193,8 +193,8 @@ PHP 8.6 UPGRADE NOTES
     constants).
 
 - Standard:
-  . explode() ValueError message when $separator is empty now suggests using
-    str_split() or mb_str_split() to split a string into characters.
+  . explode() ValueError message when $separator is empty now suggests
+    str_split() or mb_str_split().
 
 ========================================
 6. New Functions
