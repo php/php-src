@@ -969,16 +969,16 @@ PHP_METHOD(Phar, mapPhar)
 PHP_METHOD(Phar, loadPhar)
 {
 	zend_string *fname;
-	char *alias = NULL, *error;
-	size_t alias_len = 0;
+	zend_string *alias = NULL;
+	char *error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|s!", &fname, &alias, &alias_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|S!", &fname, &alias) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	phar_request_initialize();
 
-	RETVAL_BOOL(phar_open_from_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, REPORT_ERRORS, NULL, &error) == SUCCESS);
+	RETVAL_BOOL(phar_open_from_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, REPORT_ERRORS, NULL, &error) == SUCCESS);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -1265,7 +1265,7 @@ PHP_METHOD(Phar, unlinkArchive)
 		RETURN_THROWS();
 	}
 
-	if (FAILURE == phar_open_from_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 0, REPORT_ERRORS, &phar, &error)) {
+	if (FAILURE == phar_open_from_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, REPORT_ERRORS, &phar, &error)) {
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Unknown phar archive \"%s\": %s", ZSTR_VAL(fname), error);
 			efree(error);
@@ -4415,7 +4415,7 @@ PHP_METHOD(PharFileInfo, __construct)
 		RETURN_THROWS();
 	}
 
-	if (phar_open_from_filename(ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, REPORT_ERRORS, &phar_data, &error) == FAILURE) {
+	if (phar_open_from_filename(ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, REPORT_ERRORS, &phar_data, &error) == FAILURE) {
 		zend_string_release_ex(arch, false);
 		efree(entry);
 		if (error) {

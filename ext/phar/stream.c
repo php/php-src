@@ -137,7 +137,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 			return NULL;
 		}
 	} else {
-		if (phar_open_from_filename(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, options, NULL, &error) == FAILURE)
+		if (phar_open_from_filename(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, options, NULL, &error) == FAILURE)
 		{
 			if (error) {
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {

@@ -131,7 +131,7 @@ static void phar_split_cache_list(void) /* {{{ */
 			len = strlen(key);
 		}
 
-		if (SUCCESS == phar_open_from_filename(key, len, NULL, 0, 0, &phar, NULL)) {
+		if (SUCCESS == phar_open_from_filename(key, len, NULL, 0, &phar, NULL)) {
 			phar->phar_pos = i++;
 			php_stream_close(phar->fp);
 			phar->fp = NULL;
@@ -1507,7 +1507,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 6, 7) zend_result phar_create_or_parse_filename(z
  * that the manifest is proper, then pass it to phar_parse_pharfile().  SUCCESS
  * or FAILURE is returned and pphar is set to a pointer to the phar's manifest
  */
-zend_result phar_open_from_filename(char *fname, size_t fname_len, const char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+zend_result phar_open_from_filename(char *fname, size_t fname_len, const zend_string *alias, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	php_stream *fp;
 	zend_string *actual;
@@ -1521,7 +1521,9 @@ zend_result phar_open_from_filename(char *fname, size_t fname_len, const char *a
 		is_data = true;
 	}
 
-	if (phar_open_parsed_phar(fname, fname_len, alias, alias_len, is_data, options, pphar, error) == SUCCESS) {
+	const char *alias_cstr = alias ? ZSTR_VAL(alias) : NULL;
+	size_t alias_len = alias ? ZSTR_LEN(alias) : 0;
+	if (phar_open_parsed_phar(fname, fname_len, alias_cstr, alias_len, is_data, options, pphar, error) == SUCCESS) {
 		return SUCCESS;
 	} else if (error && *error) {
 		return FAILURE;
@@ -1549,7 +1551,7 @@ zend_result phar_open_from_filename(char *fname, size_t fname_len, const char *a
 		fname_len = ZSTR_LEN(actual);
 	}
 
-	zend_result ret = phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, error);
+	zend_result ret = phar_open_from_fp(fp, fname, fname_len, alias_cstr, alias_len, options, pphar, error);
 
 	if (actual) {
 		zend_string_release_ex(actual, 0);
@@ -3156,7 +3158,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 		return phar_orig_compile_file(file_handle, type);
 	}
 	if (strstr(ZSTR_VAL(file_handle->filename), ".phar") && !strstr(ZSTR_VAL(file_handle->filename), "://")) {
-		if (SUCCESS == phar_open_from_filename(ZSTR_VAL(file_handle->filename), ZSTR_LEN(file_handle->filename), NULL, 0, 0, &phar, NULL)) {
+		if (SUCCESS == phar_open_from_filename(ZSTR_VAL(file_handle->filename), ZSTR_LEN(file_handle->filename), NULL, 0, &phar, NULL)) {
 			if (phar->is_zip || phar->is_tar) {
 				zend_file_handle f;
 
