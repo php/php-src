@@ -19,8 +19,6 @@
 #include "phar_internal.h"
 #include "dirstream.h"
 
-void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, bool is_dir);
-
 static const php_stream_ops phar_dir_ops = {
 	phar_dir_write, /* write */
 	phar_dir_read,  /* read  */

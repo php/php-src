@@ -482,7 +482,7 @@ static int phar_stream_flush(php_stream *stream) /* {{{ */
 /**
  * stat an opened phar file handle stream, used by phar_stat()
  */
-void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, bool is_temp_dir)
+static void phar_dostat(const phar_archive_data *phar, const phar_entry_info *data, php_stream_statbuf *ssb, bool is_temp_dir)
 {
 	memset(ssb, 0, sizeof(php_stream_statbuf));
 
@@ -536,7 +536,7 @@ void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_stat
  */
 static int phar_stream_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ */
 {
-	phar_entry_data *data = (phar_entry_data *)stream->abstract;
+	const phar_entry_data *data = stream->abstract;
 
 	/* If ssb is NULL then someone is misbehaving */
 	if (!ssb) {
