@@ -549,8 +549,8 @@ PHP_METHOD(Phar, webPhar)
 	zval *mimeoverride = NULL;
 	zend_fcall_info rewrite_fci = {0};
 	zend_fcall_info_cache rewrite_fcc;
-	char *alias = NULL, *error, *index_php = NULL, *ru = NULL;
-	size_t alias_len = 0, free_pathinfo = 0;
+	char *error, *index_php = NULL, *ru = NULL;
+	size_t free_pathinfo = 0;
 	zend_string *f404 = NULL;
 	size_t ru_len = 0;
 	char *fname, *path_info, *mime_type = NULL, *entry, *pt;
@@ -562,14 +562,15 @@ PHP_METHOD(Phar, webPhar)
 	phar_entry_info *info = NULL;
 	size_t sapi_mod_name_len = strlen(sapi_module.name);
 	phar_action_status status = PHAR_ACT_DO_EXIT;
+	zend_string *alias = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!S!af!", &alias, &alias_len, &index_php, &index_php_len, &f404, &mimeoverride, &rewrite_fci, &rewrite_fcc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!s!S!af!", &alias, &index_php, &index_php_len, &f404, &mimeoverride, &rewrite_fci, &rewrite_fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	phar_request_initialize();
 
-	if (phar_open_executed_filename(alias, alias_len, &error) != SUCCESS) {
+	if (phar_open_executed_filename(alias, &error) != SUCCESS) {
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 			efree(error);
@@ -947,17 +948,17 @@ PHP_METHOD(Phar, createDefaultStub)
 /* {{{ Reads the currently executed file (a phar) and registers its manifest */
 PHP_METHOD(Phar, mapPhar)
 {
-	char *alias = NULL, *error;
-	size_t alias_len = 0;
+	zend_string *alias = NULL;
+	char *error;
 	zend_long dataoffset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!l", &alias, &alias_len, &dataoffset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!l", &alias, &dataoffset) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	phar_request_initialize();
 
-	RETVAL_BOOL(phar_open_executed_filename(alias, alias_len, &error) == SUCCESS);
+	RETVAL_BOOL(phar_open_executed_filename(alias, &error) == SUCCESS);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);

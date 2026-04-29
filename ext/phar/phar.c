@@ -2252,7 +2252,7 @@ zend_string* phar_split_fname(const char *filename, size_t filename_len, zend_st
  * Invoked when a user calls Phar::mapPhar() from within an executing .phar
  * to set up its manifest directly
  */
-ZEND_ATTRIBUTE_NONNULL_ARGS(3) zend_result phar_open_executed_filename(const char *alias, size_t alias_len, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result phar_open_executed_filename(const zend_string *alias, char **error) /* {{{ */
 {
 	*error = NULL;
 
@@ -2263,7 +2263,9 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(3) zend_result phar_open_executed_filename(const cha
 		return FAILURE;
 	}
 
-	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, false, REPORT_ERRORS, NULL, NULL) == SUCCESS) {
+	const char *alias_cstr = alias ? ZSTR_VAL(alias) : NULL;
+	size_t alias_len = alias ? ZSTR_LEN(alias) : 0;
+	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias_cstr, alias_len, false, REPORT_ERRORS, NULL, NULL) == SUCCESS) {
 		return SUCCESS;
 	}
 
@@ -2292,7 +2294,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(3) zend_result phar_open_executed_filename(const cha
 		fname = actual;
 	}
 
-	zend_result ret = phar_open_from_fp(fp, ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, REPORT_ERRORS, NULL, error);
+	zend_result ret = phar_open_from_fp(fp, ZSTR_VAL(fname), ZSTR_LEN(fname), alias_cstr, alias_len, REPORT_ERRORS, NULL, error);
 
 	if (actual) {
 		zend_string_release_ex(actual, 0);
