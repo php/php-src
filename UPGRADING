@@ -192,6 +192,10 @@ PHP 8.6 UPGRADE NOTES
     when not null, and on failure, gives the error code (one of the EAI_*
     constants).
 
+- Standard:
+  . explode() ValueError message when $separator is empty now suggests using
+    str_split() or mb_str_split() to split a string into characters.
+
 ========================================
 6. New Functions
 ========================================
