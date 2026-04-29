@@ -177,8 +177,8 @@ typedef zend_ulong zend_mm_bitset;    /* 4-byte or 8-byte integer */
 
 #define ZEND_MM_ALIGNED_OFFSET(size, alignment) \
 	(((size_t)(size)) & ((alignment) - 1))
-#define ZEND_MM_ALIGNED_BASE(size, alignment) \
-	(((size_t)(size)) & ~((alignment) - 1))
+#define ZEND_MM_ALIGNED_BASE(ptr, alignment) \
+	(((uintptr_t)(ptr)) & ~((alignment) - 1))
 #define ZEND_MM_SIZE_TO_NUM(size, alignment) \
 	(((size_t)(size) + ((alignment) - 1)) / (alignment))
 
