@@ -18,6 +18,9 @@ PHP                                                                        NEWS
     initialization). (Arnaud)
   . Enabled the TAILCALL VM on Windows when compiling with Clang >= 19 x86_64.
     (henderkes)
+  . Fixed bug GH-20482 (Heap use-after-free in ZEND_ASSIGN_DIM when a user
+    output handler clobbers the array during the undefined-variable
+    warning). (lacatoire)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)

@@ -2730,16 +2730,37 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 				}
 			}
 		} else {
+			HashTable *ht = Z_ARRVAL_P(object_ptr);
 			dim = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+			/* Order is critical: fetch the data value (which may emit an
+			 * "Undefined variable" warning that can recurse into user code
+			 * via a user output handler) before resolving variable_ptr.
+			 * Resolving variable_ptr only afterwards guarantees a fresh
+			 * bucket pointer that cannot have been invalidated by user
+			 * code freeing the array, rehashing it, or unsetting keys. */
+			value = GET_OP_DATA_ZVAL_PTR_UNDEF(BP_VAR_R);
+			if (OP_DATA_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				/* Temporarily addref the array around the warning so we
+				 * can detect a full destruction (last ref dropped by
+				 * reentrant user code) and bail out cleanly. Mirrors the
+				 * IS_UNUSED branch above. */
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					ZEND_VM_C_GOTO(assign_dim_error);
+				}
+			}
 			if (OP2_TYPE == IS_CONST) {
-				variable_ptr = zend_fetch_dimension_address_inner_W_CONST(Z_ARRVAL_P(object_ptr), dim EXECUTE_DATA_CC);
+				variable_ptr = zend_fetch_dimension_address_inner_W_CONST(ht, dim EXECUTE_DATA_CC);
 			} else {
-				variable_ptr = zend_fetch_dimension_address_inner_W(Z_ARRVAL_P(object_ptr), dim EXECUTE_DATA_CC);
+				variable_ptr = zend_fetch_dimension_address_inner_W(ht, dim EXECUTE_DATA_CC);
 			}
 			if (UNEXPECTED(variable_ptr == NULL)) {
 				ZEND_VM_C_GOTO(assign_dim_error);
 			}
-			value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 			value = zend_assign_to_variable_ex(variable_ptr, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES(), &garbage);
 		}
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
