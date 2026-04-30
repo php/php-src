@@ -126,10 +126,10 @@ bool phar_is_tar(const char *buf, const char *fname) /* {{{ */
 }
 /* }}} */
 
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 6, 7) zend_result phar_open_or_create_tar(zend_string *fname, const char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_tar(zend_string *fname, const zend_string *alias, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	phar_archive_data *phar;
-	zend_result ret = phar_create_or_parse_filename(fname, alias, alias_len, is_data, options, &phar, error);
+	zend_result ret = phar_create_or_parse_filename(fname, alias, is_data, options, &phar, error);
 
 	if (FAILURE == ret) {
 		return FAILURE;
