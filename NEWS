@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.22
 
+- Opcache:
+  . Fixed tracing JIT crash when a VM interrupt is handled during an observed
+    user function call. (Levi Morrison)
+
 - Standard:
   . Fixed bug GH-21689 (version_compare() incorrectly handles versions ending
     with a dot). (timwolla)
