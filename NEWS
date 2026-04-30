@@ -1,6 +1,18 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.6
+30 Apr 2026, PHP 8.5.6RC3
+
+- Windows:
+  . Fixed bug GH-21911 (dom extension fails to compile in shared build mode).
+    (ilutov, nono303)
+
+30 Apr 2026, PHP 8.5.6RC2
+
+- URI:
+  . Fixed CVE-2026-42371 (uriparser before 1.0.1 has numeric truncation in
+    text range comparison). (CVE-2026-42371) (Joshua W. Windle)
+
+23 Apr 2026, PHP 8.5.6RC1
 
 - Core:
   . Fixed bug GH-19983 (GC assertion failure with fibers, generators and
@@ -80,10 +92,6 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
     and a proxy set). (ndossche)
-
-- URI:
-  . Fixed CVE-2026-42371 (uriparser before 1.0.1 has numeric truncation in
-    text range comparison). (CVE-2026-42371) (Joshua W. Windle)
 
 26 Mar 2026, PHP 8.5.5
 
