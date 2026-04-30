@@ -32,12 +32,17 @@ ZEND_API void ZEND_FASTCALL zend_serialize_opcode_handler(zend_op *op);
 ZEND_API void ZEND_FASTCALL zend_deserialize_opcode_handler(zend_op *op);
 ZEND_API const void* ZEND_FASTCALL zend_get_opcode_handler_func(const zend_op *op);
 ZEND_API const zend_op *zend_get_halt_op(void);
+ZEND_API const zend_op *zend_get_interrupt_op(void);
 ZEND_API int ZEND_FASTCALL zend_vm_call_opcode_handler(zend_execute_data *ex);
 ZEND_API int zend_vm_kind(void);
 ZEND_API bool zend_gcc_global_regs(void);
 
 void zend_vm_init(void);
 void zend_vm_dtor(void);
+
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+const struct _zend_op *zend_vm_handle_interrupt(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
+#endif
 
 END_EXTERN_C()
 

@@ -15,6 +15,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-21746 (Segfault with tracing JIT). (Arnaud)
   . Fixed bug GH-22004 (Assertion failure at ext/opcache/jit/zend_jit_trace.c).
     (Arnaud)
+  . Fixed tailcall VM crash when a VM interrupt is handled from a VM helper.
+    (Levi Morrison, Arnaud)
 
 - OpenSSL:
   . Fix compatibility issues with OpenSSL 4.0. (jordikroon, Remi)
