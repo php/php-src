@@ -1302,7 +1302,7 @@ static zend_result phar_parse_pharfile(php_stream *fp, const char *fname, size_t
 /**
  * Create or open a phar for writing
  */
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 6, 7) zend_result phar_open_or_create_filename(zend_string *fname, const char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_filename(zend_string *fname, const zend_string *alias, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	const char *ext_str, *z;
 	char *my_error;
@@ -1327,8 +1327,10 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 6, 7) zend_result phar_open_or_create_filename(ze
 		}
 		return FAILURE;
 	}
-check_file:
-	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, is_data, options, test, &my_error) == SUCCESS) {
+check_file:;
+	const char *alias_cstr = alias ? ZSTR_VAL(alias) : NULL;
+	size_t alias_len = alias ? ZSTR_LEN(alias) : 0;
+	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias_cstr, alias_len, is_data, options, test, &my_error) == SUCCESS) {
 		*pphar = *test;
 
 		if ((*test)->is_data && !(*test)->is_tar && !(*test)->is_zip) {
@@ -1354,15 +1356,15 @@ check_file:
 
 	if (ext_len > 3 && (z = memchr(ext_str, 'z', ext_len)) && ((ext_str + ext_len) - z >= 2) && !memcmp(z + 1, "ip", 2)) {
 		/* assume zip-based phar */
-		return phar_open_or_create_zip(fname, alias, alias_len, is_data, options, pphar, error);
+		return phar_open_or_create_zip(fname, alias_cstr, alias_len, is_data, options, pphar, error);
 	}
 
 	if (ext_len > 3 && (z = memchr(ext_str, 't', ext_len)) && ((ext_str + ext_len) - z >= 2) && !memcmp(z + 1, "ar", 2)) {
 		/* assume tar-based phar */
-		return phar_open_or_create_tar(fname, alias, alias_len, is_data, options, pphar, error);
+		return phar_open_or_create_tar(fname, alias_cstr, alias_len, is_data, options, pphar, error);
 	}
 
-	return phar_create_or_parse_filename(fname, alias, alias_len, is_data, options, pphar, error);
+	return phar_create_or_parse_filename(fname, alias_cstr, alias_len, is_data, options, pphar, error);
 }
 /* }}} */
 

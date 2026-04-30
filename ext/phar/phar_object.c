@@ -1085,8 +1085,8 @@ static const spl_other_handler phar_spl_foreign_handler = {
 PHP_METHOD(Phar, __construct)
 {
 	zend_string *fname;
-	char *alias = NULL, *error;
-	size_t alias_len = 0;
+	zend_string *alias = NULL;
+	char *error;
 	bool is_data;
 	zend_long flags = SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS;
 	zend_long format = 0;
@@ -1099,11 +1099,11 @@ PHP_METHOD(Phar, __construct)
 	is_data = instanceof_function(Z_OBJCE_P(ZEND_THIS), phar_ce_data);
 
 	if (is_data) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|ls!l", &fname, &flags, &alias, &alias_len, &format) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|lS!l", &fname, &flags, &alias, &format) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|ls!", &fname, &flags, &alias, &alias_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|lS!", &fname, &flags, &alias) == FAILURE) {
 			RETURN_THROWS();
 		}
 	}
@@ -1122,7 +1122,7 @@ PHP_METHOD(Phar, __construct)
 		fname = arch;
 	}
 
-	zend_result phar_status = phar_open_or_create_filename(fname, alias, alias_len, is_data, REPORT_ERRORS, &phar_data, &error);
+	zend_result phar_status = phar_open_or_create_filename(fname, alias, is_data, REPORT_ERRORS, &phar_data, &error);
 
 	if (arch) {
 		zend_string_release_ex(arch, false);
