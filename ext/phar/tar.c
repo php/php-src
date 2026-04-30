@@ -126,8 +126,14 @@ bool phar_is_tar(const char *buf, const char *fname) /* {{{ */
 }
 /* }}} */
 
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_tar(zend_string *fname, const zend_string *alias, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
-{
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_tar(
+	zend_string *fname,
+	/* copyable & hash update */ zend_string *alias,
+	bool is_data,
+	uint32_t options,
+	phar_archive_data** pphar,
+	char **error
+) {
 	phar_archive_data *phar;
 	zend_result ret = phar_create_or_parse_filename(fname, alias, is_data, options, &phar, error);
 
@@ -153,7 +159,6 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_tar(zend_st
 	spprintf(error, 4096, "phar tar error: \"%s\" already exists as a regular phar and must be deleted from disk prior to creating as a tar-based phar", ZSTR_VAL(fname));
 	return FAILURE;
 }
-/* }}} */
 
 static zend_result phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* {{{ */
 {
