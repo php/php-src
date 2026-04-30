@@ -2136,6 +2136,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"# define ZEND_VM_DISPATCH_TO_HELPER(call) \\\n");
                         out($f,"    do { \\\n");
                         out($f,"        opline = call; \\\n");
+                        out($f,"        if (UNEXPECTED(((uintptr_t)opline & ZEND_VM_ENTER_BIT))) { \\\n");
+                        out($f,"            return opline; \\\n");
+                        out($f,"        } \\\n");
                         out($f,"        ZEND_VM_TAIL_CALL(opline->handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)); \\\n");
                         out($f,"    } while (0)\n");
                         out($f,"# define ZEND_VM_DISPATCH_TO_LEAVE_HELPER(helper) opline = &call_leave_op; SAVE_OPLINE(); ZEND_VM_CONTINUE()\n");
