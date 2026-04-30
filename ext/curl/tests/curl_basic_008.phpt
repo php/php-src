@@ -7,7 +7,7 @@ curl
 --SKIPIF--
 <?php
     $addr = "www.".uniqid().".invalid";
-    if (gethostbyname($addr) != $addr) {
+    if (@gethostbyname($addr) != $addr) {
         print "skip catch all dns";
     }
 ?>
