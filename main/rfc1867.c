@@ -69,7 +69,8 @@ static void normalize_protected_variable(char *varname) /* {{{ */
 
 	/* and remove it */
 	if (s != varname) {
-		memmove(varname, s, strlen(s)+1);
+		size_t slen = strlen(s) + 1;
+		memmove(varname, s, slen);
 	}
 
 	for (p = varname; *p && *p != '['; p++) {
@@ -596,6 +597,9 @@ static size_t multipart_buffer_read(multipart_buffer *self, char *buf, size_t by
 	}
 
 	/* maximum number of bytes we are reading */
+	if (bytes == 0) {
+		return 0;
+	}
 	len = max < bytes-1 ? max : bytes-1;
 
 	/* if we read any data... */
