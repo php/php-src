@@ -176,15 +176,15 @@ typedef uint32_t   zend_mm_page_info; /* 4-byte integer */
 typedef zend_ulong zend_mm_bitset;    /* 4-byte or 8-byte integer */
 
 #ifdef PHP_HAVE_BUILTIN_ALIGN_DOWN
-# define ZEND_MM_ALIGNED_OFFSET(size, alignment) \
-	(((size_t)(size)) - (size_t)__builtin_align_down((size), (alignment)))
 # define ZEND_MM_ALIGNED_BASE(ptr, alignment) \
 	__builtin_align_down((ptr), (alignment))
+# define ZEND_MM_ALIGNED_OFFSET(ptr, alignment) \
+	(((size_t)(ptr)) - (size_t)ZEND_MM_ALIGNED_BASE(ptr, alignment))
 #else
-# define ZEND_MM_ALIGNED_OFFSET(size, alignment) \
-	(((size_t)(size)) & ((alignment) - 1))
 # define ZEND_MM_ALIGNED_BASE(ptr, alignment) \
 	(((uintptr_t)(ptr)) & ~((alignment) - 1))
+# define ZEND_MM_ALIGNED_OFFSET(ptr, alignment) \
+	(((size_t)(ptr)) & ((alignment) - 1))
 #endif
 
 #ifdef PHP_HAVE_BUILTIN_ALIGN_UP
