@@ -2398,6 +2398,11 @@ simple_list:
 				default: ZEND_UNREACHABLE();
 			}
 			break;
+		case ZEND_AST_LIST_TYPE:
+			APPEND_STR("list<");
+			zend_ast_export_ex(str, ast->child[0], priority, indent);
+			APPEND_STR(">");
+			break;
 		case ZEND_AST_TYPE:
 			switch (ast->attr & ~ZEND_TYPE_NULLABLE) {
 				case IS_ARRAY:    APPEND_STR("array");

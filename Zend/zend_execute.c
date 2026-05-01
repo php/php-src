@@ -1036,9 +1036,16 @@ static bool zend_check_and_resolve_property_or_class_constant_class_type(
 	return false;
 }
 
+static zend_always_inline bool zend_check_typed_list_type(
+		const zend_type *type, zval *arg, bool is_return_type, bool is_internal);
+
 static zend_always_inline bool i_zend_check_property_type(const zend_property_info *info, zval *property, bool strict)
 {
 	ZEND_ASSERT(!Z_ISREF_P(property));
+	if (UNEXPECTED(ZEND_TYPE_IS_TYPED_LIST(info->type))) {
+		return zend_check_typed_list_type(&info->type, property, false, false);
+	}
+
 	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(info->type, Z_TYPE_P(property)))) {
 		return 1;
 	}
@@ -1148,10 +1155,45 @@ static bool zend_check_intersection_type_from_list(
 	return true;
 }
 
+static zend_always_inline bool zend_check_type(
+		const zend_type *type, zval *arg, bool is_return_type, bool is_internal);
+
+static zend_always_inline bool zend_check_typed_list_type(
+		const zend_type *type, zval *arg, bool is_return_type, bool is_internal)
+{
+	const zend_type *inner_type;
+	zval *element;
+
+	if (UNEXPECTED(Z_TYPE_P(arg) != IS_ARRAY)) {
+		return false;
+	}
+
+	if (UNEXPECTED(!zend_array_is_list(Z_ARRVAL_P(arg)))) {
+		return false;
+	}
+
+	inner_type = &ZEND_TYPE_LIST(*type)->types[0];
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arg), element) {
+		if (UNEXPECTED(!zend_check_type(inner_type, element, is_return_type, is_internal))) {
+			return false;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return true;
+}
+
 static zend_always_inline bool zend_check_type_slow(
 		const zend_type *type, zval *arg, const zend_reference *ref,
 		bool is_return_type, bool is_internal)
 {
+	if (UNEXPECTED(ZEND_TYPE_IS_TYPED_LIST(*type))) {
+		if (Z_TYPE_P(arg) == IS_NULL && ZEND_TYPE_ALLOW_NULL(*type)) {
+			return true;
+		}
+		return zend_check_typed_list_type(type, arg, is_return_type, is_internal);
+	}
+
 	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_class_entry *ce;
 		if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
@@ -1222,7 +1264,8 @@ static zend_always_inline bool zend_check_type(
 		arg = Z_REFVAL_P(arg);
 	}
 
-	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(*type, Z_TYPE_P(arg)))) {
+	if (EXPECTED(!ZEND_TYPE_IS_TYPED_LIST(*type))
+			&& EXPECTED(ZEND_TYPE_CONTAINS_CODE(*type, Z_TYPE_P(arg)))) {
 		return 1;
 	}
 

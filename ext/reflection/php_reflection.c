@@ -1468,6 +1468,9 @@ static reflection_type_kind get_type_kind(zend_type type) {
 	uint32_t type_mask_without_null = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(type);
 
 	if (ZEND_TYPE_HAS_LIST(type)) {
+		if (ZEND_TYPE_IS_TYPED_LIST(type)) {
+			return NAMED_TYPE;
+		}
 		if (ZEND_TYPE_IS_INTERSECTION(type)) {
 			return INTERSECTION_TYPE;
 		}

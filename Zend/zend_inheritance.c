@@ -686,6 +686,11 @@ static inheritance_status zend_perform_covariant_type_check(
 	/* Builtin types may be removed, but not added */
 	uint32_t fe_type_mask = ZEND_TYPE_PURE_MASK(fe_type);
 	uint32_t proto_type_mask = ZEND_TYPE_PURE_MASK(proto_type);
+
+	if (ZEND_TYPE_IS_TYPED_LIST(fe_type) && (proto_type_mask & MAY_BE_ARRAY)) {
+		return INHERITANCE_SUCCESS;
+	}
+
 	uint32_t added_types = fe_type_mask & ~proto_type_mask;
 	if (added_types) {
 		if ((added_types & MAY_BE_STATIC)

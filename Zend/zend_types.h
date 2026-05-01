@@ -143,6 +143,8 @@ typedef struct {
 #define _ZEND_TYPE_INTERSECTION_BIT (1u << 19)
 /* Whether the type is a union type */
 #define _ZEND_TYPE_UNION_BIT (1u << 18)
+/* Whether this represents a typed list<T> array type. */
+#define _ZEND_TYPE_TYPED_LIST_BIT (1u << 30)
 /* Type mask excluding the flags above. */
 #define _ZEND_TYPE_MAY_BE_MASK ((1u << 18) - 1)
 /* Must have same value as MAY_BE_NULL */
@@ -173,6 +175,9 @@ typedef struct {
 
 #define ZEND_TYPE_IS_UNION(t) \
 	((((t).type_mask) & _ZEND_TYPE_UNION_BIT) != 0)
+
+#define ZEND_TYPE_IS_TYPED_LIST(t) \
+	((((t).type_mask) & _ZEND_TYPE_TYPED_LIST_BIT) != 0)
 
 #define ZEND_TYPE_USES_ARENA(t) \
 	((((t).type_mask) & _ZEND_TYPE_ARENA_BIT) != 0)

@@ -1444,6 +1444,13 @@ static zend_string *add_intersection_type(zend_string *str,
 zend_string *zend_type_to_string_resolved(const zend_type type, const zend_class_entry *scope) {
 	zend_string *str = NULL;
 
+	if (ZEND_TYPE_IS_TYPED_LIST(type)) {
+		zend_string *inner = zend_type_to_string_resolved(ZEND_TYPE_LIST(type)->types[0], scope);
+		zend_string *result = zend_string_concat3("list<", 5, ZSTR_VAL(inner), ZSTR_LEN(inner), ">", 1);
+		zend_string_release(inner);
+		return result;
+	}
+
 	/* Pure intersection type */
 	if (ZEND_TYPE_IS_INTERSECTION(type)) {
 		ZEND_ASSERT(!ZEND_TYPE_IS_UNION(type));
@@ -7364,6 +7371,16 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 static zend_type zend_compile_single_typename(zend_ast *ast)
 {
 	ZEND_ASSERT(!(ast->attr & ZEND_TYPE_NULLABLE));
+	if (ast->kind == ZEND_AST_LIST_TYPE) {
+		zend_ast *inner_ast = ast->child[0];
+		zend_type inner_type = zend_compile_single_typename(inner_ast);
+		zend_type_list *type_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(1));
+		type_list->num_types = 1;
+		type_list->types[0] = inner_type;
+		zend_type type = ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY | _ZEND_TYPE_TYPED_LIST_BIT | _ZEND_TYPE_ARENA_BIT);
+		ZEND_TYPE_SET_LIST(type, type_list);
+		return type;
+	}
 	if (ast->kind == ZEND_AST_TYPE) {
 		if (ast->attr == IS_STATIC && !CG(active_class_entry) && zend_is_scope_known()) {
 			zend_error_noreturn(E_COMPILE_ERROR,
@@ -7592,6 +7609,9 @@ static zend_type zend_compile_typename_ex(
 			}
 
 			single_type = zend_compile_single_typename(type_ast);
+			if (ZEND_TYPE_IS_TYPED_LIST(single_type)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Type list<T> cannot be part of a union type");
+			}
 			uint32_t single_type_mask = ZEND_TYPE_PURE_MASK(single_type);
 
 			if (single_type_mask == MAY_BE_ANY) {
@@ -8197,7 +8217,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		ZEND_TYPE_FULL_MASK(arg_info->type) |= arg_info_flags;
 		if (opcode == ZEND_RECV) {
 			opline->op2.num = type_ast ?
-				ZEND_TYPE_FULL_MASK(arg_info->type) : MAY_BE_ANY;
+				(ZEND_TYPE_IS_TYPED_LIST(arg_info->type) ? 0 : ZEND_TYPE_FULL_MASK(arg_info->type)) : MAY_BE_ANY;
 		}
 
 		if (is_promoted) {
