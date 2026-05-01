@@ -109,7 +109,7 @@ popd
 rem prepare for snmp
 set MIBDIRS=%DEPS_DIR%\share\mibs
 sed -i "s/exec HexTest .*/exec HexTest cscript\.exe \/nologo %GITHUB_WORKSPACE:\=\/%\/ext\/snmp\/tests\/bigtest\.js/g" %GITHUB_WORKSPACE%\ext\snmp\tests\snmpd.conf
-powershell -NoProfile -Command "Start-Process -FilePath (Join-Path $env:DEPS_DIR 'bin\snmpd.exe') -ArgumentList '-C','-c',(Join-Path $env:GITHUB_WORKSPACE 'ext\snmp\tests\snmpd.conf'),'-Ln'"
+start "" /b "%DEPS_DIR%\bin\snmpd.exe" -C -c "%GITHUB_WORKSPACE%\ext\snmp\tests\snmpd.conf" -Ln
 if %errorlevel% neq 0 exit /b 3
 
 set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
@@ -149,7 +149,7 @@ copy /-y %DEPS_DIR%\bin\*.dll %PHP_BUILD_DIR%\*
 if "%ASAN%" equ "1" set ASAN_OPTS=--asan
 
 rem wait until snmpd is fully ready to serve v2c and v3/authPriv requests
-powershell -NoProfile -File .github\scripts\windows\check-snmp-ready.ps1 -PhpBuildDir %PHP_BUILD_DIR%
+.github\scripts\windows\check-snmp-ready.bat %PHP_BUILD_DIR%
 if %errorlevel% neq 0 exit /b 3
 
 mkdir c:\tests_tmp
