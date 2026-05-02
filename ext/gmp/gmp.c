@@ -353,8 +353,8 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 					shift = zval_try_get_long(op2, &failed);
 					if (UNEXPECTED(failed)) {
 						return FAILURE;
+					}
 					break;
-				}
 				case IS_STRING:
 					if (is_numeric_str_function(Z_STR_P(op2), &shift, NULL) != IS_LONG) {
 						goto valueof_op_failure;
