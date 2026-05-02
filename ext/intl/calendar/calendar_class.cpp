@@ -256,7 +256,7 @@ void calendar_register_IntlCalendar_class(void)
 
 	memcpy( &Calendar_handlers, &std_object_handlers,
 		sizeof Calendar_handlers);
-	Calendar_handlers.offset = XtOffsetOf(Calendar_object, zo);
+	Calendar_handlers.offset = offsetof(Calendar_object, zo);
 	Calendar_handlers.clone_obj = Calendar_clone_obj;
 	Calendar_handlers.get_debug_info = Calendar_get_debug_info;
 	Calendar_handlers.free_obj = Calendar_objects_free;

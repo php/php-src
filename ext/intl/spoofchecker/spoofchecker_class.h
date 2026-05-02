@@ -43,7 +43,7 @@ typedef struct {
 } Spoofchecker_object;
 
 static inline Spoofchecker_object *php_intl_spoofchecker_fetch_object(zend_object *obj) {
-	    return (Spoofchecker_object *)((char*)(obj) - XtOffsetOf(Spoofchecker_object, zo));
+	    return (Spoofchecker_object *)((char*)(obj) - offsetof(Spoofchecker_object, zo));
 }
 #define Z_INTL_SPOOFCHECKER_P(zv) php_intl_spoofchecker_fetch_object((Z_OBJ_P(zv)))
 

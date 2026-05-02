@@ -176,7 +176,7 @@ void zend_register_enum_ce(void)
 	zend_ce_backed_enum->interface_gets_implemented = zend_implement_backed_enum;
 
 	memcpy(&zend_enum_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	zend_enum_object_handlers.offset = XtOffsetOf(zend_enum_obj, std);
+	zend_enum_object_handlers.offset = offsetof(zend_enum_obj, std);
 	zend_enum_object_handlers.clone_obj = NULL;
 	zend_enum_object_handlers.compare = zend_objects_not_comparable;
 }

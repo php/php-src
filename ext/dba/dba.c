@@ -337,7 +337,7 @@ static zend_result dba_connection_cast_object(zend_object *obj, zval *result, in
 
 static inline dba_connection *dba_connection_from_obj(zend_object *obj)
 {
-	return (dba_connection *)((char *)(obj) - XtOffsetOf(dba_connection, std));
+	return (dba_connection *)((char *)(obj) - offsetof(dba_connection, std));
 }
 
 #define Z_DBA_CONNECTION_P(zv) dba_connection_from_obj(Z_OBJ_P(zv))
@@ -409,7 +409,7 @@ PHP_MINIT_FUNCTION(dba)
 	dba_connection_ce->default_object_handlers = &dba_connection_object_handlers;
 
 	memcpy(&dba_connection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	dba_connection_object_handlers.offset = XtOffsetOf(dba_connection, std);
+	dba_connection_object_handlers.offset = offsetof(dba_connection, std);
 	dba_connection_object_handlers.free_obj = dba_connection_free_obj;
 	dba_connection_object_handlers.get_constructor = dba_connection_get_constructor;
 	dba_connection_object_handlers.clone_obj = NULL;

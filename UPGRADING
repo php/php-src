@@ -47,6 +47,13 @@ PHP 8.6 UPGRADE NOTES
   . Phar::mungServer() now raises a ValueError when an invalid
     argument value is passed instead of being silently ignored.
 
+- PGSQL:
+  . pg_fetch_object() now reports the ValueError for a non-empty
+    $constructor_args on a class without a constructor on the
+    $constructor_args argument instead of $class. Errors raised when
+    the requested class is not instantiable (abstract, interface, enum)
+    now surface before the row is fetched.
+
 - Posix:
   . posix_access() now raises a ValueError when an invalid $flags
     argument value is passed.
@@ -95,6 +102,8 @@ PHP 8.6 UPGRADE NOTES
     argument value is passed.
   . scandir() now raises a ValueError when an invalid $sorting_order
     argument value is passed.
+  . proc_open() now raises a ValueError when the $cwd argument contains
+    null bytes.
 
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the
@@ -103,7 +112,9 @@ PHP 8.6 UPGRADE NOTES
 
 - Zlib:
   . deflate_init() now raises a TypeError when the value for option
-    "strategy" is not of type int.
+    "level", "memory", "window", or "strategy" is not of type int.
+  . inflate_init() now raises a TypeError when the value for option
+    "window" is not of type int.
 
 ========================================
 2. New Features
@@ -131,6 +142,15 @@ PHP 8.6 UPGRADE NOTES
 - JSON:
   . Added extra info about error location to the JSON error messages returned
     from json_last_error_msg() and JsonException message.
+
+- OpenSSL:
+  . Added TLS session resumption support for streams with new stream context
+    options: session_data, session_new_cb, session_cache, session_cache_size,
+    session_timeout, session_id_context, session_get_cb, session_remove_cb,
+    and num_tickets. This allows saving and restoring client sessions across
+    requests, implementing custom server-side session storage, and controlling
+    session cache behavior.
+    RFC: https://wiki.php.net/rfc/tls_session_resumption
 
 - Phar:
   . Overriding the getMTime() and getPathname() methods of SplFileInfo now
@@ -226,6 +246,11 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 7. New Classes and Interfaces
 ========================================
+
+- OpenSSL:
+  . Openssl\OpensslException
+  . Openssl\Session
+    RFC: https://wiki.php.net/rfc/tls_session_resumption
 
 - Standard:
   . enum SortDirection

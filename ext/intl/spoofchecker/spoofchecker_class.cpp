@@ -98,7 +98,7 @@ U_CFUNC void spoofchecker_register_Spoofchecker_class(void)
 
 	memcpy(&Spoofchecker_handlers, &std_object_handlers,
 		sizeof Spoofchecker_handlers);
-	Spoofchecker_handlers.offset = XtOffsetOf(Spoofchecker_object, zo);
+	Spoofchecker_handlers.offset = offsetof(Spoofchecker_object, zo);
 	Spoofchecker_handlers.clone_obj = spoofchecker_clone_obj;
 	Spoofchecker_handlers.free_obj = Spoofchecker_objects_free;
 }

@@ -1240,7 +1240,7 @@ PHP_FUNCTION(proc_open)
 		Z_PARAM_ARRAY_HT(descriptorspec)
 		Z_PARAM_ZVAL(pipes)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(cwd, cwd_len)
+		Z_PARAM_PATH_OR_NULL(cwd, cwd_len)
 		Z_PARAM_ARRAY_HT_OR_NULL(environment)
 		Z_PARAM_ARRAY_OR_NULL(other_options)
 	ZEND_PARSE_PARAMETERS_END();

@@ -52,7 +52,7 @@ typedef struct _spl_array_object {
 } spl_array_object;
 
 static inline spl_array_object *spl_array_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_array_object*)((char*)(obj) - XtOffsetOf(spl_array_object, std));
+	return (spl_array_object*)((char*)(obj) - offsetof(spl_array_object, std));
 }
 /* }}} */
 
@@ -1847,7 +1847,7 @@ PHP_MINIT_FUNCTION(spl_array)
 
 	memcpy(&spl_handler_ArrayObject, &std_object_handlers, sizeof(zend_object_handlers));
 
-	spl_handler_ArrayObject.offset = XtOffsetOf(spl_array_object, std);
+	spl_handler_ArrayObject.offset = offsetof(spl_array_object, std);
 
 	spl_handler_ArrayObject.clone_obj = spl_array_object_clone;
 	spl_handler_ArrayObject.read_dimension = spl_array_read_dimension;

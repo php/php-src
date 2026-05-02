@@ -25,12 +25,12 @@ typedef struct dom_token_list_object {
 
 static inline dom_token_list_object *php_dom_token_list_from_obj(zend_object *obj)
 {
-	return (dom_token_list_object *)((char *) obj - XtOffsetOf(dom_token_list_object, dom.std));
+	return (dom_token_list_object *)((char *) obj - offsetof(dom_token_list_object, dom.std));
 }
 
 static inline dom_token_list_object *php_dom_token_list_from_dom_obj(dom_object *obj)
 {
-	return (dom_token_list_object *)((char *) obj - XtOffsetOf(dom_token_list_object, dom));
+	return (dom_token_list_object *)((char *) obj - offsetof(dom_token_list_object, dom));
 }
 
 void dom_ordered_set_parser(HashTable *token_set, const char *position, bool to_lowercase);

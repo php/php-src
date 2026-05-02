@@ -260,7 +260,7 @@ typedef struct soap_url_object {
 
 static inline soap_url_object *soap_url_object_fetch(zend_object *obj)
 {
-	return (soap_url_object *) ((char *) obj - XtOffsetOf(soap_url_object, std));
+	return (soap_url_object *) ((char *) obj - offsetof(soap_url_object, std));
 }
 
 #define Z_SOAP_URL_P(zv) soap_url_object_fetch(Z_OBJ_P(zv))

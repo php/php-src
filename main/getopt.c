@@ -57,6 +57,9 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 	static char **prev_optarg = NULL;
 
 	php_optidx = -1;
+	if (optarg) {
+		*optarg = NULL;
+	}
 
 	if(prev_optarg && prev_optarg != optarg) {
 		/* reset the state */

@@ -424,7 +424,7 @@ U_CFUNC void resourcebundle_register_class( void )
 	ResourceBundle_ce_ptr->get_iterator = resourcebundle_get_iterator;
 
 	ResourceBundle_object_handlers = std_object_handlers;
-	ResourceBundle_object_handlers.offset = XtOffsetOf(ResourceBundle_object, zend);
+	ResourceBundle_object_handlers.offset = offsetof(ResourceBundle_object, zend);
 	ResourceBundle_object_handlers.clone_obj	  = NULL; /* ICU ResourceBundle has no clone implementation */
 	ResourceBundle_object_handlers.free_obj = ResourceBundle_object_free;
 	ResourceBundle_object_handlers.read_dimension = resourcebundle_array_get;

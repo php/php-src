@@ -34,7 +34,8 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #else
-static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, zend_off_t end, const char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type);
+ZEND_ATTRIBUTE_NONNULL static bool phar_call_openssl_verify(php_stream *fp, zend_off_t end, zend_string *public_key, const char *signature, size_t signature_len, uint32_t sig_type);
+static zend_result phar_call_openssl_sign(php_stream *fp, zend_off_t end, const char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type);
 #endif
 
 /* for links to relative location, prepend cwd of the entry */
@@ -263,7 +264,7 @@ zend_result phar_mount_entry(phar_archive_data *phar, const char *filename, size
 }
 /* }}} */
 
-zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data **pphar) /* {{{ */
+zend_string *phar_find_in_include_path(const zend_string *filename, phar_archive_data **pphar) /* {{{ */
 {
 	zend_string *ret;
 	char *path;
@@ -308,7 +309,8 @@ zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data 
 	}
 
 	if (*ZSTR_VAL(filename) == '.') {
-		if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL)) {
+		phar = phar_get_archive(ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, NULL);
+		if (!phar) {
 			zend_string_release_ex(arch, false);
 			return NULL;
 		}
@@ -468,7 +470,6 @@ ZEND_ATTRIBUTE_NONNULL static zend_result phar_separate_entry_fp(phar_entry_info
  */
 ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, const zend_string *fname, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security) /* {{{ */
 {
-	phar_archive_data *phar;
 	phar_entry_info *entry;
 	bool for_write  = mode[0] != 'r' || mode[1] == '+';
 	bool for_append = mode[0] == 'a';
@@ -478,7 +479,8 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, co
 	*ret = NULL;
 	*error = NULL;
 
-	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 0, error)) {
+	phar_archive_data *phar = phar_get_archive(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 0, error);
+	if (!phar) {
 		return FAILURE;
 	}
 
@@ -613,7 +615,6 @@ really_get_entry:
  */
 ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(zend_string *fname, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security, uint32_t timestamp) /* {{{ */
 {
-	phar_archive_data *phar;
 	phar_entry_info etemp;
 	phar_entry_data *ret;
 	const char *pcr_error;
@@ -625,7 +626,8 @@ ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(zend_strin
 
 	is_dir = (path_len && path[path_len - 1] == '/') ? 1 : 0;
 
-	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 0, error)) {
+	phar_archive_data *phar = phar_get_archive(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 0, error);
+	if (!phar) {
 		return NULL;
 	}
 
@@ -960,9 +962,9 @@ zend_result phar_free_alias(const phar_archive_data *phar) /* {{{ */
  * Looks up a phar archive in the filename map, connecting it to the alias
  * (if any) or returns null
  */
-zend_result phar_get_archive(phar_archive_data **archive, const char *fname, size_t fname_len, const char *alias, size_t alias_len, char **error) /* {{{ */
+phar_archive_data* phar_get_archive(const char *fname, size_t fname_len, const char *alias, size_t alias_len, char **error) /* {{{ */
 {
-	phar_archive_data *fd_ptr;
+	phar_archive_data *archive;
 
 	phar_request_initialize();
 
@@ -970,142 +972,132 @@ zend_result phar_get_archive(phar_archive_data **archive, const char *fname, siz
 		*error = NULL;
 	}
 
-	*archive = NULL;
-
 	if (PHAR_G(last_phar) && zend_string_equals_cstr(PHAR_G(last_phar_name), fname, fname_len)) {
-		*archive = PHAR_G(last_phar);
+		archive = PHAR_G(last_phar);
 		if (alias && alias_len) {
 
 			if (!PHAR_G(last_phar)->is_temporary_alias && (alias_len != PHAR_G(last_phar)->alias_len || memcmp(PHAR_G(last_phar)->alias, alias, alias_len))) {
 				if (error) {
 					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(PHAR_G(last_phar)->fname), fname);
 				}
-				*archive = NULL;
-				return FAILURE;
+				return NULL;
 			}
 
 			if (PHAR_G(last_phar)->alias_len && zend_hash_str_exists(&(PHAR_G(phar_alias_map)), PHAR_G(last_phar)->alias, PHAR_G(last_phar)->alias_len)) {
 				zend_hash_str_del(&(PHAR_G(phar_alias_map)), PHAR_G(last_phar)->alias, PHAR_G(last_phar)->alias_len);
 			}
 
-			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, *archive);
+			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, archive);
 			PHAR_G(last_alias) = alias;
 			PHAR_G(last_alias_len) = alias_len;
 		}
 
-		return SUCCESS;
+		return archive;
 	}
 
 	if (alias && alias_len) {
 		/* If the alias stored in the last_phar cache matches, just use it directly */
 		if (PHAR_G(last_phar) && alias_len == PHAR_G(last_alias_len) && !memcmp(alias, PHAR_G(last_alias), alias_len)) {
-			fd_ptr = PHAR_G(last_phar);
+			archive = PHAR_G(last_phar);
 		} else {
-			fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len);
+			archive = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len);
 		}
 
 		/* If we didn't find the alias, check in the cached manifest to see if we can find it */
-		if (!fd_ptr && PHAR_G(manifest_cached)) {
-			fd_ptr = zend_hash_str_find_ptr(&cached_alias, alias, alias_len);
+		if (!archive && PHAR_G(manifest_cached)) {
+			archive = zend_hash_str_find_ptr(&cached_alias, alias, alias_len);
 		}
 
-		if (fd_ptr) {
-			if (!zend_string_equals_cstr(fd_ptr->fname, fname, fname_len)) {
+		if (archive) {
+			if (!zend_string_equals_cstr(archive->fname, fname, fname_len)) {
 				if (error) {
-					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(fd_ptr->fname), fname);
+					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(archive->fname), fname);
 				}
-				if (SUCCESS == phar_free_alias(fd_ptr)) {
+				if (SUCCESS == phar_free_alias(archive)) {
 					if (error) {
 						efree(*error);
 						*error = NULL;
 					}
 				}
-				return FAILURE;
+				return NULL;
 			}
 
-			*archive = fd_ptr;
-			PHAR_G(last_phar) = fd_ptr;
-			PHAR_G(last_phar_name) = fd_ptr->fname;
+			PHAR_G(last_phar) = archive;
+			PHAR_G(last_phar_name) = archive->fname;
 			PHAR_G(last_alias) = alias;
 			PHAR_G(last_alias_len) = alias_len;
 
-			return SUCCESS;
+			return archive;
 		}
 	}
 
 	if (fname && fname_len) {
-		fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len);
-		if (fd_ptr) {
-			*archive = fd_ptr;
-
+		archive = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len);
+		if (archive) {
 			if (alias && alias_len) {
-				if (!fd_ptr->is_temporary_alias && (alias_len != fd_ptr->alias_len || memcmp(fd_ptr->alias, alias, alias_len))) {
+				if (!archive->is_temporary_alias && (alias_len != archive->alias_len || memcmp(archive->alias, alias, alias_len))) {
 					if (error) {
-						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(fd_ptr->fname), fname);
+						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(archive->fname), fname);
 					}
-					return FAILURE;
+					return NULL;
 				}
 
-				if (fd_ptr->alias_len && zend_hash_str_exists(&(PHAR_G(phar_alias_map)), fd_ptr->alias, fd_ptr->alias_len)) {
-					zend_hash_str_del(&(PHAR_G(phar_alias_map)), fd_ptr->alias, fd_ptr->alias_len);
+				if (archive->alias_len && zend_hash_str_exists(&(PHAR_G(phar_alias_map)), archive->alias, archive->alias_len)) {
+					zend_hash_str_del(&(PHAR_G(phar_alias_map)), archive->alias, archive->alias_len);
 				}
 
-				zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, fd_ptr);
+				zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, archive);
 			}
 
-			PHAR_G(last_phar) = fd_ptr;
-			PHAR_G(last_phar_name) = fd_ptr->fname;
-			PHAR_G(last_alias) = fd_ptr->alias;
-			PHAR_G(last_alias_len) = fd_ptr->alias_len;
+			PHAR_G(last_phar) = archive;
+			PHAR_G(last_phar_name) = archive->fname;
+			PHAR_G(last_alias) = archive->alias;
+			PHAR_G(last_alias_len) = archive->alias_len;
 
-			return SUCCESS;
+			return archive;
 		}
 
-		if (PHAR_G(manifest_cached) && NULL != (fd_ptr = zend_hash_str_find_ptr(&cached_phars, fname, fname_len))) {
-			*archive = fd_ptr;
-
+		if (PHAR_G(manifest_cached) && NULL != (archive = zend_hash_str_find_ptr(&cached_phars, fname, fname_len))) {
 			/* this could be problematic - alias should never be different from manifest alias
 			   for cached phars */
-			if (!fd_ptr->is_temporary_alias && alias && alias_len) {
-				if (alias_len != fd_ptr->alias_len || memcmp(fd_ptr->alias, alias, alias_len)) {
+			if (!archive->is_temporary_alias && alias && alias_len) {
+				if (alias_len != archive->alias_len || memcmp(archive->alias, alias, alias_len)) {
 					if (error) {
-						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(fd_ptr->fname), fname);
+						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, ZSTR_VAL(archive->fname), fname);
 					}
-					return FAILURE;
+					return NULL;
 				}
 			}
 
-			PHAR_G(last_phar) = fd_ptr;
-			PHAR_G(last_phar_name) = fd_ptr->fname;
-			PHAR_G(last_alias) = fd_ptr->alias;
-			PHAR_G(last_alias_len) = fd_ptr->alias_len;
+			PHAR_G(last_phar) = archive;
+			PHAR_G(last_phar_name) = archive->fname;
+			PHAR_G(last_alias) = archive->alias;
+			PHAR_G(last_alias_len) = archive->alias_len;
 
-			return SUCCESS;
+			return archive;
 		}
 
-		fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), fname, fname_len);
+		archive = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), fname, fname_len);
 
 		/* If we didn't find the fname in the alias map, check in the cached manifest to see if we can find it */
-		if (!fd_ptr && PHAR_G(manifest_cached)) {
-			fd_ptr = zend_hash_str_find_ptr(&cached_alias, fname, fname_len);
+		if (!archive && PHAR_G(manifest_cached)) {
+			archive = zend_hash_str_find_ptr(&cached_alias, fname, fname_len);
 		}
 
-		if (fd_ptr) {
-			*archive = fd_ptr;
+		if (archive) {
+			PHAR_G(last_phar) = archive;
+			PHAR_G(last_phar_name) = archive->fname;
+			PHAR_G(last_alias) = archive->alias;
+			PHAR_G(last_alias_len) = archive->alias_len;
 
-			PHAR_G(last_phar) = fd_ptr;
-			PHAR_G(last_phar_name) = fd_ptr->fname;
-			PHAR_G(last_alias) = fd_ptr->alias;
-			PHAR_G(last_alias_len) = fd_ptr->alias_len;
-
-			return SUCCESS;
+			return archive;
 		}
 
 		/* not found, try converting \ to / */
 		char *my_realpath = expand_filepath(fname, NULL);
 
 		if (UNEXPECTED(!my_realpath)) {
-			return FAILURE;
+			return NULL;
 		}
 
 		size_t my_realpath_len = strlen(my_realpath);
@@ -1113,31 +1105,29 @@ zend_result phar_get_archive(phar_archive_data **archive, const char *fname, siz
 		phar_unixify_path_separators(my_realpath, my_realpath_len);
 #endif
 
-		fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), my_realpath, my_realpath_len);
+		archive = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), my_realpath, my_realpath_len);
 
 		/* If we didn't find the path in the fname map, check in the cached manifest to see if we can find it */
-		if (!fd_ptr && PHAR_G(manifest_cached)) {
-			fd_ptr = zend_hash_str_find_ptr(&cached_phars, my_realpath, my_realpath_len);
+		if (!archive && PHAR_G(manifest_cached)) {
+			archive = zend_hash_str_find_ptr(&cached_phars, my_realpath, my_realpath_len);
 		}
 		efree(my_realpath);
 
-		if (fd_ptr) {
-			*archive = fd_ptr;
-
+		if (archive) {
 			if (alias && alias_len) {
-				zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, fd_ptr);
+				zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, archive);
 			}
 
-			PHAR_G(last_phar) = fd_ptr;
-			PHAR_G(last_phar_name) = fd_ptr->fname;
-			PHAR_G(last_alias) = fd_ptr->alias;
-			PHAR_G(last_alias_len) = fd_ptr->alias_len;
+			PHAR_G(last_phar) = archive;
+			PHAR_G(last_phar_name) = archive->fname;
+			PHAR_G(last_alias) = archive->alias;
+			PHAR_G(last_alias_len) = archive->alias_len;
 
-			return SUCCESS;
+			return archive;
 		}
 	}
 
-	return FAILURE;
+	return NULL;
 }
 /* }}} */
 
@@ -1372,36 +1362,105 @@ static int phar_hex_str(const char *digest, size_t digest_len, char **signature)
 /* }}} */
 
 #ifndef PHAR_HAVE_OPENSSL
-static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, zend_off_t end, const char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type) /* {{{ */
-{
-	zval retval, zp[4];
-	zend_string *str;
+ZEND_ATTRIBUTE_NONNULL static bool phar_call_openssl_verify(
+	php_stream *fp,
+	zend_off_t end,
+	zend_string *public_key,
+	const char *signature,
+	size_t signature_len,
+	uint32_t sig_type
+) {
+	ZEND_ASSERT(signature_len != 0);
+	zend_function *fn = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("openssl_verify"));
 
-	zend_function *fn = NULL;
-	if (is_sign) {
-		fn = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("openssl_sign"));
-	} else {
-		fn = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("openssl_verify"));
+	/* OpenSSL is not available, even as a shared module */
+	if (UNEXPECTED(fn == NULL)) {
+		return false;
 	}
+
+	/* Read and copy stream content */
+	php_stream_rewind(fp);
+	zend_string *str = php_stream_copy_to_mem(fp, (size_t) end, false);
+	/* No content thus signing must fail */
+	if (UNEXPECTED(str == NULL)) {
+		return false;
+	}
+
+	/* Set up parameters for call to openssl_verify()
+	 * openssl_verify(
+	 *	string $data,
+	 *	string $signature,
+	 *	OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key,
+	 *	string|int $algorithm = OPENSSL_ALGO_SHA1,
+	 *	int $padding = 0
+	 * ): int|false
+	 */
+	zval retval, zp[4];
+	ZVAL_STR(&zp[0], str);
+	ZVAL_STRINGL(&zp[1], signature, signature_len);
+	/* Note we do not own the lifetime of the public key, but it is fine as calling the function will increase the refcount) */
+	ZVAL_STR(&zp[2], public_key);
+	if (sig_type == PHAR_SIG_OPENSSL_SHA512) {
+		ZVAL_LONG(&zp[3], 9); /* value from openssl.c #define OPENSSL_ALGO_SHA512 9 */
+	} else if (sig_type == PHAR_SIG_OPENSSL_SHA256) {
+		ZVAL_LONG(&zp[3], 7); /* value from openssl.c #define OPENSSL_ALGO_SHA256 7 */
+	} else {
+		/* don't rely on default value which may change in the future */
+		ZVAL_LONG(&zp[3], 1); /* value from openssl.c #define OPENSSL_ALGO_SHA1   1 */
+	}
+	zend_call_known_function(fn, NULL, NULL, &retval, /* param_count */ 4, zp, NULL);
+	/* Free string arguments that we own */
+	zval_ptr_dtor_str(&zp[0]);
+	zval_ptr_dtor_str(&zp[1]);
+
+	/* Returns 1 if the signature is correct, 0 if it is incorrect, and -1 or false on error. */
+	switch (Z_TYPE(retval)) {
+		case IS_LONG:
+			if (1 == Z_LVAL(retval)) {
+				return true;
+			}
+			ZEND_FALLTHROUGH;
+		default:
+			/* Unlikely, but the openssl_verify() function may be disabled and redefined in userland and return bollocks */
+			zval_ptr_dtor(&retval);
+			return false;
+	}
+}
+
+static zend_result phar_call_openssl_sign(php_stream *fp, zend_off_t end, const char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type) /* {{{ */
+{
+	ZEND_ASSERT(end != 0);
+	ZEND_ASSERT(*signature_len == 0);
+	zval retval, zp[4];
+
+	zend_function *fn = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("openssl_sign"));
 
 	/* OpenSSL is not available, even as a shared module */
 	if (fn == NULL) {
 		return FAILURE;
 	}
 
-	if (*signature_len) {
-		ZVAL_STRINGL(&zp[1], *signature, *signature_len);
-	} else {
-		ZVAL_EMPTY_STRING(&zp[1]);
-	}
-	ZVAL_STRINGL(&zp[2], key, key_len);
+	/* Read and copy stream content */
 	php_stream_rewind(fp);
-	str = php_stream_copy_to_mem(fp, (size_t) end, 0);
-	if (str) {
-		ZVAL_STR(&zp[0], str);
-	} else {
-		ZVAL_EMPTY_STRING(&zp[0]);
+	zend_string *str = php_stream_copy_to_mem(fp, (size_t) end, false);
+	/* No content thus signing must fail */
+	if (!str || (size_t)end != ZSTR_LEN(str)) {
+		return FAILURE;
 	}
+
+	/* Set up parameters for call to openssl_sign()
+	 * openssl_sign(
+	 *	string $data,
+	 *	string &$signature,
+	 *	#[\SensitiveParameter] OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key,
+	 *	string|int $algorithm = OPENSSL_ALGO_SHA1,
+	 *	int $padding = 0
+	 * ): bool
+	 */
+	ZVAL_STR(&zp[0], str);
+	ZVAL_EMPTY_STRING(&zp[1]);
+	ZVAL_NEW_REF(&zp[1], &zp[1]);
+	ZVAL_STRINGL(&zp[2], key, key_len);
 	if (sig_type == PHAR_SIG_OPENSSL_SHA512) {
 		ZVAL_LONG(&zp[3], 9); /* value from openssl.c #define OPENSSL_ALGO_SHA512 9 */
 	} else if (sig_type == PHAR_SIG_OPENSSL_SHA256) {
@@ -1411,51 +1470,22 @@ static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, ze
 		ZVAL_LONG(&zp[3], 1); /* value from openssl.c #define OPENSSL_ALGO_SHA1   1 */
 	}
 
-	if ((size_t)end != Z_STRLEN(zp[0])) {
-		zval_ptr_dtor_str(&zp[0]);
-		zval_ptr_dtor_str(&zp[1]);
-		zval_ptr_dtor_str(&zp[2]);
-		return FAILURE;
-	}
-
-	Z_ADDREF(zp[0]);
-	if (is_sign) {
-		ZVAL_NEW_REF(&zp[1], &zp[1]);
-	} else {
-		Z_ADDREF(zp[1]);
-	}
-	Z_ADDREF(zp[2]);
-
 	zend_call_known_function(fn, NULL, NULL, &retval, /* param_count */ 4, zp, NULL);
 
-	Z_DELREF(zp[0]);
-
-	if (is_sign) {
-		ZVAL_UNREF(&zp[1]);
-	} else {
-		Z_DELREF(zp[1]);
-	}
-	Z_DELREF(zp[2]);
+	ZVAL_UNREF(&zp[1]);
 
 	zval_ptr_dtor_str(&zp[0]);
 	zval_ptr_dtor_str(&zp[2]);
 
 	switch (Z_TYPE(retval)) {
-		case IS_LONG:
-			zval_ptr_dtor(&zp[1]);
-			if (1 == Z_LVAL(retval)) {
-				return SUCCESS;
-			}
-			return FAILURE;
 		case IS_TRUE:
 			*signature = estrndup(Z_STRVAL(zp[1]), Z_STRLEN(zp[1]));
 			*signature_len = Z_STRLEN(zp[1]);
 			zval_ptr_dtor(&zp[1]);
 			return SUCCESS;
 		default:
+			/* Unlikely, but the openssl_sign() function may be disabled and redefined in userland and return bollocks */
 			zval_ptr_dtor(&retval);
-			ZEND_FALLTHROUGH;
-		case IS_FALSE:
 			zval_ptr_dtor(&zp[1]);
 			return FAILURE;
 	}
@@ -1463,7 +1493,7 @@ static zend_result phar_call_openssl_signverify(bool is_sign, php_stream *fp, ze
 /* }}} */
 #endif /* #ifndef PHAR_HAVE_OPENSSL */
 
-zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, const char *fname, char **signature, size_t *signature_len, char **error) /* {{{ */
+zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, const char *sig, size_t sig_len, const char *fname, char **signature, size_t *signature_len, char **error) /* {{{ */
 {
 	size_t read_size, len;
 	zend_off_t read_len;
@@ -1488,8 +1518,6 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 			} else {
 				mdtype = EVP_sha1();
 			}
-#else
-			size_t tempsig;
 #endif
 			zend_string *pubkey = NULL;
 			char *pfile;
@@ -1524,9 +1552,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 			}
 
 #ifndef PHAR_HAVE_OPENSSL
-			tempsig = sig_len;
-
-			if (FAILURE == phar_call_openssl_signverify(false, fp, end_of_phar, ZSTR_VAL(pubkey), ZSTR_LEN(pubkey), &sig, &tempsig, sig_type)) {
+			if (!phar_call_openssl_verify(fp, end_of_phar, pubkey, sig, sig_len, sig_type)) {
 				zend_string_release_ex(pubkey, 0);
 
 				if (error) {
@@ -1536,9 +1562,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 				return FAILURE;
 			}
 
-			zend_string_release_ex(pubkey, 0);
-
-			sig_len = tempsig;
+			zend_string_release_ex(pubkey, false);
 #else
 			in = BIO_new_mem_buf(ZSTR_VAL(pubkey), ZSTR_LEN(pubkey));
 
@@ -1610,7 +1634,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 			EVP_MD_CTX_destroy(md_ctx);
 #endif
 
-			*signature_len = phar_hex_str((const char*)sig, sig_len, signature);
+			*signature_len = phar_hex_str(sig, sig_len, signature);
 		}
 		break;
 		case PHAR_SIG_SHA512: {
@@ -1909,7 +1933,7 @@ ZEND_ATTRIBUTE_NONNULL zend_string* phar_create_signature(phar_archive_data *pha
 			siglen = 0;
 			php_stream_seek(fp, 0, SEEK_END);
 
-			if (FAILURE == phar_call_openssl_signverify(true, fp, php_stream_tell(fp), PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len), (char **)&sigbuf, &siglen, phar->sig_flags)) {
+			if (FAILURE == phar_call_openssl_sign(fp, php_stream_tell(fp), PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len), (char **)&sigbuf, &siglen, phar->sig_flags)) {
 				spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", ZSTR_VAL(phar->fname));
 				return NULL;
 			}

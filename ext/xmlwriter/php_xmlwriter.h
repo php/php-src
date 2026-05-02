@@ -38,7 +38,7 @@ typedef struct _ze_xmlwriter_object {
 } ze_xmlwriter_object;
 
 static inline ze_xmlwriter_object *php_xmlwriter_fetch_object(zend_object *obj) {
-	return (ze_xmlwriter_object *)((char*)(obj) - XtOffsetOf(ze_xmlwriter_object, std));
+	return (ze_xmlwriter_object *)((char*)(obj) - offsetof(ze_xmlwriter_object, std));
 }
 
 #define Z_XMLWRITER_P(zv) php_xmlwriter_fetch_object(Z_OBJ_P((zv)))

@@ -96,6 +96,8 @@ PHP                                                                        NEWS
   . Added AES-SIV support. (jordikroon)
   . Implemented GH-20310 (No critical extension indication in
     openssl_x509_parse() output). (StephenWall)
+  . Added TLS session resumption support for streams with new context options
+    and Openssl\Session class. (Jakub Zelenka)
 
 - PDO_PGSQL:
   . Clear session-local state disconnect-equivalent processing.
@@ -104,6 +106,10 @@ PHP                                                                        NEWS
 - PGSQL:
   . Enabled 64 bits support for pg_lo_truncate()/pg_lo_tell()
     if the server supports it. (KentarouTakeda)
+  . pg_fetch_object() now surfaces non-instantiable class errors
+    before fetching, resolves the constructor via the get_constructor
+    handler, and reports the empty-constructor ValueError on the
+    $constructor_args argument. (David Carlier)
 
 - Phar:
   . Support reference values in Phar::mungServer(). (ndossche)
@@ -182,6 +188,8 @@ PHP                                                                        NEWS
     contains null bytes. (Weilin Du)
   . Improved explode() ValueError message when $separator is empty; suggests
     str_split() or mb_str_split(). (diegoasales)
+  . proc_open() now raises a ValueError when the $cwd argument contains
+    null bytes. (Weilin Du)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
@@ -207,6 +215,9 @@ PHP                                                                        NEWS
 
 - Zlib:
   . deflate_init() now raises a TypeError when the value for option
-    "strategy" is not of type int. (Weilin Du)
+    "level", "memory", "window", or "strategy" is not of type int.
+    (Weilin Du)
+  . inflate_init() now raises a TypeError when the value for option
+    "window" is not of type int. (Weilin Du)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

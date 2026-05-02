@@ -733,8 +733,6 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 {
 	zend_long lval;
 	double dval;
-	zend_string *str;
-	bool bval;
 
 	/* Type preference order: int -> float -> string -> bool */
 	if (type_mask & MAY_BE_LONG) {
@@ -760,16 +758,23 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 			return false;
 		}
 	}
-	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, 0)) {
-		zval_ptr_dtor(arg);
-		ZVAL_DOUBLE(arg, dval);
-		return true;
+	if (type_mask & MAY_BE_DOUBLE) {
+		dval = zend_parse_arg_double_weak(arg, 0);
+		if (EXPECTED(!zend_isnan(dval))) {
+			zval_ptr_dtor(arg);
+			ZVAL_DOUBLE(arg, dval);
+			return true;
+		}
 	}
-	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(arg, &str, 0)) {
+	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(arg, 0)) {
 		/* on success "arg" is converted to IS_STRING */
 		return true;
 	}
-	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval, 0)) {
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
+		zpp_parse_bool_status bval = zend_parse_arg_bool_weak(arg, 0);
+		if (UNEXPECTED(bval == ZPP_PARSE_BOOL_STATUS_ERROR)) {
+			return false;
+		}
 		zval_ptr_dtor(arg);
 		ZVAL_BOOL(arg, bval);
 		return true;
@@ -793,21 +798,19 @@ static bool can_convert_to_string(const zval *zv) {
 static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, const zval *arg)
 {
 	zend_long lval;
-	double dval;
-	bool bval;
 
 	/* Pass (uint32_t)-1 as arg_num to indicate to ZPP not to emit any deprecation notice,
 	 * this is needed because the version with side effects also uses 0 (e.g. for typed properties) */
 	if ((type_mask & MAY_BE_LONG) && zend_parse_arg_long_weak(arg, &lval, (uint32_t)-1)) {
 		return true;
 	}
-	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, (uint32_t)-1)) {
+	if ((type_mask & MAY_BE_DOUBLE) && !zend_isnan(zend_parse_arg_double_weak(arg, (uint32_t)-1))) {
 		return true;
 	}
 	if ((type_mask & MAY_BE_STRING) && can_convert_to_string(arg)) {
 		return true;
 	}
-	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval, (uint32_t)-1)) {
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, (uint32_t)-1) != ZPP_PARSE_BOOL_STATUS_ERROR) {
 		return true;
 	}
 	return false;

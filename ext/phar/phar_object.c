@@ -349,9 +349,10 @@ static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, 
 /* post-process REQUEST_URI and retrieve the actual request URI.  This is for
    cases like http://localhost/blah.phar/path/to/file.php/extra/stuff
    which calls "blah.phar" file "path/to/file.php" with PATH_INFO "/extra/stuff" */
-static void phar_postprocess_ru_web(const char *fname, size_t fname_len, char *entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
+static void phar_postprocess_ru_web(const char *fname, size_t fname_len, const char *entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
 {
-	char *e = entry + 1, *u1 = NULL, *u = NULL, *saveu = NULL;
+	const char *e = entry + 1;
+	char *u1 = NULL, *u = NULL, *saveu = NULL;
 	size_t e_len = *entry_len - 1, u_len = 0;
 	phar_archive_data *pphar;
 
@@ -548,8 +549,8 @@ PHP_METHOD(Phar, webPhar)
 	zval *mimeoverride = NULL;
 	zend_fcall_info rewrite_fci = {0};
 	zend_fcall_info_cache rewrite_fcc;
-	char *alias = NULL, *error, *index_php = NULL, *ru = NULL;
-	size_t alias_len = 0, free_pathinfo = 0;
+	char *error, *index_php = NULL, *ru = NULL;
+	size_t free_pathinfo = 0;
 	zend_string *f404 = NULL;
 	size_t ru_len = 0;
 	char *fname, *path_info, *mime_type = NULL, *entry, *pt;
@@ -561,14 +562,15 @@ PHP_METHOD(Phar, webPhar)
 	phar_entry_info *info = NULL;
 	size_t sapi_mod_name_len = strlen(sapi_module.name);
 	phar_action_status status = PHAR_ACT_DO_EXIT;
+	zend_string *alias = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!S!af!", &alias, &alias_len, &index_php, &index_php_len, &f404, &mimeoverride, &rewrite_fci, &rewrite_fcc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!s!S!af!", &alias, &index_php, &index_php_len, &f404, &mimeoverride, &rewrite_fci, &rewrite_fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	phar_request_initialize();
 
-	if (phar_open_executed_filename(alias, alias_len, &error) != SUCCESS) {
+	if (phar_open_executed_filename(alias, &error) != SUCCESS) {
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 			efree(error);
@@ -752,8 +754,8 @@ PHP_METHOD(Phar, webPhar)
 			entry_len = sizeof("/index.php")-1;
 		}
 
-		if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
-			(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
+		phar = phar_get_archive(fname, fname_len, NULL, 0, NULL);
+		if (!phar || (info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
 			phar_do_404(phar, fname, fname_len, f404);
 		} else {
 			char *tmp = NULL, sa = '\0';
@@ -793,8 +795,8 @@ PHP_METHOD(Phar, webPhar)
 		goto cleanup_skip_entry;
 	}
 
-	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL) ||
-		(info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
+	phar = phar_get_archive(fname, fname_len, NULL, 0, NULL);
+	if (!phar || (info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
 		phar_do_404(phar, fname, fname_len, f404);
 		goto cleanup;
 	}
@@ -946,17 +948,17 @@ PHP_METHOD(Phar, createDefaultStub)
 /* {{{ Reads the currently executed file (a phar) and registers its manifest */
 PHP_METHOD(Phar, mapPhar)
 {
-	char *alias = NULL, *error;
-	size_t alias_len = 0;
+	zend_string *alias = NULL;
+	char *error;
 	zend_long dataoffset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!l", &alias, &alias_len, &dataoffset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!l", &alias, &dataoffset) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	phar_request_initialize();
 
-	RETVAL_BOOL(phar_open_executed_filename(alias, alias_len, &error) == SUCCESS);
+	RETVAL_BOOL(phar_open_executed_filename(alias, &error) == SUCCESS);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -968,16 +970,16 @@ PHP_METHOD(Phar, mapPhar)
 PHP_METHOD(Phar, loadPhar)
 {
 	zend_string *fname;
-	char *alias = NULL, *error;
-	size_t alias_len = 0;
+	zend_string *alias = NULL;
+	char *error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|s!", &fname, &alias, &alias_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|S!", &fname, &alias) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	phar_request_initialize();
 
-	RETVAL_BOOL(phar_open_from_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, REPORT_ERRORS, NULL, &error) == SUCCESS);
+	RETVAL_BOOL(phar_open_from_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, REPORT_ERRORS, NULL, &error) == SUCCESS);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
@@ -1264,7 +1266,7 @@ PHP_METHOD(Phar, unlinkArchive)
 		RETURN_THROWS();
 	}
 
-	if (FAILURE == phar_open_from_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 0, REPORT_ERRORS, &phar, &error)) {
+	if (FAILURE == phar_open_from_filename(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, REPORT_ERRORS, &phar, &error)) {
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Unknown phar archive \"%s\": %s", ZSTR_VAL(fname), error);
 			efree(error);
@@ -4414,7 +4416,7 @@ PHP_METHOD(PharFileInfo, __construct)
 		RETURN_THROWS();
 	}
 
-	if (phar_open_from_filename(ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, 0, REPORT_ERRORS, &phar_data, &error) == FAILURE) {
+	if (phar_open_from_filename(ZSTR_VAL(arch), ZSTR_LEN(arch), NULL, REPORT_ERRORS, &phar_data, &error) == FAILURE) {
 		zend_string_release_ex(arch, false);
 		efree(entry);
 		if (error) {

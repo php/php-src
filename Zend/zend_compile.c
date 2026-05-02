@@ -5175,7 +5175,7 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	opline->lineno = lineno;
 	opline->extended_value = (2 << 16) | IS_ARRAY;
 	const zval *fbc_zv = zend_hash_find(CG(function_table), lcname);
-	const Bucket *fbc_bucket = (const Bucket*)((uintptr_t)fbc_zv - XtOffsetOf(Bucket, val));
+	const Bucket *fbc_bucket = (const Bucket*)((uintptr_t)fbc_zv - offsetof(Bucket, val));
 	Z_EXTRA_P(CT_CONSTANT(opline->op1)) = fbc_bucket - CG(function_table)->arData;
 
 	/* Initialize the result array. */
@@ -5472,7 +5472,7 @@ static void zend_compile_call(znode *result, const zend_ast *ast, uint32_t type)
 
 		/* Store offset to function from symbol table in op2.extra. */
 		if (fbc->type == ZEND_INTERNAL_FUNCTION) {
-			const Bucket *fbc_bucket = (const Bucket*)((uintptr_t)fbc_zv - XtOffsetOf(Bucket, val));
+			const Bucket *fbc_bucket = (const Bucket*)((uintptr_t)fbc_zv - offsetof(Bucket, val));
 			Z_EXTRA_P(CT_CONSTANT(opline->op2)) = fbc_bucket - CG(function_table)->arData;
 		}
 

@@ -37,7 +37,7 @@ typedef struct {
 } IntlDatePatternGenerator_object;
 
 static inline IntlDatePatternGenerator_object *php_intl_datepatterngenerator_fetch_object(zend_object *obj) {
-	return (IntlDatePatternGenerator_object *)((char*)(obj) - XtOffsetOf(IntlDatePatternGenerator_object, zo));
+	return (IntlDatePatternGenerator_object *)((char*)(obj) - offsetof(IntlDatePatternGenerator_object, zo));
 }
 #define Z_INTL_DATEPATTERNGENERATOR_P(zv) php_intl_datepatterngenerator_fetch_object(Z_OBJ_P(zv))
 

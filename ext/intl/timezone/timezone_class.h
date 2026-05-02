@@ -47,7 +47,7 @@ typedef struct {
 } TimeZone_object;
 
 static inline TimeZone_object *php_intl_timezone_fetch_object(zend_object *obj) {
-	return (TimeZone_object *)((char*)(obj) - XtOffsetOf(TimeZone_object, zo));
+	return (TimeZone_object *)((char*)(obj) - offsetof(TimeZone_object, zo));
 }
 #define Z_INTL_TIMEZONE_P(zv) php_intl_timezone_fetch_object(Z_OBJ_P(zv))
 

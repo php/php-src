@@ -661,7 +661,7 @@ static void php_url_scanner_ex_activate(bool is_session)
 		ctx = &BG(url_adapt_output_ex);
 	}
 
-	memset(ctx, 0, XtOffsetOf(url_adapt_state_ex_t, tags));
+	memset(ctx, 0, offsetof(url_adapt_state_ex_t, tags));
 }
 
 static void php_url_scanner_ex_deactivate(bool is_session)

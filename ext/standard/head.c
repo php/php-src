@@ -74,6 +74,13 @@ PHPAPI bool php_header(void)
 	}
 }
 
+PHPAPI bool php_is_valid_samesite_value(zend_string *value)
+{
+	return zend_string_equals_literal_ci(value, "Strict")
+		|| zend_string_equals_literal_ci(value, "Lax")
+		|| zend_string_equals_literal_ci(value, "None");
+}
+
 #define ILLEGAL_COOKIE_CHARACTER "\",\", \";\", \" \", \"\\t\", \"\\r\", \"\\n\", \"\\013\", or \"\\014\""
 PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t expires,
 	zend_string *path, zend_string *domain, bool secure, bool httponly,
@@ -121,7 +128,11 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 		return FAILURE;
 	}
 
-	/* Should check value of SameSite? */
+	if (samesite && ZSTR_LEN(samesite) > 0 && !php_is_valid_samesite_value(samesite)) {
+		zend_value_error("%s(): \"samesite\" option must be \"Strict\", \"Lax\", \"None\", or \"\"",
+			get_active_function_name());
+		return FAILURE;
+	}
 
 	if (value == NULL || ZSTR_LEN(value) == 0) {
 		/*

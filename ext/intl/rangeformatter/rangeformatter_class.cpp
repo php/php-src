@@ -219,7 +219,7 @@ void rangeformatter_register_class(void)
     class_entry_IntlNumberRangeFormatter->create_object = IntlNumberRangeFormatter_object_create;
 
     memcpy(&rangeformatter_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-    rangeformatter_handlers.offset = XtOffsetOf(IntlNumberRangeFormatter_object, zo);
+    rangeformatter_handlers.offset = offsetof(IntlNumberRangeFormatter_object, zo);
     rangeformatter_handlers.free_obj = IntlNumberRangeFormatter_object_free;
     rangeformatter_handlers.clone_obj = NULL;
 }

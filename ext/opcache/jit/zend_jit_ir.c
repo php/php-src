@@ -10444,28 +10444,19 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		if (ZEND_OBSERVER_ENABLED && (!func || (func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_GENERATOR)) == 0)) {
 			ir_ref observer_handler;
 			ir_ref rx = jit_FP(jit);
+			const zend_op *observer_opline = NULL;
 			struct jit_observer_fcall_is_unobserved_data unobserved_data = jit_observer_fcall_is_unobserved_start(jit, func, &observer_handler, rx, func_ref);
 			if (trace && (trace->op != ZEND_JIT_TRACE_END || trace->stop < ZEND_JIT_TRACE_STOP_INTERPRETER)) {
 				ZEND_ASSERT(trace[1].op == ZEND_JIT_TRACE_VM || trace[1].op == ZEND_JIT_TRACE_END);
-				jit_SET_EX_OPLINE(jit, trace[1].opline);
+				observer_opline = trace[1].opline;
+				jit_SET_EX_OPLINE(jit, observer_opline);
 			} else {
 				// EX(opline) = opline
 				ir_STORE(jit_EX(opline), jit_IP(jit));
 			}
 			jit_observer_fcall_begin(jit, rx, observer_handler);
 
-			if (trace) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
-
-				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-				if (!exit_addr) {
-					return 0;
-				}
-			} else {
-				exit_addr = NULL;
-			}
-
-			zend_jit_check_timeout(jit, NULL /* we're inside the called function */, exit_addr);
+			zend_jit_check_timeout(jit, observer_opline, NULL);
 
 			jit_observer_fcall_is_unobserved_end(jit, &unobserved_data);
 		}

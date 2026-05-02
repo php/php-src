@@ -698,7 +698,7 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 		parse_unix_address(xparam, &unix_addr);
 
 		int result = bind(sock->socket, (const struct sockaddr *)&unix_addr,
-			(socklen_t) XtOffsetOf(struct sockaddr_un, sun_path) + xparam->inputs.namelen);
+			(socklen_t) offsetof(struct sockaddr_un, sun_path) + xparam->inputs.namelen);
 		if (result == -1 && xparam->want_errortext) {
 			char errstr[256];
 			xparam->outputs.error_text = strpprintf(0, "%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
@@ -834,7 +834,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 		parse_unix_address(xparam, &unix_addr);
 
 		ret = php_network_connect_socket(sock->socket,
-				(const struct sockaddr *)&unix_addr, (socklen_t) XtOffsetOf(struct sockaddr_un, sun_path) + xparam->inputs.namelen,
+				(const struct sockaddr *)&unix_addr, (socklen_t) offsetof(struct sockaddr_un, sun_path) + xparam->inputs.namelen,
 				xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC, xparam->inputs.timeout,
 				xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 				&err);

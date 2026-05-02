@@ -50,7 +50,7 @@ PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
 /* Object helper */
 static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_filesystem_object*)((char*)(obj) - XtOffsetOf(spl_filesystem_object, std));
+	return (spl_filesystem_object*)((char*)(obj) - offsetof(spl_filesystem_object, std));
 }
 /* }}} */
 
@@ -188,8 +188,8 @@ static zend_object *spl_filesystem_object_new(zend_class_entry *class_type)
 	intern = emalloc(sizeof(spl_filesystem_object) + zend_object_properties_size(class_type));
 	/* Avoid initializing the entirety of spl_filesystem_object.u.dir.entry. */
 	memset(intern, 0,
-		MAX(XtOffsetOf(spl_filesystem_object, u.dir.entry),
-			XtOffsetOf(spl_filesystem_object, u.file.escape) + sizeof(int)));
+		MAX(offsetof(spl_filesystem_object, u.dir.entry),
+			offsetof(spl_filesystem_object, u.file.escape) + sizeof(int)));
 	/* intern->type = SPL_FS_INFO; done by set 0 */
 	intern->file_class = spl_ce_SplFileObject;
 	intern->info_class = spl_ce_SplFileInfo;
@@ -2682,7 +2682,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 	spl_ce_SplFileInfo->default_object_handlers = &spl_filesystem_object_handlers;
 
 	memcpy(&spl_filesystem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	spl_filesystem_object_handlers.offset = XtOffsetOf(spl_filesystem_object, std);
+	spl_filesystem_object_handlers.offset = offsetof(spl_filesystem_object, std);
 	spl_filesystem_object_handlers.clone_obj = spl_filesystem_object_clone;
 	spl_filesystem_object_handlers.dtor_obj = spl_filesystem_object_destroy_object;
 	spl_filesystem_object_handlers.free_obj = spl_filesystem_object_free_storage;

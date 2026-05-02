@@ -126,7 +126,7 @@ bool phar_is_tar(const char *buf, const char *fname) /* {{{ */
 }
 /* }}} */
 
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 6, 7) zend_result phar_open_or_create_tar(zend_string *fname, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 6, 7) zend_result phar_open_or_create_tar(zend_string *fname, const char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	phar_archive_data *phar;
 	zend_result ret = phar_create_or_parse_filename(fname, alias, alias_len, is_data, options, &phar, error);
@@ -802,7 +802,7 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 	/* write header */
 	entry->header_offset = php_stream_tell(fp->new);
 
-	if (sizeof(header) != php_stream_write(fp->new, (char *) &header, sizeof(header))) {
+	if (sizeof(header) != php_stream_write(fp->new, (const char *) &header, sizeof(header))) {
 		if (fp->error) {
 			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, header for  file \"%s\" could not be written", ZSTR_VAL(entry->phar->fname), ZSTR_VAL(entry->filename));
 		}
@@ -906,7 +906,7 @@ ZEND_ATTRIBUTE_NONNULL static int phar_tar_setmetadata(const phar_metadata_track
 
 ZEND_ATTRIBUTE_NONNULL static int phar_tar_setupmetadata(zval *zv, void *argument) /* {{{ */
 {
-	struct _phar_pass_tar_info *i = (struct _phar_pass_tar_info *)argument;
+	const struct _phar_pass_tar_info *i = (struct _phar_pass_tar_info *)argument;
 	char **error = i->error;
 	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv), newentry = {0};
 

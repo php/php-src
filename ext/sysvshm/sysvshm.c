@@ -34,7 +34,7 @@ zend_class_entry *sysvshm_ce;
 static zend_object_handlers sysvshm_object_handlers;
 
 static inline sysvshm_shm *sysvshm_from_obj(zend_object *obj) {
-	return (sysvshm_shm *)((char *)(obj) - XtOffsetOf(sysvshm_shm, std));
+	return (sysvshm_shm *)((char *)(obj) - offsetof(sysvshm_shm, std));
 }
 
 #define Z_SYSVSHM_P(zv) sysvshm_from_obj(Z_OBJ_P(zv))
@@ -100,7 +100,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 	sysvshm_ce->default_object_handlers = &sysvshm_object_handlers;
 
 	memcpy(&sysvshm_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	sysvshm_object_handlers.offset = XtOffsetOf(sysvshm_shm, std);
+	sysvshm_object_handlers.offset = offsetof(sysvshm_shm, std);
 	sysvshm_object_handlers.free_obj = sysvshm_free_obj;
 	sysvshm_object_handlers.get_constructor = sysvshm_get_constructor;
 	sysvshm_object_handlers.clone_obj = NULL;

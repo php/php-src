@@ -357,7 +357,7 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 
 	memcpy(&TimeZone_handlers, &std_object_handlers,
 		sizeof TimeZone_handlers);
-	TimeZone_handlers.offset = XtOffsetOf(TimeZone_object, zo);
+	TimeZone_handlers.offset = offsetof(TimeZone_object, zo);
 	TimeZone_handlers.clone_obj = TimeZone_clone_obj;
 	TimeZone_handlers.compare = TimeZone_compare_objects;
 	TimeZone_handlers.get_debug_info = TimeZone_get_debug_info;

@@ -63,7 +63,7 @@ typedef struct _spl_SplObjectStorageElement {
 } spl_SplObjectStorageElement; /* }}} */
 
 static inline spl_SplObjectStorage *spl_object_storage_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_SplObjectStorage*)((char*)(obj) - XtOffsetOf(spl_SplObjectStorage, std));
+	return (spl_SplObjectStorage*)((char*)(obj) - offsetof(spl_SplObjectStorage, std));
 }
 /* }}} */
 
@@ -1378,7 +1378,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 
 	memcpy(&spl_handler_SplObjectStorage, &std_object_handlers, sizeof(zend_object_handlers));
 
-	spl_handler_SplObjectStorage.offset          = XtOffsetOf(spl_SplObjectStorage, std);
+	spl_handler_SplObjectStorage.offset          = offsetof(spl_SplObjectStorage, std);
 	spl_handler_SplObjectStorage.compare         = spl_object_storage_compare_objects;
 	spl_handler_SplObjectStorage.clone_obj       = spl_object_storage_clone;
 	spl_handler_SplObjectStorage.get_gc          = spl_object_storage_get_gc;

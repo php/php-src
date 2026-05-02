@@ -101,7 +101,7 @@ U_CFUNC void formatter_register_class( void )
 
 	memcpy(&NumberFormatter_handlers, &std_object_handlers,
 		sizeof(NumberFormatter_handlers));
-	NumberFormatter_handlers.offset = XtOffsetOf(NumberFormatter_object, zo);
+	NumberFormatter_handlers.offset = offsetof(NumberFormatter_object, zo);
 	NumberFormatter_handlers.clone_obj = NumberFormatter_object_clone;
 	NumberFormatter_handlers.free_obj = NumberFormatter_object_free;
 }

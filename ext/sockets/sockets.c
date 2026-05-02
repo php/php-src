@@ -181,7 +181,7 @@ zend_class_entry *address_info_ce;
 static zend_object_handlers address_info_object_handlers;
 
 static inline php_addrinfo *address_info_from_obj(zend_object *obj) {
-	return (php_addrinfo *)((char *)(obj) - XtOffsetOf(php_addrinfo, std));
+	return (php_addrinfo *)((char *)(obj) - offsetof(php_addrinfo, std));
 }
 
 #define Z_ADDRESS_INFO_P(zv) address_info_from_obj(Z_OBJ_P(zv))
@@ -484,7 +484,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	socket_ce->default_object_handlers = &socket_object_handlers;
 
 	memcpy(&socket_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	socket_object_handlers.offset = XtOffsetOf(php_socket, std);
+	socket_object_handlers.offset = offsetof(php_socket, std);
 	socket_object_handlers.free_obj = socket_free_obj;
 	socket_object_handlers.get_constructor = socket_get_constructor;
 	socket_object_handlers.clone_obj = NULL;
@@ -496,7 +496,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	address_info_ce->default_object_handlers = &address_info_object_handlers;
 
 	memcpy(&address_info_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	address_info_object_handlers.offset = XtOffsetOf(php_addrinfo, std);
+	address_info_object_handlers.offset = offsetof(php_addrinfo, std);
 	address_info_object_handlers.free_obj = address_info_free_obj;
 	address_info_object_handlers.get_constructor = address_info_get_constructor;
 	address_info_object_handlers.clone_obj = NULL;
@@ -1272,7 +1272,7 @@ PHP_FUNCTION(socket_connect)
 			s_un.sun_family = AF_UNIX;
 			memcpy(&s_un.sun_path, ZSTR_VAL(addr), ZSTR_LEN(addr));
 			retval = connect(php_sock->bsd_socket, (struct sockaddr *) &s_un,
-				(socklen_t)(XtOffsetOf(struct sockaddr_un, sun_path) + ZSTR_LEN(addr)));
+				(socklen_t)(offsetof(struct sockaddr_un, sun_path) + ZSTR_LEN(addr)));
 			break;
 		}
 

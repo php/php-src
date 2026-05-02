@@ -238,7 +238,7 @@ void listformatter_register_class(void)
     class_entry->create_object = listformatter_create_object;
     
     memcpy(&listformatter_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-    listformatter_handlers.offset = XtOffsetOf(ListFormatter_object, zo);
+    listformatter_handlers.offset = offsetof(ListFormatter_object, zo);
     listformatter_handlers.free_obj = listformatter_free_obj;
     listformatter_handlers.clone_obj = nullptr;
 }

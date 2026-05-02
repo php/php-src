@@ -96,7 +96,7 @@ void msgformat_register_class( void )
 
 	memcpy(&MessageFormatter_handlers, &std_object_handlers,
 		sizeof MessageFormatter_handlers);
-	MessageFormatter_handlers.offset = XtOffsetOf(MessageFormatter_object, zo);
+	MessageFormatter_handlers.offset = offsetof(MessageFormatter_object, zo);
 	MessageFormatter_handlers.clone_obj = MessageFormatter_object_clone;
 	MessageFormatter_handlers.free_obj = MessageFormatter_object_free;
 }

@@ -739,6 +739,20 @@ static PHP_INI_MH(OnUpdateSessionStr)
 	return OnUpdateStr(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
+static PHP_INI_MH(OnUpdateSessionSameSite)
+{
+	SESSION_CHECK_ACTIVE_STATE;
+	SESSION_CHECK_OUTPUT_STATE;
+
+	if (new_value && ZSTR_LEN(new_value) > 0 && !php_is_valid_samesite_value(new_value)) {
+		php_error_docref(NULL, E_WARNING,
+			"session.cookie_samesite must be \"Strict\", \"Lax\", \"None\", or \"\"");
+		return FAILURE;
+	}
+
+	return OnUpdateStr(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+}
+
 static PHP_INI_MH(OnUpdateSessionBool)
 {
 	SESSION_CHECK_ACTIVE_STATE;
@@ -910,7 +924,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("session.cookie_secure",      "0",         PHP_INI_ALL,    OnUpdateSessionBool,          cookie_secure,      php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_partitioned", "0",         PHP_INI_ALL,    OnUpdateSessionBool,          cookie_partitioned, php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_httponly",    "0",         PHP_INI_ALL,    OnUpdateSessionBool,          cookie_httponly,    php_ps_globals, ps_globals)
-	STD_PHP_INI_ENTRY("session.cookie_samesite",      "",          PHP_INI_ALL,    OnUpdateSessionStr,           cookie_samesite,    php_ps_globals, ps_globals)
+	STD_PHP_INI_ENTRY("session.cookie_samesite",      "",          PHP_INI_ALL,    OnUpdateSessionSameSite,      cookie_samesite,    php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_cookies",        "1",         PHP_INI_ALL,    OnUpdateSessionBool,          use_cookies,        php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_only_cookies",   "1",         PHP_INI_ALL,    OnUpdateUseOnlyCookies,       use_only_cookies,   php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_strict_mode",    "0",         PHP_INI_ALL,    OnUpdateSessionBool,          use_strict_mode,    php_ps_globals, ps_globals)

@@ -104,7 +104,7 @@ void dateformat_register_IntlDateFormatter_class( void )
 
 	memcpy(&IntlDateFormatter_handlers, &std_object_handlers,
 		sizeof IntlDateFormatter_handlers);
-	IntlDateFormatter_handlers.offset = XtOffsetOf(IntlDateFormatter_object, zo);
+	IntlDateFormatter_handlers.offset = offsetof(IntlDateFormatter_object, zo);
 	IntlDateFormatter_handlers.clone_obj = IntlDateFormatter_object_clone;
 	IntlDateFormatter_handlers.free_obj = IntlDateFormatter_object_free;
 }

@@ -105,7 +105,7 @@ struct _PHPTidyObj {
 };
 
 static inline PHPTidyObj *php_tidy_fetch_object(zend_object *obj) {
-	return (PHPTidyObj *)((char*)(obj) - XtOffsetOf(PHPTidyObj, std));
+	return (PHPTidyObj *)((char*)(obj) - offsetof(PHPTidyObj, std));
 }
 
 #define Z_TIDY_P(zv) php_tidy_fetch_object(Z_OBJ_P((zv)))
@@ -848,7 +848,7 @@ static PHP_MINIT_FUNCTION(tidy)
 	tidy_object_handlers_doc.cast_object = tidy_doc_cast_handler;
 	tidy_object_handlers_node.cast_object = tidy_node_cast_handler;
 
-	tidy_object_handlers_node.offset = tidy_object_handlers_doc.offset = XtOffsetOf(PHPTidyObj, std);
+	tidy_object_handlers_node.offset = tidy_object_handlers_doc.offset = offsetof(PHPTidyObj, std);
 	tidy_object_handlers_node.free_obj = tidy_object_handlers_doc.free_obj = tidy_object_free_storage;
 
 	register_tidy_symbols(module_number);

@@ -71,7 +71,7 @@ typedef struct _spl_pqueue_elem {
 } spl_pqueue_elem;
 
 static inline spl_heap_object *spl_heap_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_heap_object*)((char*)(obj) - XtOffsetOf(spl_heap_object, std));
+	return (spl_heap_object*)((char*)(obj) - offsetof(spl_heap_object, std));
 }
 /* }}} */
 
@@ -1332,7 +1332,7 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 
 	memcpy(&spl_handler_SplHeap, &std_object_handlers, sizeof(zend_object_handlers));
 
-	spl_handler_SplHeap.offset         = XtOffsetOf(spl_heap_object, std);
+	spl_handler_SplHeap.offset         = offsetof(spl_heap_object, std);
 	spl_handler_SplHeap.clone_obj      = spl_heap_object_clone;
 	spl_handler_SplHeap.count_elements = spl_heap_object_count_elements;
 	spl_handler_SplHeap.get_gc         = spl_heap_object_get_gc;
@@ -1353,7 +1353,7 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 
 	memcpy(&spl_handler_SplPriorityQueue, &std_object_handlers, sizeof(zend_object_handlers));
 
-	spl_handler_SplPriorityQueue.offset         = XtOffsetOf(spl_heap_object, std);
+	spl_handler_SplPriorityQueue.offset         = offsetof(spl_heap_object, std);
 	spl_handler_SplPriorityQueue.clone_obj      = spl_heap_object_clone;
 	spl_handler_SplPriorityQueue.count_elements = spl_heap_object_count_elements;
 	spl_handler_SplPriorityQueue.get_gc         = spl_pqueue_object_get_gc;

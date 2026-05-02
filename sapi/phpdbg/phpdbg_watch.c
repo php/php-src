@@ -148,7 +148,7 @@ bool phpdbg_check_watch_diff(phpdbg_watchtype type, void *oldPtr, void *newPtr) 
 		case WATCH_ON_REFCOUNTED:
 			return memcmp(oldPtr, newPtr, sizeof(uint32_t) /* no zend_refcounted metadata info */) != 0;
 		case WATCH_ON_STR:
-			return memcmp(oldPtr, newPtr, *(size_t *) oldPtr + XtOffsetOf(zend_string, val) - XtOffsetOf(zend_string, len)) != 0;
+			return memcmp(oldPtr, newPtr, *(size_t *) oldPtr + offsetof(zend_string, val) - offsetof(zend_string, len)) != 0;
 		case WATCH_ON_HASHDATA:
 			ZEND_UNREACHABLE();
 	}
@@ -200,11 +200,11 @@ void phpdbg_print_watch_diff(phpdbg_watchtype type, zend_string *name, void *old
 
 		case WATCH_ON_STR:
 			phpdbg_out("Old value: ");
-			zend_write((char *) oldPtr + XtOffsetOf(zend_string, val) - XtOffsetOf(zend_string, len), *(size_t *) oldPtr);
+			zend_write((char *) oldPtr + offsetof(zend_string, val) - offsetof(zend_string, len), *(size_t *) oldPtr);
 			phpdbg_out("\n");
 
 			phpdbg_out("New value: ");
-			zend_write((char *) newPtr + XtOffsetOf(zend_string, val) - XtOffsetOf(zend_string, len), *(size_t *) newPtr);
+			zend_write((char *) newPtr + offsetof(zend_string, val) - offsetof(zend_string, len), *(size_t *) newPtr);
 			phpdbg_out("\n");
 			break;
 
@@ -378,7 +378,7 @@ void phpdbg_watch_backup_data(phpdbg_watchpoint_t *watch) {
 			if (watch->backup.str) {
 				zend_string_release(watch->backup.str);
 			}
-			watch->backup.str = zend_string_init((char *) watch->addr.ptr + XtOffsetOf(zend_string, val) - XtOffsetOf(zend_string, len), *(size_t *) watch->addr.ptr, 1);
+			watch->backup.str = zend_string_init((char *) watch->addr.ptr + offsetof(zend_string, val) - offsetof(zend_string, len), *(size_t *) watch->addr.ptr, 1);
 			GC_MAKE_PERSISTENT_LOCAL(watch->backup.str);
 			break;
 		case WATCH_ON_HASHTABLE:
@@ -449,7 +449,7 @@ void phpdbg_update_watch_ref(phpdbg_watchpoint_t *watch) {
 				phpdbg_watch_backup_data(&coll->reference);
 			} else if (Z_TYPE_P(watch->addr.zv) == IS_STRING) {
 				coll->reference.type = WATCH_ON_STR;
-				phpdbg_set_addr_watchpoint(&Z_STRLEN_P(watch->addr.zv), XtOffsetOf(zend_string, val) - XtOffsetOf(zend_string, len) + Z_STRLEN_P(watch->addr.zv) + 1, &coll->reference);
+				phpdbg_set_addr_watchpoint(&Z_STRLEN_P(watch->addr.zv), offsetof(zend_string, val) - offsetof(zend_string, len) + Z_STRLEN_P(watch->addr.zv) + 1, &coll->reference);
 				coll->reference.coll = coll;
 				phpdbg_store_watchpoint_btree(&coll->reference);
 				phpdbg_activate_watchpoint(&coll->reference);

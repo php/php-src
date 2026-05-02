@@ -44,7 +44,7 @@ typedef struct _finfo_object {
 } finfo_object;
 
 static inline finfo_object *php_finfo_fetch_object(zend_object *obj) {
-	return (finfo_object *)((char*)(obj) - XtOffsetOf(finfo_object, zo));
+	return (finfo_object *)((char*)(obj) - offsetof(finfo_object, zo));
 }
 
 #define Z_FINFO_P(zv) php_finfo_fetch_object(Z_OBJ_P((zv)))
@@ -82,7 +82,7 @@ PHP_MINIT_FUNCTION(finfo)
 
 	/* copy the standard object handlers to you handler table */
 	memcpy(&finfo_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	finfo_object_handlers.offset = XtOffsetOf(finfo_object, zo);
+	finfo_object_handlers.offset = offsetof(finfo_object, zo);
 	finfo_object_handlers.free_obj = finfo_objects_free;
 	finfo_object_handlers.clone_obj = NULL;
 

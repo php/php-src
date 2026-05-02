@@ -212,7 +212,7 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 
 	memcpy(&BreakIterator_handlers, &std_object_handlers,
 		sizeof BreakIterator_handlers);
-	BreakIterator_handlers.offset = XtOffsetOf(BreakIterator_object, zo);
+	BreakIterator_handlers.offset = offsetof(BreakIterator_object, zo);
 	BreakIterator_handlers.compare = BreakIterator_compare_objects;
 	BreakIterator_handlers.clone_obj = BreakIterator_clone_obj;
 	BreakIterator_handlers.get_debug_info = BreakIterator_get_debug_info;
