@@ -166,6 +166,11 @@ PHP 8.6 UPGRADE NOTES
     is no longer maintained.
     RFC: https://wiki.php.net/rfc/eol-oniguruma
 
+- GMP:
+  . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
+    emit a deprecation warning when converting a float right operand to int
+    loses precision.
+
 ========================================
 5. Changed Functions
 ========================================
