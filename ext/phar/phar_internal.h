@@ -406,10 +406,10 @@ void phar_object_init(void);
 void phar_destroy_phar_data(phar_archive_data *phar);
 
 ZEND_ATTRIBUTE_NONNULL zend_result phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip);
-zend_result phar_open_from_filename(char *fname, size_t fname_len, const zend_string *alias, uint32_t options, phar_archive_data** pphar, char **error);
+zend_result phar_open_from_filename(char *fname, size_t fname_len, /* copyable & hash update */ zend_string *alias, uint32_t options, phar_archive_data** pphar, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_filename(zend_string *fname, /* copyable & hash update */ zend_string *alias, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_create_or_parse_filename(zend_string *fname, /* copyable & hash update */ zend_string *alias, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
-ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result phar_open_executed_filename(const zend_string *alias, char **error);
+ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result phar_open_executed_filename(/* copyable & hash update */ zend_string *alias, char **error);
 zend_result phar_free_alias(const phar_archive_data *phar);
 phar_archive_data* phar_get_archive(const char *fname, size_t fname_len, const char *alias, size_t alias_len, char **error);
 zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, const char *sig, size_t sig_len, const char *fname, char **signature, size_t *signature_len, char **error);
@@ -445,12 +445,12 @@ zend_result phar_copy_on_write(phar_archive_data **pphar);
 
 /* tar functions in tar.c */
 bool phar_is_tar(const char *buf, const char *fname);
-zend_result phar_parse_tarfile(php_stream* fp, const char *fname, size_t fname_len, const char *alias, size_t alias_len, phar_archive_data** pphar, uint32_t compression, char **error);
+zend_result phar_parse_tarfile(php_stream* fp, const char *fname, size_t fname_len, /* copyable & hash update */ zend_string *alias, phar_archive_data** pphar, uint32_t compression, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_tar(zend_string *fname, /* copyable & hash update */ zend_string *alias, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error);
 
 /* zip functions in zip.c */
-zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_len, const char *alias, size_t alias_len, phar_archive_data** pphar, char **error);
+zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_len, /* copyable & hash update */ zend_string *alias, phar_archive_data** pphar, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_zip(zend_string *fname, /* copyable & hash update */ zend_string *alias, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *archive, zend_string *user_stub, bool is_default_stub, char **error);
 

@@ -224,8 +224,14 @@ static char *phar_find_eocd(const char *s, size_t n)
  * This is used by phar_open_from_fp to process a zip-based phar, but can be called
  * directly.
  */
-zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_len, const char *alias, size_t alias_len, phar_archive_data** pphar, char **error) /* {{{ */
-{
+zend_result phar_parse_zipfile(
+	php_stream *fp,
+	const char *fname,
+	size_t fname_len,
+	/* copyable & hash update */ zend_string *alias,
+	phar_archive_data** pphar,
+	char **error
+) {
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
 	zend_off_t size;
@@ -760,8 +766,8 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 
 		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), mydata->alias, mydata->alias_len, mydata);
 	} else {
-		if (alias_len) {
-			phar_archive_data *fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len);
+		if (alias) {
+			phar_archive_data *fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), alias);
 			if (fd_ptr) {
 				if (SUCCESS != phar_free_alias(fd_ptr)) {
 					if (error) {
@@ -772,9 +778,9 @@ zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_l
 				}
 			}
 
-			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, mydata);
-			mydata->alias = pestrndup(alias, alias_len, mydata->is_persistent);
-			mydata->alias_len = alias_len;
+			zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), alias, mydata);
+			mydata->alias = pestrndup(ZSTR_VAL(alias), ZSTR_LEN(alias), mydata->is_persistent);
+			mydata->alias_len = ZSTR_LEN(alias);
 		} else {
 			mydata->alias = pestrndup(ZSTR_VAL(mydata->fname), ZSTR_LEN(mydata->fname), mydata->is_persistent);
 			mydata->alias_len = fname_len;

@@ -1373,7 +1373,7 @@ check_file:;
 	return phar_create_or_parse_filename(fname, alias, is_data, options, pphar, error);
 }
 
-static zend_result phar_open_from_fp(php_stream* fp, const char *fname, size_t fname_len, const char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, char **error);
+static zend_result phar_open_from_fp(php_stream* fp, const char *fname, size_t fname_len, /* copyable & hash update */ zend_string *alias, uint32_t options, phar_archive_data** pphar, char **error);
 
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_create_or_parse_filename(
 	zend_string *fname,
@@ -1399,10 +1399,8 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_create_or_parse_filename(
 		fname = actual;
 	}
 
-	const char *alias_cstr = alias ? ZSTR_VAL(alias) : NULL;
-	size_t alias_len = alias ? ZSTR_LEN(alias) : 0;
 	if (fp) {
-		if (phar_open_from_fp(fp, ZSTR_VAL(fname), ZSTR_LEN(fname), alias_cstr, alias_len, options, pphar, error) == SUCCESS) {
+		if (phar_open_from_fp(fp, ZSTR_VAL(fname), ZSTR_LEN(fname), alias, options, pphar, error) == SUCCESS) {
 			if ((*pphar)->is_data || !PHAR_G(readonly)) {
 				(*pphar)->is_writeable = 1;
 			}
@@ -1520,8 +1518,14 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_create_or_parse_filename(
  * that the manifest is proper, then pass it to phar_parse_pharfile().  SUCCESS
  * or FAILURE is returned and pphar is set to a pointer to the phar's manifest
  */
-zend_result phar_open_from_filename(char *fname, size_t fname_len, const zend_string *alias, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
-{
+zend_result phar_open_from_filename(
+	char *fname,
+	size_t fname_len,
+	/* copyable & hash update */ zend_string *alias,
+	uint32_t options,
+	phar_archive_data** pphar,
+	char **error
+) {
 	php_stream *fp;
 	zend_string *actual;
 	bool is_data = false;
@@ -1564,7 +1568,7 @@ zend_result phar_open_from_filename(char *fname, size_t fname_len, const zend_st
 		fname_len = ZSTR_LEN(actual);
 	}
 
-	zend_result ret = phar_open_from_fp(fp, fname, fname_len, alias_cstr, alias_len, options, pphar, error);
+	zend_result ret = phar_open_from_fp(fp, fname, fname_len, alias, options, pphar, error);
 
 	if (actual) {
 		zend_string_release_ex(actual, 0);
@@ -1572,15 +1576,21 @@ zend_result phar_open_from_filename(char *fname, size_t fname_len, const zend_st
 
 	return ret;
 }
-/* }}}*/
 
 /**
  * Scan an open fp for the required __HALT_COMPILER(); ?> token and verify
  * that the manifest is proper, then pass it to phar_parse_pharfile().  SUCCESS
  * or FAILURE is returned and pphar is set to a pointer to the phar's manifest
  */
-static zend_result phar_open_from_fp(php_stream* fp, const char *fname, size_t fname_len, const char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
-{
+static zend_result phar_open_from_fp(
+	php_stream* fp,
+	const char *fname,
+	size_t fname_len,
+	/* copyable & hash update */ zend_string *alias,
+	uint32_t options,
+	phar_archive_data** pphar,
+	char **error
+) {
 	static const char token[] = "__HALT_COMPILER();";
 	static const char zip_magic[] = "PK\x03\x04";
 	static const char gz_magic[] = "\x1f\x8b\x08";
@@ -1731,20 +1741,22 @@ static zend_result phar_open_from_fp(php_stream* fp, const char *fname, size_t f
 
 			if (!memcmp(pos, zip_magic, 4)) {
 				php_stream_seek(fp, 0, SEEK_END);
-				return phar_parse_zipfile(fp, fname, fname_len, alias, alias_len, pphar, error);
+				return phar_parse_zipfile(fp, fname, fname_len, alias, pphar, error);
 			}
 
 			if (got >= 512) {
 				if (phar_is_tar(pos, fname)) {
 					php_stream_rewind(fp);
-					return phar_parse_tarfile(fp, fname, fname_len, alias, alias_len, pphar, compression, error);
+					return phar_parse_tarfile(fp, fname, fname_len, alias, pphar, compression, error);
 				}
 			}
 		}
 
 		if (got > 0 && (pos = php_memnistr(buffer, token, tokenlen, buffer + got + sizeof(token))) != NULL) {
 			halt_offset += (pos - buffer); /* no -tokenlen+tokenlen here */
-			return phar_parse_pharfile(fp, fname, fname_len, alias, alias_len, halt_offset, pphar, compression, error);
+			const char *alias_cstr = alias ? ZSTR_VAL(alias) : NULL;
+			size_t alias_len = alias ? ZSTR_LEN(alias) : 0;
+			return phar_parse_pharfile(fp, fname, fname_len, alias_cstr, alias_len, halt_offset, pphar, compression, error);
 		}
 
 		halt_offset += got;
@@ -1753,7 +1765,6 @@ static zend_result phar_open_from_fp(php_stream* fp, const char *fname, size_t f
 
 	MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (__HALT_COMPILER(); not found)")
 }
-/* }}} */
 
 /*
  * given the location of the file extension and the start of the file path,
@@ -2267,7 +2278,7 @@ zend_string* phar_split_fname(const char *filename, size_t filename_len, zend_st
  * Invoked when a user calls Phar::mapPhar() from within an executing .phar
  * to set up its manifest directly
  */
-ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result phar_open_executed_filename(const zend_string *alias, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result phar_open_executed_filename(/* copyable & hash update */  zend_string *alias, char **error) /* {{{ */
 {
 	*error = NULL;
 
@@ -2309,7 +2320,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result phar_open_executed_filename(const zen
 		fname = actual;
 	}
 
-	zend_result ret = phar_open_from_fp(fp, ZSTR_VAL(fname), ZSTR_LEN(fname), alias_cstr, alias_len, REPORT_ERRORS, NULL, error);
+	zend_result ret = phar_open_from_fp(fp, ZSTR_VAL(fname), ZSTR_LEN(fname), alias, REPORT_ERRORS, NULL, error);
 
 	if (actual) {
 		zend_string_release_ex(actual, 0);

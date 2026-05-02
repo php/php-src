@@ -202,8 +202,15 @@ static zend_result phar_tar_process_metadata(phar_entry_info *entry, php_stream 
 }
 /* }}} */
 
-zend_result phar_parse_tarfile(php_stream* fp, const char *fname, size_t fname_len, const char *alias, size_t alias_len, phar_archive_data** pphar, uint32_t compression, char **error) /* {{{ */
-{
+zend_result phar_parse_tarfile(
+	php_stream* fp,
+	const char *fname,
+	size_t fname_len,
+	/* copyable & hash update */ zend_string *alias,
+	phar_archive_data** pphar,
+	uint32_t compression,
+	char **error
+) {
 	char buf[512], *actual_alias = NULL, *p;
 	phar_entry_info entry = {0};
 	size_t pos = 0, read, totalsize;
@@ -679,8 +686,8 @@ next:
 
 		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar->alias_len, myphar);
 	} else {
-		if (alias_len) {
-			phar_archive_data *fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len);
+		if (alias) {
+			phar_archive_data *fd_ptr = zend_hash_find_ptr(&(PHAR_G(phar_alias_map)), alias);
 			if (fd_ptr) {
 				if (SUCCESS != phar_free_alias(fd_ptr)) {
 					if (error) {
@@ -690,9 +697,9 @@ next:
 					return FAILURE;
 				}
 			}
-			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, myphar);
-			myphar->alias = pestrndup(alias, alias_len, myphar->is_persistent);
-			myphar->alias_len = alias_len;
+			zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), alias, myphar);
+			myphar->alias = pestrndup(ZSTR_VAL(alias), ZSTR_LEN(alias), myphar->is_persistent);
+			myphar->alias_len = ZSTR_LEN(alias);
 		} else {
 			myphar->alias = pestrndup(ZSTR_VAL(myphar->fname), ZSTR_LEN(myphar->fname), myphar->is_persistent);
 			myphar->alias_len = ZSTR_LEN(myphar->fname);
@@ -707,7 +714,6 @@ next:
 
 	return SUCCESS;
 }
-/* }}} */
 
 struct _phar_pass_tar_info {
 	php_stream *old;
