@@ -21,6 +21,10 @@ PHP                                                                        NEWS
     IntlCalendar::equals(), ::before(), ::after(), and ::isEquivalentTo().
     (Weilin Du)
 
+- mysqli:
+  . Fix stmt->query leak in mysqli_execute_query() validation errors.
+    (David Carlier)
+
 - Phar:
   . Fixed a bypass of the magic ".phar" directory protection in
     Phar::addEmptyDir() for paths starting with "/.phar", while allowing
