@@ -341,7 +341,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class has friends                                      |     |     |     */
-#define ZEND_ACC_HAS_FRIENDS             (1 << 31) /*  X  |     |     |     */
+#define ZEND_ACC_HAS_FRIENDS            (1U << 31) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class Flags 2 (ce_flags2) (unused: 0-31)               |     |     |     */
 /* =========================                              |     |     |     */
