@@ -81,6 +81,10 @@ PHP 8.4 UPGRADE NOTES
   . Gettext:
     . bind_textdomain_codeset, textdomain and d(*)gettext functions now throw an exception
       if the domain argument is empty.
+  . GMP:
+    . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
+      emit a deprecation warning when converting a float right operand to int
+      loses precision.
   . Intl:
     . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
       ResourceBundle object now throw:
@@ -521,11 +525,6 @@ PHP 8.4 UPGRADE NOTES
     IntlGregorianCalendar::__construct() with more than 2 arguments is
     deprecated. Use either IntlGregorianCalendar::createFromDate() or
     IntlGregorianCalendar::createFromDateTime() instead.
-
-- GMP:
-  . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
-    emit a deprecation warning when converting a float right operand to int
-    loses precision.
 
 - LDAP:
   . Calling ldap_connect() with more than 2 arguments is deprecated. Use
