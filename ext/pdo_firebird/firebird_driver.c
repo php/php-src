@@ -295,7 +295,7 @@ static FbTokenType php_firebird_get_token(const char** begin, const char* end)
 	return ret;
 }
 
-static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
+static int php_firebird_preprocess(const zend_string* sql, char* sql_out, size_t* sql_out_len, HashTable* named_params)
 {
 	bool passAsIs = 1, execBlock = 0;
 	zend_long pindex = -1;
@@ -326,7 +326,7 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 	if (l > 252) {
 		return 0;
 	}
-	strncpy(ident, i, l);
+	memcpy(ident, i, l);
 	ident[l] = '\0';
 	if (!strcasecmp(ident, "EXECUTE"))
 	{
@@ -351,7 +351,7 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 		if (l > 252) {
 			return 0;
 		}
-		strncpy(ident2, i2, l);
+		memcpy(ident2, i2, l);
 		ident2[l] = '\0';
 		execBlock = !strcasecmp(ident2, "BLOCK");
 		passAsIs = 0;
@@ -367,11 +367,15 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 
 	if (passAsIs)
 	{
-		strcpy(sql_out, ZSTR_VAL(sql));
+		memcpy(sql_out, ZSTR_VAL(sql), ZSTR_LEN(sql));
+		sql_out[ZSTR_LEN(sql)] = '\0';
+		*sql_out_len = ZSTR_LEN(sql);
 		return 1;
 	}
 
-	strncat(sql_out, start, p - start);
+	char *sql_out_p = sql_out;
+	memcpy(sql_out_p, start, p - start);
+	sql_out_p += p - start;
 
 	while (p < end)
 	{
@@ -379,10 +383,12 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 		tok = php_firebird_get_token(&p, end);
 		switch (tok)
 		{
-		case ttParamMark:
-			tok = php_firebird_get_token(&p, end);
+		case ttParamMark: {
+			const char* p_peek = p;
+			tok = php_firebird_get_token(&p_peek, end);
 			if (tok == ttIdent /*|| tok == ttString*/)
 			{
+				p = p_peek;
 				++pindex;
 				l = p - start;
 				/* check the length of the identifier */
@@ -391,7 +397,7 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 				if (l > 253) {
 					return 0;
 				}
-				strncpy(pname, start, l);
+				memcpy(pname, start, l);
 				pname[l] = '\0';
 
 				if (named_params) {
@@ -400,7 +406,7 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 					zend_hash_str_update(named_params, pname, l, &tmp);
 				}
 
-				strcat(sql_out, "?");
+				*sql_out_p++ = '?';
 			}
 			else
 			{
@@ -410,10 +416,11 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 					return 0;
 				}
 				++pindex;
-				strncat(sql_out, start, p - start);
+				memcpy(sql_out_p, start, p - start);
+				sql_out_p += p - start;
 			}
 			break;
-
+		}
 		case ttIdent:
 			if (execBlock)
 			{
@@ -425,11 +432,14 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 				if (l > 252) {
 					return 0;
 				}
-				strncpy(ident, start, l);
+				memcpy(ident, start, l);
 				ident[l] = '\0';
 				if (!strcasecmp(ident, "AS"))
 				{
-					strncat(sql_out, start, end - start);
+					memcpy(sql_out_p, start, end - start);
+					sql_out_p += end - start;
+					*sql_out_p = '\0';
+					*sql_out_len = sql_out_p - sql_out;
 					return 1;
 				}
 			}
@@ -440,7 +450,8 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 		case ttComment:
 		case ttString:
 		case ttOther:
-			strncat(sql_out, start, p - start);
+			memcpy(sql_out_p, start, p - start);
+			sql_out_p += p - start;
 			break;
 
 		case ttBrokenComment:
@@ -458,6 +469,8 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 			break;
 		}
 	}
+	*sql_out_p = '\0';
+	*sql_out_len = sql_out_p - sql_out;
 	return 1;
 }
 
@@ -792,7 +805,7 @@ free_statement:
 static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
 	size_t qcount = 0;
-	char const *co, *l, *r;
+	char const *co, *l;
 	char *c;
 	size_t quotedlen;
 	zend_string *quoted_str;
@@ -801,9 +814,15 @@ static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *un
 		return ZSTR_INIT_LITERAL("''", 0);
 	}
 
+	const char * const end = ZSTR_VAL(unquoted) + ZSTR_LEN(unquoted);
+
 	/* Firebird only requires single quotes to be doubled if string lengths are used */
 	/* count the number of ' characters */
-	for (co = ZSTR_VAL(unquoted); (co = strchr(co,'\'')); qcount++, co++);
+	for (co = ZSTR_VAL(unquoted); co < end; co++) {
+		if (*co == '\'') {
+			qcount++;
+		}
+	}
 
 	if (UNEXPECTED(ZSTR_LEN(unquoted) + 2 > ZSTR_MAX_LEN - qcount)) {
 		return NULL;
@@ -815,15 +834,14 @@ static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *un
 	*c++ = '\'';
 
 	/* foreach (chunk that ends in a quote) */
-	for (l = ZSTR_VAL(unquoted); (r = strchr(l,'\'')); l = r+1) {
-		strncpy(c, l, r-l+1);
-		c += (r-l+1);
-		/* add the second quote */
-		*c++ = '\'';
+	for (l = ZSTR_VAL(unquoted); l < end; l++) {
+		*c++ = *l;
+		if (*l == '\'') {
+			/* add the second quote */
+			*c++ = '\'';
+		}
 	}
 
-	/* copy the remainder */
-	strncpy(c, l, quotedlen-(c-ZSTR_VAL(quoted_str))-1);
 	ZSTR_VAL(quoted_str)[quotedlen-1] = '\'';
 	ZSTR_VAL(quoted_str)[quotedlen]   = '\0';
 
@@ -1001,6 +1019,7 @@ static int php_firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sq
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char *new_sql;
+	size_t new_sql_len;
 
 	/* allocate the statement */
 	if (isc_dsql_allocate_statement(H->isc_status, &H->db, s)) {
@@ -1012,14 +1031,14 @@ static int php_firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sq
 	   we need to replace :foo by ?, and store the name we just replaced */
 	new_sql = emalloc(ZSTR_LEN(sql)+1);
 	new_sql[0] = '\0';
-	if (!php_firebird_preprocess(sql, new_sql, named_params)) {
+	if (!php_firebird_preprocess(sql, new_sql, &new_sql_len, named_params)) {
 		php_firebird_error_with_info(dbh, "07000", strlen("07000"), NULL, 0);
 		efree(new_sql);
 		return 0;
 	}
 
 	/* prepare the statement */
-	if (isc_dsql_prepare(H->isc_status, &H->tr, s, 0, new_sql, H->sql_dialect, out_sqlda)) {
+	if (isc_dsql_prepare(H->isc_status, &H->tr, s, new_sql_len, new_sql, H->sql_dialect, out_sqlda)) {
 		php_firebird_error(dbh);
 		efree(new_sql);
 		return 0;
