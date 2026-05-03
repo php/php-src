@@ -634,7 +634,7 @@ static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val,
 	bool skip_lead = false;
 
 	size_t num_len = ZSTR_LEN(val);
-	while (isspace(*num_str)) {
+	while (isspace((unsigned char)*num_str)) {
 		++num_str;
 		--num_len;
 	}

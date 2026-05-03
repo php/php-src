@@ -191,7 +191,7 @@ SAPI_API void sapi_read_post_data(void)
 				*p = 0;
 				break;
 			default:
-				*p = tolower(*p);
+				*p = tolower((unsigned char)*p);
 				break;
 		}
 	}
@@ -733,10 +733,10 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 	}
 
 	/* cut off trailing spaces, linefeeds and carriage-returns */
-	if (header_line_len && isspace(header_line[header_line_len-1])) {
+	if (header_line_len && isspace((unsigned char)header_line[header_line_len - 1])) {
 		do {
 			header_line_len--;
-		} while(header_line_len && isspace(header_line[header_line_len-1]));
+		} while(header_line_len && isspace((unsigned char)header_line[header_line_len - 1]));
 		header_line[header_line_len]='\0';
 	}
 

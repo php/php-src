@@ -1921,7 +1921,7 @@ void php_shutdown_stream_wrappers(int module_number)
 static inline zend_result php_stream_wrapper_scheme_validate(const char *protocol, size_t protocol_len)
 {
 	for (size_t i = 0; i < protocol_len; i++) {
-		if (!isalnum((int)protocol[i]) &&
+		if (!isalnum((unsigned char)protocol[i]) &&
 			protocol[i] != '+' &&
 			protocol[i] != '-' &&
 			protocol[i] != '.') {
@@ -2001,7 +2001,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		return (php_stream_wrapper*)((options & STREAM_LOCATE_WRAPPERS_ONLY) ? NULL : &php_plain_files_wrapper);
 	}
 
-	for (p = path; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
+	for (p = path; isalnum((unsigned char)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
 		n++;
 	}
 

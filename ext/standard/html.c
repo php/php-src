@@ -678,8 +678,8 @@ static inline zend_result process_numeric_entity(const char **buf, unsigned *cod
 
 	/* strtol allows whitespace and other stuff in the beginning
 		* we're not interested */
-	if ((hexadecimal && !isxdigit(**buf)) ||
-			(!hexadecimal && !isdigit(**buf))) {
+	if ((hexadecimal && !isxdigit((unsigned char)**buf)) ||
+			(!hexadecimal && !isdigit((unsigned char)**buf))) {
 		return FAILURE;
 	}
 

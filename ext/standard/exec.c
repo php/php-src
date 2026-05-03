@@ -81,7 +81,7 @@ PHP_MINIT_FUNCTION(exec)
 
 static size_t strip_trailing_whitespace(char *buf, size_t bufl) {
 	size_t l = bufl;
-	while (l-- > 0 && isspace(((unsigned char *)buf)[l]));
+	while (l-- > 0 && isspace((unsigned char)buf[l]));
 	if (l != (bufl - 1)) {
 		bufl = l + 1;
 		buf[bufl] = '\0';

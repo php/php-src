@@ -82,10 +82,10 @@ PHPDBG_API int phpdbg_is_numeric(const char *str) /* {{{ */
 		return 0;
 
 	for (; *str; str++) {
-		if (isspace(*str) || *str == '-') {
+		if (isspace((unsigned char)*str) || *str == '-') {
 			continue;
 		}
-		return isdigit(*str);
+		return isdigit((unsigned char)*str);
 	}
 	return 0;
 } /* }}} */
@@ -96,7 +96,7 @@ PHPDBG_API int phpdbg_is_empty(const char *str) /* {{{ */
 		return 1;
 
 	for (; *str; str++) {
-		if (isspace(*str)) {
+		if (isspace((unsigned char)*str)) {
 			continue;
 		}
 		return 0;
@@ -199,12 +199,12 @@ PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{
 	const char *p = str;
 	char *new = NULL;
 
-	while (isspace(*p)) {
+	while (isspace((unsigned char)*p)) {
 		++p;
 		--len;
 	}
 
-	while (*p && isspace(*(p + len -1))) {
+	while (*p && isspace((unsigned char)p[len - 1])) {
 		--len;
 	}
 
