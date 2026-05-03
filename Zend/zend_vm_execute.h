@@ -7622,7 +7622,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -10351,7 +10355,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -11143,7 +11151,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -11998,7 +12010,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_PARENT_P
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
 	}
-	if (prop_info->flags & ZEND_ACC_PRIVATE) {
+	if (prop_info->flags & ZEND_ACC_PRIVATE
+		&& !zend_check_friend(parent_ce, ce)
+	) {
 		zend_throw_error(NULL, "Cannot access private property %s::$%s", ZSTR_VAL(parent_ce->name), ZSTR_VAL(property_name));
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
@@ -12965,7 +12979,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -25597,7 +25615,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -28292,7 +28314,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -29497,7 +29523,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -32168,7 +32198,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -34380,7 +34414,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -36462,7 +36500,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -36884,7 +36926,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -39047,7 +39093,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -60280,7 +60330,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -63009,7 +63063,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -63699,7 +63757,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -64554,7 +64616,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_PARENT_PROPER
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
 	}
-	if (prop_info->flags & ZEND_ACC_PRIVATE) {
+	if (prop_info->flags & ZEND_ACC_PRIVATE
+		&& !zend_check_friend(parent_ce, ce)
+	) {
 		zend_throw_error(NULL, "Cannot access private property %s::$%s", ZSTR_VAL(parent_ce->name), ZSTR_VAL(property_name));
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
@@ -65521,7 +65585,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -78053,7 +78121,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -80748,7 +80820,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -81953,7 +82029,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -84624,7 +84704,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -86836,7 +86920,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -88918,7 +89006,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -89340,7 +89432,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
@@ -91503,7 +91599,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
-		if (Z_TYPE(EX(This)) == IS_OBJECT && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_TYPE(EX(This)) == IS_OBJECT
+			&& Z_OBJ(EX(This))->ce != ce->constructor->common.scope
+			&& (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)
+			&& !(zend_check_friend(ce, Z_OBJ(EX(This))->ce))
+		) {
 			zend_throw_error(NULL, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}

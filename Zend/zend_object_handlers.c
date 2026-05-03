@@ -413,7 +413,12 @@ dynamic:
 				}
 			}
 			if (flags & ZEND_ACC_PRIVATE) {
-				if (property_info->ce != ce) {
+				// Compare the calling scope with the scope of the property
+				// declaration for friendship before assuming the desire to
+				// create a dynamic property
+				if (zend_check_friend(property_info->ce, scope)) {
+					goto found;
+				} else if (property_info->ce != ce) {
 					goto dynamic;
 				} else {
 wrong:
@@ -425,7 +430,10 @@ wrong:
 				}
 			} else {
 				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
-				if (UNEXPECTED(!is_protected_compatible_scope(property_info->prototype->ce, scope))) {
+				if (UNEXPECTED(!is_protected_compatible_scope(property_info->prototype->ce, scope))
+					&& !zend_check_friend(property_info->ce, scope)
+				) {
+					// Friendship with the class that *defines* the property is required
 					goto wrong;
 				}
 			}
@@ -508,7 +516,12 @@ dynamic:
 				}
 			}
 			if (flags & ZEND_ACC_PRIVATE) {
-				if (property_info->ce != ce) {
+				// Compare the calling scope with the scope of the property
+				// declaration for friendship before assuming the desire to
+				// create a dynamic property
+				if (zend_check_friend(property_info->ce, scope)) {
+					goto found;
+				} else if (property_info->ce != ce) {
 					goto dynamic;
 				} else {
 wrong:
@@ -520,7 +533,10 @@ wrong:
 				}
 			} else {
 				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
-				if (UNEXPECTED(!is_protected_compatible_scope(property_info->prototype->ce, scope))) {
+				if (UNEXPECTED(!is_protected_compatible_scope(property_info->prototype->ce, scope))
+					&& !zend_check_friend(property_info->ce, scope)
+				) {
+					// Friendship with the class that *defines* the property is required
 					goto wrong;
 				}
 			}
@@ -1751,18 +1767,48 @@ ZEND_API bool zend_check_protected(const zend_class_entry *ce, const zend_class_
 		fbc_scope = fbc_scope->parent;
 	}
 
+	const zend_class_entry *call_scope = scope;
+
 	/* Is the function's scope the same as our current object context,
 	 * or any of the parents of our context?
 	 */
-	while (scope) {
-		if (scope==ce) {
+	while (call_scope) {
+		if (call_scope==ce) {
 			return 1;
 		}
-		scope = scope->parent;
+		call_scope = call_scope->parent;
+	}
+
+	if (zend_check_friend(ce, scope)) {
+		return 1;
 	}
 	return 0;
 }
 /* }}} */
+
+/**
+ * Check whether the `scope` class is a friend of the given `ce` class
+ */
+ZEND_API bool zend_check_friend(const zend_class_entry *ce, const zend_class_entry *scope) {
+	if ((ce->ce_flags & ZEND_ACC_HAS_FRIENDS) == 0) {
+		return false;
+	}
+	if (scope == NULL) {
+		// Null scope = global
+		return false;
+	}
+	zend_string *potential_friend = zend_string_tolower(scope->name);
+	for (uint32_t i = 0; i < ce->num_friends; ++i) {
+		// No need for case insensitive comparison here since names are
+		// stored in lower case already
+		if (zend_string_equals(ce->friend_names[i].lc_name, potential_friend)) {
+			zend_string_release(potential_friend);
+			return true;
+		}
+	}
+	zend_string_release(potential_friend);
+	return false;
+}
 
 ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(
 	const zend_function *fbc, zend_string *method_name) /* {{{ */
@@ -1972,8 +2018,12 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 					goto exit;
 				}
 			}
-			if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
+			if (
+				(UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
+					&& !zend_check_friend(fbc->common.scope, scope)
+				)
+			 	|| UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))
+			) {
 				if (zobj->ce->__call) {
 					fbc = zend_get_call_trampoline_func(zobj->ce->__call, method_name);
 				} else {

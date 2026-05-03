@@ -255,7 +255,7 @@ ZEND_API bool zend_verify_const_access(const zend_class_constant *c, const zend_
 	if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PUBLIC) {
 		return 1;
 	} else if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PRIVATE) {
-		return (c->ce == scope);
+		return (c->ce == scope || UNEXPECTED(zend_check_friend(c->ce, scope)));
 	} else {
 		ZEND_ASSERT(ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PROTECTED);
 		return zend_check_protected(c->ce, scope);

@@ -5472,6 +5472,28 @@ ZEND_METHOD(ReflectionClass, getTraitAliases)
 }
 /* }}} */
 
+/* {{{ Returns an array of names of friends used by this class */
+ZEND_METHOD(ReflectionClass, getFriendNames)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	uint32_t i;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	if (!ce->num_friends) {
+		RETURN_EMPTY_ARRAY();
+	}
+
+	array_init(return_value);
+
+	for (i=0; i < ce->num_friends; i++) {
+		add_next_index_str(return_value, zend_string_copy(ce->friend_names[i].name));
+	}
+}
+/* }}} */
+
 /* {{{ Returns the class' parent class, or, if none exists, FALSE */
 ZEND_METHOD(ReflectionClass, getParentClass)
 {
