@@ -156,6 +156,9 @@ PHP                                                                        NEWS
     (Girgias)
   . Null bytes in session.cookie_path, session.cookie_domain, and
     session.cache_limiter are now rejected with a warning. (jorgsowa)
+  . Changed defaults of session.use_strict_mode (now 1), session.cookie_httponly
+    (now 1) and session.cookie_samesite (now "Lax") to provide secure session
+    behavior out of the box. (RFC: Secure Session Configuration Defaults)
 
 - Soap:
   . Soap::__setCookie() when cookie name is a digit is now not stored and
