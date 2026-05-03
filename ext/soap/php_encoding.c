@@ -365,6 +365,7 @@ static bool soap_check_xml_ref(zval *data, xmlNodePtr node)
 static void soap_add_xml_ref(zval *data, xmlNodePtr node)
 {
 	if (SOAP_GLOBAL(ref_map)) {
+		Z_TRY_ADDREF_P(data);
 		zend_hash_index_update(SOAP_GLOBAL(ref_map), (zend_ulong)node, data);
 	}
 }
@@ -3448,7 +3449,7 @@ void encode_reset_ns()
 	} else {
 		SOAP_GLOBAL(ref_map) = emalloc(sizeof(HashTable));
 	}
-	zend_hash_init(SOAP_GLOBAL(ref_map), 0, NULL, NULL, 0);
+	zend_hash_init(SOAP_GLOBAL(ref_map), 0, NULL, ZVAL_PTR_DTOR, 0);
 }
 
 void encode_finish()
