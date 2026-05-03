@@ -1130,8 +1130,6 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		ZEND_ASSERT(ce->backed_enum_table == NULL);
 
 		if (ce->num_friends) {
-			uint32_t i = 0;
-
 			for (uint32_t i = 0; i < ce->num_friends; i++) {
 				zend_accel_store_interned_string(ce->friend_names[i].name);
 				zend_accel_store_interned_string(ce->friend_names[i].lc_name);
