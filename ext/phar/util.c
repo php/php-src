@@ -57,14 +57,10 @@ static char *phar_get_link_location(phar_entry_info *entry) /* {{{ */
 }
 /* }}} */
 
-phar_entry_info *phar_get_link_source(phar_entry_info *entry) /* {{{ */
+static phar_entry_info *phar_follow_one_link(phar_entry_info *entry)
 {
 	phar_entry_info *link_entry;
 	char *link;
-
-	if (!entry->link) {
-		return entry;
-	}
 
 	link = phar_get_link_location(entry);
 	if (NULL != (link_entry = zend_hash_str_find_ptr(&(entry->phar->manifest), entry->link, strlen(entry->link))) ||
@@ -72,15 +68,48 @@ phar_entry_info *phar_get_link_source(phar_entry_info *entry) /* {{{ */
 		if (link != entry->link) {
 			efree(link);
 		}
-		return phar_get_link_source(link_entry);
-	} else {
-		if (link != entry->link) {
-			efree(link);
+		return link_entry;
+	}
+
+	if (link != entry->link) {
+		efree(link);
+	}
+	return NULL;
+}
+
+phar_entry_info *phar_get_link_source(phar_entry_info *entry)
+{
+	phar_entry_info *slow, *fast;
+
+	if (!entry->link) {
+		return entry;
+	}
+
+	/*
+	 * Use Floyd's cycle detection algorithm to follow the symlink chain without unbounded
+	 * recursion. Each entry has at most one outgoing link, so if a cycle exists the fast pointer
+	 * will eventually meet the slow one. Otherwise the fast pointer reaches the end first.
+	 */
+	slow = fast = entry;
+	while (1) {
+		fast = phar_follow_one_link(fast);
+		if (!fast || !fast->link) {
+			return fast;
 		}
-		return NULL;
+		fast = phar_follow_one_link(fast);
+		if (!fast || !fast->link) {
+			return fast;
+		}
+
+		/* no need to check slow as it's always behind */
+		slow = phar_follow_one_link(slow);
+
+		if (slow == fast) {
+			/* circular symlink chain */
+			return NULL;
+		}
 	}
 }
-/* }}} */
 
 /* retrieve a phar_entry_info's current file pointer for reading contents */
 php_stream *phar_get_efp(phar_entry_info *entry, int follow_links) /* {{{ */
