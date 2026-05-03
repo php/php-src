@@ -409,8 +409,13 @@ int php_mb_regex_set_mbctype(const char *encname)
 	if (mbctype == ONIG_ENCODING_UNDEF) {
 		return FAILURE;
 	}
+	const mbfl_encoding *mbfl_enc = mbfl_name2encoding(encname);
+	if (mbfl_enc == NULL) {
+		/* Encoding supported by Oniguruma but not by mbfl */
+		return FAILURE;
+	}
 	MBREX(current_mbctype) = mbctype;
-	MBREX(current_mbctype_mbfl_encoding) = mbfl_name2encoding(encname);
+	MBREX(current_mbctype_mbfl_encoding) = mbfl_enc;
 	return SUCCESS;
 }
 /* }}} */
