@@ -2074,7 +2074,7 @@ zend_string* phar_fix_filepath(const char *path, size_t path_length, bool use_cw
 	size_t ptr_length;
 
 	if (use_cwd && PHAR_G(cwd_len) && path_length > 2 && path[0] == '.' && path[1] == '/') {
-		new_path = zend_string_alloc(path_length + path_length + 1, false);
+		new_path = zend_string_alloc(path_length + PHAR_G(cwd_len) + 1, false);
 		new_path_len = PHAR_G(cwd_len);
 		memcpy(ZSTR_VAL(new_path), PHAR_G(cwd), PHAR_G(cwd_len));
 	} else {
