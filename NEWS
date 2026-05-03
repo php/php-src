@@ -189,6 +189,8 @@ PHP                                                                        NEWS
     (Weilin Du)
   . getenv() and putenv() now raises a ValueError when the first argument
     contains null bytes. (Weilin Du)
+  . parse_str() now raises a ValueError when the $string argument contains
+    null bytes. (Weilin Du)
   . proc_open() now raises a ValueError when the $cwd argument contains
     null bytes. (Weilin Du)
 
