@@ -655,7 +655,7 @@ static int sapi_cli_server_register_entry_cb(zval *entry, int num_args, va_list 
 			if (key[i] == '-') {
 				key[i] = '_';
 			} else {
-				key[i] = toupper(key[i]);
+				key[i] = toupper((unsigned char)key[i]);
 			}
 		}
 		spprintf(&real_key, 0, "%s_%s", "HTTP", key);

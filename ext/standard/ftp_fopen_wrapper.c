@@ -78,8 +78,8 @@ static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer
 {
 	buffer[0] = '\0'; /* in case read fails to read anything */
 	while (php_stream_gets(stream, buffer, buffer_size-1) &&
-		   !(isdigit((int) buffer[0]) && isdigit((int) buffer[1]) &&
-			 isdigit((int) buffer[2]) && buffer[3] == ' '));
+		   !(isdigit((unsigned char)buffer[0]) && isdigit((unsigned char)buffer[1]) &&
+			 isdigit((unsigned char)buffer[2]) && buffer[3] == ' '));
 	return strtol(buffer, NULL, 10);
 }
 /* }}} */
@@ -228,7 +228,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 #define PHP_FTP_CNTRL_CHK(val, val_len, err_msg) {	\
 	unsigned char *s = (unsigned char *) val, *e = (unsigned char *) s + val_len;	\
 	while (s < e) {	\
-		if (iscntrl(*s)) {	\
+		if (iscntrl((unsigned char)*s)) {	\
 			php_stream_wrapper_log_error(wrapper, options, err_msg, val);	\
 			goto connect_errexit;	\
 		}	\
@@ -339,14 +339,14 @@ static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, size_t ip_
 		/* parse pasv command (129, 80, 95, 25, 13, 221) */
 		tpath = tmp_line;
 		/* skip over the "227 Some message " part */
-		for (tpath += 4; *tpath && !isdigit((int) *tpath); tpath++);
+		for (tpath += 4; *tpath && !isdigit((unsigned char)*tpath); tpath++);
 		if (!*tpath) {
 			return 0;
 		}
 		/* skip over the host ip, to get the port */
 		hoststart = tpath;
 		for (i = 0; i < 4; i++) {
-			for (; isdigit((int) *tpath); tpath++);
+			for (; isdigit((unsigned char)*tpath); tpath++);
 			if (*tpath != ',') {
 				return 0;
 			}
@@ -826,7 +826,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		struct tm tm, tmbuf, *gmt;
 		time_t stamp;
 
-		while ((size_t)(p - tmp_line) < sizeof(tmp_line) && !isdigit(*p)) {
+		while ((size_t)(p - tmp_line) < sizeof(tmp_line) && !isdigit((unsigned char)*p)) {
 			p++;
 		}
 

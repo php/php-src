@@ -958,7 +958,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 					goto out;
 				}
 
-				if (!isxdigit((int) *ps)) {
+				if (!isxdigit(*ps)) {
 					err = PHP_CONV_ERR_INVALID_SEQ;
 					goto out;
 				}

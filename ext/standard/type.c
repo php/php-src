@@ -161,7 +161,7 @@ PHP_FUNCTION(intval)
 		char *strval = Z_STRVAL_P(num);
 		size_t strlen = Z_STRLEN_P(num);
 
-		while (isspace(*strval) && strlen) {
+		while (isspace((unsigned char)*strval) && strlen) {
 			strval++;
 			strlen--;
 		}

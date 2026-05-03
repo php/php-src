@@ -126,7 +126,7 @@ void timelib_time_tz_abbr_update(timelib_time* tm, const char* tz_abbr)
 	TIMELIB_TIME_FREE(tm->tz_abbr);
 	tm->tz_abbr = timelib_strdup(tz_abbr);
 	for (i = 0; i < tz_abbr_len; i++) {
-		tm->tz_abbr[i] = toupper(tz_abbr[i]);
+		tm->tz_abbr[i] = toupper((unsigned char)tz_abbr[i]);
 	}
 }
 
