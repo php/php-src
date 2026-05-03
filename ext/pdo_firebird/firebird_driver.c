@@ -293,7 +293,7 @@ static FbTokenType getToken(const char** begin, const char* end)
 	return ret;
 }
 
-int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
+int preprocess(const zend_string* sql, char* sql_out, size_t* sql_out_len, HashTable* named_params)
 {
 	bool passAsIs = 1, execBlock = 0;
 	zend_long pindex = -1;
@@ -324,7 +324,7 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 	if (l > 252) {
 		return 0;
 	}
-	strncpy(ident, i, l);
+	memcpy(ident, i, l);
 	ident[l] = '\0';
 	if (!strcasecmp(ident, "EXECUTE"))
 	{
@@ -349,7 +349,7 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 		if (l > 252) {
 			return 0;
 		}
-		strncpy(ident2, i2, l);
+		memcpy(ident2, i2, l);
 		ident2[l] = '\0';
 		execBlock = !strcasecmp(ident2, "BLOCK");
 		passAsIs = 0;
@@ -365,11 +365,15 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 
 	if (passAsIs)
 	{
-		strcpy(sql_out, ZSTR_VAL(sql));
+		memcpy(sql_out, ZSTR_VAL(sql), ZSTR_LEN(sql));
+		sql_out[ZSTR_LEN(sql)] = '\0';
+		*sql_out_len = ZSTR_LEN(sql);
 		return 1;
 	}
 
-	strncat(sql_out, start, p - start);
+	char *sql_out_p = sql_out;
+	memcpy(sql_out_p, start, p - start);
+	sql_out_p += p - start;
 
 	while (p < end)
 	{
@@ -377,10 +381,12 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 		tok = getToken(&p, end);
 		switch (tok)
 		{
-		case ttParamMark:
-			tok = getToken(&p, end);
+		case ttParamMark: {
+			const char* p_peek = p;
+			tok = getToken(&p_peek, end);
 			if (tok == ttIdent /*|| tok == ttString*/)
 			{
+				p = p_peek;
 				++pindex;
 				l = p - start;
 				/* check the length of the identifier */
@@ -389,7 +395,7 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 				if (l > 253) {
 					return 0;
 				}
-				strncpy(pname, start, l);
+				memcpy(pname, start, l);
 				pname[l] = '\0';
 
 				if (named_params) {
@@ -398,7 +404,7 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 					zend_hash_str_update(named_params, pname, l, &tmp);
 				}
 
-				strcat(sql_out, "?");
+				*sql_out_p++ = '?';
 			}
 			else
 			{
@@ -408,10 +414,11 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 					return 0;
 				}
 				++pindex;
-				strncat(sql_out, start, p - start);
+				memcpy(sql_out_p, start, p - start);
+				sql_out_p += p - start;
 			}
 			break;
-
+		}
 		case ttIdent:
 			if (execBlock)
 			{
@@ -423,11 +430,14 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 				if (l > 252) {
 					return 0;
 				}
-				strncpy(ident, start, l);
+				memcpy(ident, start, l);
 				ident[l] = '\0';
 				if (!strcasecmp(ident, "AS"))
 				{
-					strncat(sql_out, start, end - start);
+					memcpy(sql_out_p, start, end - start);
+					sql_out_p += end - start;
+					*sql_out_p = '\0';
+					*sql_out_len = sql_out_p - sql_out;
 					return 1;
 				}
 			}
@@ -438,7 +448,8 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 		case ttComment:
 		case ttString:
 		case ttOther:
-			strncat(sql_out, start, p - start);
+			memcpy(sql_out_p, start, p - start);
+			sql_out_p += p - start;
 			break;
 
 		case ttBrokenComment:
@@ -456,6 +467,8 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 			break;
 		}
 	}
+	*sql_out_p = '\0';
+	*sql_out_len = sql_out_p - sql_out;
 	return 1;
 }
 
@@ -665,7 +678,7 @@ free_statement:
 static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
 	size_t qcount = 0;
-	char const *co, *l, *r;
+	char const *co, *l;
 	char *c;
 	size_t quotedlen;
 	zend_string *quoted_str;
@@ -674,9 +687,15 @@ static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *un
 		return ZSTR_INIT_LITERAL("''", 0);
 	}
 
+	const char * const end = ZSTR_VAL(unquoted) + ZSTR_LEN(unquoted);
+
 	/* Firebird only requires single quotes to be doubled if string lengths are used */
 	/* count the number of ' characters */
-	for (co = ZSTR_VAL(unquoted); (co = strchr(co,'\'')); qcount++, co++);
+	for (co = ZSTR_VAL(unquoted); co < end; co++) {
+		if (*co == '\'') {
+			qcount++;
+		}
+	}
 
 	if (UNEXPECTED(ZSTR_LEN(unquoted) + 2 > ZSTR_MAX_LEN - qcount)) {
 		return NULL;
@@ -688,15 +707,14 @@ static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *un
 	*c++ = '\'';
 
 	/* foreach (chunk that ends in a quote) */
-	for (l = ZSTR_VAL(unquoted); (r = strchr(l,'\'')); l = r+1) {
-		strncpy(c, l, r-l+1);
-		c += (r-l+1);
-		/* add the second quote */
-		*c++ = '\'';
+	for (l = ZSTR_VAL(unquoted); l < end; l++) {
+		*c++ = *l;
+		if (*l == '\'') {
+			/* add the second quote */
+			*c++ = '\'';
+		}
 	}
 
-	/* copy the remainder */
-	strncpy(c, l, quotedlen-(c-ZSTR_VAL(quoted_str))-1);
 	ZSTR_VAL(quoted_str)[quotedlen-1] = '\'';
 	ZSTR_VAL(quoted_str)[quotedlen]   = '\0';
 
@@ -789,6 +807,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char *new_sql;
+	size_t new_sql_len;
 
 	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
 	if (ZSTR_LEN(sql) > 65536) {
@@ -816,14 +835,14 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 	   we need to replace :foo by ?, and store the name we just replaced */
 	new_sql = emalloc(ZSTR_LEN(sql)+1);
 	new_sql[0] = '\0';
-	if (!preprocess(sql, new_sql, named_params)) {
+	if (!preprocess(sql, new_sql, &new_sql_len, named_params)) {
 		strcpy(dbh->error_code, "07000");
 		efree(new_sql);
 		return 0;
 	}
 
 	/* prepare the statement */
-	if (isc_dsql_prepare(H->isc_status, &H->tr, s, 0, new_sql, H->sql_dialect, out_sqlda)) {
+	if (isc_dsql_prepare(H->isc_status, &H->tr, s, new_sql_len, new_sql, H->sql_dialect, out_sqlda)) {
 		RECORD_ERROR(dbh);
 		efree(new_sql);
 		return 0;
