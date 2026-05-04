@@ -611,8 +611,12 @@ ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_p
 	if (prop_info->ce == scope) {
 		return true;
 	}
-	return EXPECTED((prop_info->flags & ZEND_ACC_PROTECTED_SET)
-		&& is_protected_compatible_scope(prop_info->prototype->ce, scope));
+	if (EXPECTED((prop_info->flags & ZEND_ACC_PROTECTED_SET)
+		&& is_protected_compatible_scope(prop_info->prototype->ce, scope))
+	) {
+		return true;
+	}
+	return zend_check_friend(prop_info->ce, scope);
 }
 
 static void zend_property_guard_dtor(zval *el) /* {{{ */ {

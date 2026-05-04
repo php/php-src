@@ -1,16 +1,16 @@
 --TEST--
-Friends: allows access to properties
+Friends: allows access to properties with asymmetric visibility
 --FILE--
 <?php
 
 class Foo {
 	friend Bar;
 
-	protected static $protectedStatic;
-	private static $privateStatic;
+	public protected(set) static mixed $protectedStatic;
+	public private(set) static mixed $privateStatic;
 
-	protected $protectedInstance;
-	private $privateInstance;
+	public protected(set) mixed $protectedInstance;
+	public private(set) mixed $privateInstance;
 }
 
 class Bar {
@@ -57,19 +57,19 @@ Bar::testPropertyAccess();
 
 ?>
 --EXPECTF--
-Error: Cannot access protected property Foo::$protectedStatic in %s:%d
+Error: Cannot modify protected(set) property Foo::$protectedStatic from global scope in %s:%d
 Stack trace:
 #0 {main}
 
-Error: Cannot access private property Foo::$privateStatic in %s:%d
+Error: Cannot modify private(set) property Foo::$privateStatic from global scope in %s:%d
 Stack trace:
 #0 {main}
 
-Error: Cannot access protected property Foo::$protectedInstance in %s:%d
+Error: Cannot modify protected(set) property Foo::$protectedInstance from global scope in %s:%d
 Stack trace:
 #0 {main}
 
-Error: Cannot access private property Foo::$privateInstance in %s:%d
+Error: Cannot modify private(set) property Foo::$privateInstance from global scope in %s:%d
 Stack trace:
 #0 {main}
 
@@ -77,9 +77,11 @@ Stack trace:
 
 -----
 
-
-Fatal error: Uncaught Error: Cannot access protected property Foo::$protectedStatic in %s:%d
-Stack trace:
-#0 %s(%d): Bar::testPropertyAccess()
-#1 {main}
-  thrown in %s on line %d
+int(1)
+int(2)
+object(Foo)#%d (2) {
+  ["protectedInstance"]=>
+  int(3)
+  ["privateInstance"]=>
+  int(4)
+}
