@@ -151,7 +151,7 @@ typedef struct _type_reference {
 // TARGET_METHOD: zend_function
 // TARGET_PROPERTY: zend_property_info
 // TARGET_CLASS_CONST: zend_class_constant and its name which isn't a part of
-//   the struct
+//   the struct (this is also used for enum cases)
 // TARGET_PARAMETER: target function, closure (or null), and offset
 // TARGET_CONST: zend_constant
 typedef union _attribute_target_reference {
@@ -7736,6 +7736,15 @@ ZEND_METHOD(ReflectionAttribute, getCurrent)
 			);
 			return;
 		case ZEND_ATTRIBUTE_TARGET_CLASS_CONST:
+			if (ZEND_CLASS_CONST_FLAGS(attr->target_data.target_class_constant.constant) & ZEND_CLASS_CONST_IS_CASE) {
+				reflection_enum_case_factory(
+					attr->target_data.target_class_constant.constant->ce,
+					attr->target_data.target_class_constant.name,
+					attr->target_data.target_class_constant.constant,
+					return_value
+				);
+				return;
+			}
 			reflection_class_constant_factory(
 				attr->target_data.target_class_constant.name,
 				attr->target_data.target_class_constant.constant,
