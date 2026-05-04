@@ -5,8 +5,35 @@ PHP                                                                        NEWS
 - Curl:
   . Add support for brotli and zstd on Windows. (Shivam Mathur)
 
+- FPM:
+  . Fixed GHSA-7qg2-v9fj-4mwv (XSS within status endpoint). (CVE-2026-6735)
+    (Jakub Zelenka)
+
+- MBString:
+  . Fixed GHSA-wm6j-2649-pv75 (Null pointer dereference in
+    php_mb_check_encoding() via mb_ereg_search_init()). (CVE-2026-7259)
+    (vi3tL0u1s)
+
 - OpenSSL:
   . Fix compatibility issues with OpenSSL 4.0. (jordikroon, Remi)
+
+- PDO_Firebird:
+  . Fixed GHSA-w476-322c-wpvm (SQL injection via NUL bytes in quoted strings).
+    (CVE-2025-14179) (SakiTakamachi)
+
+- SOAP:
+  . Fixed GHSA-85c2-q967-79q5 (Stale SOAP_GLOBAL(ref_map) pointer with Apache
+    Map). (CVE-2026-6722) (ilutov)
+  . Fixed GHSA-m33r-qmcv-p97q (Use-after-free after header parsing failure with
+    SOAP_PERSISTENCE_SESSION). (CVE-2026-7261) (ilutov)
+  . Fixed GHSA-hmxp-6pc4-f3vv (Broken Apache map value NULL check).
+    (CVE-2026-7262) (ilutov)
+
+- Standard:
+  . Fixed GHSA-96wq-48vp-hh57 (Signed integer overflow of char array offset).
+    (CVE-2026-7568) (TimWolla)
+  . Fixed GHSA-m8rr-4c36-8gq4 (Consistently pass unsigned char to ctype.h
+    functions). (CVE-2026-7258) (ilutov)
 
 15 Jan 2026, PHP 8.3.30
 
