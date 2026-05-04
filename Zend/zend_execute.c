@@ -1207,8 +1207,7 @@ static zend_always_inline bool zend_verify_recv_arg_type(const zend_function *zf
 
 	if (ZEND_TYPE_IS_SET(cur_arg_info->type)
 			&& UNEXPECTED(!zend_check_type_and_coerce(&cur_arg_info->type, arg,
-				/* TODO: Pass scope to zend_verify_recv_arg_type()? */
-				zend_get_called_scope(EG(current_execute_data)),
+				NULL, /* Delay computation of scope, due to rarity of self types */
 				ZEND_ARG_USES_STRICT_TYPES(), 0))) {
 		zend_verify_arg_error(zf, cur_arg_info, arg_num, arg);
 		return false;
@@ -1222,8 +1221,7 @@ static zend_always_inline bool zend_verify_variadic_arg_type(
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(arg_info->type));
 	if (UNEXPECTED(!zend_check_type_and_coerce(&arg_info->type, arg,
-		/* TODO: Pass scope to zend_verify_variadic_arg_type()? */
-		zend_get_called_scope(EG(current_execute_data)),
+		NULL, /* Delay computation of scope, due to rarity of self types */
 		ZEND_ARG_USES_STRICT_TYPES(),
 		0
 	))) {
