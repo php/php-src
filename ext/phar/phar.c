@@ -1312,6 +1312,8 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_filename(ze
 	test = &unused;
 
 	*error = NULL;
+	const char *alias_cstr = alias ? ZSTR_VAL(alias) : NULL;
+	size_t alias_len = alias ? ZSTR_LEN(alias) : 0;
 
 	/* first try to open an existing file */
 	if (phar_detect_phar_fname_ext(ZSTR_VAL(fname), ZSTR_LEN(fname), &ext_str, &ext_len, !is_data, 0, true) == SUCCESS) {
@@ -1328,8 +1330,6 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_filename(ze
 		return FAILURE;
 	}
 check_file:
-	const char *alias_cstr = alias ? ZSTR_VAL(alias) : NULL;
-	size_t alias_len = alias ? ZSTR_LEN(alias) : 0;
 	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias_cstr, alias_len, is_data, options, test, &my_error) == SUCCESS) {
 		*pphar = *test;
 
