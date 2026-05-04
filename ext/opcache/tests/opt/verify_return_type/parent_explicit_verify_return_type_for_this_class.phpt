@@ -28,17 +28,14 @@ $_main:
 0000 RETURN int(1)
 
 C2::foo:
-     ; (lines=5, args=0, vars=0, tmps=1)
+     ; (lines=4, args=0, vars=0, tmps=1)
      ; (before optimizer)
      ; %s:6-8
      ; return  [] RANGE[0..0]
 0000 T0 = FETCH_THIS
-0001 VERIFY_RETURN_TYPE T0
-0002 RETURN T0
-0003 VERIFY_RETURN_TYPE
-0004 RETURN null
-LIVE RANGES:
-     0: 0001 - 0002 (tmp/var)
+0001 RETURN T0
+0002 VERIFY_RETURN_TYPE
+0003 RETURN null
 
 $_main:
      ; (lines=1, args=0, vars=0, tmps=0)
