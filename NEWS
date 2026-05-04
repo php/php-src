@@ -51,6 +51,8 @@ PHP                                                                        NEWS
   . gmp_fact() reject values larger than unsigned long. (David Carlier)
   . gmp_pow/binomial/root/rootrem and shift/pow operators reject values
     larger than unsigned long. (David Carlier)
+  . GMP exponentiation and shift operators now emit a deprecation warning
+    when converting a float right operand to int loses precision. (Weilin Du)
 
 - Hash:
   . Upgrade xxHash to 0.8.2. (timwolla)

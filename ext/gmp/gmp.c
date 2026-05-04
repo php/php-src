@@ -332,11 +332,11 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 
 	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
 		if (UNEXPECTED(!IS_GMP(op2))) {
-			// For PHP 8.3 and up use zend_try_get_long()
+			bool failed;
 			switch (Z_TYPE_P(op2)) {
 				case IS_DOUBLE:
-					shift = zval_get_long(op2);
-					if (UNEXPECTED(EG(exception))) {
+					shift = zval_try_get_long(op2, &failed);
+					if (UNEXPECTED(failed)) {
 						return FAILURE;
 					}
 					break;
