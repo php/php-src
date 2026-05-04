@@ -2696,6 +2696,17 @@ static void zend_emit_return_type_check(
 			/* we don't need run-time check */
 			return;
 		}
+		
+		/* If return type contains static and we are returning $this
+		 * (determined by checking if the previous opcode is ZEND_FETCH_THIS)
+		 * then we don't need to check the return type */
+		if (expr && ZEND_TYPE_CONTAINS_CODE(type, IS_STATIC)) {
+			const zend_op_array *op_array = CG(active_op_array);
+			zend_op previous = op_array->opcodes[op_array->last-1];
+			if (previous.opcode == ZEND_FETCH_THIS) {
+				return;
+			}
+		}
 
 		opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
 		if (expr && expr->op_type == IS_CONST) {
