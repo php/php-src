@@ -6700,11 +6700,11 @@ static bool check_visibility(uint32_t visibility, zend_class_entry *ce, zend_cla
 			return false;
 		}
 		if (visibility & ZEND_ACC_PRIVATE) {
-			return false;
+			return zend_check_friend(ce, scope);
 		}
 		ZEND_ASSERT(visibility & ZEND_ACC_PROTECTED);
 		if (!instanceof_function(scope, ce) && !instanceof_function(ce, scope)) {
-			return false;
+			return zend_check_friend(ce, scope);
 		}
 	}
 	return true;

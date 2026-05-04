@@ -20,5 +20,5 @@ var_dump(new ReflectionProperty('A', 'privateProp')->isWritable('C', null));
 ?>
 --EXPECT--
 bool(true)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
