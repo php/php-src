@@ -959,6 +959,8 @@ static zend_always_inline zend_type_check_status zend_check_type_ex(
 		/* Cannot coerce typed references */
 		strict_types |= ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(arg));
 		if (arg == coerce_arg) {
+			/* Somehow GCC in release builds is not smart enough to assert this will not be uninitialized */
+			ZEND_ASSERT(Z_ISREF_P(coerce_arg));
 			arg = coerce_arg = Z_REFVAL_P(coerce_arg);
 		} else {
 			arg = Z_REFVAL_P(arg);
