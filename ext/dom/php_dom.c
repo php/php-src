@@ -1264,7 +1264,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_merge(&dom_modern_notation_prop_handlers, &dom_modern_node_prop_handlers, NULL, false);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_notation_prop_handlers, "parentNode", dom_notation_parent_node_read, NULL);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_notation_prop_handlers, "isConnected", dom_notation_is_connected_read, NULL);
-	zend_hash_add_new_ptr(&classes, dom_modern_notation_class_entry->name, &dom_modern_node_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_modern_notation_class_entry->name, &dom_modern_notation_prop_handlers);
 
 	dom_entity_class_entry = register_class_DOMEntity(dom_node_class_entry);
 	dom_entity_class_entry->create_object = dom_objects_new;
