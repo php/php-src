@@ -167,9 +167,9 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 			if (lval > 0xFFFF) {
 				/* Supplemental planes U+010000 - U+10FFFF */
 				if (TARGET_CHECK(args, 2)) {
-					/* TODO: Find the ICU call which does this properly */
-					*(args->target++) = (UChar)(((lval - 0x10000) >> 10)   | 0xD800);
-					*(args->target++) = (UChar)(((lval - 0x10000) & 0x3FF) | 0xDC00);
+					int32_t offset = 0;
+					U16_APPEND_UNSAFE(args->target, offset, lval);
+					args->target += offset;
 				}
 				return;
 			}
