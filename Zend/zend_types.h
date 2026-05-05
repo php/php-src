@@ -1345,54 +1345,49 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 		Z_TYPE_INFO_P(z) = _IS_ERROR;	\
 	} while (0)
 
-#define Z_REFCOUNT_P(pz)			zval_refcount_p(pz)
-#define Z_SET_REFCOUNT_P(pz, rc)	zval_set_refcount_p(pz, rc)
-#define Z_ADDREF_P(pz)				zval_addref_p(pz)
-#define Z_DELREF_P(pz)				zval_delref_p(pz)
-
-#define Z_REFCOUNT(z)				Z_REFCOUNT_P(&(z))
-#define Z_SET_REFCOUNT(z, rc)		Z_SET_REFCOUNT_P(&(z), rc)
-#define Z_ADDREF(z)					Z_ADDREF_P(&(z))
-#define Z_DELREF(z)					Z_DELREF_P(&(z))
-
-#define Z_TRY_ADDREF_P(pz) do {		\
-	zval *_pz = (pz);				\
-	if (Z_REFCOUNTED_P(_pz)) {		\
-		Z_ADDREF_P(_pz);			\
-	}								\
-} while (0)
-
-#define Z_TRY_DELREF_P(pz) do {		\
-	zval *_pz = (pz);				\
-	if (Z_REFCOUNTED_P(_pz)) {		\
-		Z_DELREF_P(_pz);			\
-	}								\
-} while (0)
-
-#define Z_TRY_ADDREF(z)				Z_TRY_ADDREF_P(&(z))
-#define Z_TRY_DELREF(z)				Z_TRY_DELREF_P(&(z))
-
 static zend_always_inline uint32_t zval_refcount_p(const zval* pz) {
 #if ZEND_DEBUG
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz) || Z_TYPE_P(pz) == IS_ARRAY);
 #endif
 	return GC_REFCOUNT(Z_COUNTED_P(pz));
 }
+static zend_always_inline uint32_t Z_REFCOUNT_P(const zval *z) { return zval_refcount_p(z); }
+#define Z_REFCOUNT(z) Z_REFCOUNT_P(&(z))
 
 static zend_always_inline uint32_t zval_set_refcount_p(zval* pz, uint32_t rc) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
 	return GC_SET_REFCOUNT(Z_COUNTED_P(pz), rc);
 }
+static zend_always_inline uint32_t Z_SET_REFCOUNT_P(zval *z, uint32_t rc) { return zval_set_refcount_p(z, rc); }
+#define Z_SET_REFCOUNT(z, rc) Z_SET_REFCOUNT_P(&(z), rc)
 
 static zend_always_inline uint32_t zval_addref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
 	return GC_ADDREF(Z_COUNTED_P(pz));
 }
+static zend_always_inline uint32_t Z_ADDREF_P(zval *z) { return zval_addref_p(z); }
+#define Z_ADDREF(z) Z_ADDREF_P(&(z))
 
 static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
 	return GC_DELREF(Z_COUNTED_P(pz));
 }
+static zend_always_inline uint32_t Z_DELREF_P(zval *z) { return zval_delref_p(z); }
+#define Z_DELREF(z) Z_DELREF_P(&(z))
+
+static zend_always_inline void Z_TRY_ADDREF_P(zval *z) {
+	if (Z_REFCOUNTED_P(z)) {
+		Z_ADDREF_P(z);
+	}
+}
+#define Z_TRY_ADDREF(z) Z_TRY_ADDREF_P(&(z))
+
+static zend_always_inline void Z_TRY_DELREF_P(zval *z) {
+	if (Z_REFCOUNTED_P(z)) {
+		Z_DELREF_P(z);
+	}
+}
+#define Z_TRY_DELREF(z) Z_TRY_DELREF_P(&(z))
 
 #if SIZEOF_SIZE_T == 4
 # define ZVAL_COPY_VALUE_EX(z, v, gc, t)				\
