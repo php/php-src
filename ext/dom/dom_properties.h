@@ -147,6 +147,8 @@ zend_result dom_nodelist_length_read(dom_object *obj, zval *retval);
 /* notation properties */
 zend_result dom_notation_public_id_read(dom_object *obj, zval *retval);
 zend_result dom_notation_system_id_read(dom_object *obj, zval *retval);
+zend_result dom_notation_parent_node_read(dom_object *obj, zval *retval);
+zend_result dom_notation_is_connected_read(dom_object *obj, zval *retval);
 
 /* processinginstruction properties */
 zend_result dom_processinginstruction_target_read(dom_object *obj, zval *retval);

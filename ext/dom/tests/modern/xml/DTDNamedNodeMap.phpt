@@ -149,11 +149,11 @@ object(Dom\Notation)#4 (14) {
   ["baseURI"]=>
   string(%d) "%s"
   ["isConnected"]=>
-  bool(true)
+  bool(false)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["parentNode"]=>
-  string(22) "(object value omitted)"
+  NULL
   ["parentElement"]=>
   NULL
   ["childNodes"]=>
