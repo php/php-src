@@ -252,15 +252,49 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 	free_alloca(shiftlist, use_heap);
 }
 
-static bool safe_instanceof(const zend_class_entry *ce1, const zend_class_entry *ce2) {
+static bool safe_instanceof(
+	const zend_class_entry *ce1,
+	const zend_class_entry *ce2,
+	const zend_script *script,
+	const zend_op_array *op_array
+) {
 	if (ce1 == ce2) {
 		return true;
 	}
-	if (!(ce1->ce_flags & ZEND_ACC_LINKED)) {
-		/* This case could be generalized, similarly to unlinked_instanceof */
-		return false;
+	if (ce1->ce_flags & ZEND_ACC_LINKED) {
+		return instanceof_function(ce1, ce2);
 	}
-	return instanceof_function(ce1, ce2);
+
+	/* TODO Handle unlinked parents ike in unlinked_instanceof()? */
+
+	if (ce1->num_interfaces) {
+		uint32_t i;
+		if (ce1->ce_flags & ZEND_ACC_RESOLVED_INTERFACES) {
+			/* Unlike the normal instanceof_function(), we have to perform a recursive
+			 * check here, as the parent interfaces might not have been fully copied yet. */
+			for (i = 0; i < ce1->num_interfaces; i++) {
+				if (safe_instanceof(ce1->interfaces[i], ce2, script, op_array)) {
+					return true;
+				}
+			}
+		} else {
+			for (i = 0; i < ce1->num_interfaces; i++) {
+				const zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, ce1->interface_names[i].lc_name);
+				if (!ce) {
+					continue;
+				}
+				/* Avoid recursing if class implements itself. */
+				if (ce == ce1) {
+					continue;
+				}
+				if (safe_instanceof(ce, ce2, script, op_array)) {
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
 }
 
 static inline bool can_elide_list_type(
@@ -280,7 +314,7 @@ static inline bool can_elide_list_type(
 			zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
 			const zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
 			zend_string_release(lcname);
-			bool result = ce && safe_instanceof(use_info->ce, ce);
+			bool result = ce && safe_instanceof(use_info->ce, ce, script, op_array);
 			if (result == !is_intersection) {
 				return result;
 			}
