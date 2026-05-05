@@ -173,6 +173,9 @@ PHP                                                                        NEWS
   . Fix NUL byte truncation in sqlite3 TEXT column handling. (ndossche)
 
 - Standard:
+  . Fixed bug GH-21738 (undefined behavior when passing non-ASCII bytes to
+    isxdigit() in url_decode, quoted_printable_decode and stripcslashes).
+    (lacatoire)
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
   . Added form feed (\f) in the default trimmed characters of trim(), rtrim()
