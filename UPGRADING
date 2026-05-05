@@ -37,6 +37,8 @@ PHP 8.6 UPGRADE NOTES
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
     lower than zero or greater than platform's UINT_MAX.
+  . pcntl_exec() now raises a ValueError if the $args argument is not a list
+    array.
 
 - PCRE:
   . preg_grep() now returns false instead of a partial array when a PCRE

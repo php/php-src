@@ -85,6 +85,10 @@ PHP                                                                        NEWS
     list of candidate encodings (with 200,000+ entries). (Jordi Kroon)
   . mbregex has been deprecated. (youkidearitai)
 
+- PCNTL:
+  . pcntl_exec() now throws a ValueError if the $args array is not a list
+    array. (Weilin Du)
+
 - Mysqli:
   . Added mysqli_quote_string() and mysqli::quote_string(). (Kamil Tekiela)
 
