@@ -557,7 +557,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_
 			/* IPv6 without square brackets so without port */
 			transport.l = mnd_sprintf(&transport.s, 0, "tcp://[%s]:%u", hostname.s, port);
 		} else {
-			char *p;
+			const char *p;
 
 			/* IPv6 addresses are in the format [address]:port */
 			if (hostname.s[0] == '[') { /* IPv6 */
