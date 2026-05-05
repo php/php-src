@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.31
+07 May 2026, PHP 8.2.31
 
 - Curl:
   . Add support for brotli and zstd on Windows. (Shivam Mathur)
