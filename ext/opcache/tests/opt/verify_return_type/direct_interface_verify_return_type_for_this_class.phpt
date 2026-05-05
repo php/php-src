@@ -49,11 +49,8 @@ $_main:
 0001 RETURN int(1)
 
 C::foo:
-     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (lines=2, args=0, vars=0, tmps=1)
      ; (after optimizer)
      ; %s:6-8
 0000 T0 = FETCH_THIS
-0001 VERIFY_RETURN_TYPE T0
-0002 RETURN T0
-LIVE RANGES:
-     0: 0001 - 0002 (tmp/var)
+0001 RETURN T0
