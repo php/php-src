@@ -420,6 +420,17 @@ static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_valu
 	return 1;
 }
 
+static zend_result dblib_handle_check_liveness(pdo_dbh_t *dbh)
+{
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+
+	if (dbdead(H->link)) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 static const struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_closer,
 	dblib_handle_preparer,
@@ -432,7 +443,7 @@ static const struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_last_id, /* last insert id */
 	dblib_fetch_error, /* fetch error */
 	dblib_get_attribute, /* get attr */
-	NULL, /* check liveness */
+	dblib_handle_check_liveness, /* check_liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	NULL, /* in transaction, use PDO's internal tracking mechanism */

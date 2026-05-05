@@ -1095,6 +1095,8 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 			if (UNEXPECTED(!jit_extension)
 			 || UNEXPECTED(!(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE))) {
 				if (execute_data->prev_execute_data != prev_execute_data) {
+					stop = ZEND_JIT_TRACE_STOP_RETURN;
+				} else {
 					stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
 				}
 				break;

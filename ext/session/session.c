@@ -446,9 +446,7 @@ static zend_result php_session_initialize(void)
 	} else if (PS(use_strict_mode) && PS(mod)->s_validate_sid &&
 		PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == FAILURE
 	) {
-		if (PS(id)) {
-			zend_string_release_ex(PS(id), false);
-		}
+		zend_string_release_ex(PS(id), false);
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
 			PS(id) = php_session_create_id(NULL);

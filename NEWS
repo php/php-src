@@ -99,6 +99,13 @@ PHP                                                                        NEWS
   . Added TLS session resumption support for streams with new context options
     and Openssl\Session class. (Jakub Zelenka)
 
+- PCNTL:
+  . pcntl_exec() now throws a ValueError if the $args array is not a list
+    array. (Weilin Du)
+
+- PDO_DBLIB;
+  . Added dblib_handle_check_liveness handler. (freddy77)
+
 - PDO_PGSQL:
   . Clear session-local state disconnect-equivalent processing.
     (KentarouTakeda)
@@ -157,6 +164,8 @@ PHP                                                                        NEWS
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
+  . Fixed bug GH-21831 (SplObjectStorage::removeAllExcept() use-after-free
+    with re-entrant getHash()). (Pratik Bhujel)
   . Fix bugs GH-8561, GH-8562, GH-8563, and GH-8564 (Fixing various
     SplFileObject iterator desync bugs). (iliaal)
 
@@ -188,6 +197,8 @@ PHP                                                                        NEWS
     contains null bytes. (Weilin Du)
   . Improved explode() ValueError message when $separator is empty; suggests
     str_split() or mb_str_split(). (diegoasales)
+  . parse_str() now raises a ValueError when the $string argument contains
+    null bytes. (Weilin Du)
   . proc_open() now raises a ValueError when the $cwd argument contains
     null bytes. (Weilin Du)
 

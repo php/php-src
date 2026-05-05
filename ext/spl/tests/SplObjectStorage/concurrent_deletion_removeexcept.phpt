@@ -1,5 +1,5 @@
 --TEST--
-SplObjectStorage: Concurrent deletion during removeAllExcept
+SplObjectStorage: Mutation during getHash is prohibited during removeAllExcept
 --CREDITS--
 cnitlrt
 --FILE--
@@ -17,19 +17,16 @@ $storage = new SplObjectStorage();
 $storage[new stdClass] = 'foo';
 
 $evil = new EvilStorage();
-$storage->removeAllExcept($evil);
+try {
+    $storage->removeAllExcept($evil);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-var_dump($evil, $storage);
+var_dump(count($evil), count($storage));
 
 ?>
---EXPECTF--
-object(EvilStorage)#%d (1) {
-  ["storage":"SplObjectStorage":private]=>
-  array(0) {
-  }
-}
-object(SplObjectStorage)#%d (1) {
-  ["storage":"SplObjectStorage":private]=>
-  array(0) {
-  }
-}
+--EXPECT--
+Modification of SplObjectStorage during getHash() is prohibited
+int(0)
+int(1)

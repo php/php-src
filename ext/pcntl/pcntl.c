@@ -675,7 +675,11 @@ PHP_FUNCTION(pcntl_exec)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (args != NULL) {
-		// TODO Check array is a list?
+		if (!zend_array_is_list(Z_ARRVAL_P(args))) {
+			zend_argument_value_error(2, "must be a list array");
+			RETURN_THROWS();
+		}
+
 		/* Build argument list */
 		SEPARATE_ARRAY(args);
 		const HashTable *args_ht = Z_ARRVAL_P(args);

@@ -98,6 +98,11 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     the non-throw versions.
   . The XtOffsetOf() alias of C’s offsetof() macro has been removed. Use
     offsetof() directly.
+  . The deprecated Z_COPYABLE(), Z_COPYABLE_P(), Z_OPT_COPYABLE(), and
+    Z_OPT_COPYABLE_P() macros have been removed. Check for IS_ARRAY directly.
+  . The deprecated Z_IMMUTABLE(), Z_IMMUTABLE_P(), Z_OPT_IMMUTABLE(), and
+    Z_OPT_IMMUTABLE_P() macros have been removed. Check for
+    IS_ARRAY && !REFCOUNTED directly.
 
 ========================
 2. Build system changes

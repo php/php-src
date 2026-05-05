@@ -944,16 +944,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_COLLECTABLE(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_COLLECTABLE) != 0)
 #define Z_COLLECTABLE_P(zval_p)		Z_COLLECTABLE(*(zval_p))
 
-/* deprecated: (COPYABLE is the same as IS_ARRAY) */
-#define Z_COPYABLE(zval)			(Z_TYPE(zval) == IS_ARRAY)
-#define Z_COPYABLE_P(zval_p)		Z_COPYABLE(*(zval_p))
-
-/* deprecated: (IMMUTABLE is the same as IS_ARRAY && !REFCOUNTED) */
-#define Z_IMMUTABLE(zval)			(Z_TYPE_INFO(zval) == IS_ARRAY)
-#define Z_IMMUTABLE_P(zval_p)		Z_IMMUTABLE(*(zval_p))
-#define Z_OPT_IMMUTABLE(zval)		Z_IMMUTABLE(zval_p)
-#define Z_OPT_IMMUTABLE_P(zval_p)	Z_IMMUTABLE(*(zval_p))
-
 /* the following Z_OPT_* macros make better code when Z_TYPE_INFO accessed before */
 #define Z_OPT_TYPE(zval)			(Z_TYPE_INFO(zval) & Z_TYPE_MASK)
 #define Z_OPT_TYPE_P(zval_p)		Z_OPT_TYPE(*(zval_p))
@@ -966,10 +956,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define Z_OPT_COLLECTABLE(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT)) != 0)
 #define Z_OPT_COLLECTABLE_P(zval_p)	Z_OPT_COLLECTABLE(*(zval_p))
-
-/* deprecated: (COPYABLE is the same as IS_ARRAY) */
-#define Z_OPT_COPYABLE(zval)		(Z_OPT_TYPE(zval) == IS_ARRAY)
-#define Z_OPT_COPYABLE_P(zval_p)	Z_OPT_COPYABLE(*(zval_p))
 
 #define Z_OPT_ISREF(zval)			(Z_OPT_TYPE(zval) == IS_REFERENCE)
 #define Z_OPT_ISREF_P(zval_p)		Z_OPT_ISREF(*(zval_p))

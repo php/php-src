@@ -37,6 +37,8 @@ PHP 8.6 UPGRADE NOTES
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
     lower than zero or greater than platform's UINT_MAX.
+  . pcntl_exec() now raises a ValueError if the $args argument is not a list
+    array.
 
 - PCRE:
   . preg_grep() now returns false instead of a partial array when a PCRE
@@ -77,6 +79,8 @@ PHP 8.6 UPGRADE NOTES
     logic in their updateTimestamp() method.
 
 - SPL:
+  . SplObjectStorage::getHash() implementations may no longer mutate any
+    SplObjectStorage instance. Attempting to do so now throws an Error.
   . SplFileObject::next() now advances the stream when no prior current()
     call has cached a line. A subsequent current() call returns the new
     line rather than the previous one.
@@ -97,6 +101,8 @@ PHP 8.6 UPGRADE NOTES
     argument value is passed.
   . getenv() and putenv() now raises a ValueError when the first argument
     contains null bytes.
+  . parse_str() now raises a ValueError when the $string argument contains
+    null bytes.
   . linkinfo() now raises a ValueError when the $path argument is empty.
   . pathinfo() now raises a ValueError when an invalid $flag
     argument value is passed.
@@ -203,6 +209,10 @@ PHP 8.6 UPGRADE NOTES
 - OpenSSL:
   . Output of openssl_x509_parse() contains criticalExtensions listing all
     critical certificate extensions.
+
+- PDO_DBLIB:
+  . When using persistent connections, there is now a liveness check in the
+    constructor.
 
 - Phar:
   . Phar::mungServer() now supports reference values.
