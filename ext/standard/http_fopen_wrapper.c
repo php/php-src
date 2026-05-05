@@ -351,6 +351,16 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 	return NULL;
 }
 
+static inline void smart_str_append_header_value(smart_str *dest, const char *src, const char *header_name)
+{
+	size_t len = strcspn(src, "\r\n");
+	smart_str_appendl(dest, src, len);
+	if (src[len] != '\0') {
+		php_error_docref(NULL, E_WARNING,
+			"Header %s value contains newline characters and has been truncated", header_name);
+	}
+}
+
 static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		const char *path, const char *mode, int options, zend_string **opened_path,
 		php_stream_context *context, int redirect_max, int flags,
@@ -782,7 +792,7 @@ finish:
 	/* if the user has configured who they are, send a From: line */
 	if (!(have_header & HTTP_HEADER_FROM) && FG(from_address)) {
 		smart_str_appends(&req_buf, "From: ");
-		smart_str_appends(&req_buf, FG(from_address));
+		smart_str_append_header_value(&req_buf, FG(from_address), "From");
 		smart_str_appends(&req_buf, "\r\n");
 	}
 
@@ -816,24 +826,10 @@ finish:
 		ua_str = FG(user_agent);
 	}
 
-	if (((have_header & HTTP_HEADER_USER_AGENT) == 0) && ua_str) {
-#define _UA_HEADER "User-Agent: %s\r\n"
-		char *ua;
-		size_t ua_len;
-
-		ua_len = sizeof(_UA_HEADER) + strlen(ua_str);
-
-		/* ensure the header is only sent if user_agent is not blank */
-		if (ua_len > sizeof(_UA_HEADER)) {
-			ua = emalloc(ua_len + 1);
-			if ((ua_len = slprintf(ua, ua_len, _UA_HEADER, ua_str)) > 0) {
-				ua[ua_len] = 0;
-				smart_str_appendl(&req_buf, ua, ua_len);
-			} else {
-				php_error_docref(NULL, E_WARNING, "Cannot construct User-agent header");
-			}
-			efree(ua);
-		}
+	if (((have_header & HTTP_HEADER_USER_AGENT) == 0) && ua_str && *ua_str) {
+		smart_str_appends(&req_buf, "User-Agent: ");
+		smart_str_append_header_value(&req_buf, ua_str, "User-Agent");
+		smart_str_appends(&req_buf, "\r\n");
 	}
 
 	if (user_headers) {
