@@ -290,6 +290,14 @@ ZEND_FUNCTION(func_get_arg)
 		RETURN_THROWS();
 	}
 
+	if (UNEXPECTED(zend_is_scope_ex(ex))) {
+		arg = zend_scope_fn_get_arg_zval(ex, requested_offset);
+		if (arg && EXPECTED(!Z_ISUNDEF_P(arg))) {
+			RETURN_COPY_DEREF(arg);
+		}
+		return;
+	}
+
 	first_extra_arg = ex->func->op_array.num_args;
 	if ((zend_ulong)requested_offset >= first_extra_arg && (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg)) {
 		arg = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - first_extra_arg);
@@ -323,7 +331,28 @@ ZEND_FUNCTION(func_get_args)
 
 	arg_count = ZEND_CALL_NUM_ARGS(ex);
 
-	if (arg_count) {
+	if (!arg_count) {
+		RETURN_EMPTY_ARRAY();
+	}
+
+	if (UNEXPECTED(zend_is_scope_ex(ex))) {
+		/* scope fns live in parent ex; zend_scope_fn_get_arg_zval takes care of mapping extra args as well. */
+		array_init_size(return_value, arg_count);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			for (i = 0; i < arg_count; i++) {
+				q = zend_scope_fn_get_arg_zval(ex, i);
+				if (q && EXPECTED(!Z_ISUNDEF_P(q))) {
+					ZVAL_DEREF(q);
+					Z_TRY_ADDREF_P(q);
+					ZEND_HASH_FILL_SET(q);
+				} else {
+					ZEND_HASH_FILL_SET_NULL();
+				}
+				ZEND_HASH_FILL_NEXT();
+			}
+		} ZEND_HASH_FILL_END();
+	} else {
 		array_init_size(return_value, arg_count);
 		first_extra_arg = ex->func->op_array.num_args;
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
@@ -365,8 +394,6 @@ ZEND_FUNCTION(func_get_args)
 			}
 		} ZEND_HASH_FILL_END();
 		Z_ARRVAL_P(return_value)->nNumOfElements = arg_count;
-	} else {
-		RETURN_EMPTY_ARRAY();
 	}
 }
 /* }}} */
@@ -1718,107 +1745,125 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		array_init_size(arg_array, num_args);
 		zend_hash_real_init_packed(Z_ARRVAL_P(arg_array));
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(arg_array)) {
-			if (call->func->type == ZEND_USER_FUNCTION) {
-				uint32_t first_extra_arg = MIN(num_args, call->func->op_array.num_args);
-
-				if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
-					/* In case of attached symbol_table, values on stack may be invalid
-					 * and we have to access them through symbol_table
-					 * See: https://bugs.php.net/bug.php?id=73156
-					 */
-					while (i < first_extra_arg) {
-						zend_string *arg_name = call->func->op_array.vars[i];
-						zval original_arg;
-						zval *arg = zend_hash_find_ex_ind(call->symbol_table, arg_name, 1);
-						bool is_sensitive = backtrace_is_arg_sensitive(call, i);
-
-						if (arg) {
-							ZVAL_DEREF(arg);
-							ZVAL_COPY_VALUE(&original_arg, arg);
-						} else {
-							ZVAL_NULL(&original_arg);
-						}
-
-						if (is_sensitive) {
-							zval redacted_arg;
-							object_init_with_constructor(&redacted_arg, zend_ce_sensitive_parameter_value, 1, &original_arg, NULL);
-							ZEND_HASH_FILL_SET(&redacted_arg);
-						} else {
-							Z_TRY_ADDREF_P(&original_arg);
-							ZEND_HASH_FILL_SET(&original_arg);
-						}
-
-						ZEND_HASH_FILL_NEXT();
-						i++;
+			/* scope fns live in parent ex; zend_scope_fn_get_arg_zval takes care of mapping extra args as well. */
+			if (UNEXPECTED(call->func->type == ZEND_USER_FUNCTION && zend_is_scope_ex(call))) {
+				for (i = 0; i < num_args; i++) {
+					zval *q = zend_scope_fn_get_arg_zval(call, i);
+					zval original_arg;
+					if (q && EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
+						ZVAL_DEREF(q);
+						ZVAL_COPY_VALUE(&original_arg, q);
+					} else {
+						ZVAL_NULL(&original_arg);
+						/* -Wmaybe-uninitialized doesn't see that ZEND_HASH_FILL_SET only reads .value.counted when the type is refcounted... */
+						Z_PTR(original_arg) = NULL;
 					}
-				} else {
-					while (i < first_extra_arg) {
-						zval original_arg;
-						bool is_sensitive = backtrace_is_arg_sensitive(call, i);
-
-						if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
-							zval *arg = p;
-							ZVAL_DEREF(arg);
-							ZVAL_COPY_VALUE(&original_arg, arg);
-						} else {
-							ZVAL_NULL(&original_arg);
-						}
-
-						if (is_sensitive) {
-							zval redacted_arg;
-							object_init_with_constructor(&redacted_arg, zend_ce_sensitive_parameter_value, 1, &original_arg, NULL);
-							ZEND_HASH_FILL_SET(&redacted_arg);
-						} else {
-							Z_TRY_ADDREF_P(&original_arg);
-							ZEND_HASH_FILL_SET(&original_arg);
-						}
-
-						ZEND_HASH_FILL_NEXT();
-						p++;
-						i++;
-					}
-				}
-				p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
-			}
-
-			while (i < num_args) {
-				zval original_arg;
-				bool is_sensitive = 0;
-
-				if (i < call->func->common.num_args || call->func->common.fn_flags & ZEND_ACC_VARIADIC) {
-					is_sensitive = backtrace_is_arg_sensitive(call, MIN(i, call->func->common.num_args));
-				}
-
-				if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
-					zval *arg = p;
-					ZVAL_DEREF(arg);
-					ZVAL_COPY_VALUE(&original_arg, arg);
-				} else {
-					ZVAL_NULL(&original_arg);
-				}
-
-				if (is_sensitive) {
-					zval redacted_arg;
-					object_init_with_constructor(&redacted_arg, zend_ce_sensitive_parameter_value, 1, &original_arg, NULL);
-					ZEND_HASH_FILL_SET(&redacted_arg);
-				} else {
 					Z_TRY_ADDREF_P(&original_arg);
 					ZEND_HASH_FILL_SET(&original_arg);
+					ZEND_HASH_FILL_NEXT();
+				}
+			} else {
+				if (call->func->type == ZEND_USER_FUNCTION) {
+					uint32_t first_extra_arg = MIN(num_args, call->func->op_array.num_args);
+
+					if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
+						/* In case of attached symbol_table, values on stack may be invalid
+						 * and we have to access them through symbol_table
+						 * See: https://bugs.php.net/bug.php?id=73156
+						 */
+						while (i < first_extra_arg) {
+							zend_string *arg_name = call->func->op_array.vars[i];
+							zval original_arg;
+							zval *arg = zend_hash_find_ex_ind(call->symbol_table, arg_name, 1);
+							bool is_sensitive = backtrace_is_arg_sensitive(call, i);
+
+							if (arg) {
+								ZVAL_DEREF(arg);
+								ZVAL_COPY_VALUE(&original_arg, arg);
+							} else {
+								ZVAL_NULL(&original_arg);
+							}
+
+							if (is_sensitive) {
+								zval redacted_arg;
+								object_init_with_constructor(&redacted_arg, zend_ce_sensitive_parameter_value, 1, &original_arg, NULL);
+								ZEND_HASH_FILL_SET(&redacted_arg);
+							} else {
+								Z_TRY_ADDREF_P(&original_arg);
+								ZEND_HASH_FILL_SET(&original_arg);
+							}
+
+							ZEND_HASH_FILL_NEXT();
+							i++;
+						}
+					} else {
+						while (i < first_extra_arg) {
+							zval original_arg;
+							bool is_sensitive = backtrace_is_arg_sensitive(call, i);
+
+							if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
+								zval *arg = p;
+								ZVAL_DEREF(arg);
+								ZVAL_COPY_VALUE(&original_arg, arg);
+							} else {
+								ZVAL_NULL(&original_arg);
+							}
+
+							if (is_sensitive) {
+								zval redacted_arg;
+								object_init_with_constructor(&redacted_arg, zend_ce_sensitive_parameter_value, 1, &original_arg, NULL);
+								ZEND_HASH_FILL_SET(&redacted_arg);
+							} else {
+								Z_TRY_ADDREF_P(&original_arg);
+								ZEND_HASH_FILL_SET(&original_arg);
+							}
+
+							ZEND_HASH_FILL_NEXT();
+							p++;
+							i++;
+						}
+					}
+					p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 				}
 
-				ZEND_HASH_FILL_NEXT();
-				p++;
-				i++;
+				while (i < num_args) {
+					zval original_arg;
+					bool is_sensitive = 0;
+
+					if (i < call->func->common.num_args || call->func->common.fn_flags & ZEND_ACC_VARIADIC) {
+						is_sensitive = backtrace_is_arg_sensitive(call, MIN(i, call->func->common.num_args));
+					}
+
+					if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
+						zval *arg = p;
+						ZVAL_DEREF(arg);
+						ZVAL_COPY_VALUE(&original_arg, arg);
+					} else {
+						ZVAL_NULL(&original_arg);
+					}
+
+					if (is_sensitive) {
+						zval redacted_arg;
+						object_init_with_constructor(&redacted_arg, zend_ce_sensitive_parameter_value, 1, &original_arg, NULL);
+						ZEND_HASH_FILL_SET(&redacted_arg);
+					} else {
+						Z_TRY_ADDREF_P(&original_arg);
+						ZEND_HASH_FILL_SET(&original_arg);
+					}
+
+					ZEND_HASH_FILL_NEXT();
+					p++;
+					i++;
+				}
 			}
 		} ZEND_HASH_FILL_END();
-		Z_ARRVAL_P(arg_array)->nNumOfElements = num_args;
 	} else {
 		ZVAL_EMPTY_ARRAY(arg_array);
 	}
 
-	if ((ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)
+	if ((ZEND_CALL_INFO(call) & ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS) && call->extra_named_params != NULL
 	 /* __call and __callStatic are non-variadic, potentially with
-	  * HAS_EXTRA_NAMED_PARAMS set. Don't add extra args, as they're already
+	  * MAYBE_HAS_EXTRA_NAMED_PARAMS set. Don't add extra args, as they're already
 	  * contained in the 2nd param. */
 	 && (call->func->common.fn_flags & ZEND_ACC_VARIADIC)) {
 		zend_string *name;

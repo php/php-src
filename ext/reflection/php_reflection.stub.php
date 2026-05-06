@@ -33,6 +33,8 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @tentative-return-type */
     public function isClosure(): bool {}
 
+    public function isScopeFunction(): bool {}
+
     /** @tentative-return-type */
     public function isDeprecated(): bool {}
 

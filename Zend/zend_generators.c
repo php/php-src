@@ -22,6 +22,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_generators.h"
+#include "zend_fibers.h"
 #include "zend_closures.h"
 #include "zend_generators_arginfo.h"
 #include "zend_observer.h"
@@ -138,12 +139,44 @@ ZEND_API void zend_generator_close(zend_generator *generator, bool finished_exec
 		 * already cleaning up execute_data. */
 		generator->execute_data = NULL;
 
+		if (UNEXPECTED(zend_is_scope_ex(execute_data))) {
+			if (UNEXPECTED(!finished_execution) && !CG(unclean_shutdown)) {
+				zend_generator_cleanup_unfinished_execution(generator, execute_data, 0);
+			}
+
+			/* Handle scope fn generator being suspended in fiber. */
+			zend_fiber *unwind_fiber = NULL;
+			if (EG(active_fiber) && EG(active_fiber)->forced_unwind_target == execute_data) {
+				zend_execute_data *current_execute_data = EG(current_execute_data);
+				EG(current_execute_data) = execute_data;
+				unwind_fiber = zend_scope_fn_consume_forced_unwind();
+				EG(current_execute_data) = current_execute_data;
+			}
+
+
+			zend_scope_fn_detach(execute_data);
+
+			zend_vm_stack_free_extra_args(execute_data);
+			zend_vm_stack_free_tracked_temporaries(EX_CALL_INFO(), execute_data);
+			if (EX_CALL_INFO() & ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS) {
+				zend_free_extra_named_params(execute_data->extra_named_params);
+			}
+
+			if (UNEXPECTED(unwind_fiber != NULL)) {
+				/* the error will be thrown here on the user's next resume. */
+				zend_fiber_suspend(unwind_fiber, NULL, NULL);
+			}
+			return;
+		}
+
+		zend_vm_force_unwind_scope_fn_closures(EX_CALL_INFO(), execute_data);
+
 		if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table);
 		}
 		/* always free the CV's, in the symtable are only not-free'd IS_INDIRECT's */
 		zend_free_compiled_variables(execute_data);
-		if (EX_CALL_INFO() & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		if (EX_CALL_INFO() & ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS) {
 			zend_free_extra_named_params(execute_data->extra_named_params);
 		}
 
@@ -165,6 +198,8 @@ ZEND_API void zend_generator_close(zend_generator *generator, bool finished_exec
 		if (UNEXPECTED(!finished_execution)) {
 			zend_generator_cleanup_unfinished_execution(generator, execute_data, 0);
 		}
+
+		zend_vm_stack_free_tracked_temporaries(EX_CALL_INFO(), execute_data);
 
 		efree(execute_data);
 	}
@@ -783,6 +818,8 @@ try_again:
 	if (EG(active_fiber)) {
 		orig_generator->flags |= ZEND_GENERATOR_IN_FIBER;
 		generator->flags |= ZEND_GENERATOR_IN_FIBER;
+		orig_generator->fiber_running_me = EG(active_fiber);
+		generator->fiber_running_me = EG(active_fiber);
 	}
 
 	/* Drop the AT_FIRST_YIELD flag */
@@ -819,6 +856,8 @@ try_again:
 
 			orig_generator->flags &= ~(ZEND_GENERATOR_DO_INIT | ZEND_GENERATOR_IN_FIBER);
 			generator->flags &= ~(ZEND_GENERATOR_CURRENTLY_RUNNING | ZEND_GENERATOR_IN_FIBER);
+			orig_generator->fiber_running_me = NULL;
+			generator->fiber_running_me = NULL;
 			return;
 		}
 		/* If there are no more delegated values, resume the generator
@@ -852,6 +891,7 @@ try_again:
 		}
 	}
 	generator->flags &= ~(ZEND_GENERATOR_CURRENTLY_RUNNING | ZEND_GENERATOR_IN_FIBER);
+	generator->fiber_running_me = NULL;
 
 	generator->frozen_call_stack = NULL;
 	if (EXPECTED(generator->execute_data) &&
@@ -869,7 +909,15 @@ try_again:
 	 * In case we did yield from, the Exception must be rethrown into
 	 * its calling frame (see above in if (check_yield_from). */
 	if (UNEXPECTED(EG(exception) != NULL)) {
-		if (generator == orig_generator) {
+		/* Absorb scope unwind only when targeting this generator directly:
+		 *   - This is not being part of a fiber unwind.
+		 *   - The unwind ends at exactly this targeted frame. */
+		if (zend_is_scope_fn_unwind(EG(exception))
+		 && (((generator->func->common.fn_flags2 & ZEND_ACC2_SCOPE_FUNC) && (EG(active_fiber) == NULL || EG(active_fiber)->forced_unwind_target == NULL))
+		  || (EG(active_fiber) != NULL&& EG(active_fiber)->forced_unwind_target == generator->execute_data))) {
+			OBJ_RELEASE(EG(exception));
+			EG(exception) = NULL;
+		} else if (generator == orig_generator) {
 			zend_generator_close(generator, false);
 			if (!EG(current_execute_data)) {
 				zend_throw_exception_internal(NULL);
@@ -892,6 +940,7 @@ try_again:
 	}
 
 	orig_generator->flags &= ~(ZEND_GENERATOR_DO_INIT | ZEND_GENERATOR_IN_FIBER);
+	orig_generator->fiber_running_me = NULL;
 }
 /* }}} */
 

@@ -129,11 +129,20 @@ struct _zend_fiber {
 
 	/* Storage for fiber return value. */
 	zval result;
+
+	/* End function when unwinding exception. */
+	zend_execute_data *forced_unwind_target;
+
+	/* Exception to throw to the fiber on its next resume (e.g. scope fn unwound). */
+	zend_object *pending_resume_throw;
 };
 
 ZEND_API zend_result zend_fiber_start(zend_fiber *fiber, zval *return_value);
 ZEND_API void zend_fiber_resume(zend_fiber *fiber, zval *value, zval *return_value);
 ZEND_API void zend_fiber_suspend(zend_fiber *fiber, zval *value, zval *return_value);
+
+/* Resume, but requiring manual zend_fiber_transfer handling */
+ZEND_API zend_fiber_transfer zend_fiber_force_unwind_resume(zend_fiber *fiber, zval *exception);
 
 /* These functions may be used to create custom fiber objects using the bundled fiber switching context. */
 ZEND_API zend_result zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size);

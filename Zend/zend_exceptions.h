@@ -73,6 +73,9 @@ ZEND_API ZEND_COLD void zend_throw_unwind_exit(void);
 ZEND_API ZEND_COLD void zend_throw_graceful_exit(void);
 ZEND_API bool zend_is_unwind_exit(const zend_object *ex);
 ZEND_API bool zend_is_graceful_exit(const zend_object *ex);
+ZEND_API ZEND_COLD zend_object *zend_create_scope_fn_unwind(void);
+ZEND_API bool zend_is_scope_fn_unwind(const zend_object *ex);
+ZEND_API ZEND_COLD zend_object *zend_build_error(zend_class_entry *exception_ce, const char *message);
 
 #include "zend_globals.h"
 

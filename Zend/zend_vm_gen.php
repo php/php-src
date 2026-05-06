@@ -788,6 +788,9 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/ZEND_OBSERVER_FCALL_END\(\s*([^,]*)\s*,\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
             ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_fcall_end(\\1, \\2)")
             : "",
+        /* SPEC(SCOPE_FN): substitute the scope-fn predicate at handler-gen time
+         * so the C compiler can DCE the unselected branch. */
+        "/ZEND_VM_IS_SCOPE_FN/" => isset($extra_spec['SCOPE_FN']) && $extra_spec['SCOPE_FN'] == 1 ? "1" : "0",
     );
     $code = preg_replace(array_keys($specialized_replacements), array_values($specialized_replacements), $code);
 
@@ -1625,6 +1628,11 @@ function extra_spec_name($extra_spec) {
             $s .= "_OBSERVER";
         }
     }
+    if (isset($extra_spec["SCOPE_FN"])) {
+        if ($extra_spec["SCOPE_FN"]) {
+            $s .= "_SCOPE_FN";
+        }
+    }
     return $s;
 }
 
@@ -1650,6 +1658,9 @@ function extra_spec_flags($extra_spec) {
     }
     if (isset($extra_spec["OBSERVER"])) {
         $s[] = "SPEC_RULE_OBSERVER";
+    }
+    if (isset($extra_spec["SCOPE_FN"])) {
+        $s[] = "SPEC_RULE_SCOPE_FN";
     }
     return $s;
 }
@@ -1882,6 +1893,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                     out($f,"#define SPEC_RULE_COMMUTATIVE  0x00800000\n");
                     out($f,"#define SPEC_RULE_ISSET        0x01000000\n");
                     out($f,"#define SPEC_RULE_OBSERVER     0x02000000\n");
+                    out($f,"#define SPEC_RULE_SCOPE_FN     0x04000000\n");
                     out($f,"\n");
                     out($f,"static const uint32_t *zend_spec_handlers;\n");
                     out($f,"static zend_vm_opcode_handler_t const *zend_opcode_handlers;\n");
@@ -2456,6 +2468,9 @@ function parse_spec_rules($def, $lineno, $str) {
                 case "OBSERVER":
                     $ret["OBSERVER"] = array(0, 1);
                     break;
+                case "SCOPE_FN":
+                    $ret["SCOPE_FN"] = array(0, 1);
+                    break;
                 default:
                     die("ERROR ($def:$lineno): Wrong specialization rules '$str'\n");
             }
@@ -2957,6 +2972,14 @@ function gen_vm($def, $skel) {
         out($f, "\tuint32_t offset = 0;\n");
         out($f, "\tif (spec & SPEC_RULE_OP1) offset = offset * 5 + zend_vm_decode[op->op1_type];\n");
         out($f, "\tif (spec & SPEC_RULE_OP2) offset = offset * 5 + zend_vm_decode[op->op2_type];\n");
+        if (isset($used_extra_spec["SCOPE_FN"])) {
+            /* SPEC(SCOPE_FN): the scope-fn vs non-scope-fn variant is
+             * selected from op->extended_value bit 0 — set at compile time
+             * by the emitter when the body is a scope function. Independent
+             * axis like OP1/OP2; the SCOPE_FN-specced opcodes do not also
+             * use the SPEC_EXTRA_MASK chain. */
+            out($f, "\tif (spec & SPEC_RULE_SCOPE_FN) offset = offset * 2 + (op->extended_value & 1);\n");
+        }
 
         if (isset($used_extra_spec["OP_DATA"]) ||
             isset($used_extra_spec["RETVAL"]) ||

@@ -31,6 +31,8 @@ extern ZEND_API zend_class_entry *zend_ce_ClosedGeneratorException;
 typedef struct _zend_generator_node zend_generator_node;
 typedef struct _zend_generator zend_generator;
 
+struct _zend_fiber; /* forward declaration for generator struct */
+
 /* The concept of `yield from` exposes problems when accessed at different levels of the chain of delegated generators. We need to be able to reference the currently executed Generator in all cases and still being able to access the return values of finished Generators.
  * The solution to this problem is a doubly-linked tree, which all Generators referenced in maintain a reference to. It should be impossible to avoid walking the tree in all cases. This way, we only need tree walks from leaf to root in case where some part of the `yield from` chain is passed to another `yield from`. (Update of leaf node pointer and list of multi-children nodes needed when leaf gets a child in direct path from leaf to root node.) But only in that case, which should be a fairly rare case (which is then possible, but not totally cheap).
  * The root of the tree is then the currently executed Generator. The subnodes of the tree (all except the root node) are all Generators which do `yield from`. Each node of the tree knows a pointer to one leaf descendant node. Each node with multiple children needs a list of all leaf descendant nodes paired with pointers to their respective child node. (The stack is determined by leaf node pointers) Nodes with only one child just don't need a list, there it is enough to just have a pointer to the child node. Further, leaf nodes store a pointer to the root node.
@@ -90,6 +92,13 @@ struct _zend_generator {
 	/* The underlying function, equivalent to execute_data->func while
 	 * the generator is alive. */
 	zend_function *func;
+
+	/* While ZEND_GENERATOR_IN_FIBER is set: the fiber currently host'ing
+	 * this generator's body. NULL otherwise. Used by the scope-fn
+	 * parent-exit cleanup to find the fiber it must force-unwind when a
+	 * fiber is suspended inside the generator's body and the generator
+	 * is being force-destructed. */
+	struct _zend_fiber *fiber_running_me;
 
 	/* ZEND_GENERATOR_* flags */
 	uint8_t flags;
