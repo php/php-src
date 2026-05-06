@@ -1,12 +1,12 @@
 --TEST--
-ReflectionAttribute::getCurrent() for closure parameter
+ReflectionAttribute::getCurrent() and ::getReflectionTarget() for closure parameter
 --FILE--
 <?php
 
 #[Attribute]
 class Demo {
 	public function __construct($args) {
-		echo ReflectionAttribute::getCurrent();
+		echo ReflectionAttribute::getCurrent()->getReflectionTarget();
 	}
 }
 

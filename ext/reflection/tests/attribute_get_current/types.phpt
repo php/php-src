@@ -1,12 +1,12 @@
 --TEST--
-ReflectionAttribute::getCurrent() specific return type
+ReflectionAttribute::getCurrent() and ::getReflectionTarget() specific return type
 --FILE--
 <?php
 
 #[Attribute]
 class Demo {
 	public function __construct($args) {
-		echo get_class(ReflectionAttribute::getCurrent()) . " (on $args)\n";
+		echo get_class(ReflectionAttribute::getCurrent()->getReflectionTarget()) . " (on $args)\n";
 	}
 }
 

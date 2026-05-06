@@ -6,7 +6,7 @@ ReflectionAttribute::getCurrent() when called from another method invoked by con
 #[Attribute]
 class Demo {
 	public function __construct($args) {
-		echo ReflectionAttribute::getCurrent();
+		echo ReflectionAttribute::getCurrent()->getReflectionTarget();
 		$this->test();
 	}
 

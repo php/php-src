@@ -1,12 +1,12 @@
 --TEST--
-ReflectionAttribute::getCurrent() for class constant
+ReflectionAttribute::getCurrent() and ::getReflectionTarget() for class constant
 --FILE--
 <?php
 
 #[Attribute]
 class Demo {
 	public function __construct($args) {
-		echo ReflectionAttribute::getCurrent();
+		echo ReflectionAttribute::getCurrent()->getReflectionTarget();
 	}
 }
 

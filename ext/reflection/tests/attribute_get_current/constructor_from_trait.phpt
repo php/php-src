@@ -7,7 +7,7 @@ trait DemoTrait {
 	public function __construct($args) {
 		echo "In trait\n";
 		echo __METHOD__ . "()\n";
-		echo ReflectionAttribute::getCurrent();
+		echo ReflectionAttribute::getCurrent()->getReflectionTarget();
 	}
 }
 

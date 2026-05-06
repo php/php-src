@@ -1,12 +1,12 @@
 --TEST--
-ReflectionAttribute::getCurrent() for global constant
+ReflectionAttribute::getCurrent() and ::getReflectionTarget() for global constant
 --FILE--
 <?php
 
 #[Attribute]
 class Demo {
 	public function __construct($args) {
-		echo ReflectionAttribute::getCurrent();
+		echo ReflectionAttribute::getCurrent()->getReflectionTarget();
 	}
 }
 

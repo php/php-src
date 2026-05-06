@@ -855,6 +855,7 @@ class ReflectionAttribute implements Reflector
 
     public function getName(): string {}
     public function getTarget(): int {}
+    public function getReflectionTarget(): ReflectionAttributeTarget {}
     public function isRepeated(): bool {}
     public function getArguments(): array {}
     public function newInstance(): object {}
@@ -865,7 +866,7 @@ class ReflectionAttribute implements Reflector
 
     private function __construct() {}
 
-    public static function getCurrent(): ReflectionAttributeTarget {}
+    public static function getCurrent(): ReflectionAttribute {}
 }
 
 class ReflectionEnum extends ReflectionClass

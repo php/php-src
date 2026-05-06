@@ -7712,6 +7712,25 @@ ZEND_METHOD(ReflectionAttribute, getCurrent)
 	}
 	attribute_reference *attr = intern->ptr;
 
+	reflection_attribute_factory(
+		return_value,
+		attr->attributes,
+		attr->data,
+		attr->scope,
+		attr->target,
+		attr->filename,
+		attr->target_data
+	);
+}
+
+ZEND_METHOD(ReflectionAttribute, getReflectionTarget)
+{
+	reflection_object *intern;
+	attribute_reference *attr;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(attr);
+
 	switch (attr->target) {
 		case ZEND_ATTRIBUTE_TARGET_CLASS:
 			zend_reflection_class_factory(attr->target_data.target_class, return_value);

@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_reflection.stub.php instead.
- * Stub hash: f4076428e104e516386d5a3eb948cf94249fc3aa
+ * Stub hash: 2373c48044f208d62c1c1bff4bf7f0737885e5ec
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
@@ -650,6 +650,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionAttribute_getTarget arginfo_class_ReflectionGenerator_getExecutingLine
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionAttribute_getReflectionTarget, 0, 0, ReflectionAttributeTarget, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_ReflectionAttribute_isRepeated arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionAttribute_getArguments arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables
@@ -663,7 +666,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionAttribute___construct arginfo_class_ReflectionReference___construct
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionAttribute_getCurrent, 0, 0, ReflectionAttributeTarget, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionAttribute_getCurrent, 0, 0, ReflectionAttribute, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionEnum___construct arginfo_class_ReflectionClass___construct
@@ -980,6 +983,7 @@ ZEND_METHOD(ReflectionReference, getId);
 ZEND_METHOD(ReflectionReference, __construct);
 ZEND_METHOD(ReflectionAttribute, getName);
 ZEND_METHOD(ReflectionAttribute, getTarget);
+ZEND_METHOD(ReflectionAttribute, getReflectionTarget);
 ZEND_METHOD(ReflectionAttribute, isRepeated);
 ZEND_METHOD(ReflectionAttribute, getArguments);
 ZEND_METHOD(ReflectionAttribute, newInstance);
@@ -1339,6 +1343,7 @@ static const zend_function_entry class_ReflectionReference_methods[] = {
 static const zend_function_entry class_ReflectionAttribute_methods[] = {
 	ZEND_ME(ReflectionAttribute, getName, arginfo_class_ReflectionAttribute_getName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionAttribute, getTarget, arginfo_class_ReflectionAttribute_getTarget, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionAttribute, getReflectionTarget, arginfo_class_ReflectionAttribute_getReflectionTarget, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionAttribute, isRepeated, arginfo_class_ReflectionAttribute_isRepeated, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionAttribute, getArguments, arginfo_class_ReflectionAttribute_getArguments, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionAttribute, newInstance, arginfo_class_ReflectionAttribute_newInstance, ZEND_ACC_PUBLIC)
