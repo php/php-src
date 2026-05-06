@@ -786,18 +786,14 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 	cwd_state new_state;
 	char cwd[MAXPATHLEN];
 	size_t copy_len;
-	size_t path_len;
 
 	if (!filepath[0]) {
 		return NULL;
 	}
 
-	path_len = strlen(filepath);
-
-	if (IS_ABSOLUTE_PATH(filepath, path_len)) {
+	if (IS_ABSOLUTE_PATH(filepath, strlen(filepath))) {
 		cwd[0] = '\0';
 	} else {
-		const char *iam = SG(request_info).path_translated;
 		const char *result;
 		if (relative_to) {
 			if (relative_to_len > MAXPATHLEN-1U) {
@@ -809,27 +805,7 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 			result = VCWD_GETCWD(cwd, MAXPATHLEN);
 		}
 
-		if (!result && (iam != filepath)) {
-			int fdtest = -1;
-
-			fdtest = VCWD_OPEN(filepath, O_RDONLY);
-			if (fdtest != -1) {
-				/* return a relative file path if for any reason
-				 * we cannot getcwd() and the requested,
-				 * relatively referenced file is accessible */
-				copy_len = path_len > MAXPATHLEN - 1 ? MAXPATHLEN - 1 : path_len;
-				if (real_path) {
-					memcpy(real_path, filepath, copy_len);
-					real_path[copy_len] = '\0';
-				} else {
-					real_path = estrndup(filepath, copy_len);
-				}
-				close(fdtest);
-				return real_path;
-			} else {
-				cwd[0] = '\0';
-			}
-		} else if (!result) {
+		if (!result) {
 			cwd[0] = '\0';
 		}
 	}
