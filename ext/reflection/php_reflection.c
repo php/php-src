@@ -432,6 +432,15 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 	smart_str_free(&enum_case_str);
 	smart_str_free(&constant_str);
 
+	if (ce->num_friends > 0) {
+		smart_str_appendc(str, '\n');
+		smart_str_append_printf(str, "%s  - Friends [%d] {\n", indent, ce->num_friends);
+		for (uint32_t i = 0; i < ce->num_friends; i++) {
+			smart_str_append_printf(str, "%s friend %s\n", ZSTR_VAL(sub_indent), ZSTR_VAL(ce->friend_names[i].name));
+		}
+		smart_str_append_printf(str, "%s  }\n", indent);
+	}
+
 	/* Static properties */
 	/* counting static properties */
 	count = zend_hash_num_elements(&ce->properties_info);

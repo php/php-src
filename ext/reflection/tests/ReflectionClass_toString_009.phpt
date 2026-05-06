@@ -29,6 +29,13 @@ Class [ <user> class Foo1 ] {
   - Constants [0] {
   }
 
+  - Friends [4] {
+     friend Bar
+     friend Demo\Bar
+     friend Baz
+     friend Demo\Qux
+  }
+
   - Static properties [0] {
   }
 
@@ -45,6 +52,13 @@ Enum [ <user> enum Foo2 implements UnitEnum ] {
   @@ %s %d-%d
 
   - Constants [0] {
+  }
+
+  - Friends [4] {
+     friend Bar
+     friend Demo\Bar
+     friend Baz
+     friend Demo\Qux
   }
 
   - Static properties [0] {
