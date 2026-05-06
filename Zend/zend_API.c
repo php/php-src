@@ -374,7 +374,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_unexpected_extra_named_error(void)
 	);
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic_ex(
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(
 		const zend_function *function, uint32_t arg_num,
 		zend_class_entry *error_ce, const char *format, va_list va)
 {
@@ -397,32 +397,23 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic_ex(
 	zend_string_release(func_name);
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(zend_class_entry *error_ce, uint32_t arg_num, const char *format, va_list va) /* {{{ */
-{
-	ZEND_ASSERT(zend_is_executing());
-
-	const zend_function *function = zend_active_function();
-
-	zend_argument_error_variadic_ex(function, arg_num, error_ce, format, va);
-}
-/* }}} */
-
 ZEND_API ZEND_COLD void zend_argument_error_ex(const zend_function *function,
 		uint32_t arg_num, zend_class_entry *error_ce, const char *format, ...)
 {
 	va_list va;
 
 	va_start(va, format);
-	zend_argument_error_variadic_ex(function, arg_num, error_ce, format, va);
+	zend_argument_error_variadic(function, arg_num, error_ce, format, va);
 	va_end(va);
 }
 
 ZEND_API ZEND_COLD void zend_argument_error(zend_class_entry *error_ce, uint32_t arg_num, const char *format, ...) /* {{{ */
 {
 	va_list va;
+	const zend_function *function = zend_active_function();
 
 	va_start(va, format);
-	zend_argument_error_variadic(error_ce, arg_num, format, va);
+	zend_argument_error_variadic(function, arg_num, error_ce, format, va);
 	va_end(va);
 }
 /* }}} */
@@ -434,17 +425,17 @@ ZEND_API ZEND_COLD void zend_argument_type_error_ex(
 	va_list va;
 
 	va_start(va, format);
-	zend_argument_error_variadic_ex(function, arg_num,
-			zend_ce_type_error, format, va);
+	zend_argument_error_variadic(function, arg_num, zend_ce_type_error, format, va);
 	va_end(va);
 }
 
 ZEND_API ZEND_COLD void zend_argument_type_error(uint32_t arg_num, const char *format, ...) /* {{{ */
 {
 	va_list va;
+	const zend_function *function = zend_active_function();
 
 	va_start(va, format);
-	zend_argument_error_variadic(zend_ce_type_error, arg_num, format, va);
+	zend_argument_error_variadic(function, arg_num, zend_ce_type_error, format, va);
 	va_end(va);
 }
 /* }}} */
@@ -452,9 +443,10 @@ ZEND_API ZEND_COLD void zend_argument_type_error(uint32_t arg_num, const char *f
 ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *format, ...) /* {{{ */
 {
 	va_list va;
+	const zend_function *function = zend_active_function();
 
 	va_start(va, format);
-	zend_argument_error_variadic(zend_ce_value_error, arg_num, format, va);
+	zend_argument_error_variadic(function, arg_num, zend_ce_value_error, format, va);
 	va_end(va);
 }
 /* }}} */
