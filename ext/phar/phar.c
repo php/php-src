@@ -484,8 +484,15 @@ ZEND_ATTRIBUTE_NONNULL void phar_entry_remove(phar_entry_data *idata, char **err
 /**
  * Open an already loaded phar
  */
-static zend_result phar_open_parsed_phar(char *fname, size_t fname_len, const char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
-{
+static zend_result phar_open_parsed_phar(
+	char *fname,
+	size_t fname_len,
+	/* copyable & hash update */ zend_string *alias,
+	bool is_data,
+	uint32_t options,
+	phar_archive_data** pphar,
+	char **error
+) {
 #ifdef PHP_WIN32
 	char *save_fname;
 	ALLOCA_FLAG(fname_use_heap)
@@ -503,7 +510,9 @@ static zend_result phar_open_parsed_phar(char *fname, size_t fname_len, const ch
 		phar_unixify_path_separators(fname, fname_len);
 	}
 #endif
-	phar_archive_data *phar = phar_get_archive(fname, fname_len, alias, alias_len, error);
+	const char *alias_cstr = alias ? ZSTR_VAL(alias) : NULL;
+	size_t alias_len = alias ? ZSTR_LEN(alias) : 0;
+	phar_archive_data *phar = phar_get_archive(fname, fname_len, alias_cstr, alias_len, error);
 	/* logic is as follows:
 	   - If no alias was passed in, then it can match either and be valid
 	   - If an explicit alias was requested, ensure the filename passed in matches the phar's filename.
@@ -552,7 +561,6 @@ static zend_result phar_open_parsed_phar(char *fname, size_t fname_len, const ch
 		return FAILURE;
 	}
 }
-/* }}}*/
 
 /**
  * Attempt to serialize the data.
@@ -1333,10 +1341,8 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_filename(
 		}
 		return FAILURE;
 	}
-check_file:;
-	const char *alias_cstr = alias ? ZSTR_VAL(alias) : NULL;
-	size_t alias_len = alias ? ZSTR_LEN(alias) : 0;
-	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias_cstr, alias_len, is_data, options, test, &my_error) == SUCCESS) {
+check_file:
+	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, is_data, options, test, &my_error) == SUCCESS) {
 		*pphar = *test;
 
 		if ((*test)->is_data && !(*test)->is_tar && !(*test)->is_zip) {
@@ -1538,9 +1544,7 @@ zend_result phar_open_from_filename(
 		is_data = true;
 	}
 
-	const char *alias_cstr = alias ? ZSTR_VAL(alias) : NULL;
-	size_t alias_len = alias ? ZSTR_LEN(alias) : 0;
-	if (phar_open_parsed_phar(fname, fname_len, alias_cstr, alias_len, is_data, options, pphar, error) == SUCCESS) {
+	if (phar_open_parsed_phar(fname, fname_len, alias, is_data, options, pphar, error) == SUCCESS) {
 		return SUCCESS;
 	} else if (error && *error) {
 		return FAILURE;
@@ -2278,7 +2282,7 @@ zend_string* phar_split_fname(const char *filename, size_t filename_len, zend_st
  * Invoked when a user calls Phar::mapPhar() from within an executing .phar
  * to set up its manifest directly
  */
-ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result phar_open_executed_filename(/* copyable & hash update */  zend_string *alias, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result phar_open_executed_filename(/* copyable & hash update */ zend_string *alias, char **error) /* {{{ */
 {
 	*error = NULL;
 
@@ -2289,9 +2293,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result phar_open_executed_filename(/* copyab
 		return FAILURE;
 	}
 
-	const char *alias_cstr = alias ? ZSTR_VAL(alias) : NULL;
-	size_t alias_len = alias ? ZSTR_LEN(alias) : 0;
-	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias_cstr, alias_len, false, REPORT_ERRORS, NULL, NULL) == SUCCESS) {
+	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, false, REPORT_ERRORS, NULL, NULL) == SUCCESS) {
 		return SUCCESS;
 	}
 
