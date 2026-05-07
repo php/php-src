@@ -2008,14 +2008,13 @@ static void phar_manifest_copy_ctor(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static void phar_copy_cached_phar(phar_archive_data **pphar) /* {{{ */
+static phar_archive_data* phar_copy_cached_phar(const phar_archive_data *persistent_phar) /* {{{ */
 {
-	phar_archive_data *phar;
 	HashTable newmanifest;
 	phar_archive_object *objphar;
 
-	phar = (phar_archive_data *) emalloc(sizeof(phar_archive_data));
-	*phar = **pphar;
+	phar_archive_data *phar = emalloc(sizeof(phar_archive_data));
+	*phar = *persistent_phar;
 	phar->is_persistent = 0;
 	zend_string_addref(phar->fname);
 
@@ -2029,17 +2028,13 @@ static void phar_copy_cached_phar(phar_archive_data **pphar) /* {{{ */
 
 	phar_metadata_tracker_clone(&phar->metadata_tracker);
 
-	zend_hash_init(&newmanifest, sizeof(phar_entry_info),
-		zend_get_hash_value, destroy_phar_manifest_entry, 0);
-	zend_hash_copy(&newmanifest, &(*pphar)->manifest, phar_manifest_copy_ctor);
+	zend_hash_init(&newmanifest, sizeof(phar_entry_info), NULL, destroy_phar_manifest_entry, 0);
+	zend_hash_copy(&newmanifest, &persistent_phar->manifest, phar_manifest_copy_ctor);
 	zend_hash_apply_with_argument(&newmanifest, phar_update_cached_entry, (void *)phar);
 	phar->manifest = newmanifest;
-	zend_hash_init(&phar->mounted_dirs, sizeof(char *),
-		zend_get_hash_value, NULL, 0);
-	zend_hash_init(&phar->virtual_dirs, sizeof(char *),
-		zend_get_hash_value, NULL, 0);
-	zend_hash_copy(&phar->virtual_dirs, &(*pphar)->virtual_dirs, NULL);
-	*pphar = phar;
+	zend_hash_init(&phar->mounted_dirs, sizeof(char *), NULL, NULL, 0);
+	zend_hash_init(&phar->virtual_dirs, sizeof(char *), NULL, NULL, 0);
+	zend_hash_copy(&phar->virtual_dirs, &persistent_phar->virtual_dirs, NULL);
 
 	/* now, scan the list of persistent Phar objects referencing this phar and update the pointers */
 	ZEND_HASH_MAP_FOREACH_PTR(&PHAR_G(phar_persist_map), objphar) {
@@ -2047,29 +2042,26 @@ static void phar_copy_cached_phar(phar_archive_data **pphar) /* {{{ */
 			objphar->archive = phar;
 		}
 	} ZEND_HASH_FOREACH_END();
+	return phar;
 }
 /* }}} */
 
 zend_result phar_copy_on_write(phar_archive_data **pphar) /* {{{ */
 {
-	zval zv, *pzv;
-	phar_archive_data *newpphar;
+	phar_archive_data *newpphar = phar_copy_cached_phar(*pphar);
 
-	ZVAL_PTR(&zv, *pphar);
-	pzv = zend_hash_add(&(PHAR_G(phar_fname_map)), (*pphar)->fname, &zv);
+	zval *pzv = zend_hash_add_ptr(&(PHAR_G(phar_fname_map)), newpphar->fname, newpphar);
 	if (!pzv) {
 		return FAILURE;
 	}
 
-	phar_copy_cached_phar((phar_archive_data **)&Z_PTR_P(pzv));
-	newpphar = Z_PTR_P(pzv);
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
 	PHAR_G(last_alias) = NULL;
 	PHAR_G(last_phar_name) = NULL;
 
 	if (newpphar->alias_len && NULL == zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), newpphar->alias, newpphar->alias_len, newpphar)) {
-		zend_hash_del(&(PHAR_G(phar_fname_map)), (*pphar)->fname);
+		zend_hash_del(&(PHAR_G(phar_fname_map)), newpphar->fname);
 		return FAILURE;
 	}
 
