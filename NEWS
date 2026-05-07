@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fix persistent free of non-persistent connect_attr key (David Carlier).
 
 - Opcache:
+  . Fixed bug GH-21972 (Corrupted variable type when a typed by-value return
+    contains a reference wrapper). (Weilin Du)
   . Fixed tracing JIT crash when a VM interrupt is handled during an observed
     user function call. (Levi Morrison)
 
