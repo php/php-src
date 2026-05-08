@@ -36,9 +36,9 @@ var_dump($alice);
 $bob = $builder->newWithName("Bob");
 var_dump($bob);
 
-// Creation outside of the builder fails
+// Manipulation outside of the builder fails
 try {
-	$unknown = new User();
+	$bob->userId = 2;
 } catch (Error $e) {
 	echo $e;
 }
@@ -57,6 +57,6 @@ object(User)#%d (2) {
   ["username"]=>
   string(3) "Bob"
 }
-Error: Call to private User::__construct() from global scope in %s:%d
+Error: Cannot modify private(set) property User::$userId from global scope in %s:%d
 Stack trace:
 #0 {main}
