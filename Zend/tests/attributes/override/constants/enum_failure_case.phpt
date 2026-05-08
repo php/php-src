@@ -1,5 +1,5 @@
 --TEST--
-#[\Override]: Constants - no interface for enum
+#[\Override]: Constants - no interface for enum case
 --FILE--
 <?php
 
