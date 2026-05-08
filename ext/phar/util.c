@@ -64,24 +64,34 @@ phar_entry_info *phar_get_link_source(phar_entry_info *entry) /* {{{ */
 {
 	phar_entry_info *link_entry;
 	char *link;
+	uint32_t depth = 0, max_depth;
 
 	if (!entry->link) {
 		return entry;
 	}
 
-	link = phar_get_link_location(entry);
-	if (NULL != (link_entry = zend_hash_str_find_ptr(&(entry->phar->manifest), entry->link, strlen(entry->link))) ||
-		NULL != (link_entry = zend_hash_str_find_ptr(&(entry->phar->manifest), link, strlen(link)))) {
-		if (link != entry->link) {
-			efree(link);
+	max_depth = zend_hash_num_elements(&(entry->phar->manifest));
+
+	while (entry->link) {
+		if (UNEXPECTED(++depth > max_depth)) {
+			return NULL;
 		}
-		return phar_get_link_source(link_entry);
-	} else {
-		if (link != entry->link) {
-			efree(link);
+		link = phar_get_link_location(entry);
+
+		if (NULL != (link_entry = zend_hash_str_find_ptr(&(entry->phar->manifest), entry->link, strlen(entry->link))) ||
+			NULL != (link_entry = zend_hash_str_find_ptr(&(entry->phar->manifest), link, strlen(link)))) {
+			if (link != entry->link) {
+				efree(link);
+			}
+			entry = link_entry;
+		} else {
+			if (link != entry->link) {
+				efree(link);
+			}
+			return NULL;
 		}
-		return NULL;
 	}
+	return entry;
 }
 /* }}} */
 

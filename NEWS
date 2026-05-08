@@ -31,6 +31,10 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fix compatibility issues with OpenSSL 4.0. (jordikroon, Remi)
 
+- Phar:
+  . Fixed bug GH-21986 (PharData::getContent() crash on infinite recursion
+    with symlinks). (David Carlier)
+
 - SOAP:
   . Fixed integer overflow when decoding SOAP array indexes. (Weilin Du)
 
