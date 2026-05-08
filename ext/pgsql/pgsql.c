@@ -1241,7 +1241,7 @@ static void _php_pgsql_free_params(char **params, uint32_t num_params)
 	efree(params);
 }
 
-static char **php_pgsql_make_arguments(const HashTable *param_arr, int *num_params)
+static char **php_pgsql_make_arguments(const HashTable *param_arr, int *num_params, uint32_t arg_num)
 {
 	/* This conversion is safe because of the limit of number of elements in a table. */
 	*num_params = (int) zend_hash_num_elements(param_arr);
@@ -1252,6 +1252,10 @@ static char **php_pgsql_make_arguments(const HashTable *param_arr, int *num_para
 		ZVAL_DEREF(tmp);
 		if (Z_TYPE_P(tmp) == IS_NULL) {
 			params[i] = NULL;
+		} else if (Z_TYPE_P(tmp) == IS_TRUE || Z_TYPE_P(tmp) == IS_FALSE) {
+			zend_argument_value_error(arg_num, "must not contain boolean values, use a string representation instead");
+			_php_pgsql_free_params(params, i);
+			return NULL;
 		} else {
 			zend_string *param_str = zval_try_get_string(tmp);
 			if (!param_str) {
@@ -1318,7 +1322,7 @@ PHP_FUNCTION(pg_query_params)
 		php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
 	}
 
-	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params);
+	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params, ZEND_NUM_ARGS());
 	if (UNEXPECTED(!params)) {
 		RETURN_THROWS();
 	}
@@ -1501,7 +1505,7 @@ PHP_FUNCTION(pg_execute)
 		php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
 	}
 
-	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params);
+	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params, ZEND_NUM_ARGS());
 	if (UNEXPECTED(!params)) {
 		RETURN_THROWS();
 	}
@@ -4071,7 +4075,7 @@ PHP_FUNCTION(pg_send_query_params)
 			"There are results on this connection. Call pg_get_result() until it returns FALSE");
 	}
 
-	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params);
+	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params, 3);
 	if (UNEXPECTED(!params)) {
 		RETURN_THROWS();
 	}
@@ -4226,7 +4230,7 @@ PHP_FUNCTION(pg_send_execute)
 			"There are results on this connection. Call pg_get_result() until it returns FALSE");
 	}
 
-	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params);
+	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params, 3);
 	if (UNEXPECTED(!params)) {
 		RETURN_THROWS();
 	}
