@@ -387,7 +387,19 @@ char *alloca();
 #define ZEND_ELEMENT_COUNT(m)
 #endif
 
-#define ZEND_CONTAINER_OF(ptr, Type, member) ((Type*)((char*)(1 ? (ptr) : &((Type*)0)->member) - offsetof(Type, member)))
+#if __STDC_VERSION__ >= 202311L || ZEND_GCC_VERSION
+/* typeof is C23 or a GCC extension */
+# define ZEND_CONTAINER_OF(ptr, Type, member) \
+	_Generic( \
+		(ptr), \
+		const typeof(((Type*)0)->member) *: ((const Type*)((char*)(ptr) - offsetof(Type, member))), \
+		typeof(((Type*)0)->member) *: ((Type*)((char*)(ptr) - offsetof(Type, member))) \
+	)
+#else
+/* Define a variant that does not keep const-ness for older compilers. Mismatches
+ * are expected to be caught by CI running modern compilers. */
+# define ZEND_CONTAINER_OF(ptr, Type, member) ((Type*)((char*)(ptr) - offsetof(Type, member)))
+#endif
 
 #ifdef HAVE_BUILTIN_CONSTANT_P
 # define ZEND_CONST_COND(_condition, _default) \
