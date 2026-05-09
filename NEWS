@@ -31,6 +31,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fix compatibility issues with OpenSSL 4.0. (jordikroon, Remi)
 
+- SOAP:
+  . Fixed integer overflow when decoding SOAP array indexes. (Weilin Du)
+
 - SPL:
   . Fix SplFixedArray::setSize leak when destructor grows during clear.
     (David Carlier)

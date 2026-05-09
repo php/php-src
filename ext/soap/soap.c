@@ -2408,9 +2408,19 @@ static void do_soap_call(zend_execute_data *execute_data,
 				request = NULL;
 
 				if (ret && Z_TYPE(response) == IS_STRING) {
+					bool parse_bailout = false;
+
 					encode_reset_ns();
-					ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), fn, NULL, return_value, output_headers);
+					zend_try {
+						ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), fn, NULL, return_value, output_headers);
+					} zend_catch {
+						parse_bailout = true;
+					} zend_end_try();
 					encode_finish();
+					if (parse_bailout) {
+						zval_ptr_dtor(&response);
+						zend_bailout();
+					}
 				}
 
 				zval_ptr_dtor(&response);
@@ -2452,9 +2462,19 @@ static void do_soap_call(zend_execute_data *execute_data,
 				request = NULL;
 
 				if (ret && Z_TYPE(response) == IS_STRING) {
+					bool parse_bailout = false;
+
 					encode_reset_ns();
-					ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), NULL, NULL, return_value, output_headers);
+					zend_try {
+						ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), NULL, NULL, return_value, output_headers);
+					} zend_catch {
+						parse_bailout = true;
+					} zend_end_try();
 					encode_finish();
+					if (parse_bailout) {
+						zval_ptr_dtor(&response);
+						zend_bailout();
+					}
 				}
 
 				zval_ptr_dtor(&response);
