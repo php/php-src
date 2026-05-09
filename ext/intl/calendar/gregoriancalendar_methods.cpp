@@ -143,7 +143,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS, bool
 
 	if (variant <= 2) {
 		// From timezone and locale (0 to 2 arguments)
-		TimeZone *tz = timezone_process_timezone_argument(timezone_object, timezone_string, nullptr);
+		TimeZone *tz = timezone_process_timezone_argument(timezone_object, timezone_string, nullptr, 1);
 		if (tz == nullptr) {
 			// TODO: Exception should always occur already?
 			if (!EG(exception)) {

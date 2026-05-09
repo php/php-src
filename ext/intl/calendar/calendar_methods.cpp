@@ -85,7 +85,7 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 		Z_PARAM_STRING_OR_NULL(locale_str, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	TimeZone *timeZone = timezone_process_timezone_argument(timezone_object, timezone_string, nullptr);
+	TimeZone *timeZone = timezone_process_timezone_argument(timezone_object, timezone_string, nullptr, 1);
 	if (timeZone == nullptr) {
 		RETURN_NULL();
 	}
@@ -316,7 +316,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 	}
 
 	TimeZone *timeZone = timezone_process_timezone_argument(
-		timezone_object, timezone_string, CALENDAR_ERROR_P(co));
+		timezone_object, timezone_string, CALENDAR_ERROR_P(co), 2);
 	if (timeZone == nullptr) {
 		RETURN_FALSE;
 	}
@@ -345,7 +345,7 @@ U_CFUNC PHP_METHOD(IntlCalendar, setTimeZone)
 	}
 
 	TimeZone *timeZone = timezone_process_timezone_argument(
-		timezone_object, timezone_string, CALENDAR_ERROR_P(co));
+		timezone_object, timezone_string, CALENDAR_ERROR_P(co), 1);
 	if (timeZone == nullptr) {
 		RETURN_FALSE;
 	}

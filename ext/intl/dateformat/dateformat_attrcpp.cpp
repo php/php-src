@@ -94,7 +94,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	TimeZone *timezone = timezone_process_timezone_argument(
-		timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo));
+		timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo), 2);
 	if (timezone == nullptr) {
 		RETURN_FALSE;
 	}
@@ -119,7 +119,7 @@ U_CFUNC PHP_METHOD(IntlDateFormatter, setTimeZone)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	TimeZone *timezone = timezone_process_timezone_argument(
-		timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo));
+		timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo), 1);
 	if (timezone == nullptr) {
 		RETURN_FALSE;
 	}

@@ -62,6 +62,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
     suggests missing constants). (DanielEScherzer)
   . Added grapheme_strrev (Yuya Hamada)
+  . Passing a non-stringable object as a time zone to Intl time zone
+    argument handling now raises TypeError instead of Error. (Weilin Du)
 
 - JSON:
   . Enriched JSON last error / exception message with error location.

@@ -34,6 +34,10 @@ PHP 8.6 UPGRADE NOTES
     array arguments types/values and raise a TypeError/ValueError
     accordingly.
 
+- Intl:
+  . Passing a non-stringable object as a time zone to Intl APIs that accept
+    time zone objects or strings now raises a TypeError instead of an Error.
+
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
     lower than zero or greater than platform's UINT_MAX.

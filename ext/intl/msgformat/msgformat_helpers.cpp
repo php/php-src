@@ -341,7 +341,7 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		}
 
 		if (used_tz == NULL) {
-			used_tz = timezone_process_timezone_argument(nullptr, nullptr, &err);
+			used_tz = timezone_process_timezone_argument(nullptr, nullptr, &err, 1);
 			if (used_tz == NULL) {
 				continue;
 			}
