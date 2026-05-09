@@ -17,6 +17,7 @@
 
 #include "zend.h"
 #include "zend_globals.h"
+#include "zend_multiply.h"
 
 #ifdef HAVE_VALGRIND
 # include "valgrind/callgrind.h"
@@ -473,8 +474,7 @@ ZEND_API zend_string *zend_string_concat2(
 		const char *str1, size_t str1_len,
 		const char *str2, size_t str2_len)
 {
-	size_t len = str1_len + str2_len;
-	zend_string *res = zend_string_alloc(len, 0);
+	zend_string *res = zend_string_safe_alloc(1, str1_len, str2_len, 0);
 
 	char *p = ZSTR_VAL(res);
 	p = zend_mempcpy(p, str1, str1_len);
@@ -489,7 +489,8 @@ ZEND_API zend_string *zend_string_concat3(
 		const char *str2, size_t str2_len,
 		const char *str3, size_t str3_len)
 {
-	size_t len = str1_len + str2_len + str3_len;
+	size_t tmp_len = zend_safe_address_guarded(1, str1_len, str2_len);
+	size_t len = zend_safe_address_guarded(1, tmp_len, str3_len);
 	zend_string *res = zend_string_alloc(len, 0);
 
 	char *p = ZSTR_VAL(res);
