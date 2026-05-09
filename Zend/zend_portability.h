@@ -387,7 +387,21 @@ char *alloca();
 #define ZEND_ELEMENT_COUNT(m)
 #endif
 
-#if __STDC_VERSION__ >= 202311L || ZEND_GCC_VERSION
+#if __cplusplus
+extern "C++" {
+# include <cstddef>
+	template<typename T, typename M>
+	const T* zend_container_of(const M *ptr, size_t offset) {
+		return reinterpret_cast<const T*>(reinterpret_cast<const char*>(ptr) - offset);
+	}
+	template<typename T, typename M>
+	T* zend_container_of(M *ptr, size_t offset) {
+		return reinterpret_cast<T*>(reinterpret_cast<char*>(ptr) - offset);
+	}
+
+# define ZEND_CONTAINER_OF(ptr, Type, member) zend_container_of<Type, decltype(Type::member)>(ptr, offsetof(Type, member))
+}
+#elif __STDC_VERSION__ >= 202311L || ZEND_GCC_VERSION
 /* typeof is C23 or a GCC extension */
 # define ZEND_CONTAINER_OF(ptr, Type, member) \
 	_Generic( \
