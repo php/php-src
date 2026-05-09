@@ -1304,27 +1304,48 @@ static inheritance_status full_property_types_compatible(
 static ZEND_COLD void emit_incompatible_property_error(
 		const zend_property_info *child, const zend_property_info *parent, prop_variance variance) {
 	zend_string *type_str = zend_type_to_string_resolved(parent->type, parent->ce);
-	zend_error_noreturn(E_COMPILE_ERROR,
-		"Type of %pS::$%s must be %s%pS (as in class %pS)",
-		child->ce->name,
-		zend_get_unmangled_property_name(child->name),
-		variance == PROP_INVARIANT ? "" :
-		variance == PROP_COVARIANT ? "subtype of " : "supertype of ",
-		type_str,
-		parent->ce->name);
+	if (child->line && child->ce->type == ZEND_USER_CLASS) {
+		zend_error_at_noreturn(E_COMPILE_ERROR, child->ce->info.user.filename, child->line,
+			"Type of %pS::$%s must be %s%pS (as in class %pS)",
+			child->ce->name,
+			zend_get_unmangled_property_name(child->name),
+			variance == PROP_INVARIANT ? "" :
+			variance == PROP_COVARIANT ? "subtype of " : "supertype of ",
+			type_str,
+			parent->ce->name);
+	} else {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Type of %pS::$%s must be %s%pS (as in class %pS)",
+			child->ce->name,
+			zend_get_unmangled_property_name(child->name),
+			variance == PROP_INVARIANT ? "" :
+			variance == PROP_COVARIANT ? "subtype of " : "supertype of ",
+			type_str,
+			parent->ce->name);
+	}
 }
 
 static ZEND_COLD void emit_set_hook_type_error(const zend_property_info *child, const zend_property_info *parent)
 {
 	zend_type set_type = parent->hooks[ZEND_PROPERTY_HOOK_SET]->common.arg_info[0].type;
 	zend_string *type_str = zend_type_to_string_resolved(set_type, parent->ce);
-	zend_error_noreturn(E_COMPILE_ERROR,
-		"Set type of %pS::$%s must be supertype of %pS (as in %s %pS)",
-		child->ce->name,
-		zend_get_unmangled_property_name(child->name),
-		type_str,
-		zend_get_object_type_case(parent->ce, false),
-		parent->ce->name);
+	if (child->line && child->ce->type == ZEND_USER_CLASS) {
+		zend_error_at_noreturn(E_COMPILE_ERROR, child->ce->info.user.filename, child->line,
+			"Set type of %pS::$%s must be supertype of %pS (as in %s %pS)",
+			child->ce->name,
+			zend_get_unmangled_property_name(child->name),
+			type_str,
+			zend_get_object_type_case(parent->ce, false),
+			parent->ce->name);
+	} else {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Set type of %pS::$%s must be supertype of %pS (as in %s %pS)",
+			child->ce->name,
+			zend_get_unmangled_property_name(child->name),
+			type_str,
+			zend_get_object_type_case(parent->ce, false),
+			parent->ce->name);
+	}
 }
 
 static inheritance_status verify_property_type_compatibility(
@@ -1617,13 +1638,23 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 static void emit_incompatible_class_constant_error(
 		const zend_class_constant *child, const zend_class_constant *parent, const zend_string *const_name) {
 	zend_string *type_str = zend_type_to_string_resolved(parent->type, parent->ce);
-	zend_error_noreturn(E_COMPILE_ERROR,
-		"Type of %pS::%pS must be compatible with %pS::%pS of type %pS",
-		child->ce->name,
-		const_name,
-		parent->ce->name,
-		const_name,
-		type_str);
+	if (child->line && child->ce->type == ZEND_USER_CLASS) {
+		zend_error_at_noreturn(E_COMPILE_ERROR, child->ce->info.user.filename, child->line,
+			"Type of %pS::%pS must be compatible with %pS::%pS of type %pS",
+			child->ce->name,
+			const_name,
+			parent->ce->name,
+			const_name,
+			type_str);
+	} else {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Type of %pS::%pS must be compatible with %pS::%pS of type %pS",
+			child->ce->name,
+			const_name,
+			parent->ce->name,
+			const_name,
+			type_str);
+	}
 }
 
 static inheritance_status class_constant_types_compatible(const zend_class_constant *parent, const zend_class_constant *child)
@@ -2855,6 +2886,7 @@ static void zend_do_traits_constant_binding(zend_class_entry *ce, zend_class_ent
 				 * of the composing class. So let's replace the ce here.
 				 */
 				constant->ce = ce;
+				constant->line = 0;
 
 				Z_TRY_ADDREF(constant->value);
 				constant->doc_comment = constant->doc_comment ? zend_string_copy(constant->doc_comment) : NULL;
