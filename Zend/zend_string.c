@@ -51,6 +51,18 @@ ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
 ZEND_API zend_string **zend_known_strings = NULL;
 
+/* this is read-only, so it's ok */
+ZEND_SET_ALIGNED(16, static const char zend_hexconvtab_lower[]) = "0123456789abcdef";
+ZEND_SET_ALIGNED(16, static const char zend_hexconvtab_upper[]) = "0123456789ABCDEF";
+
+static zend_always_inline void zend_bin2hex_impl(char *out, const unsigned char *in, size_t in_len, const char *hexconvtab)
+{
+	for (size_t i = 0; i < in_len; i++) {
+		out[i * 2] = hexconvtab[in[i] >> 4];
+		out[i * 2 + 1] = hexconvtab[in[i] & 0x0f];
+	}
+}
+
 ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str)
 {
 	return ZSTR_H(str) = zend_hash_func(ZSTR_VAL(str), ZSTR_LEN(str));
@@ -59,6 +71,26 @@ ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str)
 ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len)
 {
 	return zend_inline_hash_func(str, len);
+}
+
+ZEND_API void ZEND_FASTCALL zend_bin2hex(char *out, const unsigned char *in, size_t in_len)
+{
+	zend_bin2hex_impl(out, in, in_len, zend_hexconvtab_lower);
+}
+
+ZEND_API void ZEND_FASTCALL zend_bin2hex_upper(char *out, const unsigned char *in, size_t in_len)
+{
+	zend_bin2hex_impl(out, in, in_len, zend_hexconvtab_upper);
+}
+
+ZEND_API zend_string *zend_bin2hex_str(const unsigned char *in, size_t in_len)
+{
+	zend_string *result = zend_string_safe_alloc(in_len, 2 * sizeof(char), 0, 0);
+
+	zend_bin2hex(ZSTR_VAL(result), in, in_len);
+	ZSTR_VAL(result)[in_len * 2] = '\0';
+
+	return result;
 }
 
 static void _str_dtor(zval *zv)
