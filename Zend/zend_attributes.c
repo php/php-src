@@ -472,6 +472,11 @@ static void attr_free(zval *v)
 		zend_string_release(attr->validation_error);
 	}
 
+	if (attr->generic_args) {
+		zend_type_release(*attr->generic_args, persistent);
+		pefree(attr->generic_args, persistent);
+	}
+
 	for (uint32_t i = 0; i < attr->argc; i++) {
 		if (attr->args[i].name) {
 			zend_string_release(attr->args[i].name);
@@ -508,6 +513,8 @@ ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_string 
 	attr->lineno = lineno;
 	attr->offset = offset;
 	attr->argc = argc;
+	attr->generic_arity = 0;
+	attr->generic_args = NULL;
 
 	/* Initialize arguments to avoid partial initialization in case of fatal errors. */
 	for (uint32_t i = 0; i < argc; i++) {

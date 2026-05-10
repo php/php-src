@@ -121,6 +121,83 @@ typedef struct _zend_file_context {
 	HashTable seen_symbols;
 } zend_file_context;
 
+/* Maximum number of generic type parameters or arguments at any single
+ * position. Capped at 7 bits so a uint8_t count leaves its top bit
+ * available for future runtime-model flags. */
+#define ZEND_GENERIC_MAX_PARAMS 127
+
+C23_ENUM(zend_generic_variance, uint8_t) {
+	ZEND_GENERIC_VARIANCE_INVARIANT     = 0,
+	ZEND_GENERIC_VARIANCE_COVARIANT     = 1,
+	ZEND_GENERIC_VARIANCE_CONTRAVARIANT = 2,
+};
+
+C23_ENUM(zend_generic_origin, uint8_t) {
+	ZEND_GENERIC_ORIGIN_CLASS_LIKE    = 0, /* class, interface, trait, enum */
+	ZEND_GENERIC_ORIGIN_FUNCTION_LIKE = 1, /* function, method, closure, arrow function */
+};
+
+typedef struct _zend_generic_parameter {
+	zend_string *name;        		/* type-parameter name */
+	zend_generic_variance variance;
+	zend_type bound;          		/* runtime erased; ZEND_TYPE_NONE if unbounded */
+	zend_type bound_pre_erasure;   	/* pre-erasure; ZEND_TYPE_NONE if same as `bound` */
+	zend_type default_type;   		/* runtime erased; ZEND_TYPE_NONE if no default */
+	zend_type default_pre_erasure; 	/* pre-erasure; ZEND_TYPE_NONE if same as `default_type` */
+} zend_generic_parameter;
+
+typedef struct _zend_generic_parameter_list {
+	uint32_t count;
+	bool persisted;
+	zend_generic_parameter parameters[1];
+} zend_generic_parameter_list;
+
+#define ZEND_GENERIC_PARAMETER_LIST_SIZE(count) \
+	(sizeof(zend_generic_parameter_list) + ((count) - 1) * sizeof(zend_generic_parameter))
+
+typedef struct _zend_generic_type_table {
+	zend_type   *return_type;       /* function/method return; NULL if equal to erased */
+	zend_type   *extends;           /* class extends; NULL if equal */
+	HashTable   *parameters;        /* parameter index -> zend_type * */
+	HashTable   *properties;        /* zend_string * -> zend_type * */
+	HashTable   *class_constants;   /* zend_string * -> zend_type * */
+	HashTable   *implements;        /* implements index -> zend_type * */
+	HashTable   *trait_uses;        /* trait-use index -> zend_type * */
+	HashTable   *turbofish_args;    /* opline->extended_value -> zend_type * (NAMED_WITH_ARGS holding the call-site type arguments); index is stable across optimizer reorderings */
+	bool         persisted;         /* set by opcache when the table lives in SHM/file-cache memory; suppresses destruction */
+} zend_generic_type_table;
+
+/* Compile-time linked stack of in-scope generic type parameters. */
+typedef struct _zend_generic_scope_entry {
+	zend_generic_parameter_list *params;
+	uint32_t visible_count; 						/* number of parameters in `params` already declared */
+	struct _zend_generic_parameter *self_compiling; /* param whose bound/default is being compiled, or NULL */
+	HashTable *shadowing_classes;                   /* lc_names of class-likes declared inside this scope; lazy-allocated */
+	zend_generic_origin origin;
+	struct _zend_generic_scope_entry *outer;
+} zend_generic_scope_entry;
+
+ZEND_API zend_generic_parameter_list *zend_generic_parameter_list_alloc(uint32_t count, bool persistent);
+ZEND_API void zend_generic_parameter_list_destroy(zend_generic_parameter_list *list);
+ZEND_API zend_generic_type_table *zend_generic_type_table_alloc(void);
+ZEND_API void zend_generic_type_table_destroy(zend_generic_type_table *table);
+ZEND_API void zend_generic_type_table_set_return(zend_generic_type_table *t, zend_type type);
+ZEND_API void zend_generic_type_table_set_extends(zend_generic_type_table *t, zend_type type);
+ZEND_API void zend_generic_type_table_set_parameter(zend_generic_type_table *t, uint32_t idx, zend_type type);
+ZEND_API void zend_generic_type_table_set_property(zend_generic_type_table *t, zend_string *name, zend_type type);
+ZEND_API void zend_generic_type_table_set_class_constant(zend_generic_type_table *t, zend_string *name, zend_type type);
+ZEND_API void zend_generic_type_table_set_implements(zend_generic_type_table *t, uint32_t idx, zend_type type);
+ZEND_API void zend_generic_type_table_set_trait_use(zend_generic_type_table *t, uint32_t idx, zend_type type);
+ZEND_API void zend_generic_type_table_set_turbofish_args(zend_generic_type_table *t, uint32_t op_num, zend_type type);
+
+ZEND_API void zend_check_generic_param_list_size(zend_ast *list_ast);
+ZEND_API void zend_check_generic_arg_list_size(zend_ast *list_ast);
+
+ZEND_API void zend_check_generic_call_arguments(const zend_function *fbc, uint32_t arity, const zend_type *args_box);
+ZEND_API void zend_check_generic_new_arguments(const zend_class_entry *ce, uint32_t arity, const zend_type *args_box);
+ZEND_API void zend_check_generic_static_class_arguments(const zend_class_entry *ce, uint32_t arity, const zend_type *args_box);
+ZEND_API const zend_type *zend_generic_get_turbofish_args(const zend_op_array *caller_op_array, uint32_t args_id);
+
 typedef union _zend_parser_stack_elem {
 	zend_ast *ast;
 	zend_string *str;
@@ -260,7 +337,7 @@ typedef struct _zend_oparray_context {
 /* has #[\Override] attribute                             |     |     |     */
 #define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
-/* Property Flags (unused: 13-27,29...)                   |     |     |     */
+/* Property Flags (unused: 14-27,29...)                   |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Promoted property / parameter                          |     |     |     */
@@ -273,6 +350,9 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PUBLIC_SET              (1 << 10) /*     |     |  X  |     */
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
+/*                                                        |     |     |     */
+/* Parametric LSP substitution clone owned by a child     |     |     |     */
+#define ZEND_ACC_GENERIC_CLONE           (1 << 13) /*     |     |  X  |     */
 /*                                                        |     |     |     */
 /* Class Flags (unused: 31)                               |     |     |     */
 /* ===========                                            |     |     |     */
@@ -575,6 +655,10 @@ struct _zend_op_array {
 	/* Functions that are declared dynamically are stored here and
 	 * referenced by index from opcodes. */
 	zend_op_array **dynamic_func_defs;
+
+	/* Generic-syntax metadata. NULL on non-generic functions/methods. */
+	zend_generic_parameter_list *generic_parameters;
+	zend_generic_type_table     *generic_types;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

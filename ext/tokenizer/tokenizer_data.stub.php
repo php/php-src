@@ -404,6 +404,16 @@ const T_INTERFACE = UNKNOWN;
 const T_ENUM = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_IN
+ */
+const T_IN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_OUT
+ */
+const T_OUT = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_EXTENDS
  */
 const T_EXTENDS = UNKNOWN;
@@ -717,6 +727,11 @@ const T_CURLY_OPEN = UNKNOWN;
  * @cvalue T_PAAMAYIM_NEKUDOTAYIM
  */
 const T_PAAMAYIM_NEKUDOTAYIM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_TURBOFISH
+ */
+const T_TURBOFISH = UNKNOWN;
 /**
  * @var int
  * @cvalue T_NS_SEPARATOR

@@ -5792,6 +5792,7 @@ ZEND_VM_HOT_HANDLER(64, ZEND_RECV_INIT, NUM, CONST)
 			ZEND_VM_C_GOTO(recv_init_check_type);
 		} else {
 			ZVAL_COPY(param, default_value);
+			ZEND_VM_C_GOTO(recv_init_check_type);
 		}
 	} else {
 ZEND_VM_C_LABEL(recv_init_check_type):
@@ -8929,6 +8930,46 @@ ZEND_VM_HOT_HANDLER(211, ZEND_TYPE_ASSERT, CONST, ANY, NUM)
 	}
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+ZEND_VM_HANDLER(212, ZEND_VERIFY_GENERIC_ARGUMENTS, TMP|UNUSED, UNUSED)
+{
+	USE_OPLINE
+	zend_execute_data *call = EX(call);
+	uint32_t arity = opline->op2.num;
+	const zend_type *args_box = zend_generic_get_turbofish_args(&EX(func)->op_array, opline->extended_value);
+
+	SAVE_OPLINE();
+
+	if (OP1_TYPE == IS_UNUSED) {
+		if (opline->op1.num == 0) {
+			zend_check_generic_call_arguments(call->func, arity, args_box);
+		} else {
+			zend_class_entry *ce = call->func->common.scope;
+			zend_check_generic_static_class_arguments(ce, arity, args_box);
+		}
+	} else {
+		zval *new_obj = EX_VAR(opline->op1.var);
+		zend_class_entry *ce = Z_OBJCE_P(new_obj);
+		zend_check_generic_new_arguments(ce, arity, args_box);
+	}
+
+	if (UNEXPECTED(EG(exception))) {
+		if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
+			zend_string_release_ex(call->func->common.function_name, 0);
+			zend_free_trampoline(call->func);
+		}
+
+		if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
+			OBJ_RELEASE(Z_OBJ(call->This));
+		}
+
+		EX(call) = call->prev_execute_data;
+		zend_vm_stack_free_call_frame(call);
+		HANDLE_EXCEPTION();
+	}
+
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HOT_HANDLER(122, ZEND_DEFINED, CONST, ANY, CACHE_SLOT)

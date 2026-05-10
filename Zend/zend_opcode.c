@@ -91,6 +91,9 @@ void init_op_array(zend_op_array *op_array, zend_function_type type, int initial
 	op_array->num_dynamic_func_defs = 0;
 	op_array->dynamic_func_defs = NULL;
 
+	op_array->generic_parameters = NULL;
+	op_array->generic_types = NULL;
+
 	ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 	op_array->cache_size = zend_op_array_extension_handles * sizeof(void*);
 
@@ -118,9 +121,174 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 		if (!ZEND_TYPE_USES_ARENA(type)) {
 			pefree(ZEND_TYPE_LIST(type), persistent);
 		}
+	} else if (ZEND_TYPE_HAS_NAMED_WITH_ARGS(type)) {
+		zend_type_named_with_args *named = ZEND_TYPE_NAMED_WITH_ARGS(type);
+		if (named->name) {
+			zend_string_release(named->name);
+		}
+		for (uint32_t i = 0; i < named->count; i++) {
+			zend_type_release(named->args[i], persistent);
+		}
+		pefree(named, persistent);
+	} else if (ZEND_TYPE_HAS_TYPE_PARAMETER(type)) {
+		zend_type_parameter_ref *ref = ZEND_TYPE_TYPE_PARAMETER(type);
+		if (ref->name) {
+			zend_string_release(ref->name);
+		}
+		pefree(ref, persistent);
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		zend_string_release(ZEND_TYPE_NAME(type));
 	}
+}
+
+ZEND_API zend_generic_parameter_list *zend_generic_parameter_list_alloc(uint32_t count, bool persistent) {
+	ZEND_ASSERT(count > 0);
+	zend_generic_parameter_list *list = pemalloc(ZEND_GENERIC_PARAMETER_LIST_SIZE(count), persistent);
+	list->count = count;
+	list->persisted = false;
+	for (uint32_t i = 0; i < count; i++) {
+		list->parameters[i].name = NULL;
+		list->parameters[i].variance = 0;
+		list->parameters[i].bound = (zend_type) ZEND_TYPE_INIT_NONE(0);
+		list->parameters[i].bound_pre_erasure = (zend_type) ZEND_TYPE_INIT_NONE(0);
+		list->parameters[i].default_type = (zend_type) ZEND_TYPE_INIT_NONE(0);
+		list->parameters[i].default_pre_erasure = (zend_type) ZEND_TYPE_INIT_NONE(0);
+	}
+	return list;
+}
+
+ZEND_API void zend_generic_parameter_list_destroy(zend_generic_parameter_list *list) {
+	if (!list || list->persisted) {
+		return;
+	}
+	for (uint32_t i = 0; i < list->count; i++) {
+		zend_generic_parameter *param = &list->parameters[i];
+		if (param->name) {
+			zend_string_release(param->name);
+		}
+		zend_type_release(param->bound, /* persistent */ false);
+		zend_type_release(param->bound_pre_erasure, /* persistent */ false);
+		zend_type_release(param->default_type, /* persistent */ false);
+		zend_type_release(param->default_pre_erasure, /* persistent */ false);
+	}
+	efree(list);
+}
+
+static void zend_generic_type_table_value_dtor(zval *zv) {
+	zend_type *type = Z_PTR_P(zv);
+	zend_type_release(*type, /* persistent */ false);
+	efree(type);
+}
+
+ZEND_API zend_generic_type_table *zend_generic_type_table_alloc(void) {
+	zend_generic_type_table *table = ecalloc(1, sizeof(zend_generic_type_table));
+	return table;
+}
+
+ZEND_API void zend_generic_type_table_destroy(zend_generic_type_table *table) {
+	if (!table || table->persisted) {
+		return;
+	}
+
+	if (table->return_type) {
+		zend_type_release(*table->return_type, /* persistent */ false);
+		efree(table->return_type);
+	}
+	if (table->extends) {
+		zend_type_release(*table->extends, /* persistent */ false);
+		efree(table->extends);
+	}
+	if (table->parameters) {
+		zend_hash_destroy(table->parameters);
+		FREE_HASHTABLE(table->parameters);
+	}
+	if (table->properties) {
+		zend_hash_destroy(table->properties);
+		FREE_HASHTABLE(table->properties);
+	}
+	if (table->class_constants) {
+		zend_hash_destroy(table->class_constants);
+		FREE_HASHTABLE(table->class_constants);
+	}
+	if (table->implements) {
+		zend_hash_destroy(table->implements);
+		FREE_HASHTABLE(table->implements);
+	}
+	if (table->trait_uses) {
+		zend_hash_destroy(table->trait_uses);
+		FREE_HASHTABLE(table->trait_uses);
+	}
+	if (table->turbofish_args) {
+		zend_hash_destroy(table->turbofish_args);
+		FREE_HASHTABLE(table->turbofish_args);
+	}
+	efree(table);
+}
+
+static HashTable *zend_generic_type_table_ensure_indexed(HashTable **slot) {
+	if (!*slot) {
+		HashTable *ht;
+		ALLOC_HASHTABLE(ht);
+		zend_hash_init(ht, 4, NULL, zend_generic_type_table_value_dtor, /* persistent */ false);
+		*slot = ht;
+	}
+	return *slot;
+}
+
+static HashTable *zend_generic_type_table_ensure_named(HashTable **slot) {
+	if (!*slot) {
+		HashTable *ht;
+		ALLOC_HASHTABLE(ht);
+		zend_hash_init(ht, 4, NULL, zend_generic_type_table_value_dtor, /* persistent */ false);
+		*slot = ht;
+	}
+	return *slot;
+}
+
+static zend_type *zend_type_box(zend_type type) {
+	zend_type *boxed = emalloc(sizeof(zend_type));
+	*boxed = type;
+	return boxed;
+}
+
+ZEND_API void zend_generic_type_table_set_return(zend_generic_type_table *t, zend_type type) {
+	if (t->return_type) {
+		zend_type_release(*t->return_type, /* persistent */ false);
+		efree(t->return_type);
+	}
+	t->return_type = zend_type_box(type);
+}
+
+ZEND_API void zend_generic_type_table_set_extends(zend_generic_type_table *t, zend_type type) {
+	if (t->extends) {
+		zend_type_release(*t->extends, /* persistent */ false);
+		efree(t->extends);
+	}
+	t->extends = zend_type_box(type);
+}
+
+ZEND_API void zend_generic_type_table_set_parameter(zend_generic_type_table *t, uint32_t idx, zend_type type) {
+	zend_hash_index_update_ptr(zend_generic_type_table_ensure_indexed(&t->parameters), idx, zend_type_box(type));
+}
+
+ZEND_API void zend_generic_type_table_set_property(zend_generic_type_table *t, zend_string *name, zend_type type) {
+	zend_hash_update_ptr(zend_generic_type_table_ensure_named(&t->properties), name, zend_type_box(type));
+}
+
+ZEND_API void zend_generic_type_table_set_class_constant(zend_generic_type_table *t, zend_string *name, zend_type type) {
+	zend_hash_update_ptr(zend_generic_type_table_ensure_named(&t->class_constants), name, zend_type_box(type));
+}
+
+ZEND_API void zend_generic_type_table_set_implements(zend_generic_type_table *t, uint32_t idx, zend_type type) {
+	zend_hash_index_update_ptr(zend_generic_type_table_ensure_indexed(&t->implements), idx, zend_type_box(type));
+}
+
+ZEND_API void zend_generic_type_table_set_trait_use(zend_generic_type_table *t, uint32_t idx, zend_type type) {
+	zend_hash_index_update_ptr(zend_generic_type_table_ensure_indexed(&t->trait_uses), idx, zend_type_box(type));
+}
+
+ZEND_API void zend_generic_type_table_set_turbofish_args(zend_generic_type_table *t, uint32_t op_num, zend_type type) {
+	zend_hash_index_update_ptr(zend_generic_type_table_ensure_indexed(&t->turbofish_args), op_num, zend_type_box(type));
 }
 
 ZEND_API void zend_free_internal_arg_info(zend_internal_function *function,
@@ -415,6 +583,14 @@ ZEND_API void destroy_zend_class(zval *zv)
 							}
 						}
 					}
+				} else if (prop_info->flags & ZEND_ACC_GENERIC_CLONE) {
+					if (prop_info->hooks) {
+						for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+							if (prop_info->hooks[i]) {
+								destroy_op_array(&prop_info->hooks[i]->op_array);
+							}
+						}
+					}
 				}
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
@@ -440,6 +616,12 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->backed_enum_table) {
 				zend_hash_release(ce->backed_enum_table);
+			}
+			if (ce->generic_parameters) {
+				zend_generic_parameter_list_destroy(ce->generic_parameters);
+			}
+			if (ce->generic_types) {
+				zend_generic_type_table_destroy(ce->generic_types);
 			}
 			break;
 		case ZEND_INTERNAL_CLASS:
@@ -662,6 +844,12 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			destroy_op_array(op_array->dynamic_func_defs[i]);
 		}
 		efree(op_array->dynamic_func_defs);
+	}
+	if (op_array->generic_parameters) {
+		zend_generic_parameter_list_destroy(op_array->generic_parameters);
+	}
+	if (op_array->generic_types) {
+		zend_generic_type_table_destroy(op_array->generic_types);
 	}
 }
 

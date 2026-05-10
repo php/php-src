@@ -103,6 +103,8 @@ char *get_token_type_name(int token_type)
 		case T_TRAIT: return "T_TRAIT";
 		case T_INTERFACE: return "T_INTERFACE";
 		case T_ENUM: return "T_ENUM";
+		case T_IN: return "T_IN";
+		case T_OUT: return "T_OUT";
 		case T_EXTENDS: return "T_EXTENDS";
 		case T_IMPLEMENTS: return "T_IMPLEMENTS";
 		case T_NAMESPACE: return "T_NAMESPACE";
@@ -166,6 +168,7 @@ char *get_token_type_name(int token_type)
 		case T_DOLLAR_OPEN_CURLY_BRACES: return "T_DOLLAR_OPEN_CURLY_BRACES";
 		case T_CURLY_OPEN: return "T_CURLY_OPEN";
 		case T_PAAMAYIM_NEKUDOTAYIM: return "T_DOUBLE_COLON";
+		case T_TURBOFISH: return "T_TURBOFISH";
 		case T_NS_SEPARATOR: return "T_NS_SEPARATOR";
 		case T_ELLIPSIS: return "T_ELLIPSIS";
 		case T_COALESCE: return "T_COALESCE";

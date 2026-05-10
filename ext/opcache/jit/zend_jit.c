@@ -3021,6 +3021,10 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 		return FAILURE;
 	}
 
+	if (op_array->generic_types) {
+		return SUCCESS;
+	}
+
 	orig_trigger = JIT_G(trigger);
 	JIT_G(trigger) = trigger;
 	checkpoint = zend_arena_checkpoint(CG(arena));
@@ -3303,6 +3307,10 @@ int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		return FAILURE;
 	}
 
+	if (op_array->generic_types) {
+		return SUCCESS;
+	}
+
 	if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC) {
 		zend_jit_op_array_extension *jit_extension;
 		zend_op *opline = op_array->opcodes;
@@ -3416,6 +3424,10 @@ int zend_jit_script(zend_script *script)
 		}
 	} else if (JIT_G(trigger) == ZEND_JIT_ON_SCRIPT_LOAD) {
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			if (call_graph.op_arrays[i]->generic_types) {
+				continue;
+			}
+
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
 				if (zend_jit_op_array_analyze1(call_graph.op_arrays[i], script, &info->ssa) != SUCCESS) {
@@ -3427,6 +3439,10 @@ int zend_jit_script(zend_script *script)
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			if (call_graph.op_arrays[i]->generic_types) {
+				continue;
+			}
+
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
 				info->call_map = zend_build_call_map(&CG(arena), info, call_graph.op_arrays[i]);
@@ -3437,6 +3453,9 @@ int zend_jit_script(zend_script *script)
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			if (call_graph.op_arrays[i]->generic_types) {
+				continue;
+			}
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
 				if (zend_jit_op_array_analyze2(call_graph.op_arrays[i], script, &info->ssa, ZCG(accel_directives).optimization_level) != SUCCESS) {
@@ -3447,6 +3466,10 @@ int zend_jit_script(zend_script *script)
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			if (call_graph.op_arrays[i]->generic_types) {
+				continue;
+			}
+
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
 				if (JIT_G(debug) & ZEND_JIT_DEBUG_SSA) {
