@@ -127,14 +127,42 @@ typedef struct {
 	zend_type types[1];
 } zend_type_list;
 
-#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
-#define _ZEND_TYPE_MASK ((1u << 25) - 1)
+/* Generic type-parameter reference. */
+typedef struct _zend_type_parameter_ref {
+	zend_string *name;       /* type-parameter source name (e.g. "T") */
+	uint32_t     index;      /* position in declaring entity's parameter list */
+	uint8_t      origin;     /* one of zend_generic_origin (see zend_compile.h) */
+} zend_type_parameter_ref;
+
+/* List of pre-erasure type arguments attached to a named pre-erasure zend_type. */
+typedef struct _zend_type_arguments {
+	uint32_t count;
+	zend_type arguments[1];
+} zend_type_arguments;
+
+/* Pre-erasure named type with type arguments. */
+typedef struct _zend_type_named_with_args {
+	zend_string *name;       /* class name */
+	uint32_t     name_attr;  /* ZEND_NAME_NOT_FQ / ZEND_NAME_FQ / ZEND_NAME_RELATIVE */
+	uint32_t     count;      /* number of type arguments */
+	zend_type    args[1];    /* flexible array of pre-erasure type arguments */
+} zend_type_named_with_args;
+
+#define ZEND_TYPE_NAMED_WITH_ARGS_SIZE(count) \
+	(sizeof(zend_type_named_with_args) + ((count) - 1) * sizeof(zend_type))
+
+#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 26
+#define _ZEND_TYPE_MASK (((1u << 26) - 1) | _ZEND_TYPE_NAMED_WITH_ARGS_BIT)
+/* Pre-erasure named type with type arguments. Side-table only. */
+#define _ZEND_TYPE_NAMED_WITH_ARGS_BIT (1u << 31)
+/* Generic type-parameter reference. */
+#define _ZEND_TYPE_TYPE_PARAMETER_BIT (1u << 25)
 /* Only one of these bits may be set. */
 #define _ZEND_TYPE_NAME_BIT (1u << 24)
 // Used to signify that type.ptr is not a `zend_string*` but a `const char*`,
 #define _ZEND_TYPE_LITERAL_NAME_BIT (1u << 23)
 #define _ZEND_TYPE_LIST_BIT (1u << 22)
-#define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_LITERAL_NAME_BIT)
+#define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_LITERAL_NAME_BIT|_ZEND_TYPE_TYPE_PARAMETER_BIT|_ZEND_TYPE_NAMED_WITH_ARGS_BIT)
 /* For BC behaviour with iterable type */
 #define _ZEND_TYPE_ITERABLE_BIT (1u << 21)
 /* Whether the type list is arena allocated */
@@ -164,6 +192,18 @@ typedef struct {
 
 #define ZEND_TYPE_HAS_LIST(t) \
 	((((t).type_mask) & _ZEND_TYPE_LIST_BIT) != 0)
+
+#define ZEND_TYPE_HAS_TYPE_PARAMETER(t) \
+	((((t).type_mask) & _ZEND_TYPE_TYPE_PARAMETER_BIT) != 0)
+
+#define ZEND_TYPE_TYPE_PARAMETER(t) \
+	((zend_type_parameter_ref *) (t).ptr)
+
+#define ZEND_TYPE_HAS_NAMED_WITH_ARGS(t) \
+	((((t).type_mask) & _ZEND_TYPE_NAMED_WITH_ARGS_BIT) != 0)
+
+#define ZEND_TYPE_NAMED_WITH_ARGS(t) \
+	((zend_type_named_with_args *) (t).ptr)
 
 #define ZEND_TYPE_IS_ITERABLE_FALLBACK(t) \
 	((((t).type_mask) & _ZEND_TYPE_ITERABLE_BIT) != 0)

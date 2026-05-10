@@ -115,6 +115,11 @@ abstract class ReflectionFunctionAbstract implements Reflector
     public function getTentativeReturnType(): ?ReflectionType {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function isGeneric(): bool {}
+
+    /** @return list<ReflectionGenericTypeParameter> */
+    public function getGenericParameters(): array {}
 }
 
 class ReflectionFunction extends ReflectionFunctionAbstract
@@ -436,6 +441,46 @@ class ReflectionClass implements Reflector
     public function getShortName(): string {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function isGeneric(): bool {}
+
+    /** @return list<ReflectionGenericTypeParameter> */
+    public function getGenericParameters(): array {}
+
+    /**
+     * Returns the type arguments this class supplies at the parent-class extends
+     * site, in source order. Returns an empty array if the extends clause
+     * specified no type arguments.
+     *
+     * @return list<ReflectionType>
+     * @throws ReflectionException if this class has no parent class
+     */
+    public function getGenericArgumentsForParentClass(): array {}
+
+    /**
+     * Returns every generic argument set this class supplies for the named
+     * ancestor interface, in inheritance traversal order. The outer list
+     * contains one entry per binding: a class may bind the same generic
+     * interface multiple times either directly (`implements Foo<int>,
+     * Foo<string>`) or transitively through different inheritance paths.
+     * Each inner list holds the type arguments for that binding in source
+     * order. Returns an empty outer list when no generic bindings to the
+     * ancestor exist.
+     *
+     * @return list<list<ReflectionType>>
+     * @throws ReflectionException if $name is not an ancestor interface
+     */
+    public function getGenericArgumentsForParentInterface(string $name): array {}
+
+    /**
+     * Returns the type arguments this class supplies at the use site for trait
+     * $name, in source order. Returns an empty array if no type arguments were
+     * specified at the use site.
+     *
+     * @return list<ReflectionType>
+     * @throws ReflectionException if $name is not a directly-used trait
+     */
+    public function getGenericArgumentsForUsedTrait(string $name): array {}
 }
 
 class ReflectionObject extends ReflectionClass
@@ -741,6 +786,11 @@ class ReflectionNamedType extends ReflectionType
 
     /** @tentative-return-type */
     public function isBuiltin(): bool {}
+
+    public function hasGenericArguments(): bool {}
+
+    /** @return list<ReflectionType> */
+    public function getGenericArguments(): array {}
 }
 
 class ReflectionUnionType extends ReflectionType
@@ -751,6 +801,66 @@ class ReflectionUnionType extends ReflectionType
 class ReflectionIntersectionType extends ReflectionType
 {
     public function getTypes(): array {}
+}
+
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class ReflectionTypeParameterReference extends ReflectionType
+{
+    public string $name;
+
+    private function __construct() {}
+
+    public function getName(): string {}
+
+    public function getTypeParameter(): ReflectionGenericTypeParameter {}
+
+    public function allowsNull(): bool {}
+
+    public function __toString(): string {}
+}
+
+enum ReflectionGenericVariance
+{
+    case Invariant;
+    case Covariant;
+    case Contravariant;
+}
+
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class ReflectionGenericTypeParameter implements Reflector
+{
+    public string $name;
+
+    private function __construct() {}
+
+    /** @implementation-alias ReflectionClass::__clone */
+    private function __clone(): void {}
+
+    public function getName(): string {}
+
+    public function getPosition(): int {}
+
+    public function getVariance(): ReflectionGenericVariance {}
+
+    public function hasBound(): bool {}
+
+    /** @throws ReflectionException if this type parameter has no bound; check hasBound() first */
+    public function getBound(): ReflectionType {}
+
+    public function hasDefault(): bool {}
+
+    /** @throws ReflectionException if this type parameter has no default; check hasDefault() first */
+    public function getDefault(): ReflectionType {}
+
+    public function getDeclaringEntity(): ReflectionClass|ReflectionFunctionAbstract {}
+
+    public function __toString(): string {}
 }
 
 /** @not-serializable */

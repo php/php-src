@@ -253,6 +253,12 @@ static void zend_file_cache_serialize_attribute(zval                     *zv,
 
 static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_script *script, void *buf);
 
+static void zend_file_cache_serialize_type(
+		zend_type *type, zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf);
+
+static void zend_file_cache_unserialize_type(
+		zend_type *type, zend_class_entry *scope, zend_persistent_script *script, void *buf);
+
 static void *zend_file_cache_serialize_interned(zend_string              *str,
                                                 zend_file_cache_metainfo *info)
 {
@@ -468,11 +474,40 @@ static void zend_file_cache_serialize_attribute(zval                     *zv,
 		SERIALIZE_STR(attr->args[i].name);
 		zend_file_cache_serialize_zval(&attr->args[i].value, script, info, buf);
 	}
+
+	if (attr->generic_args) {
+		SERIALIZE_PTR(attr->generic_args);
+		zend_type *t = attr->generic_args;
+		UNSERIALIZE_PTR(t);
+		zend_file_cache_serialize_type(t, script, info, buf);
+	}
 }
 
 static void zend_file_cache_serialize_type(
 		zend_type *type, zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
 {
+	if (ZEND_TYPE_HAS_TYPE_PARAMETER(*type)) {
+		zend_type_parameter_ref *ref = ZEND_TYPE_TYPE_PARAMETER(*type);
+		SERIALIZE_PTR(ref);
+		ZEND_TYPE_SET_PTR(*type, ref);
+		UNSERIALIZE_PTR(ref);
+		SERIALIZE_STR(ref->name);
+		return;
+	}
+
+	if (ZEND_TYPE_HAS_NAMED_WITH_ARGS(*type)) {
+		zend_type_named_with_args *named = ZEND_TYPE_NAMED_WITH_ARGS(*type);
+		SERIALIZE_PTR(named);
+		ZEND_TYPE_SET_PTR(*type, named);
+		UNSERIALIZE_PTR(named);
+		SERIALIZE_STR(named->name);
+		for (uint32_t i = 0; i < named->count; i++) {
+			zend_file_cache_serialize_type(&named->args[i], script, info, buf);
+		}
+
+		return;
+	}
+
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
 		SERIALIZE_PTR(list);
@@ -487,6 +522,82 @@ static void zend_file_cache_serialize_type(
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
 		SERIALIZE_STR(type_name);
 		ZEND_TYPE_SET_PTR(*type, type_name);
+	}
+}
+
+static void zend_file_cache_serialize_generic_type_entry(
+		zval *zv, zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
+{
+	SERIALIZE_PTR(Z_PTR_P(zv));
+	zend_type *boxed = Z_PTR_P(zv);
+	UNSERIALIZE_PTR(boxed);
+	zend_file_cache_serialize_type(boxed, script, info, buf);
+}
+
+static void zend_file_cache_serialize_generic_type_table_ht(
+		HashTable **ht_ptr, zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
+{
+	HashTable *ht;
+	SERIALIZE_PTR(*ht_ptr);
+	ht = *ht_ptr;
+	UNSERIALIZE_PTR(ht);
+	zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_generic_type_entry);
+}
+
+static void zend_file_cache_serialize_generic_parameter_list(
+		zend_generic_parameter_list **list_ptr, zend_persistent_script *script,
+		zend_file_cache_metainfo *info, void *buf)
+{
+	zend_generic_parameter_list *list;
+	SERIALIZE_PTR(*list_ptr);
+	list = *list_ptr;
+	UNSERIALIZE_PTR(list);
+	for (uint32_t i = 0; i < list->count; i++) {
+		SERIALIZE_STR(list->parameters[i].name);
+		zend_file_cache_serialize_type(&list->parameters[i].bound, script, info, buf);
+		zend_file_cache_serialize_type(&list->parameters[i].bound_pre_erasure, script, info, buf);
+		zend_file_cache_serialize_type(&list->parameters[i].default_type, script, info, buf);
+		zend_file_cache_serialize_type(&list->parameters[i].default_pre_erasure, script, info, buf);
+	}
+}
+
+static void zend_file_cache_serialize_generic_type_table(
+		zend_generic_type_table **table_ptr, zend_persistent_script *script,
+		zend_file_cache_metainfo *info, void *buf)
+{
+	zend_generic_type_table *table;
+	SERIALIZE_PTR(*table_ptr);
+	table = *table_ptr;
+	UNSERIALIZE_PTR(table);
+	if (table->return_type) {
+		SERIALIZE_PTR(table->return_type);
+		zend_type *t = table->return_type;
+		UNSERIALIZE_PTR(t);
+		zend_file_cache_serialize_type(t, script, info, buf);
+	}
+	if (table->extends) {
+		SERIALIZE_PTR(table->extends);
+		zend_type *t = table->extends;
+		UNSERIALIZE_PTR(t);
+		zend_file_cache_serialize_type(t, script, info, buf);
+	}
+	if (table->parameters) {
+		zend_file_cache_serialize_generic_type_table_ht(&table->parameters, script, info, buf);
+	}
+	if (table->properties) {
+		zend_file_cache_serialize_generic_type_table_ht(&table->properties, script, info, buf);
+	}
+	if (table->class_constants) {
+		zend_file_cache_serialize_generic_type_table_ht(&table->class_constants, script, info, buf);
+	}
+	if (table->implements) {
+		zend_file_cache_serialize_generic_type_table_ht(&table->implements, script, info, buf);
+	}
+	if (table->trait_uses) {
+		zend_file_cache_serialize_generic_type_table_ht(&table->trait_uses, script, info, buf);
+	}
+	if (table->turbofish_args) {
+		zend_file_cache_serialize_generic_type_table_ht(&table->turbofish_args, script, info, buf);
 	}
 }
 
@@ -700,6 +811,14 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		SERIALIZE_PTR(op_array->try_catch_array);
 		SERIALIZE_PTR(op_array->prototype);
 		SERIALIZE_PTR(op_array->prop_info);
+
+		if (op_array->generic_parameters) {
+			zend_file_cache_serialize_generic_parameter_list(&op_array->generic_parameters, script, info, buf);
+		}
+
+		if (op_array->generic_types) {
+			zend_file_cache_serialize_generic_type_table(&op_array->generic_types, script, info, buf);
+		}
 	}
 }
 
@@ -831,6 +950,14 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	SERIALIZE_STR(ce->info.user.filename);
 	SERIALIZE_STR(ce->doc_comment);
 	SERIALIZE_ATTRIBUTES(ce->attributes);
+	if (ce->generic_parameters) {
+		zend_file_cache_serialize_generic_parameter_list(&ce->generic_parameters, script, info, buf);
+	}
+
+	if (ce->generic_types) {
+		zend_file_cache_serialize_generic_type_table(&ce->generic_types, script, info, buf);
+	}
+
 	zend_file_cache_serialize_hash(&ce->properties_info, script, info, buf, zend_file_cache_serialize_prop_info);
 
 	if (ce->properties_info_table) {
@@ -1384,11 +1511,36 @@ static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_scri
 		UNSERIALIZE_STR(attr->args[i].name);
 		zend_file_cache_unserialize_zval(&attr->args[i].value, script, buf);
 	}
+
+	if (attr->generic_args) {
+		UNSERIALIZE_PTR(attr->generic_args);
+		zend_file_cache_unserialize_type(attr->generic_args, NULL, script, buf);
+	}
 }
 
 static void zend_file_cache_unserialize_type(
 		zend_type *type, zend_class_entry *scope, zend_persistent_script *script, void *buf)
 {
+	if (ZEND_TYPE_HAS_TYPE_PARAMETER(*type)) {
+		zend_type_parameter_ref *ref = ZEND_TYPE_TYPE_PARAMETER(*type);
+		UNSERIALIZE_PTR(ref);
+		ZEND_TYPE_SET_PTR(*type, ref);
+		UNSERIALIZE_STR(ref->name);
+		return;
+	}
+
+	if (ZEND_TYPE_HAS_NAMED_WITH_ARGS(*type)) {
+		zend_type_named_with_args *named = ZEND_TYPE_NAMED_WITH_ARGS(*type);
+		UNSERIALIZE_PTR(named);
+		ZEND_TYPE_SET_PTR(*type, named);
+		UNSERIALIZE_STR(named->name);
+		for (uint32_t i = 0; i < named->count; i++) {
+			zend_file_cache_unserialize_type(&named->args[i], scope, script, buf);
+		}
+
+		return;
+	}
+
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
 		UNSERIALIZE_PTR(list);
@@ -1407,6 +1559,83 @@ static void zend_file_cache_unserialize_type(
 		} else {
 			zend_alloc_ce_cache(type_name);
 		}
+	}
+}
+
+static zend_class_entry *zend_file_cache_generic_unserialize_scope = NULL;
+
+static void zend_file_cache_unserialize_generic_type_entry(
+		zval *zv, zend_persistent_script *script, void *buf)
+{
+	UNSERIALIZE_PTR(Z_PTR_P(zv));
+	zend_file_cache_unserialize_type(
+		(zend_type *) Z_PTR_P(zv), zend_file_cache_generic_unserialize_scope, script, buf);
+}
+
+static void zend_file_cache_unserialize_generic_type_table_ht(
+		HashTable **ht_ptr, zend_class_entry *scope, zend_persistent_script *script, void *buf)
+{
+	UNSERIALIZE_PTR(*ht_ptr);
+	HashTable *ht = *ht_ptr;
+	zend_class_entry *prev = zend_file_cache_generic_unserialize_scope;
+	zend_file_cache_generic_unserialize_scope = scope;
+	zend_file_cache_unserialize_hash(ht, script, buf, zend_file_cache_unserialize_generic_type_entry, NULL);
+	zend_file_cache_generic_unserialize_scope = prev;
+}
+
+static void zend_file_cache_unserialize_generic_parameter_list(
+		zend_generic_parameter_list **list_ptr, zend_class_entry *scope,
+		zend_persistent_script *script, void *buf)
+{
+	UNSERIALIZE_PTR(*list_ptr);
+	zend_generic_parameter_list *list = *list_ptr;
+	for (uint32_t i = 0; i < list->count; i++) {
+		UNSERIALIZE_STR(list->parameters[i].name);
+		zend_file_cache_unserialize_type(&list->parameters[i].bound, scope, script, buf);
+		zend_file_cache_unserialize_type(&list->parameters[i].bound_pre_erasure, scope, script, buf);
+		zend_file_cache_unserialize_type(&list->parameters[i].default_type, scope, script, buf);
+		zend_file_cache_unserialize_type(&list->parameters[i].default_pre_erasure, scope, script, buf);
+	}
+}
+
+static void zend_file_cache_unserialize_generic_type_table(
+		zend_generic_type_table **table_ptr, zend_class_entry *scope,
+		zend_persistent_script *script, void *buf)
+{
+	UNSERIALIZE_PTR(*table_ptr);
+	zend_generic_type_table *table = *table_ptr;
+	if (table->return_type) {
+		UNSERIALIZE_PTR(table->return_type);
+		zend_file_cache_unserialize_type(table->return_type, scope, script, buf);
+	}
+
+	if (table->extends) {
+		UNSERIALIZE_PTR(table->extends);
+		zend_file_cache_unserialize_type(table->extends, scope, script, buf);
+	}
+
+	if (table->parameters) {
+		zend_file_cache_unserialize_generic_type_table_ht(&table->parameters, scope, script, buf);
+	}
+
+	if (table->properties) {
+		zend_file_cache_unserialize_generic_type_table_ht(&table->properties, scope, script, buf);
+	}
+
+	if (table->class_constants) {
+		zend_file_cache_unserialize_generic_type_table_ht(&table->class_constants, scope, script, buf);
+	}
+
+	if (table->implements) {
+		zend_file_cache_unserialize_generic_type_table_ht(&table->implements, scope, script, buf);
+	}
+
+	if (table->trait_uses) {
+		zend_file_cache_unserialize_generic_type_table_ht(&table->trait_uses, scope, script, buf);
+	}
+
+	if (table->turbofish_args) {
+		zend_file_cache_unserialize_generic_type_table_ht(&table->turbofish_args, scope, script, buf);
 	}
 }
 
@@ -1596,6 +1825,16 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		UNSERIALIZE_PTR(op_array->try_catch_array);
 		UNSERIALIZE_PTR(op_array->prototype);
 		UNSERIALIZE_PTR(op_array->prop_info);
+
+		if (op_array->generic_parameters) {
+			zend_file_cache_unserialize_generic_parameter_list(&op_array->generic_parameters,
+				(op_array->fn_flags & ZEND_ACC_CLOSURE) ? NULL : op_array->scope, script, buf);
+		}
+
+		if (op_array->generic_types) {
+			zend_file_cache_unserialize_generic_type_table(&op_array->generic_types,
+				(op_array->fn_flags & ZEND_ACC_CLOSURE) ? NULL : op_array->scope, script, buf);
+		}
 	}
 }
 
@@ -1720,6 +1959,14 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	UNSERIALIZE_STR(ce->info.user.filename);
 	UNSERIALIZE_STR(ce->doc_comment);
 	UNSERIALIZE_ATTRIBUTES(ce->attributes);
+	if (ce->generic_parameters) {
+		zend_file_cache_unserialize_generic_parameter_list(&ce->generic_parameters, ce, script, buf);
+	}
+
+	if (ce->generic_types) {
+		zend_file_cache_unserialize_generic_type_table(&ce->generic_types, ce, script, buf);
+	}
+
 	zend_file_cache_unserialize_hash(&ce->properties_info,
 			script, buf, zend_file_cache_unserialize_prop_info, NULL);
 
