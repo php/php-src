@@ -18,6 +18,6 @@ class DemoClass implements DemoInterface {}
 --EXPECTF--
 Fatal error: Uncaught ErrorException: Interface DemoInterface implemented by DemoClass is deprecated in %s:%d
 Stack trace:
-#0 %s(%d): my_error_handler(16384, 'Interface DemoI...', '/usr/src/php/Ze...', 12)
+#0 %s(%d): my_error_handler(16384, 'Interface DemoI...', '%s', 12)
 #1 {main}
   thrown in %s on line %d
