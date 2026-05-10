@@ -2033,20 +2033,20 @@ ZEND_API ZEND_COLD void zend_use_of_deprecated_trait(
 }
 
 static ZEND_COLD void zend_deprecated_interface_action(
-	zend_class_entry *interface,
+	zend_class_entry *iface,
 	const zend_string *by,
 	const char *action
 ) {
 	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
 
-	if (get_deprecation_suffix_from_attribute(interface->attributes, interface, &message_suffix) == FAILURE) {
+	if (get_deprecation_suffix_from_attribute(iface->attributes, iface, &message_suffix) == FAILURE) {
 		return;
 	}
 
-	int code = interface->type == ZEND_INTERNAL_CLASS ? E_DEPRECATED : E_USER_DEPRECATED;
+	int code = iface->type == ZEND_INTERNAL_CLASS ? E_DEPRECATED : E_USER_DEPRECATED;
 
 	zend_error_unchecked(code, "Interface %s %s by %s is deprecated%S",
-		ZSTR_VAL(interface->name),
+		ZSTR_VAL(iface->name),
 		action,
 		ZSTR_VAL(by),
 		message_suffix
@@ -2056,17 +2056,17 @@ static ZEND_COLD void zend_deprecated_interface_action(
 }
 
 ZEND_API ZEND_COLD void zend_implementation_of_deprecated_interface(
-	zend_class_entry *interface,
+	zend_class_entry *iface,
 	const zend_string *implemented_by
 ) {
-	zend_deprecated_interface_action(interface, implemented_by, "implemented");
+	zend_deprecated_interface_action(iface, implemented_by, "implemented");
 }
 
 ZEND_API ZEND_COLD void zend_extending_deprecated_interface(
-	zend_class_entry *interface,
+	zend_class_entry *iface,
 	const zend_string *extended_by
 ) {
-	zend_deprecated_interface_action(interface, extended_by, "extended");
+	zend_deprecated_interface_action(iface, extended_by, "extended");
 }
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void)
