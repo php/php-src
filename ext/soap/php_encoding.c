@@ -2816,7 +2816,11 @@ static xmlNodePtr guess_xml_convert(encodeTypePtr type, zval *data, int style, x
 	xmlNodePtr ret;
 
 	if (data) {
-		enc = get_conversion(Z_TYPE_P(data));
+		if (Z_TYPE_P(data) == IS_OBJECT && instanceof_function_slow(Z_OBJCE_P(data), php_date_get_interface_ce())) {
+			enc = get_conversion(XSD_DATETIME);
+		} else {
+			enc = get_conversion(Z_TYPE_P(data));
+		}
 	} else {
 		enc = get_conversion(IS_NULL);
 	}
