@@ -297,11 +297,9 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getLocale)
 		Z_PARAM_LONG(locale_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* TODO: Change to ValueError? */
 	if (locale_type != ULOC_ACTUAL_LOCALE && locale_type != ULOC_VALID_LOCALE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"invalid locale type");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be either Locale::ACTUAL_LOCALE or Locale::VALID_LOCALE");
+		RETURN_THROWS();
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;

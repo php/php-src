@@ -37,6 +37,9 @@ PHP 8.6 UPGRADE NOTES
 - Intl:
   . Passing a non-stringable object as a time zone to Intl APIs that accept
     time zone objects or strings now raises a TypeError instead of an Error.
+  . IntlBreakIterator::getLocale() now raises a ValueError when the type is
+    neither Locale::ACTUAL_LOCALE nor Locale::VALID_LOCALE instead of
+    returning false.
 
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is

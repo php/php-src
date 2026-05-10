@@ -64,6 +64,8 @@ PHP                                                                        NEWS
   . Added grapheme_strrev (Yuya Hamada)
   . Passing a non-stringable object as a time zone to Intl time zone
     argument handling now raises TypeError instead of Error. (Weilin Du)
+  . IntlBreakIterator::getLocale() now raises ValueError for invalid locale
+    types. (Weilin Du)
 
 - JSON:
   . Enriched JSON last error / exception message with error location.
