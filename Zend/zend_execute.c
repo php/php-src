@@ -2032,6 +2032,43 @@ ZEND_API ZEND_COLD void zend_use_of_deprecated_trait(
 	zend_string_release(message_suffix);
 }
 
+static ZEND_COLD void zend_deprecated_interface_action(
+	zend_class_entry *interface,
+	const zend_string *by,
+	const char *action
+) {
+	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+	if (get_deprecation_suffix_from_attribute(interface->attributes, interface, &message_suffix) == FAILURE) {
+		return;
+	}
+
+	int code = interface->type == ZEND_INTERNAL_CLASS ? E_DEPRECATED : E_USER_DEPRECATED;
+
+	zend_error_unchecked(code, "Interface %s %s by %s is deprecated%S",
+		ZSTR_VAL(interface->name),
+		action,
+		ZSTR_VAL(by),
+		message_suffix
+	);
+
+	zend_string_release(message_suffix);
+}
+
+ZEND_API ZEND_COLD void zend_implementation_of_deprecated_interface(
+	zend_class_entry *interface,
+	const zend_string *implemented_by
+) {
+	zend_deprecated_interface_action(interface, implemented_by, "implemented");
+}
+
+ZEND_API ZEND_COLD void zend_extending_deprecated_interface(
+	zend_class_entry *interface,
+	const zend_string *extended_by
+) {
+	zend_deprecated_interface_action(interface, extended_by, "extended");
+}
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void)
 {
 	zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
