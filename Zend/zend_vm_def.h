@@ -4536,47 +4536,6 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 	}
 }
 
-ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_VERIFY_RETURN_TYPE, (((res_info & MAY_BE_REF) == 0) && op1_info == MAY_BE_LONG), ZEND_VERIFY_RETURN_TYPE_FOR_LONG, CONST|TMPVAR|CV, UNUSED)
-{
-	USE_OPLINE
-
-	zval *retval_ptr = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
-	if (OP1_TYPE == IS_CONST) {
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval_ptr);
-		retval_ptr = EX_VAR(opline->result.var);
-	}
-
-	uint32_t pure_type_mask = opline->extended_value;
-	if (pure_type_mask & MAY_BE_LONG) {
-		ZVAL_LONG(retval_ptr, Z_LVAL_P(retval_ptr));
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* Type preference order: float -> string -> bool */
-	/* int to float is always valid even with strict types */
-	if (pure_type_mask & MAY_BE_DOUBLE) {
-		ZVAL_DOUBLE(retval_ptr, (double)Z_LVAL_P(retval_ptr));
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	if (UNEXPECTED(EX_USES_STRICT_TYPES())) {
-		SAVE_OPLINE();
-		zend_verify_return_error(EX(func), retval_ptr);
-		HANDLE_EXCEPTION();
-	}
-
-	if (pure_type_mask & MAY_BE_STRING) {
-		ZVAL_STR(retval_ptr, zend_long_to_str(Z_LVAL_P(retval_ptr)));
-	} else if (pure_type_mask & MAY_BE_BOOL) {
-		ZVAL_BOOL(retval_ptr, Z_LVAL_P(retval_ptr));
-	} else {
-		SAVE_OPLINE();
-		zend_verify_return_error(EX(func), retval_ptr);
-		HANDLE_EXCEPTION();
-	}
-	ZEND_VM_NEXT_OPCODE();
-}
-
 ZEND_VM_COLD_HANDLER(201, ZEND_VERIFY_NEVER_TYPE, UNUSED, UNUSED)
 {
 	SAVE_OPLINE();
