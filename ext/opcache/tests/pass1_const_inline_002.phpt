@@ -20,9 +20,18 @@ function use_global_const_fqn() {
 
 class MyClass {
     const CLASS_CONST = 99;
+    final const FINAL_CLASS_CONST = 77;
 
     public function use_class_const() {
         return self::CLASS_CONST;
+    }
+
+    public function use_static_class_const() {
+        return static::CLASS_CONST;
+    }
+
+    public function use_static_final_class_const() {
+        return static::FINAL_CLASS_CONST;
     }
 }
 
@@ -62,3 +71,16 @@ MyClass::use_class_const:
      ; (after optimizer)
      ; %s
 0000 RETURN int(99)
+
+MyClass::use_static_class_const:
+     ; (lines=%d, args=%d, vars=%d, tmps=%d)
+     ; (after optimizer)
+     ; %s
+0000 T%d = FETCH_CLASS_CONSTANT (static) (exception) string("CLASS_CONST")
+0001 RETURN %s
+
+MyClass::use_static_final_class_const:
+     ; (lines=%d, args=%d, vars=%d, tmps=%d)
+     ; (after optimizer)
+     ; %s
+0000 RETURN int(77)
