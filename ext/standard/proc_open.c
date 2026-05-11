@@ -45,10 +45,31 @@
 #define USE_POSIX_SPAWN
 
 /* The non-_np variant is in macOS 26 (and _np deprecated) */
-#ifdef HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR
+#if defined(__APPLE__) && defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR) && defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NP)
+static inline int php_posix_spawn_file_actions_addchdir(posix_spawn_file_actions_t *actions, const char *path)
+{
+/* The standardized symbol is weak-linked when building with a newer SDK. */
+# if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wunguarded-availability-new"
+# endif
+	if (posix_spawn_file_actions_addchdir != NULL) {
+		return posix_spawn_file_actions_addchdir(actions, path);
+	}
+# if defined(__clang__)
+#  pragma clang diagnostic pop
+# endif
+
+	return posix_spawn_file_actions_addchdir_np(actions, path);
+}
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR php_posix_spawn_file_actions_addchdir
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NAME "posix_spawn_file_actions_addchdir"
+#elif defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR)
 #define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NAME "posix_spawn_file_actions_addchdir"
 #else
 #define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir_np
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NAME "posix_spawn_file_actions_addchdir_np"
 #endif
 #endif
 
@@ -1401,7 +1422,7 @@ PHP_FUNCTION(proc_open)
 	if (cwd) {
 		r = POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR(&factions, cwd);
 		if (r != 0) {
-			php_error_docref(NULL, E_WARNING, ZEND_TOSTR(POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR) "() failed: %s", strerror(r));
+			php_error_docref(NULL, E_WARNING, POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NAME "() failed: %s", strerror(r));
 		}
 	}
 
