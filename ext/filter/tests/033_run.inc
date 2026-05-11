@@ -22,6 +22,10 @@ $data = array(
 foreach(filter_list() as $filter) {
     if($filter=="validate_regexp") {
         foreach($data as $k=>$d) $result[$k] = filter_var($d,filter_id($filter),array("options"=>array("regexp"=>'/^O.*/')));
+    } else if($filter=="validate_strlen") {
+        foreach ($data as $k => $d) {
+            $result[$k] = filter_var($d, filter_id($filter),array("options" => array("min_len" => 2, "max_len" => 5)));
+        }
     } else {
         foreach($data as $k=>$d) $result[$k] = filter_var($d,filter_id($filter),array("options"=>"test"));
     }
