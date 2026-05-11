@@ -51,6 +51,19 @@ void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, const zval *name, 
 	}
 }
 
+/* prevent inlining of a constant; UNDEF sentinel blocks later DECLARE_CONST collection */
+void zend_optimizer_block_constant(zend_optimizer_ctx *ctx, const zval *name)
+{
+	if (!ctx->constants) {
+		ctx->constants = zend_arena_alloc(&ctx->arena, sizeof(HashTable));
+		zend_hash_init(ctx->constants, 16, NULL, zval_ptr_dtor_nogc, 0);
+	}
+
+	zval undef;
+	ZVAL_UNDEF(&undef);
+	zend_hash_add(ctx->constants, Z_STR_P(name), &undef);
+}
+
 zend_result zend_optimizer_eval_binary_op(zval *result, uint8_t opcode, zval *op1, zval *op2) /* {{{ */
 {
 	if (zend_binary_op_produces_error(opcode, op1, op2)) {

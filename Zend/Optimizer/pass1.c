@@ -151,6 +151,10 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					if (!ctx->constants || !zend_optimizer_get_collected_constant(ctx->constants, &ZEND_OP2_LITERAL(opline), &result)) {
 						break;
 					}
+					if (Z_TYPE(result) == IS_UNDEF) {
+						/* blocked by define() or attributed const */
+						break;
+					}
 				}
 				if (Z_TYPE(result) == IS_CONSTANT_AST) {
 					break;
@@ -224,8 +228,9 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 				if (Z_TYPE(ZEND_OP1_LITERAL(send1_opline)) == IS_STRING && send2_opline) {
 
+					/* define() can be overridden at runtime; block inlining */
 					if (collect_constants) {
-						zend_optimizer_collect_constant(ctx, &ZEND_OP1_LITERAL(send1_opline), &ZEND_OP1_LITERAL(send2_opline));
+						zend_optimizer_block_constant(ctx, &ZEND_OP1_LITERAL(send1_opline));
 					}
 
 					if (RESULT_UNUSED(opline) &&
@@ -285,6 +290,13 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			ZVAL_TRUE(&result);
 			literal_dtor(&ZEND_OP1_LITERAL(opline));
 			replace_by_const_or_qm_assign(op_array, opline, &result);
+			break;
+		case ZEND_DECLARE_ATTRIBUTED_CONST:
+			/* attributes must fire at access time; block inlining */
+			if (collect_constants &&
+			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
+				zend_optimizer_block_constant(ctx, &ZEND_OP1_LITERAL(opline));
+			}
 			break;
 		case ZEND_DECLARE_CONST:
 			if (collect_constants &&
