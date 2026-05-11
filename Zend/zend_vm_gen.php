@@ -1597,14 +1597,21 @@ function gen_halt_handler($f, $kind) {
 function gen_interrupt_func($f, $kind, $spec) {
     $cconv = $kind === ZEND_VM_KIND_TAILCALL ? 'ZEND_OPCODE_HANDLER_CCONV' : 'ZEND_OPCODE_HANDLER_FUNC_CCONV';
     $variant = $kind === ZEND_VM_KIND_TAILCALL ? '_TAILCALL' : '';
+    if ($kind !== ZEND_VM_KIND_TAILCALL) {
+        /* Guard: exclude global-reg builds (void return) and TAILCALL builds (have own variant) */
+        out($f, "#if !(defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)) && ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL\n");
+    }
     out($f, "static ZEND_COLD zend_never_inline ZEND_OPCODE_HANDLER_RET {$cconv} zend_interrupt{$variant}(ZEND_OPCODE_HANDLER_ARGS) {\n");
     out($f,"\tSAVE_OPLINE();\n");
     if ($kind === ZEND_VM_KIND_TAILCALL) {
         out($f,"\tZEND_VM_TAIL_CALL(zend_interrupt_helper".($spec?"_SPEC":"")."_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
     } else {
-        out($f, "\treturn &call_interrupt_op;\n");
+        out($f, "\treturn zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
     }
     out($f, "}\n");
+    if ($kind !== ZEND_VM_KIND_TAILCALL) {
+        out($f, "#endif\n");
+    }
 }
 
 function extra_spec_name($extra_spec) {
@@ -1860,7 +1867,11 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
         out($f, "#pragma push_macro(\"ZEND_VM_INTERRUPT\")\n");
         out($f, "#undef  ZEND_VM_INTERRUPT\n");
         out($f, "#define ZEND_VM_CONTINUE(handler) return opline\n");
-        out($f, "#define ZEND_VM_INTERRUPT()       return zend_interrupt(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
+        out($f, "#if !(defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)) && ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL\n");
+        out($f, "# define ZEND_VM_INTERRUPT()      return zend_interrupt(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
+        out($f, "#else\n");
+        out($f, "# define ZEND_VM_INTERRUPT()      return zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
+        out($f, "#endif\n");
         out($f, $delayed_helpers);
         out($f, "#pragma pop_macro(\"ZEND_VM_INTERRUPT\")\n");
         out($f, "#pragma pop_macro(\"ZEND_VM_CONTINUE\")\n");
@@ -2056,7 +2067,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             }
                             out($f,"\n");
                             out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS);\n");
+                            out($f,"#if !(defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)) && ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL\n");
                             out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_interrupt(ZEND_OPCODE_HANDLER_ARGS);\n");
+                            out($f,"#endif\n");
                             out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
                             out($f,"\n");
                             break;
