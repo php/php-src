@@ -1042,7 +1042,6 @@ cleanup_args:
 		/* This flag is regularly checked while running user functions, but not internal
 		 * So see whether interrupt flag was set while the function was running... */
 		if (zend_atomic_bool_exchange_ex(&EG(vm_interrupt), false)) {
-			zend_frameless_cleanup_reentry_copies();
 			if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 				zend_timeout();
 			} else if (zend_interrupt_function) {

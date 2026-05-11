@@ -3886,7 +3886,6 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_he
 {
 	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
 	SAVE_OPLINE();
-	zend_frameless_cleanup_reentry_copies();
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
 	} else if (zend_interrupt_function) {

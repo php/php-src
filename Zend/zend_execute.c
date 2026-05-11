@@ -1673,19 +1673,6 @@ ZEND_API bool zend_frameless_protect_args_for_reentry(void)
 	return true;
 }
 
-static bool zend_frameless_reentry_copies_in_use(zend_frameless_reentry_copies *copies)
-{
-	for (zend_execute_data *execute_data = EG(current_execute_data);
-			execute_data;
-			execute_data = execute_data->prev_execute_data) {
-		if (execute_data == copies->execute_data && execute_data->opline == copies->opline) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
 static void zend_frameless_free_reentry_copies(zend_frameless_reentry_copies *copies)
 {
 	for (uint32_t i = 0; i < 3; i++) {
@@ -1714,31 +1701,16 @@ ZEND_API void zend_frameless_cleanup_reentry_copies_for_handler(zend_execute_dat
 	}
 }
 
-static void zend_frameless_cleanup_reentry_copies_ex(bool force)
+ZEND_API void zend_frameless_cleanup_reentry_copies_force(void)
 {
 	zend_frameless_reentry_copies **next = &EG(frameless_reentry_copies);
 
 	while (*next) {
 		zend_frameless_reentry_copies *copies = *next;
 
-		if (!force && zend_frameless_reentry_copies_in_use(copies)) {
-			next = &copies->prev;
-			continue;
-		}
-
 		*next = copies->prev;
 		zend_frameless_free_reentry_copies(copies);
 	}
-}
-
-ZEND_API void zend_frameless_cleanup_reentry_copies(void)
-{
-	zend_frameless_cleanup_reentry_copies_ex(false);
-}
-
-ZEND_API void zend_frameless_cleanup_reentry_copies_force(void)
-{
-	zend_frameless_cleanup_reentry_copies_ex(true);
 }
 
 static void frameless_observed_call_copy(zend_execute_data *call, uint32_t arg, zval *zv)
@@ -4240,7 +4212,6 @@ ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *exec
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *call)
 {
 	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
-	zend_frameless_cleanup_reentry_copies();
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
 	} else if (zend_interrupt_function) {
