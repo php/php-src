@@ -269,11 +269,8 @@ typedef struct {
 #define ZEND_TYPE_PURE_MASK_WITHOUT_NULL(t) \
 	((t).type_mask & _ZEND_TYPE_MAY_BE_MASK & ~_ZEND_TYPE_NULLABLE_BIT)
 
-#define ZEND_TYPE_MASK_CONTAINS_CODE(mask, code) \
-	(((mask) & (1u << (code))) != 0)
-
 #define ZEND_TYPE_CONTAINS_CODE(t, code) \
-	ZEND_TYPE_MASK_CONTAINS_CODE((t).type_mask, code)
+	(((t).type_mask & (1u << (code))) != 0)
 
 #define ZEND_TYPE_ALLOW_NULL(t) \
 	(((t).type_mask & _ZEND_TYPE_NULLABLE_BIT) != 0)

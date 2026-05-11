@@ -22,8 +22,6 @@
  * php zend_vm_gen.php
  */
 
-#include <stdint.h>
-
 ZEND_VM_HELPER(zend_add_helper, ANY, ANY, zval *op_1, zval *op_2)
 {
 	USE_OPLINE
@@ -4478,6 +4476,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 #if !ZEND_VM_SPEC || (OP1_TYPE != IS_UNUSED)
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 		if (OP1_TYPE == IS_CONST) {
@@ -4492,8 +4491,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		uint32_t pure_type_mask = opline->extended_value;
-		if (EXPECTED(ZEND_TYPE_MASK_CONTAINS_CODE(pure_type_mask, Z_TYPE_P(retval_ptr)))) {
+		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -4503,7 +4501,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
-			if (pure_type_mask & MAY_BE_NULL) {
+			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -4524,8 +4522,6 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 			}
 		}
 
-		/* Fetch full return type info from function arg_info */
-		const zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);

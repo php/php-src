@@ -11194,6 +11194,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 #if 0 || (IS_CONST != IS_UNUSED)
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = RT_CONSTANT(opline, opline->op1);
 
 		if (IS_CONST == IS_CONST) {
@@ -11208,8 +11209,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		uint32_t pure_type_mask = opline->extended_value;
-		if (EXPECTED(ZEND_TYPE_MASK_CONTAINS_CODE(pure_type_mask, Z_TYPE_P(retval_ptr)))) {
+		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -11219,7 +11219,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
-			if (pure_type_mask & MAY_BE_NULL) {
+			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -11240,8 +11240,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 			}
 		}
 
-		/* Fetch full return type info from function arg_info */
-		const zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
@@ -21505,6 +21503,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 #if 0 || (IS_TMP_VAR != IS_UNUSED)
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
 		if (IS_TMP_VAR == IS_CONST) {
@@ -21519,8 +21518,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		uint32_t pure_type_mask = opline->extended_value;
-		if (EXPECTED(ZEND_TYPE_MASK_CONTAINS_CODE(pure_type_mask, Z_TYPE_P(retval_ptr)))) {
+		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -21530,7 +21528,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
-			if (pure_type_mask & MAY_BE_NULL) {
+			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -21551,8 +21549,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			}
 		}
 
-		/* Fetch full return type info from function arg_info */
-		const zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
@@ -29552,6 +29548,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 #if 0 || (IS_VAR != IS_UNUSED)
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 		if (IS_VAR == IS_CONST) {
@@ -29566,8 +29563,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		uint32_t pure_type_mask = opline->extended_value;
-		if (EXPECTED(ZEND_TYPE_MASK_CONTAINS_CODE(pure_type_mask, Z_TYPE_P(retval_ptr)))) {
+		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -29577,7 +29573,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
-			if (pure_type_mask & MAY_BE_NULL) {
+			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -29598,8 +29594,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			}
 		}
 
-		/* Fetch full return type info from function arg_info */
-		const zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
@@ -36941,6 +36935,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 #if 0 || (IS_UNUSED != IS_UNUSED)
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = NULL;
 
 		if (IS_UNUSED == IS_CONST) {
@@ -36955,8 +36950,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		uint32_t pure_type_mask = opline->extended_value;
-		if (EXPECTED(ZEND_TYPE_MASK_CONTAINS_CODE(pure_type_mask, Z_TYPE_P(retval_ptr)))) {
+		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -36966,7 +36960,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
-			if (pure_type_mask & MAY_BE_NULL) {
+			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -36987,8 +36981,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			}
 		}
 
-		/* Fetch full return type info from function arg_info */
-		const zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
@@ -49152,6 +49144,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 #if 0 || (IS_CV != IS_UNUSED)
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = EX_VAR(opline->op1.var);
 
 		if (IS_CV == IS_CONST) {
@@ -49166,8 +49159,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		uint32_t pure_type_mask = opline->extended_value;
-		if (EXPECTED(ZEND_TYPE_MASK_CONTAINS_CODE(pure_type_mask, Z_TYPE_P(retval_ptr)))) {
+		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -49177,7 +49169,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
-			if (pure_type_mask & MAY_BE_NULL) {
+			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -49198,8 +49190,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			}
 		}
 
-		/* Fetch full return type info from function arg_info */
-		const zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
@@ -63760,6 +63750,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIF
 #if 0 || (IS_CONST != IS_UNUSED)
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = RT_CONSTANT(opline, opline->op1);
 
 		if (IS_CONST == IS_CONST) {
@@ -63774,8 +63765,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIF
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		uint32_t pure_type_mask = opline->extended_value;
-		if (EXPECTED(ZEND_TYPE_MASK_CONTAINS_CODE(pure_type_mask, Z_TYPE_P(retval_ptr)))) {
+		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -63785,7 +63775,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIF
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
-			if (pure_type_mask & MAY_BE_NULL) {
+			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -63806,8 +63796,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIF
 			}
 		}
 
-		/* Fetch full return type info from function arg_info */
-		const zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
@@ -73971,6 +73959,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 #if 0 || (IS_TMP_VAR != IS_UNUSED)
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
 		if (IS_TMP_VAR == IS_CONST) {
@@ -73985,8 +73974,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		uint32_t pure_type_mask = opline->extended_value;
-		if (EXPECTED(ZEND_TYPE_MASK_CONTAINS_CODE(pure_type_mask, Z_TYPE_P(retval_ptr)))) {
+		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -73996,7 +73984,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
-			if (pure_type_mask & MAY_BE_NULL) {
+			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -74017,8 +74005,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			}
 		}
 
-		/* Fetch full return type info from function arg_info */
-		const zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
@@ -82018,6 +82004,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 #if 0 || (IS_VAR != IS_UNUSED)
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 		if (IS_VAR == IS_CONST) {
@@ -82032,8 +82019,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		uint32_t pure_type_mask = opline->extended_value;
-		if (EXPECTED(ZEND_TYPE_MASK_CONTAINS_CODE(pure_type_mask, Z_TYPE_P(retval_ptr)))) {
+		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -82043,7 +82029,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
-			if (pure_type_mask & MAY_BE_NULL) {
+			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -82064,8 +82050,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			}
 		}
 
-		/* Fetch full return type info from function arg_info */
-		const zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
@@ -89407,6 +89391,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 #if 0 || (IS_UNUSED != IS_UNUSED)
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = NULL;
 
 		if (IS_UNUSED == IS_CONST) {
@@ -89421,8 +89406,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		uint32_t pure_type_mask = opline->extended_value;
-		if (EXPECTED(ZEND_TYPE_MASK_CONTAINS_CODE(pure_type_mask, Z_TYPE_P(retval_ptr)))) {
+		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -89432,7 +89416,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
-			if (pure_type_mask & MAY_BE_NULL) {
+			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -89453,8 +89437,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			}
 		}
 
-		/* Fetch full return type info from function arg_info */
-		const zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
@@ -101516,6 +101498,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 #if 0 || (IS_CV != IS_UNUSED)
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		retval_ref = retval_ptr = EX_VAR(opline->op1.var);
 
 		if (IS_CV == IS_CONST) {
@@ -101530,8 +101513,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		uint32_t pure_type_mask = opline->extended_value;
-		if (EXPECTED(ZEND_TYPE_MASK_CONTAINS_CODE(pure_type_mask, Z_TYPE_P(retval_ptr)))) {
+		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -101541,7 +101523,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
-			if (pure_type_mask & MAY_BE_NULL) {
+			if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_NULL) {
 				ZEND_VM_NEXT_OPCODE();
 			}
 		}
@@ -101562,8 +101544,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			}
 		}
 
-		/* Fetch full return type info from function arg_info */
-		const zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
