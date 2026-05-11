@@ -1938,9 +1938,13 @@ function base64_decode(string $string, bool $strict = false): string|false {}
 
 function constant(string $name): mixed {}
 
+/** @compile-time-eval */
 function ip2long(string $ip): int|false {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function long2ip(int $ip): string {}
 
 /**
@@ -2194,7 +2198,10 @@ function hrtime(bool $as_number = false): array|int|float|false {}
 
 /* md5.c */
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function md5(string $string, bool $binary = false): string {}
 
 /** @refcount 1 */
@@ -2214,7 +2221,10 @@ function getlastmod(): int|false {}
 
 /* sha1.c */
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function sha1(string $string, bool $binary = false): string {}
 
 /** @refcount 1 */
@@ -3099,6 +3109,7 @@ function iptcparse(string $iptc_block): array|false {}
 
 /* levenshtein.c */
 
+/** @compile-time-eval */
 function levenshtein(string $string1, string $string2, int $insertion_cost = 1, int $replacement_cost = 1, int $deletion_cost = 1): int {}
 
 /* link.c */
