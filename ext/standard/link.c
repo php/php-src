@@ -131,10 +131,20 @@ PHP_FUNCTION(symlink)
 	char dirname[MAXPATHLEN];
 	size_t len;
 
+	zend_stat_t v_lstat = {0};
+	zend_stat_t v_stat = {0};
+
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_PATH(topath, topath_len)
 		Z_PARAM_PATH(frompath, frompath_len)
 	ZEND_PARSE_PARAMETERS_END();
+
+	// dangling link should be treated as existing file
+	ret = VCWD_LSTAT(frompath, &v_lstat);
+	if (!ret && S_ISLNK(v_lstat.st_mode) && VCWD_STAT(frompath, &v_stat)) {
+		php_error_docref(NULL, E_WARNING, "File exists in %s", frompath);
+		RETURN_FALSE;
+	}
 
 	if (!expand_filepath(frompath, source_p)) {
 		php_error_docref(NULL, E_WARNING, "No such file or directory");
