@@ -36,6 +36,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-21603 (Missing addref for __unset). (ilutov)
   . Fixed bug GH-21760 (Trait with class constant name conflict against
     enum case causes SEGV). (Pratik Bhujel)
+  . Fixed GH-22010 (Exception thrown in destructor during shutdown causes a
+    memory leak). (Weilin Du)
 
 - CLI:
   . Fixed bug GH-21754 (`--rf` command line option with a method triggers

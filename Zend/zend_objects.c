@@ -193,7 +193,12 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 			}
 		}
 
-		zend_call_known_instance_method_with_0_params(destructor, object, NULL);
+		zend_try {
+			zend_call_known_instance_method_with_0_params(destructor, object, NULL);
+		} zend_catch {
+			OBJ_RELEASE(object);
+			zend_bailout();
+		} zend_end_try();
 
 		if (old_exception) {
 			if (EG(current_execute_data)) {

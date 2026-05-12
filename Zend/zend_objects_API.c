@@ -54,7 +54,12 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_sto
 					if (obj->handlers->dtor_obj != zend_objects_destroy_object
 							|| obj->ce->destructor) {
 						GC_ADDREF(obj);
-						obj->handlers->dtor_obj(obj);
+						zend_try {
+							obj->handlers->dtor_obj(obj);
+						} zend_catch {
+							GC_DELREF(obj);
+							zend_bailout();
+						} zend_end_try();
 						GC_DELREF(obj);
 					}
 				}
