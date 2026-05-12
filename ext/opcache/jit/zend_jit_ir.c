@@ -8096,14 +8096,12 @@ static int zend_jit_escape_if_undef(zend_jit_ctx *jit, int var, uint32_t flags, 
 	zend_jit_op_array_trace_extension *jit_extension =
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 	size_t offset = jit_extension->offset;
-	ir_ref ref = ir_CONST_ADDR(ZEND_OP_TRACE_INFO((opline - 1), offset)->orig_handler);
+	ir_ref ref = ir_CONST_FC_FUNC(ZEND_OP_TRACE_INFO((opline - 1), offset)->orig_handler);
 	if (GCC_GLOBAL_REGS) {
 		ir_TAILCALL(IR_VOID, ref);
 	} else {
-#if defined(IR_TARGET_X86)
-		ref = ir_CAST_FC_FUNC(ref);
-#endif
-		ir_TAILCALL_1(IR_I32, ref, jit_FP(jit));
+		ir_CALL_1(IR_I32, ref, jit_FP(jit));
+		ir_RETURN(ir_CONST_I32(1));
 	}
 
 	ir_IF_TRUE(if_def);
