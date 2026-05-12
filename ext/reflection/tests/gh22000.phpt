@@ -21,19 +21,21 @@ class TestClass {
 
 
 function test($class) {
-    try {
-        $rc = new ReflectionClass($class);
-        foreach ($rc->getProperties() as $rp) {
-            echo $rp->getName() . ' from global: ';
-            var_dump($rp->isReadable(null, new $class));
-        }
-    } catch(\Exception $ex) {
-        echo $ex->getMessage();
+    $rc = new ReflectionClass($class);
+    foreach ($rc->getProperties() as $rp) {
+        echo $rp->getName() . ' from global:';
+        var_dump($rp->isReadable(null, new $class));
     }
 }
 
 test('TestClass');
 ?>
 --EXPECTF--
-a from global: bool(false)
-b from global: __isset should not return a reference
+a from global:bool(false)
+b from global:
+Warning: __isset unexpectedly returned a reference! in %s/ext/reflection/tests/gh22000.php on line %d
+bool(false)
+c from global:
+Warning: __isset unexpectedly returned a reference! in %s/ext/reflection/tests/gh22000.php on line %d
+bool(false)
+
