@@ -6724,6 +6724,11 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 handle_magic_get:
 		if (ce->__get) {
 			if (obj && ce->__isset) {
+				if (ce->__isset->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+					zend_throw_exception(reflection_exception_ptr, "__isset should not return a reference", 0);
+					RETURN_THROWS();
+				}
+
 				uint32_t *guard = zend_get_property_guard(obj, ref->unmangled_name);
 				if (!((*guard) & ZEND_GUARD_PROPERTY_ISSET)) {
 					GC_ADDREF(obj);
