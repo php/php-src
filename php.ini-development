@@ -615,9 +615,6 @@ ignore_repeated_source = Off
 ; function upon an error. If this is off (or there was an error fetching the
 ; arguments), the function providing the error may optionally provide some
 ; additional information after the problem function's name.
-; Default Value: Off
-; Development Value: Off
-; Production Value: Off
 ;error_include_args = Off
 
 ;;;;;;;;;;;;;;;;;
