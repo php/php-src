@@ -494,6 +494,9 @@ PHP_METHOD(SQLite3, escapeString)
 		if (ret) {
 			RETVAL_STRING(ret);
 			sqlite3_free(ret);
+		} else {
+			zend_throw_exception_ex(php_sqlite3_exception_ce, 0, "Unable to escape string");
+			RETURN_THROWS();
 		}
 	} else {
 		RETURN_EMPTY_STRING();
