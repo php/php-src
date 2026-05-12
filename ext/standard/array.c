@@ -6355,7 +6355,7 @@ static zend_always_inline void php_array_binop_apply(
 }
 
 /* Wrapper for array_sum and array_product */
-static void php_array_binop(INTERNAL_FUNCTION_PARAMETERS, const char *op_name, binary_op_type op, zend_long initial)
+static zend_always_inline void php_array_binop(INTERNAL_FUNCTION_PARAMETERS, const char *op_name, binary_op_type op, zend_long initial)
 {
 	HashTable *input;
 
