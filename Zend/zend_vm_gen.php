@@ -1867,10 +1867,12 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
         out($f, "#pragma push_macro(\"ZEND_VM_INTERRUPT\")\n");
         out($f, "#undef  ZEND_VM_INTERRUPT\n");
         out($f, "#define ZEND_VM_CONTINUE(handler) return opline\n");
-        out($f, "#if !(defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)) && ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL\n");
-        out($f, "# define ZEND_VM_INTERRUPT()      return zend_interrupt(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
-        out($f, "#else\n");
+        out($f, "#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n");
+        out($f, "# define ZEND_VM_INTERRUPT()      SAVE_OPLINE(); return &call_interrupt_op;\n");
+        out($f, "#elif defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)\n");
         out($f, "# define ZEND_VM_INTERRUPT()      return zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
+        out($f, "#else\n");
+        out($f, "# define ZEND_VM_INTERRUPT()      return zend_interrupt(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
         out($f, "#endif\n");
         out($f, $delayed_helpers);
         out($f, "#pragma pop_macro(\"ZEND_VM_INTERRUPT\")\n");
