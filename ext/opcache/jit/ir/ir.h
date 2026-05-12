@@ -429,7 +429,7 @@ typedef int32_t ir_ref;
 #define IR_CONSTS_LIMIT_MIN (-(IR_TRUE - 1))
 #define IR_INSNS_LIMIT_MIN (IR_UNUSED + 1)
 
-/* ADDR_MEMBER is neccessary to workaround MSVC C preprocessor bug */
+/* ADDR_MEMBER is necessary to workaround MSVC C preprocessor bug */
 #ifndef IR_64
 # define ADDR_MEMBER            uintptr_t                  addr; \
 								void                      *ptr;
