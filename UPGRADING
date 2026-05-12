@@ -40,6 +40,8 @@ PHP 8.6 UPGRADE NOTES
   . IntlBreakIterator::getLocale() now raises a ValueError when the type is
     neither Locale::ACTUAL_LOCALE nor Locale::VALID_LOCALE instead of
     returning false.
+  . The $type parameter of IntlBreakIterator::getPartsIterator() has been
+    changed from string to int to match the underlying implementation.
 
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
