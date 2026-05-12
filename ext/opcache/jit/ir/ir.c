@@ -161,6 +161,8 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 		case IR_CHAR:
 			if (insn->val.c == '\\') {
 				fprintf(f, "'\\\\'");
+			} else if (insn->val.c == '\'') {
+				fprintf(f, "'\\\''");
 			} else if (insn->val.c >= ' ') {
 				fprintf(f, "'%c'", insn->val.c);
 			} else if (insn->val.c == '\t') {
@@ -283,6 +285,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 #define ir_op_kind_src     IR_OPND_CONTROL
 #define ir_op_kind_reg     IR_OPND_CONTROL_DEP
 #define ir_op_kind_ret     IR_OPND_CONTROL_REF
+#define ir_op_kind_grd     IR_OPND_CONTROL_GUARD
 #define ir_op_kind_str     IR_OPND_STR
 #define ir_op_kind_num     IR_OPND_NUM
 #define ir_op_kind_fld     IR_OPND_STR
@@ -1843,7 +1846,7 @@ int ir_mem_unprotect(void *ptr, size_t size)
 
 int ir_mem_flush(void *ptr, size_t size)
 {
-	return 1;
+	return FlushInstructionCache(GetCurrentProcess(), ptr, size) == TRUE ? 1 : 0;
 }
 #else
 
@@ -2168,7 +2171,10 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_load_i(const ir_ctx *ctx, ir_ref ref, i
 			if (!(proto->flags & (IR_CONST_FUNC|IR_PURE_FUNC))) {
 				break;
 			}
-		} else if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN || insn->op == IR_VSTORE) {
+		} else if (insn->op == IR_MERGE
+				|| insn->op == IR_LOOP_BEGIN
+				|| insn->op == IR_VSTORE
+				|| (insn->op == IR_BEGIN && insn->op2)) {
 			return IR_UNUSED;
 		}
 		ref = insn->op1;
@@ -2233,7 +2239,10 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vload_i(const ir_ctx *ctx, ir_ref ref, 
 			if (!(proto->flags & (IR_CONST_FUNC|IR_PURE_FUNC))) {
 				break;
 			}
-		} else if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN || insn->op == IR_STORE) {
+		} else if (insn->op == IR_MERGE
+				|| insn->op == IR_LOOP_BEGIN
+				|| insn->op == IR_STORE
+				|| (insn->op == IR_BEGIN && insn->op2)) {
 			break;
 		}
 		ref = insn->op1;
@@ -2326,7 +2335,15 @@ check_aliasing:
 			}
 		} else if (insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
 			guarded = 1;
-		} else if (insn->op >= IR_START || insn->op == IR_CALL) {
+		} else if (insn->op >= IR_START) {
+			if (insn->op == IR_BEGIN && insn->op1 && !insn->op2) {
+				/* skip END */
+				ref = insn->op1;
+				insn = &ctx->ir_base[ref];
+			} else {
+				break;
+			}
+		} else if (insn->op == IR_CALL) {
 			break;
 		}
 		next = ref;
@@ -2407,7 +2424,15 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vstore_i(ir_ctx *ctx, ir_ref ref, ir_re
 			}
 		} else if (insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
 			guarded = 1;
-		} else if (insn->op >= IR_START || insn->op == IR_CALL || insn->op == IR_LOAD || insn->op == IR_STORE) {
+		} else if (insn->op >= IR_START) {
+			if (insn->op == IR_BEGIN && insn->op1 && !insn->op2) {
+				/* skip END */
+				ref = insn->op1;
+				insn = &ctx->ir_base[ref];
+			} else {
+				break;
+			}
+		} else if (insn->op == IR_CALL || insn->op == IR_LOAD || insn->op == IR_STORE) {
 			break;
 		}
 		next = ref;
@@ -2422,6 +2447,37 @@ ir_ref ir_find_aliasing_vstore(ir_ctx *ctx, ir_ref ref, ir_ref var, ir_ref val)
 }
 
 /* IR Construction API */
+static ir_ref ir_last_guard(ir_ctx *ctx)
+{
+	ir_ref ref;
+	ir_insn *insn;
+
+	IR_ASSERT(ctx->control);
+	ref = ctx->control;
+	while (1) {
+		insn = &ctx->ir_base[ref];
+		if (IR_IS_BB_START(insn->op) || insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
+			if (insn->op == IR_START) ref = IR_UNUSED;
+			break;
+		}
+		ref = insn->op1;
+	}
+	return ref;
+}
+
+ir_ref _ir_DIV(ir_ctx *ctx, ir_type type, ir_ref op1, ir_ref op2)
+{
+	ir_ref guard = (IR_IS_TYPE_FP(type) || (IR_IS_CONST_REF(op2) && ctx->ir_base[op2].val.u64 != 0)) ?
+		IR_UNUSED : ir_last_guard(ctx);
+	return ir_fold3(ctx, IR_OPT(IR_DIV, type), op1, op2, guard);
+}
+
+ir_ref _ir_MOD(ir_ctx *ctx, ir_type type, ir_ref op1, ir_ref op2)
+{
+	ir_ref guard = (IR_IS_CONST_REF(op2) && ctx->ir_base[op2].val.u64 != 0) ?
+		IR_UNUSED : ir_last_guard(ctx);
+	return ir_fold3(ctx, IR_OPT(IR_MOD, type), op1, op2, guard);
+}
 
 ir_ref _ir_PARAM(ir_ctx *ctx, ir_type type, const char* name, ir_ref num)
 {
