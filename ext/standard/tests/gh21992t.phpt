@@ -60,18 +60,18 @@ $realFile = $targetDir . '/real.txt';
 ?>
 --EXPECTF--
 bool(true)
-string(%d) "%s/gh21992/target_dir/real.txt"
+string(%d) "%s%egh21992%etarget_dir%ereal.txt"
 
 Warning: symlink(): File exists in %s on line %d
 bool(false)
 bool(true)
-string(%d) "%s/gh21992/target_dir/real.txt"
+string(%d) "%s%egh21992%etarget_dir%ereal.txt"
 bool(false)
 bool(true)
-string(%d) "%s/gh21992/target_dir/ghost.txt"
+string(%d) "%s%egh21992%etarget_dir%eghost.txt"
 
 Warning: symlink(): File exists in %s on line %d
 bool(false)
 bool(true)
-string(%d) "%s/gh21992/target_dir/ghost.txt"
+string(%d) "%s%egh21992%etarget_dir%eghost.txt"
 bool(false)
