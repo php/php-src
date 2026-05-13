@@ -2,8 +2,8 @@
 GH-22000 - Ensure __isset is not returning a reference in ReflectionProperty::isReadable()
 --FILE--
 <?php
-class TestClass {
-    public int $a;
+class TestClass1 {
+    public int $a = 1;
     public int $b;
     public int $c;
 
@@ -12,8 +12,25 @@ class TestClass {
         unset($this->c);
     }
 
+    public function __isset($name) {
+        return $name === 'b';
+    }
+
+    public function __get($name) {}
+}
+
+class TestClass2 {
+    public int $d;
+    public int $e;
+    public int $f;
+
+    public function __construct() {
+        unset($this->e);
+        unset($this->f);
+    }
+
     public function &__isset($name) {
-        return $name === 'c';
+        return $name === 'f';
     }
 
     public function __get($name) {}
@@ -28,13 +45,17 @@ function test($class) {
     }
 }
 
-test('TestClass');
+test('TestClass1');
+test('TestClass2');
 ?>
 --EXPECTF--
-a from global:bool(false)
-b from global:
-Notice: Only variable references should be returned by reference in /home/zaaarf/dev/irl/c/php/ext/reflection/tests/gh22000.php on line 13
+a from global:bool(true)
+b from global:bool(true)
+c from global:bool(false)
+d from global:bool(false)
+e from global:
+Notice: Only variable references should be returned by reference in %s%eext%ereflection%etests%egh22000.php on line %d
 bool(false)
-c from global:
-Notice: Only variable references should be returned by reference in /home/zaaarf/dev/irl/c/php/ext/reflection/tests/gh22000.php on line 13
+f from global:
+Notice: Only variable references should be returned by reference in %s%eext%ereflection%etests%egh22000.php on line %d
 bool(true)
