@@ -33,9 +33,8 @@ test('TestClass');
 --EXPECTF--
 a from global:bool(false)
 b from global:
-Warning: __isset unexpectedly returned a reference! in %s%eext%ereflection%etests%egh22000.php on line %d
+Notice: Only variable references should be returned by reference in /home/zaaarf/dev/irl/c/php/ext/reflection/tests/gh22000.php on line 13
 bool(false)
 c from global:
-Warning: __isset unexpectedly returned a reference! in %s%eext%ereflection%etests%egh22000.php on line %d
-bool(false)
-
+Notice: Only variable references should be returned by reference in /home/zaaarf/dev/irl/c/php/ext/reflection/tests/gh22000.php on line 13
+bool(true)

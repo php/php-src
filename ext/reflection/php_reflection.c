@@ -6724,12 +6724,6 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 handle_magic_get:
 		if (ce->__get) {
 			if (obj && ce->__isset) {
-				if (ce->__isset->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
-					//php_error_docref(NULL, E_WARNING, "__isset unexpectedly returned a reference!");
-					zend_error(E_WARNING, "__isset unexpectedly returned a reference!");
-					RETURN_FALSE;
-				}
-
 				uint32_t *guard = zend_get_property_guard(obj, ref->unmangled_name);
 				if (!((*guard) & ZEND_GUARD_PROPERTY_ISSET)) {
 					GC_ADDREF(obj);
@@ -6737,6 +6731,7 @@ handle_magic_get:
 					zval member;
 					ZVAL_STR(&member, ref->unmangled_name);
 					zend_call_known_instance_method_with_1_params(ce->__isset, obj, return_value, &member);
+					zend_unwrap_reference(return_value);
 					*guard &= ~ZEND_GUARD_PROPERTY_ISSET;
 					OBJ_RELEASE(obj);
 					return;
