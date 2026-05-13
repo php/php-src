@@ -7979,14 +7979,12 @@ static int zend_jit_escape_if_undef(zend_jit_ctx *jit, int var, uint32_t flags, 
 	zend_jit_op_array_trace_extension *jit_extension =
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 	size_t offset = jit_extension->offset;
-	ir_ref ref = ir_CONST_ADDR(ZEND_OP_TRACE_INFO((opline - 1), offset)->orig_handler);
+	ir_ref ref = ir_CONST_FC_FUNC(ZEND_OP_TRACE_INFO((opline - 1), offset)->orig_handler);
 	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		ir_TAILCALL(IR_OPCODE_HANDLER_RET, ref);
 	} else {
-#if defined(IR_TARGET_X86)
-		ref = ir_CAST_FC_FUNC(ref);
-#endif
-		ir_TAILCALL_2(IR_ADDR, ref, jit_FP(jit), jit_IP(jit));
+		ir_ref opline_ref = ir_CALL_2(IR_OPCODE_HANDLER_RET, ref, jit_FP(jit), jit_IP(jit));
+		zend_jit_vm_enter(jit, opline_ref);
 	}
 
 	ir_IF_TRUE(if_def);
