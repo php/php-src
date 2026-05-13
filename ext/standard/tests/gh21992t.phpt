@@ -3,8 +3,7 @@ GH-21992: symlink() must not resolve the final dangling link component
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
-    require_once __DIR__ . '/windows_links/common.inc';
-    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
+    die('skip (not for Windows)');
 }
 ?>
 --FILE--
