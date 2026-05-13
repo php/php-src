@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
 
+- OpenSSL:
+  . Fixed openssl_pkcs7_verify() and openssl_cms_verify() truncating output
+    files when verification fails. (Ilia Alshanetsky)
+
 
 24 Sep 2026, PHP 8.4.26
 
