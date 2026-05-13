@@ -27,6 +27,7 @@ extern "C" {
 }
 
 #include <locale.h>
+#include <memory>
 
 #define ICU_LOCALE_BUG 1
 
@@ -159,10 +160,9 @@ U_CFUNC PHP_FUNCTION( numfmt_parse_currency )
 	}
 
 	icu::ParsePosition pp(position);
-	icu::CurrencyAmount *currAmt = FORMATTER_OBJECT(nfo)->parseCurrency(ustr, pp);
+	std::unique_ptr<icu::CurrencyAmount> currAmt(FORMATTER_OBJECT(nfo)->parseCurrency(ustr, pp));
 
 	if (currAmt == nullptr || pp.getErrorIndex() >= 0) {
-		delete currAmt;
 		INTL_DATA_ERROR_CODE(nfo) = U_PARSE_ERROR;
 		INTL_METHOD_CHECK_STATUS( nfo, "Number parsing failed" );
 	}
@@ -175,7 +175,6 @@ U_CFUNC PHP_FUNCTION( numfmt_parse_currency )
 
 	/* Convert parsed currency to UTF-8 and pass it back to caller. */
 	icu::UnicodeString ucurrency(currAmt->getISOCurrency());
-	delete currAmt;
 
 	zend_string *u8str = intl_charFromString(ucurrency, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Currency conversion to UTF-8 failed" );

@@ -26,6 +26,8 @@ extern "C" {
 #include "listformatter_class.h"
 #include "listformatter_arginfo.h"
 
+#include <memory>
+
 static zend_object_handlers listformatter_handlers;
 
 static void listformatter_free_obj(zend_object *object)
@@ -134,7 +136,7 @@ PHP_METHOD(IntlListFormatter, format)
         RETURN_EMPTY_STRING();
     }
 
-    UnicodeString *items = new UnicodeString[count];
+    std::unique_ptr<UnicodeString[]> items(new UnicodeString[count]);
     uint32_t i = 0;
     zval *val;
 
@@ -144,14 +146,12 @@ PHP_METHOD(IntlListFormatter, format)
 
         str_val = zval_try_get_tmp_string(val, &tmp_str);
         if (UNEXPECTED(!str_val)) {
-            delete[] items;
             RETURN_THROWS();
         }
         intl_stringFromChar(items[i], ZSTR_VAL(str_val), ZSTR_LEN(str_val), &conv_status);
         zend_tmp_string_release(tmp_str);
 
         if (U_FAILURE(conv_status)) {
-            delete[] items;
             intl_error_set(nullptr, conv_status, "Failed to convert string to UTF-16");
             RETURN_FALSE;
         }
@@ -162,8 +162,7 @@ PHP_METHOD(IntlListFormatter, format)
     UErrorCode status = U_ZERO_ERROR;
     UnicodeString result;
 
-    LISTFORMATTER_OBJECT(obj)->format(items, count, result, status);
-    delete[] items;
+    LISTFORMATTER_OBJECT(obj)->format(items.get(), count, result, status);
 
     if (U_FAILURE(status)) {
         intl_error_set(nullptr, status, "Failed to format list");
