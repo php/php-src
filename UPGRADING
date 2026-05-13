@@ -134,6 +134,11 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 
 - Core:
+  . It is now possible to write to object properties on objects stored in
+    constants. Previously this resulted in "Cannot use temporary expression
+    in write context". This change is limited to object property access
+    (->); dim/array writes on constants (e.g. CONST[0] = value) remain
+    a compile error. RFC: https://wiki.php.net/rfc/const_object_property_write
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand.
   . It is now possible to define the `__debugInfo()` magic method on enums.
