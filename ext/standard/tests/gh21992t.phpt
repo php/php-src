@@ -70,7 +70,7 @@ bool(false)
 bool(true)
 string(%d) "%s%egh21992%etarget_dir%eghost.txt"
 
-Warning: symlink(): File exists in %s on line %d
+Warning: symlink(): Dangling symlink at %s on line %d
 bool(false)
 bool(true)
 string(%d) "%s%egh21992%etarget_dir%eghost.txt"

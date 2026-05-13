@@ -142,7 +142,7 @@ PHP_FUNCTION(symlink)
 	// dangling link should be treated as existing file
 	ret = VCWD_LSTAT(frompath, &v_lstat);
 	if (!ret && S_ISLNK(v_lstat.st_mode) && VCWD_STAT(frompath, &v_stat)) {
-		php_error_docref(NULL, E_WARNING, "File exists in %s", frompath);
+		php_error_docref(NULL, E_WARNING, "Dangling symlink at %s", frompath);
 		RETURN_FALSE;
 	}
 
