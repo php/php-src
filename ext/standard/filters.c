@@ -1781,7 +1781,8 @@ static const php_stream_filter_factory consumed_filter_factory = {
 typedef enum _php_chunked_filter_state {
 	CHUNK_SIZE_START,
 	CHUNK_SIZE,
-	CHUNK_SIZE_EXT,
+	CHUNK_MAYBE_EXT,
+	CHUNK_VALID_EXT,
 	CHUNK_SIZE_CR,
 	CHUNK_SIZE_LF,
 	CHUNK_BODY,
@@ -1820,7 +1821,7 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 						data->state = CHUNK_ERROR;
 						break;
 					} else {
-						data->state = CHUNK_SIZE_EXT;
+						data->state = CHUNK_MAYBE_EXT;
 						break;
 					}
 					data->state = CHUNK_SIZE;
@@ -1831,7 +1832,34 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 				} else if (p == end) {
 					return out_len;
 				}
-			case CHUNK_SIZE_EXT:
+				// intentional fallthrough: state is CHUNK_MAYBE_EXT if we get here
+				ZEND_FALLTHROUGH;
+			case CHUNK_MAYBE_EXT:
+				// end of size, but chunk-ext may follow
+				if (*p == '\r' || *p == '\n') {
+					data->state = CHUNK_SIZE_CR;
+					continue;
+				} else {
+					// we are not at the end of the line, so we expect a valid chunk-ext
+					// skip whitespace
+					while (p < end && (*p == ' ' || *p == '\t')) {
+						p++;
+					}
+					if (p == end) {
+						return out_len;
+					}
+
+					// semicolon indicates start of chunk-ext
+					if (*p == ';') {
+						data->state = CHUNK_VALID_EXT;
+					} else {
+						data->state = CHUNK_ERROR;
+						continue;
+					}
+				}
+				// intentional fallthrough: state is CHUNK_VALID_EXT if we get here
+				ZEND_FALLTHROUGH;
+			case CHUNK_VALID_EXT:
 				/* skip extension */
 				while (p < end && *p != '\r' && *p != '\n') {
 					p++;
@@ -1915,6 +1943,12 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 				p = end;
 				continue;
 			case CHUNK_ERROR:
+				// Unable to parse, which means that this did not look like chunked encoding.
+				// If we haven't output anything yet, return the buffer unchanged
+				if (out_len == 0) {
+					return len;
+				}
+				// Otherwise, append the remaining buffer and return
 				if (p != out) {
 					memmove(out, p, end - p);
 				}
