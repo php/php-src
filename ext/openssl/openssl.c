@@ -504,6 +504,12 @@ PHP_METHOD(Openssl_Session, __unserialize)
 		Z_PARAM_ARRAY_HT(data)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(ZEND_THIS);
+	if (obj->session != NULL) {
+		zend_throw_error(NULL, "Cannot call Openssl\\Session::__unserialize() on an already-initialized session");
+		RETURN_THROWS();
+	}
+
 	zval *pem_zv = zend_hash_str_find(data, ZEND_STRL("pem"));
 	if (!pem_zv || Z_TYPE_P(pem_zv) != IS_STRING) {
 		zend_throw_exception(php_openssl_exception_ce, "Invalid serialization data", 0);
@@ -524,7 +530,6 @@ PHP_METHOD(Openssl_Session, __unserialize)
 		RETURN_THROWS();
 	}
 
-	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(ZEND_THIS);
 	obj->session = session;
 
 	/* Populate id property */
