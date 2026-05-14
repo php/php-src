@@ -10,6 +10,12 @@ var_dump($result, $char, $offset);
 
 var_dump(sscanf($string, '%3c%n'));
 
+$result = sscanf('hi world', '%5c', $a);
+var_dump($result, $a);
+
+$result = sscanf('a', '%5c', $a);
+var_dump($result, $a);
+
 ?>
 --EXPECT--
 int(2)
@@ -21,3 +27,7 @@ array(2) {
   [1]=>
   int(3)
 }
+int(1)
+string(5) "hi wo"
+int(1)
+string(1) "a"
