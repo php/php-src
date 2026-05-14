@@ -79,7 +79,8 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
@@ -87,7 +88,8 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 bool(false)
 
@@ -98,7 +100,8 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
@@ -106,7 +109,8 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 bool(false)
 
@@ -117,7 +121,8 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
@@ -125,7 +130,8 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 bool(false)
 
@@ -136,7 +142,8 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
@@ -144,7 +151,8 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 bool(false)
 
@@ -168,7 +176,8 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
@@ -176,7 +185,8 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 bool(false)
 
@@ -216,38 +226,46 @@ bool(false)
 -- iteration 10 --
 array(1) {
   [0]=>
-  string(1) "1"
+  string(2) "1
+"
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
-  string(1) "1"
+  string(2) "1
+"
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 bool(false)
 
 -- iteration 11 --
 array(1) {
   [0]=>
-  string(1) "1"
+  string(2) "1
+"
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
-  string(1) "1"
+  string(2) "1
+"
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 bool(false)
 

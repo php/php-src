@@ -777,7 +777,7 @@ literal:
 				break;
 
 			case 'c':
-				op = 's';
+				op = 'c';
 				flags |= SCAN_NOSKIP;
 				/*-cc-*/
 				if (0 == width) {
@@ -833,7 +833,7 @@ literal:
 				end = string;
 				while (*end != '\0') {
 					sch = *end;
-					if ( isspace( (unsigned char)sch ) ) {
+					if (op == 's' && isspace((unsigned char) sch)) {
 						break;
 					}
 					end++;
