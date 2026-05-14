@@ -221,7 +221,7 @@ object(SimpleXMLElement)#%d (1) {
 }
 ===sxe->elem11->elem111->elem1111
 bool(true)
-bool(true)
+bool(false)
 int(1)
 object(SimpleXMLElement)#%d (0) {
 }

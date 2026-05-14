@@ -1839,12 +1839,7 @@ static zend_result sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int 
 	sxe = php_sxe_fetch_object(readobj);
 
 	if (type == _IS_BOOL) {
-		node = php_sxe_get_first_node_non_destructive(sxe, NULL);
-		if (node) {
-			ZVAL_TRUE(writeobj);
-		} else {
-			ZVAL_BOOL(writeobj, !sxe_prop_is_empty(readobj));
-		}
+		ZVAL_BOOL(writeobj, !sxe_prop_is_empty(readobj));
 		return SUCCESS;
 	}
 
