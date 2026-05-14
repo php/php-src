@@ -1595,9 +1595,15 @@ function gen_halt_handler($f, $kind) {
 }
 
 function gen_interrupt_func($f, $kind, $spec) {
-    out($f, "static ZEND_COLD zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_interrupt_TAILCALL(ZEND_OPCODE_HANDLER_ARGS) {\n");
+    $cconv = $kind === ZEND_VM_KIND_TAILCALL ? 'ZEND_OPCODE_HANDLER_CCONV' : 'ZEND_OPCODE_HANDLER_FUNC_CCONV';
+    $variant = $kind === ZEND_VM_KIND_TAILCALL ? '_TAILCALL' : '';
+    out($f, "static ZEND_COLD zend_never_inline ZEND_OPCODE_HANDLER_RET {$cconv} zend_interrupt{$variant}(ZEND_OPCODE_HANDLER_ARGS) {\n");
     out($f,"\tSAVE_OPLINE();\n");
-    out($f,"\tZEND_VM_TAIL_CALL(zend_interrupt_helper".($spec?"_SPEC":"")."_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
+    if ($kind === ZEND_VM_KIND_TAILCALL) {
+        out($f,"\tZEND_VM_TAIL_CALL(zend_interrupt_helper".($spec?"_SPEC":"")."_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
+    } else {
+        out($f, "\treturn &call_interrupt_op;\n");
+    }
     out($f, "}\n");
 }
 
@@ -1811,6 +1817,9 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
     switch ($kind) {
         case ZEND_VM_KIND_CALL:
             gen_null_handler($f, $kind);
+            out($f, "#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n");
+            gen_interrupt_func($f, $kind, $spec);
+            out($f, "#endif\n");
             break;
         case ZEND_VM_KIND_TAILCALL:
             gen_null_handler($f, $kind);
@@ -1853,7 +1862,7 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
         out($f, "#pragma push_macro(\"ZEND_VM_INTERRUPT\")\n");
         out($f, "#undef  ZEND_VM_INTERRUPT\n");
         out($f, "#define ZEND_VM_CONTINUE(handler) return opline\n");
-        out($f, "# define ZEND_VM_INTERRUPT()      SAVE_OPLINE(); return &call_interrupt_op;\n");
+        out($f, "# define ZEND_VM_INTERRUPT()      return zend_interrupt(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)\n");
         out($f, $delayed_helpers);
         out($f, "#pragma pop_macro(\"ZEND_VM_INTERRUPT\")\n");
         out($f, "#pragma pop_macro(\"ZEND_VM_CONTINUE\")\n");
@@ -2153,6 +2162,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"# define ZEND_VM_INTERRUPT()        ZEND_VM_TAIL_CALL(zend_interrupt_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))\n");
                         out($f,"\n");
                         out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_interrupt_helper".($spec?"_SPEC":"")."_TAILCALL(ZEND_OPCODE_HANDLER_ARGS);\n");
+                        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_interrupt(ZEND_OPCODE_HANDLER_ARGS);\n");
                         out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_interrupt_TAILCALL(ZEND_OPCODE_HANDLER_ARGS);\n");
                         out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NULL_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
                         out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
