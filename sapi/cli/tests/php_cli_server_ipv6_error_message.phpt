@@ -5,6 +5,9 @@ IPv6 address error message formatting
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die("skip not for Windows");
 }
+if (getenv("SKIP_IO_CAPTURE_TESTS")) {
+    die("skip I/O capture test");
+}
 ?>
 --FILE--
 <?php
