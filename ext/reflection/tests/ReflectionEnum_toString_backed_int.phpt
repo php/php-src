@@ -43,7 +43,7 @@ Enum [ <user> enum MyBool: int implements MyStringable, UnitEnum, BackedEnum ] {
   - Static properties [0] {
   }
 
-  - Static methods [3] {
+  - Static methods [4] {
     Method [ <internal, prototype UnitEnum> static public method cases ] {
 
       - Parameters [0] {
@@ -65,6 +65,13 @@ Enum [ <user> enum MyBool: int implements MyStringable, UnitEnum, BackedEnum ] {
         Parameter #0 [ <required> string|int $value ]
       }
       - Return [ ?static ]
+    }
+
+    Method [ <internal, prototype BackedEnum> static public method values ] {
+
+      - Parameters [0] {
+      }
+      - Return [ array ]
     }
   }
 
@@ -99,7 +106,7 @@ Enum [ <user> enum MyBool: int implements MyStringable, UnitEnum, BackedEnum ] {
   - Static properties [0] {
   }
 
-  - Static methods [3] {
+  - Static methods [4] {
     Method [ <internal, prototype UnitEnum> static public method cases ] {
 
       - Parameters [0] {
@@ -121,6 +128,13 @@ Enum [ <user> enum MyBool: int implements MyStringable, UnitEnum, BackedEnum ] {
         Parameter #0 [ <required> string|int $value ]
       }
       - Return [ ?static ]
+    }
+
+    Method [ <internal, prototype BackedEnum> static public method values ] {
+
+      - Parameters [0] {
+      }
+      - Return [ array ]
     }
   }
 
