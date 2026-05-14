@@ -89,11 +89,13 @@ unlink($filename);
 -- iteration 1 --
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
@@ -164,11 +166,13 @@ bool(false)
 -- iteration 2 --
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
@@ -239,11 +243,13 @@ bool(false)
 -- iteration 3 --
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
@@ -314,11 +320,13 @@ bool(false)
 -- iteration 4 --
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
@@ -458,11 +466,13 @@ bool(false)
 -- iteration 6 --
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
@@ -692,31 +702,38 @@ bool(false)
 -- iteration 10 --
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
-  string(1) "0"
+  string(2) "0
+"
 }
 array(1) {
   [0]=>
-  string(1) "0"
+  string(2) "0
+"
 }
 array(1) {
   [0]=>
-  string(1) "1"
+  string(2) "1
+"
 }
 array(1) {
   [0]=>
-  string(1) "1"
+  string(2) "1
+"
 }
 array(1) {
   [0]=>
-  string(1) ""
+  string(2) "
+"
 }
 array(1) {
   [0]=>
@@ -724,11 +741,13 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(1) ""
+  string(2) "
+"
 }
 array(1) {
   [0]=>
-  string(3) "\01"
+  string(4) "\01
+"
 }
 array(1) {
   [0]=>
@@ -767,75 +786,93 @@ bool(false)
 -- iteration 11 --
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
-  string(0) ""
+  string(1) "
+"
 }
 array(1) {
   [0]=>
-  string(1) "0"
+  string(2) "0
+"
 }
 array(1) {
   [0]=>
-  string(1) "0"
+  string(2) "0
+"
 }
 array(1) {
   [0]=>
-  string(1) "1"
+  string(2) "1
+"
 }
 array(1) {
   [0]=>
-  string(1) "1"
+  string(2) "1
+"
 }
 array(1) {
   [0]=>
-  string(1) ""
+  string(2) "
+"
 }
 array(1) {
   [0]=>
-  string(4) "\x01"
+  string(5) "\x01
+"
 }
 array(1) {
   [0]=>
-  string(1) ""
+  string(2) "
+"
 }
 array(1) {
   [0]=>
-  string(3) "\01"
+  string(4) "\01
+"
 }
 array(1) {
   [0]=>
-  string(6) "string"
+  string(7) "string
+"
 }
 array(1) {
   [0]=>
-  string(6) "string"
+  string(7) "string
+"
 }
 array(1) {
   [0]=>
-  string(4) "true"
+  string(5) "true
+"
 }
 array(1) {
   [0]=>
-  string(5) "FALSE"
+  string(6) "FALSE
+"
 }
 array(1) {
   [0]=>
-  string(5) "false"
+  string(6) "false
+"
 }
 array(1) {
   [0]=>
-  string(4) "TRUE"
+  string(5) "TRUE
+"
 }
 array(1) {
   [0]=>
-  string(4) "NULL"
+  string(5) "NULL
+"
 }
 array(1) {
   [0]=>
-  string(4) "null"
+  string(5) "null
+"
 }
 bool(false)
 
