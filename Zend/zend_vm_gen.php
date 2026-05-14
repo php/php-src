@@ -1908,8 +1908,8 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                     if ($kind == ZEND_VM_KIND_HYBRID || $kind == ZEND_VM_KIND_CALL) {
                         out($f,"#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n\n");
                         out($f,"static zend_vm_opcode_handler_func_t const * zend_opcode_handler_funcs;\n");
-                        out($f,"#endif\n");
-                        out($f,"#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n\n");
+                        out($f,"#endif\n\n");
+                        out($f,"#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n");
                         out($f,"static const zend_op call_interrupt_op;\n");
                         out($f,"#endif\n\n");
                     }
