@@ -1,5 +1,5 @@
 --TEST--
-GH-22000 - Ensure __isset is not returning a reference in ReflectionProperty::isReadable()
+GH-22000 - Ensure __isset is supported by ReflectionProperty::isReadable()
 --FILE--
 <?php
 class TestClass1 {
@@ -54,8 +54,8 @@ b from global:bool(true)
 c from global:bool(false)
 d from global:bool(false)
 e from global:
-Notice: Only variable references should be returned by reference in %s%eext%ereflection%etests%egh22000.php on line %d
+Notice: Only variable references should be returned by reference in %s on line %d
 bool(false)
 f from global:
-Notice: Only variable references should be returned by reference in %s%eext%ereflection%etests%egh22000.php on line %d
+Notice: Only variable references should be returned by reference in %s on line %d
 bool(true)

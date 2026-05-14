@@ -6732,7 +6732,6 @@ handle_magic_get:
 					ZVAL_STR(&member, ref->unmangled_name);
 					zend_call_known_instance_method_with_1_params(ce->__isset, obj, return_value, &member);
 
-					// if it's a reference, unwrap
 					if (Z_TYPE_P(return_value) == IS_REFERENCE) {
 						zend_unwrap_reference(return_value);
 					}
