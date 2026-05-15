@@ -67,13 +67,19 @@ PHPAPI int usleep(unsigned int useconds)
 {/*{{{*/
 	HANDLE timer;
 	LARGE_INTEGER due;
+	DWORD wait_result;
 
 	due.QuadPart = -(10 * (__int64)useconds);
 
 	timer = CreateWaitableTimer(NULL, TRUE, NULL);
 	SetWaitableTimer(timer, &due, 0, NULL, NULL, 0);
-	WaitForSingleObject(timer, INFINITE);
+	/* Alertable wait so queued APCs can interrupt it */
+	wait_result = WaitForSingleObjectEx(timer, INFINITE, TRUE);
 	CloseHandle(timer);
+	if (wait_result == WAIT_IO_COMPLETION) {
+		errno = EINTR;
+		return -1;
+	}
 	return 0;
 }/*}}}*/
 
