@@ -92,6 +92,8 @@ PHP 8.4 UPGRADE NOTES
       - ValueError if the integer index does not fit in a signed 32 bit integer
     . IntlDateFormatter::__construct() throws a ValueError if the locale is invalid.
     . NumberFormatter::__construct() throws a ValueError if the locale is invalid.
+    . SpoofChecker::setAllowedChars() now reports PHP constant names instead
+      of ICU USET_* names in invalid pattern option errors.
   . MBString:
     . mb_encode_numericentity() and mb_decode_numericentity() now check that
       the $map is only composed of integers, if not a ValueError is thrown.

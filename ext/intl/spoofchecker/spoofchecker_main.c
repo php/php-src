@@ -135,7 +135,6 @@ PHP_METHOD(Spoofchecker, setChecks)
 }
 /* }}} */
 
-#if U_ICU_VERSION_MAJOR_NUM >= 58
 /* TODO Document this method on PHP.net */
 /* {{{ Set the loosest restriction level allowed for strings. */
 PHP_METHOD(Spoofchecker, setRestrictionLevel)
@@ -164,7 +163,6 @@ PHP_METHOD(Spoofchecker, setRestrictionLevel)
 	uspoof_setRestrictionLevel(co->uspoof, (URestrictionLevel)level);
 }
 /* }}} */
-#endif
 
 PHP_METHOD(Spoofchecker, setAllowedChars)
 {
@@ -208,9 +206,9 @@ PHP_METHOD(Spoofchecker, setAllowedChars)
 #endif
             pattern_option != (USET_IGNORE_SPACE|USET_CASE_INSENSITIVE) &&
             pattern_option != (USET_IGNORE_SPACE|USET_ADD_CASE_MAPPINGS)) {
-		zend_argument_value_error(2, "must be a valid pattern option, 0 or (SpoofChecker::IGNORE_SPACE|(<none> or SpoofChecker::USET_CASE_INSENSITIVE or SpoofChecker::USET_ADD_CASE_MAPPINGS"
+		zend_argument_value_error(2, "must be a valid pattern option, 0 or (SpoofChecker::IGNORE_SPACE|(<none> or SpoofChecker::CASE_INSENSITIVE or SpoofChecker::ADD_CASE_MAPPINGS"
 #if U_ICU_VERSION_MAJOR_NUM >= 73
-				" or SpoofChecker::USET_SIMPLE_CASE_INSENSITIVE"
+				" or SpoofChecker::SIMPLE_CASE_INSENSITIVE"
 #endif
 				"))"
 		);

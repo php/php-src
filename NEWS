@@ -6,6 +6,11 @@ PHP                                                                        NEWS
   . Fix incorrect argument positions in out-of-bounds errors for
     IntlCalendar::set(), IntlCalendar::setDate(), IntlCalendar::setDateTime(),
     and IntlGregorianCalendar date/time construction. (Weilin Du)
+  . Expose Spoofchecker restriction-level APIs on all supported ICU
+    versions. (Weilin Du)
+  . Fix SpoofChecker::setAllowedChars() to report PHP constant names
+    instead of ICU USET_* names in invalid pattern option errors.
+    (Weilin Du)
 
 - MySQLnd:
   . Fix persistent free of non-persistent connect_attr key (David Carlier).
