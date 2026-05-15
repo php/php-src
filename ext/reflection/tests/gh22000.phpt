@@ -1,5 +1,5 @@
 --TEST--
-GH-22000 - Ensure __isset is supported by ReflectionProperty::isReadable()
+GH-22000 - Ensure __isset returning a reference is supported by ReflectionProperty::isReadable()
 --FILE--
 <?php
 class TestClass1 {
