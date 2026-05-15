@@ -1,5 +1,5 @@
 /* This is a generated file, edit openssl.stub.php instead.
- * Stub hash: c0b746f3a9fff06533a7682a35f44f5df951d12f */
+ * Stub hash: 4d38e81a2f73bb6dd4bbe7a3e0b8ba86600654e2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -406,6 +406,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_verify, 0, 3, _
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Openssl_Psk___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, psk, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, identity, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Openssl_Session_export, 0, 0, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, format, IS_LONG, 0, "OPENSSL_ENCODING_PEM")
 ZEND_END_ARG_INFO()
@@ -506,6 +511,7 @@ ZEND_FUNCTION(openssl_get_cert_locations);
 ZEND_FUNCTION(openssl_password_hash);
 ZEND_FUNCTION(openssl_password_verify);
 #endif
+ZEND_METHOD(Openssl_Psk, __construct);
 ZEND_METHOD(Openssl_Session, export);
 ZEND_METHOD(Openssl_Session, import);
 ZEND_METHOD(Openssl_Session, isResumable);
@@ -589,6 +595,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_password_hash, arginfo_openssl_password_hash)
 	ZEND_FE(openssl_password_verify, arginfo_openssl_password_verify)
 #endif
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Openssl_Psk_methods[] = {
+	ZEND_ME(Openssl_Psk, __construct, arginfo_class_Openssl_Psk___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -816,6 +827,40 @@ static zend_class_entry *register_class_Openssl_OpensslException(zend_class_entr
 
 	INIT_NS_CLASS_ENTRY(ce, "Openssl", "OpensslException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Openssl_Exception, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Openssl_Psk(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Openssl", "Psk", class_Openssl_Psk_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zval const_MAX_PSK_LEN_value;
+	ZVAL_LONG(&const_MAX_PSK_LEN_value, PHP_OPENSSL_PSK_MAX_PSK_LEN);
+	zend_string *const_MAX_PSK_LEN_name = zend_string_init_interned("MAX_PSK_LEN", sizeof("MAX_PSK_LEN") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_MAX_PSK_LEN_name, &const_MAX_PSK_LEN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_MAX_PSK_LEN_name, true);
+
+	zval const_MAX_IDENTITY_LEN_value;
+	ZVAL_LONG(&const_MAX_IDENTITY_LEN_value, PHP_OPENSSL_PSK_MAX_IDENTITY_LEN);
+	zend_string *const_MAX_IDENTITY_LEN_name = zend_string_init_interned("MAX_IDENTITY_LEN", sizeof("MAX_IDENTITY_LEN") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_MAX_IDENTITY_LEN_name, &const_MAX_IDENTITY_LEN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_MAX_IDENTITY_LEN_name, true);
+
+	zval property_psk_default_value;
+	ZVAL_UNDEF(&property_psk_default_value);
+	zend_string *property_psk_name = zend_string_init("psk", sizeof("psk") - 1, true);
+	zend_declare_typed_property(class_entry, property_psk_name, &property_psk_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release_ex(property_psk_name, true);
+
+	zval property_identity_default_value;
+	ZVAL_UNDEF(&property_identity_default_value);
+	zend_string *property_identity_name = zend_string_init("identity", sizeof("identity") - 1, true);
+	zend_declare_typed_property(class_entry, property_identity_name, &property_identity_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release_ex(property_identity_name, true);
 
 	return class_entry;
 }
