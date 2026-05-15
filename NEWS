@@ -32,6 +32,10 @@ PHP                                                                        NEWS
 
 07 May 2026, PHP 8.4.21
 
+- Intl:
+  . Expose Spoofchecker restriction-level APIs on all supported ICU
+    versions. (Weilin Du)
+
 - Core:
   . Fixed bug GH-19983 (GC assertion failure with fibers, generators and
     destructors). (iliaal)
