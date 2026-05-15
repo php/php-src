@@ -82,6 +82,9 @@ PHP 8.4 UPGRADE NOTES
     . bind_textdomain_codeset, textdomain and d(*)gettext functions now throw an exception
       if the domain argument is empty.
   . Intl:
+    . IntlCalendar::set(), IntlCalendar::setDate(), IntlCalendar::setDateTime(),
+      and IntlGregorianCalendar date/time construction now report the correct
+      argument position for out-of-bounds integer values.
     . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
       ResourceBundle object now throw:
       - TypeError for invalid offset types
