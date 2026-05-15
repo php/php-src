@@ -196,6 +196,8 @@ PHP 8.6 UPGRADE NOTES
     requests, implementing custom server-side session storage, and controlling
     session cache behavior.
     RFC: https://wiki.php.net/rfc/tls_session_resumption
+  . Added TLS external PSK support for streams with new strem context options:
+    psk_client_cb and psk_server_cb. This allows setting and receiving PSK.
 
 - Phar:
   . Overriding the getMTime() and getPathname() methods of SplFileInfo now
@@ -317,6 +319,7 @@ PHP 8.6 UPGRADE NOTES
   . Openssl\OpensslException
   . Openssl\Session
     RFC: https://wiki.php.net/rfc/tls_session_resumption
+  . Openssl\Psk
 
 - Standard:
   . enum SortDirection

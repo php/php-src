@@ -107,6 +107,8 @@ PHP                                                                        NEWS
     openssl_x509_parse() output). (StephenWall)
   . Added TLS session resumption support for streams with new context options
     and Openssl\Session class. (Jakub Zelenka)
+  . Added TLS external PSK support for streams with new context options and
+    Openssl\Psk class. (Jakub Zelenka)
 
 - PCNTL:
   . pcntl_exec() now throws a ValueError if the $args array is not a list
