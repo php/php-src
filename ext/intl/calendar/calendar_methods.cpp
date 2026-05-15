@@ -391,8 +391,8 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 	}
 
 	for (int i = 0; i < arg_num; i++) {
-		/* Arguments start at 1 */
-		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(args[i], i + 1);
+		/* Count from intlcal_set($calendar, ...), so date/time arguments start at #2. */
+		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(args[i], i + 2);
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
