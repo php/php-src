@@ -96,6 +96,13 @@ ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
 ZEND_API zend_result (*zend_post_startup_cb)(void) = NULL;
 ZEND_API void (*zend_post_shutdown_cb)(void) = NULL;
 ZEND_API void (*zend_accel_schedule_restart_hook)(int reason) = NULL;
+ZEND_API void (*zend_class_init_statics_hook)(zend_class_entry *ce) = NULL;
+ZEND_API void (*zend_function_init_statics_hook)(zend_execute_data *execute_data) = NULL;
+ZEND_API void (*zend_class_static_access_hook)(zend_class_entry *ce) = NULL;
+ZEND_API void (*zend_class_static_update_hook)(zend_class_entry *ce) = NULL;
+ZEND_API void (*zend_tracked_reference_update_hook)(zend_reference *ref) = NULL;
+ZEND_API bool (*zend_tracked_hash_mutation_hook)(HashTable *ht, bool publish) = NULL;
+ZEND_API void (*zend_tracked_object_mutation_hook)(zend_object *obj) = NULL;
 ZEND_ATTRIBUTE_NONNULL ZEND_API zend_result (*zend_random_bytes)(void *bytes, size_t size, char *errstr, size_t errstr_size) = NULL;
 ZEND_ATTRIBUTE_NONNULL ZEND_API void (*zend_random_bytes_insecure)(zend_random_bytes_insecure_state *state, void *bytes, size_t size) = NULL;
 
@@ -820,6 +827,8 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 #endif
 	executor_globals->saved_fpu_cw_ptr = NULL;
 	executor_globals->active = false;
+	executor_globals->static_cache_class_access_active = false;
+	executor_globals->tracked_mutation_hooks_active = false;
 	executor_globals->bailout = NULL;
 	executor_globals->error_handling  = EH_NORMAL;
 	executor_globals->exception_class = NULL;

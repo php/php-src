@@ -139,8 +139,19 @@ typedef struct _zend_persistent_script {
 	} dynamic_members;
 } zend_persistent_script;
 
+typedef struct _zend_opcache_static_cache_accelerator_handlers {
+	void (*startup)(void);
+	void (*post_startup)(void);
+	zend_result (*rinit)(void);
+	void (*invalidate_script)(zend_persistent_script *persistent_script);
+} zend_opcache_static_cache_accelerator_handlers;
+
+void zend_accel_register_static_cache_handlers(const zend_opcache_static_cache_accelerator_handlers *handlers);
+
 typedef struct _zend_accel_directives {
 	zend_long           memory_consumption;
+	zend_long           static_cache_volatile_size_mb;
+	zend_long           static_cache_persistent_size_mb;
 	zend_long           max_accelerated_files;
 	double         max_wasted_percentage;
 	char          *user_blacklist_filename;

@@ -19,6 +19,7 @@
 #include "php.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
+#include "zend_execute.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
@@ -28,6 +29,8 @@
 #include "spl_exceptions.h"
 #include "spl_functions.h" /* For spl_set_private_debug_info_property() */
 
+#include "ext/opcache/zend_static_cache.h" /* for zend_opcache_static_cache_safe_direct_handlers */
+
 /* Defined later in the file */
 PHPAPI zend_class_entry  *spl_ce_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
@@ -35,6 +38,9 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 /* ArrayObject class */
 static zend_object_handlers spl_handler_ArrayObject;
 PHPAPI zend_class_entry  *spl_ce_ArrayObject;
+
+static void spl_array_object_serialize(zval *object, zval *return_value);
+static void spl_array_object_unserialize(zval *object, HashTable *data);
 
 typedef struct _spl_array_object {
 	zval              array;
@@ -670,6 +676,7 @@ PHP_METHOD(ArrayObject, offsetSet)
 		RETURN_THROWS();
 	}
 	spl_array_write_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, value);
+	ZEND_MAYBE_TRACK_OBJECT_MUTATION(Z_OBJ_P(ZEND_THIS));
 } /* }}} */
 
 void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
@@ -682,6 +689,7 @@ void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 	}
 
 	spl_array_write_dimension(Z_OBJ_P(object), NULL, append_value);
+	ZEND_MAYBE_TRACK_OBJECT_MUTATION(Z_OBJ_P(object));
 } /* }}} */
 
 /* {{{ Appends the value (cannot be called for objects). */
@@ -703,6 +711,7 @@ PHP_METHOD(ArrayObject, offsetUnset)
 		RETURN_THROWS();
 	}
 	spl_array_unset_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index);
+	ZEND_MAYBE_TRACK_OBJECT_MUTATION(Z_OBJ_P(ZEND_THIS));
 } /* }}} */
 
 /* {{{ Return a copy of the contained array */
@@ -1024,6 +1033,7 @@ PHP_METHOD(ArrayObject, setIteratorClass)
 	ZEND_PARSE_PARAMETERS_END();
 
 	intern->ce_get_iterator = ce_get_iterator;
+	ZEND_MAYBE_TRACK_OBJECT_MUTATION(Z_OBJ_P(object));
 }
 /* }}} */
 
@@ -1064,6 +1074,7 @@ PHP_METHOD(ArrayObject, setFlags)
 	}
 
 	intern->ar_flags = (intern->ar_flags & SPL_ARRAY_INT_MASK) | (ar_flags & ~SPL_ARRAY_INT_MASK);
+	ZEND_MAYBE_TRACK_OBJECT_MUTATION(Z_OBJ_P(object));
 }
 /* }}} */
 
@@ -1084,6 +1095,7 @@ PHP_METHOD(ArrayObject, exchangeArray)
 
 	RETVAL_ARR(zend_array_dup(spl_array_get_hash_table(intern)));
 	spl_array_set_array(object, intern, array, 0L, true);
+	ZEND_MAYBE_TRACK_OBJECT_MUTATION(Z_OBJ_P(object));
 }
 /* }}} */
 
@@ -1209,6 +1221,7 @@ exit:
 		ZVAL_NULL(ht_zv);
 		zval_ptr_dtor(&params[0]);
 	}
+	ZEND_MAYBE_TRACK_OBJECT_MUTATION(Z_OBJ_P(ZEND_THIS));
 } /* }}} */
 
 #define SPL_ARRAY_METHOD(cname, fname, use_arg) \
@@ -1387,10 +1400,15 @@ outexcept:
 /* {{{ */
 PHP_METHOD(ArrayObject, __serialize)
 {
-	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
-	zval tmp;
-
 	ZEND_PARSE_PARAMETERS_NONE();
+
+	spl_array_object_serialize(ZEND_THIS, return_value);
+}
+
+static void spl_array_object_serialize(zval *object, zval *return_value)
+{
+	spl_array_object *intern = Z_SPLARRAY_P(object);
+	zval tmp;
 
 	array_init(return_value);
 
@@ -1425,14 +1443,23 @@ PHP_METHOD(ArrayObject, __serialize)
 /* {{{ */
 PHP_METHOD(ArrayObject, __unserialize)
 {
-	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 	HashTable *data;
-	zval *flags_zv, *storage_zv, *members_zv, *iterator_class_zv;
-	zend_long flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	spl_array_object_unserialize(ZEND_THIS, data);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+}
+
+static void spl_array_object_unserialize(zval *object, HashTable *data)
+{
+	spl_array_object *intern = Z_SPLARRAY_P(object);
+	zval *flags_zv, *storage_zv, *members_zv, *iterator_class_zv;
+	zend_long flags;
 
 	flags_zv          = zend_hash_index_find(data, 0);
 	storage_zv        = zend_hash_index_find(data, 1);
@@ -1445,7 +1472,7 @@ PHP_METHOD(ArrayObject, __unserialize)
 				Z_TYPE_P(iterator_class_zv) != IS_STRING))) {
 		zend_throw_exception(spl_ce_UnexpectedValueException,
 			"Incomplete or ill-typed serialization data", 0);
-		RETURN_THROWS();
+		return;
 	}
 
 	flags = Z_LVAL_P(flags_zv);
@@ -1459,14 +1486,14 @@ PHP_METHOD(ArrayObject, __unserialize)
 		if (Z_TYPE_P(storage_zv) != IS_OBJECT && Z_TYPE_P(storage_zv) != IS_ARRAY) {
 			/* TODO Use UnexpectedValueException instead? And better error message? */
 			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object", 0);
-			RETURN_THROWS();
+			return;
 		}
-		spl_array_set_array(ZEND_THIS, intern, storage_zv, 0L, true);
+		spl_array_set_array(object, intern, storage_zv, 0L, true);
 	}
 
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 	if (EG(exception)) {
-		RETURN_THROWS();
+		return;
 	}
 
 	if (iterator_class_zv && Z_TYPE_P(iterator_class_zv) == IS_STRING) {
@@ -1476,20 +1503,137 @@ PHP_METHOD(ArrayObject, __unserialize)
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 				"Cannot deserialize ArrayObject with iterator class '%s'; no such class exists",
 				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
-			RETURN_THROWS();
+			return;
 		}
 
 		if (!instanceof_function(ce, spl_ce_ArrayIterator)) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 				"Cannot deserialize ArrayObject with iterator class '%s'; this class is not derived from ArrayIterator",
 				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
-			RETURN_THROWS();
+			return;
 		}
 
 		intern->ce_get_iterator = ce;
 	}
 }
 /* }}} */
+
+static bool spl_array_object_copy_direct_cache_state(
+		void *context,
+		zend_object *old_object,
+		zend_object *new_object,
+		zend_opcache_static_cache_safe_direct_clone_value_func_t clone_value)
+{
+	zval old_zv, new_zv, state_zv, cloned_state_zv, empty_props_zv;
+	bool result = false;
+
+	if (clone_value == NULL) {
+		return false;
+	}
+
+	ZVAL_OBJ(&old_zv, old_object);
+	ZVAL_OBJ(&new_zv, new_object);
+	ZVAL_UNDEF(&state_zv);
+	ZVAL_UNDEF(&cloned_state_zv);
+
+	spl_array_object_serialize(&old_zv, &state_zv);
+	if (EG(exception) || Z_TYPE(state_zv) != IS_ARRAY) {
+		goto cleanup;
+	}
+
+	/* Properties are restored by the caller after all internal state zvals
+	 * have been copied through the shared graph clone context. */
+	array_init(&empty_props_zv);
+	zend_hash_index_update(Z_ARRVAL(state_zv), 2, &empty_props_zv);
+
+	if (!clone_value(context, &cloned_state_zv, &state_zv) ||
+			Z_TYPE(cloned_state_zv) != IS_ARRAY) {
+		goto cleanup;
+	}
+
+	spl_array_object_unserialize(&new_zv, Z_ARRVAL(cloned_state_zv));
+	result = !EG(exception);
+
+cleanup:
+	if (Z_TYPE(cloned_state_zv) != IS_UNDEF) {
+		zval_ptr_dtor(&cloned_state_zv);
+	}
+	if (Z_TYPE(state_zv) != IS_UNDEF) {
+		zval_ptr_dtor(&state_zv);
+	}
+
+	return result;
+}
+
+static bool spl_array_object_direct_cache_state_has_unstorable(
+		void *context,
+		const zval *object,
+		zend_opcache_static_cache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
+{
+	zval state_zv;
+	bool result = false;
+
+	if (value_has_unstorable == NULL) {
+		return false;
+	}
+
+	ZVAL_UNDEF(&state_zv);
+	spl_array_object_serialize((zval *) object, &state_zv);
+	if (EG(exception) || Z_TYPE(state_zv) == IS_UNDEF) {
+		return true;
+	}
+
+	result = value_has_unstorable(context, &state_zv);
+	zval_ptr_dtor(&state_zv);
+
+	return result;
+}
+
+static bool spl_array_object_serialize_direct_cache_state(const zval *object, zval *state)
+{
+	zval empty_props_zv;
+
+	ZVAL_UNDEF(state);
+	spl_array_object_serialize((zval *) object, state);
+	if (EG(exception) || Z_TYPE_P(state) != IS_ARRAY) {
+		if (Z_TYPE_P(state) != IS_UNDEF) {
+			zval_ptr_dtor(state);
+		}
+		ZVAL_UNDEF(state);
+
+		return false;
+	}
+
+	ZVAL_UNDEF(&empty_props_zv);
+	array_init(&empty_props_zv);
+	zend_hash_index_update(Z_ARRVAL_P(state), 2, &empty_props_zv);
+
+	return true;
+}
+
+static bool spl_array_object_unserialize_direct_cache_state(zval *object, zval *state)
+{
+	if (Z_TYPE_P(state) != IS_ARRAY) {
+		return false;
+	}
+
+	spl_array_object_unserialize(object, Z_ARRVAL_P(state));
+
+	return !EG(exception);
+}
+
+const zend_opcache_static_cache_safe_direct_handlers *spl_array_object_get_direct_cache_handlers(void)
+{
+	static const zend_opcache_static_cache_safe_direct_handlers handlers = {
+		false,
+		spl_array_object_copy_direct_cache_state,
+		spl_array_object_direct_cache_state_has_unstorable,
+		spl_array_object_serialize_direct_cache_state,
+		spl_array_object_unserialize_direct_cache_state
+	};
+
+	return &handlers;
+}
 
 /* {{{ */
 PHP_METHOD(ArrayObject, __debugInfo)
@@ -1675,6 +1819,7 @@ PHP_METHOD(ArrayIterator, rewind)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_array_rewind(intern);
+	ZEND_MAYBE_TRACK_OBJECT_MUTATION(Z_OBJ_P(object));
 }
 /* }}} */
 
@@ -1700,6 +1845,7 @@ PHP_METHOD(ArrayIterator, seek)
 		while (position-- > 0 && (result = spl_array_next(intern)) == SUCCESS);
 
 		if (result == SUCCESS && zend_hash_has_more_elements_ex(aht, spl_array_get_pos_ptr(aht, intern)) == SUCCESS) {
+			ZEND_MAYBE_TRACK_OBJECT_MUTATION(Z_OBJ_P(object));
 			return; /* ok */
 		}
 	}
@@ -1756,6 +1902,7 @@ PHP_METHOD(ArrayIterator, next)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_array_next_ex(intern, aht);
+	ZEND_MAYBE_TRACK_OBJECT_MUTATION(Z_OBJ_P(object));
 }
 /* }}} */
 

@@ -2,6 +2,8 @@
 
 /** @generate-class-entries */
 
+namespace {
+
 function opcache_reset(): bool {}
 
 /**
@@ -25,3 +27,95 @@ function opcache_get_configuration(): array|false {}
 function opcache_is_script_cached(string $filename): bool {}
 
 function opcache_is_script_cached_in_file_cache(string $filename): bool {}
+
+}
+
+namespace OPcache {
+
+class StaticCacheException extends \Exception
+{
+}
+
+#[\Attribute(13)] /* TARGET_CLASS | TARGET_METHOD | TARGET_PROPERTY */
+final class PersistentStatic
+{
+}
+
+enum CacheStrategy: int
+{
+	case Immediate = 0;
+	case Tracking = 1;
+}
+
+#[\Attribute(13)] /* TARGET_CLASS | TARGET_METHOD | TARGET_PROPERTY */
+final class VolatileStatic
+{
+	public readonly int $ttl;
+
+	public readonly CacheStrategy $strategy;
+
+	public function __construct(int $ttl = 0, CacheStrategy $strategy = CacheStrategy::Immediate) {}
+}
+
+#[\Attribute(1)] /* TARGET_CLASS */
+final class __DirectCacheSafe
+{
+}
+
+function volatile_store(string $key, null|bool|int|float|string|array|object $value, int $ttl = 0): bool {}
+
+function volatile_store_array(array $values, int $ttl = 0): bool {}
+
+function volatile_fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
+
+/**
+ * @return array<string, null|bool|int|float|string|array|object>|null
+ */
+function volatile_fetch_array(array $keys, ?array $default = null): ?array {}
+
+function volatile_exists(string $key): bool {}
+
+function volatile_lock(string $key): bool {}
+
+function volatile_delete(string $key): void {}
+
+function volatile_delete_array(array $keys): void {}
+
+function volatile_clear(): void {}
+
+/**
+ * @return array<string, mixed>
+ */
+function volatile_cache_info(): array {}
+
+function persistent_store(string $key, null|bool|int|float|string|array|object $value): void {}
+
+function persistent_store_array(array $values): void {}
+
+function persistent_fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
+
+/**
+ * @return array<string, null|bool|int|float|string|array|object>|null
+ */
+function persistent_fetch_array(array $keys, ?array $default = null): ?array {}
+
+function persistent_exists(string $key): bool {}
+
+function persistent_lock(string $key): bool {}
+
+function persistent_delete(string $key): void {}
+
+function persistent_delete_array(array $keys): void {}
+
+function persistent_clear(): void {}
+
+function persistent_atomic_increment(string $key, int $step = 1): int {}
+
+function persistent_atomic_decrement(string $key, int $step = 1): int {}
+
+/**
+ * @return array<string, mixed>
+ */
+function persistent_cache_info(): array {}
+
+}

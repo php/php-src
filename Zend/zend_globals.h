@@ -268,6 +268,10 @@ struct _zend_executor_globals {
 	struct _zend_module_entry *current_module;
 
 	bool active;
+
+	bool static_cache_class_access_active;		/* fast guard for zend_class_static_access_hook */
+	bool tracked_mutation_hooks_active;			/* fast guard for tracked array/object mutation hooks */
+
 	uint8_t flags;
 
 	zend_long assertions;

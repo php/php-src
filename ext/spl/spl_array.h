@@ -29,6 +29,12 @@ extern PHPAPI zend_class_entry *spl_ce_ArrayObject;
 extern PHPAPI zend_class_entry *spl_ce_ArrayIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveArrayIterator;
 
+#ifndef ZEND_OPCACHE_STATIC_CACHE_SAFE_DIRECT_HANDLERS_FWD
+# define ZEND_OPCACHE_STATIC_CACHE_SAFE_DIRECT_HANDLERS_FWD
+typedef struct _zend_opcache_static_cache_safe_direct_handlers zend_opcache_static_cache_safe_direct_handlers;
+#endif
+const zend_opcache_static_cache_safe_direct_handlers *spl_array_object_get_direct_cache_handlers(void);
+
 PHP_MINIT_FUNCTION(spl_array);
 
 extern void spl_array_iterator_append(zval *object, zval *append_value);

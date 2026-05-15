@@ -3413,6 +3413,15 @@ static void ZEND_FASTCALL zend_jit_uninit_static_prop(void)
 		zend_get_unmangled_property_name(property_info->name));
 }
 
+static void ZEND_FASTCALL zend_jit_static_prop_access_helper(const zend_property_info *property_info)
+{
+	if (UNEXPECTED(EG(static_cache_class_access_active) &&
+		zend_class_static_access_hook != NULL)
+	) {
+		zend_class_static_access_hook(property_info->ce);
+	}
+}
+
 static void ZEND_FASTCALL zend_jit_free_trampoline_helper(zend_function *func)
 {
 	ZEND_ASSERT(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
