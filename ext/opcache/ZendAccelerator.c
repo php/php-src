@@ -135,6 +135,67 @@ static zend_result (*orig_post_startup_cb)(void);
 
 static zend_result accel_post_startup(void);
 static zend_result accel_finish_startup(void);
+static const zend_opcache_static_cache_accelerator_handlers *static_cache_handlers = NULL;
+
+void zend_accel_register_static_cache_handlers(const zend_opcache_static_cache_accelerator_handlers *handlers)
+{
+	static_cache_handlers = handlers;
+}
+
+static zend_always_inline void zend_accel_static_cache_startup(void)
+{
+	if (static_cache_handlers != NULL && static_cache_handlers->startup != NULL) {
+		static_cache_handlers->startup();
+	}
+}
+
+static zend_always_inline void zend_accel_static_cache_post_startup(void)
+{
+	if (static_cache_handlers != NULL && static_cache_handlers->post_startup != NULL) {
+		static_cache_handlers->post_startup();
+	}
+}
+
+static zend_always_inline zend_result zend_accel_static_cache_rinit(void)
+{
+	if (static_cache_handlers != NULL && static_cache_handlers->rinit != NULL) {
+		return static_cache_handlers->rinit();
+	}
+
+	return SUCCESS;
+}
+
+static zend_always_inline void zend_accel_static_cache_invalidate_script(zend_persistent_script *persistent_script)
+{
+	if (static_cache_handlers != NULL && static_cache_handlers->invalidate_script != NULL) {
+		static_cache_handlers->invalidate_script(persistent_script);
+	}
+}
+
+#ifdef ZTS
+typedef struct _zend_accel_thread_startup_config {
+	bool enabled;
+	zend_atomic_bool valid;
+	zend_accel_directives accel_directives;
+} zend_accel_thread_startup_config;
+
+static zend_accel_thread_startup_config accel_thread_startup_config;
+
+static zend_always_inline void accel_apply_thread_startup_config(zend_accel_globals *accel_globals)
+{
+	if (!zend_atomic_bool_load_ex(&accel_thread_startup_config.valid)) {
+		return;
+	}
+
+	accel_globals->enabled = accel_thread_startup_config.enabled;
+	accel_globals->accel_directives = accel_thread_startup_config.accel_directives;
+}
+
+static zend_always_inline void accel_sync_thread_startup_config(void)
+{
+	accel_apply_thread_startup_config(TSRMG_FAST_BULK(accel_globals_offset, zend_accel_globals *));
+}
+#endif
 
 #ifndef ZEND_WIN32
 # define PRELOAD_SUPPORT
@@ -1453,6 +1514,7 @@ zend_result zend_accel_invalidate(zend_string *filename, bool force)
 		if (force ||
 			!ZCG(accel_directives).validate_timestamps ||
 			do_validate_timestamps(persistent_script, &file_handle) == FAILURE) {
+			zend_accel_static_cache_invalidate_script(persistent_script);
 			HANDLE_BLOCK_INTERRUPTIONS();
 			SHM_UNPROTECT();
 			zend_accel_lock_discard_script(persistent_script);
@@ -2149,6 +2211,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	/* If script is found then validate_timestamps if option is enabled */
 	if (persistent_script && ZCG(accel_directives).validate_timestamps) {
 		if (validate_timestamp_and_record(persistent_script, file_handle) == FAILURE) {
+			zend_accel_static_cache_invalidate_script(persistent_script);
 			zend_accel_lock_discard_script(persistent_script);
 			persistent_script = NULL;
 		}
@@ -2665,6 +2728,10 @@ static void accel_reset_pcre_cache(void)
 
 ZEND_RINIT_FUNCTION(zend_accelerator)
 {
+#ifdef ZTS
+	accel_sync_thread_startup_config();
+#endif
+
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		ZCG(accelerator_enabled) = false;
 		return SUCCESS;
@@ -2802,6 +2869,8 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 		preload_activate();
 	}
 #endif
+
+	zend_accel_static_cache_rinit();
 
 	return SUCCESS;
 }
@@ -2967,6 +3036,9 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
 	accel_globals->key = zend_string_alloc(ZCG_KEY_LEN, true);
 	GC_MAKE_PERSISTENT_LOCAL(accel_globals->key);
+#ifdef ZTS
+	accel_apply_thread_startup_config(accel_globals);
+#endif
 }
 
 static void accel_globals_dtor(zend_accel_globals *accel_globals)
@@ -3188,6 +3260,7 @@ static int accel_startup(zend_extension *extension)
 {
 #ifdef ZTS
 	accel_globals_id = ts_allocate_fast_id(&accel_globals_id, &accel_globals_offset, sizeof(zend_accel_globals), (ts_allocate_ctor) accel_globals_ctor, (ts_allocate_dtor) accel_globals_dtor);
+	zend_atomic_bool_store_ex(&accel_thread_startup_config.valid, false);
 #else
 	accel_globals_ctor(&accel_globals);
 #endif
@@ -3203,6 +3276,12 @@ static int accel_startup(zend_extension *extension)
 #endif
 
 	zend_accel_register_ini_entries();
+
+#ifdef ZTS
+	accel_thread_startup_config.enabled = ZCG(enabled);
+	accel_thread_startup_config.accel_directives = ZCG(accel_directives);
+	zend_atomic_bool_store_ex(&accel_thread_startup_config.valid, true);
+#endif
 
 #ifdef ZEND_WIN32
 	if (UNEXPECTED(accel_gen_uname_id() == FAILURE)) {
@@ -3461,6 +3540,21 @@ file_cache_fallback:
 	if (accel_finish_startup() != SUCCESS) {
 		return FAILURE;
 	}
+
+	/* Initialize static cache if configured */
+	bool static_cache_configured =
+		ZCG(accel_directives).static_cache_volatile_size_mb != 0 ||
+		ZCG(accel_directives).static_cache_persistent_size_mb != 0
+	;
+	bool static_cache_preload_configured = static_cache_configured &&
+		ZCG(accel_directives).preload &&
+		*ZCG(accel_directives).preload
+	;
+
+	if (static_cache_preload_configured) {
+		zend_accel_static_cache_startup();
+	}
+	zend_accel_static_cache_post_startup();
 
 	if (ZCG(enabled) && accel_startup_ok) {
 		/* Override inheritance cache callbaks */

@@ -161,4 +161,10 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 PHPAPI void php_date_initialize_from_ts_long(php_date_obj *dateobj, zend_long sec, int usec);
 PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts);
 
+#ifndef ZEND_OPCACHE_STATIC_CACHE_SAFE_DIRECT_HANDLERS_FWD
+# define ZEND_OPCACHE_STATIC_CACHE_SAFE_DIRECT_HANDLERS_FWD
+typedef struct _zend_opcache_static_cache_safe_direct_handlers zend_opcache_static_cache_safe_direct_handlers;
+#endif
+const zend_opcache_static_cache_safe_direct_handlers *php_date_get_direct_cache_handlers(void);
+
 #endif /* PHP_DATE_H */

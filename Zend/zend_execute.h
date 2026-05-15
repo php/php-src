@@ -127,12 +127,35 @@ ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, zval *re
 		? ZEND_PROPERTY_INFO_SOURCE_TO_LIST((ref)->sources.list)->ptr[0] \
 		: (ref)->sources.ptr)
 
-
 ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, const zend_property_info *prop);
 
 ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, uint8_t value_type, bool strict);
 ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *value, uint8_t value_type, bool strict, zend_refcounted **garbage_ptr);
+
+zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_track_object_mutation_slow(zend_object *zobj);
+zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_track_object_mutation_with_value_slow(zend_object *zobj, zval *value);
+
+#define ZEND_MAYBE_TRACK_OBJECT_MUTATION(zobj) do { \
+	if (UNEXPECTED(EG(tracked_mutation_hooks_active))) { \
+		zend_track_object_mutation_slow((zobj)); \
+	} \
+} while (0)
+
+#define ZEND_MAYBE_TRACK_OBJECT_MUTATION_WITH_VALUE(zobj, value) do { \
+	if (UNEXPECTED(EG(tracked_mutation_hooks_active))) { \
+		zend_track_object_mutation_with_value_slow((zobj), (value)); \
+	} \
+} while (0)
+
+static zend_always_inline bool zend_maybe_track_hash_mutation(HashTable *ht, bool publish)
+{
+	if (UNEXPECTED(zend_tracked_hash_mutation_hook != NULL)) {
+		return zend_tracked_hash_mutation_hook(ht, publish);
+	}
+
+	return false;
+}
 
 static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, const zval *value, uint8_t value_type)
 {
@@ -161,15 +184,27 @@ static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, const z
 	}
 }
 
+static zend_always_inline void zend_maybe_track_reference_update(zend_reference *updated_ref)
+{
+	if (UNEXPECTED(updated_ref != NULL && zend_tracked_reference_update_hook != NULL && EG(exception) == NULL)) {
+		zend_tracked_reference_update_hook(updated_ref);
+	}
+}
+
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, uint8_t value_type, bool strict)
 {
+	zend_reference *updated_ref = NULL;
+
 	do {
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
 			zend_refcounted *garbage;
 
 			if (Z_ISREF_P(variable_ptr)) {
+				updated_ref = Z_REF_P(variable_ptr);
 				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
-					return zend_assign_to_typed_ref(variable_ptr, value, value_type, strict);
+					variable_ptr = zend_assign_to_typed_ref(variable_ptr, value, value_type, strict);
+					zend_maybe_track_reference_update(updated_ref);
+					return variable_ptr;
 				}
 
 				variable_ptr = Z_REFVAL_P(variable_ptr);
@@ -179,22 +214,29 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			}
 			garbage = Z_COUNTED_P(variable_ptr);
 			zend_copy_to_variable(variable_ptr, value, value_type);
+			zend_maybe_track_reference_update(updated_ref);
 			GC_DTOR_NO_REF(garbage);
 			return variable_ptr;
 		}
 	} while (0);
 
 	zend_copy_to_variable(variable_ptr, value, value_type);
+	zend_maybe_track_reference_update(updated_ref);
 	return variable_ptr;
 }
 
 static zend_always_inline zval* zend_assign_to_variable_ex(zval *variable_ptr, zval *value, zend_uchar value_type, bool strict, zend_refcounted **garbage_ptr)
 {
+	zend_reference *updated_ref = NULL;
+
 	do {
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
 			if (Z_ISREF_P(variable_ptr)) {
+				updated_ref = Z_REF_P(variable_ptr);
 				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
-					return zend_assign_to_typed_ref_ex(variable_ptr, value, value_type, strict, garbage_ptr);
+					variable_ptr = zend_assign_to_typed_ref_ex(variable_ptr, value, value_type, strict, garbage_ptr);
+					zend_maybe_track_reference_update(updated_ref);
+					return variable_ptr;
 				}
 
 				variable_ptr = Z_REFVAL_P(variable_ptr);
@@ -207,7 +249,18 @@ static zend_always_inline zval* zend_assign_to_variable_ex(zval *variable_ptr, z
 	} while (0);
 
 	zend_copy_to_variable(variable_ptr, value, value_type);
+	zend_maybe_track_reference_update(updated_ref);
 	return variable_ptr;
+}
+
+static zend_always_inline void zend_class_static_update(zend_class_entry *ce)
+{
+	if (UNEXPECTED(EG(static_cache_class_access_active) &&
+		zend_class_static_update_hook != NULL &&
+		EG(exception) == NULL)
+	) {
+		zend_class_static_update_hook(ce);
+	}
 }
 
 static zend_always_inline void zend_safe_assign_to_variable_noref(zval *variable_ptr, const zval *value) {

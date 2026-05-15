@@ -16103,6 +16103,17 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	if_cached = ir_IF(ref);
 	ir_IF_TRUE(if_cached);
 
+	/* Keep the JIT static-property fast path in sync with
+	 * zend_fetch_static_property_address(): OPcache Static Cache may need to
+	 * refresh class-blob state even when the run-time cache already resolved
+	 * the static property slot. */
+	prop_info_ref = known_prop_info != NULL
+		? ir_CONST_ADDR(known_prop_info)
+		: ir_LOAD_L(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot + sizeof(void*) * 2))
+	;
+	ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_static_prop_access_helper), prop_info_ref);
+	zend_jit_check_exception_undef_result(jit, opline);
+
 	if (fetch_type == BP_VAR_R || fetch_type == BP_VAR_RW) {
 		if (!known_prop_info || ZEND_TYPE_IS_SET(known_prop_info->type)) {
 			ir_ref merge = IR_UNUSED;
@@ -16113,8 +16124,6 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 			ir_IF_FALSE_cold(if_def);
 			if (!known_prop_info) {
 				// JIT: if (ZEND_TYPE_IS_SET(property_info->type))
-				prop_info_ref = ir_LOAD_L(
-					ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot + sizeof(void*) * 2));
 				if_typed = ir_IF(ir_AND_U32(
 					ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, type.type_mask))),
 					ir_CONST_U32(_ZEND_TYPE_MASK)));
@@ -16138,20 +16147,16 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	} else if (fetch_type == BP_VAR_W) {
 		flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
 		if (flags && (!known_prop_info || ZEND_TYPE_IS_SET(known_prop_info->type))) {
-		    ir_ref merge = IR_UNUSED;
+			ir_ref merge = IR_UNUSED;
 
 			if (!known_prop_info) {
 				// JIT: if (ZEND_TYPE_IS_SET(property_info->type))
-				prop_info_ref = ir_LOAD_L(
-					ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot + sizeof(void*) * 2));
 				if_typed = ir_IF(ir_AND_U32(
 					ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, type.type_mask))),
 					ir_CONST_U32(_ZEND_TYPE_MASK)));
 				ir_IF_FALSE(if_typed);
 				ir_END_list(merge);
 				ir_IF_TRUE(if_typed);
-			} else {
-				prop_info_ref = ir_CONST_ADDR(known_prop_info);
 			}
 
 			// JIT: zend_handle_fetch_obj_flags(NULL, *retval, NULL, property_info, flags);
