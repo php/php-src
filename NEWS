@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     initialization). (Arnaud)
   . Enabled the TAILCALL VM on Windows when compiling with Clang >= 19 x86_64.
     (henderkes)
+  . Added BackedEnum::values() method. (duiliofanton)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
