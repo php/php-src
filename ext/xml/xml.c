@@ -1588,7 +1588,17 @@ PHP_FUNCTION(xml_parser_set_option)
 		/* Integer option */
 		case PHP_XML_OPTION_SKIP_TAGSTART: {
 			/* The tag start offset is stored in an int */
-			/* TODO Improve handling of values? */
+			switch (Z_TYPE_P(value)) {
+				case IS_FALSE:
+				case IS_TRUE:
+				case IS_LONG:
+				case IS_DOUBLE:
+				case IS_STRING:
+					break;
+				default:
+					RETURN_FALSE;
+			}
+
 			zend_long value_long = zval_get_long(value);
 			if (value_long < 0 || value_long > INT_MAX) {
 				/* TODO Promote to ValueError in PHP 9.0 */

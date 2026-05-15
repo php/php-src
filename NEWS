@@ -220,6 +220,11 @@ PHP                                                                        NEWS
   . Fixed bug #49874 (ftell() and fseek() inconsistency when using stream
     filters). (Jakub Zelenka)
 
+- XML:
+  . xml_parser_set_option() now reports invalid XML_OPTION_SKIP_TAGSTART
+    values more consistently and avoids an extra object-to-int conversion
+    warning for unsupported values. (Weilin Du)
+
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.
     (ilutov)

@@ -118,6 +118,11 @@ PHP 8.6 UPGRADE NOTES
   . proc_open() now raises a ValueError when the $cwd argument contains
     null bytes.
 
+- XML:
+  . xml_parser_set_option() now reports invalid XML_OPTION_SKIP_TAGSTART
+    values more consistently and no longer emits an extra object-to-int
+    conversion warning for unsupported values.
+
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the
     files argument if one or more of the entries is not

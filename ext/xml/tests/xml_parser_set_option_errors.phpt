@@ -38,6 +38,12 @@ xml_parser_set_option($xmlParser, XML_OPTION_SKIP_TAGSTART, []);
 
 xml_parser_set_option($xmlParser, XML_OPTION_SKIP_TAGSTART, new stdClass());
 
+var_dump(xml_parser_set_option($xmlParser, XML_OPTION_SKIP_TAGSTART, "123test"));
+var_dump(xml_parser_get_option($xmlParser, XML_OPTION_SKIP_TAGSTART));
+
+var_dump(xml_parser_set_option($xmlParser, XML_OPTION_SKIP_TAGSTART, 1.5));
+var_dump(xml_parser_get_option($xmlParser, XML_OPTION_SKIP_TAGSTART));
+
 echo "Encodings\n";
 try {
     xml_parser_set_option($xmlParser, XML_OPTION_TARGET_ENCODING, 'Invalid Encoding');
@@ -74,8 +80,12 @@ Warning: xml_parser_set_option(): Argument #3 ($value) must be between 0 and 214
 Warning: xml_parser_set_option(): Argument #3 ($value) must be of type string|int|bool, array given in %s on line %d
 
 Warning: xml_parser_set_option(): Argument #3 ($value) must be of type string|int|bool, stdClass given in %s on line %d
+bool(true)
+int(123)
 
-Warning: Object of class stdClass could not be converted to int in %s on line %d
+Warning: xml_parser_set_option(): Argument #3 ($value) must be of type string|int|bool, float given in %s on line %d
+bool(true)
+int(1)
 Encodings
 xml_parser_set_option(): Argument #3 ($value) is not a supported target encoding
 
