@@ -6731,6 +6731,11 @@ handle_magic_get:
 					zval member;
 					ZVAL_STR(&member, ref->unmangled_name);
 					zend_call_known_instance_method_with_1_params(ce->__isset, obj, return_value, &member);
+
+					if (Z_TYPE_P(return_value) == IS_REFERENCE) {
+						zend_unwrap_reference(return_value);
+					}
+
 					*guard &= ~ZEND_GUARD_PROPERTY_ISSET;
 					OBJ_RELEASE(obj);
 					return;
