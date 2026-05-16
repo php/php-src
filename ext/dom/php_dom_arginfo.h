@@ -2,6 +2,8 @@
  * Stub hash: 8d7713834c924709155ed7acc554c9efc55e96c1
  * Has decl header: yes */
 
+#include "zend_attributes.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dom_import_simplexml, 0, 1, DOMAttr|DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()

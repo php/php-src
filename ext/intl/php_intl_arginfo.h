@@ -1,6 +1,8 @@
 /* This is a generated file, edit php_intl.stub.php instead.
  * Stub hash: c52fd0def2530be628beedbbcdcfecdcb07449a8 */
 
+#include "zend_attributes.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")

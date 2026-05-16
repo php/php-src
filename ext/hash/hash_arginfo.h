@@ -1,6 +1,8 @@
 /* This is a generated file, edit hash.stub.php instead.
  * Stub hash: b0fe91da9b0469b44a9647b774b9b00498592e30 */
 
+#include "zend_attributes.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hash, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)

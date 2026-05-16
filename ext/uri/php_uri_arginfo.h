@@ -2,6 +2,8 @@
  * Stub hash: 3c228f4227e7543be5c12c99074789d92c27ab99
  * Has decl header: yes */
 
+#include "zend_attributes.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, baseUrl, Uri\\Rfc3986\\\125ri, 1, "null")

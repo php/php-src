@@ -1,6 +1,8 @@
 /* This is a generated file, edit ldap.stub.php instead.
  * Stub hash: 0dde8fd813f43640dee842c03365d7431858a56d */
 
+#include "zend_attributes.h"
+
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, uri, IS_STRING, 1, "null")
