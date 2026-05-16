@@ -16,8 +16,6 @@
 #ifndef SPL_FIXEDARRAY_H
 #define SPL_FIXEDARRAY_H
 
-#include "php.h"
-
 extern PHPAPI zend_class_entry *spl_ce_SplFixedArray;
 
 #ifndef ZEND_OPCACHE_STATIC_CACHE_SAFE_DIRECT_HANDLERS_FWD

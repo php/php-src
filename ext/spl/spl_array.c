@@ -19,6 +19,7 @@
 #include "php.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
+#include "ext/opcache/zend_static_cache.h"
 #include "zend_execute.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
@@ -28,8 +29,6 @@
 #include "spl_array_arginfo.h"
 #include "spl_exceptions.h"
 #include "spl_functions.h" /* For spl_set_private_debug_info_property() */
-
-#include "ext/opcache/zend_static_cache.h" /* for zend_opcache_static_cache_safe_direct_handlers */
 
 /* Defined later in the file */
 PHPAPI zend_class_entry  *spl_ce_ArrayIterator;
@@ -1544,8 +1543,6 @@ static bool spl_array_object_copy_direct_cache_state(
 		goto cleanup;
 	}
 
-	/* Properties are restored by the caller after all internal state zvals
-	 * have been copied through the shared graph clone context. */
 	array_init(&empty_props_zv);
 	zend_hash_index_update(Z_ARRVAL(state_zv), 2, &empty_props_zv);
 
@@ -1629,6 +1626,7 @@ const zend_opcache_static_cache_safe_direct_handlers *spl_array_object_get_direc
 {
 	static const zend_opcache_static_cache_safe_direct_handlers handlers = {
 		false,
+		{ false, NULL, NULL },
 		spl_array_object_copy_direct_cache_state,
 		spl_array_object_direct_cache_state_has_unstorable,
 		spl_array_object_serialize_direct_cache_state,

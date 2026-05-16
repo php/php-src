@@ -18,6 +18,7 @@
 #endif
 
 #include "php.h"
+#include "ext/opcache/zend_static_cache.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_attributes.h"
@@ -27,8 +28,6 @@
 #include "spl_fixedarray.h"
 #include "spl_exceptions.h"
 #include "ext/json/php_json.h" /* For php_json_serializable_ce */
-
-#include "ext/opcache/zend_static_cache.h" /* for zend_opcache_static_cache_safe_direct_handlers */
 
 static zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
@@ -700,8 +699,6 @@ static bool spl_fixedarray_object_copy_direct_cache_state(
 		goto cleanup;
 	}
 
-	/* SplFixedArray serializes elements and object properties into the same
-	 * array. Properties are restored by the caller. */
 	array_init_size(&elements_zv, zend_hash_num_elements(Z_ARRVAL(state_zv)));
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL(state_zv), key, elem) {
 		if (key == NULL) {
@@ -801,6 +798,7 @@ const zend_opcache_static_cache_safe_direct_handlers *spl_fixedarray_object_get_
 {
 	static const zend_opcache_static_cache_safe_direct_handlers handlers = {
 		false,
+		{ false, NULL, NULL },
 		spl_fixedarray_object_copy_direct_cache_state,
 		spl_fixedarray_object_direct_cache_state_has_unstorable,
 		spl_fixedarray_object_serialize_direct_cache_state,

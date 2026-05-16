@@ -761,7 +761,8 @@ static zend_always_inline bool zend_opcache_serializer_encode_safe_direct_regist
 {
 	zend_opcache_static_cache_safe_direct_state_serialize_func_t serialize_func;
 	zval state_zv;
-	HashTable *props;
+	HashTable *props, empty_props;
+	bool ok;
 
 	serialize_func = zend_opcache_static_cache_safe_direct_state_serialize_func(Z_OBJCE_P(zv));
 	if (serialize_func == NULL) {
@@ -775,6 +776,14 @@ static zend_always_inline bool zend_opcache_serializer_encode_safe_direct_regist
 		}
 
 		return false;
+	}
+
+	if (zend_opcache_static_cache_safe_direct_state_includes_properties(Z_OBJCE_P(zv))) {
+		zend_hash_init(&empty_props, 0, NULL, NULL, 0);
+		ok = zend_opcache_serializer_encode_safe_direct_state_payload(wb, &state_zv, &empty_props);
+		zend_hash_destroy(&empty_props);
+
+		return ok;
 	}
 
 	props = zend_std_get_properties(Z_OBJ_P(zv));
