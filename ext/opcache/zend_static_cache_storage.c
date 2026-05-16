@@ -16,7 +16,15 @@
 
 #include "zend_static_cache_internal.h"
 
-#ifndef ZEND_WIN32
+#ifdef ZEND_WIN32
+# include "zend_execute.h"
+# include "zend_system_id.h"
+# include "win32/ioutil.h"
+# include <fcntl.h>
+# include <io.h>
+# include <stdio.h>
+# include <winbase.h>
+#else
 # include <errno.h>
 # include <fcntl.h>
 # include <stdio.h>
@@ -32,6 +40,322 @@
 # endif
 #endif
 
+#ifdef ZEND_WIN32
+# define ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_PREFIX_SIZE (2 * sizeof(void *))
+# define ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_NAME "ZendOPcache.StaticCache.SharedMemoryArea"
+# define ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_MUTEX_NAME "ZendOPcache.StaticCache.SharedMemoryMutex"
+# define ZEND_OPCACHE_STATIC_CACHE_WIN32_LOCK_FILE_NAME "ZendOPcache.StaticCache.LockFile"
+
+typedef struct _zend_opcache_static_cache_win32_segment {
+	zend_shared_segment segment;
+	HANDLE memfile;
+	void *mapping_base;
+	size_t mapping_size;
+} zend_opcache_static_cache_win32_segment;
+
+static void zend_opcache_static_cache_win32_create_name(char *buffer, size_t buffer_size, const char *name, size_t unique_id)
+{
+	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
+	const char *sapi_name = sapi_module.name != NULL ? sapi_module.name : "";
+
+	snprintf(
+		buffer,
+		buffer_size,
+		"%s@%.32s@%.20s@%.32s@%s@%zx",
+		name,
+		accel_uname_id,
+		sapi_name,
+		zend_system_id,
+		context->lock_name,
+		unique_id
+	);
+}
+
+static bool zend_opcache_static_cache_win32_set_segment(
+	zend_opcache_static_cache_win32_segment *segment,
+	HANDLE memfile,
+	void *mapping_base,
+	size_t mapping_size,
+	size_t requested_size
+)
+{
+	segment->memfile = memfile;
+	segment->mapping_base = mapping_base;
+	segment->mapping_size = mapping_size;
+	segment->segment.p = (char *) mapping_base + ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_PREFIX_SIZE;
+	segment->segment.pos = 0;
+	segment->segment.size = requested_size;
+
+	return true;
+}
+
+static int zend_opcache_static_cache_win32_reattach_segment(
+	zend_opcache_static_cache_win32_segment *segment,
+	HANDLE memfile,
+	size_t requested_size,
+	const char **error_in
+)
+{
+	void *metadata_view, *wanted_mapping_base, *execute_ex_base, *mapping_base;
+	MEMORY_BASIC_INFORMATION info;
+	size_t mapping_size;
+
+	if (requested_size > SIZE_MAX - ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_PREFIX_SIZE) {
+		*error_in = "size overflow";
+		return ALLOC_FAILURE;
+	}
+
+	mapping_size = requested_size + ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_PREFIX_SIZE;
+	metadata_view = MapViewOfFileEx(memfile, FILE_MAP_READ, 0, 0, ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_PREFIX_SIZE, NULL);
+	if (metadata_view == NULL) {
+		*error_in = "MapViewOfFileEx";
+		return ALLOC_FAILURE;
+	}
+
+	wanted_mapping_base = ((void **) metadata_view)[0];
+	execute_ex_base = ((void **) metadata_view)[1];
+	UnmapViewOfFile(metadata_view);
+
+	if ((void *) execute_ex != execute_ex_base) {
+		*error_in = "execute_ex";
+		return ALLOC_FAILURE;
+	}
+
+	if (VirtualQuery(wanted_mapping_base, &info, sizeof(info)) == 0 ||
+		info.State != MEM_FREE ||
+		info.RegionSize < mapping_size
+	) {
+		*error_in = "VirtualQuery";
+		return ALLOC_FAILURE;
+	}
+
+	mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, wanted_mapping_base);
+	if (mapping_base == NULL) {
+		*error_in = "MapViewOfFileEx";
+		return ALLOC_FAILURE;
+	}
+
+	return zend_opcache_static_cache_win32_set_segment(segment, memfile, mapping_base, mapping_size, requested_size)
+		? ALLOC_SUCCESS
+		: ALLOC_FAILURE;
+}
+
+static int zend_opcache_static_cache_win32_create_segment(
+	zend_opcache_static_cache_win32_segment *segment,
+	const char *mapping_name,
+	size_t requested_size,
+	const char **error_in
+)
+{
+	HANDLE memfile;
+	void *mapping_base = NULL;
+	size_t mapping_size;
+	DWORD size_high, size_low;
+	uint32_t index;
+	void *configured_mapping_base = (void *) -1;
+#if defined(_WIN64)
+	void *mapping_base_set[] = {
+		(void *) 0x0000100000000000,
+		(void *) 0x0000200000000000,
+		(void *) 0x0000300000000000,
+		(void *) 0x0000400000000000,
+		(void *) 0x0000500000000000,
+		(void *) 0x0000600000000000,
+		(void *) 0x0000700000000000,
+		NULL,
+		(void *) -1
+	};
+#else
+	void *mapping_base_set[] = {
+		(void *) 0x20000000,
+		(void *) 0x21000000,
+		(void *) 0x30000000,
+		(void *) 0x31000000,
+		(void *) 0x50000000,
+		NULL,
+		(void *) -1
+	};
+#endif
+
+	if (requested_size > SIZE_MAX - ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_PREFIX_SIZE) {
+		*error_in = "size overflow";
+		return ALLOC_FAILURE;
+	}
+
+	mapping_size = requested_size + ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_PREFIX_SIZE;
+#if defined(_WIN64)
+	size_high = (DWORD) (mapping_size >> 32);
+	size_low = (DWORD) (mapping_size & 0xffffffff);
+#else
+	if (mapping_size > UINT32_MAX) {
+		*error_in = "size overflow";
+		return ALLOC_FAILURE;
+	}
+	size_high = 0;
+	size_low = (DWORD) mapping_size;
+#endif
+
+	memfile = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE | SEC_COMMIT, size_high, size_low, mapping_name);
+	if (memfile == NULL) {
+		*error_in = "CreateFileMappingA";
+		return ALLOC_FAILURE;
+	}
+
+	if (GetLastError() == ERROR_ALREADY_EXISTS) {
+		int result = zend_opcache_static_cache_win32_reattach_segment(segment, memfile, requested_size, error_in);
+		if (result != ALLOC_SUCCESS) {
+			CloseHandle(memfile);
+		}
+
+		return result;
+	}
+
+	if (ZCG(accel_directives).mmap_base && *ZCG(accel_directives).mmap_base) {
+		char *mmap_base = ZCG(accel_directives).mmap_base;
+
+		if (mmap_base[0] == '0' && mmap_base[1] == 'x') {
+			mmap_base += 2;
+		}
+		if (sscanf(mmap_base, "%p", &configured_mapping_base) == 1) {
+			mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, configured_mapping_base);
+		}
+	}
+
+	for (index = 0; mapping_base == NULL && mapping_base_set[index] != (void *) -1; index++) {
+		mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, mapping_base_set[index]);
+	}
+
+	if (mapping_base == NULL) {
+		CloseHandle(memfile);
+		*error_in = "MapViewOfFileEx";
+		return ALLOC_FAILURE;
+	}
+
+	((void **) mapping_base)[0] = mapping_base;
+	((void **) mapping_base)[1] = (void *) execute_ex;
+
+	return zend_opcache_static_cache_win32_set_segment(segment, memfile, mapping_base, mapping_size, requested_size)
+		? ALLOC_SUCCESS
+		: ALLOC_FAILURE;
+}
+
+static int zend_opcache_static_cache_win32_create_segments(
+	size_t requested_size,
+	zend_shared_segment ***shared_segments_p,
+	int *shared_segments_count,
+	const char **error_in
+)
+{
+	zend_opcache_static_cache_win32_segment *segment;
+	HANDLE mutex = NULL, memfile = NULL;
+	DWORD wait_result;
+	char mapping_name[MAXPATHLEN], mutex_name[MAXPATHLEN];
+	bool mutex_acquired = false;
+	int result = ALLOC_FAILURE;
+
+	*shared_segments_count = 1;
+	*shared_segments_p = (zend_shared_segment **) calloc(
+		1,
+		sizeof(zend_shared_segment *) + sizeof(zend_opcache_static_cache_win32_segment)
+	);
+	if (*shared_segments_p == NULL) {
+		*error_in = "calloc";
+		return ALLOC_FAILURE;
+	}
+
+	segment = (zend_opcache_static_cache_win32_segment *) ((char *) *shared_segments_p + sizeof(zend_shared_segment *));
+	(*shared_segments_p)[0] = (zend_shared_segment *) segment;
+
+	zend_opcache_static_cache_win32_create_name(
+		mapping_name,
+		sizeof(mapping_name),
+		ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_NAME,
+		requested_size
+	);
+	zend_opcache_static_cache_win32_create_name(
+		mutex_name,
+		sizeof(mutex_name),
+		ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_MUTEX_NAME,
+		requested_size
+	);
+
+	mutex = CreateMutexA(NULL, FALSE, mutex_name);
+	if (mutex == NULL) {
+		*error_in = "CreateMutexA";
+		goto failure;
+	}
+
+	wait_result = WaitForSingleObject(mutex, INFINITE);
+	if (wait_result != WAIT_OBJECT_0 && wait_result != WAIT_ABANDONED) {
+		*error_in = "WaitForSingleObject";
+		goto failure;
+	}
+	mutex_acquired = true;
+
+	memfile = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, mapping_name);
+	if (memfile != NULL) {
+		result = zend_opcache_static_cache_win32_reattach_segment(segment, memfile, requested_size, error_in);
+		if (result != ALLOC_SUCCESS) {
+			CloseHandle(memfile);
+		}
+	} else {
+		result = zend_opcache_static_cache_win32_create_segment(segment, mapping_name, requested_size, error_in);
+	}
+
+	if (mutex_acquired) {
+		ReleaseMutex(mutex);
+		mutex_acquired = false;
+	}
+	CloseHandle(mutex);
+	mutex = NULL;
+
+	if (result == ALLOC_SUCCESS) {
+		return ALLOC_SUCCESS;
+	}
+
+failure:
+	if (mutex_acquired) {
+		ReleaseMutex(mutex);
+	}
+	if (mutex != NULL) {
+		CloseHandle(mutex);
+	}
+	free(*shared_segments_p);
+	*shared_segments_p = NULL;
+	*shared_segments_count = 0;
+
+	return ALLOC_FAILURE;
+}
+
+static int zend_opcache_static_cache_win32_detach_segment(zend_shared_segment *shared_segment)
+{
+	zend_opcache_static_cache_win32_segment *segment = (zend_opcache_static_cache_win32_segment *) shared_segment;
+
+	if (segment->mapping_base != NULL) {
+		UnmapViewOfFile(segment->mapping_base);
+		segment->mapping_base = NULL;
+	}
+
+	if (segment->memfile != NULL) {
+		CloseHandle(segment->memfile);
+		segment->memfile = NULL;
+	}
+
+	return 0;
+}
+
+static size_t zend_opcache_static_cache_win32_segment_type_size(void)
+{
+	return sizeof(zend_opcache_static_cache_win32_segment);
+}
+
+static const zend_shared_memory_handlers zend_opcache_static_cache_win32_handlers = {
+	zend_opcache_static_cache_win32_create_segments,
+	zend_opcache_static_cache_win32_detach_segment,
+	zend_opcache_static_cache_win32_segment_type_size
+};
+#endif
+
 static const zend_shared_memory_handler_entry zend_opcache_static_cache_handler_table[] = {
 #ifdef USE_MMAP
 	{ "mmap", &zend_alloc_mmap_handlers },
@@ -43,7 +367,7 @@ static const zend_shared_memory_handler_entry zend_opcache_static_cache_handler_
 	{ "posix", &zend_alloc_posix_handlers },
 #endif
 #ifdef ZEND_WIN32
-	{ "win32", &zend_alloc_win32_handlers },
+	{ "win32", &zend_opcache_static_cache_win32_handlers },
 #endif
 	{ NULL, NULL }
 };
@@ -106,7 +430,6 @@ static zend_always_inline void zend_opcache_static_cache_cleanup_segments(const 
 	free(segments);
 }
 
-#ifndef ZEND_WIN32
 #ifdef ZTS
 static void zend_opcache_static_cache_entry_locks_shutdown(zend_opcache_static_cache_storage *storage)
 {
@@ -148,6 +471,7 @@ static bool zend_opcache_static_cache_entry_locks_startup(zend_opcache_static_ca
 }
 #endif
 
+#ifndef ZEND_WIN32
 static bool zend_opcache_static_cache_lock_internal(short lock_type)
 {
 	zend_opcache_static_cache_storage *storage = &zend_opcache_static_cache_active_context()->storage;
@@ -325,27 +649,217 @@ static void zend_opcache_static_cache_unlock_impl(void)
 #endif
 }
 #else
+static bool zend_opcache_static_cache_win32_open_lock_file_at(zend_opcache_static_cache_storage *storage, const char *directory, const char *base_name)
+{
+	if (directory == NULL || directory[0] == '\0') {
+		return false;
+	}
+
+	snprintf(
+		storage->lockfile_name,
+		sizeof(storage->lockfile_name),
+		"%s/%s.lock",
+		directory,
+		base_name
+	);
+
+	storage->lock_file = php_win32_ioutil_open(storage->lockfile_name, O_RDWR | O_CREAT | O_BINARY, 0666);
+
+	return storage->lock_file >= 0;
+}
+
+static bool zend_opcache_static_cache_win32_open_lock_file(zend_opcache_static_cache_context *context)
+{
+	zend_opcache_static_cache_storage *storage = &context->storage;
+	char base_name[MAXPATHLEN], temp_path[MAXPATHLEN];
+	DWORD temp_path_len;
+
+	zend_opcache_static_cache_win32_create_name(
+		base_name,
+		sizeof(base_name),
+		ZEND_OPCACHE_STATIC_CACHE_WIN32_LOCK_FILE_NAME,
+		storage->size
+	);
+
+	if (zend_opcache_static_cache_win32_open_lock_file_at(storage, ZCG(accel_directives).lockfile_path, base_name)) {
+		return true;
+	}
+
+	temp_path_len = GetTempPathA(sizeof(temp_path), temp_path);
+	if (temp_path_len == 0 || temp_path_len >= sizeof(temp_path)) {
+		return false;
+	}
+
+	return zend_opcache_static_cache_win32_open_lock_file_at(storage, temp_path, base_name);
+}
+
+static bool zend_opcache_static_cache_win32_lock_range(zend_opcache_static_cache_storage *storage, DWORD offset, bool exclusive, bool blocking)
+{
+	OVERLAPPED overlapped;
+	HANDLE file_handle;
+	DWORD flags = 0;
+
+	if (!storage->lock_initialized || storage->lock_file < 0) {
+		return false;
+	}
+
+	file_handle = (HANDLE) _get_osfhandle(storage->lock_file);
+	if (file_handle == INVALID_HANDLE_VALUE) {
+		return false;
+	}
+
+	memset(&overlapped, 0, sizeof(overlapped));
+	overlapped.Offset = offset;
+
+	if (exclusive) {
+		flags |= LOCKFILE_EXCLUSIVE_LOCK;
+	}
+	if (!blocking) {
+		flags |= LOCKFILE_FAIL_IMMEDIATELY;
+	}
+
+	return LockFileEx(file_handle, flags, 0, 1, 0, &overlapped) == TRUE;
+}
+
+static void zend_opcache_static_cache_win32_unlock_range(zend_opcache_static_cache_storage *storage, DWORD offset)
+{
+	OVERLAPPED overlapped;
+	HANDLE file_handle;
+
+	if (!storage->lock_initialized || storage->lock_file < 0) {
+		return;
+	}
+
+	file_handle = (HANDLE) _get_osfhandle(storage->lock_file);
+	if (file_handle == INVALID_HANDLE_VALUE) {
+		return;
+	}
+
+	memset(&overlapped, 0, sizeof(overlapped));
+	overlapped.Offset = offset;
+	UnlockFileEx(file_handle, 0, 1, 0, &overlapped);
+}
+
+static bool zend_opcache_static_cache_lock_internal(bool exclusive)
+{
+	zend_opcache_static_cache_storage *storage = &zend_opcache_static_cache_active_context()->storage;
+
+	if (!storage->lock_initialized) {
+		return false;
+	}
+
+#ifdef ZTS
+	zend_opcache_static_cache_zts_lock_is_write = exclusive;
+	if (!(exclusive
+			? zend_thread_rwlock_wrlock(&storage->zts_lock)
+			: zend_thread_rwlock_rdlock(&storage->zts_lock)
+		)
+	) {
+		zend_opcache_static_cache_zts_lock_is_write = false;
+
+		return false;
+	}
+#endif
+
+	if (!zend_opcache_static_cache_win32_lock_range(storage, 0, exclusive, true)) {
+#ifdef ZTS
+		if (exclusive) {
+			zend_thread_rwlock_unlock_wr(&storage->zts_lock);
+		} else {
+			zend_thread_rwlock_unlock_rd(&storage->zts_lock);
+		}
+		zend_opcache_static_cache_zts_lock_is_write = false;
+#endif
+		return false;
+	}
+
+	return true;
+}
+
 static bool zend_opcache_static_cache_lock_startup(void)
 {
-	return false;
+	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
+	zend_opcache_static_cache_storage *storage = &context->storage;
+
+	if (storage->lock_initialized) {
+		return true;
+	}
+
+#ifdef ZTS
+	if (!zend_opcache_static_cache_entry_locks_startup(storage)) {
+		return false;
+	}
+
+	if (!zend_thread_rwlock_init(&storage->zts_lock)) {
+		zend_opcache_static_cache_entry_locks_shutdown(storage);
+
+		return false;
+	}
+#endif
+
+	if (!zend_opcache_static_cache_win32_open_lock_file(context)) {
+#ifdef ZTS
+		zend_thread_rwlock_destroy(&storage->zts_lock);
+		zend_opcache_static_cache_entry_locks_shutdown(storage);
+#endif
+		return false;
+	}
+
+	storage->lock_initialized = true;
+
+	return true;
 }
 
 static void zend_opcache_static_cache_lock_shutdown(void)
 {
+	zend_opcache_static_cache_storage *storage = &zend_opcache_static_cache_active_context()->storage;
+
+	if (!storage->lock_initialized) {
+		return;
+	}
+
+	if (storage->lock_file >= 0) {
+		php_win32_ioutil_close(storage->lock_file);
+		storage->lock_file = -1;
+	}
+#ifdef ZTS
+	zend_thread_rwlock_destroy(&storage->zts_lock);
+	zend_opcache_static_cache_entry_locks_shutdown(storage);
+#endif
+	storage->lock_initialized = false;
 }
 
 static bool zend_opcache_static_cache_rlock_impl(void)
 {
-	return false;
+	return zend_opcache_static_cache_lock_internal(false);
 }
 
 static bool zend_opcache_static_cache_wlock_impl(void)
 {
-	return false;
+	return zend_opcache_static_cache_lock_internal(true);
 }
 
 static void zend_opcache_static_cache_unlock_impl(void)
 {
+	zend_opcache_static_cache_storage *storage = &zend_opcache_static_cache_active_context()->storage;
+#ifdef ZTS
+	bool zts_lock_is_write = zend_opcache_static_cache_zts_lock_is_write;
+#endif
+
+	if (!storage->lock_initialized) {
+		return;
+	}
+
+	zend_opcache_static_cache_win32_unlock_range(storage, 0);
+
+#ifdef ZTS
+	if (zts_lock_is_write) {
+		zend_thread_rwlock_unlock_wr(&storage->zts_lock);
+	} else {
+		zend_thread_rwlock_unlock_rd(&storage->zts_lock);
+	}
+	zend_opcache_static_cache_zts_lock_is_write = false;
+#endif
 }
 #endif
 
@@ -370,7 +884,7 @@ static uint32_t zend_opcache_static_cache_entry_lock_stripe(zend_string *key)
 	return (uint32_t) (zend_string_hash_val(key) % ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_STRIPES);
 }
 
-#ifdef ZTS
+#if defined(ZTS) && !defined(ZEND_WIN32)
 static void zend_opcache_static_cache_entry_locks_reinit_after_fork(zend_opcache_static_cache_storage *storage)
 {
 	uint32_t index, allocated = 0;
@@ -554,6 +1068,76 @@ static void zend_opcache_static_cache_unlock_entry_stripe(zend_opcache_static_ca
 	}
 #endif
 }
+#else
+static bool zend_opcache_static_cache_lock_entry_stripe_ex(zend_opcache_static_cache_context *context, uint32_t stripe, bool blocking)
+{
+	zend_opcache_static_cache_storage *storage = &context->storage;
+	uint32_t *counts = zend_opcache_static_cache_entry_lock_counts_for_context(context);
+
+	if (counts[stripe] != 0) {
+		counts[stripe]++;
+
+		return true;
+	}
+
+#ifdef ZTS
+	if (!storage->entry_locks_initialized && !zend_opcache_static_cache_entry_locks_startup(storage)) {
+		return false;
+	}
+
+	if (storage->entry_locks[stripe] == NULL) {
+		return false;
+	}
+
+	if (blocking) {
+		if (tsrm_mutex_lock(storage->entry_locks[stripe]) != 0) {
+			return false;
+		}
+	} else if (!TryEnterCriticalSection(storage->entry_locks[stripe])) {
+		return false;
+	}
+#endif
+
+	if (!zend_opcache_static_cache_win32_lock_range(storage, stripe + 1, true, blocking)) {
+#ifdef ZTS
+		tsrm_mutex_unlock(storage->entry_locks[stripe]);
+#endif
+		return false;
+	}
+
+	counts[stripe] = 1;
+
+	return true;
+}
+
+static bool zend_opcache_static_cache_lock_entry_stripe(zend_opcache_static_cache_context *context, uint32_t stripe)
+{
+	return zend_opcache_static_cache_lock_entry_stripe_ex(context, stripe, true);
+}
+
+static bool zend_opcache_static_cache_try_lock_entry_stripe(zend_opcache_static_cache_context *context, uint32_t stripe)
+{
+	return zend_opcache_static_cache_lock_entry_stripe_ex(context, stripe, false);
+}
+
+static void zend_opcache_static_cache_unlock_entry_stripe(zend_opcache_static_cache_context *context, uint32_t stripe)
+{
+	zend_opcache_static_cache_storage *storage = &context->storage;
+	uint32_t *counts = zend_opcache_static_cache_entry_lock_counts_for_context(context);
+
+	ZEND_ASSERT(counts[stripe] != 0);
+	if (--counts[stripe] != 0) {
+		return;
+	}
+
+	zend_opcache_static_cache_win32_unlock_range(storage, stripe + 1);
+
+#ifdef ZTS
+	if (storage->entry_locks_initialized && storage->entry_locks[stripe] != NULL) {
+		tsrm_mutex_unlock(storage->entry_locks[stripe]);
+	}
+#endif
+}
 #endif
 
 static void zend_opcache_static_cache_entry_lock_dtor(zval *lock_zv)
@@ -564,7 +1148,9 @@ static void zend_opcache_static_cache_entry_lock_dtor(zval *lock_zv)
 		return;
 	}
 
-#ifndef ZEND_WIN32
+#ifdef ZEND_WIN32
+	zend_opcache_static_cache_unlock_entry_stripe(lock->context, lock->stripe);
+#else
 	if (lock->owner_pid == (zend_ulong) getpid()) {
 		zend_opcache_static_cache_unlock_entry_stripe(lock->context, lock->stripe);
 	}
@@ -1001,9 +1587,7 @@ void zend_opcache_static_cache_reset_storage(void)
 	zend_opcache_static_cache_storage *storage = &zend_opcache_static_cache_active_context()->storage;
 
 	memset(storage, 0, sizeof(*storage));
-#ifndef ZEND_WIN32
 	storage->lock_file = -1;
-#endif
 }
 
 bool zend_opcache_static_cache_header_init_locked(void)
@@ -1420,17 +2004,11 @@ bool zend_opcache_static_cache_acquire_entry_lock(zend_string *key)
 		return true;
 	}
 
-#ifndef ZEND_WIN32
 	if (!zend_opcache_static_cache_lock_entry_stripe(context, stripe)) {
 		zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Unable to acquire the %s entry lock", context->name);
 
 		return false;
 	}
-#else
-	zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Unable to acquire the %s entry lock", context->name);
-
-	return false;
-#endif
 
 	lock = emalloc(sizeof(zend_opcache_static_cache_entry_lock));
 	lock->context = context;
@@ -1443,9 +2021,7 @@ bool zend_opcache_static_cache_acquire_entry_lock(zend_string *key)
 	lock->stripe = stripe;
 
 	if (zend_hash_add_ptr(zend_opcache_static_cache_entry_locks(context), key, lock) == NULL) {
-#ifndef ZEND_WIN32
 		zend_opcache_static_cache_unlock_entry_stripe(context, stripe);
-#endif
 		efree(lock);
 
 		return true;
@@ -1467,13 +2043,9 @@ bool zend_opcache_static_cache_try_acquire_entry_lock(zend_string *key)
 		return true;
 	}
 
-#ifndef ZEND_WIN32
 	if (!zend_opcache_static_cache_try_lock_entry_stripe(context, stripe)) {
 		return false;
 	}
-#else
-	return false;
-#endif
 
 	lock = emalloc(sizeof(zend_opcache_static_cache_entry_lock));
 	lock->context = context;
@@ -1486,9 +2058,7 @@ bool zend_opcache_static_cache_try_acquire_entry_lock(zend_string *key)
 	lock->stripe = stripe;
 
 	if (zend_hash_add_ptr(zend_opcache_static_cache_entry_locks(context), key, lock) == NULL) {
-#ifndef ZEND_WIN32
 		zend_opcache_static_cache_unlock_entry_stripe(context, stripe);
-#endif
 		efree(lock);
 
 		return true;
