@@ -53,14 +53,9 @@ typedef bool (*zend_opcache_static_cache_safe_direct_state_unserialize_func_t)(
 	zval *state
 );
 
-#ifndef ZEND_OPCACHE_STATIC_CACHE_SAFE_DIRECT_HANDLERS_FWD
-# define ZEND_OPCACHE_STATIC_CACHE_SAFE_DIRECT_HANDLERS_FWD
 typedef struct _zend_opcache_static_cache_safe_direct_serializer_path zend_opcache_static_cache_safe_direct_serializer_path;
 typedef struct _zend_opcache_static_cache_safe_direct_handlers zend_opcache_static_cache_safe_direct_handlers;
-#endif
 
-#ifndef ZEND_OPCACHE_STATIC_CACHE_SAFE_DIRECT_HANDLERS_DEFINED
-# define ZEND_OPCACHE_STATIC_CACHE_SAFE_DIRECT_HANDLERS_DEFINED
 struct _zend_opcache_static_cache_safe_direct_serializer_path {
 	bool state_includes_properties;
 	zend_function *serialize;
@@ -75,7 +70,6 @@ struct _zend_opcache_static_cache_safe_direct_handlers {
 	zend_opcache_static_cache_safe_direct_state_serialize_func_t state_serialize;
 	zend_opcache_static_cache_safe_direct_state_unserialize_func_t state_unserialize;
 };
-#endif
 
 BEGIN_EXTERN_C()
 
