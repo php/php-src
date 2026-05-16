@@ -189,6 +189,10 @@ PHP 8.6 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Core:
+  . Specifying a return type of array|null / ?array for __debugInfo() is now
+    deprecated. Specify array instead.
+
 - GMP
   . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
     emit a deprecation warning when converting a float right operand to int
