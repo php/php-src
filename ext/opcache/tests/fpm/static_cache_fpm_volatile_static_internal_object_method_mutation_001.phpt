@@ -1,18 +1,27 @@
 --TEST--
-OPcache VolatileStatic tracks internal object method mutations
+FPM: OPcache VolatileStatic tracks internal object method mutations
 --EXTENSIONS--
 opcache
 spl
---CONFLICTS--
-all
+--SKIPIF--
+<?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--
 <?php
 
-$docRoot = sys_get_temp_dir() . '/opcache_static_cache_' . getmypid() . '_' . str_replace('.', '_', uniqid('', true));
-$script = 'volatile_static_internal_object_method_mutation_001.php';
-mkdir($docRoot);
+require_once __DIR__ . '/tester.inc';
 
-file_put_contents($docRoot . '/' . $script, <<<'PHP'
+$cfg = <<<EOT
+[global]
+error_log = {{FILE:LOG}}
+[opcache]
+listen = {{ADDR}}
+pm = static
+pm.max_children = 1
+pm.max_requests = 0
+catch_workers_output = yes
+EOT;
+
+$code = <<<'PHP'
 <?php
 
 class VolatileStaticDateMethodState
@@ -88,34 +97,32 @@ if ($action === 'mutate') {
 }
 $second = $value->count() > 1 ? $value->offsetGet(1) : 'none';
 echo "fixed=", $value->count(), ",", $value->offsetGet(0), ",", $second, "\n";
-PHP);
+PHP;
 
-$php = getenv('TEST_PHP_EXECUTABLE');
-if ($php) {
-	$php = realpath(__DIR__ . '/../../../' . $php) ?: $php;
-	putenv('TEST_PHP_EXECUTABLE=' . $php);
+$tester = new FPM\Tester($cfg, $code);
+$tester->start(iniEntries: [
+	'opcache.enable' => '1',
+	'opcache.static_cache.volatile_size_mb' => '32',
+	'opcache.file_update_protection' => '0',
+	'opcache.jit' => '0',
+]);
+$tester->expectLogStartNotices();
+
+function static_cache_internal_object_fpm_request(FPM\Tester $tester, string $query): void
+{
+	echo $tester->request($query)->getBody(), "\n";
 }
 
-include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0', $docRoot);
-
-register_shutdown_function(static function () use ($docRoot, $script) {
-	@unlink($docRoot . '/' . $script);
-	@rmdir($docRoot);
-});
-
-$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/' . $script;
 foreach (['date', 'array', 'fixed'] as $state) {
-	echo file_get_contents($base . '?action=reset');
-	echo file_get_contents($base . '?state=' . $state . '&action=read');
-	echo file_get_contents($base . '?state=' . $state . '&action=mutate');
-	echo file_get_contents($base . '?state=' . $state . '&action=read');
+	static_cache_internal_object_fpm_request($tester, 'action=reset');
+	static_cache_internal_object_fpm_request($tester, 'state=' . $state . '&action=read');
+	static_cache_internal_object_fpm_request($tester, 'state=' . $state . '&action=mutate');
+	static_cache_internal_object_fpm_request($tester, 'state=' . $state . '&action=read');
 }
 
-?>
---CLEAN--
-<?php
-@unlink(__DIR__ . '/volatile_static_internal_object_method_mutation_001.php');
+$tester->terminate();
+$tester->expectLogTerminatingNotices();
+$tester->close();
 ?>
 --EXPECT--
 reset
@@ -130,3 +137,8 @@ reset
 fixed=1,seed,none
 fixed=2,changed,tail
 fixed=2,changed,tail
+--CLEAN--
+<?php
+require_once __DIR__ . '/tester.inc';
+FPM\Tester::clean();
+?>
