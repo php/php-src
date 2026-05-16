@@ -4,11 +4,15 @@ OPcache VolatileStatic tracks internal object method mutations
 opcache
 spl
 --CONFLICTS--
-server
+all
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/volatile_static_internal_object_method_mutation_001.php', <<<'PHP'
+$docRoot = sys_get_temp_dir() . '/opcache_static_cache_' . getmypid() . '_' . str_replace('.', '_', uniqid('', true));
+$script = 'volatile_static_internal_object_method_mutation_001.php';
+mkdir($docRoot);
+
+file_put_contents($docRoot . '/' . $script, <<<'PHP'
 <?php
 
 class VolatileStaticDateMethodState
@@ -93,9 +97,14 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0', $docRoot);
 
-$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/volatile_static_internal_object_method_mutation_001.php';
+register_shutdown_function(static function () use ($docRoot, $script) {
+	@unlink($docRoot . '/' . $script);
+	@rmdir($docRoot);
+});
+
+$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/' . $script;
 foreach (['date', 'array', 'fixed'] as $state) {
 	echo file_get_contents($base . '?action=reset');
 	echo file_get_contents($base . '?state=' . $state . '&action=read');

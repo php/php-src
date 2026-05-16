@@ -1,14 +1,14 @@
 <?php
 define ("PHP_CLI_SERVER_HOSTNAME", "localhost");
 
-function php_cli_server_start($ini = "") {
+function php_cli_server_start($ini = "", $doc_root = null) {
     $php_executable = getenv('TEST_PHP_EXECUTABLE');
     if ($php_executable) {
         $php_executable = realpath(__DIR__ . '/../../../' . $php_executable) ?: realpath($php_executable) ?: $php_executable;
     } else {
         $php_executable = PHP_BINARY;
     }
-    $doc_root = __DIR__;
+    $doc_root ??= __DIR__;
 
     $ini_array = preg_split('/\s+/', trim($ini));
     $ini_array = array_map(function($arg) {
