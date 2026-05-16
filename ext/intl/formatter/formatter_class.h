@@ -15,7 +15,7 @@
 #ifndef FORMATTER_CLASS_H
 #define FORMATTER_CLASS_H
 
-#include <php.h>
+#include "formatter_data.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,7 +23,6 @@ extern "C" {
 #include "intl_common.h"
 #include "intl_error.h"
 #include "intl_data.h"
-#include "formatter_data.h"
 #ifdef __cplusplus
 }
 #endif

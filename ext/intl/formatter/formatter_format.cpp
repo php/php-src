@@ -16,24 +16,21 @@
 #include <config.h>
 #endif
 
-extern "C" {
-#include "php_intl.h"
-#include "intl_convert.h"
-}
-
-#include <unicode/ustring.h>
-
+#include <unicode/curramt.h>
+#include <unicode/fmtable.h>
+#include "../intl_convertcpp.h"
 #include "formatter_class.h"
 #include "formatter_format.h"
+
+extern "C" {
+#include "php_intl.h"
+}
 
 /* {{{ Format a number. */
 U_CFUNC PHP_FUNCTION( numfmt_format )
 {
 	zval *number;
 	zend_long type = FORMAT_TYPE_DEFAULT;
-	UChar format_buf[32];
-	UChar* formatted = format_buf;
-	int32_t formatted_len = USIZE(format_buf);
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -59,50 +56,27 @@ U_CFUNC PHP_FUNCTION( numfmt_format )
 		}
 	}
 
+	icu::UnicodeString result;
+	icu::FieldPosition pos;
+
 	switch(type) {
 		case FORMAT_TYPE_INT32:
 			convert_to_long(number);
-			formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number),
-				formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
-			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
-				intl_error_reset(INTL_DATA_ERROR_P(nfo));
-				formatted = eumalloc(formatted_len);
-				formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number),
-					formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
-				if (U_FAILURE( INTL_DATA_ERROR_CODE(nfo) ) ) {
-					efree(formatted);
-				}
-			}
+			FORMATTER_OBJECT(nfo)->format((int32_t)Z_LVAL_P(number), result, pos, INTL_DATA_ERROR_CODE(nfo));
 			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
 			break;
 
 		case FORMAT_TYPE_INT64:
 		{
 			int64_t value = (Z_TYPE_P(number) == IS_DOUBLE)?(int64_t)Z_DVAL_P(number):Z_LVAL_P(number);
-			formatted_len = unum_formatInt64(FORMATTER_OBJECT(nfo), value, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
-			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
-				intl_error_reset(INTL_DATA_ERROR_P(nfo));
-				formatted = eumalloc(formatted_len);
-				formatted_len = unum_formatInt64(FORMATTER_OBJECT(nfo), value, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
-				if (U_FAILURE( INTL_DATA_ERROR_CODE(nfo) ) ) {
-					efree(formatted);
-				}
-			}
+			FORMATTER_OBJECT(nfo)->format(value, result, pos, INTL_DATA_ERROR_CODE(nfo));
 			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
 		}
 			break;
 
 		case FORMAT_TYPE_DOUBLE:
 			convert_to_double(number);
-			formatted_len = unum_formatDouble(FORMATTER_OBJECT(nfo), Z_DVAL_P(number), formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
-			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
-				intl_error_reset(INTL_DATA_ERROR_P(nfo));
-				formatted = eumalloc(formatted_len);
-				unum_formatDouble(FORMATTER_OBJECT(nfo), Z_DVAL_P(number), formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
-				if (U_FAILURE( INTL_DATA_ERROR_CODE(nfo) ) ) {
-					efree(formatted);
-				}
-			}
+			FORMATTER_OBJECT(nfo)->format(Z_DVAL_P(number), result, pos, INTL_DATA_ERROR_CODE(nfo));
 			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
 			break;
 		case FORMAT_TYPE_CURRENCY:
@@ -120,7 +94,9 @@ U_CFUNC PHP_FUNCTION( numfmt_format )
 			RETURN_THROWS();
 	}
 
-	INTL_METHOD_RETVAL_UTF8( nfo, formatted, formatted_len, ( formatted != format_buf ) );
+	zend_string *u8str = intl_charFromString(result, &INTL_DATA_ERROR_CODE(nfo));
+	INTL_METHOD_CHECK_STATUS(nfo, "Error converting result to UTF-8");
+	RETVAL_STR(u8str);
 }
 /* }}} */
 
@@ -128,13 +104,8 @@ U_CFUNC PHP_FUNCTION( numfmt_format )
 U_CFUNC PHP_FUNCTION( numfmt_format_currency )
 {
 	double     number;
-	UChar      format_buf[32];
-	UChar*     formatted     = format_buf;
-	int32_t    formatted_len = USIZE(format_buf);
 	char*      currency      = NULL;
 	size_t     currency_len  = 0;
-	UChar*     scurrency     = NULL;
-	int32_t    scurrency_len = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -148,36 +119,31 @@ U_CFUNC PHP_FUNCTION( numfmt_format_currency )
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	/* Convert currency to UTF-16. */
-	intl_convert_utf8_to_utf16(&scurrency, &scurrency_len, currency, currency_len, &INTL_DATA_ERROR_CODE(nfo));
+	icu::UnicodeString ucurrency;
+	intl_stringFromChar(ucurrency, currency, currency_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Currency conversion to UTF-16 failed" );
 
-	/* Format the number using a fixed-length buffer. */
-	formatted_len = unum_formatDoubleCurrency(FORMATTER_OBJECT(nfo), number, scurrency, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+	/* Format using CurrencyAmount. */
+	icu::CurrencyAmount *currAmt = new icu::CurrencyAmount(number, ucurrency.getTerminatedBuffer(), INTL_DATA_ERROR_CODE(nfo));
+	if (U_FAILURE(INTL_DATA_ERROR_CODE(nfo))) {
+		delete currAmt;
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(nfo), "Number formatting failed");
+		RETURN_FALSE;
+	}
+	icu::Formattable fmt;
+	fmt.adoptObject(currAmt);
+	icu::UnicodeString result;
+	icu::FieldPosition pos;
+	FORMATTER_OBJECT(nfo)->format(fmt, result, pos, INTL_DATA_ERROR_CODE(nfo));
 
-	/* If the buffer turned out to be too small
-	 * then allocate another buffer dynamically
-	 * and use it to format the number.
-	 */
-	if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
-		intl_error_reset(INTL_DATA_ERROR_P(nfo));
-		formatted = eumalloc(formatted_len);
-		unum_formatDoubleCurrency(FORMATTER_OBJECT(nfo), number, scurrency, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
+	if (U_FAILURE(INTL_DATA_ERROR_CODE(nfo))) {
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(nfo), "Number formatting failed");
+		RETURN_FALSE;
 	}
 
-	if( U_FAILURE( INTL_DATA_ERROR_CODE((nfo)) ) ) {
-		intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((nfo)) );
-		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(nfo), "Number formatting failed");
-		RETVAL_FALSE;
-		if (formatted != format_buf) {
-			efree(formatted);
-		}
-	} else {
-		INTL_METHOD_RETVAL_UTF8( nfo, formatted, formatted_len, ( formatted != format_buf ) );
-	}
-
-	if(scurrency) {
-		efree(scurrency);
-	}
+	zend_string *u8str = intl_charFromString(result, &INTL_DATA_ERROR_CODE(nfo));
+	INTL_METHOD_CHECK_STATUS(nfo, "Error converting result to UTF-8");
+	RETVAL_STR(u8str);
 }
 
 /* }}} */

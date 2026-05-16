@@ -12,8 +12,6 @@
    +----------------------------------------------------------------------+
  */
 
-#include <unicode/unum.h>
-
 #include "formatter_class.h"
 extern "C" {
 #include "php_intl.h"
@@ -72,10 +70,9 @@ U_CFUNC zend_object *NumberFormatter_object_clone(zend_object *object)
 	zend_objects_clone_members(&new_nfo->zo, &nfo->zo);
 
 	/* clone formatter object. It may fail, the destruction code must handle this case */
-	if (FORMATTER_OBJECT(nfo) != NULL) {
-		UErrorCode error = U_ZERO_ERROR;
-		FORMATTER_OBJECT(new_nfo) = unum_clone(FORMATTER_OBJECT(nfo), &error);
-		if (U_FAILURE(error)) {
+	if (FORMATTER_OBJECT(nfo) != nullptr) {
+		FORMATTER_OBJECT(new_nfo) = FORMATTER_OBJECT(nfo)->clone();
+		if (FORMATTER_OBJECT(new_nfo) == nullptr) {
 			zend_throw_error(NULL, "Failed to clone NumberFormatter");
 		}
 	} else {
