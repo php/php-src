@@ -23,8 +23,8 @@ date_sub($ds2, $i);
 2010-03-07T13:21:38+0000
 2010-04-20T13:21:38+0000
 
-Warning: date_sub(): Only non-special relative time specifications are supported for subtraction in %s
+Warning: date_sub(): Only non-special relative time specifications are supported for subtraction in %s on line %d
 2010-03-07T13:21:38+0000
 2010-02-16T13:21:38+0000
 
-Warning: date_sub(): Only non-special relative time specifications are supported for subtraction in %s
+Warning: date_sub(): Only non-special relative time specifications are supported for subtraction in %s on line %d

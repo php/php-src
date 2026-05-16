@@ -16,7 +16,7 @@ var_dump($_FILES);
 var_dump($_POST);
 ?>
 --EXPECTF--
-Warning: PHP Request Startup: File Upload Mime headers garbled in %s
+Warning: PHP Request Startup: File Upload Mime headers garbled in %s on line %d
 array(0) {
 }
 array(0) {

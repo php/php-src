@@ -208,9 +208,9 @@ Warning: Array to string conversion in %s on line %d
 string(27) "ArrayTESTArrayTESTPHPTEST50"
 implode(): Argument #1 ($separator) must be of type string, array given
 
-Warning: Array to string conversion in %s
+Warning: Array to string conversion in %s on line %d
 
-Warning: Array to string conversion in %s
+Warning: Array to string conversion in %s on line %d
 string(18) "Array2Array2PHP250"
 
 *** Testing implode() on objects ***

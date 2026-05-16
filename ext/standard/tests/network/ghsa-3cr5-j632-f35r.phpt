@@ -17,5 +17,5 @@ fclose($server);
 ?>
 --EXPECTF--
 
-Warning: fsockopen(): Unable to connect to localhost:%d (The hostname must not contain null bytes) in %s
+Warning: fsockopen(): Unable to connect to localhost:%d (The hostname must not contain null bytes) in %s on line %d
 bool(false)

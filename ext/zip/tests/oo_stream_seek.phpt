@@ -66,7 +66,7 @@ int(2)
 + ZipArchive::getStream no supported
 resource(%d) of type (stream)
 
-Warning: fseek(): %s does not support seeking in %s
+Warning: fseek(): %s does not support seeking in %s on line %d
 int(-1)
 string(2) "en"
 + Zip Stream

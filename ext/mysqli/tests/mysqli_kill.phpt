@@ -71,10 +71,10 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --EXPECTF--
 
-Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s on line %d
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 
-Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s on line %d
 string(%d) "%s"
 bool(false)
 object(mysqli)#%d (%d) {
@@ -126,13 +126,13 @@ object(mysqli)#%d (%d) {
   int(0)
 }
 
-Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s on line %d
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 array(1) {
   ["id"]=>
   string(1) "1"
 }
 
-Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s on line %d
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 done!

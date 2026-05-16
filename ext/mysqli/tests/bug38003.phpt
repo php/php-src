@@ -17,7 +17,7 @@ $DB = new DB();
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Call to private DB::__construct() from global scope in %s
+Fatal error: Uncaught Error: Call to private DB::__construct() from global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s

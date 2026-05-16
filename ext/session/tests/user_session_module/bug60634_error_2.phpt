@@ -48,7 +48,7 @@ echo "um, hi\n";
 --EXPECTF--
 write: goodbye cruel world
 
-Fatal error: Uncaught Exception in %s
+Fatal error: Uncaught Exception in %s:%d
 Stack trace:
 #0 [internal function]: MySessionHandler->write('%s', '')
 #1 %s(%d): session_write_close()

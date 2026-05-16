@@ -46,10 +46,10 @@ other object:
 BcMath\Number::powmod(): Argument #1 ($exponent) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 null:
 
-Deprecated: BcMath\Number::powmod(): Passing null to parameter #1 ($exponent) of type BcMath\Number|string|int is deprecated in %s
+Deprecated: BcMath\Number::powmod(): Passing null to parameter #1 ($exponent) of type BcMath\Number|string|int is deprecated in %s on line %d
 
 ========== check 2nd arg ==========
 non number str:
@@ -60,9 +60,9 @@ other object:
 BcMath\Number::powmod(): Argument #2 ($modulus) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 Modulo by zero
 null:
 
-Deprecated: BcMath\Number::powmod(): Passing null to parameter #2 ($modulus) of type BcMath\Number|string|int is deprecated in %s
+Deprecated: BcMath\Number::powmod(): Passing null to parameter #2 ($modulus) of type BcMath\Number|string|int is deprecated in %s on line %d
 Modulo by zero

@@ -48,14 +48,14 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: stream_filter_append(): "write_seek_mode" filter parameter must be one of "preserve", "reset", or "strict" in %s
+Warning: stream_filter_append(): "write_seek_mode" filter parameter must be one of "preserve", "reset", or "strict" in %s on line %d
 
-Warning: stream_filter_append(): Unable to create or locate filter "convert.base64-encode" in %s
+Warning: stream_filter_append(): Unable to create or locate filter "convert.base64-encode" in %s on line %d
 bool(true)
 bool(true)
 bool(true)
 bool(true)
 
-Warning: stream_filter_append(): "write_seek_mode" filter parameter must be one of "preserve", "reset", or "strict" in %s
+Warning: stream_filter_append(): "write_seek_mode" filter parameter must be one of "preserve", "reset", or "strict" in %s on line %d
 
-Warning: stream_filter_append(): Unable to create or locate filter "convert.quoted-printable-encode" in %s
+Warning: stream_filter_append(): Unable to create or locate filter "convert.quoted-printable-encode" in %s on line %d

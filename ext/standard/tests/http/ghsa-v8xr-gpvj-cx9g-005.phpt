@@ -40,7 +40,7 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--
 
-Warning: file_get_contents(http://127.0.0.1:%d): Failed to open stream: HTTP invalid header name (cannot start with CR character)! in %s
+Warning: file_get_contents(http://127.0.0.1:%d): Failed to open stream: HTTP invalid header name (cannot start with CR character)! in %s on line %d
 bool(false)
 array(1) {
   [0]=>

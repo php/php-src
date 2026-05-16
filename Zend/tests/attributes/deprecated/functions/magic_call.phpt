@@ -19,6 +19,6 @@ Clazz::test2();
 
 ?>
 --EXPECTF--
-Deprecated: Method Clazz::test() is deprecated in %s
+Deprecated: Method Clazz::test() is deprecated in %s on line %d
 
 Deprecated: Method Clazz::test2() is deprecated, due to some reason in %s on line %d

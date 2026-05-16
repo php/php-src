@@ -14,4 +14,4 @@ class PropertiesExample
 }
 ?>
 --EXPECTF--
-Fatal error: PropertiesExample and PropertiesTrait define the same property ($same) in the composition of PropertiesExample. However, the definition differs and is considered incompatible. Class was composed in %s
+Fatal error: PropertiesExample and PropertiesTrait define the same property ($same) in the composition of PropertiesExample. However, the definition differs and is considered incompatible. Class was composed in %s on line %d

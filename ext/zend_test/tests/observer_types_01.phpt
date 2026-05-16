@@ -27,12 +27,12 @@ foo(42);
   <Error::getTraceAsString>
   </Error::getTraceAsString:'#0 %s(%d): foo(42)
 #1 {main}'>
-</Error::__toString:'TypeError: foo(): Argument #1 ($a) must be of type array, int given, called in %s:%d
+</Error::__toString:'TypeError: foo(): Argument #1 ($a) must be of type array, int given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s%eobserver_types_%d.php(%d): foo(42)
 #1 {main}'>
 
-Fatal error: Uncaught TypeError: foo(): Argument #1 ($a) must be of type array, int given, called in %s:%d
+Fatal error: Uncaught TypeError: foo(): Argument #1 ($a) must be of type array, int given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s%eobserver_types_%d.php(%d): foo(42)
 #1 {main}

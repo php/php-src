@@ -10,4 +10,4 @@ function foo() {
 }
 ?>
 --EXPECTF--
-Fatal error: Only classes can be marked with #[ZendTestAttribute] in %s
+Fatal error: Only classes can be marked with #[ZendTestAttribute] in %s on line %d

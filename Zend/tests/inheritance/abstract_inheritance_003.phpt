@@ -9,4 +9,4 @@ abstract class B extends A { abstract function bar($x); }
 echo "DONE";
 ?>
 --EXPECTF--
-Fatal error: Declaration of B::bar($x) must be compatible with A::bar($x, $y = 0) in %s
+Fatal error: Declaration of B::bar($x) must be compatible with A::bar($x, $y = 0) in %s on line %d

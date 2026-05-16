@@ -41,7 +41,7 @@ other object:
 BcMath\Number::add(): Argument #2 ($scale) must be of type ?int, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 
 ========== sub ==========
 array:
@@ -50,7 +50,7 @@ other object:
 BcMath\Number::sub(): Argument #2 ($scale) must be of type ?int, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 
 ========== mul ==========
 array:
@@ -59,7 +59,7 @@ other object:
 BcMath\Number::mul(): Argument #2 ($scale) must be of type ?int, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 
 ========== div ==========
 array:
@@ -68,7 +68,7 @@ other object:
 BcMath\Number::div(): Argument #2 ($scale) must be of type ?int, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 
 ========== mod ==========
 array:
@@ -77,7 +77,7 @@ other object:
 BcMath\Number::mod(): Argument #2 ($scale) must be of type ?int, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 
 ========== pow ==========
 array:
@@ -86,4 +86,4 @@ other object:
 BcMath\Number::pow(): Argument #2 ($scale) must be of type ?int, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d

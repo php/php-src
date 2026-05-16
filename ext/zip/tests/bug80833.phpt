@@ -54,5 +54,5 @@ string(22) "This is a test string."
 string(22) "This is a test string."
 string(28) "This is another test string."
 
-Warning: stream_get_contents(): Zip stream error: Containing zip archive was closed in %s
+Warning: stream_get_contents(): Zip stream error: Containing zip archive was closed in %s on line %d
 string(0) ""

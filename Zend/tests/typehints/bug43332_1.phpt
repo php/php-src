@@ -13,7 +13,7 @@ $foo->bar($foo); // Ok!
 $foo->bar(new \stdclass); // Error, ok!
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: foobar\foo::bar(): Argument #1 ($a) must be of type foobar\foo, stdClass given, called in %s:%d
+Fatal error: Uncaught TypeError: foobar\foo::bar(): Argument #1 ($a) must be of type foobar\foo, stdClass given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(%d): foobar\foo->bar(Object(stdClass))
 #1 {main}

@@ -42,7 +42,7 @@ $file = $dirname . '__tmp_oo_cancel.zip';
 bool(true)
 bool(true)
 
-Warning: ZipArchive::close(): Operation cancelled in %s
+Warning: ZipArchive::close(): Operation cancelled in %s on line %d
 bool(false)
 bool(true)
 string(19) "Operation cancelled"

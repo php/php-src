@@ -25,6 +25,6 @@ pcntl_setpriority(-1000, 0);
 
 ?>
 --EXPECTF--
-Warning: pcntl_setpriority(): Error 1: A process was located, but neither its effective nor real user ID matched the effective user ID of the caller in %s
+Warning: pcntl_setpriority(): Error 1: A process was located, but neither its effective nor real user ID matched the effective user ID of the caller in %s on line %d
 
 Warning: pcntl_setpriority(): Error 13: Only a super user may attempt to increase the process priority in %s on line %d

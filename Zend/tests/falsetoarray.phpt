@@ -119,76 +119,76 @@ unset($a[0]);
 --EXPECTF--
 [001]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [002]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 
 Function
 [003]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [004]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [005]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [006]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 
 Properties
 [007]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [008]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [009]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [010]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [011]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [012]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [013]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 
 Destructuring
 [014]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [015]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [016]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [017]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [018]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [019]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [020]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [021]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [022]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 [023]
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d

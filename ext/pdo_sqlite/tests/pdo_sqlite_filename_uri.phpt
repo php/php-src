@@ -42,7 +42,7 @@ int(0)
 int(0)
 int(0)
 
-Fatal error: Uncaught PDOException: SQLSTATE[HY000]: General error: 8 attempt to write a readonly database in %s
+Fatal error: Uncaught PDOException: SQLSTATE[HY000]: General error: 8 attempt to write a readonly database in %s:%d
 Stack trace:
 %s
 #1 {main}

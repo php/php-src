@@ -35,8 +35,8 @@ BcMath\Number::compare(): Argument #1 ($num) must be of type int, string, or BcM
 
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 
 null:
 
-Deprecated: BcMath\Number::compare(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s
+Deprecated: BcMath\Number::compare(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s on line %d

@@ -36,7 +36,7 @@ b
 1
 2
 
-Fatal error: Uncaught Exception in %s
+Fatal error: Uncaught Exception in %s:%d
 Stack trace:
 #0 %s(%d): MyRecursiveIteratorIterator->endchildren()
 #1 {main}

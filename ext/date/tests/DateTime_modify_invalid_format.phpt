@@ -13,6 +13,6 @@ try {
 
 ?>
 --EXPECTF--
-Warning: date_modify(): Failed to parse time string () at position 0 ( ): Empty string in %s
+Warning: date_modify(): Failed to parse time string () at position 0 ( ): Empty string in %s on line %d
 bool(false)
 DateMalformedStringException: DateTime::modify(): Failed to parse time string () at position 0 ( ): Empty string

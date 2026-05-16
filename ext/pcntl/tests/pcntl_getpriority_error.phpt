@@ -33,4 +33,4 @@ pcntl_getpriority(-1, PRIO_PROCESS);
 --EXPECTF--
 pcntl_getpriority(): Argument #2 ($mode) must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS
 
-Warning: pcntl_getpriority(): Error %d: No process was located using the given parameters in %s
+Warning: pcntl_getpriority(): Error %d: No process was located using the given parameters in %s on line %d

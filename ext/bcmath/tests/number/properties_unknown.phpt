@@ -26,11 +26,11 @@ try {
 var_dump(isset($num->foo));
 ?>
 --EXPECTF--
-Warning: Undefined property: BcMath\Number::$foo in %s
+Warning: Undefined property: BcMath\Number::$foo in %s on line %d
 NULL
 Cannot create dynamic property BcMath\Number::$foo
 
-Warning: Undefined property: BcMath\Number::$foo in %s
+Warning: Undefined property: BcMath\Number::$foo in %s on line %d
 NULL
 Cannot create dynamic property BcMath\Number::$bar
 bool(false)

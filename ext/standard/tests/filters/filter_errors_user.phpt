@@ -91,66 +91,66 @@ test_filter0
 bool(true)
 test filtering of buffered data
 
-Warning: stream_filter_append(): Unprocessed filter buckets remaining on input brigade in %s
+Warning: stream_filter_append(): Unprocessed filter buckets remaining on input brigade in %s on line %d
 
-Warning: stream_filter_append(): Filter failed to process pre-buffered data in %s
+Warning: stream_filter_append(): Filter failed to process pre-buffered data in %s on line %d
 test filtering of non buffered data
 
-Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s
+Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s on line %d
 test_filter1
 bool(true)
 test filtering of buffered data
 
-Warning: stream_filter_append(): Filter failed to process pre-buffered data in %s
+Warning: stream_filter_append(): Filter failed to process pre-buffered data in %s on line %d
 test filtering of non buffered data
 test_filter2
 bool(true)
 test filtering of buffered data
 
-Warning: stream_filter_append(): Filter failed to process pre-buffered data in %s
+Warning: stream_filter_append(): Filter failed to process pre-buffered data in %s on line %d
 test filtering of non buffered data
 test_filter3
 bool(true)
 test filtering of buffered data
 
-Warning: stream_filter_append(): Unprocessed filter buckets remaining on input brigade in %s
+Warning: stream_filter_append(): Unprocessed filter buckets remaining on input brigade in %s on line %d
 
-Warning: stream_filter_append(): Filter failed to process pre-buffered data in %s
+Warning: stream_filter_append(): Filter failed to process pre-buffered data in %s on line %d
 test filtering of non buffered data
 
-Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s
+Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s on line %d
 test_filter4
 bool(true)
 test filtering of buffered data
 
-Warning: stream_filter_append(): Unprocessed filter buckets remaining on input brigade in %s
+Warning: stream_filter_append(): Unprocessed filter buckets remaining on input brigade in %s on line %d
 
-Warning: stream_filter_append(): Filter failed to process pre-buffered data in %s
+Warning: stream_filter_append(): Filter failed to process pre-buffered data in %s on line %d
 test filtering of non buffered data
 
-Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s
+Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s on line %d
 test append / read / remove
 test_filter0
 
-Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s
+Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s on line %d
 
-Warning: stream_filter_remove(): Unable to flush filter, not removing in %s
+Warning: stream_filter_remove(): Unable to flush filter, not removing in %s on line %d
 test_filter1
 
-Warning: stream_filter_remove(): Unable to flush filter, not removing in %s
+Warning: stream_filter_remove(): Unable to flush filter, not removing in %s on line %d
 test_filter2
 
-Warning: stream_filter_remove(): Unable to flush filter, not removing in %s
+Warning: stream_filter_remove(): Unable to flush filter, not removing in %s on line %d
 test_filter3
 
-Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s
+Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s on line %d
 
-Warning: stream_filter_remove(): Unable to flush filter, not removing in %s
+Warning: stream_filter_remove(): Unable to flush filter, not removing in %s on line %d
 test_filter4
 
-Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s
+Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s on line %d
 
-Warning: stream_filter_remove(): Unable to flush filter, not removing in %s
+Warning: stream_filter_remove(): Unable to flush filter, not removing in %s on line %d
 test append all / read / remove all
 test_filter0
 test_filter1
@@ -158,17 +158,17 @@ test_filter2
 test_filter3
 test_filter4
 
-Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s
+Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s on line %d
 
-Warning: stream_filter_remove(): Unable to flush filter, not removing in %s
+Warning: stream_filter_remove(): Unable to flush filter, not removing in %s on line %d
 
-Warning: stream_filter_remove(): Unable to flush filter, not removing in %s
+Warning: stream_filter_remove(): Unable to flush filter, not removing in %s on line %d
 
-Warning: stream_filter_remove(): Unable to flush filter, not removing in %s
+Warning: stream_filter_remove(): Unable to flush filter, not removing in %s on line %d
 
-Warning: stream_filter_remove(): Unable to flush filter, not removing in %s
+Warning: stream_filter_remove(): Unable to flush filter, not removing in %s on line %d
 
-Warning: stream_filter_remove(): Unable to flush filter, not removing in %s
+Warning: stream_filter_remove(): Unable to flush filter, not removing in %s on line %d
 test append all / read / close
 test_filter0
 test_filter1
@@ -176,4 +176,4 @@ test_filter2
 test_filter3
 test_filter4
 
-Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s
+Warning: stream_get_contents(): Unprocessed filter buckets remaining on input brigade in %s on line %d

@@ -43,20 +43,20 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: Undefined variable $undef in %s
+Warning: Undefined variable $undef in %s on line %d
 Unsupported operand types: BcMath\Number + null
 
-Warning: Undefined variable $undef in %s
+Warning: Undefined variable $undef in %s on line %d
 Unsupported operand types: BcMath\Number - null
 
-Warning: Undefined variable $undef in %s
+Warning: Undefined variable $undef in %s on line %d
 Unsupported operand types: BcMath\Number * null
 
-Warning: Undefined variable $undef in %s
+Warning: Undefined variable $undef in %s on line %d
 Unsupported operand types: BcMath\Number / null
 
-Warning: Undefined variable $undef in %s
+Warning: Undefined variable $undef in %s on line %d
 Unsupported operand types: BcMath\Number % null
 
-Warning: Undefined variable $undef in %s
+Warning: Undefined variable $undef in %s on line %d
 Unsupported operand types: BcMath\Number ** null
