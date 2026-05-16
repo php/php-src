@@ -948,6 +948,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 	fci.object = NULL;
 	fci.param_count = callback_data->arg_count;
 	fci.named_params = NULL;
+	fci.consumed_args = 0;
 
 	if (callback_data->type->func.args) {
 		int n = 0;

@@ -6417,6 +6417,7 @@ PHP_FUNCTION(array_reduce)
 	fci.retval = return_value;
 	fci.param_count = 2;
 	fci.params = args;
+	fci.consumed_args = zend_fci_consumed_arg(0);
 
 	ZEND_HASH_FOREACH_VAL(htbl, operand) {
 		ZVAL_COPY_VALUE(&args[0], return_value);

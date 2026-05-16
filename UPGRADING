@@ -34,6 +34,13 @@ PHP 8.6 UPGRADE NOTES
     array arguments types/values and raise a TypeError/ValueError
     accordingly.
 
+- Intl:
+  . Passing a non-stringable object as a time zone to Intl APIs that accept
+    time zone objects or strings now raises a TypeError instead of an Error.
+  . IntlBreakIterator::getLocale() now raises a ValueError when the type is
+    neither Locale::ACTUAL_LOCALE nor Locale::VALID_LOCALE instead of
+    returning false.
+
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
     lower than zero or greater than platform's UINT_MAX.
@@ -129,6 +136,8 @@ PHP 8.6 UPGRADE NOTES
 - Core:
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand.
+  . It is now possible to define the `__debugInfo()` magic method on enums.
+    RFC: https://wiki.php.net/rfc/debugable-enums
 
 - Fileinfo:
   . finfo_file() now works with remote streams.
@@ -179,6 +188,11 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 4. Deprecated Functionality
 ========================================
+
+- GMP
+  . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
+    emit a deprecation warning when converting a float right operand to int
+    loses precision.
 
 - Mbstring:
   . Mbregex has been deprecated, because the underlying Oniguruma library

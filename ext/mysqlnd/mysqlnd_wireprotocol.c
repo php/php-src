@@ -459,7 +459,7 @@ php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 			packet->auth_protocol = estrdup("");
 		} else {
 			/* Check if NUL present */
-			char *null_terminator = memchr(p, '\0', remaining_size);
+			const char *null_terminator = memchr(p, '\0', remaining_size);
 			size_t auth_protocol_len;
 			if (null_terminator) {
 				/* If present, do basically estrdup */

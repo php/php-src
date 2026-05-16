@@ -106,7 +106,7 @@ static zend_string* phar_get_name_for_relative_paths(zend_string *filename, bool
 
 	zend_string *name = NULL;
 	if (using_include_path) {
-		name = phar_find_in_include_path(filename, NULL);
+		name = phar_find_in_include_path(filename);
 		if (!name) {
 			/* this file is not in the phar, use the original path */
 			zend_string_release_ex(arch, false);

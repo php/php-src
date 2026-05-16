@@ -949,10 +949,11 @@ IR_ALWAYS_INLINE bool ir_ref_is_true(const ir_ctx *ctx, ir_ref ref)
 #define IR_OPND_LABEL_REF         0x3
 #define IR_OPND_CONTROL_DEP       0x4
 #define IR_OPND_CONTROL_REF       0x5
-#define IR_OPND_STR               0x6
-#define IR_OPND_NUM               0x7
-#define IR_OPND_PROB              0x8
-#define IR_OPND_PROTO             0x9
+#define IR_OPND_CONTROL_GUARD     0x6
+#define IR_OPND_STR               0x7
+#define IR_OPND_NUM               0x8
+#define IR_OPND_PROB              0x9
+#define IR_OPND_PROTO             0xa
 
 #define IR_OP_FLAGS(op_flags, op1_flags, op2_flags, op3_flags) \
 	((op_flags) | ((op1_flags) << 20) | ((op2_flags) << 24) | ((op3_flags) << 28))
@@ -966,7 +967,7 @@ IR_ALWAYS_INLINE bool ir_ref_is_true(const ir_ctx *ctx, ir_ref ref)
 	(((flags) >> (16 + (4 * (((i) > 3) ? 3 : (i))))) & 0xf)
 
 #define IR_IS_REF_OPND_KIND(kind) \
-	((kind) >= IR_OPND_DATA && (kind) <= IR_OPND_CONTROL_REF)
+	((kind) >= IR_OPND_DATA && (kind) <= IR_OPND_CONTROL_GUARD)
 
 IR_ALWAYS_INLINE ir_ref ir_operands_count(const ir_ctx *ctx, const ir_insn *insn)
 {
@@ -1223,6 +1224,7 @@ typedef struct _ir_use_pos       ir_use_pos;
 #define IR_USE_SHOULD_BE_IN_REG          (1<<1)
 #define IR_DEF_REUSES_OP1_REG            (1<<2)
 #define IR_DEF_CONFLICTS_WITH_INPUT_REGS (1<<3)
+#define IR_EXTEND_INPUTS_TO_NEXT         (1<<4) /* used for SNAPSHOT followed by GUARD */
 
 #define IR_FUSED_USE                     (1<<6)
 #define IR_PHI_USE                       (1<<7)

@@ -43,8 +43,8 @@ php_canonicalize_version(const char *version)
  *  s/([^\d\.])([^\D\.])/$1.$2/g;
  *  s/([^\D\.])([^\d\.])/$1.$2/g;
  */
-#define isdig(x) (isdigit(x)&&(x)!='.')
-#define isndig(x) (!isdigit(x)&&(x)!='.')
+#define isdig(x) (isdigit((unsigned char)(x))&&(x)!='.')
+#define isndig(x) (!isdigit((unsigned char)(x))&&(x)!='.')
 #define isspecialver(x) ((x)=='-'||(x)=='_'||(x)=='+')
 
 		lq = *(q - 1);
@@ -57,7 +57,7 @@ php_canonicalize_version(const char *version)
 				*q++ = '.';
 			}
 			*q++ = *p;
-		} else if (!isalnum(*p)) {
+		} else if (!isalnum((unsigned char)*p)) {
 			if (lq != '.') {
 				*q++ = '.';
 			}
@@ -158,17 +158,17 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 		if ((n2 = strchr(p2, '.')) != NULL) {
 			*n2 = '\0';
 		}
-		if (isdigit(*p1) && isdigit(*p2)) {
+		if (isdigit((unsigned char)*p1) && isdigit((unsigned char)*p2)) {
 			/* compare element numerically */
 			l1 = strtol(p1, NULL, 10);
 			l2 = strtol(p2, NULL, 10);
 			compare = ZEND_NORMALIZE_BOOL(l1 - l2);
-		} else if (!isdigit(*p1) && !isdigit(*p2)) {
+		} else if (!isdigit((unsigned char)*p1) && !isdigit((unsigned char)*p2)) {
 			/* compare element names */
 			compare = compare_special_version_forms(p1, p2);
 		} else {
 			/* mix of names and numbers */
-			if (isdigit(*p1)) {
+			if (isdigit((unsigned char)*p1)) {
 				compare = compare_special_version_forms("#N#", p2);
 			} else {
 				compare = compare_special_version_forms(p1, "#N#");
@@ -186,13 +186,13 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 	}
 	if (compare == 0) {
 		if (n1 != NULL) {
-			if (isdigit(*p1)) {
+			if (isdigit((unsigned char)*p1)) {
 				compare = 1;
 			} else {
 				compare = php_version_compare(p1, "#N#");
 			}
 		} else if (n2 != NULL) {
-			if (isdigit(*p2)) {
+			if (isdigit((unsigned char)*p2)) {
 				compare = -1;
 			} else {
 				compare = php_version_compare("#N#", p2);

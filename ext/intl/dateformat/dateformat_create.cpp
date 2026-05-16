@@ -131,7 +131,7 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (explicit_tz || calendar_owned ) {
 		//we have an explicit time zone or a non-object calendar
-		timezone = timezone_process_timezone_argument(timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo));
+		timezone = timezone_process_timezone_argument(timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo), 4);
 		if (timezone == nullptr) {
 			goto error;
 		}

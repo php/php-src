@@ -381,8 +381,13 @@ static const php_stream_filter_ops php_bz2_compress_ops = {
 static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	const php_stream_filter_ops *fops = NULL;
+	php_stream_filter_seekable_t write_seekable;
 	php_bz2_filter_data *data;
 	int status = BZ_OK;
+
+	if (php_stream_filter_parse_write_seek_mode(filterparams, &write_seekable) == FAILURE) {
+		return NULL;
+	}
 
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_bz2_filter_data), persistent);
@@ -476,7 +481,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START, write_seekable);
 }
 
 const php_stream_filter_factory php_bz2_filter_factory = {

@@ -349,6 +349,7 @@ static bool soap_check_xml_ref(zval *data, xmlNodePtr node)
 static void soap_add_xml_ref(zval *data, xmlNodePtr node)
 {
 	if (SOAP_GLOBAL(ref_map)) {
+		Z_TRY_ADDREF_P(data);
 		zend_hash_index_update(SOAP_GLOBAL(ref_map), (zend_ulong)(uintptr_t)node, data);
 	}
 }
@@ -2783,7 +2784,7 @@ static zval *to_zval_map(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			}
 
 			xmlValue = get_node(item->children, "value");
-			if (!xmlKey) {
+			if (!xmlValue) {
 				soap_error0(E_ERROR,  "Encoding: Can't decode apache map, missing value");
 			}
 
@@ -3520,7 +3521,7 @@ void encode_reset_ns(void)
 	} else {
 		SOAP_GLOBAL(ref_map) = emalloc(sizeof(HashTable));
 	}
-	zend_hash_init(SOAP_GLOBAL(ref_map), 0, NULL, NULL, 0);
+	zend_hash_init(SOAP_GLOBAL(ref_map), 0, NULL, ZVAL_PTR_DTOR, 0);
 }
 
 void encode_finish(void)

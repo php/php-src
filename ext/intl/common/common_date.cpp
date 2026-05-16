@@ -202,7 +202,6 @@ try_again:
 				}
 			}
 		} else {
-			/* TODO: try with cast(), get() to obtain a number */
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
 				"invalid object type for date/time "
 				"(only IntlCalendar and DateTimeInterface permitted)");

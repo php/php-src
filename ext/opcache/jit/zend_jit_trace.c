@@ -2359,6 +2359,9 @@ propagate_arg:
 				if (ssa_ops[idx].op2_use >= 0 && ssa_ops[idx].op2_def >= 0) {
 					ssa_var_info[ssa_ops[idx].op2_def] = ssa_var_info[ssa_ops[idx].op2_use];
 				}
+				if (ssa_ops[idx].result_use >= 0 && ssa_ops[idx].result_def >= 0) {
+					ssa_var_info[ssa_ops[idx].result_def] = ssa_var_info[ssa_ops[idx].result_use];
+				}
 			} else {
 				if (zend_update_type_info(op_array, tssa, script, (zend_op*)opline, ssa_ops + idx, ssa_opcodes, optimization_level) == FAILURE) {
 					// TODO:
@@ -8568,7 +8571,7 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 			do {
 				ex = ex->prev_execute_data;
 				n++;
-			} while (ex && zend_jit_traces[root].op_array != &ex->func->op_array);
+			} while (ex && (!ex->func || zend_jit_traces[root].op_array != &ex->func->op_array));
 			if (ex && n <= ZEND_JIT_TRACE_MAX_RET_DEPTH) {
 				ret_depth = n;
 			}

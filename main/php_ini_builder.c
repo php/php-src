@@ -65,7 +65,7 @@ PHPAPI void php_ini_builder_define(struct php_ini_builder *b, const char *arg)
 
 	if (val != NULL) {
 		val++;
-		if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
+		if (!isalnum((unsigned char)*val) && *val != '"' && *val != '\'' && *val != '\0') {
 			php_ini_builder_quoted(b, arg, val - arg - 1, val, arg + len - val);
 		} else {
 			php_ini_builder_realloc(b, len + strlen("\n"));

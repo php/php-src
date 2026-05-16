@@ -91,7 +91,7 @@ repository. Mailing list subscription is explained on the
 [mailing lists page](https://www.php.net/mailing-lists.php).
 
 You may also want to read
-[The Mysterious PHP RFC Process](https://blogs.oracle.com/opal/post/the-mysterious-php-rfc-process-and-how-you-can-change-the-web)
+[The Mysterious PHP RFC Process](https://web.archive.org/web/20210621140006/https://blogs.oracle.com/opal/the-mysterious-php-rfc-process-and-how-you-can-change-the-web)
 for additional notes on the best way to approach submitting an RFC.
 
 ## Technical resources
