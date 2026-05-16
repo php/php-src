@@ -1625,8 +1625,7 @@ static zval *to_zval_datetime(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		return ret;
 	}
 
-	zend_string *str = zend_string_copy(Z_STR_P(ret));
-	zval_ptr_dtor_str(ret);
+	zend_string *str = Z_STR_P(ret);
 	php_date_instantiate(php_date_get_immutable_ce(), ret);
 	if (!php_date_initialize(Z_PHPDATE_P(ret), ZSTR_VAL(str), ZSTR_LEN(str), NULL, NULL, 0)) {
 		zval_ptr_dtor(ret);
@@ -1844,6 +1843,11 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 			set_ns_and_type(xmlParam, type);
 		}
 		return xmlParam;
+	}
+
+	if (data && (Z_TYPE_P(data) == IS_OBJECT &&
+	    instanceof_function_slow(Z_OBJCE_P(data), php_date_get_interface_ce()))) {
+		return master_to_xml(get_conversion(XSD_DATETIME), data, style, parent);
 	}
 
 	if (Z_TYPE_P(data) == IS_OBJECT) {
@@ -2838,11 +2842,7 @@ static xmlNodePtr guess_xml_convert(encodeTypePtr type, zval *data, int style, x
 	xmlNodePtr ret;
 
 	if (data) {
-		if (Z_TYPE_P(data) == IS_OBJECT && instanceof_function_slow(Z_OBJCE_P(data), php_date_get_interface_ce())) {
-			enc = get_conversion(XSD_DATETIME);
-		} else {
-			enc = get_conversion(Z_TYPE_P(data));
-		}
+		enc = get_conversion(Z_TYPE_P(data));
 	} else {
 		enc = get_conversion(IS_NULL);
 	}
