@@ -181,6 +181,8 @@ PHP                                                                        NEWS
     with re-entrant getHash()). (Pratik Bhujel)
   . Fix bugs GH-8561, GH-8562, GH-8563, and GH-8564 (Fixing various
     SplFileObject iterator desync bugs). (iliaal)
+  . Fix bug GH-22062 (SplDoublyLinkedList iterator UAF
+    via destructor releasing next node). (David Carlier)
 
 - Sqlite3:
   . Fix NUL byte truncation in sqlite3 TEXT column handling. (ndossche)
