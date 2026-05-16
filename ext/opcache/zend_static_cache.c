@@ -71,7 +71,7 @@ const char *zend_opcache_static_cache_subsystem_failure_reason = NULL;
 static HashTable zend_opcache_static_cache_safe_direct_handler_table;
 static bool zend_opcache_static_cache_safe_direct_handlers_initialized = false;
 
-#if defined(ZTS) && !defined(ZEND_WIN32)
+#ifdef ZTS
 ZEND_EXT_TLS bool zend_opcache_static_cache_zts_lock_is_write = false;
 #endif
 ZEND_EXT_TLS HashTable zend_opcache_static_cache_attribute_classes;

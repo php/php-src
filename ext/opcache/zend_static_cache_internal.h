@@ -137,14 +137,12 @@ typedef struct _zend_opcache_static_cache_storage {
 	bool initialized;
 	bool initialized_before_request;
 	bool lock_initialized;
-#ifndef ZEND_WIN32
 	int lock_file;
 	char lockfile_name[MAXPATHLEN];
 #ifdef ZTS
 	zend_thread_rwlock_t zts_lock;
 	MUTEX_T entry_locks[ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_STRIPES];
 	bool entry_locks_initialized;
-#endif
 #endif
 } zend_opcache_static_cache_storage;
 
@@ -374,7 +372,7 @@ extern ZEND_EXT_TLS HashTable zend_opcache_static_cache_class_blob_handles;
 extern ZEND_EXT_TLS bool zend_opcache_static_cache_class_blob_handles_initialized;
 extern bool zend_opcache_static_cache_safe_direct_classes_marked;
 extern ZEND_EXT_TLS zend_opcache_static_cache_context *zend_opcache_static_cache_active_context_ptr;
-#if defined(ZTS) && !defined(ZEND_WIN32)
+#ifdef ZTS
 extern ZEND_EXT_TLS bool zend_opcache_static_cache_zts_lock_is_write;
 #endif
 extern ZEND_EXT_TLS HashTable *zend_opcache_static_cache_tracked_roots;
