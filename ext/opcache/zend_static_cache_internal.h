@@ -443,6 +443,7 @@ zend_opcache_static_cache_safe_direct_state_serialize_func_t zend_opcache_static
 zend_opcache_static_cache_safe_direct_state_unserialize_func_t zend_opcache_static_cache_safe_direct_state_unserialize_func(
 	zend_class_entry *ce);
 bool zend_opcache_static_cache_safe_direct_allows_custom_serializers(zend_class_entry *ce);
+bool zend_opcache_static_cache_safe_direct_state_includes_properties(zend_class_entry *ce);
 bool zend_opcache_static_cache_calculate_shared_graph_size(const zval *value, size_t *buffer_len);
 bool zend_opcache_static_cache_build_shared_graph_in_place(const zval *value, unsigned char *buffer, size_t buffer_len, size_t *graph_len);
 bool zend_opcache_static_cache_shared_graph_copy_fits_buffer(
