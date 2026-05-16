@@ -16147,7 +16147,7 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	} else if (fetch_type == BP_VAR_W) {
 		flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
 		if (flags && (!known_prop_info || ZEND_TYPE_IS_SET(known_prop_info->type))) {
-			ir_ref merge = IR_UNUSED;
+		    ir_ref merge = IR_UNUSED;
 
 			if (!known_prop_info) {
 				// JIT: if (ZEND_TYPE_IS_SET(property_info->type))
