@@ -176,7 +176,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS, bool
 		// From date/time (3, 5 or 6 arguments)
 		GregorianCalendar *tmp;
 		for (int i = 0; i < variant; i++) {
-			ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(largs[i], hasThis() ? (i-1) : i);
+			ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(largs[i], i + 1);
 		}
 
 		if (variant == 3) {
