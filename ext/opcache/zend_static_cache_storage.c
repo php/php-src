@@ -651,15 +651,25 @@ static void zend_opcache_static_cache_unlock_impl(void)
 #else
 static bool zend_opcache_static_cache_win32_open_lock_file_at(zend_opcache_static_cache_storage *storage, const char *directory, const char *base_name)
 {
+	size_t directory_len;
+	const char *separator;
+
 	if (directory == NULL || directory[0] == '\0') {
 		return false;
 	}
 
+	directory_len = strlen(directory);
+	separator = directory[directory_len - 1] == '/' || directory[directory_len - 1] == '\\'
+		? ""
+		: "/"
+	;
+
 	snprintf(
 		storage->lockfile_name,
 		sizeof(storage->lockfile_name),
-		"%s/%s.lock",
+		"%s%s%s.lock",
 		directory,
+		separator,
 		base_name
 	);
 
@@ -680,10 +690,6 @@ static bool zend_opcache_static_cache_win32_open_lock_file(zend_opcache_static_c
 		ZEND_OPCACHE_STATIC_CACHE_WIN32_LOCK_FILE_NAME,
 		storage->size
 	);
-
-	if (zend_opcache_static_cache_win32_open_lock_file_at(storage, ZCG(accel_directives).lockfile_path, base_name)) {
-		return true;
-	}
 
 	temp_path_len = GetTempPathA(sizeof(temp_path), temp_path);
 	if (temp_path_len == 0 || temp_path_len >= sizeof(temp_path)) {
