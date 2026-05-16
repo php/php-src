@@ -19,6 +19,24 @@ try {
 } catch (Throwable $e) {
     echo $e->getMessage(), "\n";
 }
+
+try {
+    $cal->set(1, 1, 1, 99999999999, 1);
+} catch (Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    $cal->set(1, 1, 1, 1, 99999999999, 1);
+} catch (Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    intlcal_set($cal, 1, 1, 1, 1, 1, 99999999999);
+} catch (Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--
 Deprecated: Calling IntlCalendar::set() with more than 2 arguments is deprecated, use either IntlCalendar::setDate() or IntlCalendar::setDateTime() instead in %s on line %d
@@ -26,3 +44,12 @@ IntlCalendar::set(): Argument #1 ($year) must be between -2147483648 and 2147483
 
 Deprecated: Function intlcal_set() is deprecated since 8.4, use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead in %s on line %d
 intlcal_set(): Argument #3 ($month) must be between -2147483648 and 2147483647
+
+Deprecated: Calling IntlCalendar::set() with more than 2 arguments is deprecated, use either IntlCalendar::setDate() or IntlCalendar::setDateTime() instead in %s on line %d
+IntlCalendar::set(): Argument #4 ($hour) must be between -2147483648 and 2147483647
+
+Deprecated: Calling IntlCalendar::set() with more than 2 arguments is deprecated, use either IntlCalendar::setDate() or IntlCalendar::setDateTime() instead in %s on line %d
+IntlCalendar::set(): Argument #5 ($minute) must be between -2147483648 and 2147483647
+
+Deprecated: Function intlcal_set() is deprecated since 8.4, use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead in %s on line %d
+intlcal_set(): Argument #7 ($second) must be between -2147483648 and 2147483647
