@@ -124,11 +124,11 @@ void fpm_env_setproctitle(char *title) /* {{{ */
 #elif defined(HAVE_SETPROCTITLE)
 	setproctitle("%s", title);
 #elif defined(__linux__) || defined(__APPLE__)
-	size_t prefixlen = strlen(SETPROCTITLE_PREFIX);
+	char *proctitle_prefix = fpm_global_config.proctitle_prefix ? fpm_global_config.proctitle_prefix : SETPROCTITLE_PREFIX;
+	size_t prefixlen = strlen(proctitle_prefix);
 	if (fpm_env_argv != NULL && fpm_env_argv_len > prefixlen + 3) {
 		memset(fpm_env_argv[0], 0, fpm_env_argv_len);
-		strncpy(fpm_env_argv[0], SETPROCTITLE_PREFIX, fpm_env_argv_len - 2);
-		strncpy(fpm_env_argv[0] + prefixlen, title, fpm_env_argv_len - prefixlen - 2);
+		snprintf(fpm_env_argv[0], fpm_env_argv_len - 2, "%s: %s", proctitle_prefix, title);
 		fpm_env_argv[1] = NULL;
 	}
 #endif
