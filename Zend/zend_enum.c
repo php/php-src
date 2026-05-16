@@ -297,6 +297,33 @@ static ZEND_NAMED_FUNCTION(zend_enum_cases_func)
 	} ZEND_HASH_FOREACH_END();
 }
 
+static ZEND_NAMED_FUNCTION(zend_enum_values_func)
+{
+	zend_class_entry *ce = execute_data->func->common.scope;
+	zend_class_constant *c;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	array_init(return_value);
+
+	ZEND_HASH_MAP_FOREACH_PTR(CE_CONSTANTS_TABLE(ce), c) {
+		if (!(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE)) {
+			continue;
+		}
+		zval *zv = &c->value;
+		if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
+			if (zval_update_constant_ex(zv, c->ce) == FAILURE) {
+				RETURN_THROWS();
+			}
+		}
+		zend_object *case_obj = Z_OBJ_P(zv);
+		zval *value_prop = zend_read_property_ex(case_obj->ce, case_obj, ZSTR_KNOWN(ZEND_STR_VALUE), 1, &EG(uninitialized_zval));
+		zval value_copy;
+		ZVAL_COPY(&value_copy, value_prop);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &value_copy);
+	} ZEND_HASH_FOREACH_END();
+}
+
 ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_class_entry *ce, zend_long long_key, zend_string *string_key, bool try_from)
 {
 	if (ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
@@ -479,6 +506,14 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		try_from_function->required_num_args = 1;
 		try_from_function->arg_info = zarginfo_class_BackedEnum_tryFrom + 1;
 		zend_enum_register_func(ce, ZEND_STR_TRYFROM_LOWERCASE, try_from_function);
+
+		zend_internal_function *values_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
+		values_function->handler = zend_enum_values_func;
+		values_function->function_name = ZSTR_KNOWN(ZEND_STR_VALUES);
+		values_function->fn_flags = fn_flags;
+		values_function->doc_comment = NULL;
+		values_function->arg_info = zarginfo_class_UnitEnum_cases + 1;
+		zend_enum_register_func(ce, ZEND_STR_VALUES, values_function);
 	}
 }
 
