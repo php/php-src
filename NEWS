@@ -4,8 +4,8 @@ PHP                                                                        NEWS
 
 - Intl:
   . Fix incorrect argument positions in out-of-bounds errors for
-    IntlCalendar::set() and IntlGregorianCalendar date/time construction.
-    (Weilin Du)
+    IntlCalendar::set(), IntlCalendar::setDate(), IntlCalendar::setDateTime(),
+    and IntlGregorianCalendar date/time construction. (Weilin Du)
 
 - MySQLnd:
   . Fix persistent free of non-persistent connect_attr key (David Carlier).

@@ -427,9 +427,18 @@ U_CFUNC PHP_METHOD(IntlCalendar, setDate)
 		RETURN_THROWS();
 	}
 
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 1);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 2);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 3);
+	if (UNEXPECTED(year < INT32_MIN || year > INT32_MAX)) {
+		zend_argument_value_error(1, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
+	}
+	if (UNEXPECTED(month < INT32_MIN || month > INT32_MAX)) {
+		zend_argument_value_error(2, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
+	}
+	if (UNEXPECTED(day < INT32_MIN || day > INT32_MAX)) {
+		zend_argument_value_error(3, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
+	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
@@ -450,18 +459,36 @@ U_CFUNC PHP_METHOD(IntlCalendar, setDateTime)
 		RETURN_THROWS();
 	}
 
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 1);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 2);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 3);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(hour, 4);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(minute, 5);
+	if (UNEXPECTED(year < INT32_MIN || year > INT32_MAX)) {
+		zend_argument_value_error(1, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
+	}
+	if (UNEXPECTED(month < INT32_MIN || month > INT32_MAX)) {
+		zend_argument_value_error(2, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
+	}
+	if (UNEXPECTED(day < INT32_MIN || day > INT32_MAX)) {
+		zend_argument_value_error(3, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
+	}
+	if (UNEXPECTED(hour < INT32_MIN || hour > INT32_MAX)) {
+		zend_argument_value_error(4, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
+	}
+	if (UNEXPECTED(minute < INT32_MIN || minute > INT32_MAX)) {
+		zend_argument_value_error(5, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
+	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
 	if (second_is_null) {
 		co->ucal->set((int32_t) year, (int32_t) month, (int32_t) day, (int32_t) hour, (int32_t) minute);
 	} else {
-		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(second, 6);
+		if (UNEXPECTED(second < INT32_MIN || second > INT32_MAX)) {
+			zend_argument_value_error(6, "must be between %d and %d", INT32_MIN, INT32_MAX);
+			RETURN_THROWS();
+		}
 		co->ucal->set((int32_t) year, (int32_t) month, (int32_t) day, (int32_t) hour, (int32_t) minute, (int32_t) second);
 	}
 }
