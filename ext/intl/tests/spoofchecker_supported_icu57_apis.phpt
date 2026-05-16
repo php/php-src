@@ -8,12 +8,28 @@ intl
 <?php
 $r = new ReflectionClass("Spoofchecker");
 
-var_dump($r->getConstant("ASCII") !== false);
-var_dump($r->getConstant("SINGLE_SCRIPT_RESTRICTIVE") !== false);
-var_dump($r->getConstant("MIXED_NUMBERS") !== false);
+$ascii = $r->getConstant("ASCII");
+$singleScriptRestrictive = $r->getConstant("SINGLE_SCRIPT_RESTRICTIVE");
+$mixedNumbers = $r->getConstant("MIXED_NUMBERS");
+
+var_dump($ascii !== false);
+var_dump($singleScriptRestrictive !== false);
+var_dump($mixedNumbers !== false);
+var_dump(is_int($ascii));
+var_dump(is_int($singleScriptRestrictive));
+var_dump(is_int($mixedNumbers));
+var_dump($ascii !== $singleScriptRestrictive);
+var_dump($ascii !== $mixedNumbers);
+var_dump($singleScriptRestrictive !== $mixedNumbers);
 var_dump($r->hasMethod("setRestrictionLevel"));
 ?>
 --EXPECT--
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 bool(true)
