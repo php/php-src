@@ -6,5 +6,8 @@ var PHP_EMBED_PGO = false;
 
 if (PHP_EMBED != "no") {
 	SAPI('embed', 'php_embed.c', 'php' + PHP_VERSION + 'embed.lib', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	ADD_SOURCES("sapi/cli", "php_cli.c php_http_parser.c php_cli_server.c ps_title.c php_cli_process_title.c", "embed");
+	ADD_FLAG("LIBS_EMBED", "ws2_32.lib");
+	ADD_FLAG("LIBS_EMBED", "shell32.lib");
 	PHP_INSTALL_HEADERS("sapi/embed", "php_embed.h");
 }
