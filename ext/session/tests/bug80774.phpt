@@ -2,6 +2,8 @@
 Bug #80774 (session_name() problem with backslash)
 --EXTENSIONS--
 session
+--INI--
+session.use_strict_mode=0
 --FILE--
 <?php
 session_name("foo\\bar");

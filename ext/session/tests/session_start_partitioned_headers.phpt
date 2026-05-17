@@ -2,6 +2,8 @@
 session_start() with partitioned cookies - header test
 --EXTENSIONS--
 session
+--INI--
+session.use_strict_mode=0
 --FILE--
 <?php
 session_id('12345');
