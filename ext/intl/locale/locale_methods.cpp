@@ -457,7 +457,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , const char* t
 		efree( mod_loc_name);
 	}
 
-	tag_value->len = strlen(tag_value->val);
+	tag_value->len = buflen;
 	return tag_value;
 }
 /* }}} */
@@ -736,7 +736,7 @@ U_CFUNC PHP_FUNCTION( locale_get_keywords )
 		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
+	INTL_CHECK_LOCALE_LEN(loc_name_len);
 
 	if(loc_name_len == 0) {
 		loc_name = (char *)intl_locale_get_default();
@@ -1127,7 +1127,7 @@ U_CFUNC PHP_FUNCTION(locale_parse)
 		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
+	INTL_CHECK_LOCALE_LEN(loc_name_len);
 
 	if(loc_name_len == 0) {
 		loc_name = (char *)intl_locale_get_default();
@@ -1318,7 +1318,7 @@ U_CFUNC PHP_FUNCTION(locale_filter_matches)
 
 		if( token && (token==cur_lang_tag) ){
 			/* check if the char. after match is SEPARATOR */
-			chrcheck = token + (strlen(cur_loc_range));
+			chrcheck = token + can_loc_range->len;
 			if( isIDSeparator(*chrcheck) || isKeywordSeparator(*chrcheck) || isEndOfTag(*chrcheck) ){
 				efree( cur_lang_tag );
 				efree( cur_loc_range );
@@ -1350,14 +1350,14 @@ U_CFUNC PHP_FUNCTION(locale_filter_matches)
 	} /* end of if isCanonical */
 	else{
 		/* Convert to lower case for case-insensitive comparison */
-		cur_lang_tag = reinterpret_cast<char *>(ecalloc( 1, strlen(lang_tag ) + 1));
+		cur_lang_tag = reinterpret_cast<char *>(ecalloc(1, lang_tag_len + 1));
 
 		result = strToMatch( lang_tag , cur_lang_tag);
 		if( result == 0) {
 			efree( cur_lang_tag );
 			RETURN_FALSE;
 		}
-		cur_loc_range = reinterpret_cast<char *>(ecalloc( 1, strlen(loc_range ) + 1));
+		cur_loc_range = reinterpret_cast<char *>(ecalloc(1, loc_range_len + 1));
 		result = strToMatch( loc_range , cur_loc_range );
 		if( result == 0) {
 			efree( cur_lang_tag );
@@ -1370,7 +1370,7 @@ U_CFUNC PHP_FUNCTION(locale_filter_matches)
 
 		if( token && (token==cur_lang_tag) ){
 			/* check if the char. after match is SEPARATOR */
-			chrcheck = token + (strlen(cur_loc_range));
+			chrcheck = token + loc_range_len;
 			if( isIDSeparator(*chrcheck) || isEndOfTag(*chrcheck) ){
 				efree( cur_lang_tag );
 				efree( cur_loc_range );
