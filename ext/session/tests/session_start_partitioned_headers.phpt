@@ -9,5 +9,5 @@ session_set_cookie_params(["secure" => true, "partitioned" => true]);
 session_start();
 ?>
 --EXPECTHEADERS--
-Set-Cookie: PHPSESSID=12345; path=/; secure; Partitioned
+Set-Cookie: PHPSESSID=12345; path=/; secure; Partitioned; HttpOnly; SameSite=Lax
 --EXPECT--

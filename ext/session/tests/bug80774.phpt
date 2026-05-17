@@ -9,5 +9,5 @@ session_id('12345');
 session_start();
 ?>
 --EXPECTHEADERS--
-Set-Cookie: foo\bar=12345; path=/
+Set-Cookie: foo\bar=12345; path=/; HttpOnly; SameSite=Lax
 --EXPECT--
