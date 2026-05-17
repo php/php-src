@@ -35,4 +35,4 @@ try {
 }
 ?>
 --EXPECT--
-Error: Class "teException" not found
+Exception: Class "teException" not found (did you mean Exception?)
