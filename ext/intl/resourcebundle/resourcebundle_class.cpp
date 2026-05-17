@@ -339,6 +339,7 @@ U_CFUNC PHP_FUNCTION( resourcebundle_locales )
 	size_t    bundlename_len = 0;
 	const char * entry;
 	int entry_len;
+	int32_t count;
 	UEnumeration *icuenum;
 	UErrorCode   icuerror = U_ZERO_ERROR;
 
@@ -361,10 +362,18 @@ U_CFUNC PHP_FUNCTION( resourcebundle_locales )
 	icuenum = ures_openAvailableLocales( bundlename, &icuerror );
 	INTL_CHECK_STATUS(icuerror, "Cannot fetch locales list");
 
+	count = uenum_count(icuenum, &icuerror);
+	if (U_FAILURE(icuerror)) {
+		uenum_close(icuenum);
+		INTL_CHECK_STATUS(icuerror, "Cannot count locales list");
+	}
 	uenum_reset( icuenum, &icuerror );
-	INTL_CHECK_STATUS(icuerror, "Cannot iterate locales list");
+	if (U_FAILURE(icuerror)) {
+		uenum_close(icuenum);
+		INTL_CHECK_STATUS(icuerror, "Cannot iterate locales list");
+	}
 
-	array_init( return_value );
+	array_init_size(return_value, count);
 	while ((entry = uenum_next( icuenum, &entry_len, &icuerror ))) {
 		add_next_index_stringl( return_value, (char *) entry, entry_len);
 	}
