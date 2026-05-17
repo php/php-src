@@ -1250,6 +1250,8 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_notation_prop_handlers, "publicId", dom_notation_public_id_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_notation_prop_handlers, "systemId", dom_notation_system_id_read, NULL);
 	zend_hash_merge(&dom_notation_prop_handlers, &dom_node_prop_handlers, NULL, false);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_notation_prop_handlers, "parentNode", dom_notation_parent_node_read, NULL);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_notation_prop_handlers, "isConnected", dom_notation_is_connected_read, NULL);
 	zend_hash_add_new_ptr(&classes, dom_notation_class_entry->name, &dom_notation_prop_handlers);
 
 	dom_modern_notation_class_entry = register_class_Dom_Notation(dom_modern_node_class_entry);
@@ -1260,7 +1262,9 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_notation_prop_handlers, "publicId", dom_notation_public_id_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_notation_prop_handlers, "systemId", dom_notation_system_id_read, NULL);
 	zend_hash_merge(&dom_modern_notation_prop_handlers, &dom_modern_node_prop_handlers, NULL, false);
-	zend_hash_add_new_ptr(&classes, dom_modern_notation_class_entry->name, &dom_modern_node_prop_handlers);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_notation_prop_handlers, "parentNode", dom_notation_parent_node_read, NULL);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_notation_prop_handlers, "isConnected", dom_notation_is_connected_read, NULL);
+	zend_hash_add_new_ptr(&classes, dom_modern_notation_class_entry->name, &dom_modern_notation_prop_handlers);
 
 	dom_entity_class_entry = register_class_DOMEntity(dom_node_class_entry);
 	dom_entity_class_entry->create_object = dom_objects_new;

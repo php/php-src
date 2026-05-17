@@ -141,7 +141,11 @@ object(Dom\Entity)#3 (17) {
   ["textContent"]=>
   NULL
 }
-object(Dom\Notation)#4 (14) {
+object(Dom\Notation)#4 (16) {
+  ["publicId"]=>
+  string(0) ""
+  ["systemId"]=>
+  string(11) "viewgif.exe"
   ["nodeType"]=>
   int(12)
   ["nodeName"]=>
@@ -149,11 +153,11 @@ object(Dom\Notation)#4 (14) {
   ["baseURI"]=>
   string(%d) "%s"
   ["isConnected"]=>
-  bool(true)
+  bool(false)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["parentNode"]=>
-  string(22) "(object value omitted)"
+  NULL
   ["parentElement"]=>
   NULL
   ["childNodes"]=>

@@ -55,47 +55,47 @@ XML;
 string(3) "GIF"
 NULL
 NULL
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 NULL
 string(3) "GIF"
 NULL
 NULL
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 NULL
 bool(true)
 === JPEG ===
 string(4) "JPEG"
 NULL
 NULL
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 NULL
 string(4) "JPEG"
 NULL
 NULL
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 NULL
 bool(true)
 === HTML ===
 string(4) "HTML"
 NULL
 NULL
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 NULL
 string(4) "HTML"
 NULL
 NULL
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 NULL
 bool(true)
