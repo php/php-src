@@ -2760,6 +2760,13 @@ static char *php_openssl_get_url_name(const char *resourcename,
 		return NULL;
 	}
 
+	if (resourcenamelen >= 2 && resourcename[0] == '[') {
+		const char *end = memchr(resourcename, ']', resourcenamelen);
+		if (end != NULL && end > resourcename + 1) {
+			return pestrndup(resourcename + 1, end - resourcename - 1, is_persistent);
+		}
+	}
+
 	url = php_url_parse_ex(resourcename, resourcenamelen);
 	if (!url) {
 		return NULL;
@@ -2773,6 +2780,11 @@ static char *php_openssl_get_url_name(const char *resourcename,
 		/* skip trailing dots */
 		while (len && host[len-1] == '.') {
 			--len;
+		}
+
+		if (len >= 2 && host[0] == '[' && host[len-1] == ']') {
+			host += 1;
+			len -= 2;
 		}
 
 		if (len) {
