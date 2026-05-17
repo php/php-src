@@ -772,7 +772,14 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_F
 
 	SAVE_OPLINE();
 	function_name = RT_CONSTANT(opline, opline->op2);
-	zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+	/* For INIT_NS_FCALL_BY_NAME with a namespace prefix, op2+2 is the global fallback */
+	zend_string *lc_key = Z_STR_P(function_name + 1);
+	zend_string *suggestion = zend_find_similar_function(ZSTR_VAL(lc_key), ZSTR_LEN(lc_key));
+	if (suggestion) {
+		zend_throw_error(NULL, "Call to undefined function %s() (did you mean %s()?)", Z_STRVAL_P(function_name), ZSTR_VAL(suggestion));
+	} else {
+		zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+	}
 	HANDLE_EXCEPTION();
 }
 
@@ -53611,7 +53618,14 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_C
 
 	SAVE_OPLINE();
 	function_name = RT_CONSTANT(opline, opline->op2);
-	zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+	/* For INIT_NS_FCALL_BY_NAME with a namespace prefix, op2+2 is the global fallback */
+	zend_string *lc_key = Z_STR_P(function_name + 1);
+	zend_string *suggestion = zend_find_similar_function(ZSTR_VAL(lc_key), ZSTR_LEN(lc_key));
+	if (suggestion) {
+		zend_throw_error(NULL, "Call to undefined function %s() (did you mean %s()?)", Z_STRVAL_P(function_name), ZSTR_VAL(suggestion));
+	} else {
+		zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+	}
 	HANDLE_EXCEPTION();
 }
 

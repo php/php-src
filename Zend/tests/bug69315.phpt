@@ -43,7 +43,7 @@ try {
 bool(false)
 bool(false)
 Call to undefined function strlen()
-Call to undefined function defined()
+Call to undefined function defined() (did you mean define()?)
 Call to undefined function constant()
 Call to undefined function call_user_func()
 Call to undefined function is_string()

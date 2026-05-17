@@ -52,6 +52,43 @@ ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
 ZEND_API zend_string **zend_known_strings = NULL;
 
+ZEND_API zend_long zend_levenshtein(const char *s1, size_t l1, const char *s2, size_t l2)
+{
+	zend_long *p1, *p2, *tmp;
+	zend_long c0, c1, c2;
+	size_t i1, i2;
+
+	if (l1 == 0) return (zend_long)l2;
+	if (l2 == 0) return (zend_long)l1;
+
+	if (l1 < l2) {
+		const char *tmp_s = s1; s1 = s2; s2 = tmp_s;
+		size_t tmp_l = l1; l1 = l2; l2 = tmp_l;
+	}
+
+	p1 = emalloc((l2 + 1) * sizeof(zend_long));
+	p2 = emalloc((l2 + 1) * sizeof(zend_long));
+
+	for (i2 = 0; i2 <= l2; i2++) {
+		p1[i2] = (zend_long)i2;
+	}
+	for (i1 = 0; i1 < l1; i1++) {
+		p2[0] = (zend_long)(i1 + 1);
+		for (i2 = 0; i2 < l2; i2++) {
+			c0 = p1[i2] + (s1[i1] == s2[i2] ? 0 : 1);
+			c1 = p1[i2 + 1] + 1;
+			c2 = p2[i2] + 1;
+			p2[i2 + 1] = c0 < c1 ? (c0 < c2 ? c0 : c2) : (c1 < c2 ? c1 : c2);
+		}
+		tmp = p1; p1 = p2; p2 = tmp;
+	}
+
+	c0 = p1[l2];
+	efree(p1);
+	efree(p2);
+	return c0;
+}
+
 ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str)
 {
 	return ZSTR_H(str) = zend_hash_func(ZSTR_VAL(str), ZSTR_LEN(str));
