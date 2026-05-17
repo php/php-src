@@ -150,6 +150,8 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug 71162 (updateTimestamp never called when session data is empty).
     (Girgias)
+  . Null bytes in session.cookie_path, session.cookie_domain, and
+    session.cache_limiter are now rejected with a warning. (jorgsowa)
 
 - Soap:
   . Soap::__setCookie() when cookie name is a digit is now not stored and
