@@ -142,6 +142,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, setChecks)
 }
 /* }}} */
 
+/* TODO Document this method on PHP.net */
 /* {{{ Set the loosest restriction level allowed for strings. */
 U_CFUNC PHP_METHOD(Spoofchecker, setRestrictionLevel)
 {
