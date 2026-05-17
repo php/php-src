@@ -883,7 +883,7 @@ typedef struct match_block {
   PCRE2_SPTR start_code;          /* For use in pattern recursion */
   PCRE2_SPTR start_subject;       /* Start of the subject string */
   PCRE2_SPTR check_subject;       /* Where UTF-checked from */
-  PCRE2_SPTR end_subject;         /* Usable end of the subject string */
+  PCRE2_SPTR end_subject;         /* usable end of the subject string */
   PCRE2_SPTR true_end_subject;    /* Actual end of the subject string */
   PCRE2_SPTR end_match_ptr;       /* Subject position at end match */
   PCRE2_SPTR start_used_ptr;      /* Earliest consulted character */

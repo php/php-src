@@ -3478,7 +3478,7 @@ XXH_PUBLIC_API XXH64_hash_t XXH64_hashFromCanonical(XXH_NOESCAPE const XXH64_can
  *
  * Thanks to this optimization, XXH3 only requires these features to be efficient:
  *
- *  - Usable unaligned access
+ *  - usable unaligned access
  *  - A 32-bit or 64-bit ALU
  *      - If 32-bit, a decent ADC instruction
  *  - A 32 or 64-bit multiply with a 64-bit result
