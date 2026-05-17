@@ -8,8 +8,9 @@ PHP                                                                        NEWS
     and IntlGregorianCalendar date/time construction. (Weilin Du)
   . Expose Spoofchecker restriction-level APIs on all supported ICU
     versions. (Weilin Du)
-  . Fix SpoofChecker::setAllowedChars() to report PHP constant names
-    instead of ICU USET_* names in invalid pattern option errors.
+  . Fix SpoofChecker::setAllowedChars() and IntlDateFormatter::__construct()
+    to report PHP constant names instead of ICU constant names in
+    user-visible error messages.
     (Weilin Du)
 
 - MySQLnd:
