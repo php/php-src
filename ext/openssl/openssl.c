@@ -2847,6 +2847,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 		zout = zend_try_array_init(zout);
 		if (!zout) {
+			sk_X509_pop_free(ca, X509_free);
 			goto cleanup;
 		}
 
