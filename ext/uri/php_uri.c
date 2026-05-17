@@ -31,6 +31,7 @@
 #include "uriparser/Uri.h"
 
 zend_class_entry *php_uri_ce_rfc3986_uri;
+zend_class_entry *php_uri_ce_rfc3986_uri_type;
 zend_class_entry *php_uri_ce_whatwg_url;
 zend_class_entry *php_uri_ce_comparison_mode;
 zend_class_entry *php_uri_ce_exception;
@@ -508,6 +509,16 @@ PHP_METHOD(Uri_WhatWg_Url, __construct)
 	create_whatwg_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 
+PHP_METHOD(Uri_Rfc3986_Uri, getUriType)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(uri_object->uri != NULL);
+
+	php_uri_parser_rfc3986_uri_type_read(uri_object->uri, return_value);
+}
+
 PHP_METHOD(Uri_Rfc3986_Uri, getScheme)
 {
 	php_uri_property_read_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_SCHEME, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
@@ -883,6 +894,16 @@ PHP_METHOD(Uri_WhatWg_Url, withScheme)
 	php_uri_property_write_str_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_SCHEME);
 }
 
+PHP_METHOD(Uri_WhatWg_Url, isSpecialScheme)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(uri_object->uri != NULL);
+
+	RETVAL_BOOL(php_uri_parser_whatwg_is_special(uri_object->uri));
+}
+
 PHP_METHOD(Uri_WhatWg_Url, withUsername)
 {
 	php_uri_property_write_str_or_null_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_USERNAME);
@@ -1077,6 +1098,8 @@ static PHP_MINIT_FUNCTION(uri)
 	object_handlers_rfc3986_uri.offset = offsetof(php_uri_object, std);
 	object_handlers_rfc3986_uri.free_obj = php_uri_object_handler_free;
 	object_handlers_rfc3986_uri.clone_obj = php_uri_object_handler_clone;
+
+	php_uri_ce_rfc3986_uri_type = register_class_Uri_Rfc3986_UriType();
 
 	php_uri_ce_whatwg_url = register_class_Uri_WhatWg_Url();
 	php_uri_ce_whatwg_url->create_object = php_uri_object_create_whatwg;

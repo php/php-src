@@ -21,6 +21,8 @@ PHPAPI extern const php_uri_parser php_uri_parser_rfc3986;
 
 typedef struct php_uri_parser_rfc3986_uris php_uri_parser_rfc3986_uris;
 
+ZEND_ATTRIBUTE_NONNULL void php_uri_parser_rfc3986_uri_type_read(void *uri, zval *retval);
+
 zend_result php_uri_parser_rfc3986_userinfo_read(php_uri_parser_rfc3986_uris *uri, php_uri_component_read_mode read_mode, zval *retval);
 zend_result php_uri_parser_rfc3986_userinfo_write(php_uri_parser_rfc3986_uris *uri, zval *value, zval *errors);
 

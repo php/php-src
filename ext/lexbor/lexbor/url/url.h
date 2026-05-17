@@ -845,6 +845,11 @@ lxb_url_get(lxb_url_parser_t *parser)
     return parser->url;
 }
 
+lxb_inline bool
+lxb_url_is_special(const lxb_url_t *url)
+{
+	return url->scheme.type != LXB_URL_SCHEMEL_TYPE__UNKNOWN;
+}
 
 #ifdef __cplusplus
 } /* extern "C" */
