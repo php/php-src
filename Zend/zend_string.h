@@ -650,6 +650,7 @@ default: ZEND_UNREACHABLE();
 	_(ZEND_STR_CONST_EXPR_PLACEHOLDER, "[constant expression]") \
 	_(ZEND_STR_DEPRECATED_CAPITALIZED, "Deprecated") \
 	_(ZEND_STR_SINCE,                  "since") \
+	_(ZEND_STR_NODISCARD,              "NoDiscard") \
 	_(ZEND_STR_GET,                    "get") \
 	_(ZEND_STR_SET,                    "set") \
 	_(ZEND_STR_8_DOT_0,                "8.0") \
