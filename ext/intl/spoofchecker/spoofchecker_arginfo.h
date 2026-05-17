@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 /* This is a generated file, edit spoofchecker.stub.php instead.
-=======
-/* This is a generated file, edit the .stub.php file instead.
->>>>>>> PHP-8.5
  * Stub hash: 4634f8ef9157fb3670a2ddc5e3246340660fc68c */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
@@ -102,11 +98,7 @@ static zend_class_entry *register_class_Spoofchecker(void)
 	ZVAL_LONG(&const_CHAR_LIMIT_value, USPOOF_CHAR_LIMIT);
 	zend_string *const_CHAR_LIMIT_name = zend_string_init_interned("CHAR_LIMIT", sizeof("CHAR_LIMIT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_CHAR_LIMIT_name, &const_CHAR_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-<<<<<<< HEAD
 	zend_string_release_ex(const_CHAR_LIMIT_name, true);
-=======
-	zend_string_release(const_CHAR_LIMIT_name);
->>>>>>> PHP-8.5
 
 	zval const_ASCII_value;
 	ZVAL_LONG(&const_ASCII_value, USPOOF_ASCII);
@@ -148,11 +140,7 @@ static zend_class_entry *register_class_Spoofchecker(void)
 	ZVAL_LONG(&const_MIXED_NUMBERS_value, USPOOF_MIXED_NUMBERS);
 	zend_string *const_MIXED_NUMBERS_name = zend_string_init_interned("MIXED_NUMBERS", sizeof("MIXED_NUMBERS") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_MIXED_NUMBERS_name, &const_MIXED_NUMBERS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-<<<<<<< HEAD
 	zend_string_release_ex(const_MIXED_NUMBERS_name, true);
-=======
-	zend_string_release(const_MIXED_NUMBERS_name);
->>>>>>> PHP-8.5
 #if U_ICU_VERSION_MAJOR_NUM >= 62
 
 	zval const_HIDDEN_OVERLAY_value;
