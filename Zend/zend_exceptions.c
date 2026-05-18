@@ -541,7 +541,7 @@ static void build_trace_args(zval *arg, smart_str *str) /* {{{ */
 
 static void build_trace_args_list(zval *tmp, smart_str *str) /* {{{ */
 {
-	if (EXPECTED(Z_TYPE_P(tmp) != IS_ARRAY)) {
+	if (UNEXPECTED(Z_TYPE_P(tmp) != IS_ARRAY)) {
 		/* only happens w/ reflection abuse (Zend/tests/bug63762.phpt) */
 		zend_error(E_WARNING, "args element is not an array");
 		return;
