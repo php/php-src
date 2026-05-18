@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fix incorrect argument positions in out-of-bounds errors for
     IntlCalendar::set(), IntlCalendar::setDate(), IntlCalendar::setDateTime(),
     and IntlGregorianCalendar date/time construction. (Weilin Du)
+  . Fix incorrect argument positions for uninitialized calendar arguments in
+    IntlCalendar::equals(), ::before(), ::after(), and ::isEquivalentTo().
+    (Weilin Du)
   . Expose Spoofchecker restriction-level APIs on all supported ICU
     versions. (Weilin Du)
   . Fix SpoofChecker::setAllowedChars() to report PHP constant names
