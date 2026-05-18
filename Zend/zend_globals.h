@@ -164,6 +164,25 @@ struct _zend_compiler_globals {
 	uint32_t internal_run_time_cache_size;
 
 	zend_stack short_circuiting_opnums;
+
+	uint32_t type_arg_depth;
+	int type_arg_residual_token;
+
+	struct _zend_generic_scope_entry *generic_scope;
+
+	/* Set while compiling a type expression that has no instance binding for
+	 * the enclosing class's type parameters (i.e. a static method's
+	 * parameter/return types or a static property's type). Class-origin type
+	 * parameter references resolved in this context are a compile error. */
+	bool in_static_member_type;
+
+	struct _zend_inheritance_binding_cache *inheritance_binding_cache;
+
+	struct {
+		zend_class_entry *target;
+		const zend_type *args;
+		uint32_t arity;
+	} inheritance_binding_hint;
 #ifdef ZTS
 	uint32_t copied_functions_count;
 #endif

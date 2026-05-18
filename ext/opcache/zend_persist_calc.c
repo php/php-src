@@ -46,6 +46,7 @@
 
 static void zend_persist_zval_calc(zval *z);
 static void zend_persist_op_array_calc(const zval *zv);
+static void zend_persist_type_calc(zend_type *type);
 
 static void zend_hash_persist_calc(const HashTable *ht)
 {
@@ -191,12 +192,37 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 				}
 				zend_persist_zval_calc(&attr->args[i].value);
 			}
+
+			if (attr->generic_args) {
+				ADD_SIZE(sizeof(zend_type));
+				zend_persist_type_calc(attr->generic_args);
+			}
 		} ZEND_HASH_FOREACH_END();
 	}
 }
 
 static void zend_persist_type_calc(zend_type *type)
 {
+	if (ZEND_TYPE_HAS_TYPE_PARAMETER(*type)) {
+		zend_type_parameter_ref *ref = ZEND_TYPE_TYPE_PARAMETER(*type);
+		ADD_SIZE(sizeof(*ref));
+		ADD_INTERNED_STRING(ref->name);
+		return;
+	}
+
+	if (ZEND_TYPE_HAS_NAMED_WITH_ARGS(*type)) {
+		zend_type_named_with_args *named = ZEND_TYPE_NAMED_WITH_ARGS(*type);
+		ADD_SIZE(ZEND_TYPE_NAMED_WITH_ARGS_SIZE(named->count));
+		if (named->name) {
+			ADD_INTERNED_STRING(named->name);
+		}
+		for (uint32_t i = 0; i < named->count; i++) {
+			zend_persist_type_calc(&named->args[i]);
+		}
+
+		return;
+	}
+
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		ADD_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
 	}
@@ -207,12 +233,103 @@ static void zend_persist_type_calc(zend_type *type)
 			zend_persist_type_calc(single_type);
 			continue;
 		}
+
+		if (ZEND_TYPE_HAS_TYPE_PARAMETER(*single_type)) {
+			zend_persist_type_calc(single_type);
+			continue;
+		}
+
+		if (ZEND_TYPE_HAS_NAMED_WITH_ARGS(*single_type)) {
+			zend_persist_type_calc(single_type);
+			continue;
+		}
+
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
 			zend_string *type_name = ZEND_TYPE_NAME(*single_type);
 			ADD_INTERNED_STRING(type_name);
 			ZEND_TYPE_SET_PTR(*single_type, type_name);
 		}
 	} ZEND_TYPE_FOREACH_END();
+}
+
+static void zend_persist_generic_parameter_list_calc(zend_generic_parameter_list *list)
+{
+	if (!list) {
+		return;
+	}
+
+	ADD_SIZE(ZEND_GENERIC_PARAMETER_LIST_SIZE(list->count));
+	for (uint32_t i = 0; i < list->count; i++) {
+		ADD_INTERNED_STRING(list->parameters[i].name);
+		zend_persist_type_calc(&list->parameters[i].bound);
+		zend_persist_type_calc(&list->parameters[i].bound_pre_erasure);
+		zend_persist_type_calc(&list->parameters[i].default_type);
+		zend_persist_type_calc(&list->parameters[i].default_pre_erasure);
+	}
+}
+
+static void zend_persist_generic_type_table_ht_calc(HashTable *ht)
+{
+	zend_hash_persist_calc(ht);
+	if (HT_IS_PACKED(ht)) {
+		zval *v;
+		ZEND_HASH_PACKED_FOREACH_VAL(ht, v) {
+			ADD_SIZE(sizeof(zend_type));
+			zend_persist_type_calc((zend_type *) Z_PTR_P(v));
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		Bucket *p;
+		ZEND_HASH_MAP_FOREACH_BUCKET(ht, p) {
+			if (p->key) {
+				ADD_INTERNED_STRING(p->key);
+			}
+			ADD_SIZE(sizeof(zend_type));
+			zend_persist_type_calc((zend_type *) Z_PTR(p->val));
+		} ZEND_HASH_FOREACH_END();
+	}
+	ADD_SIZE(sizeof(HashTable));
+}
+
+static void zend_persist_generic_type_table_calc(zend_generic_type_table *table)
+{
+	if (!table) {
+		return;
+	}
+
+	ADD_SIZE(sizeof(*table));
+	if (table->return_type) {
+		ADD_SIZE(sizeof(zend_type));
+		zend_persist_type_calc(table->return_type);
+	}
+
+	if (table->extends) {
+		ADD_SIZE(sizeof(zend_type));
+		zend_persist_type_calc(table->extends);
+	}
+
+	if (table->parameters) {
+		zend_persist_generic_type_table_ht_calc(table->parameters);
+	}
+
+	if (table->properties) {
+		zend_persist_generic_type_table_ht_calc(table->properties);
+	}
+
+	if (table->class_constants) {
+		zend_persist_generic_type_table_ht_calc(table->class_constants);
+	}
+
+	if (table->implements) {
+		zend_persist_generic_type_table_ht_calc(table->implements);
+	}
+
+	if (table->trait_uses) {
+		zend_persist_generic_type_table_ht_calc(table->trait_uses);
+	}
+
+	if (table->turbofish_args) {
+		zend_persist_generic_type_table_ht_calc(table->turbofish_args);
+	}
 }
 
 static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
@@ -231,6 +348,36 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		if (zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
 			/* already stored */
 			ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
+			if (op_array->arg_info) {
+				zend_arg_info *arg_info = op_array->arg_info;
+				if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+					arg_info--;
+				}
+
+				if (!zend_shared_alloc_get_xlat_entry(arg_info)) {
+					uint32_t num_args = op_array->num_args;
+					if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+						num_args++;
+					}
+
+					if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+						num_args++;
+					}
+
+					ADD_SIZE(sizeof(zend_arg_info) * num_args);
+					for (uint32_t i = 0; i < num_args; i++) {
+						if (arg_info[i].name) {
+							ADD_INTERNED_STRING(arg_info[i].name);
+						}
+
+						zend_persist_type_calc(&arg_info[i].type);
+						if (arg_info[i].doc_comment) {
+							ADD_INTERNED_STRING(arg_info[i].doc_comment);
+						}
+					}
+				}
+			}
+
 			return;
 		}
 	}
@@ -238,6 +385,36 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 	if (op_array->scope
 	 && !(op_array->fn_flags & ZEND_ACC_CLOSURE)
 	 && (op_array->scope->ce_flags & ZEND_ACC_CACHED)) {
+		if (op_array->arg_info) {
+			zend_arg_info *arg_info = op_array->arg_info;
+			if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				arg_info--;
+			}
+
+			if (!zend_accel_in_shm(arg_info) && !zend_shared_alloc_get_xlat_entry(arg_info)) {
+				uint32_t num_args = op_array->num_args;
+				if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+					num_args++;
+				}
+
+				if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+					num_args++;
+				}
+
+				ADD_SIZE(sizeof(zend_arg_info) * num_args);
+				for (uint32_t i = 0; i < num_args; i++) {
+					if (arg_info[i].name) {
+						ADD_INTERNED_STRING(arg_info[i].name);
+					}
+
+					zend_persist_type_calc(&arg_info[i].type);
+					if (arg_info[i].doc_comment) {
+						ADD_INTERNED_STRING(arg_info[i].doc_comment);
+					}
+				}
+			}
+		}
+
 		return;
 	}
 
@@ -344,6 +521,9 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		}
 	}
 
+	zend_persist_generic_parameter_list_calc(op_array->generic_parameters);
+	zend_persist_generic_type_table_calc(op_array->generic_types);
+
 	ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
 }
 
@@ -410,6 +590,20 @@ static void zend_persist_property_info_calc(zend_property_info *prop)
 	if (prop->attributes) {
 		zend_persist_attributes_calc(prop->attributes);
 	}
+	if (prop->hooks) {
+		ADD_SIZE(ZEND_PROPERTY_HOOK_STRUCT_SIZE);
+		for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+			if (prop->hooks[i]) {
+				zend_persist_class_method_calc(&prop->hooks[i]->op_array);
+			}
+		}
+	}
+}
+
+static void zend_persist_substituted_property_info_calc(zend_property_info *prop)
+{
+	ADD_SIZE(sizeof(zend_property_info));
+	zend_persist_type_calc(&prop->type);
 	if (prop->hooks) {
 		ADD_SIZE(ZEND_PROPERTY_HOOK_STRUCT_SIZE);
 		for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
@@ -503,6 +697,9 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 			ADD_INTERNED_STRING(p->key);
 			if (prop->ce == ce) {
 				zend_persist_property_info_calc(prop);
+			} else if ((prop->flags & ZEND_ACC_GENERIC_CLONE) && !zend_shared_alloc_get_xlat_entry(prop)) {
+				zend_shared_alloc_register_xlat_entry(prop, prop);
+				zend_persist_substituted_property_info_calc(prop);
 			}
 		} ZEND_HASH_FOREACH_END();
 
@@ -536,6 +733,9 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 		if (ce->attributes) {
 			zend_persist_attributes_calc(ce->attributes);
 		}
+
+		zend_persist_generic_parameter_list_calc(ce->generic_parameters);
+		zend_persist_generic_type_table_calc(ce->generic_types);
 
 		if (ce->num_interfaces) {
 			uint32_t i;

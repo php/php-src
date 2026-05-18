@@ -3,6 +3,14 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.6.0alpha1
 
 - Core:
+  . Added generics: type parameters on classes, interfaces, traits, functions,
+    methods, closures, and arrow functions, with optional bounds, defaults,
+    and variance markers; turbofish syntax (`f::<int>()`) at call sites; and
+    type arguments on named types (`Box<int>`, `array<K, V>`, `iterable<T>`,
+    `self<T>`, `static<T>`, `parent<T>`). Type parameters erase to their bound
+    at runtime; type arguments are discarded. Pre-erasure metadata is preserved
+    for Reflection so static-analysis tools can consume generics without
+    re-parsing source. (azjezz)
   . Added first-class callable cache to share instances for the duration of the
     request. (ilutov)
   . It is now possible to use reference assign on WeakMap without the key

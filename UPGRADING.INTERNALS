@@ -107,6 +107,54 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_fci_consumed_arg(), which allows moving a selected callback argument
     instead of copying it in zend_call_function(). Currently only a single
     consumed argument is supported.
+  . Added support for runtime-bound-checked generic type parameters. The
+    main additions:
+    . New types in zend_compile.h: zend_generic_parameter,
+      zend_generic_parameter_list, zend_generic_type_table, and
+      zend_generic_scope_entry. Allocate / destroy via
+      zend_generic_parameter_list_alloc(),
+      zend_generic_parameter_list_destroy(),
+      zend_generic_type_table_alloc(), and
+      zend_generic_type_table_destroy().
+    . zend_op_array and zend_class_entry both gained an optional
+      `generic_parameters` (declared parameter list) and an optional
+      `generic_types` side table holding the pre-erasure forms of
+      return types, parameter types, property types, class-constant
+      types, the extends type, implements list, and trait-use list.
+      The runtime arg_info / property / class-constant slots continue
+      to hold only the erased form.
+    . New AST kinds: ZEND_AST_GENERIC_TYPE_PARAMETER_LIST,
+      ZEND_AST_GENERIC_TYPE_PARAMETER, ZEND_AST_GENERIC_NAMED_TYPE,
+      ZEND_AST_GENERIC_TYPE_ARGUMENT_LIST, ZEND_AST_TURBOFISH.
+    . zend_ast_decl::child[] grew from 5 to 6 entries; the new slot
+      carries an optional generic-parameter-list AST.
+    . The child-count groups of ZEND_AST_CALL, ZEND_AST_NEW,
+      ZEND_AST_METHOD_CALL, ZEND_AST_NULLSAFE_METHOD_CALL, and
+      ZEND_AST_STATIC_CALL each gained one optional child holding the
+      call-site turbofish type-argument list. Code that walks these
+      nodes by hard-coded child count must be updated.
+    . zend_ast_export handles the new generic AST kinds.
+    . Two new bits on zend_type's type_mask:
+      _ZEND_TYPE_TYPE_PARAMETER_BIT (1u << 25) and
+      _ZEND_TYPE_NAMED_WITH_ARGS_BIT (1u << 31), with payload structs
+      zend_type_parameter_ref { zend_string *name; uint32_t index;
+      uint8_t origin; } and zend_type_named_with_args { zend_string
+      *name; uint32_t name_attr; uint32_t count; zend_type args[]; }.
+      These bits only ever appear in pre-erasure forms held by the
+      side table; runtime arg_info / property / class-constant types
+      never carry them. Helpers: ZEND_TYPE_HAS_TYPE_PARAMETER(),
+      ZEND_TYPE_TYPE_PARAMETER(), ZEND_TYPE_HAS_NAMED_WITH_ARGS(),
+      ZEND_TYPE_NAMED_WITH_ARGS().
+    . New compiler-globals fields: CG(type_arg_depth) (right-angle
+      split state used by the zendlex wrapper), CG(token_residual)
+      (single-token pushback slot), and CG(generic_scope) (linked
+      stack of in-scope type parameters).
+    . New T_TURBOFISH lexer token (literal `::<`). The zendlex wrapper
+      splits T_SR (`>>`), T_IS_GREATER_OR_EQUAL (`>=`), and T_SR_EQUAL
+      (`>>=`) into separate `>` tokens whenever CG(type_arg_depth) is
+      non-zero, with a single-token pushback slot.
+    . Module API bumped to 20260506; extension API bumped to
+      420260506. All extensions must be recompiled.
 
 ========================
 2. Build system changes

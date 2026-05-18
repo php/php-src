@@ -14,6 +14,7 @@
    :hidden:
 
    core/data-structures/index
+   core/generics
 
 .. toctree::
    :caption: Miscellaneous

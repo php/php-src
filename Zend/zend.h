@@ -228,6 +228,9 @@ struct _zend_class_entry {
 
 	zend_string *doc_comment;
 
+	struct _zend_generic_parameter_list *generic_parameters;
+	struct _zend_generic_type_table     *generic_types;
+
 	union {
 		struct {
 			zend_string *filename;

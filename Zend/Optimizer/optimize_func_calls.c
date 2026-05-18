@@ -74,6 +74,46 @@ static void zend_delete_call_instructions(const zend_op_array *op_array, zend_op
 	}
 }
 
+/* Returns true if a VERIFY_GENERIC_ARGUMENTS sits between this call's INIT and
+ * DO opcodes; such a call cannot be inlined because the verify opcode reads
+ * EX(call), which goes away once the frame is dropped. */
+static bool zend_call_has_generic_arguments_check(zend_op *opline)
+{
+	int call = 0;
+	while (1) {
+		switch (opline->opcode) {
+			case ZEND_INIT_FCALL_BY_NAME:
+			case ZEND_INIT_NS_FCALL_BY_NAME:
+			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_METHOD_CALL:
+			case ZEND_INIT_FCALL:
+			case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
+				if (call == 0) {
+					return false;
+				}
+				ZEND_FALLTHROUGH;
+			case ZEND_NEW:
+			case ZEND_INIT_DYNAMIC_CALL:
+			case ZEND_INIT_USER_CALL:
+				call--;
+				break;
+			case ZEND_DO_FCALL:
+			case ZEND_DO_ICALL:
+			case ZEND_DO_UCALL:
+			case ZEND_DO_FCALL_BY_NAME:
+				call++;
+				break;
+			case ZEND_VERIFY_GENERIC_ARGUMENTS:
+				if (call == 0) {
+					return true;
+				}
+				break;
+		}
+
+		opline--;
+	}
+}
+
 static void zend_try_inline_call(zend_op_array *op_array, const zend_op *fcall, zend_op *opline, const zend_function *func)
 {
 	const uint32_t no_discard = RETURN_VALUE_USED(opline) ? 0 : ZEND_ACC_NODISCARD;
@@ -94,6 +134,13 @@ static void zend_try_inline_call(zend_op_array *op_array, const zend_op *fcall, 
 			if (fcall->opcode == ZEND_INIT_STATIC_METHOD_CALL
 					&& !(func->op_array.fn_flags & ZEND_ACC_STATIC)) {
 				/* Don't inline static call to instance method. */
+				return;
+			}
+
+			if (op_array->generic_types
+					&& op_array->generic_types->turbofish_args
+					&& zend_call_has_generic_arguments_check(opline - 1)) {
+				/* The verify opcode must run; inlining would orphan it. */
 				return;
 			}
 

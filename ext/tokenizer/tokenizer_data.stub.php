@@ -719,6 +719,11 @@ const T_CURLY_OPEN = UNKNOWN;
 const T_PAAMAYIM_NEKUDOTAYIM = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_TURBOFISH
+ */
+const T_TURBOFISH = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_NS_SEPARATOR
  */
 const T_NS_SEPARATOR = UNKNOWN;

@@ -144,6 +144,31 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Added support for runtime-bound-checked generics. Classes, interfaces,
+    traits, functions, methods, closures, and arrow functions can now declare
+    type parameters with optional bounds (`T : Foo`), defaults (`T = int`),
+    and variance markers (`+T`, `-T`):
+
+        class Box<T : object> {
+            public T $value;
+            public function get(): T { return $this->value; }
+        }
+
+        function id<T>(T $x): T { return $x; }
+
+    Call sites accept turbofish type arguments (`Box::<int>::new()`,
+    `id::<int>(7)`); use sites accept type arguments on named types
+    (`Box<int>`, `array<int, string>`, `iterable<T>`, `self<T>`,
+    `static<T>`, `parent<T>`). Recursive bounds (`T : Comparable<T>`)
+    are supported. Anonymous classes cannot declare type parameters.
+
+    At runtime each type parameter is replaced by its declared bound
+    (or `mixed` when unbounded, or when the bound is invalid in the
+    target position, e.g. `callable` on a property), and type
+    arguments are discarded. Pre-erasure metadata is preserved on
+    functions, methods, and class entries and is exposed through
+    Reflection so that PHP-based static-analysis tools can consume
+    generics without re-parsing source.
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand.
   . It is now possible to define the `__debugInfo()` magic method on enums.
@@ -260,6 +285,23 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/isreadable-iswriteable
   . Added ReflectionParameter::getDocComment().
     RFC: https://wiki.php.net/rfc/parameter-doccomments
+  . Added ReflectionFunctionAbstract::isGeneric() and
+    ReflectionFunctionAbstract::getGenericParameters() (covers
+    ReflectionFunction, ReflectionMethod, closures, and arrow functions).
+  . Added ReflectionClass::isGeneric() and
+    ReflectionClass::getGenericParameters().
+  . Added ReflectionClass::getGenericArgumentsForParentClass(),
+    ReflectionClass::getGenericArgumentsForParentInterface(string $name),
+    and ReflectionClass::getGenericArgumentsForUsedTrait(string $name) for
+    inspecting the type arguments supplied at a class's own extends /
+    implements / use sites. Returns null when no type arguments were
+    specified for that ancestor at this class's clause site (consumers
+    enumerate ancestors via the existing getParentClass() / getInterfaces()
+    / getTraits() APIs).
+  . Added ReflectionNamedType::hasGenericArguments() and
+    ReflectionNamedType::getGenericArguments(). The arguments are returned
+    as ReflectionType instances in source order (pre-erasure form);
+    ReflectionNamedType::getName() continues to return the erased name.
 
 - Intl:
   . `grapheme_strrev()` returns strrev for grapheme cluster unit.
@@ -285,6 +327,15 @@ PHP 8.6 UPGRADE NOTES
   . Openssl\OpensslException
   . Openssl\Session
     RFC: https://wiki.php.net/rfc/tls_session_resumption
+
+- Reflection:
+  . ReflectionGenericTypeParameter (final, instances obtained via
+    ReflectionClass::getGenericParameters() and
+    ReflectionFunctionAbstract::getGenericParameters()).
+  . ReflectionTypeParameterReference (extends ReflectionType, appears only
+    inside pre-erasure type expressions: bounds, defaults, and the elements
+    of ReflectionNamedType::getGenericArguments()).
+  . enum ReflectionGenericVariance { Invariant; Covariant; Contravariant }.
 
 - Standard:
   . enum SortDirection
