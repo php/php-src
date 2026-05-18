@@ -99,7 +99,7 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		return FAILURE;
 	}
 	if (date_type == UDAT_PATTERN && time_type != UDAT_PATTERN) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: time format must be IntlDateFormatter::PATTERN if date format is IntlDateFormatter::PATTERN", 0);
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: time format must be IntlDateFormatter::PATTERN if date format is IntlDateFormatter::PATTERN");
 		return FAILURE;
 	}
 

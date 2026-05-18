@@ -21,4 +21,4 @@ try {
 
 ?>
 --EXPECT--
-IntlDateFormatter::__construct(): time format must be IntlDateFormatter::PATTERN if date format is IntlDateFormatter::PATTERN: U_ILLEGAL_ARGUMENT_ERROR
+IntlDateFormatter::__construct(): datefmt_create: time format must be IntlDateFormatter::PATTERN if date format is IntlDateFormatter::PATTERN
