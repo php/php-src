@@ -945,7 +945,7 @@ zend_function *zend_optimizer_get_called_func(
 				if (ce) {
 					zend_string *func_name = Z_STR_P(CRT_CONSTANT(opline->op2) + 1);
 					zend_function *fbc = zend_hash_find_ptr(&ce->function_table, func_name);
-					if (fbc) {
+					if (fbc && !(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 						bool is_public = (fbc->common.fn_flags & ZEND_ACC_PUBLIC) != 0;
 						bool same_scope = fbc->common.scope == op_array->scope;
 						if (is_public || same_scope) {

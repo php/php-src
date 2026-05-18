@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - CLI:
   . Fixed bug GH-21901 (Stale getopt() optional value). (onthebed)
 
+- Core:
+  . Fixed bug GH-22071 (JIT assertion on abstract static method call).
+    (David Carlier)
+
 - Date:
   . Fixed bug GH-18422 (int overflow in php_date_llabs). (iliaal)
 
