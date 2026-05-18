@@ -23,6 +23,14 @@ PHP                                                                        NEWS
   . Fixed bug GH-21689 (version_compare() incorrectly handles versions ending
     with a dot). (timwolla)
 
+- URI:
+  . Fixed CVE-2026-44927 (In uriparser before 1.0.2, there is pointer
+    difference truncation to int in various places). (CVE-2026-44927)
+    (Sebastian Pipping)
+  . Fixed CVE-2026-44928 (In uriparser before 1.0.2, the function family
+    EqualsUri can misclassify two unequal URIs as equal). (CVE-2026-44928)
+    (Sebastian Pipping)
+
 07 May 2026, PHP 8.5.6
 
 - Core:

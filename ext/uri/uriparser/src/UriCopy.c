@@ -199,6 +199,12 @@ int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri, const URI_TYPE(Uri) * sourceUri
             if (URI_FUNC(CopyRangeAsNeeded)(&destWalker->text, &sourceWalker->text,
                                             memory)
                 == URI_FALSE) {
+                // Unless wired to `destUri` above, `destWalker` may be hanging
+                // in the air now
+                if (destUri->pathHead != destWalker) {
+                    memory->free(memory, destWalker);
+                }
+
                 URI_FUNC(PreventLeakageAfterCopy)(destUri, revertMask, memory);
                 return URI_ERROR_MALLOC;
             }
