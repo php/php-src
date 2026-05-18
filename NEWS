@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.23
 
+- Intl:
+  . Fix incorrect argument positions for uninitialized calendar arguments in
+    IntlCalendar::equals(), ::before(), ::after(), and ::isEquivalentTo().
+    (Weilin Du)
+
 
 04 Jun 2026, PHP 8.4.22
 

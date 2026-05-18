@@ -345,7 +345,7 @@ static void _php_intlcal_before_after(
 
 	when_co = Z_INTL_CALENDAR_P(when_object);
 	if (when_co->ucal == NULL) {
-		zend_argument_error(NULL, 2, "is uninitialized");
+		zend_argument_error(NULL, hasThis() ? 1 : 2, "is uninitialized");
 		RETURN_THROWS();
 	}
 
@@ -774,7 +774,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_equivalent_to)
 
 	other_co = Z_INTL_CALENDAR_P(other_object);
 	if (other_co->ucal == NULL) {
-		zend_argument_error(NULL, 2, "is uninitialized");
+		zend_argument_error(NULL, hasThis() ? 1 : 2, "is uninitialized");
 		RETURN_THROWS();
 	}
 
@@ -912,7 +912,7 @@ U_CFUNC PHP_FUNCTION(intlcal_equals)
 	CALENDAR_METHOD_FETCH_OBJECT;
 	other_co = Z_INTL_CALENDAR_P(other_object);
 	if (other_co->ucal == NULL) {
-		zend_argument_error(NULL, 2, "is uninitialized");
+		zend_argument_error(NULL, hasThis() ? 1 : 2, "is uninitialized");
 		RETURN_THROWS();
 	}
 
