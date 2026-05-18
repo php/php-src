@@ -55,6 +55,11 @@ PHP 8.6 UPGRADE NOTES
 - Phar:
   . Phar::mungServer() now raises a ValueError when an invalid
     argument value is passed instead of being silently ignored.
+  . Phar::addEmptyDir() now rejects `/.phar` paths in addition to `.phar`
+    paths, and raises the same BadMethodCallException for attempts to create
+    the reserved magic ".phar" directory through that form.
+  . Phar::addEmptyDir() now treats non-magic names that merely share the
+    `.phar` prefix as ordinary directories.
 
 - PGSQL:
   . pg_fetch_object() now reports the ValueError for a non-empty

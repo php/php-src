@@ -129,6 +129,10 @@ PHP                                                                        NEWS
   . Support reference values in Phar::mungServer(). (ndossche)
   . Invalid values now throw in Phar::mungServer() instead of being silently
     ignored. (ndossche)
+  . Fixed a bypass of the magic ".phar" directory protection in
+    Phar::addEmptyDir() for paths starting with "/.phar". (Weilin Du)
+  . Phar::addEmptyDir() now allows non-magic directory names that merely
+    share the ".phar" prefix. (Weilin Du)
   . Support overridden methods in SplFileInfo for getMTime() and getPathname()
     when building a phar. (ndossche)
   . Mark Phar::buildFromIterator() base directory argument as a path.
