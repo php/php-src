@@ -75,6 +75,11 @@ PHP 8.6 UPGRADE NOTES
     argument value is passed.
 
 - Session:
+  . Setting session.cookie_path, session.cookie_domain, or session.cache_limiter
+    to a value containing null bytes now emits a warning and leaves the setting
+    unchanged. Previously, null bytes were silently accepted: for cookie_path and
+    cookie_domain this caused the SAPI to drop the Set-Cookie header; for
+    cache_limiter the value was silently truncated at the null byte.
   . A ValueError is not thrown if $name is a string containing null bytes in
     session_module_name().
   . session_encode() now returns an empty string instead of false for empty
