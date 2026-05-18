@@ -111,6 +111,7 @@ typedef struct _php_stream_filter_chain {
 
 	/* Owning stream */
 	php_stream *stream;
+	uint32_t in_iteration;
 } php_stream_filter_chain;
 
 struct _php_stream_filter {
