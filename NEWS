@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - CLI:
   . Fixed bug GH-21901 (Stale getopt() optional value). (onthebed)
 
+- DOM:
+  . Fixed bug GH-22077 (UAF in custom XPath function).
+    (afflerbach/David Carlier)
+
 - Opcache:
   . Fixed tracing JIT crash when a VM interrupt is handled during an observed
     user function call. (Levi Morrison)
