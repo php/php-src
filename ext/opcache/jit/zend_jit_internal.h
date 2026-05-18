@@ -175,6 +175,7 @@ typedef struct _zend_jit_op_array_hot_extension {
 	zend_jit_hash((op_array)->opcodes)
 
 extern const zend_op *zend_jit_halt_op;
+extern const zend_op *zend_jit_interrupt_op;
 
 #ifdef HAVE_GCC_GLOBAL_REGS
 # define EXECUTE_DATA_D                       void
