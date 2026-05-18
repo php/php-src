@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - CLI:
   . Fixed bug GH-21901 (Stale getopt() optional value). (onthebed)
 
+- Date:
+  . Fixed bug GH-18422 (int overflow in php_date_llabs). (iliaal)
+
 - DOM:
   . Fixed bug GH-22077 (UAF in custom XPath function).
     (afflerbach/David Carlier)
