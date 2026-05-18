@@ -547,20 +547,17 @@ static void build_trace_args_list(zval *tmp, smart_str *str) /* {{{ */
 		return;
 	}
 
-	zend_string *name;
-	zval *arg;
-	HashTable *ht = Z_ARRVAL_P(tmp);
-	uint32_t index = 0;
-
-	ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
+	bool first = true;
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), zend_string *name, zval *arg) {
+		if (!first) {
+			smart_str_appends(str, ", ");
+		}
+		first = false;
 		if (name) {
 			smart_str_append(str, name);
 			smart_str_appends(str, ": ");
 		}
 		build_trace_args(arg, str);
-		if (++index != zend_hash_num_elements(ht)) {
-			smart_str_appends(str, ", ");
-		}
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
