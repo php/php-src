@@ -219,7 +219,7 @@ if ($action === 'seed' || $action === 'mutate_after_fetch') {
 cached_strategy_dump($case, $values);
 
 if ($action === 'read') {
-	echo 'cache=', OPcache\volatile_cache_info()['entry_count'], ',', OPcache\persistent_cache_info()['entry_count'], "\n";
+	echo 'cache=', OPcache\volatile_cache_info()->entry_count, ',', OPcache\persistent_cache_info()->entry_count, "\n";
 }
 PHP);
 

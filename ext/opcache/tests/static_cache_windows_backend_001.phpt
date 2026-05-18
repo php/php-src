@@ -19,12 +19,12 @@ opcache.static_cache.persistent_size_mb=32
 $volatileInfo = OPcache\volatile_cache_info();
 $persistentInfo = OPcache\persistent_cache_info();
 
-var_dump($volatileInfo['available']);
-var_dump($persistentInfo['available']);
-var_dump($volatileInfo['shared_model']);
-var_dump($persistentInfo['shared_model']);
-var_dump($volatileInfo['shared_memory']);
-var_dump($persistentInfo['shared_memory']);
+var_dump($volatileInfo->available);
+var_dump($persistentInfo->available);
+var_dump($volatileInfo->shared_model);
+var_dump($persistentInfo->shared_model);
+var_dump($volatileInfo->shared_memory);
+var_dump($persistentInfo->shared_memory);
 
 OPcache\volatile_clear();
 OPcache\persistent_clear();

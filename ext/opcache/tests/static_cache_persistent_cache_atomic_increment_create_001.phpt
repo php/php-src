@@ -1,5 +1,5 @@
 --TEST--
-OPcache persistent atomic increment creates missing keys without TTL
+OPcache persistent atomic increment and decrement create missing keys
 --EXTENSIONS--
 opcache
 --INI--
@@ -8,8 +8,6 @@ opcache.enable_cli=1
 opcache.static_cache.persistent_size_mb=32
 --FILE--
 <?php
-
-use OPcache\StaticCacheException;
 
 OPcache\persistent_clear();
 
@@ -22,12 +20,10 @@ var_dump(OPcache\persistent_lock('reserved'));
 var_dump(OPcache\persistent_atomic_increment('reserved', 11));
 var_dump(OPcache\persistent_fetch('reserved'));
 var_dump(OPcache\persistent_lock('reserved'));
-
-try {
-	OPcache\persistent_atomic_decrement('missing_down');
-} catch (StaticCacheException $exception) {
-	echo $exception->getMessage(), "\n";
-}
+var_dump(OPcache\persistent_atomic_decrement('missing_down'));
+var_dump(OPcache\persistent_fetch('missing_down'));
+var_dump(OPcache\persistent_atomic_decrement('missing_down', 4));
+var_dump(OPcache\persistent_fetch('missing_down'));
 
 try {
 	OPcache\persistent_atomic_increment('extra', 1, 1);
@@ -45,5 +41,8 @@ bool(true)
 int(11)
 int(11)
 bool(true)
-Cache key "missing_down" was not found
+int(-1)
+int(-1)
+int(-5)
+int(-5)
 too-many-args

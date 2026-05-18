@@ -16,20 +16,20 @@ $status = opcache_get_status();
 $volatileInfo = OPcache\volatile_cache_info();
 $persistentInfo = OPcache\persistent_cache_info();
 
-var_dump($status['volatile_cache']['enabled']);
-var_dump($status['volatile_cache']['available']);
-var_dump($status['volatile_cache']['startup_failed']);
-var_dump($status['volatile_cache']['backend_initialized']);
-var_dump($status['volatile_cache']['configured_memory']);
-var_dump($status['persistent_cache']['enabled']);
-var_dump($status['persistent_cache']['available']);
-var_dump($status['persistent_cache']['startup_failed']);
-var_dump($status['persistent_cache']['backend_initialized']);
-var_dump($status['persistent_cache']['configured_memory']);
+var_dump($status['volatile_cache']->enabled);
+var_dump($status['volatile_cache']->available);
+var_dump($status['volatile_cache']->startup_failed);
+var_dump($status['volatile_cache']->backend_initialized);
+var_dump($status['volatile_cache']->configured_memory);
+var_dump($status['persistent_cache']->enabled);
+var_dump($status['persistent_cache']->available);
+var_dump($status['persistent_cache']->startup_failed);
+var_dump($status['persistent_cache']->backend_initialized);
+var_dump($status['persistent_cache']->configured_memory);
 var_dump($volatileInfo == $status['volatile_cache']);
 var_dump($persistentInfo == $status['persistent_cache']);
-var_dump($volatileInfo['failure_reason']);
-var_dump($persistentInfo['failure_reason']);
+var_dump($volatileInfo->failure_reason);
+var_dump($persistentInfo->failure_reason);
 
 try {
 	OPcache\volatile_store('key', 'value');

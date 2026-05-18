@@ -44,7 +44,7 @@
 #include "SAPI.h"
 
 #define ZEND_OPCACHE_STATIC_CACHE_MAGIC 0xCAC17E01U
-#define ZEND_OPCACHE_STATIC_CACHE_VERSION 1U
+#define ZEND_OPCACHE_STATIC_CACHE_VERSION 2U
 #define ZEND_OPCACHE_STATIC_CACHE_MIN_CAPACITY 127U
 #define ZEND_OPCACHE_STATIC_CACHE_MAX_CAPACITY 65521U
 #define ZEND_OPCACHE_STATIC_CACHE_SLOT_BYTES 256U
@@ -158,6 +158,10 @@ typedef struct _zend_opcache_static_cache_context {
 	bool strict_store_failure;
 } zend_opcache_static_cache_context;
 
+typedef struct _zend_opcache_static_cache_entry_lock_lease {
+	uint64_t expires_at;
+} zend_opcache_static_cache_entry_lock_lease;
+
 /* The same storage primitives serve the explicit volatile cache, VolatileStatic, and
  * PersistentStatic. Callers switch this TLS context around short critical sections
  * so allocator, lookup-cache, and lock helpers always operate on the right SHM
@@ -173,6 +177,7 @@ typedef struct _zend_opcache_static_cache_header {
 	uint32_t free_list;
 	uint32_t last_block_offset;
 	uint64_t mutation_epoch;
+	zend_opcache_static_cache_entry_lock_lease entry_lock_leases[ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_STRIPES];
 #ifndef ZEND_WIN32
 	uint32_t reserved_lock;
 #endif
@@ -294,6 +299,7 @@ typedef struct _zend_opcache_static_cache_shared_graph_ref {
 typedef struct _zend_opcache_static_cache_entry_lock {
 	zend_opcache_static_cache_context *context;
 	zend_ulong owner_pid;
+	zend_long lease;
 	uint32_t stripe;
 } zend_opcache_static_cache_entry_lock;
 
@@ -356,6 +362,7 @@ typedef struct _zend_opcache_static_cache_shared_graph_copy_context {
 
 extern zend_class_entry *zend_opcache_static_cache_exception_ce;
 extern zend_class_entry *zend_opcache_static_cache_strategy_ce;
+extern zend_class_entry *zend_opcache_static_cache_info_ce;
 extern zend_opcache_static_cache_context zend_opcache_static_cache_volatile_context_state;
 extern zend_opcache_static_cache_context zend_opcache_static_cache_persistent_context_state;
 extern bool zend_opcache_static_cache_subsystem_disabled;
@@ -417,14 +424,14 @@ bool zend_opcache_static_cache_compact_to_fit_locked(size_t size);
 bool zend_opcache_static_cache_startup_storage_before_request(void);
 void zend_opcache_static_cache_shutdown_storage(void);
 void zend_opcache_static_cache_ensure_ready(void);
-void zend_opcache_static_cache_populate_array(zval *return_value);
+void zend_opcache_static_cache_populate_info(zval *return_value);
 bool zend_opcache_static_cache_rlock(void);
 bool zend_opcache_static_cache_wlock(void);
 void zend_opcache_static_cache_unlock(void);
 bool zend_opcache_static_cache_acquire_entry_lock(zend_string *key);
-bool zend_opcache_static_cache_try_acquire_entry_lock(zend_string *key);
+bool zend_opcache_static_cache_try_acquire_entry_lock(zend_string *key, zend_long lease);
 bool zend_opcache_static_cache_has_entry_lock(zend_string *key);
-void zend_opcache_static_cache_release_entry_lock(zend_string *key);
+bool zend_opcache_static_cache_release_entry_lock(zend_string *key);
 bool zend_opcache_static_cache_has_all_entry_locks(void);
 void zend_opcache_static_cache_release_active_entry_locks(void);
 void zend_opcache_static_cache_release_request_entry_locks(void);
@@ -484,6 +491,8 @@ void zend_opcache_static_cache_release_request_local_slots(void);
 void zend_opcache_static_cache_update_mutation_hook_state(void);
 bool zend_opcache_static_cache_prepare_memo_fetch(zval *value, zend_opcache_static_cache_prepared_value *prepared);
 void zend_opcache_static_cache_prepare_memo_store(zval *value, zend_opcache_static_cache_prepared_value *prepared);
+bool zend_opcache_static_cache_class_has_keys(zend_class_entry *ce);
+void zend_opcache_static_cache_delete_class_keys_locked(zend_class_entry *ce);
 void zend_opcache_static_cache_delete_script_keys_locked(zend_persistent_script *persistent_script);
 void zend_opcache_static_cache_register_hooks(void);
 void zend_opcache_static_cache_unregister_hooks(void);

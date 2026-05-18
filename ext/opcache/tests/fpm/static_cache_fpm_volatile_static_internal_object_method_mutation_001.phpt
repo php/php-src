@@ -14,7 +14,7 @@ $cfg = <<<EOT
 [global]
 error_log = {{FILE:LOG}}
 [opcache]
-listen = {{ADDR}}
+listen = {{ADDR:UDS}}
 pm = static
 pm.max_children = 1
 pm.max_requests = 0
@@ -99,18 +99,24 @@ $second = $value->count() > 1 ? $value->offsetGet(1) : 'none';
 echo "fixed=", $value->count(), ",", $value->offsetGet(0), ",", $second, "\n";
 PHP;
 
-$tester = new FPM\Tester($cfg, $code);
+$filePrefix = sys_get_temp_dir() . '/opcache_static_cache_internal_object_fpm_' . getmypid() . '.';
+$tester = new FPM\Tester($cfg, $code, fileName: $filePrefix);
 $tester->start(iniEntries: [
 	'opcache.enable' => '1',
 	'opcache.static_cache.volatile_size_mb' => '32',
 	'opcache.file_update_protection' => '0',
 	'opcache.jit' => '0',
 ]);
+register_shutdown_function(static function () use ($filePrefix): void {
+	foreach (glob($filePrefix . '*') ?: [] as $path) {
+		@unlink($path);
+	}
+});
 $tester->expectLogStartNotices();
 
 function static_cache_internal_object_fpm_request(FPM\Tester $tester, string $query): void
 {
-	echo $tester->request($query)->getBody(), "\n";
+	echo $tester->request($query, address: '{{ADDR:UDS}}')->getBody(), "\n";
 }
 
 foreach (['date', 'array', 'fixed'] as $state) {

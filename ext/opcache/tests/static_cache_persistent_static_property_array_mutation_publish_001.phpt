@@ -28,7 +28,7 @@ if ($action === 'seed') {
 	NestedSnapshotPropertyState::$propertyState = ['numbers' => [1]];
 	NestedSnapshotPropertyState::$propertyState['numbers'][] = 2;
 	echo 'seed=', implode(',', NestedSnapshotPropertyState::$propertyState['numbers']), "\n";
-	echo 'entries=', OPcache\persistent_cache_info()['entry_count'], "\n";
+	echo 'entries=', OPcache\persistent_cache_info()->entry_count, "\n";
 	return;
 }
 

@@ -28,11 +28,11 @@ class NestedArrayPropertyState
 
 NestedArrayPropertyState::$propertyState = ['numbers' => [1]];
 echo json_encode(NestedArrayPropertyState::$propertyState['numbers']), "\n";
-echo OPcache\persistent_cache_info()['entry_count'], "\n";
+echo OPcache\persistent_cache_info()->entry_count, "\n";
 
 NestedArrayPropertyState::$propertyState['numbers'][] = 2;
 echo json_encode(NestedArrayPropertyState::$propertyState['numbers']), "\n";
-echo OPcache\persistent_cache_info()['entry_count'];
+echo OPcache\persistent_cache_info()->entry_count;
 PHP;
 
 $tester = new FPM\Tester($cfg, $code);
