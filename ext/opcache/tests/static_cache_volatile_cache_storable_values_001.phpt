@@ -63,8 +63,8 @@ function dump_static_cache_exception(Closure $callback): void
 
 dump_type_error(static fn () => OPcache\volatile_store('resource', $resource));
 var_dump(OPcache\volatile_fetch('resource', 'missing'));
-dump_type_error(static fn () => OPcache\volatile_store('closure', $closure));
-var_dump(OPcache\volatile_fetch('closure', 'missing'));
+dump_type_error(static fn () => OPcache\volatile_store('closure-value', $closure));
+var_dump(OPcache\volatile_fetch('closure-value', 'missing'));
 
 var_dump(OPcache\volatile_store_array(['nested-resource' => ['value' => $resource]]));
 var_dump(OPcache\volatile_fetch('nested-resource', 'missing'));
@@ -93,7 +93,7 @@ dump_type_error(static fn () => OPcache\volatile_fetch('missing', $resource));
 dump_type_error(static fn () => OPcache\volatile_fetch('missing', $closure));
 
 dump_type_error(static fn () => OPcache\persistent_store('resource', $resource));
-dump_type_error(static fn () => OPcache\persistent_store('closure', $closure));
+dump_type_error(static fn () => OPcache\persistent_store('closure-value', $closure));
 dump_static_cache_exception(static fn () => OPcache\persistent_store_array(['nested-resource' => ['value' => $resource]]));
 dump_static_cache_exception(static fn () => OPcache\persistent_store_array(['nested-closure' => ['value' => $closure]]));
 dump_static_cache_exception(static fn () => OPcache\persistent_store('object-resource', $resource_object));

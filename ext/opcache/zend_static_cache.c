@@ -43,10 +43,15 @@
 
 zend_class_entry *zend_opcache_static_cache_exception_ce;
 zend_class_entry *zend_opcache_static_cache_strategy_ce;
+zend_class_entry *zend_opcache_static_cache_info_ce;
 
 static zend_class_entry *zend_opcache_static_cache_persistent_attribute_ce;
 static zend_class_entry *zend_opcache_static_cache_volatile_static_attribute_ce;
 static zend_class_entry *zend_opcache_static_cache_safe_direct_attribute_ce;
+
+ZEND_METHOD(OPcache_StaticCacheInfo, __construct)
+{
+}
 
 zend_opcache_static_cache_context zend_opcache_static_cache_volatile_context_state = {
 	{0}, {0}, "volatile cache", "opcache_volatile_cache_lock",
@@ -121,7 +126,22 @@ ZEND_EXT_TLS HashTable *zend_opcache_static_cache_persistent_entry_locks = NULL;
 ZEND_EXT_TLS uint32_t zend_opcache_static_cache_volatile_entry_lock_counts[ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_STRIPES];
 ZEND_EXT_TLS uint32_t zend_opcache_static_cache_persistent_entry_lock_counts[ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_STRIPES];
 
-static zend_always_inline bool zend_opcache_static_cache_validate_key(zend_string *key, uint32_t arg_num)
+static zend_always_inline bool zend_opcache_static_cache_key_has_reserved_class_prefix(zend_string *key)
+{
+	return zend_string_starts_with_literal(key, "persistent_static_class:") ||
+		zend_string_starts_with_literal(key, "volatile_static_class:")
+	;
+}
+
+static zend_always_inline zend_class_entry *zend_opcache_static_cache_lookup_loaded_class_key(zend_string *key)
+{
+	return zend_lookup_class_ex(key, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+}
+
+static zend_always_inline bool zend_opcache_static_cache_validate_key_ex(
+		zend_string *key,
+		uint32_t arg_num,
+		bool allow_class_selector)
 {
 	if (ZSTR_LEN(key) == 0) {
 		zend_argument_value_error(arg_num, "must be a non-empty string");
@@ -129,7 +149,29 @@ static zend_always_inline bool zend_opcache_static_cache_validate_key(zend_strin
 		return false;
 	}
 
+	if (zend_opcache_static_cache_key_has_reserved_class_prefix(key)) {
+		zend_argument_value_error(arg_num, "must not start with a reserved static-cache class key prefix");
+
+		return false;
+	}
+
+	if (!allow_class_selector && zend_opcache_static_cache_lookup_loaded_class_key(key) != NULL) {
+		zend_argument_value_error(arg_num, "must not be a loaded class name");
+
+		return false;
+	}
+
 	return true;
+}
+
+static zend_always_inline bool zend_opcache_static_cache_validate_key(zend_string *key, uint32_t arg_num)
+{
+	return zend_opcache_static_cache_validate_key_ex(key, arg_num, false);
+}
+
+static zend_always_inline bool zend_opcache_static_cache_validate_key_or_class(zend_string *key_or_class, uint32_t arg_num)
+{
+	return zend_opcache_static_cache_validate_key_ex(key_or_class, arg_num, true);
 }
 
 static zend_always_inline bool zend_opcache_static_cache_validate_store_array_keys(HashTable *values, uint32_t arg_num)
@@ -137,8 +179,11 @@ static zend_always_inline bool zend_opcache_static_cache_validate_store_array_ke
 	zend_string *key;
 
 	ZEND_HASH_FOREACH_STR_KEY(values, key) {
-		if (key == NULL || ZSTR_LEN(key) == 0) {
-			zend_argument_value_error(arg_num, "must be an array with non-empty string keys");
+		if (key == NULL || ZSTR_LEN(key) == 0 ||
+			zend_opcache_static_cache_key_has_reserved_class_prefix(key) ||
+			zend_opcache_static_cache_lookup_loaded_class_key(key) != NULL
+		) {
+			zend_argument_value_error(arg_num, "must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names");
 
 			return false;
 		}
@@ -187,8 +232,11 @@ static zend_always_inline bool zend_opcache_static_cache_prepare_key_list(
 	ZEND_HASH_FOREACH_VAL(keys, value) {
 		ZVAL_DEREF(value);
 		if (Z_TYPE_P(value) == IS_STRING) {
-			if (Z_STRLEN_P(value) == 0) {
-				zend_argument_value_error(arg_num, "must contain only non-empty string or int cache keys");
+			if (Z_STRLEN_P(value) == 0 ||
+				zend_opcache_static_cache_key_has_reserved_class_prefix(Z_STR_P(value)) ||
+				zend_opcache_static_cache_lookup_loaded_class_key(Z_STR_P(value)) != NULL
+			) {
+				zend_argument_value_error(arg_num, "must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names");
 				zend_opcache_static_cache_release_key_list(prepared, index);
 
 				return false;
@@ -198,7 +246,7 @@ static zend_always_inline bool zend_opcache_static_cache_prepare_key_list(
 		} else if (Z_TYPE_P(value) == IS_LONG) {
 			prepared[index++] = zend_long_to_str(Z_LVAL_P(value));
 		} else {
-			zend_argument_value_error(arg_num, "must contain only non-empty string or int cache keys");
+			zend_argument_value_error(arg_num, "must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names");
 			zend_opcache_static_cache_release_key_list(prepared, index);
 
 			return false;
@@ -522,6 +570,7 @@ static zend_always_inline void zend_opcache_static_cache_register_classes(void)
 		return;
 	}
 
+	zend_opcache_static_cache_info_ce = register_class_OPcache_StaticCacheInfo();
 	zend_opcache_static_cache_persistent_attribute_ce = register_class_OPcache_PersistentStatic();
 	zend_mark_internal_attribute(zend_opcache_static_cache_persistent_attribute_ce);
 	zend_opcache_static_cache_strategy_ce = register_class_OPcache_CacheStrategy();
@@ -683,6 +732,17 @@ static zend_always_inline bool zend_opcache_static_cache_parse_ttl(zend_long ttl
 	return true;
 }
 
+static zend_always_inline bool zend_opcache_static_cache_parse_lease(zend_long lease, uint32_t arg_num)
+{
+	if (lease < 0) {
+		zend_argument_value_error(arg_num, "must be greater than or equal to 0");
+
+		return false;
+	}
+
+	return true;
+}
+
 static zend_always_inline bool zend_opcache_static_cache_require_available_read(void)
 {
 	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
@@ -811,6 +871,27 @@ static zend_always_inline bool zend_opcache_static_cache_explicit_delete_prevali
 	}
 
 	return deleted;
+}
+
+static zend_always_inline bool zend_opcache_static_cache_explicit_delete_or_class_prevalidated(zend_string *key_or_class)
+{
+	zend_class_entry *ce;
+
+	ce = zend_opcache_static_cache_lookup_loaded_class_key(key_or_class);
+	if (ce != NULL) {
+		if (zend_opcache_static_cache_class_has_keys(ce)) {
+			if (!zend_opcache_static_cache_acquire_write_lock()) {
+				return false;
+			}
+
+			zend_opcache_static_cache_delete_class_keys_locked(ce);
+			zend_opcache_static_cache_unlock();
+		}
+
+		return true;
+	}
+
+	return zend_opcache_static_cache_explicit_delete_prevalidated(key_or_class);
 }
 
 static zend_always_inline bool zend_opcache_static_cache_explicit_clear_prevalidated(void)
@@ -976,7 +1057,11 @@ static zend_always_inline zend_result zend_opcache_static_cache_exists_api(zend_
 	return SUCCESS;
 }
 
-static zend_always_inline zend_result zend_opcache_static_cache_lock_api(zend_opcache_static_cache_context *context, zend_string *key, bool *locked)
+static zend_always_inline zend_result zend_opcache_static_cache_lock_api(
+		zend_opcache_static_cache_context *context,
+		zend_string *key,
+		zend_long lease,
+		bool *locked)
 {
 	zend_opcache_static_cache_context *previous_context;
 
@@ -987,7 +1072,24 @@ static zend_always_inline zend_result zend_opcache_static_cache_lock_api(zend_op
 		return FAILURE;
 	}
 
-	*locked = zend_opcache_static_cache_try_acquire_entry_lock(key);
+	*locked = zend_opcache_static_cache_try_acquire_entry_lock(key, lease);
+	zend_opcache_static_cache_restore_context(previous_context);
+
+	return SUCCESS;
+}
+
+static zend_always_inline zend_result zend_opcache_static_cache_unlock_api(zend_opcache_static_cache_context *context, zend_string *key, bool *unlocked)
+{
+	zend_opcache_static_cache_context *previous_context;
+
+	previous_context = zend_opcache_static_cache_activate_context(context);
+	if (!zend_opcache_static_cache_validate_available_write()) {
+		zend_opcache_static_cache_restore_context(previous_context);
+
+		return FAILURE;
+	}
+
+	*unlocked = zend_opcache_static_cache_release_entry_lock(key);
 	zend_opcache_static_cache_restore_context(previous_context);
 
 	return SUCCESS;
@@ -1228,7 +1330,7 @@ void zend_opcache_static_cache_volatile_get_status(zval *return_value)
 {
 	zend_opcache_static_cache_context *previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_volatile_context_state);
 
-	zend_opcache_static_cache_populate_array(return_value);
+	zend_opcache_static_cache_populate_info(return_value);
 	zend_opcache_static_cache_restore_context(previous_context);
 }
 
@@ -1236,7 +1338,7 @@ void zend_opcache_static_cache_persistent_get_status(zval *return_value)
 {
 	zend_opcache_static_cache_context *previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_persistent_context_state);
 
-	zend_opcache_static_cache_populate_array(return_value);
+	zend_opcache_static_cache_populate_info(return_value);
 	zend_opcache_static_cache_restore_context(previous_context);
 }
 
@@ -1442,32 +1544,59 @@ ZEND_FUNCTION(OPcache_volatile_exists)
 ZEND_FUNCTION(OPcache_volatile_lock)
 {
 	zend_string *key;
+	zend_long lease = 0;
 	bool locked;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(key)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(lease)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!zend_opcache_static_cache_validate_key(key, 1)) {
 		RETURN_THROWS();
 	}
 
-	if (zend_opcache_static_cache_lock_api(&zend_opcache_static_cache_volatile_context_state, key, &locked) == FAILURE) {
+	if (!zend_opcache_static_cache_parse_lease(lease, 2)) {
+		RETURN_THROWS();
+	}
+
+	if (zend_opcache_static_cache_lock_api(&zend_opcache_static_cache_volatile_context_state, key, lease, &locked) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(locked);
 }
 
-ZEND_FUNCTION(OPcache_volatile_delete)
+ZEND_FUNCTION(OPcache_volatile_unlock)
 {
 	zend_string *key;
+	bool unlocked;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(key)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!zend_opcache_static_cache_validate_key(key, 1)) {
+		RETURN_THROWS();
+	}
+
+	if (zend_opcache_static_cache_unlock_api(&zend_opcache_static_cache_volatile_context_state, key, &unlocked) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(unlocked);
+}
+
+ZEND_FUNCTION(OPcache_volatile_delete)
+{
+	zend_string *key_or_class;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(key_or_class)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!zend_opcache_static_cache_validate_key_or_class(key_or_class, 1)) {
 		RETURN_THROWS();
 	}
 
@@ -1475,7 +1604,7 @@ ZEND_FUNCTION(OPcache_volatile_delete)
 		RETURN_THROWS();
 	}
 
-	if (!zend_opcache_static_cache_explicit_delete_prevalidated(key)) {
+	if (!zend_opcache_static_cache_explicit_delete_or_class_prevalidated(key_or_class)) {
 		RETURN_THROWS();
 	}
 }
@@ -1541,7 +1670,7 @@ ZEND_FUNCTION(OPcache_volatile_cache_info)
 	}
 
 	previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_volatile_context_state);
-	zend_opcache_static_cache_populate_array(return_value);
+	zend_opcache_static_cache_populate_info(return_value);
 	zend_opcache_static_cache_restore_context(previous_context);
 }
 
@@ -1690,33 +1819,60 @@ ZEND_FUNCTION(OPcache_persistent_exists)
 ZEND_FUNCTION(OPcache_persistent_lock)
 {
 	zend_string *key;
+	zend_long lease = 0;
 	bool locked;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(key)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(lease)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!zend_opcache_static_cache_validate_key(key, 1)) {
 		RETURN_THROWS();
 	}
 
-	if (zend_opcache_static_cache_lock_api(&zend_opcache_static_cache_persistent_context_state, key, &locked) == FAILURE) {
+	if (!zend_opcache_static_cache_parse_lease(lease, 2)) {
+		RETURN_THROWS();
+	}
+
+	if (zend_opcache_static_cache_lock_api(&zend_opcache_static_cache_persistent_context_state, key, lease, &locked) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(locked);
 }
 
-ZEND_FUNCTION(OPcache_persistent_delete)
+ZEND_FUNCTION(OPcache_persistent_unlock)
 {
-	zend_opcache_static_cache_context *previous_context;
 	zend_string *key;
+	bool unlocked;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(key)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!zend_opcache_static_cache_validate_key(key, 1)) {
+		RETURN_THROWS();
+	}
+
+	if (zend_opcache_static_cache_unlock_api(&zend_opcache_static_cache_persistent_context_state, key, &unlocked) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(unlocked);
+}
+
+ZEND_FUNCTION(OPcache_persistent_delete)
+{
+	zend_opcache_static_cache_context *previous_context;
+	zend_string *key_or_class;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(key_or_class)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!zend_opcache_static_cache_validate_key_or_class(key_or_class, 1)) {
 		RETURN_THROWS();
 	}
 
@@ -1727,7 +1883,7 @@ ZEND_FUNCTION(OPcache_persistent_delete)
 		RETURN_THROWS();
 	}
 
-	if (!zend_opcache_static_cache_explicit_delete_prevalidated(key)) {
+	if (!zend_opcache_static_cache_explicit_delete_or_class_prevalidated(key_or_class)) {
 		zend_opcache_static_cache_restore_context(previous_context);
 
 		RETURN_THROWS();
@@ -1877,7 +2033,7 @@ ZEND_FUNCTION(OPcache_persistent_atomic_decrement)
 		RETURN_THROWS();
 	}
 
-	if (!zend_opcache_static_cache_atomic_update_locked(key, step, true, false, &new_value, "Atomic decrement requires an integer value")) {
+	if (!zend_opcache_static_cache_atomic_update_locked(key, step, true, true, &new_value, "Atomic decrement requires an integer value")) {
 		zend_opcache_static_cache_unlock();
 		if (release_entry_lock) {
 			zend_opcache_static_cache_release_entry_lock(key);
@@ -1906,6 +2062,6 @@ ZEND_FUNCTION(OPcache_persistent_cache_info)
 	}
 
 	previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_persistent_context_state);
-	zend_opcache_static_cache_populate_array(return_value);
+	zend_opcache_static_cache_populate_info(return_value);
 	zend_opcache_static_cache_restore_context(previous_context);
 }

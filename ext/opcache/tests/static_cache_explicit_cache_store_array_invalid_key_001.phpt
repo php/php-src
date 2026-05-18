@@ -33,7 +33,7 @@ foreach ([
 
 ?>
 --EXPECT--
-volatile: OPcache\volatile_store_array(): Argument #1 ($values) must be an array with non-empty string keys
+volatile: OPcache\volatile_store_array(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
 string(7) "missing"
-persistent: OPcache\persistent_store_array(): Argument #1 ($values) must be an array with non-empty string keys
+persistent: OPcache\persistent_store_array(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
 string(7) "missing"

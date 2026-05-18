@@ -1162,6 +1162,7 @@ bool zend_opcache_static_cache_clear_locked(void)
 	}
 
 	memset(entries, 0, sizeof(zend_opcache_static_cache_entry) * header->capacity);
+	memset(header->entry_lock_leases, 0, sizeof(header->entry_lock_leases));
 
 	header->count = 0;
 	header->mutation_epoch = mutation_epoch + 1;
@@ -1992,9 +1993,9 @@ bool zend_opcache_static_cache_atomic_update_locked(zend_string *key, zend_long 
 
 	if (!zend_opcache_static_cache_find_slot_for_write_locked(key, hash, &header, &slot_index, &found) || !found) {
 		if (insert_if_missing) {
-			ZVAL_LONG(&initial_value, step);
+			ZVAL_LONG(&initial_value, decrement ? -step : step);
 			if (zend_opcache_static_cache_store_locked(key, &initial_value, 0, true)) {
-				*new_value = step;
+				*new_value = Z_LVAL(initial_value);
 
 				return true;
 			}

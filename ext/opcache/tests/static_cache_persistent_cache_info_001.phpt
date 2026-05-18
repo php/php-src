@@ -27,7 +27,7 @@ $persistentInfo = OPcache\persistent_cache_info();
 $status = opcache_get_status();
 $config = opcache_get_configuration();
 
-echo $volatileInfo['entry_count'], ',', $persistentInfo['entry_count'], ',', OPcache\volatile_fetch('explicit-volatile-key'), ',', ++PersistentInfoCounter::$value, "\n";
+echo $volatileInfo->entry_count, ',', $persistentInfo->entry_count, ',', OPcache\volatile_fetch('explicit-volatile-key'), ',', ++PersistentInfoCounter::$value, "\n";
 var_dump($status['volatile_cache'] == $volatileInfo);
 var_dump($status['persistent_cache'] == $persistentInfo);
 var_dump($config['directives']['opcache.static_cache.volatile_size_mb']);

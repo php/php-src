@@ -36,6 +36,32 @@ class StaticCacheException extends \Exception
 {
 }
 
+/** @strict-properties */
+final readonly class StaticCacheInfo
+{
+	private function __construct() {}
+
+	public bool $enabled;
+
+	public bool $available;
+
+	public bool $startup_failed;
+
+	public bool $backend_initialized;
+
+	public int $configured_memory;
+
+	public int $shared_memory;
+
+	public int $entry_count;
+
+	public int $segment_count;
+
+	public string $shared_model;
+
+	public ?string $failure_reason;
+}
+
 #[\Attribute(13)] /* TARGET_CLASS | TARGET_METHOD | TARGET_PROPERTY */
 final class PersistentStatic
 {
@@ -75,18 +101,17 @@ function volatile_fetch_array(array $keys, ?array $default = null): ?array {}
 
 function volatile_exists(string $key): bool {}
 
-function volatile_lock(string $key): bool {}
+function volatile_lock(string $key, int $lease = 0): bool {}
 
-function volatile_delete(string $key): void {}
+function volatile_unlock(string $key): bool {}
+
+function volatile_delete(string $key_or_class): void {}
 
 function volatile_delete_array(array $keys): void {}
 
 function volatile_clear(): void {}
 
-/**
- * @return array<string, mixed>
- */
-function volatile_cache_info(): array {}
+function volatile_cache_info(): StaticCacheInfo {}
 
 function persistent_store(string $key, null|bool|int|float|string|array|object $value): void {}
 
@@ -101,9 +126,11 @@ function persistent_fetch_array(array $keys, ?array $default = null): ?array {}
 
 function persistent_exists(string $key): bool {}
 
-function persistent_lock(string $key): bool {}
+function persistent_lock(string $key, int $lease = 0): bool {}
 
-function persistent_delete(string $key): void {}
+function persistent_unlock(string $key): bool {}
+
+function persistent_delete(string $key_or_class): void {}
 
 function persistent_delete_array(array $keys): void {}
 
@@ -113,9 +140,6 @@ function persistent_atomic_increment(string $key, int $step = 1): int {}
 
 function persistent_atomic_decrement(string $key, int $step = 1): int {}
 
-/**
- * @return array<string, mixed>
- */
-function persistent_cache_info(): array {}
+function persistent_cache_info(): StaticCacheInfo {}
 
 }

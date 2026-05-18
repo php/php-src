@@ -2540,6 +2540,61 @@ static zend_opcache_static_cache_static_slot_handle *zend_opcache_static_cache_t
 	return NULL;
 }
 
+static bool zend_opcache_static_cache_method_has_keys(zend_class_entry *ce)
+{
+	zend_opcache_static_cache_kind kind;
+	zend_function *function;
+	zend_op_array *op_array;
+
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, function) {
+		if (function == NULL || function->type != ZEND_USER_FUNCTION) {
+			continue;
+		}
+
+		op_array = &function->op_array;
+		kind = zend_opcache_static_cache_op_array_kind(op_array);
+		if (kind != ZEND_OPCACHE_STATIC_CACHE_NONE &&
+			zend_opcache_static_cache_context_for_kind(kind) == zend_opcache_static_cache_active_context()
+		) {
+			return true;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return false;
+}
+
+bool zend_opcache_static_cache_class_has_keys(zend_class_entry *ce)
+{
+	zend_opcache_static_cache_kind kind;
+	zend_string *property_name;
+	zend_property_info *property_info;
+
+	if (ce == NULL || ce->name == NULL) {
+		return false;
+	}
+
+	if (zend_opcache_static_cache_class_blob_enabled(ce)) {
+		kind = zend_opcache_static_cache_class_blob_kind(ce);
+
+		return zend_opcache_static_cache_context_for_kind(kind) == zend_opcache_static_cache_active_context();
+	}
+
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->properties_info, property_name, property_info) {
+		if (property_name == NULL) {
+			continue;
+		}
+
+		kind = zend_opcache_static_cache_static_property_kind(ce, property_info);
+		if (kind != ZEND_OPCACHE_STATIC_CACHE_NONE &&
+			zend_opcache_static_cache_context_for_kind(kind) == zend_opcache_static_cache_active_context()
+		) {
+			return true;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return zend_opcache_static_cache_method_has_keys(ce);
+}
+
 static void zend_opcache_static_cache_delete_method_keys_locked(zend_class_entry *ce)
 {
 	zend_opcache_static_cache_kind kind;
@@ -2579,7 +2634,7 @@ static void zend_opcache_static_cache_delete_method_keys_locked(zend_class_entry
 	} ZEND_HASH_FOREACH_END();
 }
 
-static void zend_opcache_static_cache_delete_class_keys_locked(zend_class_entry *ce)
+void zend_opcache_static_cache_delete_class_keys_locked(zend_class_entry *ce)
 {
 	zend_opcache_static_cache_kind kind;
 	zend_string *property_name, *cache_key;

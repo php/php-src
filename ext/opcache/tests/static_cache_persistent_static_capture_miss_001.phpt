@@ -47,7 +47,7 @@ if ($action === 'seed') {
 	$probe = new CaptureMissProbe();
 	$probe->bag[] = 'seed';
 	var_dump(OPcache\volatile_store('capture_miss_explicit', $probe));
-	echo 'volatile_entries=', OPcache\volatile_cache_info()['entry_count'], "\n";
+	echo 'volatile_entries=', OPcache\volatile_cache_info()->entry_count, "\n";
 	return;
 }
 
@@ -62,8 +62,8 @@ if ($action === 'miss_then_explicit_mutate') {
 	$explicit->bag[] = 'mutated outside static attribute';
 
 	echo 'explicit_bag=', count($explicit->bag), "\n";
-	echo 'volatile_entries=', OPcache\volatile_cache_info()['entry_count'], "\n";
-	echo 'persistent_entries=', OPcache\persistent_cache_info()['entry_count'], "\n";
+	echo 'volatile_entries=', OPcache\volatile_cache_info()->entry_count, "\n";
+	echo 'persistent_entries=', OPcache\persistent_cache_info()->entry_count, "\n";
 	return;
 }
 
@@ -73,8 +73,8 @@ if ($action === 'read_static') {
 		'persistent' => CaptureMissPersistentMethod::touch(),
 		default => throw new RuntimeException('unknown backend'),
 	};
-	echo 'volatile_entries=', OPcache\volatile_cache_info()['entry_count'], "\n";
-	echo 'persistent_entries=', OPcache\persistent_cache_info()['entry_count'], "\n";
+	echo 'volatile_entries=', OPcache\volatile_cache_info()->entry_count, "\n";
+	echo 'persistent_entries=', OPcache\persistent_cache_info()->entry_count, "\n";
 	return;
 }
 
