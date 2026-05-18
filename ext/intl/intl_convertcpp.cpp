@@ -72,7 +72,7 @@ zend_string* intl_charFromString(const UnicodeString &from, UErrorCode *status)
 
 	const UChar *utf16buf = from.getBuffer();
 	int32_t actual_len;
-	u_strToUTF8WithSub(ZSTR_VAL(u8res), capacity, &actual_len, utf16buf, from.length(),
+	u_strToUTF8WithSub(ZSTR_VAL(u8res), capacity + 1, &actual_len, utf16buf, from.length(),
 		U_SENTINEL, NULL, status);
 
 	if (U_FAILURE(*status)) {
