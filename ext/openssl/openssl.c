@@ -456,6 +456,9 @@ PHP_METHOD(Openssl_Session, __unserialize)
 	}
 
 	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(ZEND_THIS);
+	if (obj->session != NULL) {
+		SSL_SESSION_free(obj->session);
+	}
 	obj->session = session;
 
 	/* Populate id property */
