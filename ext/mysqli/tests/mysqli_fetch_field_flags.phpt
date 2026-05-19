@@ -158,9 +158,6 @@ mysqli_close($link);
                     // TODO - check exact version!
                     $expected_flags = trim(str_replace('UNSIGNED', '', $expected_flags));
                 }
-
-            default:
-                break;
         }
 
         list($missing_flags, $unexpected_flags, $flags_found) = checkFlags($field->flags, $expected_flags, $flags);
