@@ -1,5 +1,5 @@
 --TEST--
-OPcache PersistentStatic class, property, and method state handles cross-thread writes on ZTS builds
+OPcache PinnedStatic class, property, and method state handles cross-thread writes on ZTS builds
 --EXTENSIONS--
 opcache
 --SKIPIF--
@@ -223,9 +223,9 @@ if ($root === false) {
 }
 
 $buildRoot = resolveBuildRoot($root);
-$source = __DIR__ . '/helpers/persistent_static_zts_threads_001.c';
-$binary = __DIR__ . '/helpers/persistent_static_zts_threads_001' . (PHP_OS_FAMILY === 'Windows' ? '.exe' : '.out');
-$scenario = __DIR__ . '/helpers/persistent_static_zts_threads_001.inc';
+$source = __DIR__ . '/helpers/pinned_static_zts_threads_001.c';
+$binary = __DIR__ . '/helpers/pinned_static_zts_threads_001' . (PHP_OS_FAMILY === 'Windows' ? '.exe' : '.out');
+$scenario = __DIR__ . '/helpers/pinned_static_zts_threads_001.inc';
 $compiler = resolveBuildCommand($buildRoot, 'CC', PHP_OS_FAMILY === 'Windows' ? ['cl'] : ['gcc']);
 $buildFlags = PHP_OS_FAMILY === 'Windows' ? [] : resolveBuildFlags($buildRoot, ['CPPFLAGS', 'CFLAGS_CLEAN']);
 $extraLibs = resolveExtraLibs($buildRoot);
@@ -293,10 +293,10 @@ if ($status !== 0) {
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/helpers/persistent_static_zts_threads_001.out');
-@unlink(__DIR__ . '/helpers/persistent_static_zts_threads_001.exe');
-@unlink(__DIR__ . '/helpers/persistent_static_zts_threads_001.inc.ready');
-@unlink(__DIR__ . '/helpers/persistent_static_zts_threads_001.inc.done');
+@unlink(__DIR__ . '/helpers/pinned_static_zts_threads_001.out');
+@unlink(__DIR__ . '/helpers/pinned_static_zts_threads_001.exe');
+@unlink(__DIR__ . '/helpers/pinned_static_zts_threads_001.inc.ready');
+@unlink(__DIR__ . '/helpers/pinned_static_zts_threads_001.inc.done');
 ?>
 --EXPECT--
 ok

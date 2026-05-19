@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -15,7 +15,7 @@ function cache_clear(string $backend): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_clear();
 	} else {
-		OPcache\persistent_clear();
+		OPcache\pinned_clear();
 	}
 }
 
@@ -24,7 +24,7 @@ function cache_store_array(string $backend, array $values): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_store_array($values);
 	} else {
-		OPcache\persistent_store_array($values);
+		OPcache\pinned_store_array($values);
 	}
 }
 
@@ -33,7 +33,7 @@ function cache_store(string $backend, string $key, mixed $value): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_store($key, $value);
 	} else {
-		OPcache\persistent_store($key, $value);
+		OPcache\pinned_store($key, $value);
 	}
 }
 
@@ -41,10 +41,10 @@ function cache_fetch_array(string $backend, array $keys, ?array $default = null)
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_fetch_array($keys, $default)
-		: OPcache\persistent_fetch_array($keys, $default);
+		: OPcache\pinned_fetch_array($keys, $default);
 }
 
-foreach (['volatile', 'persistent'] as $backend) {
+foreach (['volatile', 'pinned'] as $backend) {
 	echo $backend, "\n";
 	cache_clear($backend);
 	cache_store_array($backend, [
@@ -87,7 +87,7 @@ array(1) {
 }
 array(0) {
 }
-persistent
+pinned
 array(3) {
   ["hit"]=>
   string(5) "value"

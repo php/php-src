@@ -8,28 +8,28 @@ OPCACHE_STATIC_CACHE_FORCE_STARTUP_FAILURE=1
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
 $status = opcache_get_status();
 $volatileInfo = OPcache\volatile_cache_info();
-$persistentInfo = OPcache\persistent_cache_info();
+$pinnedInfo = OPcache\pinned_cache_info();
 
 var_dump($status['volatile_cache']->enabled);
 var_dump($status['volatile_cache']->available);
 var_dump($status['volatile_cache']->startup_failed);
 var_dump($status['volatile_cache']->backend_initialized);
 var_dump($status['volatile_cache']->configured_memory);
-var_dump($status['persistent_cache']->enabled);
-var_dump($status['persistent_cache']->available);
-var_dump($status['persistent_cache']->startup_failed);
-var_dump($status['persistent_cache']->backend_initialized);
-var_dump($status['persistent_cache']->configured_memory);
+var_dump($status['pinned_cache']->enabled);
+var_dump($status['pinned_cache']->available);
+var_dump($status['pinned_cache']->startup_failed);
+var_dump($status['pinned_cache']->backend_initialized);
+var_dump($status['pinned_cache']->configured_memory);
 var_dump($volatileInfo == $status['volatile_cache']);
-var_dump($persistentInfo == $status['persistent_cache']);
+var_dump($pinnedInfo == $status['pinned_cache']);
 var_dump($volatileInfo->failure_reason);
-var_dump($persistentInfo->failure_reason);
+var_dump($pinnedInfo->failure_reason);
 
 try {
 	OPcache\volatile_store('key', 'value');
@@ -38,7 +38,7 @@ try {
 }
 
 try {
-	OPcache\persistent_store('key', 'value');
+	OPcache\pinned_store('key', 'value');
 } catch (Throwable $e) {
 	echo get_class($e), ': ', $e->getMessage(), "\n";
 }

@@ -1,5 +1,5 @@
 --TEST--
-OPcache PersistentStatic state is discarded when a cached class definition changes
+OPcache PinnedStatic state is discarded when a cached class definition changes
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -7,12 +7,12 @@ server
 --FILE--
 <?php
 
-$subject = __DIR__ . '/persistent_static_timestamp_invalidate_001_subject.php';
+$subject = __DIR__ . '/pinned_static_timestamp_invalidate_001_subject.php';
 
 $writeSubject = static function (string $version) use ($subject): void {
 	file_put_contents($subject, <<<PHP
 <?php
-#[OPcache\\PersistentStatic]
+#[OPcache\\PinnedStatic]
 class TimestampInvalidationState
 {
 	public static int \$value = 0;
@@ -32,9 +32,9 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.persistent_size_mb=32 -d opcache.validate_timestamps=1 -d opcache.revalidate_freq=0 -d opcache.file_update_protection=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.pinned_size_mb=32 -d opcache.validate_timestamps=1 -d opcache.revalidate_freq=0 -d opcache.file_update_protection=0');
 
-$url = 'http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_timestamp_invalidate_001_subject.php';
+$url = 'http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_timestamp_invalidate_001_subject.php';
 echo file_get_contents($url);
 echo file_get_contents($url);
 
@@ -45,7 +45,7 @@ echo file_get_contents($url);
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/persistent_static_timestamp_invalidate_001_subject.php');
+@unlink(__DIR__ . '/pinned_static_timestamp_invalidate_001_subject.php');
 ?>
 --EXPECT--
 v1:1

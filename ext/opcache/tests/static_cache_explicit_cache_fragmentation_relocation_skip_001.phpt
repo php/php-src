@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=8
-opcache.static_cache.persistent_size_mb=8
+opcache.static_cache.pinned_size_mb=8
 --FILE--
 <?php
 
@@ -20,7 +20,7 @@ function cache_clear(string $kind): void
     if ($kind === 'volatile') {
         OPcache\volatile_clear();
     } else {
-        OPcache\persistent_clear();
+        OPcache\pinned_clear();
     }
 }
 
@@ -30,7 +30,7 @@ function cache_store(string $kind, string $key, mixed $value): bool
         return OPcache\volatile_store($key, $value);
     }
 
-    OPcache\persistent_store($key, $value);
+    OPcache\pinned_store($key, $value);
     return true;
 }
 
@@ -38,7 +38,7 @@ function cache_fetch(string $kind, string $key): mixed
 {
     return $kind === 'volatile'
         ? OPcache\volatile_fetch($key, 'missing')
-        : OPcache\persistent_fetch($key, 'missing');
+        : OPcache\pinned_fetch($key, 'missing');
 }
 
 function cache_delete(string $kind, string $key): void
@@ -46,7 +46,7 @@ function cache_delete(string $kind, string $key): void
     if ($kind === 'volatile') {
         OPcache\volatile_delete($key);
     } else {
-        OPcache\persistent_delete($key);
+        OPcache\pinned_delete($key);
     }
 }
 
@@ -79,7 +79,7 @@ function run_relocation_skip(string $kind): void
 }
 
 run_relocation_skip('volatile');
-run_relocation_skip('persistent');
+run_relocation_skip('pinned');
 
 ?>
 --EXPECT--
@@ -94,7 +94,7 @@ bool(false)
 int(1200000)
 int(1200000)
 int(1200000)
--- persistent --
+-- pinned --
 bool(true)
 bool(true)
 bool(true)

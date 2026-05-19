@@ -1,26 +1,26 @@
 --TEST--
-OPcache persistent_store throws StaticCacheException when persistent cache memory is exhausted
+OPcache pinned_store throws StaticCacheException when pinned cache memory is exhausted
 --EXTENSIONS--
 opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.static_cache.persistent_size_mb=8
+opcache.static_cache.pinned_size_mb=8
 --FILE--
 <?php
 
 use OPcache\StaticCacheException;
 
-OPcache\persistent_store('small', 'ok');
+OPcache\pinned_store('small', 'ok');
 
 try {
-	OPcache\persistent_store('huge', str_repeat('H', 12 * 1024 * 1024));
+	OPcache\pinned_store('huge', str_repeat('H', 12 * 1024 * 1024));
 } catch (StaticCacheException $e) {
 	echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
-var_dump(OPcache\persistent_fetch('small', 'fallback'));
-var_dump(OPcache\persistent_fetch('missing', 'fallback'));
+var_dump(OPcache\pinned_fetch('small', 'fallback'));
+var_dump(OPcache\pinned_fetch('missing', 'fallback'));
 
 ?>
 --EXPECT--

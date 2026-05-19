@@ -1,5 +1,5 @@
 --TEST--
-FPM: OPcache PersistentStatic snapshots object assignments without following object property writes
+FPM: OPcache PinnedStatic snapshots object assignments without following object property writes
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--
@@ -22,27 +22,27 @@ $code = <<<'PHP'
 <?php
 class NestedObjectPropertyState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static ?stdClass $propertyState = null;
 }
 
 NestedObjectPropertyState::$propertyState ??= (object) ['count' => 1];
 echo NestedObjectPropertyState::$propertyState->count, "\n";
-echo OPcache\persistent_cache_info()->entry_count, "\n";
+echo OPcache\pinned_cache_info()->entry_count, "\n";
 
 NestedObjectPropertyState::$propertyState->count++;
 echo NestedObjectPropertyState::$propertyState->count, "\n";
-echo OPcache\persistent_cache_info()->entry_count, "\n";
+echo OPcache\pinned_cache_info()->entry_count, "\n";
 
 NestedObjectPropertyState::$propertyState->count = 10;
 echo NestedObjectPropertyState::$propertyState->count, "\n";
-echo OPcache\persistent_cache_info()->entry_count;
+echo OPcache\pinned_cache_info()->entry_count;
 PHP;
 
 $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
 	'opcache.enable' => '1',
-	'opcache.static_cache.persistent_size_mb' => '32',
+	'opcache.static_cache.pinned_size_mb' => '32',
 	'opcache.optimization_level' => '0',
 	'opcache.file_update_protection' => '0',
 	'opcache.jit' => '0',

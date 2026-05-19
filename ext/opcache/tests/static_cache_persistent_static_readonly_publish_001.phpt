@@ -1,5 +1,5 @@
 --TEST--
-OPcache VolatileStatic tracking skips read-only shutdown publish like PersistentStatic
+OPcache VolatileStatic tracking skips read-only shutdown publish like PinnedStatic
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -7,7 +7,7 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/persistent_static_readonly_publish_001.php', <<<'PHP'
+file_put_contents(__DIR__ . '/pinned_static_readonly_publish_001.php', <<<'PHP'
 <?php
 class ReadOnlyPublishProbe
 {
@@ -45,9 +45,9 @@ class CachedReadOnlyMethodState
 	}
 }
 
-class PersistentReadOnlyMethodState
+class PinnedReadOnlyMethodState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static function value(string $logFile): int
 	{
 		static $probe = null;
@@ -72,9 +72,9 @@ class CachedReadOnlyPropertyState
 	}
 }
 
-class PersistentReadOnlyPropertyState
+class PinnedReadOnlyPropertyState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static ?ReadOnlyPublishProbe $probe = null;
 
 	public static function value(string $logFile): int
@@ -86,14 +86,14 @@ class PersistentReadOnlyPropertyState
 
 function readonly_publish_log_file(string $kind): string
 {
-	return __DIR__ . '/persistent_static_readonly_publish_001_' . $kind . '.log';
+	return __DIR__ . '/pinned_static_readonly_publish_001_' . $kind . '.log';
 }
 
 $kinds = [
 	'cached_method',
 	'cached_property',
-	'persistent_method',
-	'persistent_property',
+	'pinned_method',
+	'pinned_property',
 ];
 $action = $_GET['action'] ?? 'value';
 $kind = $_GET['kind'] ?? 'cached_method';
@@ -117,8 +117,8 @@ if ($action === 'count') {
 $value = match ($kind) {
 	'cached_method' => CachedReadOnlyMethodState::value($logFile),
 	'cached_property' => CachedReadOnlyPropertyState::value($logFile),
-	'persistent_method' => PersistentReadOnlyMethodState::value($logFile),
-	'persistent_property' => PersistentReadOnlyPropertyState::value($logFile),
+	'pinned_method' => PinnedReadOnlyMethodState::value($logFile),
+	'pinned_property' => PinnedReadOnlyPropertyState::value($logFile),
 	default => throw new RuntimeException('Unknown kind: ' . $kind),
 };
 
@@ -131,16 +131,16 @@ if ($php) {
 	putenv('TEST_PHP_EXECUTABLE=' . $php);
 }
 
-foreach (['cached_method', 'cached_property', 'persistent_method', 'persistent_property'] as $kind) {
-	@unlink(__DIR__ . '/persistent_static_readonly_publish_001_' . $kind . '.log');
+foreach (['cached_method', 'cached_property', 'pinned_method', 'pinned_property'] as $kind) {
+	@unlink(__DIR__ . '/pinned_static_readonly_publish_001_' . $kind . '.log');
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.persistent_size_mb=32 -d opcache.file_update_protection=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0');
 
-$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_readonly_publish_001.php';
+$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_readonly_publish_001.php';
 echo file_get_contents($base . '?action=reset');
-foreach (['cached_method', 'cached_property', 'persistent_method', 'persistent_property'] as $kind) {
+foreach (['cached_method', 'cached_property', 'pinned_method', 'pinned_property'] as $kind) {
 	echo file_get_contents($base . '?action=value&kind=' . $kind);
 	echo file_get_contents($base . '?action=count&kind=' . $kind);
 	echo file_get_contents($base . '?action=value&kind=' . $kind);
@@ -150,9 +150,9 @@ foreach (['cached_method', 'cached_property', 'persistent_method', 'persistent_p
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/persistent_static_readonly_publish_001.php');
-foreach (['cached_method', 'cached_property', 'persistent_method', 'persistent_property'] as $kind) {
-	@unlink(__DIR__ . '/persistent_static_readonly_publish_001_' . $kind . '.log');
+@unlink(__DIR__ . '/pinned_static_readonly_publish_001.php');
+foreach (['cached_method', 'cached_property', 'pinned_method', 'pinned_property'] as $kind) {
+	@unlink(__DIR__ . '/pinned_static_readonly_publish_001_' . $kind . '.log');
 }
 ?>
 --EXPECT--
@@ -165,11 +165,11 @@ cached_property=17
 cached_property_count=1
 cached_property=17
 cached_property_count=1
-persistent_method=13
-persistent_method_count=1
-persistent_method=13
-persistent_method_count=1
-persistent_property=19
-persistent_property_count=1
-persistent_property=19
-persistent_property_count=1
+pinned_method=13
+pinned_method_count=1
+pinned_method=13
+pinned_method_count=1
+pinned_property=19
+pinned_property_count=1
+pinned_property=19
+pinned_property_count=1

@@ -1,5 +1,5 @@
 --TEST--
-OPcache PersistentStatic skips class blob publish for read-only cached requests
+OPcache PinnedStatic skips class blob publish for read-only cached requests
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -7,7 +7,7 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/persistent_static_009.php', <<<'PHP'
+file_put_contents(__DIR__ . '/pinned_static_009.php', <<<'PHP'
 <?php
 class PublishProbe
 {
@@ -30,7 +30,7 @@ class PublishProbe
 	}
 }
 
-#[OPcache\PersistentStatic]
+#[OPcache\PinnedStatic]
 class ReadOnlyBlobState
 {
 	public static function value(string $logFile): int
@@ -45,7 +45,7 @@ class ReadOnlyBlobState
 	}
 }
 
-$logFile = __DIR__ . '/persistent_static_009.log';
+$logFile = __DIR__ . '/pinned_static_009.log';
 $action = $_GET['action'] ?? 'value';
 
 if ($action === 'reset') {
@@ -69,22 +69,22 @@ if ($php) {
 	putenv('TEST_PHP_EXECUTABLE=' . $php);
 }
 
-@unlink(__DIR__ . '/persistent_static_009.log');
+@unlink(__DIR__ . '/pinned_static_009.log');
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.persistent_size_mb=32 -d opcache.file_update_protection=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0');
 
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_009.php?action=reset');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_009.php?action=value');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_009.php?action=count');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_009.php?action=value');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_009.php?action=count');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_009.php?action=reset');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_009.php?action=value');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_009.php?action=count');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_009.php?action=value');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_009.php?action=count');
 
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/persistent_static_009.php');
-@unlink(__DIR__ . '/persistent_static_009.log');
+@unlink(__DIR__ . '/pinned_static_009.php');
+@unlink(__DIR__ . '/pinned_static_009.log');
 ?>
 --EXPECT--
 reset

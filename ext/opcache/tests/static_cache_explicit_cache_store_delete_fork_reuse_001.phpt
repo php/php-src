@@ -1,5 +1,5 @@
 --TEST--
-OPcache explicit volatile and persistent delete frees payload memory across processes
+OPcache explicit volatile and pinned delete frees payload memory across processes
 --EXTENSIONS--
 opcache
 pcntl
@@ -13,7 +13,7 @@ if (!function_exists('pcntl_fork')) {
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=8
-opcache.static_cache.persistent_size_mb=8
+opcache.static_cache.pinned_size_mb=8
 --FILE--
 <?php
 
@@ -22,7 +22,7 @@ function cache_clear(string $kind): void
     if ($kind === 'volatile') {
         OPcache\volatile_clear();
     } else {
-        OPcache\persistent_clear();
+        OPcache\pinned_clear();
     }
 }
 
@@ -32,7 +32,7 @@ function cache_store(string $kind, string $key, string $value): bool
         return OPcache\volatile_store($key, $value);
     }
 
-    OPcache\persistent_store($key, $value);
+    OPcache\pinned_store($key, $value);
     return true;
 }
 
@@ -40,7 +40,7 @@ function cache_fetch(string $kind, string $key): string
 {
     return $kind === 'volatile'
         ? OPcache\volatile_fetch($key, 'missing')
-        : OPcache\persistent_fetch($key, 'missing');
+        : OPcache\pinned_fetch($key, 'missing');
 }
 
 function cache_delete(string $kind, string $key): void
@@ -48,7 +48,7 @@ function cache_delete(string $kind, string $key): void
     if ($kind === 'volatile') {
         OPcache\volatile_delete($key);
     } else {
-        OPcache\persistent_delete($key);
+        OPcache\pinned_delete($key);
     }
 }
 
@@ -85,7 +85,7 @@ function run_fork_reuse(string $kind): void
 }
 
 run_fork_reuse('volatile');
-run_fork_reuse('persistent');
+run_fork_reuse('pinned');
 
 ?>
 --EXPECT--
@@ -98,7 +98,7 @@ bool(true)
 int(1800000)
 int(1800000)
 int(1500000)
--- persistent --
+-- pinned --
 bool(true)
 bool(true)
 bool(true)

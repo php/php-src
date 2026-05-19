@@ -13,7 +13,7 @@ if (!function_exists('pcntl_fork')) {
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -70,7 +70,7 @@ function cache_clear(string $backend): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_clear();
 	} else {
-		OPcache\persistent_clear();
+		OPcache\pinned_clear();
 	}
 }
 
@@ -79,7 +79,7 @@ function cache_store(string $backend, string $key, mixed $value): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_store($key, $value);
 	} else {
-		OPcache\persistent_store($key, $value);
+		OPcache\pinned_store($key, $value);
 	}
 }
 
@@ -87,14 +87,14 @@ function cache_fetch(string $backend, string $key, mixed $default = null): mixed
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_fetch($key, $default)
-		: OPcache\persistent_fetch($key, $default);
+		: OPcache\pinned_fetch($key, $default);
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_lock($key)
-		: OPcache\persistent_lock($key);
+		: OPcache\pinned_lock($key);
 }
 
 function cache_delete(string $backend, string $key): void
@@ -102,7 +102,7 @@ function cache_delete(string $backend, string $key): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_delete($key);
 	} else {
-		OPcache\persistent_delete($key);
+		OPcache\pinned_delete($key);
 	}
 }
 
@@ -211,20 +211,20 @@ function run_delete_wait_cycle(string $backend): void
 }
 
 run_reservation_cycle('volatile', 'clear', static fn () => cache_clear('volatile'));
-run_reservation_cycle('persistent', 'clear', static fn () => cache_clear('persistent'));
+run_reservation_cycle('pinned', 'clear', static fn () => cache_clear('pinned'));
 run_reservation_cycle('volatile', 'reset', static fn () => opcache_reset());
 run_delete_wait_cycle('volatile');
-run_delete_wait_cycle('persistent');
+run_delete_wait_cycle('pinned');
 
 ?>
 --EXPECT--
 volatile clear: no deadlock
-persistent clear: no deadlock
+pinned clear: no deadlock
 volatile reset: no deadlock
 volatile delete: no wait
 volatile delete fetch: MISS
-persistent delete: no wait
-persistent delete fetch: MISS
+pinned delete: no wait
+pinned delete fetch: MISS
 --CLEAN--
 <?php
 foreach (glob(sys_get_temp_dir() . '/opcache_destructive_mutator_no_deadlock_*') ?: [] as $path) {

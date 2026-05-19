@@ -13,7 +13,7 @@ if (!function_exists('pcntl_fork')) {
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -33,7 +33,7 @@ function cache_clear(string $backend): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_clear();
 	} else {
-		OPcache\persistent_clear();
+		OPcache\pinned_clear();
 	}
 }
 
@@ -43,7 +43,7 @@ function cache_store(string $backend, string $key, mixed $value): mixed
 		return OPcache\volatile_store($key, $value);
 	}
 
-	OPcache\persistent_store($key, $value);
+	OPcache\pinned_store($key, $value);
 	return null;
 }
 
@@ -51,21 +51,21 @@ function cache_fetch(string $backend, string $key, mixed $default = null): mixed
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_fetch($key, $default)
-		: OPcache\persistent_fetch($key, $default);
+		: OPcache\pinned_fetch($key, $default);
 }
 
 function cache_exists(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_exists($key)
-		: OPcache\persistent_exists($key);
+		: OPcache\pinned_exists($key);
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_lock($key)
-		: OPcache\persistent_lock($key);
+		: OPcache\pinned_lock($key);
 }
 
 function run_child(string $backend, string $label, callable $operation): string
@@ -165,7 +165,7 @@ function run_existing_exists_does_not_reserve(string $backend): void
 	echo finish_child($child);
 }
 
-foreach (['volatile', 'persistent'] as $backend) {
+foreach (['volatile', 'pinned'] as $backend) {
 	echo $backend, "\n";
 	run_missing_lock_returns_false_when_locked($backend);
 	run_missing_without_lock_does_not_reserve($backend);
@@ -184,7 +184,7 @@ bool(false)
 child
 bool(true)
 child
-persistent
+pinned
 bool(true)
 missing-lock blocked: no
 not locked

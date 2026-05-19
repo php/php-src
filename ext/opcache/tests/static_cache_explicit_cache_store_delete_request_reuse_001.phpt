@@ -1,5 +1,5 @@
 --TEST--
-OPcache explicit volatile and persistent delete frees payload memory across requests
+OPcache explicit volatile and pinned delete frees payload memory across requests
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -15,7 +15,7 @@ function cache_clear(string $kind): void
     if ($kind === 'volatile') {
         OPcache\volatile_clear();
     } else {
-        OPcache\persistent_clear();
+        OPcache\pinned_clear();
     }
 }
 
@@ -25,7 +25,7 @@ function cache_store(string $kind, string $key, string $value): bool
         return OPcache\volatile_store($key, $value);
     }
 
-    OPcache\persistent_store($key, $value);
+    OPcache\pinned_store($key, $value);
     return true;
 }
 
@@ -33,7 +33,7 @@ function cache_fetch(string $kind, string $key): string
 {
     return $kind === 'volatile'
         ? OPcache\volatile_fetch($key, 'missing')
-        : OPcache\persistent_fetch($key, 'missing');
+        : OPcache\pinned_fetch($key, 'missing');
 }
 
 function cache_delete(string $kind, string $key): void
@@ -41,7 +41,7 @@ function cache_delete(string $kind, string $key): void
     if ($kind === 'volatile') {
         OPcache\volatile_delete($key);
     } else {
-        OPcache\persistent_delete($key);
+        OPcache\pinned_delete($key);
     }
 }
 
@@ -85,10 +85,10 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=8 -d opcache.static_cache.persistent_size_mb=8 -d opcache.file_update_protection=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=8 -d opcache.static_cache.pinned_size_mb=8 -d opcache.file_update_protection=0');
 
 $base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/explicit_cache_store_delete_request_reuse_001.php';
-foreach (['volatile', 'persistent'] as $kind) {
+foreach (['volatile', 'pinned'] as $kind) {
     echo "-- {$kind} --\n";
     echo file_get_contents($base . '?kind=' . $kind . '&action=seed');
     echo file_get_contents($base . '?kind=' . $kind . '&action=delete');
@@ -111,7 +111,7 @@ bool(true)
 int(1800000)
 int(1800000)
 int(1500000)
--- persistent --
+-- pinned --
 bool(true)
 bool(true)
 bool(true)

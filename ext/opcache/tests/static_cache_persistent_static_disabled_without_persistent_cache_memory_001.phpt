@@ -1,5 +1,5 @@
 --TEST--
-OPcache PersistentStatic stays disabled when persistent cache memory is 0
+OPcache PinnedStatic stays disabled when pinned cache memory is 0
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -7,9 +7,9 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/persistent_static_008.php', <<<'PHP'
+file_put_contents(__DIR__ . '/pinned_static_008.php', <<<'PHP'
 <?php
-#[OPcache\PersistentStatic]
+#[OPcache\PinnedStatic]
 class DisabledCounter
 {
     public static int $value = 0;
@@ -25,15 +25,15 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.persistent_size_mb=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.pinned_size_mb=0');
 
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_008.php');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_008.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_008.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_008.php');
 
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/persistent_static_008.php');
+@unlink(__DIR__ . '/pinned_static_008.php');
 ?>
 --EXPECT--
 1

@@ -9,8 +9,8 @@ server
 
 file_put_contents(__DIR__ . '/static_cache_attribute_exact_key_delete_001.php', <<<'PHP'
 <?php
-#[OPcache\PersistentStatic]
-class ExactKeyPersistentClassState
+#[OPcache\PinnedStatic]
+class ExactKeyPinnedClassState
 {
 	public static int $value = 0;
 
@@ -26,15 +26,15 @@ class ExactKeyPersistentClassState
 	}
 }
 
-class ExactKeyPersistentPropertyState
+class ExactKeyPinnedPropertyState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static int $value = 0;
 }
 
-class ExactKeyPersistentMethodState
+class ExactKeyPinnedMethodState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static function method(?int $set = null): int
 	{
 		static $value = 0;
@@ -88,7 +88,7 @@ class ExactKeyVolatileMethodState
 function exact_key_cache_info(string $backend): OPcache\StaticCacheInfo
 {
 	return match ($backend) {
-		'persistent' => OPcache\persistent_cache_info(),
+		'pinned' => OPcache\pinned_cache_info(),
 		'volatile' => OPcache\volatile_cache_info(),
 		default => throw new RuntimeException('unknown backend'),
 	};
@@ -97,11 +97,11 @@ function exact_key_cache_info(string $backend): OPcache\StaticCacheInfo
 function exact_key_state(string $backend): array
 {
 	return match ($backend) {
-		'persistent' => [
-			ExactKeyPersistentClassState::$value,
-			ExactKeyPersistentClassState::method(),
-			ExactKeyPersistentPropertyState::$value,
-			ExactKeyPersistentMethodState::method(),
+		'pinned' => [
+			ExactKeyPinnedClassState::$value,
+			ExactKeyPinnedClassState::method(),
+			ExactKeyPinnedPropertyState::$value,
+			ExactKeyPinnedMethodState::method(),
 		],
 		'volatile' => [
 			ExactKeyVolatileClassState::$value,
@@ -116,11 +116,11 @@ function exact_key_state(string $backend): array
 function exact_key_seed(string $backend): void
 {
 	switch ($backend) {
-		case 'persistent':
-			ExactKeyPersistentClassState::$value = 1;
-			ExactKeyPersistentClassState::method(1);
-			ExactKeyPersistentPropertyState::$value = 1;
-			ExactKeyPersistentMethodState::method(1);
+		case 'pinned':
+			ExactKeyPinnedClassState::$value = 1;
+			ExactKeyPinnedClassState::method(1);
+			ExactKeyPinnedPropertyState::$value = 1;
+			ExactKeyPinnedMethodState::method(1);
 			return;
 
 		case 'volatile':
@@ -138,10 +138,10 @@ function exact_key_seed(string $backend): void
 function exact_key_delete_individual(string $backend): void
 {
 	switch ($backend) {
-		case 'persistent':
-			OPcache\persistent_delete_array([
-				'persistent_static:ExactKeyPersistentPropertyState::$value',
-				'persistent_static:ExactKeyPersistentMethodState::method()::$value',
+		case 'pinned':
+			OPcache\pinned_delete_array([
+				'pinned_static:ExactKeyPinnedPropertyState::$value',
+				'pinned_static:ExactKeyPinnedMethodState::method()::$value',
 			]);
 			return;
 
@@ -166,11 +166,11 @@ function exact_key_dump(string $label, string $backend): void
 }
 
 $action = $_GET['action'] ?? 'read';
-$backend = $_GET['backend'] ?? 'persistent';
+$backend = $_GET['backend'] ?? 'pinned';
 
 if ($action === 'reset') {
 	OPcache\volatile_clear();
-	OPcache\persistent_clear();
+	OPcache\pinned_clear();
 	opcache_reset();
 	echo "reset\n";
 	return;
@@ -198,10 +198,10 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.persistent_size_mb=32 -d opcache.optimization_level=0 -d opcache.file_update_protection=0 -d opcache.jit=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.pinned_size_mb=32 -d opcache.optimization_level=0 -d opcache.file_update_protection=0 -d opcache.jit=0');
 
 $base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/static_cache_attribute_exact_key_delete_001.php';
-foreach (['persistent', 'volatile'] as $backend) {
+foreach (['pinned', 'volatile'] as $backend) {
 	echo file_get_contents($base . '?action=reset');
 	echo file_get_contents($base . '?action=seed&backend=' . $backend);
 	echo file_get_contents($base . '?action=read&backend=' . $backend);
@@ -216,10 +216,10 @@ foreach (['persistent', 'volatile'] as $backend) {
 ?>
 --EXPECT--
 reset
-seed-persistent=1,1,1,1,count=3
-read-persistent=1,1,1,1,count=3
-delete-individual-persistent=count=1
-read-persistent=1,1,0,0,count=1
+seed-pinned=1,1,1,1,count=3
+read-pinned=1,1,1,1,count=3
+delete-individual-pinned=count=1
+read-pinned=1,1,0,0,count=1
 reset
 seed-volatile=1,1,1,1,count=3
 read-volatile=1,1,1,1,count=3

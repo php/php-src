@@ -7,7 +7,7 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/persistent_static_capture_miss_001.php', <<<'PHP'
+file_put_contents(__DIR__ . '/pinned_static_capture_miss_001.php', <<<'PHP'
 <?php
 
 class CaptureMissProbe
@@ -24,9 +24,9 @@ class CaptureMissCachedMethod
 	}
 }
 
-class CaptureMissPersistentMethod
+class CaptureMissPinnedMethod
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static function touch(): void
 	{
 		static $value = null;
@@ -54,7 +54,7 @@ if ($action === 'seed') {
 if ($action === 'miss_then_explicit_mutate') {
 	match ($backend) {
 		'cached' => CaptureMissCachedMethod::touch(),
-		'persistent' => CaptureMissPersistentMethod::touch(),
+		'pinned' => CaptureMissPinnedMethod::touch(),
 		default => throw new RuntimeException('unknown backend'),
 	};
 
@@ -63,18 +63,18 @@ if ($action === 'miss_then_explicit_mutate') {
 
 	echo 'explicit_bag=', count($explicit->bag), "\n";
 	echo 'volatile_entries=', OPcache\volatile_cache_info()->entry_count, "\n";
-	echo 'persistent_entries=', OPcache\persistent_cache_info()->entry_count, "\n";
+	echo 'pinned_entries=', OPcache\pinned_cache_info()->entry_count, "\n";
 	return;
 }
 
 if ($action === 'read_static') {
 	match ($backend) {
 		'cached' => CaptureMissCachedMethod::touch(),
-		'persistent' => CaptureMissPersistentMethod::touch(),
+		'pinned' => CaptureMissPinnedMethod::touch(),
 		default => throw new RuntimeException('unknown backend'),
 	};
 	echo 'volatile_entries=', OPcache\volatile_cache_info()->entry_count, "\n";
-	echo 'persistent_entries=', OPcache\persistent_cache_info()->entry_count, "\n";
+	echo 'pinned_entries=', OPcache\pinned_cache_info()->entry_count, "\n";
 	return;
 }
 
@@ -88,10 +88,10 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.persistent_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0');
 
-$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_capture_miss_001.php';
-foreach (['cached', 'persistent'] as $backend) {
+$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_capture_miss_001.php';
+foreach (['cached', 'pinned'] as $backend) {
 	echo file_get_contents($base . '?action=reset');
 	echo file_get_contents($base . '?action=seed');
 	echo file_get_contents($base . '?action=miss_then_explicit_mutate&backend=' . $backend);
@@ -101,7 +101,7 @@ foreach (['cached', 'persistent'] as $backend) {
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/persistent_static_capture_miss_001.php');
+@unlink(__DIR__ . '/pinned_static_capture_miss_001.php');
 ?>
 --EXPECT--
 reset
@@ -109,14 +109,14 @@ bool(true)
 volatile_entries=1
 explicit_bag=2
 volatile_entries=1
-persistent_entries=0
+pinned_entries=0
 volatile_entries=1
-persistent_entries=0
+pinned_entries=0
 reset
 bool(true)
 volatile_entries=1
 explicit_bag=2
 volatile_entries=1
-persistent_entries=0
+pinned_entries=0
 volatile_entries=1
-persistent_entries=0
+pinned_entries=0

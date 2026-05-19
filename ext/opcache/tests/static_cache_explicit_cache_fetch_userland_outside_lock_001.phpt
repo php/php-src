@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -29,12 +29,12 @@ class ReentrantFetchPayload
 		if ($this->backend === 'volatile') {
 			OPcache\volatile_store('fetch_inner_volatile', 'ok');
 		} else {
-			OPcache\persistent_store('fetch_inner_persistent', 'ok');
+			OPcache\pinned_store('fetch_inner_pinned', 'ok');
 		}
 	}
 }
 
-foreach (['volatile', 'persistent'] as $backend) {
+foreach (['volatile', 'pinned'] as $backend) {
 	echo $backend, "\n";
 
 	if ($backend === 'volatile') {
@@ -43,10 +43,10 @@ foreach (['volatile', 'persistent'] as $backend) {
 		var_dump(OPcache\volatile_fetch('fetch_payload') instanceof ReentrantFetchPayload);
 		var_dump(OPcache\volatile_fetch('fetch_inner_volatile'));
 	} else {
-		OPcache\persistent_clear();
-		OPcache\persistent_store('fetch_payload', new ReentrantFetchPayload($backend));
-		var_dump(OPcache\persistent_fetch('fetch_payload') instanceof ReentrantFetchPayload);
-		var_dump(OPcache\persistent_fetch('fetch_inner_persistent'));
+		OPcache\pinned_clear();
+		OPcache\pinned_store('fetch_payload', new ReentrantFetchPayload($backend));
+		var_dump(OPcache\pinned_fetch('fetch_payload') instanceof ReentrantFetchPayload);
+		var_dump(OPcache\pinned_fetch('fetch_inner_pinned'));
 	}
 }
 
@@ -56,7 +56,7 @@ volatile
 unserialize-volatile
 bool(true)
 string(2) "ok"
-persistent
-unserialize-persistent
+pinned
+unserialize-pinned
 bool(true)
 string(2) "ok"

@@ -1,5 +1,5 @@
 --TEST--
-OPcache PersistentStatic class attribute stores class-wide state under one cache key
+OPcache PinnedStatic class attribute stores class-wide state under one cache key
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -7,9 +7,9 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/persistent_static_006.php', <<<'PHP'
+file_put_contents(__DIR__ . '/pinned_static_006.php', <<<'PHP'
 <?php
-#[OPcache\PersistentStatic]
+#[OPcache\PinnedStatic]
 class CombinedBlobState
 {
 	public static int $propertyCount = 0;
@@ -31,7 +31,7 @@ if ($request === 1) {
 	return;
 }
 
-echo CombinedBlobState::$propertyCount, ',', CombinedBlobState::$propertyBag['numbers'][0], ',', CombinedBlobState::nextMethod(), ',', OPcache\persistent_cache_info()->entry_count, "\n";
+echo CombinedBlobState::$propertyCount, ',', CombinedBlobState::$propertyBag['numbers'][0], ',', CombinedBlobState::nextMethod(), ',', OPcache\pinned_cache_info()->entry_count, "\n";
 
 CombinedBlobState::$propertyCount++;
 CombinedBlobState::$propertyBag['numbers'][] = 11;
@@ -45,15 +45,15 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.persistent_size_mb=32');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.pinned_size_mb=32');
 
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_006.php?request=1');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_006.php?request=2');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_006.php?request=1');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_006.php?request=2');
 
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/persistent_static_006.php');
+@unlink(__DIR__ . '/pinned_static_006.php');
 ?>
 --EXPECT--
 1,1

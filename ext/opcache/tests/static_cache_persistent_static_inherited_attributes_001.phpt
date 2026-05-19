@@ -7,10 +7,10 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/persistent_static_inherited_attributes_001.php', <<<'PHP'
+file_put_contents(__DIR__ . '/pinned_static_inherited_attributes_001.php', <<<'PHP'
 <?php
 
-#[OPcache\PersistentStatic]
+#[OPcache\PinnedStatic]
 class StaticCacheAttributeParent
 {
 	public static int $parentValue = 0;
@@ -46,16 +46,16 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.persistent_size_mb=32 -d opcache.file_update_protection=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0');
 
-$url = 'http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_inherited_attributes_001.php';
+$url = 'http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_inherited_attributes_001.php';
 echo file_get_contents($url);
 echo file_get_contents($url);
 
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/persistent_static_inherited_attributes_001.php');
+@unlink(__DIR__ . '/pinned_static_inherited_attributes_001.php');
 ?>
 --EXPECT--
 1,1,1,1

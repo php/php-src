@@ -54,12 +54,12 @@ static const char opcache_test_ini[] =
 	"opcache.memory_consumption=64\n"
 	"opcache.max_accelerated_files=200\n"
 	"opcache.static_cache.volatile_size_mb=8\n"
-	"opcache.static_cache.persistent_size_mb=8\n\0";
+	"opcache.static_cache.pinned_size_mb=8\n\0";
 
 static const char init_code[] =
 	"(static function (): bool {"
 	"    OPcache\\volatile_clear();"
-	"    OPcache\\persistent_clear();"
+	"    OPcache\\pinned_clear();"
 	"    return true;"
 	"})()";
 
@@ -68,30 +68,30 @@ static const char seed_code[] =
 	"    if (!OPcache\\volatile_store('zts_v_first', str_repeat('A', 1800000))) return false;"
 	"    if (!OPcache\\volatile_store('zts_v_second', str_repeat('B', 1800000))) return false;"
 	"    if (!OPcache\\volatile_store('zts_v_third', str_repeat('C', 1800000))) return false;"
-	"    OPcache\\persistent_store('zts_p_first', str_repeat('A', 1800000));"
-	"    OPcache\\persistent_store('zts_p_second', str_repeat('B', 1800000));"
-	"    OPcache\\persistent_store('zts_p_third', str_repeat('C', 1800000));"
+	"    OPcache\\pinned_store('zts_p_first', str_repeat('A', 1800000));"
+	"    OPcache\\pinned_store('zts_p_second', str_repeat('B', 1800000));"
+	"    OPcache\\pinned_store('zts_p_third', str_repeat('C', 1800000));"
 	"    return true;"
 	"})()";
 
 static const char delete_code[] =
 	"(static function (): bool {"
 	"    OPcache\\volatile_delete('zts_v_second');"
-	"    OPcache\\persistent_delete('zts_p_second');"
+	"    OPcache\\pinned_delete('zts_p_second');"
 	"    return OPcache\\volatile_fetch('zts_v_second', 'missing') === 'missing'"
-	"        && OPcache\\persistent_fetch('zts_p_second', 'missing') === 'missing';"
+	"        && OPcache\\pinned_fetch('zts_p_second', 'missing') === 'missing';"
 	"})()";
 
 static const char refill_code[] =
 	"(static function (): bool {"
 	"    if (!OPcache\\volatile_store('zts_v_replacement', str_repeat('R', 1500000))) return false;"
-	"    OPcache\\persistent_store('zts_p_replacement', str_repeat('R', 1500000));"
+	"    OPcache\\pinned_store('zts_p_replacement', str_repeat('R', 1500000));"
 	"    return strlen(OPcache\\volatile_fetch('zts_v_first')) === 1800000"
 	"        && strlen(OPcache\\volatile_fetch('zts_v_third')) === 1800000"
 	"        && strlen(OPcache\\volatile_fetch('zts_v_replacement')) === 1500000"
-	"        && strlen(OPcache\\persistent_fetch('zts_p_first')) === 1800000"
-	"        && strlen(OPcache\\persistent_fetch('zts_p_third')) === 1800000"
-	"        && strlen(OPcache\\persistent_fetch('zts_p_replacement')) === 1500000;"
+	"        && strlen(OPcache\\pinned_fetch('zts_p_first')) === 1800000"
+	"        && strlen(OPcache\\pinned_fetch('zts_p_third')) === 1800000"
+	"        && strlen(OPcache\\pinned_fetch('zts_p_replacement')) === 1500000;"
 	"})()";
 
 static void zend_opcache_thread_set_failure(zend_opcache_thread_ctx *ctx, const char *message)

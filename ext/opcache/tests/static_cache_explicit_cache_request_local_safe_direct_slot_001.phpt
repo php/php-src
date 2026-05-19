@@ -7,7 +7,7 @@ spl
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -42,8 +42,8 @@ function store_value(string $backend, string $key, mixed $value): void
 	if ($backend === 'volatile') {
 		var_dump(OPcache\volatile_store($key, $value));
 	} else {
-		OPcache\persistent_store($key, $value);
-		echo "persistent-stored\n";
+		OPcache\pinned_store($key, $value);
+		echo "pinned-stored\n";
 	}
 }
 
@@ -51,7 +51,7 @@ function fetch_value(string $backend, string $key): mixed
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_fetch($key)
-		: OPcache\persistent_fetch($key);
+		: OPcache\pinned_fetch($key);
 }
 
 function run_safe_direct_slot_scenario(string $backend): void
@@ -103,10 +103,10 @@ function run_safe_direct_slot_scenario(string $backend): void
 }
 
 OPcache\volatile_clear();
-OPcache\persistent_clear();
+OPcache\pinned_clear();
 
 run_safe_direct_slot_scenario('volatile');
-run_safe_direct_slot_scenario('persistent');
+run_safe_direct_slot_scenario('pinned');
 
 ?>
 --EXPECT--
@@ -124,17 +124,17 @@ volatile-collection-clone-calls=0
 volatile-collection-second=volatile-collection-stored:1
 volatile-collection-second-is-first=no
 volatile-collection-clone-calls=0
-persistent-stored
-persistent-date-same-object=no
-persistent-date-shared-peer=no
-persistent-date-clone-calls=0
-persistent-date-second=2026-01-01:persistent-stored
-persistent-date-second-is-first=no
-persistent-date-clone-calls=0
-persistent-stored
-persistent-collection-same-object=no
-persistent-collection-shared-peer=no
-persistent-collection-clone-calls=0
-persistent-collection-second=persistent-collection-stored:1
-persistent-collection-second-is-first=no
-persistent-collection-clone-calls=0
+pinned-stored
+pinned-date-same-object=no
+pinned-date-shared-peer=no
+pinned-date-clone-calls=0
+pinned-date-second=2026-01-01:pinned-stored
+pinned-date-second-is-first=no
+pinned-date-clone-calls=0
+pinned-stored
+pinned-collection-same-object=no
+pinned-collection-shared-peer=no
+pinned-collection-clone-calls=0
+pinned-collection-second=pinned-collection-stored:1
+pinned-collection-second-is-first=no
+pinned-collection-clone-calls=0

@@ -8,7 +8,7 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/persistent_static_object_dim_mutation_001.php', <<<'PHP'
+file_put_contents(__DIR__ . '/pinned_static_object_dim_mutation_001.php', <<<'PHP'
 <?php
 class VolatileStaticArrayObjectMethodState
 {
@@ -22,9 +22,9 @@ class VolatileStaticArrayObjectMethodState
 	}
 }
 
-class PersistentStaticArrayObjectMethodState
+class PinnedStaticArrayObjectMethodState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static function value(): ArrayObject
 	{
 		static $object = null;
@@ -34,9 +34,9 @@ class PersistentStaticArrayObjectMethodState
 	}
 }
 
-class PersistentStaticArrayObjectPropertyState
+class PinnedStaticArrayObjectPropertyState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static ?ArrayObject $object = null;
 
 	public static function value(): ArrayObject
@@ -58,8 +58,8 @@ if ($action === 'reset') {
 
 $object = match ($backend) {
 	'volatile_static' => VolatileStaticArrayObjectMethodState::value(),
-	'persistent_static' => PersistentStaticArrayObjectMethodState::value(),
-	'persistent_static_property' => PersistentStaticArrayObjectPropertyState::value(),
+	'pinned_static' => PinnedStaticArrayObjectMethodState::value(),
+	'pinned_static_property' => PinnedStaticArrayObjectPropertyState::value(),
 	default => throw new RuntimeException('unknown backend'),
 };
 
@@ -79,10 +79,10 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.persistent_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0');
 
-$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_object_dim_mutation_001.php';
-foreach (['volatile_static', 'persistent_static', 'persistent_static_property'] as $backend) {
+$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_object_dim_mutation_001.php';
+foreach (['volatile_static', 'pinned_static', 'pinned_static_property'] as $backend) {
 	$query = 'backend=' . $backend;
 	echo file_get_contents($base . '?action=reset');
 	echo file_get_contents($base . '?action=read&' . $query);
@@ -93,7 +93,7 @@ foreach (['volatile_static', 'persistent_static', 'persistent_static_property'] 
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/persistent_static_object_dim_mutation_001.php');
+@unlink(__DIR__ . '/pinned_static_object_dim_mutation_001.php');
 ?>
 --EXPECT--
 reset
@@ -101,10 +101,10 @@ volatile_static=0,0,1
 volatile_static=1,1,0
 volatile_static=1,1,0
 reset
-persistent_static=0,0,1
-persistent_static=1,1,0
-persistent_static=0,0,1
+pinned_static=0,0,1
+pinned_static=1,1,0
+pinned_static=0,0,1
 reset
-persistent_static_property=0,0,1
-persistent_static_property=1,1,0
-persistent_static_property=0,0,1
+pinned_static_property=0,0,1
+pinned_static_property=1,1,0
+pinned_static_property=0,0,1

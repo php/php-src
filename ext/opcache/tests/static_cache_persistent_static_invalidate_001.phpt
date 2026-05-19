@@ -1,5 +1,5 @@
 --TEST--
-OPcache PersistentStatic state is deleted only for the invalidated script
+OPcache PinnedStatic state is deleted only for the invalidated script
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -7,13 +7,13 @@ server
 --FILE--
 <?php
 
-$subject = __DIR__ . '/persistent_static_invalidate_001_subject.php';
-$other = __DIR__ . '/persistent_static_invalidate_001_other.php';
-$invalidator = __DIR__ . '/persistent_static_invalidate_001_invalidator.php';
+$subject = __DIR__ . '/pinned_static_invalidate_001_subject.php';
+$other = __DIR__ . '/pinned_static_invalidate_001_other.php';
+$invalidator = __DIR__ . '/pinned_static_invalidate_001_invalidator.php';
 
 file_put_contents($subject, <<<'PHP'
 <?php
-#[OPcache\PersistentStatic]
+#[OPcache\PinnedStatic]
 class InvalidateClassState
 {
 	public static int $value = 0;
@@ -28,13 +28,13 @@ class InvalidateClassState
 
 class InvalidatePropertyState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static int $value = 0;
 }
 
 class InvalidateMethodState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static function next(): int
 	{
 		static $value = 0;
@@ -48,7 +48,7 @@ PHP);
 
 file_put_contents($other, <<<'PHP'
 <?php
-#[OPcache\PersistentStatic]
+#[OPcache\PinnedStatic]
 class InvalidateOtherClassState
 {
 	public static int $value = 0;
@@ -59,11 +59,11 @@ PHP);
 
 file_put_contents($invalidator, <<<'PHP'
 <?php
-OPcache\volatile_store('persistent_static_invalidate_explicit', 'keep');
-OPcache\persistent_store('persistent_static_invalidate_persistent_explicit', 'keep-persistent');
-var_dump(opcache_invalidate(__DIR__ . '/persistent_static_invalidate_001_subject.php', true));
-echo OPcache\volatile_fetch('persistent_static_invalidate_explicit', 'missing-volatile'), "\n";
-echo OPcache\persistent_fetch('persistent_static_invalidate_persistent_explicit', 'missing-persistent'), "\n";
+OPcache\volatile_store('pinned_static_invalidate_explicit', 'keep');
+OPcache\pinned_store('pinned_static_invalidate_pinned_explicit', 'keep-pinned');
+var_dump(opcache_invalidate(__DIR__ . '/pinned_static_invalidate_001_subject.php', true));
+echo OPcache\volatile_fetch('pinned_static_invalidate_explicit', 'missing-volatile'), "\n";
+echo OPcache\pinned_fetch('pinned_static_invalidate_pinned_explicit', 'missing-pinned'), "\n";
 PHP);
 
 $php = getenv('TEST_PHP_EXECUTABLE');
@@ -73,22 +73,22 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.persistent_size_mb=32 -d opcache.file_update_protection=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0');
 
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_invalidate_001_subject.php');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_invalidate_001_subject.php');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_invalidate_001_other.php');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_invalidate_001_other.php');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_invalidate_001_invalidator.php');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_invalidate_001_subject.php');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_invalidate_001_other.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_invalidate_001_subject.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_invalidate_001_subject.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_invalidate_001_other.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_invalidate_001_other.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_invalidate_001_invalidator.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_invalidate_001_subject.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_invalidate_001_other.php');
 
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/persistent_static_invalidate_001_subject.php');
-@unlink(__DIR__ . '/persistent_static_invalidate_001_other.php');
-@unlink(__DIR__ . '/persistent_static_invalidate_001_invalidator.php');
+@unlink(__DIR__ . '/pinned_static_invalidate_001_subject.php');
+@unlink(__DIR__ . '/pinned_static_invalidate_001_other.php');
+@unlink(__DIR__ . '/pinned_static_invalidate_001_invalidator.php');
 ?>
 --EXPECT--
 1,1,1,1
@@ -97,6 +97,6 @@ echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_
 2
 bool(true)
 keep
-keep-persistent
+keep-pinned
 1,1,1,1
 3

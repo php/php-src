@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -95,7 +95,7 @@ function check_fetch_copies(string $name, callable $store, callable $fetch): voi
 }
 
 OPcache\volatile_clear();
-OPcache\persistent_clear();
+OPcache\pinned_clear();
 
 check_fetch_copies(
 	'volatile',
@@ -104,13 +104,13 @@ check_fetch_copies(
 );
 
 check_fetch_copies(
-	'persistent',
+	'pinned',
 	static function (string $key, mixed $payload): bool {
-		OPcache\persistent_store($key, $payload);
+		OPcache\pinned_store($key, $payload);
 
 		return true;
 	},
-	static fn (string $key): mixed => OPcache\persistent_fetch($key),
+	static fn (string $key): mixed => OPcache\pinned_fetch($key),
 );
 
 ?>
@@ -130,16 +130,16 @@ volatile-datetime-first-after-second-mutate=2026-05-16T12:34:56+09:00:volatile-d
 bool(false)
 volatile-datetime-third=2026-05-15T12:34:56+09:00:volatile-stored
 bool(false)
-persistent-second-after-first-mutate=persistent-stored
-persistent-first-after-second-mutate=persistent-first-mutated
+pinned-second-after-first-mutate=pinned-stored
+pinned-first-after-second-mutate=pinned-first-mutated
 bool(false)
-persistent-third=persistent-stored
+pinned-third=pinned-stored
 bool(false)
-persistent-clone-hook=0:persistent-stored:persistent-stored
+pinned-clone-hook=0:pinned-stored:pinned-stored
 bool(false)
-persistent-datetime-clone-hook=0:persistent-stored:persistent-stored
-persistent-datetime-second-before=2026-05-15T12:34:56+09:00
-persistent-datetime-second-after-first-mutate=2026-05-15T12:34:56+09:00:persistent-stored
-persistent-datetime-first-after-second-mutate=2026-05-16T12:34:56+09:00:persistent-datetime-first-mutated
+pinned-datetime-clone-hook=0:pinned-stored:pinned-stored
+pinned-datetime-second-before=2026-05-15T12:34:56+09:00
+pinned-datetime-second-after-first-mutate=2026-05-15T12:34:56+09:00:pinned-stored
+pinned-datetime-first-after-second-mutate=2026-05-16T12:34:56+09:00:pinned-datetime-first-mutated
 bool(false)
-persistent-datetime-third=2026-05-15T12:34:56+09:00:persistent-stored
+pinned-datetime-third=2026-05-15T12:34:56+09:00:pinned-stored

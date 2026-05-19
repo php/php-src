@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -34,24 +34,24 @@ function build_rows(string $prefix, int $multiplier): array
 }
 
 OPcache\volatile_clear();
-OPcache\persistent_clear();
+OPcache\pinned_clear();
 
 $payload = new PreparedScratchPayload('first', build_rows('A', 3));
 
 var_dump(OPcache\volatile_store('scratch_volatile_first', $payload));
-OPcache\persistent_store('scratch_persistent_first', $payload);
+OPcache\pinned_store('scratch_pinned_first', $payload);
 
 $payload->name = 'second';
 $payload->rows[12]['label'] = str_repeat('B', 24);
 $payload->rows[12]['nested']['value'] = 777;
 
 var_dump(OPcache\volatile_store('scratch_volatile_second', $payload));
-OPcache\persistent_store('scratch_persistent_second', $payload);
+OPcache\pinned_store('scratch_pinned_second', $payload);
 
 $volatileFirst = OPcache\volatile_fetch('scratch_volatile_first');
 $volatileSecond = OPcache\volatile_fetch('scratch_volatile_second');
-$persistentFirst = OPcache\persistent_fetch('scratch_persistent_first');
-$persistentSecond = OPcache\persistent_fetch('scratch_persistent_second');
+$pinnedFirst = OPcache\pinned_fetch('scratch_pinned_first');
+$pinnedSecond = OPcache\pinned_fetch('scratch_pinned_second');
 
 echo $volatileFirst->name, "\n";
 echo $volatileFirst->rows[12]['label'], "\n";
@@ -59,12 +59,12 @@ echo $volatileFirst->rows[12]['nested']['value'], "\n";
 echo $volatileSecond->name, "\n";
 echo $volatileSecond->rows[12]['label'], "\n";
 echo $volatileSecond->rows[12]['nested']['value'], "\n";
-echo $persistentFirst->name, "\n";
-echo $persistentFirst->rows[12]['label'], "\n";
-echo $persistentFirst->rows[12]['nested']['value'], "\n";
-echo $persistentSecond->name, "\n";
-echo $persistentSecond->rows[12]['label'], "\n";
-echo $persistentSecond->rows[12]['nested']['value'], "\n";
+echo $pinnedFirst->name, "\n";
+echo $pinnedFirst->rows[12]['label'], "\n";
+echo $pinnedFirst->rows[12]['nested']['value'], "\n";
+echo $pinnedSecond->name, "\n";
+echo $pinnedSecond->rows[12]['label'], "\n";
+echo $pinnedSecond->rows[12]['nested']['value'], "\n";
 
 ?>
 --EXPECT--

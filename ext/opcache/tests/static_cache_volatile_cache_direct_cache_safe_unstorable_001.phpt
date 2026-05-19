@@ -7,7 +7,7 @@ spl
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -21,7 +21,7 @@ class SafeDirectUnstorableFixedArray extends SplFixedArray
 {
 }
 
-function dump_persistent_exception(Closure $callback): void
+function dump_pinned_exception(Closure $callback): void
 {
 	try {
 		$callback();
@@ -40,8 +40,8 @@ var_dump(OPcache\volatile_fetch('fixed-resource', 'missing'));
 var_dump(OPcache\volatile_store('array-object-closure', $array_object));
 var_dump(OPcache\volatile_fetch('array-object-closure', 'missing'));
 
-dump_persistent_exception(static fn () => OPcache\persistent_store('fixed-resource', $fixed_array));
-dump_persistent_exception(static fn () => OPcache\persistent_store('array-object-closure', $array_object));
+dump_pinned_exception(static fn () => OPcache\pinned_store('fixed-resource', $fixed_array));
+dump_pinned_exception(static fn () => OPcache\pinned_store('array-object-closure', $array_object));
 
 fclose($resource);
 

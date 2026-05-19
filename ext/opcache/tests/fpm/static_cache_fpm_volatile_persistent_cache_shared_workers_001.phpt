@@ -1,5 +1,5 @@
 --TEST--
-FPM: OPcache volatile and persistent caches are shared across static workers
+FPM: OPcache volatile and pinned caches are shared across static workers
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--
@@ -20,8 +20,8 @@ EOT;
 
 $code = <<<'PHP'
 <?php
-#[OPcache\PersistentStatic]
-class FpmPersistentStaticWorkerShare
+#[OPcache\PinnedStatic]
+class FpmPinnedStaticWorkerShare
 {
     public static int $value = 0;
 }
@@ -34,7 +34,7 @@ $key = 'fpm_multi_worker_volatile_cache';
 if ($action === 'seed') {
     OPcache\volatile_clear();
     OPcache\volatile_store($key, 'stored-value');
-    FpmPersistentStaticWorkerShare::$value = 42;
+    FpmPinnedStaticWorkerShare::$value = 42;
     echo 'seed:', $pid;
     return;
 }
@@ -52,8 +52,8 @@ if ($action === 'fetch_volatile') {
     return;
 }
 
-if ($action === 'fetch_persistent') {
-    $value = FpmPersistentStaticWorkerShare::$value;
+if ($action === 'fetch_pinned') {
+    $value = FpmPinnedStaticWorkerShare::$value;
     usleep(200000);
     echo 'fetch:', $pid, ':', $value;
     return;
@@ -108,14 +108,14 @@ $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
     'opcache.enable' => '1',
     'opcache.static_cache.volatile_size_mb' => '32',
-    'opcache.static_cache.persistent_size_mb' => '32',
+    'opcache.static_cache.pinned_size_mb' => '32',
 ]);
 $tester->expectLogStartNotices();
 
 $seedPid = parseSeedPid($tester->request(query: 'action=seed')->getBody());
 
 expectCrossWorkerValue($tester, 'fetch_volatile', $seedPid, 'stored-value');
-expectCrossWorkerValue($tester, 'fetch_persistent', $seedPid, '42');
+expectCrossWorkerValue($tester, 'fetch_pinned', $seedPid, '42');
 
 $tester->terminate();
 $tester->expectLogTerminatingNotices();

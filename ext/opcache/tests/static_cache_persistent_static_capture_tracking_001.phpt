@@ -7,7 +7,7 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/persistent_static_capture_tracking_001.php', <<<'PHP'
+file_put_contents(__DIR__ . '/pinned_static_capture_tracking_001.php', <<<'PHP'
 <?php
 
 class CaptureTrackingChild
@@ -87,50 +87,50 @@ class CaptureTrackingCachedPropertyB
 	}
 }
 
-class CaptureTrackingPersistentMethodA
+class CaptureTrackingPinnedMethodA
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static function value(): CaptureTrackingPayload
 	{
 		static $value = null;
 
-		$value ??= capture_tracking_payload('persistent_method_a');
+		$value ??= capture_tracking_payload('pinned_method_a');
 		return $value;
 	}
 }
 
-class CaptureTrackingPersistentMethodB
+class CaptureTrackingPinnedMethodB
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static function value(): CaptureTrackingPayload
 	{
 		static $value = null;
 
-		$value ??= capture_tracking_payload('persistent_method_b');
+		$value ??= capture_tracking_payload('pinned_method_b');
 		return $value;
 	}
 }
 
-class CaptureTrackingPersistentPropertyA
+class CaptureTrackingPinnedPropertyA
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static ?CaptureTrackingPayload $value = null;
 
 	public static function value(): CaptureTrackingPayload
 	{
-		self::$value ??= capture_tracking_payload('persistent_property_a');
+		self::$value ??= capture_tracking_payload('pinned_property_a');
 		return self::$value;
 	}
 }
 
-class CaptureTrackingPersistentPropertyB
+class CaptureTrackingPinnedPropertyB
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static ?CaptureTrackingPayload $value = null;
 
 	public static function value(): CaptureTrackingPayload
 	{
-		self::$value ??= capture_tracking_payload('persistent_property_b');
+		self::$value ??= capture_tracking_payload('pinned_property_b');
 		return self::$value;
 	}
 }
@@ -140,8 +140,8 @@ function capture_tracking_pair(string $kind): array
 	return match ($kind) {
 		'cached_method' => [CaptureTrackingCachedMethodA::value(), CaptureTrackingCachedMethodB::value()],
 		'cached_property' => [CaptureTrackingCachedPropertyA::value(), CaptureTrackingCachedPropertyB::value()],
-		'persistent_method' => [CaptureTrackingPersistentMethodA::value(), CaptureTrackingPersistentMethodB::value()],
-		'persistent_property' => [CaptureTrackingPersistentPropertyA::value(), CaptureTrackingPersistentPropertyB::value()],
+		'pinned_method' => [CaptureTrackingPinnedMethodA::value(), CaptureTrackingPinnedMethodB::value()],
+		'pinned_property' => [CaptureTrackingPinnedPropertyA::value(), CaptureTrackingPinnedPropertyB::value()],
 		default => throw new RuntimeException('unknown kind'),
 	};
 }
@@ -206,10 +206,10 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.persistent_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0');
 
-$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_capture_tracking_001.php';
-foreach (['cached_method', 'cached_property', 'persistent_method', 'persistent_property'] as $kind) {
+$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_capture_tracking_001.php';
+foreach (['cached_method', 'cached_property', 'pinned_method', 'pinned_property'] as $kind) {
 	echo file_get_contents($base . '?action=reset');
 	echo file_get_contents($base . '?action=seed&kind=' . $kind);
 	echo file_get_contents($base . '?action=mutate_after_fetch&kind=' . $kind);
@@ -219,7 +219,7 @@ foreach (['cached_method', 'cached_property', 'persistent_method', 'persistent_p
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/persistent_static_capture_tracking_001.php');
+@unlink(__DIR__ . '/pinned_static_capture_tracking_001.php');
 ?>
 --EXPECT--
 reset
@@ -231,10 +231,10 @@ cached_property:1,2,1|1,2,1
 cached_property:2,3,2|2,3,2
 cached_property:2,3,2|2,3,2
 reset
-persistent_method:1,2,1|1,2,1
-persistent_method:1,2,1|1,2,1
-persistent_method:0,1,0|0,1,0
+pinned_method:1,2,1|1,2,1
+pinned_method:1,2,1|1,2,1
+pinned_method:0,1,0|0,1,0
 reset
-persistent_property:1,2,1|1,2,1
-persistent_property:1,2,1|1,2,1
-persistent_property:0,1,0|0,1,0
+pinned_property:1,2,1|1,2,1
+pinned_property:1,2,1|1,2,1
+pinned_property:0,1,0|0,1,0
