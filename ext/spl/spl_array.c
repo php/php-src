@@ -1482,7 +1482,8 @@ PHP_METHOD(ArrayObject, __unserialize)
 			RETURN_THROWS();
 		}
 
-		if (!instanceof_function(ce, zend_ce_iterator)) {
+		if (!instanceof_function(ce, spl_ce_ArrayIterator) &&
+			!instanceof_function(ce, spl_ce_RecursiveArrayIterator)) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 				"Cannot deserialize ArrayObject with iterator class '%s'; this class does not implement the Iterator interface",
 				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
