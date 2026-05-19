@@ -1,5 +1,5 @@
 --TEST--
-OPcache __DirectCacheSafe does not touch internal classes when static cache memory is disabled
+OPcache direct cache marker is not exposed when static cache memory is disabled
 --EXTENSIONS--
 opcache
 spl
@@ -11,13 +11,16 @@ opcache.static_cache.pinned_size_mb=0
 --FILE--
 <?php
 
-var_dump(count((new ReflectionClass(DateTime::class))->getAttributes(OPcache\__DirectCacheSafe::class)));
-var_dump(count((new ReflectionClass(DateTimeImmutable::class))->getAttributes(OPcache\__DirectCacheSafe::class)));
-var_dump(count((new ReflectionClass(SplFixedArray::class))->getAttributes(OPcache\__DirectCacheSafe::class)));
-var_dump(count((new ReflectionClass(ArrayObject::class))->getAttributes(OPcache\__DirectCacheSafe::class)));
+$marker = 'OPcache\\__DirectCacheSafe';
+var_dump(class_exists($marker, false));
+var_dump(count((new ReflectionClass(DateTime::class))->getAttributes($marker)));
+var_dump(count((new ReflectionClass(DateTimeImmutable::class))->getAttributes($marker)));
+var_dump(count((new ReflectionClass(SplFixedArray::class))->getAttributes($marker)));
+var_dump(count((new ReflectionClass(ArrayObject::class))->getAttributes($marker)));
 
 ?>
 --EXPECT--
+bool(false)
 int(0)
 int(0)
 int(0)

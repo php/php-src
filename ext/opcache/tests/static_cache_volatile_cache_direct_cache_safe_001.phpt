@@ -1,5 +1,5 @@
 --TEST--
-OPcache __DirectCacheSafe uses a direct DateTime path for safe subclasses and keeps fallback for wakeup hooks
+OPcache direct cache handlers use a direct DateTime path for safe subclasses and keep fallback for wakeup hooks
 --EXTENSIONS--
 opcache
 --INI--
@@ -8,9 +8,6 @@ opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
 --FILE--
 <?php
-
-var_dump(count((new ReflectionClass(DateTime::class))->getAttributes(OPcache\__DirectCacheSafe::class)));
-var_dump(count((new ReflectionClass(DateTimeImmutable::class))->getAttributes(OPcache\__DirectCacheSafe::class)));
 
 $immutable = new DateTimeImmutable('2026-06-15 11:00:00.111111', new DateTimeZone('UTC'));
 
@@ -160,8 +157,6 @@ var_dump(WakefulSerializedDateTime::$unserializeCount);
 
 ?>
 --EXPECT--
-int(1)
-int(1)
 bool(true)
 bool(true)
 string(30) "2026-06-15 11:00:00.111111 UTC"

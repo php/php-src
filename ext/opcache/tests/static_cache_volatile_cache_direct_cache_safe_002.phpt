@@ -1,5 +1,5 @@
 --TEST--
-OPcache __DirectCacheSafe covers DateTimeZone and DateInterval direct paths
+OPcache direct cache handlers cover DateTimeZone and DateInterval direct paths
 --EXTENSIONS--
 opcache
 --INI--
@@ -8,9 +8,6 @@ opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
 --FILE--
 <?php
-
-var_dump(count((new ReflectionClass(DateTimeZone::class))->getAttributes(OPcache\__DirectCacheSafe::class)));
-var_dump(count((new ReflectionClass(DateInterval::class))->getAttributes(OPcache\__DirectCacheSafe::class)));
 
 class TaggedTimeZone extends DateTimeZone
 {
@@ -90,8 +87,6 @@ var_dump($relativeIntervalCopy->format('%d %h'));
 
 ?>
 --EXPECT--
-int(1)
-int(1)
 bool(true)
 bool(true)
 string(12) "Europe/Paris"

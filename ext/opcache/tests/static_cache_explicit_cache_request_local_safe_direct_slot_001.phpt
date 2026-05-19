@@ -1,5 +1,5 @@
 --TEST--
-OPcache explicit fetch request-local slots clone __DirectCacheSafe objects
+OPcache explicit fetch request-local slots clone direct cache objects
 --EXTENSIONS--
 opcache
 spl

@@ -1,5 +1,5 @@
 --TEST--
-OPcache __DirectCacheSafe covers SPL direct paths
+OPcache direct cache handlers cover SPL direct paths
 --EXTENSIONS--
 opcache
 spl
@@ -9,11 +9,6 @@ opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
 --FILE--
 <?php
-
-var_dump(count((new ReflectionClass(SplFixedArray::class))->getAttributes(OPcache\__DirectCacheSafe::class)));
-var_dump(count((new ReflectionClass(ArrayObject::class))->getAttributes(OPcache\__DirectCacheSafe::class)));
-var_dump(count((new ReflectionClass(ArrayIterator::class))->getAttributes(OPcache\__DirectCacheSafe::class)));
-var_dump(count((new ReflectionClass(RecursiveArrayIterator::class))->getAttributes(OPcache\__DirectCacheSafe::class)));
 
 class TaggedFixedArray extends SplFixedArray
 {
@@ -169,10 +164,6 @@ var_dump($customCopy['x']);
 
 ?>
 --EXPECT--
-int(1)
-int(1)
-int(1)
-int(1)
 bool(true)
 bool(true)
 int(3)

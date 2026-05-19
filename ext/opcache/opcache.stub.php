@@ -83,11 +83,6 @@ final class VolatileStatic
 	public function __construct(int $ttl = 0, CacheStrategy $strategy = CacheStrategy::Immediate) {}
 }
 
-#[\Attribute(1)] /* TARGET_CLASS */
-final class __DirectCacheSafe
-{
-}
-
 function volatile_store(string $key, null|bool|int|float|string|array|object $value, int $ttl = 0): bool {}
 
 function volatile_store_array(array $values, int $ttl = 0): bool {}

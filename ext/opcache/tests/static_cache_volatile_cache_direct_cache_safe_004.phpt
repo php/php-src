@@ -1,5 +1,5 @@
 --TEST--
-OPcache __DirectCacheSafe covers SPL edge branches
+OPcache direct cache handlers cover SPL edge branches
 --EXTENSIONS--
 opcache
 spl

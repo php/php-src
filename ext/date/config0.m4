@@ -22,6 +22,8 @@ PHP_NEW_EXTENSION([date],
   [no],,
   [$PHP_DATE_CFLAGS])
 
+PHP_ADD_EXTENSION_DEP(date, opcache)
+
 PHP_ADD_SOURCES([$ext_dir], [$timelib_sources], [$PHP_TIMELIB_CFLAGS])
 
 PHP_ADD_BUILD_DIR([$ext_builddir/lib], [1])

@@ -1,5 +1,5 @@
 /* This is a generated file, edit opcache.stub.php instead.
- * Stub hash: 4632e9e17247948c4af8fb0c301112d78bc30c32 */
+ * Stub hash: cc89c045c31ebd7d8db0e9c0a12c136451472cc5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_opcache_reset, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -331,21 +331,6 @@ static zend_class_entry *register_class_OPcache_VolatileStatic(void)
 	zend_attribute *attribute_Attribute_class_OPcache_VolatileStatic_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_OPcache_VolatileStatic_0, 1);
 	zend_string_release_ex(attribute_name_Attribute_class_OPcache_VolatileStatic_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_OPcache_VolatileStatic_0->args[0].value, 13);
-
-	return class_entry;
-}
-
-static zend_class_entry *register_class_OPcache___DirectCacheSafe(void)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_NS_CLASS_ENTRY(ce, "OPcache", "__DirectCacheSafe", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
-
-	zend_string *attribute_name_Attribute_class_OPcache___DirectCacheSafe_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
-	zend_attribute *attribute_Attribute_class_OPcache___DirectCacheSafe_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_OPcache___DirectCacheSafe_0, 1);
-	zend_string_release_ex(attribute_name_Attribute_class_OPcache___DirectCacheSafe_0, true);
-	ZVAL_LONG(&attribute_Attribute_class_OPcache___DirectCacheSafe_0->args[0].value, 1);
 
 	return class_entry;
 }

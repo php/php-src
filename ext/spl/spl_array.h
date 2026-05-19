@@ -17,8 +17,6 @@
 
 #include "php.h"
 
-#include "ext/opcache/zend_static_cache.h" /* for opcache static cache */
-
 #define SPL_ARRAY_STD_PROP_LIST      0x00000001
 #define SPL_ARRAY_ARRAY_AS_PROPS     0x00000002
 #define SPL_ARRAY_CHILD_ARRAYS_ONLY  0x00000004
@@ -30,8 +28,6 @@
 extern PHPAPI zend_class_entry *spl_ce_ArrayObject;
 extern PHPAPI zend_class_entry *spl_ce_ArrayIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveArrayIterator;
-
-const zend_opcache_static_cache_safe_direct_handlers *spl_array_object_get_direct_cache_handlers(void);
 
 PHP_MINIT_FUNCTION(spl_array);
 
