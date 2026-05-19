@@ -2974,6 +2974,78 @@ static void zend_opcache_static_cache_capture_decoded_reachable_value_ex(
 	zval *value,
 	HashTable *seen_arrays,
 	HashTable *seen_objects
+);
+
+static void zend_opcache_static_cache_capture_decoded_hash_values(
+	HashTable *values,
+	HashTable *seen_arrays,
+	HashTable *seen_objects
+)
+{
+	zval *child, *source_value;
+
+	if (values == NULL) {
+		return;
+	}
+
+	ZEND_HASH_FOREACH_VAL(values, child) {
+		source_value = Z_TYPE_P(child) == IS_INDIRECT ? Z_INDIRECT_P(child) : child;
+		if (Z_TYPE_P(source_value) != IS_UNDEF) {
+			zend_opcache_static_cache_capture_decoded_reachable_value_ex(source_value, seen_arrays, seen_objects);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+static bool zend_opcache_static_cache_capture_decoded_safe_direct_object(
+	zval *value,
+	HashTable *seen_arrays,
+	HashTable *seen_objects
+)
+{
+	zend_class_entry *ce, *base_ce = NULL;
+	zend_opcache_static_cache_safe_direct_state_serialize_func_t serialize_func;
+	zval state;
+	HashTable *properties;
+
+	ce = Z_OBJCE_P(value);
+	base_ce = zend_opcache_serializer_find_safe_direct_cache_base(ce);
+	if (base_ce == NULL ||
+		zend_opcache_serializer_has_safe_direct_cache_overrides(ce, base_ce)
+	) {
+		return false;
+	}
+
+	serialize_func = zend_opcache_static_cache_safe_direct_state_serialize_func(ce);
+	if (serialize_func == NULL) {
+		return false;
+	}
+
+	/* Internal safe-direct objects may reject ZEND_PROP_PURPOSE_SERIALIZE
+	 * because their cache state is exposed through explicit handlers. */
+	ZVAL_UNDEF(&state);
+	if (serialize_func(value, &state) && Z_TYPE(state) == IS_ARRAY) {
+		zend_opcache_static_cache_capture_decoded_hash_values(Z_ARRVAL(state), seen_arrays, seen_objects);
+	}
+	if (!Z_ISUNDEF(state)) {
+		zval_ptr_dtor(&state);
+	}
+
+	if (EG(exception)) {
+		return true;
+	}
+
+	if (!zend_opcache_static_cache_safe_direct_state_includes_properties(ce)) {
+		properties = zend_std_get_properties(Z_OBJ_P(value));
+		zend_opcache_static_cache_capture_decoded_hash_values(properties, seen_arrays, seen_objects);
+	}
+
+	return true;
+}
+
+static void zend_opcache_static_cache_capture_decoded_reachable_value_ex(
+	zval *value,
+	HashTable *seen_arrays,
+	HashTable *seen_objects
 )
 {
 	zend_object *obj;
@@ -3023,6 +3095,10 @@ static void zend_opcache_static_cache_capture_decoded_reachable_value_ex(
 			if (zend_opcache_static_cache_capture_handle != NULL &&
 				!zend_opcache_static_cache_tracks_reachable_objects(zend_opcache_static_cache_capture_handle)
 			) {
+				return;
+			}
+
+			if (zend_opcache_static_cache_capture_decoded_safe_direct_object(value, seen_arrays, seen_objects)) {
 				return;
 			}
 
