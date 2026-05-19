@@ -488,7 +488,7 @@ static zend_always_inline bool zend_thread_start(zend_thread_t *thread, zend_thr
 {
 	zend_thread_start_ctx *ctx;
 
-	ctx = malloc(sizeof(*ctx));
+	ctx = (zend_thread_start_ctx *) malloc(sizeof(*ctx));
 	if (ctx == NULL) {
 		return false;
 	}
