@@ -96,7 +96,7 @@ static int BreakIterator_compare_objects(zval *object1,
 /* {{{ clone handler for BreakIterator */
 static zend_object *BreakIterator_clone_obj(zend_object *object)
 {
-	BreakIterator_object *bio_orig = php_intl_breakiterator_fetch_object(object);
+	const BreakIterator_object *bio_orig = php_intl_breakiterator_fetch_object(object);
 	zend_object *ret_val           = BreakIterator_ce_ptr->create_object(object->ce);
 	BreakIterator_object *bio_new  = php_intl_breakiterator_fetch_object(ret_val);
 

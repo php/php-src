@@ -207,7 +207,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(
 /* {{{ clone handler for TimeZone */
 static zend_object *TimeZone_clone_obj(zend_object *object)
 {
-	TimeZone_object *to_orig = php_intl_timezone_fetch_object(object);
+	const TimeZone_object *to_orig = php_intl_timezone_fetch_object(object);
 	zend_object     *ret_val = TimeZone_ce_ptr->create_object(object->ce);
 	TimeZone_object  *to_new = php_intl_timezone_fetch_object(ret_val);
 

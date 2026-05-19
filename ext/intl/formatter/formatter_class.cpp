@@ -62,7 +62,7 @@ U_CFUNC zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 /* {{{ NumberFormatter_object_clone */
 U_CFUNC zend_object *NumberFormatter_object_clone(zend_object *object)
 {
-	NumberFormatter_object     *nfo = php_intl_number_format_fetch_object(object);
+	const NumberFormatter_object     *nfo = php_intl_number_format_fetch_object(object);
 	zend_object            *new_obj = NumberFormatter_ce_ptr->create_object(object->ce);
 	NumberFormatter_object *new_nfo = php_intl_number_format_fetch_object(new_obj);
 

@@ -77,7 +77,7 @@ U_CFUNC void calendar_object_construct(zval *object,
 /* {{{ clone handler for Calendar */
 static zend_object *Calendar_clone_obj(zend_object *object)
 {
-	Calendar_object *co_orig = php_intl_calendar_fetch_object(object);
+	const Calendar_object *co_orig = php_intl_calendar_fetch_object(object);
 	zend_object     *ret_val = Calendar_ce_ptr->create_object(object->ce);
 	Calendar_object  *co_new = php_intl_calendar_fetch_object(ret_val);
 

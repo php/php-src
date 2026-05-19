@@ -63,7 +63,7 @@ U_CFUNC zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 
 static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
 {
-	Spoofchecker_object *spoofchecker_orig = php_intl_spoofchecker_fetch_object(object);
+	const Spoofchecker_object *spoofchecker_orig = php_intl_spoofchecker_fetch_object(object);
 	zend_object *new_obj_val               = Spoofchecker_ce_ptr->create_object(object->ce);
 	Spoofchecker_object *spoofchecker_new  = php_intl_spoofchecker_fetch_object(new_obj_val);
 

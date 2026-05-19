@@ -1034,7 +1034,7 @@ PHPAPI void php_uri_object_handler_free(zend_object *object)
 
 PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object)
 {
-	php_uri_object *uri_object = php_uri_object_from_obj(object);
+	const php_uri_object *uri_object = php_uri_object_from_obj(object);
 
 	ZEND_ASSERT(uri_object->uri != NULL);
 
