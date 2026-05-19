@@ -25,7 +25,7 @@ $clientCode = <<<'CODE'
     fclose($fd);
 CODE;
 
-include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
+include dirname(__DIR__) . "/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--
