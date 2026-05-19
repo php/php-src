@@ -860,7 +860,7 @@ lxb_url_is_url_codepoint(lxb_codepoint_t cp)
     return lxb_url_codepoint_alphanumeric[(lxb_char_t) cp] != 0xFF;
 }
 
-lxb_inline bool
+bool
 lxb_url_is_special(const lxb_url_t *url)
 {
     return url->scheme.type != LXB_URL_SCHEMEL_TYPE__UNKNOWN;
