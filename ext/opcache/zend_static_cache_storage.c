@@ -1395,7 +1395,7 @@ static uint32_t zend_opcache_static_cache_calculate_capacity(size_t size)
 	return (uint32_t) capacity;
 }
 
-static uint32_t zend_opcache_static_cache_used_end_offset_locked(const zend_opcache_static_cache_header *header)
+static zend_always_inline uint32_t zend_opcache_static_cache_used_end_offset_locked(const zend_opcache_static_cache_header *header)
 {
 	return header->data_offset + header->next_free;
 }
@@ -1594,7 +1594,7 @@ storage_ready:
 	return true;
 }
 
-static bool zend_opcache_static_cache_payload_size_to_block_size(size_t size, uint32_t *block_size)
+static zend_always_inline bool zend_opcache_static_cache_payload_size_to_block_size(size_t size, uint32_t *block_size)
 {
 	size_t aligned_size;
 
@@ -1612,7 +1612,7 @@ static bool zend_opcache_static_cache_payload_size_to_block_size(size_t size, ui
 	return true;
 }
 
-static bool zend_opcache_static_cache_offset_in_block(uint32_t offset, uint32_t block_offset, uint32_t block_size)
+static zend_always_inline bool zend_opcache_static_cache_offset_in_block(uint32_t offset, uint32_t block_offset, uint32_t block_size)
 {
 	return offset >= block_offset + sizeof(zend_opcache_static_cache_block) && offset < block_offset + block_size;
 }
@@ -1761,6 +1761,115 @@ static bool zend_opcache_static_cache_compaction_can_fit_locked(
 	return would_move && max_free_size >= required_block_size;
 }
 
+static bool zend_opcache_static_cache_compact_movable_blocks_locked(zend_opcache_static_cache_header *header)
+{
+	zend_opcache_static_cache_block *block, *free_block;
+	uint32_t used_end, offset, next_offset, block_size, write_offset,
+			previous_block_size = 0, last_block_offset = 0, free_size;
+	bool moved = false, movable;
+
+	used_end = header->data_offset + header->next_free;
+	offset = header->data_offset;
+	write_offset = header->data_offset;
+	header->free_list = 0;
+
+	while (offset < used_end) {
+		block = zend_opcache_static_cache_block_ptr(offset);
+		block_size = block->size;
+		if (block_size < ZEND_ALIGNED_SIZE(sizeof(zend_opcache_static_cache_block) + 1) ||
+			block_size > used_end - offset
+		) {
+			return false;
+		}
+
+		next_offset = offset + block_size;
+		if (zend_opcache_static_cache_block_is_free(block)) {
+			offset = next_offset;
+			continue;
+		}
+
+		movable = zend_opcache_static_cache_block_is_movable_locked(header, offset, block_size);
+		if (!movable) {
+			if (write_offset < offset) {
+				free_block = zend_opcache_static_cache_block_ptr(write_offset);
+				free_size = offset - write_offset;
+
+				free_block->size = free_size;
+				free_block->prev_size = previous_block_size;
+				free_block->next_free = 0;
+				free_block->prev_free = 0;
+				free_block->flags = ZEND_OPCACHE_STATIC_CACHE_BLOCK_FREE;
+				zend_opcache_static_cache_free_list_insert_locked(header, write_offset);
+				previous_block_size = free_size;
+				last_block_offset = write_offset;
+			}
+
+			block->prev_size = previous_block_size;
+			block->next_free = 0;
+			block->prev_free = 0;
+			zend_opcache_static_cache_block_mark_used(block);
+			previous_block_size = block_size;
+			last_block_offset = offset;
+			write_offset = next_offset;
+			offset = next_offset;
+			continue;
+		}
+
+		if (write_offset != offset) {
+			memmove(zend_opcache_static_cache_ptr(write_offset), block, block_size);
+			zend_opcache_static_cache_update_moved_block_entries_locked(header, offset, write_offset, block_size);
+			block = zend_opcache_static_cache_block_ptr(write_offset);
+			moved = true;
+		}
+
+		block->prev_size = previous_block_size;
+		block->next_free = 0;
+		block->prev_free = 0;
+		zend_opcache_static_cache_block_mark_used(block);
+		previous_block_size = block_size;
+		last_block_offset = write_offset;
+		write_offset += block_size;
+		offset = next_offset;
+	}
+
+	header->next_free = write_offset - header->data_offset;
+	header->last_block_offset = last_block_offset;
+
+	if (moved) {
+		zend_opcache_static_cache_bump_mutation_epoch_locked(header);
+	}
+
+	return moved;
+}
+
+static bool zend_opcache_static_cache_compact_if_low_memory_locked(
+	zend_opcache_static_cache_header *header,
+	uint32_t allocating_block_size
+)
+{
+	uint32_t tail_remaining;
+
+	if (!zend_opcache_static_cache_active_context()->clear_on_pressure ||
+		header->free_list == 0 ||
+		header->next_free > header->data_size
+	) {
+		return false;
+	}
+
+	tail_remaining = header->data_size - header->next_free;
+	if (tail_remaining >= ZEND_OPCACHE_STATIC_CACHE_LOW_MEMORY_COMPACT_THRESHOLD &&
+		allocating_block_size <= tail_remaining - ZEND_OPCACHE_STATIC_CACHE_LOW_MEMORY_COMPACT_THRESHOLD
+	) {
+		return false;
+	}
+
+	if (!zend_opcache_static_cache_compaction_can_fit_locked(header, 0)) {
+		return false;
+	}
+
+	return zend_opcache_static_cache_compact_movable_blocks_locked(header);
+}
+
 void zend_opcache_static_cache_reset_runtime(void)
 {
 	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
@@ -1900,6 +2009,7 @@ uint32_t zend_opcache_static_cache_alloc_locked(size_t size, const void *source)
 	}
 
 	total_size = (uint32_t) aligned_size;
+	zend_opcache_static_cache_compact_if_low_memory_locked(header, total_size);
 
 	free_offset_ptr = &header->free_list;
 	while (*free_offset_ptr != 0) {
@@ -1961,87 +2071,6 @@ uint32_t zend_opcache_static_cache_alloc_locked(size_t size, const void *source)
 	return block_offset + (uint32_t) sizeof(zend_opcache_static_cache_block);
 }
 
-static bool zend_opcache_static_cache_compact_movable_blocks_locked(zend_opcache_static_cache_header *header)
-{
-	zend_opcache_static_cache_block *block, *free_block;
-	uint32_t used_end, offset, next_offset, block_size, write_offset,
-			previous_block_size = 0, last_block_offset = 0, free_size;
-	bool moved = false, movable;
-
-	used_end = header->data_offset + header->next_free;
-	offset = header->data_offset;
-	write_offset = header->data_offset;
-	header->free_list = 0;
-
-	while (offset < used_end) {
-		block = zend_opcache_static_cache_block_ptr(offset);
-		block_size = block->size;
-		if (block_size < ZEND_ALIGNED_SIZE(sizeof(zend_opcache_static_cache_block) + 1) ||
-			block_size > used_end - offset
-		) {
-			return false;
-		}
-
-		next_offset = offset + block_size;
-		if (zend_opcache_static_cache_block_is_free(block)) {
-			offset = next_offset;
-			continue;
-		}
-
-		movable = zend_opcache_static_cache_block_is_movable_locked(header, offset, block_size);
-		if (!movable) {
-			if (write_offset < offset) {
-				free_block = zend_opcache_static_cache_block_ptr(write_offset);
-				free_size = offset - write_offset;
-
-				free_block->size = free_size;
-				free_block->prev_size = previous_block_size;
-				free_block->next_free = 0;
-				free_block->prev_free = 0;
-				free_block->flags = ZEND_OPCACHE_STATIC_CACHE_BLOCK_FREE;
-				zend_opcache_static_cache_free_list_insert_locked(header, write_offset);
-				previous_block_size = free_size;
-				last_block_offset = write_offset;
-			}
-
-			block->prev_size = previous_block_size;
-			block->next_free = 0;
-			block->prev_free = 0;
-			zend_opcache_static_cache_block_mark_used(block);
-			previous_block_size = block_size;
-			last_block_offset = offset;
-			write_offset = next_offset;
-			offset = next_offset;
-			continue;
-		}
-
-		if (write_offset != offset) {
-			memmove(zend_opcache_static_cache_ptr(write_offset), block, block_size);
-			zend_opcache_static_cache_update_moved_block_entries_locked(header, offset, write_offset, block_size);
-			block = zend_opcache_static_cache_block_ptr(write_offset);
-			moved = true;
-		}
-
-		block->prev_size = previous_block_size;
-		block->next_free = 0;
-		block->prev_free = 0;
-		zend_opcache_static_cache_block_mark_used(block);
-		previous_block_size = block_size;
-		last_block_offset = write_offset;
-		write_offset += block_size;
-		offset = next_offset;
-	}
-
-	header->next_free = write_offset - header->data_offset;
-	header->last_block_offset = last_block_offset;
-
-	if (moved) {
-		zend_opcache_static_cache_bump_mutation_epoch_locked(header);
-	}
-
-	return moved;
-}
-
 bool zend_opcache_static_cache_compact_to_fit_locked(size_t size)
 {
 	zend_opcache_static_cache_header *header = zend_opcache_static_cache_header_ptr();
@@ -2059,43 +2088,6 @@ bool zend_opcache_static_cache_compact_to_fit_locked(size_t size)
 	}
 
 	return zend_opcache_static_cache_compact_movable_blocks_locked(header);
-}
-
-bool zend_opcache_static_cache_compact_available_locked(void)
-{
-	zend_opcache_static_cache_header *header = zend_opcache_static_cache_header_ptr();
-
-	if (!header ||
-		!zend_opcache_static_cache_header_init_locked() ||
-		header->free_list == 0 ||
-		!zend_opcache_static_cache_compaction_can_fit_locked(header, 0)
-	) {
-		return false;
-	}
-
-	return zend_opcache_static_cache_compact_movable_blocks_locked(header);
-}
-
-static void zend_opcache_static_cache_compact_context_after_request_shutdown(zend_opcache_static_cache_context *context)
-{
-	zend_opcache_static_cache_context *previous_context;
-
-	if (!zend_opcache_static_cache_context_runtime(context)->available) {
-		return;
-	}
-
-	previous_context = zend_opcache_static_cache_activate_context(context);
-	if (zend_opcache_static_cache_wlock()) {
-		zend_opcache_static_cache_compact_available_locked();
-		zend_opcache_static_cache_unlock();
-	}
-	zend_opcache_static_cache_restore_context(previous_context);
-}
-
-void zend_opcache_static_cache_compact_after_request_shutdown(void)
-{
-	zend_opcache_static_cache_compact_context_after_request_shutdown(&zend_opcache_static_cache_volatile_context_state);
-	zend_opcache_static_cache_compact_context_after_request_shutdown(&zend_opcache_static_cache_pinned_context_state);
 }
 
 bool zend_opcache_static_cache_startup_storage_before_request(void)
