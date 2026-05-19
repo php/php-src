@@ -1269,6 +1269,7 @@ ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32
 	CG(in_compilation) = 0;
 	CG(memoize_mode) = 0;
 	EG(current_execute_data) = NULL;
+	EG(guard_context) = ++EG(guard_context_counter);
 	LONGJMP(*EG(bailout), FAILURE);
 }
 /* }}} */
