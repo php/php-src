@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.7
+21 May 2026, PHP 8.5.7RC1
 
 - CLI:
   . Fixed bug GH-21901 (Stale getopt() optional value). (onthebed)
