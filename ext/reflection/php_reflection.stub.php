@@ -115,6 +115,8 @@ abstract class ReflectionFunctionAbstract implements Reflector
     public function getTentativeReturnType(): ?ReflectionType {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute {}
 }
 
 class ReflectionFunction extends ReflectionFunctionAbstract
@@ -436,6 +438,8 @@ class ReflectionClass implements Reflector
     public function getShortName(): string {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute {}
 }
 
 class ReflectionObject extends ReflectionClass
@@ -564,6 +568,8 @@ class ReflectionProperty implements Reflector
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 
+    public function getAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute {}
+
     public function hasHooks(): bool {}
 
     /** @return array<string, ReflectionMethod> */
@@ -629,6 +635,8 @@ class ReflectionClassConstant implements Reflector
     public function getDocComment(): string|false {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute {}
 
     public function isEnumCase(): bool {}
 
@@ -720,6 +728,8 @@ class ReflectionParameter implements Reflector
     public function isPromoted(): bool {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute {}
 }
 
 /** @not-serializable */
@@ -940,4 +950,6 @@ class ReflectionConstant implements Reflector
     public function __toString(): string {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute {}
 }

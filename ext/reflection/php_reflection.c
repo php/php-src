@@ -1314,6 +1314,59 @@ static zend_result read_attributes(zval *ret, HashTable *attributes, zend_class_
 }
 /* }}} */
 
+static zend_result read_attribute(zval *ret, HashTable *attributes, zend_class_entry *scope,
+		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename) /* {{{ */
+{
+	ZEND_ASSERT(attributes != NULL);
+
+	zend_attribute *attr;
+
+	if (name) {
+		// Name based filtering using lowercased key.
+		zend_string *filter = zend_string_tolower(name);
+
+		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
+			if (attr->offset == offset && zend_string_equals(attr->lcname, filter)) {
+				zend_string_release(filter);
+				reflection_attribute_factory(ret, attributes, attr, scope, target, filename);
+				return SUCCESS;
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		zend_string_release(filter);
+		return SUCCESS;
+	}
+
+	ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
+		if (attr->offset != offset) {
+			continue;
+		}
+
+		if (base) {
+			// Base type filtering.
+			zend_class_entry *ce = zend_lookup_class_ex(attr->name, attr->lcname, 0);
+
+			if (ce == NULL) {
+				// Bailout on error, otherwise ignore unavailable class.
+				if (EG(exception)) {
+					return FAILURE;
+				}
+				continue;
+			}
+
+			if (!instanceof_function(ce, base)) {
+				continue;
+			}
+		}
+
+		reflection_attribute_factory(ret, attributes, attr, scope, target, filename);
+		return SUCCESS;
+	} ZEND_HASH_FOREACH_END();
+
+	return SUCCESS;
+}
+/* }}} */
+
 static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attributes,
 		uint32_t offset, zend_class_entry *scope, uint32_t target, zend_string *filename) /* {{{ */
 {
@@ -1349,6 +1402,44 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 	array_init(return_value);
 
 	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename)) {
+		RETURN_THROWS();
+	}
+}
+/* }}} */
+
+static void reflect_attribute(INTERNAL_FUNCTION_PARAMETERS, HashTable *attributes,
+		uint32_t offset, zend_class_entry *scope, uint32_t target, zend_string *filename) /* {{{ */
+{
+	zend_string *name = NULL;
+	zend_long flags = 0;
+	zend_class_entry *base = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!l", &name, &flags) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (flags & ~REFLECTION_ATTRIBUTE_IS_INSTANCEOF) {
+		zend_argument_value_error(2, "must be a valid attribute filter flag");
+		RETURN_THROWS();
+	}
+
+	if (name && (flags & REFLECTION_ATTRIBUTE_IS_INSTANCEOF)) {
+		if (NULL == (base = zend_lookup_class(name))) {
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "Class \"%s\" not found", ZSTR_VAL(name));
+			}
+
+			RETURN_THROWS();
+		}
+
+		name = NULL;
+	}
+
+	if (!attributes) {
+		RETURN_NULL();
+	}
+
+	if (FAILURE == read_attribute(return_value, attributes, scope, offset, target, name, base, filename)) {
 		RETURN_THROWS();
 	}
 }
@@ -2058,6 +2149,27 @@ ZEND_METHOD(ReflectionFunctionAbstract, getAttributes)
 	}
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		fptr->common.attributes, 0, fptr->common.scope, target,
+		fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL);
+}
+/* }}} */
+
+/* {{{ Returns the first matching attribute of this function */
+ZEND_METHOD(ReflectionFunctionAbstract, getAttribute)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+	uint32_t target;
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (fptr->common.scope && (fptr->common.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE)) != ZEND_ACC_CLOSURE) {
+		target = ZEND_ATTRIBUTE_TARGET_METHOD;
+	} else {
+		target = ZEND_ATTRIBUTE_TARGET_FUNCTION;
+	}
+
+	reflect_attribute(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		fptr->common.attributes, 0, fptr->common.scope, target,
 		fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL);
 }
@@ -2885,6 +2997,21 @@ ZEND_METHOD(ReflectionParameter, getAttributes)
 	zend_class_entry *scope = param->fptr->common.scope;
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER,
+		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL);
+}
+
+ZEND_METHOD(ReflectionParameter, getAttribute)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	HashTable *attributes = param->fptr->common.attributes;
+	zend_class_entry *scope = param->fptr->common.scope;
+
+	reflect_attribute(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER,
 		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL);
 }
@@ -4037,6 +4164,18 @@ ZEND_METHOD(ReflectionClassConstant, getAttributes)
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionClassConstant, getAttribute)
+{
+	reflection_object *intern;
+	zend_class_constant *ref;
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	reflect_attribute(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ref->attributes, 0, ref->ce, ZEND_ATTRIBUTE_TARGET_CLASS_CONST,
+		ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL);
+}
+
 ZEND_METHOD(ReflectionClassConstant, isEnumCase)
 {
 	reflection_object *intern;
@@ -4441,6 +4580,18 @@ ZEND_METHOD(ReflectionClass, getAttributes)
 		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL);
 }
 /* }}} */
+
+ZEND_METHOD(ReflectionClass, getAttribute)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	reflect_attribute(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS,
+		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL);
+}
 
 /* {{{ Returns the class' constructor if there is one, NULL otherwise */
 ZEND_METHOD(ReflectionClass, getConstructor)
@@ -6390,6 +6541,22 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionProperty, getAttribute)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (ref->prop == NULL) {
+		RETURN_NULL();
+	}
+
+	reflect_attribute(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY,
+		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL);
+}
+
 /* {{{ Sets whether non-public properties can be requested */
 ZEND_METHOD(ReflectionProperty, setAccessible)
 {
@@ -8144,6 +8311,18 @@ ZEND_METHOD(ReflectionConstant, getAttributes)
 	GET_REFLECTION_OBJECT_PTR(const_);
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		const_->attributes, 0, NULL, ZEND_ATTRIBUTE_TARGET_CONST,
+		const_->filename);
+}
+
+ZEND_METHOD(ReflectionConstant, getAttribute)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+
+	reflect_attribute(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		const_->attributes, 0, NULL, ZEND_ATTRIBUTE_TARGET_CONST,
 		const_->filename);
 }
