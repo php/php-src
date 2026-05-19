@@ -41232,7 +41232,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_BIND_STATIC_S
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_function_init_statics_hook != NULL)) {
+	if (UNEXPECTED(EG(static_cache_class_access_active) &&
+		zend_function_init_statics_hook != NULL)
+	) {
 		zend_function_init_statics_hook(execute_data);
 	}
 
@@ -41287,7 +41289,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_BIND_INIT_STA
 
 	variable_ptr = EX_VAR(opline->op1.var);
 
-	if (UNEXPECTED(zend_function_init_statics_hook != NULL)) {
+	if (UNEXPECTED(EG(static_cache_class_access_active) &&
+		zend_function_init_statics_hook != NULL)
+	) {
 		zend_function_init_statics_hook(execute_data);
 	}
 
@@ -94294,7 +94298,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_BIND_STATIC_SPEC_C
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_function_init_statics_hook != NULL)) {
+	if (UNEXPECTED(EG(static_cache_class_access_active) &&
+		zend_function_init_statics_hook != NULL)
+	) {
 		zend_function_init_statics_hook(execute_data);
 	}
 
@@ -94349,7 +94355,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_BIND_INIT_STATIC_O
 
 	variable_ptr = EX_VAR(opline->op1.var);
 
-	if (UNEXPECTED(zend_function_init_statics_hook != NULL)) {
+	if (UNEXPECTED(EG(static_cache_class_access_active) &&
+		zend_function_init_statics_hook != NULL)
+	) {
 		zend_function_init_statics_hook(execute_data);
 	}
 

@@ -9267,7 +9267,9 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, ANY, REF)
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_function_init_statics_hook != NULL)) {
+	if (UNEXPECTED(EG(static_cache_class_access_active) &&
+		zend_function_init_statics_hook != NULL)
+	) {
 		zend_function_init_statics_hook(execute_data);
 	}
 
@@ -9322,7 +9324,9 @@ ZEND_VM_HANDLER(203, ZEND_BIND_INIT_STATIC_OR_JMP, CV, JMP_ADDR)
 
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
-	if (UNEXPECTED(zend_function_init_statics_hook != NULL)) {
+	if (UNEXPECTED(EG(static_cache_class_access_active) &&
+		zend_function_init_statics_hook != NULL)
+	) {
 		zend_function_init_statics_hook(execute_data);
 	}
 

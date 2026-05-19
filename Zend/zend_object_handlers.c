@@ -2095,7 +2095,9 @@ ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 			}
 		}
 
-		if (UNEXPECTED(zend_class_init_statics_hook != NULL)) {
+		if (UNEXPECTED(EG(static_cache_class_access_active) &&
+			zend_class_init_statics_hook != NULL)
+		) {
 			zend_class_init_statics_hook(class_type);
 		}
 	}
