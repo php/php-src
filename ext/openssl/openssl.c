@@ -1807,9 +1807,9 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(zp12_len, pkcs12, 1);
 
-	bio_in = BIO_new(BIO_s_mem());
+	bio_in = BIO_new_mem_buf(zp12, (int)zp12_len);
 
-	if (0 >= BIO_write(bio_in, zp12, (int)zp12_len)) {
+	if (bio_in == NULL) {
 		php_openssl_store_errors();
 		goto cleanup;
 	}
@@ -3103,12 +3103,8 @@ PHP_FUNCTION(openssl_pkcs7_read)
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(p7b_len, p7b, 1);
 
-	bio_in = BIO_new(BIO_s_mem());
+	bio_in = BIO_new_mem_buf(p7b, (int)p7b_len);
 	if (bio_in == NULL) {
-		goto clean_exit;
-	}
-
-	if (0 >= BIO_write(bio_in, p7b, (int)p7b_len)) {
 		php_openssl_store_errors();
 		goto clean_exit;
 	}
@@ -3785,12 +3781,8 @@ PHP_FUNCTION(openssl_cms_read)
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(p7b_len, p7b, 1);
 
-	bio_in = BIO_new(BIO_s_mem());
+	bio_in = BIO_new_mem_buf(p7b, (int)p7b_len);
 	if (bio_in == NULL) {
-		goto clean_exit;
-	}
-
-	if (0 >= BIO_write(bio_in, p7b, (int)p7b_len)) {
 		php_openssl_store_errors();
 		goto clean_exit;
 	}
@@ -4575,8 +4567,9 @@ PHP_FUNCTION(openssl_seal)
 	zval *pubkeys, *pubkey, *sealdata, *ekeys, *iv = NULL;
 	HashTable *pubkeysht;
 	EVP_PKEY **pkeys;
+	zend_string *buf;
 	int i, len1, len2, *eksl, nkeys, iv_len;
-	unsigned char iv_buf[EVP_MAX_IV_LENGTH + 1], *buf = NULL, **eks;
+	unsigned char iv_buf[EVP_MAX_IV_LENGTH + 1], **eks;
 	char * data;
 	size_t data_len;
 	char *method;
@@ -4640,13 +4633,13 @@ PHP_FUNCTION(openssl_seal)
 	}
 
 	/* allocate one byte extra to make room for \0 */
-	buf = emalloc(data_len + EVP_CIPHER_CTX_block_size(ctx));
+	buf = zend_string_alloc(data_len + EVP_CIPHER_CTX_block_size(ctx), false);
 	EVP_CIPHER_CTX_reset(ctx);
 
 	if (EVP_SealInit(ctx, cipher, eks, eksl, &iv_buf[0], pkeys, nkeys) <= 0 ||
-			!EVP_SealUpdate(ctx, buf, &len1, (unsigned char *)data, (int)data_len) ||
-			!EVP_SealFinal(ctx, buf + len1, &len2)) {
-		efree(buf);
+			!EVP_SealUpdate(ctx, (unsigned char *)ZSTR_VAL(buf), &len1, (unsigned char *)data, (int)data_len) ||
+			!EVP_SealFinal(ctx, (unsigned char *)ZSTR_VAL(buf) + len1, &len2)) {
+		zend_string_release(buf);
 		EVP_CIPHER_CTX_free(ctx);
 		php_openssl_store_errors();
 		RETVAL_FALSE;
@@ -4654,8 +4647,9 @@ PHP_FUNCTION(openssl_seal)
 	}
 
 	if (len1 + len2 > 0) {
-		ZEND_TRY_ASSIGN_REF_NEW_STR(sealdata, zend_string_init((char*)buf, len1 + len2, 0));
-		efree(buf);
+		ZSTR_VAL(buf)[len1 + len2] = 0;
+		ZSTR_LEN(buf) = len1 + len2;
+		ZEND_TRY_ASSIGN_REF_NEW_STR(sealdata, buf);
 
 		ekeys = zend_try_array_init(ekeys);
 		if (!ekeys) {
@@ -4675,7 +4669,7 @@ PHP_FUNCTION(openssl_seal)
 			ZEND_TRY_ASSIGN_REF_NEW_STR(iv, zend_string_init((char*)iv_buf, iv_len, 0));
 		}
 	} else {
-		efree(buf);
+		zend_string_release(buf);
 	}
 	RETVAL_LONG(len1 + len2);
 	EVP_CIPHER_CTX_free(ctx);
@@ -4699,9 +4693,10 @@ clean_exit:
 PHP_FUNCTION(openssl_open)
 {
 	zval *privkey, *opendata;
+	zend_string *buf;
 	EVP_PKEY *pkey;
 	int len1, len2, cipher_iv_len;
-	unsigned char *buf, *iv_buf;
+	unsigned char *iv_buf;
 	EVP_CIPHER_CTX *ctx;
 	char * data;
 	size_t data_len;
@@ -4750,21 +4745,22 @@ PHP_FUNCTION(openssl_open)
 		iv_buf = NULL;
 	}
 
-	buf = emalloc(data_len + 1);
+	buf = zend_string_alloc(data_len, false);
 
 	ctx = EVP_CIPHER_CTX_new();
 	if (ctx != NULL && EVP_OpenInit(ctx, cipher, (unsigned char *)ekey, (int)ekey_len, iv_buf, pkey) &&
-			EVP_OpenUpdate(ctx, buf, &len1, (unsigned char *)data, (int)data_len) &&
-			EVP_OpenFinal(ctx, buf + len1, &len2) && (len1 + len2 > 0)) {
-		buf[len1 + len2] = '\0';
-		ZEND_TRY_ASSIGN_REF_NEW_STR(opendata, zend_string_init((char*)buf, len1 + len2, 0));
+			EVP_OpenUpdate(ctx, (unsigned char *)ZSTR_VAL(buf), &len1, (unsigned char *)data, (int)data_len) &&
+			EVP_OpenFinal(ctx, (unsigned char *)ZSTR_VAL(buf) + len1, &len2) && (len1 + len2 > 0)) {
+		ZSTR_VAL(buf)[len1 + len2] = '\0';
+		ZSTR_LEN(buf) = len1 + len2;
+		ZEND_TRY_ASSIGN_REF_NEW_STR(opendata, buf);
 		RETVAL_TRUE;
 	} else {
 		php_openssl_store_errors();
+		zend_string_release(buf);
 		RETVAL_FALSE;
 	}
 
-	efree(buf);
 	EVP_CIPHER_CTX_free(ctx);
 out_pkey:
 	EVP_PKEY_free(pkey);
