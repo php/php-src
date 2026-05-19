@@ -26,7 +26,7 @@ var_dump(OPcache\pinned_atomic_decrement('missing_down', 4));
 var_dump(OPcache\pinned_fetch('missing_down'));
 
 try {
-	OPcache\pinned_atomic_increment('extra', 1, 1);
+	OPcache\pinned_atomic_increment('extra', 1, false, false);
 } catch (ArgumentCountError $exception) {
 	echo "too-many-args\n";
 }

@@ -911,11 +911,11 @@ static bool zend_opcache_static_cache_expunge_expired_locked(void)
 	return removed;
 }
 
-static void zend_opcache_static_cache_handle_store_failure(const char *failure_message, bool throw_on_failure)
+static void zend_opcache_static_cache_handle_store_failure(const char *failure_message, bool throw_on_failure, bool honor_strict_store_failure)
 {
 	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
 
-	if (context->strict_store_failure && !throw_on_failure) {
+	if (honor_strict_store_failure && context->strict_store_failure && !throw_on_failure) {
 		zend_opcache_static_cache_mark_publish_skipped(context);
 		zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "%s", failure_message);
 
@@ -1008,7 +1008,7 @@ static bool zend_opcache_static_cache_find_unstorable_value(
 	return false;
 }
 
-static bool zend_opcache_static_cache_validate_storable_value(zval *value, bool throw_on_failure)
+static bool zend_opcache_static_cache_validate_storable_value(zval *value, bool throw_on_failure, bool honor_strict_store_failure)
 {
 	const char *failure_message = NULL;
 	HashTable seen_arrays, seen_objects;
@@ -1033,7 +1033,7 @@ static bool zend_opcache_static_cache_validate_storable_value(zval *value, bool 
 	}
 
 	if (failure_message != NULL) {
-		zend_opcache_static_cache_handle_store_failure(failure_message, throw_on_failure);
+		zend_opcache_static_cache_handle_store_failure(failure_message, throw_on_failure, honor_strict_store_failure);
 	}
 
 	return false;
@@ -1171,6 +1171,7 @@ bool zend_opcache_static_cache_prepare_value(
 		zend_string *key,
 		zval *value,
 		bool throw_on_failure,
+		bool honor_strict_store_failure,
 		bool lock_held)
 {
 	php_serialize_data_t var_hash;
@@ -1190,7 +1191,8 @@ bool zend_opcache_static_cache_prepare_value(
 	if (Z_TYPE_P(value) == IS_RESOURCE) {
 		zend_opcache_static_cache_handle_store_failure(
 			"resources cannot be stored in the static cache",
-			throw_on_failure
+			throw_on_failure,
+			honor_strict_store_failure
 		);
 
 		return false;
@@ -1199,13 +1201,14 @@ bool zend_opcache_static_cache_prepare_value(
 	if (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == zend_ce_closure) {
 		zend_opcache_static_cache_handle_store_failure(
 			"Closure objects cannot be stored in the static cache",
-			throw_on_failure
+			throw_on_failure,
+			honor_strict_store_failure
 		);
 
 		return false;
 	}
 
-	if (!zend_opcache_static_cache_validate_storable_value(value, throw_on_failure)) {
+	if (!zend_opcache_static_cache_validate_storable_value(value, throw_on_failure, honor_strict_store_failure)) {
 		return false;
 	}
 
@@ -1300,7 +1303,8 @@ bool zend_opcache_static_cache_prepare_value(
 			if (failed_unstorable) {
 				zend_opcache_static_cache_handle_store_failure(
 					"resources and Closure objects cannot be stored in the static cache",
-					throw_on_failure
+					throw_on_failure,
+					honor_strict_store_failure
 				);
 
 				return false;
@@ -1320,7 +1324,8 @@ bool zend_opcache_static_cache_prepare_value(
 
 				zend_opcache_static_cache_handle_store_failure(
 					"failed to serialize value for cache storage",
-					throw_on_failure
+					throw_on_failure,
+					honor_strict_store_failure
 				);
 
 				return false;
@@ -1360,7 +1365,8 @@ bool zend_opcache_static_cache_store_prepared_locked(
 		zval *value,
 		const zend_opcache_static_cache_prepared_value *prepared,
 		zend_long ttl,
-		bool throw_on_failure)
+		bool throw_on_failure,
+		bool honor_strict_store_failure)
 {
 	const char *failure_message;
 	zend_opcache_static_cache_header *header;
@@ -1407,7 +1413,7 @@ retry_store:
 			goto retry_store;
 		}
 
-		zend_opcache_static_cache_handle_store_failure("cache hash table is full", throw_on_failure);
+		zend_opcache_static_cache_handle_store_failure("cache hash table is full", throw_on_failure, honor_strict_store_failure);
 
 		return false;
 	}
@@ -1756,12 +1762,12 @@ store_failed:
 		goto retry_store;
 	}
 
-	zend_opcache_static_cache_handle_store_failure(failure_message, throw_on_failure);
+	zend_opcache_static_cache_handle_store_failure(failure_message, throw_on_failure, honor_strict_store_failure);
 
 	return false;
 }
 
-bool zend_opcache_static_cache_store_locked(zend_string *key, zval *value, zend_long ttl, bool throw_on_failure)
+bool zend_opcache_static_cache_store_locked(zend_string *key, zval *value, zend_long ttl, bool throw_on_failure, bool honor_strict_store_failure)
 {
 	const char *cache_name = zend_opcache_static_cache_active_context()->name;
 	zend_opcache_static_cache_prepared_value prepared;
@@ -1771,7 +1777,7 @@ bool zend_opcache_static_cache_store_locked(zend_string *key, zval *value, zend_
 	 * lock contract by dropping the write lock only for preparation and
 	 * reacquiring it before returning. */
 	zend_opcache_static_cache_unlock();
-	if (!zend_opcache_static_cache_prepare_value(&prepared, key, value, throw_on_failure, false)) {
+	if (!zend_opcache_static_cache_prepare_value(&prepared, key, value, throw_on_failure, honor_strict_store_failure, false)) {
 		zend_opcache_static_cache_reacquire_write_lock_or_fail(cache_name);
 
 		return false;
@@ -1783,7 +1789,7 @@ bool zend_opcache_static_cache_store_locked(zend_string *key, zval *value, zend_
 		return false;
 	}
 
-	stored = zend_opcache_static_cache_store_prepared_locked(key, value, &prepared, ttl, throw_on_failure);
+	stored = zend_opcache_static_cache_store_prepared_locked(key, value, &prepared, ttl, throw_on_failure, honor_strict_store_failure);
 	zend_opcache_static_cache_destroy_prepared_value(&prepared);
 
 	return stored;
@@ -1973,7 +1979,14 @@ bool zend_opcache_static_cache_delete_locked(zend_string *key)
 	return true;
 }
 
-bool zend_opcache_static_cache_atomic_update_locked(zend_string *key, zend_long step, bool decrement, bool insert_if_missing, zend_long *new_value, const char *type_error_message)
+bool zend_opcache_static_cache_atomic_update_locked(
+		zend_string *key,
+		zend_long step,
+		bool decrement,
+		bool insert_if_missing,
+		zend_long *new_value,
+		const char *type_error_message,
+		bool throw_on_error)
 {
 	zend_opcache_static_cache_header *header;
 	zend_opcache_static_cache_entry *entries, *entry;
@@ -1985,7 +1998,7 @@ bool zend_opcache_static_cache_atomic_update_locked(zend_string *key, zend_long 
 	if (!zend_opcache_static_cache_find_slot_for_write_locked(key, hash, &header, &slot_index, &found) || !found) {
 		if (insert_if_missing) {
 			ZVAL_LONG(&initial_value, decrement ? -step : step);
-			if (zend_opcache_static_cache_store_locked(key, &initial_value, 0, true)) {
+			if (zend_opcache_static_cache_store_locked(key, &initial_value, 0, throw_on_error, false)) {
 				*new_value = Z_LVAL(initial_value);
 
 				return true;
@@ -1994,7 +2007,9 @@ bool zend_opcache_static_cache_atomic_update_locked(zend_string *key, zend_long 
 			return false;
 		}
 
-		zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Cache key \"%s\" was not found", ZSTR_VAL(key));
+		if (throw_on_error) {
+			zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Cache key \"%s\" was not found", ZSTR_VAL(key));
+		}
 
 		return false;
 	}
@@ -2002,10 +2017,12 @@ bool zend_opcache_static_cache_atomic_update_locked(zend_string *key, zend_long 
 	entries = zend_opcache_static_cache_entries(header);
 	entry = &entries[slot_index];
 	if (entry->value_type != ZEND_OPCACHE_STATIC_CACHE_VALUE_LONG) {
-		if (entry->value_type > ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH) {
-			zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Stored %s value for key \"%s\" has an unknown type", zend_opcache_static_cache_active_context()->name, ZSTR_VAL(key));
-		} else {
-			zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "%s", type_error_message);
+		if (throw_on_error) {
+			if (entry->value_type > ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH) {
+				zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Stored %s value for key \"%s\" has an unknown type", zend_opcache_static_cache_active_context()->name, ZSTR_VAL(key));
+			} else {
+				zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "%s", type_error_message);
+			}
 		}
 
 		return false;

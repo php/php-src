@@ -94,18 +94,18 @@ dump_type_error(static fn () => OPcache\volatile_fetch('missing', $closure));
 
 dump_type_error(static fn () => OPcache\pinned_store('resource', $resource));
 dump_type_error(static fn () => OPcache\pinned_store('closure-value', $closure));
-dump_static_cache_exception(static fn () => OPcache\pinned_store_array(['nested-resource' => ['value' => $resource]]));
-dump_static_cache_exception(static fn () => OPcache\pinned_store_array(['nested-closure' => ['value' => $closure]]));
-dump_static_cache_exception(static fn () => OPcache\pinned_store('object-resource', $resource_object));
-dump_static_cache_exception(static fn () => OPcache\pinned_store('object-closure', $closure_object));
-dump_static_cache_exception(static fn () => OPcache\pinned_store('spl-resource', $resource_fixed_array));
-dump_static_cache_exception(static fn () => OPcache\pinned_store('spl-closure', $closure_fixed_array));
-dump_static_cache_exception(static fn () => OPcache\pinned_store('array-object-resource', $resource_array_object));
-dump_static_cache_exception(static fn () => OPcache\pinned_store('array-object-closure', $closure_array_object));
+dump_static_cache_exception(static fn () => OPcache\pinned_store_array(['nested-resource' => ['value' => $resource]], true));
+dump_static_cache_exception(static fn () => OPcache\pinned_store_array(['nested-closure' => ['value' => $closure]], true));
+dump_static_cache_exception(static fn () => OPcache\pinned_store('object-resource', $resource_object, true));
+dump_static_cache_exception(static fn () => OPcache\pinned_store('object-closure', $closure_object, true));
+dump_static_cache_exception(static fn () => OPcache\pinned_store('spl-resource', $resource_fixed_array, true));
+dump_static_cache_exception(static fn () => OPcache\pinned_store('spl-closure', $closure_fixed_array, true));
+dump_static_cache_exception(static fn () => OPcache\pinned_store('array-object-resource', $resource_array_object, true));
+dump_static_cache_exception(static fn () => OPcache\pinned_store('array-object-closure', $closure_array_object, true));
 StaticCacheUnsupportedSerializedPayload::$value = $resource;
-dump_static_cache_exception(static fn () => OPcache\pinned_store('serialized-resource', $serialized_payload));
+dump_static_cache_exception(static fn () => OPcache\pinned_store('serialized-resource', $serialized_payload, true));
 StaticCacheUnsupportedSerializedPayload::$value = $closure;
-dump_static_cache_exception(static fn () => OPcache\pinned_store('serialized-closure', $serialized_payload));
+dump_static_cache_exception(static fn () => OPcache\pinned_store('serialized-closure', $serialized_payload, true));
 dump_type_error(static fn () => OPcache\pinned_fetch('missing', $resource));
 dump_type_error(static fn () => OPcache\pinned_fetch('missing', $closure));
 

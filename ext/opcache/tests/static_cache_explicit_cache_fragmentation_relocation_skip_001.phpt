@@ -30,8 +30,7 @@ function cache_store(string $kind, string $key, mixed $value): bool
         return OPcache\volatile_store($key, $value);
     }
 
-    OPcache\pinned_store($key, $value);
-    return true;
+    return OPcache\pinned_store($key, $value);
 }
 
 function cache_fetch(string $kind, string $key): mixed
@@ -100,7 +99,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-OPcache\StaticCacheException: not enough shared memory left
+bool(false)
 bool(false)
 int(1200000)
 int(1200000)

@@ -425,7 +425,7 @@ void zend_opcache_static_cache_populate_info(zval *return_value);
 bool zend_opcache_static_cache_rlock(void);
 bool zend_opcache_static_cache_wlock(void);
 void zend_opcache_static_cache_unlock(void);
-bool zend_opcache_static_cache_acquire_entry_lock(zend_string *key);
+bool zend_opcache_static_cache_acquire_entry_lock(zend_string *key, bool throw_on_error);
 bool zend_opcache_static_cache_try_acquire_entry_lock(zend_string *key, zend_long lease);
 bool zend_opcache_static_cache_has_entry_lock(zend_string *key);
 bool zend_opcache_static_cache_release_entry_lock(zend_string *key);
@@ -470,6 +470,7 @@ bool zend_opcache_static_cache_prepare_value(
 		zend_string *key,
 		zval *value,
 		bool throw_on_failure,
+		bool honor_strict_store_failure,
 		bool lock_held);
 void zend_opcache_static_cache_destroy_prepared_value(zend_opcache_static_cache_prepared_value *prepared);
 bool zend_opcache_static_cache_store_prepared_locked(
@@ -477,12 +478,20 @@ bool zend_opcache_static_cache_store_prepared_locked(
 		zval *value,
 		const zend_opcache_static_cache_prepared_value *prepared,
 		zend_long ttl,
-		bool throw_on_failure);
-bool zend_opcache_static_cache_store_locked(zend_string *key, zval *value, zend_long ttl, bool throw_on_failure);
+		bool throw_on_failure,
+		bool honor_strict_store_failure);
+bool zend_opcache_static_cache_store_locked(zend_string *key, zval *value, zend_long ttl, bool throw_on_failure, bool honor_strict_store_failure);
 bool zend_opcache_static_cache_fetch_locked(zend_string *key, zval *return_value, bool throw_if_missing, bool *found_ptr, bool use_request_local_slot);
 bool zend_opcache_static_cache_exists_locked(zend_string *key);
 bool zend_opcache_static_cache_delete_locked(zend_string *key);
-bool zend_opcache_static_cache_atomic_update_locked(zend_string *key, zend_long step, bool decrement, bool insert_if_missing, zend_long *new_value, const char *type_error_message);
+bool zend_opcache_static_cache_atomic_update_locked(
+	zend_string *key,
+	zend_long step,
+	bool decrement,
+	bool insert_if_missing,
+	zend_long *new_value,
+	const char *type_error_message,
+	bool throw_on_error);
 void zend_opcache_static_cache_release_request_local_slots(void);
 void zend_opcache_static_cache_update_mutation_hook_state(void);
 bool zend_opcache_static_cache_prepare_memo_fetch(zval *value, zend_opcache_static_cache_prepared_value *prepared);
