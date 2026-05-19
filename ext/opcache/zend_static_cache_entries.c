@@ -80,6 +80,55 @@ static zend_always_inline void zend_opcache_static_cache_delete_entry_locked(zen
 	zend_opcache_static_cache_bump_mutation_epoch_locked(header);
 }
 
+static zend_always_inline void zend_opcache_static_cache_release_request_local_slot_context(HashTable **slots_ptr)
+{
+	if (*slots_ptr == NULL) {
+		return;
+	}
+
+	zend_hash_destroy(*slots_ptr);
+	FREE_HASHTABLE(*slots_ptr);
+	*slots_ptr = NULL;
+}
+
+static zend_always_inline bool zend_opcache_static_cache_is_expired(const zend_opcache_static_cache_entry *entry, uint64_t now)
+{
+	return entry->state == ZEND_OPCACHE_STATIC_CACHE_ENTRY_USED && entry->expires_at != 0 && entry->expires_at <= now;
+}
+
+static zend_always_inline bool zend_opcache_static_cache_maybe_expired(const zend_opcache_static_cache_entry *entry, uint64_t *now)
+{
+	if (entry->state != ZEND_OPCACHE_STATIC_CACHE_ENTRY_USED || entry->expires_at == 0) {
+		return false;
+	}
+
+	if (*now == 0) {
+		*now = (uint64_t) time(NULL);
+	}
+
+	return zend_opcache_static_cache_is_expired(entry, *now);
+}
+
+static zend_always_inline bool zend_opcache_static_cache_payload_can_fit_locked(size_t size)
+{
+	zend_opcache_static_cache_header *header = zend_opcache_static_cache_header_ptr();
+	size_t total_size;
+
+	if (!header || size == 0 || size > UINT32_MAX - sizeof(zend_opcache_static_cache_block)) {
+		return false;
+	}
+
+	total_size = ZEND_ALIGNED_SIZE(sizeof(zend_opcache_static_cache_block) + size);
+
+	return total_size <= UINT32_MAX && total_size <= header->data_size;
+}
+
+static zend_always_inline void zend_opcache_static_cache_init_prepared_value(zend_opcache_static_cache_prepared_value *prepared)
+{
+	memset(prepared, 0, sizeof(*prepared));
+	prepared->value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_NULL;
+}
+
 static void zend_opcache_static_cache_request_local_slot_dtor(zval *slot_zv)
 {
 	zend_opcache_static_cache_request_local_slot *slot = Z_PTR_P(slot_zv);
@@ -231,14 +280,6 @@ static bool zend_opcache_static_cache_clone_request_local_array_ex(
 	return true;
 }
 
-static bool zend_opcache_static_cache_clone_request_local_array(
-		zend_opcache_static_cache_request_local_clone_context *context,
-		zval *dst,
-		zval *src)
-{
-	return zend_opcache_static_cache_clone_request_local_array_ex(context, dst, src, false);
-}
-
 static bool zend_opcache_static_cache_clone_request_local_reference(
 		zend_opcache_static_cache_request_local_clone_context *context,
 		zval *dst,
@@ -383,11 +424,13 @@ static bool zend_opcache_static_cache_clone_request_local_safe_direct_object(
 		zend_object *old_object,
 		zend_object **new_object_ptr)
 {
-	zend_class_entry *ce = old_object->ce, *base_ce = NULL;
 	zend_opcache_static_cache_safe_direct_state_copy_func_t copy_func;
+	zend_class_entry *ce, *base_ce = NULL;
 	zend_object *new_object;
 	zend_ulong key;
 	zval new_zv;
+
+	ce = old_object->ce;
 
 	copy_func = zend_opcache_static_cache_safe_direct_copy_func(ce, &base_ce);
 	if (copy_func == NULL || zend_opcache_serializer_has_safe_direct_cache_overrides(ce, base_ce)) {
@@ -462,7 +505,7 @@ static bool zend_opcache_static_cache_clone_request_local_value(
 
 	switch (Z_TYPE_P(src)) {
 		case IS_ARRAY:
-			return zend_opcache_static_cache_clone_request_local_array(context, dst, src);
+			return zend_opcache_static_cache_clone_request_local_array_ex(context, dst, src, false);
 		case IS_OBJECT:
 			if (!zend_opcache_static_cache_clone_request_local_object(context, Z_OBJ_P(src), &object)) {
 				return false;
@@ -738,35 +781,6 @@ static bool zend_opcache_static_cache_fetch_finish(
 	return true;
 }
 
-static void zend_opcache_static_cache_release_request_local_slot_context(HashTable **slots_ptr)
-{
-	if (*slots_ptr == NULL) {
-		return;
-	}
-
-	zend_hash_destroy(*slots_ptr);
-	FREE_HASHTABLE(*slots_ptr);
-	*slots_ptr = NULL;
-}
-
-static bool zend_opcache_static_cache_is_expired(const zend_opcache_static_cache_entry *entry, uint64_t now)
-{
-	return entry->state == ZEND_OPCACHE_STATIC_CACHE_ENTRY_USED && entry->expires_at != 0 && entry->expires_at <= now;
-}
-
-static bool zend_opcache_static_cache_maybe_expired(const zend_opcache_static_cache_entry *entry, uint64_t *now)
-{
-	if (entry->state != ZEND_OPCACHE_STATIC_CACHE_ENTRY_USED || entry->expires_at == 0) {
-		return false;
-	}
-
-	if (*now == 0) {
-		*now = (uint64_t) time(NULL);
-	}
-
-	return zend_opcache_static_cache_is_expired(entry, *now);
-}
-
 static bool zend_opcache_static_cache_find_slot_in_header_locked(
 		zend_opcache_static_cache_header *header,
 		zend_string *key,
@@ -897,20 +911,6 @@ static bool zend_opcache_static_cache_expunge_expired_locked(void)
 	return removed;
 }
 
-static bool zend_opcache_static_cache_payload_can_fit_locked(size_t size)
-{
-	zend_opcache_static_cache_header *header = zend_opcache_static_cache_header_ptr();
-	size_t total_size;
-
-	if (!header || size == 0 || size > UINT32_MAX - sizeof(zend_opcache_static_cache_block)) {
-		return false;
-	}
-
-	total_size = ZEND_ALIGNED_SIZE(sizeof(zend_opcache_static_cache_block) + size);
-
-	return total_size <= UINT32_MAX && total_size <= header->data_size;
-}
-
 static void zend_opcache_static_cache_handle_store_failure(const char *failure_message, bool throw_on_failure)
 {
 	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
@@ -925,11 +925,6 @@ static void zend_opcache_static_cache_handle_store_failure(const char *failure_m
 	if (throw_on_failure) {
 		zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "%s", failure_message);
 	}
-}
-
-static void zend_opcache_static_cache_handle_store_failure_locked(const char *failure_message, bool throw_on_failure)
-{
-	zend_opcache_static_cache_handle_store_failure(failure_message, throw_on_failure);
 }
 
 static bool zend_opcache_static_cache_find_unstorable_value(
@@ -974,9 +969,11 @@ static bool zend_opcache_static_cache_find_unstorable_value(
 	if (Z_TYPE_P(value) == IS_OBJECT) {
 		object = Z_OBJ_P(value);
 		key = (zend_ulong) (uintptr_t) object;
+
 		if (zend_hash_index_exists(seen_objects, key)) {
 			return false;
 		}
+
 		zend_hash_index_add_empty_element(seen_objects, key);
 
 		if (object->ce->default_properties_count != 0) {
@@ -1134,12 +1131,6 @@ static bool zend_opcache_static_cache_retry_store_after_pressure_locked(
 	}
 
 	return false;
-}
-
-static void zend_opcache_static_cache_init_prepared_value(zend_opcache_static_cache_prepared_value *prepared)
-{
-	memset(prepared, 0, sizeof(*prepared));
-	prepared->value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_NULL;
 }
 
 bool zend_opcache_static_cache_clear_locked(void)
@@ -1416,7 +1407,7 @@ retry_store:
 			goto retry_store;
 		}
 
-		zend_opcache_static_cache_handle_store_failure_locked("cache hash table is full", throw_on_failure);
+		zend_opcache_static_cache_handle_store_failure("cache hash table is full", throw_on_failure);
 
 		return false;
 	}
@@ -1765,7 +1756,7 @@ store_failed:
 		goto retry_store;
 	}
 
-	zend_opcache_static_cache_handle_store_failure_locked(failure_message, throw_on_failure);
+	zend_opcache_static_cache_handle_store_failure(failure_message, throw_on_failure);
 
 	return false;
 }

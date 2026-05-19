@@ -79,6 +79,27 @@ typedef struct _zend_opcache_serializer_rbuf_t {
 	bool skip_decoded_value_capture;
 } zend_opcache_serializer_rbuf_t;
 
+typedef struct _zend_opcache_serializer_has_unstorable_context {
+	HashTable *seen_arrays;
+	HashTable *seen_objects;
+} zend_opcache_serializer_has_unstorable_context;
+
+static zend_always_inline bool zend_opcache_serializer_encode_zval(
+	zend_opcache_serializer_wbuf_t *wb,
+	const zval *zv
+);
+
+static zend_always_inline bool zend_opcache_serializer_decode_zval(
+	zend_opcache_serializer_rbuf_t *rb,
+	zval *dst
+);
+
+static bool zend_opcache_serializer_value_has_unstorable_ex(
+	const zval *value,
+	HashTable *seen_arrays,
+	HashTable *seen_objects
+);
+
 static zend_always_inline void zend_opcache_serializer_capture_decoded_value(zend_opcache_serializer_rbuf_t *rb, zval *value)
 {
 	if (rb->capture_decoded_value != NULL) {
@@ -415,8 +436,10 @@ static zend_always_inline zend_class_entry *zend_opcache_serializer_find_safe_di
 static zend_always_inline bool zend_opcache_serializer_class_magic_method_changed(zend_class_entry *ce,
 		zend_class_entry *base_ce, const char *name, size_t name_len)
 {
-	zend_function *func = zend_hash_str_find_ptr(&ce->function_table, name, name_len);
-	zend_function *base_func = zend_hash_str_find_ptr(&base_ce->function_table, name, name_len);
+	zend_function *func, *base_func;
+
+	func = zend_hash_str_find_ptr(&ce->function_table, name, name_len);
+	base_func = zend_hash_str_find_ptr(&base_ce->function_table, name, name_len);
 
 	if (func == NULL) {
 		return base_func != NULL;
@@ -453,22 +476,13 @@ static zend_always_inline bool zend_opcache_serializer_has_safe_direct_cache_ove
 	;
 }
 
-static bool zend_opcache_serializer_value_has_unstorable_ex(
-		const zval *value,
-		HashTable *seen_arrays,
-		HashTable *seen_objects);
-
-typedef struct _zend_opcache_serializer_has_unstorable_context {
-	HashTable *seen_arrays;
-	HashTable *seen_objects;
-} zend_opcache_serializer_has_unstorable_context;
-
 static bool zend_opcache_serializer_safe_direct_value_has_unstorable_callback(
 		void *context,
 		const zval *value)
 {
 	zend_opcache_serializer_has_unstorable_context *has_unstorable_context =
-		(zend_opcache_serializer_has_unstorable_context *) context;
+		(zend_opcache_serializer_has_unstorable_context *) context
+	;
 
 	return zend_opcache_serializer_value_has_unstorable_ex(
 		value,
@@ -509,10 +523,10 @@ static bool zend_opcache_serializer_safe_direct_state_has_unstorable(
 		HashTable *seen_arrays,
 		HashTable *seen_objects)
 {
-	zend_class_entry *base_ce = NULL;
 	zend_opcache_static_cache_safe_direct_state_copy_func_t copy_func;
 	zend_opcache_static_cache_safe_direct_state_has_unstorable_func_t state_has_unstorable_func;
 	zend_opcache_serializer_has_unstorable_context context;
+	zend_class_entry *base_ce = NULL;
 
 	copy_func = zend_opcache_static_cache_safe_direct_copy_func(Z_OBJCE_P(value), &base_ce);
 	if (copy_func == NULL ||
@@ -522,7 +536,8 @@ static bool zend_opcache_serializer_safe_direct_state_has_unstorable(
 	}
 
 	state_has_unstorable_func =
-		zend_opcache_static_cache_safe_direct_state_has_unstorable_func(Z_OBJCE_P(value));
+		zend_opcache_static_cache_safe_direct_state_has_unstorable_func(Z_OBJCE_P(value))
+	;
 	if (state_has_unstorable_func == NULL) {
 		return false;
 	}
@@ -625,9 +640,6 @@ static zend_always_inline bool zend_opcache_serializer_hash_has_unstorable(const
 
 	return result;
 }
-
-static zend_always_inline bool zend_opcache_serializer_encode_zval(zend_opcache_serializer_wbuf_t *wb,
-		const zval *zv);
 
 static zend_always_inline bool zend_opcache_serializer_encode_property_table(zend_opcache_serializer_wbuf_t *wb,
 		const HashTable *props)
@@ -1328,9 +1340,11 @@ static zend_always_inline bool zend_opcache_serialize_ex(
 
 	zend_opcache_serializer_wbuf_init(&wb, 256);
 	ok = zend_opcache_serializer_encode_zval(&wb, value);
+
 	if (failed_unstorable != NULL) {
 		*failed_unstorable = wb.failed_unstorable;
 	}
+
 	zend_opcache_serializer_wbuf_destroy(&wb);
 
 	if (!ok) {
@@ -1409,9 +1423,6 @@ static zend_always_inline bool zend_opcache_serializer_rbuf_skip(zend_opcache_se
 	return true;
 }
 
-static zend_always_inline bool zend_opcache_serializer_decode_zval(zend_opcache_serializer_rbuf_t *rb,
-		zval *dst);
-
 static inline bool zend_opcache_serializer_decode_zval_suppressed(zend_opcache_serializer_rbuf_t *rb, zval *dst)
 {
 	bool result;
@@ -1478,10 +1489,10 @@ static zend_always_inline bool zend_opcache_serializer_decode_object_payload_wit
 	const unsigned char *arr_meta, *key_data;
 	const char *key_str;
 	zend_opcache_serializer_hdr_t arr_hdr;
-	zend_class_entry *base_ce = NULL;
-	zend_property_info *prop_info;
 	zend_opcache_static_cache_safe_direct_state_copy_func_t copy_func;
 	zend_opcache_static_cache_safe_direct_state_unserialize_func_t unserialize_func;
+	zend_class_entry *base_ce = NULL;
+	zend_property_info *prop_info;
 	zval props_zv, state_zv, data_arr,
 		val, *existing, *target, func_name, wakeup_rv;
 	HashTable *obj_ht;
@@ -1902,8 +1913,8 @@ static bool zend_opcache_serializer_decode_array(zend_opcache_serializer_rbuf_t 
 
 static zend_always_inline bool zend_opcache_serializer_decode_zval(zend_opcache_serializer_rbuf_t *rb, zval *dst)
 {
-	zend_opcache_serializer_hdr_t hdr;
 	const void *payload;
+	zend_opcache_serializer_hdr_t hdr;
 	int64_t lval;
 	double dval;
 	bool previous_skip_decoded_value_capture, skip_decoded_value_capture;
