@@ -82,14 +82,10 @@ phar_entry_info *phar_get_link_source(phar_entry_info *entry) /* {{{ */
 
 		if (NULL != (link_entry = zend_hash_find_ptr(&(entry->phar->manifest), entry->symlink)) ||
 			NULL != (link_entry = zend_hash_find_ptr(&(entry->phar->manifest), link))) {
-			if (link != entry->symlink) {
-				zend_string_release(link);
-			}
+			zend_string_release(link);
 			entry = link_entry;
 		} else {
-			if (link != entry->symlink) {
-				zend_string_release(link);
-			}
+			zend_string_release(link);
 			return NULL;
 		}
 	}
