@@ -23,13 +23,15 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Zend/zend_atomic.h"
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_execute.h"
 #include "Zend/zend_portability.h"
 
 #include "sapi/embed/php_embed.h"
-#include "zend_static_cache_internal.h"
+#ifndef ZEND_WIN32
+# include "Zend/zend_atomic.h"
+# include "zend_static_cache_internal.h"
+#endif
 
 #ifndef ZTS
 # error "This helper requires a ZTS build"
@@ -37,78 +39,10 @@
 
 #define REQUEST_COUNT 4
 
-typedef struct _zend_opcache_test_accel_directives {
-	zend_long memory_consumption;
-	zend_long static_cache_volatile_size_mb;
-	zend_long max_accelerated_files;
-	double max_wasted_percentage;
-	char *user_blacklist_filename;
-	zend_long force_restart_timeout;
-	bool use_cwd;
-	bool ignore_dups;
-	bool validate_timestamps;
-	bool revalidate_path;
-	bool save_comments;
-	bool record_warnings;
-	bool protect_memory;
-	bool file_override_enabled;
-	bool enable_cli;
-	bool validate_permission;
-#ifndef ZEND_WIN32
-	bool validate_root;
-#endif
-	zend_ulong revalidate_freq;
-	zend_ulong file_update_protection;
-	char *error_log;
-#ifdef ZEND_WIN32
-	char *mmap_base;
-#endif
-	char *memory_model;
-	zend_long log_verbosity_level;
-	zend_long optimization_level;
-	zend_long opt_debug_level;
-	zend_long max_file_size;
-	zend_long interned_strings_buffer;
-	char *restrict_api;
-#ifndef ZEND_WIN32
-	char *lockfile_path;
-#endif
-	char *file_cache;
-	bool file_cache_read_only;
-	bool file_cache_only;
-	bool file_cache_consistency_checks;
-#if ENABLE_FILE_CACHE_FALLBACK
-	bool file_cache_fallback;
-#endif
-#ifdef HAVE_HUGE_CODE_PAGES
-	bool huge_code_pages;
-#endif
-	char *preload;
-#ifndef ZEND_WIN32
-	char *preload_user;
-#endif
-#ifdef ZEND_WIN32
-	char *cache_id;
-#endif
-} zend_opcache_test_accel_directives;
-
-typedef struct _zend_opcache_test_globals {
-	bool counted;
-	bool enabled;
-	bool locked;
-	bool accelerator_enabled;
-	bool pcre_reseted;
-	zend_opcache_test_accel_directives accel_directives;
-} zend_opcache_test_globals;
-
 typedef struct _zend_opcache_ref_thread_ctx {
 	int result;
 	char message[256];
 } zend_opcache_ref_thread_ctx;
-
-extern size_t accel_globals_offset;
-
-#define ZEND_OPCACHE_TEST_CG(v) ZEND_TSRMG_FAST(accel_globals_offset, zend_opcache_test_globals *, v)
 
 static const char opcache_test_ini[] =
 	"html_errors=0\n"
@@ -160,9 +94,7 @@ static const char worker_code[] =
 	"    return true;"
 	"})()";
 
-static zend_opcache_test_accel_directives zend_opcache_thread_accel_directives;
-static bool zend_opcache_thread_enabled;
-
+#ifndef ZEND_WIN32
 static const zend_opcache_static_cache_shared_graph_header *zend_opcache_locate_shared_graph_header(uint32_t payload_offset)
 {
 	const unsigned char *buffer;
@@ -193,6 +125,7 @@ static const zend_opcache_static_cache_shared_graph_header *zend_opcache_locate_
 
 	return header;
 }
+#endif
 
 static int zend_opcache_test_startup(int argc, char **argv)
 {
@@ -214,9 +147,6 @@ static int zend_opcache_test_startup(int argc, char **argv)
 		return FAILURE;
 	}
 
-	zend_opcache_thread_accel_directives = ZEND_OPCACHE_TEST_CG(accel_directives);
-	zend_opcache_thread_enabled = ZEND_OPCACHE_TEST_CG(enabled);
-
 	SG(options) |= SAPI_OPTION_NO_CHDIR;
 	return SUCCESS;
 }
@@ -232,8 +162,6 @@ static bool zend_opcache_thread_request_startup(void)
 {
 	(void) ts_resource(0);
 	ZEND_TSRMLS_CACHE_UPDATE();
-	ZEND_OPCACHE_TEST_CG(accel_directives) = zend_opcache_thread_accel_directives;
-	ZEND_OPCACHE_TEST_CG(enabled) = zend_opcache_thread_enabled;
 
 	SG(request_info).argc = 0;
 	SG(request_info).argv = NULL;
@@ -299,6 +227,7 @@ static bool zend_opcache_run_request_code(const char *code, const char *label, b
 		return false;
 	}
 
+#ifndef ZEND_WIN32
 	if (expect_single_shared_graph_ref && zend_opcache_static_cache_shared_graph_ref_count != 1) {
 		snprintf(
 			message,
@@ -313,6 +242,9 @@ static bool zend_opcache_run_request_code(const char *code, const char *label, b
 		php_request_shutdown(NULL);
 		return false;
 	}
+#else
+	(void) expect_single_shared_graph_ref;
+#endif
 
 	if (!Z_ISUNDEF(retval)) {
 		zval_ptr_dtor(&retval);
@@ -321,6 +253,7 @@ static bool zend_opcache_run_request_code(const char *code, const char *label, b
 	return true;
 }
 
+#ifndef ZEND_WIN32
 static bool zend_opcache_inspect_current_payload_state(
 		uint32_t *value_offset_out,
 		uint32_t *next_free_out,
@@ -395,13 +328,16 @@ done:
 	zend_opcache_static_cache_restore_context(previous_context);
 	return ok;
 }
+#endif
 
 static void *zend_opcache_ref_thread_main(void *arg)
 {
 	zend_opcache_ref_thread_ctx *ctx = (zend_opcache_ref_thread_ctx *) arg;
+#ifndef ZEND_WIN32
 	uint32_t expected_offset = 0;
 	uint32_t value_offset, next_free;
 	int refcount;
+#endif
 	int iteration;
 
 	ctx->result = 0;
@@ -419,6 +355,7 @@ static void *zend_opcache_ref_thread_main(void *arg)
 			break;
 		}
 
+#ifndef ZEND_WIN32
 		if (!zend_opcache_inspect_current_payload_state(&value_offset, &next_free, &refcount, ctx->message, sizeof(ctx->message))) {
 			ctx->result = 1;
 			break;
@@ -452,6 +389,7 @@ static void *zend_opcache_ref_thread_main(void *arg)
 			);
 			break;
 		}
+#endif
 	}
 
 	ts_free_thread();

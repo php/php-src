@@ -32,70 +32,6 @@
 # error "This helper requires a ZTS build"
 #endif
 
-typedef struct _zend_opcache_test_accel_directives {
-	zend_long memory_consumption;
-	zend_long static_cache_volatile_size_mb;
-	zend_long max_accelerated_files;
-	double max_wasted_percentage;
-	char *user_blacklist_filename;
-	zend_long force_restart_timeout;
-	bool use_cwd;
-	bool ignore_dups;
-	bool validate_timestamps;
-	bool revalidate_path;
-	bool save_comments;
-	bool record_warnings;
-	bool protect_memory;
-	bool file_override_enabled;
-	bool enable_cli;
-	bool validate_permission;
-#ifndef ZEND_WIN32
-	bool validate_root;
-#endif
-	zend_ulong revalidate_freq;
-	zend_ulong file_update_protection;
-	char *error_log;
-#ifdef ZEND_WIN32
-	char *mmap_base;
-#endif
-	char *memory_model;
-	zend_long log_verbosity_level;
-	zend_long optimization_level;
-	zend_long opt_debug_level;
-	zend_long max_file_size;
-	zend_long interned_strings_buffer;
-	char *restrict_api;
-#ifndef ZEND_WIN32
-	char *lockfile_path;
-#endif
-	char *file_cache;
-	bool file_cache_read_only;
-	bool file_cache_only;
-	bool file_cache_consistency_checks;
-#if ENABLE_FILE_CACHE_FALLBACK
-	bool file_cache_fallback;
-#endif
-#ifdef HAVE_HUGE_CODE_PAGES
-	bool huge_code_pages;
-#endif
-	char *preload;
-#ifndef ZEND_WIN32
-	char *preload_user;
-#endif
-#ifdef ZEND_WIN32
-	char *cache_id;
-#endif
-} zend_opcache_test_accel_directives;
-
-typedef struct _zend_opcache_test_globals {
-	bool counted;
-	bool enabled;
-	bool locked;
-	bool accelerator_enabled;
-	bool pcre_reseted;
-	zend_opcache_test_accel_directives accel_directives;
-} zend_opcache_test_globals;
-
 typedef struct _zend_opcache_thread_ctx {
 	const char *mode;
 	const char *scenario_path;
@@ -103,10 +39,6 @@ typedef struct _zend_opcache_thread_ctx {
 	int result;
 	char message[256];
 } zend_opcache_thread_ctx;
-
-extern size_t accel_globals_offset;
-
-#define ZEND_OPCACHE_TEST_CG(v) ZEND_TSRMG_FAST(accel_globals_offset, zend_opcache_test_globals *, v)
 
 static const char opcache_test_ini[] =
 	"html_errors=0\n"
@@ -119,9 +51,6 @@ static const char opcache_test_ini[] =
 	"opcache.memory_consumption=64\n"
 	"opcache.max_accelerated_files=200\n"
 	"opcache.static_cache.volatile_size_mb=32\n\0";
-
-static zend_opcache_test_accel_directives zend_opcache_thread_accel_directives;
-static bool zend_opcache_thread_enabled;
 
 static char *zend_opcache_build_scenario_code(const char *mode, const char *scenario_path);
 
@@ -145,9 +74,6 @@ static int zend_opcache_test_startup(int argc, char **argv)
 		return FAILURE;
 	}
 
-	zend_opcache_thread_accel_directives = ZEND_OPCACHE_TEST_CG(accel_directives);
-	zend_opcache_thread_enabled = ZEND_OPCACHE_TEST_CG(enabled);
-
 	SG(options) |= SAPI_OPTION_NO_CHDIR;
 	return SUCCESS;
 }
@@ -163,8 +89,6 @@ static bool zend_opcache_thread_request_startup(void)
 {
 	(void) ts_resource(0);
 	ZEND_TSRMLS_CACHE_UPDATE();
-	ZEND_OPCACHE_TEST_CG(accel_directives) = zend_opcache_thread_accel_directives;
-	ZEND_OPCACHE_TEST_CG(enabled) = zend_opcache_thread_enabled;
 
 	SG(request_info).argc = 0;
 	SG(request_info).argv = NULL;
