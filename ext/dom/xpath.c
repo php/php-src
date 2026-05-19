@@ -207,7 +207,7 @@ zend_result dom_xpath_document_read(dom_object *obj, zval *retval)
 
 /* {{{ registerNodeNamespaces bool*/
 static inline dom_xpath_object *php_xpath_obj_from_dom_obj(dom_object *obj) {
-	return (dom_xpath_object*)((char*)(obj) - offsetof(dom_xpath_object, dom));
+	return ZEND_CONTAINER_OF(obj, dom_xpath_object, dom);
 }
 
 zend_result dom_xpath_register_node_ns_read(dom_object *obj, zval *retval)

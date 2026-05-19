@@ -43,7 +43,7 @@ typedef struct {
 } ListFormatter_object;
 
 static inline ListFormatter_object *php_intl_listformatter_fetch_object(zend_object *obj) {
-    return (ListFormatter_object *)((char*)(obj) - offsetof(ListFormatter_object, zo));
+    return ZEND_CONTAINER_OF(obj, ListFormatter_object, zo);
 }
 #define Z_INTL_LISTFORMATTER_P(zv) php_intl_listformatter_fetch_object(Z_OBJ_P(zv))
 

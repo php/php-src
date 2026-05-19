@@ -875,10 +875,7 @@ static int bcmath_number_compare(zval *op1, zval *op2);
 #endif
 #define CHECK_SCALE_OVERFLOW(scale) (scale > INT_MAX)
 
-static zend_always_inline bcmath_number_obj_t *get_bcmath_number_from_obj(const zend_object *obj)
-{
-	return (bcmath_number_obj_t*)((char*)(obj) - offsetof(bcmath_number_obj_t, std));
-}
+#define get_bcmath_number_from_obj(obj) ZEND_CONTAINER_OF(obj, bcmath_number_obj_t, std)
 
 static zend_always_inline bcmath_number_obj_t *get_bcmath_number_from_zval(const zval *zv)
 {
@@ -1214,7 +1211,7 @@ static zend_result bc_num_from_obj_or_str_or_long(
 	bc_num *num, size_t *full_scale, const zend_object *obj, const zend_string *str, zend_long lval)
 {
 	if (obj) {
-		bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
+		const bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
 		*num = intern->num;
 		if (full_scale) {
 			*full_scale = intern->scale;

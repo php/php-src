@@ -86,7 +86,7 @@ struct _spl_dllist_it {
 };
 
 static inline spl_dllist_object *spl_dllist_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_dllist_object*)((char*)(obj) - offsetof(spl_dllist_object, std));
+	return ZEND_CONTAINER_OF(obj, spl_dllist_object, std);
 }
 /* }}} */
 

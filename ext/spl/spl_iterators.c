@@ -137,14 +137,14 @@ static zend_object_handlers spl_handlers_rec_it_it;
 static zend_object_handlers spl_handlers_dual_it;
 
 static inline spl_recursive_it_object *spl_recursive_it_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_recursive_it_object*)((char*)(obj) - offsetof(spl_recursive_it_object, std));
+	return ZEND_CONTAINER_OF(obj, spl_recursive_it_object, std);
 }
 /* }}} */
 
 #define Z_SPLRECURSIVE_IT_P(zv)  spl_recursive_it_from_obj(Z_OBJ_P((zv)))
 
 static inline spl_dual_it_object *spl_dual_it_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_dual_it_object*)((char*)(obj) - offsetof(spl_dual_it_object, std));
+	return ZEND_CONTAINER_OF(obj, spl_dual_it_object, std);
 } /* }}} */
 
 #define Z_SPLDUAL_IT_P(zv)  spl_dual_it_from_obj(Z_OBJ_P((zv)))

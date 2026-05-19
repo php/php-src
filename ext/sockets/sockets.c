@@ -181,7 +181,7 @@ zend_class_entry *address_info_ce;
 static zend_object_handlers address_info_object_handlers;
 
 static inline php_addrinfo *address_info_from_obj(zend_object *obj) {
-	return (php_addrinfo *)((char *)(obj) - offsetof(php_addrinfo, std));
+	return ZEND_CONTAINER_OF(obj, php_addrinfo, std);
 }
 
 #define Z_ADDRESS_INFO_P(zv) address_info_from_obj(Z_OBJ_P(zv))

@@ -34,7 +34,7 @@ zend_class_entry *sysvshm_ce;
 static zend_object_handlers sysvshm_object_handlers;
 
 static inline sysvshm_shm *sysvshm_from_obj(zend_object *obj) {
-	return (sysvshm_shm *)((char *)(obj) - offsetof(sysvshm_shm, std));
+	return ZEND_CONTAINER_OF(obj, sysvshm_shm, std);
 }
 
 #define Z_SYSVSHM_P(zv) sysvshm_from_obj(Z_OBJ_P(zv))

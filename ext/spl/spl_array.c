@@ -52,7 +52,7 @@ typedef struct _spl_array_object {
 } spl_array_object;
 
 static inline spl_array_object *spl_array_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_array_object*)((char*)(obj) - offsetof(spl_array_object, std));
+	return ZEND_CONTAINER_OF(obj, spl_array_object, std);
 }
 /* }}} */
 
