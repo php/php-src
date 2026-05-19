@@ -19,6 +19,9 @@ var_dump(StaticCachePreloadGlobalState::$values);
 var_dump(StaticCachePreloadGlobalState::next());
 var_dump(StaticCachePreloadMethodState::value());
 
+OPcache\volatile_clear();
+opcache_reset();
+
 ?>
 --EXPECT--
 array(1) {
