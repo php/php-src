@@ -1150,14 +1150,15 @@ static zend_opcache_static_cache_shared_graph_header *zend_opcache_static_cache_
 	return header;
 }
 
-static void zend_opcache_static_cache_free_retired_shared_graphs(void)
+static bool zend_opcache_static_cache_free_retired_shared_graphs(void)
 {
 	zend_opcache_static_cache_shared_graph_ref *ref;
 	zend_opcache_static_cache_context *previous_context;
 	uint32_t index;
+	bool freed = false;
 
 	if (zend_opcache_static_cache_retired_shared_graph_count == 0) {
-		return;
+		return false;
 	}
 
 	for (index = 0; index < zend_opcache_static_cache_retired_shared_graph_count; index++) {
@@ -1171,6 +1172,7 @@ static void zend_opcache_static_cache_free_retired_shared_graphs(void)
 		if (zend_opcache_static_cache_wlock()) {
 			if (zend_opcache_static_cache_header_is_initialized_locked()) {
 				zend_opcache_static_cache_free_locked(ref->payload_offset);
+				freed = true;
 			}
 
 			zend_opcache_static_cache_unlock();
@@ -1184,6 +1186,8 @@ static void zend_opcache_static_cache_free_retired_shared_graphs(void)
 	zend_opcache_static_cache_retired_shared_graphs = NULL;
 	zend_opcache_static_cache_retired_shared_graph_count = 0;
 	zend_opcache_static_cache_retired_shared_graph_capacity = 0;
+
+	return freed;
 }
 
 bool zend_opcache_static_cache_calculate_shared_graph_size(
@@ -1391,7 +1395,244 @@ bool zend_opcache_static_cache_fetch_shared_graph(
 	return result;
 }
 
+static zend_always_inline bool zend_opcache_static_cache_shared_graph_pointer_in_range(
+		const void *pointer,
+		const unsigned char *base,
+		size_t len)
+{
+	uintptr_t address, start;
+
+	if (pointer == NULL || base == NULL || len == 0) {
+		return false;
+	}
+
+	address = (uintptr_t) pointer;
+	start = (uintptr_t) base;
+
+	return address >= start && address - start < len;
+}
+
+static zend_always_inline void *zend_opcache_static_cache_shared_graph_rebase_pointer(
+		void *pointer,
+		const unsigned char *old_base,
+		size_t len,
+		ptrdiff_t delta)
+{
+	if (!zend_opcache_static_cache_shared_graph_pointer_in_range(pointer, old_base, len)) {
+		return pointer;
+	}
+
+	return (void *) ((char *) pointer - delta);
+}
+
+static bool zend_opcache_static_cache_shared_graph_rebase_direct_array(
+	zend_array *array,
+	const unsigned char *old_base,
+	const unsigned char *new_base,
+	size_t len,
+	ptrdiff_t delta,
+	HashTable *seen_arrays
+);
+
+static bool zend_opcache_static_cache_shared_graph_rebase_direct_zval(
+		zval *value,
+		const unsigned char *old_base,
+		const unsigned char *new_base,
+		size_t len,
+		ptrdiff_t delta,
+		HashTable *seen_arrays)
+{
+	zend_array *array;
+
+	switch (Z_TYPE_P(value)) {
+		case IS_STRING:
+			Z_STR_P(value) = (zend_string *) zend_opcache_static_cache_shared_graph_rebase_pointer(
+				Z_STR_P(value),
+				old_base,
+				len,
+				delta
+			);
+			return true;
+		case IS_ARRAY:
+			array = (zend_array *) zend_opcache_static_cache_shared_graph_rebase_pointer(
+				Z_ARR_P(value),
+				old_base,
+				len,
+				delta
+			);
+			Z_ARR_P(value) = array;
+			if (!zend_opcache_static_cache_shared_graph_pointer_in_range(array, new_base, len)) {
+				return true;
+			}
+
+			return zend_opcache_static_cache_shared_graph_rebase_direct_array(
+				array,
+				old_base,
+				new_base,
+				len,
+				delta,
+				seen_arrays
+			);
+		default:
+			return true;
+	}
+}
+
+static bool zend_opcache_static_cache_shared_graph_rebase_direct_array(
+		zend_array *array,
+		const unsigned char *old_base,
+		const unsigned char *new_base,
+		size_t len,
+		ptrdiff_t delta,
+		HashTable *seen_arrays)
+{
+	zend_ulong key;
+	zval *packed;
+	Bucket *bucket;
+	uint32_t index;
+	void *data;
+
+	if (!zend_opcache_static_cache_shared_graph_pointer_in_range(array, new_base, len)) {
+		return true;
+	}
+
+	key = (zend_ulong) (uintptr_t) array;
+	if (zend_hash_index_exists(seen_arrays, key)) {
+		return true;
+	}
+	if (zend_hash_index_add_empty_element(seen_arrays, key) == NULL) {
+		return false;
+	}
+
+	data = HT_GET_DATA_ADDR(array);
+	data = zend_opcache_static_cache_shared_graph_rebase_pointer(data, old_base, len, delta);
+	HT_SET_DATA_ADDR(array, data);
+	if (!zend_opcache_static_cache_shared_graph_pointer_in_range(data, new_base, len)) {
+		return false;
+	}
+
+	if (HT_IS_PACKED(array)) {
+		packed = array->arPacked;
+		for (index = 0; index < array->nNumUsed; index++) {
+			if (!zend_opcache_static_cache_shared_graph_rebase_direct_zval(
+					&packed[index],
+					old_base,
+					new_base,
+					len,
+					delta,
+					seen_arrays)
+			) {
+				return false;
+			}
+		}
+	} else {
+		bucket = array->arData;
+		for (index = 0; index < array->nNumUsed; index++) {
+			if (bucket[index].key != NULL) {
+				bucket[index].key = (zend_string *) zend_opcache_static_cache_shared_graph_rebase_pointer(
+					bucket[index].key,
+					old_base,
+					len,
+					delta
+				);
+
+				if (!zend_opcache_static_cache_shared_graph_pointer_in_range(bucket[index].key, new_base, len)) {
+					return false;
+				}
+			}
+
+			if (!zend_opcache_static_cache_shared_graph_rebase_direct_zval(
+					&bucket[index].val,
+					old_base,
+					new_base,
+					len,
+					delta,
+					seen_arrays)
+			) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+static bool zend_opcache_static_cache_shared_graph_rebase_graph_value(
+		const unsigned char *buffer,
+		const zend_opcache_static_cache_shared_graph_value *value,
+		const unsigned char *old_base,
+		const unsigned char *new_base,
+		size_t len,
+		ptrdiff_t delta,
+		HashTable *seen_arrays)
+{
+	const zend_opcache_static_cache_shared_graph_array *graph_array;
+	const zend_opcache_static_cache_shared_graph_array_element *graph_elements;
+	const zend_opcache_static_cache_shared_graph_object *graph_object;
+	const zend_opcache_static_cache_shared_graph_property *properties;
+	zend_array *array;
+	uint32_t index;
+
+	switch (value->type) {
+		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_ARRAY:
+			if ((uint32_t) value->payload.offset == 0) {
+				return true;
+			}
+
+			array = (zend_array *) (void *) (buffer + (uint32_t) value->payload.offset);
+			return zend_opcache_static_cache_shared_graph_rebase_direct_array(
+				array,
+				old_base,
+				new_base,
+				len,
+				delta,
+				seen_arrays
+			);
+		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_DYNAMIC_ARRAY:
+			graph_array = (const zend_opcache_static_cache_shared_graph_array *) (buffer + (uint32_t) value->payload.offset);
+			graph_elements = (const zend_opcache_static_cache_shared_graph_array_element *) (buffer + graph_array->elements_offset);
+			for (index = 0; index < graph_array->count; index++) {
+				if (!zend_opcache_static_cache_shared_graph_rebase_graph_value(
+						buffer,
+						&graph_elements[index].value,
+						old_base,
+						new_base,
+						len,
+						delta,
+						seen_arrays)
+				) {
+					return false;
+				}
+			}
+			return true;
+		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT:
+			graph_object = (const zend_opcache_static_cache_shared_graph_object *) (buffer + (uint32_t) value->payload.offset);
+			properties = (const zend_opcache_static_cache_shared_graph_property *) (buffer + graph_object->properties_offset);
+			for (index = 0; index < graph_object->property_count; index++) {
+				if (!zend_opcache_static_cache_shared_graph_rebase_graph_value(
+						buffer,
+						&properties[index].value,
+						old_base,
+						new_base,
+						len,
+						delta,
+						seen_arrays)
+				) {
+					return false;
+				}
+			}
+			return true;
+		default:
+			return true;
+	}
+}
+
 bool zend_opcache_static_cache_shared_graph_can_overwrite_payload_locked(uint32_t payload_offset)
+{
+	return zend_opcache_static_cache_shared_graph_can_move_payload_locked(payload_offset);
+}
+
+bool zend_opcache_static_cache_shared_graph_can_move_payload_locked(uint32_t payload_offset)
 {
 	zend_opcache_static_cache_shared_graph_header *header = zend_opcache_static_cache_shared_graph_payload_header(payload_offset);
 
@@ -1400,6 +1641,88 @@ bool zend_opcache_static_cache_shared_graph_can_overwrite_payload_locked(uint32_
 	}
 
 	return zend_atomic_int_load_ex(&header->ref_state) == 0;
+}
+
+bool zend_opcache_static_cache_shared_graph_rebase_moved_payload_locked(uint32_t payload_offset, ptrdiff_t delta)
+{
+	const unsigned char *buffer, *old_buffer, *new_base, *old_base;
+	zend_opcache_static_cache_shared_graph_header *header;
+	zend_opcache_static_cache_shared_graph_value root_value;
+	HashTable seen_arrays;
+	uint32_t root_type;
+	size_t buffer_len, graph_len, old_padding, new_padding;
+	bool result;
+
+	if (payload_offset == 0 || delta == 0) {
+		return true;
+	}
+
+	buffer_len = zend_opcache_static_cache_block_payload_capacity(payload_offset);
+	if (buffer_len == 0) {
+		return false;
+	}
+
+	buffer = (const unsigned char *) zend_opcache_static_cache_ptr(payload_offset);
+	old_buffer = buffer + delta;
+	old_padding = zend_opcache_static_cache_shared_graph_alignment_padding(old_buffer);
+	new_padding = zend_opcache_static_cache_shared_graph_alignment_padding(buffer);
+	if (old_padding != new_padding) {
+		return false;
+	}
+
+	buffer = zend_opcache_static_cache_shared_graph_locate_buffer(buffer, buffer_len, &graph_len);
+	if (buffer == NULL) {
+		return false;
+	}
+
+	header = (zend_opcache_static_cache_shared_graph_header *) buffer;
+	if (header->magic != ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_MAGIC ||
+		header->version != ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VERSION ||
+		(header->root_offset != 0 && header->root_offset >= graph_len)
+	) {
+		return false;
+	}
+
+	new_base = buffer;
+	old_base = old_buffer + old_padding;
+	root_type = header->root_type != 0 ? header->root_type : ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT;
+	memset(&root_value, 0, sizeof(root_value));
+	root_value.type = (uint8_t) root_type;
+	root_value.payload.offset = header->root_offset;
+
+	zend_hash_init(&seen_arrays, 8, NULL, NULL, 0);
+	switch (root_type) {
+		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_ARRAY:
+		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_DYNAMIC_ARRAY:
+			result = zend_opcache_static_cache_shared_graph_rebase_graph_value(
+				buffer,
+				&root_value,
+				old_base,
+				new_base,
+				graph_len,
+				delta,
+				&seen_arrays
+			);
+			break;
+		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT:
+			result = header->root_offset != 0 &&
+				zend_opcache_static_cache_shared_graph_rebase_graph_value(
+					buffer,
+					&root_value,
+					old_base,
+					new_base,
+					graph_len,
+					delta,
+					&seen_arrays
+				);
+			break;
+		default:
+			result = false;
+			break;
+	}
+	zend_hash_destroy(&seen_arrays);
+
+	return result;
 }
 
 bool zend_opcache_static_cache_shared_graph_acquire_locked(uint32_t payload_offset)
@@ -1540,16 +1863,15 @@ void zend_opcache_static_cache_defer_retired_shared_graph_free(uint32_t payload_
 	ref->payload_offset = payload_offset;
 }
 
-void zend_opcache_static_cache_release_request_shared_graph_refs(void)
+bool zend_opcache_static_cache_release_request_shared_graph_refs(void)
 {
 	zend_opcache_static_cache_shared_graph_ref *ref;
 	zend_opcache_static_cache_context *previous_context;
 	uint32_t index;
+	bool released = false;
 
 	if (zend_opcache_static_cache_shared_graph_ref_count == 0) {
-		zend_opcache_static_cache_free_retired_shared_graphs();
-
-		return;
+		return zend_opcache_static_cache_free_retired_shared_graphs();
 	}
 
 	for (index = 0; index < zend_opcache_static_cache_shared_graph_ref_count; index++) {
@@ -1562,9 +1884,12 @@ void zend_opcache_static_cache_release_request_shared_graph_refs(void)
 		previous_context = zend_opcache_static_cache_activate_context(ref->context);
 		if (zend_opcache_static_cache_wlock()) {
 			if (zend_opcache_static_cache_header_is_initialized_locked() &&
-				zend_opcache_static_cache_shared_graph_release_ref_locked(ref->payload_offset)
+				ref->payload_offset != 0
 			) {
-				zend_opcache_static_cache_free_locked(ref->payload_offset);
+				released = true;
+				if (zend_opcache_static_cache_shared_graph_release_ref_locked(ref->payload_offset)) {
+					zend_opcache_static_cache_free_locked(ref->payload_offset);
+				}
 			}
 
 			zend_opcache_static_cache_unlock();
@@ -1579,5 +1904,5 @@ void zend_opcache_static_cache_release_request_shared_graph_refs(void)
 	zend_opcache_static_cache_shared_graph_ref_count = 0;
 	zend_opcache_static_cache_shared_graph_ref_capacity = 0;
 
-	zend_opcache_static_cache_free_retired_shared_graphs();
+	return zend_opcache_static_cache_free_retired_shared_graphs() || released;
 }
