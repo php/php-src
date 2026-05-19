@@ -277,8 +277,6 @@ static zend_always_inline bool zend_opcache_static_cache_validate_api_value(zval
 	return true;
 }
 
-static void zend_opcache_static_cache_register_accelerator_handlers(void);
-
 static void zend_opcache_static_cache_safe_direct_handlers_dtor(zval *zv)
 {
 	pefree(Z_PTR_P(zv), true);
@@ -1121,29 +1119,6 @@ zend_result zend_opcache_register_functions(int module_type)
 	return zend_register_functions(NULL, ext_functions, NULL, module_type);
 }
 
-zend_result zend_opcache_static_cache_minit(void)
-{
-	zend_opcache_static_cache_context *previous_context;
-
-	zend_opcache_static_cache_subsystem_disabled = false;
-	zend_opcache_static_cache_subsystem_failure_reason = NULL;
-	zend_opcache_static_cache_safe_direct_classes_marked = false;
-
-	zend_opcache_static_cache_register_classes();
-	zend_opcache_static_cache_safe_direct_handlers_init();
-	zend_opcache_static_cache_register_accelerator_handlers();
-
-	previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_volatile_context_state);
-	zend_opcache_static_cache_reset_storage();
-
-	zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_pinned_context_state);
-	zend_opcache_static_cache_reset_storage();
-
-	zend_opcache_static_cache_restore_context(previous_context);
-
-	return SUCCESS;
-}
-
 static void zend_opcache_static_cache_startup(void)
 {
 	const char *failure_reason;
@@ -1290,17 +1265,11 @@ static zend_result zend_opcache_static_cache_rinit(void)
 
 zend_result zend_opcache_static_cache_rshutdown(void)
 {
-	bool shared_graph_refs_released;
-
 	zend_opcache_static_cache_clear_lookup_caches();
 	zend_opcache_static_cache_request_shutdown();
 	zend_opcache_static_cache_release_request_entry_locks();
 	zend_opcache_static_cache_release_request_local_slots();
-
-	shared_graph_refs_released = zend_opcache_static_cache_release_request_shared_graph_refs();
-	if (shared_graph_refs_released) {
-		zend_opcache_static_cache_compact_after_request_shutdown();
-	}
+	zend_opcache_static_cache_release_request_shared_graph_refs();
 
 	EG(static_cache_class_access_active) = false;
 	EG(tracked_mutation_hooks_active) = false;
@@ -1324,6 +1293,29 @@ static void zend_opcache_static_cache_register_accelerator_handlers(void)
 	};
 
 	zend_accel_register_static_cache_handlers(&handlers);
+}
+
+zend_result zend_opcache_static_cache_minit(void)
+{
+	zend_opcache_static_cache_context *previous_context;
+
+	zend_opcache_static_cache_subsystem_disabled = false;
+	zend_opcache_static_cache_subsystem_failure_reason = NULL;
+	zend_opcache_static_cache_safe_direct_classes_marked = false;
+
+	zend_opcache_static_cache_register_classes();
+	zend_opcache_static_cache_safe_direct_handlers_init();
+	zend_opcache_static_cache_register_accelerator_handlers();
+
+	previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_volatile_context_state);
+	zend_opcache_static_cache_reset_storage();
+
+	zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_pinned_context_state);
+	zend_opcache_static_cache_reset_storage();
+
+	zend_opcache_static_cache_restore_context(previous_context);
+
+	return SUCCESS;
 }
 
 void zend_opcache_static_cache_invalidate_all(void)

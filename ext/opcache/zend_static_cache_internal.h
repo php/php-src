@@ -86,6 +86,7 @@
 #define ZEND_OPCACHE_STATIC_CACHE_LOOKUP_INVALID_SLOT UINT32_MAX
 
 #define ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_STRIPES 256U
+#define ZEND_OPCACHE_STATIC_CACHE_LOW_MEMORY_COMPACT_THRESHOLD (3U * 1024U * 1024U)
 
 #define ZEND_OPCACHE_STATIC_CACHE_LOOKUP_EMPTY 0
 #define ZEND_OPCACHE_STATIC_CACHE_LOOKUP_HIT 1
@@ -421,8 +422,6 @@ bool zend_opcache_static_cache_header_init_locked(void);
 void zend_opcache_static_cache_free_locked(uint32_t payload_offset);
 uint32_t zend_opcache_static_cache_alloc_locked(size_t size, const void *source);
 bool zend_opcache_static_cache_compact_to_fit_locked(size_t size);
-bool zend_opcache_static_cache_compact_available_locked(void);
-void zend_opcache_static_cache_compact_after_request_shutdown(void);
 bool zend_opcache_static_cache_startup_storage_before_request(void);
 void zend_opcache_static_cache_shutdown_storage(void);
 void zend_opcache_static_cache_ensure_ready(void);
