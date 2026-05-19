@@ -101,6 +101,7 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Added AES-SIV support. (jordikroon)
+  . Added AES-GCM-SIV support. (Rakdos8)
   . Implemented GH-20310 (No critical extension indication in
     openssl_x509_parse() output). (StephenWall)
   . Added TLS session resumption support for streams with new context options
