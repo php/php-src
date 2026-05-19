@@ -16,6 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
+#include <limits.h>
 #include <time.h>
 
 #include "php_soap.h"
@@ -2050,6 +2051,15 @@ static int calc_dimension_12(const char* str)
 	return i;
 }
 
+static void soap_array_position_add_digit(int *position, int digit)
+{
+	if (*position > (INT_MAX - digit) / 10) {
+		soap_error0(E_ERROR, "Encoding: array index out of range");
+	}
+
+	*position = (*position * 10) + digit;
+}
+
 static int* get_position_12(int dimension, const char* str)
 {
 	int *pos;
@@ -2070,7 +2080,7 @@ static int* get_position_12(int dimension, const char* str)
 				i++;
 				flag = 1;
 			}
-			pos[i] = (pos[i]*10)+(*str-'0');
+			soap_array_position_add_digit(&pos[i], *str - '0');
 		} else if (*str == '*') {
 			soap_error0(E_ERROR, "Encoding: '*' may only be first arraySize value in list");
 		} else {
@@ -2100,7 +2110,7 @@ static void get_position_ex(int dimension, const char* str, int** pos)
 	memset(*pos,0,sizeof(int)*dimension);
 	while (*str != ']' && *str != '\0' && i < dimension) {
 		if (*str >= '0' && *str <= '9') {
-			(*pos)[i] = ((*pos)[i]*10)+(*str-'0');
+			soap_array_position_add_digit(&(*pos)[i], *str - '0');
 		} else if (*str == ',') {
 			i++;
 		}
@@ -2693,16 +2703,20 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			/* Increment position */
 			i = dimension;
 			while (i > 0) {
-			  i--;
-			  pos[i]++;
-				if (pos[i] >= dims[i]) {
-					if (i > 0) {
-						pos[i] = 0;
-					} else {
-						/* TODO: Array index overflow */
-					}
-				} else {
-				  break;
+				i--;
+				if (pos[i] == INT_MAX) {
+					efree(dims);
+					efree(pos);
+					zval_ptr_dtor(ret);
+					ZVAL_UNDEF(ret);
+					soap_error0(E_ERROR, "Encoding: array index out of range");
+				}
+				pos[i]++;
+				if (pos[i] < dims[i]) {
+					break;
+				}
+				if (i > 0) {
+					pos[i] = 0;
 				}
 			}
 		}
