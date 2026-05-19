@@ -35,10 +35,98 @@
 # ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 # endif
-# if defined(__linux__) && defined(HAVE_MEMFD_CREATE)
+# if defined(USE_MMAP) || (defined(__linux__) && defined(HAVE_MEMFD_CREATE))
 #  include <sys/mman.h>
 # endif
 #endif
+
+#if defined(USE_MMAP) && !defined(ZEND_WIN32)
+# if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
+#  define MAP_ANONYMOUS MAP_ANON
+# endif
+
+static zend_always_inline bool zend_opcache_static_cache_force_startup_failure(void)
+{
+	const char *value = getenv("OPCACHE_STATIC_CACHE_FORCE_STARTUP_FAILURE");
+
+	return value != NULL && value[0] != '\0' && value[0] != '0';
+}
+
+static zend_always_inline bool zend_opcache_static_cache_requires_pre_request_storage(void)
+{
+	return sapi_module.name != NULL && strcmp(sapi_module.name, "fpm-fcgi") == 0;
+}
+
+static zend_always_inline void zend_opcache_static_cache_set_unavailable(const char *failure_reason, bool startup_failed)
+{
+	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
+	zend_opcache_static_cache_runtime *runtime = zend_opcache_static_cache_context_runtime(context);
+
+	runtime->available = false;
+	runtime->startup_failed = startup_failed;
+	runtime->backend_initialized = context->storage.initialized;
+	runtime->failure_reason = failure_reason;
+}
+
+static zend_always_inline void zend_opcache_static_cache_set_available(void)
+{
+	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
+	zend_opcache_static_cache_runtime *runtime = zend_opcache_static_cache_context_runtime(context);
+
+	runtime->available = true;
+	runtime->startup_failed = false;
+	runtime->backend_initialized = context->storage.initialized;
+	runtime->failure_reason = NULL;
+}
+
+static zend_always_inline HashTable **zend_opcache_static_cache_entry_locks_ptr_for_context(zend_opcache_static_cache_context *context)
+{
+	return context == &zend_opcache_static_cache_pinned_context_state
+		? &zend_opcache_static_cache_pinned_entry_locks
+		: &zend_opcache_static_cache_volatile_entry_locks
+	;
+}
+
+static zend_always_inline uint32_t *zend_opcache_static_cache_entry_lock_counts_for_context(zend_opcache_static_cache_context *context)
+{
+	return context == &zend_opcache_static_cache_pinned_context_state
+		? zend_opcache_static_cache_pinned_entry_lock_counts
+		: zend_opcache_static_cache_volatile_entry_lock_counts
+	;
+}
+
+static zend_always_inline uint32_t zend_opcache_static_cache_entry_lock_stripe(zend_string *key)
+{
+	return (uint32_t) (zend_string_hash_val(key) % ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_STRIPES);
+}
+
+static zend_always_inline uint32_t zend_opcache_static_cache_used_end_offset_locked(const zend_opcache_static_cache_header *header)
+{
+	return header->data_offset + header->next_free;
+}
+
+static zend_always_inline bool zend_opcache_static_cache_payload_size_to_block_size(size_t size, uint32_t *block_size)
+{
+	size_t aligned_size;
+
+	if (size == 0 || size > UINT32_MAX - sizeof(zend_opcache_static_cache_block)) {
+		return false;
+	}
+
+	aligned_size = ZEND_ALIGNED_SIZE(sizeof(zend_opcache_static_cache_block) + size);
+	if (aligned_size > UINT32_MAX) {
+		return false;
+	}
+
+	*block_size = (uint32_t) aligned_size;
+
+	return true;
+}
+
+static zend_always_inline bool zend_opcache_static_cache_offset_in_block(uint32_t offset, uint32_t block_offset, uint32_t block_size)
+{
+	return offset >= block_offset + sizeof(zend_opcache_static_cache_block) && offset < block_offset + block_size;
+}
 
 #ifdef ZEND_WIN32
 # define ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_PREFIX_SIZE (2 * sizeof(void *))
@@ -53,6 +141,80 @@ typedef struct _zend_opcache_static_cache_win32_segment {
 	size_t mapping_size;
 } zend_opcache_static_cache_win32_segment;
 
+static inline bool zend_opcache_static_cache_win32_set_segment(
+	zend_opcache_static_cache_win32_segment *segment,
+	HANDLE memfile,
+	void *mapping_base,
+	size_t mapping_size,
+	size_t requested_size
+)
+{
+	segment->memfile = memfile;
+	segment->mapping_base = mapping_base;
+	segment->mapping_size = mapping_size;
+	segment->segment.p = (char *) mapping_base + ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_PREFIX_SIZE;
+	segment->segment.pos = 0;
+	segment->segment.size = requested_size;
+
+	return true;
+}
+#endif
+
+static int zend_opcache_static_cache_mmap_create_segments(
+	size_t requested_size,
+	zend_shared_segment ***shared_segments_p,
+	int *shared_segments_count,
+	const char **error_in
+)
+{
+	zend_shared_segment *segment;
+	void *mapping;
+
+	mapping = mmap(NULL, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+	if (mapping == MAP_FAILED) {
+		*error_in = "mmap";
+		return ALLOC_FAILURE;
+	}
+
+	*shared_segments_count = 1;
+	*shared_segments_p = (zend_shared_segment **) calloc(1, sizeof(zend_shared_segment *) + sizeof(zend_shared_segment));
+	if (*shared_segments_p == NULL) {
+		munmap(mapping, requested_size);
+		*error_in = "calloc";
+		return ALLOC_FAILURE;
+	}
+
+	segment = (zend_shared_segment *) ((char *) *shared_segments_p + sizeof(zend_shared_segment *));
+	(*shared_segments_p)[0] = segment;
+
+	segment->p = mapping;
+	segment->pos = 0;
+	segment->size = requested_size;
+	segment->end = requested_size;
+
+	return ALLOC_SUCCESS;
+}
+
+static int zend_opcache_static_cache_mmap_detach_segment(zend_shared_segment *shared_segment)
+{
+	munmap(shared_segment->p, shared_segment->size);
+
+	return 0;
+}
+
+static size_t zend_opcache_static_cache_mmap_segment_type_size(void)
+{
+	return sizeof(zend_shared_segment);
+}
+
+static const zend_shared_memory_handlers zend_opcache_static_cache_mmap_handlers = {
+	zend_opcache_static_cache_mmap_create_segments,
+	zend_opcache_static_cache_mmap_detach_segment,
+	zend_opcache_static_cache_mmap_segment_type_size
+};
+#endif
+
+#ifdef ZEND_WIN32
 static void zend_opcache_static_cache_win32_create_name(char *buffer, size_t buffer_size, const char *name, size_t unique_id)
 {
 	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
@@ -69,24 +231,6 @@ static void zend_opcache_static_cache_win32_create_name(char *buffer, size_t buf
 		context->lock_name,
 		unique_id
 	);
-}
-
-static bool zend_opcache_static_cache_win32_set_segment(
-	zend_opcache_static_cache_win32_segment *segment,
-	HANDLE memfile,
-	void *mapping_base,
-	size_t mapping_size,
-	size_t requested_size
-)
-{
-	segment->memfile = memfile;
-	segment->mapping_base = mapping_base;
-	segment->mapping_size = mapping_size;
-	segment->segment.p = (char *) mapping_base + ZEND_OPCACHE_STATIC_CACHE_WIN32_MAPPING_PREFIX_SIZE;
-	segment->segment.pos = 0;
-	segment->segment.size = requested_size;
-
-	return true;
 }
 
 static int zend_opcache_static_cache_win32_reattach_segment(
@@ -357,8 +501,8 @@ static const zend_shared_memory_handlers zend_opcache_static_cache_win32_handler
 #endif
 
 static const zend_shared_memory_handler_entry zend_opcache_static_cache_handler_table[] = {
-#ifdef USE_MMAP
-	{ "mmap", &zend_alloc_mmap_handlers },
+#if defined(USE_MMAP) && !defined(ZEND_WIN32)
+	{ "mmap", &zend_opcache_static_cache_mmap_handlers },
 #endif
 #ifdef USE_SHM
 	{ "shm", &zend_alloc_shm_handlers },
@@ -379,41 +523,7 @@ static ZEND_EXT_TLS bool zend_opcache_static_cache_entry_locks_process_is_fork_c
 #endif
 #endif
 
-static zend_always_inline bool zend_opcache_static_cache_force_startup_failure(void)
-{
-	const char *value = getenv("OPCACHE_STATIC_CACHE_FORCE_STARTUP_FAILURE");
-
-	return value != NULL && value[0] != '\0' && value[0] != '0';
-}
-
-static zend_always_inline bool zend_opcache_static_cache_requires_pre_request_storage(void)
-{
-	return sapi_module.name != NULL && strcmp(sapi_module.name, "fpm-fcgi") == 0;
-}
-
-static zend_always_inline void zend_opcache_static_cache_set_unavailable(const char *failure_reason, bool startup_failed)
-{
-	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
-	zend_opcache_static_cache_runtime *runtime = zend_opcache_static_cache_context_runtime(context);
-
-	runtime->available = false;
-	runtime->startup_failed = startup_failed;
-	runtime->backend_initialized = context->storage.initialized;
-	runtime->failure_reason = failure_reason;
-}
-
-static zend_always_inline void zend_opcache_static_cache_set_available(void)
-{
-	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
-	zend_opcache_static_cache_runtime *runtime = zend_opcache_static_cache_context_runtime(context);
-
-	runtime->available = true;
-	runtime->startup_failed = false;
-	runtime->backend_initialized = context->storage.initialized;
-	runtime->failure_reason = NULL;
-}
-
-static zend_always_inline void zend_opcache_static_cache_cleanup_segments(const zend_shared_memory_handlers *handler, zend_shared_segment **segments, int segment_count)
+static void zend_opcache_static_cache_cleanup_segments(const zend_shared_memory_handlers *handler, zend_shared_segment **segments, int segment_count)
 {
 	int index;
 
@@ -868,27 +978,6 @@ static void zend_opcache_static_cache_unlock_impl(void)
 #endif
 }
 #endif
-
-static HashTable **zend_opcache_static_cache_entry_locks_ptr_for_context(zend_opcache_static_cache_context *context)
-{
-	return context == &zend_opcache_static_cache_pinned_context_state
-		? &zend_opcache_static_cache_pinned_entry_locks
-		: &zend_opcache_static_cache_volatile_entry_locks
-	;
-}
-
-static uint32_t *zend_opcache_static_cache_entry_lock_counts_for_context(zend_opcache_static_cache_context *context)
-{
-	return context == &zend_opcache_static_cache_pinned_context_state
-		? zend_opcache_static_cache_pinned_entry_lock_counts
-		: zend_opcache_static_cache_volatile_entry_lock_counts
-	;
-}
-
-static uint32_t zend_opcache_static_cache_entry_lock_stripe(zend_string *key)
-{
-	return (uint32_t) (zend_string_hash_val(key) % ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_STRIPES);
-}
 
 #if defined(ZTS) && !defined(ZEND_WIN32)
 static void zend_opcache_static_cache_entry_locks_reinit_after_fork(zend_opcache_static_cache_storage *storage)
@@ -1395,11 +1484,6 @@ static uint32_t zend_opcache_static_cache_calculate_capacity(size_t size)
 	return (uint32_t) capacity;
 }
 
-static zend_always_inline uint32_t zend_opcache_static_cache_used_end_offset_locked(const zend_opcache_static_cache_header *header)
-{
-	return header->data_offset + header->next_free;
-}
-
 static void zend_opcache_static_cache_free_list_remove_locked(zend_opcache_static_cache_header *header, uint32_t block_offset)
 {
 	zend_opcache_static_cache_block *block = zend_opcache_static_cache_block_ptr(block_offset);
@@ -1592,29 +1676,6 @@ storage_ready:
 	zend_opcache_static_cache_unlock();
 
 	return true;
-}
-
-static zend_always_inline bool zend_opcache_static_cache_payload_size_to_block_size(size_t size, uint32_t *block_size)
-{
-	size_t aligned_size;
-
-	if (size == 0 || size > UINT32_MAX - sizeof(zend_opcache_static_cache_block)) {
-		return false;
-	}
-
-	aligned_size = ZEND_ALIGNED_SIZE(sizeof(zend_opcache_static_cache_block) + size);
-	if (aligned_size > UINT32_MAX) {
-		return false;
-	}
-
-	*block_size = (uint32_t) aligned_size;
-
-	return true;
-}
-
-static zend_always_inline bool zend_opcache_static_cache_offset_in_block(uint32_t offset, uint32_t block_offset, uint32_t block_size)
-{
-	return offset >= block_offset + sizeof(zend_opcache_static_cache_block) && offset < block_offset + block_size;
 }
 
 static bool zend_opcache_static_cache_block_is_movable_locked(
