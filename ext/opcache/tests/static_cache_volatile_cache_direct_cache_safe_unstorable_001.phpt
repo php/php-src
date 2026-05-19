@@ -40,8 +40,8 @@ var_dump(OPcache\volatile_fetch('fixed-resource', 'missing'));
 var_dump(OPcache\volatile_store('array-object-closure', $array_object));
 var_dump(OPcache\volatile_fetch('array-object-closure', 'missing'));
 
-dump_pinned_exception(static fn () => OPcache\pinned_store('fixed-resource', $fixed_array));
-dump_pinned_exception(static fn () => OPcache\pinned_store('array-object-closure', $array_object));
+dump_pinned_exception(static fn () => OPcache\pinned_store('fixed-resource', $fixed_array, true));
+dump_pinned_exception(static fn () => OPcache\pinned_store('array-object-closure', $array_object, true));
 
 fclose($resource);
 

@@ -2298,7 +2298,7 @@ void zend_opcache_static_cache_unlock(void)
 	zend_opcache_static_cache_unlock_impl();
 }
 
-bool zend_opcache_static_cache_acquire_entry_lock(zend_string *key)
+bool zend_opcache_static_cache_acquire_entry_lock(zend_string *key, bool throw_on_error)
 {
 	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
 	zend_opcache_static_cache_entry_lock *lock;
@@ -2312,13 +2312,17 @@ bool zend_opcache_static_cache_acquire_entry_lock(zend_string *key)
 	}
 
 	if (!zend_opcache_static_cache_entry_lock_lease_allows_acquire(context, stripe, true)) {
-		zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Unable to acquire the %s entry lock", context->name);
+		if (throw_on_error) {
+			zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Unable to acquire the %s entry lock", context->name);
+		}
 
 		return false;
 	}
 
 	if (!zend_opcache_static_cache_lock_entry_stripe(context, stripe)) {
-		zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Unable to acquire the %s entry lock", context->name);
+		if (throw_on_error) {
+			zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Unable to acquire the %s entry lock", context->name);
+		}
 
 		return false;
 	}

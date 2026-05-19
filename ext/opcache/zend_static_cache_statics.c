@@ -1303,7 +1303,7 @@ static bool zend_opcache_static_cache_publish_class_blob_handle_locked(
 	}
 
 	result = zend_opcache_static_cache_class_blob_build_snapshot(handle, &snapshot) &&
-		zend_opcache_static_cache_store_locked(handle->cache_key, &snapshot, handle->ttl, false)
+		zend_opcache_static_cache_store_locked(handle->cache_key, &snapshot, handle->ttl, false, true)
 	;
 
 	zval_ptr_dtor(&snapshot);
@@ -2091,7 +2091,7 @@ static void zend_opcache_static_cache_publish_immediate_root(zend_opcache_static
 					published = zend_opcache_static_cache_delete_locked(handle->cache_key);
 				} else {
 					ZVAL_COPY_DEREF(&value_snapshot, slot);
-					published = zend_opcache_static_cache_store_locked(handle->cache_key, &value_snapshot, handle->ttl, false);
+					published = zend_opcache_static_cache_store_locked(handle->cache_key, &value_snapshot, handle->ttl, false, true);
 					zval_ptr_dtor(&value_snapshot);
 				}
 			}
@@ -2413,7 +2413,7 @@ static void zend_opcache_static_cache_flush_pending(void)
 				ZVAL_COPY_DEREF(&value_snapshot, handle->slot);
 				should_store = Z_TYPE(value_snapshot) != IS_UNDEF;
 				if (should_store) {
-					published = zend_opcache_static_cache_store_locked(handle->cache_key, &value_snapshot, handle->ttl, false);
+					published = zend_opcache_static_cache_store_locked(handle->cache_key, &value_snapshot, handle->ttl, false, true);
 				} else {
 					published = zend_opcache_static_cache_delete_locked(handle->cache_key);
 				}
@@ -2795,7 +2795,7 @@ static void zend_opcache_static_cache_publish_pinned_static_properties_fast(zend
 				if (Z_TYPE_P(slot) == IS_UNDEF) {
 					published = zend_opcache_static_cache_delete_locked(cache_key);
 				} else {
-					published = zend_opcache_static_cache_store_locked(cache_key, slot, ttl, false);
+					published = zend_opcache_static_cache_store_locked(cache_key, slot, ttl, false, true);
 				}
 			}
 
@@ -2935,7 +2935,7 @@ static void zend_opcache_static_cache_publish_context(zend_opcache_static_cache_
 				if (Z_TYPE_P(slot) == IS_UNDEF) {
 					zend_opcache_static_cache_delete_locked(cache_key);
 				} else {
-					zend_opcache_static_cache_store_locked(cache_key, slot, ttl, false);
+					zend_opcache_static_cache_store_locked(cache_key, slot, ttl, false, true);
 				}
 
 				zend_string_release(cache_key);
@@ -2959,7 +2959,7 @@ static void zend_opcache_static_cache_publish_context(zend_opcache_static_cache_
 			if (Z_TYPE(value_snapshot) == IS_UNDEF) {
 				zend_opcache_static_cache_delete_locked(entry->cache_key);
 			} else {
-				zend_opcache_static_cache_store_locked(entry->cache_key, &value_snapshot, entry->ttl, false);
+				zend_opcache_static_cache_store_locked(entry->cache_key, &value_snapshot, entry->ttl, false, true);
 			}
 
 			zval_ptr_dtor(&value_snapshot);

@@ -25,6 +25,7 @@ function describe_type(?ReflectionType $type): string
 		'string' => 4,
 		'array' => 5,
 		'object' => 6,
+		'false' => 7,
 	];
 	$names = array_map(
 		static fn (ReflectionNamedType $named): string => $named->getName(),
@@ -36,21 +37,29 @@ function describe_type(?ReflectionType $type): string
 }
 
 foreach ([
-	'OPcache\\volatile_store' => ['value'],
-	'OPcache\\volatile_store_array' => [],
-	'OPcache\\volatile_fetch' => ['default'],
-	'OPcache\\volatile_fetch_array' => ['default'],
-	'OPcache\\volatile_lock' => ['lease'],
-	'OPcache\\volatile_unlock' => [],
+	'OPcache\\volatile_store' => ['value', 'ttl', 'throw_on_error'],
+	'OPcache\\volatile_store_array' => ['ttl', 'throw_on_error'],
+	'OPcache\\volatile_fetch' => ['default', 'throw_on_error'],
+	'OPcache\\volatile_fetch_array' => ['default', 'throw_on_error'],
+	'OPcache\\volatile_exists' => ['throw_on_error'],
+	'OPcache\\volatile_lock' => ['lease', 'throw_on_error'],
+	'OPcache\\volatile_unlock' => ['throw_on_error'],
+	'OPcache\\volatile_delete' => ['throw_on_error'],
+	'OPcache\\volatile_delete_array' => ['throw_on_error'],
+	'OPcache\\volatile_clear' => ['throw_on_error'],
 	'OPcache\\volatile_cache_info' => [],
-	'OPcache\\pinned_store' => ['value'],
-	'OPcache\\pinned_store_array' => [],
-	'OPcache\\pinned_fetch' => ['default'],
-	'OPcache\\pinned_fetch_array' => ['default'],
-	'OPcache\\pinned_lock' => ['lease'],
-	'OPcache\\pinned_unlock' => [],
-	'OPcache\\pinned_atomic_increment' => ['step'],
-	'OPcache\\pinned_atomic_decrement' => ['step'],
+	'OPcache\\pinned_store' => ['value', 'throw_on_error'],
+	'OPcache\\pinned_store_array' => ['throw_on_error'],
+	'OPcache\\pinned_fetch' => ['default', 'throw_on_error'],
+	'OPcache\\pinned_fetch_array' => ['default', 'throw_on_error'],
+	'OPcache\\pinned_exists' => ['throw_on_error'],
+	'OPcache\\pinned_lock' => ['lease', 'throw_on_error'],
+	'OPcache\\pinned_unlock' => ['throw_on_error'],
+	'OPcache\\pinned_delete' => ['throw_on_error'],
+	'OPcache\\pinned_delete_array' => ['throw_on_error'],
+	'OPcache\\pinned_clear' => ['throw_on_error'],
+	'OPcache\\pinned_atomic_increment' => ['step', 'throw_on_error'],
+	'OPcache\\pinned_atomic_decrement' => ['step', 'throw_on_error'],
 	'OPcache\\pinned_cache_info' => [],
 ] as $function => $parameters) {
 	$reflection = new ReflectionFunction($function);
@@ -70,19 +79,27 @@ foreach ([
 
 ?>
 --EXPECT--
-OPcache\volatile_store $value=null|bool|int|float|string|array|object params=2/3 return=bool
-OPcache\volatile_store_array params=1/2 return=bool
-OPcache\volatile_fetch $default=null|bool|int|float|string|array|object params=1/2 return=null|bool|int|float|string|array|object
-OPcache\volatile_fetch_array $default=?array params=1/2 return=?array
-OPcache\volatile_lock $lease=int params=1/2 return=bool
-OPcache\volatile_unlock params=1/1 return=bool
+OPcache\volatile_store $value=null|bool|int|float|string|array|object $ttl=int $throw_on_error=bool params=2/4 return=bool
+OPcache\volatile_store_array $ttl=int $throw_on_error=bool params=1/3 return=bool
+OPcache\volatile_fetch $default=null|bool|int|float|string|array|object $throw_on_error=bool params=1/3 return=null|bool|int|float|string|array|object
+OPcache\volatile_fetch_array $default=?array $throw_on_error=bool params=1/3 return=array|false
+OPcache\volatile_exists $throw_on_error=bool params=1/2 return=bool
+OPcache\volatile_lock $lease=int $throw_on_error=bool params=1/3 return=bool
+OPcache\volatile_unlock $throw_on_error=bool params=1/2 return=bool
+OPcache\volatile_delete $throw_on_error=bool params=1/2 return=bool
+OPcache\volatile_delete_array $throw_on_error=bool params=1/2 return=bool
+OPcache\volatile_clear $throw_on_error=bool params=0/1 return=bool
 OPcache\volatile_cache_info params=0/0 return=OPcache\StaticCacheInfo
-OPcache\pinned_store $value=null|bool|int|float|string|array|object params=2/2 return=bool
-OPcache\pinned_store_array params=1/1 return=bool
-OPcache\pinned_fetch $default=null|bool|int|float|string|array|object params=1/2 return=null|bool|int|float|string|array|object
-OPcache\pinned_fetch_array $default=?array params=1/2 return=?array
-OPcache\pinned_lock $lease=int params=1/2 return=bool
-OPcache\pinned_unlock params=1/1 return=bool
-OPcache\pinned_atomic_increment $step=int params=1/2 return=int
-OPcache\pinned_atomic_decrement $step=int params=1/2 return=int
+OPcache\pinned_store $value=null|bool|int|float|string|array|object $throw_on_error=bool params=2/3 return=bool
+OPcache\pinned_store_array $throw_on_error=bool params=1/2 return=bool
+OPcache\pinned_fetch $default=null|bool|int|float|string|array|object $throw_on_error=bool params=1/3 return=null|bool|int|float|string|array|object
+OPcache\pinned_fetch_array $default=?array $throw_on_error=bool params=1/3 return=array|false
+OPcache\pinned_exists $throw_on_error=bool params=1/2 return=bool
+OPcache\pinned_lock $lease=int $throw_on_error=bool params=1/3 return=bool
+OPcache\pinned_unlock $throw_on_error=bool params=1/2 return=bool
+OPcache\pinned_delete $throw_on_error=bool params=1/2 return=bool
+OPcache\pinned_delete_array $throw_on_error=bool params=1/2 return=bool
+OPcache\pinned_clear $throw_on_error=bool params=0/1 return=bool
+OPcache\pinned_atomic_increment $step=int $throw_on_error=bool params=1/3 return=int|false
+OPcache\pinned_atomic_decrement $step=int $throw_on_error=bool params=1/3 return=int|false
 OPcache\pinned_cache_info params=0/0 return=OPcache\StaticCacheInfo

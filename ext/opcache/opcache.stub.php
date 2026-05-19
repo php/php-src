@@ -83,57 +83,57 @@ final class VolatileStatic
 	public function __construct(int $ttl = 0, CacheStrategy $strategy = CacheStrategy::Immediate) {}
 }
 
-function volatile_store(string $key, null|bool|int|float|string|array|object $value, int $ttl = 0): bool {}
+function volatile_store(string $key, null|bool|int|float|string|array|object $value, int $ttl = 0, bool $throw_on_error = false): bool {}
 
-function volatile_store_array(array $values, int $ttl = 0): bool {}
+function volatile_store_array(array $values, int $ttl = 0, bool $throw_on_error = false): bool {}
 
-function volatile_fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
+function volatile_fetch(string $key, null|bool|int|float|string|array|object $default = null, bool $throw_on_error = false): null|bool|int|float|string|array|object {}
 
 /**
- * @return array<string, null|bool|int|float|string|array|object>|null
+ * @return array<string, null|bool|int|float|string|array|object>|false
  */
-function volatile_fetch_array(array $keys, ?array $default = null): ?array {}
+function volatile_fetch_array(array $keys, ?array $default = null, bool $throw_on_error = false): array|false {}
 
-function volatile_exists(string $key): bool {}
+function volatile_exists(string $key, bool $throw_on_error = false): bool {}
 
-function volatile_lock(string $key, int $lease = 0): bool {}
+function volatile_lock(string $key, int $lease = 0, bool $throw_on_error = false): bool {}
 
-function volatile_unlock(string $key): bool {}
+function volatile_unlock(string $key, bool $throw_on_error = false): bool {}
 
-function volatile_delete(string $key_or_class): void {}
+function volatile_delete(string $key_or_class, bool $throw_on_error = false): bool {}
 
-function volatile_delete_array(array $keys): void {}
+function volatile_delete_array(array $keys, bool $throw_on_error = false): bool {}
 
-function volatile_clear(): void {}
+function volatile_clear(bool $throw_on_error = false): bool {}
 
 function volatile_cache_info(): StaticCacheInfo {}
 
-function pinned_store(string $key, null|bool|int|float|string|array|object $value): bool {}
+function pinned_store(string $key, null|bool|int|float|string|array|object $value, bool $throw_on_error = false): bool {}
 
-function pinned_store_array(array $values): bool {}
+function pinned_store_array(array $values, bool $throw_on_error = false): bool {}
 
-function pinned_fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
+function pinned_fetch(string $key, null|bool|int|float|string|array|object $default = null, bool $throw_on_error = false): null|bool|int|float|string|array|object {}
 
 /**
- * @return array<string, null|bool|int|float|string|array|object>|null
+ * @return array<string, null|bool|int|float|string|array|object>|false
  */
-function pinned_fetch_array(array $keys, ?array $default = null): ?array {}
+function pinned_fetch_array(array $keys, ?array $default = null, bool $throw_on_error = false): array|false {}
 
-function pinned_exists(string $key): bool {}
+function pinned_exists(string $key, bool $throw_on_error = false): bool {}
 
-function pinned_lock(string $key, int $lease = 0): bool {}
+function pinned_lock(string $key, int $lease = 0, bool $throw_on_error = false): bool {}
 
-function pinned_unlock(string $key): bool {}
+function pinned_unlock(string $key, bool $throw_on_error = false): bool {}
 
-function pinned_delete(string $key_or_class): void {}
+function pinned_delete(string $key_or_class, bool $throw_on_error = false): bool {}
 
-function pinned_delete_array(array $keys): void {}
+function pinned_delete_array(array $keys, bool $throw_on_error = false): bool {}
 
-function pinned_clear(): void {}
+function pinned_clear(bool $throw_on_error = false): bool {}
 
-function pinned_atomic_increment(string $key, int $step = 1): int {}
+function pinned_atomic_increment(string $key, int $step = 1, bool $throw_on_error = false): int|false {}
 
-function pinned_atomic_decrement(string $key, int $step = 1): int {}
+function pinned_atomic_decrement(string $key, int $step = 1, bool $throw_on_error = false): int|false {}
 
 function pinned_cache_info(): StaticCacheInfo {}
 
