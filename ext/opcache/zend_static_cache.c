@@ -1266,6 +1266,10 @@ static zend_result zend_opcache_static_cache_rinit(void)
 zend_result zend_opcache_static_cache_rshutdown(void)
 {
 	zend_opcache_static_cache_clear_lookup_caches();
+
+	EG(static_cache_class_access_active) = false;
+	EG(tracked_mutation_hooks_active) = false;
+
 	zend_opcache_static_cache_request_shutdown();
 	zend_opcache_static_cache_release_request_entry_locks();
 	zend_opcache_static_cache_release_request_local_slots();
