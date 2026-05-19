@@ -498,7 +498,24 @@ PHP_FUNCTION(spl_object_id)
 
 PHPAPI zend_string *php_spl_object_hash(zend_object *obj) /* {{{*/
 {
-	return strpprintf(32, "%016zx0000000000000000", (intptr_t)obj->handle);
+    static const char hex[] = "0123456789abcdef";
+
+    zend_string *str = zend_string_alloc(32, 0);
+
+    uintptr_t handle = (uintptr_t)obj->handle;
+
+    char *p = ZSTR_VAL(str);
+
+	for (int i = 15; i >= 0; --i) {
+        p[i] = hex[handle & 0xf];
+        handle >>= 4;
+    }
+
+    memcpy(p + 16, "000000000000000", 16);
+
+    p[32] = '\0';
+
+    return str;
 }
 /* }}} */
 
