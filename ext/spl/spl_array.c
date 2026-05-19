@@ -19,7 +19,6 @@
 #include "php.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
-#include "ext/opcache/zend_static_cache.h"
 #include "zend_execute.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
@@ -29,6 +28,7 @@
 #include "spl_array_arginfo.h"
 #include "spl_exceptions.h"
 #include "spl_functions.h" /* For spl_set_private_debug_info_property() */
+#include "ext/opcache/zend_static_cache.h" /* for opcache static cache */
 
 /* Defined later in the file */
 PHPAPI zend_class_entry  *spl_ce_ArrayIterator;
@@ -1619,7 +1619,7 @@ static bool spl_array_object_unserialize_direct_cache_state(zval *object, zval *
 	return !EG(exception);
 }
 
-const zend_opcache_static_cache_safe_direct_handlers *spl_array_object_get_direct_cache_handlers(void)
+static const zend_opcache_static_cache_safe_direct_handlers *spl_array_object_get_direct_cache_handlers(void)
 {
 	static const zend_opcache_static_cache_safe_direct_handlers handlers = {
 		false,
@@ -1983,6 +1983,8 @@ PHP_METHOD(RecursiveArrayIterator, getChildren)
 /* {{{ PHP_MINIT_FUNCTION(spl_array) */
 PHP_MINIT_FUNCTION(spl_array)
 {
+	const zend_opcache_static_cache_safe_direct_handlers *handlers;
+
 	spl_ce_ArrayObject = register_class_ArrayObject(zend_ce_aggregate, zend_ce_arrayaccess, zend_ce_serializable, zend_ce_countable);
 	spl_ce_ArrayObject->create_object = spl_array_object_new;
 	spl_ce_ArrayObject->default_object_handlers = &spl_handler_ArrayObject;
@@ -2017,6 +2019,11 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_ce_RecursiveArrayIterator = register_class_RecursiveArrayIterator(spl_ce_ArrayIterator, spl_ce_RecursiveIterator);
 	spl_ce_RecursiveArrayIterator->create_object = spl_array_object_new;
 	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
+
+	handlers = spl_array_object_get_direct_cache_handlers();
+	zend_opcache_static_cache_safe_direct_register_class(spl_ce_ArrayObject, handlers);
+	zend_opcache_static_cache_safe_direct_register_class(spl_ce_ArrayIterator, handlers);
+	zend_opcache_static_cache_safe_direct_register_class(spl_ce_RecursiveArrayIterator, handlers);
 
 	return SUCCESS;
 }

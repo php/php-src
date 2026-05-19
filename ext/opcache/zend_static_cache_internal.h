@@ -36,9 +36,6 @@
 #include "zend_smart_str.h"
 #include "zend_static_cache.h"
 
-#include "ext/date/php_date.h"
-#include "ext/spl/spl_array.h"
-#include "ext/spl/spl_fixedarray.h"
 #include "ext/standard/php_var.h"
 
 #include "SAPI.h"
@@ -378,7 +375,6 @@ extern ZEND_EXT_TLS HashTable zend_opcache_static_cache_function_statics;
 extern ZEND_EXT_TLS bool zend_opcache_static_cache_function_statics_initialized;
 extern ZEND_EXT_TLS HashTable zend_opcache_static_cache_class_blob_handles;
 extern ZEND_EXT_TLS bool zend_opcache_static_cache_class_blob_handles_initialized;
-extern bool zend_opcache_static_cache_safe_direct_classes_marked;
 extern ZEND_EXT_TLS zend_opcache_static_cache_context *zend_opcache_static_cache_active_context_ptr;
 #ifdef ZTS
 extern ZEND_EXT_TLS bool zend_opcache_static_cache_zts_lock_is_write;
@@ -438,9 +434,6 @@ void zend_opcache_static_cache_release_active_entry_locks(void);
 void zend_opcache_static_cache_release_request_entry_locks(void);
 void zend_opcache_static_cache_safe_direct_handlers_init(void);
 void zend_opcache_static_cache_safe_direct_handlers_destroy(void);
-void zend_opcache_static_cache_safe_direct_register_class(
-	zend_class_entry *ce,
-	const zend_opcache_static_cache_safe_direct_handlers *handlers);
 zend_opcache_static_cache_safe_direct_state_copy_func_t zend_opcache_static_cache_safe_direct_copy_func(
 	zend_class_entry *ce,
 	zend_class_entry **base_ce_ptr);

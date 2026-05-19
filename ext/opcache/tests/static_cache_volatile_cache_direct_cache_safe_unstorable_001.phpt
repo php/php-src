@@ -1,5 +1,5 @@
 --TEST--
-OPcache __DirectCacheSafe rejects unstorable values in SPL subclass state
+OPcache direct cache handlers reject unstorable values in SPL subclass state
 --EXTENSIONS--
 opcache
 spl

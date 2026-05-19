@@ -19,7 +19,6 @@
 
 #include <string.h>
 
-#include "Zend/zend_attributes.h"
 #include "Zend/zend_closures.h"
 
 #define ZEND_OPCACHE_SERIALIZER_ALIGN8(size) (((size) + 7UL) & ~7UL)
@@ -44,8 +43,6 @@
 
 #define ZEND_OPCACHE_SERIALIZER_ARRAY_MAP 0x00
 #define ZEND_OPCACHE_SERIALIZER_ARRAY_PACKED 0x01
-
-#define ZEND_OPCACHE_STATIC_CACHE_DIRECT_CACHE_SAFE_ATTRIBUTE "opcache\\__directcachesafe"
 
 #define ZEND_OPCACHE_SERIALIZER_OBJ_SERIALIZE 0x01
 #define ZEND_OPCACHE_SERIALIZER_OBJ_PROPS 0x02
@@ -402,13 +399,6 @@ static zend_always_inline zval *zend_opcache_serializer_find_sleep_property(Hash
 	*resolved_name_owned_out = false;
 
 	return NULL;
-}
-
-static zend_always_inline bool zend_opcache_serializer_safe_direct_cache_has_attribute(const HashTable *attributes)
-{
-	return attributes != NULL &&
-		zend_get_attribute_str(attributes, ZEND_STRL(ZEND_OPCACHE_STATIC_CACHE_DIRECT_CACHE_SAFE_ATTRIBUTE)) != NULL
-	;
 }
 
 static zend_always_inline zend_class_entry *zend_opcache_serializer_find_safe_direct_cache_base(zend_class_entry *ce)

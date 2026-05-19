@@ -1,5 +1,5 @@
 --TEST--
-OPcache __DirectCacheSafe subclasses survive forked fetch and safe serializer overrides stay direct
+OPcache direct cache subclasses survive forked fetch and safe serializer overrides stay direct
 --EXTENSIONS--
 opcache
 pcntl

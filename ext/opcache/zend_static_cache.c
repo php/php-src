@@ -27,9 +27,6 @@
 #include "zend_static_cache.h"
 #include "zend_smart_str.h"
 
-#include "ext/date/php_date.h"
-#include "ext/spl/spl_array.h"
-#include "ext/spl/spl_fixedarray.h"
 #include "ext/standard/php_var.h"
 
 #include "SAPI.h"
@@ -47,7 +44,6 @@ zend_class_entry *zend_opcache_static_cache_info_ce;
 
 static zend_class_entry *zend_opcache_static_cache_pinned_attribute_ce;
 static zend_class_entry *zend_opcache_static_cache_volatile_static_attribute_ce;
-static zend_class_entry *zend_opcache_static_cache_safe_direct_attribute_ce;
 
 ZEND_METHOD(OPcache_StaticCacheInfo, __construct)
 {
@@ -69,7 +65,6 @@ zend_opcache_static_cache_context zend_opcache_static_cache_pinned_context_state
 	false, true
 };
 
-bool zend_opcache_static_cache_safe_direct_classes_marked = false;
 bool zend_opcache_static_cache_subsystem_disabled = false;
 const char *zend_opcache_static_cache_subsystem_failure_reason = NULL;
 
@@ -315,17 +310,12 @@ void zend_opcache_static_cache_safe_direct_register_class(
 	zend_opcache_static_cache_safe_direct_handlers handlers_copy;
 
 	if (ce == NULL ||
-		zend_opcache_static_cache_safe_direct_attribute_ce == NULL ||
 		handlers == NULL ||
 		handlers->copy == NULL ||
 		handlers->state_serialize == NULL ||
 		handlers->state_unserialize == NULL
 	) {
 		return;
-	}
-
-	if (!zend_opcache_serializer_safe_direct_cache_has_attribute(ce->attributes)) {
-		zend_add_class_attribute(ce, zend_opcache_static_cache_safe_direct_attribute_ce->name, 0);
 	}
 
 	zend_opcache_static_cache_safe_direct_handlers_init();
@@ -365,115 +355,6 @@ static const zend_opcache_static_cache_safe_direct_handlers *zend_opcache_static
 	}
 
 	return NULL;
-}
-
-static bool zend_opcache_static_cache_safe_direct_serializer_path_serialize(
-		const zval *object,
-		zval *state)
-{
-	const zend_opcache_static_cache_safe_direct_handlers *handlers =
-		zend_opcache_static_cache_safe_direct_find_handlers(Z_OBJCE_P(object), NULL)
-	;
-
-	ZVAL_UNDEF(state);
-	if (handlers == NULL || handlers->serializer_path.serialize == NULL) {
-		return false;
-	}
-
-	zend_call_known_instance_method_with_0_params(handlers->serializer_path.serialize, Z_OBJ_P(object), state);
-	if (EG(exception) || Z_TYPE_P(state) != IS_ARRAY) {
-		if (Z_TYPE_P(state) != IS_UNDEF) {
-			zval_ptr_dtor(state);
-			ZVAL_UNDEF(state);
-		}
-
-		return false;
-	}
-
-	return true;
-}
-
-static bool zend_opcache_static_cache_safe_direct_serializer_path_unserialize(
-		zval *object,
-		zval *state)
-{
-	const zend_opcache_static_cache_safe_direct_handlers *handlers =
-		zend_opcache_static_cache_safe_direct_find_handlers(Z_OBJCE_P(object), NULL)
-	;
-
-	if (handlers == NULL || handlers->serializer_path.unserialize == NULL || Z_TYPE_P(state) != IS_ARRAY) {
-		return false;
-	}
-
-	zend_call_known_instance_method_with_1_params(handlers->serializer_path.unserialize, Z_OBJ_P(object), NULL, state);
-
-	return !EG(exception);
-}
-
-static bool zend_opcache_static_cache_safe_direct_serializer_path_copy(
-		void *context,
-		zend_object *old_object,
-		zend_object *new_object,
-		zend_opcache_static_cache_safe_direct_clone_value_func_t clone_value)
-{
-	zval old_zv, new_zv, state_zv, cloned_state_zv;
-	bool result = false;
-
-	if (clone_value == NULL) {
-		return false;
-	}
-
-	ZVAL_OBJ(&old_zv, old_object);
-	ZVAL_OBJ(&new_zv, new_object);
-	ZVAL_UNDEF(&state_zv);
-	ZVAL_UNDEF(&cloned_state_zv);
-
-	if (!zend_opcache_static_cache_safe_direct_serializer_path_serialize(&old_zv, &state_zv)) {
-		goto cleanup;
-	}
-
-	if (!clone_value(context, &cloned_state_zv, &state_zv) ||
-			Z_TYPE(cloned_state_zv) != IS_ARRAY) {
-		goto cleanup;
-	}
-
-	result = zend_opcache_static_cache_safe_direct_serializer_path_unserialize(
-		&new_zv,
-		&cloned_state_zv
-	);
-
-cleanup:
-	if (Z_TYPE(cloned_state_zv) != IS_UNDEF) {
-		zval_ptr_dtor(&cloned_state_zv);
-	}
-	if (Z_TYPE(state_zv) != IS_UNDEF) {
-		zval_ptr_dtor(&state_zv);
-	}
-
-	return result && !EG(exception);
-}
-
-static bool zend_opcache_static_cache_safe_direct_serializer_path_has_unstorable(
-		void *context,
-		const zval *value,
-		zend_opcache_static_cache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
-{
-	zval state_zv;
-	bool result;
-
-	if (value_has_unstorable == NULL) {
-		return false;
-	}
-
-	ZVAL_UNDEF(&state_zv);
-	if (!zend_opcache_static_cache_safe_direct_serializer_path_serialize(value, &state_zv)) {
-		return true;
-	}
-
-	result = value_has_unstorable(context, &state_zv);
-	zval_ptr_dtor(&state_zv);
-
-	return result;
 }
 
 zend_opcache_static_cache_safe_direct_state_copy_func_t zend_opcache_static_cache_safe_direct_copy_func(
@@ -544,22 +425,6 @@ static zend_always_inline zend_string *zend_opcache_static_cache_validate_volati
 	return NULL;
 }
 
-static zend_always_inline zend_string *zend_opcache_static_cache_validate_direct_cache_safe_attribute(
-		zend_attribute *attr ZEND_ATTRIBUTE_UNUSED,
-		uint32_t target,
-		zend_class_entry *scope)
-{
-	if (target != ZEND_ATTRIBUTE_TARGET_CLASS) {
-		return ZSTR_INIT_LITERAL("Only classes can be marked with #[OPcache\\__DirectCacheSafe]", 0);
-	}
-
-	if (scope == NULL || scope->type != ZEND_INTERNAL_CLASS) {
-		return ZSTR_INIT_LITERAL("Only internal classes can be marked with #[OPcache\\__DirectCacheSafe]", 0);
-	}
-
-	return NULL;
-}
-
 static zend_always_inline void zend_opcache_static_cache_register_classes(void)
 {
 	zend_internal_attribute *attribute;
@@ -575,90 +440,16 @@ static zend_always_inline void zend_opcache_static_cache_register_classes(void)
 	zend_opcache_static_cache_volatile_static_attribute_ce = register_class_OPcache_VolatileStatic();
 	attribute = zend_mark_internal_attribute(zend_opcache_static_cache_volatile_static_attribute_ce);
 	attribute->validator = zend_opcache_static_cache_validate_volatile_static_attribute;
-	zend_opcache_static_cache_safe_direct_attribute_ce = register_class_OPcache___DirectCacheSafe();
-	attribute = zend_mark_internal_attribute(zend_opcache_static_cache_safe_direct_attribute_ce);
-	attribute->validator = zend_opcache_static_cache_validate_direct_cache_safe_attribute;
 	zend_opcache_static_cache_exception_ce = register_class_OPcache_StaticCacheException(zend_ce_exception);
 }
 
-static zend_always_inline void zend_opcache_static_cache_safe_direct_register_serializer_class(
-		zend_class_entry *ce,
-		bool allows_custom_serializers)
+static zend_always_inline void zend_opcache_static_cache_reset_class_entries(void)
 {
-	zend_opcache_static_cache_safe_direct_handlers handlers;
-
-	if (ce == NULL || ce->__serialize == NULL || ce->__unserialize == NULL) {
-		return;
-	}
-
-	handlers.allows_custom_serializers = allows_custom_serializers;
-	handlers.serializer_path.state_includes_properties = true;
-	handlers.serializer_path.serialize = ce->__serialize;
-	handlers.serializer_path.unserialize = ce->__unserialize;
-	handlers.copy = zend_opcache_static_cache_safe_direct_serializer_path_copy;
-	handlers.state_has_unstorable = zend_opcache_static_cache_safe_direct_serializer_path_has_unstorable;
-	handlers.state_serialize = zend_opcache_static_cache_safe_direct_serializer_path_serialize;
-	handlers.state_unserialize = zend_opcache_static_cache_safe_direct_serializer_path_unserialize;
-
-	zend_opcache_static_cache_safe_direct_register_class(ce, &handlers);
-}
-
-static zend_always_inline void zend_opcache_static_cache_safe_direct_register_internal_classes(void)
-{
-	zend_class_entry *date_ce, *immutable_ce, *timezone_ce, *interval_ce, *fixedarray_ce, *arrayobject_ce, *arrayiterator_ce, *recursive_arrayiterator_ce;
-	const zend_opcache_static_cache_safe_direct_handlers *date_handlers, *spl_array_handlers, *spl_fixedarray_handlers;
-
-	if (zend_opcache_static_cache_safe_direct_classes_marked) {
-		return;
-	}
-
-	date_ce = php_date_get_date_ce();
-	immutable_ce = php_date_get_immutable_ce();
-	timezone_ce = php_date_get_timezone_ce();
-	interval_ce = php_date_get_interval_ce();
-	fixedarray_ce = spl_ce_SplFixedArray;
-	arrayobject_ce = spl_ce_ArrayObject;
-	arrayiterator_ce = spl_ce_ArrayIterator;
-	recursive_arrayiterator_ce = spl_ce_RecursiveArrayIterator;
-	if (date_ce == NULL || immutable_ce == NULL || timezone_ce == NULL || interval_ce == NULL ||
-		fixedarray_ce == NULL || arrayobject_ce == NULL || arrayiterator_ce == NULL ||
-		recursive_arrayiterator_ce == NULL
-	) {
-		return;
-	}
-
-	date_handlers = php_date_get_direct_cache_handlers();
-	spl_fixedarray_handlers = spl_fixedarray_object_get_direct_cache_handlers();
-	spl_array_handlers = spl_array_object_get_direct_cache_handlers();
-	if (date_handlers != NULL) {
-		zend_opcache_static_cache_safe_direct_register_class(date_ce, date_handlers);
-		zend_opcache_static_cache_safe_direct_register_class(immutable_ce, date_handlers);
-		zend_opcache_static_cache_safe_direct_register_class(timezone_ce, date_handlers);
-		zend_opcache_static_cache_safe_direct_register_class(interval_ce, date_handlers);
-	} else {
-		zend_opcache_static_cache_safe_direct_register_serializer_class(date_ce, true);
-		zend_opcache_static_cache_safe_direct_register_serializer_class(immutable_ce, true);
-		zend_opcache_static_cache_safe_direct_register_serializer_class(timezone_ce, true);
-		zend_opcache_static_cache_safe_direct_register_serializer_class(interval_ce, true);
-	}
-
-	if (spl_fixedarray_handlers != NULL) {
-		zend_opcache_static_cache_safe_direct_register_class(fixedarray_ce, spl_fixedarray_handlers);
-	} else {
-		zend_opcache_static_cache_safe_direct_register_serializer_class(fixedarray_ce, false);
-	}
-
-	if (spl_array_handlers != NULL) {
-		zend_opcache_static_cache_safe_direct_register_class(arrayobject_ce, spl_array_handlers);
-		zend_opcache_static_cache_safe_direct_register_class(arrayiterator_ce, spl_array_handlers);
-		zend_opcache_static_cache_safe_direct_register_class(recursive_arrayiterator_ce, spl_array_handlers);
-	} else {
-		zend_opcache_static_cache_safe_direct_register_serializer_class(arrayobject_ce, false);
-		zend_opcache_static_cache_safe_direct_register_serializer_class(arrayiterator_ce, false);
-		zend_opcache_static_cache_safe_direct_register_serializer_class(recursive_arrayiterator_ce, false);
-	}
-
-	zend_opcache_static_cache_safe_direct_classes_marked = true;
+	zend_opcache_static_cache_exception_ce = NULL;
+	zend_opcache_static_cache_strategy_ce = NULL;
+	zend_opcache_static_cache_info_ce = NULL;
+	zend_opcache_static_cache_pinned_attribute_ce = NULL;
+	zend_opcache_static_cache_volatile_static_attribute_ce = NULL;
 }
 
 static zend_always_inline void zend_opcache_static_cache_invalidate_script_context(zend_opcache_static_cache_context *context, zend_persistent_script *persistent_script)
@@ -1200,15 +991,6 @@ static void zend_opcache_static_cache_post_startup(void)
 	}
 
 	zend_opcache_static_cache_restore_context(previous_context);
-
-	if (!zend_opcache_static_cache_subsystem_disabled &&
-		(
-			ZCG(accel_directives).static_cache_volatile_size_mb != 0 ||
-			ZCG(accel_directives).static_cache_pinned_size_mb != 0
-		)
-	) {
-		zend_opcache_static_cache_safe_direct_register_internal_classes();
-	}
 }
 
 void zend_opcache_static_cache_mshutdown(void)
@@ -1227,8 +1009,8 @@ void zend_opcache_static_cache_mshutdown(void)
 
 	zend_opcache_static_cache_subsystem_disabled = false;
 	zend_opcache_static_cache_subsystem_failure_reason = NULL;
-	zend_opcache_static_cache_safe_direct_classes_marked = false;
 	zend_opcache_static_cache_safe_direct_handlers_destroy();
+	zend_opcache_static_cache_reset_class_entries();
 	zend_accel_register_static_cache_handlers(NULL);
 }
 
@@ -1305,7 +1087,6 @@ zend_result zend_opcache_static_cache_minit(void)
 
 	zend_opcache_static_cache_subsystem_disabled = false;
 	zend_opcache_static_cache_subsystem_failure_reason = NULL;
-	zend_opcache_static_cache_safe_direct_classes_marked = false;
 
 	zend_opcache_static_cache_register_classes();
 	zend_opcache_static_cache_safe_direct_handlers_init();

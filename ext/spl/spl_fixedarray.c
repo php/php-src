@@ -18,7 +18,6 @@
 #endif
 
 #include "php.h"
-#include "ext/opcache/zend_static_cache.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_attributes.h"
@@ -28,6 +27,7 @@
 #include "spl_fixedarray.h"
 #include "spl_exceptions.h"
 #include "ext/json/php_json.h" /* For php_json_serializable_ce */
+#include "ext/opcache/zend_static_cache.h" /* for opcache static cache */
 
 static zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
@@ -791,7 +791,7 @@ static bool spl_fixedarray_object_unserialize_direct_cache_state(zval *object, z
 	return !EG(exception);
 }
 
-const zend_opcache_static_cache_safe_direct_handlers *spl_fixedarray_object_get_direct_cache_handlers(void)
+static const zend_opcache_static_cache_safe_direct_handlers *spl_fixedarray_object_get_direct_cache_handlers(void)
 {
 	static const zend_opcache_static_cache_safe_direct_handlers handlers = {
 		false,
@@ -1115,6 +1115,11 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_handler_SplFixedArray.get_properties_for = spl_fixedarray_object_get_properties_for;
 	spl_handler_SplFixedArray.get_gc          = spl_fixedarray_object_get_gc;
 	spl_handler_SplFixedArray.free_obj        = spl_fixedarray_object_free_storage;
+
+	zend_opcache_static_cache_safe_direct_register_class(
+		spl_ce_SplFixedArray,
+		spl_fixedarray_object_get_direct_cache_handlers()
+	);
 
 	return SUCCESS;
 }

@@ -1,5 +1,5 @@
 --TEST--
-OPcache volatile cache validates __DirectCacheSafe and copy-on-mutate behavior across ZTS threads
+OPcache volatile cache validates direct cache handlers and copy-on-mutate behavior across ZTS threads
 --EXTENSIONS--
 opcache
 --SKIPIF--

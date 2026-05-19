@@ -1,5 +1,5 @@
 --TEST--
-OPcache volatile cache should isolate nested post-mutation fetches even with __DirectCacheSafe properties
+OPcache volatile cache should isolate nested post-mutation fetches with direct cache properties
 --EXTENSIONS--
 opcache
 pcntl

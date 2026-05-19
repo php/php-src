@@ -18,8 +18,6 @@
 #include "lib/timelib.h"
 #include "Zend/zend_hash.h"
 
-#include "ext/opcache/zend_static_cache.h" /* for opcache static cache */
-
 /* Same as SIZEOF_ZEND_LONG but using TIMELIB_LONG_MAX/MIN */
 #if TIMELIB_LONG_MAX == INT32_MAX
 # define PHP_DATE_SIZEOF_LONG 4
@@ -154,7 +152,5 @@ PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object);
 PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int flags);
 PHPAPI void php_date_initialize_from_ts_long(php_date_obj *dateobj, zend_long sec, int usec);
 PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts);
-
-const zend_opcache_static_cache_safe_direct_handlers *php_date_get_direct_cache_handlers(void);
 
 #endif /* PHP_DATE_H */

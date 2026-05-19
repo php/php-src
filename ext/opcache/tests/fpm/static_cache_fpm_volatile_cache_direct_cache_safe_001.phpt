@@ -1,5 +1,5 @@
 --TEST--
-FPM: OPcache __DirectCacheSafe subclasses survive requests, safe serializer overrides stay direct, and wakeup hooks fallback
+FPM: OPcache direct cache subclasses survive requests, safe serializer overrides stay direct, and wakeup hooks fallback
 --EXTENSIONS--
 opcache
 spl

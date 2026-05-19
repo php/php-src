@@ -1,5 +1,5 @@
 --TEST--
-FPM: OPcache volatile cache keeps nested userland objects shared until mutation with __DirectCacheSafe properties across requests
+FPM: OPcache volatile cache keeps nested userland objects shared until mutation with direct cache properties across requests
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--

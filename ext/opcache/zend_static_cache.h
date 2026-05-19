@@ -86,6 +86,10 @@ const char *zend_opcache_static_cache_volatile_failure_reason(void);
 bool zend_opcache_static_cache_pinned_is_enabled(void);
 bool zend_opcache_static_cache_pinned_is_available(void);
 const char *zend_opcache_static_cache_pinned_failure_reason(void);
+void zend_opcache_static_cache_safe_direct_register_class(
+	zend_class_entry *ce,
+	const zend_opcache_static_cache_safe_direct_handlers *handlers
+);
 
 END_EXTERN_C()
 
