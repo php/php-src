@@ -66,23 +66,34 @@ static zend_string *phar_get_link_location(phar_entry_info *entry) /* {{{ */
 phar_entry_info *phar_get_link_source(phar_entry_info *entry) /* {{{ */
 {
 	phar_entry_info *link_entry;
+	uint32_t depth = 0, max_depth;
 
 	if (!entry->symlink) {
 		return entry;
 	}
 
-	link_entry = zend_hash_find_ptr(&(entry->phar->manifest), entry->symlink);
-	if (link_entry) {
-		return phar_get_link_source(link_entry);
-	}
+	max_depth = zend_hash_num_elements(&(entry->phar->manifest));
 
-	zend_string *link = phar_get_link_location(entry);
-	link_entry = zend_hash_find_ptr(&(entry->phar->manifest), link);
-	zend_string_release(link);
-	if (link_entry) {
-		return phar_get_link_source(link_entry);
+	while (entry->symlink) {
+		if (UNEXPECTED(++depth > max_depth)) {
+			return NULL;
+		}
+		zend_string *link = phar_get_link_location(entry);
+
+		if (NULL != (link_entry = zend_hash_find_ptr(&(entry->phar->manifest), entry->symlink)) ||
+			NULL != (link_entry = zend_hash_find_ptr(&(entry->phar->manifest), link))) {
+			if (link != entry->symlink) {
+				zend_string_release(link);
+			}
+			entry = link_entry;
+		} else {
+			if (link != entry->symlink) {
+				zend_string_release(link);
+			}
+			return NULL;
+		}
 	}
-	return NULL;
+	return entry;
 }
 /* }}} */
 
