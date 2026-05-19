@@ -934,7 +934,8 @@ static zend_object *php_converter_create_object(zend_class_entry *ce) {
 }
 
 static zend_object *php_converter_clone_object(zend_object *object) {
-	php_converter_object *objval, *oldobj = php_converter_fetch_object(object);
+	const php_converter_object *oldobj = php_converter_fetch_object(object);
+	php_converter_object *objval;
 	zend_object *retval = php_converter_object_ctor(object->ce, &objval);
 	UErrorCode error = U_ZERO_ERROR;
 

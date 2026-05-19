@@ -66,7 +66,7 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 /* {{{ IntlDateFormatter_object_clone */
 zend_object *IntlDateFormatter_object_clone(zend_object *object)
 {
-	IntlDateFormatter_object     *dfo = php_intl_dateformatter_fetch_object(object);
+	const IntlDateFormatter_object     *dfo = php_intl_dateformatter_fetch_object(object);
 	zend_object              *new_obj = IntlDateFormatter_ce_ptr->create_object(object->ce);
 	IntlDateFormatter_object *new_dfo = php_intl_dateformatter_fetch_object(new_obj);
 

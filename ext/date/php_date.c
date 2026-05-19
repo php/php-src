@@ -1831,7 +1831,7 @@ static zend_object *date_object_new_date(zend_class_entry *class_type) /* {{{ */
 
 static zend_object *date_object_clone_date(zend_object *this_ptr) /* {{{ */
 {
-	php_date_obj *old_obj = php_date_obj_from_obj(this_ptr);
+	const php_date_obj *old_obj = php_date_obj_from_obj(this_ptr);
 	php_date_obj *new_obj = php_date_obj_from_obj(date_object_new_date(old_obj->std.ce));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
@@ -1988,7 +1988,7 @@ static zend_object *date_object_new_timezone(zend_class_entry *class_type) /* {{
 
 static zend_object *date_object_clone_timezone(zend_object *this_ptr) /* {{{ */
 {
-	php_timezone_obj *old_obj = php_timezone_obj_from_obj(this_ptr);
+	const php_timezone_obj *old_obj = php_timezone_obj_from_obj(this_ptr);
 	php_timezone_obj *new_obj = php_timezone_obj_from_obj(date_object_new_timezone(old_obj->std.ce));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
@@ -2131,7 +2131,7 @@ static zend_object *date_object_new_interval(zend_class_entry *class_type) /* {{
 
 static zend_object *date_object_clone_interval(zend_object *this_ptr) /* {{{ */
 {
-	php_interval_obj *old_obj = php_interval_obj_from_obj(this_ptr);
+	const php_interval_obj *old_obj = php_interval_obj_from_obj(this_ptr);
 	php_interval_obj *new_obj = php_interval_obj_from_obj(date_object_new_interval(old_obj->std.ce));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
@@ -2222,7 +2222,7 @@ static zend_object *date_object_new_period(zend_class_entry *class_type) /* {{{ 
 
 static zend_object *date_object_clone_period(zend_object *this_ptr) /* {{{ */
 {
-	php_period_obj *old_obj = php_period_obj_from_obj(this_ptr);
+	const php_period_obj *old_obj = php_period_obj_from_obj(this_ptr);
 	php_period_obj *new_obj = php_period_obj_from_obj(date_object_new_period(old_obj->std.ce));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
