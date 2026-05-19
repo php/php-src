@@ -152,6 +152,25 @@ function resolveBuildCommand(string $buildRoot, string $variable, array $fallbac
 	return $tokens !== [] ? $tokens : $fallback;
 }
 
+function resolveWindowsBuildFlags(): array
+{
+	return [
+		'/MD',
+		'/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1',
+		'/D_WINDOWS',
+		'/DWINDOWS=1',
+		'/DZEND_WIN32=1',
+		'/DPHP_WIN32=1',
+		'/DWIN32',
+		'/D_MBCS',
+		'/D_USE_MATH_DEFINES',
+		'/DZTS=1',
+		'/DZEND_DEBUG=0',
+		'/DNDebug',
+		'/DNDEBUG',
+	];
+}
+
 function resolveBuildRoot(string $root): string
 {
 	$buildRoot = null;
@@ -223,10 +242,13 @@ if ($root === false) {
 }
 
 $buildRoot = resolveBuildRoot($root);
+if (PHP_OS_FAMILY === 'Windows') {
+	putenv('PATH=' . $buildRoot . PATH_SEPARATOR . (getenv('PATH') ?: ''));
+}
 $source = __DIR__ . '/helpers/volatile_cache_zts_request_shared_graph_refs_001.c';
 $binary = __DIR__ . '/helpers/volatile_cache_zts_request_shared_graph_refs_001' . (PHP_OS_FAMILY === 'Windows' ? '.exe' : '.out');
 $compiler = resolveBuildCommand($buildRoot, 'CC', PHP_OS_FAMILY === 'Windows' ? ['cl'] : ['gcc']);
-$buildFlags = PHP_OS_FAMILY === 'Windows' ? [] : resolveBuildFlags($buildRoot, ['CPPFLAGS', 'CFLAGS_CLEAN']);
+$buildFlags = PHP_OS_FAMILY === 'Windows' ? resolveWindowsBuildFlags() : resolveBuildFlags($buildRoot, ['CPPFLAGS', 'CFLAGS_CLEAN']);
 $extraLibs = resolveExtraLibs($buildRoot);
 
 if (PHP_OS_FAMILY === 'Windows') {
@@ -234,6 +256,7 @@ if (PHP_OS_FAMILY === 'Windows') {
 		...$compiler,
 		'/nologo',
 		'/EHsc',
+		...$buildFlags,
 		'/I' . $buildRoot,
 		'/I' . $buildRoot . '/main',
 		'/I' . $buildRoot . '/Zend',
@@ -251,6 +274,7 @@ if (PHP_OS_FAMILY === 'Windows') {
 		'/I' . $root . '/ext/opcache',
 		'/Fe:' . $binary,
 		$source,
+		'/link',
 		resolveWindowsEmbedLib($buildRoot),
 	];
 } else {

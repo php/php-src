@@ -149,7 +149,26 @@ function resolveBuildCommand(string $buildRoot, string $variable, array $fallbac
     }
 
     $tokens = resolveBuildFlags($buildRoot, [$variable]);
-    return $tokens !== [] ? $tokens : $fallback;
+	return $tokens !== [] ? $tokens : $fallback;
+}
+
+function resolveWindowsBuildFlags(): array
+{
+    return [
+        '/MD',
+        '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1',
+        '/D_WINDOWS',
+        '/DWINDOWS=1',
+        '/DZEND_WIN32=1',
+        '/DPHP_WIN32=1',
+        '/DWIN32',
+        '/D_MBCS',
+        '/D_USE_MATH_DEFINES',
+        '/DZTS=1',
+        '/DZEND_DEBUG=0',
+        '/DNDebug',
+        '/DNDEBUG',
+    ];
 }
 
 function resolveBuildRoot(string $root): string
@@ -234,18 +253,20 @@ if ($root === false) {
 }
 
 $buildRoot = resolveBuildRoot($root);
+if (PHP_OS_FAMILY === 'Windows') {
+    putenv('PATH=' . $buildRoot . PATH_SEPARATOR . (getenv('PATH') ?: ''));
+}
 $source = __DIR__ . '/helpers/volatile_cache_zts_threads_003.c';
 $binary = __DIR__ . '/helpers/volatile_cache_zts_threads_003' . (PHP_OS_FAMILY === 'Windows' ? '.exe' : '.out');
 $compiler = resolveBuildCommand($buildRoot, 'CC', PHP_OS_FAMILY === 'Windows' ? ['cl'] : ['gcc']);
-$buildFlags = PHP_OS_FAMILY === 'Windows' ? [] : resolveBuildFlags($buildRoot, ['CPPFLAGS', 'CFLAGS_CLEAN']);
+$buildFlags = PHP_OS_FAMILY === 'Windows' ? resolveWindowsBuildFlags() : resolveBuildFlags($buildRoot, ['CPPFLAGS', 'CFLAGS_CLEAN']);
 $extraLibs = resolveExtraLibs($buildRoot);
 
 if (PHP_OS_FAMILY === 'Windows') {
     $compileCommand = [
 		...$compiler,
         '/nologo',
-        '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1',
-        '/DHAVE_CONFIG_H',
+        ...$buildFlags,
         '/I' . $buildRoot,
         '/I' . $buildRoot . '/main',
         '/I' . $buildRoot . '/Zend',

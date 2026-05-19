@@ -97,7 +97,8 @@ function php_cli_server_start($ini = "", $doc_root = null) {
             for ($i = 0; $i < 60; $i++) {
                 $status = proc_get_status($handle);
                 if (!($status && $status['running'])) {
-                    if ($status && $status['exitcode'] !== -1 && $status['exitcode'] !== 0) {
+                    if ($status && $status['exitcode'] !== -1 && $status['exitcode'] !== 0
+                            && !($status['exitcode'] === 255 && PHP_OS_FAMILY === 'Windows')) {
                         printf("Server exited with non-zero status: %d\n", $status['exitcode']);
                         printf("Server output:\n%s\n", file_get_contents($output_file));
                     }

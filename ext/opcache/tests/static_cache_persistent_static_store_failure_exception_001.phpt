@@ -59,9 +59,12 @@ class PinnedStaticStoreFailureUnsupportedValueBox
 }
 
 OPcache\pinned_clear();
+$nullDevice = PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null';
 
 dump_static_cache_exception('property-resource', function (): void {
-	$resource = fopen('/dev/null', 'r');
+	global $nullDevice;
+
+	$resource = fopen($nullDevice, 'r');
 	try {
 		PinnedStaticStoreFailureProperty::$value = $resource;
 	} finally {
@@ -76,7 +79,9 @@ dump_static_cache_exception('property-closure', function (): void {
 });
 
 dump_static_cache_exception('property-object-resource', function (): void {
-	$resource = fopen('/dev/null', 'r');
+	global $nullDevice;
+
+	$resource = fopen($nullDevice, 'r');
 	try {
 		PinnedStaticStoreFailureProperty::$value = new PinnedStaticStoreFailureUnsupportedValueBox($resource);
 	} finally {

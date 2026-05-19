@@ -44,6 +44,7 @@
 # if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 #  define MAP_ANONYMOUS MAP_ANON
 # endif
+#endif
 
 static zend_always_inline bool zend_opcache_static_cache_force_startup_failure(void)
 {
@@ -160,6 +161,7 @@ static inline bool zend_opcache_static_cache_win32_set_segment(
 }
 #endif
 
+#if defined(USE_MMAP) && !defined(ZEND_WIN32)
 static int zend_opcache_static_cache_mmap_create_segments(
 	size_t requested_size,
 	zend_shared_segment ***shared_segments_p,

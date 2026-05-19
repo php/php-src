@@ -56,5 +56,5 @@ array(1) {
 }
 array(1) {
   ["backend"]=>
-  string(10) "pinned"
+  string(6) "pinned"
 }
