@@ -18,5 +18,5 @@ ob_end_flush();
 ?>
 --EXPECTF--
 Warning: PHP Startup: session.cookie_samesite must be "Strict", "Lax", "None", or "" in Unknown on line 0
-string(0) ""
+string(3) "Lax"
 Done
