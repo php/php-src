@@ -1,5 +1,5 @@
 /* This is a generated file, edit opcache.stub.php instead.
- * Stub hash: cc89c045c31ebd7d8db0e9c0a12c136451472cc5 */
+ * Stub hash: fb25c489fa59f1e062bec1e2f711d9e81b19db69 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_opcache_reset, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -74,12 +74,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_OPcache_volatile_cache_info, 0, 0, OPcache\\StaticCacheInfo, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_pinned_store, 0, 2, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_pinned_store, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_pinned_store_array, 0, 1, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_pinned_store_array, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 

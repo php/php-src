@@ -52,8 +52,7 @@ function cache_store(string $backend, string $key, mixed $value): mixed
 		return OPcache\volatile_store($key, $value);
 	}
 
-	OPcache\pinned_store($key, $value);
-	return null;
+	return OPcache\pinned_store($key, $value);
 }
 
 function cache_store_array(string $backend, array $values): mixed
@@ -62,8 +61,7 @@ function cache_store_array(string $backend, array $values): mixed
 		return OPcache\volatile_store_array($values);
 	}
 
-	OPcache\pinned_store_array($values);
-	return null;
+	return OPcache\pinned_store_array($values);
 }
 
 function cache_fetch(string $backend, string $key, mixed $default = null): mixed
@@ -256,11 +254,11 @@ clear values: owner,MISS
 pinned
 bool(true)
 store blocked: yes
-store result: null
+store result: true
 store value: child
 bool(true)
 store_array blocked: yes
-store_array result: null
+store_array result: true
 store_array value: child
 bool(true)
 delete blocked: no

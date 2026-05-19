@@ -1947,11 +1947,13 @@ void zend_opcache_static_cache_reset_runtime(void)
 	runtime->enabled = runtime->configured_memory != 0;
 
 	if (zend_opcache_static_cache_subsystem_disabled) {
-		runtime->enabled = false;
 		runtime->available = false;
-		runtime->startup_failed = true;
+		runtime->startup_failed = runtime->enabled;
 		runtime->backend_initialized = context->storage.initialized;
-		runtime->failure_reason = zend_opcache_static_cache_subsystem_failure_reason;
+		runtime->failure_reason = runtime->enabled
+			? zend_opcache_static_cache_subsystem_failure_reason
+			: NULL
+		;
 	}
 }
 
@@ -2195,6 +2197,10 @@ void zend_opcache_static_cache_ensure_ready(void)
 
 	zend_opcache_static_cache_reset_runtime();
 	runtime = zend_opcache_static_cache_context_runtime(context);
+	if (zend_opcache_static_cache_subsystem_disabled) {
+		return;
+	}
+
 	if (!runtime->enabled) {
 		return;
 	}
