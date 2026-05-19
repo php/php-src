@@ -421,6 +421,8 @@ bool zend_opcache_static_cache_header_init_locked(void);
 void zend_opcache_static_cache_free_locked(uint32_t payload_offset);
 uint32_t zend_opcache_static_cache_alloc_locked(size_t size, const void *source);
 bool zend_opcache_static_cache_compact_to_fit_locked(size_t size);
+bool zend_opcache_static_cache_compact_available_locked(void);
+void zend_opcache_static_cache_compact_after_request_shutdown(void);
 bool zend_opcache_static_cache_startup_storage_before_request(void);
 void zend_opcache_static_cache_shutdown_storage(void);
 void zend_opcache_static_cache_ensure_ready(void);
@@ -461,13 +463,15 @@ bool zend_opcache_static_cache_shared_graph_copy_fits_buffer(
 		size_t target_buffer_len);
 bool zend_opcache_static_cache_fetch_shared_graph(const unsigned char *buffer, size_t buffer_len, zval *destination);
 bool zend_opcache_static_cache_shared_graph_can_overwrite_payload_locked(uint32_t payload_offset);
+bool zend_opcache_static_cache_shared_graph_can_move_payload_locked(uint32_t payload_offset);
+bool zend_opcache_static_cache_shared_graph_rebase_moved_payload_locked(uint32_t payload_offset, ptrdiff_t delta);
 bool zend_opcache_static_cache_shared_graph_acquire_locked(uint32_t payload_offset);
 bool zend_opcache_static_cache_shared_graph_retire_payload_locked(uint32_t payload_offset);
 bool zend_opcache_static_cache_shared_graph_release_ref_locked(uint32_t payload_offset);
 bool zend_opcache_static_cache_has_request_shared_graph_ref(uint32_t payload_offset);
 void zend_opcache_static_cache_register_shared_graph_ref(uint32_t payload_offset);
 void zend_opcache_static_cache_defer_retired_shared_graph_free(uint32_t payload_offset);
-void zend_opcache_static_cache_release_request_shared_graph_refs(void);
+bool zend_opcache_static_cache_release_request_shared_graph_refs(void);
 bool zend_opcache_static_cache_clear_locked(void);
 bool zend_opcache_static_cache_prepare_value(
 		zend_opcache_static_cache_prepared_value *prepared,

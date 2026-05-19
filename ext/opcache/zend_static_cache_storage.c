@@ -1645,8 +1645,9 @@ static bool zend_opcache_static_cache_block_is_movable_locked(
 		) {
 			referenced = true;
 			if (entry->value_type == ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH) {
-				/* Shared graphs may contain final-buffer pointers, so keep their block anchored. */
-				return false;
+				if (!zend_opcache_static_cache_shared_graph_can_move_payload_locked(entry->value_offset)) {
+					return false;
+				}
 			}
 		}
 	}
@@ -1662,7 +1663,7 @@ static void zend_opcache_static_cache_update_moved_block_entries_locked(
 )
 {
 	zend_opcache_static_cache_entry *entries, *entry;
-	uint32_t index, delta;
+	uint32_t index, delta, new_value_offset;
 
 	ZEND_ASSERT(new_block_offset <= old_block_offset);
 	delta = old_block_offset - new_block_offset;
@@ -1682,7 +1683,15 @@ static void zend_opcache_static_cache_update_moved_block_entries_locked(
 		if (entry->value_offset != 0 &&
 			zend_opcache_static_cache_offset_in_block(entry->value_offset, old_block_offset, block_size)
 		) {
-			entry->value_offset -= delta;
+			new_value_offset = entry->value_offset - delta;
+
+			if (entry->value_type == ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH) {
+				if (!zend_opcache_static_cache_shared_graph_rebase_moved_payload_locked(new_value_offset, delta)) {
+					ZEND_ASSERT(0);
+				}
+			}
+
+			entry->value_offset = new_value_offset;
 		}
 	}
 }
@@ -1952,24 +1961,12 @@ uint32_t zend_opcache_static_cache_alloc_locked(size_t size, const void *source)
 	return block_offset + (uint32_t) sizeof(zend_opcache_static_cache_block);
 }
 
-bool zend_opcache_static_cache_compact_to_fit_locked(size_t size)
+static bool zend_opcache_static_cache_compact_movable_blocks_locked(zend_opcache_static_cache_header *header)
 {
-	zend_opcache_static_cache_header *header = zend_opcache_static_cache_header_ptr();
 	zend_opcache_static_cache_block *block, *free_block;
-	uint32_t required_block_size, used_end, offset, next_offset, block_size, write_offset,
+	uint32_t used_end, offset, next_offset, block_size, write_offset,
 			previous_block_size = 0, last_block_offset = 0, free_size;
 	bool moved = false, movable;
-
-	if (!header || !zend_opcache_static_cache_header_init_locked()) {
-		return false;
-	}
-
-	if (!zend_opcache_static_cache_payload_size_to_block_size(size, &required_block_size) ||
-		required_block_size > header->data_size ||
-		!zend_opcache_static_cache_compaction_can_fit_locked(header, required_block_size)
-	) {
-		return false;
-	}
 
 	used_end = header->data_offset + header->next_free;
 	offset = header->data_offset;
@@ -2043,6 +2040,62 @@ bool zend_opcache_static_cache_compact_to_fit_locked(size_t size)
 	}
 
 	return moved;
+}
+
+bool zend_opcache_static_cache_compact_to_fit_locked(size_t size)
+{
+	zend_opcache_static_cache_header *header = zend_opcache_static_cache_header_ptr();
+	uint32_t required_block_size;
+
+	if (!header || !zend_opcache_static_cache_header_init_locked()) {
+		return false;
+	}
+
+	if (!zend_opcache_static_cache_payload_size_to_block_size(size, &required_block_size) ||
+		required_block_size > header->data_size ||
+		!zend_opcache_static_cache_compaction_can_fit_locked(header, required_block_size)
+	) {
+		return false;
+	}
+
+	return zend_opcache_static_cache_compact_movable_blocks_locked(header);
+}
+
+bool zend_opcache_static_cache_compact_available_locked(void)
+{
+	zend_opcache_static_cache_header *header = zend_opcache_static_cache_header_ptr();
+
+	if (!header ||
+		!zend_opcache_static_cache_header_init_locked() ||
+		header->free_list == 0 ||
+		!zend_opcache_static_cache_compaction_can_fit_locked(header, 0)
+	) {
+		return false;
+	}
+
+	return zend_opcache_static_cache_compact_movable_blocks_locked(header);
+}
+
+static void zend_opcache_static_cache_compact_context_after_request_shutdown(zend_opcache_static_cache_context *context)
+{
+	zend_opcache_static_cache_context *previous_context;
+
+	if (!zend_opcache_static_cache_context_runtime(context)->available) {
+		return;
+	}
+
+	previous_context = zend_opcache_static_cache_activate_context(context);
+	if (zend_opcache_static_cache_wlock()) {
+		zend_opcache_static_cache_compact_available_locked();
+		zend_opcache_static_cache_unlock();
+	}
+	zend_opcache_static_cache_restore_context(previous_context);
+}
+
+void zend_opcache_static_cache_compact_after_request_shutdown(void)
+{
+	zend_opcache_static_cache_compact_context_after_request_shutdown(&zend_opcache_static_cache_volatile_context_state);
+	zend_opcache_static_cache_compact_context_after_request_shutdown(&zend_opcache_static_cache_pinned_context_state);
 }
 
 bool zend_opcache_static_cache_startup_storage_before_request(void)
