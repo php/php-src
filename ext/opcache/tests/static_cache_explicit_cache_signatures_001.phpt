@@ -37,12 +37,14 @@ function describe_type(?ReflectionType $type): string
 
 foreach ([
 	'OPcache\\volatile_store' => ['value'],
+	'OPcache\\volatile_store_array' => [],
 	'OPcache\\volatile_fetch' => ['default'],
 	'OPcache\\volatile_fetch_array' => ['default'],
 	'OPcache\\volatile_lock' => ['lease'],
 	'OPcache\\volatile_unlock' => [],
 	'OPcache\\volatile_cache_info' => [],
 	'OPcache\\pinned_store' => ['value'],
+	'OPcache\\pinned_store_array' => [],
 	'OPcache\\pinned_fetch' => ['default'],
 	'OPcache\\pinned_fetch_array' => ['default'],
 	'OPcache\\pinned_lock' => ['lease'],
@@ -69,12 +71,14 @@ foreach ([
 ?>
 --EXPECT--
 OPcache\volatile_store $value=null|bool|int|float|string|array|object params=2/3 return=bool
+OPcache\volatile_store_array params=1/2 return=bool
 OPcache\volatile_fetch $default=null|bool|int|float|string|array|object params=1/2 return=null|bool|int|float|string|array|object
 OPcache\volatile_fetch_array $default=?array params=1/2 return=?array
 OPcache\volatile_lock $lease=int params=1/2 return=bool
 OPcache\volatile_unlock params=1/1 return=bool
 OPcache\volatile_cache_info params=0/0 return=OPcache\StaticCacheInfo
-OPcache\pinned_store $value=null|bool|int|float|string|array|object params=2/2 return=void
+OPcache\pinned_store $value=null|bool|int|float|string|array|object params=2/2 return=bool
+OPcache\pinned_store_array params=1/1 return=bool
 OPcache\pinned_fetch $default=null|bool|int|float|string|array|object params=1/2 return=null|bool|int|float|string|array|object
 OPcache\pinned_fetch_array $default=?array params=1/2 return=?array
 OPcache\pinned_lock $lease=int params=1/2 return=bool

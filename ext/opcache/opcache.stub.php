@@ -108,9 +108,9 @@ function volatile_clear(): void {}
 
 function volatile_cache_info(): StaticCacheInfo {}
 
-function pinned_store(string $key, null|bool|int|float|string|array|object $value): void {}
+function pinned_store(string $key, null|bool|int|float|string|array|object $value): bool {}
 
-function pinned_store_array(array $values): void {}
+function pinned_store_array(array $values): bool {}
 
 function pinned_fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
 

@@ -30,27 +30,17 @@ var_dump($volatileInfo == $status['volatile_cache']);
 var_dump($pinnedInfo == $status['pinned_cache']);
 var_dump($volatileInfo->failure_reason);
 var_dump($pinnedInfo->failure_reason);
-
-try {
-	OPcache\volatile_store('key', 'value');
-} catch (Throwable $e) {
-	echo get_class($e), ': ', $e->getMessage(), "\n";
-}
-
-try {
-	OPcache\pinned_store('key', 'value');
-} catch (Throwable $e) {
-	echo get_class($e), ': ', $e->getMessage(), "\n";
-}
+var_dump(OPcache\volatile_store('key', 'value'));
+var_dump(OPcache\pinned_store('key', 'value'));
 
 ?>
 --EXPECT--
-bool(false)
+bool(true)
 bool(false)
 bool(true)
 bool(false)
 int(33554432)
-bool(false)
+bool(true)
 bool(false)
 bool(true)
 bool(false)
@@ -59,5 +49,5 @@ bool(true)
 bool(true)
 string(42) "Unable to initialize shared memory backend"
 string(42) "Unable to initialize shared memory backend"
-OPcache\StaticCacheException: Unable to initialize shared memory backend
-OPcache\StaticCacheException: Unable to initialize shared memory backend
+bool(false)
+bool(false)
