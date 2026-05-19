@@ -93,7 +93,7 @@
 
 #define ZEND_OPCACHE_STATIC_CACHE_ENTRY_RESERVED_COMBINED_VALUE_KEY 0x0001U
 
-#define ZEND_OPCACHE_STATIC_CACHE_PERSISTENT_ATTRIBUTE "opcache\\persistentstatic"
+#define ZEND_OPCACHE_STATIC_CACHE_PINNED_ATTRIBUTE "opcache\\pinnedstatic"
 #define ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC_ATTRIBUTE "opcache\\volatilestatic"
 
 #define ZEND_OPCACHE_STATIC_CACHE_STRATEGY_IMMEDIATE 0
@@ -103,12 +103,12 @@
 
 #ifndef ZEND_WIN32
 # define ZEND_OPCACHE_STATIC_CACHE_VOLATILE_SEM_FILENAME_PREFIX ".ZendVolatileCacheSem."
-# define ZEND_OPCACHE_STATIC_CACHE_PERSISTENT_SEM_FILENAME_PREFIX ".ZendPersistentCacheSem."
+# define ZEND_OPCACHE_STATIC_CACHE_PINNED_SEM_FILENAME_PREFIX ".ZendPinnedCacheSem."
 #endif
 
 typedef enum _zend_opcache_static_cache_kind {
 	ZEND_OPCACHE_STATIC_CACHE_NONE,
-	ZEND_OPCACHE_STATIC_CACHE_PERSISTENT,
+	ZEND_OPCACHE_STATIC_CACHE_PINNED,
 	ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC,
 	ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC_TRACKING,
 	ZEND_OPCACHE_STATIC_CACHE_CONFLICT
@@ -163,7 +163,7 @@ typedef struct _zend_opcache_static_cache_entry_lock_lease {
 } zend_opcache_static_cache_entry_lock_lease;
 
 /* The same storage primitives serve the explicit volatile cache, VolatileStatic, and
- * PersistentStatic. Callers switch this TLS context around short critical sections
+ * PinnedStatic. Callers switch this TLS context around short critical sections
  * so allocator, lookup-cache, and lock helpers always operate on the right SHM
  * segment without threading a context argument through every hot helper. */
 typedef struct _zend_opcache_static_cache_header {
@@ -364,11 +364,11 @@ extern zend_class_entry *zend_opcache_static_cache_exception_ce;
 extern zend_class_entry *zend_opcache_static_cache_strategy_ce;
 extern zend_class_entry *zend_opcache_static_cache_info_ce;
 extern zend_opcache_static_cache_context zend_opcache_static_cache_volatile_context_state;
-extern zend_opcache_static_cache_context zend_opcache_static_cache_persistent_context_state;
+extern zend_opcache_static_cache_context zend_opcache_static_cache_pinned_context_state;
 extern bool zend_opcache_static_cache_subsystem_disabled;
 extern const char *zend_opcache_static_cache_subsystem_failure_reason;
 extern ZEND_EXT_TLS zend_opcache_static_cache_runtime zend_opcache_static_cache_volatile_runtime_state;
-extern ZEND_EXT_TLS zend_opcache_static_cache_runtime zend_opcache_static_cache_persistent_runtime_state;
+extern ZEND_EXT_TLS zend_opcache_static_cache_runtime zend_opcache_static_cache_pinned_runtime_state;
 extern ZEND_EXT_TLS HashTable zend_opcache_static_cache_attribute_classes;
 extern ZEND_EXT_TLS bool zend_opcache_static_cache_attribute_classes_initialized;
 extern ZEND_EXT_TLS HashTable zend_opcache_static_cache_ignored_classes;
@@ -389,7 +389,7 @@ extern ZEND_EXT_TLS HashTable *zend_opcache_static_cache_tracked_objects;
 extern ZEND_EXT_TLS bool zend_opcache_static_cache_has_tracked_arrays;
 extern ZEND_EXT_TLS bool zend_opcache_static_cache_has_tracked_objects;
 extern ZEND_EXT_TLS bool zend_opcache_static_cache_volatile_skip_publish;
-extern ZEND_EXT_TLS bool zend_opcache_static_cache_persistent_skip_publish;
+extern ZEND_EXT_TLS bool zend_opcache_static_cache_pinned_skip_publish;
 extern ZEND_EXT_TLS zend_opcache_static_cache_shared_graph_ref *zend_opcache_static_cache_shared_graph_refs;
 extern ZEND_EXT_TLS uint32_t zend_opcache_static_cache_shared_graph_ref_count;
 extern ZEND_EXT_TLS uint32_t zend_opcache_static_cache_shared_graph_ref_capacity;
@@ -407,13 +407,13 @@ extern ZEND_EXT_TLS zend_opcache_static_cache_static_slot_handle *zend_opcache_s
 extern ZEND_EXT_TLS HashTable *zend_opcache_static_cache_capture_arrays;
 extern ZEND_EXT_TLS HashTable *zend_opcache_static_cache_capture_objects;
 extern ZEND_EXT_TLS zend_opcache_static_cache_lookup_entry zend_opcache_static_cache_volatile_lookup_entry_storage[ZEND_OPCACHE_STATIC_CACHE_LOOKUP_BUCKETS];
-extern ZEND_EXT_TLS zend_opcache_static_cache_lookup_entry zend_opcache_static_cache_persistent_lookup_entry_storage[ZEND_OPCACHE_STATIC_CACHE_LOOKUP_BUCKETS];
+extern ZEND_EXT_TLS zend_opcache_static_cache_lookup_entry zend_opcache_static_cache_pinned_lookup_entry_storage[ZEND_OPCACHE_STATIC_CACHE_LOOKUP_BUCKETS];
 extern ZEND_EXT_TLS HashTable *zend_opcache_static_cache_volatile_request_local_slots;
-extern ZEND_EXT_TLS HashTable *zend_opcache_static_cache_persistent_request_local_slots;
+extern ZEND_EXT_TLS HashTable *zend_opcache_static_cache_pinned_request_local_slots;
 extern ZEND_EXT_TLS HashTable *zend_opcache_static_cache_volatile_entry_locks;
-extern ZEND_EXT_TLS HashTable *zend_opcache_static_cache_persistent_entry_locks;
+extern ZEND_EXT_TLS HashTable *zend_opcache_static_cache_pinned_entry_locks;
 extern ZEND_EXT_TLS uint32_t zend_opcache_static_cache_volatile_entry_lock_counts[ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_STRIPES];
-extern ZEND_EXT_TLS uint32_t zend_opcache_static_cache_persistent_entry_lock_counts[ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_STRIPES];
+extern ZEND_EXT_TLS uint32_t zend_opcache_static_cache_pinned_entry_lock_counts[ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_STRIPES];
 
 void zend_opcache_static_cache_reset_runtime(void);
 void zend_opcache_static_cache_reset_storage(void);
@@ -832,8 +832,8 @@ static zend_always_inline void zend_opcache_static_cache_restore_context(zend_op
 static zend_always_inline zend_opcache_static_cache_runtime *zend_opcache_static_cache_context_runtime(zend_opcache_static_cache_context *context)
 {
 	/* Runtime readiness is request-local under ZTS, while storage remains shared. */
-	return context == &zend_opcache_static_cache_persistent_context_state
-		? &zend_opcache_static_cache_persistent_runtime_state
+	return context == &zend_opcache_static_cache_pinned_context_state
+		? &zend_opcache_static_cache_pinned_runtime_state
 		: &zend_opcache_static_cache_volatile_runtime_state
 	;
 }
@@ -845,16 +845,16 @@ static zend_always_inline zend_opcache_static_cache_runtime *zend_opcache_static
 
 static zend_always_inline zend_opcache_static_cache_lookup_entry *zend_opcache_static_cache_active_lookup_entries(void)
 {
-	return zend_opcache_static_cache_active_context() == &zend_opcache_static_cache_persistent_context_state
-		? zend_opcache_static_cache_persistent_lookup_entry_storage
+	return zend_opcache_static_cache_active_context() == &zend_opcache_static_cache_pinned_context_state
+		? zend_opcache_static_cache_pinned_lookup_entry_storage
 		: zend_opcache_static_cache_volatile_lookup_entry_storage
 	;
 }
 
 static zend_always_inline HashTable **zend_opcache_static_cache_active_request_local_slots_ptr(void)
 {
-	return zend_opcache_static_cache_active_context() == &zend_opcache_static_cache_persistent_context_state
-		? &zend_opcache_static_cache_persistent_request_local_slots
+	return zend_opcache_static_cache_active_context() == &zend_opcache_static_cache_pinned_context_state
+		? &zend_opcache_static_cache_pinned_request_local_slots
 		: &zend_opcache_static_cache_volatile_request_local_slots
 	;
 }
@@ -1041,8 +1041,8 @@ static zend_always_inline void zend_opcache_static_cache_block_mark_used(zend_op
 
 static zend_always_inline void zend_opcache_static_cache_clear_lookup_cache_context(zend_opcache_static_cache_context *context)
 {
-	zend_opcache_static_cache_lookup_entry *entries = context == &zend_opcache_static_cache_persistent_context_state
-		? zend_opcache_static_cache_persistent_lookup_entry_storage
+	zend_opcache_static_cache_lookup_entry *entries = context == &zend_opcache_static_cache_pinned_context_state
+		? zend_opcache_static_cache_pinned_lookup_entry_storage
 		: zend_opcache_static_cache_volatile_lookup_entry_storage
 	;
 
@@ -1061,13 +1061,13 @@ static zend_always_inline void zend_opcache_static_cache_lookup_cache_reset_entr
 static zend_always_inline void zend_opcache_static_cache_clear_lookup_caches(void)
 {
 	zend_opcache_static_cache_clear_lookup_cache_context(&zend_opcache_static_cache_volatile_context_state);
-	zend_opcache_static_cache_clear_lookup_cache_context(&zend_opcache_static_cache_persistent_context_state);
+	zend_opcache_static_cache_clear_lookup_cache_context(&zend_opcache_static_cache_pinned_context_state);
 }
 
 static zend_always_inline bool *zend_opcache_static_cache_skip_publish_ptr(zend_opcache_static_cache_context *context)
 {
-	return context == &zend_opcache_static_cache_persistent_context_state
-		? &zend_opcache_static_cache_persistent_skip_publish
+	return context == &zend_opcache_static_cache_pinned_context_state
+		? &zend_opcache_static_cache_pinned_skip_publish
 		: &zend_opcache_static_cache_volatile_skip_publish
 	;
 }
@@ -1085,7 +1085,7 @@ static zend_always_inline bool zend_opcache_static_cache_publish_skipped(zend_op
 static zend_always_inline void zend_opcache_static_cache_reset_publish_skips(void)
 {
 	zend_opcache_static_cache_volatile_skip_publish = false;
-	zend_opcache_static_cache_persistent_skip_publish = false;
+	zend_opcache_static_cache_pinned_skip_publish = false;
 }
 
 #endif /* ZEND_STATIC_CACHE_INTERNAL_H */

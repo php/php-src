@@ -1,5 +1,5 @@
 --TEST--
-OPcache PersistentStatic persists class static properties across requests
+OPcache PinnedStatic persists class static properties across requests
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -7,9 +7,9 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/persistent_static_001.php', <<<'PHP'
+file_put_contents(__DIR__ . '/pinned_static_001.php', <<<'PHP'
 <?php
-#[OPcache\PersistentStatic]
+#[OPcache\PinnedStatic]
 class ClassCounter
 {
     public static int $value = 0;
@@ -17,7 +17,7 @@ class ClassCounter
 
 class PropertyCounter
 {
-    #[OPcache\PersistentStatic]
+    #[OPcache\PinnedStatic]
     public static int $value = 0;
 }
 
@@ -36,15 +36,15 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.persistent_size_mb=32');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.pinned_size_mb=32');
 
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_001.php');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_001.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_001.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_001.php');
 
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/persistent_static_001.php');
+@unlink(__DIR__ . '/pinned_static_001.php');
 ?>
 --EXPECT--
 1,1,1

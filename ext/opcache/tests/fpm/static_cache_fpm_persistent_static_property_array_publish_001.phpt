@@ -1,5 +1,5 @@
 --TEST--
-FPM: OPcache PersistentStatic publishes nested array writes for property-scoped state
+FPM: OPcache PinnedStatic publishes nested array writes for property-scoped state
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--
@@ -22,23 +22,23 @@ $code = <<<'PHP'
 <?php
 class NestedArrayPropertyState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static array $propertyState = [];
 }
 
 NestedArrayPropertyState::$propertyState = ['numbers' => [1]];
 echo json_encode(NestedArrayPropertyState::$propertyState['numbers']), "\n";
-echo OPcache\persistent_cache_info()->entry_count, "\n";
+echo OPcache\pinned_cache_info()->entry_count, "\n";
 
 NestedArrayPropertyState::$propertyState['numbers'][] = 2;
 echo json_encode(NestedArrayPropertyState::$propertyState['numbers']), "\n";
-echo OPcache\persistent_cache_info()->entry_count;
+echo OPcache\pinned_cache_info()->entry_count;
 PHP;
 
 $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
 	'opcache.enable' => '1',
-	'opcache.static_cache.persistent_size_mb' => '32',
+	'opcache.static_cache.pinned_size_mb' => '32',
 	'opcache.optimization_level' => '0',
 	'opcache.file_update_protection' => '0',
 	'opcache.jit' => '0',

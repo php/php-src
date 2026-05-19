@@ -63,7 +63,7 @@ final readonly class StaticCacheInfo
 }
 
 #[\Attribute(13)] /* TARGET_CLASS | TARGET_METHOD | TARGET_PROPERTY */
-final class PersistentStatic
+final class PinnedStatic
 {
 }
 
@@ -113,33 +113,33 @@ function volatile_clear(): void {}
 
 function volatile_cache_info(): StaticCacheInfo {}
 
-function persistent_store(string $key, null|bool|int|float|string|array|object $value): void {}
+function pinned_store(string $key, null|bool|int|float|string|array|object $value): void {}
 
-function persistent_store_array(array $values): void {}
+function pinned_store_array(array $values): void {}
 
-function persistent_fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
+function pinned_fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
 
 /**
  * @return array<string, null|bool|int|float|string|array|object>|null
  */
-function persistent_fetch_array(array $keys, ?array $default = null): ?array {}
+function pinned_fetch_array(array $keys, ?array $default = null): ?array {}
 
-function persistent_exists(string $key): bool {}
+function pinned_exists(string $key): bool {}
 
-function persistent_lock(string $key, int $lease = 0): bool {}
+function pinned_lock(string $key, int $lease = 0): bool {}
 
-function persistent_unlock(string $key): bool {}
+function pinned_unlock(string $key): bool {}
 
-function persistent_delete(string $key_or_class): void {}
+function pinned_delete(string $key_or_class): void {}
 
-function persistent_delete_array(array $keys): void {}
+function pinned_delete_array(array $keys): void {}
 
-function persistent_clear(): void {}
+function pinned_clear(): void {}
 
-function persistent_atomic_increment(string $key, int $step = 1): int {}
+function pinned_atomic_increment(string $key, int $step = 1): int {}
 
-function persistent_atomic_decrement(string $key, int $step = 1): int {}
+function pinned_atomic_decrement(string $key, int $step = 1): int {}
 
-function persistent_cache_info(): StaticCacheInfo {}
+function pinned_cache_info(): StaticCacheInfo {}
 
 }

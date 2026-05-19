@@ -1,5 +1,5 @@
 <?php
-#[OPcache\PersistentStatic]
+#[OPcache\PinnedStatic]
 class ZtsRaceClassState
 {
 	public static array $data = ['value' => 0, 'numbers' => []];
@@ -14,13 +14,13 @@ class ZtsRaceClassState
 
 class ZtsRacePropertyState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static array $data = ['value' => 0, 'numbers' => []];
 }
 
 class ZtsRaceMethodState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static function next(): int
 	{
 		static $value = 0;
@@ -29,7 +29,7 @@ class ZtsRaceMethodState
 	}
 }
 
-function zts_persistent_static_wait_for_file(string $path): bool
+function zts_pinned_static_wait_for_file(string $path): bool
 {
 	$deadline = microtime(true) + 5.0;
 	while (!file_exists($path)) {
@@ -41,7 +41,7 @@ function zts_persistent_static_wait_for_file(string $path): bool
 	return true;
 }
 
-function zts_persistent_static_tuple(): string
+function zts_pinned_static_tuple(): string
 {
 	return ZtsRaceClassState::$data['value'] . ','
 		. array_sum(ZtsRaceClassState::$data['numbers']) . ','
@@ -66,7 +66,7 @@ if ($mode === 'init') {
 }
 
 if ($mode === 'writer') {
-	if (!zts_persistent_static_wait_for_file($readyFile)) {
+	if (!zts_pinned_static_wait_for_file($readyFile)) {
 		return false;
 	}
 	$classMethod = ZtsRaceClassState::next();
@@ -85,16 +85,16 @@ if ($mode === 'writer') {
 
 if ($mode === 'reader') {
 	file_put_contents($readyFile, 'ready');
-	if (!zts_persistent_static_wait_for_file($doneFile)) {
+	if (!zts_pinned_static_wait_for_file($doneFile)) {
 		return false;
 	}
-	return zts_persistent_static_tuple() === '10,21,3,1,1,3';
+	return zts_pinned_static_tuple() === '10,21,3,1,1,3';
 }
 
 if ($mode === 'verify') {
 	@unlink($readyFile);
 	@unlink($doneFile);
-	return zts_persistent_static_tuple() === '10,21,4,1,1,4';
+	return zts_pinned_static_tuple() === '10,21,4,1,1,4';
 }
 
 return false;

@@ -79,13 +79,13 @@ void zend_opcache_static_cache_mshutdown(void);
 zend_result zend_opcache_static_cache_rshutdown(void);
 void zend_opcache_static_cache_invalidate_all(void);
 void zend_opcache_static_cache_volatile_get_status(zval *return_value);
-void zend_opcache_static_cache_persistent_get_status(zval *return_value);
+void zend_opcache_static_cache_pinned_get_status(zval *return_value);
 bool zend_opcache_static_cache_volatile_is_enabled(void);
 bool zend_opcache_static_cache_volatile_is_available(void);
 const char *zend_opcache_static_cache_volatile_failure_reason(void);
-bool zend_opcache_static_cache_persistent_is_enabled(void);
-bool zend_opcache_static_cache_persistent_is_available(void);
-const char *zend_opcache_static_cache_persistent_failure_reason(void);
+bool zend_opcache_static_cache_pinned_is_enabled(void);
+bool zend_opcache_static_cache_pinned_is_available(void);
+const char *zend_opcache_static_cache_pinned_failure_reason(void);
 
 END_EXTERN_C()
 

@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -35,10 +35,10 @@ var_dump($copy['nodes'][0] instanceof RelocatableArrayNode);
 var_dump($copy['nodes'][0]->metadata['flags']['auth']);
 var_dump($copy['nodes'][1]->metadata['flags']['cache']);
 
-OPcache\persistent_store('relocatable-array-object', new RelocatableArrayNode([
+OPcache\pinned_store('relocatable-array-object', new RelocatableArrayNode([
 	'matrix' => [[1, 2], [3, 4]],
 ]));
-$global = OPcache\persistent_fetch('relocatable-array-object');
+$global = OPcache\pinned_fetch('relocatable-array-object');
 
 var_dump($global instanceof RelocatableArrayNode);
 var_dump($global->metadata['matrix'][1][0]);

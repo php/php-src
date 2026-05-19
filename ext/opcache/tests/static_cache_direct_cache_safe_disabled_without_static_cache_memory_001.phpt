@@ -7,7 +7,7 @@ spl
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=0
-opcache.static_cache.persistent_size_mb=0
+opcache.static_cache.pinned_size_mb=0
 --FILE--
 <?php
 

@@ -1,15 +1,15 @@
 --TEST--
-OPcache persistent cache batch and atomic public API
+OPcache pinned cache batch and atomic public API
 --EXTENSIONS--
 opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
-OPcache\persistent_store_array([
+OPcache\pinned_store_array([
 	'count' => 10,
 	'name' => 'php',
 	'null' => null,
@@ -17,15 +17,15 @@ OPcache\persistent_store_array([
 
 $fallback = ['fallback'];
 
-var_dump(OPcache\persistent_fetch_array(['count', 'name', 'missing'], $fallback));
-var_dump(OPcache\persistent_atomic_increment('count'));
-var_dump(OPcache\persistent_atomic_decrement('count', 3));
+var_dump(OPcache\pinned_fetch_array(['count', 'name', 'missing'], $fallback));
+var_dump(OPcache\pinned_atomic_increment('count'));
+var_dump(OPcache\pinned_atomic_decrement('count', 3));
 
-OPcache\persistent_delete_array(['name', 'missing']);
-var_dump(OPcache\persistent_fetch_array(['count', 'name', 'null'], $fallback));
+OPcache\pinned_delete_array(['name', 'missing']);
+var_dump(OPcache\pinned_fetch_array(['count', 'name', 'null'], $fallback));
 
-OPcache\persistent_clear();
-var_dump(OPcache\persistent_fetch_array(['count'], $fallback));
+OPcache\pinned_clear();
+var_dump(OPcache\pinned_fetch_array(['count'], $fallback));
 
 ?>
 --EXPECT--

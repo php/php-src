@@ -7,7 +7,7 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/persistent_static_object_property_mutation_001.php', <<<'PHP'
+file_put_contents(__DIR__ . '/pinned_static_object_property_mutation_001.php', <<<'PHP'
 <?php
 class StaticAttributePlainObject
 {
@@ -43,9 +43,9 @@ class VolatileStaticSafeDirectMethodState
 	}
 }
 
-class PersistentStaticPlainMethodState
+class PinnedStaticPlainMethodState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static function value(): StaticAttributePlainObject
 	{
 		static $object = null;
@@ -55,9 +55,9 @@ class PersistentStaticPlainMethodState
 	}
 }
 
-class PersistentStaticSafeDirectMethodState
+class PinnedStaticSafeDirectMethodState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static function value(): StaticAttributeCustomImmutableDate
 	{
 		static $object = null;
@@ -67,9 +67,9 @@ class PersistentStaticSafeDirectMethodState
 	}
 }
 
-class PersistentStaticPlainPropertyState
+class PinnedStaticPlainPropertyState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static ?StaticAttributePlainObject $object = null;
 
 	public static function value(): StaticAttributePlainObject
@@ -79,9 +79,9 @@ class PersistentStaticPlainPropertyState
 	}
 }
 
-class PersistentStaticSafeDirectPropertyState
+class PinnedStaticSafeDirectPropertyState
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static ?StaticAttributeCustomImmutableDate $object = null;
 
 	public static function value(): StaticAttributeCustomImmutableDate
@@ -105,10 +105,10 @@ if ($action === 'reset') {
 $object = match ($backend . ':' . $kind) {
 	'volatile_static:plain' => VolatileStaticPlainMethodState::value(),
 	'volatile_static:safe_direct' => VolatileStaticSafeDirectMethodState::value(),
-	'persistent_static:plain' => PersistentStaticPlainMethodState::value(),
-	'persistent_static:safe_direct' => PersistentStaticSafeDirectMethodState::value(),
-	'persistent_static_property:plain' => PersistentStaticPlainPropertyState::value(),
-	'persistent_static_property:safe_direct' => PersistentStaticSafeDirectPropertyState::value(),
+	'pinned_static:plain' => PinnedStaticPlainMethodState::value(),
+	'pinned_static:safe_direct' => PinnedStaticSafeDirectMethodState::value(),
+	'pinned_static_property:plain' => PinnedStaticPlainPropertyState::value(),
+	'pinned_static_property:safe_direct' => PinnedStaticSafeDirectPropertyState::value(),
 	default => throw new RuntimeException('unknown backend or kind'),
 };
 
@@ -126,10 +126,10 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.persistent_size_mb=32 -d opcache.file_update_protection=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0');
 
-$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/persistent_static_object_property_mutation_001.php';
-foreach (['volatile_static', 'persistent_static', 'persistent_static_property'] as $backend) {
+$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_object_property_mutation_001.php';
+foreach (['volatile_static', 'pinned_static', 'pinned_static_property'] as $backend) {
 	foreach (['plain', 'safe_direct'] as $kind) {
 		$query = 'backend=' . $backend . '&kind=' . $kind;
 		echo file_get_contents($base . '?action=reset');
@@ -142,7 +142,7 @@ foreach (['volatile_static', 'persistent_static', 'persistent_static_property'] 
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/persistent_static_object_property_mutation_001.php');
+@unlink(__DIR__ . '/pinned_static_object_property_mutation_001.php');
 ?>
 --EXPECT--
 reset
@@ -154,18 +154,18 @@ volatile_static/safe_direct=0
 volatile_static/safe_direct=1
 volatile_static/safe_direct=1
 reset
-persistent_static/plain=0
-persistent_static/plain=1
-persistent_static/plain=0
+pinned_static/plain=0
+pinned_static/plain=1
+pinned_static/plain=0
 reset
-persistent_static/safe_direct=0
-persistent_static/safe_direct=1
-persistent_static/safe_direct=0
+pinned_static/safe_direct=0
+pinned_static/safe_direct=1
+pinned_static/safe_direct=0
 reset
-persistent_static_property/plain=0
-persistent_static_property/plain=1
-persistent_static_property/plain=0
+pinned_static_property/plain=0
+pinned_static_property/plain=1
+pinned_static_property/plain=0
 reset
-persistent_static_property/safe_direct=0
-persistent_static_property/safe_direct=1
-persistent_static_property/safe_direct=0
+pinned_static_property/safe_direct=0
+pinned_static_property/safe_direct=1
+pinned_static_property/safe_direct=0

@@ -1,11 +1,11 @@
 --TEST--
-OPcache PersistentStatic storage failures throw StaticCacheException
+OPcache PinnedStatic storage failures throw StaticCacheException
 --EXTENSIONS--
 opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.static_cache.persistent_size_mb=8
+opcache.static_cache.pinned_size_mb=8
 opcache.optimization_level=0
 opcache.file_update_protection=0
 opcache.jit=0
@@ -22,21 +22,21 @@ function dump_static_cache_exception(string $label, Closure $callback): void
 	}
 }
 
-class PersistentStaticStoreFailureProperty
+class PinnedStaticStoreFailureProperty
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static mixed $value = null;
 }
 
-#[OPcache\PersistentStatic]
-class PersistentStaticStoreFailureClass
+#[OPcache\PinnedStatic]
+class PinnedStaticStoreFailureClass
 {
 	public static mixed $value = null;
 }
 
-class PersistentStaticStoreFailureMethod
+class PinnedStaticStoreFailureMethod
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static function assign(mixed $value): void
 	{
 		static $state = null;
@@ -45,25 +45,25 @@ class PersistentStaticStoreFailureMethod
 	}
 }
 
-class PersistentStaticStoreFailureArray
+class PinnedStaticStoreFailureArray
 {
-	#[OPcache\PersistentStatic]
+	#[OPcache\PinnedStatic]
 	public static array $value = [];
 }
 
-class PersistentStaticStoreFailureUnsupportedValueBox
+class PinnedStaticStoreFailureUnsupportedValueBox
 {
 	public function __construct(public mixed $value)
 	{
 	}
 }
 
-OPcache\persistent_clear();
+OPcache\pinned_clear();
 
 dump_static_cache_exception('property-resource', function (): void {
 	$resource = fopen('/dev/null', 'r');
 	try {
-		PersistentStaticStoreFailureProperty::$value = $resource;
+		PinnedStaticStoreFailureProperty::$value = $resource;
 	} finally {
 		if (is_resource($resource)) {
 			fclose($resource);
@@ -72,13 +72,13 @@ dump_static_cache_exception('property-resource', function (): void {
 });
 
 dump_static_cache_exception('property-closure', function (): void {
-	PersistentStaticStoreFailureProperty::$value = static fn () => null;
+	PinnedStaticStoreFailureProperty::$value = static fn () => null;
 });
 
 dump_static_cache_exception('property-object-resource', function (): void {
 	$resource = fopen('/dev/null', 'r');
 	try {
-		PersistentStaticStoreFailureProperty::$value = new PersistentStaticStoreFailureUnsupportedValueBox($resource);
+		PinnedStaticStoreFailureProperty::$value = new PinnedStaticStoreFailureUnsupportedValueBox($resource);
 	} finally {
 		if (is_resource($resource)) {
 			fclose($resource);
@@ -87,24 +87,24 @@ dump_static_cache_exception('property-object-resource', function (): void {
 });
 
 dump_static_cache_exception('property-object-closure', function (): void {
-	PersistentStaticStoreFailureProperty::$value = new PersistentStaticStoreFailureUnsupportedValueBox(static fn () => null);
+	PinnedStaticStoreFailureProperty::$value = new PinnedStaticStoreFailureUnsupportedValueBox(static fn () => null);
 });
 
-$unused = PersistentStaticStoreFailureClass::$value;
+$unused = PinnedStaticStoreFailureClass::$value;
 dump_static_cache_exception('class-closure', function (): void {
-	PersistentStaticStoreFailureClass::$value = static fn () => null;
+	PinnedStaticStoreFailureClass::$value = static fn () => null;
 });
 
 dump_static_cache_exception('method-closure', function (): void {
-	PersistentStaticStoreFailureMethod::assign(static fn () => null);
+	PinnedStaticStoreFailureMethod::assign(static fn () => null);
 });
 
-PersistentStaticStoreFailureArray::$value = [];
+PinnedStaticStoreFailureArray::$value = [];
 dump_static_cache_exception('array-mutation-overflow', function (): void {
-	PersistentStaticStoreFailureArray::$value[] = str_repeat('X', 12 * 1024 * 1024);
+	PinnedStaticStoreFailureArray::$value[] = str_repeat('X', 12 * 1024 * 1024);
 });
 
-OPcache\persistent_clear();
+OPcache\pinned_clear();
 
 ?>
 --EXPECT--

@@ -38,7 +38,7 @@ try {
 	echo "readonly-ttl\n";
 }
 
-var_dump((new ReflectionClass(OPcache\PersistentStatic::class))->getConstructor());
+var_dump((new ReflectionClass(OPcache\PinnedStatic::class))->getConstructor());
 
 ?>
 --EXPECT--

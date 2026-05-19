@@ -871,16 +871,16 @@ static void zend_opcache_static_cache_unlock_impl(void)
 
 static HashTable **zend_opcache_static_cache_entry_locks_ptr_for_context(zend_opcache_static_cache_context *context)
 {
-	return context == &zend_opcache_static_cache_persistent_context_state
-		? &zend_opcache_static_cache_persistent_entry_locks
+	return context == &zend_opcache_static_cache_pinned_context_state
+		? &zend_opcache_static_cache_pinned_entry_locks
 		: &zend_opcache_static_cache_volatile_entry_locks
 	;
 }
 
 static uint32_t *zend_opcache_static_cache_entry_lock_counts_for_context(zend_opcache_static_cache_context *context)
 {
-	return context == &zend_opcache_static_cache_persistent_context_state
-		? zend_opcache_static_cache_persistent_entry_lock_counts
+	return context == &zend_opcache_static_cache_pinned_context_state
+		? zend_opcache_static_cache_pinned_entry_lock_counts
 		: zend_opcache_static_cache_volatile_entry_lock_counts
 	;
 }
@@ -1152,13 +1152,13 @@ static void zend_opcache_static_cache_ensure_entry_lock_process(void)
 		zend_opcache_static_cache_volatile_entry_lock_counts,
 		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_DROP);
 	zend_opcache_static_cache_release_entry_lock_context(
-		&zend_opcache_static_cache_persistent_context_state,
-		&zend_opcache_static_cache_persistent_entry_locks,
-		zend_opcache_static_cache_persistent_entry_lock_counts,
+		&zend_opcache_static_cache_pinned_context_state,
+		&zend_opcache_static_cache_pinned_entry_locks,
+		zend_opcache_static_cache_pinned_entry_lock_counts,
 		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_DROP);
 #ifdef ZTS
 	zend_opcache_static_cache_entry_locks_reinit_after_fork(&zend_opcache_static_cache_volatile_context_state.storage);
-	zend_opcache_static_cache_entry_locks_reinit_after_fork(&zend_opcache_static_cache_persistent_context_state.storage);
+	zend_opcache_static_cache_entry_locks_reinit_after_fork(&zend_opcache_static_cache_pinned_context_state.storage);
 	zend_opcache_static_cache_entry_locks_process_is_fork_child = true;
 #endif
 	zend_opcache_static_cache_entry_lock_owner_pid = current_pid;
@@ -1759,8 +1759,8 @@ void zend_opcache_static_cache_reset_runtime(void)
 
 	memset(runtime, 0, sizeof(*runtime));
 
-	runtime->configured_memory = context == &zend_opcache_static_cache_persistent_context_state
-		? ZCG(accel_directives).static_cache_persistent_size_mb
+	runtime->configured_memory = context == &zend_opcache_static_cache_pinned_context_state
+		? ZCG(accel_directives).static_cache_pinned_size_mb
 		: ZCG(accel_directives).static_cache_volatile_size_mb
 	;
 	runtime->enabled = runtime->configured_memory != 0;
@@ -2355,15 +2355,15 @@ void zend_opcache_static_cache_release_request_entry_locks(void)
 		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_PRESERVE_LEASES
 	);
 	zend_opcache_static_cache_release_entry_lock_context(
-		&zend_opcache_static_cache_persistent_context_state,
-		&zend_opcache_static_cache_persistent_entry_locks,
-		zend_opcache_static_cache_persistent_entry_lock_counts,
+		&zend_opcache_static_cache_pinned_context_state,
+		&zend_opcache_static_cache_pinned_entry_locks,
+		zend_opcache_static_cache_pinned_entry_lock_counts,
 		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_PRESERVE_LEASES
 	);
 #if !defined(ZEND_WIN32) && defined(ZTS)
 	if (zend_opcache_static_cache_entry_locks_process_is_fork_child) {
 		zend_opcache_static_cache_entry_locks_shutdown(&zend_opcache_static_cache_volatile_context_state.storage);
-		zend_opcache_static_cache_entry_locks_shutdown(&zend_opcache_static_cache_persistent_context_state.storage);
+		zend_opcache_static_cache_entry_locks_shutdown(&zend_opcache_static_cache_pinned_context_state.storage);
 	}
 #endif
 #ifndef ZEND_WIN32

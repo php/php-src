@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -16,27 +16,27 @@ $payload = [
 ];
 
 var_dump(OPcache\volatile_store('safe_direct_volatile_first', $payload));
-OPcache\persistent_store('safe_direct_persistent_first', $payload);
+OPcache\pinned_store('safe_direct_pinned_first', $payload);
 
 $payload['name'] = 'second';
 $payload['date']->modify('+2 days');
 
 var_dump(OPcache\volatile_store('safe_direct_volatile_second', $payload));
-OPcache\persistent_store('safe_direct_persistent_second', $payload);
+OPcache\pinned_store('safe_direct_pinned_second', $payload);
 
 $volatileFirst = OPcache\volatile_fetch('safe_direct_volatile_first');
 $volatileSecond = OPcache\volatile_fetch('safe_direct_volatile_second');
-$persistentFirst = OPcache\persistent_fetch('safe_direct_persistent_first');
-$persistentSecond = OPcache\persistent_fetch('safe_direct_persistent_second');
+$pinnedFirst = OPcache\pinned_fetch('safe_direct_pinned_first');
+$pinnedSecond = OPcache\pinned_fetch('safe_direct_pinned_second');
 
 echo $volatileFirst['name'], "\n";
 echo $volatileFirst['date']->format('Y-m-d H:i:s'), "\n";
 echo $volatileSecond['name'], "\n";
 echo $volatileSecond['date']->format('Y-m-d H:i:s'), "\n";
-echo $persistentFirst['name'], "\n";
-echo $persistentFirst['date']->format('Y-m-d H:i:s'), "\n";
-echo $persistentSecond['name'], "\n";
-echo $persistentSecond['date']->format('Y-m-d H:i:s'), "\n";
+echo $pinnedFirst['name'], "\n";
+echo $pinnedFirst['date']->format('Y-m-d H:i:s'), "\n";
+echo $pinnedSecond['name'], "\n";
+echo $pinnedSecond['date']->format('Y-m-d H:i:s'), "\n";
 
 ?>
 --EXPECT--

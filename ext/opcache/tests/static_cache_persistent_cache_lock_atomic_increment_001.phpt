@@ -1,5 +1,5 @@
 --TEST--
-OPcache persistent_lock is released by persistent_atomic_increment
+OPcache pinned_lock is released by pinned_atomic_increment
 --EXTENSIONS--
 opcache
 pcntl
@@ -12,7 +12,7 @@ if (!function_exists('pcntl_fork')) {
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -27,17 +27,17 @@ function wait_for_file(string $path): void
 	}
 }
 
-$prefix = sys_get_temp_dir() . '/opcache_persistent_exists_lock_' . getmypid();
+$prefix = sys_get_temp_dir() . '/opcache_pinned_exists_lock_' . getmypid();
 $readyFile = $prefix . '.ready';
 $resultFile = $prefix . '.result';
 @unlink($readyFile);
 @unlink($resultFile);
 
-$key = 'persistent_exists_lock_' . getmypid();
-OPcache\persistent_clear();
+$key = 'pinned_exists_lock_' . getmypid();
+OPcache\pinned_clear();
 
-var_dump(OPcache\persistent_lock($key));
-var_dump(OPcache\persistent_atomic_increment($key, 9));
+var_dump(OPcache\pinned_lock($key));
+var_dump(OPcache\pinned_atomic_increment($key, 9));
 
 $pid = pcntl_fork();
 if ($pid === -1) {
@@ -52,8 +52,8 @@ if ($pid === 0) {
 	});
 	pcntl_alarm(3);
 	file_put_contents($readyFile, 'ready');
-	$exists = OPcache\persistent_lock($key);
-	$value = OPcache\persistent_fetch($key);
+	$exists = OPcache\pinned_lock($key);
+	$value = OPcache\pinned_fetch($key);
 	pcntl_alarm(0);
 	file_put_contents($resultFile, ($exists ? 'true' : 'false') . "\n" . $value . "\n");
 	exit(0);
@@ -73,7 +73,7 @@ true
 9
 --CLEAN--
 <?php
-foreach (glob(sys_get_temp_dir() . '/opcache_persistent_exists_lock_*') ?: [] as $path) {
+foreach (glob(sys_get_temp_dir() . '/opcache_pinned_exists_lock_*') ?: [] as $path) {
 	@unlink($path);
 }
 ?>

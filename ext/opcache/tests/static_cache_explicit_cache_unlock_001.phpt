@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -15,7 +15,7 @@ function cache_clear(string $backend): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_clear();
 	} else {
-		OPcache\persistent_clear();
+		OPcache\pinned_clear();
 	}
 }
 
@@ -24,7 +24,7 @@ function cache_store(string $backend, string $key, mixed $value): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_store($key, $value);
 	} else {
-		OPcache\persistent_store($key, $value);
+		OPcache\pinned_store($key, $value);
 	}
 }
 
@@ -32,24 +32,24 @@ function cache_fetch(string $backend, string $key, mixed $default = null): mixed
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_fetch($key, $default)
-		: OPcache\persistent_fetch($key, $default);
+		: OPcache\pinned_fetch($key, $default);
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_lock($key)
-		: OPcache\persistent_lock($key);
+		: OPcache\pinned_lock($key);
 }
 
 function cache_unlock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_unlock($key)
-		: OPcache\persistent_unlock($key);
+		: OPcache\pinned_unlock($key);
 }
 
-foreach (['volatile', 'persistent'] as $backend) {
+foreach (['volatile', 'pinned'] as $backend) {
 	$key = $backend . '_manual_unlock';
 
 	echo $backend, "\n";
@@ -77,7 +77,7 @@ bool(false)
 bool(true)
 bool(false)
 string(9) "published"
-persistent
+pinned
 bool(false)
 bool(true)
 bool(true)

@@ -13,7 +13,7 @@ if (!function_exists('pcntl_fork')) {
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -42,7 +42,7 @@ function cache_clear(string $backend): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_clear();
 	} else {
-		OPcache\persistent_clear();
+		OPcache\pinned_clear();
 	}
 }
 
@@ -52,7 +52,7 @@ function cache_store(string $backend, string $key, mixed $value): mixed
 		return OPcache\volatile_store($key, $value);
 	}
 
-	OPcache\persistent_store($key, $value);
+	OPcache\pinned_store($key, $value);
 	return null;
 }
 
@@ -62,7 +62,7 @@ function cache_store_array(string $backend, array $values): mixed
 		return OPcache\volatile_store_array($values);
 	}
 
-	OPcache\persistent_store_array($values);
+	OPcache\pinned_store_array($values);
 	return null;
 }
 
@@ -70,14 +70,14 @@ function cache_fetch(string $backend, string $key, mixed $default = null): mixed
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_fetch($key, $default)
-		: OPcache\persistent_fetch($key, $default);
+		: OPcache\pinned_fetch($key, $default);
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_lock($key)
-		: OPcache\persistent_lock($key);
+		: OPcache\pinned_lock($key);
 }
 
 function cache_delete(string $backend, string $key): void
@@ -85,7 +85,7 @@ function cache_delete(string $backend, string $key): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_delete($key);
 	} else {
-		OPcache\persistent_delete($key);
+		OPcache\pinned_delete($key);
 	}
 }
 
@@ -94,7 +94,7 @@ function cache_delete_array(string $backend, array $keys): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_delete_array($keys);
 	} else {
-		OPcache\persistent_delete_array($keys);
+		OPcache\pinned_delete_array($keys);
 	}
 }
 
@@ -189,13 +189,13 @@ function run_backend_mutators(string $backend): void
 		static fn () => print 'delete_array value: ' . cache_fetch($backend, $key, 'MISS') . "\n",
 	);
 
-	if ($backend === 'persistent') {
+	if ($backend === 'pinned') {
 		$key = $baseKey . '_atomic';
 		reserve_missing($backend, $key);
 		run_blocked_mutator(
 			$backend,
 			'atomic',
-			static fn () => OPcache\persistent_atomic_increment($key, 2),
+			static fn () => OPcache\pinned_atomic_increment($key, 2),
 			static fn () => cache_store($backend, $key, 10),
 			static fn () => print 'atomic value: ' . cache_fetch($backend, $key, 'MISS') . "\n",
 		);
@@ -205,7 +205,7 @@ function run_backend_mutators(string $backend): void
 		run_blocked_mutator(
 			$backend,
 			'atomic_decrement',
-			static fn () => OPcache\persistent_atomic_decrement($key, 3),
+			static fn () => OPcache\pinned_atomic_decrement($key, 3),
 			static fn () => cache_store($backend, $key, 10),
 			static fn () => print 'atomic_decrement value: ' . cache_fetch($backend, $key, 'MISS') . "\n",
 		);
@@ -227,7 +227,7 @@ function run_backend_mutators(string $backend): void
 }
 
 run_backend_mutators('volatile');
-run_backend_mutators('persistent');
+run_backend_mutators('pinned');
 
 ?>
 --EXPECT--
@@ -253,7 +253,7 @@ bool(true)
 clear blocked: no
 clear result: null
 clear values: owner,MISS
-persistent
+pinned
 bool(true)
 store blocked: yes
 store result: null

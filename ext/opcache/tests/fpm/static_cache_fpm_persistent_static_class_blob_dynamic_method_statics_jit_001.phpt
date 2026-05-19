@@ -1,5 +1,5 @@
 --TEST--
-FPM: OPcache PersistentStatic class blob survives dynamic method statics with JIT enabled across requests
+FPM: OPcache PinnedStatic class blob survives dynamic method statics with JIT enabled across requests
 --SKIPIF--
 <?php
 include __DIR__ . '/skipif.inc';
@@ -25,18 +25,18 @@ EOT;
 
 $code = <<<'PHP'
 <?php
-function persistent_static_seed(string $logFile): int
+function pinned_static_seed(string $logFile): int
 {
 	file_put_contents($logFile, "seed\n", FILE_APPEND);
 	return 1;
 }
 
-function persistent_static_jit_on(): int
+function pinned_static_jit_on(): int
 {
 	return (int) (opcache_get_status()['jit']['on'] ?? false);
 }
 
-#[OPcache\PersistentStatic]
+#[OPcache\PinnedStatic]
 class JitCombinedBlobState
 {
 	public static int $count = 0;
@@ -44,14 +44,14 @@ class JitCombinedBlobState
 
 	public static function nextValue(string $logFile): int
 	{
-		static $value = persistent_static_seed($logFile);
+		static $value = pinned_static_seed($logFile);
 
 		return ++$value;
 	}
 }
 
 $request = (int) ($_GET['request'] ?? 1);
-$logFile = __DIR__ . '/persistent_static_fpm_006.log';
+$logFile = __DIR__ . '/pinned_static_fpm_006.log';
 
 if ($request === 1) {
 	@unlink($logFile);
@@ -65,12 +65,12 @@ if ($request === 1) {
 	JitCombinedBlobState::$bag['numbers'][] = 10;
 	JitCombinedBlobState::$bag['numbers'][] = 11;
 
-	echo persistent_static_jit_on(), ',', $last, ',', JitCombinedBlobState::$count, ',', array_sum(JitCombinedBlobState::$bag['numbers']), ',', count(file($logFile, FILE_IGNORE_NEW_LINES));
+	echo pinned_static_jit_on(), ',', $last, ',', JitCombinedBlobState::$count, ',', array_sum(JitCombinedBlobState::$bag['numbers']), ',', count(file($logFile, FILE_IGNORE_NEW_LINES));
 	return;
 }
 
 if ($request === 2) {
-	echo persistent_static_jit_on(), ',', JitCombinedBlobState::$count, ',', array_sum(JitCombinedBlobState::$bag['numbers']), ',', OPcache\persistent_cache_info()->entry_count, ',', count(file($logFile, FILE_IGNORE_NEW_LINES)), "\n";
+	echo pinned_static_jit_on(), ',', JitCombinedBlobState::$count, ',', array_sum(JitCombinedBlobState::$bag['numbers']), ',', OPcache\pinned_cache_info()->entry_count, ',', count(file($logFile, FILE_IGNORE_NEW_LINES)), "\n";
 
 	$last = 0;
 	for ($i = 0; $i < 4; $i++) {
@@ -83,13 +83,13 @@ if ($request === 2) {
 	return;
 }
 
-echo persistent_static_jit_on(), ',', JitCombinedBlobState::$count, ',', array_sum(JitCombinedBlobState::$bag['numbers']), ',', OPcache\persistent_cache_info()->entry_count, ',', count(file($logFile, FILE_IGNORE_NEW_LINES));
+echo pinned_static_jit_on(), ',', JitCombinedBlobState::$count, ',', array_sum(JitCombinedBlobState::$bag['numbers']), ',', OPcache\pinned_cache_info()->entry_count, ',', count(file($logFile, FILE_IGNORE_NEW_LINES));
 PHP;
 
 $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
 	'opcache.enable' => '1',
-	'opcache.static_cache.persistent_size_mb' => '32',
+	'opcache.static_cache.pinned_size_mb' => '32',
 	'opcache.file_update_protection' => '0',
 	'opcache.jit' => 'tracing',
 	'opcache.jit_buffer_size' => '64M',
@@ -117,5 +117,5 @@ Done
 <?php
 require_once __DIR__ . '/tester.inc';
 FPM\Tester::clean();
-@unlink(__DIR__ . '/persistent_static_fpm_006.log');
+@unlink(__DIR__ . '/pinned_static_fpm_006.log');
 ?>

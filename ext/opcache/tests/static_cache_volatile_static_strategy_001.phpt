@@ -202,7 +202,7 @@ $case = $_GET['case'] ?? 'class_default';
 
 if ($action === 'reset') {
 	OPcache\volatile_clear();
-	OPcache\persistent_clear();
+	OPcache\pinned_clear();
 	opcache_reset();
 	echo "reset\n";
 	return;
@@ -219,7 +219,7 @@ if ($action === 'seed' || $action === 'mutate_after_fetch') {
 cached_strategy_dump($case, $values);
 
 if ($action === 'read') {
-	echo 'cache=', OPcache\volatile_cache_info()->entry_count, ',', OPcache\persistent_cache_info()->entry_count, "\n";
+	echo 'cache=', OPcache\volatile_cache_info()->entry_count, ',', OPcache\pinned_cache_info()->entry_count, "\n";
 }
 PHP);
 
@@ -230,7 +230,7 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.persistent_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0');
 
 $base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/volatile_static_strategy_001.php';
 $cases = [

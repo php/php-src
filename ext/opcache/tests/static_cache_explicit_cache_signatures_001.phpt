@@ -42,14 +42,14 @@ foreach ([
 	'OPcache\\volatile_lock' => ['lease'],
 	'OPcache\\volatile_unlock' => [],
 	'OPcache\\volatile_cache_info' => [],
-	'OPcache\\persistent_store' => ['value'],
-	'OPcache\\persistent_fetch' => ['default'],
-	'OPcache\\persistent_fetch_array' => ['default'],
-	'OPcache\\persistent_lock' => ['lease'],
-	'OPcache\\persistent_unlock' => [],
-	'OPcache\\persistent_atomic_increment' => ['step'],
-	'OPcache\\persistent_atomic_decrement' => ['step'],
-	'OPcache\\persistent_cache_info' => [],
+	'OPcache\\pinned_store' => ['value'],
+	'OPcache\\pinned_fetch' => ['default'],
+	'OPcache\\pinned_fetch_array' => ['default'],
+	'OPcache\\pinned_lock' => ['lease'],
+	'OPcache\\pinned_unlock' => [],
+	'OPcache\\pinned_atomic_increment' => ['step'],
+	'OPcache\\pinned_atomic_decrement' => ['step'],
+	'OPcache\\pinned_cache_info' => [],
 ] as $function => $parameters) {
 	$reflection = new ReflectionFunction($function);
 	$parts = [$function];
@@ -74,11 +74,11 @@ OPcache\volatile_fetch_array $default=?array params=1/2 return=?array
 OPcache\volatile_lock $lease=int params=1/2 return=bool
 OPcache\volatile_unlock params=1/1 return=bool
 OPcache\volatile_cache_info params=0/0 return=OPcache\StaticCacheInfo
-OPcache\persistent_store $value=null|bool|int|float|string|array|object params=2/2 return=void
-OPcache\persistent_fetch $default=null|bool|int|float|string|array|object params=1/2 return=null|bool|int|float|string|array|object
-OPcache\persistent_fetch_array $default=?array params=1/2 return=?array
-OPcache\persistent_lock $lease=int params=1/2 return=bool
-OPcache\persistent_unlock params=1/1 return=bool
-OPcache\persistent_atomic_increment $step=int params=1/2 return=int
-OPcache\persistent_atomic_decrement $step=int params=1/2 return=int
-OPcache\persistent_cache_info params=0/0 return=OPcache\StaticCacheInfo
+OPcache\pinned_store $value=null|bool|int|float|string|array|object params=2/2 return=void
+OPcache\pinned_fetch $default=null|bool|int|float|string|array|object params=1/2 return=null|bool|int|float|string|array|object
+OPcache\pinned_fetch_array $default=?array params=1/2 return=?array
+OPcache\pinned_lock $lease=int params=1/2 return=bool
+OPcache\pinned_unlock params=1/1 return=bool
+OPcache\pinned_atomic_increment $step=int params=1/2 return=int
+OPcache\pinned_atomic_decrement $step=int params=1/2 return=int
+OPcache\pinned_cache_info params=0/0 return=OPcache\StaticCacheInfo

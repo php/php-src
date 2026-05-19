@@ -134,7 +134,7 @@ static zend_opcache_static_cache_kind zend_opcache_static_cache_kind_from_attrib
 		zend_class_entry *scope,
 		zend_long *ttl)
 {
-	bool persistent_static;
+	bool pinned_static;
 	zend_attribute *volatile_static;
 
 	if (ttl != NULL) {
@@ -145,14 +145,14 @@ static zend_opcache_static_cache_kind zend_opcache_static_cache_kind_from_attrib
 		return ZEND_OPCACHE_STATIC_CACHE_NONE;
 	}
 
-	persistent_static = zend_get_attribute_str(attributes, ZEND_STRL(ZEND_OPCACHE_STATIC_CACHE_PERSISTENT_ATTRIBUTE)) != NULL;
+	pinned_static = zend_get_attribute_str(attributes, ZEND_STRL(ZEND_OPCACHE_STATIC_CACHE_PINNED_ATTRIBUTE)) != NULL;
 	volatile_static = zend_get_attribute_str(attributes, ZEND_STRL(ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC_ATTRIBUTE));
-	if (persistent_static && volatile_static != NULL) {
+	if (pinned_static && volatile_static != NULL) {
 		return ZEND_OPCACHE_STATIC_CACHE_CONFLICT;
 	}
 
-	if (persistent_static) {
-		return ZEND_OPCACHE_STATIC_CACHE_PERSISTENT;
+	if (pinned_static) {
+		return ZEND_OPCACHE_STATIC_CACHE_PINNED;
 	}
 
 	if (volatile_static != NULL) {
@@ -165,7 +165,7 @@ static zend_opcache_static_cache_kind zend_opcache_static_cache_kind_from_attrib
 static bool zend_opcache_static_cache_handle_attribute_conflict(zend_opcache_static_cache_kind kind)
 {
 	if (kind == ZEND_OPCACHE_STATIC_CACHE_CONFLICT) {
-		zend_error(E_ERROR, "OPcache\\PersistentStatic and OPcache\\VolatileStatic cannot be combined on the same target");
+		zend_error(E_ERROR, "OPcache\\PinnedStatic and OPcache\\VolatileStatic cannot be combined on the same target");
 
 		return false;
 	}
@@ -206,19 +206,19 @@ static zend_opcache_static_cache_context *zend_opcache_static_cache_context_for_
 {
 	return kind == ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC || kind == ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC_TRACKING
 		? &zend_opcache_static_cache_volatile_context_state
-		: &zend_opcache_static_cache_persistent_context_state
+		: &zend_opcache_static_cache_pinned_context_state
 	;
 }
 
 static const char *zend_opcache_static_cache_key_prefix_for_kind(zend_opcache_static_cache_kind kind)
 {
-	return kind == ZEND_OPCACHE_STATIC_CACHE_PERSISTENT ? "persistent_static" : "volatile_static";
+	return kind == ZEND_OPCACHE_STATIC_CACHE_PINNED ? "pinned_static" : "volatile_static";
 }
 
 static bool zend_opcache_static_cache_kind_tracks_reachable_arrays(
 		zend_opcache_static_cache_kind kind)
 {
-	return kind == ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC_TRACKING || kind == ZEND_OPCACHE_STATIC_CACHE_PERSISTENT;
+	return kind == ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC_TRACKING || kind == ZEND_OPCACHE_STATIC_CACHE_PINNED;
 }
 
 static bool zend_opcache_static_cache_kind_tracks_reachable_objects(
@@ -238,7 +238,7 @@ static bool zend_opcache_static_cache_kind_tracks_reachable_mutations(
 static bool zend_opcache_static_cache_kind_publishes_immediately(
 		zend_opcache_static_cache_kind kind)
 {
-	return kind == ZEND_OPCACHE_STATIC_CACHE_PERSISTENT || kind == ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC;
+	return kind == ZEND_OPCACHE_STATIC_CACHE_PINNED || kind == ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC;
 }
 
 static bool zend_opcache_static_cache_kind_defers_reachable_mutation_publish(
@@ -2134,7 +2134,7 @@ static void zend_opcache_static_cache_publish_class_blob_fast(zend_opcache_stati
 	previous_context = zend_opcache_static_cache_activate_context(class_blob_handle->context);
 	if (zend_opcache_static_cache_wlock()) {
 		if (zend_opcache_static_cache_header_init_locked()) {
-			/* Immediate class blobs publish root assignments immediately. PersistentStatic
+			/* Immediate class blobs publish root assignments immediately. PinnedStatic
 			 * array graphs are re-registered after publication so later array writes
 			 * also fail or succeed at the write site. */
 			class_blob_handle->dirty = true;
@@ -2737,7 +2737,7 @@ static bool zend_opcache_static_cache_class_access_filter(
 	return false;
 }
 
-static void zend_opcache_static_cache_publish_persistent_static_properties_fast(zend_class_entry *ce)
+static void zend_opcache_static_cache_publish_pinned_static_properties_fast(zend_class_entry *ce)
 {
 	zend_opcache_static_cache_context *context, *previous_context;
 	zend_opcache_static_cache_static_slot_handle *handle;
@@ -3059,7 +3059,7 @@ static void zend_opcache_static_cache_capture_decoded_reachable_value_ex(
 	}
 
 	if (zend_opcache_static_cache_capture_handle != NULL &&
-		zend_opcache_static_cache_capture_handle->kind == ZEND_OPCACHE_STATIC_CACHE_PERSISTENT
+		zend_opcache_static_cache_capture_handle->kind == ZEND_OPCACHE_STATIC_CACHE_PINNED
 	) {
 		return;
 	}
@@ -3391,7 +3391,7 @@ static void zend_opcache_static_cache_class_update(zend_class_entry *ce)
 
 	class_blob_handle = zend_opcache_static_cache_find_class_blob_handle(ce);
 	if (class_blob_handle == NULL) {
-		zend_opcache_static_cache_publish_persistent_static_properties_fast(ce);
+		zend_opcache_static_cache_publish_pinned_static_properties_fast(ce);
 
 		return;
 	}
@@ -3820,7 +3820,7 @@ void zend_opcache_static_cache_request_shutdown(void)
 {
 	if (zend_opcache_static_cache_attribute_classes_initialized || zend_opcache_static_cache_function_statics_initialized || zend_opcache_static_cache_class_blob_handles_initialized) {
 		zend_opcache_static_cache_flush_pending();
-		zend_opcache_static_cache_publish_context(&zend_opcache_static_cache_persistent_context_state);
+		zend_opcache_static_cache_publish_context(&zend_opcache_static_cache_pinned_context_state);
 		zend_opcache_static_cache_publish_context(&zend_opcache_static_cache_volatile_context_state);
 
 		if (zend_opcache_static_cache_attribute_classes_initialized) {

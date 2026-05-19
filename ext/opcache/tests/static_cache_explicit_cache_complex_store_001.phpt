@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -76,12 +76,12 @@ var_dump(ExplicitPreparedSerializableUser::$unserializeCount);
 var_dump($internal instanceof DateTimeImmutable);
 var_dump($internal->format('Y-m-d H:i:s'));
 
-OPcache\persistent_store('persistent_user', new ExplicitPreparedUser('Carol', 40));
-$persistent = OPcache\persistent_fetch('persistent_user');
+OPcache\pinned_store('pinned_user', new ExplicitPreparedUser('Carol', 40));
+$pinned = OPcache\pinned_fetch('pinned_user');
 
-var_dump($persistent instanceof ExplicitPreparedUser);
-var_dump($persistent->name);
-var_dump($persistent->age);
+var_dump($pinned instanceof ExplicitPreparedUser);
+var_dump($pinned->name);
+var_dump($pinned->age);
 
 var_dump(OPcache\volatile_store_array([]));
 

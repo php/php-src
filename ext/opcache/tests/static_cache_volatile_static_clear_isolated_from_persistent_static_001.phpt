@@ -1,5 +1,5 @@
 --TEST--
-OPcache VolatileStatic persists through volatile cache and can be cleared independently of PersistentStatic
+OPcache VolatileStatic persists through volatile cache and can be cleared independently of PinnedStatic
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -22,7 +22,7 @@ class CachedCounter
 	}
 }
 
-#[OPcache\PersistentStatic]
+#[OPcache\PinnedStatic]
 class GlobalCounter
 {
 	public static int $value = 0;
@@ -52,7 +52,7 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.persistent_size_mb=32 -d opcache.file_update_protection=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0');
 
 echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/volatile_static_001.php');
 echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/volatile_static_001.php');

@@ -1,5 +1,5 @@
 --TEST--
-OPcache explicit volatile and persistent delete frees payload memory across threads
+OPcache explicit volatile and pinned delete frees payload memory across threads
 --EXTENSIONS--
 opcache
 --SKIPIF--

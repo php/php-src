@@ -13,7 +13,7 @@ if (!function_exists('pcntl_fork')) {
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -22,7 +22,7 @@ function cache_clear(string $backend): void
 	if ($backend === 'volatile') {
 		OPcache\volatile_clear();
 	} else {
-		OPcache\persistent_clear();
+		OPcache\pinned_clear();
 	}
 }
 
@@ -30,7 +30,7 @@ function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
 		? OPcache\volatile_lock($key)
-		: OPcache\persistent_lock($key);
+		: OPcache\pinned_lock($key);
 }
 
 function cache_store(string $backend, string $key, mixed $value): void
@@ -40,7 +40,7 @@ function cache_store(string $backend, string $key, mixed $value): void
 			throw new RuntimeException('volatile_store failed');
 		}
 	} else {
-		OPcache\persistent_store($key, $value);
+		OPcache\pinned_store($key, $value);
 	}
 }
 
@@ -109,7 +109,7 @@ function run_collision_case(string $backend): void
 }
 
 run_collision_case('volatile');
-run_collision_case('persistent');
+run_collision_case('pinned');
 
 ?>
 --EXPECT--
@@ -118,7 +118,7 @@ volatile
 blocked
 released
 bool(true)
-persistent
+pinned
 blocked
 released
 --CLEAN--

@@ -7,7 +7,7 @@ spl
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.persistent_size_mb=32
+opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
@@ -26,7 +26,7 @@ function dump_label(string $prefix, ExplicitRequestLocalSlotPayload $payload): v
 }
 
 OPcache\volatile_clear();
-OPcache\persistent_clear();
+OPcache\pinned_clear();
 
 $volatilePayload = ['object' => new ExplicitRequestLocalSlotPayload('volatile-stored')];
 var_dump(OPcache\volatile_store('request_local_slot', $volatilePayload));
@@ -82,22 +82,22 @@ $volatileListSecond = OPcache\volatile_fetch('request_local_unsupported_internal
 var_dump($volatileListFirst === $volatileListSecond);
 echo $volatileListSecond->count(), ':', $volatileListSecond->bottom(), "\n";
 
-OPcache\persistent_store('request_local_slot', ['object' => new ExplicitRequestLocalSlotPayload('persistent-stored')]);
-$persistentFirst = OPcache\persistent_fetch('request_local_slot');
-$persistentWarm = OPcache\persistent_fetch('request_local_slot');
-var_dump($persistentFirst['object'] === $persistentWarm['object']);
-$persistentFirst['object']->label = 'persistent-mutated-in-request';
-$persistentSecond = OPcache\persistent_fetch('request_local_slot');
+OPcache\pinned_store('request_local_slot', ['object' => new ExplicitRequestLocalSlotPayload('pinned-stored')]);
+$pinnedFirst = OPcache\pinned_fetch('request_local_slot');
+$pinnedWarm = OPcache\pinned_fetch('request_local_slot');
+var_dump($pinnedFirst['object'] === $pinnedWarm['object']);
+$pinnedFirst['object']->label = 'pinned-mutated-in-request';
+$pinnedSecond = OPcache\pinned_fetch('request_local_slot');
 
-var_dump($persistentFirst['object'] === $persistentSecond['object']);
-dump_label('persistent-second', $persistentSecond['object']);
+var_dump($pinnedFirst['object'] === $pinnedSecond['object']);
+dump_label('pinned-second', $pinnedSecond['object']);
 
-OPcache\persistent_store('request_local_slot', ['object' => new ExplicitRequestLocalSlotPayload('persistent-replaced')]);
-$persistentReplaced = OPcache\persistent_fetch('request_local_slot');
-dump_label('persistent-replaced', $persistentReplaced['object']);
+OPcache\pinned_store('request_local_slot', ['object' => new ExplicitRequestLocalSlotPayload('pinned-replaced')]);
+$pinnedReplaced = OPcache\pinned_fetch('request_local_slot');
+dump_label('pinned-replaced', $pinnedReplaced['object']);
 
-OPcache\persistent_delete('request_local_slot');
-var_dump(OPcache\persistent_fetch('request_local_slot', 'persistent-missing'));
+OPcache\pinned_delete('request_local_slot');
+var_dump(OPcache\pinned_fetch('request_local_slot', 'pinned-missing'));
 
 ?>
 --EXPECT--
@@ -125,6 +125,6 @@ bool(false)
 1:stored
 bool(false)
 bool(false)
-persistent-second=persistent-stored
-persistent-replaced=persistent-replaced
-string(18) "persistent-missing"
+pinned-second=pinned-stored
+pinned-replaced=pinned-replaced
+string(14) "pinned-missing"
