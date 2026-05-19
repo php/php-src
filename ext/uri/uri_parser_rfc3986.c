@@ -111,25 +111,23 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_writing(php_uri_parser_rfc398
 	return &uriparser_uris->uri;
 }
 
-ZEND_ATTRIBUTE_NONNULL void php_uri_parser_rfc3986_uri_type_read(void *uri, zval *retval)
+ZEND_ATTRIBUTE_NONNULL void php_uri_parser_rfc3986_uri_type_read(php_uri_parser_rfc3986_uris *uri, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, PHP_URI_COMPONENT_READ_MODE_RAW);
 
+	const char *type;
+
 	if (has_text_range(&uriparser_uri->scheme)) {
-		ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_rfc3986_uri_type, "Uri"));
-		return;
-	}
-
-	if (has_text_range(&uriparser_uri->hostText)) {
-		ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_rfc3986_uri_type, "NetworkPathReference"));
-		return;
-	}
-
-	if (uriparser_uri->absolutePath) {
-		ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_rfc3986_uri_type, "AbsolutePathReference"));
+		type = "Uri";
+	} else if (has_text_range(&uriparser_uri->hostText)) {
+		type = "NetworkPathReference";
+	} else if (uriparser_uri->absolutePath) {
+		type = "AbsolutePathReference";
 	} else {
-		ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_rfc3986_uri_type, "RelativePathReference"));
+		type = "RelativePathReference";
 	}
+
+	ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_rfc3986_uri_type, type));
 }
 
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
