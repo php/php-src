@@ -68,6 +68,12 @@ function static_cache_internal_object_wait_for_file(string $path): void
 	}
 }
 
+function static_cache_internal_object_reset(): void
+{
+	OPcache\volatile_clear();
+	opcache_reset();
+}
+
 function static_cache_internal_object_fork_case(string $state): void
 {
 	$prefix = sys_get_temp_dir() . '/opcache_volatile_static_internal_object_method_mutation_fork_' . getmypid() . '_' . $state;
@@ -151,6 +157,8 @@ function static_cache_internal_object_dump_case(string $state): void
 foreach (['date', 'array', 'fixed'] as $state) {
 	static_cache_internal_object_fork_case($state);
 }
+
+static_cache_internal_object_reset();
 
 ?>
 --EXPECT--

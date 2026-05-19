@@ -9,6 +9,8 @@ opcache.static_cache.volatile_size_mb=8
 --FILE--
 <?php
 
+OPcache\volatile_clear();
+
 $payloadA = str_repeat('A', 2000000);
 $payloadB = str_repeat('B', 2000000);
 $payloadC = str_repeat('C', 2000000);
@@ -23,6 +25,8 @@ OPcache\volatile_delete('second');
 
 var_dump(OPcache\volatile_store('merged', $payloadD));
 var_dump(strlen(OPcache\volatile_fetch('merged')));
+
+OPcache\volatile_clear();
 
 ?>
 --EXPECT--
