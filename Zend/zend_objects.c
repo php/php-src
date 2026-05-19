@@ -193,14 +193,14 @@ ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 	return object;
 }
 
-ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
+ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, const zend_object *old_object)
 {
 	bool has_clone_method = old_object->ce->clone != NULL;
 
 	if (old_object->ce->default_properties_count) {
-		zval *src = old_object->properties_table;
+		const zval *src = old_object->properties_table;
 		zval *dst = new_object->properties_table;
-		zval *end = src + old_object->ce->default_properties_count;
+		const zval *end = src + old_object->ce->default_properties_count;
 
 		do {
 			i_zval_ptr_dtor(dst);
