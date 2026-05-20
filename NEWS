@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     IntlCalendar::equals(), ::before(), ::after(), and ::isEquivalentTo().
     (Weilin Du)
 
+- Zlib:
+  . Fixed memory leak if deflate initialization fails and there is a dict.
+    (ndossche)
 
 04 Jun 2026, PHP 8.4.22
 
