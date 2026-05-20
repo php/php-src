@@ -1468,6 +1468,10 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 			php_error_docref(NULL, E_WARNING, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
 				(zend_long)((char*)p - buf), buf_len);
 		}
+		/* Drain queued __wakeup / __unserialize calls before destructors of the
+		 * partially-built return value run, so __wakeup-based input validation
+		 * applies before sibling objects observe half-built state. See GH-9618. */
+		var_invoke_delayed_calls(&var_hash);
 		if (BG(unserialize).level <= 1) {
 			zval_ptr_dtor(return_value);
 		}
