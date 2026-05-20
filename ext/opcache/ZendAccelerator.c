@@ -1900,7 +1900,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 
 static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 {
-	zend_persistent_script *persistent_script;
+	zend_persistent_script *persistent_script = NULL;
 	zend_op_array *op_array = NULL;
 	bool from_memory; /* if the script we've got is stored in SHM */
 
@@ -1923,11 +1923,35 @@ static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int
 	    }
 	}
 
-	HANDLE_BLOCK_INTERRUPTIONS();
-	SHM_UNPROTECT();
-	persistent_script = zend_file_cache_script_load(file_handle);
-	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
+	/* In file_cache_only mode each call to zend_file_cache_script_load()
+	 * allocates a fresh per-request arena buffer that is never released
+	 * (see GH-9812). Reuse a previously loaded script for the same
+	 * resolved path so subsequent includes do not grow CG(arena). */
+	if (file_cache_only && file_handle->opened_path) {
+		if (UNEXPECTED(!ZCG(file_cache_only_scripts).nTableSize)) {
+			zend_hash_init(&ZCG(file_cache_only_scripts), 8, NULL, NULL, 0);
+		}
+		persistent_script = zend_hash_find_ptr(
+			&ZCG(file_cache_only_scripts), file_handle->opened_path);
+		if (persistent_script && ZCG(accel_directives).validate_timestamps
+		 && zend_get_file_handle_timestamp(file_handle, NULL) != persistent_script->timestamp) {
+			zend_hash_del(&ZCG(file_cache_only_scripts), file_handle->opened_path);
+			persistent_script = NULL;
+		}
+	}
+
+	if (!persistent_script) {
+		HANDLE_BLOCK_INTERRUPTIONS();
+		SHM_UNPROTECT();
+		persistent_script = zend_file_cache_script_load(file_handle);
+		SHM_PROTECT();
+		HANDLE_UNBLOCK_INTERRUPTIONS();
+
+		if (persistent_script && file_cache_only && file_handle->opened_path) {
+			zend_hash_add_new_ptr(&ZCG(file_cache_only_scripts),
+				file_handle->opened_path, persistent_script);
+		}
+	}
 	if (persistent_script) {
 		/* see bug #15471 (old BTS) */
 		if (persistent_script->script.filename) {
@@ -2818,6 +2842,12 @@ zend_result accel_post_deactivate(void)
 	if (ZCG(cwd)) {
 		zend_string_release_ex(ZCG(cwd), 0);
 		ZCG(cwd) = NULL;
+	}
+
+	if (ZCG(file_cache_only_scripts).nTableSize) {
+		/* See GH-9812 */
+		zend_hash_destroy(&ZCG(file_cache_only_scripts));
+		memset(&ZCG(file_cache_only_scripts), 0, sizeof(HashTable));
 	}
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
