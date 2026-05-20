@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.23
 
+- SPL:
+  . Fixed bug GH-19942 (iterator_count() on an SplFileObject looping
+    infinitely). (alexandre-daubois)
 
 04 Jun 2026, PHP 8.4.22
 
