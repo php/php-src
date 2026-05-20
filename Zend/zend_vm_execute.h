@@ -26283,8 +26283,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_UNSET_DIM_SPE
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
@@ -28611,8 +28610,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_UNSET_DIM_SPE
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
@@ -32590,8 +32588,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_UNSET_DIM_SPE
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
@@ -44599,8 +44596,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_UNSET_DIM_SPE
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = EX_VAR(opline->op1.var);
@@ -48333,8 +48329,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_UNSET_DIM_SPE
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = EX_VAR(opline->op1.var);
@@ -53608,8 +53603,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_UNSET_DIM_SPE
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = EX_VAR(opline->op1.var);
@@ -79349,8 +79343,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_UNSET_DIM_SPEC_VAR
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
@@ -81677,8 +81670,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_UNSET_DIM_SPEC_VAR
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
@@ -85656,8 +85648,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_UNSET_DIM_SPEC_VAR
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
@@ -97665,8 +97656,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_UNSET_DIM_SPEC_CV_
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = EX_VAR(opline->op1.var);
@@ -101399,8 +101389,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_UNSET_DIM_SPEC_CV_
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = EX_VAR(opline->op1.var);
@@ -106572,8 +106561,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_UNSET_DIM_SPEC_CV_
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = EX_VAR(opline->op1.var);

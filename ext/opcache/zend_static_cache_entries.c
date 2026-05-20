@@ -136,6 +136,7 @@ static void zend_opcache_static_cache_request_local_slot_dtor(zval *slot_zv)
 	if (!Z_ISUNDEF(slot->value)) {
 		zval_ptr_dtor(&slot->value);
 	}
+
 	efree(slot);
 }
 
@@ -179,11 +180,9 @@ static bool zend_opcache_static_cache_value_needs_request_local_clone(zval *valu
 
 	if (Z_ISREF_P(value)) {
 		return true;
-	}
-	if (Z_TYPE_P(value) == IS_OBJECT) {
+	} else if (Z_TYPE_P(value) == IS_OBJECT) {
 		return true;
-	}
-	if (Z_TYPE_P(value) != IS_ARRAY) {
+	} else if (Z_TYPE_P(value) != IS_ARRAY) {
 		return false;
 	}
 
@@ -286,9 +285,10 @@ static bool zend_opcache_static_cache_clone_request_local_reference(
 		zend_reference *src_ref)
 {
 	zend_ulong key = (zend_ulong) (uintptr_t) src_ref;
-	zend_reference *new_ref = zend_hash_index_find_ptr(&context->references, key);
+	zend_reference *new_ref;
 	zval inner;
 
+	new_ref = zend_hash_index_find_ptr(&context->references, key);
 	if (new_ref != NULL) {
 		GC_ADDREF(new_ref);
 		ZVAL_REF(dst, new_ref);
@@ -335,6 +335,7 @@ static bool zend_opcache_static_cache_clone_request_local_object_members(
 			zval_ptr_dtor(dst);
 			ZVAL_COPY_VALUE(dst, &new_prop);
 			Z_PROP_FLAG_P(dst) = Z_PROP_FLAG_P(src);
+
 			src++;
 			dst++;
 		} while (src != end);
@@ -350,7 +351,8 @@ static bool zend_opcache_static_cache_clone_request_local_object_members(
 		}
 
 		HT_FLAGS(new_object->properties) |=
-			HT_FLAGS(old_object->properties) & HASH_FLAG_HAS_EMPTY_IND;
+			HT_FLAGS(old_object->properties) & HASH_FLAG_HAS_EMPTY_IND
+		;
 
 		ZEND_HASH_MAP_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {
 			if (Z_TYPE_P(prop) == IS_INDIRECT) {
@@ -955,6 +957,7 @@ static bool zend_opcache_static_cache_find_unstorable_value(
 		if (zend_hash_index_exists(seen_arrays, key)) {
 			return false;
 		}
+
 		zend_hash_index_add_empty_element(seen_arrays, key);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), element) {
@@ -1979,12 +1982,35 @@ bool zend_opcache_static_cache_delete_locked(zend_string *key)
 	return true;
 }
 
+static zend_always_inline bool zend_opcache_static_cache_long_add_wrapped(
+		zend_long lhs,
+		zend_long rhs,
+		zend_long *result)
+{
+	*result = (zend_long) ((zend_ulong) lhs + (zend_ulong) rhs);
+
+	return (rhs > 0 && lhs > ZEND_LONG_MAX - rhs) ||
+		(rhs < 0 && lhs < ZEND_LONG_MIN - rhs);
+}
+
+static zend_always_inline bool zend_opcache_static_cache_long_sub_wrapped(
+		zend_long lhs,
+		zend_long rhs,
+		zend_long *result)
+{
+	*result = (zend_long) ((zend_ulong) lhs - (zend_ulong) rhs);
+
+	return (rhs > 0 && lhs < ZEND_LONG_MIN + rhs) ||
+		(rhs < 0 && lhs > ZEND_LONG_MAX + rhs);
+}
+
 bool zend_opcache_static_cache_atomic_update_locked(
 		zend_string *key,
 		zend_long step,
 		bool decrement,
 		bool insert_if_missing,
 		zend_long *new_value,
+		bool *is_overflow,
 		const char *type_error_message,
 		bool throw_on_error)
 {
@@ -1992,13 +2018,20 @@ bool zend_opcache_static_cache_atomic_update_locked(
 	zend_opcache_static_cache_entry *entries, *entry;
 	zend_ulong hash = zend_string_hash_val(key);
 	zval initial_value = {0};
+	zend_long result;
 	uint32_t slot_index;
-	bool found;
+	bool found, result_is_overflow;
+
+	*is_overflow = false;
 
 	if (!zend_opcache_static_cache_find_slot_for_write_locked(key, hash, &header, &slot_index, &found) || !found) {
 		if (insert_if_missing) {
-			ZVAL_LONG(&initial_value, decrement ? -step : step);
+			result_is_overflow = decrement
+				? zend_opcache_static_cache_long_sub_wrapped(0, step, &result)
+				: zend_opcache_static_cache_long_add_wrapped(0, step, &result);
+			ZVAL_LONG(&initial_value, result);
 			if (zend_opcache_static_cache_store_locked(key, &initial_value, 0, throw_on_error, false)) {
+				*is_overflow = result_is_overflow;
 				*new_value = Z_LVAL(initial_value);
 
 				return true;
@@ -2028,11 +2061,11 @@ bool zend_opcache_static_cache_atomic_update_locked(
 		return false;
 	}
 
-	if (decrement) {
-		entry->long_value -= step;
-	} else {
-		entry->long_value += step;
-	}
+	result_is_overflow = decrement
+		? zend_opcache_static_cache_long_sub_wrapped(entry->long_value, step, &result)
+		: zend_opcache_static_cache_long_add_wrapped(entry->long_value, step, &result);
+	entry->long_value = result;
+	*is_overflow = result_is_overflow;
 
 	zend_opcache_static_cache_bump_mutation_epoch_locked(header);
 	*new_value = entry->long_value;

@@ -405,7 +405,12 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 						return false;
 					}
 
-					source_value = Z_TYPE_P(property_value) == IS_INDIRECT ? Z_INDIRECT_P(property_value) : property_value;
+					source_value =
+						Z_TYPE_P(property_value) == IS_INDIRECT
+							? Z_INDIRECT_P(property_value)
+							: property_value
+					;
+
 					if (!zend_opcache_static_cache_shared_graph_calc_value(context, source_value)) {
 						zend_release_properties(properties);
 						return false;
@@ -831,7 +836,12 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 					return false;
 				}
 
-				source_value = Z_TYPE_P(property_value) == IS_INDIRECT ? Z_INDIRECT_P(property_value) : property_value;
+				source_value =
+					Z_TYPE_P(property_value) == IS_INDIRECT
+						? Z_INDIRECT_P(property_value)
+						: property_value
+				;
+
 				if (!zend_opcache_static_cache_shared_graph_copy_property_value(
 						context,
 						source_value,
@@ -1169,6 +1179,7 @@ static bool zend_opcache_static_cache_free_retired_shared_graphs(void)
 		}
 
 		previous_context = zend_opcache_static_cache_activate_context(ref->context);
+
 		if (zend_opcache_static_cache_wlock()) {
 			if (zend_opcache_static_cache_header_is_initialized_locked()) {
 				zend_opcache_static_cache_free_locked(ref->payload_offset);
@@ -1268,8 +1279,8 @@ bool zend_opcache_static_cache_build_shared_graph_in_place(
 	result = zend_opcache_static_cache_shared_graph_copy_alloc(&copy_context, sizeof(*header), &header_offset) && header_offset == 0;
 	if (result) {
 		if (Z_TYPE_P(value) == IS_OBJECT) {
-			result = zend_opcache_static_cache_shared_graph_copy_property_value(&copy_context, value, &root_value)
-				&& root_value.type == ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT
+			result = zend_opcache_static_cache_shared_graph_copy_property_value(&copy_context, value, &root_value) &&
+						root_value.type == ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT
 			;
 		} else if (Z_TYPE_P(value) == IS_ARRAY) {
 			result = zend_opcache_static_cache_shared_graph_copy_property_value(&copy_context, value, &root_value) &&
@@ -1297,7 +1308,9 @@ bool zend_opcache_static_cache_build_shared_graph_in_place(
 	header->version = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VERSION;
 	header->root_offset = root_offset;
 	header->root_type = root_type;
+
 	ZEND_ATOMIC_INT_INIT(&header->ref_state, 0);
+
 	if (graph_len != NULL) {
 		*graph_len = copy_context.position;
 	}
@@ -1322,6 +1335,7 @@ bool zend_opcache_static_cache_shared_graph_copy_fits_buffer(
 	}
 
 	target_padding = zend_opcache_static_cache_shared_graph_alignment_padding(target_buffer);
+
 	return target_padding <= target_buffer_len && source_graph_len <= target_buffer_len - target_padding;
 }
 
@@ -1460,7 +1474,9 @@ static bool zend_opcache_static_cache_shared_graph_rebase_direct_zval(
 				len,
 				delta
 			);
+
 			Z_ARR_P(value) = array;
+
 			if (!zend_opcache_static_cache_shared_graph_pointer_in_range(array, new_base, len)) {
 				return true;
 			}
@@ -1500,6 +1516,7 @@ static bool zend_opcache_static_cache_shared_graph_rebase_direct_array(
 	if (zend_hash_index_exists(seen_arrays, key)) {
 		return true;
 	}
+
 	if (zend_hash_index_add_empty_element(seen_arrays, key) == NULL) {
 		return false;
 	}
@@ -1507,6 +1524,7 @@ static bool zend_opcache_static_cache_shared_graph_rebase_direct_array(
 	data = HT_GET_DATA_ADDR(array);
 	data = zend_opcache_static_cache_shared_graph_rebase_pointer(data, old_base, len, delta);
 	HT_SET_DATA_ADDR(array, data);
+
 	if (!zend_opcache_static_cache_shared_graph_pointer_in_range(data, new_base, len)) {
 		return false;
 	}
@@ -1520,7 +1538,8 @@ static bool zend_opcache_static_cache_shared_graph_rebase_direct_array(
 					new_base,
 					len,
 					delta,
-					seen_arrays)
+					seen_arrays
+				)
 			) {
 				return false;
 			}
@@ -1547,7 +1566,8 @@ static bool zend_opcache_static_cache_shared_graph_rebase_direct_array(
 					new_base,
 					len,
 					delta,
-					seen_arrays)
+					seen_arrays
+				)
 			) {
 				return false;
 			}
@@ -1580,6 +1600,7 @@ static bool zend_opcache_static_cache_shared_graph_rebase_graph_value(
 			}
 
 			array = (zend_array *) (void *) (buffer + (uint32_t) value->payload.offset);
+
 			return zend_opcache_static_cache_shared_graph_rebase_direct_array(
 				array,
 				old_base,
@@ -1591,6 +1612,7 @@ static bool zend_opcache_static_cache_shared_graph_rebase_graph_value(
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_DYNAMIC_ARRAY:
 			graph_array = (const zend_opcache_static_cache_shared_graph_array *) (buffer + (uint32_t) value->payload.offset);
 			graph_elements = (const zend_opcache_static_cache_shared_graph_array_element *) (buffer + graph_array->elements_offset);
+
 			for (index = 0; index < graph_array->count; index++) {
 				if (!zend_opcache_static_cache_shared_graph_rebase_graph_value(
 						buffer,
@@ -1599,7 +1621,8 @@ static bool zend_opcache_static_cache_shared_graph_rebase_graph_value(
 						new_base,
 						len,
 						delta,
-						seen_arrays)
+						seen_arrays
+					)
 				) {
 					return false;
 				}
@@ -1616,7 +1639,8 @@ static bool zend_opcache_static_cache_shared_graph_rebase_graph_value(
 						new_base,
 						len,
 						delta,
-						seen_arrays)
+						seen_arrays
+					)
 				) {
 					return false;
 				}
@@ -1720,6 +1744,7 @@ bool zend_opcache_static_cache_shared_graph_rebase_moved_payload_locked(uint32_t
 			result = false;
 			break;
 	}
+
 	zend_hash_destroy(&seen_arrays);
 
 	return result;
@@ -1882,6 +1907,7 @@ bool zend_opcache_static_cache_release_request_shared_graph_refs(void)
 		}
 
 		previous_context = zend_opcache_static_cache_activate_context(ref->context);
+
 		if (zend_opcache_static_cache_wlock()) {
 			if (zend_opcache_static_cache_header_is_initialized_locked() &&
 				ref->payload_offset != 0

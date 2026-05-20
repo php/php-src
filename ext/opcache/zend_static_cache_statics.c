@@ -40,6 +40,12 @@ static ZEND_EXT_TLS HashTable *zend_opcache_static_cache_prepare_memo_objects = 
 static ZEND_EXT_TLS bool zend_opcache_static_cache_has_prepare_memo_arrays = false;
 static ZEND_EXT_TLS bool zend_opcache_static_cache_has_prepare_memo_objects = false;
 
+static void zend_opcache_static_cache_capture_decoded_reachable_value_ex(
+	zval *value,
+	HashTable *seen_arrays,
+	HashTable *seen_objects
+);
+
 static zend_always_inline HashTable *zend_opcache_static_cache_capture_ensure_table(HashTable **table_ptr)
 {
 	if (*table_ptr == NULL) {
@@ -1113,6 +1119,7 @@ static bool zend_opcache_static_cache_detach_class_blob_root_state(
 			? zend_hash_num_elements(Z_ARRVAL_P(methods))
 			: 0
 	);
+
 	if (methods != NULL && Z_TYPE_P(methods) == IS_ARRAY) {
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(methods), method_key, method_state) {
 			if (method_key == NULL) {
@@ -1763,7 +1770,12 @@ static void zend_opcache_static_cache_track_value_recursive(
 					continue;
 				}
 
-				source_value = Z_TYPE_P(property_value) == IS_INDIRECT ? Z_INDIRECT_P(property_value) : property_value;
+				source_value =
+					Z_TYPE_P(property_value) == IS_INDIRECT
+						? Z_INDIRECT_P(property_value)
+						: property_value
+				;
+
 				zend_opcache_static_cache_track_value_recursive(source_value, handle, seen_arrays, seen_objects);
 			} ZEND_HASH_FOREACH_END();
 
@@ -1784,7 +1796,8 @@ static bool zend_opcache_static_cache_prepare_memo_can_track_object(zend_class_e
 		ce->__serialize == NULL &&
 		ce->__unserialize == NULL &&
 		!zend_hash_str_exists(&ce->function_table, ZEND_STRL("__sleep")) &&
-		!zend_hash_str_exists(&ce->function_table, ZEND_STRL("__wakeup"));
+		!zend_hash_str_exists(&ce->function_table, ZEND_STRL("__wakeup"))
+	;
 }
 
 static bool zend_opcache_static_cache_prepare_memo_can_track_value_recursive(
@@ -1820,6 +1833,7 @@ static bool zend_opcache_static_cache_prepare_memo_can_track_value_recursive(
 			}
 
 			zend_hash_index_add_empty_element(seen_arrays, key);
+
 			ZEND_HASH_FOREACH_VAL(ht, child) {
 				if (!zend_opcache_static_cache_prepare_memo_can_track_value_recursive(child, seen_arrays, seen_objects)) {
 					return false;
@@ -1849,7 +1863,12 @@ static bool zend_opcache_static_cache_prepare_memo_can_track_value_recursive(
 					continue;
 				}
 
-				source_value = Z_TYPE_P(property_value) == IS_INDIRECT ? Z_INDIRECT_P(property_value) : property_value;
+				source_value =
+					Z_TYPE_P(property_value) == IS_INDIRECT
+						? Z_INDIRECT_P(property_value)
+						: property_value
+				;
+
 				if (!zend_opcache_static_cache_prepare_memo_can_track_value_recursive(source_value, seen_arrays, seen_objects)) {
 					zend_release_properties(properties);
 					return false;
@@ -1892,6 +1911,7 @@ static void zend_opcache_static_cache_prepare_memo_track_value_recursive(
 			zend_hash_index_add_empty_element(seen_arrays, key);
 			zend_opcache_static_cache_prepare_memo_track_dependency(zend_opcache_static_cache_prepare_memo_arrays, key, entry);
 			zend_opcache_static_cache_has_prepare_memo_arrays = true;
+
 			ZEND_HASH_FOREACH_VAL(ht, child) {
 				zend_opcache_static_cache_prepare_memo_track_value_recursive(child, entry, seen_arrays, seen_objects);
 			} ZEND_HASH_FOREACH_END();
@@ -1917,7 +1937,12 @@ static void zend_opcache_static_cache_prepare_memo_track_value_recursive(
 					continue;
 				}
 
-				source_value = Z_TYPE_P(property_value) == IS_INDIRECT ? Z_INDIRECT_P(property_value) : property_value;
+				source_value =
+					Z_TYPE_P(property_value) == IS_INDIRECT
+						? Z_INDIRECT_P(property_value)
+						: property_value
+				;
+
 				zend_opcache_static_cache_prepare_memo_track_value_recursive(source_value, entry, seen_arrays, seen_objects);
 			} ZEND_HASH_FOREACH_END();
 
@@ -2666,8 +2691,9 @@ void zend_opcache_static_cache_delete_class_keys_locked(zend_class_entry *ce)
 		}
 
 		kind = zend_opcache_static_cache_static_property_kind(ce, property_info);
-		if (kind == ZEND_OPCACHE_STATIC_CACHE_NONE
-				|| zend_opcache_static_cache_context_for_kind(kind) != zend_opcache_static_cache_active_context()) {
+		if (kind == ZEND_OPCACHE_STATIC_CACHE_NONE ||
+			zend_opcache_static_cache_context_for_kind(kind) != zend_opcache_static_cache_active_context()
+		) {
 			continue;
 		}
 
@@ -2788,6 +2814,7 @@ static void zend_opcache_static_cache_publish_pinned_static_properties_fast(zend
 
 		published = false;
 		previous_context = zend_opcache_static_cache_activate_context(context);
+
 		if (zend_opcache_static_cache_wlock()) {
 			if (zend_opcache_static_cache_header_init_locked()) {
 				/* Immediate property assignments publish immediately so later
@@ -2970,12 +2997,6 @@ static void zend_opcache_static_cache_publish_context(zend_opcache_static_cache_
 	zend_opcache_static_cache_restore_context(previous_context);
 }
 
-static void zend_opcache_static_cache_capture_decoded_reachable_value_ex(
-	zval *value,
-	HashTable *seen_arrays,
-	HashTable *seen_objects
-);
-
 static void zend_opcache_static_cache_capture_decoded_hash_values(
 	HashTable *values,
 	HashTable *seen_arrays,
@@ -3026,6 +3047,7 @@ static bool zend_opcache_static_cache_capture_decoded_safe_direct_object(
 	if (serialize_func(value, &state) && Z_TYPE(state) == IS_ARRAY) {
 		zend_opcache_static_cache_capture_decoded_hash_values(Z_ARRVAL(state), seen_arrays, seen_objects);
 	}
+
 	if (!Z_ISUNDEF(state)) {
 		zval_ptr_dtor(&state);
 	}
@@ -3111,7 +3133,13 @@ static void zend_opcache_static_cache_capture_decoded_reachable_value_ex(
 				if (property_name == NULL) {
 					continue;
 				}
-				source_value = Z_TYPE_P(property_value) == IS_INDIRECT ? Z_INDIRECT_P(property_value) : property_value;
+
+				source_value =
+					Z_TYPE_P(property_value) == IS_INDIRECT
+						? Z_INDIRECT_P(property_value)
+						: property_value
+				;
+
 				zend_opcache_static_cache_capture_decoded_reachable_value_ex(source_value, seen_arrays, seen_objects);
 			} ZEND_HASH_FOREACH_END();
 
@@ -3137,8 +3165,7 @@ static bool zend_opcache_static_cache_hash_mutation(HashTable *ht, bool publish)
 			zend_opcache_static_cache_tracks_reachable_arrays(
 				zend_opcache_static_cache_pending_mutation_state.handle) &&
 			!zend_opcache_static_cache_pending_hash_is_current_reachable_array(
-				zend_opcache_static_cache_pending_mutation_state.handle,
-				ht)
+				zend_opcache_static_cache_pending_mutation_state.handle, ht)
 		) {
 			zend_opcache_static_cache_reset_pending_mutation();
 		} else {
@@ -3308,6 +3335,7 @@ static void zend_opcache_static_cache_init_class(zend_class_entry *ce)
 
 		handle = zend_opcache_static_cache_ensure_tracked_root(slot, cache_key, context, kind, ttl, NULL);
 		zend_opcache_static_cache_capture_begin_for_handle(handle);
+
 		if (zend_opcache_static_cache_fetch_locked(cache_key, &cached_value, false, NULL, false)) {
 			fetched_cached = true;
 			zval_ptr_dtor(slot);
@@ -3527,6 +3555,7 @@ static void zend_opcache_static_cache_init_function(zend_execute_data *execute_d
 
 		handle = zend_opcache_static_cache_ensure_tracked_root(slot, cache_key, context, kind, ttl, NULL);
 		zend_opcache_static_cache_capture_begin_for_handle(handle);
+
 		if (zend_opcache_static_cache_fetch_locked(cache_key, &cached_value, false, NULL, false)) {
 			fetched_cached = true;
 			zval_ptr_dtor(slot);
@@ -3657,7 +3686,8 @@ void zend_opcache_static_cache_prepare_memo_store(
 	zend_hash_index_update_ptr(
 		zend_opcache_static_cache_prepare_memo_entries,
 		(zend_ulong) (uintptr_t) entry,
-		entry);
+		entry
+	);
 
 	roots = zend_opcache_static_cache_prepare_memo_root_table_for_value(value);
 	key = zend_opcache_static_cache_prepare_memo_root_key(value);
@@ -3818,7 +3848,10 @@ void zend_opcache_static_cache_capture_decoded_value(zval *value)
 
 void zend_opcache_static_cache_request_shutdown(void)
 {
-	if (zend_opcache_static_cache_attribute_classes_initialized || zend_opcache_static_cache_function_statics_initialized || zend_opcache_static_cache_class_blob_handles_initialized) {
+	if (zend_opcache_static_cache_attribute_classes_initialized ||
+		zend_opcache_static_cache_function_statics_initialized ||
+		zend_opcache_static_cache_class_blob_handles_initialized
+	) {
 		zend_opcache_static_cache_flush_pending();
 		zend_opcache_static_cache_publish_context(&zend_opcache_static_cache_pinned_context_state);
 		zend_opcache_static_cache_publish_context(&zend_opcache_static_cache_volatile_context_state);

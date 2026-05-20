@@ -797,8 +797,8 @@ static zend_always_inline bool zend_opcache_serializer_try_encode_safe_direct_ob
 		zend_opcache_serializer_wbuf_t *wb, const zval *zv, size_t hdr_offset,
 		zend_class_entry *ce, zend_string *class_name, uint32_t name_len)
 {
-	zend_class_entry *base_ce = NULL;
 	zend_opcache_static_cache_safe_direct_state_copy_func_t copy_func;
+	zend_class_entry *base_ce = NULL;
 	bool ok;
 
 	copy_func = zend_opcache_static_cache_safe_direct_copy_func(ce, &base_ce);

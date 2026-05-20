@@ -55,7 +55,19 @@ static zend_always_inline bool zend_opcache_static_cache_force_startup_failure(v
 
 static zend_always_inline bool zend_opcache_static_cache_requires_pre_request_storage(void)
 {
-	return sapi_module.name != NULL && strcmp(sapi_module.name, "fpm-fcgi") == 0;
+	if (sapi_module.name == NULL) {
+		return false;
+	}
+
+	/*
+	 * These SAPIs may fork or spawn long-lived workers after module startup.
+	 * Request-time initialization would allow a worker-local backend instead
+	 * of the shared static cache storage expected by all workers.
+	 */
+	return strcmp(sapi_module.name, "fpm-fcgi") == 0 ||
+		strcmp(sapi_module.name, "apache2handler") == 0 ||
+		strcmp(sapi_module.name, "litespeed") == 0 ||
+		strcmp(sapi_module.name, "cgi-fcgi") == 0;
 }
 
 static zend_always_inline void zend_opcache_static_cache_set_unavailable(const char *failure_reason, bool startup_failed)
@@ -1241,12 +1253,14 @@ static void zend_opcache_static_cache_ensure_entry_lock_process(void)
 		&zend_opcache_static_cache_volatile_context_state,
 		&zend_opcache_static_cache_volatile_entry_locks,
 		zend_opcache_static_cache_volatile_entry_lock_counts,
-		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_DROP);
+		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_DROP
+	);
 	zend_opcache_static_cache_release_entry_lock_context(
 		&zend_opcache_static_cache_pinned_context_state,
 		&zend_opcache_static_cache_pinned_entry_locks,
 		zend_opcache_static_cache_pinned_entry_lock_counts,
-		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_DROP);
+		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_DROP
+	);
 #ifdef ZTS
 	zend_opcache_static_cache_entry_locks_reinit_after_fork(&zend_opcache_static_cache_volatile_context_state.storage);
 	zend_opcache_static_cache_entry_locks_reinit_after_fork(&zend_opcache_static_cache_pinned_context_state.storage);
@@ -1944,6 +1958,7 @@ void zend_opcache_static_cache_reset_runtime(void)
 		? ZCG(accel_directives).static_cache_pinned_size_mb
 		: ZCG(accel_directives).static_cache_volatile_size_mb
 	;
+
 	runtime->enabled = runtime->configured_memory != 0;
 
 	if (zend_opcache_static_cache_subsystem_disabled) {
@@ -2226,7 +2241,7 @@ void zend_opcache_static_cache_ensure_ready(void)
 	if (!storage->initialized &&
 		zend_opcache_static_cache_requires_pre_request_storage()
 	) {
-		zend_opcache_static_cache_set_unavailable("Shared memory backend was not initialized before FPM worker startup", true);
+		zend_opcache_static_cache_set_unavailable("Shared memory backend was not initialized before worker startup", true);
 
 		return;
 	}
@@ -2240,7 +2255,7 @@ void zend_opcache_static_cache_ensure_ready(void)
 	if (zend_opcache_static_cache_requires_pre_request_storage() &&
 		!storage->initialized_before_request
 	) {
-		zend_opcache_static_cache_set_unavailable("Shared memory backend was initialized after FPM worker startup", true);
+		zend_opcache_static_cache_set_unavailable("Shared memory backend was initialized after worker startup", true);
 
 		return;
 	}
@@ -2461,7 +2476,8 @@ void zend_opcache_static_cache_release_active_entry_locks(void)
 		context,
 		zend_opcache_static_cache_entry_locks_ptr_for_context(context),
 		zend_opcache_static_cache_entry_lock_counts_for_context(context),
-		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_CLEAR);
+		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_CLEAR
+	);
 }
 
 void zend_opcache_static_cache_release_request_entry_locks(void)
@@ -2472,6 +2488,7 @@ void zend_opcache_static_cache_release_request_entry_locks(void)
 		zend_opcache_static_cache_volatile_entry_lock_counts,
 		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_PRESERVE_LEASES
 	);
+
 	zend_opcache_static_cache_release_entry_lock_context(
 		&zend_opcache_static_cache_pinned_context_state,
 		&zend_opcache_static_cache_pinned_entry_locks,

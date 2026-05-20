@@ -677,8 +677,7 @@ static bool spl_fixedarray_object_copy_direct_cache_state(
 		zend_object *new_object,
 		zend_opcache_static_cache_safe_direct_clone_value_func_t clone_value)
 {
-	zval old_zv, new_zv, state_zv, cloned_state_zv, elements_zv, copied_elem;
-	zval *elem;
+	zval old_zv, new_zv, state_zv, cloned_state_zv, elements_zv, copied_elem, *elem;
 	zend_string *key;
 	bool result = false;
 
@@ -719,6 +718,7 @@ cleanup:
 	if (Z_TYPE(cloned_state_zv) != IS_UNDEF) {
 		zval_ptr_dtor(&cloned_state_zv);
 	}
+
 	if (Z_TYPE(state_zv) != IS_UNDEF) {
 		zval_ptr_dtor(&state_zv);
 	}
@@ -740,6 +740,7 @@ static bool spl_fixedarray_object_direct_cache_state_has_unstorable(
 
 	ZVAL_UNDEF(&state_zv);
 	spl_fixedarray_object_serialize((zval *) object, &state_zv);
+
 	if (EG(exception) || Z_TYPE(state_zv) == IS_UNDEF) {
 		return true;
 	}
@@ -759,6 +760,7 @@ static bool spl_fixedarray_object_serialize_direct_cache_state(const zval *objec
 	ZVAL_UNDEF(state);
 	ZVAL_UNDEF(&serialized_state);
 	spl_fixedarray_object_serialize((zval *) object, &serialized_state);
+
 	if (EG(exception) || Z_TYPE(serialized_state) != IS_ARRAY) {
 		if (Z_TYPE(serialized_state) != IS_UNDEF) {
 			zval_ptr_dtor(&serialized_state);
