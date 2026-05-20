@@ -1057,6 +1057,13 @@ PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object)
 	return &new_uri_object->std;
 }
 
+PHPAPI int php_uri_object_handler_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data)
+{
+	zend_throw_exception_ex(NULL, 0, "Unserialization of %s using the \"C\" format is unsupported", ZSTR_VAL(ce->name));
+
+	return FAILURE;
+}
+
 PHPAPI zend_result php_uri_parser_register(const php_uri_parser *uri_parser)
 {
 	zend_string *key = zend_string_init_interned(uri_parser->name, strlen(uri_parser->name), true);
@@ -1079,6 +1086,7 @@ static PHP_MINIT_FUNCTION(uri)
 	php_uri_ce_rfc3986_uri = register_class_Uri_Rfc3986_Uri();
 	php_uri_ce_rfc3986_uri->create_object = php_uri_object_create_rfc3986;
 	php_uri_ce_rfc3986_uri->default_object_handlers = &object_handlers_rfc3986_uri;
+	php_uri_ce_rfc3986_uri->unserialize = &php_uri_object_handler_unserialize;
 	memcpy(&object_handlers_rfc3986_uri, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	object_handlers_rfc3986_uri.offset = XtOffsetOf(php_uri_object, std);
 	object_handlers_rfc3986_uri.free_obj = php_uri_object_handler_free;
@@ -1087,6 +1095,7 @@ static PHP_MINIT_FUNCTION(uri)
 	php_uri_ce_whatwg_url = register_class_Uri_WhatWg_Url();
 	php_uri_ce_whatwg_url->create_object = php_uri_object_create_whatwg;
 	php_uri_ce_whatwg_url->default_object_handlers = &object_handlers_whatwg_uri;
+	php_uri_ce_whatwg_url->unserialize = &php_uri_object_handler_unserialize;
 	memcpy(&object_handlers_whatwg_uri, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	object_handlers_whatwg_uri.offset = XtOffsetOf(php_uri_object, std);
 	object_handlers_whatwg_uri.free_obj = php_uri_object_handler_free;
@@ -1096,6 +1105,7 @@ static PHP_MINIT_FUNCTION(uri)
 	php_uri_ce_exception = register_class_Uri_UriException(zend_ce_exception);
 	php_uri_ce_error = register_class_Uri_UriError(zend_ce_error);
 	php_uri_ce_invalid_uri_exception = register_class_Uri_InvalidUriException(php_uri_ce_exception);
+	php_uri_ce_invalid_uri_exception->unserialize = &php_uri_object_handler_unserialize;
 	php_uri_ce_whatwg_invalid_url_exception = register_class_Uri_WhatWg_InvalidUrlException(php_uri_ce_invalid_uri_exception);
 	php_uri_ce_whatwg_url_validation_error = register_class_Uri_WhatWg_UrlValidationError();
 	php_uri_ce_whatwg_url_validation_error_type = register_class_Uri_WhatWg_UrlValidationErrorType();
