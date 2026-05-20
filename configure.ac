@@ -490,6 +490,8 @@ PHP_CHECK_BUILTIN([__builtin_ssubl_overflow])
 PHP_CHECK_BUILTIN([__builtin_ssubll_overflow])
 PHP_CHECK_BUILTIN([__builtin_unreachable])
 PHP_CHECK_BUILTIN([__builtin_usub_overflow])
+PHP_CHECK_BUILTIN([__builtin_align_down])
+PHP_CHECK_BUILTIN([__builtin_align_up])
 
 dnl Check AVX512
 PHP_CHECK_AVX512_SUPPORTS

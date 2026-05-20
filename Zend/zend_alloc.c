@@ -175,12 +175,25 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 typedef uint32_t   zend_mm_page_info; /* 4-byte integer */
 typedef zend_ulong zend_mm_bitset;    /* 4-byte or 8-byte integer */
 
-#define ZEND_MM_ALIGNED_OFFSET(size, alignment) \
-	(((size_t)(size)) & ((alignment) - 1))
-#define ZEND_MM_ALIGNED_BASE(size, alignment) \
-	(((size_t)(size)) & ~((alignment) - 1))
-#define ZEND_MM_SIZE_TO_NUM(size, alignment) \
+#ifdef PHP_HAVE_BUILTIN_ALIGN_DOWN
+# define ZEND_MM_ALIGNED_BASE(ptr, alignment) \
+	__builtin_align_down((void*)(ptr), (alignment))
+# define ZEND_MM_ALIGNED_OFFSET(ptr, alignment) \
+	(((size_t)(ptr)) - (size_t)ZEND_MM_ALIGNED_BASE(ptr, alignment))
+#else
+# define ZEND_MM_ALIGNED_BASE(ptr, alignment) \
+	((void*)(((uintptr_t)(ptr)) & ~((alignment) - 1)))
+# define ZEND_MM_ALIGNED_OFFSET(ptr, alignment) \
+	(((size_t)(ptr)) & ((alignment) - 1))
+#endif
+
+#ifdef PHP_HAVE_BUILTIN_ALIGN_UP
+# define ZEND_MM_SIZE_TO_NUM(size, alignment) \
+	(__builtin_align_up((size), (alignment)) / (alignment))
+#else
+# define ZEND_MM_SIZE_TO_NUM(size, alignment) \
 	(((size_t)(size) + ((alignment) - 1)) / (alignment))
+#endif
 
 #define ZEND_MM_BITSET_LEN		(sizeof(zend_mm_bitset) * 8)       /* 32 or 64 */
 #define ZEND_MM_PAGE_MAP_LEN	(ZEND_MM_PAGES / ZEND_MM_BITSET_LEN) /* 16 or 8 */

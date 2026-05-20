@@ -2380,6 +2380,8 @@ AC_CACHE_CHECK([for $1], [php_var],
   [__builtin_ssubll_overflow], [long long tmpvar; return $1(3, 7, &tmpvar);],
   [__builtin_unreachable], [$1();],
   [__builtin_usub_overflow], [unsigned int tmpvar; return $1(3, 7, &tmpvar);],
+  [__builtin_align_down], [return $1(1, 2) == 0 ? 1 : 0;],
+  [__builtin_align_up], [return $1(1, 2) == 2 ? 1 : 0;],
   [
     m4_warn([syntax], [Unsupported builtin '$1', the test may fail.])
     $1();
