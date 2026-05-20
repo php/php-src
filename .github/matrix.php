@@ -153,9 +153,11 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
             }
         }
         $jobs['WINDOWS']['matrix'] = ['include' => $matrix];
-        $jobs['WINDOWS']['config'] = version_compare($php_version, '8.4', '>=')
-            ? ['vs_crt_version' => 'vs17']
-            : ['vs_crt_version' => 'vs16'];
+        $jobs['WINDOWS']['config'] = match (true) {
+            version_compare($php_version, '8.6', '>=') => ['vs_crt_version' => 'vs18', 'runs_on' => 'windows-2025-vs2026'],
+            version_compare($php_version, '8.4', '>=') => ['vs_crt_version' => 'vs17', 'runs_on' => 'windows-2022'],
+            default => ['vs_crt_version' => 'vs16', 'runs_on' => 'windows-2022'],
+        };
     }
     if ($all_jobs || !$no_jobs || $test_freebsd) {
         $jobs['FREEBSD']['matrix'] = $all_variations && version_compare($php_version, '8.3', '>=')
