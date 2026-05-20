@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: 4143e681e589d6e663f3f7d9eb7677cd3395baf2
+ * Stub hash: a3b4696ac001d537cc34b818715c7eb382c17c5b
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
@@ -43,6 +43,9 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Uri_Rfc3986_Uri_getHost arginfo_class_Uri_Rfc3986_Uri_getScheme
 
 #define arginfo_class_Uri_Rfc3986_Uri_getRawHost arginfo_class_Uri_Rfc3986_Uri_getScheme
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_getHostType, 0, 0, Uri\\Rfc3986\\\125riHostType, 1)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_withHost, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 1)
@@ -152,6 +155,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url_getUnicodeHost arginfo_class_Uri_Rfc3986_Uri_getScheme
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_WhatWg_Url_getHostType, 0, 0, Uri\\WhatWg\\\125rlHostType, 1)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_Uri_WhatWg_Url_withHost arginfo_class_Uri_Rfc3986_Uri_withHost
 
 #define arginfo_class_Uri_WhatWg_Url_getPort arginfo_class_Uri_Rfc3986_Uri_getPort
@@ -205,6 +211,7 @@ ZEND_METHOD(Uri_Rfc3986_Uri, getPassword);
 ZEND_METHOD(Uri_Rfc3986_Uri, getRawPassword);
 ZEND_METHOD(Uri_Rfc3986_Uri, getHost);
 ZEND_METHOD(Uri_Rfc3986_Uri, getRawHost);
+ZEND_METHOD(Uri_Rfc3986_Uri, getHostType);
 ZEND_METHOD(Uri_Rfc3986_Uri, withHost);
 ZEND_METHOD(Uri_Rfc3986_Uri, getPort);
 ZEND_METHOD(Uri_Rfc3986_Uri, withPort);
@@ -235,6 +242,7 @@ ZEND_METHOD(Uri_WhatWg_Url, withUsername);
 ZEND_METHOD(Uri_WhatWg_Url, withPassword);
 ZEND_METHOD(Uri_WhatWg_Url, getAsciiHost);
 ZEND_METHOD(Uri_WhatWg_Url, getUnicodeHost);
+ZEND_METHOD(Uri_WhatWg_Url, getHostType);
 ZEND_METHOD(Uri_WhatWg_Url, equals);
 ZEND_METHOD(Uri_WhatWg_Url, toAsciiString);
 ZEND_METHOD(Uri_WhatWg_Url, toUnicodeString);
@@ -259,6 +267,7 @@ static const zend_function_entry class_Uri_Rfc3986_Uri_methods[] = {
 	ZEND_ME(Uri_Rfc3986_Uri, getRawPassword, arginfo_class_Uri_Rfc3986_Uri_getRawPassword, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getHost, arginfo_class_Uri_Rfc3986_Uri_getHost, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawHost, arginfo_class_Uri_Rfc3986_Uri_getRawHost, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_Uri, getHostType, arginfo_class_Uri_Rfc3986_Uri_getHostType, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, withHost, arginfo_class_Uri_Rfc3986_Uri_withHost, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getPort, arginfo_class_Uri_Rfc3986_Uri_getPort, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, withPort, arginfo_class_Uri_Rfc3986_Uri_withPort, ZEND_ACC_PUBLIC)
@@ -303,6 +312,7 @@ static const zend_function_entry class_Uri_WhatWg_Url_methods[] = {
 	ZEND_ME(Uri_WhatWg_Url, withPassword, arginfo_class_Uri_WhatWg_Url_withPassword, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, getAsciiHost, arginfo_class_Uri_WhatWg_Url_getAsciiHost, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, getUnicodeHost, arginfo_class_Uri_WhatWg_Url_getUnicodeHost, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_Url, getHostType, arginfo_class_Uri_WhatWg_Url_getHostType, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("withHost", zim_Uri_Rfc3986_Uri_withHost, arginfo_class_Uri_WhatWg_Url_withHost, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getPort", zim_Uri_Rfc3986_Uri_getPort, arginfo_class_Uri_WhatWg_Url_getPort, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("withPort", zim_Uri_Rfc3986_Uri_withPort, arginfo_class_Uri_WhatWg_Url_withPort, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -374,6 +384,21 @@ static zend_class_entry *register_class_Uri_Rfc3986_UriType(void)
 	zend_enum_add_case_cstr(class_entry, "NetworkPathReference", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "Uri", NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Uri_Rfc3986_UriHostType(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Uri\\Rfc3986\\UriHostType", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "IPv4", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "IPv6", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "IPvFuture", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "RegisteredName", NULL);
 
 	return class_entry;
 }
@@ -495,6 +520,23 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlValidationError(void)
 	zend_string *property_failure_name = zend_string_init("failure", sizeof("failure") - 1, true);
 	zend_declare_typed_property(class_entry, property_failure_name, &property_failure_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release_ex(property_failure_name, true);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Uri_WhatWg_UrlHostType(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Uri\\WhatWg\\UrlHostType", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "IPv4", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "IPv6", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Domain", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Opaque", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Empty", NULL);
 
 	return class_entry;
 }
