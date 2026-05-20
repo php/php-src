@@ -941,12 +941,12 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.WINDOWS.matrix }}
     name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}${{ matrix.clang && '_CLANG' || ''}}"
-    runs-on: windows-2022
+    runs-on: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.runs_on }}
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.5.0
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.7.1
       PHP_BUILD_CRT: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.vs_crt_version }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
