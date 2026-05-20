@@ -71,6 +71,7 @@ static xmlNodePtr to_xml_duration(encodeTypePtr type, zval *data, int style, xml
 
 static zval *to_zval_object(zval *ret, encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data);
+static zval *to_zval_datetime(zval *ret, encodeTypePtr type, xmlNodePtr data);
 
 static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
 static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
@@ -141,9 +142,9 @@ encode defaultEncoding[] = {
 	{{XSD_FLOAT, XSD_FLOAT_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_double, to_xml_double},
 	{{XSD_DOUBLE, XSD_DOUBLE_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_double, to_xml_double},
 
-	{{XSD_DATETIME, XSD_DATETIME_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_datetime},
-	{{XSD_TIME, XSD_TIME_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_time},
-	{{XSD_DATE, XSD_DATE_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_date},
+	{{XSD_DATETIME, XSD_DATETIME_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_datetime, to_xml_datetime},
+	{{XSD_TIME, XSD_TIME_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_datetime, to_xml_time},
+	{{XSD_DATE, XSD_DATE_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_datetime, to_xml_date},
 	{{XSD_GYEARMONTH, XSD_GYEARMONTH_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_gyearmonth},
 	{{XSD_GYEAR, XSD_GYEAR_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_gyear},
 	{{XSD_GMONTHDAY, XSD_GMONTHDAY_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_gmonthday},
@@ -1617,6 +1618,26 @@ static zval *to_zval_object(zval *ret, encodeTypePtr type, xmlNodePtr data)
 	return to_zval_object_ex(ret, type, data, NULL);
 }
 
+static zval *to_zval_datetime(zval *ret, encodeTypePtr type, xmlNodePtr data)
+{
+	to_zval_stringc(ret, type, data);
+
+	if (!(SOAP_GLOBAL(features) & SOAP_USE_DATETIME_OBJECT) || Z_TYPE_P(ret) != IS_STRING) {
+		return ret;
+	}
+
+	zend_string *str = Z_STR_P(ret);
+	php_date_instantiate(php_date_get_immutable_ce(), ret);
+	if (!php_date_initialize(Z_PHPDATE_P(ret), ZSTR_VAL(str), ZSTR_LEN(str), NULL, NULL, 0)) {
+		zval_ptr_dtor(ret);
+		ZVAL_STR(ret, str);
+	} else {
+		zend_string_release(str);
+	}
+
+	return ret;
+}
+
 
 static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *object, int style, int strict)
 {
@@ -1823,6 +1844,11 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 			set_ns_and_type(xmlParam, type);
 		}
 		return xmlParam;
+	}
+
+	if (data && (Z_TYPE_P(data) == IS_OBJECT &&
+	    instanceof_function_slow(Z_OBJCE_P(data), php_date_get_interface_ce()))) {
+		return master_to_xml(get_conversion(XSD_DATETIME), data, style, parent);
 	}
 
 	if (Z_TYPE_P(data) == IS_OBJECT) {
