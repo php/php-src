@@ -908,6 +908,7 @@ PHP_FUNCTION(inflate_init)
 	}
 
 	if (inflateInit2(&ctx->Z, encoding) != Z_OK) {
+		efree(dict);
 		zval_ptr_dtor(return_value);
 		php_error_docref(NULL, E_WARNING, "Failed allocating zlib.inflate context");
 		RETURN_FALSE;
@@ -1158,6 +1159,7 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (deflateInit2(&ctx->Z, level, Z_DEFLATED, encoding, memory, strategy) != Z_OK) {
+		efree(dict);
 		zval_ptr_dtor(return_value);
 		php_error_docref(NULL, E_WARNING, "Failed allocating zlib.deflate context");
 		RETURN_FALSE;
