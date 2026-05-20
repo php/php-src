@@ -12,11 +12,18 @@ if (PHP_CURL != "no") {
 		SETUP_ZLIB_LIB("curl", PHP_CURL) &&
 		(CHECK_LIB("normaliz.lib", "curl", PHP_CURL) &&
 		 CHECK_LIB("libssh2.lib", "curl", PHP_CURL) &&
-		 CHECK_LIB("nghttp2.lib", "curl", PHP_CURL) &&
-		 CHECK_LIB("brotlidec.lib", "curl", PHP_CURL) &&
-		 CHECK_LIB("brotlicommon.lib", "curl", PHP_CURL) &&
-		 CHECK_LIB("libzstd.lib", "curl", PHP_CURL))
+		 CHECK_LIB("nghttp2.lib", "curl", PHP_CURL))
 		) {
+		if (!(CHECK_HEADER_ADD_INCLUDE("brotli/decode.h", "CFLAGS_CURL") &&
+			CHECK_LIB("brotlidec.lib;brotlidec-static.lib", "curl", PHP_CURL) &&
+			CHECK_LIB("brotlicommon.lib;brotlicommon-static.lib", "curl", PHP_CURL)
+		)) {
+			WARNING("brotli in curl not enabled; libraries or headers not found");
+		}
+		if (!(CHECK_LIB("libzstd.lib;libzstd_a.lib", "curl", PHP_CURL)
+		)) {
+			WARNING("zstd in curl not enabled; library not found");
+		}
 		EXTENSION("curl", "interface.c multi.c share.c curl_file.c");
 		AC_DEFINE('HAVE_CURL', 1, "Define to 1 if the PHP extension 'curl' is available.");
 		ADD_FLAG("CFLAGS_CURL", "/D PHP_CURL_EXPORTS=1");
