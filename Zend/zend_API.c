@@ -1176,7 +1176,7 @@ static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, 
 				/* mark the beginning of varargs */
 				post_varargs = max_num_args;
 
-				if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+				if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS) {
 					zend_unexpected_extra_named_error();
 					return FAILURE;
 				}

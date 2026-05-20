@@ -2130,7 +2130,7 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 			dest = NULL; \
 			dest_num = 0; \
 		} \
-		if (UNEXPECTED(ZEND_CALL_INFO(execute_data) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) { \
+		if (UNEXPECTED(ZEND_CALL_INFO(execute_data) & ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS)) { \
 			_error_code = ZPP_ERROR_UNEXPECTED_EXTRA_NAMED; \
 			break; \
 		} \
@@ -2148,7 +2148,7 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 			dest = NULL; \
 			dest_num = 0; \
 		} \
-		if (ZEND_CALL_INFO(execute_data) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) { \
+		if (ZEND_CALL_INFO(execute_data) & ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS) { \
 			dest_named = execute_data->extra_named_params; \
 		} else { \
 			dest_named = NULL; \

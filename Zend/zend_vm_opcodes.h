@@ -331,7 +331,9 @@ END_EXTERN_C()
 #define ZEND_INIT_PARENT_PROPERTY_HOOK_CALL 209
 #define ZEND_DECLARE_ATTRIBUTED_CONST       210
 #define ZEND_TYPE_ASSERT                    211
+#define ZEND_DECLARE_SCOPE_FUNC             212
+#define ZEND_ENTER_SCOPE_FUNC               213
 
-#define ZEND_VM_LAST_OPCODE                 211
+#define ZEND_VM_LAST_OPCODE                 213
 
 #endif

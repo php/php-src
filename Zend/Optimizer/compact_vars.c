@@ -18,10 +18,57 @@
 #include "zend_bitset.h"
 #include "zend_observer.h"
 
+/* Recursively include scope fns for shared CVs; apply changes with vars_map, otherwise fill used_vars */
+static void scope_fn_visit_parent_cvs(zend_op_array *scope_op, zend_bitset used_vars, const uint32_t *vars_map)
+{
+#define VISIT_CV(slot) if (slot##_type == IS_CV) { \
+	uint32_t old = VAR_NUM(slot.var); \
+	if (vars_map) slot.var = NUM_VAR(vars_map[old]); \
+	else zend_bitset_incl(used_vars, old); \
+}
+	bool in_body = false;
+	for (uint32_t i = 0; i < scope_op->last; i++) {
+		zend_op *opline = &scope_op->opcodes[i];
+		if (opline->opcode == ZEND_ENTER_SCOPE_FUNC) {
+			in_body = true;
+			/* Mapping is pinned at literals[0..num_params). */
+			uint32_t num_params = opline->op1.num;
+			for (uint32_t j = 0; j < num_params; j++) {
+				zval *zv = &scope_op->literals[j];
+				uint32_t off = (uint32_t)Z_LVAL_P(zv);
+				if (vars_map) {
+					ZVAL_LONG(zv, NUM_VAR(vars_map[VAR_NUM(off)]));
+				} else {
+					zend_bitset_incl(used_vars, VAR_NUM(off));
+				}
+			}
+			continue;
+		}
+		if (!in_body) {
+			continue;
+		}
+		VISIT_CV(opline->op1);
+		VISIT_CV(opline->op2);
+		VISIT_CV(opline->result);
+	}
+	for (uint32_t i = 0; i < scope_op->num_dynamic_func_defs; i++) {
+		zend_op_array *nested = scope_op->dynamic_func_defs[i];
+		if (nested->fn_flags2 & ZEND_ACC2_SCOPE_FUNC) {
+			scope_fn_visit_parent_cvs(nested, used_vars, vars_map);
+		}
+	}
+#undef VISIT_CV
+}
+
 /* This pass removes all CVs and temporaries that are completely unused. It does *not* merge any CVs or TMPs.
  * This pass does not operate on SSA form anymore. */
 void zend_optimizer_compact_vars(zend_op_array *op_array) {
 	int i;
+
+	/* Scope fn CVs are handled by the ancestor. Just skip this here. */
+	if (op_array->fn_flags2 & ZEND_ACC2_SCOPE_FUNC) {
+		return;
+	}
 
 	ALLOCA_FLAG(use_heap1);
 	ALLOCA_FLAG(use_heap2);
@@ -49,6 +96,13 @@ void zend_optimizer_compact_vars(zend_op_array *op_array) {
 					zend_bitset_incl(used_vars, VAR_NUM(opline->result.var) + num);
 				}
 			}
+		}
+	}
+
+	for (i = 0; i < (int)op_array->num_dynamic_func_defs; i++) {
+		zend_op_array *child = op_array->dynamic_func_defs[i];
+		if (child->fn_flags2 & ZEND_ACC2_SCOPE_FUNC) {
+			scope_fn_visit_parent_cvs(child, used_vars, NULL);
 		}
 	}
 
@@ -90,6 +144,13 @@ void zend_optimizer_compact_vars(zend_op_array *op_array) {
 		}
 		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 			opline->result.var = NUM_VAR(vars_map[VAR_NUM(opline->result.var)]);
+		}
+	}
+
+	for (i = 0; i < (int)op_array->num_dynamic_func_defs; i++) {
+		zend_op_array *child = op_array->dynamic_func_defs[i];
+		if (child->fn_flags2 & ZEND_ACC2_SCOPE_FUNC) {
+			scope_fn_visit_parent_cvs(child, NULL, vars_map);
 		}
 	}
 

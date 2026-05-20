@@ -1,5 +1,5 @@
 --TEST--
-GH-20435: ZEND_CALL_HAS_EXTRA_NAMED_PARAMS & magic methods in debug_backtrace_get_args()
+GH-20435: ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS & magic methods in debug_backtrace_get_args()
 --FILE--
 <?php
 

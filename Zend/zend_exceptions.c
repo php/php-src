@@ -56,6 +56,9 @@ static zend_class_entry zend_ce_unwind_exit;
 /* Internal pseudo-exception that is not exposed to userland. Throwing this exception *does* execute finally blocks. */
 static zend_class_entry zend_ce_graceful_exit;
 
+/* Internal pseudo-exception thrown into a scope-fn body when its declaring scope is exiting. Throwing this exception *does* execute finally blocks and is swallowed at the scope-fn boundary. */
+static zend_class_entry zend_ce_scope_fn_unwind;
+
 ZEND_API void (*zend_throw_exception_hook)(zend_object *ex);
 
 static zend_object_handlers default_exception_handlers;
@@ -830,6 +833,8 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(zend_ce_unwind_exit, "UnwindExit", NULL);
 
 	INIT_CLASS_ENTRY(zend_ce_graceful_exit, "GracefulExit", NULL);
+
+	INIT_CLASS_ENTRY(zend_ce_scope_fn_unwind, "ScopeFnUnwind", NULL);
 }
 /* }}} */
 
@@ -1062,4 +1067,29 @@ ZEND_API bool zend_is_unwind_exit(const zend_object *ex)
 ZEND_API bool zend_is_graceful_exit(const zend_object *ex)
 {
 	return ex->ce == &zend_ce_graceful_exit;
+}
+
+ZEND_API ZEND_COLD zend_object *zend_create_scope_fn_unwind(void)
+{
+	return zend_objects_new(&zend_ce_scope_fn_unwind);
+}
+
+ZEND_API bool zend_is_scope_fn_unwind(const zend_object *ex)
+{
+	return ex->ce == &zend_ce_scope_fn_unwind;
+}
+
+/* Builds the error exception, but does *not* throw it. */
+ZEND_API ZEND_COLD zend_object *zend_build_error(zend_class_entry *exception_ce, const char *message)
+{
+	zval ex, msg_zv;
+	if (!exception_ce) {
+		exception_ce = zend_ce_error;
+	}
+	object_init_ex(&ex, exception_ce);
+	ZVAL_STRING(&msg_zv, message);
+	zend_update_property_ex(exception_ce, Z_OBJ(ex),
+		ZSTR_KNOWN(ZEND_STR_MESSAGE), &msg_zv);
+	zval_ptr_dtor(&msg_zv);
+	return Z_OBJ(ex);
 }
