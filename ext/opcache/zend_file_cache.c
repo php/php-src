@@ -929,6 +929,17 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		}
 	}
 
+	if (ce->num_friends) {
+		SERIALIZE_PTR(ce->friend_names);
+		zend_class_name *friend_names = ce->friend_names;
+		UNSERIALIZE_PTR(friend_names);
+
+		for (uint32_t i = 0; i < ce->num_friends; i++) {
+			SERIALIZE_STR(friend_names[i].name);
+			SERIALIZE_STR(friend_names[i].lc_name);
+		}
+	}
+
 	SERIALIZE_PTR(ce->constructor);
 	SERIALIZE_PTR(ce->destructor);
 	SERIALIZE_PTR(ce->clone);
@@ -1801,6 +1812,15 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 				}
 				p++;
 			}
+		}
+	}
+
+	if (ce->num_friends) {
+		UNSERIALIZE_PTR(ce->friend_names);
+
+		for (uint32_t i = 0; i < ce->num_friends; i++) {
+			UNSERIALIZE_STR(ce->friend_names[i].name);
+			UNSERIALIZE_STR(ce->friend_names[i].lc_name);
 		}
 	}
 

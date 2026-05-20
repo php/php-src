@@ -346,6 +346,8 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function getTraitAliases(): array {}
 
+    public function getFriendNames(): array {}
+
     /** @tentative-return-type */
     public function isTrait(): bool {}
 

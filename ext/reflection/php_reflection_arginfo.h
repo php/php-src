@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_reflection.stub.php instead.
- * Stub hash: c80946cc8c8215bb6527e09bb71b3a97a76a6a98
+ * Stub hash: fb95c24e0834855fbbf93969c22ee22d9c57a8fc
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
@@ -262,6 +262,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionClass_getTraitNames arginfo_class_ReflectionFunctionAbstract_getParameters
 
 #define arginfo_class_ReflectionClass_getTraitAliases arginfo_class_ReflectionFunctionAbstract_getParameters
+
+#define arginfo_class_ReflectionClass_getFriendNames arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables
 
 #define arginfo_class_ReflectionClass_isTrait arginfo_class_ReflectionFunctionAbstract_inNamespace
 
@@ -831,6 +833,7 @@ ZEND_METHOD(ReflectionClass, isInterface);
 ZEND_METHOD(ReflectionClass, getTraits);
 ZEND_METHOD(ReflectionClass, getTraitNames);
 ZEND_METHOD(ReflectionClass, getTraitAliases);
+ZEND_METHOD(ReflectionClass, getFriendNames);
 ZEND_METHOD(ReflectionClass, isTrait);
 ZEND_METHOD(ReflectionClass, isEnum);
 ZEND_METHOD(ReflectionClass, isAbstract);
@@ -1128,6 +1131,7 @@ static const zend_function_entry class_ReflectionClass_methods[] = {
 	ZEND_ME(ReflectionClass, getTraits, arginfo_class_ReflectionClass_getTraits, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getTraitNames, arginfo_class_ReflectionClass_getTraitNames, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getTraitAliases, arginfo_class_ReflectionClass_getTraitAliases, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getFriendNames, arginfo_class_ReflectionClass_getFriendNames, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, isTrait, arginfo_class_ReflectionClass_isTrait, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, isEnum, arginfo_class_ReflectionClass_isEnum, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, isAbstract, arginfo_class_ReflectionClass_isAbstract, ZEND_ACC_PUBLIC)
