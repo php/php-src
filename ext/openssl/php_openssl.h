@@ -203,7 +203,19 @@ static inline php_openssl_pkey_object *php_openssl_pkey_from_obj(zend_object *ob
 bool php_openssl_is_pkey_ce(zval *val);
 void php_openssl_pkey_object_init(zval *zv, EVP_PKEY *pkey, bool is_private);
 
-/* OpenSSLSession class */
+/* Openssl\Psk class */
+
+/* Matches OpenSSL's PSK_MAX_PSK_LEN and PSK_MAX_IDENTITY_LEN */
+#define PHP_OPENSSL_PSK_MAX_PSK_LEN      256
+#define PHP_OPENSSL_PSK_MAX_IDENTITY_LEN 128
+
+extern zend_class_entry *php_openssl_psk_ce;
+
+bool php_openssl_is_psk_ce(zval *val);
+zend_string *php_openssl_psk_get_psk(zval *psk_zv);
+zend_string *php_openssl_psk_get_identity(zval *psk_zv);
+
+/* Openssl\Session class */
 
 #include <openssl/ssl.h>
 
