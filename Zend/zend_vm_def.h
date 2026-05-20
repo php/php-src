@@ -6806,8 +6806,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|CV, CONST|TMP|CV)
 	zval *offset;
 	zend_ulong hval;
 	zend_string *key;
-	bool should_flush_array = false;
-	bool should_publish_tracked_array = false;
+	bool should_flush_array = false, should_publish_tracked_array = false;
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_UNSET);

@@ -41,7 +41,7 @@
 #include "SAPI.h"
 
 #define ZEND_OPCACHE_STATIC_CACHE_MAGIC 0xCAC17E01U
-#define ZEND_OPCACHE_STATIC_CACHE_VERSION 2U
+#define ZEND_OPCACHE_STATIC_CACHE_VERSION 1U
 #define ZEND_OPCACHE_STATIC_CACHE_MIN_CAPACITY 127U
 #define ZEND_OPCACHE_STATIC_CACHE_MAX_CAPACITY 65521U
 #define ZEND_OPCACHE_STATIC_CACHE_SLOT_BYTES 256U
@@ -490,6 +490,7 @@ bool zend_opcache_static_cache_atomic_update_locked(
 	bool decrement,
 	bool insert_if_missing,
 	zend_long *new_value,
+	bool *is_overflow,
 	const char *type_error_message,
 	bool throw_on_error);
 void zend_opcache_static_cache_release_request_local_slots(void);

@@ -654,6 +654,11 @@ static zend_always_inline bool zend_opcache_static_cache_acquire_write_lock(bool
 	return true;
 }
 
+static zend_always_inline void zend_opcache_static_cache_warn_atomic_overflow(const char *function_name)
+{
+	zend_error(E_WARNING, "%s(): Integer overflow occurred; result wrapped around", function_name);
+}
+
 static zend_always_inline bool zend_opcache_static_cache_begin_entry_mutation(zend_string *key, bool *release_entry_lock, bool throw_on_error)
 {
 	ZEND_ASSERT(release_entry_lock != NULL);
@@ -942,11 +947,6 @@ static zend_always_inline void zend_opcache_static_cache_disable_subsystem(const
 	zend_opcache_static_cache_restore_context(previous_context);
 }
 
-zend_result zend_opcache_register_functions(int module_type)
-{
-	return zend_register_functions(NULL, ext_functions, NULL, module_type);
-}
-
 static void zend_opcache_static_cache_startup(void)
 {
 	const char *failure_reason;
@@ -1082,24 +1082,6 @@ static zend_result zend_opcache_static_cache_rinit(void)
 	return SUCCESS;
 }
 
-zend_result zend_opcache_static_cache_rshutdown(void)
-{
-	zend_opcache_static_cache_clear_lookup_caches();
-
-	EG(static_cache_class_access_active) = false;
-	EG(tracked_mutation_hooks_active) = false;
-
-	zend_opcache_static_cache_request_shutdown();
-	zend_opcache_static_cache_release_request_entry_locks();
-	zend_opcache_static_cache_release_request_local_slots();
-	zend_opcache_static_cache_release_request_shared_graph_refs();
-
-	EG(static_cache_class_access_active) = false;
-	EG(tracked_mutation_hooks_active) = false;
-
-	return SUCCESS;
-}
-
 static void zend_opcache_static_cache_invalidate_script(zend_persistent_script *persistent_script)
 {
 	zend_opcache_static_cache_invalidate_script_context(&zend_opcache_static_cache_pinned_context_state, persistent_script);
@@ -1192,6 +1174,29 @@ const char *zend_opcache_static_cache_pinned_failure_reason(void)
 	return zend_opcache_static_cache_context_runtime(&zend_opcache_static_cache_pinned_context_state)->failure_reason;
 }
 
+zend_result zend_opcache_static_cache_rshutdown(void)
+{
+	zend_opcache_static_cache_clear_lookup_caches();
+
+	EG(static_cache_class_access_active) = false;
+	EG(tracked_mutation_hooks_active) = false;
+
+	zend_opcache_static_cache_request_shutdown();
+	zend_opcache_static_cache_release_request_entry_locks();
+	zend_opcache_static_cache_release_request_local_slots();
+	zend_opcache_static_cache_release_request_shared_graph_refs();
+
+	EG(static_cache_class_access_active) = false;
+	EG(tracked_mutation_hooks_active) = false;
+
+	return SUCCESS;
+}
+
+zend_result zend_opcache_register_functions(int module_type)
+{
+	return zend_register_functions(NULL, ext_functions, NULL, module_type);
+}
+
 ZEND_METHOD(OPcache_VolatileStatic, __construct)
 {
 	zend_long ttl = 0;
@@ -1225,8 +1230,7 @@ ZEND_FUNCTION(OPcache_volatile_store)
 	zend_string *key;
 	zend_long ttl = 0;
 	zval *value;
-	bool throw_on_error = false;
-	bool stored;
+	bool throw_on_error = false, stored;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(key)
@@ -1251,6 +1255,7 @@ ZEND_FUNCTION(OPcache_volatile_store)
 	previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_volatile_context_state);
 	if (!zend_opcache_static_cache_store_backend_available(throw_on_error)) {
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -1279,8 +1284,7 @@ ZEND_FUNCTION(OPcache_volatile_store_array)
 	zend_long ttl = 0;
 	zval *value;
 	HashTable *values;
-	bool throw_on_error = false;
-	bool stored;
+	bool throw_on_error = false, stored;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_ARRAY_HT(values)
@@ -1300,6 +1304,7 @@ ZEND_FUNCTION(OPcache_volatile_store_array)
 	previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_volatile_context_state);
 	if (!zend_opcache_static_cache_store_backend_available(throw_on_error)) {
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -1391,8 +1396,7 @@ ZEND_FUNCTION(OPcache_volatile_fetch_array)
 ZEND_FUNCTION(OPcache_volatile_exists)
 {
 	zend_string *key;
-	bool throw_on_error = false;
-	bool exists;
+	bool throw_on_error = false, exists;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(key)
@@ -1419,8 +1423,7 @@ ZEND_FUNCTION(OPcache_volatile_lock)
 {
 	zend_string *key;
 	zend_long lease = 0;
-	bool throw_on_error = false;
-	bool locked;
+	bool throw_on_error = false, locked;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(key)
@@ -1451,8 +1454,7 @@ ZEND_FUNCTION(OPcache_volatile_lock)
 ZEND_FUNCTION(OPcache_volatile_unlock)
 {
 	zend_string *key;
-	bool throw_on_error = false;
-	bool unlocked;
+	bool throw_on_error = false, unlocked;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(key)
@@ -1528,6 +1530,7 @@ ZEND_FUNCTION(OPcache_volatile_delete_array)
 
 	if (!zend_opcache_static_cache_validate_available_write(throw_on_error)) {
 		zend_opcache_static_cache_release_key_list(prepared_keys, key_count);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -1538,6 +1541,7 @@ ZEND_FUNCTION(OPcache_volatile_delete_array)
 	for (index = 0; index < key_count; index++) {
 		if (!zend_opcache_static_cache_explicit_delete_prevalidated(prepared_keys[index], throw_on_error)) {
 			zend_opcache_static_cache_release_key_list(prepared_keys, key_count);
+
 			if (EG(exception)) {
 				RETURN_THROWS();
 			}
@@ -1547,6 +1551,7 @@ ZEND_FUNCTION(OPcache_volatile_delete_array)
 	}
 
 	zend_opcache_static_cache_release_key_list(prepared_keys, key_count);
+
 	RETURN_TRUE;
 }
 
@@ -1571,6 +1576,7 @@ ZEND_FUNCTION(OPcache_volatile_clear)
 		if (throw_on_error && !EG(exception)) {
 			zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Unable to clear the volatile cache");
 		}
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -1579,6 +1585,7 @@ ZEND_FUNCTION(OPcache_volatile_clear)
 	}
 
 	zend_opcache_static_cache_mark_publish_skipped(&zend_opcache_static_cache_volatile_context_state);
+
 	RETURN_TRUE;
 }
 
@@ -1604,8 +1611,7 @@ ZEND_FUNCTION(OPcache_pinned_store)
 	zend_opcache_static_cache_context *previous_context;
 	zend_string *key;
 	zval *value;
-	bool throw_on_error = false;
-	bool stored;
+	bool throw_on_error = false, stored;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(key)
@@ -1625,6 +1631,7 @@ ZEND_FUNCTION(OPcache_pinned_store)
 	previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_pinned_context_state);
 	if (!zend_opcache_static_cache_store_backend_available(throw_on_error)) {
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -1652,8 +1659,7 @@ ZEND_FUNCTION(OPcache_pinned_store_array)
 	zend_string *key;
 	zval *value;
 	HashTable *values;
-	bool throw_on_error = false;
-	bool stored;
+	bool throw_on_error = false, stored;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY_HT(values)
@@ -1747,7 +1753,10 @@ ZEND_FUNCTION(OPcache_pinned_fetch_array)
 		default_value = &default_null;
 	}
 
-	if (zend_opcache_static_cache_fetch_array_api(&zend_opcache_static_cache_pinned_context_state, keys, default_value, return_value, throw_on_error) == FAILURE) {
+	if (zend_opcache_static_cache_fetch_array_api(
+			&zend_opcache_static_cache_pinned_context_state, keys, default_value, return_value, throw_on_error
+		) == FAILURE
+	) {
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -1759,8 +1768,7 @@ ZEND_FUNCTION(OPcache_pinned_fetch_array)
 ZEND_FUNCTION(OPcache_pinned_exists)
 {
 	zend_string *key;
-	bool throw_on_error = false;
-	bool exists;
+	bool throw_on_error = false, exists;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(key)
@@ -1787,8 +1795,7 @@ ZEND_FUNCTION(OPcache_pinned_lock)
 {
 	zend_string *key;
 	zend_long lease = 0;
-	bool throw_on_error = false;
-	bool locked;
+	bool throw_on_error = false, locked;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(key)
@@ -1819,8 +1826,7 @@ ZEND_FUNCTION(OPcache_pinned_lock)
 ZEND_FUNCTION(OPcache_pinned_unlock)
 {
 	zend_string *key;
-	bool throw_on_error = false;
-	bool unlocked;
+	bool throw_on_error = false, unlocked;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(key)
@@ -1862,6 +1868,7 @@ ZEND_FUNCTION(OPcache_pinned_delete)
 	previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_pinned_context_state);
 	if (!zend_opcache_static_cache_validate_available_write(throw_on_error)) {
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -1871,13 +1878,16 @@ ZEND_FUNCTION(OPcache_pinned_delete)
 
 	if (!zend_opcache_static_cache_explicit_delete_or_class_prevalidated(key_or_class, throw_on_error)) {
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
 
 		RETURN_FALSE;
 	}
+
 	zend_opcache_static_cache_restore_context(previous_context);
+
 	RETURN_TRUE;
 }
 
@@ -1914,6 +1924,7 @@ ZEND_FUNCTION(OPcache_pinned_delete_array)
 		if (!zend_opcache_static_cache_explicit_delete_prevalidated(prepared_keys[index], throw_on_error)) {
 			zend_opcache_static_cache_restore_context(previous_context);
 			zend_opcache_static_cache_release_key_list(prepared_keys, key_count);
+
 			if (EG(exception)) {
 				RETURN_THROWS();
 			}
@@ -1924,6 +1935,7 @@ ZEND_FUNCTION(OPcache_pinned_delete_array)
 
 	zend_opcache_static_cache_restore_context(previous_context);
 	zend_opcache_static_cache_release_key_list(prepared_keys, key_count);
+
 	RETURN_TRUE;
 }
 
@@ -1952,6 +1964,7 @@ ZEND_FUNCTION(OPcache_pinned_clear)
 		if (throw_on_error && !EG(exception)) {
 			zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Unable to clear the pinned cache");
 		}
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -1961,6 +1974,7 @@ ZEND_FUNCTION(OPcache_pinned_clear)
 
 	zend_opcache_static_cache_mark_publish_skipped(&zend_opcache_static_cache_pinned_context_state);
 	zend_opcache_static_cache_restore_context(previous_context);
+
 	RETURN_TRUE;
 }
 
@@ -1969,8 +1983,7 @@ ZEND_FUNCTION(OPcache_pinned_atomic_increment)
 	zend_opcache_static_cache_context *previous_context;
 	zend_long step = 1, new_value;
 	zend_string *key;
-	bool throw_on_error = false;
-	bool release_entry_lock = false;
+	bool throw_on_error = false, release_entry_lock = false, is_overflow = false;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(key)
@@ -1986,6 +1999,7 @@ ZEND_FUNCTION(OPcache_pinned_atomic_increment)
 	previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_pinned_context_state);
 	if (!zend_opcache_static_cache_validate_available_write(throw_on_error)) {
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -1995,6 +2009,7 @@ ZEND_FUNCTION(OPcache_pinned_atomic_increment)
 
 	if (!zend_opcache_static_cache_begin_entry_mutation(key, &release_entry_lock, throw_on_error)) {
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -2006,7 +2021,9 @@ ZEND_FUNCTION(OPcache_pinned_atomic_increment)
 		if (release_entry_lock) {
 			zend_opcache_static_cache_release_entry_lock(key);
 		}
+
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -2014,12 +2031,15 @@ ZEND_FUNCTION(OPcache_pinned_atomic_increment)
 		RETURN_FALSE;
 	}
 
-	if (!zend_opcache_static_cache_atomic_update_locked(key, step, false, true, &new_value, "Atomic increment requires an integer value", throw_on_error)) {
+	if (!zend_opcache_static_cache_atomic_update_locked(key, step, false, true, &new_value, &is_overflow, "Atomic increment requires an integer value", throw_on_error)) {
 		zend_opcache_static_cache_unlock();
+
 		if (release_entry_lock) {
 			zend_opcache_static_cache_release_entry_lock(key);
 		}
+
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -2031,6 +2051,10 @@ ZEND_FUNCTION(OPcache_pinned_atomic_increment)
 	zend_opcache_static_cache_unlock();
 	zend_opcache_static_cache_finish_entry_mutation(key, release_entry_lock, true);
 	zend_opcache_static_cache_restore_context(previous_context);
+
+	if (is_overflow) {
+		zend_opcache_static_cache_warn_atomic_overflow("OPcache\\pinned_atomic_increment");
+	}
 }
 
 ZEND_FUNCTION(OPcache_pinned_atomic_decrement)
@@ -2038,8 +2062,7 @@ ZEND_FUNCTION(OPcache_pinned_atomic_decrement)
 	zend_opcache_static_cache_context *previous_context;
 	zend_string *key;
 	zend_long step = 1, new_value;
-	bool throw_on_error = false;
-	bool release_entry_lock = false;
+	bool throw_on_error = false, release_entry_lock = false, is_overflow = false;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(key)
@@ -2055,6 +2078,7 @@ ZEND_FUNCTION(OPcache_pinned_atomic_decrement)
 	previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_pinned_context_state);
 	if (!zend_opcache_static_cache_validate_available_write(throw_on_error)) {
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -2064,6 +2088,7 @@ ZEND_FUNCTION(OPcache_pinned_atomic_decrement)
 
 	if (!zend_opcache_static_cache_begin_entry_mutation(key, &release_entry_lock, throw_on_error)) {
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -2075,7 +2100,9 @@ ZEND_FUNCTION(OPcache_pinned_atomic_decrement)
 		if (release_entry_lock) {
 			zend_opcache_static_cache_release_entry_lock(key);
 		}
+
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -2083,12 +2110,14 @@ ZEND_FUNCTION(OPcache_pinned_atomic_decrement)
 		RETURN_FALSE;
 	}
 
-	if (!zend_opcache_static_cache_atomic_update_locked(key, step, true, true, &new_value, "Atomic decrement requires an integer value", throw_on_error)) {
+	if (!zend_opcache_static_cache_atomic_update_locked(key, step, true, true, &new_value, &is_overflow, "Atomic decrement requires an integer value", throw_on_error)) {
 		zend_opcache_static_cache_unlock();
 		if (release_entry_lock) {
 			zend_opcache_static_cache_release_entry_lock(key);
 		}
+
 		zend_opcache_static_cache_restore_context(previous_context);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -2100,6 +2129,10 @@ ZEND_FUNCTION(OPcache_pinned_atomic_decrement)
 	zend_opcache_static_cache_unlock();
 	zend_opcache_static_cache_finish_entry_mutation(key, release_entry_lock, true);
 	zend_opcache_static_cache_restore_context(previous_context);
+
+	if (is_overflow) {
+		zend_opcache_static_cache_warn_atomic_overflow("OPcache\\pinned_atomic_decrement");
+	}
 }
 
 ZEND_FUNCTION(OPcache_pinned_cache_info)
