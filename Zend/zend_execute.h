@@ -428,6 +428,9 @@ ZEND_API zend_result zend_set_user_opcode_handler(uint8_t opcode, user_opcode_ha
 ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(uint8_t opcode);
 
 ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode_op *node, const zend_execute_data *execute_data);
+ZEND_API bool zend_frameless_protect_args_for_reentry(void);
+ZEND_API void zend_frameless_cleanup_reentry_copies_for_handler(zend_execute_data *execute_data, const zend_op *opline);
+ZEND_API void zend_frameless_cleanup_reentry_copies_force(void);
 
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table);
 ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *execute_data);
