@@ -17,7 +17,7 @@
 #include "../fpm.h"
 #include "../zlog.h"
 
-#ifdef HAVE_PORT_CREATE
+#ifdef HAVE_EVENT_PORTS
 
 #include <port.h>
 #include <poll.h>
@@ -43,19 +43,19 @@ port_event_t *events = NULL;
 int nevents = 0;
 static int pfd = -1;
 
-#endif /* HAVE_PORT_CREATE */
+#endif /* HAVE_EVENT_PORTS */
 
 struct fpm_event_module_s *fpm_event_port_module(void) /* {{{ */
 {
-#ifdef HAVE_PORT_CREATE
+#ifdef HAVE_EVENT_PORTS
 	return &port_module;
 #else
 	return NULL;
-#endif /* HAVE_PORT_CREATE */
+#endif /* HAVE_EVENT_PORTS */
 }
 /* }}} */
 
-#ifdef HAVE_PORT_CREATE
+#ifdef HAVE_EVENT_PORTS
 
 /*
  * Init the module
@@ -194,4 +194,4 @@ static int fpm_event_port_remove(struct fpm_event_s *ev) /* {{{ */
 }
 /* }}} */
 
-#endif /* HAVE_PORT_CREATE */
+#endif /* HAVE_EVENT_PORTS */
