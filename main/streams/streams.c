@@ -580,6 +580,7 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 			}
 
 			/* wind the handle... */
+			stream->readfilters.in_iteration++;
 			for (filter = stream->readfilters.head; filter; filter = filter->next) {
 				status = filter->fops->filter(stream, filter, brig_inp, brig_outp, NULL, flags);
 
@@ -595,6 +596,7 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 				brig_outp = brig_swap;
 				memset(brig_outp, 0, sizeof(*brig_outp));
 			}
+			stream->readfilters.in_iteration--;
 
 			switch (status) {
 				case PSFS_PASS_ON:
@@ -1233,6 +1235,7 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 		php_stream_bucket_append(&brig_in, bucket);
 	}
 
+	stream->writefilters.in_iteration++;
 	for (php_stream_filter *filter = stream->writefilters.head; filter; filter = filter->next) {
 		/* for our return value, we are interested in the number of bytes consumed from
 		 * the first filter in the chain */
@@ -1250,6 +1253,7 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 		brig_outp = brig_swap;
 		memset(brig_outp, 0, sizeof(*brig_outp));
 	}
+	stream->writefilters.in_iteration--;
 
 	switch (status) {
 		case PSFS_PASS_ON:
