@@ -64,6 +64,7 @@ function zip_entry_filesize($zip_entry): int|false {}
 #[\Deprecated(since: '8.0', message: 'use ZipArchive::statIndex() instead')]
 function zip_entry_compressionmethod($zip_entry): string|false {}
 
+/** @not-serializable */
 class ZipArchive implements Countable
 {
     /**
