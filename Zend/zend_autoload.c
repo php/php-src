@@ -63,7 +63,21 @@ ZEND_API zend_class_entry *zend_perform_class_autoload(zend_string *class_name, 
 		if (!func_info) {
 			break;
 		}
+		zend_object *guard_object = func_info->object;
+		zend_object *guard_closure = func_info->closure;
+		if (guard_object) {
+			GC_ADDREF(guard_object);
+		}
+		if (guard_closure) {
+			GC_ADDREF(guard_closure);
+		}
 		zend_call_known_fcc(func_info, /* retval */ NULL, /* param_count */ 1, /* params */ &zname, /* named_params */ NULL);
+		if (guard_object) {
+			OBJ_RELEASE(guard_object);
+		}
+		if (guard_closure) {
+			OBJ_RELEASE(guard_closure);
+		}
 
 		if (EG(exception)) {
 			return NULL;
