@@ -2642,6 +2642,58 @@ static void zend_compile_memoized_expr(znode *result, zend_ast *expr, uint32_t t
 }
 /* }}} */
 
+static bool zend_is_this_instance_of_name(const zend_string *type_name)
+{
+	if (zend_string_equals_ci(CG(active_class_entry)->name, type_name)) {
+		return true;
+	}
+	if (zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_SELF))) {
+		return true;
+	}
+	if (zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
+		return true;
+	}
+
+	ZEND_ASSERT((CG(active_class_entry)->ce_flags & ZEND_ACC_LINKED) == 0);
+	if (CG(active_class_entry)->num_interfaces) {
+		for (uint32_t i = 0; i < CG(active_class_entry)->num_interfaces; i++) {
+			if (zend_string_equals_ci(CG(active_class_entry)->interface_names[i].lc_name, type_name)) {
+				return true;
+			}
+		}
+	}
+	const zend_string *parent_name = CG(active_class_entry)->parent_name;
+	if (parent_name && zend_string_equals_ci(parent_name, type_name)) {
+		return true;
+	}
+
+	return false;
+}
+
+static bool zend_is_this_valid_for_return_type(zend_type type)
+{
+	/* Closures can be bound to a class scope, however it might not and this must type error */
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_CLOSURE) {
+		return false;
+	}
+
+	if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_OBJECT|MAY_BE_STATIC)) {
+		return true;
+	}
+
+	const zend_type *single_type;
+	ZEND_TYPE_FOREACH(type, single_type) {
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			const zend_string *name = ZEND_TYPE_NAME(*single_type);
+			if (zend_is_this_instance_of_name(name)) {
+				return true;
+			}
+		}
+	} ZEND_TYPE_FOREACH_END();
+
+	return false;
+}
+
 static void zend_emit_return_type_check(
 		znode *expr, const zend_arg_info *return_info, bool implicit) /* {{{ */
 {
@@ -2694,6 +2746,17 @@ static void zend_emit_return_type_check(
 
 		if (expr && expr->op_type == IS_CONST && ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE(expr->u.constant))) {
 			/* we don't need run-time check */
+			return;
+		}
+
+		/* If return type contains static and we are returning $this
+		 * (determined by checking if the previous opcode is ZEND_FETCH_THIS)
+		 * then we don't need to check the return type */
+		const zend_op_array *op_array = CG(active_op_array);
+		if (expr && op_array->last >= 1
+			&& op_array->opcodes[op_array->last-1].opcode == ZEND_FETCH_THIS
+			&& zend_is_this_valid_for_return_type(type)) {
+			ZEND_ASSERT((expr->op_type & (IS_VAR|IS_TMP_VAR)) && expr->u.op.var == op_array->opcodes[op_array->last-1].result.var);
 			return;
 		}
 
