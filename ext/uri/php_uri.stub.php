@@ -29,12 +29,22 @@ namespace Uri {
 }
 
 namespace Uri\Rfc3986 {
+    enum UriType
+    {
+        case AbsolutePathReference;
+        case RelativePathReference;
+        case NetworkPathReference;
+        case Uri;
+    }
+
     /** @strict-properties */
     final readonly class Uri
     {
         public static function parse(string $uri, ?\Uri\Rfc3986\Uri $baseUrl = null): ?static {}
 
         public function __construct(string $uri, ?\Uri\Rfc3986\Uri $baseUrl = null) {}
+
+        public function getUriType(): ?\Uri\Rfc3986\UriType {}
 
         public function getScheme(): ?string {}
 
@@ -164,6 +174,8 @@ namespace Uri\WhatWg {
         public function getScheme(): string {}
 
         public function withScheme(string $scheme): static {}
+
+        public function isSpecialScheme(): bool {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getUsername */
         public function getUsername(): ?string {}
