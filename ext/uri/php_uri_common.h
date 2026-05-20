@@ -18,6 +18,8 @@
 #include "php_uri_decl.h"
 
 extern zend_class_entry *php_uri_ce_rfc3986_uri;
+extern zend_class_entry *php_uri_ce_rfc3986_uri_type;
+extern zend_class_entry *php_uri_ce_rfc3986_uri_host_type;
 extern zend_class_entry *php_uri_ce_whatwg_url;
 extern zend_class_entry *php_uri_ce_comparison_mode;
 extern zend_class_entry *php_uri_ce_exception;
@@ -26,6 +28,7 @@ extern zend_class_entry *php_uri_ce_invalid_uri_exception;
 extern zend_class_entry *php_uri_ce_whatwg_invalid_url_exception;
 extern zend_class_entry *php_uri_ce_whatwg_url_validation_error_type;
 extern zend_class_entry *php_uri_ce_whatwg_url_validation_error;
+extern zend_class_entry *php_uri_ce_whatwg_url_host_type;
 
 typedef enum php_uri_recomposition_mode {
 	PHP_URI_RECOMPOSITION_MODE_RAW_ASCII,
