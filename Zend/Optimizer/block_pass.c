@@ -1702,7 +1702,7 @@ static void zend_merge_blocks(const zend_op_array *op_array, const zend_cfg *cfg
 void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_cfg cfg;
-	zend_basic_block *blocks, *end, *b;
+	zend_basic_block *blocks, *b;
 	int pass;
 	uint32_t bitset_len;
 	zend_bitset usage;
@@ -1730,7 +1730,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	jmp_hitlist = zend_arena_alloc(&ctx->arena, cfg.blocks_count * sizeof(int));
 
 	blocks = cfg.blocks;
-	end = blocks + cfg.blocks_count;
+	const zend_basic_block *end = blocks + cfg.blocks_count;
 	for (pass = 0; pass < PASSES; pass++) {
 		opt_count = 0;
 
