@@ -1,15 +1,14 @@
 <?php
 
-readonly class ProcessResult {
-    public function __construct(
-        public string $stdout,
-        public string $stderr,
-    ) {}
+class ProcessResult {
+    public $stdout;
+    public $stderr;
 }
 
 function runCommand(array $args, ?string $cwd = null, bool $printCommand = true): ProcessResult {
     $cmd = implode(' ', array_map('escapeshellarg', $args));
     $pipes = null;
+    $result = new ProcessResult();
     $descriptorSpec = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
     if ($printCommand) {
         fwrite(STDOUT, "> $cmd\n");
@@ -25,8 +24,6 @@ function runCommand(array $args, ?string $cwd = null, bool $printCommand = true)
     stream_set_blocking($stdout, false);
     stream_set_blocking($stderr, false);
 
-    $stdoutStr = '';
-    $stderrStr = '';
     $stdoutEof = false;
     $stderrEof = false;
 
@@ -40,9 +37,9 @@ function runCommand(array $args, ?string $cwd = null, bool $printCommand = true)
         foreach ($read as $stream) {
             $chunk = fgets($stream);
             if ($stream === $stdout) {
-                $stdoutStr .= $chunk;
+                $result->stdout .= $chunk;
             } elseif ($stream === $stderr) {
-                $stderrStr .= $chunk;
+                $result->stderr .= $chunk;
             }
         }
 
@@ -52,8 +49,6 @@ function runCommand(array $args, ?string $cwd = null, bool $printCommand = true)
 
     fclose($stdout);
     fclose($stderr);
-
-    $result = new ProcessResult($stdoutStr, $stderrStr);
 
     $statusCode = proc_close($processHandle);
     if ($statusCode !== 0) {
