@@ -110,6 +110,7 @@ typedef struct {
 
 void phpdbg_setup_watchpoints(void);
 void phpdbg_destroy_watchpoints(void);
+void phpdbg_destroy_watch_request_state(void);
 void phpdbg_purge_watchpoint_tree(void);
 
 #ifndef _WIN32
