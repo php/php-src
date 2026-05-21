@@ -312,10 +312,16 @@ slightly different steps. We'll call attention where the steps differ.
     ```
 
     When resolving the conflicts, ignore the changes from PHP-X.Y in higher
-    branches. It means using something like `git checkout --ours .` when on
-    PHP.X.Y+1 or master after the merge resulting in the conflicts.
+    branches when on PHP.X.Y+1 or master after the merge resulting in the
+    conflicts.
 
-    Be sure to set up a merge driver for the NEWS file as described in
+    ```
+    git checkout --ours main/php_version.h Zend/zend.h configure.ac
+    git add main/php_version.h Zend/zend.h configure.ac
+    git merge --continue
+    ```
+    
+    Be sure to set up a merge driver for the `NEWS` file as described in
     the [Git FAQ page on the PHP wiki][gitfaq-mandatory].
 
 11. Push the changes to the `php-src`.
