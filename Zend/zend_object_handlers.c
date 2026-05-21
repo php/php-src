@@ -2094,6 +2094,12 @@ ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 				ZVAL_COPY_OR_DUP(&CE_STATIC_MEMBERS(class_type)[i], p);
 			}
 		}
+
+		if (UNEXPECTED(EG(static_cache_class_access_active) &&
+			zend_class_init_statics_hook != NULL)
+		) {
+			zend_class_init_statics_hook(class_type);
+		}
 	}
 } /* }}} */
 
@@ -2137,6 +2143,12 @@ undeclared_property:
 	/* Ensure static properties are initialized. */
 	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
 		zend_class_init_statics(ce);
+	}
+
+	if (UNEXPECTED(EG(static_cache_class_access_active) &&
+		zend_class_static_access_hook != NULL)
+	) {
+		zend_class_static_access_hook(ce);
 	}
 
 	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;

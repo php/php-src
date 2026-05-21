@@ -331,6 +331,11 @@ PHP_NEW_EXTENSION([opcache], m4_normalize([
     zend_accelerator_hash.c
     zend_accelerator_module.c
     zend_accelerator_util_funcs.c
+    zend_static_cache.c
+    zend_static_cache_storage.c
+    zend_static_cache_shared_graph.c
+    zend_static_cache_entries.c
+    zend_static_cache_statics.c
     zend_file_cache.c
     zend_persist_calc.c
     zend_persist.c
@@ -342,7 +347,6 @@ PHP_NEW_EXTENSION([opcache], m4_normalize([
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $JIT_CFLAGS],,
   [yes])
 
-PHP_ADD_EXTENSION_DEP(opcache, date)
 PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
 if test "$php_cv_shm_ipc" != "yes" && test "$php_cv_shm_mmap_posix" != "yes" && test "$php_cv_shm_mmap_anon" != "yes"; then

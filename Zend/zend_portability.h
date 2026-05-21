@@ -452,6 +452,156 @@ extern "C++" {
 # endif
 #endif /* ZEND_DEBUG */
 
+#ifdef ZTS
+
+typedef void *(*zend_thread_routine_t)(void *arg);
+
+#ifdef ZEND_WIN32
+
+#include <process.h>
+#include <stdlib.h>
+
+typedef struct _zend_thread {
+	HANDLE handle;
+	unsigned id;
+} zend_thread_t;
+
+typedef SRWLOCK zend_thread_rwlock_t;
+
+typedef struct _zend_thread_start_ctx {
+	zend_thread_routine_t routine;
+	void *arg;
+} zend_thread_start_ctx;
+
+static unsigned __stdcall zend_thread_trampoline(void *arg)
+{
+	zend_thread_start_ctx *ctx = (zend_thread_start_ctx *) arg;
+	zend_thread_routine_t routine = ctx->routine;
+	void *routine_arg = ctx->arg;
+
+	routine(routine_arg);
+	free(ctx);
+	return 0;
+}
+
+static zend_always_inline bool zend_thread_start(zend_thread_t *thread, zend_thread_routine_t routine, void *arg)
+{
+	zend_thread_start_ctx *ctx;
+
+	ctx = (zend_thread_start_ctx *) malloc(sizeof(*ctx));
+	if (ctx == NULL) {
+		return false;
+	}
+
+	ctx->routine = routine;
+	ctx->arg = arg;
+	thread->handle = (HANDLE) _beginthreadex(NULL, 0, zend_thread_trampoline, ctx, 0, &thread->id);
+	if (thread->handle == NULL) {
+		free(ctx);
+		return false;
+	}
+
+	return true;
+}
+
+static zend_always_inline bool zend_thread_join(zend_thread_t *thread)
+{
+	DWORD wait_status;
+
+	wait_status = WaitForSingleObject(thread->handle, INFINITE);
+	if (thread->handle != NULL) {
+		CloseHandle(thread->handle);
+		thread->handle = NULL;
+	}
+
+	return wait_status == WAIT_OBJECT_0;
+}
+
+static zend_always_inline bool zend_thread_rwlock_init(zend_thread_rwlock_t *lock)
+{
+	InitializeSRWLock(lock);
+	return true;
+}
+
+static zend_always_inline bool zend_thread_rwlock_rdlock(zend_thread_rwlock_t *lock)
+{
+	AcquireSRWLockShared(lock);
+	return true;
+}
+
+static zend_always_inline bool zend_thread_rwlock_wrlock(zend_thread_rwlock_t *lock)
+{
+	AcquireSRWLockExclusive(lock);
+	return true;
+}
+
+static zend_always_inline bool zend_thread_rwlock_unlock_rd(zend_thread_rwlock_t *lock)
+{
+	ReleaseSRWLockShared(lock);
+	return true;
+}
+
+static zend_always_inline bool zend_thread_rwlock_unlock_wr(zend_thread_rwlock_t *lock)
+{
+	ReleaseSRWLockExclusive(lock);
+	return true;
+}
+
+static zend_always_inline void zend_thread_rwlock_destroy(zend_thread_rwlock_t *lock)
+{
+	ZEND_IGNORE_VALUE(lock);
+	return;
+}
+
+#else
+
+typedef pthread_t zend_thread_t;
+typedef pthread_rwlock_t zend_thread_rwlock_t;
+
+static zend_always_inline bool zend_thread_start(zend_thread_t *thread, zend_thread_routine_t routine, void *arg)
+{
+	return pthread_create(thread, NULL, routine, arg) == 0;
+}
+
+static zend_always_inline bool zend_thread_join(zend_thread_t *thread)
+{
+	return pthread_join(*thread, NULL) == 0;
+}
+
+static zend_always_inline bool zend_thread_rwlock_init(zend_thread_rwlock_t *lock)
+{
+	return pthread_rwlock_init(lock, NULL) == 0;
+}
+
+static zend_always_inline bool zend_thread_rwlock_rdlock(zend_thread_rwlock_t *lock)
+{
+	return pthread_rwlock_rdlock(lock) == 0;
+}
+
+static zend_always_inline bool zend_thread_rwlock_wrlock(zend_thread_rwlock_t *lock)
+{
+	return pthread_rwlock_wrlock(lock) == 0;
+}
+
+static zend_always_inline bool zend_thread_rwlock_unlock_rd(zend_thread_rwlock_t *lock)
+{
+	return pthread_rwlock_unlock(lock) == 0;
+}
+
+static zend_always_inline bool zend_thread_rwlock_unlock_wr(zend_thread_rwlock_t *lock)
+{
+	return pthread_rwlock_unlock(lock) == 0;
+}
+
+static zend_always_inline void zend_thread_rwlock_destroy(zend_thread_rwlock_t *lock)
+{
+	pthread_rwlock_destroy(lock);
+}
+
+#endif
+
+#endif
+
 #ifdef PHP_HAVE_BUILTIN_EXPECT
 # define EXPECTED(condition)   __builtin_expect(!!(condition), 1)
 # define UNEXPECTED(condition) __builtin_expect(!!(condition), 0)

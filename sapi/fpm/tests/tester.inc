@@ -548,7 +548,8 @@ class Tester
 
         $this->masterProcess = proc_open($cmd, $desc, $pipes, null, $envVars);
         register_shutdown_function(
-            function ($masterProcess) use ($configFile) {
+            /* Fix for LLVM 20 ASan false-positive */
+            static function ($masterProcess) use ($configFile) {
                 @unlink($configFile);
                 if (is_resource($masterProcess)) {
                     @proc_terminate($masterProcess);
@@ -1154,6 +1155,8 @@ class Tester
             $this->terminate();
         }
         proc_close($this->masterProcess);
+        /* Break the Tester -> Response -> Tester cycle before leak checkers run. */
+        $this->response = null;
     }
 
     /**
