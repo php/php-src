@@ -308,7 +308,7 @@ slightly different steps. We'll call attention where the steps differ.
     git merge PHP-X.Y
     # repeat             # Merge up all the way
     git switch master
-    git merge PHP-X.Y    # latest release branch
+    git merge PHP-X.Y+n  # latest release branch
     ```
 
     When resolving the conflicts, ignore the changes from PHP-X.Y in higher
