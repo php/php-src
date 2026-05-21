@@ -315,7 +315,7 @@ slightly different steps. We'll call attention where the steps differ.
     branches when on PHP.X.Y+1 or master after the merge resulting in the
     conflicts.
 
-    ```
+    ```shell
     git checkout --ours main/php_version.h Zend/zend.h configure.ac
     git add main/php_version.h Zend/zend.h configure.ac
     git merge --continue
