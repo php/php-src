@@ -28,7 +28,7 @@ array(1) {
 }
 
 
-Fatal error: Uncaught ValueError: stream_select(): Argument #5 ($microseconds) must be null when argument #4 ($seconds) is null in %s
+Fatal error: Uncaught ValueError: stream_select(): Argument #5 ($microseconds) must be null when argument #4 ($seconds) is null in %s:%d
 Stack trace:
 #0 %s stream_select(Array, NULL, NULL, NULL, 1)
 #1 {main}

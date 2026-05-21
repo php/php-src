@@ -8,4 +8,4 @@ class C1 { }
 
 ?>
 --EXPECTF--
-Fatal error: Constant expression contains invalid operations in %s
+Fatal error: Constant expression contains invalid operations in %s on line %d

@@ -49,6 +49,6 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: stream_filter_append(): "write_seek_mode" filter parameter must be one of "preserve", "reset", or "strict" in %s
+Warning: stream_filter_append(): "write_seek_mode" filter parameter must be one of "preserve", "reset", or "strict" in %s on line %d
 
-Warning: stream_filter_append(): Unable to create or locate filter "bzip2.compress" in %s
+Warning: stream_filter_append(): Unable to create or locate filter "bzip2.compress" in %s on line %d

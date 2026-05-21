@@ -40,7 +40,7 @@ session_start();
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 write: goodbye cruel world
 
-Fatal error: Uncaught Exception in %s
+Fatal error: Uncaught Exception in %s:%d
 Stack trace:
 #0 [internal function]: write('%s', '')
 #1 {main}

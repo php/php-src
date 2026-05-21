@@ -45,10 +45,10 @@ other object:
 BcMath\Number::add(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 null:
 
-Deprecated: BcMath\Number::add(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s
+Deprecated: BcMath\Number::add(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s on line %d
 
 ========== sub ==========
 non number str:
@@ -59,10 +59,10 @@ other object:
 BcMath\Number::sub(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 null:
 
-Deprecated: BcMath\Number::sub(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s
+Deprecated: BcMath\Number::sub(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s on line %d
 
 ========== mul ==========
 non number str:
@@ -73,10 +73,10 @@ other object:
 BcMath\Number::mul(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 null:
 
-Deprecated: BcMath\Number::mul(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s
+Deprecated: BcMath\Number::mul(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s on line %d
 
 ========== div ==========
 non number str:
@@ -87,11 +87,11 @@ other object:
 BcMath\Number::div(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 Division by zero
 null:
 
-Deprecated: BcMath\Number::div(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s
+Deprecated: BcMath\Number::div(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s on line %d
 Division by zero
 
 ========== mod ==========
@@ -103,11 +103,11 @@ other object:
 BcMath\Number::mod(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 Modulo by zero
 null:
 
-Deprecated: BcMath\Number::mod(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s
+Deprecated: BcMath\Number::mod(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s on line %d
 Modulo by zero
 
 ========== pow ==========
@@ -119,7 +119,7 @@ other object:
 BcMath\Number::pow(): Argument #1 ($exponent) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s on line %d
 null:
 
-Deprecated: BcMath\Number::pow(): Passing null to parameter #1 ($exponent) of type BcMath\Number|string|int is deprecated in %s
+Deprecated: BcMath\Number::pow(): Passing null to parameter #1 ($exponent) of type BcMath\Number|string|int is deprecated in %s on line %d

@@ -12,7 +12,7 @@ $one->a(new One());
 $one->a(123);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: One::a(): Argument #1 ($obj) must be of type object, int given, called in %s:%d
+Fatal error: Uncaught TypeError: One::a(): Argument #1 ($obj) must be of type object, int given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(9): One->a(123)
 #1 {main}

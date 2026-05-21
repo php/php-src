@@ -55,7 +55,7 @@ proc_close($proc);
 Missing redirection target
 Redirection target must be of type int, string given
 
-Warning: proc_open(): Redirection target 42 not found in %s
+Warning: proc_open(): Redirection target 42 not found in %s on line %d
 
 With pipe:
 array(1) {

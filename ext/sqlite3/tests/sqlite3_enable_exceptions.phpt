@@ -25,7 +25,7 @@ echo "Done\n";
 bool(false)
 no such table: non_existent_table
 
-Deprecated: SQLite3::enableExceptions(): Use of warnings for SQLite3 is deprecated in %s
+Deprecated: SQLite3::enableExceptions(): Use of warnings for SQLite3 is deprecated in %s on line %d
 bool(true)
 
 Warning: SQLite3::query(): no such table: non_existent_table in %s on line %d

@@ -24,6 +24,6 @@ try {
 echo 'done!';
 ?>
 --EXPECTF--
-Warning: failed loading cafile stream: `x509.ca' in %s
+Warning: failed loading cafile stream: `x509.ca' in %s on line %d
 Cannot connect to MySQL using SSL
 done!

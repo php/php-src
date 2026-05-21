@@ -46,4 +46,4 @@ pcntl_setpriority(): Argument #3 ($mode) must be one of PRIO_PGRP, PRIO_USER, PR
 pcntl_setpriority(): Argument #2 ($process_id) must be 0 (zero) if PRIO_DARWIN_THREAD is provided as second parameter
 pcntl_setpriority(): Argument #2 ($process_id) is not a valid process, process group, or user ID
 
-Warning: pcntl_setpriority(): Error 1: A process was located, but neither its effective nor real user ID matched the effective user ID of the caller in %s
+Warning: pcntl_setpriority(): Error 1: A process was located, but neither its effective nor real user ID matched the effective user ID of the caller in %s on line %d

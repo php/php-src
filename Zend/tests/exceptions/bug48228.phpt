@@ -23,7 +23,7 @@ $l_aa=new aa();
 $l_aa->dosome();
 ?>
 --EXPECTF--
-Fatal error: Uncaught Exception in %s
+Fatal error: Uncaught Exception in %s:%d
 Stack trace:
 #0 %s(%d): do_throw()
 #1 %s(%d): aa->dosome()

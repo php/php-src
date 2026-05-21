@@ -227,7 +227,7 @@ Array
     [3] => 2
 )
 
-Warning: PDOStatement::execute(): SQLSTATE[%s]: %s: 1366 Incorrect integer value: 'true' for column %s at row 1 in %s
+Warning: PDOStatement::execute(): SQLSTATE[%s]: %s: 1366 Incorrect integer value: 'true' for column %s at row 1 in %s on line %d
 array(3) {
   [0]=>
   string(5) "%s"
@@ -248,7 +248,7 @@ Array
     [3] => 2
 )
 
-Warning: PDOStatement::execute(): SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'some_bool_2' cannot be null in %s
+Warning: PDOStatement::execute(): SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'some_bool_2' cannot be null in %s on line %d
 array(3) {
   [0]=>
   string(5) "23000"

@@ -15,4 +15,4 @@ class Test2 extends Test {
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Could not check compatibility between Test2::method2(): (X&MyIterator)|int and Test::method2(): Traversable|array|int, because class X is not available in %s
+Fatal error: Could not check compatibility between Test2::method2(): (X&MyIterator)|int and Test::method2(): Traversable|array|int, because class X is not available in %s on line %d

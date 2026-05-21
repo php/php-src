@@ -68,7 +68,7 @@ int(1)
 Cannot use a scalar value as an array
 bool(true)
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 array(1) {
   ["foo"]=>
   array(1) {
@@ -105,7 +105,7 @@ int(1)
 Cannot use a scalar value as an array
 bool(true)
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 array(1) {
   ["foo"]=>
   &array(1) {
@@ -137,7 +137,7 @@ int(1)
 Cannot use a scalar value as an array
 bool(true)
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 array(1) {
   [0]=>
   array(1) {
@@ -170,7 +170,7 @@ int(1)
 Cannot use a scalar value as an array
 bool(true)
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 array(1) {
   [0]=>
   &array(1) {

@@ -6,5 +6,5 @@ $i = date_interval_create_from_date_string("foobar");
 var_dump($i);
 ?>
 --EXPECTF--
-Warning: date_interval_create_from_date_string(): Unknown or bad format (foobar) at position 0 (f): The timezone could not be found in the database in %s
+Warning: date_interval_create_from_date_string(): Unknown or bad format (foobar) at position 0 (f): The timezone could not be found in the database in %s on line %d
 bool(false)

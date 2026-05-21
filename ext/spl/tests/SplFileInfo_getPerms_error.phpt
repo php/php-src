@@ -16,7 +16,7 @@ $fileInfo = new SplFileInfo('not_existing');
 var_dump($fileInfo->getPerms() == 0100557);
 ?>
 --EXPECTF--
-Fatal error: Uncaught RuntimeException: SplFileInfo::getPerms(): stat failed for %s in %s
+Fatal error: Uncaught RuntimeException: SplFileInfo::getPerms(): stat failed for %s in %s:%d
 Stack trace:
 #0 %s: SplFileInfo->getPerms()
 #1 {main}

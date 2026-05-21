@@ -96,7 +96,7 @@ try {
 --EXPECTF--
 Warning: Undefined variable $x in %s on line %d
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 Cannot unset offset in a non-array variable
 Cannot unset offset in a non-array variable
 Cannot unset offset in a non-array variable
@@ -105,7 +105,7 @@ Cannot use object of type stdClass as array
 
 Warning: Undefined variable $x in %s on line %d
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 Cannot unset offset in a non-array variable
 Cannot unset offset in a non-array variable
 Cannot unset offset in a non-array variable

@@ -182,7 +182,7 @@ array(1) {
 Cannot use a scalar value as an array
 int(1)
 
-Deprecated: Automatic conversion of false to array is deprecated in %s
+Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 int(1)
 array(1) {
   [2]=>

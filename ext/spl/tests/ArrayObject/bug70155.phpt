@@ -13,7 +13,7 @@ Deprecated: ArrayObject::unserialize(): Using an object as a backing array for A
 
 Deprecated: Creation of dynamic property ArrayObject::$0 is deprecated in %s on line %d
 
-Fatal error: Uncaught InvalidArgumentException: Overloaded object of type DateInterval is not compatible with ArrayObject in %s
+Fatal error: Uncaught InvalidArgumentException: Overloaded object of type DateInterval is not compatible with ArrayObject in %s:%d
 Stack trace:
 %s
 %s

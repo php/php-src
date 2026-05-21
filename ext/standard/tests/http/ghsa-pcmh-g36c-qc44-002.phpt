@@ -41,7 +41,7 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
 Found the mime-type: text/html
 
-Warning: file_get_contents(http://127.0.0.1:%d): Failed to open stream: HTTP invalid response format (space in header name)! in %s
+Warning: file_get_contents(http://127.0.0.1:%d): Failed to open stream: HTTP invalid response format (space in header name)! in %s on line %d
 bool(false)
 array(2) {
   [0]=>

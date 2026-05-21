@@ -15,7 +15,7 @@ var_dump($_FILES);
 var_dump($_POST);
 ?>
 --EXPECTF--
-Warning: PHP Request Startup: Missing boundary in multipart/form-data POST data in %s
+Warning: PHP Request Startup: Missing boundary in multipart/form-data POST data in %s on line %d
 array(0) {
 }
 array(0) {

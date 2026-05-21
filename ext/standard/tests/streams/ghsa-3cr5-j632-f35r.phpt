@@ -22,5 +22,5 @@ fclose($server);
 ?>
 --EXPECTF--
 
-Warning: stream_socket_client(): Unable to connect to tcp://localhost\0.example.com:%d (The hostname must not contain null bytes) in %s
+Warning: stream_socket_client(): Unable to connect to tcp://localhost\0.example.com:%d (The hostname must not contain null bytes) in %s on line %d
 bool(false)

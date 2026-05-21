@@ -38,9 +38,9 @@ switch ($a):
 endswitch;
 ?>
 --EXPECTF--
-Deprecated: Case statements followed by a semicolon (;) are deprecated, use a colon (:) instead in %s
+Deprecated: Case statements followed by a semicolon (;) are deprecated, use a colon (:) instead in %s on line %d
 
-Deprecated: Case statements followed by a semicolon (;) are deprecated, use a colon (:) instead in %s
+Deprecated: Case statements followed by a semicolon (;) are deprecated, use a colon (:) instead in %s on line %d
 If: 11
 While: 12346789
 For: 0123401234

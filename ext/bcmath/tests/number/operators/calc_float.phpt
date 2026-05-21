@@ -14,14 +14,14 @@ $num % 1.01;
 $num ** 1.01;
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion from float 1.01 to int loses precision in %s
+Deprecated: Implicit conversion from float 1.01 to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from float 1.01 to int loses precision in %s
+Deprecated: Implicit conversion from float 1.01 to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from float 1.01 to int loses precision in %s
+Deprecated: Implicit conversion from float 1.01 to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from float 1.01 to int loses precision in %s
+Deprecated: Implicit conversion from float 1.01 to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from float 1.01 to int loses precision in %s
+Deprecated: Implicit conversion from float 1.01 to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from float 1.01 to int loses precision in %s
+Deprecated: Implicit conversion from float 1.01 to int loses precision in %s on line %d

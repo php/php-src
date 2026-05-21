@@ -38,12 +38,12 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --EXPECTF--
 
-Deprecated: Function mysqli_ping() is deprecated since 8.4, because the reconnect feature has been removed in PHP 8.2 and this function is now redundant in %s
+Deprecated: Function mysqli_ping() is deprecated since 8.4, because the reconnect feature has been removed in PHP 8.2 and this function is now redundant in %s on line %d
 bool(true)
 
-Deprecated: Function mysqli_ping() is deprecated since 8.4, because the reconnect feature has been removed in PHP 8.2 and this function is now redundant in %s
+Deprecated: Function mysqli_ping() is deprecated since 8.4, because the reconnect feature has been removed in PHP 8.2 and this function is now redundant in %s on line %d
 bool(true)
 
-Deprecated: Function mysqli_ping() is deprecated since 8.4, because the reconnect feature has been removed in PHP 8.2 and this function is now redundant in %s
+Deprecated: Function mysqli_ping() is deprecated since 8.4, because the reconnect feature has been removed in PHP 8.2 and this function is now redundant in %s on line %d
 mysqli object is already closed
 done!

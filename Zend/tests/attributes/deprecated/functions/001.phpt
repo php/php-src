@@ -55,17 +55,17 @@ new Constructor();
 
 ?>
 --EXPECTF--
-Deprecated: Function test() is deprecated in %s
+Deprecated: Function test() is deprecated in %s on line %d
 
 Deprecated: Function test2() is deprecated, use test() instead in %s on line %d
 
 Deprecated: Function test() is deprecated in %s on line %d
 
-Deprecated: Method Clazz::test() is deprecated in %s
+Deprecated: Method Clazz::test() is deprecated in %s on line %d
 
-Deprecated: Method Clazz::test2() is deprecated, use test() instead in %s
+Deprecated: Method Clazz::test2() is deprecated, use test() instead in %s on line %d
 
-Deprecated: Method Clazz::test() is deprecated in %s
+Deprecated: Method Clazz::test() is deprecated in %s on line %d
 
 Deprecated: Function {closure:%s:%d}() is deprecated in %s on line %d
 

@@ -15,7 +15,7 @@ var_dump($_FILES);
 var_dump($_POST);
 ?>
 --EXPECTF--
-Warning: PHP Request Startup: POST Content-Length of 168 bytes exceeds the limit of 1 bytes in %s
+Warning: PHP Request Startup: POST Content-Length of 168 bytes exceeds the limit of 1 bytes in %s on line %d
 array(0) {
 }
 array(0) {

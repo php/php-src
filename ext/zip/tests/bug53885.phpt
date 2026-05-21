@@ -19,5 +19,5 @@ $fname = __DIR__."/test53885.zip";
 @unlink($fname);
 ?>
 --EXPECTF--
-Deprecated: ZipArchive::open(): Using empty file as ZipArchive is deprecated in %s
+Deprecated: ZipArchive::open(): Using empty file as ZipArchive is deprecated in %s on line %d
 ==DONE==

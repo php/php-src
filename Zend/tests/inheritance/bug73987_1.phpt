@@ -15,4 +15,4 @@ class B extends A {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of B::example(): string must be compatible with A::example(): int in %s
+Fatal error: Declaration of B::example(): string must be compatible with A::example(): int in %s on line %d
