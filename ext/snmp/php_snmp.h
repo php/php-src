@@ -48,6 +48,13 @@ typedef struct _php_snmp_object {
 	int valueretrieval;
 	int quick_print;
 	int enum_print;
+	int numeric_index;
+	int numeric_timeticks;
+	int extended_index;
+	int dont_print_units;
+	int escape_quotes;
+	int print_hex_text;
+	int string_output_format;
 	int oid_output_format;
 	int snmp_errno;
 	int oid_increasing_check;
