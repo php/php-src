@@ -3,6 +3,7 @@ GH-21700: Append-mode open ignores a negative position returned by a user stream
 --FILE--
 <?php
 class lyingstream {
+    public $context;
     public function stream_open($path, $mode, $options, &$opened_path) { return true; }
     public function stream_seek($offset, $whence) { return true; }
     public function stream_tell(): int { return -42; }

@@ -3,6 +3,7 @@ GH-21700: User stream returning negative position must not trigger an assertion
 --FILE--
 <?php
 class mystream {
+    public $context;
     public int $pos = 0;
     public function stream_open($path, $mode, $options, &$opened_path) { return true; }
     public function stream_seek($offset, $whence) {
