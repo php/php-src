@@ -1673,8 +1673,8 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 	 * Cookies are preferred, because initially cookie and get
 	 * variables will be available.
 	 * URL/POST session ID may be used when use_only_cookies=Off.
-	 * session.use_strice_mode=On prevents session adoption.
-	 * Session based file upload progress uses non-cookie ID.
+	 * session.use_strict_mode=On prevents session adoption.
+	 * Session based file upload progress respects use_only_cookies.
 	 */
 
 	if (!PS(id)) {
@@ -3228,7 +3228,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			multipart_event_start *data = (multipart_event_start *) event_data;
 			progress = ecalloc(1, sizeof(php_session_rfc1867_progress));
 			progress->content_length = data->content_length;
-			progress->sname_len  = strlen(PS(session_name));
+			progress->sname_len = strlen(PS(session_name));
 			PS(rfc1867_progress) = progress;
 		}
 		break;
@@ -3250,7 +3250,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			if (data->name && data->value && value_len) {
 				size_t name_len = strlen(data->name);
 
-				if (name_len == progress->sname_len && memcmp(data->name, PS(session_name), name_len) == 0) {
+				if (!PS(use_only_cookies) && name_len == progress->sname_len && memcmp(data->name, PS(session_name), name_len) == 0) {
 					zval_ptr_dtor(&progress->sid);
 					ZVAL_STRINGL(&progress->sid, (*data->value), value_len);
 				} else if (name_len == strlen(PS(rfc1867_name)) && memcmp(data->name, PS(rfc1867_name), name_len + 1) == 0) {
