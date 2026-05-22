@@ -1109,6 +1109,64 @@ static zval *php_array_data_minmax(HashTable *array, bool max) /* {{{ */
 }
 /* }}} */
 
+static zend_always_inline bool php_array_minmax_long(HashTable *array, zval *return_value, bool max) /* {{{ */
+{
+	zval *entry, *result = NULL;
+	zend_long result_lval;
+	bool long_mode = true;
+
+	ZEND_HASH_FOREACH_VAL(array, entry) {
+		zval *value = entry;
+		zend_long value_lval;
+
+		ZVAL_DEREF(value);
+		if (!result) {
+			if (Z_TYPE_P(value) != IS_LONG) {
+				return false;
+			}
+
+			result = value;
+			result_lval = Z_LVAL_P(value);
+			continue;
+		}
+
+		if (long_mode && EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+			value_lval = Z_LVAL_P(value);
+			if (max) {
+				if (result_lval < value_lval) {
+					result = value;
+					result_lval = value_lval;
+				}
+			} else {
+				if (result_lval > value_lval) {
+					result = value;
+					result_lval = value_lval;
+				}
+			}
+			continue;
+		}
+
+		long_mode = false;
+
+		int cmp = zend_compare(result, value);
+		if (max ? cmp < 0 : cmp > 0) {
+			result = value;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (!result) {
+		return false;
+	}
+
+	if (long_mode) {
+		ZVAL_LONG(return_value, result_lval);
+	} else {
+		ZVAL_COPY_DEREF(return_value, result);
+	}
+	return true;
+}
+/* }}} */
+
 /* {{{
  * proto mixed min(array values)
  * proto mixed min(mixed arg1 [, mixed arg2 [, mixed ...]])
@@ -1128,7 +1186,12 @@ PHP_FUNCTION(min)
 			zend_wrong_parameter_type_error(1, Z_EXPECTED_ARRAY, &args[0]);
 			RETURN_THROWS();
 		} else {
-			zval *result = php_array_data_minmax(Z_ARRVAL(args[0]), false);
+			HashTable *array = Z_ARRVAL(args[0]);
+			if (php_array_minmax_long(array, return_value, false)) {
+				return;
+			}
+
+			zval *result = php_array_data_minmax(array, false);
 			if (result) {
 				RETURN_COPY_DEREF(result);
 			} else {
@@ -1256,7 +1319,12 @@ PHP_FUNCTION(max)
 			zend_wrong_parameter_type_error(1, Z_EXPECTED_ARRAY, &args[0]);
 			RETURN_THROWS();
 		} else {
-			zval *result = php_array_data_minmax(Z_ARRVAL(args[0]), true);
+			HashTable *array = Z_ARRVAL(args[0]);
+			if (php_array_minmax_long(array, return_value, true)) {
+				return;
+			}
+
+			zval *result = php_array_data_minmax(array, true);
 			if (result) {
 				RETURN_COPY_DEREF(result);
 			} else {
