@@ -40,6 +40,8 @@ PHP 8.6 UPGRADE NOTES
   . IntlBreakIterator::getLocale() now raises a ValueError when the type is
     neither Locale::ACTUAL_LOCALE nor Locale::VALID_LOCALE instead of
     returning false.
+  . MessageFormatter::parse() and parseMessage() now return PHP_INT_MIN as
+    int, rather than float, on 64-bit platforms when parsing integer values.
 
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is

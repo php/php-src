@@ -69,6 +69,8 @@ PHP                                                                        NEWS
     argument handling now raises TypeError instead of Error. (Weilin Du)
   . IntlBreakIterator::getLocale() now raises ValueError for invalid locale
     types. (Weilin Du)
+  . Fixed MessageFormatter::parse() and parseMessage() returning PHP_INT_MIN
+    as float rather than int on 64-bit platforms. (Weilin Du)
 
 - JSON:
   . Enriched JSON last error / exception message with error location.
