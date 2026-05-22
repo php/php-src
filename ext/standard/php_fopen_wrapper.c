@@ -144,15 +144,15 @@ static const php_stream_ops php_stream_input_ops = {
 	NULL  /* set_option */
 };
 
-static const int max_filter_count_default = 16;
+static const zend_long max_filter_count_default = 16;
 
-static int php_get_max_filter_count(php_stream_context *context) {
+static zend_long php_get_max_filter_count(php_stream_context *context) {
 	if (context != NULL) {
         zval *option_val = php_stream_context_get_option(context, "filter", "max_filter_count");
         if (option_val) {
             zend_long custom_limit = zval_get_long(option_val);
             if (custom_limit >= 0) {
-                return (int)custom_limit;
+                return custom_limit;
             }
         }
     }
@@ -160,13 +160,13 @@ static int php_get_max_filter_count(php_stream_context *context) {
 }
 
 static bool php_stream_has_too_many_filters(php_stream *stream, php_stream_context *context) {
-	int max_filter_count = php_get_max_filter_count(context);
+	zend_long max_filter_count = php_get_max_filter_count(context);
 	if (max_filter_count == -1) {
 		// If not explicitly configured we don't throw an error yet.
 		return false;
 	}
 
-	int count = MAX(php_stream_filter_count(&stream->readfilters), php_stream_filter_count(&stream->writefilters));
+	zend_long count = MAX(php_stream_filter_count(&stream->readfilters), php_stream_filter_count(&stream->writefilters));
 	return count > max_filter_count;
 }
 
@@ -177,9 +177,9 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 
 	p = php_strtok_r(filterlist, "|", &token);
 	while (p) {
-		int count = read_chain ? php_stream_filter_count(&stream->readfilters) : write_chain ? php_stream_filter_count(&stream->writefilters) : 0;
+		zend_long count = read_chain ? php_stream_filter_count(&stream->readfilters) : write_chain ? php_stream_filter_count(&stream->writefilters) : 0;
 		if (warn_filter_count && count == max_filter_count_default) {
-			zend_error(E_DEPRECATED, "Using more than %d filters in a php://filter URL is deprecated, "
+			zend_error(E_DEPRECATED, "Using more than " ZEND_LONG_FMT " filters in a php://filter URL is deprecated, "
 				"set this limit using the stream context option max_filter_count, or use stream_filter_append", max_filter_count_default);
 		}
 

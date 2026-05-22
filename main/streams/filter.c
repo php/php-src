@@ -447,7 +447,7 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 	}
 }
 
-PHPAPI int php_stream_filter_count(php_stream_filter_chain *chain) {
+PHPAPI zend_long php_stream_filter_count(php_stream_filter_chain *chain) {
     if (chain->head == NULL) {
         return 0;
     }
