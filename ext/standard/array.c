@@ -1095,54 +1095,62 @@ static int php_data_compare(const void *f, const void *s) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline bool php_array_minmax_long(HashTable *array, zval *return_value, bool max) /* {{{ */
+static zend_always_inline bool php_array_minmax(HashTable *array, zval *return_value, bool max) /* {{{ */
 {
 	zval *entry, *result = NULL;
-	zend_long result_lval;
-	bool long_mode = false;
+	zend_long result_lval = 0;
+	double result_dval = 0.0;
+	/* IS_LONG or IS_DOUBLE while every value scanned so far has that exact type,
+	 * IS_UNDEF once a value forces the generic php_data_compare() fallback. */
+	uint8_t fast_type = IS_UNDEF;
 
 	ZEND_HASH_FOREACH_VAL(array, entry) {
 		zval *value = entry;
-		zend_long value_lval;
 
 		ZVAL_DEREF(value);
+
+		if (fast_type == IS_LONG && EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+			zend_long value_lval = Z_LVAL_P(value);
+			if (max ? result_lval < value_lval : result_lval > value_lval) {
+				result = value;
+				result_lval = value_lval;
+			}
+			continue;
+		}
+
+		if (fast_type == IS_DOUBLE && EXPECTED(Z_TYPE_P(value) == IS_DOUBLE)) {
+			double value_dval = Z_DVAL_P(value);
+			/* NaN ordering differs from zend_compare(); hand it to the fallback. */
+			if (EXPECTED(!zend_isnan(value_dval))) {
+				if (max ? result_dval < value_dval : result_dval > value_dval) {
+					result = value;
+					result_dval = value_dval;
+				}
+				continue;
+			}
+		}
+
 		if (!result) {
-			if (Z_TYPE_P(value) != IS_LONG) {
-				return false;
+			if (Z_TYPE_P(value) == IS_LONG) {
+				result = value;
+				result_lval = Z_LVAL_P(value);
+				fast_type = IS_LONG;
+				continue;
 			}
+			if (Z_TYPE_P(value) == IS_DOUBLE && !zend_isnan(Z_DVAL_P(value))) {
+				result = value;
+				result_dval = Z_DVAL_P(value);
+				fast_type = IS_DOUBLE;
+				continue;
+			}
+			return false;
+		}
 
+		fast_type = IS_UNDEF;
+
+		int cmp = php_data_compare(result, value);
+		if (max ? cmp < 0 : cmp > 0) {
 			result = value;
-			result_lval = Z_LVAL_P(value);
-			long_mode = true;
-			continue;
-		}
-
-		if (long_mode && EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
-			value_lval = Z_LVAL_P(value);
-			if (max) {
-				if (result_lval < value_lval) {
-					result = value;
-					result_lval = value_lval;
-				}
-			} else {
-				if (result_lval > value_lval) {
-					result = value;
-					result_lval = value_lval;
-				}
-			}
-			continue;
-		}
-
-		long_mode = false;
-
-		if (max) {
-			if (php_data_compare(result, value) < 0) {
-				result = value;
-			}
-		} else {
-			if (php_data_compare(result, value) > 0) {
-				result = value;
-			}
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -1150,8 +1158,10 @@ static zend_always_inline bool php_array_minmax_long(HashTable *array, zval *ret
 		return false;
 	}
 
-	if (long_mode) {
+	if (fast_type == IS_LONG) {
 		ZVAL_LONG(return_value, result_lval);
+	} else if (fast_type == IS_DOUBLE) {
+		ZVAL_DOUBLE(return_value, result_dval);
 	} else {
 		ZVAL_COPY_DEREF(return_value, result);
 	}
@@ -1179,7 +1189,7 @@ PHP_FUNCTION(min)
 			RETURN_THROWS();
 		} else {
 			HashTable *array = Z_ARRVAL(args[0]);
-			if (php_array_minmax_long(array, return_value, false)) {
+			if (php_array_minmax(array, return_value, false)) {
 				return;
 			}
 
@@ -1312,7 +1322,7 @@ PHP_FUNCTION(max)
 			RETURN_THROWS();
 		} else {
 			HashTable *array = Z_ARRVAL(args[0]);
-			if (php_array_minmax_long(array, return_value, true)) {
+			if (php_array_minmax(array, return_value, true)) {
 				return;
 			}
 
