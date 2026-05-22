@@ -19,13 +19,16 @@ are not limited to):
 - Invocation of specially crafted, malicious code intended to cause memory
   violations. This commonly includes malicious error handlers, destructors or
   `__toString()` functions. PHP does not offer sandboxing, and the execution of
-  untrusted code is always considered unsafe.
+  untrusted code is always considered unsafe. Such issues are bugs, but not
+  security issues. They may still be reported, though please avoid reporting
+  the known issues.
 
 - Passing malicious arguments to functions clearly not intended to receive
   unsanitized values, e.g. `mysqli_query()`. `escapeshellarg()` on the other
   hand should clearly be hardened against unsafe inputs.
 
-- The use of legacy APIs or settings known to be insecure.
+- The use of legacy APIs or settings known to be insecure, particularly those
+  documented as such, or those with a secure alternative.
 
 - The use of FFI.
 
