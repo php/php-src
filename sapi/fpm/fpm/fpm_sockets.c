@@ -268,6 +268,13 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 		}
 	}
 #endif
+#ifdef SO_RTABLE
+	if (-1 < wp->config->listen_rtable) {
+		if (0 > setsockopt(sock, SOL_SOCKET, SO_RTABLE, &wp->config->listen_rtable, sizeof(wp->config->listen_rtable))) {
+			zlog(ZLOG_WARNING, "failed to change socket SO_RTABLE attribute");
+		}
+	}
+#endif
 
 	return sock;
 }
