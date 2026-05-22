@@ -124,6 +124,8 @@ PHP_METHOD(IntlListFormatter, format)
         Z_PARAM_ARRAY_HT(ht)
     ZEND_PARSE_PARAMETERS_END();
 
+    intl_errors_reset(LISTFORMATTER_ERROR_P(obj));
+
     uint32_t count = zend_hash_num_elements(ht);
     if (count == 0) {
         RETURN_EMPTY_STRING();
@@ -154,7 +156,7 @@ PHP_METHOD(IntlListFormatter, format)
             }
             efree(items);
             efree(itemLengths);
-            intl_error_set(NULL, status, "Failed to convert string to UTF-16");
+            intl_errors_set(LISTFORMATTER_ERROR_P(obj), status, "Failed to convert string to UTF-16");
             RETURN_FALSE;
         }
         
@@ -170,7 +172,7 @@ PHP_METHOD(IntlListFormatter, format)
     resultLength = ulistfmt_format(LISTFORMATTER_OBJECT(obj), items, itemLengths, count, NULL, 0, &status);
 
     if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
-        intl_error_set(NULL, status, "Failed to format list");
+        intl_errors_set(LISTFORMATTER_ERROR_P(obj), status, "Failed to format list");
         RETVAL_FALSE;
         goto cleanup;
     }
@@ -184,7 +186,7 @@ PHP_METHOD(IntlListFormatter, format)
         if (result) {
             efree(result);
         }
-        intl_error_set(NULL, status, "Failed to format list");
+        intl_errors_set(LISTFORMATTER_ERROR_P(obj), status, "Failed to format list");
         RETVAL_FALSE;
         goto cleanup;
     }
@@ -194,7 +196,7 @@ PHP_METHOD(IntlListFormatter, format)
     efree(result);
     
     if (!ret) {
-        intl_error_set(NULL, status, "Failed to convert result to UTF-8");
+        intl_errors_set(LISTFORMATTER_ERROR_P(obj), status, "Failed to convert result to UTF-8");
         RETVAL_FALSE;
     } else {
         RETVAL_NEW_STR(ret);
