@@ -859,7 +859,19 @@ static int authorizer(void *autharg, int access_type, const char *arg1, const ch
 
 	int authreturn = SQLITE_DENY;
 
+	zend_object *saved_obj = db_obj->authorizer_fcc.object;
+	zend_object *saved_closure = db_obj->authorizer_fcc.closure;
+	zend_fcc_addref(&db_obj->authorizer_fcc);
+
 	zend_call_known_fcc(&db_obj->authorizer_fcc, &retval, /* argc */ 5, argv, /* named_params */ NULL);
+
+	if (saved_obj) {
+		OBJ_RELEASE(saved_obj);
+	}
+	if (saved_closure) {
+		OBJ_RELEASE(saved_closure);
+	}
+
 	if (Z_ISUNDEF(retval)) {
 		ZEND_ASSERT(EG(exception));
 	} else {

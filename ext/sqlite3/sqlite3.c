@@ -2197,9 +2197,21 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 
 	int authreturn = SQLITE_DENY;
 
+	zend_object *saved_obj = db_obj->authorizer_fcc.object;
+	zend_object *saved_closure = db_obj->authorizer_fcc.closure;
+	zend_fcc_addref(&db_obj->authorizer_fcc);
+
 	zend_call_known_fcc(&db_obj->authorizer_fcc, &retval, /* argc */ 5, argv, /* named_params */ NULL);
+
+	if (saved_obj) {
+		OBJ_RELEASE(saved_obj);
+	}
+	if (saved_closure) {
+		OBJ_RELEASE(saved_closure);
+	}
+
 	if (Z_ISUNDEF(retval)) {
-		php_sqlite3_error(db_obj, 0, "An error occurred while invoking the authorizer callback");
+		ZEND_ASSERT(EG(exception));
 	} else {
 		if (Z_TYPE(retval) != IS_LONG) {
 			php_sqlite3_error(db_obj, 0, "The authorizer callback returned an invalid type: expected int");
