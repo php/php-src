@@ -848,7 +848,6 @@ PHP 8.5 UPGRADE NOTES
     IntlException now.
   . IntlListFormatter::getErrorCode() and getErrorMessage() now reflect
     IntlListFormatter::format() failures.
-    (Weilin Du)
 
 - Lexbor:
   . An always enabled lexbor extension is added. It contains the lexbor
