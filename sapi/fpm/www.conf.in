@@ -80,6 +80,19 @@ listen = 127.0.0.1:9000
 ; Default Value: no set
 ; process.priority = -19
 
+; Bind the pool processes to a cpu set.
+; The value can be one cpu id, a range or a list thereof.
+;
+; Default Value: inherits master's cpu affinity
+; Valid syntaxes are:
+;       process.cpu_list = "cpu id"                 - bind pool process to cpu id
+;       process.cpu_list = "[min cpu id]-[max cpu id]"  
+                                                    - bind pool process from 
+                                                      min cpu id to max cpu id
+;       process.cpu_list = "[[min cpu id]-[max cpu id],[min cpu id-max cpu id],...]"
+                                                    - bind pool process to cpu id 
+                                                      ranges separated by a comma
+
 ; Set the process dumpable flag (PR_SET_DUMPABLE prctl for Linux or
 ; PROC_TRACE_CTL procctl for FreeBSD) even if the process user
 ; or group is different than the master process user. It allows to create process
