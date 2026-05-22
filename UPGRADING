@@ -846,6 +846,9 @@ PHP 8.5 UPGRADE NOTES
     indicates more accurately which call site caused what error.
     Moreover, some ext/date exceptions have been wrapped inside a
     IntlException now.
+  . IntlListFormatter::getErrorCode() and getErrorMessage() now reflect
+    IntlListFormatter::format() failures.
+    (Weilin Du)
 
 - Lexbor:
   . An always enabled lexbor extension is added. It contains the lexbor

@@ -381,6 +381,8 @@ PHP                                                                        NEWS
     when pos.size < 2). (Oblivionsage)
 
 - Intl:
+  . Fixed IntlListFormatter::getErrorCode() and getErrorMessage() not
+    reflecting format() failures. (Weilin Du)
   . Fix leak in umsg_format_helper(). (ndossche)
 
 - LDAP:
