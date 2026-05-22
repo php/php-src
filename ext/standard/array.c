@@ -1113,7 +1113,7 @@ static zend_always_inline bool php_array_minmax_long(HashTable *array, zval *ret
 {
 	zval *entry, *result = NULL;
 	zend_long result_lval;
-	bool long_mode = true;
+	bool long_mode = false;
 
 	ZEND_HASH_FOREACH_VAL(array, entry) {
 		zval *value = entry;
@@ -1127,6 +1127,7 @@ static zend_always_inline bool php_array_minmax_long(HashTable *array, zval *ret
 
 			result = value;
 			result_lval = Z_LVAL_P(value);
+			long_mode = true;
 			continue;
 		}
 
