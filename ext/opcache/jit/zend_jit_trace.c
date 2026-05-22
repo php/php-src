@@ -3215,10 +3215,16 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 		zend_ssa_phi *phi = ssa->blocks[1].phis;
 
 		while (phi) {
-			i = phi->sources[1];
-			if (RA_HAS_IVAL(i) && !ssa->vars[phi->ssa_var].no_val) {
-				RA_IVAL_END(i, idx);
-				RA_IVAL_FLAGS(i) &= ~ZREG_LAST_USE;
+			if (RA_HAS_IVAL(phi->sources[1]) && !ssa->vars[phi->ssa_var].no_val) {
+				int cv = ssa->vars[phi->ssa_var].var;
+				int k;
+
+				/* All SSA versions of a loop-carried CV share the same register */
+				for (k = 0; k < ssa->vars_count; k++) {
+					if (ssa->vars[k].var == cv && RA_HAS_IVAL(k)) {
+						RA_IVAL_FLAGS(k) &= ~ZREG_LAST_USE;
+					}
+				}
 			}
 			phi = phi->next;
 		}
