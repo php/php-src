@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.23
 
+- GD:
+  . Fixed bug GH-22121 (Double free in gdImageSetStyle() after
+    overflow-triggered early return). (iliaal)
+
 - Intl:
   . Fix incorrect argument positions for uninitialized calendar arguments in
     IntlCalendar::equals(), ::before(), ::after(), and ::isEquivalentTo().
