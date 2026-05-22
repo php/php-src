@@ -2879,11 +2879,11 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 
 void gdImageSetStyle (gdImagePtr im, int *style, int noOfPixels)
 {
-	if (im->style) {
-		gdFree(im->style);
-	}
 	if (overflow2(sizeof (int), noOfPixels)) {
 		return;
+	}
+	if (im->style) {
+		gdFree(im->style);
 	}
 	im->style = (int *) gdMalloc(sizeof(int) * noOfPixels);
 	memcpy(im->style, style, sizeof(int) * noOfPixels);
