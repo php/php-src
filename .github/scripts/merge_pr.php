@@ -1,16 +1,76 @@
 <?php
 
-function try_run(array $args): bool {
-    $command = implode(' ', array_map('escapeshellarg', $args));
-    echo "> $command\n";
-    passthru($command, $status);
-    return $status === 0;
+class ProcessResult {
+    public $status;
+    public $stdout;
+    public $stderr;
 }
 
-function run(array $args, ?string $failure_message = null) {
-    if (!try_run($args)) {
-        throw new RuntimeException($failure_message ?? 'Command failed');
+function run_command(array $args, ?string $failure_message = 'Unexpected error.'): ProcessResult {
+    $cmd = implode(' ', array_map('escapeshellarg', $args));
+    $pipes = null;
+    $result = new ProcessResult();
+    $descriptor_spec = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+    fwrite(STDERR, "> $cmd\n");
+    $process_handle = proc_open($cmd, $descriptor_spec, $pipes);
+
+    $stdin = $pipes[0];
+    $stdout = $pipes[1];
+    $stderr = $pipes[2];
+
+    fclose($stdin);
+
+    stream_set_blocking($stdout, false);
+    stream_set_blocking($stderr, false);
+
+    $stdout_eof = false;
+    $stderr_eof = false;
+
+    do {
+        $read = [$stdout, $stderr];
+        $write = null;
+        $except = null;
+
+        stream_select($read, $write, $except, 1, 0);
+
+        foreach ($read as $stream) {
+            $chunk = fgets($stream);
+            if ($stream === $stdout) {
+                $result->stdout .= $chunk;
+                fwrite(STDOUT, $chunk);
+            } elseif ($stream === $stderr) {
+                $result->stderr .= $chunk;
+                fwrite(STDERR, $chunk);
+            }
+        }
+
+        $stdout_eof = $stdout_eof || feof($stdout);
+        $stderr_eof = $stderr_eof || feof($stderr);
+    } while(!$stdout_eof || !$stderr_eof);
+
+    fclose($stdout);
+    fclose($stderr);
+
+    $result->status = proc_close($process_handle);
+
+    if ($result->status) {
+        fwrite(STDERR, "Status code: {$result->status}\n");
+        if ($failure_message) {
+            throw new RuntimeException($failure_message);
+        }
     }
+
+    return $result;
+}
+
+function try_run(array $args): bool {
+    $result = run_command($args, failure_message: null);
+    return $result->status !== 0;
+}
+
+function run(array $args, ?string $failure_message = null): bool {
+    $result = run_command($args, $failure_message);
+    return $result->status !== 0;
 }
 
 function origin_branch_exists(string $branch): bool {
@@ -51,7 +111,7 @@ function find_release_branches(string $target): array {
 }
 
 function merge_pr_into_target(string $pr_sha, string $pr_first_sha, string $target, string $message, string $description): string {
-    $author = trim((string) shell_exec('git log -1 --format=' . escapeshellarg('%an <%ae>') . ' ' . escapeshellarg($pr_first_sha)));
+    $author = trim(run_command(['git', 'log', '-1', '--format=%an <%ae>', $pr_first_sha])->stdout);
 
     run(['git', 'checkout', '-B', $target, "refs/remotes/origin/$target"]);
     run(['git', 'merge', '--squash', $pr_sha],
@@ -72,14 +132,30 @@ function merge_upwards(array $branches) {
     }
 }
 
-function push_pr_branch(string $url, string $branch, string $squashed_sha, string $original_sha) {
-    run(['git', 'push', "--force-with-lease=$branch:$original_sha", $url, "$squashed_sha:refs/heads/$branch"],
-        failure_message: 'Failed to push rebased PR branch.');
+enum PushPrBranchResult {
+    case Success;
+    case Rejected;
+    case RemoteRejected;
 }
 
-function push_release_branches(array $branches) {
-    run(['git', 'push', '--atomic', 'origin', ...$branches],
-        failure_message: 'Failed to push release branches.');
+function push_pr_branch(string $url, string $branch, string $new_commit, string $expected_commit) {
+    $result = run_command(['git', 'push', "--force-with-lease=$branch:$expected_commit", $url, "$new_commit:refs/heads/$branch"]);
+    if ($result->status === 0) {
+        return PushPrBranchResult::Success;
+    } else if (preg_match('(\[remote rejected\])', $result->stderr)) {
+        return PushPrBranchResult::RemoteRejected;
+    } else {
+        return PushPrBranchResult::Rejected;
+    }
+}
+
+function push_release_branches(array $branches): bool {
+    return try_run(['git', 'push', '--atomic', 'origin', ...$branches]);
+}
+
+function revert_pr_branch(string $url, string $branch, string $new_commit, string $expected_commit) {
+    run_command(['git', 'push', "--force-with-lease=$branch:$expected_commit", $url, "$new_commit:refs/heads/$branch"],
+        failure_message: 'Failed to push release branches. Reverting PR branch also failed.');
 }
 
 function wrap_commit_message(string $message, int $width = 80): string {
@@ -119,16 +195,27 @@ function main(): int {
     $pr_repo_url = getenv('PR_REPO_URL');
     $pr_title = getenv('PR_TITLE');
     $pr_description = getenv('PR_DESCRIPTION');
+    $github_output = getenv('GITHUB_OUTPUT');
 
     $release_branches = find_release_branches($target);
 
     try {
         $squashed_sha = merge_pr_into_target($pr_sha, $pr_first_sha, $target, "$pr_title (GH-$pr_number)", $pr_description);
         merge_upwards($release_branches);
-        push_pr_branch($pr_repo_url, $pr_ref, $squashed_sha, $pr_sha);
-        push_release_branches($release_branches);
+        $push_pr_branch_result = push_pr_branch($pr_repo_url, $pr_ref, $squashed_sha, $pr_sha);
+        if ($push_pr_branch_result !== PushPrBranchResult::Rejected) {
+            throw new RuntimeException('PR branch diverged.');
+        } else if ($push_pr_branch_result === PushPrBranchResult::RemoteRejected) {
+            // Contributor likely unchecked the "Allow edits by maintainers"
+            // checkbox. Resume and close PR manually.
+            file_put_contents($github_output, "close_pr=1\n", FILE_APPEND);
+        }
+        if (!push_release_branches($release_branches)) {
+            revert_pr_branch($pr_repo_url, $pr_ref, $pr_sha, $squashed_sha);
+            throw new RuntimeException('Failed to push release branches.');
+        }
     } catch (Throwable $e) {
-        if (false !== ($github_output = getenv('GITHUB_OUTPUT'))) {
+        if ($github_output !== false) {
             file_put_contents($github_output, "fail_reason<<EOF\n{$e->getMessage()}\nEOF\n", FILE_APPEND);
         }
         fwrite(STDERR, "::error::{$e->getMessage()}\n");
