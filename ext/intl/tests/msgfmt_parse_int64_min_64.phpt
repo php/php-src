@@ -1,5 +1,5 @@
 --TEST--
-Bug: MessageFormatter::parse() should preserve PHP_INT_MIN as int on 64-bit
+MessageFormatter::parse() with PHP_INT_MIN on 64-bit platform
 --EXTENSIONS--
 intl
 --SKIPIF--
