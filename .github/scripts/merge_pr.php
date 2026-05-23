@@ -141,7 +141,7 @@ enum PushPrBranchResult {
 }
 
 function push_pr_branch(string $url, string $branch, string $new_commit, string $expected_commit) {
-    $result = run_command(['git', 'push', "--force-with-lease=$branch:$expected_commit", $url, "$new_commit:refs/heads/$branch"]);
+    $result = run_command(['git', 'push', "--force-with-lease=$branch:$expected_commit", $url, "$new_commit:refs/heads/$branch"], failure_message: null);
     if ($result->status === 0) {
         return PushPrBranchResult::Success;
     } else if (preg_match('(\[remote rejected\])', $result->stderr)) {
