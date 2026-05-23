@@ -10,16 +10,16 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Jakub Zelenka <bukka@php.net>                               |
+   | Authors: David Carlier <devnexen@gmail.com>                          |
    +----------------------------------------------------------------------+
- */
+*/
 
-  #ifndef PHP_IO_FREEBSD_H
-  #define PHP_IO_FREEBSD_H
+#ifndef PHP_IO_FREEBSD_H
+#define PHP_IO_FREEBSD_H
 
-  #define PHP_IO_PLATFORM_COPY php_io_freebsd_copy
-  #define PHP_IO_PLATFORM_NAME "freebsd"
+#define PHP_IO_PLATFORM_COPY php_io_freebsd_copy
+#define PHP_IO_PLATFORM_NAME "freebsd"
 
-  ssize_t php_io_freebsd_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen);
+ssize_t php_io_freebsd_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen);
 
-  #endif /* PHP_IO_FREEBSD_H */
+#endif /* PHP_IO_FREEBSD_H */
