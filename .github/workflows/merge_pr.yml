@@ -29,11 +29,18 @@ jobs:
 
       - name: git config
         run: |
-          git config user.name "PHP GH Bot"
-          git config user.email "gh-bot@php.net"
+          git config user.name "PHP Merge Bot"
+          git config user.email "287303856+php-merge-bot@users.noreply.github.com"
           git config merge.NEWS.name "Keep the NEWS file"
           git config merge.NEWS.driver "touch %A"
           git config merge.log true
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v7
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          git_commit_gpgsign: true
+          git_user_signingkey: true
 
       - name: Fetch PR head
         env:
