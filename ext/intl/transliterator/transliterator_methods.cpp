@@ -225,7 +225,6 @@ U_CFUNC PHP_FUNCTION( transliterator_list_ids )
 {
 	UEnumeration  *en;
 	const UChar	  *elem;
-	int32_t		  count;
 	int32_t		  elem_len;
 	UErrorCode	  status = U_ZERO_ERROR;
 
@@ -237,18 +236,7 @@ U_CFUNC PHP_FUNCTION( transliterator_list_ids )
 	INTL_CHECK_STATUS( status,
 		"Failed to obtain registered transliterators" );
 
-	count = uenum_count(en, &status);
-	if (U_FAILURE(status)) {
-		uenum_close(en);
-		INTL_CHECK_STATUS(status, "Failed to count registered transliterators");
-	}
-	uenum_reset(en, &status);
-	if (U_FAILURE(status)) {
-		uenum_close(en);
-		INTL_CHECK_STATUS(status, "Failed to iterate registered transliterators");
-	}
-
-	array_init_size(return_value, count);
+	array_init( return_value );
 	while( (elem = uenum_unext( en, &elem_len, &status )) )
 	{
 		zend_string *el = intl_convert_utf16_to_utf8(elem, elem_len, &status );
