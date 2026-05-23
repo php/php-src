@@ -199,10 +199,10 @@ function main(): int {
     $pr_description = getenv('PR_DESCRIPTION');
     $github_output = getenv('GITHUB_OUTPUT');
 
-    $release_branches = find_release_branches($target_ref);
-    $pr_first_sha = trim(run_command("git log --reverse --format=%H $target_sha..$pr_sha | head -n1")->stdout);
-
     try {
+        $release_branches = find_release_branches($target_ref);
+        $pr_first_sha = trim(run_command("git log --reverse --format=%H $target_sha..$pr_sha | head -n1")->stdout);
+
         $squashed_sha = merge_pr_into_target($pr_sha, $pr_first_sha, $target_ref, "$pr_title (GH-$pr_number)", $pr_description);
         merge_upwards($release_branches);
         $push_pr_branch_result = push_pr_branch($pr_repo_url, $pr_ref, $squashed_sha, $pr_sha);
