@@ -1956,9 +1956,9 @@ PHP_FUNCTION(ini_get_all)
 				}
 
 				if (ini_entry->def->value) {
-					add_assoc_stringl(&option, "default_value", ini_entry->def->value, ini_entry->def->value_length);
+					add_assoc_stringl(&option, "builtin_default_value", ini_entry->def->value, ini_entry->def->value_length);
 				} else {
-					add_assoc_null(&option, "default_value");
+					add_assoc_null(&option, "builtin_default_value");
 				}
 
 				add_assoc_long(&option, "access", ini_entry->modifiable);

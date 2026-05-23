@@ -38,7 +38,7 @@ array(3) {
     string(7) "1000000"
     ["local_value"]=>
     string(7) "1000000"
-    ["default_value"]=>
+    ["builtin_default_value"]=>
     string(7) "1000000"
     ["access"]=>
     int(7)
@@ -49,7 +49,7 @@ array(3) {
     string(1) "1"
     ["local_value"]=>
     string(1) "1"
-    ["default_value"]=>
+    ["builtin_default_value"]=>
     string(1) "1"
     ["access"]=>
     int(7)
@@ -60,7 +60,7 @@ array(3) {
     string(6) "100000"
     ["local_value"]=>
     string(6) "100000"
-    ["default_value"]=>
+    ["builtin_default_value"]=>
     string(6) "100000"
     ["access"]=>
     int(7)

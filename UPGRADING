@@ -269,10 +269,10 @@ PHP 8.6 UPGRADE NOTES
     constants).
 
 - Standard:
-  . ini_get_all() now includes a "default_value" element for each directive
-    when $details is true. It holds the compiled-in default value of the
-    directive (or null if it has none), independent of values set in php.ini,
-    on the command line, or at runtime.
+  . ini_get_all() now includes a "builtin_default_value" element for each
+    directive when $details is true. It holds the built-in default value of
+    the directive (or null if it has none), independent of values set in
+    php.ini, on the command line, or at runtime.
 
 ========================================
 6. New Functions
