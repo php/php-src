@@ -67,12 +67,12 @@ function run_command(string|array $cmd, ?string $failure_message = 'Unexpected e
 
 function try_run(array $args): bool {
     $result = run_command($args, failure_message: null);
-    return $result->status !== 0;
+    return $result->status === 0;
 }
 
 function run(array $args, ?string $failure_message = null): bool {
-    $result = run_command($args, $failure_message);
-    return $result->status !== 0;
+    $result = run_command($args, $failure_message ?? 'Unexpected error.');
+    return $result->status === 0;
 }
 
 function origin_branch_exists(string $branch): bool {
