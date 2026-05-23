@@ -6,8 +6,10 @@ class ProcessResult {
     public $stderr;
 }
 
-function run_command(array $args, ?string $failure_message = 'Unexpected error.'): ProcessResult {
-    $cmd = implode(' ', array_map('escapeshellarg', $args));
+function run_command(string|array $cmd, ?string $failure_message = 'Unexpected error.'): ProcessResult {
+    if (is_array($cmd)) {
+        $cmd = implode(' ', array_map('escapeshellarg', $cmd));
+    }
     $pipes = null;
     $result = new ProcessResult();
     $descriptor_spec = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
@@ -187,9 +189,9 @@ function wrap_commit_message(string $message, int $width = 80): string {
 }
 
 function main(): int {
-    $target = getenv('TARGET_BRANCH');
+    $target_sha = getenv('TARGET_SHA');
+    $target_ref = getenv('TARGET_REF');
     $pr_number = getenv('PR_NUMBER');
-    $pr_first_sha = getenv('PR_FIRST_SHA');
     $pr_sha = getenv('PR_SHA');
     $pr_ref = getenv('PR_REF');
     $pr_repo_url = getenv('PR_REPO_URL');
@@ -197,13 +199,14 @@ function main(): int {
     $pr_description = getenv('PR_DESCRIPTION');
     $github_output = getenv('GITHUB_OUTPUT');
 
-    $release_branches = find_release_branches($target);
+    $release_branches = find_release_branches($target_ref);
+    $pr_first_sha = trim(run_command("git log --reverse --format=%H $target_sha..$pr_sha | head -n1")->stdout);
 
     try {
-        $squashed_sha = merge_pr_into_target($pr_sha, $pr_first_sha, $target, "$pr_title (GH-$pr_number)", $pr_description);
+        $squashed_sha = merge_pr_into_target($pr_sha, $pr_first_sha, $target_ref, "$pr_title (GH-$pr_number)", $pr_description);
         merge_upwards($release_branches);
         $push_pr_branch_result = push_pr_branch($pr_repo_url, $pr_ref, $squashed_sha, $pr_sha);
-        if ($push_pr_branch_result !== PushPrBranchResult::Rejected) {
+        if ($push_pr_branch_result === PushPrBranchResult::Rejected) {
             throw new RuntimeException('PR branch diverged.');
         } else if ($push_pr_branch_result === PushPrBranchResult::RemoteRejected) {
             // Contributor likely unchecked the "Allow edits by maintainers"

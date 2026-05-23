@@ -51,7 +51,8 @@ jobs:
           PR_REPO_URL: ${{ github.event.pull_request.head.repo.clone_url }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_DESCRIPTION: ${{ github.event.pull_request.body }}
-          TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
+          TARGET_SHA: ${{ github.event.pull_request.base.sha }}
+          TARGET_REF: ${{ github.event.pull_request.base.ref }}
         run: |
           # Use merge script from master to avoid syncing to lower branches.
           git show origin/master:.github/scripts/merge_pr.php > "$RUNNER_TEMP/merge_pr.php"
