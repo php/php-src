@@ -268,6 +268,12 @@ PHP 8.6 UPGRADE NOTES
     when not null, and on failure, gives the error code (one of the EAI_*
     constants).
 
+- Standard:
+  . ini_get_all() now includes a "default_value" element for each directive
+    when $details is true. It holds the compiled-in default value of the
+    directive (or null if it has none), independent of values set in php.ini,
+    on the command line, or at runtime.
+
 ========================================
 6. New Functions
 ========================================
