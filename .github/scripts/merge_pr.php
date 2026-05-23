@@ -85,7 +85,7 @@ function find_next_release_branch(string $current): ?string {
     }
 
     if (!preg_match('(^PHP-(?<major>\d+)\.(?<minor>\d+)$)', $current, $matches)) {
-        throw new RuntimeException("Unsupported target branch $current");
+        throw new RuntimeException("Unsupported target branch $current.");
     }
 
     $major = $matches['major'];
