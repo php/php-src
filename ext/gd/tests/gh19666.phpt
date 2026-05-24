@@ -17,8 +17,6 @@ var_dump(imageconvolution($image, $gaussian, 16, 0));
 $rgba = imagecolorat($image, 0, 0);
 $colors = imagecolorsforindex($image, $rgba);
 var_dump($colors);
-
-imagedestroy($image);
 ?>
 --EXPECT--
 bool(true)
