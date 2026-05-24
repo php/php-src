@@ -224,6 +224,8 @@ PHP                                                                        NEWS
     null bytes. (Weilin Du)
   . proc_open() now raises a ValueError when the $cwd argument contains
     null bytes. (Weilin Du)
+  . ini_get_all() now includes the built-in default value in the details.
+    (sebastian)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
