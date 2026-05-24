@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 class ProcessResult {
-    public $status;
-    public $stdout;
-    public $stderr;
+    public int $status = 0;
+    public string $stdout = '';
+    public string $stderr = '';
 }
 
+/** @param string|list<string> $cmd */
 function run_command(string|array $cmd, ?string $failure_message = 'Unexpected error.'): ProcessResult {
     if (is_array($cmd)) {
         $cmd = implode(' ', array_map('escapeshellarg', $cmd));
@@ -65,11 +68,13 @@ function run_command(string|array $cmd, ?string $failure_message = 'Unexpected e
     return $result;
 }
 
+/** @param list<string> $args */
 function try_run(array $args): bool {
     $result = run_command($args, failure_message: null);
     return $result->status === 0;
 }
 
+/** @param list<string> $args */
 function run(array $args, ?string $failure_message = null): bool {
     $result = run_command($args, $failure_message ?? 'Unexpected error.');
     return $result->status === 0;
@@ -104,6 +109,7 @@ function find_next_release_branch(string $current): ?string {
     return 'master';
 }
 
+/** @return list<string> */
 function find_release_branches(string $target): array {
     $branches = [$target];
     while (null !== $next = find_next_release_branch(end($branches))) {
@@ -124,7 +130,8 @@ function merge_pr_into_target(string $pr_sha, string $pr_first_sha, string $targ
     return $squashed_sha;
 }
 
-function merge_upwards(array $branches) {
+/** @param list<string> $branches */
+function merge_upwards(array $branches): void {
     for ($i = 1; $i < count($branches); $i++) {
         $prev = $branches[$i - 1];
         $current = $branches[$i];
@@ -140,7 +147,7 @@ enum PushPrBranchResult {
     case RemoteRejected;
 }
 
-function push_pr_branch(string $url, string $branch, string $new_commit, string $expected_commit) {
+function push_pr_branch(string $url, string $branch, string $new_commit, string $expected_commit): PushPrBranchResult {
     $result = run_command(['git', 'push', "--force-with-lease=$branch:$expected_commit", $url, "$new_commit:refs/heads/$branch"], failure_message: null);
     if ($result->status === 0) {
         return PushPrBranchResult::Success;
@@ -151,11 +158,12 @@ function push_pr_branch(string $url, string $branch, string $new_commit, string 
     }
 }
 
+/** @param list<string> $branches */
 function push_release_branches(array $branches): bool {
     return try_run(['git', 'push', '--atomic', 'origin', ...$branches]);
 }
 
-function revert_pr_branch(string $url, string $branch, string $new_commit, string $expected_commit) {
+function revert_pr_branch(string $url, string $branch, string $new_commit, string $expected_commit): void {
     run_command(['git', 'push', "--force-with-lease=$branch:$expected_commit", $url, "$new_commit:refs/heads/$branch"],
         failure_message: 'Failed to push release branches. Reverting PR branch also failed.');
 }
@@ -209,9 +217,11 @@ function main(): int {
         if ($push_pr_branch_result === PushPrBranchResult::Rejected) {
             throw new RuntimeException('PR branch diverged.');
         } else if ($push_pr_branch_result === PushPrBranchResult::RemoteRejected) {
-            // Contributor likely unchecked the "Allow edits by maintainers"
-            // checkbox. Resume and close PR manually.
-            file_put_contents($github_output, "close_pr=1\n", FILE_APPEND);
+            if ($github_output !== false) {
+                // Contributor likely unchecked the "Allow edits by maintainers"
+                // checkbox. Resume and close PR manually.
+                file_put_contents($github_output, "close_pr=1\n", FILE_APPEND);
+            }
         }
         if (!push_release_branches($release_branches)) {
             revert_pr_branch($pr_repo_url, $pr_ref, $pr_sha, $squashed_sha);
