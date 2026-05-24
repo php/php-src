@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component retrieval - host type - registered name
+Test Uri\Rfc3986\Uri component retrieval - host type - none
 --FILE--
 <?php
 
