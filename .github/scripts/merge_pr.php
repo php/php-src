@@ -40,13 +40,14 @@ function run_command(string|array $cmd, ?string $failure_message = 'Unexpected e
         stream_select($read, $write, $except, 1, 0);
 
         foreach ($read as $stream) {
-            $chunk = fgets($stream);
-            if ($stream === $stdout) {
-                $result->stdout .= $chunk;
-                fwrite(STDOUT, $chunk);
-            } elseif ($stream === $stderr) {
-                $result->stderr .= $chunk;
-                fwrite(STDERR, $chunk);
+            if (false !== $chunk = fgets($stream)) {
+                if ($stream === $stdout) {
+                    $result->stdout .= $chunk;
+                    fwrite(STDOUT, $chunk);
+                } elseif ($stream === $stderr) {
+                    $result->stderr .= $chunk;
+                    fwrite(STDERR, $chunk);
+                }
             }
         }
 
