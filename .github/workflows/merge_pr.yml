@@ -19,16 +19,26 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
+
       - name: git checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           filter: blob:none
           ref: ${{ github.event.pull_request.base.ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: git config
         run: |
+          git config --local url."https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
           git config user.name "PHP Merge Bot"
           git config user.email "287303856+php-merge-bot@users.noreply.github.com"
           git config merge.NEWS.name "Keep the NEWS file"
