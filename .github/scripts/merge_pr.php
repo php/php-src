@@ -266,7 +266,9 @@ function main(): int {
             file_put_contents($github_output, "close_pr=1\n", FILE_APPEND);
         }
         if (!push_release_branches($context)) {
-            revert_pr_branch($context, $squashed_sha);
+            if ($push_pr_branch_result === PushPrBranchResult::Success) {
+                revert_pr_branch($context, $squashed_sha);
+            }
             throw new RuntimeException('Failed to push release branches.');
         }
     } catch (Throwable $e) {
