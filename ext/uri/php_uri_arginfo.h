@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: 3c228f4227e7543be5c12c99074789d92c27ab99
+ * Stub hash: 4143e681e589d6e663f3f7d9eb7677cd3395baf2
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
@@ -10,6 +10,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_Rfc3986_Uri___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, baseUrl, Uri\\Rfc3986\\\125ri, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_getUriType, 0, 0, Uri\\Rfc3986\\\125riType, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_getScheme, 0, 0, IS_STRING, 1)
@@ -130,6 +133,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_withScheme,
 	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_isSpecialScheme, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_Uri_WhatWg_Url_getUsername arginfo_class_Uri_Rfc3986_Uri_getScheme
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_withUsername, 0, 1, IS_STATIC, 0)
@@ -186,6 +192,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_METHOD(Uri_Rfc3986_Uri, parse);
 ZEND_METHOD(Uri_Rfc3986_Uri, __construct);
+ZEND_METHOD(Uri_Rfc3986_Uri, getUriType);
 ZEND_METHOD(Uri_Rfc3986_Uri, getScheme);
 ZEND_METHOD(Uri_Rfc3986_Uri, getRawScheme);
 ZEND_METHOD(Uri_Rfc3986_Uri, withScheme);
@@ -223,6 +230,7 @@ ZEND_METHOD(Uri_WhatWg_Url, parse);
 ZEND_METHOD(Uri_WhatWg_Url, __construct);
 ZEND_METHOD(Uri_WhatWg_Url, getScheme);
 ZEND_METHOD(Uri_WhatWg_Url, withScheme);
+ZEND_METHOD(Uri_WhatWg_Url, isSpecialScheme);
 ZEND_METHOD(Uri_WhatWg_Url, withUsername);
 ZEND_METHOD(Uri_WhatWg_Url, withPassword);
 ZEND_METHOD(Uri_WhatWg_Url, getAsciiHost);
@@ -238,6 +246,7 @@ ZEND_METHOD(Uri_WhatWg_Url, __debugInfo);
 static const zend_function_entry class_Uri_Rfc3986_Uri_methods[] = {
 	ZEND_ME(Uri_Rfc3986_Uri, parse, arginfo_class_Uri_Rfc3986_Uri_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Uri_Rfc3986_Uri, __construct, arginfo_class_Uri_Rfc3986_Uri___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_Uri, getUriType, arginfo_class_Uri_Rfc3986_Uri_getUriType, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getScheme, arginfo_class_Uri_Rfc3986_Uri_getScheme, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawScheme, arginfo_class_Uri_Rfc3986_Uri_getRawScheme, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, withScheme, arginfo_class_Uri_Rfc3986_Uri_withScheme, ZEND_ACC_PUBLIC)
@@ -287,6 +296,7 @@ static const zend_function_entry class_Uri_WhatWg_Url_methods[] = {
 	ZEND_ME(Uri_WhatWg_Url, __construct, arginfo_class_Uri_WhatWg_Url___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, getScheme, arginfo_class_Uri_WhatWg_Url_getScheme, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, withScheme, arginfo_class_Uri_WhatWg_Url_withScheme, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_Url, isSpecialScheme, arginfo_class_Uri_WhatWg_Url_isSpecialScheme, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("getUsername", zim_Uri_Rfc3986_Uri_getUsername, arginfo_class_Uri_WhatWg_Url_getUsername, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(Uri_WhatWg_Url, withUsername, arginfo_class_Uri_WhatWg_Url_withUsername, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("getPassword", zim_Uri_Rfc3986_Uri_getPassword, arginfo_class_Uri_WhatWg_Url_getPassword, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -349,6 +359,21 @@ static zend_class_entry *register_class_Uri_UriComparisonMode(void)
 	zend_enum_add_case_cstr(class_entry, "IncludeFragment", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "ExcludeFragment", NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Uri_Rfc3986_UriType(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Uri\\Rfc3986\\UriType", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "AbsolutePathReference", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "RelativePathReference", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "NetworkPathReference", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Uri", NULL);
 
 	return class_entry;
 }

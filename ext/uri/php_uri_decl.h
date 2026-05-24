@@ -1,13 +1,20 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: 3c228f4227e7543be5c12c99074789d92c27ab99 */
+ * Stub hash: 4143e681e589d6e663f3f7d9eb7677cd3395baf2 */
 
-#ifndef ZEND_PHP_URI_DECL_3c228f4227e7543be5c12c99074789d92c27ab99_H
-#define ZEND_PHP_URI_DECL_3c228f4227e7543be5c12c99074789d92c27ab99_H
+#ifndef ZEND_PHP_URI_DECL_4143e681e589d6e663f3f7d9eb7677cd3395baf2_H
+#define ZEND_PHP_URI_DECL_4143e681e589d6e663f3f7d9eb7677cd3395baf2_H
 
 typedef enum zend_enum_Uri_UriComparisonMode {
 	ZEND_ENUM_Uri_UriComparisonMode_IncludeFragment = 1,
 	ZEND_ENUM_Uri_UriComparisonMode_ExcludeFragment = 2,
 } zend_enum_Uri_UriComparisonMode;
+
+typedef enum zend_enum_Uri_Rfc3986_UriType {
+	ZEND_ENUM_Uri_Rfc3986_UriType_AbsolutePathReference = 1,
+	ZEND_ENUM_Uri_Rfc3986_UriType_RelativePathReference = 2,
+	ZEND_ENUM_Uri_Rfc3986_UriType_NetworkPathReference = 3,
+	ZEND_ENUM_Uri_Rfc3986_UriType_Uri = 4,
+} zend_enum_Uri_Rfc3986_UriType;
 
 typedef enum zend_enum_Uri_WhatWg_UrlValidationErrorType {
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_DomainToAscii = 1,
@@ -41,4 +48,4 @@ typedef enum zend_enum_Uri_WhatWg_UrlValidationErrorType {
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_FileInvalidWindowsDriveLetterHost = 29,
 } zend_enum_Uri_WhatWg_UrlValidationErrorType;
 
-#endif /* ZEND_PHP_URI_DECL_3c228f4227e7543be5c12c99074789d92c27ab99_H */
+#endif /* ZEND_PHP_URI_DECL_4143e681e589d6e663f3f7d9eb7677cd3395baf2_H */
