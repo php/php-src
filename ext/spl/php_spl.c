@@ -509,7 +509,7 @@ PHPAPI zend_string *php_spl_object_hash(zend_object *obj) /* {{{*/
 	}
 
 	p = zend_mempcpy(p, "000000000000000", 16);
-    	*p++ = '\0';
+	*p++ = '\0';
 
 	return str;
 }
