@@ -211,6 +211,10 @@ PHP 8.6 UPGRADE NOTES
     options.
   . Allowed casting casting filtered streams as file descriptor for select.
 
+- URI:
+  . Added Uri\Rfc3986\Uri:getUriType() and Uri\WhatWg\Url:isSpecialScheme().
+    RFC: https://wiki.php.net/rfc/uri_followup#uri_type_detection
+
 ========================================
 3. Changes in SAPI modules
 ========================================
