@@ -14,7 +14,7 @@ if (PHP_CURL != "no") {
 		 CHECK_LIB("libssh2.lib", "curl", PHP_CURL) &&
 		 CHECK_LIB("nghttp2.lib", "curl", PHP_CURL))
 		) {
-		if (!(CHECK_HEADER_ADD_INCLUDE("brotli/decode.h", "CFLAGS_CURL") &&
+		if (!(CHECK_HEADER("brotli/decode.h", "CFLAGS_CURL") &&
 			CHECK_LIB("brotlidec.lib;brotlidec-static.lib", "curl", PHP_CURL) &&
 			CHECK_LIB("brotlicommon.lib;brotlicommon-static.lib", "curl", PHP_CURL)
 		)) {

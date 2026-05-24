@@ -69,6 +69,8 @@ PHP                                                                        NEWS
     argument handling now raises TypeError instead of Error. (Weilin Du)
   . IntlBreakIterator::getLocale() now raises ValueError for invalid locale
     types. (Weilin Du)
+  . Fixed MessageFormatter::parse() and parseMessage() returning PHP_INT_MIN
+    as float rather than int on 64-bit platforms. (Weilin Du)
 
 - JSON:
   . Enriched JSON last error / exception message with error location.
@@ -156,6 +158,12 @@ PHP                                                                        NEWS
     (Girgias)
   . Null bytes in session.cookie_path, session.cookie_domain, and
     session.cache_limiter are now rejected with a warning. (jorgsowa)
+  . session.cookie_samesite now rejects invalid values with a warning; only
+    "Strict", "Lax", "None", or "" are accepted. (jorgsowa)
+  . session.cookie_lifetime now rejects non-integer and out-of-range values
+    with a warning. (jorgsowa)
+  . Session file GC now recursively cleans nested subdirectories when
+    session.save_path uses the dirdepth prefix. (jorgsowa)
   . Changed defaults of session.use_strict_mode (now 1), session.cookie_httponly
     (now 1) and session.cookie_samesite (now "Lax"). (jorgsowa)
 

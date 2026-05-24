@@ -108,7 +108,7 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 	INTL_METHOD_CHECK_STATUS( dfo, "Date parsing failed" );
 
 
-	array_init( return_value );
+	array_init_size( return_value, 9 );
 	/* Add  entries from various fields of the obtained parsed_calendar */
 	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_SECOND, CALENDAR_SEC);
 	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_MINUTE, CALENDAR_MIN);

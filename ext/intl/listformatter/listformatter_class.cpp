@@ -131,6 +131,8 @@ PHP_METHOD(IntlListFormatter, format)
         Z_PARAM_ARRAY_HT(ht)
     ZEND_PARSE_PARAMETERS_END();
 
+    intl_errors_reset(LISTFORMATTER_ERROR_P(obj));
+
     uint32_t count = zend_hash_num_elements(ht);
     if (count == 0) {
         RETURN_EMPTY_STRING();
@@ -152,7 +154,7 @@ PHP_METHOD(IntlListFormatter, format)
         zend_tmp_string_release(tmp_str);
 
         if (U_FAILURE(conv_status)) {
-            intl_error_set(nullptr, conv_status, "Failed to convert string to UTF-16");
+            intl_errors_set(LISTFORMATTER_ERROR_P(obj), conv_status, "Failed to convert string to UTF-16");
             RETURN_FALSE;
         }
 
@@ -165,14 +167,14 @@ PHP_METHOD(IntlListFormatter, format)
     LISTFORMATTER_OBJECT(obj)->format(items.get(), count, result, status);
 
     if (U_FAILURE(status)) {
-        intl_error_set(nullptr, status, "Failed to format list");
+        intl_errors_set(LISTFORMATTER_ERROR_P(obj), status, "Failed to format list");
         RETURN_FALSE;
     }
 
     zend_string *ret = intl_charFromString(result, &status);
 
     if (!ret) {
-        intl_error_set(nullptr, status, "Failed to convert result to UTF-8");
+        intl_errors_set(LISTFORMATTER_ERROR_P(obj), status, "Failed to convert result to UTF-8");
         RETURN_FALSE;
     }
 

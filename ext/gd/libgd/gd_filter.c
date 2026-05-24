@@ -7,6 +7,7 @@
 #else
 # include <unistd.h>
 #endif
+#include <math.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -19,6 +20,20 @@
 
 /* Begin filters function */
 #define GET_PIXEL_FUNCTION(src)(src->trueColor?gdImageGetTrueColorPixel:gdImageGetPixel)
+
+static int gdClampFloatToByte(float value)
+{
+	if (!isfinite(value)) {
+		return value > 0.0f ? 255 : 0;
+	}
+	if (value > 255.0f) {
+		return 255;
+	}
+	if (value < 0.0f) {
+		return 0;
+	}
+	return (int)value;
+}
 
 #ifdef _WIN32
 # define GD_SCATTER_SEED() (unsigned int)(time(0) * GetCurrentProcessId())
@@ -417,6 +432,7 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 
 	for ( y=0; y<src->sy; y++) {
 		for(x=0; x<src->sx; x++) {
+			int new_ri, new_gi, new_bi;
 			new_r = new_g = new_b = 0;
 			pxl = f(srcback, x, y);
 			new_a = gdImageAlpha(srcback, pxl);
@@ -435,13 +451,13 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 			new_g = (new_g/filter_div)+offset;
 			new_b = (new_b/filter_div)+offset;
 
-			new_r = (new_r > 255.0f)? 255.0f : ((new_r < 0.0f)? 0.0f:new_r);
-			new_g = (new_g > 255.0f)? 255.0f : ((new_g < 0.0f)? 0.0f:new_g);
-			new_b = (new_b > 255.0f)? 255.0f : ((new_b < 0.0f)? 0.0f:new_b);
+			new_ri = gdClampFloatToByte(new_r);
+			new_gi = gdClampFloatToByte(new_g);
+			new_bi = gdClampFloatToByte(new_b);
 
-			new_pxl = gdImageColorAllocateAlpha(src, (int)new_r, (int)new_g, (int)new_b, new_a);
+			new_pxl = gdImageColorAllocateAlpha(src, new_ri, new_gi, new_bi, new_a);
 			if (new_pxl == -1) {
-				new_pxl = gdImageColorClosestAlpha(src, (int)new_r, (int)new_g, (int)new_b, new_a);
+				new_pxl = gdImageColorClosestAlpha(src, new_ri, new_gi, new_bi, new_a);
 			}
 			gdImageSetPixel (src, x, y, new_pxl);
 		}
