@@ -16,4 +16,4 @@ try {
 
 ?>
 --EXPECTF--
-Cannot deserialize ArrayObject with iterator class 'GlobIterator'; this class does not implement the Iterator interface
+Cannot deserialize ArrayObject with iterator class 'GlobIterator'; this class is not derived from ArrayIterator
