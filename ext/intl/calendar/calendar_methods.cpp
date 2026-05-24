@@ -203,7 +203,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_available_locales)
 
 	int32_t count;
 	const Locale *availLocales = Calendar::getAvailableLocales(count);
-	array_init(return_value);
+	array_init_size(return_value, count);
 	for (int i = 0; i < count; i++) {
 		Locale locale = availLocales[i];
 		add_next_index_string(return_value, locale.getName());
