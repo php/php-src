@@ -2,6 +2,49 @@
 
 declare(strict_types=1);
 
+class Context {
+    public string $github_output;
+    public string $pr_number;
+    public string $pr_sha;
+    public string $pr_ref;
+    public string $pr_repo_url;
+    public string $pr_title;
+    public string $pr_description;
+    public string $target_sha;
+    public string $target_ref;
+    /** @var list<string> */
+    public array $release_branches;
+    public string $pr_first_sha;
+}
+
+function get_context(): Context {
+    $context = new Context;
+
+    $env_mapping = [
+        'PR_DESCRIPTION' => 'pr_description',
+        'PR_NUMBER' => 'pr_number',
+        'PR_REF' => 'pr_ref',
+        'PR_REPO_URL' => 'pr_repo_url',
+        'PR_SHA' => 'pr_sha',
+        'PR_TITLE' => 'pr_title',
+        'TARGET_REF' => 'target_ref',
+        'TARGET_SHA' => 'target_sha',
+    ];
+
+    foreach ($env_mapping as $env_name => $prop_name) {
+        $value = getenv($env_name);
+        if ($value === false) {
+            throw new InvalidArgumentException("Missing env var $env_name");
+        }
+        $context->{$prop_name} = $value;
+    }
+
+    $context->release_branches = find_release_branches($context->target_ref);
+    $context->pr_first_sha = trim(run_command("git log --reverse --format=%H {$context->target_sha}..{$context->pr_sha} | head -n1")->stdout);
+
+    return $context;
+}
+
 class ProcessResult {
     public int $status = 0;
     public string $stdout = '';
@@ -19,6 +62,9 @@ function run_command(string|array $cmd, ?string $failure_message = 'Unexpected e
     fwrite(STDERR, "::group::{$cmd}\n");
 
     $process_handle = proc_open($cmd, $descriptor_spec, $pipes);
+    if ($process_handle === false) {
+        throw new RuntimeException("Failed to execute command `$cmd`");
+    }
 
     $stdin = $pipes[0];
     $stdout = $pipes[1];
@@ -122,20 +168,20 @@ function find_release_branches(string $target): array {
     return $branches;
 }
 
-function merge_pr_into_target(string $pr_sha, string $pr_first_sha, string $target, string $message, string $description): string {
-    $author = trim(run_command(['git', 'log', '-1', '--format=%an <%ae>', $pr_first_sha])->stdout);
+function merge_pr_into_target(Context $context, string $message): string {
+    $author = trim(run_command(['git', 'log', '-1', '--format=%an <%ae>', $context->pr_first_sha])->stdout);
 
-    run(['git', 'checkout', '-B', $target, "refs/remotes/origin/$target"]);
-    run(['git', 'merge', '--squash', $pr_sha],
-        failure_message: "Failed to squash PR into $target.");
-    run(['git', 'commit', "--author=$author", '-m', $message, '-m', wrap_commit_message($description)]);
+    run(['git', 'checkout', '-B', $context->target_ref, "refs/remotes/origin/{$context->target_ref}"]);
+    run(['git', 'merge', '--squash', $context->pr_sha],
+        failure_message: "Failed to squash PR into {$context->target_ref}.");
+    run(['git', 'commit', "--author=$author", '-m', $message, '-m', wrap_commit_message($context->pr_description)]);
     $squashed_sha = trim((string) shell_exec('git rev-parse HEAD'));
 
     return $squashed_sha;
 }
 
-/** @param list<string> $branches */
-function merge_upwards(array $branches): void {
+function merge_upwards(Context $context): void {
+    $branches = $context->release_branches;
     for ($i = 1; $i < count($branches); $i++) {
         $prev = $branches[$i - 1];
         $current = $branches[$i];
@@ -151,8 +197,8 @@ enum PushPrBranchResult {
     case RemoteRejected;
 }
 
-function push_pr_branch(string $url, string $branch, string $new_commit, string $expected_commit): PushPrBranchResult {
-    $result = run_command(['git', 'push', "--force-with-lease=$branch:$expected_commit", $url, "$new_commit:refs/heads/$branch"], failure_message: null);
+function push_pr_branch(Context $context, string $new_commit): PushPrBranchResult {
+    $result = run_command(['git', 'push', "--force-with-lease={$context->pr_ref}:{$context->pr_sha}", $context->pr_repo_url, "$new_commit:refs/heads/{$context->pr_ref}"], failure_message: null);
     if ($result->status === 0) {
         return PushPrBranchResult::Success;
     } else if (preg_match('(\[rejected\])', $result->stderr)) {
@@ -162,13 +208,12 @@ function push_pr_branch(string $url, string $branch, string $new_commit, string 
     }
 }
 
-/** @param list<string> $branches */
-function push_release_branches(array $branches): bool {
-    return try_run(['git', 'push', '--atomic', 'origin', ...$branches]);
+function push_release_branches(Context $context): bool {
+    return try_run(['git', 'push', '--atomic', 'origin', ...$context->release_branches]);
 }
 
-function revert_pr_branch(string $url, string $branch, string $new_commit, string $expected_commit): void {
-    run_command(['git', 'push', "--force-with-lease=$branch:$expected_commit", $url, "$new_commit:refs/heads/$branch"],
+function revert_pr_branch(Context $context, string $expected_commit): void {
+    run_command(['git', 'push', "--force-with-lease={$context->pr_ref}:$expected_commit", $context->pr_repo_url, "{$context->pr_sha}:refs/heads/{$context->pr_ref}"],
         failure_message: 'Failed to push release branches. Reverting PR branch also failed.');
 }
 
@@ -201,40 +246,30 @@ function wrap_commit_message(string $message, int $width = 80): string {
 }
 
 function main(): int {
-    $target_sha = getenv('TARGET_SHA');
-    $target_ref = getenv('TARGET_REF');
-    $pr_number = getenv('PR_NUMBER');
-    $pr_sha = getenv('PR_SHA');
-    $pr_ref = getenv('PR_REF');
-    $pr_repo_url = getenv('PR_REPO_URL');
-    $pr_title = getenv('PR_TITLE');
-    $pr_description = getenv('PR_DESCRIPTION');
     $github_output = getenv('GITHUB_OUTPUT');
+    if ($github_output === false) {
+        throw new InvalidArgumentException('Missing env var GITHUB_OUTPUT');
+    }
 
     try {
-        $release_branches = find_release_branches($target_ref);
-        $pr_first_sha = trim(run_command("git log --reverse --format=%H $target_sha..$pr_sha | head -n1")->stdout);
+        $context = get_context();
 
-        $squashed_sha = merge_pr_into_target($pr_sha, $pr_first_sha, $target_ref, "$pr_title (GH-$pr_number)", $pr_description);
-        merge_upwards($release_branches);
-        $push_pr_branch_result = push_pr_branch($pr_repo_url, $pr_ref, $squashed_sha, $pr_sha);
+        $squashed_sha = merge_pr_into_target($context, "{$context->pr_title} (GH-{$context->pr_number})");
+        merge_upwards($context);
+        $push_pr_branch_result = push_pr_branch($context, $squashed_sha);
         if ($push_pr_branch_result === PushPrBranchResult::Rejected) {
             throw new RuntimeException('PR branch diverged.');
         } else if ($push_pr_branch_result === PushPrBranchResult::RemoteRejected) {
-            if ($github_output !== false) {
-                // Contributor likely unchecked the "Allow edits by maintainers"
-                // checkbox. Resume and close PR manually.
-                file_put_contents($github_output, "close_pr=1\n", FILE_APPEND);
-            }
+            // Contributor likely unchecked the "Allow edits by maintainers"
+            // checkbox. Resume and close PR manually.
+            file_put_contents($github_output, "close_pr=1\n", FILE_APPEND);
         }
-        if (!push_release_branches($release_branches)) {
-            revert_pr_branch($pr_repo_url, $pr_ref, $pr_sha, $squashed_sha);
+        if (!push_release_branches($context)) {
+            revert_pr_branch($context, $squashed_sha);
             throw new RuntimeException('Failed to push release branches.');
         }
     } catch (Throwable $e) {
-        if ($github_output !== false) {
-            file_put_contents($github_output, "fail_reason<<EOF\n{$e->getMessage()}\nEOF\n", FILE_APPEND);
-        }
+        file_put_contents($github_output, "fail_reason<<EOF\n{$e->getMessage()}\nEOF\n", FILE_APPEND);
         fwrite(STDERR, "::error::{$e->getMessage()}\n");
         return 1;
     }
