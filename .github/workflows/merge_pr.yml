@@ -62,7 +62,6 @@ jobs:
         id: merge
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_FIRST_SHA: $(git log --reverse --format=%H ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | head -n1)
           PR_SHA: ${{ github.event.pull_request.head.sha }}
           PR_REF: ${{ github.event.pull_request.head.ref }}
           PR_REPO_URL: ${{ github.event.pull_request.head.repo.clone_url }}
