@@ -272,7 +272,7 @@ static zend_always_inline int zend_cpu_supports_avx512_vbmi(void) {
 #endif
 
 /* __builtin_cpu_supports has pclmul from gcc9 and clang 19 */
-#if defined(PHP_HAVE_BUILTIN_CPU_SUPPORTS) && defined(__x86_64__) && \
+#if defined(PHP_HAVE_BUILTIN_CPU_SUPPORTS) && (defined(__x86_64__) || defined(__i386__)) && \
 	( \
 		(!defined(__GNUC__) || (defined(__clang__) && __clang_major__ >= 19) || (ZEND_GCC_VERSION >= 9000)) \
 	)
@@ -290,7 +290,7 @@ static inline int zend_cpu_supports_pclmul(void) {
 #endif
 
 /* __builtin_cpu_supports has cldemote from gcc11 and clang 19 */
-#if defined(PHP_HAVE_BUILTIN_CPU_SUPPORTS) && defined(__x86_64__) && \
+#if defined(PHP_HAVE_BUILTIN_CPU_SUPPORTS) && (defined(__x86_64__) || defined(__i386__)) && \
 	( \
 		(defined(__clang__) && (__clang_major__ >= 19)) || \
 		(!defined(__clang__) && defined(__GNUC__) && (ZEND_GCC_VERSION >= 11000)) \
