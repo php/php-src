@@ -1783,6 +1783,9 @@ void gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
 
 	a=w>>1;
 	b=h>>1;
+	if (overflowMul3(a, b, b) || overflowMul3(b, a, a)) {
+		return;
+	}
 	gdImageSetPixel(im,mx+a, my, c);
 	gdImageSetPixel(im,mx-a, my, c);
 	mx1 = mx-a;my1 = my;
@@ -1824,7 +1827,9 @@ void gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
 
 	a=w>>1;
 	b=h>>1;
-
+	if (overflowMul3(a, b, b) || overflowMul3(b, a, a)) {
+		return;
+	}
 	for (x = mx-a; x <= mx+a; x++) {
 		gdImageSetPixel(im, x, my, c);
 	}
