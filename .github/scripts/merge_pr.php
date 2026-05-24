@@ -125,8 +125,8 @@ function try_run(array $args): bool {
 }
 
 /** @param list<string> $args */
-function run(array $args, ?string $failure_message = null): bool {
-    $result = run_command($args, $failure_message ?? 'Unexpected error.');
+function run(array $args, string $failure_message = 'Unexpected error.'): bool {
+    $result = run_command($args, $failure_message);
     return $result->status === 0;
 }
 
@@ -168,8 +168,9 @@ function find_release_branches(string $target): array {
     return $branches;
 }
 
-function merge_pr_into_target(Context $context, string $message): string {
+function merge_pr_into_target(Context $context): string {
     $author = trim(run_command(['git', 'log', '-1', '--format=%an <%ae>', $context->pr_first_sha])->stdout);
+    $message = "{$context->pr_title} (GH-{$context->pr_number})";
 
     run(['git', 'checkout', '-B', $context->target_ref, "refs/remotes/origin/{$context->target_ref}"]);
     run(['git', 'merge', '--squash', $context->pr_sha],
@@ -254,7 +255,7 @@ function main(): int {
     try {
         $context = get_context();
 
-        $squashed_sha = merge_pr_into_target($context, "{$context->pr_title} (GH-{$context->pr_number})");
+        $squashed_sha = merge_pr_into_target($context);
         merge_upwards($context);
         $push_pr_branch_result = push_pr_branch($context, $squashed_sha);
         if ($push_pr_branch_result === PushPrBranchResult::Rejected) {
