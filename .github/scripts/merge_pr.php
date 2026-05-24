@@ -16,7 +16,8 @@ function run_command(string|array $cmd, ?string $failure_message = 'Unexpected e
     $pipes = null;
     $result = new ProcessResult();
     $descriptor_spec = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
-    fwrite(STDERR, "> $cmd\n");
+    fwrite(STDERR, "::group::{$cmd}\n");
+
     $process_handle = proc_open($cmd, $descriptor_spec, $pipes);
 
     $stdin = $pipes[0];
@@ -57,6 +58,8 @@ function run_command(string|array $cmd, ?string $failure_message = 'Unexpected e
     fclose($stderr);
 
     $result->status = proc_close($process_handle);
+
+    fwrite(STDERR, "::endgroup::\n");
 
     if ($result->status) {
         fwrite(STDERR, "Status code: {$result->status}\n");
