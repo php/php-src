@@ -214,6 +214,8 @@ PHP 8.6 UPGRADE NOTES
 - URI:
   . Added Uri\Rfc3986\Uri:getUriType() and Uri\WhatWg\Url:isSpecialScheme().
     RFC: https://wiki.php.net/rfc/uri_followup#uri_type_detection
+  . Added Uri\Rfc3986\Uri:getHostType() and Uri\WhatWg\Url:getHostType().
+    RFC: https://wiki.php.net/rfc/uri_followup#host_type_detection
 
 ========================================
 3. Changes in SAPI modules

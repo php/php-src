@@ -244,6 +244,8 @@ PHP                                                                        NEWS
 - URI:
   . Added Uri\Rfc3986\Uri:getUriType() and Uri\WhatWg\Url:isSpecialScheme().
     (kocsismate)
+  . Added Uri\Rfc3986\Uri:getHostType() and Uri\WhatWg\Url:getHostType().
+    (kocsismate)
 
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.

@@ -37,6 +37,14 @@ namespace Uri\Rfc3986 {
         case Uri;
     }
 
+    enum UriHostType
+    {
+        case IPv4;
+        case IPv6;
+        case IPvFuture;
+        case RegisteredName;
+    }
+
     /** @strict-properties */
     final readonly class Uri
     {
@@ -69,6 +77,8 @@ namespace Uri\Rfc3986 {
         public function getHost(): ?string {}
 
         public function getRawHost(): ?string {}
+
+        public function getHostType(): ?\Uri\Rfc3986\UriHostType {}
 
         public function withHost(?string $host): static {}
 
@@ -162,6 +172,15 @@ namespace Uri\WhatWg {
         public function __construct(string $context, \Uri\WhatWg\UrlValidationErrorType $type, bool $failure) {}
     }
 
+    enum UrlHostType
+    {
+        case IPv4;
+        case IPv6;
+        case Domain;
+        case Opaque;
+        case Empty;
+    }
+
     /** @strict-properties */
     final readonly class Url
     {
@@ -190,6 +209,8 @@ namespace Uri\WhatWg {
         public function getAsciiHost(): ?string {}
 
         public function getUnicodeHost(): ?string {}
+
+        public function getHostType(): ?\Uri\WhatWg\UrlHostType {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withHost */
         public function withHost(?string $host): static {}
