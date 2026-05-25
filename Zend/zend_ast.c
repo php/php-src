@@ -1058,6 +1058,10 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 				return FAILURE;
 			}
 
+			if (!zend_is_class_instantiable(ce)) {
+				return FAILURE;
+			}
+
 			if (object_init_ex(result, ce) != SUCCESS) {
 				return FAILURE;
 			}
@@ -1096,10 +1100,9 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 					}
 				}
 
-				zend_function *ctor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
-				if (ctor) {
+				if (ce->constructor) {
 					zend_call_known_function(
-						ctor, Z_OBJ_P(result), Z_OBJCE_P(result), NULL, 0, NULL, args);
+						ce->constructor, Z_OBJ_P(result), Z_OBJCE_P(result), NULL, 0, NULL, args);
 				}
 
 				zend_array_destroy(args);
@@ -1117,10 +1120,9 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 					}
 				}
 
-				zend_function *ctor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
-				if (ctor) {
+				if (ce->constructor) {
 					zend_call_known_instance_method(
-						ctor, Z_OBJ_P(result), NULL, args_ast->children, args);
+						ce->constructor, Z_OBJ_P(result), NULL, args_ast->children, args);
 				}
 
 				for (uint32_t i = 0; i < args_ast->children; i++) {

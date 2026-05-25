@@ -884,7 +884,7 @@ static zend_class_entry *register_class_Openssl_Session(void)
 	zend_string *attribute_NonInstantiableClass_class_Openssl_Session_0_arg0_str = zend_string_init("Cannot directly construct Openssl\\Session, use Openssl\\Session::import() or TLS session callbacks", strlen("Cannot directly construct Openssl\\Session, use Openssl\\Session::import() or TLS session callbacks"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_Openssl_Session_0->args[0].value, attribute_NonInstantiableClass_class_Openssl_Session_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -902,7 +902,7 @@ static zend_class_entry *register_class_OpenSSLCertificate(void)
 	zend_string *attribute_NonInstantiableClass_class_OpenSSLCertificate_0_arg0_str = zend_string_init("Cannot directly construct OpenSSLCertificate, use openssl_x509_read() instead", strlen("Cannot directly construct OpenSSLCertificate, use openssl_x509_read() instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_OpenSSLCertificate_0->args[0].value, attribute_NonInstantiableClass_class_OpenSSLCertificate_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -920,7 +920,7 @@ static zend_class_entry *register_class_OpenSSLCertificateSigningRequest(void)
 	zend_string *attribute_NonInstantiableClass_class_OpenSSLCertificateSigningRequest_0_arg0_str = zend_string_init("Cannot directly construct OpenSSLCertificateSigningRequest, use openssl_csr_new() instead", strlen("Cannot directly construct OpenSSLCertificateSigningRequest, use openssl_csr_new() instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_OpenSSLCertificateSigningRequest_0->args[0].value, attribute_NonInstantiableClass_class_OpenSSLCertificateSigningRequest_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -938,7 +938,7 @@ static zend_class_entry *register_class_OpenSSLAsymmetricKey(void)
 	zend_string *attribute_NonInstantiableClass_class_OpenSSLAsymmetricKey_0_arg0_str = zend_string_init("Cannot directly construct OpenSSLAsymmetricKey, use openssl_pkey_new() instead", strlen("Cannot directly construct OpenSSLAsymmetricKey, use openssl_pkey_new() instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_OpenSSLAsymmetricKey_0->args[0].value, attribute_NonInstantiableClass_class_OpenSSLAsymmetricKey_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

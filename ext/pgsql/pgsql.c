@@ -2105,10 +2105,16 @@ PHP_FUNCTION(pg_fetch_object)
 		ce = zend_standard_class_def;
 	}
 
-	/* TODO: Should only public constructors be allowed? */
-	zend_function *constructor = zend_get_accessible_constructor_in_scope(ce, ce);
-	if (UNEXPECTED(ce->constructor == NULL)) {
-		zend_argument_value_error(3, "must be an instantiable class");
+	if (UNEXPECTED(!zend_is_class_instantiable(ce))) {
+		zend_argument_value_error(3, "Class \"%s\" cannot be instantiated", ZSTR_VAL(ce->name));
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(!ce->constructor && ctor_params && zend_hash_num_elements(ctor_params) > 0)) {
+		zend_argument_value_error(4,
+			"must be empty when the specified class (%s) does not have a constructor",
+			ZSTR_VAL(ce->name)
+		);
 		RETURN_THROWS();
 	}
 
@@ -2131,16 +2137,8 @@ PHP_FUNCTION(pg_fetch_object)
 	}
 
 	zend_object *obj = Z_OBJ_P(return_value);
-	if (UNEXPECTED(zend_is_pass_function(constructor) && ctor_params && zend_hash_num_elements(ctor_params) > 0)) {
-		zend_argument_value_error(4,
-			"must be empty when the specified class (%s) does not have a constructor",
-			ZSTR_VAL(ce->name)
-		);
-		RETURN_THROWS();
-	}
-
-	if (!zend_is_pass_function(constructor)) {
-		zend_call_known_function(constructor, obj, ce,
+	if (ce->constructor) {
+		zend_call_known_function(ce->constructor, obj, ce,
 			/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
 		if (EG(exception)) {
 			zend_object_store_ctor_failed(obj);

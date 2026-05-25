@@ -1,5 +1,5 @@
 /* This is a generated file, edit com_extension.stub.php instead.
- * Stub hash: 9b2eea541946c291eb002ee98997f3dcad8bdfce */
+ * Stub hash: e61fc06146db8eba3c274b4c9fa2b3202e13528e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
@@ -323,6 +323,14 @@ static zend_class_entry *register_class_com_safearray_proxy(void)
 
 	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+
+	zend_string *attribute_name_NonInstantiableClass_class_com_safearray_proxy_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_com_safearray_proxy_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_com_safearray_proxy_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_com_safearray_proxy_0, true);
+	zend_string *attribute_NonInstantiableClass_class_com_safearray_proxy_0_arg0_str = zend_string_init("Cannot directly construct com_safeproxy_array; it is for internal usage only", strlen("Cannot directly construct com_safeproxy_array; it is for internal usage only"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_com_safearray_proxy_0->args[0].value, attribute_NonInstantiableClass_class_com_safearray_proxy_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

@@ -370,6 +370,7 @@ class dotnet extends variant
 }
 #endif
 
+#[\NonInstantiableClass("Cannot directly construct com_safeproxy_array; it is for internal usage only")]
 final class com_safearray_proxy
 {
 }

@@ -57,7 +57,7 @@ static zend_class_entry *register_class_Closure(void)
 	zend_string *attribute_NonInstantiableClass_class_Closure_0_arg0_str = zend_string_init("Instantiation of class Closure is not allowed", strlen("Instantiation of class Closure is not allowed"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_Closure_0->args[0].value, attribute_NonInstantiableClass_class_Closure_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

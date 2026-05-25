@@ -5704,7 +5704,9 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 
 
 	const zend_function *fbc = NULL;
-	if (ce && ce->constructor && is_func_accessible(ce->constructor)) {
+	if (ce
+		&& ce->constructor
+		&& is_func_accessible(ce->constructor)) {
 		fbc = ce->constructor;
 	}
 
@@ -9527,6 +9529,33 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 	zend_type_release(type, 0);
 }
 
+static ZEND_FUNCTION(non_instantiable_constructor)
+{
+}
+
+static zend_arg_info zend_non_instantiable_constructor_arg_info[1] = {0};
+ZEND_API const zend_internal_function zend_non_instantiable_constructor = {
+	ZEND_INTERNAL_FUNCTION, /* type */
+	{0, 0, 0},        /* arg_flags */
+	ZEND_ACC_PRIVATE,     /* fn_flags */
+	NULL,            /* name */
+	NULL,                  /* scope */
+	NULL,               /* prototype */
+	0,                  /* num_args */
+	0,            /* required_num_args */
+	zend_non_instantiable_constructor_arg_info + 1, /* arg_info */
+	NULL,               /* attributes */
+	NULL,        /* run_time_cache */
+	NULL,            /* doc_comment */
+	0,                        /* T */
+	0,                   /* fn_flags2 */
+	NULL,                /* prop_info */
+	ZEND_FN(non_instantiable_constructor), /* handler */
+	NULL,                 /* module */
+	NULL,     /* frameless_function_infos */
+	{NULL,NULL,NULL,NULL}   /* reserved */
+};
+
 static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool toplevel) /* {{{ */
 {
 	const zend_ast_decl *decl = (const zend_ast_decl *) ast;
@@ -9648,11 +9677,11 @@ static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool top
 		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
 	}
 
-	/* Add a default "pass" constructor if none are defined */
+	/* Add zend_non_instantiable_constructor constructor if class cannot be manually instantiated */
 	if (ce->constructor == NULL && (ce->ce_flags & (ZEND_ACC_ENUM|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == 0) {
-		zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
-		if (!non_instantiable_class) {
-			ce->constructor = (zend_function *) &zend_pass_function;
+		const zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
+		if (non_instantiable_class) {
+			ce->constructor = (zend_function *) &zend_non_instantiable_constructor;
 		}
 	}
 

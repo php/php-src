@@ -1020,7 +1020,7 @@ static zend_class_entry *register_class_CurlHandle(void)
 	zend_string *attribute_NonInstantiableClass_class_CurlHandle_0_arg0_str = zend_string_init("Cannot directly construct CurlHandle, use curl_init() instead", strlen("Cannot directly construct CurlHandle, use curl_init() instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_CurlHandle_0->args[0].value, attribute_NonInstantiableClass_class_CurlHandle_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -1038,7 +1038,7 @@ static zend_class_entry *register_class_CurlMultiHandle(void)
 	zend_string *attribute_NonInstantiableClass_class_CurlMultiHandle_0_arg0_str = zend_string_init("Cannot directly construct CurlMultiHandle, use curl_multi_init() instead", strlen("Cannot directly construct CurlMultiHandle, use curl_multi_init() instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_CurlMultiHandle_0->args[0].value, attribute_NonInstantiableClass_class_CurlMultiHandle_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -1056,7 +1056,7 @@ static zend_class_entry *register_class_CurlShareHandle(void)
 	zend_string *attribute_NonInstantiableClass_class_CurlShareHandle_0_arg0_str = zend_string_init("Cannot directly construct CurlShareHandle, use curl_share_init() instead", strlen("Cannot directly construct CurlShareHandle, use curl_share_init() instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_CurlShareHandle_0->args[0].value, attribute_NonInstantiableClass_class_CurlShareHandle_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -1080,7 +1080,7 @@ static zend_class_entry *register_class_CurlSharePersistentHandle(void)
 	zend_string *attribute_NonInstantiableClass_class_CurlSharePersistentHandle_0_arg0_str = zend_string_init("Cannot directly construct CurlSharePersistentHandle, use curl_share_init_persistent() instead", strlen("Cannot directly construct CurlSharePersistentHandle, use curl_share_init_persistent() instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_CurlSharePersistentHandle_0->args[0].value, attribute_NonInstantiableClass_class_CurlSharePersistentHandle_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

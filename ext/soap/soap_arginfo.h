@@ -339,7 +339,7 @@ static zend_class_entry *register_class_Soap_Url(void)
 	zend_string *attribute_NonInstantiableClass_class_Soap_Url_0_arg0_str = zend_string_init("Cannot directly construct Soap\\Url", strlen("Cannot directly construct Soap\\Url"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_Soap_Url_0->args[0].value, attribute_NonInstantiableClass_class_Soap_Url_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -357,7 +357,7 @@ static zend_class_entry *register_class_Soap_Sdl(void)
 	zend_string *attribute_NonInstantiableClass_class_Soap_Sdl_0_arg0_str = zend_string_init("Cannot directly construct Soap\\Sdl", strlen("Cannot directly construct Soap\\Sdl"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_Soap_Sdl_0->args[0].value, attribute_NonInstantiableClass_class_Soap_Sdl_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

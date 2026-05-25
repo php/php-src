@@ -761,12 +761,11 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		if (ce == NULL) {
 			ce = zend_standard_class_def;
 		}
-		/* TODO: should we only allow public constructors? */
-		if (UNEXPECTED(ce->constructor == NULL || ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
-			zend_throw_error(NULL, "Class %s cannot be instantiated", ZSTR_VAL(ce->name));
+		if (UNEXPECTED(!zend_is_class_instantiable(ce))) {
+			zend_argument_value_error(ERROR_ARG_POS(2), "Class \"%s\" cannot be instantiated", ZSTR_VAL(ce->name));
 			RETURN_THROWS();
 		}
-		if (zend_is_pass_function(ce->constructor) && ctor_params && zend_hash_num_elements(ctor_params) > 0) {
+		if (!ce->constructor && ctor_params && zend_hash_num_elements(ctor_params) > 0) {
 			zend_argument_value_error(ERROR_ARG_POS(3),
 				"must be empty when the specified class (%s) does not have a constructor",
 				ZSTR_VAL(ce->name)
@@ -811,7 +810,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			zend_array_release(prop_table);
 		}
 
-		if (!zend_is_pass_function(ce->constructor)) {
+		if (ce->constructor) {
 			zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value),
 				/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
 		}

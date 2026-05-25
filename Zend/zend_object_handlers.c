@@ -2173,40 +2173,9 @@ ZEND_API ZEND_COLD bool zend_std_unset_static_property(const zend_class_entry *c
 }
 /* }}} */
 
-static ZEND_COLD zend_never_inline void zend_bad_constructor_call(const zend_function *constructor, const zend_class_entry *scope) /* {{{ */
-{
-	if (scope) {
-		zend_throw_error(NULL, "Call to %s %s::__construct() from scope %s",
-			zend_visibility_string(constructor->common.fn_flags),
-			ZSTR_VAL(constructor->common.scope->name),
-			ZSTR_VAL(scope->name)
-		);
-	} else {
-		zend_throw_error(NULL, "Call to %s %s::__construct() from global scope",
-			zend_visibility_string(constructor->common.fn_flags),
-			ZSTR_VAL(constructor->common.scope->name)
-		);
-	}
-}
-/* }}} */
-
 ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 {
-	zend_function *constructor = zobj->ce->constructor;
-
-	if (constructor) {
-		if (UNEXPECTED(!(constructor->common.fn_flags & ZEND_ACC_PUBLIC))) {
-			const zend_class_entry *scope = get_fake_or_executed_scope();
-			ZEND_ASSERT(!(constructor->common.fn_flags & ZEND_ACC_PUBLIC));
-			if (!zend_check_method_accessible(constructor, scope)) {
-				zend_bad_constructor_call(constructor, scope);
-				zend_object_store_ctor_failed(zobj);
-				constructor = NULL;
-			}
-		}
-	}
-
-	return constructor;
+	return NULL;
 }
 /* }}} */
 

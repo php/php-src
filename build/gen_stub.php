@@ -3565,7 +3565,7 @@ class ClassInfo {
         }
 
         if (!$isInstantiable) {
-            $code .= "\n\tclass_entry->constructor = NULL;\n";
+            $code .= "\n\tclass_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;\n";
         }
 
         $code .= "\n\treturn class_entry;\n";

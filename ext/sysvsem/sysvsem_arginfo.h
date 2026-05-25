@@ -45,7 +45,7 @@ static zend_class_entry *register_class_SysvSemaphore(void)
 	zend_string *attribute_NonInstantiableClass_class_SysvSemaphore_0_arg0_str = zend_string_init("Cannot directly construct SysvSemaphore, use sem_get() instead", strlen("Cannot directly construct SysvSemaphore, use sem_get() instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_SysvSemaphore_0->args[0].value, attribute_NonInstantiableClass_class_SysvSemaphore_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

@@ -215,7 +215,7 @@ static zend_class_entry *register_class_FFI(void)
 	zend_string *attribute_NonInstantiableClass_class_FFI_0_arg0_str = zend_string_init("Instantiation of FFI is not allowed", strlen("Instantiation of FFI is not allowed"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_FFI_0->args[0].value, attribute_NonInstantiableClass_class_FFI_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -233,7 +233,7 @@ static zend_class_entry *register_class_FFI_CData(void)
 	zend_string *attribute_NonInstantiableClass_class_FFI_CData_0_arg0_str = zend_string_init("Instantiation of FFI\\CData is not allowed", strlen("Instantiation of FFI\\CData is not allowed"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_FFI_CData_0->args[0].value, attribute_NonInstantiableClass_class_FFI_CData_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -481,7 +481,7 @@ static zend_class_entry *register_class_FFI_CType(void)
 	zend_string *attribute_NonInstantiableClass_class_FFI_CType_0_arg0_str = zend_string_init("Instantiation of FFI\\CType is not allowed", strlen("Instantiation of FFI\\CType is not allowed"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_FFI_CType_0->args[0].value, attribute_NonInstantiableClass_class_FFI_CType_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

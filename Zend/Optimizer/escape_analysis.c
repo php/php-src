@@ -167,7 +167,7 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 				 && !ce->create_object
 				 && ce->default_object_handlers->get_constructor == zend_std_get_constructor
 				 && ce->default_object_handlers->dtor_obj == zend_objects_destroy_object
-				 && (!ce->constructor || zend_is_pass_function(ce->constructor))
+				 && !ce->constructor
 				 && !ce->destructor
 				 && !ce->__get
 				 && !ce->__set
@@ -236,7 +236,7 @@ static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int va
 				 && !ce->create_object
 				 && ce->default_object_handlers->get_constructor == zend_std_get_constructor
 				 && ce->default_object_handlers->dtor_obj == zend_objects_destroy_object
-				 && (!ce->constructor || zend_is_pass_function(ce->constructor))
+				 && !ce->constructor
 				 && !ce->destructor
 				 && !ce->__get
 				 && !ce->__set

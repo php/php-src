@@ -946,7 +946,7 @@ static zend_class_entry *register_class_GdImage(void)
 	zend_string *attribute_NonInstantiableClass_class_GdImage_0_arg0_str = zend_string_init("Cannot directly construct GdImage, use an appropriate image* function instead", strlen("Cannot directly construct GdImage, use an appropriate image* function instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_GdImage_0->args[0].value, attribute_NonInstantiableClass_class_GdImage_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -964,7 +964,7 @@ static zend_class_entry *register_class_GdFont(void)
 	zend_string *attribute_NonInstantiableClass_class_GdFont_0_arg0_str = zend_string_init("Cannot directly construct GdFont, use imageloadfont() instead", strlen("Cannot directly construct GdFont, use imageloadfont() instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_GdFont_0->args[0].value, attribute_NonInstantiableClass_class_GdFont_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

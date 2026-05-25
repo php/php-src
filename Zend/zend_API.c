@@ -1793,16 +1793,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 static zend_always_inline zend_result _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties) /* {{{ */
 {
 	if (UNEXPECTED(class_type->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
-		if (class_type->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_throw_error(NULL, "Cannot instantiate interface %s", ZSTR_VAL(class_type->name));
-		} else if (class_type->ce_flags & ZEND_ACC_TRAIT) {
-			zend_throw_error(NULL, "Cannot instantiate trait %s", ZSTR_VAL(class_type->name));
-		} else if (class_type->ce_flags & ZEND_ACC_ENUM) {
-			zend_throw_error(NULL, "Cannot instantiate enum %s", ZSTR_VAL(class_type->name));
-		} else {
-			ZEND_ASSERT(class_type->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
-			zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(class_type->name));
-		}
+		zend_cannot_instantiate_class(class_type, NULL);
 		ZVAL_NULL(arg);
 		Z_OBJ_P(arg) = NULL;
 		return FAILURE;
@@ -1846,25 +1837,7 @@ ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *class_type) /* 
 
 ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
 {
-	zend_function *constructor = class_type->constructor;
-	if (UNEXPECTED(constructor == NULL)) {
-		const zend_attribute *non_instantiable_class = zend_get_attribute_str(class_type->attributes, ZEND_STRL("noninstantiableclass"));
-		ZEND_ASSERT(non_instantiable_class);
-		zend_string *msg = Z_STR(non_instantiable_class->args[0].value);
-		zend_throw_error(NULL, "%s", ZSTR_VAL(msg));
-		ZVAL_UNDEF(arg);
-		return FAILURE;
-	}
-
-	if (UNEXPECTED(!(constructor->common.fn_flags & ZEND_ACC_PUBLIC))) {
-		/* Use zend_bad_constructor_call() somehow? */
-		zend_throw_error(
-			NULL,
-			"Call to %s %s::%s() from global scope",
-			zend_visibility_string(class_type->constructor->common.fn_flags),
-			ZSTR_VAL(class_type->constructor->common.scope->name),
-			ZSTR_VAL(class_type->constructor->common.function_name)
-		);
+	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(class_type, zend_get_executed_scope()))) {
 		ZVAL_UNDEF(arg);
 		return FAILURE;
 	}
@@ -1876,8 +1849,9 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 	}
 	zend_object *obj = Z_OBJ_P(arg);
 
-	/* Fake constructor means we don't need to call the constructor actually */
-	if (zend_is_pass_function(constructor)) {
+	zend_function *constructor = class_type->constructor;
+	/* No constructor, so no need to call it */
+	if (constructor == NULL) {
 		/* Surprisingly, this is the only case where internal classes will allow to pass extra arguments
 		 * However, if there are named arguments (and it is not empty),
 		 * an Error must be thrown to be consistent with new ClassName() */
@@ -3522,11 +3496,6 @@ static zend_class_entry *do_register_internal_class(const zend_class_entry *orig
 
 	if (class_entry->info.internal.builtin_functions) {
 		zend_register_functions(class_entry, class_entry->info.internal.builtin_functions, &class_entry->function_table, EG(current_module)->type);
-	}
-	
-	/* Assign the pass function as a default constructor */
-	if (class_entry->constructor == NULL) {
-		class_entry->constructor = (zend_function *) &zend_pass_function;
 	}
 
 	lowercase_name = zend_string_tolower_ex(orig_class_entry->name, EG(current_module)->type == MODULE_PERSISTENT);

@@ -1088,12 +1088,12 @@ PHP_METHOD(PDOStatement, fetchObject)
 		ce = zend_standard_class_def;
 	}
 
-	if (UNEXPECTED(ce->constructor == NULL)) {
-		zend_throw_error(NULL, "Cannot instantiate an object of class %s", ZSTR_VAL(ce->name));
+	if (UNEXPECTED(!zend_is_class_instantiable_ignoring_ctor_visibility(ce))) {
+		zend_argument_value_error(1, "Class \"%s\" cannot be instantiated", ZSTR_VAL(ce->name));
 		RETURN_THROWS();
 	}
 
-	if (ctor_args && zend_hash_num_elements(ctor_args) && zend_is_pass_function(ce->constructor)) {
+	if (ctor_args && zend_hash_num_elements(ctor_args) && ce->constructor == NULL) {
 		zend_argument_value_error(2, "must be empty when class provided in argument #1 ($class) does not have a constructor");
 		RETURN_THROWS();
 	}
@@ -1196,13 +1196,13 @@ PHP_METHOD(PDOStatement, fetchAll)
 			} else {
 				fetch_class = zend_standard_class_def;
 			}
-			if (UNEXPECTED(fetch_class->constructor == NULL)) {
+			if (UNEXPECTED(!zend_is_class_instantiable_ignoring_ctor_visibility(fetch_class))) {
 				zend_throw_error(NULL, "Cannot instantiate an object of class %s", ZSTR_VAL(fetch_class->name));
 				RETURN_THROWS();
 			}
 
 			if (ctor_args && zend_hash_num_elements(ctor_args) > 0) {
-				if (zend_is_pass_function(fetch_class->constructor)) {
+				if (fetch_class->constructor == NULL) {
 					zend_argument_value_error(3, "must be empty when class provided in argument #2 ($class) does not have a constructor");
 					RETURN_THROWS();
 				}
@@ -1716,7 +1716,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 					zend_argument_type_error(arg1_arg_num, "must be a valid class");
 					return false;
 				}
-				if (UNEXPECTED(cep->constructor == NULL)) {
+				if (UNEXPECTED(!zend_is_class_instantiable_ignoring_ctor_visibility(cep))) {
 					zend_throw_error(NULL, "Cannot instantiate an object of class %s", ZSTR_VAL(cep->name));
 					return false;
 				}
@@ -1729,7 +1729,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 						return false;
 					}
 					if (Z_TYPE(args[1]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL(args[1]))) {
-						if (zend_is_pass_function(cep->constructor)) {
+						if (UNEXPECTED(cep->constructor == NULL)) {
 							zend_argument_value_error(3, "must be empty when class provided in argument #2 ($class) does not have a constructor");
 							return false;
 						}

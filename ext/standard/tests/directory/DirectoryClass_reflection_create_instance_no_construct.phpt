@@ -14,4 +14,4 @@ try {
 ?>
 --EXPECT--
 bool(false)
-ReflectionException: Class Directory cannot be instantiated manually
+ReflectionException: Cannot directly construct Directory, use dir() instead

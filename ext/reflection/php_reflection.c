@@ -4449,7 +4449,7 @@ ZEND_METHOD(ReflectionClass, getConstructor)
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (ce->constructor && !zend_is_pass_function(ce->constructor)) {
+	if (ce->constructor && !zend_is_non_instantiable_constructor(ce->constructor)) {
 		reflection_method_factory(ce, ce->constructor, NULL, return_value);
 	} else {
 		RETURN_NULL();
@@ -4515,10 +4515,6 @@ ZEND_METHOD(ReflectionClass, getMethod)
 /* {{{ _addmethod */
 static bool _addmethod(zend_function *mptr, zend_class_entry *ce, HashTable *ht, zend_long filter)
 {
-	/* Skip fake constructor */
-	if (zend_is_pass_function(mptr)) {
-		return false;
-	}
 	if ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) && mptr->common.scope != ce) {
 		return false;
 	}
@@ -4903,16 +4899,8 @@ ZEND_METHOD(ReflectionClass, isInstantiable)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_ENUM)) {
-		RETURN_FALSE;
-	}
 
-	/* Classes marked with the #[\NonInstantiableClass()] attribute are not instantiable */
-	if (ce->constructor == NULL) {
-		RETURN_FALSE;
-	}
-
-	RETURN_BOOL(ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC);
+	RETURN_BOOL(zend_is_class_instantiable(ce));
 }
 /* }}} */
 
@@ -4998,6 +4986,15 @@ ZEND_METHOD(ReflectionClass, getModifiers)
 }
 /* }}} */
 
+static ZEND_COLD void reflection_not_instantiable_class(const zend_class_entry* ce) {
+	if (ce->ce_flags & ZEND_ACC_UNINSTANTIABLE
+		|| (ce->constructor && zend_is_non_instantiable_constructor(ce->constructor))) {
+		zend_cannot_instantiate_class_ex(ce, NULL, reflection_exception_ptr);
+	} else {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
+	}
+}
+
 /* {{{ Returns whether the given object is an instance of this class */
 ZEND_METHOD(ReflectionClass, isInstance)
 {
@@ -5021,14 +5018,8 @@ ZEND_METHOD(ReflectionClass, newInstance)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	zend_function *constructor = zend_get_public_constructor(ce);
-	if (UNEXPECTED(constructor == NULL)) {
-		if (ce->constructor == NULL) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Class %s cannot be instantiated manually", ZSTR_VAL(ce->name));
-		} else {
-			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
-		}
+	if (UNEXPECTED(!zend_is_class_instantiable(ce))) {
+		reflection_not_instantiable_class(ce);
 		RETURN_THROWS();
 	}
 
@@ -5046,9 +5037,9 @@ ZEND_METHOD(ReflectionClass, newInstance)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Run the constructor if there is one */
-	if (!zend_is_pass_function(constructor)) {
+	if (ce->constructor) {
 		zend_call_known_function(
-			constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value), NULL,
+			ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value), NULL,
 			num_args, params, named_params);
 
 		if (EG(exception)) {
@@ -5068,9 +5059,8 @@ ZEND_METHOD(ReflectionClass, newInstanceWithoutConstructor)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (UNEXPECTED(ce->constructor == NULL)) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Class %s cannot be instantiated manually", ZSTR_VAL(ce->name));
+	if (UNEXPECTED(!zend_is_class_instantiable_ignoring_ctor_visibility(ce))) {
+		zend_cannot_instantiate_class_ex(ce, NULL, reflection_exception_ptr);
 		RETURN_THROWS();
 	}
 
@@ -5097,25 +5087,19 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 		RETURN_THROWS();
 	}
 
-	zend_function *constructor = zend_get_public_constructor(ce);
-	if (UNEXPECTED(constructor == NULL)) {
-		if (ce->constructor == NULL) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Class %s cannot be instantiated manually", ZSTR_VAL(ce->name));
-		} else {
-			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
-		}
+	if (UNEXPECTED(!zend_is_class_instantiable(ce))) {
+		reflection_not_instantiable_class(ce);
 		RETURN_THROWS();
 	}
 
 	if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Run the constructor if there is one */
-	if (!zend_is_pass_function(constructor)) {
+	if (ce->constructor) {
 		zend_call_known_function(
-			constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value), NULL, 0, NULL, args);
+			ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value), NULL, 0, NULL, args);
 
 		if (EG(exception)) {
 			zend_object_store_ctor_failed(Z_OBJ_P(return_value));

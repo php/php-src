@@ -148,24 +148,31 @@ static zend_always_inline bool zend_check_method_accessible(const zend_function 
 	return true;
 }
 
-static inline zend_function *zend_get_public_constructor(const zend_class_entry *ce) {
-	if (UNEXPECTED(ce->constructor == NULL)) {
-		return NULL;
-	}
-	if (EXPECTED(ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
-		return ce->constructor;
-	}
-	return NULL;
+static inline bool zend_is_class_instantiable(const zend_class_entry *ce) {
+	return
+		!(ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)
+		&& (!ce->constructor || ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC)
+	;
+}
+static inline bool zend_is_class_instantiable_ignoring_ctor_visibility(const zend_class_entry *ce) {
+	return
+		!(ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)
+		&& (!ce->constructor || !zend_is_non_instantiable_constructor(ce->constructor))
+	;
 }
 
-static inline zend_function *zend_get_accessible_constructor_in_scope(const zend_class_entry *ce, const zend_class_entry *scope) {
-	if (UNEXPECTED(ce->constructor == NULL)) {
-		return NULL;
-	}
-	if (EXPECTED(zend_check_method_accessible(ce->constructor, scope))) {
-		return ce->constructor;
-	}
-	return NULL;
+ZEND_API ZEND_COLD zend_never_inline void zend_cannot_instantiate_class_ex(
+	const zend_class_entry *ce,
+	const zend_class_entry *scope,
+	zend_class_entry *throwable_ce
+);
+static inline  void zend_cannot_instantiate_class(
+	const zend_class_entry *ce,
+	const zend_class_entry *scope
+) {
+	zend_cannot_instantiate_class_ex(ce, scope, NULL);
 }
+
+ZEND_API bool zend_check_class_is_instantiable_or_throw(const zend_class_entry *ce, const zend_class_entry *scope);
 
 #endif /* ZEND_OBJECTS_H */

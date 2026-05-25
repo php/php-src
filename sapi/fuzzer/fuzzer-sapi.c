@@ -131,7 +131,7 @@ static void fuzzer_disable_classes(void)
 	/* Lowercase as this is how the CE as stored */
 	zend_class_entry *InfiniteIterator_class = zend_hash_str_find_ptr(CG(class_table), "infiniteiterator", strlen("infiniteiterator"));
 
-	zend_class_entry *InfiniteIterator_class->constructor = NULL;
+	zend_class_entry *InfiniteIterator_class->constructor = (zend_function *) &zend_non_instantiable_constructor;
 }
 
 int fuzzer_init_php(const char *extra_ini)

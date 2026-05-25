@@ -38,5 +38,4 @@ $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_attr_statement_class_abstract");
 ?>
 --EXPECT--
-bool(true)
 Error: Cannot instantiate abstract class DerivedButAbstract

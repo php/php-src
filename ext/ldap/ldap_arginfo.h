@@ -781,7 +781,7 @@ static zend_class_entry *register_class_LDAP_Connection(void)
 	zend_string *attribute_NonInstantiableClass_class_LDAP_Connection_0_arg0_str = zend_string_init("Cannot directly construct LDAP\\Connection, use ldap_connect() instead", strlen("Cannot directly construct LDAP\\Connection, use ldap_connect() instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_LDAP_Connection_0->args[0].value, attribute_NonInstantiableClass_class_LDAP_Connection_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -799,7 +799,7 @@ static zend_class_entry *register_class_LDAP_Result(void)
 	zend_string *attribute_NonInstantiableClass_class_LDAP_Result_0_arg0_str = zend_string_init("Cannot directly construct LDAP\\Result, use the dedicated functions instead", strlen("Cannot directly construct LDAP\\Result, use the dedicated functions instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_LDAP_Result_0->args[0].value, attribute_NonInstantiableClass_class_LDAP_Result_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -817,7 +817,7 @@ static zend_class_entry *register_class_LDAP_ResultEntry(void)
 	zend_string *attribute_NonInstantiableClass_class_LDAP_ResultEntry_0_arg0_str = zend_string_init("Cannot directly construct LDAP\\ResultEntry, use the dedicated functions instead", strlen("Cannot directly construct LDAP\\ResultEntry, use the dedicated functions instead"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_LDAP_ResultEntry_0->args[0].value, attribute_NonInstantiableClass_class_LDAP_ResultEntry_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

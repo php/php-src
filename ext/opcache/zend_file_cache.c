@@ -929,7 +929,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		}
 	}
 
-	if (ce->constructor && !zend_is_pass_function(ce->constructor)) {
+	if (ce->constructor && !zend_is_non_instantiable_constructor(ce->constructor)) {
 		SERIALIZE_PTR(ce->constructor);
 	}
 	SERIALIZE_PTR(ce->destructor);
@@ -1809,8 +1809,8 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	UNSERIALIZE_PTR(ce->constructor);
 	if (ce->constructor == NULL && (ce->ce_flags & (ZEND_ACC_ENUM|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == 0) {
 		zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
-		if (!non_instantiable_class) {
-			ce->constructor = (zend_function *) &zend_pass_function;
+		if (non_instantiable_class) {
+			ce->constructor = (zend_function *) &zend_non_instantiable_constructor;;
 		}
 	}
 	UNSERIALIZE_PTR(ce->destructor);

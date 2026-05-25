@@ -13,4 +13,4 @@ try {
 
 ?>
 --EXPECT--
-ReflectionException: Class Foo cannot be instantiated manually
+ReflectionException: Cannot instantiate enum Foo

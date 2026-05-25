@@ -64,7 +64,7 @@ static zend_class_entry *register_class_Generator(zend_class_entry *class_entry_
 	zend_string *attribute_NonInstantiableClass_class_Generator_0_arg0_str = zend_string_init("The \"Generator\" class is reserved for internal use and cannot be manually instantiated", strlen("The \"Generator\" class is reserved for internal use and cannot be manually instantiated"), 1);
 	ZVAL_STR(&attribute_NonInstantiableClass_class_Generator_0->args[0].value, attribute_NonInstantiableClass_class_Generator_0_arg0_str);
 
-	class_entry->constructor = NULL;
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

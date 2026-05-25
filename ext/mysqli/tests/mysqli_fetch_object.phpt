@@ -116,14 +116,13 @@ require_once 'skipifconnectfailure.inc';
             $this->b = $b;
         }
     }
-    /*
-    TODO
-    I think we should bail out here. The following line will give a Fatal error: Call to private ... from invalid context
-    var_dump($obj = new mysqli_fetch_object_private_constructor(1, 2));
-    This does not fail.
-    */
-    mysqli_fetch_object($res, 'mysqli_fetch_object_private_constructor', array('a', 'b'));
-    mysqli_free_result($res);
+
+    try {
+        var_dump(mysqli_fetch_object($res, 'mysqli_fetch_object_private_constructor', ['a', 'b']));
+        mysqli_free_result($res);
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
+    }
 
     try {
         var_dump(mysqli_fetch_object($res, 'this_class_does_not_exist'));
@@ -146,5 +145,6 @@ NULL
 NULL
 mysqli_result object is already closed
 TypeError: mysqli_fetch_object(): Argument #3 ($constructor_args) must be of type array, string given
+ValueError: mysqli_fetch_object(): Argument #2 ($class) Class "mysqli_fetch_object_private_constructor" cannot be instantiated
 TypeError: mysqli_fetch_object(): Argument #2 ($class) must be a valid class name, this_class_does_not_exist given
 done!

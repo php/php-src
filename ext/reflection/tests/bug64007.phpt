@@ -6,18 +6,17 @@ $reflection = new ReflectionClass('Generator');
 try {
     $generator = $reflection->newInstanceWithoutConstructor();
     var_dump($generator);
-} catch (Exception $e) {
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
-$generator = $reflection->newInstance();
-var_dump($generator);
+try {
+    $generator = $reflection->newInstance();
+    var_dump($generator);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-string(47) "Class Generator cannot be instantiated manually"
-
-Fatal error: Uncaught ReflectionException: Class Generator cannot be instantiated manually in %s:%d
-Stack trace:
-#0 %s(%d): ReflectionClass->newInstance()
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+ReflectionException: The "Generator" class is reserved for internal use and cannot be manually instantiated
+ReflectionException: The "Generator" class is reserved for internal use and cannot be manually instantiated

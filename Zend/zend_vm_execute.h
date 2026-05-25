@@ -7628,7 +7628,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -10357,7 +10357,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -11149,7 +11149,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -11395,24 +11395,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_CONS
 	}
 
 	result = EX_VAR(opline->result.var);
+	const zend_class_entry *scope = EX(func)->op_array.scope;
+	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
+		ZVAL_UNDEF(result);
+		HANDLE_EXCEPTION();
+	}
+
 	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
-	if (UNEXPECTED(constructor == NULL)) {
-		/* No constructor implies that an internal get_constructor was overwritten and threw an exception. */
-		if (UNEXPECTED(!EG(exception))) {
-			zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
-			ZEND_ASSERT(non_instantiable_class);
-			zend_string *msg = Z_STR(non_instantiable_class->args[0].value);
-			zend_throw_error(NULL, "%s", ZSTR_VAL(msg));
-		}
-		HANDLE_EXCEPTION();
-	}
-	/* Pass function is special */
-	else if (zend_is_pass_function(constructor)) {
+	constructor = ce->constructor;
+	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */
 		if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
@@ -11425,7 +11420,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_CONS
 
 		/* Perform a dummy function call */
 		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION, constructor,
+			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
 			opline->extended_value, NULL);
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
@@ -12982,7 +12977,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -25614,7 +25609,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -28309,7 +28304,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -29514,7 +29509,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -30082,24 +30077,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_VAR_
 	}
 
 	result = EX_VAR(opline->result.var);
+	const zend_class_entry *scope = EX(func)->op_array.scope;
+	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
+		ZVAL_UNDEF(result);
+		HANDLE_EXCEPTION();
+	}
+
 	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
-	if (UNEXPECTED(constructor == NULL)) {
-		/* No constructor implies that an internal get_constructor was overwritten and threw an exception. */
-		if (UNEXPECTED(!EG(exception))) {
-			zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
-			ZEND_ASSERT(non_instantiable_class);
-			zend_string *msg = Z_STR(non_instantiable_class->args[0].value);
-			zend_throw_error(NULL, "%s", ZSTR_VAL(msg));
-		}
-		HANDLE_EXCEPTION();
-	}
-	/* Pass function is special */
-	else if (zend_is_pass_function(constructor)) {
+	constructor = ce->constructor;
+	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */
 		if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
@@ -30112,7 +30102,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_VAR_
 
 		/* Perform a dummy function call */
 		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION, constructor,
+			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
 			opline->extended_value, NULL);
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
@@ -32196,7 +32186,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -34408,7 +34398,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -36490,7 +36480,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -36912,7 +36902,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -37138,24 +37128,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_UNUS
 	}
 
 	result = EX_VAR(opline->result.var);
+	const zend_class_entry *scope = EX(func)->op_array.scope;
+	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
+		ZVAL_UNDEF(result);
+		HANDLE_EXCEPTION();
+	}
+
 	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
-	if (UNEXPECTED(constructor == NULL)) {
-		/* No constructor implies that an internal get_constructor was overwritten and threw an exception. */
-		if (UNEXPECTED(!EG(exception))) {
-			zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
-			ZEND_ASSERT(non_instantiable_class);
-			zend_string *msg = Z_STR(non_instantiable_class->args[0].value);
-			zend_throw_error(NULL, "%s", ZSTR_VAL(msg));
-		}
-		HANDLE_EXCEPTION();
-	}
-	/* Pass function is special */
-	else if (zend_is_pass_function(constructor)) {
+	constructor = ce->constructor;
+	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */
 		if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
@@ -37168,7 +37153,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_UNUS
 
 		/* Perform a dummy function call */
 		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION, constructor,
+			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
 			opline->extended_value, NULL);
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
@@ -39086,7 +39071,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_STATIC_M
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -60335,7 +60320,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -63064,7 +63049,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -63754,7 +63739,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -64000,24 +63985,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_CONST_UNU
 	}
 
 	result = EX_VAR(opline->result.var);
+	const zend_class_entry *scope = EX(func)->op_array.scope;
+	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
+		ZVAL_UNDEF(result);
+		HANDLE_EXCEPTION();
+	}
+
 	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
-	if (UNEXPECTED(constructor == NULL)) {
-		/* No constructor implies that an internal get_constructor was overwritten and threw an exception. */
-		if (UNEXPECTED(!EG(exception))) {
-			zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
-			ZEND_ASSERT(non_instantiable_class);
-			zend_string *msg = Z_STR(non_instantiable_class->args[0].value);
-			zend_throw_error(NULL, "%s", ZSTR_VAL(msg));
-		}
-		HANDLE_EXCEPTION();
-	}
-	/* Pass function is special */
-	else if (zend_is_pass_function(constructor)) {
+	constructor = ce->constructor;
+	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */
 		if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
@@ -64030,7 +64010,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_CONST_UNU
 
 		/* Perform a dummy function call */
 		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION, constructor,
+			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
 			opline->extended_value, NULL);
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
@@ -65587,7 +65567,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -78119,7 +78099,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -80814,7 +80794,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -82019,7 +81999,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -82587,24 +82567,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_VAR_UNUSE
 	}
 
 	result = EX_VAR(opline->result.var);
+	const zend_class_entry *scope = EX(func)->op_array.scope;
+	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
+		ZVAL_UNDEF(result);
+		HANDLE_EXCEPTION();
+	}
+
 	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
-	if (UNEXPECTED(constructor == NULL)) {
-		/* No constructor implies that an internal get_constructor was overwritten and threw an exception. */
-		if (UNEXPECTED(!EG(exception))) {
-			zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
-			ZEND_ASSERT(non_instantiable_class);
-			zend_string *msg = Z_STR(non_instantiable_class->args[0].value);
-			zend_throw_error(NULL, "%s", ZSTR_VAL(msg));
-		}
-		HANDLE_EXCEPTION();
-	}
-	/* Pass function is special */
-	else if (zend_is_pass_function(constructor)) {
+	constructor = ce->constructor;
+	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */
 		if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
@@ -82617,7 +82592,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_VAR_UNUSE
 
 		/* Perform a dummy function call */
 		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION, constructor,
+			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
 			opline->extended_value, NULL);
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
@@ -84701,7 +84676,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -86913,7 +86888,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -88995,7 +88970,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -89417,7 +89392,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
@@ -89643,24 +89618,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_UNUSED_UN
 	}
 
 	result = EX_VAR(opline->result.var);
+	const zend_class_entry *scope = EX(func)->op_array.scope;
+	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
+		ZVAL_UNDEF(result);
+		HANDLE_EXCEPTION();
+	}
+
 	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
-	if (UNEXPECTED(constructor == NULL)) {
-		/* No constructor implies that an internal get_constructor was overwritten and threw an exception. */
-		if (UNEXPECTED(!EG(exception))) {
-			zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
-			ZEND_ASSERT(non_instantiable_class);
-			zend_string *msg = Z_STR(non_instantiable_class->args[0].value);
-			zend_throw_error(NULL, "%s", ZSTR_VAL(msg));
-		}
-		HANDLE_EXCEPTION();
-	}
-	/* Pass function is special */
-	else if (zend_is_pass_function(constructor)) {
+	constructor = ce->constructor;
+	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */
 		if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
@@ -89673,7 +89643,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_UNUSED_UN
 
 		/* Perform a dummy function call */
 		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION, constructor,
+			ZEND_CALL_FUNCTION, (zend_function *) &zend_pass_function,
 			opline->extended_value, NULL);
 	} else {
 		if (EXPECTED(constructor->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&constructor->op_array))) {
@@ -91591,7 +91561,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_STATIC_METHOD
 
 		}
 	} else {
-		if (UNEXPECTED(ce->constructor == NULL || zend_is_pass_function(ce->constructor))) {
+		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_throw_error(NULL, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}

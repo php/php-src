@@ -42,7 +42,7 @@ object(stdClass)#%d (0) {
 }
 object(DateTime)#%d (0) {
 }
-Class Generator cannot be instantiated manually
+The "Generator" class is reserved for internal use and cannot be manually instantiated
 object(Bar)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(0) {

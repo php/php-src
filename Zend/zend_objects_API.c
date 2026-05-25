@@ -19,9 +19,9 @@
 
 #include "zend.h"
 #include "zend_globals.h"
-#include "zend_variables.h"
 #include "zend_API.h"
 #include "zend_objects_API.h"
+#include "zend_attributes.h"
 #include "zend_fibers.h"
 
 ZEND_API void ZEND_FASTCALL zend_objects_store_init(zend_objects_store *objects, uint32_t init_size)
@@ -211,3 +211,70 @@ ZEND_API ZEND_COLD zend_property_info *zend_get_property_info_for_slot_slow(zend
 	} ZEND_HASH_FOREACH_END();
 	return NULL;
 }
+
+ZEND_API ZEND_COLD zend_never_inline void zend_cannot_instantiate_class_ex(
+	const zend_class_entry *ce,
+	const zend_class_entry *scope,
+	zend_class_entry *throwable_ce
+) {
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		zend_throw_error(throwable_ce, "Cannot instantiate interface %s", ZSTR_VAL(ce->name));
+		return;
+	} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		zend_throw_error(throwable_ce, "Cannot instantiate trait %s", ZSTR_VAL(ce->name));
+		return;
+	} else if (ce->ce_flags & ZEND_ACC_ENUM) {
+		zend_throw_error(throwable_ce, "Cannot instantiate enum %s", ZSTR_VAL(ce->name));
+		return;
+	} else if (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+		zend_throw_error(throwable_ce, "Cannot instantiate abstract class %s", ZSTR_VAL(ce->name));
+		return;
+	}
+	ZEND_ASSERT(ce->constructor);
+	const zend_function *constructor = ce->constructor;
+	if (zend_is_non_instantiable_constructor(constructor)) {
+		const zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
+		ZEND_ASSERT(non_instantiable_class);
+		zend_string *msg = Z_STR(non_instantiable_class->args[0].value);
+		/* Use zend_throw_exception_zstr() when exposed */
+		zend_throw_error(throwable_ce, "%s", ZSTR_VAL(msg));
+	} else if (scope) {
+		zend_throw_error(throwable_ce, "Call to %s %s::__construct() from scope %s",
+			zend_visibility_string(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name),
+			ZSTR_VAL(scope->name)
+		);
+	} else {
+		zend_throw_error(
+			throwable_ce,
+			"Call to %s %s::__construct() from global scope",
+			zend_visibility_string(constructor->common.fn_flags),
+			ZSTR_VAL(constructor->common.scope->name)
+		);
+	}
+}
+
+ZEND_API bool zend_check_class_is_instantiable_or_throw(const zend_class_entry *ce, const zend_class_entry *scope) {
+	const zend_function *constructor = ce->constructor;
+
+	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
+		zend_cannot_instantiate_class(ce, scope);
+		return false;
+	}
+	if (constructor) {
+		/* We cannot rely on the zend_check_method_accessible() call below as the fake non_instantiable_constructor,
+		 * doesn't have a scope, and therefore in the global scope fn->common.scope != scope
+		 * would be false, thus returning that the method is accessible, which is not what we need. */
+		if (UNEXPECTED(zend_is_non_instantiable_constructor(constructor))) {
+			zend_cannot_instantiate_class(ce, NULL);
+			return false;
+		}
+		if (UNEXPECTED(!(constructor->common.fn_flags & ZEND_ACC_PUBLIC))) {
+			if (!zend_check_method_accessible(constructor, scope)) {
+				zend_cannot_instantiate_class(ce, scope);
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
