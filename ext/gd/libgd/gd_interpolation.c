@@ -57,6 +57,7 @@ TODO:
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
 
 #include "gd.h"
 #include "gdhelpers.h"
@@ -2245,7 +2246,10 @@ int gdTransformAffineGetImage(gdImagePtr *dst,
 		src_area = &area_full;
 	}
 
-	gdTransformAffineBoundingBox(src_area, affine, &bbox);
+	if (gdTransformAffineBoundingBox(src_area, affine, &bbox) != GD_TRUE) {
+		*dst = NULL;
+		return GD_FALSE;
+	}
 
 	*dst = gdImageCreateTrueColor(bbox.width, bbox.height);
 	if (*dst == NULL) {
@@ -2421,6 +2425,8 @@ int gdTransformAffineCopy(gdImagePtr dst,
 int gdTransformAffineBoundingBox(gdRectPtr src, const double affine[6], gdRectPtr bbox)
 {
 	gdPointF extent[4], min, max, point;
+	double width, height;
+	int bbox_x, bbox_y, bbox_width, bbox_height;
 	int i;
 
 	extent[0].x=0.0;
@@ -2451,10 +2457,29 @@ int gdTransformAffineBoundingBox(gdRectPtr src, const double affine[6], gdRectPt
 		if (max.y < extent[i].y)
 			max.y=extent[i].y;
 	}
-	bbox->x = (int) min.x;
-	bbox->y = (int) min.y;
-	bbox->width  = (int) floor(max.x - min.x) - 1;
-	bbox->height = (int) floor(max.y - min.y);
+	width = floor(max.x - min.x);
+	height = floor(max.y - min.y);
+	if (!isfinite(min.x) || !isfinite(min.y) || !isfinite(width) || !isfinite(height)
+		|| min.x <= INT_MIN || min.x > INT_MAX
+		|| min.y <= INT_MIN || min.y > INT_MAX
+		|| width < 1.0 || width > INT_MAX
+		|| height < 0.0 || height > INT_MAX) {
+		return GD_FALSE;
+	}
+	bbox_x = (int) min.x;
+	bbox_y = (int) min.y;
+	bbox_width = (int) width - 1;
+	bbox_height = (int) height;
+	if ((bbox_x < 0 && bbox_width > INT_MAX + bbox_x)
+		|| (bbox_x > 0 && bbox_width > INT_MAX - bbox_x)
+		|| (bbox_y < 0 && bbox_height > INT_MAX + bbox_y)
+		|| (bbox_y > 0 && bbox_height > INT_MAX - bbox_y)) {
+		return GD_FALSE;
+	}
+	bbox->x = bbox_x;
+	bbox->y = bbox_y;
+	bbox->width  = bbox_width;
+	bbox->height = bbox_height;
 	return GD_TRUE;
 }
 
