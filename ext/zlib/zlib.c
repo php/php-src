@@ -865,6 +865,17 @@ ZEND_ATTRIBUTE_NONNULL static bool zlib_get_long_option(HashTable *options, cons
 
 	/* The |H ZPP specifier may leave HashTable entries wrapped in IS_INDIRECT. */
 	ZVAL_DEINDIRECT(option_buffer);
+	if (UNEXPECTED(Z_TYPE_P(option_buffer) == IS_UNDEF)) {
+		zend_argument_type_error(
+			2,
+			"the value for option \"%.*s\" must be of type int, %s given",
+			(int) option_name_len,
+			option_name,
+			zend_zval_value_name(option_buffer)
+		);
+		return false;
+	}
+	
 	*value = zval_try_get_long(option_buffer, &failed);
 	if (UNEXPECTED(failed)) {
 		zend_argument_type_error(
