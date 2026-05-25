@@ -448,6 +448,7 @@ try_again:
 				ZEND_ASSERT(Z_TYPE(dst) == IS_LONG);
 				return Z_LVAL(dst);
 			}
+		case IS_UNDEF:
 		case IS_RESOURCE:
 		case IS_ARRAY:
 			*failed = true;
