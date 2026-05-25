@@ -2173,12 +2173,6 @@ ZEND_API ZEND_COLD bool zend_std_unset_static_property(const zend_class_entry *c
 }
 /* }}} */
 
-ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
-{
-	return NULL;
-}
-/* }}} */
-
 ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
 	zend_object *zobj1, *zobj2;
@@ -2637,7 +2631,6 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_unset_dimension,				/* unset_dimension */
 	zend_std_get_properties,				/* get_properties */
 	zend_std_get_method,					/* get_method */
-	zend_std_get_constructor,				/* get_constructor */
 	zend_std_get_class_name,				/* get_class_name */
 	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */

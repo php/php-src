@@ -42,7 +42,6 @@ static const zend_object_handlers iterator_object_handlers = {
 	NULL, /* unset dim */
 	NULL, /* props get */
 	NULL, /* method get */
-	NULL, /* get ctor */
 	NULL, /* get class name */
 	NULL, /* cast */
 	NULL, /* count */
