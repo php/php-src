@@ -1089,9 +1089,23 @@ PHP_FUNCTION(key)
 }
 /* }}} */
 
-static int php_data_compare(const void *f, const void *s) /* {{{ */
+static zval *php_array_data_minmax(HashTable *array, bool max) /* {{{ */
 {
-	return zend_compare((zval*)f, (zval*)s);
+	zval *entry, *result = NULL;
+
+	ZEND_HASH_FOREACH_VAL(array, entry) {
+		if (!result) {
+			result = entry;
+			continue;
+		}
+
+		int cmp = zend_compare(result, entry);
+		if (max ? cmp < 0 : cmp > 0) {
+			result = entry;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return result;
 }
 /* }}} */
 
@@ -1114,7 +1128,7 @@ PHP_FUNCTION(min)
 			zend_argument_type_error(1, "must be of type array, %s given", zend_zval_value_name(&args[0]));
 			RETURN_THROWS();
 		} else {
-			zval *result = zend_hash_minmax(Z_ARRVAL(args[0]), php_data_compare, 0);
+			zval *result = php_array_data_minmax(Z_ARRVAL(args[0]), false);
 			if (result) {
 				RETURN_COPY_DEREF(result);
 			} else {
@@ -1242,7 +1256,7 @@ PHP_FUNCTION(max)
 			zend_argument_type_error(1, "must be of type array, %s given", zend_zval_value_name(&args[0]));
 			RETURN_THROWS();
 		} else {
-			zval *result = zend_hash_minmax(Z_ARRVAL(args[0]), php_data_compare, 1);
+			zval *result = php_array_data_minmax(Z_ARRVAL(args[0]), true);
 			if (result) {
 				RETURN_COPY_DEREF(result);
 			} else {
