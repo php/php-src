@@ -537,6 +537,9 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(const zval *arg, bool *dest
 			return 0;
 		}
 		*dest = zend_is_true(arg);
+		if (UNEXPECTED(EG(exception))) {
+			return 0;
+		}
 	} else {
 		return 0;
 	}
@@ -762,6 +765,9 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **des
 			return 0;
 		}
 		convert_to_string(arg);
+		if (UNEXPECTED(EG(exception))) {
+			return 0;
+		}
 		*dest = Z_STR_P(arg);
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_object *zobj = Z_OBJ_P(arg);
