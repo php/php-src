@@ -1089,9 +1089,77 @@ PHP_FUNCTION(key)
 }
 /* }}} */
 
-static int php_data_compare(const void *f, const void *s) /* {{{ */
+static zval *php_array_data_minmax(const HashTable *array, bool max) /* {{{ */
 {
-	return zend_compare((zval*)f, (zval*)s);
+	uint32_t idx;
+	zval *res;
+
+	if (array->nNumOfElements == 0) {
+		return NULL;
+	}
+
+	if (HT_IS_PACKED(array)) {
+		zval *zv;
+
+		idx = 0;
+		while (1) {
+			if (idx == array->nNumUsed) {
+				return NULL;
+			}
+			if (Z_TYPE(array->arPacked[idx]) != IS_UNDEF) {
+				break;
+			}
+			idx++;
+		}
+		res = array->arPacked + idx;
+		for (; idx < array->nNumUsed; idx++) {
+			zv = array->arPacked + idx;
+			if (UNEXPECTED(Z_TYPE_P(zv) == IS_UNDEF)) {
+				continue;
+			}
+
+			if (max) {
+				if (zend_compare(res, zv) < 0) {
+					res = zv;
+				}
+			} else {
+				if (zend_compare(res, zv) > 0) {
+					res = zv;
+				}
+			}
+		}
+	} else {
+		Bucket *p;
+
+		idx = 0;
+		while (1) {
+			if (idx == array->nNumUsed) {
+				return NULL;
+			}
+			if (Z_TYPE(array->arData[idx].val) != IS_UNDEF) {
+				break;
+			}
+			idx++;
+		}
+		res = &array->arData[idx].val;
+		for (; idx < array->nNumUsed; idx++) {
+			p = array->arData + idx;
+			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) {
+				continue;
+			}
+
+			if (max) {
+				if (zend_compare(res, &p->val) < 0) {
+					res = &p->val;
+				}
+			} else {
+				if (zend_compare(res, &p->val) > 0) {
+					res = &p->val;
+				}
+			}
+		}
+	}
+	return res;
 }
 /* }}} */
 
@@ -1101,7 +1169,7 @@ static zend_always_inline bool php_array_minmax(HashTable *array, zval *return_v
 	zend_long result_lval = 0;
 	double result_dval = 0.0;
 	/* IS_LONG or IS_DOUBLE while every value scanned so far has that exact type,
-	 * IS_UNDEF once a value forces the generic php_data_compare() fallback. */
+	 * IS_UNDEF once a value forces the generic zend_compare() fallback. */
 	uint8_t fast_type = IS_UNDEF;
 
 	ZEND_HASH_FOREACH_VAL(array, entry) {
@@ -1148,7 +1216,7 @@ static zend_always_inline bool php_array_minmax(HashTable *array, zval *return_v
 
 		fast_type = IS_UNDEF;
 
-		int cmp = php_data_compare(result, value);
+		int cmp = zend_compare(result, value);
 		if (max ? cmp < 0 : cmp > 0) {
 			result = value;
 		}
@@ -1193,7 +1261,7 @@ PHP_FUNCTION(min)
 				return;
 			}
 
-			zval *result = zend_hash_minmax(array, php_data_compare, 0);
+			zval *result = php_array_data_minmax(array, false);
 			if (result) {
 				RETURN_COPY_DEREF(result);
 			} else {
@@ -1326,7 +1394,7 @@ PHP_FUNCTION(max)
 				return;
 			}
 
-			zval *result = zend_hash_minmax(array, php_data_compare, 1);
+			zval *result = php_array_data_minmax(array, true);
 			if (result) {
 				RETURN_COPY_DEREF(result);
 			} else {
