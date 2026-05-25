@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Fixed bug GH-19739 (imageellipse/imagefilledellipse overflow).
     (David Carlier)
+  . Fixed bug GH-19730 (imageaffine overflow).
+    (David Carlier)
 
 - Intl:
   . Fix incorrect argument positions for uninitialized calendar arguments in
