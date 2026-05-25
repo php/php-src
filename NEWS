@@ -19,6 +19,8 @@ PHP                                                                        NEWS
   . Enabled the TAILCALL VM on Windows when compiling with Clang >= 19 x86_64.
     (henderkes)
   . Deprecate specifying a nullable return type for __debugInfo(). (timwolla)
+  . Fixed bug GH-22142 (Assertion failure in zendi_try_get_long() on IS_UNDEF).
+    (David Carlier)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
