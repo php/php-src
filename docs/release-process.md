@@ -301,12 +301,27 @@ slightly different steps. We'll call attention where the steps differ.
    > Only release tags should have version numbers in these files that do not
    > end in `-dev` (e.g., `8.1.7`, `8.1.7RC1`, `8.2.0alpha1`, etc.).
 
-    Do not forget to merge up PHP-X.Y all the way to master. When resolving
-    the conflicts, ignore the changes from PHP-X.Y in higher branches. It
-    means using something like `git checkout --ours .` when on PHP.X.Y+1 or
-    master after the merge resulting in the conflicts.
+    Do not forget to merge up PHP-X.Y all the way to master.
 
-    Be sure to set up a merge driver for the NEWS file as described in
+    ```shell
+    git switch PHP-X.Y+1 # starting from your release branch
+    git merge PHP-X.Y
+    # repeat             # Merge up all the way
+    git switch master
+    git merge PHP-X.Y+n  # latest release branch
+    ```
+
+    When resolving the conflicts, ignore the changes from PHP-X.Y in higher
+    branches when on PHP.X.Y+1 or master after the merge resulting in the
+    conflicts.
+
+    ```shell
+    git checkout --ours main/php_version.h Zend/zend.h configure.ac
+    git add main/php_version.h Zend/zend.h configure.ac
+    git merge --continue
+    ```
+    
+    Be sure to set up a merge driver for the `NEWS` file as described in
     the [Git FAQ page on the PHP wiki][gitfaq-mandatory].
 
 11. Push the changes to the `php-src`.
