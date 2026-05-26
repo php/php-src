@@ -132,6 +132,11 @@ const ARRAY_FILTER_USE_BOTH = UNKNOWN;
  * @cvalue ARRAY_FILTER_USE_KEY
  */
 const ARRAY_FILTER_USE_KEY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ARRAY_FILTER_PACK_RESULT
+ */
+const ARRAY_FILTER_PACK_RESULT = UNKNOWN;
 
 /* assert.c */
 
