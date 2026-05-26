@@ -833,7 +833,7 @@ literal:
 				end = string;
 				while (*end != '\0') {
 					sch = *end;
-					if (op == 's' && isspace((unsigned char) sch)) {
+					if (op == 's' && isspace( (unsigned char)sch ) ) {
 						break;
 					}
 					end++;
