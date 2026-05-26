@@ -42,6 +42,8 @@ PHP 8.6 UPGRADE NOTES
     returning false.
   . MessageFormatter::parse() and parseMessage() now return PHP_INT_MIN as
     int, rather than float, on 64-bit platforms when parsing integer values.
+  . The $type parameter of IntlBreakIterator::getPartsIterator() has been
+    changed from string to int to match the underlying implementation.
 
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
