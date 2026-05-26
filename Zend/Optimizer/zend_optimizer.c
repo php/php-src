@@ -780,7 +780,7 @@ static bool zend_optimizer_ignore_class(zval *ce_zv, const zend_string *filename
 		if (CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE) {
 			return true;
 		}
-		const Bucket *ce_bucket = (const Bucket*)((uintptr_t)ce_zv - offsetof(Bucket, val));
+		const Bucket *ce_bucket = ZEND_CONTAINER_OF(ce_zv, Bucket, val);
 		size_t offset = ce_bucket - EG(class_table)->arData;
 		if (offset < EG(persistent_classes_count)) {
 			return false;
@@ -801,7 +801,7 @@ static bool zend_optimizer_ignore_function(zval *fbc_zv, const zend_string *file
 			if (CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE) {
 				return true;
 			}
-			const Bucket *fbc_bucket = (const Bucket*)((uintptr_t)fbc_zv - offsetof(Bucket, val));
+			const Bucket *fbc_bucket = ZEND_CONTAINER_OF(fbc_zv, Bucket, val);
 			size_t offset = fbc_bucket - EG(function_table)->arData;
 			if (offset < EG(persistent_functions_count)) {
 				return false;
@@ -943,7 +943,7 @@ zend_function *zend_optimizer_get_called_func(
 				if (ce) {
 					zend_string *func_name = Z_STR_P(CRT_CONSTANT(opline->op2) + 1);
 					zend_function *fbc = zend_hash_find_ptr(&ce->function_table, func_name);
-					if (fbc) {
+					if (fbc && !(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 						bool is_public = (fbc->common.fn_flags & ZEND_ACC_PUBLIC) != 0;
 						bool same_scope = fbc->common.scope == op_array->scope;
 						if (is_public || same_scope) {

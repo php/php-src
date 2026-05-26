@@ -206,11 +206,11 @@ typedef struct {
 } soap_client_object;
 
 static inline soap_client_object *soap_client_object_fetch(zend_object *obj) {
-	return (soap_client_object *) ((char *) obj - offsetof(soap_client_object, std));
+	return ZEND_CONTAINER_OF(obj, soap_client_object, std);
 }
 
 static inline soap_server_object *soap_server_object_fetch(zend_object *obj) {
-	return (soap_server_object *) ((char *) obj - offsetof(soap_server_object, std));
+	return ZEND_CONTAINER_OF(obj, soap_server_object, std);
 }
 
 static zend_object *soap_client_object_create(zend_class_entry *ce)
@@ -288,7 +288,7 @@ static zend_result soap_url_cast_object(zend_object *obj, zval *result, int type
 
 static inline soap_sdl_object *soap_sdl_object_fetch(zend_object *obj)
 {
-	return (soap_sdl_object *) ((char *) obj - offsetof(soap_sdl_object, std));
+	return ZEND_CONTAINER_OF(obj, soap_sdl_object, std);
 }
 
 #define Z_SOAP_SDL_P(zv) soap_sdl_object_fetch(Z_OBJ_P(zv))
@@ -2449,9 +2449,19 @@ static void do_soap_call(zend_execute_data *execute_data,
 				request = NULL;
 
 				if (ret && Z_TYPE(response) == IS_STRING) {
+					bool parse_bailout = false;
+
 					encode_reset_ns();
-					ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), fn, NULL, return_value, output_headers);
+					zend_try {
+						ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), fn, NULL, return_value, output_headers);
+					} zend_catch {
+						parse_bailout = true;
+					} zend_end_try();
 					encode_finish();
+					if (parse_bailout) {
+						zval_ptr_dtor(&response);
+						zend_bailout();
+					}
 				}
 
 				zval_ptr_dtor(&response);
@@ -2493,9 +2503,19 @@ static void do_soap_call(zend_execute_data *execute_data,
 				request = NULL;
 
 				if (ret && Z_TYPE(response) == IS_STRING) {
+					bool parse_bailout = false;
+
 					encode_reset_ns();
-					ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), NULL, NULL, return_value, output_headers);
+					zend_try {
+						ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), NULL, NULL, return_value, output_headers);
+					} zend_catch {
+						parse_bailout = true;
+					} zend_end_try();
 					encode_finish();
+					if (parse_bailout) {
+						zval_ptr_dtor(&response);
+						zend_bailout();
+					}
 				}
 
 				zval_ptr_dtor(&response);

@@ -734,6 +734,13 @@ static PHP_INI_MH(OnUpdateSessionStr)
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 
+	if (new_value && zend_str_has_nul_byte(new_value)) {
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			php_error_docref(NULL, E_WARNING, "\"%s\" must not contain null bytes", ZSTR_VAL(entry->name));
+		}
+		return FAILURE;
+	}
+
 	return OnUpdateStr(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
@@ -921,11 +928,11 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.cookie_domain",        "",          PHP_INI_ALL,    OnUpdateSessionStr,           cookie_domain,      php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_secure",      "0",         PHP_INI_ALL,    OnUpdateSessionBool,          cookie_secure,      php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_partitioned", "0",         PHP_INI_ALL,    OnUpdateSessionBool,          cookie_partitioned, php_ps_globals, ps_globals)
-	STD_PHP_INI_BOOLEAN("session.cookie_httponly",    "0",         PHP_INI_ALL,    OnUpdateSessionBool,          cookie_httponly,    php_ps_globals, ps_globals)
-	STD_PHP_INI_ENTRY("session.cookie_samesite",      "",          PHP_INI_ALL,    OnUpdateSessionSameSite,      cookie_samesite,    php_ps_globals, ps_globals)
+	STD_PHP_INI_BOOLEAN("session.cookie_httponly",    "1",         PHP_INI_ALL,    OnUpdateSessionBool,          cookie_httponly,    php_ps_globals, ps_globals)
+	STD_PHP_INI_ENTRY("session.cookie_samesite",      "Lax",       PHP_INI_ALL,    OnUpdateSessionSameSite,      cookie_samesite,    php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_cookies",        "1",         PHP_INI_ALL,    OnUpdateSessionBool,          use_cookies,        php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_only_cookies",   "1",         PHP_INI_ALL,    OnUpdateUseOnlyCookies,       use_only_cookies,   php_ps_globals, ps_globals)
-	STD_PHP_INI_BOOLEAN("session.use_strict_mode",    "0",         PHP_INI_ALL,    OnUpdateSessionBool,          use_strict_mode,    php_ps_globals, ps_globals)
+	STD_PHP_INI_BOOLEAN("session.use_strict_mode",    "1",         PHP_INI_ALL,    OnUpdateSessionBool,          use_strict_mode,    php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.referer_check",        "",          PHP_INI_ALL,    OnUpdateRefererCheck,         extern_referer_chk, php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_limiter",        "nocache",   PHP_INI_ALL,    OnUpdateSessionStr,           cache_limiter,      php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_expire",         "180",       PHP_INI_ALL,    OnUpdateSessionLong,          cache_expire,       php_ps_globals, ps_globals)

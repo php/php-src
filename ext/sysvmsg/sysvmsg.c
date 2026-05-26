@@ -66,7 +66,7 @@ zend_class_entry *sysvmsg_queue_ce;
 static zend_object_handlers sysvmsg_queue_object_handlers;
 
 static inline sysvmsg_queue_t *sysvmsg_queue_from_obj(zend_object *obj) {
-	return (sysvmsg_queue_t *)((char *)(obj) - offsetof(sysvmsg_queue_t, std));
+	return ZEND_CONTAINER_OF(obj, sysvmsg_queue_t, std);
 }
 
 #define Z_SYSVMSG_QUEUE_P(zv) sysvmsg_queue_from_obj(Z_OBJ_P(zv))

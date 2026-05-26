@@ -87,7 +87,7 @@ static void odbc_insert_new_result(odbc_connection *connection, zval *result)
 
 static inline odbc_link *odbc_link_from_obj(zend_object *obj)
 {
-	return (odbc_link *)((char *)(obj) - offsetof(odbc_link, std));
+	return ZEND_CONTAINER_OF(obj, odbc_link, std);
 }
 
 static int _close_pconn_with_res(zval *zv, void *p)
@@ -204,7 +204,7 @@ static void odbc_connection_free_obj(zend_object *obj)
 
 static inline odbc_result *odbc_result_from_obj(zend_object *obj)
 {
-	return (odbc_result *)((char *)(obj) - offsetof(odbc_result, std));
+	return ZEND_CONTAINER_OF(obj, odbc_result, std);
 }
 
 static zend_object *odbc_result_create_object(zend_class_entry *class_type)

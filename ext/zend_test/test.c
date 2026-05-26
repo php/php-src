@@ -1114,7 +1114,7 @@ static zend_object *zend_test_class_new(zend_class_entry *class_type)
 
 static void zend_test_class_free_obj(zend_object *object)
 {
-	zend_test_object *intern = (zend_test_object*)((char*)object - offsetof(zend_test_object, std));
+	zend_test_object *intern = ZEND_CONTAINER_OF(object, zend_test_object, std);
 
 	if (intern->tmp_method) {
 		zend_internal_function *func = intern->tmp_method;
@@ -1129,7 +1129,7 @@ static void zend_test_class_free_obj(zend_object *object)
 
 static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key)
 {
-	zend_test_object *intern = (zend_test_object*)((char*)(*object) - offsetof(zend_test_object, std));
+	zend_test_object *intern = ZEND_CONTAINER_OF(*object, zend_test_object, std);
 
 	if (zend_string_equals_literal_ci(name, "test")) {
 		zend_internal_function *fptr;

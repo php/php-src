@@ -1955,6 +1955,12 @@ PHP_FUNCTION(ini_get_all)
 					add_assoc_null(&option, "local_value");
 				}
 
+				if (ini_entry->def->value) {
+					add_assoc_stringl(&option, "builtin_default_value", ini_entry->def->value, ini_entry->def->value_length);
+				} else {
+					add_assoc_null(&option, "builtin_default_value");
+				}
+
 				add_assoc_long(&option, "access", ini_entry->modifiable);
 
 				zend_symtable_update(Z_ARRVAL_P(return_value), ini_entry->name, &option);

@@ -3175,7 +3175,7 @@ function toolset_get_compiler_name(short)
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
 
 		if (version >= 1950) {
-			// skip
+			name = short ? "VS18" : "Visual C++ 2026";
 		} else if (version >= 1930) {
 			name = short ? "VS17" : "Visual C++ 2022";
 		} else if (version >= 1920) {

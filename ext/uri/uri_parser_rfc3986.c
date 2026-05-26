@@ -15,6 +15,7 @@
 #include "php.h"
 #include "uri_parser_rfc3986.h"
 #include "php_uri_common.h"
+#include "Zend/zend_enum.h"
 #include "Zend/zend_smart_str.h"
 #include "Zend/zend_exceptions.h"
 
@@ -108,6 +109,25 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_reading(php_uri_parser_rfc398
 ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_writing(php_uri_parser_rfc3986_uris *uriparser_uris)
 {
 	return &uriparser_uris->uri;
+}
+
+ZEND_ATTRIBUTE_NONNULL void php_uri_parser_rfc3986_uri_type_read(php_uri_parser_rfc3986_uris *uri, zval *retval)
+{
+	const UriUriA *uriparser_uri = get_uri_for_reading(uri, PHP_URI_COMPONENT_READ_MODE_RAW);
+
+	const char *type;
+
+	if (has_text_range(&uriparser_uri->scheme)) {
+		type = "Uri";
+	} else if (has_text_range(&uriparser_uri->hostText)) {
+		type = "NetworkPathReference";
+	} else if (uriparser_uri->absolutePath) {
+		type = "AbsolutePathReference";
+	} else {
+		type = "RelativePathReference";
+	}
+
+	ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_rfc3986_uri_type, type));
 }
 
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
@@ -249,6 +269,30 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(void 
 	}
 
 	return SUCCESS;
+}
+
+ZEND_ATTRIBUTE_NONNULL void php_uri_parser_rfc3986_host_type_read(php_uri_parser_rfc3986_uris *uri, zval *retval)
+{
+	const UriUriA *uriparser_uri = get_uri_for_reading(uri, PHP_URI_COMPONENT_READ_MODE_RAW);
+
+	if (!has_text_range(&uriparser_uri->hostText)) {
+		ZVAL_NULL(retval);
+		return;
+	}
+
+	const char *type;
+
+	if (uriparser_uri->hostData.ip4 != NULL) {
+		type = "IPv4";
+	} else if (uriparser_uri->hostData.ip6 != NULL) {
+		type = "IPv6";
+	} else if (has_text_range(&uriparser_uri->hostData.ipFuture)) {
+		type = "IPvFuture";
+	} else {
+		type = "RegisteredName";
+	}
+
+	ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_rfc3986_uri_host_type, type));
 }
 
 static zend_result php_uri_parser_rfc3986_host_write(void *uri, zval *value, zval *errors)

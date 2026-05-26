@@ -40,6 +40,8 @@ PHP 8.6 UPGRADE NOTES
   . IntlBreakIterator::getLocale() now raises a ValueError when the type is
     neither Locale::ACTUAL_LOCALE nor Locale::VALID_LOCALE instead of
     returning false.
+  . MessageFormatter::parse() and parseMessage() now return PHP_INT_MIN as
+    int, rather than float, on 64-bit platforms when parsing integer values.
   . The $type parameter of IntlBreakIterator::getPartsIterator() has been
     changed from string to int to match the underlying implementation.
 
@@ -57,6 +59,11 @@ PHP 8.6 UPGRADE NOTES
 - Phar:
   . Phar::mungServer() now raises a ValueError when an invalid
     argument value is passed instead of being silently ignored.
+  . Phar::addEmptyDir() now rejects `/.phar` paths in addition to `.phar`
+    paths, and raises the same BadMethodCallException for attempts to create
+    the reserved magic ".phar" directory through that form.
+  . Phar::addEmptyDir() now treats non-magic names that merely share the
+    `.phar` prefix as ordinary directories.
 
 - PGSQL:
   . pg_fetch_object() now reports the ValueError for a non-empty
@@ -72,6 +79,11 @@ PHP 8.6 UPGRADE NOTES
     argument value is passed.
 
 - Session:
+  . Setting session.cookie_path, session.cookie_domain, or session.cache_limiter
+    to a value containing null bytes now emits a warning and leaves the setting
+    unchanged. Previously, null bytes were silently accepted: for cookie_path and
+    cookie_domain this caused the SAPI to drop the Set-Cookie header; for
+    cache_limiter the value was silently truncated at the null byte.
   . A ValueError is not thrown if $name is a string containing null bytes in
     session_module_name().
   . session_encode() now returns an empty string instead of false for empty
@@ -86,6 +98,24 @@ PHP 8.6 UPGRADE NOTES
     comparison. Custom session handlers that rely on write() being called
     with empty data (e.g. to destroy the session) should implement the same
     logic in their updateTimestamp() method.
+  . The defaults of three session INI settings have changed to provide secure
+    behavior out of the box:
+      - session.use_strict_mode is now 1 (was 0). Strict mode rejects
+        uninitialized session IDs, mitigating session fixation. Custom session
+        handlers that previously relied on accepting externally supplied IDs
+        without a corresponding storage entry must either implement
+        validateId() / create_sid() or explicitly set this to 0.
+      - session.cookie_httponly is now 1 (was 0). Session cookies are no
+        longer accessible to JavaScript via document.cookie. Applications
+        that read the session cookie from JavaScript must explicitly set
+        this to 0.
+      - session.cookie_samesite is now "Lax" (was unset). Session cookies
+        are no longer sent on cross-site requests other than top-level
+        navigations using safe HTTP methods. Applications that depend on
+        session cookies being sent on cross-site POST submissions must
+        explicitly set this to "None" (and also set session.cookie_secure
+        to 1).
+    RFC: https://wiki.php.net/rfc/session_security_defaults
 
 - SPL:
   . SplObjectStorage::getHash() implementations may no longer mutate any
@@ -168,6 +198,8 @@ PHP 8.6 UPGRADE NOTES
     requests, implementing custom server-side session storage, and controlling
     session cache behavior.
     RFC: https://wiki.php.net/rfc/tls_session_resumption
+  . Added TLS external PSK support for streams with new strem context options:
+    psk_client_cb and psk_server_cb. This allows setting and receiving PSK.
 
 - Phar:
   . Overriding the getMTime() and getPathname() methods of SplFileInfo now
@@ -183,6 +215,12 @@ PHP 8.6 UPGRADE NOTES
     options.
   . Allowed casting casting filtered streams as file descriptor for select.
 
+- URI:
+  . Added Uri\Rfc3986\Uri:getUriType() and Uri\WhatWg\Url:isSpecialScheme().
+    RFC: https://wiki.php.net/rfc/uri_followup#uri_type_detection
+  . Added Uri\Rfc3986\Uri:getHostType() and Uri\WhatWg\Url:getHostType().
+    RFC: https://wiki.php.net/rfc/uri_followup#host_type_detection
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -190,6 +228,10 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 4. Deprecated Functionality
 ========================================
+
+- Core:
+  . Specifying a return type of array|null / ?array for __debugInfo() is now
+    deprecated. Specify array instead.
 
 - GMP
   . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
@@ -238,6 +280,12 @@ PHP 8.6 UPGRADE NOTES
     when not null, and on failure, gives the error code (one of the EAI_*
     constants).
 
+- Standard:
+  . ini_get_all() now includes a "builtin_default_value" element for each
+    directive when $details is true. It holds the built-in default value of
+    the directive (or null if it has none), independent of values set in
+    php.ini, on the command line, or at runtime.
+
 ========================================
 6. New Functions
 ========================================
@@ -273,6 +321,7 @@ PHP 8.6 UPGRADE NOTES
   . Openssl\OpensslException
   . Openssl\Session
     RFC: https://wiki.php.net/rfc/tls_session_resumption
+  . Openssl\Psk
 
 - Standard:
   . enum SortDirection
@@ -378,6 +427,8 @@ PHP 8.6 UPGRADE NOTES
 - Standard:
   . Improved performance of array_fill_keys().
   . Improved performance of array_map() with multiple arrays passed.
+  . Improved performance of array_sum() and array_product() for
+    integer-only arrays.
   . Improved performance of array_unshift().
   . Improved performance of array_walk().
   . Improved performance of intval('+0b...', 2) and intval('0b...', 2).

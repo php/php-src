@@ -16,6 +16,28 @@
 
 #include "php_soap.h"
 
+static void master_to_zval_with_doc_cleanup(zval *ret, encodePtr encode, xmlNodePtr data, xmlDocPtr doc)
+{
+	bool bailout = false;
+
+	ZVAL_UNDEF(ret);
+
+	/* SoapClient can turn decode errors into a bailout before parse_packet_soap() frees the response doc. */
+	zend_try {
+		master_to_zval(ret, encode, data);
+	} zend_catch {
+		bailout = true;
+	} zend_end_try();
+
+	if (bailout) {
+		if (!Z_ISUNDEF_P(ret)) {
+			zval_ptr_dtor(ret);
+		}
+		xmlFreeDoc(doc);
+		zend_bailout();
+	}
+}
+
 /* SOAP client calls this function to parse response from SOAP server */
 bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctionPtr fn, char *fn_name, zval *return_value, zval *soap_headers)
 {
@@ -190,7 +212,7 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 			tmp = get_node(fault->children, "faultstring");
 			if (tmp != NULL && tmp->children != NULL) {
 				zval zv;
-				master_to_zval(&zv, get_conversion(IS_STRING), tmp);
+				master_to_zval_with_doc_cleanup(&zv, get_conversion(IS_STRING), tmp, response);
 				convert_to_string(&zv)
 				faultstring = Z_STR(zv);
 			}
@@ -198,14 +220,14 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 			tmp = get_node(fault->children, "faultactor");
 			if (tmp != NULL && tmp->children != NULL) {
 				zval zv;
-				master_to_zval(&zv, get_conversion(IS_STRING), tmp);
+				master_to_zval_with_doc_cleanup(&zv, get_conversion(IS_STRING), tmp, response);
 				convert_to_string(&zv)
 				faultactor = Z_STR(zv);
 			}
 
 			tmp = get_node(fault->children, "detail");
 			if (tmp != NULL) {
-				master_to_zval(&details, NULL, tmp);
+				master_to_zval_with_doc_cleanup(&details, NULL, tmp, response);
 			}
 		} else {
 			tmp = get_node(fault->children, "Code");
@@ -221,7 +243,7 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 				tmp = get_node(tmp->children,"Text");
 				if (tmp != NULL && tmp->children != NULL) {
 					zval zv;
-					master_to_zval(&zv, get_conversion(IS_STRING), tmp);
+					master_to_zval_with_doc_cleanup(&zv, get_conversion(IS_STRING), tmp, response);
 					convert_to_string(&zv)
 					faultstring = Z_STR(zv);
 
@@ -236,7 +258,7 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 
 			tmp = get_node(fault->children,"Detail");
 			if (tmp != NULL) {
-				master_to_zval(&details, NULL, tmp);
+				master_to_zval_with_doc_cleanup(&details, NULL, tmp, response);
 			}
 		}
 		add_soap_fault(this_ptr, faultcode, faultstring ? ZSTR_VAL(faultstring) : NULL, faultactor ? ZSTR_VAL(faultactor) : NULL, &details, lang);
@@ -330,9 +352,9 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 					} else {
 						/* Decoding value of parameter */
 						if (param != NULL) {
-							master_to_zval(&tmp, param->encode, val);
+							master_to_zval_with_doc_cleanup(&tmp, param->encode, val, response);
 						} else {
-							master_to_zval(&tmp, NULL, val);
+							master_to_zval_with_doc_cleanup(&tmp, NULL, val, response);
 						}
 					}
 					add_assoc_zval(return_value, param->paramName, &tmp);
@@ -353,7 +375,7 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 						zval tmp;
 						zval *arr;
 
-						master_to_zval(&tmp, NULL, val);
+						master_to_zval_with_doc_cleanup(&tmp, NULL, val, response);
 						if (val->name) {
 							if ((arr = zend_hash_str_find(Z_ARRVAL_P(return_value), (char*)val->name, strlen((char*)val->name))) != NULL) {
 								add_next_index_zval(arr, &tmp);
@@ -418,7 +440,7 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 					}
 					smart_str_free(&key);
 				}
-				master_to_zval(&val, enc, trav);
+				master_to_zval_with_doc_cleanup(&val, enc, trav, response);
 				add_assoc_zval(soap_headers, (char*)trav->name, &val);
 			}
 			trav = trav->next;

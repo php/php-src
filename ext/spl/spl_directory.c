@@ -50,7 +50,7 @@ PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
 /* Object helper */
 static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_filesystem_object*)((char*)(obj) - offsetof(spl_filesystem_object, std));
+	return ZEND_CONTAINER_OF(obj, spl_filesystem_object, std);
 }
 /* }}} */
 

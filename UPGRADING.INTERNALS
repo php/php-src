@@ -107,6 +107,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_fci_consumed_arg(), which allows moving a selected callback argument
     instead of copying it in zend_call_function(). Currently only a single
     consumed argument is supported.
+  . Added ZEND_CONTAINER_OF().
+  . The OPENBASEDIR_CHECKPATH() compatibility macro has been removed, instead
+    use php_check_open_basedir() directly.
 
 ========================
 2. Build system changes

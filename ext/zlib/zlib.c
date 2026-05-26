@@ -48,7 +48,7 @@ zend_class_entry *inflate_context_ce;
 static zend_object_handlers inflate_context_object_handlers;
 
 static inline php_zlib_context *inflate_context_from_obj(zend_object *obj) {
-	return (php_zlib_context *)((char *)(obj) - offsetof(php_zlib_context, std));
+	return ZEND_CONTAINER_OF(obj, php_zlib_context, std);
 }
 
 #define Z_INFLATE_CONTEXT_P(zv) inflate_context_from_obj(Z_OBJ_P(zv))
@@ -86,7 +86,7 @@ zend_class_entry *deflate_context_ce;
 static zend_object_handlers deflate_context_object_handlers;
 
 static inline php_zlib_context *deflate_context_from_obj(zend_object *obj) {
-	return (php_zlib_context *)((char *)(obj) - offsetof(php_zlib_context, std));
+	return ZEND_CONTAINER_OF(obj, php_zlib_context, std);
 }
 
 #define Z_DEFLATE_CONTEXT_P(zv) deflate_context_from_obj(Z_OBJ_P(zv))
@@ -929,6 +929,7 @@ PHP_FUNCTION(inflate_init)
 	}
 
 	if (inflateInit2(&ctx->Z, encoding) != Z_OK) {
+		efree(dict);
 		zval_ptr_dtor(return_value);
 		php_error_docref(NULL, E_WARNING, "Failed allocating zlib.inflate context");
 		RETURN_FALSE;
@@ -1174,6 +1175,7 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (deflateInit2(&ctx->Z, level, Z_DEFLATED, encoding, memory, strategy) != Z_OK) {
+		efree(dict);
 		zval_ptr_dtor(return_value);
 		php_error_docref(NULL, E_WARNING, "Failed allocating zlib.deflate context");
 		RETURN_FALSE;

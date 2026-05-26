@@ -55,7 +55,7 @@ typedef struct _spl_fixedarray_it {
 
 static spl_fixedarray_object *spl_fixed_array_from_obj(zend_object *obj)
 {
-	return (spl_fixedarray_object*)((char*)(obj) - offsetof(spl_fixedarray_object, std));
+	return ZEND_CONTAINER_OF(obj, spl_fixedarray_object, std);
 }
 
 #define Z_SPLFIXEDARRAY_P(zv)  spl_fixed_array_from_obj(Z_OBJ_P((zv)))

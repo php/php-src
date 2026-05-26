@@ -86,7 +86,7 @@ struct _spl_dllist_it {
 };
 
 static inline spl_dllist_object *spl_dllist_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_dllist_object*)((char*)(obj) - offsetof(spl_dllist_object, std));
+	return ZEND_CONTAINER_OF(obj, spl_dllist_object, std);
 }
 /* }}} */
 
@@ -798,6 +798,7 @@ static void spl_dllist_it_helper_move_forward(spl_ptr_llist_element **traverse_p
 
 		if (flags & SPL_DLLIST_IT_LIFO) {
 			*traverse_pointer_ptr = old->prev;
+			SPL_LLIST_CHECK_ADDREF(*traverse_pointer_ptr);
 			(*traverse_position_ptr)--;
 
 			if (flags & SPL_DLLIST_IT_DELETE) {
@@ -808,6 +809,7 @@ static void spl_dllist_it_helper_move_forward(spl_ptr_llist_element **traverse_p
 			}
 		} else {
 			*traverse_pointer_ptr = old->next;
+			SPL_LLIST_CHECK_ADDREF(*traverse_pointer_ptr);
 
 			if (flags & SPL_DLLIST_IT_DELETE) {
 				zval prev;
@@ -820,7 +822,6 @@ static void spl_dllist_it_helper_move_forward(spl_ptr_llist_element **traverse_p
 		}
 
 		SPL_LLIST_DELREF(old);
-		SPL_LLIST_CHECK_ADDREF(*traverse_pointer_ptr);
 	}
 }
 /* }}} */

@@ -18,6 +18,9 @@ PHP                                                                        NEWS
     initialization). (Arnaud)
   . Enabled the TAILCALL VM on Windows when compiling with Clang >= 19 x86_64.
     (henderkes)
+  . Deprecate specifying a nullable return type for __debugInfo(). (timwolla)
+  . Fixed bug GH-22142 (Assertion failure in zendi_try_get_long() on IS_UNDEF).
+    (David Carlier)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
@@ -68,6 +71,8 @@ PHP                                                                        NEWS
     argument handling now raises TypeError instead of Error. (Weilin Du)
   . IntlBreakIterator::getLocale() now raises ValueError for invalid locale
     types. (Weilin Du)
+  . Fixed MessageFormatter::parse() and parseMessage() returning PHP_INT_MIN
+    as float rather than int on 64-bit platforms. (Weilin Du)
 
 - JSON:
   . Enriched JSON last error / exception message with error location.
@@ -104,6 +109,8 @@ PHP                                                                        NEWS
     openssl_x509_parse() output). (StephenWall)
   . Added TLS session resumption support for streams with new context options
     and Openssl\Session class. (Jakub Zelenka)
+  . Added TLS external PSK support for streams with new context options and
+    Openssl\Psk class. (Jakub Zelenka)
 
 - PCNTL:
   . pcntl_exec() now throws a ValueError if the $args array is not a list
@@ -128,6 +135,10 @@ PHP                                                                        NEWS
   . Support reference values in Phar::mungServer(). (ndossche)
   . Invalid values now throw in Phar::mungServer() instead of being silently
     ignored. (ndossche)
+  . Fixed a bypass of the magic ".phar" directory protection in
+    Phar::addEmptyDir() for paths starting with "/.phar". (Weilin Du)
+  . Phar::addEmptyDir() now allows non-magic directory names that merely
+    share the ".phar" prefix. (Weilin Du)
   . Support overridden methods in SplFileInfo for getMTime() and getPathname()
     when building a phar. (ndossche)
   . Mark Phar::buildFromIterator() base directory argument as a path.
@@ -149,6 +160,16 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug 71162 (updateTimestamp never called when session data is empty).
     (Girgias)
+  . Null bytes in session.cookie_path, session.cookie_domain, and
+    session.cache_limiter are now rejected with a warning. (jorgsowa)
+  . session.cookie_samesite now rejects invalid values with a warning; only
+    "Strict", "Lax", "None", or "" are accepted. (jorgsowa)
+  . session.cookie_lifetime now rejects non-integer and out-of-range values
+    with a warning. (jorgsowa)
+  . Session file GC now recursively cleans nested subdirectories when
+    session.save_path uses the dirdepth prefix. (jorgsowa)
+  . Changed defaults of session.use_strict_mode (now 1), session.cookie_httponly
+    (now 1) and session.cookie_samesite (now "Lax"). (jorgsowa)
 
 - Soap:
   . Soap::__setCookie() when cookie name is a digit is now not stored and
@@ -174,6 +195,8 @@ PHP                                                                        NEWS
     with re-entrant getHash()). (Pratik Bhujel)
   . Fix bugs GH-8561, GH-8562, GH-8563, and GH-8564 (Fixing various
     SplFileObject iterator desync bugs). (iliaal)
+  . Fix bug GH-22062 (SplDoublyLinkedList iterator UAF
+    via destructor releasing next node). (David Carlier)
 
 - Sqlite3:
   . Fix NUL byte truncation in sqlite3 TEXT column handling. (ndossche)
@@ -205,6 +228,8 @@ PHP                                                                        NEWS
     null bytes. (Weilin Du)
   . proc_open() now raises a ValueError when the $cwd argument contains
     null bytes. (Weilin Du)
+  . ini_get_all() now includes the built-in default value in the details.
+    (sebastian)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
@@ -219,6 +244,12 @@ PHP                                                                        NEWS
   . Improved stream_socket_server() bind failure error reporting. (ilutov)
   . Fixed bug #49874 (ftell() and fseek() inconsistency when using stream
     filters). (Jakub Zelenka)
+
+- URI:
+  . Added Uri\Rfc3986\Uri:getUriType() and Uri\WhatWg\Url:isSpecialScheme().
+    (kocsismate)
+  . Added Uri\Rfc3986\Uri:getHostType() and Uri\WhatWg\Url:getHostType().
+    (kocsismate)
 
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.
