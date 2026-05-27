@@ -2268,7 +2268,9 @@ PHP_METHOD(SplFileObject, fgetcsv)
 			zend_argument_value_error(1, "must be a single character");
 			RETURN_THROWS();
 		}
-		delimiter = delim[0];
+		if(delim[0] != ',') {
+			delimiter = delim[0];
+		}
 	}
 	if (enclo) {
 		if (e_len != 1) {
