@@ -25,6 +25,11 @@ PHP                                                                        NEWS
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
 
+- Curl:
+  . Added CURLOPT_SOCKOPTFUNCTION, CURLOPT_OPENSOCKETFUNCTION and
+    CURLOPT_CLOSESOCKETFUNCTION options, bridging libcurl's socket callbacks to
+    ext/sockets Socket objects (requires the sockets extension).
+
 - Date:
   . Update timelib to 2022.16. (Derick)
 

@@ -562,6 +562,18 @@ static void curl_multi_free_obj(zend_object *object)
 		if (!(OBJ_FLAGS(Z_OBJ_P(pz_ch)) & IS_OBJ_FREE_CALLED)) {
 			ch = Z_CURL_P(pz_ch);
 			_php_curl_verify_handlers(ch, /* reporterror */ false);
+#ifdef HAVE_SOCKETS
+			/* curl_multi_cleanup() closes the multi's pooled connections and
+			 * fires the userland CURLOPT_CLOSESOCKETFUNCTION on each attached
+			 * easy handle. The easy handles are still reachable here (held by
+			 * mh->easyh) so their close FCC has not been torn down yet by
+			 * curl_free_obj(). Tear it down now so the trampoline falls through
+			 * to its native-close fallback — calling into PHP from inside a
+			 * destructor would surface exceptions outside any try/catch. */
+			if (ZEND_FCC_INITIALIZED(ch->handlers.closesocket)) {
+				zend_fcc_dtor(&ch->handlers.closesocket);
+			}
+#endif
 		}
 	}
 

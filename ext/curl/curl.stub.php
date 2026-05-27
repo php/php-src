@@ -2327,6 +2327,63 @@ const CURL_FNMATCHFUNC_MATCH = UNKNOWN;
  */
 const CURL_FNMATCHFUNC_NOMATCH = UNKNOWN;
 
+#ifdef HAVE_SOCKETS
+/**
+ * Used with CURLOPT_SOCKOPTFUNCTION, which receives a Socket wrapping the
+ * descriptor libcurl just created and must return one of the CURL_SOCKOPT_*
+ * constants below.
+ * @var int
+ * @cvalue CURLOPT_SOCKOPTFUNCTION
+ */
+const CURLOPT_SOCKOPTFUNCTION = UNKNOWN;
+/**
+ * Used with CURLOPT_OPENSOCKETFUNCTION, which receives the resolved address and
+ * must return a Socket to use for the connection, or false to abort it.
+ * @var int
+ * @cvalue CURLOPT_OPENSOCKETFUNCTION
+ */
+const CURLOPT_OPENSOCKETFUNCTION = UNKNOWN;
+/**
+ * Used with CURLOPT_CLOSESOCKETFUNCTION, which is notified when libcurl is done
+ * with a socket created by the open-socket callback.
+ * @var int
+ * @cvalue CURLOPT_CLOSESOCKETFUNCTION
+ */
+const CURLOPT_CLOSESOCKETFUNCTION = UNKNOWN;
+/**
+ * Return value for the CURLOPT_SOCKOPTFUNCTION callback: proceed normally.
+ * @var int
+ * @cvalue CURL_SOCKOPT_OK
+ */
+const CURL_SOCKOPT_OK = UNKNOWN;
+/**
+ * Return value for the CURLOPT_SOCKOPTFUNCTION callback: abort the connection.
+ * @var int
+ * @cvalue CURL_SOCKOPT_ERROR
+ */
+const CURL_SOCKOPT_ERROR = UNKNOWN;
+/**
+ * Return value for the CURLOPT_SOCKOPTFUNCTION callback: the socket is already
+ * connected, so libcurl should skip its own connect step.
+ * @var int
+ * @cvalue CURL_SOCKOPT_ALREADY_CONNECTED
+ */
+const CURL_SOCKOPT_ALREADY_CONNECTED = UNKNOWN;
+/**
+ * Purpose passed to the socket callbacks: a socket for a regular IP connection.
+ * @var int
+ * @cvalue CURLSOCKTYPE_IPCXN
+ */
+const CURLSOCKTYPE_IPCXN = UNKNOWN;
+/**
+ * Purpose passed to the socket callbacks: a socket created from accept() (e.g.
+ * active FTP).
+ * @var int
+ * @cvalue CURLSOCKTYPE_ACCEPT
+ */
+const CURLSOCKTYPE_ACCEPT = UNKNOWN;
+#endif
+
 /* Available since 7.21.2 */
 /**
  * @var int
