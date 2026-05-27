@@ -75,6 +75,13 @@ if test "$PHP_CURL" != "no"; then
   PHP_NEW_EXTENSION([curl],
     [interface.c multi.c share.c curl_file.c],
     [$ext_shared])
+  dnl The CURLOPT_SOCKOPT/OPENSOCKET/CLOSESOCKETFUNCTION callbacks bridge to
+  dnl ext/sockets Socket objects (guarded by HAVE_SOCKETS). The dependency is
+  dnl optional both at build and at runtime: without sockets the rest of curl
+  dnl keeps working, and the three socket-callback options throw a clear error
+  dnl when invoked. The hint below only enforces MINIT order when sockets is
+  dnl built in alongside curl.
+  PHP_ADD_EXTENSION_DEP(curl, sockets, true)
   PHP_INSTALL_HEADERS([ext/curl], [php_curl.h])
   PHP_SUBST([CURL_SHARED_LIBADD])
 fi

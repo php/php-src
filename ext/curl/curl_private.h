@@ -85,6 +85,11 @@ typedef struct {
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	zend_fcall_info_cache sshhostkey;
 #endif
+#ifdef HAVE_SOCKETS
+	zend_fcall_info_cache sockopt;
+	zend_fcall_info_cache opensocket;
+	zend_fcall_info_cache closesocket;
+#endif
 } php_curl_handlers;
 
 struct _php_curl_error  {
