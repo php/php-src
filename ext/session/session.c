@@ -394,7 +394,14 @@ static zend_long php_session_gc(bool immediate) /* {{{ */
 	/* GC must be done before reading session data. */
 	if ((PS(mod_data) || PS(mod_user_implemented))) {
 		if (!collect && PS(gc_probability) > 0) {
-			collect = php_random_range(PS(random), 0, PS(gc_divisor) - 1) < PS(gc_probability);
+			/* Draw fresh entropy per request instead of using the per-process
+			 * PS(random) state. The latter is seeded once in GINIT, which runs
+			 * before SAPIs such as PHP-FPM fork their workers, so every worker
+			 * would inherit and replay the same GC-decision sequence. */
+			uint32_t rand_val;
+			if (php_random_bytes_silent(&rand_val, sizeof(rand_val)) == SUCCESS) {
+				collect = (rand_val % (uint32_t) PS(gc_divisor)) < (uint32_t) PS(gc_probability);
+			}
 		}
 
 		if (collect) {
@@ -2979,19 +2986,6 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_validate_sid);
 	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_update_timestamp);
 	ZVAL_UNDEF(&ps_globals->http_session_vars);
-
-	ps_globals->random = (php_random_algo_with_state){
-		.algo = &php_random_algo_pcgoneseq128xslrr64,
-		.state = &ps_globals->random_state,
-	};
-	php_random_uint128_t seed;
-	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
-		seed = php_random_uint128_constant(
-			php_random_generate_fallback_seed(),
-			php_random_generate_fallback_seed()
-		);
-	}
-	php_random_pcgoneseq128xslrr64_seed128(ps_globals->random.state, seed);
 }
 /* }}} */
 
