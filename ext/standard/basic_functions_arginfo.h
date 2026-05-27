@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 36b71aa7bbfe478a5e4af400b2822a77067efa2f
+ * Stub hash: dee75a482f622e24c440adbf4327c3b0495a47de
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -3015,8 +3015,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("base64_encode", zif_base64_encode, arginfo_base64_encode, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("base64_decode", zif_base64_decode, arginfo_base64_decode, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(constant, arginfo_constant)
-	ZEND_FE(ip2long, arginfo_ip2long)
-	ZEND_FE(long2ip, arginfo_long2ip)
+	ZEND_RAW_FENTRY("ip2long", zif_ip2long, arginfo_ip2long, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("long2ip", zif_long2ip, arginfo_long2ip, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(getenv, arginfo_getenv)
 #if defined(HAVE_PUTENV)
 	ZEND_FE(putenv, arginfo_putenv)
@@ -3105,14 +3105,14 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ftok, arginfo_ftok)
 #endif
 	ZEND_FE(hrtime, arginfo_hrtime)
-	ZEND_FE(md5, arginfo_md5)
+	ZEND_RAW_FENTRY("md5", zif_md5, arginfo_md5, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(md5_file, arginfo_md5_file)
 	ZEND_FE(getmyuid, arginfo_getmyuid)
 	ZEND_FE(getmygid, arginfo_getmygid)
 	ZEND_FE(getmypid, arginfo_getmypid)
 	ZEND_FE(getmyinode, arginfo_getmyinode)
 	ZEND_FE(getlastmod, arginfo_getlastmod)
-	ZEND_FE(sha1, arginfo_sha1)
+	ZEND_RAW_FENTRY("sha1", zif_sha1, arginfo_sha1, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(sha1_file, arginfo_sha1_file)
 #if defined(HAVE_SYSLOG_H)
 	ZEND_FE(openlog, arginfo_openlog)
@@ -3333,7 +3333,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(php_ini_loaded_file, arginfo_php_ini_loaded_file)
 	ZEND_FE(iptcembed, arginfo_iptcembed)
 	ZEND_FE(iptcparse, arginfo_iptcparse)
-	ZEND_FE(levenshtein, arginfo_levenshtein)
+	ZEND_RAW_FENTRY("levenshtein", zif_levenshtein, arginfo_levenshtein, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 #if (defined(HAVE_SYMLINK) || defined(PHP_WIN32))
 	ZEND_FE(readlink, arginfo_readlink)
 	ZEND_FE(linkinfo, arginfo_linkinfo)
