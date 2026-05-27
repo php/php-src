@@ -15,6 +15,10 @@ PHP                                                                        NEWS
     IntlCalendar::equals(), ::before(), ::after(), and ::isEquivalentTo().
     (Weilin Du)
 
+- Streams:
+  . Fixed bug GH-20921 (UBSan: Negation of PHP_INT_MIN triggers runtime error
+    in streams/memory.c via SplTempFileObject::fseek). (wadakatu)
+
 - Zlib:
   . Fixed memory leak if deflate initialization fails and there is a dict.
     (ndossche)
