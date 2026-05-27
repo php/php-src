@@ -404,14 +404,14 @@ static zend_always_inline bool _zend_handle_numeric_str(const char *key, size_t 
 	const char *tmp = key;
 
 	if (EXPECTED(*tmp > '9')) {
-		return 0;
+		return false;
 	} else if (*tmp < '0') {
 		if (*tmp != '-') {
-			return 0;
+			return false;
 		}
 		tmp++;
 		if (*tmp > '9' || *tmp < '0') {
-			return 0;
+			return false;
 		}
 	}
 	return _zend_handle_numeric_str_ex(key, length, idx);
@@ -1605,30 +1605,30 @@ static zend_always_inline bool zend_array_is_list(const zend_array *array)
 	zend_string* str_idx;
 	/* Empty arrays are lists */
 	if (zend_hash_num_elements(array) == 0) {
-		return 1;
+		return true;
 	}
 
 	/* Packed arrays are lists */
 	if (HT_IS_PACKED(array)) {
 		if (HT_IS_WITHOUT_HOLES(array)) {
-			return 1;
+			return true;
 		}
 		/* Check if the list could theoretically be repacked */
 		ZEND_HASH_PACKED_FOREACH_KEY(array, num_idx) {
 			if (num_idx != expected_idx++) {
-				return 0;
+				return false;
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* Check if the list could theoretically be repacked */
 		ZEND_HASH_MAP_FOREACH_KEY(array, num_idx, str_idx) {
 			if (str_idx != NULL || num_idx != expected_idx++) {
-				return 0;
+				return false;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	return 1;
+	return true;
 }
 
 
