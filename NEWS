@@ -218,6 +218,10 @@ PHP                                                                        NEWS
 
 - Curl:
   . Add support for CURLINFO_SIZE_DELIVERED (libcurl >= 8.20.0). (Ayesh)
+  . Added CURLOPT_SOCKOPTFUNCTION, CURLOPT_OPENSOCKETFUNCTION and
+    CURLOPT_CLOSESOCKETFUNCTION options, bridging libcurl's socket callbacks to
+    ext/sockets Socket objects (requires the sockets extension).
+    (Xavier Leune)
 
 - Date:
   . Update timelib to 2022.16. (Derick)
