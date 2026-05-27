@@ -188,9 +188,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 
 	if (ce->constructor) {
 		if (parent->constructor && UNEXPECTED(parent->constructor->common.fn_flags & ZEND_ACC_FINAL)) {
-			zend_error_noreturn(E_ERROR, "Cannot override final %s::%s() with %s::%s()",
-				ZSTR_VAL(parent->name), ZSTR_VAL(parent->constructor->common.function_name),
-				ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
+			zend_error_noreturn(E_ERROR, "Cannot override final %s::__construct() with %s::__construct()",
+				ZSTR_VAL(parent->name),
+				ZSTR_VAL(ce->name));
 		}
 		return;
 	}

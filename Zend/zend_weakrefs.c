@@ -58,10 +58,10 @@ static zend_class_entry *zend_ce_weakmap;
 static zend_object_handlers zend_weakref_handlers;
 static zend_object_handlers zend_weakmap_handlers;
 
-#define zend_weakref_from(o) ((zend_weakref*)(((char*) o) - offsetof(zend_weakref, std)))
+#define zend_weakref_from(o) (ZEND_CONTAINER_OF(o, zend_weakref, std))
 #define zend_weakref_fetch(z) zend_weakref_from(Z_OBJ_P(z))
 
-#define zend_weakmap_from(o) ((zend_weakmap*)(((char*) o) - offsetof(zend_weakmap, std)))
+#define zend_weakmap_from(o) (ZEND_CONTAINER_OF(o, zend_weakmap, std))
 #define zend_weakmap_fetch(z) zend_weakmap_from(Z_OBJ_P(z))
 
 static inline void zend_weakref_unref_single(

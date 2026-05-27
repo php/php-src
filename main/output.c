@@ -970,6 +970,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			handler->func.user->fci.param_count = 2;
 			handler->func.user->fci.params = ob_args;
 			handler->func.user->fci.retval = &retval;
+			handler->func.user->fci.consumed_args = zend_fci_consumed_arg(0);
 
 			if (SUCCESS == zend_call_function(&handler->func.user->fci, &handler->func.user->fcc) && Z_TYPE(retval) != IS_UNDEF) {
 				if (handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {

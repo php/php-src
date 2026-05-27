@@ -620,7 +620,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 
 	/* Parse through the leading whitespace, and display a warning if we
 	   get to the end without encountering a delimiter. */
-	while (isspace((int)*(unsigned char *)p)) p++;
+	while (isspace((unsigned char)*p)) p++;
 	if (p >= end_p) {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
@@ -633,7 +633,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	/* Get the delimiter and display a warning if it is alphanumeric
 	   or a backslash. */
 	delimiter = *p++;
-	if (isalnum((int)*(unsigned char *)&delimiter) || delimiter == '\\' || delimiter == '\0') {
+	if (isalnum((unsigned char)delimiter) || delimiter == '\\' || delimiter == '\0') {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
@@ -1079,7 +1079,7 @@ static void populate_subpat_array(
 	/* Add MARK, if available */
 	if (mark) {
 		ZVAL_STRING(&val, (char *)mark);
-		zend_hash_str_add_new(subpats_ht, ZEND_STRL("MARK"), &val);
+		zend_hash_str_update(subpats_ht, ZEND_STRL("MARK"), &val);
 	}
 }
 
@@ -1559,6 +1559,7 @@ static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cach
 	fci->retval = &retval;
 	fci->param_count = 1;
 	fci->params = &arg;
+	fci->consumed_args = zend_fci_consumed_arg(0);
 	zend_call_function(fci, fcc);
 	zval_ptr_dtor(&arg);
 	if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {

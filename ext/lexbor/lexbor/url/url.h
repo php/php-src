@@ -763,6 +763,15 @@ LXB_API lxb_status_t
 lxb_url_search_params_serialize(lxb_url_search_params_t *search_params,
                                 lexbor_callback_f cb, void *ctx);
 
+/**
+ * Returns whether the URL is special.
+ *
+ * @param[in] lxb_url_t *. Cannot be NULL.
+ * @return true if URL is special, false otherwise.
+ */
+LXB_API bool
+lxb_url_is_special(const lxb_url_t *url);
+
 /*
  * Inline functions.
  */

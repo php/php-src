@@ -114,7 +114,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 			php_url_free(resource);
 			return NULL;
 		}
-		if (phar_open_or_create_filename(resource->host, NULL, 0, 0, options, &phar, &error) == FAILURE)
+		if (phar_open_or_create_filename(resource->host, NULL, 0, options, &phar, &error) == FAILURE)
 		{
 			if (error) {
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {

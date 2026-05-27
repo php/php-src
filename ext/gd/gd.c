@@ -150,7 +150,7 @@ static zend_function *php_gd_image_object_get_constructor(zend_object *object)
 
 static zend_always_inline php_gd_image_object* php_gd_exgdimage_from_zobj_p(zend_object* obj)
 {
-	return (php_gd_image_object *) ((char *) (obj) - offsetof(php_gd_image_object, std));
+	return ZEND_CONTAINER_OF(obj, php_gd_image_object, std);
 }
 
 /**

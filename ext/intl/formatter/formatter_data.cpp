@@ -26,7 +26,7 @@ void formatter_data_init( formatter_data* nf_data )
 	if( !nf_data )
 		return;
 
-	nf_data->unum                = NULL;
+	nf_data->unum                = nullptr;
 	intl_error_reset( &nf_data->error );
 }
 /* }}} */
@@ -39,10 +39,8 @@ void formatter_data_free( formatter_data* nf_data )
 	if( !nf_data )
 		return;
 
-	if( nf_data->unum )
-		unum_close( nf_data->unum );
-
-	nf_data->unum = NULL;
+	delete nf_data->unum;
+	nf_data->unum = nullptr;
 	intl_error_reset( &nf_data->error );
 }
 /* }}} */

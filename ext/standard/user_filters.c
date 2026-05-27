@@ -48,8 +48,9 @@ PHP_METHOD(php_user_filter, filter)
 
 PHP_METHOD(php_user_filter, seek)
 {
-	zend_long offset, whence;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &whence) == FAILURE) {
+	zend_long offset, whence, chain;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &offset, &whence, &chain) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -263,7 +264,7 @@ static zend_result userfilter_seek(
 {
 	zval *obj = &thisfilter->abstract;
 	zval retval;
-	zval args[2];
+	zval args[3];
 
 	/* the userfilter object probably doesn't exist anymore */
 	if (CG(unclean_shutdown)) {
@@ -289,8 +290,9 @@ static zend_result userfilter_seek(
 	/* Setup calling arguments */
 	ZVAL_LONG(&args[0], offset);
 	ZVAL_LONG(&args[1], whence);
+	ZVAL_LONG(&args[2], php_stream_filter_get_chain_type(stream, thisfilter));
 
-	zend_call_known_function(seek_method, Z_OBJ_P(obj), Z_OBJCE_P(obj), &retval, 2, args, NULL);
+	zend_call_known_function(seek_method, Z_OBJ_P(obj), Z_OBJCE_P(obj), &retval, 3, args, NULL);
 
 	zend_result ret = FAILURE;
 	if (Z_TYPE(retval) != IS_UNDEF) {
@@ -383,7 +385,8 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		return NULL;
 	}
 
-	filter = php_stream_filter_alloc(&userfilter_ops, NULL, false, PSFS_SEEKABLE_CHECK);
+	filter = php_stream_filter_alloc(&userfilter_ops, NULL, false,
+			PSFS_SEEKABLE_CHECK, PSFS_SEEKABLE_CHECK);
 
 	/* filtername */
 	add_property_string(&obj, "filtername", filtername);

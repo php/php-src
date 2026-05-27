@@ -283,7 +283,7 @@ static HashTable *gmp_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 
 static zend_object *gmp_clone_obj(zend_object *obj) /* {{{ */
 {
-	gmp_object *old_object = GET_GMP_OBJECT_FROM_OBJ(obj);
+	const gmp_object *old_object = GET_GMP_OBJECT_FROM_OBJ(obj);
 	gmp_object *new_object = GET_GMP_OBJECT_FROM_OBJ(gmp_create_object(obj->ce));
 
 	zend_objects_clone_members( &new_object->std, &old_object->std);
@@ -332,11 +332,11 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 
 	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
 		if (UNEXPECTED(!IS_GMP(op2))) {
-			// For PHP 8.3 and up use zend_try_get_long()
+			bool failed;
 			switch (Z_TYPE_P(op2)) {
 				case IS_DOUBLE:
-					shift = zval_get_long(op2);
-					if (UNEXPECTED(EG(exception))) {
+					shift = zval_try_get_long(op2, &failed);
+					if (UNEXPECTED(failed)) {
 						return FAILURE;
 					}
 					break;
@@ -632,7 +632,7 @@ static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val,
 	bool skip_lead = false;
 
 	size_t num_len = ZSTR_LEN(val);
-	while (isspace(*num_str)) {
+	while (isspace((unsigned char)*num_str)) {
 		++num_str;
 		--num_len;
 	}

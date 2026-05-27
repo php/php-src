@@ -66,23 +66,30 @@ static zend_string *phar_get_link_location(phar_entry_info *entry) /* {{{ */
 phar_entry_info *phar_get_link_source(phar_entry_info *entry) /* {{{ */
 {
 	phar_entry_info *link_entry;
+	uint32_t depth = 0, max_depth;
 
 	if (!entry->symlink) {
 		return entry;
 	}
 
-	link_entry = zend_hash_find_ptr(&(entry->phar->manifest), entry->symlink);
-	if (link_entry) {
-		return phar_get_link_source(link_entry);
-	}
+	max_depth = zend_hash_num_elements(&(entry->phar->manifest));
 
-	zend_string *link = phar_get_link_location(entry);
-	link_entry = zend_hash_find_ptr(&(entry->phar->manifest), link);
-	zend_string_release(link);
-	if (link_entry) {
-		return phar_get_link_source(link_entry);
+	while (entry->symlink) {
+		if (UNEXPECTED(++depth > max_depth)) {
+			return NULL;
+		}
+		zend_string *link = phar_get_link_location(entry);
+
+		if (NULL != (link_entry = zend_hash_find_ptr(&(entry->phar->manifest), entry->symlink)) ||
+			NULL != (link_entry = zend_hash_find_ptr(&(entry->phar->manifest), link))) {
+			zend_string_release(link);
+			entry = link_entry;
+		} else {
+			zend_string_release(link);
+			return NULL;
+		}
 	}
-	return NULL;
+	return entry;
 }
 /* }}} */
 
@@ -264,18 +271,12 @@ zend_result phar_mount_entry(phar_archive_data *phar, const char *filename, size
 }
 /* }}} */
 
-zend_string *phar_find_in_include_path(const zend_string *filename, phar_archive_data **pphar) /* {{{ */
+zend_string *phar_find_in_include_path(const zend_string *filename) /* {{{ */
 {
 	zend_string *ret;
 	char *path;
 	zend_string *arch;
 	phar_archive_data *phar;
-
-	if (pphar) {
-		*pphar = NULL;
-	} else {
-		pphar = &phar;
-	}
 
 	if (!zend_is_executing() || !PHAR_G(cwd)) {
 		return NULL;
@@ -314,11 +315,7 @@ zend_string *phar_find_in_include_path(const zend_string *filename, phar_archive
 			zend_string_release_ex(arch, false);
 			return NULL;
 		}
-splitted:
-		if (pphar) {
-			*pphar = phar;
-		}
-
+splitted:;
 		zend_string *test = phar_fix_filepath(ZSTR_VAL(filename), ZSTR_LEN(filename), true);
 		if (ZSTR_VAL(test)[0] == '/') {
 			if (zend_hash_str_exists(&(phar->manifest), ZSTR_VAL(test) + 1, ZSTR_LEN(test) - 1)) {
@@ -346,22 +343,6 @@ splitted:
 	zend_string_release_ex(arch, false);
 	ret = php_resolve_path(ZSTR_VAL(filename), ZSTR_LEN(filename), path);
 	efree(path);
-
-	if (ret && zend_string_starts_with_literal_ci(ret, "phar://")) {
-		/* found phar:// */
-		arch = phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), NULL, 1, 0);
-		if (!arch) {
-			return ret;
-		}
-
-		*pphar = zend_hash_find_ptr(&(PHAR_G(phar_fname_map)), arch);
-
-		if (!*pphar && PHAR_G(manifest_cached)) {
-			*pphar = zend_hash_find_ptr(&cached_phars, arch);
-		}
-
-		zend_string_release_ex(arch, false);
-	}
 
 	return ret;
 }
@@ -2034,14 +2015,13 @@ static void phar_manifest_copy_ctor(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static void phar_copy_cached_phar(phar_archive_data **pphar) /* {{{ */
+static phar_archive_data* phar_copy_cached_phar(const phar_archive_data *persistent_phar) /* {{{ */
 {
-	phar_archive_data *phar;
 	HashTable newmanifest;
 	phar_archive_object *objphar;
 
-	phar = (phar_archive_data *) emalloc(sizeof(phar_archive_data));
-	*phar = **pphar;
+	phar_archive_data *phar = emalloc(sizeof(phar_archive_data));
+	*phar = *persistent_phar;
 	phar->is_persistent = 0;
 	zend_string_addref(phar->fname);
 
@@ -2055,17 +2035,13 @@ static void phar_copy_cached_phar(phar_archive_data **pphar) /* {{{ */
 
 	phar_metadata_tracker_clone(&phar->metadata_tracker);
 
-	zend_hash_init(&newmanifest, sizeof(phar_entry_info),
-		zend_get_hash_value, destroy_phar_manifest_entry, 0);
-	zend_hash_copy(&newmanifest, &(*pphar)->manifest, phar_manifest_copy_ctor);
+	zend_hash_init(&newmanifest, sizeof(phar_entry_info), NULL, destroy_phar_manifest_entry, 0);
+	zend_hash_copy(&newmanifest, &persistent_phar->manifest, phar_manifest_copy_ctor);
 	zend_hash_apply_with_argument(&newmanifest, phar_update_cached_entry, (void *)phar);
 	phar->manifest = newmanifest;
-	zend_hash_init(&phar->mounted_dirs, sizeof(char *),
-		zend_get_hash_value, NULL, 0);
-	zend_hash_init(&phar->virtual_dirs, sizeof(char *),
-		zend_get_hash_value, NULL, 0);
-	zend_hash_copy(&phar->virtual_dirs, &(*pphar)->virtual_dirs, NULL);
-	*pphar = phar;
+	zend_hash_init(&phar->mounted_dirs, sizeof(char *), NULL, NULL, 0);
+	zend_hash_init(&phar->virtual_dirs, sizeof(char *), NULL, NULL, 0);
+	zend_hash_copy(&phar->virtual_dirs, &persistent_phar->virtual_dirs, NULL);
 
 	/* now, scan the list of persistent Phar objects referencing this phar and update the pointers */
 	ZEND_HASH_MAP_FOREACH_PTR(&PHAR_G(phar_persist_map), objphar) {
@@ -2073,29 +2049,26 @@ static void phar_copy_cached_phar(phar_archive_data **pphar) /* {{{ */
 			objphar->archive = phar;
 		}
 	} ZEND_HASH_FOREACH_END();
+	return phar;
 }
 /* }}} */
 
 zend_result phar_copy_on_write(phar_archive_data **pphar) /* {{{ */
 {
-	zval zv, *pzv;
-	phar_archive_data *newpphar;
+	phar_archive_data *newpphar = phar_copy_cached_phar(*pphar);
 
-	ZVAL_PTR(&zv, *pphar);
-	pzv = zend_hash_add(&(PHAR_G(phar_fname_map)), (*pphar)->fname, &zv);
+	zval *pzv = zend_hash_add_ptr(&(PHAR_G(phar_fname_map)), newpphar->fname, newpphar);
 	if (!pzv) {
 		return FAILURE;
 	}
 
-	phar_copy_cached_phar((phar_archive_data **)&Z_PTR_P(pzv));
-	newpphar = Z_PTR_P(pzv);
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
 	PHAR_G(last_alias) = NULL;
 	PHAR_G(last_phar_name) = NULL;
 
 	if (newpphar->alias_len && NULL == zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), newpphar->alias, newpphar->alias_len, newpphar)) {
-		zend_hash_del(&(PHAR_G(phar_fname_map)), (*pphar)->fname);
+		zend_hash_del(&(PHAR_G(phar_fname_map)), newpphar->fname);
 		return FAILURE;
 	}
 

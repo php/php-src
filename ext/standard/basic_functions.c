@@ -598,6 +598,20 @@ PHP_FUNCTION(ip2long)
 	if (addr_len == 0 || inet_pton(AF_INET, addr, &ip) != 1) {
 		RETURN_FALSE;
 	}
+#ifdef _AIX
+	/*
+	AIX accepts IP strings with extraneous 0 (192.168.042.42 will be treated as
+	192.168.42.42), while Linux doesn't.
+	For consistency, we convert back the IP to a string and check if it is equal to
+	the original string. If not, the IP should be considered invalid.
+	*/
+	char str[INET_ADDRSTRLEN];
+	const char* result = inet_ntop(AF_INET, &ip, str, sizeof(str));
+	ZEND_ASSERT(result != NULL);
+	if (strcmp(addr, result) != 0) {
+		RETURN_FALSE;
+	}
+#endif
 	RETURN_LONG(ntohl(ip.s_addr));
 }
 /* }}} */
@@ -1939,6 +1953,12 @@ PHP_FUNCTION(ini_get_all)
 					add_assoc_str(&option, "local_value", zend_string_copy(ini_entry->value));
 				} else {
 					add_assoc_null(&option, "local_value");
+				}
+
+				if (ini_entry->def->value) {
+					add_assoc_stringl(&option, "builtin_default_value", ini_entry->def->value, ini_entry->def->value_length);
+				} else {
+					add_assoc_null(&option, "builtin_default_value");
 				}
 
 				add_assoc_long(&option, "access", ini_entry->modifiable);

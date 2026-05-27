@@ -2825,6 +2825,10 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		zend_check_magic_method_non_static(ce, fptr, error_type);
 		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_return_type(ce, fptr, error_type, (MAY_BE_ARRAY | MAY_BE_NULL));
+		if ((fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) && ZEND_TYPE_PURE_MASK(fptr->common.arg_info[-1].type) & MAY_BE_NULL) {
+			zend_error(E_DEPRECATED, "Returning null from %s::__debugInfo() is deprecated, make the return type non-nullable and return an empty array instead",
+				ZSTR_VAL(ce->name));
+		}
 	} else if (zend_string_equals_literal(lcname, "__serialize")) {
 		zend_check_magic_method_args(0, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
@@ -4243,6 +4247,7 @@ ZEND_API zend_result zend_fcall_info_init(const zval *callable, uint32_t check_f
 	fci->param_count = 0;
 	fci->params = NULL;
 	fci->named_params = NULL;
+	fci->consumed_args = 0;
 
 	return SUCCESS;
 }

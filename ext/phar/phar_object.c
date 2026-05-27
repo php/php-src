@@ -349,9 +349,9 @@ static void phar_do_404(phar_archive_data *phar, char *fname, size_t fname_len, 
 /* post-process REQUEST_URI and retrieve the actual request URI.  This is for
    cases like http://localhost/blah.phar/path/to/file.php/extra/stuff
    which calls "blah.phar" file "path/to/file.php" with PATH_INFO "/extra/stuff" */
-static void phar_postprocess_ru_web(const char *fname, size_t fname_len, const char *entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
+static void phar_postprocess_ru_web(const char *fname, size_t fname_len, char *entry, size_t *entry_len, char **ru, size_t *ru_len) /* {{{ */
 {
-	const char *e = entry + 1;
+	char *e = entry + 1;
 	char *u1 = NULL, *u = NULL, *saveu = NULL;
 	size_t e_len = *entry_len - 1, u_len = 0;
 	phar_archive_data *pphar;
@@ -1085,8 +1085,8 @@ static const spl_other_handler phar_spl_foreign_handler = {
 PHP_METHOD(Phar, __construct)
 {
 	zend_string *fname;
-	char *alias = NULL, *error;
-	size_t alias_len = 0;
+	zend_string *alias = NULL;
+	char *error;
 	bool is_data;
 	zend_long flags = SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS;
 	zend_long format = 0;
@@ -1099,11 +1099,11 @@ PHP_METHOD(Phar, __construct)
 	is_data = instanceof_function(Z_OBJCE_P(ZEND_THIS), phar_ce_data);
 
 	if (is_data) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|ls!l", &fname, &flags, &alias, &alias_len, &format) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|lS!l", &fname, &flags, &alias, &format) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|ls!", &fname, &flags, &alias, &alias_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|lS!", &fname, &flags, &alias) == FAILURE) {
 			RETURN_THROWS();
 		}
 	}
@@ -1122,7 +1122,7 @@ PHP_METHOD(Phar, __construct)
 		fname = arch;
 	}
 
-	zend_result phar_status = phar_open_or_create_filename(fname, alias, alias_len, is_data, REPORT_ERRORS, &phar_data, &error);
+	zend_result phar_status = phar_open_or_create_filename(fname, alias, is_data, REPORT_ERRORS, &phar_data, &error);
 
 	if (arch) {
 		zend_string_release_ex(arch, false);
@@ -3789,9 +3789,16 @@ PHP_METHOD(Phar, addEmptyDir)
 
 	PHAR_ARCHIVE_OBJECT();
 
-	if (zend_string_starts_with_literal(dir_name, ".phar")) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create a directory in magic \".phar\" directory");
-		RETURN_THROWS();
+	if (
+		zend_string_starts_with_literal(dir_name, ".phar")
+		|| zend_string_starts_with_literal(dir_name, "/.phar")
+	) {
+		size_t prefix_len = (ZSTR_VAL(dir_name)[0] == '/') + sizeof(".phar") - 1;
+		char next_char = ZSTR_VAL(dir_name)[prefix_len];
+		if (next_char == '/' || next_char == '\\' || next_char == '\0') {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create a directory in magic \".phar\" directory");
+			RETURN_THROWS();
+		}
 	}
 
 	phar_mkdir(&phar_obj->archive, dir_name);

@@ -109,7 +109,7 @@ void inifile_free(inifile *dba, int persistent)
 key_type inifile_key_split(const char *group_name)
 {
 	key_type key;
-	char *name;
+	const char *name;
 
 	if (group_name[0] == '[' && (name = strchr(group_name, ']')) != NULL) {
 		key.group = estrndup(group_name+1, name - (group_name + 1));

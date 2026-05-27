@@ -93,7 +93,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	}
 
 	orig_path = name;
-	for (p = name; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
+	for (p = name; isalnum((unsigned char)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
 		n++;
 	}
 

@@ -50,7 +50,7 @@ class php_user_filter
     public function filter($in, $out, &$consumed, bool $closing): int {}
 
     /** @tentative-return-type */
-    public function seek(int $offset, int $whence): bool {}
+    public function seek(int $offset, int $whence, int $chain): bool {}
 
     /** @tentative-return-type */
     public function onCreate(): bool {}

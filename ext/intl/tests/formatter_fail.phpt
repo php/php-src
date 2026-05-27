@@ -137,9 +137,9 @@ TypeError: numfmt_create(): Argument #1 ($locale) must be of type string, array 
 'U_ZERO_ERROR'
 
 IntlException: NumberFormatter::__construct(): number formatter creation failed
-'NumberFormatter::__construct(): number formatter creation failed: U_UNSUPPORTED_ERROR'
-'NumberFormatter::create(): number formatter creation failed: U_UNSUPPORTED_ERROR'
-'numfmt_create(): number formatter creation failed: U_UNSUPPORTED_ERROR'
+'NumberFormatter::__construct(): number formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'NumberFormatter::create(): number formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'numfmt_create(): number formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
 IntlException: NumberFormatter::__construct(): number formatter creation failed
 'NumberFormatter::__construct(): number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'

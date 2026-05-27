@@ -58,7 +58,7 @@ U_CFUNC zend_object *MessageFormatter_object_create(zend_class_entry *ce)
 /* {{{ MessageFormatter_object_clone */
 U_CFUNC zend_object *MessageFormatter_object_clone(zend_object *object)
 {
-	MessageFormatter_object     *mfo = php_intl_messageformatter_fetch_object(object);
+	const MessageFormatter_object     *mfo = php_intl_messageformatter_fetch_object(object);
 	zend_object             *new_obj = MessageFormatter_ce_ptr->create_object(object->ce);
 	MessageFormatter_object *new_mfo = php_intl_messageformatter_fetch_object(new_obj);
 

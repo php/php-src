@@ -29,12 +29,30 @@ namespace Uri {
 }
 
 namespace Uri\Rfc3986 {
+    enum UriType
+    {
+        case AbsolutePathReference;
+        case RelativePathReference;
+        case NetworkPathReference;
+        case Uri;
+    }
+
+    enum UriHostType
+    {
+        case IPv4;
+        case IPv6;
+        case IPvFuture;
+        case RegisteredName;
+    }
+
     /** @strict-properties */
     final readonly class Uri
     {
         public static function parse(string $uri, ?\Uri\Rfc3986\Uri $baseUrl = null): ?static {}
 
         public function __construct(string $uri, ?\Uri\Rfc3986\Uri $baseUrl = null) {}
+
+        public function getUriType(): ?\Uri\Rfc3986\UriType {}
 
         public function getScheme(): ?string {}
 
@@ -59,6 +77,8 @@ namespace Uri\Rfc3986 {
         public function getHost(): ?string {}
 
         public function getRawHost(): ?string {}
+
+        public function getHostType(): ?\Uri\Rfc3986\UriHostType {}
 
         public function withHost(?string $host): static {}
 
@@ -152,6 +172,15 @@ namespace Uri\WhatWg {
         public function __construct(string $context, \Uri\WhatWg\UrlValidationErrorType $type, bool $failure) {}
     }
 
+    enum UrlHostType
+    {
+        case IPv4;
+        case IPv6;
+        case Domain;
+        case Opaque;
+        case Empty;
+    }
+
     /** @strict-properties */
     final readonly class Url
     {
@@ -164,6 +193,8 @@ namespace Uri\WhatWg {
         public function getScheme(): string {}
 
         public function withScheme(string $scheme): static {}
+
+        public function isSpecialScheme(): bool {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getUsername */
         public function getUsername(): ?string {}
@@ -178,6 +209,8 @@ namespace Uri\WhatWg {
         public function getAsciiHost(): ?string {}
 
         public function getUnicodeHost(): ?string {}
+
+        public function getHostType(): ?\Uri\WhatWg\UrlHostType {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withHost */
         public function withHost(?string $host): static {}

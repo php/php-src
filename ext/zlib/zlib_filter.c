@@ -357,8 +357,13 @@ static const php_stream_filter_ops php_zlib_deflate_ops = {
 static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	const php_stream_filter_ops *fops = NULL;
+	php_stream_filter_seekable_t write_seekable;
 	php_zlib_filter_data *data;
 	int status;
+
+	if (php_stream_filter_parse_write_seek_mode(filterparams, &write_seekable) == FAILURE) {
+		return NULL;
+	}
 
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_zlib_filter_data), persistent);
@@ -498,7 +503,7 @@ factory_setlevel:
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START, write_seekable);
 }
 
 const php_stream_filter_factory php_zlib_filter_factory = {
