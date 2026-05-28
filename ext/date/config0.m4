@@ -50,3 +50,5 @@ cat > $ext_builddir/lib/timelib_config.h <<EOF
 #define timelib_strndup estrndup
 #define timelib_free    efree
 EOF
+
+PHP_ADD_MAKEFILE_FRAGMENT
