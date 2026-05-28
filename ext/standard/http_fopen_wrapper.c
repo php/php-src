@@ -758,14 +758,14 @@ finish:
 		smart_str scratch = {0};
 
 		/* decode the strings first */
-		php_url_decode(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
+		ZSTR_LEN(resource->user) = php_url_decode(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
 
 		smart_str_append(&scratch, resource->user);
 		smart_str_appendc(&scratch, ':');
 
 		/* Note: password is optional! */
 		if (resource->password) {
-			php_url_decode(ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
+			ZSTR_LEN(resource->password) = php_url_decode(ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
 			smart_str_append(&scratch, resource->password);
 		}
 
