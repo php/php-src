@@ -234,10 +234,15 @@ PHP                                                                        NEWS
     http(s) stream wrapper). (David Carlier)
 
 - Streams:
+  . Added new stream errors API including new StreamException, StreamError
+    classes, StreamErrorStore, StreamErrorMode, StreamErrorCode enums,
+    stream_last_errors() and stream_clear_errors() functions, error_mode,
+    error_store and error_handler stream context options and extending some
+    stream functions with context param. (Jakub Zelenka)
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
-    socket context options.
+    socket context options. (Jakub Zelenka)
   . Added so_reuseaddr streams context socket option that allows disabling
-    address reuse.
+    address reuse. (Jakub Zelenka)
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
   . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)

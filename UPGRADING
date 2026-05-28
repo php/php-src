@@ -207,6 +207,10 @@ PHP 8.6 UPGRADE NOTES
     This makes it possible to override the timestamp and names of files.
 
 - Streams:
+  . Added new stream errors API including new classes, enums, functions and
+    internal API. It is controlled using error_mode, error_store and
+    error_handler stream context options.
+    RFC: https://wiki.php.net/rfc/stream_errors
   . Added stream socket context option so_reuseaddr that allows disabling
     address reuse (SO_REUSEADDR) and explicitly uses SO_EXCLUSIVEADDRUSE on
     Windows.
@@ -309,6 +313,8 @@ PHP 8.6 UPGRADE NOTES
   . `clamp()` returns the given value if in range, else return the nearest
     bound.
     RFC: https://wiki.php.net/rfc/clamp_v2
+  . `stream_last_errors()` and `stream_clear_errors()`.
+    RFC: https://wiki.php.net/rfc/stream_errors
 
 - Zip:
   . Added ZipArchive::openString() method.
@@ -326,6 +332,12 @@ PHP 8.6 UPGRADE NOTES
 - Standard:
   . enum SortDirection
     RFC: https://wiki.php.net/rfc/sort_direction_enum
+  . StreamError
+  . StreamException
+  . enum StreamErrorStore
+  . enum StreamErrorMode
+  . enum StreamErrorCode
+    RFC: https://wiki.php.net/rfc/stream_errors
 
 ========================================
 8. Removed Extensions and SAPIs
