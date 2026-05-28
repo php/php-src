@@ -2,6 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.8
 
+- Embed:
+  . Added --enable-embed=static support on Windows: php<N>embed.lib is now
+    produced as a self-contained static library (no php<N>.dll dependency)
+    by linking PHP core, statically built extensions, and the embed SAPI
+    into a single .lib, with the corresponding source-side adjustments
+    (PHP/Zend/SAPI/TSRM export defines and TSRMLS cache deduplication).
+    (Luther Monson)
+
 - GD:
   . Fixed bug GH-22121 (Double free in gdImageSetStyle() after
     overflow-triggered early return). (iliaal)
