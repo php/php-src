@@ -47,8 +47,8 @@ zend_class_entry *php_uri_ce_whatwg_url_validation_error;
 static zend_object_handlers object_handlers_rfc3986_uri;
 static zend_object_handlers object_handlers_whatwg_uri;
 
-typedef bool (*php_uri_string_component_validator)(const zend_string *component);
-typedef bool (*php_uri_long_component_validator)(zend_long component);
+typedef bool (*php_uri_component_validator_string)(const zend_string *component);
+typedef bool (*php_uri_component_validator_long)(zend_long component);
 
 static const zend_module_dep uri_deps[] = {
 	ZEND_MOD_REQUIRED("lexbor")
@@ -56,6 +56,14 @@ static const zend_module_dep uri_deps[] = {
 };
 
 static zend_array uri_parsers;
+
+#define Z_RFC3986_URI_PROP_SCHEME_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+#define Z_RFC3986_URI_PROP_USERINFO_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
+#define Z_RFC3986_URI_PROP_HOST_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 2)
+#define Z_RFC3986_URI_PROP_PORT_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 3)
+#define Z_RFC3986_URI_PROP_PATH_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 4)
+#define Z_RFC3986_URI_PROP_QUERY_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 5)
+#define Z_RFC3986_URI_PROP_FRAGMENT_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 6)
 
 static HashTable *uri_get_debug_properties(php_uri_object *object)
 {
@@ -1057,19 +1065,20 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, reset)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_update_property_null(php_uri_ce_rfc3986_uri_builder, Z_OBJ_P(ZEND_THIS), ZEND_STRL("scheme"));
-	zend_update_property_null(php_uri_ce_rfc3986_uri_builder, Z_OBJ_P(ZEND_THIS), ZEND_STRL("userinfo"));
-	zend_update_property_null(php_uri_ce_rfc3986_uri_builder, Z_OBJ_P(ZEND_THIS), ZEND_STRL("host"));
-	zend_update_property_stringl(php_uri_ce_rfc3986_uri_builder, Z_OBJ_P(ZEND_THIS), ZEND_STRL("path"), "", 0);
-	zend_update_property_null(php_uri_ce_rfc3986_uri_builder, Z_OBJ_P(ZEND_THIS), ZEND_STRL("query"));
-	zend_update_property_null(php_uri_ce_rfc3986_uri_builder, Z_OBJ_P(ZEND_THIS), ZEND_STRL("fragment"));
+	ZVAL_NULL(Z_RFC3986_URI_PROP_SCHEME_P(ZEND_THIS));
+	ZVAL_NULL(Z_RFC3986_URI_PROP_USERINFO_P(ZEND_THIS));
+	ZVAL_NULL(Z_RFC3986_URI_PROP_HOST_P(ZEND_THIS));
+	ZVAL_NULL(Z_RFC3986_URI_PROP_PORT_P(ZEND_THIS));
+	ZVAL_EMPTY_STRING(Z_RFC3986_URI_PROP_PATH_P(ZEND_THIS));
+	ZVAL_NULL(Z_RFC3986_URI_PROP_QUERY_P(ZEND_THIS));
+	ZVAL_NULL(Z_RFC3986_URI_PROP_FRAGMENT_P(ZEND_THIS));
 
 	RETVAL_COPY(ZEND_THIS);
 }
 
 ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string(
 	INTERNAL_FUNCTION_PARAMETERS, const char *name, size_t name_length,
-	const php_uri_string_component_validator validator
+	const php_uri_component_validator_string validator
 ) {
 	zend_string *component;
 
@@ -1089,7 +1098,7 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string(
 
 ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string_or_null(
 	INTERNAL_FUNCTION_PARAMETERS, const char *name, size_t name_length,
-	const php_uri_string_component_validator validator
+	const php_uri_component_validator_string validator
 ) {
 	zend_string *component;
 
@@ -1113,7 +1122,7 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string_or_null(
 
 ZEND_ATTRIBUTE_NONNULL_ARGS(1) static void php_uri_builder_set_component_long_or_null(
 	INTERNAL_FUNCTION_PARAMETERS, const char *name, size_t name_length,
-	const php_uri_long_component_validator validator
+	const php_uri_component_validator_long validator
 ) {
 	zend_long component;
 	bool component_is_null;
@@ -1208,16 +1217,13 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, build)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(base_url, php_uri_ce_rfc3986_uri)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_object *obj = Z_OBJ_P(ZEND_THIS);
-	zval tmp;
-
-	const zval *scheme = zend_read_property(obj->ce, obj, ZEND_STRL("scheme"), false, &tmp);
-	const zval *userinfo = zend_read_property(obj->ce, obj, ZEND_STRL("userinfo"), false, &tmp);
-	const zval *host = zend_read_property(obj->ce, obj, ZEND_STRL("host"), false, &tmp);
-	const zval *port = zend_read_property(obj->ce, obj, ZEND_STRL("port"), false, &tmp);
-	const zval *path = zend_read_property(obj->ce, obj, ZEND_STRL("path"), false, &tmp);
-	const zval *query = zend_read_property(obj->ce, obj, ZEND_STRL("query"), false, &tmp);
-	const zval *fragment = zend_read_property(obj->ce, obj, ZEND_STRL("fragment"), false, &tmp);
+	const zval *scheme = Z_RFC3986_URI_PROP_SCHEME_P(ZEND_THIS);
+	const zval *userinfo = Z_RFC3986_URI_PROP_USERINFO_P(ZEND_THIS);
+	const zval *host = Z_RFC3986_URI_PROP_HOST_P(ZEND_THIS);
+	const zval *port = Z_RFC3986_URI_PROP_PORT_P(ZEND_THIS);
+	const zval *path = Z_RFC3986_URI_PROP_PATH_P(ZEND_THIS);
+	const zval *query = Z_RFC3986_URI_PROP_QUERY_P(ZEND_THIS);
+	const zval *fragment = Z_RFC3986_URI_PROP_FRAGMENT_P(ZEND_THIS);
 
 	zend_string *uri_str = php_uri_parser_rfc3986_recompose_from_zval(scheme, userinfo, host, port, path, query, fragment);
 	if (uri_str == NULL) {

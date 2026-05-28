@@ -733,7 +733,10 @@ ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_port(zend_long port)
 	const char *p = ZSTR_VAL(tmp);
 	const size_t len = ZSTR_LEN(tmp);
 
-	return uriIsWellFormedPortA(p, p + len);
+	bool result = uriIsWellFormedPortA(p, p + len);
+	zend_string_release(tmp);
+
+	return result;
 }
 
 ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_path(const zend_string *path)
@@ -741,11 +744,9 @@ ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_path(const zend_stri
 	const char *p = ZSTR_VAL(path);
 	const size_t len = ZSTR_LEN(path);
 
-	/*
-	 It's checked during the build() method whether the path begins with a "/" when there's a host
-	 that's why a false hasHost argument is passed to uriIsWellFormedPathA() for now.
-	*/
-	return uriIsWellFormedPathA(p, p + len, false);
+	/* The build() method checks whether the path begins with a "/" when there's a host.
+	 * In order to skip doing the same check, a false hasHost argument is passed to uriIsWellFormedPathA(). */
+	return uriIsWellFormedPathA(p, p + len, /* hasHost */ false);
 }
 
 ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_query(const zend_string *query)
@@ -766,18 +767,26 @@ ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_fragment(const zend_
 
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_rfc3986_recompose_from_zval(
 	const zval *scheme, const zval *userinfo, const zval *host, const zval *port,
-	const zval *path, const zval *query, const zval *fragment)
-{
-	/* The userinfo and port components can only ever be present if the host is present */
-	if ((Z_TYPE_P(userinfo) != IS_NULL || Z_TYPE_P(port) != IS_NULL) && Z_TYPE_P(host) == IS_NULL) {
-		zend_throw_exception(php_uri_ce_invalid_uri_exception, "The URI must contain a host if either the userinfo or the port component is present", 0);
-		return NULL;
-	}
+	const zval *path, const zval *query, const zval *fragment
+) {
+	if (Z_TYPE_P(host) == IS_NULL) {
+		/* The path must not begin with "//" if the URI doesn't contain a host */
+		if (zend_string_starts_with_literal(Z_STR_P(path), "//")) {
+			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \"//\" when the URI doesn't contain a host", 0);
+			return NULL;
+		}
 
-	/* The path must be either empty or begin with a "/" if the URI contains a host */
-	if (Z_TYPE_P(host) != IS_NULL && (Z_STRLEN_P(path) > 0 && Z_STRVAL_P(path)[0] != '/')) {
-		zend_throw_exception(php_uri_ce_invalid_uri_exception, "A path must be either empty or begin with \"/\" when the URI contains a host", 0);
-		return NULL;
+		/* The userinfo and port components must not be present if the URI doesn't contain a host */
+		if (Z_TYPE_P(userinfo) != IS_NULL || Z_TYPE_P(port) != IS_NULL) {
+			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The URI must contain a host if either the userinfo or the port component is present", 0);
+			return NULL;
+		}
+	} else {
+		/* The path must be either empty or begin with a "/" if the URI contains a host */
+		if (Z_STRLEN_P(path) > 0 && Z_STRVAL_P(path)[0] != '/') {
+			zend_throw_exception(php_uri_ce_invalid_uri_exception, "A path must be either empty or begin with \"/\" when the URI contains a host", 0);
+			return NULL;
+		}
 	}
 
 	/* The first segment of the path must not contain ":" if the URI doesn't contain a scheme */
@@ -791,12 +800,6 @@ ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_rfc3986_recompose_from_zval(
 
 			p++;
 		}
-	}
-
-	/* The path must not begin with "//" if the URI doesn't contain a host */
-	if (Z_TYPE_P(host) == IS_NULL && Z_STRLEN_P(path) >= 2 && Z_STRVAL_P(path)[0] == '/' && Z_STRVAL_P(path)[1] == '/') {
-		zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \"//\" when the URI doesn't contain a host", 0);
-		return NULL;
 	}
 
 	/* result = "" */

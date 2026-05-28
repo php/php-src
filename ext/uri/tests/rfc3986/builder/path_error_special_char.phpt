@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\UriBuilder::setUserInfo() - error - contains invalid special character
+Test Uri\Rfc3986\UriBuilder::setPath() - error - contains invalid special character
 --FILE--
 <?php
 
