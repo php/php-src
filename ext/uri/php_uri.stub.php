@@ -210,6 +210,39 @@ namespace Uri\WhatWg {
         case Empty;
     }
 
+    final class UrlBuilder
+    {
+        private string $scheme = "";
+        private ?string $username = null;
+        private ?string $password = null;
+        private ?string $host = null;
+        private ?int $port = null;
+        private string $path = "";
+        private ?string $query = null;
+        private ?string $fragment = null;
+
+        public function reset(): static {}
+
+        public function setScheme(string $scheme): static {}
+
+        public function setUsername(?string $username): static {}
+
+        public function setPassword(#[\SensitiveParameter] ?string $password): static {}
+
+        public function setHost(?string $host): static {}
+
+        public function setPort(?int $port): static {}
+
+        public function setPath(string $path): static {}
+
+        public function setQuery(?string $query): static {}
+
+        public function setFragment(?string $fragment): static {}
+
+        /** @param array $errors */
+        public function build(?\Uri\WhatWg\Url $baseUrl = null, &$errors = null): \Uri\WhatWg\Url {}
+    }
+
     /** @strict-properties */
     final readonly class Url
     {
