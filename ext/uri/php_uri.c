@@ -30,6 +30,7 @@
 #include "php_uri_arginfo.h"
 #include "uriparser/Uri.h"
 
+zend_class_entry *php_uri_ce_rfc3986_uri_builder;
 zend_class_entry *php_uri_ce_rfc3986_uri;
 zend_class_entry *php_uri_ce_rfc3986_uri_type;
 zend_class_entry *php_uri_ce_rfc3986_uri_host_type;
@@ -45,6 +46,9 @@ zend_class_entry *php_uri_ce_whatwg_url_validation_error;
 
 static zend_object_handlers object_handlers_rfc3986_uri;
 static zend_object_handlers object_handlers_whatwg_uri;
+
+typedef bool (*php_uri_string_component_validator)(const zend_string *component);
+typedef bool (*php_uri_long_component_validator)(zend_long component);
 
 static const zend_module_dep uri_deps[] = {
 	ZEND_MOD_REQUIRED("lexbor")
@@ -1044,6 +1048,199 @@ PHP_METHOD(Uri_WhatWg_Url, __debugInfo)
 	RETURN_ARR(uri_get_debug_properties(uri_object));
 }
 
+PHP_METHOD(Uri_Rfc3986_UriBuilder, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+PHP_METHOD(Uri_Rfc3986_UriBuilder, reset)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_update_property_null(php_uri_ce_rfc3986_uri_builder, Z_OBJ_P(ZEND_THIS), ZEND_STRL("scheme"));
+	zend_update_property_null(php_uri_ce_rfc3986_uri_builder, Z_OBJ_P(ZEND_THIS), ZEND_STRL("userinfo"));
+	zend_update_property_null(php_uri_ce_rfc3986_uri_builder, Z_OBJ_P(ZEND_THIS), ZEND_STRL("host"));
+	zend_update_property_stringl(php_uri_ce_rfc3986_uri_builder, Z_OBJ_P(ZEND_THIS), ZEND_STRL("path"), "", 0);
+	zend_update_property_null(php_uri_ce_rfc3986_uri_builder, Z_OBJ_P(ZEND_THIS), ZEND_STRL("query"));
+	zend_update_property_null(php_uri_ce_rfc3986_uri_builder, Z_OBJ_P(ZEND_THIS), ZEND_STRL("fragment"));
+
+	RETVAL_COPY(ZEND_THIS);
+}
+
+ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string(
+	INTERNAL_FUNCTION_PARAMETERS, const char *name, size_t name_length,
+	const php_uri_string_component_validator validator
+) {
+	zend_string *component;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(component)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!validator(component)) {
+		zend_throw_exception_ex(php_uri_ce_invalid_uri_exception, 0, "The specified %s is malformed", name);
+		RETURN_THROWS();
+	}
+
+	zend_update_property_str(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), name, name_length, component);
+
+	RETVAL_COPY(ZEND_THIS);
+}
+
+ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string_or_null(
+	INTERNAL_FUNCTION_PARAMETERS, const char *name, size_t name_length,
+	const php_uri_string_component_validator validator
+) {
+	zend_string *component;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_NULL(component)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (component == NULL) {
+		zend_update_property_null(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), name, name_length);
+	} else {
+		if (!validator(component)) {
+			zend_throw_exception_ex(php_uri_ce_invalid_uri_exception, 0, "The specified %s is malformed", name);
+			RETURN_THROWS();
+		}
+
+		zend_update_property_str(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), name, name_length, component);
+	}
+
+	RETVAL_COPY(ZEND_THIS);
+}
+
+ZEND_ATTRIBUTE_NONNULL_ARGS(1) static void php_uri_builder_set_component_long_or_null(
+	INTERNAL_FUNCTION_PARAMETERS, const char *name, size_t name_length,
+	const php_uri_long_component_validator validator
+) {
+	zend_long component;
+	bool component_is_null;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG_OR_NULL(component, component_is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (component_is_null) {
+		zend_update_property_null(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), name, name_length);
+	} else {
+		if (!validator(component)) {
+			zend_throw_exception_ex(php_uri_ce_invalid_uri_exception, 0, "The specified %s is malformed", name);
+			RETURN_THROWS();
+		}
+
+		zend_update_property_long(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), name, name_length, component);
+	}
+
+	RETVAL_COPY(ZEND_THIS);
+}
+
+PHP_METHOD(Uri_Rfc3986_UriBuilder, setScheme)
+{
+	php_uri_builder_set_component_string_or_null(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("scheme"),
+		php_uri_parser_rfc3986_validate_scheme
+	);
+}
+
+PHP_METHOD(Uri_Rfc3986_UriBuilder, setUserInfo)
+{
+	php_uri_builder_set_component_string_or_null(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("userinfo"),
+		php_uri_parser_rfc3986_validate_userinfo
+	);
+}
+
+PHP_METHOD(Uri_Rfc3986_UriBuilder, setHost)
+{
+	php_uri_builder_set_component_string_or_null(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("host"),
+		php_uri_parser_rfc3986_validate_host
+	);
+}
+
+PHP_METHOD(Uri_Rfc3986_UriBuilder, setPort)
+{
+	php_uri_builder_set_component_long_or_null(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("port"),
+		php_uri_parser_rfc3986_validate_port
+	);
+}
+
+PHP_METHOD(Uri_Rfc3986_UriBuilder, setPath)
+{
+	php_uri_builder_set_component_string(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("path"),
+		php_uri_parser_rfc3986_validate_path
+	);
+}
+
+PHP_METHOD(Uri_Rfc3986_UriBuilder, setQuery)
+{
+	php_uri_builder_set_component_string_or_null(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("query"),
+		php_uri_parser_rfc3986_validate_query
+	);
+}
+
+PHP_METHOD(Uri_Rfc3986_UriBuilder, setFragment)
+{
+	php_uri_builder_set_component_string_or_null(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("fragment"),
+		php_uri_parser_rfc3986_validate_fragment
+	);
+}
+
+PHP_METHOD(Uri_Rfc3986_UriBuilder, build)
+{
+	zval *base_url = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(base_url, php_uri_ce_rfc3986_uri)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_object *obj = Z_OBJ_P(ZEND_THIS);
+	zval tmp;
+
+	const zval *scheme = zend_read_property(obj->ce, obj, ZEND_STRL("scheme"), false, &tmp);
+	const zval *userinfo = zend_read_property(obj->ce, obj, ZEND_STRL("userinfo"), false, &tmp);
+	const zval *host = zend_read_property(obj->ce, obj, ZEND_STRL("host"), false, &tmp);
+	const zval *port = zend_read_property(obj->ce, obj, ZEND_STRL("port"), false, &tmp);
+	const zval *path = zend_read_property(obj->ce, obj, ZEND_STRL("path"), false, &tmp);
+	const zval *query = zend_read_property(obj->ce, obj, ZEND_STRL("query"), false, &tmp);
+	const zval *fragment = zend_read_property(obj->ce, obj, ZEND_STRL("fragment"), false, &tmp);
+
+	zend_string *uri_str = php_uri_parser_rfc3986_recompose_from_zval(scheme, userinfo, host, port, path, query, fragment);
+	if (uri_str == NULL) {
+		RETURN_THROWS();
+	}
+
+	php_uri_parser_rfc3986_uris *base_uri = NULL;
+	if (base_url != NULL) {
+		base_uri = Z_URI_OBJECT_P(base_url)->uri;
+	}
+
+	php_uri_parser_rfc3986_uris *uri = php_uri_parser_rfc3986_parse_ex(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), base_uri, false);
+	zend_string_release(uri_str);
+	if (uri == NULL) {
+		RETURN_THROWS();
+	}
+
+	object_init_ex(return_value, php_uri_ce_rfc3986_uri);
+	php_uri_object *uri_object = Z_URI_OBJECT_P(return_value);
+	uri_object->parser = &php_uri_parser_rfc3986;
+	uri_object->uri = uri;
+}
+
 PHPAPI php_uri_object *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser)
 {
 	php_uri_object *uri_object = zend_object_alloc(sizeof(*uri_object), class_type);
@@ -1113,6 +1310,8 @@ PHPAPI zend_result php_uri_parser_register(const php_uri_parser *uri_parser)
 
 static PHP_MINIT_FUNCTION(uri)
 {
+	php_uri_ce_rfc3986_uri_builder = register_class_Uri_Rfc3986_UriBuilder();
+
 	php_uri_ce_rfc3986_uri = register_class_Uri_Rfc3986_Uri();
 	php_uri_ce_rfc3986_uri->create_object = php_uri_object_create_rfc3986;
 	php_uri_ce_rfc3986_uri->default_object_handlers = &object_handlers_rfc3986_uri;

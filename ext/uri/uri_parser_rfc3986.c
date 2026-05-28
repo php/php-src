@@ -683,6 +683,190 @@ static void php_uri_parser_rfc3986_destroy(void *uri)
 	efree(uriparser_uris);
 }
 
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_scheme(const zend_string *scheme)
+{
+	const char *p = ZSTR_VAL(scheme);
+	const size_t len = ZSTR_LEN(scheme);
+
+	return uriIsWellFormedSchemeA(p, p + len);
+}
+
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_userinfo(const zend_string *userinfo)
+{
+	const char *p = ZSTR_VAL(userinfo);
+	const size_t len = ZSTR_LEN(userinfo);
+
+	return uriIsWellFormedUserInfoA(p, p + len);
+}
+
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_host(const zend_string *host)
+{
+	const char *p = ZSTR_VAL(host);
+	const size_t len = ZSTR_LEN(host);
+
+	if (len == 0) {
+		return true;
+	}
+
+	if (p[0] == '[') {
+		if (p[len - 1] != ']') {
+			return false;
+		}
+
+		if (len >= 2 && (p[1] == 'v' || p[1] == 'V')) {
+			return uriIsWellFormedHostIpFutureA(p + 1, p + len - 1) == URI_SUCCESS;
+		}
+
+		return uriIsWellFormedHostIp6A(p + 1, p + len - 1) == URI_SUCCESS;
+	}
+
+	if (uriIsWellFormedHostIp4A(p, p + len)) {
+		return true;
+	}
+
+	return uriIsWellFormedHostRegNameA(p, p + len);
+}
+
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_port(zend_long port)
+{
+	zend_string *tmp = zend_long_to_str(port);
+	const char *p = ZSTR_VAL(tmp);
+	const size_t len = ZSTR_LEN(tmp);
+
+	return uriIsWellFormedPortA(p, p + len);
+}
+
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_path(const zend_string *path)
+{
+	const char *p = ZSTR_VAL(path);
+	const size_t len = ZSTR_LEN(path);
+
+	/*
+	 It's checked during the build() method whether the path begins with a "/" when there's a host
+	 that's why a false hasHost argument is passed to uriIsWellFormedPathA() for now.
+	*/
+	return uriIsWellFormedPathA(p, p + len, false);
+}
+
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_query(const zend_string *query)
+{
+	const char *p = ZSTR_VAL(query);
+	const size_t len = ZSTR_LEN(query);
+
+	return uriIsWellFormedQueryA(p, p + len);
+}
+
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_fragment(const zend_string *fragment)
+{
+	const char *p = ZSTR_VAL(fragment);
+	const size_t len = ZSTR_LEN(fragment);
+
+	return uriIsWellFormedFragmentA(p, p + len);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_rfc3986_recompose_from_zval(
+	const zval *scheme, const zval *userinfo, const zval *host, const zval *port,
+	const zval *path, const zval *query, const zval *fragment)
+{
+	/* The userinfo and port components can only ever be present if the host is present */
+	if ((Z_TYPE_P(userinfo) != IS_NULL || Z_TYPE_P(port) != IS_NULL) && Z_TYPE_P(host) == IS_NULL) {
+		zend_throw_exception(php_uri_ce_invalid_uri_exception, "The URI must contain a host if either the userinfo or the port component is present", 0);
+		return NULL;
+	}
+
+	/* The path must be either empty or begin with a "/" if the URI contains a host */
+	if (Z_TYPE_P(host) != IS_NULL && (Z_STRLEN_P(path) > 0 && Z_STRVAL_P(path)[0] != '/')) {
+		zend_throw_exception(php_uri_ce_invalid_uri_exception, "A path must be either empty or begin with \"/\" when the URI contains a host", 0);
+		return NULL;
+	}
+
+	/* The first segment of the path must not contain ":" if the URI doesn't contain a scheme */
+	if (Z_TYPE_P(scheme) == IS_NULL) {
+		const char *p = Z_STRVAL_P(path);
+		while (*p != '\0' && *p != '/') {
+			if (*p == ':') {
+				zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \":\" when the URI doesn't contain a scheme", 0);
+				return NULL;
+			}
+
+			p++;
+		}
+	}
+
+	/* The path must not begin with "//" if the URI doesn't contain a host */
+	if (Z_TYPE_P(host) == IS_NULL && Z_STRLEN_P(path) >= 2 && Z_STRVAL_P(path)[0] == '/' && Z_STRVAL_P(path)[1] == '/') {
+		zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \"//\" when the URI doesn't contain a host", 0);
+		return NULL;
+	}
+
+	/* result = "" */
+	smart_str uri_str = {0};
+
+	/*
+	if defined(scheme) then
+	 append scheme to result;
+	 append ":" to result;
+	endif;
+	*/
+	if (Z_TYPE_P(scheme) != IS_NULL) {
+		smart_str_append(&uri_str, Z_STR_P(scheme));
+		smart_str_appendc(&uri_str, ':');
+	}
+
+	/*
+	if defined(authority) then
+	 append "//" to result;
+	 append authority to result;
+	endif;
+	*/
+	/* Check if authority is defined */
+	if (Z_TYPE_P(host) != IS_NULL) {
+		smart_str_appends(&uri_str, "//");
+
+		if (Z_TYPE_P(userinfo) != IS_NULL) {
+			smart_str_append(&uri_str, Z_STR_P(userinfo));
+			smart_str_appendc(&uri_str, '@');
+		}
+
+		if (Z_TYPE_P(host) != IS_NULL) {
+			smart_str_append(&uri_str, Z_STR_P(host));
+		}
+
+		if (Z_TYPE_P(port) != IS_NULL) {
+			smart_str_appendc(&uri_str, ':');
+			smart_str_append_long(&uri_str, Z_LVAL_P(port));
+		}
+	}
+
+	/* append path to result; */
+	smart_str_append(&uri_str, Z_STR_P(path));
+
+	/*
+	if defined(query) then
+	 append "?" to result;
+	 append query to result;
+	endif;
+	*/
+	if (Z_TYPE_P(query) != IS_NULL) {
+		smart_str_appendc(&uri_str, '?');
+		smart_str_append(&uri_str, Z_STR_P(query));
+	}
+
+	/*
+	if defined(fragment) then
+	 append "#" to result;
+	 append fragment to result;
+	endif;
+	*/
+	if (Z_TYPE_P(fragment) != IS_NULL) {
+		smart_str_appendc(&uri_str, '#');
+		smart_str_append(&uri_str, Z_STR_P(fragment));
+	}
+
+	/* return result; */
+	return smart_str_extract(&uri_str);
+}
+
 PHPAPI const php_uri_parser php_uri_parser_rfc3986 = {
 	.name = PHP_URI_PARSER_RFC3986,
 	.parse = php_uri_parser_rfc3986_parse,
