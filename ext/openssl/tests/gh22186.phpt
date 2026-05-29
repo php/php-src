@@ -4,8 +4,12 @@ GH-22186 (Heap buffer overflow in openssl_encrypt with AES-WRAP-PAD)
 openssl
 --SKIPIF--
 <?php
-if (!in_array('aes-128-wrap-pad', openssl_get_cipher_methods(), true)) {
-    die('skip aes-128-wrap-pad not available');
+/* openssl_get_cipher_methods() enumerates provider ciphers, but openssl_encrypt()
+ * resolves names via the legacy EVP_get_cipherbyname(), so on some builds the
+ * cipher is listed yet not usable. Probe the actual call path instead. */
+if (!@openssl_encrypt("test", "aes-128-wrap-pad", str_repeat("k", 16),
+        OPENSSL_RAW_DATA | OPENSSL_DONT_ZERO_PAD_KEY, str_repeat("\0", 4))) {
+    die('skip aes-128-wrap-pad not usable on this OpenSSL build');
 }
 ?>
 --FILE--

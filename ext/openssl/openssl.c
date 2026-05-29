@@ -7947,7 +7947,7 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 	}
 
 #ifdef EVP_CIPH_WRAP_MODE
-	if ((EVP_CIPHER_flags(cipher_type) & EVP_CIPH_MODE) == EVP_CIPH_WRAP_MODE) {
+	if ((EVP_CIPHER_mode(cipher_type)) == EVP_CIPH_WRAP_MODE) {
 		/*
 		 * RFC 5649 wrap-with-padding rounds the input up to the block size
 		 * and prepends an integrity block, we reserve one extra block.
