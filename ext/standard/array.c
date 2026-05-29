@@ -6950,6 +6950,118 @@ PHP_FUNCTION(array_key_exists)
 }
 /* }}} */
 
+/* {{{ Helper function to get a nested value from array using an array of path segments */
+static zval* array_get_nested(HashTable *ht, HashTable *path)
+{
+	zval *segment_val;
+	zval *current = NULL;
+	HashTable *current_ht = ht;
+	uint32_t num_segments = zend_hash_num_elements(path);
+	uint32_t segment_index = 0;
+
+	/* First pass: validate all path segments are valid types */
+	ZEND_HASH_FOREACH_VAL(path, segment_val) {
+		/* Dereference segment if it's a reference */
+		ZVAL_DEREF(segment_val);
+
+		/* Segment must be a string or int */
+		if (Z_TYPE_P(segment_val) != IS_STRING && Z_TYPE_P(segment_val) != IS_LONG) {
+			/* Invalid segment type - throw TypeError */
+			zend_type_error("Path segment must be of type string|int, %s given", zend_zval_value_name(segment_val));
+			return NULL;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	/* Second pass: traverse the array using the validated path */
+	ZEND_HASH_FOREACH_VAL(path, segment_val) {
+		segment_index++;
+
+		/* Dereference segment if it's a reference */
+		ZVAL_DEREF(segment_val);
+
+		/* Look up the segment (already validated to be string or int) */
+		if (Z_TYPE_P(segment_val) == IS_STRING) {
+			current = zend_symtable_find(current_ht, Z_STR_P(segment_val));
+		} else {
+			current = zend_hash_index_find(current_ht, Z_LVAL_P(segment_val));
+		}
+
+		/* If segment not found, return NULL */
+		if (current == NULL) {
+			return NULL;
+		}
+
+		/* Dereference if it's a reference */
+		ZVAL_DEREF(current);
+
+		/* If current is not an array and we're not at the last segment,
+		 * we can't continue traversing the path */
+		if (Z_TYPE_P(current) != IS_ARRAY && segment_index < num_segments) {
+			return NULL;
+		}
+
+		/* Update current_ht for next iteration if it's an array */
+		if (Z_TYPE_P(current) == IS_ARRAY) {
+			current_ht = Z_ARRVAL_P(current);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return current;
+}
+/* }}} */
+
+/* {{{ Retrieves a value from a deeply nested array using an array path */
+PHP_FUNCTION(array_path_get)
+{
+	zval *array;
+	zval *path;
+	zval *default_value = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY(path)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(default_value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *result = array_get_nested(Z_ARRVAL_P(array), Z_ARRVAL_P(path));
+
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
+	if (result != NULL) {
+		RETURN_COPY_DEREF(result);
+	}
+
+	/* Path not found, return default value */
+	if (default_value != NULL) {
+		RETURN_COPY(default_value);
+	}
+}
+/* }}} */
+
+/* {{{ Checks whether a given item exists in an array using an array path */
+PHP_FUNCTION(array_path_exists)
+{
+	zval *array;
+	zval *path;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY(path)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *result = array_get_nested(Z_ARRVAL_P(array), Z_ARRVAL_P(path));
+
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(result != NULL);
+}
+/* }}} */
+
 /* {{{ Split array into chunks */
 PHP_FUNCTION(array_chunk)
 {

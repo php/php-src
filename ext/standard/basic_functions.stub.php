@@ -1910,6 +1910,16 @@ function key_exists($key, array $array): bool {}
 /**
  * @compile-time-eval
  */
+function array_path_get(array $array, array $path, mixed $default = null): mixed {}
+
+/**
+ * @compile-time-eval
+ */
+function array_path_exists(array $array, array $path): bool {}
+
+/**
+ * @compile-time-eval
+ */
 function array_chunk(array $array, int $length, bool $preserve_keys = false): array {}
 
 /**
