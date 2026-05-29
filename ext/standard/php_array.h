@@ -60,6 +60,7 @@ PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, 
 #define ARRAY_FILTER_USE_VALUE	0
 #define ARRAY_FILTER_USE_BOTH	1
 #define ARRAY_FILTER_USE_KEY	2
+#define ARRAY_FILTER_PACK_RESULT 4
 
 extern PHPAPI zend_class_entry *sort_direction_ce;
 

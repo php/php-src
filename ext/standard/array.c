@@ -6511,13 +6511,19 @@ PHP_FUNCTION(array_filter)
 		Z_PARAM_LONG(use_type)
 	ZEND_PARSE_PARAMETERS_END();
 
+	bool pack_result = use_type & ARRAY_FILTER_PACK_RESULT;
+	use_type &= ~ARRAY_FILTER_PACK_RESULT;
+
 	switch (use_type) {
 		case ARRAY_FILTER_USE_VALUE:
 		case ARRAY_FILTER_USE_BOTH:
 		case ARRAY_FILTER_USE_KEY:
 			break;
 		default:
-			zend_argument_value_error(3, "must be one of ARRAY_FILTER_USE_VALUE, ARRAY_FILTER_USE_KEY, or ARRAY_FILTER_USE_BOTH");
+			zend_argument_value_error(
+				3,
+				"must be one of ARRAY_FILTER_USE_VALUE, ARRAY_FILTER_USE_KEY, or ARRAY_FILTER_USE_BOTH (optionally combined with ARRAY_FILTER_PACK_RESULT)"
+			);
 		RETURN_THROWS();
 	}
 
@@ -6567,7 +6573,9 @@ PHP_FUNCTION(array_filter)
 			continue;
 		}
 
-		if (string_key) {
+		if (pack_result) {
+			operand = zend_hash_next_index_insert(Z_ARRVAL_P(return_value), operand);
+		} else if (string_key) {
 			operand = zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, operand);
 		} else {
 			operand = zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, operand);
