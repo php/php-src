@@ -2993,7 +2993,10 @@ static void php_zip_progress_callback(zip_t *arch, double state, void *ptr)
 	ze_zip_object *obj = ptr;
 
 	ZVAL_DOUBLE(&cb_args[0], state);
-	zend_call_known_fcc(&obj->progress_callback, NULL, 1, cb_args, NULL);
+
+	zend_try {
+		zend_call_known_fcc(&obj->progress_callback, NULL, 1, cb_args, NULL);
+	} zend_end_try();
 }
 
 /* {{{ register a progression callback: void callback(double state); */
@@ -3040,7 +3043,13 @@ static int php_zip_cancel_callback(zip_t *arch, void *ptr)
 		return 0;
 	}
 
-	zend_call_known_fcc(&obj->cancel_callback, &cb_retval, 0, NULL, NULL);
+	zend_try {
+		zend_call_known_fcc(&obj->cancel_callback, &cb_retval, 0, NULL, NULL);
+	} zend_catch {
+		/* Cancel if a bailout occurs to allow cleanup to happen */
+		return -1;
+	} zend_end_try();
+
 	if (Z_ISUNDEF(cb_retval)) {
 		/* Cancel if an exception has been thrown */
 		return -1;
