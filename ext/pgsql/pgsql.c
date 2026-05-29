@@ -2118,7 +2118,7 @@ PHP_FUNCTION(pg_fetch_object)
 		RETURN_THROWS();
 	}
 
-	if (UNEXPECTED(object_init_ex(return_value, ce) == FAILURE)) {
+	if (UNEXPECTED(object_init_instantiable_class(return_value, ce) == FAILURE)) {
 		RETURN_THROWS();
 	}
 

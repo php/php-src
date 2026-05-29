@@ -88,10 +88,6 @@ PHP 8.6 UPGRADE NOTES
   . posix_mkfifo() now raises a ValueError when an invalid $permissions
     argument value is passed.
 
-- Reflection:
-  . ReflectionClass::newInstanceWithoutConstructor() no longer accepts
-    classes with non-public constructors.
-
 - Session:
   . Setting session.cookie_path, session.cookie_domain, or session.cache_limiter
     to a value containing null bytes now emits a warning and leaves the setting

@@ -6008,7 +6008,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, UNUSED|CACHE_SLOT, N
 		HANDLE_EXCEPTION();
 	}
 
-	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
+	if (UNEXPECTED(object_init_instantiable_class(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}
