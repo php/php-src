@@ -48,6 +48,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20469 (Unsafe inheritance cache replay with reentrant
     autoloading). (Levi Morrison)
 
+- OpenSSL:
+  . Fixed bug GH-22187 (Memory corruption (zend_mm_heap corrupted) in
+    openssl_encrypt with AES-WRAP-PAD). (David Carlier)
+
 - Phar:
   . Fixed a bypass of the magic ".phar" directory protection in
     Phar::addEmptyDir() for paths starting with "/.phar", while allowing
