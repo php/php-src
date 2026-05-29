@@ -8853,6 +8853,14 @@ static zend_op_array *zend_compile_func_decl_ex(
 	zend_compile_params(params_ast, return_type_ast,
 		is_method && zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_LCNAME) ? IS_STRING : 0);
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		if (CG(active_class_entry) != NULL) {
+			if (zend_is_constructor(CG(active_op_array)->function_name)) {
+				zend_error(E_DEPRECATED, "Making a constructor a Generator is deprecated");
+			} else if (zend_string_equals_literal_ci(CG(active_op_array)->function_name, ZEND_DESTRUCTOR_FUNC_NAME)) {
+				zend_error(E_DEPRECATED, "Making a destructor a Generator is deprecated");
+			}
+		}
+
 		zend_mark_function_as_generator();
 		zend_emit_op(NULL, ZEND_GENERATOR_CREATE, NULL, NULL);
 	}
