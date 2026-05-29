@@ -10,21 +10,21 @@ require 'server.inc';
 
 function probe(string $label, string $userinfo, string $expected): void
 {
-    $responses = array(
+    $responses = [
         "data://text/plain,HTTP/1.0 200 Ok\r\n\r\n",
-    );
+    ];
 
     ['pid' => $pid, 'uri' => $uri] = http_server($responses, $output);
 
-    $url = preg_replace('#^http://#', 'http://' . $userinfo . '@', $uri);
+    $url = preg_replace('(^http://)', 'http://' . $userinfo . '@', $uri);
     file_get_contents($url);
-
-    http_server_kill($pid);
 
     fseek($output, 0, SEEK_SET);
     $output = stream_get_contents($output);
 
-    if (preg_match('/^Authorization:\s*Basic\s+(\S+)/mi', $output, $m)) {
+    http_server_kill($pid);
+
+    if (preg_match('(^Authorization:\s*Basic\s+(\S+))mi', $output, $m)) {
         $decoded = base64_decode($m[1]);
     } else {
         $decoded = '<no Authorization header>';
