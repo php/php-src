@@ -55,6 +55,9 @@ PHP                                                                        NEWS
 - Zip:
   . Fixed bug GH-21705 (ZipArchive::getFromIndex() ignores
     ZipArchive::FL_UNCHANGED for deleted entries). (Weilin Du)
+  . Fixed bug GH-22176 (memory leak with ZipArchive::registerCancelBack()
+    is used with reference returning function during shutdown).
+    (David Carlier)
 
 02 Jul 2026, PHP 8.6.0alpha1
 
