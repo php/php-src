@@ -9678,11 +9678,12 @@ static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool top
 	}
 
 	/* Add zend_non_instantiable_constructor constructor if class cannot be manually instantiated */
-	if (ce->constructor == NULL && (ce->ce_flags & (ZEND_ACC_ENUM|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == 0) {
-		const zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
-		if (non_instantiable_class) {
-			ce->constructor = (zend_function *) &zend_non_instantiable_constructor;
+	const zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
+	if (non_instantiable_class) {
+		if (UNEXPECTED(ce->constructor)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot apply #[\\NonInstantiableClass] to class %s which defines a constructor", ZSTR_VAL(name));
 		}
+		ce->constructor = (zend_function *) &zend_non_instantiable_constructor;
 	}
 
 	/* We currently don't early-bind classes that implement interfaces or use traits */

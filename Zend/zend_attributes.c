@@ -265,6 +265,28 @@ ZEND_METHOD(NoDiscard, __construct)
 	}
 }
 
+static zend_string *validate_non_instantiable_class(
+	zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	const char *msg = NULL;
+	ZEND_ASSERT(CG(in_compilation));
+	ZEND_ASSERT(target == ZEND_ATTRIBUTE_TARGET_CLASS);
+	ZEND_ASSERT(scope);
+	if (scope->ce_flags & ZEND_ACC_TRAIT) {
+		msg = "Cannot apply #[\\NonInstantiableClass] to trait %s";
+	} else if (scope->ce_flags & ZEND_ACC_INTERFACE) {
+		msg = "Cannot apply #[\\NonInstantiableClass] to interface %s";
+	} else if (scope->ce_flags & ZEND_ACC_ENUM) {
+		msg = "Cannot apply #[\\NonInstantiableClass] to enum %s";
+	} else if (scope->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
+		msg = "Cannot apply #[\\NonInstantiableClass] to abstract class %s";
+	}
+	if (msg) {
+		return zend_strpprintf(0, msg, ZSTR_VAL(scope->name));
+	}
+	return NULL;
+}
+
 ZEND_METHOD(NonInstantiableClass, __construct)
 {
 	zend_string *message = NULL;
@@ -626,7 +648,8 @@ void zend_register_attribute_ce(void)
 	attr = zend_mark_internal_attribute(zend_ce_delayed_target_validation);
 
 	zend_ce_non_instantiable_class = register_class_NonInstantiableClass();
-	attr = zend_mark_internal_attribute(zend_ce_delayed_target_validation);
+	attr = zend_mark_internal_attribute(zend_ce_non_instantiable_class);
+	attr->validator = validate_non_instantiable_class;
 }
 
 void zend_attributes_shutdown(void)
