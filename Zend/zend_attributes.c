@@ -280,6 +280,8 @@ static zend_string *validate_non_instantiable_class(
 		msg = "Cannot apply #[\\NonInstantiableClass] to enum %s";
 	} else if (scope->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
 		msg = "Cannot apply #[\\NonInstantiableClass] to abstract class %s";
+	} else if (scope->type != ZEND_INTERNAL_CLASS) {
+		msg = "Cannot apply #[\\NonInstantiableClass] to a non-internal class %s";
 	}
 	if (msg) {
 		return zend_strpprintf(0, msg, ZSTR_VAL(scope->name));

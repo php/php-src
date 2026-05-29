@@ -11,4 +11,4 @@ class Test {
 var_dump(new Test());
 ?>
 --EXPECTF--
-Fatal error: Cannot apply #[\NonInstantiableClass] to class Test which defines a constructor in %s on line %d
+Fatal error: Cannot apply #[\NonInstantiableClass] to a non-internal class Test in %s on line %d
