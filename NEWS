@@ -21,6 +21,8 @@ PHP                                                                        NEWS
   . Deprecate specifying a nullable return type for __debugInfo(). (timwolla)
   . Fixed bug GH-22142 (Assertion failure in zendi_try_get_long() on IS_UNDEF).
     (David Carlier)
+  . Fixed GH-12695 (Wrong magic methods sequence with ?? operator).
+    (nicolas-grekas)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)

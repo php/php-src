@@ -934,6 +934,35 @@ try_again:
 			}
 
 			zval_ptr_dtor(&tmp_result);
+
+			/* __isset() may have materialised the property by writing into
+			 * the property table. Re-check it before deferring to __get(),
+			 * so the freshly-written value is returned directly without a
+			 * redundant __get() call (GH-12695). The value is copied into
+			 * `rv` because the property table can be freed by the OBJ_RELEASE
+			 * below (e.g. when __isset() drops the last external reference
+			 * to the object). */
+			if (IS_VALID_PROPERTY_OFFSET(property_offset)) {
+				retval = OBJ_PROP(zobj, property_offset);
+				if (Z_TYPE_P(retval) != IS_UNDEF) {
+					ZVAL_COPY(rv, retval);
+					retval = rv;
+					OBJ_RELEASE(zobj);
+					goto exit;
+				}
+			} else if (IS_DYNAMIC_PROPERTY_OFFSET(property_offset)) {
+				if (zobj->properties != NULL) {
+					retval = zend_hash_find(zobj->properties, name);
+					if (retval) {
+						ZVAL_COPY(rv, retval);
+						retval = rv;
+						OBJ_RELEASE(zobj);
+						goto exit;
+					}
+				}
+			}
+			retval = &EG(uninitialized_zval);
+
 			if (zobj->ce->__get && !((*guard) & IN_GET)) {
 				goto call_getter;
 			}
@@ -2487,7 +2516,20 @@ found:
 			result = zend_is_true(&rv);
 			zval_ptr_dtor(&rv);
 			if (has_set_exists == ZEND_PROPERTY_NOT_EMPTY && result) {
-				if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
+				/* GH-12695, see above. */
+				zval *prop = NULL;
+				if (IS_VALID_PROPERTY_OFFSET(property_offset)) {
+					prop = OBJ_PROP(zobj, property_offset);
+					if (Z_TYPE_P(prop) == IS_UNDEF) {
+						prop = NULL;
+					}
+				} else if (IS_DYNAMIC_PROPERTY_OFFSET(property_offset)
+						&& zobj->properties != NULL) {
+					prop = zend_hash_find(zobj->properties, name);
+				}
+				if (prop) {
+					result = i_zend_is_true(prop);
+				} else if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
 					(*guard) |= IN_GET;
 					zend_std_call_getter(zobj, name, &rv);
 					(*guard) &= ~IN_GET;
