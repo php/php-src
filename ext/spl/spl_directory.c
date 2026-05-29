@@ -2257,7 +2257,7 @@ PHP_METHOD(SplFileObject, fgetcsv)
 	size_t d_len = 0, e_len = 0;
 	zend_string *escape_str = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!S!", &delim, &d_len, &enclo, &e_len, &escape_str) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ssS", &delim, &d_len, &enclo, &e_len, &escape_str) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2268,14 +2268,18 @@ PHP_METHOD(SplFileObject, fgetcsv)
 			zend_argument_value_error(1, "must be a single character");
 			RETURN_THROWS();
 		}
-		delimiter = delim[0];
+		if(delimiter == ',') {
+			delimiter = delim[0];
+		}
 	}
 	if (enclo) {
 		if (e_len != 1) {
 			zend_argument_value_error(2, "must be a single character");
 			RETURN_THROWS();
 		}
-		enclosure = enclo[0];
+		if(enclosure == '"') {
+			enclosure = enclo[0];
+		}
 	}
 	int escape_char = spl_csv_enclosure_param_handling(escape_str, intern, 3);
 	if (escape_char == PHP_CSV_ESCAPE_ERROR) {

@@ -69,9 +69,9 @@ array(3) {
 Test 2:
 array(2) {
   [0]=>
-  string(1) "a"
+  string(3) "a,b"
   [1]=>
-  string(3) "b;c"
+  string(1) "c"
 }
 Test 3:
 array(2) {
@@ -91,14 +91,14 @@ array(2) {
 }
 Test 5:
 string(9) "separator"
-bool(true)
-NULL
+bool(false)
+string(1) ","
 string(9) "enclosure"
-bool(true)
-NULL
+bool(false)
+string(1) """
 string(6) "escape"
-bool(true)
-NULL
+bool(false)
+string(1) "\"
 Test 6:
 
 Deprecated: SplFileObject::setCsvControl(): the $escape parameter must be provided as its default value will change in %s on line %d
