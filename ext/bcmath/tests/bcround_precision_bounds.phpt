@@ -25,8 +25,8 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 ?>
---EXPECT--
-bcround(): Argument #2 ($precision) must be between -2147483647 and 2147483647
-bcround(): Argument #2 ($precision) must be between -2147483647 and 2147483647
-bcround(): Argument #2 ($precision) must be between -2147483647 and 2147483647
-BcMath\Number::round(): Argument #1 ($precision) must be between -2147483647 and 2147483647
+--EXPECTF--
+bcround(): Argument #2 ($precision) must be between %i and %i
+bcround(): Argument #2 ($precision) must be between %i and %i
+bcround(): Argument #2 ($precision) must be between %i and %i
+BcMath\Number::round(): Argument #1 ($precision) must be between %i and %i

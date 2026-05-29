@@ -155,10 +155,10 @@ static zend_always_inline zend_result bcmath_check_scale(zend_long scale, uint32
 	return SUCCESS;
 }
 
-static zend_always_inline zend_result bcmath_check_precision(zend_long precision, uint32_t arg_num)
+static zend_result bcmath_check_precision(zend_long precision, uint32_t arg_num)
 {
-	if (UNEXPECTED(precision < -(zend_long) INT_MAX || precision > INT_MAX)) {
-		zend_argument_value_error(arg_num, "must be between %d and %d", -INT_MAX, INT_MAX);
+	if (UNEXPECTED(precision < INT_MIN || precision > INT_MAX)) {
+		zend_argument_value_error(arg_num, "must be between %d and %d", INT_MIN, INT_MAX);
 		return FAILURE;
 	}
 	return SUCCESS;
