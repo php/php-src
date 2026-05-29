@@ -2,7 +2,7 @@ EXTENSION("uri", "php_uri.c php_uri_common.c uri_parser_rfc3986.c uri_parser_wha
 
 AC_DEFINE("URI_ENABLE_ANSI", 1, "Define to 1 for enabling ANSI support of uriparser.")
 AC_DEFINE("URI_NO_UNICODE", 1, "Define to 1 for disabling unicode support of uriparser.")
-ADD_FLAG("CFLAGS_URI", "/D URI_STATIC_BUILD");
+ADD_FLAG("CFLAGS_URI", "/D URI_STATIC_BUILD /D LEXBOR_STATIC");
 
 ADD_EXTENSION_DEP('uri', 'lexbor');
 ADD_SOURCES("ext/uri/uriparser/src", "UriCommon.c UriCompare.c UriCopy.c UriEscape.c UriFile.c UriIp4.c UriIp4Base.c \

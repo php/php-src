@@ -6,6 +6,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-22121 (Double free in gdImageSetStyle() after
     overflow-triggered early return). (iliaal)
 
+- URI:
+  . Add LEXBOR_STATIC to CFLAGS_URI on Windows so ext/uri does not see
+    LXB_API as __declspec(dllimport) when linked statically into PHP.
+    (Luther Monson)
+
 - Zlib:
   . Fixed memory leak if deflate initialization fails and there is a dict.
     (ndossche)
