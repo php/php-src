@@ -628,6 +628,12 @@ static bool php_zipobj_close(ze_zip_object *obj, zend_string **out_str) /* {{{ *
 
 	obj->za = NULL;
 	obj->from_string = false;
+
+	if (obj->bailout_callback) {
+		obj->bailout_callback = false;
+		zend_bailout();
+	}
+
 	return success;
 }
 /* }}} */
@@ -1073,10 +1079,16 @@ static void php_zip_object_dtor(zend_object *object)
 
 	if (intern->za) {
 		if (zip_close(intern->za) != 0) {
-			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
+			if (!intern->bailout_callback) {
+				php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
+			}
 			zip_discard(intern->za);
 		}
 		intern->za = NULL;
+		if (intern->bailout_callback) {
+			intern->bailout_callback = false;
+			zend_bailout();
+		}
 	}
 }
 
@@ -2985,17 +2997,20 @@ PHP_METHOD(ZipArchive, getStream)
 #ifdef HAVE_PROGRESS_CALLBACK
 static void php_zip_progress_callback(zip_t *arch, double state, void *ptr)
 {
-	if (!EG(active)) {
+	ze_zip_object *obj = ptr;
+
+	if (!EG(active) || obj->bailout_callback) {
 		return;
 	}
 
 	zval cb_args[1];
-	ze_zip_object *obj = ptr;
 
 	ZVAL_DOUBLE(&cb_args[0], state);
 
 	zend_try {
 		zend_call_known_fcc(&obj->progress_callback, NULL, 1, cb_args, NULL);
+	} zend_catch {
+		obj->bailout_callback = true;
 	} zend_end_try();
 }
 
@@ -3039,13 +3054,14 @@ static int php_zip_cancel_callback(zip_t *arch, void *ptr)
 	zval cb_retval;
 	ze_zip_object *obj = ptr;
 
-	if (!EG(active)) {
+	if (!EG(active) || obj->bailout_callback) {
 		return 0;
 	}
 
 	zend_try {
 		zend_call_known_fcc(&obj->cancel_callback, &cb_retval, 0, NULL, NULL);
 	} zend_catch {
+		obj->bailout_callback = true;
 		/* Cancel if a bailout occurs to allow cleanup to happen */
 		return -1;
 	} zend_end_try();
