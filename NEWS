@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.23
 
+- BCMath:
+  . Fixed issues with oversized allocations and signed overflow in bcround()
+    and BcMath\Number::round(). (edorian)
+
 - GD:
   . Fixed bug GH-22121 (Double free in gdImageSetStyle() after
     overflow-triggered early return). (iliaal)

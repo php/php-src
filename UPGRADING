@@ -625,6 +625,10 @@ PHP 8.4 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- BCMath:
+  . bcround() and BcMath\Number::round() now throw a ValueError when the precision
+    argument is out of range.
+
 - Core:
   . trigger_error() and user_error() now have a return type of true instead of
     bool.
