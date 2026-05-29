@@ -58,9 +58,7 @@ struct _php_date_obj {
 	zend_object   std;
 };
 
-static inline php_date_obj *php_date_obj_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, php_date_obj, std);
-}
+#define php_date_obj_from_obj(obj) ZEND_CONTAINER_OF(obj, php_date_obj, std)
 
 #define Z_PHPDATE_P(zv)  php_date_obj_from_obj(Z_OBJ_P((zv)))
 
@@ -75,9 +73,7 @@ struct _php_timezone_obj {
 	zend_object std;
 };
 
-static inline php_timezone_obj *php_timezone_obj_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, php_timezone_obj, std);
-}
+#define php_timezone_obj_from_obj(obj) ZEND_CONTAINER_OF(obj, php_timezone_obj, std)
 
 #define Z_PHPTIMEZONE_P(zv)  php_timezone_obj_from_obj(Z_OBJ_P((zv)))
 
@@ -93,9 +89,7 @@ struct _php_interval_obj {
 	zend_object       std;
 };
 
-static inline php_interval_obj *php_interval_obj_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, php_interval_obj, std);
-}
+#define php_interval_obj_from_obj(obj) ZEND_CONTAINER_OF(obj, php_interval_obj, std)
 
 #define Z_PHPINTERVAL_P(zv)  php_interval_obj_from_obj(Z_OBJ_P((zv)))
 
@@ -112,9 +106,7 @@ struct _php_period_obj {
 	zend_object       std;
 };
 
-static inline php_period_obj *php_period_obj_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, php_period_obj, std);
-}
+#define php_period_obj_from_obj(obj) ZEND_CONTAINER_OF(obj, php_period_obj, std)
 
 #define Z_PHPPERIOD_P(zv)  php_period_obj_from_obj(Z_OBJ_P((zv)))
 

@@ -41,9 +41,7 @@ typedef struct {
 	zend_object	zo;
 } BreakIterator_object;
 
-static inline BreakIterator_object *php_intl_breakiterator_fetch_object(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, BreakIterator_object, zo);
-}
+#define php_intl_breakiterator_fetch_object(obj) ZEND_CONTAINER_OF(obj, BreakIterator_object, zo)
 #define Z_INTL_BREAKITERATOR_P(zv) php_intl_breakiterator_fetch_object(Z_OBJ_P(zv))
 
 #define BREAKITER_ERROR(bio)		(bio)->err

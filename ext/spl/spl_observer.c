@@ -64,10 +64,7 @@ typedef struct _spl_SplObjectStorageElement {
 	zval inf;
 } spl_SplObjectStorageElement; /* }}} */
 
-static inline spl_SplObjectStorage *spl_object_storage_from_obj(zend_object *obj) /* {{{ */ {
-	return ZEND_CONTAINER_OF(obj, spl_SplObjectStorage, std);
-}
-/* }}} */
+#define spl_object_storage_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_SplObjectStorage, std)
 
 #define Z_SPLOBJSTORAGE_P(zv)  spl_object_storage_from_obj(Z_OBJ_P((zv)))
 

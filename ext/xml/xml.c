@@ -295,9 +295,7 @@ static void xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encodin
 }
 /* }}} */
 
-static inline xml_parser *xml_parser_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, xml_parser, std);
-}
+#define xml_parser_from_obj(obj) ZEND_CONTAINER_OF(obj, xml_parser, std)
 
 #define Z_XMLPARSER_P(zv) xml_parser_from_obj(Z_OBJ_P(zv))
 

@@ -151,9 +151,7 @@ static int le_plink;
 static zend_class_entry *pgsql_link_ce, *pgsql_result_ce, *pgsql_lob_ce;
 static zend_object_handlers pgsql_link_object_handlers, pgsql_result_object_handlers, pgsql_lob_object_handlers;
 
-static inline pgsql_link_handle *pgsql_link_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, pgsql_link_handle, std);
-}
+#define pgsql_link_from_obj(obj) ZEND_CONTAINER_OF(obj, pgsql_link_handle, std)
 
 #define Z_PGSQL_LINK_P(zv) pgsql_link_from_obj(Z_OBJ_P(zv))
 
@@ -207,9 +205,7 @@ static void pgsql_link_free_obj(zend_object *obj)
 	zend_object_std_dtor(&link->std);
 }
 
-static inline pgsql_result_handle *pgsql_result_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, pgsql_result_handle, std);
-}
+#define pgsql_result_from_obj(obj) ZEND_CONTAINER_OF(obj, pgsql_result_handle, std)
 
 #define Z_PGSQL_RESULT_P(zv) pgsql_result_from_obj(Z_OBJ_P(zv))
 
@@ -244,9 +240,7 @@ static void pgsql_result_free_obj(zend_object *obj)
 	zend_object_std_dtor(&pg_result->std);
 }
 
-static inline pgLofp *pgsql_lob_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, pgLofp, std);
-}
+#define pgsql_lob_from_obj(obj) ZEND_CONTAINER_OF(obj, pgLofp, std)
 
 #define Z_PGSQL_LOB_P(zv) pgsql_lob_from_obj(Z_OBJ_P(zv))
 

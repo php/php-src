@@ -149,9 +149,7 @@ typedef struct php_uri_object {
 	zend_object std;
 } php_uri_object;
 
-static inline php_uri_object *php_uri_object_from_obj(zend_object *object) {
-	return ZEND_CONTAINER_OF(object, php_uri_object, std);
-}
+#define php_uri_object_from_obj(object) ZEND_CONTAINER_OF(object, php_uri_object, std)
 
 #define Z_URI_OBJECT_P(zv) php_uri_object_from_obj(Z_OBJ_P((zv)))
 

@@ -100,9 +100,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(ldap)
 #endif
 
-static inline ldap_linkdata *ldap_link_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, ldap_linkdata, std);
-}
+#define ldap_link_from_obj(obj) ZEND_CONTAINER_OF(obj, ldap_linkdata, std)
 
 #define Z_LDAP_LINK_P(zv) ldap_link_from_obj(Z_OBJ_P(zv))
 
@@ -147,9 +145,7 @@ static void ldap_link_free_obj(zend_object *obj)
 	zend_object_std_dtor(&ld->std);
 }
 
-static inline ldap_resultdata *ldap_result_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, ldap_resultdata, std);
-}
+#define ldap_result_from_obj(obj) ZEND_CONTAINER_OF(obj, ldap_resultdata, std)
 
 #define Z_LDAP_RESULT_P(zv) ldap_result_from_obj(Z_OBJ_P(zv))
 
@@ -184,9 +180,7 @@ static void ldap_result_free_obj(zend_object *obj)
 	zend_object_std_dtor(&result->std);
 }
 
-static inline ldap_result_entry *ldap_result_entry_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, ldap_result_entry, std);
-}
+#define ldap_result_entry_from_obj(obj) ZEND_CONTAINER_OF(obj, ldap_result_entry, std)
 
 #define Z_LDAP_RESULT_ENTRY_P(zv) ldap_result_entry_from_obj(Z_OBJ_P(zv))
 

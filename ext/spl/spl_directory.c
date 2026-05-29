@@ -48,11 +48,7 @@ PHPAPI zend_class_entry *spl_ce_GlobIterator;
 PHPAPI zend_class_entry *spl_ce_SplFileObject;
 PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
-/* Object helper */
-static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /* {{{ */ {
-	return ZEND_CONTAINER_OF(obj, spl_filesystem_object, std);
-}
-/* }}} */
+#define spl_filesystem_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_filesystem_object, std)
 
 /* define an overloaded iterator structure */
 typedef struct {

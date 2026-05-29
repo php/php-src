@@ -60,7 +60,6 @@
 void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 static void safe_odbc_disconnect(void *handle);
 static void close_results_with_connection(odbc_connection *conn);
-static inline odbc_result *odbc_result_from_obj(zend_object *obj);
 
 static int le_pconn;
 
@@ -85,10 +84,7 @@ static void odbc_insert_new_result(odbc_connection *connection, zval *result)
 	Z_ADDREF_P(result);
 }
 
-static inline odbc_link *odbc_link_from_obj(zend_object *obj)
-{
-	return ZEND_CONTAINER_OF(obj, odbc_link, std);
-}
+#define odbc_link_from_obj(obj) ZEND_CONTAINER_OF(obj, odbc_link, std)
 
 static int _close_pconn_with_res(zval *zv, void *p)
 {
@@ -202,10 +198,7 @@ static void odbc_connection_free_obj(zend_object *obj)
 	zend_object_std_dtor(&link->std);
 }
 
-static inline odbc_result *odbc_result_from_obj(zend_object *obj)
-{
-	return ZEND_CONTAINER_OF(obj, odbc_result, std);
-}
+#define odbc_result_from_obj(obj) ZEND_CONTAINER_OF(obj, odbc_result, std)
 
 static zend_object *odbc_result_create_object(zend_class_entry *class_type)
 {

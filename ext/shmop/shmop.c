@@ -68,10 +68,7 @@ typedef struct php_shmop
 zend_class_entry *shmop_ce;
 static zend_object_handlers shmop_object_handlers;
 
-static inline php_shmop *shmop_from_obj(zend_object *obj)
-{
-	return ZEND_CONTAINER_OF(obj, php_shmop, std);
-}
+#define shmop_from_obj(obj) ZEND_CONTAINER_OF(obj, php_shmop, std)
 
 #define Z_SHMOP_P(zv) shmop_from_obj(Z_OBJ_P(zv))
 

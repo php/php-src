@@ -47,9 +47,7 @@ ZEND_DECLARE_MODULE_GLOBALS(zlib)
 zend_class_entry *inflate_context_ce;
 static zend_object_handlers inflate_context_object_handlers;
 
-static inline php_zlib_context *inflate_context_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, php_zlib_context, std);
-}
+#define inflate_context_from_obj(obj) ZEND_CONTAINER_OF(obj, php_zlib_context, std)
 
 #define Z_INFLATE_CONTEXT_P(zv) inflate_context_from_obj(Z_OBJ_P(zv))
 
@@ -85,9 +83,7 @@ static void inflate_context_free_obj(zend_object *object)
 zend_class_entry *deflate_context_ce;
 static zend_object_handlers deflate_context_object_handlers;
 
-static inline php_zlib_context *deflate_context_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, php_zlib_context, std);
-}
+#define deflate_context_from_obj(obj) ZEND_CONTAINER_OF(obj, php_zlib_context, std)
 
 #define Z_DEFLATE_CONTEXT_P(zv) deflate_context_from_obj(Z_OBJ_P(zv))
 
