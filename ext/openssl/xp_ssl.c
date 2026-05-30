@@ -190,9 +190,9 @@ typedef struct _php_openssl_psk_callbacks_t {
 /* Holds session callback */
 typedef struct _php_openssl_session_callbacks_t {
 	int refcount;
-	zval new_cb;
-	zval get_cb;
-	zval remove_cb;
+	zend_fcall_info_cache new_cb;
+	zend_fcall_info_cache get_cb;
+	zend_fcall_info_cache remove_cb;
 } php_openssl_session_callbacks_t;
 
 /* This implementation is very closely tied to the that of the native
@@ -2004,15 +2004,11 @@ static int php_openssl_session_new_cb(SSL *ssl, SSL_SESSION *session)
 	SSL_SESSION_up_ref(session);
 
 	zval args[2];
-	zval retval;
 
 	ZVAL_RES(&args[0], stream->res);
 	php_openssl_session_object_init(&args[1], session);
 
-	if (call_user_function(EG(function_table), NULL, &sslsock->session_callbacks->new_cb,
-			&retval, 2, args) == SUCCESS) {
-		zval_ptr_dtor(&retval);
-	}
+	zend_call_known_fcc(&sslsock->session_callbacks->new_cb, NULL, 2, args, NULL);
 
 	zval_ptr_dtor(&args[1]);
 
@@ -2045,22 +2041,21 @@ static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *se
 
 	SSL_SESSION *session = NULL;
 
-	if (call_user_function(EG(function_table), NULL, &sslsock->session_callbacks->get_cb,
-			&retval, 2, args) == SUCCESS) {
-		if (php_openssl_is_session_ce(&retval)) {
-			/* Get session from object and increment ref since OpenSSL will own it */
-			php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(&retval);
-			if (obj->session) {
-				SSL_SESSION_up_ref(obj->session);
-				session = obj->session;
-			}
-		} else if (Z_TYPE(retval) != IS_NULL) {
-			zend_type_error("session_get_cb return type must be null or OpenSSLSession");
+	zend_call_known_fcc(&sslsock->session_callbacks->get_cb, &retval, 2, args, NULL);
+	zval_ptr_dtor(&args[1]);
+
+	if (php_openssl_is_session_ce(&retval)) {
+		/* Get session from object and increment ref since OpenSSL will own it */
+		php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(&retval);
+		if (obj->session) {
+			SSL_SESSION_up_ref(obj->session);
+			session = obj->session;
 		}
+	} else if (Z_TYPE(retval) != IS_NULL) {
+		zend_type_error("session_get_cb return type must be null or OpenSSLSession");
 	}
 
 	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&args[1]);
 
 	*copy = 0;
 	return session;
@@ -2085,28 +2080,41 @@ static void php_openssl_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *session)
 	const unsigned char *session_id = SSL_SESSION_get_id(session, &session_id_len);
 
 	zval args[2];
-	zval retval;
 
 	ZVAL_RES(&args[0], stream->res);
 	ZVAL_STRINGL(&args[1], (char *)session_id, session_id_len);
 
-	if (call_user_function(EG(function_table), NULL, &sslsock->session_callbacks->remove_cb,
-			&retval, 2, args) == SUCCESS) {
-		zval_ptr_dtor(&retval);
-	}
-
+	zend_call_known_fcc(&sslsock->session_callbacks->remove_cb, NULL, 2, args, NULL);
 	zval_ptr_dtor(&args[1]);
 }
 
+
+enum php_openssl_session_callback_type {
+	PHP_OPENSSL_NEW_CB,
+	PHP_OPENSSL_GET_CB,
+	PHP_OPENSSL_REMOVE_CB,
+};
 /**
  * Validate callable and allocate callback structure if needed.
  */
-static zend_result php_openssl_validate_and_allocate_callback(
-		php_openssl_netstream_data_t *sslsock, zval *callable,
-		const char *callback_name, bool is_persistent)
+static zend_result php_openssl_validate_and_allocate_session_callback(
+		php_openssl_netstream_data_t *sslsock, const zval *callable,
+		enum php_openssl_session_callback_type cb_type, bool is_persistent)
 {
-	zend_fcall_info_cache fcc;
 	char *is_callable_error = NULL;
+	const char *callback_name;
+
+	switch (cb_type) {
+		case PHP_OPENSSL_NEW_CB:
+			callback_name = "session_new_cb";
+			break;
+		case PHP_OPENSSL_GET_CB:
+			callback_name = "session_get_cb";
+			break;
+		case PHP_OPENSSL_REMOVE_CB:
+			callback_name = "session_remove_cb";
+			break;
+	}
 
 	/* Callbacks not supported for persistent streams */
 	if (is_persistent) {
@@ -2116,6 +2124,7 @@ static zend_result php_openssl_validate_and_allocate_callback(
 	}
 
 	/* Validate callable */
+	zend_fcall_info_cache fcc;
 	if (!zend_is_callable_ex(callable, NULL, 0, NULL, &fcc, &is_callable_error)) {
 		if (is_callable_error) {
 			zend_type_error("%s must be a valid callback, %s", callback_name, is_callable_error);
@@ -2128,12 +2137,22 @@ static zend_result php_openssl_validate_and_allocate_callback(
 
 	/* Allocate callback structure if not already allocated */
 	if (!sslsock->session_callbacks) {
-		sslsock->session_callbacks = (php_openssl_session_callbacks_t *)pemalloc(
-				sizeof(php_openssl_session_callbacks_t), is_persistent);
-		ZVAL_UNDEF(&sslsock->session_callbacks->new_cb);
-		ZVAL_UNDEF(&sslsock->session_callbacks->get_cb);
-		ZVAL_UNDEF(&sslsock->session_callbacks->remove_cb);
+		sslsock->session_callbacks = (php_openssl_session_callbacks_t *)pecalloc(
+				1, sizeof(php_openssl_session_callbacks_t), is_persistent);
 		sslsock->session_callbacks->refcount = 1;
+	}
+
+	zend_fcc_addref(&fcc);
+	switch (cb_type) {
+		case PHP_OPENSSL_NEW_CB:
+			sslsock->session_callbacks->new_cb = fcc;
+			break;
+		case PHP_OPENSSL_GET_CB:
+			sslsock->session_callbacks->get_cb = fcc;
+			break;
+		case PHP_OPENSSL_REMOVE_CB:
+			sslsock->session_callbacks->remove_cb = fcc;
+			break;
 	}
 
 	return SUCCESS;
@@ -2159,12 +2178,11 @@ static zend_result php_openssl_setup_client_session(php_stream *stream,
 	}
 
 	if (GET_VER_OPT("session_new_cb")) {
-		if (FAILURE == php_openssl_validate_and_allocate_callback(
-				sslsock, val, "session_new_cb", is_persistent)) {
+		if (FAILURE == php_openssl_validate_and_allocate_session_callback(
+				sslsock, val, PHP_OPENSSL_NEW_CB, is_persistent)) {
 			return FAILURE;
 		}
 
-		ZVAL_COPY(&sslsock->session_callbacks->new_cb, val);
 		SSL_CTX_sess_set_new_cb(sslsock->ctx, php_openssl_session_new_cb);
 		enable_client_cache = true;
 	}
@@ -2207,11 +2225,10 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 
 	/* Check for session_get_cb first (determines cache mode) */
 	if (GET_VER_OPT("session_get_cb")) {
-		if (FAILURE == php_openssl_validate_and_allocate_callback(
-				sslsock, val, "session_new_cb", is_persistent)) {
+		if (FAILURE == php_openssl_validate_and_allocate_session_callback(
+				sslsock, val, PHP_OPENSSL_GET_CB, is_persistent)) {
 			return FAILURE;
 		}
-		ZVAL_COPY(&sslsock->session_callbacks->get_cb, val);
 		has_get_cb = true;
 	}
 
@@ -2227,11 +2244,10 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 
 	/* Check for session_new_cb */
 	if (GET_VER_OPT("session_new_cb")) {
-		if (FAILURE == php_openssl_validate_and_allocate_callback(
-				sslsock, val, "session_new_cb", is_persistent)) {
+		if (FAILURE == php_openssl_validate_and_allocate_session_callback(
+				sslsock, val, PHP_OPENSSL_NEW_CB, is_persistent)) {
 			return FAILURE;
 		}
-		ZVAL_COPY(&sslsock->session_callbacks->new_cb, val);
 		has_new_cb = true;
 
 		if (!has_session_id_context &&
@@ -2249,12 +2265,11 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 
 	/* Check for session_remove_cb (optional) */
 	if (GET_VER_OPT("session_remove_cb")) {
-		if (FAILURE == php_openssl_validate_and_allocate_callback(
-				sslsock, val, "session_remove_cb", is_persistent)) {
+		if (FAILURE == php_openssl_validate_and_allocate_session_callback(
+				sslsock, val, PHP_OPENSSL_REMOVE_CB, is_persistent)) {
 			return FAILURE;
 		}
 
-		ZVAL_COPY(&sslsock->session_callbacks->remove_cb, val);
 		has_remove_cb = true;
 	}
 
@@ -3088,9 +3103,15 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 	}
 
 	if (sslsock->session_callbacks && --sslsock->session_callbacks->refcount == 0) {
-		zval_ptr_dtor(&sslsock->session_callbacks->new_cb);
-		zval_ptr_dtor(&sslsock->session_callbacks->get_cb);
-		zval_ptr_dtor(&sslsock->session_callbacks->remove_cb);
+		if (ZEND_FCC_INITIALIZED(sslsock->session_callbacks->new_cb)) {
+			zend_fcc_dtor(&sslsock->session_callbacks->new_cb);
+		}
+		if (ZEND_FCC_INITIALIZED(sslsock->session_callbacks->get_cb)) {
+			zend_fcc_dtor(&sslsock->session_callbacks->get_cb);
+		}
+		if (ZEND_FCC_INITIALIZED(sslsock->session_callbacks->remove_cb)) {
+			zend_fcc_dtor(&sslsock->session_callbacks->remove_cb);
+		}
 		pefree(sslsock->session_callbacks, php_stream_is_persistent(stream));
 	}
 
