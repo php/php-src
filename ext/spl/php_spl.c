@@ -501,7 +501,6 @@ PHPAPI zend_string *php_spl_object_hash(zend_object *obj) /* {{{*/
     static const char hex[] = "0123456789abcdef";
 
     zend_string *str = zend_string_alloc(32, 0);
-
     uintptr_t handle = (uintptr_t)obj->handle;
 
     char *p = ZSTR_VAL(str);
