@@ -365,11 +365,7 @@ static void php_stream_call_error_handler(zval *handler, zval *errors_array)
 		return;
 	}
 
-	zval retval;
-
-	call_user_function(NULL, NULL, handler, &retval, 1, errors_array);
-
-	zval_ptr_dtor(&retval);
+	zend_call_known_fcc(&fcc, NULL, 1, errors_array, NULL);
 }
 
 static void php_stream_throw_exception_with_errors(php_stream_error_operation *op)
