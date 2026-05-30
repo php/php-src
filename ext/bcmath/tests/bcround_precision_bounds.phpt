@@ -2,6 +2,8 @@
 bcround() and BcMath\Number::round() reject out-of-range $precision
 --EXTENSIONS--
 bcmath
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip: 64-bit only"); ?>
 --FILE--
 <?php
 try {
