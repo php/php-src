@@ -28,7 +28,7 @@ foreach (yieldFromIteratorGeneratorThrows() as $k => $v) {
 int(1)
 Exception in %s:%d
 Stack trace:
-#0 %s(%d): IteratorIterator@anonymous->key()
+#0 %s(%d): class@anonymous->key()
 #1 %s(%d): yieldFromIteratorGeneratorThrows()
 #2 {main}
 int(2)
