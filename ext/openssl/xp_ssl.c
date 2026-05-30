@@ -2688,28 +2688,23 @@ static int php_openssl_enable_crypto(php_stream *stream,
 		struct timeval start_time, *timeout;
 		bool blocked = sslsock->s.is_blocked, has_timeout = false;
 
-		if (sslsock->is_client) {
-			/* Set session data for client */
-			if ( php_openssl_apply_client_session_data(stream, sslsock)) {
-				return FAILURE;
-			}
-#ifdef HAVE_TLS_SNI
-			php_openssl_enable_client_sni(stream, sslsock);
-#endif
-		} else {
-			php_openssl_init_server_reneg_limit(stream, sslsock);
-		}
-
-#ifdef PHP_OPENSSL_TLS_DEBUG
-		BIO *b_out = BIO_new_fp(stdout, BIO_NOCLOSE | BIO_FP_TEXT);
-		SSL_set_msg_callback(sslsock->ssl_handle, SSL_trace);
-		SSL_set_msg_callback_arg(sslsock->ssl_handle, b_out);
-#endif
-
 		if (!sslsock->state_set) {
+#ifdef PHP_OPENSSL_TLS_DEBUG
+			BIO *b_out = BIO_new_fp(stdout, BIO_NOCLOSE | BIO_FP_TEXT);
+			SSL_set_msg_callback(sslsock->ssl_handle, SSL_trace);
+			SSL_set_msg_callback_arg(sslsock->ssl_handle, b_out);
+#endif
 			if (sslsock->is_client) {
+				/* Set session data for client */
+				if (php_openssl_apply_client_session_data(stream, sslsock) == FAILURE) {
+					return -1;
+				}
+#ifdef HAVE_TLS_SNI
+				php_openssl_enable_client_sni(stream, sslsock);
+#endif
 				SSL_set_connect_state(sslsock->ssl_handle);
 			} else {
+				php_openssl_init_server_reneg_limit(stream, sslsock);
 				SSL_set_accept_state(sslsock->ssl_handle);
 			}
 			sslsock->state_set = 1;
