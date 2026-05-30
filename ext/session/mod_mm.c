@@ -12,12 +12,18 @@
    +----------------------------------------------------------------------+
  */
 
+/* GH-14019: backend switched from libmm (shared memory, prefork-only, not
+ * thread-safe, unmaintained upstream) to an in-process GLib GHashTable
+ * guarded by a TSRM mutex. Trade-off: no more cross-process sharing, but
+ * ZTS and Windows now work. Prefork users who relied on shared sessions
+ * must switch to files/memcached/redis. */
+
 #include "php.h"
 
-#ifdef HAVE_LIBMM
+#ifdef HAVE_LIBGLIB
 
 #include <unistd.h>
-#include <mm.h>
+#include <glib.h>
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -29,30 +35,30 @@
 #include "SAPI.h"
 
 #ifdef ZTS
-# error mm is not thread-safe
+static MUTEX_T session_mm_lock;
+# define PS_MM_LOCK()   tsrm_mutex_lock(session_mm_lock)
+# define PS_MM_UNLOCK() tsrm_mutex_unlock(session_mm_lock)
+#else
+# define PS_MM_LOCK()   ((void) 0)
+# define PS_MM_UNLOCK() ((void) 0)
 #endif
 
-#define PS_MM_FILE "session_mm_"
-
-/* This list holds all data associated with one session. */
-
+/* Per-session entry stored as the GHashTable value. */
 typedef struct ps_sd {
-	struct ps_sd *next;
-	uint32_t hv;        /* hash value of key */
 	time_t ctime;       /* time of last change */
 	void *data;
 	size_t datalen;     /* amount of valid data */
 	size_t alloclen;    /* amount of allocated memory for data */
-	zend_string *key;
 } ps_sd;
 
 typedef struct {
-	MM *mm;
-	ps_sd **hash;
-	uint32_t hash_max;
-	uint32_t hash_cnt;
-	pid_t owner;
+	GHashTable *hash;
 } ps_mm;
+
+typedef struct {
+	time_t limit;
+	zend_long nrdels;
+} ps_mm_gc_ctx;
 
 static ps_mm *ps_mm_instance = NULL;
 
@@ -62,175 +68,60 @@ static ps_mm *ps_mm_instance = NULL;
 # define ps_mm_debug(a)
 #endif
 
-static inline uint32_t ps_sd_hash(const zend_string *data)
+static guint ps_mm_hash(gconstpointer key)
 {
-	uint32_t h;
-	const char *data_char = ZSTR_VAL(data);
-	const char *e = ZSTR_VAL(data) + ZSTR_LEN(data);
-
-	for (h = 2166136261U; data_char < e; ) {
-		h *= 16777619;
-		h ^= *data_char++;
-	}
-
-	return h;
+	zend_ulong h = zend_string_hash_val((zend_string *) key);
+	return (guint) (h ^ (h >> 32));
 }
 
-static void hash_split(ps_mm *data)
+static gboolean ps_mm_key_equals(gconstpointer a, gconstpointer b)
 {
-	uint32_t nmax;
-	ps_sd **nhash;
-	ps_sd **ohash, **ehash;
-	ps_sd *ps, *next;
+	return zend_string_equals((const zend_string *) a, (const zend_string *) b);
+}
 
-	nmax = ((data->hash_max + 1) << 1) - 1;
-	nhash = mm_calloc(data->mm, nmax + 1, sizeof(*data->hash));
+static void ps_mm_key_free(gpointer key)
+{
+	zend_string_release_ex((zend_string *) key, false);
+}
 
-	if (!nhash) {
-		/* no further memory to expand hash table */
-		return;
+static void ps_mm_value_free(gpointer val)
+{
+	ps_sd *sd = (ps_sd *) val;
+	if (sd->data) {
+		g_free(sd->data);
 	}
-
-	ehash = data->hash + data->hash_max + 1;
-	for (ohash = data->hash; ohash < ehash; ohash++) {
-		for (ps = *ohash; ps; ps = next) {
-			next = ps->next;
-			ps->next = nhash[ps->hv & nmax];
-			nhash[ps->hv & nmax] = ps;
-		}
-	}
-	mm_free(data->mm, data->hash);
-
-	data->hash = nhash;
-	data->hash_max = nmax;
+	g_free(sd);
 }
 
 static ps_sd *ps_sd_new(ps_mm *data, zend_string *key)
 {
-	uint32_t hv, slot;
-	ps_sd *sd;
-
-	sd = mm_malloc(data->mm, sizeof(ps_sd) + ZSTR_LEN(key));
+	ps_sd *sd = g_try_malloc0(sizeof(ps_sd));
 	if (!sd) {
-
-		php_error_docref(NULL, E_WARNING, "mm_malloc failed, avail %ld, err %s", mm_available(data->mm), mm_error());
+		php_error_docref(NULL, E_WARNING, "g_try_malloc failed");
 		return NULL;
 	}
 
-	hv = ps_sd_hash(key);
-	slot = hv & data->hash_max;
-
-	sd->ctime = 0;
-	sd->hv = hv;
-	sd->data = NULL;
-	sd->alloclen = sd->datalen = 0;
-
-	sd->key = zend_string_copy(key);
-
-	sd->next = data->hash[slot];
-	data->hash[slot] = sd;
-
-	data->hash_cnt++;
-
-	if (!sd->next) {
-		if (data->hash_cnt >= data->hash_max) {
-			hash_split(data);
-		}
-	}
-
-	ps_mm_debug(("inserting %s(%p) into slot %d\n", ZSTR_VAL(key), sd, slot));
+	g_hash_table_insert(data->hash, zend_string_copy(key), sd);
+	ps_mm_debug(("inserting %s(%p)\n", ZSTR_VAL(key), sd));
 
 	return sd;
 }
 
-static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
-{
-	uint32_t slot;
-
-	slot = ps_sd_hash(sd->key) & data->hash_max;
-
-	if (data->hash[slot] == sd) {
-		data->hash[slot] = sd->next;
-	} else {
-		ps_sd *prev;
-
-		/* There must be some entry before the one we want to delete */
-		for (prev = data->hash[slot]; prev->next != sd; prev = prev->next);
-		prev->next = sd->next;
-	}
-
-	data->hash_cnt--;
-
-	if (sd->data) {
-		mm_free(data->mm, sd->data);
-	}
-	zend_string_release(sd->key);
-
-	mm_free(data->mm, sd);
-}
-
-static ps_sd *ps_sd_lookup(ps_mm *data, const zend_string *key, bool rw)
-{
-	uint32_t hv, slot;
-	ps_sd *ret, *prev;
-
-	hv = ps_sd_hash(key);
-	slot = hv & data->hash_max;
-
-	for (prev = NULL, ret = data->hash[slot]; ret; prev = ret, ret = ret->next) {
-		if (ret->hv == hv && zend_string_equals(ret->key, key)) {
-			break;
-		}
-	}
-
-	if (ret && rw && ret != data->hash[slot]) {
-		/* Move the entry to the top of the linked list */
-		if (prev) {
-			prev->next = ret->next;
-		}
-
-		ret->next = data->hash[slot];
-		data->hash[slot] = ret;
-	}
-
-	ps_mm_debug(("lookup(%s): ret=%p,hv=%u,slot=%d\n", ZSTR_VAL(key), ret, hv, slot));
-
-	return ret;
-}
-
-static zend_result ps_mm_key_exists(ps_mm *data, const zend_string *key)
-{
-	ps_sd *sd;
-
-	if (!key) {
-		return FAILURE;
-	}
-	sd = ps_sd_lookup(data, key, false);
-	if (sd) {
-		return SUCCESS;
-	}
-	return FAILURE;
-}
-
+/* TODO: migrate to PS_MOD_UPDATE_TIMESTAMP(mm) + PS_UPDATE_TIMESTAMP_FUNC(mm)
+ * so lazy_write can skip rewriting unchanged sessions. mod_files and mod_user
+ * are already on the new API; mm is the last legacy holdout. */
 const ps_module ps_mod_mm = {
 	PS_MOD(mm)
 };
 
 #define PS_MM_DATA ps_mm *data = PS_GET_MOD_DATA()
 
-static zend_result ps_mm_initialize(ps_mm *data, const char *path)
+static zend_result ps_mm_initialize(ps_mm *data)
 {
-	data->owner = getpid();
-	data->mm = mm_create(0, path);
-	if (!data->mm) {
-		return FAILURE;
-	}
-
-	data->hash_cnt = 0;
-	data->hash_max = 511;
-	data->hash = mm_calloc(data->mm, data->hash_max + 1, sizeof(ps_sd *));
+	data->hash = g_hash_table_new_full(ps_mm_hash, ps_mm_key_equals,
+	                                   ps_mm_key_free, ps_mm_value_free);
 	if (!data->hash) {
-		mm_destroy(data->mm);
+		php_error_docref(NULL, E_WARNING, "hash table creation failed");
 		return FAILURE;
 	}
 
@@ -239,70 +130,26 @@ static zend_result ps_mm_initialize(ps_mm *data, const char *path)
 
 static void ps_mm_destroy(ps_mm *data)
 {
-	ps_sd *sd, *next;
-
-	/* This function is called during each module shutdown,
-	   but we must not release the shared memory pool, when
-	   an Apache child dies! */
-	if (data->owner != getpid()) {
-		return;
-	}
-
-	for (int h = 0; h < data->hash_max + 1; h++) {
-		for (sd = data->hash[h]; sd; sd = next) {
-			next = sd->next;
-			ps_sd_destroy(data, sd);
-		}
-	}
-
-	mm_free(data->mm, data->hash);
-	mm_destroy(data->mm);
-	free(data);
+	g_hash_table_destroy(data->hash);
+	pefree(data, true);
 }
 
 PHP_MINIT_FUNCTION(ps_mm)
 {
-	size_t save_path_len = ZSTR_LEN(PS(save_path));
-	size_t mod_name_len = strlen(sapi_module.name);
-	size_t euid_len;
-	char *ps_mm_path, euid[30];
-	zend_result ret;
-
-	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
+	ps_mm_instance = pecalloc(1, sizeof(*ps_mm_instance), true);
 	if (!ps_mm_instance) {
 		return FAILURE;
 	}
 
-	if (!(euid_len = slprintf(euid, sizeof(euid), "%d", geteuid()))) {
-		free(ps_mm_instance);
+	if (ps_mm_initialize(ps_mm_instance) == FAILURE) {
+		pefree(ps_mm_instance, true);
 		ps_mm_instance = NULL;
 		return FAILURE;
 	}
 
-	/* Directory + '/' + File + Module Name + Effective UID + \0 */
-	ps_mm_path = emalloc(save_path_len + 1 + (sizeof(PS_MM_FILE) - 1) + mod_name_len + euid_len + 1);
-
-	memcpy(ps_mm_path, ZSTR_VAL(PS(save_path)), save_path_len);
-	if (save_path_len && ZSTR_VAL(PS(save_path))[save_path_len - 1] != DEFAULT_SLASH) {
-		ps_mm_path[save_path_len] = DEFAULT_SLASH;
-		save_path_len++;
-	}
-	memcpy(ps_mm_path + save_path_len, PS_MM_FILE, sizeof(PS_MM_FILE) - 1);
-	save_path_len += sizeof(PS_MM_FILE) - 1;
-	memcpy(ps_mm_path + save_path_len, sapi_module.name, mod_name_len);
-	save_path_len += mod_name_len;
-	memcpy(ps_mm_path + save_path_len, euid, euid_len);
-	ps_mm_path[save_path_len + euid_len] = '\0';
-
-	ret = ps_mm_initialize(ps_mm_instance, ps_mm_path);
-
-	efree(ps_mm_path);
-
-	if (ret == FAILURE) {
-		free(ps_mm_instance);
-		ps_mm_instance = NULL;
-		return FAILURE;
-	}
+#ifdef ZTS
+	session_mm_lock = tsrm_mutex_alloc();
+#endif
 
 	php_session_register_module(&ps_mod_mm);
 	return SUCCESS;
@@ -312,6 +159,11 @@ PHP_MSHUTDOWN_FUNCTION(ps_mm)
 {
 	if (ps_mm_instance) {
 		ps_mm_destroy(ps_mm_instance);
+		ps_mm_instance = NULL;
+#ifdef ZTS
+		tsrm_mutex_free(session_mm_lock);
+		session_mm_lock = NULL;
+#endif
 		return SUCCESS;
 	}
 	return FAILURE;
@@ -342,15 +194,15 @@ PS_READ_FUNC(mm)
 	ps_sd *sd;
 	zend_result ret = FAILURE;
 
-	mm_lock(data->mm, MM_LOCK_RD);
+	PS_MM_LOCK();
 
-	sd = ps_sd_lookup(data, key, false);
+	sd = g_hash_table_lookup(data->hash, key);
 	if (sd) {
 		*val = zend_string_init(sd->data, sd->datalen, false);
 		ret = SUCCESS;
 	}
 
-	mm_unlock(data->mm);
+	PS_MM_UNLOCK();
 
 	return ret;
 }
@@ -359,10 +211,11 @@ PS_WRITE_FUNC(mm)
 {
 	PS_MM_DATA;
 	ps_sd *sd;
+	zend_result ret = FAILURE;
 
-	mm_lock(data->mm, MM_LOCK_RW);
+	PS_MM_LOCK();
 
-	sd = ps_sd_lookup(data, key, true);
+	sd = g_hash_table_lookup(data->hash, key);
 	if (!sd) {
 		sd = ps_sd_new(data, key);
 		ps_mm_debug(("new entry for %s\n", ZSTR_VAL(key)));
@@ -370,78 +223,72 @@ PS_WRITE_FUNC(mm)
 
 	if (sd) {
 		if (val->len >= sd->alloclen) {
-			if (data->mm) {
-				mm_free(data->mm, sd->data);
-			}
-			sd->alloclen = val->len + 1;
-			sd->data = mm_malloc(data->mm, sd->alloclen);
+			size_t new_alloc = val->len + 1;
+			void *new_data = g_try_realloc(sd->data, new_alloc);
 
-			if (!sd->data) {
-				ps_sd_destroy(data, sd);
+			if (!new_data) {
 				php_error_docref(NULL, E_WARNING, "Cannot allocate new data segment");
+				/* sd and its old data are freed by the hash table's value destroy notifier. */
+				g_hash_table_remove(data->hash, key);
 				sd = NULL;
+			} else {
+				sd->data = new_data;
+				sd->alloclen = new_alloc;
 			}
 		}
 		if (sd) {
 			sd->datalen = val->len;
 			memcpy(sd->data, val->val, val->len);
 			time(&sd->ctime);
+			ret = SUCCESS;
 		}
 	}
 
-	mm_unlock(data->mm);
-
-	return sd ? SUCCESS : FAILURE;
+	PS_MM_UNLOCK();
+	return ret;
 }
 
 PS_DESTROY_FUNC(mm)
 {
 	PS_MM_DATA;
-	ps_sd *sd;
 
-	mm_lock(data->mm, MM_LOCK_RW);
-
-	sd = ps_sd_lookup(data, key, false);
-	if (sd) {
-		ps_sd_destroy(data, sd);
-	}
-
-	mm_unlock(data->mm);
+	PS_MM_LOCK();
+	g_hash_table_remove(data->hash, key);
+	PS_MM_UNLOCK();
 
 	return SUCCESS;
+}
+
+static gboolean ps_mm_gc_check(gpointer key, gpointer val, gpointer priv)
+{
+	ps_mm_gc_ctx *ctx = (ps_mm_gc_ctx *) priv;
+	ps_sd *sd = (ps_sd *) val;
+	(void) key;
+
+	if (sd->ctime < ctx->limit) {
+		ctx->nrdels++;
+		return TRUE;
+	}
+	return FALSE;
 }
 
 PS_GC_FUNC(mm)
 {
 	PS_MM_DATA;
-	time_t limit;
-	ps_sd **ohash, **ehash;
-	ps_sd *sd, *next;
+	ps_mm_gc_ctx ctx;
 
-	*nrdels = 0;
 	ps_mm_debug(("gc\n"));
 
-	time(&limit);
+	ctx.nrdels = 0;
+	time(&ctx.limit);
+	ctx.limit -= maxlifetime;
 
-	limit -= maxlifetime;
+	PS_MM_LOCK();
+	g_hash_table_foreach_remove(data->hash, ps_mm_gc_check, &ctx);
+	PS_MM_UNLOCK();
 
-	mm_lock(data->mm, MM_LOCK_RW);
-
-	ehash = data->hash + data->hash_max + 1;
-	for (ohash = data->hash; ohash < ehash; ohash++) {
-		for (sd = *ohash; sd; sd = next) {
-			next = sd->next;
-			if (sd->ctime < limit) {
-				ps_mm_debug(("purging %s\n", ZSTR_VAL(sd->key)));
-				ps_sd_destroy(data, sd);
-				(*nrdels)++;
-			}
-		}
-	}
-
-	mm_unlock(data->mm);
-
-	return *nrdels;
+	*nrdels = ctx.nrdels;
+	return ctx.nrdels;
 }
 
 PS_CREATE_SID_FUNC(mm)
@@ -451,14 +298,21 @@ PS_CREATE_SID_FUNC(mm)
 	PS_MM_DATA;
 
 	do {
-		sid = php_session_create_id((void **)&data);
-		/* Check collision */
-		if (ps_mm_key_exists(data, sid) == SUCCESS) {
-			if (sid) {
-				zend_string_release_ex(sid, false);
-				sid = NULL;
+		sid = php_session_create_id((void **) &data);
+		if (!sid) {
+			if (maxfail-- <= 0) {
+				return NULL;
 			}
-			if (!(maxfail--)) {
+			continue;
+		}
+		/* Check collision */
+		PS_MM_LOCK();
+		gboolean exists = g_hash_table_contains(data->hash, sid);
+		PS_MM_UNLOCK();
+		if (exists) {
+			zend_string_release_ex(sid, false);
+			sid = NULL;
+			if (maxfail-- <= 0) {
 				return NULL;
 			}
 		}
@@ -472,18 +326,20 @@ PS_CREATE_SID_FUNC(mm)
  * PARAMETERS: PS_VALIDATE_SID_ARGS in php_session.h
  * RETURN VALUE: SUCCESS or FAILURE.
  *
- * Return SUCCESS for valid key(already existing session).
- * Return FAILURE for invalid key(non-existing session).
+ * Return SUCCESS for valid key (already existing session).
+ * Return FAILURE for invalid key (non-existing session).
  * *mod_data, *key are guaranteed to have non-NULL values.
  */
 PS_VALIDATE_SID_FUNC(mm)
 {
 	PS_MM_DATA;
+	gboolean found;
 
-	mm_lock(data->mm, MM_LOCK_RD);
-	zend_result ret = ps_mm_key_exists(data, key)
-	mm_unlock(data->mm);
-	return ret;
+	PS_MM_LOCK();
+	found = g_hash_table_contains(data->hash, key);
+	PS_MM_UNLOCK();
+
+	return found ? SUCCESS : FAILURE;
 }
 
 #endif
