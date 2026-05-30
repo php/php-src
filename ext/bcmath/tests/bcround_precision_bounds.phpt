@@ -24,9 +24,15 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
+try {
+    (new BcMath\Number('1'))->round(2147483648); // INT_MAX + 1
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
 --EXPECTF--
 bcround(): Argument #2 ($precision) must be between %i and %i
 bcround(): Argument #2 ($precision) must be between %i and %i
 bcround(): Argument #2 ($precision) must be between %i and %i
+BcMath\Number::round(): Argument #1 ($precision) must be between %i and %i
 BcMath\Number::round(): Argument #1 ($precision) must be between %i and %i
