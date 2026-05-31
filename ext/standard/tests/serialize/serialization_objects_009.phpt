@@ -3,22 +3,24 @@ Custom unserialization of classes with no custom unserializer.
 --FILE--
 <?php
 $ser = 'C:1:"C":6:{dasdas}';
-$a = unserialize($ser);
-eval('class C {}');
-$b = unserialize($ser);
 
-var_dump($a, $b);
+try {
+    unserialize($ser);
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
+
+eval('class C {}');
+
+try {
+    unserialize($ser);
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
 
 echo "Done";
 ?>
---EXPECTF--
-Warning: Class __PHP_Incomplete_Class has no unserializer in %sserialization_objects_009.php on line %d
-
-Warning: Class C has no unserializer in %sserialization_objects_009.php on line %d
-object(__PHP_Incomplete_Class)#%d (1) {
-  ["__PHP_Incomplete_Class_Name"]=>
-  string(1) "C"
-}
-object(C)#%d (0) {
-}
+--EXPECT--
+Exception: Class __PHP_Incomplete_Class has no unserializer
+Exception: Class C has no unserializer
 Done
