@@ -34,6 +34,8 @@ are not limited to):
 
 - `open_basedir` or `disable_functions` bypasses.
 
+- Malicious `unserialize()` inputs.
+
 # Vulnerability Policy
 
 Our full policy is described at
