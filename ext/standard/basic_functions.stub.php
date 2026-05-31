@@ -3564,7 +3564,6 @@ function stream_resolve_include_path(string $filename): string|false {}
 function stream_get_wrappers(): array {}
 
 /**
- * @refcount 1
  * @return array<int, StreamError>
  */
 function stream_last_errors(): array {}
@@ -3577,7 +3576,7 @@ function stream_clear_errors(): void {}
  */
 function stream_get_transports(): array {}
 
-/** 
+/**
  * @param resource|string $stream
  * @param resource|null $context
  */
