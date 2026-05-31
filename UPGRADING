@@ -341,6 +341,11 @@ PHP 8.6 UPGRADE NOTES
 - mysqli
   . Added new constant MYSQLI_OPT_COMPRESS.
 
+- Soap:
+  . WSDL/XML Schema parsing now rejects out-of-range integer values for
+    occurrence constraints and integer restriction facets. Negative minOccurs
+    and maxOccurs values are rejected as well.
+
 ========================================
 10. New Global Constants
 ========================================

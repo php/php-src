@@ -177,7 +177,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-21421 (SoapClient typemap property breaks engine assumptions).
     (ndossche)
   . Fixed bug GH-22167 (Out-of-range XML Schema integer values were silently
-    accepted during WSDL parsing). (Weilin Du)
+    accepted during WSDL parsing; negative occurrence values are now rejected).
+    (Weilin Du)
 
 - Sockets:
   . Added the TCP_USER_TIMEOUT constant for Linux to set the maximum time in

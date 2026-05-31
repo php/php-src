@@ -61,6 +61,8 @@ XML;
 $cases = [
     "minOccurs" => occurrence_schema("minOccurs"),
     "maxOccurs" => occurrence_schema("maxOccurs"),
+    "negative minOccurs" => occurrence_schema("minOccurs", "-1"),
+    "negative maxOccurs" => occurrence_schema("maxOccurs", "-1"),
     "minExclusive" => restriction_schema("minExclusive"),
     "minInclusive" => restriction_schema("minInclusive"),
     "maxExclusive" => restriction_schema("maxExclusive"),
@@ -77,6 +79,7 @@ $numeric_string_cases = [
     "leading plus numeric-string" => "+2147483648",
     "leading zero numeric-string" => "00000000002147483648",
     "leading numeric-string with trailing data" => "2147483648abc",
+    "negative out-of-range numeric-string" => "-2147483649",
     "decimal numeric-string" => "2147483648.0",
     "exponent numeric-string" => "2147483648e0",
 ];
@@ -104,6 +107,8 @@ foreach ($cases as $name => $schema) {
 --EXPECT--
 minOccurs: SOAP-ERROR: Parsing Schema: minOccurs value is out of range
 maxOccurs: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
+negative minOccurs: SOAP-ERROR: Parsing Schema: minOccurs value is out of range
+negative maxOccurs: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
 minExclusive: SOAP-ERROR: Parsing Schema: minExclusive value is out of range
 minInclusive: SOAP-ERROR: Parsing Schema: minInclusive value is out of range
 maxExclusive: SOAP-ERROR: Parsing Schema: maxExclusive value is out of range
@@ -117,6 +122,7 @@ leading whitespace numeric-string: SOAP-ERROR: Parsing Schema: maxOccurs value i
 leading plus numeric-string: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
 leading zero numeric-string: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
 leading numeric-string with trailing data: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
+negative out-of-range numeric-string: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
 decimal numeric-string: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
 exponent numeric-string: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
 fractional numeric-string within int range: parsed
