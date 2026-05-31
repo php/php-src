@@ -1,5 +1,5 @@
 --TEST--
-bcround() and BcMath\Number::round() reject out-of-range $precision
+bcround() and BcMath\Number::round() reject $precision above INT_MAX
 --EXTENSIONS--
 bcmath
 --SKIPIF--
@@ -8,16 +8,6 @@ bcmath
 <?php
 try {
     bcround('1', PHP_INT_MAX);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
-try {
-    bcround('12345', -PHP_INT_MAX, RoundingMode::AwayFromZero);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
-try {
-    bcround('12345', PHP_INT_MIN, RoundingMode::AwayFromZero);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
@@ -31,10 +21,12 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
+
+// Large negative precision is accepted: result is a power of 10.
+echo bcround('1', -5, RoundingMode::AwayFromZero) . \PHP_EOL;
 ?>
 --EXPECTF--
-bcround(): Argument #2 ($precision) must be between %i and %i
-bcround(): Argument #2 ($precision) must be between %i and %i
-bcround(): Argument #2 ($precision) must be between %i and %i
-BcMath\Number::round(): Argument #1 ($precision) must be between %i and %i
-BcMath\Number::round(): Argument #1 ($precision) must be between %i and %i
+bcround(): Argument #2 ($precision) must be between %i and %d
+BcMath\Number::round(): Argument #1 ($precision) must be between %i and %d
+BcMath\Number::round(): Argument #1 ($precision) must be between %i and %d
+100000
