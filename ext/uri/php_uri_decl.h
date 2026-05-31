@@ -1,8 +1,8 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: a7e51d052ee5a78698ae4bc3b38d0241e7b47576 */
+ * Stub hash: 1a396b7a5b170b968d84a2c64a5bcf7d962653db */
 
-#ifndef ZEND_PHP_URI_DECL_a7e51d052ee5a78698ae4bc3b38d0241e7b47576_H
-#define ZEND_PHP_URI_DECL_a7e51d052ee5a78698ae4bc3b38d0241e7b47576_H
+#ifndef ZEND_PHP_URI_DECL_1a396b7a5b170b968d84a2c64a5bcf7d962653db_H
+#define ZEND_PHP_URI_DECL_1a396b7a5b170b968d84a2c64a5bcf7d962653db_H
 
 typedef enum zend_enum_Uri_UriComparisonMode {
 	ZEND_ENUM_Uri_UriComparisonMode_IncludeFragment = 1,
@@ -63,4 +63,4 @@ typedef enum zend_enum_Uri_WhatWg_UrlHostType {
 	ZEND_ENUM_Uri_WhatWg_UrlHostType_Empty = 5,
 } zend_enum_Uri_WhatWg_UrlHostType;
 
-#endif /* ZEND_PHP_URI_DECL_a7e51d052ee5a78698ae4bc3b38d0241e7b47576_H */
+#endif /* ZEND_PHP_URI_DECL_1a396b7a5b170b968d84a2c64a5bcf7d962653db_H */

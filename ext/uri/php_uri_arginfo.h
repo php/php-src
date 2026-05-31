@@ -1,9 +1,6 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: a7e51d052ee5a78698ae4bc3b38d0241e7b47576
+ * Stub hash: 1a396b7a5b170b968d84a2c64a5bcf7d962653db
  * Has decl header: yes */
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder___construct, 0, 0, 0)
-ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_reset, 0, 0, IS_STATIC, 0)
 ZEND_END_ARG_INFO()
@@ -222,7 +219,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url___debugInfo arginfo_class_Uri_Rfc3986_Uri___serialize
 
-ZEND_METHOD(Uri_Rfc3986_UriBuilder, __construct);
 ZEND_METHOD(Uri_Rfc3986_UriBuilder, reset);
 ZEND_METHOD(Uri_Rfc3986_UriBuilder, setScheme);
 ZEND_METHOD(Uri_Rfc3986_UriBuilder, setUserInfo);
@@ -288,7 +284,6 @@ ZEND_METHOD(Uri_WhatWg_Url, __unserialize);
 ZEND_METHOD(Uri_WhatWg_Url, __debugInfo);
 
 static const zend_function_entry class_Uri_Rfc3986_UriBuilder_methods[] = {
-	ZEND_ME(Uri_Rfc3986_UriBuilder, __construct, arginfo_class_Uri_Rfc3986_UriBuilder___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_UriBuilder, reset, arginfo_class_Uri_Rfc3986_UriBuilder_reset, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_UriBuilder, setScheme, arginfo_class_Uri_Rfc3986_UriBuilder_setScheme, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_UriBuilder, setUserInfo, arginfo_class_Uri_Rfc3986_UriBuilder_setUserInfo, ZEND_ACC_PUBLIC)

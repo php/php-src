@@ -1056,11 +1056,6 @@ PHP_METHOD(Uri_WhatWg_Url, __debugInfo)
 	RETURN_ARR(uri_get_debug_properties(uri_object));
 }
 
-PHP_METHOD(Uri_Rfc3986_UriBuilder, __construct)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-}
-
 PHP_METHOD(Uri_Rfc3986_UriBuilder, reset)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

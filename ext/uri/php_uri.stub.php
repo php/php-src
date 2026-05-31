@@ -55,8 +55,6 @@ namespace Uri\Rfc3986 {
         private ?string $query = null;
         private ?string $fragment = null;
 
-        public function __construct() {}
-
         public function reset(): static {}
 
         public function setScheme(?string $scheme): static {}
