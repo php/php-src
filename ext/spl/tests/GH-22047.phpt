@@ -1,5 +1,7 @@
 --TEST--
 GH-22047: ArrayObject invalid iterator class in serialized payload
+--CREDITS--
+Igor Sak-Sakovskiy (Positive Technologies)
 --FILE--
 <?php
 
