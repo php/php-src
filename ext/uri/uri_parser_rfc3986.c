@@ -537,7 +537,7 @@ static zend_result php_uri_parser_rfc3986_fragment_write(void *uri, const zval *
 	}
 }
 
-static php_uri_parser_rfc3986_uris *uriparser_create_uris(void)
+php_uri_parser_rfc3986_uris *uriparser_create_uris(void)
 {
 	php_uri_parser_rfc3986_uris *uriparser_uris = ecalloc(1, sizeof(*uriparser_uris));
 	uriparser_uris->normalized_uri_initialized = false;
@@ -545,12 +545,12 @@ static php_uri_parser_rfc3986_uris *uriparser_create_uris(void)
 	return uriparser_uris;
 }
 
-php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str, size_t uri_str_len, const php_uri_parser_rfc3986_uris *uriparser_base_urls, bool silent)
+php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str, const size_t uri_str_len, const php_uri_parser_rfc3986_uris *uriparser_base_urls, const bool silent)
 {
 	UriUriA uri = {0};
 
 	/* Parse the URI. */
-	int result = uriParseSingleUriExMmA(&uri, uri_str, uri_str + uri_str_len, NULL, mm);
+	const int result = uriParseSingleUriExMmA(&uri, uri_str, uri_str + uri_str_len, NULL, mm);
 	if (result != URI_SUCCESS) {
 		if (!silent) {
 			switch (result) {
@@ -572,7 +572,7 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 
 		/* Combine the parsed URI with the base URI and store the result in 'tmp',
 		 * since the target and source URLs must be distinct. */
-		int result = uriAddBaseUriExMmA(&tmp, &uri, &uriparser_base_urls->uri, URI_RESOLVE_STRICTLY, mm);
+		const int result = uriAddBaseUriExMmA(&tmp, &uri, &uriparser_base_urls->uri, URI_RESOLVE_STRICTLY, mm);
 		if (result != URI_SUCCESS) {
 			if (!silent) {
 				switch (result) {
@@ -727,7 +727,7 @@ ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_host(const zend_stri
 	return uriIsWellFormedHostRegNameA(p, p + len);
 }
 
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_port(zend_long port)
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_port(const zend_long port)
 {
 	zend_string *tmp = zend_long_to_str(port);
 	const char *p = ZSTR_VAL(tmp);
@@ -765,109 +765,93 @@ ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_fragment(const zend_
 	return uriIsWellFormedFragmentA(p, p + len);
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_rfc3986_recompose_from_zval(
+ZEND_ATTRIBUTE_NONNULL_ARGS(2,3,4,5,6,7,8) php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_build_from_zval(
+	const php_uri_parser_rfc3986_uris *uriparser_base_uris,
 	const zval *scheme, const zval *userinfo, const zval *host, const zval *port,
 	const zval *path, const zval *query, const zval *fragment
 ) {
-	if (Z_TYPE_P(host) == IS_NULL) {
-		/* The path must not begin with "//" if the URI doesn't contain a host */
-		if (zend_string_starts_with_literal(Z_STR_P(path), "//")) {
-			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \"//\" when the URI doesn't contain a host", 0);
-			return NULL;
-		}
+	php_uri_parser_rfc3986_uris *uriparser_uris = uriparser_create_uris();
 
-		/* The userinfo and port components must not be present if the URI doesn't contain a host */
-		if (Z_TYPE_P(userinfo) != IS_NULL || Z_TYPE_P(port) != IS_NULL) {
-			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The URI must contain a host if either the userinfo or the port component is present", 0);
-			return NULL;
-		}
-	} else {
-		/* The path must be either empty or begin with a "/" if the URI contains a host */
-		if (Z_STRLEN_P(path) > 0 && Z_STRVAL_P(path)[0] != '/') {
-			zend_throw_exception(php_uri_ce_invalid_uri_exception, "A path must be either empty or begin with \"/\" when the URI contains a host", 0);
-			return NULL;
-		}
-	}
+	if (Z_STRLEN_P(path) > 0) {
+		/* The first segment of the path must not contain ":" if the URI doesn't contain a scheme */
+		if (Z_TYPE_P(scheme) == IS_NULL) {
+			const char *p = Z_STRVAL_P(path);
+			while (*p != '\0' && *p != '/') {
+				if (*p == ':') {
+					zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \":\" when the URI doesn't contain a scheme", 0);
+					goto failure;
+				}
 
-	/* The first segment of the path must not contain ":" if the URI doesn't contain a scheme */
-	if (Z_TYPE_P(scheme) == IS_NULL) {
-		const char *p = Z_STRVAL_P(path);
-		while (*p != '\0' && *p != '/') {
-			if (*p == ':') {
-				zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \":\" when the URI doesn't contain a scheme", 0);
-				return NULL;
+				p++;
 			}
+		}
 
-			p++;
+		/* The path must not begin with "//" if the URI doesn't contain a host */
+		if (Z_TYPE_P(host) == IS_NULL && zend_string_starts_with_literal(Z_STR_P(path), "//")) {
+			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \"//\" when the URI doesn't contain a host", 0);
+			goto failure;
 		}
 	}
 
-	/* result = "" */
-	smart_str uri_str = {0};
-
-	/*
-	if defined(scheme) then
-	 append scheme to result;
-	 append ":" to result;
-	endif;
-	*/
-	if (Z_TYPE_P(scheme) != IS_NULL) {
-		smart_str_append(&uri_str, Z_STR_P(scheme));
-		smart_str_appendc(&uri_str, ':');
+	zend_result result = php_uri_parser_rfc3986_scheme_write(uriparser_uris, scheme, NULL);
+	if (result == FAILURE) {
+		goto failure;
+	}
+	result = php_uri_parser_rfc3986_host_write(uriparser_uris, host, NULL);
+	if (result == FAILURE) {
+		goto failure;
+	}
+	/* Intentionally writing userinfo after host to avoid error when the userinfo is set but the host is missing */
+	result = php_uri_parser_rfc3986_userinfo_write(uriparser_uris, userinfo, NULL);
+	if (result == FAILURE) {
+		goto failure;
+	}
+	/* Intentionally writing userinfo after host to avoid error when the port is set but the host is missing */
+	result = php_uri_parser_rfc3986_port_write(uriparser_uris, port, NULL);
+	if (result == FAILURE) {
+		goto failure;
+	}
+	result = php_uri_parser_rfc3986_path_write(uriparser_uris, path, NULL);
+	if (result == FAILURE) {
+		goto failure;
+	}
+	result = php_uri_parser_rfc3986_query_write(uriparser_uris, query, NULL);
+	if (result == FAILURE) {
+		goto failure;
+	}
+	result = php_uri_parser_rfc3986_fragment_write(uriparser_uris, fragment, NULL);
+	if (result == FAILURE) {
+		goto failure;
 	}
 
-	/*
-	if defined(authority) then
-	 append "//" to result;
-	 append authority to result;
-	endif;
-	*/
-	/* Check if authority is defined */
-	if (Z_TYPE_P(host) != IS_NULL) {
-		smart_str_appends(&uri_str, "//");
+	if (uriparser_base_uris != NULL) {
+		UriUriA tmp = {0};
 
-		if (Z_TYPE_P(userinfo) != IS_NULL) {
-			smart_str_append(&uri_str, Z_STR_P(userinfo));
-			smart_str_appendc(&uri_str, '@');
+		const int base_uri_result = uriAddBaseUriExMmA(&tmp, &uriparser_uris->uri, &uriparser_base_uris->uri, URI_RESOLVE_STRICTLY, mm);
+		if (base_uri_result != URI_SUCCESS) {
+			uriFreeUriMembersMmA(&tmp, mm);
+			switch (base_uri_result) {
+				case URI_ERROR_ADDBASE_REL_BASE:
+					zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified base URI must be absolute", 0);
+					goto failure;
+				default:
+					/* This should be unreachable in practice. */
+					zend_throw_exception(php_uri_ce_error, "Failed to resolve the specified URI against the base URI", 0);
+					goto failure;
+			}
 		}
 
-		if (Z_TYPE_P(host) != IS_NULL) {
-			smart_str_append(&uri_str, Z_STR_P(host));
-		}
-
-		if (Z_TYPE_P(port) != IS_NULL) {
-			smart_str_appendc(&uri_str, ':');
-			smart_str_append_long(&uri_str, Z_LVAL_P(port));
-		}
+		uriMakeOwnerMmA(&tmp, mm);
+		uriFreeUriMembersMmA(&uriparser_uris->uri, mm);
+		uriparser_uris->uri = tmp;
 	}
 
-	/* append path to result; */
-	smart_str_append(&uri_str, Z_STR_P(path));
+	return uriparser_uris;
 
-	/*
-	if defined(query) then
-	 append "?" to result;
-	 append query to result;
-	endif;
-	*/
-	if (Z_TYPE_P(query) != IS_NULL) {
-		smart_str_appendc(&uri_str, '?');
-		smart_str_append(&uri_str, Z_STR_P(query));
-	}
-
-	/*
-	if defined(fragment) then
-	 append "#" to result;
-	 append fragment to result;
-	endif;
-	*/
-	if (Z_TYPE_P(fragment) != IS_NULL) {
-		smart_str_appendc(&uri_str, '#');
-		smart_str_append(&uri_str, Z_STR_P(fragment));
-	}
-
-	/* return result; */
-	return smart_str_extract(&uri_str);
+failure:
+	uriFreeUriMembersMmA(&uriparser_uris->uri, mm);
+	efree(uriparser_uris);
+	return NULL;
 }
 
 PHPAPI const php_uri_parser php_uri_parser_rfc3986 = {

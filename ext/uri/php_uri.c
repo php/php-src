@@ -1225,26 +1225,22 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, build)
 	const zval *query = Z_RFC3986_URI_PROP_QUERY_P(ZEND_THIS);
 	const zval *fragment = Z_RFC3986_URI_PROP_FRAGMENT_P(ZEND_THIS);
 
-	zend_string *uri_str = php_uri_parser_rfc3986_recompose_from_zval(scheme, userinfo, host, port, path, query, fragment);
-	if (uri_str == NULL) {
-		RETURN_THROWS();
-	}
-
-	php_uri_parser_rfc3986_uris *base_uri = NULL;
+	php_uri_parser_rfc3986_uris *base_uris = NULL;
 	if (base_url != NULL) {
-		base_uri = Z_URI_OBJECT_P(base_url)->uri;
+		base_uris = Z_URI_OBJECT_P(base_url)->uri;
 	}
 
-	php_uri_parser_rfc3986_uris *uri = php_uri_parser_rfc3986_parse_ex(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), base_uri, false);
-	zend_string_release(uri_str);
-	if (uri == NULL) {
+	php_uri_parser_rfc3986_uris *uriparser_uris = php_uri_parser_rfc3986_build_from_zval(
+		base_uris, scheme, userinfo, host, port, path, query, fragment
+	);
+	if (uriparser_uris == NULL) {
 		RETURN_THROWS();
 	}
 
 	object_init_ex(return_value, php_uri_ce_rfc3986_uri);
 	php_uri_object *uri_object = Z_URI_OBJECT_P(return_value);
 	uri_object->parser = &php_uri_parser_rfc3986;
-	uri_object->uri = uri;
+	uri_object->uri = uriparser_uris;
 }
 
 PHPAPI php_uri_object *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser)

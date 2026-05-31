@@ -14,4 +14,4 @@ try {
 
 ?>
 --EXPECT--
-Uri\InvalidUriException: The URI must contain a host if either the userinfo or the port component is present
+Uri\InvalidUriException: Cannot set a port without having a host

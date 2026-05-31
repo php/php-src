@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECT--
-Uri\InvalidUriException: A path must be either empty or begin with "/" when the URI contains a host
+Uri\InvalidUriException: The specified path is malformed

@@ -37,7 +37,8 @@ ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_path(const zend_stri
 ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_query(const zend_string *query);
 ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_fragment(const zend_string *fragment);
 
-ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_rfc3986_recompose_from_zval(
+ZEND_ATTRIBUTE_NONNULL_ARGS(2,3,4,5,6,7,8) php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_build_from_zval(
+	const php_uri_parser_rfc3986_uris *uriparser_base_uris,
 	const zval *scheme, const zval *userinfo, const zval *host, const zval *port,
 	const zval *path, const zval *query, const zval *fragment
 );
