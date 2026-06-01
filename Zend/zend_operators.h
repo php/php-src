@@ -147,6 +147,7 @@ static zend_always_inline zend_long zend_dval_to_lval_silent(double d)
 /* Used to convert a string float to integer during an (int) cast */
 static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 {
+	ZEND_IGNORE_VALUE(s);
 	if (UNEXPECTED(!zend_finite(d))) {
 		return 0;
 	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
