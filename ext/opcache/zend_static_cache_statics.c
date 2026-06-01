@@ -211,8 +211,8 @@ static bool zend_opcache_static_cache_class_blob_enabled(const zend_class_entry 
 static zend_opcache_static_cache_context *zend_opcache_static_cache_context_for_kind(zend_opcache_static_cache_kind kind)
 {
 	return kind == ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC || kind == ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC_TRACKING
-		? &zend_opcache_static_cache_volatile_context_state
-		: &zend_opcache_static_cache_pinned_context_state
+		? zend_opcache_static_cache_active_volatile_context()
+		: zend_opcache_static_cache_active_pinned_context()
 	;
 }
 
@@ -3853,8 +3853,8 @@ void zend_opcache_static_cache_request_shutdown(void)
 		zend_opcache_static_cache_class_blob_handles_initialized
 	) {
 		zend_opcache_static_cache_flush_pending();
-		zend_opcache_static_cache_publish_context(&zend_opcache_static_cache_pinned_context_state);
-		zend_opcache_static_cache_publish_context(&zend_opcache_static_cache_volatile_context_state);
+		zend_opcache_static_cache_publish_context(zend_opcache_static_cache_active_pinned_context());
+		zend_opcache_static_cache_publish_context(zend_opcache_static_cache_active_volatile_context());
 
 		if (zend_opcache_static_cache_attribute_classes_initialized) {
 			zend_hash_destroy(&zend_opcache_static_cache_attribute_classes);

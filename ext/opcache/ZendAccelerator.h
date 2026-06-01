@@ -152,6 +152,7 @@ typedef struct _zend_accel_directives {
 	zend_long           memory_consumption;
 	zend_long           static_cache_volatile_size_mb;
 	zend_long           static_cache_pinned_size_mb;
+	bool                static_cache_allow_unsafe_runtime;
 	zend_long           max_accelerated_files;
 	double         max_wasted_percentage;
 	char          *user_blacklist_filename;

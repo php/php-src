@@ -55,6 +55,7 @@ typedef bool (*zend_opcache_static_cache_safe_direct_state_unserialize_func_t)(
 
 typedef struct _zend_opcache_static_cache_safe_direct_serializer_path zend_opcache_static_cache_safe_direct_serializer_path;
 typedef struct _zend_opcache_static_cache_safe_direct_handlers zend_opcache_static_cache_safe_direct_handlers;
+typedef struct _zend_opcache_static_cache_partition zend_opcache_static_cache_partition;
 
 struct _zend_opcache_static_cache_safe_direct_serializer_path {
 	bool state_includes_properties;
@@ -78,6 +79,9 @@ zend_result zend_opcache_static_cache_minit(void);
 void zend_opcache_static_cache_mshutdown(void);
 zend_result zend_opcache_static_cache_rshutdown(void);
 void zend_opcache_static_cache_invalidate_all(void);
+zend_opcache_static_cache_partition *zend_opcache_static_cache_partition_create(const char *name);
+bool zend_opcache_static_cache_partition_startup_before_request(zend_opcache_static_cache_partition *partition);
+void zend_opcache_static_cache_partition_activate(zend_opcache_static_cache_partition *partition);
 void zend_opcache_static_cache_volatile_get_status(zval *return_value);
 void zend_opcache_static_cache_pinned_get_status(zval *return_value);
 bool zend_opcache_static_cache_volatile_is_enabled(void);

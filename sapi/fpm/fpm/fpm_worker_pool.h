@@ -11,6 +11,8 @@ struct fpm_child_s;
 struct fpm_child_stat_s;
 struct fpm_shm_s;
 
+typedef struct _zend_opcache_static_cache_partition zend_opcache_static_cache_partition;
+
 enum fpm_address_domain {
 	FPM_AF_UNIX = 1,
 	FPM_AF_INET = 2
@@ -38,6 +40,7 @@ struct fpm_worker_pool_s {
 	struct fpm_scoreboard_s *scoreboard;
 	int log_fd;
 	char **limit_extensions;
+	zend_opcache_static_cache_partition *static_cache_partition;
 
 	/* for ondemand PM */
 	struct fpm_event_s *ondemand_event;

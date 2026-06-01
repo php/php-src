@@ -29,6 +29,8 @@
 
 #include "zlog.h"
 
+#include "ext/opcache/zend_static_cache.h" /* for OPcache Static Cache */
+
 static time_t *last_faults;
 static int fault;
 
@@ -189,6 +191,7 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	fpm_globals.max_requests = wp->config->pm_max_requests;
 	fpm_globals.listening_socket = dup(wp->listening_socket);
+	zend_opcache_static_cache_partition_activate(wp->static_cache_partition);
 
 	if (0 > fpm_stdio_init_child(wp)  ||
 	    0 > fpm_log_init_child(wp)    ||

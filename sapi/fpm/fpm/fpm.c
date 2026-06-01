@@ -21,6 +21,8 @@
 #include "fpm_log.h"
 #include "zlog.h"
 
+#include "ext/opcache/zend_static_cache.h" /* for OPcache Static Cache */
+
 struct fpm_globals_s fpm_globals = {
 	.parent_pid = 0,
 	.argc = 0,
@@ -40,6 +42,26 @@ struct fpm_globals_s fpm_globals = {
 	.force_stderr = 0,
 	.send_config_pipe = {0, 0},
 };
+
+static int fpm_static_cache_init_main(void)
+{
+	struct fpm_worker_pool_s *wp;
+
+	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
+		wp->static_cache_partition = zend_opcache_static_cache_partition_create(wp->config->name);
+		if (wp->static_cache_partition == NULL) {
+			zlog(ZLOG_ERROR, "[pool %s] unable to allocate OPcache Static Cache partition", wp->config->name);
+			return -1;
+		}
+
+		if (!zend_opcache_static_cache_partition_startup_before_request(wp->static_cache_partition)) {
+			zlog(ZLOG_WARNING, "[pool %s] OPcache Static Cache partition startup failed; Static Cache was disabled", wp->config->name);
+			return 0;
+		}
+	}
+
+	return 0;
+}
 
 enum fpm_init_return_status fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root, int force_daemon, int force_stderr) /* {{{ */
 {
@@ -64,7 +86,8 @@ enum fpm_init_return_status fpm_init(int argc, char **argv, char *config, char *
 	    0 > fpm_children_init_main()      ||
 	    0 > fpm_sockets_init_main()       ||
 	    0 > fpm_worker_pool_init_main()   ||
-	    0 > fpm_event_init_main()) {
+	    0 > fpm_event_init_main()         ||
+	    0 > fpm_static_cache_init_main()) {
 
 		if (fpm_globals.test_successful) {
 			return FPM_INIT_EXIT_OK;

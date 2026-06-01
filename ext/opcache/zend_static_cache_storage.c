@@ -70,6 +70,25 @@ static zend_always_inline bool zend_opcache_static_cache_requires_pre_request_st
 		strcmp(sapi_module.name, "cgi-fcgi") == 0;
 }
 
+static zend_always_inline bool zend_opcache_static_cache_environment_is_allowed_by_default(void)
+{
+	if (sapi_module.name == NULL) {
+		return false;
+	}
+
+	return strcmp(sapi_module.name, "fpm-fcgi") == 0 ||
+		strcmp(sapi_module.name, "cli") == 0 ||
+		strcmp(sapi_module.name, "cli-server") == 0 ||
+		strcmp(sapi_module.name, "phpdbg") == 0 ||
+		strcmp(sapi_module.name, "embed") == 0;
+}
+
+static zend_always_inline bool zend_opcache_static_cache_environment_is_allowed(void)
+{
+	return zend_opcache_static_cache_environment_is_allowed_by_default() ||
+		ZCG(accel_directives).static_cache_allow_unsafe_runtime;
+}
+
 static zend_always_inline void zend_opcache_static_cache_set_unavailable(const char *failure_reason, bool startup_failed)
 {
 	zend_opcache_static_cache_context *context = zend_opcache_static_cache_active_context();
@@ -94,7 +113,7 @@ static zend_always_inline void zend_opcache_static_cache_set_available(void)
 
 static zend_always_inline HashTable **zend_opcache_static_cache_entry_locks_ptr_for_context(zend_opcache_static_cache_context *context)
 {
-	return context == &zend_opcache_static_cache_pinned_context_state
+	return zend_opcache_static_cache_context_is_pinned(context)
 		? &zend_opcache_static_cache_pinned_entry_locks
 		: &zend_opcache_static_cache_volatile_entry_locks
 	;
@@ -102,7 +121,7 @@ static zend_always_inline HashTable **zend_opcache_static_cache_entry_locks_ptr_
 
 static zend_always_inline uint32_t *zend_opcache_static_cache_entry_lock_counts_for_context(zend_opcache_static_cache_context *context)
 {
-	return context == &zend_opcache_static_cache_pinned_context_state
+	return zend_opcache_static_cache_context_is_pinned(context)
 		? zend_opcache_static_cache_pinned_entry_lock_counts
 		: zend_opcache_static_cache_volatile_entry_lock_counts
 	;
@@ -1250,20 +1269,20 @@ static void zend_opcache_static_cache_ensure_entry_lock_process(void)
 	/* The request-local lock tables were inherited across fork. Destroy the
 	 * child copies without unlocking stripes owned by the parent process. */
 	zend_opcache_static_cache_release_entry_lock_context(
-		&zend_opcache_static_cache_volatile_context_state,
+		zend_opcache_static_cache_active_volatile_context(),
 		&zend_opcache_static_cache_volatile_entry_locks,
 		zend_opcache_static_cache_volatile_entry_lock_counts,
 		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_DROP
 	);
 	zend_opcache_static_cache_release_entry_lock_context(
-		&zend_opcache_static_cache_pinned_context_state,
+		zend_opcache_static_cache_active_pinned_context(),
 		&zend_opcache_static_cache_pinned_entry_locks,
 		zend_opcache_static_cache_pinned_entry_lock_counts,
 		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_DROP
 	);
 #ifdef ZTS
-	zend_opcache_static_cache_entry_locks_reinit_after_fork(&zend_opcache_static_cache_volatile_context_state.storage);
-	zend_opcache_static_cache_entry_locks_reinit_after_fork(&zend_opcache_static_cache_pinned_context_state.storage);
+	zend_opcache_static_cache_entry_locks_reinit_after_fork(&zend_opcache_static_cache_active_volatile_context()->storage);
+	zend_opcache_static_cache_entry_locks_reinit_after_fork(&zend_opcache_static_cache_active_pinned_context()->storage);
 	zend_opcache_static_cache_entry_locks_process_is_fork_child = true;
 #endif
 	zend_opcache_static_cache_entry_lock_owner_pid = current_pid;
@@ -1954,7 +1973,7 @@ void zend_opcache_static_cache_reset_runtime(void)
 
 	memset(runtime, 0, sizeof(*runtime));
 
-	runtime->configured_memory = context == &zend_opcache_static_cache_pinned_context_state
+	runtime->configured_memory = zend_opcache_static_cache_context_is_pinned(context)
 		? ZCG(accel_directives).static_cache_pinned_size_mb
 		: ZCG(accel_directives).static_cache_volatile_size_mb
 	;
@@ -2180,6 +2199,12 @@ bool zend_opcache_static_cache_startup_storage_before_request(void)
 		return false;
 	}
 
+	if (!zend_opcache_static_cache_environment_is_allowed()) {
+		zend_opcache_static_cache_set_unavailable("Static Cache is disabled for this SAPI unless opcache.static_cache.allow_unsafe_runtime=1 is set", false);
+
+		return true;
+	}
+
 	if (!zend_opcache_static_cache_startup_storage()) {
 		zend_opcache_static_cache_set_unavailable("Unable to initialize shared memory backend", true);
 
@@ -2217,6 +2242,12 @@ void zend_opcache_static_cache_ensure_ready(void)
 	}
 
 	if (!runtime->enabled) {
+		return;
+	}
+
+	if (!zend_opcache_static_cache_environment_is_allowed()) {
+		zend_opcache_static_cache_set_unavailable("Static Cache is disabled for this SAPI unless opcache.static_cache.allow_unsafe_runtime=1 is set", false);
+
 		return;
 	}
 
@@ -2483,22 +2514,22 @@ void zend_opcache_static_cache_release_active_entry_locks(void)
 void zend_opcache_static_cache_release_request_entry_locks(void)
 {
 	zend_opcache_static_cache_release_entry_lock_context(
-		&zend_opcache_static_cache_volatile_context_state,
+		zend_opcache_static_cache_active_volatile_context(),
 		&zend_opcache_static_cache_volatile_entry_locks,
 		zend_opcache_static_cache_volatile_entry_lock_counts,
 		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_PRESERVE_LEASES
 	);
 
 	zend_opcache_static_cache_release_entry_lock_context(
-		&zend_opcache_static_cache_pinned_context_state,
+		zend_opcache_static_cache_active_pinned_context(),
 		&zend_opcache_static_cache_pinned_entry_locks,
 		zend_opcache_static_cache_pinned_entry_lock_counts,
 		ZEND_OPCACHE_STATIC_CACHE_ENTRY_LOCK_RELEASE_PRESERVE_LEASES
 	);
 #if !defined(ZEND_WIN32) && defined(ZTS)
 	if (zend_opcache_static_cache_entry_locks_process_is_fork_child) {
-		zend_opcache_static_cache_entry_locks_shutdown(&zend_opcache_static_cache_volatile_context_state.storage);
-		zend_opcache_static_cache_entry_locks_shutdown(&zend_opcache_static_cache_pinned_context_state.storage);
+		zend_opcache_static_cache_entry_locks_shutdown(&zend_opcache_static_cache_active_volatile_context()->storage);
+		zend_opcache_static_cache_entry_locks_shutdown(&zend_opcache_static_cache_active_pinned_context()->storage);
 	}
 #endif
 #ifndef ZEND_WIN32
