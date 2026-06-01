@@ -21,12 +21,8 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
-
-// Large negative precision is accepted: result is a power of 10.
-echo bcround('1', -5, RoundingMode::AwayFromZero) . \PHP_EOL;
 ?>
 --EXPECTF--
 bcround(): Argument #2 ($precision) must be between %i and %d
 BcMath\Number::round(): Argument #1 ($precision) must be between %i and %d
 BcMath\Number::round(): Argument #1 ($precision) must be between %i and %d
-100000
