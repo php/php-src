@@ -60,22 +60,15 @@ static int schema_parse_int(const xmlChar *value, const char *name, bool allow_n
 	int oflow_info = 0;
 	uint8_t type = is_numeric_string_ex(str, strlen(str), &lval, NULL, true, &oflow_info, NULL);
 
-	if (oflow_info || (type == IS_LONG && ZEND_LONG_EXCEEDS_INT(lval))) {
-		soap_error1(E_ERROR, "Parsing Schema: %s value is out of range", name);
-	}
-
-	if (type == IS_LONG) {
-		if (!allow_negative && lval < 0) {
+	if (type != IS_LONG) {
+		errno = 0;
+		lval = ZEND_STRTOL(str, NULL, 10);
+		if (oflow_info || (errno == ERANGE && lval != 0)) {
 			soap_error1(E_ERROR, "Parsing Schema: %s value is out of range", name);
 		}
-		return (int) lval;
 	}
 
-	errno = 0;
-	lval = ZEND_STRTOL(str, NULL, 10);
-	if ((errno == ERANGE && (lval > 0 || lval < 0))
-			|| ZEND_LONG_EXCEEDS_INT(lval)
-			|| (!allow_negative && lval < 0)) {
+	if (ZEND_LONG_EXCEEDS_INT(lval) || (!allow_negative && lval < 0)) {
 		soap_error1(E_ERROR, "Parsing Schema: %s value is out of range", name);
 	}
 
