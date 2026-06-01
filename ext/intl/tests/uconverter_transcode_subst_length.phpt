@@ -9,12 +9,12 @@ intl.use_exceptions=false
 $subst = str_repeat('A', 129);
 
 var_dump(UConverter::transcode('abc', 'UTF-8', 'ASCII', ['from_subst' => $subst]));
-var_dump(intl_get_error_code());
+echo intl_get_error_message(), "\n";
 var_dump(UConverter::transcode('abc', 'UTF-8', 'ASCII', ['to_subst' => $subst]));
-var_dump(intl_get_error_code());
+echo intl_get_error_message(), "\n";
 ?>
 --EXPECT--
 bool(false)
-int(1)
+UConverter::transcode(): returned error 1: U_ILLEGAL_ARGUMENT_ERROR: U_ILLEGAL_ARGUMENT_ERROR
 bool(false)
-int(1)
+UConverter::transcode(): returned error 1: U_ILLEGAL_ARGUMENT_ERROR: U_ILLEGAL_ARGUMENT_ERROR
