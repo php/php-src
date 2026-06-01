@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Stanislav Malyshev <stas@zend.com>                          |
    +----------------------------------------------------------------------+
@@ -341,7 +341,7 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		}
 
 		if (used_tz == NULL) {
-			used_tz = timezone_process_timezone_argument(nullptr, nullptr, &err);
+			used_tz = timezone_process_timezone_argument(nullptr, nullptr, &err, 1);
 			if (used_tz == NULL) {
 				continue;
 			}
@@ -649,7 +649,7 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UCh
 
         case Formattable::kInt64:
             aInt64 = fargs[i].getInt64();
-			if(aInt64 > ZEND_LONG_MAX || aInt64 < -ZEND_LONG_MAX) {
+			if(aInt64 > ZEND_LONG_MAX || aInt64 < ZEND_LONG_MIN) {
 				ZVAL_DOUBLE(&(*args)[i], (double)aInt64);
 			} else {
 				ZVAL_LONG(&(*args)[i], (zend_long)aInt64);

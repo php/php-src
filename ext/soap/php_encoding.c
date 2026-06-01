@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
@@ -16,6 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
+#include <limits.h>
 #include <time.h>
 
 #include "php_soap.h"
@@ -351,6 +350,7 @@ static bool soap_check_xml_ref(zval *data, xmlNodePtr node)
 static void soap_add_xml_ref(zval *data, xmlNodePtr node)
 {
 	if (SOAP_GLOBAL(ref_map)) {
+		Z_TRY_ADDREF_P(data);
 		zend_hash_index_update(SOAP_GLOBAL(ref_map), (zend_ulong)(uintptr_t)node, data);
 	}
 }
@@ -2049,6 +2049,15 @@ static int calc_dimension_12(const char* str)
 	return i;
 }
 
+static void soap_array_position_add_digit(int *position, int digit)
+{
+	if (*position > (INT_MAX - digit) / 10) {
+		soap_error0(E_ERROR, "Encoding: array index out of range");
+	}
+
+	*position = (*position * 10) + digit;
+}
+
 static int* get_position_12(int dimension, const char* str)
 {
 	int *pos;
@@ -2069,7 +2078,7 @@ static int* get_position_12(int dimension, const char* str)
 				i++;
 				flag = 1;
 			}
-			pos[i] = (pos[i]*10)+(*str-'0');
+			soap_array_position_add_digit(&pos[i], *str - '0');
 		} else if (*str == '*') {
 			soap_error0(E_ERROR, "Encoding: '*' may only be first arraySize value in list");
 		} else {
@@ -2099,7 +2108,7 @@ static void get_position_ex(int dimension, const char* str, int** pos)
 	memset(*pos,0,sizeof(int)*dimension);
 	while (*str != ']' && *str != '\0' && i < dimension) {
 		if (*str >= '0' && *str <= '9') {
-			(*pos)[i] = ((*pos)[i]*10)+(*str-'0');
+			soap_array_position_add_digit(&(*pos)[i], *str - '0');
 		} else if (*str == ',') {
 			i++;
 		}
@@ -2686,16 +2695,20 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			/* Increment position */
 			i = dimension;
 			while (i > 0) {
-			  i--;
-			  pos[i]++;
-				if (pos[i] >= dims[i]) {
-					if (i > 0) {
-						pos[i] = 0;
-					} else {
-						/* TODO: Array index overflow */
-					}
-				} else {
-				  break;
+				i--;
+				if (pos[i] == INT_MAX) {
+					efree(dims);
+					efree(pos);
+					zval_ptr_dtor(ret);
+					ZVAL_UNDEF(ret);
+					soap_error0(E_ERROR, "Encoding: array index out of range");
+				}
+				pos[i]++;
+				if (pos[i] < dims[i]) {
+					break;
+				}
+				if (i > 0) {
+					pos[i] = 0;
 				}
 			}
 		}
@@ -2785,7 +2798,7 @@ static zval *to_zval_map(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			}
 
 			xmlValue = get_node(item->children, "value");
-			if (!xmlKey) {
+			if (!xmlValue) {
 				soap_error0(E_ERROR,  "Encoding: Can't decode apache map, missing value");
 			}
 
@@ -3522,7 +3535,7 @@ void encode_reset_ns(void)
 	} else {
 		SOAP_GLOBAL(ref_map) = emalloc(sizeof(HashTable));
 	}
-	zend_hash_init(SOAP_GLOBAL(ref_map), 0, NULL, NULL, 0);
+	zend_hash_init(SOAP_GLOBAL(ref_map), 0, NULL, ZVAL_PTR_DTOR, 0);
 }
 
 void encode_finish(void)

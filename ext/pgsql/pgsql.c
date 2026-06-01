@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Jouni Ahto <jouni.ahto@exdec.fi>                            |
@@ -153,9 +151,7 @@ static int le_plink;
 static zend_class_entry *pgsql_link_ce, *pgsql_result_ce, *pgsql_lob_ce;
 static zend_object_handlers pgsql_link_object_handlers, pgsql_result_object_handlers, pgsql_lob_object_handlers;
 
-static inline pgsql_link_handle *pgsql_link_from_obj(zend_object *obj) {
-	return (pgsql_link_handle *)((char *)(obj) - XtOffsetOf(pgsql_link_handle, std));
-}
+#define pgsql_link_from_obj(obj) ZEND_CONTAINER_OF(obj, pgsql_link_handle, std)
 
 #define Z_PGSQL_LINK_P(zv) pgsql_link_from_obj(Z_OBJ_P(zv))
 
@@ -209,9 +205,7 @@ static void pgsql_link_free_obj(zend_object *obj)
 	zend_object_std_dtor(&link->std);
 }
 
-static inline pgsql_result_handle *pgsql_result_from_obj(zend_object *obj) {
-	return (pgsql_result_handle *)((char *)(obj) - XtOffsetOf(pgsql_result_handle, std));
-}
+#define pgsql_result_from_obj(obj) ZEND_CONTAINER_OF(obj, pgsql_result_handle, std)
 
 #define Z_PGSQL_RESULT_P(zv) pgsql_result_from_obj(Z_OBJ_P(zv))
 
@@ -246,9 +240,7 @@ static void pgsql_result_free_obj(zend_object *obj)
 	zend_object_std_dtor(&pg_result->std);
 }
 
-static inline pgLofp *pgsql_lob_from_obj(zend_object *obj) {
-	return (pgLofp *)((char *)(obj) - XtOffsetOf(pgLofp, std));
-}
+#define pgsql_lob_from_obj(obj) ZEND_CONTAINER_OF(obj, pgLofp, std)
 
 #define Z_PGSQL_LOB_P(zv) pgsql_lob_from_obj(Z_OBJ_P(zv))
 
@@ -576,7 +568,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	pgsql_link_ce->default_object_handlers = &pgsql_link_object_handlers;
 
 	memcpy(&pgsql_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pgsql_link_object_handlers.offset = XtOffsetOf(pgsql_link_handle, std);
+	pgsql_link_object_handlers.offset = offsetof(pgsql_link_handle, std);
 	pgsql_link_object_handlers.free_obj = pgsql_link_free_obj;
 	pgsql_link_object_handlers.get_constructor = pgsql_link_get_constructor;
 	pgsql_link_object_handlers.clone_obj = NULL;
@@ -587,7 +579,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	pgsql_result_ce->default_object_handlers = &pgsql_result_object_handlers;
 
 	memcpy(&pgsql_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pgsql_result_object_handlers.offset = XtOffsetOf(pgsql_result_handle, std);
+	pgsql_result_object_handlers.offset = offsetof(pgsql_result_handle, std);
 	pgsql_result_object_handlers.free_obj = pgsql_result_free_obj;
 	pgsql_result_object_handlers.get_constructor = pgsql_result_get_constructor;
 	pgsql_result_object_handlers.clone_obj = NULL;
@@ -598,7 +590,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	pgsql_lob_ce->default_object_handlers = &pgsql_lob_object_handlers;
 
 	memcpy(&pgsql_lob_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pgsql_lob_object_handlers.offset = XtOffsetOf(pgLofp, std);
+	pgsql_lob_object_handlers.offset = offsetof(pgLofp, std);
 	pgsql_lob_object_handlers.free_obj = pgsql_lob_free_obj;
 	pgsql_lob_object_handlers.get_constructor = pgsql_lob_get_constructor;
 	pgsql_lob_object_handlers.clone_obj = NULL;
@@ -1230,7 +1222,7 @@ PHP_FUNCTION(pg_query)
 
 /* The char pointer MUST refer to the char* of a zend_string struct */
 static void php_pgsql_zend_string_release_from_char_pointer(char *ptr) {
-	zend_string_release((zend_string*) (ptr - XtOffsetOf(zend_string, val)));
+	zend_string_release((zend_string*) (ptr - offsetof(zend_string, val)));
 }
 
 static void _php_pgsql_free_params(char **params, uint32_t num_params)
@@ -2131,26 +2123,17 @@ PHP_FUNCTION(pg_fetch_object)
 		ce = zend_standard_class_def;
 	}
 
-	if (!ce->constructor && ctor_params && zend_hash_num_elements(ctor_params) > 0) {
-		zend_argument_value_error(3,
-			"must be empty when the specified class (%s) does not have a constructor",
-			ZSTR_VAL(ce->name)
-		);
+	if (UNEXPECTED(object_init_ex(return_value, ce) == FAILURE)) {
 		RETURN_THROWS();
 	}
 
 	zval dataset;
 	if (UNEXPECTED(!php_pgsql_fetch_hash(&dataset, result, row, row_is_null, PGSQL_ASSOC))) {
 		/* Either an exception is thrown, or we return false */
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 
-	// TODO: Check CE is an instantiable class earlier?
-	zend_result obj_initialized = object_init_ex(return_value, ce);
-	if (UNEXPECTED(obj_initialized == FAILURE)) {
-		zval_ptr_dtor(&dataset);
-		RETURN_THROWS();
-	}
 	if (!ce->default_properties_count && !ce->__set) {
 		Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
 	} else {
@@ -2158,10 +2141,32 @@ PHP_FUNCTION(pg_fetch_object)
 		zval_ptr_dtor(&dataset);
 	}
 
-	// TODO: Need to grab constructor via object handler as this allows instantiating internal objects with overridden get_constructor
-	if (ce->constructor) {
-		zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value),
+	zend_object *obj = Z_OBJ_P(return_value);
+	const zend_class_entry *old = EG(fake_scope);
+	EG(fake_scope) = ce;
+	zend_function *constructor = obj->handlers->get_constructor(obj);
+	EG(fake_scope) = old;
+
+	if (UNEXPECTED(EG(exception))) {
+		/* visibility error or override refused - VM dtors return_value */
+		return;
+	}
+
+	if (UNEXPECTED(!constructor && ctor_params && zend_hash_num_elements(ctor_params) > 0)) {
+		zend_argument_value_error(4,
+			"must be empty when the specified class (%s) does not have a constructor",
+			ZSTR_VAL(ce->name)
+		);
+		RETURN_THROWS();
+	}
+
+	if (constructor) {
+		zend_call_known_function(constructor, obj, ce,
 			/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
+		if (EG(exception)) {
+			zend_object_store_ctor_failed(obj);
+			RETURN_THROWS();
+		}
 	}
 }
 /* }}} */

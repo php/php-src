@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
@@ -224,7 +222,7 @@ PHP_MINIT_FUNCTION(xml)
 	xml_parser_ce->default_object_handlers = &xml_parser_object_handlers;
 
 	memcpy(&xml_parser_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	xml_parser_object_handlers.offset = XtOffsetOf(xml_parser, std);
+	xml_parser_object_handlers.offset = offsetof(xml_parser, std);
 	xml_parser_object_handlers.free_obj = xml_parser_free_obj;
 	xml_parser_object_handlers.get_gc = xml_parser_get_gc;
 	xml_parser_object_handlers.get_constructor = xml_parser_get_constructor;
@@ -297,9 +295,7 @@ static void xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encodin
 }
 /* }}} */
 
-static inline xml_parser *xml_parser_from_obj(zend_object *obj) {
-	return (xml_parser *)((char *)(obj) - XtOffsetOf(xml_parser, std));
-}
+#define xml_parser_from_obj(obj) ZEND_CONTAINER_OF(obj, xml_parser, std)
 
 #define Z_XMLPARSER_P(zv) xml_parser_from_obj(Z_OBJ_P(zv))
 
@@ -831,16 +827,15 @@ void xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		zval *myval;
 		/* check if the current tag already has a value - if yes append to that! */
 		if ((myval = zend_hash_find(Z_ARRVAL_P(ctag), ZSTR_KNOWN(ZEND_STR_VALUE))) && Z_TYPE_P(myval) == IS_STRING) {
-			size_t newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
-			Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
+			Z_STR_P(myval) = zend_string_safe_realloc(Z_STR_P(myval), 1, Z_STRLEN_P(myval), ZSTR_LEN(decoded_value), false);
 			strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
 					ZSTR_VAL(decoded_value), ZSTR_LEN(decoded_value) + 1);
-			zend_string_release_ex(decoded_value, 0);
+			zend_string_release_ex(decoded_value, false);
 		} else {
 			if (doprint || (! parser->skipwhite)) {
 				add_assoc_str(ctag, "value", decoded_value);
 			} else {
-				zend_string_release_ex(decoded_value, 0);
+				zend_string_release_ex(decoded_value, false);
 			}
 		}
 	} else {
@@ -858,11 +853,10 @@ void xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 				if (EXPECTED(Z_TYPE_P(mytype) == IS_STRING) && zend_string_equals_literal(Z_STR_P(mytype), "cdata")) {
 					SEPARATE_ARRAY(curtag);
 					if ((myval = zend_hash_find(Z_ARRVAL_P(curtag), ZSTR_KNOWN(ZEND_STR_VALUE)))) {
-						size_t newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
-						Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
+						Z_STR_P(myval) = zend_string_safe_realloc(Z_STR_P(myval), 1, Z_STRLEN_P(myval), ZSTR_LEN(decoded_value), false);
 						strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
 								ZSTR_VAL(decoded_value), ZSTR_LEN(decoded_value) + 1);
-						zend_string_release_ex(decoded_value, 0);
+						zend_string_release_ex(decoded_value, false);
 						return;
 					}
 				}
@@ -881,7 +875,7 @@ void xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		} else if (parser->level == (XML_MAXLEVEL + 1)) {
 								php_error_docref(NULL, E_WARNING, "Maximum depth exceeded - Results truncated");
 		} else {
-			zend_string_release_ex(decoded_value, 0);
+			zend_string_release_ex(decoded_value, false);
 		}
 	}
 }

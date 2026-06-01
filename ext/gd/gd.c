@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Stig Bakken <ssb@php.net>                                   |
@@ -146,14 +144,7 @@ static zend_function *php_gd_image_object_get_constructor(zend_object *object)
 	return NULL;
 }
 
-/**
- * Returns the underlying php_gd_image_object from a zend_object
- */
-
-static zend_always_inline php_gd_image_object* php_gd_exgdimage_from_zobj_p(zend_object* obj)
-{
-	return (php_gd_image_object *) ((char *) (obj) - XtOffsetOf(php_gd_image_object, std));
-}
+#define php_gd_exgdimage_from_zobj_p(obj) ZEND_CONTAINER_OF(obj, php_gd_image_object, std)
 
 /**
  * Converts an extension GdImage instance contained within a zval into the gdImagePtr
@@ -208,7 +199,7 @@ static void php_gd_object_minit_helper(void)
 	php_gd_image_object_handlers.free_obj = php_gd_image_object_free;
 	php_gd_image_object_handlers.get_constructor = php_gd_image_object_get_constructor;
 	php_gd_image_object_handlers.compare = zend_objects_not_comparable;
-	php_gd_image_object_handlers.offset = XtOffsetOf(php_gd_image_object, std);
+	php_gd_image_object_handlers.offset = offsetof(php_gd_image_object, std);
 }
 
 static zend_class_entry *gd_font_ce = NULL;
@@ -273,7 +264,7 @@ static void php_gd_font_minit_helper(void)
 	php_gd_font_object_handlers.clone_obj = NULL;
 	php_gd_font_object_handlers.free_obj = php_gd_font_object_free;
 	php_gd_font_object_handlers.get_constructor = php_gd_font_object_get_constructor;
-	php_gd_font_object_handlers.offset = XtOffsetOf(php_gd_font_object, std);
+	php_gd_font_object_handlers.offset = offsetof(php_gd_font_object, std);
 }
 
 /*********************************************************

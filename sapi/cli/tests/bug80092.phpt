@@ -41,6 +41,6 @@ foreach (explode("\n", $output) as $line) {
 --EXPECTF--
 preloaded
 PHP %s
-Copyright (c) The PHP Group
+Copyright © The PHP Group and Contributors
 %AZend Engine %s
 %A    with Zend OPcache %a

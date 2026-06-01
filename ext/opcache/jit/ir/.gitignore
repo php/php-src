@@ -20,3 +20,6 @@ tests/**/*.log
 
 win32/vcpkg
 win32/build_*
+
+fuzz/build/
+fuzz/corpus/

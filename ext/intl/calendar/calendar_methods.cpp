@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
@@ -85,7 +85,7 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 		Z_PARAM_STRING_OR_NULL(locale_str, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	TimeZone *timeZone = timezone_process_timezone_argument(timezone_object, timezone_string, nullptr);
+	TimeZone *timeZone = timezone_process_timezone_argument(timezone_object, timezone_string, nullptr, 1);
 	if (timeZone == nullptr) {
 		RETURN_NULL();
 	}
@@ -203,7 +203,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_available_locales)
 
 	int32_t count;
 	const Locale *availLocales = Calendar::getAvailableLocales(count);
-	array_init(return_value);
+	array_init_size(return_value, count);
 	for (int i = 0; i < count; i++) {
 		Locale locale = availLocales[i];
 		add_next_index_string(return_value, locale.getName());
@@ -316,7 +316,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 	}
 
 	TimeZone *timeZone = timezone_process_timezone_argument(
-		timezone_object, timezone_string, CALENDAR_ERROR_P(co));
+		timezone_object, timezone_string, CALENDAR_ERROR_P(co), 2);
 	if (timeZone == nullptr) {
 		RETURN_FALSE;
 	}
@@ -345,7 +345,7 @@ U_CFUNC PHP_METHOD(IntlCalendar, setTimeZone)
 	}
 
 	TimeZone *timeZone = timezone_process_timezone_argument(
-		timezone_object, timezone_string, CALENDAR_ERROR_P(co));
+		timezone_object, timezone_string, CALENDAR_ERROR_P(co), 1);
 	if (timeZone == nullptr) {
 		RETURN_FALSE;
 	}
@@ -373,7 +373,7 @@ static void _php_intlcal_before_after(
 
 	when_co = Z_INTL_CALENDAR_P(when_object);
 	if (when_co->ucal == NULL) {
-		zend_argument_error(NULL, 2, "is uninitialized");
+		zend_argument_error(NULL, hasThis() ? 1 : 2, "is uninitialized");
 		RETURN_THROWS();
 	}
 
@@ -419,8 +419,8 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 	}
 
 	for (int i = 0; i < arg_num; i++) {
-		/* Arguments start at 1 */
-		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(args[i], i + 1);
+		/* Count from intlcal_set($calendar, ...), so date/time arguments start at #2. */
+		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(args[i], i + 2);
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
@@ -455,9 +455,10 @@ U_CFUNC PHP_METHOD(IntlCalendar, setDate)
 		RETURN_THROWS();
 	}
 
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 1);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 2);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 3);
+	/* These method-only APIs parse the object first, so the API argument positions are offset by +1. */
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 2);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 3);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 4);
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
@@ -478,18 +479,19 @@ U_CFUNC PHP_METHOD(IntlCalendar, setDateTime)
 		RETURN_THROWS();
 	}
 
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 1);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 2);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 3);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(hour, 4);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(minute, 5);
+	/* These method-only APIs parse the object first, so the API argument positions are offset by +1. */
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 2);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 3);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 4);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(hour, 5);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(minute, 6);
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
 	if (second_is_null) {
 		co->ucal->set((int32_t) year, (int32_t) month, (int32_t) day, (int32_t) hour, (int32_t) minute);
 	} else {
-		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(second, 6);
+		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(second, 7);
 		co->ucal->set((int32_t) year, (int32_t) month, (int32_t) day, (int32_t) hour, (int32_t) minute, (int32_t) second);
 	}
 }
@@ -794,7 +796,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_equivalent_to)
 
 	other_co = Z_INTL_CALENDAR_P(other_object);
 	if (other_co->ucal == NULL) {
-		zend_argument_error(NULL, 2, "is uninitialized");
+		zend_argument_error(NULL, hasThis() ? 1 : 2, "is uninitialized");
 		RETURN_THROWS();
 	}
 
@@ -931,7 +933,7 @@ U_CFUNC PHP_FUNCTION(intlcal_equals)
 	CALENDAR_METHOD_FETCH_OBJECT;
 	other_co = Z_INTL_CALENDAR_P(other_object);
 	if (other_co->ucal == NULL) {
-		zend_argument_error(NULL, 2, "is uninitialized");
+		zend_argument_error(NULL, hasThis() ? 1 : 2, "is uninitialized");
 		RETURN_THROWS();
 	}
 

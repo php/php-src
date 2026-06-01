@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Wez Furlong <wez@thebrainroom.com>                          |
    | Borrowed code from:                                                  |
@@ -139,141 +137,6 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 	}
 	return PHP_STREAM_PERSISTENT_NOT_EXIST;
 }
-
-/* }}} */
-
-static zend_llist *php_get_wrapper_errors_list(php_stream_wrapper *wrapper)
-{
-	if (!FG(wrapper_errors)) {
-		return NULL;
-	} else {
-		return (zend_llist*) zend_hash_str_find_ptr(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
-	}
-}
-
-/* {{{ wrapper error reporting */
-static void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption)
-{
-	char *tmp;
-	char *msg;
-	char errstr[256];
-	int free_msg = 0;
-
-	if (EG(exception)) {
-		/* Don't emit additional warnings if an exception has already been thrown. */
-		return;
-	}
-
-	tmp = estrdup(path);
-	if (wrapper) {
-		zend_llist *err_list = php_get_wrapper_errors_list(wrapper);
-		if (err_list) {
-			size_t l = 0;
-			int brlen;
-			int i;
-			int count = (int)zend_llist_count(err_list);
-			const char *br;
-			const char **err_buf_p;
-			zend_llist_position pos;
-
-			if (PG(html_errors)) {
-				brlen = 7;
-				br = "<br />\n";
-			} else {
-				brlen = 1;
-				br = "\n";
-			}
-
-			for (err_buf_p = zend_llist_get_first_ex(err_list, &pos), i = 0;
-					err_buf_p;
-					err_buf_p = zend_llist_get_next_ex(err_list, &pos), i++) {
-				l += strlen(*err_buf_p);
-				if (i < count - 1) {
-					l += brlen;
-				}
-			}
-			msg = emalloc(l + 1);
-			msg[0] = '\0';
-			for (err_buf_p = zend_llist_get_first_ex(err_list, &pos), i = 0;
-					err_buf_p;
-					err_buf_p = zend_llist_get_next_ex(err_list, &pos), i++) {
-				strcat(msg, *err_buf_p);
-				if (i < count - 1) {
-					strcat(msg, br);
-				}
-			}
-
-			free_msg = 1;
-		} else {
-			if (wrapper == &php_plain_files_wrapper) {
-				msg = php_socket_strerror_s(errno, errstr, sizeof(errstr));
-			} else {
-				msg = "operation failed";
-			}
-		}
-	} else {
-		msg = "no suitable wrapper could be found";
-	}
-
-	php_strip_url_passwd(tmp);
-	php_error_docref1(NULL, tmp, E_WARNING, "%s: %s", caption, msg);
-	efree(tmp);
-	if (free_msg) {
-		efree(msg);
-	}
-}
-
-static void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper)
-{
-	if (wrapper && FG(wrapper_errors)) {
-		zend_hash_str_del(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
-	}
-}
-
-static void wrapper_error_dtor(void *error)
-{
-	efree(*(char**)error);
-}
-
-static void wrapper_list_dtor(zval *item) {
-	zend_llist *list = (zend_llist*)Z_PTR_P(item);
-	zend_llist_destroy(list);
-	efree(list);
-}
-
-PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int options, const char *fmt, ...)
-{
-	va_list args;
-	char *buffer = NULL;
-
-	va_start(args, fmt);
-	vspprintf(&buffer, 0, fmt, args);
-	va_end(args);
-
-	if ((options & REPORT_ERRORS) || wrapper == NULL) {
-		php_error_docref(NULL, E_WARNING, "%s", buffer);
-		efree(buffer);
-	} else {
-		zend_llist *list = NULL;
-		if (!FG(wrapper_errors)) {
-			ALLOC_HASHTABLE(FG(wrapper_errors));
-			zend_hash_init(FG(wrapper_errors), 8, NULL, wrapper_list_dtor, 0);
-		} else {
-			list = zend_hash_str_find_ptr(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
-		}
-
-		if (!list) {
-			zend_llist new_list;
-			zend_llist_init(&new_list, sizeof(buffer), wrapper_error_dtor, 0);
-			list = zend_hash_str_update_mem(FG(wrapper_errors), (const char*)&wrapper,
-					sizeof(wrapper), &new_list, sizeof(new_list));
-		}
-
-		/* append to linked list */
-		zend_llist_add_element(list, &buffer);
-	}
-}
-
 
 /* }}} */
 
@@ -511,6 +374,11 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 		if (Z_TYPE(stream->wrapperdata) != IS_UNDEF) {
 			zval_ptr_dtor(&stream->wrapperdata);
 			ZVAL_UNDEF(&stream->wrapperdata);
+		}
+
+		if (stream->error_list) {
+			zend_llist_destroy(stream->error_list);
+			pefree(stream->error_list, stream->is_persistent);
 		}
 
 		if (stream->readbuf) {
@@ -1320,7 +1188,7 @@ PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t cou
 
 	ZEND_ASSERT(buf != NULL);
 	if (stream->ops->write == NULL) {
-		php_error_docref(NULL, E_NOTICE, "Stream is not writable");
+		php_stream_notice(stream, NotWritable, "Stream is not writable");
 		return (ssize_t) -1;
 	}
 
@@ -1362,14 +1230,16 @@ PHPAPI zend_off_t _php_stream_tell(const php_stream *stream)
 	return stream->position;
 }
 
-static bool php_stream_are_filters_seekable(php_stream_filter *filter, bool is_start_seeking)
+static bool php_stream_are_filters_seekable(php_stream_filter *filter, bool is_start_seeking, int chain_type)
 {
 	while (filter) {
-		if (filter->seekable == PSFS_SEEKABLE_NEVER) {
+		php_stream_filter_seekable_t seekable = (chain_type == PHP_STREAM_FILTER_READ) ?
+				filter->read_seekable : filter->write_seekable;
+		if (seekable == PSFS_SEEKABLE_NEVER) {
 			php_error_docref(NULL, E_WARNING, "Stream filter %s is never seekable", filter->fops->label);
 			return false;
 		}
-		if (!is_start_seeking && filter->seekable == PSFS_SEEKABLE_START) {
+		if (!is_start_seeking && seekable == PSFS_SEEKABLE_START) {
 			php_error_docref(NULL, E_WARNING, "Stream filter %s is seekable only to start position", filter->fops->label);
 			return false;
 		}
@@ -1379,11 +1249,13 @@ static bool php_stream_are_filters_seekable(php_stream_filter *filter, bool is_s
 }
 
 static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter *filter,
-		bool is_start_seeking, zend_off_t offset, int whence)
+		bool is_start_seeking, zend_off_t offset, int whence, int chain_type)
 {
 	while (filter) {
-		if (((filter->seekable == PSFS_SEEKABLE_START && is_start_seeking) ||
-				filter->seekable == PSFS_SEEKABLE_CHECK) &&
+		php_stream_filter_seekable_t seekable = (chain_type == PHP_STREAM_FILTER_READ) ?
+				filter->read_seekable : filter->write_seekable;
+		if (((seekable == PSFS_SEEKABLE_START && is_start_seeking) ||
+				seekable == PSFS_SEEKABLE_CHECK) &&
 				filter->fops->seek(stream, filter, offset, whence) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Stream filter seeking for %s failed", filter->fops->label);
 			return FAILURE;
@@ -1396,10 +1268,12 @@ static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter
 static zend_result php_stream_filters_seek_all(php_stream *stream, bool is_start_seeking,
 		zend_off_t offset, int whence)
 {
-	if (php_stream_filters_seek(stream, stream->writefilters.head, is_start_seeking, offset, whence) == FAILURE) {
+	if (php_stream_filters_seek(stream, stream->writefilters.head, is_start_seeking,
+			offset, whence, PHP_STREAM_FILTER_WRITE) == FAILURE) {
 		return FAILURE;
 	}
-	if (php_stream_filters_seek(stream, stream->readfilters.head, is_start_seeking, offset, whence) == FAILURE) {
+	if (php_stream_filters_seek(stream, stream->readfilters.head, is_start_seeking,
+			offset, whence, PHP_STREAM_FILTER_READ) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -1424,11 +1298,13 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 
 	if (stream->writefilters.head) {
 		_php_stream_flush(stream, 0);
-		if (!php_stream_are_filters_seekable(stream->writefilters.head, is_start_seeking)) {
+		if (!php_stream_are_filters_seekable(stream->writefilters.head, is_start_seeking,
+				PHP_STREAM_FILTER_WRITE)) {
 			return -1;
 		}
 	}
-	if (stream->readfilters.head && !php_stream_are_filters_seekable(stream->readfilters.head, is_start_seeking)) {
+	if (stream->readfilters.head && !php_stream_are_filters_seekable(
+			stream->readfilters.head, is_start_seeking, PHP_STREAM_FILTER_READ)) {
 		return -1;
 	}
 
@@ -1507,7 +1383,8 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 		return 0;
 	}
 
-	php_error_docref(NULL, E_WARNING, "Stream does not support seeking");
+	php_stream_warn(stream, SeekNotSupported,
+			"Stream does not support seeking");
 
 	return -1;
 }
@@ -1931,11 +1808,13 @@ void php_shutdown_stream_hashes(void)
 		FG(stream_filters) = NULL;
 	}
 
-	if (FG(wrapper_errors)) {
-		zend_hash_destroy(FG(wrapper_errors));
-		efree(FG(wrapper_errors));
-		FG(wrapper_errors) = NULL;
+	if (FG(wrapper_logged_errors)) {
+		zend_hash_destroy(FG(wrapper_logged_errors));
+		efree(FG(wrapper_logged_errors));
+		FG(wrapper_logged_errors) = NULL;
 	}
+
+	php_stream_error_state_cleanup();
 }
 
 zend_result php_init_stream_wrappers(int module_number)
@@ -1975,7 +1854,7 @@ void php_shutdown_stream_wrappers(int module_number)
 static inline zend_result php_stream_wrapper_scheme_validate(const char *protocol, size_t protocol_len)
 {
 	for (size_t i = 0; i < protocol_len; i++) {
-		if (!isalnum((int)protocol[i]) &&
+		if (!isalnum((unsigned char)protocol[i]) &&
 			protocol[i] != '+' &&
 			protocol[i] != '-' &&
 			protocol[i] != '.') {
@@ -2055,7 +1934,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		return (php_stream_wrapper*)((options & STREAM_LOCATE_WRAPPERS_ONLY) ? NULL : &php_plain_files_wrapper);
 	}
 
-	for (p = path; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
+	for (p = path; isalnum((unsigned char)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
 		n++;
 	}
 
@@ -2102,7 +1981,9 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 			if (!localhost && path[n+3] != '\0' && path[n+3] != '/') {
 #endif
 				if (options & REPORT_ERRORS) {
-					php_error_docref(NULL, E_WARNING, "Remote host file access not supported, %s", path);
+					php_stream_wrapper_warn(plain_files_wrapper, NULL, options,
+							ProtocolUnsupported,
+							"Remote host file access not supported, %s", path);
 				}
 				return NULL;
 			}
@@ -2141,7 +2022,9 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 			}
 
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "file:// wrapper is disabled in the server configuration");
+				php_stream_wrapper_warn(plain_files_wrapper, NULL, options,
+					Disabled,
+					"file:// wrapper is disabled in the server configuration");
 			}
 			return NULL;
 		}
@@ -2239,10 +2122,12 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 			stream->flags |= PHP_STREAM_FLAG_NO_BUFFER | PHP_STREAM_FLAG_IS_DIR;
 		}
 	} else if (wrapper) {
-		php_stream_wrapper_log_error(wrapper, options & ~REPORT_ERRORS, "not implemented");
+		php_stream_wrapper_log_warn(wrapper, context, options & ~REPORT_ERRORS,
+				NoOpener, "not implemented");
 	}
 	if (stream == NULL && (options & REPORT_ERRORS)) {
-		php_stream_display_wrapper_errors(wrapper, path, "Failed to open directory");
+		php_stream_display_wrapper_errors(wrapper, context, PHP_STREAM_EC(OpenFailed),
+				path, "Failed to open directory");
 	}
 	php_stream_tidy_wrapper_error_log(wrapper);
 
@@ -2309,16 +2194,25 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 
 	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, options);
 	if ((options & STREAM_USE_URL) && (!wrapper || !wrapper->is_url)) {
-		php_error_docref(NULL, E_WARNING, "This function may only be used against URLs");
+		if (wrapper) {
+			php_stream_wrapper_warn(wrapper, context, options,
+					ProtocolUnsupported,
+					"This function may only be used against URLs");
+		} else {
+			php_error_docref(NULL, E_WARNING, "This function may only be used against URLs");
+		}
 		if (resolved_path) {
 			zend_string_release_ex(resolved_path, 0);
 		}
 		return NULL;
 	}
 
+	/* wrapper name needs to be stored as wrapper can be removed in opener (user stream) */
+	char *wrapper_name = pestrdup(PHP_STREAM_ERROR_WRAPPER_NAME(wrapper), persistent);
 	if (wrapper) {
 		if (!wrapper->wops->stream_opener) {
-			php_stream_wrapper_log_error(wrapper, options & ~REPORT_ERRORS,
+			php_stream_wrapper_log_warn(wrapper, context, options & ~REPORT_ERRORS,
+					NoOpener,
 					"wrapper does not support stream open");
 		} else {
 			stream = wrapper->wops->stream_opener(wrapper,
@@ -2329,7 +2223,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		/* if the caller asked for a persistent stream but the wrapper did not
 		 * return one, force an error here */
 		if (stream && persistent && !stream->is_persistent) {
-			php_stream_wrapper_log_error(wrapper, options & ~REPORT_ERRORS,
+			php_stream_wrapper_log_warn(wrapper, context, options & ~REPORT_ERRORS,
+					PersistentNotSupported,
 					"wrapper does not support persistent streams");
 			php_stream_close(stream);
 			stream = NULL;
@@ -2353,6 +2248,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		stream->open_filename = __zend_orig_filename ? __zend_orig_filename : __zend_filename;
 		stream->open_lineno = __zend_orig_lineno ? __zend_orig_lineno : __zend_lineno;
 #endif
+		if (stream->ctx == NULL && context != NULL && !persistent) {
+			php_stream_context_set(stream, context);
+		}
 	}
 
 	if (stream != NULL && (options & STREAM_MUST_SEEK)) {
@@ -2365,6 +2263,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 				if (resolved_path) {
 					zend_string_release_ex(resolved_path, 0);
 				}
+				pefree(wrapper_name, persistent);
 				return stream;
 			case PHP_STREAM_RELEASED:
 				if (newstream->orig_path) {
@@ -2374,6 +2273,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 				if (resolved_path) {
 					zend_string_release_ex(resolved_path, 0);
 				}
+				pefree(wrapper_name, persistent);
 				return newstream;
 			default:
 				php_stream_close(stream);
@@ -2381,8 +2281,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 				if (options & REPORT_ERRORS) {
 					char *tmp = estrdup(path);
 					php_strip_url_passwd(tmp);
-					php_error_docref1(NULL, tmp, E_WARNING, "could not make seekable - %s",
-							tmp);
+					php_stream_wrapper_warn_param(wrapper, context, options,
+							SeekNotSupported, tmp,
+							"could not make seekable - %s", tmp);
 					efree(tmp);
 
 					options &= ~REPORT_ERRORS;
@@ -2400,13 +2301,15 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	if (stream == NULL && (options & REPORT_ERRORS)) {
-		php_stream_display_wrapper_errors(wrapper, path, "Failed to open stream");
+		php_stream_display_wrapper_name_errors(wrapper_name, context, PHP_STREAM_EC(OpenFailed),
+				path, "Failed to open stream");
 		if (opened_path && *opened_path) {
 			zend_string_release_ex(*opened_path, 0);
 			*opened_path = NULL;
 		}
 	}
-	php_stream_tidy_wrapper_error_log(wrapper);
+	php_stream_tidy_wrapper_name_error_log(wrapper_name);
+	pefree(wrapper_name, persistent);
 	if (resolved_path) {
 		zend_string_release_ex(resolved_path, 0);
 	}

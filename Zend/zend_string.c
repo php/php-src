@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -18,6 +17,7 @@
 
 #include "zend.h"
 #include "zend_globals.h"
+#include "zend_multiply.h"
 
 #ifdef HAVE_VALGRIND
 # include "valgrind/callgrind.h"
@@ -474,8 +474,7 @@ ZEND_API zend_string *zend_string_concat2(
 		const char *str1, size_t str1_len,
 		const char *str2, size_t str2_len)
 {
-	size_t len = str1_len + str2_len;
-	zend_string *res = zend_string_alloc(len, 0);
+	zend_string *res = zend_string_safe_alloc(1, str1_len, str2_len, 0);
 
 	char *p = ZSTR_VAL(res);
 	p = zend_mempcpy(p, str1, str1_len);
@@ -490,7 +489,8 @@ ZEND_API zend_string *zend_string_concat3(
 		const char *str2, size_t str2_len,
 		const char *str3, size_t str3_len)
 {
-	size_t len = str1_len + str2_len + str3_len;
+	size_t tmp_len = zend_safe_address_guarded(1, str1_len, str2_len);
+	size_t len = zend_safe_address_guarded(1, tmp_len, str3_len);
 	zend_string *res = zend_string_alloc(len, 0);
 
 	char *p = ZSTR_VAL(res);

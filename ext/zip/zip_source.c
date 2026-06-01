@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Tim Starling <tstarling@wikimedia.org>                       |
   +----------------------------------------------------------------------+
@@ -157,6 +155,7 @@ static zip_int64_t php_zip_string_cb(void *userdata, void *data, zip_uint64_t le
 			ctx->in_str = ctx->out_str;
 			ctx->out_str = ZSTR_EMPTY_ALLOC();
 			if (ctx->dest) {
+				zend_string_release(*(ctx->dest));
 				*(ctx->dest) = zend_string_copy(ctx->in_str);
 			}
 			return 0;
@@ -202,5 +201,10 @@ zip_source_t * php_zip_create_string_source(zend_string *str, zend_string **dest
 	ctx->out_str = ZSTR_EMPTY_ALLOC();
 	ctx->dest = dest;
 	ctx->mtime = time(NULL);
+
+	if (dest) {
+		*dest = zend_string_copy(str);
+	}
+
 	return zip_source_function_create(php_zip_string_cb, (void*)ctx, err);
 }

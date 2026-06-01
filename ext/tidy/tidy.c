@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: John Coggeshall <john@php.net>                               |
   +----------------------------------------------------------------------+
@@ -106,9 +104,7 @@ struct _PHPTidyObj {
 	zend_object		std;
 };
 
-static inline PHPTidyObj *php_tidy_fetch_object(zend_object *obj) {
-	return (PHPTidyObj *)((char*)(obj) - XtOffsetOf(PHPTidyObj, std));
-}
+#define php_tidy_fetch_object(obj) ZEND_CONTAINER_OF(obj, PHPTidyObj, std)
 
 #define Z_TIDY_P(zv) php_tidy_fetch_object(Z_OBJ_P((zv)))
 /* }}} */
@@ -850,7 +846,7 @@ static PHP_MINIT_FUNCTION(tidy)
 	tidy_object_handlers_doc.cast_object = tidy_doc_cast_handler;
 	tidy_object_handlers_node.cast_object = tidy_node_cast_handler;
 
-	tidy_object_handlers_node.offset = tidy_object_handlers_doc.offset = XtOffsetOf(PHPTidyObj, std);
+	tidy_object_handlers_node.offset = tidy_object_handlers_doc.offset = offsetof(PHPTidyObj, std);
 	tidy_object_handlers_node.free_obj = tidy_object_handlers_doc.free_obj = tidy_object_free_storage;
 
 	register_tidy_symbols(module_number);

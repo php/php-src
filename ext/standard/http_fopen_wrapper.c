@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Jim Winstead <jimw@php.net>                                 |
@@ -245,7 +243,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 		while (last_header_name < last_header_value) {
 			if (*last_header_name == ' ' || *last_header_name == '\t') {
 				header_info->error = true;
-				php_stream_wrapper_log_error(wrapper, options,
+				php_stream_wrapper_log_warn(wrapper, context, options, InvalidResponse,
 					"HTTP invalid response format (space in header name)!");
 				zend_string_efree(last_header_line_str);
 				return NULL;
@@ -263,7 +261,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 	} else {
 		/* There is no colon which means invalid response so error. */
 		header_info->error = true;
-		php_stream_wrapper_log_error(wrapper, options,
+		php_stream_wrapper_log_warn(wrapper, context, options, InvalidResponse,
 				"HTTP invalid response format (no colon in header line)!");
 		zend_string_efree(last_header_line_str);
 		return NULL;
@@ -287,7 +285,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 		size_t last_header_value_len = strlen(last_header_value);
 		if (last_header_value_len > HTTP_HEADER_MAX_LOCATION_SIZE) {
 			header_info->error = true;
-			php_stream_wrapper_log_error(wrapper, options,
+			php_stream_wrapper_log_warn(wrapper, context, options, InvalidResponse,
 					"HTTP Location header size is over the limit of %d bytes",
 					HTTP_HEADER_MAX_LOCATION_SIZE);
 			zend_string_efree(last_header_line_str);
@@ -388,7 +386,8 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	tmp_line[0] = '\0';
 
 	if (redirect_max < 1) {
-		php_stream_wrapper_log_error(wrapper, options, "Redirection limit reached, aborting");
+		php_stream_wrapper_log_warn(wrapper, context, options, RedirectLimit,
+			"Redirection limit reached, aborting");
 		return NULL;
 	}
 
@@ -421,7 +420,8 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		/* Normal http request (possibly with proxy) */
 
 		if (strpbrk(mode, "awx+")) {
-			php_stream_wrapper_log_error(wrapper, options, "HTTP wrapper does not support writeable connections");
+			php_stream_wrapper_log_warn(wrapper, context, options, ModeNotSupported,
+				"HTTP wrapper does not support writeable connections");
 			php_uri_struct_free(resource);
 			return NULL;
 		}
@@ -450,7 +450,8 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	}
 
 	if (request_fulluri && (strchr(path, '\n') != NULL || strchr(path, '\r') != NULL)) {
-		php_stream_wrapper_log_error(wrapper, options, "HTTP wrapper full URI path does not allow CR or LF characters");
+		php_stream_wrapper_log_warn(wrapper, context, options, InvalidUrl,
+			"HTTP wrapper full URI path does not allow CR or LF characters");
 		php_uri_struct_free(resource);
 		zend_string_release(transport_string);
 		return NULL;
@@ -465,7 +466,8 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 #endif
 
 		if (d > timeoutmax) {
-			php_stream_wrapper_log_error(wrapper, options, "timeout must be lower than " ZEND_ULONG_FMT, (zend_ulong)timeoutmax);
+			php_stream_wrapper_log_warn(wrapper, context, options, InvalidParam,
+				"timeout must be lower than " ZEND_ULONG_FMT, (zend_ulong)timeoutmax);
 			zend_string_release(transport_string);
 			php_uri_struct_free(resource);
 			return NULL;
@@ -495,7 +497,8 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	}
 
 	if (errstr) {
-		php_stream_wrapper_log_error(wrapper, options, "%s", ZSTR_VAL(errstr));
+		php_stream_wrapper_log_warn(wrapper, context, options, ProtocolError,
+			"%s", ZSTR_VAL(errstr));
 		zend_string_release_ex(errstr, 0);
 		errstr = NULL;
 	}
@@ -549,8 +552,8 @@ finish:
 			if (reset_ssl_peer_name) {
 				php_stream_context_unset_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name");
 			}
-
-			php_stream_wrapper_log_error(wrapper, options, "Cannot connect to HTTPS server through proxy");
+			php_stream_wrapper_log_warn(wrapper, context, options, ProtocolError,
+				"Cannot connect to HTTPS server through proxy");
 			php_stream_close(stream);
 			stream = NULL;
 		}
@@ -575,7 +578,8 @@ finish:
 
 			if (php_stream_xport_crypto_setup(stream, STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL) < 0 ||
 			    php_stream_xport_crypto_enable(stream, 1) < 0) {
-				php_stream_wrapper_log_error(wrapper, options, "Cannot connect to HTTPS server through proxy");
+				php_stream_wrapper_log_warn(wrapper, context, options, SslNotSupported,
+					"Cannot connect to HTTPS server through proxy");
 				php_stream_close(stream);
 				stream = NULL;
 			}
@@ -757,14 +761,14 @@ finish:
 		smart_str scratch = {0};
 
 		/* decode the strings first */
-		php_url_decode(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
+		ZSTR_LEN(resource->user) = php_url_decode(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
 
 		smart_str_append(&scratch, resource->user);
 		smart_str_appendc(&scratch, ':');
 
 		/* Note: password is optional! */
 		if (resource->password) {
-			php_url_decode(ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
+			ZSTR_LEN(resource->password) = php_url_decode(ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
 			smart_str_append(&scratch, resource->password);
 		}
 
@@ -832,7 +836,8 @@ finish:
 				ua[ua_len] = 0;
 				smart_str_appendl(&req_buf, ua, ua_len);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Cannot construct User-agent header");
+				php_stream_wrapper_warn_nt(wrapper, context, options, InvalidHeader,
+					"Cannot construct User-agent header");
 			}
 			efree(ua);
 		}
@@ -871,7 +876,8 @@ finish:
 		}
 		if (!(have_header & HTTP_HEADER_TYPE)) {
 			smart_str_appends(&req_buf, "Content-Type: application/x-www-form-urlencoded\r\n");
-			php_error_docref(NULL, E_NOTICE, "Content-type not specified assuming application/x-www-form-urlencoded");
+			php_stream_wrapper_notice(wrapper, context, options, InvalidHeader,
+				"Content-type not specified assuming application/x-www-form-urlencoded");
 		}
 		smart_str_appends(&req_buf, "\r\n");
 		smart_str_append(&req_buf, Z_STR_P(tmpzval));
@@ -958,7 +964,8 @@ finish:
 		} else {
 			php_stream_close(stream);
 			stream = NULL;
-			php_stream_wrapper_log_error(wrapper, options, "HTTP request failed!");
+			php_stream_wrapper_log_warn(wrapper, context, options, ProtocolError,
+				"HTTP request failed!");
 			goto out;
 		}
 	}
@@ -976,7 +983,7 @@ finish:
 				if (http_header_line[1] != '\n') {
 					php_stream_close(stream);
 					stream = NULL;
-					php_stream_wrapper_log_error(wrapper, options,
+					php_stream_wrapper_log_warn(wrapper, context, options, InvalidResponse,
 							"HTTP invalid header name (cannot start with CR character)!");
 					goto out;
 				}
@@ -1007,7 +1014,7 @@ finish:
 				if (*http_header_line == ' ' || *http_header_line == '\t') {
 					php_stream_close(stream);
 					stream = NULL;
-					php_stream_wrapper_log_error(wrapper, options,
+					php_stream_wrapper_log_warn(wrapper, context, options, InvalidResponse,
 							"HTTP invalid response format (folding header at the start)!");
 					goto out;
 				}
@@ -1103,7 +1110,8 @@ finish:
 			php_uri_struct_free(resource);
 			/* check for invalid redirection URLs */
 			if ((resource = php_uri_parse_to_struct(uri_parser, new_path, strlen(new_path), PHP_URI_COMPONENT_READ_MODE_RAW, true)) == NULL) {
-				php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path);
+				php_stream_wrapper_log_warn(wrapper, context, options, InvalidUrl,
+					"Invalid redirect URL! %s", new_path);
 				efree(new_path);
 				goto out;
 			}
@@ -1115,7 +1123,8 @@ finish:
 		s = (unsigned char*)ZSTR_VAL(val); e = s + ZSTR_LEN(val); \
 		while (s < e) { \
 			if (iscntrl(*s)) { \
-				php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path); \
+				php_stream_wrapper_log_warn(wrapper, context, options, InvalidUrl, \
+					"Invalid redirect URL! %s", new_path); \
 				efree(new_path); \
 				goto out; \
 			} \
@@ -1141,7 +1150,8 @@ finish:
 				--redirect_max, new_flags, response_header STREAMS_CC);
 			efree(new_path);
 		} else {
-			php_stream_wrapper_log_error(wrapper, options, "HTTP request failed! %s", tmp_line);
+			php_stream_wrapper_log_warn(wrapper, context, options, ProtocolError,
+				"HTTP request failed! %s", tmp_line);
 		}
 	}
 out:

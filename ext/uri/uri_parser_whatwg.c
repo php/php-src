@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Máté Kocsis <kocsismate@php.net>                            |
    +----------------------------------------------------------------------+
@@ -275,6 +273,11 @@ static zend_result php_uri_parser_whatwg_scheme_write(void *uri, zval *value, zv
 	return SUCCESS;
 }
 
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_whatwg_is_special(const lxb_url_t *lexbor_uri)
+{
+	return lxb_url_is_special(lexbor_uri);
+}
+
 /* 4.2. URL miscellaneous: A URL includes credentials if its username or password is not the empty string. */
 static bool includes_credentials(const lxb_url_t *lexbor_uri)
 {
@@ -381,6 +384,31 @@ static zend_result php_uri_parser_whatwg_host_read(void *uri, php_uri_component_
 	}
 
 	return SUCCESS;
+}
+
+ZEND_ATTRIBUTE_NONNULL void php_uri_parser_whatwg_host_type_read(const lxb_url_t *lexbor_uri, zval *retval)
+{
+	switch (lexbor_uri->host.type) {
+		case LXB_URL_HOST_TYPE_IPV4:
+			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "IPv4"));
+			return;
+		case LXB_URL_HOST_TYPE_IPV6:
+			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "IPv6"));
+			return;
+		case LXB_URL_HOST_TYPE_DOMAIN:
+			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "Domain"));
+			return;
+		case LXB_URL_HOST_TYPE_EMPTY:
+			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "Empty"));
+			return;
+		case LXB_URL_HOST_TYPE_OPAQUE:
+			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "Opaque"));
+			return;
+		case LXB_URL_HOST_TYPE__UNDEF:
+			ZVAL_NULL(retval);
+			return;
+		default: ZEND_UNREACHABLE();
+	}
 }
 
 static zend_result php_uri_parser_whatwg_host_write(void *uri, zval *value, zval *errors)

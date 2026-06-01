@@ -301,12 +301,27 @@ slightly different steps. We'll call attention where the steps differ.
    > Only release tags should have version numbers in these files that do not
    > end in `-dev` (e.g., `8.1.7`, `8.1.7RC1`, `8.2.0alpha1`, etc.).
 
-    Do not forget to merge up PHP-X.Y all the way to master. When resolving
-    the conflicts, ignore the changes from PHP-X.Y in higher branches. It
-    means using something like `git checkout --ours .` when on PHP.X.Y+1 or
-    master after the merge resulting in the conflicts.
+    Do not forget to merge up PHP-X.Y all the way to master.
 
-    Be sure to set up a merge driver for the NEWS file as described in
+    ```shell
+    git switch PHP-X.Y+1 # starting from your release branch
+    git merge PHP-X.Y
+    # repeat             # Merge up all the way
+    git switch master
+    git merge PHP-X.Y+n  # latest release branch
+    ```
+
+    When resolving the conflicts, ignore the changes from PHP-X.Y in higher
+    branches when on PHP.X.Y+1 or master after the merge resulting in the
+    conflicts.
+
+    ```shell
+    git checkout --ours main/php_version.h Zend/zend.h configure.ac
+    git add main/php_version.h Zend/zend.h configure.ac
+    git merge --continue
+    ```
+    
+    Be sure to set up a merge driver for the `NEWS` file as described in
     the [Git FAQ page on the PHP wiki][gitfaq-mandatory].
 
 11. Push the changes to the `php-src`.
@@ -1087,26 +1102,19 @@ volunteers to begin the selection process for the next release managers.
    * php-general@lists.php.net (email php-general+subscribe@lists.php.net)
    * php-qa@lists.php.net (email php-qa+subscribe@lists.php.net)
 
-4. Email systems@php.net to get setup for access to downloads.php.net, to be
-   added to the release-managers@php.net distribution list, and to be added to
-   the moderators for php-announce@lists.php.net so you are able to moderate
-   your release announcements.
+4. File a [ticket in the infrastructure](https://github.com/php/infrastructure/issues/new?template=request-release-manager-access.yml)
+   project and provide an SSH key, your @php.net email address, your GitHub
+   account name, and your preferred system account name. Preferrably they're
+   all the same!
 
-   Provide the following information in a single email:
+5. Read [Logging into Servers](https://github.com/php/infrastructure/blob/main/docs/ServerAccess.rst#logging-into-servers) to set up
+   access to downloads.php.net through jump hosts with 2FA.
 
-   - An SSH public key, preferably a new unique one for PHP systems and
-     projects.
-   - Read [Machine Access](https://wiki.php.net/systems#machine_access) to set
-     up access to downloads.php.net through jump hosts, and provide a
-     `.google_authenticator` file for 2FA.
-   - Your @php.net email address to use for the release-managers@php.net
-     distribution list and php-announce@lists.php.net moderator address. This
-     should preferably not forward to a Gmail address.
-   - Your GitHub account name, so that your membership to the release managers
-     group may be approved.
-
-   A system admin will then contact you to go through with steps 5 through 8 of
-   [2FA setup instructions](https://wiki.php.net/systems#fa_setup_instructions).
+   Then [create a Google Authenticator file](https://github.com/php/infrastructure/blob/main/docs/ServerAccess.rst#creating-google-authenticator-files),
+   and provide the `.google_authenticator` file that this created, as
+   attachment to an email to systems@php.net. In this email you should also
+   provide a link to the ticket in the infrastructure project that you have
+   created in the previous step
 
    > 💬 **Hint** \
    > To send email from your @php.net address, you will need to use a custom
@@ -1114,7 +1122,7 @@ volunteers to begin the selection process for the next release managers.
    > "[Send emails from a different address or alias][]."
 
 
-5. Create a [GPG key][] for your @php.net address.
+6. Create a [GPG key][] for your @php.net address.
 
    > 💡 **Tip** \
    > If you're new to GPG, follow GitHub's instructions for
@@ -1179,7 +1187,7 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-6. Make sure you have the following repositories cloned locally:
+7. Make sure you have the following repositories cloned locally:
 
    * https://github.com/php/php-src
    * https://github.com/php/web-php

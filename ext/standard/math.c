@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Jim Winstead <jimw@php.net>                                 |
    |          Stig Sæther Bakken <ssb@php.net>                            |
@@ -861,9 +859,9 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 	e = s + ZSTR_LEN(str);
 
 	/* Skip leading whitespace */
-	while (s < e && isspace(*s)) s++;
+	while (s < e && isspace((unsigned char)*s)) s++;
 	/* Skip trailing whitespace */
-	while (s < e && isspace(*(e-1))) e--;
+	while (s < e && isspace((unsigned char)e[-1])) e--;
 
 	if (e - s >= 2) {
 		if (base == 16 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) s += 2;
@@ -1176,7 +1174,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	tmpbuf = strpprintf(0, "%.*F", dec, d);
 	if (tmpbuf == NULL) {
 		return NULL;
-	} else if (!isdigit((int)ZSTR_VAL(tmpbuf)[0])) {
+	} else if (!isdigit((unsigned char)ZSTR_VAL(tmpbuf)[0])) {
 		return tmpbuf;
 	}
 

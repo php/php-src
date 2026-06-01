@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Piere-Alain Joye <pierre@php.net>                            |
   +----------------------------------------------------------------------+
@@ -575,8 +573,12 @@ static char * php_zipobj_get_zip_comment(ze_zip_object *obj, int *len) /* {{{ */
 }
 /* }}} */
 
-/* Close and free the zip_t */
-static bool php_zipobj_close(ze_zip_object *obj) /* {{{ */
+/* Close and free the zip_t. If the archive was opened as a string, the
+ * final contents of the archive will be assigned to *out_str and that
+ * string will afterwards be owned by the caller.
+ *
+ * If out_str is NULL, the final string contents, if any, will be discarded. */
+static bool php_zipobj_close(ze_zip_object *obj, zend_string **out_str) /* {{{ */
 {
 	struct zip *intern = obj->za;
 	bool success = false;
@@ -608,7 +610,19 @@ static bool php_zipobj_close(ze_zip_object *obj) /* {{{ */
 		obj->filename_len = 0;
 	}
 
+	if (obj->out_str) {
+		if (out_str) {
+			*out_str = obj->out_str;
+		} else {
+			zend_string_release(obj->out_str);
+		}
+		obj->out_str = NULL;
+	} else {
+		ZEND_ASSERT(!out_str);
+	}
+
 	obj->za = NULL;
+	obj->from_string = false;
 	return success;
 }
 /* }}} */
@@ -1062,7 +1076,7 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 {
 	ze_zip_object * intern = php_zip_fetch_object(object);
 
-	php_zipobj_close(intern);
+	php_zipobj_close(intern, NULL);
 
 #ifdef HAVE_PROGRESS_CALLBACK
 	/* if not properly called by libzip */
@@ -1469,7 +1483,7 @@ PHP_METHOD(ZipArchive, open)
 	}
 
 	/* If we already have an opened zip, free it */
-	php_zipobj_close(ze_obj);
+	php_zipobj_close(ze_obj, NULL);
 
 	/* open for write without option to empty the archive */
 	if ((flags & (ZIP_TRUNCATE | ZIP_RDONLY)) == 0) {
@@ -1493,28 +1507,34 @@ PHP_METHOD(ZipArchive, open)
 	ze_obj->filename = resolved_path;
 	ze_obj->filename_len = strlen(resolved_path);
 	ze_obj->za = intern;
+	ze_obj->from_string = false;
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ Create new read-only zip using given string */
+/* {{{ Create new zip from a string, or a create an empty zip to be saved to a string */
 PHP_METHOD(ZipArchive, openString)
 {
-	zend_string *buffer;
+	zend_string *buffer = NULL;
+	zend_long flags = 0;
 	zval *self = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &buffer) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|Sl", &buffer, &flags) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	if (!buffer) {
+		buffer = ZSTR_EMPTY_ALLOC();
 	}
 
 	ze_zip_object *ze_obj = Z_ZIP_P(self);
 
-	php_zipobj_close(ze_obj);
+	php_zipobj_close(ze_obj, NULL);
 
 	zip_error_t err;
 	zip_error_init(&err);
 
-	zip_source_t * zip_source = php_zip_create_string_source(buffer, NULL, &err);
+	zip_source_t * zip_source = php_zip_create_string_source(buffer, &ze_obj->out_str, &err);
 
 	if (!zip_source) {
 		ze_obj->err_zip = zip_error_code_zip(&err);
@@ -1523,7 +1543,7 @@ PHP_METHOD(ZipArchive, openString)
 		RETURN_LONG(ze_obj->err_zip);
 	}
 
-	struct zip *intern = zip_open_from_source(zip_source, ZIP_RDONLY, &err);
+	struct zip *intern = zip_open_from_source(zip_source, flags, &err);
 	if (!intern) {
 		ze_obj->err_zip = zip_error_code_zip(&err);
 		ze_obj->err_sys = zip_error_code_system(&err);
@@ -1532,6 +1552,7 @@ PHP_METHOD(ZipArchive, openString)
 		RETURN_LONG(ze_obj->err_zip);
 	}
 
+	ze_obj->from_string = true;
 	ze_obj->za = intern;
 	zip_error_fini(&err);
 	RETURN_TRUE;
@@ -1570,7 +1591,34 @@ PHP_METHOD(ZipArchive, close)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	RETURN_BOOL(php_zipobj_close(Z_ZIP_P(self)));
+	RETURN_BOOL(php_zipobj_close(Z_ZIP_P(self), NULL));
+}
+/* }}} */
+
+/* {{{ close the zip archive and get the result as a string */
+PHP_METHOD(ZipArchive, closeString)
+{
+	struct zip *intern;
+	zval *self = ZEND_THIS;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZIP_FROM_OBJECT(intern, self);
+
+	if (!Z_ZIP_P(self)->from_string) {
+		zend_throw_error(NULL, "ZipArchive::closeString can only be called on "
+				"an archive opened with ZipArchive::openString");
+		RETURN_THROWS();
+	}
+
+	zend_string *ret = NULL;
+	bool success = php_zipobj_close(Z_ZIP_P(self), &ret);
+	ZEND_ASSERT(ret);
+	if (success) {
+		RETURN_STR(ret);
+	}
+	zend_string_release(ret);
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -3053,7 +3101,7 @@ static void php_zip_free_prop_handler(zval *el) /* {{{ */ {
 static PHP_MINIT_FUNCTION(zip)
 {
 	memcpy(&zip_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	zip_object_handlers.offset = XtOffsetOf(ze_zip_object, zo);
+	zip_object_handlers.offset = offsetof(ze_zip_object, zo);
 	zip_object_handlers.free_obj = php_zip_object_free_storage;
 	zip_object_handlers.dtor_obj = php_zip_object_dtor;
 	zip_object_handlers.clone_obj = NULL;

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Etienne Kneuss <colder@php.net>                             |
    +----------------------------------------------------------------------+
@@ -87,10 +85,7 @@ struct _spl_dllist_it {
 	int                    flags;
 };
 
-static inline spl_dllist_object *spl_dllist_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_dllist_object*)((char*)(obj) - XtOffsetOf(spl_dllist_object, std));
-}
-/* }}} */
+#define spl_dllist_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_dllist_object, std)
 
 #define Z_SPLDLLIST_P(zv)  spl_dllist_from_obj(Z_OBJ_P((zv)))
 
@@ -800,6 +795,7 @@ static void spl_dllist_it_helper_move_forward(spl_ptr_llist_element **traverse_p
 
 		if (flags & SPL_DLLIST_IT_LIFO) {
 			*traverse_pointer_ptr = old->prev;
+			SPL_LLIST_CHECK_ADDREF(*traverse_pointer_ptr);
 			(*traverse_position_ptr)--;
 
 			if (flags & SPL_DLLIST_IT_DELETE) {
@@ -810,6 +806,7 @@ static void spl_dllist_it_helper_move_forward(spl_ptr_llist_element **traverse_p
 			}
 		} else {
 			*traverse_pointer_ptr = old->next;
+			SPL_LLIST_CHECK_ADDREF(*traverse_pointer_ptr);
 
 			if (flags & SPL_DLLIST_IT_DELETE) {
 				zval prev;
@@ -822,7 +819,6 @@ static void spl_dllist_it_helper_move_forward(spl_ptr_llist_element **traverse_p
 		}
 
 		SPL_LLIST_DELREF(old);
-		SPL_LLIST_CHECK_ADDREF(*traverse_pointer_ptr);
 	}
 }
 /* }}} */
@@ -1209,7 +1205,7 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 
 	memcpy(&spl_handler_SplDoublyLinkedList, &std_object_handlers, sizeof(zend_object_handlers));
 
-	spl_handler_SplDoublyLinkedList.offset = XtOffsetOf(spl_dllist_object, std);
+	spl_handler_SplDoublyLinkedList.offset = offsetof(spl_dllist_object, std);
 	spl_handler_SplDoublyLinkedList.clone_obj = spl_dllist_object_clone;
 	spl_handler_SplDoublyLinkedList.count_elements = spl_dllist_object_count_elements;
 	spl_handler_SplDoublyLinkedList.get_gc = spl_dllist_object_get_gc;

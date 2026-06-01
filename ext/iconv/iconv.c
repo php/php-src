@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rui Hirokawa <rui_hirokawa@ybb.ne.jp>                       |
    |          Stig Bakken <ssb@php.net>                                   |
@@ -2635,8 +2633,13 @@ static const php_stream_filter_ops php_iconv_stream_filter_ops = {
 static php_stream_filter *php_iconv_stream_filter_factory_create(const char *name, zval *params, bool persistent)
 {
 	php_iconv_stream_filter *inst;
+	php_stream_filter_seekable_t write_seekable;
 	const char *from_charset = NULL, *to_charset = NULL;
 	size_t from_charset_len, to_charset_len;
+
+	if (php_stream_filter_parse_write_seek_mode(params, &write_seekable) == FAILURE) {
+		return NULL;
+	}
 
 	if ((from_charset = strchr(name, '.')) == NULL) {
 		return NULL;
@@ -2665,7 +2668,7 @@ static php_stream_filter *php_iconv_stream_filter_factory_create(const char *nam
 	}
 
 	return php_stream_filter_alloc(&php_iconv_stream_filter_ops, inst, persistent,
-			PSFS_SEEKABLE_START);
+			PSFS_SEEKABLE_START, write_seekable);
 }
 /* }}} */
 

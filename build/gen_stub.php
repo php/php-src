@@ -26,6 +26,7 @@ const PHP_82_VERSION_ID = 80200;
 const PHP_83_VERSION_ID = 80300;
 const PHP_84_VERSION_ID = 80400;
 const PHP_85_VERSION_ID = 80500;
+const PHP_86_VERSION_ID = 80600;
 const ALL_PHP_VERSION_IDS = [
     PHP_70_VERSION_ID,
     PHP_80_VERSION_ID,
@@ -34,6 +35,7 @@ const ALL_PHP_VERSION_IDS = [
     PHP_83_VERSION_ID,
     PHP_84_VERSION_ID,
     PHP_85_VERSION_ID,
+    PHP_86_VERSION_ID,
 ];
 
 // file_put_contents() but with a success message printed after saving
@@ -1182,6 +1184,32 @@ class VersionFlags {
         );
     }
 
+    /**
+     * If we have ZEND_ACC2_ flags, represent as 'ZEND_FENTRY_FLAGS(flags1, flags2)'.
+     * Otherwise, represent as just 'flags1' (backwards compatible).
+     */
+    private function formatFlags(array $flags): string {
+        $flags1 = [];
+        $flags2 = [];
+        foreach ($flags as $flag) {
+            if (str_starts_with($flag, 'ZEND_ACC2_')) {
+                $flags2[] = $flag;
+            } else {
+                $flags1[] = $flag;
+            }
+        }
+
+        if ($flags2 !== []) {
+            return sprintf(
+                'ZEND_FENTRY_FLAGS(%s, %s)',
+                $flags1 === [] ? 0 : implode("|", $flags1),
+                implode("|", $flags2),
+            );
+        }
+
+        return implode("|", $flags1);
+    }
+
     public function generateVersionDependentFlagCode(
         string $codeTemplate,
         ?int $phpVersionIdMinimumCompatibility,
@@ -1197,7 +1225,7 @@ class VersionFlags {
             if (empty($flagsByPhpVersions[$currentPhpVersion])) {
                 return '';
             }
-            return sprintf($codeTemplate, implode("|", $flagsByPhpVersions[$currentPhpVersion]));
+            return sprintf($codeTemplate, $this->formatFlags($flagsByPhpVersions[$currentPhpVersion]));
         }
 
         ksort($flagsByPhpVersions);
@@ -1238,7 +1266,7 @@ class VersionFlags {
             reset($flagsByPhpVersions);
             $firstVersion = key($flagsByPhpVersions);
             if ($firstVersion === $phpVersionIdMinimumCompatibility) {
-                return sprintf($codeTemplate, implode("|", reset($flagsByPhpVersions)));
+                return sprintf($codeTemplate, $this->formatFlags(reset($flagsByPhpVersions)));
             }
         }
 
@@ -1251,7 +1279,7 @@ class VersionFlags {
 
             $code .= "$if (PHP_VERSION_ID >= $version)\n";
 
-            $code .= sprintf($codeTemplate, implode("|", $versionFlags));
+            $code .= sprintf($codeTemplate, $this->formatFlags($versionFlags));
             $code .= $endif;
 
             $i++;
@@ -1276,6 +1304,7 @@ class FuncInfo {
         public ?FunctionOrMethodName $alias,
         private readonly bool $isDeprecated,
         private bool $supportsCompileTimeEval,
+        private bool $forbidDynamicCalls,
         public readonly bool $verify,
         public /* readonly */ array $args,
         public /* readonly */ ReturnInfo $return,
@@ -1581,6 +1610,10 @@ class FuncInfo {
             static fn (AttributeInfo $attr): bool => $attr->class === "NoDiscard"
         )) {
             $flags->addForVersionsAbove("ZEND_ACC_NODISCARD", PHP_85_VERSION_ID);
+        }
+
+        if ($this->forbidDynamicCalls) {
+            $flags->addForVersionsAbove("ZEND_ACC2_FORBID_DYN_CALLS", PHP_86_VERSION_ID);
         }
 
         return $flags;
@@ -2354,7 +2387,17 @@ abstract class VariableLike
             $flags = "ZEND_ACC_PRIVATE";
         }
 
-        return new VersionFlags([$flags]);
+        $versionFlags = new VersionFlags([$flags]);
+
+        if ($this->flags & Modifiers::PUBLIC_SET) {
+            $versionFlags->addForVersionsAbove("ZEND_ACC_PUBLIC_SET", PHP_84_VERSION_ID);
+        } elseif ($this->flags & Modifiers::PROTECTED_SET) {
+            $versionFlags->addForVersionsAbove("ZEND_ACC_PROTECTED_SET", PHP_84_VERSION_ID);
+        } elseif ($this->flags & Modifiers::PRIVATE_SET) {
+            $versionFlags->addForVersionsAbove("ZEND_ACC_PRIVATE_SET", PHP_84_VERSION_ID);
+        }
+
+        return $versionFlags;
     }
 
     protected function getTypeCode(string $variableLikeName, string &$code): string
@@ -2375,8 +2418,8 @@ abstract class VariableLike
                     $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->num_types = $classTypeCount;\n";
 
                     foreach ($arginfoType->classTypes as $k => $classType) {
-                        $escapedClassName = $classType->toEscapedName();
-                        $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$escapedClassName}, 0, 0);\n";
+                        $varEscapedClassName = $classType->toVarEscapedName();
+                        $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName}, 0, 0);\n";
                     }
 
                     $typeMaskCode = $this->type->toArginfoType()->toTypeMask();
@@ -2449,6 +2492,17 @@ abstract class VariableLike
         } elseif ($this->flags & Modifiers::PRIVATE) {
             $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private"));
+        }
+
+        if ($this->flags & Modifiers::PUBLIC_SET) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "public(set)"));
+        } elseif ($this->flags & Modifiers::PROTECTED_SET) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "protected(set)"));
+        } elseif ($this->flags & Modifiers::PRIVATE_SET) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private(set)"));
         }
     }
 
@@ -2900,6 +2954,11 @@ class StringBuilder {
         '8.5' => 'ZEND_STR_8_DOT_5',
     ];
 
+    // NEW in 8.6
+    private const PHP_86_KNOWN = [
+        "arguments" => "ZEND_STR_ARGUMENTS",
+    ];
+
     /**
      * Get an array of three strings:
      *   - declaration of zend_string, if needed, or empty otherwise
@@ -2938,6 +2997,10 @@ class StringBuilder {
         }
         $include = self::PHP_80_KNOWN;
         switch ($minPhp) {
+            case PHP_86_VERSION_ID:
+                $include = array_merge($include, self::PHP_86_KNOWN);
+                // Intentional fall through
+
             case PHP_85_VERSION_ID:
                 $include = array_merge($include, self::PHP_85_KNOWN);
                 // Intentional fall through
@@ -3322,6 +3385,7 @@ class ClassInfo {
         private /* readonly */ array $propertyInfos,
         public array $funcInfos,
         private readonly array $enumCaseInfos,
+        private readonly bool $generateCNameTable,
         public readonly ?string $cond,
         public ?int $phpVersionIdMinimumCompatibility,
         public readonly bool $isUndocumentable,
@@ -3535,6 +3599,25 @@ class ClassInfo {
         }
 
         $code .= "} {$cEnumName};\n";
+
+        $caseCount = count($this->enumCaseInfos);
+
+        if ($this->generateCNameTable && $caseCount > 0) {
+            $cPrefix = 'ZEND_ENUM_' . str_replace('\\', '_', $this->name->toString());
+            $useGuard = $cPrefix . '_USE_NAME_TABLE';
+
+            $code .= "\n#define {$cPrefix}_CASE_COUNT {$caseCount}\n";
+            $code .= "\n#ifdef {$useGuard}\n";
+            $code .= "static const char *{$cEnumName}_case_names[{$cPrefix}_CASE_COUNT + 1] = {\n";
+
+            foreach ($this->enumCaseInfos as $case) {
+                $cName = $cPrefix . '_' . $case->name->case;
+                $code .= "\t[{$cName}] = \"{$case->name->case}\",\n";
+            }
+
+            $code .= "};\n";
+            $code .= "#endif\n";
+        }
 
         if ($this->cond) {
             $code .= "#endif\n";
@@ -4127,7 +4210,8 @@ class FileInfo {
                     throw new Exception(
                         "Legacy PHP version must be one of: \"" . PHP_70_VERSION_ID . "\" (PHP 7.0), \"" . PHP_80_VERSION_ID . "\" (PHP 8.0), " .
                         "\"" . PHP_81_VERSION_ID . "\" (PHP 8.1), \"" . PHP_82_VERSION_ID . "\" (PHP 8.2), \"" . PHP_83_VERSION_ID . "\" (PHP 8.3), " .
-                        "\"" . PHP_84_VERSION_ID . "\" (PHP 8.4), \"" . PHP_85_VERSION_ID . "\" (PHP 8.5), \"" . $tag->value . "\" provided"
+                        "\"" . PHP_84_VERSION_ID . "\" (PHP 8.4), \"" . PHP_85_VERSION_ID . "\" (PHP 8.5), \"" . PHP_86_VERSION_ID . "\" (PHP 8.6), " .
+                        $tag->value . "\" provided"
                     );
                 }
 
@@ -4258,6 +4342,11 @@ class FileInfo {
 
             if ($stmt instanceof Stmt\Namespace_) {
                 $this->handleStatements($stmt->stmts, $prettyPrinter);
+                continue;
+            }
+
+            if ($stmt instanceof Stmt\Use_ || $stmt instanceof Stmt\GroupUse) {
+                // use statements are resolved by NameResolver before this point
                 continue;
             }
 
@@ -4733,6 +4822,7 @@ function parseFunctionLike(
         $alias = null;
         $isDeprecated = false;
         $supportsCompileTimeEval = false;
+        $forbidDynamicCalls = false;
         $verify = true;
         $docReturnType = null;
         $tentativeReturnType = false;
@@ -4748,6 +4838,7 @@ function parseFunctionLike(
             $verify = !array_key_exists('no-verify', $tagMap);
             $tentativeReturnType = array_key_exists('tentative-return-type', $tagMap);
             $supportsCompileTimeEval = array_key_exists('compile-time-eval', $tagMap);
+            $forbidDynamicCalls = array_key_exists('forbid-dynamic-calls', $tagMap);
             $isUndocumentable = $isUndocumentable || array_key_exists('undocumentable', $tagMap);
 
             foreach ($tags as $tag) {
@@ -4880,6 +4971,7 @@ function parseFunctionLike(
             $alias,
             $isDeprecated,
             $supportsCompileTimeEval,
+            $forbidDynamicCalls,
             $verify,
             $args,
             $return,
@@ -5077,6 +5169,7 @@ function parseClass(
     $isStrictProperties = array_key_exists('strict-properties', $tagMap);
     $isNotSerializable = array_key_exists('not-serializable', $tagMap);
     $isUndocumentable = $isUndocumentable || array_key_exists('undocumentable', $tagMap);
+    $generateCNameTable = array_key_exists('c-name-table', $tagMap);
     foreach ($tags as $tag) {
         if ($tag->name === 'alias') {
             $alias = $tag->getValue();
@@ -5138,6 +5231,7 @@ function parseClass(
         $properties,
         $methods,
         $enumCases,
+        $generateCNameTable,
         $cond,
         $minimumPhpVersionIdCompatibility,
         $isUndocumentable

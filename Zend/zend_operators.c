@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -449,6 +448,7 @@ try_again:
 				ZEND_ASSERT(Z_TYPE(dst) == IS_LONG);
 				return Z_LVAL(dst);
 			}
+		case IS_UNDEF:
 		case IS_RESOURCE:
 		case IS_ARRAY:
 			*failed = true;
@@ -3322,8 +3322,8 @@ ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp_l(const char *s1, size_t len1,
 
 	len = MIN(len1, len2);
 	while (len--) {
-		c1 = zend_tolower((int)*(unsigned char *)s1++);
-		c2 = zend_tolower((int)*(unsigned char *)s2++);
+		c1 = zend_tolower((unsigned char)*(s1++));
+		c2 = zend_tolower((unsigned char)*(s2++));
 		if (c1 != c2) {
 			return c1 - c2;
 		}
@@ -3343,8 +3343,8 @@ ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp_l(const char *s1, size_t len1
 	}
 	len = MIN(length, MIN(len1, len2));
 	while (len--) {
-		c1 = zend_tolower((int)*(unsigned char *)s1++);
-		c2 = zend_tolower((int)*(unsigned char *)s2++);
+		c1 = zend_tolower((unsigned char)*(s1++));
+		c2 = zend_tolower((unsigned char)*(s2++));
 		if (c1 != c2) {
 			return c1 - c2;
 		}

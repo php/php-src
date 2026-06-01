@@ -19,14 +19,37 @@ PHP 8.6 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- DOM:
+  . Properties previously documented as @readonly (e.g. DOMNode::$nodeType,
+    DOMDocument::$xmlEncoding, DOMEntity::$actualEncoding, ::$encoding,
+    ::$version) are now declared with asymmetric visibility
+    (public private(set)). Attempts to write to them from outside the
+    class now raise "Cannot modify private(set) property <class>::$<prop>
+    from global scope" instead of the prior readonly modification error.
+    ReflectionProperty::isWritable() also reports these properties
+    accurately.
+
 - GD:
   . imagesetstyle(), imagefilter() and imagecrop() filter their
     array arguments types/values and raise a TypeError/ValueError
     accordingly.
 
+- Intl:
+  . Passing a non-stringable object as a time zone to Intl APIs that accept
+    time zone objects or strings now raises a TypeError instead of an Error.
+  . IntlBreakIterator::getLocale() now raises a ValueError when the type is
+    neither Locale::ACTUAL_LOCALE nor Locale::VALID_LOCALE instead of
+    returning false.
+  . MessageFormatter::parse() and parseMessage() now return PHP_INT_MIN as
+    int, rather than float, on 64-bit platforms when parsing integer values.
+  . The $type parameter of IntlBreakIterator::getPartsIterator() has been
+    changed from string to int to match the underlying implementation.
+
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
     lower than zero or greater than platform's UINT_MAX.
+  . pcntl_exec() now raises a ValueError if the $args argument is not a list
+    array.
 
 - PCRE:
   . preg_grep() now returns false instead of a partial array when a PCRE
@@ -36,6 +59,18 @@ PHP 8.6 UPGRADE NOTES
 - Phar:
   . Phar::mungServer() now raises a ValueError when an invalid
     argument value is passed instead of being silently ignored.
+  . Phar::addEmptyDir() now rejects `/.phar` paths in addition to `.phar`
+    paths, and raises the same BadMethodCallException for attempts to create
+    the reserved magic ".phar" directory through that form.
+  . Phar::addEmptyDir() now treats non-magic names that merely share the
+    `.phar` prefix as ordinary directories.
+
+- PGSQL:
+  . pg_fetch_object() now reports the ValueError for a non-empty
+    $constructor_args on a class without a constructor on the
+    $constructor_args argument instead of $class. Errors raised when
+    the requested class is not instantiable (abstract, interface, enum)
+    now surface before the row is fetched.
 
 - Posix:
   . posix_access() now raises a ValueError when an invalid $flags
@@ -44,6 +79,11 @@ PHP 8.6 UPGRADE NOTES
     argument value is passed.
 
 - Session:
+  . Setting session.cookie_path, session.cookie_domain, or session.cache_limiter
+    to a value containing null bytes now emits a warning and leaves the setting
+    unchanged. Previously, null bytes were silently accepted: for cookie_path and
+    cookie_domain this caused the SAPI to drop the Set-Cookie header; for
+    cache_limiter the value was silently truncated at the null byte.
   . A ValueError is not thrown if $name is a string containing null bytes in
     session_module_name().
   . session_encode() now returns an empty string instead of false for empty
@@ -58,6 +98,38 @@ PHP 8.6 UPGRADE NOTES
     comparison. Custom session handlers that rely on write() being called
     with empty data (e.g. to destroy the session) should implement the same
     logic in their updateTimestamp() method.
+  . The defaults of three session INI settings have changed to provide secure
+    behavior out of the box:
+      - session.use_strict_mode is now 1 (was 0). Strict mode rejects
+        uninitialized session IDs, mitigating session fixation. Custom session
+        handlers that previously relied on accepting externally supplied IDs
+        without a corresponding storage entry must either implement
+        validateId() / create_sid() or explicitly set this to 0.
+      - session.cookie_httponly is now 1 (was 0). Session cookies are no
+        longer accessible to JavaScript via document.cookie. Applications
+        that read the session cookie from JavaScript must explicitly set
+        this to 0.
+      - session.cookie_samesite is now "Lax" (was unset). Session cookies
+        are no longer sent on cross-site requests other than top-level
+        navigations using safe HTTP methods. Applications that depend on
+        session cookies being sent on cross-site POST submissions must
+        explicitly set this to "None" (and also set session.cookie_secure
+        to 1).
+    RFC: https://wiki.php.net/rfc/session_security_defaults
+
+- SPL:
+  . SplObjectStorage::getHash() implementations may no longer mutate any
+    SplObjectStorage instance. Attempting to do so now throws an Error.
+  . SplFileObject::next() now advances the stream when no prior current()
+    call has cached a line. A subsequent current() call returns the new
+    line rather than the previous one.
+  . SplFileObject::fgets() no longer caches the returned line for
+    subsequent current() calls. current() now re-reads from the current
+    stream position instead of returning the line fgets() just returned.
+  . SplFileObject::next() past EOF no longer increments key() without
+    bound. SplFileObject::seek() past EOF now produces the same key()
+    value as SplTempFileObject; the two previously returned different
+    values.
 
 - Standard:
   . Form feed (\f) is now added in the default trimmed characters of trim(),
@@ -66,15 +138,28 @@ PHP 8.6 UPGRADE NOTES
     argument value is passed.
   . array_change_key_case() now raises a ValueError when an invalid $case
     argument value is passed.
+  . getenv() and putenv() now raises a ValueError when the first argument
+    contains null bytes.
+  . parse_str() now raises a ValueError when the $string argument contains
+    null bytes.
+  . linkinfo() now raises a ValueError when the $path argument is empty.
   . pathinfo() now raises a ValueError when an invalid $flag
     argument value is passed.
   . scandir() now raises a ValueError when an invalid $sorting_order
     argument value is passed.
+  . proc_open() now raises a ValueError when the $cwd argument contains
+    null bytes.
 
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the
     files argument if one or more of the entries is not
     a string.
+
+- Zlib:
+  . deflate_init() now raises a TypeError when the value for option
+    "level", "memory", "window", or "strategy" is not of type int.
+  . inflate_init() now raises a TypeError when the value for option
+    "window" is not of type int.
 
 ========================================
 2. New Features
@@ -83,6 +168,8 @@ PHP 8.6 UPGRADE NOTES
 - Core:
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand.
+  . It is now possible to define the `__debugInfo()` magic method on enums.
+    RFC: https://wiki.php.net/rfc/debugable-enums
 
 - Fileinfo:
   . finfo_file() now works with remote streams.
@@ -103,12 +190,27 @@ PHP 8.6 UPGRADE NOTES
   . Added extra info about error location to the JSON error messages returned
     from json_last_error_msg() and JsonException message.
 
+- OpenSSL:
+  . Added TLS session resumption support for streams with new stream context
+    options: session_data, session_new_cb, session_cache, session_cache_size,
+    session_timeout, session_id_context, session_get_cb, session_remove_cb,
+    and num_tickets. This allows saving and restoring client sessions across
+    requests, implementing custom server-side session storage, and controlling
+    session cache behavior.
+    RFC: https://wiki.php.net/rfc/tls_session_resumption
+  . Added TLS external PSK support for streams with new strem context options:
+    psk_client_cb and psk_server_cb. This allows setting and receiving PSK.
+
 - Phar:
   . Overriding the getMTime() and getPathname() methods of SplFileInfo now
     influences the result of the phar buildFrom family of functions.
     This makes it possible to override the timestamp and names of files.
 
 - Streams:
+  . Added new stream errors API including new classes, enums, functions and
+    internal API. It is controlled using error_mode, error_store and
+    error_handler stream context options.
+    RFC: https://wiki.php.net/rfc/stream_errors
   . Added stream socket context option so_reuseaddr that allows disabling
     address reuse (SO_REUSEADDR) and explicitly uses SO_EXCLUSIVEADDRUSE on
     Windows.
@@ -116,6 +218,12 @@ PHP 8.6 UPGRADE NOTES
     tcp_keepintvl and tcp_keepcnt that allow setting socket keepalive
     options.
   . Allowed casting casting filtered streams as file descriptor for select.
+
+- URI:
+  . Added Uri\Rfc3986\Uri:getUriType() and Uri\WhatWg\Url:isSpecialScheme().
+    RFC: https://wiki.php.net/rfc/uri_followup#uri_type_detection
+  . Added Uri\Rfc3986\Uri:getHostType() and Uri\WhatWg\Url:getHostType().
+    RFC: https://wiki.php.net/rfc/uri_followup#host_type_detection
 
 ========================================
 3. Changes in SAPI modules
@@ -125,9 +233,34 @@ PHP 8.6 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Core:
+  . Specifying a return type of array|null / ?array for __debugInfo() is now
+    deprecated. Specify array instead.
+
+- GMP
+  . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
+    emit a deprecation warning when converting a float right operand to int
+    loses precision.
+
+- Mbstring:
+  . Mbregex has been deprecated, because the underlying Oniguruma library
+    is no longer maintained.
+    RFC: https://wiki.php.net/rfc/eol-oniguruma
+
 ========================================
 5. Changed Functions
 ========================================
+
+- GMP:
+  . gmp_fact() now throws a ValueError() if $num does not fit into
+    a unsigned long.
+  . gmp_pow(), gmp_binomial(), gmp_root() and gmp_rootrem() now throw a
+    ValueError if their second argument does not fit into an unsigned long.
+  . The shift (<<, >>) and exponentiation (**) operators on GMP objects
+    now throw a ValueError if the right operand does not fit into an
+    unsigned long.
+  . gmp_powm() modulo-by-zero now raises a DivisionByZeroError whose
+    message includes the function name and argument index ($modulus).
 
 - mysqli:
   . The return structure of mysqli_get_charset() no longer contains
@@ -139,6 +272,10 @@ PHP 8.6 UPGRADE NOTES
   . Output of openssl_x509_parse() contains criticalExtensions listing all
     critical certificate extensions.
 
+- PDO_DBLIB:
+  . When using persistent connections, there is now a liveness check in the
+    constructor.
+
 - Phar:
   . Phar::mungServer() now supports reference values.
 
@@ -146,6 +283,12 @@ PHP 8.6 UPGRADE NOTES
   . socket_addrinfo_lookup() now has an additional optional argument $error
     when not null, and on failure, gives the error code (one of the EAI_*
     constants).
+
+- Standard:
+  . ini_get_all() now includes a "builtin_default_value" element for each
+    directive when $details is true. It holds the built-in default value of
+    the directive (or null if it has none), independent of values set in
+    php.ini, on the command line, or at runtime.
 
 ========================================
 6. New Functions
@@ -170,17 +313,32 @@ PHP 8.6 UPGRADE NOTES
   . `clamp()` returns the given value if in range, else return the nearest
     bound.
     RFC: https://wiki.php.net/rfc/clamp_v2
+  . `stream_last_errors()` and `stream_clear_errors()`.
+    RFC: https://wiki.php.net/rfc/stream_errors
 
 - Zip:
   . Added ZipArchive::openString() method.
+  . Added ZipArchive::closeString() method.
 
 ========================================
 7. New Classes and Interfaces
 ========================================
 
+- OpenSSL:
+  . Openssl\OpensslException
+  . Openssl\Session
+    RFC: https://wiki.php.net/rfc/tls_session_resumption
+  . Openssl\Psk
+
 - Standard:
   . enum SortDirection
     RFC: https://wiki.php.net/rfc/sort_direction_enum
+  . StreamError
+  . StreamException
+  . enum StreamErrorStore
+  . enum StreamErrorMode
+  . enum StreamErrorCode
+    RFC: https://wiki.php.net/rfc/stream_errors
 
 ========================================
 8. Removed Extensions and SAPIs
@@ -268,6 +426,8 @@ PHP 8.6 UPGRADE NOTES
     callbacks from internal functions and providing for better insight for the
     JIT.
   . The performance of the TAILCALL VM has been improved.
+  . The TAILCALL VM is now enabled on Windows when compiling with Clang >= 19
+    x86_64.
 
 - DOM:
   . Made splitText() faster and consume less memory.
@@ -280,6 +440,8 @@ PHP 8.6 UPGRADE NOTES
 - Standard:
   . Improved performance of array_fill_keys().
   . Improved performance of array_map() with multiple arrays passed.
+  . Improved performance of array_sum() and array_product() for
+    integer-only arrays.
   . Improved performance of array_unshift().
   . Improved performance of array_walk().
   . Improved performance of intval('+0b...', 2) and intval('0b...', 2).

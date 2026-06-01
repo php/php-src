@@ -16,19 +16,19 @@
 
 /.github @TimWolla
 /build/gen_stub.php @kocsismate
-/ext/bcmath @ndossche @SakiTakamachi
+/ext/bcmath @SakiTakamachi
 /ext/curl @adoy
 /ext/date @derickr
 /ext/dba @Girgias
-/ext/dom @ndossche
+/ext/dom @devnexen
 /ext/ffi @dstogov
 /ext/gd @devnexen
 /ext/gettext @devnexen
 /ext/gmp @Girgias
 /ext/intl @devnexen
+/ext/libxml @devnexen
 /ext/json @bukka
-/ext/lexbor @kocsismate @ndossche
-/ext/libxml @ndossche
+/ext/lexbor @kocsismate
 /ext/mbstring @alexdowad @youkidearitai
 /ext/mysqli @bukka @kamil-tekiela
 /ext/mysqlnd @bukka @kamil-tekiela @SakiTakamachi
@@ -47,17 +47,16 @@
 /ext/random @TimWolla @zeriyoshi
 /ext/reflection @DanielEScherzer
 /ext/session @Girgias
-/ext/simplexml @ndossche
-/ext/soap @ndossche
+/ext/simplexml @devnexen
+/ext/soap @devnexen
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
-/ext/tidy @ndossche
 /ext/uri @kocsismate @TimWolla
-/ext/xml @ndossche
-/ext/xmlreader @ndossche
-/ext/xmlwriter @ndossche
-/ext/xsl @ndossche
+/ext/xml @devnexen
+/ext/xmlreader @devnexen
+/ext/xmlwriter @devnexen
+/ext/xsl @devnexen
 /main @bukka
 /sapi/fpm @bukka
 /Zend/Optimizer @dstogov

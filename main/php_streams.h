@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong (wez@thebrainroom.com)                           |
    +----------------------------------------------------------------------+
@@ -248,6 +246,8 @@ struct _php_stream  {
 #endif
 
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
+
+	zend_llist *error_list;
 }; /* php_stream */
 
 #define PHP_STREAM_CONTEXT(stream) \
@@ -539,6 +539,7 @@ PHPAPI ssize_t _php_stream_passthru(php_stream * src STREAMS_DC);
 #define php_stream_passthru(stream)	_php_stream_passthru((stream) STREAMS_CC)
 END_EXTERN_C()
 
+#include "streams/php_stream_errors.h"
 #include "streams/php_stream_transport.h"
 #include "streams/php_stream_plain_wrapper.h"
 #include "streams/php_stream_glob_wrapper.h"
@@ -642,10 +643,6 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC)
-
-/* pushes an error message onto the stack for a wrapper instance */
-PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-
 typedef enum {
 	PHP_STREAM_UNCHANGED = 0, /* orig stream was seekable anyway */
 	PHP_STREAM_RELEASED = 1, /* newstream should be used; origstream is no longer valid */

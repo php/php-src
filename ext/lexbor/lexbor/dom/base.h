@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 Alexander Borisov
+ * Copyright (C) 2019-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -15,8 +15,8 @@ extern "C" {
 #include "lexbor/core/base.h"
 
 
-#define LXB_DOM_VERSION_MAJOR 1
-#define LXB_DOM_VERSION_MINOR 8
+#define LXB_DOM_VERSION_MAJOR 2
+#define LXB_DOM_VERSION_MINOR 0
 #define LXB_DOM_VERSION_PATCH 0
 
 #define LXB_DOM_VERSION_STRING                                                 \

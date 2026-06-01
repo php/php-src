@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Timm Friebe <thekid@thekid.de>                              |
    |          George Schlossnagle <george@omniti.com>                     |
@@ -176,9 +174,7 @@ typedef struct {
 	zend_object zo;
 } reflection_object;
 
-static inline reflection_object *reflection_object_from_obj(zend_object *obj) {
-	return (reflection_object*)((char*)(obj) - XtOffsetOf(reflection_object, zo));
-}
+#define reflection_object_from_obj(obj) ZEND_CONTAINER_OF(obj, reflection_object, zo)
 
 #define Z_REFLECTION_P(zv)  reflection_object_from_obj(Z_OBJ_P((zv)))
 /* }}} */
@@ -6733,6 +6729,11 @@ handle_magic_get:
 					zval member;
 					ZVAL_STR(&member, ref->unmangled_name);
 					zend_call_known_instance_method_with_1_params(ce->__isset, obj, return_value, &member);
+
+					if (Z_TYPE_P(return_value) == IS_REFERENCE) {
+						zend_unwrap_reference(return_value);
+					}
+
 					*guard &= ~ZEND_GUARD_PROPERTY_ISSET;
 					OBJ_RELEASE(obj);
 					return;
@@ -8161,7 +8162,7 @@ ZEND_METHOD(ReflectionConstant, __toString)
 PHP_MINIT_FUNCTION(reflection) /* {{{ */
 {
 	memcpy(&reflection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	reflection_object_handlers.offset = XtOffsetOf(reflection_object, zo);
+	reflection_object_handlers.offset = offsetof(reflection_object, zo);
 	reflection_object_handlers.free_obj = reflection_free_objects_storage;
 	reflection_object_handlers.clone_obj = NULL;
 	reflection_object_handlers.write_property = _reflection_write_property;

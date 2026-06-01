@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Sara Golemon <pollita@php.net>                              |
    +----------------------------------------------------------------------+
@@ -37,7 +37,7 @@ typedef struct _php_converter_object {
 
 
 static inline php_converter_object *php_converter_fetch_object(zend_object *obj) {
-	return (php_converter_object *)((char*)(obj) - XtOffsetOf(php_converter_object, obj));
+	return (php_converter_object *)((char*)(obj) - offsetof(php_converter_object, obj));
 }
 #define Z_INTL_CONVERTER_P(zv) php_converter_fetch_object(Z_OBJ_P(zv))
 
@@ -167,9 +167,9 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 			if (lval > 0xFFFF) {
 				/* Supplemental planes U+010000 - U+10FFFF */
 				if (TARGET_CHECK(args, 2)) {
-					/* TODO: Find the ICU call which does this properly */
-					*(args->target++) = (UChar)(((lval - 0x10000) >> 10)   | 0xD800);
-					*(args->target++) = (UChar)(((lval - 0x10000) & 0x3FF) | 0xDC00);
+					int32_t offset = 0;
+					U16_APPEND_UNSAFE(args->target, offset, lval);
+					args->target += offset;
 				}
 				return;
 			}
@@ -934,7 +934,8 @@ static zend_object *php_converter_create_object(zend_class_entry *ce) {
 }
 
 static zend_object *php_converter_clone_object(zend_object *object) {
-	php_converter_object *objval, *oldobj = php_converter_fetch_object(object);
+	const php_converter_object *oldobj = php_converter_fetch_object(object);
+	php_converter_object *objval;
 	zend_object *retval = php_converter_object_ctor(object->ce, &objval);
 	UErrorCode error = U_ZERO_ERROR;
 
@@ -975,7 +976,7 @@ U_CFUNC int php_converter_minit(INIT_FUNC_ARGS) {
 	php_converter_ce->create_object = php_converter_create_object;
 	php_converter_ce->default_object_handlers = &php_converter_object_handlers;
 	memcpy(&php_converter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
+	php_converter_object_handlers.offset = offsetof(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
 	php_converter_object_handlers.free_obj = php_converter_free_object;
 

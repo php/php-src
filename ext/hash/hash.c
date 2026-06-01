@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Sara Golemon <pollita@php.net>                               |
   |         Scott MacVicar <scottmac@php.net>                            |
@@ -1399,7 +1397,7 @@ static void php_hashcontext_free(zend_object *obj) {
 
 /* {{{ php_hashcontext_clone */
 static zend_object *php_hashcontext_clone(zend_object *zobj) {
-	php_hashcontext_object *oldobj = php_hashcontext_from_object(zobj);
+	const php_hashcontext_object *oldobj = php_hashcontext_from_object(zobj);
 	zend_object *znew = php_hashcontext_create(zobj->ce);
 	php_hashcontext_object *newobj = php_hashcontext_from_object(znew);
 
@@ -1654,7 +1652,7 @@ PHP_MINIT_FUNCTION(hash)
 
 	memcpy(&php_hashcontext_handlers, &std_object_handlers,
 	       sizeof(zend_object_handlers));
-	php_hashcontext_handlers.offset = XtOffsetOf(php_hashcontext_object, std);
+	php_hashcontext_handlers.offset = offsetof(php_hashcontext_object, std);
 	php_hashcontext_handlers.free_obj = php_hashcontext_free;
 	php_hashcontext_handlers.clone_obj = php_hashcontext_clone;
 

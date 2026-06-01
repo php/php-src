@@ -55,6 +55,74 @@ lxb_encoding_data_by_pre_name(const lxb_char_t *name, size_t length)
     return entry->value;
 }
 
+lxb_encoding_t
+lxb_encoding_prescan_validate(const lxb_char_t *name, size_t length)
+{
+    const lxb_encoding_data_t *data;
+
+    data = lxb_encoding_data_by_pre_name(name, length);
+    if (data == NULL) {
+        return LXB_ENCODING_DEFAULT;
+    }
+
+    if (data->encoding == LXB_ENCODING_UTF_16BE
+        || data->encoding == LXB_ENCODING_UTF_16LE)
+    {
+        return LXB_ENCODING_UTF_8;
+    }
+
+    if (data->encoding == LXB_ENCODING_X_USER_DEFINED) {
+        return LXB_ENCODING_WINDOWS_1252;
+    }
+
+    return data->encoding;
+}
+
+const lxb_encoding_data_t *
+lxb_encoding_data_prescan_validate(const lxb_char_t *name, size_t length)
+{
+    const lxb_encoding_data_t *data;
+
+    data = lxb_encoding_data_by_pre_name(name, length);
+    if (data == NULL) {
+        return NULL;
+    }
+
+    if (data->encoding == LXB_ENCODING_UTF_16BE
+        || data->encoding == LXB_ENCODING_UTF_16LE)
+    {
+        return lxb_encoding_data(LXB_ENCODING_UTF_8);
+    }
+
+    if (data->encoding == LXB_ENCODING_X_USER_DEFINED) {
+        return lxb_encoding_data(LXB_ENCODING_WINDOWS_1252);
+    }
+
+    return data;
+}
+
+lxb_encoding_t
+lxb_encoding_bom_sniff(const lxb_char_t *begin, size_t length)
+{
+    if (length >= 3) {
+        if (begin[0] == 0xEF && begin[1] == 0xBB && begin[2] == 0xBF) {
+            return LXB_ENCODING_UTF_8;
+        }
+    }
+
+    if (length >= 2) {
+        if (begin[0] == 0xFE && begin[1] == 0xFF) {
+            return LXB_ENCODING_UTF_16BE;
+        }
+
+        if (begin[0] == 0xFF && begin[1] == 0xFE) {
+            return LXB_ENCODING_UTF_16LE;
+        }
+    }
+
+    return LXB_ENCODING_DEFAULT;
+}
+
 void
 lxb_encoding_utf_8_skip_bom(const lxb_char_t **begin, size_t *length)
 {
@@ -98,6 +166,54 @@ lxb_encoding_utf_16le_skip_bom(const lxb_char_t **begin, size_t *length)
             *length -= 2;
         }
     }
+}
+
+const lxb_encoding_data_t *
+lxb_encoding_data_by_name(const lxb_char_t *name, size_t length)
+{
+    const lexbor_shs_entry_t *entry;
+
+    if (length == 0) {
+        return NULL;
+    }
+
+    entry = lexbor_shs_entry_get_lower_static(lxb_encoding_res_shs_entities,
+                                              name, length);
+    if (entry == NULL) {
+        return NULL;
+    }
+
+    return (const lxb_encoding_data_t *) entry->value;
+}
+
+const lxb_encoding_data_t *
+lxb_encoding_data(lxb_encoding_t encoding)
+{
+    if (encoding >= LXB_ENCODING_LAST_ENTRY) {
+        return NULL;
+    }
+
+    return &lxb_encoding_res_map[encoding];
+}
+
+lxb_encoding_encode_f
+lxb_encoding_encode_function(lxb_encoding_t encoding)
+{
+    if (encoding >= LXB_ENCODING_LAST_ENTRY) {
+        return NULL;
+    }
+
+    return lxb_encoding_res_map[encoding].encode;
+}
+
+lxb_encoding_decode_f
+lxb_encoding_decode_function(lxb_encoding_t encoding)
+{
+    if (encoding >= LXB_ENCODING_LAST_ENTRY) {
+        return NULL;
+    }
+
+    return lxb_encoding_res_map[encoding].decode;
 }
 
 /*

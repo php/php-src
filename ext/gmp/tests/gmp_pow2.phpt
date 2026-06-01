@@ -31,5 +31,5 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(4) "1024"
 }
-Exponent must be greater than or equal to 0
-Exponent must be greater than or equal to 0
+Exponent must be between 0 and %d
+Exponent must be between 0 and %d

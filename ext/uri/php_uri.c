@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Máté Kocsis <kocsismate@php.net>                            |
    +----------------------------------------------------------------------+
@@ -33,11 +31,14 @@
 #include "uriparser/Uri.h"
 
 zend_class_entry *php_uri_ce_rfc3986_uri;
+zend_class_entry *php_uri_ce_rfc3986_uri_type;
+zend_class_entry *php_uri_ce_rfc3986_uri_host_type;
 zend_class_entry *php_uri_ce_whatwg_url;
 zend_class_entry *php_uri_ce_comparison_mode;
 zend_class_entry *php_uri_ce_exception;
 zend_class_entry *php_uri_ce_error;
 zend_class_entry *php_uri_ce_invalid_uri_exception;
+zend_class_entry *php_uri_ce_whatwg_url_host_type;
 zend_class_entry *php_uri_ce_whatwg_invalid_url_exception;
 zend_class_entry *php_uri_ce_whatwg_url_validation_error_type;
 zend_class_entry *php_uri_ce_whatwg_url_validation_error;
@@ -510,6 +511,16 @@ PHP_METHOD(Uri_WhatWg_Url, __construct)
 	create_whatwg_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 
+PHP_METHOD(Uri_Rfc3986_Uri, getUriType)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(uri_object->uri != NULL);
+
+	php_uri_parser_rfc3986_uri_type_read(uri_object->uri, return_value);
+}
+
 PHP_METHOD(Uri_Rfc3986_Uri, getScheme)
 {
 	php_uri_property_read_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_SCHEME, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
@@ -611,6 +622,16 @@ PHP_METHOD(Uri_Rfc3986_Uri, getHost)
 PHP_METHOD(Uri_Rfc3986_Uri, getRawHost)
 {
 	php_uri_property_read_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_HOST, PHP_URI_COMPONENT_READ_MODE_RAW);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getHostType)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(uri_object->uri != NULL);
+
+	php_uri_parser_rfc3986_host_type_read(uri_object->uri, return_value);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, withHost)
@@ -885,6 +906,16 @@ PHP_METHOD(Uri_WhatWg_Url, withScheme)
 	php_uri_property_write_str_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_SCHEME);
 }
 
+PHP_METHOD(Uri_WhatWg_Url, isSpecialScheme)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(uri_object->uri != NULL);
+
+	RETVAL_BOOL(php_uri_parser_whatwg_is_special(uri_object->uri));
+}
+
 PHP_METHOD(Uri_WhatWg_Url, withUsername)
 {
 	php_uri_property_write_str_or_null_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_USERNAME);
@@ -903,6 +934,16 @@ PHP_METHOD(Uri_WhatWg_Url, getAsciiHost)
 PHP_METHOD(Uri_WhatWg_Url, getUnicodeHost)
 {
 	php_uri_property_read_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_HOST, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE);
+}
+
+PHP_METHOD(Uri_WhatWg_Url, getHostType)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(uri_object->uri != NULL);
+
+	php_uri_parser_whatwg_host_type_read(uri_object->uri, return_value);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, getFragment)
@@ -1036,7 +1077,7 @@ PHPAPI void php_uri_object_handler_free(zend_object *object)
 
 PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object)
 {
-	php_uri_object *uri_object = php_uri_object_from_obj(object);
+	const php_uri_object *uri_object = php_uri_object_from_obj(object);
 
 	ZEND_ASSERT(uri_object->uri != NULL);
 
@@ -1076,15 +1117,18 @@ static PHP_MINIT_FUNCTION(uri)
 	php_uri_ce_rfc3986_uri->create_object = php_uri_object_create_rfc3986;
 	php_uri_ce_rfc3986_uri->default_object_handlers = &object_handlers_rfc3986_uri;
 	memcpy(&object_handlers_rfc3986_uri, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	object_handlers_rfc3986_uri.offset = XtOffsetOf(php_uri_object, std);
+	object_handlers_rfc3986_uri.offset = offsetof(php_uri_object, std);
 	object_handlers_rfc3986_uri.free_obj = php_uri_object_handler_free;
 	object_handlers_rfc3986_uri.clone_obj = php_uri_object_handler_clone;
+
+	php_uri_ce_rfc3986_uri_type = register_class_Uri_Rfc3986_UriType();
+	php_uri_ce_rfc3986_uri_host_type = register_class_Uri_Rfc3986_UriHostType();
 
 	php_uri_ce_whatwg_url = register_class_Uri_WhatWg_Url();
 	php_uri_ce_whatwg_url->create_object = php_uri_object_create_whatwg;
 	php_uri_ce_whatwg_url->default_object_handlers = &object_handlers_whatwg_uri;
 	memcpy(&object_handlers_whatwg_uri, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	object_handlers_whatwg_uri.offset = XtOffsetOf(php_uri_object, std);
+	object_handlers_whatwg_uri.offset = offsetof(php_uri_object, std);
 	object_handlers_whatwg_uri.free_obj = php_uri_object_handler_free;
 	object_handlers_whatwg_uri.clone_obj = php_uri_object_handler_clone;
 
@@ -1093,6 +1137,7 @@ static PHP_MINIT_FUNCTION(uri)
 	php_uri_ce_error = register_class_Uri_UriError(zend_ce_error);
 	php_uri_ce_invalid_uri_exception = register_class_Uri_InvalidUriException(php_uri_ce_exception);
 	php_uri_ce_whatwg_invalid_url_exception = register_class_Uri_WhatWg_InvalidUrlException(php_uri_ce_invalid_uri_exception);
+	php_uri_ce_whatwg_url_host_type = register_class_Uri_WhatWg_UrlHostType();
 	php_uri_ce_whatwg_url_validation_error = register_class_Uri_WhatWg_UrlValidationError();
 	php_uri_ce_whatwg_url_validation_error_type = register_class_Uri_WhatWg_UrlValidationErrorType();
 

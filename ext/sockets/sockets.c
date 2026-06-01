@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Chris Vandomelen <chrisv@b0rked.dhs.org>                    |
    |          Sterling Hughes  <sterling@php.net>                         |
@@ -182,9 +180,7 @@ typedef struct {
 zend_class_entry *address_info_ce;
 static zend_object_handlers address_info_object_handlers;
 
-static inline php_addrinfo *address_info_from_obj(zend_object *obj) {
-	return (php_addrinfo *)((char *)(obj) - XtOffsetOf(php_addrinfo, std));
-}
+#define address_info_from_obj(obj) ZEND_CONTAINER_OF(obj, php_addrinfo, std)
 
 #define Z_ADDRESS_INFO_P(zv) address_info_from_obj(Z_OBJ_P(zv))
 
@@ -486,7 +482,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	socket_ce->default_object_handlers = &socket_object_handlers;
 
 	memcpy(&socket_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	socket_object_handlers.offset = XtOffsetOf(php_socket, std);
+	socket_object_handlers.offset = offsetof(php_socket, std);
 	socket_object_handlers.free_obj = socket_free_obj;
 	socket_object_handlers.get_constructor = socket_get_constructor;
 	socket_object_handlers.clone_obj = NULL;
@@ -498,7 +494,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	address_info_ce->default_object_handlers = &address_info_object_handlers;
 
 	memcpy(&address_info_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	address_info_object_handlers.offset = XtOffsetOf(php_addrinfo, std);
+	address_info_object_handlers.offset = offsetof(php_addrinfo, std);
 	address_info_object_handlers.free_obj = address_info_free_obj;
 	address_info_object_handlers.get_constructor = address_info_get_constructor;
 	address_info_object_handlers.clone_obj = NULL;
@@ -854,18 +850,17 @@ PHP_FUNCTION(socket_listen)
 PHP_FUNCTION(socket_close)
 {
 	zval *arg1;
-	php_socket *php_socket;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_socket = Z_SOCKET_P(arg1);
-	ENSURE_SOCKET_VALID(php_socket);
+	php_socket *socket = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(socket);
 
-	if (!Z_ISUNDEF(php_socket->zstream)) {
+	if (!Z_ISUNDEF(socket->zstream)) {
 		php_stream *stream = NULL;
-		php_stream_from_zval_no_verify(stream, &php_socket->zstream);
+		php_stream_from_zval_no_verify(stream, &socket->zstream);
 		if (stream != NULL) {
 			/* close & destroy stream, incl. removing it from the rsrc list;
 			 * resource stored in php_sock->zstream will become invalid */
@@ -874,13 +869,13 @@ PHP_FUNCTION(socket_close)
 					(stream->is_persistent?PHP_STREAM_FREE_CLOSE_PERSISTENT:0));
 		}
 	} else {
-		if (!IS_INVALID_SOCKET(php_socket)) {
-			close(php_socket->bsd_socket);
+		if (!IS_INVALID_SOCKET(socket)) {
+			close(socket->bsd_socket);
 		}
 	}
 
-	ZVAL_UNDEF(&php_socket->zstream);
-	php_socket->bsd_socket = -1;
+	ZVAL_UNDEF(&socket->zstream);
+	socket->bsd_socket = -1;
 }
 /* }}} */
 
@@ -1274,7 +1269,7 @@ PHP_FUNCTION(socket_connect)
 			s_un.sun_family = AF_UNIX;
 			memcpy(&s_un.sun_path, ZSTR_VAL(addr), ZSTR_LEN(addr));
 			retval = connect(php_sock->bsd_socket, (struct sockaddr *) &s_un,
-				(socklen_t)(XtOffsetOf(struct sockaddr_un, sun_path) + ZSTR_LEN(addr)));
+				(socklen_t)(offsetof(struct sockaddr_un, sun_path) + ZSTR_LEN(addr)));
 			break;
 		}
 

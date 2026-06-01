@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Derick Rethans <derick@derickrethans.nl>                    |
    +----------------------------------------------------------------------+
@@ -60,9 +58,7 @@ struct _php_date_obj {
 	zend_object   std;
 };
 
-static inline php_date_obj *php_date_obj_from_obj(zend_object *obj) {
-	return (php_date_obj*)((char*)(obj) - XtOffsetOf(php_date_obj, std));
-}
+#define php_date_obj_from_obj(obj) ZEND_CONTAINER_OF(obj, php_date_obj, std)
 
 #define Z_PHPDATE_P(zv)  php_date_obj_from_obj(Z_OBJ_P((zv)))
 
@@ -77,9 +73,7 @@ struct _php_timezone_obj {
 	zend_object std;
 };
 
-static inline php_timezone_obj *php_timezone_obj_from_obj(zend_object *obj) {
-	return (php_timezone_obj*)((char*)(obj) - XtOffsetOf(php_timezone_obj, std));
-}
+#define php_timezone_obj_from_obj(obj) ZEND_CONTAINER_OF(obj, php_timezone_obj, std)
 
 #define Z_PHPTIMEZONE_P(zv)  php_timezone_obj_from_obj(Z_OBJ_P((zv)))
 
@@ -95,9 +89,7 @@ struct _php_interval_obj {
 	zend_object       std;
 };
 
-static inline php_interval_obj *php_interval_obj_from_obj(zend_object *obj) {
-	return (php_interval_obj*)((char*)(obj) - XtOffsetOf(php_interval_obj, std));
-}
+#define php_interval_obj_from_obj(obj) ZEND_CONTAINER_OF(obj, php_interval_obj, std)
 
 #define Z_PHPINTERVAL_P(zv)  php_interval_obj_from_obj(Z_OBJ_P((zv)))
 
@@ -114,9 +106,7 @@ struct _php_period_obj {
 	zend_object       std;
 };
 
-static inline php_period_obj *php_period_obj_from_obj(zend_object *obj) {
-	return (php_period_obj*)((char*)(obj) - XtOffsetOf(php_period_obj, std));
-}
+#define php_period_obj_from_obj(obj) ZEND_CONTAINER_OF(obj, php_period_obj, std)
 
 #define Z_PHPPERIOD_P(zv)  php_period_obj_from_obj(Z_OBJ_P((zv)))
 

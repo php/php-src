@@ -31,9 +31,13 @@ try {
 
 var_dump($mb_regs);
 ?>
---EXPECT--
+--EXPECTF--
 Without $regs arg:
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 mb_ereg(): Argument #1 ($pattern) must not be empty
 NULL

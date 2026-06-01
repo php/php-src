@@ -1,9 +1,9 @@
 /*
- * Copyright (C) 2021-2025 Alexander Borisov
+ * Copyright (C) 2021-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  * Adapted for PHP + libxml2 by: Niels Dossche <nielsdos@php.net>
- * Based on Lexbor (upstream commit 971faf11a5f45433b9193a143e2897d8c0fd5611)
+ * Based on Lexbor (upstream commit 5291cde0d40f77e7c4ea364b7cd726269e0bf1f9)
  */
 
 #include <libxml/xmlstring.h>
@@ -1356,8 +1356,8 @@ lxb_selectors_state_after_nth_child(lxb_selectors_t *selectors,
 	current = selectors->current;
 
 	if (current->index == 0) {
-		selectors->state = lxb_selectors_state_not_found;
 		selectors->current = selectors->current->parent;
+		lxb_selectors_switch_to_not_found(selectors, selectors->current);
 
 		return selectors->current->entry;
 	}

@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Scott MacVicar <scottmac@php.net>                           |
    +----------------------------------------------------------------------+
@@ -142,7 +142,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, setChecks)
 }
 /* }}} */
 
-#if U_ICU_VERSION_MAJOR_NUM >= 58
+/* TODO Document this method on PHP.net */
 /* {{{ Set the loosest restriction level allowed for strings. */
 U_CFUNC PHP_METHOD(Spoofchecker, setRestrictionLevel)
 {
@@ -170,7 +170,6 @@ U_CFUNC PHP_METHOD(Spoofchecker, setRestrictionLevel)
 	uspoof_setRestrictionLevel(co->uspoof, (URestrictionLevel)level);
 }
 /* }}} */
-#endif
 
 U_CFUNC PHP_METHOD(Spoofchecker, setAllowedChars)
 {
@@ -214,9 +213,9 @@ U_CFUNC PHP_METHOD(Spoofchecker, setAllowedChars)
 #endif
             pattern_option != (USET_IGNORE_SPACE|USET_CASE_INSENSITIVE) &&
             pattern_option != (USET_IGNORE_SPACE|USET_ADD_CASE_MAPPINGS)) {
-		zend_argument_value_error(2, "must be a valid pattern option, 0 or (SpoofChecker::IGNORE_SPACE|(<none> or SpoofChecker::USET_CASE_INSENSITIVE or SpoofChecker::USET_ADD_CASE_MAPPINGS"
+		zend_argument_value_error(2, "must be a valid pattern option, 0 or (SpoofChecker::IGNORE_SPACE|(<none> or SpoofChecker::CASE_INSENSITIVE or SpoofChecker::ADD_CASE_MAPPINGS"
 #if U_ICU_VERSION_MAJOR_NUM >= 73
-				" or SpoofChecker::USET_SIMPLE_CASE_INSENSITIVE"
+				" or SpoofChecker::SIMPLE_CASE_INSENSITIVE"
 #endif
 				"))"
 		);

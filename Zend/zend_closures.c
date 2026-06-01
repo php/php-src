@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Seiler <chris_se@gmx.net>                         |
    |          Dmitry Stogov <dmitry@php.net>                              |
@@ -155,6 +154,7 @@ ZEND_METHOD(Closure, call)
 	fci_cache.object = fci.object = newobj;
 
 	fci.size = sizeof(fci);
+	fci.consumed_args = 0;
 	ZVAL_OBJ(&fci.function_name, &closure->std);
 	ZVAL_UNDEF(&closure_result);
 	fci.retval = &closure_result;
@@ -750,6 +750,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 {
 	zend_closure *closure = (zend_closure*)ZEND_CLOSURE_OBJECT(EX(func));
 	closure->orig_internal_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	ZEND_ASSERT(!(closure->func.common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS) || EG(exception));
 	// Assign to EX(this) so that it is released after observer checks etc.
 	ZEND_ADD_CALL_FLAG(execute_data, ZEND_CALL_RELEASE_THIS);
 	Z_OBJ(EX(This)) = &closure->std;
@@ -829,7 +830,7 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 		/* wrap internal function handler to avoid memory leak */
 		if (UNEXPECTED(closure->func.internal_function.handler == zend_closure_internal_handler)) {
 			/* avoid infinity recursion, by taking handler from nested closure */
-			zend_closure *nested = (zend_closure*)((char*)func - XtOffsetOf(zend_closure, func));
+			zend_closure *nested = ZEND_CONTAINER_OF(func, zend_closure, func);
 			ZEND_ASSERT(nested->std.ce == zend_ce_closure);
 			closure->orig_internal_handler = nested->orig_internal_handler;
 		} else {

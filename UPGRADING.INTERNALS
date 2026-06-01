@@ -88,6 +88,28 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     ZEND_AST_TRAIT_METHOD_REFERENCE.
   . The EMPTY_SWITCH_DEFAULT_CASE() macro has been removed. Use
     default: ZEND_UNREACHABLE(); instead.
+  . Functions using zend_forbid_dynamic_call() *must* be flagged with
+    ZEND_ACC2_FORBID_DYN_CALLS (@forbid-dynamic-calls in stubs). In debug
+    builds, failing to include that flag will lead to assertion failures.
+  . The ZEND_RESULT_CODE type has been removed. Use zend_result directly.
+  . The zend_parse_parameters_none_throw(), zend_parse_parameters_throw(),
+    and ZEND_PARSE_PARAMS_THROW have been removed due to being misleading,
+    since ZPP always throws, unless ZEND_PARSE_PARAMS_QUIET is given. Use
+    the non-throw versions.
+  . The XtOffsetOf() alias of C’s offsetof() macro has been removed. Use
+    offsetof() directly.
+  . The deprecated Z_COPYABLE(), Z_COPYABLE_P(), Z_OPT_COPYABLE(), and
+    Z_OPT_COPYABLE_P() macros have been removed. Check for IS_ARRAY directly.
+  . The deprecated Z_IMMUTABLE(), Z_IMMUTABLE_P(), Z_OPT_IMMUTABLE(), and
+    Z_OPT_IMMUTABLE_P() macros have been removed. Check for
+    IS_ARRAY && !REFCOUNTED directly.
+  . Added zend_fcall_info.consumed_args together with
+    zend_fci_consumed_arg(), which allows moving a selected callback argument
+    instead of copying it in zend_call_function(). Currently only a single
+    consumed argument is supported.
+  . Added ZEND_CONTAINER_OF().
+  . The OPENBASEDIR_CHECKPATH() compatibility macro has been removed, instead
+    use php_check_open_basedir() directly.
 
 ========================
 2. Build system changes
@@ -133,6 +155,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Dropped session_options parameter from all methods in mysqlnd_auth.
     The same information is present in conn->options and should be used
     instead.
+  . Removed charsets plugin.
 
 - ext/session:
   . php_session_flush() now returns a bool rather than a zend_result.

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Etienne Kneuss <colder@php.net>                             |
    +----------------------------------------------------------------------+
@@ -72,10 +70,7 @@ typedef struct _spl_pqueue_elem {
 	zval priority;
 } spl_pqueue_elem;
 
-static inline spl_heap_object *spl_heap_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_heap_object*)((char*)(obj) - XtOffsetOf(spl_heap_object, std));
-}
-/* }}} */
+#define spl_heap_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_heap_object, std)
 
 #define Z_SPLHEAP_P(zv)  spl_heap_from_obj(Z_OBJ_P((zv)))
 
@@ -1334,7 +1329,7 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 
 	memcpy(&spl_handler_SplHeap, &std_object_handlers, sizeof(zend_object_handlers));
 
-	spl_handler_SplHeap.offset         = XtOffsetOf(spl_heap_object, std);
+	spl_handler_SplHeap.offset         = offsetof(spl_heap_object, std);
 	spl_handler_SplHeap.clone_obj      = spl_heap_object_clone;
 	spl_handler_SplHeap.count_elements = spl_heap_object_count_elements;
 	spl_handler_SplHeap.get_gc         = spl_heap_object_get_gc;
@@ -1355,7 +1350,7 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 
 	memcpy(&spl_handler_SplPriorityQueue, &std_object_handlers, sizeof(zend_object_handlers));
 
-	spl_handler_SplPriorityQueue.offset         = XtOffsetOf(spl_heap_object, std);
+	spl_handler_SplPriorityQueue.offset         = offsetof(spl_heap_object, std);
 	spl_handler_SplPriorityQueue.clone_obj      = spl_heap_object_clone;
 	spl_handler_SplPriorityQueue.count_elements = spl_heap_object_count_elements;
 	spl_handler_SplPriorityQueue.get_gc         = spl_pqueue_object_get_gc;

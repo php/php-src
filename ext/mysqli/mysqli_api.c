@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Georg Richter <georg@php.net>                               |
   |          Andrey Hristov <andrey@php.net>                             |
@@ -1489,6 +1487,15 @@ PHP_FUNCTION(mysqli_stmt_data_seek)
 	}
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
+
+	if (!stmt->stmt->data || !stmt->stmt->data->result || !stmt->stmt->data->result->stored_data) {
+		if (hasThis()) {
+			zend_throw_error(NULL, "mysqli_stmt::data_seek(): No result set associated with the statement");
+		} else {
+			zend_throw_error(NULL, "mysqli_stmt_data_seek(): No result set associated with the statement");
+		}
+		RETURN_THROWS();
+	}
 
 	mysql_stmt_data_seek(stmt->stmt, offset);
 }

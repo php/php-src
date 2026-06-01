@@ -179,6 +179,9 @@ class ServerClientTestCase
                 if (empty($addr)) {
                     throw new \Exception("Failed server start");
                 }
+				if (strpos($addr, 'SERVER_EXCEPTION') !== false) {
+					echo $addr;
+				}
                 if ($code === false) {
                     $clientCode = preg_replace('/{{\s*ADDR\s*}}/', $addr, $clientCode);
                 } else {

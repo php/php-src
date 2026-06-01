@@ -63,7 +63,7 @@ var_dump(gmp_powm(10, $n, 10));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 string(1) "0"
 string(1) "5"
 string(1) "5"
@@ -73,8 +73,8 @@ string(3) "533"
 string(3) "331"
 string(3) "171"
 string(3) "371"
-Modulo by zero
-Modulo by zero
+gmp_powm(): Argument #3 ($modulus) Modulo by zero
+gmp_powm(): Argument #3 ($modulus) Modulo by zero
 gmp_powm(): Argument #1 ($num) must be of type GMP|string|int, array given
 gmp_powm(): Argument #2 ($exponent) must be of type GMP|string|int, array given
 gmp_powm(): Argument #2 ($exponent) must be of type GMP|string|int, TypeError given

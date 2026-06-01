@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
@@ -207,13 +205,8 @@ typedef struct {
 	zend_object std;
 } soap_client_object;
 
-static inline soap_client_object *soap_client_object_fetch(zend_object *obj) {
-	return (soap_client_object *) ((char *) obj - XtOffsetOf(soap_client_object, std));
-}
-
-static inline soap_server_object *soap_server_object_fetch(zend_object *obj) {
-	return (soap_server_object *) ((char *) obj - XtOffsetOf(soap_server_object, std));
-}
+#define soap_client_object_fetch(obj) ZEND_CONTAINER_OF(obj, soap_client_object, std)
+#define soap_server_object_fetch(obj) ZEND_CONTAINER_OF(obj, soap_server_object, std)
 
 static zend_object *soap_client_object_create(zend_class_entry *ce)
 {
@@ -288,10 +281,7 @@ static zend_result soap_url_cast_object(zend_object *obj, zval *result, int type
 	return zend_std_cast_object_tostring(obj, result, type);
 }
 
-static inline soap_sdl_object *soap_sdl_object_fetch(zend_object *obj)
-{
-	return (soap_sdl_object *) ((char *) obj - XtOffsetOf(soap_sdl_object, std));
-}
+#define soap_sdl_object_fetch(obj) ZEND_CONTAINER_OF(obj, soap_sdl_object, std)
 
 #define Z_SOAP_SDL_P(zv) soap_sdl_object_fetch(Z_OBJ_P(zv))
 
@@ -534,7 +524,7 @@ PHP_MINIT_FUNCTION(soap)
 	soap_class_entry->default_object_handlers = &soap_client_object_handlers;
 
 	memcpy(&soap_client_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	soap_client_object_handlers.offset = XtOffsetOf(soap_client_object, std);
+	soap_client_object_handlers.offset = offsetof(soap_client_object, std);
 	soap_client_object_handlers.free_obj = soap_client_object_free;
 	soap_client_object_handlers.clone_obj = NULL;
 
@@ -547,7 +537,7 @@ PHP_MINIT_FUNCTION(soap)
 	soap_server_class_entry->default_object_handlers = &soap_server_object_handlers;
 
 	memcpy(&soap_server_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	soap_server_object_handlers.offset = XtOffsetOf(soap_server_object, std);
+	soap_server_object_handlers.offset = offsetof(soap_server_object, std);
 	soap_server_object_handlers.free_obj = soap_server_object_free;
 	soap_server_object_handlers.clone_obj = NULL;
 
@@ -564,7 +554,7 @@ PHP_MINIT_FUNCTION(soap)
 	soap_url_class_entry->default_object_handlers = &soap_url_object_handlers;
 
 	memcpy(&soap_url_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	soap_url_object_handlers.offset = XtOffsetOf(soap_url_object, std);
+	soap_url_object_handlers.offset = offsetof(soap_url_object, std);
 	soap_url_object_handlers.free_obj = soap_url_object_free;
 	soap_url_object_handlers.get_constructor = soap_url_object_get_constructor;
 	soap_url_object_handlers.clone_obj = NULL;
@@ -576,7 +566,7 @@ PHP_MINIT_FUNCTION(soap)
 	soap_sdl_class_entry->default_object_handlers = &soap_sdl_object_handlers;
 
 	memcpy(&soap_sdl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	soap_sdl_object_handlers.offset = XtOffsetOf(soap_sdl_object, std);
+	soap_sdl_object_handlers.offset = offsetof(soap_sdl_object, std);
 	soap_sdl_object_handlers.free_obj = soap_sdl_object_free;
 	soap_sdl_object_handlers.get_constructor = soap_sdl_object_get_constructor;
 	soap_sdl_object_handlers.clone_obj = NULL;
@@ -1594,12 +1584,20 @@ PHP_METHOD(SoapServer, handle)
 				    instanceof_function(Z_OBJCE(h->retval), soap_fault_class_entry)) {
 					php_output_discard();
 					soap_server_fault_ex(function, &h->retval, h);
-					if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(soap_obj);}
+					if (service->type == SOAP_CLASS && soap_obj) {
+						if (service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
+							zval_ptr_dtor(soap_obj);
+						}
+					}
 					goto fail;
 				} else if (EG(exception)) {
 					php_output_discard();
 					_soap_server_exception(service, function, ZEND_THIS);
-					if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(soap_obj);}
+					if (service->type == SOAP_CLASS && soap_obj) {
+						if (service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
+							zval_ptr_dtor(soap_obj);
+						}
+					}
 					goto fail;
 				}
 			} else if (h->mustUnderstand) {
@@ -2443,9 +2441,19 @@ static void do_soap_call(zend_execute_data *execute_data,
 				request = NULL;
 
 				if (ret && Z_TYPE(response) == IS_STRING) {
+					bool parse_bailout = false;
+
 					encode_reset_ns();
-					ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), fn, NULL, return_value, output_headers);
+					zend_try {
+						ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), fn, NULL, return_value, output_headers);
+					} zend_catch {
+						parse_bailout = true;
+					} zend_end_try();
 					encode_finish();
+					if (parse_bailout) {
+						zval_ptr_dtor(&response);
+						zend_bailout();
+					}
 				}
 
 				zval_ptr_dtor(&response);
@@ -2487,9 +2495,19 @@ static void do_soap_call(zend_execute_data *execute_data,
 				request = NULL;
 
 				if (ret && Z_TYPE(response) == IS_STRING) {
+					bool parse_bailout = false;
+
 					encode_reset_ns();
-					ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), NULL, NULL, return_value, output_headers);
+					zend_try {
+						ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), NULL, NULL, return_value, output_headers);
+					} zend_catch {
+						parse_bailout = true;
+					} zend_end_try();
 					encode_finish();
+					if (parse_bailout) {
+						zval_ptr_dtor(&response);
+						zend_bailout();
+					}
 				}
 
 				zval_ptr_dtor(&response);

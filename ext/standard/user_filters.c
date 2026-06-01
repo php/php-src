@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors:                                                             |
    | Wez Furlong (wez@thebrainroom.com)                                   |
@@ -50,8 +48,9 @@ PHP_METHOD(php_user_filter, filter)
 
 PHP_METHOD(php_user_filter, seek)
 {
-	zend_long offset, whence;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &whence) == FAILURE) {
+	zend_long offset, whence, chain;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &offset, &whence, &chain) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -265,7 +264,7 @@ static zend_result userfilter_seek(
 {
 	zval *obj = &thisfilter->abstract;
 	zval retval;
-	zval args[2];
+	zval args[3];
 
 	/* the userfilter object probably doesn't exist anymore */
 	if (CG(unclean_shutdown)) {
@@ -291,8 +290,9 @@ static zend_result userfilter_seek(
 	/* Setup calling arguments */
 	ZVAL_LONG(&args[0], offset);
 	ZVAL_LONG(&args[1], whence);
+	ZVAL_LONG(&args[2], php_stream_filter_get_chain_type(stream, thisfilter));
 
-	zend_call_known_function(seek_method, Z_OBJ_P(obj), Z_OBJCE_P(obj), &retval, 2, args, NULL);
+	zend_call_known_function(seek_method, Z_OBJ_P(obj), Z_OBJCE_P(obj), &retval, 3, args, NULL);
 
 	zend_result ret = FAILURE;
 	if (Z_TYPE(retval) != IS_UNDEF) {
@@ -385,7 +385,8 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		return NULL;
 	}
 
-	filter = php_stream_filter_alloc(&userfilter_ops, NULL, false, PSFS_SEEKABLE_CHECK);
+	filter = php_stream_filter_alloc(&userfilter_ops, NULL, false,
+			PSFS_SEEKABLE_CHECK, PSFS_SEEKABLE_CHECK);
 
 	/* filtername */
 	add_property_string(&obj, "filtername", filtername);

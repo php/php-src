@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -796,6 +795,7 @@ zend_result _call_user_function_impl(zval *object, zval *function_name, zval *re
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.named_params = named_params;
+	fci.consumed_args = 0;
 
 	return zend_call_function(&fci, NULL);
 }
@@ -863,6 +863,9 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 
 	call = zend_vm_stack_push_call_frame(call_info,
 		func, fci->param_count, object_or_called_scope);
+	uint32_t consumed_args = fci->param_count ? fci->consumed_args : 0;
+
+	ZEND_ASSERT((consumed_args & (consumed_args - 1)) == 0);
 
 	for (uint32_t i = 0; i < fci->param_count; i++) {
 		zval *param = ZEND_CALL_ARG(call, i+1);
@@ -904,7 +907,15 @@ cleanup_args:
 		}
 
 		if (EXPECTED(!must_wrap)) {
-			ZVAL_COPY(param, arg);
+			if (EXPECTED(consumed_args == 0)
+					|| !zend_fci_is_consumed_arg(consumed_args, i)
+					|| Z_ISREF_P(arg)
+					|| arg != &fci->params[i]) {
+				ZVAL_COPY(param, arg);
+			} else {
+				ZVAL_COPY_VALUE(param, arg);
+				ZVAL_UNDEF(arg);
+			}
 		} else {
 			Z_TRY_ADDREF_P(arg);
 			ZVAL_NEW_REF(param, arg);
@@ -1031,6 +1042,7 @@ cleanup_args:
 			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(fci->retval) : !Z_ISREF_P(fci->retval));
+			ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
 		}
 #endif
 		ZEND_OBSERVER_FCALL_END(call, fci->retval);
@@ -1092,6 +1104,7 @@ ZEND_API void zend_call_known_function(
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.named_params = named_params;
+	fci.consumed_args = 0;
 	ZVAL_UNDEF(&fci.function_name); /* Unused */
 
 	fcic.function_handler = fn;

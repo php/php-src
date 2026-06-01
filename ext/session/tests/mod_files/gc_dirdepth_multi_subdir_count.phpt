@@ -7,6 +7,7 @@ session
 --INI--
 session.gc_probability=0
 session.gc_maxlifetime=10
+session.use_strict_mode=0
 --FILE--
 <?php
 $base = __DIR__ . '/gc_multi_subdir_test';

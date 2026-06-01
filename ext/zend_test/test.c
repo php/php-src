@@ -1,16 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
-  +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
 */
 
@@ -69,6 +65,7 @@ static zend_class_entry *zend_test_forbid_dynamic_call;
 static zend_class_entry *zend_test_ns_foo_class;
 static zend_class_entry *zend_test_ns_unlikely_compile_error_class;
 static zend_class_entry *zend_test_ns_not_unlikely_compile_error_class;
+static zend_class_entry *zend_test_ns_bar_class;
 static zend_class_entry *zend_test_ns2_foo_class;
 static zend_class_entry *zend_test_ns2_ns_foo_class;
 static zend_class_entry *zend_test_unit_enum;
@@ -546,6 +543,79 @@ static ZEND_FUNCTION(zend_call_method_if_exists)
 		}
 		RETURN_NULL();
 	}
+	if (Z_TYPE_P(return_value) == IS_REFERENCE) {
+		zend_unwrap_reference(return_value);
+	}
+}
+
+static ZEND_FUNCTION(zend_test_call_with_consumed_args)
+{
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	zval *args;
+	zend_long consumed_args;
+	zval retval;
+	uint32_t actual_consumed_args = 0;
+	uint32_t i;
+	zend_result call_result;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_ARRAY(args)
+		Z_PARAM_LONG(consumed_args)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(consumed_args < 0 || consumed_args > UINT32_MAX)) {
+		zend_argument_value_error(3, "must be between 0 and 4294967295");
+		RETURN_THROWS();
+	}
+
+	zend_fcall_info_args(&fci, args);
+
+	ZVAL_UNDEF(&retval);
+	fci.retval = &retval;
+	fci.consumed_args = (uint32_t) consumed_args;
+
+	call_result = zend_call_function(&fci, &fcc);
+
+	for (i = 0; i < fci.param_count && i < 32; i++) {
+		if (Z_ISUNDEF(fci.params[i])) {
+			actual_consumed_args |= (1u << i);
+		}
+	}
+
+	zend_fcall_info_args_clear(&fci, true);
+
+	if (call_result == FAILURE || EG(exception)) {
+		if (!Z_ISUNDEF(retval)) {
+			zval_ptr_dtor(&retval);
+		}
+		RETURN_THROWS();
+	}
+
+	array_init(return_value);
+	add_assoc_long(return_value, "consumed_args", actual_consumed_args);
+
+	if (Z_ISUNDEF(retval)) {
+		add_assoc_null(return_value, "retval");
+	} else {
+		add_assoc_zval(return_value, "retval", &retval);
+	}
+}
+
+static ZEND_FUNCTION(zend_test_refcount)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_REFCOUNTED_P(value)) {
+		RETURN_LONG(-1);
+	}
+
+	RETURN_LONG(Z_REFCOUNT_P(value));
 }
 
 static ZEND_FUNCTION(zend_get_unit_enum)
@@ -1047,7 +1117,7 @@ static zend_object *zend_test_class_new(zend_class_entry *class_type)
 
 static void zend_test_class_free_obj(zend_object *object)
 {
-	zend_test_object *intern = (zend_test_object*)((char*)object - XtOffsetOf(zend_test_object, std));
+	zend_test_object *intern = ZEND_CONTAINER_OF(object, zend_test_object, std);
 
 	if (intern->tmp_method) {
 		zend_internal_function *func = intern->tmp_method;
@@ -1062,7 +1132,7 @@ static void zend_test_class_free_obj(zend_object *object)
 
 static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key)
 {
-	zend_test_object *intern = (zend_test_object*)((char*)(*object) - XtOffsetOf(zend_test_object, std));
+	zend_test_object *intern = ZEND_CONTAINER_OF(*object, zend_test_object, std);
 
 	if (zend_string_equals_literal_ci(name, "test")) {
 		zend_internal_function *fptr;
@@ -1529,7 +1599,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
 	zend_test_class_handlers.clone_obj = NULL;
 	zend_test_class_handlers.free_obj = zend_test_class_free_obj;
-	zend_test_class_handlers.offset = XtOffsetOf(zend_test_object, std);
+	zend_test_class_handlers.offset = offsetof(zend_test_object, std);
 
 	zend_test_gen_stub_flag_compatibility_test = register_class_ZendTestGenStubFlagCompatibilityTest();
 
@@ -1571,6 +1641,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
 	zend_test_ns_unlikely_compile_error_class = register_class_ZendTestNS_UnlikelyCompileError();
 	zend_test_ns_not_unlikely_compile_error_class = register_class_ZendTestNS_NotUnlikelyCompileError();
+	zend_test_ns_bar_class = register_class_ZendTestNS_Bar();
 	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
 	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
 
