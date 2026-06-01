@@ -47,9 +47,7 @@ typedef struct {
 #define COLLATOR_ERROR_CODE(co)   INTL_ERROR_CODE(COLLATOR_ERROR(co))
 #define COLLATOR_ERROR_CODE_P(co) &(INTL_ERROR_CODE(COLLATOR_ERROR(co)))
 
-static inline Collator_object *php_intl_collator_fetch_object(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, Collator_object, zo);
-}
+#define php_intl_collator_fetch_object(obj) ZEND_CONTAINER_OF(obj, Collator_object, zo)
 #define Z_INTL_COLLATOR_P(zv) php_intl_collator_fetch_object(Z_OBJ_P(zv))
 
 #ifdef __cplusplus

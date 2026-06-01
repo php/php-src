@@ -180,9 +180,7 @@ typedef struct {
 zend_class_entry *address_info_ce;
 static zend_object_handlers address_info_object_handlers;
 
-static inline php_addrinfo *address_info_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, php_addrinfo, std);
-}
+#define address_info_from_obj(obj) ZEND_CONTAINER_OF(obj, php_addrinfo, std)
 
 #define Z_ADDRESS_INFO_P(zv) address_info_from_obj(Z_OBJ_P(zv))
 
@@ -852,18 +850,17 @@ PHP_FUNCTION(socket_listen)
 PHP_FUNCTION(socket_close)
 {
 	zval *arg1;
-	php_socket *php_socket;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_socket = Z_SOCKET_P(arg1);
-	ENSURE_SOCKET_VALID(php_socket);
+	php_socket *socket = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(socket);
 
-	if (!Z_ISUNDEF(php_socket->zstream)) {
+	if (!Z_ISUNDEF(socket->zstream)) {
 		php_stream *stream = NULL;
-		php_stream_from_zval_no_verify(stream, &php_socket->zstream);
+		php_stream_from_zval_no_verify(stream, &socket->zstream);
 		if (stream != NULL) {
 			/* close & destroy stream, incl. removing it from the rsrc list;
 			 * resource stored in php_sock->zstream will become invalid */
@@ -872,13 +869,13 @@ PHP_FUNCTION(socket_close)
 					(stream->is_persistent?PHP_STREAM_FREE_CLOSE_PERSISTENT:0));
 		}
 	} else {
-		if (!IS_INVALID_SOCKET(php_socket)) {
-			close(php_socket->bsd_socket);
+		if (!IS_INVALID_SOCKET(socket)) {
+			close(socket->bsd_socket);
 		}
 	}
 
-	ZVAL_UNDEF(&php_socket->zstream);
-	php_socket->bsd_socket = -1;
+	ZVAL_UNDEF(&socket->zstream);
+	socket->bsd_socket = -1;
 }
 /* }}} */
 

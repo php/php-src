@@ -70,10 +70,7 @@ typedef struct _spl_pqueue_elem {
 	zval priority;
 } spl_pqueue_elem;
 
-static inline spl_heap_object *spl_heap_from_obj(zend_object *obj) /* {{{ */ {
-	return ZEND_CONTAINER_OF(obj, spl_heap_object, std);
-}
-/* }}} */
+#define spl_heap_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_heap_object, std)
 
 #define Z_SPLHEAP_P(zv)  spl_heap_from_obj(Z_OBJ_P((zv)))
 

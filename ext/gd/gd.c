@@ -144,14 +144,7 @@ static zend_function *php_gd_image_object_get_constructor(zend_object *object)
 	return NULL;
 }
 
-/**
- * Returns the underlying php_gd_image_object from a zend_object
- */
-
-static zend_always_inline php_gd_image_object* php_gd_exgdimage_from_zobj_p(zend_object* obj)
-{
-	return ZEND_CONTAINER_OF(obj, php_gd_image_object, std);
-}
+#define php_gd_exgdimage_from_zobj_p(obj) ZEND_CONTAINER_OF(obj, php_gd_image_object, std)
 
 /**
  * Converts an extension GdImage instance contained within a zval into the gdImagePtr

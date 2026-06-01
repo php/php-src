@@ -81,9 +81,7 @@ typedef struct _ze_zip_object {
 	zend_object zo;
 } ze_zip_object;
 
-static inline ze_zip_object *php_zip_fetch_object(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, ze_zip_object, zo);
-}
+#define php_zip_fetch_object(obj) ZEND_CONTAINER_OF(obj, ze_zip_object, zo)
 
 #define Z_ZIP_P(zv) php_zip_fetch_object(Z_OBJ_P((zv)))
 
