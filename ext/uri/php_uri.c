@@ -57,13 +57,22 @@ static const zend_module_dep uri_deps[] = {
 
 static zend_array uri_parsers;
 
-#define Z_RFC3986_URI_PROP_SCHEME_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
-#define Z_RFC3986_URI_PROP_USERINFO_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
-#define Z_RFC3986_URI_PROP_HOST_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 2)
-#define Z_RFC3986_URI_PROP_PORT_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 3)
-#define Z_RFC3986_URI_PROP_PATH_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 4)
-#define Z_RFC3986_URI_PROP_QUERY_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 5)
-#define Z_RFC3986_URI_PROP_FRAGMENT_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 6)
+static zend_always_inline zval *php_uri_deref(zval *zv)
+{
+	if (UNEXPECTED(Z_TYPE_P(zv) == IS_REFERENCE)) {
+		return Z_REFVAL_P(zv);
+	}
+
+	return zv;
+}
+
+#define Z_RFC3986_URI_PROP_SCHEME_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
+#define Z_RFC3986_URI_PROP_USERINFO_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
+#define Z_RFC3986_URI_PROP_HOST_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 2))
+#define Z_RFC3986_URI_PROP_PORT_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 3))
+#define Z_RFC3986_URI_PROP_PATH_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 4))
+#define Z_RFC3986_URI_PROP_QUERY_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 5))
+#define Z_RFC3986_URI_PROP_FRAGMENT_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 6))
 
 static HashTable *uri_get_debug_properties(php_uri_object *object)
 {
@@ -1060,13 +1069,14 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, reset)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	ZVAL_NULL(Z_RFC3986_URI_PROP_SCHEME_P(ZEND_THIS));
-	ZVAL_NULL(Z_RFC3986_URI_PROP_USERINFO_P(ZEND_THIS));
-	ZVAL_NULL(Z_RFC3986_URI_PROP_HOST_P(ZEND_THIS));
-	ZVAL_NULL(Z_RFC3986_URI_PROP_PORT_P(ZEND_THIS));
+	convert_to_null(Z_RFC3986_URI_PROP_SCHEME_P(ZEND_THIS));
+	convert_to_null(Z_RFC3986_URI_PROP_USERINFO_P(ZEND_THIS));
+	convert_to_null(Z_RFC3986_URI_PROP_HOST_P(ZEND_THIS));
+	convert_to_null(Z_RFC3986_URI_PROP_PORT_P(ZEND_THIS));
+	zval_ptr_dtor(Z_RFC3986_URI_PROP_PATH_P(ZEND_THIS));
 	ZVAL_EMPTY_STRING(Z_RFC3986_URI_PROP_PATH_P(ZEND_THIS));
-	ZVAL_NULL(Z_RFC3986_URI_PROP_QUERY_P(ZEND_THIS));
-	ZVAL_NULL(Z_RFC3986_URI_PROP_FRAGMENT_P(ZEND_THIS));
+	convert_to_null(Z_RFC3986_URI_PROP_QUERY_P(ZEND_THIS));
+	convert_to_null(Z_RFC3986_URI_PROP_FRAGMENT_P(ZEND_THIS));
 
 	RETVAL_COPY(ZEND_THIS);
 }
