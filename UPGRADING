@@ -318,6 +318,7 @@ PHP 8.6 UPGRADE NOTES
 
 - Zip:
   . Added ZipArchive::openString() method.
+  . Added ZipArchive::closeString() method.
 
 ========================================
 7. New Classes and Interfaces
