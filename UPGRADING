@@ -44,6 +44,9 @@ PHP 8.6 UPGRADE NOTES
     int, rather than float, on 64-bit platforms when parsing integer values.
   . The $type parameter of IntlBreakIterator::getPartsIterator() has been
     changed from string to int to match the underlying implementation.
+  . UConverter::transcode() now rejects from_subst and to_subst option values
+    longer than 127 bytes instead of silently truncating the length before
+    passing it to ICU.
 
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
