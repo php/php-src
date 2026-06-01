@@ -60,6 +60,19 @@ zend_object *IntlNumberRangeFormatter_object_create(zend_class_entry *ce)
     return &intern->zo;
 }
 
+static icu::Formattable rangeformatter_create_formattable(zval *number)
+{
+    icu::Formattable formattable;
+
+    if (Z_TYPE_P(number) == IS_DOUBLE) {
+        formattable.setDouble(Z_DVAL_P(number));
+    } else {
+        formattable.setInt64(static_cast<int64_t>(Z_LVAL_P(number)));
+    }
+
+    return formattable;
+}
+
 U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, __construct)
 {
     ZEND_PARSE_PARAMETERS_NONE();
@@ -154,8 +167,8 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
 
     UErrorCode error = U_ZERO_ERROR;
 
-    icu::Formattable start_formattable(Z_TYPE_P(start) == IS_DOUBLE ? Z_DVAL_P(start) : Z_LVAL_P(start));
-    icu::Formattable end_formattable(Z_TYPE_P(end) == IS_DOUBLE ? Z_DVAL_P(end) : Z_LVAL_P(end));
+    icu::Formattable start_formattable = rangeformatter_create_formattable(start);
+    icu::Formattable end_formattable = rangeformatter_create_formattable(end);
 
     UnicodeString result = RANGEFORMATTER_OBJECT(obj)->formatFormattableRange(start_formattable, end_formattable, error).toString(error);
 
