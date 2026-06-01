@@ -69,6 +69,8 @@ typedef struct _ze_zip_object {
 	HashTable *prop_handler;
 	char *filename;
 	size_t filename_len;
+	zend_string *out_str;
+	bool from_string;
 	zip_int64_t last_id;
 	int err_zip;
 	int err_sys;
