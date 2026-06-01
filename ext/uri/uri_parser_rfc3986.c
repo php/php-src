@@ -24,6 +24,7 @@
 struct php_uri_parser_rfc3986_uris {
 	UriUriA uri;
 	UriUriA normalized_uri;
+	unsigned int normalization_mask;
 	bool normalized_uri_initialized;
 };
 
@@ -84,10 +85,19 @@ ZEND_ATTRIBUTE_NONNULL static void copy_uri(UriUriA *new_uriparser_uri, const Ur
 
 ZEND_ATTRIBUTE_NONNULL static UriUriA *get_normalized_uri(php_uri_parser_rfc3986_uris *uriparser_uris) {
 	if (!uriparser_uris->normalized_uri_initialized) {
-		copy_uri(&uriparser_uris->normalized_uri, &uriparser_uris->uri);
-		int result = uriNormalizeSyntaxExMmA(&uriparser_uris->normalized_uri, (unsigned int)-1, mm);
-		ZEND_ASSERT(result == URI_SUCCESS);
+		int mask_result = uriNormalizeSyntaxMaskRequiredExA(&uriparser_uris->uri, &uriparser_uris->normalization_mask);
+		ZEND_ASSERT(mask_result == URI_SUCCESS);
+
+		if (uriparser_uris->normalization_mask != URI_NORMALIZED) {
+			copy_uri(&uriparser_uris->normalized_uri, &uriparser_uris->uri);
+			int result = uriNormalizeSyntaxExMmA(&uriparser_uris->normalized_uri, uriparser_uris->normalization_mask, mm);
+			ZEND_ASSERT(result == URI_SUCCESS);
+		}
 		uriparser_uris->normalized_uri_initialized = true;
+	}
+
+	if (uriparser_uris->normalization_mask == URI_NORMALIZED) {
+		return &uriparser_uris->uri;
 	}
 
 	return &uriparser_uris->normalized_uri;

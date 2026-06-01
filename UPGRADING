@@ -448,7 +448,10 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of str_split().
 
 - URI:
-  . Reduced allocations when reading RFC3986 IPv6/IPFuture hosts and paths.
+  . Reduced allocations when reading IPv6/IPFuture hosts and paths with
+    Uri\Rfc3986\Uri.
+  . Improved performance and memory consumption when using normalizing
+    (non-raw) getters on already-normalized URIs with Uri\Rfc3986\Uri.
 
 - Zip:
   . Avoid string copies in ZipArchive::addFromString().
