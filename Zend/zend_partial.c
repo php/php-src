@@ -182,7 +182,7 @@ static zp_names *zp_assign_names(uint32_t argc, zval *argv,
 		zend_array *extra_named_params)
 {
 	zp_names *names = zend_arena_calloc(&CG(ast_arena),
-			1, XtOffsetOf(zp_names, params) + sizeof(zend_string*) * argc);
+			1, offsetof(zp_names, params) + sizeof(zend_string*) * argc);
 
 	/* Assign names for params. We never rename those. */
 	for (uint32_t offset = 0; offset < MIN(argc, function->common.num_args); offset++) {
