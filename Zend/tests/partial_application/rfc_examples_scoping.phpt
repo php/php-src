@@ -34,7 +34,7 @@ class Unrelated {}
 $tests = [
     'Static closure 1' => [
         foo(?, ?),
-        static fn(int $i, int $j = 0): string => foo($i, $j),
+        static fn(int $i, int $j): string => foo($i, $j),
     ],
     'Static closure 2' => [
         Foo::bar(?, ?),
@@ -42,7 +42,7 @@ $tests = [
     ],
     'Static closure 3' => [
         foo(?, ?)(1, ?),
-        static fn(int $j = 0): string => foo(1, $j),
+        static fn(int $j): string => foo(1, $j),
     ],
     'Static closure 4' => [
         foo(...)(?),

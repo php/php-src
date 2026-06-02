@@ -578,7 +578,7 @@ static zend_ast *zp_compile_forwarding_call(
 			}
 			zend_ast *default_value_ast;
 			if (Z_TYPE(default_value) == IS_CONSTANT_AST) {
-				/* Must dup AST because we are doing to destroy it */
+				/* Must dup AST because we are going to destroy it */
 				default_value_ast = zend_ast_dup(Z_ASTVAL(default_value));
 			} else {
 				default_value_ast = zend_ast_create_zval(&default_value);
@@ -766,10 +766,9 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 			}
 
 			arg_to_param_offset_map[arg_offset] = param_offset;
-
-			num_required = zp_compute_num_required(function,
-					arg_offset, param_offset, num_required);
 		}
+
+		num_required = num_params;
 
 		/* Handle implicit placeholders added by '...' */
 		if (uses_variadic_placeholder) {

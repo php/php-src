@@ -23,7 +23,7 @@ Closure [ <user> static function {closure:%s:%d} ] {
   @@ %sreflection_001.php 6 - 6
 
   - Parameters [3] {
-    Parameter #0 [ <optional> $a = 1 ]
+    Parameter #0 [ <required> $a ]
     Parameter #1 [ <optional> $b = 5 ]
     Parameter #2 [ <optional> $c = 10 ]
   }
@@ -32,8 +32,8 @@ Closure [ <user> static function {closure:%s:%d} ] {
   @@ %sreflection_001.php 10 - 10
 
   - Parameters [3] {
-    Parameter #0 [ <optional> $a = 1 ]
-    Parameter #1 [ <optional> $b = 5 ]
+    Parameter #0 [ <required> $a ]
+    Parameter #1 [ <required> $b ]
     Parameter #2 [ <optional> $c = 10 ]
   }
 }
@@ -41,8 +41,8 @@ Closure [ <user> static function {closure:%s:%d} ] {
   @@ %sreflection_001.php 14 - 14
 
   - Parameters [3] {
-    Parameter #0 [ <optional> $a = 1 ]
-    Parameter #1 [ <optional> $b = 5 ]
-    Parameter #2 [ <optional> $c = 10 ]
+    Parameter #0 [ <required> $a ]
+    Parameter #1 [ <required> $b ]
+    Parameter #2 [ <required> $c ]
   }
 }

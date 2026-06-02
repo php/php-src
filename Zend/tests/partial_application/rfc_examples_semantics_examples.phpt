@@ -54,7 +54,7 @@ $tests = [
     ],
     'Provide some values, require the rest to be provided later (1)' => [
         stuff(1, 'hi', ?, ?, ?),
-        static fn(float $f3, Point $p4, int $m5 = 0): array => stuff(1, 'hi', $f3, $p4, $m5),
+        static fn(float $f3, Point $p4, int $m5): array => stuff(1, 'hi', $f3, $p4, $m5),
     ],
     'Provide some values, require the rest to be provided later (2)' => [
         stuff(1, 'hi', ...),
@@ -62,7 +62,7 @@ $tests = [
     ],
     'Provide some values, but not just from the left (1)' => [
         stuff(1, ?, 3.5, ?, ?),
-        static fn(string $s2, Point $p4, int $m5 = 0): array => stuff(1, $s2, 3.5, $p4, $m5),
+        static fn(string $s2, Point $p4, int $m5): array => stuff(1, $s2, 3.5, $p4, $m5),
     ],
     'Provide some values, but not just from the left (2)' => [
         stuff(1, ?, 3.5, ...),

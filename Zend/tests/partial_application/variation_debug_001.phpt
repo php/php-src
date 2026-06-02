@@ -35,6 +35,6 @@ object(Closure)#%d (5) {
   ["parameter"]=>
   array(1) {
     ["$a"]=>
-    string(10) "<optional>"
+    string(10) "<required>"
   }
 }
