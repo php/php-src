@@ -5,6 +5,20 @@ if ($argc < 2) {
     die("Usage: php bless_tests.php dir/\n");
 }
 
+// Build a list of known errors on this platform, so we can avoid hardcoding
+// platform-specific errors in expect output, as the errno/strerror differs
+// between platforms.
+$strerrors = [];
+if (function_exists("posix_strerror")) {
+	for ($i = -1; $i < 255; $i++) {
+		$str = posix_strerror($i);
+		if (str_contains($str, "Unknown error") && $i > 0) {
+			break;
+		}
+		$strerrors[] = $str;
+	}
+}
+
 $files = getFiles(array_slice($argv, 1));
 foreach ($files as $path) {
     if (!preg_match('/^(.*)\.phpt$/', $path, $matches)) {
@@ -74,6 +88,10 @@ function normalizeOutput(string $out): string {
         'Resource ID#%d used as offset, casting to integer (%d)',
         $out);
     $out = preg_replace('/string\(\d+\) "([^"]*%d)/', 'string(%d) "$1', $out);
+    global $strerrors;
+    foreach ($strerrors as $strerror) {
+        $out = str_replace($strerror, "%s", $out);
+    }
     $out = str_replace("\0", '%0', $out);
     return $out;
 }
