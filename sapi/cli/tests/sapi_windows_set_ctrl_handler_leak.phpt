@@ -1,5 +1,5 @@
 --TEST--
-sapi_windows_set_ctrl_handler() trampoline test
+sapi_windows_set_ctrl_handler() leak bug
 --SKIPIF--
 <?php
 include "skipif.inc";
