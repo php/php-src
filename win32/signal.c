@@ -122,6 +122,9 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 #endif
 
 	if (!php_win32_console_is_cli_sapi()) {
+		if (ZEND_FCC_INITIALIZED(fcc)) {
+			zend_release_fcall_info_cache(&fcc);
+		}
 		zend_throw_error(NULL, "CTRL events trapping is only supported on console");
 		RETURN_THROWS();
 	}
