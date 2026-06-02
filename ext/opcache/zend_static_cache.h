@@ -74,15 +74,19 @@ struct _zend_opcache_static_cache_safe_direct_handlers {
 
 BEGIN_EXTERN_C()
 
+/* The opt-in/partition functions form the SAPI-facing API. They are called
+ * from the SAPI binaries (cli, cli-server, fpm, phpdbg, embedders), which on
+ * Windows are separate PE modules from the php8ts.dll that statically links
+ * OPcache. They must therefore be exported across the module boundary. */
+ZEND_API void zend_opcache_static_cache_opt_in(void);
+ZEND_API zend_opcache_static_cache_partition *zend_opcache_static_cache_partition_create(const char *name);
+ZEND_API bool zend_opcache_static_cache_partition_startup_before_request(zend_opcache_static_cache_partition *partition);
+ZEND_API void zend_opcache_static_cache_partition_activate(zend_opcache_static_cache_partition *partition);
 zend_result zend_opcache_register_functions(int module_type);
 zend_result zend_opcache_static_cache_minit(void);
 void zend_opcache_static_cache_mshutdown(void);
 zend_result zend_opcache_static_cache_rshutdown(void);
-void zend_opcache_static_cache_opt_in(void);
 void zend_opcache_static_cache_invalidate_all(void);
-zend_opcache_static_cache_partition *zend_opcache_static_cache_partition_create(const char *name);
-bool zend_opcache_static_cache_partition_startup_before_request(zend_opcache_static_cache_partition *partition);
-void zend_opcache_static_cache_partition_activate(zend_opcache_static_cache_partition *partition);
 void zend_opcache_static_cache_volatile_get_status(zval *return_value);
 void zend_opcache_static_cache_pinned_get_status(zval *return_value);
 bool zend_opcache_static_cache_volatile_is_enabled(void);

@@ -691,7 +691,7 @@ static void zend_opcache_static_cache_init_partition_contexts(zend_opcache_stati
 	partition->name = name != NULL ? strdup(name) : NULL;
 }
 
-zend_opcache_static_cache_partition *zend_opcache_static_cache_partition_create(const char *name)
+ZEND_API zend_opcache_static_cache_partition *zend_opcache_static_cache_partition_create(const char *name)
 {
 	zend_opcache_static_cache_partition *partition = calloc(1, sizeof(zend_opcache_static_cache_partition));
 
@@ -706,7 +706,7 @@ zend_opcache_static_cache_partition *zend_opcache_static_cache_partition_create(
 	return partition;
 }
 
-bool zend_opcache_static_cache_partition_startup_before_request(zend_opcache_static_cache_partition *partition)
+ZEND_API bool zend_opcache_static_cache_partition_startup_before_request(zend_opcache_static_cache_partition *partition)
 {
 	const char *failure_reason;
 	zend_opcache_static_cache_context *previous_context;
@@ -749,17 +749,6 @@ bool zend_opcache_static_cache_partition_startup_before_request(zend_opcache_sta
 	zend_opcache_static_cache_active_partition = previous_partition;
 
 	return true;
-}
-
-void zend_opcache_static_cache_partition_activate(zend_opcache_static_cache_partition *partition)
-{
-	zend_opcache_static_cache_active_partition = partition;
-	zend_opcache_static_cache_active_context_ptr = NULL;
-}
-
-void zend_opcache_static_cache_opt_in(void)
-{
-	zend_opcache_static_cache_runtime_opted_in = true;
 }
 
 static zend_always_inline bool zend_opcache_static_cache_begin_entry_mutation(zend_string *key, bool *release_entry_lock, bool throw_on_error)
@@ -1234,30 +1223,6 @@ static void zend_opcache_static_cache_partition_shutdown_all(void)
 	zend_opcache_static_cache_restore_context(previous_context);
 }
 
-void zend_opcache_static_cache_mshutdown(void)
-{
-	zend_opcache_static_cache_context *previous_context;
-
-	zend_opcache_static_cache_unregister_hooks();
-	zend_opcache_static_cache_partition_shutdown_all();
-	zend_opcache_static_cache_active_partition = NULL;
-
-	previous_context = zend_opcache_static_cache_activate_context(zend_opcache_static_cache_active_volatile_context());
-	zend_opcache_static_cache_shutdown_storage();
-	zend_opcache_static_cache_reset_runtime();
-	zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_pinned_context_state);
-	zend_opcache_static_cache_shutdown_storage();
-	zend_opcache_static_cache_reset_runtime();
-	zend_opcache_static_cache_restore_context(previous_context);
-
-	zend_opcache_static_cache_subsystem_disabled = false;
-	zend_opcache_static_cache_subsystem_failure_reason = NULL;
-	zend_opcache_static_cache_active_partition = NULL;
-	zend_opcache_static_cache_safe_direct_handlers_destroy();
-	zend_opcache_static_cache_reset_class_entries();
-	zend_accel_register_static_cache_handlers(NULL);
-}
-
 static zend_result zend_opcache_static_cache_rinit(void)
 {
 	zend_opcache_static_cache_context *previous_context;
@@ -1307,6 +1272,17 @@ static void zend_opcache_static_cache_register_accelerator_handlers(void)
 	zend_accel_register_static_cache_handlers(&handlers);
 }
 
+ZEND_API void zend_opcache_static_cache_partition_activate(zend_opcache_static_cache_partition *partition)
+{
+	zend_opcache_static_cache_active_partition = partition;
+	zend_opcache_static_cache_active_context_ptr = NULL;
+}
+
+ZEND_API void zend_opcache_static_cache_opt_in(void)
+{
+	zend_opcache_static_cache_runtime_opted_in = true;
+}
+
 zend_result zend_opcache_static_cache_minit(void)
 {
 	zend_opcache_static_cache_context *previous_context;
@@ -1327,6 +1303,30 @@ zend_result zend_opcache_static_cache_minit(void)
 	zend_opcache_static_cache_restore_context(previous_context);
 
 	return SUCCESS;
+}
+
+void zend_opcache_static_cache_mshutdown(void)
+{
+	zend_opcache_static_cache_context *previous_context;
+
+	zend_opcache_static_cache_unregister_hooks();
+	zend_opcache_static_cache_partition_shutdown_all();
+	zend_opcache_static_cache_active_partition = NULL;
+
+	previous_context = zend_opcache_static_cache_activate_context(zend_opcache_static_cache_active_volatile_context());
+	zend_opcache_static_cache_shutdown_storage();
+	zend_opcache_static_cache_reset_runtime();
+	zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_pinned_context_state);
+	zend_opcache_static_cache_shutdown_storage();
+	zend_opcache_static_cache_reset_runtime();
+	zend_opcache_static_cache_restore_context(previous_context);
+
+	zend_opcache_static_cache_subsystem_disabled = false;
+	zend_opcache_static_cache_subsystem_failure_reason = NULL;
+	zend_opcache_static_cache_active_partition = NULL;
+	zend_opcache_static_cache_safe_direct_handlers_destroy();
+	zend_opcache_static_cache_reset_class_entries();
+	zend_accel_register_static_cache_handlers(NULL);
 }
 
 void zend_opcache_static_cache_invalidate_all(void)
