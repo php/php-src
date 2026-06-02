@@ -281,8 +281,6 @@ PHP 8.6 UPGRADE NOTES
     constants).
 
 - Standard:
-  . explode() ValueError message when $separator is empty now suggests
-    str_split() or mb_str_split().
   . ini_get_all() now includes a "builtin_default_value" element for each
     directive when $details is true. It holds the built-in default value of
     the directive (or null if it has none), independent of values set in

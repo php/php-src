@@ -62,9 +62,9 @@ array (
   4 => 'd',
 )
 d6bee42a771449205344c0938ad4f035
-explode(): Argument #1 ($separator) must not be empty. Use str_split() or mb_str_split() to split a string into characters
-explode(): Argument #1 ($separator) must not be empty. Use str_split() or mb_str_split() to split a string into characters
-explode(): Argument #1 ($separator) must not be empty. Use str_split() or mb_str_split() to split a string into characters
+explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
 array(1) {
   [0]=>
   string(0) ""
@@ -79,7 +79,7 @@ array(1) {
   [0]=>
   string(0) ""
 }
-explode(): Argument #1 ($separator) must not be empty. Use str_split() or mb_str_split() to split a string into characters
+explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
 array(1) {
   [0]=>
   string(3) "acb"
