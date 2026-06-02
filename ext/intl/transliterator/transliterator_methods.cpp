@@ -47,7 +47,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 		return FAILURE;
 	}
 
-	object_init_ex( object, Transliterator_ce_ptr );
+	object_init_instantiable_class( object, Transliterator_ce_ptr );
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; /* fetch zend object from zval "object" into "to" */
 
 	/* Convert transliterator id to UTF-16 */
@@ -152,7 +152,7 @@ U_CFUNC PHP_FUNCTION( transliterator_create_from_rules )
 	}
 
 	object = return_value;
-	object_init_ex( object, Transliterator_ce_ptr );
+	object_init_instantiable_class( object, Transliterator_ce_ptr );
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	intl_convert_utf8_to_utf16( &ustr_rules, &ustr_rules_len,
@@ -208,7 +208,7 @@ U_CFUNC PHP_FUNCTION( transliterator_create_inverse )
 	to_orig = to;
 
 	object = return_value;
-	object_init_ex( object, Transliterator_ce_ptr );
+	object_init_instantiable_class( object, Transliterator_ce_ptr );
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; /* change "to" into new object (from "object" ) */
 
 	utrans = utrans_openInverse( to_orig->utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );

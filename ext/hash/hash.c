@@ -634,7 +634,7 @@ PHP_FUNCTION(hash_init)
 		}
 	}
 
-	object_init_ex(return_value, php_hashcontext_ce);
+	object_init_instantiable_class(return_value, php_hashcontext_ce);
 	hash = php_hashcontext_from_object(Z_OBJ_P(return_value));
 
 	context = php_hash_alloc_context(ops);

@@ -206,7 +206,7 @@ error:
 /* {{{ Create formatter. */
 U_CFUNC PHP_FUNCTION( datefmt_create )
 {
-    object_init_ex( return_value, IntlDateFormatter_ce_ptr );
+    object_init_instantiable_class( return_value, IntlDateFormatter_ce_ptr );
     if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();

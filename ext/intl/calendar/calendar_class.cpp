@@ -53,7 +53,7 @@ U_CFUNC	void calendar_object_create(zval *object,
 		ce = Calendar_ce_ptr;
 	}
 
-	object_init_ex(object, ce);
+	object_init_instantiable_class(object, ce);
 	calendar_object_construct(object, calendar);
 }
 

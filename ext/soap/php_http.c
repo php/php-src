@@ -557,7 +557,7 @@ try_again:
 			zval_ptr_dtor(url_zval);
 		}
 
-		object_init_ex(url_zval, soap_url_class_entry);
+		object_init_instantiable_class(url_zval, soap_url_class_entry);
 		soap_url_object *url_obj = Z_SOAP_URL_P(url_zval);
 		url_obj->uri = uri;
 

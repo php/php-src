@@ -2623,7 +2623,7 @@ static int php_openssl_capture_peer_certs(php_stream *stream,
 			"ssl", "capture_peer_cert")) &&
 		zend_is_true(val)
 	) {
-		object_init_ex(&zcert, php_openssl_certificate_ce);
+		object_init_instantiable_class(&zcert, php_openssl_certificate_ce);
 		cert_object = Z_OPENSSL_CERTIFICATE_P(&zcert);
 		cert_object->x509 = peer_cert;
 
@@ -2648,7 +2648,7 @@ static int php_openssl_capture_peer_certs(php_stream *stream,
 			for (i = 0; i < sk_X509_num(chain); i++) {
 				X509 *mycert = X509_dup(sk_X509_value(chain, i));
 
-				object_init_ex(&zcert, php_openssl_certificate_ce);
+				object_init_instantiable_class(&zcert, php_openssl_certificate_ce);
 				cert_object = Z_OPENSSL_CERTIFICATE_P(&zcert);
 				cert_object->x509 = mycert;
 				add_next_index_zval(&arr, &zcert);

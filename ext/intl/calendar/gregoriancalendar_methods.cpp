@@ -209,7 +209,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS, bool
 
 U_CFUNC PHP_FUNCTION(intlgregcal_create_instance)
 {
-	object_init_ex(return_value, GregorianCalendar_ce_ptr);
+	object_init_instantiable_class(return_value, GregorianCalendar_ce_ptr);
 	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* is_constructor */ false);
 }
 
@@ -254,7 +254,7 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDate)
 		goto cleanup;
 	}
 
-	object_init_ex(return_value, GregorianCalendar_ce_ptr);
+	object_init_instantiable_class(return_value, GregorianCalendar_ce_ptr);
 	co = Z_INTL_CALENDAR_P(return_value);
 	co->ucal = gcal.release();
 
@@ -303,7 +303,7 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDateTime)
 		goto cleanup;
 	}
 
-	object_init_ex(return_value, GregorianCalendar_ce_ptr);
+	object_init_instantiable_class(return_value, GregorianCalendar_ce_ptr);
 	co = Z_INTL_CALENDAR_P(return_value);
 	// TODO: trying to get passed the ownership change step
 	co->ucal = gcal.release();

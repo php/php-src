@@ -1511,7 +1511,7 @@ PHP_METHOD(SoapServer, handle)
 
 		/* If new session or something weird happned */
 		if (soap_obj == NULL) {
-			object_init_ex(&tmp_soap, service->soap_class.ce);
+			object_init_instantiable_class(&tmp_soap, service->soap_class.ce);
 
 			/* Call constructor */
 			if (service->soap_class.ce->constructor) {
@@ -2241,7 +2241,7 @@ PHP_METHOD(SoapClient, __construct)
 			zval_ptr_dtor(sdl_zval);
 		}
 
-		object_init_ex(sdl_zval, soap_sdl_class_entry);
+		object_init_instantiable_class(sdl_zval, soap_sdl_class_entry);
 		soap_sdl_object *sdl_object = Z_SOAP_SDL_P(sdl_zval);
 		sdl_object->sdl = sdl;
 
@@ -2990,7 +2990,7 @@ static void add_soap_fault_en(zval *obj, char *fault_code, char *fault_string, c
 static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fault_code, const char *fault_string, const char *fault_actor, zval *fault_detail, zend_string *name, zend_string *lang) /* {{{ */
 {
 	if (Z_TYPE_P(obj) != IS_OBJECT) {
-		object_init_ex(obj, soap_fault_class_entry);
+		object_init_instantiable_class(obj, soap_fault_class_entry);
 	}
 
 	ZVAL_STRING(Z_FAULT_STRING_P(obj), fault_string ? fault_string : "");

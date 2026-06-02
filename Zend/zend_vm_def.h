@@ -4697,7 +4697,7 @@ ZEND_VM_HANDLER(139, ZEND_GENERATOR_CREATE, ANY, ANY)
 		uint32_t num_args, used_stack, call_info;
 
 		SAVE_OPLINE();
-		object_init_ex(return_value, zend_ce_generator);
+		object_init_instantiable_class(return_value, zend_ce_generator);
 
 		/*
 		 * Normally the execute_data is allocated on the VM stack (because it does

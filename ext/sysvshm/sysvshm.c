@@ -169,7 +169,7 @@ PHP_FUNCTION(shm_attach)
 		chunk_ptr->free = shm_size-chunk_ptr->end;
 	}
 
-	object_init_ex(return_value, sysvshm_ce);
+	object_init_instantiable_class(return_value, sysvshm_ce);
 
 	shm_list_ptr = Z_SYSVSHM_P(return_value);
 

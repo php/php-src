@@ -168,7 +168,7 @@ PHP_FUNCTION(ftp_connect)
 	ftp->use_ssl = false;
 #endif
 
-	object_init_ex(return_value, php_ftp_ce);
+	object_init_instantiable_class(return_value, php_ftp_ce);
 	ftp_object_from_zend_object(Z_OBJ_P(return_value))->ftp = ftp;
 }
 /* }}} */
@@ -203,7 +203,7 @@ PHP_FUNCTION(ftp_ssl_connect)
 	/* enable ssl */
 	ftp->use_ssl = true;
 
-	object_init_ex(return_value, php_ftp_ce);
+	object_init_instantiable_class(return_value, php_ftp_ce);
 	ftp_object_from_zend_object(Z_OBJ_P(return_value))->ftp = ftp;
 }
 /* }}} */

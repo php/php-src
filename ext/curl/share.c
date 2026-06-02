@@ -34,7 +34,7 @@ PHP_FUNCTION(curl_share_init)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	object_init_ex(return_value, curl_share_ce);
+	object_init_instantiable_class(return_value, curl_share_ce);
 	sh = Z_CURL_SHARE_P(return_value);
 
 	sh->share = curl_share_init();
@@ -194,7 +194,7 @@ PHP_FUNCTION(curl_share_init_persistent)
 	} ZEND_HASH_FOREACH_END();
 
 	// We're now decently confident that we'll be returning a CurlSharePersistentHandle object, so we construct it here.
-	object_init_ex(return_value, curl_share_persistent_ce);
+	object_init_instantiable_class(return_value, curl_share_persistent_ce);
 
 	// Next we initialize a property field for the CurlSharePersistentHandle object with the enabled share options.
 	array_init(&share_opts_prop);

@@ -213,7 +213,7 @@ static zend_result php_tidy_apply_config(TidyDoc doc, const zend_string *str_str
 
 static void tidy_create_node_object(zval *zv, PHPTidyDoc *ptdoc, TidyNode node)
 {
-	object_init_ex(zv, tidy_ce_node);
+	object_init_instantiable_class(zv, tidy_ce_node);
 	PHPTidyObj *newobj = Z_TIDY_P(zv);
 	newobj->node = node;
 	newobj->type = is_node;
@@ -1016,7 +1016,7 @@ PHP_FUNCTION(tidy_parse_string)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(return_value, tidy_ce_doc);
+	object_init_instantiable_class(return_value, tidy_ce_doc);
 	obj = Z_TIDY_P(return_value);
 
 	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht, 2) != SUCCESS
@@ -1084,7 +1084,7 @@ PHP_FUNCTION(tidy_parse_file)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(return_value, tidy_ce_doc);
+	object_init_instantiable_class(return_value, tidy_ce_doc);
 	obj = Z_TIDY_P(return_value);
 
 	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht, 2) != SUCCESS

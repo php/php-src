@@ -1915,7 +1915,7 @@ static zend_fiber *gc_create_destructor_fiber(void)
 
 	GC_TRACE("starting destructor fiber");
 
-	if (UNEXPECTED(object_init_ex(&zobj, zend_ce_fiber) == FAILURE)) {
+	if (UNEXPECTED(object_init_instantiable_class(&zobj, zend_ce_fiber) == FAILURE)) {
 		gc_create_destructor_fiber_error();
 	}
 

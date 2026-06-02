@@ -64,7 +64,7 @@ PHP_FUNCTION(curl_multi_init)
 		zend_throw_error(NULL, "%s(): Could not initialize a new cURL multi handle", get_active_function_name());
 		RETURN_THROWS();
 	}
-	object_init_ex(return_value, curl_multi_ce);
+	object_init_instantiable_class(return_value, curl_multi_ce);
 	mh = Z_CURL_MULTI_P(return_value);
 	mh->multi = multi;
 

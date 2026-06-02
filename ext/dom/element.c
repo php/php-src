@@ -199,7 +199,7 @@ zend_result dom_element_class_list_read(dom_object *obj, zval *retval)
 {
 	zval *cached_token_list = dom_element_class_list_zval(obj);
 	if (Z_ISUNDEF_P(cached_token_list)) {
-		object_init_ex(cached_token_list, dom_token_list_class_entry);
+		object_init_instantiable_class(cached_token_list, dom_token_list_class_entry);
 		dom_token_list_object *intern = php_dom_token_list_from_obj(Z_OBJ_P(cached_token_list));
 		dom_token_list_ctor(intern, obj);
 	}
@@ -824,7 +824,7 @@ static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, z
 
 	DOM_GET_THIS_INTERN(intern);
 
-	object_init_ex(return_value, iter_ce);
+	object_init_instantiable_class(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
 	php_dom_create_obj_map(intern, namednode, NULL, name, NULL, &php_dom_obj_map_by_tag_name);
 }
@@ -856,7 +856,7 @@ PHP_METHOD(Dom_Element, getElementsByClassName)
 
 	DOM_GET_THIS_INTERN(intern);
 
-	object_init_ex(return_value, dom_html_collection_class_entry);
+	object_init_instantiable_class(return_value, dom_html_collection_class_entry);
 	namednode = Z_DOMOBJ_P(return_value);
 
 	HashTable *token_set;
@@ -1287,7 +1287,7 @@ static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS
 
 	DOM_GET_THIS_INTERN(intern);
 
-	object_init_ex(return_value, iter_ce);
+	object_init_instantiable_class(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
 	php_dom_create_obj_map(intern, namednode, NULL, name, uri, &php_dom_obj_map_by_tag_name);
 }
@@ -2080,7 +2080,7 @@ static void dom_element_get_in_scope_namespace_info(php_dom_libxml_ns_mapper *ns
 		}
 
 		zval zv;
-		object_init_ex(&zv, dom_namespace_info_class_entry);
+		object_init_instantiable_class(&zv, dom_namespace_info_class_entry);
 		zend_object *obj = Z_OBJ(zv);
 
 		if (ZSTR_LEN(prefix) != 0) {

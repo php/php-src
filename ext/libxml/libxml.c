@@ -1150,7 +1150,7 @@ PHP_FUNCTION(libxml_use_internal_errors)
 
 static void php_libxml_create_error_object(zval *return_value, const xmlError *error)
 {
-	object_init_ex(return_value, libxmlerror_class_entry);
+	object_init_instantiable_class(return_value, libxmlerror_class_entry);
 	add_property_long(return_value, "level", error->level);
 	add_property_long(return_value, "code", error->code);
 	add_property_long(return_value, "column", error->int2);

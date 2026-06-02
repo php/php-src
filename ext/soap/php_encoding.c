@@ -2907,7 +2907,7 @@ static zval *guess_zval_convert(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		char *ns;
 		xmlNsPtr nsptr;
 
-		object_init_ex(&soapvar, soap_var_class_entry);
+		object_init_instantiable_class(&soapvar, soap_var_class_entry);
 		ZVAL_LONG(Z_VAR_ENC_TYPE_P(&soapvar), enc->details.type);
 		ZVAL_COPY_VALUE(Z_VAR_ENC_VALUE_P(&soapvar), ret);
 		parse_namespace(type_name, &cptype, &ns);

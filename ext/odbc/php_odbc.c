@@ -861,7 +861,7 @@ PHP_FUNCTION(odbc_prepare)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	result->numparams = 0;
@@ -1240,7 +1240,7 @@ PHP_FUNCTION(odbc_exec)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
@@ -1884,7 +1884,7 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 	SQLRETURN ret;
 	odbc_link *link;
 
-	object_init_ex(zv, odbc_connection_ce);
+	object_init_instantiable_class(zv, odbc_connection_ce);
 	link = Z_ODBC_LINK_P(zv);
 	link->connection = pecalloc(1, sizeof(odbc_connection), persistent);
 	zend_hash_init(&link->connection->results, 0, NULL, ZVAL_PTR_DTOR, true);
@@ -2127,7 +2127,7 @@ try_and_get_another_connection:
 
 			zval *link_zval;
 			if ((link_zval = zend_hash_str_find(&ODBCG(connections), hashed_details, hashed_details_len)) == NULL) {
-				object_init_ex(return_value, odbc_connection_ce);
+				object_init_instantiable_class(return_value, odbc_connection_ce);
 				odbc_link *link = Z_ODBC_LINK_P(return_value);
 				link->connection = db_conn;
 				link->hash = zend_string_init(hashed_details, hashed_details_len, persistent);
@@ -2564,7 +2564,7 @@ PHP_FUNCTION(odbc_tables)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
@@ -2629,7 +2629,7 @@ PHP_FUNCTION(odbc_columns)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
@@ -2696,7 +2696,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
@@ -2768,7 +2768,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
@@ -2831,7 +2831,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
@@ -2886,7 +2886,7 @@ PHP_FUNCTION(odbc_primarykeys)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
@@ -2945,7 +2945,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
@@ -3004,7 +3004,7 @@ PHP_FUNCTION(odbc_procedures)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
@@ -3069,7 +3069,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
@@ -3135,7 +3135,7 @@ PHP_FUNCTION(odbc_statistics)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
@@ -3195,7 +3195,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 	odbc_connection *conn = Z_ODBC_CONNECTION_P(pv_conn);
 	CHECK_ODBC_CONNECTION(conn);
 
-	object_init_ex(return_value, odbc_result_ce);
+	object_init_instantiable_class(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));

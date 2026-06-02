@@ -251,7 +251,7 @@ PHP_FUNCTION(sem_get)
 		}
 	}
 
-	object_init_ex(return_value, sysvsem_ce);
+	object_init_instantiable_class(return_value, sysvsem_ce);
 
 	sem_ptr = Z_SYSVSEM_P(return_value);
 	sem_ptr->key   = key;

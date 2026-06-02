@@ -159,7 +159,7 @@ PHP_METHOD( ResourceBundle, __construct )
 /* {{{ */
 U_CFUNC PHP_FUNCTION( resourcebundle_create )
 {
-	object_init_ex( return_value, ResourceBundle_ce_ptr );
+	object_init_instantiable_class( return_value, ResourceBundle_ce_ptr );
 	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();

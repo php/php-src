@@ -66,7 +66,7 @@ PHP_METHOD(Random_Randomizer, __construct)
 		ZVAL_COPY(&engine, param_engine);
 	} else {
 		/* Create default RNG instance */
-		object_init_ex(&engine, random_ce_Random_Engine_Secure);
+		object_init_instantiable_class(&engine, random_ce_Random_Engine_Secure);
 	}
 
 	zend_update_property(random_ce_Random_Randomizer, Z_OBJ_P(ZEND_THIS), "engine", strlen("engine"), &engine);

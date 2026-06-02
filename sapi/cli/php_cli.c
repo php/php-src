@@ -1069,7 +1069,7 @@ do_repeat:
 					zend_call_known_function(
 						create_from_method, NULL, pce, &ref, 1, &arg, NULL);
 				} else {
-					object_init_ex(&ref, pce);
+					object_init_instantiable_class(&ref, pce);
 					zend_call_known_instance_method_with_1_params(
 						pce->constructor, Z_OBJ(ref), NULL, &arg);
 				}

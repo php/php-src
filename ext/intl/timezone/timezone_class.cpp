@@ -51,7 +51,7 @@ U_CFUNC void timezone_object_construct(const TimeZone *zone, zval *object, int o
 {
 	TimeZone_object	*to;
 
-	object_init_ex(object, TimeZone_ce_ptr);
+	object_init_instantiable_class(object, TimeZone_ce_ptr);
 	TIMEZONE_METHOD_FETCH_OBJECT_NO_CHECK; /* fetch zend object from zval "object" into "to" */
 	to->utimezone = zone;
 	to->should_delete = owned;
@@ -76,7 +76,7 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 	if (id.compare(0, 3, UnicodeString("GMT", sizeof("GMT")-1, US_INV)) == 0) {
 		/* The DateTimeZone constructor doesn't support offset time zones,
 		* so we must mess with DateTimeZone structure ourselves */
-		object_init_ex(ret, php_date_get_timezone_ce());
+		object_init_instantiable_class(ret, php_date_get_timezone_ce());
 		php_timezone_obj *tzobj = Z_PHPTIMEZONE_P(ret);
 
 		tzobj->initialized	  = true;

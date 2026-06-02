@@ -1467,7 +1467,7 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 			return;
 		}
 		if (S_ISSOCK(statbuf.st_mode)) {
-			object_init_ex(&elem, socket_ce);
+			object_init_instantiable_class(&elem, socket_ce);
 			php_socket *sock = Z_SOCKET_P(&elem);
 
 			if (!socket_import_file_descriptor(fd, sock)) {

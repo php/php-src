@@ -754,7 +754,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 
-		object_init_ex(return_value, pgsql_link_ce);
+		object_init_instantiable_class(return_value, pgsql_link_ce);
 		link = Z_PGSQL_LINK_P(return_value);
 		link->conn = pgsql;
 		link->hash = zend_string_copy(str.s);
@@ -805,7 +805,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 
-		object_init_ex(return_value, pgsql_link_ce);
+		object_init_instantiable_class(return_value, pgsql_link_ce);
 		link = Z_PGSQL_LINK_P(return_value);
 		link->conn = pgsql;
 		link->hash = zend_string_copy(str.s);
@@ -1207,7 +1207,7 @@ PHP_FUNCTION(pg_query)
 		case PGRES_COMMAND_OK: /* successful command that did not return rows */
 		default:
 			if (pgsql_result) {
-				object_init_ex(return_value, pgsql_result_ce);
+				object_init_instantiable_class(return_value, pgsql_result_ce);
 				pgsql_result_handle *pg_result = Z_PGSQL_RESULT_P(return_value);
 				pg_result->conn = pgsql;
 				pg_result->result = pgsql_result;
@@ -1345,7 +1345,7 @@ PHP_FUNCTION(pg_query_params)
 		case PGRES_COMMAND_OK: /* successful command that did not return rows */
 		default:
 			if (pgsql_result) {
-				object_init_ex(return_value, pgsql_result_ce);
+				object_init_instantiable_class(return_value, pgsql_result_ce);
 				pg_result = Z_PGSQL_RESULT_P(return_value);
 				pg_result->conn = pgsql;
 				pg_result->result = pgsql_result;
@@ -1430,7 +1430,7 @@ PHP_FUNCTION(pg_prepare)
 		case PGRES_COMMAND_OK: /* successful command that did not return rows */
 		default:
 			if (pgsql_result) {
-				object_init_ex(return_value, pgsql_result_ce);
+				object_init_instantiable_class(return_value, pgsql_result_ce);
 				pg_result = Z_PGSQL_RESULT_P(return_value);
 				pg_result->conn = pgsql;
 				pg_result->result = pgsql_result;
@@ -1528,7 +1528,7 @@ PHP_FUNCTION(pg_execute)
 		case PGRES_COMMAND_OK: /* successful command that did not return rows */
 		default:
 			if (pgsql_result) {
-				object_init_ex(return_value, pgsql_result_ce);
+				object_init_instantiable_class(return_value, pgsql_result_ce);
 				pg_result = Z_PGSQL_RESULT_P(return_value);
 				pg_result->conn = pgsql;
 				pg_result->result = pgsql_result;
@@ -2755,7 +2755,7 @@ PHP_FUNCTION(pg_lo_open)
 		}
 	}
 
-	object_init_ex(return_value, pgsql_lob_ce);
+	object_init_instantiable_class(return_value, pgsql_lob_ce);
 	pgsql_lofp = Z_PGSQL_LOB_P(return_value);
 	pgsql_lofp->conn = pgsql;
 	pgsql_lofp->lofd = pgsql_lofd;
@@ -4289,7 +4289,7 @@ PHP_FUNCTION(pg_get_result)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, pgsql_result_ce);
+	object_init_instantiable_class(return_value, pgsql_result_ce);
 	pg_result = Z_PGSQL_RESULT_P(return_value);
 	pg_result->conn = pgsql;
 	pg_result->result = pgsql_result;
@@ -5792,7 +5792,7 @@ PHP_FUNCTION(pg_insert)
 			case PGRES_COMMAND_OK: /* successful command that did not return rows */
 			default:
 				if (pg_result) {
-					object_init_ex(return_value, pgsql_result_ce);
+					object_init_instantiable_class(return_value, pgsql_result_ce);
 					pgsql_result_handle *pg_res = Z_PGSQL_RESULT_P(return_value);
 					pg_res->conn = pg_link;
 					pg_res->result = pg_result;
@@ -6419,7 +6419,7 @@ PHP_FUNCTION(pg_close_stmt)
 		RETURN_FALSE;
 	} else {
 		pgsql_result_handle *pg_handle;
-		object_init_ex(return_value, pgsql_result_ce);
+		object_init_instantiable_class(return_value, pgsql_result_ce);
 		pg_handle = Z_PGSQL_RESULT_P(return_value);
 		pg_handle->conn = link->conn;
 		pg_handle->result = pgsql_result;

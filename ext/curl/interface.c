@@ -1024,7 +1024,7 @@ php_curl *init_curl_handle_into_zval(zval *curl)
 {
 	php_curl *ch;
 
-	object_init_ex(curl, curl_ce);
+	object_init_instantiable_class(curl, curl_ce);
 	ch = Z_CURL_P(curl);
 
 	init_curl_handle(ch);

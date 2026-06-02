@@ -1761,7 +1761,7 @@ dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_ent
 }
 
 void php_dom_create_implementation(zval *retval, bool modern) {
-	object_init_ex(retval, dom_get_domimplementation_ce(modern));
+	object_init_instantiable_class(retval, dom_get_domimplementation_ce(modern));
 }
 
 /* {{{ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child) */

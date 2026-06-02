@@ -33,7 +33,7 @@ zend_result dom_parent_node_children_read(dom_object *obj, zval *retval)
 {
 	zval *cached_children = dom_parent_node_children(obj);
 	if (Z_ISUNDEF_P(cached_children)) {
-		object_init_ex(cached_children, dom_html_collection_class_entry);
+		object_init_instantiable_class(cached_children, dom_html_collection_class_entry);
 		php_dom_create_obj_map(obj, Z_DOMOBJ_P(cached_children), NULL, NULL, NULL, &php_dom_obj_map_child_elements);
 
 		/* Handle cycles for potential TMPVARs (could also be CV but we can't differentiate).

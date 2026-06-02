@@ -2809,7 +2809,7 @@ PHP_METHOD(AppendIterator, __construct)
 	}
 
 	intern->dit_type = DIT_AppendIterator;
-	object_init_ex(&intern->u.append.zarrayit, spl_ce_ArrayIterator);
+	object_init_instantiable_class(&intern->u.append.zarrayit, spl_ce_ArrayIterator);
 	zend_call_method_with_0_params(Z_OBJ(intern->u.append.zarrayit), spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL);
 	intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
 
