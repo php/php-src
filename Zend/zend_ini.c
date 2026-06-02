@@ -561,6 +561,11 @@ ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
 
 ZEND_API bool zend_ini_parse_bool(const zend_string *str)
 {
+	/* May happen if an unknown INI setting is queried via zend_ini_bool_literal(),
+	 * as zend_ini_str() would return NULL */
+	if (UNEXPECTED(str == NULL)) {
+		return false;
+	}
 	if (zend_string_equals_literal_ci(str, "true")
 			|| zend_string_equals_literal_ci(str, "yes")
 			|| zend_string_equals_literal_ci(str, "on")
