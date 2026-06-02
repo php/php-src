@@ -11395,13 +11395,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_CONS
 	}
 
 	result = EX_VAR(opline->result.var);
-	const zend_class_entry *scope = EX(func)->op_array.scope;
-	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
-		ZVAL_UNDEF(result);
-		HANDLE_EXCEPTION();
-	}
-
-	if (UNEXPECTED(object_init_instantiable_class(result, ce) != SUCCESS)) {
+	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}
@@ -30077,13 +30071,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_VAR_
 	}
 
 	result = EX_VAR(opline->result.var);
-	const zend_class_entry *scope = EX(func)->op_array.scope;
-	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
-		ZVAL_UNDEF(result);
-		HANDLE_EXCEPTION();
-	}
-
-	if (UNEXPECTED(object_init_instantiable_class(result, ce) != SUCCESS)) {
+	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}
@@ -37128,13 +37116,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_UNUS
 	}
 
 	result = EX_VAR(opline->result.var);
-	const zend_class_entry *scope = EX(func)->op_array.scope;
-	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
-		ZVAL_UNDEF(result);
-		HANDLE_EXCEPTION();
-	}
-
-	if (UNEXPECTED(object_init_instantiable_class(result, ce) != SUCCESS)) {
+	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}
@@ -63985,13 +63967,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_CONST_UNU
 	}
 
 	result = EX_VAR(opline->result.var);
-	const zend_class_entry *scope = EX(func)->op_array.scope;
-	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
-		ZVAL_UNDEF(result);
-		HANDLE_EXCEPTION();
-	}
-
-	if (UNEXPECTED(object_init_instantiable_class(result, ce) != SUCCESS)) {
+	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}
@@ -82567,13 +82543,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_VAR_UNUSE
 	}
 
 	result = EX_VAR(opline->result.var);
-	const zend_class_entry *scope = EX(func)->op_array.scope;
-	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
-		ZVAL_UNDEF(result);
-		HANDLE_EXCEPTION();
-	}
-
-	if (UNEXPECTED(object_init_instantiable_class(result, ce) != SUCCESS)) {
+	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}
@@ -89618,13 +89588,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_UNUSED_UN
 	}
 
 	result = EX_VAR(opline->result.var);
-	const zend_class_entry *scope = EX(func)->op_array.scope;
-	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
-		ZVAL_UNDEF(result);
-		HANDLE_EXCEPTION();
-	}
-
-	if (UNEXPECTED(object_init_instantiable_class(result, ce) != SUCCESS)) {
+	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}

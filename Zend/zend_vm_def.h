@@ -6002,13 +6002,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, UNUSED|CACHE_SLOT, N
 	}
 
 	result = EX_VAR(opline->result.var);
-	const zend_class_entry *scope = EX(func)->op_array.scope;
-	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(ce, scope))) {
-		ZVAL_UNDEF(result);
-		HANDLE_EXCEPTION();
-	}
-
-	if (UNEXPECTED(object_init_instantiable_class(result, ce) != SUCCESS)) {
+	if (UNEXPECTED(object_init_ex(result, ce) != SUCCESS)) {
 		ZVAL_UNDEF(result);
 		HANDLE_EXCEPTION();
 	}

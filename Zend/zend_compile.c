@@ -9531,6 +9531,8 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 
 static ZEND_FUNCTION(non_instantiable_constructor)
 {
+	ZEND_ASSERT(hasThis());
+	zend_cannot_instantiate_class(Z_OBJCE_P(ZEND_THIS), NULL);
 }
 
 static zend_arg_info zend_non_instantiable_constructor_arg_info[1] = {0};
