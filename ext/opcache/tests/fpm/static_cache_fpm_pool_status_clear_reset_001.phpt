@@ -41,19 +41,19 @@ $pinnedKey = 'fpm_pool_status_clear_reset_pinned_key';
 if ($action === 'seed') {
     $base = $pool === 'alpha' ? 100 : 200;
 
-    OPcache\volatile_store($volatileKey, $pool . '-volatile');
-    OPcache\pinned_store($pinnedKey, $pool . '-pinned');
+    OPcache\VolatileCache::set($volatileKey, $pool . '-volatile');
+    OPcache\PinnedCache::set($pinnedKey, $pool . '-pinned');
     FpmPoolStatusClearResetPinnedStatic::$value = $base + 1;
 } elseif ($action === 'volatile_clear') {
-    printf("volatile_clear=%d\n", OPcache\volatile_clear());
+    printf("volatile_clear=%d\n", OPcache\VolatileCache::clear());
 } elseif ($action === 'pinned_clear') {
-    printf("pinned_clear=%d\n", OPcache\pinned_clear());
+    printf("pinned_clear=%d\n", OPcache\PinnedCache::clear());
 } elseif ($action === 'reset') {
     printf("reset=%d\n", opcache_reset());
 }
 
-$volatileInfo = OPcache\volatile_cache_info();
-$pinnedInfo = OPcache\pinned_cache_info();
+$volatileInfo = OPcache\VolatileCache::info();
+$pinnedInfo = OPcache\PinnedCache::info();
 $status = opcache_get_status();
 $statusVolatile = $status['volatile_cache'];
 $statusPinned = $status['pinned_cache'];
@@ -61,8 +61,8 @@ $statusPinned = $status['pinned_cache'];
 printf(
     "%s:%s:%s:class=%d:info=%d/%d:status=%d/%d:eq=%d/%d\n",
     $pool,
-    OPcache\volatile_fetch($volatileKey, 'MISS'),
-    OPcache\pinned_fetch($pinnedKey, 'MISS'),
+    OPcache\VolatileCache::get($volatileKey, 'MISS'),
+    OPcache\PinnedCache::get($pinnedKey, 'MISS'),
     FpmPoolStatusClearResetPinnedStatic::$value,
     $volatileInfo->entry_count,
     $pinnedInfo->entry_count,

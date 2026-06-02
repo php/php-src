@@ -40,9 +40,9 @@ class SafeDirectSlotArrayObject extends ArrayObject
 function store_value(string $backend, string $key, mixed $value): void
 {
 	if ($backend === 'volatile') {
-		var_dump(OPcache\volatile_store($key, $value));
+		var_dump(OPcache\VolatileCache::set($key, $value));
 	} else {
-		OPcache\pinned_store($key, $value);
+		OPcache\PinnedCache::set($key, $value);
 		echo "pinned-stored\n";
 	}
 }
@@ -50,8 +50,8 @@ function store_value(string $backend, string $key, mixed $value): void
 function fetch_value(string $backend, string $key): mixed
 {
 	return $backend === 'volatile'
-		? OPcache\volatile_fetch($key)
-		: OPcache\pinned_fetch($key);
+		? OPcache\VolatileCache::get($key)
+		: OPcache\PinnedCache::get($key);
 }
 
 function run_safe_direct_slot_scenario(string $backend): void
@@ -102,8 +102,8 @@ function run_safe_direct_slot_scenario(string $backend): void
 	echo $backend, '-collection-clone-calls=', SafeDirectSlotArrayObject::$cloneCalls, "\n";
 }
 
-OPcache\volatile_clear();
-OPcache\pinned_clear();
+OPcache\VolatileCache::clear();
+OPcache\PinnedCache::clear();
 
 run_safe_direct_slot_scenario('volatile');
 run_safe_direct_slot_scenario('pinned');

@@ -59,11 +59,11 @@ PHP);
 
 file_put_contents($invalidator, <<<'PHP'
 <?php
-OPcache\volatile_store('pinned_static_invalidate_explicit', 'keep');
-OPcache\pinned_store('pinned_static_invalidate_pinned_explicit', 'keep-pinned');
+OPcache\VolatileCache::set('pinned_static_invalidate_explicit', 'keep');
+OPcache\PinnedCache::set('pinned_static_invalidate_pinned_explicit', 'keep-pinned');
 var_dump(opcache_invalidate(__DIR__ . '/pinned_static_invalidate_001_subject.php', true));
-echo OPcache\volatile_fetch('pinned_static_invalidate_explicit', 'missing-volatile'), "\n";
-echo OPcache\pinned_fetch('pinned_static_invalidate_pinned_explicit', 'missing-pinned'), "\n";
+echo OPcache\VolatileCache::get('pinned_static_invalidate_explicit', 'missing-volatile'), "\n";
+echo OPcache\PinnedCache::get('pinned_static_invalidate_pinned_explicit', 'missing-pinned'), "\n";
 PHP);
 
 $php = getenv('TEST_PHP_EXECUTABLE');

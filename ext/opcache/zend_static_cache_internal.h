@@ -61,7 +61,11 @@
 #define ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH 8
 
 #define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_MAGIC 0xCAC17E02U
-#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VERSION 1U
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VERSION 2U
+/* Header flag: the graph embeds at least one serialized object node, which is
+ * expensive to re-decode, so such a graph keeps the request-local prototype
+ * (decode once, clone many) instead of decoding from SHM on every fetch. */
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_FLAG_HAS_SERIALIZED_OBJECT 0x1U
 #define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_RETIRED (1 << 30)
 #define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_REFCOUNT_MASK (ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_RETIRED - 1)
 
@@ -294,6 +298,7 @@ typedef struct _zend_opcache_static_cache_shared_graph_header {
 	uint32_t version;
 	uint32_t root_offset;
 	uint32_t root_type;
+	uint32_t flags;
 	zend_atomic_int ref_state;
 } zend_opcache_static_cache_shared_graph_header;
 
@@ -364,6 +369,8 @@ typedef struct _zend_opcache_static_cache_shared_graph_copy_context {
 	size_t position;
 	HashTable seen_arrays;
 	HashTable seen_objects;
+	HashTable string_dedup;
+	bool has_serialized_object;
 } zend_opcache_static_cache_shared_graph_copy_context;
 
 extern zend_class_entry *zend_opcache_static_cache_exception_ce;
@@ -372,6 +379,7 @@ extern zend_class_entry *zend_opcache_static_cache_info_ce;
 extern zend_opcache_static_cache_context zend_opcache_static_cache_volatile_context_state;
 extern zend_opcache_static_cache_context zend_opcache_static_cache_pinned_context_state;
 extern bool zend_opcache_static_cache_subsystem_disabled;
+extern bool zend_opcache_static_cache_runtime_opted_in;
 extern const char *zend_opcache_static_cache_subsystem_failure_reason;
 extern zend_opcache_static_cache_partition *zend_opcache_static_cache_partitions;
 extern ZEND_EXT_TLS zend_opcache_static_cache_partition *zend_opcache_static_cache_active_partition;
@@ -464,6 +472,7 @@ bool zend_opcache_static_cache_shared_graph_copy_fits_buffer(
 		const unsigned char *target_buffer,
 		size_t target_buffer_len);
 bool zend_opcache_static_cache_fetch_shared_graph(const unsigned char *buffer, size_t buffer_len, zval *destination);
+bool zend_opcache_static_cache_shared_graph_requires_prototype(uint32_t payload_offset);
 bool zend_opcache_static_cache_shared_graph_can_overwrite_payload_locked(uint32_t payload_offset);
 bool zend_opcache_static_cache_shared_graph_can_move_payload_locked(uint32_t payload_offset);
 bool zend_opcache_static_cache_shared_graph_rebase_moved_payload_locked(uint32_t payload_offset, ptrdiff_t delta);
@@ -493,6 +502,7 @@ bool zend_opcache_static_cache_store_prepared_locked(
 bool zend_opcache_static_cache_store_locked(zend_string *key, zval *value, zend_long ttl, bool throw_on_failure, bool honor_strict_store_failure);
 bool zend_opcache_static_cache_fetch_locked(zend_string *key, zval *return_value, bool throw_if_missing, bool *found_ptr, bool use_request_local_slot);
 bool zend_opcache_static_cache_exists_locked(zend_string *key);
+bool zend_opcache_static_cache_value_type_locked(zend_string *key, uint8_t *value_type);
 bool zend_opcache_static_cache_delete_locked(zend_string *key);
 bool zend_opcache_static_cache_atomic_update_locked(
 	zend_string *key,

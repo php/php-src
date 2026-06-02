@@ -27,64 +27,31 @@ function dump_result(string $label, mixed $value): void
 	var_dump($value);
 }
 
-function dump_static_cache_exception(string $label, Closure $callback): void
-{
-	try {
-		$callback();
-		echo $label, ": no exception\n";
-	} catch (OPcache\StaticCacheException $exception) {
-		echo $label, ': ', get_class($exception), ': ', $exception->getMessage(), "\n";
-	}
-}
+dump_info('volatile', OPcache\VolatileCache::info());
+dump_info('pinned', OPcache\PinnedCache::info());
 
-dump_info('volatile', OPcache\volatile_cache_info());
-dump_info('pinned', OPcache\pinned_cache_info());
-
-dump_result('volatile_store', OPcache\volatile_store('key', 'value'));
-dump_result('volatile_store_array', OPcache\volatile_store_array(['array-key' => 'value']));
-dump_result('volatile_fetch', OPcache\volatile_fetch('key', 'default'));
-dump_result('volatile_fetch_array', OPcache\volatile_fetch_array(['key'], ['key' => 'default']));
-dump_result('volatile_exists', OPcache\volatile_exists('key'));
-dump_result('volatile_lock', OPcache\volatile_lock('key'));
-dump_result('volatile_unlock', OPcache\volatile_unlock('key'));
-dump_result('volatile_delete', OPcache\volatile_delete('key'));
-dump_result('volatile_delete_array', OPcache\volatile_delete_array(['key']));
-dump_result('volatile_clear', OPcache\volatile_clear());
-dump_result('pinned_store', OPcache\pinned_store('key', 'value'));
-dump_result('pinned_store_array', OPcache\pinned_store_array(['array-key' => 'value']));
-dump_result('pinned_fetch', OPcache\pinned_fetch('key', 'default'));
-dump_result('pinned_fetch_array', OPcache\pinned_fetch_array(['key'], ['key' => 'default']));
-dump_result('pinned_exists', OPcache\pinned_exists('key'));
-dump_result('pinned_lock', OPcache\pinned_lock('key'));
-dump_result('pinned_unlock', OPcache\pinned_unlock('key'));
-dump_result('pinned_delete', OPcache\pinned_delete('key'));
-dump_result('pinned_delete_array', OPcache\pinned_delete_array(['key']));
-dump_result('pinned_clear', OPcache\pinned_clear());
-dump_result('pinned_atomic_increment', OPcache\pinned_atomic_increment('key'));
-dump_result('pinned_atomic_decrement', OPcache\pinned_atomic_decrement('key'));
-
-dump_static_cache_exception('volatile_store_throw', static fn () => OPcache\volatile_store('key', 'value', 0, true));
-dump_static_cache_exception('volatile_store_array_throw', static fn () => OPcache\volatile_store_array(['array-key' => 'value'], 0, true));
-dump_static_cache_exception('volatile_fetch_throw', static fn () => OPcache\volatile_fetch('key', 'default', true));
-dump_static_cache_exception('volatile_fetch_array_throw', static fn () => OPcache\volatile_fetch_array(['key'], ['key' => 'default'], true));
-dump_static_cache_exception('volatile_exists_throw', static fn () => OPcache\volatile_exists('key', true));
-dump_static_cache_exception('volatile_lock_throw', static fn () => OPcache\volatile_lock('key', 0, true));
-dump_static_cache_exception('volatile_unlock_throw', static fn () => OPcache\volatile_unlock('key', true));
-dump_static_cache_exception('volatile_delete_throw', static fn () => OPcache\volatile_delete('key', true));
-dump_static_cache_exception('volatile_delete_array_throw', static fn () => OPcache\volatile_delete_array(['key'], true));
-dump_static_cache_exception('volatile_clear_throw', static fn () => OPcache\volatile_clear(true));
-dump_static_cache_exception('pinned_store_throw', static fn () => OPcache\pinned_store('key', 'value', true));
-dump_static_cache_exception('pinned_store_array_throw', static fn () => OPcache\pinned_store_array(['array-key' => 'value'], true));
-dump_static_cache_exception('pinned_fetch_throw', static fn () => OPcache\pinned_fetch('key', 'default', true));
-dump_static_cache_exception('pinned_fetch_array_throw', static fn () => OPcache\pinned_fetch_array(['key'], ['key' => 'default'], true));
-dump_static_cache_exception('pinned_exists_throw', static fn () => OPcache\pinned_exists('key', true));
-dump_static_cache_exception('pinned_lock_throw', static fn () => OPcache\pinned_lock('key', 0, true));
-dump_static_cache_exception('pinned_unlock_throw', static fn () => OPcache\pinned_unlock('key', true));
-dump_static_cache_exception('pinned_delete_throw', static fn () => OPcache\pinned_delete('key', true));
-dump_static_cache_exception('pinned_delete_array_throw', static fn () => OPcache\pinned_delete_array(['key'], true));
-dump_static_cache_exception('pinned_clear_throw', static fn () => OPcache\pinned_clear(true));
-dump_static_cache_exception('pinned_atomic_increment_throw', static fn () => OPcache\pinned_atomic_increment('key', 1, true));
-dump_static_cache_exception('pinned_atomic_decrement_throw', static fn () => OPcache\pinned_atomic_decrement('key', 1, true));
+dump_result('VolatileCache::set', OPcache\VolatileCache::set('key', 'value'));
+dump_result('VolatileCache::setMultiple', OPcache\VolatileCache::setMultiple(['array-key' => 'value']));
+dump_result('VolatileCache::get', OPcache\VolatileCache::get('key', 'default'));
+dump_result('VolatileCache::getMultiple', OPcache\VolatileCache::getMultiple(['key'], ['key' => 'default']));
+dump_result('VolatileCache::has', OPcache\VolatileCache::has('key'));
+dump_result('VolatileCache::lock', OPcache\VolatileCache::lock('key'));
+dump_result('VolatileCache::unlock', OPcache\VolatileCache::unlock('key'));
+dump_result('VolatileCache::delete', OPcache\VolatileCache::delete('key'));
+dump_result('VolatileCache::deleteMultiple', OPcache\VolatileCache::deleteMultiple(['key']));
+dump_result('VolatileCache::clear', OPcache\VolatileCache::clear());
+dump_result('PinnedCache::set', OPcache\PinnedCache::set('key', 'value'));
+dump_result('PinnedCache::setMultiple', OPcache\PinnedCache::setMultiple(['array-key' => 'value']));
+dump_result('PinnedCache::get', OPcache\PinnedCache::get('key', 'default'));
+dump_result('PinnedCache::getMultiple', OPcache\PinnedCache::getMultiple(['key'], ['key' => 'default']));
+dump_result('PinnedCache::has', OPcache\PinnedCache::has('key'));
+dump_result('PinnedCache::lock', OPcache\PinnedCache::lock('key'));
+dump_result('PinnedCache::unlock', OPcache\PinnedCache::unlock('key'));
+dump_result('PinnedCache::delete', OPcache\PinnedCache::delete('key'));
+dump_result('PinnedCache::deleteMultiple', OPcache\PinnedCache::deleteMultiple(['key']));
+dump_result('PinnedCache::clear', OPcache\PinnedCache::clear());
+dump_result('PinnedCache::increment', OPcache\PinnedCache::increment('key'));
+dump_result('PinnedCache::decrement', OPcache\PinnedCache::decrement('key'));
 
 ?>
 --EXPECT--
@@ -102,47 +69,25 @@ bool(false)
 bool(false)
 int(0)
 NULL
-volatile_store: bool(false)
-volatile_store_array: bool(false)
-volatile_fetch: bool(false)
-volatile_fetch_array: bool(false)
-volatile_exists: bool(false)
-volatile_lock: bool(false)
-volatile_unlock: bool(false)
-volatile_delete: bool(false)
-volatile_delete_array: bool(false)
-volatile_clear: bool(false)
-pinned_store: bool(false)
-pinned_store_array: bool(false)
-pinned_fetch: bool(false)
-pinned_fetch_array: bool(false)
-pinned_exists: bool(false)
-pinned_lock: bool(false)
-pinned_unlock: bool(false)
-pinned_delete: bool(false)
-pinned_delete_array: bool(false)
-pinned_clear: bool(false)
-pinned_atomic_increment: bool(false)
-pinned_atomic_decrement: bool(false)
-volatile_store_throw: OPcache\StaticCacheException: OPcache volatile cache is disabled
-volatile_store_array_throw: OPcache\StaticCacheException: OPcache volatile cache is disabled
-volatile_fetch_throw: OPcache\StaticCacheException: OPcache volatile cache is disabled
-volatile_fetch_array_throw: OPcache\StaticCacheException: OPcache volatile cache is disabled
-volatile_exists_throw: OPcache\StaticCacheException: OPcache volatile cache is disabled
-volatile_lock_throw: OPcache\StaticCacheException: OPcache volatile cache is disabled
-volatile_unlock_throw: OPcache\StaticCacheException: OPcache volatile cache is disabled
-volatile_delete_throw: OPcache\StaticCacheException: OPcache volatile cache is disabled
-volatile_delete_array_throw: OPcache\StaticCacheException: OPcache volatile cache is disabled
-volatile_clear_throw: OPcache\StaticCacheException: OPcache volatile cache is disabled
-pinned_store_throw: OPcache\StaticCacheException: OPcache pinned cache is disabled
-pinned_store_array_throw: OPcache\StaticCacheException: OPcache pinned cache is disabled
-pinned_fetch_throw: OPcache\StaticCacheException: OPcache pinned cache is disabled
-pinned_fetch_array_throw: OPcache\StaticCacheException: OPcache pinned cache is disabled
-pinned_exists_throw: OPcache\StaticCacheException: OPcache pinned cache is disabled
-pinned_lock_throw: OPcache\StaticCacheException: OPcache pinned cache is disabled
-pinned_unlock_throw: OPcache\StaticCacheException: OPcache pinned cache is disabled
-pinned_delete_throw: OPcache\StaticCacheException: OPcache pinned cache is disabled
-pinned_delete_array_throw: OPcache\StaticCacheException: OPcache pinned cache is disabled
-pinned_clear_throw: OPcache\StaticCacheException: OPcache pinned cache is disabled
-pinned_atomic_increment_throw: OPcache\StaticCacheException: OPcache pinned cache is disabled
-pinned_atomic_decrement_throw: OPcache\StaticCacheException: OPcache pinned cache is disabled
+VolatileCache::set: bool(false)
+VolatileCache::setMultiple: bool(false)
+VolatileCache::get: bool(false)
+VolatileCache::getMultiple: bool(false)
+VolatileCache::has: bool(false)
+VolatileCache::lock: bool(false)
+VolatileCache::unlock: bool(false)
+VolatileCache::delete: bool(false)
+VolatileCache::deleteMultiple: bool(false)
+VolatileCache::clear: bool(false)
+PinnedCache::set: bool(false)
+PinnedCache::setMultiple: bool(false)
+PinnedCache::get: bool(false)
+PinnedCache::getMultiple: bool(false)
+PinnedCache::has: bool(false)
+PinnedCache::lock: bool(false)
+PinnedCache::unlock: bool(false)
+PinnedCache::delete: bool(false)
+PinnedCache::deleteMultiple: bool(false)
+PinnedCache::clear: bool(false)
+PinnedCache::increment: bool(false)
+PinnedCache::decrement: bool(false)

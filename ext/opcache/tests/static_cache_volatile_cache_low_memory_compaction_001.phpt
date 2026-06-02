@@ -26,24 +26,24 @@ function build_low_memory_graph(): array
     ];
 }
 
-OPcache\volatile_clear();
+OPcache\VolatileCache::clear();
 
-var_dump(OPcache\volatile_store('low_memory_first', str_repeat('A', 1500000)));
-var_dump(OPcache\volatile_store('low_memory_graph', build_low_memory_graph()));
-var_dump(OPcache\volatile_store('low_memory_third', str_repeat('C', 1500000)));
+var_dump(OPcache\VolatileCache::set('low_memory_first', str_repeat('A', 1500000)));
+var_dump(OPcache\VolatileCache::set('low_memory_graph', build_low_memory_graph()));
+var_dump(OPcache\VolatileCache::set('low_memory_third', str_repeat('C', 1500000)));
 
-OPcache\volatile_delete('low_memory_first');
+OPcache\VolatileCache::delete('low_memory_first');
 
-var_dump(OPcache\volatile_store('low_memory_trigger', str_repeat('T', 1700000)));
-$graph = OPcache\volatile_fetch('low_memory_graph');
-OPcache\volatile_delete('low_memory_trigger');
+var_dump(OPcache\VolatileCache::set('low_memory_trigger', str_repeat('T', 1700000)));
+$graph = OPcache\VolatileCache::get('low_memory_graph');
+OPcache\VolatileCache::delete('low_memory_trigger');
 
-var_dump(OPcache\volatile_store('low_memory_merged', str_repeat('M', 3200000)));
+var_dump(OPcache\VolatileCache::set('low_memory_merged', str_repeat('M', 3200000)));
 var_dump($graph['rows'][123][1]);
 var_dump($graph['rows'][123][2][1]);
 var_dump($graph['meta']['kind']);
-var_dump(strlen(OPcache\volatile_fetch('low_memory_merged')));
-var_dump(strlen(OPcache\volatile_fetch('low_memory_third')));
+var_dump(strlen(OPcache\VolatileCache::get('low_memory_merged')));
+var_dump(strlen(OPcache\VolatileCache::get('low_memory_third')));
 
 ?>
 --EXPECT--

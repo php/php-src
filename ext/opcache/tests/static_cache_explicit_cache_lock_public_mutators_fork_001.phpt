@@ -40,59 +40,59 @@ function result_to_string(mixed $value): string
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\volatile_clear();
+		OPcache\VolatileCache::clear();
 	} else {
-		OPcache\pinned_clear();
+		OPcache\PinnedCache::clear();
 	}
 }
 
 function cache_store(string $backend, string $key, mixed $value): mixed
 {
 	if ($backend === 'volatile') {
-		return OPcache\volatile_store($key, $value);
+		return OPcache\VolatileCache::set($key, $value);
 	}
 
-	return OPcache\pinned_store($key, $value);
+	return OPcache\PinnedCache::set($key, $value);
 }
 
 function cache_store_array(string $backend, array $values): mixed
 {
 	if ($backend === 'volatile') {
-		return OPcache\volatile_store_array($values);
+		return OPcache\VolatileCache::setMultiple($values);
 	}
 
-	return OPcache\pinned_store_array($values);
+	return OPcache\PinnedCache::setMultiple($values);
 }
 
 function cache_fetch(string $backend, string $key, mixed $default = null): mixed
 {
 	return $backend === 'volatile'
-		? OPcache\volatile_fetch($key, $default)
-		: OPcache\pinned_fetch($key, $default);
+		? OPcache\VolatileCache::get($key, $default)
+		: OPcache\PinnedCache::get($key, $default);
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\volatile_lock($key)
-		: OPcache\pinned_lock($key);
+		? OPcache\VolatileCache::lock($key)
+		: OPcache\PinnedCache::lock($key);
 }
 
 function cache_delete(string $backend, string $key): void
 {
 	if ($backend === 'volatile') {
-		OPcache\volatile_delete($key);
+		OPcache\VolatileCache::delete($key);
 	} else {
-		OPcache\pinned_delete($key);
+		OPcache\PinnedCache::delete($key);
 	}
 }
 
 function cache_delete_array(string $backend, array $keys): void
 {
 	if ($backend === 'volatile') {
-		OPcache\volatile_delete_array($keys);
+		OPcache\VolatileCache::deleteMultiple($keys);
 	} else {
-		OPcache\pinned_delete_array($keys);
+		OPcache\PinnedCache::deleteMultiple($keys);
 	}
 }
 
@@ -193,7 +193,7 @@ function run_backend_mutators(string $backend): void
 		run_blocked_mutator(
 			$backend,
 			'atomic',
-			static fn () => OPcache\pinned_atomic_increment($key, 2),
+			static fn () => OPcache\PinnedCache::increment($key, 2),
 			static fn () => cache_store($backend, $key, 10),
 			static fn () => print 'atomic value: ' . cache_fetch($backend, $key, 'MISS') . "\n",
 		);
@@ -203,7 +203,7 @@ function run_backend_mutators(string $backend): void
 		run_blocked_mutator(
 			$backend,
 			'atomic_decrement',
-			static fn () => OPcache\pinned_atomic_decrement($key, 3),
+			static fn () => OPcache\PinnedCache::decrement($key, 3),
 			static fn () => cache_store($backend, $key, 10),
 			static fn () => print 'atomic_decrement value: ' . cache_fetch($backend, $key, 'MISS') . "\n",
 		);

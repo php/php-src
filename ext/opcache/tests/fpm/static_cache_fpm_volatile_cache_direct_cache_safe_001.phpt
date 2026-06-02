@@ -129,25 +129,25 @@ class WakefulSerializedDateTime extends DateTime
 $action = $_GET['action'] ?? 'seed';
 
 if ($action === 'seed') {
-	OPcache\volatile_clear();
+	OPcache\VolatileCache::clear();
 
 	$event = new EventDateTime('2026-06-15 09:30:00.123456', new DateTimeZone('Europe/Paris'), 'launch', 7);
 	$collection = new TaggedCollection(['alpha' => 10, 'beta' => 20], 'metric', LabelIterator::class);
 	$fallback = new CustomSerializedDateTime('2026-06-15 10:45:00.654321', new DateTimeZone('UTC'), 'fallback');
 	$wakeful = new WakefulSerializedDateTime('2026-06-15 12:15:00.987654', new DateTimeZone('UTC'), 'fallback');
 
-	var_dump(OPcache\volatile_store('safe_direct_event_datetime', $event));
-	var_dump(OPcache\volatile_store('safe_direct_tagged_collection', $collection));
-	var_dump(OPcache\volatile_store('safe_direct_custom_datetime', $fallback));
-	var_dump(OPcache\volatile_store('safe_direct_wakeful_datetime', $wakeful));
+	var_dump(OPcache\VolatileCache::set('safe_direct_event_datetime', $event));
+	var_dump(OPcache\VolatileCache::set('safe_direct_tagged_collection', $collection));
+	var_dump(OPcache\VolatileCache::set('safe_direct_custom_datetime', $fallback));
+	var_dump(OPcache\VolatileCache::set('safe_direct_wakeful_datetime', $wakeful));
 	echo "seed\n";
 	return;
 }
 
-$event = OPcache\volatile_fetch('safe_direct_event_datetime');
-$collection = OPcache\volatile_fetch('safe_direct_tagged_collection');
-$fallback = OPcache\volatile_fetch('safe_direct_custom_datetime');
-$wakeful = OPcache\volatile_fetch('safe_direct_wakeful_datetime');
+$event = OPcache\VolatileCache::get('safe_direct_event_datetime');
+$collection = OPcache\VolatileCache::get('safe_direct_tagged_collection');
+$fallback = OPcache\VolatileCache::get('safe_direct_custom_datetime');
+$wakeful = OPcache\VolatileCache::get('safe_direct_wakeful_datetime');
 $iterator = $collection->getIterator();
 
 echo $event->format('Y-m-d H:i:s.u e'), ',', $event->describe(), "\n";

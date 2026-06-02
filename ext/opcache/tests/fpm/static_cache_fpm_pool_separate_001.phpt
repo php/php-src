@@ -62,8 +62,8 @@ $pinnedKey = 'fpm_pool_separate_pinned_key';
 if ($action === 'seed') {
     $base = $pool === 'alpha' ? 100 : 200;
 
-    OPcache\volatile_store($volatileKey, $pool . '-volatile');
-    OPcache\pinned_store($pinnedKey, $pool . '-pinned');
+    OPcache\VolatileCache::set($volatileKey, $pool . '-volatile');
+    OPcache\PinnedCache::set($pinnedKey, $pool . '-pinned');
     FpmPoolSeparatePinnedStatic::$value = $base + 1;
     FpmPoolSeparatePinnedProperty::$value = $base + 2;
     FpmPoolSeparatePinnedMethod::value($base + 3);
@@ -72,8 +72,8 @@ if ($action === 'seed') {
 printf(
     "%s:%s:%s:%d:%d:%d\n",
     $pool,
-    OPcache\volatile_fetch($volatileKey, 'MISS'),
-    OPcache\pinned_fetch($pinnedKey, 'MISS'),
+    OPcache\VolatileCache::get($volatileKey, 'MISS'),
+    OPcache\PinnedCache::get($pinnedKey, 'MISS'),
     FpmPoolSeparatePinnedStatic::$value,
     FpmPoolSeparatePinnedProperty::$value,
     FpmPoolSeparatePinnedMethod::value()

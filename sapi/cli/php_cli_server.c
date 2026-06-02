@@ -67,6 +67,8 @@
 #include "fopen_wrappers.h"
 #include "http_status_codes.h"
 
+#include "ext/opcache/zend_static_cache.h" /* for OPcache Static Cache opt-in */
+
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
@@ -499,6 +501,11 @@ const zend_function_entry server_additional_functions[] = {
 
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
+	/* The built-in web server runs one trusted application per process and owns
+	 * the Static Cache trust boundary for the runtime, so it opts in before
+	 * module startup, while OPcache initializes. */
+	zend_opcache_static_cache_opt_in();
+
 	return php_module_startup(sapi_module_ptr, &cli_server_module_entry);
 } /* }}} */
 

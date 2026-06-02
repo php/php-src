@@ -10,12 +10,12 @@ opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
-OPcache\volatile_clear();
-OPcache\pinned_clear();
+OPcache\VolatileCache::clear();
+OPcache\PinnedCache::clear();
 
 foreach ([
-	'volatile' => ['OPcache\\volatile_store_array', 'OPcache\\volatile_fetch'],
-	'pinned' => ['OPcache\\pinned_store_array', 'OPcache\\pinned_fetch'],
+	'volatile' => ['OPcache\\VolatileCache::setMultiple', 'OPcache\\VolatileCache::get'],
+	'pinned' => ['OPcache\\PinnedCache::setMultiple', 'OPcache\\PinnedCache::get'],
 ] as $label => [$storeArray, $fetch]) {
 	$key = $label . '_first';
 
@@ -33,7 +33,7 @@ foreach ([
 
 ?>
 --EXPECT--
-volatile: OPcache\volatile_store_array(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
+volatile: OPcache\VolatileCache::setMultiple(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
 string(7) "missing"
-pinned: OPcache\pinned_store_array(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
+pinned: OPcache\PinnedCache::setMultiple(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
 string(7) "missing"

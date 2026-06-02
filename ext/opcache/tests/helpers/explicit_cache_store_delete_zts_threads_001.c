@@ -58,40 +58,40 @@ static const char opcache_test_ini[] =
 
 static const char init_code[] =
 	"(static function (): bool {"
-	"    OPcache\\volatile_clear();"
-	"    OPcache\\pinned_clear();"
+	"    OPcache\\VolatileCache::clear();"
+	"    OPcache\\PinnedCache::clear();"
 	"    return true;"
 	"})()";
 
 static const char seed_code[] =
 	"(static function (): bool {"
-	"    if (!OPcache\\volatile_store('zts_v_first', str_repeat('A', 1800000))) return false;"
-	"    if (!OPcache\\volatile_store('zts_v_second', str_repeat('B', 1800000))) return false;"
-	"    if (!OPcache\\volatile_store('zts_v_third', str_repeat('C', 1800000))) return false;"
-	"    OPcache\\pinned_store('zts_p_first', str_repeat('A', 1800000));"
-	"    OPcache\\pinned_store('zts_p_second', str_repeat('B', 1800000));"
-	"    OPcache\\pinned_store('zts_p_third', str_repeat('C', 1800000));"
+	"    if (!OPcache\\VolatileCache::set('zts_v_first', str_repeat('A', 1800000))) return false;"
+	"    if (!OPcache\\VolatileCache::set('zts_v_second', str_repeat('B', 1800000))) return false;"
+	"    if (!OPcache\\VolatileCache::set('zts_v_third', str_repeat('C', 1800000))) return false;"
+	"    OPcache\\PinnedCache::set('zts_p_first', str_repeat('A', 1800000));"
+	"    OPcache\\PinnedCache::set('zts_p_second', str_repeat('B', 1800000));"
+	"    OPcache\\PinnedCache::set('zts_p_third', str_repeat('C', 1800000));"
 	"    return true;"
 	"})()";
 
 static const char delete_code[] =
 	"(static function (): bool {"
-	"    OPcache\\volatile_delete('zts_v_second');"
-	"    OPcache\\pinned_delete('zts_p_second');"
-	"    return OPcache\\volatile_fetch('zts_v_second', 'missing') === 'missing'"
-	"        && OPcache\\pinned_fetch('zts_p_second', 'missing') === 'missing';"
+	"    OPcache\\VolatileCache::delete('zts_v_second');"
+	"    OPcache\\PinnedCache::delete('zts_p_second');"
+	"    return OPcache\\VolatileCache::get('zts_v_second', 'missing') === 'missing'"
+	"        && OPcache\\PinnedCache::get('zts_p_second', 'missing') === 'missing';"
 	"})()";
 
 static const char refill_code[] =
 	"(static function (): bool {"
-	"    if (!OPcache\\volatile_store('zts_v_replacement', str_repeat('R', 1500000))) return false;"
-	"    OPcache\\pinned_store('zts_p_replacement', str_repeat('R', 1500000));"
-	"    return strlen(OPcache\\volatile_fetch('zts_v_first')) === 1800000"
-	"        && strlen(OPcache\\volatile_fetch('zts_v_third')) === 1800000"
-	"        && strlen(OPcache\\volatile_fetch('zts_v_replacement')) === 1500000"
-	"        && strlen(OPcache\\pinned_fetch('zts_p_first')) === 1800000"
-	"        && strlen(OPcache\\pinned_fetch('zts_p_third')) === 1800000"
-	"        && strlen(OPcache\\pinned_fetch('zts_p_replacement')) === 1500000;"
+	"    if (!OPcache\\VolatileCache::set('zts_v_replacement', str_repeat('R', 1500000))) return false;"
+	"    OPcache\\PinnedCache::set('zts_p_replacement', str_repeat('R', 1500000));"
+	"    return strlen(OPcache\\VolatileCache::get('zts_v_first')) === 1800000"
+	"        && strlen(OPcache\\VolatileCache::get('zts_v_third')) === 1800000"
+	"        && strlen(OPcache\\VolatileCache::get('zts_v_replacement')) === 1500000"
+	"        && strlen(OPcache\\PinnedCache::get('zts_p_first')) === 1800000"
+	"        && strlen(OPcache\\PinnedCache::get('zts_p_third')) === 1800000"
+	"        && strlen(OPcache\\PinnedCache::get('zts_p_replacement')) === 1500000;"
 	"})()";
 
 static void zend_opcache_thread_set_failure(zend_opcache_thread_ctx *ctx, const char *message)
@@ -109,6 +109,9 @@ static int zend_opcache_test_startup(int argc, char **argv)
 
 	zend_signal_startup();
 	sapi_startup(&php_embed_module);
+	/* Static Cache is opt-in per SAPI; this embed-based test enables it. */
+	extern void zend_opcache_static_cache_opt_in(void);
+	zend_opcache_static_cache_opt_in();
 	php_embed_module.ini_entries = opcache_test_ini;
 	if (argv != NULL) {
 		php_embed_module.executable_location = argv[0];

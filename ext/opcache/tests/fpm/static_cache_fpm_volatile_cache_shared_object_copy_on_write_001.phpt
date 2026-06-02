@@ -47,14 +47,14 @@ function build_rows(): array
 $action = $_GET['action'] ?? 'seed';
 
 if ($action === 'seed') {
-	OPcache\volatile_clear();
-	var_dump(OPcache\volatile_store('materialization_plain_payload', new LargePayload(build_rows(), 'plain')));
+	OPcache\VolatileCache::clear();
+	var_dump(OPcache\VolatileCache::set('materialization_plain_payload', new LargePayload(build_rows(), 'plain')));
 	echo "seed\n";
 	return;
 }
 
 $before = memory_get_usage();
-$fetched = OPcache\volatile_fetch('materialization_plain_payload');
+$fetched = OPcache\VolatileCache::get('materialization_plain_payload');
 $readOnly = $fetched->rows[100]['text'];
 $afterFetch = memory_get_usage();
 $fetched->rows[100]['text'] = 'changed';

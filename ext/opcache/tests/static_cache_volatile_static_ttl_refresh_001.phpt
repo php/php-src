@@ -24,7 +24,7 @@ class VolatileStaticTtlRefreshTracking
 $action = $_GET['action'] ?? 'step';
 
 if ($action === 'reset') {
-	OPcache\volatile_clear();
+	OPcache\VolatileCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;

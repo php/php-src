@@ -1,5 +1,5 @@
 --TEST--
-OPcache pinned_store, pinned_fetch, and pinned_exists public API
+OPcache PinnedCache::set, PinnedCache::get, and PinnedCache::has public API
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -12,18 +12,18 @@ file_put_contents(__DIR__ . '/pinned_cache_api_001.php', <<<'PHP'
 
 $action = $_GET['action'] ?? 'write';
 if ($action === 'write') {
-	OPcache\pinned_store('shared', ['v' => 1]);
-	var_dump(OPcache\pinned_exists('shared'));
+	OPcache\PinnedCache::set('shared', ['v' => 1]);
+	var_dump(OPcache\PinnedCache::has('shared'));
 	return;
 }
 
-var_dump(OPcache\pinned_exists('shared'));
-var_dump(OPcache\pinned_fetch('shared', 'fallback'));
-var_dump(OPcache\pinned_fetch('missing'));
-var_dump(OPcache\pinned_fetch('missing', 'fallback'));
+var_dump(OPcache\PinnedCache::has('shared'));
+var_dump(OPcache\PinnedCache::get('shared', 'fallback'));
+var_dump(OPcache\PinnedCache::get('missing'));
+var_dump(OPcache\PinnedCache::get('missing', 'fallback'));
 
-OPcache\pinned_store('null', null);
-var_dump(OPcache\pinned_fetch('null', 'fallback'));
+OPcache\PinnedCache::set('null', null);
+var_dump(OPcache\PinnedCache::get('null', 'fallback'));
 PHP);
 
 $php = getenv('TEST_PHP_EXECUTABLE');

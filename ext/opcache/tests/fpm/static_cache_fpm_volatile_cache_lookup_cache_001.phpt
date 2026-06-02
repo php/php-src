@@ -22,40 +22,40 @@ $code = <<<'PHP'
 <?php
 function fetch_or_miss(string $key): string
 {
-	return OPcache\volatile_fetch($key, 'MISS');
+	return OPcache\VolatileCache::get($key, 'MISS');
 }
 
 $scenario = $_GET['scenario'] ?? 'hit_store';
 $key = 'fpm_lookup_cache_' . $scenario . '_key';
-OPcache\volatile_clear();
+OPcache\VolatileCache::clear();
 
 if ($scenario === 'hit_store') {
-	OPcache\volatile_store($key, 'old');
+	OPcache\VolatileCache::set($key, 'old');
 	$first = fetch_or_miss($key);
-	OPcache\volatile_store($key, 'new');
+	OPcache\VolatileCache::set($key, 'new');
 	echo $first, "\n", fetch_or_miss($key);
 	return;
 }
 
 if ($scenario === 'miss_store') {
 	$first = fetch_or_miss($key);
-	OPcache\volatile_store($key, 'created');
+	OPcache\VolatileCache::set($key, 'created');
 	echo $first, "\n", fetch_or_miss($key);
 	return;
 }
 
 if ($scenario === 'hit_delete') {
-	OPcache\volatile_store($key, 'old');
+	OPcache\VolatileCache::set($key, 'old');
 	$first = fetch_or_miss($key);
-	OPcache\volatile_delete($key);
+	OPcache\VolatileCache::delete($key);
 	echo $first, "\n", fetch_or_miss($key);
 	return;
 }
 
 if ($scenario === 'hit_clear') {
-	OPcache\volatile_store($key, 'old');
+	OPcache\VolatileCache::set($key, 'old');
 	$first = fetch_or_miss($key);
-	OPcache\volatile_clear();
+	OPcache\VolatileCache::clear();
 	echo $first, "\n", fetch_or_miss($key);
 	return;
 }

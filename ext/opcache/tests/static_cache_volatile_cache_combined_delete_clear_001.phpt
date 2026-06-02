@@ -42,48 +42,48 @@ function build_refs(): array
 	return $payload;
 }
 
-OPcache\volatile_clear();
+OPcache\VolatileCache::clear();
 
-var_dump(OPcache\volatile_store('keep-string', str_repeat('S', 1200000)));
-var_dump(OPcache\volatile_store('victim-graph', build_graph('O', 3)));
-var_dump(OPcache\volatile_store('keep-refs', build_refs()));
+var_dump(OPcache\VolatileCache::set('keep-string', str_repeat('S', 1200000)));
+var_dump(OPcache\VolatileCache::set('victim-graph', build_graph('O', 3)));
+var_dump(OPcache\VolatileCache::set('keep-refs', build_refs()));
 
-$fetched = OPcache\volatile_fetch('victim-graph');
-OPcache\volatile_delete('victim-graph');
+$fetched = OPcache\VolatileCache::get('victim-graph');
+OPcache\VolatileCache::delete('victim-graph');
 
-var_dump(OPcache\volatile_fetch('victim-graph', 'missing'));
+var_dump(OPcache\VolatileCache::get('victim-graph', 'missing'));
 var_dump($fetched instanceof CombinedDeleteClearNode);
 var_dump($fetched->rows[123]['text']);
 
 $fetched->rows[123]['text'] = 'local-after-delete';
 var_dump($fetched->rows[123]['text']);
 
-var_dump(OPcache\volatile_store('replacement-graph', build_graph('N', 7)));
+var_dump(OPcache\VolatileCache::set('replacement-graph', build_graph('N', 7)));
 
-$replacement = OPcache\volatile_fetch('replacement-graph');
-$refs = OPcache\volatile_fetch('keep-refs');
+$replacement = OPcache\VolatileCache::get('replacement-graph');
+$refs = OPcache\VolatileCache::get('keep-refs');
 $refs['alias'] = 'mutated-via-alias';
 
 var_dump($replacement->rows[123]['text']);
 var_dump($replacement->rows[123]['nested']['value']);
 var_dump($refs['value']);
 
-$cleared = OPcache\volatile_fetch('replacement-graph');
-OPcache\volatile_clear();
+$cleared = OPcache\VolatileCache::get('replacement-graph');
+OPcache\VolatileCache::clear();
 
-var_dump(OPcache\volatile_fetch('keep-string', 'missing'));
-var_dump(OPcache\volatile_fetch('replacement-graph', 'missing'));
+var_dump(OPcache\VolatileCache::get('keep-string', 'missing'));
+var_dump(OPcache\VolatileCache::get('replacement-graph', 'missing'));
 var_dump($cleared->rows[321]['text']);
 
 $cleared->rows[321]['text'] = 'local-after-clear';
 var_dump($cleared->rows[321]['text']);
 
-var_dump(OPcache\volatile_store('after-clear-string', str_repeat('A', 1200000)));
-var_dump(OPcache\volatile_store('after-clear-graph', build_graph('C', 11)));
+var_dump(OPcache\VolatileCache::set('after-clear-string', str_repeat('A', 1200000)));
+var_dump(OPcache\VolatileCache::set('after-clear-graph', build_graph('C', 11)));
 
-$afterClear = OPcache\volatile_fetch('after-clear-graph');
+$afterClear = OPcache\VolatileCache::get('after-clear-graph');
 
-var_dump(strlen(OPcache\volatile_fetch('after-clear-string')));
+var_dump(strlen(OPcache\VolatileCache::get('after-clear-string')));
 var_dump($afterClear->rows[321]['text']);
 var_dump($afterClear->rows[321]['nested']['value']);
 

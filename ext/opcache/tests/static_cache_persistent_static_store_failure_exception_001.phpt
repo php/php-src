@@ -58,7 +58,7 @@ class PinnedStaticStoreFailureUnsupportedValueBox
 	}
 }
 
-OPcache\pinned_clear();
+OPcache\PinnedCache::clear();
 $nullDevice = PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null';
 
 dump_static_cache_exception('property-resource', function (): void {
@@ -109,7 +109,7 @@ dump_static_cache_exception('array-mutation-overflow', function (): void {
 	PinnedStaticStoreFailureArray::$value[] = str_repeat('X', 12 * 1024 * 1024);
 });
 
-OPcache\pinned_clear();
+OPcache\PinnedCache::clear();
 
 ?>
 --EXPECT--

@@ -47,6 +47,8 @@ static int fpm_static_cache_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
 
+	zend_opcache_static_cache_opt_in();
+
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		wp->static_cache_partition = zend_opcache_static_cache_partition_create(wp->config->name);
 		if (wp->static_cache_partition == NULL) {

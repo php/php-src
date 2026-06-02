@@ -1,5 +1,5 @@
 --TEST--
-OPcache pinned_clear clears only the pinned cache API namespace
+OPcache PinnedCache::clear clears only the pinned cache API namespace
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -13,22 +13,22 @@ file_put_contents(__DIR__ . '/pinned_cache_clear_001.php', <<<'PHP'
 $action = $_GET['action'] ?? 'seed';
 
 if ($action === 'seed') {
-	OPcache\volatile_clear();
-	OPcache\pinned_clear();
-	var_dump(OPcache\volatile_store('local', 'volatile-value'));
-	OPcache\pinned_store('shared', 'pinned-value');
+	OPcache\VolatileCache::clear();
+	OPcache\PinnedCache::clear();
+	var_dump(OPcache\VolatileCache::set('local', 'volatile-value'));
+	OPcache\PinnedCache::set('shared', 'pinned-value');
 	return;
 }
 
 if ($action === 'clear') {
-	OPcache\pinned_clear();
-	var_dump(OPcache\volatile_fetch('local', 'missing-volatile'));
-	var_dump(OPcache\pinned_fetch('shared', 'missing-pinned'));
+	OPcache\PinnedCache::clear();
+	var_dump(OPcache\VolatileCache::get('local', 'missing-volatile'));
+	var_dump(OPcache\PinnedCache::get('shared', 'missing-pinned'));
 	return;
 }
 
-var_dump(OPcache\volatile_fetch('local', 'missing-volatile'));
-var_dump(OPcache\pinned_fetch('shared', 'missing-pinned'));
+var_dump(OPcache\VolatileCache::get('local', 'missing-volatile'));
+var_dump(OPcache\PinnedCache::get('shared', 'missing-pinned'));
 PHP);
 
 $php = getenv('TEST_PHP_EXECUTABLE');

@@ -96,7 +96,7 @@ $backend = $_GET['backend'] ?? 'volatile_static';
 $kind = $_GET['kind'] ?? 'plain';
 
 if ($action === 'reset') {
-	OPcache\volatile_clear();
+	OPcache\VolatileCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;

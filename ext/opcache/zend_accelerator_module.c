@@ -372,7 +372,6 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.memory_consumption"    , "128"  , PHP_INI_SYSTEM, OnUpdateMemoryConsumption,    accel_directives.memory_consumption,        zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.static_cache.volatile_size_mb", "8", PHP_INI_SYSTEM, OnUpdateStaticCacheVolatileSizeMb, accel_directives.static_cache_volatile_size_mb, zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.static_cache.pinned_size_mb", "8", PHP_INI_SYSTEM, OnUpdateStaticCachePinnedSizeMb, accel_directives.static_cache_pinned_size_mb, zend_accel_globals, accel_globals)
-	STD_PHP_INI_BOOLEAN("opcache.static_cache.allow_unsafe_runtime", "0", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.static_cache_allow_unsafe_runtime, zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.interned_strings_buffer", "8"  , PHP_INI_SYSTEM, OnUpdateInternedStringsBuffer,	 accel_directives.interned_strings_buffer,   zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_accelerated_files" , "10000", PHP_INI_SYSTEM, OnUpdateMaxAcceleratedFiles,	 accel_directives.max_accelerated_files,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_wasted_percentage" , "5"   , PHP_INI_SYSTEM, OnUpdateMaxWastedPercentage,	 accel_directives.max_wasted_percentage,     zend_accel_globals, accel_globals)
@@ -945,7 +944,6 @@ ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_long(&directives,	 "opcache.memory_consumption",     ZCG(accel_directives).memory_consumption);
 	add_assoc_long(&directives,	 "opcache.static_cache.volatile_size_mb", ZCG(accel_directives).static_cache_volatile_size_mb);
 	add_assoc_long(&directives,	 "opcache.static_cache.pinned_size_mb", ZCG(accel_directives).static_cache_pinned_size_mb);
-	add_assoc_bool(&directives,	 "opcache.static_cache.allow_unsafe_runtime", ZCG(accel_directives).static_cache_allow_unsafe_runtime);
 	add_assoc_long(&directives,	 "opcache.interned_strings_buffer",ZCG(accel_directives).interned_strings_buffer);
 	add_assoc_long(&directives, 	 "opcache.max_accelerated_files",  ZCG(accel_directives).max_accelerated_files);
 	add_assoc_double(&directives, "opcache.max_wasted_percentage",  ZCG(accel_directives).max_wasted_percentage);

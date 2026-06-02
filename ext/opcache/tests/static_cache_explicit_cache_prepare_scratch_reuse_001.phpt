@@ -33,25 +33,25 @@ function build_rows(string $prefix, int $multiplier): array
 	return $rows;
 }
 
-OPcache\volatile_clear();
-OPcache\pinned_clear();
+OPcache\VolatileCache::clear();
+OPcache\PinnedCache::clear();
 
 $payload = new PreparedScratchPayload('first', build_rows('A', 3));
 
-var_dump(OPcache\volatile_store('scratch_volatile_first', $payload));
-OPcache\pinned_store('scratch_pinned_first', $payload);
+var_dump(OPcache\VolatileCache::set('scratch_volatile_first', $payload));
+OPcache\PinnedCache::set('scratch_pinned_first', $payload);
 
 $payload->name = 'second';
 $payload->rows[12]['label'] = str_repeat('B', 24);
 $payload->rows[12]['nested']['value'] = 777;
 
-var_dump(OPcache\volatile_store('scratch_volatile_second', $payload));
-OPcache\pinned_store('scratch_pinned_second', $payload);
+var_dump(OPcache\VolatileCache::set('scratch_volatile_second', $payload));
+OPcache\PinnedCache::set('scratch_pinned_second', $payload);
 
-$volatileFirst = OPcache\volatile_fetch('scratch_volatile_first');
-$volatileSecond = OPcache\volatile_fetch('scratch_volatile_second');
-$pinnedFirst = OPcache\pinned_fetch('scratch_pinned_first');
-$pinnedSecond = OPcache\pinned_fetch('scratch_pinned_second');
+$volatileFirst = OPcache\VolatileCache::get('scratch_volatile_first');
+$volatileSecond = OPcache\VolatileCache::get('scratch_volatile_second');
+$pinnedFirst = OPcache\PinnedCache::get('scratch_pinned_first');
+$pinnedSecond = OPcache\PinnedCache::get('scratch_pinned_second');
 
 echo $volatileFirst->name, "\n";
 echo $volatileFirst->rows[12]['label'], "\n";

@@ -13,25 +13,25 @@ opcache.static_cache.pinned_size_mb=32
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\volatile_clear();
+		OPcache\VolatileCache::clear();
 	} else {
-		OPcache\pinned_clear();
+		OPcache\PinnedCache::clear();
 	}
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\volatile_lock($key)
-		: OPcache\pinned_lock($key);
+		? OPcache\VolatileCache::lock($key)
+		: OPcache\PinnedCache::lock($key);
 }
 
 function cache_delete(string $backend, string $key): void
 {
 	if ($backend === 'volatile') {
-		OPcache\volatile_delete($key);
+		OPcache\VolatileCache::delete($key);
 	} else {
-		OPcache\pinned_delete($key);
+		OPcache\PinnedCache::delete($key);
 	}
 }
 
@@ -47,14 +47,14 @@ foreach (['volatile', 'pinned'] as $backend) {
 	var_dump(cache_lock($backend, $key));
 }
 
-OPcache\volatile_clear();
-OPcache\pinned_clear();
+OPcache\VolatileCache::clear();
+OPcache\PinnedCache::clear();
 
-var_dump(OPcache\volatile_lock('opcache_reset_volatile_lock'));
-var_dump(OPcache\pinned_lock('opcache_reset_pinned_lock'));
+var_dump(OPcache\VolatileCache::lock('opcache_reset_volatile_lock'));
+var_dump(OPcache\PinnedCache::lock('opcache_reset_pinned_lock'));
 var_dump(opcache_reset());
-var_dump(OPcache\volatile_lock('opcache_reset_volatile_lock'));
-var_dump(OPcache\pinned_lock('opcache_reset_pinned_lock'));
+var_dump(OPcache\VolatileCache::lock('opcache_reset_volatile_lock'));
+var_dump(OPcache\PinnedCache::lock('opcache_reset_pinned_lock'));
 
 ?>
 --EXPECT--

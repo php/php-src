@@ -20,15 +20,15 @@ class NestedObjectPropertyState
 
 NestedObjectPropertyState::$propertyState ??= (object) ['count' => 1];
 var_dump(NestedObjectPropertyState::$propertyState->count);
-var_dump(OPcache\pinned_cache_info()->entry_count);
+var_dump(OPcache\PinnedCache::info()->entry_count);
 
 NestedObjectPropertyState::$propertyState->count++;
 var_dump(NestedObjectPropertyState::$propertyState->count);
-var_dump(OPcache\pinned_cache_info()->entry_count);
+var_dump(OPcache\PinnedCache::info()->entry_count);
 
 NestedObjectPropertyState::$propertyState->count = 10;
 var_dump(NestedObjectPropertyState::$propertyState->count);
-var_dump(OPcache\pinned_cache_info()->entry_count);
+var_dump(OPcache\PinnedCache::info()->entry_count);
 
 ?>
 --EXPECT--

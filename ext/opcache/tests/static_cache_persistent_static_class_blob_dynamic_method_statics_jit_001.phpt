@@ -59,7 +59,7 @@ if ($request === 1) {
 }
 
 if ($request === 2) {
-	echo pinned_static_jit_on(), ',', JitCombinedBlobState::$count, ',', array_sum(JitCombinedBlobState::$bag['numbers']), ',', OPcache\pinned_cache_info()->entry_count, ',', count(file($logFile, FILE_IGNORE_NEW_LINES)), "\n";
+	echo pinned_static_jit_on(), ',', JitCombinedBlobState::$count, ',', array_sum(JitCombinedBlobState::$bag['numbers']), ',', OPcache\PinnedCache::info()->entry_count, ',', count(file($logFile, FILE_IGNORE_NEW_LINES)), "\n";
 
 	$last = 0;
 	for ($i = 0; $i < 4; $i++) {
@@ -72,7 +72,7 @@ if ($request === 2) {
 	return;
 }
 
-echo pinned_static_jit_on(), ',', JitCombinedBlobState::$count, ',', array_sum(JitCombinedBlobState::$bag['numbers']), ',', OPcache\pinned_cache_info()->entry_count, ',', count(file($logFile, FILE_IGNORE_NEW_LINES)), "\n";
+echo pinned_static_jit_on(), ',', JitCombinedBlobState::$count, ',', array_sum(JitCombinedBlobState::$bag['numbers']), ',', OPcache\PinnedCache::info()->entry_count, ',', count(file($logFile, FILE_IGNORE_NEW_LINES)), "\n";
 PHP);
 
 $php = getenv('TEST_PHP_EXECUTABLE');

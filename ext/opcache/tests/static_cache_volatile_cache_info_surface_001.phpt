@@ -11,7 +11,7 @@ opcache.static_cache.volatile_size_mb=32
 
 $config = opcache_get_configuration();
 $status = opcache_get_status();
-$info = OPcache\volatile_cache_info();
+$info = OPcache\VolatileCache::info();
 
 var_dump($config['directives']['opcache.static_cache.volatile_size_mb']);
 var_dump($status['volatile_cache']->enabled);

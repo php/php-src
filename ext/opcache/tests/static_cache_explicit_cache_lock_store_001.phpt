@@ -13,41 +13,41 @@ opcache.static_cache.pinned_size_mb=32
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\volatile_clear();
+		OPcache\VolatileCache::clear();
 	} else {
-		OPcache\pinned_clear();
+		OPcache\PinnedCache::clear();
 	}
 }
 
 function cache_store(string $backend, string $key, mixed $value): mixed
 {
 	if ($backend === 'volatile') {
-		return OPcache\volatile_store($key, $value);
+		return OPcache\VolatileCache::set($key, $value);
 	}
 
-	OPcache\pinned_store($key, $value);
+	OPcache\PinnedCache::set($key, $value);
 	return null;
 }
 
 function cache_fetch(string $backend, string $key, mixed $default = null): mixed
 {
 	return $backend === 'volatile'
-		? OPcache\volatile_fetch($key, $default)
-		: OPcache\pinned_fetch($key, $default);
+		? OPcache\VolatileCache::get($key, $default)
+		: OPcache\PinnedCache::get($key, $default);
 }
 
 function cache_exists(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\volatile_exists($key)
-		: OPcache\pinned_exists($key);
+		? OPcache\VolatileCache::has($key)
+		: OPcache\PinnedCache::has($key);
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\volatile_lock($key)
-		: OPcache\pinned_lock($key);
+		? OPcache\VolatileCache::lock($key)
+		: OPcache\PinnedCache::lock($key);
 }
 
 foreach (['volatile', 'pinned'] as $backend) {

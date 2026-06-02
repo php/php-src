@@ -9,10 +9,10 @@ opcache.static_cache.volatile_size_mb=32
 --FILE--
 <?php
 
-var_dump(function_exists('OPcache\\volatile_atomic_increment'));
-var_dump(function_exists('OPcache\\volatile_atomic_decrement'));
-var_dump(function_exists('OPcache\\pinned_atomic_increment'));
-var_dump(function_exists('OPcache\\pinned_atomic_decrement'));
+var_dump(method_exists('OPcache\\VolatileCache', 'increment'));
+var_dump(method_exists('OPcache\\VolatileCache', 'decrement'));
+var_dump(method_exists('OPcache\\PinnedCache', 'increment'));
+var_dump(method_exists('OPcache\\PinnedCache', 'decrement'));
 
 ?>
 --EXPECT--

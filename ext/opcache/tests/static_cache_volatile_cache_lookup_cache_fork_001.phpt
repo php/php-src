@@ -18,7 +18,7 @@ opcache.static_cache.volatile_size_mb=32
 
 function fetch_or_miss(string $key): string
 {
-	$value = OPcache\volatile_fetch($key, 'MISS');
+	$value = OPcache\VolatileCache::get($key, 'MISS');
 	return is_string($value) ? $value : get_debug_type($value);
 }
 
@@ -52,9 +52,9 @@ function run_lookup_cache_scenario(string $key, ?string $initialValue, string $a
 	cleanup_files($readyFile, $doneFile, $resultFile);
 
 	if ($initialValue === null) {
-		OPcache\volatile_delete($key);
+		OPcache\VolatileCache::delete($key);
 	} else {
-		OPcache\volatile_store($key, $initialValue);
+		OPcache\VolatileCache::set($key, $initialValue);
 	}
 
 	$pid = pcntl_fork();
@@ -74,13 +74,13 @@ function run_lookup_cache_scenario(string $key, ?string $initialValue, string $a
 	wait_for_file($readyFile);
 	switch ($action) {
 		case 'store':
-			OPcache\volatile_store($key, $updatedValue);
+			OPcache\VolatileCache::set($key, $updatedValue);
 			break;
 		case 'delete':
-			OPcache\volatile_delete($key);
+			OPcache\VolatileCache::delete($key);
 			break;
 		case 'clear':
-			OPcache\volatile_clear();
+			OPcache\VolatileCache::clear();
 			break;
 		default:
 			throw new RuntimeException("unknown action {$action}");
@@ -92,7 +92,7 @@ function run_lookup_cache_scenario(string $key, ?string $initialValue, string $a
 	cleanup_files($readyFile, $doneFile, $resultFile);
 }
 
-OPcache\volatile_clear();
+OPcache\VolatileCache::clear();
 
 run_lookup_cache_scenario('lookup_hit_store_key', 'old', 'store', 'new');
 run_lookup_cache_scenario('lookup_miss_store_key', null, 'store', 'created');

@@ -52,7 +52,7 @@ $logFile = local_copy_log_file();
 
 if ($action === 'reset') {
 	@unlink($logFile);
-	OPcache\pinned_clear();
+	OPcache\PinnedCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;

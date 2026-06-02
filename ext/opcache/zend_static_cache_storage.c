@@ -70,23 +70,14 @@ static zend_always_inline bool zend_opcache_static_cache_requires_pre_request_st
 		strcmp(sapi_module.name, "cgi-fcgi") == 0;
 }
 
-static zend_always_inline bool zend_opcache_static_cache_environment_is_allowed_by_default(void)
-{
-	if (sapi_module.name == NULL) {
-		return false;
-	}
-
-	return strcmp(sapi_module.name, "fpm-fcgi") == 0 ||
-		strcmp(sapi_module.name, "cli") == 0 ||
-		strcmp(sapi_module.name, "cli-server") == 0 ||
-		strcmp(sapi_module.name, "phpdbg") == 0 ||
-		strcmp(sapi_module.name, "embed") == 0;
-}
-
 static zend_always_inline bool zend_opcache_static_cache_environment_is_allowed(void)
 {
-	return zend_opcache_static_cache_environment_is_allowed_by_default() ||
-		ZCG(accel_directives).static_cache_allow_unsafe_runtime;
+	/* Availability is opt-in: a SAPI enables the Static Cache for its runtime by
+	 * calling zend_opcache_static_cache_opt_in() before request handling, which
+	 * is its declaration that a trust/storage boundary holds for the lifetime of
+	 * the shared-memory owner. SAPIs that never opt in stay unavailable, so no
+	 * SAPI name allowlist or unsafe-runtime override is needed. */
+	return zend_opcache_static_cache_runtime_opted_in;
 }
 
 static zend_always_inline void zend_opcache_static_cache_set_unavailable(const char *failure_reason, bool startup_failed)
@@ -2200,7 +2191,7 @@ bool zend_opcache_static_cache_startup_storage_before_request(void)
 	}
 
 	if (!zend_opcache_static_cache_environment_is_allowed()) {
-		zend_opcache_static_cache_set_unavailable("Static Cache is disabled for this SAPI unless opcache.static_cache.allow_unsafe_runtime=1 is set", false);
+		zend_opcache_static_cache_set_unavailable("Static Cache is not enabled for this SAPI (the runtime did not opt in)", false);
 
 		return true;
 	}
@@ -2246,7 +2237,7 @@ void zend_opcache_static_cache_ensure_ready(void)
 	}
 
 	if (!zend_opcache_static_cache_environment_is_allowed()) {
-		zend_opcache_static_cache_set_unavailable("Static Cache is disabled for this SAPI unless opcache.static_cache.allow_unsafe_runtime=1 is set", false);
+		zend_opcache_static_cache_set_unavailable("Static Cache is not enabled for this SAPI (the runtime did not opt in)", false);
 
 		return;
 	}

@@ -18,34 +18,34 @@ class ExplicitCacheRelocationSkipProbe
 function cache_clear(string $kind): void
 {
     if ($kind === 'volatile') {
-        OPcache\volatile_clear();
+        OPcache\VolatileCache::clear();
     } else {
-        OPcache\pinned_clear();
+        OPcache\PinnedCache::clear();
     }
 }
 
 function cache_store(string $kind, string $key, mixed $value): bool
 {
     if ($kind === 'volatile') {
-        return OPcache\volatile_store($key, $value);
+        return OPcache\VolatileCache::set($key, $value);
     }
 
-    return OPcache\pinned_store($key, $value);
+    return OPcache\PinnedCache::set($key, $value);
 }
 
 function cache_fetch(string $kind, string $key): mixed
 {
     return $kind === 'volatile'
-        ? OPcache\volatile_fetch($key, 'missing')
-        : OPcache\pinned_fetch($key, 'missing');
+        ? OPcache\VolatileCache::get($key, 'missing')
+        : OPcache\PinnedCache::get($key, 'missing');
 }
 
 function cache_delete(string $kind, string $key): void
 {
     if ($kind === 'volatile') {
-        OPcache\volatile_delete($key);
+        OPcache\VolatileCache::delete($key);
     } else {
-        OPcache\pinned_delete($key);
+        OPcache\PinnedCache::delete($key);
     }
 }
 

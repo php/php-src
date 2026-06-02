@@ -53,17 +53,17 @@ $routePayload = [
 	'headers' => ['cache-control' => 'public, max-age=60'],
 ];
 
-var_dump(OPcache\volatile_store_array([
+var_dump(OPcache\VolatileCache::setMultiple([
 	'route' => $routePayload,
 	'meta' => new ExplicitPreparedUser('Alice', 30),
 	'serial' => new ExplicitPreparedSerializableUser(7, 'Bob'),
 	'internal' => new DateTimeImmutable('2026-06-15 09:30:00', new DateTimeZone('UTC')),
 ]));
 
-$route = OPcache\volatile_fetch('route');
-$meta = OPcache\volatile_fetch('meta');
-$serial = OPcache\volatile_fetch('serial');
-$internal = OPcache\volatile_fetch('internal');
+$route = OPcache\VolatileCache::get('route');
+$meta = OPcache\VolatileCache::get('meta');
+$serial = OPcache\VolatileCache::get('serial');
+$internal = OPcache\VolatileCache::get('internal');
 
 var_dump($route['nested']['alpha'][2]);
 var_dump($meta instanceof ExplicitPreparedUser);
@@ -76,14 +76,14 @@ var_dump(ExplicitPreparedSerializableUser::$unserializeCount);
 var_dump($internal instanceof DateTimeImmutable);
 var_dump($internal->format('Y-m-d H:i:s'));
 
-OPcache\pinned_store('pinned_user', new ExplicitPreparedUser('Carol', 40));
-$pinned = OPcache\pinned_fetch('pinned_user');
+OPcache\PinnedCache::set('pinned_user', new ExplicitPreparedUser('Carol', 40));
+$pinned = OPcache\PinnedCache::get('pinned_user');
 
 var_dump($pinned instanceof ExplicitPreparedUser);
 var_dump($pinned->name);
 var_dump($pinned->age);
 
-var_dump(OPcache\volatile_store_array([]));
+var_dump(OPcache\VolatileCache::setMultiple([]));
 
 ?>
 --EXPECT--

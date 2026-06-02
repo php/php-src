@@ -11,26 +11,26 @@ opcache.static_cache.volatile_size_mb=32
 
 $immutable = new DateTimeImmutable('2026-06-15 11:00:00.111111', new DateTimeZone('UTC'));
 
-var_dump(OPcache\volatile_store('immutable_datetime', $immutable));
+var_dump(OPcache\VolatileCache::set('immutable_datetime', $immutable));
 
-$immutableCopy = OPcache\volatile_fetch('immutable_datetime');
+$immutableCopy = OPcache\VolatileCache::get('immutable_datetime');
 var_dump($immutableCopy instanceof DateTimeImmutable);
 var_dump($immutableCopy->format('Y-m-d H:i:s.u e'));
 
 $offsetImmutable = new DateTimeImmutable('2023-10-27 10:00:00 +05:30');
 
-var_dump(OPcache\volatile_store('offset_immutable_datetime', $offsetImmutable));
+var_dump(OPcache\VolatileCache::set('offset_immutable_datetime', $offsetImmutable));
 
-$offsetImmutableCopy = OPcache\volatile_fetch('offset_immutable_datetime');
+$offsetImmutableCopy = OPcache\VolatileCache::get('offset_immutable_datetime');
 var_dump($offsetImmutableCopy instanceof DateTimeImmutable);
 var_dump($offsetImmutableCopy->format('Y-m-d H:i:s P T'));
 var_dump($offsetImmutableCopy->getTimezone()->getName());
 
 $abbrImmutable = new DateTimeImmutable('2023-10-27 10:00:00 EST');
 
-var_dump(OPcache\volatile_store('abbr_immutable_datetime', $abbrImmutable));
+var_dump(OPcache\VolatileCache::set('abbr_immutable_datetime', $abbrImmutable));
 
-$abbrImmutableCopy = OPcache\volatile_fetch('abbr_immutable_datetime');
+$abbrImmutableCopy = OPcache\VolatileCache::get('abbr_immutable_datetime');
 var_dump($abbrImmutableCopy instanceof DateTimeImmutable);
 var_dump($abbrImmutableCopy->format('Y-m-d H:i:s P T'));
 var_dump($abbrImmutableCopy->getTimezone()->getName());
@@ -55,9 +55,9 @@ class EventDateTime extends DateTime
 
 $event = new EventDateTime('2026-06-15 09:30:00.123456', new DateTimeZone('Europe/Paris'), 'launch', 7);
 
-var_dump(OPcache\volatile_store('event_datetime', $event));
+var_dump(OPcache\VolatileCache::set('event_datetime', $event));
 
-$eventCopy = OPcache\volatile_fetch('event_datetime');
+$eventCopy = OPcache\VolatileCache::get('event_datetime');
 var_dump($eventCopy instanceof EventDateTime);
 var_dump($eventCopy->format('Y-m-d H:i:s.u e'));
 var_dump($eventCopy->describe());
@@ -97,9 +97,9 @@ class CustomSerializedDateTime extends DateTime
 
 $custom = new CustomSerializedDateTime('2026-06-15 10:45:00.654321', new DateTimeZone('UTC'), 'fallback');
 
-var_dump(OPcache\volatile_store('custom_datetime', $custom));
+var_dump(OPcache\VolatileCache::set('custom_datetime', $custom));
 
-$customCopy = OPcache\volatile_fetch('custom_datetime');
+$customCopy = OPcache\VolatileCache::get('custom_datetime');
 var_dump($customCopy instanceof CustomSerializedDateTime);
 var_dump($customCopy->format('Y-m-d H:i:s.u e'));
 var_dump($customCopy->label());
@@ -146,9 +146,9 @@ class WakefulSerializedDateTime extends DateTime
 
 $wakeful = new WakefulSerializedDateTime('2026-06-15 12:15:00.987654', new DateTimeZone('UTC'), 'fallback');
 
-var_dump(OPcache\volatile_store('wakeful_datetime', $wakeful));
+var_dump(OPcache\VolatileCache::set('wakeful_datetime', $wakeful));
 
-$wakefulCopy = OPcache\volatile_fetch('wakeful_datetime');
+$wakefulCopy = OPcache\VolatileCache::get('wakeful_datetime');
 var_dump($wakefulCopy instanceof WakefulSerializedDateTime);
 var_dump($wakefulCopy->format('Y-m-d H:i:s.u e'));
 var_dump($wakefulCopy->label());

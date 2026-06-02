@@ -9,28 +9,12 @@ opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
-use OPcache\StaticCacheException;
+OPcache\PinnedCache::set('text', 'php');
 
-OPcache\pinned_store('text', 'php');
-
-var_dump(OPcache\pinned_atomic_increment('text'));
-var_dump(OPcache\pinned_atomic_decrement('text'));
-
-try {
-	OPcache\pinned_atomic_increment('text', 1, true);
-} catch (StaticCacheException $exception) {
-	echo $exception->getMessage(), "\n";
-}
-
-try {
-	OPcache\pinned_atomic_decrement('text', 1, true);
-} catch (StaticCacheException $exception) {
-	echo $exception->getMessage(), "\n";
-}
+var_dump(OPcache\PinnedCache::increment('text'));
+var_dump(OPcache\PinnedCache::decrement('text'));
 
 ?>
 --EXPECT--
 bool(false)
 bool(false)
-Atomic increment requires an integer value
-Atomic decrement requires an integer value

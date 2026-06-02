@@ -37,7 +37,7 @@ $action = $_GET['action'] ?? 'seed';
 $backend = $_GET['backend'] ?? 'cached';
 
 if ($action === 'reset') {
-	OPcache\volatile_clear();
+	OPcache\VolatileCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;
@@ -46,8 +46,8 @@ if ($action === 'reset') {
 if ($action === 'seed') {
 	$probe = new CaptureMissProbe();
 	$probe->bag[] = 'seed';
-	var_dump(OPcache\volatile_store('capture_miss_explicit', $probe));
-	echo 'volatile_entries=', OPcache\volatile_cache_info()->entry_count, "\n";
+	var_dump(OPcache\VolatileCache::set('capture_miss_explicit', $probe));
+	echo 'volatile_entries=', OPcache\VolatileCache::info()->entry_count, "\n";
 	return;
 }
 
@@ -58,12 +58,12 @@ if ($action === 'miss_then_explicit_mutate') {
 		default => throw new RuntimeException('unknown backend'),
 	};
 
-	$explicit = OPcache\volatile_fetch('capture_miss_explicit');
+	$explicit = OPcache\VolatileCache::get('capture_miss_explicit');
 	$explicit->bag[] = 'mutated outside static attribute';
 
 	echo 'explicit_bag=', count($explicit->bag), "\n";
-	echo 'volatile_entries=', OPcache\volatile_cache_info()->entry_count, "\n";
-	echo 'pinned_entries=', OPcache\pinned_cache_info()->entry_count, "\n";
+	echo 'volatile_entries=', OPcache\VolatileCache::info()->entry_count, "\n";
+	echo 'pinned_entries=', OPcache\PinnedCache::info()->entry_count, "\n";
 	return;
 }
 
@@ -73,8 +73,8 @@ if ($action === 'read_static') {
 		'pinned' => CaptureMissPinnedMethod::touch(),
 		default => throw new RuntimeException('unknown backend'),
 	};
-	echo 'volatile_entries=', OPcache\volatile_cache_info()->entry_count, "\n";
-	echo 'pinned_entries=', OPcache\pinned_cache_info()->entry_count, "\n";
+	echo 'volatile_entries=', OPcache\VolatileCache::info()->entry_count, "\n";
+	echo 'pinned_entries=', OPcache\PinnedCache::info()->entry_count, "\n";
 	return;
 }
 

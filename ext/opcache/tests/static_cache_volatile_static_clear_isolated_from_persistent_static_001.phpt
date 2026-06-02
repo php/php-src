@@ -37,7 +37,7 @@ class GlobalCounter
 
 $action = $_GET['action'] ?? 'step';
 if ($action === 'clear') {
-	OPcache\volatile_clear();
+	OPcache\VolatileCache::clear();
 	echo "clear\n";
 	return;
 }

@@ -22,7 +22,7 @@ try {
 	PinnedStaticCacheOverflow::$value = str_repeat('X', 12 * 1024 * 1024);
 } catch (OPcache\StaticCacheException $exception) {
 	echo get_class($exception), ': ', $exception->getMessage(), "\n";
-	OPcache\pinned_clear();
+	OPcache\PinnedCache::clear();
 }
 
 ?>

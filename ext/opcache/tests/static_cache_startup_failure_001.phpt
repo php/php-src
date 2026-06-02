@@ -13,8 +13,8 @@ opcache.static_cache.pinned_size_mb=32
 <?php
 
 $status = opcache_get_status();
-$volatileInfo = OPcache\volatile_cache_info();
-$pinnedInfo = OPcache\pinned_cache_info();
+$volatileInfo = OPcache\VolatileCache::info();
+$pinnedInfo = OPcache\PinnedCache::info();
 
 var_dump($status['volatile_cache']->enabled);
 var_dump($status['volatile_cache']->available);
@@ -30,8 +30,8 @@ var_dump($volatileInfo == $status['volatile_cache']);
 var_dump($pinnedInfo == $status['pinned_cache']);
 var_dump($volatileInfo->failure_reason);
 var_dump($pinnedInfo->failure_reason);
-var_dump(OPcache\volatile_store('key', 'value'));
-var_dump(OPcache\pinned_store('key', 'value'));
+var_dump(OPcache\VolatileCache::set('key', 'value'));
+var_dump(OPcache\PinnedCache::set('key', 'value'));
 
 ?>
 --EXPECT--

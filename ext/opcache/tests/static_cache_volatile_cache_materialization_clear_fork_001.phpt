@@ -1,5 +1,5 @@
 --TEST--
-OPcache volatile cache fetched shared graph survives cross-process volatile_clear()
+OPcache volatile cache fetched shared graph survives cross-process VolatileCache::clear()
 --EXTENSIONS--
 opcache
 pcntl
@@ -58,8 +58,8 @@ $resultFile = $prefix . '.result';
 @unlink($doneFile);
 @unlink($resultFile);
 
-OPcache\volatile_clear();
-if (!OPcache\volatile_store($key, new ClearPayload(build_rows()))) {
+OPcache\VolatileCache::clear();
+if (!OPcache\VolatileCache::set($key, new ClearPayload(build_rows()))) {
 	throw new RuntimeException('store failed');
 }
 
@@ -69,21 +69,21 @@ if ($pid === -1) {
 }
 
 if ($pid === 0) {
-	$fetched = OPcache\volatile_fetch($key);
+	$fetched = OPcache\VolatileCache::get($key);
 	$before = $fetched->rows[123]['text'];
 	file_put_contents($readyFile, 'ready');
 	wait_for_file($doneFile);
 	$fetched->rows[123]['text'] = 'changed after clear';
 	$after = $fetched->rows[123]['text'];
 
-	$refetch = OPcache\volatile_fetch($key, 'MISS') === 'MISS' ? 'MISS' : 'HIT';
+	$refetch = OPcache\VolatileCache::get($key, 'MISS') === 'MISS' ? 'MISS' : 'HIT';
 
 	file_put_contents($resultFile, $before . "\n" . $after . "\n" . $refetch);
 	exit(0);
 }
 
 wait_for_file($readyFile);
-OPcache\volatile_clear();
+OPcache\VolatileCache::clear();
 file_put_contents($doneFile, 'done');
 pcntl_waitpid($pid, $status);
 

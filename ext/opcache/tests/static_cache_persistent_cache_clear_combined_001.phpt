@@ -1,5 +1,5 @@
 --TEST--
-OPcache pinned_clear drops combined pinned entries without corrupting refill or volatile entries
+OPcache PinnedCache::clear drops combined pinned entries without corrupting refill or volatile entries
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -38,38 +38,38 @@ function build_graph(string $prefix, int $multiplier): PinnedClearCombinedNode
 $action = $_GET['action'] ?? 'seed';
 
 if ($action === 'seed') {
-	OPcache\volatile_clear();
-	OPcache\pinned_clear();
-	var_dump(OPcache\volatile_store('local-string', str_repeat('L', 400000)));
-	OPcache\pinned_store('pinned-string', str_repeat('G', 400000));
-	OPcache\pinned_store('pinned-graph', build_graph('O', 3));
-	$graph = OPcache\pinned_fetch('pinned-graph');
-	var_dump(strlen(OPcache\pinned_fetch('pinned-string')));
+	OPcache\VolatileCache::clear();
+	OPcache\PinnedCache::clear();
+	var_dump(OPcache\VolatileCache::set('local-string', str_repeat('L', 400000)));
+	OPcache\PinnedCache::set('pinned-string', str_repeat('G', 400000));
+	OPcache\PinnedCache::set('pinned-graph', build_graph('O', 3));
+	$graph = OPcache\PinnedCache::get('pinned-graph');
+	var_dump(strlen(OPcache\PinnedCache::get('pinned-string')));
 	var_dump($graph->rows[123]['text']);
 	return;
 }
 
 if ($action === 'clear') {
-	OPcache\pinned_clear();
-	var_dump(strlen(OPcache\volatile_fetch('local-string', 'missing-volatile')));
-	var_dump(OPcache\pinned_fetch('pinned-string', 'missing-pinned'));
-	var_dump(OPcache\pinned_fetch('pinned-graph', 'missing-graph'));
+	OPcache\PinnedCache::clear();
+	var_dump(strlen(OPcache\VolatileCache::get('local-string', 'missing-volatile')));
+	var_dump(OPcache\PinnedCache::get('pinned-string', 'missing-pinned'));
+	var_dump(OPcache\PinnedCache::get('pinned-graph', 'missing-graph'));
 	return;
 }
 
 if ($action === 'refill') {
-	OPcache\pinned_store('pinned-string', str_repeat('H', 400000));
-	OPcache\pinned_store('pinned-graph', build_graph('N', 7));
-	$graph = OPcache\pinned_fetch('pinned-graph');
-	var_dump(strlen(OPcache\pinned_fetch('pinned-string')));
+	OPcache\PinnedCache::set('pinned-string', str_repeat('H', 400000));
+	OPcache\PinnedCache::set('pinned-graph', build_graph('N', 7));
+	$graph = OPcache\PinnedCache::get('pinned-graph');
+	var_dump(strlen(OPcache\PinnedCache::get('pinned-string')));
 	var_dump($graph->rows[123]['text']);
 	var_dump($graph->rows[123]['nested']['value']);
 	return;
 }
 
-$graph = OPcache\pinned_fetch('pinned-graph');
-var_dump(strlen(OPcache\volatile_fetch('local-string', 'missing-volatile')));
-var_dump(strlen(OPcache\pinned_fetch('pinned-string')));
+$graph = OPcache\PinnedCache::get('pinned-graph');
+var_dump(strlen(OPcache\VolatileCache::get('local-string', 'missing-volatile')));
+var_dump(strlen(OPcache\PinnedCache::get('pinned-string')));
 var_dump($graph->rows[123]['text']);
 var_dump($graph->rows[123]['nested']['value']);
 PHP);

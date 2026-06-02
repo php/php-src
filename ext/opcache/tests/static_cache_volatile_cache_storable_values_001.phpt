@@ -11,8 +11,6 @@ opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
-use OPcache\StaticCacheException;
-
 class StaticCacheUnsupportedValueBox
 {
 	public function __construct(public mixed $value)
@@ -52,72 +50,61 @@ function dump_type_error(Closure $callback): void
 	}
 }
 
-function dump_static_cache_exception(Closure $callback): void
-{
-	try {
-		$callback();
-	} catch (StaticCacheException $e) {
-		echo get_class($e), ': ', $e->getMessage(), "\n";
-	}
-}
+dump_type_error(static fn () => OPcache\VolatileCache::set('resource', $resource));
+var_dump(OPcache\VolatileCache::get('resource', 'missing'));
+dump_type_error(static fn () => OPcache\VolatileCache::set('closure-value', $closure));
+var_dump(OPcache\VolatileCache::get('closure-value', 'missing'));
 
-dump_type_error(static fn () => OPcache\volatile_store('resource', $resource));
-var_dump(OPcache\volatile_fetch('resource', 'missing'));
-dump_type_error(static fn () => OPcache\volatile_store('closure-value', $closure));
-var_dump(OPcache\volatile_fetch('closure-value', 'missing'));
-
-var_dump(OPcache\volatile_store_array(['nested-resource' => ['value' => $resource]]));
-var_dump(OPcache\volatile_fetch('nested-resource', 'missing'));
-var_dump(OPcache\volatile_store_array(['nested-closure' => ['value' => $closure]]));
-var_dump(OPcache\volatile_fetch('nested-closure', 'missing'));
-var_dump(OPcache\volatile_store('object-resource', $resource_object));
-var_dump(OPcache\volatile_fetch('object-resource', 'missing'));
-var_dump(OPcache\volatile_store('object-closure', $closure_object));
-var_dump(OPcache\volatile_fetch('object-closure', 'missing'));
-var_dump(OPcache\volatile_store('spl-resource', $resource_fixed_array));
-var_dump(OPcache\volatile_fetch('spl-resource', 'missing'));
-var_dump(OPcache\volatile_store('spl-closure', $closure_fixed_array));
-var_dump(OPcache\volatile_fetch('spl-closure', 'missing'));
-var_dump(OPcache\volatile_store('array-object-resource', $resource_array_object));
-var_dump(OPcache\volatile_fetch('array-object-resource', 'missing'));
-var_dump(OPcache\volatile_store('array-object-closure', $closure_array_object));
-var_dump(OPcache\volatile_fetch('array-object-closure', 'missing'));
+var_dump(OPcache\VolatileCache::setMultiple(['nested-resource' => ['value' => $resource]]));
+var_dump(OPcache\VolatileCache::get('nested-resource', 'missing'));
+var_dump(OPcache\VolatileCache::setMultiple(['nested-closure' => ['value' => $closure]]));
+var_dump(OPcache\VolatileCache::get('nested-closure', 'missing'));
+var_dump(OPcache\VolatileCache::set('object-resource', $resource_object));
+var_dump(OPcache\VolatileCache::get('object-resource', 'missing'));
+var_dump(OPcache\VolatileCache::set('object-closure', $closure_object));
+var_dump(OPcache\VolatileCache::get('object-closure', 'missing'));
+var_dump(OPcache\VolatileCache::set('spl-resource', $resource_fixed_array));
+var_dump(OPcache\VolatileCache::get('spl-resource', 'missing'));
+var_dump(OPcache\VolatileCache::set('spl-closure', $closure_fixed_array));
+var_dump(OPcache\VolatileCache::get('spl-closure', 'missing'));
+var_dump(OPcache\VolatileCache::set('array-object-resource', $resource_array_object));
+var_dump(OPcache\VolatileCache::get('array-object-resource', 'missing'));
+var_dump(OPcache\VolatileCache::set('array-object-closure', $closure_array_object));
+var_dump(OPcache\VolatileCache::get('array-object-closure', 'missing'));
 StaticCacheUnsupportedSerializedPayload::$value = $resource;
-var_dump(OPcache\volatile_store('serialized-resource', $serialized_payload));
-var_dump(OPcache\volatile_fetch('serialized-resource', 'missing'));
+var_dump(OPcache\VolatileCache::set('serialized-resource', $serialized_payload));
+var_dump(OPcache\VolatileCache::get('serialized-resource', 'missing'));
 StaticCacheUnsupportedSerializedPayload::$value = $closure;
-var_dump(OPcache\volatile_store('serialized-closure', $serialized_payload));
-var_dump(OPcache\volatile_fetch('serialized-closure', 'missing'));
+var_dump(OPcache\VolatileCache::set('serialized-closure', $serialized_payload));
+var_dump(OPcache\VolatileCache::get('serialized-closure', 'missing'));
 
-dump_type_error(static fn () => OPcache\volatile_fetch('missing', $resource));
-dump_type_error(static fn () => OPcache\volatile_fetch('missing', $closure));
+dump_type_error(static fn () => OPcache\VolatileCache::get('missing', $resource));
+dump_type_error(static fn () => OPcache\VolatileCache::get('missing', $closure));
 
-dump_type_error(static fn () => OPcache\pinned_store('resource', $resource));
-dump_type_error(static fn () => OPcache\pinned_store('closure-value', $closure));
-dump_static_cache_exception(static fn () => OPcache\pinned_store_array(['nested-resource' => ['value' => $resource]], true));
-dump_static_cache_exception(static fn () => OPcache\pinned_store_array(['nested-closure' => ['value' => $closure]], true));
-dump_static_cache_exception(static fn () => OPcache\pinned_store('object-resource', $resource_object, true));
-dump_static_cache_exception(static fn () => OPcache\pinned_store('object-closure', $closure_object, true));
-dump_static_cache_exception(static fn () => OPcache\pinned_store('spl-resource', $resource_fixed_array, true));
-dump_static_cache_exception(static fn () => OPcache\pinned_store('spl-closure', $closure_fixed_array, true));
-dump_static_cache_exception(static fn () => OPcache\pinned_store('array-object-resource', $resource_array_object, true));
-dump_static_cache_exception(static fn () => OPcache\pinned_store('array-object-closure', $closure_array_object, true));
+dump_type_error(static fn () => OPcache\PinnedCache::set('resource', $resource));
+dump_type_error(static fn () => OPcache\PinnedCache::set('closure-value', $closure));
+var_dump(OPcache\PinnedCache::setMultiple(['nested-resource' => ['value' => $resource]]));
+var_dump(OPcache\PinnedCache::setMultiple(['nested-closure' => ['value' => $closure]]));
+var_dump(OPcache\PinnedCache::set('object-resource', $resource_object));
+var_dump(OPcache\PinnedCache::set('object-closure', $closure_object));
+var_dump(OPcache\PinnedCache::set('spl-resource', $resource_fixed_array));
+var_dump(OPcache\PinnedCache::set('spl-closure', $closure_fixed_array));
+var_dump(OPcache\PinnedCache::set('array-object-resource', $resource_array_object));
+var_dump(OPcache\PinnedCache::set('array-object-closure', $closure_array_object));
 StaticCacheUnsupportedSerializedPayload::$value = $resource;
-dump_static_cache_exception(static fn () => OPcache\pinned_store('serialized-resource', $serialized_payload, true));
+var_dump(OPcache\PinnedCache::set('serialized-resource', $serialized_payload));
 StaticCacheUnsupportedSerializedPayload::$value = $closure;
-dump_static_cache_exception(static fn () => OPcache\pinned_store('serialized-closure', $serialized_payload, true));
-dump_type_error(static fn () => OPcache\pinned_fetch('missing', $resource));
-dump_type_error(static fn () => OPcache\pinned_fetch('missing', $closure));
+var_dump(OPcache\PinnedCache::set('serialized-closure', $serialized_payload));
+dump_type_error(static fn () => OPcache\PinnedCache::get('missing', $resource));
+dump_type_error(static fn () => OPcache\PinnedCache::get('missing', $closure));
 
 fclose($resource);
 
 ?>
 --EXPECT--
-OPcache\volatile_store(): Argument #2 ($value) must be of type object|array|string|int|float|bool|null, resource given
+OPcache\VolatileCache::set(): Argument #2 ($value) must be of type object|array|string|int|float|bool|null, resource given
 string(7) "missing"
-OPcache\volatile_store(): Argument #2 ($value) must not be a Closure object
-string(7) "missing"
-bool(false)
+OPcache\VolatileCache::set(): Argument #2 ($value) must not be a Closure object
 string(7) "missing"
 bool(false)
 string(7) "missing"
@@ -137,19 +124,21 @@ bool(false)
 string(7) "missing"
 bool(false)
 string(7) "missing"
-OPcache\volatile_fetch(): Argument #2 ($default) must be of type object|array|string|int|float|bool|null, resource given
-OPcache\volatile_fetch(): Argument #2 ($default) must not be a Closure object
-OPcache\pinned_store(): Argument #2 ($value) must be of type object|array|string|int|float|bool|null, resource given
-OPcache\pinned_store(): Argument #2 ($value) must not be a Closure object
-OPcache\StaticCacheException: resources cannot be stored in the static cache
-OPcache\StaticCacheException: Closure objects cannot be stored in the static cache
-OPcache\StaticCacheException: resources cannot be stored in the static cache
-OPcache\StaticCacheException: Closure objects cannot be stored in the static cache
-OPcache\StaticCacheException: resources and Closure objects cannot be stored in the static cache
-OPcache\StaticCacheException: resources and Closure objects cannot be stored in the static cache
-OPcache\StaticCacheException: resources and Closure objects cannot be stored in the static cache
-OPcache\StaticCacheException: resources and Closure objects cannot be stored in the static cache
-OPcache\StaticCacheException: resources and Closure objects cannot be stored in the static cache
-OPcache\StaticCacheException: resources and Closure objects cannot be stored in the static cache
-OPcache\pinned_fetch(): Argument #2 ($default) must be of type object|array|string|int|float|bool|null, resource given
-OPcache\pinned_fetch(): Argument #2 ($default) must not be a Closure object
+bool(false)
+string(7) "missing"
+OPcache\VolatileCache::get(): Argument #2 ($default) must be of type object|array|string|int|float|bool|null, resource given
+OPcache\VolatileCache::get(): Argument #2 ($default) must not be a Closure object
+OPcache\PinnedCache::set(): Argument #2 ($value) must be of type object|array|string|int|float|bool|null, resource given
+OPcache\PinnedCache::set(): Argument #2 ($value) must not be a Closure object
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+OPcache\PinnedCache::get(): Argument #2 ($default) must be of type object|array|string|int|float|bool|null, resource given
+OPcache\PinnedCache::get(): Argument #2 ($default) must not be a Closure object

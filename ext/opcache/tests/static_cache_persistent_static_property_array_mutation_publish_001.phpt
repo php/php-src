@@ -18,7 +18,7 @@ class NestedSnapshotPropertyState
 $action = $_GET['action'] ?? 'read';
 
 if ($action === 'reset') {
-	OPcache\pinned_clear();
+	OPcache\PinnedCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;
@@ -28,7 +28,7 @@ if ($action === 'seed') {
 	NestedSnapshotPropertyState::$propertyState = ['numbers' => [1]];
 	NestedSnapshotPropertyState::$propertyState['numbers'][] = 2;
 	echo 'seed=', implode(',', NestedSnapshotPropertyState::$propertyState['numbers']), "\n";
-	echo 'entries=', OPcache\pinned_cache_info()->entry_count, "\n";
+	echo 'entries=', OPcache\PinnedCache::info()->entry_count, "\n";
 	return;
 }
 

@@ -50,7 +50,7 @@ $action = $_GET['action'] ?? 'read';
 $backend = $_GET['backend'] ?? 'volatile_static';
 
 if ($action === 'reset') {
-	OPcache\volatile_clear();
+	OPcache\VolatileCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;

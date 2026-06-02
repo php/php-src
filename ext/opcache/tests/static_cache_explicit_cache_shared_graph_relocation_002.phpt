@@ -38,30 +38,35 @@ function build_shared_graph_relocation_payload(string $label, int $multiplier): 
     ];
 }
 
+function cache_class_for_relocation(string $backend): string
+{
+    return $backend === 'volatile' ? 'OPcache\\VolatileCache' : 'OPcache\\PinnedCache';
+}
+
 function cache_clear_for_relocation(string $backend): void
 {
-    $function = 'OPcache\\' . $backend . '_clear';
-    $function();
+    $class = cache_class_for_relocation($backend);
+    $class::clear();
 }
 
 function cache_store_for_relocation(string $backend, string $key, mixed $value): bool
 {
-    $function = 'OPcache\\' . $backend . '_store';
+    $class = cache_class_for_relocation($backend);
 
-    return $function($key, $value);
+    return $class::set($key, $value);
 }
 
 function cache_fetch_for_relocation(string $backend, string $key): mixed
 {
-    $function = 'OPcache\\' . $backend . '_fetch';
+    $class = cache_class_for_relocation($backend);
 
-    return $function($key);
+    return $class::get($key);
 }
 
 function cache_delete_for_relocation(string $backend, string $key): void
 {
-    $function = 'OPcache\\' . $backend . '_delete';
-    $function($key);
+    $class = cache_class_for_relocation($backend);
+    $class::delete($key);
 }
 
 function run_shared_graph_relocation(string $backend, string $label): void

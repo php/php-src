@@ -58,7 +58,7 @@ static const char opcache_test_ini[] =
 
 static const char clear_code[] =
 	"(static function (): bool {"
-	"    OPcache\\volatile_clear();"
+	"    OPcache\\VolatileCache::clear();"
 	"    return true;"
 	"})()";
 
@@ -79,12 +79,12 @@ static const char worker_code[] =
 	"        ];"
 	"    }"
 	"    for ($i = 0; $i < 16; $i++) {"
-	"        if (!OPcache\\volatile_store('zts_request_shared_graph_refs_payload', $payload)) {"
+	"        if (!OPcache\\VolatileCache::set('zts_request_shared_graph_refs_payload', $payload)) {"
 	"            return false;"
 	"        }"
 	"    }"
 	"    for ($i = 0; $i < 64; $i++) {"
-	"        $fetched = OPcache\\volatile_fetch('zts_request_shared_graph_refs_payload');"
+	"        $fetched = OPcache\\VolatileCache::get('zts_request_shared_graph_refs_payload');"
 	"        if (!is_array($fetched)"
 	"            || !isset($fetched['routes'], $fetched['generators'])"
 	"            || count($fetched['routes']) !== 192) {"
@@ -136,6 +136,9 @@ static int zend_opcache_test_startup(int argc, char **argv)
 
 	zend_signal_startup();
 	sapi_startup(&php_embed_module);
+	/* Static Cache is opt-in per SAPI; this embed-based test enables it. */
+	extern void zend_opcache_static_cache_opt_in(void);
+	zend_opcache_static_cache_opt_in();
 	php_embed_module.ini_entries = opcache_test_ini;
 	if (argv != NULL) {
 		php_embed_module.executable_location = argv[0];

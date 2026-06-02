@@ -24,11 +24,11 @@ function build_rows(): array
 }
 
 if ($mode === 'store') {
-	return OPcache\volatile_store('zts_materialization_plain_payload', new LargePayload(build_rows(), 'plain'));
+	return OPcache\VolatileCache::set('zts_materialization_plain_payload', new LargePayload(build_rows(), 'plain'));
 }
 
 $before = memory_get_usage();
-$fetched = OPcache\volatile_fetch('zts_materialization_plain_payload');
+$fetched = OPcache\VolatileCache::get('zts_materialization_plain_payload');
 
 if (!$fetched instanceof LargePayload) {
 	return false;

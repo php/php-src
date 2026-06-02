@@ -31,33 +31,33 @@ function wait_for_file(string $path): void
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\volatile_clear();
+		OPcache\VolatileCache::clear();
 	} else {
-		OPcache\pinned_clear();
+		OPcache\PinnedCache::clear();
 	}
 }
 
 function cache_store(string $backend, string $key, mixed $value): void
 {
 	if ($backend === 'volatile') {
-		OPcache\volatile_store($key, $value);
+		OPcache\VolatileCache::set($key, $value);
 	} else {
-		OPcache\pinned_store($key, $value);
+		OPcache\PinnedCache::set($key, $value);
 	}
 }
 
 function cache_fetch(string $backend, string $key, mixed $default = null): mixed
 {
 	return $backend === 'volatile'
-		? OPcache\volatile_fetch($key, $default)
-		: OPcache\pinned_fetch($key, $default);
+		? OPcache\VolatileCache::get($key, $default)
+		: OPcache\PinnedCache::get($key, $default);
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\volatile_lock($key)
-		: OPcache\pinned_lock($key);
+		? OPcache\VolatileCache::lock($key)
+		: OPcache\PinnedCache::lock($key);
 }
 
 foreach (['volatile', 'pinned'] as $backend) {

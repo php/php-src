@@ -9,7 +9,7 @@ opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
-OPcache\pinned_store_array([
+OPcache\PinnedCache::setMultiple([
 	'count' => 10,
 	'name' => 'php',
 	'null' => null,
@@ -17,15 +17,15 @@ OPcache\pinned_store_array([
 
 $fallback = ['fallback'];
 
-var_dump(OPcache\pinned_fetch_array(['count', 'name', 'missing'], $fallback));
-var_dump(OPcache\pinned_atomic_increment('count'));
-var_dump(OPcache\pinned_atomic_decrement('count', 3));
+var_dump(OPcache\PinnedCache::getMultiple(['count', 'name', 'missing'], $fallback));
+var_dump(OPcache\PinnedCache::increment('count'));
+var_dump(OPcache\PinnedCache::decrement('count', 3));
 
-OPcache\pinned_delete_array(['name', 'missing']);
-var_dump(OPcache\pinned_fetch_array(['count', 'name', 'null'], $fallback));
+OPcache\PinnedCache::deleteMultiple(['name', 'missing']);
+var_dump(OPcache\PinnedCache::getMultiple(['count', 'name', 'null'], $fallback));
 
-OPcache\pinned_clear();
-var_dump(OPcache\pinned_fetch_array(['count'], $fallback));
+OPcache\PinnedCache::clear();
+var_dump(OPcache\PinnedCache::getMultiple(['count'], $fallback));
 
 ?>
 --EXPECT--

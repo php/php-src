@@ -39,15 +39,15 @@ foreach (['volatile', 'pinned'] as $backend) {
 
 	$reservedClassKey = $backend . '_static_class:LoadedClassKey';
 	$loadedClassKey = LoadedClassKey::class;
-	$store = $backend === 'volatile' ? OPcache\volatile_store(...) : OPcache\pinned_store(...);
-	$storeArray = $backend === 'volatile' ? OPcache\volatile_store_array(...) : OPcache\pinned_store_array(...);
-	$fetch = $backend === 'volatile' ? OPcache\volatile_fetch(...) : OPcache\pinned_fetch(...);
-	$fetchArray = $backend === 'volatile' ? OPcache\volatile_fetch_array(...) : OPcache\pinned_fetch_array(...);
-	$exists = $backend === 'volatile' ? OPcache\volatile_exists(...) : OPcache\pinned_exists(...);
-	$lock = $backend === 'volatile' ? OPcache\volatile_lock(...) : OPcache\pinned_lock(...);
-	$unlock = $backend === 'volatile' ? OPcache\volatile_unlock(...) : OPcache\pinned_unlock(...);
-	$delete = $backend === 'volatile' ? OPcache\volatile_delete(...) : OPcache\pinned_delete(...);
-	$deleteArray = $backend === 'volatile' ? OPcache\volatile_delete_array(...) : OPcache\pinned_delete_array(...);
+	$store = $backend === 'volatile' ? OPcache\VolatileCache::set(...) : OPcache\PinnedCache::set(...);
+	$storeArray = $backend === 'volatile' ? OPcache\VolatileCache::setMultiple(...) : OPcache\PinnedCache::setMultiple(...);
+	$fetch = $backend === 'volatile' ? OPcache\VolatileCache::get(...) : OPcache\PinnedCache::get(...);
+	$fetchArray = $backend === 'volatile' ? OPcache\VolatileCache::getMultiple(...) : OPcache\PinnedCache::getMultiple(...);
+	$exists = $backend === 'volatile' ? OPcache\VolatileCache::has(...) : OPcache\PinnedCache::has(...);
+	$lock = $backend === 'volatile' ? OPcache\VolatileCache::lock(...) : OPcache\PinnedCache::lock(...);
+	$unlock = $backend === 'volatile' ? OPcache\VolatileCache::unlock(...) : OPcache\PinnedCache::unlock(...);
+	$delete = $backend === 'volatile' ? OPcache\VolatileCache::delete(...) : OPcache\PinnedCache::delete(...);
+	$deleteArray = $backend === 'volatile' ? OPcache\VolatileCache::deleteMultiple(...) : OPcache\PinnedCache::deleteMultiple(...);
 
 	dump_error('store-empty', static fn () => $store('', 'value'));
 	dump_error('store-array-empty', static fn () => $storeArray(['' => 'value']));
@@ -80,76 +80,76 @@ foreach (['volatile', 'pinned'] as $backend) {
 	dump_error('delete-array-loaded-class', static fn () => $deleteArray([$loadedClassKey]));
 
 	if ($backend === 'pinned') {
-		dump_error('atomic-increment-reserved-class', static fn () => OPcache\pinned_atomic_increment($reservedClassKey));
-		dump_error('atomic-decrement-reserved-class', static fn () => OPcache\pinned_atomic_decrement($reservedClassKey));
-		dump_error('atomic-increment-loaded-class', static fn () => OPcache\pinned_atomic_increment($loadedClassKey));
-		dump_error('atomic-decrement-loaded-class', static fn () => OPcache\pinned_atomic_decrement($loadedClassKey));
+		dump_error('atomic-increment-reserved-class', static fn () => OPcache\PinnedCache::increment($reservedClassKey));
+		dump_error('atomic-decrement-reserved-class', static fn () => OPcache\PinnedCache::decrement($reservedClassKey));
+		dump_error('atomic-increment-loaded-class', static fn () => OPcache\PinnedCache::increment($loadedClassKey));
+		dump_error('atomic-decrement-loaded-class', static fn () => OPcache\PinnedCache::decrement($loadedClassKey));
 	}
 }
 
 ?>
 --EXPECTF--
 volatile
-store-empty: ValueError: OPcache\volatile_store(): Argument #1 ($key) must be a non-empty string
-store-array-empty: ValueError: OPcache\volatile_store_array(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
-store-reserved-class: ValueError: OPcache\volatile_store(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
-store-array-reserved-class: ValueError: OPcache\volatile_store_array(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
-store-loaded-class: ValueError: OPcache\volatile_store(): Argument #1 ($key) must not be a loaded class name
-store-array-loaded-class: ValueError: OPcache\volatile_store_array(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
-fetch-empty: ValueError: OPcache\volatile_fetch(): Argument #1 ($key) must be a non-empty string
-fetch-array-empty: ValueError: OPcache\volatile_fetch_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-fetch-array-object: ValueError: OPcache\volatile_fetch_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-fetch-reserved-class: ValueError: OPcache\volatile_fetch(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
-fetch-array-reserved-class: ValueError: OPcache\volatile_fetch_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-fetch-loaded-class: ValueError: OPcache\volatile_fetch(): Argument #1 ($key) must not be a loaded class name
-fetch-array-loaded-class: ValueError: OPcache\volatile_fetch_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-exists-empty: ValueError: OPcache\volatile_exists(): Argument #1 ($key) must be a non-empty string
-exists-reserved-class: ValueError: OPcache\volatile_exists(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
-exists-loaded-class: ValueError: OPcache\volatile_exists(): Argument #1 ($key) must not be a loaded class name
-lock-empty: ValueError: OPcache\volatile_lock(): Argument #1 ($key) must be a non-empty string
-lock-negative-lease: ValueError: OPcache\volatile_lock(): Argument #2 ($lease) must be greater than or equal to 0
-lock-reserved-class: ValueError: OPcache\volatile_lock(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
-lock-loaded-class: ValueError: OPcache\volatile_lock(): Argument #1 ($key) must not be a loaded class name
-unlock-empty: ValueError: OPcache\volatile_unlock(): Argument #1 ($key) must be a non-empty string
-unlock-reserved-class: ValueError: OPcache\volatile_unlock(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
-unlock-loaded-class: ValueError: OPcache\volatile_unlock(): Argument #1 ($key) must not be a loaded class name
-delete-empty: ValueError: OPcache\volatile_delete(): Argument #1 ($key_or_class) must be a non-empty string
-delete-reserved-class: ValueError: OPcache\volatile_delete(): Argument #1 ($key_or_class) must not start with a reserved static-cache class key prefix
-delete-array-empty: ValueError: OPcache\volatile_delete_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-delete-array-object: ValueError: OPcache\volatile_delete_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-delete-array-reserved-class: ValueError: OPcache\volatile_delete_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-delete-array-loaded-class: ValueError: OPcache\volatile_delete_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+store-empty: ValueError: OPcache\VolatileCache::set(): Argument #1 ($key) must be a non-empty string
+store-array-empty: ValueError: OPcache\VolatileCache::setMultiple(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
+store-reserved-class: ValueError: OPcache\VolatileCache::set(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
+store-array-reserved-class: ValueError: OPcache\VolatileCache::setMultiple(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
+store-loaded-class: ValueError: OPcache\VolatileCache::set(): Argument #1 ($key) must not be a loaded class name
+store-array-loaded-class: ValueError: OPcache\VolatileCache::setMultiple(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
+fetch-empty: ValueError: OPcache\VolatileCache::get(): Argument #1 ($key) must be a non-empty string
+fetch-array-empty: ValueError: OPcache\VolatileCache::getMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+fetch-array-object: ValueError: OPcache\VolatileCache::getMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+fetch-reserved-class: ValueError: OPcache\VolatileCache::get(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
+fetch-array-reserved-class: ValueError: OPcache\VolatileCache::getMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+fetch-loaded-class: ValueError: OPcache\VolatileCache::get(): Argument #1 ($key) must not be a loaded class name
+fetch-array-loaded-class: ValueError: OPcache\VolatileCache::getMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+exists-empty: ValueError: OPcache\VolatileCache::has(): Argument #1 ($key) must be a non-empty string
+exists-reserved-class: ValueError: OPcache\VolatileCache::has(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
+exists-loaded-class: ValueError: OPcache\VolatileCache::has(): Argument #1 ($key) must not be a loaded class name
+lock-empty: ValueError: OPcache\VolatileCache::lock(): Argument #1 ($key) must be a non-empty string
+lock-negative-lease: ValueError: OPcache\VolatileCache::lock(): Argument #2 ($lease) must be greater than or equal to 0
+lock-reserved-class: ValueError: OPcache\VolatileCache::lock(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
+lock-loaded-class: ValueError: OPcache\VolatileCache::lock(): Argument #1 ($key) must not be a loaded class name
+unlock-empty: ValueError: OPcache\VolatileCache::unlock(): Argument #1 ($key) must be a non-empty string
+unlock-reserved-class: ValueError: OPcache\VolatileCache::unlock(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
+unlock-loaded-class: ValueError: OPcache\VolatileCache::unlock(): Argument #1 ($key) must not be a loaded class name
+delete-empty: ValueError: OPcache\VolatileCache::delete(): Argument #1 ($key_or_class) must be a non-empty string
+delete-reserved-class: ValueError: OPcache\VolatileCache::delete(): Argument #1 ($key_or_class) must not start with a reserved static-cache class key prefix
+delete-array-empty: ValueError: OPcache\VolatileCache::deleteMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+delete-array-object: ValueError: OPcache\VolatileCache::deleteMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+delete-array-reserved-class: ValueError: OPcache\VolatileCache::deleteMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+delete-array-loaded-class: ValueError: OPcache\VolatileCache::deleteMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
 pinned
-store-empty: ValueError: OPcache\pinned_store(): Argument #1 ($key) must be a non-empty string
-store-array-empty: ValueError: OPcache\pinned_store_array(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
-store-reserved-class: ValueError: OPcache\pinned_store(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
-store-array-reserved-class: ValueError: OPcache\pinned_store_array(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
-store-loaded-class: ValueError: OPcache\pinned_store(): Argument #1 ($key) must not be a loaded class name
-store-array-loaded-class: ValueError: OPcache\pinned_store_array(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
-fetch-empty: ValueError: OPcache\pinned_fetch(): Argument #1 ($key) must be a non-empty string
-fetch-array-empty: ValueError: OPcache\pinned_fetch_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-fetch-array-object: ValueError: OPcache\pinned_fetch_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-fetch-reserved-class: ValueError: OPcache\pinned_fetch(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
-fetch-array-reserved-class: ValueError: OPcache\pinned_fetch_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-fetch-loaded-class: ValueError: OPcache\pinned_fetch(): Argument #1 ($key) must not be a loaded class name
-fetch-array-loaded-class: ValueError: OPcache\pinned_fetch_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-exists-empty: ValueError: OPcache\pinned_exists(): Argument #1 ($key) must be a non-empty string
-exists-reserved-class: ValueError: OPcache\pinned_exists(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
-exists-loaded-class: ValueError: OPcache\pinned_exists(): Argument #1 ($key) must not be a loaded class name
-lock-empty: ValueError: OPcache\pinned_lock(): Argument #1 ($key) must be a non-empty string
-lock-negative-lease: ValueError: OPcache\pinned_lock(): Argument #2 ($lease) must be greater than or equal to 0
-lock-reserved-class: ValueError: OPcache\pinned_lock(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
-lock-loaded-class: ValueError: OPcache\pinned_lock(): Argument #1 ($key) must not be a loaded class name
-unlock-empty: ValueError: OPcache\pinned_unlock(): Argument #1 ($key) must be a non-empty string
-unlock-reserved-class: ValueError: OPcache\pinned_unlock(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
-unlock-loaded-class: ValueError: OPcache\pinned_unlock(): Argument #1 ($key) must not be a loaded class name
-delete-empty: ValueError: OPcache\pinned_delete(): Argument #1 ($key_or_class) must be a non-empty string
-delete-reserved-class: ValueError: OPcache\pinned_delete(): Argument #1 ($key_or_class) must not start with a reserved static-cache class key prefix
-delete-array-empty: ValueError: OPcache\pinned_delete_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-delete-array-object: ValueError: OPcache\pinned_delete_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-delete-array-reserved-class: ValueError: OPcache\pinned_delete_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-delete-array-loaded-class: ValueError: OPcache\pinned_delete_array(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
-atomic-increment-reserved-class: ValueError: OPcache\pinned_atomic_increment(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
-atomic-decrement-reserved-class: ValueError: OPcache\pinned_atomic_decrement(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
-atomic-increment-loaded-class: ValueError: OPcache\pinned_atomic_increment(): Argument #1 ($key) must not be a loaded class name
-atomic-decrement-loaded-class: ValueError: OPcache\pinned_atomic_decrement(): Argument #1 ($key) must not be a loaded class name
+store-empty: ValueError: OPcache\PinnedCache::set(): Argument #1 ($key) must be a non-empty string
+store-array-empty: ValueError: OPcache\PinnedCache::setMultiple(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
+store-reserved-class: ValueError: OPcache\PinnedCache::set(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
+store-array-reserved-class: ValueError: OPcache\PinnedCache::setMultiple(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
+store-loaded-class: ValueError: OPcache\PinnedCache::set(): Argument #1 ($key) must not be a loaded class name
+store-array-loaded-class: ValueError: OPcache\PinnedCache::setMultiple(): Argument #1 ($values) must be an array with non-empty string keys that are not reserved static-cache class keys or loaded class names
+fetch-empty: ValueError: OPcache\PinnedCache::get(): Argument #1 ($key) must be a non-empty string
+fetch-array-empty: ValueError: OPcache\PinnedCache::getMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+fetch-array-object: ValueError: OPcache\PinnedCache::getMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+fetch-reserved-class: ValueError: OPcache\PinnedCache::get(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
+fetch-array-reserved-class: ValueError: OPcache\PinnedCache::getMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+fetch-loaded-class: ValueError: OPcache\PinnedCache::get(): Argument #1 ($key) must not be a loaded class name
+fetch-array-loaded-class: ValueError: OPcache\PinnedCache::getMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+exists-empty: ValueError: OPcache\PinnedCache::has(): Argument #1 ($key) must be a non-empty string
+exists-reserved-class: ValueError: OPcache\PinnedCache::has(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
+exists-loaded-class: ValueError: OPcache\PinnedCache::has(): Argument #1 ($key) must not be a loaded class name
+lock-empty: ValueError: OPcache\PinnedCache::lock(): Argument #1 ($key) must be a non-empty string
+lock-negative-lease: ValueError: OPcache\PinnedCache::lock(): Argument #2 ($lease) must be greater than or equal to 0
+lock-reserved-class: ValueError: OPcache\PinnedCache::lock(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
+lock-loaded-class: ValueError: OPcache\PinnedCache::lock(): Argument #1 ($key) must not be a loaded class name
+unlock-empty: ValueError: OPcache\PinnedCache::unlock(): Argument #1 ($key) must be a non-empty string
+unlock-reserved-class: ValueError: OPcache\PinnedCache::unlock(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
+unlock-loaded-class: ValueError: OPcache\PinnedCache::unlock(): Argument #1 ($key) must not be a loaded class name
+delete-empty: ValueError: OPcache\PinnedCache::delete(): Argument #1 ($key_or_class) must be a non-empty string
+delete-reserved-class: ValueError: OPcache\PinnedCache::delete(): Argument #1 ($key_or_class) must not start with a reserved static-cache class key prefix
+delete-array-empty: ValueError: OPcache\PinnedCache::deleteMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+delete-array-object: ValueError: OPcache\PinnedCache::deleteMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+delete-array-reserved-class: ValueError: OPcache\PinnedCache::deleteMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+delete-array-loaded-class: ValueError: OPcache\PinnedCache::deleteMultiple(): Argument #1 ($keys) must contain only non-empty string or int cache keys that are not reserved static-cache class keys or loaded class names
+atomic-increment-reserved-class: ValueError: OPcache\PinnedCache::increment(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
+atomic-decrement-reserved-class: ValueError: OPcache\PinnedCache::decrement(): Argument #1 ($key) must not start with a reserved static-cache class key prefix
+atomic-increment-loaded-class: ValueError: OPcache\PinnedCache::increment(): Argument #1 ($key) must not be a loaded class name
+atomic-decrement-loaded-class: ValueError: OPcache\PinnedCache::decrement(): Argument #1 ($key) must not be a loaded class name

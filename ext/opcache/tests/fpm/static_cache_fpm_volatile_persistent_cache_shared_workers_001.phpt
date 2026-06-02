@@ -32,8 +32,8 @@ $pid = getmypid();
 $key = 'fpm_multi_worker_volatile_cache';
 
 if ($action === 'seed') {
-    OPcache\volatile_clear();
-    OPcache\volatile_store($key, 'stored-value');
+    OPcache\VolatileCache::clear();
+    OPcache\VolatileCache::set($key, 'stored-value');
     FpmPinnedStaticWorkerShare::$value = 42;
     echo 'seed:', $pid;
     return;
@@ -46,7 +46,7 @@ if ($pid === $seedPid) {
 }
 
 if ($action === 'fetch_volatile') {
-    $value = OPcache\volatile_fetch($key, 'MISS');
+    $value = OPcache\VolatileCache::get($key, 'MISS');
     usleep(200000);
     echo 'fetch:', $pid, ':', $value;
     return;

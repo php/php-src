@@ -27,9 +27,9 @@ class ReentrantFetchPayload
 		echo "unserialize-", $this->backend, "\n";
 
 		if ($this->backend === 'volatile') {
-			OPcache\volatile_store('fetch_inner_volatile', 'ok');
+			OPcache\VolatileCache::set('fetch_inner_volatile', 'ok');
 		} else {
-			OPcache\pinned_store('fetch_inner_pinned', 'ok');
+			OPcache\PinnedCache::set('fetch_inner_pinned', 'ok');
 		}
 	}
 }
@@ -38,15 +38,15 @@ foreach (['volatile', 'pinned'] as $backend) {
 	echo $backend, "\n";
 
 	if ($backend === 'volatile') {
-		OPcache\volatile_clear();
-		OPcache\volatile_store('fetch_payload', new ReentrantFetchPayload($backend));
-		var_dump(OPcache\volatile_fetch('fetch_payload') instanceof ReentrantFetchPayload);
-		var_dump(OPcache\volatile_fetch('fetch_inner_volatile'));
+		OPcache\VolatileCache::clear();
+		OPcache\VolatileCache::set('fetch_payload', new ReentrantFetchPayload($backend));
+		var_dump(OPcache\VolatileCache::get('fetch_payload') instanceof ReentrantFetchPayload);
+		var_dump(OPcache\VolatileCache::get('fetch_inner_volatile'));
 	} else {
-		OPcache\pinned_clear();
-		OPcache\pinned_store('fetch_payload', new ReentrantFetchPayload($backend));
-		var_dump(OPcache\pinned_fetch('fetch_payload') instanceof ReentrantFetchPayload);
-		var_dump(OPcache\pinned_fetch('fetch_inner_pinned'));
+		OPcache\PinnedCache::clear();
+		OPcache\PinnedCache::set('fetch_payload', new ReentrantFetchPayload($backend));
+		var_dump(OPcache\PinnedCache::get('fetch_payload') instanceof ReentrantFetchPayload);
+		var_dump(OPcache\PinnedCache::get('fetch_inner_pinned'));
 	}
 }
 

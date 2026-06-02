@@ -61,8 +61,8 @@ function run_same_key_refetch_case(string $operation): void
 	@unlink($doneFile);
 	@unlink($resultFile);
 
-	OPcache\volatile_clear();
-	if (!OPcache\volatile_store($key, build_same_key_payload('A', 3))) {
+	OPcache\VolatileCache::clear();
+	if (!OPcache\VolatileCache::set($key, build_same_key_payload('A', 3))) {
 		throw new RuntimeException('initial store failed');
 	}
 
@@ -72,7 +72,7 @@ function run_same_key_refetch_case(string $operation): void
 	}
 
 	if ($pid === 0) {
-		$fetched = OPcache\volatile_fetch($key);
+		$fetched = OPcache\VolatileCache::get($key);
 		file_put_contents($readyFile, 'ready');
 		wait_for_same_key_file($doneFile);
 
@@ -80,7 +80,7 @@ function run_same_key_refetch_case(string $operation): void
 		$fetched['rows'][123]['text'] = 'changed old after ' . $operation;
 		$after = $fetched['rows'][123]['text'];
 		$oldNested = $fetched['rows'][123]['nested']['value'];
-		$refetched = OPcache\volatile_fetch($key, 'MISS');
+		$refetched = OPcache\VolatileCache::get($key, 'MISS');
 
 		file_put_contents(
 			$resultFile,
@@ -96,12 +96,12 @@ function run_same_key_refetch_case(string $operation): void
 	wait_for_same_key_file($readyFile);
 	switch ($operation) {
 		case 'delete':
-			if (!OPcache\volatile_delete($key)) {
+			if (!OPcache\VolatileCache::delete($key)) {
 				throw new RuntimeException('delete failed');
 			}
 			break;
 		case 'clear':
-			if (!OPcache\volatile_clear()) {
+			if (!OPcache\VolatileCache::clear()) {
 				throw new RuntimeException('clear failed');
 			}
 			break;
@@ -109,10 +109,10 @@ function run_same_key_refetch_case(string $operation): void
 			throw new RuntimeException('unknown operation');
 	}
 
-	if (!OPcache\volatile_store($key, build_same_key_payload('B', 7))) {
+	if (!OPcache\VolatileCache::set($key, build_same_key_payload('B', 7))) {
 		throw new RuntimeException('replacement store failed');
 	}
-	$parentRefetched = OPcache\volatile_fetch($key);
+	$parentRefetched = OPcache\VolatileCache::get($key);
 
 	file_put_contents($doneFile, 'done');
 	pcntl_waitpid($pid, $status);

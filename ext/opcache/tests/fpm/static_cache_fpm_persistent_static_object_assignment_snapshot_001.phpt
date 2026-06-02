@@ -28,15 +28,15 @@ class NestedObjectPropertyState
 
 NestedObjectPropertyState::$propertyState ??= (object) ['count' => 1];
 echo NestedObjectPropertyState::$propertyState->count, "\n";
-echo OPcache\pinned_cache_info()->entry_count, "\n";
+echo OPcache\PinnedCache::info()->entry_count, "\n";
 
 NestedObjectPropertyState::$propertyState->count++;
 echo NestedObjectPropertyState::$propertyState->count, "\n";
-echo OPcache\pinned_cache_info()->entry_count, "\n";
+echo OPcache\PinnedCache::info()->entry_count, "\n";
 
 NestedObjectPropertyState::$propertyState->count = 10;
 echo NestedObjectPropertyState::$propertyState->count, "\n";
-echo OPcache\pinned_cache_info()->entry_count;
+echo OPcache\PinnedCache::info()->entry_count;
 PHP;
 
 $tester = new FPM\Tester($cfg, $code);

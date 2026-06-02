@@ -42,7 +42,7 @@ if ($request === 1) {
 	return;
 }
 
-echo CombinedBlobState::$propertyCount, ',', CombinedBlobState::$propertyBag['numbers'][0], ',', CombinedBlobState::nextMethod(), ',', OPcache\pinned_cache_info()->entry_count, "\n";
+echo CombinedBlobState::$propertyCount, ',', CombinedBlobState::$propertyBag['numbers'][0], ',', CombinedBlobState::nextMethod(), ',', OPcache\PinnedCache::info()->entry_count, "\n";
 
 CombinedBlobState::$propertyCount++;
 CombinedBlobState::$propertyBag['numbers'][] = 11;

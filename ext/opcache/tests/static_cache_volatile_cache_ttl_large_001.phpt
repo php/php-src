@@ -9,10 +9,10 @@ opcache.static_cache.volatile_size_mb=32
 --FILE--
 <?php
 
-OPcache\volatile_clear();
+OPcache\VolatileCache::clear();
 
-var_dump(OPcache\volatile_store('large_ttl', 'value', PHP_INT_MAX));
-var_dump(OPcache\volatile_fetch('large_ttl', 'expired'));
+var_dump(OPcache\VolatileCache::set('large_ttl', 'value', PHP_INT_MAX));
+var_dump(OPcache\VolatileCache::get('large_ttl', 'expired'));
 
 ?>
 --EXPECT--

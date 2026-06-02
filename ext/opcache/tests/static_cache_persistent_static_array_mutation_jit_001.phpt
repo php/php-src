@@ -74,7 +74,7 @@ function warm_jit(): void
 $action = $_GET['action'] ?? 'read';
 
 if ($action === 'reset') {
-	OPcache\pinned_clear();
+	OPcache\PinnedCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;

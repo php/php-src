@@ -23,28 +23,28 @@ $code = <<<'PHP'
 $action = $_GET['action'] ?? 'seed';
 
 if ($action === 'seed') {
-    OPcache\volatile_clear();
-    var_dump(OPcache\volatile_store('counter', 41));
-    var_dump(OPcache\volatile_store_array([
+    OPcache\VolatileCache::clear();
+    var_dump(OPcache\VolatileCache::set('counter', 41));
+    var_dump(OPcache\VolatileCache::setMultiple([
         'message' => 'hello from fpm',
         'payload' => ['a' => 1, 'b' => [2, 3]],
     ]));
-    var_dump(OPcache\volatile_store('ttl_key', 'short-lived', 1));
+    var_dump(OPcache\VolatileCache::set('ttl_key', 'short-lived', 1));
     echo "seed\n";
     return;
 }
 
 if ($action === 'fetch') {
-    var_dump(OPcache\volatile_fetch('counter'));
-    var_dump(OPcache\volatile_fetch('message'));
-    var_dump(OPcache\volatile_fetch('payload'));
-    OPcache\volatile_delete_array(['message']);
-    echo OPcache\volatile_fetch('message', 'MISS'), "\n";
+    var_dump(OPcache\VolatileCache::get('counter'));
+    var_dump(OPcache\VolatileCache::get('message'));
+    var_dump(OPcache\VolatileCache::get('payload'));
+    OPcache\VolatileCache::deleteMultiple(['message']);
+    echo OPcache\VolatileCache::get('message', 'MISS'), "\n";
     echo "fetch\n";
     return;
 }
 
-echo OPcache\volatile_fetch('ttl_key', 'MISS'), "\n";
+echo OPcache\VolatileCache::get('ttl_key', 'MISS'), "\n";
 echo "expire\n";
 PHP;
 

@@ -1,5 +1,5 @@
 --TEST--
-OPcache volatile_cache_info and pinned_cache_info report separate cache backends
+OPcache VolatileCache::info and PinnedCache::info report separate cache backends
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -17,17 +17,17 @@ class PinnedInfoCounter
 
 $action = $_GET['action'] ?? 'write';
 if ($action === 'write') {
-	OPcache\volatile_store('explicit-volatile-key', 'volatile-value');
+	OPcache\VolatileCache::set('explicit-volatile-key', 'volatile-value');
 	echo ++PinnedInfoCounter::$value, "\n";
 	return;
 }
 
-$volatileInfo = OPcache\volatile_cache_info();
-$pinnedInfo = OPcache\pinned_cache_info();
+$volatileInfo = OPcache\VolatileCache::info();
+$pinnedInfo = OPcache\PinnedCache::info();
 $status = opcache_get_status();
 $config = opcache_get_configuration();
 
-echo $volatileInfo->entry_count, ',', $pinnedInfo->entry_count, ',', OPcache\volatile_fetch('explicit-volatile-key'), ',', ++PinnedInfoCounter::$value, "\n";
+echo $volatileInfo->entry_count, ',', $pinnedInfo->entry_count, ',', OPcache\VolatileCache::get('explicit-volatile-key'), ',', ++PinnedInfoCounter::$value, "\n";
 var_dump($status['volatile_cache'] == $volatileInfo);
 var_dump($status['pinned_cache'] == $pinnedInfo);
 var_dump($config['directives']['opcache.static_cache.volatile_size_mb']);

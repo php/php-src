@@ -200,7 +200,7 @@ $action = $_GET['action'] ?? 'read';
 $kind = $_GET['kind'] ?? 'class';
 
 if ($action === 'reset') {
-	OPcache\volatile_clear();
+	OPcache\VolatileCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;

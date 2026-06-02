@@ -1,5 +1,5 @@
 /* This is a generated file, edit opcache.stub.php instead.
- * Stub hash: 97f9dbdaf39f619254f05e89b18d48f5484f4fb0 */
+ * Stub hash: ad17ed5c8a3b83b385c4b188c39e375df65a4848 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_opcache_reset, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -28,98 +28,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_opcache_is_script_cached_in_file_cache arginfo_opcache_compile_file
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_volatile_store, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ttl, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw_on_error, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_volatile_store_array, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ttl, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw_on_error, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_OPcache_volatile_fetch, 0, 1, MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, default, MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw_on_error, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_OPcache_volatile_fetch_array, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, default, IS_ARRAY, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw_on_error, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_volatile_exists, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw_on_error, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_volatile_lock, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, lease, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw_on_error, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-#define arginfo_OPcache_volatile_unlock arginfo_OPcache_volatile_exists
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_volatile_delete, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, key_or_class, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw_on_error, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_volatile_delete_array, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw_on_error, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_volatile_clear, 0, 0, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw_on_error, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_OPcache_volatile_cache_info, 0, 0, OPcache\\StaticCacheInfo, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_pinned_store, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw_on_error, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_OPcache_pinned_store_array, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw_on_error, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-#define arginfo_OPcache_pinned_fetch arginfo_OPcache_volatile_fetch
-
-#define arginfo_OPcache_pinned_fetch_array arginfo_OPcache_volatile_fetch_array
-
-#define arginfo_OPcache_pinned_exists arginfo_OPcache_volatile_exists
-
-#define arginfo_OPcache_pinned_lock arginfo_OPcache_volatile_lock
-
-#define arginfo_OPcache_pinned_unlock arginfo_OPcache_volatile_exists
-
-#define arginfo_OPcache_pinned_delete arginfo_OPcache_volatile_delete
-
-#define arginfo_OPcache_pinned_delete_array arginfo_OPcache_volatile_delete_array
-
-#define arginfo_OPcache_pinned_clear arginfo_OPcache_volatile_clear
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_OPcache_pinned_atomic_increment, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, step, IS_LONG, 0, "1")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw_on_error, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-#define arginfo_OPcache_pinned_atomic_decrement arginfo_OPcache_pinned_atomic_increment
-
-#define arginfo_OPcache_pinned_cache_info arginfo_OPcache_volatile_cache_info
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OPcache_StaticCacheInfo___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
@@ -127,6 +35,92 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OPcache_VolatileStatic___construct, 0, 0, 0
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ttl, IS_LONG, 0, "0")
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, strategy, OPcache\\CacheStrategy, 0, "OPcache\\CacheStrategy::Immediate")
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_OPcache_VolatileCache_get, 0, 1, MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_MASK(0, default, MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_OPcache_VolatileCache_getMultiple, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, default, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OPcache_VolatileCache_set, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ttl, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OPcache_VolatileCache_setMultiple, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ttl, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OPcache_VolatileCache_has, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OPcache_VolatileCache_delete, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, key_or_class, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OPcache_VolatileCache_deleteMultiple, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_OPcache_VolatileCache_clear arginfo_opcache_reset
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OPcache_VolatileCache_lock, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, lease, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_OPcache_VolatileCache_unlock arginfo_class_OPcache_VolatileCache_has
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OPcache_VolatileCache_getCacheStoreType, 0, 1, OPcache\\CacheStoreType, 0)
+	ZEND_ARG_TYPE_INFO(0, key_or_property, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class_name, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_OPcache_VolatileCache_info, 0, 0, OPcache\\StaticCacheInfo, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_OPcache_PinnedCache_get arginfo_class_OPcache_VolatileCache_get
+
+#define arginfo_class_OPcache_PinnedCache_getMultiple arginfo_class_OPcache_VolatileCache_getMultiple
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OPcache_PinnedCache_set, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_OPcache_PinnedCache_setMultiple, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, values, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_OPcache_PinnedCache_has arginfo_class_OPcache_VolatileCache_has
+
+#define arginfo_class_OPcache_PinnedCache_delete arginfo_class_OPcache_VolatileCache_delete
+
+#define arginfo_class_OPcache_PinnedCache_deleteMultiple arginfo_class_OPcache_VolatileCache_deleteMultiple
+
+#define arginfo_class_OPcache_PinnedCache_clear arginfo_opcache_reset
+
+#define arginfo_class_OPcache_PinnedCache_lock arginfo_class_OPcache_VolatileCache_lock
+
+#define arginfo_class_OPcache_PinnedCache_unlock arginfo_class_OPcache_VolatileCache_has
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_OPcache_PinnedCache_increment, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, step, IS_LONG, 0, "1")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_OPcache_PinnedCache_decrement arginfo_class_OPcache_PinnedCache_increment
+
+#define arginfo_class_OPcache_PinnedCache_getCacheStoreType arginfo_class_OPcache_VolatileCache_getCacheStoreType
+
+#define arginfo_class_OPcache_PinnedCache_info arginfo_class_OPcache_VolatileCache_info
 
 ZEND_FUNCTION(opcache_reset);
 ZEND_FUNCTION(opcache_get_status);
@@ -136,32 +130,34 @@ ZEND_FUNCTION(opcache_jit_blacklist);
 ZEND_FUNCTION(opcache_get_configuration);
 ZEND_FUNCTION(opcache_is_script_cached);
 ZEND_FUNCTION(opcache_is_script_cached_in_file_cache);
-ZEND_FUNCTION(OPcache_volatile_store);
-ZEND_FUNCTION(OPcache_volatile_store_array);
-ZEND_FUNCTION(OPcache_volatile_fetch);
-ZEND_FUNCTION(OPcache_volatile_fetch_array);
-ZEND_FUNCTION(OPcache_volatile_exists);
-ZEND_FUNCTION(OPcache_volatile_lock);
-ZEND_FUNCTION(OPcache_volatile_unlock);
-ZEND_FUNCTION(OPcache_volatile_delete);
-ZEND_FUNCTION(OPcache_volatile_delete_array);
-ZEND_FUNCTION(OPcache_volatile_clear);
-ZEND_FUNCTION(OPcache_volatile_cache_info);
-ZEND_FUNCTION(OPcache_pinned_store);
-ZEND_FUNCTION(OPcache_pinned_store_array);
-ZEND_FUNCTION(OPcache_pinned_fetch);
-ZEND_FUNCTION(OPcache_pinned_fetch_array);
-ZEND_FUNCTION(OPcache_pinned_exists);
-ZEND_FUNCTION(OPcache_pinned_lock);
-ZEND_FUNCTION(OPcache_pinned_unlock);
-ZEND_FUNCTION(OPcache_pinned_delete);
-ZEND_FUNCTION(OPcache_pinned_delete_array);
-ZEND_FUNCTION(OPcache_pinned_clear);
-ZEND_FUNCTION(OPcache_pinned_atomic_increment);
-ZEND_FUNCTION(OPcache_pinned_atomic_decrement);
-ZEND_FUNCTION(OPcache_pinned_cache_info);
 ZEND_METHOD(OPcache_StaticCacheInfo, __construct);
 ZEND_METHOD(OPcache_VolatileStatic, __construct);
+ZEND_METHOD(OPcache_VolatileCache, get);
+ZEND_METHOD(OPcache_VolatileCache, getMultiple);
+ZEND_METHOD(OPcache_VolatileCache, set);
+ZEND_METHOD(OPcache_VolatileCache, setMultiple);
+ZEND_METHOD(OPcache_VolatileCache, has);
+ZEND_METHOD(OPcache_VolatileCache, delete);
+ZEND_METHOD(OPcache_VolatileCache, deleteMultiple);
+ZEND_METHOD(OPcache_VolatileCache, clear);
+ZEND_METHOD(OPcache_VolatileCache, lock);
+ZEND_METHOD(OPcache_VolatileCache, unlock);
+ZEND_METHOD(OPcache_VolatileCache, getCacheStoreType);
+ZEND_METHOD(OPcache_VolatileCache, info);
+ZEND_METHOD(OPcache_PinnedCache, get);
+ZEND_METHOD(OPcache_PinnedCache, getMultiple);
+ZEND_METHOD(OPcache_PinnedCache, set);
+ZEND_METHOD(OPcache_PinnedCache, setMultiple);
+ZEND_METHOD(OPcache_PinnedCache, has);
+ZEND_METHOD(OPcache_PinnedCache, delete);
+ZEND_METHOD(OPcache_PinnedCache, deleteMultiple);
+ZEND_METHOD(OPcache_PinnedCache, clear);
+ZEND_METHOD(OPcache_PinnedCache, lock);
+ZEND_METHOD(OPcache_PinnedCache, unlock);
+ZEND_METHOD(OPcache_PinnedCache, increment);
+ZEND_METHOD(OPcache_PinnedCache, decrement);
+ZEND_METHOD(OPcache_PinnedCache, getCacheStoreType);
+ZEND_METHOD(OPcache_PinnedCache, info);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(opcache_reset, arginfo_opcache_reset)
@@ -172,30 +168,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(opcache_get_configuration, arginfo_opcache_get_configuration)
 	ZEND_FE(opcache_is_script_cached, arginfo_opcache_is_script_cached)
 	ZEND_FE(opcache_is_script_cached_in_file_cache, arginfo_opcache_is_script_cached_in_file_cache)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "volatile_store"), zif_OPcache_volatile_store, arginfo_OPcache_volatile_store, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "volatile_store_array"), zif_OPcache_volatile_store_array, arginfo_OPcache_volatile_store_array, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "volatile_fetch"), zif_OPcache_volatile_fetch, arginfo_OPcache_volatile_fetch, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "volatile_fetch_array"), zif_OPcache_volatile_fetch_array, arginfo_OPcache_volatile_fetch_array, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "volatile_exists"), zif_OPcache_volatile_exists, arginfo_OPcache_volatile_exists, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "volatile_lock"), zif_OPcache_volatile_lock, arginfo_OPcache_volatile_lock, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "volatile_unlock"), zif_OPcache_volatile_unlock, arginfo_OPcache_volatile_unlock, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "volatile_delete"), zif_OPcache_volatile_delete, arginfo_OPcache_volatile_delete, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "volatile_delete_array"), zif_OPcache_volatile_delete_array, arginfo_OPcache_volatile_delete_array, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "volatile_clear"), zif_OPcache_volatile_clear, arginfo_OPcache_volatile_clear, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "volatile_cache_info"), zif_OPcache_volatile_cache_info, arginfo_OPcache_volatile_cache_info, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_store"), zif_OPcache_pinned_store, arginfo_OPcache_pinned_store, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_store_array"), zif_OPcache_pinned_store_array, arginfo_OPcache_pinned_store_array, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_fetch"), zif_OPcache_pinned_fetch, arginfo_OPcache_pinned_fetch, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_fetch_array"), zif_OPcache_pinned_fetch_array, arginfo_OPcache_pinned_fetch_array, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_exists"), zif_OPcache_pinned_exists, arginfo_OPcache_pinned_exists, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_lock"), zif_OPcache_pinned_lock, arginfo_OPcache_pinned_lock, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_unlock"), zif_OPcache_pinned_unlock, arginfo_OPcache_pinned_unlock, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_delete"), zif_OPcache_pinned_delete, arginfo_OPcache_pinned_delete, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_delete_array"), zif_OPcache_pinned_delete_array, arginfo_OPcache_pinned_delete_array, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_clear"), zif_OPcache_pinned_clear, arginfo_OPcache_pinned_clear, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_atomic_increment"), zif_OPcache_pinned_atomic_increment, arginfo_OPcache_pinned_atomic_increment, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_atomic_decrement"), zif_OPcache_pinned_atomic_decrement, arginfo_OPcache_pinned_atomic_decrement, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("OPcache", "pinned_cache_info"), zif_OPcache_pinned_cache_info, arginfo_OPcache_pinned_cache_info, 0, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -206,6 +178,40 @@ static const zend_function_entry class_OPcache_StaticCacheInfo_methods[] = {
 
 static const zend_function_entry class_OPcache_VolatileStatic_methods[] = {
 	ZEND_ME(OPcache_VolatileStatic, __construct, arginfo_class_OPcache_VolatileStatic___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_OPcache_VolatileCache_methods[] = {
+	ZEND_ME(OPcache_VolatileCache, get, arginfo_class_OPcache_VolatileCache_get, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_VolatileCache, getMultiple, arginfo_class_OPcache_VolatileCache_getMultiple, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_VolatileCache, set, arginfo_class_OPcache_VolatileCache_set, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_VolatileCache, setMultiple, arginfo_class_OPcache_VolatileCache_setMultiple, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_VolatileCache, has, arginfo_class_OPcache_VolatileCache_has, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_VolatileCache, delete, arginfo_class_OPcache_VolatileCache_delete, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_VolatileCache, deleteMultiple, arginfo_class_OPcache_VolatileCache_deleteMultiple, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_VolatileCache, clear, arginfo_class_OPcache_VolatileCache_clear, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_VolatileCache, lock, arginfo_class_OPcache_VolatileCache_lock, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_VolatileCache, unlock, arginfo_class_OPcache_VolatileCache_unlock, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_VolatileCache, getCacheStoreType, arginfo_class_OPcache_VolatileCache_getCacheStoreType, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_VolatileCache, info, arginfo_class_OPcache_VolatileCache_info, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_OPcache_PinnedCache_methods[] = {
+	ZEND_ME(OPcache_PinnedCache, get, arginfo_class_OPcache_PinnedCache_get, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, getMultiple, arginfo_class_OPcache_PinnedCache_getMultiple, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, set, arginfo_class_OPcache_PinnedCache_set, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, setMultiple, arginfo_class_OPcache_PinnedCache_setMultiple, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, has, arginfo_class_OPcache_PinnedCache_has, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, delete, arginfo_class_OPcache_PinnedCache_delete, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, deleteMultiple, arginfo_class_OPcache_PinnedCache_deleteMultiple, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, clear, arginfo_class_OPcache_PinnedCache_clear, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, lock, arginfo_class_OPcache_PinnedCache_lock, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, unlock, arginfo_class_OPcache_PinnedCache_unlock, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, increment, arginfo_class_OPcache_PinnedCache_increment, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, decrement, arginfo_class_OPcache_PinnedCache_decrement, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, getCacheStoreType, arginfo_class_OPcache_PinnedCache_getCacheStoreType, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(OPcache_PinnedCache, info, arginfo_class_OPcache_PinnedCache_info, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -319,6 +325,23 @@ static zend_class_entry *register_class_OPcache_CacheStrategy(void)
 	return class_entry;
 }
 
+static zend_class_entry *register_class_OPcache_CacheStoreType(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("OPcache\\CacheStoreType", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "NotFound", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Scalar", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "SharedGraph", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "OPcacheSerialized", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "PHPSerialized", NULL);
+
+	return class_entry;
+}
+
 static zend_class_entry *register_class_OPcache_VolatileStatic(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -343,6 +366,26 @@ static zend_class_entry *register_class_OPcache_VolatileStatic(void)
 	zend_attribute *attribute_Attribute_class_OPcache_VolatileStatic_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_OPcache_VolatileStatic_0, 1);
 	zend_string_release_ex(attribute_name_Attribute_class_OPcache_VolatileStatic_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_OPcache_VolatileStatic_0->args[0].value, 13);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_OPcache_VolatileCache(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "OPcache", "VolatileCache", class_OPcache_VolatileCache_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_OPcache_PinnedCache(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "OPcache", "PinnedCache", class_OPcache_PinnedCache_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	return class_entry;
 }

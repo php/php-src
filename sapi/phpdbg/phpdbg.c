@@ -31,6 +31,7 @@
 #include "php_main.h"
 
 #include "ext/standard/basic_functions.h"
+#include "ext/opcache/zend_static_cache.h" /* for OPcache Static Cache opt-in */
 
 #if defined(PHP_WIN32) && defined(HAVE_OPENSSL_EXT)
 # include "openssl/applink.c"
@@ -686,6 +687,8 @@ static zend_module_entry sapi_phpdbg_module_entry = {
 
 static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* {{{ */
 {
+	zend_opcache_static_cache_opt_in();
+
 	if (php_module_startup(module, &sapi_phpdbg_module_entry) == FAILURE) {
 		return FAILURE;
 	}

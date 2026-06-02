@@ -1,5 +1,5 @@
 --TEST--
-OPcache pinned_lock is released by pinned_atomic_increment
+OPcache PinnedCache::lock is released by PinnedCache::increment
 --EXTENSIONS--
 opcache
 pcntl
@@ -34,10 +34,10 @@ $resultFile = $prefix . '.result';
 @unlink($resultFile);
 
 $key = 'pinned_exists_lock_' . getmypid();
-OPcache\pinned_clear();
+OPcache\PinnedCache::clear();
 
-var_dump(OPcache\pinned_lock($key));
-var_dump(OPcache\pinned_atomic_increment($key, 9));
+var_dump(OPcache\PinnedCache::lock($key));
+var_dump(OPcache\PinnedCache::increment($key, 9));
 
 $pid = pcntl_fork();
 if ($pid === -1) {
@@ -52,8 +52,8 @@ if ($pid === 0) {
 	});
 	pcntl_alarm(3);
 	file_put_contents($readyFile, 'ready');
-	$exists = OPcache\pinned_lock($key);
-	$value = OPcache\pinned_fetch($key);
+	$exists = OPcache\PinnedCache::lock($key);
+	$value = OPcache\PinnedCache::get($key);
 	pcntl_alarm(0);
 	file_put_contents($resultFile, ($exists ? 'true' : 'false') . "\n" . $value . "\n");
 	exit(0);

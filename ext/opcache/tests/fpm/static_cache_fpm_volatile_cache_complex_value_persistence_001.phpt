@@ -76,22 +76,22 @@ if ($action === 'seed') {
 	$refs = ['value' => 1];
 	$refs['alias'] =& $refs['value'];
 
-	OPcache\volatile_clear();
-	var_dump(OPcache\volatile_store('complex', $payload));
-	var_dump(OPcache\volatile_store('shared_pair', [$shared, $shared]));
-	var_dump(OPcache\volatile_store('refs', $refs));
+	OPcache\VolatileCache::clear();
+	var_dump(OPcache\VolatileCache::set('complex', $payload));
+	var_dump(OPcache\VolatileCache::set('shared_pair', [$shared, $shared]));
+	var_dump(OPcache\VolatileCache::set('refs', $refs));
 	echo "seed\n";
 	return;
 }
 
-$complex = OPcache\volatile_fetch('complex');
+$complex = OPcache\VolatileCache::get('complex');
 $complex['gap'][] = 'tail';
 echo $complex['props']->name, ',', $complex['props']->age, ',', $complex['serialize']->info(), ',', $complex['internal']->format('Y-m-d H:i:s'), ',', array_key_last($complex['gap']), "\n";
 
-$pair = OPcache\volatile_fetch('shared_pair');
+$pair = OPcache\VolatileCache::get('shared_pair');
 var_dump(spl_object_id($pair[0]) === spl_object_id($pair[1]));
 
-$refs = OPcache\volatile_fetch('refs');
+$refs = OPcache\VolatileCache::get('refs');
 $refs['alias'] = 7;
 var_dump($refs['value']);
 

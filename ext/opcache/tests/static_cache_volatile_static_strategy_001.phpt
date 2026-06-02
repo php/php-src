@@ -201,8 +201,8 @@ $action = $_GET['action'] ?? 'read';
 $case = $_GET['case'] ?? 'class_default';
 
 if ($action === 'reset') {
-	OPcache\volatile_clear();
-	OPcache\pinned_clear();
+	OPcache\VolatileCache::clear();
+	OPcache\PinnedCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;
@@ -219,7 +219,7 @@ if ($action === 'seed' || $action === 'mutate_after_fetch') {
 cached_strategy_dump($case, $values);
 
 if ($action === 'read') {
-	echo 'cache=', OPcache\volatile_cache_info()->entry_count, ',', OPcache\pinned_cache_info()->entry_count, "\n";
+	echo 'cache=', OPcache\VolatileCache::info()->entry_count, ',', OPcache\PinnedCache::info()->entry_count, "\n";
 }
 PHP);
 

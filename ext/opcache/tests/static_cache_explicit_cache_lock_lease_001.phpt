@@ -20,24 +20,24 @@ opcache.static_cache.pinned_size_mb=32
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\volatile_clear();
+		OPcache\VolatileCache::clear();
 	} else {
-		OPcache\pinned_clear();
+		OPcache\PinnedCache::clear();
 	}
 }
 
 function cache_lock(string $backend, string $key, int $lease = 0): bool
 {
 	return $backend === 'volatile'
-		? OPcache\volatile_lock($key, $lease)
-		: OPcache\pinned_lock($key, $lease);
+		? OPcache\VolatileCache::lock($key, $lease)
+		: OPcache\PinnedCache::lock($key, $lease);
 }
 
 function cache_unlock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\volatile_unlock($key)
-		: OPcache\pinned_unlock($key);
+		? OPcache\VolatileCache::unlock($key)
+		: OPcache\PinnedCache::unlock($key);
 }
 
 foreach (['volatile', 'pinned'] as $backend) {

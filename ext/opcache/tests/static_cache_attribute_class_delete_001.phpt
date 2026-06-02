@@ -90,8 +90,8 @@ class ClassDeleteVolatilePlain
 function class_delete_cache_info(string $backend): OPcache\StaticCacheInfo
 {
 	return match ($backend) {
-		'pinned' => OPcache\pinned_cache_info(),
-		'volatile' => OPcache\volatile_cache_info(),
+		'pinned' => OPcache\PinnedCache::info(),
+		'volatile' => OPcache\VolatileCache::info(),
 		default => throw new RuntimeException('unknown backend'),
 	};
 }
@@ -99,8 +99,8 @@ function class_delete_cache_info(string $backend): OPcache\StaticCacheInfo
 function class_delete_store(string $backend, string $key, mixed $value): void
 {
 	match ($backend) {
-		'pinned' => OPcache\pinned_store($key, $value),
-		'volatile' => OPcache\volatile_store($key, $value),
+		'pinned' => OPcache\PinnedCache::set($key, $value),
+		'volatile' => OPcache\VolatileCache::set($key, $value),
 		default => throw new RuntimeException('unknown backend'),
 	};
 }
@@ -108,8 +108,8 @@ function class_delete_store(string $backend, string $key, mixed $value): void
 function class_delete_fetch(string $backend, string $key, mixed $default): mixed
 {
 	return match ($backend) {
-		'pinned' => OPcache\pinned_fetch($key, $default),
-		'volatile' => OPcache\volatile_fetch($key, $default),
+		'pinned' => OPcache\PinnedCache::get($key, $default),
+		'volatile' => OPcache\VolatileCache::get($key, $default),
 		default => throw new RuntimeException('unknown backend'),
 	};
 }
@@ -117,8 +117,8 @@ function class_delete_fetch(string $backend, string $key, mixed $default): mixed
 function class_delete_delete(string $backend, string $key_or_class): void
 {
 	match ($backend) {
-		'pinned' => OPcache\pinned_delete($key_or_class),
-		'volatile' => OPcache\volatile_delete($key_or_class),
+		'pinned' => OPcache\PinnedCache::delete($key_or_class),
+		'volatile' => OPcache\VolatileCache::delete($key_or_class),
 		default => throw new RuntimeException('unknown backend'),
 	};
 }
@@ -236,8 +236,8 @@ $action = $_GET['action'] ?? 'read_blob';
 $backend = $_GET['backend'] ?? 'pinned';
 
 if ($action === 'reset') {
-	OPcache\volatile_clear();
-	OPcache\pinned_clear();
+	OPcache\VolatileCache::clear();
+	OPcache\PinnedCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;

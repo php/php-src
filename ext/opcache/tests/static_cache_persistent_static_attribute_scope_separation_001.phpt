@@ -66,7 +66,7 @@ if ($action === 'inspect') {
 		PropertyScopeState::$normalValue, ',',
 		MethodScopeState::$normalValue, ',',
 		MethodScopeState::normalMethodValue(), ',',
-		OPcache\pinned_cache_info()->entry_count, "\n";
+		OPcache\PinnedCache::info()->entry_count, "\n";
 	return;
 }
 

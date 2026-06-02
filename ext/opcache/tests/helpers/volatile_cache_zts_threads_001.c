@@ -73,6 +73,9 @@ static int zend_opcache_test_startup(int argc, char **argv)
 
 	zend_signal_startup();
 	sapi_startup(&php_embed_module);
+	/* Static Cache is opt-in per SAPI; this embed-based test enables it. */
+	extern void zend_opcache_static_cache_opt_in(void);
+	zend_opcache_static_cache_opt_in();
 	php_embed_module.ini_entries = opcache_test_ini;
 	if (argv != NULL) {
 		php_embed_module.executable_location = argv[0];
@@ -143,9 +146,9 @@ static bool zend_opcache_thread_eval(const char *code, zval *retval, const char 
 static void *zend_opcache_thread_main(void *arg)
 {
 	static const char store_code[] =
-		"OPcache\\volatile_store('" TEST_KEY "', '" TEST_VALUE "');";
+		"OPcache\\VolatileCache::set('" TEST_KEY "', '" TEST_VALUE "');";
 	static const char fetch_code[] =
-		"OPcache\\volatile_fetch('" TEST_KEY "');";
+		"OPcache\\VolatileCache::get('" TEST_KEY "');";
 	zend_opcache_thread_ctx *ctx;
 	zval retval;
 	bool request_started = false;
@@ -163,21 +166,21 @@ static void *zend_opcache_thread_main(void *arg)
 
 	if (ctx->mode == THREAD_MODE_STORE) {
 		if (!zend_opcache_thread_eval(store_code, &retval, "zts volatile cache store")) {
-			zend_opcache_thread_set_failure(ctx, "volatile_store failed");
+			zend_opcache_thread_set_failure(ctx, "VolatileCache::set failed");
 			goto cleanup;
 		}
 
 		if (!zend_is_true(&retval)) {
-			zend_opcache_thread_set_failure(ctx, "volatile_store returned false");
+			zend_opcache_thread_set_failure(ctx, "VolatileCache::set returned false");
 		}
 	} else {
 		if (!zend_opcache_thread_eval(fetch_code, &retval, "zts volatile cache fetch")) {
-			zend_opcache_thread_set_failure(ctx, "volatile_fetch failed");
+			zend_opcache_thread_set_failure(ctx, "VolatileCache::get failed");
 			goto cleanup;
 		}
 
 		if (Z_TYPE(retval) != IS_STRING || strcmp(Z_STRVAL(retval), TEST_VALUE) != 0) {
-			zend_opcache_thread_set_failure(ctx, "volatile_fetch returned unexpected value");
+			zend_opcache_thread_set_failure(ctx, "VolatileCache::get returned unexpected value");
 		}
 	}
 
@@ -194,9 +197,9 @@ cleanup:
 
 int main(int argc, char **argv)
 {
-	static const char clear_code[] = "OPcache\\volatile_clear();";
+	static const char clear_code[] = "OPcache\\VolatileCache::clear();";
 	static const char fetch_code[] =
-		"OPcache\\volatile_fetch('" TEST_KEY "');";
+		"OPcache\\VolatileCache::get('" TEST_KEY "');";
 	zend_thread_t writer_thread;
 	zend_thread_t reader_thread;
 	zend_opcache_thread_ctx writer_ctx;
@@ -211,11 +214,11 @@ int main(int argc, char **argv)
 
 	exit_code = 1;
 	if (!zend_opcache_thread_request_startup()) {
-		fprintf(stderr, "volatile_clear request startup failed\n");
+		fprintf(stderr, "VolatileCache::clear request startup failed\n");
 		goto cleanup;
 	}
 	if (!zend_opcache_thread_eval(clear_code, &retval, "zts volatile cache clear")) {
-		fprintf(stderr, "volatile_clear failed\n");
+		fprintf(stderr, "VolatileCache::clear failed\n");
 		php_request_shutdown(NULL);
 		goto cleanup;
 	}

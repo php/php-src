@@ -13,35 +13,35 @@ file_put_contents(__DIR__ . '/explicit_cache_store_delete_request_reuse_001.php'
 function cache_clear(string $kind): void
 {
     if ($kind === 'volatile') {
-        OPcache\volatile_clear();
+        OPcache\VolatileCache::clear();
     } else {
-        OPcache\pinned_clear();
+        OPcache\PinnedCache::clear();
     }
 }
 
 function cache_store(string $kind, string $key, string $value): bool
 {
     if ($kind === 'volatile') {
-        return OPcache\volatile_store($key, $value);
+        return OPcache\VolatileCache::set($key, $value);
     }
 
-    OPcache\pinned_store($key, $value);
+    OPcache\PinnedCache::set($key, $value);
     return true;
 }
 
 function cache_fetch(string $kind, string $key): string
 {
     return $kind === 'volatile'
-        ? OPcache\volatile_fetch($key, 'missing')
-        : OPcache\pinned_fetch($key, 'missing');
+        ? OPcache\VolatileCache::get($key, 'missing')
+        : OPcache\PinnedCache::get($key, 'missing');
 }
 
 function cache_delete(string $kind, string $key): void
 {
     if ($kind === 'volatile') {
-        OPcache\volatile_delete($key);
+        OPcache\VolatileCache::delete($key);
     } else {
-        OPcache\pinned_delete($key);
+        OPcache\PinnedCache::delete($key);
     }
 }
 

@@ -9,24 +9,24 @@ opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
-OPcache\pinned_clear();
+OPcache\PinnedCache::clear();
 
-var_dump(OPcache\pinned_atomic_increment('created', 7));
-var_dump(OPcache\pinned_fetch('created'));
-var_dump(OPcache\pinned_atomic_increment('created', 3));
-var_dump(OPcache\pinned_fetch('created'));
+var_dump(OPcache\PinnedCache::increment('created', 7));
+var_dump(OPcache\PinnedCache::get('created'));
+var_dump(OPcache\PinnedCache::increment('created', 3));
+var_dump(OPcache\PinnedCache::get('created'));
 
-var_dump(OPcache\pinned_lock('reserved'));
-var_dump(OPcache\pinned_atomic_increment('reserved', 11));
-var_dump(OPcache\pinned_fetch('reserved'));
-var_dump(OPcache\pinned_lock('reserved'));
-var_dump(OPcache\pinned_atomic_decrement('missing_down'));
-var_dump(OPcache\pinned_fetch('missing_down'));
-var_dump(OPcache\pinned_atomic_decrement('missing_down', 4));
-var_dump(OPcache\pinned_fetch('missing_down'));
+var_dump(OPcache\PinnedCache::lock('reserved'));
+var_dump(OPcache\PinnedCache::increment('reserved', 11));
+var_dump(OPcache\PinnedCache::get('reserved'));
+var_dump(OPcache\PinnedCache::lock('reserved'));
+var_dump(OPcache\PinnedCache::decrement('missing_down'));
+var_dump(OPcache\PinnedCache::get('missing_down'));
+var_dump(OPcache\PinnedCache::decrement('missing_down', 4));
+var_dump(OPcache\PinnedCache::get('missing_down'));
 
 try {
-	OPcache\pinned_atomic_increment('extra', 1, false, false);
+	OPcache\PinnedCache::increment('extra', 1, false, false);
 } catch (ArgumentCountError $exception) {
 	echo "too-many-args\n";
 }

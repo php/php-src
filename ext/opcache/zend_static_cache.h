@@ -78,6 +78,7 @@ zend_result zend_opcache_register_functions(int module_type);
 zend_result zend_opcache_static_cache_minit(void);
 void zend_opcache_static_cache_mshutdown(void);
 zend_result zend_opcache_static_cache_rshutdown(void);
+void zend_opcache_static_cache_opt_in(void);
 void zend_opcache_static_cache_invalidate_all(void);
 zend_opcache_static_cache_partition *zend_opcache_static_cache_partition_create(const char *name);
 bool zend_opcache_static_cache_partition_startup_before_request(zend_opcache_static_cache_partition *partition);

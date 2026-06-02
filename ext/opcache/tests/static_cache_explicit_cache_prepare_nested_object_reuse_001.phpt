@@ -24,21 +24,21 @@ $payload = [
 	'rows' => [['state' => 'alpha']],
 ];
 
-var_dump(OPcache\volatile_store('nested_volatile_first', $payload));
-OPcache\pinned_store('nested_pinned_first', $payload);
+var_dump(OPcache\VolatileCache::set('nested_volatile_first', $payload));
+OPcache\PinnedCache::set('nested_pinned_first', $payload);
 
 $payload['name'] = 'second';
 $payload['leaf']->label = 'leaf-second';
 $payload['leaf']->revision = 2;
 $payload['rows'][0]['state'] = 'beta';
 
-var_dump(OPcache\volatile_store('nested_volatile_second', $payload));
-OPcache\pinned_store('nested_pinned_second', $payload);
+var_dump(OPcache\VolatileCache::set('nested_volatile_second', $payload));
+OPcache\PinnedCache::set('nested_pinned_second', $payload);
 
-$volatileFirst = OPcache\volatile_fetch('nested_volatile_first');
-$volatileSecond = OPcache\volatile_fetch('nested_volatile_second');
-$pinnedFirst = OPcache\pinned_fetch('nested_pinned_first');
-$pinnedSecond = OPcache\pinned_fetch('nested_pinned_second');
+$volatileFirst = OPcache\VolatileCache::get('nested_volatile_first');
+$volatileSecond = OPcache\VolatileCache::get('nested_volatile_second');
+$pinnedFirst = OPcache\PinnedCache::get('nested_pinned_first');
+$pinnedSecond = OPcache\PinnedCache::get('nested_pinned_second');
 
 echo $volatileFirst['name'], "\n";
 echo $volatileFirst['leaf']->label, "\n";

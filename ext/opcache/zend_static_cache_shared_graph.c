@@ -17,6 +17,17 @@
 #include "zend_static_cache_internal.h"
 #include "zend_opcache_serializer.h"
 
+/* Within one decode the class for a given (buffer, offset) is fixed, and after
+ * string dedup every object of a class shares one class-name offset. Memoize the
+ * last resolved class so a homogeneous graph (an array or tree of one class)
+ * resolves its class once instead of once per node. The slot is reset at the top
+ * of each decode so a recycled buffer address cannot alias a stale class. */
+static ZEND_EXT_TLS struct {
+	const unsigned char *buffer;
+	uint32_t class_name_offset;
+	zend_class_entry *ce;
+} zend_opcache_static_cache_decode_class_memo;
+
 /* Shared-graph payloads start inside generic SHM blocks whose payload base may
  * be less aligned than zend managed objects require. Align the graph start
  * within the payload and treat that aligned layout as the only valid format. */
@@ -443,10 +454,13 @@ static void zend_opcache_static_cache_shared_graph_copy_init(
 
 	zend_hash_init(&context->seen_arrays, 8, NULL, NULL, 0);
 	zend_hash_init(&context->seen_objects, 8, NULL, NULL, 0);
+	zend_hash_init(&context->string_dedup, 8, NULL, NULL, 0);
+	context->has_serialized_object = false;
 }
 
 static void zend_opcache_static_cache_shared_graph_copy_destroy(zend_opcache_static_cache_shared_graph_copy_context *context)
 {
+	zend_hash_destroy(&context->string_dedup);
 	zend_hash_destroy(&context->seen_objects);
 	zend_hash_destroy(&context->seen_arrays);
 }
@@ -480,6 +494,19 @@ static bool zend_opcache_static_cache_shared_graph_copy_string(
 	zend_string *new_string;
 	uint32_t string_offset;
 	size_t string_size;
+	zval *cached, cached_offset;
+
+	/* Deduplicate equal strings within a payload. Class names and property
+	 * names repeat across every object, so interning them to a single buffer
+	 * copy shrinks the payload and lets the decoder memoize the class per
+	 * offset. The strings are immutable (IS_STR_INTERNED | IS_STR_PERMANENT),
+	 * so sharing one copy is safe. */
+	cached = zend_hash_find(&context->string_dedup, (zend_string *) string);
+	if (cached != NULL) {
+		*offset = (uint32_t) Z_LVAL_P(cached);
+
+		return true;
+	}
 
 	string_size = _ZSTR_STRUCT_SIZE(ZSTR_LEN(string));
 	if (!zend_opcache_static_cache_shared_graph_copy_alloc(context, string_size, &string_offset)) {
@@ -491,6 +518,9 @@ static bool zend_opcache_static_cache_shared_graph_copy_string(
 	GC_SET_REFCOUNT(new_string, 2);
 	GC_TYPE_INFO(new_string) = GC_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT);
 	*offset = string_offset;
+
+	ZVAL_LONG(&cached_offset, (zend_long) string_offset);
+	zend_hash_add(&context->string_dedup, (zend_string *) string, &cached_offset);
 
 	return true;
 }
@@ -772,6 +802,10 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 
 				destination->type = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_SERIALIZED_OBJECT;
 				destination->payload.offset = payload_offset;
+
+				/* This node is decoded by re-running unserialize, so a graph
+				 * containing it keeps its request-local prototype. */
+				context->has_serialized_object = true;
 
 				return true;
 			}
@@ -1073,8 +1107,20 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 			return true;
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT:
 			graph_object = (const zend_opcache_static_cache_shared_graph_object *) (buffer + (uint32_t) value->payload.offset);
-			class_name = (zend_string *) (void *) (buffer + graph_object->class_name_offset);
-			ce = zend_lookup_class(class_name);
+			if (zend_opcache_static_cache_decode_class_memo.buffer == buffer &&
+				zend_opcache_static_cache_decode_class_memo.class_name_offset == graph_object->class_name_offset
+			) {
+				ce = zend_opcache_static_cache_decode_class_memo.ce;
+			} else {
+				class_name = (zend_string *) (void *) (buffer + graph_object->class_name_offset);
+				ce = zend_lookup_class(class_name);
+				if (ce != NULL) {
+					zend_opcache_static_cache_decode_class_memo.buffer = buffer;
+					zend_opcache_static_cache_decode_class_memo.class_name_offset = graph_object->class_name_offset;
+					zend_opcache_static_cache_decode_class_memo.ce = ce;
+				}
+			}
+
 			if (ce == NULL || object_init_ex(destination, ce) != SUCCESS) {
 				return false;
 			}
@@ -1158,6 +1204,22 @@ static zend_opcache_static_cache_shared_graph_header *zend_opcache_static_cache_
 	}
 
 	return header;
+}
+
+/* A shared graph that embeds serialized object nodes is expensive to re-decode
+ * (each fetch would re-run unserialize), so such a graph keeps its request-local
+ * prototype. A pure-direct graph decodes cheaply from SHM and skips it. */
+bool zend_opcache_static_cache_shared_graph_requires_prototype(uint32_t payload_offset)
+{
+	zend_opcache_static_cache_shared_graph_header *header =
+		zend_opcache_static_cache_shared_graph_payload_header(payload_offset)
+	;
+
+	if (header == NULL) {
+		return true;
+	}
+
+	return (header->flags & ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_FLAG_HAS_SERIALIZED_OBJECT) != 0;
 }
 
 static bool zend_opcache_static_cache_free_retired_shared_graphs(void)
@@ -1308,6 +1370,10 @@ bool zend_opcache_static_cache_build_shared_graph_in_place(
 	header->version = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VERSION;
 	header->root_offset = root_offset;
 	header->root_type = root_type;
+	header->flags = copy_context.has_serialized_object
+		? ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_FLAG_HAS_SERIALIZED_OBJECT
+		: 0
+	;
 
 	ZEND_ATOMIC_INT_INIT(&header->ref_state, 0);
 
@@ -1357,6 +1423,10 @@ bool zend_opcache_static_cache_fetch_shared_graph(
 	}
 
 	buffer = graph_buffer;
+
+	/* Invalidate the per-decode class memo: a buffer address can be recycled
+	 * across payloads, so a stale (buffer, offset) entry must not be trusted. */
+	zend_opcache_static_cache_decode_class_memo.buffer = NULL;
 
 	header = (const zend_opcache_static_cache_shared_graph_header *) buffer;
 	if (header->magic != ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_MAGIC ||

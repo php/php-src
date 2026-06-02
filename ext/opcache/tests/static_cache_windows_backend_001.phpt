@@ -16,8 +16,8 @@ opcache.static_cache.pinned_size_mb=32
 --FILE--
 <?php
 
-$volatileInfo = OPcache\volatile_cache_info();
-$pinnedInfo = OPcache\pinned_cache_info();
+$volatileInfo = OPcache\VolatileCache::info();
+$pinnedInfo = OPcache\PinnedCache::info();
 
 var_dump($volatileInfo->available);
 var_dump($pinnedInfo->available);
@@ -26,18 +26,18 @@ var_dump($pinnedInfo->shared_model);
 var_dump($volatileInfo->shared_memory);
 var_dump($pinnedInfo->shared_memory);
 
-OPcache\volatile_clear();
-OPcache\pinned_clear();
+OPcache\VolatileCache::clear();
+OPcache\PinnedCache::clear();
 
 $key = 'windows-backend';
 
-var_dump(OPcache\volatile_lock($key));
-var_dump(OPcache\volatile_store($key, ['backend' => 'volatile']));
-var_dump(OPcache\pinned_lock($key));
-OPcache\pinned_store($key, ['backend' => 'pinned']);
+var_dump(OPcache\VolatileCache::lock($key));
+var_dump(OPcache\VolatileCache::set($key, ['backend' => 'volatile']));
+var_dump(OPcache\PinnedCache::lock($key));
+OPcache\PinnedCache::set($key, ['backend' => 'pinned']);
 
-var_dump(OPcache\volatile_fetch($key));
-var_dump(OPcache\pinned_fetch($key));
+var_dump(OPcache\VolatileCache::get($key));
+var_dump(OPcache\PinnedCache::get($key));
 
 ?>
 --EXPECT--

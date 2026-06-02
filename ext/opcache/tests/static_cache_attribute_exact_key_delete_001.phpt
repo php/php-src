@@ -88,8 +88,8 @@ class ExactKeyVolatileMethodState
 function exact_key_cache_info(string $backend): OPcache\StaticCacheInfo
 {
 	return match ($backend) {
-		'pinned' => OPcache\pinned_cache_info(),
-		'volatile' => OPcache\volatile_cache_info(),
+		'pinned' => OPcache\PinnedCache::info(),
+		'volatile' => OPcache\VolatileCache::info(),
 		default => throw new RuntimeException('unknown backend'),
 	};
 }
@@ -139,14 +139,14 @@ function exact_key_delete_individual(string $backend): void
 {
 	switch ($backend) {
 		case 'pinned':
-			OPcache\pinned_delete_array([
+			OPcache\PinnedCache::deleteMultiple([
 				'pinned_static:ExactKeyPinnedPropertyState::$value',
 				'pinned_static:ExactKeyPinnedMethodState::method()::$value',
 			]);
 			return;
 
 		case 'volatile':
-			OPcache\volatile_delete_array([
+			OPcache\VolatileCache::deleteMultiple([
 				'volatile_static:ExactKeyVolatilePropertyState::$value',
 				'volatile_static:ExactKeyVolatileMethodState::method()::$value',
 			]);
@@ -169,8 +169,8 @@ $action = $_GET['action'] ?? 'read';
 $backend = $_GET['backend'] ?? 'pinned';
 
 if ($action === 'reset') {
-	OPcache\volatile_clear();
-	OPcache\pinned_clear();
+	OPcache\VolatileCache::clear();
+	OPcache\PinnedCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;

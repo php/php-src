@@ -69,21 +69,21 @@ class CustomSerializedDateTime extends DateTime
 }
 
 if ($mode === 'store') {
-	return OPcache\volatile_store(
+	return OPcache\VolatileCache::set(
 		'zts_safe_direct_event_datetime',
 		new EventDateTime('2026-06-15 09:30:00.123456', new DateTimeZone('Europe/Paris'), 'launch', 7),
-	) && OPcache\volatile_store(
+	) && OPcache\VolatileCache::set(
 		'zts_safe_direct_tagged_collection',
 		new TaggedCollection(['alpha' => 10, 'beta' => 20], 'metric', LabelIterator::class),
-	) && OPcache\volatile_store(
+	) && OPcache\VolatileCache::set(
 		'zts_safe_direct_custom_datetime',
 		new CustomSerializedDateTime('2026-06-15 10:45:00.654321', new DateTimeZone('UTC'), 'fallback'),
 	);
 }
 
-$event = OPcache\volatile_fetch('zts_safe_direct_event_datetime');
-$collection = OPcache\volatile_fetch('zts_safe_direct_tagged_collection');
-$fallback = OPcache\volatile_fetch('zts_safe_direct_custom_datetime');
+$event = OPcache\VolatileCache::get('zts_safe_direct_event_datetime');
+$collection = OPcache\VolatileCache::get('zts_safe_direct_tagged_collection');
+$fallback = OPcache\VolatileCache::get('zts_safe_direct_custom_datetime');
 
 if (!$event instanceof EventDateTime) {
 	return false;

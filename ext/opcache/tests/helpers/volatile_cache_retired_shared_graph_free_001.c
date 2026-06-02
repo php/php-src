@@ -44,12 +44,12 @@ static const char opcache_test_ini[] =
 
 static const char seed_code[] =
 	"(static function (): bool {"
-	"    OPcache\\volatile_clear();"
+	"    OPcache\\VolatileCache::clear();"
 	"    $payload = ['name' => 'retired-shared-graph-free', 'items' => []];"
 	"    for ($i = 0; $i < 128; $i++) {"
 	"        $payload['items'][] = ['id' => $i, 'path' => '/items/' . $i, 'flags' => [true, false, true]];"
 	"    }"
-	"    return OPcache\\volatile_store('" TEST_KEY "', $payload);"
+	"    return OPcache\\VolatileCache::set('" TEST_KEY "', $payload);"
 	"})()";
 
 static int zend_opcache_test_startup(int argc, char **argv)
@@ -63,6 +63,9 @@ static int zend_opcache_test_startup(int argc, char **argv)
 
 	zend_signal_startup();
 	sapi_startup(&php_embed_module);
+	/* Static Cache is opt-in per SAPI; this embed-based test enables it. */
+	extern void zend_opcache_static_cache_opt_in(void);
+	zend_opcache_static_cache_opt_in();
 	php_embed_module.ini_entries = opcache_test_ini;
 	if (argv != NULL) {
 		php_embed_module.executable_location = argv[0];

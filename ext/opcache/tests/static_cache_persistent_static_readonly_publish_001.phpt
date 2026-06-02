@@ -102,7 +102,7 @@ if ($action === 'reset') {
 	foreach ($kinds as $logKind) {
 		@unlink(readonly_publish_log_file($logKind));
 	}
-	OPcache\volatile_clear();
+	OPcache\VolatileCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;

@@ -94,23 +94,23 @@ function check_fetch_copies(string $name, callable $store, callable $fetch): voi
 		$dateThird->label, "\n";
 }
 
-OPcache\volatile_clear();
-OPcache\pinned_clear();
+OPcache\VolatileCache::clear();
+OPcache\PinnedCache::clear();
 
 check_fetch_copies(
 	'volatile',
-	static fn (string $key, mixed $payload): bool => OPcache\volatile_store($key, $payload),
-	static fn (string $key): mixed => OPcache\volatile_fetch($key),
+	static fn (string $key, mixed $payload): bool => OPcache\VolatileCache::set($key, $payload),
+	static fn (string $key): mixed => OPcache\VolatileCache::get($key),
 );
 
 check_fetch_copies(
 	'pinned',
 	static function (string $key, mixed $payload): bool {
-		OPcache\pinned_store($key, $payload);
+		OPcache\PinnedCache::set($key, $payload);
 
 		return true;
 	},
-	static fn (string $key): mixed => OPcache\pinned_fetch($key),
+	static fn (string $key): mixed => OPcache\PinnedCache::get($key),
 );
 
 ?>

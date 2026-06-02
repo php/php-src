@@ -35,11 +35,11 @@ function build_packed_graph_items(): array
 $items = build_packed_graph_items();
 $payload = new PackedGraphPayload($items);
 
-var_dump(OPcache\volatile_store('packed_graph_payload', $payload));
-var_dump(OPcache\volatile_store('packed_graph_root', $items));
+var_dump(OPcache\VolatileCache::set('packed_graph_payload', $payload));
+var_dump(OPcache\VolatileCache::set('packed_graph_root', $items));
 
-$payloadCopy = OPcache\volatile_fetch('packed_graph_payload');
-$rootCopy = OPcache\volatile_fetch('packed_graph_root');
+$payloadCopy = OPcache\VolatileCache::get('packed_graph_payload');
+$rootCopy = OPcache\VolatileCache::get('packed_graph_root');
 
 var_dump($payloadCopy instanceof PackedGraphPayload);
 var_dump($payloadCopy->items[7] instanceof PackedGraphItem);

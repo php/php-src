@@ -1,5 +1,5 @@
 --TEST--
-OPcache pinned_store throws StaticCacheException when throw_on_error is enabled and pinned cache memory is exhausted
+OPcache PinnedCache::set returns false when pinned cache memory is exhausted
 --EXTENSIONS--
 opcache
 --INI--
@@ -9,24 +9,15 @@ opcache.static_cache.pinned_size_mb=8
 --FILE--
 <?php
 
-use OPcache\StaticCacheException;
+OPcache\PinnedCache::set('small', 'ok');
 
-OPcache\pinned_store('small', 'ok');
+var_dump(OPcache\PinnedCache::set('huge', str_repeat('H', 12 * 1024 * 1024)));
 
-var_dump(OPcache\pinned_store('huge', str_repeat('H', 12 * 1024 * 1024)));
-
-try {
-	OPcache\pinned_store('huge-throw', str_repeat('H', 12 * 1024 * 1024), true);
-} catch (StaticCacheException $e) {
-	echo get_class($e), ': ', $e->getMessage(), "\n";
-}
-
-var_dump(OPcache\pinned_fetch('small', 'fallback'));
-var_dump(OPcache\pinned_fetch('missing', 'fallback'));
+var_dump(OPcache\PinnedCache::get('small', 'fallback'));
+var_dump(OPcache\PinnedCache::get('missing', 'fallback'));
 
 ?>
 --EXPECT--
 bool(false)
-OPcache\StaticCacheException: not enough shared memory left
 string(2) "ok"
 string(8) "fallback"

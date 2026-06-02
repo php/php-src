@@ -15,19 +15,19 @@ $payload = [
 	'date' => new DateTime('2026-05-01 10:30:45', new DateTimeZone('UTC')),
 ];
 
-var_dump(OPcache\volatile_store('safe_direct_volatile_first', $payload));
-OPcache\pinned_store('safe_direct_pinned_first', $payload);
+var_dump(OPcache\VolatileCache::set('safe_direct_volatile_first', $payload));
+OPcache\PinnedCache::set('safe_direct_pinned_first', $payload);
 
 $payload['name'] = 'second';
 $payload['date']->modify('+2 days');
 
-var_dump(OPcache\volatile_store('safe_direct_volatile_second', $payload));
-OPcache\pinned_store('safe_direct_pinned_second', $payload);
+var_dump(OPcache\VolatileCache::set('safe_direct_volatile_second', $payload));
+OPcache\PinnedCache::set('safe_direct_pinned_second', $payload);
 
-$volatileFirst = OPcache\volatile_fetch('safe_direct_volatile_first');
-$volatileSecond = OPcache\volatile_fetch('safe_direct_volatile_second');
-$pinnedFirst = OPcache\pinned_fetch('safe_direct_pinned_first');
-$pinnedSecond = OPcache\pinned_fetch('safe_direct_pinned_second');
+$volatileFirst = OPcache\VolatileCache::get('safe_direct_volatile_first');
+$volatileSecond = OPcache\VolatileCache::get('safe_direct_volatile_second');
+$pinnedFirst = OPcache\PinnedCache::get('safe_direct_pinned_first');
+$pinnedSecond = OPcache\PinnedCache::get('safe_direct_pinned_second');
 
 echo $volatileFirst['name'], "\n";
 echo $volatileFirst['date']->format('Y-m-d H:i:s'), "\n";

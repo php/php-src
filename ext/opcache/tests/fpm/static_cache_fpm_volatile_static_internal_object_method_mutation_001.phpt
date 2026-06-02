@@ -64,7 +64,7 @@ $action = $_GET['action'] ?? 'read';
 $state = $_GET['state'] ?? 'date';
 
 if ($action === 'reset') {
-	OPcache\volatile_clear();
+	OPcache\VolatileCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;

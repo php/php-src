@@ -1807,7 +1807,7 @@ bool zend_opcache_static_cache_fetch_locked(zend_string *key, zval *return_value
 	zend_ulong hash;
 	uint64_t mutation_epoch, now;
 	uint32_t way, slot_index;
-	bool found;
+	bool found, use_proto;
 
 	if (found_ptr != NULL) {
 		*found_ptr = false;
@@ -1898,7 +1898,21 @@ value_found:
 	}
 
 	entry = &entries[slot_index];
-	if (use_request_local_slot) {
+
+	/* The request-local prototype trades a re-decode for a deep clone on every
+	 * repeat fetch. For the serialized payloads, where re-running unserialize is
+	 * expensive, the prototype wins. For a pure shared graph it is a net loss:
+	 * decoding straight from SHM is cheaper than deep-cloning the materialized
+	 * object graph, and such a graph holds no shared identity or cycles, so each
+	 * decode is already an independent copy. A shared graph that embeds
+	 * serialized object nodes (e.g. classes with custom __serialize) re-runs
+	 * unserialize per node on decode, so it keeps the prototype too. */
+	use_proto = use_request_local_slot;
+	if (use_proto && entry->value_type == ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH) {
+		use_proto = zend_opcache_static_cache_shared_graph_requires_prototype(entry->value_offset);
+	}
+
+	if (use_proto) {
 		if (zend_opcache_static_cache_fetch_request_local_slot(key, mutation_epoch, return_value)) {
 			return true;
 		}
@@ -1910,22 +1924,22 @@ value_found:
 	switch (entry->value_type) {
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_NULL:
 			ZVAL_NULL(return_value);
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_request_local_slot);
+			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_TRUE:
 			ZVAL_TRUE(return_value);
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_request_local_slot);
+			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_FALSE:
 			ZVAL_FALSE(return_value);
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_request_local_slot);
+			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_LONG:
 			ZVAL_LONG(return_value, entry->long_value);
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_request_local_slot);
+			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_DOUBLE:
 			ZVAL_DOUBLE(return_value, entry->double_value);
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_request_local_slot);
+			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING:
 			ZVAL_STRINGL(return_value, zend_opcache_static_cache_ptr(entry->value_offset), entry->value_len);
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_request_local_slot);
+			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED:
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED:
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH:
@@ -1941,7 +1955,7 @@ value_found:
 				return false;
 			}
 
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_request_local_slot);
+			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
 		default:
 			if (throw_if_missing) {
 				zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Stored %s value for key \"%s\" has an unknown type", cache_name, ZSTR_VAL(key));
@@ -1962,6 +1976,24 @@ bool zend_opcache_static_cache_exists_locked(zend_string *key)
 	}
 
 	return found;
+}
+
+/* Reports the storage strategy (value_type) of an entry without decoding the
+ * stored payload. Used by the getCacheStoreType() introspection API. */
+bool zend_opcache_static_cache_value_type_locked(zend_string *key, uint8_t *value_type)
+{
+	zend_ulong hash = zend_string_hash_val(key);
+	zend_opcache_static_cache_header *header = NULL;
+	uint32_t slot_index;
+	bool found;
+
+	if (!zend_opcache_static_cache_find_slot_for_read_locked(key, hash, &header, &slot_index, &found) || !found) {
+		return false;
+	}
+
+	*value_type = zend_opcache_static_cache_entries(header)[slot_index].value_type;
+
+	return true;
 }
 
 bool zend_opcache_static_cache_delete_locked(zend_string *key)
@@ -2063,7 +2095,8 @@ bool zend_opcache_static_cache_atomic_update_locked(
 
 	result_is_overflow = decrement
 		? zend_opcache_static_cache_long_sub_wrapped(entry->long_value, step, &result)
-		: zend_opcache_static_cache_long_add_wrapped(entry->long_value, step, &result);
+		: zend_opcache_static_cache_long_add_wrapped(entry->long_value, step, &result)
+	;
 	entry->long_value = result;
 	*is_overflow = result_is_overflow;
 

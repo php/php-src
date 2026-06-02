@@ -1,5 +1,5 @@
 --TEST--
-OPcache VolatileStatic tracking reference graphs are not republished after volatile_clear() or opcache_invalidate() in the same request
+OPcache VolatileStatic tracking reference graphs are not republished after VolatileCache::clear() or opcache_invalidate() in the same request
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -153,7 +153,7 @@ $action = $_GET['action'] ?? 'read';
 $kind = $_GET['kind'] ?? 'class';
 
 if ($action === 'reset') {
-	OPcache\volatile_clear();
+	OPcache\VolatileCache::clear();
 	opcache_reset();
 	echo "reset\n";
 	return;
@@ -173,7 +173,7 @@ if ($action === 'clear_after_access') {
 
 	tracking_clear_invalidate_apply($payload, 'clear-node', 'clear-child', 'clear');
 	tracking_clear_invalidate_dump($kind, 'clear-before');
-	OPcache\volatile_clear();
+	OPcache\VolatileCache::clear();
 	echo "clear\n";
 	return;
 }

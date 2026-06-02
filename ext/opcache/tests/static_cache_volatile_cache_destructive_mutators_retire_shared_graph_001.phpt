@@ -59,8 +59,8 @@ function run_destructive_mutator(string $operation): void
 	@unlink($doneFile);
 	@unlink($resultFile);
 
-	OPcache\volatile_clear();
-	if (!OPcache\volatile_store($key, new DestructiveMutatorPayload(build_rows('T', 3)))) {
+	OPcache\VolatileCache::clear();
+	if (!OPcache\VolatileCache::set($key, new DestructiveMutatorPayload(build_rows('T', 3)))) {
 		throw new RuntimeException('store failed');
 	}
 
@@ -70,7 +70,7 @@ function run_destructive_mutator(string $operation): void
 	}
 
 	if ($pid === 0) {
-		$fetched = OPcache\volatile_fetch($key);
+		$fetched = OPcache\VolatileCache::get($key);
 		file_put_contents($readyFile, 'ready');
 		wait_for_file($doneFile);
 
@@ -78,7 +78,7 @@ function run_destructive_mutator(string $operation): void
 		$fetched->rows[123]['text'] = 'changed after ' . $operation;
 		$after = $fetched->rows[123]['text'];
 		$nested = $fetched->rows[123]['nested']['value'];
-		$refetch = OPcache\volatile_fetch($key, 'MISS') === 'MISS' ? 'MISS' : 'HIT';
+		$refetch = OPcache\VolatileCache::get($key, 'MISS') === 'MISS' ? 'MISS' : 'HIT';
 
 		file_put_contents($resultFile, $before . "\n" . $after . "\n" . $nested . "\n" . $refetch);
 		exit(0);
@@ -87,17 +87,17 @@ function run_destructive_mutator(string $operation): void
 	wait_for_file($readyFile);
 	switch ($operation) {
 		case 'delete':
-			OPcache\volatile_delete($key);
+			OPcache\VolatileCache::delete($key);
 			break;
 		case 'clear':
-			OPcache\volatile_clear();
+			OPcache\VolatileCache::clear();
 			break;
 		case 'reset':
 			opcache_reset();
 			break;
 	}
 
-	if (!OPcache\volatile_store($overwriteKey, new DestructiveMutatorPayload(build_rows('X', 7)))) {
+	if (!OPcache\VolatileCache::set($overwriteKey, new DestructiveMutatorPayload(build_rows('X', 7)))) {
 		throw new RuntimeException('overwrite store failed');
 	}
 	file_put_contents($doneFile, 'done');

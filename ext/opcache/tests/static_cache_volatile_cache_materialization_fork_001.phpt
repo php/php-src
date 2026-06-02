@@ -62,12 +62,12 @@ if ($pid === 0) {
 	}
 
 	$before = memory_get_usage();
-	$fetched = OPcache\volatile_fetch('materialization_plain_payload');
+	$fetched = OPcache\VolatileCache::get('materialization_plain_payload');
 	$readOnly = $fetched->rows[100]['text'];
 	$afterFetch = memory_get_usage();
 	$fetched->rows[100]['text'] = 'changed';
 	$afterMutate = memory_get_usage();
-	$secondFetch = OPcache\volatile_fetch('materialization_plain_payload');
+	$secondFetch = OPcache\VolatileCache::get('materialization_plain_payload');
 
 	var_dump($readOnly === $expectedText
 		&& (!$canMeasureRequestAllocations || ($afterFetch - $before) < 262144));
@@ -77,7 +77,7 @@ if ($pid === 0) {
 	exit(0);
 }
 
-if (!OPcache\volatile_store('materialization_plain_payload', new LargePayload(build_rows(), 'plain'))) {
+if (!OPcache\VolatileCache::set('materialization_plain_payload', new LargePayload(build_rows(), 'plain'))) {
 	throw new RuntimeException('Failed to store materialization_plain_payload');
 }
 
@@ -85,7 +85,7 @@ file_put_contents($readyFile, 'ready');
 pcntl_waitpid($pid, $status);
 @unlink($readyFile);
 
-$fetched = OPcache\volatile_fetch('materialization_plain_payload');
+$fetched = OPcache\VolatileCache::get('materialization_plain_payload');
 var_dump($fetched->rows[100]['text'] === str_repeat(chr(65 + (100 % 26)), 96));
 
 ?>

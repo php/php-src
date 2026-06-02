@@ -71,12 +71,12 @@ if ($pid === 0) {
 	}
 
 	$before = memory_get_usage();
-	$fetched = OPcache\volatile_fetch('materialization_nested_payload');
+	$fetched = OPcache\VolatileCache::get('materialization_nested_payload');
 	$readOnly = $fetched->timestamp->format(DateTimeInterface::ATOM) . '|' . $fetched->payload->rows[100]['text'];
 	$afterFetch = memory_get_usage();
 	$fetched->payload->rows[100]['text'] = 'changed';
 	$afterMutate = memory_get_usage();
-	$secondFetch = OPcache\volatile_fetch('materialization_nested_payload');
+	$secondFetch = OPcache\VolatileCache::get('materialization_nested_payload');
 
 	var_dump($readOnly === $expectedPrefix . $expectedText
 		&& (!$canMeasureRequestAllocations || ($afterFetch - $before) < 262144));
@@ -91,7 +91,7 @@ $payload = new WrappedPayload(
 	new DateTimeImmutable('2026-06-15 09:30:00', new DateTimeZone('UTC')),
 );
 
-if (!OPcache\volatile_store('materialization_nested_payload', $payload)) {
+if (!OPcache\VolatileCache::set('materialization_nested_payload', $payload)) {
 	throw new RuntimeException('Failed to store materialization_nested_payload');
 }
 
@@ -99,7 +99,7 @@ file_put_contents($readyFile, 'ready');
 pcntl_waitpid($pid, $status);
 @unlink($readyFile);
 
-$fetched = OPcache\volatile_fetch('materialization_nested_payload');
+$fetched = OPcache\VolatileCache::get('materialization_nested_payload');
 var_dump($fetched->payload->rows[100]['text'] === str_repeat(chr(65 + (100 % 26)), 96));
 
 ?>
