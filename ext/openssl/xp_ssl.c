@@ -2051,13 +2051,12 @@ static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *se
 				SSL_SESSION_up_ref(obj->session);
 				session = obj->session;
 			}
-			zval_ptr_dtor(&retval);
 		} else if (Z_TYPE(retval) != IS_NULL) {
 			zend_type_error("session_get_cb return type must be null or OpenSSLSession");
-			return NULL;
 		}
 	}
 
+	zval_ptr_dtor(&retval);
 	zval_ptr_dtor(&args[1]);
 
 	*copy = 0;
