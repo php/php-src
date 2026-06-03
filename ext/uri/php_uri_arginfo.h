@@ -480,7 +480,7 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlValidationErrorType(void)
 
 	zend_enum_add_case_cstr(class_entry, "MissingSchemeNonRelativeUrl", NULL);
 
-	zend_enum_add_case_cstr(class_entry, "InvalidReverseSoldius", NULL);
+	zend_enum_add_case_cstr(class_entry, "InvalidReverseSolidus", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "InvalidCredentials", NULL);
 
