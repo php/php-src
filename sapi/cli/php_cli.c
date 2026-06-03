@@ -592,6 +592,11 @@ static int zend_ini_entry_cmp(Bucket *a, Bucket *b)
 	return zend_binary_strcasecmp(ZSTR_VAL(A->name), ZSTR_LEN(A->name), ZSTR_VAL(B->name), ZSTR_LEN(B->name));
 }
 
+static bool is_single_request(void)
+{
+	return true;
+}
+
 static int do_cli(int argc, char **argv) /* {{{ */
 {
 	int c;
@@ -834,6 +839,10 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			default:
 				break;
 			}
+		}
+
+		if (num_repeats == 1) {
+			sapi_module.is_single_request = is_single_request;
 		}
 
 		if (param_error) {
