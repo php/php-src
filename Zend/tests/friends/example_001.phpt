@@ -6,8 +6,8 @@ Friends: RFC example 1 (User and UserFactory)
 class User {
     friend UserFactory;
 
-    // Private constructor - user information must come from a trusted source
-    private function __construct(
+    // Protected constructor - user information must come from a trusted source
+    protected function __construct(
         public readonly int $userId,
         public readonly string $username,
     ) {}
@@ -54,6 +54,6 @@ object(User)#%d (2) {
   ["username"]=>
   string(3) "Bob"
 }
-Error: Call to private User::__construct() from global scope in %s:%d
+Error: Call to protected User::__construct() from global scope in %s:%d
 Stack trace:
 #0 {main}

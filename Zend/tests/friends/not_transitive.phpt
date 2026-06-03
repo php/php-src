@@ -6,7 +6,7 @@ Friends: friendship is not transitive
 class Foo {
 	friend Bar;
 
-	private static function privateStatic() {
+	protected static function protectedStatic() {
 		echo __METHOD__ . "()\n";
 	}
 
@@ -16,23 +16,23 @@ class Foo {
 class Bar {
 	friend Baz;
 
-	private static function privateStatic() {
+	protected static function protectedStatic() {
 		echo __METHOD__ . "()\n";
 	}
 
 	public static function testFooAccess() {
-		Foo::privateStatic();
+		Foo::protectedStatic();
 	}
 }
 
 class Baz {
 
 	public static function testBarAccess() {
-		Bar::privateStatic();
+		Bar::protectedStatic();
 	}
 
 	public static function testFooAccess() {
-		Foo::privateStatic();
+		Foo::protectedStatic();
 	}
 }
 
@@ -45,14 +45,14 @@ Baz::testFooAccess();
 
 ?>
 --EXPECTF--
-Foo::privateStatic()
-Bar::privateStatic()
+Foo::protectedStatic()
+Bar::protectedStatic()
 
 
 -----
 
 
-Fatal error: Uncaught Error: Call to private method Foo::privateStatic() from scope Baz in %s:%d
+Fatal error: Uncaught Error: Call to protected method Foo::protectedStatic() from scope Baz in %s:%d
 Stack trace:
 #0 %s(%d): Baz::testFooAccess()
 #1 {main}

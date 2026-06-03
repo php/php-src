@@ -21,4 +21,4 @@ var_dump(new ReflectionProperty('A', 'privateProp')->isReadable('C', null));
 --EXPECT--
 bool(true)
 bool(true)
-bool(true)
+bool(false)

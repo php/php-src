@@ -413,12 +413,7 @@ dynamic:
 				}
 			}
 			if (flags & ZEND_ACC_PRIVATE) {
-				// Compare the calling scope with the scope of the property
-				// declaration for friendship before assuming the desire to
-				// create a dynamic property
-				if (zend_check_friend(property_info->ce, scope)) {
-					goto found;
-				} else if (property_info->ce != ce) {
+				if (property_info->ce != ce) {
 					goto dynamic;
 				} else {
 wrong:
@@ -516,12 +511,7 @@ dynamic:
 				}
 			}
 			if (flags & ZEND_ACC_PRIVATE) {
-				// Compare the calling scope with the scope of the property
-				// declaration for friendship before assuming the desire to
-				// create a dynamic property
-				if (zend_check_friend(property_info->ce, scope)) {
-					goto found;
-				} else if (property_info->ce != ce) {
+				if (property_info->ce != ce) {
 					goto dynamic;
 				} else {
 wrong:
@@ -611,12 +601,12 @@ ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_p
 	if (prop_info->ce == scope) {
 		return true;
 	}
-	if (EXPECTED((prop_info->flags & ZEND_ACC_PROTECTED_SET)
-		&& is_protected_compatible_scope(prop_info->prototype->ce, scope))
-	) {
-		return true;
-	}
-	return zend_check_friend(prop_info->ce, scope);
+	return EXPECTED((prop_info->flags & ZEND_ACC_PROTECTED_SET)
+		&& (
+			is_protected_compatible_scope(prop_info->prototype->ce, scope)
+			|| zend_check_friend(prop_info->ce, scope)
+		)
+	);
 }
 
 static void zend_property_guard_dtor(zval *el) /* {{{ */ {
@@ -2022,12 +2012,8 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 					goto exit;
 				}
 			}
-			if (
-				(UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
-					&& !zend_check_friend(fbc->common.scope, scope)
-				)
-			 	|| UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))
-			) {
+			if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
+			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
 				if (zobj->ce->__call) {
 					fbc = zend_get_call_trampoline_func(zobj->ce->__call, method_name);
 				} else {

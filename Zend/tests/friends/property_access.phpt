@@ -1,5 +1,5 @@
 --TEST--
-Friends: allows access to properties
+Friends: allows access to protected properties
 --FILE--
 <?php
 
@@ -17,11 +17,23 @@ class Bar {
 	public static function testPropertyAccess() {
 		Foo::$protectedStatic = 1;
 		var_dump(Foo::$protectedStatic);
-		Foo::$privateStatic = 2;
-		var_dump(Foo::$privateStatic);
+		try {
+			Foo::$privateStatic = 2;
+		} catch (Error $e) {
+			echo $e . "\n";
+		}
+		try {
+			var_dump(Foo::$privateStatic);
+		} catch (Error $e) {
+			echo $e . "\n";
+		}
 		$f = new Foo();
 		$f->protectedInstance = 3;
-		$f->privateInstance = 4;
+		try {
+			$f->privateInstance = 4;
+		} catch (Error $e) {
+			echo $e . "\n";
+		}
 		var_dump($f);
 	}
 }

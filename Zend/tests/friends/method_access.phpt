@@ -1,5 +1,5 @@
 --TEST--
-Friends: allows access to methods
+Friends: allows access to protectd methods
 --FILE--
 <?php
 
@@ -31,12 +31,19 @@ class Bar {
 	public static function testMethodAccess() {
 		Foo::protectedStatic();
 		echo "\n";
-		Foo::privateStatic();
-		echo "\n";
+		try {
+			Foo::privateStatic();
+		} catch (Error $e) {
+			echo $e . "\n\n";
+		}
 		$f = new Foo();
 		$f->protectedInstance();
 		echo "\n";
-		$f->privateInstance();
+		try {
+			$f->privateInstance();
+		} catch (Error $e) {
+			echo $e . "\n";
+		}
 	}
 }
 
@@ -95,14 +102,16 @@ Foo::protectedStatic() called, backtrace:
 #0 %s(%d): Foo::protectedStatic()
 #1 %s(%d): Bar::testMethodAccess()
 
-Foo::privateStatic() called, backtrace:
-#0 %s(%d): Foo::privateStatic()
-#1 %s(%d): Bar::testMethodAccess()
+Error: Call to private method Foo::privateStatic() from scope Bar in %s:%d
+Stack trace:
+#0 %s(%d): Bar::testMethodAccess()
+#1 {main}
 
 Foo::protectedInstance() called, backtrace:
 #0 %s(%d): Foo->protectedInstance()
 #1 %s(%d): Bar::testMethodAccess()
 
-Foo::privateInstance() called, backtrace:
-#0 %s(%d): Foo->privateInstance()
-#1 %s(%d): Bar::testMethodAccess()
+Error: Call to private method Foo::privateInstance() from scope Bar in %s:%d
+Stack trace:
+#0 %s(%d): Bar::testMethodAccess()
+#1 {main}

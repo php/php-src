@@ -6,7 +6,7 @@ Friends: friendship is not inherited
 class Foo {
 	friend Bar;
 
-	private static function privateStatic() {
+	protected static function protectedStatic() {
 		echo __METHOD__ . "()\n";
 	}
 
@@ -16,14 +16,14 @@ class Foo {
 class Bar {
 
 	public static function testFooAccess() {
-		Foo::privateStatic();
+		Foo::protectedStatic();
 	}
 }
 
 class Baz extends Bar {
 
 	public static function testFooAccessAgain() {
-		Foo::privateStatic();
+		Foo::protectedStatic();
 	}
 }
 
@@ -37,14 +37,14 @@ Baz::testFooAccessAgain();
 
 ?>
 --EXPECTF--
-Foo::privateStatic()
-Foo::privateStatic()
+Foo::protectedStatic()
+Foo::protectedStatic()
 
 
 -----
 
 
-Fatal error: Uncaught Error: Call to private method Foo::privateStatic() from scope Baz in %s:%d
+Fatal error: Uncaught Error: Call to protected method Foo::protectedStatic() from scope Baz in %s:%d
 Stack trace:
 #0 %s(%d): Baz::testFooAccessAgain()
 #1 {main}

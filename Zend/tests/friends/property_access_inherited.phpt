@@ -1,5 +1,5 @@
 --TEST--
-Friends: allows access to inherited non-overridden instance properties
+Friends: allows access to inherited non-overridden protected instance properties
 --FILE--
 <?php
 
@@ -22,7 +22,11 @@ class Bar {
 	public static function testPropertyAccess() {
 		$fc = new FooChild();
 		$fc->protectedInstance = 1;
-		$fc->privateInstance = 2;
+		try {
+			$fc->privateInstance = 2;
+		} catch (Error $e) {
+			echo $e . "\n";
+		}
 
 		try {
 			$fc->protectedInstance2 = 3;
@@ -43,6 +47,7 @@ Bar::testPropertyAccess();
 
 ?>
 --EXPECTF--
+Deprecated: Creation of dynamic property FooChild::$privateInstance is deprecated in %s on line %d
 Error: Cannot access protected property FooChild::$protectedInstance2 in %s:%d
 Stack trace:
 #0 %s(%d): Bar::testPropertyAccess()
@@ -53,15 +58,17 @@ Stack trace:
 #0 %s(%d): Bar::testPropertyAccess()
 #1 {main}
 
-object(FooChild)#%d (5) {
+object(FooChild)#%d (6) {
   ["protectedInstance":protected]=>
   int(1)
   ["privateInstance":"Foo":private]=>
-  int(2)
+  NULL
   ["protectedInstance2":protected]=>
   NULL
   ["privateInstance2":"Foo":private]=>
   NULL
   ["privateInstance2":"FooChild":private]=>
   NULL
+  ["privateInstance"]=>
+  int(2)
 }

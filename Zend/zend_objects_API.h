@@ -141,9 +141,7 @@ static zend_always_inline bool zend_check_method_accessible(const zend_function 
 	if (!(fn->common.fn_flags & ZEND_ACC_PUBLIC)
 		&& fn->common.scope != scope
 		&& (UNEXPECTED(fn->common.fn_flags & ZEND_ACC_PRIVATE)
-			|| UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fn), scope)))
-		&& UNEXPECTED(!zend_check_friend(zend_get_function_root_class(fn), scope))
-	) {
+			|| UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fn), scope)))) {
 		return false;
 	}
 

@@ -3,7 +3,17 @@ Friends: allows access to destructors
 --FILE--
 <?php
 
-class Foo {
+class ProtectedDestructor {
+	friend Bar;
+
+	protected function __destruct() {
+		echo __METHOD__ . "() called, backtrace:\n";
+		debug_print_backtrace();
+	}
+
+}
+
+class PrivateDestructor {
 	friend Bar;
 
 	private function __destruct() {
@@ -15,14 +25,25 @@ class Foo {
 
 class Bar {
 	public static function testDestructorAccess() {
-		new Foo();
+		new ProtectedDestructor();
+		echo "\n";
+		try {
+			new PrivateDestructor();
+		} catch (Error $e) {
+			echo $e . "\n";
+		}
 	}
 }
 
 // Confirm that the presence of a friend does not negate normal visibility
 // enforcement for non friends
 try {
-	new Foo();
+	new ProtectedDestructor();
+} catch (Error $e) {
+	echo $e . "\n";
+}
+try {
+	new PrivateDestructor();
 } catch (Error $e) {
 	echo $e . "\n";
 }
@@ -34,13 +55,21 @@ Bar::testDestructorAccess();
 
 ?>
 --EXPECTF--
-Error: Call to private Foo::__destruct() from global scope in %s:%d
+Error: Call to protected ProtectedDestructor::__destruct() from global scope in %s:%d
+Stack trace:
+#0 {main}
+Error: Call to private PrivateDestructor::__destruct() from global scope in %s:%d
 Stack trace:
 #0 {main}
 
 
 -----
 
-Foo::__destruct() called, backtrace:
-#0 %s(%d): Foo->__destruct()
+ProtectedDestructor::__destruct() called, backtrace:
+#0 %s(%d): ProtectedDestructor->__destruct()
 #1 %s(%d): Bar::testDestructorAccess()
+
+Error: Call to private PrivateDestructor::__destruct() from scope Bar in %s:%d
+Stack trace:
+#0 %s(%d): Bar::testDestructorAccess()
+#1 {main}

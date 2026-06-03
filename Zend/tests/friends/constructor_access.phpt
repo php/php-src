@@ -25,7 +25,11 @@ class Bar {
 	public static function testConstructorAccess() {
 		new ConstructorProtected();
 		echo "\n";
-		new ConstructorPrivate();
+		try {
+			new ConstructorPrivate();
+		} catch (Error $e) {
+			echo $e . "\n";
+		}
 	}
 }
 
@@ -65,6 +69,7 @@ ConstructorProtected::__construct() called, backtrace:
 #0 %s(%d): ConstructorProtected->__construct()
 #1 %s(%d): Bar::testConstructorAccess()
 
-ConstructorPrivate::__construct() called, backtrace:
-#0 %s(%d): ConstructorPrivate->__construct()
-#1 %s(%d): Bar::testConstructorAccess()
+Error: Call to private ConstructorPrivate::__construct() from scope Bar in %s:%d
+Stack trace:
+#0 %s(%d): Bar::testConstructorAccess()
+#1 {main}

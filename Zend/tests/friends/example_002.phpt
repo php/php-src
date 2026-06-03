@@ -6,11 +6,11 @@ Friends: RFC example 2 (User and UserBuilder)
 class User {
     friend UserBuilder;
 
-    public private(set) ?int $userId = null;
-    public private(set) ?string $username = null;
+    public protected(set) ?int $userId = null;
+    public protected(set) ?string $username = null;
 
-    // Private constructor - use the UserBuilder
-    private function __construct() {}
+    // Protected constructor - use the UserBuilder
+    protected function __construct() {}
 }
 
 class UserBuilder {
@@ -57,6 +57,6 @@ object(User)#%d (2) {
   ["username"]=>
   string(3) "Bob"
 }
-Error: Cannot modify private(set) property User::$userId from global scope in %s:%d
+Error: Cannot modify protected(set) property User::$userId from global scope in %s:%d
 Stack trace:
 #0 {main}

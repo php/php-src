@@ -1,5 +1,5 @@
 --TEST--
-Friends: allows access to constants on enums
+Friends: allows access to protected constants on enums
 --FILE--
 <?php
 
@@ -16,7 +16,12 @@ enum Foo {
 class Bar {
 	public static function testConstantAccess() {
 		var_dump(Foo::FIRST);
-		var_dump(Foo::SECOND);
+		echo "\n";
+		try {
+			var_dump(Foo::SECOND);
+		} catch (Error $e) {
+			echo $e . "\n";
+		}
 	}
 }
 
@@ -53,4 +58,8 @@ Stack trace:
 -----
 
 int(1)
-int(2)
+
+Error: Cannot access private constant Foo::SECOND in %s:%d
+Stack trace:
+#0 %s(%d): Bar::testConstantAccess()
+#1 {main}

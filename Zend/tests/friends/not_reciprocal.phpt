@@ -6,24 +6,24 @@ Friends: friendship is not reciprocal
 class Foo {
 	friend Bar;
 
-	private static function privateStatic() {
+	protected static function protectedStatic() {
 		echo __METHOD__ . "()\n";
 	}
 
 	public static function testBarAccess() {
-		Bar::privateStatic();
+		Bar::protectedStatic();
 	}
 
 }
 
 class Bar {
 
-	private static function privateStatic() {
+	protected static function protectedStatic() {
 		echo __METHOD__ . "()\n";
 	}
 
 	public static function testFooAccess() {
-		Foo::privateStatic();
+		Foo::protectedStatic();
 	}
 }
 
@@ -35,13 +35,13 @@ Foo::testBarAccess();
 
 ?>
 --EXPECTF--
-Foo::privateStatic()
+Foo::protectedStatic()
 
 
 -----
 
 
-Fatal error: Uncaught Error: Call to private method Bar::privateStatic() from scope Foo in %s:%d
+Fatal error: Uncaught Error: Call to protected method Bar::protectedStatic() from scope Foo in %s:%d
 Stack trace:
 #0 %s(%d): Foo::testBarAccess()
 #1 {main}

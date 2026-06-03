@@ -7,17 +7,32 @@ class Bar {
 	public static function testAccess(object $obj) {
 		$obj::protectedStatic();
 		echo "\n";
-		$obj::privateStatic();
-		echo "\n";
+		try {
+			$obj::privateStatic();
+		} catch (Error $e) {
+			echo $e . "\n\n";
+		}
 		$obj->protectedInstance();
 		echo "\n";
-		$obj->privateInstance();
-		echo "\n";
+		try {
+			$obj->privateInstance();
+		} catch (Error $e) {
+			echo $e . "\n\n";
+		}
 		$obj->protectedProp = 1;
-		$obj->privateProp = 2;
+		try {
+			$obj->privateProp = 2;
+		} catch (Error $e) {
+			echo $e . "\n\n";
+		}
 		var_dump($obj);
 		var_dump($obj::FIRST);
-		var_dump($obj::SECOND);
+		try {
+			var_dump($obj::SECOND);
+			$obj::privateStatic();
+		} catch (Error $e) {
+			echo $e . "\n";
+		}
 	}
 }
 
@@ -59,23 +74,33 @@ class@anonymous%s:%d$0::protectedStatic() called, backtrace:
 #0 %s(%d): class@anonymous::protectedStatic()
 #1 %s(%d): Bar::testAccess(Object(class@anonymous))
 
-class@anonymous%s:%d$0::privateStatic() called, backtrace:
-#0 %s(%d): class@anonymous::privateStatic()
-#1 %s(%d): Bar::testAccess(Object(class@anonymous))
+Error: Call to private method class@anonymous::privateStatic() from scope Bar in %s:%d
+Stack trace:
+#0 %s(%d): Bar::testAccess(Object(class@anonymous))
+#1 {main}
 
 class@anonymous%s:%d$0::protectedInstance() called, backtrace:
 #0 %s(%d): class@anonymous->protectedInstance()
 #1 %s(%d): Bar::testAccess(Object(class@anonymous))
 
-class@anonymous%s:%d$0::privateInstance() called, backtrace:
-#0 %s(%d): class@anonymous->privateInstance()
-#1 %s(%d): Bar::testAccess(Object(class@anonymous))
+Error: Call to private method class@anonymous::privateInstance() from scope Bar in %s:%d
+Stack trace:
+#0 %s(%d): Bar::testAccess(Object(class@anonymous))
+#1 {main}
+
+Error: Cannot access private property class@anonymous::$privateProp in %s:%d
+Stack trace:
+#0 %s(%d): Bar::testAccess(Object(class@anonymous))
+#1 {main}
 
 object(class@anonymous)#1 (2) {
   ["protectedProp":protected]=>
   int(1)
   ["privateProp":"class@anonymous":private]=>
-  int(2)
+  NULL
 }
 int(1)
-int(2)
+Error: Cannot access private constant class@anonymous::SECOND in %s:%d
+Stack trace:
+#0 %s(%d): Bar::testAccess(Object(class@anonymous))
+#1 {main}

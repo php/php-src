@@ -1,5 +1,5 @@
 --TEST--
-Friends: allows access to properties with asymmetric visibility
+Friends: allows access to protected properties with asymmetric visibility
 --FILE--
 <?php
 
@@ -7,7 +7,7 @@ class Foo {
 	friend Bar;
 
 	public protected(set) static mixed $protectedStatic;
-	public private(set) static mixed $privateStatic;
+	public private(set) static mixed $privateStatic = true;
 
 	public protected(set) mixed $protectedInstance;
 	public private(set) mixed $privateInstance;
@@ -17,11 +17,21 @@ class Bar {
 	public static function testPropertyAccess() {
 		Foo::$protectedStatic = 1;
 		var_dump(Foo::$protectedStatic);
-		Foo::$privateStatic = 2;
+		echo "\n";
+		try {
+			Foo::$privateStatic = 2;
+		} catch (Error $e) {
+			echo $e . "\n\n";
+		}
 		var_dump(Foo::$privateStatic);
+		echo "\n";
 		$f = new Foo();
 		$f->protectedInstance = 3;
-		$f->privateInstance = 4;
+		try {
+			$f->privateInstance = 4;
+		} catch (Error $e) {
+			echo $e . "\n\n";
+		}
 		var_dump($f);
 	}
 }
@@ -78,10 +88,22 @@ Stack trace:
 -----
 
 int(1)
-int(2)
-object(Foo)#%d (2) {
+
+Error: Cannot modify private(set) property Foo::$privateStatic from scope Bar in %s:%d
+Stack trace:
+#0 %s(%d): Bar::testPropertyAccess()
+#1 {main}
+
+bool(true)
+
+Error: Cannot modify private(set) property Foo::$privateInstance from scope Bar in %s:%d
+Stack trace:
+#0 %s(%d): Bar::testPropertyAccess()
+#1 {main}
+
+object(Foo)#%d (1) {
   ["protectedInstance"]=>
   int(3)
   ["privateInstance"]=>
-  int(4)
+  uninitialized(mixed)
 }
