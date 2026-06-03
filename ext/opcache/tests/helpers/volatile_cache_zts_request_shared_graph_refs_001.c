@@ -28,6 +28,7 @@
 #include "Zend/zend_portability.h"
 
 #include "sapi/embed/php_embed.h"
+#include "ext/opcache/zend_static_cache.h"
 #ifndef ZEND_WIN32
 # include "Zend/zend_atomic.h"
 # include "zend_static_cache_internal.h"
@@ -38,6 +39,7 @@
 #endif
 
 #define REQUEST_COUNT 4
+#define TEST_STORAGE_KEY "volatile_cache:default:zts_request_shared_graph_refs_payload"
 
 typedef struct _zend_opcache_ref_thread_ctx {
 	int result;
@@ -58,7 +60,7 @@ static const char opcache_test_ini[] =
 
 static const char clear_code[] =
 	"(static function (): bool {"
-	"    OPcache\\VolatileCache::clear();"
+	"    opcache_static_cache_volatile_reset();"
 	"    return true;"
 	"})()";
 
@@ -79,12 +81,12 @@ static const char worker_code[] =
 	"        ];"
 	"    }"
 	"    for ($i = 0; $i < 16; $i++) {"
-	"        if (!OPcache\\VolatileCache::set('zts_request_shared_graph_refs_payload', $payload)) {"
+	"        if (!OPcache\\VolatileCache::getInstance('default')->store('zts_request_shared_graph_refs_payload', $payload)) {"
 	"            return false;"
 	"        }"
 	"    }"
 	"    for ($i = 0; $i < 64; $i++) {"
-	"        $fetched = OPcache\\VolatileCache::get('zts_request_shared_graph_refs_payload');"
+	"        $fetched = OPcache\\VolatileCache::getInstance('default')->fetch('zts_request_shared_graph_refs_payload');"
 	"        if (!is_array($fetched)"
 	"            || !isset($fetched['routes'], $fetched['generators'])"
 	"            || count($fetched['routes']) !== 192) {"
@@ -137,7 +139,6 @@ static int zend_opcache_test_startup(int argc, char **argv)
 	zend_signal_startup();
 	sapi_startup(&php_embed_module);
 	/* Static Cache is opt-in per SAPI; this embed-based test enables it. */
-	extern void zend_opcache_static_cache_opt_in(void);
 	zend_opcache_static_cache_opt_in();
 	php_embed_module.ini_entries = opcache_test_ini;
 	if (argv != NULL) {
@@ -264,7 +265,7 @@ static bool zend_opcache_inspect_current_payload_state(
 		char *message,
 		size_t message_size)
 {
-	static const char key_name[] = "zts_request_shared_graph_refs_payload";
+	static const char key_name[] = TEST_STORAGE_KEY;
 	zend_opcache_static_cache_context *previous_context;
 	zend_opcache_static_cache_header *header;
 	zend_opcache_static_cache_entry *entries, *entry = NULL;

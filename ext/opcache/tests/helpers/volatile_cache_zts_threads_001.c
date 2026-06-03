@@ -27,6 +27,7 @@
 #include "Zend/zend_execute.h"
 #include "Zend/zend_portability.h"
 #include "sapi/embed/php_embed.h"
+#include "ext/opcache/zend_static_cache.h"
 
 #ifndef ZTS
 # error "This helper requires a ZTS build"
@@ -74,7 +75,6 @@ static int zend_opcache_test_startup(int argc, char **argv)
 	zend_signal_startup();
 	sapi_startup(&php_embed_module);
 	/* Static Cache is opt-in per SAPI; this embed-based test enables it. */
-	extern void zend_opcache_static_cache_opt_in(void);
 	zend_opcache_static_cache_opt_in();
 	php_embed_module.ini_entries = opcache_test_ini;
 	if (argv != NULL) {
@@ -146,9 +146,9 @@ static bool zend_opcache_thread_eval(const char *code, zval *retval, const char 
 static void *zend_opcache_thread_main(void *arg)
 {
 	static const char store_code[] =
-		"OPcache\\VolatileCache::set('" TEST_KEY "', '" TEST_VALUE "');";
+		"OPcache\\VolatileCache::getInstance('default')->store('" TEST_KEY "', '" TEST_VALUE "');";
 	static const char fetch_code[] =
-		"OPcache\\VolatileCache::get('" TEST_KEY "');";
+		"OPcache\\VolatileCache::getInstance('default')->fetch('" TEST_KEY "');";
 	zend_opcache_thread_ctx *ctx;
 	zval retval;
 	bool request_started = false;
@@ -166,21 +166,21 @@ static void *zend_opcache_thread_main(void *arg)
 
 	if (ctx->mode == THREAD_MODE_STORE) {
 		if (!zend_opcache_thread_eval(store_code, &retval, "zts volatile cache store")) {
-			zend_opcache_thread_set_failure(ctx, "VolatileCache::set failed");
+			zend_opcache_thread_set_failure(ctx, "VolatileCache::store failed");
 			goto cleanup;
 		}
 
 		if (!zend_is_true(&retval)) {
-			zend_opcache_thread_set_failure(ctx, "VolatileCache::set returned false");
+			zend_opcache_thread_set_failure(ctx, "VolatileCache::store returned false");
 		}
 	} else {
 		if (!zend_opcache_thread_eval(fetch_code, &retval, "zts volatile cache fetch")) {
-			zend_opcache_thread_set_failure(ctx, "VolatileCache::get failed");
+			zend_opcache_thread_set_failure(ctx, "VolatileCache::fetch failed");
 			goto cleanup;
 		}
 
 		if (Z_TYPE(retval) != IS_STRING || strcmp(Z_STRVAL(retval), TEST_VALUE) != 0) {
-			zend_opcache_thread_set_failure(ctx, "VolatileCache::get returned unexpected value");
+			zend_opcache_thread_set_failure(ctx, "VolatileCache::fetch returned unexpected value");
 		}
 	}
 
@@ -197,9 +197,9 @@ cleanup:
 
 int main(int argc, char **argv)
 {
-	static const char clear_code[] = "OPcache\\VolatileCache::clear();";
+	static const char clear_code[] = "opcache_static_cache_volatile_reset();";
 	static const char fetch_code[] =
-		"OPcache\\VolatileCache::get('" TEST_KEY "');";
+		"OPcache\\VolatileCache::getInstance('default')->fetch('" TEST_KEY "');";
 	zend_thread_t writer_thread;
 	zend_thread_t reader_thread;
 	zend_opcache_thread_ctx writer_ctx;

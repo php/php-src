@@ -33,9 +33,9 @@ $fixed[0] = 'a';
 $fixed[1] = ['nested' => 1];
 $fixed[2] = 42;
 
-var_dump(OPcache\VolatileCache::set('safe_direct_spl_fixed', $fixed));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('safe_direct_spl_fixed', $fixed));
 
-$fixedCopy = OPcache\VolatileCache::get('safe_direct_spl_fixed');
+$fixedCopy = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_spl_fixed');
 var_dump($fixedCopy instanceof TaggedFixedArray);
 var_dump($fixedCopy->getSize());
 var_dump($fixedCopy[0]);
@@ -65,9 +65,9 @@ class TaggedCollection extends ArrayObject
 
 $collection = new TaggedCollection(['alpha' => 10, 'beta' => 20], 'metric', LabelIterator::class);
 
-var_dump(OPcache\VolatileCache::set('safe_direct_array_object', $collection));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('safe_direct_array_object', $collection));
 
-$collectionCopy = OPcache\VolatileCache::get('safe_direct_array_object');
+$collectionCopy = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_array_object');
 $collectionIterator = $collectionCopy->getIterator();
 var_dump($collectionCopy instanceof TaggedCollection);
 var_dump($collectionIterator instanceof LabelIterator);
@@ -93,9 +93,9 @@ class TaggedIterator extends ArrayIterator
 
 $iterator = new TaggedIterator([3, 5, 8], 'fib');
 
-var_dump(OPcache\VolatileCache::set('safe_direct_array_iterator', $iterator));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('safe_direct_array_iterator', $iterator));
 
-$iteratorCopy = OPcache\VolatileCache::get('safe_direct_array_iterator');
+$iteratorCopy = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_array_iterator');
 $iteratorCopy->rewind();
 var_dump($iteratorCopy instanceof TaggedIterator);
 var_dump($iteratorCopy->count());
@@ -120,9 +120,9 @@ class TaggedRecursiveIterator extends RecursiveArrayIterator
 
 $recursive = new TaggedRecursiveIterator(['leaf' => ['value' => 99]], 'tree');
 
-var_dump(OPcache\VolatileCache::set('safe_direct_recursive_array_iterator', $recursive));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('safe_direct_recursive_array_iterator', $recursive));
 
-$recursiveCopy = OPcache\VolatileCache::get('safe_direct_recursive_array_iterator');
+$recursiveCopy = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_recursive_array_iterator');
 $recursiveCopy->rewind();
 var_dump($recursiveCopy instanceof TaggedRecursiveIterator);
 var_dump($recursiveCopy->count());
@@ -154,9 +154,9 @@ class CustomSerializedArrayObject extends ArrayObject
 
 $custom = new CustomSerializedArrayObject(['x' => 1]);
 
-var_dump(OPcache\VolatileCache::set('safe_direct_array_override', $custom));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('safe_direct_array_override', $custom));
 
-$customCopy = OPcache\VolatileCache::get('safe_direct_array_override');
+$customCopy = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_array_override');
 var_dump($customCopy instanceof CustomSerializedArrayObject);
 var_dump(CustomSerializedArrayObject::$serializeCalls);
 var_dump(CustomSerializedArrayObject::$unserializeCalls);

@@ -6,45 +6,45 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::clear();
+		opcache_static_cache_volatile_reset();
 	} else {
-		OPcache\PinnedCache::clear();
+		OPcache\StableCache::getInstance('default')->clear();
 	}
 }
 
 function cache_store_array(string $backend, array $values): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::setMultiple($values);
+		OPcache\VolatileCache::getInstance('default')->storeMultiple($values);
 	} else {
-		OPcache\PinnedCache::setMultiple($values);
+		OPcache\StableCache::getInstance('default')->storeMultiple($values);
 	}
 }
 
 function cache_store(string $backend, string $key, mixed $value): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::set($key, $value);
+		OPcache\VolatileCache::getInstance('default')->store($key, $value);
 	} else {
-		OPcache\PinnedCache::set($key, $value);
+		OPcache\StableCache::getInstance('default')->store($key, $value);
 	}
 }
 
 function cache_fetch_array(string $backend, array $keys, ?array $default = null): ?array
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::getMultiple($keys, $default)
-		: OPcache\PinnedCache::getMultiple($keys, $default);
+		? OPcache\VolatileCache::getInstance('default')->fetchMultiple($keys, $default)
+		: OPcache\StableCache::getInstance('default')->fetchMultiple($keys, $default);
 }
 
-foreach (['volatile', 'pinned'] as $backend) {
+foreach (['volatile', 'stable'] as $backend) {
 	echo $backend, "\n";
 	cache_clear($backend);
 	cache_store_array($backend, [
@@ -87,7 +87,7 @@ array(1) {
 }
 array(0) {
 }
-pinned
+stable
 array(3) {
   ["hit"]=>
   string(5) "value"

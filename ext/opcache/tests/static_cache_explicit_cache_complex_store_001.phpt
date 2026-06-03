@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
@@ -53,17 +53,17 @@ $routePayload = [
 	'headers' => ['cache-control' => 'public, max-age=60'],
 ];
 
-var_dump(OPcache\VolatileCache::setMultiple([
+var_dump(OPcache\VolatileCache::getInstance('default')->storeMultiple([
 	'route' => $routePayload,
 	'meta' => new ExplicitPreparedUser('Alice', 30),
 	'serial' => new ExplicitPreparedSerializableUser(7, 'Bob'),
 	'internal' => new DateTimeImmutable('2026-06-15 09:30:00', new DateTimeZone('UTC')),
 ]));
 
-$route = OPcache\VolatileCache::get('route');
-$meta = OPcache\VolatileCache::get('meta');
-$serial = OPcache\VolatileCache::get('serial');
-$internal = OPcache\VolatileCache::get('internal');
+$route = OPcache\VolatileCache::getInstance('default')->fetch('route');
+$meta = OPcache\VolatileCache::getInstance('default')->fetch('meta');
+$serial = OPcache\VolatileCache::getInstance('default')->fetch('serial');
+$internal = OPcache\VolatileCache::getInstance('default')->fetch('internal');
 
 var_dump($route['nested']['alpha'][2]);
 var_dump($meta instanceof ExplicitPreparedUser);
@@ -76,14 +76,14 @@ var_dump(ExplicitPreparedSerializableUser::$unserializeCount);
 var_dump($internal instanceof DateTimeImmutable);
 var_dump($internal->format('Y-m-d H:i:s'));
 
-OPcache\PinnedCache::set('pinned_user', new ExplicitPreparedUser('Carol', 40));
-$pinned = OPcache\PinnedCache::get('pinned_user');
+OPcache\StableCache::getInstance('default')->store('stable_user', new ExplicitPreparedUser('Carol', 40));
+$stable = OPcache\StableCache::getInstance('default')->fetch('stable_user');
 
-var_dump($pinned instanceof ExplicitPreparedUser);
-var_dump($pinned->name);
-var_dump($pinned->age);
+var_dump($stable instanceof ExplicitPreparedUser);
+var_dump($stable->name);
+var_dump($stable->age);
 
-var_dump(OPcache\VolatileCache::setMultiple([]));
+var_dump(OPcache\VolatileCache::getInstance('default')->storeMultiple([]));
 
 ?>
 --EXPECT--

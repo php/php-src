@@ -26,11 +26,23 @@ typedef struct _zend_opcache_static_cache_request_local_clone_context {
 	HashTable references;
 } zend_opcache_static_cache_request_local_clone_context;
 
-/* Value graph cloning is mutually recursive across arrays, references, and objects. */
+typedef enum _zend_opcache_static_cache_request_local_slot_result {
+	ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_SLOT_MISS,
+	ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_SLOT_HIT
+} zend_opcache_static_cache_request_local_slot_result;
+
 static bool zend_opcache_static_cache_clone_request_local_value(
 	zend_opcache_static_cache_request_local_clone_context *context,
 	zval *dst,
 	zval *src
+);
+
+static bool zend_opcache_static_cache_find_slot_for_read_locked(
+	zend_string *key,
+	zend_ulong hash,
+	zend_opcache_static_cache_header **header_ptr,
+	uint32_t *slot_index,
+	bool *found
 );
 
 static zend_always_inline void zend_opcache_static_cache_release_value_storage_locked(uint8_t value_type, uint32_t value_offset)
@@ -75,6 +87,7 @@ static zend_always_inline void zend_opcache_static_cache_delete_entry_locked(zen
 	entry->value_len = 0;
 	entry->reserved = 0;
 	entry->expires_at = 0;
+	entry->generation = 0;
 	entry->long_value = 0;
 	entry->double_value = 0;
 	zend_opcache_static_cache_bump_mutation_epoch_locked(header);
@@ -89,6 +102,28 @@ static zend_always_inline void zend_opcache_static_cache_release_request_local_s
 	zend_hash_destroy(*slots_ptr);
 	FREE_HASHTABLE(*slots_ptr);
 	*slots_ptr = NULL;
+}
+
+static int zend_opcache_static_cache_release_request_local_slot_by_prefix_apply(zval *slot_zv, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	zend_string *prefix;
+
+	ZEND_ASSERT(num_args == 1);
+	(void) slot_zv;
+	(void) num_args;
+
+	if (hash_key->key == NULL) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
+
+	prefix = va_arg(args, zend_string *);
+	if (ZSTR_LEN(hash_key->key) < ZSTR_LEN(prefix) ||
+		memcmp(ZSTR_VAL(hash_key->key), ZSTR_VAL(prefix), ZSTR_LEN(prefix)) != 0
+	) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
+
+	return ZEND_HASH_APPLY_REMOVE;
 }
 
 static zend_always_inline bool zend_opcache_static_cache_is_expired(const zend_opcache_static_cache_entry *entry, uint64_t now)
@@ -161,6 +196,7 @@ static bool zend_opcache_static_cache_value_needs_request_local_clone_inner(
 			}
 
 			zend_hash_index_add_empty_element(visited_arrays, array_key);
+
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), element) {
 				if (zend_opcache_static_cache_value_needs_request_local_clone_inner(element, visited_arrays)) {
 					return true;
@@ -187,6 +223,7 @@ static bool zend_opcache_static_cache_value_needs_request_local_clone(zval *valu
 	}
 
 	zend_hash_init(&visited_arrays, 8, NULL, NULL, 0);
+
 	result = zend_opcache_static_cache_value_needs_request_local_clone_inner(value, &visited_arrays);
 	zend_hash_destroy(&visited_arrays);
 
@@ -299,6 +336,7 @@ static bool zend_opcache_static_cache_clone_request_local_reference(
 	ZVAL_NEW_EMPTY_REF(dst);
 	new_ref = Z_REF_P(dst);
 	ZVAL_UNDEF(&new_ref->val);
+
 	zend_hash_index_update_ptr(&context->references, key, new_ref);
 
 	if (!zend_opcache_static_cache_clone_request_local_value(context, &inner, &src_ref->val)) {
@@ -333,6 +371,7 @@ static bool zend_opcache_static_cache_clone_request_local_object_members(
 			}
 
 			zval_ptr_dtor(dst);
+
 			ZVAL_COPY_VALUE(dst, &new_prop);
 			Z_PROP_FLAG_P(dst) = Z_PROP_FLAG_P(src);
 
@@ -427,9 +466,9 @@ static bool zend_opcache_static_cache_clone_request_local_safe_direct_object(
 		zend_object **new_object_ptr)
 {
 	zend_opcache_static_cache_safe_direct_state_copy_func_t copy_func;
+	zend_ulong key;
 	zend_class_entry *ce, *base_ce = NULL;
 	zend_object *new_object;
-	zend_ulong key;
 	zval new_zv;
 
 	ce = old_object->ce;
@@ -440,6 +479,7 @@ static bool zend_opcache_static_cache_clone_request_local_safe_direct_object(
 	}
 
 	ZVAL_UNDEF(&new_zv);
+
 	if (object_init_ex(&new_zv, ce) != SUCCESS) {
 		return false;
 	}
@@ -471,8 +511,8 @@ static bool zend_opcache_static_cache_clone_request_local_object(
 		zend_object *old_object,
 		zend_object **new_object_ptr)
 {
-	zend_object *new_object;
 	zend_ulong key;
+	zend_object *new_object;
 
 	if (old_object == NULL || zend_object_is_lazy(old_object)) {
 		return false;
@@ -556,6 +596,30 @@ static bool zend_opcache_static_cache_clone_request_local_slot_value(zval *dst, 
 	return result;
 }
 
+static bool zend_opcache_static_cache_clone_request_local_slot_value_known(zval *dst, zval *src, bool needs_clone)
+{
+	zend_opcache_static_cache_request_local_clone_context context;
+	bool result;
+
+	if (!needs_clone) {
+		ZVAL_COPY(dst, src);
+
+		return true;
+	}
+
+	zend_opcache_static_cache_request_local_clone_context_init(&context);
+
+	if (Z_TYPE_P(src) == IS_ARRAY) {
+		result = zend_opcache_static_cache_clone_request_local_array_ex(&context, dst, src, true);
+	} else {
+		result = zend_opcache_static_cache_clone_request_local_value(&context, dst, src);
+	}
+
+	zend_opcache_static_cache_request_local_clone_context_destroy(&context);
+
+	return result;
+}
+
 static HashTable *zend_opcache_static_cache_request_local_slots(void)
 {
 	HashTable **slots_ptr = zend_opcache_static_cache_active_request_local_slots_ptr();
@@ -611,6 +675,7 @@ static bool zend_opcache_static_cache_materialize_payload_locked(
 			copied_value_len = value_len;
 			payload_copy = emalloc(copied_value_len);
 			memcpy(payload_copy, zend_opcache_static_cache_ptr(value_offset), copied_value_len);
+
 			zend_opcache_static_cache_unlock();
 
 			ZVAL_UNDEF(return_value);
@@ -687,12 +752,15 @@ static bool zend_opcache_static_cache_materialize_payload_locked(
 			}
 
 			zend_opcache_static_cache_unlock();
+
 			ZVAL_UNDEF(return_value);
+
 			result = zend_opcache_static_cache_fetch_shared_graph(
 				(const unsigned char *) zend_opcache_static_cache_ptr(value_offset),
 				value_len,
 				return_value
 			);
+
 			zend_opcache_static_cache_reacquire_read_lock_or_fail(cache_name);
 
 			if (!result) {
@@ -722,62 +790,103 @@ static bool zend_opcache_static_cache_materialize_payload_locked(
 	}
 }
 
-static bool zend_opcache_static_cache_fetch_request_local_slot(zend_string *key, uint64_t mutation_epoch, zval *return_value)
+static zend_always_inline bool zend_opcache_static_cache_entry_uses_request_local_slot(
+		const zend_opcache_static_cache_entry *entry)
+{
+	switch (entry->value_type) {
+		case ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING:
+			return entry->value_len >= ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_STRING_MIN_LEN;
+		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED:
+		case ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED:
+			return true;
+		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH:
+			return zend_opcache_static_cache_shared_graph_requires_prototype(entry->value_offset);
+		default:
+			return false;
+	}
+}
+
+static zend_always_inline bool zend_opcache_static_cache_prepared_value_can_seed_request_local_slot(
+		const zend_opcache_static_cache_prepared_value *prepared)
+{
+	return prepared->value_type == ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING &&
+		prepared->value_len >= ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_STRING_MIN_LEN
+	;
+}
+
+static zend_opcache_static_cache_request_local_slot_result zend_opcache_static_cache_fetch_request_local_slot(
+			zend_string *key,
+			uint64_t generation,
+			zval *return_value)
 {
 	zend_opcache_static_cache_request_local_slot *slot;
 	HashTable **slots_ptr = zend_opcache_static_cache_active_request_local_slots_ptr();
 
 	if (*slots_ptr == NULL) {
-		return false;
+		return ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_SLOT_MISS;
 	}
 
 	slot = zend_hash_find_ptr(*slots_ptr, key);
 	if (slot == NULL) {
-		return false;
+		return ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_SLOT_MISS;
 	}
 
-	if (slot->mutation_epoch != mutation_epoch) {
+	if (slot->generation != generation) {
 		zend_hash_del(*slots_ptr, key);
 
-		return false;
+		return ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_SLOT_MISS;
 	}
 
-	if (!zend_opcache_static_cache_clone_request_local_slot_value(return_value, &slot->value)) {
+	if (!zend_opcache_static_cache_clone_request_local_slot_value_known(
+			return_value,
+			&slot->value,
+			slot->needs_clone
+		)
+	) {
 		zend_hash_del(*slots_ptr, key);
 
-		return false;
+		return ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_SLOT_MISS;
 	}
 
-	return true;
+	return ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_SLOT_HIT;
 }
 
-static void zend_opcache_static_cache_store_request_local_value_slot(zend_string *key, uint64_t mutation_epoch, zval *value)
+void zend_opcache_static_cache_store_request_local_value_slot(zend_string *key, uint64_t generation, zval *value)
 {
 	zend_opcache_static_cache_request_local_slot *slot;
 	zval slot_zv;
 
+	ZVAL_DEREF(value);
+
 	slot = emalloc(sizeof(zend_opcache_static_cache_request_local_slot));
-	slot->mutation_epoch = mutation_epoch;
+	slot->generation = generation;
+	slot->needs_clone = false;
+
 	ZVAL_UNDEF(&slot->value);
+
 	if (!zend_opcache_static_cache_clone_request_local_slot_value(&slot->value, value)) {
 		ZVAL_PTR(&slot_zv, slot);
+
 		zend_opcache_static_cache_request_local_slot_dtor(&slot_zv);
 
 		return;
 	}
+
+	slot->needs_clone = zend_opcache_static_cache_value_needs_request_local_clone(&slot->value);
+
 	zend_hash_update_ptr(zend_opcache_static_cache_request_local_slots(), key, slot);
 }
 
 static bool zend_opcache_static_cache_fetch_finish(
-		zend_string *key,
-		uint64_t mutation_epoch,
-		zval *return_value,
-		bool use_request_local_slot)
+			zend_string *key,
+			uint64_t generation,
+			zval *return_value,
+			bool use_request_local_slot)
 {
 	if (use_request_local_slot) {
 		/* Keep a request-local prototype. Later fetches clone object handles out
 		 * of this prototype instead of rematerializing from SHM. */
-		zend_opcache_static_cache_store_request_local_value_slot(key, mutation_epoch, return_value);
+		zend_opcache_static_cache_store_request_local_value_slot(key, generation, return_value);
 	}
 
 	return true;
@@ -935,11 +1044,12 @@ static bool zend_opcache_static_cache_find_unstorable_value(
 		HashTable *seen_objects,
 		const char **failure_message)
 {
-	zend_object *object;
 	zend_ulong key;
+	zend_object *object;
 	zval *element, *property, *end;
 
 	ZVAL_DEREF(value);
+
 	if (Z_TYPE_P(value) == IS_RESOURCE) {
 		*failure_message = "resources cannot be stored in the static cache";
 
@@ -1018,15 +1128,19 @@ static bool zend_opcache_static_cache_validate_storable_value(zval *value, bool 
 	bool found;
 
 	ZVAL_DEREF(value);
+
 	if (Z_TYPE_P(value) != IS_ARRAY && Z_TYPE_P(value) != IS_OBJECT) {
 		return true;
 	}
 
 	zend_hash_init(&seen_arrays, 8, NULL, NULL, 0);
 	zend_hash_init(&seen_objects, 8, NULL, NULL, 0);
+
 	found = zend_opcache_static_cache_find_unstorable_value(value, &seen_arrays, &seen_objects, &failure_message);
+
 	zend_hash_destroy(&seen_objects);
 	zend_hash_destroy(&seen_arrays);
+
 	if (EG(exception)) {
 		return false;
 	}
@@ -1058,7 +1172,9 @@ static unsigned char *zend_opcache_static_cache_reserve_combined_offset_value_lo
 	}
 
 	total_size = payload_size + key_size;
-	if (reusable_offset != 0 && zend_opcache_static_cache_block_payload_capacity(reusable_offset) >= total_size) {
+	if (reusable_offset != 0 &&
+		zend_opcache_static_cache_block_payload_capacity(reusable_offset) >= total_size
+	) {
 		base_offset = reusable_offset;
 	} else {
 		base_offset = zend_opcache_static_cache_alloc_locked(total_size, NULL);
@@ -1160,6 +1276,8 @@ bool zend_opcache_static_cache_clear_locked(void)
 
 	header->count = 0;
 	header->mutation_epoch = mutation_epoch + 1;
+
+	/* Lookup-cache slots use 0 as their empty mutation epoch. */
 	if (header->mutation_epoch == 0) {
 		header->mutation_epoch = 1;
 	}
@@ -1218,20 +1336,25 @@ bool zend_opcache_static_cache_prepare_value(
 	switch (Z_TYPE_P(value)) {
 		case IS_NULL:
 			prepared->value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_NULL;
+
 			return true;
 		case IS_TRUE:
 			prepared->value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_TRUE;
+
 			return true;
 		case IS_FALSE:
 			prepared->value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_FALSE;
+
 			return true;
 		case IS_LONG:
 			prepared->value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_LONG;
 			prepared->long_value = Z_LVAL_P(value);
+
 			return true;
 		case IS_DOUBLE:
 			prepared->value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_DOUBLE;
 			prepared->double_value = Z_DVAL_P(value);
+
 			return true;
 		case IS_STRING:
 			prepared->value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING;
@@ -1239,13 +1362,12 @@ bool zend_opcache_static_cache_prepare_value(
 			prepared->payload_size = Z_STRLEN_P(value) + 1;
 			prepared->payload_used_size = prepared->payload_size;
 			prepared->payload_source = (const unsigned char *) Z_STRVAL_P(value);
+
 			return true;
 		default:
-			/* The distinct-key write benchmark stores the same source graph many times
-			 * in one request. Reusing a request-local prepared shared graph is only
-			 * safe when we can prove the source graph stayed clean, so the memo layer
-			 * tracks reachable array/object mutations and excludes internal safe-direct
-			 * objects whose state may change outside those hooks. */
+			/* Prepared shared-graph reuse is only safe while all reachable mutable
+			 * roots stay clean. Internal safe-direct objects are excluded because
+			 * their state can change outside the tracked array/object hooks. */
 			if (zend_opcache_static_cache_prepare_memo_fetch(value, prepared)) {
 				return true;
 			}
@@ -1256,9 +1378,7 @@ bool zend_opcache_static_cache_prepare_value(
 				prepared->value_len = (uint32_t) shared_graph_len;
 				prepared->payload_size = shared_graph_len;
 
-				/* Explicit stores keep shared-graph construction out of the write lock
-				 * regardless of payload size. Even small direct builds lengthen the
-				 * critical section enough to regress contended writers. */
+				/* Explicit stores keep shared-graph construction out of the write lock. */
 				if (lock_held) {
 					return true;
 				}
@@ -1320,6 +1440,7 @@ bool zend_opcache_static_cache_prepare_value(
 			PHP_VAR_SERIALIZE_INIT(var_hash);
 			php_var_serialize(&serialized, value, &var_hash);
 			PHP_VAR_SERIALIZE_DESTROY(var_hash);
+
 			if (serialized.s == NULL) {
 				if (EG(exception)) {
 					return false;
@@ -1364,12 +1485,14 @@ void zend_opcache_static_cache_destroy_prepared_value(zend_opcache_static_cache_
 }
 
 bool zend_opcache_static_cache_store_prepared_locked(
-		zend_string *key,
-		zval *value,
-		const zend_opcache_static_cache_prepared_value *prepared,
-		zend_long ttl,
-		bool throw_on_failure,
-		bool honor_strict_store_failure)
+			zend_string *key,
+			zval *value,
+			const zend_opcache_static_cache_prepared_value *prepared,
+			zend_long ttl,
+			bool throw_on_failure,
+			bool honor_strict_store_failure,
+			uint64_t *generation_ptr,
+			bool *seed_request_local_slot_ptr)
 {
 	const char *failure_message;
 	zend_opcache_static_cache_header *header;
@@ -1388,6 +1511,14 @@ bool zend_opcache_static_cache_store_prepared_locked(
 	double new_double_value = 0;
 
 	ZVAL_DEREF(value);
+
+	if (generation_ptr != NULL) {
+		*generation_ptr = 0;
+	}
+
+	if (seed_request_local_slot_ptr != NULL) {
+		*seed_request_local_slot_ptr = false;
+	}
 
 	if (prepared == NULL) {
 		return false;
@@ -1482,20 +1613,25 @@ retry_store:
 	switch (prepared->value_type) {
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_NULL:
 			new_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_NULL;
+
 			break;
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_TRUE:
 			new_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_TRUE;
+
 			break;
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_FALSE:
 			new_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_FALSE;
+
 			break;
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_LONG:
 			new_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_LONG;
 			new_long_value = prepared->long_value;
+
 			break;
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_DOUBLE:
 			new_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_DOUBLE;
 			new_double_value = prepared->double_value;
+
 			break;
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING:
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED:
@@ -1521,7 +1657,8 @@ retry_store:
 				offset = zend_opcache_static_cache_write_payload_locked(
 					reusable_offset,
 					prepared->payload_size,
-					prepared->payload_source);
+					prepared->payload_source
+				);
 				if (offset == 0) {
 					failure_message = "not enough shared memory left";
 					failed_payload_size = prepared->payload_size;
@@ -1537,6 +1674,8 @@ retry_store:
 			new_value_len = prepared->value_len;
 			break;
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH:
+			/* Direct array nodes can contain final-buffer pointers, so shared
+			 * graphs are built into their final SHM destination. */
 			if (use_combined_publish) {
 				/* Shared-graph fetch helpers treat value_offset as the start of the SHM
 				 * payload, so the graph must stay at the block base. Reserve the whole
@@ -1549,28 +1688,29 @@ retry_store:
 					&new_value_offset,
 					&new_key_offset
 				);
+
 				graph_offset = new_value_offset;
 
 				if (combined_payload != NULL) {
-					/* Prepared shared-graph buffers may contain direct array payloads with
-					 * final-buffer pointers, so the SHM destination must be the build site. */
 					if (zend_opcache_static_cache_build_shared_graph_in_place(
-							value,
-							combined_payload,
-							prepared->payload_size,
-							NULL)
+						value,
+						combined_payload,
+						prepared->payload_size,
+						NULL)
 					) {
 						memcpy(combined_payload + prepared->payload_size, ZSTR_VAL(key), key_payload_size);
 						new_reserved = ZEND_OPCACHE_STATIC_CACHE_ENTRY_RESERVED_COMBINED_VALUE_KEY;
 						new_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH;
 						new_value_offset = graph_offset;
 						new_value_len = prepared->value_len;
+
 						break;
 					}
 
 					if (graph_offset != combined_reusable_offset) {
 						zend_opcache_static_cache_free_locked(graph_offset);
 					}
+
 					graph_offset = 0;
 					new_value_offset = 0;
 					new_key_offset = found ? old_key_offset : 0;
@@ -1588,8 +1728,6 @@ retry_store:
 				graph_offset = zend_opcache_static_cache_alloc_locked(prepared->payload_size, NULL);
 
 				if (graph_offset != 0) {
-					/* Prepared shared-graph buffers may contain direct array payloads with
-					 * final-buffer pointers, so the SHM destination must be the build site. */
 					if (zend_opcache_static_cache_build_shared_graph_in_place(
 							value,
 							(unsigned char *) zend_opcache_static_cache_ptr(graph_offset),
@@ -1599,6 +1737,7 @@ retry_store:
 						new_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH;
 						new_value_offset = graph_offset;
 						new_value_len = prepared->value_len;
+
 						break;
 					}
 
@@ -1630,6 +1769,7 @@ retry_store:
 							&new_key_offset)
 					) {
 						efree(encoded);
+
 						failure_message = "not enough shared memory left";
 						failed_payload_size = encoded_len + key_payload_size;
 						allow_clear = zend_opcache_static_cache_payload_can_fit_locked(encoded_len + key_payload_size);
@@ -1642,6 +1782,7 @@ retry_store:
 					offset = zend_opcache_static_cache_write_payload_locked(offset, encoded_len, encoded);
 					if (offset == 0) {
 						efree(encoded);
+
 						failure_message = "not enough shared memory left";
 						failed_payload_size = encoded_len;
 						allow_clear = zend_opcache_static_cache_payload_can_fit_locked(encoded_len);
@@ -1652,8 +1793,10 @@ retry_store:
 					new_value_offset = offset;
 				}
 				efree(encoded);
+
 				new_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED;
 				new_value_len = (uint32_t) encoded_len;
+
 				break;
 			}
 
@@ -1693,6 +1836,7 @@ retry_store:
 						&new_key_offset)
 				) {
 					smart_str_free(&serialized);
+
 					failure_message = "not enough shared memory left";
 					failed_payload_size = serialized_len + key_payload_size;
 					allow_clear = zend_opcache_static_cache_payload_can_fit_locked(serialized_len + key_payload_size);
@@ -1705,6 +1849,7 @@ retry_store:
 				offset = zend_opcache_static_cache_write_payload_locked(reusable_offset, serialized_len, ZSTR_VAL(serialized.s));
 				if (offset == 0) {
 					smart_str_free(&serialized);
+
 					failure_message = "not enough shared memory left";
 					failed_payload_size = serialized_len;
 					allow_clear = zend_opcache_static_cache_payload_can_fit_locked(serialized_len);
@@ -1714,9 +1859,12 @@ retry_store:
 
 				new_value_offset = offset;
 			}
+
 			smart_str_free(&serialized);
+
 			new_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED;
 			new_value_len = (uint32_t) serialized_len;
+
 			break;
 		default:
 			ZEND_UNREACHABLE();
@@ -1747,6 +1895,15 @@ retry_store:
 	}
 
 	zend_opcache_static_cache_bump_mutation_epoch_locked(header);
+
+	entry->generation = header->mutation_epoch;
+	if (generation_ptr != NULL) {
+		*generation_ptr = entry->generation;
+	}
+
+	if (seed_request_local_slot_ptr != NULL) {
+		*seed_request_local_slot_ptr = zend_opcache_static_cache_prepared_value_can_seed_request_local_slot(prepared);
+	}
 
 	return true;
 
@@ -1792,7 +1949,17 @@ bool zend_opcache_static_cache_store_locked(zend_string *key, zval *value, zend_
 		return false;
 	}
 
-	stored = zend_opcache_static_cache_store_prepared_locked(key, value, &prepared, ttl, throw_on_failure, honor_strict_store_failure);
+	stored = zend_opcache_static_cache_store_prepared_locked(
+		key,
+		value,
+		&prepared,
+		ttl,
+		throw_on_failure,
+		honor_strict_store_failure,
+		NULL,
+		NULL
+	);
+
 	zend_opcache_static_cache_destroy_prepared_value(&prepared);
 
 	return stored;
@@ -1804,8 +1971,9 @@ bool zend_opcache_static_cache_fetch_locked(zend_string *key, zval *return_value
 	zend_opcache_static_cache_header *header;
 	zend_opcache_static_cache_entry *entries, *entry;
 	zend_opcache_static_cache_lookup_entry *lookup_entries, *lookup_entry;
+	zend_opcache_static_cache_request_local_slot_result slot_result;
 	zend_ulong hash;
-	uint64_t mutation_epoch, now;
+	uint64_t mutation_epoch, generation, now;
 	uint32_t way, slot_index;
 	bool found, use_proto;
 
@@ -1823,6 +1991,7 @@ bool zend_opcache_static_cache_fetch_locked(zend_string *key, zval *return_value
 
 		return false;
 	}
+
 	entries = zend_opcache_static_cache_entries(header);
 	mutation_epoch = header->mutation_epoch;
 	lookup_entries = zend_opcache_static_cache_lookup_cache_set(hash);
@@ -1893,11 +2062,8 @@ bool zend_opcache_static_cache_fetch_locked(zend_string *key, zval *return_value
 	}
 
 value_found:
-	if (found_ptr != NULL) {
-		*found_ptr = true;
-	}
-
 	entry = &entries[slot_index];
+	generation = entry->generation;
 
 	/* The request-local prototype trades a re-decode for a deep clone on every
 	 * repeat fetch. For the serialized payloads, where re-running unserialize is
@@ -1907,39 +2073,46 @@ value_found:
 	 * decode is already an independent copy. A shared graph that embeds
 	 * serialized object nodes (e.g. classes with custom __serialize) re-runs
 	 * unserialize per node on decode, so it keeps the prototype too. */
-	use_proto = use_request_local_slot;
-	if (use_proto && entry->value_type == ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH) {
-		use_proto = zend_opcache_static_cache_shared_graph_requires_prototype(entry->value_offset);
-	}
+	use_proto = use_request_local_slot && zend_opcache_static_cache_entry_uses_request_local_slot(entry);
 
 	if (use_proto) {
-		if (zend_opcache_static_cache_fetch_request_local_slot(key, mutation_epoch, return_value)) {
+		slot_result = zend_opcache_static_cache_fetch_request_local_slot(key, generation, return_value);
+		if (slot_result == ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_SLOT_HIT) {
+			if (found_ptr != NULL) {
+				*found_ptr = true;
+			}
+
 			return true;
 		}
+
 		if (EG(exception)) {
 			return false;
 		}
 	}
 
+	if (found_ptr != NULL) {
+		*found_ptr = true;
+	}
+
 	switch (entry->value_type) {
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_NULL:
 			ZVAL_NULL(return_value);
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
+			return zend_opcache_static_cache_fetch_finish(key, generation, return_value, use_proto);
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_TRUE:
 			ZVAL_TRUE(return_value);
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
+			return zend_opcache_static_cache_fetch_finish(key, generation, return_value, use_proto);
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_FALSE:
 			ZVAL_FALSE(return_value);
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
+			return zend_opcache_static_cache_fetch_finish(key, generation, return_value, use_proto);
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_LONG:
 			ZVAL_LONG(return_value, entry->long_value);
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
+			return zend_opcache_static_cache_fetch_finish(key, generation, return_value, use_proto);
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_DOUBLE:
 			ZVAL_DOUBLE(return_value, entry->double_value);
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
+			return zend_opcache_static_cache_fetch_finish(key, generation, return_value, use_proto);
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING:
 			ZVAL_STRINGL(return_value, zend_opcache_static_cache_ptr(entry->value_offset), entry->value_len);
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
+			return zend_opcache_static_cache_fetch_finish(key, generation, return_value, use_proto);
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED:
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED:
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH:
@@ -1955,7 +2128,7 @@ value_found:
 				return false;
 			}
 
-			return zend_opcache_static_cache_fetch_finish(key, mutation_epoch, return_value, use_proto);
+			return zend_opcache_static_cache_fetch_finish(key, generation, return_value, use_proto);
 		default:
 			if (throw_if_missing) {
 				zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Stored %s value for key \"%s\" has an unknown type", cache_name, ZSTR_VAL(key));
@@ -1978,8 +2151,6 @@ bool zend_opcache_static_cache_exists_locked(zend_string *key)
 	return found;
 }
 
-/* Reports the storage strategy (value_type) of an entry without decoding the
- * stored payload. Used by the getCacheStoreType() introspection API. */
 bool zend_opcache_static_cache_value_type_locked(zend_string *key, uint8_t *value_type)
 {
 	zend_ulong hash = zend_string_hash_val(key);
@@ -2022,7 +2193,8 @@ static zend_always_inline bool zend_opcache_static_cache_long_add_wrapped(
 	*result = (zend_long) ((zend_ulong) lhs + (zend_ulong) rhs);
 
 	return (rhs > 0 && lhs > ZEND_LONG_MAX - rhs) ||
-		(rhs < 0 && lhs < ZEND_LONG_MIN - rhs);
+		(rhs < 0 && lhs < ZEND_LONG_MIN - rhs)
+	;
 }
 
 static zend_always_inline bool zend_opcache_static_cache_long_sub_wrapped(
@@ -2033,7 +2205,8 @@ static zend_always_inline bool zend_opcache_static_cache_long_sub_wrapped(
 	*result = (zend_long) ((zend_ulong) lhs - (zend_ulong) rhs);
 
 	return (rhs > 0 && lhs < ZEND_LONG_MIN + rhs) ||
-		(rhs < 0 && lhs > ZEND_LONG_MAX + rhs);
+		(rhs < 0 && lhs > ZEND_LONG_MAX + rhs)
+	;
 }
 
 bool zend_opcache_static_cache_atomic_update_locked(
@@ -2042,15 +2215,13 @@ bool zend_opcache_static_cache_atomic_update_locked(
 		bool decrement,
 		bool insert_if_missing,
 		zend_long *new_value,
-		bool *is_overflow,
-		const char *type_error_message,
-		bool throw_on_error)
+		bool *is_overflow)
 {
 	zend_opcache_static_cache_header *header;
 	zend_opcache_static_cache_entry *entries, *entry;
 	zend_ulong hash = zend_string_hash_val(key);
-	zval initial_value = {0};
 	zend_long result;
+	zval initial_value = {0};
 	uint32_t slot_index;
 	bool found, result_is_overflow;
 
@@ -2060,9 +2231,10 @@ bool zend_opcache_static_cache_atomic_update_locked(
 		if (insert_if_missing) {
 			result_is_overflow = decrement
 				? zend_opcache_static_cache_long_sub_wrapped(0, step, &result)
-				: zend_opcache_static_cache_long_add_wrapped(0, step, &result);
+				: zend_opcache_static_cache_long_add_wrapped(0, step, &result)
+			;
 			ZVAL_LONG(&initial_value, result);
-			if (zend_opcache_static_cache_store_locked(key, &initial_value, 0, throw_on_error, false)) {
+			if (zend_opcache_static_cache_store_locked(key, &initial_value, 0, false, false)) {
 				*is_overflow = result_is_overflow;
 				*new_value = Z_LVAL(initial_value);
 
@@ -2072,24 +2244,12 @@ bool zend_opcache_static_cache_atomic_update_locked(
 			return false;
 		}
 
-		if (throw_on_error) {
-			zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Cache key \"%s\" was not found", ZSTR_VAL(key));
-		}
-
 		return false;
 	}
 
 	entries = zend_opcache_static_cache_entries(header);
 	entry = &entries[slot_index];
 	if (entry->value_type != ZEND_OPCACHE_STATIC_CACHE_VALUE_LONG) {
-		if (throw_on_error) {
-			if (entry->value_type > ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH) {
-				zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Stored %s value for key \"%s\" has an unknown type", zend_opcache_static_cache_active_context()->name, ZSTR_VAL(key));
-			} else {
-				zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "%s", type_error_message);
-			}
-		}
-
 		return false;
 	}
 
@@ -2097,10 +2257,13 @@ bool zend_opcache_static_cache_atomic_update_locked(
 		? zend_opcache_static_cache_long_sub_wrapped(entry->long_value, step, &result)
 		: zend_opcache_static_cache_long_add_wrapped(entry->long_value, step, &result)
 	;
+
 	entry->long_value = result;
 	*is_overflow = result_is_overflow;
 
 	zend_opcache_static_cache_bump_mutation_epoch_locked(header);
+	entry->generation = header->mutation_epoch;
+
 	*new_value = entry->long_value;
 
 	return true;
@@ -2109,5 +2272,33 @@ bool zend_opcache_static_cache_atomic_update_locked(
 void zend_opcache_static_cache_release_request_local_slots(void)
 {
 	zend_opcache_static_cache_release_request_local_slot_context(&zend_opcache_static_cache_volatile_request_local_slots);
-	zend_opcache_static_cache_release_request_local_slot_context(&zend_opcache_static_cache_pinned_request_local_slots);
+	zend_opcache_static_cache_release_request_local_slot_context(&zend_opcache_static_cache_stable_request_local_slots);
+}
+
+void zend_opcache_static_cache_release_active_request_local_slots(void)
+{
+	zend_opcache_static_cache_release_request_local_slot_context(zend_opcache_static_cache_active_request_local_slots_ptr());
+}
+
+void zend_opcache_static_cache_release_active_request_local_slots_by_prefix(zend_string *prefix)
+{
+	HashTable **slots_ptr = zend_opcache_static_cache_active_request_local_slots_ptr();
+
+	if (*slots_ptr == NULL) {
+		return;
+	}
+
+	zend_hash_apply_with_arguments(
+		*slots_ptr,
+		zend_opcache_static_cache_release_request_local_slot_by_prefix_apply,
+		1,
+		prefix
+	);
+
+	if (zend_hash_num_elements(*slots_ptr) == 0) {
+		zend_hash_destroy(*slots_ptr);
+		FREE_HASHTABLE(*slots_ptr);
+
+		*slots_ptr = NULL;
+	}
 }

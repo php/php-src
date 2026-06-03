@@ -1,5 +1,5 @@
 --TEST--
-OPcache PinnedStatic publishes class, property, and method array mutations immediately
+OPcache StableStatic publishes class, property, and method array mutations immediately
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -7,23 +7,23 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/static_cache_pinned_static_array_mutation_fast_path_001.php', <<<'PHP'
+file_put_contents(__DIR__ . '/static_cache_stable_static_array_mutation_fast_path_001.php', <<<'PHP'
 <?php
-#[OPcache\PinnedStatic]
-class PinnedStaticArrayClassState
+#[OPcache\StableStatic]
+class StableStaticArrayClassState
 {
 	public static array $routes = [];
 }
 
-class PinnedStaticArrayPropertyState
+class StableStaticArrayPropertyState
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static array $routes = [];
 }
 
-class PinnedStaticArrayMethodState
+class StableStaticArrayMethodState
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static function routes(?string $append = null): array
 	{
 		static $routes = [];
@@ -38,35 +38,35 @@ class PinnedStaticArrayMethodState
 
 function dump_routes(string $label): void
 {
-	echo $label, '-class=', implode(',', PinnedStaticArrayClassState::$routes), "\n";
-	echo $label, '-property=', implode(',', PinnedStaticArrayPropertyState::$routes), "\n";
-	echo $label, '-method=', implode(',', PinnedStaticArrayMethodState::routes()), "\n";
+	echo $label, '-class=', implode(',', StableStaticArrayClassState::$routes), "\n";
+	echo $label, '-property=', implode(',', StableStaticArrayPropertyState::$routes), "\n";
+	echo $label, '-method=', implode(',', StableStaticArrayMethodState::routes()), "\n";
 }
 
 $action = $_GET['action'] ?? 'read';
 
 if ($action === 'reset') {
-	OPcache\PinnedCache::clear();
+	OPcache\StableCache::getInstance('default')->clear();
 	opcache_reset();
 	echo "reset\n";
 	return;
 }
 
 if ($action === 'seed') {
-	PinnedStaticArrayClassState::$routes = ['foo'];
-	PinnedStaticArrayClassState::$routes[] = 'bar';
-	PinnedStaticArrayPropertyState::$routes = ['foo'];
-	PinnedStaticArrayPropertyState::$routes[] = 'bar';
-	PinnedStaticArrayMethodState::routes('foo');
-	PinnedStaticArrayMethodState::routes('bar');
+	StableStaticArrayClassState::$routes = ['foo'];
+	StableStaticArrayClassState::$routes[] = 'bar';
+	StableStaticArrayPropertyState::$routes = ['foo'];
+	StableStaticArrayPropertyState::$routes[] = 'bar';
+	StableStaticArrayMethodState::routes('foo');
+	StableStaticArrayMethodState::routes('bar');
 	dump_routes('seed');
 	return;
 }
 
 if ($action === 'mutate') {
-	PinnedStaticArrayClassState::$routes[] = 'baz';
-	PinnedStaticArrayPropertyState::$routes[] = 'baz';
-	PinnedStaticArrayMethodState::routes('baz');
+	StableStaticArrayClassState::$routes[] = 'baz';
+	StableStaticArrayPropertyState::$routes[] = 'baz';
+	StableStaticArrayMethodState::routes('baz');
 	dump_routes('mutate');
 	return;
 }
@@ -81,9 +81,9 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.pinned_size_mb=32 -d opcache.optimization_level=0 -d opcache.file_update_protection=0 -d opcache.jit=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.stable_size_mb=32 -d opcache.optimization_level=0 -d opcache.file_update_protection=0 -d opcache.jit=0');
 
-$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/static_cache_pinned_static_array_mutation_fast_path_001.php';
+$base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/static_cache_stable_static_array_mutation_fast_path_001.php';
 echo file_get_contents($base . '?action=reset');
 echo file_get_contents($base . '?action=seed');
 echo file_get_contents($base . '?action=read');
@@ -93,7 +93,7 @@ echo file_get_contents($base . '?action=read');
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/static_cache_pinned_static_array_mutation_fast_path_001.php');
+@unlink(__DIR__ . '/static_cache_stable_static_array_mutation_fast_path_001.php');
 ?>
 --EXPECT--
 reset

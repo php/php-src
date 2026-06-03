@@ -1,5 +1,5 @@
 --TEST--
-FPM: OPcache PinnedStatic persists across requests
+FPM: OPcache StableStatic persists across requests
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--
@@ -20,7 +20,7 @@ EOT;
 
 $code = <<<'PHP'
 <?php
-#[OPcache\PinnedStatic]
+#[OPcache\StableStatic]
 class SharedCounter
 {
     public static int $classValue = 0;
@@ -35,7 +35,7 @@ class SharedCounter
 
 class PropertyCounter
 {
-    #[OPcache\PinnedStatic]
+    #[OPcache\StableStatic]
     public static int $value = 0;
 }
 
@@ -57,7 +57,7 @@ PHP;
 $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
     'opcache.enable' => '1',
-    'opcache.static_cache.pinned_size_mb' => '32',
+    'opcache.static_cache.stable_size_mb' => '32',
 ]);
 $tester->expectLogStartNotices();
 

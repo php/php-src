@@ -9,24 +9,24 @@ opcache.static_cache.volatile_size_mb=8
 --FILE--
 <?php
 
-OPcache\VolatileCache::clear();
+opcache_static_cache_volatile_reset();
 
 $payloadA = str_repeat('A', 2000000);
 $payloadB = str_repeat('B', 2000000);
 $payloadC = str_repeat('C', 2000000);
 $payloadD = str_repeat('D', 3500000);
 
-var_dump(OPcache\VolatileCache::set('first', $payloadA));
-var_dump(OPcache\VolatileCache::set('second', $payloadB));
-var_dump(OPcache\VolatileCache::set('third', $payloadC));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('first', $payloadA));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('second', $payloadB));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('third', $payloadC));
 
-OPcache\VolatileCache::delete('first');
-OPcache\VolatileCache::delete('second');
+OPcache\VolatileCache::getInstance('default')->delete('first');
+OPcache\VolatileCache::getInstance('default')->delete('second');
 
-var_dump(OPcache\VolatileCache::set('merged', $payloadD));
-var_dump(strlen(OPcache\VolatileCache::get('merged')));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('merged', $payloadD));
+var_dump(strlen(OPcache\VolatileCache::getInstance('default')->fetch('merged')));
 
-OPcache\VolatileCache::clear();
+opcache_static_cache_volatile_reset();
 
 ?>
 --EXPECT--

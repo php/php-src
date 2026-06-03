@@ -1,20 +1,20 @@
 --TEST--
-OPcache PinnedCache::set returns false when pinned cache memory is exhausted
+OPcache StableCache::store returns false when stable cache memory is exhausted
 --EXTENSIONS--
 opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.static_cache.pinned_size_mb=8
+opcache.static_cache.stable_size_mb=8
 --FILE--
 <?php
 
-OPcache\PinnedCache::set('small', 'ok');
+OPcache\StableCache::getInstance('default')->store('small', 'ok');
 
-var_dump(OPcache\PinnedCache::set('huge', str_repeat('H', 12 * 1024 * 1024)));
+var_dump(OPcache\StableCache::getInstance('default')->store('huge', str_repeat('H', 12 * 1024 * 1024)));
 
-var_dump(OPcache\PinnedCache::get('small', 'fallback'));
-var_dump(OPcache\PinnedCache::get('missing', 'fallback'));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('small', 'fallback'));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('missing', 'fallback'));
 
 ?>
 --EXPECT--

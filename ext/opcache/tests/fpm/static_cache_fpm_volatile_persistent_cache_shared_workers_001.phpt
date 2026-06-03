@@ -1,5 +1,5 @@
 --TEST--
-FPM: OPcache volatile and pinned caches are shared across static workers
+FPM: OPcache volatile and stable caches are shared across static workers
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--
@@ -20,8 +20,8 @@ EOT;
 
 $code = <<<'PHP'
 <?php
-#[OPcache\PinnedStatic]
-class FpmPinnedStaticWorkerShare
+#[OPcache\StableStatic]
+class FpmStableStaticWorkerShare
 {
     public static int $value = 0;
 }
@@ -32,9 +32,9 @@ $pid = getmypid();
 $key = 'fpm_multi_worker_volatile_cache';
 
 if ($action === 'seed') {
-    OPcache\VolatileCache::clear();
-    OPcache\VolatileCache::set($key, 'stored-value');
-    FpmPinnedStaticWorkerShare::$value = 42;
+    opcache_static_cache_volatile_reset();
+    OPcache\VolatileCache::getInstance('default')->store($key, 'stored-value');
+    FpmStableStaticWorkerShare::$value = 42;
     echo 'seed:', $pid;
     return;
 }
@@ -46,14 +46,14 @@ if ($pid === $seedPid) {
 }
 
 if ($action === 'fetch_volatile') {
-    $value = OPcache\VolatileCache::get($key, 'MISS');
+    $value = OPcache\VolatileCache::getInstance('default')->fetch($key, 'MISS');
     usleep(200000);
     echo 'fetch:', $pid, ':', $value;
     return;
 }
 
-if ($action === 'fetch_pinned') {
-    $value = FpmPinnedStaticWorkerShare::$value;
+if ($action === 'fetch_stable') {
+    $value = FpmStableStaticWorkerShare::$value;
     usleep(200000);
     echo 'fetch:', $pid, ':', $value;
     return;
@@ -108,14 +108,14 @@ $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
     'opcache.enable' => '1',
     'opcache.static_cache.volatile_size_mb' => '32',
-    'opcache.static_cache.pinned_size_mb' => '32',
+    'opcache.static_cache.stable_size_mb' => '32',
 ]);
 $tester->expectLogStartNotices();
 
 $seedPid = parseSeedPid($tester->request(query: 'action=seed')->getBody());
 
 expectCrossWorkerValue($tester, 'fetch_volatile', $seedPid, 'stored-value');
-expectCrossWorkerValue($tester, 'fetch_pinned', $seedPid, '42');
+expectCrossWorkerValue($tester, 'fetch_stable', $seedPid, '42');
 
 $tester->terminate();
 $tester->expectLogTerminatingNotices();

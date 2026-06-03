@@ -7,7 +7,7 @@ spl
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
@@ -40,18 +40,18 @@ class SafeDirectSlotArrayObject extends ArrayObject
 function store_value(string $backend, string $key, mixed $value): void
 {
 	if ($backend === 'volatile') {
-		var_dump(OPcache\VolatileCache::set($key, $value));
+		var_dump(OPcache\VolatileCache::getInstance('default')->store($key, $value));
 	} else {
-		OPcache\PinnedCache::set($key, $value);
-		echo "pinned-stored\n";
+		OPcache\StableCache::getInstance('default')->store($key, $value);
+		echo "stable-stored\n";
 	}
 }
 
 function fetch_value(string $backend, string $key): mixed
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::get($key)
-		: OPcache\PinnedCache::get($key);
+		? OPcache\VolatileCache::getInstance('default')->fetch($key)
+		: OPcache\StableCache::getInstance('default')->fetch($key);
 }
 
 function run_safe_direct_slot_scenario(string $backend): void
@@ -102,11 +102,11 @@ function run_safe_direct_slot_scenario(string $backend): void
 	echo $backend, '-collection-clone-calls=', SafeDirectSlotArrayObject::$cloneCalls, "\n";
 }
 
-OPcache\VolatileCache::clear();
-OPcache\PinnedCache::clear();
+opcache_static_cache_volatile_reset();
+OPcache\StableCache::getInstance('default')->clear();
 
 run_safe_direct_slot_scenario('volatile');
-run_safe_direct_slot_scenario('pinned');
+run_safe_direct_slot_scenario('stable');
 
 ?>
 --EXPECT--
@@ -124,17 +124,17 @@ volatile-collection-clone-calls=0
 volatile-collection-second=volatile-collection-stored:1
 volatile-collection-second-is-first=no
 volatile-collection-clone-calls=0
-pinned-stored
-pinned-date-same-object=no
-pinned-date-shared-peer=no
-pinned-date-clone-calls=0
-pinned-date-second=2026-01-01:pinned-stored
-pinned-date-second-is-first=no
-pinned-date-clone-calls=0
-pinned-stored
-pinned-collection-same-object=no
-pinned-collection-shared-peer=no
-pinned-collection-clone-calls=0
-pinned-collection-second=pinned-collection-stored:1
-pinned-collection-second-is-first=no
-pinned-collection-clone-calls=0
+stable-stored
+stable-date-same-object=no
+stable-date-shared-peer=no
+stable-date-clone-calls=0
+stable-date-second=2026-01-01:stable-stored
+stable-date-second-is-first=no
+stable-date-clone-calls=0
+stable-stored
+stable-collection-same-object=no
+stable-collection-shared-peer=no
+stable-collection-clone-calls=0
+stable-collection-second=stable-collection-stored:1
+stable-collection-second-is-first=no
+stable-collection-clone-calls=0

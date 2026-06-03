@@ -15,9 +15,9 @@ $config = opcache_get_configuration();
 $status = opcache_get_status(false);
 
 var_dump($config['directives']['opcache.static_cache.volatile_size_mb']);
-var_dump($config['directives']['opcache.static_cache.pinned_size_mb']);
+var_dump($config['directives']['opcache.static_cache.stable_size_mb']);
 var_dump($status['volatile_cache']->enabled);
-var_dump($status['pinned_cache']->enabled);
+var_dump($status['stable_cache']->enabled);
 echo "OK\n";
 
 ?>

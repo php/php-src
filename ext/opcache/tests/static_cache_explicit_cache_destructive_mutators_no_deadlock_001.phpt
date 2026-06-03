@@ -13,7 +13,7 @@ if (!function_exists('pcntl_fork')) {
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
@@ -32,7 +32,7 @@ function stripe_for_key(string $key): int
 function key_for_stripe(string $prefix, int $stripe): string
 {
 	for ($i = 0; $i < 100000; $i++) {
-		$key = $prefix . ':' . $i;
+		$key = $prefix . '_' . $i;
 		if (stripe_for_key($key) === $stripe) {
 			return $key;
 		}
@@ -68,56 +68,57 @@ function wait_for_result(string $path, float $seconds): bool
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::clear();
+		opcache_static_cache_volatile_reset();
 	} else {
-		OPcache\PinnedCache::clear();
+		OPcache\StableCache::getInstance('default')->clear();
 	}
 }
 
 function cache_store(string $backend, string $key, mixed $value): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::set($key, $value);
+		OPcache\VolatileCache::getInstance('default')->store($key, $value);
 	} else {
-		OPcache\PinnedCache::set($key, $value);
+		OPcache\StableCache::getInstance('default')->store($key, $value);
 	}
 }
 
 function cache_fetch(string $backend, string $key, mixed $default = null): mixed
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::get($key, $default)
-		: OPcache\PinnedCache::get($key, $default);
+		? OPcache\VolatileCache::getInstance('default')->fetch($key, $default)
+		: OPcache\StableCache::getInstance('default')->fetch($key, $default);
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::lock($key)
-		: OPcache\PinnedCache::lock($key);
+		? OPcache\VolatileCache::getInstance('default')->lock($key)
+		: OPcache\StableCache::getInstance('default')->lock($key);
 }
 
 function cache_delete(string $backend, string $key): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::delete($key);
+		OPcache\VolatileCache::getInstance('default')->delete($key);
 	} else {
-		OPcache\PinnedCache::delete($key);
+		OPcache\StableCache::getInstance('default')->delete($key);
 	}
 }
 
 function run_reservation_cycle(string $backend, string $label, callable $operation): void
 {
-	$prefix = sys_get_temp_dir() . '/opcache_destructive_mutator_no_deadlock_' . getmypid() . '_' . $backend . '_' . $label;
-	$readyFile = $prefix . '.ready';
-	$operationFile = $prefix . '.operation';
-	$deleteFile = $prefix . '.delete';
+	$filePrefix = sys_get_temp_dir() . '/opcache_destructive_mutator_no_deadlock_' . getmypid() . '_' . $backend . '_' . $label;
+	$keyPrefix = 'opcache_destructive_mutator_no_deadlock_' . getmypid() . '_' . $backend . '_' . $label;
+	$readyFile = $filePrefix . '.ready';
+	$operationFile = $filePrefix . '.operation';
+	$deleteFile = $filePrefix . '.delete';
 	@unlink($readyFile);
 	@unlink($operationFile);
 	@unlink($deleteFile);
 
-	$reservedKey = key_for_stripe($prefix . ':reserved', 200);
-	$blockedKey = key_for_stripe($prefix . ':blocked', 1);
+	$reservedKey = key_for_stripe($keyPrefix . '_reserved', 200);
+	$blockedKey = key_for_stripe($keyPrefix . '_blocked', 1);
 
 	cache_clear($backend);
 	if (!cache_lock($backend, $reservedKey)) {
@@ -171,11 +172,12 @@ function run_reservation_cycle(string $backend, string $label, callable $operati
 
 function run_delete_wait_cycle(string $backend): void
 {
-	$prefix = sys_get_temp_dir() . '/opcache_destructive_mutator_no_deadlock_' . getmypid() . '_' . $backend . '_delete';
-	$resultFile = $prefix . '.result';
+	$filePrefix = sys_get_temp_dir() . '/opcache_destructive_mutator_no_deadlock_' . getmypid() . '_' . $backend . '_delete';
+	$keyPrefix = 'opcache_destructive_mutator_no_deadlock_' . getmypid() . '_' . $backend . '_delete';
+	$resultFile = $filePrefix . '.result';
 	@unlink($resultFile);
 
-	$key = key_for_stripe($prefix . ':reserved-delete', 17);
+	$key = key_for_stripe($keyPrefix . '_reserved_delete', 17);
 
 	cache_clear($backend);
 	cache_store($backend, $key, 'value');
@@ -211,20 +213,20 @@ function run_delete_wait_cycle(string $backend): void
 }
 
 run_reservation_cycle('volatile', 'clear', static fn () => cache_clear('volatile'));
-run_reservation_cycle('pinned', 'clear', static fn () => cache_clear('pinned'));
+run_reservation_cycle('stable', 'clear', static fn () => cache_clear('stable'));
 run_reservation_cycle('volatile', 'reset', static fn () => opcache_reset());
 run_delete_wait_cycle('volatile');
-run_delete_wait_cycle('pinned');
+run_delete_wait_cycle('stable');
 
 ?>
 --EXPECT--
 volatile clear: no deadlock
-pinned clear: no deadlock
+stable clear: no deadlock
 volatile reset: no deadlock
 volatile delete: no wait
 volatile delete fetch: MISS
-pinned delete: no wait
-pinned delete fetch: MISS
+stable delete: no wait
+stable delete fetch: MISS
 --CLEAN--
 <?php
 foreach (glob(sys_get_temp_dir() . '/opcache_destructive_mutator_no_deadlock_*') ?: [] as $path) {

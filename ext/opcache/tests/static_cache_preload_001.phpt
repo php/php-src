@@ -10,7 +10,7 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 opcache.preload={PWD}/static_cache_preload_001.inc
 --FILE--
 <?php
@@ -19,7 +19,7 @@ var_dump(StaticCachePreloadGlobalState::$values);
 var_dump(StaticCachePreloadGlobalState::next());
 var_dump(StaticCachePreloadMethodState::value());
 
-OPcache\VolatileCache::clear();
+opcache_static_cache_volatile_reset();
 opcache_reset();
 
 ?>

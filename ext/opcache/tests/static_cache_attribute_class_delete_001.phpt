@@ -1,5 +1,5 @@
 --TEST--
-OPcache static attributes can be deleted by their class names
+OPcache explicit cache delete rejects loaded class names and leaves static attributes intact
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -9,8 +9,8 @@ server
 
 file_put_contents(__DIR__ . '/static_cache_attribute_class_delete_001.php', <<<'PHP'
 <?php
-#[OPcache\PinnedStatic]
-class ClassDeletePinnedBlob
+#[OPcache\StableStatic]
+class ClassDeleteStableBlob
 {
 	public static int $value = 0;
 
@@ -26,12 +26,12 @@ class ClassDeletePinnedBlob
 	}
 }
 
-class ClassDeletePinnedMembers
+class ClassDeleteStableMembers
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static int $property = 0;
 
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static function method(?int $set = null): int
 	{
 		static $value = 0;
@@ -79,7 +79,7 @@ class ClassDeleteVolatileMembers
 	}
 }
 
-class ClassDeletePinnedPlain
+class ClassDeleteStablePlain
 {
 }
 
@@ -90,7 +90,7 @@ class ClassDeleteVolatilePlain
 function class_delete_cache_info(string $backend): OPcache\StaticCacheInfo
 {
 	return match ($backend) {
-		'pinned' => OPcache\PinnedCache::info(),
+		'stable' => OPcache\StableCache::info(),
 		'volatile' => OPcache\VolatileCache::info(),
 		default => throw new RuntimeException('unknown backend'),
 	};
@@ -99,8 +99,8 @@ function class_delete_cache_info(string $backend): OPcache\StaticCacheInfo
 function class_delete_store(string $backend, string $key, mixed $value): void
 {
 	match ($backend) {
-		'pinned' => OPcache\PinnedCache::set($key, $value),
-		'volatile' => OPcache\VolatileCache::set($key, $value),
+		'stable' => OPcache\StableCache::getInstance('default')->store($key, $value),
+		'volatile' => OPcache\VolatileCache::getInstance('default')->store($key, $value),
 		default => throw new RuntimeException('unknown backend'),
 	};
 }
@@ -108,8 +108,8 @@ function class_delete_store(string $backend, string $key, mixed $value): void
 function class_delete_fetch(string $backend, string $key, mixed $default): mixed
 {
 	return match ($backend) {
-		'pinned' => OPcache\PinnedCache::get($key, $default),
-		'volatile' => OPcache\VolatileCache::get($key, $default),
+		'stable' => OPcache\StableCache::getInstance('default')->fetch($key, $default),
+		'volatile' => OPcache\VolatileCache::getInstance('default')->fetch($key, $default),
 		default => throw new RuntimeException('unknown backend'),
 	};
 }
@@ -117,16 +117,27 @@ function class_delete_fetch(string $backend, string $key, mixed $default): mixed
 function class_delete_delete(string $backend, string $key_or_class): void
 {
 	match ($backend) {
-		'pinned' => OPcache\PinnedCache::delete($key_or_class),
-		'volatile' => OPcache\VolatileCache::delete($key_or_class),
+		'stable' => OPcache\StableCache::getInstance('default')->delete($key_or_class),
+		'volatile' => OPcache\VolatileCache::getInstance('default')->delete($key_or_class),
 		default => throw new RuntimeException('unknown backend'),
 	};
+}
+
+function class_delete_delete_result(string $backend, string $key_or_class): string
+{
+	try {
+		class_delete_delete($backend, $key_or_class);
+
+		return 'deleted';
+	} catch (ValueError $e) {
+		return get_class($e) . ',loaded=' . (str_contains($e->getMessage(), 'loaded class name') ? '1' : '0');
+	}
 }
 
 function class_delete_blob_class(string $backend): string
 {
 	return match ($backend) {
-		'pinned' => ClassDeletePinnedBlob::class,
+		'stable' => ClassDeleteStableBlob::class,
 		'volatile' => ClassDeleteVolatileBlob::class,
 		default => throw new RuntimeException('unknown backend'),
 	};
@@ -135,7 +146,7 @@ function class_delete_blob_class(string $backend): string
 function class_delete_members_class(string $backend): string
 {
 	return match ($backend) {
-		'pinned' => ClassDeletePinnedMembers::class,
+		'stable' => ClassDeleteStableMembers::class,
 		'volatile' => ClassDeleteVolatileMembers::class,
 		default => throw new RuntimeException('unknown backend'),
 	};
@@ -144,7 +155,7 @@ function class_delete_members_class(string $backend): string
 function class_delete_plain_class(string $backend): string
 {
 	return match ($backend) {
-		'pinned' => ClassDeletePinnedPlain::class,
+		'stable' => ClassDeleteStablePlain::class,
 		'volatile' => ClassDeleteVolatilePlain::class,
 		default => throw new RuntimeException('unknown backend'),
 	};
@@ -153,9 +164,9 @@ function class_delete_plain_class(string $backend): string
 function class_delete_blob_state(string $backend): array
 {
 	return match ($backend) {
-		'pinned' => [
-			ClassDeletePinnedBlob::$value,
-			ClassDeletePinnedBlob::method(),
+		'stable' => [
+			ClassDeleteStableBlob::$value,
+			ClassDeleteStableBlob::method(),
 		],
 		'volatile' => [
 			ClassDeleteVolatileBlob::$value,
@@ -168,9 +179,9 @@ function class_delete_blob_state(string $backend): array
 function class_delete_members_state(string $backend): array
 {
 	return match ($backend) {
-		'pinned' => [
-			ClassDeletePinnedMembers::$property,
-			ClassDeletePinnedMembers::method(),
+		'stable' => [
+			ClassDeleteStableMembers::$property,
+			ClassDeleteStableMembers::method(),
 		],
 		'volatile' => [
 			ClassDeleteVolatileMembers::$property,
@@ -183,9 +194,9 @@ function class_delete_members_state(string $backend): array
 function class_delete_seed_blob(string $backend): void
 {
 	switch ($backend) {
-		case 'pinned':
-			ClassDeletePinnedBlob::$value = 1;
-			ClassDeletePinnedBlob::method(1);
+		case 'stable':
+			ClassDeleteStableBlob::$value = 1;
+			ClassDeleteStableBlob::method(1);
 			break;
 
 		case 'volatile':
@@ -201,9 +212,9 @@ function class_delete_seed_blob(string $backend): void
 function class_delete_seed_members(string $backend): void
 {
 	switch ($backend) {
-		case 'pinned':
-			ClassDeletePinnedMembers::$property = 1;
-			ClassDeletePinnedMembers::method(1);
+		case 'stable':
+			ClassDeleteStableMembers::$property = 1;
+			ClassDeleteStableMembers::method(1);
 			break;
 
 		case 'volatile':
@@ -233,11 +244,11 @@ function class_delete_dump_members(string $label, string $backend): void
 }
 
 $action = $_GET['action'] ?? 'read_blob';
-$backend = $_GET['backend'] ?? 'pinned';
+$backend = $_GET['backend'] ?? 'stable';
 
 if ($action === 'reset') {
-	OPcache\VolatileCache::clear();
-	OPcache\PinnedCache::clear();
+	opcache_static_cache_volatile_reset();
+	OPcache\StableCache::getInstance('default')->clear();
 	opcache_reset();
 	echo "reset\n";
 	return;
@@ -259,8 +270,10 @@ if ($action === 'delete_blob') {
 	if ($backend === 'volatile') {
 		$key_or_class = '\\' . $key_or_class;
 	}
-	class_delete_delete($backend, $key_or_class);
-	echo 'delete-blob-', $backend, '=count=', class_delete_cache_info($backend)->entry_count, "\n";
+	echo 'delete-blob-', $backend, '=',
+		class_delete_delete_result($backend, $key_or_class),
+		',count=', class_delete_cache_info($backend)->entry_count,
+		"\n";
 	return;
 }
 
@@ -276,14 +289,18 @@ if ($action === 'read_members') {
 }
 
 if ($action === 'delete_members') {
-	class_delete_delete($backend, class_delete_members_class($backend));
-	echo 'delete-members-', $backend, '=count=', class_delete_cache_info($backend)->entry_count, "\n";
+	echo 'delete-members-', $backend, '=',
+		class_delete_delete_result($backend, class_delete_members_class($backend)),
+		',count=', class_delete_cache_info($backend)->entry_count,
+		"\n";
 	return;
 }
 
 if ($action === 'delete_plain') {
-	class_delete_delete($backend, class_delete_plain_class($backend));
-	echo 'delete-plain-', $backend, '=count=', class_delete_cache_info($backend)->entry_count, "\n";
+	echo 'delete-plain-', $backend, '=',
+		class_delete_delete_result($backend, class_delete_plain_class($backend)),
+		',count=', class_delete_cache_info($backend)->entry_count,
+		"\n";
 	return;
 }
 
@@ -311,10 +328,10 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.pinned_size_mb=32 -d opcache.optimization_level=0 -d opcache.file_update_protection=0 -d opcache.jit=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.stable_size_mb=32 -d opcache.optimization_level=0 -d opcache.file_update_protection=0 -d opcache.jit=0');
 
 $base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/static_cache_attribute_class_delete_001.php';
-foreach (['pinned', 'volatile'] as $backend) {
+foreach (['stable', 'volatile'] as $backend) {
 	echo file_get_contents($base . '?action=reset');
 	echo file_get_contents($base . '?action=seed_blob&backend=' . $backend);
 	echo file_get_contents($base . '?action=read_blob&backend=' . $backend);
@@ -338,30 +355,30 @@ foreach (['pinned', 'volatile'] as $backend) {
 ?>
 --EXPECT--
 reset
-seed-blob-pinned=1,1,count=1
-read-blob-pinned=1,1,count=1
-delete-blob-pinned=count=0
-read-blob-pinned=0,0,count=0
+seed-blob-stable=1,1,count=1
+read-blob-stable=1,1,count=1
+delete-blob-stable=ValueError,loaded=1,count=1
+read-blob-stable=1,1,count=1
 reset
-seed-members-pinned=1,1,count=2
-read-members-pinned=1,1,count=2
-delete-members-pinned=count=0
-read-members-pinned=0,0,count=0
+seed-members-stable=1,1,count=2
+read-members-stable=1,1,count=2
+delete-members-stable=ValueError,loaded=1,count=2
+read-members-stable=1,1,count=2
 reset
-delete-plain-pinned=count=0
+delete-plain-stable=ValueError,loaded=1,count=0
 reset
-noautoload-pinned=missing,count=0
+noautoload-stable=missing,count=0
 reset
 seed-blob-volatile=1,1,count=1
 read-blob-volatile=1,1,count=1
-delete-blob-volatile=count=0
-read-blob-volatile=0,0,count=0
+delete-blob-volatile=ValueError,loaded=1,count=1
+read-blob-volatile=1,1,count=1
 reset
 seed-members-volatile=1,1,count=2
 read-members-volatile=1,1,count=2
-delete-members-volatile=count=0
-read-members-volatile=0,0,count=0
+delete-members-volatile=ValueError,loaded=1,count=2
+read-members-volatile=1,1,count=2
 reset
-delete-plain-volatile=count=0
+delete-plain-volatile=ValueError,loaded=1,count=0
 reset
 noautoload-volatile=missing,count=0

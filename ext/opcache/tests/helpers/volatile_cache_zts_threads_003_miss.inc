@@ -2,7 +2,7 @@
 
 function fetch_or_miss(string $key): string
 {
-	return OPcache\VolatileCache::get($key, 'MISS');
+	return OPcache\VolatileCache::getInstance('default')->fetch($key, 'MISS');
 }
 
 function wait_for_file(string $path): void
@@ -31,14 +31,14 @@ $doneFile = sys_get_temp_dir() . '/opcache_zts_lookup_cache_miss.done';
 
 if ($mode === 'init') {
 	cleanup_files($readyFile, $doneFile);
-	OPcache\VolatileCache::clear();
-	OPcache\VolatileCache::delete($key);
+	opcache_static_cache_volatile_reset();
+	OPcache\VolatileCache::getInstance('default')->delete($key);
 	return true;
 }
 
 if ($mode === 'writer') {
 	wait_for_file($readyFile);
-	$result = OPcache\VolatileCache::set($key, 'created');
+	$result = OPcache\VolatileCache::getInstance('default')->store($key, 'created');
 	file_put_contents($doneFile, 'done');
 	return $result;
 }

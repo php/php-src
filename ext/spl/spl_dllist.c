@@ -22,6 +22,7 @@
 #include "zend_hash.h"
 
 #include "ext/standard/php_var.h"
+#include "ext/opcache/zend_static_cache.h" /* for opcache static cache */
 #include "zend_smart_str.h"
 #include "spl_dllist.h"
 #include "spl_dllist_arginfo.h"
@@ -1101,6 +1102,162 @@ PHP_METHOD(SplDoublyLinkedList, __unserialize) {
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 } /* }}} */
 
+static bool spl_dllist_object_allows_direct_cache_state(zend_class_entry *ce)
+{
+	return instanceof_function(ce, spl_ce_SplDoublyLinkedList);
+}
+
+static bool spl_dllist_object_serialize_direct_cache_state(const zval *object, zval *state)
+{
+	spl_dllist_object *intern;
+	spl_ptr_llist_element *current;
+	zval tmp;
+
+	if (!spl_dllist_object_allows_direct_cache_state(Z_OBJCE_P(object))) {
+		return false;
+	}
+
+	intern = Z_SPLDLLIST_P((zval *) object);
+	current = intern->llist->head;
+
+	array_init(state);
+
+	ZVAL_LONG(&tmp, intern->flags);
+	zend_hash_next_index_insert(Z_ARRVAL_P(state), &tmp);
+
+	array_init_size(&tmp, intern->llist->count);
+	while (current) {
+		zend_hash_next_index_insert(Z_ARRVAL(tmp), &current->data);
+		Z_TRY_ADDREF(current->data);
+		current = current->next;
+	}
+	zend_hash_next_index_insert(Z_ARRVAL_P(state), &tmp);
+
+	return true;
+}
+
+static bool spl_dllist_object_unserialize_direct_cache_state(zval *object, zval *state)
+{
+	spl_dllist_object *intern;
+	zend_long flags;
+	zval *flags_zv, *storage_zv, *elem;
+	HashTable *data;
+
+	if (!spl_dllist_object_allows_direct_cache_state(Z_OBJCE_P(object)) ||
+		Z_TYPE_P(state) != IS_ARRAY
+	) {
+		return false;
+	}
+
+	data = Z_ARRVAL_P(state);
+	flags_zv = zend_hash_index_find(data, 0);
+	storage_zv = zend_hash_index_find(data, 1);
+	if (!flags_zv || !storage_zv ||
+		Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(storage_zv) != IS_ARRAY
+	) {
+		return false;
+	}
+
+	flags = Z_LVAL_P(flags_zv);
+	if ((flags & ~(SPL_DLLIST_IT_MASK | SPL_DLLIST_IT_FIX)) != 0) {
+		return false;
+	}
+
+	intern = Z_SPLDLLIST_P(object);
+	if (intern->llist->count != 0) {
+		return false;
+	}
+
+	intern->flags = (int) flags;
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(storage_zv), elem) {
+		spl_ptr_llist_push(intern->llist, elem);
+	} ZEND_HASH_FOREACH_END();
+
+	return !EG(exception);
+}
+
+static bool spl_dllist_object_copy_direct_cache_state(
+		void *context,
+		zend_object *old_object,
+		zend_object *new_object,
+		zend_opcache_static_cache_safe_direct_clone_value_func_t clone_value)
+{
+	spl_dllist_object *old_intern, *new_intern;
+	spl_ptr_llist_element *current;
+	zval cloned_elem;
+
+	if (clone_value == NULL ||
+		!spl_dllist_object_allows_direct_cache_state(old_object->ce) ||
+		!spl_dllist_object_allows_direct_cache_state(new_object->ce)
+	) {
+		return false;
+	}
+
+	old_intern = spl_dllist_from_obj(old_object);
+	new_intern = spl_dllist_from_obj(new_object);
+	if (new_intern->llist->count != 0) {
+		return false;
+	}
+
+	new_intern->flags = old_intern->flags;
+	current = old_intern->llist->head;
+	while (current) {
+		ZVAL_UNDEF(&cloned_elem);
+		if (!clone_value(context, &cloned_elem, &current->data)) {
+			return false;
+		}
+
+		spl_ptr_llist_push(new_intern->llist, &cloned_elem);
+		zval_ptr_dtor(&cloned_elem);
+		current = current->next;
+	}
+
+	return !EG(exception);
+}
+
+static bool spl_dllist_object_direct_cache_state_has_unstorable(
+		void *context,
+		const zval *object,
+		zend_opcache_static_cache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
+{
+	spl_dllist_object *intern;
+	spl_ptr_llist_element *current;
+
+	if (value_has_unstorable == NULL) {
+		return false;
+	}
+
+	if (!spl_dllist_object_allows_direct_cache_state(Z_OBJCE_P(object))) {
+		return true;
+	}
+
+	intern = Z_SPLDLLIST_P((zval *) object);
+	current = intern->llist->head;
+	while (current) {
+		if (value_has_unstorable(context, &current->data)) {
+			return true;
+		}
+
+		current = current->next;
+	}
+
+	return false;
+}
+
+static const zend_opcache_static_cache_safe_direct_handlers *spl_dllist_object_get_direct_cache_handlers(void)
+{
+	static const zend_opcache_static_cache_safe_direct_handlers handlers = {
+		false,
+		{ false, NULL, NULL },
+		spl_dllist_object_copy_direct_cache_state,
+		spl_dllist_object_direct_cache_state_has_unstorable,
+		spl_dllist_object_serialize_direct_cache_state,
+		spl_dllist_object_unserialize_direct_cache_state
+	};
+
+	return &handlers;
+}
+
 /* {{{ Inserts a new entry before the specified $index consisting of $newval. */
 PHP_METHOD(SplDoublyLinkedList, add)
 {
@@ -1218,6 +1375,21 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	spl_ce_SplStack = register_class_SplStack(spl_ce_SplDoublyLinkedList);
 	spl_ce_SplStack->create_object = spl_dllist_object_new;
 	spl_ce_SplStack->get_iterator = spl_dllist_get_iterator;
+
+	zend_opcache_static_cache_safe_direct_register_class(
+		spl_ce_SplDoublyLinkedList,
+		spl_dllist_object_get_direct_cache_handlers()
+	);
+
+	zend_opcache_static_cache_safe_direct_register_class(
+		spl_ce_SplQueue,
+		spl_dllist_object_get_direct_cache_handlers()
+	);
+
+	zend_opcache_static_cache_safe_direct_register_class(
+		spl_ce_SplStack,
+		spl_dllist_object_get_direct_cache_handlers()
+	);
 
 	return SUCCESS;
 }

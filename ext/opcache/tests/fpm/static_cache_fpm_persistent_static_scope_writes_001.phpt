@@ -1,5 +1,5 @@
 --TEST--
-FPM: OPcache PinnedStatic class, property, and method state handles sequential writes by scope
+FPM: OPcache StableStatic class, property, and method state handles sequential writes by scope
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--
@@ -20,7 +20,7 @@ EOT;
 
 $code = <<<'PHP'
 <?php
-#[OPcache\PinnedStatic]
+#[OPcache\StableStatic]
 class FpmRaceClassState
 {
 	public static array $data = ['value' => 0, 'numbers' => []];
@@ -35,13 +35,13 @@ class FpmRaceClassState
 
 class FpmRacePropertyState
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static array $data = ['value' => 0, 'numbers' => []];
 }
 
 class FpmRaceMethodState
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static function next(): int
 	{
 		static $value = 0;
@@ -96,7 +96,7 @@ PHP;
 $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
 	'opcache.enable' => '1',
-	'opcache.static_cache.pinned_size_mb' => '32',
+	'opcache.static_cache.stable_size_mb' => '32',
 	'opcache.file_update_protection' => '0',
 ]);
 $tester->expectLogStartNotices();

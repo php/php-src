@@ -1,5 +1,5 @@
 --TEST--
-OPcache VolatileCache::get default value and VolatileCache::has
+OPcache VolatileCache::fetch default value and VolatileCache::has
 --EXTENSIONS--
 opcache
 --INI--
@@ -9,22 +9,22 @@ opcache.static_cache.volatile_size_mb=32
 --FILE--
 <?php
 
-OPcache\VolatileCache::clear();
+opcache_static_cache_volatile_reset();
 
-var_dump(OPcache\VolatileCache::has('missing'));
-var_dump(OPcache\VolatileCache::get('missing'));
-var_dump(OPcache\VolatileCache::get('missing', 'fallback'));
+var_dump(OPcache\VolatileCache::getInstance('default')->has('missing'));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('missing'));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('missing', 'fallback'));
 
-var_dump(OPcache\VolatileCache::set('null', null));
-var_dump(OPcache\VolatileCache::get('null', 'fallback'));
-var_dump(OPcache\VolatileCache::has('null'));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('null', null));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('null', 'fallback'));
+var_dump(OPcache\VolatileCache::getInstance('default')->has('null'));
 
-var_dump(OPcache\VolatileCache::set('false', false));
-var_dump(OPcache\VolatileCache::get('false', 'fallback'));
-var_dump(OPcache\VolatileCache::has('false'));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('false', false));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('false', 'fallback'));
+var_dump(OPcache\VolatileCache::getInstance('default')->has('false'));
 
-OPcache\VolatileCache::delete('false');
-var_dump(OPcache\VolatileCache::has('false'));
+OPcache\VolatileCache::getInstance('default')->delete('false');
+var_dump(OPcache\VolatileCache::getInstance('default')->has('false'));
 
 ?>
 --EXPECT--

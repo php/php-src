@@ -3544,7 +3544,7 @@ file_cache_fallback:
 	/* Initialize static cache if configured */
 	bool static_cache_configured =
 		ZCG(accel_directives).static_cache_volatile_size_mb != 0 ||
-		ZCG(accel_directives).static_cache_pinned_size_mb != 0
+		ZCG(accel_directives).static_cache_stable_size_mb != 0
 	;
 	bool static_cache_preload_configured = static_cache_configured &&
 		ZCG(accel_directives).preload &&

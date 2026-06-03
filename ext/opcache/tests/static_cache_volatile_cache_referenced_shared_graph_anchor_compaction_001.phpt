@@ -26,21 +26,21 @@ function build_anchored_graph(): array
     ];
 }
 
-OPcache\VolatileCache::clear();
+opcache_static_cache_volatile_reset();
 
-var_dump(OPcache\VolatileCache::set('shared_graph_anchor_first', str_repeat('A', 1500000)));
-var_dump(OPcache\VolatileCache::set('shared_graph_anchor_graph', build_anchored_graph()));
-var_dump(OPcache\VolatileCache::set('shared_graph_anchor_third', str_repeat('C', 1500000)));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('shared_graph_anchor_first', str_repeat('A', 1500000)));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('shared_graph_anchor_graph', build_anchored_graph()));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('shared_graph_anchor_third', str_repeat('C', 1500000)));
 
-$graph = OPcache\VolatileCache::get('shared_graph_anchor_graph');
-OPcache\VolatileCache::delete('shared_graph_anchor_first');
+$graph = OPcache\VolatileCache::getInstance('default')->fetch('shared_graph_anchor_graph');
+OPcache\VolatileCache::getInstance('default')->delete('shared_graph_anchor_first');
 
-var_dump(OPcache\VolatileCache::set('shared_graph_anchor_merged', str_repeat('M', 3200000)));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('shared_graph_anchor_merged', str_repeat('M', 3200000)));
 var_dump($graph['rows'][123][1]);
 var_dump($graph['rows'][123][2][1]);
 var_dump($graph['meta']['kind']);
-var_dump(OPcache\VolatileCache::get('shared_graph_anchor_merged', 'MISS'));
-var_dump(strlen(OPcache\VolatileCache::get('shared_graph_anchor_third')));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('shared_graph_anchor_merged', 'MISS'));
+var_dump(strlen(OPcache\VolatileCache::getInstance('default')->fetch('shared_graph_anchor_third')));
 
 ?>
 --EXPECT--

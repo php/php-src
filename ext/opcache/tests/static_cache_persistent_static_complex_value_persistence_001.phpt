@@ -1,5 +1,5 @@
 --TEST--
-OPcache PinnedStatic persists complex static values across requests
+OPcache StableStatic persists complex static values across requests
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -7,14 +7,14 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/pinned_static_003.php', <<<'PHP'
+file_put_contents(__DIR__ . '/stable_static_003.php', <<<'PHP'
 <?php
 class CounterBox
 {
 	public function __construct(public int $value) {}
 }
 
-#[OPcache\PinnedStatic]
+#[OPcache\StableStatic]
 class ComplexState
 {
 	public static ?CounterBox $box = null;
@@ -56,15 +56,15 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.pinned_size_mb=32');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.stable_size_mb=32');
 
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_003.php');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_003.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/stable_static_003.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/stable_static_003.php');
 
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/pinned_static_003.php');
+@unlink(__DIR__ . '/stable_static_003.php');
 ?>
 --EXPECT--
 2,4,101:5

@@ -1,5 +1,5 @@
 --TEST--
-OPcache PinnedCache::set, PinnedCache::get, and PinnedCache::has public API
+OPcache StableCache::store, StableCache::fetch, and StableCache::has public API
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -7,23 +7,23 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/pinned_cache_api_001.php', <<<'PHP'
+file_put_contents(__DIR__ . '/stable_cache_api_001.php', <<<'PHP'
 <?php
 
 $action = $_GET['action'] ?? 'write';
 if ($action === 'write') {
-	OPcache\PinnedCache::set('shared', ['v' => 1]);
-	var_dump(OPcache\PinnedCache::has('shared'));
+	OPcache\StableCache::getInstance('default')->store('shared', ['v' => 1]);
+	var_dump(OPcache\StableCache::getInstance('default')->has('shared'));
 	return;
 }
 
-var_dump(OPcache\PinnedCache::has('shared'));
-var_dump(OPcache\PinnedCache::get('shared', 'fallback'));
-var_dump(OPcache\PinnedCache::get('missing'));
-var_dump(OPcache\PinnedCache::get('missing', 'fallback'));
+var_dump(OPcache\StableCache::getInstance('default')->has('shared'));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('shared', 'fallback'));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('missing'));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('missing', 'fallback'));
 
-OPcache\PinnedCache::set('null', null);
-var_dump(OPcache\PinnedCache::get('null', 'fallback'));
+OPcache\StableCache::getInstance('default')->store('null', null);
+var_dump(OPcache\StableCache::getInstance('default')->fetch('null', 'fallback'));
 PHP);
 
 $php = getenv('TEST_PHP_EXECUTABLE');
@@ -33,15 +33,15 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.stable_size_mb=32 -d opcache.file_update_protection=0');
 
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_cache_api_001.php?action=write');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_cache_api_001.php?action=read');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/stable_cache_api_001.php?action=write');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/stable_cache_api_001.php?action=read');
 
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/pinned_cache_api_001.php');
+@unlink(__DIR__ . '/stable_cache_api_001.php');
 ?>
 --EXPECT--
 bool(true)

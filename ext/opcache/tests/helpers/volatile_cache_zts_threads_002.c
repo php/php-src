@@ -27,6 +27,7 @@
 #include "Zend/zend_execute.h"
 #include "Zend/zend_portability.h"
 #include "sapi/embed/php_embed.h"
+#include "ext/opcache/zend_static_cache.h"
 
 #ifndef ZTS
 # error "This helper requires a ZTS build"
@@ -70,7 +71,6 @@ static int zend_opcache_test_startup(int argc, char **argv)
 	zend_signal_startup();
 	sapi_startup(&php_embed_module);
 	/* Static Cache is opt-in per SAPI; this embed-based test enables it. */
-	extern void zend_opcache_static_cache_opt_in(void);
 	zend_opcache_static_cache_opt_in();
 	php_embed_module.ini_entries = opcache_test_ini;
 	if (argv != NULL) {
@@ -198,7 +198,7 @@ static void *zend_opcache_thread_main(void *arg)
 
 static bool zend_opcache_run_clear_request(char *message, size_t message_size)
 {
-	static const char clear_code[] = "OPcache\\VolatileCache::clear(); return true;";
+	static const char clear_code[] = "opcache_static_cache_volatile_reset(); return true;";
 	zval retval;
 
 	if (!zend_opcache_thread_request_startup()) {

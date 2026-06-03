@@ -1,11 +1,11 @@
 --TEST--
-OPcache PinnedStatic storage failures throw StaticCacheException
+OPcache StableStatic storage failures throw StaticCacheException
 --EXTENSIONS--
 opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.static_cache.pinned_size_mb=8
+opcache.static_cache.stable_size_mb=8
 opcache.optimization_level=0
 opcache.file_update_protection=0
 opcache.jit=0
@@ -22,21 +22,21 @@ function dump_static_cache_exception(string $label, Closure $callback): void
 	}
 }
 
-class PinnedStaticStoreFailureProperty
+class StableStaticStoreFailureProperty
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static mixed $value = null;
 }
 
-#[OPcache\PinnedStatic]
-class PinnedStaticStoreFailureClass
+#[OPcache\StableStatic]
+class StableStaticStoreFailureClass
 {
 	public static mixed $value = null;
 }
 
-class PinnedStaticStoreFailureMethod
+class StableStaticStoreFailureMethod
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static function assign(mixed $value): void
 	{
 		static $state = null;
@@ -45,20 +45,20 @@ class PinnedStaticStoreFailureMethod
 	}
 }
 
-class PinnedStaticStoreFailureArray
+class StableStaticStoreFailureArray
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static array $value = [];
 }
 
-class PinnedStaticStoreFailureUnsupportedValueBox
+class StableStaticStoreFailureUnsupportedValueBox
 {
 	public function __construct(public mixed $value)
 	{
 	}
 }
 
-OPcache\PinnedCache::clear();
+OPcache\StableCache::getInstance('default')->clear();
 $nullDevice = PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null';
 
 dump_static_cache_exception('property-resource', function (): void {
@@ -66,7 +66,7 @@ dump_static_cache_exception('property-resource', function (): void {
 
 	$resource = fopen($nullDevice, 'r');
 	try {
-		PinnedStaticStoreFailureProperty::$value = $resource;
+		StableStaticStoreFailureProperty::$value = $resource;
 	} finally {
 		if (is_resource($resource)) {
 			fclose($resource);
@@ -75,7 +75,7 @@ dump_static_cache_exception('property-resource', function (): void {
 });
 
 dump_static_cache_exception('property-closure', function (): void {
-	PinnedStaticStoreFailureProperty::$value = static fn () => null;
+	StableStaticStoreFailureProperty::$value = static fn () => null;
 });
 
 dump_static_cache_exception('property-object-resource', function (): void {
@@ -83,7 +83,7 @@ dump_static_cache_exception('property-object-resource', function (): void {
 
 	$resource = fopen($nullDevice, 'r');
 	try {
-		PinnedStaticStoreFailureProperty::$value = new PinnedStaticStoreFailureUnsupportedValueBox($resource);
+		StableStaticStoreFailureProperty::$value = new StableStaticStoreFailureUnsupportedValueBox($resource);
 	} finally {
 		if (is_resource($resource)) {
 			fclose($resource);
@@ -92,24 +92,24 @@ dump_static_cache_exception('property-object-resource', function (): void {
 });
 
 dump_static_cache_exception('property-object-closure', function (): void {
-	PinnedStaticStoreFailureProperty::$value = new PinnedStaticStoreFailureUnsupportedValueBox(static fn () => null);
+	StableStaticStoreFailureProperty::$value = new StableStaticStoreFailureUnsupportedValueBox(static fn () => null);
 });
 
-$unused = PinnedStaticStoreFailureClass::$value;
+$unused = StableStaticStoreFailureClass::$value;
 dump_static_cache_exception('class-closure', function (): void {
-	PinnedStaticStoreFailureClass::$value = static fn () => null;
+	StableStaticStoreFailureClass::$value = static fn () => null;
 });
 
 dump_static_cache_exception('method-closure', function (): void {
-	PinnedStaticStoreFailureMethod::assign(static fn () => null);
+	StableStaticStoreFailureMethod::assign(static fn () => null);
 });
 
-PinnedStaticStoreFailureArray::$value = [];
+StableStaticStoreFailureArray::$value = [];
 dump_static_cache_exception('array-mutation-overflow', function (): void {
-	PinnedStaticStoreFailureArray::$value[] = str_repeat('X', 12 * 1024 * 1024);
+	StableStaticStoreFailureArray::$value[] = str_repeat('X', 12 * 1024 * 1024);
 });
 
-OPcache\PinnedCache::clear();
+OPcache\StableCache::getInstance('default')->clear();
 
 ?>
 --EXPECT--

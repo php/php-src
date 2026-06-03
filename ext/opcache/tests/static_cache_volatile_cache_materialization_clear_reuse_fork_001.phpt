@@ -59,8 +59,8 @@ $resultFile = $prefix . '.result';
 @unlink($doneFile);
 @unlink($resultFile);
 
-OPcache\VolatileCache::clear();
-if (!OPcache\VolatileCache::set($key, new ClearReusePayload(build_rows('T', 3)))) {
+opcache_static_cache_volatile_reset();
+if (!OPcache\VolatileCache::getInstance('default')->store($key, new ClearReusePayload(build_rows('T', 3)))) {
 	throw new RuntimeException('store failed');
 }
 
@@ -70,7 +70,7 @@ if ($pid === -1) {
 }
 
 if ($pid === 0) {
-	$fetched = OPcache\VolatileCache::get($key);
+	$fetched = OPcache\VolatileCache::getInstance('default')->fetch($key);
 	file_put_contents($readyFile, 'ready');
 	wait_for_file($doneFile);
 
@@ -79,15 +79,15 @@ if ($pid === 0) {
 	$after = $fetched->rows[123]['text'];
 	$nested = $fetched->rows[123]['nested']['value'];
 
-	$refetch = OPcache\VolatileCache::get($key, 'MISS') === 'MISS' ? 'MISS' : 'HIT';
+	$refetch = OPcache\VolatileCache::getInstance('default')->fetch($key, 'MISS') === 'MISS' ? 'MISS' : 'HIT';
 
 	file_put_contents($resultFile, $before . "\n" . $after . "\n" . $nested . "\n" . $refetch);
 	exit(0);
 }
 
 wait_for_file($readyFile);
-OPcache\VolatileCache::clear();
-if (!OPcache\VolatileCache::set($overwriteKey, new ClearReusePayload(build_rows('X', 7)))) {
+opcache_static_cache_volatile_reset();
+if (!OPcache\VolatileCache::getInstance('default')->store($overwriteKey, new ClearReusePayload(build_rows('X', 7)))) {
 	throw new RuntimeException('overwrite store failed');
 }
 file_put_contents($doneFile, 'done');

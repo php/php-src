@@ -11,8 +11,8 @@ opcache.static_cache.volatile_size_mb=32
 
 var_dump(method_exists('OPcache\\VolatileCache', 'increment'));
 var_dump(method_exists('OPcache\\VolatileCache', 'decrement'));
-var_dump(method_exists('OPcache\\PinnedCache', 'increment'));
-var_dump(method_exists('OPcache\\PinnedCache', 'decrement'));
+var_dump(method_exists('OPcache\\StableCache', 'increment'));
+var_dump(method_exists('OPcache\\StableCache', 'decrement'));
 
 ?>
 --EXPECT--

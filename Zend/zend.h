@@ -387,7 +387,7 @@ extern ZEND_API void (*zend_post_shutdown_cb)(void);
 extern ZEND_API void (*zend_accel_schedule_restart_hook)(int reason);
 
 /* These hooks are used by OPcache Static Cache to restore, publish, and track
- * selected VolatileStatic and PinnedStatic state across requests. They remain
+ * selected VolatileStatic and StableStatic state across requests. They remain
  * NULL when the static-cache subsystem is not active. */
 extern ZEND_API void (*zend_class_init_statics_hook)(zend_class_entry *ce);
 extern ZEND_API void (*zend_function_init_statics_hook)(zend_execute_data *execute_data);

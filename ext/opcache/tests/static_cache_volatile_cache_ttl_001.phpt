@@ -1,23 +1,23 @@
 --TEST--
-OPcache volatile cache TTL expiry and reuse
+OPcache stable cache TTL expiry and reuse
 --EXTENSIONS--
 opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.static_cache.volatile_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
-var_dump(OPcache\VolatileCache::set('ttl', 'one', 1));
-var_dump(OPcache\VolatileCache::get('ttl'));
+var_dump(OPcache\StableCache::getInstance('default')->storeWithTtl('ttl', 'one', 1));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('ttl'));
 
 sleep(2);
 
-var_dump(OPcache\VolatileCache::get('ttl', 'expired'));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('ttl', 'expired'));
 
-var_dump(OPcache\VolatileCache::set('ttl', 'two'));
-var_dump(OPcache\VolatileCache::get('ttl'));
+var_dump(OPcache\StableCache::getInstance('default')->store('ttl', 'two'));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('ttl'));
 
 ?>
 --EXPECT--

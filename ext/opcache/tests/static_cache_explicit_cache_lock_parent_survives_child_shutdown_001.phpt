@@ -13,32 +13,32 @@ if (!function_exists('pcntl_fork')) {
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::clear();
+		opcache_static_cache_volatile_reset();
 	} else {
-		OPcache\PinnedCache::clear();
+		OPcache\StableCache::getInstance('default')->clear();
 	}
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::lock($key)
-		: OPcache\PinnedCache::lock($key);
+		? OPcache\VolatileCache::getInstance('default')->lock($key)
+		: OPcache\StableCache::getInstance('default')->lock($key);
 }
 
 function cache_store(string $backend, string $key, mixed $value): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::set($key, $value);
+		OPcache\VolatileCache::getInstance('default')->store($key, $value);
 	} else {
-		OPcache\PinnedCache::set($key, $value);
+		OPcache\StableCache::getInstance('default')->store($key, $value);
 	}
 }
 
@@ -64,7 +64,7 @@ function fork_lock_result(string $backend, string $key, string $label): string
 	return $result;
 }
 
-foreach (['volatile', 'pinned'] as $backend) {
+foreach (['volatile', 'stable'] as $backend) {
 	$key = $backend . '_parent_lock_survives_child_shutdown_' . getmypid();
 
 	echo $backend, "\n";
@@ -83,7 +83,7 @@ bool(true)
 not locked
 not locked
 locked
-pinned
+stable
 bool(true)
 not locked
 not locked

@@ -59,8 +59,8 @@ function run_destructive_mutator(string $operation): void
 	@unlink($doneFile);
 	@unlink($resultFile);
 
-	OPcache\VolatileCache::clear();
-	if (!OPcache\VolatileCache::set($key, new DestructiveMutatorPayload(build_rows('T', 3)))) {
+	opcache_static_cache_volatile_reset();
+	if (!OPcache\VolatileCache::getInstance('default')->store($key, new DestructiveMutatorPayload(build_rows('T', 3)))) {
 		throw new RuntimeException('store failed');
 	}
 
@@ -70,7 +70,7 @@ function run_destructive_mutator(string $operation): void
 	}
 
 	if ($pid === 0) {
-		$fetched = OPcache\VolatileCache::get($key);
+		$fetched = OPcache\VolatileCache::getInstance('default')->fetch($key);
 		file_put_contents($readyFile, 'ready');
 		wait_for_file($doneFile);
 
@@ -78,7 +78,7 @@ function run_destructive_mutator(string $operation): void
 		$fetched->rows[123]['text'] = 'changed after ' . $operation;
 		$after = $fetched->rows[123]['text'];
 		$nested = $fetched->rows[123]['nested']['value'];
-		$refetch = OPcache\VolatileCache::get($key, 'MISS') === 'MISS' ? 'MISS' : 'HIT';
+		$refetch = OPcache\VolatileCache::getInstance('default')->fetch($key, 'MISS') === 'MISS' ? 'MISS' : 'HIT';
 
 		file_put_contents($resultFile, $before . "\n" . $after . "\n" . $nested . "\n" . $refetch);
 		exit(0);
@@ -87,17 +87,17 @@ function run_destructive_mutator(string $operation): void
 	wait_for_file($readyFile);
 	switch ($operation) {
 		case 'delete':
-			OPcache\VolatileCache::delete($key);
+			OPcache\VolatileCache::getInstance('default')->delete($key);
 			break;
 		case 'clear':
-			OPcache\VolatileCache::clear();
+			opcache_static_cache_volatile_reset();
 			break;
 		case 'reset':
 			opcache_reset();
 			break;
 	}
 
-	if (!OPcache\VolatileCache::set($overwriteKey, new DestructiveMutatorPayload(build_rows('X', 7)))) {
+	if (!OPcache\VolatileCache::getInstance('default')->store($overwriteKey, new DestructiveMutatorPayload(build_rows('X', 7)))) {
 		throw new RuntimeException('overwrite store failed');
 	}
 	file_put_contents($doneFile, 'done');

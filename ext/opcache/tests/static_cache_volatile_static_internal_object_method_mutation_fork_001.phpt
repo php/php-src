@@ -70,7 +70,7 @@ function static_cache_internal_object_wait_for_file(string $path): void
 
 function static_cache_internal_object_reset(): void
 {
-	OPcache\VolatileCache::clear();
+	opcache_static_cache_volatile_reset();
 	opcache_reset();
 }
 

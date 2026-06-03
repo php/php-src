@@ -12,32 +12,32 @@ if (PHP_OS_FAMILY !== 'Windows') {
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
 $volatileInfo = OPcache\VolatileCache::info();
-$pinnedInfo = OPcache\PinnedCache::info();
+$stableInfo = OPcache\StableCache::info();
 
 var_dump($volatileInfo->available);
-var_dump($pinnedInfo->available);
+var_dump($stableInfo->available);
 var_dump($volatileInfo->shared_model);
-var_dump($pinnedInfo->shared_model);
+var_dump($stableInfo->shared_model);
 var_dump($volatileInfo->shared_memory);
-var_dump($pinnedInfo->shared_memory);
+var_dump($stableInfo->shared_memory);
 
-OPcache\VolatileCache::clear();
-OPcache\PinnedCache::clear();
+opcache_static_cache_volatile_reset();
+OPcache\StableCache::getInstance('default')->clear();
 
 $key = 'windows-backend';
 
-var_dump(OPcache\VolatileCache::lock($key));
-var_dump(OPcache\VolatileCache::set($key, ['backend' => 'volatile']));
-var_dump(OPcache\PinnedCache::lock($key));
-OPcache\PinnedCache::set($key, ['backend' => 'pinned']);
+var_dump(OPcache\VolatileCache::getInstance('default')->lock($key));
+var_dump(OPcache\VolatileCache::getInstance('default')->store($key, ['backend' => 'volatile']));
+var_dump(OPcache\StableCache::getInstance('default')->lock($key));
+OPcache\StableCache::getInstance('default')->store($key, ['backend' => 'stable']);
 
-var_dump(OPcache\VolatileCache::get($key));
-var_dump(OPcache\PinnedCache::get($key));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch($key));
+var_dump(OPcache\StableCache::getInstance('default')->fetch($key));
 
 ?>
 --EXPECT--
@@ -56,5 +56,5 @@ array(1) {
 }
 array(1) {
   ["backend"]=>
-  string(6) "pinned"
+  string(6) "stable"
 }

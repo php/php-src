@@ -55,18 +55,18 @@ function build_rows(): array
 $action = $_GET['action'] ?? 'seed';
 
 if ($action === 'seed') {
-	OPcache\VolatileCache::clear();
+	opcache_static_cache_volatile_reset();
 	$payload = new WrappedPayload(
 		new LargePayload(build_rows(), 'nested'),
 		new DateTimeImmutable('2026-06-15 09:30:00', new DateTimeZone('UTC')),
 	);
-	var_dump(OPcache\VolatileCache::set('materialization_nested_payload', $payload));
+	var_dump(OPcache\VolatileCache::getInstance('default')->store('materialization_nested_payload', $payload));
 	echo "seed\n";
 	return;
 }
 
 $before = memory_get_usage();
-$fetched = OPcache\VolatileCache::get('materialization_nested_payload');
+$fetched = OPcache\VolatileCache::getInstance('default')->fetch('materialization_nested_payload');
 $readOnly = $fetched->timestamp->format(DateTimeInterface::ATOM) . '|' . $fetched->payload->rows[100]['text'];
 $afterFetch = memory_get_usage();
 $fetched->payload->rows[100]['text'] = 'changed';

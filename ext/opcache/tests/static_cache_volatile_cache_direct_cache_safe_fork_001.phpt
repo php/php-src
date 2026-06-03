@@ -105,9 +105,9 @@ if ($pid === 0) {
 		usleep(1000);
 	}
 
-	$event = OPcache\VolatileCache::get('safe_direct_event_datetime');
-	$collection = OPcache\VolatileCache::get('safe_direct_tagged_collection');
-	$fallback = OPcache\VolatileCache::get('safe_direct_custom_datetime');
+	$event = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_event_datetime');
+	$collection = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_tagged_collection');
+	$fallback = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_custom_datetime');
 	$iterator = $collection->getIterator();
 
 	echo $event->format('Y-m-d H:i:s.u e'), ',', $event->describe(), "\n";
@@ -120,13 +120,13 @@ $event = new EventDateTime('2026-06-15 09:30:00.123456', new DateTimeZone('Europ
 $collection = new TaggedCollection(['alpha' => 10, 'beta' => 20], 'metric', LabelIterator::class);
 $fallback = new CustomSerializedDateTime('2026-06-15 10:45:00.654321', new DateTimeZone('UTC'), 'fallback');
 
-if (!OPcache\VolatileCache::set('safe_direct_event_datetime', $event)) {
+if (!OPcache\VolatileCache::getInstance('default')->store('safe_direct_event_datetime', $event)) {
 	throw new RuntimeException('Failed to store safe_direct_event_datetime');
 }
-if (!OPcache\VolatileCache::set('safe_direct_tagged_collection', $collection)) {
+if (!OPcache\VolatileCache::getInstance('default')->store('safe_direct_tagged_collection', $collection)) {
 	throw new RuntimeException('Failed to store safe_direct_tagged_collection');
 }
-if (!OPcache\VolatileCache::set('safe_direct_custom_datetime', $fallback)) {
+if (!OPcache\VolatileCache::getInstance('default')->store('safe_direct_custom_datetime', $fallback)) {
 	throw new RuntimeException('Failed to store safe_direct_custom_datetime');
 }
 

@@ -32,7 +32,7 @@ function build_rows(): array
 }
 
 if ($mode === 'store') {
-	return OPcache\VolatileCache::set(
+	return OPcache\VolatileCache::getInstance('default')->store(
 		'zts_materialization_nested_payload',
 		new WrappedPayload(
 			new LargePayload(build_rows(), 'nested'),
@@ -42,7 +42,7 @@ if ($mode === 'store') {
 }
 
 $before = memory_get_usage();
-$fetched = OPcache\VolatileCache::get('zts_materialization_nested_payload');
+$fetched = OPcache\VolatileCache::getInstance('default')->fetch('zts_materialization_nested_payload');
 
 if (!$fetched instanceof WrappedPayload) {
 	return false;

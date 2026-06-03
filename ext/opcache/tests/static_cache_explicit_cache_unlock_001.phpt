@@ -6,50 +6,50 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::clear();
+		opcache_static_cache_volatile_reset();
 	} else {
-		OPcache\PinnedCache::clear();
+		OPcache\StableCache::getInstance('default')->clear();
 	}
 }
 
 function cache_store(string $backend, string $key, mixed $value): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::set($key, $value);
+		OPcache\VolatileCache::getInstance('default')->store($key, $value);
 	} else {
-		OPcache\PinnedCache::set($key, $value);
+		OPcache\StableCache::getInstance('default')->store($key, $value);
 	}
 }
 
 function cache_fetch(string $backend, string $key, mixed $default = null): mixed
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::get($key, $default)
-		: OPcache\PinnedCache::get($key, $default);
+		? OPcache\VolatileCache::getInstance('default')->fetch($key, $default)
+		: OPcache\StableCache::getInstance('default')->fetch($key, $default);
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::lock($key)
-		: OPcache\PinnedCache::lock($key);
+		? OPcache\VolatileCache::getInstance('default')->lock($key)
+		: OPcache\StableCache::getInstance('default')->lock($key);
 }
 
 function cache_unlock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::unlock($key)
-		: OPcache\PinnedCache::unlock($key);
+		? OPcache\VolatileCache::getInstance('default')->unlock($key)
+		: OPcache\StableCache::getInstance('default')->unlock($key);
 }
 
-foreach (['volatile', 'pinned'] as $backend) {
+foreach (['volatile', 'stable'] as $backend) {
 	$key = $backend . '_manual_unlock';
 
 	echo $backend, "\n";
@@ -77,7 +77,7 @@ bool(false)
 bool(true)
 bool(false)
 string(9) "published"
-pinned
+stable
 bool(false)
 bool(true)
 bool(true)

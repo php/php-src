@@ -13,19 +13,19 @@ $payloadA = str_repeat('A', 2400000);
 $payloadB = str_repeat('B', 2400000);
 $payloadC = str_repeat('C', 2400000);
 
-var_dump(OPcache\VolatileCache::set('first', $payloadA));
-OPcache\VolatileCache::delete('first');
-var_dump(OPcache\VolatileCache::set('second', $payloadB));
-OPcache\VolatileCache::delete('second');
-var_dump(OPcache\VolatileCache::set('third', $payloadC));
-var_dump(strlen(OPcache\VolatileCache::get('third')));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('first', $payloadA));
+OPcache\VolatileCache::getInstance('default')->delete('first');
+var_dump(OPcache\VolatileCache::getInstance('default')->store('second', $payloadB));
+OPcache\VolatileCache::getInstance('default')->delete('second');
+var_dump(OPcache\VolatileCache::getInstance('default')->store('third', $payloadC));
+var_dump(strlen(OPcache\VolatileCache::getInstance('default')->fetch('third')));
 
-OPcache\VolatileCache::clear();
+opcache_static_cache_volatile_reset();
 
-var_dump(OPcache\VolatileCache::set('same', $payloadA));
-var_dump(OPcache\VolatileCache::set('same', $payloadB));
-var_dump(OPcache\VolatileCache::set('same', $payloadC));
-var_dump(strlen(OPcache\VolatileCache::get('same')));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('same', $payloadA));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('same', $payloadB));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('same', $payloadC));
+var_dump(strlen(OPcache\VolatileCache::getInstance('default')->fetch('same')));
 
 ?>
 --EXPECT--

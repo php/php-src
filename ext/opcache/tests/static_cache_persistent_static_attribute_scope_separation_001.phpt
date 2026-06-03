@@ -1,5 +1,5 @@
 --TEST--
-OPcache PinnedStatic keeps class, property, and method attribute scopes separate
+OPcache StableStatic keeps class, property, and method attribute scopes separate
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -7,9 +7,9 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/pinned_static_010.php', <<<'PHP'
+file_put_contents(__DIR__ . '/stable_static_010.php', <<<'PHP'
 <?php
-#[OPcache\PinnedStatic]
+#[OPcache\StableStatic]
 class ClassScopeState
 {
 	public static int $propertyValue = 0;
@@ -24,7 +24,7 @@ class ClassScopeState
 
 class PropertyScopeState
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static int $propertyValue = 0;
 
 	public static int $normalValue = 0;
@@ -34,7 +34,7 @@ class MethodScopeState
 {
 	public static int $normalValue = 0;
 
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static function methodValue(): int
 	{
 		static $value = 0;
@@ -66,7 +66,7 @@ if ($action === 'inspect') {
 		PropertyScopeState::$normalValue, ',',
 		MethodScopeState::$normalValue, ',',
 		MethodScopeState::normalMethodValue(), ',',
-		OPcache\PinnedCache::info()->entry_count, "\n";
+		OPcache\StableCache::info()->entry_count, "\n";
 	return;
 }
 
@@ -85,17 +85,17 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.stable_size_mb=32 -d opcache.file_update_protection=0');
 
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_010.php?action=reset');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_010.php?action=step');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_010.php?action=step');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_010.php?action=inspect');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/stable_static_010.php?action=reset');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/stable_static_010.php?action=step');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/stable_static_010.php?action=step');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/stable_static_010.php?action=inspect');
 
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/pinned_static_010.php');
+@unlink(__DIR__ . '/stable_static_010.php');
 ?>
 --EXPECT--
 reset

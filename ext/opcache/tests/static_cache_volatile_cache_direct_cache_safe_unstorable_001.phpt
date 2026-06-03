@@ -7,7 +7,7 @@ spl
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
@@ -24,13 +24,13 @@ $fixed_array = new SafeDirectUnstorableFixedArray(1);
 $fixed_array[0] = $resource;
 $array_object = new SafeDirectUnstorableArrayObject(['value' => static fn () => true]);
 
-var_dump(OPcache\VolatileCache::set('fixed-resource', $fixed_array));
-var_dump(OPcache\VolatileCache::get('fixed-resource', 'missing'));
-var_dump(OPcache\VolatileCache::set('array-object-closure', $array_object));
-var_dump(OPcache\VolatileCache::get('array-object-closure', 'missing'));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('fixed-resource', $fixed_array));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('fixed-resource', 'missing'));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('array-object-closure', $array_object));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('array-object-closure', 'missing'));
 
-var_dump(OPcache\PinnedCache::set('fixed-resource', $fixed_array));
-var_dump(OPcache\PinnedCache::set('array-object-closure', $array_object));
+var_dump(OPcache\StableCache::getInstance('default')->store('fixed-resource', $fixed_array));
+var_dump(OPcache\StableCache::getInstance('default')->store('array-object-closure', $array_object));
 
 fclose($resource);
 

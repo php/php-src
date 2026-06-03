@@ -1,15 +1,15 @@
 --TEST--
-OPcache pinned cache batch and atomic public API
+OPcache stable cache batch and atomic public API
 --EXTENSIONS--
 opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
-OPcache\PinnedCache::setMultiple([
+OPcache\StableCache::getInstance('default')->storeMultiple([
 	'count' => 10,
 	'name' => 'php',
 	'null' => null,
@@ -17,15 +17,15 @@ OPcache\PinnedCache::setMultiple([
 
 $fallback = ['fallback'];
 
-var_dump(OPcache\PinnedCache::getMultiple(['count', 'name', 'missing'], $fallback));
-var_dump(OPcache\PinnedCache::increment('count'));
-var_dump(OPcache\PinnedCache::decrement('count', 3));
+var_dump(OPcache\StableCache::getInstance('default')->fetchMultiple(['count', 'name', 'missing'], $fallback));
+var_dump(OPcache\StableCache::getInstance('default')->increment('count'));
+var_dump(OPcache\StableCache::getInstance('default')->decrement('count', 3));
 
-OPcache\PinnedCache::deleteMultiple(['name', 'missing']);
-var_dump(OPcache\PinnedCache::getMultiple(['count', 'name', 'null'], $fallback));
+OPcache\StableCache::getInstance('default')->deleteMultiple(['name', 'missing']);
+var_dump(OPcache\StableCache::getInstance('default')->fetchMultiple(['count', 'name', 'null'], $fallback));
 
-OPcache\PinnedCache::clear();
-var_dump(OPcache\PinnedCache::getMultiple(['count'], $fallback));
+OPcache\StableCache::getInstance('default')->clear();
+var_dump(OPcache\StableCache::getInstance('default')->fetchMultiple(['count'], $fallback));
 
 ?>
 --EXPECT--

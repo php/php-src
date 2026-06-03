@@ -47,21 +47,21 @@ $doneFile = sys_get_temp_dir() . '/opcache_zts_materialized_clear.done';
 
 if ($mode === 'init') {
 	cleanup_files($readyFile, $doneFile);
-	OPcache\VolatileCache::clear();
-	return OPcache\VolatileCache::set($key, new ZtsClearPayload(build_zts_clear_rows('T', 5)));
+	opcache_static_cache_volatile_reset();
+	return OPcache\VolatileCache::getInstance('default')->store($key, new ZtsClearPayload(build_zts_clear_rows('T', 5)));
 }
 
 if ($mode === 'writer') {
 	wait_for_file($readyFile);
-	OPcache\VolatileCache::clear();
-	if (!OPcache\VolatileCache::set($overwriteKey, new ZtsClearPayload(build_zts_clear_rows('X', 7)))) {
+	opcache_static_cache_volatile_reset();
+	if (!OPcache\VolatileCache::getInstance('default')->store($overwriteKey, new ZtsClearPayload(build_zts_clear_rows('X', 7)))) {
 		return false;
 	}
 	file_put_contents($doneFile, 'done');
 	return true;
 }
 
-$fetched = OPcache\VolatileCache::get($key);
+$fetched = OPcache\VolatileCache::getInstance('default')->fetch($key);
 file_put_contents($readyFile, 'ready');
 wait_for_file($doneFile);
 $before = $fetched->rows[123]['text'];
@@ -69,7 +69,7 @@ $fetched->rows[123]['text'] = 'changed after clear';
 $after = $fetched->rows[123]['text'];
 $nested = $fetched->rows[123]['nested']['value'];
 
-$refetch = OPcache\VolatileCache::get($key, 'MISS') === 'MISS' ? 'MISS' : 'HIT';
+$refetch = OPcache\VolatileCache::getInstance('default')->fetch($key, 'MISS') === 'MISS' ? 'MISS' : 'HIT';
 
 cleanup_files($readyFile, $doneFile);
 

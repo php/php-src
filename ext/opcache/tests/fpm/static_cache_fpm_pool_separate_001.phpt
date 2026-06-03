@@ -27,21 +27,21 @@ EOT;
 $code = <<<'PHP'
 <?php
 
-#[OPcache\PinnedStatic]
-class FpmPoolSeparatePinnedStatic
+#[OPcache\StableStatic]
+class FpmPoolSeparateStableStatic
 {
     public static int $value = 0;
 }
 
-class FpmPoolSeparatePinnedProperty
+class FpmPoolSeparateStableProperty
 {
-    #[OPcache\PinnedStatic]
+    #[OPcache\StableStatic]
     public static int $value = 0;
 }
 
-class FpmPoolSeparatePinnedMethod
+class FpmPoolSeparateStableMethod
 {
-    #[OPcache\PinnedStatic]
+    #[OPcache\StableStatic]
     public static function value(?int $value = null): int
     {
         static $stored = 0;
@@ -57,26 +57,26 @@ class FpmPoolSeparatePinnedMethod
 $action = $_GET['action'] ?? 'fetch';
 $pool = $_GET['pool'] ?? 'unknown';
 $volatileKey = 'fpm_pool_separate_shared_key';
-$pinnedKey = 'fpm_pool_separate_pinned_key';
+$stableKey = 'fpm_pool_separate_stable_key';
 
 if ($action === 'seed') {
     $base = $pool === 'alpha' ? 100 : 200;
 
-    OPcache\VolatileCache::set($volatileKey, $pool . '-volatile');
-    OPcache\PinnedCache::set($pinnedKey, $pool . '-pinned');
-    FpmPoolSeparatePinnedStatic::$value = $base + 1;
-    FpmPoolSeparatePinnedProperty::$value = $base + 2;
-    FpmPoolSeparatePinnedMethod::value($base + 3);
+    OPcache\VolatileCache::getInstance('default')->store($volatileKey, $pool . '-volatile');
+    OPcache\StableCache::getInstance('default')->store($stableKey, $pool . '-stable');
+    FpmPoolSeparateStableStatic::$value = $base + 1;
+    FpmPoolSeparateStableProperty::$value = $base + 2;
+    FpmPoolSeparateStableMethod::value($base + 3);
 }
 
 printf(
     "%s:%s:%s:%d:%d:%d\n",
     $pool,
-    OPcache\VolatileCache::get($volatileKey, 'MISS'),
-    OPcache\PinnedCache::get($pinnedKey, 'MISS'),
-    FpmPoolSeparatePinnedStatic::$value,
-    FpmPoolSeparatePinnedProperty::$value,
-    FpmPoolSeparatePinnedMethod::value()
+    OPcache\VolatileCache::getInstance('default')->fetch($volatileKey, 'MISS'),
+    OPcache\StableCache::getInstance('default')->fetch($stableKey, 'MISS'),
+    FpmPoolSeparateStableStatic::$value,
+    FpmPoolSeparateStableProperty::$value,
+    FpmPoolSeparateStableMethod::value()
 );
 PHP;
 
@@ -118,18 +118,18 @@ $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
     'opcache.enable' => '1',
     'opcache.static_cache.volatile_size_mb' => '32',
-    'opcache.static_cache.pinned_size_mb' => '32',
+    'opcache.static_cache.stable_size_mb' => '32',
     'opcache.file_update_protection' => '0',
 ]);
 $tester->expectLogStartNotices();
 
-seedPool($tester, 'alpha', 'alpha:alpha-volatile:alpha-pinned:101:102:103');
-expectPoolState($tester, 'alpha', 'alpha:alpha-volatile:alpha-pinned:101:102:103');
+seedPool($tester, 'alpha', 'alpha:alpha-volatile:alpha-stable:101:102:103');
+expectPoolState($tester, 'alpha', 'alpha:alpha-volatile:alpha-stable:101:102:103');
 expectPoolState($tester, 'beta', 'beta:MISS:MISS:0:0:0');
 
-seedPool($tester, 'beta', 'beta:beta-volatile:beta-pinned:201:202:203');
-expectPoolState($tester, 'alpha', 'alpha:alpha-volatile:alpha-pinned:101:102:103');
-expectPoolState($tester, 'beta', 'beta:beta-volatile:beta-pinned:201:202:203');
+seedPool($tester, 'beta', 'beta:beta-volatile:beta-stable:201:202:203');
+expectPoolState($tester, 'alpha', 'alpha:alpha-volatile:alpha-stable:101:102:103');
+expectPoolState($tester, 'beta', 'beta:beta-volatile:beta-stable:201:202:203');
 
 $tester->terminate();
 $tester->expectLogTerminatingNotices();

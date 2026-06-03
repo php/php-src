@@ -1,32 +1,32 @@
 --TEST--
-OPcache pinned atomic increment and decrement create missing keys
+OPcache stable atomic increment and decrement create missing keys
 --EXTENSIONS--
 opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
-OPcache\PinnedCache::clear();
+OPcache\StableCache::getInstance('default')->clear();
 
-var_dump(OPcache\PinnedCache::increment('created', 7));
-var_dump(OPcache\PinnedCache::get('created'));
-var_dump(OPcache\PinnedCache::increment('created', 3));
-var_dump(OPcache\PinnedCache::get('created'));
+var_dump(OPcache\StableCache::getInstance('default')->increment('created', 7));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('created'));
+var_dump(OPcache\StableCache::getInstance('default')->increment('created', 3));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('created'));
 
-var_dump(OPcache\PinnedCache::lock('reserved'));
-var_dump(OPcache\PinnedCache::increment('reserved', 11));
-var_dump(OPcache\PinnedCache::get('reserved'));
-var_dump(OPcache\PinnedCache::lock('reserved'));
-var_dump(OPcache\PinnedCache::decrement('missing_down'));
-var_dump(OPcache\PinnedCache::get('missing_down'));
-var_dump(OPcache\PinnedCache::decrement('missing_down', 4));
-var_dump(OPcache\PinnedCache::get('missing_down'));
+var_dump(OPcache\StableCache::getInstance('default')->lock('reserved'));
+var_dump(OPcache\StableCache::getInstance('default')->increment('reserved', 11));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('reserved'));
+var_dump(OPcache\StableCache::getInstance('default')->lock('reserved'));
+var_dump(OPcache\StableCache::getInstance('default')->decrement('missing_down'));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('missing_down'));
+var_dump(OPcache\StableCache::getInstance('default')->decrement('missing_down', 4));
+var_dump(OPcache\StableCache::getInstance('default')->fetch('missing_down'));
 
 try {
-	OPcache\PinnedCache::increment('extra', 1, false, false);
+	OPcache\StableCache::getInstance('default')->increment('extra', 1, false, false);
 } catch (ArgumentCountError $exception) {
 	echo "too-many-args\n";
 }

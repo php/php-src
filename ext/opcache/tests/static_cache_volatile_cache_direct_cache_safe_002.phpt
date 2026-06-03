@@ -27,26 +27,26 @@ class TaggedTimeZone extends DateTimeZone
 
 $timezone = new TaggedTimeZone('Europe/Paris', 'paris');
 
-var_dump(OPcache\VolatileCache::set('safe_direct_timezone', $timezone));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('safe_direct_timezone', $timezone));
 
-$timezoneCopy = OPcache\VolatileCache::get('safe_direct_timezone');
+$timezoneCopy = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_timezone');
 var_dump($timezoneCopy instanceof TaggedTimeZone);
 var_dump($timezoneCopy->getName());
 var_dump($timezoneCopy->label());
 
 $offsetTimezone = (new DateTimeImmutable('2023-10-27 10:00:00 +05:30'))->getTimezone();
 
-var_dump(OPcache\VolatileCache::set('safe_direct_offset_timezone', $offsetTimezone));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('safe_direct_offset_timezone', $offsetTimezone));
 
-$offsetTimezoneCopy = OPcache\VolatileCache::get('safe_direct_offset_timezone');
+$offsetTimezoneCopy = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_offset_timezone');
 var_dump($offsetTimezoneCopy instanceof DateTimeZone);
 var_dump($offsetTimezoneCopy->getName());
 
 $abbrTimezone = (new DateTimeImmutable('2023-10-27 10:00:00 EST'))->getTimezone();
 
-var_dump(OPcache\VolatileCache::set('safe_direct_abbr_timezone', $abbrTimezone));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('safe_direct_abbr_timezone', $abbrTimezone));
 
-$abbrTimezoneCopy = OPcache\VolatileCache::get('safe_direct_abbr_timezone');
+$abbrTimezoneCopy = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_abbr_timezone');
 var_dump($abbrTimezoneCopy instanceof DateTimeZone);
 var_dump($abbrTimezoneCopy->getName());
 
@@ -70,18 +70,18 @@ class TaggedInterval extends DateInterval
 
 $interval = new TaggedInterval('P1Y2M3DT4H5M6S', 'window', 9);
 
-var_dump(OPcache\VolatileCache::set('safe_direct_interval', $interval));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('safe_direct_interval', $interval));
 
-$intervalCopy = OPcache\VolatileCache::get('safe_direct_interval');
+$intervalCopy = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_interval');
 var_dump($intervalCopy instanceof TaggedInterval);
 var_dump($intervalCopy->format('%y-%m-%d %h:%i:%s'));
 var_dump($intervalCopy->describe());
 
 $relativeInterval = DateInterval::createFromDateString('2 days 4 hours');
 
-var_dump(OPcache\VolatileCache::set('safe_direct_relative_interval', $relativeInterval));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('safe_direct_relative_interval', $relativeInterval));
 
-$relativeIntervalCopy = OPcache\VolatileCache::get('safe_direct_relative_interval');
+$relativeIntervalCopy = OPcache\VolatileCache::getInstance('default')->fetch('safe_direct_relative_interval');
 var_dump($relativeIntervalCopy instanceof DateInterval);
 var_dump($relativeIntervalCopy->format('%d %h'));
 

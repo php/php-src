@@ -126,7 +126,7 @@ $action = $_GET['action'] ?? 'read';
 $case = $_GET['case'] ?? 'scalar_copy';
 
 if ($action === 'reset') {
-	OPcache\VolatileCache::clear();
+	opcache_static_cache_volatile_reset();
 	opcache_reset();
 	echo "reset\n";
 	return;

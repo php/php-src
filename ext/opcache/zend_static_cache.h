@@ -53,24 +53,22 @@ typedef bool (*zend_opcache_static_cache_safe_direct_state_unserialize_func_t)(
 	zval *state
 );
 
-typedef struct _zend_opcache_static_cache_safe_direct_serializer_path zend_opcache_static_cache_safe_direct_serializer_path;
-typedef struct _zend_opcache_static_cache_safe_direct_handlers zend_opcache_static_cache_safe_direct_handlers;
 typedef struct _zend_opcache_static_cache_partition zend_opcache_static_cache_partition;
 
-struct _zend_opcache_static_cache_safe_direct_serializer_path {
+typedef struct {
 	bool state_includes_properties;
 	zend_function *serialize;
 	zend_function *unserialize;
-};
+} zend_opcache_static_cache_safe_direct_serializer_path;
 
-struct _zend_opcache_static_cache_safe_direct_handlers {
+typedef struct {
 	bool allows_custom_serializers;
 	zend_opcache_static_cache_safe_direct_serializer_path serializer_path;
 	zend_opcache_static_cache_safe_direct_state_copy_func_t copy;
 	zend_opcache_static_cache_safe_direct_state_has_unstorable_func_t state_has_unstorable;
 	zend_opcache_static_cache_safe_direct_state_serialize_func_t state_serialize;
 	zend_opcache_static_cache_safe_direct_state_unserialize_func_t state_unserialize;
-};
+} zend_opcache_static_cache_safe_direct_handlers;
 
 BEGIN_EXTERN_C()
 
@@ -88,13 +86,13 @@ void zend_opcache_static_cache_mshutdown(void);
 zend_result zend_opcache_static_cache_rshutdown(void);
 void zend_opcache_static_cache_invalidate_all(void);
 void zend_opcache_static_cache_volatile_get_status(zval *return_value);
-void zend_opcache_static_cache_pinned_get_status(zval *return_value);
+void zend_opcache_static_cache_stable_get_status(zval *return_value);
 bool zend_opcache_static_cache_volatile_is_enabled(void);
 bool zend_opcache_static_cache_volatile_is_available(void);
 const char *zend_opcache_static_cache_volatile_failure_reason(void);
-bool zend_opcache_static_cache_pinned_is_enabled(void);
-bool zend_opcache_static_cache_pinned_is_available(void);
-const char *zend_opcache_static_cache_pinned_failure_reason(void);
+bool zend_opcache_static_cache_stable_is_enabled(void);
+bool zend_opcache_static_cache_stable_is_available(void);
+const char *zend_opcache_static_cache_stable_failure_reason(void);
 void zend_opcache_static_cache_safe_direct_register_class(
 	zend_class_entry *ce,
 	const zend_opcache_static_cache_safe_direct_handlers *handlers

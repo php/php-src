@@ -1,5 +1,5 @@
 --TEST--
-OPcache PinnedStatic snapshots recursive shared-graph state across requests
+OPcache StableStatic snapshots recursive shared-graph state across requests
 --EXTENSIONS--
 opcache
 spl
@@ -8,7 +8,7 @@ server
 --FILE--
 <?php
 
-file_put_contents(__DIR__ . '/pinned_static_011.php', <<<'PHP'
+file_put_contents(__DIR__ . '/stable_static_011.php', <<<'PHP'
 <?php
 class GraphChild
 {
@@ -25,7 +25,7 @@ class GraphNode
 
 class RecursivePropertyState
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static array $state = [];
 }
 
@@ -59,16 +59,16 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.pinned_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.stable_size_mb=32 -d opcache.file_update_protection=0 -d opcache.jit=0');
 
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_011.php');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_011.php');
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/pinned_static_011.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/stable_static_011.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/stable_static_011.php');
+echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/stable_static_011.php');
 
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/pinned_static_011.php');
+@unlink(__DIR__ . '/stable_static_011.php');
 ?>
 --EXPECT--
 2,1,11,1

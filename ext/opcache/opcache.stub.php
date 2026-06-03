@@ -6,6 +6,8 @@ namespace {
 
 function opcache_reset(): bool {}
 
+function opcache_static_cache_volatile_reset(): bool {}
+
 /**
  * @return array<string, mixed>|false
  * @refcount 1
@@ -63,7 +65,7 @@ final readonly class StaticCacheInfo
 }
 
 #[\Attribute(13)] /* TARGET_CLASS | TARGET_METHOD | TARGET_PROPERTY */
-final class PinnedStatic
+final class StableStatic
 {
 }
 
@@ -92,68 +94,126 @@ final class VolatileStatic
 	public function __construct(int $ttl = 0, CacheStrategy $strategy = CacheStrategy::Immediate) {}
 }
 
-final class VolatileCache
+interface StaticCacheInterface
 {
-	public static function get(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
+	public static function getInstance(string $pool_name): static;
+
+	public function fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object;
 
 	/**
 	 * @return array<string, null|bool|int|float|string|array|object>|false
 	 */
-	public static function getMultiple(array $keys, ?array $default = null): array|false {}
+	public function fetchMultiple(array $keys, ?array $default = null): array|false;
 
-	public static function set(string $key, null|bool|int|float|string|array|object $value, int $ttl = 0): bool {}
+	public function store(string $key, null|bool|int|float|string|array|object $value): bool;
 
-	public static function setMultiple(array $values, int $ttl = 0): bool {}
+	public function storeMultiple(array $values): bool;
 
-	public static function has(string $key): bool {}
+	public function has(string $key): bool;
 
-	public static function delete(string $key_or_class): bool {}
+	public function delete(string $key): bool;
 
-	public static function deleteMultiple(array $keys): bool {}
+	public function deleteMultiple(array $keys): bool;
 
-	public static function clear(): bool {}
+	public function clear(): bool;
 
-	public static function lock(string $key, int $lease = 0): bool {}
+	public function lock(string $key, int $lease = 0): bool;
 
-	public static function unlock(string $key): bool {}
+	public function unlock(string $key): bool;
 
-	public static function getCacheStoreType(string $key_or_property, ?string $class_name = null): CacheStoreType {}
+	public function getCacheStoreType(string $key): CacheStoreType;
 
-	public static function info(): StaticCacheInfo {}
+	public static function info(): StaticCacheInfo;
+
+	public static function getCacheStoreTypeByProperty(string $class_name, string $property_name): CacheStoreType;
+
+	public static function getCacheStoreTypeByMethod(string $class_name, string $method_name, string $variable_name): CacheStoreType;
 }
 
-final class PinnedCache
+/** @not-serializable */
+final class VolatileCache implements StaticCacheInterface
 {
-	public static function get(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
+	private function __construct() {}
+
+	public static function getInstance(string $pool_name): static {}
+
+	public function fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
 
 	/**
 	 * @return array<string, null|bool|int|float|string|array|object>|false
 	 */
-	public static function getMultiple(array $keys, ?array $default = null): array|false {}
+	public function fetchMultiple(array $keys, ?array $default = null): array|false {}
 
-	public static function set(string $key, null|bool|int|float|string|array|object $value): bool {}
+	public function store(string $key, null|bool|int|float|string|array|object $value): bool {}
 
-	public static function setMultiple(array $values): bool {}
+	public function storeMultiple(array $values): bool {}
 
-	public static function has(string $key): bool {}
+	public function has(string $key): bool {}
 
-	public static function delete(string $key_or_class): bool {}
+	public function delete(string $key): bool {}
 
-	public static function deleteMultiple(array $keys): bool {}
+	public function deleteMultiple(array $keys): bool {}
 
-	public static function clear(): bool {}
+	public function clear(): bool {}
 
-	public static function lock(string $key, int $lease = 0): bool {}
+	public function lock(string $key, int $lease = 0): bool {}
 
-	public static function unlock(string $key): bool {}
+	public function unlock(string $key): bool {}
 
-	public static function increment(string $key, int $step = 1): int|false {}
-
-	public static function decrement(string $key, int $step = 1): int|false {}
-
-	public static function getCacheStoreType(string $key_or_property, ?string $class_name = null): CacheStoreType {}
+	public function getCacheStoreType(string $key): CacheStoreType {}
 
 	public static function info(): StaticCacheInfo {}
+
+	public static function getCacheStoreTypeByProperty(string $class_name, string $property_name): CacheStoreType {}
+
+	public static function getCacheStoreTypeByMethod(string $class_name, string $method_name, string $variable_name): CacheStoreType {}
+}
+
+/** @not-serializable */
+final class StableCache implements StaticCacheInterface
+{
+	private function __construct() {}
+
+	public static function getInstance(string $pool_name): static {}
+
+	public function fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
+
+	/**
+	 * @return array<string, null|bool|int|float|string|array|object>|false
+	 */
+	public function fetchMultiple(array $keys, ?array $default = null): array|false {}
+
+	public function store(string $key, null|bool|int|float|string|array|object $value): bool {}
+
+	public function storeMultiple(array $values): bool {}
+
+	public function storeWithTtl(string $key, null|bool|int|float|string|array|object $value, int $ttl): bool {}
+
+	public function storeMultipleWithTtl(array $values, int $ttl): bool {}
+
+	public function has(string $key): bool {}
+
+	public function delete(string $key): bool {}
+
+	public function deleteMultiple(array $keys): bool {}
+
+	public function clear(): bool {}
+
+	public function lock(string $key, int $lease = 0): bool {}
+
+	public function unlock(string $key): bool {}
+
+	public function increment(string $key, int $step = 1): int|false {}
+
+	public function decrement(string $key, int $step = 1): int|false {}
+
+	public function getCacheStoreType(string $key): CacheStoreType {}
+
+	public static function info(): StaticCacheInfo {}
+
+	public static function getCacheStoreTypeByProperty(string $class_name, string $property_name): CacheStoreType {}
+
+	public static function getCacheStoreTypeByMethod(string $class_name, string $method_name, string $variable_name): CacheStoreType {}
 }
 
 }

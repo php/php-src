@@ -63,9 +63,9 @@ $payload = [
 	'gap' => $gap,
 ];
 
-var_dump(OPcache\VolatileCache::set('complex', $payload));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('complex', $payload));
 
-$fetched = OPcache\VolatileCache::get('complex');
+$fetched = OPcache\VolatileCache::getInstance('default')->fetch('complex');
 var_dump($fetched['props'] instanceof SimpleUser);
 var_dump($fetched['props']->name);
 var_dump($fetched['props']->age);
@@ -81,17 +81,17 @@ var_dump(array_key_last($fetched['gap']));
 
 $shared = new stdClass();
 $shared->value = 42;
-var_dump(OPcache\VolatileCache::set('shared_pair', [$shared, $shared]));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('shared_pair', [$shared, $shared]));
 
-$pair = OPcache\VolatileCache::get('shared_pair');
+$pair = OPcache\VolatileCache::getInstance('default')->fetch('shared_pair');
 var_dump($pair[0] instanceof stdClass);
 var_dump(spl_object_id($pair[0]) === spl_object_id($pair[1]));
 
 $refs = ['value' => 1];
 $refs['alias'] =& $refs['value'];
-var_dump(OPcache\VolatileCache::set('refs', $refs));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('refs', $refs));
 
-$fetchedRefs = OPcache\VolatileCache::get('refs');
+$fetchedRefs = OPcache\VolatileCache::getInstance('default')->fetch('refs');
 $fetchedRefs['alias'] = 7;
 var_dump($fetchedRefs['value']);
 

@@ -1,5 +1,5 @@
 --TEST--
-OPcache static property and method attributes can be deleted by documented exact cache keys
+OPcache explicit cache delete rejects documented static attribute storage keys
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -9,8 +9,8 @@ server
 
 file_put_contents(__DIR__ . '/static_cache_attribute_exact_key_delete_001.php', <<<'PHP'
 <?php
-#[OPcache\PinnedStatic]
-class ExactKeyPinnedClassState
+#[OPcache\StableStatic]
+class ExactKeyStableClassState
 {
 	public static int $value = 0;
 
@@ -26,15 +26,15 @@ class ExactKeyPinnedClassState
 	}
 }
 
-class ExactKeyPinnedPropertyState
+class ExactKeyStablePropertyState
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static int $value = 0;
 }
 
-class ExactKeyPinnedMethodState
+class ExactKeyStableMethodState
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static function method(?int $set = null): int
 	{
 		static $value = 0;
@@ -88,7 +88,7 @@ class ExactKeyVolatileMethodState
 function exact_key_cache_info(string $backend): OPcache\StaticCacheInfo
 {
 	return match ($backend) {
-		'pinned' => OPcache\PinnedCache::info(),
+		'stable' => OPcache\StableCache::info(),
 		'volatile' => OPcache\VolatileCache::info(),
 		default => throw new RuntimeException('unknown backend'),
 	};
@@ -97,11 +97,11 @@ function exact_key_cache_info(string $backend): OPcache\StaticCacheInfo
 function exact_key_state(string $backend): array
 {
 	return match ($backend) {
-		'pinned' => [
-			ExactKeyPinnedClassState::$value,
-			ExactKeyPinnedClassState::method(),
-			ExactKeyPinnedPropertyState::$value,
-			ExactKeyPinnedMethodState::method(),
+		'stable' => [
+			ExactKeyStableClassState::$value,
+			ExactKeyStableClassState::method(),
+			ExactKeyStablePropertyState::$value,
+			ExactKeyStableMethodState::method(),
 		],
 		'volatile' => [
 			ExactKeyVolatileClassState::$value,
@@ -116,11 +116,11 @@ function exact_key_state(string $backend): array
 function exact_key_seed(string $backend): void
 {
 	switch ($backend) {
-		case 'pinned':
-			ExactKeyPinnedClassState::$value = 1;
-			ExactKeyPinnedClassState::method(1);
-			ExactKeyPinnedPropertyState::$value = 1;
-			ExactKeyPinnedMethodState::method(1);
+		case 'stable':
+			ExactKeyStableClassState::$value = 1;
+			ExactKeyStableClassState::method(1);
+			ExactKeyStablePropertyState::$value = 1;
+			ExactKeyStableMethodState::method(1);
 			return;
 
 		case 'volatile':
@@ -135,25 +135,31 @@ function exact_key_seed(string $backend): void
 	}
 }
 
-function exact_key_delete_individual(string $backend): void
+function exact_key_delete_individual(string $backend): string
 {
-	switch ($backend) {
-		case 'pinned':
-			OPcache\PinnedCache::deleteMultiple([
-				'pinned_static:ExactKeyPinnedPropertyState::$value',
-				'pinned_static:ExactKeyPinnedMethodState::method()::$value',
-			]);
-			return;
+	try {
+		switch ($backend) {
+			case 'stable':
+				OPcache\StableCache::getInstance('default')->deleteMultiple([
+					'stable_static:ExactKeyStablePropertyState::$value',
+					'stable_static:ExactKeyStableMethodState::method()::$value',
+				]);
+				break;
 
-		case 'volatile':
-			OPcache\VolatileCache::deleteMultiple([
-				'volatile_static:ExactKeyVolatilePropertyState::$value',
-				'volatile_static:ExactKeyVolatileMethodState::method()::$value',
-			]);
-			return;
+			case 'volatile':
+				OPcache\VolatileCache::getInstance('default')->deleteMultiple([
+					'volatile_static:ExactKeyVolatilePropertyState::$value',
+					'volatile_static:ExactKeyVolatileMethodState::method()::$value',
+				]);
+				break;
 
-		default:
-			throw new RuntimeException('unknown backend');
+			default:
+				throw new RuntimeException('unknown backend');
+		}
+
+		return 'deleted';
+	} catch (ValueError $e) {
+		return get_class($e) . ',delimiter=' . (str_contains($e->getMessage(), 'do not contain') ? '1' : '0');
 	}
 }
 
@@ -166,11 +172,11 @@ function exact_key_dump(string $label, string $backend): void
 }
 
 $action = $_GET['action'] ?? 'read';
-$backend = $_GET['backend'] ?? 'pinned';
+$backend = $_GET['backend'] ?? 'stable';
 
 if ($action === 'reset') {
-	OPcache\VolatileCache::clear();
-	OPcache\PinnedCache::clear();
+	opcache_static_cache_volatile_reset();
+	OPcache\StableCache::getInstance('default')->clear();
 	opcache_reset();
 	echo "reset\n";
 	return;
@@ -183,8 +189,10 @@ if ($action === 'seed') {
 }
 
 if ($action === 'delete_individual') {
-	exact_key_delete_individual($backend);
-	echo 'delete-individual-', $backend, '=count=', exact_key_cache_info($backend)->entry_count, "\n";
+	echo 'delete-individual-', $backend, '=',
+		exact_key_delete_individual($backend),
+		',count=', exact_key_cache_info($backend)->entry_count,
+		"\n";
 	return;
 }
 
@@ -198,10 +206,10 @@ if ($php) {
 }
 
 include 'php_cli_server.inc';
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.pinned_size_mb=32 -d opcache.optimization_level=0 -d opcache.file_update_protection=0 -d opcache.jit=0');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.static_cache.volatile_size_mb=32 -d opcache.static_cache.stable_size_mb=32 -d opcache.optimization_level=0 -d opcache.file_update_protection=0 -d opcache.jit=0');
 
 $base = 'http://' . PHP_CLI_SERVER_ADDRESS . '/static_cache_attribute_exact_key_delete_001.php';
-foreach (['pinned', 'volatile'] as $backend) {
+foreach (['stable', 'volatile'] as $backend) {
 	echo file_get_contents($base . '?action=reset');
 	echo file_get_contents($base . '?action=seed&backend=' . $backend);
 	echo file_get_contents($base . '?action=read&backend=' . $backend);
@@ -216,12 +224,12 @@ foreach (['pinned', 'volatile'] as $backend) {
 ?>
 --EXPECT--
 reset
-seed-pinned=1,1,1,1,count=3
-read-pinned=1,1,1,1,count=3
-delete-individual-pinned=count=1
-read-pinned=1,1,0,0,count=1
+seed-stable=1,1,1,1,count=3
+read-stable=1,1,1,1,count=3
+delete-individual-stable=ValueError,delimiter=1,count=3
+read-stable=1,1,1,1,count=3
 reset
 seed-volatile=1,1,1,1,count=3
 read-volatile=1,1,1,1,count=3
-delete-individual-volatile=count=1
-read-volatile=1,1,0,0,count=1
+delete-individual-volatile=ValueError,delimiter=1,count=3
+read-volatile=1,1,1,1,count=3

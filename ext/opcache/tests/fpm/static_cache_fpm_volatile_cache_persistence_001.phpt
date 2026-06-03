@@ -23,29 +23,29 @@ $code = <<<'PHP'
 $action = $_GET['action'] ?? 'seed';
 
 if ($action === 'seed') {
-    OPcache\VolatileCache::clear();
-    var_dump(OPcache\VolatileCache::set('counter', 41));
-    var_dump(OPcache\VolatileCache::setMultiple([
+    opcache_static_cache_volatile_reset();
+    var_dump(OPcache\VolatileCache::getInstance('default')->store('counter', 41));
+    var_dump(OPcache\VolatileCache::getInstance('default')->storeMultiple([
         'message' => 'hello from fpm',
         'payload' => ['a' => 1, 'b' => [2, 3]],
     ]));
-    var_dump(OPcache\VolatileCache::set('ttl_key', 'short-lived', 1));
+    var_dump(OPcache\VolatileCache::getInstance('default')->store('persistent_key', 'long-lived'));
     echo "seed\n";
     return;
 }
 
 if ($action === 'fetch') {
-    var_dump(OPcache\VolatileCache::get('counter'));
-    var_dump(OPcache\VolatileCache::get('message'));
-    var_dump(OPcache\VolatileCache::get('payload'));
-    OPcache\VolatileCache::deleteMultiple(['message']);
-    echo OPcache\VolatileCache::get('message', 'MISS'), "\n";
+    var_dump(OPcache\VolatileCache::getInstance('default')->fetch('counter'));
+    var_dump(OPcache\VolatileCache::getInstance('default')->fetch('message'));
+    var_dump(OPcache\VolatileCache::getInstance('default')->fetch('payload'));
+    OPcache\VolatileCache::getInstance('default')->deleteMultiple(['message']);
+    echo OPcache\VolatileCache::getInstance('default')->fetch('message', 'MISS'), "\n";
     echo "fetch\n";
     return;
 }
 
-echo OPcache\VolatileCache::get('ttl_key', 'MISS'), "\n";
-echo "expire\n";
+echo OPcache\VolatileCache::getInstance('default')->fetch('persistent_key', 'MISS'), "\n";
+echo "persist\n";
 PHP;
 
 $tester = new FPM\Tester($cfg, $code);
@@ -82,9 +82,9 @@ $tester->request(query: 'action=fetch')->expectBody(
 
 sleep(2);
 
-$tester->request(query: 'action=expire')->expectBody(
-    "MISS\n" .
-    "expire"
+$tester->request(query: 'action=persist')->expectBody(
+    "long-lived\n" .
+    "persist"
 );
 
 $tester->terminate();

@@ -1,5 +1,5 @@
 --TEST--
-FPM: OPcache PinnedStatic persists complex values across requests
+FPM: OPcache StableStatic persists complex values across requests
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--
@@ -25,7 +25,7 @@ class CounterBox
 	public function __construct(public int $value) {}
 }
 
-#[OPcache\PinnedStatic]
+#[OPcache\StableStatic]
 class ComplexState
 {
 	public static ?CounterBox $box = null;
@@ -63,7 +63,7 @@ PHP;
 $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
 	'opcache.enable' => '1',
-	'opcache.static_cache.pinned_size_mb' => '32',
+	'opcache.static_cache.stable_size_mb' => '32',
 ]);
 $tester->expectLogStartNotices();
 

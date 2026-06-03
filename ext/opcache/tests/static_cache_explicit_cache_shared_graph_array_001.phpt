@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
@@ -26,8 +26,8 @@ $payload = [
 	],
 ];
 
-var_dump(OPcache\VolatileCache::set('relocatable-array-payload', $payload));
-$copy = OPcache\VolatileCache::get('relocatable-array-payload');
+var_dump(OPcache\VolatileCache::getInstance('default')->store('relocatable-array-payload', $payload));
+$copy = OPcache\VolatileCache::getInstance('default')->fetch('relocatable-array-payload');
 
 var_dump($copy['routes'][0]['methods'][1]);
 var_dump($copy['routes'][1]['defaults']['page']);
@@ -35,18 +35,18 @@ var_dump($copy['nodes'][0] instanceof RelocatableArrayNode);
 var_dump($copy['nodes'][0]->metadata['flags']['auth']);
 var_dump($copy['nodes'][1]->metadata['flags']['cache']);
 
-OPcache\PinnedCache::set('relocatable-array-object', new RelocatableArrayNode([
+OPcache\StableCache::getInstance('default')->store('relocatable-array-object', new RelocatableArrayNode([
 	'matrix' => [[1, 2], [3, 4]],
 ]));
-$global = OPcache\PinnedCache::get('relocatable-array-object');
+$global = OPcache\StableCache::getInstance('default')->fetch('relocatable-array-object');
 
 var_dump($global instanceof RelocatableArrayNode);
 var_dump($global->metadata['matrix'][1][0]);
 
-var_dump(OPcache\VolatileCache::set('relocatable-array-payload', [
+var_dump(OPcache\VolatileCache::getInstance('default')->store('relocatable-array-payload', [
 	'routes' => [['path' => '/health', 'methods' => ['GET']]],
 ]));
-$updated = OPcache\VolatileCache::get('relocatable-array-payload');
+$updated = OPcache\VolatileCache::getInstance('default')->fetch('relocatable-array-payload');
 
 var_dump($updated['routes'][0]['path']);
 var_dump($updated['routes'][0]['methods'][0]);

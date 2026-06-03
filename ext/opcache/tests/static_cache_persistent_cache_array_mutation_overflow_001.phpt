@@ -1,29 +1,29 @@
 --TEST--
-OPcache PinnedStatic throws an exception when array mutation exhausts pinned cache shared memory
+OPcache StableStatic throws an exception when array mutation exhausts stable cache shared memory
 --EXTENSIONS--
 opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.static_cache.pinned_size_mb=8
+opcache.static_cache.stable_size_mb=8
 opcache.optimization_level=0
 opcache.file_update_protection=0
 opcache.jit=0
 --FILE--
 <?php
 
-class PinnedStaticCacheArrayMutationOverflow
+class StableStaticCacheArrayMutationOverflow
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static array $value = [];
 }
 
-PinnedStaticCacheArrayMutationOverflow::$value = [];
+StableStaticCacheArrayMutationOverflow::$value = [];
 try {
-	PinnedStaticCacheArrayMutationOverflow::$value[] = str_repeat('X', 12 * 1024 * 1024);
+	StableStaticCacheArrayMutationOverflow::$value[] = str_repeat('X', 12 * 1024 * 1024);
 } catch (OPcache\StaticCacheException $exception) {
 	echo get_class($exception), ': ', $exception->getMessage(), "\n";
-	OPcache\PinnedCache::clear();
+	OPcache\StableCache::getInstance('default')->clear();
 }
 
 ?>

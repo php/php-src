@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
@@ -21,9 +21,9 @@ class ReentrantPublishPayload
 		echo "serialize-", $this->backend, "\n";
 
 		if ($this->backend === 'volatile') {
-			OPcache\VolatileCache::set('publish_inner_volatile', 'ok');
+			OPcache\VolatileCache::getInstance('default')->store('publish_inner_volatile', 'ok');
 		} else {
-			OPcache\PinnedCache::set('publish_inner_pinned', 'ok');
+			OPcache\StableCache::getInstance('default')->store('publish_inner_stable', 'ok');
 		}
 
 		return ['backend' => $this->backend];
@@ -41,23 +41,23 @@ class VolatilePublishTarget
 	public static mixed $value;
 }
 
-class PinnedPublishTarget
+class StablePublishTarget
 {
-	#[OPcache\PinnedStatic]
+	#[OPcache\StableStatic]
 	public static mixed $value;
 }
 
-OPcache\VolatileCache::clear();
+opcache_static_cache_volatile_reset();
 VolatilePublishTarget::$value = new ReentrantPublishPayload('volatile');
-var_dump(OPcache\VolatileCache::get('publish_inner_volatile'));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('publish_inner_volatile'));
 
-OPcache\PinnedCache::clear();
-PinnedPublishTarget::$value = new ReentrantPublishPayload('pinned');
-var_dump(OPcache\PinnedCache::get('publish_inner_pinned'));
+OPcache\StableCache::getInstance('default')->clear();
+StablePublishTarget::$value = new ReentrantPublishPayload('stable');
+var_dump(OPcache\StableCache::getInstance('default')->fetch('publish_inner_stable'));
 
 ?>
 --EXPECT--
 serialize-volatile
 string(2) "ok"
-serialize-pinned
+serialize-stable
 string(2) "ok"

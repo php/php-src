@@ -27,13 +27,13 @@ function build_shutdown_payload(string $prefix): array
     ];
 }
 
-OPcache\VolatileCache::clear();
+opcache_static_cache_volatile_reset();
 
-var_dump(OPcache\VolatileCache::set('fragment-padding', str_repeat('P', 131072)));
-var_dump(OPcache\VolatileCache::set('shutdown-anchor', build_shutdown_payload('A')));
-OPcache\VolatileCache::delete('fragment-padding');
+var_dump(OPcache\VolatileCache::getInstance('default')->store('fragment-padding', str_repeat('P', 131072)));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('shutdown-anchor', build_shutdown_payload('A')));
+OPcache\VolatileCache::getInstance('default')->delete('fragment-padding');
 
-$_POST['shutdown-anchor'] = OPcache\VolatileCache::get('shutdown-anchor');
+$_POST['shutdown-anchor'] = OPcache\VolatileCache::getInstance('default')->fetch('shutdown-anchor');
 
 echo $_POST['shutdown-anchor']['name'], "\n";
 echo $_POST['shutdown-anchor']['rows'][123]['text'], "\n";

@@ -61,7 +61,7 @@ $doneFile = sys_get_temp_dir() . '/opcache_zts_volatile_static_class.done';
 
 if ($mode === 'init') {
 	cleanup_files($readyFile, $doneFile);
-	OPcache\VolatileCache::clear();
+	opcache_static_cache_volatile_reset();
 	return true;
 }
 

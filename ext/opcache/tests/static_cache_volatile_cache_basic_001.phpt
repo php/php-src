@@ -9,24 +9,24 @@ opcache.static_cache.volatile_size_mb=32
 --FILE--
 <?php
 
-var_dump(OPcache\VolatileCache::set('n', 41));
-var_dump(OPcache\VolatileCache::get('n'));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('n', 41));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('n'));
 
-var_dump(OPcache\VolatileCache::set('s', 'php'));
-var_dump(OPcache\VolatileCache::get('s'));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('s', 'php'));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('s'));
 
-var_dump(OPcache\VolatileCache::set('a', ['x' => 1, 'y' => true]));
-var_dump(OPcache\VolatileCache::get('a'));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('a', ['x' => 1, 'y' => true]));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('a'));
 
-var_dump(OPcache\VolatileCache::setMultiple(['foo' => 'bar', 'baz' => true]));
-var_dump(OPcache\VolatileCache::get('foo'));
-var_dump(OPcache\VolatileCache::get('baz'));
+var_dump(OPcache\VolatileCache::getInstance('default')->storeMultiple(['foo' => 'bar', 'baz' => true]));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('foo'));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('baz'));
 
-OPcache\VolatileCache::deleteMultiple(['foo', 'baz']);
-var_dump(OPcache\VolatileCache::get('foo', 'fallback'));
+OPcache\VolatileCache::getInstance('default')->deleteMultiple(['foo', 'baz']);
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('foo', 'fallback'));
 
-OPcache\VolatileCache::clear();
-var_dump(OPcache\VolatileCache::get('n', 'fallback'));
+opcache_static_cache_volatile_reset();
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('n', 'fallback'));
 
 ?>
 --EXPECT--

@@ -29,6 +29,7 @@
 #include "zend_static_cache_internal.h"
 
 #define TEST_KEY "retired_shared_graph_free_payload"
+#define TEST_STORAGE_KEY "volatile_cache:default:" TEST_KEY
 
 static const char opcache_test_ini[] =
 	"html_errors=0\n"
@@ -44,12 +45,12 @@ static const char opcache_test_ini[] =
 
 static const char seed_code[] =
 	"(static function (): bool {"
-	"    OPcache\\VolatileCache::clear();"
+	"    opcache_static_cache_volatile_reset();"
 	"    $payload = ['name' => 'retired-shared-graph-free', 'items' => []];"
 	"    for ($i = 0; $i < 128; $i++) {"
 	"        $payload['items'][] = ['id' => $i, 'path' => '/items/' . $i, 'flags' => [true, false, true]];"
 	"    }"
-	"    return OPcache\\VolatileCache::set('" TEST_KEY "', $payload);"
+	"    return OPcache\\VolatileCache::getInstance('default')->store('" TEST_KEY "', $payload);"
 	"})()";
 
 static int zend_opcache_test_startup(int argc, char **argv)
@@ -64,7 +65,6 @@ static int zend_opcache_test_startup(int argc, char **argv)
 	zend_signal_startup();
 	sapi_startup(&php_embed_module);
 	/* Static Cache is opt-in per SAPI; this embed-based test enables it. */
-	extern void zend_opcache_static_cache_opt_in(void);
 	zend_opcache_static_cache_opt_in();
 	php_embed_module.ini_entries = opcache_test_ini;
 	if (argv != NULL) {
@@ -169,7 +169,7 @@ static bool zend_opcache_test_locate_payload(uint32_t *payload_offset)
 	uint32_t index;
 	bool found = false;
 
-	key = zend_string_init(TEST_KEY, sizeof(TEST_KEY) - 1, false);
+	key = zend_string_init(TEST_STORAGE_KEY, sizeof(TEST_STORAGE_KEY) - 1, false);
 	hash = zend_string_hash_val(key);
 	previous_context = zend_opcache_static_cache_activate_context(&zend_opcache_static_cache_volatile_context_state);
 

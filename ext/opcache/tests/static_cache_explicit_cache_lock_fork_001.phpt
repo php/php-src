@@ -13,7 +13,7 @@ if (!function_exists('pcntl_fork')) {
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
@@ -31,41 +31,41 @@ function wait_for_file(string $path): void
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::clear();
+		opcache_static_cache_volatile_reset();
 	} else {
-		OPcache\PinnedCache::clear();
+		OPcache\StableCache::getInstance('default')->clear();
 	}
 }
 
 function cache_store(string $backend, string $key, mixed $value): mixed
 {
 	if ($backend === 'volatile') {
-		return OPcache\VolatileCache::set($key, $value);
+		return OPcache\VolatileCache::getInstance('default')->store($key, $value);
 	}
 
-	OPcache\PinnedCache::set($key, $value);
+	OPcache\StableCache::getInstance('default')->store($key, $value);
 	return null;
 }
 
 function cache_fetch(string $backend, string $key, mixed $default = null): mixed
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::get($key, $default)
-		: OPcache\PinnedCache::get($key, $default);
+		? OPcache\VolatileCache::getInstance('default')->fetch($key, $default)
+		: OPcache\StableCache::getInstance('default')->fetch($key, $default);
 }
 
 function cache_exists(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::has($key)
-		: OPcache\PinnedCache::has($key);
+		? OPcache\VolatileCache::getInstance('default')->has($key)
+		: OPcache\StableCache::getInstance('default')->has($key);
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::lock($key)
-		: OPcache\PinnedCache::lock($key);
+		? OPcache\VolatileCache::getInstance('default')->lock($key)
+		: OPcache\StableCache::getInstance('default')->lock($key);
 }
 
 function run_child(string $backend, string $label, callable $operation): string
@@ -165,7 +165,7 @@ function run_existing_exists_does_not_reserve(string $backend): void
 	echo finish_child($child);
 }
 
-foreach (['volatile', 'pinned'] as $backend) {
+foreach (['volatile', 'stable'] as $backend) {
 	echo $backend, "\n";
 	run_missing_lock_returns_false_when_locked($backend);
 	run_missing_without_lock_does_not_reserve($backend);
@@ -184,7 +184,7 @@ bool(false)
 child
 bool(true)
 child
-pinned
+stable
 bool(true)
 missing-lock blocked: no
 not locked

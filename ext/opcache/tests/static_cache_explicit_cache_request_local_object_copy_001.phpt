@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
@@ -94,23 +94,23 @@ function check_fetch_copies(string $name, callable $store, callable $fetch): voi
 		$dateThird->label, "\n";
 }
 
-OPcache\VolatileCache::clear();
-OPcache\PinnedCache::clear();
+opcache_static_cache_volatile_reset();
+OPcache\StableCache::getInstance('default')->clear();
 
 check_fetch_copies(
 	'volatile',
-	static fn (string $key, mixed $payload): bool => OPcache\VolatileCache::set($key, $payload),
-	static fn (string $key): mixed => OPcache\VolatileCache::get($key),
+	static fn (string $key, mixed $payload): bool => OPcache\VolatileCache::getInstance('default')->store($key, $payload),
+	static fn (string $key): mixed => OPcache\VolatileCache::getInstance('default')->fetch($key),
 );
 
 check_fetch_copies(
-	'pinned',
+	'stable',
 	static function (string $key, mixed $payload): bool {
-		OPcache\PinnedCache::set($key, $payload);
+		OPcache\StableCache::getInstance('default')->store($key, $payload);
 
 		return true;
 	},
-	static fn (string $key): mixed => OPcache\PinnedCache::get($key),
+	static fn (string $key): mixed => OPcache\StableCache::getInstance('default')->fetch($key),
 );
 
 ?>
@@ -130,16 +130,16 @@ volatile-datetime-first-after-second-mutate=2026-05-16T12:34:56+09:00:volatile-d
 bool(false)
 volatile-datetime-third=2026-05-15T12:34:56+09:00:volatile-stored
 bool(false)
-pinned-second-after-first-mutate=pinned-stored
-pinned-first-after-second-mutate=pinned-first-mutated
+stable-second-after-first-mutate=stable-stored
+stable-first-after-second-mutate=stable-first-mutated
 bool(false)
-pinned-third=pinned-stored
+stable-third=stable-stored
 bool(false)
-pinned-clone-hook=0:pinned-stored:pinned-stored
+stable-clone-hook=0:stable-stored:stable-stored
 bool(false)
-pinned-datetime-clone-hook=0:pinned-stored:pinned-stored
-pinned-datetime-second-before=2026-05-15T12:34:56+09:00
-pinned-datetime-second-after-first-mutate=2026-05-15T12:34:56+09:00:pinned-stored
-pinned-datetime-first-after-second-mutate=2026-05-16T12:34:56+09:00:pinned-datetime-first-mutated
+stable-datetime-clone-hook=0:stable-stored:stable-stored
+stable-datetime-second-before=2026-05-15T12:34:56+09:00
+stable-datetime-second-after-first-mutate=2026-05-15T12:34:56+09:00:stable-stored
+stable-datetime-first-after-second-mutate=2026-05-16T12:34:56+09:00:stable-datetime-first-mutated
 bool(false)
-pinned-datetime-third=2026-05-15T12:34:56+09:00:pinned-stored
+stable-datetime-third=2026-05-15T12:34:56+09:00:stable-stored

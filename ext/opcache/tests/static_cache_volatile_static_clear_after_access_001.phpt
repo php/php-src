@@ -1,5 +1,5 @@
 --TEST--
-OPcache VolatileStatic is not republished after VolatileCache::clear() in the same request
+OPcache VolatileStatic is not republished after opcache_static_cache_volatile_reset() in the same request
 --EXTENSIONS--
 opcache
 --CONFLICTS--
@@ -26,7 +26,7 @@ $action = $_GET['action'] ?? 'step';
 
 if ($action === 'clear_after_access') {
 	echo ++CachedClearAfterAccess::$value, ',', CachedClearAfterAccess::next(), "\n";
-	OPcache\VolatileCache::clear();
+	opcache_static_cache_volatile_reset();
 	echo "clear\n";
 	return;
 }

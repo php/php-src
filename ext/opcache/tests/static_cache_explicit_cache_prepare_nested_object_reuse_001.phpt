@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
@@ -24,21 +24,21 @@ $payload = [
 	'rows' => [['state' => 'alpha']],
 ];
 
-var_dump(OPcache\VolatileCache::set('nested_volatile_first', $payload));
-OPcache\PinnedCache::set('nested_pinned_first', $payload);
+var_dump(OPcache\VolatileCache::getInstance('default')->store('nested_volatile_first', $payload));
+OPcache\StableCache::getInstance('default')->store('nested_stable_first', $payload);
 
 $payload['name'] = 'second';
 $payload['leaf']->label = 'leaf-second';
 $payload['leaf']->revision = 2;
 $payload['rows'][0]['state'] = 'beta';
 
-var_dump(OPcache\VolatileCache::set('nested_volatile_second', $payload));
-OPcache\PinnedCache::set('nested_pinned_second', $payload);
+var_dump(OPcache\VolatileCache::getInstance('default')->store('nested_volatile_second', $payload));
+OPcache\StableCache::getInstance('default')->store('nested_stable_second', $payload);
 
-$volatileFirst = OPcache\VolatileCache::get('nested_volatile_first');
-$volatileSecond = OPcache\VolatileCache::get('nested_volatile_second');
-$pinnedFirst = OPcache\PinnedCache::get('nested_pinned_first');
-$pinnedSecond = OPcache\PinnedCache::get('nested_pinned_second');
+$volatileFirst = OPcache\VolatileCache::getInstance('default')->fetch('nested_volatile_first');
+$volatileSecond = OPcache\VolatileCache::getInstance('default')->fetch('nested_volatile_second');
+$stableFirst = OPcache\StableCache::getInstance('default')->fetch('nested_stable_first');
+$stableSecond = OPcache\StableCache::getInstance('default')->fetch('nested_stable_second');
 
 echo $volatileFirst['name'], "\n";
 echo $volatileFirst['leaf']->label, "\n";
@@ -48,14 +48,14 @@ echo $volatileSecond['name'], "\n";
 echo $volatileSecond['leaf']->label, "\n";
 echo $volatileSecond['leaf']->revision, "\n";
 echo $volatileSecond['rows'][0]['state'], "\n";
-echo $pinnedFirst['name'], "\n";
-echo $pinnedFirst['leaf']->label, "\n";
-echo $pinnedFirst['leaf']->revision, "\n";
-echo $pinnedFirst['rows'][0]['state'], "\n";
-echo $pinnedSecond['name'], "\n";
-echo $pinnedSecond['leaf']->label, "\n";
-echo $pinnedSecond['leaf']->revision, "\n";
-echo $pinnedSecond['rows'][0]['state'], "\n";
+echo $stableFirst['name'], "\n";
+echo $stableFirst['leaf']->label, "\n";
+echo $stableFirst['leaf']->revision, "\n";
+echo $stableFirst['rows'][0]['state'], "\n";
+echo $stableSecond['name'], "\n";
+echo $stableSecond['leaf']->label, "\n";
+echo $stableSecond['leaf']->revision, "\n";
+echo $stableSecond['rows'][0]['state'], "\n";
 
 ?>
 --EXPECT--

@@ -1,6 +1,6 @@
 <?php
 
-#[OPcache\PinnedStatic]
+#[OPcache\StableStatic]
 class StaticCachePreloadGlobalState
 {
 	public static array $values = ['preload' => true];

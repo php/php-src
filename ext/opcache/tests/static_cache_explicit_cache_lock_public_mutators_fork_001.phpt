@@ -13,7 +13,7 @@ if (!function_exists('pcntl_fork')) {
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
@@ -40,59 +40,59 @@ function result_to_string(mixed $value): string
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::clear();
+		opcache_static_cache_volatile_reset();
 	} else {
-		OPcache\PinnedCache::clear();
+		OPcache\StableCache::getInstance('default')->clear();
 	}
 }
 
 function cache_store(string $backend, string $key, mixed $value): mixed
 {
 	if ($backend === 'volatile') {
-		return OPcache\VolatileCache::set($key, $value);
+		return OPcache\VolatileCache::getInstance('default')->store($key, $value);
 	}
 
-	return OPcache\PinnedCache::set($key, $value);
+	return OPcache\StableCache::getInstance('default')->store($key, $value);
 }
 
 function cache_store_array(string $backend, array $values): mixed
 {
 	if ($backend === 'volatile') {
-		return OPcache\VolatileCache::setMultiple($values);
+		return OPcache\VolatileCache::getInstance('default')->storeMultiple($values);
 	}
 
-	return OPcache\PinnedCache::setMultiple($values);
+	return OPcache\StableCache::getInstance('default')->storeMultiple($values);
 }
 
 function cache_fetch(string $backend, string $key, mixed $default = null): mixed
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::get($key, $default)
-		: OPcache\PinnedCache::get($key, $default);
+		? OPcache\VolatileCache::getInstance('default')->fetch($key, $default)
+		: OPcache\StableCache::getInstance('default')->fetch($key, $default);
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::lock($key)
-		: OPcache\PinnedCache::lock($key);
+		? OPcache\VolatileCache::getInstance('default')->lock($key)
+		: OPcache\StableCache::getInstance('default')->lock($key);
 }
 
 function cache_delete(string $backend, string $key): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::delete($key);
+		OPcache\VolatileCache::getInstance('default')->delete($key);
 	} else {
-		OPcache\PinnedCache::delete($key);
+		OPcache\StableCache::getInstance('default')->delete($key);
 	}
 }
 
 function cache_delete_array(string $backend, array $keys): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::deleteMultiple($keys);
+		OPcache\VolatileCache::getInstance('default')->deleteMultiple($keys);
 	} else {
-		OPcache\PinnedCache::deleteMultiple($keys);
+		OPcache\StableCache::getInstance('default')->deleteMultiple($keys);
 	}
 }
 
@@ -187,13 +187,13 @@ function run_backend_mutators(string $backend): void
 		static fn () => print 'delete_array value: ' . cache_fetch($backend, $key, 'MISS') . "\n",
 	);
 
-	if ($backend === 'pinned') {
+	if ($backend === 'stable') {
 		$key = $baseKey . '_atomic';
 		reserve_missing($backend, $key);
 		run_blocked_mutator(
 			$backend,
 			'atomic',
-			static fn () => OPcache\PinnedCache::increment($key, 2),
+			static fn () => OPcache\StableCache::getInstance('default')->increment($key, 2),
 			static fn () => cache_store($backend, $key, 10),
 			static fn () => print 'atomic value: ' . cache_fetch($backend, $key, 'MISS') . "\n",
 		);
@@ -203,7 +203,7 @@ function run_backend_mutators(string $backend): void
 		run_blocked_mutator(
 			$backend,
 			'atomic_decrement',
-			static fn () => OPcache\PinnedCache::decrement($key, 3),
+			static fn () => OPcache\StableCache::getInstance('default')->decrement($key, 3),
 			static fn () => cache_store($backend, $key, 10),
 			static fn () => print 'atomic_decrement value: ' . cache_fetch($backend, $key, 'MISS') . "\n",
 		);
@@ -225,7 +225,7 @@ function run_backend_mutators(string $backend): void
 }
 
 run_backend_mutators('volatile');
-run_backend_mutators('pinned');
+run_backend_mutators('stable');
 
 ?>
 --EXPECT--
@@ -251,7 +251,7 @@ bool(true)
 clear blocked: no
 clear result: null
 clear values: owner,MISS
-pinned
+stable
 bool(true)
 store blocked: yes
 store result: true

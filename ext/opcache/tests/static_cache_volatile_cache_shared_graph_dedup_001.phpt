@@ -39,9 +39,9 @@ $payload = [
     'meta' => ['kind' => 'repeated-kind', 'again' => 'repeated-kind'],
 ];
 
-var_dump(OPcache\VolatileCache::set('graph', $payload));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('graph', $payload));
 
-$a = OPcache\VolatileCache::get('graph');
+$a = OPcache\VolatileCache::getInstance('default')->fetch('graph');
 
 /* Lossless round trip despite heavy string duplication. */
 var_dump(serialize($a) === serialize($payload));
@@ -56,10 +56,10 @@ var_dump(spl_object_id($a['list'][0]) !== spl_object_id($a['list'][1]));
 
 /* Each fetch decodes an independent copy, so mutating one must not affect
  * another fetch or the stored value. */
-$b = OPcache\VolatileCache::get('graph');
+$b = OPcache\VolatileCache::getInstance('default')->fetch('graph');
 var_dump(spl_object_id($a['list'][0]) !== spl_object_id($b['list'][0]));
 $b['list'][0]->kind = 'mutated';
-$c = OPcache\VolatileCache::get('graph');
+$c = OPcache\VolatileCache::getInstance('default')->fetch('graph');
 var_dump($c['list'][0]->kind);
 
 /* A deeply nested homogeneous chain exercises the class memo across the
@@ -78,9 +78,9 @@ function make_chain(int $depth): Node
     return $head;
 }
 
-var_dump(OPcache\VolatileCache::set('chain', make_chain(500)));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('chain', make_chain(500)));
 
-$chain = OPcache\VolatileCache::get('chain');
+$chain = OPcache\VolatileCache::getInstance('default')->fetch('chain');
 $len = 0;
 for ($n = $chain; $n !== null; $n = $n->next) {
     $len++;

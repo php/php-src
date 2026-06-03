@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=0
-opcache.static_cache.pinned_size_mb=0
+opcache.static_cache.stable_size_mb=0
 --FILE--
 <?php
 
@@ -28,30 +28,30 @@ function dump_result(string $label, mixed $value): void
 }
 
 dump_info('volatile', OPcache\VolatileCache::info());
-dump_info('pinned', OPcache\PinnedCache::info());
+dump_info('stable', OPcache\StableCache::info());
 
-dump_result('VolatileCache::set', OPcache\VolatileCache::set('key', 'value'));
-dump_result('VolatileCache::setMultiple', OPcache\VolatileCache::setMultiple(['array-key' => 'value']));
-dump_result('VolatileCache::get', OPcache\VolatileCache::get('key', 'default'));
-dump_result('VolatileCache::getMultiple', OPcache\VolatileCache::getMultiple(['key'], ['key' => 'default']));
-dump_result('VolatileCache::has', OPcache\VolatileCache::has('key'));
-dump_result('VolatileCache::lock', OPcache\VolatileCache::lock('key'));
-dump_result('VolatileCache::unlock', OPcache\VolatileCache::unlock('key'));
-dump_result('VolatileCache::delete', OPcache\VolatileCache::delete('key'));
-dump_result('VolatileCache::deleteMultiple', OPcache\VolatileCache::deleteMultiple(['key']));
-dump_result('VolatileCache::clear', OPcache\VolatileCache::clear());
-dump_result('PinnedCache::set', OPcache\PinnedCache::set('key', 'value'));
-dump_result('PinnedCache::setMultiple', OPcache\PinnedCache::setMultiple(['array-key' => 'value']));
-dump_result('PinnedCache::get', OPcache\PinnedCache::get('key', 'default'));
-dump_result('PinnedCache::getMultiple', OPcache\PinnedCache::getMultiple(['key'], ['key' => 'default']));
-dump_result('PinnedCache::has', OPcache\PinnedCache::has('key'));
-dump_result('PinnedCache::lock', OPcache\PinnedCache::lock('key'));
-dump_result('PinnedCache::unlock', OPcache\PinnedCache::unlock('key'));
-dump_result('PinnedCache::delete', OPcache\PinnedCache::delete('key'));
-dump_result('PinnedCache::deleteMultiple', OPcache\PinnedCache::deleteMultiple(['key']));
-dump_result('PinnedCache::clear', OPcache\PinnedCache::clear());
-dump_result('PinnedCache::increment', OPcache\PinnedCache::increment('key'));
-dump_result('PinnedCache::decrement', OPcache\PinnedCache::decrement('key'));
+dump_result('VolatileCache::store', OPcache\VolatileCache::getInstance('default')->store('key', 'value'));
+dump_result('VolatileCache::storeMultiple', OPcache\VolatileCache::getInstance('default')->storeMultiple(['array-key' => 'value']));
+dump_result('VolatileCache::fetch', OPcache\VolatileCache::getInstance('default')->fetch('key', 'default'));
+dump_result('VolatileCache::fetchMultiple', OPcache\VolatileCache::getInstance('default')->fetchMultiple(['key'], ['key' => 'default']));
+dump_result('VolatileCache::has', OPcache\VolatileCache::getInstance('default')->has('key'));
+dump_result('VolatileCache::lock', OPcache\VolatileCache::getInstance('default')->lock('key'));
+dump_result('VolatileCache::unlock', OPcache\VolatileCache::getInstance('default')->unlock('key'));
+dump_result('VolatileCache::delete', OPcache\VolatileCache::getInstance('default')->delete('key'));
+dump_result('VolatileCache::deleteMultiple', OPcache\VolatileCache::getInstance('default')->deleteMultiple(['key']));
+dump_result('opcache_static_cache_volatile_reset', opcache_static_cache_volatile_reset());
+dump_result('StableCache::store', OPcache\StableCache::getInstance('default')->store('key', 'value'));
+dump_result('StableCache::storeMultiple', OPcache\StableCache::getInstance('default')->storeMultiple(['array-key' => 'value']));
+dump_result('StableCache::fetch', OPcache\StableCache::getInstance('default')->fetch('key', 'default'));
+dump_result('StableCache::fetchMultiple', OPcache\StableCache::getInstance('default')->fetchMultiple(['key'], ['key' => 'default']));
+dump_result('StableCache::has', OPcache\StableCache::getInstance('default')->has('key'));
+dump_result('StableCache::lock', OPcache\StableCache::getInstance('default')->lock('key'));
+dump_result('StableCache::unlock', OPcache\StableCache::getInstance('default')->unlock('key'));
+dump_result('StableCache::delete', OPcache\StableCache::getInstance('default')->delete('key'));
+dump_result('StableCache::deleteMultiple', OPcache\StableCache::getInstance('default')->deleteMultiple(['key']));
+dump_result('StableCache::clear', OPcache\StableCache::getInstance('default')->clear());
+dump_result('StableCache::increment', OPcache\StableCache::getInstance('default')->increment('key'));
+dump_result('StableCache::decrement', OPcache\StableCache::getInstance('default')->decrement('key'));
 
 ?>
 --EXPECT--
@@ -62,32 +62,32 @@ bool(false)
 bool(false)
 int(0)
 NULL
-pinned
+stable
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 int(0)
 NULL
-VolatileCache::set: bool(false)
-VolatileCache::setMultiple: bool(false)
-VolatileCache::get: bool(false)
-VolatileCache::getMultiple: bool(false)
+VolatileCache::store: bool(false)
+VolatileCache::storeMultiple: bool(false)
+VolatileCache::fetch: bool(false)
+VolatileCache::fetchMultiple: bool(false)
 VolatileCache::has: bool(false)
 VolatileCache::lock: bool(false)
 VolatileCache::unlock: bool(false)
 VolatileCache::delete: bool(false)
 VolatileCache::deleteMultiple: bool(false)
-VolatileCache::clear: bool(false)
-PinnedCache::set: bool(false)
-PinnedCache::setMultiple: bool(false)
-PinnedCache::get: bool(false)
-PinnedCache::getMultiple: bool(false)
-PinnedCache::has: bool(false)
-PinnedCache::lock: bool(false)
-PinnedCache::unlock: bool(false)
-PinnedCache::delete: bool(false)
-PinnedCache::deleteMultiple: bool(false)
-PinnedCache::clear: bool(false)
-PinnedCache::increment: bool(false)
-PinnedCache::decrement: bool(false)
+opcache_static_cache_volatile_reset: bool(false)
+StableCache::store: bool(false)
+StableCache::storeMultiple: bool(false)
+StableCache::fetch: bool(false)
+StableCache::fetchMultiple: bool(false)
+StableCache::has: bool(false)
+StableCache::lock: bool(false)
+StableCache::unlock: bool(false)
+StableCache::delete: bool(false)
+StableCache::deleteMultiple: bool(false)
+StableCache::clear: bool(false)
+StableCache::increment: bool(false)
+StableCache::decrement: bool(false)

@@ -27,6 +27,7 @@
 #include "Zend/zend_execute.h"
 #include "Zend/zend_portability.h"
 #include "sapi/embed/php_embed.h"
+#include "ext/opcache/zend_static_cache.h"
 
 #ifndef ZTS
 # error "This helper requires a ZTS build"
@@ -50,7 +51,7 @@ static const char opcache_test_ini[] =
 	"opcache.enable_cli=1\n"
 	"opcache.memory_consumption=64\n"
 	"opcache.max_accelerated_files=200\n"
-	"opcache.static_cache.pinned_size_mb=32\n\0";
+	"opcache.static_cache.stable_size_mb=32\n\0";
 
 static void zend_opcache_thread_set_failure(zend_opcache_thread_ctx *ctx, const char *message)
 {
@@ -68,7 +69,6 @@ static int zend_opcache_test_startup(int argc, char **argv)
 	zend_signal_startup();
 	sapi_startup(&php_embed_module);
 	/* Static Cache is opt-in per SAPI; this embed-based test enables it. */
-	extern void zend_opcache_static_cache_opt_in(void);
 	zend_opcache_static_cache_opt_in();
 	php_embed_module.ini_entries = opcache_test_ini;
 	if (argv != NULL) {
@@ -251,13 +251,13 @@ static bool zend_opcache_run_threaded_scenario(const char *scenario_path, char *
 	zend_opcache_thread_ctx reader_ctx;
 	zend_opcache_thread_ctx writer_ctx;
 
-	if (!zend_opcache_run_request_mode(scenario_path, "init", "zts pinned_static init", message, message_size)) {
+	if (!zend_opcache_run_request_mode(scenario_path, "init", "zts stable_static init", message, message_size)) {
 		return false;
 	}
 
 	reader_ctx.mode = "reader";
 	reader_ctx.scenario_path = scenario_path;
-	reader_ctx.label = "zts pinned_static reader";
+	reader_ctx.label = "zts stable_static reader";
 	if (!zend_thread_start(&reader_thread, zend_opcache_thread_main, &reader_ctx)) {
 		snprintf(message, message_size, "reader thread creation failed");
 		return false;
@@ -265,7 +265,7 @@ static bool zend_opcache_run_threaded_scenario(const char *scenario_path, char *
 
 	writer_ctx.mode = "writer";
 	writer_ctx.scenario_path = scenario_path;
-	writer_ctx.label = "zts pinned_static writer";
+	writer_ctx.label = "zts stable_static writer";
 	if (!zend_thread_start(&writer_thread, zend_opcache_thread_main, &writer_ctx)) {
 		snprintf(message, message_size, "writer thread creation failed");
 		return false;
@@ -288,7 +288,7 @@ static bool zend_opcache_run_threaded_scenario(const char *scenario_path, char *
 		return false;
 	}
 
-	return zend_opcache_run_request_mode(scenario_path, "verify", "zts pinned_static verify", message, message_size);
+	return zend_opcache_run_request_mode(scenario_path, "verify", "zts stable_static verify", message, message_size);
 }
 
 int main(int argc, char **argv)

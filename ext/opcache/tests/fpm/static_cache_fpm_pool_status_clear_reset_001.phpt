@@ -27,8 +27,8 @@ EOT;
 $code = <<<'PHP'
 <?php
 
-#[OPcache\PinnedStatic]
-class FpmPoolStatusClearResetPinnedStatic
+#[OPcache\StableStatic]
+class FpmPoolStatusClearResetStableStatic
 {
     public static int $value = 0;
 }
@@ -36,40 +36,40 @@ class FpmPoolStatusClearResetPinnedStatic
 $action = $_GET['action'] ?? 'status';
 $pool = $_GET['pool'] ?? 'unknown';
 $volatileKey = 'fpm_pool_status_clear_reset_volatile_key';
-$pinnedKey = 'fpm_pool_status_clear_reset_pinned_key';
+$stableKey = 'fpm_pool_status_clear_reset_stable_key';
 
 if ($action === 'seed') {
     $base = $pool === 'alpha' ? 100 : 200;
 
-    OPcache\VolatileCache::set($volatileKey, $pool . '-volatile');
-    OPcache\PinnedCache::set($pinnedKey, $pool . '-pinned');
-    FpmPoolStatusClearResetPinnedStatic::$value = $base + 1;
+    OPcache\VolatileCache::getInstance('default')->store($volatileKey, $pool . '-volatile');
+    OPcache\StableCache::getInstance('default')->store($stableKey, $pool . '-stable');
+    FpmPoolStatusClearResetStableStatic::$value = $base + 1;
 } elseif ($action === 'volatile_clear') {
-    printf("volatile_clear=%d\n", OPcache\VolatileCache::clear());
-} elseif ($action === 'pinned_clear') {
-    printf("pinned_clear=%d\n", OPcache\PinnedCache::clear());
+    printf("volatile_clear=%d\n", opcache_static_cache_volatile_reset());
+} elseif ($action === 'stable_clear') {
+    printf("stable_clear=%d\n", OPcache\StableCache::getInstance('default')->clear());
 } elseif ($action === 'reset') {
     printf("reset=%d\n", opcache_reset());
 }
 
 $volatileInfo = OPcache\VolatileCache::info();
-$pinnedInfo = OPcache\PinnedCache::info();
+$stableInfo = OPcache\StableCache::info();
 $status = opcache_get_status();
 $statusVolatile = $status['volatile_cache'];
-$statusPinned = $status['pinned_cache'];
+$statusStable = $status['stable_cache'];
 
 printf(
     "%s:%s:%s:class=%d:info=%d/%d:status=%d/%d:eq=%d/%d\n",
     $pool,
-    OPcache\VolatileCache::get($volatileKey, 'MISS'),
-    OPcache\PinnedCache::get($pinnedKey, 'MISS'),
-    FpmPoolStatusClearResetPinnedStatic::$value,
+    OPcache\VolatileCache::getInstance('default')->fetch($volatileKey, 'MISS'),
+    OPcache\StableCache::getInstance('default')->fetch($stableKey, 'MISS'),
+    FpmPoolStatusClearResetStableStatic::$value,
     $volatileInfo->entry_count,
-    $pinnedInfo->entry_count,
+    $stableInfo->entry_count,
     $statusVolatile->entry_count,
-    $statusPinned->entry_count,
+    $statusStable->entry_count,
     (int) ($statusVolatile == $volatileInfo),
-    (int) ($statusPinned == $pinnedInfo)
+    (int) ($statusStable == $stableInfo)
 );
 PHP;
 
@@ -95,15 +95,15 @@ $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
     'opcache.enable' => '1',
     'opcache.static_cache.volatile_size_mb' => '32',
-    'opcache.static_cache.pinned_size_mb' => '32',
+    'opcache.static_cache.stable_size_mb' => '32',
     'opcache.file_update_protection' => '0',
 ]);
 $tester->expectLogStartNotices();
 
-$alphaSeeded = 'alpha:alpha-volatile:alpha-pinned:class=101:info=1/2:status=1/2:eq=1/1';
-$betaSeeded = 'beta:beta-volatile:beta-pinned:class=201:info=1/2:status=1/2:eq=1/1';
-$alphaVolatileCleared = "volatile_clear=1\nalpha:MISS:alpha-pinned:class=101:info=0/2:status=0/2:eq=1/1";
-$alphaPinnedCleared = "pinned_clear=1\nalpha:alpha-volatile:MISS:class=0:info=1/0:status=1/0:eq=1/1";
+$alphaSeeded = 'alpha:alpha-volatile:alpha-stable:class=101:info=1/2:status=1/2:eq=1/1';
+$betaSeeded = 'beta:beta-volatile:beta-stable:class=201:info=1/2:status=1/2:eq=1/1';
+$alphaVolatileCleared = "volatile_clear=1\nalpha:MISS:alpha-stable:class=101:info=0/2:status=0/2:eq=1/1";
+$alphaStableCleared = "stable_clear=1\nalpha:alpha-volatile:MISS:class=101:info=1/1:status=1/1:eq=1/1";
 $alphaReset = "reset=1\nalpha:MISS:MISS:class=0:info=0/0:status=0/0:eq=1/1";
 
 expectPoolAction($tester, 'alpha', 'seed', $alphaSeeded);
@@ -115,7 +115,7 @@ expectPoolAction($tester, 'alpha', 'volatile_clear', $alphaVolatileCleared);
 expectPoolAction($tester, 'beta', 'status', $betaSeeded);
 
 expectPoolAction($tester, 'alpha', 'seed', $alphaSeeded);
-expectPoolAction($tester, 'alpha', 'pinned_clear', $alphaPinnedCleared);
+expectPoolAction($tester, 'alpha', 'stable_clear', $alphaStableCleared);
 expectPoolAction($tester, 'beta', 'status', $betaSeeded);
 
 expectPoolAction($tester, 'alpha', 'seed', $alphaSeeded);

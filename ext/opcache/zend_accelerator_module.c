@@ -115,15 +115,15 @@ static ZEND_INI_MH(OnUpdateStaticCacheVolatileSizeMb)
 	return SUCCESS;
 }
 
-static ZEND_INI_MH(OnUpdateStaticCachePinnedSizeMb)
+static ZEND_INI_MH(OnUpdateStaticCacheStableSizeMb)
 {
 	zend_long *p, memsize;
 
 	if (accel_startup_ok) {
 		if (strcmp(sapi_module.name, "fpm-fcgi") == 0) {
-			zend_accel_error(ACCEL_LOG_WARNING, "opcache.static_cache.pinned_size_mb cannot be changed when OPcache is already set up. Are you using php_admin_value[opcache.static_cache.pinned_size_mb] in an individual pool's configuration?\n");
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.static_cache.stable_size_mb cannot be changed when OPcache is already set up. Are you using php_admin_value[opcache.static_cache.stable_size_mb] in an individual pool's configuration?\n");
 		} else {
-			zend_accel_error(ACCEL_LOG_WARNING, "opcache.static_cache.pinned_size_mb cannot be changed when OPcache is already set up.\n");
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.static_cache.stable_size_mb cannot be changed when OPcache is already set up.\n");
 		}
 		return FAILURE;
 	}
@@ -131,7 +131,7 @@ static ZEND_INI_MH(OnUpdateStaticCachePinnedSizeMb)
 	p = ZEND_INI_GET_ADDR();
 	memsize = atoi(ZSTR_VAL(new_value));
 
-	/* zero disables the pinned cache */
+	/* zero disables the stable cache */
 	if (memsize == 0) {
 		*p = 0;
 		return SUCCESS;
@@ -139,7 +139,7 @@ static ZEND_INI_MH(OnUpdateStaticCachePinnedSizeMb)
 
 	/* sanity check we must use at least 8 MB */
 	if (memsize < 8) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache.static_cache.pinned_size_mb is set below the required 8MB.\n");
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache.static_cache.stable_size_mb is set below the required 8MB.\n");
 		return FAILURE;
 	}
 
@@ -371,7 +371,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.log_verbosity_level"   , "1"   , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.log_verbosity_level,       zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.memory_consumption"    , "128"  , PHP_INI_SYSTEM, OnUpdateMemoryConsumption,    accel_directives.memory_consumption,        zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.static_cache.volatile_size_mb", "8", PHP_INI_SYSTEM, OnUpdateStaticCacheVolatileSizeMb, accel_directives.static_cache_volatile_size_mb, zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.static_cache.pinned_size_mb", "8", PHP_INI_SYSTEM, OnUpdateStaticCachePinnedSizeMb, accel_directives.static_cache_pinned_size_mb, zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.static_cache.stable_size_mb", "8", PHP_INI_SYSTEM, OnUpdateStaticCacheStableSizeMb, accel_directives.static_cache_stable_size_mb, zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.interned_strings_buffer", "8"  , PHP_INI_SYSTEM, OnUpdateInternedStringsBuffer,	 accel_directives.interned_strings_buffer,   zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_accelerated_files" , "10000", PHP_INI_SYSTEM, OnUpdateMaxAcceleratedFiles,	 accel_directives.max_accelerated_files,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_wasted_percentage" , "5"   , PHP_INI_SYSTEM, OnUpdateMaxWastedPercentage,	 accel_directives.max_wasted_percentage,     zend_accel_globals, accel_globals)
@@ -601,14 +601,14 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Volatile Static Cache Failure", zend_opcache_static_cache_volatile_failure_reason());
 		}
 	}
-	if (!zend_opcache_static_cache_pinned_is_enabled()) {
-		php_info_print_table_row(2, "Pinned Static Cache", "Disabled");
-	} else if (zend_opcache_static_cache_pinned_is_available()) {
-		php_info_print_table_row(2, "Pinned Static Cache", "Enabled");
+	if (!zend_opcache_static_cache_stable_is_enabled()) {
+		php_info_print_table_row(2, "Stable Static Cache", "Disabled");
+	} else if (zend_opcache_static_cache_stable_is_available()) {
+		php_info_print_table_row(2, "Stable Static Cache", "Enabled");
 	} else {
-		php_info_print_table_row(2, "Pinned Static Cache", "Unavailable");
-		if (zend_opcache_static_cache_pinned_failure_reason()) {
-			php_info_print_table_row(2, "Pinned Static Cache Failure", zend_opcache_static_cache_pinned_failure_reason());
+		php_info_print_table_row(2, "Stable Static Cache", "Unavailable");
+		if (zend_opcache_static_cache_stable_failure_reason()) {
+			php_info_print_table_row(2, "Stable Static Cache Failure", zend_opcache_static_cache_stable_failure_reason());
 		}
 	}
 
@@ -778,7 +778,7 @@ static int accelerator_get_scripts(zval *return_value)
 ZEND_FUNCTION(opcache_get_status)
 {
 	zend_long reqs;
-	zval memory_usage, statistics, scripts, volatile_cache, pinned_cache;
+	zval memory_usage, statistics, scripts, volatile_cache, stable_cache;
 	bool fetch_scripts = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &fetch_scripts) == FAILURE) {
@@ -805,8 +805,8 @@ ZEND_FUNCTION(opcache_get_status)
 	/* Static cache */
 	zend_opcache_static_cache_volatile_get_status(&volatile_cache);
 	add_assoc_zval(return_value, "volatile_cache", &volatile_cache);
-	zend_opcache_static_cache_pinned_get_status(&pinned_cache);
-	add_assoc_zval(return_value, "pinned_cache", &pinned_cache);
+	zend_opcache_static_cache_stable_get_status(&stable_cache);
+	add_assoc_zval(return_value, "stable_cache", &stable_cache);
 
 	if (file_cache_only) {
 		add_assoc_bool(return_value, "file_cache_only", 1);
@@ -929,36 +929,36 @@ ZEND_FUNCTION(opcache_get_configuration)
 
 	/* directives */
 	array_init(&directives);
-	add_assoc_bool(&directives, "opcache.enable",              ZCG(enabled));
-	add_assoc_bool(&directives, "opcache.enable_cli",          ZCG(accel_directives).enable_cli);
-	add_assoc_bool(&directives, "opcache.use_cwd",             ZCG(accel_directives).use_cwd);
-	add_assoc_bool(&directives, "opcache.validate_timestamps", ZCG(accel_directives).validate_timestamps);
-	add_assoc_bool(&directives, "opcache.validate_permission", ZCG(accel_directives).validate_permission);
+	add_assoc_bool(&directives,   "opcache.enable",              			ZCG(enabled));
+	add_assoc_bool(&directives,   "opcache.enable_cli",          			ZCG(accel_directives).enable_cli);
+	add_assoc_bool(&directives,   "opcache.use_cwd",             			ZCG(accel_directives).use_cwd);
+	add_assoc_bool(&directives,   "opcache.validate_timestamps", 			ZCG(accel_directives).validate_timestamps);
+	add_assoc_bool(&directives,   "opcache.validate_permission", 			ZCG(accel_directives).validate_permission);
 #ifndef ZEND_WIN32
-	add_assoc_bool(&directives, "opcache.validate_root",       ZCG(accel_directives).validate_root);
+	add_assoc_bool(&directives,   "opcache.validate_root",       			ZCG(accel_directives).validate_root);
 #endif
-	add_assoc_bool(&directives, "opcache.dups_fix",            ZCG(accel_directives).ignore_dups);
-	add_assoc_bool(&directives, "opcache.revalidate_path",     ZCG(accel_directives).revalidate_path);
+	add_assoc_bool(&directives,   "opcache.dups_fix",            			ZCG(accel_directives).ignore_dups);
+	add_assoc_bool(&directives,   "opcache.revalidate_path",     			ZCG(accel_directives).revalidate_path);
 
-	add_assoc_long(&directives,   "opcache.log_verbosity_level",    ZCG(accel_directives).log_verbosity_level);
-	add_assoc_long(&directives,	 "opcache.memory_consumption",     ZCG(accel_directives).memory_consumption);
-	add_assoc_long(&directives,	 "opcache.static_cache.volatile_size_mb", ZCG(accel_directives).static_cache_volatile_size_mb);
-	add_assoc_long(&directives,	 "opcache.static_cache.pinned_size_mb", ZCG(accel_directives).static_cache_pinned_size_mb);
-	add_assoc_long(&directives,	 "opcache.interned_strings_buffer",ZCG(accel_directives).interned_strings_buffer);
-	add_assoc_long(&directives, 	 "opcache.max_accelerated_files",  ZCG(accel_directives).max_accelerated_files);
-	add_assoc_double(&directives, "opcache.max_wasted_percentage",  ZCG(accel_directives).max_wasted_percentage);
-	add_assoc_long(&directives, 	 "opcache.force_restart_timeout",  ZCG(accel_directives).force_restart_timeout);
-	add_assoc_long(&directives, 	 "opcache.revalidate_freq",        ZCG(accel_directives).revalidate_freq);
-	add_assoc_string(&directives, "opcache.preferred_memory_model", STRING_NOT_NULL(ZCG(accel_directives).memory_model));
-	add_assoc_string(&directives, "opcache.blacklist_filename",     STRING_NOT_NULL(ZCG(accel_directives).user_blacklist_filename));
-	add_assoc_long(&directives,   "opcache.max_file_size",          ZCG(accel_directives).max_file_size);
-	add_assoc_string(&directives, "opcache.error_log",              STRING_NOT_NULL(ZCG(accel_directives).error_log));
+	add_assoc_long(&directives,   "opcache.log_verbosity_level",    		ZCG(accel_directives).log_verbosity_level);
+	add_assoc_long(&directives,	  "opcache.memory_consumption",     		ZCG(accel_directives).memory_consumption);
+	add_assoc_long(&directives,	  "opcache.static_cache.volatile_size_mb",	ZCG(accel_directives).static_cache_volatile_size_mb);
+	add_assoc_long(&directives,	  "opcache.static_cache.stable_size_mb", 	ZCG(accel_directives).static_cache_stable_size_mb);
+	add_assoc_long(&directives,	  "opcache.interned_strings_buffer",		ZCG(accel_directives).interned_strings_buffer);
+	add_assoc_long(&directives,   "opcache.max_accelerated_files",  		ZCG(accel_directives).max_accelerated_files);
+	add_assoc_double(&directives, "opcache.max_wasted_percentage",  		ZCG(accel_directives).max_wasted_percentage);
+	add_assoc_long(&directives,   "opcache.force_restart_timeout",  		ZCG(accel_directives).force_restart_timeout);
+	add_assoc_long(&directives,   "opcache.revalidate_freq",        		ZCG(accel_directives).revalidate_freq);
+	add_assoc_string(&directives, "opcache.preferred_memory_model", 		STRING_NOT_NULL(ZCG(accel_directives).memory_model));
+	add_assoc_string(&directives, "opcache.blacklist_filename",     		STRING_NOT_NULL(ZCG(accel_directives).user_blacklist_filename));
+	add_assoc_long(&directives,   "opcache.max_file_size",          		ZCG(accel_directives).max_file_size);
+	add_assoc_string(&directives, "opcache.error_log",              		STRING_NOT_NULL(ZCG(accel_directives).error_log));
 
-	add_assoc_bool(&directives,   "opcache.protect_memory",         ZCG(accel_directives).protect_memory);
-	add_assoc_bool(&directives,   "opcache.save_comments",          ZCG(accel_directives).save_comments);
-	add_assoc_bool(&directives,   "opcache.record_warnings",        ZCG(accel_directives).record_warnings);
-	add_assoc_bool(&directives,   "opcache.enable_file_override",   ZCG(accel_directives).file_override_enabled);
-	add_assoc_long(&directives, 	 "opcache.optimization_level",     ZCG(accel_directives).optimization_level);
+	add_assoc_bool(&directives,   "opcache.protect_memory",         		ZCG(accel_directives).protect_memory);
+	add_assoc_bool(&directives,   "opcache.save_comments",          		ZCG(accel_directives).save_comments);
+	add_assoc_bool(&directives,   "opcache.record_warnings",        		ZCG(accel_directives).record_warnings);
+	add_assoc_bool(&directives,   "opcache.enable_file_override",   		ZCG(accel_directives).file_override_enabled);
+	add_assoc_long(&directives,   "opcache.optimization_level",     		ZCG(accel_directives).optimization_level);
 
 #ifndef ZEND_WIN32
 	add_assoc_string(&directives, "opcache.lockfile_path",          STRING_NOT_NULL(ZCG(accel_directives).lockfile_path));

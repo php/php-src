@@ -13,7 +13,7 @@ if (!function_exists('pcntl_fork')) {
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
@@ -31,36 +31,36 @@ function wait_for_file(string $path): void
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::clear();
+		opcache_static_cache_volatile_reset();
 	} else {
-		OPcache\PinnedCache::clear();
+		OPcache\StableCache::getInstance('default')->clear();
 	}
 }
 
 function cache_store(string $backend, string $key, mixed $value): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::set($key, $value);
+		OPcache\VolatileCache::getInstance('default')->store($key, $value);
 	} else {
-		OPcache\PinnedCache::set($key, $value);
+		OPcache\StableCache::getInstance('default')->store($key, $value);
 	}
 }
 
 function cache_fetch(string $backend, string $key, mixed $default = null): mixed
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::get($key, $default)
-		: OPcache\PinnedCache::get($key, $default);
+		? OPcache\VolatileCache::getInstance('default')->fetch($key, $default)
+		: OPcache\StableCache::getInstance('default')->fetch($key, $default);
 }
 
 function cache_lock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::lock($key)
-		: OPcache\PinnedCache::lock($key);
+		? OPcache\VolatileCache::getInstance('default')->lock($key)
+		: OPcache\StableCache::getInstance('default')->lock($key);
 }
 
-foreach (['volatile', 'pinned'] as $backend) {
+foreach (['volatile', 'stable'] as $backend) {
 	$prefix = sys_get_temp_dir() . '/opcache_explicit_exists_lock_rshutdown_' . getmypid() . '_' . $backend;
 	$readyFile = $prefix . '.ready';
 	$resultFile = $prefix . '.result';
@@ -108,7 +108,7 @@ volatile
 true
 bool(true)
 string(5) "after"
-pinned
+stable
 true
 bool(true)
 string(5) "after"

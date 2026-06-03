@@ -27,6 +27,7 @@
 #include "Zend/zend_execute.h"
 #include "Zend/zend_portability.h"
 #include "sapi/embed/php_embed.h"
+#include "ext/opcache/zend_static_cache.h"
 
 #ifndef ZTS
 # error "This helper requires a ZTS build"
@@ -54,44 +55,44 @@ static const char opcache_test_ini[] =
 	"opcache.memory_consumption=64\n"
 	"opcache.max_accelerated_files=200\n"
 	"opcache.static_cache.volatile_size_mb=8\n"
-	"opcache.static_cache.pinned_size_mb=8\n\0";
+	"opcache.static_cache.stable_size_mb=8\n\0";
 
 static const char init_code[] =
 	"(static function (): bool {"
-	"    OPcache\\VolatileCache::clear();"
-	"    OPcache\\PinnedCache::clear();"
+	"    opcache_static_cache_volatile_reset();"
+	"    OPcache\\StableCache::getInstance('default')->clear();"
 	"    return true;"
 	"})()";
 
 static const char seed_code[] =
 	"(static function (): bool {"
-	"    if (!OPcache\\VolatileCache::set('zts_v_first', str_repeat('A', 1800000))) return false;"
-	"    if (!OPcache\\VolatileCache::set('zts_v_second', str_repeat('B', 1800000))) return false;"
-	"    if (!OPcache\\VolatileCache::set('zts_v_third', str_repeat('C', 1800000))) return false;"
-	"    OPcache\\PinnedCache::set('zts_p_first', str_repeat('A', 1800000));"
-	"    OPcache\\PinnedCache::set('zts_p_second', str_repeat('B', 1800000));"
-	"    OPcache\\PinnedCache::set('zts_p_third', str_repeat('C', 1800000));"
+	"    if (!OPcache\\VolatileCache::getInstance('default')->store('zts_v_first', str_repeat('A', 1800000))) return false;"
+	"    if (!OPcache\\VolatileCache::getInstance('default')->store('zts_v_second', str_repeat('B', 1800000))) return false;"
+	"    if (!OPcache\\VolatileCache::getInstance('default')->store('zts_v_third', str_repeat('C', 1800000))) return false;"
+	"    OPcache\\StableCache::getInstance('default')->store('zts_p_first', str_repeat('A', 1800000));"
+	"    OPcache\\StableCache::getInstance('default')->store('zts_p_second', str_repeat('B', 1800000));"
+	"    OPcache\\StableCache::getInstance('default')->store('zts_p_third', str_repeat('C', 1800000));"
 	"    return true;"
 	"})()";
 
 static const char delete_code[] =
 	"(static function (): bool {"
-	"    OPcache\\VolatileCache::delete('zts_v_second');"
-	"    OPcache\\PinnedCache::delete('zts_p_second');"
-	"    return OPcache\\VolatileCache::get('zts_v_second', 'missing') === 'missing'"
-	"        && OPcache\\PinnedCache::get('zts_p_second', 'missing') === 'missing';"
+	"    OPcache\\VolatileCache::getInstance('default')->delete('zts_v_second');"
+	"    OPcache\\StableCache::getInstance('default')->delete('zts_p_second');"
+	"    return OPcache\\VolatileCache::getInstance('default')->fetch('zts_v_second', 'missing') === 'missing'"
+	"        && OPcache\\StableCache::getInstance('default')->fetch('zts_p_second', 'missing') === 'missing';"
 	"})()";
 
 static const char refill_code[] =
 	"(static function (): bool {"
-	"    if (!OPcache\\VolatileCache::set('zts_v_replacement', str_repeat('R', 1500000))) return false;"
-	"    OPcache\\PinnedCache::set('zts_p_replacement', str_repeat('R', 1500000));"
-	"    return strlen(OPcache\\VolatileCache::get('zts_v_first')) === 1800000"
-	"        && strlen(OPcache\\VolatileCache::get('zts_v_third')) === 1800000"
-	"        && strlen(OPcache\\VolatileCache::get('zts_v_replacement')) === 1500000"
-	"        && strlen(OPcache\\PinnedCache::get('zts_p_first')) === 1800000"
-	"        && strlen(OPcache\\PinnedCache::get('zts_p_third')) === 1800000"
-	"        && strlen(OPcache\\PinnedCache::get('zts_p_replacement')) === 1500000;"
+	"    if (!OPcache\\VolatileCache::getInstance('default')->store('zts_v_replacement', str_repeat('R', 1500000))) return false;"
+	"    OPcache\\StableCache::getInstance('default')->store('zts_p_replacement', str_repeat('R', 1500000));"
+	"    return strlen(OPcache\\VolatileCache::getInstance('default')->fetch('zts_v_first')) === 1800000"
+	"        && strlen(OPcache\\VolatileCache::getInstance('default')->fetch('zts_v_third')) === 1800000"
+	"        && strlen(OPcache\\VolatileCache::getInstance('default')->fetch('zts_v_replacement')) === 1500000"
+	"        && strlen(OPcache\\StableCache::getInstance('default')->fetch('zts_p_first')) === 1800000"
+	"        && strlen(OPcache\\StableCache::getInstance('default')->fetch('zts_p_third')) === 1800000"
+	"        && strlen(OPcache\\StableCache::getInstance('default')->fetch('zts_p_replacement')) === 1500000;"
 	"})()";
 
 static void zend_opcache_thread_set_failure(zend_opcache_thread_ctx *ctx, const char *message)
@@ -110,7 +111,6 @@ static int zend_opcache_test_startup(int argc, char **argv)
 	zend_signal_startup();
 	sapi_startup(&php_embed_module);
 	/* Static Cache is opt-in per SAPI; this embed-based test enables it. */
-	extern void zend_opcache_static_cache_opt_in(void);
 	zend_opcache_static_cache_opt_in();
 	php_embed_module.ini_entries = opcache_test_ini;
 	if (argv != NULL) {

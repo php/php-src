@@ -1,18 +1,18 @@
 --TEST--
-OPcache pinned atomic operations reject non-integer entries
+OPcache stable atomic operations reject non-integer entries
 --EXTENSIONS--
 opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
-OPcache\PinnedCache::set('text', 'php');
+OPcache\StableCache::getInstance('default')->store('text', 'php');
 
-var_dump(OPcache\PinnedCache::increment('text'));
-var_dump(OPcache\PinnedCache::decrement('text'));
+var_dump(OPcache\StableCache::getInstance('default')->increment('text'));
+var_dump(OPcache\StableCache::getInstance('default')->decrement('text'));
 
 ?>
 --EXPECT--

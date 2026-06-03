@@ -20,6 +20,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
+#include "ext/opcache/zend_static_cache.h" /* for opcache static cache */
 #include "spl_heap.h"
 #include "spl_heap_arginfo.h"
 #include "spl_exceptions.h"
@@ -1259,6 +1260,290 @@ PHP_METHOD(SplHeap, __unserialize)
 	}
 }
 
+static bool spl_heap_object_allows_direct_cache_state(zend_class_entry *ce)
+{
+	return instanceof_function(ce, spl_ce_SplHeap) ||
+		instanceof_function(ce, spl_ce_SplPriorityQueue)
+	;
+}
+
+static bool spl_heap_object_direct_cache_is_pqueue(zend_class_entry *ce)
+{
+	return instanceof_function(ce, spl_ce_SplPriorityQueue);
+}
+
+static void spl_ptr_heap_direct_ensure_capacity(spl_ptr_heap *heap, size_t count)
+{
+	size_t alloc_size;
+
+	while (count > heap->max_size) {
+		alloc_size = heap->max_size * heap->elem_size;
+		heap->elements = safe_erealloc(heap->elements, 2, alloc_size, 0);
+		memset((char *) heap->elements + alloc_size, 0, alloc_size);
+
+		heap->max_size *= 2;
+	}
+}
+
+static void spl_heap_object_direct_append_zval(spl_heap_object *intern, zval *value)
+{
+	zval *target;
+
+	spl_ptr_heap_direct_ensure_capacity(intern->heap, intern->heap->count + 1);
+	target = spl_heap_elem(intern->heap, intern->heap->count);
+
+	intern->heap->count++;
+
+	ZVAL_COPY(target, value);
+}
+
+static void spl_heap_object_direct_append_pqueue_elem(spl_heap_object *intern, zval *data, zval *priority)
+{
+	spl_pqueue_elem *target;
+
+	spl_ptr_heap_direct_ensure_capacity(intern->heap, intern->heap->count + 1);
+	target = spl_heap_elem(intern->heap, intern->heap->count);
+
+	intern->heap->count++;
+
+	ZVAL_COPY(&target->data, data);
+	ZVAL_COPY(&target->priority, priority);
+}
+
+static bool spl_heap_object_serialize_direct_cache_state(const zval *object, zval *state)
+{
+	spl_heap_object *intern;
+	zval elements, entry, tmp;
+	size_t i;
+	bool is_pqueue;
+
+	if (!spl_heap_object_allows_direct_cache_state(Z_OBJCE_P(object))) {
+		return false;
+	}
+
+	intern = Z_SPLHEAP_P((zval *) object);
+	if ((intern->heap->flags & (SPL_HEAP_CORRUPTED | SPL_HEAP_WRITE_LOCKED)) != 0) {
+		return false;
+	}
+
+	is_pqueue = spl_heap_object_direct_cache_is_pqueue(Z_OBJCE_P(object));
+
+	array_init(state);
+
+	ZVAL_LONG(&tmp, intern->flags);
+	zend_hash_next_index_insert(Z_ARRVAL_P(state), &tmp);
+
+	array_init_size(&elements, intern->heap->count);
+	for (i = 0; i < intern->heap->count; i++) {
+		if (is_pqueue) {
+			spl_pqueue_elem *elem = spl_heap_elem(intern->heap, i);
+
+			array_init_size(&entry, 2);
+			Z_TRY_ADDREF(elem->data);
+			zend_hash_index_add_new(Z_ARRVAL(entry), 0, &elem->data);
+			Z_TRY_ADDREF(elem->priority);
+			zend_hash_index_add_new(Z_ARRVAL(entry), 1, &elem->priority);
+			zend_hash_next_index_insert(Z_ARRVAL(elements), &entry);
+		} else {
+			zval *elem = spl_heap_elem(intern->heap, i);
+
+			zend_hash_next_index_insert(Z_ARRVAL(elements), elem);
+			Z_TRY_ADDREF_P(elem);
+		}
+	}
+
+	zend_hash_next_index_insert(Z_ARRVAL_P(state), &elements);
+
+	return true;
+}
+
+static bool spl_heap_object_unserialize_direct_cache_state(zval *object, zval *state)
+{
+	spl_heap_object *intern;
+	zend_long flags;
+	zval *flags_zv, *elements_zv, *elem, *data_zv, *priority_zv;
+	HashTable *data;
+	bool is_pqueue;
+
+	if (!spl_heap_object_allows_direct_cache_state(Z_OBJCE_P(object)) ||
+		Z_TYPE_P(state) != IS_ARRAY
+	) {
+		return false;
+	}
+
+	data = Z_ARRVAL_P(state);
+	flags_zv = zend_hash_index_find(data, 0);
+	elements_zv = zend_hash_index_find(data, 1);
+	if (!flags_zv || !elements_zv ||
+		Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(elements_zv) != IS_ARRAY
+	) {
+		return false;
+	}
+
+	is_pqueue = spl_heap_object_direct_cache_is_pqueue(Z_OBJCE_P(object));
+	flags = Z_LVAL_P(flags_zv);
+	if (is_pqueue) {
+		flags &= SPL_PQUEUE_EXTR_MASK;
+		if (!flags) {
+			return false;
+		}
+	} else if (flags != 0) {
+		return false;
+	}
+
+	intern = Z_SPLHEAP_P(object);
+	if (intern->heap->count != 0 ||
+		(intern->heap->flags & SPL_HEAP_WRITE_LOCKED) != 0
+	) {
+		return false;
+	}
+
+	intern->flags = (int) flags;
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(elements_zv), elem) {
+		if (is_pqueue) {
+			if (Z_TYPE_P(elem) != IS_ARRAY) {
+				return false;
+			}
+
+			data_zv = zend_hash_index_find(Z_ARRVAL_P(elem), 0);
+			priority_zv = zend_hash_index_find(Z_ARRVAL_P(elem), 1);
+			if (!data_zv || !priority_zv) {
+				return false;
+			}
+
+			spl_heap_object_direct_append_pqueue_elem(intern, data_zv, priority_zv);
+		} else {
+			spl_heap_object_direct_append_zval(intern, elem);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return !EG(exception);
+}
+
+static bool spl_heap_object_copy_direct_cache_state(
+		void *context,
+		zend_object *old_object,
+		zend_object *new_object,
+		zend_opcache_static_cache_safe_direct_clone_value_func_t clone_value)
+{
+	spl_heap_object *old_intern, *new_intern;
+	spl_pqueue_elem *old_elem;
+	zval cloned_data, cloned_priority, *zv_old_elem, cloned_elem;
+	size_t i;
+	bool is_pqueue;
+
+	if (clone_value == NULL ||
+		!spl_heap_object_allows_direct_cache_state(old_object->ce) ||
+		!spl_heap_object_allows_direct_cache_state(new_object->ce)
+	) {
+		return false;
+	}
+
+	old_intern = spl_heap_from_obj(old_object);
+	new_intern = spl_heap_from_obj(new_object);
+	if (new_intern->heap->count != 0 ||
+		(old_intern->heap->flags & (SPL_HEAP_CORRUPTED | SPL_HEAP_WRITE_LOCKED)) != 0
+	) {
+		return false;
+	}
+
+	new_intern->flags = old_intern->flags;
+	is_pqueue = spl_heap_object_direct_cache_is_pqueue(old_object->ce);
+	for (i = 0; i < old_intern->heap->count; i++) {
+		if (is_pqueue) {
+			old_elem = spl_heap_elem(old_intern->heap, i);
+
+			ZVAL_UNDEF(&cloned_data);
+			ZVAL_UNDEF(&cloned_priority);
+			if (!clone_value(context, &cloned_data, &old_elem->data)) {
+				return false;
+			}
+			if (!clone_value(context, &cloned_priority, &old_elem->priority)) {
+				zval_ptr_dtor(&cloned_data);
+
+				return false;
+			}
+
+			spl_heap_object_direct_append_pqueue_elem(new_intern, &cloned_data, &cloned_priority);
+
+			zval_ptr_dtor(&cloned_data);
+			zval_ptr_dtor(&cloned_priority);
+		} else {
+			zv_old_elem = spl_heap_elem(old_intern->heap, i);
+			ZVAL_UNDEF(&cloned_elem);
+			if (!clone_value(context, &cloned_elem, zv_old_elem)) {
+				return false;
+			}
+
+			spl_heap_object_direct_append_zval(new_intern, &cloned_elem);
+
+			zval_ptr_dtor(&cloned_elem);
+		}
+	}
+
+	return !EG(exception);
+}
+
+static bool spl_heap_object_direct_cache_state_has_unstorable(
+		void *context,
+		const zval *object,
+		zend_opcache_static_cache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
+{
+	spl_heap_object *intern;
+	spl_pqueue_elem *elem;
+	zval *zv_elem;
+	size_t i;
+	bool is_pqueue;
+
+	if (value_has_unstorable == NULL) {
+		return false;
+	}
+
+	if (!spl_heap_object_allows_direct_cache_state(Z_OBJCE_P(object))) {
+		return true;
+	}
+
+	intern = Z_SPLHEAP_P((zval *) object);
+	if ((intern->heap->flags & (SPL_HEAP_CORRUPTED | SPL_HEAP_WRITE_LOCKED)) != 0) {
+		return true;
+	}
+
+	is_pqueue = spl_heap_object_direct_cache_is_pqueue(Z_OBJCE_P(object));
+	for (i = 0; i < intern->heap->count; i++) {
+		if (is_pqueue) {
+			elem = spl_heap_elem(intern->heap, i);
+
+			if (value_has_unstorable(context, &elem->data) ||
+					value_has_unstorable(context, &elem->priority)) {
+				return true;
+			}
+		} else {
+			zv_elem = spl_heap_elem(intern->heap, i);
+
+			if (value_has_unstorable(context, zv_elem)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+static const zend_opcache_static_cache_safe_direct_handlers *spl_heap_object_get_direct_cache_handlers(void)
+{
+	static const zend_opcache_static_cache_safe_direct_handlers handlers = {
+		false,
+		{ false, NULL, NULL },
+		spl_heap_object_copy_direct_cache_state,
+		spl_heap_object_direct_cache_state_has_unstorable,
+		spl_heap_object_serialize_direct_cache_state,
+		spl_heap_object_unserialize_direct_cache_state
+	};
+
+	return &handlers;
+}
+
 /* iterator handler table */
 static const zend_object_iterator_funcs spl_heap_it_funcs = {
 	spl_heap_it_dtor,
@@ -1355,6 +1640,26 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	spl_handler_SplPriorityQueue.count_elements = spl_heap_object_count_elements;
 	spl_handler_SplPriorityQueue.get_gc         = spl_pqueue_object_get_gc;
 	spl_handler_SplPriorityQueue.free_obj = spl_heap_object_free_storage;
+
+	zend_opcache_static_cache_safe_direct_register_class(
+		spl_ce_SplHeap,
+		spl_heap_object_get_direct_cache_handlers()
+	);
+
+	zend_opcache_static_cache_safe_direct_register_class(
+		spl_ce_SplMinHeap,
+		spl_heap_object_get_direct_cache_handlers()
+	);
+
+	zend_opcache_static_cache_safe_direct_register_class(
+		spl_ce_SplMaxHeap,
+		spl_heap_object_get_direct_cache_handlers()
+	);
+
+	zend_opcache_static_cache_safe_direct_register_class(
+		spl_ce_SplPriorityQueue,
+		spl_heap_object_get_direct_cache_handlers()
+	);
 
 	return SUCCESS;
 }

@@ -6,7 +6,7 @@ opcache
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
@@ -27,26 +27,26 @@ class ReentrantFetchPayload
 		echo "unserialize-", $this->backend, "\n";
 
 		if ($this->backend === 'volatile') {
-			OPcache\VolatileCache::set('fetch_inner_volatile', 'ok');
+			OPcache\VolatileCache::getInstance('default')->store('fetch_inner_volatile', 'ok');
 		} else {
-			OPcache\PinnedCache::set('fetch_inner_pinned', 'ok');
+			OPcache\StableCache::getInstance('default')->store('fetch_inner_stable', 'ok');
 		}
 	}
 }
 
-foreach (['volatile', 'pinned'] as $backend) {
+foreach (['volatile', 'stable'] as $backend) {
 	echo $backend, "\n";
 
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::clear();
-		OPcache\VolatileCache::set('fetch_payload', new ReentrantFetchPayload($backend));
-		var_dump(OPcache\VolatileCache::get('fetch_payload') instanceof ReentrantFetchPayload);
-		var_dump(OPcache\VolatileCache::get('fetch_inner_volatile'));
+		opcache_static_cache_volatile_reset();
+		OPcache\VolatileCache::getInstance('default')->store('fetch_payload', new ReentrantFetchPayload($backend));
+		var_dump(OPcache\VolatileCache::getInstance('default')->fetch('fetch_payload') instanceof ReentrantFetchPayload);
+		var_dump(OPcache\VolatileCache::getInstance('default')->fetch('fetch_inner_volatile'));
 	} else {
-		OPcache\PinnedCache::clear();
-		OPcache\PinnedCache::set('fetch_payload', new ReentrantFetchPayload($backend));
-		var_dump(OPcache\PinnedCache::get('fetch_payload') instanceof ReentrantFetchPayload);
-		var_dump(OPcache\PinnedCache::get('fetch_inner_pinned'));
+		OPcache\StableCache::getInstance('default')->clear();
+		OPcache\StableCache::getInstance('default')->store('fetch_payload', new ReentrantFetchPayload($backend));
+		var_dump(OPcache\StableCache::getInstance('default')->fetch('fetch_payload') instanceof ReentrantFetchPayload);
+		var_dump(OPcache\StableCache::getInstance('default')->fetch('fetch_inner_stable'));
 	}
 }
 
@@ -56,7 +56,7 @@ volatile
 unserialize-volatile
 bool(true)
 string(2) "ok"
-pinned
-unserialize-pinned
+stable
+unserialize-stable
 bool(true)
 string(2) "ok"

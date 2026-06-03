@@ -9,20 +9,20 @@ opcache.static_cache.volatile_size_mb=32
 --FILE--
 <?php
 
-var_dump(OPcache\VolatileCache::get('transient', 'MISS'));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('transient', 'MISS'));
 
-var_dump(OPcache\VolatileCache::set('transient', 'value'));
-var_dump(OPcache\VolatileCache::get('transient'));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('transient', 'value'));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('transient'));
 
-var_dump(OPcache\VolatileCache::set('victim', 'gone'));
-var_dump(OPcache\VolatileCache::get('victim'));
-OPcache\VolatileCache::delete('victim');
-var_dump(OPcache\VolatileCache::get('victim', 'MISS'));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('victim', 'gone'));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('victim'));
+OPcache\VolatileCache::getInstance('default')->delete('victim');
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('victim', 'MISS'));
 
-var_dump(OPcache\VolatileCache::set('clear_victim', 'clear me'));
-var_dump(OPcache\VolatileCache::get('clear_victim'));
-OPcache\VolatileCache::clear();
-var_dump(OPcache\VolatileCache::get('clear_victim', 'MISS'));
+var_dump(OPcache\VolatileCache::getInstance('default')->store('clear_victim', 'clear me'));
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('clear_victim'));
+opcache_static_cache_volatile_reset();
+var_dump(OPcache\VolatileCache::getInstance('default')->fetch('clear_victim', 'MISS'));
 
 ?>
 --EXPECT--

@@ -1,5 +1,5 @@
 --TEST--
-FPM: OPcache PinnedStatic class blob persists across requests
+FPM: OPcache StableStatic class blob persists across requests
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--
@@ -20,7 +20,7 @@ EOT;
 
 $code = <<<'PHP'
 <?php
-#[OPcache\PinnedStatic]
+#[OPcache\StableStatic]
 class CombinedBlobState
 {
 	public static int $propertyCount = 0;
@@ -42,7 +42,7 @@ if ($request === 1) {
 	return;
 }
 
-echo CombinedBlobState::$propertyCount, ',', CombinedBlobState::$propertyBag['numbers'][0], ',', CombinedBlobState::nextMethod(), ',', OPcache\PinnedCache::info()->entry_count, "\n";
+echo CombinedBlobState::$propertyCount, ',', CombinedBlobState::$propertyBag['numbers'][0], ',', CombinedBlobState::nextMethod(), ',', OPcache\StableCache::info()->entry_count, "\n";
 
 CombinedBlobState::$propertyCount++;
 CombinedBlobState::$propertyBag['numbers'][] = 11;
@@ -52,7 +52,7 @@ PHP;
 $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
 	'opcache.enable' => '1',
-	'opcache.static_cache.pinned_size_mb' => '32',
+	'opcache.static_cache.stable_size_mb' => '32',
 ]);
 $tester->expectLogStartNotices();
 

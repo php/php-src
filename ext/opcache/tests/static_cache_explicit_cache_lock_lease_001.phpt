@@ -13,34 +13,34 @@ if (!function_exists('pcntl_fork')) {
 opcache.enable=1
 opcache.enable_cli=1
 opcache.static_cache.volatile_size_mb=32
-opcache.static_cache.pinned_size_mb=32
+opcache.static_cache.stable_size_mb=32
 --FILE--
 <?php
 
 function cache_clear(string $backend): void
 {
 	if ($backend === 'volatile') {
-		OPcache\VolatileCache::clear();
+		opcache_static_cache_volatile_reset();
 	} else {
-		OPcache\PinnedCache::clear();
+		OPcache\StableCache::getInstance('default')->clear();
 	}
 }
 
 function cache_lock(string $backend, string $key, int $lease = 0): bool
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::lock($key, $lease)
-		: OPcache\PinnedCache::lock($key, $lease);
+		? OPcache\VolatileCache::getInstance('default')->lock($key, $lease)
+		: OPcache\StableCache::getInstance('default')->lock($key, $lease);
 }
 
 function cache_unlock(string $backend, string $key): bool
 {
 	return $backend === 'volatile'
-		? OPcache\VolatileCache::unlock($key)
-		: OPcache\PinnedCache::unlock($key);
+		? OPcache\VolatileCache::getInstance('default')->unlock($key)
+		: OPcache\StableCache::getInstance('default')->unlock($key);
 }
 
-foreach (['volatile', 'pinned'] as $backend) {
+foreach (['volatile', 'stable'] as $backend) {
 	$key = $backend . '_lock_lease_' . getmypid();
 	$resultFile = sys_get_temp_dir() . '/opcache_explicit_cache_lock_lease_' . getmypid() . '_' . $backend . '.result';
 	@unlink($resultFile);
@@ -76,7 +76,7 @@ child locked: true
 bool(false)
 bool(true)
 bool(true)
-pinned
+stable
 child locked: true
 bool(false)
 bool(true)
