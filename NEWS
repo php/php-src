@@ -16,6 +16,10 @@ PHP                                                                        NEWS
     Phar::addEmptyDir() for paths starting with "/.phar", while allowing
     non-magic directory names that merely share the ".phar" prefix. (Weilin Du)
 
+- SOAP:
+  . Fixed bug GH-22218 (SoapServer::handle() crash on $_SERVER not being
+    an array). (David Carlier / Rex-Reynolds)
+
 - Zlib:
   . Fixed memory leak if deflate initialization fails and there is a dict.
     (ndossche)

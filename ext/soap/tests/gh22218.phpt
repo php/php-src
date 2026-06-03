@@ -20,8 +20,6 @@ if (php_sapi_name() == 'cli') echo 'skip needs request body (POST)';
 $_SERVER = 79;
 $server = new SoapServer(null, ['uri' => 'http://test-uri']);
 $server->handle();
-echo "ALIVE\n";
 ?>
 --EXPECTF--
-%A
-ALIVE
+%AFunction 'test' doesn't exist%A
