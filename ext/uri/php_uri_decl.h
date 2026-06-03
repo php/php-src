@@ -1,8 +1,8 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: a3b4696ac001d537cc34b818715c7eb382c17c5b */
+ * Stub hash: 8bf205edfa9cb281e73daf66285aa6a60f3431c0 */
 
-#ifndef ZEND_PHP_URI_DECL_a3b4696ac001d537cc34b818715c7eb382c17c5b_H
-#define ZEND_PHP_URI_DECL_a3b4696ac001d537cc34b818715c7eb382c17c5b_H
+#ifndef ZEND_PHP_URI_DECL_8bf205edfa9cb281e73daf66285aa6a60f3431c0_H
+#define ZEND_PHP_URI_DECL_8bf205edfa9cb281e73daf66285aa6a60f3431c0_H
 
 typedef enum zend_enum_Uri_UriComparisonMode {
 	ZEND_ENUM_Uri_UriComparisonMode_IncludeFragment = 1,
@@ -46,7 +46,7 @@ typedef enum zend_enum_Uri_WhatWg_UrlValidationErrorType {
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_InvalidUrlUnit = 20,
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_SpecialSchemeMissingFollowingSolidus = 21,
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_MissingSchemeNonRelativeUrl = 22,
-	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_InvalidReverseSoldius = 23,
+	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_InvalidReverseSolidus = 23,
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_InvalidCredentials = 24,
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_HostMissing = 25,
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_PortOutOfRange = 26,
@@ -63,4 +63,4 @@ typedef enum zend_enum_Uri_WhatWg_UrlHostType {
 	ZEND_ENUM_Uri_WhatWg_UrlHostType_Empty = 5,
 } zend_enum_Uri_WhatWg_UrlHostType;
 
-#endif /* ZEND_PHP_URI_DECL_a3b4696ac001d537cc34b818715c7eb382c17c5b_H */
+#endif /* ZEND_PHP_URI_DECL_8bf205edfa9cb281e73daf66285aa6a60f3431c0_H */
