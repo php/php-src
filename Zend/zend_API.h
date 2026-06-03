@@ -758,43 +758,7 @@ ZEND_API void zend_fcall_info_argn(zend_fcall_info *fci, uint32_t argc, ...);
 ZEND_API zend_result zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *retval, zval *args);
 
 /* Zend FCC API to store and handle PHP userland functions */
-extern ZEND_API zend_class_entry *zend_ce_closure;
-ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj);
-
-static zend_always_inline bool zend_fcc_closure_objects_equals(zend_object *closure1, zend_object *closure2)
-{
-	if (closure1 == closure2) {
-		return true;
-	}
-	if (!closure1 || !closure2) {
-		return false;
-	}
-	if (closure1->ce != zend_ce_closure || closure2->ce != zend_ce_closure) {
-		return false;
-	}
-
-	const zend_function *func1 = zend_get_closure_method_def(closure1);
-	const zend_function *func2 = zend_get_closure_method_def(closure2);
-
-	if (!(func1->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) ||
-			!(func2->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
-		return false;
-	}
-	if (func1 == func2) {
-		return true;
-	}
-	if (func1->type != func2->type ||
-			func1->common.scope != func2->common.scope ||
-			!zend_string_equals(func1->common.function_name, func2->common.function_name)) {
-		return false;
-	}
-
-	if (func1->type == ZEND_USER_FUNCTION) {
-		return func1->op_array.opcodes == func2->op_array.opcodes;
-	}
-
-	return func1->internal_function.handler == func2->internal_function.handler;
-}
+ZEND_API bool zend_fcc_closure_equals_ex(const zend_fcall_info_cache* a, const zend_fcall_info_cache* b);
 
 static zend_always_inline bool zend_fcc_equals(const zend_fcall_info_cache* a, const zend_fcall_info_cache* b)
 {
@@ -802,7 +766,7 @@ static zend_always_inline bool zend_fcc_equals(const zend_fcall_info_cache* a, c
 		return a->object == b->object
 			&& a->calling_scope == b->calling_scope
 			&& a->called_scope == b->called_scope
-			&& zend_fcc_closure_objects_equals(a->closure, b->closure)
+			&& (a->closure == b->closure || zend_fcc_closure_equals_ex(a, b))
 		;
 	}
 	if (UNEXPECTED((a->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) &&
