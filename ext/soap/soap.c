@@ -1393,10 +1393,10 @@ PHP_METHOD(SoapServer, handle)
 						return;
 					}
 				}
-			}
 
-			if ((soap_action_z = zend_hash_str_find(Z_ARRVAL_P(server_vars), ZEND_STRL("HTTP_SOAPACTION"))) != NULL && Z_TYPE_P(soap_action_z) == IS_STRING) {
-				soap_action = Z_STRVAL_P(soap_action_z);
+			    if ((soap_action_z = zend_hash_str_find(Z_ARRVAL_P(server_vars), ZEND_STRL("HTTP_SOAPACTION"))) != NULL && Z_TYPE_P(soap_action_z) == IS_STRING) {
+				    soap_action = Z_STRVAL_P(soap_action_z);
+			    }
 			}
 
 			doc_request = soap_xmlParseFile("php://input");
