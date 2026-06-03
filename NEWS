@@ -11,6 +11,11 @@ PHP                                                                        NEWS
     LXB_API as __declspec(dllimport) when linked statically into PHP.
     (Luther Monson)
 
+- Phar:
+  . Fixed a bypass of the magic ".phar" directory protection in
+    Phar::addEmptyDir() for paths starting with "/.phar", while allowing
+    non-magic directory names that merely share the ".phar" prefix. (Weilin Du)
+
 - Zlib:
   . Fixed memory leak if deflate initialization fails and there is a dict.
     (ndossche)
