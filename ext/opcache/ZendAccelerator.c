@@ -2013,18 +2013,12 @@ static const char hexchars[] = "0123456789abcdef";
 
 static char *zend_accel_uintptr_hex(char *dest, uintptr_t n)
 {
-	char *start = dest;
-	dest += sizeof(uintptr_t)*2;
+	do {
+		*dest++ = hexchars[n & 0xf];
+		n >>= 4;
+	} while (n);
 
-	while (n > 0) {
-		*--dest = hexchars[n % strlen(hexchars)];
-		n /= strlen(hexchars);
-	}
-	while (dest > start) {
-		*--dest = '0';
-	}
-
-	return dest + sizeof(uintptr_t)*2;
+	return dest;
 }
 
 /* Prevents collisions with real scripts, as we don't cache paths prefixed with
@@ -2034,8 +2028,8 @@ static char *zend_accel_uintptr_hex(char *dest, uintptr_t n)
 static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 		const zend_function *called_function)
 {
-	const size_t key_len = strlen(PFA_KEY_PREFIX) + (sizeof(uintptr_t)*2) + strlen(":") + (sizeof(uintptr_t)*2);
-	zend_string *key = zend_string_alloc(key_len, 0);
+	const size_t max_key_len = strlen(PFA_KEY_PREFIX) + (sizeof(uintptr_t)*2) + strlen(":") + (sizeof(uintptr_t)*2);
+	zend_string *key = zend_string_alloc(max_key_len, 0);
 	char *dest = ZSTR_VAL(key);
 
 	dest = zend_mempcpy(ZSTR_VAL(key), PFA_KEY_PREFIX, strlen(PFA_KEY_PREFIX));
@@ -2055,10 +2049,8 @@ static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 	}
 	dest = zend_accel_uintptr_hex(dest, (uintptr_t)ptr);
 
-	ZEND_ASSERT(dest == ZSTR_VAL(key) + key_len);
-
-	ZSTR_VAL(key)[key_len] = 0;
-	ZSTR_LEN(key) = key_len;
+	*dest = '\0';
+	ZSTR_LEN(key) = dest - ZSTR_VAL(key);
 
 	return key;
 }
