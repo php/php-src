@@ -117,6 +117,11 @@ PHP 8.6 UPGRADE NOTES
         to 1).
     RFC: https://wiki.php.net/rfc/session_security_defaults
 
+- SOAP:
+  . WSDL/XML Schema parsing now rejects out-of-range integer values for
+    occurrence constraints and integer restriction facets. Negative minOccurs
+    and maxOccurs values are rejected as well.
+
 - SPL:
   . SplObjectStorage::getHash() implementations may no longer mutate any
     SplObjectStorage instance. Attempting to do so now throws an Error.
@@ -340,11 +345,6 @@ PHP 8.6 UPGRADE NOTES
 
 - mysqli
   . Added new constant MYSQLI_OPT_COMPRESS.
-
-- Soap:
-  . WSDL/XML Schema parsing now rejects out-of-range integer values for
-    occurrence constraints and integer restriction facets. Negative minOccurs
-    and maxOccurs values are rejected as well.
 
 ========================================
 10. New Global Constants
