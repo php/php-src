@@ -75,15 +75,6 @@ enum CacheStrategy: int
 	case Tracking = 1;
 }
 
-enum CacheStoreType
-{
-	case NotFound;
-	case Scalar;
-	case SharedGraph;
-	case OPcacheSerialized;
-	case PHPSerialized;
-}
-
 #[\Attribute(13)] /* TARGET_CLASS | TARGET_METHOD | TARGET_PROPERTY */
 final class VolatileStatic
 {
@@ -121,13 +112,7 @@ interface StaticCacheInterface
 
 	public function unlock(string $key): bool;
 
-	public function getCacheStoreType(string $key): CacheStoreType;
-
 	public static function info(): StaticCacheInfo;
-
-	public static function getCacheStoreTypeByProperty(string $class_name, string $property_name): CacheStoreType;
-
-	public static function getCacheStoreTypeByMethod(string $class_name, string $method_name, string $variable_name): CacheStoreType;
 }
 
 /** @not-serializable */
@@ -160,13 +145,7 @@ final class VolatileCache implements StaticCacheInterface
 
 	public function unlock(string $key): bool {}
 
-	public function getCacheStoreType(string $key): CacheStoreType {}
-
 	public static function info(): StaticCacheInfo {}
-
-	public static function getCacheStoreTypeByProperty(string $class_name, string $property_name): CacheStoreType {}
-
-	public static function getCacheStoreTypeByMethod(string $class_name, string $method_name, string $variable_name): CacheStoreType {}
 }
 
 /** @not-serializable */
@@ -207,13 +186,7 @@ final class StableCache implements StaticCacheInterface
 
 	public function decrement(string $key, int $step = 1): int|false {}
 
-	public function getCacheStoreType(string $key): CacheStoreType {}
-
 	public static function info(): StaticCacheInfo {}
-
-	public static function getCacheStoreTypeByProperty(string $class_name, string $property_name): CacheStoreType {}
-
-	public static function getCacheStoreTypeByMethod(string $class_name, string $method_name, string $variable_name): CacheStoreType {}
 }
 
 }

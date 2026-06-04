@@ -261,7 +261,9 @@ typedef struct {
 typedef struct {
 	uint64_t generation;
 	bool needs_clone;
+	bool has_array_clone_flags;
 	zval value;
+	HashTable array_clone_flags;
 } zend_opcache_static_cache_request_local_slot;
 
 typedef struct {
