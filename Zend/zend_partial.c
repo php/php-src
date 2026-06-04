@@ -132,7 +132,7 @@ typedef struct zp_names {
 	zend_string *params[1];
 } zp_names;
 
-static bool zp_name_exists(zp_names *names, uint32_t argc, const zend_string *name)
+static bool zp_name_exists(const zp_names *names, uint32_t argc, const zend_string *name)
 {
 	for (uint32_t i = 0; i < argc; i++) {
 		if (names->params[i] && zend_string_equals(names->params[i], name)) {
