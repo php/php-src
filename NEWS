@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fix incorrect recurrence check of DatePeriod::createFromISO8601String().
     (ndossche)
 
+- DOM:
+  . Fix GH-22219 (Dom\XMLDocument::schemaValidate fails to resolve
+    xs:QName with prefix from imported schema). (David Carlier)
+
 - GD:
   . Fixed bug GH-22121 (Double free in gdImageSetStyle() after
     overflow-triggered early return). (iliaal)
