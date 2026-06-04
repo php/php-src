@@ -7,21 +7,26 @@ $c = function ($a) {
     try {
         var_dump($this, $this === $a);
     } catch (Error $e) {
-        var_dump(null, false);
+        echo $e::class, ": ", $e->getMessage(), "\n";
     }
 };
+
+echo "# Original PFA\n";
 
 $f = $c(?);
 echo new ReflectionFunction($f), "\n";
 $f($c);
+
+echo "# Re-bound PFA\n";
 
 $c2 = new class {};
 $f->bindTo($c2)($c2);
 
 ?>
 --EXPECTF--
-Closure [ <user> function {closure:pfa:%s:11} ] {
-  @@ %s 11 - 11
+# Original PFA
+Closure [ <user> function {closure:pfa:%s:13} ] {
+  @@ %s 13 - 13
 
   - Bound Variables [1] {
       Variable #0 [ $fn ]
@@ -32,8 +37,8 @@ Closure [ <user> function {closure:pfa:%s:11} ] {
   }
 }
 
-NULL
-bool(false)
+Error: Using $this when not in object context
+# Re-bound PFA
 object(class@anonymous)#3 (0) {
 }
 bool(true)
