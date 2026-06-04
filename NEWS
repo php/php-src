@@ -220,6 +220,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-24988 (Incorrect opcode range check causes bugs with exceptions in
     function JIT). (ndossche, Jorg Sowa)
   . Fix opcache phar check. (ndossche)
+  . Fixed bug GH-22216 (spurious opcache.memory_consumption warning on each new
+    ZTS thread; the directive is also reported as 0 in worker threads).
+    (Daisuke Komazaki)
 
 - OpenSSL:
   . Fixed build and test compatibility with OpenSSL 4.0 and 4.1.
