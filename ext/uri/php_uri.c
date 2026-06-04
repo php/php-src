@@ -21,6 +21,7 @@
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_attributes.h"
 #include "Zend/zend_enum.h"
+#include "Zend/zend_ast.h"
 #include "ext/standard/info.h"
 
 #include "php_uri.h"
@@ -1111,6 +1112,69 @@ PHPAPI zend_result php_uri_parser_register(const php_uri_parser *uri_parser)
 	return result;
 }
 
+/* Registers the deprecated, misspelled "InvalidReverseSoldius" class constant as
+ * an alias of the correctly spelled UrlValidationErrorType::InvalidReverseSolidus
+ * enum case. The typo was shipped in PHP 8.5, so the alias is kept for backwards
+ * compatibility.
+ *
+ * The value is stored as a lazy "self::InvalidReverseSolidus" constant AST instead
+ * of an eager enum case object: enum case objects are materialized lazily (the case
+ * constants are still IS_CONSTANT_AST during module startup), so resolving the case
+ * eagerly here would crash. The AST is allocated persistently and flagged immutable,
+ * mirroring how the engine stores internal enum case constants. */
+static void php_uri_register_invalid_reverse_solidus_alias(zend_class_entry *ce)
+{
+	zend_string *self_name = ZSTR_KNOWN(ZEND_STR_SELF);
+	zend_string *case_name = zend_string_init_interned("InvalidReverseSolidus", sizeof("InvalidReverseSolidus") - 1, true);
+
+	/* Build a persistent AST equivalent to "self::InvalidReverseSolidus":
+	 *   ZEND_AST_CLASS_CONST(child[0] = "self", child[1] = "InvalidReverseSolidus"). */
+	const uint32_t num_children = 2;
+	size_t size = sizeof(zend_ast_ref) + zend_ast_size(num_children)
+		+ num_children * sizeof(zend_ast_zval);
+	char *p = pemalloc(size, 1);
+
+	zend_ast_ref *ref = (zend_ast_ref *) p;
+	p += sizeof(zend_ast_ref);
+	GC_SET_REFCOUNT(ref, 1);
+	GC_TYPE_INFO(ref) = GC_CONSTANT_AST | GC_PERSISTENT | GC_IMMUTABLE;
+
+	zend_ast *ast = (zend_ast *) p;
+	p += zend_ast_size(num_children);
+	ast->kind = ZEND_AST_CLASS_CONST;
+	ast->attr = ZEND_FETCH_CLASS_EXCEPTION;
+	ast->lineno = 0;
+
+	ast->child[0] = (zend_ast *) p;
+	p += sizeof(zend_ast_zval);
+	ast->child[0]->kind = ZEND_AST_ZVAL;
+	ast->child[0]->attr = 0;
+	ZVAL_STR(zend_ast_get_zval(ast->child[0]), self_name);
+	Z_LINENO_P(zend_ast_get_zval(ast->child[0])) = 0;
+
+	ast->child[1] = (zend_ast *) p;
+	ast->child[1]->kind = ZEND_AST_ZVAL;
+	ast->child[1]->attr = 0;
+	ZVAL_STR(zend_ast_get_zval(ast->child[1]), case_name);
+	Z_LINENO_P(zend_ast_get_zval(ast->child[1])) = 0;
+
+	zval alias_value;
+	Z_TYPE_INFO(alias_value) = IS_CONSTANT_AST;
+	Z_AST(alias_value) = ref;
+
+	zend_string *alias_name = zend_string_init_interned("InvalidReverseSoldius", sizeof("InvalidReverseSoldius") - 1, true);
+	zend_class_constant *alias = zend_declare_class_constant_ex(
+		ce, alias_name, &alias_value, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED, NULL);
+
+	/* Attach #[\Deprecated(since: "8.6", message: "...")] so the deprecation notice
+	 * directs users to the correctly spelled enum case. */
+	zend_attribute *attr = zend_add_class_constant_attribute(ce, alias, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attr->args[0].value, zend_string_init("8.6", strlen("8.6"), 1));
+	attr->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR(&attr->args[1].value, zend_string_init("use Uri\\WhatWg\\UrlValidationErrorType::InvalidReverseSolidus instead", strlen("use Uri\\WhatWg\\UrlValidationErrorType::InvalidReverseSolidus instead"), 1));
+	attr->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+}
+
 static PHP_MINIT_FUNCTION(uri)
 {
 	php_uri_ce_rfc3986_uri = register_class_Uri_Rfc3986_Uri();
@@ -1140,6 +1204,7 @@ static PHP_MINIT_FUNCTION(uri)
 	php_uri_ce_whatwg_url_host_type = register_class_Uri_WhatWg_UrlHostType();
 	php_uri_ce_whatwg_url_validation_error = register_class_Uri_WhatWg_UrlValidationError();
 	php_uri_ce_whatwg_url_validation_error_type = register_class_Uri_WhatWg_UrlValidationErrorType();
+	php_uri_register_invalid_reverse_solidus_alias(php_uri_ce_whatwg_url_validation_error_type);
 
 	zend_hash_init(&uri_parsers, 4, NULL, NULL, true);
 

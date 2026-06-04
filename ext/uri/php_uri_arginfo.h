@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: a3b4696ac001d537cc34b818715c7eb382c17c5b
+ * Stub hash: 8bf205edfa9cb281e73daf66285aa6a60f3431c0
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
@@ -480,7 +480,7 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlValidationErrorType(void)
 
 	zend_enum_add_case_cstr(class_entry, "MissingSchemeNonRelativeUrl", NULL);
 
-	zend_enum_add_case_cstr(class_entry, "InvalidReverseSoldius", NULL);
+	zend_enum_add_case_cstr(class_entry, "InvalidReverseSolidus", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "InvalidCredentials", NULL);
 

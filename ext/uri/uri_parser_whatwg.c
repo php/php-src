@@ -167,7 +167,7 @@ static const char *fill_errors(zval *errors)
 				ZVAL_TRUE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_INVALID_REVERSE_SOLIDUS:
-				error_str = "InvalidReverseSoldius";
+				error_str = "InvalidReverseSolidus";
 				ZVAL_FALSE(&failure);
 				break;
 			case LXB_URL_ERROR_TYPE_INVALID_CREDENTIALS:
