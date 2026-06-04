@@ -95,6 +95,9 @@ try {
 	echo $e->getMessage(), "\n";
 }
 
+/* --repeat from reusing attribute-backed state from this run, require reset */
+opcache_reset();
+
 ?>
 --EXPECT--
 NotFound,Scalar,SharedGraph,OPcacheSerialized,PHPSerialized

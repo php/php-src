@@ -55,6 +55,9 @@ OPcache\StableCache::getInstance('default')->clear();
 StablePublishTarget::$value = new ReentrantPublishPayload('stable');
 var_dump(OPcache\StableCache::getInstance('default')->fetch('publish_inner_stable'));
 
+/* --repeat from reusing attribute-backed state from this run, require reset */
+opcache_reset();
+
 ?>
 --EXPECT--
 serialize-volatile
