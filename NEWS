@@ -16,6 +16,11 @@ PHP                                                                        NEWS
     Phar::addEmptyDir() for paths starting with "/.phar", while allowing
     non-magic directory names that merely share the ".phar" prefix. (Weilin Du)
 
+- Opcache:
+  . Fixed bug GH-22216 (spurious opcache.memory_consumption warning on each new
+    ZTS thread; the directive is also reported as 0 in worker threads).
+    (Daisuke Komazaki)
+
 - Zlib:
   . Fixed memory leak if deflate initialization fails and there is a dict.
     (ndossche)
