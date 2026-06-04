@@ -806,6 +806,17 @@ static zend_always_inline void zend_opcache_static_cache_warn_atomic_overflow(co
 	zend_error(E_WARNING, "%s(): Integer overflow occurred; result wrapped around", function_name);
 }
 
+static zend_always_inline void zend_opcache_static_cache_throw_atomic_failure(const char *function_name, zend_string *key)
+{
+	zend_throw_exception_ex(
+		zend_opcache_static_cache_exception_ce,
+		0,
+		"%s(): Unable to update stable cache integer value for key \"%s\"",
+		function_name,
+		ZSTR_VAL(key)
+	);
+}
+
 static void zend_opcache_static_cache_init_partition_contexts(zend_opcache_static_cache_partition *partition, const char *name)
 {
 	partition->volatile_context = zend_opcache_static_cache_volatile_context_state;
@@ -1837,7 +1848,7 @@ ZEND_METHOD(OPcache_VolatileCache, fetch)
 			RETURN_THROWS();
 		}
 
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 
 	zend_string_release(storage_key);
@@ -1870,7 +1881,7 @@ ZEND_METHOD(OPcache_VolatileCache, fetchMultiple)
 			RETURN_THROWS();
 		}
 
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 }
 
@@ -2330,7 +2341,7 @@ ZEND_METHOD(OPcache_StableCache, fetch)
 			RETURN_THROWS();
 		}
 
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 
 	zend_string_release(storage_key);
@@ -2363,7 +2374,7 @@ ZEND_METHOD(OPcache_StableCache, fetchMultiple)
 			RETURN_THROWS();
 		}
 
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 }
 
@@ -2654,12 +2665,12 @@ ZEND_METHOD(OPcache_StableCache, increment)
 			RETURN_THROWS();
 		}
 
-		RETURN_FALSE;
+		zend_opcache_static_cache_throw_atomic_failure("OPcache\\StableCache::increment", key);
+		RETURN_THROWS();
 	}
 
 	storage_key = zend_opcache_static_cache_build_storage_key(cache, key);
 	if (!zend_opcache_static_cache_begin_entry_mutation(storage_key, &release_entry_lock)) {
-
 		zend_string_release(storage_key);
 
 		zend_opcache_static_cache_restore_context(previous_context);
@@ -2668,7 +2679,8 @@ ZEND_METHOD(OPcache_StableCache, increment)
 			RETURN_THROWS();
 		}
 
-		RETURN_FALSE;
+		zend_opcache_static_cache_throw_atomic_failure("OPcache\\StableCache::increment", key);
+		RETURN_THROWS();
 	}
 
 	if (!zend_opcache_static_cache_acquire_write_lock()) {
@@ -2684,7 +2696,8 @@ ZEND_METHOD(OPcache_StableCache, increment)
 			RETURN_THROWS();
 		}
 
-		RETURN_FALSE;
+		zend_opcache_static_cache_throw_atomic_failure("OPcache\\StableCache::increment", key);
+		RETURN_THROWS();
 	}
 
 	if (!zend_opcache_static_cache_atomic_update_locked(storage_key, step, false, true, &new_value, &is_overflow)) {
@@ -2702,7 +2715,8 @@ ZEND_METHOD(OPcache_StableCache, increment)
 			RETURN_THROWS();
 		}
 
-		RETURN_FALSE;
+		zend_opcache_static_cache_throw_atomic_failure("OPcache\\StableCache::increment", key);
+		RETURN_THROWS();
 	}
 
 	RETVAL_LONG(new_value);
@@ -2750,12 +2764,12 @@ ZEND_METHOD(OPcache_StableCache, decrement)
 			RETURN_THROWS();
 		}
 
-		RETURN_FALSE;
+		zend_opcache_static_cache_throw_atomic_failure("OPcache\\StableCache::decrement", key);
+		RETURN_THROWS();
 	}
 
 	storage_key = zend_opcache_static_cache_build_storage_key(cache, key);
 	if (!zend_opcache_static_cache_begin_entry_mutation(storage_key, &release_entry_lock)) {
-
 		zend_string_release(storage_key);
 
 		zend_opcache_static_cache_restore_context(previous_context);
@@ -2764,7 +2778,8 @@ ZEND_METHOD(OPcache_StableCache, decrement)
 			RETURN_THROWS();
 		}
 
-		RETURN_FALSE;
+		zend_opcache_static_cache_throw_atomic_failure("OPcache\\StableCache::decrement", key);
+		RETURN_THROWS();
 	}
 
 	if (!zend_opcache_static_cache_acquire_write_lock()) {
@@ -2780,7 +2795,8 @@ ZEND_METHOD(OPcache_StableCache, decrement)
 			RETURN_THROWS();
 		}
 
-		RETURN_FALSE;
+		zend_opcache_static_cache_throw_atomic_failure("OPcache\\StableCache::decrement", key);
+		RETURN_THROWS();
 	}
 
 	if (!zend_opcache_static_cache_atomic_update_locked(storage_key, step, true, true, &new_value, &is_overflow)) {
@@ -2798,7 +2814,8 @@ ZEND_METHOD(OPcache_StableCache, decrement)
 			RETURN_THROWS();
 		}
 
-		RETURN_FALSE;
+		zend_opcache_static_cache_throw_atomic_failure("OPcache\\StableCache::decrement", key);
+		RETURN_THROWS();
 	}
 
 	RETVAL_LONG(new_value);

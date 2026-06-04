@@ -11,10 +11,20 @@ opcache.static_cache.stable_size_mb=32
 
 OPcache\StableCache::getInstance('default')->store('text', 'php');
 
-var_dump(OPcache\StableCache::getInstance('default')->increment('text'));
-var_dump(OPcache\StableCache::getInstance('default')->decrement('text'));
+function dump_atomic_failure(string $label, Closure $callback): void
+{
+	echo $label, ': ';
+	try {
+		var_dump($callback());
+	} catch (Throwable $exception) {
+		echo get_class($exception), ': ', $exception->getMessage(), "\n";
+	}
+}
+
+dump_atomic_failure('increment', static fn () => OPcache\StableCache::getInstance('default')->increment('text'));
+dump_atomic_failure('decrement', static fn () => OPcache\StableCache::getInstance('default')->decrement('text'));
 
 ?>
 --EXPECT--
-bool(false)
-bool(false)
+increment: OPcache\StaticCacheException: OPcache\StableCache::increment(): Unable to update stable cache integer value for key "text"
+decrement: OPcache\StaticCacheException: OPcache\StableCache::decrement(): Unable to update stable cache integer value for key "text"

@@ -92,9 +92,9 @@ interface StaticCacheInterface
 	public function fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object;
 
 	/**
-	 * @return array<string, null|bool|int|float|string|array|object>|false
+	 * @return array<string, null|bool|int|float|string|array|object>|null
 	 */
-	public function fetchMultiple(array $keys, ?array $default = null): array|false;
+	public function fetchMultiple(array $keys, ?array $default = null): ?array;
 
 	public function store(string $key, null|bool|int|float|string|array|object $value): bool;
 
@@ -125,9 +125,9 @@ final class VolatileCache implements StaticCacheInterface
 	public function fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
 
 	/**
-	 * @return array<string, null|bool|int|float|string|array|object>|false
+	 * @return array<string, null|bool|int|float|string|array|object>|null
 	 */
-	public function fetchMultiple(array $keys, ?array $default = null): array|false {}
+	public function fetchMultiple(array $keys, ?array $default = null): ?array {}
 
 	public function store(string $key, null|bool|int|float|string|array|object $value): bool {}
 
@@ -158,9 +158,9 @@ final class StableCache implements StaticCacheInterface
 	public function fetch(string $key, null|bool|int|float|string|array|object $default = null): null|bool|int|float|string|array|object {}
 
 	/**
-	 * @return array<string, null|bool|int|float|string|array|object>|false
+	 * @return array<string, null|bool|int|float|string|array|object>|null
 	 */
-	public function fetchMultiple(array $keys, ?array $default = null): array|false {}
+	public function fetchMultiple(array $keys, ?array $default = null): ?array {}
 
 	public function store(string $key, null|bool|int|float|string|array|object $value): bool {}
 
@@ -182,9 +182,9 @@ final class StableCache implements StaticCacheInterface
 
 	public function unlock(string $key): bool {}
 
-	public function increment(string $key, int $step = 1): int|false {}
+	public function increment(string $key, int $step = 1): int {}
 
-	public function decrement(string $key, int $step = 1): int|false {}
+	public function decrement(string $key, int $step = 1): int {}
 
 	public static function info(): StaticCacheInfo {}
 }

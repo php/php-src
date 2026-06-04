@@ -1,5 +1,5 @@
 --TEST--
-OPcache static cache disabled backends report unavailable and explicit APIs return false by default
+OPcache static cache disabled backends report unavailable and explicit APIs expose documented failure behavior
 --EXTENSIONS--
 opcache
 --INI--
@@ -27,6 +27,16 @@ function dump_result(string $label, mixed $value): void
 	var_dump($value);
 }
 
+function dump_call(string $label, Closure $callback): void
+{
+	echo $label, ': ';
+	try {
+		var_dump($callback());
+	} catch (Throwable $exception) {
+		echo get_class($exception), ': ', $exception->getMessage(), "\n";
+	}
+}
+
 dump_info('volatile', OPcache\VolatileCache::info());
 dump_info('stable', OPcache\StableCache::info());
 
@@ -50,8 +60,8 @@ dump_result('StableCache::unlock', OPcache\StableCache::getInstance('default')->
 dump_result('StableCache::delete', OPcache\StableCache::getInstance('default')->delete('key'));
 dump_result('StableCache::deleteMultiple', OPcache\StableCache::getInstance('default')->deleteMultiple(['key']));
 dump_result('StableCache::clear', OPcache\StableCache::getInstance('default')->clear());
-dump_result('StableCache::increment', OPcache\StableCache::getInstance('default')->increment('key'));
-dump_result('StableCache::decrement', OPcache\StableCache::getInstance('default')->decrement('key'));
+dump_call('StableCache::increment', static fn () => OPcache\StableCache::getInstance('default')->increment('key'));
+dump_call('StableCache::decrement', static fn () => OPcache\StableCache::getInstance('default')->decrement('key'));
 
 ?>
 --EXPECT--
@@ -71,8 +81,8 @@ int(0)
 NULL
 VolatileCache::store: bool(false)
 VolatileCache::storeMultiple: bool(false)
-VolatileCache::fetch: bool(false)
-VolatileCache::fetchMultiple: bool(false)
+VolatileCache::fetch: NULL
+VolatileCache::fetchMultiple: NULL
 VolatileCache::has: bool(false)
 VolatileCache::lock: bool(false)
 VolatileCache::unlock: bool(false)
@@ -81,13 +91,13 @@ VolatileCache::deleteMultiple: bool(false)
 opcache_static_cache_volatile_reset: bool(false)
 StableCache::store: bool(false)
 StableCache::storeMultiple: bool(false)
-StableCache::fetch: bool(false)
-StableCache::fetchMultiple: bool(false)
+StableCache::fetch: NULL
+StableCache::fetchMultiple: NULL
 StableCache::has: bool(false)
 StableCache::lock: bool(false)
 StableCache::unlock: bool(false)
 StableCache::delete: bool(false)
 StableCache::deleteMultiple: bool(false)
 StableCache::clear: bool(false)
-StableCache::increment: bool(false)
-StableCache::decrement: bool(false)
+StableCache::increment: OPcache\StaticCacheException: OPcache\StableCache::increment(): Unable to update stable cache integer value for key "key"
+StableCache::decrement: OPcache\StaticCacheException: OPcache\StableCache::decrement(): Unable to update stable cache integer value for key "key"

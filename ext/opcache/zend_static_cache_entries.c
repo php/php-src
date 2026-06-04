@@ -2251,7 +2251,7 @@ bool zend_opcache_static_cache_atomic_update_locked(
 				: zend_opcache_static_cache_long_add_wrapped(0, step, &result)
 			;
 			ZVAL_LONG(&initial_value, result);
-			if (zend_opcache_static_cache_store_locked(key, &initial_value, 0, false, false)) {
+			if (zend_opcache_static_cache_store_locked(key, &initial_value, 0, true, false)) {
 				*is_overflow = result_is_overflow;
 				*new_value = Z_LVAL(initial_value);
 
