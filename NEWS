@@ -178,6 +178,9 @@ PHP                                                                        NEWS
     represented as a string anymore but a int. (David Carlier)
   . Fixed bug GH-21421 (SoapClient typemap property breaks engine assumptions).
     (ndossche)
+  . WSDL/XML Schema parsing now rejects out-of-range integer values for
+    occurrence constraints and integer restriction facets. Negative minOccurs
+    and maxOccurs values are rejected as well. (Weilin Du)
 
 - Sockets:
   . Added the TCP_USER_TIMEOUT constant for Linux to set the maximum time in
