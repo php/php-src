@@ -411,7 +411,8 @@ PHPAPI int php_stream_xport_crypto_get_status(php_stream *stream)
 		return param.outputs.returncode;
 	}
 
-	php_error_docref("streams.crypto", E_WARNING, "This stream does not support SSL/crypto");
+	php_stream_warn_docref(stream, "streams.crypto", SslNotSupported,
+		"This stream does not support SSL/crypto");
 
 	return STREAM_CRYPTO_STATUS_NONE;
 }
