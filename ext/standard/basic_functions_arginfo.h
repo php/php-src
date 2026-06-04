@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: d997420d0668e5b6ac26c43a8f86cff64891aced
+ * Stub hash: 3b1649a3abb3cfb5cb39d93f30a97765fe862d67
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -1926,6 +1926,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_enable_crypto, 0, 
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, session_stream, "null")
 ZEND_END_ARG_INFO()
 
+#define arginfo_stream_socket_get_crypto_status arginfo_fpassthru
+
 #if defined(HAVE_SHUTDOWN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_socket_shutdown, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream)
@@ -2823,6 +2825,7 @@ ZEND_FUNCTION(stream_socket_get_name);
 ZEND_FUNCTION(stream_socket_recvfrom);
 ZEND_FUNCTION(stream_socket_sendto);
 ZEND_FUNCTION(stream_socket_enable_crypto);
+ZEND_FUNCTION(stream_socket_get_crypto_status);
 #if defined(HAVE_SHUTDOWN)
 ZEND_FUNCTION(stream_socket_shutdown);
 #endif
@@ -3438,6 +3441,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(stream_socket_recvfrom, arginfo_stream_socket_recvfrom)
 	ZEND_FE(stream_socket_sendto, arginfo_stream_socket_sendto)
 	ZEND_FE(stream_socket_enable_crypto, arginfo_stream_socket_enable_crypto)
+	ZEND_FE(stream_socket_get_crypto_status, arginfo_stream_socket_get_crypto_status)
 #if defined(HAVE_SHUTDOWN)
 	ZEND_FE(stream_socket_shutdown, arginfo_stream_socket_shutdown)
 #endif

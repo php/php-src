@@ -113,6 +113,8 @@ PHP                                                                        NEWS
     and Openssl\Session class. (Jakub Zelenka)
   . Added TLS external PSK support for streams with new context options and
     Openssl\Psk class. (Jakub Zelenka)
+  . Added stream crypto status for exposing OpenSSL WANT_READ / WANT_WRITE.
+    (Jakub Zelenka)
 
 - PCNTL:
   . pcntl_exec() now throws a ValueError if the $args array is not a list

@@ -207,6 +207,7 @@ typedef struct _php_openssl_netstream_data_t {
 	int enable_on_connect;
 	int is_client;
 	int ssl_active;
+	int last_status;
 	php_stream_xport_crypt_method_t method;
 	php_openssl_handshake_bucket_t *reneg;
 	php_openssl_sni_cert_t *sni_certs;
@@ -271,6 +272,10 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 			 * packets: retry in next iteration */
 			errno = EAGAIN;
 			retry = is_init ? true : sslsock->s.is_blocked;
+			if (!retry) {
+				sslsock->last_status = err == SSL_ERROR_WANT_READ ? 
+						STREAM_CRYPTO_STATUS_WANT_READ : STREAM_CRYPTO_STATUS_WANT_WRITE;
+			}
 			break;
 		case SSL_ERROR_SYSCALL:
 			if (ERR_peek_error() == 0) {
@@ -2701,6 +2706,8 @@ static int php_openssl_enable_crypto(php_stream *stream,
 	int cert_captured = 0;
 	X509 *peer_cert;
 
+	sslsock->last_status = STREAM_CRYPTO_STATUS_NONE;
+
 	if (cparam->inputs.activate && !sslsock->ssl_active) {
 		struct timeval start_time, *timeout;
 		bool blocked = sslsock->s.is_blocked, has_timeout = false;
@@ -2900,6 +2907,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 
 			/* Now, do the IO operation. Don't block if we can't complete... */
 			ERR_clear_error();
+			sslsock->last_status = STREAM_CRYPTO_STATUS_NONE;
 			if (read) {
 				nr_bytes = SSL_read(sslsock->ssl_handle, buf, (int)count);
 
@@ -2974,6 +2982,10 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
 							(POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);
 					}
+				} else if (err == SSL_ERROR_WANT_READ) {
+					sslsock->last_status = STREAM_CRYPTO_STATUS_WANT_READ;
+				} else if (err == SSL_ERROR_WANT_WRITE) {
+					sslsock->last_status = STREAM_CRYPTO_STATUS_WANT_WRITE;
 				}
 			}
 
@@ -3444,6 +3456,9 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 					return PHP_STREAM_OPTION_RETURN_OK;
 				case STREAM_XPORT_CRYPTO_OP_ENABLE:
 					cparam->outputs.returncode = php_openssl_enable_crypto(stream, sslsock, cparam);
+					return PHP_STREAM_OPTION_RETURN_OK;
+				case STREAM_XPORT_CRYPTO_OP_GET_STATUS:
+					cparam->outputs.returncode = sslsock->last_status;
 					return PHP_STREAM_OPTION_RETURN_OK;
 				default:
 					/* fall through */

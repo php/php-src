@@ -323,6 +323,7 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/clamp_v2
   . `stream_last_errors()` and `stream_clear_errors()`.
     RFC: https://wiki.php.net/rfc/stream_errors
+  . stream_socket_get_crypto_status()
 
 - Zip:
   . Added ZipArchive::openString() method.
@@ -389,6 +390,9 @@ PHP 8.6 UPGRADE NOTES
 
 - Standard
   . ARRAY_FILTER_USE_VALUE.
+  . STREAM_CRYPTO_STATUS_NONE
+  . STREAM_CRYPTO_STATUS_WANT_READ
+  . STREAM_CRYPTO_STATUS_WANT_WRITE
 
 ========================================
 11. Changes to INI File Handling

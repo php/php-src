@@ -3484,6 +3484,11 @@ function stream_socket_sendto($socket, string $data, int $flags = 0, string $add
  */
 function stream_socket_enable_crypto($stream, bool $enable, ?int $crypto_method = null, $session_stream = null): int|bool {}
 
+/**
+ * @param resource $stream
+ */
+function stream_socket_get_crypto_status($stream): int {}
+
 #ifdef HAVE_SHUTDOWN
 /** @param resource $stream */
 function stream_socket_shutdown($stream, int $mode): bool {}

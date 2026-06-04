@@ -397,6 +397,25 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate)
 	return ret;
 }
 
+PHPAPI int php_stream_xport_crypto_get_status(php_stream *stream)
+{
+	php_stream_xport_crypto_param param;
+	int ret;
+
+	memset(&param, 0, sizeof(param));
+	param.op = STREAM_XPORT_CRYPTO_OP_GET_STATUS;
+
+	ret = php_stream_set_option(stream, PHP_STREAM_OPTION_CRYPTO_API, 0, &param);
+
+	if (ret == PHP_STREAM_OPTION_RETURN_OK) {
+		return param.outputs.returncode;
+	}
+
+	php_error_docref("streams.crypto", E_WARNING, "This stream does not support SSL/crypto");
+
+	return STREAM_CRYPTO_STATUS_NONE;
+}
+
 /* Similar to recv() system call; read data from the stream, optionally
  * peeking, optionally retrieving OOB data */
 PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t buflen,
