@@ -32,7 +32,6 @@
 #include "SAPI.h"
 
 #include "zend_static_cache_internal.h"
-#include "zend_opcache_serializer.h"
 
 #include "opcache_arginfo.h"
 
@@ -47,7 +46,6 @@ typedef struct _zend_opcache_static_cache_object {
 
 zend_class_entry *zend_opcache_static_cache_exception_ce;
 zend_class_entry *zend_opcache_static_cache_strategy_ce;
-zend_class_entry *zend_opcache_static_cache_store_type_ce;
 zend_class_entry *zend_opcache_static_cache_info_ce;
 
 static zend_class_entry *zend_opcache_static_cache_interface_ce;
@@ -630,7 +628,6 @@ static zend_always_inline void zend_opcache_static_cache_register_classes(void)
 	zend_mark_internal_attribute(zend_opcache_static_cache_stable_attribute_ce);
 
 	zend_opcache_static_cache_strategy_ce = register_class_OPcache_CacheStrategy();
-	zend_opcache_static_cache_store_type_ce = register_class_OPcache_CacheStoreType();
 	zend_opcache_static_cache_volatile_static_attribute_ce = register_class_OPcache_VolatileStatic();
 	attribute = zend_mark_internal_attribute(zend_opcache_static_cache_volatile_static_attribute_ce);
 	attribute->validator = zend_opcache_static_cache_validate_volatile_static_attribute;
@@ -662,7 +659,6 @@ static zend_always_inline void zend_opcache_static_cache_reset_class_entries(voi
 {
 	zend_opcache_static_cache_exception_ce = NULL;
 	zend_opcache_static_cache_strategy_ce = NULL;
-	zend_opcache_static_cache_store_type_ce = NULL;
 	zend_opcache_static_cache_info_ce = NULL;
 	zend_opcache_static_cache_interface_ce = NULL;
 	zend_opcache_static_cache_volatile_cache_ce = NULL;
@@ -1152,80 +1148,6 @@ static zend_always_inline zend_result zend_opcache_static_cache_exists_api(zend_
 	zend_opcache_static_cache_restore_context(previous_context);
 
 	return SUCCESS;
-}
-
-static const char *zend_opcache_static_cache_store_type_case_name(uint8_t value_type)
-{
-	switch (value_type) {
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_NULL:
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_TRUE:
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_FALSE:
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_LONG:
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_DOUBLE:
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING:
-			return "Scalar";
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED:
-			return "PHPSerialized";
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED:
-			return "OPcacheSerialized";
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH:
-			return "SharedGraph";
-		default:
-			return "NotFound";
-	}
-}
-
-static void zend_opcache_static_cache_return_store_type(
-		zval *return_value,
-		zend_opcache_static_cache_context *context,
-		zend_opcache_static_cache_kind kind,
-		zend_string *key_or_property,
-		zend_string *class_name)
-{
-	const char *class_value, *prefix;
-	zend_opcache_static_cache_context *previous_context;
-	zend_string *lookup_key;
-	uint8_t value_type = 0;
-	size_t class_length;
-	bool found = false;
-
-	if (class_name != NULL) {
-		prefix = kind == ZEND_OPCACHE_STATIC_CACHE_STABLE
-			? "stable_static"
-			: "volatile_static"
-		;
-		class_value = ZSTR_VAL(class_name);
-		class_length = ZSTR_LEN(class_name);
-
-		if (class_length > 0 && class_value[0] == '\\') {
-			class_value++;
-			class_length--;
-		}
-
-		lookup_key = zend_strpprintf(0, "%s:%.*s::$%s", prefix, (int) class_length, class_value, ZSTR_VAL(key_or_property));
-	} else {
-		lookup_key = zend_string_copy(key_or_property);
-	}
-
-	previous_context = zend_opcache_static_cache_activate_context(context);
-
-	if (zend_opcache_static_cache_require_available_read()) {
-		found = zend_opcache_static_cache_value_type_locked(lookup_key, &value_type);
-
-		zend_opcache_static_cache_unlock();
-	}
-
-	zend_opcache_static_cache_restore_context(previous_context);
-
-	zend_string_release(lookup_key);
-
-	ZVAL_OBJ_COPY(
-		return_value,
-		zend_enum_get_case_cstr(
-			zend_opcache_static_cache_store_type_ce,
-			found ? zend_opcache_static_cache_store_type_case_name(value_type) : "NotFound"
-		)
-	);
 }
 
 static zend_always_inline zend_result zend_opcache_static_cache_lock_api(
@@ -1768,140 +1690,6 @@ static zend_always_inline void zend_opcache_static_cache_return_info(
 	zend_opcache_static_cache_restore_context(previous_context);
 }
 
-static zend_always_inline zend_string *zend_opcache_static_cache_attribute_property_key(
-		bool is_stable,
-		zend_string *class_name,
-		zend_string *property_name)
-{
-	const char *class_value = ZSTR_VAL(class_name),
-		*prefix = is_stable ? "stable_static" : "volatile_static"
-	;
-	size_t class_length = ZSTR_LEN(class_name);
-
-	if (class_length > 0 && class_value[0] == '\\') {
-		class_value++;
-		class_length--;
-	}
-
-	return zend_strpprintf(
-		0,
-		"%s:%.*s::$%s",
-		prefix,
-		(int) class_length,
-		class_value,
-		ZSTR_VAL(property_name)
-	);
-}
-
-static zend_always_inline zend_string *zend_opcache_static_cache_attribute_method_key(
-		bool is_stable,
-		zend_string *class_name,
-		zend_string *method_name,
-		zend_string *variable_name)
-{
-	const char *class_value = ZSTR_VAL(class_name),
-		*prefix = is_stable ? "stable_static" : "volatile_static"
-	;
-	size_t class_length = ZSTR_LEN(class_name);
-
-	if (class_length > 0 && class_value[0] == '\\') {
-		class_value++;
-		class_length--;
-	}
-
-	return zend_strpprintf(
-		0,
-		"%s:%.*s::%s()::$%s",
-		prefix,
-		(int) class_length,
-		class_value,
-		ZSTR_VAL(method_name),
-		ZSTR_VAL(variable_name)
-	);
-}
-
-static zend_always_inline void zend_opcache_static_cache_return_attribute_property_store_type(
-		INTERNAL_FUNCTION_PARAMETERS,
-		bool is_stable)
-{
-	zend_string *class_name, *property_name, *lookup_key;
-
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR(class_name)
-		Z_PARAM_STR(property_name)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (ZSTR_LEN(class_name) == 0) {
-		zend_argument_value_error(1, "must be a non-empty string");
-
-		RETURN_THROWS();
-	}
-
-	if (ZSTR_LEN(property_name) == 0) {
-		zend_argument_value_error(2, "must be a non-empty string");
-
-		RETURN_THROWS();
-	}
-
-	lookup_key = zend_opcache_static_cache_attribute_property_key(is_stable, class_name, property_name);
-	zend_opcache_static_cache_return_store_type(
-		return_value,
-		is_stable ? zend_opcache_static_cache_active_stable_context() : zend_opcache_static_cache_active_volatile_context(),
-		is_stable ? ZEND_OPCACHE_STATIC_CACHE_STABLE : ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC,
-		lookup_key,
-		NULL
-	);
-
-	zend_string_release(lookup_key);
-}
-
-static zend_always_inline void zend_opcache_static_cache_return_attribute_method_store_type(
-		INTERNAL_FUNCTION_PARAMETERS,
-		bool is_stable)
-{
-	zend_string *class_name, *method_name, *variable_name, *lookup_key;
-
-	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_STR(class_name)
-		Z_PARAM_STR(method_name)
-		Z_PARAM_STR(variable_name)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (ZSTR_LEN(class_name) == 0) {
-		zend_argument_value_error(1, "must be a non-empty string");
-
-		RETURN_THROWS();
-	}
-
-	if (ZSTR_LEN(method_name) == 0) {
-		zend_argument_value_error(2, "must be a non-empty string");
-
-		RETURN_THROWS();
-	}
-
-	if (ZSTR_LEN(variable_name) == 0) {
-		zend_argument_value_error(3, "must be a non-empty string");
-
-		RETURN_THROWS();
-	}
-
-	lookup_key = zend_opcache_static_cache_attribute_method_key(
-		is_stable,
-		class_name,
-		method_name,
-		variable_name
-	);
-	zend_opcache_static_cache_return_store_type(
-		return_value,
-		is_stable ? zend_opcache_static_cache_active_stable_context() : zend_opcache_static_cache_active_volatile_context(),
-		is_stable ? ZEND_OPCACHE_STATIC_CACHE_STABLE : ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC,
-		lookup_key,
-		NULL
-	);
-
-	zend_string_release(lookup_key);
-}
-
 PHP_FUNCTION(opcache_static_cache_volatile_reset)
 {
 	zend_opcache_static_cache_context *previous_context;
@@ -2339,36 +2127,6 @@ ZEND_METHOD(OPcache_VolatileCache, unlock)
 	RETURN_BOOL(unlocked);
 }
 
-ZEND_METHOD(OPcache_VolatileCache, getCacheStoreType)
-{
-	zend_opcache_static_cache_object *cache;
-	zend_string *key, *storage_key;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(key)
-	ZEND_PARSE_PARAMETERS_END();
-
-	cache = zend_opcache_static_cache_from_this(ZEND_THIS);
-	if (cache == NULL) {
-		RETURN_THROWS();
-	}
-
-	if (!zend_opcache_static_cache_validate_key(key, 1)) {
-		RETURN_THROWS();
-	}
-
-	storage_key = zend_opcache_static_cache_build_storage_key(cache, key);
-	zend_opcache_static_cache_return_store_type(
-		return_value,
-		cache->context,
-		ZEND_OPCACHE_STATIC_CACHE_VOLATILE_STATIC,
-		storage_key,
-		NULL
-	);
-
-	zend_string_release(storage_key);
-}
-
 ZEND_METHOD(OPcache_VolatileCache, info)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -2378,16 +2136,6 @@ ZEND_METHOD(OPcache_VolatileCache, info)
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
-}
-
-ZEND_METHOD(OPcache_VolatileCache, getCacheStoreTypeByProperty)
-{
-	zend_opcache_static_cache_return_attribute_property_store_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
-}
-
-ZEND_METHOD(OPcache_VolatileCache, getCacheStoreTypeByMethod)
-{
-	zend_opcache_static_cache_return_attribute_method_store_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
 ZEND_METHOD(OPcache_StableCache, __construct)
@@ -3060,35 +2808,6 @@ ZEND_METHOD(OPcache_StableCache, decrement)
 	}
 }
 
-ZEND_METHOD(OPcache_StableCache, getCacheStoreType)
-{
-	zend_opcache_static_cache_object *cache;
-	zend_string *key, *storage_key;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(key)
-	ZEND_PARSE_PARAMETERS_END();
-
-	cache = zend_opcache_static_cache_from_this(ZEND_THIS);
-	if (cache == NULL) {
-		RETURN_THROWS();
-	}
-
-	if (!zend_opcache_static_cache_validate_key(key, 1)) {
-		RETURN_THROWS();
-	}
-
-	storage_key = zend_opcache_static_cache_build_storage_key(cache, key);
-	zend_opcache_static_cache_return_store_type(
-		return_value,
-		cache->context,
-		ZEND_OPCACHE_STATIC_CACHE_STABLE,
-		storage_key,
-		NULL
-	);
-	zend_string_release(storage_key);
-}
-
 ZEND_METHOD(OPcache_StableCache, info)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -3097,14 +2816,4 @@ ZEND_METHOD(OPcache_StableCache, info)
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
-}
-
-ZEND_METHOD(OPcache_StableCache, getCacheStoreTypeByProperty)
-{
-	zend_opcache_static_cache_return_attribute_property_store_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
-}
-
-ZEND_METHOD(OPcache_StableCache, getCacheStoreTypeByMethod)
-{
-	zend_opcache_static_cache_return_attribute_method_store_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }

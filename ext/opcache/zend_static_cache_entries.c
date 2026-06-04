@@ -15,7 +15,7 @@
 */
 
 #include "zend_static_cache_internal.h"
-#include "zend_opcache_serializer.h"
+#include "zend_static_cache_safe_direct.h"
 
 #include "Zend/zend_closures.h"
 #include "Zend/zend_objects.h"
@@ -25,6 +25,7 @@ typedef struct _zend_opcache_static_cache_request_local_clone_context {
 	HashTable objects;
 	HashTable references;
 } zend_opcache_static_cache_request_local_clone_context;
+
 
 typedef enum _zend_opcache_static_cache_request_local_slot_result {
 	ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_SLOT_MISS,
@@ -663,84 +664,11 @@ static bool zend_opcache_static_cache_materialize_payload_locked(
 		bool throw_if_missing,
 		const char *cache_name)
 {
-	const unsigned char *position, *end;
-	php_unserialize_data_t var_hash;
-	uint32_t copied_value_len;
 	bool ref_registered;
-	unsigned char *payload_copy;
+	bool lock_safe;
 	int result;
 
 	switch (value_type) {
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED:
-			copied_value_len = value_len;
-			payload_copy = emalloc(copied_value_len);
-			memcpy(payload_copy, zend_opcache_static_cache_ptr(value_offset), copied_value_len);
-
-			zend_opcache_static_cache_unlock();
-
-			ZVAL_UNDEF(return_value);
-			position = payload_copy;
-			end = position + copied_value_len;
-			PHP_VAR_UNSERIALIZE_INIT(var_hash);
-			result = php_var_unserialize(return_value, &position, end, &var_hash);
-			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-			efree(payload_copy);
-
-			zend_opcache_static_cache_reacquire_read_lock_or_fail(cache_name);
-
-			if (result != 1 || position != end) {
-				if (Z_TYPE_P(return_value) != IS_UNDEF) {
-					zval_ptr_dtor(return_value);
-					ZVAL_UNDEF(return_value);
-				}
-
-				if (!EG(exception) && throw_if_missing) {
-					zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Stored %s value for key \"%s\" is corrupted", cache_name, ZSTR_VAL(key));
-				}
-
-				return false;
-			}
-
-			return true;
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED:
-			copied_value_len = value_len;
-			payload_copy = emalloc(copied_value_len);
-			memcpy(payload_copy, zend_opcache_static_cache_ptr(value_offset), copied_value_len);
-			zend_opcache_static_cache_unlock();
-
-			ZVAL_UNDEF(return_value);
-			result = (zend_opcache_static_cache_capture_active
-					? zend_opcache_unserialize_ex(
-						return_value,
-						payload_copy,
-						copied_value_len,
-						zend_opcache_static_cache_capture_decoded_value,
-						zend_opcache_static_cache_capture_decoded_reachable_value
-					)
-					: zend_opcache_unserialize(
-						return_value,
-						payload_copy,
-						copied_value_len
-					)
-				);
-			efree(payload_copy);
-
-			zend_opcache_static_cache_reacquire_read_lock_or_fail(cache_name);
-
-			if (!result) {
-				if (Z_TYPE_P(return_value) != IS_UNDEF) {
-					zval_ptr_dtor(return_value);
-					ZVAL_UNDEF(return_value);
-				}
-
-				if (!EG(exception) && throw_if_missing) {
-					zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0, "Stored %s value for key \"%s\" is corrupted", cache_name, ZSTR_VAL(key));
-				}
-
-				return false;
-			}
-
-			return true;
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH:
 			ref_registered = zend_opcache_static_cache_has_request_shared_graph_ref(value_offset);
 			if (!ref_registered && !zend_opcache_static_cache_shared_graph_acquire_locked(value_offset)) {
@@ -751,8 +679,17 @@ static bool zend_opcache_static_cache_materialize_payload_locked(
 				return false;
 			}
 
-			zend_opcache_static_cache_unlock();
-
+			/* A pure-data graph (no object or enum node) runs no userland on decode,
+			 * so it is materialized while the read lock is held. A graph that resolves
+			 * a class (which may autoload) or runs __unserialize/__wakeup must decode
+			 * off-lock, so for it the lock is dropped and reacquired around the decode;
+			 * such graphs keep a request-local prototype, so this happens once and
+			 * repeat fetches clone instead of re-decoding. The acquired graph ref pins
+			 * the payload in either case (the decoded value may alias it). */
+			lock_safe = zend_opcache_static_cache_shared_graph_decode_is_lock_safe(value_offset);
+			if (!lock_safe) {
+				zend_opcache_static_cache_unlock();
+			}
 			ZVAL_UNDEF(return_value);
 
 			result = zend_opcache_static_cache_fetch_shared_graph(
@@ -760,8 +697,9 @@ static bool zend_opcache_static_cache_materialize_payload_locked(
 				value_len,
 				return_value
 			);
-
-			zend_opcache_static_cache_reacquire_read_lock_or_fail(cache_name);
+			if (!lock_safe) {
+				zend_opcache_static_cache_reacquire_read_lock_or_fail(cache_name);
+			}
 
 			if (!result) {
 				if (Z_TYPE_P(return_value) != IS_UNDEF) {
@@ -796,9 +734,6 @@ static zend_always_inline bool zend_opcache_static_cache_entry_uses_request_loca
 	switch (entry->value_type) {
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING:
 			return entry->value_len >= ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_STRING_MIN_LEN;
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED:
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED:
-			return true;
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH:
 			return zend_opcache_static_cache_shared_graph_requires_prototype(entry->value_offset);
 		default:
@@ -840,8 +775,7 @@ static zend_opcache_static_cache_request_local_slot_result zend_opcache_static_c
 	if (!zend_opcache_static_cache_clone_request_local_slot_value_known(
 			return_value,
 			&slot->value,
-			slot->needs_clone
-		)
+			slot->needs_clone)
 	) {
 		zend_hash_del(*slots_ptr, key);
 
@@ -1295,11 +1229,7 @@ bool zend_opcache_static_cache_prepare_value(
 		bool honor_strict_store_failure,
 		bool lock_held)
 {
-	php_serialize_data_t var_hash;
-	smart_str serialized = {0};
-	size_t shared_graph_len, encoded_len;
-	unsigned char *encoded;
-	bool failed_unstorable;
+	size_t shared_graph_len;
 
 	if (prepared == NULL) {
 		return false;
@@ -1373,97 +1303,72 @@ bool zend_opcache_static_cache_prepare_value(
 			}
 
 			shared_graph_len = 0;
-			if (zend_opcache_static_cache_calculate_shared_graph_size(value, &shared_graph_len)) {
-				prepared->value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH;
-				prepared->value_len = (uint32_t) shared_graph_len;
-				prepared->payload_size = shared_graph_len;
-
-				/* Explicit stores keep shared-graph construction out of the write lock. */
-				if (lock_held) {
-					return true;
+			{
+				/* Compute each hooked object's __serialize() array once, here, and
+				 * keep it on `prepared` so the under-lock re-build into SHM reuses it
+				 * (no second __serialize call); freed in destroy_prepared_value. A
+				 * store triggered from within __serialize has its own `prepared`, so
+				 * memos never cross-talk. The lock-held path defers the build and runs
+				 * with no memo, so a graph needing __serialize or __sleep is refused
+				 * there. */
+				if (!lock_held && prepared->serialize_memo == NULL) {
+					prepared->serialize_memo = emalloc(sizeof(HashTable));
+					zend_hash_init(prepared->serialize_memo, 8, NULL, ZVAL_PTR_DTOR, 0);
 				}
 
-				prepared->owned_buffer = emalloc(shared_graph_len);
-				if (zend_opcache_static_cache_build_shared_graph_in_place(
-						value,
-						prepared->owned_buffer,
-						shared_graph_len,
-						&prepared->payload_used_size
-					)
-				) {
-					prepared->payload_source = prepared->owned_buffer;
-					zend_opcache_static_cache_prepare_memo_store(value, prepared);
+				if (zend_opcache_static_cache_calculate_shared_graph_size(value, &shared_graph_len, prepared->serialize_memo)) {
+					prepared->value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH;
+					prepared->value_len = (uint32_t) shared_graph_len;
+					prepared->payload_size = shared_graph_len;
 
-					return true;
+					/* Explicit stores keep shared-graph construction out of the write lock
+					 * regardless of payload size. Even small direct builds lengthen the
+					 * critical section enough to regress contended writers. */
+					if (lock_held) {
+						return true;
+					}
+
+					prepared->owned_buffer = emalloc(shared_graph_len);
+					if (zend_opcache_static_cache_build_shared_graph_in_place(
+							value,
+							prepared->owned_buffer,
+							shared_graph_len,
+							&prepared->payload_used_size,
+							prepared->serialize_memo
+						)
+					) {
+						prepared->payload_source = prepared->owned_buffer;
+						zend_opcache_static_cache_prepare_memo_store(value, prepared);
+
+						return true;
+					}
+
+					if (EG(exception)) {
+						return false;
+					}
+
+					efree(prepared->owned_buffer);
+					prepared->owned_buffer = NULL;
 				}
-
-				if (EG(exception)) {
-					return false;
-				}
-
-				efree(prepared->owned_buffer);
-				prepared->owned_buffer = NULL;
 			}
 
 			if (EG(exception)) {
 				return false;
 			}
 
-			encoded = NULL;
-			encoded_len = 0;
-			failed_unstorable = false;
-			if (zend_opcache_serialize_ex(&encoded, &encoded_len, value, &failed_unstorable)) {
-				prepared->value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED;
-				prepared->value_len = (uint32_t) encoded_len;
-				prepared->payload_size = encoded_len;
-				prepared->payload_used_size = encoded_len;
-				prepared->owned_buffer = encoded;
-				prepared->payload_source = encoded;
+			/* A value that cannot be represented as a transparent shared graph is
+			 * refused rather than stored opaquely. The shared-graph encoder accepts
+			 * scalars, strings, arrays, hard references, enums, and objects whose
+			 * state is reconstructable (plain/stdClass, __serialize, __sleep/__wakeup);
+			 * it refuses resources, closures, and objects with opaque internal state
+			 * (Fiber, Generator, PDO, ... marked non-serializable). */
+			zend_opcache_static_cache_handle_store_failure(
+				"value cannot be stored in the static cache: it contains a resource, a closure, or an object with opaque internal state (e.g. Fiber, Generator, PDO)",
+				throw_on_failure,
+				honor_strict_store_failure
+			);
 
-				return true;
-			}
-
-			if (failed_unstorable) {
-				zend_opcache_static_cache_handle_store_failure(
-					"resources and Closure objects cannot be stored in the static cache",
-					throw_on_failure,
-					honor_strict_store_failure
-				);
-
-				return false;
-			}
-
-			if (EG(exception)) {
-				return false;
-			}
-
-			PHP_VAR_SERIALIZE_INIT(var_hash);
-			php_var_serialize(&serialized, value, &var_hash);
-			PHP_VAR_SERIALIZE_DESTROY(var_hash);
-
-			if (serialized.s == NULL) {
-				if (EG(exception)) {
-					return false;
-				}
-
-				zend_opcache_static_cache_handle_store_failure(
-					"failed to serialize value for cache storage",
-					throw_on_failure,
-					honor_strict_store_failure
-				);
-
-				return false;
-			}
-
-			prepared->value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED;
-			prepared->value_len = (uint32_t) ZSTR_LEN(serialized.s);
-			prepared->payload_size = ZSTR_LEN(serialized.s);
-			prepared->payload_used_size = prepared->payload_size;
-			prepared->owned_string = serialized.s;
-			prepared->payload_source = (const unsigned char *) ZSTR_VAL(serialized.s);
-			serialized.s = NULL;
-
-			return true;
+			return false;
 	}
 }
 
@@ -1479,6 +1384,11 @@ void zend_opcache_static_cache_destroy_prepared_value(zend_opcache_static_cache_
 
 	if (prepared->owned_string != NULL) {
 		zend_string_release(prepared->owned_string);
+	}
+
+	if (prepared->serialize_memo != NULL) {
+		zend_hash_destroy(prepared->serialize_memo);
+		efree(prepared->serialize_memo);
 	}
 
 	zend_opcache_static_cache_init_prepared_value(prepared);
@@ -1498,16 +1408,14 @@ bool zend_opcache_static_cache_store_prepared_locked(
 	zend_opcache_static_cache_header *header;
 	zend_opcache_static_cache_entry *entries, *entry;
 	zend_long new_long_value = 0;
-	php_serialize_data_t var_hash;
-	smart_str serialized = {0};
 	uint64_t expires_at;
 	uint32_t slot_index, offset = 0, graph_offset = 0, reusable_offset, old_key_offset = 0, old_value_offset = 0,
 			new_key_offset = 0, new_value_offset = 0, new_value_len = 0, combined_reusable_offset = 0;
 	uint16_t old_reserved = 0, new_reserved = 0;
 	uint8_t old_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_NULL, new_value_type;
-	size_t encoded_len, serialized_len, key_payload_size, failed_payload_size;
-	bool found, retried_expired = false, retried_compact = false, retried_clear = false, allow_clear, old_combined, use_combined_publish, failed_unstorable;
-	unsigned char *encoded, *combined_payload;
+	size_t key_payload_size, failed_payload_size;
+	bool found, retried_expired = false, retried_compact = false, retried_clear = false, allow_clear, old_combined, use_combined_publish;
+	unsigned char *combined_payload;
 	double new_double_value = 0;
 
 	ZVAL_DEREF(value);
@@ -1634,8 +1542,6 @@ retry_store:
 
 			break;
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING:
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED:
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED:
 			if (use_combined_publish) {
 				if (!zend_opcache_static_cache_publish_combined_offset_value_locked(
 						combined_reusable_offset,
@@ -1693,10 +1599,11 @@ retry_store:
 
 				if (combined_payload != NULL) {
 					if (zend_opcache_static_cache_build_shared_graph_in_place(
-						value,
-						combined_payload,
-						prepared->payload_size,
-						NULL)
+							value,
+							combined_payload,
+							prepared->payload_size,
+							NULL,
+							prepared->serialize_memo)
 					) {
 						memcpy(combined_payload + prepared->payload_size, ZSTR_VAL(key), key_payload_size);
 						new_reserved = ZEND_OPCACHE_STATIC_CACHE_ENTRY_RESERVED_COMBINED_VALUE_KEY;
@@ -1732,7 +1639,8 @@ retry_store:
 							value,
 							(unsigned char *) zend_opcache_static_cache_ptr(graph_offset),
 							prepared->payload_size,
-							NULL)
+							NULL,
+							prepared->serialize_memo)
 					) {
 						new_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH;
 						new_value_offset = graph_offset;
@@ -1754,118 +1662,15 @@ retry_store:
 				}
 			}
 
-			offset = reusable_offset;
-			encoded = NULL;
-			encoded_len = 0;
-			failed_unstorable = false;
-			if (zend_opcache_serialize_ex(&encoded, &encoded_len, value, &failed_unstorable)) {
-				if (use_combined_publish) {
-					if (!zend_opcache_static_cache_publish_combined_offset_value_locked(
-							combined_reusable_offset,
-							key,
-							encoded_len,
-							encoded,
-							&new_value_offset,
-							&new_key_offset)
-					) {
-						efree(encoded);
+			/* The shared-graph payload did not fit in shared memory. The build was
+			 * already validated off-lock at prepare time, so a store-time failure is
+			 * purely a memory shortfall, reached only after the expiry, compaction,
+			 * and clear retries above. */
+			failure_message = "not enough shared memory left";
+			failed_payload_size = prepared->payload_size;
+			allow_clear = zend_opcache_static_cache_payload_can_fit_locked(prepared->payload_size);
 
-						failure_message = "not enough shared memory left";
-						failed_payload_size = encoded_len + key_payload_size;
-						allow_clear = zend_opcache_static_cache_payload_can_fit_locked(encoded_len + key_payload_size);
-
-						goto store_failed;
-					}
-
-					new_reserved = ZEND_OPCACHE_STATIC_CACHE_ENTRY_RESERVED_COMBINED_VALUE_KEY;
-				} else {
-					offset = zend_opcache_static_cache_write_payload_locked(offset, encoded_len, encoded);
-					if (offset == 0) {
-						efree(encoded);
-
-						failure_message = "not enough shared memory left";
-						failed_payload_size = encoded_len;
-						allow_clear = zend_opcache_static_cache_payload_can_fit_locked(encoded_len);
-
-						goto store_failed;
-					}
-
-					new_value_offset = offset;
-				}
-				efree(encoded);
-
-				new_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED;
-				new_value_len = (uint32_t) encoded_len;
-
-				break;
-			}
-
-			if (failed_unstorable) {
-				failure_message = "resources and Closure objects cannot be stored in the static cache";
-				allow_clear = false;
-
-				goto store_failed;
-			}
-
-			if (EG(exception)) {
-				return false;
-			}
-
-			PHP_VAR_SERIALIZE_INIT(var_hash);
-			php_var_serialize(&serialized, value, &var_hash);
-			PHP_VAR_SERIALIZE_DESTROY(var_hash);
-			if (serialized.s == NULL) {
-				if (EG(exception)) {
-					return false;
-				}
-
-				failure_message = "failed to serialize value for cache storage";
-				allow_clear = false;
-
-				goto store_failed;
-			}
-
-			serialized_len = ZSTR_LEN(serialized.s);
-			if (use_combined_publish) {
-				if (!zend_opcache_static_cache_publish_combined_offset_value_locked(
-						combined_reusable_offset,
-						key,
-						serialized_len,
-						ZSTR_VAL(serialized.s),
-						&new_value_offset,
-						&new_key_offset)
-				) {
-					smart_str_free(&serialized);
-
-					failure_message = "not enough shared memory left";
-					failed_payload_size = serialized_len + key_payload_size;
-					allow_clear = zend_opcache_static_cache_payload_can_fit_locked(serialized_len + key_payload_size);
-
-					goto store_failed;
-				}
-
-				new_reserved = ZEND_OPCACHE_STATIC_CACHE_ENTRY_RESERVED_COMBINED_VALUE_KEY;
-			} else {
-				offset = zend_opcache_static_cache_write_payload_locked(reusable_offset, serialized_len, ZSTR_VAL(serialized.s));
-				if (offset == 0) {
-					smart_str_free(&serialized);
-
-					failure_message = "not enough shared memory left";
-					failed_payload_size = serialized_len;
-					allow_clear = zend_opcache_static_cache_payload_can_fit_locked(serialized_len);
-
-					goto store_failed;
-				}
-
-				new_value_offset = offset;
-			}
-
-			smart_str_free(&serialized);
-
-			new_value_type = ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED;
-			new_value_len = (uint32_t) serialized_len;
-
-			break;
+			goto store_failed;
 		default:
 			ZEND_UNREACHABLE();
 	}
@@ -2066,14 +1871,16 @@ value_found:
 	generation = entry->generation;
 
 	/* The request-local prototype trades a re-decode for a deep clone on every
-	 * repeat fetch. For the serialized payloads, where re-running unserialize is
-	 * expensive, the prototype wins. For a pure shared graph it is a net loss:
-	 * decoding straight from SHM is cheaper than deep-cloning the materialized
-	 * object graph, and such a graph holds no shared identity or cycles, so each
-	 * decode is already an independent copy. A shared graph that embeds
-	 * serialized object nodes (e.g. classes with custom __serialize) re-runs
-	 * unserialize per node on decode, so it keeps the prototype too. */
-	use_proto = use_request_local_slot && zend_opcache_static_cache_entry_uses_request_local_slot(entry);
+	 * repeat fetch. It wins only when re-decoding is expensive or unsafe to repeat:
+	 * a graph that reconstructs an object by running userland on decode
+	 * (__unserialize/__wakeup), or that holds shared identity or cycles, keeps the
+	 * prototype. A pure-direct shared graph is a net loss: decoding straight from
+	 * SHM is cheaper than deep-cloning the materialized graph, and it holds no
+	 * shared identity or cycles, so each decode is already an independent copy. */
+	use_proto = use_request_local_slot;
+	if (use_proto && entry->value_type == ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH) {
+		use_proto = zend_opcache_static_cache_shared_graph_requires_prototype(entry->value_offset);
+	}
 
 	if (use_proto) {
 		slot_result = zend_opcache_static_cache_fetch_request_local_slot(key, generation, return_value);
@@ -2113,8 +1920,6 @@ value_found:
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING:
 			ZVAL_STRINGL(return_value, zend_opcache_static_cache_ptr(entry->value_offset), entry->value_len);
 			return zend_opcache_static_cache_fetch_finish(key, generation, return_value, use_proto);
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED:
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED:
 		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH:
 			if (!zend_opcache_static_cache_materialize_payload_locked(
 					key,
@@ -2149,22 +1954,6 @@ bool zend_opcache_static_cache_exists_locked(zend_string *key)
 	}
 
 	return found;
-}
-
-bool zend_opcache_static_cache_value_type_locked(zend_string *key, uint8_t *value_type)
-{
-	zend_ulong hash = zend_string_hash_val(key);
-	zend_opcache_static_cache_header *header = NULL;
-	uint32_t slot_index;
-	bool found;
-
-	if (!zend_opcache_static_cache_find_slot_for_read_locked(key, hash, &header, &slot_index, &found) || !found) {
-		return false;
-	}
-
-	*value_type = zend_opcache_static_cache_entries(header)[slot_index].value_type;
-
-	return true;
 }
 
 bool zend_opcache_static_cache_delete_locked(zend_string *key)

@@ -138,7 +138,7 @@ pcntl_waitpid($pid, $status);
 --EXPECT--
 2026-06-15 09:30:00.123456 Europe/Paris,launch:7
 metric,LabelIterator,10,20
-2026-06-15 10:45:00.654321 UTC,fallback,0
+2026-06-15 10:45:00.654321 UTC,fallback,1
 --CLEAN--
 <?php
 foreach (glob(sys_get_temp_dir() . '/opcache_volatile_cache_direct_cache_safe_fork_[0-9]*.ready') ?: [] as $path) {

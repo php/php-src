@@ -1,5 +1,5 @@
 --TEST--
-FPM: OPcache direct cache subclasses survive requests, safe serializer overrides stay direct, and wakeup hooks fallback
+FPM: OPcache direct cache subclasses survive requests, safe serializer overrides stay direct, and custom hook state is preserved
 --EXTENSIONS--
 opcache
 spl
@@ -174,7 +174,7 @@ $tester->request(query: 'action=seed')->expectBody(
 $tester->request(query: 'action=fetch')->expectBody(
 	"2026-06-15 09:30:00.123456 Europe/Paris,launch:7\n" .
 	"metric,LabelIterator,10,20\n" .
-	"2026-06-15 10:45:00.654321 UTC,fallback,0\n" .
+	"2026-06-15 10:45:00.654321 UTC,fallback,1\n" .
 	"2026-06-15 12:15:00.987654 UTC,fallback,1"
 );
 

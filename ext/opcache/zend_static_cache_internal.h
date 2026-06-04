@@ -56,16 +56,26 @@
 #define ZEND_OPCACHE_STATIC_CACHE_VALUE_LONG 3
 #define ZEND_OPCACHE_STATIC_CACHE_VALUE_DOUBLE 4
 #define ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING 5
-#define ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED 6
-#define ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED 7
 #define ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH 8
 
 #define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_MAGIC 0xCAC17E02U
-#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VERSION 1U
-/* Header flag: the graph embeds at least one serialized object node, which is
- * expensive to re-decode, so such a graph keeps the request-local prototype
- * (decode once, clone many) instead of decoding from SHM on every fetch. */
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VERSION 8U
+/* Header flag: the graph embeds an object restored by running userland on decode
+ * (__unserialize for a hooked object, __wakeup for a __sleep object), so it keeps
+ * its request-local prototype (decode once, clone many) instead of re-running
+ * that userland from SHM on every fetch. */
 #define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_FLAG_HAS_SERIALIZED_OBJECT 0x1U
+/* The graph contains a shared object (OBJECT_REF) or a cycle. Such a graph keeps
+ * its request-local prototype: cloning the materialized prototype (which already
+ * carries the shared identity) is cheaper than re-decoding with the identity map
+ * on every fetch. */
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_FLAG_HAS_SHARED_IDENTITY 0x2U
+/* The graph contains an object or enum node, so decoding it resolves a class (which
+ * may autoload) and may run userland (__unserialize/__wakeup). Such a graph is
+ * decoded off-lock and keeps its request-local prototype. A graph without this flag
+ * is pure data (scalars, strings, arrays, references) and runs no userland on decode,
+ * so it can be materialized while the read lock is held. */
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_FLAG_HAS_OBJECT 0x4U
 #define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_RETIRED (1 << 30)
 #define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_REFCOUNT_MASK (ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_RETIRED - 1)
 
@@ -78,8 +88,38 @@
 #define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_STRING 6
 #define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_ARRAY 7
 #define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT 8
-#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_SERIALIZED_OBJECT 9
 #define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_DYNAMIC_ARRAY 10
+/* Back-reference to an OBJECT node already emitted in this graph (shared identity
+ * or a cycle). payload.offset points at that node; the node carries FLAG_SHARED. */
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT_REF 11
+/* Object reconstructed via __unserialize: class name + the __serialize() array
+ * stored as a transparent subtree (state). Decoded by running __unserialize. */
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_HOOKED_OBJECT 12
+/* A PHP hard reference (&). REFERENCE holds the referenced value; REFERENCE_REF is
+ * a back-reference to a REFERENCE node already emitted (a shared or cyclic &), so
+ * the decoder resolves both to the same zend_reference. */
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_REFERENCE 13
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_REFERENCE_REF 14
+
+/* A back-reference to a DYNAMIC_ARRAY node already emitted, used when an array
+ * is reachable from inside itself (a cycle, always closed through a &). The
+ * decoder records the array before filling it and resolves the cycle to it. */
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_ARRAY_REF 15
+
+/* An enum case, encoded as class name + case name. The decoder resolves it to
+ * the process-global singleton via zend_enum_get_case, so it is restored by
+ * reference (no instantiation, which is forbidden for enums). */
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_ENUM 16
+
+/* A legacy __sleep/__wakeup object: the state is the __sleep-selected properties
+ * (or all properties when only __wakeup is defined) as a name => value array.
+ * The decoder sets the properties and runs __wakeup. Reuses the hooked_object
+ * node layout. */
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_SLEEP_OBJECT 17
+
+/* Set in an object node's flags word when the graph references it more than once
+ * (so the decoder records it in the per-decode identity map for back-refs). */
+#define ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED 0x1U
 
 #define ZEND_OPCACHE_STATIC_CACHE_LOOKUP_BUCKETS 256U
 #define ZEND_OPCACHE_STATIC_CACHE_LOOKUP_WAYS 2U
@@ -236,6 +276,10 @@ typedef struct {
 	zend_string *owned_string;
 	zend_long long_value;
 	double double_value;
+	/* object -> its __serialize() array, computed once during prepare and reused
+	 * by both the prepare-time build and the under-lock re-build into SHM, so
+	 * __serialize runs exactly once. Owned here; freed in destroy_prepared_value. */
+	HashTable *serialize_memo;
 } zend_opcache_static_cache_prepared_value;
 
 typedef struct {
@@ -347,16 +391,37 @@ typedef struct {
 	uint32_t reserved;
 } zend_opcache_static_cache_shared_graph_object;
 
-typedef struct {
-	uint32_t data_len;
+typedef struct _zend_opcache_static_cache_shared_graph_hooked_object {
+	uint32_t class_name_offset;
 	uint32_t reserved;
-	unsigned char data[1];
-} zend_opcache_static_cache_shared_graph_serialized_object;
+	zend_opcache_static_cache_shared_graph_value state;
+} zend_opcache_static_cache_shared_graph_hooked_object;
+
+typedef struct _zend_opcache_static_cache_shared_graph_reference {
+	uint32_t flags;     /* OBJECT_FLAG_SHARED if the reference is shared/cyclic */
+	uint32_t reserved;
+	zend_opcache_static_cache_shared_graph_value inner;
+} zend_opcache_static_cache_shared_graph_reference;
+
+typedef struct _zend_opcache_static_cache_shared_graph_enum {
+	uint32_t class_name_offset;
+	uint32_t case_name_offset;
+} zend_opcache_static_cache_shared_graph_enum;
 
 typedef struct {
 	size_t size;
 	HashTable seen_arrays;
 	HashTable seen_objects;
+	HashTable seen_references;
+	/* Strings counted once each, matching the copy pass's string_dedup, so the
+	 * size estimate is not inflated by repeated strings (class/property names,
+	 * repeated array values). */
+	HashTable string_dedup;
+	/* object -> its __serialize() array, computed once and reused by the copy
+	 * pass so __serialize runs exactly once per store. NULL when userland calls
+	 * are not allowed (under the write lock): a graph needing __serialize or
+	 * __sleep cannot be encoded then and is refused. */
+	HashTable *serialize_memo;
 } zend_opcache_static_cache_shared_graph_calc_context;
 
 typedef struct {
@@ -365,8 +430,13 @@ typedef struct {
 	size_t position;
 	HashTable seen_arrays;
 	HashTable seen_objects;
+	HashTable seen_references;
 	HashTable string_dedup;
 	bool has_serialized_object;
+	bool has_shared_identity;
+	bool has_object;
+	/* Shared with the calc pass: object -> its already-computed __serialize() array. */
+	HashTable *serialize_memo;
 } zend_opcache_static_cache_shared_graph_copy_context;
 
 typedef struct _zend_opcache_static_cache_partition {
@@ -471,8 +541,8 @@ zend_opcache_static_cache_safe_direct_state_unserialize_func_t zend_opcache_stat
 );
 bool zend_opcache_static_cache_safe_direct_allows_custom_serializers(zend_class_entry *ce);
 bool zend_opcache_static_cache_safe_direct_state_includes_properties(zend_class_entry *ce);
-bool zend_opcache_static_cache_calculate_shared_graph_size(const zval *value, size_t *buffer_len);
-bool zend_opcache_static_cache_build_shared_graph_in_place(const zval *value, unsigned char *buffer, size_t buffer_len, size_t *graph_len);
+bool zend_opcache_static_cache_calculate_shared_graph_size(const zval *value, size_t *buffer_len, HashTable *serialize_memo);
+bool zend_opcache_static_cache_build_shared_graph_in_place(const zval *value, unsigned char *buffer, size_t buffer_len, size_t *graph_len, HashTable *serialize_memo);
 bool zend_opcache_static_cache_shared_graph_copy_fits_buffer(
 	const unsigned char *source_buffer,
 	size_t source_buffer_len,
@@ -482,6 +552,7 @@ bool zend_opcache_static_cache_shared_graph_copy_fits_buffer(
 );
 bool zend_opcache_static_cache_fetch_shared_graph(const unsigned char *buffer, size_t buffer_len, zval *destination);
 bool zend_opcache_static_cache_shared_graph_requires_prototype(uint32_t payload_offset);
+bool zend_opcache_static_cache_shared_graph_decode_is_lock_safe(uint32_t payload_offset);
 bool zend_opcache_static_cache_shared_graph_can_overwrite_payload_locked(uint32_t payload_offset);
 bool zend_opcache_static_cache_shared_graph_can_move_payload_locked(uint32_t payload_offset);
 bool zend_opcache_static_cache_shared_graph_rebase_moved_payload_locked(uint32_t payload_offset, ptrdiff_t delta);
@@ -515,7 +586,6 @@ bool zend_opcache_static_cache_store_prepared_locked(
 bool zend_opcache_static_cache_store_locked(zend_string *key, zval *value, zend_long ttl, bool throw_on_failure, bool honor_strict_store_failure);
 bool zend_opcache_static_cache_fetch_locked(zend_string *key, zval *return_value, bool throw_if_missing, bool *found_ptr, bool use_request_local_slot);
 bool zend_opcache_static_cache_exists_locked(zend_string *key);
-bool zend_opcache_static_cache_value_type_locked(zend_string *key, uint8_t *value_type);
 bool zend_opcache_static_cache_delete_locked(zend_string *key);
 bool zend_opcache_static_cache_atomic_update_locked(
 	zend_string *key,
@@ -1095,8 +1165,6 @@ static zend_always_inline bool zend_opcache_static_cache_value_uses_offset(uint8
 {
 	return
 		value_type == ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING ||
-		value_type == ZEND_OPCACHE_STATIC_CACHE_VALUE_SERIALIZED ||
-		value_type == ZEND_OPCACHE_STATIC_CACHE_VALUE_OPCACHE_SERIALIZED ||
 		value_type == ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH
 	;
 }

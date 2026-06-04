@@ -15,7 +15,7 @@
 */
 
 #include "zend_static_cache_internal.h"
-#include "zend_opcache_serializer.h"
+#include "zend_static_cache_safe_direct.h"
 
 typedef struct _zend_opcache_static_cache_prepare_memo_entry {
 	zval root_snapshot;

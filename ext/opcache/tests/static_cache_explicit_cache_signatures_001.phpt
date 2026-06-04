@@ -62,10 +62,7 @@ foreach ([
 	'OPcache\\StaticCacheInterface::clear' => [],
 	'OPcache\\StaticCacheInterface::lock' => ['lease'],
 	'OPcache\\StaticCacheInterface::unlock' => [],
-	'OPcache\\StaticCacheInterface::getCacheStoreType' => [],
 	'OPcache\\StaticCacheInterface::info' => [],
-	'OPcache\\StaticCacheInterface::getCacheStoreTypeByProperty' => [],
-	'OPcache\\StaticCacheInterface::getCacheStoreTypeByMethod' => [],
 	'OPcache\\VolatileCache::getInstance' => ['pool_name'],
 	'OPcache\\VolatileCache::fetch' => ['default'],
 	'OPcache\\VolatileCache::fetchMultiple' => ['default'],
@@ -77,10 +74,7 @@ foreach ([
 	'OPcache\\VolatileCache::clear' => [],
 	'OPcache\\VolatileCache::lock' => ['lease'],
 	'OPcache\\VolatileCache::unlock' => [],
-	'OPcache\\VolatileCache::getCacheStoreType' => [],
 	'OPcache\\VolatileCache::info' => [],
-	'OPcache\\VolatileCache::getCacheStoreTypeByProperty' => [],
-	'OPcache\\VolatileCache::getCacheStoreTypeByMethod' => [],
 	'OPcache\\StableCache::getInstance' => ['pool_name'],
 	'OPcache\\StableCache::fetch' => ['default'],
 	'OPcache\\StableCache::fetchMultiple' => ['default'],
@@ -96,10 +90,7 @@ foreach ([
 	'OPcache\\StableCache::unlock' => [],
 	'OPcache\\StableCache::increment' => ['step'],
 	'OPcache\\StableCache::decrement' => ['step'],
-	'OPcache\\StableCache::getCacheStoreType' => [],
 	'OPcache\\StableCache::info' => [],
-	'OPcache\\StableCache::getCacheStoreTypeByProperty' => [],
-	'OPcache\\StableCache::getCacheStoreTypeByMethod' => [],
 ] as $method => $parameters) {
 	$reflection = ReflectionMethod::createFromMethodName($method);
 	$parts = [$method];
@@ -133,10 +124,7 @@ OPcache\StaticCacheInterface::deleteMultiple static=0 params=1/1 return=bool
 OPcache\StaticCacheInterface::clear static=0 params=0/0 return=bool
 OPcache\StaticCacheInterface::lock $lease=int static=0 params=1/2 return=bool
 OPcache\StaticCacheInterface::unlock static=0 params=1/1 return=bool
-OPcache\StaticCacheInterface::getCacheStoreType static=0 params=1/1 return=OPcache\CacheStoreType
 OPcache\StaticCacheInterface::info static=1 params=0/0 return=OPcache\StaticCacheInfo
-OPcache\StaticCacheInterface::getCacheStoreTypeByProperty static=1 params=2/2 return=OPcache\CacheStoreType
-OPcache\StaticCacheInterface::getCacheStoreTypeByMethod static=1 params=3/3 return=OPcache\CacheStoreType
 OPcache\VolatileCache::getInstance $pool_name=string static=1 params=1/1 return=static
 OPcache\VolatileCache::fetch $default=null|bool|int|float|string|array|object static=0 params=1/2 return=null|bool|int|float|string|array|object
 OPcache\VolatileCache::fetchMultiple $default=?array static=0 params=1/2 return=array|false
@@ -148,10 +136,7 @@ OPcache\VolatileCache::deleteMultiple static=0 params=1/1 return=bool
 OPcache\VolatileCache::clear static=0 params=0/0 return=bool
 OPcache\VolatileCache::lock $lease=int static=0 params=1/2 return=bool
 OPcache\VolatileCache::unlock static=0 params=1/1 return=bool
-OPcache\VolatileCache::getCacheStoreType static=0 params=1/1 return=OPcache\CacheStoreType
 OPcache\VolatileCache::info static=1 params=0/0 return=OPcache\StaticCacheInfo
-OPcache\VolatileCache::getCacheStoreTypeByProperty static=1 params=2/2 return=OPcache\CacheStoreType
-OPcache\VolatileCache::getCacheStoreTypeByMethod static=1 params=3/3 return=OPcache\CacheStoreType
 OPcache\StableCache::getInstance $pool_name=string static=1 params=1/1 return=static
 OPcache\StableCache::fetch $default=null|bool|int|float|string|array|object static=0 params=1/2 return=null|bool|int|float|string|array|object
 OPcache\StableCache::fetchMultiple $default=?array static=0 params=1/2 return=array|false
@@ -167,7 +152,4 @@ OPcache\StableCache::lock $lease=int static=0 params=1/2 return=bool
 OPcache\StableCache::unlock static=0 params=1/1 return=bool
 OPcache\StableCache::increment $step=int static=0 params=1/2 return=int|false
 OPcache\StableCache::decrement $step=int static=0 params=1/2 return=int|false
-OPcache\StableCache::getCacheStoreType static=0 params=1/1 return=OPcache\CacheStoreType
 OPcache\StableCache::info static=1 params=0/0 return=OPcache\StaticCacheInfo
-OPcache\StableCache::getCacheStoreTypeByProperty static=1 params=2/2 return=OPcache\CacheStoreType
-OPcache\StableCache::getCacheStoreTypeByMethod static=1 params=3/3 return=OPcache\CacheStoreType
