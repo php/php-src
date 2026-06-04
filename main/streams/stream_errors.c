@@ -215,6 +215,7 @@ static void php_stream_error_entry_free(php_stream_error_entry *entry)
 		zend_string_release(entry->message);
 		efree(entry->wrapper_name);
 		efree(entry->param);
+		efree(entry->docref);
 		efree(entry);
 		entry = next;
 	}
@@ -449,9 +450,6 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 		return;
 	}
 
-	state->operation_depth--;
-	state->current_operation = php_stream_get_parent_operation();
-
 	if (op->error_count > 0) {
 		if (context == NULL) {
 			context = FG(default_context);
@@ -526,6 +524,9 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 			op->first_error = NULL;
 		}
 	}
+
+	state->operation_depth--;
+	state->current_operation = php_stream_get_parent_operation();
 
 	op->first_error = NULL;
 	op->last_error = NULL;
