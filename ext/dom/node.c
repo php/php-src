@@ -2201,7 +2201,7 @@ static void dom_relink_ns_decls_element(HashTable *links, xmlNodePtr node)
 	}
 }
 
-static void dom_relink_ns_decls(HashTable *links, xmlNodePtr root)
+void dom_relink_ns_decls(HashTable *links, xmlNodePtr root)
 {
 	dom_relink_ns_decls_element(links, root);
 
@@ -2213,7 +2213,7 @@ static void dom_relink_ns_decls(HashTable *links, xmlNodePtr root)
 	}
 }
 
-static void dom_unlink_ns_decls(HashTable *links)
+void dom_unlink_ns_decls(HashTable *links)
 {
 	ZEND_HASH_MAP_FOREACH_NUM_KEY_VAL(links, zend_ulong h, zval *data) {
 		if (h & 1) {
