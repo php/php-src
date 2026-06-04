@@ -993,6 +993,8 @@ static zend_always_inline bool zend_opcache_static_cache_explicit_store_prevalid
 	bool stored, release_entry_lock = false, seed_request_local_slot = false;
 
 	if (!zend_opcache_static_cache_prepare_value(&prepared, key, value, false, false, false)) {
+		zend_opcache_static_cache_destroy_prepared_value(&prepared);
+
 		return false;
 	}
 
@@ -1106,6 +1108,7 @@ static zend_always_inline zend_result zend_opcache_static_cache_fetch_array_pool
 				ZVAL_COPY(&fetched_value, default_value);
 			} else {
 				zval_ptr_dtor(return_value);
+
 				ZVAL_UNDEF(return_value);
 
 				zend_string_release(storage_key);
@@ -1556,11 +1559,11 @@ ZEND_METHOD(OPcache_VolatileStatic, __construct)
 
 static zend_always_inline void zend_opcache_static_cache_get_instance(INTERNAL_FUNCTION_PARAMETERS, bool is_stable)
 {
+	zend_opcache_static_cache_object *cache;
 	zend_class_entry *ce = is_stable
 		? zend_opcache_static_cache_stable_cache_ce
 		: zend_opcache_static_cache_volatile_cache_ce
 	;
-	zend_opcache_static_cache_object *cache;
 	zend_string *pool_name, *instance_key;
 	zval instance, *cached_instance;
 	HashTable *instances;
@@ -2311,6 +2314,7 @@ ZEND_METHOD(OPcache_StableCache, fetch)
 
 	if (default_value == NULL) {
 		ZVAL_NULL(&default_null);
+
 		default_value = &default_null;
 	}
 
@@ -2473,6 +2477,7 @@ ZEND_METHOD(OPcache_StableCache, deleteMultiple)
 	if (!zend_opcache_static_cache_validate_available_write()) {
 		zend_opcache_static_cache_restore_context(previous_context);
 		zend_opcache_static_cache_release_key_list(prepared_keys, key_count);
+
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -2813,6 +2818,7 @@ ZEND_METHOD(OPcache_StableCache, info)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_opcache_static_cache_return_info(return_value, zend_opcache_static_cache_active_stable_context());
+
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}

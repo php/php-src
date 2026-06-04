@@ -20,17 +20,17 @@
 #include "Zend/zend_closures.h"
 #include "Zend/zend_objects.h"
 
-typedef struct _zend_opcache_static_cache_request_local_clone_context {
+#define ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_ARRAY_NO_CLONE ((void *) 1)
+#define ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_ARRAY_NEEDS_CLONE ((void *) 2)
+
+typedef struct {
 	HashTable arrays;
 	HashTable objects;
 	HashTable references;
 	HashTable *array_clone_flags;
 } zend_opcache_static_cache_request_local_clone_context;
 
-#define ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_ARRAY_NO_CLONE ((void *) 1)
-#define ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_ARRAY_NEEDS_CLONE ((void *) 2)
-
-typedef enum _zend_opcache_static_cache_request_local_slot_result {
+typedef enum {
 	ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_SLOT_MISS,
 	ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_SLOT_HIT
 } zend_opcache_static_cache_request_local_slot_result;
@@ -212,9 +212,13 @@ static bool zend_opcache_static_cache_value_needs_request_local_clone_inner(
 
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), element) {
 				if (zend_opcache_static_cache_value_needs_request_local_clone_inner(element, visited_arrays)) {
+					zend_hash_index_del(visited_arrays, array_key);
+
 					return true;
 				}
 			} ZEND_HASH_FOREACH_END();
+
+			zend_hash_index_del(visited_arrays, array_key);
 
 			return false;
 		default:
@@ -247,7 +251,8 @@ static bool zend_opcache_static_cache_collect_request_local_array_clone_flags_in
 		zval *value,
 		HashTable *visited_arrays,
 		HashTable *visited_objects,
-		HashTable *array_clone_flags);
+		HashTable *array_clone_flags,
+		bool record_array_result);
 
 static bool zend_opcache_static_cache_collect_request_local_object_clone_flags(
 		zend_object *object,
@@ -277,7 +282,8 @@ static bool zend_opcache_static_cache_collect_request_local_object_clone_flags(
 				src,
 				visited_arrays,
 				visited_objects,
-				array_clone_flags
+				array_clone_flags,
+				true
 			);
 			src++;
 		} while (src != end);
@@ -290,7 +296,8 @@ static bool zend_opcache_static_cache_collect_request_local_object_clone_flags(
 					prop,
 					visited_arrays,
 					visited_objects,
-					array_clone_flags
+					array_clone_flags,
+					true
 				);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -303,7 +310,8 @@ static bool zend_opcache_static_cache_collect_request_local_array_clone_flags_in
 		zval *value,
 		HashTable *visited_arrays,
 		HashTable *visited_objects,
-		HashTable *array_clone_flags)
+		HashTable *array_clone_flags,
+		bool record_array_result)
 {
 	zend_ulong array_key;
 	zval *element;
@@ -315,7 +323,8 @@ static bool zend_opcache_static_cache_collect_request_local_array_clone_flags_in
 			&Z_REF_P(value)->val,
 			visited_arrays,
 			visited_objects,
-			array_clone_flags
+			array_clone_flags,
+			true
 		);
 
 		return true;
@@ -349,20 +358,25 @@ static bool zend_opcache_static_cache_collect_request_local_array_clone_flags_in
 						element,
 						visited_arrays,
 						visited_objects,
-						array_clone_flags
+						array_clone_flags,
+						false
 					)
 				) {
 					needs_clone = true;
 				}
 			} ZEND_HASH_FOREACH_END();
 
-			zend_hash_index_update_ptr(
-				array_clone_flags,
-				array_key,
-				needs_clone ?
-					ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_ARRAY_NEEDS_CLONE :
-					ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_ARRAY_NO_CLONE
-			);
+			zend_hash_index_del(visited_arrays, array_key);
+
+			if (needs_clone || record_array_result) {
+				zend_hash_index_update_ptr(
+					array_clone_flags,
+					array_key,
+					needs_clone ?
+						ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_ARRAY_NEEDS_CLONE :
+						ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_ARRAY_NO_CLONE
+				);
+			}
 
 			return needs_clone;
 		default:
@@ -384,7 +398,8 @@ static bool zend_opcache_static_cache_collect_request_local_array_clone_flags(
 		value,
 		&visited_arrays,
 		&visited_objects,
-		array_clone_flags
+		array_clone_flags,
+		true
 	);
 
 	zend_hash_destroy(&visited_objects);
@@ -503,9 +518,7 @@ static bool zend_opcache_static_cache_clone_request_local_array_ex(
 
 	array = zend_array_dup(Z_ARRVAL_P(src));
 	zend_hash_index_update_ptr(&context->arrays, key, array);
-	GC_ADDREF(array);
-	ZVAL_ARR(dst, array);
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(dst), element) {
+	ZEND_HASH_FOREACH_VAL(array, element) {
 		if (Z_TYPE_P(element) == IS_INDIRECT ||
 			!zend_opcache_static_cache_value_needs_request_local_clone_cached(context, element)
 		) {
@@ -513,7 +526,6 @@ static bool zend_opcache_static_cache_clone_request_local_array_ex(
 		}
 
 		if (!zend_opcache_static_cache_clone_request_local_value(context, &cloned_element, element)) {
-			zval_ptr_dtor(dst);
 			ZVAL_UNDEF(dst);
 
 			return false;
@@ -522,6 +534,9 @@ static bool zend_opcache_static_cache_clone_request_local_array_ex(
 		zval_ptr_dtor(element);
 		ZVAL_COPY_VALUE(element, &cloned_element);
 	} ZEND_HASH_FOREACH_END();
+
+	GC_ADDREF(array);
+	ZVAL_ARR(dst, array);
 
 	return true;
 }
@@ -936,19 +951,6 @@ static bool zend_opcache_static_cache_materialize_payload_locked(
 			}
 
 			return true;
-		default:
-			return false;
-	}
-}
-
-static zend_always_inline bool zend_opcache_static_cache_entry_uses_request_local_slot(
-		const zend_opcache_static_cache_entry *entry)
-{
-	switch (entry->value_type) {
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_STRING:
-			return entry->value_len >= ZEND_OPCACHE_STATIC_CACHE_REQUEST_LOCAL_STRING_MIN_LEN;
-		case ZEND_OPCACHE_STATIC_CACHE_VALUE_SHARED_GRAPH:
-			return zend_opcache_static_cache_shared_graph_requires_prototype(entry->value_offset);
 		default:
 			return false;
 	}
@@ -1968,6 +1970,7 @@ bool zend_opcache_static_cache_store_locked(zend_string *key, zval *value, zend_
 	 * reacquiring it before returning. */
 	zend_opcache_static_cache_unlock();
 	if (!zend_opcache_static_cache_prepare_value(&prepared, key, value, throw_on_failure, honor_strict_store_failure, false)) {
+		zend_opcache_static_cache_destroy_prepared_value(&prepared);
 		zend_opcache_static_cache_reacquire_write_lock_or_fail(cache_name);
 
 		return false;

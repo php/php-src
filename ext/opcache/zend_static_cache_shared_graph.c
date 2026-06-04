@@ -39,6 +39,20 @@ static ZEND_EXT_TLS struct {
  * and restore it: fetch_shared_graph is re-entrant via autoload. NULL = inactive. */
 static ZEND_EXT_TLS HashTable *zend_opcache_static_cache_decode_identity_map = NULL;
 
+/* Per-decode reference-identity map: REFERENCE nodes flagged shared record their
+ * materialized zend_reference here (keyed by node offset) so REFERENCE_REF nodes
+ * resolve to the same reference. Mirrors the object identity map above. */
+static ZEND_EXT_TLS HashTable *zend_opcache_static_cache_decode_reference_map = NULL;
+
+static bool zend_opcache_static_cache_shared_graph_rebase_direct_array(
+	zend_array *array,
+	const unsigned char *old_base,
+	const unsigned char *new_base,
+	size_t len,
+	ptrdiff_t delta,
+	HashTable *seen_arrays
+);
+
 static void zend_opcache_static_cache_decode_identity_object_dtor(zval *zv)
 {
 	OBJ_RELEASE((zend_object *) Z_PTR_P(zv));
@@ -82,11 +96,6 @@ static zend_always_inline zend_object *zend_opcache_static_cache_decode_identity
 	return zend_hash_index_find_ptr(zend_opcache_static_cache_decode_identity_map, offset);
 }
 
-/* Per-decode reference-identity map: REFERENCE nodes flagged shared record their
- * materialized zend_reference here (keyed by node offset) so REFERENCE_REF nodes
- * resolve to the same reference. Mirrors the object identity map above. */
-static ZEND_EXT_TLS HashTable *zend_opcache_static_cache_decode_reference_map = NULL;
-
 static void zend_opcache_static_cache_decode_reference_dtor(zval *zv)
 {
 	zval tmp;
@@ -109,11 +118,15 @@ static zend_always_inline bool zend_opcache_static_cache_decode_reference_map_in
 {
 	if (zend_opcache_static_cache_decode_reference_map == NULL) {
 		zend_opcache_static_cache_decode_reference_map = emalloc(sizeof(HashTable));
-		zend_hash_init(zend_opcache_static_cache_decode_reference_map, 8, NULL,
-			zend_opcache_static_cache_decode_reference_dtor, 0);
+		zend_hash_init(zend_opcache_static_cache_decode_reference_map,
+			8,
+			NULL,
+			zend_opcache_static_cache_decode_reference_dtor, 0
+		);
 	}
 
 	GC_ADDREF(reference);
+
 	if (zend_hash_index_add_ptr(zend_opcache_static_cache_decode_reference_map, offset, reference) == NULL) {
 		if (GC_DELREF(reference) == 0) {
 			efree_size(reference, sizeof(zend_reference));
@@ -144,6 +157,7 @@ static void zend_opcache_static_cache_decode_array_dtor(zval *zv)
 
 	/* Release the transient ref taken on insert (frees the array at rc 0). */
 	ZVAL_ARR(&tmp, (zend_array *) Z_PTR_P(zv));
+
 	zval_ptr_dtor(&tmp);
 }
 
@@ -151,7 +165,9 @@ static zend_always_inline void zend_opcache_static_cache_decode_array_map_teardo
 {
 	if (zend_opcache_static_cache_decode_array_map != NULL) {
 		zend_hash_destroy(zend_opcache_static_cache_decode_array_map);
+
 		efree(zend_opcache_static_cache_decode_array_map);
+
 		zend_opcache_static_cache_decode_array_map = NULL;
 	}
 }
@@ -160,8 +176,10 @@ static zend_always_inline bool zend_opcache_static_cache_decode_array_map_insert
 {
 	if (zend_opcache_static_cache_decode_array_map == NULL) {
 		zend_opcache_static_cache_decode_array_map = emalloc(sizeof(HashTable));
+
 		zend_hash_init(zend_opcache_static_cache_decode_array_map, 8, NULL,
-			zend_opcache_static_cache_decode_array_dtor, 0);
+			zend_opcache_static_cache_decode_array_dtor, 0
+		);
 	}
 
 	GC_ADDREF(array);
@@ -476,6 +494,9 @@ static bool zend_opcache_static_cache_shared_graph_build_sleep_state(
 		zend_object *object, zend_class_entry *ce, zval *state_out)
 {
 	zend_function *sleep_fn = zend_hash_str_find_ptr(&ce->function_table, "__sleep", sizeof("__sleep") - 1);
+	zend_string *prop_name;
+	zval obj_zv, *prop_value, rv, *prop;
+	HashTable *props;
 
 	array_init(state_out);
 
@@ -487,14 +508,13 @@ static bool zend_opcache_static_cache_shared_graph_build_sleep_state(
 		if (EG(exception) || Z_TYPE(sleep_rv) != IS_ARRAY) {
 			zval_ptr_dtor(&sleep_rv);
 			zval_ptr_dtor(state_out);
+
 			ZVAL_UNDEF(state_out);
 
 			return false;
 		}
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL(sleep_rv), name_zv) {
-			zval rv, *prop;
-
 			if (Z_TYPE_P(name_zv) != IS_STRING) {
 				continue;
 			}
@@ -516,35 +536,33 @@ static bool zend_opcache_static_cache_shared_graph_build_sleep_state(
 
 	/* Only __wakeup: store every property (keyed by its mangled name; the decoder
 	 * unmangles it through the property-write helper). */
-	{
-		zval obj_zv;
-		HashTable *props;
-		zend_string *prop_name;
-		zval *prop_value;
+	ZVAL_OBJ(&obj_zv, object);
 
-		ZVAL_OBJ(&obj_zv, object);
-		props = zend_get_properties_for(&obj_zv, ZEND_PROP_PURPOSE_SERIALIZE);
-		if (props != NULL) {
-			ZEND_HASH_FOREACH_STR_KEY_VAL(props, prop_name, prop_value) {
-				if (prop_name == NULL) {
-					continue;
-				}
-				if (Z_TYPE_P(prop_value) == IS_INDIRECT) {
-					prop_value = Z_INDIRECT_P(prop_value);
-				}
-				if (Z_TYPE_P(prop_value) == IS_UNDEF) {
-					continue;
-				}
+	props = zend_get_properties_for(&obj_zv, ZEND_PROP_PURPOSE_SERIALIZE);
+	if (props != NULL) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(props, prop_name, prop_value) {
+			if (prop_name == NULL) {
+				continue;
+			}
 
-				Z_TRY_ADDREF_P(prop_value);
-				zend_hash_update(Z_ARRVAL_P(state_out), prop_name, prop_value);
-			} ZEND_HASH_FOREACH_END();
+			if (Z_TYPE_P(prop_value) == IS_INDIRECT) {
+				prop_value = Z_INDIRECT_P(prop_value);
+			}
 
-			zend_release_properties(props);
-		}
+			if (Z_TYPE_P(prop_value) == IS_UNDEF) {
+				continue;
+			}
+
+			Z_TRY_ADDREF_P(prop_value);
+			zend_hash_update(Z_ARRVAL_P(state_out), prop_name, prop_value);
+		} ZEND_HASH_FOREACH_END();
+
+		zend_release_properties(props);
 
 		return true;
 	}
+
+	return true;
 }
 
 static bool zend_opcache_static_cache_shared_graph_calc_value(
@@ -553,11 +571,12 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 )
 {
 	const HashTable *array;
-	zend_object *object;
-	zend_class_entry *ce;
-	zend_string *key, *property_name;
 	zend_ulong array_key;
-	zval *element, *property_value, *source_value;
+	zend_string *key, *property_name, *case_name;
+	zend_class_entry *ce;
+	zend_reference *ref;
+	zend_object *object;
+	zval *element, *property_value, *source_value, serialized, state;
 	HashTable *properties;
 	uint32_t property_count;
 	bool result;
@@ -580,7 +599,8 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 				 * unset) is encoded as a 0-element dynamic array to keep the index. */
 				if (array->nNextFreeElement != 0) {
 					return zend_opcache_static_cache_shared_graph_reserve_size(&context->size,
-						sizeof(zend_opcache_static_cache_shared_graph_array));
+						sizeof(zend_opcache_static_cache_shared_graph_array))
+					;
 				}
 
 				return true;
@@ -622,11 +642,13 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 			ZEND_HASH_FOREACH_STR_KEY_VAL((HashTable *) array, key, element) {
 				if (key != NULL && !zend_opcache_static_cache_shared_graph_calc_reserve_string(context, key)) {
 					result = false;
+
 					break;
 				}
 
 				if (!zend_opcache_static_cache_shared_graph_calc_value(context, element)) {
 					result = false;
+
 					break;
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -639,12 +661,15 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 			if (ce->ce_flags & ZEND_ACC_ENUM) {
 				/* An enum case is a process-global singleton, restored by name
 				 * rather than instantiated. Encode class name + case name. */
-				zend_string *case_name = Z_STR_P(zend_enum_fetch_case_name(object));
+				case_name = Z_STR_P(zend_enum_fetch_case_name(object));
 
-				return zend_opcache_static_cache_shared_graph_reserve_size(&context->size,
-						sizeof(zend_opcache_static_cache_shared_graph_enum)) &&
+				return zend_opcache_static_cache_shared_graph_reserve_size(
+						&context->size,
+						sizeof(zend_opcache_static_cache_shared_graph_enum)
+					) &&
 					zend_opcache_static_cache_shared_graph_calc_reserve_string(context, ce->name) &&
-					zend_opcache_static_cache_shared_graph_calc_reserve_string(context, case_name);
+					zend_opcache_static_cache_shared_graph_calc_reserve_string(context, case_name)
+				;
 			}
 
 			if (ce->__serialize == NULL && zend_ce_serializable != NULL &&
@@ -657,8 +682,6 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 			}
 
 			if (ce->__serialize != NULL && ce->__unserialize != NULL) {
-				zval serialized;
-
 				/* Encoding this object requires running __serialize, which is only
 				 * allowed off-lock at prepare time (where the memo is built). With no
 				 * memo (under the write lock, where userland is forbidden) the value
@@ -676,7 +699,9 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 				}
 
 				ZVAL_UNDEF(&serialized);
+
 				zend_call_known_instance_method_with_0_params(ce->__serialize, object, &serialized);
+
 				if (EG(exception) || Z_TYPE(serialized) != IS_ARRAY) {
 					zval_ptr_dtor(&serialized);
 
@@ -691,7 +716,7 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 				}
 
 				if (!zend_opcache_static_cache_shared_graph_reserve_size(&context->size,
-						sizeof(zend_opcache_static_cache_shared_graph_hooked_object)) ||
+					sizeof(zend_opcache_static_cache_shared_graph_hooked_object)) ||
 					!zend_opcache_static_cache_shared_graph_calc_reserve_string(context, ce->name)
 				) {
 					return false;
@@ -703,8 +728,6 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 			if (zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep") - 1) ||
 				zend_hash_str_exists(&ce->function_table, "__wakeup", sizeof("__wakeup") - 1)
 			) {
-				zval state;
-
 				/* Capturing this object's state requires running __sleep, which is
 				 * only allowed off-lock at prepare time. With no memo (under the write
 				 * lock, where userland is forbidden) the value is refused. */
@@ -767,6 +790,7 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 				if (properties != NULL) {
 					zend_release_properties(properties);
 				}
+
 				return false;
 			}
 
@@ -774,17 +798,18 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 				ZEND_HASH_FOREACH_STR_KEY_VAL(properties, property_name, property_value) {
 					if (property_name == NULL || !zend_opcache_static_cache_shared_graph_calc_reserve_string(context, property_name)) {
 						zend_release_properties(properties);
+
 						return false;
 					}
 
-					source_value =
-						Z_TYPE_P(property_value) == IS_INDIRECT
-							? Z_INDIRECT_P(property_value)
-							: property_value
+					source_value = Z_TYPE_P(property_value) == IS_INDIRECT
+						? Z_INDIRECT_P(property_value)
+						: property_value
 					;
 
 					if (!zend_opcache_static_cache_shared_graph_calc_value(context, source_value)) {
 						zend_release_properties(properties);
+
 						return false;
 					}
 				} ZEND_HASH_FOREACH_END();
@@ -794,7 +819,7 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 
 			return true;
 		case IS_REFERENCE: {
-			zend_reference *ref = Z_REF_P(value);
+			ref = Z_REF_P(value);
 
 			/* Repeat (shared or cyclic) reference -> back-ref node, no extra payload. */
 			if (!zend_opcache_static_cache_shared_graph_mark_seen(&context->seen_references, (zend_object *) ref)) {
@@ -802,7 +827,8 @@ static bool zend_opcache_static_cache_shared_graph_calc_value(
 			}
 
 			if (!zend_opcache_static_cache_shared_graph_reserve_size(&context->size,
-					sizeof(zend_opcache_static_cache_shared_graph_reference))) {
+				sizeof(zend_opcache_static_cache_shared_graph_reference))
+			) {
 				return false;
 			}
 
@@ -832,6 +858,7 @@ static void zend_opcache_static_cache_shared_graph_copy_init(
 	zend_hash_init(&context->seen_objects, 8, NULL, NULL, 0);
 	zend_hash_init(&context->seen_references, 8, NULL, NULL, 0);
 	zend_hash_init(&context->string_dedup, 8, NULL, NULL, 0);
+
 	context->has_serialized_object = false;
 	context->has_shared_identity = false;
 	context->has_object = false;
@@ -946,11 +973,13 @@ static bool zend_opcache_static_cache_shared_graph_copy_direct_value(
 			}
 
 			ZVAL_INTERNED_STR(destination, (zend_string *) (void *) (context->buffer + string_offset));
+
 			return true;
 		case IS_ARRAY:
 			source_array = Z_ARRVAL_P(source);
 			if (source_array->nNumOfElements == 0) {
 				ZVAL_EMPTY_ARRAY(destination);
+
 				return true;
 			}
 
@@ -968,13 +997,18 @@ static bool zend_opcache_static_cache_shared_graph_copy_direct_value(
 			}
 
 			target = (zend_array *) (context->buffer + array_offset);
+
 			memcpy(target, source_array, sizeof(zend_array));
 			memcpy(context->buffer + data_offset, HT_GET_DATA_ADDR(source_array), data_size);
+
 			GC_SET_REFCOUNT(target, 2);
 			GC_TYPE_INFO(target) = GC_ARRAY | ((IS_ARRAY_IMMUTABLE | GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
+
 			HT_FLAGS(target) |= HASH_FLAG_STATIC_KEYS;
+
 			target->pDestructor = NULL;
 			target->nInternalPointer = 0;
+
 			HT_SET_DATA_ADDR(target, context->buffer + data_offset);
 
 			if (HT_IS_PACKED(source_array)) {
@@ -983,6 +1017,7 @@ static bool zend_opcache_static_cache_shared_graph_copy_direct_value(
 					source_packed = &source_array->arPacked[index];
 					if (!zend_opcache_static_cache_shared_graph_copy_direct_value(context, source_packed, &target_packed[index])) {
 						result = false;
+
 						break;
 					}
 				}
@@ -993,6 +1028,7 @@ static bool zend_opcache_static_cache_shared_graph_copy_direct_value(
 					if (source_bucket[index].key != NULL) {
 						if (!zend_opcache_static_cache_shared_graph_copy_string(context, source_bucket[index].key, &key_offset)) {
 							result = false;
+
 							break;
 						}
 
@@ -1003,6 +1039,7 @@ static bool zend_opcache_static_cache_shared_graph_copy_direct_value(
 
 					if (!zend_opcache_static_cache_shared_graph_copy_direct_value(context, &source_bucket[index].val, &target_bucket[index].val)) {
 						result = false;
+
 						break;
 					}
 				}
@@ -1010,12 +1047,14 @@ static bool zend_opcache_static_cache_shared_graph_copy_direct_value(
 
 copy_direct_array_done:
 			zend_hash_index_del(&context->seen_arrays, array_key);
+
 			if (!result) {
 				return false;
 			}
 
 			ZVAL_ARR(destination, (zend_array *) (void *) (context->buffer + array_offset));
 			Z_TYPE_FLAGS_P(destination) = 0;
+
 			return true;
 		default:
 			return false;
@@ -1032,14 +1071,26 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 	zend_opcache_static_cache_shared_graph_property *graph_properties;
 	zend_opcache_static_cache_shared_graph_array *graph_array;
 	zend_opcache_static_cache_shared_graph_array_element *graph_elements, *graph_element;
+	zend_opcache_static_cache_shared_graph_hooked_object *graph_hooked, *graph_sleep;
+	zend_opcache_static_cache_shared_graph_enum *graph_enum;
+	zend_opcache_static_cache_shared_graph_reference *graph_reference;
+	zend_reference *ref;
 	zend_object *object;
 	zend_class_entry *ce;
-	zend_string *property_name, *key;
+	zend_string *property_name, *key, *case_name;
 	zend_ulong array_key, h;
-	zval *property_value, *source_value, *element, array_value;
+	zval *property_value, *source_value, *element, array_value, *serialized, *sleep_state;
 	HashTable *properties;
-	uint32_t string_offset, object_offset, class_name_offset, properties_offset, property_index, property_count, array_offset, elements_offset, key_offset;
+	uint32_t string_offset, object_offset, class_name_offset, properties_offset,
+		property_index, property_count,
+		array_offset, elements_offset, key_offset,
+		hooked_offset, hooked_class_offset, shared_offset,
+		enum_offset, enum_class_offset, enum_case_offset,
+		sleep_offset, sleep_class_offset,
+		reference_offset
+	;
 	bool result;
+	void *seen_offset;
 
 	memset(destination, 0, sizeof(*destination));
 
@@ -1122,21 +1173,22 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 			}
 
 			array_key = (zend_ulong) (uintptr_t) Z_ARRVAL_P(source);
-			{
-				void *seen_offset = zend_hash_index_find_ptr(&context->seen_arrays, array_key);
-				if (seen_offset != NULL) {
-					/* Cyclic array: the same array is an ancestor still being built.
-					 * Write a back-ref to its node and flag it shared so the decoder
-					 * records the array before filling it and resolves the cycle. */
-					uint32_t shared_offset = (uint32_t) (uintptr_t) seen_offset;
-					((zend_opcache_static_cache_shared_graph_array *) (context->buffer + shared_offset))->reserved |=
-						ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED;
-					destination->type = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_ARRAY_REF;
-					destination->payload.offset = shared_offset;
-					context->has_shared_identity = true;
 
-					return true;
-				}
+			seen_offset = zend_hash_index_find_ptr(&context->seen_arrays, array_key);
+			if (seen_offset != NULL) {
+				/* Cyclic array: the same array is an ancestor still being built.
+				 * Write a back-ref to its node and flag it shared so the decoder
+				 * records the array before filling it and resolves the cycle. */
+				shared_offset = (uint32_t) (uintptr_t) seen_offset;
+				((zend_opcache_static_cache_shared_graph_array *) (context->buffer + shared_offset))->reserved |=
+					ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED
+				;
+
+				destination->type = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_ARRAY_REF;
+				destination->payload.offset = shared_offset;
+				context->has_shared_identity = true;
+
+				return true;
 			}
 
 			if (!zend_opcache_static_cache_shared_graph_copy_alloc(context, sizeof(*graph_array), &array_offset) ||
@@ -1182,6 +1234,7 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 
 				if (!zend_opcache_static_cache_shared_graph_copy_property_value(context, element, &graph_element->value)) {
 					result = false;
+
 					break;
 				}
 
@@ -1203,12 +1256,10 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 			ce = Z_OBJCE_P(source);
 
 			if (ce->ce_flags & ZEND_ACC_ENUM) {
-				zend_string *case_name = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(source)));
-				uint32_t enum_offset, enum_class_offset, enum_case_offset;
-				zend_opcache_static_cache_shared_graph_enum *graph_enum;
+				case_name = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(source)));
 
 				if (!zend_opcache_static_cache_shared_graph_copy_alloc(context,
-						sizeof(zend_opcache_static_cache_shared_graph_enum), &enum_offset) ||
+					sizeof(zend_opcache_static_cache_shared_graph_enum), &enum_offset) ||
 					!zend_opcache_static_cache_shared_graph_copy_string(context, ce->name, &enum_class_offset) ||
 					!zend_opcache_static_cache_shared_graph_copy_string(context, case_name, &enum_case_offset)
 				) {
@@ -1218,6 +1269,7 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 				graph_enum = (zend_opcache_static_cache_shared_graph_enum *) (context->buffer + enum_offset);
 				graph_enum->class_name_offset = enum_class_offset;
 				graph_enum->case_name_offset = enum_case_offset;
+
 				destination->type = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_ENUM;
 				destination->payload.offset = enum_offset;
 
@@ -1229,35 +1281,32 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 				instanceof_function(object->ce, zend_ce_serializable)
 			) {
 				zend_throw_exception_ex(zend_opcache_static_cache_exception_ce, 0,
-					"Objects implementing the deprecated Serializable interface without __serialize() are not supported by the static cache");
+					"Objects implementing the deprecated Serializable interface without __serialize() are not supported by the static cache"
+				);
 
 				return false;
 			}
 
 			if (object->ce->__serialize != NULL && object->ce->__unserialize != NULL) {
-				zval *serialized;
-				uint32_t hooked_offset, hooked_class_offset;
-				zend_opcache_static_cache_shared_graph_hooked_object *graph_hooked;
-
 				if (context->serialize_memo == NULL) {
 					return false;
 				}
 
-				{
-					void *seen_offset = zend_hash_index_find_ptr(&context->seen_objects, (zend_ulong) (uintptr_t) object);
-					if (seen_offset != NULL) {
-						/* Shared or cyclic hooked object: write a back-ref to the node
-						 * already emitted and flag it shared, so the decoder records
-						 * the __unserialize'd instance once and points later refs at it. */
-						uint32_t shared_offset = (uint32_t) (uintptr_t) seen_offset;
-						((zend_opcache_static_cache_shared_graph_hooked_object *) (context->buffer + shared_offset))->reserved |=
-							ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED;
-						destination->type = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT_REF;
-						destination->payload.offset = shared_offset;
-						context->has_shared_identity = true;
+				seen_offset = zend_hash_index_find_ptr(&context->seen_objects, (zend_ulong) (uintptr_t) object);
+				if (seen_offset != NULL) {
+					/* Shared or cyclic hooked object: write a back-ref to the node
+					 * already emitted and flag it shared, so the decoder records
+					 * the __unserialize'd instance once and points later refs at it. */
+					shared_offset = (uint32_t) (uintptr_t) seen_offset;
+					((zend_opcache_static_cache_shared_graph_hooked_object *) (context->buffer + shared_offset))->reserved |=
+						ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED
+					;
 
-						return true;
-					}
+					destination->type = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT_REF;
+					destination->payload.offset = shared_offset;
+					context->has_shared_identity = true;
+
+					return true;
 				}
 
 				/* Reuse the array the calc pass computed, so __serialize runs once. */
@@ -1267,14 +1316,15 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 				}
 
 				if (!zend_opcache_static_cache_shared_graph_copy_alloc(context,
-						sizeof(zend_opcache_static_cache_shared_graph_hooked_object), &hooked_offset)) {
+					sizeof(zend_opcache_static_cache_shared_graph_hooked_object), &hooked_offset)) {
 					return false;
 				}
 
 				/* Record the node offset before encoding the state so a cycle through
 				 * __serialize's data resolves to a back-ref. */
 				if (zend_hash_index_add_ptr(&context->seen_objects, (zend_ulong) (uintptr_t) object,
-						(void *) (uintptr_t) hooked_offset) == NULL) {
+					(void *) (uintptr_t) hooked_offset) == NULL
+				) {
 					return false;
 				}
 
@@ -1301,27 +1351,23 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 			if (zend_hash_str_exists(&object->ce->function_table, "__sleep", sizeof("__sleep") - 1) ||
 				zend_hash_str_exists(&object->ce->function_table, "__wakeup", sizeof("__wakeup") - 1)
 			) {
-				zval *sleep_state;
-				uint32_t sleep_offset, sleep_class_offset;
-				zend_opcache_static_cache_shared_graph_hooked_object *graph_sleep;
-
 				if (context->serialize_memo == NULL) {
 					return false;
 				}
 
-				{
-					void *seen_offset = zend_hash_index_find_ptr(&context->seen_objects, (zend_ulong) (uintptr_t) object);
-					if (seen_offset != NULL) {
-						/* Shared or cyclic: back-ref to the node already emitted. */
-						uint32_t shared_offset = (uint32_t) (uintptr_t) seen_offset;
-						((zend_opcache_static_cache_shared_graph_hooked_object *) (context->buffer + shared_offset))->reserved |=
-							ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED;
-						destination->type = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT_REF;
-						destination->payload.offset = shared_offset;
-						context->has_shared_identity = true;
+				seen_offset = zend_hash_index_find_ptr(&context->seen_objects, (zend_ulong) (uintptr_t) object);
+				if (seen_offset != NULL) {
+					/* Shared or cyclic: back-ref to the node already emitted. */
+					shared_offset = (uint32_t) (uintptr_t) seen_offset;
+					((zend_opcache_static_cache_shared_graph_hooked_object *) (context->buffer + shared_offset))->reserved |=
+						ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED
+					;
 
-						return true;
-					}
+					destination->type = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT_REF;
+					destination->payload.offset = shared_offset;
+					context->has_shared_identity = true;
+
+					return true;
 				}
 
 				/* Reuse the state the calc pass computed, so __sleep runs once. */
@@ -1331,12 +1377,14 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 				}
 
 				if (!zend_opcache_static_cache_shared_graph_copy_alloc(context,
-						sizeof(zend_opcache_static_cache_shared_graph_hooked_object), &sleep_offset)) {
+					sizeof(zend_opcache_static_cache_shared_graph_hooked_object), &sleep_offset)
+				) {
 					return false;
 				}
 
 				if (zend_hash_index_add_ptr(&context->seen_objects, (zend_ulong) (uintptr_t) object,
-						(void *) (uintptr_t) sleep_offset) == NULL) {
+					(void *) (uintptr_t) sleep_offset) == NULL
+				) {
 					return false;
 				}
 
@@ -1365,22 +1413,22 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 				return false;
 			}
 
-			{
-				void *seen_offset = zend_hash_index_find_ptr(&context->seen_objects, (zend_ulong) (uintptr_t) object);
-				if (seen_offset != NULL) {
-					/* Already emitted (shared identity or a cycle): write a back-ref
-					 * and flag the original node shared, so the decoder records it
-					 * once and points later refs at the same instance. */
-					uint32_t shared_offset = (uint32_t) (uintptr_t) seen_offset;
-					((zend_opcache_static_cache_shared_graph_object *) (context->buffer + shared_offset))->reserved |=
-						ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED;
-					destination->type = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT_REF;
-					destination->payload.offset = shared_offset;
-					/* Keep the prototype: cloning beats re-decoding with the identity map. */
-					context->has_shared_identity = true;
+			seen_offset = zend_hash_index_find_ptr(&context->seen_objects, (zend_ulong) (uintptr_t) object);
+			if (seen_offset != NULL) {
+				/* Already emitted (shared identity or a cycle): write a back-ref
+				 * and flag the original node shared, so the decoder records it
+				 * once and points later refs at the same instance. */
+				shared_offset = (uint32_t) (uintptr_t) seen_offset;
+				((zend_opcache_static_cache_shared_graph_object *) (context->buffer + shared_offset))->reserved |=
+					ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED
+				;
 
-					return true;
-				}
+				destination->type = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT_REF;
+				destination->payload.offset = shared_offset;
+				/* Keep the prototype: cloning beats re-decoding with the identity map. */
+				context->has_shared_identity = true;
+
+				return true;
 			}
 
 			if (!zend_opcache_static_cache_shared_graph_copy_alloc(context, sizeof(*graph_object), &object_offset)) {
@@ -1390,7 +1438,8 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 			/* Record the node offset before encoding properties so a cyclic or
 			 * shared reference reached while encoding them resolves to a back-ref. */
 			if (zend_hash_index_add_ptr(&context->seen_objects, (zend_ulong) (uintptr_t) object,
-					(void *) (uintptr_t) object_offset) == NULL) {
+				(void *) (uintptr_t) object_offset) == NULL
+			) {
 				return false;
 			}
 
@@ -1411,6 +1460,7 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 				if (properties != NULL) {
 					zend_release_properties(properties);
 				}
+
 				return false;
 			}
 
@@ -1418,6 +1468,7 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 			graph_object->class_name_offset = class_name_offset;
 			graph_object->property_count = property_count;
 			graph_object->properties_offset = properties_offset;
+
 			/* Cleared here (before properties are encoded); a later back-ref to this
 			 * object sets FLAG_SHARED on the node once it is discovered. */
 			graph_object->reserved = 0;
@@ -1435,6 +1486,7 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 
 			graph_properties = (zend_opcache_static_cache_shared_graph_property *) (context->buffer + properties_offset);
 			property_index = 0;
+
 			ZEND_HASH_FOREACH_STR_KEY_VAL(properties, property_name, property_value) {
 				if (property_name == NULL ||
 					!zend_opcache_static_cache_shared_graph_copy_string(context, property_name, &graph_properties[property_index].name_offset)
@@ -1444,10 +1496,9 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 					return false;
 				}
 
-				source_value =
-					Z_TYPE_P(property_value) == IS_INDIRECT
-						? Z_INDIRECT_P(property_value)
-						: property_value
+				source_value = Z_TYPE_P(property_value) == IS_INDIRECT
+					? Z_INDIRECT_P(property_value)
+					: property_value
 				;
 
 				if (!zend_opcache_static_cache_shared_graph_copy_property_value(
@@ -1465,21 +1516,22 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 			} ZEND_HASH_FOREACH_END();
 
 			zend_release_properties(properties);
+
 			destination->type = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT;
 			destination->payload.offset = object_offset;
 
 			return true;
 		case IS_REFERENCE: {
-			zend_reference *ref = Z_REF_P(source);
-			void *seen_offset = zend_hash_index_find_ptr(&context->seen_references, (zend_ulong) (uintptr_t) ref);
-			uint32_t reference_offset;
-			zend_opcache_static_cache_shared_graph_reference *graph_reference;
+			ref = Z_REF_P(source);
+			seen_offset = zend_hash_index_find_ptr(&context->seen_references, (zend_ulong) (uintptr_t) ref);
 
 			if (seen_offset != NULL) {
 				/* Shared/cyclic reference already emitted: flag it, write a back-ref. */
-				uint32_t shared_offset = (uint32_t) (uintptr_t) seen_offset;
+				shared_offset = (uint32_t) (uintptr_t) seen_offset;
 				((zend_opcache_static_cache_shared_graph_reference *) (context->buffer + shared_offset))->flags |=
-					ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED;
+					ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED
+				;
+
 				destination->type = ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_REFERENCE_REF;
 				destination->payload.offset = shared_offset;
 				context->has_shared_identity = true;
@@ -1488,14 +1540,16 @@ static bool zend_opcache_static_cache_shared_graph_copy_property_value(
 			}
 
 			if (!zend_opcache_static_cache_shared_graph_copy_alloc(context,
-					sizeof(zend_opcache_static_cache_shared_graph_reference), &reference_offset)) {
+				sizeof(zend_opcache_static_cache_shared_graph_reference), &reference_offset)
+			) {
 				return false;
 			}
 
 			/* Record the offset before encoding the inner value so a cycle through
 			 * this reference resolves to a back-ref. */
 			if (zend_hash_index_add_ptr(&context->seen_references, (zend_ulong) (uintptr_t) ref,
-					(void *) (uintptr_t) reference_offset) == NULL) {
+				(void *) (uintptr_t) reference_offset) == NULL
+			) {
 				return false;
 			}
 
@@ -1611,8 +1665,13 @@ static bool zend_opcache_static_cache_shared_graph_update_object_property(
 	zval *property_value
 )
 {
+	const char *class_name, *prop_name;
+	zend_string *cname;
+	zend_class_entry *scope;
 	zend_object *object;
 	zend_property_info *property_info;
+	HashTable *properties;
+	size_t prop_name_len;
 	bool failed;
 
 	object = Z_OBJ_P(object_zv);
@@ -1636,10 +1695,11 @@ static bool zend_opcache_static_cache_shared_graph_update_object_property(
 		 * reference directly in the property table so shared/aliased dynamic
 		 * properties keep their identity (the standard write path would deref it). */
 		if (Z_ISREF_P(property_value)) {
-			HashTable *properties = zend_std_get_properties(object);
+			properties = zend_std_get_properties(object);
 
 			if (properties != NULL) {
 				Z_TRY_ADDREF_P(property_value);
+
 				zend_hash_update(properties, property_name, property_value);
 
 				return true;
@@ -1654,23 +1714,18 @@ static bool zend_opcache_static_cache_shared_graph_update_object_property(
 
 	/* A mangled private/protected name (a declared property the slot path above
 	 * could not take): resolve the declaring scope and write through it. */
-	{
-		const char *class_name, *prop_name;
-		size_t prop_name_len;
+	if (zend_unmangle_property_name_ex(property_name, &class_name, &prop_name, &prop_name_len) == SUCCESS) {
+		if (class_name[0] != '*') {
+			cname = zend_string_init(class_name, strlen(class_name), 0);
+			scope = zend_lookup_class(cname);
 
-		if (zend_unmangle_property_name_ex(property_name, &class_name, &prop_name, &prop_name_len) == SUCCESS) {
-			if (class_name[0] != '*') {
-				zend_string *cname = zend_string_init(class_name, strlen(class_name), 0);
-				zend_class_entry *scope = zend_lookup_class(cname);
-
-				if (scope != NULL) {
-					zend_update_property(scope, object, prop_name, prop_name_len, property_value);
-				}
-
-				zend_string_release_ex(cname, 0);
-			} else {
-				zend_update_property(object->ce, object, prop_name, prop_name_len, property_value);
+			if (scope != NULL) {
+				zend_update_property(scope, object, prop_name, prop_name_len, property_value);
 			}
+
+			zend_string_release_ex(cname, 0);
+		} else {
+			zend_update_property(object->ce, object, prop_name, prop_name_len, property_value);
 		}
 	}
 
@@ -1701,7 +1756,8 @@ static bool zend_opcache_static_cache_shared_graph_update_object_property_at(
 				property_name,
 				property_info,
 				property_value,
-				&failed)
+				&failed
+			)
 		) {
 			return true;
 		}
@@ -1724,10 +1780,19 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 	const zend_opcache_static_cache_shared_graph_array *graph_array;
 	const zend_opcache_static_cache_shared_graph_array_element *graph_elements, *graph_element;
 	const zend_opcache_static_cache_shared_graph_property *properties, *property;
-	zend_class_entry *ce;
-	zend_string *class_name, *property_name;
-	zval property_value;
+	const zend_opcache_static_cache_shared_graph_hooked_object *graph_hooked;
+	const zend_opcache_static_cache_shared_graph_hooked_object *graph_sleep;
+	const zend_opcache_static_cache_shared_graph_enum *graph_enum;
+	const zend_opcache_static_cache_shared_graph_reference *graph_reference;
+	zend_class_entry *ce, *enum_ce;
+	zend_string *class_name, *property_name, *prop_name, *enum_class_name, *enum_case_name;
+	zend_reference *ref, *shared_reference;
+	zend_array *shared_array;
+	zend_object *shared_object, *case_obj;
+	zend_function *wakeup_fn;
+	zval property_value, hooked_state, unserialize_rv, sleep_state, wakeup_rv, *prop_value;
 	uint32_t index;
+	bool ok;
 
 	switch (value->type) {
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_UNDEF:
@@ -1768,22 +1833,28 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 
 			/* Register the array before filling it so a cycle reached through one of
 			 * its elements resolves to this same array. */
-			if ((graph_array->reserved & ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED) &&
-				!zend_opcache_static_cache_decode_array_map_insert((uint32_t) value->payload.offset, Z_ARRVAL_P(destination))
-			) {
-				zval_ptr_dtor(destination);
-				ZVAL_UNDEF(destination);
+			if (graph_array->reserved & ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED) {
+				if (!zend_opcache_static_cache_decode_array_map_insert((uint32_t) value->payload.offset, Z_ARRVAL_P(destination))) {
+					zval_ptr_dtor(destination);
 
-				return false;
+					ZVAL_UNDEF(destination);
+
+					return false;
+				}
+
+				HT_ALLOW_COW_VIOLATION(Z_ARRVAL_P(destination));
 			}
 
 			graph_elements = (const zend_opcache_static_cache_shared_graph_array_element *) (buffer + graph_array->elements_offset);
 
 			for (index = 0; index < graph_array->count; index++) {
 				graph_element = &graph_elements[index];
+
 				ZVAL_UNDEF(&property_value);
+
 				if (!zend_opcache_static_cache_fetch_shared_graph_value(buffer, &graph_element->value, &property_value)) {
 					zval_ptr_dtor(destination);
+
 					ZVAL_UNDEF(destination);
 
 					return false;
@@ -1791,28 +1862,40 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 
 				if (graph_element->key_offset != 0) {
 					property_name = (zend_string *) (void *) (buffer + graph_element->key_offset);
+
+					HT_ALLOW_COW_VIOLATION(Z_ARRVAL_P(destination));
+
 					if (zend_hash_add_new(Z_ARRVAL_P(destination), property_name, &property_value) == NULL) {
 						zval_ptr_dtor(&property_value);
 						zval_ptr_dtor(destination);
+
 						ZVAL_UNDEF(destination);
 
 						return false;
 					}
-				} else if (zend_hash_index_add_new(Z_ARRVAL_P(destination), graph_element->h, &property_value) == NULL) {
-					zval_ptr_dtor(&property_value);
-					zval_ptr_dtor(destination);
-					ZVAL_UNDEF(destination);
+				} else {
+					HT_ALLOW_COW_VIOLATION(Z_ARRVAL_P(destination));
 
-					return false;
+					if (zend_hash_index_add_new(Z_ARRVAL_P(destination), graph_element->h, &property_value) == NULL) {
+						zval_ptr_dtor(&property_value);
+						zval_ptr_dtor(destination);
+
+						ZVAL_UNDEF(destination);
+
+						return false;
+					}
 				}
 			}
 
 			Z_ARRVAL_P(destination)->nNextFreeElement = graph_array->next_free;
+#if ZEND_DEBUG
+			HT_FLAGS(Z_ARRVAL_P(destination)) &= ~HASH_FLAG_ALLOW_COW_VIOLATION;
+#endif
 			zend_opcache_static_cache_capture_decoded_value(destination);
 
 			return true;
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_ARRAY_REF: {
-			zend_array *shared_array = zend_opcache_static_cache_decode_array_map_find((uint32_t) value->payload.offset);
+			shared_array = zend_opcache_static_cache_decode_array_map_find((uint32_t) value->payload.offset);
 			if (shared_array == NULL) {
 				return false;
 			}
@@ -1848,6 +1931,7 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 				!zend_opcache_static_cache_decode_identity_map_insert((uint32_t) value->payload.offset, Z_OBJ_P(destination))
 			) {
 				zval_ptr_dtor(destination);
+
 				ZVAL_UNDEF(destination);
 
 				return false;
@@ -1855,6 +1939,7 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 
 			if (graph_object->property_count == 0) {
 				zend_opcache_static_cache_capture_decoded_value(destination);
+
 				return true;
 			}
 
@@ -1866,12 +1951,15 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 				}
 
 				property_name = (zend_string *) (void *) (buffer + property->name_offset);
+
 				ZVAL_UNDEF(&property_value);
+
 				if (!zend_opcache_static_cache_fetch_shared_graph_value(buffer, &property->value, &property_value) ||
 					!zend_opcache_static_cache_shared_graph_update_object_property_at(destination, property_name, index, &property_value)
 				) {
 					zval_ptr_dtor(&property_value);
 					zval_ptr_dtor(destination);
+
 					ZVAL_UNDEF(destination);
 
 					return false;
@@ -1884,7 +1972,7 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 
 			return true;
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT_REF: {
-			zend_object *shared_object = zend_opcache_static_cache_decode_identity_map_find((uint32_t) value->payload.offset);
+			shared_object = zend_opcache_static_cache_decode_identity_map_find((uint32_t) value->payload.offset);
 			if (shared_object == NULL) {
 				return false;
 			}
@@ -1895,9 +1983,7 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 			return true;
 		}
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_HOOKED_OBJECT: {
-			const zend_opcache_static_cache_shared_graph_hooked_object *graph_hooked =
-				(const zend_opcache_static_cache_shared_graph_hooked_object *) (buffer + (uint32_t) value->payload.offset);
-			zval hooked_state, unserialize_rv;
+			graph_hooked = (const zend_opcache_static_cache_shared_graph_hooked_object *) (buffer + (uint32_t) value->payload.offset);
 
 			class_name = (zend_string *) (void *) (buffer + graph_hooked->class_name_offset);
 			ce = zend_lookup_class(class_name);
@@ -1912,29 +1998,34 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 				!zend_opcache_static_cache_decode_identity_map_insert((uint32_t) value->payload.offset, Z_OBJ_P(destination))
 			) {
 				zval_ptr_dtor(destination);
+
 				ZVAL_UNDEF(destination);
 
 				return false;
 			}
 
 			ZVAL_UNDEF(&hooked_state);
+
 			if (!zend_opcache_static_cache_fetch_shared_graph_value(buffer, &graph_hooked->state, &hooked_state) ||
 				Z_TYPE(hooked_state) != IS_ARRAY
 			) {
 				zval_ptr_dtor(&hooked_state);
 				zval_ptr_dtor(destination);
+
 				ZVAL_UNDEF(destination);
 
 				return false;
 			}
 
 			ZVAL_UNDEF(&unserialize_rv);
+
 			zend_call_known_instance_method_with_1_params(ce->__unserialize, Z_OBJ_P(destination), &unserialize_rv, &hooked_state);
 			zval_ptr_dtor(&unserialize_rv);
 			zval_ptr_dtor(&hooked_state);
 
 			if (EG(exception)) {
 				zval_ptr_dtor(destination);
+
 				ZVAL_UNDEF(destination);
 
 				return false;
@@ -1943,13 +2034,8 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 			return true;
 		}
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_SLEEP_OBJECT: {
-			const zend_opcache_static_cache_shared_graph_hooked_object *graph_sleep =
-				(const zend_opcache_static_cache_shared_graph_hooked_object *) (buffer + (uint32_t) value->payload.offset);
-			zval sleep_state, wakeup_rv;
-			zend_function *wakeup_fn;
-			zend_string *prop_name;
-			zval *prop_value;
-			bool ok = true;
+			graph_sleep = (const zend_opcache_static_cache_shared_graph_hooked_object *) (buffer + (uint32_t) value->payload.offset);
+			ok = true;
 
 			class_name = (zend_string *) (void *) (buffer + graph_sleep->class_name_offset);
 			ce = zend_lookup_class(class_name);
@@ -1963,17 +2049,20 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 				!zend_opcache_static_cache_decode_identity_map_insert((uint32_t) value->payload.offset, Z_OBJ_P(destination))
 			) {
 				zval_ptr_dtor(destination);
+
 				ZVAL_UNDEF(destination);
 
 				return false;
 			}
 
 			ZVAL_UNDEF(&sleep_state);
+
 			if (!zend_opcache_static_cache_fetch_shared_graph_value(buffer, &graph_sleep->state, &sleep_state) ||
 				Z_TYPE(sleep_state) != IS_ARRAY
 			) {
 				zval_ptr_dtor(&sleep_state);
 				zval_ptr_dtor(destination);
+
 				ZVAL_UNDEF(destination);
 
 				return false;
@@ -1983,6 +2072,7 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 				if (prop_name == NULL) {
 					continue;
 				}
+
 				if (!zend_opcache_static_cache_shared_graph_update_object_property(destination, prop_name, prop_value)) {
 					ok = false;
 					break;
@@ -1992,6 +2082,7 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 
 			if (!ok) {
 				zval_ptr_dtor(destination);
+
 				ZVAL_UNDEF(destination);
 
 				return false;
@@ -2000,11 +2091,13 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 			wakeup_fn = zend_hash_str_find_ptr(&ce->function_table, "__wakeup", sizeof("__wakeup") - 1);
 			if (wakeup_fn != NULL) {
 				ZVAL_UNDEF(&wakeup_rv);
+
 				zend_call_known_instance_method_with_0_params(wakeup_fn, Z_OBJ_P(destination), &wakeup_rv);
 				zval_ptr_dtor(&wakeup_rv);
 
 				if (EG(exception)) {
 					zval_ptr_dtor(destination);
+
 					ZVAL_UNDEF(destination);
 
 					return false;
@@ -2014,12 +2107,11 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 			return true;
 		}
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_ENUM: {
-			const zend_opcache_static_cache_shared_graph_enum *graph_enum =
-				(const zend_opcache_static_cache_shared_graph_enum *) (buffer + (uint32_t) value->payload.offset);
-			zend_string *enum_class_name = (zend_string *) (void *) (buffer + graph_enum->class_name_offset);
-			zend_string *enum_case_name = (zend_string *) (void *) (buffer + graph_enum->case_name_offset);
-			zend_class_entry *enum_ce = zend_lookup_class(enum_class_name);
-			zend_object *case_obj;
+			graph_enum = (const zend_opcache_static_cache_shared_graph_enum *) (buffer + (uint32_t) value->payload.offset);
+			enum_class_name = (zend_string *) (void *) (buffer + graph_enum->class_name_offset);
+			enum_case_name = (zend_string *) (void *) (buffer + graph_enum->case_name_offset);
+			enum_ce = zend_lookup_class(enum_class_name);
+			case_obj = NULL;
 
 			if (enum_ce == NULL || !(enum_ce->ce_flags & ZEND_ACC_ENUM)) {
 				return false;
@@ -2036,12 +2128,11 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 			return true;
 		}
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_REFERENCE: {
-			const zend_opcache_static_cache_shared_graph_reference *graph_reference =
-				(const zend_opcache_static_cache_shared_graph_reference *) (buffer + (uint32_t) value->payload.offset);
-			zend_reference *ref;
+			graph_reference = (const zend_opcache_static_cache_shared_graph_reference *) (buffer + (uint32_t) value->payload.offset);
 
 			ZVAL_NEW_EMPTY_REF(destination);
 			ref = Z_REF_P(destination);
+
 			ZVAL_UNDEF(&ref->val);
 
 			/* Register before decoding the inner value so a cycle or sibling that
@@ -2051,6 +2142,7 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 				!zend_opcache_static_cache_decode_reference_map_insert((uint32_t) value->payload.offset, ref)
 			) {
 				zval_ptr_dtor(destination);
+
 				ZVAL_UNDEF(destination);
 
 				return false;
@@ -2058,6 +2150,7 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 
 			if (!zend_opcache_static_cache_fetch_shared_graph_value(buffer, &graph_reference->inner, &ref->val)) {
 				zval_ptr_dtor(destination);
+
 				ZVAL_UNDEF(destination);
 
 				return false;
@@ -2066,8 +2159,8 @@ static bool zend_opcache_static_cache_fetch_shared_graph_value(
 			return true;
 		}
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_REFERENCE_REF: {
-			zend_reference *shared_reference =
-				zend_opcache_static_cache_decode_reference_map_find((uint32_t) value->payload.offset);
+			shared_reference = zend_opcache_static_cache_decode_reference_map_find((uint32_t) value->payload.offset);
+
 			if (shared_reference == NULL) {
 				return false;
 			}
@@ -2133,7 +2226,8 @@ bool zend_opcache_static_cache_shared_graph_requires_prototype(uint32_t payload_
 
 	return (header->flags & (ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_FLAG_HAS_SERIALIZED_OBJECT |
 		ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_FLAG_HAS_SHARED_IDENTITY |
-		ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_FLAG_HAS_OBJECT)) != 0;
+		ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_FLAG_HAS_OBJECT)) != 0
+	;
 }
 
 /* A graph that contains no object or enum node resolves no class and runs no
@@ -2142,10 +2236,12 @@ bool zend_opcache_static_cache_shared_graph_requires_prototype(uint32_t payload_
 bool zend_opcache_static_cache_shared_graph_decode_is_lock_safe(uint32_t payload_offset)
 {
 	zend_opcache_static_cache_shared_graph_header *header =
-		zend_opcache_static_cache_shared_graph_payload_header(payload_offset);
+		zend_opcache_static_cache_shared_graph_payload_header(payload_offset)
+	;
 
 	return header != NULL &&
-		(header->flags & ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_FLAG_HAS_OBJECT) == 0;
+		(header->flags & ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_FLAG_HAS_OBJECT) == 0
+	;
 }
 
 static bool zend_opcache_static_cache_free_retired_shared_graphs(void)
@@ -2196,6 +2292,7 @@ bool zend_opcache_static_cache_calculate_shared_graph_size(
 )
 {
 	zend_opcache_static_cache_shared_graph_calc_context calc_context;
+	zend_class_entry *root_ce;
 	bool result;
 
 	if (!buffer_len) {
@@ -2203,8 +2300,9 @@ bool zend_opcache_static_cache_calculate_shared_graph_size(
 	}
 
 	*buffer_len = 0;
+
 	if (Z_TYPE_P(value) == IS_OBJECT) {
-		zend_class_entry *root_ce = Z_OBJCE_P(value);
+		root_ce = Z_OBJCE_P(value);
 		/* A top-level __serialize object becomes a HOOKED root and a top-level enum
 		 * case an ENUM root; otherwise only a plain (directly restorable) object is
 		 * a valid graph root. */
@@ -2221,12 +2319,14 @@ bool zend_opcache_static_cache_calculate_shared_graph_size(
 	}
 
 	zend_opcache_static_cache_shared_graph_calc_init(&calc_context);
-	calc_context.serialize_memo = serialize_memo;
 
+	calc_context.serialize_memo = serialize_memo;
 	result = zend_opcache_static_cache_shared_graph_reserve_size(&calc_context.size, sizeof(zend_opcache_static_cache_shared_graph_header));
+
 	if (result) {
 		result = zend_opcache_static_cache_shared_graph_calc_value(&calc_context, value);
 	}
+
 	if (result) {
 		if (calc_context.size > UINT32_MAX - (ZEND_MM_ALIGNMENT - 1)) {
 			result = false;
@@ -2266,6 +2366,7 @@ bool zend_opcache_static_cache_build_shared_graph_in_place(
 	if (padding > buffer_len || buffer_len - padding < sizeof(zend_opcache_static_cache_shared_graph_header)) {
 		return false;
 	}
+
 	if (padding != 0) {
 		memset(buffer, 0, padding);
 	}
@@ -2274,9 +2375,11 @@ bool zend_opcache_static_cache_build_shared_graph_in_place(
 	buffer_len -= padding;
 
 	zend_opcache_static_cache_shared_graph_copy_init(&copy_context, buffer, buffer_len);
+
 	copy_context.serialize_memo = serialize_memo;
 	root_offset = 0;
 	root_type = 0;
+
 	result = zend_opcache_static_cache_shared_graph_copy_alloc(&copy_context, sizeof(*header), &header_offset) && header_offset == 0;
 	if (result) {
 		if (Z_TYPE_P(value) == IS_OBJECT) {
@@ -2357,11 +2460,9 @@ bool zend_opcache_static_cache_fetch_shared_graph(
 	const zend_opcache_static_cache_shared_graph_header *header;
 	const unsigned char *graph_buffer;
 	zend_opcache_static_cache_shared_graph_value root_value;
+	HashTable *saved_identity_map, *saved_reference_map, *saved_array_map;
 	uint32_t root_type;
 	bool capture_active, result;
-	HashTable *saved_identity_map;
-	HashTable *saved_reference_map;
-	HashTable *saved_array_map;
 
 	graph_buffer = zend_opcache_static_cache_shared_graph_locate_buffer(buffer, buffer_len, &buffer_len);
 	if (graph_buffer == NULL) {
@@ -2393,7 +2494,9 @@ bool zend_opcache_static_cache_fetch_shared_graph(
 	zend_opcache_static_cache_decode_array_map = NULL;
 
 	root_type = header->root_type != 0 ? header->root_type : ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT;
+
 	memset(&root_value, 0, sizeof(root_value));
+
 	root_value.type = (uint8_t) root_type;
 	root_value.payload.offset = header->root_offset;
 	capture_active = zend_opcache_static_cache_capture_active;
@@ -2409,6 +2512,7 @@ bool zend_opcache_static_cache_fetch_shared_graph(
 				if (capture_active) {
 					zend_opcache_static_cache_capture_active = true;
 				}
+
 				zend_opcache_static_cache_decode_identity_map = saved_identity_map;
 				zend_opcache_static_cache_decode_reference_map = saved_reference_map;
 				zend_opcache_static_cache_decode_array_map = saved_array_map;
@@ -2417,16 +2521,19 @@ bool zend_opcache_static_cache_fetch_shared_graph(
 			}
 
 			result = zend_opcache_static_cache_fetch_shared_graph_value(buffer, &root_value, destination);
+
 			break;
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_ARRAY:
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_DYNAMIC_ARRAY:
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_ENUM:
 			result = zend_opcache_static_cache_fetch_shared_graph_value(buffer, &root_value, destination);
+
 			break;
 		default:
 			if (capture_active) {
 				zend_opcache_static_cache_capture_active = true;
 			}
+
 			zend_opcache_static_cache_decode_identity_map = saved_identity_map;
 			zend_opcache_static_cache_decode_reference_map = saved_reference_map;
 			zend_opcache_static_cache_decode_array_map = saved_array_map;
@@ -2445,6 +2552,7 @@ bool zend_opcache_static_cache_fetch_shared_graph(
 	zend_opcache_static_cache_decode_identity_map_teardown();
 	zend_opcache_static_cache_decode_reference_map_teardown();
 	zend_opcache_static_cache_decode_array_map_teardown();
+
 	zend_opcache_static_cache_decode_identity_map = saved_identity_map;
 	zend_opcache_static_cache_decode_reference_map = saved_reference_map;
 	zend_opcache_static_cache_decode_array_map = saved_array_map;
@@ -2481,15 +2589,6 @@ static zend_always_inline void *zend_opcache_static_cache_shared_graph_rebase_po
 
 	return (void *) ((char *) pointer - delta);
 }
-
-static bool zend_opcache_static_cache_shared_graph_rebase_direct_array(
-	zend_array *array,
-	const unsigned char *old_base,
-	const unsigned char *new_base,
-	size_t len,
-	ptrdiff_t delta,
-	HashTable *seen_arrays
-);
 
 static bool zend_opcache_static_cache_shared_graph_rebase_direct_zval(
 		zval *value,
@@ -2566,6 +2665,7 @@ static bool zend_opcache_static_cache_shared_graph_rebase_direct_array(
 
 	data = HT_GET_DATA_ADDR(array);
 	data = zend_opcache_static_cache_shared_graph_rebase_pointer(data, old_base, len, delta);
+
 	HT_SET_DATA_ADDR(array, data);
 
 	if (!zend_opcache_static_cache_shared_graph_pointer_in_range(data, new_base, len)) {
@@ -2688,6 +2788,7 @@ static bool zend_opcache_static_cache_shared_graph_rebase_graph_value(
 					return false;
 				}
 			}
+
 			return true;
 		case ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_REFERENCE:
 			/* Recurse into the referenced value so a direct (zero-copy) array held
@@ -2758,6 +2859,7 @@ bool zend_opcache_static_cache_shared_graph_rebase_moved_payload_locked(uint32_t
 	old_buffer = buffer + delta;
 	old_padding = zend_opcache_static_cache_shared_graph_alignment_padding(old_buffer);
 	new_padding = zend_opcache_static_cache_shared_graph_alignment_padding(buffer);
+
 	if (old_padding != new_padding) {
 		return false;
 	}
@@ -2778,7 +2880,9 @@ bool zend_opcache_static_cache_shared_graph_rebase_moved_payload_locked(uint32_t
 	new_base = buffer;
 	old_base = old_buffer + old_padding;
 	root_type = header->root_type != 0 ? header->root_type : ZEND_OPCACHE_STATIC_CACHE_SHARED_GRAPH_VALUE_OBJECT;
+
 	memset(&root_value, 0, sizeof(root_value));
+
 	root_value.type = (uint8_t) root_type;
 	root_value.payload.offset = header->root_offset;
 
