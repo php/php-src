@@ -213,8 +213,10 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 		php_url_free(resource);
 		efree(internal_file);
 
-		if (context && Z_TYPE(context->options) != IS_UNDEF && (pzoption = zend_hash_str_find_ind(HASH_OF(&context->options), "phar", sizeof("phar")-1)) != NULL) {
-			pharcontext = HASH_OF(pzoption);
+		ZEND_ASSERT(Z_TYPE(context->options) == IS_UNDEF || Z_TYPE(context->options) == IS_ARRAY);
+		if (context && Z_TYPE(context->options) != IS_UNDEF && (pzoption = zend_hash_str_find(Z_ARR(context->options), "phar", sizeof("phar")-1)) != NULL) {
+			ZEND_ASSERT(Z_TYPE_P(pzoption) == IS_ARRAY);
+			pharcontext = Z_ARR_P(pzoption);
 			if (idata->internal_file->uncompressed_filesize == 0
 				&& idata->internal_file->compressed_filesize == 0
 				&& (pzoption = zend_hash_str_find_ind(pharcontext, "compress", sizeof("compress")-1)) != NULL
