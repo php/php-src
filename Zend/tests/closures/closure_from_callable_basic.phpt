@@ -98,30 +98,9 @@ echo $fn(" OK".PHP_EOL);
 ?>
 --EXPECTF--
 Access public static function OK
-Access public static function with different case OK
-Access public static function with colon scheme OK
-Access public instance method of object OK
-Access public instance method of parent object through parent::  OK
-Function that exists OK
-Function that exists with different spelling OK
-Closure is already a closure OK
-Class with public invocable OK
-Instance return private method as callable OK
-Instance return private static method as callable OK
-Instance return protected static method as callable OK
-Subclass closure over parent class protected method OK
-Subclass closure over parent class static protected method OK
-Access public instance method of parent object through "parent::" 
-Deprecated: Use of "parent" in callables is deprecated in %s on line %d
- OK
-Access public instance method of self object through "self::" 
-Deprecated: Use of "self" in callables is deprecated in %s on line %d
- OK
-Access public instance method of parent object through "self::" to parent method
-Deprecated: Use of "self" in callables is deprecated in %s on line %d
- OK
-Access protected instance method of parent object through "self::" to parent method
-Deprecated: Use of "self" in callables is deprecated in %s on line %d
- OK
-MagicCall __call instance method __call,nonExistentMethod, OK
-MagicCall __callStatic static method __callStatic,nonExistentMethod, OK
+Access public static function with different case
+Fatal error: Uncaught TypeError: Failed to create closure from callable: class "fOo" not found in %s:%d
+Stack trace:
+#%d %s(10): Closure::fromCallable(Array)
+#%d {main}
+  thrown in %s on line %d

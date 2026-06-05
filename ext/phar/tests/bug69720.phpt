@@ -12,8 +12,8 @@ try {
     foreach (new RecursiveIteratorIterator($p) as $file) {
         // $file is a PharFileInfo class, and inherits from SplFileInfo
         $temp="";
-        $temp= $file->getFileName() . "\n";
-        $temp.=file_get_contents($file->getPathName()) . "\n"; // display contents
+        $temp= $file->getFilename() . "\n";
+        $temp.=file_get_contents($file->getPathname()) . "\n"; // display contents
         var_dump($file->getMetadata());
     }
 }

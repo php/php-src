@@ -61,7 +61,7 @@ int(0)
 int(0)
 int(3)
 
-Warning: Cannot bind closure to scope of internal class stdClass, this will be an error in PHP 9 in %s line %d
-NULL
-int(21)
-int(3)
+Fatal error: Uncaught Error: Class "StdClass" not found in %s:%d
+Stack trace:
+#%d {main}
+  thrown in %s on line %d

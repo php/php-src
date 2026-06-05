@@ -15,8 +15,8 @@ $struct1 = new SOAPStruct('arg',34,325.325);
 $struct2 = new SOAPStruct('arg',34,325.325);
 $client = new SoapClient(__DIR__."/round2_base.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoStructArray(array($struct1,$struct2));
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round2_base.inc");
 echo "ok\n";
 ?>

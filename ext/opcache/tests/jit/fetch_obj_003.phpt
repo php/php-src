@@ -8,7 +8,7 @@ opcache.file_update_protection=0
 opcache
 --FILE--
 <?php
-#[ALlowDynamicProperties]
+#[AllowDynamicProperties]
 class C {
     var $a = 0;
 }

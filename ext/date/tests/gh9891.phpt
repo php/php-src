@@ -4,11 +4,11 @@ Bug GH-9891 (DateTime modify with unixtimestamp (@) must work like setTimestamp)
 <?php
 $m = new DateTime('2022-12-20 14:30:25', new DateTimeZone('Europe/Paris'));
 $m->modify('@1234567890');
-var_dump($m->getTimeStamp());
+var_dump($m->getTimestamp());
 
 echo "=======\n";
 
-$a = new DateTime('2022-11-01 13:30:00', new DateTimezone('America/Lima'));
+$a = new DateTime('2022-11-01 13:30:00', new DateTimeZone('America/Lima'));
 $b = clone $a;
 echo '$a: ', $a->format(DateTime::ATOM), "\n";
 echo '$b: ', $b->format(DateTime::ATOM), "\n";

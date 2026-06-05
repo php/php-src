@@ -4,7 +4,7 @@ SQLite3 load extension
 sqlite3
 --SKIPIF--
 <?php
-$r = new ReflectionClass("sqlite3");
+$r = new ReflectionClass("SQLite3");
 if (!$r->hasMethod("loadExtension")) {
     die("skip - sqlite3 doesn't have loadExtension enabled");
 }

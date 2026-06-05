@@ -9,7 +9,7 @@ if (4 != PHP_INT_SIZE) print "skip x86 only"; ?>
 <?php
 error_reporting(E_ALL);
 
-$v = new VARIANT();
+$v = new variant();
 if (VT_EMPTY != variant_get_type($v)) {
     echo "VT_EMPTY: bork\n";
 }
@@ -19,7 +19,7 @@ $binary_ops = array('add', 'cat', 'sub', 'mul', 'and', 'div',
     'eqv', 'idiv', 'imp', 'mod', 'or', 'pow', 'xor');
 
 foreach ($values as $t => $val) {
-    $v = new VARIANT($val);
+    $v = new variant($val);
     if ($t != variant_get_type($v)) {
         printf("Bork: [%d] %d: %s\n", $t, variant_get_type($v), $val);
         print $v . "\n";

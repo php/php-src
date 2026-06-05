@@ -6,7 +6,7 @@ xsl
 <?php
 
 function test($input) {
-    $xsl = new DomDocument();
+    $xsl = new DOMDocument();
     $xsl->loadXML('<?xml version="1.0" encoding="iso-8859-1" ?>
     <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -16,12 +16,12 @@ function test($input) {
     </xsl:template>
     </xsl:stylesheet>');
 
-    $inputdom = new DomDocument();
+    $inputdom = new DOMDocument();
     $inputdom->loadXML('<?xml version="1.0" encoding="iso-8859-1" ?>
     <today></today>');
 
-    $proc = new XsltProcessor();
-    $proc->registerPhpFunctions();
+    $proc = new XSLTProcessor();
+    $proc->registerPHPFunctions();
     $proc->importStylesheet($xsl);
     $proc->transformToDoc($inputdom);
 }

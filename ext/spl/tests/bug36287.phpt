@@ -9,7 +9,7 @@ $idx = 0;
 foreach($it as $file)
 {
     echo "First\n";
-    var_Dump($file->getFilename());
+    var_dump($file->getFilename());
     echo "Second\n";
     var_dump($file->getFilename());
     if (++$idx > 1)

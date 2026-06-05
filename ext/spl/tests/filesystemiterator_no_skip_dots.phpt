@@ -1,5 +1,5 @@
 --TEST--
-FileSystemIterator without SKIP_DOTS
+FilesystemIterator without SKIP_DOTS
 --FILE--
 <?php
 
@@ -7,10 +7,10 @@ $dir = __DIR__ . '/filesystemiterator_no_skip_dots';
 mkdir($dir);
 touch($dir . '/file');
 
-$it = new FileSystemIterator($dir, 0);
+$it = new FilesystemIterator($dir, 0);
 $files = [];
 foreach ($it as $f) {
-    $files[] = $f->getFileName();
+    $files[] = $f->getFilename();
 }
 sort($files);
 var_dump($files);

@@ -574,7 +574,7 @@ static zend_class_entry* zend_get_known_class(const zend_op_array *op_array, con
 
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
 		class_name = Z_STR_P(zv);
-		ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+		ce = zend_lookup_class_ex(class_name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 		if (ce && (ce->type == ZEND_INTERNAL_CLASS || ce->info.user.filename != op_array->filename)) {
 			ce = NULL;
 		}
@@ -735,7 +735,6 @@ static bool zend_jit_class_may_be_modified(const zend_class_entry *ce, const zen
 				}
 				for (i=0; i < ce->num_traits; i++) {
 					zend_class_entry *trait = zend_fetch_class_by_name(ce->trait_names[i].name,
-						ce->trait_names[i].lc_name,
 						ZEND_FETCH_CLASS_TRAIT | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
 					if (!trait || zend_jit_class_may_be_modified(trait, called_from)) {
 						return 1;
@@ -2833,8 +2832,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							if (opline->op1_type == IS_CONST) {
 								zval *zv = RT_CONSTANT(opline, opline->op1);
 								if (Z_TYPE_P(zv) == IS_STRING) {
-									zval *lc = zv + 1;
-									ce = (zend_class_entry*)zend_hash_find_ptr(EG(class_table), Z_STR_P(lc));
+									ce = (zend_class_entry*)zend_hash_find_ptr(EG(class_table), Z_STR_P(zv));
 								}
 							}
 						}

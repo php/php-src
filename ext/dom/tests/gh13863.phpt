@@ -50,7 +50,7 @@ foreach ([DomType::Legacy, DomType::Modern] as $case) {
         }
     }
 
-    echo $doc->saveXML(), "\n";
+    echo $doc instanceof Dom\XMLDocument ? $doc->saveXml() : $doc->saveXML(), "\n";
 
     echo "--- $name test remove index 1 at index 2 ---\n";
 
@@ -64,7 +64,7 @@ foreach ([DomType::Legacy, DomType::Modern] as $case) {
         }
     }
 
-    echo $doc->saveXML(), "\n";
+    echo $doc instanceof Dom\XMLDocument ? $doc->saveXml() : $doc->saveXML(), "\n";
 
     echo "--- $name test remove all ---\n";
 
@@ -76,7 +76,7 @@ foreach ([DomType::Legacy, DomType::Modern] as $case) {
         $node->remove();
     }
 
-    echo $doc->saveXML(), "\n";
+    echo $doc instanceof Dom\XMLDocument ? $doc->saveXml() : $doc->saveXML(), "\n";
 }
 
 ?>

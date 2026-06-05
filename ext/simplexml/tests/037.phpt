@@ -6,7 +6,7 @@ simplexml
 <?php
 
 $str = '<xml></xml>';
-$sxe = new SimpleXmlElement($str);
+$sxe = new SimpleXMLElement($str);
 var_dump($sxe instanceof Countable);
 ?>
 --EXPECT--

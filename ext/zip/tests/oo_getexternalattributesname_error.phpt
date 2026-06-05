@@ -8,7 +8,7 @@ zip
 $zip = new ZipArchive();
 $dirname = __DIR__ . '/';
 
-$zip->open($dirname . "test.zip", ZIPARCHIVE::CREATE);
+$zip->open($dirname . "test.zip", ZipArchive::CREATE);
 
 $a = ZipArchive::OPSYS_DEFAULT;
 $b = ZipArchive::OPSYS_DEFAULT;

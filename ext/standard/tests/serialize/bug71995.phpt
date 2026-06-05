@@ -6,7 +6,7 @@ Bug #71995 (Returning the same var twice from __sleep() produces broken serializ
 class A {
     public $b;
     public function __construct() {
-        $this->b = new StdClass();
+        $this->b = new stdClass();
     }
     public  function __sleep() {
         return array("b", "b");

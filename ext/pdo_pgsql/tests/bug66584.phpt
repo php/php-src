@@ -38,7 +38,7 @@ for ($i = 1; $i >= 0; $i--) {
 
 try {
     $pdo->query("DROP TABLE test66584");
-    $pdo->rollback();
+    $pdo->rollBack();
 } catch (\Exception $e) {
 }
 

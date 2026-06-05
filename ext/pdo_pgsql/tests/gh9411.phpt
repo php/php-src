@@ -19,7 +19,7 @@ $db->beginTransaction();
 $oid = $db->pgsqlLOBCreate();
 var_dump($lob = $db->pgsqlLOBOpen($oid, 'wb'));
 fwrite($lob, 'test');
-$db->rollback();
+$db->rollBack();
 var_dump($lob);
 
 $db->beginTransaction();

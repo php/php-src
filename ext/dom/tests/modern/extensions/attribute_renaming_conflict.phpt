@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <!DOCTYPE root [
     <!ELEMENT implied-attribute ANY>
     <!ATTLIST implied-attribute hello CDATA #FIXED "world">
@@ -54,7 +54,7 @@ try {
 }
 
 // This is here to validate that nothing actually changed
-echo $dom->saveXML();
+echo $dom->saveXml();
 
 ?>
 --EXPECT--

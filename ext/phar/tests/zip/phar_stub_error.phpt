@@ -24,7 +24,7 @@ try
 {
     $phar->setStub($newstub);
 }
-catch(exception $e)
+catch(Exception $e)
 {
     echo 'Exception: ' . $e->getMessage() . "\n";
 }

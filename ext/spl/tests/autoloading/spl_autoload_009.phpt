@@ -14,10 +14,10 @@ function my_autoload($name)
 spl_autoload_register("spl_autoload");
 spl_autoload_register("my_autoload");
 
-$obj = new testclass;
+$obj = new TestClass;
 
 ?>
 --EXPECTF--
-%stestclass.inc
-%stestclass.class.inc
+%sTestClass.inc
+%sTestClass.class.inc
 bool(true)

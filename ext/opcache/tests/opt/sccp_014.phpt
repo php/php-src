@@ -9,7 +9,7 @@ opcache
 --FILE--
 <?php
 function loadEntities($entity_information) {
-    $entity_types = new StdClass();
+    $entity_types = new stdClass();
     $entity_types->a = 1;
     foreach ($entity_information as $info) {
         $entity_types->a = 0;

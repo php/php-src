@@ -10,7 +10,7 @@ class FailClass
     function __destruct()
     {
         echo __METHOD__ . "\n";
-        throw new exception("FailClass");
+        throw new Exception("FailClass");
         echo "Done: " . __METHOD__ . "\n";
     }
 }

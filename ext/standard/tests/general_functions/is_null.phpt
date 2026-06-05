@@ -8,7 +8,7 @@ $unset_array = array();
 $unset_int = 10;
 $unset_float = 10.5;
 $unset_bool = true;
-$unset_object = new stdclass;
+$unset_object = new stdClass;
 $unset_resource = fopen(__FILE__, "r");
 // unset them to make it null.
 unset ($unset_array, $unset_int, $unset_float, $unset_bool, $unset_object, $unset_resource);
@@ -95,7 +95,7 @@ $not_null_types = array (
   -1E7,
 
   /* objects */
-  new stdclass,
+  new stdClass,
 
   /* resources */
   $fp,

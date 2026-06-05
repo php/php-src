@@ -12,7 +12,7 @@ PDOTest::skip();
 $db = PDOTest::factory();
 try {
   $db->beginTransaction();
-  $db->rollback();
+  $db->rollBack();
 } catch (PDOException $e) {
   die('skip no working transactions: ' . $e->getMessage());
 }

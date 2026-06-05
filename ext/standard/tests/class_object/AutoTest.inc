@@ -1,6 +1,6 @@
 <?php
 
-class autoTest {
+class AutoTest {
   public static $bob = "bob";
 
     public function __get($name) {

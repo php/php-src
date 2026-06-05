@@ -17,7 +17,7 @@ try {
 }
 
 try {
-    var_dump(password_hash("foo", 19, new StdClass));
+    var_dump(password_hash("foo", 19, new stdClass));
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }

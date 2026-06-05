@@ -25,8 +25,8 @@ function test() {
     return "Hello Body!";
 }
 
-$server = new soapserver(__DIR__."/server025.wsdl");
-$server->addfunction("test");
+$server = new SoapServer(__DIR__."/server025.wsdl");
+$server->addFunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>

@@ -9,7 +9,7 @@ $file = __DIR__ . '/__tmp_oo_set_comment_error.zip';
 @unlink($file);
 
 $zip = new ZipArchive;
-if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
+if (!$zip->open($file, ZipArchive::CREATE)) {
     exit('failed');
 }
 

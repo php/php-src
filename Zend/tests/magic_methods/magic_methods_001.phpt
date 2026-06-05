@@ -16,11 +16,11 @@ class foo {
     function __clone() {
         print "clone\n";
     }
-    static public function __callstatic($a, $b) {
+    static public function __callStatic($a, $b) {
         print "callstatic\n";
     }
 
-    public function __tostring() {
+    public function __toString() {
         return 'foo';
     }
 }

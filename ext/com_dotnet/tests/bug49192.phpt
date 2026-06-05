@@ -5,7 +5,7 @@ com_dotnet
 --FILE--
 <?php
 
-$dbConnection = new Com('ADODB.Connection');
+$dbConnection = new com('ADODB.Connection');
 var_dump(gc_collect_cycles());
 ?>
 --EXPECT--

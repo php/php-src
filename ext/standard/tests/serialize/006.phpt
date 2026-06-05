@@ -9,7 +9,7 @@ serialize()/unserialize() with exotic letters
         public $åäöÅÄÖüÜber = 'åäöÅÄÖ';
     }
 
-    $foo = new Überkööliäå();
+    $foo = new ÜberKööliäå();
 
     var_dump(serialize($foo));
     var_dump(unserialize(serialize($foo)));

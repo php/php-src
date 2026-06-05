@@ -29,7 +29,7 @@ class for_string_rsort
     }
 
     // return string value
-    function __tostring() {
+    function __toString() {
         return (string)$this->value;
     }
 

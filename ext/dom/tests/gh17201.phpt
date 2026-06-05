@@ -6,7 +6,7 @@ dom
 opcache.protect_memory=1
 --FILE--
 <?php
-$dom = DOM\XMLDocument::createFromString('<root class="AA B C"/>');
+$dom = Dom\XMLDocument::createFromString('<root class="AA B C"/>');
 $element = $dom->documentElement;
 $list = $element->classList;
 $list->replace('AA', 'AB'); // Use interned string

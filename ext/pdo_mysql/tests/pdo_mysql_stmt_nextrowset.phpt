@@ -20,7 +20,7 @@ MySQLPDOTest::skipNotMySQLnd();
     MySQLPDOTest::createTestTable($table, $db);
 
     $stmt = $db->query("SELECT id FROM {$table}");
-    if (false !== ($tmp = $stmt->nextRowSet()))
+    if (false !== ($tmp = $stmt->nextRowset()))
         printf("[002] Expecting false got %s\n", var_export($tmp, true));
 
     function test_proc1($db) {
@@ -36,7 +36,7 @@ MySQLPDOTest::skipNotMySQLnd();
         $db->exec("CALL {$procedure}(@VERSION)");
         $stmt = $db->query('SELECT @VERSION as _version');
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-        var_dump($stmt->nextRowSet());
+        var_dump($stmt->nextRowset());
     }
 
     function test_proc2($db) {
@@ -48,13 +48,13 @@ MySQLPDOTest::skipNotMySQLnd();
         $stmt = $db->query("CALL {$procedure}()");
         do {
             var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-        } while ($stmt->nextRowSet());
-        var_dump($stmt->nextRowSet());
+        } while ($stmt->nextRowset());
+        var_dump($stmt->nextRowset());
 
         echo "Skip fetchAll(): ";
         unset($stmt);
         $stmt = $db->query("CALL {$procedure}()");
-        var_dump($stmt->nextRowSet());
+        var_dump($stmt->nextRowset());
         $stmt->closeCursor();
     }
 

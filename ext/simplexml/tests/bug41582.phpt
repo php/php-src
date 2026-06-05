@@ -10,7 +10,7 @@ $xml = new SimpleXMLElement('<?xml version="1.0" standalone="yes"?>
 
 $xml->movie[]->characters->character[0]->name = 'Miss Coder';
 
-echo($xml->asXml());
+echo($xml->asXML());
 
 ?>
 --EXPECT--

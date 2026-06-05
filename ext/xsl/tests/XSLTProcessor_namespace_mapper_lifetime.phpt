@@ -29,7 +29,7 @@ $processor = new XSLTProcessor();
 $processor->importStylesheet(Dom\XMLDocument::createFromString($xslXML));
 $processor->importStylesheet(Dom\XMLDocument::createFromString($xslXML));
 $processor->registerPHPFunctions();
-echo $processor->transformToXML($input), "\n";
+echo $processor->transformToXml($input), "\n";
 
 ?>
 --EXPECT--

@@ -461,7 +461,6 @@ static void zend_file_cache_serialize_attribute(zval                     *zv,
 	UNSERIALIZE_PTR(attr);
 
 	SERIALIZE_STR(attr->name);
-	SERIALIZE_STR(attr->lcname);
 	SERIALIZE_STR(attr->validation_error);
 
 	for (i = 0; i < attr->argc; i++) {
@@ -858,7 +857,6 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 
 		for (i = 0; i < ce->num_interfaces; i++) {
 			SERIALIZE_STR(interface_names[i].name);
-			SERIALIZE_STR(interface_names[i].lc_name);
 		}
 	}
 
@@ -872,7 +870,6 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 
 		for (i = 0; i < ce->num_traits; i++) {
 			SERIALIZE_STR(trait_names[i].name);
-			SERIALIZE_STR(trait_names[i].lc_name);
 		}
 
 		if (ce->trait_aliases) {
@@ -1000,9 +997,8 @@ static void zend_file_cache_serialize_early_bindings(
 		zend_early_binding *early_bindings = script->early_bindings;
 		UNSERIALIZE_PTR(early_bindings);
 		for (uint32_t i = 0; i < script->num_early_bindings; i++) {
-			SERIALIZE_STR(early_bindings[i].lcname);
+			SERIALIZE_STR(early_bindings[i].name);
 			SERIALIZE_STR(early_bindings[i].rtd_key);
-			SERIALIZE_STR(early_bindings[i].lc_parent_name);
 		}
 	}
 }
@@ -1377,7 +1373,6 @@ static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_scri
 	attr = Z_PTR_P(zv);
 
 	UNSERIALIZE_STR(attr->name);
-	UNSERIALIZE_STR(attr->lcname);
 	UNSERIALIZE_STR(attr->validation_error);
 
 	for (i = 0; i < attr->argc; i++) {
@@ -1740,7 +1735,6 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 
 		for (i = 0; i < ce->num_interfaces; i++) {
 			UNSERIALIZE_STR(ce->interface_names[i].name);
-			UNSERIALIZE_STR(ce->interface_names[i].lc_name);
 		}
 	}
 
@@ -1751,7 +1745,6 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 
 		for (i = 0; i < ce->num_traits; i++) {
 			UNSERIALIZE_STR(ce->trait_names[i].name);
-			UNSERIALIZE_STR(ce->trait_names[i].lc_name);
 		}
 
 		if (ce->trait_aliases) {
@@ -1876,9 +1869,8 @@ static void zend_file_cache_unserialize_early_bindings(zend_persistent_script *s
 	if (script->early_bindings) {
 		UNSERIALIZE_PTR(script->early_bindings);
 		for (uint32_t i = 0; i < script->num_early_bindings; i++) {
-			UNSERIALIZE_STR(script->early_bindings[i].lcname);
+			UNSERIALIZE_STR(script->early_bindings[i].name);
 			UNSERIALIZE_STR(script->early_bindings[i].rtd_key);
-			UNSERIALIZE_STR(script->early_bindings[i].lc_parent_name);
 		}
 	}
 }

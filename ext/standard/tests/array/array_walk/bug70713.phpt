@@ -5,7 +5,7 @@ Bug #70713: Use After Free Vulnerability in array_walk()/array_walk_recursive()
 
 class obj
 {
-    function __tostring()
+    function __toString()
     {
         global $arr;
 

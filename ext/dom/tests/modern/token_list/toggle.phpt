@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root class="A B C"/>');
+$dom = Dom\XMLDocument::createFromString('<root class="A B C"/>');
 $element = $dom->documentElement;
 $list = $element->classList;
 
@@ -13,44 +13,44 @@ echo "--- Toggle A (forced add) ---\n";
 
 var_dump($list->toggle("A", true));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "--- Toggle A (not forced) ---\n";
 
 var_dump($list->toggle("A"));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "--- Toggle A (forced remove) ---\n";
 
 var_dump($list->toggle("A", false));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "--- Toggle B (forced remove) ---\n";
 
 var_dump($list->toggle("B", false));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "--- Toggle D ---\n";
 
 var_dump($list->toggle("D"));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "--- Toggle C ---\n";
 
 var_dump($list->toggle("C"));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "--- Toggle E ---\n";
 
 $list->value = 'E';
 $list->toggle('E');
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

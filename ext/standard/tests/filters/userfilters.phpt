@@ -13,7 +13,7 @@ class testfilter extends php_user_filter {
     return PSFS_PASS_ON;
   }
 
-  function oncreate(): bool {
+  function onCreate(): bool {
     echo "params: {$this->params}\n";
     return true;
   }

@@ -368,7 +368,7 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 }
 
 static inline int unserialize_allowed_class(
-		zend_string *lcname, php_unserialize_data_t *var_hashx)
+		zend_string *name, php_unserialize_data_t *var_hashx)
 {
 	HashTable *classes = (*var_hashx)->allowed_classes;
 
@@ -379,7 +379,7 @@ static inline int unserialize_allowed_class(
 		return 0;
 	}
 
-	return zend_hash_exists(classes, lcname);
+	return zend_hash_exists(classes, name);
 }
 
 #define YYFILL(n) do { } while (0)
@@ -1195,8 +1195,6 @@ object ":" uiv ":" ["]	{
 	class_name = zend_string_init_interned(str, len, 0);
 
 	do {
-		zend_string *lc_name;
-
 		if (!(*var_hash)->allowed_classes && ZSTR_HAS_CE_CACHE(class_name)) {
 			ce = ZSTR_GET_CE_CACHE(class_name);
 			if (ce) {
@@ -1204,9 +1202,7 @@ object ":" uiv ":" ["]	{
 			}
 		}
 
-		lc_name = zend_string_tolower(class_name);
-		if(!unserialize_allowed_class(lc_name, var_hash)) {
-			zend_string_release_ex(lc_name, 0);
+		if(!unserialize_allowed_class(class_name, var_hash)) {
 			if (!zend_is_valid_class_name(class_name)) {
 				zend_string_release_ex(class_name, 0);
 				return 0;
@@ -1219,30 +1215,26 @@ object ":" uiv ":" ["]	{
 		if ((*var_hash)->allowed_classes && ZSTR_HAS_CE_CACHE(class_name)) {
 			ce = ZSTR_GET_CE_CACHE(class_name);
 			if (ce) {
-				zend_string_release_ex(lc_name, 0);
 				break;
 			}
 		}
 
-		ce = zend_hash_find_ptr(EG(class_table), lc_name);
+		ce = zend_hash_find_ptr(EG(class_table), class_name);
 		if (ce
 		 && (ce->ce_flags & ZEND_ACC_LINKED)
 		 && !(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
-			zend_string_release_ex(lc_name, 0);
 			break;
 		}
 
 		if (!ZSTR_HAS_CE_CACHE(class_name) && !zend_is_valid_class_name(class_name)) {
-			zend_string_release_ex(lc_name, 0);
 			zend_string_release_ex(class_name, 0);
 			return 0;
 		}
 
 		/* Try to find class directly */
 		BG(serialize_lock)++;
-		ce = zend_lookup_class_ex(class_name, lc_name, 0);
+		ce = zend_lookup_class_ex(class_name, 0);
 		BG(serialize_lock)--;
-		zend_string_release_ex(lc_name, 0);
 		if (EG(exception)) {
 			zend_string_release_ex(class_name, 0);
 			return 0;

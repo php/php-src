@@ -24,7 +24,7 @@ if (!$zip->replaceFile($dirname . 'utils.inc', 0)) {
 if (!$zip->replaceFile($dirname . 'utils.inc', 2, 12, 42)) {
     echo "replace 2 failed\n";
 }
-if ($zip->status == ZIPARCHIVE::ER_OK) {
+if ($zip->status == ZipArchive::ER_OK) {
     if (!verify_entries($zip, [
         "bar",
         "foobar/",

@@ -9,7 +9,7 @@ var_dump( $d );
 echo $d->format( DATE_ISO8601 ), "\n";
 echo $d->format( 'U' ), "\n\n";
 
-$d->setTimeZone( new DateTimeZone( 'Europe/Budapest' ) );
+$d->setTimezone( new DateTimeZone( 'Europe/Budapest' ) );
 var_dump( $d );
 echo $d->format( DATE_ISO8601 ), "\n\n";
 echo $d->format( 'U' ), "\n\n";

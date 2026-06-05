@@ -14,7 +14,7 @@ class MyZipArchive extends ZipArchive {
 
 new MyZipArchive;
 $file = __DIR__ . '/ZipArchive_destruct.zip';
-$leak->open($file, ZIPARCHIVE::CREATE);
+$leak->open($file, ZipArchive::CREATE);
 $leak->addFromString('test', 'test');
 
 ?>

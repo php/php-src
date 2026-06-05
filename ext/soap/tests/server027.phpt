@@ -17,7 +17,7 @@ class Foo {
 $foo = new Foo();
 $server = new SoapServer(null,array('uri'=>"http://testuri.org"));
 $server->setObject($foo);
-var_dump($server->getfunctions());
+var_dump($server->getFunctions());
 echo "ok\n";
 ?>
 --EXPECT--

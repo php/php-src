@@ -764,7 +764,7 @@ PHP_METHOD(SoapFault, __toString)
 	line = zend_read_property_ex(soap_fault_class_entry, Z_OBJ_P(this_ptr), ZSTR_KNOWN(ZEND_STR_LINE), /* silent */ true, &rv4);
 
 	zend_call_method_with_0_params(
-		Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), NULL, "gettraceasstring", &trace);
+		Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), NULL, "getTraceAsString", &trace);
 
 	faultcode_val = zval_get_string(faultcode);
 	faultstring_val = zval_get_string(faultstring);
@@ -1280,28 +1280,24 @@ PHP_METHOD(SoapServer, addFunction)
 					RETURN_THROWS();
 				}
 
-				key = zend_string_tolower(Z_STR_P(tmp_function));
+				key = Z_STR_P(tmp_function);
 
 				if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
-					zend_string_release_ex(key, false);
 					zend_type_error("SoapServer::addFunction(): Function \"%s\" not found", Z_STRVAL_P(tmp_function));
 					RETURN_THROWS();
 				}
 
 				ZVAL_STR_COPY(&function_copy, f->common.function_name);
 				zend_hash_update(service->soap_functions.ft, key, &function_copy);
-
-				zend_string_release_ex(key, 0);
 			} ZEND_HASH_FOREACH_END();
 		}
 	} else if (Z_TYPE_P(function_name) == IS_STRING) {
 		zend_string *key;
 		zend_function *f;
 
-		key = zend_string_tolower(Z_STR_P(function_name));
+		key = Z_STR_P(function_name);
 
 		if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
-			zend_string_release_ex(key, false);
 			zend_argument_type_error(1, "must be a valid function name, function \"%s\" not found", Z_STRVAL_P(function_name));
 			RETURN_THROWS();
 		}
@@ -1312,7 +1308,6 @@ PHP_METHOD(SoapServer, addFunction)
 
 		ZVAL_STR_COPY(&function_copy, f->common.function_name);
 		zend_hash_update(service->soap_functions.ft, key, &function_copy);
-		zend_string_release_ex(key, 0);
 	} else if (Z_TYPE_P(function_name) == IS_LONG) {
 		if (Z_LVAL_P(function_name) == SOAP_FUNCTIONS_ALL) {
 			php_error_docref(NULL, E_DEPRECATED, "Enabling all functions via SOAP_FUNCTIONS_ALL is deprecated since 8.4, due to possible security concerns."
@@ -1629,7 +1624,7 @@ PHP_METHOD(SoapServer, handle)
 				}
 			}
 #endif
-			if (zend_hash_find_ptr_lc(function_table, Z_STR(h->function_name)) != NULL ||
+			if (zend_hash_find_ptr(function_table, Z_STR(h->function_name)) != NULL ||
 			    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
 			     zend_hash_str_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1))) {
 				if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
@@ -1667,7 +1662,7 @@ PHP_METHOD(SoapServer, handle)
 		}
 	}
 
-	if (zend_hash_find_ptr_lc(function_table, Z_STR(function_name)) != NULL ||
+	if (zend_hash_find_ptr(function_table, Z_STR(function_name)) != NULL ||
 	    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
 	     zend_hash_str_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1))) {
 		if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
@@ -2350,7 +2345,7 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 			ZVAL_COPY(Z_CLIENT_LAST_REQUEST_P(this_ptr), &params[0]);
 		}
 
-		zend_function *func = zend_hash_str_find_ptr(&Z_OBJCE_P(this_ptr)->function_table, ZEND_STRL("__dorequest"));
+		zend_function *func = zend_hash_str_find_ptr(&Z_OBJCE_P(this_ptr)->function_table, ZEND_STRL("__doRequest"));
 		ZEND_ASSERT(func != NULL);
 
 		zend_call_known_instance_method(func, Z_OBJ_P(this_ptr), response, 5, params);
@@ -4361,9 +4356,9 @@ static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name, size_t
 	sdlFunctionPtr tmp;
 
 	if (sdl != NULL) {
-		if ((tmp = zend_hash_str_find_ptr_lc(&sdl->functions, function_name, function_name_length)) != NULL) {
+		if ((tmp = zend_hash_str_find_ptr(&sdl->functions, function_name, function_name_length)) != NULL) {
 			return tmp;
-		} else if (sdl->requests != NULL && (tmp = zend_hash_str_find_ptr_lc(sdl->requests, function_name, function_name_length)) != NULL) {
+		} else if (sdl->requests != NULL && (tmp = zend_hash_str_find_ptr(sdl->requests, function_name, function_name_length)) != NULL) {
 			return tmp;
 		}
 	}

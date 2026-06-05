@@ -53,6 +53,15 @@ PHP                                                                        NEWS
 02 Jul 2026, PHP 8.6.0alpha1
 
 - Core:
+  . PHP is now case-sensitive for function and class names. Calling a function
+    using incorrect casing (e.g. STRLEN() instead of strlen()) now raises a
+    fatal Error. (jorgsowa)
+  . Class, interface, trait, and enum names are now stored and looked up using
+    their canonical casing. Referencing them with incorrect casing now raises a
+    fatal Error across all language constructs and APIs that accept a class
+    name. (jorgsowa)
+  . Namespace segments in references and use imports are now matched
+    case-sensitively. Using incorrect casing raises a fatal Error. (jorgsowa)
   . Added first-class callable cache to share instances for the duration of the
     request. (ilutov)
   . It is now possible to use reference assign on WeakMap without the key

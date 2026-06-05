@@ -13,12 +13,12 @@ function nonDomNode() {
     return new foo();
 }
 
-$dom = new domDocument();
+$dom = new DOMDocument();
 $dom->load(__DIR__."/xslt_non_dom_node.xsl");
-$proc = new xsltprocessor;
+$proc = new XSLTProcessor;
 $xsl = $proc->importStylesheet($dom);
 
-$xml = new DomDocument();
+$xml = new DOMDocument();
 $xml->load(__DIR__."/xslt011.xml");
 $proc->registerPHPFunctions();
 try {

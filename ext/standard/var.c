@@ -1432,9 +1432,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 					zend_tmp_string_release(tmp_str);
 					goto cleanup;
 				}
-				zend_string *lcname = zend_string_tolower(name);
-				zend_hash_add_empty_element(class_hash, lcname);
-		        zend_string_release_ex(lcname, false);
+				zend_hash_add_empty_element(class_hash, name);
 		        zend_tmp_string_release(tmp_str);
 			} ZEND_HASH_FOREACH_END();
 		}

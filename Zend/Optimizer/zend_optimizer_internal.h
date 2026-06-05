@@ -100,7 +100,7 @@ bool zend_optimizer_replace_by_const(zend_op_array *op_array,
                                      zval          *val);
 zend_op *zend_optimizer_get_loop_var_def(const zend_op_array *op_array, zend_op *free_opline);
 zend_class_entry *zend_optimizer_get_class_entry(
-		const zend_script *script, const zend_op_array *op_array, zend_string *lcname);
+		const zend_script *script, const zend_op_array *op_array, zend_string *name);
 zend_class_entry *zend_optimizer_get_class_entry_from_op1(
 		const zend_script *script, const zend_op_array *op_array, const zend_op *opline);
 const zend_class_constant *zend_fetch_class_const_info(

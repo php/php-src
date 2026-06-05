@@ -13,7 +13,7 @@ class C {
 
 echo "\nSubstituting the iterated object for a different object.\n";
 $obj = new C;
-$obj2 = new stdclass;
+$obj2 = new stdClass;
 $obj2->a = "new a";
 $obj2->b = "new b";
 $obj2->c = "new c";

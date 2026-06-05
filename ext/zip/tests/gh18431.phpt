@@ -7,7 +7,7 @@ zip
 $file = __DIR__ . '/gh18431.zip';
 $callback = var_dump(...);
 $zip = new ZipArchive;
-$zip->open($file, ZIPARCHIVE::CREATE);
+$zip->open($file, ZipArchive::CREATE);
 $zip->registerProgressCallback(0.5, $callback);
 $zip->registerProgressCallback(0.5, $callback);
 $zip->addFromString('foo', 'entry #1');

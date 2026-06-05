@@ -3,9 +3,9 @@ Duplicate class type
 --FILE--
 <?php
 
-function test(): Foo|int|FOO {
+function test(): Foo|int|Foo {
 }
 
 ?>
 --EXPECTF--
-Fatal error: Duplicate type FOO is redundant in %s on line %d
+Fatal error: Duplicate type Foo is redundant in %s on line %d

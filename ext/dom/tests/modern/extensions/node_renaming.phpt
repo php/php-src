@@ -16,7 +16,7 @@ function test($target, $namespaceURI, $qualifiedName) {
     $qualifiedNamePretty = json_encode($qualifiedName);
     echo "--- rename to $namespaceURIPretty $qualifiedNamePretty ---\n";
     $target->rename($namespaceURI, $qualifiedName);
-    echo $target->ownerDocument->saveXML(), "\n";
+    echo $target->ownerDocument->saveXml(), "\n";
     var_dump($target->namespaceURI, $target->prefix);
 }
 

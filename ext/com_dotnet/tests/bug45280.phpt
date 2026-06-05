@@ -4,7 +4,7 @@ Bug #45280 (Reflection of instantiated COM classes causes PHP to crash)
 com_dotnet
 --FILE--
 <?php
-$dict = new COM("Scripting.Dictionary");
+$dict = new com("Scripting.Dictionary");
 
 $reflection = new ReflectionObject($dict);
 ob_start();

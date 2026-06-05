@@ -32,7 +32,7 @@ $proc = new XSLTProcessor;
 // Set the template depth limit so high that we will certainly hit the variable depth limit first.
 $proc->maxTemplateDepth = 2**30;
 $proc->maxTemplateVars = 2;
-$proc->importStyleSheet($xsl);
+$proc->importStylesheet($xsl);
 $proc->transformToDoc($doc);
 
 ?>

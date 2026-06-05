@@ -4,7 +4,7 @@ Testing __callStatic
 <?php
 
 class foo {
-    static function __callstatic($a, $b) {
+    static function __callStatic($a, $b) {
         var_dump($a);
     }
 }

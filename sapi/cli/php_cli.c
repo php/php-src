@@ -1063,7 +1063,7 @@ do_repeat:
 				if (pce == reflection_method_ptr) {
 					zend_function *create_from_method = zend_hash_str_find_ptr(
 						&(pce->function_table),
-						"createfrommethodname",
+						"createFromMethodName",
 						strlen( "createFromMethodName" )
 					);
 					zend_call_known_function(

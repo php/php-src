@@ -4,14 +4,14 @@ Bug #45529 (UTC not properly recognised as timezone identifier while parsing)
 <?php
 date_default_timezone_set('Europe/Oslo');
 $tz1 = new DateTimeZone('UTC');
-$tz2 = date_create('UTC')->getTimeZone();
+$tz2 = date_create('UTC')->getTimezone();
 echo $tz1->getName(), PHP_EOL;
 echo $tz2->getName(), PHP_EOL;
 $d = new DateTime('2008-01-01 12:00:00+0200');
-$d->setTimeZone($tz1);
+$d->setTimezone($tz1);
 echo $d->format(DATE_ISO8601), PHP_EOL;
 $d = new DateTime('2008-01-01 12:00:00+0200');
-$d->setTimeZone($tz2);
+$d->setTimezone($tz2);
 echo $d->format(DATE_ISO8601), PHP_EOL;
 ?>
 --EXPECT--

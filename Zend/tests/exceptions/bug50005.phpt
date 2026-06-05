@@ -3,7 +3,7 @@ Bug #50005 (Throwing through Reflection modified Exception object makes segmenta
 --FILE--
 <?php
 
-class a extends exception {
+class a extends Exception {
     public function __construct() {
         $this->file = "";
     }

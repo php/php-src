@@ -2163,25 +2163,20 @@ PHP_FUNCTION(session_set_save_handler)
 		/* First release old handlers */
 		SESSION_RELEASE_USER_HANDLER_OO(ps_validate_sid);
 		SESSION_RELEASE_USER_HANDLER_OO(ps_update_timestamp);
-		/* Method names need to be lowercase */
-		zend_string *validate_sid_name = ZSTR_INIT_LITERAL("validateid", false);
-		zend_string *update_timestamp_name = ZSTR_INIT_LITERAL("updatetimestamp", false);
+		zend_string *validate_sid_name = ZSTR_INIT_LITERAL("validateId", false);
+		zend_string *update_timestamp_name = ZSTR_INIT_LITERAL("updateTimestamp", false);
 		if (instanceof_function(Z_OBJCE_P(obj), php_session_update_timestamp_iface_entry)) {
 			/* Validate ID handler */
 			SESSION_SET_USER_HANDLER_OO(ps_validate_sid, zend_string_copy(validate_sid_name));
 			/* Update Timestamp handler */
-			/* We need to provide a new string with the correct casing so that error messages work */
-			SESSION_SET_USER_HANDLER_OO(ps_update_timestamp, ZSTR_INIT_LITERAL("updateTimestamp", false));
+			SESSION_SET_USER_HANDLER_OO(ps_update_timestamp, zend_string_copy(update_timestamp_name));
 		} else {
 			/* For BC reasons we accept methods even if the class does not implement the interface */
 			if (zend_hash_find_ptr(object_methods, validate_sid_name)) {
-				/* For BC reasons we accept methods even if the class does not implement the interface */
 				SESSION_SET_USER_HANDLER_OO(ps_validate_sid, zend_string_copy(validate_sid_name));
 			}
 			if (zend_hash_find_ptr(object_methods, update_timestamp_name)) {
-				/* For BC reasons we accept methods even if the class does not implement the interface */
-				/* We need to provide a new string with the correct casing so that error messages work */
-				SESSION_SET_USER_HANDLER_OO(ps_update_timestamp, ZSTR_INIT_LITERAL("updateTimestamp", false));
+				SESSION_SET_USER_HANDLER_OO(ps_update_timestamp, zend_string_copy(update_timestamp_name));
 			}
 		}
 		zend_string_release_ex(validate_sid_name, false);

@@ -19,7 +19,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-echo $dom->saveXML();
+echo $dom->saveXml();
 
 ?>
 --EXPECT--

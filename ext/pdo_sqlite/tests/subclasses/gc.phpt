@@ -12,7 +12,7 @@ class Obj {
 }
 
 $obj = new Obj;
-$obj->a = Pdo::connect('sqlite::memory:');
+$obj->a = PDO::connect('sqlite::memory:');
 
 if (!$obj->a instanceof Pdo\Sqlite) {
     echo "Wrong class type. Should be Pdo\Sqlite but is " . get_class($obj->a) . "]\n";

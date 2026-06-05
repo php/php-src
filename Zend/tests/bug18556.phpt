@@ -13,8 +13,8 @@ class InfoBlob {
    }
 }
 
-echo "Instantiating an infoBlob with a lowercase i\n";
-$foobar = new infoBlob();
+echo "Instantiating an InfoBlob\n";
+$foobar = new InfoBlob();
 echo $foobar->foo;
 echo "\nInstantiating an InfoBlob with an uppercase I\n";
 $foobar = new InfoBlob();
@@ -30,7 +30,7 @@ foreach(get_declared_classes() as $class)
 echo "Done.\n";
 ?>
 --EXPECT--
-Instantiating an infoBlob with a lowercase i
+Instantiating an InfoBlob
 Foo
 Instantiating an InfoBlob with an uppercase I
 Foo

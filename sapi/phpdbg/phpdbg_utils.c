@@ -166,29 +166,23 @@ PHPDBG_API const char *phpdbg_current_file(void) /* {{{ */
 PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const char *cname) /* {{{ */
 {
 	zend_function *func = NULL;
-	zend_string *lfname = zend_string_init(fname, strlen(fname), 0);
-	zend_string *tmp = zend_string_tolower(lfname);
-	zend_string_release(lfname);
-	lfname = tmp;
+	zend_string *fname_str = zend_string_init(fname, strlen(fname), 0);
 
 	if (cname) {
 		zend_class_entry *ce;
-		zend_string *lcname = zend_string_init(cname, strlen(cname), 0);
-		tmp = zend_string_tolower(lcname);
-		zend_string_release(lcname);
-		lcname = tmp;
-		ce = zend_lookup_class(lcname);
+		zend_string *cname_str = zend_string_init(cname, strlen(cname), 0);
+		ce = zend_lookup_class(cname_str);
 
-		zend_string_release(lcname);
+		zend_string_release(cname_str);
 
 		if (ce) {
-			func = zend_hash_find_ptr(&ce->function_table, lfname);
+			func = zend_hash_find_ptr(&ce->function_table, fname_str);
 		}
 	} else {
-		func = zend_hash_find_ptr(EG(function_table), lfname);
+		func = zend_hash_find_ptr(EG(function_table), fname_str);
 	}
 
-	zend_string_release(lfname);
+	zend_string_release(fname_str);
 	return func;
 } /* }}} */
 
@@ -395,29 +389,20 @@ PHPDBG_API void phpdbg_set_async_io(int fd) {
 
 int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry **ce) {
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
-		char *lc_name, *lc_free;
-		int lc_length;
-
 		if (name == NULL || !name_length) {
 			return FAILURE;
 		}
 
-		lc_free = lc_name = emalloc(name_length + 1);
-		zend_str_tolower_copy(lc_name, name, name_length);
-		lc_length = name_length + 1;
-
-		if (lc_name[0] == '\\') {
-			lc_name += 1;
-			lc_length -= 1;
+		if (name[0] == '\\') {
+			name += 1;
+			name_length -= 1;
 		}
 
 		phpdbg_try_access {
-			*ce = zend_hash_str_find_ptr(EG(class_table), lc_name, lc_length);
+			*ce = zend_hash_str_find_ptr(EG(class_table), name, name_length);
 		} phpdbg_catch_access {
 			phpdbg_error("Could not fetch class %.*s, invalid data source", name_length, name);
 		} phpdbg_end_try_access();
-
-		efree(lc_free);
 	} else {
 		zend_string *str_name = zend_string_init(name, name_length, 0);
 		*ce = zend_lookup_class(str_name);
@@ -633,7 +618,7 @@ PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_obj
 				zend_class_entry *ce;
 
 				if (!(ce = CACHED_PTR(cur->extended_value & ~ZEND_LAST_CATCH))) {
-					ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(cur, cur->op1)), Z_STR_P(RT_CONSTANT(cur, cur->op1) + 1), ZEND_FETCH_CLASS_NO_AUTOLOAD);
+					ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(cur, cur->op1)), ZEND_FETCH_CLASS_NO_AUTOLOAD);
 					CACHE_PTR(cur->extended_value & ~ZEND_LAST_CATCH, ce);
 				}
 

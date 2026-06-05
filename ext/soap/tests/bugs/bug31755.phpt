@@ -15,12 +15,12 @@ $client = new MySoapClient(null, array(
 ));
 
 try {
-    new SOAPHeader('', 'foo', 'bar');
+    new SoapHeader('', 'foo', 'bar');
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
-$header = new SOAPHeader('namespace', 'foo', 'bar');
+$header = new SoapHeader('namespace', 'foo', 'bar');
 $response= $client->__soapCall('function', array(), null, $header);
 
 print $client->__getLastRequest();

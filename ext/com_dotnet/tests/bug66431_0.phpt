@@ -8,7 +8,7 @@ com_dotnet
 $text= "Xin chào cộng đồng PHP";
 $fpath = str_replace("/", "\\", __DIR__ . "/bug66431.txt");
 
-$fso = new COM("Scripting.FileSystemObject");
+$fso = new com("Scripting.FileSystemObject");
 $fh = $fso->OpenTextFile($fpath, 2, true);
 $fh->Write($text);
 $fh->Close();

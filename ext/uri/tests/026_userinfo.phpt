@@ -30,7 +30,7 @@ try {
 }
 
 $uri5 = Uri\Rfc3986\Uri::parse("file:///foo/bar/");
-$uri6 = $uri5->withUserinfo("user:pass");
+$uri6 = $uri5->withUserInfo("user:pass");
 
 var_dump($uri5->getUserInfo());
 var_dump($uri6->getUserInfo());

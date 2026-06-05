@@ -6,7 +6,7 @@ pdo_mysql
 <?php
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-if (MYSQLPDOTest::isPDOMySQLnd())
+if (MySQLPDOTest::isPDOMySQLnd())
     die("skip libmysql only test");
 ?>
 --FILE--

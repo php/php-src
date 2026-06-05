@@ -940,9 +940,9 @@ uint32_t zend_modifier_list_to_flags(zend_modifier_target target, zend_ast *modi
 bool zend_handle_encoding_declaration(zend_ast *ast);
 
 ZEND_API zend_class_entry *zend_bind_class_in_slot(
-		zval *class_table_slot, const zval *lcname, zend_string *lc_parent_name);
-ZEND_API zend_result do_bind_function(zend_function *func, const zval *lcname);
-ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name);
+		zval *class_table_slot, const zval *name_key);
+ZEND_API zend_result do_bind_function(zend_function *func, const zval *name_key);
+ZEND_API zend_result do_bind_class(zval *name_key);
 
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline);
 
@@ -1250,12 +1250,9 @@ END_EXTERN_C()
 #define ZEND_ISSET_FUNC_NAME        "__isset"
 #define ZEND_CALL_FUNC_NAME         "__call"
 #define ZEND_CALLSTATIC_FUNC_NAME   "__callStatic"
-#define ZEND_CALLSTATIC_FUNC_LCNAME "__callstatic"
 #define ZEND_TOSTRING_FUNC_NAME     "__toString"
-#define ZEND_TOSTRING_FUNC_LCNAME   "__tostring"
 #define ZEND_INVOKE_FUNC_NAME       "__invoke"
 #define ZEND_DEBUGINFO_FUNC_NAME    "__debugInfo"
-#define ZEND_DEBUGINFO_FUNC_LCNAME  "__debuginfo"
 #define ZEND_SLEEP_FUNC_NAME        "__sleep"
 #define ZEND_WAKEUP_FUNC_NAME       "__wakeup"
 #define ZEND_SERIALIZE_FUNC_NAME    "__serialize"

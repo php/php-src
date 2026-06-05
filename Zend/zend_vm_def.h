@@ -3574,7 +3574,7 @@ ZEND_VM_HANDLER(109, ZEND_FETCH_CLASS, UNUSED|CLASS_FETCH, CONST|TMP|UNUSED|CV, 
 
 		if (UNEXPECTED(ce == NULL)) {
 			class_name = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
-			ce = zend_fetch_class_by_name(Z_STR_P(class_name), Z_STR_P(class_name + 1), opline->op1.num);
+			ce = zend_fetch_class_by_name(Z_STR_P(class_name), opline->op1.num);
 			CACHE_PTR(opline->extended_value, ce);
 		}
 		Z_CE_P(EX_VAR(opline->result.var)) = ce;
@@ -3700,7 +3700,7 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMP|UNUSED|THIS|CV, CO
 		}
 
 		/* First, locate the function. */
-		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((OP2_TYPE == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((OP2_TYPE == IS_CONST) ? (RT_CONSTANT(opline, opline->op2)) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
 				zend_undefined_method(orig_obj->ce, Z_STR_P(function_name));
@@ -3773,7 +3773,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 		/* no function found. try a static method in class */
 		ce = CACHED_PTR(opline->result.num);
 		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				FREE_OP2();
 				HANDLE_EXCEPTION();
@@ -3826,7 +3826,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 		if (ce->get_static_method) {
 			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
 		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((OP2_TYPE == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
+			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((OP2_TYPE == IS_CONST) ? (RT_CONSTANT(opline, opline->op2)) : NULL));
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
@@ -3901,7 +3901,7 @@ ZEND_VM_HOT_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
 		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name+1));
+		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name));
 		if (UNEXPECTED(func == NULL)) {
 			ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
 		}
@@ -4055,9 +4055,9 @@ ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
 		func_name = (zval *)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));
+		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name));
 		if (func == NULL) {
-			func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
+			func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));
 			if (UNEXPECTED(func == NULL)) {
 				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
 			}
@@ -4861,8 +4861,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH|CACHE_SLOT)
 	}
 	catch_ce = CACHED_PTR(opline->extended_value & ~ZEND_LAST_CATCH);
 	if (UNEXPECTED(catch_ce == NULL)) {
-		catch_ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
-
+		catch_ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
 		CACHE_PTR(opline->extended_value & ~ZEND_LAST_CATCH, catch_ce);
 	}
 	ce = EG(exception)->ce;
@@ -5987,7 +5986,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, UNUSED|CACHE_SLOT, N
 	if (OP1_TYPE == IS_CONST) {
 		ce = CACHED_PTR(opline->op2.num);
 		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
@@ -6121,7 +6120,7 @@ ZEND_VM_HOT_HANDLER(99, ZEND_FETCH_CONSTANT, UNUSED|CONST_FETCH, CONST, CACHE_SL
 	}
 
 	SAVE_OPLINE();
-	zend_quick_get_constant(RT_CONSTANT(opline, opline->op2) + 1, opline->op1.num OPLINE_CC EXECUTE_DATA_CC);
+	zend_quick_get_constant(RT_CONSTANT(opline, opline->op2), opline->op1.num OPLINE_CC EXECUTE_DATA_CC);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -6146,7 +6145,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 			if (EXPECTED(CACHED_PTR(opline->extended_value))) {
 				ce = CACHED_PTR(opline->extended_value);
 			} else {
-				ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+				ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 				if (UNEXPECTED(ce == NULL)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 					FREE_OP2();
@@ -6729,7 +6728,7 @@ ZEND_VM_COLD_HANDLER(179, ZEND_UNSET_STATIC_PROP, ANY, ANY, CACHE_SLOT)
 	if (OP2_TYPE == IS_CONST) {
 		ce = CACHED_PTR(opline->extended_value);
 		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), Z_STR_P(RT_CONSTANT(opline, opline->op2) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				FREE_OP1();
 				HANDLE_EXCEPTION();
@@ -8006,7 +8005,7 @@ ZEND_VM_HANDLER(144, ZEND_DECLARE_CLASS, CONST, ANY)
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	do_bind_class(RT_CONSTANT(opline, opline->op1), (OP2_TYPE == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL);
+	do_bind_class(RT_CONSTANT(opline, opline->op1));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -8016,11 +8015,12 @@ ZEND_VM_HANDLER(145, ZEND_DECLARE_CLASS_DELAYED, CONST, CONST)
 
 	zend_class_entry *ce = CACHED_PTR(opline->extended_value);
 	if (ce == NULL) {
-		zval *lcname = RT_CONSTANT(opline, opline->op1);
-		zval *zv = zend_hash_find_known_hash(EG(class_table), Z_STR_P(lcname + 1));
+		/* slot 0 = canonical class name, slot 1 = RTD key */
+		zval *name = RT_CONSTANT(opline, opline->op1);
+		zval *zv = zend_hash_find_known_hash(EG(class_table), Z_STR_P(name + 1));
 		if (zv) {
 			SAVE_OPLINE();
-			ce = zend_bind_class_in_slot(zv, lcname, Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+			ce = zend_bind_class_in_slot(zv, name);
 			if (EG(exception)) {
 				HANDLE_EXCEPTION();
 			}
@@ -8044,7 +8044,7 @@ ZEND_VM_HANDLER(146, ZEND_DECLARE_ANON_CLASS, ANY, ANY, CACHE_SLOT)
 		ce = Z_CE_P(zv);
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			SAVE_OPLINE();
-			ce = zend_do_link_class(ce, (OP2_TYPE == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL, rtd_key);
+			ce = zend_do_link_class(ce, rtd_key);
 			if (EG(exception)) {
 				HANDLE_EXCEPTION();
 			}
@@ -8099,7 +8099,7 @@ ZEND_VM_C_LABEL(try_instanceof):
 		if (OP2_TYPE == IS_CONST) {
 			ce = CACHED_PTR(opline->extended_value);
 			if (UNEXPECTED(ce == NULL)) {
-				ce = zend_lookup_class_ex(Z_STR_P(RT_CONSTANT(opline, opline->op2)), Z_STR_P(RT_CONSTANT(opline, opline->op2) + 1), ZEND_FETCH_CLASS_NO_AUTOLOAD);
+				ce = zend_lookup_class_ex(Z_STR_P(RT_CONSTANT(opline, opline->op2)), ZEND_FETCH_CLASS_NO_AUTOLOAD);
 				if (EXPECTED(ce)) {
 					CACHE_PTR(opline->extended_value, ce);
 				}

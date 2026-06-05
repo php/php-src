@@ -8,7 +8,7 @@ xmlwriter
 <?php
 
 $cDataString = "Text for inclusion within CData tags can include characters like <, >, &, and quotes like ' and \"";
-$xmlWriter = new XmlWriter();
+$xmlWriter = new XMLWriter();
 $xmlWriter->openMemory();
 
 $xmlWriter->startDocument('1.0', 'UTF-8');
@@ -16,7 +16,7 @@ $xmlWriter->startElement('myDocumentRoot');
 $xmlWriter->startElement('myElement');
 // CData output
 $xmlWriter->startElement('cdataElement');
-$xmlWriter->writeCData($cDataString);
+$xmlWriter->writeCdata($cDataString);
 $xmlWriter->endElement();
 // end the document and output
 $xmlWriter->endElement();

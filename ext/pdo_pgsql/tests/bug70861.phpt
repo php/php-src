@@ -34,7 +34,7 @@ $f = fopen("hello://there", "r");
 
 $stmt = $db->prepare("INSERT INTO test70861 (blob1) VALUES (:foo)", array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 
-$stmt->bindparam(':foo', $f, PDO::PARAM_LOB);
+$stmt->bindParam(':foo', $f, PDO::PARAM_LOB);
 $stmt->execute();
 
 fclose($f);

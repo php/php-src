@@ -9,7 +9,7 @@ trait myTrait {
 
 class myClass {
      use myTrait {
-         MyTrait::run as private;
+         myTrait::run as private;
      }
 }
 $class = new \ReflectionClass('myClass');

@@ -7,7 +7,7 @@ xsl
 <?php
 echo "Test 8: Stream Wrapper Includes ";
 include("prepare.inc");
-$xsl = new domDocument;
+$xsl = new DOMDocument;
 $xsl->load(__DIR__."/streamsinclude.xsl");
 if(!$xsl) {
   echo "Error while parsing the document\n";
@@ -16,7 +16,7 @@ if(!$xsl) {
 chdir(__DIR__);
 $proc->importStylesheet($xsl);
 print "\n";
-print $proc->transformToXML($dom);
+print $proc->transformToXml($dom);
 ?>
 --EXPECT--
 Test 8: Stream Wrapper Includes 

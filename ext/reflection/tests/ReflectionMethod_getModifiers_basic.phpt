@@ -4,7 +4,7 @@ ReflectionMethod::getModifiers()
 <?php
 
 function reflectMethodModifiers($class) {
-    $classInfo = new reflectionClass($class);
+    $classInfo = new ReflectionClass($class);
     $methodArray = $classInfo->getMethods();
 
     foreach ($methodArray as $method) {
@@ -52,7 +52,7 @@ class TestClass
 
     public function __isset($a) {}
 
-    public function __tostring() {}
+    public function __toString() {}
 
     public function __sleep() {}
 
@@ -154,7 +154,7 @@ Modifiers for method TestClass::__isset():
 0x00000001
 
 
-Modifiers for method TestClass::__tostring():
+Modifiers for method TestClass::__toString():
 0x00000001
 
 
@@ -242,7 +242,7 @@ Modifiers for method TestClass::__isset():
 0x00000001
 
 
-Modifiers for method TestClass::__tostring():
+Modifiers for method TestClass::__toString():
 0x00000001
 
 

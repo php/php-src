@@ -20,7 +20,8 @@ var_dump(clone (new bar)->getZ());
 
 ?>
 --EXPECTF--
-object(stdClass)#%d (0) {
-}
-object(stdClass)#%d (0) {
-}
+Fatal error: Uncaught Error: Class "stdclass" not found in %s:%d
+Stack trace:
+#0 %s(%d): bar->__construct()
+#1 {main}
+  thrown in %s on line %d

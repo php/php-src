@@ -78,14 +78,14 @@ $z = $v;
 $x = $z->setDate(5, 7, 19);
 dump($v, $z, $x);
 
-echo "\nsetIsoDate():\n";
+echo "\nsetISODate():\n";
 $v = date_create_immutable($current);
 $z = $v;
-$x = $z->setIsoDate(2012, 2, 6);
+$x = $z->setISODate(2012, 2, 6);
 dump($v, $z, $x);
 $v = date_create($current);
 $z = $v;
-$x = $z->setIsoDate(2012, 2, 6);
+$x = $z->setISODate(2012, 2, 6);
 dump($v, $z, $x);
 
 echo "\nsetTimestamp():\n";
@@ -150,7 +150,7 @@ orig:    0005-07-19 16:24:08 Europe/London
 copy:    0005-07-19 16:24:08 Europe/London
 changed: 0005-07-19 16:24:08 Europe/London
 
-setIsoDate():
+setISODate():
 orig:    2012-12-27 16:24:08 Europe/London
 copy:    2012-12-27 16:24:08 Europe/London
 changed: 2012-01-14 16:24:08 Europe/London

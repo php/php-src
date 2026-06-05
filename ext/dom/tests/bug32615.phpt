@@ -4,7 +4,7 @@ Bug #32615 (Replacing and inserting Fragments)
 dom
 --FILE--
 <?php
-$dom = new DomDocument;
+$dom = new DOMDocument;
 $frag = $dom->createDocumentFragment();
 $frag->appendChild(new DOMElement('root'));
 $dom->appendChild($frag);

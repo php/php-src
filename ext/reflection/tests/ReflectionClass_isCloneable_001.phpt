@@ -38,19 +38,19 @@ var_dump($obj->isCloneable());
 $h = clone $closure;
 
 print "Internal class - SimpleXMLElement\n";
-$obj = new ReflectionClass('simplexmlelement');
+$obj = new ReflectionClass('SimpleXMLElement');
 var_dump($obj->isCloneable());
-$obj = new ReflectionObject(new simplexmlelement('<test></test>'));
+$obj = new ReflectionObject(new SimpleXMLElement('<test></test>'));
 var_dump($obj->isCloneable());
-$h = clone new simplexmlelement('<test></test>');
+$h = clone new SimpleXMLElement('<test></test>');
 
 print "Internal class - XMLWriter\n";
-$obj = new ReflectionClass('xmlwriter');
+$obj = new ReflectionClass('XMLWriter');
 var_dump($obj->isCloneable());
 $obj = new ReflectionObject(new XMLWriter);
 var_dump($obj->isCloneable());
 try {
-    $h = clone new xmlwriter;
+    $h = clone new XMLWriter;
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }

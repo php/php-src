@@ -11,9 +11,9 @@ function Sub($x,$y) {
   return $x-$y;
 }
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction(array("Sub","Add"));
-var_dump($server->getfunctions());
+$server = new SoapServer(null,array('uri'=>"http://testuri.org"));
+$server->addFunction(array("Sub","Add"));
+var_dump($server->getFunctions());
 echo "ok\n";
 ?>
 --EXPECT--

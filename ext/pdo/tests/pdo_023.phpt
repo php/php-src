@@ -53,7 +53,7 @@ class PDODatabaseX extends PDO
     function query($sql, ...$rest): PDOStatement|false
     {
         echo __METHOD__ . "()\n";
-        $stmt = parent::prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx')));
+        $stmt = parent::prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementX')));
         $stmt->execute();
         return $stmt;
     }

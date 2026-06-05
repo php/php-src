@@ -180,7 +180,6 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			ADD_SIZE(ZEND_ATTRIBUTE_SIZE(attr->argc));
 			ADD_INTERNED_STRING(attr->name);
-			ADD_INTERNED_STRING(attr->lcname);
 			if (attr->validation_error != NULL) {
 				ADD_INTERNED_STRING(attr->validation_error);
 			}
@@ -543,7 +542,6 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 			if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 				for (i = 0; i < ce->num_interfaces; i++) {
 					ADD_INTERNED_STRING(ce->interface_names[i].name);
-					ADD_INTERNED_STRING(ce->interface_names[i].lc_name);
 				}
 				ADD_SIZE(sizeof(zend_class_name) * ce->num_interfaces);
 			}
@@ -554,7 +552,6 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 
 			for (i = 0; i < ce->num_traits; i++) {
 				ADD_INTERNED_STRING(ce->trait_names[i].name);
-				ADD_INTERNED_STRING(ce->trait_names[i].lc_name);
 			}
 			ADD_SIZE(sizeof(zend_class_name) * ce->num_traits);
 
@@ -624,9 +621,8 @@ static void zend_persist_early_bindings_calc(
 	ADD_SIZE(sizeof(zend_early_binding) * num_early_bindings);
 	for (uint32_t i = 0; i < num_early_bindings; i++) {
 		zend_early_binding *early_binding = &early_bindings[i];
-		ADD_INTERNED_STRING(early_binding->lcname);
+		ADD_INTERNED_STRING(early_binding->name);
 		ADD_INTERNED_STRING(early_binding->rtd_key);
-		ADD_INTERNED_STRING(early_binding->lc_parent_name);
 	}
 }
 
