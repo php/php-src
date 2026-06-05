@@ -25,7 +25,7 @@ $dbh->setAttribute(PDO::ATTR_AUTOCOMMIT,0);
 $dbh->beginTransaction();
 var_dump($dbh->exec("INSERT INTO test_ddl (text) VALUES ('bla')"));
 var_dump($dbh->exec("UPDATE test_ddl SET text='blabla'"));
-$dbh->rollback();
+$dbh->rollBack();
 
 $dbh->beginTransaction();
 var_dump($dbh->exec("DELETE FROM test_ddl"));

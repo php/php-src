@@ -4,7 +4,7 @@ SQLite3Result::fetchAll usage
 sqlite3
 --FILE--
 <?php
-$conn = new sqlite3(':memory:');
+$conn = new SQLite3(':memory:');
 $conn->query('CREATE TABLE users (id INTEGER NOT NULL, num INTEGER NOT NULL, PRIMARY KEY(id))');
 
 $stmt = $conn->query('insert into users (id, num) values (1, 1)');

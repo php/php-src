@@ -7,7 +7,7 @@ dom
 
 function testNormalReplace($cb)
 {
-    $dom = DOM\HTMLDocument::createFromString('<p>foo</p>', LIBXML_NOERROR);
+    $dom = Dom\HTMLDocument::createFromString('<p>foo</p>', LIBXML_NOERROR);
     var_dump($dom->body?->nodeName);
     try {
         $dom->body = $cb($dom);
@@ -30,7 +30,7 @@ echo "--- Right element tag in no namespace ---\n";
 testNormalReplace(fn ($dom) => $dom->createElementNS("", "frameset"));
 
 echo "--- Set body without document element ---\n";
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 try {
     $dom->body = $dom->createElementNS("http://www.w3.org/1999/xhtml", "body");
 } catch (DOMException $e) {

@@ -7,14 +7,14 @@ phar
 $a = new PharData(__DIR__ . '/files/zip.zip');
 foreach ($a as $b) {
     if ($b->isDir()) {
-        echo "dir " . $b->getPathName() . "\n";
+        echo "dir " . $b->getPathname() . "\n";
     } else {
-        echo $b->getPathName(), "\n";
-        echo file_get_contents($b->getPathName()), "\n";
+        echo $b->getPathname(), "\n";
+        echo file_get_contents($b->getPathname()), "\n";
     }
 }
 if (isset($a['notempty/hi.txt'])) {
-    echo $a['notempty/hi.txt']->getPathName() . "\n";
+    echo $a['notempty/hi.txt']->getPathname() . "\n";
 }
 ?>
 --EXPECTF--

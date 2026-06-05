@@ -28,7 +28,7 @@ foreach ($values as $value) {
         echo $e->getMessage(), "\n";
     }
 }
-$value = new stdclass(); //Object
+$value = new stdClass(); //Object
 try {
     var_dump(preg_grep($value, $array));
 } catch (TypeError $e) {

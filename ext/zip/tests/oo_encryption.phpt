@@ -14,7 +14,7 @@ $pass = 'secret';
 
 echo "== Write\n";
 $zip  = new ZipArchive;
-$r = $zip->open($name, ZIPARCHIVE::CREATE);
+$r = $zip->open($name, ZipArchive::CREATE);
 // Clear
 $zip->addFromString('foo.txt', 'foo');
 // Encrypted

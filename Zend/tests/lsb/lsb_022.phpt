@@ -6,7 +6,7 @@ class A {
     static function test() {
         echo "A\n";
     }
-    static function __callstatic($name, $args) {
+    static function __callStatic($name, $args) {
         call_user_func("static::test");
     }
 }
@@ -14,9 +14,9 @@ class B extends A {
     static function test() {
         echo "B\n";
     }
-    static function __callstatic($name, $args) {
-        parent::__callstatic($name, $args);
-        call_user_func_array("parent::__callstatic", array($name, $args));
+    static function __callStatic($name, $args) {
+        parent::__callStatic($name, $args);
+        call_user_func_array("parent::__callStatic", array($name, $args));
         parent::foo();
         call_user_func_array("parent::foo", $args);
         call_user_func_array(array("parent","foo"), $args);

@@ -15,8 +15,8 @@ foreach ($test_dates as $test_date)
     $d2 = new DateTime('2008-01-01 12:00:00 UTC');
     echo $d1->format(DATE_ISO8601), PHP_EOL;
     echo $d2->format(DATE_ISO8601), PHP_EOL;
-    $tz = $d1->getTimeZone();
-    $d2->setTimeZone($tz);
+    $tz = $d1->getTimezone();
+    $d2->setTimezone($tz);
     echo $d1->format(DATE_ISO8601), PHP_EOL;
     echo $d2->format(DATE_ISO8601), PHP_EOL;
     echo PHP_EOL;

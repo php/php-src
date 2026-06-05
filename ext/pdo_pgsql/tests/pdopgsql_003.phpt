@@ -13,7 +13,7 @@ PDOTest::skip();
 
 require_once __DIR__ . "/config.inc";
 
-$db =  Pdo::connect($config['ENV']['PDOTEST_DSN']);
+$db =  PDO::connect($config['ENV']['PDOTEST_DSN']);
 if (!$db instanceof Pdo\Pgsql) {
     echo "Wrong class type. Should be Pdo\Pgsql but is " . get_class($db) . "\n";
 }

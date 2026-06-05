@@ -15,7 +15,7 @@ function foo() {
 }
 
 call_user_func(__NAMESPACE__."\\foo");
-call_user_func(__NAMESPACE__."\\test::foo");
+call_user_func(__NAMESPACE__."\\Test::foo");
 ?>
 --EXPECT--
 test\foo

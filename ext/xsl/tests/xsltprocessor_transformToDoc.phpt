@@ -43,7 +43,7 @@ $xsldoc->loadXML($xsl);
 
 $proc = new XSLTProcessor();
 $proc->registerPHPFunctions();
-$proc->importStyleSheet($xsldoc);
+$proc->importStylesheet($xsldoc);
 
 var_dump($proc->transformToDoc($xmldoc)->firstChild->tagName);
 ?>

@@ -8,7 +8,7 @@ class caseSensitivityTest {
     function MyMeThOd() {}
 }
 
-var_dump( get_class_methods('CasesensitivitytesT') );
+var_dump( get_class_methods('caseSensitivityTest') );
 
 echo "Done";
 ?>

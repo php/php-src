@@ -4,7 +4,7 @@ Basic print functionality
 opcache.enable_cli=0
 --PHPDBG--
 p foo
-p class \Foo\bar
+p class \Foo\Bar
 p
 p e
 q

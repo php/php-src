@@ -20,7 +20,7 @@ $output = null;
 // Then we run the subprocess with com_dotnet loaded
 $script = <<<SCRIPT
 ini_set('com.autoregister_typelib', '1');
-new COM('WbemScripting.SWbemLocator');
+new com('WbemScripting.SWbemLocator');
 SCRIPT;
 if ($loaded) {
     $command = "$php -r \"$script\"";

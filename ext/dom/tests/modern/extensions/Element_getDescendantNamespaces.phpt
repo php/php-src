@@ -19,7 +19,7 @@ function dump($dom, $name) {
     }
 }
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <root xmlns="urn:a">
     <child xmlns="">
         <c:child xmlns:c="urn:c"/>

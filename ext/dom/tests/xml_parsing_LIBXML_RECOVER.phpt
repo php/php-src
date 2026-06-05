@@ -10,7 +10,7 @@ $dom->loadXML('<root><child/>', options: LIBXML_RECOVER);
 echo $dom->saveXML();
 
 $dom = Dom\XMLDocument::createFromString('<root><child/>', options: LIBXML_RECOVER);
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECTF--

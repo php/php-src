@@ -275,7 +275,7 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getRuleStatus)
 	zval *iter = &ii->iterator->data;
 	ZEND_ASSERT(Z_TYPE_P(iter) == IS_OBJECT);
 	zend_call_method_with_0_params(
-			Z_OBJ_P(iter), Z_OBJCE_P(iter), NULL, "getrulestatus", return_value);
+			Z_OBJ_P(iter), Z_OBJCE_P(iter), NULL, "getRuleStatus", return_value);
 }
 
 U_CFUNC void breakiterator_register_IntlPartsIterator_class(void)

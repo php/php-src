@@ -17,7 +17,7 @@ class pwa {
         var_dump($this->var['value']);
     }
 }
-$myPwa = new Pwa();
+$myPwa = new pwa();
 $myPwa->test();
 
 echo "Done\n";

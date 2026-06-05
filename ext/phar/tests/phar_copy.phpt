@@ -23,12 +23,12 @@ try
     $p['a'] = 'hi';
     $p->startBuffering();
     $p->copy('a', 'b');
-    echo file_get_contents($p['b']->getPathName());
+    echo file_get_contents($p['b']->getPathname());
     $p['a']->compress(Phar::GZ);
     $p['b']->setMetadata('a');
     $p->copy('b', 'c');
     $p->stopBuffering();
-    echo file_get_contents($p['c']->getPathName());
+    echo file_get_contents($p['c']->getPathname());
     copy($fname, $fname2);
     $p->copy('a', $ename);
 }
@@ -39,9 +39,9 @@ catch(Exception $e)
 ini_set('phar.readonly',1);
 $p2 = new Phar($fname2);
 echo "\n";
-echo 'a: ' , file_get_contents($p2['a']->getPathName());
-echo 'b: ' ,file_get_contents($p2['b']->getPathName());
-echo 'c: ' ,file_get_contents($p2['c']->getPathName()), $p2['c']->getMetaData(), "\n";
+echo 'a: ' , file_get_contents($p2['a']->getPathname());
+echo 'b: ' ,file_get_contents($p2['b']->getPathname());
+echo 'c: ' ,file_get_contents($p2['c']->getPathname()), $p2['c']->getMetadata(), "\n";
 ini_set('phar.readonly', 0);
 try {
 $p2->copy('notexisting', 'another');

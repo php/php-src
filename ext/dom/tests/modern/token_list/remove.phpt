@@ -5,26 +5,26 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root class="test1    test2"/>');
+$dom = Dom\XMLDocument::createFromString('<root class="test1    test2"/>');
 $list = $dom->documentElement->classList;
 
 $list->remove();
 $list->remove('test1');
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $list->remove('nope');
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $list->remove('test2');
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $list->value = 'test3 test4';
 $list->remove('test4');
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

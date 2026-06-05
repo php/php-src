@@ -23,7 +23,7 @@ if ($location === null) {
 
 require __DIR__ . "/config.inc";
 
-$db = Pdo::connect('sqlite::memory:');
+$db = PDO::connect('sqlite::memory:');
 if (!$db instanceof Pdo\Sqlite) {
     echo "Wrong class type. Should be Pdo\Sqlite but is " . get_class($db) . "\n";
 }

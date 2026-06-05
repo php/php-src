@@ -1943,12 +1943,9 @@ static void dbstmt_prop_delete(zend_object *object, zend_string *name, void **ca
 static zend_function *dbstmt_method_get(zend_object **object_pp, zend_string *method_name, const zval *key)
 {
 	zend_function *fbc = NULL;
-	zend_string *lc_method_name;
 	zend_object *object = *object_pp;
 
-	lc_method_name = zend_string_tolower(method_name);
-
-	if ((fbc = zend_hash_find_ptr(&object->ce->function_table, lc_method_name)) == NULL) {
+	if ((fbc = zend_hash_find_ptr(&object->ce->function_table, method_name)) == NULL) {
 		pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
 		/* instance not created by PDO object */
 		if (!stmt->dbh) {
@@ -1964,14 +1961,13 @@ static zend_function *dbstmt_method_get(zend_object **object_pp, zend_string *me
 			}
 		}
 
-		if ((fbc = zend_hash_find_ptr(stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT], lc_method_name)) == NULL) {
+		if ((fbc = zend_hash_find_ptr(stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT], method_name)) == NULL) {
 			goto out;
 		}
 		/* got it */
 	}
 
 out:
-	zend_string_release_ex(lc_method_name, 0);
 	if (!fbc) {
 		fbc = zend_std_get_method(object_pp, method_name, key);
 	}

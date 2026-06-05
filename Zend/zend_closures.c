@@ -540,7 +540,7 @@ ZEND_API zval* zend_get_closure_this_ptr(zval *obj) /* {{{ */
 
 static zend_function *zend_closure_get_method(zend_object **object, zend_string *method, const zval *key) /* {{{ */
 {
-	if (zend_string_equals_literal_ci(method, ZEND_INVOKE_FUNC_NAME)) {
+	if (zend_string_equals_literal(method, ZEND_INVOKE_FUNC_NAME)) {
 		return zend_get_closure_invoke_method(*object);
 	}
 

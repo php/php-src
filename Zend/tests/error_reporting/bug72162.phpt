@@ -3,7 +3,7 @@ Bug #72162 (use-after-free - error_reporting)
 --FILE--
 <?php
 error_reporting(E_ALL);
-$var11 = new StdClass();
+$var11 = new stdClass();
 
 try {
     $var16 = error_reporting($var11);

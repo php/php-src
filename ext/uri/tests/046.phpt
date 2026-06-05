@@ -41,17 +41,17 @@ var_dump($uri->toRawString());
 var_dump($uri->getPath());
 var_dump($uri->getRawPath());
 
-$url = new Uri\Whatwg\Url("mailto:johndoe@example.com");
+$url = new Uri\WhatWg\Url("mailto:johndoe@example.com");
 
 var_dump($url->toAsciiString());
 var_dump($url->getPath());
 
-$url = new Uri\Whatwg\Url("https://example.com");
+$url = new Uri\WhatWg\Url("https://example.com");
 
 var_dump($url->toAsciiString());
 var_dump($url->getPath());
 
-$url = new Uri\Whatwg\Url("https://example.com/");
+$url = new Uri\WhatWg\Url("https://example.com/");
 
 var_dump($url->toAsciiString());
 var_dump($url->getPath());

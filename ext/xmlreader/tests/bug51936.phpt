@@ -6,7 +6,7 @@ xmlreader
 <?php
 
 $xmlreader = new XMLReader();
-$xmlreader->xml("<a><b/></a>");
+$xmlreader->XML("<a><b/></a>");
 
 $xmlreader->next();
 

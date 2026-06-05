@@ -1403,7 +1403,7 @@ PHPDBG_COMMAND(register) /* {{{ */
 	size_t lcname_len = param->len;
 
 	if (!zend_hash_str_exists(&PHPDBG_G(registered), lcname, lcname_len)) {
-		if ((function = zend_hash_str_find_ptr(EG(function_table), lcname, lcname_len))) {
+		if ((function = zend_hash_str_find_ptr(EG(function_table), param->str, param->len))) {
 			zend_hash_str_update_ptr(&PHPDBG_G(registered), lcname, lcname_len, function);
 
 			phpdbg_notice("Registered %s", lcname);

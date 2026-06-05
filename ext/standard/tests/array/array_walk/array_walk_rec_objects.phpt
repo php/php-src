@@ -13,7 +13,7 @@ class test {
     public $var_pub = "test_public";
 }
 
-$stdclass = new stdclass;
+$stdclass = new stdClass;
 $stdclass->foo = "foo";
 $stdclass->bar = "bar";
 array_walk_recursive($stdclass, "walk");

@@ -45,7 +45,7 @@ $stmt = $db->query("select * from test_copy_from");
 foreach($stmt as $r) {
     var_dump($r);
 }
-$db->rollback();
+$db->rollBack();
 
 echo "Testing pgsqlCopyFromArray() with different field separator and not null indicator\n";
 $db->beginTransaction();
@@ -54,7 +54,7 @@ $stmt = $db->query("select * from test_copy_from");
 foreach($stmt as $r) {
     var_dump($r);
 }
-$db->rollback();
+$db->rollBack();
 
 echo "Testing pgsqlCopyFromArray() with only selected fields\n";
 $db->beginTransaction();
@@ -63,7 +63,7 @@ $stmt = $db->query("select * from test_copy_from");
 foreach($stmt as $r) {
     var_dump($r);
 }
-$db->rollback();
+$db->rollBack();
 
 echo "Testing pgsqlCopyFromArray() with error\n";
 $db->beginTransaction();
@@ -72,7 +72,7 @@ try {
 } catch (Exception $e) {
     echo "Exception: {$e->getMessage()}\n";
 }
-$db->rollback();
+$db->rollBack();
 
 echo "Testing pgsqlCopyFromFile() with default parameters\n";
 $db->beginTransaction();
@@ -82,7 +82,7 @@ $stmt = $db->query("select * from test_copy_from");
 foreach($stmt as $r) {
     var_dump($r);
 }
-$db->rollback();
+$db->rollBack();
 
 echo "Testing pgsqlCopyFromFile() with different field separator and not null indicator\n";
 $db->beginTransaction();
@@ -91,7 +91,7 @@ $stmt = $db->query("select * from test_copy_from");
 foreach($stmt as $r) {
     var_dump($r);
 }
-$db->rollback();
+$db->rollBack();
 
 echo "Testing pgsqlCopyFromFile() with only selected fields\n";
 $db->beginTransaction();
@@ -100,7 +100,7 @@ $stmt = $db->query("select * from test_copy_from");
 foreach($stmt as $r) {
     var_dump($r);
 }
-$db->rollback();
+$db->rollBack();
 
 echo "Testing pgsqlCopyFromFile() with error\n";
 $db->beginTransaction();
@@ -109,7 +109,7 @@ try {
 } catch (Exception $e) {
     echo "Exception: {$e->getMessage()}\n";
 }
-$db->rollback();
+$db->rollBack();
 
 echo "Testing pgsqlCopyFromFile() with non existing file\n";
 $db->beginTransaction();
@@ -118,7 +118,7 @@ try {
 } catch (Exception $e) {
     echo "Exception: {$e->getMessage()}\n";
 }
-$db->rollback();
+$db->rollBack();
 
 // Clean up
 foreach (array($filename, $filenameWithDifferentNullValues, $filenameWithDifferentNullValuesAndSelectedFields) as $f) {

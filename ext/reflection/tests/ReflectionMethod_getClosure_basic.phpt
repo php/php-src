@@ -25,7 +25,7 @@ class Example
 $class = new ReflectionClass( 'Example' );
 $staticclass = new ReflectionClass( 'StaticExample' );
 $object = new Example();
-$fakeobj = new StdClass();
+$fakeobj = new stdClass();
 
 
 $method = $staticclass->getMethod( 'foo' );

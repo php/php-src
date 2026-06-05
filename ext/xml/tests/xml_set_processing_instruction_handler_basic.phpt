@@ -29,7 +29,7 @@ $xml = <<<HERE
 HERE;
 
 echo "Simple test of xml_set_processing_instruction_handler() function\n";
-$p1 = new Xml_Parser();
+$p1 = new XML_Parser();
 $p1->parse($xml);
 echo "Done\n";
 ?>

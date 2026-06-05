@@ -3,7 +3,7 @@ Bug #48215 - parent::method() calls __construct, case sensitive test
 --FILE--
 <?php
 class a {
-    public function __CONSTRUCT() { echo __METHOD__ . "\n"; }
+    public function __construct() { echo __METHOD__ . "\n"; }
     public function a() { echo __METHOD__ . "\n"; }
 }
 class b extends a {}

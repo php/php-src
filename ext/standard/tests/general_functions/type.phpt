@@ -27,7 +27,7 @@ $array = array(
     "some string",
     $fp,
     $fp1,
-    new stdclass,
+    new stdClass,
 );
 
 $types = array(

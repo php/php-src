@@ -14,7 +14,7 @@ if (!defined('Pgsql::ATTR_RESULT_MEMORY_SIZE')) die('skip constant Pgsql::ATTR_R
 require_once __DIR__ . "/config.inc";
 
 /** @var Pdo */
-$db =  Pdo::connect($config['ENV']['PDOTEST_DSN']);
+$db =  PDO::connect($config['ENV']['PDOTEST_DSN']);
 
 echo 'Result set with only 1 row: ';
 $statement = $db->query('select 1');

@@ -18,7 +18,7 @@ foreach($replace as $value) {
         echo $e->getMessage(), "\n";
     }
 }
-$value = new stdclass(); //Object
+$value = new stdClass(); //Object
 try {
     var_dump(preg_replace($regex, $value, $subject));
 } catch (Error $e) {

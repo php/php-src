@@ -1,5 +1,5 @@
 --TEST--
-Testing invalid method names with __call and __callstatic
+Testing invalid method names with __call and __callStatic
 --FILE--
 <?php
 
@@ -8,7 +8,7 @@ class foo {
         print "non-static - ok\n";
     }
 
-    public static function __callstatic($a, $b) {
+    public static function __callStatic($a, $b) {
         print "static - ok\n";
     }
 }

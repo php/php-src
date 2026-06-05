@@ -9,7 +9,7 @@ $xml = <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <test></test>
 XML;
-$doc = new DomDocument;
+$doc = new DOMDocument;
 $doc->loadXML($xml);
 $xpath = new DOMXPath($doc);
 $nodes = $xpath->query('//namespace::*');

@@ -16,7 +16,7 @@ try {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
-    var_dump(new IntlDateFormatter(NULL, 0, 0, NULL, new stdclass));
+    var_dump(new IntlDateFormatter(NULL, 0, 0, NULL, new stdClass));
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }

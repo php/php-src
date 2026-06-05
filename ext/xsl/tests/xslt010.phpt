@@ -4,7 +4,7 @@ Test 10: EXSLT Support
 xsl
 --SKIPIF--
 <?php
-$proc = new xsltprocessor;
+$proc = new XSLTProcessor;
 if (!$proc->hasExsltSupport()) die('skip EXSLT support not available');
 if (LIBXSLT_VERSION < 10117) die('skip too old libxsl');
 if (LIBXSLT_VERSION > 10129) die('skip for libxsl < 10130');
@@ -13,12 +13,12 @@ if (LIBXSLT_VERSION > 10129) die('skip for libxsl < 10130');
 <?php
 echo "Test 10: EXSLT Support";
 
-$dom = new domDocument();
+$dom = new DOMDocument();
   $dom->load(__DIR__."/exslt.xsl");
-  $proc = new xsltprocessor;
+  $proc = new XSLTProcessor;
   $xsl = $proc->importStylesheet($dom);
 
-  $xml = new DomDocument();
+  $xml = new DOMDocument();
   $xml->load(__DIR__."/exslt.xml");
 
   print $proc->transformToXml($xml);

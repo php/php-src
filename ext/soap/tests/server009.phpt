@@ -16,9 +16,9 @@ class foo {
   }
 }
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->setclass("foo");
-$server->setpersistence(SOAP_PERSISTENCE_SESSION);
+$server = new SoapServer(null,array('uri'=>"http://testuri.org"));
+$server->setClass("foo");
+$server->setPersistence(SOAP_PERSISTENCE_SESSION);
 
 ob_start();
 $HTTP_RAW_POST_DATA = <<<EOF

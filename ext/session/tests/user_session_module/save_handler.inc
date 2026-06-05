@@ -1,6 +1,6 @@
 <?php
 
-DEFINE("SESSION_FILE_PREFIX" ,"session_test_");
+define("SESSION_FILE_PREFIX" ,"session_test_");
 
 /*
  * == General Return Value Rule ==

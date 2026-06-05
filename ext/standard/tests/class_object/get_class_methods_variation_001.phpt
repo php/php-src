@@ -57,7 +57,7 @@ $values = array(
       'string',
 
       // object data
-      new stdclass(),
+      new stdClass(),
 
       // undefined data
       $undefined_var,

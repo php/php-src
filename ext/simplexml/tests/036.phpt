@@ -4,7 +4,7 @@ SimpleXML: overridden count() method
 simplexml
 --FILE--
 <?php
-class SXE extends SimpleXmlElement {
+class SXE extends SimpleXMLElement {
     public function count(): int {
         echo "Called Count!\n";
         return parent::count();

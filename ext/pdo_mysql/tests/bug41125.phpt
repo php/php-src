@@ -17,7 +17,7 @@ $sql = "SELECT 1 FROM DUAL WHERE 'o''riley' LIKE " . $db->quote('%' . $search . 
 $stmt = $db->prepare($sql);
 $stmt->execute();
 print implode(' - ', (($r = @$stmt->fetch(PDO::FETCH_NUM)) ? $r : array())) ."\n";
-print implode(' - ', $stmt->errorinfo()) ."\n";
+print implode(' - ', $stmt->errorInfo()) ."\n";
 
 print "-------------------------------------------------------\n";
 
@@ -33,7 +33,7 @@ foreach ($queries as $k => $query) {
     $stmt->execute(array(1));
     printf("[%d] Query: [[%s]]\n", $k + 1, $query);
     print implode(' - ', (($r = @$stmt->fetch(PDO::FETCH_NUM)) ? $r : array())) ."\n";
-    print implode(' - ', $stmt->errorinfo()) ."\n";
+    print implode(' - ', $stmt->errorInfo()) ."\n";
     print "--------\n";
 }
 
@@ -46,7 +46,7 @@ $stmt->bindParam(':id', $id);
 $stmt->execute();
 printf("Query: [[%s]]\n", $sql);
 print implode(' - ', (($r = @$stmt->fetch(PDO::FETCH_NUM)) ? $r : array())) ."\n";
-print implode(' - ', $stmt->errorinfo()) ."\n";
+print implode(' - ', $stmt->errorInfo()) ."\n";
 
 print "-------------------------------------------------------\n";
 
@@ -76,7 +76,7 @@ foreach ($queries as $k => $query) {
 
     printf("[%d] Query: [[%s]]\n", $k + 1, $query);
     print implode(' - ', (($r = @$stmt->fetch(PDO::FETCH_NUM)) ? $r : array())) ."\n";
-    print implode(' - ', $stmt->errorinfo()) ."\n";
+    print implode(' - ', $stmt->errorInfo()) ."\n";
     print "--------\n";
 }
 

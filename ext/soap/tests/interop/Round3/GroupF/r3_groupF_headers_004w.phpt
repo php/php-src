@@ -12,8 +12,8 @@ $hdr = array(
 );
 $client = new SoapClient(__DIR__."/round3_groupF_headers.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->__soapCall("echoString",array("Hello World"),null,$hdr);
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round3_groupF_headers.inc");
 echo "ok\n";
 ?>

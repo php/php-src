@@ -29,8 +29,8 @@ function test() {
   return "Hello World";
 }
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction("test");
+$server = new SoapServer(null,array('uri'=>"http://testuri.org"));
+$server->addFunction("test");
 $server->handle();
 echo "ok\n";
 ?>

@@ -10,7 +10,7 @@ class MyString {
     }
 }
 
-$a = new BCMath\Number("1");
+$a = new BcMath\Number("1");
 $b = new MyString();
 try {
     var_dump($a + $b);

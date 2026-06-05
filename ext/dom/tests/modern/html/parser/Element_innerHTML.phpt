@@ -5,43 +5,43 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $el = $dom->createElement('div');
 $dom->appendChild($el);
 $el->innerHTML = '<p>foo</p>';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 $el->innerHTML = '</div>';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 $el->innerHTML = '';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 $el->innerHTML = '<div></div>&nbsp;<p></p>';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 $el->innerHTML = "invalid\xffutf-8𐍈𐍈𐍈";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 // Create a non-interned string that gets the UTF-8 validity flag added
 $str = str_repeat("my valid string", random_int(1, 1));
 preg_match('/^.*$/u', $str);
 $el->innerHTML = $str;
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $el = $dom->createElement('style');
 $dom->appendChild($el);
 $el->innerHTML = '<p>foo</p>';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $el = $dom->createElementNS('urn:a', 'style');
 $dom->appendChild($el);
 $el->innerHTML = '<p>foo</p>';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $el = $dom->createElement('textarea');
 $dom->appendChild($el);
 $el->innerHTML = "</textarea>\0-->";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

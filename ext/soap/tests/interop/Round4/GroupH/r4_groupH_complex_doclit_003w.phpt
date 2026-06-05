@@ -24,8 +24,8 @@ class ExtendedStruct extends BaseStruct {
 $struct = new ExtendedStruct(new SOAPStruct("a1",11,12.345),12,"arg",-3,5);
 $client = new SoapClient(__DIR__."/round4_groupH_complex_doclit.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoExtendedStructFault($struct);
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round4_groupH_complex_doclit.inc");
 echo "ok\n";
 ?>

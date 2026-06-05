@@ -29,7 +29,7 @@ test('Ghost', $obj);
 
 $obj = $reflector->newLazyProxy(function ($obj) {
     var_dump("initializer");
-    $c = new c();
+    $c = new C();
     $c->a = 1;
     return $c;
 });

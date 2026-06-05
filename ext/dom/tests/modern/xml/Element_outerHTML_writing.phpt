@@ -7,21 +7,21 @@ dom
 
 $dom = Dom\XMLDocument::createFromString("<root xmlns='urn:a'><x/></root>");
 $dom->documentElement->firstChild->outerHTML = '<x xmlns="urn:a"><p>foo</p><p xmlns="urn:x">bar</p></x>';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $dom->documentElement->firstChild->outerHTML = $dom->documentElement->firstChild->outerHTML;
 $element = $dom->documentElement->firstChild->firstChild;
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $dom->documentElement->firstChild->outerHTML = 'tést';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 var_dump($element->tagName);
 
 $fragment = $dom->createDocumentFragment();
 $fragment->appendChild($dom->createElement('p'));
 $fragment->firstChild->outerHTML = '<strong>bar</strong>';
-echo $dom->saveXML($fragment), "\n";
+echo $dom->saveXml($fragment), "\n";
 
 ?>
 --EXPECT--

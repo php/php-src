@@ -22,8 +22,8 @@ Class User {
   public $sName;
 }
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2));
-$server->addfunction("test");
+$server = new SoapServer(null,array('uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2));
+$server->addFunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>

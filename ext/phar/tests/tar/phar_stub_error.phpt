@@ -24,7 +24,7 @@ $newstub = '<?php echo "second stub\n"; _x_HALT_COMPILER(); ?>';
 
 try {
     $phar->setStub($newstub);
-} catch(exception $e) {
+} catch(Exception $e) {
     echo 'Exception: ' . $e->getMessage() . "\n";
 }
 

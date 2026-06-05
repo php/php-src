@@ -16,16 +16,16 @@ class TrampolineTest {
 $o = new TrampolineTest();
 $callback = [$o, 'strtoupper'];
 
-var_dump($db->createfunction('', $callback));
+var_dump($db->createFunction('', $callback));
 
 try {
-    var_dump($db->createfunction(new stdClass(), $callback, new stdClass()));
+    var_dump($db->createFunction(new stdClass(), $callback, new stdClass()));
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
-    var_dump($db->createfunction('strtoupper', $callback, new stdClass()));
+    var_dump($db->createFunction('strtoupper', $callback, new stdClass()));
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
@@ -35,12 +35,12 @@ $rc = new ReflectionClass(SQLite3::class);
 $obj = $rc->newInstanceWithoutConstructor();
 
 try {
-    var_dump($obj->createfunction('strtoupper', $callback));
+    var_dump($obj->createFunction('strtoupper', $callback));
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
-var_dump($db->createfunction('strtoupper', $callback));
+var_dump($db->createFunction('strtoupper', $callback));
 
 ?>
 --EXPECT--

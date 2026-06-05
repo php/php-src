@@ -16,8 +16,8 @@ class SOAPList {
 $struct = NULL;
 $client = new SoapClient(__DIR__."/round3_groupE_list.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoLinkedList($struct);
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round3_groupE_list.inc");
 echo "ok\n";
 ?>

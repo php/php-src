@@ -12,7 +12,7 @@ $root->appendChild($dom->importLegacyNode(new DOMComment));
 $root->appendChild($dom->importLegacyNode(new DOMProcessingInstruction('target')));
 $root->appendChild($dom->importLegacyNode(new DOMCdataSection('')));
 
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 echo $dom->documentElement->innerHTML, "\n";
 ?>
 --EXPECT--

@@ -4,7 +4,7 @@ Bug #41287 (Writing empty tags with Xmlwriter::WriteElement[ns])
 xmlwriter
 --FILE--
 <?php
-$xml = new XmlWriter();
+$xml = new XMLWriter();
 $xml->openMemory();
 $xml->setIndent(true);
 $xml->startDocument();
@@ -23,12 +23,12 @@ $xw = new XMLWriter();
 $xw->openMemory();
 $xw->setIndent(true);
 $xw->startDocument();
-$xw->startElementNS('test', 'test', 'urn:x-test:');
-$xw->writeElementNS('test', 'foo', null, '');
-$xw->writeElementNS(null, 'bar', 'urn:x-test:', '');
-$xw->writeElementNS(null, 'bar', 'urn:x-test:', NULL);
-$xw->writeElementNS(null, 'bar', 'urn:x-test:');
-$xw->writeElementNS(null, 'bar', '', '');
+$xw->startElementNs('test', 'test', 'urn:x-test:');
+$xw->writeElementNs('test', 'foo', null, '');
+$xw->writeElementNs(null, 'bar', 'urn:x-test:', '');
+$xw->writeElementNs(null, 'bar', 'urn:x-test:', NULL);
+$xw->writeElementNs(null, 'bar', 'urn:x-test:');
+$xw->writeElementNs(null, 'bar', '', '');
 $xw->endElement();
 $xw->endDocument();
 print $xw->flush(true);

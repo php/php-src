@@ -6,12 +6,12 @@ xsl
 <?php
 print "Test 11: php:function Support\n";
 
-$dom = new domDocument();
+$dom = new DOMDocument();
 $dom->load(__DIR__."/xslt011.xsl");
-$proc = new xsltprocessor;
+$proc = new XSLTProcessor;
 $xsl = $proc->importStylesheet($dom);
 
-$xml = new DomDocument();
+$xml = new DOMDocument();
 $xml->load(__DIR__."/xslt011.xml");
 $proc->registerPHPFunctions();
 print $proc->transformToXml($xml);
@@ -27,7 +27,7 @@ function nodeSet($id = null) {
     if ($id and is_array($id)) {
         return $id[0];
     } else {
-        $dom = new domdocument;
+        $dom = new DOMDocument;
         $dom->loadXML("<root>this is from an external DomDocument</root>");
         return $dom->documentElement;
     }

@@ -6,7 +6,7 @@ dom
 <?php
 $doc = new DOMDocument();
 $doc->loadHTML('<p id=x>foo</p>');
-$dom = DOM\XMLDocument::createFromString('<root/>');
+$dom = Dom\XMLDocument::createFromString('<root/>');
 $child = $dom->documentElement->appendChild($dom->createElementNS('urn:a', 'child'));
 function test($child, $html) {
     try {
@@ -17,7 +17,7 @@ function test($child, $html) {
 test($child, '--></root><!--');
 test($doc, '<');
 echo $doc->saveXML(), "\n";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 ?>
 --EXPECTF--
 Deprecated: Creation of dynamic property DOMDocument::$innerHTML is deprecated in %s on line %d

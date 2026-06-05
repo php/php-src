@@ -11,7 +11,7 @@ try {
 }
 
 $dom = new DOMDocument;
-$dom->loadxml('<?xml version="1.0" ?><root />');
+$dom->loadXML('<?xml version="1.0" ?><root />');
 var_dump($dom->save(__DIR__ . '/bug79191.xml'));
 ?>
 --CLEAN--

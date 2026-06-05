@@ -52,7 +52,7 @@ if (false !== getenv('PDOTEST_DSN')) {
 	if (!file_exists($path)) {
 		try {
 			// try to create database
-			$adox = new COM('ADOX.Catalog');
+			$adox = new com('ADOX.Catalog');
 			$adox->Create('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=' . $path);
 			$adox = null;
 

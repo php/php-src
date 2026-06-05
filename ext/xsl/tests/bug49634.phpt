@@ -40,7 +40,7 @@ for ($i = 0; $i < 10; $i++)
 {
     $xsltProcessor = new XSLTProcessor();
     $xsltProcessor->registerPHPFunctions(array('testFunction'));
-    $xsltProcessor->importStyleSheet($domXsl);
+    $xsltProcessor->importStylesheet($domXsl);
     try {
         @$xsltProcessor->transformToDoc($domXml);
     } catch (Exception $e) {

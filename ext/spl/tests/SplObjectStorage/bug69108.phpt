@@ -7,7 +7,7 @@ zend.enable_gc=1
 $a = array();
 $b = new SplObjectStorage();
 for ($i = 10000; $i > 0; $i--) {
-        $object = new StdClass();
+        $object = new stdClass();
             $a[] = $object;
             $b->offsetSet($object);
 }

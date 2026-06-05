@@ -23,10 +23,10 @@ try
     $p['a'] = 'hi';
     $p->startBuffering();
     $p->copy('a', 'b');
-    echo file_get_contents($p['b']->getPathName());
+    echo file_get_contents($p['b']->getPathname());
     $p->copy('b', 'c');
     $p->stopBuffering();
-    echo file_get_contents($p['c']->getPathName());
+    echo file_get_contents($p['c']->getPathname());
     copy($fname, $fname2);
     var_dump($p->isFileFormat(Phar::TAR));
     $p->copy('a', $ename);
@@ -39,9 +39,9 @@ ini_set('phar.readonly',1);
 $p2 = new Phar($fname2);
 var_dump($p2->isFileFormat(Phar::TAR));
 echo "\n";
-echo 'a: ' , file_get_contents($p2['a']->getPathName());
-echo 'b: ' ,file_get_contents($p2['b']->getPathName());
-echo 'c: ' ,file_get_contents($p2['c']->getPathName());
+echo 'a: ' , file_get_contents($p2['a']->getPathname());
+echo 'b: ' ,file_get_contents($p2['b']->getPathname());
+echo 'c: ' ,file_get_contents($p2['c']->getPathname());
 ?>
 ===DONE===
 --CLEAN--

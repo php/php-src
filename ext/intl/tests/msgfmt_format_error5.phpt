@@ -14,7 +14,7 @@ EOD;
 
 $mf = new MessageFormatter('en_US', $fmt);
 try {
-    var_dump($mf->format(array("foo" => new stdclass())));
+    var_dump($mf->format(array("foo" => new stdClass())));
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }

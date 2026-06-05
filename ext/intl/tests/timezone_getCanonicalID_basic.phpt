@@ -4,9 +4,9 @@ IntlTimeZone::getCanonicalID: basic test
 intl
 --FILE--
 <?php
-print_R(IntlTimeZone::getCanonicalID('Portugal'));
+print_r(IntlTimeZone::getCanonicalID('Portugal'));
 echo "\n";
-print_R(intltz_get_canonical_id('Portugal'));
+print_r(intltz_get_canonical_id('Portugal'));
 echo "\n";
 ?>
 --EXPECT--

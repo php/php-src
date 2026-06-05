@@ -6,8 +6,8 @@ date.timezone=UTC
 <?php
 
 $the_date = new DateTime();
-$the_date->SetTime(0, 0, 0);
-$the_date->SetDate(20201, 01, 01);
+$the_date->setTime(0, 0, 0);
+$the_date->setDate(20201, 01, 01);
 
 var_dump($the_date);
 

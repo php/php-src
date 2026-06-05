@@ -3,7 +3,7 @@ Bug #68545 Use after free vulnerability in unserialize()
 --FILE--
 <?php
 for ($i=4; $i<100; $i++) {
-    $m = new StdClass();
+    $m = new stdClass();
 
     $u = array(1);
 

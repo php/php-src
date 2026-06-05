@@ -12,7 +12,7 @@ MySQLPDOTest::skip();
 
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
-$db = Pdo::connect(PDO_MYSQL_TEST_DSN, PDO_MYSQL_TEST_USER, PDO_MYSQL_TEST_PASS);
+$db = PDO::connect(PDO_MYSQL_TEST_DSN, PDO_MYSQL_TEST_USER, PDO_MYSQL_TEST_PASS);
 if (!$db instanceof Pdo\Mysql) {
     echo "Wrong class type. Should be Pdo\Mysql but is " . get_class($db) . "\n";
 }

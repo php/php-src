@@ -16,7 +16,7 @@ MySQLPDOTest::skip();
 
     function check_result($offset, $stmt, $columns) {
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $stmt->nextRowSet();
+        $stmt->nextRowset();
 
         if (!isset($row['one']) || ($row['one'] != 1)) {
                 printf("[%03d + 1] Expecting array('one' => 1), got %s\n", $offset, var_export($row, true));

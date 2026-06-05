@@ -194,11 +194,9 @@ void zend_enum_add_interfaces(zend_class_entry *ce)
 	ce->interface_names = erealloc(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
 
 	ce->interface_names[num_interfaces_before].name = zend_string_copy(zend_ce_unit_enum->name);
-	ce->interface_names[num_interfaces_before].lc_name = ZSTR_INIT_LITERAL("unitenum", 0);
 
 	if (ce->enum_backing_type != IS_UNDEF) {
 		ce->interface_names[num_interfaces_before + 1].name = zend_string_copy(zend_ce_backed_enum->name);
-		ce->interface_names[num_interfaces_before + 1].lc_name = ZSTR_INIT_LITERAL("backedenum", 0);
 	}
 
 	ce->default_object_handlers = &zend_enum_object_handlers;
@@ -478,7 +476,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		try_from_function->num_args = 1;
 		try_from_function->required_num_args = 1;
 		try_from_function->arg_info = zarginfo_class_BackedEnum_tryFrom + 1;
-		zend_enum_register_func(ce, ZEND_STR_TRYFROM_LOWERCASE, try_from_function);
+		zend_enum_register_func(ce, ZEND_STR_TRYFROM, try_from_function);
 	}
 }
 

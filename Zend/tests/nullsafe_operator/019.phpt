@@ -10,7 +10,7 @@ class Foo {
 }
 
 $foo = new Foo();
-$foo->bar = 'bar';
+$foo->bar = 'Bar';
 var_dump(new $foo?->bar);
 
 $foo = null;

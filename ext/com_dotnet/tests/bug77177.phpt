@@ -8,8 +8,8 @@ if (!class_exists("dotnet")) die("skip mscoree not available");
 ?>
 --FILE--
 <?php
-$com = new COM("WScript.Shell");
-$dotnet = new DOTNET("mscorlib", "System.Collections.Stack");
+$com = new com("WScript.Shell");
+$dotnet = new dotnet("mscorlib", "System.Collections.Stack");
 $variant = new VARIANT;
 foreach ([$com, $dotnet, $variant] as $object) {
     try {

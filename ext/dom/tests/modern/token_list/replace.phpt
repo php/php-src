@@ -5,34 +5,34 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root class="A B C"/>');
+$dom = Dom\XMLDocument::createFromString('<root class="A B C"/>');
 $element = $dom->documentElement;
 $list = $element->classList;
 
 var_dump($list->replace('nonexistent', 'X'));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 var_dump($list->replace('B', 'X'));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 var_dump($list->replace('C', 'X'));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 var_dump($list->replace('A', 'B'));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 var_dump($list->replace('X', 'B'));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $list->value = 'A';
 $list->replace('A', 'AA');
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

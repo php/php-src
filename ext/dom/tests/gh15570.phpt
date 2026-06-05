@@ -12,7 +12,7 @@ $html = <<<HTML
 HTML;
 $dom = Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR);
 $a = $dom->head->firstChild->cloneNode(false);
-var_dump($dom->saveHTML($a));
+var_dump($dom->saveHtml($a));
 ?>
 --EXPECT--
 string(1) "
