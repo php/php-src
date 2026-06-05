@@ -178,6 +178,23 @@ AC_MSG_RESULT([$ZEND_ZTS])
 AS_VAR_IF([ZEND_ZTS], [yes], [
   AC_DEFINE([ZTS], [1], [Define to 1 if thread safety (ZTS) is enabled.])
   AS_VAR_APPEND([CFLAGS], [" -DZTS"])
+
+  AC_CACHE_CHECK([for __thread support], [php_cv_have_thread_local], [
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+      [[static __thread int tls_var;]],
+      [[tls_var = 1; return tls_var;]])],
+      [php_cv_have_thread_local=yes], [php_cv_have_thread_local=no])
+  ])
+  AS_VAR_IF([php_cv_have_thread_local], [yes], [
+    AC_DEFINE([ZEND_EG_TLS], [1],
+      [Define to hold EG()/CG() in a __thread variable under ZTS.])
+    AS_VAR_APPEND([CFLAGS], [" -DZEND_EG_TLS"])
+
+    dnl -mtls-size=12 drops the dead high-bits offset add from TLS access,
+    dnl valid while the thread-local block stays under 4 KiB.
+    AX_CHECK_COMPILE_FLAG([-mtls-size=12],
+      [AS_VAR_APPEND([CFLAGS], [" -mtls-size=12"])])
+  ])
 ])
 
 AC_MSG_CHECKING([whether to enable Zend debugging])

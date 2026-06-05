@@ -54,6 +54,14 @@ ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
 ZEND_API size_t compiler_globals_offset;
 ZEND_API size_t executor_globals_offset;
+# ifdef ZEND_EG_TLS
+ZEND_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_executor_globals executor_globals_tls;
+ZEND_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_compiler_globals compiler_globals_tls;
+/* ts_allocate_tls_id takes a callback so each thread resolves its own block.
+ * A plain &..._tls would capture only the registering thread's address. */
+static void *executor_globals_tls_addr(void) { return &executor_globals_tls; }
+static void *compiler_globals_tls_addr(void) { return &compiler_globals_tls; }
+# endif
 static HashTable *global_function_table = NULL;
 static HashTable *global_class_table = NULL;
 static HashTable *global_constants_table = NULL;
@@ -1019,8 +1027,13 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	zend_init_rsrc_list_dtors();
 
 #ifdef ZTS
+#ifdef ZEND_EG_TLS
+	ts_allocate_tls_id(&compiler_globals_id, compiler_globals_tls_addr, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
+	ts_allocate_tls_id(&executor_globals_id, executor_globals_tls_addr, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
+#else
 	ts_allocate_fast_id(&compiler_globals_id, &compiler_globals_offset, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
 	ts_allocate_fast_id(&executor_globals_id, &executor_globals_offset, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
+#endif
 	ts_allocate_fast_id(&language_scanner_globals_id, &language_scanner_globals_offset, sizeof(zend_php_scanner_globals), (ts_allocate_ctor) php_scanner_globals_ctor, NULL);
 	ts_allocate_fast_id(&ini_scanner_globals_id, &ini_scanner_globals_offset, sizeof(zend_ini_scanner_globals), (ts_allocate_ctor) ini_scanner_globals_ctor, NULL);
 	compiler_globals = ts_resource(compiler_globals_id);
