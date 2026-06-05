@@ -238,6 +238,12 @@ PHP 8.6 UPGRADE NOTES
     This value can also be obtained by passing CURLINFO_SIZE_DELIVERED as the
     $option parameter.
     Requires libcurl 8.20.0 or later.
+  . Added CURLOPT_SEEKFUNCTION to register a callback that repositions a
+    streamed request body so libcurl can rewind and resend it on a redirect,
+    multi-pass authentication, or a retried reused connection instead of
+    failing with CURLE_SEND_FAIL_REWIND. The callback receives the CurlHandle,
+    offset and origin, and must return one of CURL_SEEKFUNC_OK,
+    CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK.
 
 - Fileinfo:
   . finfo_file() now works with remote streams.
@@ -467,6 +473,10 @@ PHP 8.6 UPGRADE NOTES
 
 - Curl:
   . CURLINFO_SIZE_DELIVERED (libcurl >= 8.20.0).
+  . CURLOPT_SEEKFUNCTION.
+  . CURL_SEEKFUNC_OK.
+  . CURL_SEEKFUNC_FAIL.
+  . CURL_SEEKFUNC_CANTSEEK.
 
 - Sockets:
   . TCP_USER_TIMEOUT (Linux only).

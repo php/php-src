@@ -345,6 +345,11 @@ const CURLOPT_RESUME_FROM = UNKNOWN;
 const CURLOPT_RETURNTRANSFER = UNKNOWN;
 /**
  * @var int
+ * @cvalue CURLOPT_SEEKFUNCTION
+ */
+const CURLOPT_SEEKFUNCTION = UNKNOWN;
+/**
+ * @var int
  * @cvalue CURLOPT_SHARE
  */
 const CURLOPT_SHARE = UNKNOWN;
@@ -1788,6 +1793,21 @@ const CURLPAUSE_SEND_CONT = UNKNOWN;
  * @cvalue CURL_READFUNC_PAUSE
  */
 const CURL_READFUNC_PAUSE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_SEEKFUNC_OK
+ */
+const CURL_SEEKFUNC_OK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_SEEKFUNC_FAIL
+ */
+const CURL_SEEKFUNC_FAIL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_SEEKFUNC_CANTSEEK
+ */
+const CURL_SEEKFUNC_CANTSEEK = UNKNOWN;
 /**
  * @var int
  * @cvalue CURL_WRITEFUNC_PAUSE
