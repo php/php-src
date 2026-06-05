@@ -5,7 +5,7 @@ tidy
 --FILE--
 <?php
 
-$nx = new Tidy();
+$nx = new tidy();
 $nx->diagnose();
 var_dump($nx);
 

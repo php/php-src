@@ -39,7 +39,7 @@ $db->setAuthorizer(function (int $action) {
     $constants = array_flip($constants);
 
     var_dump($constants[$action], implode(',', array_slice(func_get_args(), 1)));
-    return SQLITE3::OK;
+    return SQLite3::OK;
 });
 
 var_dump($db->exec('SELECT * FROM test WHERE a = 42;'));

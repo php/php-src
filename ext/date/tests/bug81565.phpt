@@ -9,7 +9,7 @@ var_export(
     )
 );
 
-echo "\n", (new DatetimeZone('+01:45:30'))->getName();
+echo "\n", (new DateTimeZone('+01:45:30'))->getName();
 ?>
 --EXPECT--
 \DateTime::__set_state(array(

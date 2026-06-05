@@ -15,24 +15,24 @@ require_once(__DIR__ . '/new_db.inc');
 
 $db->exec('CREATE TABLE test_explain (a string);');
 $stmt = $db->prepare("INSERT INTO test_explain VALUES ('first insert'), ('second_insert')");
-$stmt->setExplain(Sqlite3Stmt::EXPLAIN_MODE_EXPLAIN);
-var_dump($stmt->explain() == Sqlite3Stmt::EXPLAIN_MODE_EXPLAIN);
+$stmt->setExplain(SQLite3Stmt::EXPLAIN_MODE_EXPLAIN);
+var_dump($stmt->explain() == SQLite3Stmt::EXPLAIN_MODE_EXPLAIN);
 $r = $stmt->execute();
 $result = [];
 while (($arr = $r->fetchArray(SQLITE3_ASSOC)) !== false) $result[] = $arr;
 var_dump($result);
 $stmts = $db->prepare('SELECT * FROM test_explain');
-$stmts->setExplain(Sqlite3Stmt::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN);
+$stmts->setExplain(SQLite3Stmt::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN);
 $r = $stmts->execute();
 $result = [];
 while (($arr = $r->fetchArray(SQLITE3_ASSOC)) !== false) $result[] = $arr;
 var_dump($result);
 
 $stmt = $db->prepare("INSERT INTO test_explain VALUES ('first insert'), ('second_insert')");
-$stmt->setExplain(Sqlite3Stmt::EXPLAIN_MODE_PREPARED);
+$stmt->setExplain(SQLite3Stmt::EXPLAIN_MODE_PREPARED);
 $stmt->execute();
 $stmts = $db->prepare('SELECT * FROM test_explain');
-$stmts->setExplain(Sqlite3Stmt::EXPLAIN_MODE_PREPARED);
+$stmts->setExplain(SQLite3Stmt::EXPLAIN_MODE_PREPARED);
 $r = $stmts->execute();
 $result = [];
 while (($arr = $r->fetchArray(SQLITE3_ASSOC)) !== false) $result[] = $arr;
@@ -50,7 +50,7 @@ try {
     echo $e->getMessage(), PHP_EOL;
 }
 
-var_dump($stmts->explain() == Sqlite3Stmt::EXPLAIN_MODE_PREPARED);
+var_dump($stmts->explain() == SQLite3Stmt::EXPLAIN_MODE_PREPARED);
 ?>
 --EXPECTF--
 bool(true)

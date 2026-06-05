@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root/>');
+$dom = Dom\XMLDocument::createFromString('<root/>');
 $list = $dom->documentElement->classList;
 
 $list->add();
@@ -17,12 +17,12 @@ $ref =& $str;
 
 $list->add($ref);
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $list->value = '';
 $list->add('e');
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

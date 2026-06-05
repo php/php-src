@@ -1,5 +1,5 @@
 --TEST--
-ReflectionObject::IsInstantiable() - variation - constructors
+ReflectionObject::isInstantiable() - variation - constructors
 --FILE--
 <?php
 
@@ -40,7 +40,7 @@ $reflectionObjects = array(
 foreach ($reflectionObjects as $reflectionObject) {
     $name = $reflectionObject->getName();
     echo "Is $name instantiable? ";
-    var_dump($reflectionObject->IsInstantiable());
+    var_dump($reflectionObject->isInstantiable());
 }
 ?>
 --EXPECT--

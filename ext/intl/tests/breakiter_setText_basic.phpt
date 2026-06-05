@@ -6,7 +6,7 @@ intl
 <?php
 
 class A {
-function __tostring() { return 'aaa'; }
+function __toString() { return 'aaa'; }
 }
 
 $bi = IntlBreakIterator::createWordInstance('pt');

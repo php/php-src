@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-Class books extends domDocument {
+Class books extends DOMDocument {
     function addBook($title, $author) {
         $titleElement = $this->createElement("title");
         $titleElement->appendChild($this->createTextNode($title));

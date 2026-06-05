@@ -7,7 +7,7 @@ ReflectionObject::__toString() : very basic test with dynamic properties
 class Foo  {
     public $bar = 1;
 }
-$f = new foo;
+$f = new Foo;
 $f->dynProp = 'hello';
 $f->dynProp2 = 'hello again';
 echo new ReflectionObject($f);

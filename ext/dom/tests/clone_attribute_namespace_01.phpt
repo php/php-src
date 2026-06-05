@@ -8,9 +8,9 @@ dom
 function createTestDocument() {
     $dom = new DOMDocument;
     $dom->loadXML('<?xml version="1.0"?><container/>');
-    $dom->documentElement->setAttributeNs("some:ns", "foo:bar", "value");
+    $dom->documentElement->setAttributeNS("some:ns", "foo:bar", "value");
 
-    $attr = $dom->documentElement->getAttributeNodeNs("some:ns", "bar");
+    $attr = $dom->documentElement->getAttributeNodeNS("some:ns", "bar");
     $clone = $attr->cloneNode(true);
 
     return [$dom, $clone];
@@ -22,16 +22,16 @@ var_dump($clone->prefix, $clone->namespaceURI);
 echo "--- Re-adding a namespaced attribute ---\n";
 
 [$dom, $clone] = createTestDocument();
-$dom->documentElement->removeAttributeNs("some:ns", "bar");
+$dom->documentElement->removeAttributeNS("some:ns", "bar");
 echo $dom->saveXML();
-$dom->documentElement->setAttributeNodeNs($clone);
+$dom->documentElement->setAttributeNodeNS($clone);
 echo $dom->saveXML();
 
 echo "--- Re-adding a namespaced attribute, with the namespace deleted (setAttributeNodeNs variation) ---\n";
 
 function readd_test(string $method) {
     [$dom, $clone] = createTestDocument();
-    $dom->documentElement->removeAttributeNs("some:ns", "bar");
+    $dom->documentElement->removeAttributeNS("some:ns", "bar");
     $dom->documentElement->removeAttribute("xmlns:foo");
     echo $dom->saveXML();
     $child = $dom->documentElement->appendChild($dom->createElement("child"));
@@ -39,7 +39,7 @@ function readd_test(string $method) {
     echo $dom->saveXML();
 }
 
-readd_test("setAttributeNodeNs");
+readd_test("setAttributeNodeNS");
 
 echo "--- Re-adding a namespaced attribute, with the namespace deleted (setAttributeNode variation) ---\n";
 

@@ -4,7 +4,7 @@ DomDocument::createEntityReference() - DOM_INVALID_CHARACTER_ERR raised if name 
 dom
 --FILE--
 <?php
-$objDoc = new DomDocument();
+$objDoc = new DOMDocument();
 
 try {
     $objDoc->createEntityReference('!');

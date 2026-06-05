@@ -10,7 +10,7 @@ spl_autoload_register(function ($className) {
     exit();
 });
 
-$xsl = new DomDocument();
+$xsl = new DOMDocument();
 $xsl->loadXML('<?xml version="1.0" encoding="iso-8859-1" ?>
 <xsl:stylesheet version="1.0"
 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -19,12 +19,12 @@ xmlns:php="http://php.net/xsl">
 <xsl:value-of select="php:function(\'TeSt::dateLang\')" />
 </xsl:template>
 </xsl:stylesheet>');
-$inputdom = new DomDocument();
+$inputdom = new DOMDocument();
 $inputdom->loadXML('<?xml version="1.0" encoding="iso-8859-1" ?>
 <today></today>');
 
-$proc = new XsltProcessor();
-$proc->registerPhpFunctions();
+$proc = new XSLTProcessor();
+$proc->registerPHPFunctions();
 $xsl = $proc->importStylesheet($xsl);
 $newdom = $proc->transformToDoc($inputdom);
 ?>

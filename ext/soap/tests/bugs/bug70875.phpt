@@ -7,7 +7,7 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 
-class bug70875 extends SOAPClient
+class bug70875 extends SoapClient
 {
     public function __doRequest($request, $location, $action, $version, $one_way = false, ?string $uriParserClass = null): never
     {
@@ -43,7 +43,7 @@ $r = new TestService();
 $r->TestServiceRQ = new TestServiceRQ();
 $r->TestServiceRQ->RqHeader = new RqHeader();
 
-$c->testService($r);
+$c->TestService($r);
 
 ?>
 --EXPECT--

@@ -9,7 +9,7 @@ $name = __DIR__ . '/withattr.zip';
 
 echo "== Set\n";
 $zip = new ZipArchive;
-$r = $zip->open($name, ZIPARCHIVE::CREATE);
+$r = $zip->open($name, ZipArchive::CREATE);
 $zip->addFromString('foo.txt', 'foo');
 $zip->addFromString('bar.txt', 'bar');
 var_dump($zip->setExternalAttributesName('foo.txt', ZipArchive::OPSYS_UNIX, 123));

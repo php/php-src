@@ -4,7 +4,7 @@ Passing Closure as parameter to an non-existent function
 <?php
 
 class foo {
-    public static function __callstatic($x, $y) {
+    public static function __callStatic($x, $y) {
         var_dump($x,$y);
         return 1;
     }

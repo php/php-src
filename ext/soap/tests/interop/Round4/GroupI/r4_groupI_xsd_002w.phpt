@@ -8,8 +8,8 @@ soap.wsdl_cache_enabled=0
 <?php
 $client = new SoapClient(__DIR__."/round4_groupI_xsd.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoInteger(array("inputInteger"=>22));
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round4_groupI_xsd.inc");
 echo "ok\n";
 ?>

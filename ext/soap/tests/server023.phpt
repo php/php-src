@@ -11,8 +11,8 @@ function test() {
     return "Hello Body!";
 }
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction("test");
+$server = new SoapServer(null,array('uri'=>"http://testuri.org"));
+$server->addFunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>

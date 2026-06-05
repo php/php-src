@@ -7,7 +7,7 @@ dom
 
 require __DIR__ . '/test_utils.inc';
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <container>
     <a title="http://example.com" lang="en-us"/>
     <a title="http://example.be"/>

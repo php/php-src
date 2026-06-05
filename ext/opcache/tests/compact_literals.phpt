@@ -54,7 +54,7 @@ if (!class_exists("C")) {
 }
 
 A::say();
-B::Say();
+B::say();
 A::say();
 B::say();
 C::say();
@@ -91,8 +91,8 @@ var_dump(F::F); 	//"F"
 var_dump(E::TEST);  //"NULL"
 var_dump(F::TEST);  //"FALSE"
 var_dump(E::$E);	//"EP"
-var_dumP(F::$F);    //"FP"
-var_dumP(F::$E);    //"FEP"
+var_dump(F::$F);    //"FP"
+var_dump(F::$E);    //"FEP"
 
 echo "propertes and methods" . EOL;
 
@@ -121,40 +121,40 @@ function geti() {
 $h = new CH;
 
 echo "-->H" . PHP_EOL;
-$h->H();
+$h->h();
 var_dump($h::H);
 var_dump(CH::H);
 
-$h->H();
+$h->h();
 var_dump($h::H);
 var_dump(CH::H);
 
 echo "-->I" . PHP_EOL;
 $h = new CI;
-$h->H();
+$h->h();
 var_dump($h::H);
 var_dump(CI::H);
-$h->H();
+$h->h();
 var_dump($h::H);
 var_dump(CI::H);
 
 echo "-->H" . PHP_EOL;
 change($h);
 
-$h->H();
+$h->h();
 var_dump($h::H);
 var_dump(CH::H);
 
-$h->H();
+$h->h();
 var_dump($h::H);
 var_dump(CH::H);
 
 echo "-->I" . PHP_EOL;
 $h = geti();
-$h->H();
+$h->h();
 var_dump($h::H);
 var_dump(CI::H);
-$h->H();
+$h->h();
 var_dump($h::H);
 var_dump(CI::H);
 ?>

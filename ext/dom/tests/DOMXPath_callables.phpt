@@ -36,7 +36,7 @@ try {
 
 echo "--- Legit cases: all ---\n";
 
-$xpath->registerPHPFunctions(null);
+$xpath->registerPhpFunctions(null);
 $xpath->evaluate("//a[php:function('var_dump', string(@href))]");
 $xpath->evaluate("//a[php:function('MyClass::dump', string(@href))]");
 
@@ -45,7 +45,7 @@ echo "--- Legit cases: set ---\n";
 $xpath = new DOMXPath($doc);
 $xpath->registerNamespace("php", "http://php.net/xpath");
 $xpath->registerPhpFunctions([]);
-$xpath->registerPHPFunctions(["xyz" => MyClass::dump(...), "mydump" => function (string $x) {
+$xpath->registerPhpFunctions(["xyz" => MyClass::dump(...), "mydump" => function (string $x) {
     var_dump($x);
 }]);
 $xpath->registerPhpFunctions(str_repeat("var_dump", mt_rand(1, 1) /* defeat SCCP */));

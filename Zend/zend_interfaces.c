@@ -53,7 +53,7 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 	}
 	if (!fn_proxy || !*fn_proxy) {
 		if (EXPECTED(obj_ce)) {
-			fn = zend_hash_str_find_ptr_lc(
+			fn = zend_hash_str_find_ptr(
 				&obj_ce->function_table, function_name, function_name_len);
 			if (UNEXPECTED(fn == NULL)) {
 				/* error at c-level */
@@ -301,7 +301,7 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 
 	memset(funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
 	funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(
-		&class_type->function_table, "getiterator", sizeof("getiterator") - 1);
+		&class_type->function_table, "getIterator", sizeof("getIterator") - 1);
 
 	if (class_type->get_iterator
 	 && class_type->get_iterator != zend_user_it_get_new_iterator
@@ -389,13 +389,13 @@ static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_en
 	class_type->arrayaccess_funcs_ptr = funcs_ptr;
 
 	funcs_ptr->zf_offsetget = zend_hash_str_find_ptr(
-		&class_type->function_table, "offsetget", sizeof("offsetget") - 1);
+		&class_type->function_table, "offsetGet", sizeof("offsetGet") - 1);
 	funcs_ptr->zf_offsetexists = zend_hash_str_find_ptr(
-		&class_type->function_table, "offsetexists", sizeof("offsetexists") - 1);
+		&class_type->function_table, "offsetExists", sizeof("offsetExists") - 1);
 	funcs_ptr->zf_offsetset = zend_hash_str_find_ptr(
-		&class_type->function_table, "offsetset", sizeof("offsetset") - 1);
+		&class_type->function_table, "offsetSet", sizeof("offsetSet") - 1);
 	funcs_ptr->zf_offsetunset = zend_hash_str_find_ptr(
-		&class_type->function_table, "offsetunset", sizeof("offsetunset") - 1);
+		&class_type->function_table, "offsetUnset", sizeof("offsetUnset") - 1);
 
 	return SUCCESS;
 }

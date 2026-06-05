@@ -13,7 +13,7 @@ $file = $dirname . '__tmp_oo_set_mtime.zip';
 @unlink($file);
 
 $zip = new ZipArchive;
-if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
+if (!$zip->open($file, ZipArchive::CREATE)) {
     exit('failed');
 }
 
@@ -37,7 +37,7 @@ var_dump($zip->setMtimeIndex(1, $t2));
 $s = $zip->statIndex(1);
 // ONLY with 1.6.0 - var_dump($s['mtime'] ==  $t2);
 
-if (!$zip->status == ZIPARCHIVE::ER_OK) {
+if (!$zip->status == ZipArchive::ER_OK) {
     echo "failed to write zip\n";
 }
 $zip->close();

@@ -12,7 +12,7 @@ if (getenv("USE_ZEND_ALLOC") === "0") {
 <?php
 $b = new SplObjectStorage();
 for ($i = 10000; $i > 0; $i--) {
-    $object = new StdClass();
+    $object = new stdClass();
     $object->a = str_repeat("a", 2);
     $b->offsetSet($object);
 }

@@ -5,14 +5,14 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <!DOCTYPE root [
     <!ENTITY foo "content">
 ]>
 <root/>
 XML);
 $child = $dom->documentElement->appendChild($dom->createElementNS('urn:a', 'child'));
-$original = $dom->saveXML();
+$original = $dom->saveXml();
 
 function test($child, $html) {
     global $dom, $original;
@@ -21,7 +21,7 @@ function test($child, $html) {
     } catch (DOMException $e) {
         echo $e->getMessage(), "\n";
     }
-    var_dump($dom->saveXML() === $original);
+    var_dump($dom->saveXml() === $original);
 }
 
 test($child, '&foo;');

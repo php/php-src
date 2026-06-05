@@ -6,7 +6,7 @@ dom
 <?php
 $dom = new DOMDocument();
 $dom->loadXML('<root><child/></root>');
-$xpath = new DOMXpath($dom);
+$xpath = new DOMXPath($dom);
 foreach($xpath->query('/root/noexist') as $child) {
     var_dump($child);
 }

@@ -5,8 +5,8 @@ SplObjectStorage magic operators
 $i = 'dynamic';
 $v = $i . '_';
 $s = new SplObjectStorage();
-$o1 = new Stdclass;
-$o2 = new Stdclass;
+$o1 = new stdClass;
+$o2 = new stdClass;
 var_dump($s[$o1] ?? 'default');
 var_dump($s[$o1] ??= $i);
 var_dump($s[$o1] ??= null);

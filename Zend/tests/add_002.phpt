@@ -5,7 +5,7 @@ adding objects to arrays
 
 $a = array(1,2,3);
 
-$o = new stdclass;
+$o = new stdClass;
 $o->prop = "value";
 
 try {

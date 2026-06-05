@@ -264,13 +264,13 @@ ZEND_METHOD(NoDiscard, __construct)
 	}
 }
 
-static zend_attribute *get_attribute(const HashTable *attributes, const zend_string *lcname, uint32_t offset)
+static zend_attribute *get_attribute(const HashTable *attributes, const zend_string *name, uint32_t offset)
 {
 	if (attributes) {
 		zend_attribute *attr;
 
 		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
-			if (attr->offset == offset && zend_string_equals(attr->lcname, lcname)) {
+			if (attr->offset == offset && zend_string_equals(attr->name, name)) {
 				return attr;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -285,7 +285,7 @@ static zend_attribute *get_attribute_str(const HashTable *attributes, const char
 		zend_attribute *attr;
 
 		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
-			if (attr->offset == offset && zend_string_equals_cstr(attr->lcname, str, len)) {
+			if (attr->offset == offset && zend_string_equals_cstr(attr->name, str, len)) {
 				return attr;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -294,9 +294,9 @@ static zend_attribute *get_attribute_str(const HashTable *attributes, const char
 	return NULL;
 }
 
-ZEND_API zend_attribute *zend_get_attribute(const HashTable *attributes, const zend_string *lcname)
+ZEND_API zend_attribute *zend_get_attribute(const HashTable *attributes, const zend_string *name)
 {
-	return get_attribute(attributes, lcname, 0);
+	return get_attribute(attributes, name, 0);
 }
 
 ZEND_API zend_attribute *zend_get_attribute_str(const HashTable *attributes, const char *str, size_t len)
@@ -304,9 +304,9 @@ ZEND_API zend_attribute *zend_get_attribute_str(const HashTable *attributes, con
 	return get_attribute_str(attributes, str, len, 0);
 }
 
-ZEND_API zend_attribute *zend_get_parameter_attribute(const HashTable *attributes, const zend_string *lcname, uint32_t offset)
+ZEND_API zend_attribute *zend_get_parameter_attribute(const HashTable *attributes, const zend_string *name, uint32_t offset)
 {
-	return get_attribute(attributes, lcname, offset + 1);
+	return get_attribute(attributes, name, offset + 1);
 }
 
 ZEND_API zend_attribute *zend_get_parameter_attribute_str(const HashTable *attributes, const char *str, size_t len, uint32_t offset)
@@ -452,7 +452,7 @@ ZEND_API bool zend_is_attribute_repeated(const HashTable *attributes, const zend
 
 	ZEND_HASH_PACKED_FOREACH_PTR(attributes, other) {
 		if (other != attr && other->offset == attr->offset) {
-			if (zend_string_equals(other->lcname, attr->lcname)) {
+			if (zend_string_equals(other->name, attr->name)) {
 				return 1;
 			}
 		}
@@ -467,7 +467,6 @@ static void attr_free(zval *v)
 	bool persistent = attr->flags & ZEND_ATTRIBUTE_PERSISTENT;
 
 	zend_string_release(attr->name);
-	zend_string_release(attr->lcname);
 	if (attr->validation_error != NULL) {
 		zend_string_release(attr->validation_error);
 	}
@@ -502,7 +501,6 @@ ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_string 
 		attr->name = zend_string_dup(name, persistent);
 	}
 
-	attr->lcname = zend_string_tolower_ex(attr->name, persistent);
 	attr->validation_error = NULL;
 	attr->flags = flags;
 	attr->lineno = lineno;
@@ -541,9 +539,7 @@ ZEND_API zend_internal_attribute *zend_mark_internal_attribute(zend_class_entry 
 			internal_attr->flags = Z_LVAL(attr->args[0].value);
 			internal_attr->validator = NULL;
 
-			zend_string *lcname = zend_string_tolower_ex(ce->name, 1);
-			zend_hash_update_ptr(&internal_attributes, lcname, internal_attr);
-			zend_string_release(lcname);
+			zend_hash_update_ptr(&internal_attributes, ce->name, internal_attr);
 
 			return internal_attr;
 		}
@@ -560,9 +556,9 @@ ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_en
 	return zend_mark_internal_attribute(ce);
 }
 
-ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *lcname)
+ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *name)
 {
-	return zend_hash_find_ptr(&internal_attributes, lcname);
+	return zend_hash_find_ptr(&internal_attributes, name);
 }
 
 void zend_register_attribute_ce(void)

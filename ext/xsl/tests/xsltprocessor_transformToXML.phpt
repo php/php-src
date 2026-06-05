@@ -46,9 +46,9 @@ $xsldoc->loadXML($xsl);
 
 $proc = new XSLTProcessor();
 $proc->registerPHPFunctions();
-$proc->importStyleSheet($xsldoc);
+$proc->importStylesheet($xsldoc);
 
-var_dump($proc->transformToXML($xmldoc));
+var_dump($proc->transformToXml($xmldoc));
 ?>
 --EXPECT--
 string(135) "<html xmlns:php="http://php.net/xsl"><body>

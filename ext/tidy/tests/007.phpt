@@ -8,14 +8,14 @@ tidy.default_config=
 <?php
 $a = new tidy(__DIR__."/007.html");
 echo "Current Value of 'tidy-mark': ";
-var_dump($a->getopt("tidy-mark"));
+var_dump($a->getOpt("tidy-mark"));
 echo "Current Value of 'error-file': ";
-var_dump($a->getopt("error-file"));
+var_dump($a->getOpt("error-file"));
 echo "Current Value of 'tab-size': ";
-var_dump($a->getopt("tab-size"));
+var_dump($a->getOpt("tab-size"));
 
 try {
-    $a->getopt('bogus-opt');
+    $a->getOpt('bogus-opt');
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }

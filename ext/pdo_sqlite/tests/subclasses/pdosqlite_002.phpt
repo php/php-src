@@ -9,7 +9,7 @@ if (!defined('Pdo\Sqlite::DETERMINISTIC')) die('skip Pdo\Sqlite::DETERMINISTIC r
 --FILE--
 <?php
 
-$db = Pdo::connect('sqlite::memory:');
+$db = PDO::connect('sqlite::memory:');
 if (!$db instanceof Pdo\Sqlite) {
     echo "Wrong class type. Should be Pdo\Sqlite but is " . get_class($db) . "\n";
 }

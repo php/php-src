@@ -83,7 +83,6 @@ typedef struct _zend_unserialize_data zend_unserialize_data;
 
 typedef struct _zend_class_name {
 	zend_string *name;
-	zend_string *lc_name;
 } zend_class_name;
 
 typedef struct _zend_trait_method_reference {

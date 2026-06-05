@@ -77,11 +77,11 @@ static uint32_t ZEND_FASTCALL zend_jit_jmp_frameless_helper(zval *func_name, voi
 
 static zend_function* ZEND_FASTCALL zend_jit_find_ns_func_helper(zval *func_name, void **cache_slot)
 {
-	zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));
+	zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name));
 	zend_function *fbc;
 
 	if (func == NULL) {
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
+		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));
 		if (UNEXPECTED(func == NULL)) {
 			return NULL;
 		}
@@ -143,7 +143,7 @@ static zend_function* ZEND_FASTCALL zend_jit_find_method_helper(zend_object *obj
 	zend_class_entry *called_scope = obj->ce;
 	zend_function *fbc;
 
-	fbc = obj->handlers->get_method(obj_ptr, Z_STR_P(function_name), function_name + 1);
+	fbc = obj->handlers->get_method(obj_ptr, Z_STR_P(function_name), function_name);
 	if (UNEXPECTED(fbc == NULL)) {
 		if (EXPECTED(!EG(exception))) {
 			zend_undefined_method(called_scope, Z_STR_P(function_name));
@@ -194,7 +194,7 @@ static zend_class_entry* ZEND_FASTCALL zend_jit_find_class_helper(zend_execute_d
 		/* no function found. try a static method in class */
 		ce = CACHED_PTR(opline->result.num);
 		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 		}
 	} else if (opline->op1_type == IS_UNUSED) {
 		ce = zend_fetch_class(NULL, opline->op1.num);
@@ -224,7 +224,7 @@ static zend_function* ZEND_FASTCALL zend_jit_find_static_method_helper(zend_exec
 		if (ce->get_static_method) {
 			fbc = ce->get_static_method(ce, Z_STR_P(function_name));
 		} else {
-			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), RT_CONSTANT(opline, opline->op2) + 1);
+			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), RT_CONSTANT(opline, opline->op2));
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {

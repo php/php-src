@@ -13,37 +13,37 @@ class TrampolineClass {
 require __DIR__ . '/xpath_callables.inc';
 
 try {
-    createProcessor([])->registerPhpFunctionNS('http://php.net/xsl', 'strtolower', strtolower(...));
+    createProcessor([])->registerPHPFunctionNS('http://php.net/xsl', 'strtolower', strtolower(...));
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    createProcessor([])->registerPhpFunctionNS('http://php.net/xsl', 'test', [new TrampolineClass, 'test']);
+    createProcessor([])->registerPHPFunctionNS('http://php.net/xsl', 'test', [new TrampolineClass, 'test']);
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    createProcessor([])->registerPhpFunctionNS('urn:foo', '$$$', [new TrampolineClass, 'test']);
+    createProcessor([])->registerPHPFunctionNS('urn:foo', '$$$', [new TrampolineClass, 'test']);
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    createProcessor([])->registerPhpFunctionNS('urn:foo', 'x:a', strtolower(...));
+    createProcessor([])->registerPHPFunctionNS('urn:foo', 'x:a', strtolower(...));
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    createProcessor([])->registerPhpFunctionNS("urn:foo", "\0", strtolower(...));
+    createProcessor([])->registerPHPFunctionNS("urn:foo", "\0", strtolower(...));
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    createProcessor([])->registerPhpFunctionNS("\0", 'strtolower', strtolower(...));
+    createProcessor([])->registerPHPFunctionNS("\0", 'strtolower', strtolower(...));
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }

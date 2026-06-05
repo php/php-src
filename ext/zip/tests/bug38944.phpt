@@ -7,7 +7,7 @@ zip
 
 $arc_name = __DIR__."/bug38944.zip";
 $foo = new ZipArchive;
-$foo->open($arc_name, ZIPARCHIVE::CREATE);
+$foo->open($arc_name, ZipArchive::CREATE);
 
 var_dump($foo->status);
 var_dump($foo->statusSys);

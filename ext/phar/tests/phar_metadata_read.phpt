@@ -24,12 +24,12 @@ foreach($files as $name => $cont) {
 }
 
 $phar = new Phar($fname);
-var_dump($phar->hasMetaData());
-var_dump($phar->getMetaData());
-var_dump($phar->delMetaData());
-var_dump($phar->getMetaData());
-var_dump($phar->delMetaData());
-var_dump($phar->getMetaData());
+var_dump($phar->hasMetadata());
+var_dump($phar->getMetadata());
+var_dump($phar->delMetadata());
+var_dump($phar->getMetadata());
+var_dump($phar->delMetadata());
+var_dump($phar->getMetadata());
 foreach($files as $name => $cont) {
     echo "  meta $name\n";
     var_dump($phar[$name]->hasMetadata());

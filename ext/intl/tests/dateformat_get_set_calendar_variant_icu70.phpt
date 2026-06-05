@@ -19,7 +19,7 @@ global $ts;
 echo $df->format($ts), "\n";
 var_dump($df->getCalendar(),
 $df->getCalendarObject()->getType(),
-$df->getCalendarObject()->getTimeZone()->getId());
+$df->getCalendarObject()->getTimeZone()->getID());
 echo "\n";
 }
 

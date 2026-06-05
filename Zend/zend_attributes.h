@@ -58,7 +58,6 @@ typedef struct {
 
 typedef struct _zend_attribute {
 	zend_string *name;
-	zend_string *lcname;
 	/* Only non-null for internal attributes with validation errors that are
 	 * delayed until runtime via #[\DelayedTargetValidation] */
 	zend_string *validation_error;
@@ -76,10 +75,10 @@ typedef struct _zend_internal_attribute {
 	zend_string* (*validator)(zend_attribute *attr, uint32_t target, zend_class_entry *scope);
 } zend_internal_attribute;
 
-ZEND_API zend_attribute *zend_get_attribute(const HashTable *attributes, const zend_string *lcname);
+ZEND_API zend_attribute *zend_get_attribute(const HashTable *attributes, const zend_string *name);
 ZEND_API zend_attribute *zend_get_attribute_str(const HashTable *attributes, const char *str, size_t len);
 
-ZEND_API zend_attribute *zend_get_parameter_attribute(const HashTable *attributes, const zend_string *lcname, uint32_t offset);
+ZEND_API zend_attribute *zend_get_parameter_attribute(const HashTable *attributes, const zend_string *name, uint32_t offset);
 ZEND_API zend_attribute *zend_get_parameter_attribute_str(const HashTable *attributes, const char *str, size_t len, uint32_t offset);
 
 ZEND_API zend_result zend_get_attribute_value(zval *ret, const zend_attribute *attr, uint32_t i, zend_class_entry *scope);
@@ -90,7 +89,7 @@ ZEND_API bool zend_is_attribute_repeated(const HashTable *attributes, const zend
 
 ZEND_API zend_internal_attribute *zend_mark_internal_attribute(zend_class_entry *ce);
 ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce, uint32_t flags);
-ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *lcname);
+ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *name);
 
 ZEND_API zend_attribute *zend_add_attribute(
 		HashTable **attributes, zend_string *name, uint32_t argc,

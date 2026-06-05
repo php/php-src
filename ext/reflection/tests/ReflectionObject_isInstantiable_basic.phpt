@@ -1,5 +1,5 @@
 --TEST--
-ReflectionObject::IsInstantiable() - basic function test
+ReflectionObject::isInstantiable() - basic function test
 --FILE--
 <?php
 class C {
@@ -27,7 +27,7 @@ $classes = array("C", "ifaceImpl", "D");
 foreach($classes  as $class ) {
     $ro = new ReflectionObject(new $class);
     echo "Is $class instantiable?  ";
-    var_dump($ro->IsInstantiable());
+    var_dump($ro->isInstantiable());
 }
 ?>
 --EXPECT--

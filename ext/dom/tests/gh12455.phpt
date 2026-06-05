@@ -11,7 +11,7 @@ $doc->appendChild($element);
 $element1 = $doc->createElementNS('http://test', 'b:y');
 $element->appendChild($element1);
 $element1->appendChild($doc->createElementNS('http://test', 'b:z'));
-echo $doc->saveXml();
+echo $doc->saveXML();
 
 $xpath = new DOMXPath($doc);
 $xpath->registerNodeNamespaces = true;

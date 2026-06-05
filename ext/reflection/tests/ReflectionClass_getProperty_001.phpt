@@ -34,25 +34,25 @@ foreach($classes as $class) {
     try {
         echo "  --> Check for s: ";
         var_dump($rc->getProperty("s"));
-    } catch (exception $e) {
+    } catch (Exception $e) {
         echo $e->getMessage() . "\n";
     }
     try {
         echo "  --> Check for a: ";
         var_dump($rc->getProperty("a"));
-    } catch (exception $e) {
+    } catch (Exception $e) {
         echo $e->getMessage() . "\n";
     }
     try {
         echo "  --> Check for A: ";
         var_dump($rc->getProperty("A"));
-    } catch (exception $e) {
+    } catch (Exception $e) {
         echo $e->getMessage() . "\n";
     }
     try {
         echo "  --> Check for doesNotExist: ";
         var_dump($rc->getProperty("doesNotExist"));
-    } catch (exception $e) {
+    } catch (Exception $e) {
         echo $e->getMessage() . "\n";
     }
 

@@ -4,7 +4,7 @@ Bug #72434: ZipArchive class Use After Free Vulnerability in PHP's GC algorithm 
 zip
 --FILE--
 <?php
-$free_me = array(new StdClass());
+$free_me = array(new stdClass());
 $serialized_payload = 'a:3:{i:1;N;i:2;O:10:"ZipArchive":1:{s:8:"filename";'.serialize($free_me).'}i:1;R:4;}';
 try {
     $unserialized_payload = unserialize($serialized_payload);

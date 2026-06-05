@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-class z extends domDocument{
+class z extends DOMDocument{
     /** variable can have name */
     public $p_array;
     public $p_variable;

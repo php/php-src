@@ -2,7 +2,7 @@
 "Reference Unpacking - New Reference" list()
 --FILE--
 <?php
-$arr = array(new stdclass);
+$arr = array(new stdClass);
 list(&$a, &$b) = $arr;
 var_dump($a, $b);
 var_dump($arr);

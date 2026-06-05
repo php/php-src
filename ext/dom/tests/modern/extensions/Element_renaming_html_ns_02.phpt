@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $el = $dom->createElementNS("http://www.w3.org/1999/xhtml", "foo:bar");
 try {
     $el->rename("urn:a", "foo:baz");

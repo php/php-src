@@ -13,7 +13,7 @@ class Base
     public static $prop1 = 1;
 }
 
-class Child extends base
+class Child extends Base
 {
     use T1;
 }

@@ -13,9 +13,9 @@ var_dump($good, $happy);
 echo PHP_EOL;
 
 $stdClassCollection = new SplObjectStorage;
-$foo = new StdClass;
+$foo = new stdClass;
 $stdClassCollection[$foo] = "foo";
-$bar = new StdClass;
+$bar = new stdClass;
 $stdClassCollection[$bar] = "bar";
 
 list($foo => $fooStr, $bar => $barStr) = $stdClassCollection;

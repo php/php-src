@@ -9,7 +9,7 @@ class MyClass {
 
 class MyXSLTProcessor extends XSLTProcessor {
     public function registerCycle() {
-        $this->registerPhpFunctions(["cycle" => array($this, "dummy")]);
+        $this->registerPHPFunctions(["cycle" => array($this, "dummy")]);
     }
 
     public function dummy(string $var) {
@@ -18,7 +18,7 @@ class MyXSLTProcessor extends XSLTProcessor {
 }
 
 function createProcessor($inputs, $class = "XSLTProcessor") {
-    $xsl = new DomDocument();
+    $xsl = new DOMDocument();
     $xsl->loadXML('<?xml version="1.0" encoding="iso-8859-1" ?>
     <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"

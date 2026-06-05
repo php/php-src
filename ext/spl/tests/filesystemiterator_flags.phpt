@@ -5,13 +5,13 @@ Joshua Thijssen <jthijssen@noxlogic.nl>
 --FILE--
 <?php
 
-$it = new FileSystemIterator(".");
+$it = new FilesystemIterator(".");
 printflags($it);
 
-$it->setFlags(FileSystemIterator::CURRENT_AS_SELF |
-        FileSystemIterator::KEY_AS_FILENAME |
-        FileSystemIterator::SKIP_DOTS |
-        FileSystemIterator::UNIX_PATHS);
+$it->setFlags(FilesystemIterator::CURRENT_AS_SELF |
+        FilesystemIterator::KEY_AS_FILENAME |
+        FilesystemIterator::SKIP_DOTS |
+        FilesystemIterator::UNIX_PATHS);
 printflags($it);
 
 $it->setFlags(-1);
@@ -19,9 +19,9 @@ printflags($it);
 
 function printflags($it) {
     printf("%08X\n", $it->getFlags());
-    printf("%08X\n", ($it->getFlags() & FileSystemIterator::CURRENT_MODE_MASK));
-    printf("%08X\n", ($it->getFlags() & FileSystemIterator::KEY_MODE_MASK));
-    printf("%08X\n", ($it->getFlags() & FileSystemIterator::OTHER_MODE_MASK));
+    printf("%08X\n", ($it->getFlags() & FilesystemIterator::CURRENT_MODE_MASK));
+    printf("%08X\n", ($it->getFlags() & FilesystemIterator::KEY_MODE_MASK));
+    printf("%08X\n", ($it->getFlags() & FilesystemIterator::OTHER_MODE_MASK));
 }
 
 ?>

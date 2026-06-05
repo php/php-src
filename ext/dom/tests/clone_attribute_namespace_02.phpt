@@ -13,8 +13,8 @@ $dom->loadXML(<<<XML
 </container>
 XML);
 
-$clone = $dom->documentElement->getAttributeNodeNs("some:ns", "bar")->cloneNode(true);
-$dom->documentElement->firstElementChild->setAttributeNodeNs($clone);
+$clone = $dom->documentElement->getAttributeNodeNS("some:ns", "bar")->cloneNode(true);
+$dom->documentElement->firstElementChild->setAttributeNodeNS($clone);
 
 echo $dom->saveXML();
 

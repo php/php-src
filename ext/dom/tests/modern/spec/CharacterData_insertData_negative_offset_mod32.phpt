@@ -31,13 +31,13 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHtml($comment), "\n";
+echo $dom->saveHTML($comment), "\n";
 try {
     $comment->insertData(-(2**32 - 1), "A");
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHtml($comment), "\n";
+echo $dom->saveHTML($comment), "\n";
 
 ?>
 --EXPECT--

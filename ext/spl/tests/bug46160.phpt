@@ -4,7 +4,7 @@ Bug #46160 (SPL - Memory leak when exception is throwed in offsetSet method)
 <?php
 
 try {
-    $x = new splqueue;
+    $x = new SplQueue;
     $x->offsetSet(0, 0);
 } catch (Exception $e) { }
 

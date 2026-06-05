@@ -12,7 +12,7 @@ class Tester {
     }
 }
 
-$o = unserialize('O:3:"FOO":0:{}');
+$o = unserialize('O:3:"Foo":0:{}');
 
 var_dump($o);
 

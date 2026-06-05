@@ -81,7 +81,7 @@ class DList {
     }
 }
 
-$dlist = new Dlist;
+$dlist = new DList;
 $dlist->add(1);
 $dlist->add(3);
 $dlist->add(5);

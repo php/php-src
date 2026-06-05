@@ -9,7 +9,7 @@ $ctxs = array(
     NULL,
     'bogus',
     123,
-    new stdclass,
+    new stdClass,
     array('a'),
     stream_context_create(),
 );

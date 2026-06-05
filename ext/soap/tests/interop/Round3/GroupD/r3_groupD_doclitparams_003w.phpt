@@ -13,8 +13,8 @@ class SOAPStruct {
 $struct = new SOAPStruct('arg',34,325.325);
 $client = new SoapClient(__DIR__."/round3_groupD_doclitparams.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoStruct(array("param0"=>$struct));
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round3_groupD_doclitparams.inc");
 echo "ok\n";
 ?>

@@ -13,5 +13,5 @@ echo "Done";
 ?>
 --EXPECT--
 *** Testing is_a() : usage variations ***
-bool(true)
+bool(false)
 Done

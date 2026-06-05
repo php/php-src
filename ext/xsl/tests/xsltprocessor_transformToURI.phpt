@@ -45,9 +45,9 @@ $xsldoc->loadXML($xsl);
 
 $proc = new XSLTProcessor();
 $proc->registerPHPFunctions();
-$proc->importStyleSheet($xsldoc);
+$proc->importStylesheet($xsldoc);
 
-var_dump($proc->transformToURI($xsldoc, 'php://output'));
+var_dump($proc->transformToUri($xsldoc, 'php://output'));
 ?>
 --EXPECT--
 int(56)

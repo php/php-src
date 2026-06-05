@@ -7,7 +7,7 @@ tidy
 $html = '<!DOCTYPE html><html lang="en" boolean empty="" selected="selected"></html>';
 
 $tidy = new tidy();
-$tidy->ParseString($html);
+$tidy->parseString($html);
 echo tidy_get_output($tidy), "\n";
 
 var_dump($tidy->root()->child[1]->attribute);

@@ -1,13 +1,14 @@
 --TEST--
-importing function with same name but different case should fail
+Importing functions whose aliases differ only by case is allowed (aliases are case-sensitive)
 --FILE--
 <?php
 
 namespace {
     use function foo\bar;
     use function foo\BAR;
+    echo "ok\n";
 }
 
 ?>
---EXPECTF--
-Fatal error: Cannot use function foo\BAR as BAR because the name is already in use in %s on line %d
+--EXPECT--
+ok

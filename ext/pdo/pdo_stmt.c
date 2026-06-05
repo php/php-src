@@ -1945,7 +1945,7 @@ static zend_function *dbstmt_method_get(zend_object **object_pp, zend_string *me
 	zend_function *fbc = NULL;
 	zend_object *object = *object_pp;
 
-	if ((fbc = zend_hash_find_ptr_lc(&object->ce->function_table, method_name)) == NULL) {
+	if ((fbc = zend_hash_find_ptr(&object->ce->function_table, method_name)) == NULL) {
 		pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
 		/* instance not created by PDO object */
 		if (!stmt->dbh) {
@@ -1961,7 +1961,7 @@ static zend_function *dbstmt_method_get(zend_object **object_pp, zend_string *me
 			}
 		}
 
-		if ((fbc = zend_hash_find_ptr_lc(stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT], method_name)) == NULL) {
+		if ((fbc = zend_hash_find_ptr(stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT], method_name)) == NULL) {
 			goto out;
 		}
 		/* got it */

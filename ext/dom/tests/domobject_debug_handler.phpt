@@ -9,8 +9,8 @@ $xml = <<<XML
     <bar>foobar</bar>
 </foo>
 XML;
-$d = new domdocument;
-$d->dynamicProperty = new stdclass;
+$d = new DOMDocument;
+$d->dynamicProperty = new stdClass;
 $d->loadXML($xml);
 var_dump($d);
 ?>

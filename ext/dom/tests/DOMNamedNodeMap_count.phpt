@@ -7,7 +7,7 @@ dom
 --FILE--
 <?php
 
-$document = new DomDocument();
+$document = new DOMDocument();
 $root = $document->createElement('root');
 $document->appendChild($root);
 for($i = 0; $i < 5; $i++) {

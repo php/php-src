@@ -9,7 +9,7 @@ dom
 <?php
 
 //offset to large
-$dom = new DomDocument();
+$dom = new DOMDocument();
 $comment = $dom->createComment('test-comment');
 try {
   $comment->insertData(999,'-inserted');

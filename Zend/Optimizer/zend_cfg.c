@@ -333,8 +333,8 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_INIT_NS_FCALL_BY_NAME:
 				zv = CRT_CONSTANT(opline->op2);
 				if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
-					/* The third literal is the lowercased unqualified name */
-					zv += 2;
+					/* The second literal is the unqualified fallback name */
+					zv += 1;
 				}
 				if ((fn = zend_hash_find_ptr(EG(function_table), Z_STR_P(zv))) != NULL) {
 					if (fn->type == ZEND_INTERNAL_FUNCTION) {

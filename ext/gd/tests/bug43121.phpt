@@ -10,12 +10,12 @@ gd
 ?>
 --FILE--
 <?php
-$im = ImageCreate( 200, 100 );
-$black = ImageColorAllocate( $im, 0, 0, 0 );
+$im = imagecreate( 200, 100 );
+$black = imagecolorallocate( $im, 0, 0, 0 );
 
-$im_tile = ImageCreateFromGif(__DIR__ . "/bug43121.gif" );
-ImageSetTile( $im, $im_tile );
-ImageFill( $im, 0, 0, IMG_COLOR_TILED );
+$im_tile = imagecreatefromgif(__DIR__ . "/bug43121.gif" );
+imagesettile( $im, $im_tile );
+imagefill( $im, 0, 0, IMG_COLOR_TILED );
 
 print "OK";
 ?>

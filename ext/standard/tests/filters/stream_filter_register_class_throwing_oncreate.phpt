@@ -1,9 +1,9 @@
 --TEST--
-stream_filter_register() with a class that has a oncreate method that throws
+stream_filter_register() with a class that has a onCreate method that throws
 --FILE--
 <?php
 class foo extends php_user_filter {
-	public function oncreate(): bool {
+	public function onCreate(): bool {
 		throw new Exception("No");
 	}
 }
@@ -21,7 +21,7 @@ bool(true)
 
 Fatal error: Uncaught Exception: No in %s:%d
 Stack trace:
-#0 [internal function]: foo->oncreate()
+#0 [internal function]: foo->onCreate()
 #1 %s(%d): stream_filter_append(Resource id #2, 'invalid_filter')
 #2 {main}
   thrown in %s on line %d

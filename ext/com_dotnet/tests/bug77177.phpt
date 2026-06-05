@@ -4,7 +4,7 @@ Bug #77177 (Serializing or unserializing COM objects crashes)
 com_dotnet
 --FILE--
 <?php
-$com = new COM("WScript.Shell");
+$com = new com("WScript.Shell");
 $variant = new VARIANT;
 foreach ([$com, $variant] as $object) {
     try {

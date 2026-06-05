@@ -34,5 +34,5 @@ $db->exec("delete from t");
 $db->exec("insert into t values ('ah')");
 var_dump($db->query("select * from t")->fetchAll(PDO::FETCH_ASSOC));
 echo "Done\n";
-$db->rollback();
+$db->rollBack();
 ?>

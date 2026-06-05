@@ -40,7 +40,7 @@ try {
 echo "-- (4)\n";
 
 try {
-    filter_var_array(array(), new stdclass);
+    filter_var_array(array(), new stdClass);
 } catch (TypeError $exception) {
     echo $exception->getMessage() . "\n";
 }
