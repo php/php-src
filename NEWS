@@ -266,6 +266,8 @@ PHP                                                                        NEWS
     (kocsismate)
 
 - Zip:
+  . Fixed bug GH-21682 (ZipArchive must not be serializable).
+    (Nickolay Harin)
   . Fixed ZipArchive callback being called after executor has shut down.
     (ilutov)
   . Support minimum version for libzip dependency updated to 1.0.0.

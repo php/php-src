@@ -5,7 +5,7 @@ Bug #72434: ZipArchive class Use After Free Vulnerability in PHP's GC algorithm 
 // The following array will be serialized and this representation will be freed later on.
 $free_me = array(new StdClass());
 // Create our payload and unserialize it.
-$serialized_payload = 'a:3:{i:1;N;i:2;O:10:"ZipArchive":1:{s:8:"filename";'.serialize($free_me).'}i:1;R:4;}';
+$serialized_payload = 'a:3:{i:1;N;i:2;O:8:"stdClass":1:{s:8:"filename";'.serialize($free_me).'}i:1;R:4;}';
 $unserialized_payload = unserialize($serialized_payload);
 gc_collect_cycles();
 // The reference counter for $free_me is at -1 for PHP 7 right now.
