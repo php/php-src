@@ -360,7 +360,7 @@ DBA_SYNC_FUNC(lmdb)
 
 DBA_INFO_FUNC(lmdb)
 {
-	return estrdup(MDB_VERSION_STRING);
+	return zend_string_init(MDB_VERSION_STRING, strlen(MDB_VERSION_STRING), false);
 }
 
 #endif

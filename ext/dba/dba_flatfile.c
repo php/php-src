@@ -166,8 +166,9 @@ DBA_SYNC_FUNC(flatfile)
 }
 
 DBA_INFO_FUNC(flatfile)
-{
-	return estrdup(flatfile_version());
+{	
+	char* version = flatfile_version();
+	return zend_string_init(version, strlen(version), false);
 }
 
 #endif
