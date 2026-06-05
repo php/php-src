@@ -9,7 +9,7 @@ class foo {
     public $x = array();
     public function __construct() {
         $h = array();
-        $h[] = new stdclass;
+        $h[] = new stdClass;
         $this->x = $h;
     }
     public function __invoke() {

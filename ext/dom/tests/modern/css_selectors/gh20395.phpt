@@ -8,7 +8,7 @@ DeveloperRob
 <?php
 
 $html   = '<!doctype html><html><head></head><body></body></html>';
-$dom    = Dom\HtmlDocument::createFromString($html);
+$dom    = Dom\HTMLDocument::createFromString($html);
 var_dump(is_null($dom->querySelector('html')));
 var_dump(is_null($dom->querySelector('Html')));
 var_dump(is_null($dom->querySelector('HTML')));

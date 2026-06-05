@@ -8,11 +8,11 @@ curl
 function testcurl($ch, $name, $mime = '', $postname = '')
 {
     if(!empty($postname)) {
-        $file = new CurlFile($name, $mime, $postname);
+        $file = new CURLFile($name, $mime, $postname);
     } else if(!empty($mime)) {
-        $file = new CurlFile($name, $mime);
+        $file = new CURLFile($name, $mime);
     } else {
-        $file = new CurlFile($name);
+        $file = new CURLFile($name);
     }
     curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
     var_dump(curl_exec($ch));
@@ -29,7 +29,7 @@ testcurl($ch, __DIR__ . '/curl_testdata1.txt', 'text/plain');
 testcurl($ch, __DIR__ . '/curl_testdata1.txt', '', 'foo.txt');
 testcurl($ch, __DIR__ . '/curl_testdata1.txt', 'text/plain', 'foo.txt');
 
-$file = new CurlFile(__DIR__ . '/curl_testdata1.txt');
+$file = new CURLFile(__DIR__ . '/curl_testdata1.txt');
 $file->setMimeType('text/plain');
 var_dump($file->getMimeType());
 var_dump($file->getFilename());

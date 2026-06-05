@@ -17,9 +17,9 @@ $dom2->loadXML(<<<XML
 <container xmlns:foo="some:other"/>
 XML);
 
-$imported = $dom2->importNode($dom->documentElement->getAttributeNodeNs("some:ns", "bar"));
+$imported = $dom2->importNode($dom->documentElement->getAttributeNodeNS("some:ns", "bar"));
 var_dump($imported->prefix, $imported->namespaceURI);
-$dom2->documentElement->setAttributeNodeNs($imported);
+$dom2->documentElement->setAttributeNodeNS($imported);
 var_dump($imported->prefix, $imported->namespaceURI);
 
 echo $dom->saveXML();

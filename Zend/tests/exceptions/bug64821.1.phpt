@@ -4,7 +4,7 @@ Bug #64821 Custom Exceptions crash when internal properties overridden (variatio
 <?php
 
 #[AllowDynamicProperties]
-class a extends exception {
+class a extends Exception {
     public function __construct() {
         $this->message = NULL;
         $this->string  = NULL;

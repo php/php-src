@@ -15,7 +15,7 @@ $db->commit();
 
 $db->beginTransaction();
 $db->query("INSERT INTO test_pdo_sqlite_transaction VALUES (NULL, 'PHP'), (NULL, 'PHP6')");
-$db->rollback();
+$db->rollBack();
 
 $r = $db->query('SELECT COUNT(*) FROM test_pdo_sqlite_transaction');
 var_dump($r->rowCount());

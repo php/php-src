@@ -9,28 +9,28 @@ intl.default_locale=nl
 <?php
 
 $cal = intlcal_create_instance('Europe/Amsterdam');
-print_R($cal->getTimeZone());
-print_R($cal->getLocale(Locale::ACTUAL_LOCALE));
+print_r($cal->getTimeZone());
+print_r($cal->getLocale(Locale::ACTUAL_LOCALE));
 echo "\n";
 
 $cal = intlcal_create_instance('Europe/Lisbon', null);
-print_R($cal->getTimeZone());
-print_R($cal->getLocale(Locale::ACTUAL_LOCALE));
+print_r($cal->getTimeZone());
+print_r($cal->getLocale(Locale::ACTUAL_LOCALE));
 echo "\n";
 
 $cal = intlcal_create_instance(IntlTimeZone::createTimeZone('Europe/Lisbon'));
-print_R($cal->getTimeZone());
-print_R($cal->getLocale(Locale::ACTUAL_LOCALE));
+print_r($cal->getTimeZone());
+print_r($cal->getLocale(Locale::ACTUAL_LOCALE));
 echo "\n";
 
 $cal = intlcal_create_instance(null, "pt");
-print_R($cal->getTimeZone());
-print_R($cal->getLocale(Locale::ACTUAL_LOCALE));
+print_r($cal->getTimeZone());
+print_r($cal->getLocale(Locale::ACTUAL_LOCALE));
 echo "\n";
 
 $cal = intlcal_create_instance("Europe/Lisbon", "pt");
-print_R($cal->getTimeZone());
-print_R($cal->getLocale(Locale::ACTUAL_LOCALE));
+print_r($cal->getTimeZone());
+print_r($cal->getLocale(Locale::ACTUAL_LOCALE));
 echo "\n";
 
 ?>

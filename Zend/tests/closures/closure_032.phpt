@@ -19,7 +19,7 @@ Array
     [0] => Array
         (
             [file] => %s
-            [line] => %d
+            [line] => 10
             [function] => {closure:%s:%d}
             [args] => Array
                 (
@@ -29,44 +29,10 @@ Array
         )
 
 )
-#0 %s(%d): {closure:%s:%d}(23)
-Array
-(
-    [0] => Array
-        (
-            [file] => %s
-            [line] => %d
-            [function] => {closure:%s:%d}
-            [args] => Array
-                (
-                    [0] => 23
-                )
+#%d %s(10): {closure:%s:%d}(23)
 
-        )
-
-    [1] => Array
-        (
-            [file] => %s
-            [line] => %d
-            [function] => test
-            [args] => Array
-                (
-                    [0] => Closure Object
-                        (
-                            [name] => {closure:%s:%d}
-                            [file] => %s
-                            [line] => 8
-                            [parameter] => Array
-                                (
-                                    [$param] => <required>
-                                )
-
-                        )
-
-                )
-
-        )
-
-)
-#0 %s(%d): {closure:%s:%d}(23)
-#1 %s(%d): test(Object(Closure))
+Fatal error: Uncaught TypeError: test(): Argument #%d ($a) must be of type closure, Closure given, called in %s on line %d and defined in %s:%d
+Stack trace:
+#%d %s(11): test(Object(Closure))
+#%d {main}
+  thrown in %s on line %d

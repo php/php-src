@@ -28,8 +28,8 @@ $s2 = new ExtendedStruct(12.345,2,"arg",-3,5);
 $s3 = new MoreExtendedStruct(12.345,3,"arg",-3,5,true);
 $client = new SoapClient(__DIR__."/round4_groupH_complex_rpcenc.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoMultipleFaults2(1,$s1,$s2,$s3);
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round4_groupH_complex_rpcenc.inc");
 echo "ok\n";
 ?>

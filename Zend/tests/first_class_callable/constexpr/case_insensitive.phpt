@@ -1,5 +1,5 @@
 --TEST--
-Allow defining FCC in const expressions with case-insensitive names.
+FCC names in const expressions are case-sensitive.
 --FILE--
 <?php
 
@@ -10,13 +10,7 @@ var_dump((Closure)("abc"));
 
 ?>
 --EXPECTF--
-object(Closure)#%d (2) {
-  ["function"]=>
-  string(%d) "%s"
-  ["parameter"]=>
-  array(1) {
-    ["$string"]=>
-    string(10) "<required>"
-  }
-}
-string(3) "cba"
+Fatal error: Uncaught Error: Call to undefined function StrRev() in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

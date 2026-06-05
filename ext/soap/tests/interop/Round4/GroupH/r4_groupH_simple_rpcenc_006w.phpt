@@ -9,8 +9,8 @@ soap.wsdl_cache_enabled=0
 <?php
 $client = new SoapClient(__DIR__."/round4_groupH_simple_rpcenc.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoMultipleFaults1(3,"Hello world",array(12.345,45,678));
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round4_groupH_simple_rpcenc.inc");
 echo "ok\n";
 ?>

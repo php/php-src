@@ -23,7 +23,7 @@ $zip->addEmptyDir('emptydir');
 var_dump($zip->lastId); // -1 (already exists)
 $zip->addEmptyDir('emptydir', ZipArchive::FL_OVERWRITE);
 var_dump($zip->lastId); // 4
-if ($zip->status == ZIPARCHIVE::ER_OK) {
+if ($zip->status == ZipArchive::ER_OK) {
     if (!verify_entries($zip, [
         "bar",
         "foobar/",

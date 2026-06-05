@@ -6,7 +6,7 @@ dom
 <?php
 $dom = Dom\XMLDocument::createFromString('<x:root xmlns:x="urn:x"/>');
 $dom->documentElement->innerHTML = '<child><x:subchild/></child>';
-echo $dom->saveXML();
+echo $dom->saveXml();
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>

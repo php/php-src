@@ -9,7 +9,7 @@ require __DIR__ . '/test_utils.inc';
 
 echo "\n=== Document in quirks mode ===\n\n";
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <html>
     <div class="HElLoWorLD"/>
     <div id="hI"/>
@@ -23,7 +23,7 @@ test_helper($dom, '#hI');
 
 echo "\n=== Document not in quirks mode ===\n\n";
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE html>
 <html>
     <div class="HElLoWorLD"/>

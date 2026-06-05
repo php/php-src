@@ -116,7 +116,7 @@ static void userfilter_dtor(php_stream_filter *thisfilter)
 		return;
 	}
 
-	zend_string *func_name = ZSTR_INIT_LITERAL("onclose", 0);
+	zend_string *func_name = ZSTR_INIT_LITERAL("onClose", 0);
 	zend_call_method_if_exists(Z_OBJ_P(obj), func_name, &retval, 0, NULL);
 	zend_string_release(func_name);
 
@@ -392,7 +392,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	}
 
 	/* invoke the constructor */
-	zend_string *func_name = ZSTR_INIT_LITERAL("oncreate", 0);
+	zend_string *func_name = ZSTR_INIT_LITERAL("onCreate", 0);
 	zend_call_method_if_exists(Z_OBJ(obj), func_name, &retval, 0, NULL);
 	zend_string_release(func_name);
 

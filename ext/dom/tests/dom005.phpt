@@ -4,7 +4,7 @@ Test 5: HTML Test
 dom
 --FILE--
 <?php
-$dom = new domdocument;
+$dom = new DOMDocument;
 $dom->loadHTMLFile(__DIR__."/test.html", LIBXML_NOBLANKS);
 print  "--- save as XML\n";
 

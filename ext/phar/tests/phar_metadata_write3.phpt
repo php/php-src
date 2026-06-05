@@ -30,7 +30,7 @@ echo "Original metadata\n";
 var_dump($phar->getMetadata());
 $phar->setMetadata(new EchoesOnWakeup());
 unset($phar);
-// NOTE: Phar will use the cached value of metadata if setMetaData was called on that Phar path before.
+// NOTE: Phar will use the cached value of metadata if setMetadata was called on that Phar path before.
 // Save the writes to the phar and use a different file path.
 $fname_new = "$fname.copy.php";
 copy($fname, $fname_new);
@@ -42,7 +42,7 @@ var_dump($phar->getMetadata(['allowed_classes' => []]));
 echo "Calling getMetadata with EchoesOnWakeup allowed\n";
 var_dump($phar->getMetadata(['allowed_classes' => [EchoesOnWakeup::class]]));
 // Part of this is a test that there are no unexpected behaviors when both selMetadata and getMetadata are used
-$phar->setMetaData([new EchoesOnWakeup(), new stdClass()]);
+$phar->setMetadata([new EchoesOnWakeup(), new stdClass()]);
 echo "Calling getMetadata with too low max_depth\n";
 var_dump($phar->getMetadata(['max_depth' => 1]));
 echo "Calling getMetadata with some allowed classes\n";

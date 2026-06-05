@@ -8,7 +8,7 @@ intl
 <?php
 
 $dt = new DateTime('2012-08-01 00:00:00 WEST');
-var_dump(IntlTimeZone::fromDateTimeZone($dt->getTimeZone()));
+var_dump(IntlTimeZone::fromDateTimeZone($dt->getTimezone()));
 var_dump(intl_get_error_message());
 
 ?>

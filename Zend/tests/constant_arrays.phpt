@@ -24,7 +24,7 @@ $y[0] = 3;
 var_dump($x, $y, QUX);
 
 // objects are allowed in arrays
-define('ELEPHPANT', [new StdClass]);
+define('ELEPHPANT', [new stdClass]);
 var_dump(ELEPHPANT);
 
 // ensure recursion doesn't crash

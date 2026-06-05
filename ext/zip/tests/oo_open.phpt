@@ -14,7 +14,7 @@ if ($r !== TRUE) {
     echo "ER_OPEN: FAILED\n";
 }
 
-$r = $zip->open($dirname . 'nofile', ZIPARCHIVE::CREATE);
+$r = $zip->open($dirname . 'nofile', ZipArchive::CREATE);
 if (!$r) {
     echo "create: failed\n";
 } else {
@@ -33,7 +33,7 @@ if (!$zip->open($dirname . 'test.zip')) {
     exit("failed 1\n");
 }
 
-if ($zip->status == ZIPARCHIVE::ER_OK) {
+if ($zip->status == ZipArchive::ER_OK) {
     echo "OK\n";
 } else {
     echo "failed\n";

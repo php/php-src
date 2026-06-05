@@ -38,8 +38,10 @@ namespace CallNamespace
     $callback(...$args);
 }
 ?>
---EXPECT--
+--EXPECTF--
 Static method called!
-Static method called!
-Static method called with args: arg1, arg2, arg3
-Static method called with args: arg1, arg2, arg3
+
+Fatal error: Uncaught Error: Class "testnamespace\testclass" not found in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

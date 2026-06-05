@@ -48,10 +48,10 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-$foo->setbazPrivate('baz2');
+$foo->setBazPrivate('baz2');
 var_dump($foo->baz);
 
-$foo->setbazProtected('baz3');
+$foo->setBazProtected('baz3');
 var_dump($foo->baz);
 
 

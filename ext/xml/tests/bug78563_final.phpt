@@ -5,7 +5,7 @@ xml
 --FILE--
 <?php
 
-class Dummy extends Xmlparser {
+class Dummy extends XMLParser {
 
 }
 

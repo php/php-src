@@ -4,7 +4,7 @@ Bug #66783 (UAF when appending DOMDocument to element)
 dom
 --FILE--
 <?php
-$doc = new DomDocument;
+$doc = new DOMDocument;
 $doc->loadXML('<root></root>');
 $e = $doc->createElement('e');
 try {

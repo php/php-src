@@ -7,7 +7,7 @@ com_dotnet
 $fname = __DIR__ . '/bug78650/foo/bar';
 mkdir($fname, 0777, true);
 
-$fso = new COM("Scripting.FileSystemObject");
+$fso = new com("Scripting.FileSystemObject");
 $folder = $fso->GetFolder($fname);
 $folder->ParentFolder->Name = 'baz';
 

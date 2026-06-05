@@ -73,7 +73,7 @@ unset($stmt);
 echo "===QUERY===\n";
 
 var_dump($db->getAttribute(PDO::ATTR_STATEMENT_CLASS));
-$db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatementx', array($db)));
+$db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatementX', array($db)));
 var_dump($db->getAttribute(PDO::ATTR_STATEMENT_CLASS));
 $stmt = $db->query('SELECT * FROM test030');
 var_dump(get_class($stmt));

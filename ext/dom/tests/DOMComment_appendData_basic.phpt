@@ -8,7 +8,7 @@ dom
 --FILE--
 <?php
 
-$dom = new DomDocument();
+$dom = new DOMDocument();
 $comment = $dom->createComment('test-comment');
 $comment->appendData('-more-data');
 $dom->appendChild($comment);

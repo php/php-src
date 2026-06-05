@@ -46,15 +46,15 @@ dumpType($rp->getType());
 
 /* Force CE resolution of the property type */
 
-class x {}
+class X {}
 $test = new Test;
-$test->prop = new x;
+$test->prop = new X;
 
 $rp = $rc->getProperty('prop');
 dumpType($rp->getType());
 
-class y {}
-$test->prop = new y;
+class Y {}
+$test->prop = new Y;
 
 $rp = $rc->getProperty('prop');
 dumpType($rp->getType());

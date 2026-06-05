@@ -8,7 +8,7 @@ soap.wsdl_cache_enabled=0
 <?php
 define('WSDL', __DIR__."/bug66112.wsdl");
 function Mist($p) {
-    $client=new soapclient(WSDL, array('typemap'=>array(array("type_ns"=>"uri:mist", "type_name"=>"A"))));
+    $client=new SoapClient(WSDL, array('typemap'=>array(array("type_ns"=>"uri:mist", "type_name"=>"A"))));
     try{
         $client->Mist(array("XX"=>"xx"));
     }catch(SoapFault $x){

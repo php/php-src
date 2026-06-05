@@ -22,7 +22,7 @@ $zip = new ZipArchive();
 if (!$zip->open(__DIR__ . '/test.zip')) {
     die('Failure');
 }
-if ($zip->status == ZIPARCHIVE::ER_OK) {
+if ($zip->status == ZipArchive::ER_OK) {
     var_dump($zip->close());
     try {
         $zip->close();

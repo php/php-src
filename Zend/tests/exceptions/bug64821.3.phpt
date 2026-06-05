@@ -3,7 +3,7 @@ Bug #64821 Custom Exceptions crash when internal properties overridden (variatio
 --FILE--
 <?php
 
-class a extends exception {
+class a extends Exception {
     public function __construct() {
         $this->line = 0;
         $this->file = "";

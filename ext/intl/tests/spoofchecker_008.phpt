@@ -13,7 +13,7 @@ $s->setAllowedChars('[a-z]');
 var_dump($s->isSuspicious("123"));
 $s->setAllowedChars('[1-3]');
 var_dump($s->isSuspicious("123"));
-$s->setAllowedChars('[a-z]', SpoofChecker::IGNORE_SPACE | SpoofChecker::CASE_INSENSITIVE);
+$s->setAllowedChars('[a-z]', Spoofchecker::IGNORE_SPACE | Spoofchecker::CASE_INSENSITIVE);
 var_dump($s->isSuspicious("ABC"));
 
 try {

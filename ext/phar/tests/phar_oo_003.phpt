@@ -18,7 +18,7 @@ foreach($phar as $name => $ent)
         var_dump('DIR');
     } else {
         var_dump($ent->openFile()->fgets());
-        include $ent->getPathName();
+        include $ent->getPathname();
     }
 }
 

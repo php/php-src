@@ -10,16 +10,16 @@ echo "=== After creation ===\n";
 $dom = Dom\HTMLDocument::createEmpty();
 $template = $dom->appendChild($dom->createElement("template"));
 var_dump($template->innerHTML);
-echo $dom->saveXML(), "\n";
-echo $dom->saveHTML(), "\n";
+echo $dom->saveXml(), "\n";
+echo $dom->saveHtml(), "\n";
 
 echo "=== After setting content ===\n";
 
 $template->innerHTML = "<p>hello</template></p>";
 var_dump($template->innerHTML);
 var_dump($template->firstChild);
-echo $dom->saveXML(), "\n";
-echo $dom->saveHTML(), "\n";
+echo $dom->saveXml(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

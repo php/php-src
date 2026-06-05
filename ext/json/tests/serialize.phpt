@@ -46,7 +46,7 @@ $adata = array(
     'bool'	=> false,
     'nil'	=> null,
     'arr'	=> array(1,2,3),
-    'obj'	=> new StdClass,
+    'obj'	=> new stdClass,
 );
 
 $ndata = array_values($adata);

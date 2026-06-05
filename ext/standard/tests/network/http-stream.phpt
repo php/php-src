@@ -16,7 +16,7 @@ require __DIR__.'/../http/server.inc';
 
 ['pid' => $pid, 'uri' => $uri] = http_server([__DIR__."/news.rss"]);
 
-$d = new DomDocument;
+$d = new DOMDocument;
 $e = $d->load("$uri/news.rss");
 echo "ALIVE\n";
 http_server_kill($pid);

@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root/>');
+$dom = Dom\XMLDocument::createFromString('<root/>');
 $list = $dom->documentElement->classList;
 
 var_dump($list->value);

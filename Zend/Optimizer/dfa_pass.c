@@ -277,9 +277,7 @@ static inline bool can_elide_list_type(
 			return can_elide_list_type(script, op_array, use_info, *single_type);
 		}
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
-			zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
-			const zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
-			zend_string_release(lcname);
+			const zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, ZEND_TYPE_NAME(*single_type));
 			bool result = ce && safe_instanceof(use_info->ce, ce);
 			if (result == !is_intersection) {
 				return result;
@@ -410,7 +408,7 @@ static uint32_t zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 			if ((op->opcode == ZEND_FRAMELESS_ICALL_2
 			  || (op->opcode == ZEND_FRAMELESS_ICALL_3 && (op + 1)->op1_type == IS_CONST))
 			 && call_info->callee_func
-			 && zend_string_equals_literal_ci(call_info->callee_func->common.function_name, "in_array")) {
+			 && zend_string_equals_literal(call_info->callee_func->common.function_name, "in_array")) {
 				bool strict = false;
 				bool has_opdata = op->opcode == ZEND_FRAMELESS_ICALL_3;
 				ZEND_ASSERT(!call_info->is_prototype);

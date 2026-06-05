@@ -73,7 +73,7 @@ $Value_object = new Value();
 $concreteClass_object = new concreteClass();
 
 $valid_objects = array(
-  new stdclass,
+  new stdClass,
   new foo,
   new concreteClass,
   new Value,

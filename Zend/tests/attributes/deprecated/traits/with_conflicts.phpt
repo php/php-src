@@ -24,7 +24,7 @@ trait DemoTraitB {
 }
 
 class DemoClass {
-    use DemoTraita, DemoTraitB {
+    use DemoTraitA, DemoTraitB {
         DemoTraitA::lowerCase insteadof DemoTraitB;
         DemoTraitB::upperCase insteadof DemoTraitA;
     }

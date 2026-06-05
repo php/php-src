@@ -11,10 +11,10 @@ $period   = new DatePeriod($start, $interval, $end);
 $recurrences = 4;
 
 var_dump($period->getStartDate()->format('Y-m-d H:i:s'));
-var_dump($period->getStartDate()->getTimeZone()->getName());
+var_dump($period->getStartDate()->getTimezone()->getName());
 
 var_dump($period->getEndDate()->format('Y-m-d H:i:s'));
-var_dump($period->getEndDate()->getTimeZone()->getName());
+var_dump($period->getEndDate()->getTimezone()->getName());
 
 var_dump($period->getDateInterval()->format('%R%y-%m-%d-%h-%i-%s'));
 var_dump($period->getRecurrences());

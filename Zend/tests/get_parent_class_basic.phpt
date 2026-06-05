@@ -60,7 +60,7 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
-var_dump(get_parent_class(new stdclass));
+var_dump(get_parent_class(new stdClass));
 
 try {
     get_parent_class(array());

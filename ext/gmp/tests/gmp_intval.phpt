@@ -19,7 +19,7 @@ try {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
-    var_dump(gmp_intval(new stdclass));
+    var_dump(gmp_intval(new stdClass));
 } catch (TypeError $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }

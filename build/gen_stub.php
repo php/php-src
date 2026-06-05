@@ -974,7 +974,7 @@ class FunctionName implements FunctionOrMethodName {
     }
 
     public function getNameForAttributes(): string {
-        return strtolower($this->name->toString());
+        return $this->name->toString();
     }
 
     public function __toString(): string {
@@ -1017,7 +1017,7 @@ class MethodName implements FunctionOrMethodName {
     }
 
     public function getNameForAttributes(): string {
-        return strtolower($this->methodName);
+        return $this->methodName;
     }
 
     public function __toString(): string {

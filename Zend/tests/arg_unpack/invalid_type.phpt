@@ -29,7 +29,7 @@ try {
     echo $e::class . ": " . $e->getMessage(), "\n";
 }
 try {
-    test(1, 2, 3, ...new StdClass, ...3.14, ...[4, 5]);
+    test(1, 2, 3, ...new stdClass, ...3.14, ...[4, 5]);
 } catch (Error $e) {
     echo $e::class . ": " . $e->getMessage(), "\n";
 }

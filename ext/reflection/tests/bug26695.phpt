@@ -7,11 +7,11 @@ class Foo {
 }
 
 class Bar {
-  function demo(foo $f) {
+  function demo(Foo $f) {
   }
 }
 
-$class = new ReflectionClass('bar');
+$class = new ReflectionClass('Bar');
 $methods = $class->getMethods();
 $params = $methods[0]->getParameters();
 

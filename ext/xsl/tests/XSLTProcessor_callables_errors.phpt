@@ -9,49 +9,49 @@ require __DIR__ . '/xpath_callables.inc';
 
 $proc = createProcessor([]);
 try {
-    $proc->registerPhpFunctions("nonexistent");
+    $proc->registerPHPFunctions("nonexistent");
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    $proc->registerPhpFunctions(function () {});
+    $proc->registerPHPFunctions(function () {});
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    $proc->registerPhpFunctions([function () {}]);
+    $proc->registerPHPFunctions([function () {}]);
 } catch (Throwable $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    $proc->registerPhpFunctions([var_dump(...)]);
+    $proc->registerPHPFunctions([var_dump(...)]);
 } catch (Throwable $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    $proc->registerPhpFunctions(["nonexistent"]);
+    $proc->registerPHPFunctions(["nonexistent"]);
 } catch (Throwable $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    $proc->registerPhpFunctions(["" => var_dump(...)]);
+    $proc->registerPHPFunctions(["" => var_dump(...)]);
 } catch (Throwable $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    $proc->registerPhpFunctions(["\0" => var_dump(...)]);
+    $proc->registerPHPFunctions(["\0" => var_dump(...)]);
 } catch (Throwable $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    $proc->registerPhpFunctions("");
+    $proc->registerPHPFunctions("");
 } catch (Throwable $e) {
     echo $e->getMessage(), "\n";
 }

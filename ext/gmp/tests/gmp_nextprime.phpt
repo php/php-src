@@ -28,7 +28,7 @@ try {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
-    $n = gmp_nextprime(new stdclass());
+    $n = gmp_nextprime(new stdClass());
     var_dump(gmp_strval($n));
 } catch (\TypeError $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;

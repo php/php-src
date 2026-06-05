@@ -2,7 +2,7 @@
 Bug #81097 (DateTimeZone silently falls back to UTC when providing an offset with seconds)
 --FILE--
 <?php
-$d = new DatetimeZone('+01:45:30');
+$d = new DateTimeZone('+01:45:30');
 var_dump($d);
 ?>
 --EXPECTF--

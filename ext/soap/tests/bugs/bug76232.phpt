@@ -26,7 +26,7 @@ PHP;
 
 php_cli_server_start($code, null, $args);
 
-$client = new soapclient(NULL, [
+$client = new SoapClient(NULL, [
   'location' => 'http://' . PHP_CLI_SERVER_ADDRESS,
   'uri' => 'misc-uri',
   'trace' => true,

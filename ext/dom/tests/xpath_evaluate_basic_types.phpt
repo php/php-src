@@ -7,7 +7,7 @@ dom
 
 $dom = new DOMDocument();
 $dom->loadHTML('<p align="center">foo</p>');
-$xpath = new DOMXpath($dom);
+$xpath = new DOMXPath($dom);
 var_dump($xpath->evaluate("count(//p) > 0"));
 var_dump($xpath->evaluate("string(//p/@align)"));
 

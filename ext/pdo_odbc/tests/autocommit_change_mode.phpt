@@ -58,7 +58,7 @@ try {
 }
 
 echo "end transaction\n";
-$db->rollback();
+$db->rollBack();
 
 echo "auto commit OFF\n";
 $db->setAttribute(PDO::ATTR_AUTOCOMMIT, false);
@@ -84,7 +84,7 @@ try {
 }
 
 echo "end transaction\n";
-$db->rollback();
+$db->rollBack();
 echo "\n";
 
 echo "done!";

@@ -26,8 +26,8 @@ MySQLPDOTest::skip();
         $stmt = $db->query("CALL {$procedure}()");
         do {
             var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-        } while ($stmt->nextRowSet());
-        var_dump($stmt->nextRowSet());
+        } while ($stmt->nextRowset());
+        var_dump($stmt->nextRowset());
     }
 
     try {

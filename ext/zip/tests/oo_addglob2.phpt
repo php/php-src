@@ -56,7 +56,7 @@ $options['comp_flags'] = 5;
 if (!$zip->addGlob($dirname . 'bar.*', GLOB_BRACE, $options)) {
         echo "failed 2\n";
 }
-if ($zip->status == ZIPARCHIVE::ER_OK) {
+if ($zip->status == ZipArchive::ER_OK) {
         $zip->close();
 
         $zip = new ZipArchive();

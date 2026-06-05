@@ -16,9 +16,9 @@ if (!$reader->open($filename)) {
 }
 
 while ($reader->read()) {
-    if ($reader->nodeType != XMLREADER::END_ELEMENT) {
+    if ($reader->nodeType != XMLReader::END_ELEMENT) {
         echo $reader->name."\n";
-        if ($reader->nodeType == XMLREADER::ELEMENT && $reader->hasAttributes) {
+        if ($reader->nodeType == XMLReader::ELEMENT && $reader->hasAttributes) {
             $attr = $reader->moveToFirstAttribute();
             while ($attr) {
                 echo "   Attribute Name: ".$reader->name."\n";

@@ -313,7 +313,7 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend
 			/* Possible optimization: Cache these results with a map from class entry to IS_NULL/IS_PTR.
 			 * Or maybe just a single item with the result for the most recently loaded subclass. */
 			if (class_type != spl_ce_SplObjectStorage) {
-				zend_function *get_hash = zend_hash_str_find_ptr(&class_type->function_table, "gethash", sizeof("gethash") - 1);
+				zend_function *get_hash = zend_hash_str_find_ptr(&class_type->function_table, "getHash", sizeof("getHash") - 1);
 				if (get_hash->common.scope != spl_ce_SplObjectStorage) {
 					intern->fptr_get_hash = get_hash;
 				}

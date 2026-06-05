@@ -4,14 +4,14 @@ Bug #37277 (cloning Dom Documents or Nodes does not work)
 dom
 --FILE--
 <?php
-$dom1 = new DomDocument('1.0', 'UTF-8');
+$dom1 = new DOMDocument('1.0', 'UTF-8');
 
 $xml = '<foo />';
-$dom1->loadXml($xml);
+$dom1->loadXML($xml);
 
 $node = clone $dom1->documentElement;
 
-$dom2 = new DomDocument('1.0', 'UTF-8');
+$dom2 = new DOMDocument('1.0', 'UTF-8');
 $dom2->appendChild($dom2->importNode($node->cloneNode(true), TRUE));
 
 print $dom2->saveXML();

@@ -4,19 +4,19 @@ Bug #26384 (domxslt->process causes segfault with xsl:key)
 xsl
 --FILE--
 <?php
-$dom = new domDocument;
+$dom = new DOMDocument;
 $dom->load(__DIR__."/area_name.xml");
 if(!$dom) {
   echo "Error while parsing the document\n";
   exit;
 }
-$xsl = new domDocument;
+$xsl = new DOMDocument;
 $xsl->load(__DIR__."/area_list.xsl");
 if(!$xsl) {
   echo "Error while parsing the document\n";
   exit;
 }
-$proc = new xsltprocessor;
+$proc = new XSLTProcessor;
 if(!$proc) {
   echo "Error while making xsltprocessor object\n";
   exit;

@@ -2,8 +2,8 @@
 SPL: Test unserializing tested & linked storage
 --FILE--
 <?php
-$o = new StdClass();
-$a = new StdClass();
+$o = new stdClass();
+$a = new stdClass();
 
 $o->a = $a;
 

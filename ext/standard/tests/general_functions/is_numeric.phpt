@@ -110,7 +110,7 @@ $not_numerics = array(
   "+0x80001",
   "-0x80001.5",
   "0x80001.5",
-  new stdclass, // object
+  new stdClass, // object
   $fp,  // resource
   $dfp,
   array(),

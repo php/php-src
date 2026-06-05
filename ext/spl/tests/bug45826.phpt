@@ -3,7 +3,7 @@ ArrayObject/ArrayIterator : serialization
 --FILE--
 <?php
 $o = new ArrayObject();
-$y = new StdClass;
+$y = new stdClass;
 $o->append($y);
 $o->append($y);
 $o->append($o);
@@ -41,7 +41,7 @@ class ArrayObject2 extends ArrayObject {
 }
 
 $o = new ArrayObject2();
-$y = new StdClass;
+$y = new stdClass;
 $o->append($y);
 $o->append($y);
 $o->append($o);

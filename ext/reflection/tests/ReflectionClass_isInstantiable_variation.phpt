@@ -1,5 +1,5 @@
 --TEST--
-ReflectionClass::IsInstantiable()
+ReflectionClass::isInstantiable()
 --FILE--
 <?php
 class noCtor {
@@ -21,7 +21,7 @@ $classes = array("noCtor", "publicCtorNew", "protectedCtorNew", "privateCtorNew"
 foreach ($classes as $class) {
     $reflectionClass = new ReflectionClass($class);
     echo "Is $class instantiable?  ";
-    var_dump($reflectionClass->IsInstantiable());
+    var_dump($reflectionClass->isInstantiable());
 }
 
 ?>

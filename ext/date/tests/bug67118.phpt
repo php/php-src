@@ -4,7 +4,7 @@ Bug #67118 crashes in DateTime when this used after failed __construct
 date.timezone=Europe/Berlin
 --FILE--
 <?php
-class mydt extends datetime
+class mydt extends DateTime
 {
     public function __construct($time = 'now', $tz = NULL, $format = NULL)
     {

@@ -5,7 +5,7 @@ Bug #52057 (ReflectionClass fails on Closure class)
 
 $closure = function($a) { echo $a; };
 
-$reflection = new ReflectionClass('closure');
+$reflection = new ReflectionClass('Closure');
 var_dump($reflection->hasMethod('__invoke')); // true
 
 $reflection = new ReflectionClass($closure);
@@ -14,7 +14,7 @@ var_dump($reflection->hasMethod('__invoke')); // true
 $reflection = new ReflectionObject($closure);
 var_dump($reflection->hasMethod('__invoke')); // true
 
-$reflection = new ReflectionClass('closure');
+$reflection = new ReflectionClass('Closure');
 var_dump($h = $reflection->getMethod('__invoke')); // true
 var_dump($h->class.'::'.$h->getName());
 
