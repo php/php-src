@@ -14,6 +14,12 @@ PHP                                                                        NEWS
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
     INT_MAX year). (arshidkv12)
 
+- Curl:
+  . Added CURLOPT_SEEKFUNCTION and the CURL_SEEKFUNC_OK, CURL_SEEKFUNC_FAIL
+    and CURL_SEEKFUNC_CANTSEEK constants, letting libcurl rewind a streamed
+    request body to resend it on a redirect, multi-pass authentication or a
+    retried reused connection. (GrahamCampbell)
+
 - Date:
   . Update timelib to 2022.17. (Derick)
   . Fixed bug GH-19803 (Parsing a string with a single white space does create
