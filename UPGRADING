@@ -47,6 +47,9 @@ PHP 8.6 UPGRADE NOTES
   . UConverter::transcode() now rejects from_subst and to_subst option values
     longer than 127 bytes instead of silently truncating the length before
     passing it to ICU.
+  . ResourceBundle::get() and resourcebundle_get() now report fallback-disabled
+    resource lookups with "without fallback to <locale>" instead of the
+    malformed "without fallback from to <locale>".
 
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
