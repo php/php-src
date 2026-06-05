@@ -167,7 +167,7 @@ DBA_SYNC_FUNC(flatfile)
 
 DBA_INFO_FUNC(flatfile)
 {	
-	char* version = flatfile_version();
+	const char* version = flatfile_version();
 	return zend_string_init(version, strlen(version), false);
 }
 

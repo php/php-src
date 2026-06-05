@@ -188,7 +188,7 @@ DBA_INFO_FUNC(dbm)
 {
 #ifdef DBA_GDBM
 	if (!strcmp(DBM_VERSION, "GDBM"))
-	{
+	{	
 		return dba_info_gdbm(hnd, info);
 	}
 #endif
