@@ -11,15 +11,19 @@ PHP                                                                        NEWS
     LXB_API as __declspec(dllimport) when linked statically into PHP.
     (Luther Monson)
 
+- Opcache:
+  . Fixed bug GH-22216 (spurious opcache.memory_consumption warning on each new
+    ZTS thread; the directive is also reported as 0 in worker threads).
+    (Daisuke Komazaki)
+
 - Phar:
   . Fixed a bypass of the magic ".phar" directory protection in
     Phar::addEmptyDir() for paths starting with "/.phar", while allowing
     non-magic directory names that merely share the ".phar" prefix. (Weilin Du)
 
-- Opcache:
-  . Fixed bug GH-22216 (spurious opcache.memory_consumption warning on each new
-    ZTS thread; the directive is also reported as 0 in worker threads).
-    (Daisuke Komazaki)
+- SOAP:
+  . Fixed bug GH-22218 (SoapServer::handle() crash on $_SERVER not being
+    an array). (David Carlier / Rex-Reynolds)
 
 - Zlib:
   . Fixed memory leak if deflate initialization fails and there is a dict.
