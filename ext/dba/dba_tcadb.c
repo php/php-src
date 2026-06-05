@@ -193,7 +193,7 @@ DBA_SYNC_FUNC(tcadb)
 
 DBA_INFO_FUNC(tcadb)
 {
-	return zend_string_init(tcversion, strlen(tcversion), false);;
+	return zend_string_init(tcversion, strlen(tcversion), false);
 }
 
 #endif

@@ -318,14 +318,13 @@ DBA_SYNC_FUNC(cdb)
 DBA_INFO_FUNC(cdb)
 {
 #ifdef DBA_CDB_BUILTIN
-	char* version_str = NULL;
+	const char* version_str = NULL;
 	if (!strcmp(hnd->name, "cdb")) {
 		version_str = cdb_version();
-		return zend_string_init(cdb_version, strlen(cdb_version), false);
 	} else {
 		version_str = cdb_make_version();
-		return zend_string_init(cdb_version, strlen(cdb_version), false);
 	}
+	return zend_string_init(cdb_version, strlen(cdb_version), false);
 #else
 	return zend_string_init("External", strlen("External"), false);
 #endif
