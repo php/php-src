@@ -5868,8 +5868,12 @@ static void ir_emit_tls(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |		ldr Rx(reg), [Rx(reg), #insn->op3]
 ||	}
 ||# else
+||	/* op2 == 0 with no index requests the bare thread pointer (used to form
+||	 * &EG/&CG with an add); a real TLS var never sits at tprel offset 0. */
+||	if (insn->op2 != 0 || insn->op3 != IR_NULL) {
 ||//???	IR_ASSERT(insn->op2 <= LDR_STR_PIMM64);
-|	ldr Rx(reg), [Rx(reg), #insn->op2]
+|		ldr Rx(reg), [Rx(reg), #insn->op2]
+||	}
 ||# endif
 ||#endif
 	if (IR_REG_SPILLED(ctx->regs[def][0])) {
