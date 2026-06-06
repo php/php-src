@@ -313,11 +313,15 @@ static int php_zip_add_file(ze_zip_object *obj, const char *filename, size_t fil
 		}
 		flags ^= ZIP_FL_OPEN_FILE_NOW;
 		zs = zip_source_filep(obj->za, fd, offset_start, offset_len);
+		if (!zs) {
+			fclose(fd);
+			return FAILURE;
+		}
 	} else {
 		zs = zip_source_file(obj->za, resolved_path, offset_start, offset_len);
-	}
-	if (!zs) {
-		return -1;
+		if (!zs) {
+			return FAILURE;
+		}
 	}
 	/* Replace */
 	if (replace >= 0) {
