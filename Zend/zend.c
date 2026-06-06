@@ -52,8 +52,8 @@ static bool startup_done = false;
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
-ZEND_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_executor_globals executor_globals_tls;
-ZEND_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_compiler_globals compiler_globals_tls;
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_executor_globals executor_globals_tls;
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_compiler_globals compiler_globals_tls;
 /* ts_allocate_tls_id takes a callback so each thread resolves its own block.
  * A plain &..._tls would capture only the registering thread's address. */
 static void *executor_globals_tls_addr(void) { return &executor_globals_tls; }
