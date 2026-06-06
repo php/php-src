@@ -2962,6 +2962,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	buffer = zend_string_safe_alloc(1, len, 0, 0);
 	zip_int64_t n = zip_fread(zf, ZSTR_VAL(buffer), ZSTR_LEN(buffer));
 	if (n < 1) {
+		zip_fclose(zf);
 		zend_string_efree(buffer);
 		RETURN_EMPTY_STRING();
 	}
