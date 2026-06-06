@@ -24,6 +24,7 @@
 #include "zend_string.h"
 
 ZEND_TLS HashTable *zend_class_autoload_functions;
+ZEND_TLS HashTable *zend_function_autoload_functions;
 
 static void zend_autoload_callback_zval_destroy(zval *element)
 {
@@ -131,12 +132,109 @@ ZEND_API bool zend_autoload_unregister_class_loader(const zend_fcall_info_cache 
 
 /* We do not return a HashTable* because zend_empty_array is not collectable,
  * therefore the zval holding this value must do so. Something that ZVAL_EMPTY_ARRAY(); does. */
-ZEND_API void zend_autoload_fcc_map_to_callable_zval_map(zval *return_value) {
+ZEND_API void zend_autoload_class_fcc_map_to_callable_zval_map(zval *return_value) {
 	if (zend_class_autoload_functions) {
 		zend_fcall_info_cache *fcc;
 
 		zend_array *map = zend_new_array(zend_hash_num_elements(zend_class_autoload_functions));
 		ZEND_HASH_MAP_FOREACH_PTR(zend_class_autoload_functions, fcc) {
+			zval tmp;
+			zend_get_callable_zval_from_fcc(fcc, &tmp);
+			zend_hash_next_index_insert(map, &tmp);
+		} ZEND_HASH_FOREACH_END();
+		RETURN_ARR(map);
+	}
+	RETURN_EMPTY_ARRAY();
+}
+
+ZEND_API zend_function *zend_perform_function_autoload(zend_string *function_name, zend_string *lc_name)
+{
+	if (!zend_function_autoload_functions) {
+		return NULL;
+	}
+
+	zval zname;
+	ZVAL_STR(&zname, function_name);
+
+	const HashTable *function_autoload_functions = zend_function_autoload_functions;
+
+	/* Cannot use ZEND_HASH_MAP_FOREACH_PTR here as autoloaders may be
+	 * added/removed during autoloading. */
+	HashPosition pos;
+	zend_hash_internal_pointer_reset_ex(function_autoload_functions, &pos);
+	while (true) {
+		zend_fcall_info_cache *func_info = zend_hash_get_current_data_ptr_ex(function_autoload_functions, &pos);
+		if (!func_info) {
+			break;
+		}
+		zend_call_known_fcc(func_info, /* retval */ NULL, /* param_count */ 1, /* params */ &zname, /* named_params */ NULL);
+
+		if (EG(exception)) {
+			return NULL;
+		}
+
+		zend_function *fbc = zend_hash_find_ptr(EG(function_table), lc_name);
+		if (fbc) {
+			return fbc;
+		}
+
+		zend_hash_move_forward_ex(function_autoload_functions, &pos);
+	}
+	return NULL;
+}
+
+ZEND_API void zend_autoload_register_function_loader(zend_fcall_info_cache *fcc, bool prepend)
+{
+	ZEND_ASSERT(ZEND_FCC_INITIALIZED(*fcc));
+
+	if (!zend_function_autoload_functions) {
+		ALLOC_HASHTABLE(zend_function_autoload_functions);
+		zend_hash_init(zend_function_autoload_functions, 1, NULL, zend_autoload_callback_zval_destroy, false);
+		/* Initialize as non-packed hash table for prepend functionality. */
+		zend_hash_real_init_mixed(zend_function_autoload_functions);
+	}
+
+	ZEND_ASSERT(
+		fcc->function_handler->type != ZEND_INTERNAL_FUNCTION
+		|| !zend_string_equals_literal(fcc->function_handler->common.function_name, "spl_autoload_call_function_loader")
+	);
+
+	/* If function is already registered, don't do anything */
+	if (autoload_find_registered_function(zend_function_autoload_functions, fcc)) {
+		/* Release potential call trampoline */
+		zend_release_fcall_info_cache(fcc);
+		return;
+	}
+
+	zend_fcc_addref(fcc);
+	zend_hash_next_index_insert_mem(zend_function_autoload_functions, fcc, sizeof(zend_fcall_info_cache));
+	if (prepend && zend_hash_num_elements(zend_function_autoload_functions) > 1) {
+		/* Move the newly created element to the head of the hashtable */
+		ZEND_ASSERT(!HT_IS_PACKED(zend_function_autoload_functions));
+		Bucket tmp = zend_function_autoload_functions->arData[zend_function_autoload_functions->nNumUsed-1];
+		memmove(zend_function_autoload_functions->arData + 1, zend_function_autoload_functions->arData, sizeof(Bucket) * (zend_function_autoload_functions->nNumUsed - 1));
+		zend_function_autoload_functions->arData[0] = tmp;
+		zend_hash_rehash(zend_function_autoload_functions);
+	}
+}
+
+ZEND_API bool zend_autoload_unregister_function_loader(const zend_fcall_info_cache *fcc) {
+	if (zend_function_autoload_functions) {
+		Bucket *p = autoload_find_registered_function(zend_function_autoload_functions, fcc);
+		if (p) {
+			zend_hash_del_bucket(zend_function_autoload_functions, p);
+			return true;
+		}
+	}
+	return false;
+}
+
+ZEND_API void zend_autoload_function_fcc_map_to_callable_zval_map(zval *return_value) {
+	if (zend_function_autoload_functions) {
+		zend_fcall_info_cache *fcc;
+
+		zend_array *map = zend_new_array(zend_hash_num_elements(zend_function_autoload_functions));
+		ZEND_HASH_MAP_FOREACH_PTR(zend_function_autoload_functions, fcc) {
 			zval tmp;
 			zend_get_callable_zval_from_fcc(fcc, &tmp);
 			zend_hash_next_index_insert(map, &tmp);
@@ -161,5 +259,10 @@ void zend_autoload_shutdown(void)
 		zend_hash_destroy(zend_class_autoload_functions);
 		FREE_HASHTABLE(zend_class_autoload_functions);
 		zend_class_autoload_functions = NULL;
+	}
+	if (zend_function_autoload_functions) {
+		zend_hash_destroy(zend_function_autoload_functions);
+		FREE_HASHTABLE(zend_function_autoload_functions);
+		zend_function_autoload_functions = NULL;
 	}
 }

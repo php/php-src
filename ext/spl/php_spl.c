@@ -467,7 +467,74 @@ PHP_FUNCTION(spl_autoload_functions)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_autoload_fcc_map_to_callable_zval_map(return_value);
+	zend_autoload_class_fcc_map_to_callable_zval_map(return_value);
+} /* }}} */
+
+/* {{{ Register given function as a function autoloader */
+PHP_FUNCTION(spl_autoload_register_function_loader)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	bool prepend = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(prepend)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!ZEND_FCC_INITIALIZED(fcc)) {
+		/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+		 * with it ourselves. It is important that it is not refetched on every call,
+		 * because calls may occur from different scopes. */
+		zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
+	}
+
+	if (fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&
+		fcc.function_handler->internal_function.handler == zif_spl_autoload_call_function_loader) {
+		zend_argument_value_error(1, "must not be the spl_autoload_call_function_loader() function");
+		RETURN_THROWS();
+	}
+
+	zend_autoload_register_function_loader(&fcc, prepend);
+	RETURN_TRUE;
+} /* }}} */
+
+/* {{{ Unregister given function as a function autoloader */
+PHP_FUNCTION(spl_autoload_unregister_function_loader)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETVAL_BOOL(zend_autoload_unregister_function_loader(&fcc));
+	/* Release trampoline */
+	zend_release_fcall_info_cache(&fcc);
+} /* }}} */
+
+/* {{{ Return all registered function autoloader functions */
+PHP_FUNCTION(spl_autoload_function_loaders)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_autoload_function_fcc_map_to_callable_zval_map(return_value);
+} /* }}} */
+
+/* {{{ Try all registered function autoloaders to load the requested function */
+PHP_FUNCTION(spl_autoload_call_function_loader)
+{
+	zend_string *function_name;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(function_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_string *lc_name = zend_string_tolower(function_name);
+	zend_perform_function_autoload(function_name, lc_name);
+	zend_string_release(lc_name);
 } /* }}} */
 
 /* {{{ Return hash id for given object */

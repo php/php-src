@@ -51,9 +51,30 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_jit_init_func_run_tim
 }
 /* }}} */
 
-static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name, void **cache_slot)
+static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name, zend_string *lc_name, void **cache_slot)
 {
-	zval *func = zend_hash_find_known_hash(EG(function_table), name);
+	zval *func = zend_hash_find_known_hash(EG(function_table), lc_name);
+	zend_function *fbc;
+
+	if (UNEXPECTED(func == NULL)) {
+		fbc = zend_lookup_function(name, lc_name);
+		if (fbc == NULL) {
+			return NULL;
+		}
+	} else {
+		fbc = Z_FUNC_P(func);
+		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+			fbc = _zend_jit_init_func_run_time_cache(&fbc->op_array);
+		}
+	}
+	*cache_slot = fbc;
+	return fbc;
+}
+
+/* ZEND_INIT_FCALL: the function existed at compile time, so don't autoload on a runtime miss. */
+static zend_function* ZEND_FASTCALL zend_jit_find_known_func_helper(zend_string *lc_name, void **cache_slot)
+{
+	zval *func = zend_hash_find_known_hash(EG(function_table), lc_name);
 	zend_function *fbc;
 
 	if (UNEXPECTED(func == NULL)) {
@@ -83,7 +104,13 @@ static zend_function* ZEND_FASTCALL zend_jit_find_ns_func_helper(zval *func_name
 	if (func == NULL) {
 		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
 		if (UNEXPECTED(func == NULL)) {
-			return NULL;
+			/* Autoload with the fully qualified name */
+			fbc = zend_lookup_function(Z_STR_P(func_name), Z_STR_P(func_name + 1));
+			if (fbc == NULL) {
+				return NULL;
+			}
+			*cache_slot = fbc;
+			return fbc;
 		}
 	}
 	fbc = Z_FUNC_P(func);

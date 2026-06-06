@@ -1,0 +1,53 @@
+UPGRADE NOTES: FUNCTION AUTOLOADING
+
+1. New Features
+2. Changed Functions
+3. New Functions
+4. Internal API Changes
+
+========================================
+1. New Features
+========================================
+
+- Core:
+  . Added function autoloading support. Register callbacks via
+    spl_autoload_register_function_loader() that are invoked when an
+    undefined function is called.
+    Function autoloading is triggered by direct calls to undefined
+    functions, dynamic calls through a string variable ("$func()"), and
+    function_exists($name, true). It is not triggered when a function
+    name is used as a callable (callable parameters, is_callable(),
+    Closure::fromCallable()) or by the Reflection API;
+    spl_autoload_call_function_loader() can be used to trigger it
+    manually in those situations.
+
+========================================
+2. Changed Functions
+========================================
+
+- Core:
+  . function_exists() now accepts an optional bool $autoload parameter.
+    When true, triggers function autoloading before returning false.
+    Unlike class_exists(), it defaults to false so that existing
+    function_exists() guards around conditional function definitions
+    (polyfills) do not start triggering autoloaders.
+
+========================================
+3. New Functions
+========================================
+
+- SPL:
+  . spl_autoload_register_function_loader() registers a function autoloader.
+  . spl_autoload_unregister_function_loader() unregisters a function autoloader.
+  . spl_autoload_function_loaders() returns registered function autoloaders.
+  . spl_autoload_call_function_loader() manually triggers function autoloading.
+
+========================================
+4. Internal API Changes
+========================================
+
+- Zend:
+  . zend_autoload_fcc_map_to_callable_zval_map() has been renamed to
+    zend_autoload_class_fcc_map_to_callable_zval_map(), since there is
+    now a function loader counterpart,
+    zend_autoload_function_fcc_map_to_callable_zval_map().

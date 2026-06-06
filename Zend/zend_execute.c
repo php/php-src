@@ -5147,15 +5147,21 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 			lcname = zend_string_tolower(function);
 		}
 		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
-			zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function));
+			fbc = zend_lookup_function(function, lcname);
+			if (UNEXPECTED(fbc == NULL)) {
+				if (!EG(exception)) {
+					zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function));
+				}
+				zend_string_release_ex(lcname, 0);
+				return NULL;
+			}
 			zend_string_release_ex(lcname, 0);
-			return NULL;
-		}
-		zend_string_release_ex(lcname, 0);
-
-		fbc = Z_FUNC_P(func);
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
+		} else {
+			zend_string_release_ex(lcname, 0);
+			fbc = Z_FUNC_P(func);
+			if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+				init_func_run_time_cache(&fbc->op_array);
+			}
 		}
 		called_scope = NULL;
 	}
