@@ -519,14 +519,15 @@ PHP_FUNCTION(bzdecompress)
 	bzs.bzalloc = NULL;
 	bzs.bzfree = NULL;
 
-	if (BZ2_bzDecompressInit(&bzs, 0, (int)small) != BZ_OK) {
-		RETURN_FALSE;
-	}
-
 	if (source_len > UINT_MAX) {
 		zend_argument_value_error(1, "must not exceed %u bytes", UINT_MAX);
 		RETURN_THROWS();
 	}
+
+	if (BZ2_bzDecompressInit(&bzs, 0, (int)small) != BZ_OK) {
+		RETURN_FALSE;
+	}
+
 	bzs.next_in = source;
 	bzs.avail_in = source_len;
 
