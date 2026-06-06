@@ -10,30 +10,16 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Jakub Zelenka <bukka@php.net>                               |
+   | Authors: David Carlier <devnexen@gmail.com>                          |
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_IO_INTERNAL_H
-#define PHP_IO_INTERNAL_H
+#ifndef PHP_IO_MACOS_H
+#define PHP_IO_MACOS_H
 
-#include "php_io.h"
+#define PHP_IO_PLATFORM_COPY php_io_macos_copy
+#define PHP_IO_PLATFORM_NAME "macos"
 
-ssize_t php_io_generic_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen);
-ssize_t php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t maxlen);
+ssize_t php_io_macos_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen);
 
-#ifdef __linux__
-#include "php_io_linux.h"
-#elif defined(PHP_WIN32)
-#include "php_io_windows.h"
-#elif defined(__FreeBSD__) || defined(__DragonFly__)
-#include "php_io_freebsd.h"
-#elif defined(__sun) && defined(__SVR4)
-#include "php_io_solaris.h"
-#elif defined(__APPLE__)
-#include "php_io_macos.h"
-#else
-#include "php_io_generic.h"
-#endif
-
-#endif /* PHP_IO_INTERNAL_H */
+#endif /* PHP_IO_MACOS_H */
