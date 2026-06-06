@@ -213,7 +213,6 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 		php_url_free(resource);
 		efree(internal_file);
 
-		ZEND_ASSERT(Z_TYPE(context->options) == IS_UNDEF || Z_TYPE(context->options) == IS_ARRAY);
 		if (context && Z_TYPE(context->options) != IS_UNDEF && (pzoption = zend_hash_str_find(Z_ARR(context->options), "phar", sizeof("phar")-1)) != NULL) {
 			ZEND_ASSERT(Z_TYPE_P(pzoption) == IS_ARRAY);
 			pharcontext = Z_ARR_P(pzoption);
