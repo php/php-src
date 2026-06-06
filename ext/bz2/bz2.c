@@ -523,7 +523,10 @@ PHP_FUNCTION(bzdecompress)
 		RETURN_FALSE;
 	}
 
-	// TODO Check source string length fits in unsigned int
+	if (source_len > UINT_MAX) {
+		zend_argument_value_error(1, "must not exceed %u bytes", UINT_MAX);
+		RETURN_THROWS();
+	}
 	bzs.next_in = source;
 	bzs.avail_in = source_len;
 
