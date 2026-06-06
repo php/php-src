@@ -369,6 +369,9 @@ AC_SEARCH_LIBS([Pgrab], [proc])
 dnl Haiku does not have network api in libc.
 AC_SEARCH_LIBS([setsockopt], [network])
 
+dnl Solaris/illumos provide sendfile() in libsendfile; libc on Linux/FreeBSD.
+AC_SEARCH_LIBS([sendfile], [sendfile])
+
 dnl Check for openpty. It may require linking against libutil or libbsd.
 AC_CHECK_FUNCS([openpty],,
   [AC_SEARCH_LIBS([openpty], [util bsd], [AC_DEFINE([HAVE_OPENPTY], [1])])])
@@ -1688,6 +1691,7 @@ PHP_ADD_SOURCES([main/io], m4_normalize([
     php_io.c
     php_io_copy_linux.c
     php_io_copy_freebsd.c
+    php_io_copy_solaris.c
   ]),
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
