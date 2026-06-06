@@ -29,6 +29,7 @@ PHP                                                                        NEWS
 - Zlib:
   . Fixed memory leak if deflate initialization fails and there is a dict.
     (ndossche)
+  . Fixed memory leak in inflate_add(). (ndossche)
 
 04 Jun 2026, PHP 8.4.22
 
