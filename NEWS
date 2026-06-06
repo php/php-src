@@ -25,6 +25,9 @@ PHP                                                                        NEWS
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
 
+- BZ2:
+  . Reject oversized input in bzdecompress(). (arshidkv12)
+
 - Date:
   . Update timelib to 2022.16. (Derick)
 
