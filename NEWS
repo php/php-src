@@ -31,6 +31,9 @@ PHP                                                                        NEWS
     (ndossche)
   . Fixed memory leak in inflate_add(). (ndossche)
 
+- Zip:
+  . Fixed error-related memory leaks. (ndossche)
+
 04 Jun 2026, PHP 8.4.22
 
 - Date:
