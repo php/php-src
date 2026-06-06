@@ -18,7 +18,11 @@
 #define PHP_IO_FREEBSD_H
 
 #define PHP_IO_PLATFORM_COPY php_io_freebsd_copy
-#define PHP_IO_PLATFORM_NAME "freebsd"
+#if defined(__DragonFly__)
+#  define PHP_IO_PLATFORM_NAME "dragonfly"
+#else
+#  define PHP_IO_PLATFORM_NAME "freebsd"
+#endif
 
 ssize_t php_io_freebsd_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen);
 

@@ -12,7 +12,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__DragonFly__)
 
 #include "php_io_internal.h"
 #include <sys/types.h>
