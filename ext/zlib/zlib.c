@@ -1026,6 +1026,7 @@ PHP_FUNCTION(inflate_add)
 					}
 					break;
 				} else {
+					zend_string_release_ex(out, false);
 					php_error_docref(NULL, E_WARNING, "Inflating this data requires a preset dictionary, please specify it in the options array of inflate_init()");
 					RETURN_FALSE;
 				}
