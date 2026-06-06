@@ -38,11 +38,15 @@ typedef struct _zend_ini_scanner_globals zend_ini_scanner_globals;
 
 BEGIN_EXTERN_C()
 
+#ifdef ZTS
+typedef struct _zend_tsrm_ls_cache zend_tsrm_ls_cache;
+extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache;
+#endif
+
 /* Compiler */
 #ifdef ZTS
 # ifdef ZEND_TLS_DIRECT
-extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_compiler_globals compiler_globals_tls;
-#  define CG(v) (compiler_globals_tls.v)
+#  define CG(v) (_tsrm_ls_cache.cg.v)
 # else
 #  define CG(v) ZEND_TSRMG(compiler_globals_id, zend_compiler_globals *, v)
 # endif
@@ -56,8 +60,7 @@ ZEND_API int zendparse(void);
 /* Executor */
 #ifdef ZTS
 # ifdef ZEND_TLS_DIRECT
-extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_executor_globals executor_globals_tls;
-#  define EG(v) (executor_globals_tls.v)
+#  define EG(v) (_tsrm_ls_cache.eg.v)
 # else
 #  define EG(v) ZEND_TSRMG(executor_globals_id, zend_executor_globals *, v)
 # endif

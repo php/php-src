@@ -327,6 +327,15 @@ struct _zend_executor_globals {
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
+#ifdef ZTS
+struct _zend_tsrm_ls_cache {
+	void *cache;
+	void *self;
+	zend_executor_globals eg;
+	zend_compiler_globals cg;
+};
+#endif
+
 #define EG_FLAGS_INITIAL				(0)
 #define EG_FLAGS_IN_SHUTDOWN			(1<<0)
 #define EG_FLAGS_OBJECT_STORE_NO_REUSE	(1<<1)
