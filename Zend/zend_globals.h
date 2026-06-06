@@ -51,8 +51,6 @@
 BEGIN_EXTERN_C()
 ZEND_API extern int compiler_globals_id;
 ZEND_API extern int executor_globals_id;
-ZEND_API extern size_t compiler_globals_offset;
-ZEND_API extern size_t executor_globals_offset;
 END_EXTERN_C()
 
 #endif

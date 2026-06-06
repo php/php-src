@@ -201,56 +201,35 @@ static uint32_t default_mflags = 0;
 static bool delayed_call_chain = false; // TODO: remove this var (use jit->delayed_call_level) ???
 
 #ifdef ZTS
-static size_t tsrm_ls_cache_tcb_offset = 0;
-static size_t tsrm_tls_index = -1;
-static size_t tsrm_tls_offset = -1;
-
-# ifdef ZEND_EG_TLS
-/* When nonzero, &executor_globals_tls/&compiler_globals_tls equal the thread
- * pointer plus this offset, so the JIT forms them without a runtime call. */
 static size_t eg_tls_tcb_offset = 0;
 static size_t cg_tls_tcb_offset = 0;
 /* gottpoff yields the offset from the %fs-based thread pointer that ir_TLS(0)
  * loads. */
-#  if defined(__ELF__) && defined(__x86_64__) && defined(__GNUC__) && !defined(TSRM_TLS_MODEL_DEFAULT)
-#   define ZEND_JIT_TLS_TCB_OFFSET(sym) __extension__({ \
+# if defined(__ELF__) && defined(__x86_64__) && defined(__GNUC__) && !defined(TSRM_TLS_MODEL_DEFAULT)
+#  define ZEND_JIT_TLS_TCB_OFFSET(sym) __extension__({ \
 		size_t _off; \
 		__asm__ ("movq " #sym "@gottpoff(%%rip),%0" : "=r" (_off)); \
 		_off; \
 	})
-#  elif defined(__ELF__) && defined(__aarch64__) && !defined(__APPLE__) && \
+# elif defined(__ELF__) && defined(__aarch64__) && !defined(__APPLE__) && \
 		(defined(__GNUC__) || defined(__clang__))
 /* The TLS variable sits at a fixed offset from tpidr_el0 (the thread pointer
  * the JIT reads with mrs); compute it once on the main thread. Subtracting the
  * thread pointer is model-independent (works for both local- and initial-exec)
  * and matches tsrm_get_ls_cache_tcb_offset()'s tprel reasoning. */
-#   define ZEND_JIT_TLS_TCB_OFFSET(sym) __extension__({ \
+#  define ZEND_JIT_TLS_TCB_OFFSET(sym) __extension__({ \
 		char *_tp; \
 		__asm__ ("mrs %0, tpidr_el0" : "=r" (_tp)); \
 		(size_t)((char*)&(sym) - _tp); \
 	})
-#  else
-#   define ZEND_JIT_TLS_TCB_OFFSET(sym) ((size_t)0)
-#  endif
-# endif
-
-# define EG_TLS_OFFSET(field) \
-	(executor_globals_offset + offsetof(zend_executor_globals, field))
-
-# define CG_TLS_OFFSET(field) \
-	(compiler_globals_offset + offsetof(zend_compiler_globals, field))
-
-# ifdef ZEND_EG_TLS
-#  define jit_EG(_field) \
-	ir_ADD_OFFSET(jit_EG_base(jit), offsetof(zend_executor_globals, _field))
-#  define jit_CG(_field) \
-	ir_ADD_OFFSET(jit_CG_base(jit), offsetof(zend_compiler_globals, _field))
 # else
-#  define jit_EG(_field) \
-	ir_ADD_OFFSET(jit_TLS(jit), EG_TLS_OFFSET(_field))
-#  define jit_CG(_field) \
-	ir_ADD_OFFSET(jit_TLS(jit), CG_TLS_OFFSET(_field))
+#  define ZEND_JIT_TLS_TCB_OFFSET(sym) ((size_t)0)
 # endif
+
+# define jit_EG(_field) \
+	ir_ADD_OFFSET(jit_EG_base(jit), offsetof(zend_executor_globals, _field))
+# define jit_CG(_field) \
+	ir_ADD_OFFSET(jit_CG_base(jit), offsetof(zend_compiler_globals, _field))
 
 #else
 
@@ -333,12 +312,9 @@ typedef struct _zend_jit_ctx {
 	uint32_t             delayed_call_level;
 	int                  b;           /* current basic block number or -1 */
 #ifdef ZTS
-	ir_ref               tls;
-# ifdef ZEND_EG_TLS
 	ir_ref               tp;     /* cached thread pointer for &EG/&CG */
 	ir_ref               eg_tls; /* cached base of __thread executor_globals_tls */
 	ir_ref               cg_tls; /* cached base of __thread compiler_globals_tls */
-# endif
 #endif
 	ir_ref               fp;
 	ir_ref               poly_func_ref; /* restored from parent trace snapshot */
@@ -529,12 +505,6 @@ static const char* zend_reg_name(int8_t reg)
 /* IR helpers */
 
 #ifdef ZTS
-static void * ZEND_FASTCALL zend_jit_get_tsrm_ls_cache(void)
-{
-	return _tsrm_ls_cache;
-}
-
-# ifdef ZEND_EG_TLS
 static void * ZEND_FASTCALL zend_jit_get_eg_tls(void)
 {
 	return &executor_globals_tls;
@@ -583,44 +553,12 @@ static ir_ref jit_GLOBALS_TLS_call(zend_jit_ctx *jit, ir_ref *cache, const void 
 	}
 	return *cache;
 }
-#  define jit_EG_base(jit) (eg_tls_tcb_offset \
+# define jit_EG_base(jit) (eg_tls_tcb_offset \
 	? ir_ADD_OFFSET(jit_TP(jit), eg_tls_tcb_offset) \
 	: jit_GLOBALS_TLS_call((jit), &(jit)->eg_tls, zend_jit_get_eg_tls))
-#  define jit_CG_base(jit) (cg_tls_tcb_offset \
+# define jit_CG_base(jit) (cg_tls_tcb_offset \
 	? ir_ADD_OFFSET(jit_TP(jit), cg_tls_tcb_offset) \
 	: jit_GLOBALS_TLS_call((jit), &(jit)->cg_tls, zend_jit_get_cg_tls))
-# endif
-
-static ZEND_ATTRIBUTE_UNUSED ir_ref jit_TLS(zend_jit_ctx *jit)
-{
-	ZEND_ASSERT(jit->ctx.control);
-	if (jit->tls) {
-		/* Emit "TLS" once for basic block */
-		ir_insn *insn;
-		ir_ref ref = jit->ctx.control;
-
-		while (1) {
-			if (ref == jit->tls) {
-				return jit->tls;
-			}
-			insn = &jit->ctx.ir_base[ref];
-			if (insn->op >= IR_START || insn->op == IR_CALL) {
-				break;
-			}
-			ref = insn->op1;
-		}
-	}
-
-	if (tsrm_ls_cache_tcb_offset == 0 && tsrm_tls_index == -1) {
-		jit->tls = ir_CALL(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_get_tsrm_ls_cache));
-	} else {
-		jit->tls = ir_TLS(
-				tsrm_ls_cache_tcb_offset ? tsrm_ls_cache_tcb_offset : tsrm_tls_index,
-				tsrm_ls_cache_tcb_offset ? IR_NULL : tsrm_tls_offset);
-	}
-
-	return jit->tls;
-}
 #endif
 
 static ir_ref jit_CONST_ADDR(zend_jit_ctx *jit, uintptr_t addr)
@@ -2917,12 +2855,9 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	delayed_call_chain = false;
 	jit->b = -1;
 #ifdef ZTS
-	jit->tls = IR_UNUSED;
-# ifdef ZEND_EG_TLS
 	jit->tp = IR_UNUSED;
 	jit->eg_tls = IR_UNUSED;
 	jit->cg_tls = IR_UNUSED;
-# endif
 #endif
 	jit->fp = IR_UNUSED;
 	jit->poly_func_ref = IR_UNUSED;
@@ -3316,11 +3251,8 @@ static void zend_jit_setup_disasm(void)
 
 	REGISTER_DATA(CG(map_ptr_base));
 #else /* ZTS */
-	REGISTER_HELPER(zend_jit_get_tsrm_ls_cache);
-# ifdef ZEND_EG_TLS
 	REGISTER_HELPER(zend_jit_get_eg_tls);
 	REGISTER_HELPER(zend_jit_get_cg_tls);
-# endif
 #endif
 #endif
 }
@@ -3531,19 +3463,8 @@ static void zend_jit_setup(bool reattached)
 #endif
 
 #ifdef ZTS
-	zend_result result = zend_jit_resolve_tsrm_ls_cache_offsets(
-		&tsrm_ls_cache_tcb_offset,
-		&tsrm_tls_index,
-		&tsrm_tls_offset
-	);
-	if (result == FAILURE) {
-		zend_accel_error(ACCEL_LOG_INFO,
-				"Could not get _tsrm_ls_cache offsets, will fallback to runtime resolution");
-	}
-# ifdef ZEND_EG_TLS
 	eg_tls_tcb_offset = ZEND_JIT_TLS_TCB_OFFSET(executor_globals_tls);
 	cg_tls_tcb_offset = ZEND_JIT_TLS_TCB_OFFSET(compiler_globals_tls);
-# endif
 #endif
 
 #if !defined(ZEND_WIN32) && !defined(IR_TARGET_AARCH64)
