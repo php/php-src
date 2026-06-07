@@ -20,5 +20,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
-bzdecompress(): Argument #1 ($data) must have a length less than or equal to %d
+--EXPECT--
+bzdecompress(): Argument #1 ($data) must have a length less than or equal to 4294967295
