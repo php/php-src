@@ -768,7 +768,9 @@ echo "Done";
   string(9) "/blah.com"
 }
 
---> x://::abc/?: bool(false)
+--> x://::abc/?: 
+Warning: parse_url(): Invalid port in URL in %s on line %d
+bool(false)
 
 --> http://::?: array(3) {
   ["scheme"]=>
