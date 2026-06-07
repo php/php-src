@@ -534,6 +534,9 @@ PHP_FUNCTION(mysqli_execute_query)
 		if (!zend_array_is_list(input_params)) {
 			mysqli_stmt_close(stmt->stmt, false);
 			stmt->stmt = NULL;
+			if (stmt->query) {
+				efree(stmt->query);
+			}
 			efree(stmt);
 			zend_argument_value_error(ERROR_ARG_POS(3), "must be a list array");
 			RETURN_THROWS();
@@ -544,6 +547,9 @@ PHP_FUNCTION(mysqli_execute_query)
 		if (hash_num_elements != param_count) {
 			mysqli_stmt_close(stmt->stmt, false);
 			stmt->stmt = NULL;
+			if (stmt->query) {
+				efree(stmt->query);
+			}
 			efree(stmt);
 			zend_argument_value_error(ERROR_ARG_POS(3), "must consist of exactly %d elements, %d present", param_count, hash_num_elements);
 			RETURN_THROWS();
