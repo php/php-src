@@ -545,6 +545,29 @@ php_uri_parser_rfc3986_uris *uriparser_create_uris(void)
 	return uriparser_uris;
 }
 
+static zend_result php_uri_parser_rfc3986_add_base_url(
+	UriUriA *tmp, const UriUriA *uri, const php_uri_parser_rfc3986_uris *uriparser_base_urls, const bool silent
+) {
+	const int result = uriAddBaseUriExMmA(tmp, uri, &uriparser_base_urls->uri, URI_RESOLVE_STRICTLY, mm);
+	if (result != URI_SUCCESS) {
+		if (!silent) {
+			switch (result) {
+				case URI_ERROR_ADDBASE_REL_BASE:
+					zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified base URI must be absolute", 0);
+					break;
+				default:
+					/* This should be unreachable in practice. */
+					zend_throw_exception(php_uri_ce_error, "Failed to resolve the specified URI against the base URI", 0);
+					break;
+			}
+		}
+
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str, const size_t uri_str_len, const php_uri_parser_rfc3986_uris *uriparser_base_urls, const bool silent)
 {
 	UriUriA uri = {0};
@@ -572,20 +595,7 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 
 		/* Combine the parsed URI with the base URI and store the result in 'tmp',
 		 * since the target and source URLs must be distinct. */
-		const int result = uriAddBaseUriExMmA(&tmp, &uri, &uriparser_base_urls->uri, URI_RESOLVE_STRICTLY, mm);
-		if (result != URI_SUCCESS) {
-			if (!silent) {
-				switch (result) {
-					case URI_ERROR_ADDBASE_REL_BASE:
-						zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified base URI must be absolute", 0);
-						break;
-					default:
-						/* This should be unreachable in practice. */
-						zend_throw_exception(php_uri_ce_error, "Failed to resolve the specified URI against the base URI", 0);
-						break;
-				}
-			}
-
+		if (php_uri_parser_rfc3986_add_base_url(&tmp, &uri, uriparser_base_urls, silent) == FAILURE) {
 			goto fail;
 		}
 
@@ -683,86 +693,109 @@ static void php_uri_parser_rfc3986_destroy(void *uri)
 	efree(uriparser_uris);
 }
 
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_scheme(const zend_string *scheme)
+static zend_always_inline zend_result php_uri_parser_rfc3986_validate_component_result(const bool well_formed, const char *component_name)
+{
+	if (well_formed) {
+		return SUCCESS;
+	}
+
+	zend_throw_exception_ex(php_uri_ce_invalid_uri_exception, 0, "The specified %s is malformed", component_name);
+	return FAILURE;
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_scheme(const zend_string *scheme)
 {
 	const char *p = ZSTR_VAL(scheme);
 	const size_t len = ZSTR_LEN(scheme);
+	const bool well_formed = uriIsWellFormedSchemeA(p, p + len) == URI_TRUE;
 
-	return uriIsWellFormedSchemeA(p, p + len);
+	return php_uri_parser_rfc3986_validate_component_result(well_formed, "scheme");
 }
 
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_userinfo(const zend_string *userinfo)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_userinfo(const zend_string *userinfo)
 {
 	const char *p = ZSTR_VAL(userinfo);
 	const size_t len = ZSTR_LEN(userinfo);
+	const bool well_formed = uriIsWellFormedUserInfoA(p, p + len) == URI_TRUE;
 
-	return uriIsWellFormedUserInfoA(p, p + len);
+	return php_uri_parser_rfc3986_validate_component_result(well_formed, "userinfo");
 }
 
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_host(const zend_string *host)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_host(const zend_string *host)
 {
 	const char *p = ZSTR_VAL(host);
 	const size_t len = ZSTR_LEN(host);
 
 	if (len == 0) {
-		return true;
+		return SUCCESS;
 	}
 
 	if (p[0] == '[') {
 		if (p[len - 1] != ']') {
-			return false;
+			return php_uri_parser_rfc3986_validate_component_result(false, "host");
 		}
 
 		if (len >= 2 && (p[1] == 'v' || p[1] == 'V')) {
-			return uriIsWellFormedHostIpFutureA(p + 1, p + len - 1) == URI_SUCCESS;
+			return php_uri_parser_rfc3986_validate_component_result(
+				uriIsWellFormedHostIpFutureA(p + 1, p + len - 1) == URI_SUCCESS,
+				"host"
+			);
 		}
 
-		return uriIsWellFormedHostIp6A(p + 1, p + len - 1) == URI_SUCCESS;
+		return php_uri_parser_rfc3986_validate_component_result(
+			uriIsWellFormedHostIp6A(p + 1, p + len - 1) == URI_SUCCESS,
+			"host"
+		);
 	}
 
-	if (uriIsWellFormedHostIp4A(p, p + len)) {
-		return true;
+	if (uriIsWellFormedHostIp4A(p, p + len) == URI_TRUE) {
+		return SUCCESS;
 	}
 
-	return uriIsWellFormedHostRegNameA(p, p + len);
+	return php_uri_parser_rfc3986_validate_component_result(
+		uriIsWellFormedHostRegNameA(p, p + len) == URI_TRUE,
+		"host"
+	);
 }
 
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_port(const zend_long port)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_port(const zend_long port)
 {
 	zend_string *tmp = zend_long_to_str(port);
 	const char *p = ZSTR_VAL(tmp);
 	const size_t len = ZSTR_LEN(tmp);
-
-	bool result = uriIsWellFormedPortA(p, p + len);
+	const bool well_formed = uriIsWellFormedPortA(p, p + len);
 	zend_string_release(tmp);
 
-	return result;
+	return php_uri_parser_rfc3986_validate_component_result(well_formed, "port");
 }
 
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_path(const zend_string *path)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_path(const zend_string *path)
 {
 	const char *p = ZSTR_VAL(path);
 	const size_t len = ZSTR_LEN(path);
-
 	/* The build() method checks whether the path begins with a "/" when there's a host.
 	 * In order to skip doing the same check, a false hasHost argument is passed to uriIsWellFormedPathA(). */
-	return uriIsWellFormedPathA(p, p + len, /* hasHost */ false);
+	const bool well_formed = uriIsWellFormedPathA(p, p + len, /* hasHost */ false);
+
+	return php_uri_parser_rfc3986_validate_component_result(well_formed, "path");
 }
 
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_query(const zend_string *query)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_query(const zend_string *query)
 {
 	const char *p = ZSTR_VAL(query);
 	const size_t len = ZSTR_LEN(query);
+	const bool well_formed = uriIsWellFormedQueryA(p, p + len);
 
-	return uriIsWellFormedQueryA(p, p + len);
+	return php_uri_parser_rfc3986_validate_component_result(well_formed, "query");
 }
 
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_fragment(const zend_string *fragment)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_fragment(const zend_string *fragment)
 {
 	const char *p = ZSTR_VAL(fragment);
 	const size_t len = ZSTR_LEN(fragment);
+	const bool well_formed = uriIsWellFormedFragmentA(p, p + len);
 
-	return uriIsWellFormedFragmentA(p, p + len);
+	return php_uri_parser_rfc3986_validate_component_result(well_formed, "fragment");
 }
 
 ZEND_ATTRIBUTE_NONNULL_ARGS(2,3,4,5,6,7,8) php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_build_from_zval(
@@ -827,18 +860,8 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2,3,4,5,6,7,8) php_uri_parser_rfc3986_uris *php_uri_
 	if (uriparser_base_uris != NULL) {
 		UriUriA tmp = {0};
 
-		const int base_uri_result = uriAddBaseUriExMmA(&tmp, &uriparser_uris->uri, &uriparser_base_uris->uri, URI_RESOLVE_STRICTLY, mm);
-		if (base_uri_result != URI_SUCCESS) {
-			uriFreeUriMembersMmA(&tmp, mm);
-			switch (base_uri_result) {
-				case URI_ERROR_ADDBASE_REL_BASE:
-					zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified base URI must be absolute", 0);
-					goto failure;
-				default:
-					/* This should be unreachable in practice. */
-					zend_throw_exception(php_uri_ce_error, "Failed to resolve the specified URI against the base URI", 0);
-					goto failure;
-			}
+		if (php_uri_parser_rfc3986_add_base_url(&tmp, &uriparser_uris->uri, uriparser_base_uris, false) == FAILURE) {
+			goto failure;
 		}
 
 		uriMakeOwnerMmA(&tmp, mm);

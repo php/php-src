@@ -29,13 +29,13 @@ zend_result php_uri_parser_rfc3986_userinfo_write(php_uri_parser_rfc3986_uris *u
 
 php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str, size_t uri_str_len, const php_uri_parser_rfc3986_uris *uriparser_base_url, bool silent);
 
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_scheme(const zend_string *scheme);
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_userinfo(const zend_string *userinfo);
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_host(const zend_string *host);
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_port(zend_long port);
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_path(const zend_string *path);
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_query(const zend_string *query);
-ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_validate_fragment(const zend_string *fragment);
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_scheme(const zend_string *scheme);
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_userinfo(const zend_string *userinfo);
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_host(const zend_string *host);
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_port(zend_long port);
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_path(const zend_string *path);
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_query(const zend_string *query);
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_fragment(const zend_string *fragment);
 
 ZEND_ATTRIBUTE_NONNULL_ARGS(2,3,4,5,6,7,8) php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_build_from_zval(
 	const php_uri_parser_rfc3986_uris *uriparser_base_uris,

@@ -47,8 +47,8 @@ zend_class_entry *php_uri_ce_whatwg_url_validation_error;
 static zend_object_handlers object_handlers_rfc3986_uri;
 static zend_object_handlers object_handlers_whatwg_uri;
 
-typedef bool (*php_uri_component_validator_string)(const zend_string *component);
-typedef bool (*php_uri_component_validator_long)(zend_long component);
+typedef zend_result (*php_uri_component_validator_string)(const zend_string *component);
+typedef zend_result (*php_uri_component_validator_long)(zend_long component);
 
 static const zend_module_dep uri_deps[] = {
 	ZEND_MOD_REQUIRED("lexbor")
@@ -1082,7 +1082,7 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, reset)
 }
 
 ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string(
-	INTERNAL_FUNCTION_PARAMETERS, const char *name, size_t name_length,
+	INTERNAL_FUNCTION_PARAMETERS, const char *name, const size_t name_length,
 	const php_uri_component_validator_string validator
 ) {
 	zend_string *component;
@@ -1091,8 +1091,7 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string(
 		Z_PARAM_STR(component)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!validator(component)) {
-		zend_throw_exception_ex(php_uri_ce_invalid_uri_exception, 0, "The specified %s is malformed", name);
+	if (validator(component) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1102,7 +1101,7 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string(
 }
 
 ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string_or_null(
-	INTERNAL_FUNCTION_PARAMETERS, const char *name, size_t name_length,
+	INTERNAL_FUNCTION_PARAMETERS, const char *name, const size_t name_length,
 	const php_uri_component_validator_string validator
 ) {
 	zend_string *component;
@@ -1114,8 +1113,7 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string_or_null(
 	if (component == NULL) {
 		zend_update_property_null(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), name, name_length);
 	} else {
-		if (!validator(component)) {
-			zend_throw_exception_ex(php_uri_ce_invalid_uri_exception, 0, "The specified %s is malformed", name);
+		if (validator(component) == FAILURE) {
 			RETURN_THROWS();
 		}
 
@@ -1126,7 +1124,7 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string_or_null(
 }
 
 ZEND_ATTRIBUTE_NONNULL_ARGS(1) static void php_uri_builder_set_component_long_or_null(
-	INTERNAL_FUNCTION_PARAMETERS, const char *name, size_t name_length,
+	INTERNAL_FUNCTION_PARAMETERS, const char *name, const size_t name_length,
 	const php_uri_component_validator_long validator
 ) {
 	zend_long component;
@@ -1139,8 +1137,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1) static void php_uri_builder_set_component_long_or
 	if (component_is_null) {
 		zend_update_property_null(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), name, name_length);
 	} else {
-		if (!validator(component)) {
-			zend_throw_exception_ex(php_uri_ce_invalid_uri_exception, 0, "The specified %s is malformed", name);
+		if (validator(component) == FAILURE) {
 			RETURN_THROWS();
 		}
 
