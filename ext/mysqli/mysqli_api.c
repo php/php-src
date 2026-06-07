@@ -532,6 +532,10 @@ PHP_FUNCTION(mysqli_execute_query)
 		MYSQLND_PARAM_BIND	*params;
 
 		if (!zend_array_is_list(input_params)) {
+			if (stmt->query) {
+				efree(stmt->query);
+				stmt->query = NULL;
+			}
 			mysqli_stmt_close(stmt->stmt, false);
 			stmt->stmt = NULL;
 			efree(stmt);
@@ -542,6 +546,10 @@ PHP_FUNCTION(mysqli_execute_query)
 		hash_num_elements = zend_hash_num_elements(input_params);
 		param_count = mysql_stmt_param_count(stmt->stmt);
 		if (hash_num_elements != param_count) {
+			if (stmt->query) {
+				efree(stmt->query);
+				stmt->query = NULL;
+			}
 			mysqli_stmt_close(stmt->stmt, false);
 			stmt->stmt = NULL;
 			efree(stmt);
