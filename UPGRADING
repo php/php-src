@@ -597,6 +597,10 @@ PHP 8.5 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- BCMath:
+  . bcround() and BcMath\Number::round() now throw a ValueError when the precision
+    argument is out of range.
+
 - Intl:
   . IntlDateFormatter::setTimeZone()/datefmt_set_timezone()
     throws an IntlException on uninitialised classes/clone failures.
