@@ -307,11 +307,15 @@ static int php_zip_add_file(ze_zip_object *obj, const char *filename, size_t fil
 		}
 		flags ^= ZIP_FL_OPEN_FILE_NOW;
 		zs = zip_source_filep(obj->za, fd, offset_start, offset_len);
+		if (!zs) {
+			fclose(fd);
+			return FAILURE;
+		}
 	} else {
 		zs = zip_source_file(obj->za, resolved_path, offset_start, offset_len);
-	}
-	if (!zs) {
-		return -1;
+		if (!zs) {
+			return FAILURE;
+		}
 	}
 	/* Replace */
 	if (replace >= 0) {
@@ -743,7 +747,10 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 			if ((path_len + namelist_len + 1) >= MAXPATHLEN) {
 				php_error_docref(NULL, E_WARNING, "add_path string too long (max: %u, %zu given)",
 						MAXPATHLEN - 1, (path_len + namelist_len + 1));
-				zend_string_release_ex(namelist[i], 0);
+				/* The loop isn't continued, so all remaining file names must get freed. */
+				for (; i < files_cnt; i++) {
+					zend_string_release_ex(namelist[i], false);
+				}
 				break;
 			}
 
@@ -2907,6 +2914,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	buffer = zend_string_safe_alloc(1, len, 0, 0);
 	zip_int64_t n = zip_fread(zf, ZSTR_VAL(buffer), ZSTR_LEN(buffer));
 	if (n < 1) {
+		zip_fclose(zf);
 		zend_string_efree(buffer);
 		RETURN_EMPTY_STRING();
 	}
