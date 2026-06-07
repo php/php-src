@@ -135,6 +135,7 @@ PHP_METHOD(Spoofchecker, setChecks)
 }
 /* }}} */
 
+#if U_ICU_VERSION_MAJOR_NUM >= 53
 /* TODO Document this method on PHP.net */
 /* {{{ Set the loosest restriction level allowed for strings. */
 PHP_METHOD(Spoofchecker, setRestrictionLevel)
@@ -163,6 +164,7 @@ PHP_METHOD(Spoofchecker, setRestrictionLevel)
 	uspoof_setRestrictionLevel(co->uspoof, (URestrictionLevel)level);
 }
 /* }}} */
+#endif
 
 PHP_METHOD(Spoofchecker, setAllowedChars)
 {

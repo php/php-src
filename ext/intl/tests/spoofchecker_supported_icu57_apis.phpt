@@ -4,6 +4,12 @@ Spoofchecker exposes restriction-level APIs on all supported ICU versions
 intl
 --SKIPIF--
 <?php if (!class_exists("Spoofchecker")) print 'skip'; ?>
+<?php
+    $r = new ReflectionClass("Spoofchecker");
+    if (false === $r->getConstant("SINGLE_SCRIPT_RESTRICTIVE")) {
+        die("skip Incompatible ICU version");
+    }
+?>
 --FILE--
 <?php
 $r = new ReflectionClass("Spoofchecker");
