@@ -911,7 +911,7 @@ PHP_FUNCTION(inflate_init)
 	}
 
 	if (inflateInit2(&ctx->Z, encoding) != Z_OK) {
-		efree(dict);
+		/* dict is stored in the ctx in the object and will thus be freed by zval_ptr_dtor(). */
 		zval_ptr_dtor(return_value);
 		php_error_docref(NULL, E_WARNING, "Failed allocating zlib.inflate context");
 		RETURN_FALSE;
@@ -1029,6 +1029,7 @@ PHP_FUNCTION(inflate_add)
 					}
 					break;
 				} else {
+					zend_string_release_ex(out, false);
 					php_error_docref(NULL, E_WARNING, "Inflating this data requires a preset dictionary, please specify it in the options array of inflate_init()");
 					RETURN_FALSE;
 				}
