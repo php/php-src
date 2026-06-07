@@ -519,7 +519,7 @@ PHP_FUNCTION(bzdecompress)
 	bzs.bzalloc = NULL;
 	bzs.bzfree = NULL;
 
-	if (source_len >= UINT_MAX) {
+	if (source_len > UINT_MAX) {
 		zend_argument_value_error(1, "must have a length less than or equal to %u", UINT_MAX);
 		RETURN_THROWS();
 	}
