@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fix GH-22219 (Dom\XMLDocument::schemaValidate fails to resolve
     xs:QName with prefix from imported schema). (David Carlier)
 
+- Exif:
+  . Read correct value for single and double tags. (ndossche)
+
 - GD:
   . Fixed bug GH-22121 (Double free in gdImageSetStyle() after
     overflow-triggered early return). (iliaal)
