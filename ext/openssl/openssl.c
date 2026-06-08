@@ -169,7 +169,76 @@ static void php_openssl_pkey_free_obj(zend_object *object)
 	zend_object_std_dtor(&key_object->std);
 }
 
-/* OpenSSLSession class */
+/* Openssl\Psk class */
+
+zend_class_entry *php_openssl_psk_ce;
+
+static zend_object_handlers php_openssl_psk_object_handlers;
+
+bool php_openssl_is_psk_ce(zval *val)
+{
+	return Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val) == php_openssl_psk_ce;
+}
+
+zend_string *php_openssl_psk_get_psk(zval *psk_zv)
+{
+	zval rv;
+	zval *prop = zend_read_property(php_openssl_psk_ce, Z_OBJ_P(psk_zv), ZEND_STRL("psk"), 0, &rv);
+	if (UNEXPECTED(Z_TYPE_P(prop) != IS_STRING)) {
+		return NULL;
+	}
+	return Z_STR_P(prop);
+}
+
+zend_string *php_openssl_psk_get_identity(zval *psk_zv)
+{
+	zval rv;
+	zval *prop = zend_read_property(php_openssl_psk_ce, Z_OBJ_P(psk_zv),
+			ZEND_STRL("identity"), 0, &rv);
+	if (Z_TYPE_P(prop) == IS_NULL) {
+		return NULL;
+	}
+	if (UNEXPECTED(Z_TYPE_P(prop) != IS_STRING)) {
+		return NULL;
+	}
+	return Z_STR_P(prop);
+}
+
+PHP_METHOD(Openssl_Psk, __construct)
+{
+	zend_string *psk;
+	zend_string *identity = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(psk)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(identity)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(psk) == 0) {
+		zend_argument_must_not_be_empty_error(1);
+		RETURN_THROWS();
+	}
+	if (ZSTR_LEN(psk) > PHP_OPENSSL_PSK_MAX_PSK_LEN) {
+		zend_argument_value_error(1, "must not exceed %d bytes", PHP_OPENSSL_PSK_MAX_PSK_LEN);
+		RETURN_THROWS();
+	}
+	if (identity != NULL && ZSTR_LEN(identity) > PHP_OPENSSL_PSK_MAX_IDENTITY_LEN) {
+		zend_argument_value_error(2, "must not exceed %d bytes", PHP_OPENSSL_PSK_MAX_IDENTITY_LEN);
+		RETURN_THROWS();
+	}
+
+	zend_update_property_str(php_openssl_psk_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("psk"), psk);
+
+	if (identity != NULL) {
+		zend_update_property_str(php_openssl_psk_ce, Z_OBJ_P(ZEND_THIS),
+				ZEND_STRL("identity"), identity);
+	} else {
+		zend_update_property_null(php_openssl_psk_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("identity"));
+	}
+}
+
+/* Openssl\Session class */
 
 zend_class_entry *php_openssl_session_ce;
 
@@ -715,6 +784,11 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_pkey_object_handlers.get_constructor = php_openssl_pkey_get_constructor;
 	php_openssl_pkey_object_handlers.clone_obj = NULL;
 	php_openssl_pkey_object_handlers.compare = zend_objects_not_comparable;
+
+	php_openssl_psk_ce = register_class_Openssl_Psk();
+	php_openssl_psk_ce->default_object_handlers = &php_openssl_psk_object_handlers;
+
+	memcpy(&php_openssl_psk_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 
 	php_openssl_session_ce = register_class_Openssl_Session();
 	php_openssl_session_ce->create_object = php_openssl_session_create_object;

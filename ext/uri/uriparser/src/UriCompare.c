@@ -72,17 +72,17 @@ UriBool URI_FUNC(EqualsUri)(const URI_TYPE(Uri) * a, const URI_TYPE(Uri) * b) {
     }
 
     /* scheme */
-    if (URI_FUNC(CompareRange)(&(a->scheme), &(b->scheme))) {
+    if (!URI_FUNC(RangeEquals)(&(a->scheme), &(b->scheme))) {
         return URI_FALSE;
     }
 
-    /* absolutePath */
-    if ((a->scheme.first == NULL) && (a->absolutePath != b->absolutePath)) {
+    /* absolutePath -- not meaningful for URIs with a host set! */
+    if (!URI_FUNC(HasHost)(a) && (a->absolutePath != b->absolutePath)) {
         return URI_FALSE;
     }
 
     /* userInfo */
-    if (URI_FUNC(CompareRange)(&(a->userInfo), &(b->userInfo))) {
+    if (!URI_FUNC(RangeEquals)(&(a->userInfo), &(b->userInfo))) {
         return URI_FALSE;
     }
 
@@ -107,20 +107,20 @@ UriBool URI_FUNC(EqualsUri)(const URI_TYPE(Uri) * a, const URI_TYPE(Uri) * b) {
     }
 
     if (a->hostData.ipFuture.first != NULL) {
-        if (URI_FUNC(CompareRange)(&(a->hostData.ipFuture), &(b->hostData.ipFuture))) {
+        if (!URI_FUNC(RangeEquals)(&(a->hostData.ipFuture), &(b->hostData.ipFuture))) {
             return URI_FALSE;
         }
     }
 
     if ((a->hostData.ip4 == NULL) && (a->hostData.ip6 == NULL)
         && (a->hostData.ipFuture.first == NULL)) {
-        if (URI_FUNC(CompareRange)(&(a->hostText), &(b->hostText))) {
+        if (!URI_FUNC(RangeEquals)(&(a->hostText), &(b->hostText))) {
             return URI_FALSE;
         }
     }
 
     /* portText */
-    if (URI_FUNC(CompareRange)(&(a->portText), &(b->portText))) {
+    if (!URI_FUNC(RangeEquals)(&(a->portText), &(b->portText))) {
         return URI_FALSE;
     }
 
@@ -133,7 +133,7 @@ UriBool URI_FUNC(EqualsUri)(const URI_TYPE(Uri) * a, const URI_TYPE(Uri) * b) {
         URI_TYPE(PathSegment) * walkA = a->pathHead;
         URI_TYPE(PathSegment) * walkB = b->pathHead;
         do {
-            if (URI_FUNC(CompareRange)(&(walkA->text), &(walkB->text))) {
+            if (!URI_FUNC(RangeEquals)(&(walkA->text), &(walkB->text))) {
                 return URI_FALSE;
             }
             if ((walkA->next == NULL) != (walkB->next == NULL)) {
@@ -145,12 +145,12 @@ UriBool URI_FUNC(EqualsUri)(const URI_TYPE(Uri) * a, const URI_TYPE(Uri) * b) {
     }
 
     /* query */
-    if (URI_FUNC(CompareRange)(&(a->query), &(b->query))) {
+    if (!URI_FUNC(RangeEquals)(&(a->query), &(b->query))) {
         return URI_FALSE;
     }
 
     /* fragment */
-    if (URI_FUNC(CompareRange)(&(a->fragment), &(b->fragment))) {
+    if (!URI_FUNC(RangeEquals)(&(a->fragment), &(b->fragment))) {
         return URI_FALSE;
     }
 

@@ -682,6 +682,16 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 }
 /* }}} */
 
+static void php_converter_set_subst_chars(UConverter *cnv, zend_string *subst, UErrorCode *error)
+{
+	if (ZSTR_LEN(subst) > SCHAR_MAX) {
+		*error = U_ILLEGAL_ARGUMENT_ERROR;
+		return;
+	}
+
+	ucnv_setSubstChars(cnv, ZSTR_VAL(subst), (int8_t) ZSTR_LEN(subst), error);
+}
+
 /* {{{ */
 #define UCNV_REASON_CASE(v) case (UCNV_ ## v) : RETURN_STRINGL( "REASON_" #v , sizeof( "REASON_" #v ) - 1);
 PHP_METHOD(UConverter, reasonText) {
@@ -761,13 +771,13 @@ PHP_METHOD(UConverter, transcode) {
 				(tmpzval = zend_hash_str_find_deref(Z_ARRVAL_P(options), "from_subst", sizeof("from_subst") - 1)) != NULL &&
 				Z_TYPE_P(tmpzval) == IS_STRING) {
 				error = U_ZERO_ERROR;
-				ucnv_setSubstChars(src_cnv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval) & 0x7F, &error);
+				php_converter_set_subst_chars(src_cnv, Z_STR_P(tmpzval), &error);
 			}
 			if (U_SUCCESS(error) &&
 				(tmpzval = zend_hash_str_find_deref(Z_ARRVAL_P(options), "to_subst", sizeof("to_subst") - 1)) != NULL &&
 				Z_TYPE_P(tmpzval) == IS_STRING) {
 				error = U_ZERO_ERROR;
-				ucnv_setSubstChars(dest_cnv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval) & 0x7F, &error);
+				php_converter_set_subst_chars(dest_cnv, Z_STR_P(tmpzval), &error);
 			}
 		}
 
@@ -934,7 +944,8 @@ static zend_object *php_converter_create_object(zend_class_entry *ce) {
 }
 
 static zend_object *php_converter_clone_object(zend_object *object) {
-	php_converter_object *objval, *oldobj = php_converter_fetch_object(object);
+	const php_converter_object *oldobj = php_converter_fetch_object(object);
+	php_converter_object *objval;
 	zend_object *retval = php_converter_object_ctor(object->ce, &objval);
 	UErrorCode error = U_ZERO_ERROR;
 

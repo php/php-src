@@ -387,6 +387,34 @@ char *alloca();
 #define ZEND_ELEMENT_COUNT(m)
 #endif
 
+#if __cplusplus
+extern "C++" {
+# include <cstddef>
+	template<typename T, typename M>
+	const T* zend_container_of(const M *ptr, size_t offset) {
+		return reinterpret_cast<const T*>(reinterpret_cast<const char*>(ptr) - offset);
+	}
+	template<typename T, typename M>
+	T* zend_container_of(M *ptr, size_t offset) {
+		return reinterpret_cast<T*>(reinterpret_cast<char*>(ptr) - offset);
+	}
+
+# define ZEND_CONTAINER_OF(ptr, Type, member) zend_container_of<Type, decltype(Type::member)>(ptr, offsetof(Type, member))
+}
+#elif __STDC_VERSION__ >= 202311L || ZEND_GCC_VERSION
+/* typeof is C23 or a GCC extension */
+# define ZEND_CONTAINER_OF(ptr, Type, member) \
+	_Generic( \
+		(ptr), \
+		const typeof(((Type*)0)->member) *: ((const Type*)((char*)(ptr) - offsetof(Type, member))), \
+		typeof(((Type*)0)->member) *: ((Type*)((char*)(ptr) - offsetof(Type, member))) \
+	)
+#else
+/* Define a variant that does not keep const-ness for older compilers. Mismatches
+ * are expected to be caught by CI running modern compilers. */
+# define ZEND_CONTAINER_OF(ptr, Type, member) ((Type*)((char*)(ptr) - offsetof(Type, member)))
+#endif
+
 #ifdef HAVE_BUILTIN_CONSTANT_P
 # define ZEND_CONST_COND(_condition, _default) \
 	(__builtin_constant_p(_condition) ? (_condition) : (_default))

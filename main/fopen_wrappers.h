@@ -28,9 +28,6 @@ PHPAPI int php_check_open_basedir(const char *path);
 PHPAPI int php_check_open_basedir_ex(const char *path, int warn);
 PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path);
 
-/* OPENBASEDIR_CHECKPATH(filename) to ease merge between 6.x and 5.x */
-#define OPENBASEDIR_CHECKPATH(filename) php_check_open_basedir(filename)
-
 PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_len, const char *path);
 
 PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const char *path, zend_string **opened_path);

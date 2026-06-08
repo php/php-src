@@ -66,23 +66,30 @@ static zend_string *phar_get_link_location(phar_entry_info *entry) /* {{{ */
 phar_entry_info *phar_get_link_source(phar_entry_info *entry) /* {{{ */
 {
 	phar_entry_info *link_entry;
+	uint32_t depth = 0, max_depth;
 
 	if (!entry->symlink) {
 		return entry;
 	}
 
-	link_entry = zend_hash_find_ptr(&(entry->phar->manifest), entry->symlink);
-	if (link_entry) {
-		return phar_get_link_source(link_entry);
-	}
+	max_depth = zend_hash_num_elements(&(entry->phar->manifest));
 
-	zend_string *link = phar_get_link_location(entry);
-	link_entry = zend_hash_find_ptr(&(entry->phar->manifest), link);
-	zend_string_release(link);
-	if (link_entry) {
-		return phar_get_link_source(link_entry);
+	while (entry->symlink) {
+		if (UNEXPECTED(++depth > max_depth)) {
+			return NULL;
+		}
+		zend_string *link = phar_get_link_location(entry);
+
+		if (NULL != (link_entry = zend_hash_find_ptr(&(entry->phar->manifest), entry->symlink)) ||
+			NULL != (link_entry = zend_hash_find_ptr(&(entry->phar->manifest), link))) {
+			zend_string_release(link);
+			entry = link_entry;
+		} else {
+			zend_string_release(link);
+			return NULL;
+		}
 	}
-	return NULL;
+	return entry;
 }
 /* }}} */
 
@@ -1319,18 +1326,18 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 
 static const char hexChars[] = "0123456789ABCDEF";
 
-static int phar_hex_str(const char *digest, size_t digest_len, char **signature) /* {{{ */
+static size_t phar_hex_str(const char *digest, size_t digest_len, char **signature) /* {{{ */
 {
-	int pos = -1;
+	size_t pos = 0;
 	size_t len = 0;
 
 	*signature = (char*)safe_pemalloc(digest_len, 2, 1, PHAR_G(persist));
 
 	for (; len < digest_len; ++len) {
-		(*signature)[++pos] = hexChars[((const unsigned char *)digest)[len] >> 4];
-		(*signature)[++pos] = hexChars[((const unsigned char *)digest)[len] & 0x0F];
+		(*signature)[pos++] = hexChars[((const unsigned char *)digest)[len] >> 4];
+		(*signature)[pos++] = hexChars[((const unsigned char *)digest)[len] & 0x0F];
 	}
-	(*signature)[++pos] = '\0';
+	(*signature)[pos] = '\0';
 	return pos;
 }
 /* }}} */
@@ -1356,7 +1363,7 @@ ZEND_ATTRIBUTE_NONNULL static bool phar_call_openssl_verify(
 	php_stream_rewind(fp);
 	zend_string *str = php_stream_copy_to_mem(fp, (size_t) end, false);
 	/* No content thus signing must fail */
-	if (UNEXPECTED(str == NULL)) {
+	if (UNEXPECTED(str == NULL || (size_t)end != ZSTR_LEN(str))) {
 		return false;
 	}
 

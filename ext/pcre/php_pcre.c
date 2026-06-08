@@ -1079,7 +1079,7 @@ static void populate_subpat_array(
 	/* Add MARK, if available */
 	if (mark) {
 		ZVAL_STRING(&val, (char *)mark);
-		zend_hash_str_add_new(subpats_ht, ZEND_STRL("MARK"), &val);
+		zend_hash_str_update(subpats_ht, ZEND_STRL("MARK"), &val);
 	}
 }
 

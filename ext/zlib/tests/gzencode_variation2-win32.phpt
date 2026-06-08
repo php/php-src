@@ -7,9 +7,8 @@ zlib
 if( substr(PHP_OS, 0, 3) != "WIN" ) {
   die("skip.. only for Windows");
 }
-include 'data/func.inc';
-if (version_compare(get_zlib_version(), "1.2.11") < 0) {
-    die("skip - at least zlib 1.2.11 required, got " . get_zlib_version());
+if (version_compare(ZLIB_VERSION, "1.2.11") < 0) {
+    die("skip - at least zlib 1.2.11 required, got " . ZLIB_VERSION);
 }
 ?>
 --FILE--

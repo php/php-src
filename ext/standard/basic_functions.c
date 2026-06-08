@@ -335,6 +335,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 	BASIC_MINIT_SUBMODULE(exec)
 
+	BASIC_MINIT_SUBMODULE(stream_errors)
 	BASIC_MINIT_SUBMODULE(user_streams)
 
 	php_register_url_stream_wrapper("php", &php_stream_php_wrapper);
@@ -1953,6 +1954,12 @@ PHP_FUNCTION(ini_get_all)
 					add_assoc_str(&option, "local_value", zend_string_copy(ini_entry->value));
 				} else {
 					add_assoc_null(&option, "local_value");
+				}
+
+				if (ini_entry->def->value) {
+					add_assoc_stringl(&option, "builtin_default_value", ini_entry->def->value, ini_entry->def->value_length);
+				} else {
+					add_assoc_null(&option, "builtin_default_value");
 				}
 
 				add_assoc_long(&option, "access", ini_entry->modifiable);

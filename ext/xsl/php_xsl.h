@@ -60,9 +60,7 @@ typedef struct xsl_object {
 	zend_object std;
 } xsl_object;
 
-static inline xsl_object *php_xsl_fetch_object(zend_object *obj) {
-	return (xsl_object *)((char*)(obj) - offsetof(xsl_object, std));
-}
+#define php_xsl_fetch_object(obj) ZEND_CONTAINER_OF(obj, xsl_object, std)
 
 #define Z_XSL_P(zv) php_xsl_fetch_object(Z_OBJ_P((zv)))
 

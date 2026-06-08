@@ -35,10 +35,7 @@
 
 PHP_SXE_API zend_object *sxe_object_new(zend_class_entry *ce);
 
-static inline php_sxe_object *php_sxe_fetch_object(zend_object *obj) /* {{{ */ {
-	return (php_sxe_object *)((char*)(obj) - offsetof(php_sxe_object, zo));
-}
-/* }}} */
+#define php_sxe_fetch_object(obj) ZEND_CONTAINER_OF(obj, php_sxe_object, zo)
 
 #define Z_SXEOBJ_P(zv) php_sxe_fetch_object(Z_OBJ_P((zv)))
 

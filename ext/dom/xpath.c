@@ -33,6 +33,24 @@
 
 #ifdef LIBXML_XPATH_ENABLED
 
+static dom_object *dom_xpath_intern_for_doc(dom_xpath_object *xpath_obj, xmlDocPtr doc)
+{
+	if (xpath_obj->dom.document && xpath_obj->dom.document->ptr == doc) {
+		return &xpath_obj->dom;
+	}
+	HashTable *node_list = xpath_obj->xpath_callbacks.node_list;
+	if (node_list) {
+		zval *entry;
+		ZEND_HASH_PACKED_FOREACH_VAL(node_list, entry) {
+			dom_object *obj = Z_DOMOBJ_P(entry);
+			if (obj->document && obj->document->ptr == doc) {
+				return obj;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	return &xpath_obj->dom;
+}
+
 void dom_xpath_objects_free_storage(zend_object *object)
 {
 	dom_xpath_object *intern = php_xpath_obj_from_obj(object);
@@ -189,7 +207,7 @@ zend_result dom_xpath_document_read(dom_object *obj, zval *retval)
 
 /* {{{ registerNodeNamespaces bool*/
 static inline dom_xpath_object *php_xpath_obj_from_dom_obj(dom_object *obj) {
-	return (dom_xpath_object*)((char*)(obj) - offsetof(dom_xpath_object, dom));
+	return ZEND_CONTAINER_OF(obj, dom_xpath_object, dom);
 }
 
 zend_result dom_xpath_register_node_ns_read(dom_object *obj, zval *retval)
@@ -352,7 +370,8 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 
 						node = php_dom_create_fake_namespace_decl(nsparent, original, &child, parent_intern);
 					} else {
-						php_dom_create_object(node, &child, &intern->dom);
+						dom_object *parent = dom_xpath_intern_for_doc(intern, node->doc);
+						php_dom_create_object(node, &child, parent);
 					}
 					add_next_index_zval(&retval, &child);
 				}

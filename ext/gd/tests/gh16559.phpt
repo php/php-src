@@ -2,6 +2,13 @@
 GH-16559 (UBSan abort in ext/gd/libgd/gd_interpolation.c:1007)
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+    if (!GD_BUNDLED) {
+        /* external libgd bugs are not our problem */
+    	die("skip meaningful only for bundled libgd\n");
+    }
+?>
 --FILE--
 <?php
 $input = imagecreatefrompng(__DIR__ . '/gh10614.png');

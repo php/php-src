@@ -69,6 +69,8 @@ typedef struct _ze_zip_object {
 	HashTable *prop_handler;
 	char *filename;
 	size_t filename_len;
+	zend_string *out_str;
+	bool from_string;
 	zip_int64_t last_id;
 	int err_zip;
 	int err_sys;
@@ -81,9 +83,7 @@ typedef struct _ze_zip_object {
 	zend_object zo;
 } ze_zip_object;
 
-static inline ze_zip_object *php_zip_fetch_object(zend_object *obj) {
-	return (ze_zip_object *)((char*)(obj) - offsetof(ze_zip_object, zo));
-}
+#define php_zip_fetch_object(obj) ZEND_CONTAINER_OF(obj, ze_zip_object, zo)
 
 #define Z_ZIP_P(zv) php_zip_fetch_object(Z_OBJ_P((zv)))
 

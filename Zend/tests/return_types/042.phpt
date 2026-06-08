@@ -20,5 +20,10 @@ class JustAnArray {
 
 echo 'No problems!';
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning null from UnionType::__debugInfo() is deprecated, make the return type non-nullable and return an empty array instead in %s on line %d
+
+Deprecated: Returning null from UnionType2::__debugInfo() is deprecated, make the return type non-nullable and return an empty array instead in %s on line %d
+
+Deprecated: Returning null from UnionTypeOldStyle::__debugInfo() is deprecated, make the return type non-nullable and return an empty array instead in %s on line %d
 No problems!

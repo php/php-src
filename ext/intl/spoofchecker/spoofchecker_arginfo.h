@@ -1,5 +1,5 @@
 /* This is a generated file, edit spoofchecker.stub.php instead.
- * Stub hash: 4834be57a3f0cb74dbc4422e609846139f09f6cb */
+ * Stub hash: 4634f8ef9157fb3670a2ddc5e3246340660fc68c */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -23,11 +23,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_set
 	ZEND_ARG_TYPE_INFO(0, checks, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#if U_ICU_VERSION_MAJOR_NUM >= 58
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_setRestrictionLevel, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, level, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_setAllowedChars, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
@@ -39,9 +37,7 @@ ZEND_METHOD(Spoofchecker, isSuspicious);
 ZEND_METHOD(Spoofchecker, areConfusable);
 ZEND_METHOD(Spoofchecker, setAllowedLocales);
 ZEND_METHOD(Spoofchecker, setChecks);
-#if U_ICU_VERSION_MAJOR_NUM >= 58
 ZEND_METHOD(Spoofchecker, setRestrictionLevel);
-#endif
 ZEND_METHOD(Spoofchecker, setAllowedChars);
 
 static const zend_function_entry class_Spoofchecker_methods[] = {
@@ -50,9 +46,7 @@ static const zend_function_entry class_Spoofchecker_methods[] = {
 	ZEND_ME(Spoofchecker, areConfusable, arginfo_class_Spoofchecker_areConfusable, ZEND_ACC_PUBLIC)
 	ZEND_ME(Spoofchecker, setAllowedLocales, arginfo_class_Spoofchecker_setAllowedLocales, ZEND_ACC_PUBLIC)
 	ZEND_ME(Spoofchecker, setChecks, arginfo_class_Spoofchecker_setChecks, ZEND_ACC_PUBLIC)
-#if U_ICU_VERSION_MAJOR_NUM >= 58
 	ZEND_ME(Spoofchecker, setRestrictionLevel, arginfo_class_Spoofchecker_setRestrictionLevel, ZEND_ACC_PUBLIC)
-#endif
 	ZEND_ME(Spoofchecker, setAllowedChars, arginfo_class_Spoofchecker_setAllowedChars, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
@@ -105,7 +99,6 @@ static zend_class_entry *register_class_Spoofchecker(void)
 	zend_string *const_CHAR_LIMIT_name = zend_string_init_interned("CHAR_LIMIT", sizeof("CHAR_LIMIT") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_CHAR_LIMIT_name, &const_CHAR_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_CHAR_LIMIT_name, true);
-#if U_ICU_VERSION_MAJOR_NUM >= 58
 
 	zval const_ASCII_value;
 	ZVAL_LONG(&const_ASCII_value, USPOOF_ASCII);
@@ -148,7 +141,6 @@ static zend_class_entry *register_class_Spoofchecker(void)
 	zend_string *const_MIXED_NUMBERS_name = zend_string_init_interned("MIXED_NUMBERS", sizeof("MIXED_NUMBERS") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_MIXED_NUMBERS_name, &const_MIXED_NUMBERS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_MIXED_NUMBERS_name, true);
-#endif
 #if U_ICU_VERSION_MAJOR_NUM >= 62
 
 	zval const_HIDDEN_OVERLAY_value;

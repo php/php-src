@@ -38,9 +38,7 @@ typedef struct {
 	zend_object     zo;
 } Transliterator_object;
 
-static inline Transliterator_object *php_intl_transliterator_fetch_object(zend_object *obj) {
-	return (Transliterator_object *)((char*)(obj) - offsetof(Transliterator_object, zo));
-}
+#define php_intl_transliterator_fetch_object(obj) ZEND_CONTAINER_OF(obj, Transliterator_object, zo)
 #define Z_INTL_TRANSLITERATOR_P(zv) php_intl_transliterator_fetch_object(Z_OBJ_P(zv))
 
 #define TRANSLITERATOR_FORWARD UTRANS_FORWARD

@@ -36,9 +36,7 @@ typedef struct {
 	zend_object		zo;
 } IntlDateFormatter_object;
 
-static inline IntlDateFormatter_object *php_intl_dateformatter_fetch_object(zend_object *obj) {
-	return (IntlDateFormatter_object *)((char*)(obj) - offsetof(IntlDateFormatter_object, zo));
-}
+#define php_intl_dateformatter_fetch_object(obj) ZEND_CONTAINER_OF(obj, IntlDateFormatter_object, zo)
 #define Z_INTL_DATEFORMATTER_P(zv) php_intl_dateformatter_fetch_object(Z_OBJ_P(zv))
 
 #ifdef __cplusplus
