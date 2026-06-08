@@ -20,6 +20,8 @@ PHP                                                                        NEWS
   . Fix incorrect argument positions for uninitialized calendar arguments in
     IntlCalendar::equals(), ::before(), ::after(), and ::isEquivalentTo().
     (Weilin Du)
+  . Fixed Spoofchecker restriction-level APIs to only be exposed with ICU 53
+    and later. (Graham Campbell)
 
 - Phar:
   . Fixed a bypass of the magic ".phar" directory protection in
