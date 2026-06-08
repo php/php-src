@@ -425,7 +425,8 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		}
 
 		if (php_stream_has_too_many_filters(stream, context)) {
-			php_stream_wrapper_log_error(wrapper, options, "too many filters");
+			php_stream_wrapper_log_warn(wrapper, context, options,
+				PathTooLong, "too many filters");
 			php_stream_close(stream);
 			return NULL;
 		}
