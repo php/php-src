@@ -882,8 +882,23 @@ static zend_always_inline bcmath_number_obj_t *get_bcmath_number_from_zval(const
 	return get_bcmath_number_from_obj(Z_OBJ_P(zv));
 }
 
+/* A BcMath\Number whose constructor or __unserialize() never ran has a NULL
+ * bc_num. This cannot happen through normal PHP (the class is final with a
+ * custom create_object, so newInstanceWithoutConstructor is rejected and
+ * unserialize() routes through __unserialize()), but C code may build one via
+ * create_object directly. Every operation dereferences ->num, so guard the
+ * entry points and throw rather than crash. */
+static zend_never_inline ZEND_COLD void bcmath_number_throw_uninitialized(void)
+{
+	zend_throw_error(NULL, "The BcMath\\Number object has not been correctly initialized by its constructor");
+}
+
 static zend_always_inline zend_string *bcmath_number_value_to_str(bcmath_number_obj_t *intern)
 {
+	if (UNEXPECTED(intern->num == NULL)) {
+		bcmath_number_throw_uninitialized();
+		return zend_empty_string;
+	}
 	if (intern->value == NULL) {
 		intern->value = bc_num2str_ex(intern->num, intern->scale);
 	}
@@ -920,6 +935,11 @@ static zend_object *bcmath_number_clone(zend_object *obj)
 {
 	bcmath_number_obj_t *original = get_bcmath_number_from_obj(obj);
 	bcmath_number_obj_t *clone = get_bcmath_number_from_obj(bcmath_number_create(bcmath_number_ce));
+
+	if (UNEXPECTED(original->num == NULL)) {
+		bcmath_number_throw_uninitialized();
+		return &clone->std;
+	}
 
 	clone->num = bc_copy_num(original->num);
 	if (original->value) {
@@ -993,6 +1013,10 @@ static int bcmath_number_has_property(zend_object *obj, zend_string *name, int c
 		bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
 
 		if (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_VALUE))) {
+			if (UNEXPECTED(intern->num == NULL)) {
+				bcmath_number_throw_uninitialized();
+				return 0;
+			}
 			return !bc_is_zero(intern->num);
 		}
 
@@ -1007,6 +1031,14 @@ static zend_result bcmath_number_cast_object(zend_object *obj, zval *ret, int ty
 {
 	if (type == _IS_BOOL) {
 		bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
+		if (UNEXPECTED(intern->num == NULL)) {
+			/* Return SUCCESS with a placeholder so the engine does not add its
+			 * own "could not be converted to bool" error on top of ours; the
+			 * pending exception propagates and the value is discarded. */
+			bcmath_number_throw_uninitialized();
+			ZVAL_FALSE(ret);
+			return SUCCESS;
+		}
 		ZVAL_BOOL(ret, !bc_is_zero(intern->num));
 		return SUCCESS;
 	}
@@ -1212,6 +1244,10 @@ static zend_result bc_num_from_obj_or_str_or_long(
 {
 	if (obj) {
 		const bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
+		if (UNEXPECTED(intern->num == NULL)) {
+			bcmath_number_throw_uninitialized();
+			return FAILURE;
+		}
 		*num = intern->num;
 		if (full_scale) {
 			*full_scale = intern->scale;
@@ -1259,11 +1295,15 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 	size_t n1_full_scale;
 	size_t n2_full_scale;
 	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&n1, &n1_full_scale, obj1, str1, lval1) == FAILURE)) {
-		zend_value_error("Left string operand cannot be converted to BcMath\\Number");
+		if (!EG(exception)) {
+			zend_value_error("Left string operand cannot be converted to BcMath\\Number");
+		}
 		goto fail;
 	}
 	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&n2, &n2_full_scale, obj2, str2, lval2) == FAILURE)) {
-		zend_value_error("Right string operand cannot be converted to BcMath\\Number");
+		if (!EG(exception)) {
+			zend_value_error("Right string operand cannot be converted to BcMath\\Number");
+		}
 		goto fail;
 	}
 
@@ -1394,7 +1434,9 @@ static zend_always_inline zend_result bc_num_from_obj_or_str_or_long_with_err(
 {
 	size_t full_scale = 0;
 	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(num, &full_scale, obj, str, lval) == FAILURE)) {
-		zend_argument_value_error(arg_num, "is not well-formed");
+		if (!EG(exception)) {
+			zend_argument_value_error(arg_num, "is not well-formed");
+		}
 		return FAILURE;
 	}
 	if (UNEXPECTED(CHECK_SCALE_OVERFLOW(full_scale))) {
@@ -1459,6 +1501,10 @@ static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opco
 	bc_num ret = NULL;
 	size_t scale = scale_lval;
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
+	if (UNEXPECTED(intern->num == NULL)) {
+		bcmath_number_throw_uninitialized();
+		goto fail;
+	}
 
 	switch (opcode) {
 		case ZEND_ADD:
@@ -1561,6 +1607,10 @@ PHP_METHOD(BcMath_Number, divmod)
 	bc_num rem = NULL;
 	size_t scale = scale_lval;
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
+	if (UNEXPECTED(intern->num == NULL)) {
+		bcmath_number_throw_uninitialized();
+		goto fail;
+	}
 
 	if (scale_is_null) {
 		scale = MAX(intern->scale, num_full_scale);
@@ -1626,6 +1676,10 @@ PHP_METHOD(BcMath_Number, powmod)
 	}
 
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
+	if (UNEXPECTED(intern->num == NULL)) {
+		bcmath_number_throw_uninitialized();
+		goto cleanup;
+	}
 	bc_num ret = NULL;
 	size_t scale = scale_lval;
 	raise_mod_status status = bc_raisemod(intern->num, exponent_num, modulus_num, &ret, scale);
@@ -1687,6 +1741,10 @@ PHP_METHOD(BcMath_Number, sqrt)
 	}
 
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
+	if (UNEXPECTED(intern->num == NULL)) {
+		bcmath_number_throw_uninitialized();
+		RETURN_THROWS();
+	}
 
 	size_t scale;
 	if (scale_is_null) {
@@ -1742,6 +1800,10 @@ PHP_METHOD(BcMath_Number, compare)
 
 	size_t scale;
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
+	if (UNEXPECTED(intern->num == NULL)) {
+		bcmath_number_throw_uninitialized();
+		goto fail;
+	}
 	if (scale_is_null) {
 		scale = MAX(intern->num->n_scale, num->n_scale);
 	} else {
@@ -1766,6 +1828,10 @@ static void bcmath_number_floor_or_ceil(INTERNAL_FUNCTION_PARAMETERS, bool is_fl
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
+	if (UNEXPECTED(intern->num == NULL)) {
+		bcmath_number_throw_uninitialized();
+		RETURN_THROWS();
+	}
 
 	bc_num ret = bc_floor_or_ceil(intern->num, is_floor);
 
@@ -1811,6 +1877,10 @@ PHP_METHOD(BcMath_Number, round)
 	}
 
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
+	if (UNEXPECTED(intern->num == NULL)) {
+		bcmath_number_throw_uninitialized();
+		RETURN_THROWS();
+	}
 
 	bc_num ret = NULL;
 	size_t scale = bc_round(intern->num, precision, rounding_mode, &ret);
