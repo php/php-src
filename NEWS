@@ -58,6 +58,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-20469 (Unsafe inheritance cache replay with reentrant
     autoloading). (Levi Morrison)
+  . Fixed bug GH-22158 (Tracing JIT dispatches the observer begin handler
+    through the wrong run_time_cache slot on megamorphic calls). (ptondereau,
+    iliaal)
 
 - OpenSSL:
   . Fixed bug GH-22187 (Memory corruption (zend_mm_heap corrupted) in
