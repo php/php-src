@@ -823,7 +823,10 @@ TSRM_API void *tsrm_get_ls_cache(void)
 /* Returns offset of tsrm_ls_cache slot from Thread Control Block address */
 TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 {/*{{{*/
-#if defined(__APPLE__) && defined(__x86_64__)
+#if defined(TSRM_TLS_MODEL_GLOBAL_DYNAMIC)
+	/* No constant TCB offset under global-dynamic, can't use fast path */
+	return 0;
+#elif defined(__APPLE__) && defined(__x86_64__)
     // TODO: Implement support for fast JIT ZTS code ???
 	return 0;
 #elif defined(__x86_64__) && defined(__GNUC__) && !defined(__FreeBSD__) && \

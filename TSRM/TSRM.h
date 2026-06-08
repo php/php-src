@@ -158,8 +158,13 @@ TSRM_API bool tsrm_is_managed_thread(void);
 # define TSRM_TLS_MODEL_ATTR
 # define TSRM_TLS_MODEL_DEFAULT
 #elif __PIC__ && !defined(__PIE__)
-# define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))
-# define TSRM_TLS_MODEL_INITIAL_EXEC
+# if defined(TSRM_TLS_MODEL_USE_GLOBAL_DYNAMIC)
+#  define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("global-dynamic")))
+#  define TSRM_TLS_MODEL_GLOBAL_DYNAMIC
+# else
+#  define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))
+#  define TSRM_TLS_MODEL_INITIAL_EXEC
+# endif
 #else
 # define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("local-exec")))
 # define TSRM_TLS_MODEL_LOCAL_EXEC
