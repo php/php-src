@@ -40,7 +40,9 @@ BEGIN_EXTERN_C()
 
 #ifdef ZTS
 typedef struct _zend_tsrm_ls_cache zend_tsrm_ls_cache;
+# ifdef ZEND_TLS_DIRECT
 extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache;
+# endif
 #endif
 
 /* Compiler */

@@ -534,7 +534,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 		/* In case that extensions don't use the pointer passed from the dtor, but incorrectly
 		 * use the global pointer, we need to setup the global pointer temporarily here. */
 		set_thread_local_storage_resource_to(thread_resources);
-		/* Dead thread, recycled id: already freed, so just zero it. */
+		/* Free up the old resource from the old thread instance */
 		thread_resources->thread_id = 0;
 		ts_free_resources(thread_resources);
 		free(thread_resources);

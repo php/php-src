@@ -178,15 +178,24 @@ TSRM_API bool tsrm_is_managed_thread(void);
 #define TSRMG_FAST_STATIC(offset, type, element)	(TSRMG_FAST_BULK_STATIC(offset, type)->element)
 #define TSRMG_FAST_BULK_STATIC(offset, type)	((type) (((char*) TSRMLS_CACHE)+(offset)))
 struct _zend_tsrm_ls_cache;
-#ifdef __cplusplus
-#define TSRMLS_MAIN_CACHE_EXTERN() extern "C" { extern TSRM_TLS struct _zend_tsrm_ls_cache _tsrm_ls_cache TSRM_TLS_MODEL_ATTR; }
-#define TSRMLS_CACHE_EXTERN() extern "C" { extern TSRM_TLS struct _zend_tsrm_ls_cache _tsrm_ls_cache; }
+#if defined(ZEND_WIN32) && !defined(LIBZEND_EXPORTS)
+/* Windows can't dllexport the TLS struct, so outside Zend each module
+ * keeps a per-module `void *` pointer and reaches EG/CG via the resource-id indirection. */
+# define ZEND_TSRMLS_CACHE_T void *
+# define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *_tsrm_ls_cache TSRM_TLS_MODEL_ATTR = NULL;
+# define TSRMLS_CACHE_DEFINE() TSRM_TLS void *_tsrm_ls_cache = NULL;
 #else
-#define TSRMLS_MAIN_CACHE_EXTERN() extern TSRM_TLS struct _zend_tsrm_ls_cache _tsrm_ls_cache TSRM_TLS_MODEL_ATTR;
-#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS struct _zend_tsrm_ls_cache _tsrm_ls_cache;
+# define ZEND_TSRMLS_CACHE_T struct _zend_tsrm_ls_cache
+# define TSRMLS_MAIN_CACHE_DEFINE()
+# define TSRMLS_CACHE_DEFINE()
 #endif
-#define TSRMLS_MAIN_CACHE_DEFINE()
-#define TSRMLS_CACHE_DEFINE()
+#ifdef __cplusplus
+#define TSRMLS_MAIN_CACHE_EXTERN() extern "C" { extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache TSRM_TLS_MODEL_ATTR; }
+#define TSRMLS_CACHE_EXTERN() extern "C" { extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache; }
+#else
+#define TSRMLS_MAIN_CACHE_EXTERN() extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache TSRM_TLS_MODEL_ATTR;
+#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache;
+#endif
 #define TSRMLS_CACHE_UPDATE() TSRMLS_CACHE = tsrm_get_ls_cache()
 #define TSRMLS_CACHE (*(void **) &_tsrm_ls_cache)
 
