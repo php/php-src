@@ -553,6 +553,17 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_locale_get_display_variant arginfo_locale_get_display_script
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_get_display_keyword, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, keyword, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, displayLocale, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_get_display_keyword_value, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, keyword, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, displayLocale, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_compose, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, subtags, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -941,6 +952,8 @@ ZEND_FUNCTION(locale_get_display_region);
 ZEND_FUNCTION(locale_get_display_name);
 ZEND_FUNCTION(locale_get_display_language);
 ZEND_FUNCTION(locale_get_display_variant);
+ZEND_FUNCTION(locale_get_display_keyword);
+ZEND_FUNCTION(locale_get_display_keyword_value);
 ZEND_FUNCTION(locale_compose);
 ZEND_FUNCTION(locale_parse);
 ZEND_FUNCTION(locale_get_all_variants);
@@ -1133,6 +1146,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(locale_get_display_name, arginfo_locale_get_display_name)
 	ZEND_FE(locale_get_display_language, arginfo_locale_get_display_language)
 	ZEND_FE(locale_get_display_variant, arginfo_locale_get_display_variant)
+	ZEND_FE(locale_get_display_keyword, arginfo_locale_get_display_keyword)
+	ZEND_FE(locale_get_display_keyword_value, arginfo_locale_get_display_keyword_value)
 	ZEND_FE(locale_compose, arginfo_locale_compose)
 	ZEND_FE(locale_parse, arginfo_locale_parse)
 	ZEND_FE(locale_get_all_variants, arginfo_locale_get_all_variants)

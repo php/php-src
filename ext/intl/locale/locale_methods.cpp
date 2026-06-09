@@ -44,6 +44,8 @@ ZEND_EXTERN_MODULE_GLOBALS( intl )
 #define EXTLANG_PREFIX "a"
 #define PRIVATE_PREFIX "x"
 #define DISP_NAME "name"
+#define DISP_KEYWORD "keyword"
+#define DISP_KEYWORD_VALUE "keyword_value"
 
 #define MAX_NO_VARIANT  15
 #define MAX_NO_EXTLANG  3
@@ -671,6 +673,107 @@ static void get_icu_disp_value_src_php( const char* tag_name, INTERNAL_FUNCTION_
 }
 /* }}} */
 
+/* {{{
+ * common code shared by display keyword functions to get the value from ICU
+ }}} */
+static void get_icu_disp_keyword_value_src_php(const char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
+{
+	char*       loc_name            = NULL;
+	size_t      loc_name_len        = 0;
+	char*       keyword_name        = NULL;
+	size_t      keyword_name_len    = 0;
+	char*       disp_loc_name       = NULL;
+	size_t      disp_loc_name_len   = 0;
+	int         free_loc_name       = 0;
+
+	UChar*      disp_name           = NULL;
+	int32_t     disp_name_len       = 0;
+	int32_t     buflen              = 512;
+	UErrorCode  status              = U_ZERO_ERROR;
+
+	zend_string* u8str;
+	char*       msg                 = NULL;
+
+	intl_error_reset( NULL );
+
+	if (strcmp(tag_name, DISP_KEYWORD) == 0) {
+		ZEND_PARSE_PARAMETERS_START(1, 2)
+			Z_PARAM_PATH(keyword_name, keyword_name_len)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_PATH_OR_NULL(disp_loc_name, disp_loc_name_len)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_PARSE_PARAMETERS_START(2, 3)
+			Z_PARAM_PATH(loc_name, loc_name_len)
+			Z_PARAM_PATH(keyword_name, keyword_name_len)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_PATH_OR_NULL(disp_loc_name, disp_loc_name_len)
+		ZEND_PARSE_PARAMETERS_END();
+
+		if (loc_name_len > ULOC_FULLNAME_CAPACITY) {
+			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "name too long");
+			RETURN_FALSE;
+		}
+
+		if (loc_name_len == 0) {
+			loc_name = (char *)intl_locale_get_default();
+		}
+	}
+
+	if (!disp_loc_name) {
+		disp_loc_name = estrdup(intl_locale_get_default());
+		free_loc_name = 1;
+	}
+
+	do {
+		disp_name = reinterpret_cast<UChar *>(erealloc(disp_name, buflen * sizeof(UChar)));
+		disp_name_len = buflen;
+
+		if (strcmp(tag_name, DISP_KEYWORD) == 0) {
+			buflen = uloc_getDisplayKeyword(keyword_name, disp_loc_name, disp_name, disp_name_len, &status);
+		} else {
+			buflen = uloc_getDisplayKeywordValue(loc_name, keyword_name, disp_loc_name, disp_name, disp_name_len, &status);
+		}
+
+		/* U_STRING_NOT_TERMINATED_WARNING is admissible here; don't look for it */
+		if (U_FAILURE(status)) {
+			if (status == U_BUFFER_OVERFLOW_ERROR) {
+				status = U_ZERO_ERROR;
+				continue;
+			}
+
+			spprintf(&msg, 0, "unable to get locale %s", tag_name);
+			intl_error_set( NULL, status, msg);
+			efree(msg);
+			if (disp_name) {
+				efree(disp_name);
+			}
+			if (free_loc_name) {
+				efree((void *)disp_loc_name);
+				disp_loc_name = NULL;
+			}
+			RETURN_FALSE;
+		}
+	} while (buflen > disp_name_len);
+
+	if (free_loc_name) {
+		efree((void *)disp_loc_name);
+		disp_loc_name = NULL;
+	}
+
+	u8str = intl_convert_utf16_to_utf8(disp_name, buflen, &status);
+	efree(disp_name);
+	if (!u8str) {
+		spprintf(&msg, 0, "error converting display name for %s to UTF-8", tag_name);
+		intl_error_set( NULL, status, msg);
+		efree(msg);
+		RETURN_FALSE;
+	}
+
+	RETVAL_NEW_STR(u8str);
+}
+/* }}} */
+
 /* {{{ gets the name for the $locale in $in_locale or default_locale */
 U_CFUNC PHP_FUNCTION(locale_get_display_name)
 {
@@ -710,6 +813,20 @@ U_CFUNC PHP_FUNCTION(locale_get_display_region)
 U_CFUNC PHP_FUNCTION(locale_get_display_variant)
 {
 	get_icu_disp_value_src_php( LOC_VARIANT_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
+}
+/* }}} */
+
+/* {{{ gets the keyword display label in $in_locale or default_locale */
+U_CFUNC PHP_FUNCTION(locale_get_display_keyword)
+{
+	get_icu_disp_keyword_value_src_php(DISP_KEYWORD, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+/* {{{ gets the keyword value display label in $in_locale or default_locale */
+U_CFUNC PHP_FUNCTION(locale_get_display_keyword_value)
+{
+	get_icu_disp_keyword_value_src_php(DISP_KEYWORD_VALUE, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
