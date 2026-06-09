@@ -42,13 +42,20 @@ BEGIN_EXTERN_C()
 typedef struct _zend_tsrm_ls_cache zend_tsrm_ls_cache;
 # ifdef ZEND_TLS_DIRECT
 extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache;
+/* See zenc.c: zend_win_tsrm_cache_init */
+#  if defined(_WIN64)
+extern ZEND_TLS_API unsigned long zend_win_tsrm_cache_slot;
+#   define ZEND_TSRM_CACHE_PTR ((zend_tsrm_ls_cache*)__readgsqword(0x1480 + zend_win_tsrm_cache_slot * 8))
+#  else
+#   define ZEND_TSRM_CACHE_PTR (&_tsrm_ls_cache)
+#  endif
 # endif
 #endif
 
 /* Compiler */
 #ifdef ZTS
 # ifdef ZEND_TLS_DIRECT
-#  define CG(v) (_tsrm_ls_cache.cg.v)
+#  define CG(v) (ZEND_TSRM_CACHE_PTR->cg.v)
 # else
 #  define CG(v) ZEND_TSRMG(compiler_globals_id, zend_compiler_globals *, v)
 # endif
@@ -62,7 +69,7 @@ ZEND_API int zendparse(void);
 /* Executor */
 #ifdef ZTS
 # ifdef ZEND_TLS_DIRECT
-#  define EG(v) (_tsrm_ls_cache.eg.v)
+#  define EG(v) (ZEND_TSRM_CACHE_PTR->eg.v)
 # else
 #  define EG(v) ZEND_TSRMG(executor_globals_id, zend_executor_globals *, v)
 # endif
