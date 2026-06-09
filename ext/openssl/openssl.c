@@ -810,7 +810,7 @@ PHP_MINIT_FUNCTION(openssl)
 	ssl_stream_data_index = SSL_get_ex_new_index(0, "PHP stream index", NULL, NULL, NULL);
 
 	php_stream_xport_register("ssl", php_openssl_ssl_socket_factory);
-#ifndef OPENSSL_NO_SSL3
+#if OPENSSL_VERSION_NUMBER < 0x40000000L && !defined(OPENSSL_NO_SSL3)
 	php_stream_xport_register("sslv3", php_openssl_ssl_socket_factory);
 #endif
 	php_stream_xport_register("tls", php_openssl_ssl_socket_factory);
@@ -884,7 +884,7 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	php_unregister_url_stream_wrapper("ftps");
 
 	php_stream_xport_unregister("ssl");
-#ifndef OPENSSL_NO_SSL3
+#if OPENSSL_VERSION_NUMBER < 0x40000000L && !defined(OPENSSL_NO_SSL3)
 	php_stream_xport_unregister("sslv3");
 #endif
 	php_stream_xport_unregister("tls");
