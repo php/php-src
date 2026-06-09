@@ -23,6 +23,7 @@ extern zend_module_entry openssl_module_entry;
 #include "php_version.h"
 #define PHP_OPENSSL_VERSION PHP_VERSION
 
+#include <openssl/opensslconf.h>
 #include <openssl/opensslv.h>
 /* OpenSSL version check */
 #if OPENSSL_VERSION_NUMBER < 0x30000000L
