@@ -6,7 +6,7 @@ intl
 <?php
 if (!class_exists("Spoofchecker")) print 'skip';
 
-if (!method_exists(new Spoofchecker(), 'setRestrictionLevel')) print 'skip ICU version < 53';
+if (!method_exists(new Spoofchecker(), 'setRestrictionLevel')) print 'skip for ICU version < 53';
 ?>
 --FILE--
 <?php
