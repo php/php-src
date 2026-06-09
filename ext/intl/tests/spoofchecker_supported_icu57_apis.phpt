@@ -7,7 +7,7 @@ intl
 <?php
     $r = new ReflectionClass("Spoofchecker");
     if (false === $r->getConstant("SINGLE_SCRIPT_RESTRICTIVE")) {
-        die("skip Incompatible ICU version");
+        die("skip for ICU version < 53");
     }
 ?>
 --FILE--
