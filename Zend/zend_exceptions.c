@@ -685,8 +685,9 @@ ZEND_METHOD(Exception, getTraceAsString)
 	}
 
 	ZVAL_DEREF(trace);
-	/* Type should be guaranteed by property type. */
-	ZEND_ASSERT(Z_TYPE_P(trace) == IS_ARRAY);
+	if (UNEXPECTED(Z_TYPE_P(trace) != IS_ARRAY)) {
+		RETURN_EMPTY_STRING();
+	}
 	RETURN_NEW_STR(zend_trace_to_string(Z_ARRVAL_P(trace), /* include_main */ true));
 }
 /* }}} */
