@@ -157,8 +157,6 @@ typedef struct _php_ps_globals {
 	zend_string *session_started_filename;
 	uint32_t session_started_lineno;
 	int module_number;
-	/* Unused since the GC probability draw was made stateless; retained only
-	 * to preserve struct layout (ABI) on stable branches. */
 	php_random_status_state_pcgoneseq128xslrr64 random_state;
 	php_random_algo_with_state random;
 	zend_long gc_probability;
@@ -205,6 +203,7 @@ typedef struct _php_ps_globals {
 	bool in_save_handler; /* state if session is in save handler or not */
 	bool set_handler;     /* state if session module i setting handler or not */
 	zend_string *session_vars; /* serialized original session data */
+	bool random_seeded;
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
