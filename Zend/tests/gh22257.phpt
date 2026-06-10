@@ -1,7 +1,7 @@
 --TEST--
 GH-22257 (Type confusion / OOB read in Exception::getTraceAsString() with a non-array trace)
 --CREDITS--
-012git012
+Igor Sak-Sakovskiy (Positive Technologies)
 --FILE--
 <?php
 /* A crafted, deliberately truncated payload leaves Exception::$trace holding a
