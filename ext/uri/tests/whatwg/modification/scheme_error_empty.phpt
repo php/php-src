@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - scheme - empty string
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - query - null byte
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

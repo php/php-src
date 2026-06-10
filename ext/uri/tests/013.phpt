@@ -1,7 +1,5 @@
 --TEST--
 Test parsing of query strings
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

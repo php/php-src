@@ -1,7 +1,5 @@
 --TEST--
 Test property mutation - port
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

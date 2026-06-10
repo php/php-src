@@ -1,7 +1,5 @@
 --TEST--
 Test serialization and unserialization
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

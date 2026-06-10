@@ -1,7 +1,5 @@
 --TEST--
 Test the parse_url-based URI parser
---EXTENSIONS--
-uri
 zend_test
 --FILE--
 <?php

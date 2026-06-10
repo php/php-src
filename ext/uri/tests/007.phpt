@@ -1,7 +1,5 @@
 --TEST--
 Test URI creation errors
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - query - with leading question mark
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

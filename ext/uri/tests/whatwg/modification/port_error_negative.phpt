@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - port - negative number
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

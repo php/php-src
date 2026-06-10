@@ -1,7 +1,5 @@
 --TEST--
 Test UrlValidationError constructor error handling
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

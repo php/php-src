@@ -1,7 +1,5 @@
 --TEST--
 Test special path variants
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

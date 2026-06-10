@@ -1,7 +1,5 @@
 --TEST--
 Test RFC 3986 percent-encoding normalization
---EXTENSIONS--
-uri
 --FILE--
 <?php
 
