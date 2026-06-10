@@ -125,13 +125,8 @@ extern PHPAPI zend_class_entry *random_ce_Random_Randomizer;
 
 extern PHPAPI zend_class_entry *random_ce_Random_IntervalBoundary;
 
-static inline php_random_engine *php_random_engine_from_obj(zend_object *object) {
-	return ZEND_CONTAINER_OF(object, php_random_engine, std);
-}
-
-static inline php_random_randomizer *php_random_randomizer_from_obj(zend_object *object) {
-	return ZEND_CONTAINER_OF(object, php_random_randomizer, std);
-}
+#define php_random_engine_from_obj(object) ZEND_CONTAINER_OF(object, php_random_engine, std)
+#define php_random_randomizer_from_obj(object) ZEND_CONTAINER_OF(object, php_random_randomizer, std)
 
 # define Z_RANDOM_ENGINE_P(zval) php_random_engine_from_obj(Z_OBJ_P(zval))
 

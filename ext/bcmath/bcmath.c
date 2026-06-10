@@ -155,6 +155,16 @@ static zend_always_inline zend_result bcmath_check_scale(zend_long scale, uint32
 	return SUCCESS;
 }
 
+static zend_result bcmath_check_precision(zend_long precision, uint32_t arg_num)
+{
+	if (ZEND_LONG_INT_OVFL(precision)) {
+		zend_argument_value_error(arg_num, "must be between " ZEND_LONG_FMT " and %d",
+			(zend_long) ZEND_LONG_MIN, INT_MAX);
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 static void php_long2num(bc_num *num, zend_long lval)
 {
 	*num = bc_long2num(lval);
@@ -794,6 +804,10 @@ PHP_FUNCTION(bcround)
 		Z_PARAM_LONG(precision)
 		Z_PARAM_ENUM(rounding_mode, rounding_mode_ce)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (bcmath_check_precision(precision, 2) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	switch (rounding_mode) {
 		case ZEND_ENUM_RoundingMode_HalfAwayFromZero:
@@ -1793,6 +1807,10 @@ PHP_METHOD(BcMath_Number, round)
 		Z_PARAM_LONG(precision);
 		Z_PARAM_ENUM(rounding_mode, rounding_mode_ce);
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (bcmath_check_precision(precision, 1) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	switch (rounding_mode) {
 		case ZEND_ENUM_RoundingMode_HalfAwayFromZero:

@@ -51,10 +51,7 @@ typedef struct _spl_array_object {
 	zend_object       std;
 } spl_array_object;
 
-static inline spl_array_object *spl_array_from_obj(zend_object *obj) /* {{{ */ {
-	return ZEND_CONTAINER_OF(obj, spl_array_object, std);
-}
-/* }}} */
+#define spl_array_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_array_object, std)
 
 #define Z_SPLARRAY_P(zv)  spl_array_from_obj(Z_OBJ_P((zv)))
 
@@ -1482,9 +1479,9 @@ PHP_METHOD(ArrayObject, __unserialize)
 			RETURN_THROWS();
 		}
 
-		if (!instanceof_function(ce, zend_ce_iterator)) {
+		if (!instanceof_function(ce, spl_ce_ArrayIterator)) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-				"Cannot deserialize ArrayObject with iterator class '%s'; this class does not implement the Iterator interface",
+				"Cannot deserialize ArrayObject with iterator class '%s'; this class is not derived from ArrayIterator",
 				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
 			RETURN_THROWS();
 		}

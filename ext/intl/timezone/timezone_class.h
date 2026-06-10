@@ -46,9 +46,7 @@ typedef struct {
 	zend_object		zo;
 } TimeZone_object;
 
-static inline TimeZone_object *php_intl_timezone_fetch_object(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, TimeZone_object, zo);
-}
+#define php_intl_timezone_fetch_object(obj) ZEND_CONTAINER_OF(obj, TimeZone_object, zo)
 #define Z_INTL_TIMEZONE_P(zv) php_intl_timezone_fetch_object(Z_OBJ_P(zv))
 
 #define TIMEZONE_ERROR(to)						(to)->err

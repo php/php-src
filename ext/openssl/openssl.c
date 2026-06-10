@@ -216,7 +216,7 @@ PHP_METHOD(Openssl_Psk, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(psk) == 0) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 	if (ZSTR_LEN(psk) > PHP_OPENSSL_PSK_MAX_PSK_LEN) {

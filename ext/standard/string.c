@@ -914,7 +914,7 @@ PHP_FUNCTION(explode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(delim) == 0) {
-		zend_argument_must_not_be_empty_error(1);
+		zend_argument_value_error(1, "must not be empty, use str_split() to split a string into characters");
 		RETURN_THROWS();
 	}
 

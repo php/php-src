@@ -44,6 +44,12 @@ PHP 8.6 UPGRADE NOTES
     int, rather than float, on 64-bit platforms when parsing integer values.
   . The $type parameter of IntlBreakIterator::getPartsIterator() has been
     changed from string to int to match the underlying implementation.
+  . UConverter::transcode() now rejects from_subst and to_subst option values
+    longer than 127 bytes instead of silently truncating the length before
+    passing it to ICU.
+  . ResourceBundle::get() and resourcebundle_get() now report fallback-disabled
+    resource lookups with "without fallback to <locale>" instead of the
+    malformed "without fallback from to <locale>".
 
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
@@ -116,6 +122,11 @@ PHP 8.6 UPGRADE NOTES
         explicitly set this to "None" (and also set session.cookie_secure
         to 1).
     RFC: https://wiki.php.net/rfc/session_security_defaults
+
+- SOAP:
+  . WSDL/XML Schema parsing now rejects out-of-range integer values for
+    occurrence constraints and integer restriction facets. Negative minOccurs
+    and maxOccurs values are rejected as well.
 
 - SPL:
   . SplObjectStorage::getHash() implementations may no longer mutate any
@@ -219,6 +230,10 @@ PHP 8.6 UPGRADE NOTES
     This makes it possible to override the timestamp and names of files.
 
 - Streams:
+  . Added new stream errors API including new classes, enums, functions and
+    internal API. It is controlled using error_mode, error_store and
+    error_handler stream context options.
+    RFC: https://wiki.php.net/rfc/stream_errors
   . Added stream socket context option so_reuseaddr that allows disabling
     address reuse (SO_REUSEADDR) and explicitly uses SO_EXCLUSIVEADDRUSE on
     Windows.
@@ -321,9 +336,13 @@ PHP 8.6 UPGRADE NOTES
   . `clamp()` returns the given value if in range, else return the nearest
     bound.
     RFC: https://wiki.php.net/rfc/clamp_v2
+  . `stream_last_errors()` and `stream_clear_errors()`.
+    RFC: https://wiki.php.net/rfc/stream_errors
+  . stream_socket_get_crypto_status()
 
 - Zip:
   . Added ZipArchive::openString() method.
+  . Added ZipArchive::closeString() method.
 
 ========================================
 7. New Classes and Interfaces
@@ -338,6 +357,12 @@ PHP 8.6 UPGRADE NOTES
 - Standard:
   . enum SortDirection
     RFC: https://wiki.php.net/rfc/sort_direction_enum
+  . StreamError
+  . StreamException
+  . enum StreamErrorStore
+  . enum StreamErrorMode
+  . enum StreamErrorCode
+    RFC: https://wiki.php.net/rfc/stream_errors
 
 ========================================
 8. Removed Extensions and SAPIs
@@ -380,6 +405,9 @@ PHP 8.6 UPGRADE NOTES
 
 - Standard
   . ARRAY_FILTER_USE_VALUE.
+  . STREAM_CRYPTO_STATUS_NONE
+  . STREAM_CRYPTO_STATUS_WANT_READ
+  . STREAM_CRYPTO_STATUS_WANT_WRITE
 
 ========================================
 11. Changes to INI File Handling
@@ -447,7 +475,10 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of str_split().
 
 - URI:
-  . Reduced allocations when reading RFC3986 IPv6/IPFuture hosts and paths.
+  . Reduced allocations when reading IPv6/IPFuture hosts and paths with
+    Uri\Rfc3986\Uri.
+  . Improved performance and memory consumption when using normalizing
+    (non-raw) getters on already-normalized URIs with Uri\Rfc3986\Uri.
 
 - Zip:
   . Avoid string copies in ZipArchive::addFromString().

@@ -646,7 +646,7 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function open(string $filename, int $flags = 0): bool|int {}
 
-    public function openString(string $data): bool|int {}
+    public function openString(string $data = '', int $flags = 0): bool|int {}
 
     /**
      * @tentative-return-type
@@ -655,6 +655,8 @@ class ZipArchive implements Countable
 
     /** @tentative-return-type */
     public function close(): bool {}
+
+    public function closeString(): string|false {}
 
     /** @tentative-return-type */
     public function count(): int {}

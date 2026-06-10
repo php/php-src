@@ -85,10 +85,7 @@ struct _spl_dllist_it {
 	int                    flags;
 };
 
-static inline spl_dllist_object *spl_dllist_from_obj(zend_object *obj) /* {{{ */ {
-	return ZEND_CONTAINER_OF(obj, spl_dllist_object, std);
-}
-/* }}} */
+#define spl_dllist_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_dllist_object, std)
 
 #define Z_SPLDLLIST_P(zv)  spl_dllist_from_obj(Z_OBJ_P((zv)))
 

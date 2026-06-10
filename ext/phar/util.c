@@ -1326,18 +1326,18 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 
 static const char hexChars[] = "0123456789ABCDEF";
 
-static int phar_hex_str(const char *digest, size_t digest_len, char **signature) /* {{{ */
+static size_t phar_hex_str(const char *digest, size_t digest_len, char **signature) /* {{{ */
 {
-	int pos = -1;
+	size_t pos = 0;
 	size_t len = 0;
 
 	*signature = (char*)safe_pemalloc(digest_len, 2, 1, PHAR_G(persist));
 
 	for (; len < digest_len; ++len) {
-		(*signature)[++pos] = hexChars[((const unsigned char *)digest)[len] >> 4];
-		(*signature)[++pos] = hexChars[((const unsigned char *)digest)[len] & 0x0F];
+		(*signature)[pos++] = hexChars[((const unsigned char *)digest)[len] >> 4];
+		(*signature)[pos++] = hexChars[((const unsigned char *)digest)[len] & 0x0F];
 	}
-	(*signature)[++pos] = '\0';
+	(*signature)[pos] = '\0';
 	return pos;
 }
 /* }}} */
@@ -1363,7 +1363,7 @@ ZEND_ATTRIBUTE_NONNULL static bool phar_call_openssl_verify(
 	php_stream_rewind(fp);
 	zend_string *str = php_stream_copy_to_mem(fp, (size_t) end, false);
 	/* No content thus signing must fail */
-	if (UNEXPECTED(str == NULL)) {
+	if (UNEXPECTED(str == NULL || (size_t)end != ZSTR_LEN(str))) {
 		return false;
 	}
 

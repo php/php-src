@@ -543,6 +543,9 @@ static ZEND_FUNCTION(zend_call_method_if_exists)
 		}
 		RETURN_NULL();
 	}
+	if (Z_TYPE_P(return_value) == IS_REFERENCE) {
+		zend_unwrap_reference(return_value);
+	}
 }
 
 static ZEND_FUNCTION(zend_test_call_with_consumed_args)

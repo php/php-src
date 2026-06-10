@@ -48,9 +48,7 @@ typedef struct _dict_struct {
 zend_class_entry *enchant_broker_ce;
 static zend_object_handlers enchant_broker_handlers;
 
-static inline enchant_broker *enchant_broker_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, enchant_broker, std);
-}
+#define enchant_broker_from_obj(obj) ZEND_CONTAINER_OF(obj, enchant_broker, std)
 
 #define Z_ENCHANT_BROKER_P(zv) enchant_broker_from_obj(Z_OBJ_P(zv))
 
@@ -66,9 +64,7 @@ static zend_object *enchant_broker_create_object(zend_class_entry *class_type) {
 zend_class_entry *enchant_dict_ce;
 static zend_object_handlers enchant_dict_handlers;
 
-static inline enchant_dict *enchant_dict_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, enchant_dict, std);
-}
+#define enchant_dict_from_obj(obj) ZEND_CONTAINER_OF(obj, enchant_dict, std)
 
 #define Z_ENCHANT_DICT_P(zv) enchant_dict_from_obj(Z_OBJ_P(zv))
 

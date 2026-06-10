@@ -519,11 +519,15 @@ PHP_FUNCTION(bzdecompress)
 	bzs.bzalloc = NULL;
 	bzs.bzfree = NULL;
 
+	if (source_len > UINT_MAX) {
+		zend_argument_value_error(1, "must have a length less than or equal to %u", UINT_MAX);
+		RETURN_THROWS();
+	}
+
 	if (BZ2_bzDecompressInit(&bzs, 0, (int)small) != BZ_OK) {
 		RETURN_FALSE;
 	}
 
-	// TODO Check source string length fits in unsigned int
 	bzs.next_in = source;
 	bzs.avail_in = source_len;
 

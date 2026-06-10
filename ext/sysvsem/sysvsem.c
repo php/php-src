@@ -82,9 +82,7 @@ ZEND_GET_MODULE(sysvsem)
 zend_class_entry *sysvsem_ce;
 static zend_object_handlers sysvsem_object_handlers;
 
-static inline sysvsem_sem *sysvsem_from_obj(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, sysvsem_sem, std);
-}
+#define sysvsem_from_obj(obj) ZEND_CONTAINER_OF(obj, sysvsem_sem, std)
 
 #define Z_SYSVSEM_P(zv) sysvsem_from_obj(Z_OBJ_P(zv))
 

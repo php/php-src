@@ -36,9 +36,7 @@ typedef struct {
 	zend_object	zo;
 } IntlDatePatternGenerator_object;
 
-static inline IntlDatePatternGenerator_object *php_intl_datepatterngenerator_fetch_object(zend_object *obj) {
-	return ZEND_CONTAINER_OF(obj, IntlDatePatternGenerator_object, zo);
-}
+#define php_intl_datepatterngenerator_fetch_object(obj) ZEND_CONTAINER_OF(obj, IntlDatePatternGenerator_object, zo)
 #define Z_INTL_DATEPATTERNGENERATOR_P(zv) php_intl_datepatterngenerator_fetch_object(Z_OBJ_P(zv))
 
 #define DTPATTERNGEN_ERROR(dtpgo)		(dtpgo)->err
