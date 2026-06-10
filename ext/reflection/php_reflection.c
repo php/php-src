@@ -1934,6 +1934,7 @@ ZEND_METHOD(ReflectionFunction, isAnonymous)
 }
 /* }}} */
 
+
 /* {{{ Returns whether this function has been disabled or not */
 ZEND_METHOD(ReflectionFunction, isDisabled)
 {

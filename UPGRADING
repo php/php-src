@@ -248,6 +248,14 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/override_constants
   . Implemented partial function application
     RFC: https://wiki.php.net/rfc/partial_function_application_v2
+  . Closures declared in a class's constant expressions (anonymous closures
+    and first-class callables, in attribute arguments and parameter default
+    values) can now be serialized. The payload is a reference to the
+    declaration site and carries no code; unserialize() re-evaluates that
+    declaration, so it can only produce a closure the named class declares.
+    References are verified on resolve and are valid for the code revision
+    that produced them. Runtime-created and bound closures still refuse.
+    RFC: https://wiki.php.net/rfc/serializable_closures
 
 - Curl:
   . curl_getinfo() return array now includes a new size_delivered key, which
