@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - host - too small number
+Test Uri\Rfc3986\Uri component modification - port - too small number
 --EXTENSIONS--
 uri
 --FILE--
