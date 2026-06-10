@@ -19,8 +19,11 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_ast.h"
+#include "zend_attributes.h"
 #include "zend_closures.h"
 #include "zend_exceptions.h"
+#include "zend_execute.h"
 #include "zend_interfaces.h"
 #include "zend_objects.h"
 #include "zend_objects_API.h"
@@ -33,6 +36,10 @@ typedef struct _zend_closure {
 	zval              this_ptr;
 	zend_class_entry *called_scope;
 	zif_handler       orig_internal_handler;
+	/* The class whose constant expressions declared this closure, when it was
+	 * created by evaluating a first-class callable in one of them (a fake
+	 * closure carrying ZEND_ACC2_CONSTEXPR_CLOSURE). */
+	zend_class_entry *constexpr_site;
 } zend_closure;
 
 /* non-static since it needs to be referenced */
@@ -40,6 +47,8 @@ ZEND_API zend_class_entry *zend_ce_closure;
 static zend_object_handlers closure_handlers;
 
 static zend_result zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
+static ZEND_COLD ZEND_NAMED_FUNCTION(zend_closure_uninitialized_handler);
+static void zend_closure_init_ex(zend_closure *closure, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr, bool is_fake);
 
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
@@ -448,6 +457,749 @@ ZEND_METHOD(Closure, getCurrent)
 	RETURN_OBJ_COPY(obj);
 }
 
+/* Closures declared in constant expressions
+ *
+ * Closures declared in constant expressions are static, capture no variables
+ * and are fully described by their compiled op_array. This makes them
+ * addressable by (class, id), where the id is the position of the closure in
+ * a canonical walk over all constant expression ASTs that are reachable from
+ * the class and that are not subject to in-place evaluation: attribute
+ * arguments and parameter default values, including those of nested
+ * functions. Class constant values and property default values are evaluated
+ * (and their AST freed) in place, so closures declared there are not
+ * addressable this way.
+ *
+ * The walk visits candidates in a deterministic order that only depends on
+ * the compiled class, not on runtime evaluation state, so ids computed by one
+ * process can be resolved by another process running the same code.
+ */
+
+/* Reflection-element kinds for the site descriptor. */
+typedef enum _zend_constexpr_site_kind {
+	ZEND_CEXPR_SITE_CLASS,
+	ZEND_CEXPR_SITE_CONST,
+	ZEND_CEXPR_SITE_PROP,
+	ZEND_CEXPR_SITE_HOOK,
+	ZEND_CEXPR_SITE_METHOD,
+} zend_constexpr_site_kind;
+
+typedef struct zend_constexpr_closure_walk {
+	/* Rank of the next closure WITHIN the current reflection element; reset to
+	 * 0 at each element boundary by zend_constexpr_closure_walk_class. A
+	 * reference is (element site, local rank), not a single class-global rank,
+	 * so adding/removing/reordering closures in one element does not renumber
+	 * closures in other elements. */
+	uint32_t next_id;
+	/* When by_id is true, search for target_id (a LOCAL rank among the
+	 * anonymous closures of a single element; the caller has already
+	 * positioned the walk on that element). When target_key is set, search
+	 * for the first-class callable reference matching that "Called::method"
+	 * / "function" key. Otherwise search for the op_array of an anonymous
+	 * closure identified by its opcodes. Serialization and resolution both
+	 * match first-class callables by key, so a closure is serializable
+	 * exactly when its reference resolves. */
+	bool by_id;
+	uint32_t target_id;
+	const char *target_key;
+	size_t target_key_len;
+	const zend_op *opcodes;
+	/* The class being walked; used to resolve self/parent references. */
+	zend_class_entry *site_class;
+	/* The reflection element currently being walked, kept as a cheap
+	 * (kind, borrowed name, hook) descriptor rather than a built string, so no
+	 * allocation happens for the elements the walk merely passes through. The
+	 * "<site>@<rank>" string is materialized once, from found_*, on a match. */
+	zend_constexpr_site_kind cur_kind;
+	zend_string *cur_name;
+	uint8_t cur_hook;
+	/* The found site: either a ZEND_AST_OP_ARRAY node, or a ZEND_AST_CALL /
+	 * ZEND_AST_STATIC_CALL node whose argument list is a first-class callable
+	 * placeholder. */
+	zend_ast *found;
+	uint32_t found_id;
+	zend_constexpr_site_kind found_kind;
+	zend_string *found_name;
+	uint8_t found_hook;
+} zend_constexpr_closure_walk;
+
+static bool zend_constexpr_closure_walk_op_array(zend_constexpr_closure_walk *w, zend_op_array *op_array);
+
+/* Whether the first-class callable declared by the given site matches a
+ * "Called::method" / "function" key. Pure string comparisons: class
+ * references are compile-time resolved names ('self'/'parent' resolve
+ * against the walked class), so no class or function is ever loaded. */
+static bool zend_constexpr_fcc_key_matches(const zend_constexpr_closure_walk *w, const zend_ast *ast)
+{
+	const char *key = w->target_key;
+	size_t key_len = w->target_key_len;
+	const char *sep = NULL;
+
+	for (size_t i = 0; i + 1 < key_len; i++) {
+		if (key[i] == ':' && key[i + 1] == ':') {
+			sep = key + i;
+			break;
+		}
+	}
+
+	if (ast->kind == ZEND_AST_STATIC_CALL) {
+		const zend_ast *class_ast = ast->child[0];
+		zend_string *method = zend_ast_get_str(ast->child[1]);
+		zend_string *ref_name;
+
+		if (!sep) {
+			return false;
+		}
+
+		switch (class_ast->attr >> ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT) {
+			case ZEND_FETCH_CLASS_SELF:
+				ref_name = w->site_class->name;
+				break;
+			case ZEND_FETCH_CLASS_PARENT:
+				ref_name = w->site_class->parent ? w->site_class->parent->name : NULL;
+				break;
+			default:
+				ref_name = zend_ast_get_str((zend_ast *) class_ast);
+				break;
+		}
+
+		return ref_name
+			&& ZSTR_LEN(ref_name) == (size_t) (sep - key)
+			&& zend_binary_strcasecmp(ZSTR_VAL(ref_name), ZSTR_LEN(ref_name), key, sep - key) == 0
+			&& ZSTR_LEN(method) == key_len - (sep - key) - 2
+			&& zend_binary_strcasecmp(ZSTR_VAL(method), ZSTR_LEN(method), sep + 2, ZSTR_LEN(method)) == 0;
+	}
+
+	ZEND_ASSERT(ast->kind == ZEND_AST_CALL);
+
+	if (sep) {
+		return false;
+	}
+
+	zend_string *fname = zend_ast_get_str(ast->child[0]);
+	if (ZSTR_LEN(fname) == key_len
+	 && zend_binary_strcasecmp(ZSTR_VAL(fname), ZSTR_LEN(fname), key, key_len) == 0) {
+		return true;
+	}
+	/* Non-fully-qualified names in namespaced code may resolve to the global
+	 * function, whose name is what serialization emits as the key. */
+	if (ast->child[0]->attr != ZEND_NAME_FQ) {
+		const char *backslash = zend_memrchr(ZSTR_VAL(fname), '\\', ZSTR_LEN(fname));
+		if (backslash) {
+			size_t tail_len = ZSTR_LEN(fname) - (backslash + 1 - ZSTR_VAL(fname));
+			return tail_len == key_len
+				&& zend_binary_strcasecmp(backslash + 1, tail_len, key, key_len) == 0;
+		}
+	}
+	return false;
+}
+
+static bool zend_constexpr_closure_visit_op_array(zend_constexpr_closure_walk *w, zend_ast *ast)
+{
+	zend_op_array *op_array = zend_ast_get_op_array(ast)->op_array;
+	uint32_t id = w->next_id++;
+
+	if (w->by_id ? w->target_id == id : (w->opcodes && w->opcodes == op_array->opcodes)) {
+		w->found = ast;
+		w->found_id = id;
+		w->found_kind = w->cur_kind;
+		w->found_name = w->cur_name;
+		w->found_hook = w->cur_hook;
+		return true;
+	}
+
+	/* The closure may itself declare closures in its attributes or in its
+	 * parameter default values. */
+	return zend_constexpr_closure_walk_op_array(w, op_array);
+}
+
+static bool zend_constexpr_closure_walk_ast(zend_constexpr_closure_walk *w, zend_ast *ast)
+{
+	if (!ast) {
+		return false;
+	}
+
+	switch (ast->kind) {
+		case ZEND_AST_OP_ARRAY:
+			return zend_constexpr_closure_visit_op_array(w, ast);
+		case ZEND_AST_ZVAL:
+		case ZEND_AST_CONSTANT:
+			return false;
+		case ZEND_AST_CALL:
+		case ZEND_AST_STATIC_CALL: {
+			zend_ast *args = ast->kind == ZEND_AST_CALL ? ast->child[1] : ast->child[2];
+
+			/* In constant expressions, calls only exist in their first-class
+			 * callable form: each one is a closure declaration site, keyed by
+			 * the name of its target. It does not consume a rank: adding or
+			 * removing a callable reference never renumbers the anonymous
+			 * closures of the element. */
+			if (args && args->kind == ZEND_AST_CALLABLE_CONVERT) {
+				if (w->target_key && zend_constexpr_fcc_key_matches(w, ast)) {
+					w->found = ast;
+					w->found_kind = w->cur_kind;
+					w->found_name = w->cur_name;
+					w->found_hook = w->cur_hook;
+					return true;
+				}
+				return false;
+			}
+			break;
+		}
+		case ZEND_AST_CALLABLE_CONVERT:
+			/* Visited through its enclosing call node. */
+			return false;
+		default:
+			break;
+	}
+
+	if (zend_ast_is_list(ast)) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		for (uint32_t i = 0; i < list->children; i++) {
+			if (zend_constexpr_closure_walk_ast(w, list->child[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	if (zend_ast_is_decl(ast)) {
+		/* Closure declarations in constant expressions are compiled to
+		 * ZEND_AST_OP_ARRAY nodes, so declarations cannot appear here. */
+		ZEND_UNREACHABLE();
+		return false;
+	}
+
+	uint32_t children = zend_ast_get_num_children(ast);
+	for (uint32_t i = 0; i < children; i++) {
+		if (zend_constexpr_closure_walk_ast(w, ast->child[i])) {
+			return true;
+		}
+	}
+	return false;
+}
+
+static bool zend_constexpr_closure_walk_zval(zend_constexpr_closure_walk *w, zval *zv)
+{
+	if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
+		return zend_constexpr_closure_walk_ast(w, Z_ASTVAL_P(zv));
+	}
+	return false;
+}
+
+static bool zend_constexpr_closure_walk_attributes(zend_constexpr_closure_walk *w, HashTable *attributes)
+{
+	if (!attributes) {
+		return false;
+	}
+
+	/* Attribute lists are always packed (c.f. zend_get_attribute()). */
+	ZEND_HASH_PACKED_FOREACH_PTR(attributes, zend_attribute *attr) {
+		for (uint32_t i = 0; i < attr->argc; i++) {
+			if (zend_constexpr_closure_walk_zval(w, &attr->args[i].value)) {
+				return true;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return false;
+}
+
+static bool zend_constexpr_closure_walk_op_array(zend_constexpr_closure_walk *w, zend_op_array *op_array)
+{
+	if (op_array->type != ZEND_USER_FUNCTION) {
+		return false;
+	}
+
+	if (zend_constexpr_closure_walk_attributes(w, op_array->attributes)) {
+		return true;
+	}
+
+	/* Parameter default values are the op2 of the RECV_INIT for each optional
+	 * parameter, at the head of the op array in parameter order. */
+	for (uint32_t i = 0; i < op_array->num_args; i++) {
+		const zend_op *recv = &op_array->opcodes[i];
+		if (recv->opcode == ZEND_RECV_INIT
+		 && zend_constexpr_closure_walk_zval(w, RT_CONSTANT(recv, recv->op2))) {
+			return true;
+		}
+	}
+
+	for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+		if (zend_constexpr_closure_walk_op_array(w, op_array->dynamic_func_defs[i])) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/* Enter a reflection element: record its (kind, borrowed name, hook) descriptor
+ * and restart the local rank. No allocation for elements merely passed through;
+ * the "<site>@<rank>" string is built once from found_* on a match. */
+#define WALK_ELEMENT(kind_, name_, hook_) \
+	(w->cur_kind = (kind_), w->cur_name = (name_), w->cur_hook = (hook_), w->next_id = 0)
+
+static bool zend_constexpr_closure_walk_class(zend_constexpr_closure_walk *w, zend_class_entry *ce)
+{
+	zend_string *cname, *pname;
+	zend_class_constant *c;
+	zend_property_info *prop_info;
+	zend_function *func;
+
+	if (ce->type != ZEND_USER_CLASS) {
+		return false;
+	}
+
+	WALK_ELEMENT(ZEND_CEXPR_SITE_CLASS, NULL, 0);
+	if (zend_constexpr_closure_walk_attributes(w, ce->attributes)) {
+		return true;
+	}
+
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->constants_table, cname, c) {
+		WALK_ELEMENT(ZEND_CEXPR_SITE_CONST, cname, 0);
+		if (zend_constexpr_closure_walk_attributes(w, c->attributes)) {
+			return true;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->properties_info, pname, prop_info) {
+		WALK_ELEMENT(ZEND_CEXPR_SITE_PROP, pname, 0);
+		if (zend_constexpr_closure_walk_attributes(w, prop_info->attributes)) {
+			return true;
+		}
+		if (prop_info->hooks) {
+			for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+				if (prop_info->hooks[i]) {
+					WALK_ELEMENT(ZEND_CEXPR_SITE_HOOK, pname, (uint8_t) i);
+					if (zend_constexpr_closure_walk_op_array(w, &prop_info->hooks[i]->op_array)) {
+						return true;
+					}
+				}
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, func) {
+		WALK_ELEMENT(ZEND_CEXPR_SITE_METHOD, func->common.function_name, 0);
+		if (zend_constexpr_closure_walk_op_array(w, &func->op_array)) {
+			return true;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return false;
+}
+
+#undef WALK_ELEMENT
+
+/* Build the "<site>" element descriptor for a found closure: the empty string
+ * for the class itself, a constant or enum-case name, "$prop" for a property,
+ * "$prop::get()" / "$prop::set()" for a property hook, "name()" for a method. */
+static zend_string *zend_constexpr_closure_build_site(const zend_constexpr_closure_walk *w)
+{
+	switch (w->found_kind) {
+		case ZEND_CEXPR_SITE_CLASS:
+			return ZSTR_EMPTY_ALLOC();
+		case ZEND_CEXPR_SITE_CONST:
+			return zend_string_copy(w->found_name);
+		case ZEND_CEXPR_SITE_PROP:
+			return zend_strpprintf(0, "$%s", ZSTR_VAL(w->found_name));
+		case ZEND_CEXPR_SITE_HOOK:
+			return zend_strpprintf(0, "$%s::%s()", ZSTR_VAL(w->found_name),
+				w->found_hook == ZEND_PROPERTY_HOOK_GET ? "get" : "set");
+		case ZEND_CEXPR_SITE_METHOD:
+			return zend_strpprintf(0, "%s()", ZSTR_VAL(w->found_name));
+		default:
+			ZEND_UNREACHABLE();
+			return NULL;
+	}
+}
+
+/* Resolve (element site, local rank) to a declaration-site AST: locate the one
+ * named element by a direct hash lookup, then walk only it. This is where
+ * element-scoping pays off on decode: instead of a class-global scan to the
+ * Nth site, resolution is bounded by a single element's const-expr surface. */
+static zend_ast *zend_constexpr_closure_site_by_element(
+	zend_class_entry *ce, const char *site, size_t site_len,
+	uint32_t rank, const char *key, size_t key_len)
+{
+	zend_constexpr_closure_walk w = {0};
+
+	if (ce->type != ZEND_USER_CLASS) {
+		return NULL;
+	}
+
+	if (key) {
+		w.target_key = key;
+		w.target_key_len = key_len;
+	} else {
+		w.by_id = true;
+		w.target_id = rank;
+	}
+	w.site_class = ce;
+
+	if (site_len == 0) {
+		/* class attributes */
+		zend_constexpr_closure_walk_attributes(&w, ce->attributes);
+		return w.found;
+	}
+
+	if (site[0] == '$') {
+		/* property "$name" or hook "$name::get()" / "$name::set()" */
+		const char *sep = NULL;
+		for (size_t i = 1; i + 1 < site_len; i++) {
+			if (site[i] == ':' && site[i + 1] == ':') {
+				sep = site + i;
+				break;
+			}
+		}
+		size_t name_len = (sep ? (size_t) (sep - site) : site_len) - 1;
+		zend_property_info *prop = zend_hash_str_find_ptr(&ce->properties_info, site + 1, name_len);
+		if (!prop) {
+			return NULL;
+		}
+		if (!sep) {
+			zend_constexpr_closure_walk_attributes(&w, prop->attributes);
+			return w.found;
+		}
+		const char *spec = sep + 2;
+		size_t spec_len = site_len - (spec - site);
+		uint32_t hook_kind;
+		if (spec_len == 5 && memcmp(spec, "get()", 5) == 0) {
+			hook_kind = ZEND_PROPERTY_HOOK_GET;
+		} else if (spec_len == 5 && memcmp(spec, "set()", 5) == 0) {
+			hook_kind = ZEND_PROPERTY_HOOK_SET;
+		} else {
+			return NULL;
+		}
+		if (!prop->hooks || !prop->hooks[hook_kind]
+		 || prop->hooks[hook_kind]->type != ZEND_USER_FUNCTION) {
+			return NULL;
+		}
+		zend_constexpr_closure_walk_op_array(&w, &prop->hooks[hook_kind]->op_array);
+		return w.found;
+	}
+
+	if (site_len >= 2 && site[site_len - 2] == '(' && site[site_len - 1] == ')') {
+		/* method "name()" */
+		zend_function *func = zend_hash_str_find_ptr_lc(&ce->function_table, site, site_len - 2);
+		if (!func || func->type != ZEND_USER_FUNCTION) {
+			return NULL;
+		}
+		zend_constexpr_closure_walk_op_array(&w, &func->op_array);
+		return w.found;
+	}
+
+	/* class constant / enum case "NAME" */
+	zend_class_constant *c = zend_hash_str_find_ptr(&ce->constants_table, site, site_len);
+	if (!c) {
+		return NULL;
+	}
+	zend_constexpr_closure_walk_attributes(&w, c->attributes);
+	return w.found;
+}
+
+/* Instantiate the closure a declaration site declares, exactly as evaluating
+ * its constant expression would: an anonymous closure from its op_array, a
+ * first-class callable by re-evaluating the reference in the scope of the
+ * declaring class, re-running its visibility checks. */
+static zend_result zend_constexpr_closure_instantiate(zend_ast *site, zend_class_entry *ce, zval *result)
+{
+	if (site->kind == ZEND_AST_OP_ARRAY) {
+		zend_create_closure(result, (zend_function *) zend_ast_get_op_array(site)->op_array, ce, ce, NULL);
+		return SUCCESS;
+	}
+	return zend_ast_evaluate(result, site, ce);
+}
+
+static zend_result zend_constexpr_closure_ref(zend_object *closure_obj, zend_class_entry **ce,
+	zend_string **site, zval *key, uint32_t *hash)
+{
+	const zend_closure *closure = (const zend_closure *) closure_obj;
+	zend_constexpr_closure_walk w = {0};
+	zend_class_entry *site_class;
+	zend_string *name = NULL;
+
+	if (!(closure->func.common.fn_flags2 & ZEND_ACC2_CONSTEXPR_CLOSURE)) {
+		return FAILURE;
+	}
+
+	if (!(closure->func.common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
+		/* Anonymous closure declared in a constant expression: identified by
+		 * its op_array, found in the class it is scoped to. */
+		if (closure->func.type != ZEND_USER_FUNCTION) {
+			return FAILURE;
+		}
+		site_class = closure->func.common.scope;
+		w.opcodes = closure->func.op_array.opcodes;
+	} else {
+		/* First-class callable evaluated in a constant expression: identified
+		 * by the name key its reference serializes to, matched with the same
+		 * comparison resolution uses, so the closure is serializable exactly
+		 * when its reference resolves. */
+		if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
+			return FAILURE;
+		}
+		site_class = closure->constexpr_site;
+		if (closure->func.common.scope && closure->called_scope) {
+			zend_string *called = closure->called_scope->name;
+			zend_string *method = closure->func.common.function_name;
+			name = zend_string_concat3(
+				ZSTR_VAL(called), ZSTR_LEN(called), "::", 2, ZSTR_VAL(method), ZSTR_LEN(method));
+		} else if (!closure->func.common.scope) {
+			name = zend_string_copy(closure->func.common.function_name);
+		} else {
+			return FAILURE;
+		}
+		w.target_key = ZSTR_VAL(name);
+		w.target_key_len = ZSTR_LEN(name);
+	}
+
+	w.site_class = site_class;
+
+	if (!site_class || site_class->type != ZEND_USER_CLASS || (site_class->ce_flags & ZEND_ACC_ANON_CLASS)
+	 || !zend_constexpr_closure_walk_class(&w, site_class)) {
+		if (name) {
+			zend_string_release_ex(name, 0);
+		}
+		return FAILURE;
+	}
+
+	*ce = site_class;
+	/* Reference [class, site, key, hash]: <site> names the declaring element;
+	 * <key> is the closure's local rank for an anonymous closure, with <hash> a
+	 * non-zero hash of its code so a reordering of the element's declarations
+	 * cannot make the rank name a different closure; or a callable name for a
+	 * first-class callable, which cannot drift and so carries a zero hash. */
+	*site = zend_constexpr_closure_build_site(&w);
+	if (w.found->kind == ZEND_AST_OP_ARRAY) {
+		ZVAL_LONG(key, w.found_id);
+		*hash = zend_ast_get_op_array(w.found)->code_hash;
+	} else {
+		ZVAL_STR(key, name);
+		name = NULL;
+		*hash = 0;
+	}
+	if (name) {
+		zend_string_release_ex(name, 0);
+	}
+	return SUCCESS;
+}
+
+ZEND_API void zend_closure_mark_as_constexpr_fcc(zval *closure_zv, zend_class_entry *site_class)
+{
+	zend_closure *closure = (zend_closure *) Z_OBJ_P(closure_zv);
+
+	ZEND_ASSERT(closure->func.common.fn_flags & ZEND_ACC_FAKE_CLOSURE);
+	closure->func.common.fn_flags2 |= ZEND_ACC2_CONSTEXPR_CLOSURE;
+	closure->constexpr_site = site_class;
+}
+
+/* Serialize a closure as a reference to the declaration site of the
+       constant expression that declared it: either an anonymous closure
+       declaration, or a first-class callable reference */
+ZEND_METHOD(Closure, __serialize)
+{
+	zend_class_entry *ce;
+	zend_string *site;
+	zval key, payload, tagged;
+	uint32_t hash;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (zend_constexpr_closure_ref(Z_OBJ_P(ZEND_THIS), &ce, &site, &key, &hash) == FAILURE) {
+		/* Only closures declared in a constant expression are serializable
+		 * (handled above); every other closure stays non-serializable, with
+		 * the same message as before this feature existed. */
+		zend_throw_exception(NULL, "Serialization of 'Closure' is not allowed", 0);
+		RETURN_THROWS();
+	}
+
+	/* Tagged-union payload: [ <object properties>, [ <tag>, <tag payload> ] ].
+	 * A Closure has no properties, so the first slot is an empty array; the
+	 * tag names the reference kind so the format can grow new kinds without
+	 * ambiguity. The "const-expr" reference is [class, site, key, hash]: key is
+	 * an int rank (anonymous) or a callable name (first-class callable), and
+	 * hash is the anonymous code hash, 0 when there is none. */
+	array_init_size(&payload, 4);
+	add_next_index_str(&payload, zend_string_copy(ce->name));
+	add_next_index_str(&payload, site);
+	add_next_index_zval(&payload, &key);
+	add_next_index_long(&payload, hash);
+
+	array_init_size(&tagged, 2);
+	add_next_index_string(&tagged, "const-expr");
+	add_next_index_zval(&tagged, &payload);
+
+	array_init_size(return_value, 2);
+	add_next_index_array(return_value, zend_new_array(0));
+	add_next_index_zval(return_value, &tagged);
+}
+
+/* Build a "<site>@<key>" display of a reference, for error messages only. */
+static zend_string *zend_constexpr_closure_ref_display(zval *z_site, zval *z_key)
+{
+	if (Z_TYPE_P(z_key) == IS_LONG) {
+		return zend_strpprintf(0, "%s@" ZEND_LONG_FMT, Z_STRVAL_P(z_site), Z_LVAL_P(z_key));
+	}
+	return zend_strpprintf(0, "%s@%s", Z_STRVAL_P(z_site), Z_STRVAL_P(z_key));
+}
+
+/* Recreate a closure from a reference to its declaration site */
+ZEND_METHOD(Closure, __unserialize)
+{
+	zend_closure *closure = (zend_closure *) Z_OBJ_P(ZEND_THIS);
+	HashTable *data;
+	zval *z_class;
+	zend_class_entry *ce;
+	zend_ast *site;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (closure->func.type != ZEND_INTERNAL_FUNCTION
+	 || closure->func.internal_function.handler != zend_closure_uninitialized_handler) {
+		zend_throw_exception(NULL, "Cannot unserialize an already initialized Closure", 0);
+		RETURN_THROWS();
+	}
+
+	/* Tagged-union payload: [ <object properties>, [ <tag>, <tag payload> ] ].
+	 * Only the "const-expr" tag is known; an unknown tag from a future format
+	 * is rejected cleanly rather than misread. */
+	zval *z_props, *z_tagged, *z_tag, *z_payload;
+	HashTable *tagged, *payload;
+
+	z_props = zend_hash_index_find(data, 0);
+	z_tagged = zend_hash_index_find(data, 1);
+	if (zend_hash_num_elements(data) != 2 || !z_props || !z_tagged) {
+		zend_throw_exception(NULL, "Invalid serialization data for Closure object", 0);
+		RETURN_THROWS();
+	}
+	ZVAL_DEREF(z_tagged);
+	if (Z_TYPE_P(z_tagged) != IS_ARRAY) {
+		zend_throw_exception(NULL, "Invalid serialization data for Closure object", 0);
+		RETURN_THROWS();
+	}
+	tagged = Z_ARRVAL_P(z_tagged);
+	z_tag = zend_hash_index_find(tagged, 0);
+	z_payload = zend_hash_index_find(tagged, 1);
+	if (zend_hash_num_elements(tagged) != 2 || !z_tag || !z_payload) {
+		zend_throw_exception(NULL, "Invalid serialization data for Closure object", 0);
+		RETURN_THROWS();
+	}
+	ZVAL_DEREF(z_tag);
+	ZVAL_DEREF(z_payload);
+	if (Z_TYPE_P(z_tag) != IS_STRING || !zend_string_equals_literal(Z_STR_P(z_tag), "const-expr")
+	 || Z_TYPE_P(z_payload) != IS_ARRAY) {
+		zend_throw_exception(NULL, "Invalid serialization data for Closure object", 0);
+		RETURN_THROWS();
+	}
+	payload = Z_ARRVAL_P(z_payload);
+
+	zval *z_site, *z_key, *z_hash;
+	z_class = zend_hash_index_find(payload, 0);
+	z_site = zend_hash_index_find(payload, 1);
+	z_key = zend_hash_index_find(payload, 2);
+	z_hash = zend_hash_index_find(payload, 3);
+	if (z_class) { ZVAL_DEREF(z_class); }
+	if (z_site) { ZVAL_DEREF(z_site); }
+	if (z_key) { ZVAL_DEREF(z_key); }
+	if (z_hash) { ZVAL_DEREF(z_hash); }
+	if (zend_hash_num_elements(payload) != 4
+	 || !z_class || Z_TYPE_P(z_class) != IS_STRING
+	 || !z_site || Z_TYPE_P(z_site) != IS_STRING
+	 || !z_key || (Z_TYPE_P(z_key) != IS_LONG && Z_TYPE_P(z_key) != IS_STRING)
+	 || !z_hash || Z_TYPE_P(z_hash) != IS_LONG) {
+		zend_throw_exception(NULL, "Invalid serialization data for Closure object", 0);
+		RETURN_THROWS();
+	}
+
+	/* Honor unserialize()'s allowed_classes: resolving the reference autoloads
+	 * the named class and pulls a closure out of it, so a class the filter
+	 * excludes must not be reachable through a Closure payload. Outside
+	 * unserialize() (a direct __unserialize() call) the hook allows everything. */
+	if (zend_unserialize_class_allowed && !zend_unserialize_class_allowed(Z_STR_P(z_class))) {
+		zend_throw_exception_ex(NULL, 0,
+			"Invalid serialization data for Closure object (class \"%s\" is not allowed)",
+			Z_STRVAL_P(z_class));
+		RETURN_THROWS();
+	}
+
+	ce = zend_lookup_class(Z_STR_P(z_class));
+	if (!ce || ce->type != ZEND_USER_CLASS) {
+		if (!EG(exception)) {
+			zend_throw_exception_ex(NULL, 0,
+				"Invalid serialization data for Closure object (cannot load class \"%s\")",
+				Z_STRVAL_P(z_class));
+		}
+		RETURN_THROWS();
+	}
+
+	/* Resolve [site, key] to a declaration-site AST. A LONG key is the local
+	 * rank of an anonymous closure; a STRING key is a first-class callable name.
+	 * A non-zero hash verifies the rank against the closure's code, so a
+	 * reordering of the element's declarations cannot silently resolve to a
+	 * different closure; a callable name cannot drift and carries no hash. A
+	 * producer that cannot compute the hash passes 0, resolving the rank by
+	 * position without verification. */
+	uint32_t verify_hash = 0;
+	if (Z_TYPE_P(z_key) == IS_LONG) {
+		zend_long rank = Z_LVAL_P(z_key);
+		site = (rank >= 0 && rank <= UINT32_MAX)
+			? zend_constexpr_closure_site_by_element(ce, Z_STRVAL_P(z_site), Z_STRLEN_P(z_site), (uint32_t) rank, NULL, 0)
+			: NULL;
+		verify_hash = (uint32_t) Z_LVAL_P(z_hash);
+	} else if (Z_LVAL_P(z_hash) == 0 && Z_STRLEN_P(z_key) != 0) {
+		site = zend_constexpr_closure_site_by_element(ce, Z_STRVAL_P(z_site), Z_STRLEN_P(z_site), 0,
+			Z_STRVAL_P(z_key), Z_STRLEN_P(z_key));
+	} else {
+		site = NULL;
+	}
+
+	if (!site) {
+		zend_string *disp = zend_constexpr_closure_ref_display(z_site, z_key);
+		zend_throw_exception_ex(NULL, 0,
+			"Invalid serialization data for Closure object (constant-expression closure \"%s\" of class %s not found)",
+			ZSTR_VAL(disp), ZSTR_VAL(ce->name));
+		zend_string_release(disp);
+		RETURN_THROWS();
+	}
+
+	if (verify_hash && verify_hash != zend_ast_get_op_array(site)->code_hash) {
+		zend_string *disp = zend_constexpr_closure_ref_display(z_site, z_key);
+		zend_throw_exception_ex(NULL, 0,
+			"Invalid serialization data for Closure object (constant-expression closure \"%s\" of class %s changed)",
+			ZSTR_VAL(disp), ZSTR_VAL(ce->name));
+		zend_string_release(disp);
+		RETURN_THROWS();
+	}
+
+	zval tmp;
+	zend_closure *tmp_closure;
+
+	if (zend_constexpr_closure_instantiate(site, ce, &tmp) == FAILURE) {
+		if (!EG(exception)) {
+			zend_throw_exception(NULL, "Invalid serialization data for Closure object", 0);
+		}
+		RETURN_THROWS();
+	}
+
+	ZEND_ASSERT(Z_TYPE(tmp) == IS_OBJECT && Z_OBJCE(tmp) == zend_ce_closure);
+	tmp_closure = (zend_closure *) Z_OBJ(tmp);
+
+	/* Move the resolved closure into the object being unserialized. */
+	bool is_fake = (tmp_closure->func.common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
+	zend_closure_init_ex(closure, &tmp_closure->func,
+		tmp_closure->func.common.scope, tmp_closure->called_scope, NULL, is_fake);
+	closure->constexpr_site = tmp_closure->constexpr_site;
+	if (is_fake) {
+		closure->func.common.fn_flags |= ZEND_ACC_FAKE_CLOSURE;
+		GC_ADD_FLAGS(&closure->std, GC_NOT_COLLECTABLE);
+	}
+
+	zval_ptr_dtor(&tmp);
+}
+
 static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object) /* {{{ */
 {
 	zend_throw_error(NULL, "Instantiation of class Closure is not allowed");
@@ -570,6 +1322,12 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
+static ZEND_COLD ZEND_NAMED_FUNCTION(zend_closure_uninitialized_handler) /* {{{ */
+{
+	zend_throw_error(NULL, "Cannot call an uninitialized Closure");
+}
+/* }}} */
+
 static zend_object *zend_closure_new(zend_class_entry *class_type) /* {{{ */
 {
 	zend_closure *closure;
@@ -578,6 +1336,17 @@ static zend_object *zend_closure_new(zend_class_entry *class_type) /* {{{ */
 	memset(closure, 0, sizeof(zend_closure));
 
 	zend_object_std_init(&closure->std, class_type);
+
+	/* Initialize the function as a safe placeholder. Until the closure is
+	 * actually initialized through zend_closure_init_ex() it may be observed
+	 * by userland code (e.g. while delayed __unserialize() calls are still
+	 * pending) and must not crash any object handler. The placeholder mimics
+	 * a fake internal closure with a handler that always throws. */
+	closure->func.type = ZEND_INTERNAL_FUNCTION;
+	closure->func.common.fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_CLOSURE | ZEND_ACC_FAKE_CLOSURE;
+	closure->func.common.function_name = ZSTR_EMPTY_ALLOC();
+	closure->func.internal_function.handler = zend_closure_uninitialized_handler;
+	closure->orig_internal_handler = zend_closure_uninitialized_handler;
 
 	return (zend_object*)closure;
 }
@@ -590,6 +1359,7 @@ static zend_object *zend_closure_clone(zend_object *zobject) /* {{{ */
 
 	zend_create_closure(&result, &closure->func,
 		closure->func.common.scope, closure->called_scope, &closure->this_ptr);
+	((zend_closure *) Z_OBJ(result))->constexpr_site = closure->constexpr_site;
 	return Z_OBJ(result);
 }
 /* }}} */
@@ -757,14 +1527,9 @@ static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 }
 /* }}} */
 
-static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr, bool is_fake) /* {{{ */
+static void zend_closure_init_ex(zend_closure *closure, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr, bool is_fake) /* {{{ */
 {
-	zend_closure *closure;
 	void *ptr;
-
-	object_init_ex(res, zend_ce_closure);
-
-	closure = (zend_closure *)Z_OBJ_P(res);
 
 	if ((scope == NULL) && this_ptr && (Z_TYPE_P(this_ptr) != IS_UNDEF)) {
 		/* use dummy scope if we're binding an object without specifying a scope */
@@ -856,6 +1621,13 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 			ZVAL_OBJ_COPY(&closure->this_ptr, Z_OBJ_P(this_ptr));
 		}
 	}
+}
+/* }}} */
+
+static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr, bool is_fake) /* {{{ */
+{
+	object_init_ex(res, zend_ce_closure);
+	zend_closure_init_ex((zend_closure *) Z_OBJ_P(res), func, scope, called_scope, this_ptr, is_fake);
 }
 /* }}} */
 

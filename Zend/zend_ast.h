@@ -213,6 +213,7 @@ typedef struct _zend_ast_op_array {
 	zend_ast_kind kind;
 	zend_ast_attr attr;
 	uint32_t lineno;
+	uint32_t code_hash; /* of the pretty-printed declaration, for serialization */
 	zend_op_array *op_array;
 } zend_ast_op_array;
 

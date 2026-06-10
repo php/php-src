@@ -231,6 +231,17 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/debugable-enums
   . #[\Override] can now be applied to class constants, including enum cases.
     RFC: https://wiki.php.net/rfc/override_constants
+  . Closures declared in constant expressions of a class member (anonymous
+    closures and first-class callables, in attribute arguments and parameter
+    default values) can now be serialized and unserialized. serialize()
+    records a reference to the declaration site (the payload contains no code),
+    and unserialize() recreates the closure by re-evaluating that declaration,
+    so it can only ever produce a closure the named class declares, never an
+    arbitrary callable. The reference is verified on resolve and valid for the
+    code revision that produced it. Closures created at runtime, bound to an
+    object, or declared in class constant values or property defaults still
+    refuse to serialize.
+    RFC: https://wiki.php.net/rfc/serializable_closures
 
 - Curl:
   . curl_getinfo() return array now includes a new size_delivered key, which

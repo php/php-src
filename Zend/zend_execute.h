@@ -36,6 +36,13 @@ ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data, z
 /* The lc_name may be stack allocated! */
 ZEND_API extern zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
 
+/* Installed by ext/standard so that a magic __unserialize() which resolves a
+ * class by name (e.g. Closure) can honor unserialize()'s allowed_classes
+ * filter. Returns whether class_name may be resolved in the current context:
+ * always true outside unserialize(), or when no filter restricts classes.
+ * NULL when ext/standard is not present. */
+ZEND_API extern bool (*zend_unserialize_class_allowed)(zend_string *class_name);
+
 void init_executor(void);
 void shutdown_executor(void);
 void shutdown_destructors(void);

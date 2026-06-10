@@ -40,6 +40,12 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *obj);
 ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj);
 ZEND_API zval* zend_get_closure_this_ptr(zval *obj);
 
+/* A first-class callable in a class constant expression is created without a
+ * link back to the declaring class (its scope points at the target). This
+ * records that class so Closure::__serialize() can reference the callable by
+ * its declaration; anonymous closures are found through their own scope. */
+ZEND_API void zend_closure_mark_as_constexpr_fcc(zval *closure_zv, zend_class_entry *site_class);
+
 END_EXTERN_C()
 
 #endif

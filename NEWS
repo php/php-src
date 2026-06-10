@@ -140,6 +140,10 @@ PHP                                                                        NEWS
 - Core:
   . Added first-class callable cache to share instances for the duration of the
     request. (ilutov)
+  . Closures declared in constant expressions (anonymous closures and
+    first-class callables) can now be serialized: serialize() records a
+    reference to their declaration site, and unserialize() recreates them
+    bounded to what the class declares. (nicolas-grekas)
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand. (ndossche)
   . Added `clamp()`. (kylekatarnls, thinkverse)
