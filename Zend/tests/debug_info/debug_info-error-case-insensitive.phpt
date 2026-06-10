@@ -1,11 +1,11 @@
 --TEST--
-Testing __debugInfo() magic method with bad returns TRUE
+Testing __debugInfo() magic method declared with non-canonical case
 --FILE--
 <?php
 
 class C {
   public $val;
-  public function __debugInfo() {
+  public function __DEBUGINFO() {
     return $this->val;
   }
   public function __construct($val) {
@@ -13,7 +13,7 @@ class C {
   }
 }
 
-$c = new C(true);
+$c = new C(1);
 var_dump($c);
 ?>
 --EXPECTF--
