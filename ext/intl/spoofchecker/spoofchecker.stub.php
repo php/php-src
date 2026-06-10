@@ -19,6 +19,7 @@ class Spoofchecker
     public const int INVISIBLE = UNKNOWN;
     /** @cvalue USPOOF_CHAR_LIMIT */
     public const int CHAR_LIMIT = UNKNOWN;
+#if U_ICU_VERSION_MAJOR_NUM >= 53
     /** @cvalue USPOOF_ASCII */
     public const int ASCII = UNKNOWN;
     /** @cvalue USPOOF_HIGHLY_RESTRICTIVE */
@@ -33,6 +34,7 @@ class Spoofchecker
     public const int SINGLE_SCRIPT_RESTRICTIVE = UNKNOWN;
     /** @cvalue USPOOF_MIXED_NUMBERS */
     public const int MIXED_NUMBERS = UNKNOWN;
+#endif
 #if U_ICU_VERSION_MAJOR_NUM >= 62
     /** @cvalue USPOOF_HIDDEN_OVERLAY */
     public const int HIDDEN_OVERLAY = UNKNOWN;
@@ -69,7 +71,9 @@ class Spoofchecker
     /** @tentative-return-type */
     public function setChecks(int $checks): void {}
 
+#if U_ICU_VERSION_MAJOR_NUM >= 53
     /** @tentative-return-type */
     public function setRestrictionLevel(int $level): void {}
+#endif
     public function setAllowedChars(string $pattern, int $patternOptions = 0): void {}
 }
