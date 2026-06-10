@@ -153,7 +153,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(voi
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_rfc3986_scheme_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_rfc3986_scheme_write(void *uri, const zval *value, zval *errors)
 {
 	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
@@ -305,7 +305,7 @@ ZEND_ATTRIBUTE_NONNULL void php_uri_parser_rfc3986_host_type_read(php_uri_parser
 	ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_rfc3986_uri_host_type, type));
 }
 
-static zend_result php_uri_parser_rfc3986_host_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_rfc3986_host_write(void *uri, const zval *value, zval *errors)
 {
 	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
@@ -366,7 +366,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(void 
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_rfc3986_port_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_rfc3986_port_write(void *uri, const zval *value, zval *errors)
 {
 	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
@@ -439,7 +439,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(void 
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_rfc3986_path_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_rfc3986_path_write(void *uri, const zval *value, zval *errors)
 {
 	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
@@ -476,7 +476,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_query_read(void
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_rfc3986_query_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_rfc3986_query_write(void *uri, const zval *value, zval *errors)
 {
 	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
@@ -513,7 +513,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_fragment_read(v
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_rfc3986_fragment_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_rfc3986_fragment_write(void *uri, const zval *value, zval *errors)
 {
 	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;

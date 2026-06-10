@@ -28,7 +28,7 @@ ZEND_TLS lxb_unicode_idna_t lexbor_idna = {0};
 
 static const size_t lexbor_mraw_byte_size = 8192;
 
-static zend_always_inline void zval_string_or_null_to_lexbor_str(zval *value, lexbor_str_t *lexbor_str)
+static zend_always_inline void zval_string_or_null_to_lexbor_str(const zval *value, lexbor_str_t *lexbor_str)
 {
 	if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0) {
 		lexbor_str->data = (lxb_char_t *) Z_STRVAL_P(value);
@@ -40,12 +40,12 @@ static zend_always_inline void zval_string_or_null_to_lexbor_str(zval *value, le
 	}
 }
 
-static zend_always_inline void zval_long_or_null_to_lexbor_str(zval *value, lexbor_str_t *lexbor_str)
+static zend_always_inline void zval_long_or_null_to_lexbor_str(const zval *value, lexbor_str_t *lexbor_str)
 {
 	if (Z_TYPE_P(value) == IS_LONG) {
-		ZVAL_STR(value, zend_long_to_str(Z_LVAL_P(value)));
-		lexbor_str_init_append(lexbor_str, lexbor_parser.mraw, (const lxb_char_t *) Z_STRVAL_P(value), Z_STRLEN_P(value));
-		zval_ptr_dtor_str(value);
+		zend_string *tmp = zend_long_to_str(Z_LVAL_P(value));
+		lexbor_str_init_append(lexbor_str, lexbor_parser.mraw, (const lxb_char_t *) ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+		zend_string_release(tmp);
 	} else {
 		ZEND_ASSERT(Z_ISNULL_P(value));
 		lexbor_str->data = (lxb_char_t *) "";
@@ -257,7 +257,7 @@ static zend_result php_uri_parser_whatwg_scheme_read(void *uri, php_uri_componen
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_scheme_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_scheme_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -297,7 +297,7 @@ static zend_result php_uri_parser_whatwg_username_read(void *uri, php_uri_compon
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_username_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_username_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -326,7 +326,7 @@ static zend_result php_uri_parser_whatwg_password_read(void *uri, php_uri_compon
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_password_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_password_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -411,7 +411,7 @@ ZEND_ATTRIBUTE_NONNULL void php_uri_parser_whatwg_host_type_read(const lxb_url_t
 	}
 }
 
-static zend_result php_uri_parser_whatwg_host_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_host_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -440,7 +440,7 @@ static zend_result php_uri_parser_whatwg_port_read(void *uri, php_uri_component_
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_port_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_port_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -469,7 +469,7 @@ static zend_result php_uri_parser_whatwg_path_read(void *uri, php_uri_component_
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_path_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_path_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -498,7 +498,7 @@ static zend_result php_uri_parser_whatwg_query_read(void *uri, php_uri_component
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_query_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_query_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -527,7 +527,7 @@ static zend_result php_uri_parser_whatwg_fragment_read(void *uri, php_uri_compon
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_fragment_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_fragment_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
