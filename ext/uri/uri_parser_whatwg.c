@@ -265,6 +265,8 @@ static zend_result php_uri_parser_whatwg_scheme_write(void *uri, zval *value, zv
 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
+	lxb_url_parser_clean(&lexbor_parser);
+
 	if (lxb_url_api_protocol_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		throw_invalid_url_exception_during_write(errors, "scheme");
 
@@ -300,6 +302,8 @@ static zend_result php_uri_parser_whatwg_username_write(void *uri, zval *value, 
 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
+	lxb_url_parser_clean(&lexbor_parser);
+
 	if (lxb_url_api_username_set(lexbor_uri, str.data, str.length) != LXB_STATUS_OK) {
 		throw_invalid_url_exception_during_write(errors, "username");
 
@@ -328,6 +332,8 @@ static zend_result php_uri_parser_whatwg_password_write(void *uri, zval *value, 
 	lexbor_str_t str = {0};
 
 	zval_string_or_null_to_lexbor_str(value, &str);
+
+	lxb_url_parser_clean(&lexbor_parser);
 
 	if (lxb_url_api_password_set(lexbor_uri, str.data, str.length) != LXB_STATUS_OK) {
 		throw_invalid_url_exception_during_write(errors, "password");
@@ -389,6 +395,8 @@ static zend_result php_uri_parser_whatwg_host_write(void *uri, zval *value, zval
 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
+	lxb_url_parser_clean(&lexbor_parser);
+
 	if (lxb_url_api_hostname_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		throw_invalid_url_exception_during_write(errors, "host");
 
@@ -417,6 +425,8 @@ static zend_result php_uri_parser_whatwg_port_write(void *uri, zval *value, zval
 	lexbor_str_t str = {0};
 
 	zval_long_or_null_to_lexbor_str(value, &str);
+
+	lxb_url_parser_clean(&lexbor_parser);
 
 	if (lxb_url_api_port_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		throw_invalid_url_exception_during_write(errors, "port");
@@ -447,6 +457,8 @@ static zend_result php_uri_parser_whatwg_path_write(void *uri, zval *value, zval
 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
+	lxb_url_parser_clean(&lexbor_parser);
+
 	if (lxb_url_api_pathname_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		throw_invalid_url_exception_during_write(errors, "path");
 
@@ -476,6 +488,8 @@ static zend_result php_uri_parser_whatwg_query_write(void *uri, zval *value, zva
 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
+	lxb_url_parser_clean(&lexbor_parser);
+
 	if (lxb_url_api_search_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		throw_invalid_url_exception_during_write(errors, "query string");
 
@@ -504,6 +518,8 @@ static zend_result php_uri_parser_whatwg_fragment_write(void *uri, zval *value, 
 	lexbor_str_t str = {0};
 
 	zval_string_or_null_to_lexbor_str(value, &str);
+
+	lxb_url_parser_clean(&lexbor_parser);
 
 	if (lxb_url_api_hash_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		throw_invalid_url_exception_during_write(errors, "fragment");
