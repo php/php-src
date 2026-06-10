@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_closures.stub.php instead.
- * Stub hash: e0626e52adb2d38dad1140c1a28cc7774cc84500 */
+ * Stub hash: d84d010e45e23e4a61d3b40e795d1075bcbae91c */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Closure___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -24,7 +24,19 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Closure_fromCallable, 0, 1,
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Closure_fromConstExpr, 0, 2, Closure, 0)
+	ZEND_ARG_TYPE_INFO(0, class, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, id, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Closure_getCurrent, 0, 0, Closure, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Closure___serialize, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Closure___unserialize, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_METHOD(Closure, __construct);
@@ -32,7 +44,10 @@ ZEND_METHOD(Closure, bind);
 ZEND_METHOD(Closure, bindTo);
 ZEND_METHOD(Closure, call);
 ZEND_METHOD(Closure, fromCallable);
+ZEND_METHOD(Closure, fromConstExpr);
 ZEND_METHOD(Closure, getCurrent);
+ZEND_METHOD(Closure, __serialize);
+ZEND_METHOD(Closure, __unserialize);
 
 static const zend_function_entry class_Closure_methods[] = {
 	ZEND_ME(Closure, __construct, arginfo_class_Closure___construct, ZEND_ACC_PRIVATE)
@@ -40,7 +55,10 @@ static const zend_function_entry class_Closure_methods[] = {
 	ZEND_ME(Closure, bindTo, arginfo_class_Closure_bindTo, ZEND_ACC_PUBLIC)
 	ZEND_ME(Closure, call, arginfo_class_Closure_call, ZEND_ACC_PUBLIC)
 	ZEND_ME(Closure, fromCallable, arginfo_class_Closure_fromCallable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Closure, fromConstExpr, arginfo_class_Closure_fromConstExpr, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Closure, getCurrent, arginfo_class_Closure_getCurrent, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Closure, __serialize, arginfo_class_Closure___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(Closure, __unserialize, arginfo_class_Closure___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -49,7 +67,7 @@ static zend_class_entry *register_class_Closure(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Closure", class_Closure_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }

@@ -119,6 +119,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_op_array(zend_op_array *op_arr
 	ast->kind = ZEND_AST_OP_ARRAY;
 	ast->attr = 0;
 	ast->lineno = CG(zend_lineno);
+	ast->code_hash = 0;
 	ast->op_array = op_array;
 
 	return (zend_ast *) ast;
@@ -1244,6 +1245,12 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 
 			zend_create_fake_closure(result, fptr, fptr->common.scope, called_scope, NULL);
 
+			if (scope) {
+				/* Remember the declaration site, so that the closure can be
+				 * serialized as a reference to it. */
+				zend_closure_mark_as_constexpr_fcc(result, scope);
+			}
+
 			return SUCCESS;
 		}
 		case ZEND_AST_OP_ARRAY:
@@ -1410,6 +1417,7 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		new->kind = old->kind;
 		new->attr = old->attr;
 		new->lineno = old->lineno;
+		new->code_hash = old->code_hash;
 		new->op_array = old->op_array;
 		function_add_ref((zend_function *)new->op_array);
 		buf = (void*)((char*)buf + sizeof(zend_ast_op_array));
