@@ -685,10 +685,8 @@ ZEND_METHOD(Exception, getTraceAsString)
 	}
 
 	ZVAL_DEREF(trace);
-	if (UNEXPECTED(Z_TYPE_P(trace) != IS_ARRAY)) {
-		zend_throw_error(NULL, "Exception trace is not an array");
-		RETURN_THROWS();
-	}
+	/* Type should be guaranteed by property type. */
+	ZEND_ASSERT(Z_TYPE_P(trace) == IS_ARRAY);
 	RETURN_NEW_STR(zend_trace_to_string(Z_ARRVAL_P(trace), /* include_main */ true));
 }
 /* }}} */

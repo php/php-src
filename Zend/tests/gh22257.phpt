@@ -1,14 +1,15 @@
 --TEST--
-GH-22257 (Type confusion / OOB read in Exception::getTraceAsString() with a non-array trace)
+GH-22257 (Type confusion / OOB read unserializing an Exception with a non-array trace)
 --CREDITS--
 Igor Sak-Sakovskiy (Positive Technologies)
 --FILE--
 <?php
-/* A crafted, deliberately truncated payload leaves Exception::$trace holding a
- * non-array value (the typed-property check is skipped on the parse failure path).
- * The half-built object is then exposed to getTraceAsString() through SplHeap's
- * delayed __unserialize(), which used to type-confuse the object as a HashTable.
- * It must throw instead of reading out of bounds. */
+/* A crafted, deliberately truncated payload makes the nested value of the typed
+ * "array $trace" property fail to unserialize. On that failure path the slot used
+ * to keep the half-built (non-array) value, and the partially-built Exception was
+ * then exposed to getTraceAsString() through SplHeap's delayed __unserialize(),
+ * type-confusing the object as a HashTable. The slot is now reset to the property
+ * default, so the run completes without an out-of-bounds read. */
 $n = "\x00";
 try {
     unserialize(
@@ -25,6 +26,4 @@ echo "OK\n";
 ?>
 --EXPECTF--
 Warning: unserialize(): Error at offset %d of %d bytes in %s on line %d
-Exception: Invalid serialization data for SplMaxHeap object
-Error: Exception trace is not an array
 OK

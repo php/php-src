@@ -677,10 +677,17 @@ second_try:
 		}
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash)) {
-			if (info && Z_ISREF_P(data)) {
-				/* Add type source even if we failed to unserialize.
-				 * The data is still stored in the property. */
-				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
+			if (info) {
+				if (Z_ISREF_P(data)) {
+					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
+				} else {
+					/* "partially unserialized" value might violate the property
+					 * declared type so we restore the default
+					 */
+					zval *tmp = &obj->ce->default_properties_table[OBJ_PROP_TO_NUM(info->offset)];
+					zval_ptr_dtor(data);
+					ZVAL_COPY_OR_DUP(data, tmp);
+				}
 			}
 			goto failure;
 		}
