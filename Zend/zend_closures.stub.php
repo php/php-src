@@ -4,7 +4,6 @@
 
 /**
  * @strict-properties
- * @not-serializable
  */
 final class Closure
 {
@@ -23,4 +22,8 @@ final class Closure
     public static function fromCallable(callable $callback): Closure {}
 
     public static function getCurrent(): Closure {}
+
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
 }
