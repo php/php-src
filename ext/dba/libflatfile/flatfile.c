@@ -112,6 +112,9 @@ int flatfile_delete(flatfile *dba, datum key_datum) {
 		}
 		num = atoi(buf);
 		if (num >= buf_size) {
+			if (num > SIZE_MAX - FLATFILE_BLOCK_SIZE) {
+				break;
+			}
 			buf_size = num + FLATFILE_BLOCK_SIZE;
 			buf = erealloc(buf, buf_size);
 		}
@@ -135,6 +138,9 @@ int flatfile_delete(flatfile *dba, datum key_datum) {
 		}
 		num = atoi(buf);
 		if (num >= buf_size) {
+			if (num > SIZE_MAX - FLATFILE_BLOCK_SIZE) {
+				break;
+			}
 			buf_size = num + FLATFILE_BLOCK_SIZE;
 			buf = erealloc(buf, buf_size);
 		}
@@ -162,6 +168,9 @@ int flatfile_findkey(flatfile *dba, datum key_datum) {
 		}
 		num = atoi(buf);
 		if (num >= buf_size) {
+			if (num > SIZE_MAX - FLATFILE_BLOCK_SIZE) {
+				break;
+			}
 			buf_size = num + FLATFILE_BLOCK_SIZE;
 			buf = erealloc(buf, buf_size);
 		}
@@ -178,6 +187,9 @@ int flatfile_findkey(flatfile *dba, datum key_datum) {
 		}
 		num = atoi(buf);
 		if (num >= buf_size) {
+			if (num > SIZE_MAX - FLATFILE_BLOCK_SIZE) {
+				break;
+			}
 			buf_size = num + FLATFILE_BLOCK_SIZE;
 			buf = erealloc(buf, buf_size);
 		}
@@ -202,6 +214,9 @@ datum flatfile_firstkey(flatfile *dba) {
 		}
 		num = atoi(buf);
 		if (num >= buf_size) {
+			if (num > SIZE_MAX - FLATFILE_BLOCK_SIZE) {
+				break;
+			}
 			buf_size = num + FLATFILE_BLOCK_SIZE;
 			buf = erealloc(buf, buf_size);
 		}
@@ -218,6 +233,9 @@ datum flatfile_firstkey(flatfile *dba) {
 		}
 		num = atoi(buf);
 		if (num >= buf_size) {
+			if (num > SIZE_MAX - FLATFILE_BLOCK_SIZE) {
+				break;
+			}
 			buf_size = num + FLATFILE_BLOCK_SIZE;
 			buf = erealloc(buf, buf_size);
 		}
@@ -244,6 +262,9 @@ datum flatfile_nextkey(flatfile *dba) {
 		}
 		num = atoi(buf);
 		if (num >= buf_size) {
+			if (num > SIZE_MAX - FLATFILE_BLOCK_SIZE) {
+				break;
+			}
 			buf_size = num + FLATFILE_BLOCK_SIZE;
 			buf = erealloc(buf, buf_size);
 		}
@@ -254,6 +275,9 @@ datum flatfile_nextkey(flatfile *dba) {
 		}
 		num = atoi(buf);
 		if (num >= buf_size) {
+			if (num > SIZE_MAX - FLATFILE_BLOCK_SIZE) {
+				break;
+			}
 			buf_size = num + FLATFILE_BLOCK_SIZE;
 			buf = erealloc(buf, buf_size);
 		}
