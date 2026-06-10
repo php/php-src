@@ -1384,8 +1384,8 @@ PHP_FUNCTION(openssl_x509_parse)
 	zval subitem;
 	zval critext;
 	int critcount = 0;
-	X509_EXTENSION *extension;
-	X509_NAME *subject_name;
+	PHP_OPENSSL_X509_EXTENSION *extension;
+	const X509_NAME *subject_name;
 	char *cert_name;
 	char *extname;
 	BIO *bio_out;
@@ -2359,7 +2359,7 @@ PHP_FUNCTION(openssl_csr_get_subject)
 	zend_object *csr_obj;
 	zend_string *csr_str;
 	bool use_shortnames = 1;
-	X509_NAME *subject;
+	const X509_NAME *subject;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
