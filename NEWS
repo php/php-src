@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Add LEXBOR_STATIC to CFLAGS_URI on Windows so ext/uri does not see
     LXB_API as __declspec(dllimport) when linked statically into PHP.
     (Luther Monson)
+  . Clean error logs before each Uri\WhatWg\Url wither call so that errors from
+    previous wither calls are not returned the next time a UrlValidationError
+    is thrown. (kocsismate)
 
 - Opcache:
   . Fixed bug GH-22265 (Another tailcall vm_interrupt bug). (Levi Morrison)
