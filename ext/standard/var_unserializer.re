@@ -682,10 +682,11 @@ second_try:
 					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
 				} else {
 					/* "partially unserialized" value might violate the property
-					 * declared type so we restore the default
-					 */
+					 * declared type so we restore the default */
 					zval *tmp = &obj->ce->default_properties_table[OBJ_PROP_TO_NUM(info->offset)];
-					zval_ptr_dtor(data);
+					if (Z_REFCOUNTED_P(data)) {
+						var_push_dtor_value(var_hash, data);
+					}
 					ZVAL_COPY_OR_DUP(data, tmp);
 				}
 			}
