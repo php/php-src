@@ -11,6 +11,9 @@ PHP                                                                        NEWS
     the next smaller bin in its larger bin, which efree_size() then freed
     into the wrong one. (Marc Bennewitz)
 
+- Curl:
+  . Bumped required libcurl version to 7.61.1. (GrahamCampbell)
+
 - Opcache:
   . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
     root trace at the opcache.jit_max_root_traces limit, causing spurious
