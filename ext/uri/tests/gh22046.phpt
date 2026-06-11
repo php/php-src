@@ -1,22 +1,19 @@
 --TEST--
-GH-22046: The unserialize function with Uri\WhatWg\Url leads to NULL pointer dereference when object serialized back
+GH-22046: The unserialize function can lead to segfault when internal classes are serialized back with the unsupported C format
 --FILE--
 <?php
 
 $payload = 'C:14:"Uri\WhatWg\Url":0:{}';
-try {
-    unserialize($payload);
-} catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
-}
+unserialize($payload);
 
 $payload = 'C:15:"Uri\Rfc3986\Uri":0:{}';
-try {
-    unserialize($payload);
-} catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
-}
+unserialize($payload);
 ?>
---EXPECT--
-Exception: Class Uri\WhatWg\Url has no unserializer
-Exception: Class Uri\Rfc3986\Uri has no unserializer
+--EXPECTF--
+Warning: Class Uri\WhatWg\Url has no unserializer in %s on line %d
+
+Warning: unserialize(): Error at offset 25 of 26 bytes in %s on line %d
+
+Warning: Class Uri\Rfc3986\Uri has no unserializer in %s on line %d
+
+Warning: unserialize(): Error at offset 26 of 27 bytes in %s on line %d
