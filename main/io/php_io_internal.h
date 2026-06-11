@@ -19,6 +19,10 @@
 
 #include "php_io.h"
 
+/* Buffer size for the userspace read/write copy loops. Larger than the stream
+ * layer CHUNK_SIZE (8 KiB) to cut the number of syscalls on bulk transfers. */
+#define PHP_IO_COPY_BUFSIZE (64 * 1024)
+
 ssize_t php_io_generic_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen);
 ssize_t php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t maxlen);
 

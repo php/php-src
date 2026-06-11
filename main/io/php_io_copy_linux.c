@@ -151,8 +151,23 @@ static ssize_t php_io_linux_sendfile(int src_fd, int dest_fd, size_t maxlen)
 }
 
 #ifdef HAVE_SPLICE
-static ssize_t php_io_linux_splice_from_pipe(php_io_fd *src, int dest_fd, size_t maxlen)
+/* Enlarge the intermediate pipe so socket transfers move more data per splice
+ * round-trip. Capped by /proc/sys/fs/pipe-max-size (1 MiB by default); a failed
+ * fcntl() simply leaves the kernel default (64 KiB) in place. */
+#define PHP_IO_PIPE_SIZE (1 << 20)
+
+/* SPLICE_F_MORE corks the socket the same way MSG_MORE does, letting the kernel
+ * coalesce splices into full segments. The final partial segment is flushed by
+ * the kernel cork timer (<= 200 ms) or when the socket is next written/closed. */
+static inline unsigned int php_io_linux_out_flags(const php_io_fd *dest)
 {
+	return (dest->fd_type == PHP_IO_FD_SOCKET) ? SPLICE_F_MORE : 0;
+}
+
+static ssize_t php_io_linux_splice_from_pipe(php_io_fd *src, php_io_fd *dest, size_t maxlen)
+{
+	int dest_fd = dest->fd;
+	unsigned int out_flags = php_io_linux_out_flags(dest);
 	size_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
 
@@ -165,7 +180,7 @@ static ssize_t php_io_linux_splice_from_pipe(php_io_fd *src, int dest_fd, size_t
 		}
 
 		size_t to_copy = (remaining < SSIZE_MAX) ? remaining : SSIZE_MAX;
-		ssize_t result = splice(src->fd, NULL, dest_fd, NULL, to_copy, 0);
+		ssize_t result = splice(src->fd, NULL, dest_fd, NULL, to_copy, out_flags);
 
 		if (result > 0) {
 			total_copied += result;
@@ -185,12 +200,18 @@ static ssize_t php_io_linux_splice_from_pipe(php_io_fd *src, int dest_fd, size_t
 	return total_copied > 0 ? (ssize_t) total_copied : -1;
 }
 
-static ssize_t php_io_linux_splice_via_pipe(php_io_fd *src, int dest_fd, size_t maxlen)
+static ssize_t php_io_linux_splice_via_pipe(php_io_fd *src, php_io_fd *dest, size_t maxlen)
 {
+	int dest_fd = dest->fd;
+	unsigned int out_flags = php_io_linux_out_flags(dest);
 	int pipefd[2];
 	if (pipe(pipefd) == -1) {
 		return php_io_generic_copy_fallback(src->fd, dest_fd, maxlen);
 	}
+
+#ifdef F_SETPIPE_SZ
+	fcntl(pipefd[1], F_SETPIPE_SZ, PHP_IO_PIPE_SIZE);
+#endif
 
 	size_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
@@ -226,7 +247,7 @@ static ssize_t php_io_linux_splice_via_pipe(php_io_fd *src, int dest_fd, size_t 
 
 		size_t pipe_remaining = in_pipe;
 		while (pipe_remaining > 0) {
-			ssize_t out = splice(pipefd[0], NULL, dest_fd, NULL, pipe_remaining, 0);
+			ssize_t out = splice(pipefd[0], NULL, dest_fd, NULL, pipe_remaining, out_flags);
 			if (out <= 0) {
 				char drain_buf[1024];
 				while (pipe_remaining > 0) {
@@ -285,11 +306,11 @@ ssize_t php_io_linux_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen)
 
 #ifdef HAVE_SPLICE
 	if (src->fd_type == PHP_IO_FD_PIPE) {
-		return php_io_linux_splice_from_pipe(src, dest->fd, maxlen);
+		return php_io_linux_splice_from_pipe(src, dest, maxlen);
 	}
 
 	if (src->fd_type == PHP_IO_FD_SOCKET) {
-		return php_io_linux_splice_via_pipe(src, dest->fd, maxlen);
+		return php_io_linux_splice_via_pipe(src, dest, maxlen);
 	}
 #endif
 

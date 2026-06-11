@@ -40,7 +40,7 @@ PHPAPI ssize_t php_io_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen)
 
 ssize_t php_io_generic_copy_fallback(int src_fd, int dest_fd, size_t maxlen)
 {
-	char buf[8192];
+	char buf[PHP_IO_COPY_BUFSIZE];
 	ssize_t total_copied = 0;
 	size_t remaining = (maxlen == PHP_IO_COPY_ALL) ? SIZE_MAX : maxlen;
 
