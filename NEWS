@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Implemented partial function application RFC. (Arnaud)
 
+- Curl:
+  . Bumped required libcurl version to 7.61.1. (GrahamCampbell)
+
 - GMP:
   . Fixed GMP power and shift operators to reject GMP right operands outside
     the unsigned long range instead of silently truncating them. (Weilin Du)
