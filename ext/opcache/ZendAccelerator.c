@@ -402,6 +402,38 @@ static inline void accel_unlock_all(void)
 #endif
 }
 
+#if defined(ZTS) && !defined(ZEND_WIN32)
+/* In threaded SAPIs (FrankenPHP, mod_php with a threaded MPM, ...) requests
+ * run as threads of one process. The fcntl() record locks used by
+ * accel_activate_add()/accel_is_inactive() are per-process: a process never
+ * conflicts with its own locks, so in-flight readers running as threads are
+ * invisible to accel_is_inactive(). It then wrongly reports the cache as
+ * inactive and a scheduled restart wipes SHM (hash table + interned strings)
+ * under running requests, corrupting the heap (GH-8739, GH-14471, GH-18517).
+ *
+ * Mirror the approach ZEND_WIN32 already uses for the same reason (threaded
+ * SAPIs): track in-flight requests with an atomic counter in SHM and have
+ * accel_is_inactive() refuse to restart while it is non-zero. Registration
+ * is gated on ZCG(accelerator_enabled), so once a restart is pending (the
+ * accelerator is disabled) new requests no longer register and the counter
+ * drains within the duration of the longest in-flight request. */
+static zend_always_inline void accel_ts_request_enter(void)
+{
+	if (!ZCG(ts_reader_registered)) {
+		__atomic_add_fetch(&ZCSG(ts_active_requests), 1, __ATOMIC_SEQ_CST);
+		ZCG(ts_reader_registered) = true;
+	}
+}
+
+static zend_always_inline void accel_ts_request_leave(void)
+{
+	if (ZCG(ts_reader_registered)) {
+		__atomic_sub_fetch(&ZCSG(ts_active_requests), 1, __ATOMIC_SEQ_CST);
+		ZCG(ts_reader_registered) = false;
+	}
+}
+#endif
+
 /* Interned strings support */
 
 /* O+ disables creation of interned strings by regular PHP compiler, instead,
@@ -894,6 +926,13 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 
 static inline bool accel_is_inactive(void)
 {
+#if defined(ZTS) && !defined(ZEND_WIN32)
+	/* Threads of this process may still be inside requests registered as
+	 * SHM readers; the fcntl() probe below cannot detect them. */
+	if (__atomic_load_n(&ZCSG(ts_active_requests), __ATOMIC_SEQ_CST) != 0) {
+		return false;
+	}
+#endif
 #ifdef ZEND_WIN32
 	/* on Windows, we don't need kill_all_lockers() because SAPIs
 	   that work on Windows don't manage child processes (and we
@@ -2742,6 +2781,17 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 
 	ZCG(accelerator_enabled) = ZCSG(accelerator_enabled);
 
+#if defined(ZTS) && !defined(ZEND_WIN32)
+	if (ZCG(accelerator_enabled)) {
+		accel_ts_request_enter();
+		if (UNEXPECTED(ZCSG(restart_in_progress))) {
+			/* lost the race against a restart that passed accel_is_inactive()
+			 * before our registration became visible; run uncached */
+			ZCG(accelerator_enabled) = false;
+		}
+	}
+#endif
+
 	SHM_PROTECT();
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
@@ -2792,6 +2842,14 @@ zend_result accel_post_deactivate(void)
 	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
 	accel_unlock_all();
 	ZCG(counted) = false;
+
+#if defined(ZTS) && !defined(ZEND_WIN32)
+	if (!file_cache_only && accel_shared_globals) {
+		SHM_UNPROTECT();
+		accel_ts_request_leave();
+		SHM_PROTECT();
+	}
+#endif
 
 	return SUCCESS;
 }

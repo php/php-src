@@ -197,6 +197,7 @@ typedef struct _zend_accel_directives {
 
 typedef struct _zend_accel_globals {
 	bool               counted;   /* the process uses shared memory */
+	bool               ts_reader_registered; /* this request is counted in ZCSG(ts_active_requests) (ZTS only) */
 	bool               enabled;
 	bool               locked;    /* thread obtained exclusive lock */
 	bool               accelerator_enabled; /* accelerator enabled for current request */
@@ -267,6 +268,12 @@ typedef struct _zend_accel_shared_globals {
 #ifdef ZEND_WIN32
 	LONGLONG   mem_usage;
 	LONGLONG   restart_in;
+#elif defined(ZTS)
+	/* In-flight requests registered as SHM readers. POSIX fcntl() record
+	 * locks cannot track readers that are threads of one process (a process
+	 * never conflicts with its own locks), so threaded SAPIs need an
+	 * explicit counter — mirroring what ZEND_WIN32 does with mem_usage. */
+	uint32_t   ts_active_requests;
 #endif
 	bool       restart_in_progress;
 	bool       jit_counters_stopped;
