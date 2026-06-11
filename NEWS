@@ -34,6 +34,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-22218 (SoapServer::handle() crash on $_SERVER not being
     an array). (David Carlier / Rex-Reynolds)
 
+- Sqlite:
+  . Fix error checks for column retrieval. (ndossche)
+
 - Zlib:
   . Fixed memory leak if deflate initialization fails and there is a dict.
     (ndossche)
