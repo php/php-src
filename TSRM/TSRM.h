@@ -155,7 +155,7 @@ TSRM_API bool tsrm_is_managed_thread(void);
 #if !__has_attribute(tls_model) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__MUSL__) || defined(__HAIKU__)
 # define TSRM_TLS_MODEL_ATTR
 # define TSRM_TLS_MODEL_DEFAULT
-#elif __PIC__
+#elif defined(__PIC__) && !defined(__PIE__)
 # define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))
 # define TSRM_TLS_MODEL_INITIAL_EXEC
 #else
