@@ -17,7 +17,7 @@ var_dump(intltz_get_display_name(null, IntlTimeZone::DISPLAY_SHORT, false, 'pt_P
 --EXPECTF--
 Warning: IntlTimeZone::getDisplayName(): wrong display type in %s on line %d
 bool(false)
-IntlTimeZone::getDisplayName(): wrong display type: U_ILLEGAL_ARGUMENT_ERROR
+wrong display type: U_ILLEGAL_ARGUMENT_ERROR
 int(1)
 wrong display type: U_ILLEGAL_ARGUMENT_ERROR
 
