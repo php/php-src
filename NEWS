@@ -15,6 +15,9 @@ PHP                                                                        NEWS
     LXB_API as __declspec(dllimport) when linked statically into PHP.
     (Luther Monson)
 
+- Opcache:
+  . Fixed bug GH-22265 (Another tailcall vm_interrupt bug). (Levi Morrison)
+
 - Phar:
   . Fixed a bypass of the magic ".phar" directory protection in
     Phar::addEmptyDir() for paths starting with "/.phar", while allowing
