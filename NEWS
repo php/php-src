@@ -33,6 +33,7 @@ PHP                                                                        NEWS
   . Fixed GH-22422 (zend_arena layout mismatch leaked memory in separately
     built extensions under AddressSanitizer). (iliaal)
   . TSRM: use local-exec TLS in PIE executables. (henderkes)
+  . perf: make all static extensions use TSRMG_STATIC. (henderkes)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)

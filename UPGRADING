@@ -490,7 +490,7 @@ PHP 8.6 UPGRADE NOTES
   . The performance of the TAILCALL VM has been improved.
   . The TAILCALL VM is now enabled on Windows when compiling with Clang >= 19
     x86_64.
-  . The performance of ZTS+PIE builds has been improved.
+  . The performance of ZTS builds has been improved.
 
 - DOM:
   . Made splitText() faster and consume less memory.
