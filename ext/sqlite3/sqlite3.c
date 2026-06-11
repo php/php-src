@@ -604,7 +604,7 @@ PHP_METHOD(SQLite3, query)
 }
 /* }}} */
 
-static void sqlite_value_to_zval(sqlite3_stmt *stmt, int column, zval *data) /* {{{ */
+static void sqlite_value_to_zval(php_sqlite3_db_object *db_obj, sqlite3_stmt *stmt, int column, zval *data) /* {{{ */
 {
 	sqlite3_int64 val;
 
@@ -613,7 +613,13 @@ static void sqlite_value_to_zval(sqlite3_stmt *stmt, int column, zval *data) /* 
 			val = sqlite3_column_int64(stmt, column);
 #if LONG_MAX <= 2147483647
 			if (val > ZEND_LONG_MAX || val < ZEND_LONG_MIN) {
-				ZVAL_STRINGL(data, (char *)sqlite3_column_text(stmt, column), sqlite3_column_bytes(stmt, column));
+				const char *text = (const char *) sqlite3_column_text(stmt, column);
+				if (UNEXPECTED(text == NULL)) {
+					php_sqlite3_error(db_obj, SQLITE_NOMEM, "Failed to retrieve column value due to out of memory");
+					ZVAL_NULL(data);
+				} else {
+					ZVAL_STRINGL(data, text, sqlite3_column_bytes(stmt, column));
+				}
 			} else {
 #endif
 				ZVAL_LONG(data, (zend_long) val);
@@ -630,13 +636,33 @@ static void sqlite_value_to_zval(sqlite3_stmt *stmt, int column, zval *data) /* 
 			ZVAL_NULL(data);
 			break;
 
-		case SQLITE3_TEXT:
-			ZVAL_STRINGL(data, (const char *) sqlite3_column_text(stmt, column), sqlite3_column_bytes(stmt, column));
+		case SQLITE3_TEXT: {
+			const char *text = (const char *) sqlite3_column_text(stmt, column);
+			if (UNEXPECTED(text == NULL)) {
+				php_sqlite3_error(db_obj, SQLITE_NOMEM, "Failed to retrieve column value due to out of memory");
+				ZVAL_NULL(data);
+			} else {
+				ZVAL_STRINGL(data, text, sqlite3_column_bytes(stmt, column));
+			}
 			break;
+		}
 
 		case SQLITE_BLOB:
-		default:
-			ZVAL_STRINGL(data, (char*)sqlite3_column_blob(stmt, column), sqlite3_column_bytes(stmt, column));
+		default: {
+			const char *blob = (const char *) sqlite3_column_blob(stmt, column);
+			if (UNEXPECTED(blob == NULL)) {
+				if (sqlite3_errcode(sqlite3_db_handle(stmt)) == SQLITE_NOMEM) {
+					php_sqlite3_error(db_obj, SQLITE_NOMEM, "Failed to retrieve column value due to out of memory");
+					ZVAL_NULL(data);
+				} else {
+					/* Zero-length BLOB */
+					ZVAL_EMPTY_STRING(data);
+				}
+			} else {
+				ZVAL_STRINGL(data, blob, sqlite3_column_bytes(stmt, column));
+			}
+			break;
+		}
 	}
 }
 /* }}} */
@@ -686,14 +712,14 @@ PHP_METHOD(SQLite3, querySingle)
 		case SQLITE_ROW: /* Valid Row */
 		{
 			if (!entire_row) {
-				sqlite_value_to_zval(stmt, 0, return_value);
+				sqlite_value_to_zval(db_obj, stmt, 0, return_value);
 			} else {
 				int i = 0, count = sqlite3_data_count(stmt);
 
 				array_init_size(return_value, count);
 				for (i = 0; i < count; i++) {
 					zval data;
-					sqlite_value_to_zval(stmt, i, &data);
+					sqlite_value_to_zval(db_obj, stmt, i, &data);
 					add_assoc_zval(return_value, (char*)sqlite3_column_name(stmt, i), &data);
 				}
 			}
@@ -2447,7 +2473,7 @@ static zend_always_inline void php_sqlite3_fetch_one(int n_cols, php_sqlite3_res
 {
 	for (int i = 0; i < n_cols; i ++) {
 		zval data;
-		sqlite_value_to_zval(result_obj->stmt_obj->stmt, i, &data);
+		sqlite_value_to_zval(result_obj->db_obj, result_obj->stmt_obj->stmt, i, &data);
 
 		if (mode & PHP_SQLITE3_NUM) {
 			add_index_zval(result, i, &data);
