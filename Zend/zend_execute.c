@@ -4327,8 +4327,15 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
 		} \
 	} while (0)
 
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+# define ZEND_VM_KIND_TAILCALL_SAVE_OPLINE() SAVE_OPLINE()
+#else
+# define ZEND_VM_KIND_TAILCALL_SAVE_OPLINE()
+#endif
+
 #define ZEND_VM_LOOP_INTERRUPT_CHECK() do { \
 		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+			ZEND_VM_KIND_TAILCALL_SAVE_OPLINE(); \
 			ZEND_VM_LOOP_INTERRUPT(); \
 		} \
 	} while (0)
