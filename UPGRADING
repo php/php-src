@@ -19,6 +19,11 @@ PHP 8.6 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . ??/empty() on a magic property no longer call __get() when __isset()
+    has materialised the property by writing into the property table.
+    The freshly-written value is returned directly. isset() is unaffected.
+
 - DOM:
   . Properties previously documented as @readonly (e.g. DOMNode::$nodeType,
     DOMDocument::$xmlEncoding, DOMEntity::$actualEncoding, ::$encoding,
