@@ -492,4 +492,142 @@ PHP_DOM_EXPORT void php_dom_in_scope_ns_destroy(php_dom_in_scope_ns *in_scope_ns
 	}
 }
 
+static xmlNsPtr dom_alloc_ns_decl(HashTable *links, xmlNodePtr node)
+{
+	xmlNsPtr ns = xmlMalloc(sizeof(*ns));
+	if (!ns) {
+		return NULL;
+	}
+
+	zval *zv = zend_hash_index_lookup(links, (zend_ulong) node);
+	if (Z_ISNULL_P(zv)) {
+		ZVAL_LONG(zv, 1);
+	} else {
+		Z_LVAL_P(zv)++;
+	}
+
+	memset(ns, 0, sizeof(*ns));
+	ns->type = XML_LOCAL_NAMESPACE;
+	ns->next = node->nsDef;
+	node->nsDef = ns;
+
+	return ns;
+}
+
+/* Mint a temporary nsDef entry so C14N finds namespaces that live on node->ns
+ * but have no matching xmlns attribute (typical for createElementNS). */
+static void dom_add_synthetic_ns_decl(HashTable *links, xmlNodePtr node, xmlNsPtr src_ns)
+{
+	xmlNsPtr ns = dom_alloc_ns_decl(links, node);
+	if (!ns) {
+		return;
+	}
+
+	ns->href = xmlStrdup(src_ns->href);
+	ns->prefix = src_ns->prefix ? xmlStrdup(src_ns->prefix) : NULL;
+}
+
+/* Same, but for attribute namespaces, which may collide by prefix with the
+ * element's own ns or with a sibling attribute's ns. */
+static void dom_add_synthetic_ns_decl_for_attr(HashTable *links, xmlNodePtr node, xmlNsPtr src_ns)
+{
+	for (xmlNsPtr existing = node->nsDef; existing; existing = existing->next) {
+		if (xmlStrEqual(existing->prefix, src_ns->prefix)) {
+			return;
+		}
+	}
+
+	dom_add_synthetic_ns_decl(links, node, src_ns);
+}
+
+static void dom_relink_ns_decls_element(HashTable *links, xmlNodePtr node)
+{
+	if (node->type == XML_ELEMENT_NODE) {
+		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
+			if (php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
+				xmlNsPtr ns = dom_alloc_ns_decl(links, node);
+				if (!ns) {
+					return;
+				}
+
+				bool should_free;
+				xmlChar *attr_value = php_libxml_attr_value(attr, &should_free);
+
+				ns->href = should_free ? attr_value : xmlStrdup(attr_value);
+				ns->prefix = attr->ns->prefix ? xmlStrdup(attr->name) : NULL;
+				ns->_private = attr;
+				if (attr->prev) {
+					attr->prev->next = attr->next;
+				} else {
+					node->properties = attr->next;
+				}
+				if (attr->next) {
+					attr->next->prev = attr->prev;
+				}
+			}
+		}
+
+		/* The default namespace is handled separately from the other namespaces in C14N.
+		 * The default namespace is explicitly looked up while the other namespaces are
+		 * deduplicated and compared to a list of visible namespaces. */
+		if (node->ns && !node->ns->prefix) {
+			/* Workaround for the behaviour where the xmlSearchNs() call inside c14n.c
+			 * can return the current namespace. */
+			zend_hash_index_add_new_ptr(links, (zend_ulong) node | 1, node->ns);
+			node->ns = xmlSearchNs(node->doc, node, NULL);
+		} else if (node->ns) {
+			dom_add_synthetic_ns_decl(links, node, node->ns);
+		}
+
+		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
+			if (attr->ns && !php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
+				dom_add_synthetic_ns_decl_for_attr(links, node, attr->ns);
+			}
+		}
+	}
+}
+
+void dom_relink_ns_decls(HashTable *links, xmlNodePtr root)
+{
+	dom_relink_ns_decls_element(links, root);
+
+	xmlNodePtr base = root;
+	xmlNodePtr node = base->children;
+	while (node != NULL) {
+		dom_relink_ns_decls_element(links, node);
+		node = php_dom_next_in_tree_order(node, base);
+	}
+}
+
+void dom_unlink_ns_decls(HashTable *links)
+{
+	ZEND_HASH_MAP_FOREACH_NUM_KEY_VAL(links, zend_ulong h, zval *data) {
+		if (h & 1) {
+			xmlNodePtr node = (xmlNodePtr) (h ^ 1);
+			node->ns = Z_PTR_P(data);
+		} else {
+			xmlNodePtr node = (xmlNodePtr) h;
+			while (Z_LVAL_P(data)-- > 0) {
+				xmlNsPtr ns = node->nsDef;
+				node->nsDef = ns->next;
+
+				xmlAttrPtr attr = ns->_private;
+				if (attr) {
+					if (attr->prev) {
+						attr->prev->next = attr;
+					} else {
+						node->properties = attr;
+					}
+					if (attr->next) {
+						attr->next->prev = attr;
+					}
+				}
+
+				xmlFreeNs(ns);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+
 #endif  /* HAVE_LIBXML && HAVE_DOM */
