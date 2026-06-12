@@ -69,12 +69,4 @@ PHP_DOM_EXPORT php_dom_in_scope_ns php_dom_get_in_scope_ns(php_dom_libxml_ns_map
 PHP_DOM_EXPORT php_dom_in_scope_ns php_dom_get_in_scope_ns_legacy(const xmlNode *node);
 PHP_DOM_EXPORT void php_dom_in_scope_ns_destroy(php_dom_in_scope_ns *in_scope_ns);
 
-/* Temporarily materialize namespace declarations as nsDef entries on the tree so
- * that libxml's native validators/canonicalizers can resolve prefixed QNames that
- * appear in element/attribute *content*. Modern DOM keeps declarations off the
- * tree (node->nsDef == NULL), which xmlSearchNs() cannot follow. Internal only —
- * not part of the exported DOM ABI. */
-void dom_relink_ns_decls(HashTable *links, xmlNodePtr root);
-void dom_unlink_ns_decls(HashTable *links);
-
 #endif
