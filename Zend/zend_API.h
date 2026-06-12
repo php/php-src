@@ -306,6 +306,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.__set = NULL;							\
 		class_container.__unset = NULL;							\
 		class_container.__isset = NULL;							\
+		class_container.__exists = NULL;						\
 		class_container.__debugInfo = NULL;						\
 		class_container.__serialize = NULL;						\
 		class_container.__unserialize = NULL;					\

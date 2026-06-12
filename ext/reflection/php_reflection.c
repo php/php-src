@@ -6721,14 +6721,15 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 		}
 handle_magic_get:
 		if (ce->__get) {
-			if (obj && ce->__isset) {
+			zend_function *check = ce->__exists ? ce->__exists : ce->__isset;
+			if (obj && check) {
 				uint32_t *guard = zend_get_property_guard(obj, ref->unmangled_name);
 				if (!((*guard) & ZEND_GUARD_PROPERTY_ISSET)) {
 					GC_ADDREF(obj);
 					*guard |= ZEND_GUARD_PROPERTY_ISSET;
 					zval member;
 					ZVAL_STR(&member, ref->unmangled_name);
-					zend_call_known_instance_method_with_1_params(ce->__isset, obj, return_value, &member);
+					zend_call_known_instance_method_with_1_params(check, obj, return_value, &member);
 
 					if (Z_TYPE_P(return_value) == IS_REFERENCE) {
 						zend_unwrap_reference(return_value);

@@ -181,6 +181,7 @@ struct _zend_class_entry {
 	zend_function *__set;
 	zend_function *__unset;
 	zend_function *__isset;
+	zend_function *__exists;
 	zend_function *__call;
 	zend_function *__callstatic;
 	zend_function *__tostring;
