@@ -684,6 +684,10 @@ static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num
 	int i;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
+		if (!op_array->try_catch_array[i].finally_op) {
+			continue;
+		}
+
 		if ((op_num < op_array->try_catch_array[i].finally_op ||
 					op_num >= op_array->try_catch_array[i].finally_end)
 				&& (dst_num >= op_array->try_catch_array[i].finally_op &&
