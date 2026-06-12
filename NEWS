@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22121 (Double free in gdImageSetStyle() after
     overflow-triggered early return). (iliaal)
 
+- Intl:
+  . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
+    for invalid display types. (Weilin Du)
+
 - URI:
   . Add LEXBOR_STATIC to CFLAGS_URI on Windows so ext/uri does not see
     LXB_API as __declspec(dllimport) when linked statically into PHP.
