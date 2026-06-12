@@ -133,13 +133,13 @@ dnl
 AC_DEFUN([ZEND_INIT], [dnl
 AC_REQUIRE([AC_PROG_CC])
 
-AC_CHECK_HEADERS(m4_normalize([
+AC_CHECK_HEADERS([
   cpuid.h
   libproc.h
-]))
+])
 
 dnl Check for library functions.
-AC_CHECK_FUNCS(m4_normalize([
+AC_CHECK_FUNCS([
   getpid
   gettid
   kill
@@ -150,7 +150,7 @@ AC_CHECK_FUNCS(m4_normalize([
   pthread_getattr_np
   pthread_stackseg_np
   strnlen
-]))
+])
 
 AC_CHECK_DECL([clock_gettime_nsec_np],
   [AC_DEFINE([HAVE_CLOCK_GETTIME_NSEC_NP], [1],
