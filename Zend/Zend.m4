@@ -178,6 +178,22 @@ AC_MSG_RESULT([$ZEND_ZTS])
 AS_VAR_IF([ZEND_ZTS], [yes], [
   AC_DEFINE([ZTS], [1], [Define to 1 if thread safety (ZTS) is enabled.])
   AS_VAR_APPEND([CFLAGS], [" -DZTS"])
+
+  dnl -mtls-size=12 drops the dead high-bits offset add from TLS access,
+  dnl valid while the thread-local block stays under 4 KiB.
+  AC_CACHE_CHECK([whether -mtls-size=12 compiles and links],
+    [php_cv_flag_mtls_size_12],
+    [save_CFLAGS=$CFLAGS
+     AS_VAR_IF([GCC], [yes], [php_tls_size_werror=-Werror], [php_tls_size_werror=])
+     CFLAGS="$CFLAGS -mtls-size=12 $php_tls_size_werror"
+     AC_LINK_IFELSE([AC_LANG_PROGRAM(
+       [[static __thread void *tls_probe __attribute__((tls_model("local-exec")));]],
+       [[tls_probe = &tls_probe; return !!tls_probe;]])],
+       [php_cv_flag_mtls_size_12=yes],
+       [php_cv_flag_mtls_size_12=no])
+     CFLAGS=$save_CFLAGS])
+  AS_VAR_IF([php_cv_flag_mtls_size_12], [yes],
+    [AS_VAR_APPEND([CFLAGS], [" -mtls-size=12"])])
 ])
 
 AC_MSG_CHECKING([whether to enable Zend debugging])
