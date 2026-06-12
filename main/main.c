@@ -2842,6 +2842,12 @@ PHPAPI bool php_tsrm_startup_ex(int expected_threads)
 {
 	bool ret = tsrm_startup(expected_threads, 1, 0, NULL);
 	php_reserve_tsrm_memory();
+	/* Must reserve exactly the prefix laid out by ZEND_*_OFFSET (zend_globals.h). */
+	tsrm_reserve_fast_front(
+		TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)) +
+		TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)) +
+		TSRM_ALIGNED_SIZE(sizeof(zend_php_scanner_globals)) +
+		TSRM_ALIGNED_SIZE(zend_mm_globals_size())); // AG size, exposed through function call
 	(void)ts_resource(0);
 	return ret;
 }

@@ -36,6 +36,15 @@ struct _tsrm_tls_entry {
 	tsrm_tls_entry *next;
 };
 
+#if defined(__cplusplus) || defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 202311L)
+# define TSRM_STATIC_ASSERT(c, m) static_assert((c), m)
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) /* C11 */
+# define TSRM_STATIC_ASSERT(c, m) _Static_assert((c), m)
+#else
+# define TSRM_STATIC_ASSERT(c, m)
+#endif
+TSRM_STATIC_ASSERT(TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) == TSRM_FAST_RESERVED_BASE,
+	"TSRM_FAST_RESERVED_BASE must equal the tsrm_tls_entry header size");
 
 typedef struct {
 	size_t size;
@@ -319,6 +328,14 @@ TSRM_API void tsrm_reserve(size_t size)
 }/*}}}*/
 
 
+/* Reserve the front of the fast space for fixed-offset fast resources, so the
+ * bump-allocated ones (ts_allocate_fast_id) are placed after it. */
+TSRM_API void tsrm_reserve_fast_front(size_t size)
+{/*{{{*/
+	tsrm_reserved_pos = TSRM_ALIGNED_SIZE(size);
+}/*}}}*/
+
+
 /* allocates a new fast thread-safe-resource id */
 TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
 {/*{{{*/
@@ -365,6 +382,28 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 	tsrm_mutex_unlock(tsmm_mutex);
 
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully allocated new resource id %d", *rsrc_id));
+	return *rsrc_id;
+}/*}}}*/
+
+
+/* Allocate a fast resource id at a fixed, compile-time-constant offset.
+ * Like tsrm_reserve(), assumes single-threaded startup. */
+TSRM_API ts_rsrc_id ts_allocate_fast_id_at(ts_rsrc_id *rsrc_id, size_t *offset, size_t fixed_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
+{/*{{{*/
+	size_t saved_pos = tsrm_reserved_pos;
+
+	if (fixed_offset - TSRM_FAST_RESERVED_BASE > tsrm_reserved_size) {
+		TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate space for fixed fast resource"));
+		*rsrc_id = 0;
+		*offset = 0;
+		return 0;
+	}
+	tsrm_reserved_pos = fixed_offset - TSRM_FAST_RESERVED_BASE;
+	ts_allocate_fast_id(rsrc_id, offset, size, ctor, dtor);
+	/* keep ordinary (bump-allocated) fast resources past the high-water mark */
+	if (tsrm_reserved_pos < saved_pos) {
+		tsrm_reserved_pos = saved_pos;
+	}
 	return *rsrc_id;
 }/*}}}*/
 

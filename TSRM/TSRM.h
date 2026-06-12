@@ -75,6 +75,8 @@ typedef void (*ts_allocate_dtor)(void *);
 
 #define THREAD_HASH_OF(thr,ts)  (unsigned long)thr%(unsigned long)ts
 
+#define TSRM_FAST_RESERVED_BASE TSRM_ALIGNED_SIZE(4 * sizeof(void *))
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -93,6 +95,11 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 /* Fast resource in reserved (pre-allocated) space */
 TSRM_API void tsrm_reserve(size_t size);
 TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
+
+/* Fast resources at caller-chosen, compile-time-constant offsets. The fixed
+ * prefix must be reserved after tsrm_reserve() and before any fast id. */
+TSRM_API void tsrm_reserve_fast_front(size_t size);
+TSRM_API ts_rsrc_id ts_allocate_fast_id_at(ts_rsrc_id *rsrc_id, size_t *offset, size_t fixed_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
 /* fetches the requested resource for the current thread */
 TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id);
