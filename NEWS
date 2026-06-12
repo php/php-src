@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Deprecate specifying a nullable return type for __debugInfo(). (timwolla)
   . Fixed bug GH-22142 (Assertion failure in zendi_try_get_long() on IS_UNDEF).
     (David Carlier)
+  . Fixed bug GH-22046 (The unserialize function can lead to segfault when
+    non-Serializable internal classes are serialized back with the C format).
+    (kocsismate)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
