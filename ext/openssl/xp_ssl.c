@@ -27,7 +27,7 @@
 #include "zend_exceptions.h"
 #include "php_openssl.h"
 #include "php_openssl_backend.h"
-#include "php_network.h"
+#include "php_io.h"
 #include <openssl/ssl.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
@@ -3569,6 +3569,18 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)  
 			}
 			if (ret) {
 				*(php_socket_t *)ret = sslsock->s.socket;
+			}
+			return SUCCESS;
+		case PHP_STREAM_AS_FD_FOR_COPY:
+			if (sslsock->ssl_active) {
+				return FAILURE;
+			}
+			if (ret) {
+				php_io_fd *copy_fd = (php_io_fd *) ret;
+				copy_fd->socket = sslsock->s.socket;
+				copy_fd->fd_type = PHP_IO_FD_SOCKET;
+				copy_fd->timeout = sslsock->s.timeout;
+				copy_fd->is_blocked = sslsock->s.is_blocked;
 			}
 			return SUCCESS;
 		default:
