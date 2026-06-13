@@ -351,6 +351,7 @@ STATUS:              Working
 EXTENSION:           intl
 PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2008 - 2019)
                      Anatol Belski <ab@php.net> (2017 - 2018)
+                     Weilin Du <weilindu@php.net> (2026 - 2026)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
