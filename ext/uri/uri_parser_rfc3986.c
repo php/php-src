@@ -537,7 +537,7 @@ static zend_result php_uri_parser_rfc3986_fragment_write(void *uri, const zval *
 	}
 }
 
-php_uri_parser_rfc3986_uris *uriparser_create_uris(void)
+static php_uri_parser_rfc3986_uris *uriparser_create_uris(void)
 {
 	php_uri_parser_rfc3986_uris *uriparser_uris = ecalloc(1, sizeof(*uriparser_uris));
 	uriparser_uris->normalized_uri_initialized = false;
