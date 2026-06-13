@@ -110,6 +110,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added ZEND_CONTAINER_OF().
   . The OPENBASEDIR_CHECKPATH() compatibility macro has been removed, instead
     use php_check_open_basedir() directly.
+  . The Z_CONSTANT(), Z_CONSTANT_P(), Z_OPT_CONSTANT(), and
+    Z_OPT_CONSTANT_P() macros have been removed. Check for IS_CONSTANT_AST
+    directly.
 
 ========================
 2. Build system changes
