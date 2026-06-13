@@ -3354,18 +3354,6 @@ ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp_l(const char *s1, size_t len1
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_binary_zval_strcmp(const zval *s1, const zval *s2) /* {{{ */
-{
-	return zend_binary_strcmp(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2));
-}
-/* }}} */
-
-ZEND_API int ZEND_FASTCALL zend_binary_zval_strncmp(const zval *s1, const zval *s2, const zval *s3) /* {{{ */
-{
-	return zend_binary_strncmp(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2), Z_LVAL_P(s3));
-}
-/* }}} */
-
 ZEND_API bool ZEND_FASTCALL zendi_smart_streq(const zend_string *s1, const zend_string *s2) /* {{{ */
 {
 	uint8_t ret1, ret2;
