@@ -46,7 +46,6 @@
 #include "zend_portability.h"
 #include "zend_strtod.h"
 #include "zend_multiply.h"
-#include "zend_object_handlers.h"
 
 #define LONG_SIGN_MASK ZEND_LONG_MIN
 
