@@ -25,7 +25,7 @@
 /ext/gd @devnexen
 /ext/gettext @devnexen
 /ext/gmp @Girgias
-/ext/intl @devnexen
+/ext/intl @devnexen @LamentXU123
 /ext/libxml @devnexen
 /ext/json @bukka
 /ext/mbstring @alexdowad @youkidearitai
