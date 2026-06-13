@@ -55,7 +55,7 @@ void php_uri_property_read_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property
 	}
 }
 
-static void php_uri_property_write_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, zval *property_zv)
+static void php_uri_property_write_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, const zval *property_zv)
 {
 	php_uri_object *old_uri_object = Z_URI_OBJECT_P(ZEND_THIS);
 	ZEND_ASSERT(old_uri_object->uri != NULL);
