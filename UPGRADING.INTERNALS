@@ -182,6 +182,11 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . _php_error_log_ex() has been removed.
   . php_mail()'s extra_cmd parameter is now a zend_string*.
 
+- ext/uri:
+  . The value parameter of the php_uri_property_handler_write callback is now
+    const zval * instead of zval *, reflecting that write handlers must
+    not modify the input zval.
+
 - ext/xml:
   . Removed the XML_ExpatVersion() libxml compatibility wrapper,
     as it was unused.
