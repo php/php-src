@@ -1112,12 +1112,12 @@ PHP_FUNCTION(hash_equals)
 
 	/* We only allow comparing string to prevent unexpected results. */
 	if (Z_TYPE_P(known_zval) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type string, %s given", zend_zval_value_name(known_zval));
+		zend_wrong_parameter_type_error(1, Z_EXPECTED_STRING, known_zval);
 		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(user_zval) != IS_STRING) {
-		zend_argument_type_error(2, "must be of type string, %s given", zend_zval_value_name(user_zval));
+		zend_wrong_parameter_type_error(2, Z_EXPECTED_STRING, user_zval);
 		RETURN_THROWS();
 	}
 

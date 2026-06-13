@@ -1179,7 +1179,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 			zend_class_entry *fetch_class = NULL;
 			if (arg2) {
 				if (Z_TYPE_P(arg2) != IS_STRING) {
-					zend_argument_type_error(2, "must be of type string, %s given", zend_zval_value_name(arg2));
+					zend_wrong_parameter_type_error(2, Z_EXPECTED_STRING, arg2);
 					RETURN_THROWS();
 				}
 				fetch_class = zend_lookup_class(Z_STR_P(arg2));
@@ -1228,7 +1228,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 			if (arg2) {
 				// Reuse convert_to_long(arg2); ?
 				if (Z_TYPE_P(arg2) != IS_LONG) {
-					zend_argument_type_error(2, "must be of type int, %s given", zend_zval_value_name(arg2));
+					zend_wrong_parameter_type_error(2, Z_EXPECTED_LONG, arg2);
 					RETURN_THROWS();
 				}
 				if (Z_LVAL_P(arg2) < 0) {
@@ -1698,7 +1698,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 					return false;
 				}
 				if (Z_TYPE(args[0]) != IS_STRING) {
-					zend_argument_type_error(arg1_arg_num, "must be of type string, %s given", zend_zval_value_name(&args[0]));
+					zend_wrong_parameter_type_error(arg1_arg_num, Z_EXPECTED_STRING, &args[0]);
 					return false;
 				}
 				cep = zend_lookup_class(Z_STR(args[0]));
@@ -1710,8 +1710,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				/* TODO: Improve logic? */
 				if (variadic_num_args == 2) {
 					if (Z_TYPE(args[1]) != IS_NULL && Z_TYPE(args[1]) != IS_ARRAY) {
-						zend_argument_type_error(constructor_arg_num, "must be of type ?array, %s given",
-							zend_zval_value_name(&args[1]));
+						zend_wrong_parameter_type_error(constructor_arg_num, Z_EXPECTED_ARRAY_OR_NULL, &args[1]);
 						return false;
 					}
 					if (Z_TYPE(args[1]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL(args[1]))) {
@@ -1736,7 +1735,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				return false;
 			}
 			if (Z_TYPE(args[0]) != IS_OBJECT) {
-				zend_argument_type_error(arg1_arg_num, "must be of type object, %s given", zend_zval_value_name(&args[0]));
+				zend_wrong_parameter_type_error(arg1_arg_num, Z_EXPECTED_OBJECT, &args[0]);
 				return false;
 			}
 
