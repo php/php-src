@@ -43,9 +43,9 @@ static zend_always_inline void zval_string_or_null_to_lexbor_str(const zval *val
 static zend_always_inline void zval_long_or_null_to_lexbor_str(const zval *value, lexbor_str_t *lexbor_str)
 {
 	if (Z_TYPE_P(value) == IS_LONG) {
-		zend_string *tmp = zend_long_to_str(Z_LVAL_P(value));
-		lexbor_str_init_append(lexbor_str, lexbor_parser.mraw, (const lxb_char_t *) ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-		zend_string_release(tmp);
+		char buf[MAX_LENGTH_OF_LONG + 1];
+		const char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, Z_LVAL_P(value));
+		lexbor_str_init_append(lexbor_str, lexbor_parser.mraw, (const lxb_char_t *) res, strlen(res));
 	} else {
 		ZEND_ASSERT(Z_ISNULL_P(value));
 		lexbor_str->data = (lxb_char_t *) "";
