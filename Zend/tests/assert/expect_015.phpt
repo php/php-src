@@ -201,7 +201,7 @@ assert(0 && ($a = function &(array &$a, ?X $b = null) use($c, &$d): ?X {
                 $s[$i] = $a[$j];
             }
             foreach ($a as $key => &$val) {
-                print "$key => $val\n";
+                print "{$key} => {$val}\n";
             }
             while ($s[$i]) {
                 $i++;
@@ -299,12 +299,12 @@ assert(0 && ($a = function (): ?static {
         echo 1;
     }
     $x = '\'"`$a';
-    $x = "'\"`$a";
-    $x = `'"\`$a`;
+    $x = "'\"`{$a}";
+    $x = `'"\`{$a}`;
     $x = "{$a}b";
     $x = "{$a}b";
     $x = " {$foo->bar} {${$foo->bar}} ";
-    $x = " ${---} ";
+    $x = " {${---}} ";
     foo();
     \foo();
     namespace\foo();
