@@ -760,11 +760,10 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_host(const ze
 
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_port(const zend_long port)
 {
-	zend_string *tmp = zend_long_to_str(port);
-	const char *p = ZSTR_VAL(tmp);
-	const size_t len = ZSTR_LEN(tmp);
-	const bool well_formed = uriIsWellFormedPortA(p, p + len);
-	zend_string_release(tmp);
+	char buf[MAX_LENGTH_OF_LONG + 1];
+	const char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, port);
+
+	const bool well_formed = uriIsWellFormedPortA(res, res + strlen(res));
 
 	return php_uri_parser_rfc3986_validate_component_result(well_formed, "port");
 }
