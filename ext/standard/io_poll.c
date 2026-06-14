@@ -414,7 +414,7 @@ PHP_METHOD(Io_Poll_Backend, getAvailableBackends)
 		if (php_poll_is_backend_available(backends[i])) {
 			const char *name = php_io_poll_backend_type_to_name(backends[i]);
 			zval enum_case;
-			ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_backend_class_entry, name));
+			ZVAL_OBJ_COPY(&enum_case, zend_enum_get_case_cstr(php_io_poll_backend_class_entry, name));
 			add_next_index_zval(return_value, &enum_case);
 		}
 	}
