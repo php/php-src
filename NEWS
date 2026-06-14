@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.8
 
+- Core:
+  . Fixed bug GH-22280 (Incorrect compile error for goto to label preceding
+    try/finally block). (Pratik Bhujel)
+
 - BCMath:
   . Fixed issues with oversized allocations and signed overflow in bcround()
     and BcMath\Number::round(). (edorian)
