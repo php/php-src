@@ -116,10 +116,10 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
 /* zend_type.kind discriminates what type.ptr points at. Exactly one value
  * applies at a time; it is a plain enum, not a bitmask like type_mask. */
 typedef enum zend_type_kind {
-	ZEND_TYPE_KIND_NONE         = 0, /* no payload; ptr is NULL */
-	ZEND_TYPE_KIND_NAME         = 1, /* a `zend_string*` (class name) */
-	ZEND_TYPE_KIND_LITERAL_NAME = 2, /* a `const char*` (literal class name) */
-	ZEND_TYPE_KIND_LIST         = 3, /* a `zend_type_list*` */
+	ZEND_TYPE_KIND_NONE, /* no payload; ptr is NULL */
+	ZEND_TYPE_KIND_NAME, /* a `zend_string*` (class name) */
+	ZEND_TYPE_KIND_LITERAL_NAME, /* a `const char*` (literal class name) */
+	ZEND_TYPE_KIND_LIST, /* a `zend_type_list*` */
 } zend_type_kind;
 
 typedef struct {
