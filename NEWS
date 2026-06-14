@@ -280,6 +280,9 @@ PHP                                                                        NEWS
     (kocsismate)
 
 - Zip:
+  . Fixed bug GH-21682 (ZipArchive instances should not be serializable).
+    serialize()/unserialize() now throw unless a subclass overrides
+    __serialize()/__unserialize(). (iliaal)
   . Fixed ZipArchive callback being called after executor has shut down.
     (ilutov)
   . Support minimum version for libzip dependency updated to 1.0.0.
