@@ -235,7 +235,7 @@ static void throw_invalid_url_exception_during_write(zval *errors, const char *c
 	}
 }
 
-static lxb_status_t serialize_to_smart_str_callback(const lxb_char_t *data, size_t length, void *ctx)
+static lxb_status_t serialize_to_smart_str_callback(const lxb_char_t *data, const size_t length, void *ctx)
 {
 	smart_str *uri_str = ctx;
 
@@ -246,7 +246,7 @@ static lxb_status_t serialize_to_smart_str_callback(const lxb_char_t *data, size
 	return LXB_STATUS_OK;
 }
 
-static zend_result php_uri_parser_whatwg_scheme_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_scheme_read(void *uri, const php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
@@ -348,7 +348,7 @@ static zend_result php_uri_parser_whatwg_password_write(void *uri, const zval *v
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_host_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_host_read(void *uri, const php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
@@ -435,7 +435,7 @@ static zend_result php_uri_parser_whatwg_host_write(void *uri, const zval *value
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_port_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_port_read(void *uri, const php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
@@ -466,7 +466,7 @@ static zend_result php_uri_parser_whatwg_port_write(void *uri, const zval *value
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_path_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_path_read(void *uri, const php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
@@ -497,7 +497,7 @@ static zend_result php_uri_parser_whatwg_path_write(void *uri, const zval *value
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_query_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_query_read(void *uri, const php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
@@ -528,7 +528,7 @@ static zend_result php_uri_parser_whatwg_query_write(void *uri, const zval *valu
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_fragment_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_fragment_read(void *uri, const php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
@@ -606,7 +606,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(uri_parser_whatwg)
 	return SUCCESS;
 }
 
-lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent)
+lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, const size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, const bool silent)
 {
 	lxb_url_parser_clean(&lexbor_parser);
 
@@ -630,7 +630,7 @@ lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_le
 	return url;
 }
 
-static void *php_uri_parser_whatwg_parse(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent)
+static void *php_uri_parser_whatwg_parse(const char *uri_str, const size_t uri_str_len, const void *base_url, zval *errors, const bool silent)
 {
 	return php_uri_parser_whatwg_parse_ex(uri_str, uri_str_len, base_url, errors, silent);
 }
@@ -642,7 +642,7 @@ static void *php_uri_parser_whatwg_clone(void *uri)
 	return lxb_url_clone(lexbor_parser.mraw, lexbor_uri);
 }
 
-static zend_string *php_uri_parser_whatwg_to_string(void *uri, php_uri_recomposition_mode recomposition_mode, bool exclude_fragment)
+static zend_string *php_uri_parser_whatwg_to_string(void *uri, const php_uri_recomposition_mode recomposition_mode, const bool exclude_fragment)
 {
 	const lxb_url_t *lexbor_uri = uri;
 	smart_str uri_str = {0};
