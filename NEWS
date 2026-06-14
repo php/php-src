@@ -27,14 +27,6 @@ PHP                                                                        NEWS
   . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
     for invalid display types. (Weilin Du)
 
-- URI:
-  . Add LEXBOR_STATIC to CFLAGS_URI on Windows so ext/uri does not see
-    LXB_API as __declspec(dllimport) when linked statically into PHP.
-    (Luther Monson)
-  . Clean error logs before each Uri\WhatWg\Url wither call so that errors from
-    previous wither calls are not returned the next time a UrlValidationError
-    is thrown. (kocsismate)
-
 - Opcache:
   . Fixed bug GH-22265 (Another tailcall vm_interrupt bug). (Levi Morrison)
 
@@ -54,13 +46,21 @@ PHP                                                                        NEWS
 - Sqlite:
   . Fix error checks for column retrieval. (ndossche)
 
+- URI:
+  . Add LEXBOR_STATIC to CFLAGS_URI on Windows so ext/uri does not see
+    LXB_API as __declspec(dllimport) when linked statically into PHP.
+    (Luther Monson)
+  . Clean error logs before each Uri\WhatWg\Url wither call so that errors from
+    previous wither calls are not returned the next time a UrlValidationError
+    is thrown. (kocsismate)
+
+- Zip:
+  . Fixed error-related memory leaks. (ndossche)
+
 - Zlib:
   . Fixed memory leak if deflate initialization fails and there is a dict.
     (ndossche)
   . Fixed memory leak in inflate_add(). (ndossche)
-
-- Zip:
-  . Fixed error-related memory leaks. (ndossche)
 
 02 Jun 2026, PHP 8.5.7
 
