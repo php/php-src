@@ -64,6 +64,7 @@ typedef struct {
 /* Stream poll handle specific data */
 typedef struct {
 	php_stream *stream;
+	zend_resource *res;
 } php_stream_poll_handle_data;
 
 /* Accessor macros */
@@ -250,7 +251,9 @@ static void php_stream_poll_handle_cleanup(php_poll_handle_object *handle)
 {
 	php_stream_poll_handle_data *data = (php_stream_poll_handle_data *) handle->handle_data;
 	if (data) {
-		/* Don't close the stream - user still owns it */
+		if (data->res) {
+			zend_list_delete(data->res);
+		}
 		efree(data);
 		handle->handle_data = NULL;
 	}
@@ -331,6 +334,15 @@ static void php_io_poll_context_free_object(zend_object *obj)
 {
 	php_io_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZOBJ(obj);
 
+	if (intern->watchers) {
+		zval *zv;
+		ZEND_HASH_FOREACH_VAL(intern->watchers, zv) {
+			php_io_poll_watcher_object *watcher = PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(Z_OBJ_P(zv));
+			watcher->active = false;
+			watcher->poll_ctx = NULL;
+		} ZEND_HASH_FOREACH_END();
+	}
+
 	if (intern->ctx) {
 		php_poll_destroy(intern->ctx);
 	}
@@ -341,6 +353,36 @@ static void php_io_poll_context_free_object(zend_object *obj)
 	}
 
 	zend_object_std_dtor(&intern->std);
+}
+
+static HashTable *php_io_poll_watcher_get_gc(zend_object *obj, zval **table, int *n)
+{
+	php_io_poll_watcher_object *intern = PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(obj);
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+
+	zend_get_gc_buffer_add_zval(gc_buffer, &intern->data);
+	if (intern->handle) {
+		zend_get_gc_buffer_add_obj(gc_buffer, &intern->handle->std);
+	}
+
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+	return NULL;
+}
+
+static HashTable *php_io_poll_context_get_gc(zend_object *obj, zval **table, int *n)
+{
+	php_io_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZOBJ(obj);
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+
+	if (intern->watchers) {
+		zval *zv;
+		ZEND_HASH_FOREACH_VAL(intern->watchers, zv) {
+			zend_get_gc_buffer_add_zval(gc_buffer, zv);
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+	return NULL;
 }
 
 /* Utility functions */
@@ -448,13 +490,19 @@ PHP_METHOD(StreamPollHandle, __construct)
 
 	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(getThis());
 
+	if (intern->handle_data) {
+		zend_throw_error(NULL, "StreamPollHandle object is already constructed");
+		RETURN_THROWS();
+	}
+
 	/* Set up stream-specific data */
 	php_stream_poll_handle_data *data = emalloc(sizeof(php_stream_poll_handle_data));
 	data->stream = stream;
+	data->res = stream->res;
 	intern->handle_data = data;
 
 	/* Add reference to stream */
-	GC_ADDREF(stream->res);
+	GC_ADDREF(data->res);
 }
 
 PHP_METHOD(StreamPollHandle, getStream)
@@ -656,6 +704,11 @@ PHP_METHOD(Io_Poll_Context, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_io_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZV(getThis());
+
+	if (intern->ctx) {
+		zend_throw_error(NULL, "Io\\Poll\\Context object is already constructed");
+		RETURN_THROWS();
+	}
 
 	php_poll_backend_type backend_type = PHP_POLL_BACKEND_AUTO;
 	if (backend_obj != NULL) {
@@ -861,6 +914,7 @@ PHP_MINIT_FUNCTION(poll)
 	memcpy(&php_io_poll_handle_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_io_poll_handle_object_handlers.offset = offsetof(php_poll_handle_object, std);
 	php_io_poll_handle_object_handlers.free_obj = php_poll_handle_object_free;
+	php_io_poll_handle_object_handlers.clone_obj = NULL;
 	php_stream_poll_handle_class_entry->default_object_handlers = &php_io_poll_handle_object_handlers;
 
 	/* Register Watcher class */
@@ -871,6 +925,8 @@ PHP_MINIT_FUNCTION(poll)
 			sizeof(zend_object_handlers));
 	php_io_poll_watcher_object_handlers.offset = offsetof(php_io_poll_watcher_object, std);
 	php_io_poll_watcher_object_handlers.free_obj = php_io_poll_watcher_free_object;
+	php_io_poll_watcher_object_handlers.get_gc = php_io_poll_watcher_get_gc;
+	php_io_poll_watcher_object_handlers.clone_obj = NULL;
 	php_io_poll_watcher_class_entry->default_object_handlers = &php_io_poll_watcher_object_handlers;
 
 	/* Register Context class */
@@ -881,6 +937,8 @@ PHP_MINIT_FUNCTION(poll)
 			sizeof(zend_object_handlers));
 	php_io_poll_context_object_handlers.offset = offsetof(php_io_poll_context_object, std);
 	php_io_poll_context_object_handlers.free_obj = php_io_poll_context_free_object;
+	php_io_poll_context_object_handlers.get_gc = php_io_poll_context_get_gc;
+	php_io_poll_context_object_handlers.clone_obj = NULL;
 	php_io_poll_context_class_entry->default_object_handlers = &php_io_poll_context_object_handlers;
 
 	/* Register exception hierarchy */
