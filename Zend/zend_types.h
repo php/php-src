@@ -119,7 +119,7 @@ typedef struct {
 	 * are only supported since C++20). */
 	void *ptr;
 	uint32_t type_mask;
-	/* TODO: We could use the extra 32-bit of padding on 64-bit systems. */
+	uint32_t kind;
 } zend_type;
 
 typedef struct {
@@ -129,11 +129,11 @@ typedef struct {
 
 #define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
 #define _ZEND_TYPE_MASK ((1u << 25) - 1)
-/* Only one of these bits may be set. */
-#define _ZEND_TYPE_NAME_BIT (1u << 24)
-// Used to signify that type.ptr is not a `zend_string*` but a `const char*`,
-#define _ZEND_TYPE_LITERAL_NAME_BIT (1u << 23)
-#define _ZEND_TYPE_LIST_BIT (1u << 22)
+/* These bits live in zend_type.kind (not type_mask). Only one may be set.
+ * Signifies what type.ptr points at: */
+#define _ZEND_TYPE_NAME_BIT (1u << 24)         /* a `zend_string*` (class name) */
+#define _ZEND_TYPE_LITERAL_NAME_BIT (1u << 23) /* a `const char*` (literal class name) */
+#define _ZEND_TYPE_LIST_BIT (1u << 22)         /* a `zend_type_list*` */
 #define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_LITERAL_NAME_BIT)
 /* For BC behaviour with iterable type */
 #define _ZEND_TYPE_ITERABLE_BIT (1u << 21)
@@ -149,21 +149,21 @@ typedef struct {
 #define _ZEND_TYPE_NULLABLE_BIT 0x2u
 
 #define ZEND_TYPE_IS_SET(t) \
-	(((t).type_mask & _ZEND_TYPE_MASK) != 0)
+	(((t).type_mask & _ZEND_TYPE_MASK) != 0 || (t).kind != 0)
 
 /* If a type is complex it means it's either a list with a union or intersection,
  * or the void pointer is a class name */
 #define ZEND_TYPE_IS_COMPLEX(t) \
-	((((t).type_mask) & _ZEND_TYPE_KIND_MASK) != 0)
+	((((t).kind) & _ZEND_TYPE_KIND_MASK) != 0)
 
 #define ZEND_TYPE_HAS_NAME(t) \
-	((((t).type_mask) & _ZEND_TYPE_NAME_BIT) != 0)
+	((((t).kind) & _ZEND_TYPE_NAME_BIT) != 0)
 
 #define ZEND_TYPE_HAS_LITERAL_NAME(t) \
-	((((t).type_mask) & _ZEND_TYPE_LITERAL_NAME_BIT) != 0)
+	((((t).kind) & _ZEND_TYPE_LITERAL_NAME_BIT) != 0)
 
 #define ZEND_TYPE_HAS_LIST(t) \
-	((((t).type_mask) & _ZEND_TYPE_LIST_BIT) != 0)
+	((((t).kind) & _ZEND_TYPE_LIST_BIT) != 0)
 
 #define ZEND_TYPE_IS_ITERABLE_FALLBACK(t) \
 	((((t).type_mask) & _ZEND_TYPE_ITERABLE_BIT) != 0)
@@ -248,8 +248,7 @@ typedef struct {
 
 #define ZEND_TYPE_SET_PTR_AND_KIND(t, _ptr, kind_bit) do { \
 	(t).ptr = (_ptr); \
-	(t).type_mask &= ~_ZEND_TYPE_KIND_MASK; \
-	(t).type_mask |= (kind_bit); \
+	(t).kind = (kind_bit); \
 } while (0)
 
 #define ZEND_TYPE_SET_LIST(t, list) \
@@ -284,10 +283,10 @@ typedef struct {
 #endif
 
 #define ZEND_TYPE_INIT_NONE(extra_flags) \
-	_ZEND_TYPE_PREFIX { NULL, (extra_flags) }
+	_ZEND_TYPE_PREFIX { NULL, (extra_flags), 0 }
 
 #define ZEND_TYPE_INIT_MASK(_type_mask) \
-	_ZEND_TYPE_PREFIX { NULL, (_type_mask) }
+	_ZEND_TYPE_PREFIX { NULL, (_type_mask), 0 }
 
 #define ZEND_TYPE_INIT_CODE(code, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : ( (code) == IS_ITERABLE ? _ZEND_TYPE_ITERABLE_BIT : ((code) == IS_MIXED ? MAY_BE_ANY : (1 << (code))))) \
@@ -295,28 +294,28 @@ typedef struct {
 
 #define ZEND_TYPE_INIT_PTR(ptr, type_kind, allow_null, extra_flags) \
 	_ZEND_TYPE_PREFIX { (void *) (ptr), \
-		(type_kind) | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
+		(((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags)), (type_kind) }
 
 #define ZEND_TYPE_INIT_PTR_MASK(ptr, type_mask) \
-	_ZEND_TYPE_PREFIX { (void *) (ptr), (type_mask) }
+	_ZEND_TYPE_PREFIX { (void *) (ptr), (type_mask), 0 }
 
 #define ZEND_TYPE_INIT_UNION(ptr, extra_flags) \
-	_ZEND_TYPE_PREFIX { (void *) (ptr), (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_UNION_BIT) | (extra_flags) }
+	_ZEND_TYPE_PREFIX { (void *) (ptr), (_ZEND_TYPE_UNION_BIT) | (extra_flags), _ZEND_TYPE_LIST_BIT }
 
 #define ZEND_TYPE_INIT_INTERSECTION(ptr, extra_flags) \
-	_ZEND_TYPE_PREFIX { (void *) (ptr), (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_INTERSECTION_BIT) | (extra_flags) }
+	_ZEND_TYPE_PREFIX { (void *) (ptr), (_ZEND_TYPE_INTERSECTION_BIT) | (extra_flags), _ZEND_TYPE_LIST_BIT }
 
 #define ZEND_TYPE_INIT_CLASS(class_name, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)
 
 #define ZEND_TYPE_INIT_CLASS_MASK(class_name, type_mask) \
-	ZEND_TYPE_INIT_PTR_MASK(class_name, _ZEND_TYPE_NAME_BIT | (type_mask))
+	_ZEND_TYPE_PREFIX { (void *) (class_name), (type_mask), _ZEND_TYPE_NAME_BIT }
 
 #define ZEND_TYPE_INIT_CLASS_CONST(class_name, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_LITERAL_NAME_BIT, allow_null, extra_flags)
 
 #define ZEND_TYPE_INIT_CLASS_CONST_MASK(class_name, type_mask) \
-	ZEND_TYPE_INIT_PTR_MASK(class_name, (_ZEND_TYPE_LITERAL_NAME_BIT | (type_mask)))
+	_ZEND_TYPE_PREFIX { (void *) (class_name), (type_mask), _ZEND_TYPE_LITERAL_NAME_BIT }
 
 typedef union _zend_value {
 	zend_long         lval;				/* long value */
