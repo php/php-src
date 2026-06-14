@@ -2318,13 +2318,13 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 #ifdef EXIF_DEBUG
 						php_error_docref(NULL, E_WARNING, "Found value of type single");
 #endif
-						info_value->f = php_ifd_get_float(value);
+						info_value->f = php_ifd_get_float(vptr);
 						break;
 					case TAG_FMT_DOUBLE:
 #ifdef EXIF_DEBUG
 						php_error_docref(NULL, E_WARNING, "Found value of type double");
 #endif
-						info_value->d = php_ifd_get_double(value);
+						info_value->d = php_ifd_get_double(vptr);
 						break;
 				}
 			}
