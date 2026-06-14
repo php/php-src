@@ -49,6 +49,10 @@ PHP                                                                        NEWS
     Phar::addEmptyDir() for paths starting with "/.phar", while allowing
     non-magic directory names that merely share the ".phar" prefix. (Weilin Du)
 
+- Reflection:
+  . Preserve class-name case in ReflectionClass::getProperty() error messages
+    and autoloading. (jorgsowa)
+
 - Sqlite:
   . Fix error checks for column retrieval. (ndossche)
 
