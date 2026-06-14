@@ -4651,9 +4651,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 	str_name = ZSTR_VAL(name);
 	if ((tmp = strstr(ZSTR_VAL(name), "::")) != NULL) {
 		classname_len = tmp - ZSTR_VAL(name);
-		classname = zend_string_alloc(classname_len, 0);
-		zend_str_tolower_copy(ZSTR_VAL(classname), ZSTR_VAL(name), classname_len);
-		ZSTR_VAL(classname)[classname_len] = '\0';
+		classname = zend_string_init(ZSTR_VAL(name), classname_len, 0);
 		str_name_len = ZSTR_LEN(name) - (classname_len + 2);
 		str_name = tmp + 2;
 
