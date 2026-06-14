@@ -29,6 +29,8 @@
 #include "ext/standard/file.h"
 #include "Zend/zend_attributes.h"
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_permissions.h"
+
 
 #include "php_ftp.h"
 #include "ftp.h"
@@ -418,6 +420,10 @@ PHP_FUNCTION(ftp_chmod)
 		RETURN_THROWS();
 	}
 	GET_FTPBUF(ftp, z_ftp);
+
+	if (zend_validate_file_permission(mode, 2, "mode") == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	if (!ftp_chmod(ftp, mode, filename, filename_len)) {
 		if (*ftp->inbuf) {

@@ -1760,6 +1760,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_ini_parser.c
     zend_ini_scanner.c
     zend_ini.c
+    zend_permissions.c
     zend_interfaces.c
     zend_iterators.c
     zend_language_parser.c
