@@ -7621,7 +7621,7 @@ static zend_type zend_compile_typename_ex(
 			if (ZEND_TYPE_IS_COMPLEX(single_type)) {
 				if (!ZEND_TYPE_IS_COMPLEX(type) && !is_composite) {
 					/* The first class type can be stored directly as the type ptr payload. */
-					ZEND_TYPE_SET_PTR_AND_KIND(type, ZEND_TYPE_NAME(single_type), _ZEND_TYPE_KIND_NAME);
+					ZEND_TYPE_SET_PTR_AND_KIND(type, ZEND_TYPE_NAME(single_type), ZEND_TYPE_KIND_NAME);
 				} else {
 					if (type_list->num_types == 0) {
 						/* Switch from single name to name list. */

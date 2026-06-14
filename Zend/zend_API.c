@@ -2950,7 +2950,7 @@ static void zend_convert_internal_arg_info_type(zend_type *type, bool persistent
 			zend_string *str = zend_string_init_interned(class_name, strlen(class_name), persistent);
 			zend_alloc_ce_cache(str);
 			ZEND_TYPE_SET_PTR(*type, str);
-			type->kind = _ZEND_TYPE_KIND_NAME;
+			type->kind = ZEND_TYPE_KIND_NAME;
 		} else {
 			/* Union type */
 			zend_type_list *list = pemalloc(ZEND_TYPE_LIST_SIZE(num_types), persistent);
