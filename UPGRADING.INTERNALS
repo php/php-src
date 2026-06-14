@@ -104,6 +104,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The deprecated Z_IMMUTABLE(), Z_IMMUTABLE_P(), Z_OPT_IMMUTABLE(), and
     Z_OPT_IMMUTABLE_P() macros have been removed. Check for
     IS_ARRAY && !REFCOUNTED directly.
+  . The unused Z_GC_*() macros have been removed. Use the corresponding
+    GC_*() macro on the result of Z_COUNTED().
   . The zend_binary_zval_strcmp() and zend_binary_zval_strncmp() functions
     have been removed, because they are unsafe by relying on the zvals
     having a specific type. Use zend_binary_strcmp() / zend_binary_strncmp(),
