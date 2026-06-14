@@ -515,7 +515,11 @@ ZEND_API zpp_parse_bool_status ZEND_FASTCALL zend_parse_arg_bool_weak(const zval
 		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("bool", arg_num)) {
 			return ZPP_PARSE_BOOL_STATUS_ERROR;
 		}
-		return zend_is_true(arg);
+		bool result = zend_is_true(arg);
+		if (UNEXPECTED(EG(exception))) {
+			return ZPP_PARSE_BOOL_STATUS_ERROR;
+		}
+		return result;
 	}
 	return ZPP_PARSE_BOOL_STATUS_ERROR;
 }
@@ -735,6 +739,9 @@ ZEND_API zend_string* ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, uint32_t 
 			return NULL;
 		}
 		convert_to_string(arg);
+		if (UNEXPECTED(EG(exception))) {
+			return NULL;
+		}
 		return Z_STR_P(arg);
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_object *zobj = Z_OBJ_P(arg);
