@@ -3,6 +3,11 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.4.26
 
 
+- Session:
+  . Fixed session upload progress to respect session.use_only_cookies.
+    (jorgsowa)
+
+
 27 Aug 2026, PHP 8.4.25
 
 - Core:
