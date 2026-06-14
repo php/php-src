@@ -2809,18 +2809,18 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_STRING);
 		zend_check_magic_method_arg_type(1, ce, fptr, error_type, MAY_BE_ARRAY);
-	} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
+	} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_LCNAME)) {
 		zend_check_magic_method_args(2, ce, fptr, error_type);
 		zend_check_magic_method_static(ce, fptr, error_type);
 		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_STRING);
 		zend_check_magic_method_arg_type(1, ce, fptr, error_type, MAY_BE_ARRAY);
-	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
+	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_LCNAME)) {
 		zend_check_magic_method_args(0, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
 		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_STRING);
-	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
+	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_LCNAME)) {
 		zend_check_magic_method_args(0, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
 		zend_check_magic_method_public(ce, fptr);
@@ -2829,18 +2829,18 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 			zend_error(E_DEPRECATED, "Returning null from %s::__debugInfo() is deprecated, make the return type non-nullable and return an empty array instead",
 				ZSTR_VAL(ce->name));
 		}
-	} else if (zend_string_equals_literal(lcname, "__serialize")) {
+	} else if (zend_string_equals_literal(lcname, ZEND_SERIALIZE_FUNC_NAME)) {
 		zend_check_magic_method_args(0, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
 		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_ARRAY);
-	} else if (zend_string_equals_literal(lcname, "__unserialize")) {
+	} else if (zend_string_equals_literal(lcname, ZEND_UNSERIALIZE_FUNC_NAME)) {
 		zend_check_magic_method_args(1, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
 		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_ARRAY);
 		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_VOID);
-	} else if (zend_string_equals_literal(lcname, "__set_state")) {
+	} else if (zend_string_equals_literal(lcname, ZEND_SET_STATE_FUNC_NAME)) {
 		zend_check_magic_method_args(1, ce, fptr, error_type);
 		zend_check_magic_method_static(ce, fptr, error_type);
 		zend_check_magic_method_public(ce, fptr);
@@ -2888,16 +2888,16 @@ ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, c
 	} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
 		ce->__isset = fptr;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
+	} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_LCNAME)) {
 		ce->__callstatic = fptr;
-	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
+	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_LCNAME)) {
 		ce->__tostring = fptr;
-	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
+	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_LCNAME)) {
 		ce->__debugInfo = fptr;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
-	} else if (zend_string_equals_literal(lcname, "__serialize")) {
+	} else if (zend_string_equals_literal(lcname, ZEND_SERIALIZE_FUNC_NAME)) {
 		ce->__serialize = fptr;
-	} else if (zend_string_equals_literal(lcname, "__unserialize")) {
+	} else if (zend_string_equals_literal(lcname, ZEND_UNSERIALIZE_FUNC_NAME)) {
 		ce->__unserialize = fptr;
 	}
 }
@@ -3111,7 +3111,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 
 		/* If not specified, add __toString() return type for compatibility with Stringable
 		 * interface. */
-		if (scope && zend_string_equals_literal_ci(internal_function->function_name, "__tostring") &&
+		if (scope && zend_string_equals_literal_ci(internal_function->function_name, ZEND_TOSTRING_FUNC_LCNAME) &&
 				!(internal_function->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 			zend_error(E_CORE_WARNING, "%s::__toString() implemented without string return type",
 				ZSTR_VAL(scope->name));
