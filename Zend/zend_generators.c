@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Nikita Popov <nikic@php.net>                                |
    |          Bob Weinand <bobwei9@hotmail.com>                           |
@@ -179,7 +178,7 @@ static void zend_generator_remove_child(zend_generator_node *node, zend_generato
 		node->child.single = NULL;
 	} else {
 		HashTable *ht = node->child.ht;
-		zend_hash_index_del(ht, (zend_ulong) child);
+		zend_hash_index_del(ht, (zend_ulong)(uintptr_t) child);
 		if (node->children == 2) {
 			zend_generator *other_child;
 			ZEND_HASH_FOREACH_PTR(ht, other_child) {
@@ -244,7 +243,6 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 	zend_generator *current_generator = zend_generator_get_current(generator);
 	zend_execute_data *ex = generator->execute_data;
 	uint32_t op_num, try_catch_offset;
-	int i;
 
 	/* If current_generator is running in a fiber, there are 2 cases to consider:
 	 *  - If generator is also marked with ZEND_GENERATOR_IN_FIBER, then the
@@ -281,7 +279,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 	if (EXPECTED(!ex) || EXPECTED(!(ex->func->op_array.fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK))
 			|| CG(unclean_shutdown)) {
-		zend_generator_close(generator, 0);
+		zend_generator_close(generator, false);
 		return;
 	}
 
@@ -289,7 +287,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 	try_catch_offset = -1;
 
 	/* Find the innermost try/catch that we are inside of. */
-	for (i = 0; i < ex->func->op_array.last_try_catch; i++) {
+	for (uint32_t i = 0; i < ex->func->op_array.last_try_catch; i++) {
 		zend_try_catch_element *try_catch = &ex->func->op_array.try_catch_array[i];
 		if (op_num < try_catch->try_op) {
 			break;
@@ -365,7 +363,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 		try_catch_offset--;
 	}
 
-	zend_generator_close(generator, 0);
+	zend_generator_close(generator, false);
 }
 /* }}} */
 
@@ -373,7 +371,7 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*) object;
 
-	zend_generator_close(generator, 0);
+	zend_generator_close(generator, false);
 
 	if (generator->func && (generator->func->common.fn_flags & ZEND_ACC_CLOSURE)) {
 		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(generator->func));
@@ -559,7 +557,7 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 			node->child.ht = ht;
 		}
 
-		zend_hash_index_add_new_ptr(node->child.ht, (zend_ulong) child, child);
+		zend_hash_index_add_new_ptr(node->child.ht, (zend_ulong)(uintptr_t) child, child);
 	}
 
 	++node->children;
@@ -655,7 +653,9 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 			} else {
 				zval_ptr_dtor(&new_root->value);
 				ZVAL_COPY(&new_root->value, &new_root_parent->value);
-				ZVAL_COPY(ZEND_CALL_VAR(new_root->execute_data, yield_from->result.var), &new_root_parent->retval);
+				if (yield_from->result_type != IS_UNUSED) {
+					ZVAL_COPY(ZEND_CALL_VAR(new_root->execute_data, yield_from->result.var), &new_root_parent->retval);
+				}
 			}
 		}
 	}
@@ -870,7 +870,7 @@ try_again:
 	 * its calling frame (see above in if (check_yield_from). */
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		if (generator == orig_generator) {
-			zend_generator_close(generator, 0);
+			zend_generator_close(generator, false);
 			if (!EG(current_execute_data)) {
 				zend_throw_exception_internal(NULL);
 			} else if (EG(current_execute_data)->func &&

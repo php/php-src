@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
@@ -290,7 +288,7 @@ static zend_class_entry *helper_ce;
 static inline HRESULT get_persist_stream(php_com_persist_helper *helper)
 {
 	if (!helper->ips && helper->unk) {
-		return IUnknown_QueryInterface(helper->unk, &IID_IPersistStream, &helper->ips);
+		return IUnknown_QueryInterface(helper->unk, &IID_IPersistStream, (void **) &helper->ips);
 	}
 	return helper->ips ? S_OK : E_NOTIMPL;
 }
@@ -298,7 +296,7 @@ static inline HRESULT get_persist_stream(php_com_persist_helper *helper)
 static inline HRESULT get_persist_stream_init(php_com_persist_helper *helper)
 {
 	if (!helper->ipsi && helper->unk) {
-		return IUnknown_QueryInterface(helper->unk, &IID_IPersistStreamInit, &helper->ipsi);
+		return IUnknown_QueryInterface(helper->unk, &IID_IPersistStreamInit, (void **) &helper->ipsi);
 	}
 	return helper->ipsi ? S_OK : E_NOTIMPL;
 }
@@ -306,7 +304,7 @@ static inline HRESULT get_persist_stream_init(php_com_persist_helper *helper)
 static inline HRESULT get_persist_file(php_com_persist_helper *helper)
 {
 	if (!helper->ipf && helper->unk) {
-		return IUnknown_QueryInterface(helper->unk, &IID_IPersistFile, &helper->ipf);
+		return IUnknown_QueryInterface(helper->unk, &IID_IPersistFile, (void **) &helper->ipf);
 	}
 	return helper->ipf ? S_OK : E_NOTIMPL;
 }
@@ -319,9 +317,7 @@ CPH_METHOD(GetCurFileName)
 	OLECHAR *olename = NULL;
 	CPH_FETCH();
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	CPH_NO_OBJ();
 
@@ -457,9 +453,7 @@ CPH_METHOD(GetMaxStreamSize)
 	ULARGE_INTEGER size;
 	CPH_FETCH();
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	CPH_NO_OBJ();
 
@@ -491,9 +485,7 @@ CPH_METHOD(InitNew)
 	HRESULT res;
 	CPH_FETCH();
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	CPH_NO_OBJ();
 
@@ -545,7 +537,7 @@ CPH_METHOD(LoadFromStream)
 		IDispatch *disp = NULL;
 
 		/* we need to create an object and load using OleLoadFromStream */
-		res = OleLoadFromStream(stm, &IID_IDispatch, &disp);
+		res = OleLoadFromStream(stm, &IID_IDispatch, (void **) &disp);
 
 		if (SUCCEEDED(res)) {
 			php_com_wrap_dispatch(return_value, disp, COMG(code_page));
@@ -557,7 +549,7 @@ CPH_METHOD(LoadFromStream)
 		} else {
 			res = get_persist_stream(helper);
 			if (helper->ips) {
-				res = IPersistStreamInit_Load(helper->ipsi, stm);
+				res = IPersistStream_Load(helper->ips, stm);
 			}
 		}
 	}

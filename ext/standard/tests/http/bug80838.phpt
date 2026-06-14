@@ -33,7 +33,8 @@ var_dump(http_get_last_response_headers());
 http_server_kill($pid);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: The predefined locally scoped $http_response_header variable is deprecated, call http_get_last_response_headers() instead in %s on line 23
 NULL
 array(3) {
   [0]=>

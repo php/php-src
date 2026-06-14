@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Levi Morrison <levim@php.net>                               |
    |          Sammy Kaye Powers <sammyk@php.net>                          |
@@ -74,10 +73,10 @@ ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init);
 
 // Call during runtime, but only if you have used zend_observer_fcall_register.
 // You must not have more than one begin and one end handler active at the same time. Remove the old one first, if there is an existing one.
-ZEND_API void zend_observer_add_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin);
-ZEND_API bool zend_observer_remove_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin, zend_observer_fcall_begin_handler *next);
-ZEND_API void zend_observer_add_end_handler(zend_function *function, zend_observer_fcall_end_handler end);
-ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_observer_fcall_end_handler end, zend_observer_fcall_end_handler *next);
+ZEND_API void zend_observer_add_begin_handler(const zend_function *function, zend_observer_fcall_begin_handler begin);
+ZEND_API bool zend_observer_remove_begin_handler(const zend_function *function, zend_observer_fcall_begin_handler begin, zend_observer_fcall_begin_handler *next);
+ZEND_API void zend_observer_add_end_handler(const zend_function *function, zend_observer_fcall_end_handler end);
+ZEND_API bool zend_observer_remove_end_handler(const zend_function *function, zend_observer_fcall_end_handler end, zend_observer_fcall_end_handler *next);
 
 ZEND_API void zend_observer_startup(void); // Called by engine before MINITs
 ZEND_API void zend_observer_post_startup(void); // Called by engine after MINITs
@@ -88,13 +87,13 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin(zend_execute_data *execute
 /* prechecked: the call is actually observed. */
 ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin_prechecked(zend_execute_data *execute_data, zend_observer_fcall_begin_handler *observer_data);
 
-static zend_always_inline bool zend_observer_handler_is_unobserved(zend_observer_fcall_begin_handler *handler) {
+static zend_always_inline bool zend_observer_handler_is_unobserved(const zend_observer_fcall_begin_handler *handler) {
 	return *handler == ZEND_OBSERVER_NONE_OBSERVED;
 }
 
 /* Initial check for observers has not happened yet or no observers are installed. */
-static zend_always_inline bool zend_observer_fcall_has_no_observers(zend_execute_data *execute_data, bool allow_generator, zend_observer_fcall_begin_handler **handler) {
-	zend_function *function = EX(func);
+static zend_always_inline bool zend_observer_fcall_has_no_observers(const zend_execute_data *execute_data, bool allow_generator, zend_observer_fcall_begin_handler **handler) {
+	const zend_function *function = EX(func);
 	void *ZEND_MAP_PTR(runtime_cache) = ZEND_MAP_PTR(function->common.run_time_cache);
 
 	if (function->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | (allow_generator ? 0 : ZEND_ACC_GENERATOR))) {

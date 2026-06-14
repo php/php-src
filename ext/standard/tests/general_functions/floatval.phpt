@@ -47,18 +47,11 @@ foreach ($valid_floats as $value ) {
 
 echo "\n*** Testing floatval() on non floating types ***\n";
 
-// get a resource type variable
-$fp = fopen (__FILE__, "r");
-fclose($fp);
-$dfp = opendir ( __DIR__ );
-closedir($dfp);
-
 // other types in an array
 $not_float_types = array (
                    -2147483648, // max negative integer value
                    2147483648,  // max positive integer value
-                   $fp,  // resource
-                   $dfp,
+                   STDERR,  // resource
                    "0.0", // string
                    "1.0",
                "-1.3e3",
@@ -88,7 +81,6 @@ foreach ($not_float_types as $type ) {
 }
 
 echo "\nDone\n";
-
 
 ?>
 --EXPECTF--
@@ -145,8 +137,7 @@ Warning: A non-numeric value encountered in %s on line %d
 Warning: A non-numeric value encountered in %s on line %d
 float(-2147483648)
 float(2147483648)
-float(5)
-float(6)
+float(3)
 float(0)
 float(1)
 float(-1300)
@@ -163,8 +154,7 @@ float(0)
 *** Testing doubleval() on non floating types ***
 float(-2147483648)
 float(2147483648)
-float(5)
-float(6)
+float(3)
 float(0)
 float(1)
 float(-1300)

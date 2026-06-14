@@ -9,7 +9,7 @@ $db = new PDO('sqlite::memory:');
 
 $db->query('CREATE TABLE test_pdo_sqlite_createfunction (id INT AUTO INCREMENT, name TEXT)');
 
-$db->query('INSERT INTO test_pdo_sqlite_createfunction VALUES (NULL, "PHP"), (NULL, "PHP6")');
+$db->query("INSERT INTO test_pdo_sqlite_createfunction VALUES (NULL, 'PHP'), (NULL, 'PHP6')");
 
 
 $db->sqliteCreateFunction('testing', function($v) { return strtolower($v); });
@@ -20,7 +20,8 @@ foreach ($db->query('SELECT testing(name) FROM test_pdo_sqlite_createfunction') 
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method PDO::sqliteCreateFunction() is deprecated since 8.5, use Pdo\Sqlite::createFunction() instead in %s on line %d
 array(2) {
   ["testing(name)"]=>
   string(3) "php"

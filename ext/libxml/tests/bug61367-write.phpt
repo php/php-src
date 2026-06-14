@@ -44,5 +44,5 @@ bool(true)
 
 Warning: DOMDocument::save(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: DOMDocument::save(%s): Failed to open stream: Operation not permitted in %s on line %d
+Warning: DOMDocument::save(%s): Failed to open stream: %r(Operation not permitted|Insufficient privileges)%r in %s on line %d
 bool(false)

@@ -16,8 +16,8 @@ MySQLPDOTest::skip();
     try {
         $db->exec(sprintf('CREATE TABLE test_prepare_native_dup_named(id INT, label1 CHAR(255), label2 CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
 
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn off emulated prepared statements\n");
         printf("Native...\n");
 
@@ -36,8 +36,8 @@ MySQLPDOTest::skip();
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
         // Now the same with emulated PS.
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
-        if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
+        if (1 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[004] Unable to turn on emulated prepared statements\n");
         printf("Emulated...\n");
 
@@ -72,8 +72,8 @@ MySQLPDOTest::skip();
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
         // native...
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[007] Unable to turn off emulated prepared statements\n");
         printf("Native...\n");
 

@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit fpm_main.stub.php instead.
  * Stub hash: b4ac4c0f1d91c354293e21185a2e6d9f99cc9fcc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fastcgi_finish_request, 0, 0, _IS_BOOL, 0)

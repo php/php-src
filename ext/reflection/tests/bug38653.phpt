@@ -20,9 +20,11 @@ var_dump($foo->getConstant("no such const"));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 int(10)
 string(0) ""
 string(4) "test"
+
+Deprecated: ReflectionClass::getConstant() for a non-existent constant is deprecated, use ReflectionClass::hasConstant() to check if the constant exists in %s on line %d
 bool(false)
 Done

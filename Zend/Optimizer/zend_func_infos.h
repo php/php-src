@@ -1,6 +1,7 @@
 /* This is a generated file, edit the .stub.php files instead. */
 
 static const func_info_t func_infos[] = {
+	F1("clone", MAY_BE_OBJECT),
 	F1("zend_version", MAY_BE_STRING),
 	FN("func_get_args", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ANY),
 	F1("get_class_vars", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
@@ -46,6 +47,7 @@ static const func_info_t func_infos[] = {
 	F1("curl_multi_strerror", MAY_BE_STRING|MAY_BE_NULL),
 	F1("curl_share_init", MAY_BE_OBJECT),
 	F1("curl_share_strerror", MAY_BE_STRING|MAY_BE_NULL),
+	F1("curl_share_init_persistent", MAY_BE_OBJECT),
 	F1("curl_strerror", MAY_BE_STRING|MAY_BE_NULL),
 	F1("curl_version", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
 	F1("date", MAY_BE_STRING),
@@ -129,9 +131,7 @@ static const func_info_t func_infos[] = {
 	F1("imagecreatefromgd", MAY_BE_OBJECT|MAY_BE_FALSE),
 	F1("imagecreatefromgd2", MAY_BE_OBJECT|MAY_BE_FALSE),
 	F1("imagecreatefromgd2part", MAY_BE_OBJECT|MAY_BE_FALSE),
-#if defined(HAVE_GD_BMP)
 	F1("imagecreatefrombmp", MAY_BE_OBJECT|MAY_BE_FALSE),
-#endif
 	F1("imagecolorsforindex", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG),
 	F1("imagegetclip", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG),
 #if defined(HAVE_GD_FREETYPE)
@@ -421,13 +421,12 @@ static const func_info_t func_infos[] = {
 #endif
 	F1("get_current_user", MAY_BE_STRING),
 	FN("get_cfg_var", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
-	F1("error_get_last", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL),
+	F1("error_get_last", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_NULL),
 	F1("highlight_file", MAY_BE_STRING|MAY_BE_BOOL),
 	F1("php_strip_whitespace", MAY_BE_STRING),
 	F1("highlight_string", MAY_BE_STRING|MAY_BE_TRUE),
 	F1("ini_get_all", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_NULL|MAY_BE_FALSE),
 	F1("set_include_path", MAY_BE_STRING|MAY_BE_FALSE),
-	F1("get_include_path", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("print_r", MAY_BE_STRING|MAY_BE_TRUE),
 #if defined(HAVE_GETSERVBYPORT)
 	F1("getservbyport", MAY_BE_STRING|MAY_BE_FALSE),
@@ -511,9 +510,7 @@ static const func_info_t func_infos[] = {
 	F1("getcwd", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("readdir", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("scandir", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-#if defined(HAVE_GLOB)
-	F1("glob", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-#endif
+	FN("glob", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 	F1("exec", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("system", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("escapeshellcmd", MAY_BE_STRING),
@@ -599,6 +596,7 @@ static const func_info_t func_infos[] = {
 	F1("stream_get_line", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("stream_resolve_include_path", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("stream_get_wrappers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+	FN("stream_last_errors", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_OBJECT),
 	F1("stream_get_transports", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 #if defined(HAVE_GETTIMEOFDAY)
 	F1("uniqid", MAY_BE_STRING),

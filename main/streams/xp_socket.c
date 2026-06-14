@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@thebrainroom.com>                           |
   +----------------------------------------------------------------------+
@@ -16,7 +14,7 @@
 
 #include "php.h"
 #include "ext/standard/file.h"
-#include "streams/php_streams_int.h"
+#include "php_streams.h"
 #include "php_network.h"
 
 #if defined(PHP_WIN32) || defined(__riscos__)
@@ -48,8 +46,18 @@ static const php_stream_ops php_stream_udp_socket_ops;
 #ifdef AF_UNIX
 static const php_stream_ops php_stream_unix_socket_ops;
 static const php_stream_ops php_stream_unixdg_socket_ops;
-#endif
 
+#define PHP_STREAM_XPORT_IS_UNIX_DG(stream) php_stream_is(stream, &php_stream_unixdg_socket_ops)
+#define PHP_STREAM_XPORT_IS_UNIX_ST(stream) php_stream_is(stream, &php_stream_unix_socket_ops)
+#define PHP_STREAM_XPORT_IS_UNIX(stream) \
+	(PHP_STREAM_XPORT_IS_UNIX_DG(stream) || PHP_STREAM_XPORT_IS_UNIX_ST(stream))
+#else
+#define PHP_STREAM_XPORT_IS_UNIX_DG(stream) false
+#define PHP_STREAM_XPORT_IS_UNIX_STD(stream) false
+#define PHP_STREAM_XPORT_IS_UNIX(stream) false
+#endif
+#define PHP_STREAM_XPORT_IS_UDP(stream) (php_stream_is(stream, &php_stream_udp_socket_ops))
+#define PHP_STREAM_XPORT_IS_TCP(stream) (!PHP_STREAM_XPORT_IS_UNIX(stream) && !PHP_STREAM_XPORT_IS_UDP(stream))
 
 static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam);
 
@@ -80,13 +88,13 @@ retry:
 			if (sock->is_blocked) {
 				int retval;
 
-				sock->timeout_event = 0;
+				sock->timeout_event = false;
 
 				do {
 					retval = php_pollfd_for(sock->socket, POLLOUT, ptimeout);
 
 					if (retval == 0) {
-						sock->timeout_event = 1;
+						sock->timeout_event = true;
 						break;
 					}
 
@@ -106,9 +114,8 @@ retry:
 
 		if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
 			estr = php_socket_strerror(err, NULL, 0);
-			php_error_docref(NULL, E_NOTICE,
-				"Send of " ZEND_LONG_FMT " bytes failed with errno=%d %s",
-				(zend_long)count, err, estr);
+			php_stream_warn(stream, NetworkSendFailed,
+					"Send of %zu bytes failed with errno=%d %s", count, err, estr);
 			efree(estr);
 		}
 	}
@@ -129,7 +136,7 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 		return;
 	}
 
-	sock->timeout_event = 0;
+	sock->timeout_event = false;
 
 	if (has_buffered_data) {
 		/* If there is already buffered data, use no timeout. */
@@ -146,7 +153,7 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
 
 		if (retval == 0)
-			sock->timeout_event = 1;
+			sock->timeout_event = true;
 
 		if (retval >= 0)
 			break;
@@ -399,7 +406,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 
 		case PHP_STREAM_OPTION_READ_TIMEOUT:
 			sock->timeout = *(struct timeval*)ptrparam;
-			sock->timeout_event = 0;
+			sock->timeout_event = false;
 			return PHP_STREAM_OPTION_RETURN_OK;
 
 		case PHP_STREAM_OPTION_META_DATA_API:
@@ -444,8 +451,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 							xparam->inputs.addrlen);
 					if (xparam->outputs.returncode == -1) {
 						char *err = php_socket_strerror(php_socket_errno(), NULL, 0);
-						php_error_docref(NULL, E_WARNING,
-						   	"%s\n", err);
+						php_stream_warn(stream, NetworkSendFailed, "%s", err);
 						efree(err);
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
@@ -585,7 +591,8 @@ static const php_stream_ops php_stream_unixdg_socket_ops = {
 /* network socket operations */
 
 #ifdef AF_UNIX
-static inline int parse_unix_address(php_stream_xport_param *xparam, struct sockaddr_un *unix_addr)
+static inline int parse_unix_address(php_stream *stream, php_stream_xport_param *xparam,
+		struct sockaddr_un *unix_addr)
 {
 	memset(unix_addr, 0, sizeof(*unix_addr));
 	unix_addr->sun_family = AF_UNIX;
@@ -604,9 +611,9 @@ static inline int parse_unix_address(php_stream_xport_param *xparam, struct sock
 		 * BUT, to get into this branch of code, the name is too long,
 		 * so we don't care. */
 		xparam->inputs.namelen = max_length;
-		php_error_docref(NULL, E_NOTICE,
-			"socket path exceeded the maximum allowed length of %lu bytes "
-			"and was truncated", max_length);
+		php_stream_notice(stream, InvalidPath,
+				"socket path exceeded the maximum allowed length of %lu bytes and was truncated",
+				max_length);
 	}
 
 	memcpy(unix_addr->sun_path, xparam->inputs.name, xparam->inputs.namelen);
@@ -669,27 +676,33 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 	int portno, err;
 	long sockopts = STREAM_SOCKOP_NONE;
 	zval *tmpzval = NULL;
+	php_sockvals sockvals = {0};
 
 #ifdef AF_UNIX
-	if (stream->ops == &php_stream_unix_socket_ops || stream->ops == &php_stream_unixdg_socket_ops) {
+	if (PHP_STREAM_XPORT_IS_UNIX(stream)) {
 		struct sockaddr_un unix_addr;
 
-		sock->socket = socket(PF_UNIX, stream->ops == &php_stream_unix_socket_ops ? SOCK_STREAM : SOCK_DGRAM, 0);
+		sock->socket = socket(PF_UNIX, PHP_STREAM_XPORT_IS_UNIX_ST(stream) ? SOCK_STREAM : SOCK_DGRAM, 0);
 
 		if (sock->socket == SOCK_ERR) {
 			if (xparam->want_errortext) {
 				char errstr[256];
 				xparam->outputs.error_text = strpprintf(0, "Failed to create unix%s socket %s",
-						stream->ops == &php_stream_unix_socket_ops ? "" : "datagram",
+						PHP_STREAM_XPORT_IS_UNIX_ST(stream) ? "" : " datagram",
 						php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 			}
 			return -1;
 		}
 
-		parse_unix_address(xparam, &unix_addr);
+		parse_unix_address(stream, xparam, &unix_addr);
 
-		return bind(sock->socket, (const struct sockaddr *)&unix_addr,
-			(socklen_t) XtOffsetOf(struct sockaddr_un, sun_path) + xparam->inputs.namelen);
+		int result = bind(sock->socket, (const struct sockaddr *)&unix_addr,
+			(socklen_t) offsetof(struct sockaddr_un, sun_path) + xparam->inputs.namelen);
+		if (result == -1 && xparam->want_errortext) {
+			char errstr[256];
+			xparam->outputs.error_text = strpprintf(0, "%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
+		}
+		return result;
 	}
 #endif
 
@@ -718,8 +731,18 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 	}
 #endif
 
+#ifdef SO_REUSEADDR
+	/* SO_REUSEADDR is enabled by default so this option is just to disable it if set to false. */
+	if (!PHP_STREAM_CONTEXT(stream)
+		|| (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_reuseaddr")) == NULL
+		|| zend_is_true(tmpzval)
+	) {
+		sockopts |= STREAM_SOCKOP_SO_REUSEADDR;
+	}
+#endif
+
 #ifdef SO_BROADCAST
-	if (stream->ops == &php_stream_udp_socket_ops /* SO_BROADCAST is only applicable for UDP */
+	if (PHP_STREAM_XPORT_IS_UDP(stream) /* SO_BROADCAST is only applicable for UDP */
 		&& PHP_STREAM_CONTEXT(stream)
 		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_broadcast")) != NULL
 		&& zend_is_true(tmpzval)
@@ -728,9 +751,50 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 	}
 #endif
 
-	sock->socket = php_network_bind_socket_to_local_addr(host, portno,
-			stream->ops == &php_stream_udp_socket_ops ? SOCK_DGRAM : SOCK_STREAM,
+#ifdef SO_KEEPALIVE
+	if (PHP_STREAM_XPORT_IS_TCP(stream) /* SO_KEEPALIVE is only applicable for TCP */
+		&& PHP_STREAM_CONTEXT(stream)
+		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_keepalive")) != NULL
+		&& zend_is_true(tmpzval)
+	) {
+		sockopts |= STREAM_SOCKOP_SO_KEEPALIVE;
+	}
+#endif
+
+	/* Parse TCP keepalive parameters - only for TCP streams */
+	if (PHP_STREAM_XPORT_IS_TCP(stream)) {
+#if defined(TCP_KEEPIDLE) || defined(TCP_KEEPALIVE)
+		if (PHP_STREAM_CONTEXT(stream)
+			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepidle")) != NULL
+		) {
+			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPIDLE;
+			sockvals.keepalive.keepidle = (int)zval_get_long(tmpzval);
+		}
+#endif
+
+#ifdef TCP_KEEPINTVL
+		if (PHP_STREAM_CONTEXT(stream)
+			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepintvl")) != NULL
+		) {
+			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPINTVL;
+			sockvals.keepalive.keepintvl = (int)zval_get_long(tmpzval);
+		}
+#endif
+
+#ifdef TCP_KEEPCNT
+		if (PHP_STREAM_CONTEXT(stream)
+			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepcnt")) != NULL
+		) {
+			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPCNT;
+			sockvals.keepalive.keepcnt = (int)zval_get_long(tmpzval);
+		}
+#endif
+	}
+
+	sock->socket = php_network_bind_socket_to_local_addr_ex(host, portno,
+			PHP_STREAM_XPORT_IS_UDP(stream) ? SOCK_DGRAM : SOCK_STREAM,
 			sockopts,
+			sockvals.mask ? &sockvals : NULL,
 			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 			&err
 			);
@@ -751,12 +815,13 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	int ret;
 	zval *tmpzval = NULL;
 	long sockopts = STREAM_SOCKOP_NONE;
+	php_sockvals sockvals = {0};
 
 #ifdef AF_UNIX
-	if (stream->ops == &php_stream_unix_socket_ops || stream->ops == &php_stream_unixdg_socket_ops) {
+	if (PHP_STREAM_XPORT_IS_UNIX(stream)) {
 		struct sockaddr_un unix_addr;
 
-		sock->socket = socket(PF_UNIX, stream->ops == &php_stream_unix_socket_ops ? SOCK_STREAM : SOCK_DGRAM, 0);
+		sock->socket = socket(PF_UNIX, PHP_STREAM_XPORT_IS_UNIX_ST(stream) ? SOCK_STREAM : SOCK_DGRAM, 0);
 
 		if (sock->socket == SOCK_ERR) {
 			if (xparam->want_errortext) {
@@ -765,10 +830,10 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 			return -1;
 		}
 
-		parse_unix_address(xparam, &unix_addr);
+		parse_unix_address(stream, xparam, &unix_addr);
 
 		ret = php_network_connect_socket(sock->socket,
-				(const struct sockaddr *)&unix_addr, (socklen_t) XtOffsetOf(struct sockaddr_un, sun_path) + xparam->inputs.namelen,
+				(const struct sockaddr *)&unix_addr, (socklen_t) offsetof(struct sockaddr_un, sun_path) + xparam->inputs.namelen,
 				xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC, xparam->inputs.timeout,
 				xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 				&err);
@@ -797,7 +862,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	}
 
 #ifdef SO_BROADCAST
-	if (stream->ops == &php_stream_udp_socket_ops /* SO_BROADCAST is only applicable for UDP */
+	if (PHP_STREAM_XPORT_IS_UDP(stream) /* SO_BROADCAST is only applicable for UDP */
 		&& PHP_STREAM_CONTEXT(stream)
 		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_broadcast")) != NULL
 		&& zend_is_true(tmpzval)
@@ -806,11 +871,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	}
 #endif
 
-	if (stream->ops != &php_stream_udp_socket_ops /* TCP_NODELAY is only applicable for TCP */
-#ifdef AF_UNIX
-		&& stream->ops != &php_stream_unix_socket_ops
-		&& stream->ops != &php_stream_unixdg_socket_ops
-#endif
+	if (PHP_STREAM_XPORT_IS_TCP(stream) /* TCP_NODELAY is only applicable for TCP */
 		&& PHP_STREAM_CONTEXT(stream)
 		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL
 		&& zend_is_true(tmpzval)
@@ -818,19 +879,60 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 		sockopts |= STREAM_SOCKOP_TCP_NODELAY;
 	}
 
+#ifdef SO_KEEPALIVE
+	if (PHP_STREAM_XPORT_IS_TCP(stream) /* SO_KEEPALIVE is only applicable for TCP */
+		&& PHP_STREAM_CONTEXT(stream)
+		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_keepalive")) != NULL
+		&& zend_is_true(tmpzval)
+	) {
+		sockopts |= STREAM_SOCKOP_SO_KEEPALIVE;
+	}
+#endif
+
+	/* Parse TCP keepalive parameters - only for TCP streams */
+	if (PHP_STREAM_XPORT_IS_TCP(stream)) {
+#if defined(TCP_KEEPIDLE) || defined(TCP_KEEPALIVE)
+		if (PHP_STREAM_CONTEXT(stream)
+			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepidle")) != NULL
+		) {
+			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPIDLE;
+			sockvals.keepalive.keepidle = (int)zval_get_long(tmpzval);
+		}
+#endif
+
+#ifdef TCP_KEEPINTVL
+		if (PHP_STREAM_CONTEXT(stream)
+			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepintvl")) != NULL
+		) {
+			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPINTVL;
+			sockvals.keepalive.keepintvl = (int)zval_get_long(tmpzval);
+		}
+#endif
+
+#ifdef TCP_KEEPCNT
+		if (PHP_STREAM_CONTEXT(stream)
+			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepcnt")) != NULL
+		) {
+			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPCNT;
+			sockvals.keepalive.keepcnt = (int)zval_get_long(tmpzval);
+		}
+#endif
+	}
+
 	/* Note: the test here for php_stream_udp_socket_ops is important, because we
 	 * want the default to be TCP sockets so that the openssl extension can
 	 * re-use this code. */
 
-	sock->socket = php_network_connect_socket_to_host(host, portno,
-			stream->ops == &php_stream_udp_socket_ops ? SOCK_DGRAM : SOCK_STREAM,
+	sock->socket = php_network_connect_socket_to_host_ex(host, portno,
+			PHP_STREAM_XPORT_IS_UDP(stream) ? SOCK_DGRAM : SOCK_STREAM,
 			xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC,
 			xparam->inputs.timeout,
 			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 			&err,
 			bindto,
 			bindport,
-			sockopts
+			sockopts,
+			sockvals.mask ? &sockvals : NULL
 			);
 
 	ret = sock->socket == -1 ? -1 : 0;
@@ -858,26 +960,32 @@ out:
 static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t *sock,
 		php_stream_xport_param *xparam STREAMS_DC)
 {
-	php_socket_t clisock;
-	bool nodelay = 0;
+	php_sockvals sockvals = {0};
 	zval *tmpzval = NULL;
 
 	xparam->outputs.client = NULL;
 
-	if ((NULL != PHP_STREAM_CONTEXT(stream)) &&
-		(tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL &&
-		zend_is_true(tmpzval)) {
-		nodelay = 1;
+	if (PHP_STREAM_CONTEXT(stream)) {
+		tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay");
+		if (tmpzval != NULL && zend_is_true(tmpzval)) {
+			sockvals.mask |= PHP_SOCKVAL_TCP_NODELAY;
+			sockvals.tcp_nodelay = 1;
+		}
+		tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_keepidle");
+		if (tmpzval != NULL) {
+			sockvals.mask |= PHP_SOCKVAL_TCP_KEEPIDLE;
+			sockvals.keepalive.keepidle = (int)zval_get_long(tmpzval);
+		}
 	}
 
-	clisock = php_network_accept_incoming(sock->socket,
+	php_socket_t clisock = php_network_accept_incoming_ex(sock->socket,
 		xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
 		xparam->want_addr ? &xparam->outputs.addr : NULL,
 		xparam->want_addr ? &xparam->outputs.addrlen : NULL,
 		xparam->inputs.timeout,
 		xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 		&xparam->outputs.error_code,
-		nodelay);
+		&sockvals);
 
 	if (clisock != SOCK_ERR) {
 		php_netstream_data_t *clisockdata = (php_netstream_data_t*) emalloc(sizeof(*clisockdata));
@@ -886,7 +994,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		clisockdata->socket = clisock;
 #ifdef __linux__
 		/* O_NONBLOCK is not inherited on Linux */
-		clisockdata->is_blocked = 1;
+		clisockdata->is_blocked = true;
 #endif
 
 		xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
@@ -964,7 +1072,7 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 	sock = pemalloc(sizeof(php_netstream_data_t), persistent_id ? 1 : 0);
 	memset(sock, 0, sizeof(php_netstream_data_t));
 
-	sock->is_blocked = 1;
+	sock->is_blocked = true;
 	sock->timeout.tv_sec = FG(default_socket_timeout);
 	sock->timeout.tv_usec = 0;
 

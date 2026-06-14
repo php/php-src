@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Zeev Suraski <zeev@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -48,8 +46,8 @@ extern ZEND_API struct _php_core_globals core_globals;
 struct _php_tick_function_entry;
 
 typedef struct _arg_separators {
-	char *output;
-	char *input;
+	zend_string *output;
+	zend_string *input;
 } arg_separators;
 
 struct _php_core_globals {
@@ -61,6 +59,7 @@ struct _php_core_globals {
 
 	uint8_t display_errors;
 	bool display_startup_errors;
+	bool error_include_args;
 	bool log_errors;
 	bool ignore_repeated_errors;
 	bool ignore_repeated_source;
@@ -72,6 +71,7 @@ struct _php_core_globals {
 	zend_long serialize_precision;
 
 	zend_long memory_limit;
+	zend_long max_memory_limit;
 	zend_long max_input_time;
 
 	char *error_log;
@@ -142,7 +142,6 @@ struct _php_core_globals {
 
 	char *php_sys_temp_dir;
 
-	char *disable_classes;
 	zend_long max_input_nesting_level;
 	zend_long max_input_vars;
 
@@ -152,6 +151,7 @@ struct _php_core_globals {
 	char *request_order;
 
 	char *mail_log;
+	zend_string *mail_cr_lf_mode;
 	bool mail_x_header;
 	bool mail_mixed_lf_and_crlf;
 

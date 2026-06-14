@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Georg Richter <georg@php.net>                               |
   |          Andrey Hristov <andrey@php.net>                             |
@@ -39,31 +37,13 @@ enum mysqli_status {
 };
 
 typedef struct {
-	char		*val;
-	zend_ulong		buflen;
-	zend_ulong		output_len;
-	zend_ulong		type;
-} VAR_BUFFER;
-
-typedef struct {
-	unsigned int	var_cnt;
-	VAR_BUFFER		*buf;
-	zval			*vars;
-	my_bool			*is_null;
-} BIND_BUFFER;
-
-typedef struct {
 	MYSQL_STMT	*stmt;
-	BIND_BUFFER	param;
-	BIND_BUFFER	result;
 	char		*query;
 } MY_STMT;
 
 typedef struct {
 	MYSQL			*mysql;
 	zend_string		*hash_key;
-	zval			li_read;
-	php_stream		*li_stream;
 	unsigned int 	multi_query;
 	bool		persistent;
 	int				async_result_fetch_type;
@@ -81,9 +61,7 @@ typedef struct _mysqli_object {
 	zend_object 		zo;
 } mysqli_object; /* extends zend_object */
 
-static inline mysqli_object *php_mysqli_fetch_object(zend_object *obj) {
-	return (mysqli_object *)((char*)(obj) - XtOffsetOf(mysqli_object, zo));
-}
+#define php_mysqli_fetch_object(obj) ZEND_CONTAINER_OF(obj, mysqli_object, zo)
 
 #define Z_MYSQLI_P(zv) php_mysqli_fetch_object(Z_OBJ_P((zv)))
 
@@ -177,7 +155,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 	MYSQLI_REGISTER_RESOURCE_EX(__ptr, object)\
 }
 
-#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __name, __check) \
+#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __check) \
 { \
 	MYSQLI_RESOURCE *my_res; \
 	mysqli_object *intern = Z_MYSQLI_P(__id); \
@@ -192,7 +170,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 	}\
 }
 
-#define MYSQLI_FETCH_RESOURCE_BY_OBJ(__ptr, __type, __obj, __name, __check) \
+#define MYSQLI_FETCH_RESOURCE_BY_OBJ(__ptr, __type, __obj, __check) \
 { \
 	MYSQLI_RESOURCE *my_res; \
 	if (!(my_res = (MYSQLI_RESOURCE *)(__obj->ptr))) {\
@@ -208,7 +186,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 
 #define MYSQLI_FETCH_RESOURCE_CONN(__ptr, __id, __check) \
 { \
-	MYSQLI_FETCH_RESOURCE((__ptr), MY_MYSQL *, (__id), "mysqli_link", (__check)); \
+	MYSQLI_FETCH_RESOURCE((__ptr), MY_MYSQL *, (__id), (__check)); \
 	if (!(__ptr)->mysql) { \
 		zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(Z_OBJCE_P(__id)->name)); \
 		RETURN_THROWS(); \
@@ -217,7 +195,7 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 
 #define MYSQLI_FETCH_RESOURCE_STMT(__ptr, __id, __check) \
 { \
-	MYSQLI_FETCH_RESOURCE((__ptr), MY_STMT *, (__id), "mysqli_stmt", (__check)); \
+	MYSQLI_FETCH_RESOURCE((__ptr), MY_STMT *, (__id), (__check)); \
 	ZEND_ASSERT((__ptr)->stmt && "Missing statement?"); \
 }
 
@@ -236,21 +214,21 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
+	unsigned short      		default_port;
+	bool				allow_persistent;
+	bool				allow_local_infile;
+	char				*default_host;
+	char				*default_user;
+	char				*default_pw;
+	char				*default_socket;
+	char				*local_infile_directory;
+	char				*error_msg;
 	zend_long			num_links;
 	zend_long			max_links;
 	zend_long 			num_active_persistent;
 	zend_long 			num_inactive_persistent;
 	zend_long			max_persistent;
-	bool				allow_persistent;
-	zend_ulong			default_port;
-	char				*default_host;
-	char				*default_user;
-	char				*default_pw;
-	char				*default_socket;
-	bool				allow_local_infile;
-	char				*local_infile_directory;
 	zend_long			error_no;
-	char				*error_msg;
 	zend_long			report_mode;
 	bool 				rollback_on_cached_plink;
 ZEND_END_MODULE_GLOBALS(mysqli)

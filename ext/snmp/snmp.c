@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Mike Jackson <mhjack@tscnet.com>                            |
@@ -34,7 +32,6 @@
 #include "php_snmp.h"
 
 #include "zend_exceptions.h"
-#include "zend_smart_string.h"
 #include "ext/spl/spl_exceptions.h"
 
 #ifdef HAVE_SNMP
@@ -153,7 +150,7 @@ static PHP_GINIT_FUNCTION(snmp)
 	} \
 }
 
-static void netsnmp_session_free(php_snmp_session **session) /* {{{ */
+static void snmp_session_free(php_snmp_session **session) /* {{{ */
 {
 	if (*session) {
 		PHP_SNMP_SESSION_FREE(peername);
@@ -170,11 +167,7 @@ static void php_snmp_object_free_storage(zend_object *object) /* {{{ */
 {
 	php_snmp_object *intern = php_snmp_fetch_object(object);
 
-	if (!intern) {
-		return;
-	}
-
-	netsnmp_session_free(&(intern->session));
+	snmp_session_free(&(intern->session));
 
 	zend_object_std_dtor(&intern->zo);
 }
@@ -631,7 +624,7 @@ retry:
 
 static void php_snmp_zend_string_release_from_char_pointer(char *ptr) {
 	if (ptr) {
-		zend_string *pptr = (zend_string *)(ptr - XtOffsetOf(zend_string, val));
+		zend_string *pptr = (zend_string *)(ptr - offsetof(zend_string, val));
 		zend_string_release(pptr);
 	}
 }
@@ -660,7 +653,8 @@ static void php_free_objid_query(struct objid_query *objid_query, HashTable* oid
 */
 static bool php_snmp_parse_oid(
 	zval *object, int st, struct objid_query *objid_query, zend_string *oid_str, HashTable *oid_ht,
-	zend_string *type_str, HashTable *type_ht, zend_string *value_str, HashTable *value_ht
+	zend_string *type_str, HashTable *type_ht, zend_string *value_str, HashTable *value_ht,
+	uint32_t oid_arg_num, uint32_t type_arg_num, uint32_t value_arg_num
 ) {
 	char *pptr;
 	uint32_t idx_type = 0, idx_value = 0;
@@ -687,7 +681,7 @@ static bool php_snmp_parse_oid(
 			ZEND_ASSERT(type_str && value_str);
 
 			if (ZSTR_LEN(type_str) != 1) {
-				zend_value_error("Type must be a single character");
+				zend_argument_value_error(type_arg_num, "must be a single character");
 				efree(objid_query->vars);
 				return false;
 			}
@@ -698,7 +692,7 @@ static bool php_snmp_parse_oid(
 		objid_query->count++;
 	} else if (oid_ht) { /* we got objid array */
 		if (zend_hash_num_elements(oid_ht) == 0) {
-			zend_value_error("Array of object IDs must not be empty");
+			zend_argument_value_error(oid_arg_num, "must not be empty when passed as an array");
 			return false;
 		}
 		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);
@@ -743,14 +737,14 @@ static bool php_snmp_parse_oid(
 						char ptype = *ZSTR_VAL(type);
 						zend_string_release(type);
 						if (len != 1) {
-							zend_value_error("Type must be a single character");
+							zend_argument_value_error(type_arg_num, "must be a single character");
 							php_free_objid_query(objid_query, oid_ht, value_ht, st);
 							return false;
 						}
 						objid_query->vars[objid_query->count].type = ptype;
 						idx_type++;
 					} else {
-						php_error_docref(NULL, E_WARNING, "'%s': no type set", ZSTR_VAL(tmp));
+						zend_argument_value_error(type_arg_num, "must contain a type for object ID '%s'", ZSTR_VAL(tmp));
 						php_free_objid_query(objid_query, oid_ht, value_ht, st);
 						return false;
 					}
@@ -785,7 +779,7 @@ static bool php_snmp_parse_oid(
 						objid_query->vars[objid_query->count].value = ZSTR_VAL(tmp);
 						idx_value++;
 					} else {
-						php_error_docref(NULL, E_WARNING, "'%s': no value set", ZSTR_VAL(tmp));
+						zend_argument_value_error(value_arg_num, "must contain a value for object ID '%s'", ZSTR_VAL(tmp));
 						php_free_objid_query(objid_query, oid_ht, value_ht, st);
 						return false;
 					}
@@ -829,10 +823,10 @@ static bool php_snmp_parse_oid(
 }
 /* }}} */
 
-/* {{{ netsnmp_session_init
-	allocates memory for session and session->peername, caller should free it manually using netsnmp_session_free() and efree()
+/* {{{ snmp_session_init
+	allocates memory for session and session->peername, caller should free it manually using snmp_session_free() and efree()
 */
-static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, int timeout, int retries)
+static bool snmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, zend_long timeout, zend_long retries, uint32_t hostname_arg_num, uint32_t timeout_arg_num)
 {
 	php_snmp_session *session;
 	char *pptr, *host_ptr;
@@ -840,8 +834,37 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	int n;
 	struct sockaddr **psal;
 	struct sockaddr **res;
+
+	*session_p = 0;
+
+	ZEND_ASSERT(hostname != NULL);
+	ZEND_ASSERT(community != NULL);
+
+	if (ZSTR_LEN(hostname) >= MAX_NAME_LEN) {
+		zend_argument_value_error(hostname_arg_num, "length must be lower than %d", MAX_NAME_LEN);
+		return false;
+	}
+
+	if (ZSTR_LEN(community) == 0) {
+		zend_argument_must_not_be_empty_error(hostname_arg_num + 1);
+		return false;
+	}
+
+	if (timeout_arg_num != 0) {
+		if (timeout < -1 || timeout > LONG_MAX) {
+			zend_argument_value_error(timeout_arg_num, "must be between -1 and %ld", LONG_MAX);
+			return false;
+		}
+
+		if (retries < -1 || retries > INT_MAX) {
+			zend_argument_value_error(timeout_arg_num + 1, "must be between -1 and %d", INT_MAX);
+			return false;
+		}
+	}
+
 	// TODO: Do not strip and re-add the port in peername?
-	unsigned remote_port = SNMP_PORT;
+	unsigned short remote_port = SNMP_PORT;
+	int tmp_port;
 
 	*session_p = (php_snmp_session *)emalloc(sizeof(php_snmp_session));
 	session = *session_p;
@@ -849,11 +872,11 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 
 	snmp_sess_init(session);
 
-	session->version = version;
+	session->version = (long)version;
 
 	session->peername = emalloc(MAX_NAME_LEN);
 	/* we copy original hostname for further processing */
-	strlcpy(session->peername, ZSTR_VAL(hostname), MAX_NAME_LEN);
+	memcpy(session->peername, ZSTR_VAL(hostname), ZSTR_LEN(hostname) + 1);
 	host_ptr = session->peername;
 
 	/* Reading the hostname and its optional non-default port number */
@@ -862,16 +885,28 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 		host_ptr++;
 		if ((pptr = strchr(host_ptr, ']'))) {
 			if (pptr[1] == ':') {
-				remote_port = atoi(pptr + 2);
+				char *pport = pptr + 2;
+				tmp_port = atoi(pport);
+				if (tmp_port < 0 || tmp_port > USHRT_MAX) {
+					zend_argument_value_error(hostname_arg_num, "remote port must be between 0 and %u", USHRT_MAX);
+					return false;
+				}
+				remote_port = (unsigned short)tmp_port;
 			}
 			*pptr = '\0';
 		} else {
-			php_error_docref(NULL, E_WARNING, "Malformed IPv6 address, closing square bracket missing");
+			zend_argument_value_error(hostname_arg_num, "has a malformed IPv6 address, closing square bracket missing");
 			return false;
 		}
 	} else { /* IPv4 address */
 		if ((pptr = strchr(host_ptr, ':'))) {
-			remote_port = atoi(pptr + 1);
+			char *pport = pptr + 1;
+			tmp_port = atoi(pport);
+			if (tmp_port < 0 || tmp_port > USHRT_MAX) {
+				zend_argument_value_error(hostname_arg_num, "remote port must be between 0 and %u", USHRT_MAX);
+				return false;
+			}
+			remote_port = (unsigned short)tmp_port;
 			*pptr = '\0';
 		}
 	}
@@ -920,7 +955,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	if (remote_port != SNMP_PORT) {
 		size_t peername_length = strlen(session->peername);
 		pptr = session->peername + peername_length;
-		snprintf(pptr, MAX_NAME_LEN - peername_length, ":%d", remote_port);
+		snprintf(pptr, MAX_NAME_LEN - peername_length, ":%u", remote_port);
 	}
 
 	php_network_freeaddresses(psal);
@@ -935,14 +970,14 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 		session->community_len = ZSTR_LEN(community);
 	}
 
-	session->retries = retries;
-	session->timeout = timeout;
+	session->retries = (int)retries;
+	session->timeout = (long)timeout;
 	return true;
 }
 /* }}} */
 
 /* {{{ Set the security level in the snmpv3 session */
-static bool netsnmp_session_set_sec_level(struct snmp_session *s, zend_string *level)
+static bool snmp_session_set_sec_level(struct snmp_session *s, zend_string *level)
 {
 	if (zend_string_equals_literal_ci(level, "noAuthNoPriv") || zend_string_equals_literal_ci(level, "nanp")) {
 		s->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
@@ -959,7 +994,7 @@ static bool netsnmp_session_set_sec_level(struct snmp_session *s, zend_string *l
 /* }}} */
 
 /* {{{ Set the authentication protocol in the snmpv3 session */
-static ZEND_ATTRIBUTE_NONNULL bool netsnmp_session_set_auth_protocol(struct snmp_session *s, zend_string *prot)
+static ZEND_ATTRIBUTE_NONNULL bool snmp_session_set_auth_protocol(struct snmp_session *s, zend_string *prot)
 {
 #ifndef DISABLE_MD5
 	if (zend_string_equals_literal_ci(prot, "MD5")) {
@@ -991,27 +1026,24 @@ static ZEND_ATTRIBUTE_NONNULL bool netsnmp_session_set_auth_protocol(struct snmp
 	}
 #endif
 
-	smart_string err = {0};
-
-	smart_string_appends(&err, "Authentication protocol must be \"SHA\"");
+	zend_value_error(
+		"Authentication protocol must be \"SHA\""
 #ifdef HAVE_SNMP_SHA256
-	smart_string_appends(&err, " or \"SHA256\"");
+		" or \"SHA256\""
 #endif
 #ifdef HAVE_SNMP_SHA512
-	smart_string_appends(&err, " or \"SHA512\"");
+		" or \"SHA512\""
 #endif
 #ifndef DISABLE_MD5
-	smart_string_appends(&err, " or \"MD5\"");
+		" or \"MD5\""
 #endif
-	smart_string_0(&err);
-	zend_value_error("%s", err.c);
-	smart_string_free(&err);
+	);
 	return false;
 }
 /* }}} */
 
 /* {{{ Set the security protocol in the snmpv3 session */
-static ZEND_ATTRIBUTE_NONNULL bool netsnmp_session_set_sec_protocol(struct snmp_session *s, zend_string *prot)
+static ZEND_ATTRIBUTE_NONNULL bool snmp_session_set_sec_protocol(struct snmp_session *s, zend_string *prot)
 {
 #ifndef NETSNMP_DISABLE_DES
 	if (zend_string_equals_literal_ci(prot, "DES")) {
@@ -1048,7 +1080,7 @@ static ZEND_ATTRIBUTE_NONNULL bool netsnmp_session_set_sec_protocol(struct snmp_
 /* }}} */
 
 /* {{{ Make key from pass phrase in the snmpv3 session */
-static ZEND_ATTRIBUTE_NONNULL bool netsnmp_session_gen_auth_key(struct snmp_session *s, zend_string *pass)
+static ZEND_ATTRIBUTE_NONNULL bool snmp_session_gen_auth_key(struct snmp_session *s, zend_string *pass)
 {
 	int snmp_errno;
 
@@ -1064,7 +1096,7 @@ static ZEND_ATTRIBUTE_NONNULL bool netsnmp_session_gen_auth_key(struct snmp_sess
 /* }}} */
 
 /* {{{ Make key from pass phrase in the snmpv3 session */
-static ZEND_ATTRIBUTE_NONNULL bool netsnmp_session_gen_sec_key(struct snmp_session *s, zend_string *pass)
+static ZEND_ATTRIBUTE_NONNULL bool snmp_session_gen_sec_key(struct snmp_session *s, zend_string *pass)
 {
 	int snmp_errno;
 
@@ -1080,14 +1112,13 @@ static ZEND_ATTRIBUTE_NONNULL bool netsnmp_session_gen_sec_key(struct snmp_sessi
 /* }}} */
 
 /* {{{ Set context Engine Id in the snmpv3 session */
-static bool netsnmp_session_set_contextEngineID(struct snmp_session *s, zend_string * contextEngineID)
+static bool snmp_session_set_contextEngineID(struct snmp_session *s, zend_string *contextEngineID, uint32_t context_engine_id_arg_num)
 {
 	size_t	ebuf_len = 32, eout_len = 0;
 	uint8_t	*ebuf = (uint8_t *) emalloc(ebuf_len);
 
 	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, ZSTR_VAL(contextEngineID))) {
-		// TODO Promote to Error?
-		php_error_docref(NULL, E_WARNING, "Bad engine ID value '%s'", ZSTR_VAL(contextEngineID));
+		zend_argument_value_error(context_engine_id_arg_num, "must be a valid context engine ID");
 		efree(ebuf);
 		return false;
 	}
@@ -1102,15 +1133,18 @@ static bool netsnmp_session_set_contextEngineID(struct snmp_session *s, zend_str
 }
 /* }}} */
 
-/* {{{ Set all snmpv3-related security options */
-static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool netsnmp_session_set_security(struct snmp_session *session, zend_string *sec_level,
+/* {{{ Set all snmpv3-related security options
+ * auth_protocol_arg_num and context_engine_id_arg_num are the userland
+ * argument numbers used for error reporting.
+ */
+static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool snmp_session_set_security(struct snmp_session *session, zend_string *sec_level,
 	zend_string *auth_protocol, zend_string *auth_passphrase, zend_string *priv_protocol,
 	zend_string *priv_passphrase, zend_string *contextName, zend_string *contextEngineID,
-	uint32_t auth_protocol_argnum)
+	uint32_t auth_protocol_arg_num, uint32_t context_engine_id_arg_num)
 {
 
 	/* Setting the security level. */
-	if (!netsnmp_session_set_sec_level(session, sec_level)) {
+	if (!snmp_session_set_sec_level(session, sec_level)) {
 		/* ValueError already generated, just bail out */
 		return false;
 	}
@@ -1118,23 +1152,23 @@ static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool netsnmp_session_set_security(struct s
 	if (session->securityLevel == SNMP_SEC_LEVEL_AUTHNOPRIV || session->securityLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
 
 		if (!auth_protocol) {
-			zend_argument_value_error(auth_protocol_argnum, "cannot be null when security level is \"authNoPriv\" or \"authPriv\"");
+			zend_argument_value_error(auth_protocol_arg_num, "cannot be null when security level is \"authNoPriv\" or \"authPriv\"");
 			return false;
 		}
 
 		/* Setting the authentication protocol. */
-		if (!netsnmp_session_set_auth_protocol(session, auth_protocol)) {
+		if (!snmp_session_set_auth_protocol(session, auth_protocol)) {
 			/* ValueError already generated, just bail out */
 			return false;
 		}
 
 		if (!auth_passphrase) {
-			zend_argument_value_error(auth_protocol_argnum + 1, "cannot be null when security level is \"authNoPriv\" or \"authPriv\"");
+			zend_argument_value_error(auth_protocol_arg_num + 1, "cannot be null when security level is \"authNoPriv\" or \"authPriv\"");
 			return false;
 		}
 
 		/* Setting the authentication passphrase. */
-		if (!netsnmp_session_gen_auth_key(session, auth_passphrase)) {
+		if (!snmp_session_gen_auth_key(session, auth_passphrase)) {
 			/* Warning message sent already, just bail out */
 			return false;
 		}
@@ -1142,23 +1176,23 @@ static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool netsnmp_session_set_security(struct s
 		if (session->securityLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
 
 			if (!priv_protocol) {
-				zend_argument_value_error(auth_protocol_argnum + 2, "cannot be null when security level is \"authPriv\"");
+				zend_argument_value_error(auth_protocol_arg_num + 2, "cannot be null when security level is \"authPriv\"");
 				return false;
 			}
 
 			/* Setting the security protocol. */
-			if (!netsnmp_session_set_sec_protocol(session, priv_protocol)) {
+			if (!snmp_session_set_sec_protocol(session, priv_protocol)) {
 				/* ValueError already generated, just bail out */
 				return false;
 			}
 
 			if (!priv_passphrase) {
-				zend_argument_value_error(auth_protocol_argnum + 3, "cannot be null when security level is \"authPriv\"");
+				zend_argument_value_error(auth_protocol_arg_num + 3, "cannot be null when security level is \"authPriv\"");
 				return false;
 			}
 
 			/* Setting the security protocol passphrase. */
-			if (!netsnmp_session_gen_sec_key(session, priv_passphrase)) {
+			if (!snmp_session_gen_sec_key(session, priv_passphrase)) {
 				/* Warning message sent already, just bail out */
 				return false;
 			}
@@ -1172,7 +1206,7 @@ static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool netsnmp_session_set_security(struct s
 	}
 
 	/* Setting contextEngineIS if specified */
-	if (contextEngineID && ZSTR_LEN(contextEngineID) && !netsnmp_session_set_contextEngineID(session, contextEngineID)) {
+	if (contextEngineID && ZSTR_LEN(contextEngineID) && !snmp_session_set_contextEngineID(session, contextEngineID, context_engine_id_arg_num)) {
 		/* Warning message sent already, just bail out */
 		return false;
 	}
@@ -1192,13 +1226,17 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 {
 	zend_string *oid_str, *type_str = NULL, *value_str = NULL;
 	HashTable *oid_ht, *type_ht = NULL, *value_ht = NULL;
-	zend_string *a1 = NULL, *a2 = NULL, *a3 = NULL, *a4 = NULL, *a5 = NULL, *a6 = NULL, *a7 = NULL;
+	zend_string *hostname = NULL, *community_or_security_name = NULL;
+	zend_string *security_level = NULL, *auth_protocol = NULL, *auth_passphrase = NULL;
+	zend_string *privacy_protocol = NULL, *privacy_passphrase = NULL;
 	bool use_orignames = 0, suffix_keys = 0;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
 	zend_long retries = SNMP_DEFAULT_RETRIES;
 	struct objid_query objid_query;
 	php_snmp_session *session;
 	int session_less_mode = (getThis() == NULL);
+	uint32_t timeout_arg_num = 0;
+	uint32_t oid_arg_num = 1, type_arg_num = 0, value_arg_num = 0;
 	php_snmp_object *snmp_object;
 	php_snmp_object glob_snmp_object;
 
@@ -1211,13 +1249,13 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		if (version == SNMP_VERSION_3) {
 			if (st & SNMP_CMD_SET) {
 				ZEND_PARSE_PARAMETERS_START(10, 12)
-					Z_PARAM_STR(a1)
-					Z_PARAM_STR(a2)
-					Z_PARAM_STR(a3)
-					Z_PARAM_STR(a4)
-					Z_PARAM_STR(a5)
-					Z_PARAM_STR(a6)
-					Z_PARAM_STR(a7)
+					Z_PARAM_PATH_STR(hostname)
+					Z_PARAM_PATH_STR(community_or_security_name)
+					Z_PARAM_STR(security_level)
+					Z_PARAM_STR(auth_protocol)
+					Z_PARAM_STR(auth_passphrase)
+					Z_PARAM_STR(privacy_protocol)
+					Z_PARAM_STR(privacy_passphrase)
 					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
 					Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
@@ -1225,30 +1263,38 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
 				ZEND_PARSE_PARAMETERS_END();
+
+				timeout_arg_num = 10;
+				oid_arg_num = 8;
+				type_arg_num = 9;
+				value_arg_num = 10;
 			} else {
 				/* SNMP_CMD_GET
 				 * SNMP_CMD_GETNEXT
 				 * SNMP_CMD_WALK
 				 */
 				ZEND_PARSE_PARAMETERS_START(8, 10)
-					Z_PARAM_STR(a1)
-					Z_PARAM_STR(a2)
-					Z_PARAM_STR(a3)
-					Z_PARAM_STR(a4)
-					Z_PARAM_STR(a5)
-					Z_PARAM_STR(a6)
-					Z_PARAM_STR(a7)
+					Z_PARAM_PATH_STR(hostname)
+					Z_PARAM_PATH_STR(community_or_security_name)
+					Z_PARAM_STR(security_level)
+					Z_PARAM_STR(auth_protocol)
+					Z_PARAM_STR(auth_passphrase)
+					Z_PARAM_STR(privacy_protocol)
+					Z_PARAM_STR(privacy_passphrase)
 					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
 				ZEND_PARSE_PARAMETERS_END();
+
+				timeout_arg_num = 9;
+				oid_arg_num = 8;
 			}
 		} else {
 			if (st & SNMP_CMD_SET) {
 				ZEND_PARSE_PARAMETERS_START(5, 7)
-					Z_PARAM_STR(a1)
-					Z_PARAM_STR(a2)
+					Z_PARAM_PATH_STR(hostname)
+					Z_PARAM_PATH_STR(community_or_security_name)
 					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
 					Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
@@ -1256,19 +1302,27 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
 				ZEND_PARSE_PARAMETERS_END();
+
+				timeout_arg_num = 6;
+				oid_arg_num = 3;
+				type_arg_num = 4;
+				value_arg_num = 5;
 			} else {
 				/* SNMP_CMD_GET
 				 * SNMP_CMD_GETNEXT
 				 * SNMP_CMD_WALK
 				 */
 				ZEND_PARSE_PARAMETERS_START(3, 5)
-					Z_PARAM_STR(a1)
-					Z_PARAM_STR(a2)
+					Z_PARAM_PATH_STR(hostname)
+					Z_PARAM_PATH_STR(community_or_security_name)
 					Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
 					Z_PARAM_OPTIONAL
 					Z_PARAM_LONG(timeout)
 					Z_PARAM_LONG(retries)
 				ZEND_PARSE_PARAMETERS_END();
+
+				timeout_arg_num = 4;
+				oid_arg_num = 3;
 			}
 		}
 	} else {
@@ -1278,6 +1332,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				Z_PARAM_ARRAY_HT_OR_STR(type_ht, type_str)
 				Z_PARAM_ARRAY_HT_OR_STR(value_ht, value_str)
 			ZEND_PARSE_PARAMETERS_END();
+			type_arg_num = 2;
+			value_arg_num = 3;
 		} else if (st & SNMP_CMD_WALK) {
 			ZEND_PARSE_PARAMETERS_START(1, 4)
 				Z_PARAM_ARRAY_HT_OR_STR(oid_ht, oid_str)
@@ -1307,20 +1363,21 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		}
 	}
 
-	if (!php_snmp_parse_oid(getThis(), st, &objid_query, oid_str, oid_ht, type_str, type_ht, value_str, value_ht)) {
+	if (!php_snmp_parse_oid(getThis(), st, &objid_query, oid_str, oid_ht, type_str, type_ht, value_str, value_ht,
+			oid_arg_num, type_arg_num, value_arg_num)) {
 		RETURN_FALSE;
 	}
 
 	if (session_less_mode) {
-		if (!netsnmp_session_init(&session, version, a1, a2, timeout, retries)) {
+		if (!snmp_session_init(&session, version, hostname, community_or_security_name, timeout, retries, 1, timeout_arg_num)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
-			netsnmp_session_free(&session);
+			snmp_session_free(&session);
 			RETURN_FALSE;
 		}
-		if (version == SNMP_VERSION_3 && !netsnmp_session_set_security(session, a3, a4, a5, a6, a7, NULL, NULL, 4)) {
+		if (version == SNMP_VERSION_3 && !snmp_session_set_security(session, security_level, auth_protocol, auth_passphrase, privacy_protocol, privacy_passphrase, NULL, NULL, 4, 0)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
-			netsnmp_session_free(&session);
-			/* Warning message sent already, just bail out */
+			snmp_session_free(&session);
+			/* An error has already been emitted, just bail out. */
 			RETURN_FALSE;
 		}
 	} else {
@@ -1358,7 +1415,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 
 	if (session_less_mode) {
-		netsnmp_session_free(&session);
+		snmp_session_free(&session);
 	} else {
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, glob_snmp_object.enum_print);
 		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, glob_snmp_object.quick_print);
@@ -1405,9 +1462,7 @@ PHP_FUNCTION(snmpset)
 /* {{{ Return the current status of quick_print */
 PHP_FUNCTION(snmp_get_quick_print)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT));
 }
@@ -1558,9 +1613,7 @@ PHP_FUNCTION(snmp_set_valueretrieval)
 /* {{{ Return the method how the SNMP values will be returned */
 PHP_FUNCTION(snmp_get_valueretrieval)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(SNMP_G(valueretrieval));
 }
@@ -1597,7 +1650,7 @@ PHP_METHOD(SNMP, __construct)
 
 	snmp_object = Z_SNMP_P(object);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lSS|ll", &version, &a1, &a2, &timeout, &retries) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lPP|ll", &version, &a1, &a2, &timeout, &retries) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1613,10 +1666,10 @@ PHP_METHOD(SNMP, __construct)
 
 	/* handle re-open of snmp session */
 	if (snmp_object->session) {
-		netsnmp_session_free(&(snmp_object->session));
+		snmp_session_free(&(snmp_object->session));
 	}
 
-	if (!netsnmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries)) {
+	if (!snmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries, 2, 4)) {
 		return;
 	}
 	snmp_object->max_oids = 0;
@@ -1637,11 +1690,9 @@ PHP_METHOD(SNMP, close)
 
 	snmp_object = Z_SNMP_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
-	netsnmp_session_free(&(snmp_object->session));
+	snmp_session_free(&(snmp_object->session));
 
 	RETURN_TRUE;
 }
@@ -1680,7 +1731,11 @@ PHP_METHOD(SNMP, setSecurity)
 {
 	php_snmp_object *snmp_object;
 	zval *object = ZEND_THIS;
-	zend_string *a1 = NULL, *a2 = NULL, *a3 = NULL, *a4 = NULL, *a5 = NULL, *a6 = NULL, *a7 = NULL;
+	zend_string *security_level = NULL, *auth_protocol = NULL, *auth_passphrase = NULL;
+	zend_string *privacy_protocol = NULL, *privacy_passphrase = NULL;
+	zend_string *context_name = NULL, *context_engine_id = NULL;
+	uint32_t auth_protocol_arg_num = 2;
+	uint32_t context_engine_id_arg_num = 7;
 
 	snmp_object = Z_SNMP_P(object);
 	if (!snmp_object->session) {
@@ -1688,12 +1743,12 @@ PHP_METHOD(SNMP, setSecurity)
 		RETURN_THROWS();
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|SSSSSS", &a1, &a2, &a3, &a4,&a5, &a6, &a7) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|SSSSSS", &security_level, &auth_protocol, &auth_passphrase, &privacy_protocol, &privacy_passphrase, &context_name, &context_engine_id) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (!netsnmp_session_set_security(snmp_object->session, a1, a2, a3, a4, a5, a6, a7, 2)) {
-		/* Warning message sent already, just bail out */
+	if (!snmp_session_set_security(snmp_object->session, security_level, auth_protocol, auth_passphrase, privacy_protocol, privacy_passphrase, context_name, context_engine_id, auth_protocol_arg_num, context_engine_id_arg_num)) {
+		/* An error has already been emitted, just bail out. */
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1708,9 +1763,7 @@ PHP_METHOD(SNMP, getErrno)
 
 	snmp_object = Z_SNMP_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(snmp_object->snmp_errno);
 }
@@ -1724,9 +1777,7 @@ PHP_METHOD(SNMP, getError)
 
 	snmp_object = Z_SNMP_P(object);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_STRING(snmp_object->snmp_errstr);
 }
@@ -2093,7 +2144,7 @@ PHP_MINIT_FUNCTION(snmp)
 	php_snmp_ce = register_class_SNMP();
 	php_snmp_ce->create_object = php_snmp_object_new;
 	php_snmp_ce->default_object_handlers = &php_snmp_object_handlers;
-	php_snmp_object_handlers.offset = XtOffsetOf(php_snmp_object, zo);
+	php_snmp_object_handlers.offset = offsetof(php_snmp_object, zo);
 	php_snmp_object_handlers.clone_obj = NULL;
 	php_snmp_object_handlers.free_obj = php_snmp_object_free_storage;
 

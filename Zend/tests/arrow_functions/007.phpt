@@ -5,8 +5,6 @@ zend.assertions=1
 --FILE--
 <?php
 
-// TODO We're missing parentheses for the direct call
-
 try {
     assert((fn() => false)());
 } catch (AssertionError $e) {
@@ -21,5 +19,5 @@ try {
 
 ?>
 --EXPECT--
-assert(): assert(fn() => false()) failed
-assert(): assert(fn&(int ...$args): ?bool => $args[0](false)) failed
+assert(): assert((fn() => false)()) failed
+assert(): assert((fn&(int ...$args): ?bool => $args[0])(false)) failed

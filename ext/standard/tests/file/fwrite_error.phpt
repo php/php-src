@@ -40,5 +40,5 @@ unlink( $filename );
 int(0)
 int(0)
 -- Testing fwrite() with closed/unset file handle --
-fwrite(): supplied resource is not a valid stream resource
+fwrite(): Argument #1 ($stream) must be an open stream resource
 Done

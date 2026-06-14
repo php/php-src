@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong <wez@thebrainroom.com>, based on work by:        |
    |         Hartmut Holzgraefe <hholzgra@php.net>                        |
@@ -30,6 +28,18 @@ struct php_gz_stream_data_t	{
 	php_stream *stream;
 };
 
+static void php_gziop_report_errors(php_stream *stream, size_t count, const char *verb)
+{
+	if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
+		struct php_gz_stream_data_t *self = stream->abstract;
+		int error = 0;
+		gzerror(self->gz_file, &error);
+		if (error == Z_ERRNO) {
+			php_error_docref(NULL, E_NOTICE, "%s of %zu bytes failed with errno=%d %s", verb, count, errno, strerror(errno));
+		}
+	}
+}
+
 static ssize_t php_gziop_read(php_stream *stream, char *buf, size_t count)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
@@ -49,6 +59,7 @@ static ssize_t php_gziop_read(php_stream *stream, char *buf, size_t count)
 		}
 
 		if (UNEXPECTED(read < 0)) {
+			php_gziop_report_errors(stream, chunk_size, "Read");
 			return read;
 		}
 
@@ -74,6 +85,7 @@ static ssize_t php_gziop_write(php_stream *stream, const char *buf, size_t count
 		count -= chunk_size;
 
 		if (UNEXPECTED(written < 0)) {
+			php_gziop_report_errors(stream, chunk_size, "Write");
 			return written;
 		}
 
@@ -131,6 +143,21 @@ static int php_gziop_flush(php_stream *stream)
 	return gzflush(self->gz_file, Z_SYNC_FLUSH);
 }
 
+static int php_gziop_set_option(php_stream *stream, int option, int value, void *ptrparam)
+{
+	struct php_gz_stream_data_t *self = stream->abstract;
+
+	switch (option) {
+		case PHP_STREAM_OPTION_LOCKING:
+		case PHP_STREAM_OPTION_META_DATA_API:
+			return self->stream->ops->set_option(self->stream, option, value, ptrparam);
+		default:
+			break;
+	}
+
+	return PHP_STREAM_OPTION_RETURN_NOTIMPL;
+}
+
 const php_stream_ops php_stream_gzio_ops = {
 	php_gziop_write, php_gziop_read,
 	php_gziop_close, php_gziop_flush,
@@ -138,7 +165,7 @@ const php_stream_ops php_stream_gzio_ops = {
 	php_gziop_seek,
 	NULL, /* cast */
 	NULL, /* stat */
-	NULL  /* set_option */
+	php_gziop_set_option  /* set_option */
 };
 
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,

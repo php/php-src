@@ -17,7 +17,6 @@ if (!file_exists($extDir . '/opcache.so')) {
 $cmd = [
     PHP_BINARY,
     '-dextension_dir=' . ini_get('extension_dir'),
-    '-dzend_extension=opcache.so',
     '-dopcache.enable=1',
     '-dopcache.enable_cli=1',
     '-dopcache.preload=' . __DIR__ . '/preload.inc',
@@ -42,6 +41,6 @@ foreach (explode("\n", $output) as $line) {
 --EXPECTF--
 preloaded
 PHP %s
-Copyright (c) The PHP Group
+Copyright © The PHP Group and Contributors
 %AZend Engine %s
 %A    with Zend OPcache %a

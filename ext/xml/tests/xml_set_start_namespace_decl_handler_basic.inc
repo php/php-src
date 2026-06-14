@@ -14,7 +14,6 @@ var_dump(xml_set_start_namespace_decl_handler( $parser, "Namespace_Start_Handler
 var_dump(xml_set_end_namespace_decl_handler( $parser, "Namespace_End_Handler" ));
 
 xml_parse( $parser, $xml, true);
-xml_parser_free( $parser );
 
 echo "Done\n";
 

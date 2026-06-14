@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit zend_interfaces.stub.php instead.
  * Stub hash: a9c915c11e5989d8c7cf2d704ada09ca765670c3 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IteratorAggregate_getIterator, 0, 0, Traversable, 0)

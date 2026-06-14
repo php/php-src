@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Sascha Schumann <sascha@schumann.cx>                        |
    |          Parts based on Apache 1.3 SAPI module by                    |
@@ -46,7 +44,6 @@
 #include "http_log.h"
 #include "http_main.h"
 #include "util_script.h"
-#include "http_core.h"
 #include "ap_mpm.h"
 
 #include "php_apache.h"
@@ -270,14 +267,14 @@ php_apache_sapi_register_variables(zval *track_vars_array)
 	char *key, *val;
 	size_t new_val_len;
 
-	APR_ARRAY_FOREACH_OPEN(arr, key, val)
+	APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 		if (!val) {
 			val = "";
 		}
 		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), &new_val_len)) {
 			php_register_variable_safe(key, val, new_val_len, track_vars_array);
 		}
-	APR_ARRAY_FOREACH_CLOSE()
+	} APR_ARRAY_FOREACH_CLOSE();
 
 	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), &new_val_len)) {
 		php_register_variable_safe("PHP_SELF", ctx->r->uri, new_val_len, track_vars_array);
@@ -466,6 +463,7 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 {
 	void *data = NULL;
 	const char *userdata_key = "apache2hook_post_config";
+	zend_set_dl_use_deepbind(true);
 
 	/* Apache will load, unload and then reload a DSO module. This
 	 * prevents us from starting PHP until the second load. */
@@ -751,6 +749,7 @@ zend_first_try {
 static void php_apache_child_init(apr_pool_t *pchild, server_rec *s)
 {
 	apr_pool_cleanup_register(pchild, NULL, php_apache_child_shutdown, apr_pool_cleanup_null);
+	php_child_init();
 }
 
 #ifdef ZEND_SIGNALS

@@ -15,7 +15,7 @@ echo "*** Testing session_set_save_handler() : using closures as callbacks ***\n
 
 require_once "save_handler_closures.inc";
 var_dump(session_module_name());
-var_dump(session_module_name(FALSE));
+var_dump(session_module_name(''));
 var_dump(session_module_name("blah"));
 var_dump(session_module_name("foo"));
 

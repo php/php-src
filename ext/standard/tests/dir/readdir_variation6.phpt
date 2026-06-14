@@ -55,7 +55,7 @@ closedir();
 $dir_path = __DIR__ . "/readdir_variation6";
 rmdir($dir_path);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing readdir() : usage variations ***
 
 -- Reading Directory Contents with Previous Handle --
@@ -66,8 +66,22 @@ string(23) "readdir_variation62.tmp"
 string(23) "readdir_variation63.tmp"
 
 -- Reading Directory Contents with Current Handle (no arguments supplied) --
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
+
+Deprecated: readdir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
 string(1) "."
 string(2) ".."
 string(23) "readdir_variation61.tmp"
 string(23) "readdir_variation62.tmp"
 string(23) "readdir_variation63.tmp"
+
+Deprecated: closedir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d

@@ -30,7 +30,11 @@ curl
   curl_close($copy);
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing curl copy handle with User Agent ***
 string(9) "cURL phpt"
 string(9) "cURL phpt"
+
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
+
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d

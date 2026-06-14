@@ -97,9 +97,6 @@ class SplFileInfo implements Stringable
     /** @tentative-return-type */
     public function __debugInfo(): array {}
 
-    /**
-     * @tentative-return-type
-     */
     #[\Deprecated(since: '8.2')]
     final public function _bad_state_ex(): void {}
 }
@@ -210,7 +207,6 @@ class RecursiveDirectoryIterator extends FilesystemIterator implements Recursive
     public function getSubPathname(): string {}
 }
 
-#ifdef HAVE_GLOB
 class GlobIterator extends FilesystemIterator implements Countable
 {
     public function __construct(string $pattern, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO) {}
@@ -218,7 +214,6 @@ class GlobIterator extends FilesystemIterator implements Countable
     /** @tentative-return-type */
     public function count(): int {}
 }
-#endif
 
 class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIterator
 {
@@ -286,7 +281,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function fscanf(string $format, mixed &...$vars): array|int|null {}
 
     /** @tentative-return-type */
-    public function fwrite(string $data, int $length = 0): int|false {}
+    public function fwrite(string $data, ?int $length = null): int|false {}
 
     /** @tentative-return-type */
     public function fstat(): array {}

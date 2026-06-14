@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Go Kudo <zeriyoshi@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -43,16 +41,9 @@ static inline void randomizer_common_init(php_random_randomizer *randomizer, zen
 			.state = state,
 		};
 
-		zend_string *mname;
-		zend_function *generate_method;
-
-		mname = ZSTR_INIT_LITERAL("generate", 0);
-		generate_method = zend_hash_find_ptr(&engine_object->ce->function_table, mname);
-		zend_string_release(mname);
-
 		/* Create compatible state */
 		state->object = engine_object;
-		state->generate_method = generate_method;
+		state->generate_method = zend_hash_str_find_ptr(&engine_object->ce->function_table, "generate", strlen("generate"));
 
 		/* Mark self-allocated for memory management */
 		randomizer->is_userland_algo = true;
@@ -138,14 +129,13 @@ PHP_METHOD(Random_Randomizer, getFloat)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	double min, max;
-	zend_object *bounds = NULL;
-	int bounds_type = 'C' + sizeof("ClosedOpen") - 1;
+	zend_enum_Random_IntervalBoundary bounds_type = ZEND_ENUM_Random_IntervalBoundary_ClosedOpen;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_DOUBLE(min)
 		Z_PARAM_DOUBLE(max)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS(bounds, random_ce_Random_IntervalBoundary);
+		Z_PARAM_ENUM(bounds_type, random_ce_Random_IntervalBoundary);
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!zend_finite(min)) {
@@ -158,36 +148,29 @@ PHP_METHOD(Random_Randomizer, getFloat)
 		RETURN_THROWS();
 	}
 
-	if (bounds) {
-		zval *case_name = zend_enum_fetch_case_name(bounds);
-		zend_string *bounds_name = Z_STR_P(case_name);
-
-		bounds_type = ZSTR_VAL(bounds_name)[0] + ZSTR_LEN(bounds_name);
-	}
-
 	switch (bounds_type) {
-	case 'C' + sizeof("ClosedOpen") - 1:
+	case ZEND_ENUM_Random_IntervalBoundary_ClosedOpen:
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
 		RETURN_DOUBLE(php_random_gammasection_closed_open(randomizer->engine, min, max));
-	case 'C' + sizeof("ClosedClosed") - 1:
+	case ZEND_ENUM_Random_IntervalBoundary_ClosedClosed:
 		if (UNEXPECTED(max < min)) {
 			zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
 		RETURN_DOUBLE(php_random_gammasection_closed_closed(randomizer->engine, min, max));
-	case 'O' + sizeof("OpenClosed") - 1:
+	case ZEND_ENUM_Random_IntervalBoundary_OpenClosed:
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
 		RETURN_DOUBLE(php_random_gammasection_open_closed(randomizer->engine, min, max));
-	case 'O' + sizeof("OpenOpen") - 1:
+	case ZEND_ENUM_Random_IntervalBoundary_OpenOpen:
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
@@ -196,13 +179,11 @@ PHP_METHOD(Random_Randomizer, getFloat)
 		RETVAL_DOUBLE(php_random_gammasection_open_open(randomizer->engine, min, max));
 
 		if (UNEXPECTED(isnan(Z_DVAL_P(return_value)))) {
-			zend_value_error("The given interval is empty, there are no floats between argument #1 ($min) and argument #2 ($max).");
+			zend_value_error("The given interval is empty, there are no floats between argument #1 ($min) and argument #2 ($max)");
 			RETURN_THROWS();
 		}
 
 		return;
-	default:
-		ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -297,7 +278,7 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	while (total_size + 8 <= length) {
 		result = engine.algo->generate(engine.state);
 		if (EG(exception)) {
-			zend_string_free(retval);
+			zend_string_efree(retval);
 			RETURN_THROWS();
 		}
 
@@ -326,7 +307,7 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	while (total_size < length) {
 		result = engine.algo->generate(engine.state);
 		if (EG(exception)) {
-			zend_string_free(retval);
+			zend_string_efree(retval);
 			RETURN_THROWS();
 		}
 
@@ -342,7 +323,7 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	}
 
 	ZSTR_VAL(retval)[length] = '\0';
-	RETURN_STR(retval);
+	RETURN_NEW_STR(retval);
 }
 /* }}} */
 
@@ -356,7 +337,7 @@ PHP_METHOD(Random_Randomizer, shuffleArray)
 		Z_PARAM_ARRAY(array)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_DUP(return_value, array);
+	RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(array)));
 	if (!php_array_data_shuffle(randomizer->engine, return_value)) {
 		RETURN_THROWS();
 	}
@@ -451,7 +432,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 			uint64_t offset = engine.algo->range(engine.state, 0, max_offset);
 
 			if (EG(exception)) {
-				zend_string_free(retval);
+				zend_string_efree(retval);
 				RETURN_THROWS();
 			}
 
@@ -473,7 +454,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 		while (total_size < length) {
 			php_random_result result = engine.algo->generate(engine.state);
 			if (EG(exception)) {
-				zend_string_free(retval);
+				zend_string_efree(retval);
 				RETURN_THROWS();
 			}
 
@@ -484,7 +465,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 
 				if (offset > max_offset) {
 					if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {
-						zend_string_free(retval);
+						zend_string_efree(retval);
 						zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", PHP_RANDOM_RANGE_ATTEMPTS);
 						RETURN_THROWS();
 					}
@@ -503,7 +484,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 	}
 
 	ZSTR_VAL(retval)[length] = '\0';
-	RETURN_STR(retval);
+	RETURN_NEW_STR(retval);
 }
 /* }}} */
 

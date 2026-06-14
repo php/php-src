@@ -25,6 +25,5 @@ try {
 }
 
 ?>
---EXPECTF--
-Warning: ldap_add(): Unknown attribute in the data in %s on line %d
-bool(false)
+--EXPECT--
+ValueError: ldap_add(): Argument #3 ($entry) must be an associative array of attribute => values

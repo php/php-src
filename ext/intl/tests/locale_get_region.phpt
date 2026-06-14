@@ -76,6 +76,12 @@ function ut_main()
         $res_str .= "\n";
     }
 
+    try {
+	    ut_loc_get_region("a-\0DE");
+    } catch (\ValueError $e) {
+	    echo $e->getMessage(). PHP_EOL;
+    }
+
     return $res_str;
 
 }
@@ -85,6 +91,8 @@ ut_run();
 
 ?>
 --EXPECTF--
+Locale::getRegion(): Argument #1 ($locale) must not contain any null bytes
+locale_get_region(): Argument #1 ($locale) must not contain any null bytes
 uk-ua_CALIFORNIA@currency=;currency=GRN:  region='UA'
 root:  region=''
 uk@currency=EURO:  region=''

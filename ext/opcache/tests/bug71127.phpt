@@ -21,5 +21,5 @@ include($file);
 @unlink(__DIR__ . "/bug71127.inc");
 ?>
 --EXPECTF--
-Warning: Constant FOO already defined in %sbug71127.inc on line %d
+Warning: Constant FOO already defined, this will be an error in PHP 9 in %sbug71127.inc on line %d
 okey

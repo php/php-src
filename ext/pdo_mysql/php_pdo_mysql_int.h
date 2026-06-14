@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: George Schlossnagle <george@omniti.com>                      |
   |         Wez Furlong <wez@php.net>                                    |
@@ -78,7 +76,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pdo_mysql)
 	/* dummy member so we get at least one member in the struct
 	 * and avoids build errors.
 	 */
-	void *dummymemmber;
+	void *dummymember;
 #endif
 ZEND_END_MODULE_GLOBALS(pdo_mysql)
 
@@ -167,7 +165,6 @@ enum {
 	PDO_MYSQL_ATTR_MAX_BUFFER_SIZE,
 #endif
 	PDO_MYSQL_ATTR_COMPRESS,
-	PDO_MYSQL_ATTR_DIRECT_QUERY,
 	PDO_MYSQL_ATTR_FOUND_ROWS,
 	PDO_MYSQL_ATTR_IGNORE_SPACE,
 	PDO_MYSQL_ATTR_SSL_KEY,

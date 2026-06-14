@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Sara Golemon (pollita@php.net)                              |
    +----------------------------------------------------------------------+
@@ -42,6 +40,10 @@ typedef struct _php_bz2_filter_data {
 	unsigned int is_flushed : 1;          /* only for compression */
 
 	int persistent;
+
+	/* Configuration for reset - immutable */
+	int blockSize100k;  /* compress only */
+	int workFactor;     /* compress only */
 } php_bz2_filter_data;
 
 /* }}} */
@@ -50,12 +52,12 @@ typedef struct _php_bz2_filter_data {
 
 static void *php_bz2_alloc(void *opaque, int items, int size)
 {
-	return (void *)safe_pemalloc(items, size, 0, ((php_bz2_filter_data*)opaque)->persistent);
+	return safe_pemalloc(items, size, 0, ((php_bz2_filter_data*)opaque)->persistent);
 }
 
 static void php_bz2_free(void *opaque, void *address)
 {
-	pefree((void *)address, ((php_bz2_filter_data*)opaque)->persistent);
+	pefree(address, ((php_bz2_filter_data*)opaque)->persistent);
 }
 /* }}} */
 
@@ -178,6 +180,36 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 	return exit_status;
 }
 
+static zend_result php_bz2_decompress_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	if (!Z_PTR(thisfilter->abstract)) {
+		return FAILURE;
+	}
+
+	php_bz2_filter_data *data = Z_PTR(thisfilter->abstract);
+
+	/* End current decompression if running */
+	if (data->status == PHP_BZ2_RUNNING) {
+		BZ2_bzDecompressEnd(&(data->strm));
+	}
+
+	/* Reset stream state */
+	data->strm.next_in = data->inbuf;
+	data->strm.avail_in = 0;
+	data->strm.next_out = data->outbuf;
+	data->strm.avail_out = data->outbuf_len;
+	data->status = PHP_BZ2_UNINITIALIZED;
+
+	/* Note: We don't reinitialize here - it will be done on first use in the filter function */
+
+	return SUCCESS;
+}
+
 static void php_bz2_decompress_dtor(php_stream_filter *thisfilter)
 {
 	if (thisfilter && Z_PTR(thisfilter->abstract)) {
@@ -193,6 +225,7 @@ static void php_bz2_decompress_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops php_bz2_decompress_ops = {
 	php_bz2_decompress_filter,
+	php_bz2_decompress_seek,
 	php_bz2_decompress_dtor,
 	"bzip2.decompress"
 };
@@ -288,6 +321,41 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 	return exit_status;
 }
 
+static zend_result php_bz2_compress_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	int status;
+
+	if (!Z_PTR(thisfilter->abstract)) {
+		return FAILURE;
+	}
+
+	php_bz2_filter_data *data = Z_PTR(thisfilter->abstract);
+
+	/* End current compression */
+	BZ2_bzCompressEnd(&(data->strm));
+
+	/* Reset stream state */
+	data->strm.next_in = data->inbuf;
+	data->strm.avail_in = 0;
+	data->strm.next_out = data->outbuf;
+	data->strm.avail_out = data->outbuf_len;
+	data->is_flushed = 1;
+
+	/* Reinitialize compression with saved configuration */
+	status = BZ2_bzCompressInit(&(data->strm), data->blockSize100k, 0, data->workFactor);
+	if (status != BZ_OK) {
+		php_error_docref(NULL, E_WARNING, "bzip2.compress: failed to reset compression state");
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 static void php_bz2_compress_dtor(php_stream_filter *thisfilter)
 {
 	if (Z_PTR(thisfilter->abstract)) {
@@ -301,6 +369,7 @@ static void php_bz2_compress_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops php_bz2_compress_ops = {
 	php_bz2_compress_filter,
+	php_bz2_compress_seek,
 	php_bz2_compress_dtor,
 	"bzip2.compress"
 };
@@ -309,11 +378,16 @@ static const php_stream_filter_ops php_bz2_compress_ops = {
 
 /* {{{ bzip2.* common factory */
 
-static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	const php_stream_filter_ops *fops = NULL;
+	php_stream_filter_seekable_t write_seekable;
 	php_bz2_filter_data *data;
 	int status = BZ_OK;
+
+	if (php_stream_filter_parse_write_seek_mode(filterparams, &write_seekable) == FAILURE) {
+		return NULL;
+	}
 
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_bz2_filter_data), persistent);
@@ -388,6 +462,10 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 			}
 		}
 
+		/* Save configuration for reset */
+		data->blockSize100k = blockSize100k;
+		data->workFactor = workFactor;
+
 		status = BZ2_bzCompressInit(&(data->strm), blockSize100k, 0, workFactor);
 		data->is_flushed = 1;
 		fops = &php_bz2_compress_ops;
@@ -403,7 +481,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(fops, data, persistent);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START, write_seekable);
 }
 
 const php_stream_filter_factory php_bz2_filter_factory = {

@@ -3,11 +3,11 @@ GH-8086 (mb_send_mail() function not working correctly in PHP 8.x)
 --EXTENSIONS--
 mbstring
 --INI--
+internal_encoding=UTF-8
 sendmail_path={MAIL:{PWD}/gh8086.eml}
 mail.mixed_lf_and_crlf=on
 --FILE--
 <?php
-mb_internal_encoding("UTF-8");
 mb_language("uni");
 $to = "omittedvalidaddress@example.com";
 $subject = "test mail";

@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Vadim Savchuk <vsavchuk@productengine.com>                  |
    |          Dmitry Lakhtyuk <dlakhtyuk@productengine.com>               |
@@ -40,6 +40,9 @@
 
 #include "locale/locale.h"
 #include "locale/locale_class.h"
+
+#include "listformatter/listformatter_class.h"
+#include "rangeformatter/rangeformatter_class.h"
 
 #include "dateformat/dateformat.h"
 #include "dateformat/dateformat_class.h"
@@ -110,10 +113,24 @@ char* canonicalize_locale_string(const char* locale) {
 	return estrdup(canonicalized);
 }
 
+static PHP_INI_MH(OnUpdateErrorLevel)
+{
+	zend_long *p = ZEND_INI_GET_ADDR();
+	*p = zend_ini_parse_quantity_warn(new_value, entry->name);
+	if (*p) {
+		php_error_docref("session.configuration", E_DEPRECATED,
+			"Using a value different than 0 for intl.error_level is deprecated,"
+			" as the intl.error_level INI setting is deprecated."
+			" Instead the intl.use_exceptions INI setting should be enabled to throw exceptions on errors"
+			" or intl_get_error_code()/intl_get_error_message() should be used to manually deal with errors");
+	}
+	return SUCCESS;
+}
+
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY(LOCALE_INI_NAME, NULL, PHP_INI_ALL, OnUpdateStringUnempty, default_locale, zend_intl_globals, intl_globals)
-	STD_PHP_INI_ENTRY("intl.error_level", "0", PHP_INI_ALL, OnUpdateLong, error_level, zend_intl_globals, intl_globals)
+	STD_PHP_INI_ENTRY("intl.error_level", "0", PHP_INI_ALL, OnUpdateErrorLevel, error_level, zend_intl_globals, intl_globals)
 	STD_PHP_INI_BOOLEAN("intl.use_exceptions", "0", PHP_INI_ALL, OnUpdateBool, use_exceptions, zend_intl_globals, intl_globals)
 PHP_INI_END()
 /* }}} */
@@ -170,6 +187,13 @@ PHP_MINIT_FUNCTION( intl )
 	/* Register 'NumberFormatter' PHP class */
 	formatter_register_class(  );
 
+	/* Register 'ListFormatter' PHP class */
+	listformatter_register_class(  );
+
+#if U_ICU_VERSION_MAJOR_NUM >= 63
+	/* Register 'NumberRangeFormatter' PHP class */
+	rangeformatter_register_class( );
+#endif
 	/* Register 'Normalizer' PHP class */
 	normalizer_register_Normalizer_class(  );
 

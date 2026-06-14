@@ -1,7 +1,6 @@
 --TEST--
 Bug #46274 (pdo_pgsql - Segfault when using PDO::ATTR_STRINGIFY_FETCHES and blob)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

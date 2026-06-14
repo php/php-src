@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Ilija Tovilo <ilutov@php.net>                               |
    +----------------------------------------------------------------------+
@@ -36,9 +35,21 @@ ZEND_API zend_class_entry *zend_ce_unit_enum;
 ZEND_API zend_class_entry *zend_ce_backed_enum;
 ZEND_API zend_object_handlers zend_enum_object_handlers;
 
-zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case_name, zval *backing_value_zv)
+static zend_arg_info zarginfo_class_UnitEnum_cases[sizeof(arginfo_class_UnitEnum_cases)/sizeof(zend_internal_arg_info)];
+static zend_arg_info zarginfo_class_BackedEnum_from[sizeof(arginfo_class_BackedEnum_from)/sizeof(zend_internal_arg_info)];
+static zend_arg_info zarginfo_class_BackedEnum_tryFrom[sizeof(arginfo_class_BackedEnum_tryFrom)/sizeof(zend_internal_arg_info)];
+
+zend_object *zend_enum_new(zval *result, zend_class_entry *ce, int case_id, zend_string *case_name, zval *backing_value_zv)
 {
-	zend_object *zobj = zend_objects_new(ce);
+	zend_enum_obj *intern = zend_object_alloc(sizeof(*intern), ce);
+
+	zend_object_std_init(&intern->std, ce);
+	object_properties_init(&intern->std, ce);
+
+	intern->case_id = case_id;
+
+	zend_object *zobj = &intern->std;
+	GC_ADD_FLAGS(zobj, GC_NOT_COLLECTABLE);
 	ZVAL_OBJ(result, zobj);
 
 	zval *zname = OBJ_PROP_NUM(zobj, 0);
@@ -79,24 +90,23 @@ static void zend_verify_enum_properties(const zend_class_entry *ce)
 
 static void zend_verify_enum_magic_methods(const zend_class_entry *ce)
 {
-	// Only __get, __call and __invoke are allowed
+	// Only __get, __call, __debugInfo and __invoke are allowed
 
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(constructor, "__construct");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(destructor, "__destruct");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(clone, "__clone");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__get, "__get");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__set, "__set");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unset, "__unset");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__isset, "__isset");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__tostring, "__toString");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__debugInfo, "__debugInfo");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__serialize, "__serialize");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unserialize, "__unserialize");
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(constructor, ZEND_CONSTRUCTOR_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(destructor, ZEND_DESTRUCTOR_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(clone, ZEND_CLONE_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__get, ZEND_GET_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__set, ZEND_SET_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unset, ZEND_UNSET_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__isset, ZEND_ISSET_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__tostring, ZEND_TOSTRING_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__serialize, ZEND_SERIALIZE_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unserialize, ZEND_UNSERIALIZE_FUNC_NAME);
 
 	static const char *const forbidden_methods[] = {
-		"__sleep",
-		"__wakeup",
-		"__set_state",
+		ZEND_SLEEP_FUNC_NAME,
+		ZEND_WAKEUP_FUNC_NAME,
+		ZEND_SET_STATE_FUNC_NAME,
 	};
 
 	uint32_t forbidden_methods_length = sizeof(forbidden_methods) / sizeof(forbidden_methods[0]);
@@ -165,6 +175,7 @@ void zend_register_enum_ce(void)
 	zend_ce_backed_enum->interface_gets_implemented = zend_implement_backed_enum;
 
 	memcpy(&zend_enum_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	zend_enum_object_handlers.offset = offsetof(zend_enum_obj, std);
 	zend_enum_object_handlers.clone_obj = NULL;
 	zend_enum_object_handlers.compare = zend_objects_not_comparable;
 }
@@ -445,7 +456,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 	cases_function->function_name = ZSTR_KNOWN(ZEND_STR_CASES);
 	cases_function->fn_flags = fn_flags;
 	cases_function->doc_comment = NULL;
-	cases_function->arg_info = (zend_internal_arg_info *) (arginfo_class_UnitEnum_cases + 1);
+	cases_function->arg_info = zarginfo_class_UnitEnum_cases + 1;
 	zend_enum_register_func(ce, ZEND_STR_CASES, cases_function);
 
 	if (ce->enum_backing_type != IS_UNDEF) {
@@ -456,7 +467,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		from_function->doc_comment = NULL;
 		from_function->num_args = 1;
 		from_function->required_num_args = 1;
-		from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_from + 1);
+		from_function->arg_info = zarginfo_class_BackedEnum_from + 1;
 		zend_enum_register_func(ce, ZEND_STR_FROM, from_function);
 
 		zend_internal_function *try_from_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
@@ -466,7 +477,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		try_from_function->doc_comment = NULL;
 		try_from_function->num_args = 1;
 		try_from_function->required_num_args = 1;
-		try_from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_tryFrom + 1);
+		try_from_function->arg_info = zarginfo_class_BackedEnum_tryFrom + 1;
 		zend_enum_register_func(ce, ZEND_STR_TRYFROM_LOWERCASE, try_from_function);
 	}
 }
@@ -534,16 +545,18 @@ ZEND_API zend_class_entry *zend_register_internal_enum(
 }
 
 static zend_ast_ref *create_enum_case_ast(
-		zend_string *class_name, zend_string *case_name, zval *value) {
+		zend_string *class_name, int case_id, zend_string *case_name,
+		zval *value) {
 	// TODO: Use custom node type for enum cases?
-	size_t size = sizeof(zend_ast_ref) + zend_ast_size(3)
-		+ (value ? 3 : 2) * sizeof(zend_ast_zval);
+	const size_t num_children = ZEND_AST_CONST_ENUM_INIT >> ZEND_AST_NUM_CHILDREN_SHIFT;
+	size_t size = sizeof(zend_ast_ref) + zend_ast_size(num_children)
+		+ (value ? num_children : num_children-1) * sizeof(zend_ast_zval);
 	char *p = pemalloc(size, 1);
 	zend_ast_ref *ref = (zend_ast_ref *) p; p += sizeof(zend_ast_ref);
 	GC_SET_REFCOUNT(ref, 1);
 	GC_TYPE_INFO(ref) = GC_CONSTANT_AST | GC_PERSISTENT | GC_IMMUTABLE;
 
-	zend_ast *ast = (zend_ast *) p; p += zend_ast_size(3);
+	zend_ast *ast = (zend_ast *) p; p += zend_ast_size(num_children);
 	ast->kind = ZEND_AST_CONST_ENUM_INIT;
 	ast->attr = 0;
 	ast->lineno = 0;
@@ -558,22 +571,45 @@ static zend_ast_ref *create_enum_case_ast(
 	ast->child[1] = (zend_ast *) p; p += sizeof(zend_ast_zval);
 	ast->child[1]->kind = ZEND_AST_ZVAL;
 	ast->child[1]->attr = 0;
-	ZEND_ASSERT(ZSTR_IS_INTERNED(case_name));
-	ZVAL_STR(zend_ast_get_zval(ast->child[1]), case_name);
+	ZVAL_LONG(zend_ast_get_zval(ast->child[1]), case_id);
 	Z_LINENO_P(zend_ast_get_zval(ast->child[1])) = 0;
 
+	ast->child[2] = (zend_ast *) p; p += sizeof(zend_ast_zval);
+	ast->child[2]->kind = ZEND_AST_ZVAL;
+	ast->child[2]->attr = 0;
+	ZEND_ASSERT(ZSTR_IS_INTERNED(case_name));
+	ZVAL_STR(zend_ast_get_zval(ast->child[2]), case_name);
+	Z_LINENO_P(zend_ast_get_zval(ast->child[2])) = 0;
+
 	if (value) {
-		ast->child[2] = (zend_ast *) p; p += sizeof(zend_ast_zval);
-		ast->child[2]->kind = ZEND_AST_ZVAL;
-		ast->child[2]->attr = 0;
+		ast->child[3] = (zend_ast *) p; p += sizeof(zend_ast_zval);
+		ast->child[3]->kind = ZEND_AST_ZVAL;
+		ast->child[3]->attr = 0;
 		ZEND_ASSERT(!Z_REFCOUNTED_P(value));
-		ZVAL_COPY_VALUE(zend_ast_get_zval(ast->child[2]), value);
-		Z_LINENO_P(zend_ast_get_zval(ast->child[2])) = 0;
+		ZVAL_COPY_VALUE(zend_ast_get_zval(ast->child[3]), value);
+		Z_LINENO_P(zend_ast_get_zval(ast->child[3])) = 0;
 	} else {
-		ast->child[2] = NULL;
+		ast->child[3] = NULL;
 	}
 
 	return ref;
+}
+
+int zend_enum_next_case_id(zend_class_entry *enum_class)
+{
+	ZEND_HASH_REVERSE_FOREACH_VAL(&enum_class->constants_table, zval *zv) {
+		zend_class_constant *c = Z_PTR_P(zv);
+		if (!(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE)) {
+			continue;
+		}
+		ZEND_ASSERT(Z_TYPE(c->value) == IS_CONSTANT_AST);
+		zend_ast *ast = Z_ASTVAL(c->value);
+
+		ZEND_ASSERT(ast->kind == ZEND_AST_CONST_ENUM_INIT);
+		return Z_LVAL_P(zend_ast_get_zval(ast->child[1])) + 1;
+	} ZEND_HASH_FOREACH_END();
+
+	return 1;
 }
 
 ZEND_API void zend_enum_add_case(zend_class_entry *ce, zend_string *case_name, zval *value)
@@ -597,9 +633,11 @@ ZEND_API void zend_enum_add_case(zend_class_entry *ce, zend_string *case_name, z
 		ZEND_ASSERT(ce->enum_backing_type == IS_UNDEF);
 	}
 
+	int case_id = zend_enum_next_case_id(ce);
+
 	zval ast_zv;
 	Z_TYPE_INFO(ast_zv) = IS_CONSTANT_AST;
-	Z_AST(ast_zv) = create_enum_case_ast(ce->name, case_name, value);
+	Z_AST(ast_zv) = create_enum_case_ast(ce->name, case_id, case_name, value);
 	zend_class_constant *c = zend_declare_class_constant_ex(
 		ce, case_name, &ast_zv, ZEND_ACC_PUBLIC, NULL);
 	ZEND_CLASS_CONST_FLAGS(c) |= ZEND_CLASS_CONST_IS_CASE;
@@ -612,8 +650,7 @@ ZEND_API void zend_enum_add_case_cstr(zend_class_entry *ce, const char *name, zv
 	zend_string_release(name_str);
 }
 
-ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name) {
-	zend_class_constant *c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), name);
+static zend_object *zend_enum_case_from_class_constant(zend_class_constant *c) {
 	ZEND_ASSERT(c && "Must be a valid enum case");
 	ZEND_ASSERT(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE);
 
@@ -626,9 +663,25 @@ ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name
 	return Z_OBJ(c->value);
 }
 
+ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name) {
+	zend_class_constant *c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), name);
+	return zend_enum_case_from_class_constant(c);
+}
+
 ZEND_API zend_object *zend_enum_get_case_cstr(zend_class_entry *ce, const char *name) {
-	zend_string *name_str = zend_string_init(name, strlen(name), 0);
-	zend_object *result = zend_enum_get_case(ce, name_str);
-	zend_string_release(name_str);
-	return result;
+	zend_class_constant *c = zend_hash_str_find_ptr(CE_CONSTANTS_TABLE(ce), name, strlen(name));
+	return zend_enum_case_from_class_constant(c);
+}
+
+void zend_enum_startup(void)
+{
+	for (size_t i = 0; i < sizeof(zarginfo_class_UnitEnum_cases)/sizeof(zend_arg_info); i++) {
+		zend_convert_internal_arg_info(&zarginfo_class_UnitEnum_cases[i], &arginfo_class_UnitEnum_cases[i], i == 0, true);
+	}
+	for (size_t i = 0; i < sizeof(zarginfo_class_BackedEnum_from)/sizeof(zend_arg_info); i++) {
+		zend_convert_internal_arg_info(&zarginfo_class_BackedEnum_from[i], &arginfo_class_BackedEnum_from[i], i == 0, true);
+	}
+	for (size_t i = 0; i < sizeof(zarginfo_class_BackedEnum_tryFrom)/sizeof(zend_arg_info); i++) {
+		zend_convert_internal_arg_info(&zarginfo_class_BackedEnum_tryFrom[i], &arginfo_class_BackedEnum_tryFrom[i], i == 0, true);
+	}
 }

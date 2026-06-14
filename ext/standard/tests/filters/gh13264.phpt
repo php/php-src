@@ -1,7 +1,7 @@
 --TEST--
 GH-13264: fgets() and stream_get_line() do not return false on filter fatal error
---SKIPIF--
-<?php require 'filter_errors.inc'; filter_errors_skipif('zlib.inflate'); ?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 function create_stream()

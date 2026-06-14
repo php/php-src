@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: George Wang <gwang@litespeedtech.com>                        |
    +----------------------------------------------------------------------+
@@ -1395,6 +1393,8 @@ void start_children( int children )
             switch( pid ) {
             case 0: /* children process */
 
+                php_child_init();
+
                 /* don't catch our signals */
                 sigaction( SIGTERM, &old_term, 0 );
                 sigaction( SIGQUIT, &old_quit, 0 );
@@ -1656,9 +1656,7 @@ static int add_associate_array( const char * pKey, int keyLen, const char * pVal
 /* {{{ Fetch all HTTP request headers */
 PHP_FUNCTION(litespeed_request_headers)
 {
-    if (zend_parse_parameters_none() == FAILURE) {
-        RETURN_THROWS();
-    }
+    ZEND_PARSE_PARAMETERS_NONE();
 
     array_init(return_value);
 
@@ -1677,12 +1675,10 @@ PHP_FUNCTION(litespeed_response_headers)
     int          len;
     char         headerBuf[SAPI_LSAPI_MAX_HEADER_LENGTH];
 
-    if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+    ZEND_PARSE_PARAMETERS_NONE();
 
-    if (!&SG(sapi_headers).headers) {
-        RETURN_FALSE;
+    if (!zend_llist_count(&SG(sapi_headers).headers)) {
+	    RETURN_FALSE;
     }
     array_init(return_value);
 
@@ -1719,9 +1715,7 @@ PHP_FUNCTION(apache_get_modules)
     };
     const char **name = mod_names;
 
-    if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+    ZEND_PARSE_PARAMETERS_NONE();
 
     array_init(return_value);
     while( *name )
@@ -1736,9 +1730,7 @@ PHP_FUNCTION(apache_get_modules)
 /* {{{ Flushes all response data to the client */
 PHP_FUNCTION(litespeed_finish_request)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+    ZEND_PARSE_PARAMETERS_NONE();
 
     php_output_end_all();
     php_header();

@@ -1,5 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c01c9337e58601ff9e6c85072a62f68cc7fec9ba */
+/* This is a generated file, edit spl_fixedarray.stub.php instead.
+ * Stub hash: 0c838fed60b29671fe04e63315ab662d8cb16f0c */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
@@ -68,7 +68,6 @@ ZEND_METHOD(SplFixedArray, offsetGet);
 ZEND_METHOD(SplFixedArray, offsetSet);
 ZEND_METHOD(SplFixedArray, offsetUnset);
 ZEND_METHOD(SplFixedArray, getIterator);
-ZEND_METHOD(SplFixedArray, jsonSerialize);
 
 static const zend_function_entry class_SplFixedArray_methods[] = {
 	ZEND_ME(SplFixedArray, __construct, arginfo_class_SplFixedArray___construct, ZEND_ACC_PUBLIC)
@@ -85,7 +84,7 @@ static const zend_function_entry class_SplFixedArray_methods[] = {
 	ZEND_ME(SplFixedArray, offsetSet, arginfo_class_SplFixedArray_offsetSet, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, offsetUnset, arginfo_class_SplFixedArray_offsetUnset, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, getIterator, arginfo_class_SplFixedArray_getIterator, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplFixedArray, jsonSerialize, arginfo_class_SplFixedArray_jsonSerialize, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("jsonSerialize", zim_SplFixedArray_toArray, arginfo_class_SplFixedArray_jsonSerialize, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -99,15 +98,10 @@ static zend_class_entry *register_class_SplFixedArray(zend_class_entry *class_en
 
 
 	zend_attribute *attribute_Deprecated_func___wakeup_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__wakeup", sizeof("__wakeup") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func___wakeup_0_arg0;
-	zend_string *attribute_Deprecated_func___wakeup_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
-	ZVAL_STR(&attribute_Deprecated_func___wakeup_0_arg0, attribute_Deprecated_func___wakeup_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func___wakeup_0->args[0].value, &attribute_Deprecated_func___wakeup_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_func___wakeup_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func___wakeup_0_arg1;
 	zend_string *attribute_Deprecated_func___wakeup_0_arg1_str = zend_string_init("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()", strlen("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()"), 1);
-	ZVAL_STR(&attribute_Deprecated_func___wakeup_0_arg1, attribute_Deprecated_func___wakeup_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func___wakeup_0->args[1].value, &attribute_Deprecated_func___wakeup_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[1].value, attribute_Deprecated_func___wakeup_0_arg1_str);
 	attribute_Deprecated_func___wakeup_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;

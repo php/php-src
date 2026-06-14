@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Brian Schaffner <brian@tool.net>                            |
    |          Shane Caraveo <shane@caraveo.com>                           |
@@ -114,11 +112,11 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 	zend_module_entry *module_entry;
 	zend_module_entry *(*get_module)(void);
 	int error_type, slash_suffix = 0;
-	char *extension_dir;
+	const char *extension_dir;
 	char *err1, *err2;
 
 	if (type == MODULE_PERSISTENT) {
-		extension_dir = INI_STR("extension_dir");
+		extension_dir = zend_ini_string_literal("extension_dir");
 	} else {
 		extension_dir = PG(extension_dir);
 	}
@@ -177,7 +175,7 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 
 #ifdef PHP_WIN32
 	if (!php_win32_image_compatible(handle, &err1)) {
-			php_error_docref(NULL, error_type, err1);
+			php_error_docref(NULL, error_type, "%s", err1);
 			efree(err1);
 			DL_UNLOAD(handle);
 			return FAILURE;

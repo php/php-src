@@ -94,13 +94,10 @@ $not_int_types = array (
   array(),
   array(0),
   array(1),
-  array(NULL),
   array(null),
   array("string"),
   array(true),
-  array(TRUE),
   array(false),
-  array(FALSE),
   array(1,2,3,4),
   array(1 => "One", "two" => 2),
 
@@ -127,12 +124,6 @@ $not_int_types = array (
   /* booleans */
   true,
   false,
-  TRUE,
-  FALSE,
-
-  /* undefined and unset vars */
-  @$unset_var,
-  @$undefined_var
 );
 
 
@@ -256,9 +247,6 @@ int(1)
 int(1)
 int(1)
 int(1)
-int(1)
-int(1)
-int(1)
 int(0)
 int(0)
 int(0)
@@ -278,10 +266,6 @@ int(0)
 int(0)
 int(0)
 int(1)
-int(0)
-int(1)
-int(0)
-int(0)
 int(0)
 
 --- Done ---

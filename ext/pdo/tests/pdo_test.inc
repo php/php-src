@@ -96,4 +96,20 @@ class PDOTest {
         };
     }
 }
-?>
+/** See https://stackoverflow.com/a/3732466 */
+function get_dummy_sql_request(): string
+{
+    $dsn = getenv('PDOTEST_DSN');
+
+    // Firebird: https://www.firebirdfaq.org/faq30/
+    if (str_starts_with($dsn, 'firebird')) {
+        return "SELECT FIRST 0 FROM (VALUES ('Hello world')";
+    }
+
+    // Oracle
+    if (str_starts_with($dsn, 'oci')) {
+        return 'SELECT 1 FROM DUAL';
+    }
+
+    return 'SELECT 1';
+}

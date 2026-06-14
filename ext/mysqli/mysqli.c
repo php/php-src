@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Georg Richter <georg@php.net>                               |
   |          Andrey Hristov <andrey@php.net>                             |
@@ -32,7 +30,6 @@
 #include "zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
 #include "zend_interfaces.h"
-#include "zend_attributes.h"
 #include "mysqli_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)
@@ -75,7 +72,6 @@ typedef zend_result (*mysqli_read_t)(mysqli_object *obj, zval *rv, bool quiet);
 typedef zend_result (*mysqli_write_t)(mysqli_object *obj, zval *newval);
 
 typedef struct _mysqli_prop_handler {
-	zend_string *name;
 	mysqli_read_t read_func;
 	mysqli_write_t write_func;
 } mysqli_prop_handler;
@@ -136,10 +132,6 @@ void php_clear_mysql(MY_MYSQL *mysql) {
 	if (mysql->hash_key) {
 		zend_string_release_ex(mysql->hash_key, 0);
 		mysql->hash_key = NULL;
-	}
-	if (!Z_ISUNDEF(mysql->li_read)) {
-		zval_ptr_dtor(&(mysql->li_read));
-		ZVAL_UNDEF(&mysql->li_read);
 	}
 }
 /* }}} */
@@ -294,11 +286,11 @@ zval *mysqli_write_property(zend_object *object, zend_string *name, zval *value,
 void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysqli_read_t r_func, mysqli_write_t w_func) {
 	mysqli_prop_handler	p;
 
-	p.name = zend_string_init_interned(pname, pname_len, 1);
+	zend_string *name = zend_string_init_interned(pname, pname_len, 1);
 	p.read_func = (r_func) ? r_func : mysqli_read_na;
 	p.write_func = w_func;
-	zend_hash_add_mem(h, p.name, &p, sizeof(mysqli_prop_handler));
-	zend_string_release_ex(p.name, 1);
+	zend_hash_add_mem(h, name, &p, sizeof(mysqli_prop_handler));
+	zend_string_release_ex(name, 1);
 }
 /* }}} */
 
@@ -317,8 +309,8 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 				zval rv;
 				zval *value = mysqli_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
-					convert_to_boolean(value);
-					has_property = Z_TYPE_P(value) == IS_TRUE;
+					has_property = zend_is_true(value);
+					zval_ptr_dtor(value);
 				}
 				break;
 			}
@@ -331,7 +323,7 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 				}
 				break;
 			}
-			EMPTY_SWITCH_DEFAULT_CASE();
+			default: ZEND_UNREACHABLE();
 		}
 	} else {
 		has_property = zend_std_has_property(object, name, has_set_exists, cache_slot);
@@ -344,17 +336,17 @@ HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 {
 	mysqli_object *obj = php_mysqli_fetch_object(object);
 	HashTable *retval, *props = obj->prop_handler;
-	mysqli_prop_handler *entry;
+	zend_string *name;
 
 	retval = zend_new_array(zend_hash_num_elements(props) + 1);
 
-	ZEND_HASH_MAP_FOREACH_PTR(props, entry) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY(props, name) {
 		zval rv;
 		zval *value;
 
-		value = mysqli_read_property(object, entry->name, BP_VAR_IS, 0, &rv);
+		value = mysqli_read_property(object, name, BP_VAR_IS, 0, &rv);
 		if (value != &EG(uninitialized_zval)) {
-			zend_hash_add(retval, entry->name, value);
+			zend_hash_add(retval, name, value);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -366,12 +358,11 @@ HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type)
 {
 	mysqli_object *intern;
-	zend_class_entry *mysqli_base_class;
 	zend_object_handlers *handlers;
 
 	intern = zend_object_alloc(sizeof(mysqli_object), class_type);
 
-	mysqli_base_class = class_type;
+	const zend_class_entry *mysqli_base_class = class_type;
 	while (mysqli_base_class->type != ZEND_INTERNAL_CLASS &&
 		   mysqli_base_class->parent != NULL) {
 		mysqli_base_class = mysqli_base_class->parent;
@@ -425,6 +416,19 @@ static const MYSQLND_REVERSE_API mysqli_reverse_api = {
 	mysqli_convert_zv_to_mysqlnd
 };
 
+static PHP_INI_MH(OnUpdateDefaultPort)
+{
+	zend_long value = ZEND_ATOL(ZSTR_VAL(new_value));
+
+	if (value < 0 || value > USHRT_MAX) {
+		return FAILURE;
+	}
+
+	MyG(default_port) = (unsigned short)value;
+
+	return SUCCESS;
+}
+
 /* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mysqli.max_links",			"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_links,			zend_mysqli_globals,		mysqli_globals, display_link_numbers)
@@ -434,7 +438,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqli.default_host",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_host,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_user",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_user,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_pw",				NULL,	PHP_INI_ALL,		OnUpdateString,		default_pw,			zend_mysqli_globals,		mysqli_globals)
-	STD_PHP_INI_ENTRY("mysqli.default_port",			"3306",	PHP_INI_ALL,		OnUpdateLong,		default_port,		zend_mysqli_globals,		mysqli_globals)
+	STD_PHP_INI_ENTRY("mysqli.default_port",			"3306",	PHP_INI_ALL,		OnUpdateDefaultPort,		default_port,		zend_mysqli_globals,		mysqli_globals)
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 	STD_PHP_INI_ENTRY("mysqli.default_socket",			MYSQL_UNIX_ADDR,PHP_INI_ALL,OnUpdateStringUnempty,	default_socket,	zend_mysqli_globals,		mysqli_globals)
 #else
@@ -475,7 +479,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_INI_ENTRIES();
 
 	memcpy(&mysqli_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	mysqli_object_handlers.offset = XtOffsetOf(mysqli_object, zo);
+	mysqli_object_handlers.offset = offsetof(mysqli_object, zo);
 	mysqli_object_handlers.free_obj = mysqli_objects_free_storage;
 	mysqli_object_handlers.clone_obj = NULL;
 	mysqli_object_handlers.read_property = mysqli_read_property;
@@ -716,9 +720,7 @@ PHP_METHOD(mysqli_result, __construct)
 
 PHP_METHOD(mysqli_result, getIterator)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
@@ -776,7 +778,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			}
 		}
 	}
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
 
 	if (fetchtype < MYSQLI_ASSOC || fetchtype > MYSQLI_BOTH) {
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH");

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author:  Jim Winstead <jimw@php.net>                                 |
    +----------------------------------------------------------------------+
@@ -39,7 +37,7 @@
 
 #if defined(__APPLE__)
   /*
-   Apple statvfs has an interger overflow in libc copying to statvfs.
+   Apple statvfs has an integer overflow in libc copying to statvfs.
    cvt_statfs_to_statvfs(struct statfs *from, struct statvfs *to) {
    to->f_blocks = (fsblkcnt_t)from->f_blocks;
    */
@@ -749,7 +747,7 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 	php_stream_wrapper *wrapper = NULL;
 
 	if (IS_ACCESS_CHECK(type)) {
-		if (!ZSTR_LEN(filename) || CHECK_NULL_PATH(ZSTR_VAL(filename), ZSTR_LEN(filename))) {
+		if (!ZSTR_LEN(filename) || zend_str_has_nul_byte(filename)) {
 			if (ZSTR_LEN(filename) && !IS_EXISTS_CHECK(type)) {
 				php_error_docref(NULL, E_WARNING, "Filename contains null byte");
 			}
@@ -774,22 +772,18 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 #ifdef F_OK
 				case FS_EXISTS:
 					RETURN_BOOL(VCWD_ACCESS(file_path_to_check, F_OK) == 0);
-					break;
 #endif
 #ifdef W_OK
 				case FS_IS_W:
 					RETURN_BOOL(VCWD_ACCESS(file_path_to_check, W_OK) == 0);
-					break;
 #endif
 #ifdef R_OK
 				case FS_IS_R:
 					RETURN_BOOL(VCWD_ACCESS(file_path_to_check, R_OK) == 0);
-					break;
 #endif
 #ifdef X_OK
 				case FS_IS_X:
 					RETURN_BOOL(VCWD_ACCESS(file_path_to_check, X_OK) == 0);
-					break;
 #endif
 			}
 		}
@@ -821,7 +815,7 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		}
 
 		if (!wrapper) {
-			if (!ZSTR_LEN(filename) || CHECK_NULL_PATH(ZSTR_VAL(filename), ZSTR_LEN(filename))) {
+			if (!ZSTR_LEN(filename) || zend_str_has_nul_byte(filename)) {
 				if (ZSTR_LEN(filename) && !IS_EXISTS_CHECK(type)) {
 					php_error_docref(NULL, E_WARNING, "Filename contains null byte");
 				}

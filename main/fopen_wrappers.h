@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Jim Winstead <jimw@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -29,11 +27,6 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 PHPAPI int php_check_open_basedir(const char *path);
 PHPAPI int php_check_open_basedir_ex(const char *path, int warn);
 PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path);
-
-/* OPENBASEDIR_CHECKPATH(filename) to ease merge between 6.x and 5.x */
-#define OPENBASEDIR_CHECKPATH(filename) php_check_open_basedir(filename)
-
-PHPAPI int php_check_safe_mode_include_dir(const char *path);
 
 PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_len, const char *path);
 

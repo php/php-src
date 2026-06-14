@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Niels Dossche <nielsdos@php.net>                            |
    +----------------------------------------------------------------------+
@@ -462,7 +460,7 @@ static php_libxml_quirks_mode dom_translate_quirks_mode(lxb_dom_document_cmode_t
 		case LXB_DOM_DOCUMENT_CMODE_NO_QUIRKS: return PHP_LIBXML_NO_QUIRKS;
 		case LXB_DOM_DOCUMENT_CMODE_LIMITED_QUIRKS: return PHP_LIBXML_LIMITED_QUIRKS;
 		case LXB_DOM_DOCUMENT_CMODE_QUIRKS: return PHP_LIBXML_QUIRKS;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 

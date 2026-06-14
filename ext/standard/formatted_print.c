@@ -1,16 +1,14 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Author: Stig S�ther Bakken <ssb@php.net>                             |
+   | Author: Stig Sæther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
 
@@ -103,7 +101,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 	if (req_size > ZSTR_LEN(*buffer)) {
 		size_t size = ZSTR_LEN(*buffer);
 		while (req_size > size) {
-			if (size > ZEND_SIZE_MAX/2) {
+			if (size > SIZE_MAX/2) {
 				zend_error_noreturn(E_ERROR, "Field width %zd is too long", req_size);
 			}
 			size <<= 1;
@@ -298,9 +296,9 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 			char exp_char = fmt == 'G' || fmt == 'H' ? 'E' : 'e';
 			/* We use &num_buf[ 1 ], so that we have room for the sign. */
 			s = zend_gcvt(number, precision, decimal_point, exp_char, &num_buf[1]);
-			is_negative = 0;
+			is_negative = false;
 			if (*s == '-') {
-				is_negative = 1;
+				is_negative = true;
 				s = &num_buf[1];
 			} else if (always_sign) {
 				num_buf[0] = '+';
@@ -591,6 +589,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 						expprec = 1;
 					} else {
 						precision = 0;
+						adjusting |= ADJ_PRECISION;
 					}
 				} else {
 					precision = 0;
@@ -864,17 +863,15 @@ PHP_FUNCTION(fprintf)
 	php_stream *stream;
 	char *format;
 	size_t format_len;
-	zval *arg1, *args;
-	int argc;
+	zval *args = NULL;
+	int argc = 0;
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
-		Z_PARAM_RESOURCE(arg1)
+		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_STRING(format, format_len)
 		Z_PARAM_VARIADIC('*', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
-
-	php_stream_from_zval(stream, arg1);
 
 	result = php_formatted_print(format, format_len, args, argc, 2);
 	if (result == NULL) {
@@ -894,18 +891,16 @@ PHP_FUNCTION(vfprintf)
 	php_stream *stream;
 	char *format;
 	size_t format_len;
-	zval *arg1, *args;
+	zval *args;
 	zend_array *array;
 	int argc;
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_RESOURCE(arg1)
+		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_STRING(format, format_len)
 		Z_PARAM_ARRAY_HT(array)
 	ZEND_PARSE_PARAMETERS_END();
-
-	php_stream_from_zval(stream, arg1);
 
 	args = php_formatted_print_get_array(array, &argc);
 

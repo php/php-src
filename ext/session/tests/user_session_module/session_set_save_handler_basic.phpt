@@ -16,7 +16,7 @@ echo "*** Testing session_set_save_handler() : basic functionality ***\n";
 
 require_once "save_handler.inc";
 var_dump(session_module_name());
-var_dump(session_module_name(FALSE));
+var_dump(session_module_name(''));
 var_dump(session_module_name("blah"));
 var_dump(session_module_name("foo"));
 

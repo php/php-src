@@ -1,3 +1,17 @@
+/*
+   +----------------------------------------------------------------------+
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
+   +----------------------------------------------------------------------+
+   | Authors: Gustavo Lopes    <cataphract@php.net>                       |
+   +----------------------------------------------------------------------+
+ */
+
 #ifdef __sun
 /* to enable 'new' ancillary data layout instead */
 # define _XPG4_2
@@ -86,7 +100,7 @@ typedef struct {
 	/* zval info */
 	const char *name;
 	unsigned name_size;
-	int required;
+	bool required;
 
 	/* structure info */
 	size_t field_offset; /* 0 to pass full structure, e.g. when more than
@@ -555,7 +569,7 @@ static void from_zval_write_sin_addr(const zval *zaddr_str, char *inaddr, ser_co
 	zend_string			*addr_str, *tmp_addr_str;
 
 	addr_str = zval_get_tmp_string((zval *) zaddr_str, &tmp_addr_str);
-	res = php_set_inet_addr(&saddr, ZSTR_VAL(addr_str), ctx->sock);
+	res = php_set_inet_addr(&saddr, addr_str, ctx->sock);
 	if (res) {
 		memcpy(inaddr, &saddr.sin_addr, sizeof saddr.sin_addr);
 	} else {
@@ -571,7 +585,6 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 	const struct in_addr *addr = (const struct in_addr *)data;
 	socklen_t size = INET_ADDRSTRLEN;
 	zend_string *str = zend_string_alloc(size - 1, 0);
-	memset(ZSTR_VAL(str), '\0', size);
 
 	ZVAL_NEW_STR(zv, str);
 
@@ -581,12 +594,12 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STR_P(zv) = zend_string_truncate(Z_STR_P(zv), strlen(Z_STRVAL_P(zv)), 0);
 }
 static const field_descriptor descriptors_sockaddr_in[] = {
-		{"family", sizeof("family"), 0, offsetof(struct sockaddr_in, sin_family), from_zval_write_sa_family, to_zval_read_sa_family},
-		{"addr", sizeof("addr"), 0, offsetof(struct sockaddr_in, sin_addr), from_zval_write_sin_addr, to_zval_read_sin_addr},
-		{"port", sizeof("port"), 0, offsetof(struct sockaddr_in, sin_port), from_zval_write_net_uint16, to_zval_read_net_uint16},
+		{"family", sizeof("family"), false, offsetof(struct sockaddr_in, sin_family), from_zval_write_sa_family, to_zval_read_sa_family},
+		{"addr", sizeof("addr"), false, offsetof(struct sockaddr_in, sin_addr), from_zval_write_sin_addr, to_zval_read_sin_addr},
+		{"port", sizeof("port"), false, offsetof(struct sockaddr_in, sin_port), from_zval_write_net_uint16, to_zval_read_net_uint16},
 		{0}
 };
 static void from_zval_write_sockaddr_in(const zval *container, char *sockaddr, ser_context *ctx)
@@ -605,7 +618,7 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 	zend_string			*addr_str, *tmp_addr_str;
 
 	addr_str = zval_get_tmp_string((zval *) zaddr_str, &tmp_addr_str);
-	res = php_set_inet6_addr(&saddr6, ZSTR_VAL(addr_str), ctx->sock);
+	res = php_set_inet6_addr(&saddr6, addr_str, ctx->sock);
 	if (res) {
 		memcpy(addr6, &saddr6.sin6_addr, sizeof saddr6.sin6_addr);
 	} else {
@@ -622,8 +635,6 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 	socklen_t size = INET6_ADDRSTRLEN;
 	zend_string *str = zend_string_alloc(size - 1, 0);
 
-	memset(ZSTR_VAL(str), '\0', size);
-
 	ZVAL_NEW_STR(zv, str);
 
 	if (inet_ntop(AF_INET6, addr, Z_STRVAL_P(zv), size) == NULL) {
@@ -632,14 +643,14 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STR_P(zv) = zend_string_truncate(Z_STR_P(zv), strlen(Z_STRVAL_P(zv)), 0);
 }
 static const field_descriptor descriptors_sockaddr_in6[] = {
-		{"family", sizeof("family"), 0, offsetof(struct sockaddr_in6, sin6_family), from_zval_write_sa_family, to_zval_read_sa_family},
-		{"addr", sizeof("addr"), 0, offsetof(struct sockaddr_in6, sin6_addr), from_zval_write_sin6_addr, to_zval_read_sin6_addr},
-		{"port", sizeof("port"), 0, offsetof(struct sockaddr_in6, sin6_port), from_zval_write_net_uint16, to_zval_read_net_uint16},
-		{"flowinfo", sizeof("flowinfo"), 0, offsetof(struct sockaddr_in6, sin6_flowinfo), from_zval_write_uint32, to_zval_read_uint32},
-		{"scope_id", sizeof("scope_id"), 0, offsetof(struct sockaddr_in6, sin6_scope_id), from_zval_write_uint32, to_zval_read_uint32},
+		{"family", sizeof("family"), false, offsetof(struct sockaddr_in6, sin6_family), from_zval_write_sa_family, to_zval_read_sa_family},
+		{"addr", sizeof("addr"), false, offsetof(struct sockaddr_in6, sin6_addr), from_zval_write_sin6_addr, to_zval_read_sin6_addr},
+		{"port", sizeof("port"), false, offsetof(struct sockaddr_in6, sin6_port), from_zval_write_net_uint16, to_zval_read_net_uint16},
+		{"flowinfo", sizeof("flowinfo"), false, offsetof(struct sockaddr_in6, sin6_flowinfo), from_zval_write_uint32, to_zval_read_uint32},
+		{"scope_id", sizeof("scope_id"), false, offsetof(struct sockaddr_in6, sin6_scope_id), from_zval_write_uint32, to_zval_read_uint32},
 		{0}
 };
 static void from_zval_write_sockaddr_in6(const zval *container, char *sockaddr6, ser_context *ctx)
@@ -930,7 +941,7 @@ static void from_zval_write_control_array(const zval *arr, char *msghdr_c, ser_c
 	char				*bufp = buf;
 	zval				*elem;
 	uint32_t			i = 0;
-	int					num_elems;
+	uint32_t			num_elems;
 	void				*control_buf;
 	zend_llist_element	*alloc;
 	size_t				control_len,
@@ -1024,6 +1035,7 @@ static void to_zval_read_control_array(const char *msghdr_c, zval *zv, res_conte
 	uint32_t		i = 1;
 
 	array_init(zv);
+	zend_hash_real_init_packed(Z_ARRVAL_P(zv));
 
 	for (cmsg = CMSG_FIRSTHDR(msg);
 			cmsg != NULL && !ctx->err.has_error;
@@ -1101,7 +1113,7 @@ static void from_zval_write_iov_array_aux(zval *elem, unsigned i, void **args, s
 }
 static void from_zval_write_iov_array(const zval *arr, char *msghdr_c, ser_context *ctx)
 {
-	int				num_elem;
+	uint32_t	num_elem;
 	struct msghdr	*msg = (struct msghdr*)msghdr_c;
 
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
@@ -1269,10 +1281,11 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 #elif defined(SIOCGIFINDEX)
 		{
 			struct ifreq ifr;
-			if (strlcpy(ifr.ifr_name, ZSTR_VAL(str), sizeof(ifr.ifr_name))
-					>= sizeof(ifr.ifr_name)) {
+			if (ZSTR_LEN(str) >= sizeof(ifr.ifr_name)) {
 				do_from_zval_err(ctx, "the interface name \"%s\" is too large ", ZSTR_VAL(str));
-			} else if (ioctl(ctx->sock->bsd_socket, SIOCGIFINDEX, &ifr) < 0) {
+			}
+			memcpy(ifr.ifr_name, ZSTR_VAL(str), ZSTR_LEN(str) + 1);
+			if (ioctl(ctx->sock->bsd_socket, SIOCGIFINDEX, &ifr) < 0) {
 				if (errno == ENODEV) {
 					do_from_zval_err(ctx, "no interface with name \"%s\" could be "
 							"found", ZSTR_VAL(str));
@@ -1301,8 +1314,8 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 
 /* CONVERSIONS for struct in6_pktinfo */
 static const field_descriptor descriptors_in6_pktinfo[] = {
-		{"addr", sizeof("addr"), 1, offsetof(struct in6_pktinfo, ipi6_addr), from_zval_write_sin6_addr, to_zval_read_sin6_addr},
-		{"ifindex", sizeof("ifindex"), 1, offsetof(struct in6_pktinfo, ipi6_ifindex), from_zval_write_ifindex, to_zval_read_unsigned},
+		{"addr", sizeof("addr"), true, offsetof(struct in6_pktinfo, ipi6_addr), from_zval_write_sin6_addr, to_zval_read_sin6_addr},
+		{"ifindex", sizeof("ifindex"), true, offsetof(struct in6_pktinfo, ipi6_ifindex), from_zval_write_ifindex, to_zval_read_unsigned},
 		{0}
 };
 void from_zval_write_in6_pktinfo(const zval *container, char *in6_pktinfo_c, ser_context *ctx)
@@ -1321,25 +1334,25 @@ void to_zval_read_in6_pktinfo(const char *data, zval *zv, res_context *ctx)
 #if defined(SO_PASSCRED) || defined(LOCAL_CREDS_PERSISTENT) || defined(LOCAL_CREDS)
 static const field_descriptor descriptors_ucred[] = {
 #if defined(LOCAL_CREDS_PERSISTENT)
-		{"pid", sizeof("pid"), 1, offsetof(struct sockcred2, sc_pid), from_zval_write_pid_t, to_zval_read_pid_t},
-		{"uid", sizeof("uid"), 1, offsetof(struct sockcred2, sc_euid), from_zval_write_uid_t, to_zval_read_uid_t},
+		{"pid", sizeof("pid"), true, offsetof(struct sockcred2, sc_pid), from_zval_write_pid_t, to_zval_read_pid_t},
+		{"uid", sizeof("uid"), true, offsetof(struct sockcred2, sc_euid), from_zval_write_uid_t, to_zval_read_uid_t},
 		/* the type gid_t is the same as uid_t: */
-		{"gid", sizeof("gid"), 1, offsetof(struct sockcred2, sc_egid), from_zval_write_uid_t, to_zval_read_uid_t},
+		{"gid", sizeof("gid"), true, offsetof(struct sockcred2, sc_egid), from_zval_write_uid_t, to_zval_read_uid_t},
 #elif defined(LOCAL_CREDS)
-		{"pid", sizeof("pid"), 1, offsetof(struct sockcred, sc_pid), from_zval_write_pid_t, to_zval_read_pid_t},
-		{"uid", sizeof("uid"), 1, offsetof(struct sockcred, sc_euid), from_zval_write_uid_t, to_zval_read_uid_t},
+		{"pid", sizeof("pid"), true, offsetof(struct sockcred, sc_pid), from_zval_write_pid_t, to_zval_read_pid_t},
+		{"uid", sizeof("uid"), true, offsetof(struct sockcred, sc_euid), from_zval_write_uid_t, to_zval_read_uid_t},
 		/* the type gid_t is the same as uid_t: */
-		{"gid", sizeof("gid"), 1, offsetof(struct sockcred, sc_egid), from_zval_write_uid_t, to_zval_read_uid_t},
+		{"gid", sizeof("gid"), true, offsetof(struct sockcred, sc_egid), from_zval_write_uid_t, to_zval_read_uid_t},
 #elif defined(HAVE_STRUCT_CMSGCRED)
-		{"pid", sizeof("pid"), 1, offsetof(struct cmsgcred, cmcred_pid), from_zval_write_pid_t, to_zval_read_pid_t},
-		{"uid", sizeof("uid"), 1, offsetof(struct cmsgcred, cmcred_uid), from_zval_write_uid_t, to_zval_read_uid_t},
+		{"pid", sizeof("pid"), true, offsetof(struct cmsgcred, cmcred_pid), from_zval_write_pid_t, to_zval_read_pid_t},
+		{"uid", sizeof("uid"), true, offsetof(struct cmsgcred, cmcred_uid), from_zval_write_uid_t, to_zval_read_uid_t},
 		/* assume the type gid_t is the same as uid_t: */
-		{"gid", sizeof("gid"), 1, offsetof(struct cmsgcred, cmcred_gid), from_zval_write_uid_t, to_zval_read_uid_t},
+		{"gid", sizeof("gid"), true, offsetof(struct cmsgcred, cmcred_gid), from_zval_write_uid_t, to_zval_read_uid_t},
 #elif defined(SO_PASSCRED)
-		{"pid", sizeof("pid"), 1, offsetof(struct ucred, pid), from_zval_write_pid_t, to_zval_read_pid_t},
-		{"uid", sizeof("uid"), 1, offsetof(struct ucred, uid), from_zval_write_uid_t, to_zval_read_uid_t},
+		{"pid", sizeof("pid"), true, offsetof(struct ucred, pid), from_zval_write_pid_t, to_zval_read_pid_t},
+		{"uid", sizeof("uid"), true, offsetof(struct ucred, uid), from_zval_write_uid_t, to_zval_read_uid_t},
 		/* assume the type gid_t is the same as uid_t: */
-		{"gid", sizeof("gid"), 1, offsetof(struct ucred, gid), from_zval_write_uid_t, to_zval_read_uid_t},
+		{"gid", sizeof("gid"), true, offsetof(struct ucred, gid), from_zval_write_uid_t, to_zval_read_uid_t},
 #endif
 		{0}
 };
@@ -1359,7 +1372,7 @@ void to_zval_read_ucred(const char *data, zval *zv, res_context *ctx)
 #ifdef SCM_RIGHTS
 size_t calculate_scm_rights_space(const zval *arr, ser_context *ctx)
 {
-	int num_elems;
+	uint32_t num_elems;
 
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
 		do_from_zval_err(ctx, "%s", "expected an array here");
@@ -1372,7 +1385,7 @@ size_t calculate_scm_rights_space(const zval *arr, ser_context *ctx)
 		return (size_t)-1;
 	}
 
-	return zend_hash_num_elements(Z_ARRVAL_P(arr)) * sizeof(int);
+	return num_elems * sizeof(int);
 }
 static void from_zval_write_fd_array_aux(zval *elem, unsigned i, void **args, ser_context *ctx)
 {
@@ -1418,7 +1431,7 @@ void from_zval_write_fd_array(const zval *arr, char *int_arr, ser_context *ctx)
 void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 {
 	size_t			*cmsg_len;
-	int				num_elems,
+	uint32_t				num_elems,
 					i;
 	struct cmsghdr	*dummy_cmsg = 0;
 	size_t			data_offset;

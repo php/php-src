@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                        |
    +----------------------------------------------------------------------+
@@ -76,10 +74,17 @@ PHPAPI bool php_header(void)
 	}
 }
 
+PHPAPI bool php_is_valid_samesite_value(zend_string *value)
+{
+	return zend_string_equals_literal_ci(value, "Strict")
+		|| zend_string_equals_literal_ci(value, "Lax")
+		|| zend_string_equals_literal_ci(value, "None");
+}
+
 #define ILLEGAL_COOKIE_CHARACTER "\",\", \";\", \" \", \"\\t\", \"\\r\", \"\\n\", \"\\013\", or \"\\014\""
 PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t expires,
 	zend_string *path, zend_string *domain, bool secure, bool httponly,
-	zend_string *samesite, bool url_encode)
+	zend_string *samesite, bool partitioned, bool url_encode)
 {
 	zend_string *dt;
 	sapi_header_line ctr = {0};
@@ -117,8 +122,17 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 		return FAILURE;
 	}
 #endif
+	if (partitioned && !secure) {
+		zend_value_error("%s(): \"partitioned\" option cannot be used without \"secure\" option",
+			get_active_function_name());
+		return FAILURE;
+	}
 
-	/* Should check value of SameSite? */
+	if (samesite && ZSTR_LEN(samesite) > 0 && !php_is_valid_samesite_value(samesite)) {
+		zend_value_error("%s(): \"samesite\" option must be \"Strict\", \"Lax\", \"None\", or \"\"",
+			get_active_function_name());
+		return FAILURE;
+	}
 
 	if (value == NULL || ZSTR_LEN(value) == 0) {
 		/*
@@ -126,13 +140,9 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 		 * so in order to force cookies to be deleted, even on MSIE, we
 		 * pick an expiry date in the past
 		 */
-		dt = php_format_date("D, d M Y H:i:s \\G\\M\\T", sizeof("D, d M Y H:i:s \\G\\M\\T")-1, 1, 0);
 		smart_str_appends(&buf, "Set-Cookie: ");
 		smart_str_append(&buf, name);
-		smart_str_appends(&buf, "=deleted; expires=");
-		smart_str_append(&buf, dt);
-		smart_str_appends(&buf, "; Max-Age=0");
-		zend_string_free(dt);
+		smart_str_appends(&buf, "=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0");
 	} else {
 		smart_str_appends(&buf, "Set-Cookie: ");
 		smart_str_append(&buf, name);
@@ -182,6 +192,9 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 		smart_str_appends(&buf, COOKIE_SAMESITE);
 		smart_str_append(&buf, samesite);
 	}
+	if (partitioned) {
+		smart_str_appends(&buf, COOKIE_PARTITIONED);
+	}
 
 	ctr.line = ZSTR_VAL(buf.s);
 	ctr.line_len = (uint32_t) ZSTR_LEN(buf.s);
@@ -192,7 +205,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 }
 
 static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_long *expires, zend_string **path,
-		zend_string **domain, bool *secure, bool *httponly, zend_string **samesite)
+		zend_string **domain, bool *secure, bool *httponly, zend_string **samesite, bool *partitioned)
 {
 	zend_string *key;
 	zval *value;
@@ -209,11 +222,13 @@ static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_
 		} else if (zend_string_equals_literal_ci(key, "domain")) {
 			*domain = zval_get_string(value);
 		} else if (zend_string_equals_literal_ci(key, "secure")) {
-			*secure = zval_is_true(value);
+			*secure = zend_is_true(value);
 		} else if (zend_string_equals_literal_ci(key, "httponly")) {
-			*httponly = zval_is_true(value);
+			*httponly = zend_is_true(value);
 		} else if (zend_string_equals_literal_ci(key, "samesite")) {
 			*samesite = zval_get_string(value);
+		} else if (zend_string_equals_literal_ci(key, "partitioned")) {
+			*partitioned = zend_is_true(value);
 		} else {
 			zend_value_error("%s(): option \"%s\" is invalid", get_active_function_name(), ZSTR_VAL(key));
 			return FAILURE;
@@ -227,7 +242,7 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 	HashTable *options = NULL;
 	zend_long expires = 0;
 	zend_string *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
-	bool secure = 0, httponly = 0;
+	bool secure = 0, httponly = 0, partitioned = false;
 
 	ZEND_PARSE_PARAMETERS_START(1, 7)
 		Z_PARAM_STR(name)
@@ -248,17 +263,13 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 		}
 
 		if (FAILURE == php_head_parse_cookie_options_array(options, &expires, &path,
-			&domain, &secure, &httponly, &samesite)
+			&domain, &secure, &httponly, &samesite, &partitioned)
 		) {
 			goto cleanup;
 		}
 	}
 
-	if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, !is_raw) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETVAL_BOOL(php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, partitioned, !is_raw) == SUCCESS);
 
 	if (options) {
 cleanup:
@@ -322,11 +333,7 @@ PHP_FUNCTION(headers_sent)
 		break;
 	}
 
-	if (SG(headers_sent)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(SG(headers_sent));
 }
 /* }}} */
 
@@ -375,6 +382,14 @@ PHP_FUNCTION(http_response_code)
 			}
 			RETURN_FALSE;
 		}
+
+		if (SG(sapi_headers).http_status_line) {
+			php_error_docref(NULL, E_WARNING, "Calling http_response_code() after header('HTTP/...') has no effect");
+			// If it is decided that this should have effect in the future, replace warning with
+			// efree(SG(sapi_headers).http_status_line);
+			// SG(sapi_headers).http_status_line = NULL;
+		}
+
 		zend_long old_response_code;
 
 		old_response_code = SG(sapi_headers).http_response_code;

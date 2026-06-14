@@ -28,5 +28,5 @@ try {
 ?>
 --EXPECT--
 int(42)
-Property Test::$prop is write-only
-Property Test::$prop is write-only
+Cannot read from set-only virtual property Test::$prop
+Cannot read from set-only virtual property Test::$prop

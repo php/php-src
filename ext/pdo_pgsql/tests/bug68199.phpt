@@ -1,7 +1,6 @@
 --TEST--
 Bug #68199 (PDO::pgsqlGetNotify doesn't support NOTIFY payloads)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php
@@ -81,26 +80,41 @@ var_dump($notify[2]);
 var_dump($db->pgsqlGetNotify());
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method PDO::pgsqlGetPid() is deprecated since 8.5, use Pdo\Pgsql::getPid() instead in %s on line %d
 bool(true)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 bool(false)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 bool(false)
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 int(3)
 string(16) "channel_bug68199"
 bool(true)
 string(7) "payload"
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 int(3)
 string(16) "channel_bug68199"
 bool(true)
 string(7) "payload"
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 int(3)
 string(16) "channel_bug68199"
 bool(true)
 string(7) "payload"
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 int(3)
 string(16) "channel_bug68199"
 bool(true)
 string(7) "payload"
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 int(6)
 string(16) "channel_bug68199"
 bool(true)
@@ -108,4 +122,6 @@ string(7) "payload"
 string(16) "channel_bug68199"
 bool(true)
 string(7) "payload"
+
+Deprecated: Method PDO::pgsqlGetNotify() is deprecated since 8.5, use Pdo\Pgsql::getNotify() instead in %s on line %d
 bool(false)

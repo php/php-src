@@ -1,16 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
-  +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
 */
 
@@ -300,26 +296,45 @@ static void (*zend_test_prev_execute_internal)(zend_execute_data *execute_data, 
 static void zend_test_execute_internal(zend_execute_data *execute_data, zval *return_value) {
 	zend_function *fbc = execute_data->func;
 
+	ZEND_ASSERT(!ZEND_USER_CODE(fbc->type));
+
 	if (fbc->common.function_name) {
 		if (fbc->common.scope) {
 			php_printf("%*s<!-- internal enter %s::%s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 		} else {
 			php_printf("%*s<!-- internal enter %s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name));
 		}
-	} else if (ZEND_USER_CODE(fbc->type)) {
-		php_printf("%*s<!-- internal enter '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->op_array.filename));
 	}
+
+	ZT_G(observer_nesting_depth)++;
 
 	if (zend_test_prev_execute_internal) {
 		zend_test_prev_execute_internal(execute_data, return_value);
 	} else {
 		fbc->internal_function.handler(execute_data, return_value);
 	}
+
+	ZT_G(observer_nesting_depth)--;
+
+	if (fbc->common.function_name) {
+		if (EG(exception)) {
+			php_printf("%*s<!-- Exception: %s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(EG(exception)->ce->name));
+		}
+
+		smart_str retval_info = {0};
+		get_retval_info(return_value, &retval_info);
+		if (fbc->common.scope) {
+			php_printf("%*s<!-- internal leave %s::%s()%s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name), retval_info.s ? ZSTR_VAL(retval_info.s) : "");
+		} else {
+			php_printf("%*s<!-- internal leave %s()%s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name), retval_info.s ? ZSTR_VAL(retval_info.s) : "");
+		}
+		smart_str_free(&retval_info);
+	}
 }
 
 static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 {
-	zend_array **p = (zend_array **) ZEND_INI_GET_ADDR();
+	zend_array **p = ZEND_INI_GET_ADDR();
 	zend_string *funcname;
 	zend_function *func;
 	if (!ZT_G(observer_enabled)) {
@@ -327,7 +342,8 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 	}
 	if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_ACTIVATE && stage != PHP_INI_STAGE_DEACTIVATE && stage != PHP_INI_STAGE_SHUTDOWN) {
 		ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
-			if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
+			if ((func = zend_hash_find_ptr(EG(function_table), funcname))
+					&& RUN_TIME_CACHE(&func->common)) {
 				void *old_handler;
 				zend_observer_remove_begin_handler(func, observer_begin, (zend_observer_fcall_begin_handler *)&old_handler);
 				zend_observer_remove_end_handler(func, observer_end, (zend_observer_fcall_end_handler *)&old_handler);
@@ -350,7 +366,11 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 		zend_string_release(str);
 		if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_ACTIVATE && stage != PHP_INI_STAGE_DEACTIVATE && stage != PHP_INI_STAGE_SHUTDOWN) {
 			ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
-				if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
+				if ((func = zend_hash_find_ptr(EG(function_table), funcname))
+						&& RUN_TIME_CACHE(&func->common) && *ZEND_OBSERVER_DATA(func)) {
+					void *old_handler;
+					zend_observer_remove_begin_handler(func, observer_begin, (zend_observer_fcall_begin_handler *)&old_handler);
+					zend_observer_remove_end_handler(func, observer_end, (zend_observer_fcall_end_handler *)&old_handler);
 					zend_observer_add_begin_handler(func, observer_begin);
 					zend_observer_add_end_handler(func, observer_end);
 				}

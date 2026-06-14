@@ -644,6 +644,11 @@ const T_BOOL_CAST = UNKNOWN;
 const T_UNSET_CAST = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_VOID_CAST
+ */
+const T_VOID_CAST = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_OBJECT_OPERATOR
  */
 const T_OBJECT_OPERATOR = UNKNOWN;
@@ -737,6 +742,11 @@ const T_POW = UNKNOWN;
  * @cvalue T_POW_EQUAL
  */
 const T_POW_EQUAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_PIPE
+ */
+const T_PIPE = UNKNOWN;
 /**
  * @var int
  * @cvalue T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
@@ -127,7 +125,6 @@ static HRESULT dotnet_bind_runtime(LPVOID FAR *ppv)
 	typedef HRESULT (STDAPICALLTYPE *cbtr_t)(LPCWSTR pwszVersion, LPCWSTR pwszBuildFlavor, REFCLSID rclsid, REFIID riid, LPVOID FAR *ppv);
 	cbtr_t CorBindToRuntime;
 	OLECHAR *oleversion;
-	char *version;
 
 	mscoree = LoadLibraryA("mscoree.dll");
 	if (mscoree == NULL) {
@@ -140,11 +137,11 @@ static HRESULT dotnet_bind_runtime(LPVOID FAR *ppv)
 		return S_FALSE;
 	}
 
-	version = INI_STR("com.dotnet_version");
-	if (version == NULL || *version == '\0') {
+	const zend_string *version = zend_ini_str_literal("com.dotnet_version");
+	if (version == NULL || ZSTR_LEN(version) == 0) {
 		oleversion = NULL;
 	} else {
-		oleversion = php_com_string_to_olestring(version, strlen(version), COMG(code_page));
+		oleversion = php_com_string_to_olestring(ZSTR_VAL(version), ZSTR_LEN(version), COMG(code_page));
 	}
 
 	hr = CorBindToRuntime(oleversion, NULL, &CLSID_CorRuntimeHost, &IID_ICorRuntimeHost, ppv);
@@ -303,7 +300,7 @@ PHP_METHOD(dotnet, __construct)
 		IObjectHandle *handle = NULL;
 
 		where = "QI: IObjectHandle";
-		hr = IUnknown_QueryInterface(unk, &IID_IObjectHandle, &handle);
+		hr = IUnknown_QueryInterface(unk, &IID_IObjectHandle, (void**) &handle);
 
 		if (SUCCEEDED(hr)) {
 			where = "IObjectHandle_Unwrap";
@@ -312,7 +309,7 @@ PHP_METHOD(dotnet, __construct)
 
 				if (V_VT(&unwrapped) == VT_UNKNOWN) {
 					where = "Unwrapped, QI for IDispatch";
-					hr = IUnknown_QueryInterface(V_UNKNOWN(&unwrapped), &IID_IDispatch, &V_DISPATCH(&obj->v));
+					hr = IUnknown_QueryInterface(V_UNKNOWN(&unwrapped), &IID_IDispatch, (void **) &V_DISPATCH(&obj->v));
 
 					if (SUCCEEDED(hr)) {
 						V_VT(&obj->v) = VT_DISPATCH;

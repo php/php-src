@@ -4,12 +4,6 @@ spoofchecker with restriction level
 intl
 --SKIPIF--
 <?php if(!class_exists("Spoofchecker")) print 'skip'; ?>
-<?php
-    $r = new ReflectionClass("SpoofChecker");
-    if (false === $r->getConstant("SINGLE_SCRIPT_RESTRICTIVE")) {
-        die("skip for ICU version < 53");
-    }
-?>
 --FILE--
 <?php
 

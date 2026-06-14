@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: funcs.c,v 1.140 2023/05/21 17:08:34 christos Exp $")
+FILE_RCSID("@(#)$File: funcs.c,v 1.142 2023/07/30 14:41:14 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -662,13 +662,13 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	size_t rep_cnt = 0;
 
 	opts |= PCRE2_MULTILINE;
-	pattern = convert_libmagic_pattern((char*)pat, strlen(pat), opts);
-	if ((pce = pcre_get_compiled_regex_cache_ex(pattern, 0)) == NULL) {
-		zend_string_release(pattern);
+	pattern = convert_libmagic_pattern(pat, strlen(pat), opts);
+	pce = pcre_get_compiled_regex_cache_ex(pattern, 0);
+	zend_string_release_ex(pattern, 0);
+	if (pce == NULL) {
 		rep_cnt = -1;
 		goto out;
 	}
-	zend_string_release(pattern);
 
 	repl = zend_string_init(rep, strlen(rep), 0);
 	res = php_pcre_replace_impl(pce, NULL, ms->o.buf, strlen(ms->o.buf), repl, -1, &rep_cnt);

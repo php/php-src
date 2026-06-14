@@ -60,7 +60,13 @@ var_dump("MYSQLI_OPT_LOCAL_INFILE", mysqli_options($link, MYSQLI_OPT_LOCAL_INFIL
 var_dump("MYSQLI_INIT_COMMAND", mysqli_options($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT=0'));
 
 /* mysqli_real_connect() */
-var_dump("MYSQLI_CLIENT_SSL", mysqli_options($link, MYSQLI_CLIENT_SSL, 'not a mysqli_option'));
+var_dump("MYSQLI_CLIENT_SSL");
+
+try {
+    var_dump(mysqli_options($link, MYSQLI_CLIENT_SSL, 'not a mysqli_option'));
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 mysqli_close($link);
 
@@ -80,9 +86,6 @@ try {
 } catch (mysqli_sql_exception $e) {
     echo $e->getMessage() . "\n";
 }
-
-// invalid options do not generate errors
-mysqli_options($link, -1, "Invalid option");
 
 print "done!";
 ?>
@@ -110,7 +113,7 @@ bool(true)
 %s(19) "MYSQLI_INIT_COMMAND"
 bool(true)
 %s(17) "MYSQLI_CLIENT_SSL"
-bool(false)
+mysqli_options(): Argument #%d ($option) must be MYSQLI_INIT_COMMAND, MYSQLI_SET_CHARSET_NAME, MYSQLI_SERVER_PUBLIC_KEY, or one of the MYSQLI_OPT_* constants
 Link closed
 mysqli object is already closed
 Unknown character set

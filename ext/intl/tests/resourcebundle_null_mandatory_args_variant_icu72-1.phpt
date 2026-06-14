@@ -8,7 +8,6 @@ intl
 <?php if (version_compare(INTL_ICU_VERSION, '72.1') < 0) die('skip for ICU >= 72.1'); ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $r = new ResourceBundle('en_US', NULL);
 $c = $r->get('calendar')->get('gregorian')->get('DateTimePatterns')->get(0);

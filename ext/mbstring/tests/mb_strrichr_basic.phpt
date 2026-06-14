@@ -2,11 +2,11 @@
 Test mb_strrichr() function : basic functionality
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
 echo "*** Testing mb_strrichr() : basic functionality ***\n";
-
-mb_internal_encoding('UTF-8');
 
 $string_ascii = 'abcdef';
 $needle_ascii_upper = "BCD";

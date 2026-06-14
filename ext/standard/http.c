@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Sara Golemon <pollita@php.net>                              |
    +----------------------------------------------------------------------+
@@ -37,14 +35,7 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 		smart_str_append(form_str, key_prefix);
 	}
 	if (index_string) {
-		zend_string *encoded_key;
-		if (encoding_type == PHP_QUERY_RFC3986) {
-			encoded_key = php_raw_url_encode(index_string, index_string_len);
-		} else {
-			encoded_key = php_url_encode(index_string, index_string_len);
-		}
-		smart_str_append(form_str, encoded_key);
-		zend_string_free(encoded_key);
+		php_url_encode_to_smart_str(form_str, index_string, index_string_len, encoding_type == PHP_QUERY_RFC3986);
 	} else {
 		/* Numeric key */
 		if (num_prefix) {
@@ -59,31 +50,16 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 
 try_again:
 	switch (Z_TYPE_P(scalar)) {
-		case IS_STRING: {
-			zend_string *encoded_data;
-			if (encoding_type == PHP_QUERY_RFC3986) {
-				encoded_data = php_raw_url_encode(Z_STRVAL_P(scalar), Z_STRLEN_P(scalar));
-			} else {
-				encoded_data = php_url_encode(Z_STRVAL_P(scalar), Z_STRLEN_P(scalar));
-			}
-			smart_str_append(form_str, encoded_data);
-			zend_string_free(encoded_data);
+		case IS_STRING:
+			php_url_encode_to_smart_str(form_str, Z_STRVAL_P(scalar), Z_STRLEN_P(scalar), encoding_type == PHP_QUERY_RFC3986);
 			break;
-		}
 		case IS_LONG:
 			smart_str_append_long(form_str, Z_LVAL_P(scalar));
 			break;
 		case IS_DOUBLE: {
-			zend_string *encoded_data;
 			zend_string *tmp = zend_double_to_str(Z_DVAL_P(scalar));
-			if (encoding_type == PHP_QUERY_RFC3986) {
-				encoded_data = php_raw_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-			} else {
-				encoded_data = php_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-			}
-			smart_str_append(form_str, encoded_data);
+			php_url_encode_to_smart_str(form_str, ZSTR_VAL(tmp), ZSTR_LEN(tmp), encoding_type == PHP_QUERY_RFC3986);
 			zend_string_free(tmp);
-			zend_string_free(encoded_data);
 			break;
 		}
 		case IS_FALSE:
@@ -101,7 +77,7 @@ try_again:
 			scalar = zend_enum_fetch_case_value(Z_OBJ_P(scalar));
 			goto try_again;
 		/* All possible types are either handled here or previously */
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -139,21 +115,21 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 
 	if (!arg_sep) {
-		arg_sep = zend_ini_str("arg_separator.output", strlen("arg_separator.output"), false);
+		arg_sep = PG(arg_separator).output;
 		if (ZSTR_LEN(arg_sep) == 0) {
 			arg_sep = ZSTR_CHAR('&');
 		}
 	}
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, idx, key, zdata) {
-		bool is_dynamic = 1;
+		bool is_dynamic = true;
 		if (Z_TYPE_P(zdata) == IS_INDIRECT) {
 			zdata = Z_INDIRECT_P(zdata);
 			if (Z_ISUNDEF_P(zdata)) {
 				continue;
 			}
 
-			is_dynamic = 0;
+			is_dynamic = false;
 		}
 
 		/* handling for private & protected object properties */
@@ -196,7 +172,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				} else {
 					new_prefix = zend_string_concat2(ZSTR_VAL(encoded_key), ZSTR_LEN(encoded_key), "%5B", strlen("%5B"));
 				}
-				zend_string_release_ex(encoded_key, false);
+				zend_string_efree(encoded_key);
 			} else { /* is integer index */
 				char *index_int_as_str;
 				size_t index_int_as_str_len;
@@ -225,7 +201,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			GC_TRY_PROTECT_RECURSION(ht);
 			php_url_encode_hash_ex(HASH_OF(zdata), formstr, NULL, 0, new_prefix, (Z_TYPE_P(zdata) == IS_OBJECT ? zdata : NULL), arg_sep, enc_type);
 			GC_TRY_UNPROTECT_RECURSION(ht);
-			zend_string_release_ex(new_prefix, false);
+			zend_string_efree(new_prefix);
 		} else if (Z_TYPE_P(zdata) == IS_NULL || Z_TYPE_P(zdata) == IS_RESOURCE) {
 			/* Skip these types */
 			continue;
@@ -396,9 +372,7 @@ exit:
 
 PHP_FUNCTION(http_get_last_response_headers)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!Z_ISUNDEF(BG(last_http_headers))) {
 		RETURN_COPY(&BG(last_http_headers));
@@ -409,9 +383,7 @@ PHP_FUNCTION(http_get_last_response_headers)
 
 PHP_FUNCTION(http_clear_last_response_headers)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zval_ptr_dtor(&BG(last_http_headers));
 	ZVAL_UNDEF(&BG(last_http_headers));

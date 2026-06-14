@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
@@ -50,8 +48,6 @@ PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 	obj = emalloc(sizeof(*obj));
 	memset(obj, 0, sizeof(*obj));
 	obj->code_page = codepage;
-	obj->ce = php_com_variant_class_entry;
-	obj->zo.ce = php_com_variant_class_entry;
 
 	VariantInit(&obj->v);
 	V_VT(&obj->v) = VT_DISPATCH;
@@ -72,12 +68,10 @@ PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 	obj = emalloc(sizeof(*obj));
 	memset(obj, 0, sizeof(*obj));
 	obj->code_page = codepage;
-	obj->ce = php_com_variant_class_entry;
-	obj->zo.ce = php_com_variant_class_entry;
 
 	VariantInit(&obj->v);
 	VariantCopyInd(&obj->v, v);
-	obj->modified = 0;
+	obj->modified = false;
 
 	if ((V_VT(&obj->v) == VT_DISPATCH) && (V_DISPATCH(&obj->v) != NULL)) {
 		IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &obj->typeinfo);

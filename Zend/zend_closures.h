@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Seiler <chris_se@gmx.net>                         |
    |          Dmitry Stogov <dmitry@php.net>                              |
@@ -31,7 +30,7 @@ BEGIN_EXTERN_C()
 void zend_register_closure_ce(void);
 void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var);
 void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val);
-void zend_closure_from_frame(zval *closure_zv, zend_execute_data *frame);
+void zend_closure_from_frame(zval *closure_zv, const zend_execute_data *frame);
 
 extern ZEND_API zend_class_entry *zend_ce_closure;
 

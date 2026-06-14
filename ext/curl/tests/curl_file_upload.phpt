@@ -61,8 +61,6 @@ curl_setopt($ch, CURLOPT_URL, "{$host}/get.inc?test=post");
 $params = array('file' => '@' . __DIR__ . '/curl_testdata1.txt');
 curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 var_dump(curl_exec($ch));
-
-curl_close($ch);
 ?>
 --EXPECTF--
 string(%d) "curl_testdata1.txt|application/octet-stream|6"

@@ -183,7 +183,7 @@ assert(0 && ($a = function () {
     $x = $a ?? $b;
     [$a, $b, $c] = [1, 2 => 'x', 'z' => 'c'];
     @foo();
-    $y = clone $x;
+    $y = \clone($x);
     yield 1 => 2;
     yield from $x;
 }))
@@ -304,7 +304,7 @@ assert(0 && ($a = function (): ?static {
     $x = "{$a}b";
     $x = "{$a}b";
     $x = " {$foo->bar} {${$foo->bar}} ";
-    $x = " {${---}} ";
+    $x = " {${'---'}} ";
     foo();
     \foo();
     namespace\foo();

@@ -23,4 +23,4 @@ try {
 
 ?>
 --EXPECT--
-ValueError: ldap_modify_batch(): Required option "attrib" is missing
+ValueError: ldap_modify_batch(): Argument #3 ($modifications_info) a modification entry must contain the "attrib" option

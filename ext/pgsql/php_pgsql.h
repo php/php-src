@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Jouni Ahto <jouni.ahto@exdec.fi>                            |
@@ -180,12 +178,12 @@ static const php_stream_ops php_stream_pgsql_fd_ops = {
 ZEND_BEGIN_MODULE_GLOBALS(pgsql)
 	zend_long num_links,num_persistent;
 	zend_long max_links,max_persistent;
-	bool allow_persistent;
-	int ignore_notices;
 	zend_long auto_reset_persistent;
-	int log_notices;
 	zend_object *default_link; /* default link when connection is omitted */
 	zend_string *regexes[PGSQL_MAX_REGEXES];
+	bool allow_persistent;
+	bool ignore_notices;
+	bool log_notices;
 	HashTable field_oids;
 	HashTable table_oids;
 	HashTable connections;

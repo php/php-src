@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Jim Winstead <jimw@php.net>                                 |
    |          Stig Sæther Bakken <ssb@php.net>                            |
@@ -152,7 +150,7 @@ static inline double php_round_helper(double integral, double value, double expo
 
 			return integral;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	// FIXME: GCC bug, branch is considered reachable.
 	ZEND_UNREACHABLE();
@@ -261,7 +259,7 @@ PHP_FUNCTION(abs)
 			}
 		case IS_DOUBLE:
 			RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -280,7 +278,7 @@ PHP_FUNCTION(ceil)
 			RETURN_DOUBLE(zval_get_double(value));
 		case IS_DOUBLE:
 			RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -299,35 +297,33 @@ PHP_FUNCTION(floor)
 			RETURN_DOUBLE(zval_get_double(value));
 		case IS_DOUBLE:
 			RETURN_DOUBLE(floor(Z_DVAL_P(value)));
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
 
-PHPAPI int php_math_round_mode_from_enum(zend_object *mode)
+PHPAPI int php_math_round_mode_from_enum(zend_enum_RoundingMode mode)
 {
-	zval *case_name = zend_enum_fetch_case_name(mode);
-	zend_string *mode_name = Z_STR_P(case_name);
-
-	switch (ZSTR_VAL(mode_name)[0] + ZSTR_VAL(mode_name)[4]) {
-		case 'H' + 'A':
+	switch (mode) {
+		case ZEND_ENUM_RoundingMode_HalfAwayFromZero:
 			return PHP_ROUND_HALF_UP;
-		case 'H' + 'T':
+		case ZEND_ENUM_RoundingMode_HalfTowardsZero:
 			return PHP_ROUND_HALF_DOWN;
-		case 'H' + 'E':
+		case ZEND_ENUM_RoundingMode_HalfEven:
 			return PHP_ROUND_HALF_EVEN;
-		case 'H' + 'O':
+		case ZEND_ENUM_RoundingMode_HalfOdd:
 			return PHP_ROUND_HALF_ODD;
-		case 'T' + 'r':
+		case ZEND_ENUM_RoundingMode_TowardsZero:
 			return PHP_ROUND_TOWARD_ZERO;
-		case 'A' + 'F':
+		case ZEND_ENUM_RoundingMode_AwayFromZero:
 			return PHP_ROUND_AWAY_FROM_ZERO;
-		case 'N' + 't':
+		case ZEND_ENUM_RoundingMode_NegativeInfinity:
 			return PHP_ROUND_FLOOR;
-		case 'P' + 't':
+		case ZEND_ENUM_RoundingMode_PositiveInfinity:
 			return PHP_ROUND_CEILING;
-		EMPTY_SWITCH_DEFAULT_CASE();
 	}
+
+	ZEND_UNREACHABLE();
 }
 
 /* {{{ Returns the number rounded to specified precision */
@@ -355,7 +351,7 @@ PHP_FUNCTION(round)
 	}
 
 	if (mode_object != NULL) {
-		mode = php_math_round_mode_from_enum(mode_object);
+		mode = php_math_round_mode_from_enum(zend_enum_fetch_case_id(mode_object));
 	}
 
 	switch (mode) {
@@ -384,8 +380,64 @@ PHP_FUNCTION(round)
 		case IS_DOUBLE:
 			RETURN_DOUBLE(_php_math_round(zval_get_double(value), (int)places, (int)mode));
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
+}
+/* }}} */
+
+/* Return the given value if in range of min and max */
+static void php_math_clamp(zval *return_value, zval *value, zval *min, zval *max)
+{
+	if (Z_TYPE_P(min) == IS_DOUBLE && UNEXPECTED(zend_isnan(Z_DVAL_P(min)))) {
+		zend_argument_value_error(2, "must not be NAN");
+		RETURN_THROWS();
+	}
+
+	if (Z_TYPE_P(max) == IS_DOUBLE && UNEXPECTED(zend_isnan(Z_DVAL_P(max)))) {
+		zend_argument_value_error(3, "must not be NAN");
+		RETURN_THROWS();
+	}
+
+	if (zend_compare(max, min) == -1) {
+		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)");
+		RETURN_THROWS();
+	}
+
+	if (zend_compare(max, value) == -1) {
+		RETURN_COPY(max);
+	}
+
+	if (zend_compare(value, min) == -1) {
+		RETURN_COPY(min);
+	}
+
+	RETURN_COPY(value);
+}
+
+/* {{{ Return the given value if in range of min and max */
+PHP_FUNCTION(clamp)
+{
+	zval *zvalue, *zmin, *zmax;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_ZVAL(zvalue)
+		Z_PARAM_ZVAL(zmin)
+		Z_PARAM_ZVAL(zmax)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_math_clamp(return_value, zvalue, zmin, zmax);
+}
+/* }}} */
+
+/* {{{ Return the given value if in range of min and max */
+ZEND_FRAMELESS_FUNCTION(clamp, 3)
+{
+	zval *zvalue, *zmin, *zmax;
+	Z_FLF_PARAM_ZVAL(1, zvalue);
+	Z_FLF_PARAM_ZVAL(2, zmin);
+	Z_FLF_PARAM_ZVAL(3, zmax);
+
+	php_math_clamp(return_value, zvalue, zmin, zmax);
 }
 /* }}} */
 
@@ -1365,7 +1417,6 @@ PHP_FUNCTION(number_format)
 	switch (Z_TYPE_P(num)) {
 		case IS_LONG:
 			RETURN_STR(_php_math_number_format_long(Z_LVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
-			break;
 
 		case IS_DOUBLE:
 			// double values of >= 2^52 can not have fractional digits anymore
@@ -1375,7 +1426,6 @@ PHP_FUNCTION(number_format)
 				&& ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(num))
 			)) {
 				RETURN_STR(_php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
-                break;
 			}
 
 			if (dec >= 0) {
@@ -1384,9 +1434,8 @@ PHP_FUNCTION(number_format)
 				dec_int = ZEND_LONG_INT_UDFL(dec) ? INT_MIN : (int)dec;
 			}
 			RETURN_STR(_php_math_number_format_ex(Z_DVAL_P(num), dec_int, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
-			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 /* }}} */

@@ -18,7 +18,9 @@ var_dump($element->parentNode);
 ?>
 --EXPECT--
 Exception: Cannot have more than one element child in a document
-object(Dom\DocumentFragment)#2 (17) {
+object(Dom\DocumentFragment)#2 (18) {
+  ["children"]=>
+  string(22) "(object value omitted)"
   ["firstElementChild"]=>
   string(22) "(object value omitted)"
   ["lastElementChild"]=>

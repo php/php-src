@@ -28,7 +28,7 @@ enum NonBackedEnum
 }
 
 class TestSoapClient extends SoapClient {
-    function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+    function __doRequest($request, $location, $action, $version, $one_way = false, ?string $uriParserClass = null): ?string {
         echo $request;
     }
 }

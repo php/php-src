@@ -1,2413 +1,299 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.23
+?? ??? ????, PHP 8.6.0alpha1
+
+- Core:
+  . Added first-class callable cache to share instances for the duration of the
+    request. (ilutov)
+  . It is now possible to use reference assign on WeakMap without the key
+    needing to be present beforehand. (ndossche)
+  . Added `clamp()`. (kylekatarnls, thinkverse)
+  . Fix OSS-Fuzz #429429090 (Failed assertion on unset() with uninitialized
+    container). (ilutov)
+  . Fixed GH-20564 (Don't call autoloaders with pending exception). (ilutov)
+  . Fix deprecation now showing when accessing null key of an array with JIT.
+    (alexandre-daubois)
+  . Fixed bug GH-20174 (Assertion failure in
+    ReflectionProperty::skipLazyInitialization after failed LazyProxy
+    initialization). (Arnaud)
+  . Enabled the TAILCALL VM on Windows when compiling with Clang >= 19 x86_64.
+    (henderkes)
+  . Deprecate specifying a nullable return type for __debugInfo(). (timwolla)
+  . Fixed bug GH-22142 (Assertion failure in zendi_try_get_long() on IS_UNDEF).
+    (David Carlier)
+  . Fixed bug GH-22046 (The unserialize function can lead to segfault when
+    non-Serializable internal classes are serialized back with the C format).
+    (kocsismate)
+  . Fixed bug GH-22292 (AST pretty printing does not correctly handle
+    invalid variable names). (timwolla)
 
 - BCMath:
-  . Fixed issues with oversized allocations and signed overflow in bcround()
-    and BcMath\Number::round(). (edorian)
+  . Added NUL-byte validation to BCMath functions. (jorgsowa)
 
-- Date:
-  . Fix incorrect recurrence check of DatePeriod::createFromISO8601String().
-    (ndossche)
-
-- DOM:
-  . Fix GH-22219 (Dom\XMLDocument::schemaValidate fails to resolve
-    xs:QName with prefix from imported schema). (David Carlier)
-
-- GD:
-  . Fixed bug GH-22121 (Double free in gdImageSetStyle() after
-    overflow-triggered early return). (iliaal)
-  . Fixed bug GH-19666 (imageconvolution() unexpected nan filter value).
-    (David Carlier)
-  . Fixed bug GH-19739 (imageellipse/imagefilledellipse overflow).
-    (David Carlier)
-  . Fixed bug GH-19730 (imageaffine overflow).
-    (David Carlier)
-
-- Intl:
-  . Fix incorrect argument positions for uninitialized calendar arguments in
-    IntlCalendar::equals(), ::before(), ::after(), and ::isEquivalentTo().
-    (Weilin Du)
-  . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
-    for invalid display types. (Weilin Du)
-  . Fixed Spoofchecker restriction-level APIs to only be exposed with ICU 53
-    and later. (Graham Campbell)
-
-- mysqli:
-  . Fix stmt->query leak in mysqli_execute_query() validation errors.
-    (David Carlier)
-
-- Phar:
-  . Fixed a bypass of the magic ".phar" directory protection in
-    Phar::addEmptyDir() for paths starting with "/.phar", while allowing
-    non-magic directory names that merely share the ".phar" prefix. (Weilin Du)
-
-- Sqlite:
-  . Fix error checks for column retrieval. (ndossche)
-
-- Zlib:
-  . Fixed memory leak if deflate initialization fails and there is a dict.
-    (ndossche)
-  . Fixed memory leak in inflate_add(). (ndossche)
-
-- Zip:
-  . Fixed error-related memory leaks. (ndossche)
-
-04 Jun 2026, PHP 8.4.22
-
-- Date:
-  . Fixed bug GH-18422 (int overflow in php_date_llabs). (iliaal)
-
-- Intl:
-  . Fix incorrect argument positions in out-of-bounds errors for
-    IntlCalendar::set(), IntlCalendar::setDate(), IntlCalendar::setDateTime(),
-    and IntlGregorianCalendar date/time construction. (Weilin Du)
-  . Expose Spoofchecker restriction-level APIs on all supported ICU
-    versions. (Weilin Du)
-  . Fix SpoofChecker::setAllowedChars() and IntlDateFormatter::__construct()
-    to report PHP constant names instead of ICU constant names in
-    user-visible error messages.
-    (Weilin Du)
-
-- MySQLnd:
-  . Fix persistent free of non-persistent connect_attr key (David Carlier).
-
-- Opcache:
-  . Fixed tracing JIT crash when a VM interrupt is handled during an observed
-    user function call. (Levi Morrison)
-  . Fixed bug GH-22004 (Assertion failure at ext/opcache/jit/zend_jit_trace.c).
-    (Arnaud)
-
-- OpenSSL:
-  . Fix compatibility issues with OpenSSL 4.0. (jordikroon, Remi)
-
-- Phar:
-  . Fixed bug GH-21986 (PharData::getContent() crash on infinite recursion
-    with symlinks). (David Carlier)
-
-- SOAP:
-  . Fixed integer overflow when decoding SOAP array indexes. (Weilin Du)
-
-- SPL:
-  . Fix SplFixedArray::setSize leak when destructor grows during clear.
-    (David Carlier)
-  . Fixed bug GH-21933 (use after free of self-freeing MultipleIterator
-    children). (David Carlier)
-
-- Standard:
-  . Fixed bug GH-21689 (version_compare() incorrectly handles versions ending
-    with a dot). (timwolla)
-  . Fixed ip2long() leading zeros handling inconsistency on AIX. (ayappanec)
-
-07 May 2026, PHP 8.4.21
-
-- Core:
-  . Fixed bug GH-19983 (GC assertion failure with fibers, generators and
-    destructors). (iliaal)
-  . Fixed bug GH-21478 (Forward property operations to real instance for
-    initialized lazy proxies). (iliaal)
-  . Fixed bug GH-21605 (Missing addref for Countable::count()). (ilutov)
-  . Fixed bug GH-21699 (Assertion failure in shutdown_executor when resolving
-    self::/parent::/static:: callables if the error handler throws). (macoaure)
-  . Fixed bug GH-21603 (Missing addref for __unset). (ilutov)
-  . Fixed bug GH-21760 (Trait with class constant name conflict against
-    enum case causes SEGV). (Pratik Bhujel)
-
-- CLI:
-  . Fixed bug GH-21754 (`--rf` command line option with a method triggers
-    ext/reflection deprecation warnings). (DanielEScherzer)
-
-- Curl:
-  . Add support for brotli and zstd on Windows. (Shivam Mathur)
-
-- DOM:
-  . Fixed GHSA-4jhr-8w89-j733 and GH-21566 (Dom\XMLDocument::C14N() emits
-    duplicate xmlns declarations after setAttributeNS()). (CVE-2026-7263)
-    (David Carlier)
-  . Fixed bug GH-21688 (segmentation fault on empty HTMLDocument).
-    (David Carlier)
-  . Upgrade to lexbor v2.7.0. (CVE-2026-29078, CVE-2026-29079)
-    (ndossche, ilutov)
-  . Fixed bug GH-21544 (Dom\XMLDocument::C14N*( drops namespace declarations
-    on DOM-built documents). (David Carlier, ndossche)
-
-- FPM:
-  . Fixed GHSA-7qg2-v9fj-4mwv (XSS within status endpoint). (CVE-2026-6735)
-    (Jakub Zelenka)
-
-- Iconv:
-  . Fixed bug GH-17399 (iconv memory leak on bailout). (iliaal)
-
-- MBString:
-  . Fixed GHSA-wm6j-2649-pv75 (Null pointer dereference in
-    php_mb_check_encoding() via mb_ereg_search_init()). (CVE-2026-7259)
-    (vi3tL0u1s)
-  . Fixed GHSA-74r9-qxhc-fx53 (Out-of-bounds access in mbfl_name2encoding_ex()).
-    (CVE-2026-6104) (ilutov)
-
-- Opcache:
-  . Fixed bug GH-21158 (JIT: Assertion jit->ra[var].flags & (1<<0) failed in
-    zend_jit_use_reg). (Arnaud)
-  . Fixed bug GH-21593 (Borked function JIT JMPNZ smart branch). (ilutov)
-  . Fixed bug GH-21460 (COND optimization regression). (Dmitry, Arnaud)
-  . Fixed faulty returns out of zend_try block in zend_jit_trace(). (ilutov)
-
-- OpenSSL:
-  . Fix a bunch of memory leaks and crashes on edge cases. (ndossche)
-
-- PDO_Firebird:
-  . Fixed GHSA-w476-322c-wpvm (SQL injection via NUL bytes in quoted strings).
-    (CVE-2025-14179) (SakiTakamachi)
-
-- Phar:
-  . Restore is_link handler in phar_intercept_functions_shutdown. (iliaal)
-  . Fixed bug GH-21797 (phar: NULL dereference in Phar::webPhar() when
-    SCRIPT_NAME is absent from SAPI environment). (iliaal)
-  . Fix memory leak in Phar::offsetGet(). (iliaal)
-  . Fix memory leak in phar_add_file(). (iliaal)
-  . Fixed bug GH-21799 (phar: propagate phar_stream_flush return value from
-    phar_stream_close). (iliaal)
-  . Fix memory leak in phar_verify_signature() when md_ctx is invalid.
-    (JarneClauw)
-
-- Random:
-  . Fixed bug GH-21731 (Random\Engine\Xoshiro256StarStar::__unserialize()
-    accepts all-zero state). (iliaal)
-
-- Session:
-  . Fixed memory leak when session GC callback return a refcounted value.
-    (jorgsowa)
-
-- SOAP:
-  . Fixed GHSA-85c2-q967-79q5 (Stale SOAP_GLOBAL(ref_map) pointer with Apache
-    Map). (CVE-2026-6722) (ilutov)
-  . Fixed GHSA-m33r-qmcv-p97q (Use-after-free after header parsing failure with
-    SOAP_PERSISTENCE_SESSION). (CVE-2026-7261) (ilutov)
-  . Fixed GHSA-hmxp-6pc4-f3vv (Broken Apache map value NULL check).
-    (CVE-2026-7262) (ilutov)
-
-- SPL:
-  . Fixed bug GH-21499 (RecursiveArrayIterator getChildren UAF after parent
-    free). (Girgias)
-  . Fix concurrent iteration and deletion issues in SplObjectStorage.
-    (ndossche)
-
-- Standard:
-  . Fixed GHSA-96wq-48vp-hh57 (Signed integer overflow of char array offset).
-    (CVE-2026-7568) (TimWolla)
-  . Fixed GHSA-m8rr-4c36-8gq4 (Consistently pass unsigned char to ctype.h
-    functions). (CVE-2026-7258) (ilutov)
-
-- Streams:
-  . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
-    and a proxy set). (ndossche)
-
-- XSL:
-  . Fixed bug GH-21600 (Segfault on module shutdown). (David Carlier)
-
-- Zip:
-  . Fixed bug GH-21698 (memory leak with ZipArchive::addGlob()
-    early return statements). (David Carlier)
-
-09 Apr 2026, PHP 8.4.20
-
-- Bz2:
-  . Fix truncation of total output size causing erroneous errors. (ndossche)
-
-- Core:
-  . Fixed bugs GH-20875, GH-20873, GH-20854 (Propagate IN_GET guard in
-    get_property_ptr_ptr for lazy proxies). (iliaal)
-
-- DOM:
-  . Fixed bug GH-21486 (Dom\HTMLDocument parser mangles xml:space and
-    xml:lang attributes). (ndossche)
-
-- FFI:
-  . Fixed resource leak in FFI::cdef() onsymbol resolution failure.
-    (David Carlier)
-
-- GD:
-  . Fixed bug GH-21431 (phpinfo() to display libJPEG 10.0 support).
-    (David Carlier)
-
-- Opcache:
-  . Fixed bug GH-20838 (JIT compiler produces wrong arithmetic results).
-    (Dmitry, iliaal)
-  . Fixed bug GH-21267 (JIT tracing: infinite loop on FETCH_OBJ_R with
-    IS_UNDEF property in polymorphic context). (Dmitry, iliaal)
-  . Fixed bug GH-21395 (uaf in jit). (ndossche)
-
-- OpenSSL:
-  . Fixed bug GH-21083 (Skip private_key_bits validation for EC/curve-based
-    keys). (iliaal)
-  . Fix missing error propagation for BIO_printf() calls. (ndossche)
-
-- PCRE:
-  . Fixed re-entrancy issue on php_pcre_match_impl, php_pcre_replace_impl,
-    php_pcre_split_impl, and php_pcre_grep_impl. (David Carlier)
-
-- PGSQL:
-  . Fixed preprocessor silently guarding PGSQL_SUPPRESS_TIMESTAMPS support
-    due to a typo. (KentarouTakeda)
-
-- SNMP:
-  . Fixed bug GH-21336 (SNMP::setSecurity() undefined behavior with
-    NULL arguments). (David Carlier)
-
-- SOAP:
-  . Fixed Set-Cookie parsing bug wrong offset while scanning attributes.
-    (David Carlier)
-
-- SPL:
-  . Fixed bug GH-21454 (missing write lock validation in SplHeap).
-    (ndossche)
-
-- Standard:
-  . Fixed bug GH-20906 (Assertion failure when messing up output buffers).
-    (ndossche)
-  . Fixed bug GH-20627 (Cannot identify some avif images with getimagesize).
-    (y-guyon)
-
-- Sysvshm:
-  . Fix memory leak in shm_get_var() when variable is corrupted. (ndossche)
-
-- XSL:
-  . Fix GH-21357 (XSLTProcessor works with DOMDocument, but fails with
-    Dom\XMLDocument). (ndossche)
-  . Fixed bug GH-21496 (UAF in dom_objects_free_storage).
-    (David Carlier/ndossche)
-
-12 Mar 2026, PHP 8.4.19
-
-- Core:
-  . Fixed bug GH-21029 (zend_mm_heap corrupted on Aarch64, LTO builds). (Arnaud)
-  . Fixed bug GH-20657 (Assertion failure in zend_lazy_object_get_info triggered
-    by setRawValueWithoutLazyInitialization() and newLazyGhost()). (Arnaud)
-  . Fixed bug GH-20504 (Assertion failure in zend_get_property_guard when
-    accessing properties on Reflection LazyProxy via isset()). (Arnaud)
-  . Fixed OSS-Fuzz #478009707 (Borked assign-op/inc/dec on untyped hooked
-    property backing value). (ilutov)
-  . Fixed bug GH-21215 (Build fails with -std=). (Arnaud)
-  . Fixed bug GH-13674 (Build system installs libtool wrappers when using
-    slibtool). (Michael Orlitzky)
-
-- Curl:
-  . Fixed bug GH-21023 (CURLOPT_XFERINFOFUNCTION crash with a null callback).
-    (David Carlier)
-  . Don't truncate length. (ndossche)
-
-- Date:
-  . Fixed bug GH-20936 (DatePeriod::__set_state() cannot handle null start).
-    (ndossche)
-  . Fix timezone offset with seconds losing precision. (ndossche)
-
-- DOM:
-  . Fixed bug GH-21077 (Accessing Dom\Node::baseURI can throw TypeError).
-    (ndossche)
-  . Fixed bug GH-21097 (Accessing Dom\Node properties can can throw TypeError).
-    (ndossche)
-
-- MBString:
-  . Fixed bug GH-21223; mb_guess_encoding no longer crashes when passed huge
-    list of candidate encodings (with 200,000+ entries). (Jordi Kroon)
-
-- Opcache:
-  . Fixed bug GH-20718 ("Insufficient shared memory" when using JIT on Solaris).
-    (Petr Sumbera)
-  . Fixed bug GH-21227 (Borked SCCP of array containing partial object).
-    (ilutov)
-  . Fixed bug GH-21052 (Preloaded constant erroneously propagated to file-cached
-    script). (ilutov)
-
-- OpenSSL:
-  . Fix a bunch of leaks and error propagation. (ndossche)
-
-- PCNTL:
-  . Fixed pcntl_setns() internal errors handling regarding errnos.
-    (David Carlier/ndossche)
-  . Fixed cpuset leak in pcntl_setcpuaffinity on out-of-range CPU ID
-    on NetBSD/Solaris platforms. (David Carlier)
-  . Fixed pcntl_signal() signal table registering the callback first
-    OS-wise before the internal list. (David Carlier)
-  . Fixed pcntl_signal_dispatch() stale pointer and exception
-    handling. (David Carlier)
-
-- PCRE:
-  . Fixed preg_match memory leak with invalid regexes. (David Carlier)
-  . Fixed pcre2_code leak when pcre2_pattern_info() fails after a
-    successful pcre2_compile(), and match_sets/match_data/marks leaks
-    in php_pcre_match_impl(). (David Carlier)
-
-- PDO_PGSQL:
-  . Fixed bug GH-21055 (connection attribute status typo for GSS negotiation).
-    (lsaos)
-
-- PGSQL:
-  . Fixed bug GH-21162 (pg_connect() memory leak on error).
-    (David Carlier)
-
-- Sockets:
-  . Fixed bug GH-21161 (socket_set_option() crash with array 'addr'
-    entry as null). (David Carlier)
-  . Fixed possible addr length overflow with socket_connect() and AF_UNIX
-    family sockets. (David Carlier)
-
-- Windows:
-  . Fixed compilation with clang (missing intrin.h include). (Kévin Dunglas)
-
-12 Feb 2026, PHP 8.4.18
-
-- Core:
-  . Fixed bug GH-20837 (NULL dereference when calling ob_start() in shutdown
-    function triggered by bailout in php_output_lock_error()). (timwolla)
-  . Fix OSS-Fuzz #471533782 (Infinite loop in GC destructor fiber). (ilutov)
-  . Fix OSS-Fuzz #472563272 (Borked block_pass JMP[N]Z optimization). (ilutov)
-  . Fixed bug GH-GH-20914 (Internal enums can be cloned and compared). (Arnaud)
-  . Fix OSS-Fuzz #474613951 (Leaked parent property default value). (ilutov)
-  . Fixed bug GH-20766 (Use-after-free in FE_FREE with GC interaction). (Bob)
-  . Fix OSS-Fuzz #471486164 (Broken by-ref assignment to uninitialized hooked
-    backing value). (ilutov)
-  . Fix OSS-Fuzz #438780145 (Nested finally with repeated return type check may
-    uaf). (ilutov)
-  . Fixed bug GH-20905 (Lazy proxy bailing __clone assertion). (ilutov)
-  . Fixed bug GH-20479 (Hooked object properties overflow). (ndossche)
+- BZ2:
+  . Reject oversized input in bzdecompress(). (arshidkv12)
 
 - Date:
   . Update timelib to 2022.16. (Derick)
 
 - DOM:
-  . Fixed GH-21041 (Dom\HTMLDocument corrupts closing tags within scripts).
-    (lexborisov)
-
-- MbString:
-  . Fixed bug GH-20833 (mb_str_pad() divide by zero if padding string is
-    invalid in the encoding). (ndossche)
-  . Fixed bug GH-20836 (Stack overflow in mb_convert_variables with
-    recursive array references). (alexandre-daubois)
-
-- Opcache:
-  . Fixed bug GH-20818 (Segfault in Tracing JIT with object reference).
-    (khasinski)
-
-- OpenSSL:
-  . Fix memory leaks when sk_X509_new_null() fails. (ndossche)
-  . Fix crash when in openssl_x509_parse() when i2s_ASN1_INTEGER() fails.
-    (ndossche)
-  . Fix crash in openssl_x509_parse() when X509_NAME_oneline() fails.
-    (ndossche)
-
-- Phar:
-  . Fixed bug GH-20882 (buildFromIterator breaks with missing base directory).
-    (ndossche)
-
-- PGSQL:
-  . Fixed INSERT/UPDATE queries building with PQescapeIdentifier() and possible
-    UB. (David Carlier)
-
-- Readline:
-  . Fixed bug GH-18139 (Memory leak when overriding some settings
-    via readline_info()). (ndossche)
-
-- SPL:
-  . Fixed bug GH-20856 (heap-use-after-free in SplDoublyLinkedList iterator
-    when modifying during iteration). (ndossche)
-
-- Standard:
-  . Fixed bug #74357 (lchown fails to change ownership of symlink with ZTS)
-    (Jakub Zelenka)
-  . Fixed bug GH-20843 (var_dump() crash with nested objects)
+  . Removed LIBXML_XINCLUDE from valid options for XMLDocument,
+    as it was a no-op. (ndossche)
+  . Readonly DOM properties are now declared with asymmetric visibility
+    (public private(set)). ReflectionProperty::isWritable() reports them
+    correctly, and external writes raise "Cannot modify private(set)
+    property" instead of the previous readonly modification error.
     (David Carlier)
+  . Fixed Dom\Notation nodes missing tree connection, so that
+    ownerDocument, parentNode, isConnected and baseURI now return correct
+    values, and textContent returns NULL per the DOM specification.
+    (jordikroon)
 
-15 Jan 2026, PHP 8.4.17
+- EXIF:
+  . Added support for reading EXIF metadata from WebP images (GH-19904).
+    (iliaal)
 
-- Core:
-  . Fix OSS-Fuzz #465488618 (Wrong assumptions when dumping function signature
-    with dynamic class const lookup default argument). (ilutov)
-  . Fixed bug GH-20695 (Assertion failure in normalize_value() when parsing
-    malformed INI input via parse_ini_string()). (ndossche)
-  . Fixed bug GH-20714 (Uncatchable exception thrown in generator). (ilutov)
-  . Fixed bug GH-20352 (UAF in php_output_handler_free via re-entrant
-    ob_start() during error deactivation). (ndossche)
-
-- Bz2:
-  . Fixed bug GH-20620 (bzcompress overflow on large source size).
-    (David Carlier)
-
-- DOM:
-  . Fixed bug GH-20722 (Null pointer dereference in DOM namespace node cloning
-    via clone on malformed objects). (ndossche)
-  . Fixed bug GH-20444 (Dom\XMLDocument::C14N() seems broken compared
-    to DOMDocument::C14N()). (ndossche)
+- Fileinfo:
+  . Fixed bug GH-20679 (finfo_file() doesn't work on remote resources).
+    (ndossche)
+  . Fixed bug #66095 (Hide libmagic dynamic symbols). (orlitzky)
 
 - GD:
-  . Fixed bug GH-20622 (imagestring/imagestringup overflow). (David Carlier)
+  . imagesetstyle()/imagefilter()/imagecrop() check array argument entries
+    types. (David Carlier)
+
+- GMP:
+  . gmp_fact() reject values larger than unsigned long. (David Carlier)
+  . gmp_pow/binomial/root/rootrem and shift/pow operators reject values
+    larger than unsigned long. (David Carlier)
+  . GMP exponentiation and shift operators now emit a deprecation warning
+    when converting a float right operand to int loses precision. (Weilin Du)
+
+- Hash:
+  . Upgrade xxHash to 0.8.2. (timwolla)
 
 - Intl:
-  . Fix leak in umsg_format_helper(). (ndossche)
+  . Fixed malformed ResourceBundle::get() error message when fallback is
+    disabled. (Weilin Du)
+  . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
+    for invalid display types. (Weilin Du)
+  . Added IntlNumberRangeFormatter class to format an interval of two numbers
+    with a given skeleton, locale, collapse type and identity fallback.
+    (BogdanUngureanu)
+  . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
+    suggests missing constants). (DanielEScherzer)
+  . Added grapheme_strrev (Yuya Hamada)
+  . Passing a non-stringable object as a time zone to Intl time zone
+    argument handling now raises TypeError instead of Error. (Weilin Du)
+  . IntlBreakIterator::getLocale() now raises ValueError for invalid locale
+    types. (Weilin Du)
+  . Fixed MessageFormatter::parse() and parseMessage() returning PHP_INT_MIN
+    as float rather than int on 64-bit platforms. (Weilin Du)
+  . Fixed UConverter::transcode() silently truncating from_subst and to_subst
+    option lengths greater than 127 bytes. (Weilin Du)
 
-- LDAP:
-  . Fix memory leak in ldap_set_options(). (ndossche)
-
-- Mbstring:
-  . Fixed bug GH-20674 (mb_decode_mimeheader does not handle separator).
-    (Yuya Hamada)
-
-- OpenSSL:
-  . Fixed bug GH-20802 (undefined behavior with invalid SNI_server_certs
-    options). (David Carlier)
-
-- PCNTL:
-  . Fixed bug with pcntl_getcpuaffinity() on solaris regarding invalid
-    process ids handling. (David Carlier)
-
-- Phar:
-  . Fixed bug GH-20732 (Phar::LoadPhar undefined behavior when reading fails).
-    (ndossche)
-  . Fix SplFileInfo::openFile() in write mode. (ndossche)
-  . Fix build on legacy OpenSSL 1.1.0 systems. (Giovanni Giacobbi)
-  . Fixed bug #74154 (Phar extractTo creates empty files). (ndossche)
-
-- POSIX:
-  . Fixed crash on posix groups to php array creation on macos.
-    (David Carlier)
-
-- SPL:
-  . Fixed bug GH-20678 (resource created by GlobIterator crashes with fclose()).
-    (David Carlier)
-
-- Sqlite3:
-  . Fixed bug GH-20699 (SQLite3Result fetchArray return array|false,
-    null returned). (ndossche, plusminmax)
-
-- Standard:
-  . Fix error check for proc_open() command. (ndossche)
-  . Fix memory leak in mail() when header key is numeric. (Girgias)
-  . Fixed bug GH-20582 (Heap Buffer Overflow in iptcembed). (ndossche)
-
-- Zlib:
-  . Fix OOB gzseek() causing assertion failure. (ndossche)
-
-18 Dec 2025, PHP 8.4.16
-
-- Core:
-  . Sync all boost.context files with release 1.86.0. (mvorisek)
-  . Fixed bug GH-20435 (SensitiveParameter doesn't work for named argument
-    passing to variadic parameter). (ndossche)
-  . Fixed bug GH-20286 (use-after-destroy during userland stream_close()).
-    (ndossche, David Carlier)
-
-- Bz2:
-  . Fix assertion failures resulting in crashes with stream filter
-    object parameters. (ndossche)
-
-- Date:
-  . Fix crashes when trying to instantiate uninstantiable classes via date
-    static constructors. (ndossche)
-
-- DOM:
-  . Fix memory leak when edge case is hit when registering xpath callback.
-    (ndossche)
-  . Fixed bug GH-20395 (querySelector and querySelectorAll requires elements
-    in $selectors to be lowercase). (ndossche)
-  . Fix missing NUL byte check on C14NFile(). (ndossche)
+- JSON:
+  . Enriched JSON last error / exception message with error location.
+    (Juan Morales)
 
 - Fibers:
   . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
     small value). (David Carlier)
 
-- FTP:
-  . Fixed bug GH-20601 (ftp_connect overflow on timeout). (David Carlier)
+- Mail:
+  . Fixed bug GH-20862 (null pointer dereference in
+    php_mail_detect_multiple_crlf via error_log (jordikroon)
 
-- GD:
-  . Fixed bug GH-20511 (imagegammacorrect out of range input/output values).
-    (David Carlier)
-  . Fixed bug GH-20602 (imagescale overflow with large height values).
-    (David Carlier)
+- Mbstring:
+  . ini_set() with mbstring.detect_order changes the order of mb_detect_order
+    as intended, since mbstring.detect_order is an INI_ALL setting. (tobee94)
+  . Added GB18030-2022 to default encoding list for zh-CN. (HeRaNO)
+  . Fixed bug GH-20836 (Stack overflow in mb_convert_variables with
+    recursive array references). (alexandre-daubois)
+  . Fixed bug GH-21223; mb_guess_encoding no longer crashes when passed huge
+    list of candidate encodings (with 200,000+ entries). (Jordi Kroon)
+  . mbregex has been deprecated. (youkidearitai)
 
-- Intl:
-  . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
-    suggests missing constants). (DanielEScherzer)
-
-- LibXML:
-  . Fix some deprecations on newer libxml versions regarding input
-    buffer/parser handling. (ndossche)
-
-- MbString:
-  . Fixed bug GH-20491 (SLES15 compile error with mbstring oniguruma).
-    (ndossche)
-  . Fixed bug GH-20492 (mbstring compile warning due to non-strings).
-    (ndossche)
-
-- mysqli:
-  . Make mysqli_begin_transaction() report errors properly. (Kamil Tekiela)
-
-- MySQLnd:
-  . Fixed bug GH-20528 (Regression breaks mysql connexion using an IPv6 address
-    enclosed in square brackets). (Remi)
+- Mysqli:
+  . Added mysqli_quote_string() and mysqli::quote_string(). (Kamil Tekiela)
 
 - Opcache:
-  . Fixed bug GH-20329 (opcache.file_cache broken with full interned string
-    buffer). (Arnaud)
+  . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
+    preloading). (Arnaud, welcomycozyhom)
 
-- PDO:
-  . Fixed GHSA-8xr5-qppj-gvwj (PDO quoting result null deref). (CVE-2025-14180)
+- OpenSSL:
+  . Added AES-SIV support. (jordikroon)
+  . Implemented GH-20310 (No critical extension indication in
+    openssl_x509_parse() output). (StephenWall)
+  . Added TLS session resumption support for streams with new context options
+    and Openssl\Session class. (Jakub Zelenka)
+  . Added TLS external PSK support for streams with new context options and
+    Openssl\Psk class. (Jakub Zelenka)
+  . Added stream crypto status for exposing OpenSSL WANT_READ / WANT_WRITE.
     (Jakub Zelenka)
 
+- PCNTL:
+  . pcntl_exec() now throws a ValueError if the $args array is not a list
+    array. (Weilin Du)
+
+- PDO_DBLIB;
+  . Added dblib_handle_check_liveness handler. (freddy77)
+
+- PDO_PGSQL:
+  . Clear session-local state disconnect-equivalent processing.
+    (KentarouTakeda)
+
+- PGSQL:
+  . Enabled 64 bits support for pg_lo_truncate()/pg_lo_tell()
+    if the server supports it. (KentarouTakeda)
+  . pg_fetch_object() now surfaces non-instantiable class errors
+    before fetching, resolves the constructor via the get_constructor
+    handler, and reports the empty-constructor ValueError on the
+    $constructor_args argument. (David Carlier)
+
 - Phar:
-  . Fixed bug GH-20442 (Phar does not respect case-insensitiveness of
-    __halt_compiler() when reading stub). (ndossche, TimWolla)
-  . Fix broken return value of fflush() for phar file entries. (ndossche)
-  . Fix assertion failure when fseeking a phar file out of bounds. (ndossche)
-
-- PHPDBG:
-  . Fixed ZPP type violation in phpdbg_get_executable() and phpdbg_end_oplog().
-    (Girgias)
-
-- SPL:
-  . Fixed bug GH-20614 (SplFixedArray incorrectly handles references
-    in deserialization). (ndossche)
-
-- Standard:
-  . Fix memory leak in array_diff() with custom type checks. (ndossche)
-  . Fixed bug GH-20583 (Stack overflow in http_build_query
-    via deep structures). (ndossche)
-  . Fixed GHSA-www2-q4fc-65wf (Null byte termination in dns_get_record()).
+  . Support reference values in Phar::mungServer(). (ndossche)
+  . Invalid values now throw in Phar::mungServer() instead of being silently
+    ignored. (ndossche)
+  . Fixed a bypass of the magic ".phar" directory protection in
+    Phar::addEmptyDir() for paths starting with "/.phar". (Weilin Du)
+  . Phar::addEmptyDir() now allows non-magic directory names that merely
+    share the ".phar" prefix. (Weilin Du)
+  . Support overridden methods in SplFileInfo for getMTime() and getPathname()
+    when building a phar. (ndossche)
+  . Mark Phar::buildFromIterator() base directory argument as a path.
     (ndossche)
-  . Fixed GHSA-h96m-rvf9-jgm2 (Heap buffer overflow in array_merge()).
-    (CVE-2025-14178) (ndossche)
-  . Fixed GHSA-3237-qqm7-mfv7 (Information Leak of Memory in getimagesize).
-    (CVE-2025-14177) (ndossche)
 
-- Streams:
-  . Fixed bug GH-20370 (User stream filters could violate typed property
-    constraints). (alexandre-daubois)
-
-- Tidy:
-  . Fixed bug GH-20374 (PHP with tidy and custom-tags). (ndossche)
-
-- XML:
-  . Fixed bug GH-20439 (xml_set_default_handler() does not properly handle
-    special characters in attributes when passing data to callback). (ndossche)
-
-- Zip:
-  . Fix crash in property existence test. (ndossche)
-  . Don't truncate return value of zip_fread() with user sizes. (ndossche)
-
-- Zlib:
-  . Fix assertion failures resulting in crashes with stream filter
-    object parameters. (ndossche)
-
-20 Nov 2025, PHP 8.4.15
-
-- Core:
-  . Fixed bug GH-19934 (CGI with auto_globals_jit=0 causes uouv). (ilutov)
-  . Fixed bug GH-20073 (Assertion failure in WeakMap offset operations on
-    reference). (nielsdos)
-  . Fixed bug GH-20085 (Assertion failure when combining lazy object
-    get_properties exception with foreach loop). (nielsdos)
-  . Fixed bug GH-19844 (Don't bail when closing resources on shutdown). (ilutov)
-  . Fixed bug GH-20177 (Accessing overridden private property in
-    get_object_vars() triggers assertion error). (ilutov)
-  . Fixed bug GH-20270 (Broken parent hook call with named arguments). (ilutov)
-  . Fixed bug GH-20183 (Stale EG(opline_before_exception) pointer through eval).
-    (ilutov)
-
-- DOM:
-  . Partially fixed bug GH-16317 (DOM classes do not allow
-    __debugInfo() overrides to work). (nielsdos)
-  . Fixed bug GH-20281 (\Dom\Document::getElementById() is inconsistent
-    after nodes are removed). (nielsdos)
-
-- Exif:
-  . Fix possible memory leak when tag is empty. (nielsdos)
-
-- FPM:
-  . Fixed bug GH-19974 (fpm_status_export_to_zval segfault for parallel
-    execution). (Jakub Zelenka, txuna)
-
-- FTP:
-  . Fixed bug GH-20240 (FTP with SSL: ftp_fput(): Connection timed out on
-    successful writes). (nielsdos)
-
-- GD:
-  . Fixed bug GH-20070 (Return type violation in imagefilter when an invalid
-    filter is provided). (Girgias)
-
-- Intl:
-  . Fix memory leak on error in locale_filter_matches(). (nielsdos)
-
-- LibXML:
-  . Fix not thread safe schema/relaxng calls. (SpencerMalone, nielsdos)
-
-- MySQLnd:
-  . Fixed bug GH-8978 (SSL certificate verification fails (port doubled)).
-    (nielsdos)
-  . Fixed bug GH-20122 (getColumnMeta() for JSON-column in MySQL). (nielsdos)
-
-- Opcache:
-  . Fixed bug GH-20081 (access to uninitialized vars in preload_load()).
-    (Arnaud)
-  . Fixed bug GH-20121 (JIT broken in ZTS builds on MacOS 15).
-    (Arnaud, Shivam Mathur)
-  . Fixed bug GH-19875 (JIT 1205 segfault on large file compiled in subprocess).
-    (Arnaud)
-  . Fixed bug GH-20012 (heap buffer overflow in jit). (Arnaud)
-  . Partially fixed bug GH-17733 (Avoid calling wrong function when reusing file
-    caches across differing environments). (ilutov)
-
-- PgSql:
-  . Fix memory leak when first string conversion fails. (nielsdos)
-  . Fix segfaults when attempting to fetch row into a non-instantiable class
-    name. (Girgias, nielsdos)
-
-- Phar:
-  . Fix memory leak of argument in webPhar. (nielsdos)
-  . Fix memory leak when setAlias() fails. (nielsdos)
-  . Fix a bunch of memory leaks in phar_parse_zipfile() error handling.
-    (nielsdos)
-  . Fix file descriptor/memory leak when opening central fp fails. (nielsdos)
-  . Fix memleak+UAF when opening temp stream in buildFromDirectory() fails.
-    (nielsdos)
-  . Fix potential buffer length truncation due to usage of type int instead
-    of type size_t. (Girgias)
-  . Fix memory leak when openssl polyfill returns garbage. (nielsdos)
-  . Fix file descriptor leak in phar_zip_flush() on failure. (nielsdos)
-  . Fix memory leak when opening temp file fails while trying to open
-    gzip-compressed archive. (nielsdos)
-  . Fixed bug GH-20302 (Freeing a phar alias may invalidate
-    PharFileInfo objects). (nielsdos)
-
-- Random:
-  . Fix Randomizer::__serialize() w.r.t. INDIRECTs. (nielsdos)
+- Posix:
+  . Added validity check to the flags argument for posix_access(). (arshidkv12)
 
 - Reflection:
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
-
-- SimpleXML:
-  . Partially fixed bug GH-16317 (SimpleXML does not allow __debugInfo() overrides
-    to work). (nielsdos)
-
-- Streams:
-  . Fixed bug GH-19798: XP_SOCKET XP_SSL (Socket stream modules): Incorrect
-    condition for Win32/Win64. (Jakub Zelenka)
-
-- Tidy:
-  . Fixed GH-19021 (improved tidyOptGetCategory detection).
-    (arjendekorte, David Carlier, Peter Kokot)
-  . Fix UAF in tidy when tidySetErrorBuffer() fails. (nielsdos)
-
-- XMLReader:
-  . Fix arginfo/zpp violations when LIBXML_SCHEMAS_ENABLED is not available.
-    (nielsdos)
-
-- Windows:
-  . Fix GH-19722 (_get_osfhandle asserts in debug mode when given a socket).
-    (dktapps)
-
-09 Oct 2025, PHP 8.4.14
-
-- Core:
-  . Fixed bug GH-19765 (object_properties_load() bypasses readonly property
-    checks). (timwolla)
-  . Fixed hard_timeout with --enable-zend-max-execution-timers. (Appla)
-  . Fixed bug GH-19792 (SCCP causes UAF for return value if both warning and
-    exception are triggered). (nielsdos)
-  . Fixed bug GH-19653 (Closure named argument unpacking between temporary
-    closures can cause a crash). (nielsdos, Arnaud, Bob)
-  . Fixed bug GH-19839 (Incorrect HASH_FLAG_HAS_EMPTY_IND flag on userland
-    array). (ilutov)
-  . Fixed bug GH-19480 (error_log php.ini cannot be unset when open_basedir is
-    configured). (nielsdos)
-  . Fixed bug GH-20002 (Broken build on *BSD with MSAN). (outtersg)
-
-- CLI:
-  . Fix useless "Failed to poll event" error logs due to EAGAIN in CLI server
-    with PHP_CLI_SERVER_WORKERS. (leotaku)
-
-- Curl:
-  . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
-    of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
-  . Fix curl build and test failures with version 8.16.
-    (nielsdos, ilutov, Jakub Zelenka)
-
-- Date:
-  . Fixed GH-17159: "P" format for ::createFromFormat swallows string literals.
-    (nielsdos)
-
-- DOM:
-  . Fix macro name clash on macOS. (Ruoyu Zhong)
-  . Fixed bug GH-20022 (docker-php-ext-install DOM failed). (nielsdos)
-
-- GD:
-  . Fixed GH-19955 (imagefttext() memory leak). (David Carlier)
-
-- MySQLnd:
-  . Fixed bug #67563 (mysqli compiled with mysqlnd does not take ipv6 adress
-    as parameter). (nielsdos)
-
-- Opcache:
-  . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
-    (Arnaud)
-  . Fixed bug GH-19831 (function JIT may not deref property value). (Arnaud)
-  . Fixed bug GH-19889 (race condition in zend_runtime_jit(),
-    zend_jit_hot_func()). (Arnaud)
-
-- Phar:
-  . Fix memory leak and invalid continuation after tar header writing fails.
-    (nielsdos)
-  . Fix memory leaks when creating temp file fails when applying zip signature.
-    (nielsdos)
-
-- SimpleXML:
-  . Fixed bug GH-19988 (zend_string_init with NULL pointer in simplexml (UB)).
-    (nielsdos)
-
-- Soap:
-  . Fixed bug GH-19784 (SoapServer memory leak). (nielsdos)
-  . Fixed bug GH-20011 (Array of SoapVar of unknown type causes crash).
-    (nielsdos)
-
-- Standard:
-  . Fixed bug GH-12265 (Cloning an object breaks serialization recursion).
-    (nielsdos)
-  . Fixed bug GH-19701 (Serialize/deserialize loses some data). (nielsdos)
-  . Fixed bug GH-19801 (leaks in var_dump() and debug_zval_dump()).
-    (alexandre-daubois)
-  . Fixed bug GH-20043 (array_unique assertion failure with RC1 array
-    causing an exception on sort). (nielsdos)
-  . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
-    while COW violation flag is still set). (alexandre-daubois)
-  . Fixed bug GH-19570 (unable to fseek in /dev/zero and /dev/null).
-    (nielsdos, divinity76)
-
-- Streams:
-  . Fixed bug GH-19248 (Use strerror_r instead of strerror in main).
-    (Jakub Zelenka)
-  . Fixed bug GH-17345 (Bug #35916 was not completely fixed). (nielsdos)
-  . Fixed bug GH-19705 (segmentation when attempting to flush on non seekable
-    stream. (bukka/David Carlier)
-
-- XMLReader:
-  . Fixed bug GH-20009 (XMLReader leak on RelaxNG schema failure). (nielsdos)
-
-- Zip:
-  . Fixed bug GH-19688 (Remove pattern overflow in zip addGlob()). (nielsdos)
-  . Fixed bug GH-19932 (Memory leak in zip setEncryptionName()/setEncryptionIndex()).
-    (David Carlier)
-
-25 Sep 2025, PHP 8.4.13
-
-- Core:
-  . Fixed bug GH-18850 (Repeated inclusion of file with __halt_compiler()
-    triggers "Constant already defined" warning). (ilutov)
-  . Partially fixed bug GH-19542 (Scanning of string literals >=2GB will fail
-    due to signed int overflow). (ilutov)
-  . Fixed bug GH-19544 (GC treats ZEND_WEAKREF_TAG_MAP references as WeakMap
-    references). (Arnaud, timwolla)
-  . Fixed bug GH-19613 (Stale array iterator pointer). (ilutov)
-  . Fixed bug GH-19679 (zend_ssa_range_widening may fail to converge). (Arnaud)
-  . Fixed bug GH-19681 (PHP_EXPAND_PATH broken with bash 5.3.0). (Remi)
-  . Fixed bug GH-19720 (Assertion failure when error handler throws when
-    accessing a deprecated constant). (nielsdos)
-
-- CLI:
-  . Fixed bug GH-19461 (Improve error message on listening error with IPv6
-    address). (alexandre-daubois)
-
-- Date:
-  . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
+  . Added ReflectionConstant::inNamespace(). (Khaled Alam)
+  . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
     (ilutov)
-
-- DBA:
-  . Fixed bug GH-19706 (dba stream resource mismanagement). (nielsdos)
-
-- DOM:
-  . Fixed bug GH-19612 (Mitigate libxml2 tree dictionary bug). (nielsdos)
-
-- FPM:
-  . Fixed failed debug assertion when php_admin_value setting fails. (ilutov)
-
-- Intl:
-  . Fixed bug GH-11952 (Fix locale strings canonicalization for IntlDateFormatter
-    and NumberFormatter). (alexandre-daubois)
-
-- Opcache:
-  . Fixed bug GH-19493 (JIT variable not stored before YIELD). (Arnaud)
-
-- OpenSSL:
-  . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
-    (Jakub Zelenka)
-
-- PGSQL:
-  . Fixed bug GH-19485 (potential use after free when using persistent pgsql
-    connections). (Mark Karpeles)
-
-- Phar:
-  . Fixed memory leaks when verifying OpenSSL signature. (Girgias)
-  . Fix memory leak in phar tar temporary file error handling code. (nielsdos)
-  . Fix metadata leak when phar convert logic fails. (nielsdos)
-  . Fix memory leak on failure in phar_convert_to_other(). (nielsdos)
-  . Fixed bug GH-19752 (Phar decompression with invalid extension
-    can cause UAF). (nielsdos)
-
-- Standard:
-  . Fixed bug GH-16649 (UAF during array_splice). (alexandre-daubois)
-  . Fixed bug GH-19577 (Avoid integer overflow when using a small offset
-    and PHP_INT_MAX with LimitIterator). (alexandre-daubois)
-
-- Streams:
-  . Remove incorrect call to zval_ptr_dtor() in user_wrapper_metadata().
-    (nielsdos)
-  . Fix OSS-Fuzz #385993744. (nielsdos)
-
-- Zip:
-  . Fix memory leak in zip when encountering empty glob result. (nielsdos)
-
-28 Aug 2025, PHP 8.4.12
-
-- Core:
-  . Fixed GH-19169 build issue with C++17 and ZEND_STATIC_ASSERT macro.
-    (psumbera)
-  . Fixed bug GH-19053 (Duplicate property slot with hooks and interface
-    property). (ilutov)
-  . Fixed bug GH-19044 (Protected properties are not scoped according to their
-    prototype). (Bob)
-  . Fixed bug GH-18581 (Coerce numeric string keys from iterators when argument
-    unpacking). (ilutov)
-  . Fixed OSS-Fuzz #434346548 (Failed assertion with throwing __toString in
-    binary const expr). (ilutov)
-  . Fixed bug GH-19305 (Operands may be being released during comparison).
-    (Arnaud)
-  . Fixed bug GH-19303 (Unpacking empty packed array into uninitialized array
-    causes assertion failure). (nielsdos)
-  . Fixed bug GH-19306 (Generator can be resumed while fetching next value from
-    delegated Generator). (Arnaud)
-  . Fixed bug GH-19326 (Calling Generator::throw() on a running generator with
-    a non-Generator delegate crashes). (Arnaud)
-  . Fixed bug GH-19280 (Stale array iterator position on rehashing). (ilutov)
-  . Fixed bug GH-18736 (Circumvented type check with return by ref + finally).
-    (ilutov)
-  . Fixed bug GH-19065 (Long match statement can segfault compiler during
-    recursive SSA renaming). (nielsdos, Arnaud)
-
-- Calendar:
-  . Fixed bug GH-19371 (integer overflow in calendar.c). (nielsdos)
-
-- FTP:
-  . Fix theoretical issues with hrtime() not being available. (nielsdos)
-
-- GD:
-  . Fix incorrect comparison with result of php_stream_can_cast(). (Girgias)
-
-- Hash:
-  . Fix crash on clone failure. (nielsdos)
-
-- Intl:
-  . Fix memleak on failure in collator_get_sort_key(). (nielsdos)
-  . Fix return value on failure for resourcebundle count handler. (Girgias)
-
-- LDAP:
-  . Fixed bug GH-18529 (additional inheriting of TLS int options).
-    (Jakub Zelenka)
-
-- LibXML:
-  . Fixed bug GH-19098 (libxml<2.13 segmentation fault caused by
-    php_libxml_node_free). (nielsdos)
-
-- MbString:
-  . Fixed bug GH-19397 (mb_list_encodings() can cause crashes on shutdown).
-    (nielsdos)
-
-- Opcache:
-  . Reset global pointers to prevent use-after-free in zend_jit_status().
-    (Florian Engelhardt)
-  . Fix issue with JIT restart and hooks. (nielsdos)
-  . Fix crash with dynamic function defs in hooks during preload. (nielsdos)
-
-- OpenSSL:
-  . Fixed bug GH-18986 (OpenSSL backend: incorrect RAND_{load,write}_file()
-    return value check). (nielsdos, botovq)
-  . Fix error return check of EVP_CIPHER_CTX_ctrl(). (nielsdos)
-  . Fixed bug GH-19428 (openssl_pkey_derive segfaults for DH derive with low
-    key_length param). (Jakub Zelenka)
-
-- PDO Pgsql:
-  . Fixed dangling pointer access on _pdo_pgsql_trim_message helper.
-    (dixyes)
-
-- SOAP:
-  . Fixed bug GH-18640 (heap-use-after-free ext/soap/php_encoding.c:299:32
-    in soap_check_zval_ref). (nielsdos)
-
-- Sockets:
-  . Fix some potential crashes on incorrect argument value. (nielsdos)
-
-- Standard:
-  . Fixed OSS Fuzz #433303828 (Leak in failed unserialize() with opcache).
-    (ilutov)
-  . Fix theoretical issues with hrtime() not being available. (nielsdos)
-  . Fixed bug GH-19300 (Nested array_multisort invocation with error breaks).
-    (nielsdos)
-
-- Windows:
- . Free opened_path when opened_path_len >= MAXPATHLEN. (dixyes)
-
-31 Jul 2025, PHP 8.4.11
-
-- Calendar:
-  . Fixed jewishtojd overflow on year argument. (David Carlier)
-
-- Core:
-  . Fixed bug GH-18833 (Use after free with weakmaps dependent on destruction
-    order). (Daniil Gentili)
-  . Fixed bug GH-18907 (Leak when creating cycle in hook). (ilutov)
-  . Fix OSS-Fuzz #427814456. (nielsdos)
-  . Fix OSS-Fuzz #428983568 and #428760800. (nielsdos)
-
-- Curl:
-  . Fix memory leaks when returning refcounted value from curl callback.
-    (nielsdos)
-  . Remove incorrect string release. (nielsdos)
-
-- DOM:
-  . Fixed bug GH-18979 (Dom\XMLDocument::createComment() triggers undefined
-    behavior with null byte). (nielsdos)
-
-- LDAP:
-  . Fixed GH-18902 ldap_exop/ldap_exop_sync assert triggered on empty
-    request OID. (David Carlier)
-
-- MbString:
-  . Fixed bug GH-18901 (integer overflow mb_split). (nielsdos)
-
-- Opcache:
-  . Fixed bug GH-18639 (Internal class aliases can break preloading + JIT).
-    (nielsdos)
-  . Fixed bug GH-18899 (JIT function crash when emitting undefined variable
-    warning and opline is not set yet). (nielsdos)
-  . Fixed bug GH-14082 (Segmentation fault on unknown address 0x600000000018
-    in ext/opcache/jit/zend_jit.c). (nielsdos)
-  . Fixed bug GH-18898 (SEGV zend_jit_op_array_hot with property hooks
-    and preloading). (nielsdos)
-
-- OpenSSL:
-  . Fixed bug #80770 (It is not possible to get client peer certificate with
-    stream_socket_server). (Jakub Zelenka)
-
-- PCNTL:
-  . Fixed bug GH-18958 (Fatal error during shutdown after pcntl_rfork() or
-    pcntl_forkx() with zend-max-execution-timers). (Arnaud)
-
-- Phar:
-  . Fix stream double free in phar. (nielsdos, dixyes)
-  . Fix phar crash and file corruption with SplFileObject. (nielsdos)
-
-- SOAP:
-  . Fixed bug GH-18990, bug #81029, bug #47314 (SOAP HTTP socket not closing
-    on object destruction). (nielsdos)
-  . Fix memory leak when URL parsing fails in redirect. (Girgias)
-
-- SPL:
-  . Fixed bug GH-19094 (Attaching class with no Iterator implementation to
-    MultipleIterator causes crash). (nielsdos)
-
-- Standard:
-  . Fix misleading errors in printf(). (nielsdos)
-  . Fix RCN violations in array functions. (nielsdos)
-  . Fixed GH-18976 pack() overflow with h/H format and INT_MAX repeater value.
-    (David Carlier)
-
-- Streams:
-  . Fixed GH-13264 (fgets() and stream_get_line() do not return false on filter
-    fatal error). (Jakub Zelenka)
-
-- Zip:
-  . Fix leak when path is too long in ZipArchive::extractTo(). (nielsdos)
-
-03 Jul 2025, PHP 8.4.10
-
-- BcMath:
-  . Fixed bug GH-18641 (Accessing a BcMath\Number property by ref crashes).
-    (nielsdos)
-
-- Core:
-  . Fixed bugs GH-17711 and GH-18022 (Infinite recursion on deprecated attribute
-    evaluation) and GH-18464 (Recursion protection for deprecation constants not
-    released on bailout). (DanielEScherzer and ilutov)
-  . Fixed GH-18695 (zend_ast_export() - float number is not preserved).
-    (Oleg Efimov)
-  . Fix handling of references in zval_try_get_long(). (nielsdos)
-  . Do not delete main chunk in zend_gc. (danog, Arnaud)
-  . Fix compile issues with zend_alloc and some non-default options. (nielsdos)
-
-- Curl:
-  . Fix memory leak when setting a list via curl_setopt fails. (nielsdos)
-
-- Date:
-  . Fix leaks with multiple calls to DatePeriod iterator current(). (nielsdos)
-
-- DOM:
-  . Fixed bug GH-18744 (classList works not correctly if copy HTMLElement by
-    clone keyword). (nielsdos)
-
-- FPM:
-  . Fixed GH-18662 (fpm_get_status segfault). (txuna)
-
-- Hash:
-  . Fixed bug GH-14551 (PGO build fails with xxhash). (nielsdos)
-
-- Intl:
-  . Fix memory leak in intl_datetime_decompose() on failure. (nielsdos)
-  . Fix memory leak in locale lookup on failure. (nielsdos)
-
-- Opcache:
-  . Fixed bug GH-18743 (Incompatibility in Inline TLS Assembly on Alpine 3.22).
-    (nielsdos, Arnaud)
-
-- ODBC:
-  . Fix memory leak on php_odbc_fetch_hash() failure. (nielsdos)
-
-- OpenSSL:
-  . Fix memory leak of X509_STORE in php_openssl_setup_verify() on failure.
-    (nielsdos)
-  . Fixed bug #74796 (Requests through http proxy set peer name).
-    (Jakub Zelenka)
-
-- PDO ODBC:
-  . Fix memory leak if WideCharToMultiByte() fails. (nielsdos)
-
-- PDO Sqlite:
-  . Fixed memory leak with Pdo_Sqlite::createCollation when the callback
-    has an incorrect return type. (David Carlier)
-
-- Phar:
-  . Add missing filter cleanups on phar failure. (nielsdos)
-  . Fixed bug GH-18642 (Signed integer overflow in ext/phar fseek). (nielsdos)
-
-- PHPDBG:
-  . Fix 'phpdbg --help' segfault on shutdown with USE_ZEND_ALLOC=0. (nielsdos)
-
-- PGSQL:
-  . Fix warning not being emitted when failure to cancel a query with
-    pg_cancel_query(). (Girgias)
-
-- Random:
-  . Fix reference type confusion and leak in user random engine.
-    (nielsdos, timwolla)
-
-- Readline:
-  . Fix memory leak when calloc() fails in php_readline_completion_cb().
-    (nielsdos)
-
-- SimpleXML:
-  . Fixed bug GH-18597 (Heap-buffer-overflow in zend_alloc.c when assigning
-    string with UTF-8 bytes). (nielsdos)
-
-- Soap:
-  . Fix memory leaks in php_http.c when call_user_function() fails. (nielsdos)
-
-- Tidy:
-  . Fix memory leak in tidy output handler on error. (nielsdos)
-  . Fix tidyOptIsReadonly deprecation, using tidyOptGetCategory. (David Carlier)
-
-06 Jun 2025, PHP 8.4.8
-
-- Core:
-  . Fixed GH-18480 (array_splice with large values for offset/length arguments).
-    (nielsdos/David Carlier)
-  . Partially fixed GH-18572 (nested object comparisons leading to stack overflow).
-    (David Carlier)
-  . Fixed OSS-Fuzz #417078295. (nielsdos)
-  . Fixed OSS-Fuzz #418106144. (nielsdos)
-
-- Curl:
-  . Fixed GH-18460 (curl_easy_setopt with CURLOPT_USERPWD/CURLOPT_USERNAME/
-    CURLOPT_PASSWORD set the Authorization header when set to NULL).
-    (David Carlier)
-
-- Date:
-  . Fixed bug GH-18076 (Since PHP 8, the date_sun_info() function returns
-    inaccurate sunrise and sunset times, but other calculated times are
-    correct) (JiriJozif).
-  . Fixed bug GH-18481 (date_sunrise with unexpected nan value for the offset).
-    (nielsdos/David Carlier)
-
-- DOM:
-  . Backport lexbor/lexbor#274. (nielsdos, alexpeattie)
-
-- Intl:
-  . Fix various reference issues. (nielsdos)
-
-- LDAP:
-  . Fixed bug GH-18529 (ldap no longer respects TLS_CACERT from ldaprc in
-    ldap_start_tls()). (Remi)
-
-- Opcache:
-  . Fixed bug GH-18417 (Windows SHM reattachment fails when increasing
-    memory_consumption or jit_buffer_size). (nielsdos)
-  . Fixed bug GH-18297 (Exception not handled when jit guard is triggered).
-    (Arnaud)
-  . Fixed bug GH-18408 (Snapshotted poly_func / poly_this may be spilled).
-    (Arnaud)
-  . Fixed bug GH-18567 (Preloading with internal class alias triggers assertion
-    failure). (nielsdos)
-  . Fixed bug GH-18534 (FPM exit code 70 with enabled opcache and hooked
-    properties in traits). (nielsdos)
-  . Fix leak of accel_globals->key. (nielsdos)
-
-- OpenSSL:
-  . Fix missing checks against php_set_blocking() in xp_ssl.c. (nielsdos)
-
-- SPL:
-  . Fixed bug GH-18421 (Integer overflow with large numbers in LimitIterator).
-    (nielsdos)
-
-- Standard:
-  . Fixed bug GH-17403 (Potential deadlock when putenv fails). (nielsdos)
-  . Fixed bug GH-18400 (http_build_query type error is inaccurate). (nielsdos)
-  . Fixed bug GH-18509 (Dynamic calls to assert() ignore zend.assertions).
-    (timwolla)
-
-- Windows:
-  . Fix leak+crash with sapi_windows_set_ctrl_handler(). (nielsdos)
-
-- Zip:
-  . Fixed bug GH-18431 (Registering ZIP progress callback twice doesn't work).
-    (nielsdos)
-  . Fixed bug GH-18438 (Handling of empty data and errors in
-    ZipArchive::addPattern). (nielsdos)
-
-24 Apr 2025, PHP 8.4.7
-
-- Core:
-  . Fixed bug GH-18038 (Lazy proxy calls magic methods twice). (Arnaud)
-  . Fixed bug GH-18209 (Use-after-free in extract() with EXTR_REFS). (ilutov)
-  . Fixed bug GH-18268 (Segfault in array_walk() on object with added property
-    hooks). (ilutov)
-  . Fixed bug GH-18304 (Changing the properties of a DateInterval through
-    dynamic properties triggers a SegFault). (nielsdos)
-  . Fix some leaks in php_scandir. (nielsdos)
-
-- DBA:
-  . FIxed bug GH-18247 dba_popen() memory leak on invalid path. (David Carlier)
-
-- Filter:
-  . Fixed bug GH-18309 (ipv6 filter integer overflow). (nielsdos)
-
-- GD:
-  . Fixed imagecrop() overflow with rect argument with x/width y/heigh usage
-    in gdImageCrop(). (David Carlier)
-  . Fixed GH-18243 imagettftext() overflow/underflow on font size value.
-    (David Carlier)
-
-- Intl:
-  . Fix reference support for intltz_get_offset(). (nielsdos)
-
-- LDAP:
-  . Fixed bug GH-17776 (LDAP_OPT_X_TLS_* options can't be overridden). (Remi)
-  . Fix NULL deref on high modification key. (nielsdos)
-
-- libxml:
-  . Fixed custom external entity loader returning an invalid resource leading
-    to a confusing TypeError message. (Girgias)
-
-- Opcache:
-  . Fixed bug GH-18294 (assertion failure zend_jit_ir.c). (nielsdos)
-  . Fixed bug GH-18289 (Fix segfault in JIT). (Florian Engelhardt)
-  . Fixed bug GH-18136 (tracing JIT floating point register clobbering on
-    Windows and ARM64). (nielsdos)
-
-- OpenSSL:
-  . Fix memory leak in openssl_sign() when passing invalid algorithm.
-    (nielsdos)
-  . Fix potential leaks when writing to BIO fails. (nielsdos)
-
-- PDO Firebird:
-  . Fixed bug GH-18276 (persistent connection - "zend_mm_heap corrupted"
-    with setAttribute()) (SakiTakamachi).
-  . Fixed bug GH-17383 (PDOException has wrong code and message since PHP 8.4)
-    (SakiTakamachi).
-
-- PDO Sqlite:
-  . Fix memory leak on error return of collation callback. (nielsdos)
-
-- PgSql:
-  . Fix uouv in pg_put_copy_end(). (nielsdos)
-
-- SPL:
-  . Fixed bug GH-18322 (SplObjectStorage debug handler mismanages memory).
-    (nielsdos)
-
-- Standard:
-  . Fixed bug GH-18145 (php8ts crashes in php_clear_stat_cache()).
-    (Jakub Zelenka)
-  . Fix resource leak in iptcembed() on error. (nielsdos)
-
-- Tests:
-  . Address deprecated PHP 8.4 session options to prevent test failures.
-    (willvar)
-
-- Zip:
-  . Fix uouv when handling empty options in ZipArchive::addGlob(). (nielsdos)
-  . Fix memory leak when handling a too long path in ZipArchive::addGlob().
-    (nielsdos)
-
-10 Apr 2025, PHP 8.4.6
-
-- BCMath:
-  . Fixed pointer subtraction for scale. (SakiTakamachi)
-
-- Core:
-  . Fixed property hook backing value access in multi-level inheritance.
-    (ilutov)
-  . Fixed accidentally inherited default value in overridden virtual properties.
-    (ilutov)
-  . Fixed bug GH-17376 (Broken JIT polymorphism for property hooks added to
-    child class). (ilutov)
-  . Fixed bug GH-17913 (ReflectionFunction::isDeprecated() returns incorrect
-    results for closures created from magic __call()). (timwolla)
-  . Fixed bug GH-17941 (Stack-use-after-return with lazy objects and hooks).
-    (nielsdos)
-  . Fixed bug GH-17988 (Incorrect handling of hooked props without get hook in
-    get_object_vars()). (ilutov)
-  . Fixed bug GH-17998 (Skipped lazy object initialization on primed
-    SIMPLE_WRITE cache). (ilutov)
-  . Fixed bug GH-17998 (Assignment to backing value in set hook of lazy proxy
-    calls hook again). (ilutov)
-  . Fixed bug GH-17961 (use-after-free during dl()'ed module class destruction).
-    (Arnaud)
-  . Fixed bug GH-15367 (dl() of module with aliased class crashes in shutdown).
-    (Arnaud)
-  . Fixed OSS-Fuzz #403308724. (nielsdos)
-  . Fixed bug GH-13193 again (Significant performance degradation in 'foreach').
-    (nielsdos)
-
-- DBA:
-  . Fixed assertion violation when opening the same file with dba_open
-    multiple times. (chschneider)
-
-- DOM:
-  . Fixed bug GH-17991 (Assertion failure dom_attr_value_write). (nielsdos)
-  . Fix weird unpack behaviour in DOM. (nielsdos)
-  . Fixed bug GH-18090 (DOM: Svg attributes and tag names are being lowercased).
-    (nielsdos)
-  . Fix xinclude destruction of live attributes. (nielsdos)
-
-- Fuzzer:
-  . Fixed bug GH-18081 (Memory leaks in error paths of fuzzer SAPI).
-    (Lung-Alexandra)
-
-- GD:
-  . Fixed bug GH-17984 (calls with arguments as array with references).
-    (David Carlier)
-
-- LDAP:
-  . Fixed bug GH-18015 (Error messages for ldap_mod_replace are confusing).
-    (nielsdos)
-
-- Mbstring:
-  . Fixed bug GH-17989 (mb_output_handler crash with unset
-    http_output_conv_mimetypes). (nielsdos)
-
-- Opcache:
-  . Fixed bug GH-15834 (Segfault with hook "simple get" cache slot and minimal
-    JIT). (nielsdos)
-  . Fixed bug GH-17966 (Symfony JIT 1205 assertion failure). (nielsdos)
-  . Fixed bug GH-18037 (SEGV Zend/zend_execute.c). (nielsdos)
-  . Fixed bug GH-18050 (IN_ARRAY optimization in DFA pass is broken). (ilutov)
-  . Fixed bug GH-18113 (stack-buffer-overflow ext/opcache/jit/ir/ir_sccp.c).
-    (nielsdos)
-  . Fixed bug GH-18112 (NULL access with preloading and INI option). (nielsdos)
-  . Fixed bug GH-18107 (Opcache CFG jmp optimization with try-finally breaks
-    the exception table). (nielsdos)
-
-- PDO:
-  . Fix memory leak when destroying PDORow. (nielsdos)
-
-- PGSQL:
-  . Fixed bug GH-18148 (pg_copy_from() regression with explicit \n terminator
-    due to wrong offset check). (David Carlier)
-
-- Standard:
-  . Fix memory leaks in array_any() / array_all(). (nielsdos)
-
-- SOAP:
-  . Fixed bug #66049 (Typemap can break parsing in parse_packet_soap leading to
-    a segfault) . (Remi)
-
-- SPL:
-  . Fixed bug GH-18018 (RC1 data returned from offsetGet causes UAF in
-    ArrayObject). (nielsdos)
-
-- Treewide:
-  . Fixed bug GH-17736 (Assertion failure zend_reference_destroy()). (nielsdos)
-
-- Windows:
-  . Fixed bug GH-17836 (zend_vm_gen.php shouldn't break on Windows line
-    endings). (DanielEScherzer)
-
-27 Feb 2025, PHP 8.4.5
-
-- BCMath:
-  . Fixed bug GH-17398 (bcmul memory leak). (SakiTakamachi)
-
-- Core:
-  . Fixed bug GH-17623 (Broken stack overflow detection for variable
-    compilation). (ilutov)
-  . Fixed bug GH-17618 (UnhandledMatchError does not take
-    zend.exception_ignore_args=1 into account). (timwolla)
-  . Fix fallback paths in fast_long_{add,sub}_function. (nielsdos)
-  . Fixed bug OSS-Fuzz #391975641 (Crash when accessing property backing value
-    by reference). (ilutov)
-  . Fixed bug GH-17718 (Calling static methods on an interface that has
-    `__callStatic` is allowed). (timwolla)
-  . Fixed bug GH-17713 (ReflectionProperty::getRawValue() and related methods
-    may call hooks of overridden properties). (Arnaud)
-  . Fixed bug GH-17916 (Final abstract properties should error).
-    (DanielEScherzer)
-  . Fixed bug GH-17866 (zend_mm_heap corrupted error after upgrading from
-    8.4.3 to 8.4.4). (nielsdos)
-  . Fixed GHSA-rwp7-7vc6-8477 (Reference counting in php_request_shutdown
-    causes Use-After-Free). (CVE-2024-11235) (ilutov)
-
-- DOM:
-  . Fixed bug GH-17609 (Typo in error message: Dom\NO_DEFAULT_NS instead of
-    Dom\HTML_NO_DEFAULT_NS). (nielsdos)
-  . Fixed bug GH-17802 (\Dom\HTMLDocument querySelector attribute name is case
-    sensitive in HTML). (nielsdos)
-  . Fixed bug GH-17847 (xinclude destroys live node). (nielsdos)
-  . Fix using Dom\Node with Dom\XPath callbacks. (nielsdos)
-
-- FFI:
-  . Fix FFI Parsing of Pointer Declaration Lists. (davnotdev)
-
-- FPM:
-  . Fixed bug GH-17643 (FPM with httpd ProxyPass encoded PATH_INFO env).
-    (Jakub Zelenka)
-
-- GD:
-  . Fixed bug GH-17703 (imagescale with both width and height negative values
-    triggers only an Exception on width). (David Carlier)
-  . Fixed bug GH-17772 (imagepalettetotruecolor crash with memory_limit=2M).
-    (David Carlier)
-
-- LDAP:
-  . Fixed bug GH-17704 (ldap_search fails when $attributes contains a
-    non-packed array with numerical keys). (nielsdos, 7u83)
-
-- LibXML:
-  . Fixed GHSA-wg4p-4hqh-c3g9 (Reocurrence of #72714). (nielsdos)
-  . Fixed GHSA-p3x9-6h7p-cgfc (libxml streams use wrong `content-type` header
-    when requesting a redirected resource). (CVE-2025-1219) (timwolla)
-
-- MBString:
-  . Fixed bug GH-17503 (Undefined float conversion in mb_convert_variables).
-    (cmb)
-
-- Opcache:
-  . Fixed bug GH-17654 (Multiple classes using same trait causes function
-    JIT crash). (nielsdos)
-  . Fixed bug GH-17577 (JIT packed type guard crash). (nielsdos, Dmitry)
-  . Fixed bug GH-17747 (Exception on reading property in register-based
-    FETCH_OBJ_R breaks JIT). (Dmitry, nielsdos)
-  . Fixed bug GH-17715 (Null pointer deref in observer API when calling
-    cases() method on preloaded enum). (Bob)
-  . Fixed bug GH-17868 (Cannot allocate memory with tracing JIT on 8.4.4).
-    (nielsdos)
-
-- PDO_SQLite:
-  . Fixed GH-17837 ()::getColumnMeta() on unexecuted statement segfaults).
-    (cmb)
-  . Fix cycle leak in sqlite3 setAuthorizer(). (nielsdos)
-  . Fix memory leaks in pdo_sqlite callback registration. (nielsdos)
-
-- Phar:
-  . Fixed bug GH-17808: PharFileInfo refcount bug. (nielsdos)
-
-- PHPDBG:
-  . Partially fixed bug GH-17387 (Trivial crash in phpdbg lexer). (nielsdos)
-  . Fix memory leak in phpdbg calling registered function. (nielsdos)
-
-- Reflection:
-  . Fixed bug GH-15902 (Core dumped in ext/reflection/php_reflection.c).
-    (DanielEScherzer)
-  . Fixed missing final and abstract flags when dumping properties.
-    (DanielEScherzer)
-
-- Standard:
-  . Fixed bug #72666 (stat cache clearing inconsistent between file:// paths
-    and plain paths). (Jakub Zelenka)
-
-- Streams:
-  . Fixed bug GH-17650 (realloc with size 0 in user_filters.c). (nielsdos)
-  . Fix memory leak on overflow in _php_stream_scandir(). (nielsdos)
-  . Fixed GHSA-hgf5-96fm-v528 (Stream HTTP wrapper header check might omit
-    basic auth header). (CVE-2025-1736) (Jakub Zelenka)
-  . Fixed GHSA-52jp-hrpf-2jff (Stream HTTP wrapper truncate redirect location
-    to 1024 bytes). (CVE-2025-1861) (Jakub Zelenka)
-  . Fixed GHSA-pcmh-g36c-qc44 (Streams HTTP wrapper does not fail for headers
-    without colon). (CVE-2025-1734) (Jakub Zelenka)
-  . Fixed GHSA-v8xr-gpvj-cx9g (Header parser of `http` stream wrapper does not
-    handle folded headers). (CVE-2025-1217) (Jakub Zelenka)
-
-- Windows:
-  . Fixed phpize for Windows 11 (24H2). (bwoebi)
-  . Fixed GH-17855 (CURL_STATICLIB flag set even if linked with shared lib).
-    (cmb)
-
-- Zlib:
-  . Fixed bug GH-17745 (zlib extension incorrectly handles object arguments).
-    (nielsdos)
-  . Fix memory leak when encoding check fails. (nielsdos)
-  . Fix zlib support for large files. (nielsdos)
-
-13 Feb 2025, PHP 8.4.4
-
-- Core:
-  . Fixed bug GH-17234 (Numeric parent hook call fails with assertion).
-    (nielsdos)
-  . Fixed bug GH-16892 (ini_parse_quantity() fails to parse inputs starting
-    with 0x0b). (nielsdos)
-  . Fixed bug GH-16886 (ini_parse_quantity() fails to emit warning for 0x+0).
-    (nielsdos)
-  . Fixed bug GH-17222 (__PROPERTY__ magic constant does not work in all
-    constant expression contexts). (ilutov)
-  . Fixed bug GH-17214 (Relax final+private warning for trait methods with
-    inherited final). (ilutov)
-  . Fixed NULL arithmetic during system program execution on Windows. (cmb,
-    nielsdos)
-  . Fixed potential OOB when checking for trailing spaces on Windows. (cmb)
-  . Fixed bug GH-17408 (Assertion failure Zend/zend_exceptions.c).
-    (nielsdos, ilutov)
-  . Fix may_have_extra_named_args flag for ZEND_AST_UNPACK. (nielsdos)
-  . Fix NULL arithmetic in System V shared memory emulation for Windows. (cmb)
-  . Fixed bug GH-17597 (#[\Deprecated] does not work for __call() and
-    __callStatic()). (timwolla)
-
-- DOM:
-  . Fixed bug GH-17397 (Assertion failure ext/dom/php_dom.c). (nielsdos)
-  . Fixed bug GH-17486 (Incorrect error line numbers reported in
-    Dom\HTMLDocument::createFromString). (nielsdos)
-  . Fixed bug GH-17481 (UTF-8 corruption in \Dom\HTMLDocument). (nielsdos)
-  . Fixed bug GH-17500 (Segfault with requesting nodeName on nameless doctype).
-    (nielsdos)
-  . Fixed bug GH-17485 (upstream fix, Self-closing tag on void elements
-    shouldn't be a parse error/warning in \Dom\HTMLDocument). (lexborisov)
-  . Fixed bug GH-17572 (getElementsByTagName returns collections with
-    tagName-based indexing). (nielsdos)
-
-- Enchant:
-  . Fix crashes in enchant when passing null bytes. (nielsdos)
-
-- FTP:
-  . Fixed bug GH-16800 (ftp functions can abort with EINTR). (nielsdos)
-
-- GD:
-  . Fixed bug GH-17349 (Tiled truecolor filling looses single color
-    transparency). (cmb)
-  . Fixed bug GH-17373 (imagefttext() ignores clipping rect for palette
-    images). (cmb)
-  . Ported fix for libgd 223 (gdImageRotateGeneric() does not properly
-    interpolate). (cmb)
-  . Added support for reading GIFs without colormap to bundled libgd. (Andrew
-    Burley, cmb)
-
-- Gettext:
-  . Fixed bug GH-17400 (bindtextdomain SEGV on invalid domain).
-    (David Carlier)
-
-- Intl:
-  . Fixed bug GH-11874 (intl causing segfault in docker images). (nielsdos)
-
-- Opcache:
-  . Fixed bug GH-15981 (Segfault with frameless jumps and minimal JIT).
-    (nielsdos)
-  . Fixed bug GH-17307 (Internal closure causes JIT failure). (nielsdos)
-  . Fixed bug GH-17428 (Assertion failure ext/opcache/jit/zend_jit_ir.c:8940).
-    (nielsdos)
-  . Fixed bug GH-17564 (Potential UB when reading from / writing to struct
-    padding). (ilutov)
-
-- PCNTL:
-  . Fixed pcntl_setcpuaffinity exception type from ValueError to TypeError for
-    the cpu mask argument with entries type different than int/string.
-    (David Carlier)
-
-- PCRE:
-  . Fixed bug GH-17122 (memory leak in regex). (nielsdos)
-
-- PDO:
-  . Fixed a memory leak when the GC is used to free a PDOStatment. (Girgias)
-  . Fixed a crash in the PDO Firebird Statement destructor. (nielsdos)
-  . Fixed UAFs when changing default fetch class ctor args. (Girgias, nielsdos)
-
-- PgSql:
-  . Fixed build failure when the constant PGRES_TUPLES_CHUNK is not present
-    in the system. (chschneider)
-
-- Phar:
-  . Fixed bug GH-17518 (offset overflow phar extractTo()). (nielsdos)
-
-- PHPDBG:
-  . Fix crashes in function registration + test. (nielsdos, Girgias)
+  . Fixed bug GH-21362 (ReflectionMethod::invoke/invokeArgs() did not verify
+    Closure instance identity for Closure::__invoke()). (Ilia Alshanetsky)
+  . Added ReflectionParameter::getDocComment(). (chschneider)
 
 - Session:
-  . Fix type confusion with session SID constant. (nielsdos)
-  . Fixed bug GH-17541 (ext/session NULL pointer dereferencement during
-    ID reset). (Girgias)
+  . Fixed bug 71162 (updateTimestamp never called when session data is empty).
+    (Girgias)
+  . Null bytes in session.cookie_path, session.cookie_domain, and
+    session.cache_limiter are now rejected with a warning. (jorgsowa)
+  . session.cookie_samesite now rejects invalid values with a warning; only
+    "Strict", "Lax", "None", or "" are accepted. (jorgsowa)
+  . session.cookie_lifetime now rejects non-integer and out-of-range values
+    with a warning. (jorgsowa)
+  . Session file GC now recursively cleans nested subdirectories when
+    session.save_path uses the dirdepth prefix. (jorgsowa)
+  . Changed defaults of session.use_strict_mode (now 1), session.cookie_httponly
+    (now 1) and session.cookie_samesite (now "Lax"). (jorgsowa)
 
-- SimpleXML:
-  . Fixed bug GH-17409 (Assertion failure Zend/zend_hash.c:1730). (nielsdos)
-
-- SNMP:
-  . Fixed bug GH-17330 (SNMP::setSecurity segfault on closed session).
-    (David Carlier)
-
-- SPL:
-  . Fixed bug GH-15833 (Segmentation fault (access null pointer) in
-    ext/spl/spl_array.c). (nielsdos)
-  . Fixed bug GH-17516 (SplFileTempObject::getPathInfo() Undefined behavior
-    on invalid class). (David Carlier)
-
-- Standard:
-  . Fixed bug GH-17447 (Assertion failure when array popping a self addressing
-    variable). (nielsdos)
-
-- Windows:
-  . Fixed clang compiler detection. (cmb)
-
-- Zip:
-  . Fixed bug GH-17139 (Fix zip_entry_name() crash on invalid entry).
-    (nielsdos)
-
-16 Jan 2025, PHP 8.4.3
-
-- BcMath:
-  . Fixed bug GH-17049 (Correctly compare 0 and -0). (Saki Takamachi)
-  . Fixed bug GH-17061 (Now Number::round() does not remove trailing zeros).
-    (Saki Takamachi)
-  . Fixed bug GH-17064 (Correctly round rounding mode with zero edge case).
-    (Saki Takamachi)
-  . Fixed bug GH-17275 (Fixed the calculation logic of dividend scale).
-    (Saki Takamachi)
-
-- Core:
-  . Fixed bug OSS-Fuzz #382922236 (Duplicate dynamic properties in hooked object
-    iterator properties table). (ilutov)
-  . Fixed unstable get_iterator pointer for hooked classes in shm on Windows.
-    (ilutov)
-  . Fixed bug GH-17106 (ZEND_MATCH_ERROR misoptimization). (ilutov)
-  . Fixed bug GH-17162 (zend_array_try_init() with dtor can cause engine UAF).
-    (nielsdos)
-  . Fixed bug GH-17101 (AST->string does not reproduce constructor property
-    promotion correctly). (nielsdos)
-  . Fixed bug GH-17200 (Incorrect dynamic prop offset in hooked prop iterator).
-    (ilutov)
-  . Fixed bug GH-17216 (Trampoline crash on error). (nielsdos)
-
-- DBA:
-  . Skip test if inifile is disabled. (orlitzky)
-
-- DOM:
-  . Fixed bug GH-17145 (DOM memory leak). (nielsdos)
-  . Fixed bug GH-17201 (Dom\TokenList issues with interned string replace).
-    (nielsdos)
-  . Fixed bug GH-17224 (UAF in importNode). (nielsdos)
-
-- Embed:
-  . Make build command for program using embed portable. (dunglas)
-
-- FFI:
-  . Fixed bug #79075 (FFI header parser chokes on comments). (nielsdos)
-  . Fix memory leak on ZEND_FFI_TYPE_CHAR conversion failure. (nielsdos)
-  . Fixed bug GH-16013 and bug #80857 (Big endian issues). (Dmitry, nielsdos)
-
-- Fileinfo:
-  . Fixed bug GH-17039 (PHP 8.4: Incorrect MIME content type). (nielsdos)
-
-- FPM:
-  . Fixed bug GH-13437 (FPM: ERROR: scoreboard: failed to lock (already
-    locked)). (Jakub Zelenka)
-  . Fixed bug GH-17112 (Macro redefinitions). (cmb, nielsdos)
-  . Fixed bug GH-17208 (bug64539-status-json-encoding.phpt fail on 32-bits).
-    (nielsdos)
-
-- GD:
-  . Fixed bug GH-16255 (Unexpected nan value in ext/gd/libgd/gd_filter.c).
-    (nielsdos, cmb)
-  . Ported fix for libgd bug 276 (Sometimes pixels are missing when storing
-    images as BMPs). (cmb)
-
-- Gettext:
-  . Fixed bug GH-17202 (Segmentation fault ext/gettext/gettext.c
-    bindtextdomain()). (Michael Orlitzky)
-
-- Iconv:
-  . Fixed bug GH-17047 (UAF on iconv filter failure). (nielsdos)
-
-- LDAP:
-  . Fixed bug GH-17280 (ldap_search() fails when $attributes array has holes).
-    (nielsdos)
-
-- LibXML:
-  . Fixed bug GH-17223 (Memory leak in libxml encoding handling). (nielsdos)
-
-- MBString:
-  . Fixed bug GH-17112 (Macro redefinitions). (nielsdos, cmb)
-
-- Opcache:
-  . opcache_get_configuration() properly reports jit_prof_threshold. (cmb)
-  . Fixed bug GH-17140 (Assertion failure in JIT trace exit with
-    ZEND_FETCH_DIM_FUNC_ARG). (nielsdos, Dmitry)
-  . Fixed bug GH-17151 (Incorrect RC inference of op1 of FETCH_OBJ and
-    INIT_METHOD_CALL). (Dmitry, ilutov)
-  . Fixed bug GH-17246 (GC during SCCP causes segfault). (Dmitry)
-  . Fixed bug GH-17257 (UBSAN warning in ext/opcache/jit/zend_jit_vm_helpers.c).
-    (nielsdos, Dmitry)
-
-- PCNTL:
-  . Fix memory leak in cleanup code of pcntl_exec() when a non stringable
-    value is encountered past the first entry. (Girgias)
-
-- PgSql:
-  . Fixed bug GH-17158 (pg_fetch_result Shows Incorrect ArgumentCountError
-    Message when Called With 1 Argument). (nielsdos)
-  . Fixed further ArgumentCountError for calls with flexible
-    number of arguments. (David Carlier)
-
-- Phar:
-  . Fixed bug GH-17137 (Segmentation fault ext/phar/phar.c). (nielsdos)
-
-- SimpleXML:
-  . Fixed bug GH-17040 (SimpleXML's unset can break DOM objects). (nielsdos)
-  . Fixed bug GH-17153 (SimpleXML crash when using autovivification on
-    document). (nielsdos)
+- Soap:
+  . Soap::__setCookie() when cookie name is a digit is now not stored and
+    represented as a string anymore but a int. (David Carlier)
+  . Fixed bug GH-21421 (SoapClient typemap property breaks engine assumptions).
+    (ndossche)
+  . WSDL/XML Schema parsing now rejects out-of-range integer values for
+    occurrence constraints and integer restriction facets. Negative minOccurs
+    and maxOccurs values are rejected as well. (Weilin Du)
 
 - Sockets:
-  . Fixed bug GH-16276 (socket_strerror overflow handling with INT_MIN).
-    (David Carlier / cmb)
-  . Fixed overflow on SO_LINGER values setting, strengthening values check
-    on SO_SNDTIMEO/SO_RCVTIMEO for socket_set_option().
-    (David Carlier)
-
-- SPL:
-  . Fixed bug GH-17198 (SplFixedArray assertion failure with get_object_vars).
-    (nielsdos)
-  . Fixed bug GH-17225 (NULL deref in spl_directory.c). (nielsdos)
-
-- Streams:
-  . Fixed bug GH-17037 (UAF in user filter when adding existing filter name due
-    to incorrect error handling). (nielsdos)
-  . Fixed bug GH-16810 (overflow on fopen HTTP wrapper timeout value).
-    (David Carlier)
-  . Fixed bug GH-17067 (glob:// wrapper doesn't cater to CWD for ZTS builds).
-    (cmb)
-
-- Windows:
-  . Hardened proc_open() against cmd.exe hijacking. (cmb)
-
-- XML:
-  . Fixed bug GH-1718 (unreachable program point in zend_hash). (nielsdos)
-
-19 Dec 2024, PHP 8.4.2
-
-- BcMath:
-  . Fixed bug GH-16978 (Avoid unnecessary padding with leading zeros).
-    (Saki Takamachi)
-
-- COM:
-  . Fixed bug GH-16991 (Getting typeinfo of non DISPATCH variant segfaults).
-    (cmb)
-
-- Core:
-  . Fixed bug GH-16344 (setRawValueWithoutLazyInitialization() and
-    skipLazyInitialization() may change initialized proxy). (Arnaud)
-  . Fix is_zend_ptr() huge block comparison. (nielsdos)
-  . Fixed potential OOB read in zend_dirname() on Windows. (cmb)
-  . Fixed bug GH-15964 (printf() can strip sign of -INF). (divinity76, cmb)
-
-- Curl:
-  . Fix various memory leaks in curl mime handling. (nielsdos)
-
-- DBA:
-  . Fixed bug GH-16990 (dba_list() is now zero-indexed instead of using
-    resource ids) (kocsismate)
-
-- DOM:
-  . Fixed bug GH-16906 (Reloading document can cause UAF in iterator).
-    (nielsdos)
-
-- FPM:
-  . Fixed bug GH-16932 (wrong FPM status output). (Jakub Zelenka, James Lucas)
-
-- GMP:
-  . Fixed bug GH-16890 (array_sum() with GMP can loose precision (LLP64)).
-    (cmb)
-
-- Opcache:
-  . Fixed bug GH-16851 (JIT_G(enabled) not set correctly on other threads).
-    (dktapps)
-  . Fixed bug GH-16902 (Set of opcache tests fail zts+aarch64). (nielsdos)
-  . Fixed bug GH-16879 (JIT dead code skipping does not update call_level).
-    (nielsdos)
-
-- SAPI:
-  . Fixed bug GH-16998 (UBSAN warning in rfc1867). (nielsdos)
-
-- PHPDBG:
-  . Fixed bug GH-15208 (Segfault with breakpoint map and phpdbg_clear()).
-    (nielsdos)
-
-- Standard:
-  . Fixed bug GH-16905 (Internal iterator functions can't handle UNDEF
-    properties). (nielsdos)
-  . Fixed bug GH-16957 (Assertion failure in array_shift with
-    self-referencing array). (nielsdos)
-
-- Streams:
-  . Fixed network connect poll interuption handling. (Jakub Zelenka)
-
-- Windows:
-  . Fixed bug GH-16849 (Error dialog causes process to hang). (cmb)
-  . Windows Server 2025 is now properly reported. (cmb)
-
-21 Nov 2024, PHP 8.4.1
-
-- BcMath:
-  . [RFC] Add bcfloor, bcceil and bcround to BCMath. (Saki Takamachi)
-  . Improve performance. (Saki Takamachi, nielsdos)
-  . Adjust bcround()'s $mode parameter to only accept the RoundingMode
-    enum. (timwolla, saki)
-  . Fixed LONG_MAX in BCMath ext. (Saki Takamachi)
-  . Fixed bcdiv() div by one. (Saki Takamachi)
-  . [RFC] Support object types in BCMath. (Saki Takamachi)
-  . bcpow() performance improvement. (Jorg Sowa)
-  . ext/bcmath: Check for scale overflow. (SakiTakamachi)
-  . [RFC] ext/bcmath: Added bcdivmod. (SakiTakamachi)
-  . Fix GH-15968 (Avoid converting objects to strings in operator calculations).
-    (SakiTakamachi)
-  . Fixed bug GH-16265 (Added early return case when result is 0)
-    (Saki Takamachi).
-  . Fixed bug GH-16262 (Fixed a bug where size_t underflows) (Saki Takamachi).
-  . Fixed GH-16236 (Fixed a bug in BcMath\Number::pow() and bcpow() when
-    raising negative powers of 0) (Saki Takamachi).
-
-- Core:
-  . Added zend_call_stack_get implementation for NetBSD, DragonFlyBSD,
-    Solaris and Haiku. (David Carlier)
-  . Enabled ifunc checks on FreeBSD from the 12.x releases. (Freaky)
-  . Changed the type of PHP_DEBUG and PHP_ZTS constants to bool. (haszi)
-  . Fixed bug GH-13142 (Undefined variable name is shortened when contains \0).
-    (nielsdos)
-  . Fixed bug GH-13178 (Iterator positions incorrect when converting packed
-    array to hashed). (ilutov)
-  . Fixed zend fiber build for solaris default mode (32 bits). (David Carlier)
-  . Fixed zend call stack size for macOs/arm64. (David Carlier)
-  . Added support for Zend Max Execution Timers on FreeBSD. (Kévin Dunglas)
-  . Ensure fiber stack is not backed by THP. (crrodriguez)
-  . Implement GH-13609 (Dump wrapped object in WeakReference class). (nielsdos)
-  . Added sparc64 arch assembly support for zend fiber. (Claudio Jeker)
-  . Fixed GH-13581 no space available for TLS on NetBSD. (Paul Ripke)
-  . Added fiber Sys-V loongarch64 support. (qiangxuhui)
-  . Adjusted closure names to include the parent function's name. (timwolla)
-  . Improve randomness of uploaded file names and files created by tempnam().
-    (Arnaud)
-  . Added gc and shutdown callbacks to zend_mm custom handlers.
-    (Florian Engelhardt)
-  . Fixed bug GH-14650 (Compute the size of pages before allocating memory).
-    (Julien Voisin)
-  . Fixed bug GH-11928 (The --enable-re2c-cgoto doesn't add the -g flag).
-    (Peter Kokot)
-  . Added the #[\Deprecated] attribute. (beberlei, timwolla)
-  . Fixed GH-11389 (Allow suspending fibers in destructors). (Arnaud, trowski)
-  . Fixed bug GH-14801 (Fix build for armv7). (andypost)
-  . Implemented property hooks RFC. (ilutov)
-  . Fix GH-14978 (The xmlreader extension phpize build). (Peter Kokot)
-  . Throw Error exception when encountering recursion during comparison, rather
-    than fatal error. (ilutov)
-  . Added missing cstddef include for C++ builds. (cmb)
-  . Updated build system scripts config.guess to 2024-07-27 and config.sub to
-    2024-05-27. (Peter Kokot)
-  . Fixed bug GH-15240 (Infinite recursion in trait hook). (ilutov)
-  . Fixed bug GH-15140 (Missing variance check for abstract set with asymmetric
-    type). (ilutov)
-  . Fixed bug GH-15181 (Disabled output handler is flushed again). (cmb)
-  . Passing E_USER_ERROR to trigger_error() is now deprecated. (Girgias)
-  . Fixed bug GH-15292 (Dynamic AVX detection is broken for MSVC). (nielsdos)
-  . Using "_" as a class name is now deprecated. (Girgias)
-  . Exiting a namespace now clears seen symbols. (ilutov)
-  . The exit (and die) language constructs now behave more like a function.
-    They can be passed liked callables, are affected by the strict_types
-    declare statement, and now perform the usual type coercions instead of
-    casting any non-integer value to a string.
-    As such, passing invalid types to exit/die may now result in a TypeError
-    being thrown. (Girgias)
-  . Fixed bug GH-15438 (Hooks on constructor promoted properties without
-    visibility are ignored). (ilutov)
-  . Fixed bug GH-15419 (Missing readonly+hook incompatibility check for readonly
-    classes). (ilutov)
-  . Fixed bug GH-15187 (Various hooked object iterator issues). (ilutov)
-  . Fixed bug GH-15456 (Crash in get_class_vars() on virtual properties).
-    (ilutov)
-  . Fixed bug GH-15501 (Windows HAVE_<header>_H macros defined to 1 or
-    undefined). (Peter Kokot)
-  . Implemented asymmetric visibility for properties. (ilutov)
-  . Fixed bug GH-15644 (Asymmetric visibility doesn't work with hooks). (ilutov)
-  . Implemented lazy objects RFC. (Arnaud)
-  . Fixed bug GH-15686 (Building shared iconv with external iconv library).
-    (Peter Kokot, zeriyoshi)
-  . Fixed missing error when adding asymmetric visibility to unilateral virtual
-    property. (ilutov)
-  . Fixed bug GH-15693 (Unnecessary include in main.c bloats binary).
-    (nielsdos)
-  . Fixed bug GH-15731 (AllowDynamicProperties validation should error on
-    enums). (DanielEScherzer)
-  . Fixed bug GH-16040 (Use-after-free of object released in hook). (ilutov)
-  . Fixed bug GH-16026 (Reuse of dtor fiber during shutdown). (Arnaud)
-  . Fixed bug GH-15999 (zend_std_write_property() assertion failure with lazy
-    objects). (Arnaud)
-  . Fixed bug GH-15960 (Foreach edge cases with lazy objects). (Arnaud)
-  . Fixed bug GH-16185 (Various hooked object iterator issues). (ilutov)
-  . Fixed bug OSS-Fuzz #371445205 (Heap-use-after-free in attr_free).
-    (nielsdos)
-  . Fixed missing error when adding asymmetric visibility to static properties.
-    (ilutov)
-  . Fixed bug OSS-Fuzz #71407 (Null-dereference WRITE in
-    zend_lazy_object_clone). (Arnaud)
-  . Fixed bug GH-16574 (Incorrect error "undefined method" messages).
-    (nielsdos)
-  . Fixed bug GH-16577 (EG(strtod_state).freelist leaks with opcache.preload).
-    (nielsdos)
-  . Fixed bug GH-16615 (Assertion failure in zend_std_read_property). (Arnaud)
-  . Fixed bug GH-16342 (Added ReflectionProperty::isLazy()). (Arnaud)
-  . Fixed bug GH-16725 (Incorrect access check for non-hooked props in hooked
-    object iterator). (ilutov)
-
-- Curl:
-  . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
-  . Bumped required libcurl version to 7.61.0. (Ayesh)
-  . Added feature_list key to the curl_version() return value. (Ayesh)
-  . Added constants CURL_HTTP_VERSION_3 (libcurl 7.66) and CURL_HTTP_VERSION_3ONLY
-    (libcurl 7.88) as options for CURLOPT_HTTP_VERSION (Ayesh Karunaratne)
-  . Added CURLOPT_TCP_KEEPCNT to set the number of probes to send before
-    dropping the connection. (David Carlier)
-  . Added CURLOPT_PREREQFUNCTION Curl option to set a custom callback
-    after the connection is established, but before the request is
-    performed. (Ayesh Karunaratne)
-  . Added CURLOPT_SERVER_RESPONSE_TIMEOUT, which was formerly known as
-    CURLOPT_FTP_RESPONSE_TIMEOUT. (Ayesh Karunaratne)
-  . The CURLOPT_DNS_USE_GLOBAL_CACHE option is now silently ignored. (Ayesh Karunaratne)
-  . Added CURLOPT_DEBUGFUNCTION as a Curl option. (Ayesh Karunaratne)
-  . Fixed bug GH-16359 (crash with curl_setopt* CURLOPT_WRITEFUNCTION
-    without null callback). (David Carlier)
-  . Fixed bug GH-16723 (CURLMOPT_PUSHFUNCTION issues). (cmb)
-
-- Date:
-  . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
-  . Added DateTime[Immutable]::[get|set]Microsecond. (Marc Bennewitz)
-  . Constants SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING, and SUNFUNCS_RET_DOUBLE
-    are now deprecated. (Jorg Sowa)
-  . Fixed bug GH-13773 (DatePeriod not taking into account microseconds for end
-    date). (Mark Bennewitz, Derick)
-
-- DBA:
-  . Passing null or false to dba_key_split() is deprecated. (Grigias)
-
-- Debugging:
-  . Fixed bug GH-15923 (GDB: Python Exception <class 'TypeError'>:
-    exceptions must derive from BaseException). (nielsdos)
-
-- DOM:
-  . Added DOMNode::compareDocumentPosition(). (nielsdos)
-  . Implement #53655 (Improve speed of DOMNode::C14N() on large XML documents).
-    (nielsdos)
-  . Fix cloning attribute with namespace disappearing namespace. (nielsdos)
-  . Implement DOM HTML5 parsing and serialization RFC. (nielsdos)
-  . Fix DOMElement->prefix with empty string creates bogus prefix. (nielsdos)
-  . Handle OOM more consistently. (nielsdos)
-  . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
-  . Added DOMXPath::quote() static method. (divinity76)
-  . Implemented opt-in ext/dom spec compliance RFC. (nielsdos)
-  . Fixed bug #79701 (getElementById does not correctly work with duplicate
-    definitions). (nielsdos)
-  . Implemented "New ext-dom features in PHP 8.4" RFC. (nielsdos)
-  . Fixed GH-14698 (segfault on DOM node dereference). (David Carlier)
-  . Improve support for template elements. (nielsdos)
-  . Fix trampoline leak in xpath callables. (nielsdos)
-  . Throw instead of silently failing when creating a too long text node in
-    (DOM)ParentNode and (DOM)ChildNode. (nielsdos)
-  . Fixed bug GH-15192 (Segmentation fault in dom extension
-    (html5_serializer)). (nielsdos)
-  . Deprecated DOM_PHP_ERR constant. (nielsdos)
-  . Removed DOMImplementation::getFeature(). (nielsdos)
-  . Fixed bug GH-15331 (Element::$substitutedNodeValue test failed). (nielsdos)
-  . Fixed bug GH-15570 (Segmentation fault (access null pointer) in
-    ext/dom/html5_serializer.c). (nielsdos)
-  . Fixed bug GH-13988 (Storing DOMElement consume 4 times more memory in
-    PHP 8.1 than in PHP 8.0). (nielsdos)
-  . Fix XML serializer errata: xmlns="" serialization should be allowed.
-    (nielsdos)
-  . Fixed bug GH-15910 (Assertion failure in ext/dom/element.c). (nielsdos)
-  . Fix unsetting DOM properties. (nielsdos)
-  . Fixed bug GH-16190 (Using reflection to call Dom\Node::__construct
-    causes assertion failure). (nielsdos)
-  . Fix edge-case in DOM parsing decoding. (nielsdos)
-  . Fixed bug GH-16465 (Heap buffer overflow in DOMNode->getElementByTagName).
-    (nielsdos)
-  . Fixed bug GH-16594 (Assertion failure in DOM -> before). (nielsdos)
-
-- Fileinfo:
-  . Update to libmagic 5.45. (nielsdos)
-  . Fixed bug #65106 (PHP fails to compile ext/fileinfo). (Guillaume Outters)
-
-- FPM:
-  . Implement GH-12385 (flush headers without body when calling flush()).
-    (nielsdos)
-  . Added DragonFlyBSD system to the list which set FPM_BACKLOG_DEFAULT
-    to SOMAXCONN. (David Carlier)
-  . /dev/poll events.mechanism for Solaris/Illumos setting had been retired.
-    (David Carlier)
-  . Added memory peak to the scoreboard / status page. (Flávio Heleno)
-
-- FTP:
-  . Removed the deprecated inet_ntoa call support. (David Carlier)
-  . Fixed bug #63937 (Upload speed 10 times slower with PHP). (nielsdos)
-
-- GD:
-  . Fix parameter numbers and missing alpha check for imagecolorset().
-    (Giovanni Giacobbi)
-  . imagepng/imagejpeg/imagewep/imageavif now throw an exception on
-    invalid quality parameter. (David Carlier)
-  . Check overflow/underflow for imagescale/imagefilter. (David Carlier)
-  . Added gdImageClone to bundled libgd. (David Carlier)
-
-- Gettext:
-  . bind_textdomain_codeset, textdomain and d(*)gettext functions
-    now throw an exception on empty domain. (David Carlier)
-
-- GMP:
-  . The GMP class is now final and cannot be extended anymore. (Girgias)
-  . RFC: Change GMP bool cast behavior. (Saki Takamachi)
-
-- Hash:
-  . Changed return type of hash_update() to true. (nielsdos)
-  . Added HashContext::__debugInfo(). (timwolla)
-  . Deprecated passing incorrect data types for options to ext/hash functions.
-    (nielsdos)
-  . Added SSE2 and SHA-NI implementation of SHA-256. (timwolla, Colin Percival,
-    Graham Percival)
-  . Fix GH-15384 (Build fails on Alpine / Musl for amd64). (timwolla)
-  . Fixed bug GH-15742 (php_hash_sha.h incompatible with C++). (cmb)
-
-- IMAP:
-  . Moved to PECL. (Derick Rethans)
-
-- Intl:
-  . Added IntlDateFormatter::PATTERN constant. (David Carlier)
-  . Fixed Numberformatter::__construct when the locale is invalid, now
-    throws an exception. (David Carlier)
-  . Added NumberFormatter::ROUND_TOWARD_ZERO and ::ROUND_AWAY_FROM_ZERO as
-    aliases for ::ROUND_DOWN and ::ROUND_UP. (Jorg Sowa)
-  . Added NumberFormatter::ROUND_HALFODD. (Ayesh Karunaratne)
-  . Added PROPERTY_IDS_UNARY_OPERATOR, PROPERTY_ID_COMPAT_MATH_START and
-    PROPERTY_ID_COMPAT_MATH_CONTINUE constants. (David Carlier)
-  . Added IntlDateFormatter::getIanaID/intltz_get_iana_id method/function.
-    (David Carlier)
-  . Set to C++17 standard for icu 74 and onwards. (David Carlier)
-  . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
-    ResourceBundle object now throw:
-    - TypeError for invalid offset types
-    - ValueError for an empty string
-    - ValueError if the integer index does not fit in a signed 32 bit integer
-  . ResourceBundle::get() now has a tentative return type of:
-    ResourceBundle|array|string|int|null
-  . Added the new Grapheme function grapheme_str_split. (youkidearitai)
-  . Added IntlDateFormatter::parseToCalendar. (David Carlier)
-  . Added SpoofChecker::setAllowedChars to set unicode chars ranges.
-    (David Carlier)
-
-- LDAP:
-  . Added LDAP_OPT_X_TLS_PROTOCOL_MAX/LDAP_OPT_X_TLS_PROTOCOL_TLS1_3
-    constants. (StephenWall)
-
-- LibXML:
-  . Added LIBXML_RECOVER constant. (nielsdos)
-  . libxml_set_streams_context() now throws immediately on an invalid context
-    instead of at the use-site. (nielsdos)
-  . Added LIBXML_NO_XXE constant. (nielsdos)
-
-- MBString:
-  . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
-  . Added mb_ucfirst and mb_lcfirst. (Yuya Hamada)
-  . Updated Unicode data tables to Unicode 15.1. (Ayesh Karunaratne)
-  . Fixed bug GH-15824 (mb_detect_encoding(): Argument $encodings contains
-    invalid encoding "UTF8"). (Yuya Hamada)
-  . Updated Unicode data tables to Unicode 16.0. (Ayesh Karunaratne)
-
-- Mysqli:
-  . The mysqli_ping() function and mysqli::ping() method are now deprecated,
-    as the reconnect feature was removed in PHP 8.2. (Kamil Tekiela)
-  . The mysqli_kill() function and mysqli::kill() method are now deprecated.
-    If this functionality is needed a SQL "KILL" command can be used instead.
-    (Kamil Tekiela)
-  . The mysqli_refresh() function and mysqli::refresh() method are now deprecated.
-    If this functionality is needed a SQL "FLUSH" command can be used instead.
-    (Kamil Tekiela)
-  . Passing explicitly the $mode parameter to mysqli_store_result() has been
-    deprecated. As the MYSQLI_STORE_RESULT_COPY_DATA constant was only used in
-    conjunction with this function it has also been deprecated. (Girgias)
-
-- MySQLnd:
-  . Fixed bug GH-13440 (PDO quote bottleneck). (nielsdos)
-  . Fixed bug GH-10599 (Apache crash on Windows when using a self-referencing
-    anonymous function inside a class with an active mysqli connection).
-    (nielsdos)
-
-- Opcache:
-  . Added large shared segments support for FreeBSD. (David Carlier)
-  . If JIT is enabled, PHP will now exit with a fatal error on startup in case
-    of JIT startup initialization issues. (danog)
-  . Increased the maximum value of opcache.interned_strings_buffer to 32767 on
-    64bit archs. (Arnaud)
-  . Fixed bug GH-13834 (Applying non-zero offset 36 to null pointer in
-    zend_jit.c). (nielsdos)
-  . Fixed bug GH-14361 (Deep recursion in zend_cfg.c causes segfault).
-    (nielsdos)
-  . Fixed bug GH-14873 (PHP 8.4 min function fails on typed integer).
-    (nielsdos)
-  . Fixed bug GH-15490 (Building of callgraph modifies preloaded symbols).
-    (ilutov)
-  . Fixed bug GH-15178 (Assertion in tracing JIT on hooks). (ilutov)
-  . Fixed bug GH-15657 (Segmentation fault in dasm_x86.h). (nielsdos)
-  . Added opcache_jit_blacklist() function. (Bob)
-  . Fixed bug GH-16009 (Segmentation fault with frameless functions and
-    undefined CVs). (nielsdos)
-  . Fixed bug GH-16186 (Assertion failure in Zend/zend_operators.c). (Arnaud)
-  . Fixed bug GH-16572 (Incorrect result with reflection in low-trigger JIT).
-    (nielsdos)
-  . Fixed GH-16839 (Error on building Opcache JIT for Windows ARM64). (cmb)
-
-- OpenSSL:
-  . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
-    (Jakub Zelenka)
-  . Implement request #48520 (openssl_csr_new - allow multiple values in DN).
-    (Jakub Zelenka)
-  . Introduced new serial_hex parameter to openssl_csr_sign. (Jakub Zelenka,
-    Florian Sowade)
-  . Added X509_PURPOSE_OCSP_HELPER and X509_PURPOSE_TIMESTAMP_SIGN constants.
-    (Vincent Jardin)
-  . Bumped minimum required OpenSSL version to 1.1.1. (Ayesh Karunaratne)
-  . Added compile-time option --with-openssl-legacy-provider to enable legacy
-    provider. (Adam Saponara)
-  . Added support for Curve25519 + Curve448 based keys. (Manuel Mausz)
-  . Fixed bug GH-13343 (openssl_x509_parse should not allow omitted seconds in
-    UTCTimes). (Jakub Zelenka)
-  . Bumped minimum required OpenSSL version to 1.1.0. (cmb)
-  . Implement GH-13514 PASSWORD_ARGON2 from OpenSSL 3.2. (Remi)
-
-- Output:
-  . Clear output handler status flags during handler initialization. (haszi)
-  . Fixed bug with url_rewriter.hosts not used by output_add_rewrite_var().
-    (haszi)
-
-- PCNTL:
-  . Added pcntl_setns for Linux. (David Carlier)
-  . Added pcntl_getcpuaffinity/pcntl_setcpuaffinity. (David Carlier)
-  . Updated pcntl_get_signal_handler signal id upper limit to be
-    more in line with platforms limits. (David Carlier)
-  . Added pcntl_getcpu for Linux/FreeBSD/Solaris/Illumos. (David Carlier)
-  . Added pcntl_getqos_class/pcntl_setqos_class for macOs. (David Carlier)
-  . Added SIGCKPT/SIGCKPTEXIT constants for DragonFlyBSD. (David Carlier)
-  . Added FreeBSD's SIGTRAP handling to pcntl_siginfo_to_zval. (David Carlier)
-  . Added POSIX pcntl_waitid. (Vladimir Vrzić)
-  . Fixed bug GH-16769: (pcntl_sigwaitinfo aborts on signal value
-    as reference). (David Carlier)
-
-- PCRE:
-  . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
-  . Add "/r" modifier. (Ayesh)
-  . Upgrade bundled pcre2lib to version 10.44. (Ayesh)
-  . Fixed GH-16189 (underflow on offset argument). (David Carlier)
-  . Fix UAF issues with PCRE after request shutdown. (nielsdos)
-
-- PDO:
-  . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Implemented PDO driver-specific subclasses RFC. (danack, kocsismate)
-  . Added support for PDO driver-specific SQL parsers. (Matteo Beccati)
-  . Fixed bug GH-14792 (Compilation failure on pdo_* extensions).
-    (Peter Kokot)
-  . mysqlnd: support ER_CLIENT_INTERACTION_TIMEOUT. (Appla)
-  . The internal header php_pdo_int.h is no longer installed; it is not
-    supposed to be used by PDO drivers. (cmb)
-  . Fixed bug GH-16167 (Prevent mixing PDO sub-classes with different DSN).
-    (kocsismate)
-  . Fixed bug GH-16314 ("Pdo\Mysql object is uninitialized" when opening a
-    persistent connection). (kocsismate)
-
-- PDO_DBLIB:
-  . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Added class Pdo\DbLib. (danack, kocsismate)
-
-- PDO_Firebird:
-  . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Feature: Add transaction isolation level and mode settings to pdo_firebird.
-    (SakiTakamachi)
-  . Added class Pdo\Firebird. (danack, kocsismate)
-  . Added Pdo\Firebird::ATTR_API_VERSION. (SakiTakamachi)
-  . Added getApiVersion() and removed from getAttribute().
-    (SakiTakamachi)
-  . Supported Firebird 4.0 datatypes. (sim1984)
-  . Support proper formatting of time zone types. (sim1984)
-  . Fixed GH-15604 (Always make input parameters nullable). (sim1984)
-
-- PDO_MYSQL:
-  . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Added class Pdo\Mysql. (danack, kocsismate)
-  . Added custom SQL parser. (Matteo Beccati)
-  . Fixed GH-15949 (PDO_MySQL not properly quoting PDO_PARAM_LOB binary
-    data). (mbeccati, lcobucci)
-
-- PDO_ODBC:
-  . Added class Pdo\Odbc. (danack, kocsismate)
-
-- PDO_PGSQL:
-  . Fixed GH-12423, DSN credentials being prioritized over the user/password
-    PDO constructor arguments. (SakiTakamachi)
-  . Fixed native float support with pdo_pgsql query results. (Yurunsoft)
-  . Added class Pdo\Pgsql. (danack, kocsismate)
-  . Retrieve the memory usage of the query result resource. (KentarouTakeda)
-  . Added Pdo\Pgsql::setNoticeCallBack method to receive DB notices.
-    (outtersg)
-  . Added custom SQL parser. (Matteo Beccati)
-  . Fixed GH-15986 (Double-free due to Pdo\Pgsql::setNoticeCallback()). (cmb,
-    nielsdos)
-  . Fixed GH-12940 (Using PQclosePrepared when available instead of
-    the DEALLOCATE command to free statements resources). (David Carlier)
-  . Remove PGSQL_ATTR_RESULT_MEMORY_SIZE constant as it is provided by
-    the new PDO Subclass as Pdo\Pgsql::ATTR_RESULT_MEMORY_SIZE. (Girgias)
-
-- PDO_SQLITE:
-  . Added class Pdo\Sqlite. (danack, kocsismate)
-  . Fixed bug #81227 (PDO::inTransaction reports false when in transaction).
-    (nielsdos)
-  . Added custom SQL parser. (Matteo Beccati)
-
-- PHPDBG:
-  . array out of bounds, stack overflow handled for segfault handler on windows.
-    (David Carlier)
-  . Fixed bug GH-16041 (Support stack limit in phpdbg). (Arnaud)
-
-- PGSQL:
-  . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)
-  . Persistent connections support the PGSQL_CONNECT_FORCE_RENEW flag.
-    (David Carlier)
-  . Added pg_result_memory_size to get the query result memory usage.
-    (KentarouTakeda)
-  . Added pg_change_password to alter an user's password. (David Carlier)
-  . Added pg_put_copy_data/pg_put_copy_end to send COPY commands and signal
-    the end of the COPY. (David Carlier)
-  . Added pg_socket_poll to poll on the connection. (David Carlier)
-  . Added pg_jit to get infos on server JIT support. (David Carlier)
-  . Added pg_set_chunked_rows_size to fetch results per chunk. (David Carlier)
-  . pg_convert/pg_insert/pg_update/pg_delete ; regexes are now cached.
-    (David Carlier)
-
-- Phar:
-  . Fixed bug GH-12532 (PharData created from zip has incorrect timestamp).
-    (nielsdos)
-
-- POSIX:
-  . Added POSIX_SC_CHILD_MAX and POSIX_SC_CLK_TCK constants. (Jakub Zelenka)
-  . Updated posix_isatty to set the error number on file descriptors.
-    (David Carlier)
-
-- PSpell:
-  . Moved to PECL. (Derick Rethans)
-
-- Random:
-  . Fixed bug GH-15094 (php_random_default_engine() is not C++ conforming).
-    (cmb)
-  . lcg_value() is now deprecated. (timwolla)
-
-- Readline:
-  . Fixed readline_info, rl_line_buffer_length/rl_len globals on update.
-    (David Carlier)
-  . Fixed bug #51558 (Shared readline build fails). (Peter Kokot)
-  . Fixed UAF with readline_info(). (David Carlier)
-
-- Reflection:
-  . Implement GH-12908 (Show attribute name/class in ReflectionAttribute dump).
-    (nielsdos)
-  . Make ReflectionGenerator::getFunction() legal after generator termination.
-    (timwolla)
-  . Added ReflectionGenerator::isClosed(). (timwolla)
-  . Fixed bug GH-15718 (Segfault on ReflectionProperty::get{Hook,Hooks}() on
-    dynamic properties). (DanielEScherzer)
-  . Fixed bug GH-15694 (ReflectionProperty::isInitialized() is incorrect for
-    hooked properties). (ilutov)
-  . Add missing ReflectionProperty::hasHook[s]() methods. (ilutov)
-  . Add missing ReflectionProperty::isFinal() method. (ilutov)
-  . Fixed bug GH-16122 (The return value of ReflectionFunction::getNamespaceName()
-    and ReflectionFunction::inNamespace() for closures is incorrect). (timwolla)
-  . Fixed bug GH-16162 (No ReflectionProperty::IS_VIRTUAL) (DanielEScherzer)
-  . Fixed the name of the second parameter of
-    ReflectionClass::resetAsLazyGhost(). (Arnaud)
-
-- Session:
-  . INI settings session.sid_length and session.sid_bits_per_character are now
-    deprecated. (timwolla)
-  . Emit warnings for non-positive values of session.gc_divisor and negative values
-    of session.gc_probability. (Jorg Sowa)
-  . Fixed bug GH-16590 (UAF in session_encode()). (nielsdos)
-
-- SimpleXML:
-  . Fix signature of simplexml_import_dom(). (nielsdos)
-
-- SNMP:
-  . Removed the deprecated inet_ntoa call support. (David Carlier)
-
-- SOAP:
-  . Add support for clark notation for namespaces in class map. (lxShaDoWxl)
-  . Mitigate #51561 (SoapServer with a extented class and using sessions,
-    lost the setPersistence()). (nielsdos)
-  . Fixed bug #49278 (SoapClient::__getLastResponseHeaders returns NULL if
-    wsdl operation !has output). (nielsdos)
-  . Fixed bug #44383 (PHP DateTime not converted to xsd:datetime). (nielsdos)
-  . Fixed bug GH-11941 (soap with session persistence will silently fail when
-    "session" built as a shared object). (nielsdos)
-  . Passing an int to SoapServer::addFunction() is now deprecated.
-    If all PHP functions need to be provided flatten the array returned by
-    get_defined_functions(). (Girgias)
-  . The SOAP_FUNCTIONS_ALL constant is now deprecated. (Girgias)
-  . Fixed bug #61525 (SOAP functions require at least one space after HTTP
-    header colon). (nielsdos)
-  . Implement request #47317 (SoapServer::__getLastResponse()). (nielsdos)
-
-- Sockets:
-  . Removed the deprecated inet_ntoa call support. (David Carlier)
-  . Added the SO_EXECLUSIVEADDRUSE windows constant. (David Carlier)
-  . Added the SOCK_CONN_DGRAM/SOCK_DCCP netbsd constants. (David Carlier)
-  . Added multicast group support for ipv4 on FreeBSD. (jonathan@tangential.ca)
-  . Added the TCP_SYNCNT constant for Linux to set number of attempts to send
-    SYN packets from the client. (David Carlier)
-  . Added the SO_EXCLBIND constant for exclusive socket binding on illumos/solaris.
-    (David Carlier)
-  . Updated the socket_create_listen backlog argument default value to SOMAXCONN.
-    (David Carlier)
-  . Added the SO_NOSIGPIPE constant to control the generation of SIGPIPE for
-    macOs and FreeBSD. (David Carlier)
-  . Added SO_LINGER_SEC for macOs, true equivalent of SO_LINGER in other platforms.
-    (David Carlier)
-  . Add close-on-exec on socket created with socket_accept on unixes. (David Carlier)
-  . Added IP_PORTRANGE* constants for BSD systems to control ephemeral port
-    ranges. (David Carlier)
-  . Added SOCK_NONBLOCK/SOCK_CLOEXEC constants for socket_create and
-    socket_create_pair to apply O_NONBLOCK/O_CLOEXEC flags to the
-    newly created sockets. (David Carlier)
-  . Added SO_BINDTOIFINDEX to bind a socket to an interface index.
-    (David Carlier)
+  . Added the TCP_USER_TIMEOUT constant for Linux to set the maximum time in
+    milliseconds transmitted data can remain unacknowledged. (James Lucas)
+  . Added AF_UNSPEC support for sock_addrinfo_lookup() as a sole umbrella for
+    AF_INET* family only. (David Carlier)
+  . Fixed GH-20532 (socket_addrinfo_lookup gives the error code with a new
+    optional parameter). (David Carlier)
 
 - Sodium:
-  . Add support for AEGIS-128L and AEGIS-256. (jedisct1)
-  . Enable AES-GCM on aarch64 with the ARM crypto extensions. (jedisct1)
+  . Added support for libsodium 1.0.21 IPcrypt and XOF APIs. (jedisct1)
 
 - SPL:
-  . Implement SeekableIterator for SplObjectStorage. (nielsdos)
-  . The SplFixedArray::__wakeup() method has been deprecated as it implements
-    __serialize() and __unserialize() which need to be overwritten instead.
-    (TysonAndre)
-  . Passing a non-empty string for the $escape parameter of:
-    - SplFileObject::setCsvControl()
-    - SplFileObject::fputcsv()
-    - SplFileObject::fgetcsv()
-    is now deprecated. (Girgias)
+  . DirectoryIterator key can now work better with filesystem supporting larger
+    directory indexing. (David Carlier)
+  . Fixed bug GH-21831 (SplObjectStorage::removeAllExcept() use-after-free
+    with re-entrant getHash()). (Pratik Bhujel)
+  . Fix bugs GH-8561, GH-8562, GH-8563, and GH-8564 (Fixing various
+    SplFileObject iterator desync bugs). (iliaal)
+  . Fix bug GH-22062 (SplDoublyLinkedList iterator UAF
+    via destructor releasing next node). (David Carlier)
+
+- Sqlite3:
+  . Fix NUL byte truncation in sqlite3 TEXT column handling. (ndossche)
 
 - Standard:
-  . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)
-  . Partly fix GH-12143 (Incorrect round() result for 0.49999999999999994).
-    (timwolla)
-  . Fix GH-12252 (round(): Validate the rounding mode). (timwolla)
-  . Increase the default BCrypt cost to 12. (timwolla)
-  . Fixed bug GH-12592 (strcspn() odd behaviour with NUL bytes and empty mask).
-    (nielsdos)
-  . Removed the deprecated inet_ntoa call support. (David Carlier)
-  . Cast large floats that are within int range to int in number_format so
-    the precision is not lost. (Marc Bennewitz)
-  . Add support for 4 new rounding modes to the round() function. (Jorg Sowa)
-  . debug_zval_dump() now indicates whether an array is packed. (Max Semenik)
-  . Fix GH-12143 (Optimize round). (SakiTakamachi)
-  . Changed return type of long2ip to string from string|false. (Jorg Sowa)
-  . Fix GH-12143 (Extend the maximum precision round can handle by one digit).
-    (SakiTakamachi)
-  . Added the http_get_last_response_headers() and
-    http_clear_last_response_headers() that allows retrieving the same content
-    as the magic $http_response_header variable.
-  . Add php_base64_encode_ex() API. (Remi)
-  . Implemented "Raising zero to the power of negative number" RFC. (Jorg Sowa)
-  . Added array_find(), array_find_key(), array_all(), and array_any(). (josh)
-  . Change highlight_string() and print_r() return type to string|true. (Ayesh)
-  . Fix references in request_parse_body() options array. (nielsdos)
-  . Add RoundingMode enum. (timwolla, saki)
-  . Unserializing the uppercase 'S' tag is now deprecated. (timwolla)
-  . Enables crc32 auxiliary detection on OpenBSD. (David Carlier)
-  . Passing a non-empty string for the $escape parameter of:
-    - fputcsv()
-    - fgetcsv()
-    - str_getcsv()
-    is now deprecated. (Girgias)
-  . The str_getcsv() function now throws ValueErrors when the $separator and
-    $enclosure arguments are not one byte long, or if the $escape is not one
-    byte long or the empty string. This aligns the behaviour to be identical
-    to that of fputcsv() and fgetcsv(). (Girgias)
-  . php_uname() now throws ValueErrors on invalid inputs. (Girgias)
-  . The "allowed_classes" option for unserialize() now throws TypeErrors and
-    ValueErrors	if it is not an	array of class names. (Girgias)
-  . Implemented GH-15685 (improve proc_open error reporting on Windows). (cmb)
-  . Add support for backed enums in http_build_query(). (ilutov)
-  . Fixed bug GH-15982 (Assertion failure with array_find when references are
-    involved). (nielsdos)
-  . Fixed parameter names of fpow() to be identical to pow(). (Girgias)
+  . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
+    while COW violation flag is still set). (alexandre-daubois)
+  . Added form feed (\f) in the default trimmed characters of trim(), rtrim()
+    and ltrim(). (Weilin Du)
+  . Invalid mode values now throw in array_filter() instead of being silently
+    defaulted to 0. (Jorg Sowa)
+  . Fixed bug GH-21058 (error_log() crashes with message_type 3 and
+    null destination). (David Carlier)
+  . Fixed bug GH-13204 (glob() fails if square bracket is in current directory).
+    (ndossche)
+  . Add array size maximum to array_diff(). (ndossche)
+  . Add enum SortDirection. (timwolla)
+  . pathinfo() raises a ValueError with an invalid $flags argument.
+    (David Carlier)
+  . Passing an invalid flag value to the second argument of scandir() will now
+    throw a ValueError. (alexandre-daubois)
+  . array_change_key_case() now raises a ValueError when an invalid $case
+    argument value is passed. (Girgias)
+  . linkinfo() now raises a ValueError when the argument is an empty string.
+    (Weilin Du)
+  . getenv() and putenv() now raises a ValueError when the first argument
+    contains null bytes. (Weilin Du)
+  . parse_str() now raises a ValueError when the $string argument contains
+    null bytes. (Weilin Du)
+  . proc_open() now raises a ValueError when the $cwd argument contains
+    null bytes. (Weilin Du)
+  . ini_get_all() now includes the built-in default value in the details.
+    (sebastian)
+  . Fixed bug GH-22171 (Invalid auth header generation in
+    http(s) stream wrapper). (David Carlier)
 
 - Streams:
-  . Implemented GH-15155 (Stream context is lost when custom stream wrapper is
-    being filtered). (Quentin Dreyer)
+  . Added new stream errors API including new StreamException, StreamError
+    classes, StreamErrorStore, StreamErrorMode, StreamErrorCode enums,
+    stream_last_errors() and stream_clear_errors() functions, error_mode,
+    error_store and error_handler stream context options and extending some
+    stream functions with context param. (Jakub Zelenka)
+  . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
+    socket context options. (Jakub Zelenka)
+  . Added so_reuseaddr streams context socket option that allows disabling
+    address reuse. (Jakub Zelenka)
+  . Fixed bug GH-20370 (User stream filters could violate typed property
+    constraints). (alexandre-daubois)
+  . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)
+  . Fixed bug GH-21221 (Prevent closing of innerstream of php://temp stream).
+    (ilutov)
+  . Improved stream_socket_server() bind failure error reporting. (ilutov)
+  . Fixed bug #49874 (ftell() and fseek() inconsistency when using stream
+    filters). (Jakub Zelenka)
 
-- Tidy:
-  . Failures in the constructor now throw exceptions rather than emitting
-    warnings and having a broken object. (nielsdos)
-  . Add tidyNode::getNextSibling() and tidyNode::getPreviousSibling().
-    (nielsdos)
-
-- Windows:
-  . Update the icon of the Windows executables, e.g. php.exe. (Ayesh,
-    Nurudin Imširović)
-  . Fixed bug GH-16199 (GREP_HEADER() is broken). (Peter Kokot)
-
-- XML:
-  . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
-  . Fixed bug #81481 (xml_get_current_byte_index limited to 32-bit numbers on
-    64-bit builds). (nielsdos)
-  . The xml_set_object() function has been deprecated. (Girgias)
-  . Passing non-callable strings to the xml_set_*_handler() functions is now
-    deprecated. (Girgias)
-
-- XMLReader:
-  . Declares class constant types. (Ayesh)
-  . Add XMLReader::fromStream(), XMLReader::fromUri(), XMLReader::fromString(). (nielsdos)
-  . Fixed bug GH-15123 (var_dump doesn't actually work on XMLReader).
-    (nielsdos)
-
-- XMLWriter:
-  . Add XMLWriter::toStream(), XMLWriter::toUri(), XMLWriter::toMemory(). (nielsdos)
-
-- XSL:
-  . Implement request #64137 (XSLTProcessor::setParameter() should allow both
-    quotes to be used). (nielsdos)
-  . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
-  . Added XSLTProcessor::$maxTemplateDepth and XSLTProcessor::$maxTemplateVars.
-    (nielsdos)
-  . Fix trampoline leak in xpath callables. (nielsdos)
+- URI:
+  . Added Uri\Rfc3986\Uri:getUriType() and Uri\WhatWg\Url:isSpecialScheme().
+    (kocsismate)
+  . Added Uri\Rfc3986\Uri:getHostType() and Uri\WhatWg\Url:getHostType().
+    (kocsismate)
 
 - Zip:
-  . Added ZipArchive::ER_TRUNCATED_ZIP added in libzip 1.11. (Remi)
+  . Fixed ZipArchive callback being called after executor has shut down.
+    (ilutov)
+  . Support minimum version for libzip dependency updated to 1.0.0.
+    (David Carlier)
+  . Added ZipArchive::openString() method.
+    (Tim Starling, Soner Sayakci, Ghaith Olabi)
+
+- Zlib:
+  . deflate_init() now raises a TypeError when the value for option
+    "level", "memory", "window", or "strategy" is not of type int.
+    (Weilin Du)
+  . inflate_init() now raises a TypeError when the value for option
+    "window" is not of type int. (Weilin Du)
+
+<<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

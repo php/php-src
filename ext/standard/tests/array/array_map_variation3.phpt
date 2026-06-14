@@ -31,11 +31,11 @@ $arrays = array (
        array("one" => 1, 2 => "two", 4 => "four"),  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*13*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
+/*13*/
        array(true => "true", false => "false", "false" => false, "true" => true),
        array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-       array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-       array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
+       array(1 => '', 2 => "", 5 => false, 6 => true),
+       array('' => 1, "" => 2, false => 5, true => 6),
 
        // array with repetitive keys
 /*18*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
@@ -158,15 +158,6 @@ array(3) {
   string(4) "four"
 }
 -- Iteration 13 --
-array(3) {
-  [""]=>
-  string(4) "null"
-  ["NULL"]=>
-  NULL
-  ["null"]=>
-  NULL
-}
--- Iteration 14 --
 array(4) {
   [1]=>
   string(4) "true"
@@ -177,7 +168,7 @@ array(4) {
   ["true"]=>
   bool(true)
 }
--- Iteration 15 --
+-- Iteration 14 --
 array(3) {
   [""]=>
   string(6) "emptys"
@@ -186,31 +177,27 @@ array(3) {
   ["emptys"]=>
   string(0) ""
 }
--- Iteration 16 --
-array(6) {
+-- Iteration 15 --
+array(4) {
   [1]=>
   string(0) ""
   [2]=>
   string(0) ""
-  [3]=>
-  NULL
-  [4]=>
-  NULL
   [5]=>
   bool(false)
   [6]=>
   bool(true)
 }
--- Iteration 17 --
+-- Iteration 16 --
 array(3) {
   [""]=>
-  int(4)
+  int(2)
   [0]=>
   int(5)
   [1]=>
   int(6)
 }
--- Iteration 18 --
+-- Iteration 17 --
 array(3) {
   ["One"]=>
   int(10)

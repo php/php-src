@@ -2,10 +2,11 @@
 Bug #79441 Segfault in mb_chr() if internal encoding is unsupported
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=utf-7
 --FILE--
 <?php
 
-mb_internal_encoding("utf-7");
 try {
     mb_chr(0xd800);
 } catch (\ValueError $e) {

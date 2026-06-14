@@ -1,3 +1,17 @@
+/*
+   +----------------------------------------------------------------------+
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
+   +----------------------------------------------------------------------+
+   | Authors: Gustavo Lopes    <cataphract@php.net>                       |
+   +----------------------------------------------------------------------+
+ */
+
 #include <php.h>
 #include <php_network.h>
 #include "php_sockets.h"
@@ -13,16 +27,16 @@ extern zend_result php_string_to_if_index(const char *val, unsigned *out);
 
 #ifdef HAVE_IPV6
 /* Sets addr by hostname, or by ip in string form (AF_INET6) */
-int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock) /* {{{ */
+int php_set_inet6_addr(struct sockaddr_in6 *sin6, zend_string *string, php_socket *php_sock) /* {{{ */
 {
 	struct in6_addr tmp;
 #ifdef HAVE_GETADDRINFO
 	struct addrinfo hints;
 	struct addrinfo *addrinfo = NULL;
 #endif
-	char *scope = strchr(string, '%');
+	char *scope = strchr(ZSTR_VAL(string), '%');
 
-	if (inet_pton(AF_INET6, string, &tmp)) {
+	if (inet_pton(AF_INET6, ZSTR_VAL(string), &tmp)) {
 		memcpy(&(sin6->sin6_addr.s6_addr), &(tmp.s6_addr), sizeof(struct in6_addr));
 	} else {
 #ifdef HAVE_GETADDRINFO
@@ -34,7 +48,7 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 #else
 		hints.ai_flags = AI_ADDRCONFIG;
 #endif
-		getaddrinfo(string, NULL, &hints, &addrinfo);
+		getaddrinfo(ZSTR_VAL(string), NULL, &hints, &addrinfo);
 		if (!addrinfo) {
 #ifdef PHP_WIN32
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", WSAGetLastError());
@@ -84,15 +98,15 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 #endif
 
 /* Sets addr by hostname, or by ip in string form (AF_INET)  */
-int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock) /* {{{ */
+int php_set_inet_addr(struct sockaddr_in *sin, zend_string *string, php_socket *php_sock) /* {{{ */
 {
 	struct in_addr tmp;
 	struct hostent *host_entry;
 
-	if (inet_pton(AF_INET, string, &tmp)) {
+	if (inet_pton(AF_INET, ZSTR_VAL(string), &tmp)) {
 		sin->sin_addr.s_addr = tmp.s_addr;
 	} else {
-		if (strlen(string) > MAXFQDNLEN || ! (host_entry = php_network_gethostbyname(string))) {
+		if (ZSTR_LEN(string) > MAXFQDNLEN || ! (host_entry = php_network_gethostbyname(ZSTR_VAL(string)))) {
 			/* Note: < -10000 indicates a host lookup error */
 #ifdef PHP_WIN32
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", WSAGetLastError());
@@ -114,7 +128,7 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 
 /* Sets addr by hostname or by ip in string form (AF_INET or AF_INET6,
  * depending on the socket) */
-int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *string, php_socket *php_sock) /* {{{ */
+int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, zend_string *string, php_socket *php_sock) /* {{{ */
 {
 	if (php_sock->type == AF_INET) {
 		struct sockaddr_in t = {0};
@@ -137,8 +151,7 @@ int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *strin
 	}
 #endif
 	else {
-		php_error_docref(NULL, E_WARNING,
-			"IP address used in the context of an unexpected type of socket");
+		zend_value_error("IP address used in the context of an unexpected type of socket");
 	}
 	return 0;
 }

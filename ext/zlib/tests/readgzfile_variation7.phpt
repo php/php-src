@@ -1,39 +1,17 @@
 --TEST--
-Test function readgzfile() by substituting argument 1 with string values.
+readgzfile() with unknown file
 --EXTENSIONS--
 zlib
 --FILE--
 <?php
 
-
-$use_include_path = false;
-
-
-$heredoc = <<<EOT
-hello world
-EOT;
-
-$variation_array = array(
-  'string DQ' => "string",
-  'string SQ' => 'string',
-  'mixed case string' => "sTrInG",
-  'heredoc' => $heredoc
-  );
-
-
-foreach ( $variation_array as $var ) {
-  var_dump(readgzfile( $var ,  $use_include_path ) );
-}
+$file = "unknown_file.txt.gz";
+var_dump(readgzfile($file, false));
+var_dump(readgzfile($file, true));
 ?>
 --EXPECTF--
-Warning: readgzfile(string): Failed to open stream: No such file or directory in %s on line %d
+Warning: readgzfile(unknown_file.txt.gz): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: readgzfile(string): Failed to open stream: No such file or directory in %s on line %d
-bool(false)
-
-Warning: readgzfile(sTrInG): Failed to open stream: No such file or directory in %s on line %d
-bool(false)
-
-Warning: readgzfile(hello world): Failed to open stream: No such file or directory in %s on line %d
+Warning: readgzfile(unknown_file.txt.gz): Failed to open stream: No such file or directory in %s on line %d
 bool(false)

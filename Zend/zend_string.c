@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -18,6 +17,7 @@
 
 #include "zend.h"
 #include "zend_globals.h"
+#include "zend_multiply.h"
 
 #ifdef HAVE_VALGRIND
 # include "valgrind/callgrind.h"
@@ -86,8 +86,6 @@ static zend_always_inline void zend_init_interned_strings_ht(HashTable *interned
 ZEND_API void zend_interned_strings_init(void)
 {
 	char s[2];
-	unsigned int i;
-	zend_string *str;
 
 	interned_string_request_handler = zend_new_interned_string_request;
 	interned_string_init_request_handler = zend_string_init_interned_request;
@@ -96,22 +94,20 @@ ZEND_API void zend_interned_strings_init(void)
 	zend_empty_string = NULL;
 	zend_known_strings = NULL;
 
-	zend_init_interned_strings_ht(&interned_strings_permanent, 1);
+	zend_init_interned_strings_ht(&interned_strings_permanent, true);
 
 	zend_new_interned_string = zend_new_interned_string_permanent;
 	zend_string_init_interned = zend_string_init_interned_permanent;
 	zend_string_init_existing_interned = zend_string_init_existing_interned_permanent;
 
 	/* interned empty string */
-	str = zend_string_alloc(sizeof("")-1, 1);
-	ZSTR_VAL(str)[0] = '\000';
-	zend_empty_string = zend_new_interned_string_permanent(str);
+	zend_empty_string = zend_string_init_interned_permanent("", 0, true);
 	GC_ADD_FLAGS(zend_empty_string, IS_STR_VALID_UTF8);
 
 	s[1] = 0;
-	for (i = 0; i < 256; i++) {
+	for (size_t i = 0; i < 256; i++) {
 		s[0] = i;
-		zend_one_char_string[i] = zend_new_interned_string_permanent(zend_string_init(s, 1, 1));
+		zend_one_char_string[i] = zend_string_init_interned_permanent(s, 1, true);
 		if (i < 0x80) {
 			GC_ADD_FLAGS(zend_one_char_string[i], IS_STR_VALID_UTF8);
 		}
@@ -119,9 +115,8 @@ ZEND_API void zend_interned_strings_init(void)
 
 	/* known strings */
 	zend_known_strings = pemalloc(sizeof(zend_string*) * ((sizeof(known_strings) / sizeof(known_strings[0]) - 1)), 1);
-	for (i = 0; i < (sizeof(known_strings) / sizeof(known_strings[0])) - 1; i++) {
-		str = zend_string_init(known_strings[i], strlen(known_strings[i]), 1);
-		zend_known_strings[i] = zend_new_interned_string_permanent(str);
+	for (size_t i = 0; i < (sizeof(known_strings) / sizeof(known_strings[0])) - 1; i++) {
+		zend_known_strings[i] = zend_string_init_interned_permanent(known_strings[i], strlen(known_strings[i]), true);
 		GC_ADD_FLAGS(zend_known_strings[i], IS_STR_VALID_UTF8);
 	}
 }
@@ -350,7 +345,7 @@ static zend_string* ZEND_FASTCALL zend_string_init_existing_interned_request(con
 
 ZEND_API void zend_interned_strings_activate(void)
 {
-	zend_init_interned_strings_ht(&CG(interned_strings), 0);
+	zend_init_interned_strings_ht(&CG(interned_strings), false);
 }
 
 ZEND_API void zend_interned_strings_deactivate(void)
@@ -479,12 +474,12 @@ ZEND_API zend_string *zend_string_concat2(
 		const char *str1, size_t str1_len,
 		const char *str2, size_t str2_len)
 {
-	size_t len = str1_len + str2_len;
-	zend_string *res = zend_string_alloc(len, 0);
+	zend_string *res = zend_string_safe_alloc(1, str1_len, str2_len, 0);
 
-	memcpy(ZSTR_VAL(res), str1, str1_len);
-	memcpy(ZSTR_VAL(res) + str1_len, str2, str2_len);
-	ZSTR_VAL(res)[len] = '\0';
+	char *p = ZSTR_VAL(res);
+	p = zend_mempcpy(p, str1, str1_len);
+	p = zend_mempcpy(p, str2, str2_len);
+	*p++ = '\0';
 
 	return res;
 }
@@ -494,13 +489,15 @@ ZEND_API zend_string *zend_string_concat3(
 		const char *str2, size_t str2_len,
 		const char *str3, size_t str3_len)
 {
-	size_t len = str1_len + str2_len + str3_len;
+	size_t tmp_len = zend_safe_address_guarded(1, str1_len, str2_len);
+	size_t len = zend_safe_address_guarded(1, tmp_len, str3_len);
 	zend_string *res = zend_string_alloc(len, 0);
 
-	memcpy(ZSTR_VAL(res), str1, str1_len);
-	memcpy(ZSTR_VAL(res) + str1_len, str2, str2_len);
-	memcpy(ZSTR_VAL(res) + str1_len + str2_len, str3, str3_len);
-	ZSTR_VAL(res)[len] = '\0';
+	char *p = ZSTR_VAL(res);
+	p = zend_mempcpy(p, str1, str1_len);
+	p = zend_mempcpy(p, str2, str2_len);
+	p = zend_mempcpy(p, str3, str3_len);
+	*p++ = '\0';
 
 	return res;
 }

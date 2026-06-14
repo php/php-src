@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Jim Winstead <jimw@php.net>                                 |
@@ -44,7 +42,6 @@
 #include <pwd.h>
 #endif
 
-#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -73,7 +70,7 @@ Allows any change to open_basedir setting in during Startup and Shutdown events,
 or a tightening during activation/runtime/deactivation */
 PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 {
-	char **p = (char **) ZEND_INI_GET_ADDR();
+	char **p = ZEND_INI_GET_ADDR();
 	char *pathbuf, *ptr, *end;
 
 	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN || stage == PHP_INI_STAGE_ACTIVATE || stage == PHP_INI_STAGE_DEACTIVATE) {
@@ -506,7 +503,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 	php_stream_wrapper *wrapper;
 	zend_string *exec_filename;
 
-	if (!filename || CHECK_NULL_PATH(filename, filename_length)) {
+	if (!filename || zend_char_has_nul_byte(filename, filename_length)) {
 		return NULL;
 	}
 
@@ -531,7 +528,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 		   IS_ABSOLUTE_PATH doesn't care about this path form till now. It
 		   might be a big thing to extend, thus just a local handling for
 		   now. */
-		filename_length >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
+		(filename_length >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1])) ||
 #endif
 	    !path ||
 	    !*path) {

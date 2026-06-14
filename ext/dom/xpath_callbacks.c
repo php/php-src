@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -353,7 +351,7 @@ static zval *php_dom_xpath_callback_fetch_args(xmlXPathParserContextPtr ctxt, ui
 								xmlNsPtr original = (xmlNsPtr) node;
 
 								/* Make sure parent dom object exists, so we can take an extra reference. */
-								zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
+								zval parent_zval; /* don't destroy me, my lifetime is transferred to the fake namespace decl */
 								php_dom_create_object(nsparent, &parent_zval, intern);
 								dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
 
@@ -408,6 +406,7 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 		fci.param_count = param_count;
 		fci.params = params;
 		fci.named_params = NULL;
+		fci.consumed_args = 0;
 		ZVAL_STRINGL(&fci.function_name, function_name, function_name_length);
 
 		zend_call_function(&fci, NULL);
@@ -430,15 +429,12 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 	if (Z_TYPE(callback_retval) != IS_UNDEF) {
 		if (Z_TYPE(callback_retval) == IS_OBJECT
 		 && (instanceof_function(Z_OBJCE(callback_retval), dom_get_node_ce(php_dom_follow_spec_node((const xmlNode *) ctxt->context->doc))))) {
-			xmlNode *nodep;
-			dom_object *obj;
 			if (xpath_callbacks->node_list == NULL) {
 				xpath_callbacks->node_list = zend_new_array(0);
 			}
-			Z_ADDREF_P(&callback_retval);
 			zend_hash_next_index_insert_new(xpath_callbacks->node_list, &callback_retval);
-			obj = Z_DOMOBJ_P(&callback_retval);
-			nodep = dom_object_get_node(obj);
+			dom_object *obj = Z_DOMOBJ_P(&callback_retval);
+			xmlNodePtr nodep = dom_object_get_node(obj);
 			valuePush(ctxt, xmlXPathNewNodeSet(nodep));
 		} else if (Z_TYPE(callback_retval) == IS_FALSE || Z_TYPE(callback_retval) == IS_TRUE) {
 			valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(callback_retval) == IS_TRUE));
@@ -447,11 +443,10 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 			zval_ptr_dtor(&callback_retval);
 			return FAILURE;
 		} else {
-			zend_string *str = zval_get_string(&callback_retval);
-			valuePush(ctxt, xmlXPathNewString(BAD_CAST ZSTR_VAL(str)));
-			zend_string_release_ex(str, 0);
+			convert_to_string(&callback_retval);
+			valuePush(ctxt, xmlXPathNewString(BAD_CAST Z_STRVAL(callback_retval)));
+			zval_ptr_dtor_str(&callback_retval);
 		}
-		zval_ptr_dtor(&callback_retval);
 	}
 
 	return SUCCESS;

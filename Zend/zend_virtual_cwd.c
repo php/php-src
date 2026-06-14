@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Sascha Schumann <sascha@schumann.cx>                        |
@@ -524,18 +522,18 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 			(i + 1 == len && path[i] == '.')) {
 			/* remove double slashes and '.' */
 			len = EXPECTED(i > 0) ? i - 1 : 0;
-			is_dir = 1;
+			is_dir = true;
 			continue;
 		} else if (i + 2 == len && path[i] == '.' && path[i+1] == '.') {
 			/* remove '..' and previous directory */
-			is_dir = 1;
+			is_dir = true;
 			if (link_is_dir) {
 				*link_is_dir = 1;
 			}
 			if (i <= start + 1) {
 				return start ? start : len;
 			}
-			j = tsrm_realpath_r(path, start, i-1, ll, t, use_realpath, 1, NULL);
+			j = tsrm_realpath_r(path, start, i-1, ll, t, use_realpath, true, NULL);
 			if (j > start && j != (size_t)-1) {
 				j--;
 				assert(i < MAXPATHLEN);
@@ -948,7 +946,8 @@ retry_reparse_tag_cloud:
 				j = start;
 			} else {
 				/* some leading directories may be inaccessible */
-				j = tsrm_realpath_r(path, start, i-1, ll, t, save ? CWD_FILEPATH : use_realpath, 1, NULL);
+				j = tsrm_realpath_r(path, start, i-1, ll, t, save ? CWD_FILEPATH : use_realpath, true,
+						    NULL);
 				if (j > start && j != (size_t)-1) {
 					path[j++] = DEFAULT_SLASH;
 				}
@@ -1138,7 +1137,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 
 	add_slash = (use_realpath != CWD_REALPATH) && path_length > 0 && IS_SLASH(resolved_path[path_length-1]);
 	t = CWDG(realpath_cache_ttl) ? 0 : -1;
-	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL);
+	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, false, NULL);
 
 	if (path_length == (size_t)-1) {
 #ifdef ZEND_WIN32

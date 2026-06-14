@@ -2,10 +2,10 @@
 Bug #65045: mb_convert_encoding breaks well-formed character
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
-
-mb_internal_encoding('UTF-8');
 
 $str = "\xF0\xA4\xAD".  "\xF0\xA4\xAD\xA2"."\xF0\xA4\xAD\xA2";
 $str2 = "\xF0\xA4\xAD\xA2"."\xF0\xA4\xAD\xA2"."\xF0\xA4\xAD";

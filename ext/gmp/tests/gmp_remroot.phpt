@@ -105,5 +105,5 @@ array(2) {
     string(1) "0"
   }
 }
-gmp_rootrem(): Argument #2 ($nth) must be greater than or equal to 1
-gmp_rootrem(): Argument #2 ($nth) must be greater than or equal to 1
+gmp_rootrem(): Argument #2 ($nth) must be between 1 and %d
+gmp_rootrem(): Argument #2 ($nth) must be between 1 and %d

@@ -169,15 +169,15 @@ function zlib_get_coding_type(): string|false {}
  * @return array<int, string>|false
  * @refcount 1
  */
-function gzfile(string $filename, int $use_include_path = 0): array|false {}
+function gzfile(string $filename, bool $use_include_path = false): array|false {}
 
 /**
  * @return resource|false
  * @refcount 1
  */
-function gzopen(string $filename, string $mode, int $use_include_path = 0) {}
+function gzopen(string $filename, string $mode, bool $use_include_path = false) {}
 
-function readgzfile(string $filename, int $use_include_path = 0): int|false {}
+function readgzfile(string $filename, bool $use_include_path = false): int|false {}
 
 /** @refcount 1 */
 function zlib_encode(string $data, int $encoding, int $level = -1): string|false {}

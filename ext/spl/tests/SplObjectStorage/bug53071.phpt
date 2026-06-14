@@ -13,8 +13,8 @@ function LimitedScope()
     $myB = new SplObjectStorage();
     $myC = new myClass();
     $myC->member = $myA; // myC has a reference to myA
-    $myB->Attach($myC);  // myB attaches myC
-    $myA->member = $myB; // myA has myB, comleting the cycle
+    $myB->offsetSet($myC);  // myB attaches myC
+    $myA->member = $myB; // myA has myB, completing the cycle
 }
 LimitedScope();
 var_dump(gc_collect_cycles());

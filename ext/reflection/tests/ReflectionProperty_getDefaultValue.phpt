@@ -60,15 +60,21 @@ $property = new ReflectionProperty($test, 'dynamic');
 var_dump($property->getDefaultValue());
 
 ?>
---EXPECT--
+--EXPECTF--
 NULL
 string(3) "baz"
 NULL
 int(1234)
+
+Deprecated: ReflectionProperty::getDefaultValue() for a property without a default value is deprecated, use ReflectionProperty::hasDefaultValue() to check if the default value exists in %s on line %d
 NULL
 int(1234)
+
+Deprecated: ReflectionProperty::getDefaultValue() for a property without a default value is deprecated, use ReflectionProperty::hasDefaultValue() to check if the default value exists in %s on line %d
 NULL
 NULL
 int(4)
 int(42)
+
+Deprecated: ReflectionProperty::getDefaultValue() for a property without a default value is deprecated, use ReflectionProperty::hasDefaultValue() to check if the default value exists in %s on line %d
 NULL

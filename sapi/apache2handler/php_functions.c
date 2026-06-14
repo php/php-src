@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Sascha Schumann <sascha@schumann.cx>                         |
    +----------------------------------------------------------------------+
@@ -41,7 +39,6 @@
 #include "http_log.h"
 #include "http_main.h"
 #include "util_script.h"
-#include "http_core.h"
 #include "ap_mpm.h"
 #ifndef PHP_WIN32
 #include "unixd.h"
@@ -173,19 +170,17 @@ PHP_FUNCTION(apache_request_headers)
 	const apr_array_header_t *arr;
 	char *key, *val;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
 	ctx = SG(server_context);
 	arr = apr_table_elts(ctx->r->headers_in);
 
-	APR_ARRAY_FOREACH_OPEN(arr, key, val)
+	APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 		if (!val) val = "";
 		add_assoc_string(return_value, key, val);
-	APR_ARRAY_FOREACH_CLOSE()
+	} APR_ARRAY_FOREACH_CLOSE();
 }
 /* }}} */
 
@@ -196,19 +191,17 @@ PHP_FUNCTION(apache_response_headers)
 	const apr_array_header_t *arr;
 	char *key, *val;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
 	ctx = SG(server_context);
 	arr = apr_table_elts(ctx->r->headers_out);
 
-	APR_ARRAY_FOREACH_OPEN(arr, key, val)
+	APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 		if (!val) val = "";
 		add_assoc_string(return_value, key, val);
-	APR_ARRAY_FOREACH_CLOSE()
+	} APR_ARRAY_FOREACH_CLOSE();
 }
 /* }}} */
 
@@ -249,22 +242,19 @@ PHP_FUNCTION(apache_setenv)
 	php_struct *ctx;
 	char *variable=NULL, *string_val=NULL;
 	size_t variable_len, string_val_len;
-	bool walk_to_top = 0;
-	int arg_count = ZEND_NUM_ARGS();
+	bool walk_to_top = false;
 	request_rec *r;
 
-	if (zend_parse_parameters(arg_count, "ss|b", &variable, &variable_len, &string_val, &string_val_len, &walk_to_top) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &variable, &variable_len, &string_val, &string_val_len, &walk_to_top) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
 
 	r = ctx->r;
-	if (arg_count == 3) {
-		if (walk_to_top) {
-			while(r->prev) {
-				r = r->prev;
-			}
+	if (walk_to_top) {
+		while(r->prev) {
+			r = r->prev;
 		}
 	}
 
@@ -284,22 +274,19 @@ PHP_FUNCTION(apache_getenv)
 	char *variable;
 	size_t variable_len;
 	bool walk_to_top = 0;
-	int arg_count = ZEND_NUM_ARGS();
 	char *env_val=NULL;
 	request_rec *r;
 
-	if (zend_parse_parameters(arg_count, "s|b", &variable, &variable_len, &walk_to_top) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &variable, &variable_len, &walk_to_top) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
 
 	r = ctx->r;
-	if (arg_count == 2) {
-		if (walk_to_top) {
-			while(r->prev) {
-				r = r->prev;
-			}
+	if (walk_to_top) {
+		while(r->prev) {
+			r = r->prev;
 		}
 	}
 
@@ -422,12 +409,12 @@ PHP_MINFO_FUNCTION(apache)
 		SECTION("Apache Environment");
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
-		APR_ARRAY_FOREACH_OPEN(arr, key, val)
+		APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 			if (!val) {
 				val = "";
 			}
 			php_info_print_table_row(2, key, val);
-		APR_ARRAY_FOREACH_CLOSE()
+		} APR_ARRAY_FOREACH_CLOSE();
 
 		php_info_print_table_end();
 
@@ -437,21 +424,21 @@ PHP_MINFO_FUNCTION(apache)
 		php_info_print_table_row(2, "HTTP Request", ((php_struct *) SG(server_context))->r->the_request);
 
 		arr = apr_table_elts(((php_struct *) SG(server_context))->r->headers_in);
-		APR_ARRAY_FOREACH_OPEN(arr, key, val)
+		APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 			if (!val) {
 				val = "";
 			}
 		        php_info_print_table_row(2, key, val);
-		APR_ARRAY_FOREACH_CLOSE()
+		} APR_ARRAY_FOREACH_CLOSE();
 
 		php_info_print_table_colspan_header(2, "HTTP Response Headers");
 		arr = apr_table_elts(((php_struct *) SG(server_context))->r->headers_out);
-		APR_ARRAY_FOREACH_OPEN(arr, key, val)
+		APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 			if (!val) {
 				val = "";
 			}
 		        php_info_print_table_row(2, key, val);
-		APR_ARRAY_FOREACH_CLOSE()
+		} APR_ARRAY_FOREACH_CLOSE();
 
 		php_info_print_table_end();
 	}

@@ -4,9 +4,6 @@ Test mb_substr_count() function : error conditions - pass unknown encoding
 mbstring
 --FILE--
 <?php
-/*
- * Test behaviour of mb_substr_count() function when passed an unknown encoding
- */
 
 echo "*** Testing mb_substr_count() : error conditions ***\n";
 

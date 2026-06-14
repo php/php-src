@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
 
 /* Wait Constants */
 
@@ -1006,8 +1009,11 @@ const PCNTL_ECAPMODE = UNKNOWN;
     function pcntl_waitpid(int $process_id, &$status, int $flags = 0, &$resource_usage = []): int {}
 
 #if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
-    /** @param array $info */
-    function pcntl_waitid(int $idtype = P_ALL, ?int $id = null, &$info = [], int $flags = WEXITED): bool {}
+    /**
+    * @param array $info
+    * @param array $resource_usage
+    */
+    function pcntl_waitid(int $idtype = P_ALL, ?int $id = null, &$info = [], int $flags = WEXITED, &$resource_usage = []): bool {}
 #endif
 
     /**
@@ -1029,14 +1035,12 @@ const PCNTL_ECAPMODE = UNKNOWN;
     function pcntl_sigprocmask(int $mode, array $signals, &$old_signals = null): bool {}
 #endif
 
-#ifdef HAVE_STRUCT_SIGINFO_T
 #if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
     /** @param array $info */
     function pcntl_sigwaitinfo(array $signals, &$info = []): int|false {}
 
     /** @param array $info */
     function pcntl_sigtimedwait(array $signals, &$info = [], int $seconds = 0, int $nanoseconds = 0): int|false {}
-#endif
 #endif
 
     function pcntl_wifexited(int $status): bool {}
@@ -1055,7 +1059,7 @@ function pcntl_wifcontinued(int $status): bool {}
 
     function pcntl_wstopsig(int $status): int|false {}
 
-    function pcntl_exec(string $path, array $args = [], array $env_vars = []): bool {}
+    function pcntl_exec(string $path, array $args = [], array $env_vars = []): false {}
 
     function pcntl_alarm(int $seconds): int {}
 

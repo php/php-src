@@ -1,5 +1,5 @@
 --TEST--
-Bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag, not enity)
+Bug #39504 (xmlwriter_write_dtd_entity() creates Attlist tag, not entity)
 --EXTENSIONS--
 xmlwriter
 --FILE--

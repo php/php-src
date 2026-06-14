@@ -2,6 +2,67 @@
 
 /** @generate-class-entries */
 
+namespace Openssl {
+
+    class OpensslException extends Exception
+    {
+    }
+
+    /**
+     * @strict-properties
+     */
+    final class Psk
+    {
+        /**
+         * @cvalue PHP_OPENSSL_PSK_MAX_PSK_LEN
+         */
+        public const int MAX_PSK_LEN = UNKNOWN;
+
+        /**
+         * @cvalue PHP_OPENSSL_PSK_MAX_IDENTITY_LEN
+         */
+        public const int MAX_IDENTITY_LEN = UNKNOWN;
+
+        public readonly string $psk;
+        public readonly ?string $identity;
+
+        public function __construct(string $psk, ?string $identity = null) {}
+    }
+
+    /**
+     * @strict-properties
+     */
+    final class Session
+    {
+        public readonly string $id;
+
+        public function export(int $format = OPENSSL_ENCODING_PEM): string {}
+
+        public static function import(string $data, int $format = OPENSSL_ENCODING_PEM): Session {}
+
+        public function isResumable(): bool {}
+
+        public function getTimeout(): int {}
+
+        public function getCreatedAt(): int {}
+
+        public function getProtocol(): ?string {}
+
+        public function getCipher(): ?string {}
+
+        public function hasTicket(): bool {}
+
+        public function getTicketLifetimeHint(): ?int {}
+
+        public function __serialize(): array {}
+
+        public function __unserialize(array $data): void {}
+    }
+
+}
+
+namespace {
+
 /**
  * @var string
  * @cvalue OPENSSL_VERSION_TEXT
@@ -86,14 +147,6 @@ const OPENSSL_ALGO_MD4 = UNKNOWN;
  */
 const OPENSSL_ALGO_MD2 = UNKNOWN;
 #endif
-#if PHP_OPENSSL_API_VERSION < 0x10100
-/**
- * @var int
- * @cvalue OPENSSL_ALGO_DSS1
- */
-const OPENSSL_ALGO_DSS1 = UNKNOWN;
-#endif
-
 /**
  * @var int
  * @cvalue OPENSSL_ALGO_SHA224
@@ -174,6 +227,26 @@ const PKCS7_NOSIGS = UNKNOWN;
  * @cvalue PKCS7_NOOLDMIMETYPE
  */
 const PKCS7_NOOLDMIMETYPE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOSMIMECAP
+ */
+const PKCS7_NOSMIMECAP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_CRLFEOL
+ */
+const PKCS7_CRLFEOL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOCRL
+ */
+const PKCS7_NOCRL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NO_DUAL_CONTENT
+ */
+const PKCS7_NO_DUAL_CONTENT = UNKNOWN;
 
 /**
  * @var int
@@ -244,6 +317,11 @@ const OPENSSL_NO_PADDING = UNKNOWN;
  * @cvalue RSA_PKCS1_OAEP_PADDING
  */
 const OPENSSL_PKCS1_OAEP_PADDING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue RSA_PKCS1_PSS_PADDING
+ */
+const OPENSSL_PKCS1_PSS_PADDING = UNKNOWN;
 
 /* Informational stream wrapper constants */
 
@@ -371,7 +449,6 @@ const OPENSSL_ZERO_PADDING = UNKNOWN;
 const OPENSSL_DONT_ZERO_PAD_KEY = UNKNOWN;
 
 #ifndef OPENSSL_NO_TLSEXT
-/** @var int */
 const OPENSSL_TLSEXT_SERVER_NAME = 1;
 #endif
 
@@ -392,7 +469,6 @@ const OPENSSL_ENCODING_SMIME = UNKNOWN;
  * @cvalue ENCODING_PEM
  */
 const OPENSSL_ENCODING_PEM = UNKNOWN;
-
 
 /**
  * @strict-properties
@@ -557,7 +633,7 @@ function openssl_pkcs7_read(string $data, &$certificates): bool {}
 function openssl_cms_verify(string $input_filename, int $flags = 0, ?string $certificates = null, array $ca_info = [], ?string $untrusted_certificates_filename = null, ?string $content = null, ?string $pk7 = null, ?string $sigfile = null, int $encoding = OPENSSL_ENCODING_SMIME): bool {}
 
 /** @param OpenSSLCertificate|array|string $certificate */
-function openssl_cms_encrypt(string $input_filename, string $output_filename, $certificate, ?array $headers, int $flags = 0, int $encoding = OPENSSL_ENCODING_SMIME, int $cipher_algo = OPENSSL_CIPHER_AES_128_CBC): bool {}
+function openssl_cms_encrypt(string $input_filename, string $output_filename, $certificate, ?array $headers, int $flags = 0, int $encoding = OPENSSL_ENCODING_SMIME, string|int $cipher_algo = OPENSSL_CIPHER_AES_128_CBC): bool {}
 
 /**
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
@@ -583,13 +659,13 @@ function openssl_private_encrypt(#[\SensitiveParameter] string $data, &$encrypte
  * @param string $decrypted_data
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_private_decrypt(string $data, #[\SensitiveParameter] &$decrypted_data, #[\SensitiveParameter] $private_key, int $padding = OPENSSL_PKCS1_PADDING): bool {}
+function openssl_private_decrypt(string $data, #[\SensitiveParameter] &$decrypted_data, #[\SensitiveParameter] $private_key, int $padding = OPENSSL_PKCS1_PADDING, ?string $digest_algo = null): bool {}
 
 /**
  * @param string $encrypted_data
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key
  */
-function openssl_public_encrypt(#[\SensitiveParameter] string $data, &$encrypted_data, $public_key, int $padding = OPENSSL_PKCS1_PADDING): bool {}
+function openssl_public_encrypt(#[\SensitiveParameter] string $data, &$encrypted_data, $public_key, int $padding = OPENSSL_PKCS1_PADDING, ?string $digest_algo = null): bool {}
 
 /**
  * @param string $decrypted_data
@@ -603,10 +679,10 @@ function openssl_error_string(): string|false {}
  * @param string $signature
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1): bool {}
+function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0): bool {}
 
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key */
-function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1): int|false {}
+function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0): int|false {}
 
 /**
  * @param string $sealed_data
@@ -646,9 +722,9 @@ function openssl_digest(string $data, string $digest_algo, bool $binary = false)
 /**
  * @param string $tag
  */
-function openssl_encrypt(#[\SensitiveParameter] string $data, string $cipher_algo, #[\SensitiveParameter] string $passphrase, int $options = 0, string $iv = "", &$tag = null, string $aad = "", int $tag_length = 16): string|false {}
+function openssl_encrypt(#[\SensitiveParameter] string $data, string $cipher_algo, #[\SensitiveParameter] string $passphrase, int $options = 0, string $iv = "", &$tag = null, ?string $aad = "", int $tag_length = 16): string|false {}
 
-function openssl_decrypt(string $data, string $cipher_algo, #[\SensitiveParameter] string $passphrase, int $options = 0, string $iv = "", ?string $tag = null, string $aad = ""): string|false {}
+function openssl_decrypt(string $data, string $cipher_algo, #[\SensitiveParameter] string $passphrase, int $options = 0, string $iv = "", ?string $tag = null, ?string $aad = ""): string|false {}
 
 function openssl_cipher_iv_length(string $cipher_algo): int|false {}
 
@@ -683,3 +759,5 @@ function openssl_get_cert_locations(): array {}
 function openssl_password_hash(string $algo, #[\SensitiveParameter] string $password, array $options = []): string {}
 function openssl_password_verify(string $algo, #[\SensitiveParameter] string $password, string $hash): bool {}
 #endif
+
+}

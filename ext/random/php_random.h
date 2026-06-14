@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -34,18 +32,9 @@
 # include "php.h"
 # include "php_random_csprng.h"
 # include "php_random_uint128.h"
+# include "random_decl.h"
 
 PHPAPI double php_combined_lcg(void);
-
-typedef struct _php_random_fallback_seed_state php_random_fallback_seed_state;
-
-PHPAPI uint64_t php_random_generate_fallback_seed(void);
-PHPAPI uint64_t php_random_generate_fallback_seed_ex(php_random_fallback_seed_state *state);
-
-static inline zend_long GENERATE_SEED(void)
-{
-	return (zend_long)php_random_generate_fallback_seed();
-}
 
 # define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
 
@@ -61,31 +50,31 @@ PHPAPI uint32_t php_mt_rand(void);
 PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max);
 PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max);
 
-typedef struct _php_random_status_state_mt19937 {
+typedef struct php_random_status_state_mt19937 {
 	uint32_t count;
 	enum php_random_mt19937_mode mode;
 	uint32_t state[624];
 } php_random_status_state_mt19937;
 
-typedef struct _php_random_status_state_pcgoneseq128xslrr64 {
+typedef struct php_random_status_state_pcgoneseq128xslrr64 {
 	php_random_uint128_t state;
 } php_random_status_state_pcgoneseq128xslrr64;
 
-typedef struct _php_random_status_state_xoshiro256starstar {
+typedef struct php_random_status_state_xoshiro256starstar {
 	uint64_t state[4];
 } php_random_status_state_xoshiro256starstar;
 
-typedef struct _php_random_status_state_user {
+typedef struct php_random_status_state_user {
 	zend_object *object;
 	zend_function *generate_method;
 } php_random_status_state_user;
 
-typedef struct _php_random_result {
+typedef struct php_random_result {
 	uint64_t result;
 	size_t size;
 } php_random_result;
 
-typedef struct _php_random_algo {
+typedef struct php_random_algo {
 	const size_t state_size;
 	php_random_result (*generate)(void *state);
 	zend_long (*range)(void *state, zend_long min, zend_long max);
@@ -93,12 +82,12 @@ typedef struct _php_random_algo {
 	bool (*unserialize)(void *state, HashTable *data);
 } php_random_algo;
 
-typedef struct _php_random_algo_with_state {
+typedef struct php_random_algo_with_state {
 	const php_random_algo *algo;
 	void *state;
 } php_random_algo_with_state;
 
-typedef struct _php_random_fallback_seed_state {
+typedef struct php_random_fallback_seed_state {
 	bool initialized;
 	unsigned char seed[20];
 } php_random_fallback_seed_state;
@@ -109,12 +98,12 @@ extern PHPAPI const php_random_algo php_random_algo_xoshiro256starstar;
 extern PHPAPI const php_random_algo php_random_algo_secure;
 extern PHPAPI const php_random_algo php_random_algo_user;
 
-typedef struct _php_random_engine {
+typedef struct php_random_engine {
 	php_random_algo_with_state engine;
 	zend_object std;
 } php_random_engine;
 
-typedef struct _php_random_randomizer {
+typedef struct php_random_randomizer {
 	php_random_algo_with_state engine;
 	bool is_userland_algo;
 	zend_object std;
@@ -136,22 +125,25 @@ extern PHPAPI zend_class_entry *random_ce_Random_Randomizer;
 
 extern PHPAPI zend_class_entry *random_ce_Random_IntervalBoundary;
 
-static inline php_random_engine *php_random_engine_from_obj(zend_object *object) {
-	return (php_random_engine *)((char *)(object) - XtOffsetOf(php_random_engine, std));
-}
-
-static inline php_random_randomizer *php_random_randomizer_from_obj(zend_object *object) {
-	return (php_random_randomizer *)((char *)(object) - XtOffsetOf(php_random_randomizer, std));
-}
+#define php_random_engine_from_obj(object) ZEND_CONTAINER_OF(object, php_random_engine, std)
+#define php_random_randomizer_from_obj(object) ZEND_CONTAINER_OF(object, php_random_randomizer, std)
 
 # define Z_RANDOM_ENGINE_P(zval) php_random_engine_from_obj(Z_OBJ_P(zval))
 
 # define Z_RANDOM_RANDOMIZER_P(zval) php_random_randomizer_from_obj(Z_OBJ_P(zval));
 
+PHPAPI uint64_t php_random_generate_fallback_seed(void);
+PHPAPI uint64_t php_random_generate_fallback_seed_ex(php_random_fallback_seed_state *state);
+
+static inline zend_long GENERATE_SEED(void)
+{
+	return (zend_long)php_random_generate_fallback_seed();
+}
+
 PHPAPI void *php_random_status_alloc(const php_random_algo *algo, const bool persistent);
 PHPAPI void *php_random_status_copy(const php_random_algo *algo, void *old_status, void *new_status);
 PHPAPI void php_random_status_free(void *status, const bool persistent);
-PHPAPI php_random_engine *php_random_engine_common_init(zend_class_entry *ce, zend_object_handlers *handlers, const php_random_algo *algo);
+PHPAPI php_random_engine *php_random_engine_common_init(zend_class_entry *ce, const php_random_algo *algo);
 PHPAPI void php_random_engine_common_free_object(zend_object *object);
 PHPAPI zend_object *php_random_engine_common_clone_object(zend_object *object);
 PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t umax);

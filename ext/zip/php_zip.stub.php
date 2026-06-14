@@ -82,12 +82,10 @@ class ZipArchive implements Countable
      * @cvalue ZIP_OVERWRITE
      */
     public const int OVERWRITE = UNKNOWN;
-#ifdef ZIP_RDONLY
     /**
      * @cvalue ZIP_RDONLY
      */
     public const int RDONLY = UNKNOWN;
-#endif
 
     /**
      * @cvalue ZIP_FL_NOCASE
@@ -154,7 +152,7 @@ class ZipArchive implements Countable
     public const int FL_ENC_CP437 = UNKNOWN;
 
     /**
-     * Additionnal flags not from libzip
+     * Additional flags not from libzip
      * @cvalue ZIP_FL_OPEN_FILE_NOW
      */
     public const int FL_OPEN_FILE_NOW = UNKNOWN;
@@ -648,6 +646,8 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function open(string $filename, int $flags = 0): bool|int {}
 
+    public function openString(string $data = '', int $flags = 0): bool|int {}
+
     /**
      * @tentative-return-type
      */
@@ -655,6 +655,8 @@ class ZipArchive implements Countable
 
     /** @tentative-return-type */
     public function close(): bool {}
+
+    public function closeString(): string|false {}
 
     /** @tentative-return-type */
     public function count(): int {}
@@ -704,13 +706,11 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function setCommentName(string $name, string $comment): bool {}
 
-#ifdef HAVE_SET_MTIME
     /** @tentative-return-type */
     public function setMtimeIndex(int $index, int $timestamp, int $flags = 0): bool {}
 
     /** @tentative-return-type */
     public function setMtimeName(string $name, int $timestamp, int $flags = 0): bool {}
-#endif
 
     /** @tentative-return-type */
     public function getCommentIndex(int $index, int $flags = 0): string|false {}

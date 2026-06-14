@@ -26,7 +26,7 @@ PHP_ARG_WITH([openssl-argon2],
 
 if test "$PHP_OPENSSL" != "no"; then
   PHP_NEW_EXTENSION([openssl],
-    [openssl.c openssl_pwhash.c xp_ssl.c],
+    [openssl.c openssl_pwhash.c openssl_backend_common.c openssl_backend_v1.c openssl_backend_v3.c xp_ssl.c],
     [$ext_shared])
   PHP_SUBST([OPENSSL_SHARED_LIBADD])
   PHP_SETUP_OPENSSL([OPENSSL_SHARED_LIBADD],
@@ -49,9 +49,6 @@ if test "$PHP_OPENSSL" != "no"; then
       the default provider.])])
 
   AS_VAR_IF([PHP_OPENSSL_ARGON2], [no],, [
-    AS_VAR_IF([PHP_THREAD_SAFETY], [yes],
-      [AC_MSG_ERROR([Not supported in ZTS mode for now])])
-
     PHP_CHECK_LIBRARY([crypto], [OSSL_set_max_threads],
       [AC_DEFINE([HAVE_OPENSSL_ARGON2], [1],
         [Define to 1 to enable OpenSSL argon2 password hashing.])],

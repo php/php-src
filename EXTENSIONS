@@ -195,6 +195,13 @@ PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net> (1999 - 2002)
 MAINTENANCE:         Orphan
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           lexbor
+PRIMARY MAINTAINER:  Niels Dossche <nielsdos@php.net> (2025 - 2025)
+                     Mate Kocsis <kocsismate@php.net> (2025 - 2025)
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               8.5
+-------------------------------------------------------------------------------
 EXTENSION:           libxml
 PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2003 - 2009)
                      Christian Stocker <chregu@php.net> (2004 - 2011)
@@ -231,6 +238,7 @@ SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           bcmath
 PRIMARY MAINTAINER:  Andi Gutmans <andi@php.net> (2000 - 2004)
+                     Saki Takamachi <saki@php.net> (2024 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -343,6 +351,7 @@ STATUS:              Working
 EXTENSION:           intl
 PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2008 - 2019)
                      Anatol Belski <ab@php.net> (2017 - 2018)
+                     Weilin Du <weilindu@php.net> (2026 - 2026)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
@@ -364,8 +373,8 @@ STATUS:              Working
 EXTENSION:           mbstring
 PRIMARY MAINTAINER:  Rui Hirokawa <hirokawa@php.net> (2001 - 2013)
                      Nikita Popov <nikic@php.net> (2017 - 2020)
-                     Alex Dowad <alexinbeijing@gmail.com> (2021 - 2024)
-                     Yuya Hamada <youkidearitai@gmail.com> (2024 - 2024)
+                     Alex Dowad <alexinbeijing@gmail.com> (2021 - 2026)
+                     Yuya Hamada <youkidearitai@gmail.com> (2024 - 2026)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -412,7 +421,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           random
 PRIMARY MAINTAINER   Go Kudo <zeriyoshi@php.net> (2022 - 2024)
-                     Tim Düsterhus <timwolla@php.net> (2022 - 2024)
+                     Tim Düsterhus <timwolla@php.net> (2022 - 2026)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               8.2.0
@@ -426,6 +435,7 @@ EXTENSION:           reflection
 PRIMARY MAINTAINER:  Marcus Börger <helly@php.net> (2003 - 2009)
                      Johannes Schlüter <johannes@php.net> (2006 - 2014)
                      Nikita Popov <nikic@php.net> (2019 - 2020)
+                     Daniel Scherzer <daniel.e.scherzer@gmail.com> (2025 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -495,6 +505,13 @@ PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net> (2002 - 2002)
                      Nikita Popov <nikic@php.net> (2013 - 2020)
 MAINTENANCE:         Maintained
 STATUS:              Working
+-------------------------------------------------------------------------------
+EXTENSION:           uri
+PRIMARY MAINTAINER   Máté Kocsis <kocsismate@php.net> (2025 - 2025)
+                     Tim Düsterhus <timwolla@php.net> (2025 - 2026)
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               8.5.0
 -------------------------------------------------------------------------------
 EXTENSION:           zip
 PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net> (2006 - 2011)

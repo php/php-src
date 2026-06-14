@@ -27,7 +27,6 @@ foreach( $options as $option ) {
     foreach( $buffers as $string ) {
         var_dump( finfo_buffer( $finfo, $string, $option ) );
     }
-    finfo_close( $finfo );
 }
 
 ?>

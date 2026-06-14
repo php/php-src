@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Ard Biesheuvel <abies@php.net>                               |
   +----------------------------------------------------------------------+
@@ -297,7 +295,7 @@ static FbTokenType php_firebird_get_token(const char** begin, const char* end)
 
 static int php_firebird_preprocess(const zend_string* sql, char* sql_out, size_t* sql_out_len, HashTable* named_params)
 {
-	bool passAsIs = 1, execBlock = 0;
+	bool passAsIs = true, execBlock = false;
 	zend_long pindex = -1;
 	char pname[254], ident[253], ident2[253];
 	unsigned int l;
@@ -354,7 +352,7 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, size_t
 		memcpy(ident2, i2, l);
 		ident2[l] = '\0';
 		execBlock = !strcasecmp(ident2, "BLOCK");
-		passAsIs = 0;
+		passAsIs = false;
 	}
 	else
 	{
@@ -466,7 +464,6 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, size_t
 		case ttNone:
 			/* Execute statement preprocess SQL error */
 			return 0;
-			break;
 		}
 	}
 	*sql_out_p = '\0';
@@ -548,7 +545,7 @@ void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state,
 		einfo->errmsg_length = 0;
 	}
 
-	if (H->isc_status && (H->isc_status[0] == 1 && H->isc_status[1] > 0)) {
+	if (H->isc_status[0] == 1 && H->isc_status[1] > 0) {
 		char buf[512];
 		size_t buf_size = sizeof(buf), read_len = 0;
 		ssize_t tmp_len;
@@ -570,7 +567,7 @@ void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state,
 
 		char sqlstate[sizeof(pdo_error_type)];
 		fb_sqlstate(sqlstate, H->isc_status);
-		if (sqlstate != NULL && strlen(sqlstate) < sizeof(pdo_error_type)) {
+		if (strlen(sqlstate) < sizeof(pdo_error_type)) {
 			strcpy(*error_code, sqlstate);
 			goto end;
 		}
@@ -605,7 +602,7 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 			php_firebird_rollback_transaction(dbh);
 		}
 	}
-	H->in_manually_txn = 0;
+	H->in_manually_txn = false;
 
 	/* isc_detach_database returns 0 on success, 1 on failure. */
 	if (H->db && isc_detach_database(H->isc_status, &H->db)) {
@@ -922,7 +919,7 @@ static bool firebird_handle_manually_begin(pdo_dbh_t *dbh) /* {{{ */
 	if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ false)) {
 		return false;
 	}
-	H->in_manually_txn = 1;
+	H->in_manually_txn = true;
 	return true;
 }
 /* }}} */
@@ -972,7 +969,7 @@ static bool firebird_handle_manually_commit(pdo_dbh_t *dbh) /* {{{ */
 			return false;
 		}
 	}
-	H->in_manually_txn = 0;
+	H->in_manually_txn = false;
 	return true;
 }
 /* }}} */
@@ -1008,7 +1005,7 @@ static bool firebird_handle_manually_rollback(pdo_dbh_t *dbh) /* {{{ */
 			return false;
 		}
 	}
-	H->in_manually_txn = 0;
+	H->in_manually_txn = false;
 	return true;
 }
 /* }}} */
@@ -1246,27 +1243,9 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			ZVAL_BOOL(val, !isc_version(&H->db, php_firebird_info_cb, NULL));
 			return 1;
 
-		case PDO_ATTR_CLIENT_VERSION: {
-#if defined(__GNUC__) || defined(PHP_WIN32)
-			info_func_t info_func = NULL;
-#ifdef __GNUC__
-			info_func = (info_func_t)dlsym(RTLD_DEFAULT, "isc_get_client_version");
-#else
-			HMODULE l = GetModuleHandle("fbclient");
-
-			if (!l) {
-				break;
-			}
-			info_func = (info_func_t)GetProcAddress(l, "isc_get_client_version");
-#endif
-			if (info_func) {
-				info_func(tmp);
-				ZVAL_STRING(val, tmp);
-			}
-#else
-			ZVAL_NULL(val);
-#endif
-			}
+		case PDO_ATTR_CLIENT_VERSION:
+			isc_get_client_version(tmp);
+			ZVAL_STRING(val, tmp);
 			return 1;
 
 		case PDO_ATTR_SERVER_VERSION:
@@ -1390,7 +1369,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 		dbh->password = pestrdup(vars[5].optval, dbh->is_persistent);
 	}
 
-	H->in_manually_txn = 0;
+	H->in_manually_txn = false;
 	H->is_writable_txn = pdo_attr_lval(driver_options, PDO_FB_WRITABLE_TRANSACTION, 1);
 	zend_long txn_isolation_level = pdo_attr_lval(driver_options, PDO_FB_TRANSACTION_ISOLATION_LEVEL, PDO_FB_REPEATABLE_READ);
 	if (txn_isolation_level == PDO_FB_READ_COMMITTED ||
@@ -1450,7 +1429,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 		char errmsg[512];
 		const ISC_STATUS *s = H->isc_status;
 		fb_interpret(errmsg, sizeof(errmsg),&s);
-		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%ld] %s",
+		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%" PRIiPTR "] %s",
 				"HY000", H->isc_status[1], errmsg);
 	}
 

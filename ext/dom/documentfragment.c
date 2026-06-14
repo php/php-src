@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -36,9 +34,7 @@ PHP_METHOD(DOMDocumentFragment, __construct)
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	nodep = xmlNewDocFragment(NULL);
 
@@ -73,7 +69,7 @@ PHP_METHOD(DOMDocumentFragment, appendXML) {
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS) {
+	if (dom_node_is_read_only(nodep)) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}

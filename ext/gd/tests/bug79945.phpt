@@ -9,17 +9,17 @@ if (!(imagetypes() & IMG_PNG)) {
 }
 set_error_handler(function($errno, $errstr) {
     if (str_contains($errstr, 'Cannot cast a filtered stream on this system')) {
-        die('skip: fopencookie not support on this system');
+        die('skip: fopencookie not supported on this system');
     }
 });
-imagecreatefrompng('php://filter/read=convert.base64-encode/resource=' . __DIR__ . '/test.png');
+imagecreatefrompng('php://filter/read=string.rot13/resource=' . __DIR__ . '/test.png');
 restore_error_handler();
 ?>
 --FILE--
 <?php
-imagecreatefrompng('php://filter/read=convert.base64-encode/resource=' . __DIR__ . '/test.png');
+imagecreatefrompng('php://filter/read=string.rot13/resource=' . __DIR__ . '/test.png');
 ?>
 --CLEAN--
 --EXPECTF--
 
-Warning: imagecreatefrompng(): "php://filter/read=convert.base64-encode/resource=%s" is not a valid PNG file in %s on line %d
+Warning: imagecreatefrompng(): "php://filter/read=string.rot13/resource=%s" is not a valid PNG file in %s on line %d

@@ -7,6 +7,9 @@ class stdClass
 {
 }
 
+/** @refcount 1 */
+function clone(object $object, array $withProperties = []): object {}
+
 function exit(string|int $status = 0): never {}
 
 /** @alias exit */
@@ -15,11 +18,16 @@ function die(string|int $status = 0): never {}
 /** @refcount 1 */
 function zend_version(): string {}
 
+/** @forbid-dynamic-calls */
 function func_num_args(): int {}
 
+/** @forbid-dynamic-calls */
 function func_get_arg(int $position): mixed {}
 
-/** @return array<int, mixed> */
+/**
+ * @return array<int, mixed>
+ * @forbid-dynamic-calls
+ */
 function func_get_args(): array {}
 
 function strlen(string $string): int {}
@@ -117,10 +125,14 @@ function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
 
 function restore_error_handler(): true {}
 
+function get_error_handler(): ?callable {}
+
 /** @return callable|null */
 function set_exception_handler(?callable $callback) {}
 
 function restore_exception_handler(): true {}
+
+function get_exception_handler(): ?callable {}
 
 /**
  * @return array<int, string>
@@ -149,6 +161,7 @@ function get_defined_functions(bool $exclude_disabled = true): array {}
 /**
  * @return array<string, mixed|ref>
  * @refcount 1
+ * @forbid-dynamic-calls
  */
 function get_defined_vars(): array {}
 

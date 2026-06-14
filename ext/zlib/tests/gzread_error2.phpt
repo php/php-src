@@ -4,7 +4,7 @@ Test function gzread() by calling it invalid lengths
 zlib
 --FILE--
 <?php
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 $h = gzopen($f, 'r');
 var_dump(gzread($h, 10));
 try {

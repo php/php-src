@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>							  |
@@ -34,10 +32,8 @@ extern zend_module_entry dom_module_entry;
 #include <libxml/xinclude.h>
 #include <libxml/hash.h>
 #include <libxml/c14n.h>
-#ifdef LIBXML_HTML_ENABLED
 #include <libxml/HTMLparser.h>
 #include <libxml/HTMLtree.h>
-#endif
 #ifdef LIBXML_XPATH_ENABLED
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
@@ -56,13 +52,13 @@ extern zend_module_entry dom_module_entry;
 #include "xpath_callbacks.h"
 #include "zend_exceptions.h"
 #include "dom_ce.h"
+#include "php_dom_decl.h"
+
 /* DOM API_VERSION, please bump it up, if you change anything in the API
     therefore it's easier for the script-programmers to check, what's working how
    Can be checked with phpversion("dom");
 */
 #define DOM_API_VERSION "20031129"
-/* Define a custom type for iterating using an unused nodetype */
-#define DOM_NODESET XML_XINCLUDE_START
 
 typedef struct dom_xpath_object {
 	php_dom_xpath_callbacks xpath_callbacks;
@@ -72,31 +68,14 @@ typedef struct dom_xpath_object {
 
 static inline dom_xpath_object *php_xpath_obj_from_obj(zend_object *obj) {
 	return (dom_xpath_object*)((char*)(obj)
-		- XtOffsetOf(dom_xpath_object, dom) - XtOffsetOf(dom_object, std));
+		- offsetof(dom_xpath_object, dom) - offsetof(dom_object, std));
 }
 
 #define Z_XPATHOBJ_P(zv)  php_xpath_obj_from_obj(Z_OBJ_P((zv)))
 
-typedef struct dom_nnodemap_object {
-	dom_object *baseobj;
-	zval baseobj_zv;
-	int nodetype;
-	int cached_length;
-	xmlHashTable *ht;
-	xmlChar *local, *local_lower;
-	xmlChar *ns;
-	php_libxml_cache_tag cache_tag;
-	dom_object *cached_obj;
-	zend_long cached_obj_index;
-	xmlDictPtr dict;
-	bool free_local : 1;
-	bool free_ns : 1;
-} dom_nnodemap_object;
-
 typedef struct {
 	zend_object_iterator intern;
 	zval curobj;
-	HashPosition pos;
 	/* intern->index is only updated for FE_* opcodes, not for e.g. unpacking,
 	 * yet we need to track the position of the node relative to the start. */
 	zend_ulong index;
@@ -111,18 +90,11 @@ typedef struct {
 	dom_object dom;
 } dom_object_namespace_node;
 
-typedef enum dom_iterator_type {
-	DOM_NODELIST,
-	DOM_NAMEDNODEMAP,
-	DOM_DTD_NAMEDNODEMAP,
-	DOM_HTMLCOLLECTION,
-} dom_iterator_type;
-
 struct php_dom_libxml_ns_mapper;
 typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
 
 static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zend_object *obj) {
-	return (dom_object_namespace_node*)((char*)(obj) - XtOffsetOf(dom_object_namespace_node, dom.std));
+	return (dom_object_namespace_node*)((char*)(obj) - offsetof(dom_object_namespace_node, dom.std));
 }
 
 #include "domexception.h"
@@ -147,16 +119,15 @@ void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
 void php_dom_normalize_legacy(xmlNodePtr nodep);
 void php_dom_normalize_modern(xmlNodePtr nodep);
-xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, xmlChar *local_lower, zend_long *cur, zend_long index);
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, const xmlChar *ns, const xmlChar *local, const zend_string *local_lower, zend_long *cur, zend_long index);
 void php_dom_create_implementation(zval *retval, bool modern);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);
-int dom_node_is_read_only(const xmlNode *node);
+bool dom_node_is_read_only(const xmlNode *node);
 bool dom_node_children_valid(const xmlNode *node);
-void php_dom_create_iterator(zval *return_value, dom_iterator_type iterator_type, bool modern);
-void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, const char *local, size_t local_len, const char *ns, size_t ns_len);
-xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
-xmlNode *php_dom_libxml_hash_iter(dom_nnodemap_object *objmap, int index);
+xmlNodePtr create_notation(xmlDtdPtr parent_dtd, const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
+void dom_free_notation(xmlEntityPtr entity);
+xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce);
 xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr original, zval *return_value, dom_object *parent_intern);
@@ -188,6 +159,8 @@ xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, 
 void dom_set_document_ref_pointers(xmlNodePtr node, php_libxml_ref_obj *document);
 void dom_set_document_ref_pointers_attr(xmlAttrPtr attr, php_libxml_ref_obj *document);
 
+/* Prop getters by offset */
+zval *dom_get_prop_checked_offset(dom_object *obj, uint32_t offset, const char *name);
 /* Temporarily materialize namespace declarations as nsDef entries on the tree so
  * that libxml's native validators/canonicalizers can resolve prefixed QNames that
  * appear in element/attribute *content*. Modern DOM keeps declarations off the
@@ -195,6 +168,7 @@ void dom_set_document_ref_pointers_attr(xmlAttrPtr attr, php_libxml_ref_obj *doc
 void dom_relink_ns_decls(HashTable *links, xmlNodePtr root);
 void dom_unlink_ns_decls(HashTable *links);
 zval *dom_element_class_list_zval(dom_object *obj);
+zval *dom_parent_node_children(dom_object *obj);
 
 typedef enum {
 	DOM_LOAD_STRING = 0,
@@ -223,13 +197,10 @@ void dom_parent_node_query_selector(xmlNodePtr thisp, dom_object *intern, zval *
 void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
 void dom_element_matches(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
 void dom_element_closest(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
+xmlNodePtr dom_parse_fragment(dom_object *obj, xmlNodePtr context_node, const zend_string *input);
 
 /* nodemap and nodelist APIs */
-xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, const zend_string *named, bool may_transform);
-void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, zval *return_value);
-xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_long index);
-void php_dom_named_node_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
-int php_dom_get_namednodemap_length(dom_object *obj);
+zend_long php_dom_get_namednodemap_length(dom_object *obj);
 xmlNodePtr dom_nodelist_iter_start_first_child(xmlNodePtr nodep);
 
 #define DOM_GET_INTERN(__id, __intern) { \

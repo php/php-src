@@ -31,8 +31,8 @@ var_dump($x);
 DONE
 --EXPECT--
 string(1) "1"
-string(50) "Increment on non-alphanumeric string is deprecated"
+string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
 string(4) "foo!"
-string(50) "Increment on non-alphanumeric string is deprecated"
+string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
 string(1) "!"
 DONE

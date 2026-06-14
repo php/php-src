@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
@@ -412,13 +411,12 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *b
 	zend_call_method_with_0_params(
 		Z_OBJ_P(object), Z_OBJCE_P(object), NULL, "serialize", &retval);
 
-	if (Z_TYPE(retval) == IS_UNDEF || EG(exception)) {
+	if (Z_TYPE(retval) == IS_UNDEF) {
 		result = FAILURE;
 	} else {
 		switch(Z_TYPE(retval)) {
 		case IS_NULL:
 			/* we could also make this '*buf_len = 0' but this allows to skip variables */
-			zval_ptr_dtor(&retval);
 			return FAILURE;
 		case IS_STRING:
 			*buffer = (unsigned char*)estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
@@ -497,7 +495,7 @@ static zend_object *zend_internal_iterator_create(zend_class_entry *ce) {
 	zend_internal_iterator *intern = emalloc(sizeof(zend_internal_iterator));
 	zend_object_std_init(&intern->std, ce);
 	intern->iter = NULL;
-	intern->rewind_called = 0;
+	intern->rewind_called = false;
 	return &intern->std;
 }
 
@@ -538,7 +536,7 @@ static zend_internal_iterator *zend_internal_iterator_fetch(zval *This) {
 static zend_result zend_internal_iterator_ensure_rewound(zend_internal_iterator *intern) {
 	if (!intern->rewind_called) {
 		zend_object_iterator *iter = intern->iter;
-		intern->rewind_called = 1;
+		intern->rewind_called = true;
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter);
 			if (UNEXPECTED(EG(exception))) {
@@ -631,7 +629,7 @@ ZEND_METHOD(InternalIterator, rewind) {
 		RETURN_THROWS();
 	}
 
-	intern->rewind_called = 1;
+	intern->rewind_called = true;
 	if (!intern->iter->funcs->rewind) {
 		/* Allow calling rewind() if no iteration has happened yet,
 		 * even if the iterator does not support rewinding. */

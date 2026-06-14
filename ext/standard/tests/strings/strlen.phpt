@@ -24,8 +24,8 @@ $strings = array( "Hello, World",
           "\0000",					// len = 2
           "0",
           0,
-          "\t", 					// len = 1
-          '\t', 					// len = 2
+          "\t",						// len = 1
+          '\t',						// len = 2
           TRUE,
           FALSE,
           "Hello, World\0",
@@ -36,7 +36,7 @@ $strings = array( "Hello, World",
           "Hello, World\t",
           "Hello, World\\",
           "              ",
-          chr(128).chr(234).chr(65).chr(255).chr(256),
+          chr(128).chr(234).chr(65).chr(255).chr(0),
 
           "abcdefghijklmnopqrstuvwxyz0123456789~!@#$%^&*()_+=|?><-;:$
                    []{}{{{}}}[[[[]][]]]***&&&^^%$###@@!!@#$%&^&**/////|\\\\\\
@@ -113,11 +113,11 @@ var_dump(strlen("{$str}S"));
 echo "\n--- strlen for long float values ---\n";
 /* Here two different outputs, which depends on the rounding value
    before converting to string. Here Precision = 12  */
-var_dump(strlen(10.55555555555555555555555555));   		// len = 13
-var_dump(strlen(10.55555555595555555555555555));    		// len = 12
+var_dump(strlen(10.55555555555555555555555555));			// len = 13
+var_dump(strlen(10.55555555595555555555555555));			// len = 12
 
 echo "\n--- Nested strlen() ---\n";
-var_dump(strlen(strlen("Hello"))); 				// len=1
+var_dump(strlen(strlen("Hello")));					// len=1
 
 echo "Done\n";
 ?>

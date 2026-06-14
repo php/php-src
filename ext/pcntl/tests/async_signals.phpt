@@ -5,7 +5,7 @@ pcntl
 posix
 --FILE--
 <?php
-pcntl_async_signals(1);
+pcntl_async_signals(true);
 
 pcntl_signal(SIGTERM, function ($signo) { echo "Signal handler called!\n"; });
 

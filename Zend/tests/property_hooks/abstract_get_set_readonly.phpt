@@ -10,4 +10,4 @@ class C extends P {
 }
 ?>
 --EXPECTF--
-Fatal error: Class C contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (P::$prop::set) in %s on line %d
+Fatal error: Class C contains 1 abstract method and must therefore be declared abstract or implement the remaining method (P::$prop::set) in %s on line %d

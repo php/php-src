@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Niels Dossche <nielsdos@php.net>                            |
    +----------------------------------------------------------------------+
@@ -61,7 +59,7 @@ static HashTable *php_dom_libxml_ns_mapper_ensure_prefix_map(php_dom_libxml_ns_m
 		zend_hash_add_new(&mapper->uri_to_prefix_map, *uri, &zv_prefix_map);
 	} else {
 		/* cast to Bucket* only works if this holds, I would prefer a static assert but we're stuck at C99. */
-		ZEND_ASSERT(XtOffsetOf(Bucket, val) == 0);
+		ZEND_ASSERT(offsetof(Bucket, val) == 0);
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_ARRAY);
 		Bucket *bucket = (Bucket *) zv;
 		/* Make sure we take the value from the key string that lives long enough. */
@@ -180,7 +178,7 @@ PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(php
 	return php_dom_libxml_ns_mapper_get_ns_raw_strings(mapper, prefix, uri);
 }
 
-static xmlNsPtr php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(php_dom_libxml_ns_mapper *mapper, xmlNsPtr ns)
+static void php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(php_dom_libxml_ns_mapper *mapper, xmlNsPtr ns)
 {
 	ZEND_ASSERT(ns != NULL);
 
@@ -198,16 +196,9 @@ static xmlNsPtr php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(php_dom_l
 		prefix_len = xmlStrlen(ns->prefix);
 	}
 
-	zval *zv = zend_hash_str_find_ptr(prefix_map, prefix, prefix_len);
-	if (zv != NULL) {
-		return Z_PTR_P(zv);
-	}
-
 	zval new_zv;
 	DOM_Z_UNOWNED(&new_zv, ns);
-	zend_hash_str_add_new(prefix_map, prefix, prefix_len, &new_zv);
-
-	return ns;
+	zend_hash_str_add(prefix_map, prefix, prefix_len, &new_zv);
 }
 
 typedef struct {

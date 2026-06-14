@@ -1,5 +1,11 @@
 --TEST--
 Bug #65272: flock() correctly sets wouldblock out param in windows
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip: Solaris flock() uses fcntl semantics - per-process (not per-file-descriptor)");
+}
+?>
 --FILE--
 <?php
 

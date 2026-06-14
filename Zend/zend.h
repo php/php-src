@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -20,7 +19,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "4.4.23-dev"
+#define ZEND_VERSION "4.6.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -144,19 +143,25 @@ struct _zend_inheritance_cache_entry {
 	zend_class_entry             *traits_and_interfaces[1];
 };
 
+C23_ENUM(zend_class_type, uint8_t) {
+	ZEND_INTERNAL_CLASS = 1,
+	ZEND_USER_CLASS = 2,
+};
+
 struct _zend_class_entry {
-	char type;
+	zend_class_type type;
 	zend_string *name;
 	/* class_entry or string depending on ZEND_ACC_LINKED */
 	union {
 		zend_class_entry *parent;
 		zend_string *parent_name;
 	};
-	int refcount;
+	uint32_t refcount;
 	uint32_t ce_flags;
+	uint32_t ce_flags2;
 
 	int default_properties_count;
-	int default_static_members_count;
+	uint32_t default_static_members_count;
 	zval *default_properties_table;
 	zval *default_static_members_table;
 	ZEND_MAP_PTR_DEF(zval *, static_members_table);
@@ -443,9 +448,10 @@ typedef struct {
 BEGIN_EXTERN_C()
 ZEND_API void zend_save_error_handling(zend_error_handling *current);
 ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, zend_class_entry *exception_class, zend_error_handling *current);
-ZEND_API void zend_restore_error_handling(zend_error_handling *saved);
+ZEND_API void zend_restore_error_handling(const zend_error_handling *saved);
 ZEND_API void zend_begin_record_errors(void);
 ZEND_API void zend_emit_recorded_errors(void);
+ZEND_API void zend_emit_recorded_errors_ex(uint32_t num_errors, zend_error_info **errors);
 ZEND_API void zend_free_recorded_errors(void);
 END_EXTERN_C()
 

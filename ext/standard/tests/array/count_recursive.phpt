@@ -17,7 +17,7 @@ print "COUNT_RECURSIVE: should be 6, is ".count($arr, COUNT_RECURSIVE)."\n";
 print "-- Testing various types with no second argument --\n";
 print "COUNT_NORMAL: should be 2, is ".count(array("a", array("b")))."\n";
 
-$arr = array('a'=>array(NULL, NULL, NULL), 1=>array(NULL=>1, 1=>NULL),
+$arr = array('a'=>array(NULL, NULL, NULL), 1=>array(''=>1, 1=>NULL),
     array(array(array(array(array(NULL))))));
 print "-- Testing really cool arrays --\n";
 print "COUNT_NORMAL: should be 3, is ".count($arr, COUNT_NORMAL)."\n";
@@ -27,14 +27,14 @@ echo "\n*** Testing possible variations of count() function on arrays ***";
 $count_array = array(
   array(),
   array( 1 => "string"),
-  array( "" => "string", 0 => "a", NULL => "b", -1 => "c",
+  array( "" => "string", 0 => "a", -1 => "c",
          array(array(array(NULL)))),
   array( -2 => 12, array(array(1, 2, array(array("0"))))),
   array( "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344),
   array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,
          1 => -2.344, array()),
   array( TRUE => TRUE, FALSE => FALSE, "" => "", " " => " ",
-     NULL => NULL, "\x000" => "\x000", "\000" => "\000"),
+     "\x000" => "\x000", "\000" => "\000"),
   array( NULL, 1 => "Hi", "string" => "hello",
          array("" => "World", "-2.34" => "a", "0" => "b"))
 );

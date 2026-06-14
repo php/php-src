@@ -13,10 +13,10 @@ var_dump(msgfmt_format_message('en', 'some {wrong.format}', []), intl_get_error_
 ?>
 --EXPECT--
 bool(false)
-string(128) "pattern syntax error (parse error at offset 19, after " message with {", before or at "invalid format}"): U_PATTERN_SYNTAX_ERROR"
+string(163) "MessageFormatter::formatMessage(): pattern syntax error (parse error at offset 19, after " message with {", before or at "invalid format}"): U_PATTERN_SYNTAX_ERROR"
 bool(false)
-string(116) "pattern syntax error (parse error at offset 6, after "some {", before or at "wrong.format}"): U_PATTERN_SYNTAX_ERROR"
+string(151) "MessageFormatter::formatMessage(): pattern syntax error (parse error at offset 6, after "some {", before or at "wrong.format}"): U_PATTERN_SYNTAX_ERROR"
 bool(false)
-string(128) "pattern syntax error (parse error at offset 19, after " message with {", before or at "invalid format}"): U_PATTERN_SYNTAX_ERROR"
+string(153) "msgfmt_format_message(): pattern syntax error (parse error at offset 19, after " message with {", before or at "invalid format}"): U_PATTERN_SYNTAX_ERROR"
 bool(false)
-string(116) "pattern syntax error (parse error at offset 6, after "some {", before or at "wrong.format}"): U_PATTERN_SYNTAX_ERROR"
+string(141) "msgfmt_format_message(): pattern syntax error (parse error at offset 6, after "some {", before or at "wrong.format}"): U_PATTERN_SYNTAX_ERROR"

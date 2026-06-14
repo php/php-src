@@ -11,7 +11,7 @@ class MyObjectStorage extends SplObjectStorage {
 class TestObject {}
 
 $list = new MyObjectStorage();
-$list->attach(new TestObject());
+$list->offsetSet(new TestObject());
 
 foreach($list as $x) var_dump($list->offsetExists($x));
 

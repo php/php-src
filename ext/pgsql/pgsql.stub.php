@@ -13,8 +13,8 @@ namespace {
     /**
      * @var string
      * @cvalue pgsql_libpq_version
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'as it is the same as PGSQL_LIBPQ_VERSION')]
     const PGSQL_LIBPQ_VERSION_STR = UNKNOWN;
 
     /* For connection option */
@@ -98,13 +98,11 @@ namespace {
      * @cvalue CONNECTION_AUTH_OK
      */
     const PGSQL_CONNECTION_AUTH_OK = UNKNOWN;
-#ifdef CONNECTION_SSL_STARTUP
     /**
      * @var int
      * @cvalue CONNECTION_SSL_STARTUP
      */
     const PGSQL_CONNECTION_SSL_STARTUP = UNKNOWN;
-#endif
     /**
      * @var int
      * @cvalue CONNECTION_SETENV
@@ -310,20 +308,16 @@ namespace {
      * @cvalue PG_DIAG_STATEMENT_POSITION
      */
     const PGSQL_DIAG_STATEMENT_POSITION = UNKNOWN;
-#ifdef PG_DIAG_INTERNAL_POSITION
     /**
      * @var int
      * @cvalue PG_DIAG_INTERNAL_POSITION
      */
     const PGSQL_DIAG_INTERNAL_POSITION = UNKNOWN;
-#endif
-#ifdef PG_DIAG_INTERNAL_QUERY
     /**
      * @var int
      * @cvalue PG_DIAG_INTERNAL_QUERY
      */
     const PGSQL_DIAG_INTERNAL_QUERY = UNKNOWN;
-#endif
     /**
      * @var int
      * @cvalue PG_DIAG_CONTEXT
@@ -344,48 +338,36 @@ namespace {
      * @cvalue PG_DIAG_SOURCE_FUNCTION
      */
     const PGSQL_DIAG_SOURCE_FUNCTION = UNKNOWN;
-#ifdef PG_DIAG_SCHEMA_NAME
     /**
      * @var int
      * @cvalue PG_DIAG_SCHEMA_NAME
      */
     const PGSQL_DIAG_SCHEMA_NAME = UNKNOWN;
-#endif
-#ifdef PG_DIAG_TABLE_NAME
     /**
      * @var int
      * @cvalue PG_DIAG_TABLE_NAME
      */
     const PGSQL_DIAG_TABLE_NAME = UNKNOWN;
-#endif
-#ifdef PG_DIAG_COLUMN_NAME
     /**
      * @var int
      * @cvalue PG_DIAG_COLUMN_NAME
      */
     const PGSQL_DIAG_COLUMN_NAME = UNKNOWN;
-#endif
-#ifdef PG_DIAG_DATATYPE_NAME
     /**
      * @var int
      * @cvalue PG_DIAG_DATATYPE_NAME
      */
     const PGSQL_DIAG_DATATYPE_NAME = UNKNOWN;
-#endif
-#ifdef PG_DIAG_CONSTRAINT_NAME
     /**
      * @var int
      * @cvalue PG_DIAG_CONSTRAINT_NAME
      */
     const PGSQL_DIAG_CONSTRAINT_NAME = UNKNOWN;
-#endif
-#ifdef PG_DIAG_SEVERITY_NONLOCALIZED
     /**
      * @var int
      * @cvalue PG_DIAG_SEVERITY_NONLOCALIZED
      */
     const PGSQL_DIAG_SEVERITY_NONLOCALIZED = UNKNOWN;
-#endif
 
     /* pg_convert options */
 
@@ -508,6 +490,9 @@ namespace {
      */
     function pg_jit(?PgSql\Connection $connection = null): array {}
 
+#ifdef HAVE_PG_SERVICE
+    function pg_service(?PgSql\Connection $connection = null): string {}
+#endif
     /**
      * @param PgSql\Connection|string $connection
      * @refcount 1
@@ -847,7 +832,7 @@ namespace {
      */
     function pg_copy_to(PgSql\Connection $connection, string $table_name, string $separator = "\t", string $null_as = "\\\\N"): array|false {}
 
-    function pg_copy_from(PgSql\Connection $connection, string $table_name, array $rows, string $separator = "\t", string $null_as = "\\\\N"): bool {}
+    function pg_copy_from(PgSql\Connection $connection, string $table_name, array|Traversable $rows, string $separator = "\t", string $null_as = "\\\\N"): bool {}
 
     /**
      * @param PgSql\Connection|string $connection
@@ -969,6 +954,9 @@ namespace {
 
 #ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
     function pg_set_chunked_rows_size(PgSql\Connection $connection, int $size): bool {}
+#endif
+#ifdef HAVE_PG_CLOSE_STMT
+    function pg_close_stmt(Pgsql\Connection $connection, string $statement_name): PgSql\Result|false {}
 #endif
 }
 

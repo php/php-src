@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Thies C. Arntzen <thies@thieso.net>                          |
    +----------------------------------------------------------------------+
@@ -309,9 +307,7 @@ PHP_FUNCTION(readline_add_history)
 /* {{{ Clears the history */
 PHP_FUNCTION(readline_clear_history)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 #ifdef HAVE_LIBEDIT
 	/* clear_history is the only function where rl_initialize
@@ -331,9 +327,7 @@ PHP_FUNCTION(readline_list_history)
 {
 	HIST_ENTRY **history;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -393,13 +387,9 @@ PHP_FUNCTION(readline_read_history)
 		RETURN_FALSE;
 	}
 
-	/* XXX from & to NYI */
-	if (read_history(arg)) {
-		/* If filename is NULL, then read from `~/.history' */
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
-	}
+	/* XXX from & to NYI  
+		If filename is NULL, then read from `~/.history' */
+	RETURN_BOOL(!read_history(arg));
 }
 
 /* }}} */
@@ -417,11 +407,7 @@ PHP_FUNCTION(readline_write_history)
 		RETURN_FALSE;
 	}
 
-	if (write_history(arg)) {
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
-	}
+	RETURN_BOOL(!write_history(arg));
 }
 
 /* }}} */
@@ -503,10 +489,8 @@ PHP_FUNCTION(readline_completion_function)
 
 	/* NOTE: The rl_attempted_completion_function variable (and others) are part of the readline library, not php */
 	rl_attempted_completion_function = php_readline_completion_cb;
-	if (rl_attempted_completion_function == NULL) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	
+	RETURN_BOOL(rl_attempted_completion_function != NULL);
 }
 
 /* }}} */
@@ -556,9 +540,7 @@ PHP_FUNCTION(readline_callback_handler_install)
 /* {{{ Informs the readline callback interface that a character is ready for input */
 PHP_FUNCTION(readline_callback_read_char)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_read_char();
@@ -569,9 +551,7 @@ PHP_FUNCTION(readline_callback_read_char)
 /* {{{ Removes a previously installed callback handler and restores terminal settings */
 PHP_FUNCTION(readline_callback_handler_remove)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();
@@ -586,9 +566,7 @@ PHP_FUNCTION(readline_callback_handler_remove)
 /* {{{ Ask readline to redraw the display */
 PHP_FUNCTION(readline_redisplay)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 #ifdef HAVE_LIBEDIT
 	/* seems libedit doesn't take care of rl_initialize in rl_redisplay
@@ -605,9 +583,7 @@ PHP_FUNCTION(readline_redisplay)
 /* {{{ Inform readline that the cursor has moved to a new line */
 PHP_FUNCTION(readline_on_new_line)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	rl_on_new_line();
 }

@@ -3,9 +3,7 @@ zlib.output_compression
 --EXTENSIONS--
 zlib
 --SKIPIF--
-<?php
-if (false === stristr(PHP_SAPI, "cgi")) die("skip need sapi/cgi");
-?>
+--CGI--
 --GET--
 a=b
 --INI--

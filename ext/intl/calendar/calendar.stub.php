@@ -90,11 +90,10 @@ class IntlCalendar
     private function __construct() {}
 
     /**
-     * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @tentative-return-type
      * @alias intlcal_create_instance
      */
-    public static function createInstance($timezone = null, ?string $locale = null): ?IntlCalendar {}
+    public static function createInstance(IntlTimeZone|DateTimeZone|string|null $timezone = null, ?string $locale = null): ?IntlCalendar {}
 
     /**
      * @tentative-return-type
@@ -355,11 +354,9 @@ class IntlCalendar
     public function setTime(float $timestamp): bool {}
 
     /**
-     * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @tentative-return-type
-     * @alias intlcal_set_time_zone
      */
-    public function setTimeZone($timezone): bool {}
+    public function setTimeZone(IntlTimeZone|DateTimeZone|string|null $timezone): bool {}
 
     /**
      * @tentative-return-type

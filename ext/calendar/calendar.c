@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Shane Caraveo             <shane@caraveo.com>               |
    |          Colin Viebrock            <colin@easydns.com>               |
@@ -131,8 +129,10 @@ static void _php_cal_info(int cal, zval *ret)
 	calendar = &cal_conversion_table[cal];
 	array_init(ret);
 
-	array_init(&months);
-	array_init(&smonths);
+	array_init_size(&months, calendar->num_months + 1);
+	array_init_size(&smonths, calendar->num_months + 1);
+	zend_hash_real_init_packed(Z_ARRVAL(months));
+	zend_hash_real_init_packed(Z_ARRVAL(smonths));
 
 	for (i = 1; i <= calendar->num_months; i++) {
 		add_index_string(&months, i, calendar->month_name_long[i]);
@@ -160,7 +160,8 @@ PHP_FUNCTION(cal_info)
 		int i;
 		zval val;
 
-		array_init(return_value);
+		array_init_size(return_value, CAL_NUM_CALS);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 		for (i = 0; i < CAL_NUM_CALS; i++) {
 			_php_cal_info(i, &val);
@@ -423,7 +424,7 @@ static char *heb_number_to_chars(int n, int fl, char **ret)
 		n -= 400;
 	}
 
-/* meot (hundreads) case */
+/* meot (hundreds) case */
 	if (n >= 100) {
 		*p = alef_bet[18 + n / 100];
 		p++;
@@ -477,7 +478,7 @@ static char *heb_number_to_chars(int n, int fl, char **ret)
 PHP_FUNCTION(jdtojewish)
 {
 	zend_long julday, fl = 0;
-	bool heb   = 0;
+	bool heb = false;
 	int year, month, day;
 	char *dayp, *yearp;
 
@@ -571,14 +572,11 @@ PHP_FUNCTION(jddayofweek)
 	switch (mode) {
 	case CAL_DOW_LONG:
 		RETURN_STRING(daynamel);
-		break;
 	case CAL_DOW_SHORT:
 		RETURN_STRING(daynames);
-		break;
 	case CAL_DOW_DAYNO:
 	default:
 		RETURN_LONG(day);
-		break;
 	}
 }
 /* }}} */

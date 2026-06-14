@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@thebrainroom.com>                           |
   +----------------------------------------------------------------------+
@@ -188,11 +186,17 @@ typedef enum {
 	STREAM_CRYPTO_METHOD_ANY_SERVER = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6))
 } php_stream_xport_crypt_method_t;
 
+/* Flags for crypto status */
+#define STREAM_CRYPTO_STATUS_NONE       0
+#define STREAM_CRYPTO_STATUS_WANT_READ  1
+#define STREAM_CRYPTO_STATUS_WANT_WRITE 2
+
 /* These functions provide crypto support on the underlying transport */
 
 BEGIN_EXTERN_C()
 PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_crypt_method_t crypto_method, php_stream *session_stream);
 PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate);
+PHPAPI int php_stream_xport_crypto_get_status(php_stream *stream);
 END_EXTERN_C()
 
 typedef struct _php_stream_xport_crypto_param {
@@ -206,7 +210,8 @@ typedef struct _php_stream_xport_crypto_param {
 	} outputs;
 	enum {
 		STREAM_XPORT_CRYPTO_OP_SETUP,
-		STREAM_XPORT_CRYPTO_OP_ENABLE
+		STREAM_XPORT_CRYPTO_OP_ENABLE,
+		STREAM_XPORT_CRYPTO_OP_GET_STATUS
 	} op;
 } php_stream_xport_crypto_param;
 

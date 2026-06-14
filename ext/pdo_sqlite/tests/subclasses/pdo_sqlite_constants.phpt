@@ -2,6 +2,10 @@
 PDO_sqlite: Testing constants exist
 --EXTENSIONS--
 pdo_sqlite
+--SKIPIF--
+<?php
+if (!defined('Pdo\Sqlite::DETERMINISTIC')) die('skip Pdo\Sqlite::DETERMINISTIC requires SQLite library >= 3.8.3');
+?>
 --FILE--
 <?php
 
@@ -13,10 +17,12 @@ var_dump(Pdo\Sqlite::OPEN_READWRITE);
 var_dump(Pdo\Sqlite::OPEN_CREATE);
 var_dump(Pdo\Sqlite::ATTR_READONLY_STATEMENT);
 var_dump(Pdo\Sqlite::ATTR_EXTENDED_RESULT_CODES);
+var_dump(Pdo\Sqlite::ATTR_BUSY_STATEMENT);
 
 ?>
 --EXPECTF--
 Hello
+int(%d)
 int(%d)
 int(%d)
 int(%d)

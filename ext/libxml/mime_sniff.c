@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Niels Dossche <nielsdos@php.net>                            |
    +----------------------------------------------------------------------+
@@ -314,8 +312,8 @@ PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_stream(const php_strea
 		ZEND_HASH_REVERSE_FOREACH_VAL_IND(Z_ARRVAL(s->wrapperdata), header) {
 			if (Z_TYPE_P(header) == IS_STRING) {
 				/* If no colon is found in the header, we assume it's the HTTP status line and bail out. */
-				char *colon = memchr(Z_STRVAL_P(header), ':', Z_STRLEN_P(header));
-				char *space = memchr(Z_STRVAL_P(header), ' ', Z_STRLEN_P(header));
+				const char *colon = memchr(Z_STRVAL_P(header), ':', Z_STRLEN_P(header));
+				const char *space = memchr(Z_STRVAL_P(header), ' ', Z_STRLEN_P(header));
 				if (colon == NULL || space < colon) {
 					return NULL;
 				}

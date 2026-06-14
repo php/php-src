@@ -25,10 +25,9 @@ curl
 
   $curl_content = curl_exec($ch);
   $copy = curl_copy_handle($ch);
-  curl_close($ch);
+  $ch = null;
 
   $curl_content_copy = curl_exec($copy);
-  curl_close($copy);
 
   var_dump( $curl_content_copy );
 ?>

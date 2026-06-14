@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Tom May <tom@go2net.com>                                    |
    |          Gavin Sherry <gavin@linuxworld.com.au>                      |
@@ -84,9 +82,7 @@ ZEND_GET_MODULE(sysvsem)
 zend_class_entry *sysvsem_ce;
 static zend_object_handlers sysvsem_object_handlers;
 
-static inline sysvsem_sem *sysvsem_from_obj(zend_object *obj) {
-	return (sysvsem_sem *)((char *)(obj) - XtOffsetOf(sysvsem_sem, std));
-}
+#define sysvsem_from_obj(obj) ZEND_CONTAINER_OF(obj, sysvsem_sem, std)
 
 #define Z_SYSVSEM_P(zv) sysvsem_from_obj(Z_OBJ_P(zv))
 
@@ -149,7 +145,7 @@ PHP_MINIT_FUNCTION(sysvsem)
 	sysvsem_ce->default_object_handlers = &sysvsem_object_handlers;
 
 	memcpy(&sysvsem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	sysvsem_object_handlers.offset = XtOffsetOf(sysvsem_sem, std);
+	sysvsem_object_handlers.offset = offsetof(sysvsem_sem, std);
 	sysvsem_object_handlers.free_obj = sysvsem_free_obj;
 	sysvsem_object_handlers.get_constructor = sysvsem_get_constructor;
 	sysvsem_object_handlers.clone_obj = NULL;
@@ -172,7 +168,7 @@ PHP_MINFO_FUNCTION(sysvsem)
 PHP_FUNCTION(sem_get)
 {
 	zend_long key, max_acquire = 1, perm = 0666;
-	bool auto_release = 1;
+	bool auto_release = true;
 	int semid;
 	struct sembuf sop[3];
 	int count;
@@ -266,10 +262,10 @@ PHP_FUNCTION(sem_get)
 /* }}} */
 
 /* {{{ php_sysvsem_semop */
-static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
+static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, bool acquire)
 {
 	zval *arg_id;
-	bool nowait = 0;
+	bool nowait = false;
 	sysvsem_sem *sem_ptr;
 	struct sembuf sop;
 
@@ -311,14 +307,14 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 /* {{{ Acquires the semaphore with the given id, blocking if necessary */
 PHP_FUNCTION(sem_acquire)
 {
-	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
 /* {{{ Releases the semaphore with the given id */
 PHP_FUNCTION(sem_release)
 {
-	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
 

@@ -17,4 +17,4 @@ class D extends C {
 
 ?>
 --EXPECTF--
-Fatal error: Class C must implement 1 abstract private method (C::method) in %s on line %d
+Fatal error: Class C must implement 1 abstract method (C::method) in %s on line %d

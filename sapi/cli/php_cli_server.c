@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Moriyoshi Koizumi <moriyoshi@php.net>                        |
    |         Xinchen Hui       <laruence@php.net>                         |
@@ -44,7 +42,6 @@
 #include <unistd.h>
 #endif
 
-#include <signal.h>
 #include <locale.h>
 
 #ifdef HAVE_DLFCN_H
@@ -395,22 +392,14 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 
 static const char *get_mime_type(const php_cli_server *server, const char *ext, size_t ext_len) /* {{{ */
 {
-	char *ret;
-	ALLOCA_FLAG(use_heap)
-	char *ext_lower = do_alloca(ext_len + 1, use_heap);
-	zend_str_tolower_copy(ext_lower, ext, ext_len);
-	ret = zend_hash_str_find_ptr(&server->extension_mime_types, ext_lower, ext_len);
-	free_alloca(ext_lower, use_heap);
-	return (const char*)ret;
+	return zend_hash_str_find_ptr_lc(&server->extension_mime_types, ext, ext_len);
 } /* }}} */
 
 PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
 	php_cli_server_client *client;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	client = SG(server_context);
 
@@ -449,9 +438,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);
@@ -510,9 +497,9 @@ const zend_function_entry server_additional_functions[] = {
 	PHP_FE_END
 };
 
-static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
+static int sapi_cli_server_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	return php_module_startup(sapi_module, &cli_server_module_entry);
+	return php_module_startup(sapi_module_ptr, &cli_server_module_entry);
 } /* }}} */
 
 static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */
@@ -2026,7 +2013,7 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 		escaped_request_uri = php_escape_html_entities_ex((const unsigned char *) ZSTR_VAL(client->request.request_uri), ZSTR_LEN(client->request.request_uri), 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
 
 		{
-			static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";
+			static const char prologue_template[] = "<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>%d %s</title>";
 			php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(prologue_template) + 3 + strlen(status_string) + 1);
 			if (!chunk) {
 				goto fail;
@@ -2355,14 +2342,14 @@ static zend_result php_cli_server_dispatch(php_cli_server *server, php_cli_serve
 }
 /* }}} */
 
-static void php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map) /* {{{ */
+static void php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map_ptr) /* {{{ */
 {
 	const php_cli_server_ext_mime_type_pair *pair;
 
 	zend_hash_init(&server->extension_mime_types, 0, NULL, NULL, 1);
 	GC_MAKE_PERSISTENT_LOCAL(&server->extension_mime_types);
 
-	for (pair = mime_type_map; pair->ext; pair++) {
+	for (pair = mime_type_map_ptr; pair->ext; pair++) {
 		size_t ext_len = strlen(pair->ext);
 		zend_hash_str_add_ptr(&server->extension_mime_types, pair->ext, ext_len, (void*)pair->mime_type);
 	}
@@ -2398,7 +2385,7 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 			 do {
 				if (waitpid(php_cli_server_workers[php_cli_server_worker],
 						   &php_cli_server_worker_status,
-						   0) == FAILURE) {
+						   0) == (pid_t) -1) {
 					/* an extremely bad thing happened */
 					break;
 				}
@@ -2530,6 +2517,7 @@ static void php_cli_server_startup_workers(void) {
 #if defined(HAVE_PRCTL) || defined(HAVE_PROCCTL)
 				php_cli_server_worker_install_pdeathsig();
 #endif
+				php_child_init();
 				return;
 			} else {
 				php_cli_server_workers[php_cli_server_worker] = pid;
@@ -2658,7 +2646,7 @@ static zend_result php_cli_server_recv_event_read_request(php_cli_server *server
 		case 0:
 			php_cli_server_poller_add(&server->poller, POLLIN, client->sock);
 			return SUCCESS;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	/* Under ASAN the compiler somehow doesn't realise that the switch block always returns */
 	return FAILURE;

@@ -12,7 +12,7 @@ final class SysvSharedMemory
 
 function shm_attach(int $key, ?int $size = null, int $permissions = 0666): SysvSharedMemory|false {}
 
-function shm_detach(SysvSharedMemory $shm): bool {}
+function shm_detach(SysvSharedMemory $shm): true {}
 
 function shm_has_var(SysvSharedMemory $shm, int $key): bool {}
 

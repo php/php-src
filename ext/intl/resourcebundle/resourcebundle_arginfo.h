@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit resourcebundle.stub.php instead.
  * Stub hash: e302e5ca1abcb9b52e3c14abbd38b9e8f1461390 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle___construct, 0, 0, 2)

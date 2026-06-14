@@ -55,7 +55,7 @@ foreach ($values as $key => $value) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 --- string blocklevel ---
 <html>
 <head>
@@ -120,6 +120,8 @@ test
 </body>
 </html>
 --- NAN ---
+
+Warning: The float NAN is not representable as an int, cast occurred in %s on line %d
 <html>
 <head>
 <title></title>
@@ -129,6 +131,8 @@ test
 </body>
 </html>
 --- INF ---
+
+Warning: The float INF is not representable as an int, cast occurred in %s on line %d
 <html>
 <head>
 <title></title>

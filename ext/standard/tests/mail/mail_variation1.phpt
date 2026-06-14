@@ -17,6 +17,8 @@ $subject = 'Test Subject';
 $message = 'A Message';
 var_dump( mail($to, $subject, $message) );
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mail() : variation ***
+
+Warning: mail(): Sendmail exited with non-zero exit code 127 in %smail_variation1.php on line %d
 bool(false)

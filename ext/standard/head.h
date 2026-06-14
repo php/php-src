@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                        |
    +----------------------------------------------------------------------+
@@ -17,19 +15,22 @@
 #ifndef HEAD_H
 #define HEAD_H
 
-#define COOKIE_EXPIRES    "; expires="
-#define COOKIE_MAX_AGE    "; Max-Age="
-#define COOKIE_DOMAIN     "; domain="
-#define COOKIE_PATH       "; path="
-#define COOKIE_SECURE     "; secure"
-#define COOKIE_HTTPONLY   "; HttpOnly"
-#define COOKIE_SAMESITE   "; SameSite="
+#define COOKIE_EXPIRES     "; expires="
+#define COOKIE_MAX_AGE     "; Max-Age="
+#define COOKIE_DOMAIN      "; domain="
+#define COOKIE_PATH        "; path="
+#define COOKIE_SECURE      "; secure"
+#define COOKIE_HTTPONLY    "; HttpOnly"
+#define COOKIE_SAMESITE    "; SameSite="
+#define COOKIE_PARTITIONED "; Partitioned"
+
+PHPAPI bool php_is_valid_samesite_value(zend_string *value);
 
 extern PHP_RINIT_FUNCTION(head);
 
 PHPAPI bool php_header(void);
 PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t expires,
 	zend_string *path, zend_string *domain, bool secure, bool httponly,
-	zend_string *samesite, bool url_encode);
+	zend_string *samesite, bool partitioned, bool url_encode);
 
 #endif

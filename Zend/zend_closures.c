@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Seiler <chris_se@gmx.net>                         |
    |          Dmitry Stogov <dmitry@php.net>                              |
@@ -40,6 +39,8 @@ typedef struct _zend_closure {
 ZEND_API zend_class_entry *zend_ce_closure;
 static zend_object_handlers closure_handlers;
 
+static zend_result zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
+
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
 	zend_function *func = EX(func);
@@ -51,9 +52,12 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 		Z_PARAM_VARIADIC_WITH_NAMED(args, num_args, named_args)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (call_user_function_named(CG(function_table), NULL, ZEND_THIS, return_value, num_args, args, named_args) == FAILURE) {
-		RETVAL_FALSE;
-	}
+	zend_fcall_info_cache fcc = {
+		.closure = Z_OBJ_P(ZEND_THIS),
+	};
+	zend_closure_get_closure(Z_OBJ_P(ZEND_THIS), &fcc.calling_scope, &fcc.function_handler, &fcc.object, false);
+	fcc.called_scope = fcc.calling_scope;
+	zend_call_known_fcc(&fcc, return_value, num_args, args, named_args);
 
 	/* destruct the function also, then - we have allocated it in get_method */
 	zend_string_release_ex(func->internal_function.function_name, 0);
@@ -76,46 +80,46 @@ static bool zend_valid_closure_binding(
 	bool is_fake_closure = (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
 	if (newthis) {
 		if (func->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error(E_WARNING, "Cannot bind an instance to a static closure");
-			return 0;
+			zend_error(E_WARNING, "Cannot bind an instance to a static closure, this will be an error in PHP 9");
+			return false;
 		}
 
 		if (is_fake_closure && func->common.scope &&
 				!instanceof_function(Z_OBJCE_P(newthis), func->common.scope)) {
 			/* Binding incompatible $this to an internal method is not supported. */
-			zend_error(E_WARNING, "Cannot bind method %s::%s() to object of class %s",
+			zend_error(E_WARNING, "Cannot bind method %s::%s() to object of class %s, this will be an error in PHP 9",
 					ZSTR_VAL(func->common.scope->name),
 					ZSTR_VAL(func->common.function_name),
 					ZSTR_VAL(Z_OBJCE_P(newthis)->name));
-			return 0;
+			return false;
 		}
 	} else if (is_fake_closure && func->common.scope
 			&& !(func->common.fn_flags & ZEND_ACC_STATIC)) {
-		zend_error(E_WARNING, "Cannot unbind $this of method");
-		return 0;
+		zend_error(E_WARNING, "Cannot unbind $this of method, this will be an error in PHP 9");
+		return false;
 	} else if (!is_fake_closure && !Z_ISUNDEF(closure->this_ptr)
 			&& (func->common.fn_flags & ZEND_ACC_USES_THIS)) {
-		zend_error(E_WARNING, "Cannot unbind $this of closure using $this");
-		return 0;
+		zend_error(E_WARNING, "Cannot unbind $this of closure using $this, this will be an error in PHP 9");
+		return false;
 	}
 
 	if (scope && scope != func->common.scope && scope->type == ZEND_INTERNAL_CLASS) {
 		/* rebinding to internal class is not allowed */
-		zend_error(E_WARNING, "Cannot bind closure to scope of internal class %s",
+		zend_error(E_WARNING, "Cannot bind closure to scope of internal class %s, this will be an error in PHP 9",
 				ZSTR_VAL(scope->name));
-		return 0;
+		return false;
 	}
 
 	if (is_fake_closure && scope != func->common.scope) {
 		if (func->common.scope == NULL) {
-			zend_error(E_WARNING, "Cannot rebind scope of closure created from function");
+			zend_error(E_WARNING, "Cannot rebind scope of closure created from function, this will be an error in PHP 9");
 		} else {
-			zend_error(E_WARNING, "Cannot rebind scope of closure created from method");
+			zend_error(E_WARNING, "Cannot rebind scope of closure created from method, this will be an error in PHP 9");
 		}
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 /* }}} */
 
@@ -150,6 +154,7 @@ ZEND_METHOD(Closure, call)
 	fci_cache.object = fci.object = newobj;
 
 	fci.size = sizeof(fci);
+	fci.consumed_args = 0;
 	ZVAL_OBJ(&fci.function_name, &closure->std);
 	ZVAL_UNDEF(&closure_result);
 	fci.retval = &closure_result;
@@ -282,6 +287,19 @@ ZEND_METHOD(Closure, bindTo)
 	do_closure_bind(return_value, ZEND_THIS, newthis, scope_obj, scope_str);
 }
 
+static void zend_copy_parameters_array(const uint32_t param_count, HashTable *argument_array) /* {{{ */
+{
+	zval *param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+
+	ZEND_ASSERT(param_count <= ZEND_CALL_NUM_ARGS(EG(current_execute_data)));
+
+	for (uint32_t i = 0; i < param_count; i++) {
+		Z_TRY_ADDREF_P(param_ptr);
+		zend_hash_next_index_insert_new(argument_array, param_ptr);
+		param_ptr++;
+	}
+}
+
 static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
@@ -305,14 +323,14 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 		array_init_size(&fci.params[1], ZEND_NUM_ARGS() + zend_hash_num_elements(EX(extra_named_params)));
 		/* Avoid conversion from packed to mixed later. */
 		zend_hash_real_init_mixed(Z_ARRVAL(fci.params[1]));
-		zend_copy_parameters_array(ZEND_NUM_ARGS(), &fci.params[1]);
+		zend_copy_parameters_array(ZEND_NUM_ARGS(), Z_ARRVAL(fci.params[1]));
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EX(extra_named_params), name, named_param_zval) {
 			Z_TRY_ADDREF_P(named_param_zval);
 			zend_hash_add_new(Z_ARRVAL(fci.params[1]), name, named_param_zval);
 		} ZEND_HASH_FOREACH_END();
 	} else if (ZEND_NUM_ARGS()) {
 		array_init_size(&fci.params[1], ZEND_NUM_ARGS());
-		zend_copy_parameters_array(ZEND_NUM_ARGS(), &fci.params[1]);
+		zend_copy_parameters_array(ZEND_NUM_ARGS(), Z_ARRVAL(fci.params[1]));
 	} else {
 		ZVAL_EMPTY_ARRAY(&fci.params[1]);
 	}
@@ -321,7 +339,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	fcc.called_scope = zend_get_called_scope(EG(current_execute_data));
 
 	zend_call_function(&fci, &fcc);
-
+	zend_return_unwrap_ref(EG(current_execute_data), return_value);
 	zval_ptr_dtor(&fci.params[1]);
 }
 /* }}} */
@@ -413,6 +431,23 @@ ZEND_METHOD(Closure, fromCallable)
 }
 /* }}} */
 
+ZEND_METHOD(Closure, getCurrent)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_execute_data *prev_ex = EX(prev_execute_data);
+
+	if (!prev_ex
+	 || !prev_ex->func
+	 || (prev_ex->func->common.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE)) != ZEND_ACC_CLOSURE) {
+			zend_throw_error(NULL, "Current function is not a closure");
+			RETURN_THROWS();
+	}
+
+	zend_object *obj = ZEND_CLOSURE_OBJECT(prev_ex->func);
+	RETURN_OBJ_COPY(obj);
+}
+
 static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object) /* {{{ */
 {
 	zend_throw_error(NULL, "Instantiation of class Closure is not allowed");
@@ -475,7 +510,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	 * ZEND_ACC_USER_ARG_INFO flag to prevent invalid usage by Reflection */
 	invoke->type = ZEND_INTERNAL_FUNCTION;
 	invoke->internal_function.fn_flags =
-		ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | (closure->func.common.fn_flags & keep_flags);
+		ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | ZEND_ACC_NEVER_CACHE | (closure->func.common.fn_flags & keep_flags);
 	if (closure->func.type != ZEND_INTERNAL_FUNCTION || (closure->func.common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 		invoke->internal_function.fn_flags |=
 			ZEND_ACC_USER_ARG_INFO;
@@ -523,7 +558,6 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 		/* We don't own the static variables of fake closures. */
 		if (!(closure->func.op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 			zend_destroy_static_vars(&closure->func.op_array);
-			closure->func.op_array.static_variables = NULL;
 		}
 		destroy_op_array(&closure->func.op_array);
 	} else if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
@@ -584,7 +618,6 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 	zval val;
 	struct _zend_arg_info *arg_info = closure->func.common.arg_info;
 	HashTable *debug_info;
-	bool zstr_args = (closure->func.type == ZEND_USER_FUNCTION) || (closure->func.common.fn_flags & ZEND_ACC_USER_ARG_INFO);
 
 	*is_temp = 1;
 
@@ -660,15 +693,9 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 			zend_string *name;
 			zval info;
 			ZEND_ASSERT(arg_info->name && "Argument should have name");
-			if (zstr_args) {
-				name = zend_strpprintf(0, "%s$%s",
-						ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
-						ZSTR_VAL(arg_info->name));
-			} else {
-				name = zend_strpprintf(0, "%s$%s",
-						ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
-						((zend_internal_arg_info*)arg_info)->name);
-			}
+			name = zend_strpprintf(0, "%s$%s",
+					ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
+					ZSTR_VAL(arg_info->name));
 			ZVAL_NEW_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
 			zend_hash_update(Z_ARRVAL(val), name, &info);
 			zend_string_release_ex(name, 0);
@@ -723,6 +750,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 {
 	zend_closure *closure = (zend_closure*)ZEND_CLOSURE_OBJECT(EX(func));
 	closure->orig_internal_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	ZEND_ASSERT(!(closure->func.common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS) || EG(exception));
 	// Assign to EX(this) so that it is released after observer checks etc.
 	ZEND_ADD_CALL_FLAG(execute_data, ZEND_CALL_RELEASE_THIS);
 	Z_OBJ(EX(This)) = &closure->std;
@@ -755,16 +783,14 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 		}
 
 		/* For fake closures, we want to reuse the static variables of the original function. */
+		HashTable *ht = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
 		if (!is_fake) {
-			if (closure->func.op_array.static_variables) {
-				closure->func.op_array.static_variables =
-					zend_array_dup(closure->func.op_array.static_variables);
+			if (!ht) {
+				ht = closure->func.op_array.static_variables;
 			}
 			ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr,
-				closure->func.op_array.static_variables);
+				ht ? zend_array_dup(ht) : NULL);
 		} else if (func->op_array.static_variables) {
-			HashTable *ht = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
-
 			if (!ht) {
 				ht = zend_array_dup(func->op_array.static_variables);
 				ZEND_MAP_PTR_SET(func->op_array.static_variables_ptr, ht);
@@ -804,7 +830,7 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 		/* wrap internal function handler to avoid memory leak */
 		if (UNEXPECTED(closure->func.internal_function.handler == zend_closure_internal_handler)) {
 			/* avoid infinity recursion, by taking handler from nested closure */
-			zend_closure *nested = (zend_closure*)((char*)func - XtOffsetOf(zend_closure, func));
+			zend_closure *nested = ZEND_CONTAINER_OF(func, zend_closure, func);
 			ZEND_ASSERT(nested->std.ce == zend_ce_closure);
 			closure->orig_internal_handler = nested->orig_internal_handler;
 		} else {
@@ -847,13 +873,13 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 
 	closure = (zend_closure *)Z_OBJ_P(res);
 	closure->func.common.fn_flags |= ZEND_ACC_FAKE_CLOSURE;
+	if (Z_TYPE(closure->this_ptr) != IS_OBJECT) {
+		GC_ADD_FLAGS(&closure->std, GC_NOT_COLLECTABLE);
+	}
 }
 /* }}} */
 
-/* __call and __callStatic name the arguments "$arguments" in the docs. */
-static zend_internal_arg_info trampoline_arg_info[] = {ZEND_ARG_VARIADIC_TYPE_INFO(false, arguments, IS_MIXED, false)};
-
-void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {{{ */
+void zend_closure_from_frame(zval *return_value, const zend_execute_data *call) { /* {{{ */
 	zval instance;
 	zend_internal_function trampoline;
 	zend_function *mptr = call->func;
@@ -877,9 +903,7 @@ void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {
 		trampoline.function_name = mptr->common.function_name;
 		trampoline.scope = mptr->common.scope;
 		trampoline.doc_comment = NULL;
-		if (trampoline.fn_flags & ZEND_ACC_VARIADIC) {
-			trampoline.arg_info = trampoline_arg_info;
-		}
+		trampoline.arg_info = mptr->common.arg_info;
 		trampoline.attributes = mptr->common.attributes;
 
 		zend_free_trampoline(mptr);

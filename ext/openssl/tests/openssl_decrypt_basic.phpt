@@ -10,8 +10,7 @@ $password = "openssl";
 
 $ivlen = openssl_cipher_iv_length($method);
 $iv    = '';
-srand(time() + ((int)(microtime(true) * 1000000) % 1000000));
-while(strlen($iv) < $ivlen) $iv .= chr(rand(0,255));
+while(strlen($iv) < $ivlen) $iv .= random_bytes(1);
 
 $encrypted = openssl_encrypt($data, $method, $password, 0, $iv);
 $output = openssl_decrypt($encrypted, $method, $password, 0, $iv);

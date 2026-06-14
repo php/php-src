@@ -9,7 +9,7 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 --FILE--
 <?php
 
-pcntl_async_signals(1);
+pcntl_async_signals(true);
 pcntl_signal(SIGALRM, function($signo) {
     throw new Exception("Alarm!");
 });

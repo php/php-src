@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -220,6 +219,7 @@ ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void);
 
 ZEND_API void start_memory_manager(void);
 ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown);
+ZEND_API void refresh_memory_manager(void);
 ZEND_API bool is_zend_mm(void);
 ZEND_API bool is_zend_ptr(const void *ptr);
 
@@ -315,6 +315,8 @@ struct _zend_mm_storage {
 
 ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap);
 ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void *data, size_t data_size);
+
+ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap);
 
 /*
 

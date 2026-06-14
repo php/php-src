@@ -6,7 +6,6 @@ date.timezone=Atlantic/Azores
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 $ams = IntlTimeZone::createTimeZone('Europe/Amsterdam');
 
 $date = strtotime("1 July 2012 +0000");
@@ -26,4 +25,4 @@ int(3600000)
 int(3600000)
 bool(true)
 int(0)
-int(3600000)
+int(3600000)

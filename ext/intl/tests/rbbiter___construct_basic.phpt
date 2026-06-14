@@ -2,9 +2,10 @@
 IntlRuleBasedBreakIterator::__construct: basic test
 --EXTENSIONS--
 intl
+--INI--
+intl.default_locale=pt_PT
 --FILE--
 <?php
-ini_set("intl.default_locale", "pt_PT");
 
 $rules = <<<RULES
 \$LN = [[:letter:] [:number:]];

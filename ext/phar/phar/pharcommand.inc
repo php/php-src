@@ -225,13 +225,13 @@ class PharCommand extends CLICommand
                 }
             }
             if ($pear) {
-                $apiver = (string) `pear -q info PHP_Archive 2>/dev/null|grep 'API Version'`;
+                $apiver = (string) shell_exec("pear -q info PHP_Archive 2>/dev/null|grep 'API Version'");
                 $apiver = trim(substr($apiver, strlen('API Version')));
             }
             if ($apiver) {
                 self::notice("PEAR package PHP_Archive: API Version: $apiver.\n");
-                $files  = explode("\n", (string) `pear list-files PHP_Archive`);
-                $phpdir = (string) `pear config-get php_dir 2>/dev/null`;
+                $files  = explode("\n", (string) shell_exec("pear list-files PHP_Archive"));
+                $phpdir = (string) shell_exec("pear config-get php_dir 2>/dev/null");
                 $phpdir = trim($phpdir);
                 self::notice("PEAR package PHP_Archive: $phpdir.\n");
                 if (is_dir($phpdir)) {

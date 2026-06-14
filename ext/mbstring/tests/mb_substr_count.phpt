@@ -4,9 +4,9 @@ mb_substr_count()
 mbstring
 --INI--
 output_handler=
+internal_encoding=EUC-JP
 --FILE--
 <?php
-    mb_internal_encoding("EUC-JP");
 
     print "== Empty needle should raise an error ==\n";
     try {

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Sascha Schumann <sascha@schumann.cx>                         |
   |         Yasuo Ohgaki <yohgaki@ohgaki.net>                            |
@@ -188,7 +186,7 @@ alphadash = ([a-zA-Z] | "-");
 #define YYLIMIT q
 #define YYMARKER r
 
-static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *url_app, const char *separator, int type)
+static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *url_app, const zend_string *separator, int type)
 {
 	php_url *url_parts;
 
@@ -245,40 +243,40 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	}
 
 	if (url_parts->scheme) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->scheme));
+		smart_str_append(dest, url_parts->scheme);
 		smart_str_appends(dest, "://");
 	} else if (*(ZSTR_VAL(url->s)) == '/' && *(ZSTR_VAL(url->s)+1) == '/') {
 		smart_str_appends(dest, "//");
 	}
 	if (url_parts->user) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->user));
+		smart_str_append(dest, url_parts->user);
 		if (url_parts->pass) {
-			smart_str_appends(dest, ZSTR_VAL(url_parts->pass));
+			smart_str_append(dest, url_parts->pass);
 			smart_str_appendc(dest, ':');
 		}
 		smart_str_appendc(dest, '@');
 	}
 	if (url_parts->host) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->host));
+		smart_str_append(dest, url_parts->host);
 	}
 	if (url_parts->port) {
 		smart_str_appendc(dest, ':');
 		smart_str_append_unsigned(dest, (long)url_parts->port);
 	}
 	if (url_parts->path) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->path));
+		smart_str_append(dest, url_parts->path);
 	}
 	smart_str_appendc(dest, '?');
 	if (url_parts->query) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->query));
-		smart_str_appends(dest, separator);
+		smart_str_append(dest, url_parts->query);
+		smart_str_append(dest, separator);
 		smart_str_append_smart_str(dest, url_app);
 	} else {
 		smart_str_append_smart_str(dest, url_app);
 	}
 	if (url_parts->fragment) {
 		smart_str_appendc(dest, '#');
-		smart_str_appends(dest, ZSTR_VAL(url_parts->fragment));
+		smart_str_append(dest, url_parts->fragment);
 	}
 	php_url_free(url_parts);
 }
@@ -601,7 +599,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 
 	if (encode) {
 		encoded = php_raw_url_encode(name, strlen(name));
-		smart_str_appendl(&url_app, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		smart_str_append(&url_app, encoded);
 		zend_string_free(encoded);
 	} else {
 		smart_str_appends(&url_app, name);
@@ -609,7 +607,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 	smart_str_appendc(&url_app, '=');
 	if (encode) {
 		encoded = php_raw_url_encode(value, strlen(value));
-		smart_str_appendl(&url_app, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		smart_str_append(&url_app, encoded);
 		zend_string_free(encoded);
 	} else {
 		smart_str_appends(&url_app, value);
@@ -663,7 +661,7 @@ static void php_url_scanner_ex_activate(bool is_session)
 		ctx = &BG(url_adapt_output_ex);
 	}
 
-	memset(ctx, 0, XtOffsetOf(url_adapt_state_ex_t, tags));
+	memset(ctx, 0, offsetof(url_adapt_state_ex_t, tags));
 }
 
 static void php_url_scanner_ex_deactivate(bool is_session)
@@ -701,7 +699,7 @@ static inline void php_url_scanner_session_handler_impl(char *output, size_t out
 				len = UINT_MAX;
 		}
 		*handled_output_len = len;
-	} else if (ZSTR_LEN(url_state->url_app.s) == 0) {
+	} else {
 		url_adapt_state_ex_t *ctx = url_state;
 		if (ctx->buf.s && ZSTR_LEN(ctx->buf.s)) {
 			smart_str_append(&ctx->result, ctx->buf.s);
@@ -715,8 +713,6 @@ static inline void php_url_scanner_session_handler_impl(char *output, size_t out
 		} else {
 			*handled_output = estrndup(output, *handled_output_len = output_len);
 		}
-	} else {
-		*handled_output = NULL;
 	}
 }
 
@@ -757,18 +753,18 @@ static inline void php_url_scanner_add_var_impl(const char *name, size_t name_le
 	}
 
 	if (url_state->url_app.s && ZSTR_LEN(url_state->url_app.s) != 0) {
-		smart_str_appends(&url_state->url_app, PG(arg_separator).output);
+		smart_str_append(&url_state->url_app, PG(arg_separator).output);
 	}
 
 	if (encode) {
 		encoded = php_raw_url_encode(name, name_len);
-		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		smart_str_append(&sname, encoded); zend_string_free(encoded);
 		encoded = php_raw_url_encode(value, value_len);
-		smart_str_appendl(&svalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		smart_str_append(&svalue, encoded); zend_string_free(encoded);
 		encoded = php_escape_html_entities_ex((const unsigned char *) name, name_len, 0, ENT_QUOTES|ENT_SUBSTITUTE, NULL, /* double_encode */ 0, /* quiet */ 1);
-		smart_str_appendl(&hname, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		smart_str_append(&hname, encoded); zend_string_free(encoded);
 		encoded = php_escape_html_entities_ex((const unsigned char *) value, value_len, 0, ENT_QUOTES|ENT_SUBSTITUTE, NULL, /* double_encode */ 0, /* quiet */ 1);
-		smart_str_appendl(&hvalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		smart_str_append(&hvalue, encoded); zend_string_free(encoded);
 	} else {
 		smart_str_appendl(&sname, name, name_len);
 		smart_str_appendl(&svalue, value, value_len);
@@ -869,14 +865,14 @@ static inline zend_result php_url_scanner_reset_var_impl(zend_string *name, int 
 
 	if (encode) {
 		encoded = php_raw_url_encode(ZSTR_VAL(name), ZSTR_LEN(name));
-		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		smart_str_append(&sname, encoded);
 		zend_string_free(encoded);
 		encoded = php_escape_html_entities_ex((const unsigned char *) ZSTR_VAL(name), ZSTR_LEN(name), 0, ENT_QUOTES|ENT_SUBSTITUTE, SG(default_charset), /* double_encode */ 0, /* quiet */ 1);
-		smart_str_appendl(&hname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		smart_str_append(&hname, encoded);
 		zend_string_free(encoded);
 	} else {
-		smart_str_appendl(&sname, ZSTR_VAL(name), ZSTR_LEN(name));
-		smart_str_appendl(&hname, ZSTR_VAL(name), ZSTR_LEN(name));
+		smart_str_append(&sname, name);
+		smart_str_append(&hname, name);
 	}
 	smart_str_0(&sname);
 	smart_str_0(&hname);
@@ -902,9 +898,9 @@ static inline zend_result php_url_scanner_reset_var_impl(zend_string *name, int 
 	/* Get end of url var */
 	limit = ZSTR_VAL(url_state->url_app.s) + ZSTR_LEN(url_state->url_app.s);
 	end = start + ZSTR_LEN(url_app.s);
-	separator_len = strlen(PG(arg_separator).output);
+	separator_len = ZSTR_LEN(PG(arg_separator).output);
 	while (end < limit) {
-		if (!memcmp(end, PG(arg_separator).output, separator_len)) {
+		if (!memcmp(end, ZSTR_VAL(PG(arg_separator).output), separator_len)) {
 			end += separator_len;
 			sep_removed = 1;
 			break;
@@ -918,8 +914,8 @@ static inline zend_result php_url_scanner_reset_var_impl(zend_string *name, int 
 	}
 	/* Check preceding separator */
 	if (!sep_removed
-		&& (size_t)(start - PG(arg_separator).output) >= separator_len
-		&& !memcmp(start - separator_len, PG(arg_separator).output, separator_len)) {
+		&& (size_t)(start - ZSTR_VAL(PG(arg_separator).output)) >= separator_len
+		&& !memcmp(start - separator_len, ZSTR_VAL(PG(arg_separator).output), separator_len)) {
 		start -= separator_len;
 	}
 	/* Remove partially */

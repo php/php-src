@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
@@ -20,6 +20,10 @@
 
 // Fix build on Windows/old versions of ICU
 #include <stdio.h>
+
+extern "C" {
+#include <zend_attributes.h>
+}
 
 #include "common_enum.h"
 #include "common_arginfo.h"
@@ -74,8 +78,7 @@ static void string_enum_current_move_forward(zend_object_iterator *iter)
 
 	intl_error_set_code(NULL, INTLITERATOR_ERROR_CODE(ii));
 	if (U_FAILURE(INTLITERATOR_ERROR_CODE(ii))) {
-		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii),
-			"Error fetching next iteration element", 0);
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii), "Error fetching next iteration element");
 	} else if (result) {
 		ZVAL_STRINGL(&zoi_iter->current, result, result_length);
 	} //else we've reached the end of the enum, nothing more is required
@@ -105,8 +108,7 @@ static void string_enum_rewind(zend_object_iterator *iter)
 
 	intl_error_set_code(NULL, INTLITERATOR_ERROR_CODE(ii));
 	if (U_FAILURE(INTLITERATOR_ERROR_CODE(ii))) {
-		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii),
-			"Error resetting enumeration", 0);
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii), "Error resetting enumeration");
 	} else {
 		iter->funcs->move_forward(iter);
 	}
@@ -204,9 +206,7 @@ static zend_object_iterator *IntlIterator_get_iterator(
 
 static zend_object *IntlIterator_object_create(zend_class_entry *ce)
 {
-	IntlIterator_object	*intern;
-
-	intern = (IntlIterator_object*)ecalloc(1, sizeof(IntlIterator_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	IntlIterator_object	*intern = (IntlIterator_object*)zend_object_alloc(sizeof(IntlIterator_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
     object_properties_init(&intern->zo, ce);
@@ -270,7 +270,7 @@ PHP_METHOD(IntlIterator, rewind)
 		ii->iterator->funcs->rewind(ii->iterator);
 	} else {
 		intl_errors_set(INTLITERATOR_ERROR_P(ii), U_UNSUPPORTED_ERROR,
-			"IntlIterator::rewind: rewind not supported", 0);
+			"rewind not supported");
 	}
 }
 
@@ -294,7 +294,7 @@ U_CFUNC void intl_register_common_symbols(int module_number)
 
 	memcpy(&IntlIterator_handlers, &std_object_handlers,
 		sizeof IntlIterator_handlers);
-	IntlIterator_handlers.offset = XtOffsetOf(IntlIterator_object, zo);
+	IntlIterator_handlers.offset = offsetof(IntlIterator_object, zo);
 	IntlIterator_handlers.clone_obj = NULL;
 	IntlIterator_handlers.dtor_obj = IntlIterator_objects_dtor;
 	IntlIterator_handlers.free_obj = IntlIterator_objects_free;

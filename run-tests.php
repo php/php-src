@@ -2,15 +2,13 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Ilia Alshanetsky <iliaa@php.net>                            |
    |          Preston L. Bannister <pbannister@php.net>                   |
@@ -49,7 +47,7 @@ Options:
 
     -w <file>   Write a list of all failed tests to <file>.
 
-    -a <file>   Same as -w but append rather then truncating <file>.
+    -a <file>   Same as -w but append rather than truncating <file>.
 
     -W <file>   Write a list of all tests and their result status to <file>.
 
@@ -90,7 +88,7 @@ Options:
     --temp-source <sdir>  --temp-target <tdir> [--temp-urlbase <url>]
                 Write temporary files to <tdir> by replacing <sdir> from the
                 filenames to generate with <tdir>. In general you want to make
-                <sdir> the path to your source files and <tdir> some patch in
+                <sdir> the path to your source files and <tdir> some path in
                 your web page hierarchy with <url> pointing to <tdir>.
 
     --keep-[all|php|skip|clean]
@@ -272,12 +270,13 @@ function main(): void
         'disable_functions=',
         'output_buffering=Off',
         'error_reporting=' . E_ALL,
+        'fatal_error_backtraces=Off',
         'display_errors=1',
         'display_startup_errors=1',
+        'error_include_args=0',
         'log_errors=0',
         'html_errors=0',
         'track_errors=0',
-        'report_memleaks=1',
         'report_zend_debug=0',
         'docref_root=',
         'docref_ext=.html',
@@ -694,6 +693,10 @@ function main(): void
     // Run selected tests.
     $test_cnt = count($test_files);
 
+    if ($test_cnt === 1) {
+        $cfg['show']['diff'] = true;
+    }
+
     verify_config($php);
     write_information($user_tests, $phpdbg);
 
@@ -701,7 +704,6 @@ function main(): void
         $exts_tested = [];
         $exts_skipped = [];
         usort($test_files, "test_sort");
-        $start_timestamp = time();
         $start_time = hrtime(true);
 
         echo "Running selected tests.\n";
@@ -792,23 +794,6 @@ function main(): void
     }
 }
 
-if (!function_exists("hrtime")) {
-    /**
-     * @return array|float|int
-     */
-    function hrtime(bool $as_num = false)
-    {
-        $t = microtime(true);
-
-        if ($as_num) {
-            return $t * 1000000000;
-        }
-
-        $s = floor($t);
-        return [0 => $s, 1 => ($t - $s) * 1000000000];
-    }
-}
-
 function verify_config(string $php): void
 {
     if (empty($php) || !file_exists($php)) {
@@ -874,8 +859,8 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         $exts = get_loaded_extensions();
         $ext_dir = ini_get('extension_dir');
         foreach (scandir($ext_dir) as $file) {
-            if (preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
-                if (!extension_loaded($matches[1]) && @dl($matches[1])) {
+            if (preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:' . PHP_SHLIB_SUFFIX . ')$/', $file, $matches)) {
+                if (!extension_loaded($matches[1])) {
                     $exts[] = $matches[1];
                 }
             }
@@ -1102,7 +1087,7 @@ function test_sort($a, $b): int
 }
 
 //
-//  Write the given text to a temporary file, and return the filename.
+//  Write the given text to a temporary file.
 //
 
 function save_text(string $filename, string $text, ?string $filename_copy = null): void
@@ -1257,7 +1242,7 @@ function system_with_timeout(
 
 function run_all_tests(array $test_files, array $env, ?string $redir_tested = null): void
 {
-    global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache;
+    global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache, $shuffle;
     global $preload;
     // Parallel testing
     global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
@@ -1277,6 +1262,11 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
             }
             return true;
         });
+    }
+
+    // To discover parallelization issues and order dependent tests it is useful to randomize the test order.
+    if ($shuffle) {
+        shuffle($test_files);
     }
 
     /* Ignore -jN if there is only one file to analyze. */
@@ -1384,11 +1374,8 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
     // Some tests assume that they are executed in a certain order. We will be popping from
     // $test_files, so reverse its order here. This makes sure that order is preserved at least
     // for tests with a common conflict key.
-    $test_files = array_reverse($test_files);
-
-    // To discover parallelization issues it is useful to randomize the test order.
-    if ($shuffle) {
-        shuffle($test_files);
+    if (!$shuffle) {
+        $test_files = array_reverse($test_files);
     }
 
     // Don't start more workers than test files.
@@ -1957,6 +1944,7 @@ TEST $file
     $diff_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'diff';
     $log_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'log';
     $exp_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'exp';
+    $stdin_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'stdin';
     $output_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'out';
     $memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'mem';
     $sh_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'sh';
@@ -1995,6 +1983,7 @@ TEST $file
     @unlink($diff_filename);
     @unlink($log_filename);
     @unlink($exp_filename);
+    @unlink($stdin_filename);
     @unlink($output_filename);
     @unlink($memcheck_filename);
     @unlink($sh_filename);
@@ -2719,6 +2708,16 @@ COMMAND $cmd
             $diff = generate_diff($wanted, $wanted_re, $output);
         }
 
+        // write .stdin
+        if ($test->hasSection('STDIN') || $test->hasSection('PHPDBG')) {
+            $stdin = $test->hasSection('STDIN')
+                ? $test->getSection('STDIN')
+                : $test->getSection('PHPDBG') . "\n";
+            if (file_put_contents($stdin_filename, $stdin) === false) {
+                error("Cannot create test stdin - $stdin_filename");
+            }
+        }
+
         if (is_array($IN_REDIRECT)) {
             $orig_shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $file);
             $diff = "# original source file: $orig_shortname\n" . $diff;
@@ -2746,8 +2745,14 @@ $output
     if (!$passed || $leaked) {
         // write .sh
         if (strpos($log_format, 'S') !== false) {
-            $env_lines = [];
+            // Unset all environment variables so that we don't inherit extra
+            // ones from the parent process.
+            $env_lines = ['unset $(env | cut -d= -f1)'];
             foreach ($env as $env_var => $env_val) {
+                if (strval($env_val) === '') {
+                    // proc_open does not pass empty env vars
+                    continue;
+                }
                 $env_lines[] = "export $env_var=" . escapeshellarg($env_val ?? "");
             }
             $exported_environment = "\n" . implode("\n", $env_lines) . "\n";
@@ -2756,7 +2761,7 @@ $output
 {$exported_environment}
 case "$1" in
 "gdb")
-    gdb --args {$orig_cmd}
+    gdb -ex 'unset environment LINES' -ex 'unset environment COLUMNS' --args {$orig_cmd}
     ;;
 "lldb")
     lldb -- {$orig_cmd}
@@ -2885,8 +2890,8 @@ function expectf_to_regex(?string $wanted): string
         '%e' => preg_quote(DIRECTORY_SEPARATOR, '/'),
         '%s' => '[^\r\n]+',
         '%S' => '[^\r\n]*',
-        '%a' => '.+',
-        '%A' => '.*',
+        '%a' => '.+?',
+        '%A' => '.*?',
         '%w' => '\s*',
         '%i' => '[+-]?\d+',
         '%d' => '\d+',
@@ -2896,19 +2901,6 @@ function expectf_to_regex(?string $wanted): string
         '%0' => '\x00',
     ]);
 }
-
-/**
- * @return bool|int
- */
-function comp_line(string $l1, string $l2, bool $is_reg)
-{
-    if ($is_reg) {
-        return preg_match('/^' . $l1 . '$/s', $l2);
-    }
-
-    return !strcmp($l1, $l2);
-}
-
 /**
  * Map "Zend OPcache" to "opcache" and convert all ext names to lowercase.
  */

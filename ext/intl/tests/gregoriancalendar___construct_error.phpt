@@ -4,7 +4,6 @@ IntlGregorianCalendar::__construct(): bad arguments
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 try {
     var_dump(intlgregcal_create_instance(1,2,3,4,5,6,7));

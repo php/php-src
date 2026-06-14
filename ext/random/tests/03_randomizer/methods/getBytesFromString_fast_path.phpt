@@ -41,7 +41,7 @@ for ($i = 1; $i <= strlen($allBytes); $i *= 2) {
     }
 
     // We also expect that each possible value appears at least once, if
-    // not is is very likely that some bits were erroneously masked away.
+    // not it is very likely that some bits were erroneously masked away.
     var_dump(count($count));
 
     echo PHP_EOL;
@@ -67,7 +67,7 @@ for ($i = 1; ($i + 1) <= strlen($allBytes); $i *= 2) {
     }
 
     // We expect that each possible value appears at least once, if
-    // not is is very likely that some bits were erroneously masked away.
+    // not it is very likely that some bits were erroneously masked away.
     var_dump(count($count));
 
     echo PHP_EOL;
@@ -90,7 +90,7 @@ for ($j = 0; $j < strlen($result); $j++) {
 }
 
 // We also expect that each possible value appears at least once, if
-// not is is very likely that some bits were erroneously masked away.
+// not it is very likely that some bits were erroneously masked away.
 var_dump(count($count));
 
 ?>

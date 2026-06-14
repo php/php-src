@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@php.net>                                    |
   |         Frank M. Kromann <frank@kromann.info>                        |
@@ -190,15 +188,18 @@ PHP_RSHUTDOWN_FUNCTION(pdo_dblib)
 	return SUCCESS;
 }
 
+#define REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, value) \
+		REGISTER_PDO_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, "DBLIB_", "Pdo\\Dblib::", value)
+
 PHP_MINIT_FUNCTION(pdo_dblib)
 {
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_CONNECTION_TIMEOUT", (long) PDO_DBLIB_ATTR_CONNECTION_TIMEOUT);
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_QUERY_TIMEOUT", (long) PDO_DBLIB_ATTR_QUERY_TIMEOUT);
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER", (long) PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER);
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_VERSION", (long) PDO_DBLIB_ATTR_VERSION);
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_TDS_VERSION", (long) PDO_DBLIB_ATTR_TDS_VERSION);
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_SKIP_EMPTY_ROWSETS", (long) PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS);
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_DATETIME_CONVERT", (long) PDO_DBLIB_ATTR_DATETIME_CONVERT);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_CONNECTION_TIMEOUT", (long) PDO_DBLIB_ATTR_CONNECTION_TIMEOUT);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_QUERY_TIMEOUT", (long) PDO_DBLIB_ATTR_QUERY_TIMEOUT);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_STRINGIFY_UNIQUEIDENTIFIER", (long) PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_VERSION", (long) PDO_DBLIB_ATTR_VERSION);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_TDS_VERSION", (long) PDO_DBLIB_ATTR_TDS_VERSION);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_SKIP_EMPTY_ROWSETS", (long) PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_DATETIME_CONVERT", (long) PDO_DBLIB_ATTR_DATETIME_CONVERT);
 
 	if (FAIL == dbinit()) {
 		return FAILURE;

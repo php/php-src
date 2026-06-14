@@ -42,8 +42,6 @@ $color1 = imagecolorsforindex($image, $col1);
 $color2 = imagecolorsforindex($image, $col2);
 var_dump($color1, $color2);
 
-imagedestroy($image);
-
 echo "Done\n";
 ?>
 --CLEAN--

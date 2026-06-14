@@ -33,7 +33,7 @@ echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECT--
-string(6641) "<?php
+string(6659) "<?php
 
 $web = 'index.php';
 
@@ -109,7 +109,7 @@ exit;
 $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
 if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
 header('HTTP/1.0 404 Not Found');
-echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
+echo "<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
 exit;
 }
 $b = pathinfo($a);
@@ -143,13 +143,13 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 6643;
+const LEN = 6661;
 
 static function go($return = false)
 {
 $fp = fopen(__FILE__, 'rb');
 fseek($fp, self::LEN);
-$L = unpack('V', $a = fread($fp, 4));
+$L = unpack('V', $a = (string)fread($fp, 4));
 $m = '';
 
 do {
@@ -157,7 +157,7 @@ $read = 8192;
 if ($L[1] - strlen($m) < 8192) {
 $read = $L[1] - strlen($m);
 }
-$last = fread($fp, $read);
+$last = (string)fread($fp, $read);
 $m .= $last;
 } while (strlen($last) && strlen($m) < $L[1]);
 
@@ -248,7 +248,8 @@ return realpath('/tmp');
 static function _unpack($m)
 {
 $info = unpack('V', substr($m, 0, 4));
- $l = unpack('V', substr($m, 10, 4));
+
+$l = unpack('V', substr($m, 10, 4));
 $m = substr($m, 14 + $l[1]);
 $s = unpack('V', substr($m, 0, 4));
 $o = 0;
@@ -256,11 +257,16 @@ $start = 4 + $s[1];
 $ret['c'] = 0;
 
 for ($i = 0; $i < $info[1]; $i++) {
- $len = unpack('V', substr($m, $start, 4));
+
+$len = unpack('V', substr($m, $start, 4));
 $start += 4;
- $savepath = substr($m, $start, $len[1]);
+
+$savepath = substr($m, $start, $len[1]);
 $start += $len[1];
-   $ret['m'][$savepath] = array_values(unpack('Va/Vb/Vc/Vd/Ve/Vf', substr($m, $start, 24)));
+
+
+
+$ret['m'][$savepath] = array_values(unpack('Va/Vb/Vc/Vd/Ve/Vf', substr($m, $start, 24)));
 $ret['m'][$savepath][3] = sprintf('%u', $ret['m'][$savepath][3]
 & 0xffffffff);
 $ret['m'][$savepath][7] = $o;
@@ -294,7 +300,7 @@ $data = bzdecompress($data);
 
 if (strlen($data) != $entry[0]) {
 die("Invalid internal .phar file (size error " . strlen($data) . " != " .
-$stat[7] . ")");
+$entry[0] . ")");
 }
 
 if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
@@ -327,7 +333,7 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-string(6652) "<?php
+string(6670) "<?php
 
 $web = 'index.php';
 
@@ -403,7 +409,7 @@ exit;
 $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
 if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
 header('HTTP/1.0 404 Not Found');
-echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
+echo "<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
 exit;
 }
 $b = pathinfo($a);
@@ -437,13 +443,13 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6654;
+const LEN = 6672;
 
 static function go($return = false)
 {
 $fp = fopen(__FILE__, 'rb');
 fseek($fp, self::LEN);
-$L = unpack('V', $a = fread($fp, 4));
+$L = unpack('V', $a = (string)fread($fp, 4));
 $m = '';
 
 do {
@@ -451,7 +457,7 @@ $read = 8192;
 if ($L[1] - strlen($m) < 8192) {
 $read = $L[1] - strlen($m);
 }
-$last = fread($fp, $read);
+$last = (string)fread($fp, $read);
 $m .= $last;
 } while (strlen($last) && strlen($m) < $L[1]);
 
@@ -542,7 +548,8 @@ return realpath('/tmp');
 static function _unpack($m)
 {
 $info = unpack('V', substr($m, 0, 4));
- $l = unpack('V', substr($m, 10, 4));
+
+$l = unpack('V', substr($m, 10, 4));
 $m = substr($m, 14 + $l[1]);
 $s = unpack('V', substr($m, 0, 4));
 $o = 0;
@@ -550,11 +557,16 @@ $start = 4 + $s[1];
 $ret['c'] = 0;
 
 for ($i = 0; $i < $info[1]; $i++) {
- $len = unpack('V', substr($m, $start, 4));
+
+$len = unpack('V', substr($m, $start, 4));
 $start += 4;
- $savepath = substr($m, $start, $len[1]);
+
+$savepath = substr($m, $start, $len[1]);
 $start += $len[1];
-   $ret['m'][$savepath] = array_values(unpack('Va/Vb/Vc/Vd/Ve/Vf', substr($m, $start, 24)));
+
+
+
+$ret['m'][$savepath] = array_values(unpack('Va/Vb/Vc/Vd/Ve/Vf', substr($m, $start, 24)));
 $ret['m'][$savepath][3] = sprintf('%u', $ret['m'][$savepath][3]
 & 0xffffffff);
 $ret['m'][$savepath][7] = $o;
@@ -588,7 +600,7 @@ $data = bzdecompress($data);
 
 if (strlen($data) != $entry[0]) {
 die("Invalid internal .phar file (size error " . strlen($data) . " != " .
-$stat[7] . ")");
+$entry[0] . ")");
 }
 
 if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
@@ -621,7 +633,7 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(7032)
+int(7050)
 ============================================================================
 ============================================================================
 Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
@@ -629,7 +641,7 @@ Illegal filename passed in for stub creation, was 401 characters long, and only 
 ============================================================================
 ============================================================================
 ============================================================================
-string(6654) "<?php
+string(6672) "<?php
 
 $web = 'the/web.php';
 
@@ -705,7 +717,7 @@ exit;
 $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
 if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
 header('HTTP/1.0 404 Not Found');
-echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
+echo "<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
 exit;
 }
 $b = pathinfo($a);
@@ -739,13 +751,13 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6656;
+const LEN = 6674;
 
 static function go($return = false)
 {
 $fp = fopen(__FILE__, 'rb');
 fseek($fp, self::LEN);
-$L = unpack('V', $a = fread($fp, 4));
+$L = unpack('V', $a = (string)fread($fp, 4));
 $m = '';
 
 do {
@@ -753,7 +765,7 @@ $read = 8192;
 if ($L[1] - strlen($m) < 8192) {
 $read = $L[1] - strlen($m);
 }
-$last = fread($fp, $read);
+$last = (string)fread($fp, $read);
 $m .= $last;
 } while (strlen($last) && strlen($m) < $L[1]);
 
@@ -844,7 +856,8 @@ return realpath('/tmp');
 static function _unpack($m)
 {
 $info = unpack('V', substr($m, 0, 4));
- $l = unpack('V', substr($m, 10, 4));
+
+$l = unpack('V', substr($m, 10, 4));
 $m = substr($m, 14 + $l[1]);
 $s = unpack('V', substr($m, 0, 4));
 $o = 0;
@@ -852,11 +865,16 @@ $start = 4 + $s[1];
 $ret['c'] = 0;
 
 for ($i = 0; $i < $info[1]; $i++) {
- $len = unpack('V', substr($m, $start, 4));
+
+$len = unpack('V', substr($m, $start, 4));
 $start += 4;
- $savepath = substr($m, $start, $len[1]);
+
+$savepath = substr($m, $start, $len[1]);
 $start += $len[1];
-   $ret['m'][$savepath] = array_values(unpack('Va/Vb/Vc/Vd/Ve/Vf', substr($m, $start, 24)));
+
+
+
+$ret['m'][$savepath] = array_values(unpack('Va/Vb/Vc/Vd/Ve/Vf', substr($m, $start, 24)));
 $ret['m'][$savepath][3] = sprintf('%u', $ret['m'][$savepath][3]
 & 0xffffffff);
 $ret['m'][$savepath][7] = $o;
@@ -890,7 +908,7 @@ $data = bzdecompress($data);
 
 if (strlen($data) != $entry[0]) {
 die("Invalid internal .phar file (size error " . strlen($data) . " != " .
-$stat[7] . ")");
+$entry[0] . ")");
 }
 
 if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
@@ -923,5 +941,5 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(7032)
+int(7050)
 Illegal web filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed

@@ -36,9 +36,7 @@ for ($y = 0; $y < 8; $y++) {
             if ($color !== 0x000000) {
                 printf("Pixel at %d, %d: unexpected color (%d)\n", $x, $y, $color);
             }
-            imagedestroy($cropped);
         }
-        imagedestroy($orig);
     }
 }
 

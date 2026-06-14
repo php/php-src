@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -115,7 +113,9 @@ void zend_shared_alloc_create_lock(char *lockfile_path)
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Unable to create opcache lock file in %s: %s (%d)", lockfile_path, strerror(errno), errno);
 	}
 
-	fchmod(lock_file, 0666);
+	if (fchmod(lock_file, 0666) == -1) {
+		zend_accel_error(ACCEL_LOG_WARNING, "Unable to change opcache lock file permissions in %s: %s (%d)", lockfile_path, strerror(errno), errno);
+	}
 
 	val = fcntl(lock_file, F_GETFD, 0);
 	val |= FD_CLOEXEC;
@@ -227,6 +227,9 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 
 	if (!g_shared_alloc_handler) {
 		/* try memory handlers in order */
+		if (handler_table->name == NULL) {
+			return NO_SHM_BACKEND;
+		}
 		for (he = handler_table; he->name; he++) {
 			res = zend_shared_alloc_try(he, requested_size, &ZSMMG(shared_segments), &ZSMMG(shared_segments_count), &error_in);
 			if (res) {

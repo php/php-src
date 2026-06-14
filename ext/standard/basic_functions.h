@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -26,6 +24,8 @@
 #include "zend_highlight.h"
 
 #include "url_scanner_ex.h"
+
+#include "basic_functions_decl.h"
 
 #if defined(_WIN32) && !defined(__clang__)
 #include <intrin.h>
@@ -46,10 +46,7 @@ PHP_MINIT_FUNCTION(user_filters);
 PHP_RSHUTDOWN_FUNCTION(user_filters);
 PHP_RSHUTDOWN_FUNCTION(browscap);
 
-/* Left for BC (not binary safe!) */
-PHPAPI int _php_error_log(int opt_err, const char *message, const char *opt, const char *headers);
-PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_len, const char *opt, const char *headers);
-PHPAPI int php_prefix_varname(zval *result, zend_string *prefix, const char *var_name, size_t var_name_len, bool add_underscore);
+PHPAPI zend_result _php_error_log(int opt_err, const zend_string *message, const zend_string *opt, const zend_string *headers);
 
 typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;
@@ -123,8 +120,9 @@ PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);
 
 typedef struct _php_shutdown_function_entry {
-	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
+	zval *params;
+	uint32_t param_count;
 } php_shutdown_function_entry;
 
 PHPAPI extern bool register_user_shutdown_function(const char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry);

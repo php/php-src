@@ -19,7 +19,11 @@ var_dump(++$test->prop);
 var_dump(--$test->prop);
 ?>
 --EXPECTF--
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
+
 Deprecated: Decrement on non-numeric string has no effect and is deprecated in %s on line %d
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(1) "c"
 
 Deprecated: Decrement on non-numeric string has no effect and is deprecated in %s on line %d
