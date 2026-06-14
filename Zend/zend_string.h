@@ -397,11 +397,22 @@ static zend_always_inline bool zend_string_equals(const zend_string *s1, const z
 	return s1 == s2 || zend_string_equal_content(s1, s2);
 }
 
-#define zend_string_equals_ci(s1, s2) \
-	(ZSTR_LEN(s1) == ZSTR_LEN(s2) && !zend_binary_strcasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2)))
+BEGIN_EXTERN_C()
+ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp(const char *s1, size_t len1, const char *s2, size_t len2);
+END_EXTERN_C()
 
-#define zend_string_equals_literal_ci(str, c) \
-	(ZSTR_LEN(str) == sizeof("" c) - 1 && !zend_binary_strcasecmp(ZSTR_VAL(str), ZSTR_LEN(str), (c), sizeof(c) - 1))
+static zend_always_inline bool zend_string_equals_cstr_ci(const zend_string *s1, const char *s2, size_t s2_length)
+{
+	return ZSTR_LEN(s1) == s2_length && !zend_binary_strcasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), s2, s2_length);
+}
+
+#define zend_string_equals_literal_ci(str, literal) \
+	zend_string_equals_cstr_ci(str, "" literal, sizeof(literal) - 1)
+
+static zend_always_inline bool zend_string_equals_ci(const zend_string *s1, const zend_string *s2)
+{
+	return zend_string_equals_cstr_ci(s1, ZSTR_VAL(s2), ZSTR_LEN(s2));
+}
 
 #define zend_string_equals_literal(str, literal) \
 	zend_string_equals_cstr(str, "" literal, sizeof(literal) - 1)
