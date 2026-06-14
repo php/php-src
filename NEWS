@@ -45,6 +45,10 @@ PHP                                                                        NEWS
     Phar::addEmptyDir() for paths starting with "/.phar", while allowing
     non-magic directory names that merely share the ".phar" prefix. (Weilin Du)
 
+- Session:
+  . Fixed session upload progress to respect session.use_only_cookies.
+    (jorgsowa)
+
 - Sqlite:
   . Fix error checks for column retrieval. (ndossche)
 
