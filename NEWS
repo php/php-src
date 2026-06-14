@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-22046 (The unserialize function can lead to segfault when
     non-Serializable internal classes are serialized back with the C format).
     (kocsismate)
+  . Fixed bug GH-22292 (AST pretty printing does not correctly handle
+    invalid variable names). (timwolla)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
