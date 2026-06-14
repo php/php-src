@@ -3178,6 +3178,10 @@ static sdlFunctionPtr find_function_using_soap_action(const sdl *sdl, const char
 		soap_action_length -= 2;
 	}
 
+	if (UNEXPECTED(soap_action_length == 0)) {
+		return NULL;
+	}
+
 	/* TODO: This may depend on a particular target namespace, in which case this won't find a match when multiple different
 	 *       target namespaces are used until #45282 is resolved. */
 	sdlFunctionPtr function;
