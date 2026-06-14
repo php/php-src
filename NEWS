@@ -43,6 +43,10 @@ PHP                                                                        NEWS
     Phar::addEmptyDir() for paths starting with "/.phar", while allowing
     non-magic directory names that merely share the ".phar" prefix. (Weilin Du)
 
+- Reflection:
+  . Preserve class-name case in ReflectionClass::getProperty() error messages
+    and autoloading. (jorgsowa)
+
 - SOAP:
   . Fixed bug GH-22218 (SoapServer::handle() crash on $_SERVER not being
     an array). (David Carlier / Rex-Reynolds)
