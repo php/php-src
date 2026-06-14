@@ -191,7 +191,8 @@ PHPAPI php_poll_ctx *php_poll_create_by_name(const char *preferred_backend, uint
 /* Set event capacity hint (optional optimization) */
 PHPAPI zend_result php_poll_set_max_events_hint(php_poll_ctx *ctx, int max_events)
 {
-	if (UNEXPECTED(!ctx || max_events <= 0)) {
+	ZEND_ASSERT(ctx);
+	if (UNEXPECTED(max_events <= 0)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
 		return FAILURE;
 	}
@@ -243,7 +244,8 @@ PHPAPI void php_poll_destroy(php_poll_ctx *ctx)
 /* Add file descriptor */
 PHPAPI zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
-	if (UNEXPECTED(!ctx || !ctx->initialized || fd < 0)) {
+	ZEND_ASSERT(ctx);
+	if (UNEXPECTED(!ctx->initialized || fd < 0)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
 		return FAILURE;
 	}
@@ -259,7 +261,8 @@ PHPAPI zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void
 /* Modify file descriptor */
 PHPAPI zend_result php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
-	if (UNEXPECTED(!ctx || !ctx->initialized || fd < 0)) {
+	ZEND_ASSERT(ctx);
+	if (UNEXPECTED(!ctx->initialized || fd < 0)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
 		return FAILURE;
 	}
@@ -275,7 +278,8 @@ PHPAPI zend_result php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, v
 /* Remove file descriptor */
 PHPAPI zend_result php_poll_remove(php_poll_ctx *ctx, int fd)
 {
-	if (UNEXPECTED(!ctx || !ctx->initialized || fd < 0)) {
+	ZEND_ASSERT(ctx);
+	if (UNEXPECTED(!ctx->initialized || fd < 0)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
 		return FAILURE;
 	}
@@ -292,7 +296,8 @@ PHPAPI zend_result php_poll_remove(php_poll_ctx *ctx, int fd)
 PHPAPI int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events,
 		const struct timespec *timeout)
 {
-	if (UNEXPECTED(!ctx || !ctx->initialized || !events || max_events <= 0)) {
+	ZEND_ASSERT(ctx);
+	if (UNEXPECTED(!ctx->initialized || !events || max_events <= 0)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
 		return -1;
 	}
