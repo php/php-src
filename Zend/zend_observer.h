@@ -32,8 +32,9 @@ extern ZEND_API bool zend_observer_errors_observed;
 extern ZEND_API bool zend_observer_function_declared_observed;
 extern ZEND_API bool zend_observer_class_linked_observed;
 
-#define ZEND_OBSERVER_HANDLE(function) (ZEND_USER_CODE((function)->type) \
-	? zend_observer_fcall_op_array_extension : zend_observer_fcall_internal_function_extension)
+static zend_always_inline int ZEND_OBSERVER_HANDLE(const zend_function *function) {
+	return ZEND_USER_CODE(function->common.type) ? zend_observer_fcall_op_array_extension : zend_observer_fcall_internal_function_extension;
+}
 
 #define ZEND_OBSERVER_DATA(function) \
 	((zend_observer_fcall_begin_handler *)&ZEND_OP_ARRAY_EXTENSION((&(function)->common), ZEND_OBSERVER_HANDLE(function)))
