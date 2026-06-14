@@ -37,8 +37,8 @@ try {
     $emulated =  $stmt->getColumnMeta(0);
 
     printf("Testing native PS...\n");
-    $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+    $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[007] Unable to turn off emulated prepared statements\n");
 
     $stmt = $db->prepare('SELECT id FROM test_stmt_getcolumnmeta ORDER BY id ASC');

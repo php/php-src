@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
@@ -249,7 +247,6 @@ static void function_dtor(zval *zv)
 static PHP_FUNCTION(com_method_handler)
 {
 	zval *object = getThis();
-	zend_string *method = EX(func)->common.function_name;
 	zval *args = NULL;
 	php_com_dotnet_object *obj = CDNO_FETCH(object);
 	int nargs;
@@ -307,7 +304,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 		f.type = ZEND_INTERNAL_FUNCTION;
 		f.num_args = 0;
 		f.arg_info = NULL;
-		f.scope = obj->ce;
+		f.scope = obj->zo.ce;
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 		f.function_name = zend_string_copy(name);
 		f.handler = PHP_FN(com_method_handler);
@@ -353,7 +350,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 							ITypeComp_Release(bindptr.lptcomp);
 							break;
 
-						case DESCKIND_NONE:
+						default:
 							break;
 					}
 					if (TI) {
@@ -392,7 +389,7 @@ static zend_string* com_class_name_get(const zend_object *object)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
 
-	return zend_string_copy(obj->ce->name);
+	return zend_string_copy(obj->zo.ce->name);
 }
 
 /* This compares two variants for equality */
@@ -515,6 +512,7 @@ zend_object_handlers php_com_object_handlers = {
 	php_com_object_free_storage,
 	zend_objects_destroy_object,
 	php_com_object_clone,
+	NULL, /* clone_with */
 	com_property_read,
 	com_property_write,
 	com_read_dimension,
@@ -625,7 +623,6 @@ zend_object* php_com_object_new(zend_class_entry *ce)
 
 	VariantInit(&obj->v);
 	obj->code_page = CP_ACP;
-	obj->ce = ce;
 
 	zend_object_std_init(&obj->zo, ce);
 

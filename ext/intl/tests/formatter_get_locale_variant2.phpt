@@ -3,7 +3,6 @@ numfmt_get_locale()
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '58.1') >=  0) die('skip for ICU < 58.1'); ?>
 --FILE--
 <?php

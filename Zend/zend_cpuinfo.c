@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Xinchen Hui <xinchen.h@zend.com>                            |
    +----------------------------------------------------------------------+
@@ -93,21 +92,21 @@ static unsigned get_xcr0_eax(void) {
 static bool is_avx_supported(void) {
 	if (!(cpuinfo.ecx & ZEND_CPU_FEATURE_AVX)) {
 		/* No support for AVX */
-		return 0;
+		return false;
 	}
 	if (!(cpuinfo.ecx & ZEND_CPU_FEATURE_OSXSAVE)) {
 		/* The operating system does not support XSAVE. */
-		return 0;
+		return false;
 	}
 	if ((get_xcr0_eax() & 0x6) != 0x6) {
 		/* XCR0 SSE and AVX bits must be set. */
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 #else
 static bool is_avx_supported(void) {
-	return 0;
+	return false;
 }
 #endif
 

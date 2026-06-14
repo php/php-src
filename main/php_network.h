@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Stig Venaas <venaas@uninett.no>                              |
    +----------------------------------------------------------------------+
@@ -101,8 +99,10 @@ END_EXTERN_C()
 
 #ifdef PHP_WIN32
 typedef SOCKET php_socket_t;
+#define PHP_SOCKET_FMT "%" PRIxPTR
 #else
 typedef int php_socket_t;
+#define PHP_SOCKET_FMT "%d"
 #endif
 
 #ifdef PHP_WIN32
@@ -121,7 +121,8 @@ typedef int php_socket_t;
 #define STREAM_SOCKOP_IPV6_V6ONLY         (1 << 3)
 #define STREAM_SOCKOP_IPV6_V6ONLY_ENABLED (1 << 4)
 #define STREAM_SOCKOP_TCP_NODELAY         (1 << 5)
-
+#define STREAM_SOCKOP_SO_REUSEADDR        (1 << 6)
+#define STREAM_SOCKOP_SO_KEEPALIVE        (1 << 7)
 
 /* uncomment this to debug poll(2) emulation on systems that have poll(2) */
 /* #define PHP_USE_POLL_2_EMULATION 1 */
@@ -264,9 +265,31 @@ typedef struct {
 } php_sockaddr_storage;
 #endif
 
+#define PHP_SOCKVAL_TCP_NODELAY   (1 << 0)
+#define PHP_SOCKVAL_TCP_KEEPIDLE  (1 << 1)
+#define PHP_SOCKVAL_TCP_KEEPCNT   (1 << 2)
+#define PHP_SOCKVAL_TCP_KEEPINTVL (1 << 3)
+
+#define PHP_SOCKVAL_IS_SET(sockvals, opt) ((sockvals)->mask & (opt))
+
+typedef struct {
+	unsigned int mask;
+	int tcp_nodelay;
+	struct {
+		int keepidle;
+		int keepcnt;
+		int keepintvl;
+	} keepalive;
+} php_sockvals;
+
 BEGIN_EXTERN_C()
 PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string);
 PHPAPI void php_network_freeaddresses(struct sockaddr **sal);
+
+PHPAPI php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned short port,
+		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
+		int *error_code, const char *bindto, unsigned short bindport, long sockopts, php_sockvals *sockvals
+		);
 
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
@@ -284,8 +307,22 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 #define php_connect_nonb(sock, addr, addrlen, timeout) \
 	php_network_connect_socket((sock), (addr), (addrlen), 0, (timeout), NULL, NULL)
 
+PHPAPI php_socket_t php_network_bind_socket_to_local_addr_ex(const char *host, unsigned port,
+		int socktype, long sockopts, php_sockvals *sockvals, zend_string **error_string, int *error_code
+		);
+
 PHPAPI php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
 		int socktype, long sockopts, zend_string **error_string, int *error_code
+		);
+
+PHPAPI php_socket_t php_network_accept_incoming_ex(php_socket_t srvsock,
+		zend_string **textaddr,
+		struct sockaddr **addr,
+		socklen_t *addrlen,
+		struct timeval *timeout,
+		zend_string **error_string,
+		int *error_code,
+		php_sockvals *sockvals
 		);
 
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
@@ -316,9 +353,9 @@ END_EXTERN_C()
 
 struct _php_netstream_data_t	{
 	php_socket_t socket;
-	char is_blocked;
+	bool is_blocked;
+	bool timeout_event;
 	struct timeval timeout;
-	char timeout_event;
 	size_t ownsize;
 };
 typedef struct _php_netstream_data_t php_netstream_data_t;

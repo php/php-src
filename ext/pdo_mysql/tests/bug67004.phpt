@@ -14,7 +14,7 @@ $dbh = MySQLPDOTest::factory();
 
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-$dbh->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+$dbh->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, true);
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $stmt = $dbh->prepare("SELECT ?");
 

@@ -46,7 +46,7 @@ bc_num _bc_do_add(bc_num n1, bc_num n2)
 	size_t min_len = MIN (n1->n_len, n2->n_len);
 	size_t min_scale = MIN(n1->n_scale, n2->n_scale);
 	size_t min_bytes = min_len + min_scale;
-	char *n1ptr, *n2ptr, *sumptr;
+	char *sumptr;
 	bool carry = 0;
 	size_t count;
 
@@ -54,8 +54,8 @@ bc_num _bc_do_add(bc_num n1, bc_num n2)
 	sum = bc_new_num_nonzeroed(sum_len, sum_scale);
 
 	/* Start with the fraction part.  Initialize the pointers. */
-	n1ptr = (char *) (n1->n_value + n1->n_len + n1->n_scale - 1);
-	n2ptr = (char *) (n2->n_value + n2->n_len + n2->n_scale - 1);
+	const char *n1ptr = (char *) (n1->n_value + n1->n_len + n1->n_scale - 1);
+	const char *n2ptr = (char *) (n2->n_value + n2->n_len + n2->n_scale - 1);
 	sumptr = (char *) (sum->n_value + sum_scale + sum_len - 1);
 
 	/* Add the fraction part.  First copy the longer fraction.*/
@@ -182,14 +182,14 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2)
 	size_t borrow = 0;
 	size_t count;
 	int val;
-	char *n1ptr, *n2ptr, *diffptr;
+	char *diffptr;
 
 	/* Allocate temporary storage. */
 	diff = bc_new_num_nonzeroed(diff_len, diff_scale);
 
 	/* Initialize the subtract. */
-	n1ptr = (char *) (n1->n_value + n1->n_len + n1->n_scale - 1);
-	n2ptr = (char *) (n2->n_value + n2->n_len + n2->n_scale - 1);
+	const char *n1ptr = (char *) (n1->n_value + n1->n_len + n1->n_scale - 1);
+	const char *n2ptr = (char *) (n2->n_value + n2->n_len + n2->n_scale - 1);
 	diffptr = (char *) (diff->n_value + diff_len + diff_scale - 1);
 
 	/* Take care of the longer scaled number. */

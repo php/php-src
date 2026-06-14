@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Niels Dossche <nielsdos@php.net>                            |
    +----------------------------------------------------------------------+
@@ -51,7 +49,7 @@ static zend_always_inline void dom_add_token(HashTable *ht, zend_string *token)
 
 /* https://dom.spec.whatwg.org/#concept-ordered-set-parser
  * and https://infra.spec.whatwg.org/#split-on-ascii-whitespace */
-static void dom_ordered_set_parser(HashTable *token_set, const char *position)
+void dom_ordered_set_parser(HashTable *token_set, const char *position, bool to_lowercase)
 {
 	/* Adapted steps from "split on ASCII whitespace" such that that loop directly appends to the token set. */
 
@@ -72,6 +70,9 @@ static void dom_ordered_set_parser(HashTable *token_set, const char *position)
 
 		/* 4.2. Append token to tokens. */
 		zend_string *token = zend_string_init(start, length, false);
+		if (to_lowercase) {
+			zend_str_tolower(ZSTR_VAL(token), length);
+		}
 		dom_add_token(token_set, token);
 		zend_string_release_ex(token, false);
 
@@ -81,6 +82,53 @@ static void dom_ordered_set_parser(HashTable *token_set, const char *position)
 
 	/* 5. Return tokens.
 	 *    => That's the token set. */
+}
+
+/* This returns true if all tokens in "token_set" are found in "value". */
+bool dom_ordered_set_all_contained(HashTable *token_set, const char *value, bool to_lowercase)
+{
+	/* This code is conceptually close to dom_ordered_set_parser(),
+	 * but without building a hash table.
+	 * Since the storage of the token set maps a value on itself,
+	 * we can reuse that storage as a "seen" flag by setting it to NULL. */
+	zval *zv;
+
+	uint32_t still_needed = zend_hash_num_elements(token_set);
+
+	value += strspn(value, ascii_whitespace);
+
+	while (*value != '\0' && still_needed > 0) {
+		const char *start = value;
+		value += strcspn(value, ascii_whitespace);
+		size_t length = value - start;
+
+		if (to_lowercase) {
+			ALLOCA_FLAG(use_heap)
+			char *lc_str = zend_str_tolower_copy(do_alloca(length + 1, use_heap), start, length);
+			zv = zend_hash_str_find(token_set, lc_str, length);
+			free_alloca(lc_str, use_heap);
+		} else {
+			zv = zend_hash_str_find(token_set, start, length);
+		}
+		if (zv) {
+			if (Z_STR_P(zv)) {
+				still_needed--;
+				Z_STR_P(zv) = NULL;
+			}
+		}
+
+		value += strspn(value, ascii_whitespace);
+	}
+
+	/* Restore "seen" flag. */
+	zend_string *k;
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(token_set, k, zv) {
+		if (!Z_STR_P(zv)) {
+			Z_STR_P(zv) = k;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return still_needed == 0;
 }
 
 /* https://dom.spec.whatwg.org/#concept-ordered-set-serializer */
@@ -166,7 +214,7 @@ static void dom_token_list_update_set(dom_token_list_object *intern, HashTable *
 	xmlChar *value = dom_token_list_get_class_value(attr, &should_free);
 	if (value != NULL) {
 		/* 2. Otherwise, parse the token set. */
-		dom_ordered_set_parser(token_set, (const char *) value);
+		dom_ordered_set_parser(token_set, (const char *) value, false);
 		intern->cached_string = estrdup((const char *) value);
 	} else {
 		intern->cached_string = NULL;
@@ -436,7 +484,7 @@ static bool dom_validate_tokens_varargs(const zval *args, uint32_t argc)
 {
 	for (uint32_t i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_STRING) {
-			zend_argument_type_error(i + 1, "must be of type string, %s given", zend_zval_value_name(&args[i]));
+			zend_wrong_parameter_type_error(i + 1, Z_EXPECTED_STRING, &args[i]);
 			return false;
 		}
 
@@ -527,7 +575,7 @@ PHP_METHOD(Dom_TokenList, toggle)
 	HashTable *token_set = TOKEN_LIST_GET_SET(intern);
 	zval *found_token = zend_hash_find(token_set, token);
 	if (found_token != NULL) {
-		ZEND_ASSERT(XtOffsetOf(Bucket, val) == 0 && "the cast only works if this is true");
+		ZEND_ASSERT(offsetof(Bucket, val) == 0 && "the cast only works if this is true");
 		Bucket *bucket = (Bucket *) found_token;
 
 		/* 3.1. If force is either not given or is false, then remove token from this’s token set,
@@ -577,7 +625,7 @@ PHP_METHOD(Dom_TokenList, replace)
 	}
 
 	/* 4. Replace token in this’s token set with newToken. */
-	ZEND_ASSERT(XtOffsetOf(Bucket, val) == 0 && "the cast only works if this is true");
+	ZEND_ASSERT(offsetof(Bucket, val) == 0 && "the cast only works if this is true");
 	Bucket *bucket = (Bucket *) found_token;
 	if (zend_hash_set_bucket_key(token_set, bucket, new_token) == NULL) {
 		/* It already exists, remove token instead. */

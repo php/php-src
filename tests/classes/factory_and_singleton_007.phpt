@@ -8,14 +8,13 @@ class test {
   }
 }
 
-$obj = new test;
-$clone = clone $obj;
-$obj = NULL;
+try {
+  $obj = new test;
+  $clone = clone $obj;
+} catch (Throwable $e) {
+  echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
 
-echo "Done\n";
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Call to protected test::__clone() from global scope in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+Error: Call to protected method test::__clone() from global scope

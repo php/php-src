@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
@@ -182,7 +180,6 @@ typedef struct st_mysqlnd_charset
 	const char		*collation;
 	unsigned int	char_minlen;
 	unsigned int	char_maxlen;
-	const char		*comment;
 	short			mb_charlen;
 	short			mb_valid;
 	unsigned int    lowest_mb_byte;
@@ -297,11 +294,11 @@ typedef struct st_mysqlnd_stats MYSQLND_STATS;
 
 struct st_mysqlnd_stats
 {
-	uint64_t				*values;
 	size_t					count;
 #ifdef ZTS
 	MUTEX_T	LOCK_access;
 #endif
+	uint64_t values[] ZEND_ELEMENT_COUNT(count);
 };
 
 
@@ -890,10 +887,6 @@ struct st_mysqlnd_connection_data
 	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory;
 
 /* Information related */
-	MYSQLND_STRING	hostname;
-	MYSQLND_STRING	unix_socket;
-	MYSQLND_STRING	username;
-	MYSQLND_STRING	password;
 	MYSQLND_STRING	scheme;
 	uint64_t		thread_id;
 	char			*server_version;
@@ -901,7 +894,6 @@ struct st_mysqlnd_connection_data
 	MYSQLND_STRING	authentication_plugin_data;
 	const MYSQLND_CHARSET *charset;
 	const MYSQLND_CHARSET *greet_charset;
-	MYSQLND_STRING	connect_or_select_db;
 	MYSQLND_INFILE	infile;
 	unsigned int	protocol_version;
 	unsigned int	port;
@@ -1328,7 +1320,6 @@ typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authen
 														size_t * auth_data_len,
 														MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 														const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
-														const MYSQLND_SESSION_OPTIONS * const session_options,
 														const MYSQLND_PFC_DATA * const pfc_data, const zend_ulong mysql_flags
 														);
 

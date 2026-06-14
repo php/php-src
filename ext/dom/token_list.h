@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Niels Dossche <nielsdos@php.net>                            |
    +----------------------------------------------------------------------+
@@ -27,14 +25,16 @@ typedef struct dom_token_list_object {
 
 static inline dom_token_list_object *php_dom_token_list_from_obj(zend_object *obj)
 {
-	return (dom_token_list_object *)((char *) obj - XtOffsetOf(dom_token_list_object, dom.std));
+	return (dom_token_list_object *)((char *) obj - offsetof(dom_token_list_object, dom.std));
 }
 
 static inline dom_token_list_object *php_dom_token_list_from_dom_obj(dom_object *obj)
 {
-	return (dom_token_list_object *)((char *) obj - XtOffsetOf(dom_token_list_object, dom));
+	return ZEND_CONTAINER_OF(obj, dom_token_list_object, dom);
 }
 
+void dom_ordered_set_parser(HashTable *token_set, const char *position, bool to_lowercase);
+bool dom_ordered_set_all_contained(HashTable *token_set, const char *value, bool to_lowercase);
 void dom_token_list_ctor(dom_token_list_object *intern, dom_object *element_obj);
 void dom_token_list_free_obj(zend_object *object);
 zval *dom_token_list_read_dimension(zend_object *object, zval *offset, int type, zval *rv);

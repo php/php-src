@@ -26,8 +26,6 @@ if ($arr['blue'] == 2) {
 } else {
   $r = "Failed";
 }
-imagedestroy($tile);
-imagedestroy($im);
 echo $r;
 ?>
 --EXPECT--

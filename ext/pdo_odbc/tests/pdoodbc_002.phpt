@@ -1,7 +1,7 @@
 --TEST--
 PDO_mysql connect through PDO::connect
 --EXTENSIONS--
-PDO_odbc
+pdo_odbc
 --SKIPIF--
 <?php
 require 'ext/pdo/tests/pdo_test.inc';

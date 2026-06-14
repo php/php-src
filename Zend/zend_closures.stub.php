@@ -21,4 +21,6 @@ final class Closure
     public function call(object $newThis, mixed ...$args): mixed {}
 
     public static function fromCallable(callable $callback): Closure {}
+
+    public static function getCurrent(): Closure {}
 }

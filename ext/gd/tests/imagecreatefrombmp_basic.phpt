@@ -4,7 +4,6 @@ imagecreatefrombmp() - basic functionality
 gd
 --SKIPIF--
 <?php
-if (!(imagetypes() & IMG_BMP)) die('skip BMP support required');
 if (!(imagetypes() & IMG_PNG)) {
     die("skip No PNG support");
 }

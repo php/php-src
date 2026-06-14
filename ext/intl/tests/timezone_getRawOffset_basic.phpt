@@ -4,7 +4,6 @@ IntlTimeZone::getRawOffset(): basic test
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 $ams = IntlTimeZone::createTimeZone('Europe/Amsterdam');
 var_dump($ams->getRawOffset());
 
@@ -14,4 +13,4 @@ var_dump(intltz_get_raw_offset($lsb));
 ?>
 --EXPECT--
 int(3600000)
-int(0)
+int(0)

@@ -76,7 +76,7 @@ export LDFLAGS=-L/usr/lib/i386-linux-gnu
 export CFLAGS='-m32'
 export CXXFLAGS='-m32'
 export PKG_CONFIG=/usr/bin/i686-linux-gnu-pkg-config
-./configure --disable-all --enable-opcache --build=i686-pc-linux-gnu
+./configure --disable-all --build=i686-pc-linux-gnu
 make -j$(nproc)
 ```
 

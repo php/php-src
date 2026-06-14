@@ -10,7 +10,7 @@ $db = new Pdo\Sqlite('sqlite::memory:');
 
 $db->query('CREATE TABLE test_pdo_sqlite_createaggregate (id INT AUTO INCREMENT, name TEXT)');
 
-$db->query('INSERT INTO test_pdo_sqlite_createaggregate VALUES (NULL, "PHP"), (NULL, "PHP6")');
+$db->query("INSERT INTO test_pdo_sqlite_createaggregate VALUES (NULL, 'PHP'), (NULL, 'PHP6')");
 
 $db->createAggregate('testing', function(&$a, $b) { $a .= $b; return $a; }, function(&$v) { return $v; });
 

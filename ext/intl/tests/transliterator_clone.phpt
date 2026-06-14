@@ -4,7 +4,6 @@ Transliterator clone handler
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 $str = "a U+4E07";
 
 $t = Transliterator::create("hex-any");

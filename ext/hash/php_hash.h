@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Sara Golemon <pollita@php.net>                               |
   +----------------------------------------------------------------------+
@@ -29,14 +27,22 @@
 
 #define L64 INT64_C
 
+typedef enum {
+    HASH_SPEC_SUCCESS = 0,
+    HASH_SPEC_FAILURE = -1,
+    WRONG_CONTEXT_SIZE = -999,
+    BYTE_OFFSET_POS_ERROR = -1000,
+    CONTEXT_VALIDATION_FAILURE = -2000,
+} hash_spec_result;
+
 typedef struct _php_hashcontext_object php_hashcontext_object;
 
 typedef void (*php_hash_init_func_t)(void *context, HashTable *args);
 typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, size_t count);
 typedef void (*php_hash_final_func_t)(unsigned char *digest, void *context);
 typedef zend_result (*php_hash_copy_func_t)(const void *ops, const void *orig_context, void *dest_context);
-typedef zend_result (*php_hash_serialize_func_t)(const php_hashcontext_object *hash, zend_long *magic, zval *zv);
-typedef int  (*php_hash_unserialize_func_t)(php_hashcontext_object *hash, zend_long magic, const zval *zv);
+typedef hash_spec_result (*php_hash_serialize_func_t)(const php_hashcontext_object *hash, zend_long *magic, zval *zv);
+typedef hash_spec_result (*php_hash_unserialize_func_t)(php_hashcontext_object *hash, zend_long magic, const zval *zv);
 
 typedef struct _php_hash_ops {
 	const char *algo;
@@ -148,10 +154,10 @@ extern PHP_HASH_API zend_class_entry *php_hashcontext_ce;
 PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(zend_string *algo);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
 PHP_HASH_API zend_result php_hash_copy(const void *ops, const void *orig_context, void *dest_context);
-PHP_HASH_API zend_result php_hash_serialize(const php_hashcontext_object *context, zend_long *magic, zval *zv);
-PHP_HASH_API int php_hash_unserialize(php_hashcontext_object *context, zend_long magic, const zval *zv);
-PHP_HASH_API zend_result php_hash_serialize_spec(const php_hashcontext_object *context, zval *zv, const char *spec);
-PHP_HASH_API int php_hash_unserialize_spec(php_hashcontext_object *hash, const zval *zv, const char *spec);
+PHP_HASH_API hash_spec_result php_hash_serialize(const php_hashcontext_object *context, zend_long *magic, zval *zv);
+PHP_HASH_API hash_spec_result php_hash_unserialize(php_hashcontext_object *context, zend_long magic, const zval *zv);
+PHP_HASH_API hash_spec_result php_hash_serialize_spec(const php_hashcontext_object *context, zval *zv, const char *spec);
+PHP_HASH_API hash_spec_result php_hash_unserialize_spec(php_hashcontext_object *hash, const zval *zv, const char *spec);
 
 static inline void *php_hash_alloc_context(const php_hash_ops *ops) {
 	/* Zero out context memory so serialization doesn't expose internals */

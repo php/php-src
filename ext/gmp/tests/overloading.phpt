@@ -123,7 +123,7 @@ $a .= '17';
 var_dump($a);
 
 ?>
---EXPECT--
+--EXPECTF--
 object(GMP)#3 (1) {
   ["num"]=>
   string(2) "59"
@@ -254,8 +254,8 @@ object(GMP)#5 (1) {
   ["num"]=>
   string(3) "-11"
 }
-Shift must be greater than or equal to 0
-Shift must be greater than or equal to 0
+Shift must be between 0 and %d
+Shift must be between 0 and %d
 object(GMP)#5 (1) {
   ["num"]=>
   string(3) "-43"

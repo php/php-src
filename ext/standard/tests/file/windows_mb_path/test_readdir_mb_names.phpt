@@ -2,12 +2,8 @@
 Test readdir() with a dir for multibyte filenames
 --SKIPIF--
 <?php
-include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
-
-skip_if_not_win();
+if (PHP_OS_FAMILY !== 'Windows') die('skip windows only test');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-skip_if_no_required_exts();
-
 ?>
 --CONFLICTS--
 mb_names
@@ -38,8 +34,9 @@ create_verify_dir($prefix, "żółć");
 
 $dirw = $prefix . DIRECTORY_SEPARATOR;
 
-$old_cp = get_active_cp();
-set_active_cp(65001);
+$old_cp = sapi_windows_cp_get();
+sapi_windows_cp_set(65001);
+echo "Active code page: ", sapi_windows_cp_get(), "\n";
 
 if (is_dir($dirw)) {
     if ($dh = opendir($dirw)) {
@@ -51,12 +48,12 @@ if (is_dir($dirw)) {
 } else {
     echo "is_dir failed\n";
 }
-set_active_cp($old_cp);
+sapi_windows_cp_set($old_cp);
 
 remove_data("mb_names");
 
 ?>
---EXPECTF--
+--EXPECT--
 Active code page: 65001
 filename: . : filetype: dir
 filename: .. : filetype: dir
@@ -76,4 +73,3 @@ filename: テストマルチバイト・パス : filetype: file
 filename: テストマルチバイト・パス42 : filetype: dir
 filename: 測試多字節路徑 : filetype: file
 filename: 測試多字節路徑5 : filetype: dir
-Active code page: %d

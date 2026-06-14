@@ -13,7 +13,7 @@ if (!defined("IMAGETYPE_SWC")) {
     var_dump(getimagesize(__DIR__ . "/test13pix.swf"));
 ?>
 --EXPECT--
-array(5) {
+array(7) {
   [0]=>
   int(550)
   [1]=>
@@ -24,4 +24,8 @@ array(5) {
   string(24) "width="550" height="400""
   ["mime"]=>
   string(29) "application/x-shockwave-flash"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }

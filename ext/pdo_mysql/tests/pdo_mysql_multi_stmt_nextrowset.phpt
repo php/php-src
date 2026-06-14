@@ -1,5 +1,5 @@
 --TEST--
-MySQL PDOStatement->nextRowSet() with PDO::MYSQL_ATTR_MULTI_STATEMENTS either true or false
+MySQL PDOStatement->nextRowSet() with Pdo\Mysql::ATTR_MULTI_STATEMENTS either true or false
 --EXTENSIONS--
 pdo_mysql
 --SKIPIF--
@@ -35,21 +35,21 @@ MySQLPDOTest::skip();
         printf("Native PS...\n");
         foreach (array(false, true) as $multi) {
             $value = $multi ? 'true' : 'false';
-            echo "\nTesting with PDO::MYSQL_ATTR_MULTI_STATEMENTS set to {$value}\n";
+            echo "\nTesting with Pdo\Mysql::ATTR_MULTI_STATEMENTS set to {$value}\n";
             $dsn = MySQLPDOTest::getDSN();
             $user = PDO_MYSQL_TEST_USER;
             $pass = PDO_MYSQL_TEST_PASS;
-            $db = new PDO($dsn, $user, $pass, array(PDO::MYSQL_ATTR_MULTI_STATEMENTS => $multi));
+            $db = new PDO($dsn, $user, $pass, array(Pdo\Mysql::ATTR_MULTI_STATEMENTS => $multi));
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-            $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
+            $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, 1);
             $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
             test_proc($db);
 
-            $db = new PDO($dsn, $user, $pass, array(PDO::MYSQL_ATTR_MULTI_STATEMENTS => $multi));
+            $db = new PDO($dsn, $user, $pass, array(Pdo\Mysql::ATTR_MULTI_STATEMENTS => $multi));
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
             $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-            $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 0);
+            $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, 0);
             $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
 
             test_proc($db);
@@ -81,7 +81,7 @@ $db->exec('DROP PROCEDURE IF EXISTS pdo_mysql_multi_stmt_nextrowset_p');
 --EXPECTF--
 Native PS...
 
-Testing with PDO::MYSQL_ATTR_MULTI_STATEMENTS set to false
+Testing with Pdo\Mysql::ATTR_MULTI_STATEMENTS set to false
 array(3) {
   [0]=>
   array(1) {
@@ -172,7 +172,7 @@ bool(false)
 Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'INSERT INTO pdo_mysql_multi_stmt_nextrowset (id, label) VALUES (99, 'x')' at line 1 in %s on line %d
 string(5) "42000"
 
-Testing with PDO::MYSQL_ATTR_MULTI_STATEMENTS set to true
+Testing with Pdo\Mysql::ATTR_MULTI_STATEMENTS set to true
 array(3) {
   [0]=>
   array(1) {

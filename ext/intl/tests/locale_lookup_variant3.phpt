@@ -59,6 +59,24 @@ function ut_main()
 
     }
 
+    try {
+	    ut_loc_locale_lookup(["de\0-DE"], "de-DE", false, "en-US");
+    } catch (\ValueError $e) {
+	    echo $e->getMessage(). PHP_EOL;
+    }
+
+    try {
+	    ut_loc_locale_lookup(["de-DE"], "de-D\0E", true, "en-US");
+    } catch (\ValueError $e) {
+	    echo $e->getMessage(). PHP_EOL;
+    }
+
+    try {
+	    ut_loc_locale_lookup(["de-DE"], "de-DE", true, "e\0n-US");
+    } catch (\ValueError $e) {
+	    echo $e->getMessage(). PHP_EOL;
+    }
+
     $res_str .= "\n";
     return $res_str;
 
@@ -69,6 +87,12 @@ ut_run();
 
 ?>
 --EXPECT--
+Locale::lookup(): Argument #2 ($locale) must not contain any null bytes
+Locale::lookup(): Argument #2 ($locale) must not contain any null bytes
+Locale::lookup(): Argument #4 ($defaultLocale) must not contain any null bytes
+locale_lookup(): Argument #2 ($locale) must not contain any null bytes
+locale_lookup(): Argument #2 ($locale) must not contain any null bytes
+locale_lookup(): Argument #4 ($defaultLocale) must not contain any null bytes
 --------------
 loc_range:de-de 
 lang_tags: de-DEVA,de-DE-1996,de-DE,zh_Hans,de-CH-1996,sl_IT,sl_IT_nedis-a-kirti-x-xyz,sl_IT_rozaj,sl_IT_NEDIS_ROJAZ_1901,i-enochian,sgn-CH-de,art-lojban,i-lux,art-lojban,jbo,en_sl_IT,zh-Hant-CN-x-prv1-prv2

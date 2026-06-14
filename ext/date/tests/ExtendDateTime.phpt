@@ -1,5 +1,5 @@
 --TEST--
-Extendig DatTime and calling __set_state without args
+Extending DateTime and calling __set_state without args
 --CREDITS--
 Gabriel Caruso (carusogabriel34@gmail.com)
 --FILE--

@@ -19,12 +19,26 @@ const AF_INET = UNKNOWN;
  */
 const AF_INET6 = UNKNOWN;
 #endif
+#ifdef AF_UNSPEC
+/**
+ * @var int
+ * @cvalue AF_UNSPEC
+ */
+const AF_UNSPEC = UNKNOWN;
+#endif
 #ifdef AF_DIVERT
 /**
  * @var int
  * @cvalue AF_DIVERT
  */
 const AF_DIVERT = UNKNOWN;
+#endif
+#ifdef AF_PACKET
+/**
+ * @var int
+ * @cvalue AF_PACKET
+ */
+const AF_PACKET = UNKNOWN;
 #endif
 /**
  * @var int
@@ -447,6 +461,13 @@ const SO_BPF_EXTENSIONS = UNKNOWN;
  */
 const SO_EXCLBIND = UNKNOWN;
 #endif
+#ifdef SO_BUSY_POLL
+/**
+ * @var int
+ * @cvalue SO_BUSY_POLL
+ */
+const SO_BUSY_POLL = UNKNOWN;
+#endif
 #ifdef SKF_AD_OFF
 /**
  * @var int
@@ -588,6 +609,13 @@ const TCP_CONGESTION = UNKNOWN;
  */
 const TCP_SYNCNT = UNKNOWN;
 #endif
+#ifdef TCP_USER_TIMEOUT
+/**
+ * @var int
+ * @cvalue TCP_USER_TIMEOUT
+ */
+const TCP_USER_TIMEOUT = UNKNOWN;
+#endif
 #ifdef SO_ZEROCOPY
 /**
  * @var int
@@ -629,16 +657,58 @@ const TCP_KEEPALIVE = UNKNOWN;
  * @cvalue TCP_KEEPIDLE
  */
 const TCP_KEEPIDLE = UNKNOWN;
+#endif
+#ifdef TCP_KEEPINTVL
 /**
  * @var int
  * @cvalue TCP_KEEPINTVL
  */
 const TCP_KEEPINTVL = UNKNOWN;
+#endif
+#ifdef TCP_KEEPCNT
 /**
  * @var int
  * @cvalue TCP_KEEPCNT
  */
 const TCP_KEEPCNT = UNKNOWN;
+#endif
+#ifdef TCP_FUNCTION_BLK
+/**
+ * @var int
+ * @cvalue TCP_FUNCTION_BLK
+ */
+const TCP_FUNCTION_BLK = UNKNOWN;
+#endif
+#ifdef TCP_FUNCTION_ALIAS
+/**
+ * @var int
+ * @cvalue TCP_FUNCTION_ALIAS
+ */
+const TCP_FUNCTION_ALIAS = UNKNOWN;
+#endif
+#ifdef TCP_REUSPORT_LB_NUMA
+/**
+ * @var int
+ * @cvalue TCP_REUSPORT_LB_NUMA
+ */
+const TCP_REUSPORT_LB_NUMA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TCP_REUSPORT_LB_NUMA_NODOM
+ */
+const TCP_REUSPORT_LB_NUMA_NODOM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TCP_REUSPORT_LB_NUMA_CURDOM
+ */
+const TCP_REUSPORT_LB_NUMA_CURDOM = UNKNOWN;
+#endif
+#ifdef TCP_BBR_ALGORITHM
+/**
+ * @var int
+ * @cvalue TCP_BBR_ALGORITHM
+ */
+const TCP_BBR_ALGORITHM = UNKNOWN;
 #endif
 /**
  * @var int
@@ -1647,6 +1717,20 @@ const SOL_UDP = UNKNOWN;
  */
 const SOL_UDPLITE = UNKNOWN;
 #endif
+#if defined(IPPROTO_ICMP) || defined(PHP_WIN32)
+/**
+ * @var int
+ * @cvalue IPPROTO_ICMP
+ */
+const IPPROTO_ICMP = UNKNOWN;
+#endif
+#if defined(IPPROTO_ICMPV6) || defined(PHP_WIN32)
+/**
+ * @var int
+ * @cvalue IPPROTO_ICMPV6
+ */
+const IPPROTO_ICMPV6 = UNKNOWN;
+#endif
 
 #ifdef HAVE_IPV6
 /**
@@ -1856,6 +1940,13 @@ const TCP_QUICKACK = UNKNOWN;
  */
 const TCP_REPAIR = UNKNOWN;
 #endif
+#if defined(IP_BINDANY)
+/**
+ * @var int
+ * @cvalue IP_BINDANY
+ */
+const IP_BINDANY = UNKNOWN;
+#endif
 #if defined(IP_DONTFRAG)
 /**
  * @var int
@@ -1925,6 +2016,185 @@ const UDPLITE_SEND_CSCOV = UNKNOWN;
  * @cvalue UDPLITE_RECV_CSCOV
  */
 const UDPLITE_RECV_CSCOV = UNKNOWN;
+#endif
+#if defined(ETH_P_ALL)
+/**
+ * @var int
+ * @cvalue ETH_P_IP
+ */
+const ETH_P_IP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_P_IPV6
+ */
+const ETH_P_IPV6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_P_LOOP
+ */
+const ETH_P_LOOP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ETH_P_ALL
+ */
+const ETH_P_ALL = UNKNOWN;
+#endif
+
+#ifdef UDP_SEGMENT
+/**
+ * @var int
+ * @cvalue UDP_SEGMENT
+ */
+const UDP_SEGMENT = UNKNOWN;
+#endif
+
+#ifdef SHUT_RDWR
+/**
+ * @var int
+ * @cvalue SHUT_RD
+ */
+const SHUT_RD = UNKNOWN;
+/**
+/**
+ * @var int
+ * @cvalue SHUT_WR
+ */
+const SHUT_WR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SHUT_RDWR
+ */
+const SHUT_RDWR = UNKNOWN;
+#endif
+
+
+#ifdef EAI_BADFLAGS
+/**
+ * @var int
+ * @cvalue EAI_BADFLAGS
+ */
+const EAI_BADFLAGS = UNKNOWN;
+#endif
+#ifdef EAI_NONAME
+/**
+ * @var int
+ * @cvalue EAI_NONAME
+ */
+const EAI_NONAME = UNKNOWN;
+#endif
+#ifdef EAI_AGAIN
+/**
+ * @var int
+ * @cvalue EAI_AGAIN
+ */
+const EAI_AGAIN = UNKNOWN;
+#endif
+#ifdef EAI_FAIL
+/**
+ * @var int
+ * @cvalue EAI_FAIL
+ */
+const EAI_FAIL = UNKNOWN;
+#endif
+#ifdef EAI_NODATA
+/**
+ * @var int
+ * @cvalue EAI_NODATA
+ */
+const EAI_NODATA = UNKNOWN;
+#endif
+#ifdef EAI_FAMILY
+/**
+ * @var int
+ * @cvalue EAI_FAMILY
+ */
+const EAI_FAMILY = UNKNOWN;
+#endif
+#ifdef EAI_SOCKTYPE
+/**
+ * @var int
+ * @cvalue EAI_SOCKTYPE
+ */
+const EAI_SOCKTYPE = UNKNOWN;
+#endif
+#ifdef EAI_SERVICE
+/**
+ * @var int
+ * @cvalue EAI_SERVICE
+ */
+const EAI_SERVICE = UNKNOWN;
+#endif
+#ifdef EAI_ADDRFAMILY
+/**
+ * @var int
+ * @cvalue EAI_ADDRFAMILY
+ */
+const EAI_ADDRFAMILY = UNKNOWN;
+#else
+#ifdef EAI_FAMILY
+/**
+ * @var int
+ * @cvalue EAI_FAMILY
+ */
+const EAI_ADDRFAMILY = UNKNOWN;
+#else
+#endif
+#endif
+#ifdef EAI_SYSTEM
+/**
+ * @var int
+ * @cvalue EAI_SYSTEM
+ */
+const EAI_SYSTEM = UNKNOWN;
+#endif
+#ifdef EAI_OVERFLOW
+/**
+ * @var int
+ * @cvalue EAI_OVERFLOW
+ */
+const EAI_OVERFLOW = UNKNOWN;
+#endif
+#ifdef EAI_INPROGRESS
+/**
+ * @var int
+ * @cvalue EAI_INPROGRESS
+ */
+const EAI_INPROGRESS = UNKNOWN;
+#endif
+#ifdef EAI_CANCELED
+/**
+ * @var int
+ * @cvalue EAI_CANCELED
+ */
+const EAI_CANCELED = UNKNOWN;
+#endif
+#ifdef EAI_NOTCANCELED
+/**
+ * @var int
+ * @cvalue EAI_NOTCANCELED
+ */
+const EAI_NOTCANCELED = UNKNOWN;
+#endif
+#ifdef EAI_ALLDONE
+/**
+ * @var int
+ * @cvalue EAI_ALLDONE
+ */
+const EAI_ALLDONE = UNKNOWN;
+#endif
+#ifdef EAI_INTR
+/**
+ * @var int
+ * @cvalue EAI_INTR
+ */
+const EAI_INTR = UNKNOWN;
+#endif
+#ifdef EAI_IDN_ENCODE
+/**
+ * @var int
+ * @cvalue EAI_IDN_ENCODE
+ */
+const EAI_IDN_ENCODE = UNKNOWN;
 #endif
 
 /**
@@ -2047,9 +2317,10 @@ function socket_cmsg_space(int $level, int $type, int $num = 0): ?int {}
 
 /**
  * @return array<int, AddressInfo>|false
+ * @param int $error_code
  * @refcount 1
  */
-function socket_addrinfo_lookup(string $host, ?string $service = null, array $hints = []): array|false {}
+function socket_addrinfo_lookup(string $host, ?string $service = null, array $hints = [], &$error_code = null): array|false {}
 
 function socket_addrinfo_connect(AddressInfo $address): Socket|false {}
 

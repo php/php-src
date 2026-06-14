@@ -50,8 +50,6 @@ if (false === getenv('PHP_CURL_FTP_REMOTE_PASSWD'))  exit("skip PHP_CURL_FTP_REM
 
   $result  =  curl_exec ( $ch );
   var_dump ( $result );
-  curl_close ( $ch );
-
 ?>
 --EXPECT--
 bool(true)

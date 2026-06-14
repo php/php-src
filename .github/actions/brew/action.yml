@@ -19,7 +19,8 @@ runs:
           tidy-html5 \
           libzip \
           libsodium \
-          icu4c
+          icu4c \
+          curl
         brew install -v \
           bison \
           re2c

@@ -29,6 +29,7 @@ echo "\n*** Done ***";
 $file_path = __DIR__;
 include($file_path."/file.inc");
 delete_files($file_path, 1);
+@unlink($file_path."/file_get_contents_basic1.tmp");
 ?>
 --EXPECT--
 *** Testing the basic functionality of the file_get_contents() function ***

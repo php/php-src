@@ -40,11 +40,10 @@ gd
 
     $im = imagecreate(256, 256);
     var_dump(testrun($im, $fontfile_8859));
-    imagedestroy($im);
+    $im = null;
 
     $im = imagecreatetruecolor(256, 256);
     var_dump(testrun($im, $fontfile_8859));
-    imagedestroy($im);
 ?>
 --EXPECT--
 bool(true)

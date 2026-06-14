@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -80,7 +79,7 @@ static zend_always_inline void zend_object_release(zend_object *obj)
 	}
 }
 
-static zend_always_inline size_t zend_object_properties_size(zend_class_entry *ce)
+static zend_always_inline size_t zend_object_properties_size(const zend_class_entry *ce)
 {
 	return sizeof(zval) *
 		(ce->default_properties_count -
@@ -90,7 +89,7 @@ static zend_always_inline size_t zend_object_properties_size(zend_class_entry *c
 /* Allocates object type and zeros it, but not the standard zend_object and properties.
  * Standard object MUST be initialized using zend_object_std_init().
  * Properties MUST be initialized using object_properties_init(). */
-static zend_always_inline void *zend_object_alloc(size_t obj_size, zend_class_entry *ce) {
+static zend_always_inline void *zend_object_alloc(size_t obj_size, const zend_class_entry *ce) {
 	void *obj = emalloc(obj_size + zend_object_properties_size(ce));
 	memset(obj, 0, obj_size - sizeof(zend_object));
 	return obj;
@@ -137,5 +136,16 @@ static inline zend_property_info *zend_get_typed_property_info_for_slot(zend_obj
 	return NULL;
 }
 
+static zend_always_inline bool zend_check_method_accessible(const zend_function *fn, const zend_class_entry *scope)
+{
+	if (!(fn->common.fn_flags & ZEND_ACC_PUBLIC)
+		&& fn->common.scope != scope
+		&& (UNEXPECTED(fn->common.fn_flags & ZEND_ACC_PRIVATE)
+			|| UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fn), scope)))) {
+		return false;
+	}
+
+	return true;
+}
 
 #endif /* ZEND_OBJECTS_H */

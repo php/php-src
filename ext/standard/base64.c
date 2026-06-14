@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Jim Winstead <jimw@php.net>                                  |
    |         Xinchen Hui <laruence@php.net>                               |
@@ -536,7 +534,7 @@ zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t leng
 		/* Step 2: splitting 24-bit words into 32-bit lanes */
 		str = _mm512_permutexvar_epi8(shuffle_splitting, str);
 
-		/* Step 3: moving 6-bit word to sperate bytes */
+		/* Step 3: moving 6-bit word to separate bytes */
 		str = _mm512_multishift_epi64_epi8(multi_shifts, str);
 
 		/* Step 4: conversion to ASCII */
@@ -643,7 +641,7 @@ zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length, z
 		/* [D1 D2 D0 D1|C1 C2 C0 C1|B1 B2 B0 B1|A1 A2 A0 A1] x 4 */
 		str = _mm512_shuffle_epi8(str, _mm512_set4_epi32(0x0a0b090a, 0x07080607, 0x04050304, 0x01020001));
 
-		/* Step 3: moving 6-bit word to sperate bytes */
+		/* Step 3: moving 6-bit word to separate bytes */
 		/* in:  [bbbbcccc|ccdddddd|aaaaaabb|bbbbcccc] */
 		/* t0:  [0000cccc|cc000000|aaaaaa00|00000000] */
 		const __m512i t0 = _mm512_and_si512(str, _mm512_set1_epi32(0x0fc0fc00));

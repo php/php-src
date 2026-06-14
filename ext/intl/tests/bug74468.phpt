@@ -2,8 +2,6 @@
 Bug #74468 Wrong reflection on Collator::sortWithSortKeys
 --EXTENSIONS--
 intl
---SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
 --FILE--
 <?php
 $rm = new ReflectionMethod(Collator::class, 'sortWithSortKeys');

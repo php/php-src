@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
@@ -96,7 +96,7 @@ static int BreakIterator_compare_objects(zval *object1,
 /* {{{ clone handler for BreakIterator */
 static zend_object *BreakIterator_clone_obj(zend_object *object)
 {
-	BreakIterator_object *bio_orig = php_intl_breakiterator_fetch_object(object);
+	const BreakIterator_object *bio_orig = php_intl_breakiterator_fetch_object(object);
 	zend_object *ret_val           = BreakIterator_ce_ptr->create_object(object->ce);
 	BreakIterator_object *bio_new  = php_intl_breakiterator_fetch_object(ret_val);
 
@@ -212,7 +212,7 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 
 	memcpy(&BreakIterator_handlers, &std_object_handlers,
 		sizeof BreakIterator_handlers);
-	BreakIterator_handlers.offset = XtOffsetOf(BreakIterator_object, zo);
+	BreakIterator_handlers.offset = offsetof(BreakIterator_object, zo);
 	BreakIterator_handlers.compare = BreakIterator_compare_objects;
 	BreakIterator_handlers.clone_obj = BreakIterator_clone_obj;
 	BreakIterator_handlers.get_debug_info = BreakIterator_get_debug_info;

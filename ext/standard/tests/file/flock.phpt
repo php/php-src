@@ -14,7 +14,13 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-$fp = fopen($file, "w");
+/*
+ On Solaris, flock() is emulated via fcntl(). A shared lock (LOCK_SH) maps to
+ F_RDLCK, which requires the file descriptor to be open for reading. Using "w"
+ opens write-only and causes EBADF on Solaris. Open with "w+" so LOCK_SH works
+ portably across platforms.
+*/
+$fp = fopen($file, "w+");
 
 var_dump(flock($fp, LOCK_SH|LOCK_NB));
 var_dump(flock($fp, LOCK_UN));
@@ -46,7 +52,7 @@ $file = __DIR__."/flock.dat";
 unlink($file);
 ?>
 --EXPECT--
-flock(): supplied resource is not a valid stream resource
+flock(): Argument #1 ($stream) must be an open stream resource
 bool(true)
 bool(true)
 bool(true)

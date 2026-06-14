@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -70,46 +69,53 @@ END_EXTERN_C()
 #define ZSTR_H(zstr)    (zstr)->h
 #define ZSTR_HASH(zstr) zend_string_hash_val(zstr)
 
-/* Compatibility macros */
-
-#define IS_INTERNED(s)	ZSTR_IS_INTERNED(s)
-#define STR_EMPTY_ALLOC()	ZSTR_EMPTY_ALLOC()
-#define _STR_HEADER_SIZE _ZSTR_HEADER_SIZE
-#define STR_ALLOCA_ALLOC(str, _len, use_heap) ZSTR_ALLOCA_ALLOC(str, _len, use_heap)
-#define STR_ALLOCA_INIT(str, s, len, use_heap) ZSTR_ALLOCA_INIT(str, s, len, use_heap)
-#define STR_ALLOCA_FREE(str, use_heap) ZSTR_ALLOCA_FREE(str, use_heap)
-
 /*---*/
 
-#define ZSTR_IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
-#define ZSTR_IS_VALID_UTF8(s)				(GC_FLAGS(s) & IS_STR_VALID_UTF8)
+static zend_always_inline bool ZSTR_IS_INTERNED(const zend_string *s) {
+	return GC_FLAGS(s) & IS_STR_INTERNED;
+}
+
+static inline bool ZSTR_IS_VALID_UTF8(const zend_string *s) {
+	return GC_FLAGS(s) & IS_STR_VALID_UTF8;
+}
 
 /* These are properties, encoded as flags, that will hold on the resulting string
  * after concatenating two strings that have these property.
  * Example: concatenating two UTF-8 strings yields another UTF-8 string. */
 #define ZSTR_COPYABLE_CONCAT_PROPERTIES		(IS_STR_VALID_UTF8)
 
-#define ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(s) 				(GC_FLAGS(s) & ZSTR_COPYABLE_CONCAT_PROPERTIES)
-/* This macro returns the copyable concat properties which hold on both strings. */
-#define ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(s1, s2)	(GC_FLAGS(s1) & GC_FLAGS(s2) & ZSTR_COPYABLE_CONCAT_PROPERTIES)
+static inline uint32_t ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(const zend_string *s) {
+	return GC_FLAGS(s) & ZSTR_COPYABLE_CONCAT_PROPERTIES;
+}
 
-#define ZSTR_COPY_CONCAT_PROPERTIES(out, in) do { \
-	zend_string *_out = (out); \
-	uint32_t properties = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES((in)); \
-	GC_ADD_FLAGS(_out, properties); \
-} while (0)
+/* This function returns the copyable concat properties which hold on both strings. */
+static inline uint32_t ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(const zend_string *s1, const zend_string *s2) {
+	return ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(s1) & ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(s2);
+}
 
-#define ZSTR_COPY_CONCAT_PROPERTIES_BOTH(out, in1, in2) do { \
-	zend_string *_out = (out); \
-	uint32_t properties = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH((in1), (in2)); \
-	GC_ADD_FLAGS(_out, properties); \
-} while (0)
+static inline void ZSTR_COPY_CONCAT_PROPERTIES(zend_string *out, const zend_string *in) {
+	uint32_t properties = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(in);
+	GC_ADD_FLAGS(out, properties);
+}
 
-#define ZSTR_EMPTY_ALLOC() zend_empty_string
-#define ZSTR_CHAR(c) zend_one_char_string[c]
-#define ZSTR_KNOWN(idx) zend_known_strings[idx]
+static inline void ZSTR_COPY_CONCAT_PROPERTIES_BOTH(zend_string *out, const zend_string *in1, const zend_string *in2) {
+	uint32_t properties = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(in1, in2);
+	GC_ADD_FLAGS(out, properties);
+}
 
-#define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
+static zend_always_inline zend_string *ZSTR_EMPTY_ALLOC(void) {
+	return zend_empty_string;
+}
+
+static zend_always_inline zend_string *ZSTR_CHAR(unsigned char c) {
+	return zend_one_char_string[c];
+}
+
+static zend_always_inline zend_string *ZSTR_KNOWN(size_t idx) {
+	return zend_known_strings[idx];
+}
+
+#define _ZSTR_HEADER_SIZE offsetof(zend_string, val)
 
 #define _ZSTR_STRUCT_SIZE(len) (_ZSTR_HEADER_SIZE + len + 1)
 
@@ -132,7 +138,7 @@ END_EXTERN_C()
 
 #define ZSTR_ALLOCA_FREE(str, use_heap) free_alloca(str, use_heap)
 
-#define ZSTR_INIT_LITERAL(s, persistent) (zend_string_init((s), strlen(s), (persistent)))
+#define ZSTR_INIT_LITERAL(s, persistent) (zend_string_init(("" s), sizeof(s) - 1, (persistent)))
 
 /*---*/
 
@@ -411,7 +417,7 @@ static zend_always_inline bool zend_string_starts_with(const zend_string *str, c
 }
 
 #define zend_string_starts_with_literal(str, prefix) \
-	zend_string_starts_with_cstr(str, prefix, strlen(prefix))
+	zend_string_starts_with_cstr(str, "" prefix, sizeof(prefix) - 1)
 
 static zend_always_inline bool zend_string_starts_with_cstr_ci(const zend_string *str, const char *prefix, size_t prefix_length)
 {
@@ -424,7 +430,7 @@ static zend_always_inline bool zend_string_starts_with_ci(const zend_string *str
 }
 
 #define zend_string_starts_with_literal_ci(str, prefix) \
-	zend_string_starts_with_cstr_ci(str, prefix, strlen(prefix))
+	zend_string_starts_with_cstr_ci(str, "" prefix, sizeof(prefix) - 1)
 
 /*
  * DJBX33A (Daniel J. Bernstein, Times 33 with Addition)
@@ -546,7 +552,7 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 		case 2: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
 		case 1: hash = ((hash << 5) + hash) + *str++; break;
 		case 0: break;
-EMPTY_SWITCH_DEFAULT_CASE()
+default: ZEND_UNREACHABLE();
 	}
 #endif
 
@@ -560,6 +566,8 @@ EMPTY_SWITCH_DEFAULT_CASE()
 #endif
 }
 
+// When adding a new string here, please also update build/gen_stub.php to the
+// known strings to be used in property registration; see gh-15751
 #define ZEND_KNOWN_STRINGS(_) \
 	_(ZEND_STR_FILE,                   "file") \
 	_(ZEND_STR_LINE,                   "line") \
@@ -570,9 +578,11 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_OBJECT_OPERATOR,        "->") \
 	_(ZEND_STR_PAAMAYIM_NEKUDOTAYIM,   "::") \
 	_(ZEND_STR_ARGS,                   "args") \
+	_(ZEND_STR_ARGUMENTS,              "arguments") \
 	_(ZEND_STR_UNKNOWN,                "unknown") \
 	_(ZEND_STR_UNKNOWN_CAPITALIZED,    "Unknown") \
 	_(ZEND_STR_EXIT,                   "exit") \
+	_(ZEND_STR_CLONE,                  "clone") \
 	_(ZEND_STR_EVAL,                   "eval") \
 	_(ZEND_STR_INCLUDE,                "include") \
 	_(ZEND_STR_REQUIRE,                "require") \
@@ -595,7 +605,9 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_HOST,                   "host") \
 	_(ZEND_STR_PORT,                   "port") \
 	_(ZEND_STR_USER,                   "user") \
+	_(ZEND_STR_USERNAME,               "username") \
 	_(ZEND_STR_PASS,                   "pass") \
+	_(ZEND_STR_PASSWORD,               "password") \
 	_(ZEND_STR_PATH,                   "path") \
 	_(ZEND_STR_QUERY,                  "query") \
 	_(ZEND_STR_FRAGMENT,               "fragment") \
@@ -622,6 +634,8 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_NULL_LOWERCASE,         "null") \
 	_(ZEND_STR_MIXED,                  "mixed") \
 	_(ZEND_STR_TRAVERSABLE,            "Traversable") \
+	_(ZEND_STR_SELF,                   "self") \
+	_(ZEND_STR_PARENT,                 "parent") \
 	_(ZEND_STR_SLEEP,                  "__sleep") \
 	_(ZEND_STR_WAKEUP,                 "__wakeup") \
 	_(ZEND_STR_CASES,                  "cases") \
@@ -638,6 +652,12 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_SINCE,                  "since") \
 	_(ZEND_STR_GET,                    "get") \
 	_(ZEND_STR_SET,                    "set") \
+	_(ZEND_STR_8_DOT_0,                "8.0") \
+	_(ZEND_STR_8_DOT_1,                "8.1") \
+	_(ZEND_STR_8_DOT_2,                "8.2") \
+	_(ZEND_STR_8_DOT_3,                "8.3") \
+	_(ZEND_STR_8_DOT_4,                "8.4") \
+	_(ZEND_STR_8_DOT_5,                "8.5") \
 
 
 typedef enum _zend_known_string_id {

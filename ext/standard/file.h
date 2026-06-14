@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                        |
    +----------------------------------------------------------------------+
@@ -34,9 +32,9 @@ PHPAPI PHP_FUNCTION(ftell);
 PHPAPI PHP_FUNCTION(fseek);
 PHPAPI PHP_FUNCTION(fpassthru);
 
+PHP_MINIT_FUNCTION(stream_errors);
 PHP_MINIT_FUNCTION(user_streams);
 
-PHPAPI int php_le_stream_context(void);
 PHPAPI zend_result php_copy_file(const char *src, const char *dest);
 PHPAPI zend_result php_copy_file_ex(const char *src, const char *dest, int src_flags);
 PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_flags, php_stream_context *ctx);
@@ -101,7 +99,8 @@ typedef struct {
 	php_stream_context *default_context;
 	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */
 	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */
-	HashTable *wrapper_errors;			/* key: wrapper address; value: linked list of char* */
+	HashTable *wrapper_logged_errors;	/* key: wrapper address; value: linked list of error entries */
+	php_stream_error_state stream_error_state;
 	int pclose_wait;
 #ifdef HAVE_GETHOSTBYNAME_R
 	struct hostent tmp_host_info;

@@ -40,5 +40,6 @@ dtlkbGbtoDOnxeNnN93gwQZngGYZYciu
 var_dump(openssl_pkey_derive($pub, $priv, 10));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: openssl_pkey_derive(): the $key_length parameter is deprecated as it is either ignored or truncates the key in %s on line %d
 bool(false)

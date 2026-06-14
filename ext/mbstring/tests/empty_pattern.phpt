@@ -24,6 +24,11 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 mb_ereg_search_init(): Argument #2 ($pattern) must not be empty
+
+Deprecated: Function mb_split() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg_search_regs() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 No pattern was provided

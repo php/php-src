@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
@@ -39,6 +37,11 @@ static void pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 	if (stmt) {
 		S = (pdo_odbc_stmt*)stmt->driver_data;
 		einfo = &S->einfo;
+	}
+
+	/* If we don't have a driver error do not populate the info array */
+	if (strlen(einfo->last_err_msg) == 0) {
+		return;
 	}
 
 	message = strpprintf(0, "%s (%s[%ld] at %s:%d)",
@@ -527,14 +530,12 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 
 		use_direct = 1;
 
-		size_t db_len = strlen(dbh->data_source);
-		bool use_uid_arg = dbh->username != NULL && !php_memnistr(dbh->data_source, "uid=", strlen("uid="), dbh->data_source + db_len);
-		bool use_pwd_arg = dbh->password != NULL && !php_memnistr(dbh->data_source, "pwd=", strlen("pwd="), dbh->data_source + db_len);
+		bool use_uid_arg = dbh->username != NULL && !php_memnistr(dbh->data_source, "uid=", strlen("uid="), dbh->data_source + dbh->data_source_len);
+		bool use_pwd_arg = dbh->password != NULL && !php_memnistr(dbh->data_source, "pwd=", strlen("pwd="), dbh->data_source + dbh->data_source_len);
 
 		if (use_uid_arg || use_pwd_arg) {
-			char *db = (char*) emalloc(db_len + 1);
-			strcpy(db, dbh->data_source);
-			char *db_end = db + db_len;
+			char *db = (char*) estrndup(dbh->data_source, dbh->data_source_len);
+			char *db_end = db + dbh->data_source_len;
 			db_end--;
 			if ((unsigned char)*(db_end) == ';') {
 				*db_end = '\0';
@@ -547,9 +548,9 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 			if (use_uid_arg) {
 				should_quote_uid = !php_odbc_connstr_is_quoted(dbh->username) && php_odbc_connstr_should_quote(dbh->username);
 				if (should_quote_uid) {
-					size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->username);
-					uid = emalloc(estimated_length);
-					php_odbc_connstr_quote(uid, dbh->username, estimated_length);
+					size_t quoted_length = php_odbc_connstr_get_quoted_length(dbh->username);
+					uid = emalloc(quoted_length);
+					php_odbc_connstr_quote(uid, dbh->username, quoted_length);
 				} else {
 					uid = dbh->username;
 				}
@@ -564,9 +565,9 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 			if (use_pwd_arg) {
 				should_quote_pwd = !php_odbc_connstr_is_quoted(dbh->password) && php_odbc_connstr_should_quote(dbh->password);
 				if (should_quote_pwd) {
-					size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->password);
-					pwd = emalloc(estimated_length);
-					php_odbc_connstr_quote(pwd, dbh->password, estimated_length);
+					size_t quoted_length = php_odbc_connstr_get_quoted_length(dbh->password);
+					pwd = emalloc(quoted_length);
+					php_odbc_connstr_quote(pwd, dbh->password, quoted_length);
 				} else {
 					pwd = dbh->password;
 				}
@@ -588,6 +589,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 
 			pefree((char*)dbh->data_source, dbh->is_persistent);
 			dbh->data_source = dsn;
+			dbh->data_source_len = strlen(dsn);
 			if (uid && should_quote_uid) {
 				efree(uid);
 			}
@@ -597,7 +599,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 			efree(db);
 		}
 
-		rc = SQLDriverConnect(H->dbc, NULL, (SQLCHAR *) dbh->data_source, strlen(dbh->data_source),
+		rc = SQLDriverConnect(H->dbc, NULL, (SQLCHAR *) dbh->data_source, dbh->data_source_len,
 				dsnbuf, sizeof(dsnbuf)-1, &dsnbuflen, SQL_DRIVER_NOPROMPT);
 	}
 	if (!use_direct) {

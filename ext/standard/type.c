@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Rasmus Lerdorf <rasmus@php.net>                              |
    +----------------------------------------------------------------------+
@@ -105,7 +103,7 @@ PHP_FUNCTION(settype)
 		convert_to_long(ptr);
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_FLOAT))) {
 		convert_to_double(ptr);
-	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_DOUBLE))) { /* deprecated */
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_DOUBLE))) {
 		convert_to_double(ptr);
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_STRING))) {
 		convert_to_string(ptr);
@@ -151,8 +149,7 @@ PHP_FUNCTION(intval)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(num) != IS_STRING || base == 10) {
-		RETVAL_LONG(zval_get_long(num));
-		return;
+		RETURN_LONG(zval_get_long(num));
 	}
 
 
@@ -173,14 +170,17 @@ PHP_FUNCTION(intval)
 			}
 
 			if (strval[offset] == '0' && (strval[offset + 1] == 'b' || strval[offset + 1] == 'B')) {
+				if (strval[0] != '-') {
+					/* Either "+0b", or "0b" */
+					RETURN_LONG(ZEND_STRTOL(strval + 2 + offset, NULL, 2));
+				}
+
 				char *tmpval;
 				strlen -= 2; /* Removing "0b" */
 				tmpval = emalloc(strlen + 1);
 
-				/* Place the unary symbol at pos 0 if there was one */
-				if (offset) {
-					tmpval[0] = strval[0];
-				}
+				/* Place the unary symbol at pos 0 */
+				tmpval[0] = '-';
 
 				/* Copy the data from after "0b" to the end of the buffer */
 				memcpy(tmpval + offset, strval + offset + 2, strlen - offset);
@@ -341,13 +341,12 @@ PHP_FUNCTION(is_object)
 }
 /* }}} */
 
-static inline void _zend_is_numeric(zval *return_value, zval *arg)
+static zend_always_inline void _zend_is_numeric(zval *return_value, zval *arg)
 {
 	switch (Z_TYPE_P(arg)) {
 		case IS_LONG:
 		case IS_DOUBLE:
 			RETURN_TRUE;
-			break;
 
 		case IS_STRING:
 			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 0)) {
@@ -359,7 +358,6 @@ static inline void _zend_is_numeric(zval *return_value, zval *arg)
 
 		default:
 			RETURN_FALSE;
-			break;
 	}
 }
 
@@ -401,11 +399,9 @@ PHP_FUNCTION(is_scalar)
 		case IS_LONG:
 		case IS_STRING:
 			RETURN_TRUE;
-			break;
 
 		default:
 			RETURN_FALSE;
-			break;
 	}
 }
 /* }}} */

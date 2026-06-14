@@ -2,7 +2,8 @@
 
 /**
  * @generate-class-entries static
- * @generate-legacy-arginfo 80000
+ * @generate-c-enums
+ * @generate-legacy-arginfo 70000
  * @undocumentable
  */
 namespace {
@@ -16,6 +17,12 @@ namespace {
 
     /** @var string */
     const ZEND_CONSTANT_A = "global";
+
+    /**
+     * @var int
+     */
+    #[\Deprecated(message: "use something else", since: "version 1.5")]
+    const ZEND_TEST_ATTRIBUTED_CONSTANT = 42;
 
     interface _ZendTestInterface
     {
@@ -55,6 +62,7 @@ namespace {
         public stdClass|Iterator|null $classUnionProp = null;
         public Traversable&Countable $classIntersectionProp;
         public readonly int $readonlyProp;
+        public final int $finalProp;
 
         public static function is_object(): int {}
 
@@ -179,7 +187,9 @@ namespace {
     }
 
     final class ZendTestForbidDynamicCall {
+        /** @forbid-dynamic-calls */
         public function call(): void {}
+        /** @forbid-dynamic-calls */
         public static function callStatic(): void {}
     }
 
@@ -206,6 +216,8 @@ namespace {
         case Bar;
     }
 
+    function zend_trigger_bailout(): never {}
+
     function zend_test_array_return(): array {}
 
     /** @genstubs-expose-comment-block
@@ -229,6 +241,13 @@ namespace {
     #[\Deprecated(message: "custom message")]
     function zend_test_deprecated_attr(): void {}
 
+    #[\NoDiscard(message: "custom message")]
+    function zend_test_nodiscard(): int {}
+
+    #[\Deprecated(message: "custom message")]
+    #[\NoDiscard(message: "custom message 2")]
+    function zend_test_deprecated_nodiscard(): int {}
+
     /** @alias zend_test_void_return */
     function zend_test_aliased(): void {}
 
@@ -245,6 +264,8 @@ namespace {
     function zend_leak_variable(mixed $variable): void {}
 
     function zend_leak_bytes(int $bytes = 3): void {}
+
+    function zend_delref(mixed $variable): void {}
 
     function zend_string_or_object(object|string $param): object|string {}
 
@@ -282,10 +303,17 @@ namespace {
 
     function zend_object_init_with_constructor(string $class, mixed ...$args): mixed {}
 
+    function zend_call_method_if_exists(object $obj, string $method, mixed ...$args): mixed {}
+
+    function zend_test_call_with_consumed_args(callable $cb, array $args, int $consumed_args): array {}
+
+    function zend_test_refcount(mixed $value): int {}
+
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
 
     function zend_test_zend_ini_str(): string {}
+    function zend_test_zstr_init_literal(): string {}
 
 #ifdef ZEND_CHECK_STACK_LIMIT
     function zend_test_zend_call_stack_get(): ?array {}
@@ -322,7 +350,13 @@ function zend_test_override_libxml_global_state(): void {}
 
     function zend_test_log_err_debug(string $str): void {}
 
+    function zend_test_compile_to_ast(string $str): string {}
+
     function zend_test_gh18756(): void {}
+
+    function zend_test_opcache_preloading(): bool {}
+
+    function zend_test_uri_parser(string $uri, string $parser): array { }
 
     /** @compile-time-eval */
     function zend_test_gh19792(): void {}
@@ -334,6 +368,8 @@ namespace ZendTestNS {
         /** @tentative-return-type */
         public function method(): int {}
     }
+
+    interface Bar {}
 
     class UnlikelyCompileError {
         /* This method signature would create a compile error due to the string
@@ -350,11 +386,20 @@ namespace ZendTestNS {
 
 namespace ZendTestNS2 {
 
+    use ZendTestNS\Foo as FooAlias;
+    use ZendTestNS\UnlikelyCompileError;
+    use ZendTestNS\{NotUnlikelyCompileError};
+
     /** @var string */
     const ZEND_CONSTANT_A = "namespaced";
 
     class Foo {
         public ZendSubNS\Foo $foo;
+        public ZendSubNS\Foo&\ZendTestNS\Bar $intersectionProp;
+        public ZendSubNS\Foo|\ZendTestNS\Bar $unionProp;
+        public FooAlias $fooAlias;
+        public UnlikelyCompileError $unlProp;
+        public NotUnlikelyCompileError $notUnlProp;
 
         public function method(): void {}
     }

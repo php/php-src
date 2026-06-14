@@ -119,10 +119,11 @@ class Response extends BaseResponse
     /**
      * @param mixed  $body
      * @param string $contentType
+     * @param bool $skipHeadersCheck
      *
      * @return Response
      */
-    public function expectBody($body, $contentType = 'text/html')
+    public function expectBody($body, $contentType = 'text/html', bool $skipHeadersCheck = false)
     {
         if ($multiLine = is_array($body)) {
             $body = implode("\n", $body);
@@ -130,7 +131,7 @@ class Response extends BaseResponse
 
         if ( ! $this->checkIfValid()) {
             $this->error('Response is invalid');
-        } elseif ( ! $this->checkDefaultHeaders($contentType)) {
+        } elseif ( ! $skipHeadersCheck && ! $this->checkDefaultHeaders($contentType)) {
             $this->error('Response default headers not found');
         } elseif ($body !== $this->rawBody) {
             if ($multiLine) {

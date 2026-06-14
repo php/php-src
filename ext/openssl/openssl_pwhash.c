@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Remi Collet <remi@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -22,7 +20,7 @@
 #include "ext/standard/php_password.h"
 #include "php_openssl.h"
 
-#if defined(HAVE_OPENSSL_ARGON2)
+#ifdef HAVE_OPENSSL_ARGON2
 #include "Zend/zend_attributes.h"
 #include "openssl_pwhash_arginfo.h"
 #include <ext/standard/base64.h>
@@ -46,9 +44,12 @@
 #define PHP_OPENSSL_HASH_SIZE     32
 #define PHP_OPENSSL_DIGEST_SIZE  128
 
+ZEND_EXTERN_MODULE_GLOBALS(openssl)
+
 static inline zend_result get_options(zend_array *options, uint32_t *memlimit, uint32_t *iterlimit, uint32_t *threads)
 {
 	zval *opt;
+	zend_long sthreads;
 
 	*iterlimit = PHP_OPENSSL_PWHASH_ITERLIMIT;
 	*memlimit  = PHP_OPENSSL_PWHASH_MEMLIMIT;
@@ -74,8 +75,7 @@ static inline zend_result get_options(zend_array *options, uint32_t *memlimit, u
 		}
 		*iterlimit = siterlimit;
 	}
-	if ((opt = zend_hash_str_find(options, "threads", strlen("threads"))) && (zval_get_long(opt) != 1)) {
-		zend_long sthreads = zval_get_long(opt);
+	if ((opt = zend_hash_str_find(options, "threads", strlen("threads"))) && ((sthreads = zval_get_long(opt)) != 1)) {
 		if ((sthreads < PHP_OPENSSL_THREADS_MIN) || (sthreads > PHP_OPENSSL_THREADS_MAX)) {
 			zend_value_error("Invalid number of threads");
 			return FAILURE;
@@ -98,8 +98,8 @@ static bool php_openssl_argon2_compute_hash(
 	uint32_t oldthreads;
 	bool ret = false;
 
-	oldthreads = OSSL_get_max_threads(NULL);
-	if (OSSL_set_max_threads(NULL, threads) != 1) {
+	oldthreads = OSSL_get_max_threads(PHP_OPENSSL_LIBCTX);
+	if (OSSL_set_max_threads(PHP_OPENSSL_LIBCTX, threads) != 1) {
 		goto fail;
 	}
 	p = params;
@@ -111,7 +111,7 @@ static bool php_openssl_argon2_compute_hash(
 	*p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD, (void *)pass, pass_len);
 	*p++ = OSSL_PARAM_construct_end();
 
-	if ((kdf = EVP_KDF_fetch(NULL, algo, NULL)) == NULL) {
+	if ((kdf = EVP_KDF_fetch(PHP_OPENSSL_LIBCTX, algo, PHP_OPENSSL_PROPQ)) == NULL) {
 		goto fail;
 	}
 	if ((kctx = EVP_KDF_CTX_new(kdf)) == NULL) {
@@ -127,7 +127,7 @@ static bool php_openssl_argon2_compute_hash(
 fail:
 	EVP_KDF_free(kdf);
 	EVP_KDF_CTX_free(kctx);
-	OSSL_set_max_threads(NULL, oldthreads);
+	OSSL_set_max_threads(PHP_OPENSSL_LIBCTX, oldthreads);
 
 	return ret;
 }
@@ -385,4 +385,5 @@ PHP_MINIT_FUNCTION(openssl_pwhash)
 
 	return SUCCESS;
 }
+
 #endif /* HAVE_OPENSSL_ARGON2 */

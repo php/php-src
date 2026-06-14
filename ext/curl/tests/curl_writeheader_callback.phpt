@@ -24,8 +24,6 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_HEADERFUNCTION, 'curl_header_callback');
 curl_setopt($ch, CURLOPT_URL, $host);
 curl_exec($ch);
-curl_close($ch);
-
 ?>
 --EXPECTF--
 HTTP/1.1 %d %s

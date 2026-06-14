@@ -27,6 +27,8 @@ object(CurlHandle)#1 (0) {
 }
 object(CurlHandle)#1 (0) {
 }
+
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
 object(CurlHandle)#1 (0) {
 }
 object(CurlHandle)#1 (0) {

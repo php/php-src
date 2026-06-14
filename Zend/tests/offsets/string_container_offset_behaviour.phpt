@@ -280,7 +280,7 @@ OUTPUT;
 
 $EXPECTED_OUTPUT_STRING_CAST_OFFSETS_OUT_OF_RANGE_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_STRING_CAST_OFFSETS_OUT_OF_RANGE) . '$/s';
 
-const EXPECTF_OUTPUT_FLOAT_OFFSETS_OUT_OF_RANGE = <<<OUTPUT
+const EXPECTF_OUTPUT_FLOAT_WITH_FRACTIONAL_OUT_OF_RANGE_OFFSETS = <<<OUTPUT
 Read before write:
 
 Warning: String offset cast occurred in %s on line %d
@@ -349,9 +349,78 @@ Cannot use string offset as an array
 
 OUTPUT;
 
-$EXPECTF_OUTPUT_FLOAT_OFFSETS_OUT_OF_RANGE_REGEX = '/^' . expectf_to_regex(EXPECTF_OUTPUT_FLOAT_OFFSETS_OUT_OF_RANGE) . '$/s';
+$EXPECTF_OUTPUT_FLOAT_WITH_FRACTIONAL_OUT_OF_RANGE_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTF_OUTPUT_FLOAT_WITH_FRACTIONAL_OUT_OF_RANGE_OFFSETS) . '$/s';
 
-const EXPECTED_OUTPUT_FLOAT_INF_NAN_OFFSETS = <<<OUTPUT
+const EXPECTF_OUTPUT_FLOAT_WITH_FRACTIONAL_OFFSETS = <<<OUTPUT
+Read before write:
+
+Warning: String offset cast occurred in %s on line %d
+
+Warning: Uninitialized string offset %i in %s on line %d
+string(0) ""
+Write:
+
+Warning: String offset cast occurred in %s on line %d
+Read:
+
+Warning: String offset cast occurred in %s on line %d
+string(1) "5"
+Read-Write:
+
+Warning: String offset cast occurred in %s on line %d
+Cannot use assign-op operators with string offsets
+isset():
+
+Deprecated: Implicit conversion from float %f to int loses precision in %s on line %d
+bool(true)
+empty():
+
+Deprecated: Implicit conversion from float %f to int loses precision in %s on line %d
+bool(false)
+null coalesce:
+string(1) "5"
+Reference to dimension:
+
+Warning: String offset cast occurred in %s on line %d
+Cannot create references %s string offsets
+unset():
+Cannot unset string offsets
+Nested read:
+
+Warning: String offset cast occurred in %s on line %d
+
+Warning: String offset cast occurred in %s on line %d
+
+Warning: Uninitialized string offset %i in %s on line %d
+string(0) ""
+Nested write:
+
+Warning: String offset cast occurred in %s on line %d
+Cannot use string offset as an array
+Nested Read-Write:
+
+Warning: String offset cast occurred in %s on line %d
+Cannot use string offset as an array
+Nested isset():
+
+Deprecated: Implicit conversion from float %f to int loses precision in %s on line %d
+bool(false)
+Nested empty():
+
+Deprecated: Implicit conversion from float %f to int loses precision in %s on line %d
+bool(true)
+Nested null coalesce:
+string(7) "default"
+Nested unset():
+
+Warning: String offset cast occurred in %s on line %d
+Cannot use string offset as an array
+
+OUTPUT;
+
+$EXPECTF_OUTPUT_FLOAT_WITH_FRACTIONAL_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTF_OUTPUT_FLOAT_WITH_FRACTIONAL_OFFSETS) . '$/s';
+
+const EXPECTED_OUTPUT_FLOAT_OOB_OFFSETS = <<<OUTPUT
 Read before write:
 
 Warning: String offset cast occurred in %s on line %d
@@ -371,9 +440,13 @@ Warning: String offset cast occurred in %s on line %d
 Cannot use assign-op operators with string offsets
 isset():
 
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(true)
 empty():
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(false)
@@ -401,9 +474,13 @@ Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 Nested isset():
 
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
+
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(true)
 Nested empty():
+
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(false)
@@ -416,7 +493,7 @@ Cannot use string offset as an array
 
 OUTPUT;
 
-$EXPECTED_OUTPUT_FLOAT_INF_NAN_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_FLOAT_INF_NAN_OFFSETS) . '$/s';
+$EXPECTED_OUTPUT_FLOAT_OOB_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_FLOAT_OOB_OFFSETS) . '$/s';
 
 const EXPECTED_OUTPUT_INVALID_OFFSETS = <<<OUTPUT
 Read before write:
@@ -648,8 +725,9 @@ foreach ($offsets as $dimension) {
         && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_TO_0_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_OUT_OF_RANGE_REGEX, $varOutput)
-        && !preg_match($EXPECTF_OUTPUT_FLOAT_OFFSETS_OUT_OF_RANGE_REGEX, $varOutput)
-        && !preg_match($EXPECTED_OUTPUT_FLOAT_INF_NAN_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTF_OUTPUT_FLOAT_WITH_FRACTIONAL_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTF_OUTPUT_FLOAT_WITH_FRACTIONAL_OUT_OF_RANGE_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_FLOAT_OOB_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && $varOutput !== EXPECTED_OUTPUT_INVALID_OFFSETS_AS_STRINGS
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_AS_LEADING_NUMERIC_STRINGS_REGEX, $varOutput)
@@ -682,8 +760,9 @@ foreach ($offsets as $offset) {
         && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_TO_0_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_OUT_OF_RANGE_REGEX, $varOutput)
-        && !preg_match($EXPECTF_OUTPUT_FLOAT_OFFSETS_OUT_OF_RANGE_REGEX, $varOutput)
-        && !preg_match($EXPECTED_OUTPUT_FLOAT_INF_NAN_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTF_OUTPUT_FLOAT_WITH_FRACTIONAL_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTF_OUTPUT_FLOAT_WITH_FRACTIONAL_OUT_OF_RANGE_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_FLOAT_OOB_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && $varOutput !== EXPECTED_OUTPUT_INVALID_OFFSETS_AS_STRINGS
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_AS_LEADING_NUMERIC_STRINGS_REGEX, $varOutput)

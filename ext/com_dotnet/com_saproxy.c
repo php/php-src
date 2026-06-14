@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
@@ -56,6 +54,14 @@ typedef struct {
 } php_com_saproxy_iter;
 
 #define SA_FETCH(zv)			(php_com_saproxy*)Z_OBJ_P(zv)
+
+zend_object *php_com_saproxy_create_object(zend_class_entry *class_type)
+{
+	php_com_saproxy *intern = emalloc(sizeof(*intern));
+	memset(intern, 0, sizeof(*intern));
+	zend_object_std_init(&intern->std, class_type);
+	return &intern->std;
+}
 
 static inline void clone_indices(php_com_saproxy *dest, php_com_saproxy *src, int ndims)
 {
@@ -317,7 +323,7 @@ static zend_function *saproxy_method_get(zend_object **object, zend_string *name
 
 static zend_function *saproxy_constructor_get(zend_object *object)
 {
-	/* user cannot instantiate */
+	zend_throw_error(NULL, "Cannot directly construct com_safeproxy_array; it is for internal usage only");
 	return NULL;
 }
 
@@ -365,7 +371,9 @@ static void saproxy_free_storage(zend_object *object)
 //???		}
 //???	}
 
-	OBJ_RELEASE(&proxy->obj->zo);
+	if (proxy->obj != NULL) {
+		OBJ_RELEASE(&proxy->obj->zo);
+	}
 
 	zend_object_std_dtor(object);
 
@@ -392,6 +400,7 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_free_storage,
 	zend_objects_destroy_object,
 	saproxy_clone,
+	NULL, /* clone_with */
 	saproxy_property_read,
 	saproxy_property_write,
 	saproxy_read_dimension,

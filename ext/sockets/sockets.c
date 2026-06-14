@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Chris Vandomelen <chrisv@b0rked.dhs.org>                    |
    |          Sterling Hughes  <sterling@php.net>                         |
@@ -18,6 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
+#include "zend_exceptions.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -64,6 +63,15 @@
 # else
 #  undef SO_BPF_EXTENSIONS
 # endif
+# if defined(HAVE_LINUX_IF_PACKET_H)
+#  include <linux/if_packet.h>
+# endif
+# if defined(HAVE_LINUX_IF_ETHER_H)
+#  include <linux/if_ether.h>
+# endif
+# if defined(HAVE_LINUX_UDP_H)
+#  include <linux/udp.h>
+# endif
 #endif
 
 #include <stddef.h>
@@ -89,6 +97,20 @@ ZEND_DECLARE_MODULE_GLOBALS(sockets)
 
 #ifndef PF_INET
 #define PF_INET AF_INET
+#endif
+
+#if defined(AF_PACKET)
+#define PHP_ETH_PROTO_CHECK(protocol, family)								\
+	do {												\
+		/* We ll let EINVAL errno warning about miusage, too many protocols conflicts */	\
+                if (protocol <= USHRT_MAX && family == AF_PACKET) {					\
+                    protocol = htons(protocol);								\
+                }											\
+        } while (0)
+#else
+#define PHP_ETH_PROTO_CHECK(protocol, family)								\
+	(void)protocol;											\
+	(void)family
 #endif
 
 static PHP_GINIT_FUNCTION(sockets);
@@ -158,9 +180,7 @@ typedef struct {
 zend_class_entry *address_info_ce;
 static zend_object_handlers address_info_object_handlers;
 
-static inline php_addrinfo *address_info_from_obj(zend_object *obj) {
-	return (php_addrinfo *)((char *)(obj) - XtOffsetOf(php_addrinfo, std));
-}
+#define address_info_from_obj(obj) ZEND_CONTAINER_OF(obj, php_addrinfo, std)
 
 #define Z_ADDRESS_INFO_P(zv) address_info_from_obj(Z_OBJ_P(zv))
 
@@ -217,29 +237,20 @@ zend_module_entry sockets_module_entry = {
 ZEND_GET_MODULE(sockets)
 #endif
 
-static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
+static bool php_open_listen_sock(php_socket *sock, unsigned short port, int backlog) /* {{{ */
 {
 	struct sockaddr_in  la = {0};
-	struct hostent	    *hp;
 
-#ifndef PHP_WIN32
-	if ((hp = php_network_gethostbyname("0.0.0.0")) == NULL) {
-#else
-	if ((hp = php_network_gethostbyname("localhost")) == NULL) {
-#endif
-		return 0;
-	}
-
-	memcpy((char *) &la.sin_addr, hp->h_addr, hp->h_length);
-	la.sin_family = hp->h_addrtype;
-	la.sin_port = htons((unsigned short) port);
+	la.sin_addr.s_addr = htonl(INADDR_ANY);
+	la.sin_family = AF_INET;
+	la.sin_port = htons(port);
 
 	sock->bsd_socket = socket(PF_INET, SOCK_STREAM, 0);
 	sock->blocking = 1;
 
 	if (IS_INVALID_SOCKET(sock)) {
 		PHP_SOCKET_ERROR(sock, "unable to create listening socket", errno);
-		return 0;
+		return false;
 	}
 
 	sock->type = PF_INET;
@@ -247,38 +258,51 @@ static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{
 	if (bind(sock->bsd_socket, (struct sockaddr *)&la, sizeof(la)) != 0) {
 		PHP_SOCKET_ERROR(sock, "unable to bind to given address", errno);
 		close(sock->bsd_socket);
-		return 0;
+		return false;
 	}
 
 	if (listen(sock->bsd_socket, backlog) != 0) {
 		PHP_SOCKET_ERROR(sock, "unable to listen on socket", errno);
 		close(sock->bsd_socket);
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 /* }}} */
 
 static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct sockaddr *la, socklen_t *la_len) /* {{{ */
 {
+#if defined(HAVE_ACCEPT4)
+	int flags = SOCK_CLOEXEC;
+	if (!in_sock->blocking) {
+		flags |= SOCK_NONBLOCK;
+	}
+
+	out_sock->bsd_socket = accept4(in_sock->bsd_socket, la, la_len, flags);
+
+	if (IS_INVALID_SOCKET(out_sock)) {
+		PHP_SOCKET_ERROR(out_sock, "unable to accept incoming connection", errno);
+		return false;
+	}
+#else
 	out_sock->bsd_socket = accept(in_sock->bsd_socket, la, la_len);
 
 	if (IS_INVALID_SOCKET(out_sock)) {
 		PHP_SOCKET_ERROR(out_sock, "unable to accept incoming connection", errno);
-		return 0;
+		return false;
 	}
 
 #if !defined(PHP_WIN32)
 	/**
-	 * accept4 could had been used but not all platforms support it (e.g. Haiku, solaris < 11.4, ...)
+	 * for fewer and fewer platforms not supporting accept4 syscall we use fcntl instead,
 	 * win32, not having any concept of child process, has no need to address it.
 	 */
 	int mode;
 
 	if ((mode = fcntl(out_sock->bsd_socket, F_GETFD)) < 0) {
 		PHP_SOCKET_ERROR(out_sock, "unable to get fcntl mode on the socket", errno);
-		return 0;
+		return false;
 	}
 
 	int cloexec = (mode | FD_CLOEXEC);
@@ -286,16 +310,17 @@ static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct
 	if (mode != cloexec) {
 		if (fcntl(out_sock->bsd_socket, F_SETFD, cloexec) < 0) {
 			PHP_SOCKET_ERROR(out_sock, "unable to set cloexec mode on the socket", errno);
-			return 0;
+			return false;
 		}
 	}
+#endif
 #endif
 
 	out_sock->error = 0;
 	out_sock->blocking = 1;
 	out_sock->type = la->sa_family;
 
-	return 1;
+	return true;
 }
 /* }}} */
 
@@ -457,7 +482,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	socket_ce->default_object_handlers = &socket_object_handlers;
 
 	memcpy(&socket_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	socket_object_handlers.offset = XtOffsetOf(php_socket, std);
+	socket_object_handlers.offset = offsetof(php_socket, std);
 	socket_object_handlers.free_obj = socket_free_obj;
 	socket_object_handlers.get_constructor = socket_get_constructor;
 	socket_object_handlers.clone_obj = NULL;
@@ -469,7 +494,7 @@ static PHP_MINIT_FUNCTION(sockets)
 	address_info_ce->default_object_handlers = &address_info_object_handlers;
 
 	memcpy(&address_info_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	address_info_object_handlers.offset = XtOffsetOf(php_addrinfo, std);
+	address_info_object_handlers.offset = offsetof(php_addrinfo, std);
 	address_info_object_handlers.free_obj = address_info_free_obj;
 	address_info_object_handlers.get_constructor = address_info_get_constructor;
 	address_info_object_handlers.clone_obj = NULL;
@@ -680,10 +705,15 @@ PHP_FUNCTION(socket_create_listen)
 		Z_PARAM_LONG(backlog)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (port < 0 || port > USHRT_MAX) {
+		zend_argument_value_error(1, "must be between 0 and %u", USHRT_MAX);
+		RETURN_THROWS();
+	}
+
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
 
-	if (!php_open_listen_sock(php_sock, port, backlog)) {
+	if (!php_open_listen_sock(php_sock, (unsigned short)port, backlog)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -820,18 +850,17 @@ PHP_FUNCTION(socket_listen)
 PHP_FUNCTION(socket_close)
 {
 	zval *arg1;
-	php_socket *php_socket;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_socket = Z_SOCKET_P(arg1);
-	ENSURE_SOCKET_VALID(php_socket);
+	php_socket *socket = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(socket);
 
-	if (!Z_ISUNDEF(php_socket->zstream)) {
+	if (!Z_ISUNDEF(socket->zstream)) {
 		php_stream *stream = NULL;
-		php_stream_from_zval_no_verify(stream, &php_socket->zstream);
+		php_stream_from_zval_no_verify(stream, &socket->zstream);
 		if (stream != NULL) {
 			/* close & destroy stream, incl. removing it from the rsrc list;
 			 * resource stored in php_sock->zstream will become invalid */
@@ -840,13 +869,13 @@ PHP_FUNCTION(socket_close)
 					(stream->is_persistent?PHP_STREAM_FREE_CLOSE_PERSISTENT:0));
 		}
 	} else {
-		if (!IS_INVALID_SOCKET(php_socket)) {
-			close(php_socket->bsd_socket);
+		if (!IS_INVALID_SOCKET(socket)) {
+			close(socket->bsd_socket);
 		}
 	}
 
-	ZVAL_UNDEF(&php_socket->zstream);
-	php_socket->bsd_socket = -1;
+	ZVAL_UNDEF(&socket->zstream);
+	socket->bsd_socket = -1;
 }
 /* }}} */
 
@@ -955,13 +984,16 @@ PHP_FUNCTION(socket_read)
 /* {{{ Queries the remote side of the given socket which may either result in host/port or in a UNIX filesystem path, dependent on its type. */
 PHP_FUNCTION(socket_getsockname)
 {
-	zval					*arg1, *addr, *port = NULL;
+	zval					*arg1, *addr, *objint = NULL;
 	php_sockaddr_storage	sa_storage = {0};
 	php_socket				*php_sock;
 	struct sockaddr			*sa;
 	struct sockaddr_in		*sin;
 #ifdef HAVE_IPV6
 	struct sockaddr_in6		*sin6;
+#endif
+#ifdef AF_PACKET
+	struct sockaddr_ll              *sll;
 #endif
 	char					addrbuf[INET6_ADDRSTRLEN];
 	struct sockaddr_un		*s_un;
@@ -972,7 +1004,7 @@ PHP_FUNCTION(socket_getsockname)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
 		Z_PARAM_ZVAL(addr)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(port)
+		Z_PARAM_ZVAL(objint)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_sock = Z_SOCKET_P(arg1);
@@ -992,32 +1024,45 @@ PHP_FUNCTION(socket_getsockname)
 			inet_ntop(AF_INET6, &sin6->sin6_addr,  addrbuf, sizeof(addrbuf));
 			ZEND_TRY_ASSIGN_REF_STRING(addr, addrbuf);
 
-			if (port != NULL) {
-				ZEND_TRY_ASSIGN_REF_LONG(port, htons(sin6->sin6_port));
+			if (objint != NULL) {
+				ZEND_TRY_ASSIGN_REF_LONG(objint, htons(sin6->sin6_port));
 			}
 			RETURN_TRUE;
-			break;
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
 			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, sizeof(addrbuf));
 			ZEND_TRY_ASSIGN_REF_STRING(addr, addr_string);
 
-			if (port != NULL) {
-				ZEND_TRY_ASSIGN_REF_LONG(port, htons(sin->sin_port));
+			if (objint != NULL) {
+				ZEND_TRY_ASSIGN_REF_LONG(objint, htons(sin->sin_port));
 			}
 			RETURN_TRUE;
-			break;
 
 		case AF_UNIX:
 			s_un = (struct sockaddr_un *) sa;
 
 			ZEND_TRY_ASSIGN_REF_STRING(addr, s_un->sun_path);
 			RETURN_TRUE;
-			break;
+#ifdef AF_PACKET
+		case AF_PACKET:
+			sll = (struct sockaddr_ll *) sa;
+			char ifrname[IFNAMSIZ];
+
+			if (UNEXPECTED(!if_indextoname(sll->sll_ifindex, ifrname))) {
+				zend_throw_error(NULL, "invalid interface index");
+				RETURN_THROWS();
+			}
+
+			ZEND_TRY_ASSIGN_REF_STRING(addr, ifrname);
+			if (objint != NULL) {
+				ZEND_TRY_ASSIGN_REF_LONG(objint, sll->sll_ifindex);
+			}
+			RETURN_TRUE;
+#endif
 
 		default:
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 }
@@ -1069,7 +1114,6 @@ PHP_FUNCTION(socket_getpeername)
 			}
 
 			RETURN_TRUE;
-			break;
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
@@ -1081,14 +1125,12 @@ PHP_FUNCTION(socket_getpeername)
 			}
 
 			RETURN_TRUE;
-			break;
 
 		case AF_UNIX:
 			s_un = (struct sockaddr_un *) sa;
 
 			ZEND_TRY_ASSIGN_REF_STRING(arg2, s_un->sun_path);
 			RETURN_TRUE;
-			break;
 
 		default:
 			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
@@ -1113,8 +1155,11 @@ PHP_FUNCTION(socket_create)
 #ifdef HAVE_IPV6
 		&& domain != AF_INET6
 #endif
+#ifdef AF_PACKET
+		&& domain != AF_PACKET
+#endif
 		&& domain != AF_INET) {
-		zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET6, or AF_INET");
+		zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_INET6, or AF_INET");
 		RETURN_THROWS();
 	}
 
@@ -1132,6 +1177,8 @@ PHP_FUNCTION(socket_create)
 		);
 		RETURN_THROWS();
 	}
+
+	PHP_ETH_PROTO_CHECK(protocol, domain);
 
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
@@ -1156,15 +1203,14 @@ PHP_FUNCTION(socket_connect)
 {
 	zval				*resource_socket;
 	php_socket			*php_sock;
-	char				*addr;
+	zend_string                     *addr;
 	int					retval;
-	size_t              addr_len;
 	zend_long				port;
 	bool				port_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_OBJECT_OF_CLASS(resource_socket, socket_ce)
-		Z_PARAM_STRING(addr, addr_len)
+		Z_PARAM_STR(addr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(port, port_is_null)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1181,8 +1227,6 @@ PHP_FUNCTION(socket_connect)
 				zend_argument_value_error(3, "cannot be null when the socket type is AF_INET6");
 				RETURN_THROWS();
 			}
-
-			memset(&sin6, 0, sizeof(struct sockaddr_in6));
 
 			sin6.sin6_family = AF_INET6;
 			sin6.sin6_port   = htons((unsigned short int)port);
@@ -1217,15 +1261,15 @@ PHP_FUNCTION(socket_connect)
 		case AF_UNIX: {
 			struct sockaddr_un s_un = {0};
 
-			if (addr_len >= sizeof(s_un.sun_path)) {
+			if (ZSTR_LEN(addr) >= sizeof(s_un.sun_path)) {
 				zend_argument_value_error(2, "must be less than %d", sizeof(s_un.sun_path));
 				RETURN_THROWS();
 			}
 
 			s_un.sun_family = AF_UNIX;
-			memcpy(&s_un.sun_path, addr, addr_len);
+			memcpy(&s_un.sun_path, ZSTR_VAL(addr), ZSTR_LEN(addr));
 			retval = connect(php_sock->bsd_socket, (struct sockaddr *) &s_un,
-				(socklen_t)(XtOffsetOf(struct sockaddr_un, sun_path) + addr_len));
+				(socklen_t)(offsetof(struct sockaddr_un, sun_path) + ZSTR_LEN(addr)));
 			break;
 		}
 
@@ -1268,20 +1312,24 @@ PHP_FUNCTION(socket_bind)
 	php_sockaddr_storage	sa_storage = {0};
 	struct sockaddr			*sock_type = (struct sockaddr*) &sa_storage;
 	php_socket				*php_sock;
-	char					*addr;
-	size_t						addr_len;
-	zend_long					port = 0;
+	zend_string                             *addr;
+	zend_long					objint = 0;
 	zend_long					retval = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
-		Z_PARAM_STRING(addr, addr_len)
+		Z_PARAM_STR(addr)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(port)
+		Z_PARAM_LONG(objint)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
+
+	if (objint < 0 || objint > USHRT_MAX) {
+		zend_argument_value_error(3, "must be between 0 and %u", USHRT_MAX);
+		RETURN_THROWS();
+	}
 
 	switch(php_sock->type) {
 		case AF_UNIX:
@@ -1290,14 +1338,14 @@ PHP_FUNCTION(socket_bind)
 
 				sa->sun_family = AF_UNIX;
 
-				if (addr_len >= sizeof(sa->sun_path)) {
+				if (ZSTR_LEN(addr) >= sizeof(sa->sun_path)) {
 					zend_argument_value_error(2, "must be less than %d", sizeof(sa->sun_path));
 					RETURN_THROWS();
 				}
-				memcpy(&sa->sun_path, addr, addr_len);
+				memcpy(&sa->sun_path, ZSTR_VAL(addr), ZSTR_LEN(addr));
 
 				retval = bind(php_sock->bsd_socket, (struct sockaddr *) sa,
-						offsetof(struct sockaddr_un, sun_path) + addr_len);
+						offsetof(struct sockaddr_un, sun_path) + ZSTR_LEN(addr));
 				break;
 			}
 
@@ -1306,7 +1354,7 @@ PHP_FUNCTION(socket_bind)
 				struct sockaddr_in *sa = (struct sockaddr_in *) sock_type;
 
 				sa->sin_family = AF_INET;
-				sa->sin_port = htons((unsigned short) port);
+				sa->sin_port = htons((unsigned short) objint);
 
 				if (! php_set_inet_addr(sa, addr, php_sock)) {
 					RETURN_FALSE;
@@ -1321,7 +1369,7 @@ PHP_FUNCTION(socket_bind)
 				struct sockaddr_in6 *sa = (struct sockaddr_in6 *) sock_type;
 
 				sa->sin6_family = AF_INET6;
-				sa->sin6_port = htons((unsigned short) port);
+				sa->sin6_port = htons((unsigned short) objint);
 
 				if (! php_set_inet6_addr(sa, addr, php_sock)) {
 					RETURN_FALSE;
@@ -1331,8 +1379,25 @@ PHP_FUNCTION(socket_bind)
 				break;
 			}
 #endif
+#ifdef AF_PACKET
+		case AF_PACKET:
+			{
+				struct sockaddr_ll *sa = (struct sockaddr_ll *) sock_type;
+				socklen_t sa_len = sizeof(sa);
+
+				if (getsockname(php_sock->bsd_socket, sock_type, &sa_len) < 0) {
+					zend_value_error("invalid AF_PACKET socket");
+					RETURN_THROWS();
+				}
+
+				sa->sll_ifindex = if_nametoindex(ZSTR_VAL(addr));
+
+				retval = bind(php_sock->bsd_socket, sock_type, sizeof(struct sockaddr_ll));
+				break;
+			}
+#endif
 		default:
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 
@@ -1434,6 +1499,9 @@ PHP_FUNCTION(socket_recvfrom)
 #ifdef HAVE_IPV6
 	struct sockaddr_in6	sin6;
 #endif
+#ifdef AF_PACKET
+	//struct sockaddr_ll     sll;
+#endif
 	char				addrbuf[INET6_ADDRSTRLEN];
 	socklen_t			slen;
 	int					retval;
@@ -1490,7 +1558,11 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (arg6 == NULL) {
 				zend_string_efree(recv_buf);
-				WRONG_PARAM_COUNT;
+				zend_throw_exception(
+					zend_ce_argument_count_error,
+					"socket_recvfrom() expects exactly 6 arguments when argument #1 ($socket) is of type AF_INET or AF_INET6",
+					0);
+				RETURN_THROWS();
 			}
 
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sin, (socklen_t *)&slen);
@@ -1517,7 +1589,11 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (arg6 == NULL) {
 				zend_string_efree(recv_buf);
-				WRONG_PARAM_COUNT;
+				zend_throw_exception(
+					zend_ce_argument_count_error,
+					"socket_recvfrom() expects exactly 6 arguments when argument #1 ($socket) is of type AF_INET or AF_INET6",
+					0);
+				RETURN_THROWS();
 			}
 
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sin6, (socklen_t *)&slen);
@@ -1530,7 +1606,6 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
-			memset(addrbuf, 0, INET6_ADDRSTRLEN);
 			inet_ntop(AF_INET6, &sin6.sin6_addr,  addrbuf, sizeof(addrbuf));
 
 			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
@@ -1538,7 +1613,40 @@ PHP_FUNCTION(socket_recvfrom)
 			ZEND_TRY_ASSIGN_REF_LONG(arg6, ntohs(sin6.sin6_port));
 			break;
 #endif
+#ifdef AF_PACKET
+			/*
+		case AF_PACKET:
+			// TODO expose and use proper ethernet frame type instead i.e. src mac, dst mac and payload to userland
+			// ditto for socket_sendto
+			slen = sizeof(sll);
+			memset(&sll, 0, sizeof(sll));
+			sll.sll_family = AF_PACKET;
+			char ifrname[IFNAMSIZ];
+
+			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sll, (socklen_t *)&slen);
+
+			if (retval < 0) {
+				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
+				zend_string_efree(recv_buf);
+				RETURN_FALSE;
+			}
+			ZSTR_LEN(recv_buf) = retval;
+			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
+
+			if (UNEXPECTED(!if_indextoname(sll.sll_ifindex, ifrname))) {
+				PHP_SOCKET_ERROR(php_sock, "unable to get the interface name", errno);
+				zend_string_efree(recv_buf);
+				RETURN_FALSE;
+			}
+
+			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
+			ZEND_TRY_ASSIGN_REF_STRING(arg5, ifrname);
+			ZEND_TRY_ASSIGN_REF_LONG(arg6, sll.sll_ifindex);
+			break;
+			*/
+#endif
 		default:
+			zend_string_efree(recv_buf);
 			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
@@ -1557,24 +1665,34 @@ PHP_FUNCTION(socket_sendto)
 #ifdef HAVE_IPV6
 	struct sockaddr_in6	sin6;
 #endif
+#ifdef AF_PACKET
+	//struct sockaddr_ll      sll;
+#endif
 	int					retval;
-	size_t              buf_len, addr_len;
-	zend_long			len, flags, port;
+	size_t              buf_len;
+	zend_long			len, flags, port = 0;
 	bool           port_is_null = 1;
-	char				*buf, *addr;
+	char				*buf;
+	zend_string *addr;
 
 	ZEND_PARSE_PARAMETERS_START(5, 6)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
 		Z_PARAM_STRING(buf, buf_len)
 		Z_PARAM_LONG(len)
 		Z_PARAM_LONG(flags)
-		Z_PARAM_STRING(addr, addr_len)
+		Z_PARAM_STR(addr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(port, port_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
+
+	if (port < 0 || port > USHRT_MAX) {
+		zend_argument_value_error(6, "must be between 0 and %u", USHRT_MAX);
+		RETURN_THROWS();
+	}
+
 
 	if (len < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
@@ -1585,13 +1703,13 @@ PHP_FUNCTION(socket_sendto)
 		case AF_UNIX:
 			memset(&s_un, 0, sizeof(s_un));
 
-			if (addr_len >= sizeof(s_un.sun_path)) {
+			if (ZSTR_LEN(addr) >= sizeof(s_un.sun_path)) {
 				zend_argument_value_error(5, "must be less than %d", sizeof(s_un.sun_path));
 				RETURN_THROWS();
 			}
 
 			s_un.sun_family = AF_UNIX;
-			snprintf(s_un.sun_path, sizeof(s_un.sun_path), "%s", addr);
+			memcpy(s_un.sun_path, ZSTR_VAL(addr), ZSTR_LEN(addr) + 1);
 
 			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len,	flags, (struct sockaddr *) &s_un, SUN_LEN(&s_un));
 			break;
@@ -1630,6 +1748,22 @@ PHP_FUNCTION(socket_sendto)
 			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin6, sizeof(sin6));
 			break;
 #endif
+#ifdef AF_PACKET
+			/*
+		case AF_PACKET:
+			if (port_is_null) {
+				zend_argument_value_error(6, "cannot be null when the socket type is AF_PACKET");
+				RETURN_THROWS();
+			}
+
+			memset(&sll, 0, sizeof(sll));
+			sll.sll_family = AF_PACKET;
+			sll.sll_ifindex = port;
+
+			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin, sizeof(sin));
+			break;
+		*/
+#endif
 		default:
 			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
 			RETURN_THROWS();
@@ -1651,7 +1785,9 @@ PHP_FUNCTION(socket_get_option)
 	struct linger	linger_val;
 	struct timeval	tv;
 #ifdef PHP_WIN32
-	int				timeout = 0;
+	DWORD				timeout = 0;
+#else
+	struct timeval timeout;
 #endif
 	socklen_t		optlen;
 	php_socket		*php_sock;
@@ -1713,6 +1849,29 @@ PHP_FUNCTION(socket_get_option)
 			}
 		}
 #endif
+
+#ifdef TCP_FUNCTION_BLK
+		case TCP_FUNCTION_BLK:
+#ifdef TCP_FUNCTION_ALIAS
+		case TCP_FUNCTION_ALIAS:
+#endif
+		{
+
+			struct tcp_function_set tsf = {0};
+			optlen = sizeof(tsf);
+
+			if (getsockopt(php_sock->bsd_socket, level, optname, &tsf, &optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+				RETURN_FALSE;
+			}
+
+			array_init_size(return_value, 2);
+
+			add_assoc_string(return_value, "function_set_name", tsf.function_set_name);
+			add_assoc_long(return_value, "pcbcnt", tsf.pcbcnt);
+			return;
+		}
+#endif
 		}
 	}
 
@@ -1729,33 +1888,29 @@ PHP_FUNCTION(socket_get_option)
 					RETURN_FALSE;
 				}
 
-				array_init(return_value);
+				array_init_size(return_value, 2);
 				add_assoc_long(return_value, "l_onoff", linger_val.l_onoff);
 				add_assoc_long(return_value, "l_linger", linger_val.l_linger);
 				return;
 
 			case SO_RCVTIMEO:
 			case SO_SNDTIMEO:
-#ifndef PHP_WIN32
-				optlen = sizeof(tv);
-
-				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&tv, &optlen) != 0) {
-					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
-					RETURN_FALSE;
-				}
-#else
-				optlen = sizeof(int);
+				optlen = sizeof(timeout);
 
 				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&timeout, &optlen) != 0) {
 					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
 					RETURN_FALSE;
 				}
 
-				tv.tv_sec = timeout ? timeout / 1000 : 0;
-				tv.tv_usec = timeout ? (timeout * 1000) % 1000000 : 0;
+#ifndef PHP_WIN32
+				tv.tv_sec = timeout.tv_sec;
+				tv.tv_usec = timeout.tv_usec;
+#else
+				tv.tv_sec = timeout ? (long)(timeout / 1000) : 0;
+				tv.tv_usec = timeout ? (long)((timeout % 1000) * 1000) : 0;
 #endif
 
-				array_init(return_value);
+				array_init_size(return_value, 2);
 
 				add_assoc_long(return_value, "sec", tv.tv_sec);
 				add_assoc_long(return_value, "usec", tv.tv_usec);
@@ -1777,7 +1932,7 @@ PHP_FUNCTION(socket_get_option)
 					RETURN_FALSE;
 				}
 
-				array_init(return_value);
+				array_init_size(return_value, 9);
 
 				add_assoc_long(return_value, "rmem_alloc", minfo[SK_MEMINFO_RMEM_ALLOC]);
 				add_assoc_long(return_value, "rcvbuf", minfo[SK_MEMINFO_RCVBUF]);
@@ -1802,7 +1957,7 @@ PHP_FUNCTION(socket_get_option)
 					RETURN_FALSE;
 				}
 
-				array_init(return_value);
+				array_init_size(return_value, 1);
 
 				add_assoc_string(return_value, "af_name", af.af_name);
 				return;
@@ -1826,9 +1981,12 @@ PHP_FUNCTION(socket_get_option)
 					RETURN_FALSE;
 				}
 
-				array_init(return_value);
+				size_t arrlen = optlen / sizeof(struct fil_info);
 
-				for (i = 0; i < optlen / sizeof(struct fil_info); i++) {
+				array_init_size(return_value, arrlen);
+				zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+
+				for (i = 0; i < arrlen; i++) {
 					add_index_string(return_value, i, fi[i].fi_name);
 				}
 
@@ -1861,15 +2019,13 @@ PHP_FUNCTION(socket_set_option)
 	php_socket				*php_sock;
 	int						ov, optlen, retval;
 #ifdef PHP_WIN32
-	int						timeout;
+	DWORD						timeout;
 #else
 	struct					timeval tv;
 #endif
 	zend_long					level, optname;
 	void 					*opt_ptr;
 	HashTable		 		*opt_ht;
-	zval 					*l_onoff, *l_linger;
-	zval		 			*sec, *usec;
 
 	ZEND_PARSE_PARAMETERS_START(4, 4)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
@@ -1910,13 +2066,12 @@ PHP_FUNCTION(socket_set_option)
 		switch (optname) {
 #ifdef TCP_CONGESTION
 		case TCP_CONGESTION: {
-			if (Z_TYPE_P(arg4) == IS_STRING) {
-				opt_ptr = Z_STRVAL_P(arg4);
-				optlen = Z_STRLEN_P(arg4);
-			} else {
-				opt_ptr = "";
-				optlen = 0;
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is TCP_CONGESTION, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
 			}
+			opt_ptr = Z_STRVAL_P(arg4);
+			optlen = Z_STRLEN_P(arg4);
 			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
 				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
 				RETURN_FALSE;
@@ -1925,6 +2080,61 @@ PHP_FUNCTION(socket_set_option)
 			RETURN_TRUE;
 		}
 #endif
+
+#ifdef TCP_FUNCTION_BLK
+		case TCP_FUNCTION_BLK: {
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is TCP_FUNCTION_BLK, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
+			if (zend_str_has_nul_byte(Z_STR_P(arg4))) {
+				zend_argument_value_error(4, "must not contain null bytes when argument #3 ($option) is TCP_FUNCTION_BLK");
+				RETURN_THROWS();
+			}
+			/* [...] the unique name of the TCP stack, and should be no longer than
+			 * TCP_FUNCTION_NAME_LEN_MAX-1 characters in length.
+			 * https://github.com/freebsd/freebsd-src/blob/da2c88dfcf4f425e6e0a58d6df3a7c8e88d8df92/share/man/man9/tcp_functions.9#L193C1-L194C50 */
+			if (Z_STRLEN_P(arg4) >= TCP_FUNCTION_NAME_LEN_MAX) {
+				zend_argument_value_error(4, "must be less than %zu bytes when argument #3 ($option) is TCP_FUNCTION_BLK", TCP_FUNCTION_NAME_LEN_MAX);
+				RETURN_THROWS();
+			}
+			struct tcp_function_set tfs = {0};
+			/* Copy the trailing nul byte */
+			memcpy(tfs.function_set_name, Z_STRVAL_P(arg4), Z_STRLEN_P(arg4)+1);
+
+			optlen = sizeof(tfs);
+			opt_ptr = &tfs;
+			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
+				RETURN_FALSE;
+			}
+
+			RETURN_TRUE;
+		}
+#endif
+
+#if defined(TCP_USER_TIMEOUT)
+		case TCP_USER_TIMEOUT: {
+			zend_long timeout = zval_get_long(arg4);
+
+			// TCP_USER_TIMEOUT unsigned int
+			if (timeout < 0 || timeout > UINT_MAX) {
+				zend_argument_value_error(4, "must be of between 0 and %u", UINT_MAX);
+				RETURN_THROWS();
+			}
+
+			unsigned int val = (unsigned int)timeout;
+			optlen = sizeof(val);
+			opt_ptr = &val;
+			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
+				RETURN_FALSE;
+			}
+
+			RETURN_TRUE;
+		}
+#endif
+
 		}
 	}
 
@@ -1935,6 +2145,7 @@ PHP_FUNCTION(socket_set_option)
 		case SO_LINGER: {
 			const char l_onoff_key[] = "l_onoff";
 			const char l_linger_key[] = "l_linger";
+			zval *l_onoff, *l_linger;
 
 			if (Z_TYPE_P(arg4) != IS_ARRAY) {
 				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
@@ -1981,6 +2192,7 @@ PHP_FUNCTION(socket_set_option)
 		case SO_SNDTIMEO: {
 			const char sec_key[] = "sec";
 			const char usec_key[] = "usec";
+			zval *sec, *usec;
 
 			if (Z_TYPE_P(arg4) != IS_ARRAY) {
 				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
@@ -2012,22 +2224,37 @@ PHP_FUNCTION(socket_set_option)
 			optlen = sizeof(tv);
 			opt_ptr = &tv;
 #else
-			timeout = valsec * 1000 + valusec / 1000;
-	
-			optlen = sizeof(int);
+			if (valsec < 0 || valsec > ULONG_MAX / 1000) {
+				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", sec_key, (ULONG_MAX / 1000));
+				RETURN_THROWS();
+			}
+
+			timeout = valsec * 1000;
+
+
+			/*
+			 * We deliberately throw if (valusec / 1000) > ULONG_MAX, treating it as a programmer error.
+			 * On Windows, ULONG_MAX = 2^32, unlike ZEND_LONG_MAX = 2^63.
+			 */
+			if (valusec < 0 || timeout > ULONG_MAX - (valusec / 1000)) {
+				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", usec_key, (DWORD)(ULONG_MAX - (valusec / 1000)));
+				RETURN_THROWS();
+			}
+
+			timeout += valusec / 1000;
+			optlen = sizeof(timeout);
 			opt_ptr = &timeout;
 #endif
 			break;
 		}
 #ifdef SO_BINDTODEVICE
 		case SO_BINDTODEVICE: {
-			if (Z_TYPE_P(arg4) == IS_STRING) {
-				opt_ptr = Z_STRVAL_P(arg4);
-				optlen = Z_STRLEN_P(arg4);
-			} else {
-				opt_ptr = "";
-				optlen = 0;
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is SO_BINDTODEVICE, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
 			}
+			opt_ptr = Z_STRVAL_P(arg4);
+			optlen = Z_STRLEN_P(arg4);
 			break;
 		}
 #endif
@@ -2035,11 +2262,20 @@ PHP_FUNCTION(socket_set_option)
 #ifdef SO_ACCEPTFILTER
 		case SO_ACCEPTFILTER: {
 			if (Z_TYPE_P(arg4) != IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Invalid filter argument type");
-				RETURN_FALSE;
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is SO_ACCEPTFILTER, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
+			if (zend_str_has_nul_byte(Z_STR_P(arg4))) {
+				zend_argument_value_error(4, "must not contain null bytes when argument #3 ($option) is SO_ACCEPTFILTER");
+				RETURN_THROWS();
 			}
 			struct accept_filter_arg af = {0};
-			strlcpy(af.af_name, Z_STRVAL_P(arg4), sizeof(af.af_name));
+			if (Z_STRLEN_P(arg4) >= sizeof(af.af_name)) {
+				zend_argument_value_error(4, "must be less than %zu bytes when argument #3 ($option) is SO_ACCEPTFILTER", sizeof(af.af_name));
+				RETURN_THROWS();
+			}
+			/* Copy the trailing nul byte */
+			memcpy(af.af_name, Z_STRVAL_P(arg4), Z_STRLEN_P(arg4)+1);
 			opt_ptr = &af;
 			optlen = sizeof(af);
 			break;
@@ -2054,8 +2290,8 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_FALSE;
 			}
 			if (Z_TYPE_P(arg4) != IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Invalid filter argument type");
-				RETURN_FALSE;
+				zend_argument_type_error(4, "must be of type string when argument #3 ($option) is FIL_ATTACH or FIL_DETACH, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
 			}
 			opt_ptr = Z_STRVAL_P(arg4);
 			optlen = Z_STRLEN_P(arg4);
@@ -2094,6 +2330,22 @@ PHP_FUNCTION(socket_set_option)
 				optlen = sizeof(bpfprog);
 				opt_ptr = &bpfprog;
 			}
+			break;
+		}
+#endif
+
+#if defined(UDP_SEGMENT)
+		case UDP_SEGMENT: {
+			ov = zval_get_long(arg4);
+
+			// UDP segmentation offload maximum size or 0 to disable it
+			if (ov < 0 || ov > USHRT_MAX) {
+				zend_argument_value_error(4, "must be of between 0 and %u", USHRT_MAX);
+				RETURN_FALSE;
+			}
+
+			optlen = sizeof(ov);
+			opt_ptr = &ov;
 			break;
 		}
 #endif
@@ -2157,26 +2409,22 @@ PHP_FUNCTION(socket_create_pair)
 		RETURN_THROWS();
 	}
 
+	if (socketpair(domain, type, protocol, fds_array) != 0) {
+		SOCKETS_G(last_error) = errno;
+		php_error_docref(NULL, E_WARNING, "Unable to create socket pair [%d]: %s", errno, sockets_strerror(errno));
+		RETURN_FALSE;
+	}
+
+	fds_array_zval = zend_try_array_init_size(fds_array_zval, 2);
+	if (!fds_array_zval) {
+		RETURN_THROWS();
+	}
+
 	object_init_ex(&retval[0], socket_ce);
 	php_sock[0] = Z_SOCKET_P(&retval[0]);
 
 	object_init_ex(&retval[1], socket_ce);
 	php_sock[1] = Z_SOCKET_P(&retval[1]);
-
-	if (socketpair(domain, type, protocol, fds_array) != 0) {
-		SOCKETS_G(last_error) = errno;
-		php_error_docref(NULL, E_WARNING, "Unable to create socket pair [%d]: %s", errno, sockets_strerror(errno));
-		zval_ptr_dtor(&retval[0]);
-		zval_ptr_dtor(&retval[1]);
-		RETURN_FALSE;
-	}
-
-	fds_array_zval = zend_try_array_init(fds_array_zval);
-	if (!fds_array_zval) {
-		zval_ptr_dtor(&retval[0]);
-		zval_ptr_dtor(&retval[1]);
-		RETURN_THROWS();
-	}
 
 	php_sock[0]->bsd_socket = fds_array[0];
 	php_sock[1]->bsd_socket = fds_array[1];
@@ -2211,6 +2459,11 @@ PHP_FUNCTION(socket_shutdown)
 
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
+
+	if (how_shutdown < SHUT_RD || how_shutdown > SHUT_RDWR) {
+		zend_argument_value_error(2, "must be one of SHUT_RD, SHUT_WR or SHUT_RDWR");
+		RETURN_THROWS();
+	}
 
 	if (shutdown(php_sock->bsd_socket, how_shutdown) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to shutdown socket", errno);
@@ -2318,7 +2571,7 @@ bool socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock)
 		retsock->type = addr.ss_family;
 	} else {
 		PHP_SOCKET_ERROR(retsock, "Unable to obtain socket family", errno);
-		return 0;
+		return false;
 	}
 
 	/* determine blocking mode */
@@ -2326,13 +2579,13 @@ bool socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock)
 	t = fcntl(socket, F_GETFL);
 	if (t == -1) {
 		PHP_SOCKET_ERROR(retsock, "Unable to obtain blocking state", errno);
-		return 0;
+		return false;
 	} else {
 		retsock->blocking = !(t & O_NONBLOCK);
 	}
 #endif
 
-	return 1;
+	return true;
 }
 
 /* {{{ Imports a stream that encapsulates a socket into a socket extension resource. */
@@ -2348,7 +2601,7 @@ PHP_FUNCTION(socket_import_stream)
 	ZEND_PARSE_PARAMETERS_END();
 	php_stream_from_zval(stream, zstream);
 
-	if (php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void**)&socket, 1)) {
+	if (php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void**)&socket, 1) == FAILURE) {
 		/* error supposedly already shown */
 		RETURN_FALSE;
 	}
@@ -2479,51 +2732,123 @@ PHP_FUNCTION(socket_export_stream)
 /* {{{ Gets array with contents of getaddrinfo about the given hostname. */
 PHP_FUNCTION(socket_addrinfo_lookup)
 {
-	char *service = NULL;
-	size_t service_len = 0;
+	zend_string *service = NULL;
 	zend_string *hostname, *key;
-	zval *hint, *zhints = NULL;
+	zval *hint, *zhints = NULL, *error_code = NULL;
+	int ret = 0;
 
 	struct addrinfo hints, *result, *rp;
 	php_addrinfo *res;
 
-	ZEND_PARSE_PARAMETERS_START(1, 3)
+	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(hostname)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(service, service_len)
+		Z_PARAM_STR_OR_NULL(service)
 		Z_PARAM_ARRAY(zhints)
+		Z_PARAM_ZVAL_OR_NULL(error_code)
 	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&hints, 0, sizeof(hints));
 
-	if (zhints && !HT_IS_PACKED(Z_ARRVAL_P(zhints))) {
+#if defined(PHP_WIN32)
+#  if !defined(AF_MAX)
+#    define AF_MAX (AF_BTH + 1)
+#  endif
+#endif
+
+	if (zhints) {
+		if (UNEXPECTED(HT_IS_PACKED(Z_ARRVAL_P(zhints)))) {
+			zend_argument_value_error(3, "must only contain array keys \"ai_flags\", \"ai_socktype\", "
+					"\"ai_protocol\", or \"ai_family\"");
+			RETURN_THROWS();
+		}
+
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
 			if (key) {
+				bool failed = false;
 				if (zend_string_equals_literal(key, "ai_flags")) {
-					hints.ai_flags = zval_get_long(hint);
+					zend_long val = zval_try_get_long(hint, &failed);
+					if (failed) {
+						zend_argument_type_error(3, "\"ai_flags\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					if (val < 0 || val > INT_MAX) {
+						zend_argument_value_error(3, "\"ai_flags\" key must be between 0 and %d", INT_MAX);
+						RETURN_THROWS();
+					}
+					hints.ai_flags = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_socktype")) {
-					hints.ai_socktype = zval_get_long(hint);
+					zend_long val = zval_try_get_long(hint, &failed);
+					if (failed) {
+						zend_argument_type_error(3, "\"ai_socktype\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					if (val < 0 || val > INT_MAX) {
+						zend_argument_value_error(3, "\"ai_socktype\" key must be between 0 and %d", INT_MAX);
+						RETURN_THROWS();
+					}
+					hints.ai_socktype = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_protocol")) {
-					hints.ai_protocol = zval_get_long(hint);
+					zend_long val = zval_try_get_long(hint, &failed);
+					if (failed) {
+						zend_argument_type_error(3, "\"ai_protocol\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					if (val < 0 || val > INT_MAX) {
+						zend_argument_value_error(3, "\"ai_protocol\" key must be between 0 and %d", INT_MAX);
+						RETURN_THROWS();
+					}
+					hints.ai_protocol = (int)val;
 				} else if (zend_string_equals_literal(key, "ai_family")) {
-					hints.ai_family = zval_get_long(hint);
+					zend_long val = zval_try_get_long(hint, &failed);
+					if (failed) {
+						zend_argument_type_error(3, "\"ai_family\" key must be of type int, %s given", zend_zval_type_name(hint));
+						RETURN_THROWS();
+					}
+					// Some platforms support also PF_LOCAL/AF_UNIX (e.g. FreeBSD) but the security concerns implied
+					// make it not worth handling it (e.g. unwarranted write permissions on the socket).
+					// Note existing socket_addrinfo* api already forbid such case.
+					if (val != AF_UNSPEC) {
+#ifdef HAVE_IPV6
+						if (val != AF_INET && val != AF_INET6) {
+							zend_argument_value_error(3, "\"ai_family\" key must be AF_INET or AF_INET6");
+#else
+						if (val != AF_INET) {
+							zend_argument_value_error(3, "\"ai_family\" key must be AF_INET");
+#endif
+							RETURN_THROWS();
+						}
+					}
+					hints.ai_family = (int)val;
 				} else {
 					zend_argument_value_error(3, "must only contain array keys \"ai_flags\", \"ai_socktype\", "
-						"\"ai_protocol\", or \"ai_family\"");
+							"\"ai_protocol\", or \"ai_family\"");
 					RETURN_THROWS();
-				}
+					}
+			} else {
+				zend_argument_value_error(3, "must only contain array keys \"ai_flags\", \"ai_socktype\", "
+						"\"ai_protocol\", or \"ai_family\"");
+				RETURN_THROWS();
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (getaddrinfo(ZSTR_VAL(hostname), service, &hints, &result) != 0) {
+	if ((ret = getaddrinfo(ZSTR_VAL(hostname), service ? ZSTR_VAL(service) : NULL, &hints, &result)) != 0) {
+		if (error_code) {
+			ZEND_TRY_ASSIGN_REF_LONG(error_code, ret);
+		}
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (rp = result; rp != NULL; rp = rp->ai_next) {
-		if (rp->ai_family != AF_UNSPEC) {
+		if (rp->ai_family == AF_INET
+#ifdef HAVE_IPV6
+		 || rp->ai_family == AF_INET6
+#endif
+				) {
 			zval zaddr;
 
 			object_init_ex(&zaddr, address_info_ce);
@@ -2550,7 +2875,6 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 PHP_FUNCTION(socket_addrinfo_bind)
 {
 	zval			*arg1;
-	int				retval;
 	php_addrinfo	*ai;
 	php_socket		*php_sock;
 
@@ -2559,6 +2883,10 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ai = Z_ADDRESS_INFO_P(arg1);
+
+	ZEND_ASSERT(ai->addrinfo.ai_family == AF_INET || ai->addrinfo.ai_family == AF_INET6);
+
+	PHP_ETH_PROTO_CHECK(ai->addrinfo.ai_protocol, ai->addrinfo.ai_family);
 
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
@@ -2576,30 +2904,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	php_sock->error = 0;
 	php_sock->blocking = 1;
 
-	switch(php_sock->type) {
-		case AF_UNIX:
-			{
-				// AF_UNIX sockets via getaddrino are not implemented due to security problems
-				close(php_sock->bsd_socket);
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
-			}
-
-		case AF_INET:
-#ifdef HAVE_IPV6
-		case AF_INET6:
-#endif
-			{
-				retval = bind(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen);
-				break;
-			}
-		default:
-			close(php_sock->bsd_socket);
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
-			RETURN_THROWS();
-	}
-
-	if (retval != 0) {
+	if (bind(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to bind address", errno);
 		close(php_sock->bsd_socket);
 		zval_ptr_dtor(return_value);
@@ -2612,7 +2917,6 @@ PHP_FUNCTION(socket_addrinfo_bind)
 PHP_FUNCTION(socket_addrinfo_connect)
 {
 	zval			*arg1;
-	int				retval;
 	php_addrinfo	*ai;
 	php_socket		*php_sock;
 
@@ -2621,6 +2925,10 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ai = Z_ADDRESS_INFO_P(arg1);
+
+	ZEND_ASSERT(ai->addrinfo.ai_family == AF_INET || ai->addrinfo.ai_family == AF_INET6);
+
+	PHP_ETH_PROTO_CHECK(ai->addrinfo.ai_protocol, ai->addrinfo.ai_family);
 
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
@@ -2638,30 +2946,7 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	php_sock->error = 0;
 	php_sock->blocking = 1;
 
-	switch(php_sock->type) {
-		case AF_UNIX:
-			{
-				// AF_UNIX sockets via getaddrino are not implemented due to security problems
-				close(php_sock->bsd_socket);
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
-			}
-
-		case AF_INET:
-#ifdef HAVE_IPV6
-		case AF_INET6:
-#endif
-			{
-				retval = connect(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen);
-				break;
-			}
-		default:
-			zend_argument_value_error(1, "socket type must be one of AF_UNIX, AF_INET, or AF_INET6");
-			close(php_sock->bsd_socket);
-			RETURN_THROWS();
-	}
-
-	if (retval != 0) {
+	if (connect(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to connect address", errno);
 		close(php_sock->bsd_socket);
 		zval_ptr_dtor(return_value);

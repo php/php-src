@@ -23,12 +23,14 @@ printf("printf 64-bit signed int '18446744073709551615' (2^64)-1 = %u\n", 184467
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 -Test
 sscanf 32-bit signed int '2147483647'           (2^31)-1 = 2147483647
 sscanf 32-bit unsign int '4294967295'           (2^32)-1 = 4294967295
 sscanf 64-bit signed int '9223372036854775807'  (2^63)-1 = 9223372036854775807
 sscanf 64-bit unsign int '18446744073709551615' (2^64)-1 = 18446744073709551615
 printf 64-bit signed int '9223372036854775807'  (2^63)-1 = 9223372036854775807
+
+Warning: The float 1.8446744073709552E+19 is not representable as an int, cast occurred in %s on line %d
 printf 64-bit signed int '18446744073709551615' (2^64)-1 = 0
 Done

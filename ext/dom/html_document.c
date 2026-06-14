@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Niels Dossche <nielsdos@php.net>                            |
    +----------------------------------------------------------------------+
@@ -30,6 +28,7 @@
 #include <Zend/zend_smart_string.h>
 #include <lexbor/html/encoding.h>
 #include <lexbor/encoding/encoding.h>
+#include <lexbor/core/swar.h>
 
 /* Implementation defined, but as HTML5 defaults in all other cases to UTF-8, we'll do the same. */
 #define DOM_FALLBACK_ENCODING_ID LXB_ENCODING_UTF_8
@@ -83,16 +82,7 @@ typedef struct dom_decoding_encoding_ctx {
 /* https://dom.spec.whatwg.org/#dom-document-implementation */
 zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retval)
 {
-	const uint32_t PROP_INDEX = 0;
-
-#if ZEND_DEBUG
-	zend_string *implementation_str = ZSTR_INIT_LITERAL("implementation", false);
-	const zend_property_info *prop_info = zend_get_property_info(dom_abstract_base_document_class_entry, implementation_str, 0);
-	zend_string_release_ex(implementation_str, false);
-	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == PROP_INDEX);
-#endif
-
-	zval *cached_implementation = OBJ_PROP_NUM(&obj->std, PROP_INDEX);
+	zval *cached_implementation = dom_get_prop_checked_offset(obj, 1, "implementation");
 	if (Z_ISUNDEF_P(cached_implementation)) {
 		php_dom_create_implementation(cached_implementation, true);
 	}
@@ -517,6 +507,30 @@ static bool dom_process_parse_chunk(
 	return true;
 }
 
+/* This seeks, using SWAR techniques, to the first non-ASCII byte in a UTF-8 input.
+ * Returns true if the entire input was consumed without encountering non-ASCII, false otherwise. */
+static zend_always_inline bool dom_seek_utf8_non_ascii(const lxb_char_t **data, const lxb_char_t *end)
+{
+	while (*data + sizeof(size_t) <= end) {
+		size_t bytes;
+		memcpy(&bytes, *data, sizeof(bytes));
+		/* If the top bit is set, it's not ASCII. */
+		if ((bytes & LEXBOR_SWAR_REPEAT(0x80)) != 0) {
+			return false;
+		}
+		*data += sizeof(size_t);
+	}
+
+	while (*data < end) {
+		if (**data & 0x80) {
+			return false;
+		}
+		(*data)++;
+	}
+
+	return true;
+}
+
 static bool dom_decode_encode_fast_path(
 	lexbor_libxml2_bridge_parse_context *ctx,
 	lxb_html_document_t *document,
@@ -557,23 +571,22 @@ static bool dom_decode_encode_fast_path(
 	const lxb_char_t *last_output = buf_ref;
 	while (buf_ref != buf_end) {
 		/* Fast path converts non-validated UTF-8 -> validated UTF-8 */
-		if (decoding_encoding_ctx->decode.u.utf_8.need == 0 && *buf_ref < 0x80) {
+		if (decoding_encoding_ctx->decode.u.utf_8.need == 0) {
 			/* Fast path within the fast path: try to skip non-mb bytes in bulk if we are not in a state where we
-			 * need more UTF-8 bytes to complete a sequence.
-			 * It might be tempting to use SIMD here, but it turns out that this is less efficient because
-			 * we need to process the same byte multiple times sometimes when mixing ASCII with multibyte. */
-			buf_ref++;
-			continue;
+			 * need more UTF-8 bytes to complete a sequence. */
+			if (dom_seek_utf8_non_ascii(&buf_ref, buf_end)) {
+				ZEND_ASSERT(buf_ref == buf_end);
+				break;
+			}
 		}
 		const lxb_char_t *buf_ref_backup = buf_ref;
 		lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(&decoding_encoding_ctx->decode, &buf_ref, buf_end);
 		if (UNEXPECTED(codepoint > LXB_ENCODING_MAX_CODEPOINT)) {
-			size_t skip = buf_ref - buf_ref_backup; /* Skip invalid data, it's replaced by the UTF-8 replacement bytes */
 			if (!dom_process_parse_chunk(
 				ctx,
 				document,
 				parser,
-				buf_ref - last_output - skip,
+				buf_ref_backup - last_output,
 				last_output,
 				buf_ref - last_output,
 				tokenizer_error_offset,
@@ -1213,6 +1226,68 @@ static zend_result dom_write_output_stream(void *application_data, const char *b
 	return SUCCESS;
 }
 
+/* Fast path when the output encoding is UTF-8 */
+static zend_result dom_saveHTML_write_string_len_utf8_output(void *application_data, const char *buf, size_t len)
+{
+	dom_output_ctx *output = (dom_output_ctx *) application_data;
+
+	output->decode->status = LXB_STATUS_OK;
+
+	const lxb_char_t *buf_ref = (const lxb_char_t *) buf;
+	const lxb_char_t *last_output = buf_ref;
+	const lxb_char_t *buf_end = buf_ref + len;
+
+	while (buf_ref != buf_end) {
+		const lxb_char_t *buf_ref_backup = buf_ref;
+		lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(output->decode, &buf_ref, buf_end);
+		if (UNEXPECTED(codepoint > LXB_ENCODING_MAX_CODEPOINT)) {
+			if (UNEXPECTED(output->write_output(
+				output->output_data,
+				(const char *) last_output,
+				buf_ref_backup - last_output
+			) != SUCCESS)) {
+				return FAILURE;
+			}
+
+			if (codepoint == LXB_ENCODING_DECODE_CONTINUE) {
+				ZEND_ASSERT(buf_ref == buf_end);
+				/* The decoder needs more data but the entire buffer is consumed.
+				 * All valid data is outputted, and if the remaining data for the code point
+				 * is invalid, the next call will output the replacement bytes. */
+				output->decode->status = LXB_STATUS_CONTINUE;
+				return SUCCESS;
+			}
+
+			if (UNEXPECTED(output->write_output(
+				output->output_data,
+				(const char *) LXB_ENCODING_REPLACEMENT_BYTES,
+				LXB_ENCODING_REPLACEMENT_SIZE
+			) != SUCCESS)) {
+				return FAILURE;
+			}
+
+			last_output = buf_ref;
+		}
+	}
+
+	if (buf_ref != last_output) {
+		if (UNEXPECTED(output->write_output(
+			output->output_data,
+			(const char *) last_output,
+			buf_ref - last_output
+		) != SUCCESS)) {
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+
+static zend_result dom_saveHTML_write_string_utf8_output(void *application_data, const char *buf)
+{
+	return dom_saveHTML_write_string_len_utf8_output(application_data, buf, strlen(buf));
+}
+
 static zend_result dom_saveHTML_write_string_len(void *application_data, const char *buf, size_t len)
 {
 	dom_output_ctx *output = (dom_output_ctx *) application_data;
@@ -1221,7 +1296,7 @@ static zend_result dom_saveHTML_write_string_len(void *application_data, const c
 	const lxb_char_t *buf_end = buf_ref + len;
 
 	do {
-		decode_status = output->decoding_data->decode(output->decode, &buf_ref, buf_end);
+		decode_status = lxb_encoding_decode_utf_8(output->decode, &buf_ref, buf_end);
 
 		const lxb_codepoint_t *codepoints_ref = output->codepoints;
 		const lxb_codepoint_t *codepoints_end = codepoints_ref + lxb_encoding_decode_buf_used(output->decode);
@@ -1277,8 +1352,15 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, dom_object *inter
 	output_ctx->encoding_output = encoding_output;
 
 	dom_html5_serialize_context ctx;
-	ctx.write_string_len = dom_saveHTML_write_string_len;
-	ctx.write_string = dom_saveHTML_write_string;
+	if (encoding_data->encoding == LXB_ENCODING_UTF_8) {
+		/* Fast path */
+		ctx.write_string_len = dom_saveHTML_write_string_len_utf8_output;
+		ctx.write_string = dom_saveHTML_write_string_utf8_output;
+	} else {
+		/* Slow path */
+		ctx.write_string_len = dom_saveHTML_write_string_len;
+		ctx.write_string = dom_saveHTML_write_string;
+	}
 	ctx.application_data = output_ctx;
 	ctx.private_data = php_dom_get_private_data(intern);
 	if (UNEXPECTED(dom_html5_serialize_outer(&ctx, node) != SUCCESS)) {

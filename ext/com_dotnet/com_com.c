@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
@@ -38,7 +36,7 @@ PHP_METHOD(com, __construct)
 	OLECHAR *moniker;
 	CLSID clsid;
 	CLSCTX ctx = CLSCTX_SERVER;
-	HRESULT res = E_FAIL;
+	HRESULT res = E_FAIL, res2;
 	ITypeLib *TL = NULL;
 	COSERVERINFO	info;
 	COAUTHIDENTITY	authid = {0};
@@ -142,7 +140,7 @@ PHP_METHOD(com, __construct)
 		}
 	}
 
-	if (FAILED(CLSIDFromString(moniker, &clsid))) {
+	if (FAILED(res2 = CLSIDFromString(moniker, &clsid))) {
 		/* try to use it as a moniker */
 		IBindCtx *pBindCtx = NULL;
 		IMoniker *pMoniker = NULL;
@@ -181,6 +179,9 @@ PHP_METHOD(com, __construct)
 		}
 		if (pBindCtx) {
 			IBindCtx_Release(pBindCtx);
+		}
+		if (FAILED(res) && res2 == CO_E_CLASSSTRING && !wcspbrk(moniker, L"\\:")) {
+			res = res2;
 		}
 	} else if (server_name) {
 		MULTI_QI		qi;
@@ -278,7 +279,7 @@ PHP_FUNCTION(com_get_active_object)
 	char *module_name;
 	size_t module_name_len;
 	zend_long code_page;
-	bool code_page_is_null = 1;
+	bool code_page_is_null = true;
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
 	HRESULT res;
@@ -306,7 +307,7 @@ PHP_FUNCTION(com_get_active_object)
 		if (FAILED(res)) {
 			php_com_throw_exception(res, NULL);
 		} else {
-			res = IUnknown_QueryInterface(unk, &IID_IDispatch, &obj);
+			res = IUnknown_QueryInterface(unk, &IID_IDispatch, (void **) &obj);
 
 			if (FAILED(res)) {
 				php_com_throw_exception(res, NULL);
@@ -535,7 +536,7 @@ zend_result php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_fu
 	}
 
 	/* this will create an exception if needed */
-	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v, 0, 0);
+	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v, false, false);
 
 	/* release variants */
 	if (vargs) {
@@ -646,7 +647,7 @@ zend_result php_com_do_invoke(php_com_dotnet_object *obj, zend_string *name,
 		return FAILURE;
 	}
 
-	return php_com_do_invoke_by_id(obj, dispid, flags, v, nargs, args, 0, allow_noarg);
+	return php_com_do_invoke_by_id(obj, dispid, flags, v, nargs, args, false, allow_noarg);
 }
 
 /* {{{ Generate a globally unique identifier (GUID) */
@@ -655,9 +656,7 @@ PHP_FUNCTION(com_create_guid)
 	GUID retval;
 	OLECHAR *guid_string;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_com_initialize();
 	if (CoCreateGuid(&retval) == S_OK && StringFromCLSID(&retval, &guid_string) == S_OK) {

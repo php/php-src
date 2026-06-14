@@ -1,10 +1,10 @@
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://test-uri" targetNamespace="http://test-uri">
 	<types>
-		<xs:schema targetNamespace="http://test-uri" elementFormDefault="qualified">
+		<xs:schema targetNamespace="http://test-uri" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema">
 			<import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml2.xsd" />
 			<complexType name="LocalizedString">
 				<sequence>
-					<element name="value" type="xsd:string"/>
+					<element name="value" type="xs:string"/>
 				</sequence>
 				<attribute ref="xml:lang" use="required"/>
 			</complexType>

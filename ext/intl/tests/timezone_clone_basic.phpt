@@ -4,7 +4,6 @@ IntlTimeZone clone handler: basic test
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $tz1 = IntlTimeZone::createTimeZone('Europe/Amsterdam');
 print_r($tz1);
@@ -44,4 +43,4 @@ IntlTimeZone Object
     [id] => GMT
     [rawOffset] => 0
     [currentOffset] => 0
-)
+)

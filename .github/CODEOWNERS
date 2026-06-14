@@ -16,7 +16,7 @@
 
 /.github @TimWolla
 /build/gen_stub.php @kocsismate
-/ext/bcmath @Girgias @SakiTakamachi
+/ext/bcmath @SakiTakamachi
 /ext/curl @adoy
 /ext/date @derickr
 /ext/dba @Girgias
@@ -25,9 +25,10 @@
 /ext/gd @devnexen
 /ext/gettext @devnexen
 /ext/gmp @Girgias
-/ext/intl @devnexen
+/ext/intl @devnexen @LamentXU123
 /ext/libxml @devnexen
 /ext/json @bukka
+/ext/lexbor @kocsismate
 /ext/mbstring @alexdowad @youkidearitai
 /ext/mysqli @bukka @kamil-tekiela
 /ext/mysqlnd @bukka @kamil-tekiela @SakiTakamachi
@@ -51,6 +52,7 @@
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
+/ext/uri @kocsismate @TimWolla
 /ext/xml @devnexen
 /ext/xmlreader @devnexen
 /ext/xmlwriter @devnexen

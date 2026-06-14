@@ -1,5 +1,5 @@
 --TEST--
-Passing empty filename to exif_read_data() and exif_thumnail()
+Passing empty filename to exif_read_data() and exif_thumbnail()
 --EXTENSIONS--
 exif
 --FILE--

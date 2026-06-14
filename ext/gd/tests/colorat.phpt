@@ -15,7 +15,6 @@ echo 'test colorat truecolor: ';
 $c = imagecolorat($im, 3,3);
 echo $c == 0x0 ? 'ok' : 'failed';
 echo "\n";
-imagedestroy($im);
 
 $im = imagecreate(6,6);
 $c1 = imagecolorallocate($im, 255,255,255);

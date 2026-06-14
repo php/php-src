@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: cdf.c,v 1.123 2022/09/24 20:30:13 christos Exp $")
+FILE_RCSID("@(#)$File: cdf.c,v 1.124 2024/11/25 21:24:59 christos Exp $")
 #endif
 
 #include <assert.h>
@@ -73,7 +73,7 @@ FILE_RCSID("@(#)$File: cdf.c,v 1.123 2022/09/24 20:30:13 christos Exp $")
 #define DPRINTF(a)
 #endif
 
-static union {
+file_private union {
 	char s[4];
 	uint32_t u;
 } cdf_bo;
@@ -109,7 +109,7 @@ static union {
 /*
  * swap a short
  */
-static uint16_t
+file_private uint16_t
 _cdf_tole2(uint16_t sv)
 {
 	uint16_t rv;
@@ -123,7 +123,7 @@ _cdf_tole2(uint16_t sv)
 /*
  * swap an int
  */
-static uint32_t
+file_private uint32_t
 _cdf_tole4(uint32_t sv)
 {
 	uint32_t rv;
@@ -139,7 +139,7 @@ _cdf_tole4(uint32_t sv)
 /*
  * swap a quad
  */
-static uint64_t
+file_private uint64_t
 _cdf_tole8(uint64_t sv)
 {
 	uint64_t rv;
@@ -161,7 +161,7 @@ _cdf_tole8(uint64_t sv)
  * grab a uint32_t from a possibly unaligned address, and return it in
  * the native host order.
  */
-static uint32_t
+file_private uint32_t
 cdf_getuint32(const uint8_t *p, size_t offs)
 {
 	uint32_t rv;
@@ -174,25 +174,25 @@ cdf_getuint32(const uint8_t *p, size_t offs)
 #define CDF_UNPACKA(a)	\
     (void)memcpy((a), &buf[len], sizeof(a)), len += sizeof(a)
 
-uint16_t
+file_protected uint16_t
 cdf_tole2(uint16_t sv)
 {
 	return CDF_TOLE2(sv);
 }
 
-uint32_t
+file_protected uint32_t
 cdf_tole4(uint32_t sv)
 {
 	return CDF_TOLE4(sv);
 }
 
-uint64_t
+file_protected uint64_t
 cdf_tole8(uint64_t sv)
 {
 	return CDF_TOLE8(sv);
 }
 
-void
+file_protected void
 cdf_swap_header(cdf_header_t *h)
 {
 	size_t i;
@@ -223,7 +223,7 @@ cdf_swap_header(cdf_header_t *h)
 	}
 }
 
-void
+file_protected void
 cdf_unpack_header(cdf_header_t *h, char *buf)
 {
 	size_t i;
@@ -249,7 +249,7 @@ cdf_unpack_header(cdf_header_t *h, char *buf)
 		CDF_UNPACK(h->h_master_sat[i]);
 }
 
-void
+file_protected void
 cdf_swap_dir(cdf_directory_t *d)
 {
 	d->d_namelen = CDF_TOLE2(d->d_namelen);
@@ -266,7 +266,7 @@ cdf_swap_dir(cdf_directory_t *d)
 	d->d_size = CDF_TOLE4(d->d_size);
 }
 
-void
+file_protected void
 cdf_swap_class(cdf_classid_t *d)
 {
 	d->cl_dword = CDF_TOLE4(d->cl_dword);
@@ -274,7 +274,7 @@ cdf_swap_class(cdf_classid_t *d)
 	d->cl_word[1] = CDF_TOLE2(d->cl_word[1]);
 }
 
-void
+file_protected void
 cdf_unpack_dir(cdf_directory_t *d, char *buf)
 {
 	size_t len = 0;
@@ -295,7 +295,7 @@ cdf_unpack_dir(cdf_directory_t *d, char *buf)
 	CDF_UNPACK(d->d_unused0);
 }
 
-int
+file_protected int
 cdf_zero_stream(cdf_stream_t *scn)
 {
 	scn->sst_len = 0;
@@ -306,7 +306,7 @@ cdf_zero_stream(cdf_stream_t *scn)
 	return -1;
 }
 
-static size_t
+file_private size_t
 cdf_check_stream(const cdf_stream_t *sst, const cdf_header_t *h)
 {
 #ifndef NDEBUG
@@ -317,7 +317,7 @@ cdf_check_stream(const cdf_stream_t *sst, const cdf_header_t *h)
 	return sst->sst_ss;
 }
 
-static int
+file_private int
 cdf_check_stream_offset(const cdf_stream_t *sst, const cdf_header_t *h,
     const void *p, size_t tail, int line)
 {
@@ -335,7 +335,7 @@ cdf_check_stream_offset(const cdf_stream_t *sst, const cdf_header_t *h,
 	return -1;
 }
 
-static ssize_t
+file_private ssize_t
 cdf_read(const cdf_info_t *info, zend_off_t off, void *buf, size_t len)
 {
 	size_t siz = CAST(size_t, off + len);
@@ -363,7 +363,7 @@ out:
 	return -1;
 }
 
-int
+file_protected int
 cdf_read_header(const cdf_info_t *info, cdf_header_t *h)
 {
 	char buf[512];
@@ -440,7 +440,7 @@ out:
 /*
  * Read the sector allocation table.
  */
-int
+file_protected int
 cdf_read_sat(const cdf_info_t *info, cdf_header_t *h, cdf_sat_t *sat)
 {
 	size_t i, j, k;
@@ -565,7 +565,7 @@ out:
 	return CAST(size_t, -1);
 }
 
-int
+file_protected int
 cdf_read_long_sector_chain(const cdf_info_t *info, const cdf_header_t *h,
     const cdf_sat_t *sat, cdf_secid_t sid, size_t len, cdf_stream_t *scn)
 {
@@ -614,7 +614,7 @@ out:
 	return cdf_zero_stream(scn);
 }
 
-int
+file_protected int
 cdf_read_short_sector_chain(const cdf_header_t *h,
     const cdf_sat_t *ssat, const cdf_stream_t *sst,
     cdf_secid_t sid, size_t len, cdf_stream_t *scn)
@@ -656,7 +656,7 @@ out:
 	return cdf_zero_stream(scn);
 }
 
-int
+file_protected int
 cdf_read_sector_chain(const cdf_info_t *info, const cdf_header_t *h,
     const cdf_sat_t *sat, const cdf_sat_t *ssat, const cdf_stream_t *sst,
     cdf_secid_t sid, size_t len, cdf_stream_t *scn)
@@ -669,7 +669,7 @@ cdf_read_sector_chain(const cdf_info_t *info, const cdf_header_t *h,
 		return cdf_read_long_sector_chain(info, h, sat, sid, len, scn);
 }
 
-int
+file_protected int
 cdf_read_dir(const cdf_info_t *info, const cdf_header_t *h,
     const cdf_sat_t *sat, cdf_dir_t *dir)
 {
@@ -724,7 +724,7 @@ out:
 }
 
 
-int
+file_protected int
 cdf_read_ssat(const cdf_info_t *info, const cdf_header_t *h,
     const cdf_sat_t *sat, cdf_sat_t *ssat)
 {
@@ -767,7 +767,7 @@ out1:
 	return -1;
 }
 
-int
+file_protected int
 cdf_read_short_stream(const cdf_info_t *info, const cdf_header_t *h,
     const cdf_sat_t *sat, const cdf_dir_t *dir, cdf_stream_t *scn,
     const cdf_directory_t **root)
@@ -802,7 +802,7 @@ out:
 	return 0;
 }
 
-static int
+file_private int
 cdf_namecmp(const char *d, const uint16_t *s, size_t l)
 {
 	for (; l--; d++, s++)
@@ -811,7 +811,7 @@ cdf_namecmp(const char *d, const uint16_t *s, size_t l)
 	return 0;
 }
 
-int
+file_protected int
 cdf_read_doc_summary_info(const cdf_info_t *info, const cdf_header_t *h,
     const cdf_sat_t *sat, const cdf_sat_t *ssat, const cdf_stream_t *sst,
     const cdf_dir_t *dir, cdf_stream_t *scn)
@@ -820,7 +820,7 @@ cdf_read_doc_summary_info(const cdf_info_t *info, const cdf_header_t *h,
 	    "\05DocumentSummaryInformation", scn);
 }
 
-int
+file_protected int
 cdf_read_summary_info(const cdf_info_t *info, const cdf_header_t *h,
     const cdf_sat_t *sat, const cdf_sat_t *ssat, const cdf_stream_t *sst,
     const cdf_dir_t *dir, cdf_stream_t *scn)
@@ -829,7 +829,7 @@ cdf_read_summary_info(const cdf_info_t *info, const cdf_header_t *h,
 	    "\05SummaryInformation", scn);
 }
 
-int
+file_protected int
 cdf_read_user_stream(const cdf_info_t *info, const cdf_header_t *h,
     const cdf_sat_t *sat, const cdf_sat_t *ssat, const cdf_stream_t *sst,
     const cdf_dir_t *dir, const char *name, cdf_stream_t *scn)
@@ -847,7 +847,7 @@ cdf_read_user_stream(const cdf_info_t *info, const cdf_header_t *h,
 	    d->d_stream_first_sector, d->d_size, scn);
 }
 
-int
+file_protected int
 cdf_find_stream(const cdf_dir_t *dir, const char *name, int type)
 {
 	size_t i, name_len = strlen(name) + 1;
@@ -868,13 +868,13 @@ cdf_find_stream(const cdf_dir_t *dir, const char *name, int type)
 #define CDF_SHLEN_LIMIT (UINT32_MAX / 64)
 #define CDF_PROP_LIMIT (UINT32_MAX / (64 * sizeof(cdf_property_info_t)))
 
-static const void *
+file_private const void *
 cdf_offset(const void *p, size_t l)
 {
 	return CAST(const void *, CAST(const uint8_t *, p) + l);
 }
 
-static const uint8_t *
+file_private const uint8_t *
 cdf_get_property_info_pos(const cdf_stream_t *sst, const cdf_header_t *h,
     const uint8_t *p, const uint8_t *e, size_t i)
 {
@@ -905,7 +905,7 @@ cdf_get_property_info_pos(const cdf_stream_t *sst, const cdf_header_t *h,
 	return CAST(const uint8_t *, cdf_offset(CAST(const void *, p), ofs));
 }
 
-static cdf_property_info_t *
+file_private cdf_property_info_t *
 cdf_grow_info(cdf_property_info_t **info, size_t *maxcount, size_t incr)
 {
 	cdf_property_info_t *inp;
@@ -931,7 +931,7 @@ out:
 	return NULL;
 }
 
-static int
+file_private int
 cdf_copy_info(cdf_property_info_t *inp, const void *p, const void *e,
     size_t len)
 {
@@ -959,7 +959,7 @@ cdf_copy_info(cdf_property_info_t *inp, const void *p, const void *e,
 	return 1;
 }
 
-int
+file_protected int
 cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
     uint32_t offs, cdf_property_info_t **info, size_t *count, size_t *maxcount)
 {
@@ -1116,7 +1116,7 @@ out:
 	return -1;
 }
 
-int
+file_protected int
 cdf_unpack_summary_info(const cdf_stream_t *sst, const cdf_header_t *h,
     cdf_summary_info_header_t *ssi, cdf_property_info_t **info, size_t *count)
 {
@@ -1155,7 +1155,7 @@ cdf_unpack_summary_info(const cdf_stream_t *sst, const cdf_header_t *h,
     memcpy(&cep->f, b + (l), sizeof(cep->f)); \
     ce[i].f = CAST(t, CDF_TOLE(cep->f))
 
-int
+file_protected int
 cdf_unpack_catalog(const cdf_header_t *h, const cdf_stream_t *sst,
     cdf_catalog_t **cat)
 {
@@ -1223,7 +1223,7 @@ cdf_unpack_catalog(const cdf_header_t *h, const cdf_stream_t *sst,
 	return 0;
 }
 
-int
+file_protected int
 cdf_print_classid(char *buf, size_t buflen, const cdf_classid_t *id)
 {
 	return snprintf(buf, buflen, "%.8x-%.4x-%.4x-%.2x%.2x-"
@@ -1233,7 +1233,7 @@ cdf_print_classid(char *buf, size_t buflen, const cdf_classid_t *id)
 	    id->cl_six[5]);
 }
 
-static const struct {
+file_private const struct {
 	uint32_t v;
 	const char *n;
 } vn[] = {
@@ -1259,7 +1259,7 @@ static const struct {
 	{ CDF_PROPERTY_LOCALE_ID, "Locale ID" },
 };
 
-int
+file_protected int
 cdf_print_property_name(char *buf, size_t bufsiz, uint32_t p)
 {
 	size_t i;
@@ -1270,7 +1270,7 @@ cdf_print_property_name(char *buf, size_t bufsiz, uint32_t p)
 	return snprintf(buf, bufsiz, "%#x", p);
 }
 
-int
+file_protected int
 cdf_print_elapsed_time(char *buf, size_t bufsiz, cdf_timestamp_t ts)
 {
 	int len = 0;
@@ -1305,7 +1305,7 @@ cdf_print_elapsed_time(char *buf, size_t bufsiz, cdf_timestamp_t ts)
 	return len;
 }
 
-char *
+file_protected char *
 cdf_u16tos8(char *buf, size_t len, const uint16_t *p)
 {
 	size_t i;
@@ -1316,7 +1316,7 @@ cdf_u16tos8(char *buf, size_t len, const uint16_t *p)
 }
 
 #ifdef CDF_DEBUG
-void
+file_protected void
 cdf_dump_header(const cdf_header_t *h)
 {
 	size_t i;
@@ -1344,7 +1344,7 @@ cdf_dump_header(const cdf_header_t *h)
 	}
 }
 
-void
+file_protected void
 cdf_dump_sat(const char *prefix, const cdf_sat_t *sat, size_t size)
 {
 	size_t i, j, s = size / sizeof(cdf_secid_t);
@@ -1363,7 +1363,7 @@ cdf_dump_sat(const char *prefix, const cdf_sat_t *sat, size_t size)
 	}
 }
 
-void
+file_protected void
 cdf_dump(const void *v, size_t len)
 {
 	size_t i, j;
@@ -1384,14 +1384,14 @@ cdf_dump(const void *v, size_t len)
 	(void)fprintf(stderr, "\n");
 }
 
-void
+file_protected void
 cdf_dump_stream(const cdf_stream_t *sst)
 {
 	size_t ss = sst->sst_ss;
 	cdf_dump(sst->sst_tab, ss * sst->sst_len);
 }
 
-void
+file_protected void
 cdf_dump_dir(const cdf_info_t *info, const cdf_header_t *h,
     const cdf_sat_t *sat, const cdf_sat_t *ssat, const cdf_stream_t *sst,
     const cdf_dir_t *dir)
@@ -1451,7 +1451,7 @@ cdf_dump_dir(const cdf_info_t *info, const cdf_header_t *h,
 	}
 }
 
-void
+file_protected void
 cdf_dump_property_info(const cdf_property_info_t *info, size_t count)
 {
 	cdf_timestamp_t tp;
@@ -1521,7 +1521,7 @@ cdf_dump_property_info(const cdf_property_info_t *info, size_t count)
 }
 
 
-void
+file_protected void
 cdf_dump_summary_info(const cdf_header_t *h, const cdf_stream_t *sst)
 {
 	char buf[128];
@@ -1544,7 +1544,7 @@ cdf_dump_summary_info(const cdf_header_t *h, const cdf_stream_t *sst)
 }
 
 
-void
+file_protected void
 cdf_dump_catalog(const cdf_header_t *h, const cdf_stream_t *sst)
 {
 	cdf_catalog_t *cat;

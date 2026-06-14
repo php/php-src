@@ -11,7 +11,7 @@ $phpdbg = getenv('TEST_PHPDBG_EXECUTABLE_ESCAPED');
 
 chdir(__DIR__."/bug73615");
 
-print `$phpdbg -qn`;
+print shell_exec("$phpdbg -qn");
 
 ?>
 --EXPECT--

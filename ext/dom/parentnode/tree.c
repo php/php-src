@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Benjamin Eberlei <beberlei@php.net>                         |
    |          Niels Dossche <nielsdos@php.net>                            |
@@ -22,8 +20,33 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "../php_dom.h"
+#include "../obj_map.h"
 #include "../internal_helpers.h"
 #include "../dom_properties.h"
+
+zval *dom_parent_node_children(dom_object *obj)
+{
+	return dom_get_prop_checked_offset(obj, 0, "children");
+}
+
+zend_result dom_parent_node_children_read(dom_object *obj, zval *retval)
+{
+	zval *cached_children = dom_parent_node_children(obj);
+	if (Z_ISUNDEF_P(cached_children)) {
+		object_init_ex(cached_children, dom_html_collection_class_entry);
+		php_dom_create_obj_map(obj, Z_DOMOBJ_P(cached_children), NULL, NULL, NULL, &php_dom_obj_map_child_elements);
+
+		/* Handle cycles for potential TMPVARs (could also be CV but we can't differentiate).
+		 * RC == 2 because of 1 TMPVAR and 1 in HTMLCollection. */
+		if (GC_REFCOUNT(&obj->std) == 2) {
+			gc_possible_root(Z_COUNTED_P(cached_children));
+		}
+	}
+
+	ZVAL_OBJ_COPY(retval, Z_OBJ_P(cached_children));
+
+	return SUCCESS;
+}
 
 /* {{{ firstElementChild DomParentNode
 readonly=yes
@@ -699,8 +722,8 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 
 static zend_result dom_child_removal_preconditions(const xmlNode *child, const dom_object *context)
 {
-	if (dom_node_is_read_only(child) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+	if (dom_node_is_read_only(child) ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent))) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(context->document));
 		return FAILURE;
 	}

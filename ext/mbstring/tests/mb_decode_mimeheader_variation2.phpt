@@ -2,10 +2,11 @@
 Test mb_decode_mimeheader() function : variation
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=utf-8
 --FILE--
 <?php
 echo "*** Testing mb_decode_mimeheader() : variation ***\n";
-mb_internal_encoding('utf-8');
 
 //all the following are identical, we will convert to utf-8
 

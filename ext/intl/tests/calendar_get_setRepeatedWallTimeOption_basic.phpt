@@ -2,12 +2,11 @@
 IntlCalendar::get/setRepeatedWallTimeOption(): basic test
 --EXTENSIONS--
 intl
+--INI--
+intl.default_locale=nl
+date.timezone=Europe/Amsterdam
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
-
-date_default_timezone_set('Europe/Amsterdam');
 
 //28 October 2012, transition from DST
 $intlcal = IntlGregorianCalendar::createFromDateTime(2012, 9, 28, 0, 0, 0);

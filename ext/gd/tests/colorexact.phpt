@@ -12,7 +12,7 @@ $c2 = imagecolorexactalpha($im, 255,0,255, 100);
 printf("%X\n", $c);
 printf("%X\n", $c2);
 
-imagedestroy($im);
+$im = null;
 
 $im = imagecreate(5,5);
 $c = imagecolorallocate($im, 255,0,255);
@@ -26,8 +26,6 @@ echo imagecolorexactalpha($im, 255,200,0,100) . "\n";
 
 // unallocated index
 echo imagecolorexact($im, 12,12,12) . "\n";
-
-imagedestroy($im);
 ?>
 --EXPECT--
 FF00FF

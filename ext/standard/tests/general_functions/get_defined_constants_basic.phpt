@@ -9,7 +9,7 @@ var_dump(gettype(get_defined_constants()));
 
 $arr1 = get_defined_constants(false);
 $arr2 = get_defined_constants();
-var_dump(array_diff($arr1, $arr2));
+var_dump(array_diff_key($arr1, $arr2));
 
 $n1 = count(get_defined_constants());
 define("USER_CONSTANT", "test");

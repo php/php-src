@@ -119,15 +119,15 @@
 ;   Development Value: 60 (60 seconds)
 ;   Production Value: 60 (60 seconds)
 
+; mysqlnd.collect_memory_statistics
+;   Default Value: Off
+;   Development Value: On
+;   Production Value: Off
+
 ; output_buffering
 ;   Default Value: Off
 ;   Development Value: 4096
 ;   Production Value: 4096
-
-; register_argc_argv
-;   Default Value: On
-;   Development Value: Off
-;   Production Value: Off
 
 ; request_order
 ;   Default Value: None
@@ -322,11 +322,6 @@ serialize_precision = -1
 ; https://php.net/disable-functions
 disable_functions =
 
-; This directive allows you to disable certain classes.
-; It receives a comma-delimited list of class names.
-; https://php.net/disable-classes
-disable_classes =
-
 ; Colors for Syntax Highlighting mode.  Anything that's acceptable in
 ; <span style="color: ???????"> would work.
 ; https://php.net/syntax-highlighting
@@ -431,6 +426,7 @@ max_input_time = 60
 ; Maximum amount of memory a script may consume
 ; https://php.net/memory-limit
 memory_limit = 128M
+max_memory_limit = -1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Error handling and logging ;
@@ -531,12 +527,6 @@ ignore_repeated_errors = Off
 ; https://php.net/ignore-repeated-source
 ignore_repeated_source = Off
 
-; If this parameter is set to Off, then memory leaks will not be shown (on
-; stdout or in the log). This is only effective in a debug compile, and if
-; error reporting includes E_WARNING in the allowed list
-; https://php.net/report-memleaks
-report_memleaks = On
-
 ; This setting is off by default.
 ;report_zend_debug = 0
 
@@ -615,6 +605,18 @@ report_memleaks = On
 ; Development value: 0
 ; Production value: 0
 
+; This directive controls whether PHP will output the backtrace of fatal errors.
+; Default Value: On
+; Development Value: On
+; Production Value: On
+;fatal_error_backtraces = On
+
+; This directive controls whether PHP will print the actual arguments of a
+; function upon an error. If this is off (or there was an error fetching the
+; arguments), the function providing the error may optionally provide some
+; additional information after the problem function's name.
+;error_include_args = Off
+
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
@@ -664,14 +666,12 @@ request_order = "GP"
 ; that were passed when the script was invoked. These arrays are extremely
 ; useful when running scripts from the command line. When this directive is
 ; enabled, registering these variables consumes CPU cycles and memory each time
-; a script is executed. For performance reasons, this feature should be disabled
-; on production servers.
-; Note: This directive is hardcoded to On for the CLI SAPI
-; Default Value: On
-; Development Value: Off
-; Production Value: Off
+; a script is executed. For security reasons, this feature should be disabled
+; for non-CLI SAPIs.
+; Note: This directive is ignored for the CLI SAPI
+; This directive is deprecated.
 ; https://php.net/register-argc-argv
-register_argc_argv = Off
+;register_argc_argv = Off
 
 ; When enabled, the ENV, REQUEST and SERVER variables are created when they're
 ; first used (Just In Time) instead of when the script starts. If these
@@ -812,6 +812,12 @@ enable_dl = Off
 ; https://php.net/fastcgi.impersonate
 ;fastcgi.impersonate = 1
 
+; Prevent decoding of SCRIPT_FILENAME when using Apache ProxyPass or
+; ProxyPassMatch. This should be used if script file paths are not stored
+; in an encoded format on the file system.
+; Default is 1.
+;fastcgi.script_path_encoded = 0
+
 ; Disable logging through FastCGI connection. PHP's default behavior is to enable
 ; this feature.
 ;fastcgi.logging = 0
@@ -915,6 +921,7 @@ default_socket_timeout = 60
 ;
 ;extension=bz2
 ;extension=curl
+;extension=exif
 ;extension=ffi
 ;extension=ftp
 ;extension=fileinfo
@@ -924,7 +931,6 @@ default_socket_timeout = 60
 ;extension=intl
 ;extension=ldap
 ;extension=mbstring
-;extension=exif      ; Must be after mbstring as it depends on it
 ;extension=mysqli
 ;extension=odbc
 ;extension=openssl
@@ -947,8 +953,6 @@ default_socket_timeout = 60
 ;extension=tidy
 ;extension=xsl
 ;extension=zip
-
-;zend_extension=opcache
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
@@ -1005,8 +1009,12 @@ cli_server.color = On
 ; This directive allows you to produce PHP errors when some error
 ; happens within intl functions. The value is the level of the error produced.
 ; Default is 0, which does not produce any errors.
+; This directive is deprecated.
 ;intl.error_level = E_WARNING
-;intl.use_exceptions = 0
+; If enabled this directive indicates that when an error occurs within an
+; intl function a IntlException should be thrown.
+; Default is Off, which means errors need to be handled manually.
+;intl.use_exceptions = On
 
 [sqlite3]
 ; Directory pointing to SQLite3 extensions
@@ -1084,6 +1092,14 @@ mail.add_x_header = Off
 ; RFC 2822 non conformant MTA.
 mail.mixed_lf_and_crlf = Off
 
+; Control line ending mode for mail messages and headers.
+; Possible values: "crlf" (default), "lf", "mixed", "os"
+; - crlf: Use CRLF line endings
+; - lf: Use LF line endings only (converts CRLF in message to LF)
+; - mixed: Same as mail.mixed_lf_and_crlf = On
+; - os: Use CRLF on Windows, LF on other systems
+mail.cr_lf_mode = crlf
+
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
 ;mail.log =
@@ -1153,10 +1169,7 @@ mysqli.allow_persistent = On
 ; https://php.net/mysqli.max-links
 mysqli.max_links = -1
 
-; Default port number for mysqli_connect().  If unset, mysqli_connect() will use
-; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
-; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
-; at MYSQL_PORT.
+; Default port number for mysqli_connect().
 ; https://php.net/mysqli.default-port
 mysqli.default_port = 3306
 
@@ -1165,15 +1178,15 @@ mysqli.default_port = 3306
 ; https://php.net/mysqli.default-socket
 mysqli.default_socket =
 
-; Default host for mysqli_connect() (doesn't apply in safe mode).
+; Default host for mysqli_connect().
 ; https://php.net/mysqli.default-host
 mysqli.default_host =
 
-; Default user for mysqli_connect() (doesn't apply in safe mode).
+; Default user for mysqli_connect().
 ; https://php.net/mysqli.default-user
 mysqli.default_user =
 
-; Default password for mysqli_connect() (doesn't apply in safe mode).
+; Default password for mysqli_connect().
 ; Note that this is generally a *bad* idea to store passwords in this file.
 ; *Any* user with PHP access can run 'echo get_cfg_var("mysqli.default_pw")
 ; and reveal this password!  And of course, any users with read access to this
@@ -1193,6 +1206,9 @@ mysqlnd.collect_statistics = On
 
 ; Enable / Disable collection of memory usage statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
+; Default Value: Off
+; Development Value: On
+; Production Value: Off
 mysqlnd.collect_memory_statistics = On
 
 ; Records communication from all extensions using mysqlnd to the specified log
@@ -1295,10 +1311,9 @@ session.save_handler = files
 ; Strict session mode does not accept an uninitialized session ID, and
 ; regenerates the session ID if the browser sends an uninitialized session ID.
 ; Strict mode protects applications from session fixation via a session adoption
-; vulnerability. It is disabled by default for maximum compatibility, but
-; enabling it is encouraged.
+; vulnerability.
 ; https://wiki.php.net/rfc/strict_sessions
-session.use_strict_mode = 0
+session.use_strict_mode = 1
 
 ; Whether to use cookies.
 ; https://php.net/session.use-cookies
@@ -1306,6 +1321,9 @@ session.use_cookies = 1
 
 ; https://php.net/session.cookie-secure
 ;session.cookie_secure =
+
+; https://php.net/session.cookie-partitioned
+;session.cookie_partitioned = 0
 
 ; This option forces PHP to fetch and use a cookie for storing and maintaining
 ; the session id. We encourage this operation as it's very helpful in combating
@@ -1337,13 +1355,13 @@ session.cookie_domain =
 ; Whether or not to add the httpOnly flag to the cookie, which makes it
 ; inaccessible to browser scripting languages such as JavaScript.
 ; https://php.net/session.cookie-httponly
-session.cookie_httponly =
+session.cookie_httponly = 1
 
 ; Add SameSite attribute to cookie to help mitigate Cross-Site Request Forgery (CSRF/XSRF)
 ; Current valid values are "Strict", "Lax" or "None". When using "None",
 ; make sure to include the quotes, as `none` is interpreted like `false` in ini files.
 ; https://tools.ietf.org/html/draft-west-first-party-cookies-07
-session.cookie_samesite =
+session.cookie_samesite = "Lax"
 
 ; Handler used to serialize data. php is the standard serializer of PHP.
 ; https://php.net/session.serialize-handler
@@ -1373,13 +1391,6 @@ session.gc_divisor = 1000
 ; https://php.net/session.gc-maxlifetime
 session.gc_maxlifetime = 1440
 
-; NOTE: If you are using the subdirectory option for storing session files
-;       (see session.save_path above), then garbage collection does *not*
-;       happen automatically.  You will need to do your own garbage
-;       collection through a shell script, cron entry, or some other method.
-;       For example, the following script is the equivalent of setting
-;       session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
-;          find /path/to/sessions -cmin +24 -type f | xargs rm
 
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
 ; HTTP_REFERER has to contain this substring for the session to be
@@ -1766,6 +1777,15 @@ ldap.max_links = -1
 ; SHM reset. The default "" disables file based caching.
 ;opcache.file_cache=
 
+; Enables or disables read-only mode for the second level cache directory.
+; It should improve performance for read-only containers,
+; when the cache is pre-warmed and packaged alongside the application.
+; Best used with `opcache.validate_timestamps=0`, `opcache.enable_file_override=1`
+; and `opcache.file_cache_consistency_checks=0`.
+; Note: A cache generated with a different build of PHP, a different file path,
+; or different settings (including which extensions are loaded), may be ignored.
+;opcache.file_cache_read_only=0
+
 ; Enables or disables opcode caching in shared memory.
 ;opcache.file_cache_only=0
 
@@ -1836,6 +1856,14 @@ ldap.max_links = -1
 ; this value may still be overridden on a per-stream basis via the "capath"
 ; SSL stream context option.
 ;openssl.capath=
+
+; The libctx is an OpenSSL library context. OpenSSL defines a default library
+; context, but PHP OpenSSL also defines its own library context to avoid
+; interference with other libraries using OpenSSL and to provide an independent
+; context for each thread in ZTS. Possible values:
+;  "custom"  - use a custom library context (default)
+;  "default" - use the default OpenSSL library context
+;openssl.libctx=custom
 
 [ffi]
 ; FFI API restriction. Possible values:

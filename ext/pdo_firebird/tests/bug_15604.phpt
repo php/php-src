@@ -4,9 +4,6 @@ Bug #15604 It is not possible to pass a NULL value as an input parameter if the 
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---XLEAK--
-A bug in firebird causes a memory leak when calling `isc_attach_database()`.
-See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 require_once 'testdb.inc';
@@ -15,7 +12,7 @@ $dbh = getDbConnection();
 
 $dbh->exec('
 recreate table t_bug_15604 (
-  id bigint not null,
+  id int not null,
   a int not null,
   b int,
   constraint pk_bug_15604 primary key(id)

@@ -1,5 +1,5 @@
 --TEST--
-MySQL PDO->__construct(), PDO::MYSQL_ATTR_MAX_BUFFER_SIZE
+MySQL PDO->__construct(), Pdo\Mysql::ATTR_MAX_BUFFER_SIZE
 --EXTENSIONS--
 pdo_mysql
 --SKIPIF--
@@ -7,7 +7,7 @@ pdo_mysql
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 if (MySQLPDOTest::isPDOMySQLnd())
-    die("skip PDO::MYSQL_ATTR_MAX_BUFFER_SIZE not supported with mysqlnd");
+    die("skip Pdo\Mysql::ATTR_MAX_BUFFER_SIZE not supported with mysqlnd");
 ?>
 --FILE--
 <?php
@@ -17,9 +17,9 @@ function try_buffer_size($offset, $buffer_size)
 {
     /* unsigned overflow possible ? */
     $db = new PDO(MySQLPDOTest::getDSN(), PDO_MYSQL_TEST_USER, PDO_MYSQL_TEST_PASS, [
-        PDO::MYSQL_ATTR_MAX_BUFFER_SIZE => $buffer_size,
+        Pdo\Mysql::ATTR_MAX_BUFFER_SIZE => $buffer_size,
         /* buffer is only relevant with native PS */
-        PDO::MYSQL_ATTR_DIRECT_QUERY => 0,
+        Pdo\Mysql::ATTR_DIRECT_QUERY => 0,
         PDO::ATTR_EMULATE_PREPARES => 0,
     ]);
 

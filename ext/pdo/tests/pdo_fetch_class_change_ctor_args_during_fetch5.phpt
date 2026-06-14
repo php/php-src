@@ -38,7 +38,11 @@ function stuffingErrorHandler(int $errno, string $errstr, string $errfile, int $
 }
 set_error_handler(stuffingErrorHandler(...));
 
-var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE, 'B', [$stmt]));
+try {
+    var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE, 'B', [$stmt]));
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+}
 
 ?>
 --CLEAN--
@@ -47,9 +51,6 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_fetch_class_change_ctor_five");
 ?>
---EXPECTF--
+--EXPECT--
 PDOStatement::fetchAll(): The PDO::FETCH_SERIALIZE mode is deprecated
-PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: cannot unserialize class
-PDOStatement::fetchAll(): SQLSTATE[HY000]: General error%S
-array(0) {
-}
+Error: Cannot change default fetch mode while fetching

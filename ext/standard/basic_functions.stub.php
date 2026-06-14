@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
 
 /* array.c */
 
@@ -87,6 +90,11 @@ const SORT_NATURAL = UNKNOWN;
  */
 const SORT_FLAG_CASE = UNKNOWN;
 
+enum SortDirection {
+    case Ascending;
+    case Descending;
+}
+
 /**
  * @var int
  * @cvalue PHP_CASE_LOWER
@@ -111,6 +119,11 @@ const COUNT_RECURSIVE = UNKNOWN;
 
 /**
  * @var int
+ * @cvalue ARRAY_FILTER_USE_VALUE
+ */
+const ARRAY_FILTER_USE_VALUE = UNKNOWN;
+/**
+ * @var int
  * @cvalue ARRAY_FILTER_USE_BOTH
  */
 const ARRAY_FILTER_USE_BOTH = UNKNOWN;
@@ -124,33 +137,33 @@ const ARRAY_FILTER_USE_KEY = UNKNOWN;
 
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_ACTIVE
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_ACTIVE = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_CALLBACK
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_CALLBACK = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_BAIL
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_BAIL = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_WARNING
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_WARNING = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_EXCEPTION
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_EXCEPTION = UNKNOWN;
 
 /* basic_functions.h */
@@ -260,87 +273,70 @@ const PHP_QUERY_RFC1738 = UNKNOWN;
 const PHP_QUERY_RFC3986 = UNKNOWN;
 
 /**
- * @var float
  * @cvalue M_E
  */
 const M_E = 2.718281828459045;
 /**
- * @var float
  * @cvalue M_LOG2E
  */
 const M_LOG2E = 1.4426950408889634074;
 /**
- * @var float
  * @cvalue M_LOG10E
  */
 const M_LOG10E = 0.43429448190325182765;
 /**
- * @var float
  * @cvalue M_LN2
  */
 const M_LN2 = 0.69314718055994530942;
 /**
- * @var float
  * @cvalue M_LN10
  */
 const M_LN10 = 2.30258509299404568402;
 /**
- * @var float
  * @cvalue M_PI
  */
 const M_PI = 3.14159265358979323846;
 /**
- * @var float
  * @cvalue M_PI_2
  */
 const M_PI_2 = 1.57079632679489661923;
 /**
- * @var float
  * @cvalue M_PI_4
  */
 const M_PI_4 = 0.78539816339744830962;
 /**
- * @var float
  * @cvalue M_1_PI
  */
 const M_1_PI = 0.31830988618379067154;
 /**
- * @var float
  * @cvalue M_2_PI
  */
 const M_2_PI = 0.63661977236758134308;
 /**
- * @var float
  * @cvalue M_SQRTPI
  */
 const M_SQRTPI = 1.77245385090551602729;
 /**
- * @var float
  * @cvalue M_2_SQRTPI
  */
 const M_2_SQRTPI = 1.12837916709551257390;
 /**
- * @var float
  * @cvalue M_LNPI
  */
 const M_LNPI = 1.14472988584940017414;
 /**
- * @var float
  * @cvalue M_EULER
  */
 const M_EULER = 0.57721566490153286061;
 /**
- * @var float
  * @cvalue M_SQRT2
  */
 const M_SQRT2 = 1.41421356237309504880;
 /**
- * @var float
  * @cvalue M_SQRT1_2
  */
 const M_SQRT1_2 = 0.70710678118654752440;
 /**
- * @var float
  * @cvalue M_SQRT3
  */
 const M_SQRT3 = 1.73205080756887729352;
@@ -383,17 +379,11 @@ const PHP_ROUND_HALF_ODD = UNKNOWN;
  * @cvalue PHP_MAX_SALT_LEN
  */
 const CRYPT_SALT_LENGTH = UNKNOWN;
-/** @var int */
 const CRYPT_STD_DES = 1;
-/** @var int */
 const CRYPT_EXT_DES = 1;
-/** @var int */
 const CRYPT_MD5 = 1;
-/** @var int */
 const CRYPT_BLOWFISH = 1;
-/** @var int */
 const CRYPT_SHA256 = 1;
-/** @var int */
 const CRYPT_SHA512 = 1;
 
 /* dns.c */
@@ -648,12 +638,17 @@ const IMAGETYPE_WEBP = UNKNOWN;
 const IMAGETYPE_AVIF = UNKNOWN;
 /**
  * @var int
+ * @cvalue IMAGE_FILETYPE_HEIF
+ */
+const IMAGETYPE_HEIF = UNKNOWN;
+/**
+ * @var int
  * @cvalue IMAGE_FILETYPE_UNKNOWN
  */
 const IMAGETYPE_UNKNOWN = UNKNOWN;
 /**
  * @var int
- * @cvalue IMAGE_FILETYPE_COUNT
+ * @cvalue IMAGE_FILETYPE_FIXED_COUNT
  */
 const IMAGETYPE_COUNT = UNKNOWN;
 
@@ -1624,6 +1619,12 @@ function min(mixed $value, mixed ...$values): mixed {}
  */
 function max(mixed $value, mixed ...$values): mixed {}
 
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 3}
+ */
+function clamp(mixed $value, mixed $min, mixed $max): mixed {}
+
 function array_walk(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
 
 function array_walk_recursive(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
@@ -1640,7 +1641,10 @@ function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
  */
 function array_search(mixed $needle, array $haystack, bool $strict = false): int|string|false {}
 
-/** @prefer-ref $array */
+/**
+ * @prefer-ref $array
+ * @forbid-dynamic-calls
+ */
 function extract(array &$array, int $flags = EXTR_OVERWRITE, string $prefix = ""): int {}
 
 /**
@@ -1648,6 +1652,7 @@ function extract(array &$array, int $flags = EXTR_OVERWRITE, string $prefix = ""
  * @param array|string $var_names
  * @return array<string, mixed|ref>
  * @refcount 1
+ * @forbid-dynamic-calls
  */
 function compact($var_name, ...$var_names): array {}
 
@@ -1709,6 +1714,16 @@ function array_key_first(array $array): int|string|null {}
  * @compile-time-eval
  */
 function array_key_last(array $array): int|string|null {}
+
+/**
+ * @compile-time-eval
+ */
+function array_first(array $array): mixed {}
+
+/**
+ * @compile-time-eval
+ */
+function array_last(array $array): mixed {}
 
 /**
  * @return array<int, mixed|ref>
@@ -1851,7 +1866,7 @@ function array_udiff_uassoc(array $array, ...$rest): array {}
  * @prefer-ref $array
  * @prefer-ref $rest
  */
-function array_multisort(&$array, &...$rest): bool {}
+function array_multisort(&$array, &...$rest): true {}
 
 /** @return int|string|array<int, int|string> */
 function array_rand(array $array, int $num = 1): int|string|array {}
@@ -1868,7 +1883,7 @@ function array_product(array $array): int|float {}
 
 function array_reduce(array $array, callable $callback, mixed $initial = null): mixed {}
 
-function array_filter(array $array, ?callable $callback = null, int $mode = 0): array {}
+function array_filter(array $array, ?callable $callback = null, int $mode = ARRAY_FILTER_USE_VALUE): array {}
 
 function array_find(array $array, callable $callback): mixed {}
 
@@ -1970,7 +1985,7 @@ function get_cfg_var(string $option): string|array|false {}
 function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $additional_headers = null): bool {}
 
 /**
- * @return array<string, int|string>|null
+ * @return array<string, int|string|array>|null
  * @refcount 1
  */
 function error_get_last(): ?array {}
@@ -2019,7 +2034,6 @@ function ini_parse_quantity(string $shorthand): int {}
 /** @refcount 1 */
 function set_include_path(string $include_path): string|false {}
 
-/** @refcount 1 */
 function get_include_path(): string|false {}
 
 /** @refcount 1 */
@@ -2313,16 +2327,16 @@ function strcoll(string $string1, string $string2): int {}
  * @frameless-function {"arity": 1}
  * @frameless-function {"arity": 2}
  */
-function trim(string $string, string $characters = " \n\r\t\v\0"): string {}
+function trim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /** @compile-time-eval */
-function rtrim(string $string, string $characters = " \n\r\t\v\0"): string {}
+function rtrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /** @alias rtrim */
-function chop(string $string, string $characters = " \n\r\t\v\0"): string {}
+function chop(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /** @compile-time-eval */
-function ltrim(string $string, string $characters = " \n\r\t\v\0"): string {}
+function ltrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /**
  * @compile-time-eval
@@ -2546,8 +2560,8 @@ function nl2br(string $string, bool $use_xhtml = true): string {}
 function strip_tags(string $string, array|string|null $allowed_tags = null): string {}
 
 /**
- * @param array|string $locales
- * @param string $rest
+ * @param array|string|null $locales
+ * @param string|null $rest
  */
 function setlocale(int $category, $locales, ...$rest): string|false {}
 
@@ -2681,13 +2695,10 @@ function readdir($dir_handle = null): string|false {}
  */
 function scandir(string $directory, int $sorting_order = SCANDIR_SORT_ASCENDING, $context = null): array|false {}
 
-#ifdef HAVE_GLOB
 /**
  * @return array<int, string>|false
- * @refcount 1
  */
 function glob(string $pattern, int $flags = 0): array|false {}
-#endif
 
 /* exec.c */
 
@@ -3374,7 +3385,10 @@ function soundex(string $string): string {}
 
 /* streamsfuncs.c */
 
-function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null): int|false {}
+/**
+ * @param resource|null $context
+ */
+function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null, $context = null): int|false {}
 
 /**
  * @return resource
@@ -3470,6 +3484,11 @@ function stream_socket_sendto($socket, string $data, int $flags = 0, string $add
  */
 function stream_socket_enable_crypto($stream, bool $enable, ?int $crypto_method = null, $session_stream = null): int|bool {}
 
+/**
+ * @param resource $stream
+ */
+function stream_socket_get_crypto_status($stream): int {}
+
 #ifdef HAVE_SHUTDOWN
 /** @param resource $stream */
 function stream_socket_shutdown($stream, int $mode): bool {}
@@ -3477,17 +3496,19 @@ function stream_socket_shutdown($stream, int $mode): bool {}
 
 #ifdef HAVE_SOCKETPAIR
 /**
+ * @param resource|null $context
  * @return array<int, resource>|false
  * @refcount 1
  */
-function stream_socket_pair(int $domain, int $type, int $protocol): array|false {}
+function stream_socket_pair(int $domain, int $type, int $protocol, $context = null): array|false {}
 #endif
 
 /**
  * @param resource $from
  * @param resource $to
+ * @param resource|null $context
  */
-function stream_copy_to_stream($from, $to, ?int $length = null, int $offset = 0): int|false {}
+function stream_copy_to_stream($from, $to, ?int $length = null, int $offset = 0, $context = null): int|false {}
 
 /**
  * @param resource $stream
@@ -3548,13 +3569,23 @@ function stream_resolve_include_path(string $filename): string|false {}
 function stream_get_wrappers(): array {}
 
 /**
+ * @return array<int, StreamError>
+ */
+function stream_last_errors(): array {}
+
+function stream_clear_errors(): void {}
+
+/**
  * @return array<int, string>
  * @refcount 1
  */
 function stream_get_transports(): array {}
 
-/** @param resource|string $stream */
-function stream_is_local($stream): bool {}
+/**
+ * @param resource|string $stream
+ * @param resource|null $context
+ */
+function stream_is_local($stream, $context = null): bool {}
 
 /** @param resource $stream */
 function stream_isatty($stream): bool {}
@@ -3575,6 +3606,7 @@ function stream_set_timeout($stream, int $seconds, int $microseconds = 0): bool 
  * @param resource $stream
  * @alias stream_set_timeout
  */
+#[\Deprecated(since: '8.5', message: "use stream_set_timeout() instead")]
 function socket_set_timeout($stream, int $seconds, int $microseconds = 0): bool {}
 #endif
 

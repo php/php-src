@@ -12,10 +12,6 @@ echo "*** Testing array_merge() : usage variations ***\n";
 // Initialise function arguments not being substituted
 $arr = array ('one' => 1, 'two' => 2);
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
@@ -32,31 +28,13 @@ $inputs = array(
        -2345 => 'negative',
        ),
 
-       // null data
-/*4*/  'null uppercase' => array(
-       NULL => 'null 1',
-       ),
-
-/*5*/  'null lowercase' => array(
-       null => 'null 2',
-       ),
-
        // boolean data
 /*6*/ 'bool lowercase' => array(
        true => 'lowert',
        false => 'lowerf',
        ),
 
-/*7*/  'bool uppercase' => array(
-       TRUE => 'uppert',
-       FALSE => 'upperf',
-       ),
-
        // empty data
-/*8*/ 'empty double quotes' => array(
-       "" => 'emptyd',
-       ),
-
 /*9*/  'empty single quotes' => array(
        '' => 'emptys',
        ),
@@ -66,16 +44,6 @@ $inputs = array(
        "stringd" => 'stringd',
        'strings' => 'strings',
        $heredoc => 'stringh',
-       ),
-
-       // undefined data
-/*11*/ 'undefined' => array(
-       @$undefined_var => 'undefined',
-       ),
-
-       // unset data
-/*12*/ 'unset' => array(
-       @$unset_var => 'unset',
        ),
 );
 
@@ -123,43 +91,7 @@ array(6) {
   string(8) "negative"
 }
 
--- Iteration 2: null uppercase data --
-array(3) {
-  [""]=>
-  string(6) "null 1"
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-}
-array(3) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-  [""]=>
-  string(6) "null 1"
-}
-
--- Iteration 3: null lowercase data --
-array(3) {
-  [""]=>
-  string(6) "null 2"
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-}
-array(3) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-  [""]=>
-  string(6) "null 2"
-}
-
--- Iteration 4: bool lowercase data --
+-- Iteration 2: bool lowercase data --
 array(4) {
   [0]=>
   string(6) "lowert"
@@ -181,47 +113,7 @@ array(4) {
   string(6) "lowerf"
 }
 
--- Iteration 5: bool uppercase data --
-array(4) {
-  [0]=>
-  string(6) "uppert"
-  [1]=>
-  string(6) "upperf"
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-}
-array(4) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-  [0]=>
-  string(6) "uppert"
-  [1]=>
-  string(6) "upperf"
-}
-
--- Iteration 6: empty double quotes data --
-array(3) {
-  [""]=>
-  string(6) "emptyd"
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-}
-array(3) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-  [""]=>
-  string(6) "emptyd"
-}
-
--- Iteration 7: empty single quotes data --
+-- Iteration 3: empty single quotes data --
 array(3) {
   [""]=>
   string(6) "emptys"
@@ -239,7 +131,7 @@ array(3) {
   string(6) "emptys"
 }
 
--- Iteration 8: string data --
+-- Iteration 4: string data --
 array(5) {
   ["stringd"]=>
   string(7) "stringd"
@@ -263,41 +155,5 @@ array(5) {
   string(7) "strings"
   ["hello world"]=>
   string(7) "stringh"
-}
-
--- Iteration 9: undefined data --
-array(3) {
-  [""]=>
-  string(9) "undefined"
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-}
-array(3) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-  [""]=>
-  string(9) "undefined"
-}
-
--- Iteration 10: unset data --
-array(3) {
-  [""]=>
-  string(5) "unset"
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-}
-array(3) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-  [""]=>
-  string(5) "unset"
 }
 Done

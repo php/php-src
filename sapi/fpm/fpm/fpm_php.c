@@ -50,35 +50,6 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 }
 /* }}} */
 
-static void fpm_php_disable(char *value, int (*zend_disable)(const char *, size_t)) /* {{{ */
-{
-	char *s = 0, *e = value;
-
-	while (*e) {
-		switch (*e) {
-			case ' ':
-			case ',':
-				if (s) {
-					*e = '\0';
-					zend_disable(s, e - s);
-					s = 0;
-				}
-				break;
-			default:
-				if (!s) {
-					s = e;
-				}
-				break;
-		}
-		e++;
-	}
-
-	if (s) {
-		zend_disable(s, e - s);
-	}
-}
-/* }}} */
-
 #define FPM_PHP_INI_ALTERING_ERROR   -1
 #define FPM_PHP_INI_APPLIED          1
 #define FPM_PHP_INI_EXTENSION_FAILED 0
@@ -120,13 +91,6 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 
 	if (!strcmp(name, "disable_functions") && *value) {
 		zend_disable_functions(value);
-		return FPM_PHP_INI_APPLIED;
-	}
-
-	if (!strcmp(name, "disable_classes") && *value) {
-		char *v = strdup(value);
-		PG(disable_classes) = v;
-		fpm_php_disable(v, zend_disable_class);
 		return FPM_PHP_INI_APPLIED;
 	}
 
@@ -255,6 +219,9 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		limit_extensions = wp->limit_extensions;
 		wp->limit_extensions = NULL;
 	}
+
+	php_child_init();
+
 	return 0;
 }
 /* }}} */

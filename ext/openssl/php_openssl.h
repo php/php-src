@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Stig Venaas <venaas@php.net>                                |
    |          Wez Furlong <wez@thebrainroom.com                           |
@@ -26,22 +24,16 @@ extern zend_module_entry openssl_module_entry;
 #define PHP_OPENSSL_VERSION PHP_VERSION
 
 #include <openssl/opensslv.h>
-#ifdef LIBRESSL_VERSION_NUMBER
-/* LibreSSL version check */
-#if LIBRESSL_VERSION_NUMBER < 0x20700000L
-#define PHP_OPENSSL_API_VERSION 0x10001
-#else
-#define PHP_OPENSSL_API_VERSION 0x10100
-#endif
-#else
 /* OpenSSL version check */
 #if OPENSSL_VERSION_NUMBER < 0x30000000L
+/* This includes LibreSSL that defines version 0x20000000L */
 #define PHP_OPENSSL_API_VERSION 0x10100
 #elif OPENSSL_VERSION_NUMBER < 0x30200000L
 #define PHP_OPENSSL_API_VERSION 0x30000
-#else
+#elif OPENSSL_VERSION_NUMBER < 0x30300000L
 #define PHP_OPENSSL_API_VERSION 0x30200
-#endif
+#else
+#define PHP_OPENSSL_API_VERSION 0x30300
 #endif
 
 #define PHP_OPENSSL_ERR_BUFFER_SIZE 16
@@ -80,10 +72,23 @@ struct php_openssl_errors {
 	int bottom;
 };
 
+struct php_openssl_libctx {
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+	OSSL_LIB_CTX *libctx;
+	OSSL_LIB_CTX *default_libctx;
+	OSSL_LIB_CTX *custom_libctx;
+#endif
+	char *propq;
+};
+
 ZEND_BEGIN_MODULE_GLOBALS(openssl)
 	struct php_openssl_errors *errors;
 	struct php_openssl_errors *errors_mark;
+	struct php_openssl_libctx ctx;
 ZEND_END_MODULE_GLOBALS(openssl)
+
+#define PHP_OPENSSL_LIBCTX OPENSSL_G(ctx).libctx
+#define PHP_OPENSSL_PROPQ OPENSSL_G(ctx).propq
 
 #define OPENSSL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(openssl, v)
 
@@ -94,6 +99,8 @@ ZEND_TSRMLS_CACHE_EXTERN();
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 
 void php_openssl_store_errors(void);
+void php_openssl_errors_set_mark(void);
+void php_openssl_errors_restore_mark(void);
 
 /* openssl file path extra */
 bool php_openssl_check_path_ex(
@@ -147,6 +154,8 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 
 /* OpenSSLCertificate class */
 
+#include <openssl/x509.h>
+
 typedef struct _php_openssl_certificate_object {
 	X509 *x509;
 	zend_object std;
@@ -154,11 +163,73 @@ typedef struct _php_openssl_certificate_object {
 
 extern zend_class_entry *php_openssl_certificate_ce;
 
-static inline php_openssl_certificate_object *php_openssl_certificate_from_obj(zend_object *obj) {
-	return (php_openssl_certificate_object *)((char *)(obj) - XtOffsetOf(php_openssl_certificate_object, std));
-}
+#define php_openssl_certificate_from_obj(obj) ZEND_CONTAINER_OF(obj, php_openssl_certificate_object, std)
 
 #define Z_OPENSSL_CERTIFICATE_P(zv) php_openssl_certificate_from_obj(Z_OBJ_P(zv))
+
+bool php_openssl_is_certificate_ce(zval *val);
+
+/* OpenSSLCertificateSigningRequest class */
+
+typedef struct _php_openssl_x509_request_object {
+	X509_REQ *csr;
+	zend_object std;
+} php_openssl_request_object;
+
+#define php_openssl_request_from_obj(obj) ZEND_CONTAINER_OF(obj, php_openssl_request_object, std)
+
+#define Z_OPENSSL_REQUEST_P(zv) php_openssl_request_from_obj(Z_OBJ_P(zv))
+
+bool php_openssl_is_request_ce(zval *val);
+
+/* OpenSSLAsymmetricKey class */
+
+typedef struct _php_openssl_pkey_object {
+	EVP_PKEY *pkey;
+	bool is_private;
+	zend_object std;
+} php_openssl_pkey_object;
+
+#define php_openssl_pkey_from_obj(obj) ZEND_CONTAINER_OF(obj, php_openssl_pkey_object, std)
+
+#define Z_OPENSSL_PKEY_P(zv) php_openssl_pkey_from_obj(Z_OBJ_P(zv))
+
+bool php_openssl_is_pkey_ce(zval *val);
+void php_openssl_pkey_object_init(zval *zv, EVP_PKEY *pkey, bool is_private);
+
+/* Openssl\Psk class */
+
+/* Matches OpenSSL's PSK_MAX_PSK_LEN and PSK_MAX_IDENTITY_LEN */
+#define PHP_OPENSSL_PSK_MAX_PSK_LEN      256
+#define PHP_OPENSSL_PSK_MAX_IDENTITY_LEN 128
+
+extern zend_class_entry *php_openssl_psk_ce;
+
+bool php_openssl_is_psk_ce(zval *val);
+zend_string *php_openssl_psk_get_psk(zval *psk_zv);
+zend_string *php_openssl_psk_get_identity(zval *psk_zv);
+
+/* Openssl\Session class */
+
+#include <openssl/ssl.h>
+
+typedef struct _php_openssl_session_object {
+	SSL_SESSION *session;
+	zend_object std;
+} php_openssl_session_object;
+
+static inline php_openssl_session_object *php_openssl_session_from_obj(zend_object *obj) {
+	return (php_openssl_session_object *)((char *)(obj) - offsetof(php_openssl_session_object, std));
+}
+
+#define Z_OPENSSL_SESSION_P(zv) php_openssl_session_from_obj(Z_OBJ_P(zv))
+
+/* Extern declarations for xp_ssl.c */
+extern zend_class_entry *php_openssl_session_ce;
+
+void php_openssl_session_object_init(zval *zv, SSL_SESSION *session);
+bool php_openssl_is_session_ce(zval *val);
+SSL_SESSION *php_openssl_session_from_zval(zval *zv);
 
 #if defined(HAVE_OPENSSL_ARGON2)
 

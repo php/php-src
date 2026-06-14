@@ -14,7 +14,6 @@ curl
   curl_setopt($ch, CURLOPT_URL, $url);
   curl_exec($ch);
   var_dump(curl_getinfo($ch, CURLINFO_CONTENT_TYPE));
-  curl_close($ch);
 ?>
 --EXPECT--
 string(24) "text/plain;charset=utf-8"

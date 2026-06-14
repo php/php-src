@@ -67,7 +67,7 @@
  *     the Julian calendar.
  *
  *     The details are unknown, but the lengths of the months were adjusted
- *     until they finally stablized in 8 A.D. with their current lengths:
+ *     until they finally stabilized in 8 A.D. with their current lengths:
  *
  *         January          31
  *         February         28/29

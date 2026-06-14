@@ -32,7 +32,6 @@ class XML_Parser
         xml_set_notation_decl_handler($parser, $this->notation_decl_handler(...));
         xml_set_unparsed_entity_decl_handler($parser, $this->unparsed_entity_decl_handler(...));
         xml_parse($parser, $data, true);
-        xml_parser_free($parser);
     }
 }
 

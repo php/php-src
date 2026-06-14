@@ -29,12 +29,11 @@ $arrays = array (
        array( "one" => "ten", "two" => "twenty", "three" => "thirty"),  // string key/value
        array("one" => 1, 2 => "two", 4 => "four"),  //mixed
 
-       // associative array, containing null/empty/boolean values as key/value
-/*13*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
-       array(true => "true", false => "false", "false" => false, "true" => true),
+       // associative array, containing empty/boolean values as key/value
+/*13*/ array(true => "true", false => "false", "false" => false, "true" => true),
        array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-       array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-       array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
+       array(1 => '', 2 => "", 5 => false, 6 => true),
+       array('' => 1, "" => 2, false => 5, true => 6),
 
        // array with repetitive keys
 /*18*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
@@ -386,33 +385,6 @@ array(6) {
   string(4) "four"
 }
 -- Iteration 13 --
-int(4)
-array(4) {
-  [0]=>
-  int(10)
-  [""]=>
-  string(4) "null"
-  ["NULL"]=>
-  NULL
-  ["null"]=>
-  NULL
-}
-int(6)
-array(6) {
-  [0]=>
-  int(10)
-  [1]=>
-  string(5) "hello"
-  [2]=>
-  string(5) "world"
-  [""]=>
-  string(4) "null"
-  ["NULL"]=>
-  NULL
-  ["null"]=>
-  NULL
-}
--- Iteration 14 --
 int(5)
 array(5) {
   [0]=>
@@ -443,7 +415,7 @@ array(7) {
   ["true"]=>
   bool(true)
 }
--- Iteration 15 --
+-- Iteration 14 --
 int(4)
 array(4) {
   [0]=>
@@ -470,29 +442,25 @@ array(6) {
   ["emptys"]=>
   string(0) ""
 }
--- Iteration 16 --
+-- Iteration 15 --
+int(5)
+array(5) {
+  [0]=>
+  int(10)
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(0) ""
+  [3]=>
+  bool(false)
+  [4]=>
+  bool(true)
+}
 int(7)
 array(7) {
   [0]=>
   int(10)
   [1]=>
-  string(0) ""
-  [2]=>
-  string(0) ""
-  [3]=>
-  NULL
-  [4]=>
-  NULL
-  [5]=>
-  bool(false)
-  [6]=>
-  bool(true)
-}
-int(9)
-array(9) {
-  [0]=>
-  int(10)
-  [1]=>
   string(5) "hello"
   [2]=>
   string(5) "world"
@@ -501,21 +469,17 @@ array(9) {
   [4]=>
   string(0) ""
   [5]=>
-  NULL
-  [6]=>
-  NULL
-  [7]=>
   bool(false)
-  [8]=>
+  [6]=>
   bool(true)
 }
--- Iteration 17 --
+-- Iteration 16 --
 int(4)
 array(4) {
   [0]=>
   int(10)
   [""]=>
-  int(4)
+  int(2)
   [1]=>
   int(5)
   [2]=>
@@ -530,13 +494,13 @@ array(6) {
   [2]=>
   string(5) "world"
   [""]=>
-  int(4)
+  int(2)
   [3]=>
   int(5)
   [4]=>
   int(6)
 }
--- Iteration 18 --
+-- Iteration 17 --
 int(4)
 array(4) {
   [0]=>

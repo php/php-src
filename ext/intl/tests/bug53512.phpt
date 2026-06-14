@@ -19,10 +19,10 @@ foreach ($badvals as $val) {
 ?>
 --EXPECT--
 bool(false)
-string(65) "numfmt_set_symbol: invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"
+string(67) "numfmt_set_symbol(): invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(65) "numfmt_set_symbol: invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"
+string(67) "numfmt_set_symbol(): invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(65) "numfmt_set_symbol: invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"
+string(67) "numfmt_set_symbol(): invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(65) "numfmt_set_symbol: invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"
+string(67) "numfmt_set_symbol(): invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"

@@ -3,73 +3,62 @@
 /** @generate-class-entries */
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC3339
  */
 const DATE_ATOM = "Y-m-d\\TH:i:sP";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_COOKIE
  */
 const DATE_COOKIE = "l, d-M-Y H:i:s T";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_ISO8601
  */
 const DATE_ISO8601 = "Y-m-d\\TH:i:sO";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_ISO8601_EXPANDED
  */
 const DATE_ISO8601_EXPANDED = "X-m-d\\TH:i:sP";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC822
  */
 const DATE_RFC822 = "D, d M y H:i:s O";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC850
  */
 const DATE_RFC850 = "l, d-M-y H:i:s T";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC1036
  */
 const DATE_RFC1036 = "D, d M y H:i:s O";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC1123
  */
 const DATE_RFC1123 = "D, d M Y H:i:s O";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC7231
  */
+#[\Deprecated(since: '8.5', message: "as this format ignores the associated timezone and always uses GMT")]
 const DATE_RFC7231 = "D, d M Y H:i:s \\G\\M\\T";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC2822
  */
 const DATE_RFC2822 = "D, d M Y H:i:s O";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC3339
  */
 const DATE_RFC3339 = "Y-m-d\\TH:i:sP";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC3339_EXTENDED
  */
 const DATE_RFC3339_EXTENDED = "Y-m-d\\TH:i:s.vP";
@@ -83,22 +72,22 @@ const DATE_W3C = DATE_RFC3339;
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_TIMESTAMP
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as date_sunrise() and date_sunset() were deprecated in 8.1')]
 const SUNFUNCS_RET_TIMESTAMP = UNKNOWN;
 
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_STRING
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as date_sunrise() and date_sunset() were deprecated in 8.1')]
 const SUNFUNCS_RET_STRING = UNKNOWN;
 
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_DOUBLE
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as date_sunrise() and date_sunset() were deprecated in 8.1')]
 const SUNFUNCS_RET_DOUBLE = UNKNOWN;
 
 function strtotime(string $datetime, ?int $baseTimestamp = null): int|false {}
@@ -227,7 +216,7 @@ function timezone_offset_get(DateTimeZone $object, DateTimeInterface $datetime):
  * @refcount 1
  */
 function timezone_transitions_get(
-    DateTimeZone $object, int $timestampBegin = PHP_INT_MIN, int $timestampEnd = PHP_INT_MAX): array|false {}
+    DateTimeZone $object, int $timestampBegin = PHP_INT_MIN, int $timestampEnd = 2147483647): array|false {}
 
 /**
  * @return array<string, float|string>|false
@@ -287,7 +276,6 @@ function date_sun_info(int $timestamp, float $latitude, float $longitude): array
 
 interface DateTimeInterface
 {
-
     public const string ATOM = DATE_ATOM;
 
     public const string COOKIE = DATE_COOKIE;
@@ -304,6 +292,7 @@ interface DateTimeInterface
 
     public const string RFC1123 = DATE_RFC1123;
 
+    #[\Deprecated(since: '8.5', message: "as this format ignores the associated timezone and always uses GMT")]
     public const string RFC7231 = DATE_RFC7231;
 
     public const string RFC2822 = DATE_RFC2822;
@@ -334,6 +323,7 @@ interface DateTimeInterface
     public function diff(DateTimeInterface $targetObject, bool $absolute = false): DateInterval;
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void;
 
     public function __serialize(): array;
@@ -350,6 +340,7 @@ class DateTime implements DateTimeInterface
     public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -467,6 +458,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -524,29 +516,38 @@ class DateTimeImmutable implements DateTimeInterface
     public function diff(DateTimeInterface $targetObject, bool $absolute = false): DateInterval {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::modify() does not modify the object itself")]
     public function modify(string $modifier): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::add() does not modify the object itself")]
     public function add(DateInterval $interval): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::sub() does not modify the object itself")]
     public function sub(DateInterval $interval): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setTimezone() does not modify the object itself")]
     public function setTimezone(DateTimeZone $timezone): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setTime() does not modify the object itself")]
     public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setDate() does not modify the object itself")]
     public function setDate(int $year, int $month, int $day): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setISODate() does not modify the object itself")]
     public function setISODate(int $year, int $week, int $dayOfWeek = 1): DateTimeImmutable {}
 
     /** @tentative-return-type */
+    #[\NoDiscard(message: "as DateTimeImmutable::setTimestamp() does not modify the object itself")]
     public function setTimestamp(int $timestamp): DateTimeImmutable {}
 
+    #[\NoDiscard(message: "as DateTimeImmutable::setMicrosecond() does not modify the object itself")]
     public function setMicrosecond(int $microsecond): static {}
 
     /** @tentative-return-type */
@@ -606,7 +607,7 @@ class DateTimeZone
      * @tentative-return-type
      * @alias timezone_transitions_get
      */
-    public function getTransitions(int $timestampBegin = PHP_INT_MIN, int $timestampEnd = PHP_INT_MAX): array|false {}
+    public function getTransitions(int $timestampBegin = PHP_INT_MIN, int $timestampEnd = 2147483647): array|false {}
 
     /**
      * @return array<string, float|string>|false
@@ -634,6 +635,7 @@ class DateTimeZone
     public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -660,6 +662,7 @@ class DateInterval
     public function __unserialize(array $data): void;
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -673,19 +676,40 @@ class DatePeriod implements IteratorAggregate
     /** @cvalue PHP_DATE_PERIOD_INCLUDE_END_DATE */
     public const int INCLUDE_END_DATE = UNKNOWN;
 
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public ?DateTimeInterface $start;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public ?DateTimeInterface $current;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public ?DateTimeInterface $end;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public ?DateInterval $interval;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public int $recurrences;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public bool $include_start_date;
-    /** @readonly */
+    /**
+     * @readonly
+     * @virtual
+     */
     public bool $include_end_date;
 
     public static function createFromISO8601String(string $specification, int $options = 0): static {}
@@ -715,6 +739,7 @@ class DatePeriod implements IteratorAggregate
     public function __unserialize(array $data): void;
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */

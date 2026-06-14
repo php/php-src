@@ -1,5 +1,5 @@
 --TEST--
-Test curl_setopt(_array)() with options that take callabes
+Test curl_setopt(_array)() with options that take callables
 --EXTENSIONS--
 curl
 --FILE--

@@ -25,10 +25,6 @@ do {
     }
 } while ($status === CURLM_CALL_MULTI_PERFORM || $active);
 
-foreach ($urls as $i => $url) {
-    curl_close($conn[$i]);
-}
-
 curl_multi_close($mh);
 ?>
 --EXPECTF--

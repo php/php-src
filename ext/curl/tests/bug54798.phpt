@@ -28,8 +28,6 @@ function checkForClosedFilePointer($host, $curl_option, $description) {
 
     curl_exec($ch);
 
-    curl_close($ch);
-
     echo "Ok for $description\n";
 }
 

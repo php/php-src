@@ -3,15 +3,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -71,6 +70,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
 %nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
+%left T_PIPE
 %left '.'
 %left T_SL T_SR
 %left '+' '-'
@@ -211,12 +211,13 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_INC "'++'"
 %token T_DEC "'--'"
 %token T_INT_CAST    "'(int)'"
-%token T_DOUBLE_CAST "'(double)'"
+%token T_DOUBLE_CAST "'(float)'"
 %token T_STRING_CAST "'(string)'"
 %token T_ARRAY_CAST  "'(array)'"
 %token T_OBJECT_CAST "'(object)'"
 %token T_BOOL_CAST   "'(bool)'"
 %token T_UNSET_CAST  "'(unset)'"
+%token T_VOID_CAST   "'(void)'"
 %token T_OBJECT_OPERATOR "'->'"
 %token T_NULLSAFE_OBJECT_OPERATOR "'?->'"
 %token T_DOUBLE_ARROW    "'=>'"
@@ -236,6 +237,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_COALESCE        "'??'"
 %token T_POW             "'**'"
 %token T_POW_EQUAL       "'**='"
+%token T_PIPE         "'|>'"
 /* We need to split the & token in two to avoid a shift/reduce conflict. For T1&$v and T1&T2,
  * with only one token lookahead, bison does not know whether to reduce T1 as a complete type,
  * or shift to continue parsing an intersection type. */
@@ -256,7 +258,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> unprefixed_use_declarations const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
-%type <ast> extends_from parameter optional_type_without_static argument global_var
+%type <ast> extends_from parameter optional_type_without_static argument argument_no_expr global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_dereferenceable new_non_dereferenceable anonymous_class class_name class_name_reference simple_variable
@@ -267,7 +269,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> callable_expr callable_variable static_member new_variable
 %type <ast> encaps_var encaps_var_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
-%type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
+%type <ast> alt_if_stmt for_cond_exprs for_exprs switch_case_list global_var_list static_var_list
 %type <ast> echo_expr_list unset_variables catch_name_list catch_list optional_variable parameter_list class_statement_list
 %type <ast> implements_list case_list if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
@@ -278,13 +280,13 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> isset_variable type return_type type_expr type_without_static
 %type <ast> identifier type_expr_without_static union_type_without_static_element union_type_without_static intersection_type_without_static
 %type <ast> inline_function union_type_element union_type intersection_type
-%type <ast> attributed_statement attributed_class_statement attributed_parameter
+%type <ast> attributed_statement attributed_top_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
-%type <ast> optional_parameter_list
+%type <ast> optional_parameter_list clone_argument_list non_empty_clone_argument_list
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -376,7 +378,7 @@ attribute_group:
 ;
 
 attribute:
-		T_ATTRIBUTE attribute_group possible_comma ']'	{ $$ = $2; }
+		T_ATTRIBUTE backup_doc_comment attribute_group possible_comma ']'	{ $$ = $3; CG(doc_comment) = $2; }
 ;
 
 attributes:
@@ -392,10 +394,15 @@ attributed_statement:
 	|	enum_declaration_statement			{ $$ = $1; }
 ;
 
+attributed_top_statement:
+		attributed_statement				{ $$ = $1; }
+	|	T_CONST const_list ';'				{ $$ = $2; }
+;
+
 top_statement:
 		statement							{ $$ = $1; }
-	|	attributed_statement					{ $$ = $1; }
-	|	attributes attributed_statement		{ $$ = zend_ast_with_attributes($2, $1); }
+	|	attributed_top_statement			{ $$ = $1; }
+	|	attributes attributed_top_statement	{ $$ = zend_ast_with_attributes($2, $1); }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ $$ = zend_ast_create(ZEND_AST_HALT_COMPILER,
 			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset()));
@@ -413,7 +420,6 @@ top_statement:
 	|	T_USE use_type group_use_declaration ';'	{ $$ = $3; $$->attr = $2; }
 	|	T_USE use_declarations ';'					{ $$ = $2; $$->attr = ZEND_SYMBOL_CLASS; }
 	|	T_USE use_type use_declarations ';'			{ $$ = $3; $$->attr = $2; }
-	|	T_CONST const_list ';'						{ $$ = $2; }
 ;
 
 use_type:
@@ -507,7 +513,7 @@ statement:
 			{ $$ = zend_ast_create(ZEND_AST_WHILE, $3, $5); }
 	|	T_DO statement T_WHILE '(' expr ')' ';'
 			{ $$ = zend_ast_create(ZEND_AST_DO_WHILE, $2, $5); }
-	|	T_FOR '(' for_exprs ';' for_exprs ';' for_exprs ')' for_statement
+	|	T_FOR '(' for_exprs ';' for_cond_exprs ';' for_exprs ')' for_statement
 			{ $$ = zend_ast_create(ZEND_AST_FOR, $3, $5, $7, $9); }
 	|	T_SWITCH '(' expr ')' switch_case_list
 			{ $$ = zend_ast_create(ZEND_AST_SWITCH, $3, $5); }
@@ -534,6 +540,7 @@ statement:
 			{ $$ = zend_ast_create(ZEND_AST_TRY, $3, $5, $6); }
 	|	T_GOTO T_STRING ';' { $$ = zend_ast_create(ZEND_AST_GOTO, $2); }
 	|	T_STRING ':' { $$ = zend_ast_create(ZEND_AST_LABEL, $1); }
+	|	T_VOID_CAST expr ';' { $$ = zend_ast_create(ZEND_AST_CAST_VOID, $2); }
 ;
 
 catch_list:
@@ -705,21 +712,20 @@ switch_case_list:
 
 case_list:
 		%empty { $$ = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
-	|	case_list T_CASE expr case_separator inner_statement_list
+	|	case_list T_CASE expr ':' inner_statement_list
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, $3, $5)); }
-	|	case_list T_DEFAULT case_separator inner_statement_list
+	|	case_list T_CASE expr ';' inner_statement_list
+			{ $$ = zend_ast_list_add($1, zend_ast_create_ex(ZEND_AST_SWITCH_CASE, ZEND_ALT_CASE_SYNTAX, $3, $5)); }
+	|	case_list T_DEFAULT ':' inner_statement_list
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, NULL, $4)); }
-;
-
-case_separator:
-		':'
-	|	';'
+	|	case_list T_DEFAULT ';' inner_statement_list
+			{ $$ = zend_ast_list_add($1, zend_ast_create_ex(ZEND_AST_SWITCH_CASE, ZEND_ALT_CASE_SYNTAX, NULL, $4)); }
 ;
 
 
 match:
 		T_MATCH '(' expr ')' '{' match_arm_list '}'
-			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); };
+			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); }
 ;
 
 match_arm_list:
@@ -814,9 +820,9 @@ parameter:
 			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, NULL,
 					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL, $7); }
 	|	optional_cpp_modifiers optional_type_without_static
-		is_reference is_variadic T_VARIABLE backup_doc_comment '=' expr optional_property_hook_list
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, $8,
-					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL, $9); }
+		is_reference is_variadic T_VARIABLE '=' expr backup_doc_comment optional_property_hook_list
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, $7,
+					NULL, $8 ? zend_ast_create_zval_from_str($8) : NULL, $9); }
 ;
 
 optional_type_without_static:
@@ -894,23 +900,57 @@ return_type:
 ;
 
 argument_list:
-		'(' ')'	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
+		'(' ')'	{ $$ = zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST); }
 	|	'(' non_empty_argument_list possible_comma ')' { $$ = $2; }
-	|	'(' T_ELLIPSIS ')' { $$ = zend_ast_create(ZEND_AST_CALLABLE_CONVERT); }
 ;
 
 non_empty_argument_list:
 		argument
-			{ $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1); }
+			{ $$ = zend_ast_create_arg_list(1, ZEND_AST_ARG_LIST, $1); }
 	|	non_empty_argument_list ',' argument
-			{ $$ = zend_ast_list_add($1, $3); }
+			{ $$ = zend_ast_arg_list_add($1, $3); }
+;
+
+/* `clone_argument_list` is necessary to resolve a parser ambiguity (shift-reduce conflict)
+ * of `clone($expr)`, which could either be parsed as a function call with `$expr` as the first
+ * argument or as a use of the `clone` language construct with an expression with useless
+ * parenthesis. Both would be valid and result in the same AST / the same semantics.
+ * `clone_argument_list` is defined in a way that an `expr` in the first position needs to
+ * be followed by a `,` which is not valid syntax for a parenthesized `expr`, ensuring
+ * that calling `clone()` with a single unnamed parameter is handled by the language construct
+ * syntax.
+ */
+clone_argument_list:
+		'(' ')'	{ $$ = zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST); }
+	|	'(' non_empty_clone_argument_list possible_comma ')' { $$ = $2; }
+	|	'(' expr ',' ')' { $$ = zend_ast_create_arg_list(1, ZEND_AST_ARG_LIST, $2); }
+;
+
+non_empty_clone_argument_list:
+		expr ',' argument
+			{ $$ = zend_ast_create_arg_list(2, ZEND_AST_ARG_LIST, $1, $3); }
+	|	argument_no_expr
+			{ $$ = zend_ast_create_arg_list(1, ZEND_AST_ARG_LIST, $1); }
+	|	non_empty_clone_argument_list ',' argument
+			{ $$ = zend_ast_arg_list_add($1, $3); }
+;
+
+argument_no_expr:
+		identifier ':' expr
+			{ $$ = zend_ast_create(ZEND_AST_NAMED_ARG, $1, $3); }
+	|	T_ELLIPSIS
+			{ $$ = zend_ast_create_ex(ZEND_AST_PLACEHOLDER_ARG, ZEND_PLACEHOLDER_VARIADIC); }
+	|	'?'
+			{ $$ = zend_ast_create(ZEND_AST_PLACEHOLDER_ARG); }
+	|	identifier ':' '?'
+			{ $$ = zend_ast_create(ZEND_AST_NAMED_ARG, $1, zend_ast_create(ZEND_AST_PLACEHOLDER_ARG)); }
+	|	T_ELLIPSIS expr
+			{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
 ;
 
 argument:
-		expr				{ $$ = $1; }
-	|	identifier ':' expr
-			{ $$ = zend_ast_create(ZEND_AST_NAMED_ARG, $1, $3); }
-	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
+		expr { $$ = $1; }
+	|	argument_no_expr { $$ = $1; }
 ;
 
 global_var_list:
@@ -1018,13 +1058,13 @@ trait_alias:
 
 trait_method_reference:
 		identifier
-			{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, NULL, $1); }
+			{ $$ = zend_ast_create(ZEND_AST_TRAIT_METHOD_REFERENCE, NULL, $1); }
 	|	absolute_trait_method_reference { $$ = $1; }
 ;
 
 absolute_trait_method_reference:
 	class_name T_PAAMAYIM_NEKUDOTAYIM identifier
-		{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, $1, $3); }
+		{ $$ = zend_ast_create(ZEND_AST_TRAIT_METHOD_REFERENCE, $1, $3); }
 ;
 
 method_body:
@@ -1167,6 +1207,12 @@ echo_expr:
 	expr { $$ = zend_ast_create(ZEND_AST_ECHO, $1); }
 ;
 
+for_cond_exprs:
+		%empty			{ $$ = NULL; }
+	|	non_empty_for_exprs ',' expr { $$ = zend_ast_list_add($1, $3); }
+	|	expr { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, $1); }
+;
+
 for_exprs:
 		%empty			{ $$ = NULL; }
 	|	non_empty_for_exprs	{ $$ = $1; }
@@ -1174,6 +1220,8 @@ for_exprs:
 
 non_empty_for_exprs:
 		non_empty_for_exprs ',' expr { $$ = zend_ast_list_add($1, $3); }
+	|	non_empty_for_exprs ',' T_VOID_CAST expr { $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_CAST_VOID, $4)); }
+	|	T_VOID_CAST expr { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, zend_ast_create(ZEND_AST_CAST_VOID, $2)); }
 	|	expr { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, $1); }
 ;
 
@@ -1212,7 +1260,16 @@ expr:
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' ampersand variable
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
-	|	T_CLONE expr { $$ = zend_ast_create(ZEND_AST_CLONE, $2); }
+	|	T_CLONE clone_argument_list {
+			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CLONE));
+			name->attr = ZEND_NAME_FQ;
+			$$ = zend_ast_create(ZEND_AST_CALL, name, $2);
+		}
+	|	T_CLONE expr {
+			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CLONE));
+			name->attr = ZEND_NAME_FQ;
+			$$ = zend_ast_create(ZEND_AST_CALL, name, zend_ast_create_list(1, ZEND_AST_ARG_LIST, $2));
+		}
 	|	variable T_PLUS_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ADD, $1, $3); }
 	|	variable T_MINUS_EQUAL expr
@@ -1278,6 +1335,8 @@ expr:
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_EQUAL, $1, $3); }
 	|	expr T_IS_NOT_EQUAL expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_NOT_EQUAL, $1, $3); }
+	|	expr T_PIPE expr
+			{ $$ = zend_ast_create(ZEND_AST_PIPE, $1, $3); }
 	|	expr '<' expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_SMALLER, $1, $3); }
 	|	expr T_IS_SMALLER_OR_EQUAL expr
@@ -1293,6 +1352,7 @@ expr:
 	|	'(' expr ')' {
 			$$ = $2;
 			if ($$->kind == ZEND_AST_CONDITIONAL) $$->attr = ZEND_PARENTHESIZED_CONDITIONAL;
+			if ($$->kind == ZEND_AST_ARROW_FUNC) $$->attr = ZEND_PARENTHESIZED_ARROW_FUNC;
 		}
 	|	new_dereferenceable { $$ = $1; }
 	|	new_non_dereferenceable { $$ = $1; }
@@ -1817,6 +1877,14 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			yystpcpy(yyres, "\"\\\"");
 		}
 		return sizeof("\"\\\"")-1;
+	}
+
+	/* We used "amp" as a dummy label to avoid a duplicate token literal warning. */
+	if (strcmp(toktype, "\"amp\"") == 0) {
+		if (yyres) {
+			yystpcpy(yyres, "token \"&\"");
+		}
+		return sizeof("token \"&\"")-1;
 	}
 
 	/* Strip off the outer quote marks */

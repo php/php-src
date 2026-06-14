@@ -22,7 +22,7 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_encode() : variation ***
-bool(false)
+string(0) ""
 bool(true)
 
 Warning: session_encode(): Cannot encode non-existent session in %s on line %d

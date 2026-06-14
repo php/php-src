@@ -1,5 +1,10 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3dbc84896823c9aaa9ac8aeef8841266920c3e50 */
+/* This is a generated file, edit zend_builtin_functions.stub.php instead.
+ * Stub hash: 64c61862de86d9968930893bf21b516119724064 */
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_clone, 0, 1, IS_OBJECT, 0)
+	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, withProperties, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_exit, 0, 0, IS_NEVER, 0)
 	ZEND_ARG_TYPE_MASK(0, status, MAY_BE_STRING|MAY_BE_LONG, "0")
@@ -148,11 +153,16 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_restore_error_handler, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_error_handler, 0, 0, IS_CALLABLE, 1)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_set_exception_handler, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_restore_exception_handler arginfo_restore_error_handler
+
+#define arginfo_get_exception_handler arginfo_get_error_handler
 
 #define arginfo_get_declared_classes arginfo_func_get_args
 
@@ -238,6 +248,7 @@ static const zend_frameless_function_info frameless_function_infos_class_exists[
 	{ 0 },
 };
 
+ZEND_FUNCTION(clone);
 ZEND_FUNCTION(exit);
 ZEND_FUNCTION(zend_version);
 ZEND_FUNCTION(func_num_args);
@@ -272,8 +283,10 @@ ZEND_FUNCTION(get_included_files);
 ZEND_FUNCTION(trigger_error);
 ZEND_FUNCTION(set_error_handler);
 ZEND_FUNCTION(restore_error_handler);
+ZEND_FUNCTION(get_error_handler);
 ZEND_FUNCTION(set_exception_handler);
 ZEND_FUNCTION(restore_exception_handler);
+ZEND_FUNCTION(get_exception_handler);
 ZEND_FUNCTION(get_declared_classes);
 ZEND_FUNCTION(get_declared_traits);
 ZEND_FUNCTION(get_declared_interfaces);
@@ -299,12 +312,25 @@ ZEND_FUNCTION(gc_disable);
 ZEND_FUNCTION(gc_status);
 
 static const zend_function_entry ext_functions[] = {
+	ZEND_FE(clone, arginfo_clone)
 	ZEND_FE(exit, arginfo_exit)
 	ZEND_RAW_FENTRY("die", zif_exit, arginfo_die, 0, NULL, NULL)
 	ZEND_FE(zend_version, arginfo_zend_version)
-	ZEND_FE(func_num_args, arginfo_func_num_args)
-	ZEND_FE(func_get_arg, arginfo_func_get_arg)
-	ZEND_FE(func_get_args, arginfo_func_get_args)
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_RAW_FENTRY("func_num_args", zif_func_num_args, arginfo_func_num_args, ZEND_FENTRY_FLAGS(0, ZEND_ACC2_FORBID_DYN_CALLS), NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("func_num_args", zif_func_num_args, arginfo_func_num_args, 0, NULL, NULL)
+#endif
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_RAW_FENTRY("func_get_arg", zif_func_get_arg, arginfo_func_get_arg, ZEND_FENTRY_FLAGS(0, ZEND_ACC2_FORBID_DYN_CALLS), NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("func_get_arg", zif_func_get_arg, arginfo_func_get_arg, 0, NULL, NULL)
+#endif
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_RAW_FENTRY("func_get_args", zif_func_get_args, arginfo_func_get_args, ZEND_FENTRY_FLAGS(0, ZEND_ACC2_FORBID_DYN_CALLS), NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("func_get_args", zif_func_get_args, arginfo_func_get_args, 0, NULL, NULL)
+#endif
 	ZEND_FE(strlen, arginfo_strlen)
 	ZEND_RAW_FENTRY("strcmp", zif_strcmp, arginfo_strcmp, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("strncmp", zif_strncmp, arginfo_strncmp, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
@@ -336,13 +362,19 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("user_error", zif_trigger_error, arginfo_user_error, 0, NULL, NULL)
 	ZEND_FE(set_error_handler, arginfo_set_error_handler)
 	ZEND_FE(restore_error_handler, arginfo_restore_error_handler)
+	ZEND_FE(get_error_handler, arginfo_get_error_handler)
 	ZEND_FE(set_exception_handler, arginfo_set_exception_handler)
 	ZEND_FE(restore_exception_handler, arginfo_restore_exception_handler)
+	ZEND_FE(get_exception_handler, arginfo_get_exception_handler)
 	ZEND_FE(get_declared_classes, arginfo_get_declared_classes)
 	ZEND_FE(get_declared_traits, arginfo_get_declared_traits)
 	ZEND_FE(get_declared_interfaces, arginfo_get_declared_interfaces)
 	ZEND_FE(get_defined_functions, arginfo_get_defined_functions)
-	ZEND_FE(get_defined_vars, arginfo_get_defined_vars)
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_RAW_FENTRY("get_defined_vars", zif_get_defined_vars, arginfo_get_defined_vars, ZEND_FENTRY_FLAGS(0, ZEND_ACC2_FORBID_DYN_CALLS), NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("get_defined_vars", zif_get_defined_vars, arginfo_get_defined_vars, 0, NULL, NULL)
+#endif
 	ZEND_FE(get_resource_type, arginfo_get_resource_type)
 	ZEND_FE(get_resource_id, arginfo_get_resource_id)
 	ZEND_FE(get_resources, arginfo_get_resources)
@@ -371,9 +403,9 @@ static zend_class_entry *register_class_stdClass(void)
 	INIT_CLASS_ENTRY(ce, "stdClass", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES);
 
-	zend_string *attribute_name_AllowDynamicProperties_class_stdClass_0 = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_string *attribute_name_AllowDynamicProperties_class_stdClass_0 = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, true);
 	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_stdClass_0, 0);
-	zend_string_release(attribute_name_AllowDynamicProperties_class_stdClass_0);
+	zend_string_release_ex(attribute_name_AllowDynamicProperties_class_stdClass_0, true);
 
 	return class_entry;
 }

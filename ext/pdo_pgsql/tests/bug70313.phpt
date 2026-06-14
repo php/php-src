@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #70313 (PDO statement fails to throw exception)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

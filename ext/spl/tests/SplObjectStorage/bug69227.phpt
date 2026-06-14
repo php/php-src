@@ -6,7 +6,7 @@ zend.enable_gc=1
 <?php
 
 $s = new SplObjectStorage();
-$s->attach($s);
+$s->offsetSet($s);
 gc_collect_cycles();
 echo "ok";
 ?>

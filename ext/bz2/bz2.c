@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Sterling Hughes <sterling@php.net>                           |
   +----------------------------------------------------------------------+
@@ -303,16 +301,15 @@ static PHP_MINFO_FUNCTION(bz2)
 /* {{{ Reads up to length bytes from a BZip2 stream, or 1024 bytes if length is not specified */
 PHP_FUNCTION(bzread)
 {
-	zval *bz;
 	zend_long len = 1024;
 	php_stream *stream;
 	zend_string *data;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &bz, &len)) {
-		RETURN_THROWS();
-	}
-
-	php_stream_from_zval(stream, bz);
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		PHP_Z_PARAM_STREAM(stream)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (len  < 0) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
@@ -353,7 +350,7 @@ PHP_FUNCTION(bzopen)
 			RETURN_THROWS();
 		}
 
-		if (CHECK_ZVAL_NULL_PATH(file)) {
+		if (zend_str_has_nul_byte(Z_STR_P(file))) {
 			zend_argument_type_error(1, "must not contain null bytes");
 			RETURN_THROWS();
 		}
@@ -367,10 +364,23 @@ PHP_FUNCTION(bzopen)
 		php_stream_from_zval(stream, file);
 		stream_mode_len = strlen(stream->mode);
 
-		if (stream_mode_len != 1 && !(stream_mode_len == 2 && memchr(stream->mode, 'b', 2))) {
-			php_error_docref(NULL, E_WARNING, "Cannot use stream opened in mode '%s'", stream->mode);
-			RETURN_FALSE;
-		} else if (stream_mode_len == 1 && stream->mode[0] != 'r' && stream->mode[0] != 'w' && stream->mode[0] != 'a' && stream->mode[0] != 'x') {
+		char primary_stream_mode;
+		if (stream_mode_len == 1) {
+			primary_stream_mode = stream->mode[0];
+		} else if (stream_mode_len == 2) {
+			char secondary_stream_mode = 0;
+			if (stream->mode[0] != 'b') {
+				primary_stream_mode = stream->mode[0];
+				secondary_stream_mode = stream->mode[1];
+			} else {
+				primary_stream_mode = stream->mode[1];
+				secondary_stream_mode = stream->mode[0];
+			}
+			if (secondary_stream_mode != 'b') {
+				goto unsupported_mode;
+			}
+		} else {
+unsupported_mode:
 			php_error_docref(NULL, E_WARNING, "Cannot use stream opened in mode '%s'", stream->mode);
 			RETURN_FALSE;
 		}
@@ -378,21 +388,19 @@ PHP_FUNCTION(bzopen)
 		switch(mode[0]) {
 			case 'r':
 				/* only "r" and "rb" are supported */
-				if (stream->mode[0] != mode[0] && !(stream_mode_len == 2 && stream->mode[1] != mode[0])) {
+				if (primary_stream_mode != 'r') {
 					php_error_docref(NULL, E_WARNING, "Cannot read from a stream opened in write only mode");
 					RETURN_FALSE;
 				}
 				break;
 			case 'w':
 				/* support only "w"(b), "a"(b), "x"(b) */
-				if (stream->mode[0] != mode[0] && !(stream_mode_len == 2 && stream->mode[1] != mode[0])
-					&& stream->mode[0] != 'a' && !(stream_mode_len == 2 && stream->mode[1] != 'a')
-					&& stream->mode[0] != 'x' && !(stream_mode_len == 2 && stream->mode[1] != 'x')) {
+				if (!strchr("wax", primary_stream_mode)) {
 					php_error_docref(NULL, E_WARNING, "cannot write to a stream opened in read only mode");
 					RETURN_FALSE;
 				}
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE();
+			default: ZEND_UNREACHABLE();
 		}
 
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_FD, (void *) &fd, REPORT_ERRORS)) {
@@ -439,20 +447,28 @@ PHP_FUNCTION(bzerror)
 /* {{{ Compresses a string into BZip2 encoded data */
 PHP_FUNCTION(bzcompress)
 {
-	char             *source;          /* Source data to compress */
-	zend_long              zblock_size = 0; /* Optional block size to use */
-	zend_long              zwork_factor = 0;/* Optional work factor to use */
-	zend_string      *dest = NULL;     /* Destination to place the compressed data into */
-	int               error,           /* Error Container */
-					  block_size  = 4, /* Block size for compression algorithm */
-					  work_factor = 0, /* Work factor for compression algorithm */
-					  argc = ZEND_NUM_ARGS(); /* Argument count */
-	size_t               source_len;      /* Length of the source data */
-	unsigned int      dest_len;        /* Length of the destination buffer */
+	char        *source;           /* Source data to compress */
+	zend_long    zblock_size = 4;  /* Block size for compression algorithm */
+	zend_long    zwork_factor = 0; /* Work factor for compression algorithm */
+	zend_string *dest = NULL;      /* Destination to place the compressed data into */
+	size_t       source_len;       /* Length of the source data */
+	unsigned int dest_len;         /* Length of the destination buffer */
 
-	if (zend_parse_parameters(argc, "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	if (zblock_size < 1 || zblock_size > 9) {
+		zend_argument_value_error(2, "must be between 1 and 9");
+		RETURN_THROWS();
+	}
+	int block_size = (int) zblock_size;
+
+	if (zwork_factor < 0 || zwork_factor > 250) {
+		zend_argument_value_error(3, "must be between 0 and 250");
+		RETURN_THROWS();
+	}
+	int work_factor = (int) zwork_factor;
 
 	/* Assign them to easy to use variables, dest_len is initially the length of the data
 	   + .01 x length of data + 600 which is the largest size the results of the compression
@@ -471,16 +487,7 @@ PHP_FUNCTION(bzcompress)
 	/* Allocate the destination buffer */
 	dest = zend_string_alloc(dest_len, 0);
 
-	/* Handle the optional arguments */
-	if (argc > 1) {
-		block_size = zblock_size;
-	}
-
-	if (argc > 2) {
-		work_factor = zwork_factor;
-	}
-
-	error = BZ2_bzBuffToBuffCompress(ZSTR_VAL(dest), &dest_len, source, source_len, block_size, 0, work_factor);
+	int error = BZ2_bzBuffToBuffCompress(ZSTR_VAL(dest), &dest_len, source, source_len, block_size, 0, work_factor);
 	if (error != BZ_OK) {
 		zend_string_efree(dest);
 		RETURN_LONG(error);
@@ -512,6 +519,11 @@ PHP_FUNCTION(bzdecompress)
 	bzs.bzalloc = NULL;
 	bzs.bzfree = NULL;
 
+	if (source_len > UINT_MAX) {
+		zend_argument_value_error(1, "must have a length less than or equal to %u", UINT_MAX);
+		RETURN_THROWS();
+	}
+
 	if (BZ2_bzDecompressInit(&bzs, 0, (int)small) != BZ_OK) {
 		RETURN_FALSE;
 	}
@@ -528,7 +540,7 @@ PHP_FUNCTION(bzdecompress)
 		/* compression is better then 2:1, need to allocate more memory */
 		bzs.avail_out = source_len;
 		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
-		if (size > SIZE_MAX) {
+		if (UNEXPECTED(size > SIZE_MAX)) {
 			/* no reason to continue if we're going to drop it anyway */
 			break;
 		}
@@ -539,7 +551,7 @@ PHP_FUNCTION(bzdecompress)
 	if (error == BZ_STREAM_END || error == BZ_OK) {
 		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
 		if (UNEXPECTED(size > SIZE_MAX)) {
-			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zd", SIZE_MAX);
+			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zu", SIZE_MAX);
 			zend_string_efree(dest);
 			RETVAL_LONG(BZ_MEM_ERROR);
 		} else {
@@ -561,17 +573,14 @@ PHP_FUNCTION(bzdecompress)
    The central error handling interface, does the work for bzerrno, bzerrstr and bzerror */
 static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
-	zval         *bzp;     /* BZip2 Resource Pointer */
 	php_stream   *stream;
 	const char   *errstr;  /* Error string */
 	int           errnum;  /* Error number */
 	struct php_bz2_stream_data_t *self;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &bzp) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	php_stream_from_zval(stream, bzp);
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		PHP_Z_PARAM_STREAM(stream)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!php_stream_is(stream, PHP_STREAM_IS_BZIP2)) {
 		zend_argument_type_error(1, "must be a bz2 stream");
@@ -587,10 +596,8 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	switch (opt) {
 		case PHP_BZ_ERRNO:
 			RETURN_LONG(errnum);
-			break;
 		case PHP_BZ_ERRSTR:
 			RETURN_STRING((char*)errstr);
-			break;
 		case PHP_BZ_ERRBOTH:
 			array_init(return_value);
 

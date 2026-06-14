@@ -22,7 +22,6 @@ if (curl_exec($ch)) {
     usleep(300);
     var_dump(curl_upkeep($ch));
 }
-curl_close($ch);
 ?>
 --EXPECT--
 bool(true)

@@ -1,5 +1,5 @@
 --TEST--
-Bug #69521	Segfault in gc_collect_cycles()
+Bug #69521 (Segfault in gc_collect_cycles())
 --FILE--
 <?php
 $serverUri = "tcp://127.0.0.1:74321";

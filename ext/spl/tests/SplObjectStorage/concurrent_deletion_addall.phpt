@@ -1,5 +1,5 @@
 --TEST--
-SplObjectStorage: Concurrent deletion during addAll
+SplObjectStorage: Mutation during getHash is prohibited during addAll
 --CREDITS--
 cnitlrt
 --FILE--
@@ -17,27 +17,16 @@ $storage = new SplObjectStorage();
 $storage[new stdClass] = 'foo';
 
 $evil = new EvilStorage();
-$evil->addAll($storage);
+try {
+    $evil->addAll($storage);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-var_dump($evil, $storage);
+var_dump(count($evil), count($storage));
 
 ?>
---EXPECTF--
-object(EvilStorage)#%d (1) {
-  ["storage":"SplObjectStorage":private]=>
-  array(1) {
-    [0]=>
-    array(2) {
-      ["obj"]=>
-      object(stdClass)#%d (0) {
-      }
-      ["inf"]=>
-      string(3) "foo"
-    }
-  }
-}
-object(SplObjectStorage)#%d (1) {
-  ["storage":"SplObjectStorage":private]=>
-  array(0) {
-  }
-}
+--EXPECT--
+Modification of SplObjectStorage during getHash() is prohibited
+int(0)
+int(1)

@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andy Wingo <wingo@igalia.com>                               |
    +----------------------------------------------------------------------+
@@ -97,12 +95,12 @@ static inline bool zend_worklist_push(zend_worklist *worklist, int i)
 	ZEND_ASSERT(i >= 0 && i < worklist->stack.capacity);
 
 	if (zend_bitset_in(worklist->visited, i)) {
-		return 0;
+		return false;
 	}
 
 	zend_bitset_incl(worklist->visited, i);
 	zend_worklist_stack_push(&worklist->stack, i);
-	return 1;
+	return true;
 }
 
 static inline int zend_worklist_peek(const zend_worklist *worklist)

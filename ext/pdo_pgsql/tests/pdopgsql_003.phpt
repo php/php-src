@@ -1,7 +1,6 @@
 --TEST--
 Pdo\Pgsql getWarningCount
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

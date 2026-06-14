@@ -2,25 +2,28 @@
 IntlCalendar::setTimeZone(): valid time zones for DateTime but not ICU
 --EXTENSIONS--
 intl
+--INI--
+date.timezone=Europe/Amsterdam
+intl.default_locale=nl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
-date_default_timezone_set('Europe/Amsterdam');
 
 $intlcal = new IntlGregorianCalendar();
 
 $pstdate = new DateTime('2012-01-01 00:00:00 WEST');
-$intlcal->setTimeZone($pstdate->getTimeZone());
+var_dump($intlcal->setTimeZone($pstdate->getTimeZone()));
+var_dump($intlcal->getErrorMessage());
 var_dump($intlcal->getTimeZone()->getID());
 
 $pstdate = new DateTime('2012-01-01 00:00:00 +24:00');
-$intlcal->setTimeZone($pstdate->getTimeZone());
+var_dump($intlcal->setTimeZone($pstdate->getTimeZone()));
+var_dump($intlcal->getErrorMessage());
 var_dump($intlcal->getTimeZone()->getID());
 ?>
---EXPECTF--
-Warning: IntlCalendar::setTimeZone(): intlcal_set_time_zone: time zone id 'WEST' extracted from ext/date DateTimeZone not recognized in %s on line %d
+--EXPECT--
+bool(false)
+string(126) "IntlCalendar::setTimeZone(): time zone id 'WEST' extracted from ext/date DateTimeZone not recognized: U_ILLEGAL_ARGUMENT_ERROR"
 string(16) "Europe/Amsterdam"
-
-Warning: IntlCalendar::setTimeZone(): intlcal_set_time_zone: object has an time zone offset that's too large in %s on line %d
+bool(false)
+string(102) "IntlCalendar::setTimeZone(): object has an time zone offset that's too large: U_ILLEGAL_ARGUMENT_ERROR"
 string(16) "Europe/Amsterdam"

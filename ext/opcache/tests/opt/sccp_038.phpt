@@ -15,5 +15,5 @@ foo();
 ?>
 DONE
 --EXPECTF--
-Deprecated: Increment on non-alphanumeric string is deprecated in %ssccp_038.php on line 5
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %ssccp_038.php on line 5
 DONE

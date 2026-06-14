@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL PDOStatement::debugDumpParams() with emulated prepares
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

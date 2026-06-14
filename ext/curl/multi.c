@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Sterling Hughes <sterling@php.net>                           |
    +----------------------------------------------------------------------+
@@ -50,9 +48,7 @@
 
 zend_class_entry *curl_multi_ce;
 
-static inline php_curlm *curl_multi_from_obj(zend_object *obj) {
-	return (php_curlm *)((char *)(obj) - XtOffsetOf(php_curlm, std));
-}
+#define curl_multi_from_obj(obj) ZEND_CONTAINER_OF(obj, php_curlm, std)
 
 #define Z_CURL_MULTI_P(zv) curl_multi_from_obj(Z_OBJ_P(zv))
 
@@ -174,6 +170,30 @@ PHP_FUNCTION(curl_multi_remove_handle)
 }
 /* }}} */
 
+PHP_FUNCTION(curl_multi_get_handles)
+{
+	zval      *z_mh;
+	php_curlm *mh;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(z_mh, curl_multi_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	mh = Z_CURL_MULTI_P(z_mh);
+
+	array_init_size(return_value, zend_llist_count(&mh->easyh));
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+	zend_llist_position pos;
+	zval	*pz_ch;
+
+	for (pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
+		pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
+
+		Z_TRY_ADDREF_P(pz_ch);
+		add_next_index_zval(return_value, pz_ch);
+	}
+}
+
 /* {{{ Get all the sockets associated with the cURL extension, which can then be "selected" */
 PHP_FUNCTION(curl_multi_select)
 {
@@ -191,8 +211,8 @@ PHP_FUNCTION(curl_multi_select)
 
 	mh = Z_CURL_MULTI_P(z_mh);
 
-	if (!(timeout >= 0.0 && timeout <= ((double)INT_MAX / 1000.0))) {
-		zend_argument_value_error(2, "must be between 0 and %d", (int)ceilf((double)INT_MAX / 1000));
+	if (!(timeout >= 0.0 && timeout <= (INT_MAX / 1000.0))) {
+		zend_argument_value_error(2, "must be between 0 and %f", INT_MAX / 1000.0);
 		RETURN_THROWS();
 	}
 
@@ -374,13 +394,12 @@ PHP_FUNCTION(curl_multi_strerror)
 }
 /* }}} */
 
-
 static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_headers, struct curl_pushheaders *push_headers, void *userp) /* {{{ */
 {
 	php_curl 				*ch;
 	php_curl 				*parent;
 	php_curlm 				*mh 			= (php_curlm *)userp;
-	size_t 					rval 			= CURL_PUSH_DENY;
+	int 					rval 			= CURL_PUSH_DENY;
 	zval					*pz_parent_ch 	= NULL;
 	zval 					pz_ch;
 	zval 					headers;
@@ -397,10 +416,11 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	ch->cp = easy;
 	_php_setup_easy_copy_handlers(ch, parent);
 
-	array_init(&headers);
+	array_init_size(&headers, num_headers);
+	zend_hash_real_init_packed(Z_ARRVAL(headers));
 	for (size_t i = 0; i < num_headers; i++) {
 		char *header = curl_pushheader_bynum(push_headers, i);
-		add_next_index_string(&headers, header);
+		add_index_string(&headers, i, header);
 	}
 
 	ZEND_ASSERT(pz_parent_ch);
@@ -501,11 +521,7 @@ PHP_FUNCTION(curl_multi_setopt)
 
 	mh = Z_CURL_MULTI_P(z_mh);
 
-	if (_php_curl_multi_setopt(mh, options, zvalue, return_value)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(_php_curl_multi_setopt(mh, options, zvalue, return_value));
 }
 /* }}} */
 
@@ -575,7 +591,9 @@ static HashTable *curl_multi_get_gc(zend_object *object, zval **table, int *n)
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 
-	return zend_std_get_properties(object);
+	/* CurlMultiHandle can never have properties as it's final and has strict-properties on.
+	 * Avoid building a hash table. */
+	return NULL;
 }
 
 static zend_object_handlers curl_multi_handlers;
@@ -585,7 +603,7 @@ void curl_multi_register_handlers(void) {
 	curl_multi_ce->default_object_handlers = &curl_multi_handlers;
 
 	memcpy(&curl_multi_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	curl_multi_handlers.offset = XtOffsetOf(php_curlm, std);
+	curl_multi_handlers.offset = offsetof(php_curlm, std);
 	curl_multi_handlers.free_obj = curl_multi_free_obj;
 	curl_multi_handlers.get_gc = curl_multi_get_gc;
 	curl_multi_handlers.get_constructor = curl_multi_get_constructor;

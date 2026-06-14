@@ -15,6 +15,8 @@ $filename = __DIR__ . "/gd276.bmp";
 imagebmp($orig, $filename, true);
 $saved = imagecreatefrombmp($filename);
 var_dump($saved !== false);
+imagepalettetotruecolor($orig);
+imagepalettetotruecolor($saved);
 test_image_equals_image($orig, $saved);
 ?>
 --EXPECT--

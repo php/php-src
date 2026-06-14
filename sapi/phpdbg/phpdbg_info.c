@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
@@ -307,7 +305,7 @@ PHPDBG_INFO(literal) /* {{{ */
 	bool in_executor = PHPDBG_G(in_execution) && EG(current_execute_data) && EG(current_execute_data)->func;
 	if (in_executor || PHPDBG_G(ops)) {
 		zend_op_array *ops = in_executor ? &EG(current_execute_data)->func->op_array : PHPDBG_G(ops);
-		int literal = 0, count = ops->last_literal - 1;
+		uint32_t literal = 0, count = ops->last_literal - 1;
 
 		if (ops->function_name) {
 			if (ops->scope) {
@@ -374,7 +372,11 @@ PHPDBG_INFO(memory) /* {{{ */
 static inline void phpdbg_print_class_name(zend_class_entry *ce) /* {{{ */
 {
 	const char *visibility = ce->type == ZEND_USER_CLASS ? "User" : "Internal";
-	const char *type = (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface" : (ce->ce_flags & ZEND_ACC_ABSTRACT) ? "Abstract Class" : "Class";
+	const char *type = (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface"
+		: (ce->ce_flags & ZEND_ACC_ABSTRACT) ? "Abstract Class"
+		: (ce->ce_flags & ZEND_ACC_ENUM) ? "Enum"
+		: (ce->ce_flags & ZEND_ACC_TRAIT) ? "Trait"
+		: "Class";
 
 	phpdbg_writeln("%s %s %.*s (%d)", visibility, type, (int) ZSTR_LEN(ce->name), ZSTR_VAL(ce->name), zend_hash_num_elements(&ce->function_table));
 } /* }}} */

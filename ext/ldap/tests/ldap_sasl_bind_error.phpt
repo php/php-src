@@ -5,6 +5,7 @@ Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
 --EXTENSIONS--
 ldap
+--XLEAK--
 --SKIPIF--
 <?php require_once('skipifbindfailure.inc'); ?>
 <?php if (!function_exists("ldap_sasl_bind")) die("skip LDAP extension not compiled with SASL support"); ?>

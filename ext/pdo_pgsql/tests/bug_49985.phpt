@@ -1,7 +1,6 @@
 --TEST--
 Bug #49985 (pdo_pgsql prepare() re-use previous aborted transaction)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

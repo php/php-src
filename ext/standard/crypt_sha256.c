@@ -312,12 +312,6 @@ static const char sha256_rounds_prefix[] = "rounds=";
 /* Maximum number of rounds.  */
 #define ROUNDS_MAX 999999999
 
-#if __has_attribute(nonstring)
-# define ZEND_NONSTRING __attribute__((nonstring))
-#else
-# define ZEND_NONSTRING
-#endif
-
 /* Table with characters for base64 transformation.  */
 static const char b64t[64] ZEND_NONSTRING =
 "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -344,7 +338,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	char *s_bytes;
 	/* Default number of rounds.  */
 	size_t rounds = ROUNDS_DEFAULT;
-	bool rounds_custom = 0;
+	bool rounds_custom = false;
 
 	/* Find beginning of salt string.  The prefix should normally always
 	be present.  Just in case it is not.  */
@@ -364,7 +358,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 			}
 
 			rounds = srounds;
-			rounds_custom = 1;
+			rounds_custom = true;
 		}
 	}
 

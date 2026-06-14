@@ -27,7 +27,7 @@ foreach ( [ __DIR__, "glob://".__DIR__ ] as $spec) {
 
 Warning: opendir(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (/does_not_exist) in %s%eglob-wrapper.php on line 5
 
-Warning: opendir(%s): Failed to open directory: Operation not permitted in %s%eglob-wrapper.php on line 5
+Warning: opendir(%s): Failed to open directory: %r(Operation not permitted|Insufficient privileges)%r in %s%eglob-wrapper.php on line 5
 Failed to open %s
 ** Opening glob://%s
 No files in glob://%s

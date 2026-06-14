@@ -46,7 +46,7 @@ runs:
             pkgconf \
             webp \
             libavif \
-            `#sqlite3` \
+            sqlite3 \
             curl \
             $OPCACHE_TLS_TESTS_DEPS
 
@@ -57,9 +57,7 @@ runs:
             --enable-debug \
             --enable-option-checking=fatal \
             --enable-fpm \
-            `#--with-pdo-sqlite` \
-            --without-sqlite3 \
-            --without-pdo-sqlite \
+            --with-pdo-sqlite \
             --without-pear \
             --with-bz2 \
             --with-avif \
@@ -115,8 +113,7 @@ runs:
             --offline \
             --show-diff \
             --show-slow 1000 \
-            --set-timeout 120 \
-            -d zend_extension=opcache.so
+            --set-timeout 120
 
           if test "${{ inputs.runExtraTests }}" = "true"; then
             sapi/cli/php run-extra-tests.php

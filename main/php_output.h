@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Michael Wallner <mike@php.net>                               |
    +----------------------------------------------------------------------+
@@ -42,6 +40,7 @@
 #define PHP_OUTPUT_HANDLER_STARTED		0x1000
 #define PHP_OUTPUT_HANDLER_DISABLED		0x2000
 #define PHP_OUTPUT_HANDLER_PROCESSED	0x4000
+#define PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT 0x8000
 
 #define PHP_OUTPUT_HANDLER_ABILITY_FLAGS(bitmask) ((bitmask) & ~0xf00f)
 
@@ -81,8 +80,8 @@ typedef enum _php_output_handler_hook_t {
 } php_output_handler_hook_t;
 
 #define PHP_OUTPUT_HANDLER_INITBUF_SIZE(s) \
-( ((s) > 1) ? \
-	(s) + PHP_OUTPUT_HANDLER_ALIGNTO_SIZE - ((s) % (PHP_OUTPUT_HANDLER_ALIGNTO_SIZE)) : \
+( ((s) > 0) ? \
+	ZEND_MM_ALIGNED_SIZE_EX(s, PHP_OUTPUT_HANDLER_ALIGNTO_SIZE) : \
 	PHP_OUTPUT_HANDLER_DEFAULT_SIZE \
 )
 #define PHP_OUTPUT_HANDLER_ALIGNTO_SIZE		0x1000

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong (wez@thebrainroom.com)                           |
    +----------------------------------------------------------------------+
@@ -248,6 +246,8 @@ struct _php_stream  {
 #endif
 
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
+
+	zend_llist *error_list;
 }; /* php_stream */
 
 #define PHP_STREAM_CONTEXT(stream) \
@@ -288,7 +288,50 @@ END_EXTERN_C()
 #define php_stream_from_res_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2((res), "stream", php_file_le_stream(), php_file_le_pstream())
 #define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), "stream", php_file_le_stream(), php_file_le_pstream())
 
+static zend_always_inline php_stream* php_stream_from_zval_no_verify_no_error(zval *zval) {
+	return (php_stream*)zend_fetch_resource2_ex(zval, NULL, php_file_le_stream(), php_file_le_pstream());
+}
+
 BEGIN_EXTERN_C()
+
+static zend_always_inline bool php_stream_zend_parse_arg_into_stream(
+	zval *arg,
+	php_stream **destination_stream_ptr,
+	bool check_null,
+	uint32_t arg_num
+) {
+	if (EXPECTED(Z_TYPE_P(arg) == IS_RESOURCE)) {
+		zend_resource *res = Z_RES_P(arg);
+		/* We do not use zend_fetch_resource2() API,
+		 * as we want to be able to specify the argument number in the type error */
+		if (EXPECTED(res->type == php_file_le_stream() || res->type == php_file_le_pstream())) {
+			*destination_stream_ptr = (php_stream*)res->ptr;
+			return true;
+		} else {
+			zend_argument_type_error(arg_num, "must be an open stream resource");
+			return false;
+		}
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*destination_stream_ptr = NULL;
+	} else {
+		return false;
+	}
+	return true;
+}
+
+#define PHP_Z_PARAM_STREAM_EX(destination_stream_ptr, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!php_stream_zend_parse_arg_into_stream(_arg, &destination_stream_ptr, check_null, _i))) { \
+		_error_code = ZPP_ERROR_FAILURE; \
+		if (!EG(exception)) { \
+			_expected_type = check_null ? Z_EXPECTED_RESOURCE_OR_NULL : Z_EXPECTED_RESOURCE; \
+			_error_code = ZPP_ERROR_WRONG_ARG; \
+		} \
+		break; \
+	}
+#define PHP_Z_PARAM_STREAM(dest) PHP_Z_PARAM_STREAM_EX(dest, false)
+#define PHP_Z_PARAM_STREAM_OR_NULL(dest) PHP_Z_PARAM_STREAM_EX(dest, true)
+
 PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed);
 #define php_stream_free_enclosed(stream_enclosed, close_options) _php_stream_free_enclosed((stream_enclosed), (close_options))
 PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options);
@@ -318,7 +361,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence);
 #define php_stream_rewind(stream)	_php_stream_seek((stream), 0L, SEEK_SET)
 #define php_stream_seek(stream, offset, whence)	_php_stream_seek((stream), (offset), (whence))
 
-PHPAPI zend_off_t _php_stream_tell(php_stream *stream);
+PHPAPI zend_off_t _php_stream_tell(const php_stream *stream);
 #define php_stream_tell(stream)	_php_stream_tell((stream))
 
 PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t count);
@@ -488,7 +531,7 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 
 /* read all data from stream and put into a buffer. Caller must free buffer
  * when done. */
-PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int persistent STREAMS_DC);
+PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, bool persistent STREAMS_DC);
 #define php_stream_copy_to_mem(src, maxlen, persistent) _php_stream_copy_to_mem((src), (maxlen), (persistent) STREAMS_CC)
 
 /* output all data from a stream */
@@ -496,6 +539,7 @@ PHPAPI ssize_t _php_stream_passthru(php_stream * src STREAMS_DC);
 #define php_stream_passthru(stream)	_php_stream_passthru((stream) STREAMS_CC)
 END_EXTERN_C()
 
+#include "streams/php_stream_errors.h"
 #include "streams/php_stream_transport.h"
 #include "streams/php_stream_plain_wrapper.h"
 #include "streams/php_stream_glob_wrapper.h"
@@ -518,7 +562,7 @@ END_EXTERN_C()
 #define PHP_STREAM_CAST_INTERNAL	0x20000000	/* stream cast for internal use */
 #define PHP_STREAM_CAST_MASK		(PHP_STREAM_CAST_TRY_HARD | PHP_STREAM_CAST_RELEASE | PHP_STREAM_CAST_INTERNAL)
 BEGIN_EXTERN_C()
-PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err);
+PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err);
 END_EXTERN_C()
 /* use this to check if a stream can be cast into another form */
 #define php_stream_can_cast(stream, as)	_php_stream_cast((stream), (as), NULL, 0)
@@ -583,7 +627,7 @@ END_EXTERN_C()
 /* this flag is only used by include/require functions */
 #define STREAM_OPEN_FOR_ZEND_STREAM     0x00010000
 
-int php_init_stream_wrappers(int module_number);
+zend_result php_init_stream_wrappers(int module_number);
 void php_shutdown_stream_wrappers(int module_number);
 void php_shutdown_stream_hashes(void);
 PHP_RSHUTDOWN_FUNCTION(streams);
@@ -599,19 +643,18 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC)
+typedef enum {
+	PHP_STREAM_UNCHANGED = 0, /* orig stream was seekable anyway */
+	PHP_STREAM_RELEASED = 1, /* newstream should be used; origstream is no longer valid */
+	PHP_STREAM_FAILED = 2, /* an error occurred while attempting conversion */
+	PHP_STREAM_CRITICAL = 3, /* an error occurred; origstream is in an unknown state; you should close origstream */
+} php_stream_make_seekable_status;
 
-/* pushes an error message onto the stack for a wrapper instance */
-PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-
-#define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
-#define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */
-#define PHP_STREAM_FAILED		2 /* an error occurred while attempting conversion */
-#define PHP_STREAM_CRITICAL		3 /* an error occurred; origstream is in an unknown state; you should close origstream */
 #define PHP_STREAM_NO_PREFERENCE	0
 #define PHP_STREAM_PREFER_STDIO		1
 #define PHP_STREAM_FORCE_CONVERSION	2
 /* DO NOT call this on streams that are referenced by resources! */
-PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC);
+PHPAPI php_stream_make_seekable_status _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC);
 #define php_stream_make_seekable(origstream, newstream, flags)	_php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_CC)
 
 /* Give other modules access to the url_stream_wrappers_hash and stream_filters_hash */

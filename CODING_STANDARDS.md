@@ -79,6 +79,16 @@ rewritten to comply with these rules.
     return value for functions that perform some operation that may
     succeed or fail.
 
+1. When throwing a `ValueError` or emitting a warning, use consistent
+    phrasing for error messages. Common patterns are:
+
+    * Type errors: `must be of type int` (use the type name, not e.g. `must be an integer`)
+    * Range/boundary: `must be between X and Y` / `must be greater than [or equal to] X` / `must be less than X` / `must be finite`
+    * String constraints: `must not contain any null bytes` / `must not be empty` / `must be a single character`
+    * Valid value: `must be a valid X` (e.g. `must be a valid encoding`, `must be a valid calendar ID`)
+    * Enum-like: `must be one of X, Y, or Z`
+    * Structural: `must have X` / `must have key X` / `must have N elements`
+
 ## User functions/methods naming conventions
 
 1. Function names for user-level functions should be enclosed with in the
@@ -276,7 +286,7 @@ rewritten to comply with these rules.
 
 1. The length of constant string literals should be calculated via ``strlen()``
    instead of using ``sizeof()-1`` as it is clearer and any modern compiler
-   will optimize it away. Legacy usages of the latter style exists within the
+   will optimize it away. Legacy usages of the latter style exist within the
    codebase but should not be refactored, unless larger refactoring around that
    code is taking place.
 

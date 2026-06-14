@@ -65,7 +65,7 @@ function normalizeOutput(string $out): string {
     $out = preg_replace('/in (\/|[A-Z]:\\\\)\S+ on line \d+/m', 'in %s on line %d', $out);
     $out = preg_replace('/in (\/|[A-Z]:\\\\)\S+:\d+/m', 'in %s:%d', $out);
     $out = preg_replace('/\{closure:(\/|[A-Z]:\\\\)\S+:\d+\}/', '{closure:%s:%d}', $out);
-    $out = preg_replace('/object\(([A-Za-z0-9]*)\)#\d+/', 'object($1)#%d', $out);
+    $out = preg_replace('/object\(([A-Za-z0-9\\\\]*)\)#\d+/', 'object($1)#%d', $out);
     $out = preg_replace('/^#(\d+) (\/|[A-Z]:\\\\)\S+\(\d+\):/m', '#$1 %s(%d):', $out);
     $out = preg_replace('/Resource id #\d+/', 'Resource id #%d', $out);
     $out = preg_replace('/resource\(\d+\) of type/', 'resource(%d) of type', $out);
@@ -124,7 +124,7 @@ function insertOutput(string $phpt, string $out): string {
 }
 
 /**
- * Implementation of the the Myers diff algorithm.
+ * Implementation of the Myers diff algorithm.
  *
  * Myers, Eugene W. "An O (ND) difference algorithm and its variations."
  * Algorithmica 1.1 (1986): 251-266.

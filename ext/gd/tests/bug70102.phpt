@@ -19,7 +19,6 @@ $white = imagecolorallocate($im, 255, 255, 255);
 var_dump($white & 0xffffff);
 imagefilledrectangle($im, 0, 0, 7, 7, $white);
 imagewebp($im, $filename);
-imagedestroy($im);
 
 $im = imagecreatefromwebp($filename);
 $color = imagecolorat($im, 4, 4);

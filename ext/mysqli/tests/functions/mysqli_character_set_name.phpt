@@ -13,6 +13,8 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
 $link = default_mysqli_connect();
 
+mysqli_set_charset($link, 'utf8mb4');
+
 $result = mysqli_query($link, 'SELECT @@character_set_connection AS charset, @@collation_connection AS collation');
 $tmp = mysqli_fetch_assoc($result);
 mysqli_free_result($result);

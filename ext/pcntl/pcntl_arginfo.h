@@ -1,5 +1,6 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 897062ad1dfe06326e561429509360174820379e */
+/* This is a generated file, edit pcntl.stub.php instead.
+ * Stub hash: 04e7b30c6fb23cf6ce6bc26fe094fd5b4dbfe826
+ * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -17,6 +18,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_waitid, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, id, IS_LONG, 1, "null")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "WEXITED")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, resource_usage, "[]")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -47,7 +49,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_sigprocmask, 0, 2, _IS_BOO
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
+#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigwaitinfo, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, signals, IS_ARRAY, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
@@ -83,7 +85,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_pcntl_wstopsig arginfo_pcntl_wexitstatus
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_exec, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_exec, 0, 1, IS_FALSE, 0)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, env_vars, IS_ARRAY, 0, "[]")
@@ -183,7 +185,7 @@ ZEND_FUNCTION(pcntl_signal_dispatch);
 #if defined(HAVE_SIGPROCMASK)
 ZEND_FUNCTION(pcntl_sigprocmask);
 #endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
+#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 ZEND_FUNCTION(pcntl_sigwaitinfo);
 ZEND_FUNCTION(pcntl_sigtimedwait);
 #endif
@@ -244,7 +246,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_SIGPROCMASK)
 	ZEND_FE(pcntl_sigprocmask, arginfo_pcntl_sigprocmask)
 #endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
+#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	ZEND_FE(pcntl_sigwaitinfo, arginfo_pcntl_sigwaitinfo)
 	ZEND_FE(pcntl_sigtimedwait, arginfo_pcntl_sigtimedwait)
 #endif
@@ -317,11 +319,7 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if defined(HAVE_WAITID) && defined(HAVE_POSIX_IDTYPES)
 	REGISTER_LONG_CONSTANT("P_ALL", LONG_CONST(P_ALL), CONST_PERSISTENT);
-#endif
-#if defined(HAVE_WAITID) && defined(HAVE_POSIX_IDTYPES)
 	REGISTER_LONG_CONSTANT("P_PID", LONG_CONST(P_PID), CONST_PERSISTENT);
-#endif
-#if defined(HAVE_WAITID) && defined(HAVE_POSIX_IDTYPES)
 	REGISTER_LONG_CONSTANT("P_PGID", LONG_CONST(P_PGID), CONST_PERSISTENT);
 #endif
 #if defined(HAVE_WAITID) && defined(HAVE_LINUX_IDTYPES)
@@ -329,11 +327,7 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if defined(HAVE_WAITID) && defined(HAVE_NETBSD_IDTYPES)
 	REGISTER_LONG_CONSTANT("P_UID", LONG_CONST(P_UID), CONST_PERSISTENT);
-#endif
-#if defined(HAVE_WAITID) && defined(HAVE_NETBSD_IDTYPES)
 	REGISTER_LONG_CONSTANT("P_GID", LONG_CONST(P_GID), CONST_PERSISTENT);
-#endif
-#if defined(HAVE_WAITID) && defined(HAVE_NETBSD_IDTYPES)
 	REGISTER_LONG_CONSTANT("P_SID", LONG_CONST(P_SID), CONST_PERSISTENT);
 #endif
 #if defined(HAVE_WAITID) && defined(HAVE_FREEBSD_IDTYPES)
@@ -394,8 +388,6 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if defined(SIGSYS)
 	REGISTER_LONG_CONSTANT("SIGSYS", LONG_CONST(SIGSYS), CONST_PERSISTENT);
-#endif
-#if defined(SIGSYS)
 	REGISTER_LONG_CONSTANT("SIGBABY", LONG_CONST(SIGSYS), CONST_PERSISTENT);
 #endif
 #if defined(SIGCKPT)
@@ -412,26 +404,16 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if (defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY))
 	REGISTER_LONG_CONSTANT("PRIO_PGRP", PRIO_PGRP, CONST_PERSISTENT);
-#endif
-#if (defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY))
 	REGISTER_LONG_CONSTANT("PRIO_USER", PRIO_USER, CONST_PERSISTENT);
-#endif
-#if (defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY))
 	REGISTER_LONG_CONSTANT("PRIO_PROCESS", PRIO_PROCESS, CONST_PERSISTENT);
 #endif
 #if (defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY)) && defined(PRIO_DARWIN_BG)
 	REGISTER_LONG_CONSTANT("PRIO_DARWIN_BG", PRIO_DARWIN_BG, CONST_PERSISTENT);
-#endif
-#if (defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY)) && defined(PRIO_DARWIN_BG)
 	REGISTER_LONG_CONSTANT("PRIO_DARWIN_THREAD", PRIO_DARWIN_THREAD, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_SIGPROCMASK)
 	REGISTER_LONG_CONSTANT("SIG_BLOCK", SIG_BLOCK, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_SIGPROCMASK)
 	REGISTER_LONG_CONSTANT("SIG_UNBLOCK", SIG_UNBLOCK, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_SIGPROCMASK)
 	REGISTER_LONG_CONSTANT("SIG_SETMASK", SIG_SETMASK, CONST_PERSISTENT);
 #endif
 #if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
@@ -445,14 +427,8 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	REGISTER_LONG_CONSTANT("SI_QUEUE", SI_QUEUE, CONST_PERSISTENT);
-#endif
-#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	REGISTER_LONG_CONSTANT("SI_TIMER", SI_TIMER, CONST_PERSISTENT);
-#endif
-#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	REGISTER_LONG_CONSTANT("SI_MESGQ", SI_MESGQ, CONST_PERSISTENT);
-#endif
-#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	REGISTER_LONG_CONSTANT("SI_ASYNCIO", SI_ASYNCIO, CONST_PERSISTENT);
 #endif
 #if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)) && defined(SI_SIGIO)
@@ -610,8 +586,6 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if defined(HAVE_FORKX)
 	REGISTER_LONG_CONSTANT("FORK_NOSIGCHLD", FORK_NOSIGCHLD, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_FORKX)
 	REGISTER_LONG_CONSTANT("FORK_WAITPID", FORK_WAITPID, CONST_PERSISTENT);
 #endif
 #if defined(EINTR)

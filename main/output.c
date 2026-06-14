@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Thies C. Arntzen <thies@thieso.net>                         |
@@ -609,7 +607,6 @@ PHPAPI zend_result php_output_handler_conflict_register(const char *name, size_t
 
 	if (!EG(current_module)) {
 		zend_error_noreturn(E_ERROR, "Cannot register an output handler conflict outside of MINIT");
-		return FAILURE;
 	}
 	str = zend_string_init_interned(name, name_len, 1);
 	zend_hash_update_ptr(&php_output_handler_conflicts, str, check_func);
@@ -626,7 +623,6 @@ PHPAPI zend_result php_output_handler_reverse_conflict_register(const char *name
 
 	if (!EG(current_module)) {
 		zend_error_noreturn(E_ERROR, "Cannot register a reverse output handler conflict outside of MINIT");
-		return FAILURE;
 	}
 
 	if (NULL != (rev_ptr = zend_hash_str_find_ptr(&php_output_handler_reverse_conflicts, name, name_len))) {
@@ -663,7 +659,6 @@ PHPAPI zend_result php_output_handler_alias_register(const char *name, size_t na
 
 	if (!EG(current_module)) {
 		zend_error_noreturn(E_ERROR, "Cannot register an output handler alias outside of MINIT");
-		return FAILURE;
 	}
 	str = zend_string_init_interned(name, name_len, 1);
 	zend_hash_update_ptr(&php_output_handler_aliases, str, func);
@@ -943,6 +938,14 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 		return PHP_OUTPUT_HANDLER_FAILURE;
 	}
 
+	/* php_output_lock_error() doesn't fail for PHP_OUTPUT_HANDLER_WRITE but
+	 * anything that gets written will silently be discarded, remember that we
+	 * tried to write so a deprecation warning can be emitted at the end. */
+	if (context->op == PHP_OUTPUT_HANDLER_WRITE && OG(active) && OG(running)) {
+		handler->flags |= PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT;
+	}
+
+	bool still_have_handler = true;
 	/* storable? */
 	if (php_output_handler_append(handler, &context->in) && !context->op) {
 		context->op = original_op;
@@ -967,18 +970,55 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			handler->func.user->fci.param_count = 2;
 			handler->func.user->fci.params = ob_args;
 			handler->func.user->fci.retval = &retval;
+			handler->func.user->fci.consumed_args = zend_fci_consumed_arg(0);
 
-#define PHP_OUTPUT_USER_SUCCESS(retval) ((Z_TYPE(retval) != IS_UNDEF) && !(Z_TYPE(retval) == IS_FALSE))
-			if (SUCCESS == zend_call_function(&handler->func.user->fci, &handler->func.user->fcc) && PHP_OUTPUT_USER_SUCCESS(retval)) {
-				/* user handler may have returned TRUE */
-				status = PHP_OUTPUT_HANDLER_NO_DATA;
-				if (Z_TYPE(retval) != IS_FALSE && Z_TYPE(retval) != IS_TRUE) {
-					convert_to_string(&retval);
-					if (Z_STRLEN(retval)) {
-						context->out.data = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
-						context->out.used = Z_STRLEN(retval);
-						context->out.free = 1;
-						status = PHP_OUTPUT_HANDLER_SUCCESS;
+			if (SUCCESS == zend_call_function(&handler->func.user->fci, &handler->func.user->fcc) && Z_TYPE(retval) != IS_UNDEF) {
+				if (handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
+					// Make sure that we don't get lost in the current output buffer
+					// by disabling it
+					handler->flags |= PHP_OUTPUT_HANDLER_DISABLED;
+					if (handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
+						// The handler might not always produce output
+						handler->flags &= ~PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT;
+						php_error_docref(
+							NULL,
+							E_DEPRECATED,
+							"Producing output from user output handler %s is deprecated",
+							ZSTR_VAL(handler->name)
+						);
+					}
+
+					// Check if the handler is still in the list of handlers to
+					// determine if the PHP_OUTPUT_HANDLER_DISABLED flag can
+					// be removed
+					still_have_handler = false;
+					int handler_count = php_output_get_level();
+					if (handler_count) {
+						php_output_handler **handlers = (php_output_handler **) zend_stack_base(&OG(handlers));
+						for (int handler_num = 0; handler_num < handler_count; ++handler_num) {
+							php_output_handler *curr_handler = handlers[handler_num];
+							if (curr_handler == handler) {
+								handler->flags &= (~PHP_OUTPUT_HANDLER_DISABLED);
+								still_have_handler = true;
+								break;
+							}
+						}
+					}
+				}
+				if (Z_TYPE(retval) == IS_FALSE) {
+					/* call failed, pass internal buffer along */
+					status = PHP_OUTPUT_HANDLER_FAILURE;
+				} else {
+					/* user handler may have returned TRUE */
+					status = PHP_OUTPUT_HANDLER_NO_DATA;
+					if (Z_TYPE(retval) != IS_FALSE && Z_TYPE(retval) != IS_TRUE) {
+						convert_to_string(&retval);
+						if (Z_STRLEN(retval)) {
+							context->out.data = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
+							context->out.used = Z_STRLEN(retval);
+							context->out.free = 1;
+							status = PHP_OUTPUT_HANDLER_SUCCESS;
+						}
 					}
 				}
 			} else {
@@ -1005,8 +1045,15 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 				status = PHP_OUTPUT_HANDLER_FAILURE;
 			}
 		}
-		handler->flags |= PHP_OUTPUT_HANDLER_STARTED;
+		if (still_have_handler) {
+			handler->flags |= PHP_OUTPUT_HANDLER_STARTED;
+		}
 		OG(running) = NULL;
+	}
+
+	if (!still_have_handler) {
+		// Handler and context will have both already been freed
+		return status;
 	}
 
 	switch (status) {
@@ -1234,6 +1281,19 @@ static int php_output_stack_pop(int flags)
 			}
 			php_output_handler_op(orphan, &context);
 		}
+		// If it isn't still in the stack, cannot free it
+		bool still_have_handler = false;
+		int handler_count = php_output_get_level();
+		if (handler_count) {
+			php_output_handler **handlers = (php_output_handler **) zend_stack_base(&OG(handlers));
+			for (int handler_num = 0; handler_num < handler_count; ++handler_num) {
+				php_output_handler *curr_handler = handlers[handler_num];
+				if (curr_handler == orphan) {
+					still_have_handler = true;
+					break;
+				}
+			}
+		}
 
 		/* pop it off the stack */
 		zend_stack_del_top(&OG(handlers));
@@ -1249,7 +1309,9 @@ static int php_output_stack_pop(int flags)
 		}
 
 		/* destroy the handler (after write!) */
-		php_output_handler_free(&orphan);
+		if (still_have_handler) {
+			php_output_handler_free(&orphan);
+		}
 		php_output_context_dtor(&context);
 
 		return 1;
@@ -1330,9 +1392,7 @@ PHP_FUNCTION(ob_start)
 /* {{{ Flush (send) contents of the output buffer. The last buffer content is sent to next buffer */
 PHP_FUNCTION(ob_flush)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!OG(active)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to flush buffer. No buffer to flush");
@@ -1350,9 +1410,7 @@ PHP_FUNCTION(ob_flush)
 /* {{{ Clean (delete) the current output buffer */
 PHP_FUNCTION(ob_clean)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!OG(active)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer. No buffer to delete");
@@ -1370,9 +1428,7 @@ PHP_FUNCTION(ob_clean)
 /* {{{ Flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_flush)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!OG(active)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete and flush buffer. No buffer to delete or flush");
@@ -1386,9 +1442,7 @@ PHP_FUNCTION(ob_end_flush)
 /* {{{ Clean the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_clean)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!OG(active)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer. No buffer to delete");
@@ -1402,9 +1456,7 @@ PHP_FUNCTION(ob_end_clean)
 /* {{{ Get current buffer contents, flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_get_flush)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_output_get_contents(return_value) == FAILURE) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete and flush buffer. No buffer to delete or flush");
@@ -1420,9 +1472,7 @@ PHP_FUNCTION(ob_get_flush)
 /* {{{ Get current buffer contents and delete current output buffer */
 PHP_FUNCTION(ob_get_clean)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if(!OG(active)) {
 		RETURN_FALSE;
@@ -1442,9 +1492,7 @@ PHP_FUNCTION(ob_get_clean)
 /* {{{ Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_output_get_contents(return_value) == FAILURE) {
 		RETURN_FALSE;
@@ -1455,9 +1503,7 @@ PHP_FUNCTION(ob_get_contents)
 /* {{{ Return the nesting level of the output buffer */
 PHP_FUNCTION(ob_get_level)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(php_output_get_level());
 }
@@ -1466,9 +1512,7 @@ PHP_FUNCTION(ob_get_level)
 /* {{{ Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_output_get_length(return_value) == FAILURE) {
 		RETURN_FALSE;
@@ -1479,9 +1523,7 @@ PHP_FUNCTION(ob_get_length)
 /* {{{ List all output_buffers in an array */
 PHP_FUNCTION(ob_list_handlers)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -1532,9 +1574,7 @@ PHP_FUNCTION(ob_implicit_flush)
 /* {{{ Reset(clear) URL rewriter values */
 PHP_FUNCTION(output_reset_rewrite_vars)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_url_scanner_reset_vars() == SUCCESS) {
 		RETURN_TRUE;

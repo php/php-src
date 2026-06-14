@@ -22,7 +22,10 @@ function_exists('mb_ereg_search_regs') or die("skip mb_ereg_search_regs() not av
 
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg_search_regs() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 array(1) {
   [0]=>
   string(4) "ов"

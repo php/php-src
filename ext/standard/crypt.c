@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Stig Bakken <ssb@php.net>                                   |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -177,7 +175,19 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 
 	if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
 		return NULL;
-	} else {
+	}
+	else if (!strcmp(crypt_res, "*")) {
+		/* Musl crypt() uses "*" as a failure token rather
+		 * than the "*0" that libxcrypt/PHP use. Our test
+		 * suite in particular looks for "*0" in a few places,
+		 * and it would be annoying to handle both values
+		 * explicitly. It seems wise to abstract this detail
+		 * from the end user: if it's annoying for us, imagine
+		 * how annoying it would be in end-user code; not that
+		 * anyone would think of it. */
+		return NULL;
+	}
+	else {
 		result = zend_string_init(crypt_res, strlen(crypt_res), 0);
 		return result;
 	}
