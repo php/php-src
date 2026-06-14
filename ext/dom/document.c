@@ -1757,6 +1757,35 @@ static int dom_perform_xinclude(xmlDocPtr docp, dom_object *intern, zend_long fl
 	return err;
 }
 
+/* For modern DOM, namespace declarations are stored as attributes (node->nsDef
+ * is NULL), so libxml's native validators can't resolve prefixed QNames found in
+ * content (e.g. an xs:QName attribute value). Temporarily relink them, mirroring
+ * what C14N does in dom_canonicalization(). */
+typedef struct {
+	HashTable links;
+	bool active;
+} dom_validate_ns_guard;
+
+static void dom_validate_ns_guard_begin(dom_validate_ns_guard *guard, xmlDocPtr docp)
+{
+	guard->active = php_dom_follow_spec_node((const xmlNode *) docp);
+	if (guard->active) {
+		zend_hash_init(&guard->links, 0, NULL, NULL, false);
+		xmlNodePtr root_element = xmlDocGetRootElement(docp);
+		if (root_element) {
+			dom_relink_ns_decls(&guard->links, root_element);
+		}
+	}
+}
+
+static void dom_validate_ns_guard_end(dom_validate_ns_guard *guard)
+{
+	if (guard->active) {
+		dom_unlink_ns_decls(&guard->links);
+		zend_hash_destroy(&guard->links);
+	}
+}
+
 /* {{{ Substitutues xincludes in a DomDocument */
 PHP_METHOD(DOMDocument, xinclude)
 {
@@ -1832,8 +1861,11 @@ PHP_METHOD(DOMDocument, validate)
 	cvp->userData = NULL;
 	cvp->error    = (xmlValidityErrorFunc) php_libxml_error_handler;
 	cvp->warning  = (xmlValidityErrorFunc) php_libxml_error_handler;
-
-	if (xmlValidateDocument(cvp, docp)) {
+	dom_validate_ns_guard guard;
+	dom_validate_ns_guard_begin(&guard, docp);
+	int dtd_valid = xmlValidateDocument(cvp, docp);
+	dom_validate_ns_guard_end(&guard);
+	if (dtd_valid) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -1930,7 +1962,10 @@ static void dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	PHP_LIBXML_SANITIZE_GLOBALS(validate);
 	xmlSchemaSetValidOptions(vptr, valid_opts);
 	xmlSchemaSetValidErrors(vptr, php_libxml_error_handler, php_libxml_error_handler, vptr);
+	dom_validate_ns_guard guard;
+	dom_validate_ns_guard_begin(&guard, docp);
 	is_valid = xmlSchemaValidateDoc(vptr, docp);
+	dom_validate_ns_guard_end(&guard);
 	xmlSchemaFree(sptr);
 	xmlSchemaFreeValidCtxt(vptr);
 	PHP_LIBXML_RESTORE_GLOBALS(validate);
@@ -2028,7 +2063,10 @@ static void dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 	}
 
 	xmlRelaxNGSetValidErrors(vptr, php_libxml_error_handler, php_libxml_error_handler, vptr);
+	dom_validate_ns_guard guard;
+	dom_validate_ns_guard_begin(&guard, docp);
 	is_valid = xmlRelaxNGValidateDoc(vptr, docp);
+	dom_validate_ns_guard_end(&guard);
 	xmlRelaxNGFree(sptr);
 	xmlRelaxNGFreeValidCtxt(vptr);
 

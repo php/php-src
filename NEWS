@@ -10,6 +10,13 @@ PHP                                                                        NEWS
   . Fix incorrect recurrence check of DatePeriod::createFromISO8601String().
     (ndossche)
 
+- DOM:
+  . Fix GH-22219 (Dom\XMLDocument::schemaValidate fails to resolve
+    xs:QName with prefix from imported schema). (David Carlier)
+
+- Exif:
+  . Read correct value for single and double tags. (ndossche)
+
 - GD:
   . Fixed bug GH-22121 (Double free in gdImageSetStyle() after
     overflow-triggered early return). (iliaal)
@@ -24,6 +31,8 @@ PHP                                                                        NEWS
   . Fix incorrect argument positions for uninitialized calendar arguments in
     IntlCalendar::equals(), ::before(), ::after(), and ::isEquivalentTo().
     (Weilin Du)
+  . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
+    for invalid display types. (Weilin Du)
   . Fixed Spoofchecker restriction-level APIs to only be exposed with ICU 53
     and later. (Graham Campbell)
 

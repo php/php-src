@@ -513,13 +513,15 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 		RETURN_THROWS();
 	}
 
+	TIMEZONE_METHOD_FETCH_OBJECT;
+
 	bool found = false;
 	for (int i = 0; !found && i < sizeof(display_types)/sizeof(*display_types); i++) {
 		if (display_types[i] == display_type)
 			found = true;
 	}
 	if (!found) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+		intl_errors_set(TIMEZONE_ERROR_P(to), U_ILLEGAL_ARGUMENT_ERROR,
 			"wrong display type", 0);
 		RETURN_FALSE;
 	}
@@ -527,8 +529,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 	if (!locale_str) {
 		locale_str = intl_locale_get_default();
 	}
-
-	TIMEZONE_METHOD_FETCH_OBJECT;
 
 	UnicodeString result;
 	to->utimezone->getDisplayName((UBool)daylight, (TimeZone::EDisplayType)display_type,
