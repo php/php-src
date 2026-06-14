@@ -563,6 +563,7 @@ PHP_MINIT_FUNCTION(spl)
 PHP_RINIT_FUNCTION(spl) /* {{{ */
 {
 	spl_autoload_extensions = NULL;
+	spl_object_storage_reset_get_hash_depth();
 	return SUCCESS;
 } /* }}} */
 

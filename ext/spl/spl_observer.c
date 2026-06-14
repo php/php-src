@@ -47,6 +47,11 @@ static zend_object_handlers spl_handler_MultipleIterator;
 
 ZEND_TLS uint32_t spl_object_storage_get_hash_depth;
 
+void spl_object_storage_reset_get_hash_depth(void)
+{
+	spl_object_storage_get_hash_depth = 0;
+}
+
 typedef struct _spl_SplObjectStorage { /* {{{ */
 	HashTable         storage;
 	zend_long         index;
