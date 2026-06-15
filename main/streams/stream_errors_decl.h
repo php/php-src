@@ -1,8 +1,8 @@
 /* This is a generated file, edit stream_errors.stub.php instead.
- * Stub hash: 3e9ee6f0fdd8ecf3ded82728487a9e774137036a */
+ * Stub hash: 425ea51156dba004bcc2a04ef916439e83e74f4a */
 
-#ifndef ZEND_STREAM_ERRORS_DECL_3e9ee6f0fdd8ecf3ded82728487a9e774137036a_H
-#define ZEND_STREAM_ERRORS_DECL_3e9ee6f0fdd8ecf3ded82728487a9e774137036a_H
+#ifndef ZEND_STREAM_ERRORS_DECL_425ea51156dba004bcc2a04ef916439e83e74f4a_H
+#define ZEND_STREAM_ERRORS_DECL_425ea51156dba004bcc2a04ef916439e83e74f4a_H
 
 typedef enum zend_enum_StreamErrorCode {
 	ZEND_ENUM_StreamErrorCode_None = 1,
@@ -70,20 +70,21 @@ typedef enum zend_enum_StreamErrorCode {
 	ZEND_ENUM_StreamErrorCode_InvalidParam = 63,
 	ZEND_ENUM_StreamErrorCode_RedirectLimit = 64,
 	ZEND_ENUM_StreamErrorCode_AuthFailed = 65,
-	ZEND_ENUM_StreamErrorCode_ArchivingFailed = 66,
-	ZEND_ENUM_StreamErrorCode_EncodingFailed = 67,
-	ZEND_ENUM_StreamErrorCode_DecodingFailed = 68,
-	ZEND_ENUM_StreamErrorCode_InvalidFormat = 69,
-	ZEND_ENUM_StreamErrorCode_AllocationFailed = 70,
-	ZEND_ENUM_StreamErrorCode_TemporaryFileFailed = 71,
-	ZEND_ENUM_StreamErrorCode_LockFailed = 72,
-	ZEND_ENUM_StreamErrorCode_LockNotSupported = 73,
-	ZEND_ENUM_StreamErrorCode_UserspaceNotImplemented = 74,
-	ZEND_ENUM_StreamErrorCode_UserspaceInvalidReturn = 75,
-	ZEND_ENUM_StreamErrorCode_UserspaceCallFailed = 76,
+	ZEND_ENUM_StreamErrorCode_TimeOut = 66,
+	ZEND_ENUM_StreamErrorCode_ArchivingFailed = 67,
+	ZEND_ENUM_StreamErrorCode_EncodingFailed = 68,
+	ZEND_ENUM_StreamErrorCode_DecodingFailed = 69,
+	ZEND_ENUM_StreamErrorCode_InvalidFormat = 70,
+	ZEND_ENUM_StreamErrorCode_AllocationFailed = 71,
+	ZEND_ENUM_StreamErrorCode_TemporaryFileFailed = 72,
+	ZEND_ENUM_StreamErrorCode_LockFailed = 73,
+	ZEND_ENUM_StreamErrorCode_LockNotSupported = 74,
+	ZEND_ENUM_StreamErrorCode_UserspaceNotImplemented = 75,
+	ZEND_ENUM_StreamErrorCode_UserspaceInvalidReturn = 76,
+	ZEND_ENUM_StreamErrorCode_UserspaceCallFailed = 77,
 } zend_enum_StreamErrorCode;
 
-#define ZEND_ENUM_StreamErrorCode_CASE_COUNT 76
+#define ZEND_ENUM_StreamErrorCode_CASE_COUNT 77
 
 #ifdef ZEND_ENUM_StreamErrorCode_USE_NAME_TABLE
 static const char *zend_enum_StreamErrorCode_case_names[ZEND_ENUM_StreamErrorCode_CASE_COUNT + 1] = {
@@ -152,6 +153,7 @@ static const char *zend_enum_StreamErrorCode_case_names[ZEND_ENUM_StreamErrorCod
 	[ZEND_ENUM_StreamErrorCode_InvalidParam] = "InvalidParam",
 	[ZEND_ENUM_StreamErrorCode_RedirectLimit] = "RedirectLimit",
 	[ZEND_ENUM_StreamErrorCode_AuthFailed] = "AuthFailed",
+	[ZEND_ENUM_StreamErrorCode_TimeOut] = "TimeOut",
 	[ZEND_ENUM_StreamErrorCode_ArchivingFailed] = "ArchivingFailed",
 	[ZEND_ENUM_StreamErrorCode_EncodingFailed] = "EncodingFailed",
 	[ZEND_ENUM_StreamErrorCode_DecodingFailed] = "DecodingFailed",
@@ -180,4 +182,4 @@ typedef enum zend_enum_StreamErrorStore {
 	ZEND_ENUM_StreamErrorStore_All = 5,
 } zend_enum_StreamErrorStore;
 
-#endif /* ZEND_STREAM_ERRORS_DECL_3e9ee6f0fdd8ecf3ded82728487a9e774137036a_H */
+#endif /* ZEND_STREAM_ERRORS_DECL_425ea51156dba004bcc2a04ef916439e83e74f4a_H */

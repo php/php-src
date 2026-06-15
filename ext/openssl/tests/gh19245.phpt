@@ -48,6 +48,6 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--
 PHP Warning:  stream_socket_accept(): Path for local_cert in ssl stream context option must not contain any null bytes in %s
+PHP Warning:  stream_socket_accept(): Accept failed: Cannot enable crypto in %s
 PHP Warning:  stream_socket_accept(): Unable to get real path of certificate file `%scert.crt' in %s
 PHP Warning:  stream_socket_accept(): Failed to enable crypto in %s
-PHP Warning:  stream_socket_accept(): Accept failed: Cannot enable crypto in %s
