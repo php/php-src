@@ -26,6 +26,8 @@ PHP                                                                        NEWS
     (kocsismate)
   . Fixed bug GH-22292 (AST pretty printing does not correctly handle
     invalid variable names). (timwolla)
+  . Fixed bug GH-22291 (AST pretty printing does not correctly handle braces
+    in string interpolation). (timwolla)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
