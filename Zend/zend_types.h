@@ -864,17 +864,6 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 		} \
 	} while (0)
 
-#define Z_GC_TYPE(zval)				GC_TYPE(Z_COUNTED(zval))
-#define Z_GC_TYPE_P(zval_p)			Z_GC_TYPE(*(zval_p))
-
-#define Z_GC_FLAGS(zval)			GC_FLAGS(Z_COUNTED(zval))
-#define Z_GC_FLAGS_P(zval_p)		Z_GC_FLAGS(*(zval_p))
-
-#define Z_GC_INFO(zval)				GC_INFO(Z_COUNTED(zval))
-#define Z_GC_INFO_P(zval_p)			Z_GC_INFO(*(zval_p))
-#define Z_GC_TYPE_INFO(zval)		GC_TYPE_INFO(Z_COUNTED(zval))
-#define Z_GC_TYPE_INFO_P(zval_p)	Z_GC_TYPE_INFO(*(zval_p))
-
 #define GC_NULL						(IS_NULL         | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 #define GC_STRING					(IS_STRING       | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 #define GC_ARRAY					IS_ARRAY

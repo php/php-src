@@ -2248,7 +2248,12 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		stream->open_filename = __zend_orig_filename ? __zend_orig_filename : __zend_filename;
 		stream->open_lineno = __zend_orig_lineno ? __zend_orig_lineno : __zend_lineno;
 #endif
-		if (stream->ctx == NULL && context != NULL && !persistent) {
+		/* Attach an explicitly provided context to the stream, but never the
+		 * default context: sharing it by reference would let a later
+		 * stream_context_set_option() on the stream mutate the global default
+		 * context, leaking options into every other stream. Stream errors fall
+		 * back to the default context on their own when the stream has none. */
+		if (stream->ctx == NULL && context != NULL && context != FG(default_context) && !persistent) {
 			php_stream_context_set(stream, context);
 		}
 	}
