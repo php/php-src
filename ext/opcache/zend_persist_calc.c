@@ -335,6 +335,23 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		}
 	}
 
+	/* Typed local variables: parallel to vars[]. Account for the pointer array plus,
+	 * for each typed slot, the zend_property_info struct and its interned name. The
+	 * type is a pure scalar mask (no class/list pointers), so zend_persist_type_calc()
+	 * adds nothing. Mirrors the vars[] accounting above. */
+	if (op_array->cv_types) {
+		int i;
+
+		ADD_SIZE(sizeof(zend_property_info*) * op_array->last_var);
+		for (i = 0; i < op_array->last_var; i++) {
+			if (op_array->cv_types[i]) {
+				ADD_SIZE(sizeof(zend_property_info));
+				ADD_INTERNED_STRING(op_array->cv_types[i]->name);
+				zend_persist_type_calc(&op_array->cv_types[i]->type);
+			}
+		}
+	}
+
 	if (op_array->num_dynamic_func_defs) {
 		ADD_SIZE(sizeof(void *) * op_array->num_dynamic_func_defs);
 		for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {

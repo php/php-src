@@ -512,6 +512,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			SERIALIZE_PTR(op_array->opcodes);
 			SERIALIZE_PTR(op_array->arg_info);
 			SERIALIZE_PTR(op_array->vars);
+			SERIALIZE_PTR(op_array->cv_types);
 			SERIALIZE_STR(op_array->function_name);
 			SERIALIZE_STR(op_array->filename);
 			SERIALIZE_PTR(op_array->live_range);
@@ -672,6 +673,31 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			while (p < end) {
 				if (!IS_SERIALIZED(*p)) {
 					SERIALIZE_STR(*p);
+				}
+				p++;
+			}
+		}
+
+		/* Typed local variables: parallel to vars[]. Serialize the pointer array and,
+		 * for each non-NULL slot, the zend_property_info pointer, its name and its type
+		 * (a pure scalar mask, so serialize_type is a no-op). Mirrors the vars[] block. */
+		if (op_array->cv_types) {
+			zend_property_info **p, **end;
+
+			SERIALIZE_PTR(op_array->cv_types);
+			p = op_array->cv_types;
+			UNSERIALIZE_PTR(p);
+			end = p + op_array->last_var;
+			while (p < end) {
+				if (*p) {
+					zend_property_info *prop_info;
+					SERIALIZE_PTR(*p);
+					prop_info = *p;
+					UNSERIALIZE_PTR(prop_info);
+					if (!IS_SERIALIZED(prop_info->name)) {
+						SERIALIZE_STR(prop_info->name);
+					}
+					zend_file_cache_serialize_type(&prop_info->type, script, info, buf);
 				}
 				p++;
 			}
@@ -1444,6 +1470,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		UNSERIALIZE_PTR(op_array->opcodes);
 		UNSERIALIZE_PTR(op_array->arg_info);
 		UNSERIALIZE_PTR(op_array->vars);
+		UNSERIALIZE_PTR(op_array->cv_types);
 		UNSERIALIZE_STR(op_array->function_name);
 		UNSERIALIZE_STR(op_array->filename);
 		UNSERIALIZE_PTR(op_array->live_range);
@@ -1575,6 +1602,29 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 			while (p < end) {
 				if (!IS_UNSERIALIZED(*p)) {
 					UNSERIALIZE_STR(*p);
+				}
+				p++;
+			}
+		}
+
+		/* Typed local variables: parallel to vars[]. Fix up the pointer array, then for
+		 * each non-NULL slot the zend_property_info pointer, its name and its type
+		 * (a pure scalar mask, so unserialize_type is a no-op). Mirrors the vars[] block. */
+		if (op_array->cv_types) {
+			zend_property_info **p, **end;
+
+			UNSERIALIZE_PTR(op_array->cv_types);
+			p = op_array->cv_types;
+			end = p + op_array->last_var;
+			while (p < end) {
+				if (*p) {
+					zend_property_info *prop_info;
+					UNSERIALIZE_PTR(*p);
+					prop_info = *p;
+					if (!IS_UNSERIALIZED(prop_info->name)) {
+						UNSERIALIZE_STR(prop_info->name);
+					}
+					zend_file_cache_unserialize_type(&prop_info->type, (op_array->fn_flags & ZEND_ACC_CLOSURE) ? NULL : op_array->scope, script, buf);
 				}
 				p++;
 			}

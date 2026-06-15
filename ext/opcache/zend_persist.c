@@ -688,6 +688,23 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		}
 	}
 
+	/* Typed local variables: parallel to vars[]. Copy the pointer array into SHM, then
+	 * deep-copy each non-NULL zend_property_info and intern its name. The type is a pure
+	 * scalar mask, so zend_persist_type() copies it in place (no pointers). Mirrors the
+	 * vars[] block above; matching cleanup is guarded in destroy_op_array() by the
+	 * refcount==NULL early-return that already protects vars[] on persisted op_arrays. */
+	if (op_array->cv_types) {
+		int i;
+		op_array->cv_types = zend_shared_memdup_put_free(op_array->cv_types, sizeof(zend_property_info*) * op_array->last_var);
+		for (i = 0; i < op_array->last_var; i++) {
+			if (op_array->cv_types[i]) {
+				op_array->cv_types[i] = zend_shared_memdup_put_free(op_array->cv_types[i], sizeof(zend_property_info));
+				zend_accel_store_interned_string(op_array->cv_types[i]->name);
+				zend_persist_type(&op_array->cv_types[i]->type);
+			}
+		}
+	}
+
 	if (op_array->num_dynamic_func_defs) {
 		op_array->dynamic_func_defs = zend_shared_memdup_put_free(
 			op_array->dynamic_func_defs, sizeof(zend_function *) * op_array->num_dynamic_func_defs);
