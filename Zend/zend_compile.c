@@ -101,6 +101,7 @@ static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t 
 static void zend_compile_expr(znode *result, zend_ast *ast);
 static void zend_compile_stmt(zend_ast *ast);
 static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt, uint32_t type);
+static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type);
 
 #ifdef ZEND_CHECK_STACK_LIMIT
 zend_never_inline static void zend_stack_limit_error(void)
@@ -5541,11 +5542,70 @@ static void zend_compile_call(znode *result, const zend_ast *ast, uint32_t type)
 }
 /* }}} */
 
+/* True if the expression is a compile-time-known string for the purpose of
+ * dispatching scalar methods to the Str backing class. For now this is limited
+ * to string literals and explicit (string) casts. */
+static bool zend_is_static_string_ast(zend_ast *ast) /* {{{ */
+{
+	if (ast->kind == ZEND_AST_ZVAL) {
+		return Z_TYPE_P(zend_ast_get_zval(ast)) == IS_STRING;
+	}
+	if (ast->kind == ZEND_AST_CAST) {
+		return ast->attr == IS_STRING;
+	}
+	return false;
+}
+/* }}} */
+
+/* Rewrite `<static-string>-><method>(<args>)` into `Str::<method>(<static-string>, <args>)`
+ * and compile it as a static call. Returns true if the rewrite applied. */
+static bool zend_try_compile_scalar_string_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
+{
+	zend_ast *obj_ast = ast->child[0];
+	zend_ast *method_ast = ast->child[1];
+	zend_ast *args_ast = ast->child[2];
+
+	/* Only plain `->` calls with a literal method name on a static-string receiver. */
+	if (ast->kind != ZEND_AST_METHOD_CALL
+	 || !zend_is_static_string_ast(obj_ast)
+	 || method_ast->kind != ZEND_AST_ZVAL
+	 || Z_TYPE_P(zend_ast_get_zval(method_ast)) != IS_STRING) {
+		return false;
+	}
+
+	/* Build the class-name node for `Str`. ZEND_NAME_FQ makes it resolve as the
+	 * global `\Str` regardless of the current namespace. The name is interned so
+	 * that the orphan AST zval node carries no refcounted string to leak. */
+	zval class_zv;
+	ZVAL_STRINGL(&class_zv, "Str", sizeof("Str") - 1);
+	zval_make_interned_string(&class_zv);
+	zend_ast *class_ast = zend_ast_create_zval_ex(&class_zv, ZEND_NAME_FQ);
+
+	/* Build a new argument list with the receiver prepended before the original args. */
+	zend_ast_list *orig_args = zend_ast_get_list(args_ast);
+	zend_ast *new_args = zend_ast_create_arg_list(1, ZEND_AST_ARG_LIST, obj_ast);
+	for (uint32_t i = 0; i < orig_args->children; i++) {
+		new_args = zend_ast_arg_list_add(new_args, orig_args->child[i]);
+	}
+
+	zend_ast *static_call_ast = zend_ast_create(
+		ZEND_AST_STATIC_CALL, class_ast, method_ast, new_args);
+	static_call_ast->lineno = ast->lineno;
+
+	zend_compile_static_call(result, static_call_ast, type);
+	return true;
+}
+/* }}} */
+
 static void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
 	zend_ast *obj_ast = ast->child[0];
 	zend_ast *method_ast = ast->child[1];
 	zend_ast *args_ast = ast->child[2];
+
+	if (zend_try_compile_scalar_string_method_call(result, ast, type)) {
+		return;
+	}
 
 	znode obj_node, method_node;
 	zend_op *opline;
