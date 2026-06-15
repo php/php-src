@@ -570,6 +570,26 @@ static uint32_t lookup_cv(zend_string *name) /* {{{ */{
 }
 /* }}} */
 
+/* Returns the synthesized type info of an already-declared typed local with this name,
+ * or NULL if no such CV exists or it is untyped. Does NOT create a CV (unlike lookup_cv),
+ * so it is safe to probe from compile paths that must reject typed locals. */
+static zend_property_info *zend_find_typed_local(zend_string *name) /* {{{ */
+{
+	zend_op_array *op_array = CG(active_op_array);
+	if (!op_array->cv_types) {
+		return NULL;
+	}
+	zend_ulong hash_value = zend_string_hash_val(name);
+	for (int i = 0; i < op_array->last_var; i++) {
+		if (ZSTR_H(op_array->vars[i]) == hash_value
+		 && zend_string_equals(op_array->vars[i], name)) {
+			return op_array->cv_types[i];
+		}
+	}
+	return NULL;
+}
+/* }}} */
+
 zend_string *zval_make_interned_string(zval *zv)
 {
 	ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
@@ -5755,7 +5775,18 @@ static void zend_compile_global_var(zend_ast *ast) /* {{{ */
 	// TODO(GLOBALS) Forbid "global $GLOBALS"?
 	if (is_this_fetch(var_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as global variable");
-	} else if (zend_try_compile_cv(&result, var_ast, BP_VAR_R) == SUCCESS) {
+	}
+	/* A `global $x` binding turns $x into a reference to the global, bypassing the
+	 * declared scalar type. This reference path is not enforced, so forbid it. */
+	if (name_ast->kind == ZEND_AST_ZVAL && Z_TYPE_P(zend_ast_get_zval(name_ast)) == IS_STRING) {
+		zend_property_info *info = zend_find_typed_local(Z_STR_P(zend_ast_get_zval(name_ast)));
+		if (info) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use typed local variable $%s as global variable",
+				ZSTR_VAL(info->name));
+		}
+	}
+	if (zend_try_compile_cv(&result, var_ast, BP_VAR_R) == SUCCESS) {
 		zend_op *opline = zend_emit_op(NULL, ZEND_BIND_GLOBAL, &result, &name_node);
 		opline->extended_value = zend_alloc_cache_slot();
 	} else {
@@ -5807,6 +5838,13 @@ static void zend_compile_static_var(zend_ast *ast) /* {{{ */
 
 	if (zend_string_equals(var_name, ZSTR_KNOWN(ZEND_STR_THIS))) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as static variable");
+	}
+
+	/* A `static $x` binding turns $x into a reference to the static slot, bypassing the
+	 * declared scalar type. This reference path is not enforced, so forbid it. */
+	if (zend_find_typed_local(var_name)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use typed local variable $%s as static variable", ZSTR_VAL(var_name));
 	}
 
 	if (!CG(active_op_array)->static_variables) {
@@ -6422,6 +6460,20 @@ static void zend_compile_foreach(zend_ast *ast) /* {{{ */
 
 	if (value_ast->kind == ZEND_AST_ARRAY && zend_propagate_list_refs(value_ast)) {
 		by_ref = true;
+	}
+
+	/* `foreach ($arr as &$x)` makes the typed local $x a reference into the array
+	 * element, bypassing its declared scalar type. This reference path is not
+	 * enforced, so forbid it. */
+	if (by_ref && value_ast->kind == ZEND_AST_VAR
+	 && value_ast->child[0]->kind == ZEND_AST_ZVAL
+	 && Z_TYPE_P(zend_ast_get_zval(value_ast->child[0])) == IS_STRING) {
+		zend_property_info *info = zend_find_typed_local(Z_STR_P(zend_ast_get_zval(value_ast->child[0])));
+		if (info) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use typed local variable $%s as foreach by-reference value",
+				ZSTR_VAL(info->name));
+		}
 	}
 
 	if (by_ref && is_variable) {

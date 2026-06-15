@@ -2912,7 +2912,25 @@ ZEND_VM_HANDLER(30, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 		variable_ptr = zend_wrong_assign_to_variable_reference(
 			variable_ptr, value_ptr, &garbage OPLINE_CC EXECUTE_DATA_CC);
 	} else {
-		zend_assign_to_variable_reference(variable_ptr, value_ptr, &garbage);
+		/* Typed local variables: if either side of `$target = &$source` is a typed
+		 * CV, route through a helper that enforces the type and attaches it as a
+		 * source on the resulting (shared) reference. Only IS_CV operands can be
+		 * typed locals. */
+		zend_property_info *target_info = NULL, *source_info = NULL;
+		if (UNEXPECTED(EX(func)->op_array.cv_types != NULL)) {
+			if (OP1_TYPE == IS_CV) {
+				target_info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+			}
+			if (OP2_TYPE == IS_CV) {
+				source_info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op2.var)];
+			}
+		}
+		if (UNEXPECTED(target_info || source_info)) {
+			variable_ptr = zend_assign_to_typed_cv_reference(
+				target_info, source_info, variable_ptr, value_ptr, &garbage EXECUTE_DATA_CC);
+		} else {
+			zend_assign_to_variable_reference(variable_ptr, value_ptr, &garbage);
+		}
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -5171,6 +5189,11 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, CONST|UNUSED|NUM)
 		Z_ADDREF_P(varptr);
 	} else {
 		ZVAL_MAKE_REF_EX(varptr, 2);
+		/* Typed local passed by reference: attach its type to the new reference so
+		 * the callee cannot write through it in a type-violating way. */
+		if (OP1_TYPE == IS_CV && UNEXPECTED(EX(func)->op_array.cv_types != NULL)) {
+			zend_attach_cv_type_source_ex(&EX(func)->op_array, opline->op1.var, Z_REF_P(varptr));
+		}
 	}
 	ZVAL_REF(arg, Z_REF_P(varptr));
 
@@ -5208,6 +5231,10 @@ ZEND_VM_C_LABEL(send_var_by_ref):
 			Z_ADDREF_P(varptr);
 		} else {
 			ZVAL_MAKE_REF_EX(varptr, 2);
+			/* Typed local passed by reference: enforce the type on the new reference. */
+			if (OP1_TYPE == IS_CV && UNEXPECTED(EX(func)->op_array.cv_types != NULL)) {
+				zend_attach_cv_type_source_ex(&EX(func)->op_array, opline->op1.var, Z_REF_P(varptr));
+			}
 		}
 		ZVAL_REF(arg, Z_REF_P(varptr));
 
@@ -9373,16 +9400,28 @@ ZEND_VM_HANDLER(140, ZEND_MAKE_REF, VAR|CV, UNUSED)
 	zval *op1 = EX_VAR(opline->op1.var);
 
 	if (OP1_TYPE == IS_CV) {
+		zend_property_info *cv_info = NULL;
+		if (UNEXPECTED(EX(func)->op_array.cv_types != NULL)) {
+			cv_info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+		}
 		if (UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 			ZVAL_NEW_EMPTY_REF(op1);
 			Z_SET_REFCOUNT_P(op1, 2);
 			ZVAL_NULL(Z_REFVAL_P(op1));
+			/* Newly created reference for a typed local: attach its type. */
+			if (UNEXPECTED(cv_info != NULL)) {
+				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(op1), cv_info);
+			}
 			ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
 		} else {
 			if (Z_ISREF_P(op1)) {
 				Z_ADDREF_P(op1);
 			} else {
 				ZVAL_MAKE_REF_EX(op1, 2);
+				/* Newly created reference for a typed local: attach its type. */
+				if (UNEXPECTED(cv_info != NULL)) {
+					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(op1), cv_info);
+				}
 			}
 			ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
 		}

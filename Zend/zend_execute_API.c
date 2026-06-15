@@ -1899,8 +1899,23 @@ ZEND_API void zend_detach_symbol_table(zend_execute_data *execute_data) /* {{{ *
 		zend_string **str = op_array->vars;
 		zend_string **end = str + op_array->last_var;
 		zval *var = EX_VAR_NUM(0);
+		zend_property_info **cv_types = op_array->cv_types;
+		uint32_t i = 0;
 
 		do {
+			/* A typed local that was aliased by a reference attached its op_array-owned
+			 * type as a source on that reference (see zend_assign_to_typed_cv_reference).
+			 * The CV is about to be moved out of the op_array's frame into the symbol
+			 * table; remove the source first so the reference never carries a dangling
+			 * type-source pointer once the op_array (and its cv_types) is gone. Frame
+			 * teardown either calls i_free_compiled_variables() OR this function, never
+			 * both, so the ADD/DEL bookkeeping stays balanced one-per-CV-slot. */
+			if (UNEXPECTED(cv_types != NULL)
+			 && UNEXPECTED(cv_types[i] != NULL)
+			 && Z_ISREF_P(var)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(var))) {
+				ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(var), cv_types[i]);
+			}
 			if (Z_TYPE_P(var) == IS_UNDEF) {
 				zend_hash_del(ht, *str);
 			} else {
@@ -1909,6 +1924,7 @@ ZEND_API void zend_detach_symbol_table(zend_execute_data *execute_data) /* {{{ *
 			}
 			str++;
 			var++;
+			i++;
 		} while (str != end);
 	}
 }

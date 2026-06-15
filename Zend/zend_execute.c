@@ -592,6 +592,61 @@ static zend_never_inline zval* zend_assign_to_typed_property_reference(zend_prop
 	return prop;
 }
 
+/* Reference binding `$target = &$source` (ZEND_ASSIGN_REF) where the target and/or the
+ * source is a typed local variable. Mirrors zend_assign_to_typed_property_reference():
+ * the resulting (shared) zend_reference gets each involved typed local's synthesized
+ * type added as a source, so any later write through the reference is type-checked by
+ * zend_verify_ref_assignable_zval(). The matching removal happens at frame teardown in
+ * i_free_compiled_variables(). target_info/source_info are NULL for untyped operands.
+ * Source-add bookkeeping is kept balanced at one-per-typed-CV-slot. */
+static zend_never_inline zval* zend_assign_to_typed_cv_reference(
+		zend_property_info *target_info, zend_property_info *source_info,
+		zval *variable_ptr, zval *value_ptr, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
+{
+	bool same_slot = (variable_ptr == value_ptr);
+	bool source_was_ref = Z_ISREF_P(value_ptr);
+
+	/* If the target is typed, the value it is about to alias must satisfy the target's
+	 * declared type up front (e.g. `int $x; $x = &$strvar;` is rejected). */
+	if (target_info
+	 && !zend_verify_prop_assignable_by_ref(target_info, value_ptr, EX_USES_STRICT_TYPES())) {
+		return &EG(uninitialized_zval);
+	}
+
+	/* The target is being re-pointed: drop its old source (if it was a typed ref) so the
+	 * count stays balanced when the old reference is released below. */
+	if (target_info && Z_ISREF_P(variable_ptr)) {
+		ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), target_info);
+	}
+
+	zend_assign_to_variable_reference(variable_ptr, value_ptr, garbage_ptr);
+
+	/* Attach the source operand's type, but only if its slot newly began holding this
+	 * reference (otherwise its source is already present from a prior binding). When the
+	 * target and source are the same CV slot the target-add below already covers it. */
+	if (source_info && !source_was_ref && !same_slot) {
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(value_ptr), source_info);
+	}
+	/* Attach the target's type to the now-shared reference. */
+	if (target_info) {
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), target_info);
+	}
+	return variable_ptr;
+}
+
+/* Attach a typed local's synthesized type as a source on a reference that a typed CV
+ * has just been wrapped into (by-ref argument passing, ZEND_MAKE_REF). Called only when
+ * the CV slot transitioned from a plain value to a freshly created reference, so exactly
+ * one source is added per CV slot; the balancing removal is in i_free_compiled_variables(). */
+static zend_always_inline void zend_attach_cv_type_source_ex(
+		const zend_op_array *op_array, uint32_t var, zend_reference *ref)
+{
+	zend_property_info *info = op_array->cv_types[EX_VAR_TO_NUM(var)];
+	if (UNEXPECTED(info != NULL)) {
+		ZEND_REF_ADD_TYPE_SOURCE(ref, info);
+	}
+}
+
 static zend_never_inline ZEND_COLD zval *zend_wrong_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr, zend_refcounted **garbage_ptr OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_error(E_NOTICE, "Only variables should be assigned by reference");
@@ -858,11 +913,19 @@ static zend_never_inline ZEND_COLD void zend_verify_property_type_error(const ze
 	}
 
 	type_str = zend_type_to_string(info->type);
-	zend_type_error("Cannot assign %s to property %s::$%s of type %s",
-		zend_zval_value_name(property),
-		ZSTR_VAL(info->ce->name),
-		zend_get_unmangled_property_name(info->name),
-		ZSTR_VAL(type_str));
+	if (info->ce) {
+		zend_type_error("Cannot assign %s to property %s::$%s of type %s",
+			zend_zval_value_name(property),
+			ZSTR_VAL(info->ce->name),
+			zend_get_unmangled_property_name(info->name),
+			ZSTR_VAL(type_str));
+	} else {
+		/* Synthesized info for a typed local variable (ce == NULL). */
+		zend_type_error("Cannot assign %s to local variable $%s of type %s",
+			zend_zval_value_name(property),
+			ZSTR_VAL(info->name),
+			ZSTR_VAL(type_str));
+	}
 	zend_string_release(type_str);
 }
 
@@ -3939,45 +4002,59 @@ ZEND_API zval* ZEND_FASTCALL zend_fetch_static_property(zend_execute_data *ex, i
 	return result;
 }
 
+/* A typed local variable is modeled by a synthesized zend_property_info whose ce is
+ * NULL (it does not belong to a class). Reference type-error messages must therefore
+ * branch on ce: "property C::$x" for real properties, "local variable $x" otherwise.
+ * info->name holds the plain (unmangled) variable/property name in the local case. */
+static zend_always_inline const char *zend_ref_source_name(const zend_property_info *info) {
+	return info->ce ? zend_get_unmangled_property_name(info->name) : ZSTR_VAL(info->name);
+}
+
 ZEND_API zend_never_inline ZEND_COLD void zend_throw_ref_type_error_type(const zend_property_info *prop1, const zend_property_info *prop2, const zval *zv) {
 	zend_string *type1_str = zend_type_to_string(prop1->type);
 	zend_string *type2_str = zend_type_to_string(prop2->type);
-	zend_type_error("Reference with value of type %s held by property %s::$%s of type %s is not compatible with property %s::$%s of type %s",
-		zend_zval_type_name(zv),
-		ZSTR_VAL(prop1->ce->name),
-		zend_get_unmangled_property_name(prop1->name),
-		ZSTR_VAL(type1_str),
-		ZSTR_VAL(prop2->ce->name),
-		zend_get_unmangled_property_name(prop2->name),
-		ZSTR_VAL(type2_str)
-	);
+	if (prop1->ce && prop2->ce) {
+		zend_type_error("Reference with value of type %s held by property %s::$%s of type %s is not compatible with property %s::$%s of type %s",
+			zend_zval_type_name(zv),
+			ZSTR_VAL(prop1->ce->name), zend_get_unmangled_property_name(prop1->name), ZSTR_VAL(type1_str),
+			ZSTR_VAL(prop2->ce->name), zend_get_unmangled_property_name(prop2->name), ZSTR_VAL(type2_str));
+	} else {
+		zend_type_error("Reference with value of type %s held by %s%s of type %s is not compatible with %s%s of type %s",
+			zend_zval_type_name(zv),
+			prop1->ce ? "property " : "local variable $", zend_ref_source_name(prop1), ZSTR_VAL(type1_str),
+			prop2->ce ? "property " : "local variable $", zend_ref_source_name(prop2), ZSTR_VAL(type2_str));
+	}
 	zend_string_release(type1_str);
 	zend_string_release(type2_str);
 }
 
 ZEND_API zend_never_inline ZEND_COLD void zend_throw_ref_type_error_zval(const zend_property_info *prop, const zval *zv) {
 	zend_string *type_str = zend_type_to_string(prop->type);
-	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s",
-		zend_zval_value_name(zv),
-		ZSTR_VAL(prop->ce->name),
-		zend_get_unmangled_property_name(prop->name),
-		ZSTR_VAL(type_str)
-	);
+	if (prop->ce) {
+		zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s",
+			zend_zval_value_name(zv),
+			ZSTR_VAL(prop->ce->name), zend_get_unmangled_property_name(prop->name), ZSTR_VAL(type_str));
+	} else {
+		zend_type_error("Cannot assign %s to reference held by local variable $%s of type %s",
+			zend_zval_value_name(zv), ZSTR_VAL(prop->name), ZSTR_VAL(type_str));
+	}
 	zend_string_release(type_str);
 }
 
 static zend_never_inline ZEND_COLD void zend_throw_conflicting_coercion_error(const zend_property_info *prop1, const zend_property_info *prop2, const zval *zv) {
 	zend_string *type1_str = zend_type_to_string(prop1->type);
 	zend_string *type2_str = zend_type_to_string(prop2->type);
-	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s and property %s::$%s of type %s, as this would result in an inconsistent type conversion",
-		zend_zval_value_name(zv),
-		ZSTR_VAL(prop1->ce->name),
-		zend_get_unmangled_property_name(prop1->name),
-		ZSTR_VAL(type1_str),
-		ZSTR_VAL(prop2->ce->name),
-		zend_get_unmangled_property_name(prop2->name),
-		ZSTR_VAL(type2_str)
-	);
+	if (prop1->ce && prop2->ce) {
+		zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s and property %s::$%s of type %s, as this would result in an inconsistent type conversion",
+			zend_zval_value_name(zv),
+			ZSTR_VAL(prop1->ce->name), zend_get_unmangled_property_name(prop1->name), ZSTR_VAL(type1_str),
+			ZSTR_VAL(prop2->ce->name), zend_get_unmangled_property_name(prop2->name), ZSTR_VAL(type2_str));
+	} else {
+		zend_type_error("Cannot assign %s to reference held by %s%s of type %s and %s%s of type %s, as this would result in an inconsistent type conversion",
+			zend_zval_value_name(zv),
+			prop1->ce ? "property " : "local variable $", zend_ref_source_name(prop1), ZSTR_VAL(type1_str),
+			prop2->ce ? "property " : "local variable $", zend_ref_source_name(prop2), ZSTR_VAL(type2_str));
+	}
 	zend_string_release(type1_str);
 	zend_string_release(type2_str);
 }
@@ -4337,8 +4414,33 @@ ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table) /* {{{
 
 static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 {
+	const zend_op_array *op_array = &EX(func)->op_array;
 	zval *cv = EX_VAR_NUM(0);
-	int count = EX(func)->op_array.last_var;
+	int count = op_array->last_var;
+
+	if (UNEXPECTED(op_array->cv_types != NULL)) {
+		/* A typed local that was aliased by a reference (e.g. `$y = &$x` or a by-ref
+		 * argument) attached its synthesized type as a source on that reference. The
+		 * source is owned by this op_array and must be removed from the reference
+		 * before the CV slot drops its refcount, so the reference never outlives the
+		 * op_array carrying a dangling type-source pointer. This mirrors how a typed
+		 * object property removes its source in zend_object_dtor_property(). The
+		 * ADD (at ref-creation time) and this DEL are balanced one-per-CV-slot. */
+		zend_property_info **cv_types = op_array->cv_types;
+		int i = 0;
+		while (EXPECTED(i != count)) {
+			if (UNEXPECTED(cv_types[i] != NULL)
+			 && UNEXPECTED(Z_ISREF_P(cv))
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(cv))) {
+				ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(cv), cv_types[i]);
+			}
+			i_zval_ptr_dtor(cv);
+			cv++;
+			i++;
+		}
+		return;
+	}
+
 	while (EXPECTED(count != 0)) {
 		i_zval_ptr_dtor(cv);
 		cv++;
