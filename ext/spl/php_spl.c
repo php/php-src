@@ -310,7 +310,12 @@ PHP_FUNCTION(spl_autoload)
 		pos_len = (int)ZSTR_LEN(file_exts);
 	}
 
-	lc_name = zend_string_tolower(class_name);
+	if (ZSTR_VAL(class_name)[0] == '\\') {
+		lc_name = zend_string_alloc(ZSTR_LEN(class_name) - 1, 0);
+		zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(class_name) + 1, ZSTR_LEN(class_name) - 1);
+	} else {
+		lc_name = zend_string_tolower(class_name);
+	}
 	while (pos && *pos && !EG(exception)) {
 		pos1 = strchr(pos, ',');
 		if (pos1) {
