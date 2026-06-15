@@ -44,6 +44,10 @@ PHP                                                                        NEWS
   . Fix stmt->query leak in mysqli_execute_query() validation errors.
     (David Carlier)
 
+- Opcache:
+  . Fixed bug GH-20469 (Unsafe inheritance cache replay with reentrant
+    autoloading). (Levi Morrison)
+
 - Phar:
   . Fixed a bypass of the magic ".phar" directory protection in
     Phar::addEmptyDir() for paths starting with "/.phar", while allowing
