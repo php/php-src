@@ -382,12 +382,13 @@ static int kqueue_backend_wait(
 
 				if (!found) {
 					/* New FD, create new event */
-					ZEND_ASSERT(unique_events < max_events);
-					events[unique_events].fd = fd;
-					events[unique_events].events = 0;
-					events[unique_events].revents = revents;
-					events[unique_events].data = data;
-					unique_events++;
+					if (unique_events < max_events) {
+						events[unique_events].fd = fd;
+						events[unique_events].events = 0;
+						events[unique_events].revents = revents;
+						events[unique_events].data = data;
+						unique_events++;
+					}
 
 					/* Handle oneshot tracking */
 					if (is_oneshot) {
