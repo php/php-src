@@ -58,6 +58,7 @@ void init_op_array(zend_op_array *op_array, zend_function_type type, int initial
 
 	op_array->last_var = 0;
 	op_array->vars = NULL;
+	op_array->cv_types = NULL;
 
 	op_array->T = 0;
 
@@ -586,6 +587,16 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			zend_string_release_ex(op_array->vars[i], 0);
 		}
 		efree(op_array->vars);
+	}
+
+	if (op_array->cv_types) {
+		for (i = 0; i < (uint32_t) op_array->last_var; i++) {
+			if (op_array->cv_types[i]) {
+				zend_type_release(op_array->cv_types[i]->type, /* persistent */ 0);
+				efree(op_array->cv_types[i]);
+			}
+		}
+		efree(op_array->cv_types);
 	}
 
 	/* ZEND_ACC_PTR_OPS and ZEND_ACC_OVERRIDE use the same value */
