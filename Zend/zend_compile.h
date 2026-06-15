@@ -556,7 +556,7 @@ struct _zend_op_array {
 	ZEND_MAP_PTR_DEF(HashTable *, static_variables_ptr);
 	HashTable *static_variables;
 	zend_string **vars; /* names of CV variables */
-	zend_property_info **cv_types; /* parallel to vars[]; NULL entry = untyped CV; whole pointer NULL if no typed locals */ /* TODO(opcache): persist cv_types — Plan 4 */
+	zend_property_info **cv_types; /* parallel to vars[]; NULL entry = untyped CV; whole pointer NULL if no typed locals */
 
 	uint32_t *refcount;
 
