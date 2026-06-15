@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.24
 
+- Reflection:
+  . Fixed bug GH-22324 (Ignore leading namespace separator in
+    ReflectionParameter::__construct()). (jorgsowa)
 
 02 Jul 2026, PHP 8.4.23
 
