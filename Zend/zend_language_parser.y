@@ -278,6 +278,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> lexical_var_list encaps_list
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
 %type <ast> isset_variable type return_type type_expr type_without_static
+%type <ast> local_var_type typed_local_decl
 %type <ast> identifier type_expr_without_static union_type_without_static_element union_type_without_static intersection_type_without_static
 %type <ast> inline_function union_type_element union_type intersection_type
 %type <ast> attributed_statement attributed_top_statement attributed_class_statement attributed_parameter
@@ -541,6 +542,7 @@ statement:
 	|	T_GOTO T_STRING ';' { $$ = zend_ast_create(ZEND_AST_GOTO, $2); }
 	|	T_STRING ':' { $$ = zend_ast_create(ZEND_AST_LABEL, $1); }
 	|	T_VOID_CAST expr ';' { $$ = zend_ast_create(ZEND_AST_CAST_VOID, $2); }
+	|	typed_local_decl ';' { $$ = $1; }
 ;
 
 catch_list:
@@ -873,6 +875,18 @@ type_without_static:
 		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
 	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
 	|	name		{ $$ = $1; }
+;
+
+local_var_type:
+		type_without_static				{ $$ = $1; }
+	|	'?' type_without_static			{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
+;
+
+typed_local_decl:
+		local_var_type T_VARIABLE '=' expr
+			{ $$ = zend_ast_create(ZEND_AST_TYPED_VAR_DECL, $1, $2, $4); }
+	|	local_var_type T_VARIABLE
+			{ $$ = zend_ast_create(ZEND_AST_TYPED_VAR_DECL, $1, $2, NULL); }
 ;
 
 union_type_without_static_element:
