@@ -29,6 +29,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug GH-22265 (Another tailcall vm_interrupt bug). (Levi Morrison)
+  . Fixed bug GH-20469 (Unsafe inheritance cache replay with reentrant
+    autoloading). (Levi Morrison)
 
 - Phar:
   . Fixed a bypass of the magic ".phar" directory protection in
