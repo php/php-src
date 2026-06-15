@@ -4411,11 +4411,16 @@ ZEND_API void zend_get_callable_zval_from_fcc(const zend_fcall_info_cache *fcc, 
 	}
 }
 
-ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
+ZEND_API const char *zend_get_module_version_ex(const char *module_name, size_t module_name_len)
 {
-	size_t name_len = strlen(module_name);
-	zend_module_entry *module = zend_hash_str_find_ptr_lc(&module_registry, module_name, name_len);
+	zend_module_entry *module = zend_hash_str_find_ptr_lc(&module_registry, module_name, module_name_len);
 	return module ? module->version : NULL;
+}
+
+ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
+{	
+	size_t name_len = strlen(module_name);
+	return zend_get_module_version_ex(module_name, name_len);
 }
 /* }}} */
 
