@@ -3530,6 +3530,20 @@ static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt, uint32_
 			zend_compile_expr(&expr_node, expr_ast);
 			zend_delayed_compile_end(offset);
 			CG(zend_lineno) = zend_ast_get_lineno(var_ast);
+			/* If the target is a typed local CV, enforce the declared type on every
+			 * (re)assignment by emitting ZEND_ASSIGN_TYPED instead of plain ZEND_ASSIGN.
+			 * The operand setup mirrors the initializer path in
+			 * zend_compile_typed_var_decl(); cv_types[] persists across unset()/reuse,
+			 * so this also covers `int $x; $x = ...;` and post-unset reassignment.
+			 * Only simple CV targets are affected; dynamic/auto-global $$vars compile to
+			 * a non-CV var_node and fall through to plain ZEND_ASSIGN unchanged. */
+			if (var_node.op_type == IS_CV && CG(active_op_array)->cv_types) {
+				uint32_t cv_index = EX_VAR_TO_NUM(var_node.u.op.var);
+				if (CG(active_op_array)->cv_types[cv_index]) {
+					zend_emit_op_tmp(result, ZEND_ASSIGN_TYPED, &var_node, &expr_node);
+					return;
+				}
+			}
 			zend_emit_op_tmp(result, ZEND_ASSIGN, &var_node, &expr_node);
 			return;
 		case ZEND_AST_STATIC_PROP:
@@ -11996,8 +12010,26 @@ static void zend_compile_typed_var_decl(zend_ast *ast) /* {{{ */
 	zend_op_array *op_array = CG(active_op_array);
 
 	/* child[1] is the raw T_VARIABLE semantic value: a ZEND_AST_ZVAL node whose
-	 * zval is the variable name (the leading '$' was stripped by the scanner). */
-	zend_string *name = zend_ast_get_str(var_ast);
+	 * zval is the variable name (the leading '$' was stripped by the scanner). The
+	 * grammar (typed_local_decl) always produces an IS_STRING zval here. Intern it the
+	 * same way zend_try_compile_cv() does so the string stored in vars[] matches the
+	 * canonical CV path (and opcache's interned-string accounting). zval_make_interned_string()
+	 * replaces the zval in place; the AST keeps ownership, so we hold only a borrowed ref. */
+	zval *name_zv = zend_ast_get_zval(var_ast);
+	ZEND_ASSERT(Z_TYPE_P(name_zv) == IS_STRING);
+	zend_string *name = zval_make_interned_string(name_zv);
+
+	/* Special variables cannot be given a type. The canonical CV path
+	 * (zend_try_compile_cv) silently routes auto-globals / $this / $GLOBALS away from
+	 * the CV slot; for a typed declaration that would mean the type is silently
+	 * dropped (or, worse, a superglobal gets shadowed), so reject them outright
+	 * (finding I1). Mirrors is_this_fetch()/is_globals_fetch() name handling. */
+	if (zend_is_auto_global(name)
+	 || zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_THIS))
+	 || zend_string_equals_literal(name, "GLOBALS")) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot declare a type for the special variable $%s", ZSTR_VAL(name));
+	}
 
 	/* lookup_cv() returns an EX_NUM_TO_VAR()-encoded operand, not a raw index, and
 	 * it appends a new CV (growing last_var) only when the name is not yet interned.
