@@ -592,6 +592,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	if (op_array->cv_types) {
 		for (i = 0; i < (uint32_t) op_array->last_var; i++) {
 			if (op_array->cv_types[i]) {
+				zend_string_release(op_array->cv_types[i]->name);
 				zend_type_release(op_array->cv_types[i]->type, /* persistent */ 0);
 				efree(op_array->cv_types[i]);
 			}

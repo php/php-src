@@ -1098,6 +1098,48 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 	return zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }
 
+static zend_never_inline ZEND_COLD void zend_typed_cv_type_error(
+		const zend_property_info *info, const zend_string *name, const zval *value)
+{
+	if (EG(exception)) {
+		return;
+	}
+	zend_string *type_str = zend_type_to_string(info->type);
+	zend_type_error("Cannot assign %s to local variable $%s of type %s",
+		zend_zval_value_name(value), ZSTR_VAL(name), ZSTR_VAL(type_str));
+	zend_string_release(type_str);
+}
+
+/* Verify + coerce a value against a typed local variable's declared (scalar-only)
+ * type and assign it. Modeled on zend_assign_to_typed_prop(): the value is copied
+ * into a separated tmp before coercion, so a CONST/read-only RHS literal is never
+ * mutated in place. Honors strict/weak mode via EX_USES_STRICT_TYPES(). On a type
+ * mismatch a TypeError is thrown and the variable is left unchanged. */
+static zend_never_inline zval* zend_assign_to_typed_cv(
+		const zend_property_info *info, const zend_string *name,
+		zval *variable_ptr, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
+{
+	zval tmp;
+	bool strict = EX_USES_STRICT_TYPES();
+
+	ZVAL_DEREF(value);
+	ZVAL_COPY(&tmp, value);
+
+	/* Fast path: exact type code already allowed (covers nullable + matching scalar). */
+	if (!ZEND_TYPE_CONTAINS_CODE(info->type, Z_TYPE(tmp))) {
+		/* cv_types is restricted to scalar (int/float/string/bool, optionally nullable)
+		 * at compile time, so the scalar coercion path is sufficient and never touches
+		 * info->ce (which is NULL for synthesized local-variable infos). */
+		if (UNEXPECTED(!zend_verify_scalar_type_hint(ZEND_TYPE_FULL_MASK(info->type), &tmp, strict, false))) {
+			zend_typed_cv_type_error(info, name, &tmp);
+			zval_ptr_dtor(&tmp);
+			return &EG(uninitialized_zval);
+		}
+	}
+
+	return zend_assign_to_variable_ex(variable_ptr, &tmp, IS_TMP_VAR, strict, garbage_ptr);
+}
+
 static zend_always_inline bool zend_value_instanceof_static(const zval *zv) {
 	if (Z_TYPE_P(zv) != IS_OBJECT) {
 		return 0;

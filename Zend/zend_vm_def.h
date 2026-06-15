@@ -2859,6 +2859,36 @@ ZEND_VM_HANDLER(22, ZEND_ASSIGN, VAR|CV, CONST|TMP|CV, SPEC(RETVAL))
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HANDLER(212, ZEND_ASSIGN_TYPED, CV, CONST|TMP|VAR|CV, SPEC(RETVAL))
+{
+	USE_OPLINE
+	zval *value;
+	zval *variable_ptr;
+	const zend_property_info *info;
+	zend_refcounted *garbage = NULL;
+
+	SAVE_OPLINE();
+	value = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	variable_ptr = EX_VAR(opline->op1.var);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	/* zend_assign_to_typed_cv() copies the value into a separated tmp before any
+	 * coercion, so a CONST literal RHS is never mutated in place. It consumes the
+	 * tmp (IS_TMP_VAR) but NOT the source operand, so we free op2 ourselves below. */
+	value = zend_assign_to_typed_cv(info, info->name, variable_ptr, value, &garbage EXECUTE_DATA_CC);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
+
+	if (garbage) {
+		GC_DTOR_NO_REF(garbage);
+	}
+
+	FREE_OP2();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 ZEND_VM_HANDLER(30, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 {
 	USE_OPLINE
