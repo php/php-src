@@ -5542,9 +5542,51 @@ static void zend_compile_call(znode *result, const zend_ast *ast, uint32_t type)
 }
 /* }}} */
 
+static bool zend_is_static_string_ast(zend_ast *ast);
+
+/* True if `Str::<method_name>` exists and is declared to return `string`. Used to
+ * decide whether a `<static-string>-><method>()` call may itself act as a static
+ * string receiver for chaining (e.g. `"..."->trim()->upper()`). This is real
+ * return-type introspection: the Str class is an internal class registered at
+ * MINIT, so it is always present in the class table during compilation, and
+ * zend_lookup_class() does not autoload while compiling (it returns NULL instead).
+ * Methods such as length() that return int are intentionally rejected, so the int
+ * result is not treated as a chainable string receiver. */
+static bool zend_str_method_returns_string(zval *method_name) /* {{{ */
+{
+	if (Z_TYPE_P(method_name) != IS_STRING) {
+		return false;
+	}
+
+	zend_string *class_name = ZSTR_INIT_LITERAL("Str", 0);
+	zend_class_entry *ce = zend_lookup_class(class_name);
+	zend_string_release(class_name);
+	if (!ce) {
+		return false;
+	}
+
+	zend_string *lcname = zend_string_tolower(Z_STR_P(method_name));
+	const zend_function *fbc = zend_hash_find_ptr(&ce->function_table, lcname);
+	zend_string_release(lcname);
+	if (!fbc) {
+		return false;
+	}
+
+	if (!(fbc->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+		return false;
+	}
+
+	/* arg_info[-1] is the return type slot when a return type is declared. */
+	const zend_arg_info *return_info = fbc->common.arg_info - 1;
+	return ZEND_TYPE_CONTAINS_CODE(return_info->type, IS_STRING);
+}
+/* }}} */
+
 /* True if the expression is a compile-time-known string for the purpose of
- * dispatching scalar methods to the Str backing class. For now this is limited
- * to string literals and explicit (string) casts. */
+ * dispatching scalar methods to the Str backing class. This covers string
+ * literals, explicit (string) casts, and — to support method chaining — a
+ * `<static-string>-><method>()` call whose Str method is declared to return
+ * `string` (so the call's result is itself a static-string receiver). */
 static bool zend_is_static_string_ast(zend_ast *ast) /* {{{ */
 {
 	if (ast->kind == ZEND_AST_ZVAL) {
@@ -5552,6 +5594,16 @@ static bool zend_is_static_string_ast(zend_ast *ast) /* {{{ */
 	}
 	if (ast->kind == ZEND_AST_CAST) {
 		return ast->attr == IS_STRING;
+	}
+	/* Chaining: a method call on a static-string receiver with a literal method
+	 * name that resolves to a string-returning Str method is itself a static
+	 * string. nullsafe (`?->`) is deliberately excluded. */
+	if (ast->kind == ZEND_AST_METHOD_CALL) {
+		zend_ast *recv_ast = ast->child[0];
+		zend_ast *method_ast = ast->child[1];
+		return zend_is_static_string_ast(recv_ast)
+			&& method_ast->kind == ZEND_AST_ZVAL
+			&& zend_str_method_returns_string(zend_ast_get_zval(method_ast));
 	}
 	return false;
 }
@@ -5573,12 +5625,16 @@ static bool zend_try_compile_scalar_string_method_call(znode *result, zend_ast *
 		return false;
 	}
 
-	/* Build the class-name node for `Str`. ZEND_NAME_FQ makes it resolve as the
-	 * global `\Str` regardless of the current namespace. The name is interned so
-	 * that the orphan AST zval node carries no refcounted string to leak. */
+	/* Build the class-name node for `Str`. ZEND_NAME_FQ resolves it as the global
+	 * `\Str` regardless of namespace. This transient AST is arena-allocated and
+	 * bulk-freed WITHOUT running zval dtors, so the name must be non-refcounted or
+	 * it leaks. Request-time interning is unreliable here (under opcache, interning
+	 * during arbitrary compilation may hand back a refcounted string), so we use a
+	 * PERMANENT interned string (persistent=1): never refcounted, never per-request
+	 * freed — leak-safe in every config including opcache. Repeated calls dedup to
+	 * the same permanent entry. */
 	zval class_zv;
-	ZVAL_STRINGL(&class_zv, "Str", sizeof("Str") - 1);
-	zval_make_interned_string(&class_zv);
+	ZVAL_STR(&class_zv, zend_string_init_interned("Str", sizeof("Str") - 1, 1));
 	zend_ast *class_ast = zend_ast_create_zval_ex(&class_zv, ZEND_NAME_FQ);
 
 	/* Build a new argument list with the receiver prepended before the original args. */
