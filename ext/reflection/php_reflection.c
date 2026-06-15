@@ -86,6 +86,7 @@ PHPAPI zend_class_entry *reflection_generator_ptr;
 PHPAPI zend_class_entry *reflection_parameter_ptr;
 PHPAPI zend_class_entry *reflection_type_ptr;
 PHPAPI zend_class_entry *reflection_named_type_ptr;
+PHPAPI zend_class_entry *reflection_literal_scalar_type_ptr;
 PHPAPI zend_class_entry *reflection_intersection_type_ptr;
 PHPAPI zend_class_entry *reflection_union_type_ptr;
 PHPAPI zend_class_entry *reflection_class_ptr;
@@ -1455,8 +1456,11 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 typedef enum {
 	NAMED_TYPE = 0,
 	UNION_TYPE = 1,
-	INTERSECTION_TYPE = 2
+	INTERSECTION_TYPE = 2,
+	LITERAL_SCALAR_TYPE = 3
 } reflection_type_kind;
+
+static const zval *reflection_type_get_literal(zend_type type);
 
 /* For backwards compatibility reasons, we need to return T|null style unions
  * and transformation from iterable to Traversable|array
@@ -1464,6 +1468,12 @@ typedef enum {
  * what doesn't. */
 static reflection_type_kind get_type_kind(zend_type type) {
 	uint32_t type_mask_without_null = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(type);
+
+	/* An int/float/string literal value type, whether bare or wrapped in a
+	 * single-element (possibly nullable) union, is its own reflection type. */
+	if (reflection_type_get_literal(type) != NULL) {
+		return LITERAL_SCALAR_TYPE;
+	}
 
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		if (ZEND_TYPE_IS_INTERSECTION(type)) {
@@ -1511,6 +1521,9 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 			break;
 		case NAMED_TYPE:
 			object_init_ex(object, reflection_named_type_ptr);
+			break;
+		case LITERAL_SCALAR_TYPE:
+			object_init_ex(object, reflection_literal_scalar_type_ptr);
 			break;
 		default: ZEND_UNREACHABLE();
 	}
@@ -3125,6 +3138,40 @@ ZEND_METHOD(ReflectionNamedType, isBuiltin)
 	/* Treat "static" as a class type for the purposes of reflection. */
 	RETVAL_BOOL(ZEND_TYPE_IS_ONLY_MASK(param->type)
 		&& !(ZEND_TYPE_FULL_MASK(param->type) & MAY_BE_STATIC));
+}
+/* }}} */
+
+/* If the reflected type is an int/float/string literal value type, return its
+ * value; otherwise NULL. Handles both a bare literal entry (a union member) and
+ * a standalone literal stored as a single-element union list. */
+static const zval *reflection_type_get_literal(zend_type type)
+{
+	if (ZEND_TYPE_HAS_LITERAL(type)) {
+		return ZEND_TYPE_LITERAL_VALUE(type);
+	}
+
+	if (ZEND_TYPE_HAS_LIST(type) && ZEND_TYPE_IS_UNION(type)) {
+		const zend_type_list *list = ZEND_TYPE_LIST(type);
+		if (list->num_types == 1 && ZEND_TYPE_HAS_LITERAL(list->types[0])) {
+			return ZEND_TYPE_LITERAL_VALUE(list->types[0]);
+		}
+	}
+
+	return NULL;
+}
+
+/* {{{ Returns the value of an int/float/string literal value type */
+ZEND_METHOD(ReflectionLiteralScalarType, getValue)
+{
+	reflection_object *intern;
+	type_reference *param;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	const zval *literal = reflection_type_get_literal(param->type);
+	ZEND_ASSERT(literal != NULL);
+	RETURN_COPY((zval *) literal);
 }
 /* }}} */
 
@@ -8203,6 +8250,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_intersection_type_ptr = register_class_ReflectionIntersectionType(reflection_type_ptr);
 	reflection_intersection_type_ptr->create_object = reflection_objects_new;
 	reflection_intersection_type_ptr->default_object_handlers = &reflection_object_handlers;
+
+	reflection_literal_scalar_type_ptr = register_class_ReflectionLiteralScalarType(reflection_type_ptr);
+	reflection_literal_scalar_type_ptr->create_object = reflection_objects_new;
+	reflection_literal_scalar_type_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_method_ptr = register_class_ReflectionMethod(reflection_function_abstract_ptr);
 	reflection_method_ptr->create_object = reflection_objects_new;

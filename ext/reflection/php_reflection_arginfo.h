@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_reflection.stub.php instead.
- * Stub hash: c80946cc8c8215bb6527e09bb71b3a97a76a6a98
+ * Stub hash: f5972aa8c8682cf773c1ef3d769d3afefdac74c5
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
@@ -581,6 +581,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionNamedType_isBuiltin arginfo_class_ReflectionFunctionAbstract_inNamespace
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionLiteralScalarType_getValue, 0, 0, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_ReflectionUnionType_getTypes arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables
 
 #define arginfo_class_ReflectionIntersectionType_getTypes arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables
@@ -948,6 +951,7 @@ ZEND_METHOD(ReflectionType, allowsNull);
 ZEND_METHOD(ReflectionType, __toString);
 ZEND_METHOD(ReflectionNamedType, getName);
 ZEND_METHOD(ReflectionNamedType, isBuiltin);
+ZEND_METHOD(ReflectionLiteralScalarType, getValue);
 ZEND_METHOD(ReflectionUnionType, getTypes);
 ZEND_METHOD(ReflectionIntersectionType, getTypes);
 ZEND_METHOD(ReflectionExtension, __construct);
@@ -1274,6 +1278,11 @@ static const zend_function_entry class_ReflectionType_methods[] = {
 static const zend_function_entry class_ReflectionNamedType_methods[] = {
 	ZEND_ME(ReflectionNamedType, getName, arginfo_class_ReflectionNamedType_getName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionNamedType, isBuiltin, arginfo_class_ReflectionNamedType_isBuiltin, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_ReflectionLiteralScalarType_methods[] = {
+	ZEND_ME(ReflectionLiteralScalarType, getValue, arginfo_class_ReflectionLiteralScalarType_getValue, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1783,6 +1792,16 @@ static zend_class_entry *register_class_ReflectionNamedType(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionNamedType", class_ReflectionNamedType_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ReflectionType, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ReflectionLiteralScalarType(zend_class_entry *class_entry_ReflectionType)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionLiteralScalarType", class_ReflectionLiteralScalarType_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ReflectionType, 0);
 
 	return class_entry;

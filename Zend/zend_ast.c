@@ -2061,6 +2061,10 @@ static ZEND_COLD void zend_ast_export_type(smart_str *str, zend_ast *ast, int in
 		}
 		return;
 	}
+	if (ast->kind == ZEND_AST_TYPE_LITERAL) {
+		zend_ast_export_ex(str, ast->child[0], 0, indent);
+		return;
+	}
 	if (ast->attr & ZEND_TYPE_NULLABLE) {
 		smart_str_appendc(str, '?');
 	}

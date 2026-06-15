@@ -279,7 +279,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
 %type <ast> isset_variable type return_type type_expr type_without_static
 %type <ast> identifier type_expr_without_static union_type_without_static_element union_type_without_static intersection_type_without_static
-%type <ast> inline_function union_type_element union_type intersection_type
+%type <ast> inline_function union_type_element union_type intersection_type literal_type
 %type <ast> attributed_statement attributed_top_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
@@ -833,6 +833,7 @@ optional_type_without_static:
 type_expr:
 		type				{ $$ = $1; }
 	|	'?' type			{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
+	|	literal_type		{ $$ = $1; }
 	|	union_type			{ $$ = $1; }
 	|	intersection_type	{ $$ = $1; }
 ;
@@ -842,8 +843,17 @@ type:
 	|	T_STATIC			{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_STATIC); }
 ;
 
+literal_type:
+		T_LNUMBER					{ $$ = zend_ast_create(ZEND_AST_TYPE_LITERAL, $1); }
+	|	T_DNUMBER					{ $$ = zend_ast_create(ZEND_AST_TYPE_LITERAL, $1); }
+	|	'-' T_LNUMBER				{ $$ = zend_ast_create(ZEND_AST_TYPE_LITERAL, zend_ast_create(ZEND_AST_UNARY_MINUS, $2)); }
+	|	'-' T_DNUMBER				{ $$ = zend_ast_create(ZEND_AST_TYPE_LITERAL, zend_ast_create(ZEND_AST_UNARY_MINUS, $2)); }
+	|	T_CONSTANT_ENCAPSED_STRING	{ $$ = zend_ast_create(ZEND_AST_TYPE_LITERAL, $1); }
+;
+
 union_type_element:
                 type { $$ = $1; }
+        |        literal_type { $$ = $1; }
         |        '(' intersection_type ')' { $$ = $2; }
 ;
 
@@ -865,6 +875,7 @@ intersection_type:
 type_expr_without_static:
 		type_without_static			{ $$ = $1; }
 	|	'?' type_without_static		{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
+	|	literal_type				{ $$ = $1; }
 	|	union_type_without_static	{ $$ = $1; }
 	|	intersection_type_without_static	{ $$ = $1; }
 ;
@@ -877,6 +888,7 @@ type_without_static:
 
 union_type_without_static_element:
                 type_without_static { $$ = $1; }
+        |        literal_type { $$ = $1; }
         |        '(' intersection_type_without_static ')' { $$ = $2; }
 ;
 

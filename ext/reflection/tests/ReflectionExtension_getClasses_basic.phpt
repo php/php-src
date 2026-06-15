@@ -8,7 +8,7 @@ $ext = new ReflectionExtension('reflection');
 var_dump($ext->getClasses());
 ?>
 --EXPECTF--
-array(26) {
+array(27) {
   ["ReflectionException"]=>
   object(ReflectionClass)#%d (1) {
     ["name"]=>
@@ -63,6 +63,11 @@ array(26) {
   object(ReflectionClass)#%d (1) {
     ["name"]=>
     string(26) "ReflectionIntersectionType"
+  }
+  ["ReflectionLiteralScalarType"]=>
+  object(ReflectionClass)#%d (1) {
+    ["name"]=>
+    string(27) "ReflectionLiteralScalarType"
   }
   ["ReflectionMethod"]=>
   object(ReflectionClass)#%d (1) {

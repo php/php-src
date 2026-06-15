@@ -212,6 +212,16 @@ static void zend_persist_type_calc(zend_type *type)
 			ADD_INTERNED_STRING(type_name);
 			ZEND_TYPE_SET_PTR(*single_type, type_name);
 		}
+
+		if (ZEND_TYPE_HAS_LITERAL(*single_type)) {
+			ADD_SIZE(sizeof(zval));
+			zval *zv = ZEND_TYPE_LITERAL_VALUE(*single_type);
+			if (Z_TYPE_P(zv) == IS_STRING) {
+				zend_string *str = Z_STR_P(zv);
+				ADD_INTERNED_STRING(str);
+				ZVAL_STR(zv, str);
+			}
+		}
 	} ZEND_TYPE_FOREACH_END();
 }
 

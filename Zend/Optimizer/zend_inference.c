@@ -2382,15 +2382,29 @@ static uint32_t zend_convert_type(const zend_script *script, zend_type type, zen
 
 	uint32_t tmp = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(type));
 	if (ZEND_TYPE_IS_COMPLEX(type)) {
-		tmp |= MAY_BE_OBJECT;
-		if (pce) {
-			/* As we only have space to store one CE,
-			 * we use a plain object type for class unions. */
-			if (ZEND_TYPE_HAS_NAME(type)) {
-				zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(type));
-				// TODO: Pass through op_array.
-				*pce = zend_optimizer_get_class_entry(script, NULL, lcname);
-				zend_string_release_ex(lcname, 0);
+		/* A complex type is a class/object type, unless it is made up solely of
+		 * literal types, which contribute their base scalar type instead. */
+		bool has_class = false;
+		const zend_type *single_type;
+		ZEND_TYPE_FOREACH(type, single_type) {
+			if (ZEND_TYPE_HAS_LITERAL(*single_type)) {
+				/* int/float/string literal -> MAY_BE_LONG/DOUBLE/STRING */
+				tmp |= 1u << Z_TYPE_P(ZEND_TYPE_LITERAL_VALUE(*single_type));
+			} else {
+				has_class = true;
+			}
+		} ZEND_TYPE_FOREACH_END();
+		if (has_class) {
+			tmp |= MAY_BE_OBJECT;
+			if (pce) {
+				/* As we only have space to store one CE,
+				 * we use a plain object type for class unions. */
+				if (ZEND_TYPE_HAS_NAME(type)) {
+					zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(type));
+					// TODO: Pass through op_array.
+					*pce = zend_optimizer_get_class_entry(script, NULL, lcname);
+					zend_string_release_ex(lcname, 0);
+				}
 			}
 		}
 	}
