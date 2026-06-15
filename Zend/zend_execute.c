@@ -2296,19 +2296,35 @@ static zend_never_inline ZEND_COLD zend_long zend_throw_incdec_ref_error(const z
 {
 	zend_string *type_str = zend_type_to_string(error_prop->type);
 	if (ZEND_IS_INCREMENT(opline->opcode)) {
-		zend_type_error(
-			"Cannot increment a reference held by property %s::$%s of type %s past its maximal value",
-			ZSTR_VAL(error_prop->ce->name),
-			zend_get_unmangled_property_name(error_prop->name),
-			ZSTR_VAL(type_str));
+		if (error_prop->ce) {
+			zend_type_error(
+				"Cannot increment a reference held by property %s::$%s of type %s past its maximal value",
+				ZSTR_VAL(error_prop->ce->name),
+				zend_get_unmangled_property_name(error_prop->name),
+				ZSTR_VAL(type_str));
+		} else {
+			/* Synthesized info for a typed local variable (ce == NULL). */
+			zend_type_error(
+				"Cannot increment a reference held by local variable $%s of type %s past its maximal value",
+				ZSTR_VAL(error_prop->name),
+				ZSTR_VAL(type_str));
+		}
 		zend_string_release(type_str);
 		return ZEND_LONG_MAX;
 	} else {
-		zend_type_error(
-			"Cannot decrement a reference held by property %s::$%s of type %s past its minimal value",
-			ZSTR_VAL(error_prop->ce->name),
-			zend_get_unmangled_property_name(error_prop->name),
-			ZSTR_VAL(type_str));
+		if (error_prop->ce) {
+			zend_type_error(
+				"Cannot decrement a reference held by property %s::$%s of type %s past its minimal value",
+				ZSTR_VAL(error_prop->ce->name),
+				zend_get_unmangled_property_name(error_prop->name),
+				ZSTR_VAL(type_str));
+		} else {
+			/* Synthesized info for a typed local variable (ce == NULL). */
+			zend_type_error(
+				"Cannot decrement a reference held by local variable $%s of type %s past its minimal value",
+				ZSTR_VAL(error_prop->name),
+				ZSTR_VAL(type_str));
+		}
 		zend_string_release(type_str);
 		return ZEND_LONG_MIN;
 	}
@@ -2317,17 +2333,31 @@ static zend_never_inline ZEND_COLD zend_long zend_throw_incdec_ref_error(const z
 static zend_never_inline ZEND_COLD zend_long zend_throw_incdec_prop_error(const zend_property_info *prop OPLINE_DC) {
 	zend_string *type_str = zend_type_to_string(prop->type);
 	if (ZEND_IS_INCREMENT(opline->opcode)) {
-		zend_type_error("Cannot increment property %s::$%s of type %s past its maximal value",
-			ZSTR_VAL(prop->ce->name),
-			zend_get_unmangled_property_name(prop->name),
-			ZSTR_VAL(type_str));
+		if (prop->ce) {
+			zend_type_error("Cannot increment property %s::$%s of type %s past its maximal value",
+				ZSTR_VAL(prop->ce->name),
+				zend_get_unmangled_property_name(prop->name),
+				ZSTR_VAL(type_str));
+		} else {
+			/* Synthesized info for a typed local variable (ce == NULL). */
+			zend_type_error("Cannot increment local variable $%s of type %s past its maximal value",
+				ZSTR_VAL(prop->name),
+				ZSTR_VAL(type_str));
+		}
 		zend_string_release(type_str);
 		return ZEND_LONG_MAX;
 	} else {
-		zend_type_error("Cannot decrement property %s::$%s of type %s past its minimal value",
-			ZSTR_VAL(prop->ce->name),
-			zend_get_unmangled_property_name(prop->name),
-			ZSTR_VAL(type_str));
+		if (prop->ce) {
+			zend_type_error("Cannot decrement property %s::$%s of type %s past its minimal value",
+				ZSTR_VAL(prop->ce->name),
+				zend_get_unmangled_property_name(prop->name),
+				ZSTR_VAL(type_str));
+		} else {
+			/* Synthesized info for a typed local variable (ce == NULL). */
+			zend_type_error("Cannot decrement local variable $%s of type %s past its minimal value",
+				ZSTR_VAL(prop->name),
+				ZSTR_VAL(type_str));
+		}
 		zend_string_release(type_str);
 		return ZEND_LONG_MIN;
 	}

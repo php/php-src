@@ -39700,6 +39700,138 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ECHO_SPEC_CV_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_PRE_INC_TYPED_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	var_ptr = EX_VAR(opline->op1.var);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_incdec_typed_ref(ref, NULL OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_incdec_typed_prop(info, var_ptr, NULL OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_PRE_DEC_TYPED_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	var_ptr = EX_VAR(opline->op1.var);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_incdec_typed_ref(ref, NULL OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_incdec_typed_prop(info, var_ptr, NULL OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_POST_INC_TYPED_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	var_ptr = EX_VAR(opline->op1.var);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_incdec_typed_prop(info, var_ptr, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_POST_DEC_TYPED_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	var_ptr = EX_VAR(opline->op1.var);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_incdec_typed_prop(info, var_ptr, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_JMPZ_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -43642,6 +43774,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_TYPED_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_TYPED_SPEC_CV_CONST_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -43672,6 +43812,58 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_TYPED_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OP_TYPED_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	zval *value;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	value = RT_CONSTANT(opline, opline->op2);
+	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_binary_assign_op_typed_prop(info, var_ptr, value OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+/* ++/-- on a typed local CV. Emitted by the compiler in place of the plain
+ * ZEND_PRE_INC / ZEND_PRE_DEC / ZEND_POST_INC / ZEND_POST_DEC when op1 is a
+ * typed local. The increment/decrement is computed first (so int overflow can
+ * be detected) and then verified against the declared type exactly as for a
+ * typed property (zend_incdec_typed_prop): an int that overflows to float is
+ * rejected with a TypeError unless the type admits float, otherwise the value
+ * is coerced/verified honoring strict/weak mode. A typed reference is handled
+ * through its sources, matching the untyped helpers. The opcode numbers keep
+ * the increment/decrement parity required by ZEND_IS_INCREMENT() and the
+ * POST = PRE + 2 relationship used by zend_do_free()'s $i++ -> ++$i rewrite. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -47528,6 +47720,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_TYPED_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_TYPED_SPEC_CV_TMP_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -47558,6 +47758,58 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_TYPED_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OP_TYPED_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	zval *value;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
+	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_binary_assign_op_typed_prop(info, var_ptr, value OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+/* ++/-- on a typed local CV. Emitted by the compiler in place of the plain
+ * ZEND_PRE_INC / ZEND_PRE_DEC / ZEND_POST_INC / ZEND_POST_DEC when op1 is a
+ * typed local. The increment/decrement is computed first (so int overflow can
+ * be detected) and then verified against the declared type exactly as for a
+ * typed property (zend_incdec_typed_prop): an int that overflows to float is
+ * rejected with a TypeError unless the type admits float, otherwise the value
+ * is coerced/verified honoring strict/weak mode. A typed reference is handled
+ * through its sources, matching the untyped helpers. The opcode numbers keep
+ * the increment/decrement parity required by ZEND_IS_INCREMENT() and the
+ * POST = PRE + 2 relationship used by zend_do_free()'s $i++ -> ++$i rewrite. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMP_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -48516,6 +48768,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_TYPED_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_TYPED_SPEC_CV_VAR_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -48546,6 +48806,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_TYPED_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -52813,6 +53081,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_TYPED_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_TYPED_SPEC_CV_CV_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -52843,6 +53119,58 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_TYPED_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_OP_TYPED_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	zval *value;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
+	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_binary_assign_op_typed_prop(info, var_ptr, value OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+/* ++/-- on a typed local CV. Emitted by the compiler in place of the plain
+ * ZEND_PRE_INC / ZEND_PRE_DEC / ZEND_POST_INC / ZEND_POST_DEC when op1 is a
+ * typed local. The increment/decrement is computed first (so int overflow can
+ * be detected) and then verified against the declared type exactly as for a
+ * typed property (zend_incdec_typed_prop): an int that overflows to float is
+ * rejected with a TypeError unless the type admits float, otherwise the value
+ * is coerced/verified honoring strict/weak mode. A typed reference is handled
+ * through its sources, matching the untyped helpers. The opcode numbers keep
+ * the increment/decrement parity required by ZEND_IS_INCREMENT() and the
+ * POST = PRE + 2 relationship used by zend_do_free()'s $i++ -> ++$i rewrite. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -92552,6 +92880,138 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ECHO_SPEC_CV_TAILC
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_INC_TYPED_SPEC_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	var_ptr = EX_VAR(opline->op1.var);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_incdec_typed_ref(ref, NULL OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_incdec_typed_prop(info, var_ptr, NULL OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_PRE_DEC_TYPED_SPEC_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	var_ptr = EX_VAR(opline->op1.var);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_incdec_typed_ref(ref, NULL OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_incdec_typed_prop(info, var_ptr, NULL OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_POST_INC_TYPED_SPEC_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	var_ptr = EX_VAR(opline->op1.var);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_incdec_typed_prop(info, var_ptr, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_POST_DEC_TYPED_SPEC_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	var_ptr = EX_VAR(opline->op1.var);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_incdec_typed_prop(info, var_ptr, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_JMPZ_SPEC_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -96494,6 +96954,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_TYPED_SPEC_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_TYPED_SPEC_CV_CONST_RETVAL_USED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -96524,6 +96992,58 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_TYPED_SPEC_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OP_TYPED_SPEC_CV_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	zval *value;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	value = RT_CONSTANT(opline, opline->op2);
+	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_binary_assign_op_typed_prop(info, var_ptr, value OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+/* ++/-- on a typed local CV. Emitted by the compiler in place of the plain
+ * ZEND_PRE_INC / ZEND_PRE_DEC / ZEND_POST_INC / ZEND_POST_DEC when op1 is a
+ * typed local. The increment/decrement is computed first (so int overflow can
+ * be detected) and then verified against the declared type exactly as for a
+ * typed property (zend_incdec_typed_prop): an int that overflows to float is
+ * rejected with a TypeError unless the type admits float, otherwise the value
+ * is coerced/verified honoring strict/weak mode. A typed reference is handled
+ * through its sources, matching the untyped helpers. The opcode numbers keep
+ * the increment/decrement parity required by ZEND_IS_INCREMENT() and the
+ * POST = PRE + 2 relationship used by zend_do_free()'s $i++ -> ++$i rewrite. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_OP_DATA_VAR_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -100380,6 +100900,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_TYPED_SPEC_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_TYPED_SPEC_CV_TMP_RETVAL_USED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -100410,6 +100938,58 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_TYPED_SPEC_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OP_TYPED_SPEC_CV_TMP_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	zval *value;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
+	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_binary_assign_op_typed_prop(info, var_ptr, value OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+/* ++/-- on a typed local CV. Emitted by the compiler in place of the plain
+ * ZEND_PRE_INC / ZEND_PRE_DEC / ZEND_POST_INC / ZEND_POST_DEC when op1 is a
+ * typed local. The increment/decrement is computed first (so int overflow can
+ * be detected) and then verified against the declared type exactly as for a
+ * typed property (zend_incdec_typed_prop): an int that overflows to float is
+ * rejected with a TypeError unless the type admits float, otherwise the value
+ * is coerced/verified honoring strict/weak mode. A typed reference is handled
+ * through its sources, matching the untyped helpers. The opcode numbers keep
+ * the increment/decrement parity required by ZEND_IS_INCREMENT() and the
+ * POST = PRE + 2 relationship used by zend_do_free()'s $i++ -> ++$i rewrite. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMP_OP_DATA_VAR_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -101368,6 +101948,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_TYPED_SPEC_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_TYPED_SPEC_CV_VAR_RETVAL_USED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -101398,6 +101986,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_TYPED_SPEC_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_REF_SPEC_CV_VAR_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -105563,6 +106159,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_TYPED_SPEC_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_TYPED_SPEC_CV_CV_RETVAL_USED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -105593,6 +106197,58 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_TYPED_SPEC_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+/* Compound assignment (`+= -= .= ...`) to a typed local CV. Emitted by the
+ * compiler in place of ZEND_ASSIGN_OP when op1 is a typed local (cv_types[idx]
+ * is set), mirroring the ZEND_ASSIGN_TYPED choice. Behaves exactly like the
+ * typed-property case in ZEND_ASSIGN_OBJ_OP: a typed reference enforces the
+ * type through its sources, and a plain typed-CV value is routed through
+ * zend_binary_assign_op_typed_prop (compute via zend_binary_op, then verify /
+ * coerce against the declared scalar type honoring strict/weak mode). The
+ * untyped ASSIGN_OP hot path is left untouched. */
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_OP_TYPED_SPEC_CV_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	zval *value;
+	const zend_property_info *info;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
+	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
+	info = EX(func)->op_array.cv_types[EX_VAR_TO_NUM(opline->op1.var)];
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_binary_assign_op_typed_prop(info, var_ptr, value OPLINE_CC EXECUTE_DATA_CC);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+
+
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+/* ++/-- on a typed local CV. Emitted by the compiler in place of the plain
+ * ZEND_PRE_INC / ZEND_PRE_DEC / ZEND_POST_INC / ZEND_POST_DEC when op1 is a
+ * typed local. The increment/decrement is computed first (so int overflow can
+ * be detected) and then verified against the declared type exactly as for a
+ * typed property (zend_incdec_typed_prop): an int that overflows to float is
+ * rejected with a TypeError unless the type admits float, otherwise the value
+ * is coerced/verified honoring strict/weak mode. A typed reference is handled
+ * through its sources, matching the untyped helpers. The opcode numbers keep
+ * the increment/decrement parity required by ZEND_IS_INCREMENT() and the
+ * POST = PRE + 2 relationship used by zend_do_free()'s $i++ -> ++$i rewrite. */
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_REF_SPEC_CV_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -110013,6 +110669,15 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_TYPED_SPEC_CV_CV_RETVAL_UNUSED_LABEL,
 			(void*)&&ZEND_ASSIGN_TYPED_SPEC_CV_CV_RETVAL_USED_LABEL,
+			(void*)&&ZEND_ASSIGN_OP_TYPED_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OP_TYPED_SPEC_CV_TMP_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_ASSIGN_OP_TYPED_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_PRE_INC_TYPED_SPEC_CV_LABEL,
+			(void*)&&ZEND_PRE_DEC_TYPED_SPEC_CV_LABEL,
+			(void*)&&ZEND_POST_INC_TYPED_SPEC_CV_LABEL,
+			(void*)&&ZEND_POST_DEC_TYPED_SPEC_CV_LABEL,
 			(void*)&&ZEND_INIT_FCALL_OFFSET_SPEC_CONST_LABEL,
 			(void*)&&ZEND_RECV_NOTYPE_SPEC_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -115050,6 +115715,26 @@ zend_leave_helper_SPEC_LABEL:
 				ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_ECHO_SPEC_CV)
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_PRE_INC_TYPED_SPEC_CV):
+				VM_TRACE(ZEND_PRE_INC_TYPED_SPEC_CV)
+				ZEND_PRE_INC_TYPED_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_PRE_INC_TYPED_SPEC_CV)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_PRE_DEC_TYPED_SPEC_CV):
+				VM_TRACE(ZEND_PRE_DEC_TYPED_SPEC_CV)
+				ZEND_PRE_DEC_TYPED_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_PRE_DEC_TYPED_SPEC_CV)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_POST_INC_TYPED_SPEC_CV):
+				VM_TRACE(ZEND_POST_INC_TYPED_SPEC_CV)
+				ZEND_POST_INC_TYPED_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_POST_INC_TYPED_SPEC_CV)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_POST_DEC_TYPED_SPEC_CV):
+				VM_TRACE(ZEND_POST_DEC_TYPED_SPEC_CV)
+				ZEND_POST_DEC_TYPED_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_POST_DEC_TYPED_SPEC_CV)
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_JMPZ_SPEC_CV):
 				VM_TRACE(ZEND_JMPZ_SPEC_CV)
 				ZEND_JMPZ_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -115519,6 +116204,11 @@ zend_leave_helper_SPEC_LABEL:
 				ZEND_ASSIGN_TYPED_SPEC_CV_CONST_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_ASSIGN_TYPED_SPEC_CV_CONST_RETVAL_USED)
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ASSIGN_OP_TYPED_SPEC_CV_CONST):
+				VM_TRACE(ZEND_ASSIGN_OP_TYPED_SPEC_CV_CONST)
+				ZEND_ASSIGN_OP_TYPED_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_ASSIGN_OP_TYPED_SPEC_CV_CONST)
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_OP_DATA_VAR):
 				VM_TRACE(ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_OP_DATA_VAR)
 				ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -115828,6 +116518,11 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_ASSIGN_TYPED_SPEC_CV_TMP_RETVAL_USED)
 				ZEND_ASSIGN_TYPED_SPEC_CV_TMP_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_ASSIGN_TYPED_SPEC_CV_TMP_RETVAL_USED)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ASSIGN_OP_TYPED_SPEC_CV_TMP):
+				VM_TRACE(ZEND_ASSIGN_OP_TYPED_SPEC_CV_TMP)
+				ZEND_ASSIGN_OP_TYPED_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_ASSIGN_OP_TYPED_SPEC_CV_TMP)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMP_OP_DATA_VAR):
 				VM_TRACE(ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMP_OP_DATA_VAR)
@@ -116278,6 +116973,11 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_ASSIGN_TYPED_SPEC_CV_CV_RETVAL_USED)
 				ZEND_ASSIGN_TYPED_SPEC_CV_CV_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_ASSIGN_TYPED_SPEC_CV_CV_RETVAL_USED)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ASSIGN_OP_TYPED_SPEC_CV_CV):
+				VM_TRACE(ZEND_ASSIGN_OP_TYPED_SPEC_CV_CV)
+				ZEND_ASSIGN_OP_TYPED_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_ASSIGN_OP_TYPED_SPEC_CV_CV)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_REF_SPEC_CV_CV):
 				VM_TRACE(ZEND_ASSIGN_REF_SPEC_CV_CV)
@@ -119001,6 +119701,15 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_TYPED_SPEC_CV_CV_RETVAL_UNUSED_HANDLER,
 		ZEND_ASSIGN_TYPED_SPEC_CV_CV_RETVAL_USED_HANDLER,
+		ZEND_ASSIGN_OP_TYPED_SPEC_CV_CONST_HANDLER,
+		ZEND_ASSIGN_OP_TYPED_SPEC_CV_TMP_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_ASSIGN_OP_TYPED_SPEC_CV_CV_HANDLER,
+		ZEND_PRE_INC_TYPED_SPEC_CV_HANDLER,
+		ZEND_PRE_DEC_TYPED_SPEC_CV_HANDLER,
+		ZEND_POST_INC_TYPED_SPEC_CV_HANDLER,
+		ZEND_POST_DEC_TYPED_SPEC_CV_HANDLER,
 		ZEND_INIT_FCALL_OFFSET_SPEC_CONST_HANDLER,
 		ZEND_RECV_NOTYPE_SPEC_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -122489,6 +123198,15 @@ void zend_vm_init(void)
 		ZEND_NULL_TAILCALL_HANDLER,
 		ZEND_ASSIGN_TYPED_SPEC_CV_CV_RETVAL_UNUSED_TAILCALL_HANDLER,
 		ZEND_ASSIGN_TYPED_SPEC_CV_CV_RETVAL_USED_TAILCALL_HANDLER,
+		ZEND_ASSIGN_OP_TYPED_SPEC_CV_CONST_TAILCALL_HANDLER,
+		ZEND_ASSIGN_OP_TYPED_SPEC_CV_TMP_TAILCALL_HANDLER,
+		ZEND_NULL_TAILCALL_HANDLER,
+		ZEND_NULL_TAILCALL_HANDLER,
+		ZEND_ASSIGN_OP_TYPED_SPEC_CV_CV_TAILCALL_HANDLER,
+		ZEND_PRE_INC_TYPED_SPEC_CV_TAILCALL_HANDLER,
+		ZEND_PRE_DEC_TYPED_SPEC_CV_TAILCALL_HANDLER,
+		ZEND_POST_INC_TYPED_SPEC_CV_TAILCALL_HANDLER,
+		ZEND_POST_DEC_TYPED_SPEC_CV_TAILCALL_HANDLER,
 		ZEND_INIT_FCALL_OFFSET_SPEC_CONST_TAILCALL_HANDLER,
 		ZEND_RECV_NOTYPE_SPEC_TAILCALL_HANDLER,
 		ZEND_NULL_TAILCALL_HANDLER,
@@ -123457,7 +124175,7 @@ void zend_vm_init(void)
 		1255,
 		1256 | SPEC_RULE_OP1,
 		1261 | SPEC_RULE_OP1,
-		3484,
+		3493,
 		1266 | SPEC_RULE_OP1,
 		1271 | SPEC_RULE_OP1,
 		1276 | SPEC_RULE_OP2,
@@ -123491,7 +124209,7 @@ void zend_vm_init(void)
 		1559 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1584 | SPEC_RULE_OP1,
 		1589,
-		3484,
+		3493,
 		1590 | SPEC_RULE_OP1,
 		1595 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1620 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
@@ -123625,49 +124343,49 @@ void zend_vm_init(void)
 		2557,
 		2558,
 		2559 | SPEC_RULE_OP2 | SPEC_RULE_RETVAL,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
-		3484,
+		2569 | SPEC_RULE_OP2,
+		2574,
+		2575,
+		2576,
+		2577,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
+		3493,
 	};
 #if 0
 #elif (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
@@ -123860,7 +124578,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2577 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2586 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -123868,7 +124586,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2602 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2611 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -123876,7 +124594,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2627 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2636 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -123887,17 +124605,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2652 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2661 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2677 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2686 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2702 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2711 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_MUL:
@@ -123908,17 +124626,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2727 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2736 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2752 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2761 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2777 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2786 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_IDENTICAL:
@@ -123929,16 +124647,16 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2802 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2811 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2877 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2886 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op2_type == IS_CONST && (Z_TYPE_P(RT_CONSTANT(op, op->op2)) == IS_ARRAY && zend_hash_num_elements(Z_ARR_P(RT_CONSTANT(op, op->op2))) == 0)) {
-				spec = 3102 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3111 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF))) {
-				spec = 3108 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3117 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_IDENTICAL:
@@ -123949,16 +124667,16 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2952 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2961 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3027 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3036 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op2_type == IS_CONST && (Z_TYPE_P(RT_CONSTANT(op, op->op2)) == IS_ARRAY && zend_hash_num_elements(Z_ARR_P(RT_CONSTANT(op, op->op2))) == 0)) {
-				spec = 3105 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3114 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF))) {
-				spec = 3113 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3122 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_EQUAL:
@@ -123969,12 +124687,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2802 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2811 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2877 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2886 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_EQUAL:
@@ -123985,12 +124703,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2952 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2961 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3027 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3036 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_SMALLER:
@@ -123998,12 +124716,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3118 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3127 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3193 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3202 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
@@ -124011,79 +124729,79 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3268 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3277 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3343 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3352 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_QM_ASSIGN:
 			if (op1_info == MAY_BE_LONG) {
-				spec = 3430 | SPEC_RULE_OP1;
+				spec = 3439 | SPEC_RULE_OP1;
 			} else if (op1_info == MAY_BE_DOUBLE) {
-				spec = 3435 | SPEC_RULE_OP1;
+				spec = 3444 | SPEC_RULE_OP1;
 			} else if ((op->op1_type == IS_CONST) ? !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1)) : (!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))))) {
-				spec = 3440 | SPEC_RULE_OP1;
+				spec = 3449 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_PRE_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3418 | SPEC_RULE_RETVAL;
+				spec = 3427 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3420 | SPEC_RULE_RETVAL;
+				spec = 3429 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_PRE_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3422 | SPEC_RULE_RETVAL;
+				spec = 3431 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3424 | SPEC_RULE_RETVAL;
+				spec = 3433 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_POST_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3426;
+				spec = 3435;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3427;
+				spec = 3436;
 			}
 			break;
 		case ZEND_POST_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3428;
+				spec = 3437;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3429;
+				spec = 3438;
 			}
 			break;
 		case ZEND_JMP:
 			if (OP_JMP_ADDR(op, op->op1) > op) {
-				spec = 2576;
+				spec = 2585;
 			}
 			break;
 		case ZEND_INIT_FCALL:
 			if (Z_EXTRA_P(RT_CONSTANT(op, op->op2)) != 0) {
-				spec = 2569;
+				spec = 2578;
 			}
 			break;
 		case ZEND_RECV:
 			if (op->op2.num == MAY_BE_ANY) {
-				spec = 2570;
+				spec = 2579;
 			}
 			break;
 		case ZEND_SEND_VAL:
 			if (op->op1_type == IS_CONST && op->op2_type == IS_UNUSED && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 3480;
+				spec = 3489;
 			}
 			break;
 		case ZEND_SEND_VAR_EX:
 			if (op->op2_type == IS_UNUSED && op->op2.num <= MAX_ARG_FLAG_NUM && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 3475 | SPEC_RULE_OP1;
+				spec = 3484 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_FE_FETCH_R:
 			if (op->op2_type == IS_CV && (op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 3482 | SPEC_RULE_RETVAL;
+				spec = 3491 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_FETCH_DIM_R:
@@ -124091,22 +124809,22 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3445 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3454 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_SEND_VAL_EX:
 			if (op->op2_type == IS_UNUSED && op->op2.num <= MAX_ARG_FLAG_NUM && op->op1_type == IS_CONST && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 3481;
+				spec = 3490;
 			}
 			break;
 		case ZEND_SEND_VAR:
 			if (op->op2_type == IS_UNUSED && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 3470 | SPEC_RULE_OP1;
+				spec = 3479 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_COUNT:
 			if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 2571 | SPEC_RULE_OP1;
+				spec = 2580 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_BW_OR:

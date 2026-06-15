@@ -790,6 +790,7 @@ bool zend_op_may_elide_result(uint8_t opcode)
 		case ZEND_ASSIGN_OBJ:
 		case ZEND_ASSIGN_STATIC_PROP:
 		case ZEND_ASSIGN_OP:
+		case ZEND_ASSIGN_OP_TYPED:
 		case ZEND_ASSIGN_DIM_OP:
 		case ZEND_ASSIGN_OBJ_OP:
 		case ZEND_ASSIGN_STATIC_PROP_OP:
@@ -799,6 +800,8 @@ bool zend_op_may_elide_result(uint8_t opcode)
 		case ZEND_PRE_DEC_OBJ:
 		case ZEND_PRE_INC:
 		case ZEND_PRE_DEC:
+		case ZEND_PRE_INC_TYPED:
+		case ZEND_PRE_DEC_TYPED:
 		case ZEND_DO_FCALL:
 		case ZEND_DO_ICALL:
 		case ZEND_DO_UCALL:
@@ -834,7 +837,9 @@ static void zend_do_free(znode *op1) /* {{{ */
 				case ZEND_POST_DEC_OBJ:
 				case ZEND_POST_INC:
 				case ZEND_POST_DEC:
-					/* convert $i++ to ++$i */
+				case ZEND_POST_INC_TYPED:
+				case ZEND_POST_DEC_TYPED:
+					/* convert $i++ to ++$i (POST_*_TYPED = PRE_*_TYPED + 2) */
 					opline->opcode -= 2;
 					SET_UNUSED(opline->result);
 					return;
@@ -3745,7 +3750,18 @@ static void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_RW, false);
 			zend_compile_expr(&expr_node, expr_ast);
 			zend_delayed_compile_end(offset);
-			opline = zend_emit_op_tmp(result, ZEND_ASSIGN_OP, &var_node, &expr_node);
+			/* If the target is a typed local CV, enforce the declared type on the
+			 * result of the compound operation by emitting ZEND_ASSIGN_OP_TYPED
+			 * instead of plain ZEND_ASSIGN_OP, mirroring the ZEND_ASSIGN_TYPED
+			 * choice in zend_compile_assign(). Only simple CV targets are typed;
+			 * dynamic/auto-global $$vars compile to a non-CV var_node and fall
+			 * through to plain ZEND_ASSIGN_OP unchanged. */
+			if (var_node.op_type == IS_CV && CG(active_op_array)->cv_types
+			 && CG(active_op_array)->cv_types[EX_VAR_TO_NUM(var_node.u.op.var)]) {
+				opline = zend_emit_op_tmp(result, ZEND_ASSIGN_OP_TYPED, &var_node, &expr_node);
+			} else {
+				opline = zend_emit_op_tmp(result, ZEND_ASSIGN_OP, &var_node, &expr_node);
+			}
 			opline->extended_value = opcode;
 			return;
 		case ZEND_AST_STATIC_PROP:
@@ -10795,8 +10811,15 @@ static void zend_compile_post_incdec(znode *result, const zend_ast *ast) /* {{{ 
 		if (opline && opline->opcode == ZEND_FETCH_DIM_RW) {
 			opline->extended_value = ZEND_FETCH_DIM_INCDEC;
 		}
-		zend_emit_op_tmp(result, ast->kind == ZEND_AST_POST_INC ? ZEND_POST_INC : ZEND_POST_DEC,
-			&var_node, NULL);
+		/* Typed local CV: emit the type-enforcing variant (see ZEND_PRE_INC_TYPED). */
+		uint8_t opcode;
+		if (var_node.op_type == IS_CV && CG(active_op_array)->cv_types
+		 && CG(active_op_array)->cv_types[EX_VAR_TO_NUM(var_node.u.op.var)]) {
+			opcode = ast->kind == ZEND_AST_POST_INC ? ZEND_POST_INC_TYPED : ZEND_POST_DEC_TYPED;
+		} else {
+			opcode = ast->kind == ZEND_AST_POST_INC ? ZEND_POST_INC : ZEND_POST_DEC;
+		}
+		zend_emit_op_tmp(result, opcode, &var_node, NULL);
 	}
 }
 /* }}} */
@@ -10824,8 +10847,15 @@ static void zend_compile_pre_incdec(znode *result, const zend_ast *ast) /* {{{ *
 		if (opline && opline->opcode == ZEND_FETCH_DIM_RW) {
 			opline->extended_value = ZEND_FETCH_DIM_INCDEC;
 		}
-		zend_emit_op_tmp(result, ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC : ZEND_PRE_DEC,
-			&var_node, NULL);
+		/* Typed local CV: emit the type-enforcing variant (see ZEND_PRE_INC_TYPED). */
+		uint8_t opcode;
+		if (var_node.op_type == IS_CV && CG(active_op_array)->cv_types
+		 && CG(active_op_array)->cv_types[EX_VAR_TO_NUM(var_node.u.op.var)]) {
+			opcode = ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC_TYPED : ZEND_PRE_DEC_TYPED;
+		} else {
+			opcode = ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC : ZEND_PRE_DEC;
+		}
+		zend_emit_op_tmp(result, opcode, &var_node, NULL);
 	}
 }
 /* }}} */

@@ -332,7 +332,12 @@ END_EXTERN_C()
 #define ZEND_DECLARE_ATTRIBUTED_CONST       210
 #define ZEND_TYPE_ASSERT                    211
 #define ZEND_ASSIGN_TYPED                   212
+#define ZEND_ASSIGN_OP_TYPED                213
+#define ZEND_PRE_INC_TYPED                  214
+#define ZEND_PRE_DEC_TYPED                  215
+#define ZEND_POST_INC_TYPED                 216
+#define ZEND_POST_DEC_TYPED                 217
 
-#define ZEND_VM_LAST_OPCODE                 212
+#define ZEND_VM_LAST_OPCODE                 217
 
 #endif
