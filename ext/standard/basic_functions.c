@@ -113,6 +113,7 @@ PHPAPI php_basic_globals basic_globals;
 #include "streamsfuncs.h"
 #include "zend_frameless_function.h"
 #include "basic_functions_arginfo.h"
+#include "str_arginfo.h"
 
 #if __has_feature(memory_sanitizer)
 # include <sanitizer/msan_interface.h>
@@ -297,6 +298,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	rounding_mode_ce = register_class_RoundingMode();
 	sort_direction_ce = register_class_SortDirection();
 
+	BASIC_MINIT_SUBMODULE(str)
 	BASIC_MINIT_SUBMODULE(var)
 	BASIC_MINIT_SUBMODULE(file)
 	BASIC_MINIT_SUBMODULE(browscap)
