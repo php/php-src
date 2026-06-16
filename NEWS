@@ -33,7 +33,8 @@ PHP                                                                        NEWS
 
 - Intl:
   . Fix incorrect argument positions for uninitialized calendar arguments in
-    IntlCalendar::equals(), ::before(), ::after(), and ::isEquivalentTo().
+    IntlCalendar::equals(), ::before(), ::after(), and ::isEquivalentTo(), and
+    for invalid start/end arguments in transliterator_transliterate().
     (Weilin Du)
   . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
     for invalid display types. (Weilin Du)
