@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-22280 (Incorrect compile error for goto to label preceding
     try/finally block). (Pratik Bhujel)
+  . Fixed bug GH-22290 (AST pretty printing does not correctly handle strings
+    containing NUL). (iliaal)
 
 - BCMath:
   . Fixed issues with oversized allocations and signed overflow in bcround()
