@@ -2997,6 +2997,16 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 			php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
 		}
 
+		/* This might be a supplemental read after consuming buffered data. If
+		 * the read returned nothing, ignore status WANT_READ. */
+		if (read &&
+			nr_bytes <= 0 &&
+			sslsock->last_status == STREAM_CRYPTO_STATUS_WANT_READ &&
+			stream->has_buffered_data
+		) {
+			sslsock->last_status = STREAM_CRYPTO_STATUS_NONE;
+		}
+
 		/* And if we were originally supposed to be blocking, let's reset the socket to that. */
 		if (began_blocked) {
 			php_openssl_set_blocking(sslsock, 1);
