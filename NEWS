@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.8
+18 Jun 2026, PHP 8.5.8RC1
 
 - Core:
   . Fixed bug GH-22280 (Incorrect compile error for goto to label preceding
