@@ -252,45 +252,64 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 	free_alloca(shiftlist, use_heap);
 }
 
+/* Returns true if every instance of ce1 (or a subclass) is provably an instance
+ * of the target class. target_ce is the resolved class entry for the target
+ * when available; it may be NULL for a class declared in the same compilation
+ * unit that is not yet linked, in which case we fall back to matching
+ * target_lc against ce1's own declared parent and interfaces. */
 static bool safe_instanceof(
 	const zend_class_entry *ce1,
-	const zend_class_entry *ce2,
+	const zend_class_entry *target_ce,
+	const zend_string *target_lc,
 	const zend_script *script,
 	const zend_op_array *op_array
 ) {
-	if (ce1 == ce2) {
+	if (target_ce && ce1 == target_ce) {
+		return true;
+	}
+	if (zend_string_equals_ci(ce1->name, target_lc)) {
 		return true;
 	}
 	if (ce1->ce_flags & ZEND_ACC_LINKED) {
-		return instanceof_function(ce1, ce2);
+		return target_ce && instanceof_function(ce1, target_ce);
 	}
 
-	/* TODO Handle unlinked parents ike in unlinked_instanceof()? */
-
-	if (ce1->num_interfaces) {
-		uint32_t i;
+	for (uint32_t i = 0; i < ce1->num_interfaces; i++) {
+		const zend_class_entry *iface;
 		if (ce1->ce_flags & ZEND_ACC_RESOLVED_INTERFACES) {
 			/* Unlike the normal instanceof_function(), we have to perform a recursive
 			 * check here, as the parent interfaces might not have been fully copied yet. */
-			for (i = 0; i < ce1->num_interfaces; i++) {
-				if (safe_instanceof(ce1->interfaces[i], ce2, script, op_array)) {
-					return true;
-				}
-			}
+			iface = ce1->interfaces[i];
 		} else {
-			for (i = 0; i < ce1->num_interfaces; i++) {
-				const zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, ce1->interface_names[i].lc_name);
-				if (!ce) {
-					continue;
-				}
-				/* Avoid recursing if class implements itself. */
-				if (ce == ce1) {
-					continue;
-				}
-				if (safe_instanceof(ce, ce2, script, op_array)) {
-					return true;
-				}
+			if (zend_string_equals_ci(ce1->interface_names[i].lc_name, target_lc)) {
+				return true;
 			}
+
+			iface = zend_optimizer_get_class_entry(script, op_array, ce1->interface_names[i].lc_name);
+		}
+
+		/* Skip if unresolvable/not-yet-copied, or the class implements itself. */
+		if (!iface || iface == ce1) {
+			continue;
+		}
+
+		if (safe_instanceof(iface, target_ce, target_lc, script, op_array)) {
+			return true;
+		}
+	}
+
+	/* ce1 is unlinked here (the linked case returned above), so the
+	 * parent/parent_name union holds the as-yet-unresolved parent name. */
+	if (ce1->parent_name) {
+		if (zend_string_equals_ci(ce1->parent_name, target_lc)) {
+			return true;
+		}
+
+		zend_string *parent_lc = zend_string_tolower(ce1->parent_name);
+		const zend_class_entry *parent = zend_optimizer_get_class_entry(script, op_array, parent_lc);
+		zend_string_release(parent_lc);
+		if (parent && parent != ce1 && safe_instanceof(parent, target_ce, target_lc, script, op_array)) {
+			return true;
 		}
 	}
 
@@ -313,8 +332,8 @@ static inline bool can_elide_list_type(
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
 			zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
 			const zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
+			bool result = use_info->ce && safe_instanceof(use_info->ce, ce, lcname, script, op_array);
 			zend_string_release(lcname);
-			bool result = ce && safe_instanceof(use_info->ce, ce, script, op_array);
 			if (result == !is_intersection) {
 				return result;
 			}
