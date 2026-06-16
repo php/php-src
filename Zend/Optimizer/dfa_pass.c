@@ -1107,10 +1107,10 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			}
 
 			/* The assigned value lives in the following OP_DATA opline. */
-			const zend_op *data = op + 1;
+			zend_op *data = op + 1;
 			uint32_t val_type;
 			if (data->op1_type == IS_CONST) {
-				val_type = _const_op_type(CRT_CONSTANT(data->op1));
+				val_type = _const_op_type(CRT_CONSTANT_EX(op_array, data, data->op1));
 			} else if (ssa->ops[i + 1].op1_use >= 0) {
 				val_type = ssa->var_info[ssa->ops[i + 1].op1_use].type;
 			} else {
