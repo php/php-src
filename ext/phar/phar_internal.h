@@ -381,6 +381,31 @@ static inline bool phar_validate_alias(const char *alias, size_t alias_len) /* {
 }
 /* }}} */
 
+static inline bool phar_path_is_magic_phar_ex(const char *path, size_t path_len) /* {{{ */
+{
+	if (path_len > 0 && path[0] == '/') {
+		path++;
+		path_len--;
+	}
+
+	if (path_len < sizeof(".phar") - 1 || memcmp(path, ".phar", sizeof(".phar") - 1) != 0) {
+		return false;
+	}
+
+	if (path_len == sizeof(".phar") - 1) {
+		return true;
+	}
+
+	return path[sizeof(".phar") - 1] == '/' || path[sizeof(".phar") - 1] == '\\';
+}
+/* }}} */
+
+static inline bool phar_is_magic_phar(const zend_string *path) /* {{{ */
+{
+	return phar_path_is_magic_phar_ex(ZSTR_VAL(path), ZSTR_LEN(path));
+}
+/* }}} */
+
 static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
 {
 	char tmp[MAXPATHLEN];
