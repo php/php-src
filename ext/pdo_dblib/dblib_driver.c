@@ -267,8 +267,8 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 		return NULL;
 	}
 
-	id = emalloc(32);
-	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
+	id = emalloc(40);
+	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)40);
 	dbcancel(H->link);
 
 	ret_id = zend_string_init(id, len, 0);
