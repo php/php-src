@@ -43,4 +43,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2,3,4,5,6,7,8) php_uri_parser_rfc3986_uris *php_uri_
 	const zval *path, const zval *query, const zval *fragment
 );
 
+zend_string *php_uri_parser_rfc3986_query_component_percent_decode(const char *str, size_t str_length, bool plus_to_space);
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_rfc3986_query_params_to_string(const php_uri_query_params_object *query_params_object, bool space_to_plus);
+
 #endif

@@ -26,6 +26,85 @@ namespace Uri {
         case IncludeFragment;
         case ExcludeFragment;
     }
+
+    final readonly class QueryParamOptions
+    {
+        /** @virtual */
+        public int $parsingMaxQueryStringLength;
+        /** @virtual */
+        public int $parsingMaxParamCount;
+        /** @virtual */
+        public string $trueValue;
+        /** @virtual */
+        public string $falseValue;
+        /** @virtual */
+        public bool $useNullAsEmptyString;
+
+        public function __construct(
+            int $parsingMaxQueryStringLength = 10000,
+            int $parsingMaxParamCount = 1000,
+            string $trueValue = "0",
+            string $falseValue = "0",
+            bool $useNullAsEmptyString = false
+        ) {}
+
+        public function __debugInfo(): array {}
+    }
+
+    final readonly class QueryParams implements \IteratorAggregate, \Countable
+    {
+        private QueryParamOptions $options;
+
+        public static function parseRfc1866(string $queryString, ?QueryParamOptions $options = null): \Uri\QueryParams {}
+
+        public static function parseRfc3986(string $queryString, ?QueryParamOptions $options = null): ?\Uri\QueryParams {}
+
+        public static function parseWhatWg(string $queryString, ?QueryParamOptions $options = null): \Uri\QueryParams {}
+
+        public static function fromArray(array $queryParams, ?QueryParamOptions $options = null): \Uri\QueryParams {}
+
+        public function __construct(?QueryParamOptions $options = null) {}
+
+        public function append(string $name, mixed $value): static {}
+
+        public function delete(string $name): static {}
+
+        public function deleteValue(string $name, ?string $value): static {}
+
+        public function has(string $name): bool {}
+
+        public function hasValue(string $name, mixed $value): bool {}
+
+        public function getFirst(string $name): ?string {}
+
+        public function getLast(string $name): ?string {}
+
+        public function getAll(string $name): array {}
+
+        public function list(): array {}
+
+        public function getIterator(): \Traversable {}
+
+        public function count(): int {}
+
+        public function set(string $name, mixed $value): static {}
+
+        public function sort(): static {}
+
+        public function toArray(): array {}
+
+        public function toRfc1866String(): string {}
+
+        public function toRfc3986String(): string {}
+
+        public function toWhatWgString(): string {}
+
+        public function __serialize(): array {}
+
+        public function __unserialize(array $data): void {}
+
+        public function __debugInfo(): array {}
+    }
 }
 
 namespace Uri\Rfc3986 {
