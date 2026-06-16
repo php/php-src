@@ -24,6 +24,9 @@ PHP                                                                        NEWS
     overflow-triggered early return). (iliaal)
 
 - Intl:
+  . Fix incorrect argument positions for invalid start/end arguments in
+    transliterator_transliterate().
+    (Weilin Du)
   . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
     for invalid display types. (Weilin Du)
 
