@@ -1206,6 +1206,11 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 #define ZEND_RETURNS_FUNCTION (1<<0)
 #define ZEND_RETURNS_VALUE    (1<<1)
 
+/* Stored in the OP_DATA opline's extended_value for ZEND_ASSIGN_OBJ. Set by the
+ * optimizer when the assigned value is statically proven to already satisfy the
+ * (typed) property, so the run-time type verification can be skipped. */
+#define ZEND_ASSIGN_OBJ_SKIP_TYPE_CHECK (1<<0)
+
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
 #define ZEND_ARRAY_SIZE_SHIFT		2

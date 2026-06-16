@@ -1087,6 +1087,48 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 #endif
 		}
 
+		/* Elide the run-time type check on typed property writes (ASSIGN_OBJ)
+		 * when the assigned value is statically proven to already satisfy the
+		 * property type, so no verification or coercion is required. The flag is
+		 * read by the ASSIGN_OBJ handler from the following OP_DATA opline. */
+		for (int i = 0; i < (int) op_array->last; i++) {
+			zend_op *op = op_array->opcodes + i;
+			if (op->opcode != ZEND_ASSIGN_OBJ) {
+				continue;
+			}
+
+			const zend_property_info *prop_info = zend_fetch_prop_info(op_array, ssa, op, &ssa->ops[i]);
+			if (!prop_info
+			 || !ZEND_TYPE_IS_SET(prop_info->type)
+			 || !ZEND_TYPE_IS_ONLY_MASK(prop_info->type)
+			 || prop_info->hooks
+			 || (prop_info->flags & (ZEND_ACC_READONLY | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_VIRTUAL))) {
+				continue;
+			}
+
+			/* The assigned value lives in the following OP_DATA opline. */
+			const zend_op *data = op + 1;
+			uint32_t val_type;
+			if (data->op1_type == IS_CONST) {
+				val_type = _const_op_type(CRT_CONSTANT(data->op1));
+			} else if (ssa->ops[i + 1].op1_use >= 0) {
+				val_type = ssa->var_info[ssa->ops[i + 1].op1_use].type;
+			} else {
+				continue;
+			}
+
+			if (val_type & (MAY_BE_REF | MAY_BE_UNDEF)) {
+				continue;
+			}
+
+			uint32_t pure = val_type & MAY_BE_ANY;
+			if (!pure || (pure & ~ZEND_TYPE_PURE_MASK(prop_info->type))) {
+				continue;
+			}
+
+			op_array->opcodes[i + 1].extended_value |= ZEND_ASSIGN_OBJ_SKIP_TYPE_CHECK;
+		}
+
 		for (v = op_array->last_var; v < ssa->vars_count; v++) {
 
 			op_1 = ssa->vars[v].definition;
