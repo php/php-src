@@ -1817,6 +1817,7 @@ AC_DEFINE([HAVE_BUILD_DEFS_H], [1],
 
 PHP_ADD_BUILD_DIR([
   main
+  main/poll
   main/streams
   scripts
   scripts/man1
