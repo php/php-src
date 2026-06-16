@@ -1162,12 +1162,12 @@ try_again:
 				zend_string_release_ex(http_headers, 0);
 				zend_string_release_ex(http_body, 0);
 				if (new_uri->scheme == NULL && new_uri->path != NULL) {
-					new_uri->scheme = new_uri->scheme ? zend_string_copy(new_uri->scheme) : NULL;
-					new_uri->host = new_uri->host ? zend_string_copy(new_uri->host) : NULL;
-					new_uri->port = new_uri->port;
+					new_uri->scheme = uri->scheme ? zend_string_copy(uri->scheme) : NULL;
+					new_uri->host = uri->host ? zend_string_copy(uri->host) : NULL;
+					new_uri->port = uri->port;
 					if (new_uri->path && ZSTR_VAL(new_uri->path)[0] != '/') {
-						if (new_uri->path) {
-							char *t = ZSTR_VAL(new_uri->path);
+						if (uri->path) {
+							char *t = ZSTR_VAL(uri->path);
 							char *p = strrchr(t, '/');
 							if (p) {
 								zend_string *s = zend_string_alloc((p - t) + ZSTR_LEN(new_uri->path) + 2, 0);
