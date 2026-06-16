@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_spl.stub.php instead.
- * Stub hash: 21ec2dcca99c85c90afcd319da76016a9f678dc2 */
+ * Stub hash: cc3c674e48e9fb4cf658dcb9603e78076bfdd56a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_implements, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, object_or_class)
@@ -36,6 +36,19 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_autoload_unregister, 0, 1, _
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_autoload_register_function_loader, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, prepend, _IS_BOOL, 0, "false")
+ZEND_END_ARG_INFO()
+
+#define arginfo_spl_autoload_unregister_function_loader arginfo_spl_autoload_unregister
+
+#define arginfo_spl_autoload_function_loaders arginfo_spl_autoload_functions
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_autoload_call_function_loader, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, function_name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_spl_classes arginfo_spl_autoload_functions
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_object_hash, 0, 1, IS_STRING, 0)
@@ -70,6 +83,10 @@ ZEND_FUNCTION(spl_autoload_extensions);
 ZEND_FUNCTION(spl_autoload_functions);
 ZEND_FUNCTION(spl_autoload_register);
 ZEND_FUNCTION(spl_autoload_unregister);
+ZEND_FUNCTION(spl_autoload_register_function_loader);
+ZEND_FUNCTION(spl_autoload_unregister_function_loader);
+ZEND_FUNCTION(spl_autoload_function_loaders);
+ZEND_FUNCTION(spl_autoload_call_function_loader);
 ZEND_FUNCTION(spl_classes);
 ZEND_FUNCTION(spl_object_hash);
 ZEND_FUNCTION(spl_object_id);
@@ -87,6 +104,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(spl_autoload_functions, arginfo_spl_autoload_functions)
 	ZEND_FE(spl_autoload_register, arginfo_spl_autoload_register)
 	ZEND_FE(spl_autoload_unregister, arginfo_spl_autoload_unregister)
+	ZEND_FE(spl_autoload_register_function_loader, arginfo_spl_autoload_register_function_loader)
+	ZEND_FE(spl_autoload_unregister_function_loader, arginfo_spl_autoload_unregister_function_loader)
+	ZEND_FE(spl_autoload_function_loaders, arginfo_spl_autoload_function_loaders)
+	ZEND_FE(spl_autoload_call_function_loader, arginfo_spl_autoload_call_function_loader)
 	ZEND_FE(spl_classes, arginfo_spl_classes)
 	ZEND_FE(spl_object_hash, arginfo_spl_object_hash)
 	ZEND_FE(spl_object_id, arginfo_spl_object_id)

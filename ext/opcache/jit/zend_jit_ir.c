@@ -2164,6 +2164,13 @@ static int zend_jit_invalid_this_stub(zend_jit_ctx *jit)
 
 static int zend_jit_undefined_function_stub(zend_jit_ctx *jit)
 {
+	// JIT: if (EG(exception)) goto exception_handler;
+	ir_ref exception_ref = ir_LOAD_A(jit_EG_exception(jit));
+	ir_ref if_exception = ir_IF(exception_ref);
+	ir_IF_TRUE(if_exception);
+	ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler));
+	ir_IF_FALSE(if_exception);
+
 	// JIT: load EX(opline)
 	ir_ref ref = ir_LOAD_A(jit_FP(jit));
 	ir_ref arg3 = ir_LOAD_U32(ir_ADD_OFFSET(ref, offsetof(zend_op, op2.constant)));
@@ -3108,6 +3115,7 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_extend_stack_helper);
 	REGISTER_HELPER(zend_jit_init_func_run_time_cache_helper);
 	REGISTER_HELPER(zend_jit_find_func_helper);
+	REGISTER_HELPER(zend_jit_find_known_func_helper);
 	REGISTER_HELPER(zend_jit_find_ns_func_helper);
 	REGISTER_HELPER(zend_jit_jmp_frameless_helper);
 	REGISTER_HELPER(zend_jit_unref_helper);
@@ -8887,12 +8895,16 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 		} else {
 			zval *zv = RT_CONSTANT(opline, opline->op2);
 
+			/* The helpers may invoke a function autoloader, which runs user code. */
+			jit_SET_EX_OPLINE(jit, opline);
+
 			if (opline->opcode == ZEND_INIT_FCALL) {
-				ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_find_func_helper),
+				ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_find_known_func_helper),
 					ir_CONST_ADDR(Z_STR_P(zv)),
 					cache_slot_ref);
 			} else if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
-				ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_find_func_helper),
+				ref = ir_CALL_3(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_find_func_helper),
+					ir_CONST_ADDR(Z_STR_P(zv)),
 					ir_CONST_ADDR(Z_STR_P(zv + 1)),
 					cache_slot_ref);
 			} else if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
@@ -8916,7 +8928,6 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 					return 0;
 				}
 			} else {
-jit_SET_EX_OPLINE(jit, opline);
 				ir_GUARD(ref, jit_STUB_ADDR(jit, jit_stub_undefined_function));
 			}
 		}
