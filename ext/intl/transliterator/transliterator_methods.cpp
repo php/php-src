@@ -276,14 +276,16 @@ U_CFUNC PHP_FUNCTION( transliterator_transliterate )
 	zend_long	start		= 0,
 				limit		= -1;
 	int			success     = 0;
+	bool		is_method;
 	zval 		tmp_object;
 	TRANSLITERATOR_METHOD_INIT_VARS;
 
 	object = getThis();
+	is_method = object != NULL;
 
 	ZVAL_UNDEF(&tmp_object);
 
-	if (object == nullptr) {
+	if (!is_method) {
 		/* in non-OOP version, accept both a transliterator and a string */
 		zend_string *arg1_str;
 		zend_object *arg1_obj;
@@ -320,17 +322,17 @@ U_CFUNC PHP_FUNCTION( transliterator_transliterate )
 	}
 
 	if (limit < -1) {
-		zend_argument_value_error(object ? 3 : 4, "must be greater than or equal to -1");
+		zend_argument_value_error(is_method ? 3 : 4, "must be greater than or equal to -1");
 		goto cleanup_object;
 	}
 
 	if (start < 0) {
-		zend_argument_value_error(object ? 2 : 3, "must be greater than or equal to 0");
+		zend_argument_value_error(is_method ? 2 : 3, "must be greater than or equal to 0");
 		goto cleanup_object;
 	}
 
 	if (limit != -1 && start > limit) {
-		zend_argument_value_error(object ? 2 : 3, "must be less than or equal to argument #%d ($end)", object ? 3 : 4);
+		zend_argument_value_error(is_method ? 2 : 3, "must be less than or equal to argument #%d ($end)", is_method ? 3 : 4);
 		goto cleanup_object;
 	}
 

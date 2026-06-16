@@ -77,6 +77,8 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed malformed ResourceBundle::get() error message when fallback is
     disabled. (Weilin Du)
+  . Fix incorrect argument positions for invalid start/end arguments in
+    transliterator_transliterate(). (Weilin Du)
   . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
     for invalid display types. (Weilin Du)
   . Added IntlNumberRangeFormatter class to format an interval of two numbers
