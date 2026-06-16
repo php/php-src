@@ -445,6 +445,66 @@ URI_PUBLIC URI_CHAR * URI_FUNC(Escape)(const URI_CHAR * in, URI_CHAR * out,
                                        UriBool spaceToPlus, UriBool normalizeBreaks);
 
 /**
+ * Percent-encodes all but unreserved characters from the input string and
+ * writes the encoded version to the output string.
+ *
+ * NOTE: Be sure to allocate <b>3 times</b> the space of the input buffer for
+ * the output buffer for <c>normalizeBreaks == URI_FALSE</c> and <b>6 times</b>
+ * the space for <c>normalizeBreaks == URI_TRUE</c>
+ * (since e.g. "\x0d" becomes "%0D%0A" in that case).
+ *
+ * NOTE: The implementation treats (both <c>char</c> and) <c>wchar_t</c> units
+ * as code point integers, which works well for code points <c>U+0001</c> to <c>U+00ff</c>
+ * in host-native endianness but nothing more;
+ * in particular, using <c>uriEscapeQueryRfc3986ExW</c> with arbitrary Unicode input will
+ * not produce healthy results.
+ * Passing UTF-8 input to <c>uriEscapeQueryRfc3986ExA</c> may be useful in some scenarios.
+ * Keep in mind that uriparser is about %URI (RFC 3986) not %IRI (RFC 3987).
+ *
+ * @param inFirst           <b>IN</b>: Pointer to first character of the input text
+ * @param inAfterLast       <b>IN</b>: Pointer after the last character of the input text
+ * @param out               <b>OUT</b>: Encoded text destination
+ * @param normalizeBreaks   <b>IN</b>: Whether to convert CR and LF to CR-LF or not.
+ * @return                  Position of terminator in output string
+ *
+ * @see uriEscapeQueryRfc3986A
+ * @see uriUnescapeInPlaceExA
+ * @since 0.5.2
+ */
+URI_PUBLIC URI_CHAR * URI_FUNC(EscapeQueryRfc3986Ex)(const URI_CHAR * inFirst,
+                                         const URI_CHAR * inAfterLast, URI_CHAR * out,
+                                         UriBool normalizeBreaks);
+
+/**
+ * Percent-encodes all but unreserved characters from the input string and
+ * writes the encoded version to the output string.
+ *
+ * NOTE: Be sure to allocate <b>3 times</b> the space of the input buffer for
+ * the output buffer for <c>normalizeBreaks == URI_FALSE</c> and <b>6 times</b>
+ * the space for <c>normalizeBreaks == URI_TRUE</c>
+ * (since e.g. "\x0d" becomes "%0D%0A" in that case).
+ *
+ * NOTE: The implementation treats (both <c>char</c> and) <c>wchar_t</c> units
+ * as code point integers, which works well for code points <c>U+0001</c> to <c>U+00ff</c>
+ * in host-native endianness but nothing more;
+ * in particular, using <c>uriEscapeQueryRfc3986W</c> with arbitrary Unicode input will
+ * not produce healthy results.
+ * Passing UTF-8 input to <c>uriEEscapeQueryRfc3986A</c> may be useful in some scenarios.
+ * Keep in mind that uriparser is about %URI (RFC 3986) not %IRI (RFC 3987).
+ *
+ * @param in                <b>IN</b>: Text source
+ * @param out               <b>OUT</b>: Encoded text destination
+ * @param normalizeBreaks   <b>IN</b>: Whether to convert CR and LF to CR-LF or not.
+ * @return                  Position of terminator in output string
+ *
+ * @see uriEscapeQueryRfc3986ExA
+ * @see uriUnescapeInPlaceA
+ * @since 0.5.0
+ */
+URI_PUBLIC URI_CHAR * URI_FUNC(EscapeQueryRfc3986)(const URI_CHAR * in, URI_CHAR * out,
+													UriBool normalizeBreaks);
+
+/**
  * Unescapes percent-encoded groups in a given string.
  * E.g. "%20" will become " ". Unescaping is done in place.
  * The return value will be point to the new position

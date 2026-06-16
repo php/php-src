@@ -24,6 +24,7 @@
 #include "ext/standard/info.h"
 
 #include "php_uri.h"
+#include "php_uri_query.h"
 #include "uri_parser_whatwg.h"
 #include "uri_parser_rfc3986.h"
 #include "uri_parser_php_parse_url.h"
@@ -39,6 +40,8 @@ zend_class_entry *php_uri_ce_comparison_mode;
 zend_class_entry *php_uri_ce_exception;
 zend_class_entry *php_uri_ce_error;
 zend_class_entry *php_uri_ce_invalid_uri_exception;
+zend_class_entry *php_uri_ce_query_params;
+zend_class_entry *php_uri_ce_query_param_options;
 zend_class_entry *php_uri_ce_whatwg_url_host_type;
 zend_class_entry *php_uri_ce_whatwg_invalid_url_exception;
 zend_class_entry *php_uri_ce_whatwg_url_validation_error_type;
@@ -46,6 +49,8 @@ zend_class_entry *php_uri_ce_whatwg_url_validation_error;
 
 static zend_object_handlers object_handlers_rfc3986_uri;
 static zend_object_handlers object_handlers_whatwg_uri;
+static zend_object_handlers object_handlers_query_params;
+static zend_object_handlers object_handlers_query_param_options;
 
 typedef zend_result (*php_uri_component_validator_string)(const zend_string *component);
 typedef zend_result (*php_uri_component_validator_long)(zend_long component);
@@ -1312,6 +1317,19 @@ PHPAPI zend_result php_uri_parser_register(const php_uri_parser *uri_parser)
 	return result;
 }
 
+static PHP_MINFO_FUNCTION(uri)
+{
+	php_info_print_table_start();
+	php_info_print_table_row(2, "URI support", "active");
+#ifdef URI_STATIC_BUILD
+	php_info_print_table_row(2, "uriparser bundled version", URI_VER_ANSI);
+#else
+	php_info_print_table_row(2, "uriparser compiled version", URI_VER_ANSI);
+	php_info_print_table_row(2, "uriparser loaded version", uriBaseRuntimeVersionA());
+#endif
+	php_info_print_table_end();
+}
+
 static PHP_MINIT_FUNCTION(uri)
 {
 	php_uri_ce_rfc3986_uri_builder = register_class_Uri_Rfc3986_UriBuilder();
@@ -1339,6 +1357,28 @@ static PHP_MINIT_FUNCTION(uri)
 	php_uri_ce_exception = register_class_Uri_UriException(zend_ce_exception);
 	php_uri_ce_error = register_class_Uri_UriError(zend_ce_error);
 	php_uri_ce_invalid_uri_exception = register_class_Uri_InvalidUriException(php_uri_ce_exception);
+
+	php_uri_ce_query_params = register_class_Uri_QueryParams(zend_ce_aggregate, zend_ce_countable);
+	php_uri_ce_query_params->create_object = php_uri_object_query_params_create_object;
+	php_uri_ce_query_params->get_iterator = php_uri_object_query_params_get_iterator;
+	php_uri_ce_query_params->default_object_handlers = &object_handlers_query_params;
+	memcpy(&object_handlers_query_params, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	object_handlers_query_params.offset = offsetof(php_uri_query_params_object, std);
+	object_handlers_query_params.free_obj = php_uri_query_params_object_handler_free;
+	object_handlers_query_params.clone_obj = php_uri_query_params_object_handler_clone;
+
+	php_uri_ce_query_param_options = register_class_Uri_QueryParamOptions();
+	php_uri_ce_query_param_options->create_object = php_uri_object_create_query_param_options;
+	memcpy(&object_handlers_query_param_options, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	object_handlers_query_param_options.offset = offsetof(php_uri_query_param_options_object, std);
+	object_handlers_query_param_options.free_obj = php_uri_query_param_options_object_handler_free;
+	object_handlers_query_param_options.clone_obj = php_uri_query_param_options_object_handler_clone;
+	object_handlers_query_param_options.has_property = php_uri_query_param_options_object_handler_has_property;
+	object_handlers_query_param_options.read_property = php_uri_query_param_options_object_handler_read_property;
+	object_handlers_query_param_options.write_property = php_uri_query_param_options_object_handler_write_property;
+	object_handlers_query_param_options.unset_property = php_uri_query_param_options_object_handler_unset_property;
+	object_handlers_query_param_options.get_property_ptr_ptr = php_uri_query_param_options_object_handler_get_property_ptr_ptr;
+
 	php_uri_ce_whatwg_invalid_url_exception = register_class_Uri_WhatWg_InvalidUrlException(php_uri_ce_invalid_uri_exception);
 	php_uri_ce_whatwg_url_host_type = register_class_Uri_WhatWg_UrlHostType();
 	php_uri_ce_whatwg_url_validation_error = register_class_Uri_WhatWg_UrlValidationError();
@@ -1359,19 +1399,6 @@ static PHP_MINIT_FUNCTION(uri)
 	}
 
 	return SUCCESS;
-}
-
-static PHP_MINFO_FUNCTION(uri)
-{
-	php_info_print_table_start();
-	php_info_print_table_row(2, "URI support", "active");
-#ifdef URI_STATIC_BUILD
-	php_info_print_table_row(2, "uriparser bundled version", URI_VER_ANSI);
-#else
-	php_info_print_table_row(2, "uriparser compiled version", URI_VER_ANSI);
-	php_info_print_table_row(2, "uriparser loaded version", uriBaseRuntimeVersionA());
-#endif
-	php_info_print_table_end();
 }
 
 static PHP_MSHUTDOWN_FUNCTION(uri)
