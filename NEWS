@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0alpha2
 
+- OpenSSL:
+  . Fixed stream_socket_get_crypto_status() after supplemental read. (ilutov)
 
 02 Jul 2026, PHP 8.6.0alpha1
 
