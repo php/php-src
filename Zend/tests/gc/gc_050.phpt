@@ -36,5 +36,6 @@ for ($i = 0; $i < 100000; $i++) {
 }
 echo "OK\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
 OK
