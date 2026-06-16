@@ -24,7 +24,8 @@ test("false", false);
 test("true", true);
 test("object", new stdClass);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
 yield null
 Keys must be of type int|string during array unpacking
 yield false

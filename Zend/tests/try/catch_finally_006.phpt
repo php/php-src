@@ -22,7 +22,8 @@ try {
     var_dump($e->getMessage());
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
 string(4) "para"
 string(7) "finally"
 string(6) "return"
