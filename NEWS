@@ -34,6 +34,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-22265 (Another tailcall vm_interrupt bug). (Levi Morrison)
   . Fixed bug GH-20469 (Unsafe inheritance cache replay with reentrant
     autoloading). (Levi Morrison)
+  . Fixed bug GH-21972 (Corrupted variable type when a typed by-value return
+    contains a reference wrapper). (Weilin Du)
 
 - Phar:
   . Fixed a bypass of the magic ".phar" directory protection in
