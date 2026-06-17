@@ -535,7 +535,6 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		}
 
 		if (i==nvers) {
-			printf("Invalid version '%s'\n", vars[5].optval);
 			pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Invalid version specified in connection string.");
 			goto cleanup; /* unknown version specified */
 		}
