@@ -404,7 +404,15 @@ static bool php_openssl_x509_fingerprint_match(php_stream *stream, X509 *peer, c
 				break;
 		}
 
-		return method && php_openssl_x509_fingerprint_is_equal(peer, method, Z_STR_P(val));
+		if (UNEXPECTED(method == NULL)) {
+			php_stream_warn(stream, AuthFailed, "peer_fingerprint length doesn't match a md5 or sha1 hash");
+			return false;
+		}
+		if (!php_openssl_x509_fingerprint_is_equal(peer, method, Z_STR_P(val))) {
+			php_stream_warn(stream, AuthFailed, "peer_fingerprint match failure");
+			return false;
+		}
+		return true;
 	} else if (Z_TYPE_P(val) == IS_ARRAY) {
 		zval *current;
 		zend_string *key;
@@ -422,6 +430,7 @@ static bool php_openssl_x509_fingerprint_match(php_stream *stream, X509 *peer, c
 				return false;
 			}
 			if (!php_openssl_x509_fingerprint_is_equal(peer, ZSTR_VAL(key), Z_STR_P(current))) {
+				php_stream_warn(stream, AuthFailed, "peer_fingerprint match failure");
 				return false;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -635,9 +644,6 @@ static zend_result php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *pe
 	if (must_verify_fingerprint) {
 		if (Z_TYPE_P(peer_fingerprint) == IS_STRING || Z_TYPE_P(peer_fingerprint) == IS_ARRAY) {
 			if (!php_openssl_x509_fingerprint_match(stream, peer, peer_fingerprint)) {
-				php_stream_warn(stream, AuthFailed,
-					"peer_fingerprint match failure"
-				);
 				return FAILURE;
 			}
 		} else {
