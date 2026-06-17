@@ -48,6 +48,7 @@
 #define GMP_LITTLE_ENDIAN (1 << 2)
 #define GMP_BIG_ENDIAN    (1 << 3)
 #define GMP_NATIVE_ENDIAN (1 << 4)
+#define GMP_POW_MAX_EXP 1000000L
 
 #include "gmp_arginfo.h"
 
@@ -1131,8 +1132,8 @@ ZEND_FUNCTION(gmp_pow)
 		Z_PARAM_LONG(exp)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (exp < 0 || exp > ULONG_MAX) {
-		zend_argument_value_error(2, "must be between 0 and %lu", ULONG_MAX);
+	if (exp < 0 || exp > GMP_POW_MAX_EXP) {
+		zend_argument_value_error(2, "must be between 0 and %lu", GMP_POW_MAX_EXP);
 		RETURN_THROWS();
 	}
 
