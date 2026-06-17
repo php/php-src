@@ -342,6 +342,16 @@ static inline bool can_elide_list_type(
 	return is_intersection;
 }
 
+/* Whether the SSA variable is the result of a ZEND_FETCH_THIS, i.e. is $this. */
+static bool zend_ssa_var_is_this(const zend_op_array *op_array, const zend_ssa *ssa, int var) {
+	if (var < 0) {
+		return false;
+	}
+
+	int def = ssa->vars[var].definition;
+	return def >= 0 && op_array->opcodes[def].opcode == ZEND_FETCH_THIS;
+}
+
 static inline bool can_elide_return_type_check(
 		const zend_script *script, zend_op_array *op_array, zend_ssa *ssa, zend_ssa_op *ssa_op) {
 	zend_arg_info *arg_info = &op_array->arg_info[-1];
@@ -359,6 +369,16 @@ static inline bool can_elide_return_type_check(
 	uint32_t disallowed_types = use_type & ~ZEND_TYPE_PURE_MASK(arg_info->type);
 	if (!disallowed_types) {
 		/* Only contains allowed types. */
+		return true;
+	}
+
+	/* A `static` return type only accepts the late-static-bound class. Returning
+	 * $this always satisfies it, since $this is by definition an instance of
+	 * `static`. Closures are excluded as they may be rebound to another scope. */
+	if (disallowed_types == MAY_BE_OBJECT
+	 && (ZEND_TYPE_PURE_MASK(arg_info->type) & MAY_BE_STATIC)
+	 && !(op_array->fn_flags & ZEND_ACC_CLOSURE)
+	 && zend_ssa_var_is_this(op_array, ssa, ssa_op->op1_use)) {
 		return true;
 	}
 

@@ -26,14 +26,17 @@ $_main:
 0000 RETURN int(1)
 
 T::foo:
-     ; (lines=4, args=0, vars=0, tmps=1)
+     ; (lines=5, args=0, vars=0, tmps=1)
      ; (before optimizer)
      ; %s:4-6
      ; return  [] RANGE[0..0]
 0000 T0 = FETCH_THIS
-0001 RETURN T0
-0002 VERIFY_RETURN_TYPE
-0003 RETURN null
+0001 VERIFY_RETURN_TYPE T0
+0002 RETURN T0
+0003 VERIFY_RETURN_TYPE
+0004 RETURN null
+LIVE RANGES:
+     0: 0001 - 0002 (tmp/var)
 
 $_main:
      ; (lines=1, args=0, vars=0, tmps=0)
@@ -42,8 +45,11 @@ $_main:
 0000 RETURN int(1)
 
 T::foo:
-     ; (lines=2, args=0, vars=0, tmps=1)
+     ; (lines=3, args=0, vars=0, tmps=1)
      ; (after optimizer)
      ; %s:4-6
 0000 T0 = FETCH_THIS
-0001 RETURN T0
+0001 VERIFY_RETURN_TYPE T0
+0002 RETURN T0
+LIVE RANGES:
+     0: 0001 - 0002 (tmp/var)
