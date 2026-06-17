@@ -1,7 +1,5 @@
 --TEST--
 Verify that #[ZendTestAttributeAddsInterface] adding an interface doesn't leak (manually implement same interface)
---XFAIL--
-Currently leaks
 --EXTENSIONS--
 zend_test
 --FILE--
