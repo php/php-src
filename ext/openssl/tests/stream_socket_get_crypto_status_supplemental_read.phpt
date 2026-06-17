@@ -8,8 +8,8 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
-$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'crypto_status_read.pem.tmp';
-$peerName = 'crypto-status-read';
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'crypto_status_supplemental_read.pem.tmp';
+$peerName = 'crypto-status-supplemental-read';
 
 $serverCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => ['local_cert' => '%s']]);
@@ -76,7 +76,7 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'crypto_status_read.pem.tmp');
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'crypto_status_supplemental_read.pem.tmp');
 ?>
 --EXPECT--
 hello
