@@ -377,18 +377,16 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 }
 /* }}} */
 
-static int php_openssl_x509_fingerprint_cmp(X509 *peer, const char *method, const char *expected)
+static bool php_openssl_x509_fingerprint_is_equal(X509 *peer, const char *method, const zend_string *expected)
 {
-	zend_string *fingerprint;
-	int result = -1;
-
-	fingerprint = php_openssl_x509_fingerprint(peer, method, false);
+	bool is_equal = false;
+	zend_string *fingerprint = php_openssl_x509_fingerprint(peer, method, false);
 	if (fingerprint) {
-		result = strcasecmp(expected, ZSTR_VAL(fingerprint));
-		zend_string_release_ex(fingerprint, 0);
+		is_equal = zend_string_equals_ci(fingerprint, expected);
+		zend_string_release_ex(fingerprint, false);
 	}
 
-	return result;
+	return is_equal;
 }
 
 static bool php_openssl_x509_fingerprint_match(php_stream *stream, X509 *peer, const zval *val)
@@ -406,7 +404,7 @@ static bool php_openssl_x509_fingerprint_match(php_stream *stream, X509 *peer, c
 				break;
 		}
 
-		return method && php_openssl_x509_fingerprint_cmp(peer, method, Z_STRVAL_P(val)) == 0;
+		return method && php_openssl_x509_fingerprint_is_equal(peer, method, Z_STR_P(val));
 	} else if (Z_TYPE_P(val) == IS_ARRAY) {
 		zval *current;
 		zend_string *key;
@@ -423,7 +421,7 @@ static bool php_openssl_x509_fingerprint_match(php_stream *stream, X509 *peer, c
 				php_stream_warn(stream, Generic, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
 				return false;
 			}
-			if (php_openssl_x509_fingerprint_cmp(peer, ZSTR_VAL(key), Z_STRVAL_P(current)) != 0) {
+			if (!php_openssl_x509_fingerprint_is_equal(peer, ZSTR_VAL(key), Z_STR_P(current))) {
 				return false;
 			}
 		} ZEND_HASH_FOREACH_END();
