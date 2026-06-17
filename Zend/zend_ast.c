@@ -566,10 +566,24 @@ static inline bool is_power_of_two(uint32_t n) {
 ZEND_ATTRIBUTE_NODISCARD ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_add(zend_ast *ast, zend_ast *op) {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	if (list->children >= 4 && is_power_of_two(list->children)) {
-			list = zend_ast_realloc(list,
+		list = zend_ast_realloc(list,
 			zend_ast_list_size(list->children), zend_ast_list_size(list->children * 2));
 	}
 	list->child[list->children++] = op;
+	return (zend_ast *) list;
+}
+
+ZEND_ATTRIBUTE_NODISCARD ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_prepend(zend_ast *ast, zend_ast *op) {
+	zend_ast_list *list = zend_ast_get_list(ast);
+	if (list->children >= 4 && is_power_of_two(list->children)) {
+		list = zend_ast_realloc(list,
+			zend_ast_list_size(list->children), zend_ast_list_size(list->children * 2));
+	}
+	for (uint32_t i = list->children; i > 0; i--) {
+		list->child[i] = list->child[i - 1];
+	}
+	list->child[0] = op;
+	list->children++;
 	return (zend_ast *) list;
 }
 

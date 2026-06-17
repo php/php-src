@@ -329,6 +329,7 @@ ZEND_API zend_ast *zend_ast_create_arg_list(uint32_t init_children, zend_ast_kin
 #endif
 
 ZEND_ATTRIBUTE_NODISCARD ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_add(zend_ast *list, zend_ast *op);
+ZEND_ATTRIBUTE_NODISCARD ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_prepend(zend_ast *list, zend_ast *op);
 
 /* Like zend_ast_list_add(), but wraps the list into a ZEND_AST_CALLABLE_CONVERT
  * if any arg is a ZEND_AST_PLACEHOLDER_ARG. list can be a zend_ast_list, or a
