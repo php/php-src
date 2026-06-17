@@ -1636,6 +1636,23 @@ static ZEND_COLD void zend_ast_export_qstr(smart_str *str, char quote, const zen
 	}
 }
 
+static ZEND_COLD void zend_ast_export_quoted_str(smart_str *str, zend_string *s)
+{
+	size_t i;
+
+	for (i = 0; i < ZSTR_LEN(s); i++) {
+		if ((unsigned char) ZSTR_VAL(s)[i] < ' ') {
+			smart_str_appendc(str, '"');
+			zend_ast_export_qstr(str, '"', s);
+			smart_str_appendc(str, '"');
+			return;
+		}
+	}
+	smart_str_appendc(str, '\'');
+	zend_ast_export_str(str, s);
+	smart_str_appendc(str, '\'');
+}
+
 static ZEND_COLD void zend_ast_export_indent(smart_str *str, int indent)
 {
 	while (indent > 0) {
@@ -1907,9 +1924,7 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, const zval *zv, int p
 				str, Z_DVAL_P(zv), (int) EG(precision), /* zero_fraction */ true);
 			break;
 		case IS_STRING:
-			smart_str_appendc(str, '\'');
-			zend_ast_export_str(str, Z_STR_P(zv));
-			smart_str_appendc(str, '\'');
+			zend_ast_export_quoted_str(str, Z_STR_P(zv));
 			break;
 		case IS_ARRAY: {
 			zend_long idx;
@@ -1924,9 +1939,8 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, const zval *zv, int p
 					smart_str_appends(str, ", ");
 				}
 				if (key) {
-					smart_str_appendc(str, '\'');
-					zend_ast_export_str(str, key);
-					smart_str_appends(str, "' => ");
+					zend_ast_export_quoted_str(str, key);
+					smart_str_appends(str, " => ");
 				} else {
 					smart_str_append_long(str, idx);
 					smart_str_appends(str, " => ");
