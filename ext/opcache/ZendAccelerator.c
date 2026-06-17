@@ -338,7 +338,7 @@ static inline zend_result accel_activate_add(void)
 {
 #ifdef ZEND_WIN32
 	SHM_UNPROTECT();
-	INCREMENT(mem_usage);
+	zend_atomic_int_fetch_add_ex(&ZCSG(mem_usage), 1);
 	SHM_PROTECT();
 #else
 	struct flock mem_usage_lock;
@@ -362,7 +362,7 @@ static inline void accel_deactivate_sub(void)
 #ifdef ZEND_WIN32
 	if (ZCG(counted)) {
 		SHM_UNPROTECT();
-		DECREMENT(mem_usage);
+		zend_atomic_int_fetch_sub_ex(&ZCSG(mem_usage), 1);
 		ZCG(counted) = false;
 		SHM_PROTECT();
 	}
@@ -403,33 +403,26 @@ static inline void accel_unlock_all(void)
 }
 
 #if defined(ZTS) && !defined(ZEND_WIN32)
-/* In threaded SAPIs (FrankenPHP, mod_php with a threaded MPM, ...) requests
- * run as threads of one process. The fcntl() record locks used by
- * accel_activate_add()/accel_is_inactive() are per-process: a process never
- * conflicts with its own locks, so in-flight readers running as threads are
- * invisible to accel_is_inactive(). It then wrongly reports the cache as
- * inactive and a scheduled restart wipes SHM (hash table + interned strings)
- * under running requests, corrupting the heap (GH-8739, GH-14471, GH-18517).
- *
- * Mirror the approach ZEND_WIN32 already uses for the same reason (threaded
- * SAPIs): track in-flight requests with an atomic counter in SHM and have
- * accel_is_inactive() refuse to restart while it is non-zero. Registration
- * is gated on ZCG(accelerator_enabled), so once a restart is pending (the
- * accelerator is disabled) new requests no longer register and the counter
- * drains within the duration of the longest in-flight request. */
-static zend_always_inline void accel_ts_request_enter(void)
+/* Threaded POSIX SAPIs (e.g. FrankenPHP) run requests as threads of one
+ * process. fcntl() locks are per-process, so accel_is_inactive() can't see
+ * sibling threads still reading SHM (GH-8739). Mirror what Windows does with
+ * the atomic mem_usage counter, but keep it process-local: cross-process
+ * coordination stays on fcntl(), which self-heals if a process dies. */
+static zend_atomic_int accel_active_readers;
+
+static zend_always_inline void accel_reader_enter(void)
 {
-	if (!ZCG(ts_reader_registered)) {
-		__atomic_add_fetch(&ZCSG(ts_active_requests), 1, __ATOMIC_SEQ_CST);
-		ZCG(ts_reader_registered) = true;
+	if (!ZCG(reader_counted)) {
+		zend_atomic_int_fetch_add_ex(&accel_active_readers, 1);
+		ZCG(reader_counted) = true;
 	}
 }
 
-static zend_always_inline void accel_ts_request_leave(void)
+static zend_always_inline void accel_reader_leave(void)
 {
-	if (ZCG(ts_reader_registered)) {
-		__atomic_sub_fetch(&ZCSG(ts_active_requests), 1, __ATOMIC_SEQ_CST);
-		ZCG(ts_reader_registered) = false;
+	if (ZCG(reader_counted)) {
+		zend_atomic_int_fetch_sub_ex(&accel_active_readers, 1);
+		ZCG(reader_counted) = false;
 	}
 }
 #endif
@@ -926,13 +919,6 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 
 static inline bool accel_is_inactive(void)
 {
-#if defined(ZTS) && !defined(ZEND_WIN32)
-	/* Threads of this process may still be inside requests registered as
-	 * SHM readers; the fcntl() probe below cannot detect them. */
-	if (__atomic_load_n(&ZCSG(ts_active_requests), __ATOMIC_SEQ_CST) != 0) {
-		return false;
-	}
-#endif
 #ifdef ZEND_WIN32
 	/* on Windows, we don't need kill_all_lockers() because SAPIs
 	   that work on Windows don't manage child processes (and we
@@ -941,10 +927,19 @@ static inline bool accel_is_inactive(void)
 	   instead of flocks (atomics are much faster but they don't
 	   provide us with the PID of locker processes) */
 
-	if (LOCKVAL(mem_usage) == 0) {
+	if (zend_atomic_int_load_ex(&ZCSG(mem_usage)) == 0) {
 		return true;
 	}
 #else
+#if defined(ZTS)
+	/* Sibling threads of this process are invisible to the fcntl() probe below
+	 * (locks are per-process), so consult the process-local reader counter
+	 * first. Acts as the whole check for single-process SAPIs like FrankenPHP;
+	 * for multi-process ones the fcntl() probe still covers other processes. */
+	if (zend_atomic_int_load_ex(&accel_active_readers) != 0) {
+		return false;
+	}
+#endif
 	struct flock mem_usage_check;
 
 	mem_usage_check.l_type = F_WRLCK;
@@ -2782,11 +2777,18 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 	ZCG(accelerator_enabled) = ZCSG(accelerator_enabled);
 
 #if defined(ZTS) && !defined(ZEND_WIN32)
+	/* Register as an active SHM reader for the duration of this request so a
+	 * restart scheduled while we run waits for us (see accel_is_inactive()).
+	 * Done after the restart block above, so the restarting thread never counts
+	 * itself. Gated on accelerator_enabled: once a restart is pending the
+	 * accelerator is disabled, new requests stop registering and the counter
+	 * drains to zero. */
 	if (ZCG(accelerator_enabled)) {
-		accel_ts_request_enter();
+		accel_reader_enter();
 		if (UNEXPECTED(ZCSG(restart_in_progress))) {
-			/* lost the race against a restart that passed accel_is_inactive()
-			 * before our registration became visible; run uncached */
+			/* A restart passed accel_is_inactive() before our increment became
+			 * visible and is wiping SHM now; back out and run uncached. */
+			accel_reader_leave();
 			ZCG(accelerator_enabled) = false;
 		}
 	}
@@ -2830,6 +2832,12 @@ void accel_deactivate(void)
 
 zend_result accel_post_deactivate(void)
 {
+#if defined(ZTS) && !defined(ZEND_WIN32)
+	/* Stop counting as an active SHM reader (balances accel_reader_enter() in
+	 * RINIT). A no-op if this request never registered. */
+	accel_reader_leave();
+#endif
+
 	if (ZCG(cwd)) {
 		zend_string_release_ex(ZCG(cwd), 0);
 		ZCG(cwd) = NULL;
@@ -2842,14 +2850,6 @@ zend_result accel_post_deactivate(void)
 	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
 	accel_unlock_all();
 	ZCG(counted) = false;
-
-#if defined(ZTS) && !defined(ZEND_WIN32)
-	if (!file_cache_only && accel_shared_globals) {
-		SHM_UNPROTECT();
-		accel_ts_request_leave();
-		SHM_PROTECT();
-	}
-#endif
 
 	return SUCCESS;
 }
