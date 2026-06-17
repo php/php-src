@@ -453,7 +453,7 @@ PHPAPI zend_long php_stream_filter_count(php_stream_filter_chain *chain) {
         return 0;
     }
 
-    int count = 1;
+    zend_long count = 1;
     php_stream_filter *node = chain->head;
     while (node != chain->tail) {
         count += 1;
