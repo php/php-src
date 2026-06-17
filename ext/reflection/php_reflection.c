@@ -2477,9 +2477,20 @@ ZEND_METHOD(ReflectionParameter, __construct)
 	switch (Z_TYPE_P(reference)) {
 		case IS_STRING:
 			{
-				zend_string *lcname = zend_string_tolower(Z_STR_P(reference));
-				fptr = zend_hash_find_ptr(EG(function_table), lcname);
-				zend_string_release(lcname);
+				zend_string *fname = Z_STR_P(reference);
+				zend_string *lcname;
+				if (UNEXPECTED(ZSTR_VAL(fname)[0] == '\\')) {
+					/* Ignore leading "\" */
+					ALLOCA_FLAG(use_heap)
+					ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(fname) - 1, use_heap);
+					zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(fname) + 1, ZSTR_LEN(fname) - 1);
+					fptr = zend_fetch_function(lcname);
+					ZSTR_ALLOCA_FREE(lcname, use_heap);
+				} else {
+					lcname = zend_string_tolower(fname);
+					fptr = zend_fetch_function(lcname);
+					zend_string_release(lcname);
+				}
 				if (!fptr) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Function %s() does not exist", Z_STRVAL_P(reference));
