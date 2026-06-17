@@ -233,7 +233,7 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	RETCODE ret;
-	BYTE id[32];
+	BYTE id[40];
 	size_t len;
 
 	/*
@@ -266,7 +266,7 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 		return NULL;
 	}
 
-	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
+	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)sizeof(id));
 	dbcancel(H->link);
 
 	return zend_string_init((const char *) id, len, 0);
