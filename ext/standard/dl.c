@@ -43,7 +43,7 @@ PHPAPI PHP_FUNCTION(dl)
 	size_t filename_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(filename, filename_len)
+		Z_PARAM_PATH(filename, filename_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PG(enable_dl)) {
