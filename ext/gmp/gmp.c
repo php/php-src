@@ -1126,14 +1126,22 @@ ZEND_FUNCTION(gmp_pow)
 	mpz_ptr gmpnum_result;
 	mpz_ptr gmpnum_base;
 	zend_long exp;
+	size_t bits;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_base)
 		Z_PARAM_LONG(exp)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (exp < 0 || exp > GMP_POW_MAX_EXP) {
-		zend_argument_value_error(2, "must be between 0 and %lu", GMP_POW_MAX_EXP);
+	if (exp < 0) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+	
+	bits = mpz_sizeinbase(gmpnum_base, 2);
+
+	if (exp < 0 || exp > (SIZE_MAX - 5) / bits) {
+		zend_argument_value_error(2, "results in a value that exceeds the supported size");
 		RETURN_THROWS();
 	}
 

@@ -18,5 +18,5 @@ echo "Done\n";
 ?>
 --EXPECTF--
 Testing gmp_pow overflow safety
-ValueError: gmp_pow(): Argument #2 ($exponent) must be between 0 and 1000000
+ValueError: gmp_pow(): Argument #2 ($exponent) results in a value that exceeds the supported size
 Done
