@@ -27,7 +27,7 @@
 #define KQUEUE_FD_GARBAGE_WRITE    (1 << 3)  /* Write filter fired, needs read cleanup */
 #define KQUEUE_FD_HAS_GARBAGE      (KQUEUE_FD_GARBAGE_READ | KQUEUE_FD_GARBAGE_WRITE)
 
-typedef struct {
+typedef struct kqueue_backend_data {
 	int kqueue_fd;
 	struct kevent *events;
 	int events_capacity;

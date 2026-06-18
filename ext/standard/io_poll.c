@@ -44,7 +44,7 @@ static zend_object_handlers php_io_poll_watcher_object_handlers;
 static zend_object_handlers php_io_poll_handle_object_handlers;
 
 /* Watcher object structure */
-typedef struct {
+typedef struct php_io_poll_watcher_object {
 	php_poll_handle_object *handle;
 	uint32_t watched_events;
 	uint32_t triggered_events;
@@ -55,14 +55,14 @@ typedef struct {
 } php_io_poll_watcher_object;
 
 /* Context object structure */
-typedef struct {
+typedef struct php_io_poll_context_object {
 	php_poll_ctx *ctx;
 	HashTable *watchers; /* Maps handle pointer -> watcher object */
 	zend_object std;
 } php_io_poll_context_object;
 
 /* Stream poll handle specific data */
-typedef struct {
+typedef struct php_stream_poll_handle_data {
 	php_stream *stream;
 	zend_resource *res;
 } php_stream_poll_handle_data;

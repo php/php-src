@@ -18,7 +18,7 @@
 
 #include <sys/epoll.h>
 
-typedef struct {
+typedef struct epoll_backend_data {
 	int epoll_fd;
 	struct epoll_event *events;
 	int events_capacity;

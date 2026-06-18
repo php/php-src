@@ -22,7 +22,7 @@
 #include <string.h>
 #include <errno.h>
 
-typedef struct {
+typedef struct eventport_backend_data {
 	int port_fd;
 	port_event_t *events;
 	int events_capacity;
@@ -212,7 +212,7 @@ static zend_result eventport_backend_remove(php_poll_ctx *ctx, int fd)
 }
 
 /* Callback context for associating fds */
-typedef struct {
+typedef struct eventport_associate_ctx {
 	eventport_backend_data_t *backend_data;
 	php_poll_ctx *ctx;
 	bool has_error;
