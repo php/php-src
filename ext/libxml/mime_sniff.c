@@ -271,7 +271,7 @@ PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_string(const char *sta
 			/* 11.9.1. Set parameterValue to the result of collecting a sequence of code points that are not ';' */
 			size_t parameter_value_length = collect_a_sequence_of_code_points(start, end, is_not_semicolon);
 			parameter_value = zend_string_init(start, parameter_value_length, false);
-			start += parameter_name_length;
+			start += parameter_value_length;
 
 			/* 11.9.2. Remove trailing HTTP whitespace from parameterValue */
 			while (ZSTR_LEN(parameter_value) > 0 && is_http_whitespace(ZSTR_VAL(parameter_value)[ZSTR_LEN(parameter_value) - 1])) {
