@@ -178,8 +178,6 @@ $baseDir = __DIR__ . '/gh9310';
 --EXPECTF--
 PHP Warning:  stream_socket_accept(): Path for local_cert in ssl stream context option must not contain any null bytes in %s : eval()'d code on line %d
 PHP Warning:  stream_socket_accept(): Accept failed: %s
-PHP Warning:  stream_socket_accept(): Unable to get real path of certificate file `%scert.crt' in %s : eval()'d code on line %d
-PHP Warning:  stream_socket_accept(): Failed to enable crypto in %s : eval()'d code on line %d
 PHP Warning:  stream_socket_accept(): Path for local_pk in ssl stream context option must not contain any null bytes in %s : eval()'d code on line %d
 PHP Warning:  stream_socket_accept(): Accept failed: %s
 PHP Warning:  stream_socket_accept(): Unable to get real path of private key file `%sprivate.key' in %s : eval()'d code on line %d
@@ -198,8 +196,6 @@ PHP Warning:  stream_socket_accept(): Failed setting local cert chain file `%sgh
 PHP Warning:  stream_socket_accept(): Failed to enable crypto in %s : eval()'d code on line %d
 PHP Warning:  stream_socket_accept(): open_basedir restriction in effect. File(%sgh9310_sni_uk_key.pem.tmp) is not within the allowed path(s): (%sgh9310) in %s : eval()'d code on line %d
 PHP Warning:  stream_socket_accept(): Accept failed: %s
-PHP Warning:  stream_socket_accept(): Failed setting local private key file `%sgh9310_sni_uk_key.pem.tmp';  could not open file in %s : eval()'d code on line %d
-PHP Warning:  stream_socket_accept(): Failed to enable crypto in %s : eval()'d code on line %d
 PHP Warning:  stream_socket_accept(): open_basedir restriction in effect. File(%sgh9310_sni_us_cert.pem.tmp) is not within the allowed path(s): (%sgh9310) in %s : eval()'d code on line %d
 PHP Warning:  stream_socket_accept(): Accept failed: %s
 PHP Warning:  stream_socket_accept(): Failed setting local cert chain file `%sgh9310_sni_us_cert.pem.tmp'; could not open file in %s : eval()'d code on line %d
