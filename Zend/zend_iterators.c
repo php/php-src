@@ -51,7 +51,8 @@ static const zend_object_handlers iterator_object_handlers = {
 	iter_wrapper_get_gc,
 	NULL, /* do_operation */
 	NULL, /* compare */
-	NULL  /* get_properties_for */
+	NULL,  /* get_properties_for */
+	NULL	/* equals */
 };
 
 ZEND_API void zend_register_iterator_wrapper(void)
