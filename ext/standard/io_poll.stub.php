@@ -39,7 +39,7 @@ namespace Io\Poll {
     {
     }
 
-    /*
+    /**
      * @strict-properties
      * @not-serializable
      */
@@ -70,7 +70,7 @@ namespace Io\Poll {
         public function remove(): void {}
     }
 
-    /*
+    /**
      * @strict-properties
      * @not-serializable
      */
@@ -145,7 +145,7 @@ namespace Io\Poll {
 }
 
 namespace {
-    /*
+    /**
      * @strict-properties
      * @not-serializable
      */
