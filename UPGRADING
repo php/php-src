@@ -235,6 +235,10 @@ PHP 8.6 UPGRADE NOTES
     tcp_keepintvl and tcp_keepcnt that allow setting socket keepalive
     options.
   . Allowed casting casting filtered streams as file descriptor for select.
+  . Added the "write_seek_mode stream" filter parameter for the bz2, iconv,
+    zlib, and string stream filters. This parameter must be set via an
+    associative array where the key is "write_seek_mode stream" and the
+    value is one of the following strings "preserve", "reset", or "strict".
 
 - URI:
   . Added Uri\Rfc3986\Uri:getUriType() and Uri\WhatWg\Url:isSpecialScheme().
