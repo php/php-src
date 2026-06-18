@@ -873,7 +873,7 @@ bool ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_
 #else
 			while (e > ptr && (s = memchr(ptr, '\r', (e - ptr)))) {
 				php_stream_write(outstream, ptr, (s - ptr));
-				if (*(s + 1) == '\n') {
+				if (s + 1 < e && *(s + 1) == '\n') {
 					s++;
 					php_stream_putc(outstream, '\n');
 				}
