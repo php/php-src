@@ -164,6 +164,7 @@ PHP                                                                        NEWS
     ignored. (ndossche)
   . Fixed a bypass of the magic ".phar" directory protection in
     Phar::addEmptyDir() for paths starting with "/.phar". (Weilin Du)
+  . Fixed an integer underflow when parsing ZIP extra fields. (Weilin Du)
   . Phar::addEmptyDir() now allows non-magic directory names that merely
     share the ".phar" prefix. (Weilin Du)
   . Support overridden methods in SplFileInfo for getMTime() and getPathname()
