@@ -8,89 +8,89 @@ mbstring
 // We convert runs of whitespace, including CR, LF, tab, and space, to a single space...
 // but ONLY when that run of whitespace does not occur right in the middle between two
 // valid MIME encoded words
-mb_internal_encoding('UCS-2');
+ini_set('internal_encoding', 'UCS-2');
 var_dump(bin2hex(mb_decode_mimeheader("2,\rGCG\xb3GS")));
 
 // We DO convert a run of whitespace to a single space at the very beginning of the input string,
 // as long as it is followed by a non-whitespace character
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader("\n8i")));
 
 // But not if it is just a CR or LF at the end of the string
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader("\r")));
 
 // Not if it is a run of whitespace going right up to the end of the string
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader("\n ")));
 
 // Handle = which doesn't initiate a valid encoded word
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader(",\x13@=,")));
 
 // Encoded word which should not be accepted
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader("=?I?B??=")));
 
 // Encoded word with invalid charset name, and input string ends with whitespace
 // The old implementation of mb_decode_mimeheader would get 'stuck' on the invalid encoding name
 // and could never get out of that state; it would not even try to interpret any other encoded words
 // up to the end of the input string
-mb_internal_encoding('ISO-8859-7');
+ini_set('internal_encoding', 'ISO-8859-7');
 var_dump(bin2hex(mb_decode_mimeheader("=?=\x20?=?R\xb7=?=\x20?\x8b\x00====?===??=\xc5UC-R\xb7=?=\x20?=?=====?=\x20?======?======?=\x20?======?===??=\xc5UC-KR\xb7=?=\x20?=?===?==?\x0a")));
 
 // While the old implementation would generally trim off whitespace at the end of the input string,
 // but there was a bug whereby it would not do this when the whitespace character was the 100th
 // byte of an invalid charset name
-mb_internal_encoding('UCS-2');
+ini_set('internal_encoding', 'UCS-2');
 var_dump(bin2hex(mb_decode_mimeheader("=?\xc2\x86tf7,U\x01\x00`@\x00\x04|\xf1D\x18\x00\x00\x00v\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xff\x13f7,U&\x00S\x01\x00\x17,D\xcb\xcb\xcb\xcb\xcb\xcb\xcb\x01\x00\x00\x14\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\xcb\x00\x11\x00\x00\x00\x00\x00\x00\x0a")));
 
 // Empty encoded word
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader("=?us?B?")));
 
 // Encoded word with just one invalid Base64 byte
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader("=?us?B?-")));
 
 // Encoded word with an invalid Base64 byte followed by a valid Base64 byte
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader("=?us?B?-s")));
 
 // Empty encoded word with a ? which looks like it should be terminator, but = is missing
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader("=?us?B??")));
 
 // Encoded word with just one invalid Base64 byte, but this time properly terminated
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader("=?us?B?\x00?=")));
 
 // Invalid encoded word, followed immediately by valid encoded word
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader("=?=?hz?b?")));
 
 // Another example of invalid encoded word followed immediately by valid encoded word
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader("=?==?hz?b?")));
 
 // Yet another example
-mb_internal_encoding('ASCII');
+ini_set('internal_encoding', 'ASCII');
 var_dump(bin2hex(mb_decode_mimeheader("=?,=?hz?b?")));
 
 // In PHP 8.0-8.1 this would cause a crash
-mb_internal_encoding('UUENCODE');
+ini_set('internal_encoding', 'UUENCODE');
 var_dump(bin2hex(mb_decode_mimeheader("")));
 
 // The conversion filter for SJIS-Mobile#SOFTBANK did not work correctly when it was
 // passed the last buffer of wchars without passing 'end' flag, then called one more
 // time with an empty buffer and 'end' flag to finish up
-mb_internal_encoding('SJIS-Mobile#SOFTBANK');
+ini_set('internal_encoding', 'SJIS-Mobile#SOFTBANK');
 var_dump(bin2hex(mb_decode_mimeheader("6")));
 
 // Same for SJIS-Mobile#KDDI and SJIS-Mobile#DOCOMO
-mb_internal_encoding('SJIS-Mobile#KDDI');
+ini_set('internal_encoding', 'SJIS-Mobile#SOFTBANK');
 var_dump(bin2hex(mb_decode_mimeheader("6")));
-mb_internal_encoding('SJIS-Mobile#DOCOMO');
+ini_set('internal_encoding', 'SJIS-Mobile#SOFTBANK');
 var_dump(bin2hex(mb_decode_mimeheader("6")));
 
 ?>

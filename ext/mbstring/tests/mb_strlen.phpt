@@ -101,15 +101,19 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 == ASCII ==
 40
 40
 == EUC-JP ==
 43
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 72
 == SJIS ==
 43
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 72
 -- Testing illegal bytes 0x80,0xFD-FF --
 2
@@ -136,9 +140,13 @@ try {
 6
 == JIS ==
 43
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 90
 == UTF-8 ==
 43 codepoints
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 101 bytes
 23
 2300
@@ -147,4 +155,6 @@ try {
 2300
 2048
 == WRONG PARAMETERS ==
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 mb_strlen(): Argument #2 ($encoding) must be a valid encoding, "BAD_NAME" given

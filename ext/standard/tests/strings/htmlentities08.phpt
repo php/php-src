@@ -7,7 +7,7 @@ internal_encoding=EUC-JP
 mbstring
 --FILE--
 <?php
-    print mb_internal_encoding()."\n";
+    print ini_get('internal_encoding')."\n";
     var_dump(htmlentities("\xa1\xa2\xa1\xa3\xa1\xa4", ENT_QUOTES, ''));
 ?>
 --EXPECTF--

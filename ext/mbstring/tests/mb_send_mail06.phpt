@@ -7,7 +7,7 @@ mbstring
 if (!function_exists("mb_send_mail") || !mb_language("Traditional Chinese")) {
     die("skip mb_send_mail() not available");
 }
-if (!@mb_internal_encoding('BIG5')) {
+if (!@ini_set('internal_encoding','BIG5')) {
     die("skip BIG5 encoding is not available on this platform");
 }
 ?>
@@ -24,8 +24,8 @@ readfile(__DIR__ . "/mb_send_mail06.eml");
 
 /* Traditional Chinese () */
 if (mb_language("traditional chinese")) {
-    mb_internal_encoding('BIG5');
-    mb_send_mail($to, "´úÅç ".mb_language(), "´úÅç");
+    ini_set('internal_encoding','BIG5');
+    mb_send_mail($to, "ï¿½ï¿½ï¿½ï¿½ ".mb_language(), "ï¿½ï¿½ï¿½ï¿½");
     readfile(__DIR__ . "/mb_send_mail06.eml");
 }
 ?>
@@ -47,4 +47,4 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=BIG5
 Content-Transfer-Encoding: 8bit
 
-´úÅç
+ï¿½ï¿½ï¿½ï¿½

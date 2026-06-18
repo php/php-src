@@ -104,8 +104,10 @@ var_dump(mb_strpos("abc\x80\x80", "\x80", 0, "UTF-8"));
 var_dump(mb_strpos("abc\xFF", "c\xFF", 0, "UTF-8"));
 
 ?>
---EXPECT--
+--EXPECTF--
 String len: 43
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 == POSITIVE OFFSET ==
 10
 0
@@ -125,6 +127,8 @@ String len: 43
 OK_STR
 OK_NEWLINE
 == NO ENCODING PARAMETER ==
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 10
 0
 3
@@ -132,6 +136,8 @@ OK_NEWLINE
 OK_STR
 OK_NEWLINE
 == NO OFFSET AND ENCODING PARAMETER ==
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 10
 0
 3
