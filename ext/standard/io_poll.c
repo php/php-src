@@ -68,11 +68,9 @@ typedef struct php_stream_poll_handle_data {
 } php_stream_poll_handle_data;
 
 /* Accessor macros */
-#define PHP_POLL_CONTEXT_OBJ_FROM_ZOBJ(_obj) \
-	((php_io_poll_context_object *) ((char *) (_obj) - offsetof(php_io_poll_context_object, std)))
+#define PHP_POLL_CONTEXT_OBJ_FROM_ZOBJ(_obj) ZEND_CONTAINER_OF(_obj, php_io_poll_context_object, std)
 
-#define PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(_obj) \
-	((php_io_poll_watcher_object *) ((char *) (_obj) - offsetof(php_io_poll_watcher_object, std)))
+#define PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(_obj) ZEND_CONTAINER_OF(_obj, php_io_poll_watcher_object, std)
 
 #define PHP_POLL_WATCHER_OBJ_FROM_ZV(_zv) PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(Z_OBJ_P(_zv))
 #define PHP_POLL_CONTEXT_OBJ_FROM_ZV(_zv) PHP_POLL_CONTEXT_OBJ_FROM_ZOBJ(Z_OBJ_P(_zv))
