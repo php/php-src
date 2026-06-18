@@ -9,10 +9,6 @@ opcache.jit=function
 opcache.preload={PWD}/preload_bug80634.inc
 --EXTENSIONS--
 opcache
---SKIPIF--
-<?php
-if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
-?>
 --FILE--
 <?php
 $v = new SomeClass(5);
