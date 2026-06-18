@@ -56,7 +56,7 @@ class Tester
     /**
      * @var array
      */
-    static private array $filesToClean = ['.user.ini'];
+    static private array $filesToClean = ['.user.ini', 'php.ini'];
 
     /**
      * @var bool
@@ -496,12 +496,12 @@ class Tester
     /**
      * Start PHP-FPM master process
      *
-     * @param array      $extraArgs   Command extra arguments.
-     * @param bool       $forceStderr Whether to output to stderr so error log is used.
-     * @param bool       $daemonize   Whether to start FPM daemonized
-     * @param array      $extensions  List of extension to add if shared build used.
-     * @param array      $iniEntries  List of ini entries to use.
-     * @param array|null $envVars     List of env variable to execute FPM with or null to use the current ones.
+     * @param array        $extraArgs   Command extra arguments.
+     * @param bool         $forceStderr Whether to output to stderr so error log is used.
+     * @param bool         $daemonize   Whether to start FPM daemonized
+     * @param array        $extensions  List of extension to add if shared build used.
+     * @param array|string $iniEntries  List of ini entries or content of php.ini to use.
+     * @param array|null   $envVars     List of env variable to execute FPM with or null to use the current ones.
      *
      * @return bool
      * @throws \Exception
@@ -511,7 +511,7 @@ class Tester
         bool $forceStderr = true,
         bool $daemonize = false,
         array $extensions = [],
-        array $iniEntries = [],
+        array|string $iniEntries = [],
         ?array $envVars = null,
     ) {
         $configFile = $this->createConfig();
@@ -536,8 +536,15 @@ class Tester
             }
         }
 
-        foreach ($iniEntries as $iniEntryName => $iniEntryValue) {
-            $cmd[] = '-d' . $iniEntryName . '=' . $iniEntryValue;
+        if (is_string($iniEntries)) {
+            $iniFile = __DIR__ . '/php.ini';
+            $this->trace('Writing php.ini file', $iniEntries, isFile: true);
+            file_put_contents($iniFile, $iniEntries);
+            $cmd[] = '-c' . $iniFile;
+        } else {
+            foreach ($iniEntries as $iniEntryName => $iniEntryValue) {
+                $cmd[] = '-d' . $iniEntryName . '=' . $iniEntryValue;
+            }
         }
 
         if ($envVars['TEST_FPM_RUN_AS_ROOT'] ?? getenv('TEST_FPM_RUN_AS_ROOT')) {
