@@ -851,7 +851,7 @@ PHP_METHOD(Io_Poll_Context, wait)
 		RETURN_THROWS();
 	}
 
-	php_poll_event *events = emalloc(sizeof(php_poll_event) * max_events);
+	php_poll_event *events = safe_emalloc(max_events, sizeof(*events), 0);
 	int num_events = php_poll_wait(intern->ctx, events, (int) max_events, timeout);
 
 	if (num_events < 0) {
