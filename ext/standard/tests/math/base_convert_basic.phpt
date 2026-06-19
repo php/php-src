@@ -14,7 +14,8 @@ $values = array(10,
                 "27",
                 "39",
                 "5F",
-                "3XYZ"
+                "3XYZ",
+                "1111111111111111"
                 );
 
 for ($f= 0; $f < count($frombase); $f++) {
@@ -57,6 +58,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 0
+.........value= 1111111111111111 res = 1111111111111111
 ......to base is 8
 .........value= 10 res = 2
 
@@ -84,6 +86,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 0
+.........value= 1111111111111111 res = 177777
 ......to base is 10
 .........value= 10 res = 2
 
@@ -111,6 +114,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 0
+.........value= 1111111111111111 res = 65535
 ......to base is 16
 .........value= 10 res = 2
 
@@ -138,6 +142,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 0
+.........value= 1111111111111111 res = ffff
 ......to base is 36
 .........value= 10 res = 2
 
@@ -165,6 +170,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 0
+.........value= 1111111111111111 res = 1ekf
 
 ...from base is 8
 ......to base is 2
@@ -188,6 +194,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 11
+.........value= 1111111111111111 res = 1001001001001001001001001001001001001001001001
 ......to base is 8
 .........value= 10 res = 10
 .........value= 27 res = 27
@@ -209,6 +216,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 3
+.........value= 1111111111111111 res = 1111111111111111
 ......to base is 10
 .........value= 10 res = 8
 .........value= 27 res = 23
@@ -230,6 +238,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 3
+.........value= 1111111111111111 res = 40210710958665
 ......to base is 16
 .........value= 10 res = 8
 .........value= 27 res = 17
@@ -251,6 +260,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 3
+.........value= 1111111111111111 res = 249249249249
 ......to base is 36
 .........value= 10 res = 8
 .........value= 27 res = n
@@ -272,6 +282,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 3
+.........value= 1111111111111111 res = e94jn3f49
 
 ...from base is 10
 ......to base is 2
@@ -289,6 +300,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 11
+.........value= 1111111111111111 res = 11111100101000110010110111000101010111000111000111
 ......to base is 8
 .........value= 10 res = 12
 .........value= 27 res = 33
@@ -304,6 +316,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 3
+.........value= 1111111111111111 res = 37450626705270707
 ......to base is 10
 .........value= 10 res = 10
 .........value= 27 res = 27
@@ -319,6 +332,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 3
+.........value= 1111111111111111 res = 1111111111111111
 ......to base is 16
 .........value= 10 res = a
 .........value= 27 res = 1b
@@ -334,6 +348,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 3
+.........value= 1111111111111111 res = 3f28cb71571c7
 ......to base is 36
 .........value= 10 res = a
 .........value= 27 res = r
@@ -349,6 +364,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 3
+.........value= 1111111111111111 res = axutebils7
 
 ...from base is 16
 ......to base is 2
@@ -364,6 +380,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 11
+.........value= 1111111111111111 res = 1000100010001000100010001000100010001000100010001000100010001
 ......to base is 8
 .........value= 10 res = 20
 .........value= 27 res = 47
@@ -377,6 +394,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 3
+.........value= 1111111111111111 res = 104210421042104210421
 ......to base is 10
 .........value= 10 res = 16
 .........value= 27 res = 39
@@ -390,6 +408,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 3
+.........value= 1111111111111111 res = 1229782938247303441
 ......to base is 16
 .........value= 10 res = 10
 .........value= 27 res = 27
@@ -403,6 +422,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 3
+.........value= 1111111111111111 res = 1111111111111111
 ......to base is 36
 .........value= 10 res = g
 .........value= 27 res = 13
@@ -416,6 +436,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 .........value= 3XYZ res = 3
+.........value= 1111111111111111 res = 9ccxo2jlx3ip
 
 ...from base is 36
 ......to base is 2
@@ -429,6 +450,9 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 39 res = 1110101
 .........value= 5F res = 11000011
 .........value= 3XYZ res = 101100111010111011
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
+.........value= 1111111111111111 res = 1101101010010011001001100101101101110100000000000000000000000000
 ......to base is 8
 .........value= 10 res = 44
 .........value= 27 res = 117
@@ -440,6 +464,9 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 39 res = 165
 .........value= 5F res = 303
 .........value= 3XYZ res = 547273
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
+.........value= 1111111111111111 res = 60115552231145556400000000
 ......to base is 10
 .........value= 10 res = 36
 .........value= 27 res = 79
@@ -451,6 +478,9 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 39 res = 117
 .........value= 5F res = 195
 .........value= 3XYZ res = 183995
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
+.........value= 1111111111111111 res = 227390317427040000046866
 ......to base is 16
 .........value= 10 res = 24
 .........value= 27 res = 4f
@@ -462,6 +492,9 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 39 res = 75
 .........value= 5F res = c3
 .........value= 3XYZ res = 2cebb
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
+.........value= 1111111111111111 res = 3026da93265b74000000
 ......to base is 36
 .........value= 10 res = 10
 .........value= 27 res = 27
@@ -473,3 +506,6 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 39 res = 39
 .........value= 5F res = 5f
 .........value= 3XYZ res = 3xyz
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
+.........value= 1111111111111111 res = 11111111111wsws0

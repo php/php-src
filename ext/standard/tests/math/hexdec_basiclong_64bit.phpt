@@ -30,18 +30,24 @@ foreach ($hexLongStrs as $strVal) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 --- testing: 7fffffffffffffff ---
 int(9223372036854775807)
 --- testing: ffffffffffffffff ---
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(1.8446744073709552E+19)
 --- testing: 7fffffff ---
 int(2147483647)
 --- testing: ffffffff ---
 int(4294967295)
 --- testing: 7ffffffffffffffff ---
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(1.4757395258967641E+20)
 --- testing: ffffffffffffffffff ---
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(4.722366482869645E+21)
 --- testing: 7ffffffff ---
 int(34359738367)

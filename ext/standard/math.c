@@ -898,6 +898,7 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 				num = num * base + c;
 				break;
 			} else {
+				zend_error(E_NOTICE, "Input number exceeds maximum integer value, precision has been lost in conversion");
 				fnum = (double)num;
 				mode = 1;
 			}
