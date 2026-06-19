@@ -18,6 +18,7 @@
 #include "php_network.h"
 #include "php_poll.h"
 #include "io_poll_arginfo.h"
+#include "io_poll_decl.h"
 
 /* Class entries */
 static zend_class_entry *php_io_poll_backend_class_entry;
@@ -85,26 +86,7 @@ static inline void php_io_poll_throw_failed_operation(
 /* Event enum to bit mask mapping */
 static uint32_t php_io_poll_event_enum_to_bit(zend_object *event_enum)
 {
-	zval *case_name = zend_enum_fetch_case_name(event_enum);
-	const char *name = Z_STRVAL_P(case_name);
-
-	if (strcmp(name, "Read") == 0) {
-		return PHP_POLL_READ;
-	} else if (strcmp(name, "Write") == 0) {
-		return PHP_POLL_WRITE;
-	} else if (strcmp(name, "Error") == 0) {
-		return PHP_POLL_ERROR;
-	} else if (strcmp(name, "HangUp") == 0) {
-		return PHP_POLL_HUP;
-	} else if (strcmp(name, "ReadHangUp") == 0) {
-		return PHP_POLL_RDHUP;
-	} else if (strcmp(name, "OneShot") == 0) {
-		return PHP_POLL_ONESHOT;
-	} else if (strcmp(name, "EdgeTriggered") == 0) {
-		return PHP_POLL_ET;
-	}
-
-	return 0;
+	return 1 << (zend_enum_fetch_case_id(event_enum) - 1);
 }
 
 static uint32_t php_io_poll_event_enums_to_events(zval *event_enums)
@@ -179,24 +161,7 @@ static zend_result php_io_poll_events_to_event_enums(uint32_t events, zval *even
 /* Backend enum name to backend type mapping */
 static php_poll_backend_type php_io_poll_backend_enum_to_type(zend_object *backend_enum)
 {
-	zval *case_name = zend_enum_fetch_case_name(backend_enum);
-	const char *name = Z_STRVAL_P(case_name);
-
-	if (strcmp(name, "Auto") == 0) {
-		return PHP_POLL_BACKEND_AUTO;
-	} else if (strcmp(name, "Poll") == 0) {
-		return PHP_POLL_BACKEND_POLL;
-	} else if (strcmp(name, "Epoll") == 0) {
-		return PHP_POLL_BACKEND_EPOLL;
-	} else if (strcmp(name, "Kqueue") == 0) {
-		return PHP_POLL_BACKEND_KQUEUE;
-	} else if (strcmp(name, "EventPorts") == 0) {
-		return PHP_POLL_BACKEND_EVENTPORT;
-	} else if (strcmp(name, "WSAPoll") == 0) {
-		return PHP_POLL_BACKEND_WSAPOLL;
-	}
-
-	return PHP_POLL_BACKEND_AUTO;
+	return zend_enum_fetch_case_id(backend_enum) - 2;
 }
 
 static const char *php_io_poll_backend_type_to_name(php_poll_backend_type type)

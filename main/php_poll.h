@@ -24,7 +24,7 @@
 
 /* clang-format off */
 
-/* Event types */
+/* Event types. Keep in sync with io_poll.stub.php! */
 #define PHP_POLL_READ    0x01
 #define PHP_POLL_WRITE   0x02
 #define PHP_POLL_ERROR   0x04
@@ -37,7 +37,7 @@
 #define PHP_POLL_FLAG_PERSISTENT 0x01
 #define PHP_POLL_FLAG_RAW_EVENTS 0x02
 
-/* Poll backend types */
+/* Poll backend types. Keep in sync with io_poll.stub.php! */
 typedef enum {
 	PHP_POLL_BACKEND_AUTO = -1,
 	PHP_POLL_BACKEND_POLL = 0,
