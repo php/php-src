@@ -185,6 +185,8 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fix a bunch of memory leaks and crashes on edge cases. (ndossche)
+  . Fixed bug GH-18988 (Check various unchecked error-prone OpenSSL function
+    return values). (alexandre-daubois)
 
 - PDO_Firebird:
   . Fixed GHSA-w476-322c-wpvm (SQL injection via NUL bytes in quoted strings).
