@@ -58,13 +58,15 @@ foreach($inputs as $input) {
     try {
         var_dump(bindec($input));
     } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+        echo 'TypeError: ', $e->getMessage(), "\n";
+    } catch (ValueError $e) {
+        echo 'ValueError: ', $e->getMessage(), "\n";
     }
     $iterator++;
 };
 fclose($fp);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing bindec() : usage variations ***
 
 -- Iteration 1 --
@@ -74,39 +76,25 @@ int(0)
 int(1)
 
 -- Iteration 3 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(1)
+ValueError: Invalid characters passed for attempted conversion
 
 -- Iteration 4 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+ValueError: Invalid characters passed for attempted conversion
 
 -- Iteration 5 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(2)
+ValueError: Invalid characters passed for attempted conversion
 
 -- Iteration 6 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(2)
+ValueError: Invalid characters passed for attempted conversion
 
 -- Iteration 7 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(8)
+ValueError: Invalid characters passed for attempted conversion
 
 -- Iteration 8 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(1)
+ValueError: Invalid characters passed for attempted conversion
 
 -- Iteration 9 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+ValueError: Invalid characters passed for attempted conversion
 
 -- Iteration 10 --
 int(1)
@@ -130,19 +118,13 @@ int(0)
 bindec(): Argument #1 ($binary_string) must be of type string, array given
 
 -- Iteration 17 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+ValueError: Invalid characters passed for attempted conversion
 
 -- Iteration 18 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+ValueError: Invalid characters passed for attempted conversion
 
 -- Iteration 19 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+ValueError: Invalid characters passed for attempted conversion
 
 -- Iteration 20 --
 bindec(): Argument #1 ($binary_string) must be of type string, resource given
