@@ -222,7 +222,7 @@ static const char *php_io_poll_backend_type_to_name(php_poll_backend_type type)
 
 static php_socket_t php_stream_poll_handle_get_fd(php_poll_handle_object *handle)
 {
-	php_stream_poll_handle_data *data = (php_stream_poll_handle_data *) handle->handle_data;
+	php_stream_poll_handle_data *data = handle->handle_data;
 	php_socket_t fd;
 
 	if (!data || !data->stream) {
@@ -241,13 +241,13 @@ static php_socket_t php_stream_poll_handle_get_fd(php_poll_handle_object *handle
 
 static int php_stream_poll_handle_is_valid(php_poll_handle_object *handle)
 {
-	php_stream_poll_handle_data *data = (php_stream_poll_handle_data *) handle->handle_data;
+	php_stream_poll_handle_data *data = handle->handle_data;
 	return data && data->stream && !php_stream_eof(data->stream);
 }
 
 static void php_stream_poll_handle_cleanup(php_poll_handle_object *handle)
 {
-	php_stream_poll_handle_data *data = (php_stream_poll_handle_data *) handle->handle_data;
+	php_stream_poll_handle_data *data = handle->handle_data;
 	if (data) {
 		if (data->res) {
 			zend_list_delete(data->res);
@@ -508,7 +508,7 @@ PHP_METHOD(StreamPollHandle, getStream)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(getThis());
-	php_stream_poll_handle_data *data = (php_stream_poll_handle_data *) intern->handle_data;
+	php_stream_poll_handle_data *data = intern->handle_data;
 
 	if (!data || !data->stream) {
 		RETURN_NULL();
