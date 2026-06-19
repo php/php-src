@@ -25,8 +25,12 @@ $values = array(01234567,
                 );
 
 for ($i = 0; $i < count($values); $i++) {
-    $res = octdec($values[$i]);
-    var_dump($res);
+    try {
+        $res = octdec($values[$i]);
+        var_dump($res);
+    } catch (ValueError $e) {
+        echo 'ValueError: ', $e->getMessage(), "\n";
+    }
 }
 ?>
 --EXPECT--

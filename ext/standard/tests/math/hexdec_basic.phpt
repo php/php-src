@@ -25,8 +25,12 @@ $values = array(0x123abc,
                 false,
                 );
 for ($i = 0; $i < count($values); $i++) {
-    $res = hexdec($values[$i]);
-    var_dump($res);
+    try {
+        $res = hexdec($values[$i]);
+        var_dump($res);
+    } catch (ValueError $e) {
+        echo 'ValueError: ', $e->getMessage(), "\n";
+    }
 }
 ?>
 --EXPECT--

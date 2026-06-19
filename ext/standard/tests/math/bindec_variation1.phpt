@@ -115,7 +115,7 @@ int(0)
 int(0)
 
 -- Iteration 16 --
-bindec(): Argument #1 ($binary_string) must be of type string, array given
+TypeError: bindec(): Argument #1 ($binary_string) must be of type string, array given
 
 -- Iteration 17 --
 ValueError: Invalid characters passed for attempted conversion
@@ -127,4 +127,4 @@ ValueError: Invalid characters passed for attempted conversion
 ValueError: Invalid characters passed for attempted conversion
 
 -- Iteration 20 --
-bindec(): Argument #1 ($binary_string) must be of type string, resource given
+TypeError: bindec(): Argument #1 ($binary_string) must be of type string, resource given
