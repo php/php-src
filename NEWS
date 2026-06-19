@@ -257,6 +257,8 @@ PHP                                                                        NEWS
     contains null bytes. (Weilin Du)
   . dl() now raises a ValueError when the $extension_filename argument
     contains null bytes. (Weilin Du)
+  . openlog() now raises a ValueError when the $prefix argument contains
+    null bytes. (Weilin Du)
   . parse_str() now raises a ValueError when the $string argument contains
     null bytes. (Weilin Du)
   . proc_open() now raises a ValueError when the $cwd argument contains

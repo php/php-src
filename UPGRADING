@@ -153,6 +153,8 @@ PHP 8.6 UPGRADE NOTES
     contains null bytes.
   . dl() now raises a ValueError when the $extension_filename argument
     contains null bytes.
+  . openlog() now raises a ValueError when the $prefix argument contains
+    null bytes.
   . parse_str() now raises a ValueError when the $string argument contains
     null bytes.
   . linkinfo() now raises a ValueError when the $path argument is empty.
