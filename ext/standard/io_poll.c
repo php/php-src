@@ -18,7 +18,6 @@
 #include "php_network.h"
 #include "php_poll.h"
 #include "io_poll_arginfo.h"
-#include "io_poll_decl.h"
 
 /* Class entries */
 static zend_class_entry *php_io_poll_backend_class_entry;
