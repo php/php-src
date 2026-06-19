@@ -348,14 +348,27 @@ typedef enum mysqlnd_server_option
 #define SET_FLAG				 2048
 #define NO_DEFAULT_VALUE_FLAG	 4096
 #define ON_UPDATE_NOW_FLAG		 8192
-#define PART_KEY_FLAG			16384
-#define GROUP_FLAG				32768
 #define NUM_FLAG				32768
 
-#define IS_PRI_KEY(n)	((n) & PRI_KEY_FLAG)
-#define IS_NOT_NULL(n)	((n) & NOT_NULL_FLAG)
-#define IS_BLOB(n)		((n) & BLOB_FLAG)
-#define IS_NUM(t)		((t) <= FIELD_TYPE_INT24 || (t) == FIELD_TYPE_YEAR || (t) == FIELD_TYPE_NEWDECIMAL)
+/* The following flags are marked as internal in mysql_com.h */
+#define PART_KEY_FLAG			16384
+#define GROUP_FLAG				32768
+
+#define IS_NOT_NULL(n)			((n) & NOT_NULL_FLAG)
+#define IS_PRI_KEY(n)			((n) & PRI_KEY_FLAG)
+#define IS_UNIQUE_KEY(n)		((n) & UNIQUE_KEY_FLAG)
+#define IS_MULTIPLE_KEY(n)		((n) & MULTIPLE_KEY_FLAG)
+#define IS_BLOB(n)				((n) & BLOB_FLAG)
+#define IS_UNSIGNED(n)			((n) & UNSIGNED_FLAG)
+#define IS_ZEROFILL(n)			((n) & ZEROFILL_FLAG)
+#define IS_BINARY(n)			((n) & BINARY_FLAG)
+#define IS_ENUM(n)				((n) & ENUM_FLAG)
+#define IS_AUTO_INCREMENT(n)	((n) & AUTO_INCREMENT_FLAG)
+#define IS_TIMESTAMP(n)			((n) & TIMESTAMP_FLAG)
+#define IS_SET(n)				((n) & SET_FLAG)
+#define IS_NO_DEFAULT_VALUE(n)	((n) & NO_DEFAULT_VALUE_FLAG)
+#define IS_ON_UPDATE_NOW(n)		((n) & ON_UPDATE_NOW_FLAG)
+#define IS_NUM(n)				((n) & NUM_FLAG)
 
 
 /*
