@@ -22,6 +22,7 @@ extern "C" {
 #include <limits.h>
 }
 
+#include "../intl_cppshims.h"
 #include "../intl_convertcpp.h"
 #include "../intl_common.h"
 
@@ -138,7 +139,10 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
 	ZEND_ASSERT(BREAKITER_ERROR_CODE(bio) == U_BUFFER_OVERFLOW_ERROR);
 	BREAKITER_ERROR_CODE(bio) = U_ZERO_ERROR;
 
-	std::unique_ptr<int32_t[]> rules = std::unique_ptr<int32_t[]>(new int32_t[num_rules]);
+	int32_t *r = zend_mm_safe_alloc<int32_t *>(static_cast<size_t>(num_rules), sizeof(int32_t));
+
+	std::unique_ptr<int32_t[], decltype(&zend_mm_destructor<int32_t>)> rules(r, zend_mm_destructor);
+
 	num_rules = fetch_rbbi(bio)->getRuleStatusVec(rules.get(), num_rules,
 			BREAKITER_ERROR_CODE(bio));
 	if (U_FAILURE(BREAKITER_ERROR_CODE(bio))) {
