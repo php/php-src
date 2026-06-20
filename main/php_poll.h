@@ -38,7 +38,7 @@
 #define PHP_POLL_FLAG_RAW_EVENTS 0x02
 
 /* Poll backend types. Keep in sync with io_poll.stub.php! */
-typedef enum {
+typedef enum php_poll_backend_type {
 	PHP_POLL_BACKEND_AUTO = -1,
 	PHP_POLL_BACKEND_POLL = 0,
 	PHP_POLL_BACKEND_EPOLL,
@@ -62,7 +62,7 @@ typedef enum {
 #define PHP_POLL_ERROR_CODE_NOSUPPORT   11
 
 /* Error codes */
-typedef enum {
+typedef enum php_poll_error {
 	PHP_POLL_ERR_NONE        = PHP_POLL_ERROR_CODE_NONE,        /* No error */
 	PHP_POLL_ERR_SYSTEM      = PHP_POLL_ERROR_CODE_SYSTEM,      /* Generic system error */
 	PHP_POLL_ERR_NOMEM       = PHP_POLL_ERROR_CODE_NOMEM,       /* Out of memory (ENOMEM) */
