@@ -1,5 +1,6 @@
 /* This is a generated file, edit io_poll.stub.php instead.
- * Stub hash: 4383509df1f1ebcbf6188feb346cbe4805bb0cc5 */
+ * Stub hash: a7450146c5b3b3f3486611c83a55cf0cc932b27a
+ * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_Backend_getAvailableBackends, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
