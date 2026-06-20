@@ -50,6 +50,9 @@ echo "Done\n";
 ?>
 --EXPECTF--
 gmp_pow(): Argument #2 ($exponent) results in a value that exceeds the supported size
-shift count results in a value that exceeds the supported size
-exponent results in a value that exceeds the supported size
+gmp_binomial(): Argument #2 ($k) must be between 0 and %d
+gmp_root(): Argument #2 ($nth) must be between 1 and %d
+gmp_rootrem(): Argument #2 ($nth) must be between 1 and %d
+Shift must be between 0 and %d
+Exponent must be between 0 and %d
 Done
