@@ -48,7 +48,6 @@
 #define GMP_LITTLE_ENDIAN (1 << 2)
 #define GMP_BIG_ENDIAN    (1 << 3)
 #define GMP_NATIVE_ENDIAN (1 << 4)
-#define GMP_POW_MAX_EXP 1000000L
 
 #include "gmp_arginfo.h"
 
@@ -1140,7 +1139,7 @@ ZEND_FUNCTION(gmp_pow)
 	
 	bits = mpz_sizeinbase(gmpnum_base, 2);
 
-	if (exp < 0 || exp > (SIZE_MAX - 5) / bits) {
+	if (exp > (SIZE_MAX - 5) / bits) {
 		zend_argument_value_error(2, "results in a value that exceeds the supported size");
 		RETURN_THROWS();
 	}
