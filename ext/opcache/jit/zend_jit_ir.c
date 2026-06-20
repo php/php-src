@@ -4687,7 +4687,7 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 		ir_ref observer_handler_user = ir_ADD_OFFSET(run_time_cache, zend_observer_fcall_op_array_extension * sizeof(void *));
 
 		ir_MERGE_WITH(if_internal_func_end);
-		*observer_handler = ir_PHI_2(IR_ADDR, observer_handler_internal, observer_handler_user);
+		*observer_handler = ir_PHI_2(IR_ADDR, observer_handler_user, observer_handler_internal);
 	}
 
 	// JIT: if (*observer_handler == ZEND_OBSERVER_NONE_OBSERVED) {

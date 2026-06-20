@@ -8,6 +8,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-22206 (missing return in global register detection).
     (P3p111n0)
 
+- Opcache:
+  . Fixed bug GH-22158 (Tracing JIT dispatches the observer begin handler
+    through the wrong run_time_cache slot on megamorphic calls). (ptondereau,
+    iliaal)
+
 - Reflection:
   . Fixed bug GH-22324 (Ignore leading namespace separator in
     ReflectionParameter::__construct()). (jorgsowa)
