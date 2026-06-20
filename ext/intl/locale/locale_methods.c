@@ -1435,14 +1435,15 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 			zend_argument_type_error(2, "must only contain string values");
 			LOOKUP_CLEAN_RETURN(NULL);
 		}
-		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
-		result = strToMatch(Z_STRVAL_P(ele_value), cur_arr[cur_arr_len*2]);
+		i = cur_arr_len*2;
+		cur_arr[i] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
+		cur_arr_len++;
+		result = strToMatch(Z_STRVAL_P(ele_value), cur_arr[i]);
 		if(result == 0) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag", 0);
 			LOOKUP_CLEAN_RETURN(NULL);
 		}
-		cur_arr[cur_arr_len*2+1] = Z_STRVAL_P(ele_value);
-		cur_arr_len++ ;
+		cur_arr[i+1] = Z_STRVAL_P(ele_value);
 	} ZEND_HASH_FOREACH_END(); /* end of for */
 
 	/* Canonicalize array elements */
@@ -1562,6 +1563,15 @@ PHP_FUNCTION(locale_lookup)
 	}
 
 	result_str = lookup_loc_range(loc_range, hash_arr, boolCanonical);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+	if (U_FAILURE(intl_error_get_code(NULL))) {
+		if (result_str) {
+			zend_string_release_ex(result_str, 0);
+		}
+		RETURN_NULL();
+	}
 	if(result_str == NULL || ZSTR_VAL(result_str)[0] == '\0') {
 		if( fallback_loc_str ) {
 			result_str = zend_string_copy(fallback_loc_str);

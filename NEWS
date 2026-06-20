@@ -48,6 +48,8 @@ PHP                                                                        NEWS
     for invalid display types. (Weilin Du)
   . Fixed Spoofchecker restriction-level APIs to only be exposed with ICU 53
     and later. (Graham Campbell)
+  . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
+    fallback locale when a language tag cannot be canonicalized. (Weilin Du)
 
 - mysqli:
   . Fix stmt->query leak in mysqli_execute_query() validation errors.
