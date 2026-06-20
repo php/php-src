@@ -28,8 +28,8 @@ try {
 ?>
 --EXPECT--
 NULL
-string(57) "unable to canonicalize lang_tag: U_ILLEGAL_ARGUMENT_ERROR"
+string(75) "Locale::lookup(): unable to canonicalize lang_tag: U_ILLEGAL_ARGUMENT_ERROR"
 NULL
-string(57) "unable to canonicalize lang_tag: U_ILLEGAL_ARGUMENT_ERROR"
-unable to canonicalize lang_tag
-unable to canonicalize lang_tag
+string(74) "locale_lookup(): unable to canonicalize lang_tag: U_ILLEGAL_ARGUMENT_ERROR"
+Locale::lookup(): unable to canonicalize lang_tag
+locale_lookup(): unable to canonicalize lang_tag
