@@ -1387,7 +1387,7 @@ static void from_zval_write_fd_array_aux(zval *elem, unsigned i, void **args, se
 			return;
 		}
 
-		iarr[i] = sock->bsd_socket;
+		iarr[i - 1] = sock->bsd_socket;
 		return;
 	}
 
