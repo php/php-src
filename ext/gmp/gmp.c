@@ -365,9 +365,35 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 		return FAILURE;
 	} else {
 		mpz_ptr gmpnum_op, gmpnum_result;
-
+    	size_t bits;
+ 
 		if (!gmp_zend_parse_arg_into_mpz_ex(op1, &gmpnum_op, 1, true)) {
 			goto typeof_op_failure;
+		}
+
+		bits = mpz_sizeinbase(gmpnum_op, 2);
+		if (bits == 0) {
+			bits = 1;
+		}
+
+		if (opcode == ZEND_POW) {
+			if ((size_t) shift > (SIZE_MAX - 5) / bits) {
+				zend_value_error(
+					"exponent results in a value that exceeds the supported size"
+				);
+				return FAILURE;
+			}
+		} 
+		
+		if (opcode == ZEND_SL) {
+			size_t max_shift = ((size_t)INT_MAX * GMP_NUMB_BITS);
+
+			if ((size_t) shift > max_shift) {
+				zend_value_error(
+					"shift count results in a value that exceeds the supported size"
+				);
+				return FAILURE;
+			}
 		}
 
 		INIT_GMP_RETVAL(gmpnum_result);
