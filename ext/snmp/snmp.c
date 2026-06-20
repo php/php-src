@@ -957,6 +957,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 
 	if (strlen(session->peername) == 0) {
 		php_error_docref(NULL, E_WARNING, "Unknown failure while resolving '%s'", ZSTR_VAL(hostname));
+		php_network_freeaddresses(psal);
 		return false;
 	}
 	/* XXX FIXME
