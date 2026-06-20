@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22324 (Ignore leading namespace separator in
     ReflectionParameter::__construct()). (jorgsowa)
 
+- Standard:
+  . Fixed bug GH-22360 (convert.base64-encode corruption on
+    incremental flush). (David Carlier)
+
 02 Jul 2026, PHP 8.4.23
 
 - Core:
