@@ -1519,7 +1519,7 @@ static php_stream_filter_status_t strfilter_convert_filter(
 		php_stream_bucket_delref(bucket);
 	}
 
-	if (flags != PSFS_FLAG_NORMAL) {
+	if (flags & PSFS_FLAG_FLUSH_CLOSE) {
 		if (strfilter_convert_append_bucket(inst, stream, thisfilter,
 				buckets_out, NULL, 0, &consumed,
 				php_stream_is_persistent(stream)) != SUCCESS) {
