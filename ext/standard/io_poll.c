@@ -91,7 +91,6 @@ static uint32_t php_io_poll_event_enum_to_bit(zend_object *event_enum)
 static uint32_t php_io_poll_event_enums_to_events(zval *event_enums)
 {
 	HashTable *ht;
-	zval *entry;
 	uint32_t events = 0;
 
 	if (Z_TYPE_P(event_enums) != IS_ARRAY) {
@@ -100,7 +99,7 @@ static uint32_t php_io_poll_event_enums_to_events(zval *event_enums)
 
 	ht = Z_ARRVAL_P(event_enums);
 
-	ZEND_HASH_FOREACH_VAL(ht, entry) {
+	ZEND_HASH_FOREACH_VAL(ht, zval *entry) {
 		if (Z_TYPE_P(entry) != IS_OBJECT
 				|| !instanceof_function(Z_OBJCE_P(entry), php_io_poll_event_class_entry)) {
 			return 0;
@@ -297,8 +296,7 @@ static void php_io_poll_context_free_object(zend_object *obj)
 	php_io_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZOBJ(obj);
 
 	if (intern->watchers) {
-		zval *zv;
-		ZEND_HASH_FOREACH_VAL(intern->watchers, zv) {
+		ZEND_HASH_FOREACH_VAL(intern->watchers, zval *zv) {
 			php_io_poll_watcher_object *watcher = PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(Z_OBJ_P(zv));
 			watcher->active = false;
 			watcher->poll_ctx = NULL;
@@ -337,8 +335,7 @@ static HashTable *php_io_poll_context_get_gc(zend_object *obj, zval **table, int
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 
 	if (intern->watchers) {
-		zval *zv;
-		ZEND_HASH_FOREACH_VAL(intern->watchers, zv) {
+		ZEND_HASH_FOREACH_VAL(intern->watchers, zval *zv) {
 			zend_get_gc_buffer_add_zval(gc_buffer, zv);
 		} ZEND_HASH_FOREACH_END();
 	}
