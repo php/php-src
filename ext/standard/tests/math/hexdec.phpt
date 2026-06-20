@@ -33,8 +33,8 @@ var_dump((float)hexdec("17fffffff"));
 --EXPECT--
 int(74565)
 int(74565)
-ValueError: Invalid characters passed for attempted conversion
-ValueError: Invalid characters passed for attempted conversion
-ValueError: Invalid characters passed for attempted conversion
+ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
 float(78187069441)
 float(6442450943)

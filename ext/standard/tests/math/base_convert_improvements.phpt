@@ -62,9 +62,9 @@ try {
 7
 10
 =======================================
-Invalid characters passed for attempted conversion
-Invalid characters passed for attempted conversion
-Invalid characters passed for attempted conversion
-Invalid characters passed for attempted conversion
-Invalid characters passed for attempted conversion
-Invalid characters passed for attempted conversion
+base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+base_convert(): Argument #1 ($num) has invalid characters for attempted conversion

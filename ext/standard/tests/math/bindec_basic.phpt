@@ -39,20 +39,20 @@ for ($i = 0; $i < count($values); $i++) {
 ?>
 --EXPECT--
 int(455)
-ValueError: Invalid characters passed for attempted conversion
-ValueError: Invalid characters passed for attempted conversion
-ValueError: Invalid characters passed for attempted conversion
-ValueError: Invalid characters passed for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 int(455)
 int(224)
 int(2147483647)
 float(2147483648)
-ValueError: Invalid characters passed for attempted conversion
-ValueError: Invalid characters passed for attempted conversion
-ValueError: Invalid characters passed for attempted conversion
-ValueError: Invalid characters passed for attempted conversion
-ValueError: Invalid characters passed for attempted conversion
-ValueError: Invalid characters passed for attempted conversion
-ValueError: Invalid characters passed for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 int(1)
 int(0)

@@ -76,25 +76,25 @@ int(0)
 int(1)
 
 -- Iteration 3 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 
 -- Iteration 4 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 
 -- Iteration 5 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 
 -- Iteration 6 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 
 -- Iteration 7 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 
 -- Iteration 8 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 
 -- Iteration 9 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 
 -- Iteration 10 --
 int(1)
@@ -118,13 +118,13 @@ int(0)
 TypeError: bindec(): Argument #1 ($binary_string) must be of type string, array given
 
 -- Iteration 17 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 
 -- Iteration 18 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 
 -- Iteration 19 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 
 -- Iteration 20 --
 TypeError: bindec(): Argument #1 ($binary_string) must be of type string, resource given

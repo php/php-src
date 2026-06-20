@@ -76,25 +76,25 @@ string(1) "1"
 string(2) "14"
 
 -- Iteration 4 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 5 --
 string(11) "17777777777"
 
 -- Iteration 6 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 7 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 8 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 9 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 10 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 11 --
 string(1) "1"
@@ -118,13 +118,13 @@ string(1) "0"
 TypeError: base_convert(): Argument #1 ($num) must be of type string, array given
 
 -- Iteration 18 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 19 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 20 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 21 --
 TypeError: base_convert(): Argument #1 ($num) must be of type string, resource given

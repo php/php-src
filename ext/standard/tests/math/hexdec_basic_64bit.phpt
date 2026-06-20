@@ -65,7 +65,7 @@ int(2147483647)
 int(2147483648)
 
 -- hexdec 0x123XYZABC --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
 
 -- hexdec 311015 --
 int(3215381)
@@ -74,7 +74,7 @@ int(3215381)
 int(3215381)
 
 -- hexdec 31101.3 --
-ValueError: Invalid characters passed for attempted conversion
+ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
 
 -- hexdec 3110130 --
 int(51446064)

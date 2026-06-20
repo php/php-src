@@ -908,7 +908,7 @@ PHPAPI zend_result _php_math_basetozval(zend_string *str, int base, zval *ret)
 	}
 
 	if (invalidchars > 0) {
-		zend_value_error("Invalid characters passed for attempted conversion");
+		zend_argument_value_error(1, "has invalid characters for attempted conversion");
 		return FAILURE;
 	}
 
