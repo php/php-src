@@ -11077,6 +11077,15 @@ static void zend_compile_instanceof(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
+	/* "instanceof object" is equivalent to is_object(): emit a type-check instead of a class lookup */
+	if (class_ast->kind == ZEND_AST_ZVAL
+			&& Z_TYPE_P(zend_ast_get_zval(class_ast)) == IS_STRING
+			&& zend_string_equals_ci(zend_ast_get_str(class_ast), ZSTR_KNOWN(ZEND_STR_OBJECT))) {
+		opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &obj_node, NULL);
+		opline->extended_value = (1 << IS_OBJECT);
+		return;
+	}
+
 	zend_compile_class_ref(&class_node, class_ast,
 		ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_EXCEPTION | ZEND_FETCH_CLASS_SILENT);
 

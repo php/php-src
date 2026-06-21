@@ -19,6 +19,10 @@ PHP 8.6 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . `$x instanceof object` previously always evaluated to false. It now
+    evaluates identically to `is_object($x)`, returning true for any object.
+
 - DOM:
   . Properties previously documented as @readonly (e.g. DOMNode::$nodeType,
     DOMDocument::$xmlEncoding, DOMEntity::$actualEncoding, ::$encoding,
@@ -181,6 +185,8 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 
 - Core:
+  . `$x instanceof object` now evaluates like `is_object($x)`, correctly
+    returning true for any object.
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand.
   . It is now possible to define the `__debugInfo()` magic method on enums.
