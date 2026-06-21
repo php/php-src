@@ -1254,7 +1254,7 @@ static bool ftp_readline(ftpbuf_t *ftp)
 		}
 
 		data = eol;
-		if ((rcvd = my_recv(ftp, ftp->fd, data, size)) < 1) {
+		if (size < 2 || (rcvd = my_recv(ftp, ftp->fd, data, size - 1)) < 1) {
 			*data = 0;
 			return false;
 		}
