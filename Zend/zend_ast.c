@@ -2535,12 +2535,18 @@ simple_list:
 			break;
 		case ZEND_AST_CALL: {
 			zend_ast *left = ast->child[0];
-			if (left->kind == ZEND_AST_ARROW_FUNC || left->kind == ZEND_AST_CLOSURE) {
-				smart_str_appendc(str, '(');
-				zend_ast_export_ns_name(str, left, 0, indent);
-				smart_str_appendc(str, ')');
-			} else {
-				zend_ast_export_ns_name(str, left, 0, indent);
+			switch (left->kind) {
+				/* ZEND_AST_ZVAL is a regular function call. */
+				case ZEND_AST_ZVAL:
+				/* ZEND_AST_VAR ($foo()) is unambiguous without parens. */
+				case ZEND_AST_VAR:
+					zend_ast_export_ns_name(str, left, 0, indent);
+					break;
+				default:
+					smart_str_appendc(str, '(');
+					zend_ast_export_ex(str, left, 0, indent);
+					smart_str_appendc(str, ')');
+					break;
 			}
 			smart_str_appendc(str, '(');
 			zend_ast_export_ex(str, ast->child[1], 0, indent);
