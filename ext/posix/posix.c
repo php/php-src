@@ -910,13 +910,33 @@ int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
 	if (NULL == return_value || Z_TYPE_P(return_value) != IS_ARRAY)
 		return 0;
 
-	add_assoc_string(return_value, "name",      pw->pw_name);
-	add_assoc_string(return_value, "passwd",    pw->pw_passwd);
-	add_assoc_long  (return_value, "uid",       pw->pw_uid);
-	add_assoc_long  (return_value, "gid",		pw->pw_gid);
-	add_assoc_string(return_value, "gecos",     pw->pw_gecos);
-	add_assoc_string(return_value, "dir",       pw->pw_dir);
-	add_assoc_string(return_value, "shell",     pw->pw_shell);
+	if (pw->pw_name) {
+		add_assoc_string(return_value, "name", pw->pw_name);
+	} else {
+		add_assoc_null(return_value, "name");
+	}
+	if (pw->pw_passwd) {
+		add_assoc_string(return_value, "passwd", pw->pw_passwd);
+	} else {
+		add_assoc_null(return_value, "passwd");
+	}
+	add_assoc_long(return_value, "uid", pw->pw_uid);
+	add_assoc_long(return_value, "gid", pw->pw_gid);
+	if (pw->pw_gecos) {
+		add_assoc_string(return_value, "gecos", pw->pw_gecos);
+	} else {
+		add_assoc_null(return_value, "gecos");
+	}
+	if (pw->pw_dir) {
+		add_assoc_string(return_value, "dir", pw->pw_dir);
+	} else {
+		add_assoc_null(return_value, "dir");
+	}
+	if (pw->pw_shell) {
+		add_assoc_string(return_value, "shell", pw->pw_shell);
+	} else {
+		add_assoc_null(return_value, "shell");
+	}
 	return 1;
 }
 /* }}} */
