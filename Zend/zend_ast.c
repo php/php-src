@@ -1578,9 +1578,7 @@ static ZEND_COLD void zend_ast_export_ex(smart_str *str, zend_ast *ast, int prio
 
 static ZEND_COLD void zend_ast_export_str(smart_str *str, const zend_string *s)
 {
-	size_t i;
-
-	for (i = 0; i < ZSTR_LEN(s); i++) {
+	for (size_t i = 0; i < ZSTR_LEN(s); i++) {
 		unsigned char c = ZSTR_VAL(s)[i];
 		if (c == '\'' || c == '\\') {
 			smart_str_appendc(str, '\\');
@@ -1593,9 +1591,7 @@ static ZEND_COLD void zend_ast_export_str(smart_str *str, const zend_string *s)
 
 static ZEND_COLD void zend_ast_export_qstr(smart_str *str, char quote, const zend_string *s)
 {
-	size_t i;
-
-	for (i = 0; i < ZSTR_LEN(s); i++) {
+	for (size_t i = 0; i < ZSTR_LEN(s); i++) {
 		unsigned char c = ZSTR_VAL(s)[i];
 		if (c < ' ') {
 			switch (c) {
@@ -1636,12 +1632,11 @@ static ZEND_COLD void zend_ast_export_qstr(smart_str *str, char quote, const zen
 	}
 }
 
-static ZEND_COLD void zend_ast_export_quoted_str(smart_str *str, zend_string *s)
+static ZEND_COLD void zend_ast_export_quoted_str(smart_str *str, const zend_string *s)
 {
-	size_t i;
-
-	for (i = 0; i < ZSTR_LEN(s); i++) {
-		if ((unsigned char) ZSTR_VAL(s)[i] < ' ') {
+	for (size_t i = 0; i < ZSTR_LEN(s); i++) {
+		unsigned char c = ZSTR_VAL(s)[i];
+		if (c < ' ') {
 			smart_str_appendc(str, '"');
 			zend_ast_export_qstr(str, '"', s);
 			smart_str_appendc(str, '"');
