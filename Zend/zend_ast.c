@@ -1636,7 +1636,7 @@ static ZEND_COLD void zend_ast_export_qstr(smart_str *str, char quote, const zen
 	}
 }
 
-static ZEND_COLD void zend_ast_export_quoted_str(smart_str *str, zend_string *s)
+static ZEND_COLD void zend_ast_export_quoted_str(smart_str *str, const zend_string *s)
 {
 	size_t i;
 
