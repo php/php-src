@@ -1469,6 +1469,7 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 	}
 	if (memlimit < crypto_pwhash_MEMLIMIT_MIN) {
 		zend_argument_error(sodium_exception_ce, 5, "must be greater than or equal to %d", crypto_pwhash_MEMLIMIT_MIN);
+		RETURN_THROWS();
 	}
 	hash = zend_string_alloc((size_t) hash_len, 0);
 	ret = -1;
@@ -1528,9 +1529,11 @@ PHP_FUNCTION(sodium_crypto_pwhash_str)
 	}
 	if (opslimit < crypto_pwhash_OPSLIMIT_MIN) {
 		zend_argument_error(sodium_exception_ce, 2, "must be greater than or equal to %d", crypto_pwhash_OPSLIMIT_MIN);
+		RETURN_THROWS();
 	}
 	if (memlimit < crypto_pwhash_MEMLIMIT_MIN) {
 		zend_argument_error(sodium_exception_ce, 3, "must be greater than or equal to %d", crypto_pwhash_MEMLIMIT_MIN);
+		RETURN_THROWS();
 	}
 	hash_str = zend_string_alloc(crypto_pwhash_STRBYTES - 1, 0);
 	if (crypto_pwhash_str
@@ -1636,9 +1639,11 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 	}
 	if (opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE) {
 		zend_argument_error(sodium_exception_ce, 4, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE);
+		RETURN_THROWS();
 	}
 	if (memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE) {
 		zend_argument_error(sodium_exception_ce, 5, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE);
+		RETURN_THROWS();
 	}
 	hash = zend_string_alloc((size_t) hash_len, 0);
 	if (crypto_pwhash_scryptsalsa208sha256
@@ -1681,9 +1686,11 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str)
 	}
 	if (opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE) {
 		zend_argument_error(sodium_exception_ce, 2, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE);
+		RETURN_THROWS();
 	}
 	if (memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE) {
 		zend_argument_error(sodium_exception_ce, 3, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE);
+		RETURN_THROWS();
 	}
 	hash_str = zend_string_alloc
 		(crypto_pwhash_scryptsalsa208sha256_STRBYTES - 1, 0);
