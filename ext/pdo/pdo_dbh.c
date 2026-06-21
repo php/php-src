@@ -1529,7 +1529,7 @@ void pdo_dbh_init(int module_number)
 	pdo_dbh_ce->default_object_handlers = &pdo_dbh_object_handlers;
 
 	memcpy(&pdo_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pdo_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);
+	pdo_dbh_object_handlers.offset = offsetof(pdo_dbh_object_t, std);
 	pdo_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
 	pdo_dbh_object_handlers.clone_obj = NULL;
 	pdo_dbh_object_handlers.get_method = dbh_method_get;

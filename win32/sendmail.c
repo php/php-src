@@ -57,7 +57,7 @@
 												efree(response); \
 											} \
 										}
-#define SMTP_SKIP_SPACE(str)	{ while (isspace(*str)) { str++; } }
+#define SMTP_SKIP_SPACE(str)	{ while (isspace((unsigned char)*(str))) { (str)++; } }
 
 
 char seps[] = " ,\t\n";
@@ -783,7 +783,7 @@ return 0;
 
 	/* Resolve the servers IP */
 	/*
-	if (!isdigit(PW32G(mail_host)[0])||!gethostbyname(PW32G(mail_host)))
+	if (!isdigit((unsigned char)PW32G(mail_host)[0])||!gethostbyname(PW32G(mail_host)))
 	{
 		return (FAILED_TO_RESOLVE_HOST);
 	}

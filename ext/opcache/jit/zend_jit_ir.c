@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "Zend/zend_cpuinfo.h"
 #include "Zend/zend_types.h"
 #include "Zend/zend_type_info.h"
 #include "jit/ir/ir.h"
@@ -3313,6 +3314,27 @@ static PRUNTIME_FUNCTION zend_jit_unwind_callback(DWORD64 pc, PVOID context)
 
 static void zend_jit_setup_unwinder(void)
 {
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+	/* TAILCALL VM: fixed_save_regset=0, no registers pushed in prologue.
+	 * fixed_stack_frame_size=40, fixed_call_stack_size=48 (16+IR_SHADOW_ARGS).
+	 * Prologue is: sub rsp, 0x58 (88 bytes = 40+48). */
+	static const unsigned char uw_data[] = {
+		0x01, // Version=1, Flags=0
+		0x04, // Size of prolog (sub rsp,imm8 = 4 bytes: 48 83 ec 58)
+		0x01, // Count of unwind codes
+		0x00, // Frame Register=none
+		0x04, 0xa2, // offset 4: UWOP_ALLOC_SMALL info=10, alloc=(10+1)*8=88
+		0x00, 0x00, // padding
+	};
+	/* Exit call variant: base 88 + 304 (shadow+GP+FP+padding) = 392 (0x188) */
+	static const unsigned char uw_data_exitcall[] = {
+		0x01, // Version=1, Flags=0
+		0x07, // Size of prolog (sub rsp,imm32 = 7 bytes: 48 81 ec 88 01 00 00)
+		0x02, // Count of unwind codes
+		0x00, // Frame Register=none
+		0x07, 0x01, 0x31, 0x00, // offset 7: UWOP_ALLOC_LARGE info=0, size/8=49, alloc=392
+	};
+#else
 	/* Hardcoded SEH unwind data for JIT-ed PHP functions with "fixed stack frame" */
 	static const unsigned char uw_data[] = {
 		0x01, // UBYTE: 3 Version , UBYTE: 5 Flags
@@ -3347,6 +3369,7 @@ static void zend_jit_setup_unwinder(void)
 		0x02, 0x50, // 1: pushq %rbp
 		0x01, 0x30, // 0: pushq %rbx
 	};
+#endif
 
 	zend_jit_uw_func = (PRUNTIME_FUNCTION)*dasm_ptr;
 	*dasm_ptr = (char*)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(sizeof(RUNTIME_FUNCTION) * 4 +
@@ -3394,7 +3417,7 @@ static void zend_jit_setup(bool reattached)
 	if (zend_cpu_supports_avx()) {
 		allowed_opt_flags |= ZEND_JIT_CPU_AVX;
 	}
-# if defined(PHP_HAVE_BUILTIN_CPU_SUPPORTS) && defined(__GNUC__) && (ZEND_GCC_VERSION >= 11000)
+# ifdef HAVE_ZEND_CPU_SUPPORTS_CLDEMOTE
 	if (zend_cpu_supports_cldemote()) {
 		default_mflags |= IR_X86_CLDEMOTE;
 	}
@@ -4685,7 +4708,7 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 		ir_ref observer_handler_user = ir_ADD_OFFSET(run_time_cache, zend_observer_fcall_op_array_extension * sizeof(void *));
 
 		ir_MERGE_WITH(if_internal_func_end);
-		*observer_handler = ir_PHI_2(IR_ADDR, observer_handler_internal, observer_handler_user);
+		*observer_handler = ir_PHI_2(IR_ADDR, observer_handler_user, observer_handler_internal);
 	}
 
 	// JIT: if (*observer_handler == ZEND_OBSERVER_NONE_OBSERVED) {
@@ -7977,14 +8000,12 @@ static int zend_jit_escape_if_undef(zend_jit_ctx *jit, int var, uint32_t flags, 
 	zend_jit_op_array_trace_extension *jit_extension =
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 	size_t offset = jit_extension->offset;
-	ir_ref ref = ir_CONST_ADDR(ZEND_OP_TRACE_INFO((opline - 1), offset)->orig_handler);
+	ir_ref ref = ir_CONST_FC_FUNC(ZEND_OP_TRACE_INFO((opline - 1), offset)->orig_handler);
 	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		ir_TAILCALL(IR_OPCODE_HANDLER_RET, ref);
 	} else {
-#if defined(IR_TARGET_X86)
-		ref = ir_CAST_FC_FUNC(ref);
-#endif
-		ir_TAILCALL_2(IR_ADDR, ref, jit_FP(jit), jit_IP(jit));
+		ir_ref opline_ref = ir_CALL_2(IR_OPCODE_HANDLER_RET, ref, jit_FP(jit), jit_IP(jit));
+		zend_jit_vm_enter(jit, opline_ref);
 	}
 
 	ir_IF_TRUE(if_def);
@@ -10421,28 +10442,19 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		if (ZEND_OBSERVER_ENABLED && (!func || (func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_GENERATOR)) == 0)) {
 			ir_ref observer_handler;
 			ir_ref rx = jit_FP(jit);
+			const zend_op *observer_opline = NULL;
 			struct jit_observer_fcall_is_unobserved_data unobserved_data = jit_observer_fcall_is_unobserved_start(jit, func, &observer_handler, rx, func_ref);
 			if (trace && (trace->op != ZEND_JIT_TRACE_END || trace->stop < ZEND_JIT_TRACE_STOP_INTERPRETER)) {
 				ZEND_ASSERT(trace[1].op == ZEND_JIT_TRACE_VM || trace[1].op == ZEND_JIT_TRACE_END);
-				jit_SET_EX_OPLINE(jit, trace[1].opline);
+				observer_opline = trace[1].opline;
+				jit_SET_EX_OPLINE(jit, observer_opline);
 			} else {
 				// EX(opline) = opline
 				ir_STORE(jit_EX(opline), jit_IP(jit));
 			}
 			jit_observer_fcall_begin(jit, rx, observer_handler);
 
-			if (trace) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
-
-				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-				if (!exit_addr) {
-					return 0;
-				}
-			} else {
-				exit_addr = NULL;
-			}
-
-			zend_jit_check_timeout(jit, NULL /* we're inside the called function */, exit_addr);
+			zend_jit_check_timeout(jit, observer_opline, NULL);
 
 			jit_observer_fcall_is_unobserved_end(jit, &unobserved_data);
 		}

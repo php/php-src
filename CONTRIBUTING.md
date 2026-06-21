@@ -91,7 +91,7 @@ repository. Mailing list subscription is explained on the
 [mailing lists page](https://www.php.net/mailing-lists.php).
 
 You may also want to read
-[The Mysterious PHP RFC Process](https://blogs.oracle.com/opal/post/the-mysterious-php-rfc-process-and-how-you-can-change-the-web)
+[The Mysterious PHP RFC Process](https://web.archive.org/web/20210621140006/https://blogs.oracle.com/opal/the-mysterious-php-rfc-process-and-how-you-can-change-the-web)
 for additional notes on the best way to approach submitting an RFC.
 
 ## Technical resources
@@ -152,9 +152,8 @@ about what you're working on, you can contact us via the
 issues.
 
 Although not a formal channel, you can also find a number of core developers on
-the #php.pecl channel on [EFnet](http://www.efnet.org/). Similarly, many
-documentation writers can be found on #php.doc. Windows development IRC channel
-is available at #winphp-dev on FreeNode.
+the [php community discord server](https://phpc.chat/) (`#php-internals` channel)
+where many people are eager to help.
 
 ## PHP source code directory structure
 

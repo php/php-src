@@ -27,6 +27,7 @@ extern char *gd_strtok_r(char *s, char *sep, char **state);
 	netpbm fixes by Alan Cox. */
 
 int overflow2(int a, int b);
+int overflowMul3(int a, int b, int c);
 
 #ifdef ZTS
 #define gdMutexDeclare(x) MUTEX_T x

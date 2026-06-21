@@ -624,7 +624,7 @@ retry:
 
 static void php_snmp_zend_string_release_from_char_pointer(char *ptr) {
 	if (ptr) {
-		zend_string *pptr = (zend_string *)(ptr - XtOffsetOf(zend_string, val));
+		zend_string *pptr = (zend_string *)(ptr - offsetof(zend_string, val));
 		zend_string_release(pptr);
 	}
 }
@@ -945,6 +945,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 
 	if (strlen(session->peername) == 0) {
 		php_error_docref(NULL, E_WARNING, "Unknown failure while resolving '%s'", ZSTR_VAL(hostname));
+		php_network_freeaddresses(psal);
 		return false;
 	}
 	/* XXX FIXME
@@ -2144,7 +2145,7 @@ PHP_MINIT_FUNCTION(snmp)
 	php_snmp_ce = register_class_SNMP();
 	php_snmp_ce->create_object = php_snmp_object_new;
 	php_snmp_ce->default_object_handlers = &php_snmp_object_handlers;
-	php_snmp_object_handlers.offset = XtOffsetOf(php_snmp_object, zo);
+	php_snmp_object_handlers.offset = offsetof(php_snmp_object, zo);
 	php_snmp_object_handlers.clone_obj = NULL;
 	php_snmp_object_handlers.free_obj = php_snmp_object_free_storage;
 

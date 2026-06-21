@@ -341,7 +341,7 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		}
 
 		if (used_tz == NULL) {
-			used_tz = timezone_process_timezone_argument(nullptr, nullptr, &err);
+			used_tz = timezone_process_timezone_argument(nullptr, nullptr, &err, 1);
 			if (used_tz == NULL) {
 				continue;
 			}
@@ -649,7 +649,7 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UCh
 
         case Formattable::kInt64:
             aInt64 = fargs[i].getInt64();
-			if(aInt64 > ZEND_LONG_MAX || aInt64 < -ZEND_LONG_MAX) {
+			if(aInt64 > ZEND_LONG_MAX || aInt64 < ZEND_LONG_MIN) {
 				ZVAL_DOUBLE(&(*args)[i], (double)aInt64);
 			} else {
 				ZVAL_LONG(&(*args)[i], (zend_long)aInt64);

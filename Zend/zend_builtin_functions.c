@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "php_version.h"
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_attributes.h"
@@ -969,7 +970,7 @@ ZEND_FUNCTION(method_exists)
 			RETURN_FALSE;
 		}
 	} else {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(klass));
+		zend_wrong_parameter_type_error(1, Z_EXPECTED_OBJECT_OR_STRING, klass);
 		RETURN_THROWS();
 	}
 
@@ -1023,7 +1024,7 @@ static void _property_exists(zval *return_value, const zval *object, zend_string
 	} else if (Z_TYPE_P(object) == IS_OBJECT) {
 		ce = Z_OBJCE_P(object);
 	} else {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(object));
+		zend_wrong_parameter_type_error(1, Z_EXPECTED_OBJECT_OR_STRING, object);
 		RETURN_THROWS();
 	}
 

@@ -174,9 +174,7 @@ typedef struct {
 	zend_object zo;
 } reflection_object;
 
-static inline reflection_object *reflection_object_from_obj(zend_object *obj) {
-	return (reflection_object*)((char*)(obj) - XtOffsetOf(reflection_object, zo));
-}
+#define reflection_object_from_obj(obj) ZEND_CONTAINER_OF(obj, reflection_object, zo)
 
 #define Z_REFLECTION_P(zv)  reflection_object_from_obj(Z_OBJ_P((zv)))
 /* }}} */
@@ -2479,9 +2477,20 @@ ZEND_METHOD(ReflectionParameter, __construct)
 	switch (Z_TYPE_P(reference)) {
 		case IS_STRING:
 			{
-				zend_string *lcname = zend_string_tolower(Z_STR_P(reference));
-				fptr = zend_hash_find_ptr(EG(function_table), lcname);
-				zend_string_release(lcname);
+				zend_string *fname = Z_STR_P(reference);
+				zend_string *lcname;
+				if (UNEXPECTED(ZSTR_VAL(fname)[0] == '\\')) {
+					/* Ignore leading "\" */
+					ALLOCA_FLAG(use_heap)
+					ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(fname) - 1, use_heap);
+					zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(fname) + 1, ZSTR_LEN(fname) - 1);
+					fptr = zend_fetch_function(lcname);
+					ZSTR_ALLOCA_FREE(lcname, use_heap);
+				} else {
+					lcname = zend_string_tolower(fname);
+					fptr = zend_fetch_function(lcname);
+					zend_string_release(lcname);
+				}
 				if (!fptr) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Function %s() does not exist", Z_STRVAL_P(reference));
@@ -4637,9 +4646,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 	str_name = ZSTR_VAL(name);
 	if ((tmp = strstr(ZSTR_VAL(name), "::")) != NULL) {
 		classname_len = tmp - ZSTR_VAL(name);
-		classname = zend_string_alloc(classname_len, 0);
-		zend_str_tolower_copy(ZSTR_VAL(classname), ZSTR_VAL(name), classname_len);
-		ZSTR_VAL(classname)[classname_len] = '\0';
+		classname = zend_string_init(ZSTR_VAL(name), classname_len, 0);
 		str_name_len = ZSTR_LEN(name) - (classname_len + 2);
 		str_name = tmp + 2;
 
@@ -6731,6 +6738,11 @@ handle_magic_get:
 					zval member;
 					ZVAL_STR(&member, ref->unmangled_name);
 					zend_call_known_instance_method_with_1_params(ce->__isset, obj, return_value, &member);
+
+					if (Z_TYPE_P(return_value) == IS_REFERENCE) {
+						zend_unwrap_reference(return_value);
+					}
+
 					*guard &= ~ZEND_GUARD_PROPERTY_ISSET;
 					OBJ_RELEASE(obj);
 					return;
@@ -8159,7 +8171,7 @@ ZEND_METHOD(ReflectionConstant, __toString)
 PHP_MINIT_FUNCTION(reflection) /* {{{ */
 {
 	memcpy(&reflection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	reflection_object_handlers.offset = XtOffsetOf(reflection_object, zo);
+	reflection_object_handlers.offset = offsetof(reflection_object, zo);
 	reflection_object_handlers.free_obj = reflection_free_objects_storage;
 	reflection_object_handlers.clone_obj = NULL;
 	reflection_object_handlers.write_property = _reflection_write_property;

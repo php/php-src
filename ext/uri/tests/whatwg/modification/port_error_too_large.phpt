@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - host - larger than a 16-bit unsigned integer
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

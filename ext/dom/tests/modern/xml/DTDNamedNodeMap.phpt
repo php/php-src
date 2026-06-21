@@ -21,7 +21,6 @@ var_dump($doctype);
 
 var_dump($doctype->entities["test"]);
 var_dump($doctype->entities["myimage"]);
-// TODO: isConnected returning false is a bug
 var_dump($doctype->notations["GIF"]);
 
 ?>
@@ -142,17 +141,19 @@ object(Dom\Entity)#3 (17) {
   ["textContent"]=>
   NULL
 }
-object(Dom\Notation)#4 (13) {
+object(Dom\Notation)#4 (14) {
   ["nodeType"]=>
   int(12)
   ["nodeName"]=>
   string(3) "GIF"
   ["baseURI"]=>
-  string(11) "about:blank"
+  string(%d) "%s"
   ["isConnected"]=>
-  bool(false)
+  bool(true)
+  ["ownerDocument"]=>
+  string(22) "(object value omitted)"
   ["parentNode"]=>
-  NULL
+  string(22) "(object value omitted)"
   ["parentElement"]=>
   NULL
   ["childNodes"]=>
@@ -168,5 +169,5 @@ object(Dom\Notation)#4 (13) {
   ["nodeValue"]=>
   NULL
   ["textContent"]=>
-  string(0) ""
+  NULL
 }

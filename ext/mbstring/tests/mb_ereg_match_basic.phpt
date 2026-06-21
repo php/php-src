@@ -38,18 +38,27 @@ var_dump(mb_ereg_match($regex2, $string_mb));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 *** Testing mb_ereg_match() : basic functionality ***
 
 -- ASCII string 1 --
+
+Deprecated: Function mb_ereg_match() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
 
 -- ASCII string 2 --
+
+Deprecated: Function mb_ereg_match() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(false)
 
 -- Multibyte string 1 --
+
+Deprecated: Function mb_ereg_match() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
 
 -- Multibyte string 2 --
+
+Deprecated: Function mb_ereg_match() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(false)
 Done

@@ -4,7 +4,7 @@ PDO_sqlite: Testing createFunction() with flags
 pdo_sqlite
 --SKIPIF--
 <?php
-if (!defined('Pdo\Sqlite::DETERMINISTIC')) die('skip system sqlite is too old');
+if (!defined('Pdo\Sqlite::DETERMINISTIC')) die('skip Pdo\Sqlite::DETERMINISTIC requires SQLite library >= 3.8.3');
 ?>
 --FILE--
 <?php

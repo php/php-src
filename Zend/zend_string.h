@@ -71,35 +71,51 @@ END_EXTERN_C()
 
 /*---*/
 
-#define ZSTR_IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
-#define ZSTR_IS_VALID_UTF8(s)				(GC_FLAGS(s) & IS_STR_VALID_UTF8)
+static zend_always_inline bool ZSTR_IS_INTERNED(const zend_string *s) {
+	return GC_FLAGS(s) & IS_STR_INTERNED;
+}
+
+static inline bool ZSTR_IS_VALID_UTF8(const zend_string *s) {
+	return GC_FLAGS(s) & IS_STR_VALID_UTF8;
+}
 
 /* These are properties, encoded as flags, that will hold on the resulting string
  * after concatenating two strings that have these property.
  * Example: concatenating two UTF-8 strings yields another UTF-8 string. */
 #define ZSTR_COPYABLE_CONCAT_PROPERTIES		(IS_STR_VALID_UTF8)
 
-#define ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(s) 				(GC_FLAGS(s) & ZSTR_COPYABLE_CONCAT_PROPERTIES)
-/* This macro returns the copyable concat properties which hold on both strings. */
-#define ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(s1, s2)	(GC_FLAGS(s1) & GC_FLAGS(s2) & ZSTR_COPYABLE_CONCAT_PROPERTIES)
+static inline uint32_t ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(const zend_string *s) {
+	return GC_FLAGS(s) & ZSTR_COPYABLE_CONCAT_PROPERTIES;
+}
 
-#define ZSTR_COPY_CONCAT_PROPERTIES(out, in) do { \
-	zend_string *_out = (out); \
-	uint32_t properties = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES((in)); \
-	GC_ADD_FLAGS(_out, properties); \
-} while (0)
+/* This function returns the copyable concat properties which hold on both strings. */
+static inline uint32_t ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(const zend_string *s1, const zend_string *s2) {
+	return ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(s1) & ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(s2);
+}
 
-#define ZSTR_COPY_CONCAT_PROPERTIES_BOTH(out, in1, in2) do { \
-	zend_string *_out = (out); \
-	uint32_t properties = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH((in1), (in2)); \
-	GC_ADD_FLAGS(_out, properties); \
-} while (0)
+static inline void ZSTR_COPY_CONCAT_PROPERTIES(zend_string *out, const zend_string *in) {
+	uint32_t properties = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(in);
+	GC_ADD_FLAGS(out, properties);
+}
 
-#define ZSTR_EMPTY_ALLOC() zend_empty_string
-#define ZSTR_CHAR(c) zend_one_char_string[c]
-#define ZSTR_KNOWN(idx) zend_known_strings[idx]
+static inline void ZSTR_COPY_CONCAT_PROPERTIES_BOTH(zend_string *out, const zend_string *in1, const zend_string *in2) {
+	uint32_t properties = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(in1, in2);
+	GC_ADD_FLAGS(out, properties);
+}
 
-#define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
+static zend_always_inline zend_string *ZSTR_EMPTY_ALLOC(void) {
+	return zend_empty_string;
+}
+
+static zend_always_inline zend_string *ZSTR_CHAR(unsigned char c) {
+	return zend_one_char_string[c];
+}
+
+static zend_always_inline zend_string *ZSTR_KNOWN(size_t idx) {
+	return zend_known_strings[idx];
+}
+
+#define _ZSTR_HEADER_SIZE offsetof(zend_string, val)
 
 #define _ZSTR_STRUCT_SIZE(len) (_ZSTR_HEADER_SIZE + len + 1)
 
@@ -381,11 +397,22 @@ static zend_always_inline bool zend_string_equals(const zend_string *s1, const z
 	return s1 == s2 || zend_string_equal_content(s1, s2);
 }
 
-#define zend_string_equals_ci(s1, s2) \
-	(ZSTR_LEN(s1) == ZSTR_LEN(s2) && !zend_binary_strcasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2)))
+BEGIN_EXTERN_C()
+ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp(const char *s1, size_t len1, const char *s2, size_t len2);
+END_EXTERN_C()
 
-#define zend_string_equals_literal_ci(str, c) \
-	(ZSTR_LEN(str) == sizeof("" c) - 1 && !zend_binary_strcasecmp(ZSTR_VAL(str), ZSTR_LEN(str), (c), sizeof(c) - 1))
+static zend_always_inline bool zend_string_equals_cstr_ci(const zend_string *s1, const char *s2, size_t s2_length)
+{
+	return ZSTR_LEN(s1) == s2_length && !zend_binary_strcasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), s2, s2_length);
+}
+
+#define zend_string_equals_literal_ci(str, literal) \
+	zend_string_equals_cstr_ci(str, "" literal, sizeof(literal) - 1)
+
+static zend_always_inline bool zend_string_equals_ci(const zend_string *s1, const zend_string *s2)
+{
+	return zend_string_equals_cstr_ci(s1, ZSTR_VAL(s2), ZSTR_LEN(s2));
+}
 
 #define zend_string_equals_literal(str, literal) \
 	zend_string_equals_cstr(str, "" literal, sizeof(literal) - 1)

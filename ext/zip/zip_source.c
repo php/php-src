@@ -155,6 +155,7 @@ static zip_int64_t php_zip_string_cb(void *userdata, void *data, zip_uint64_t le
 			ctx->in_str = ctx->out_str;
 			ctx->out_str = ZSTR_EMPTY_ALLOC();
 			if (ctx->dest) {
+				zend_string_release(*(ctx->dest));
 				*(ctx->dest) = zend_string_copy(ctx->in_str);
 			}
 			return 0;
@@ -200,5 +201,10 @@ zip_source_t * php_zip_create_string_source(zend_string *str, zend_string **dest
 	ctx->out_str = ZSTR_EMPTY_ALLOC();
 	ctx->dest = dest;
 	ctx->mtime = time(NULL);
+
+	if (dest) {
+		*dest = zend_string_copy(str);
+	}
+
 	return zip_source_function_create(php_zip_string_cb, (void*)ctx, err);
 }

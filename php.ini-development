@@ -611,6 +611,12 @@ ignore_repeated_source = Off
 ; Production Value: On
 ;fatal_error_backtraces = On
 
+; This directive controls whether PHP will print the actual arguments of a
+; function upon an error. If this is off (or there was an error fetching the
+; arguments), the function providing the error may optionally provide some
+; additional information after the problem function's name.
+;error_include_args = Off
+
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
@@ -1305,10 +1311,9 @@ session.save_handler = files
 ; Strict session mode does not accept an uninitialized session ID, and
 ; regenerates the session ID if the browser sends an uninitialized session ID.
 ; Strict mode protects applications from session fixation via a session adoption
-; vulnerability. It is disabled by default for maximum compatibility, but
-; enabling it is encouraged.
+; vulnerability.
 ; https://wiki.php.net/rfc/strict_sessions
-session.use_strict_mode = 0
+session.use_strict_mode = 1
 
 ; Whether to use cookies.
 ; https://php.net/session.use-cookies
@@ -1350,13 +1355,13 @@ session.cookie_domain =
 ; Whether or not to add the httpOnly flag to the cookie, which makes it
 ; inaccessible to browser scripting languages such as JavaScript.
 ; https://php.net/session.cookie-httponly
-session.cookie_httponly =
+session.cookie_httponly = 1
 
 ; Add SameSite attribute to cookie to help mitigate Cross-Site Request Forgery (CSRF/XSRF)
 ; Current valid values are "Strict", "Lax" or "None". When using "None",
 ; make sure to include the quotes, as `none` is interpreted like `false` in ini files.
 ; https://tools.ietf.org/html/draft-west-first-party-cookies-07
-session.cookie_samesite =
+session.cookie_samesite = "Lax"
 
 ; Handler used to serialize data. php is the standard serializer of PHP.
 ; https://php.net/session.serialize-handler

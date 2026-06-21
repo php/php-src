@@ -35,9 +35,7 @@ typedef struct _gmp_object {
 	zend_object std;
 } gmp_object;
 
-static inline gmp_object *php_gmp_object_from_zend_object(zend_object *zobj) {
-	return (gmp_object *)( ((char *)zobj) - XtOffsetOf(gmp_object, std) );
-}
+#define php_gmp_object_from_zend_object(zobj) ZEND_CONTAINER_OF(zobj, gmp_object, std)
 
 PHP_GMP_API zend_class_entry *php_gmp_class_entry(void);
 

@@ -483,7 +483,7 @@ void ftp_raw(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, zval *return_
 	array_init(return_value);
 	while (ftp_readline(ftp)) {
 		add_next_index_string(return_value, ftp->inbuf);
-		if (isdigit(ftp->inbuf[0]) && isdigit(ftp->inbuf[1]) && isdigit(ftp->inbuf[2]) && ftp->inbuf[3] == ' ') {
+		if (isdigit((unsigned char)ftp->inbuf[0]) && isdigit((unsigned char)ftp->inbuf[1]) && isdigit((unsigned char)ftp->inbuf[2]) && ftp->inbuf[3] == ' ') {
 			return;
 		}
 	}
@@ -789,7 +789,7 @@ bool ftp_pasv(ftpbuf_t *ftp, int pasv)
 		return false;
 	}
 	/* parse out the IP and port */
-	for (ptr = ftp->inbuf; *ptr && !isdigit(*ptr); ptr++);
+	for (ptr = ftp->inbuf; *ptr && !isdigit((unsigned char)*ptr); ptr++);
 	n = sscanf(ptr, "%lu,%lu,%lu,%lu,%lu,%lu", &b[0], &b[1], &b[2], &b[3], &b[4], &b[5]);
 	if (n != 6) {
 		return false;
@@ -850,6 +850,7 @@ bool ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_
 		goto bail;
 	}
 
+	bool pending_cr = false;
 	while ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
 		if (rcvd == (size_t)-1) {
 			goto bail;
@@ -869,13 +870,30 @@ bool ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_
 			php_stream_write(outstream, ptr, (e - ptr));
 			ptr = e;
 #else
-			while (e > ptr && (s = memchr(ptr, '\r', (e - ptr)))) {
-				php_stream_write(outstream, ptr, (s - ptr));
-				if (*(s + 1) == '\n') {
-					s++;
+			if (pending_cr) {
+				pending_cr = false;
+				if (*ptr == '\n') {
 					php_stream_putc(outstream, '\n');
+					ptr++;
+				} else {
+					php_stream_putc(outstream, '\r');
 				}
-				ptr = s + 1;
+			}
+			while (e > ptr && (s = memchr(ptr, '\r', (e - ptr)))) {
+				if (s + 1 < e) {
+					if (*(s + 1) == '\n') {
+						php_stream_write(outstream, ptr, (s - ptr));
+						php_stream_putc(outstream, '\n');
+						ptr = s + 2;
+					} else {
+						php_stream_write(outstream, ptr, (s - ptr) + 1);
+						ptr = s + 1;
+					}
+				} else {
+					php_stream_write(outstream, ptr, (s - ptr));
+					pending_cr = true;
+					ptr = s + 1;
+				}
 			}
 #endif
 			if (ptr < e) {
@@ -884,6 +902,9 @@ bool ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_
 		} else if (rcvd != php_stream_write(outstream, data->buf, rcvd)) {
 			goto bail;
 		}
+	}
+	if (pending_cr) {
+		php_stream_putc(outstream, '\r');
 	}
 
 	data_close(ftp);
@@ -1100,7 +1121,7 @@ time_t ftp_mdtm(ftpbuf_t *ftp, const char *path, const size_t path_len)
 		return -1;
 	}
 	/* parse out the timestamp */
-	for (ptr = ftp->inbuf; *ptr && !isdigit(*ptr); ptr++);
+	for (ptr = ftp->inbuf; *ptr && !isdigit((unsigned char)*ptr); ptr++);
 	n = sscanf(ptr, "%4d%2d%2d%2d%2d%2d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec);
 	if (n != 6) {
 		return -1;
@@ -1276,13 +1297,13 @@ static bool ftp_getresp(ftpbuf_t *ftp)
 		}
 
 		/* Break out when the end-tag is found */
-		if (isdigit(ftp->inbuf[0]) && isdigit(ftp->inbuf[1]) && isdigit(ftp->inbuf[2]) && ftp->inbuf[3] == ' ') {
+		if (isdigit((unsigned char)ftp->inbuf[0]) && isdigit((unsigned char)ftp->inbuf[1]) && isdigit((unsigned char)ftp->inbuf[2]) && ftp->inbuf[3] == ' ') {
 			break;
 		}
 	}
 
 	/* translate the tag */
-	if (!isdigit(ftp->inbuf[0]) || !isdigit(ftp->inbuf[1]) || !isdigit(ftp->inbuf[2])) {
+	if (!isdigit((unsigned char)ftp->inbuf[0]) || !isdigit((unsigned char)ftp->inbuf[1]) || !isdigit((unsigned char)ftp->inbuf[2])) {
 		return false;
 	}
 

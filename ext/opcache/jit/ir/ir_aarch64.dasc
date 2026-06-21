@@ -402,6 +402,7 @@ int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *co
 	int flags = IR_USE_MUST_BE_IN_REG | IR_OP1_MUST_BE_IN_REG | IR_OP2_MUST_BE_IN_REG | IR_OP3_MUST_BE_IN_REG;
 	const ir_proto_t *proto;
 	const ir_call_conv_dsc *cc;
+	ir_ref next;
 
 	constraints->def_reg = IR_REG_NONE;
 	constraints->hints_count = 0;
@@ -562,11 +563,13 @@ int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *co
 				constraints->tmp_regs[0] = IR_TMP_REG(1, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
 				n = 1;
 			}
-			if (IR_IS_CONST_REF(insn->op2) && insn->op1 != insn->op2) {
-				insn = &ctx->ir_base[insn->op2];
-				if (IR_IS_SYM_CONST(insn->op) || !aarch64_may_encode_imm12(insn->val.u64)) {
-					constraints->tmp_regs[n] = IR_TMP_REG(2, insn->type, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
-					n++;
+			if (IR_IS_CONST_REF(insn->op2)) {
+				if (insn->op1 != insn->op2) {
+					insn = &ctx->ir_base[insn->op2];
+					if (IR_IS_SYM_CONST(insn->op) || !aarch64_may_encode_imm12(insn->val.u64)) {
+						constraints->tmp_regs[n] = IR_TMP_REG(2, insn->type, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+						n++;
+					}
 				}
 			} else if (ir_rule(ctx, insn->op2) == IR_STATIC_ALLOCA) {
 				constraints->tmp_regs[n] = IR_TMP_REG(2, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
@@ -751,6 +754,10 @@ get_arg_hints:
 			break;
 		case IR_SNAPSHOT:
 			flags = 0;
+			next = ir_next_control(ctx, ref);
+			if (ctx->ir_base[next].op == IR_GUARD || ctx->ir_base[next].op == IR_GUARD_NOT) {
+				flags = IR_EXTEND_INPUTS_TO_NEXT;
+			}
 			break;
 		case IR_VA_START:
 			flags = IR_OP2_MUST_BE_IN_REG;
@@ -1199,10 +1206,6 @@ binop_fp:
 			if (!IR_IS_CONST_REF(insn->op2) && (ctx->use_lists[insn->op2].count == 1 || all_usages_are_fusable(ctx, insn->op2))) {
 				op2_insn = &ctx->ir_base[insn->op2];
 				if (op2_insn->op >= IR_EQ && op2_insn->op <= IR_UNORDERED) {
-					// TODO: register allocator may clobber operands of CMP before they are used in the GUARD_CMP
-//???				 && (insn->op2 == ref - 1 ||
-//???				     (insn->op2 == ctx->prev_ref[ref] - 1
-//???				   && ctx->ir_base[ctx->prev_ref[ref]].op == IR_SNAPSHOT))) {
 					if (IR_IS_TYPE_INT(ctx->ir_base[op2_insn->op1].type)) {
 						ctx->rules[insn->op2] = IR_FUSED | IR_CMP_INT;
 						return IR_GUARD_CMP_INT;
@@ -1264,6 +1267,12 @@ binop_fp:
 		case IR_ARGVAL:
 			return IR_FUSED | IR_ARGVAL;
 		case IR_NOP:
+			return IR_SKIPPED | IR_NOP;
+		case IR_ASM:
+		case IR_ASM_OUT:
+		case IR_ASM_GOTO:
+			fprintf(stderr, "ERROR: IR_ASM is not implemented yet\n");
+			exit(1);
 			return IR_SKIPPED | IR_NOP;
 		default:
 			break;
@@ -4996,7 +5005,8 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 						void *addr = ir_jmp_addr(ctx, insn, &ctx->ir_base[insn->op2]);
 
 						|	.addr &addr
-						if (ctx->ir_base[bb->start].op != IR_CASE_DEFAULT) {
+						if (ctx->ir_base[bb->start].op1 == def
+						 && ctx->ir_base[bb->start].op != IR_CASE_DEFAULT) {
 							bb->flags |= IR_BB_EMPTY;
 						}
 						continue;

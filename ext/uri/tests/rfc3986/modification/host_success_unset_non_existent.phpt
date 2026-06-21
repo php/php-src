@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\Rfc3986\Uri component modification - host - unsetting non-existent
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

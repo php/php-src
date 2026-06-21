@@ -54,6 +54,7 @@
 #include "mb_gpc.h"
 
 #ifdef HAVE_MBREGEX
+# include "zend_attributes.h"
 # include "php_mbregex.h"
 #endif
 
@@ -623,7 +624,7 @@ static char *php_mb_rfc1867_getword(const zend_encoding *encoding, char **line, 
 
 static char *php_mb_rfc1867_getword_conf(const zend_encoding *encoding, char *str) /* {{{ */
 {
-	while (*str && isspace(*(unsigned char *)str)) {
+	while (*str && isspace((unsigned char)*str)) {
 		++str;
 	}
 
@@ -639,7 +640,7 @@ static char *php_mb_rfc1867_getword_conf(const zend_encoding *encoding, char *st
 	} else {
 		char *strend = str;
 
-		while (*strend && !isspace(*(unsigned char *)strend)) {
+		while (*strend && !isspace((unsigned char)*strend)) {
 			++strend;
 		}
 		return php_mb_rfc1867_substring_conf(encoding, str, strend - str, 0);
@@ -4480,12 +4481,14 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 								fld_val = zend_string_init(token, token_pos, 0);
 							}
 
-							if (fld_name != NULL && fld_val != NULL) {
-								zval val;
-								zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
-								ZVAL_STR(&val, fld_val);
+							if (fld_name != NULL) {
+								if (fld_val != NULL) {
+									zval val;
+									zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
+									ZVAL_STR(&val, fld_val);
 
-								zend_hash_update(ht, fld_name, &val);
+									zend_hash_update(ht, fld_name, &val);
+								}
 
 								zend_string_release_ex(fld_name, 0);
 							}
@@ -4526,11 +4529,13 @@ out:
 		if(token && token_pos > 0) {
 			fld_val = zend_string_init(token, token_pos, 0);
 		}
-		if (fld_name != NULL && fld_val != NULL) {
-			zval val;
-			zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
-			ZVAL_STR(&val, fld_val);
-			zend_hash_update(ht, fld_name, &val);
+		if (fld_name != NULL) {
+			if (fld_val != NULL) {
+				zval val;
+				zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
+				ZVAL_STR(&val, fld_val);
+				zend_hash_update(ht, fld_name, &val);
+			}
 
 			zend_string_release_ex(fld_name, 0);
 		}

@@ -283,7 +283,7 @@ static HashTable *gmp_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 
 static zend_object *gmp_clone_obj(zend_object *obj) /* {{{ */
 {
-	gmp_object *old_object = GET_GMP_OBJECT_FROM_OBJ(obj);
+	const gmp_object *old_object = GET_GMP_OBJECT_FROM_OBJ(obj);
 	gmp_object *new_object = GET_GMP_OBJECT_FROM_OBJ(gmp_create_object(obj->ce));
 
 	zend_objects_clone_members( &new_object->std, &old_object->std);
@@ -332,11 +332,11 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 
 	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
 		if (UNEXPECTED(!IS_GMP(op2))) {
-			// For PHP 8.3 and up use zend_try_get_long()
+			bool failed;
 			switch (Z_TYPE_P(op2)) {
 				case IS_DOUBLE:
-					shift = zval_get_long(op2);
-					if (UNEXPECTED(EG(exception))) {
+					shift = zval_try_get_long(op2, &failed);
+					if (UNEXPECTED(failed)) {
 						return FAILURE;
 					}
 					break;
@@ -356,10 +356,10 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 		shift = Z_LVAL_P(op2);
 	}
 
-	if (shift < 0) {
+	if (shift < 0 || shift > ULONG_MAX) {
 		zend_throw_error(
-			zend_ce_value_error, "%s must be greater than or equal to 0",
-			opcode == ZEND_POW ? "Exponent" : "Shift"
+			zend_ce_value_error, "%s must be between 0 and %lu",
+			opcode == ZEND_POW ? "Exponent" : "Shift", ULONG_MAX
 		);
 		ZVAL_UNDEF(return_value);
 		return FAILURE;
@@ -586,7 +586,7 @@ ZEND_MINIT_FUNCTION(gmp)
 	gmp_ce->unserialize = gmp_unserialize;
 
 	memcpy(&gmp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	gmp_object_handlers.offset = XtOffsetOf(gmp_object, std);
+	gmp_object_handlers.offset = offsetof(gmp_object, std);
 	gmp_object_handlers.free_obj = gmp_free_object_storage;
 	gmp_object_handlers.cast_object = gmp_cast_object;
 	gmp_object_handlers.get_debug_info = gmp_get_debug_info;
@@ -632,7 +632,7 @@ static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val,
 	bool skip_lead = false;
 
 	size_t num_len = ZSTR_LEN(val);
-	while (isspace(*num_str)) {
+	while (isspace((unsigned char)*num_str)) {
 		++num_str;
 		--num_len;
 	}
@@ -1087,11 +1087,6 @@ ZEND_FUNCTION(gmp_fact)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (mpz_sgn(gmpnum) < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
-
 	if (!mpz_fits_ulong_p(gmpnum)) {
 		zend_argument_value_error(1, "must be between 0 and %lu", ULONG_MAX);
 		RETURN_THROWS();
@@ -1114,8 +1109,8 @@ ZEND_FUNCTION(gmp_binomial)
 		Z_PARAM_LONG(k)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (k < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
+	if (k < 0 || k > ULONG_MAX) {
+		zend_argument_value_error(2, "must be between 0 and %lu", ULONG_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1136,8 +1131,8 @@ ZEND_FUNCTION(gmp_pow)
 		Z_PARAM_LONG(exp)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (exp < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
+	if (exp < 0 || exp > ULONG_MAX) {
+		zend_argument_value_error(2, "must be between 0 and %lu", ULONG_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1163,7 +1158,7 @@ ZEND_FUNCTION(gmp_powm)
 	}
 
 	if (!mpz_cmp_ui(gmpnum_mod, 0)) {
-		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+		zend_argument_error(zend_ce_division_by_zero_error, 3, "Modulo by zero");
 		RETURN_THROWS();
 	}
 
@@ -1226,8 +1221,8 @@ ZEND_FUNCTION(gmp_root)
 		Z_PARAM_LONG(nth)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (nth <= 0) {
-		zend_argument_value_error(2, "must be greater than 0");
+	if (nth <= 0 || nth > ULONG_MAX) {
+		zend_argument_value_error(2, "must be between 1 and %lu", ULONG_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1253,8 +1248,8 @@ ZEND_FUNCTION(gmp_rootrem)
 		Z_PARAM_LONG(nth)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (nth <= 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 1");
+	if (nth <= 0 || nth > ULONG_MAX) {
+		zend_argument_value_error(2, "must be between 1 and %lu", ULONG_MAX);
 		RETURN_THROWS();
 	}
 

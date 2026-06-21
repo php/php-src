@@ -60,7 +60,6 @@
 void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 static void safe_odbc_disconnect(void *handle);
 static void close_results_with_connection(odbc_connection *conn);
-static inline odbc_result *odbc_result_from_obj(zend_object *obj);
 
 static int le_pconn;
 
@@ -69,6 +68,7 @@ static zend_object_handlers odbc_connection_object_handlers, odbc_result_object_
 
 #define Z_ODBC_LINK_P(zv) odbc_link_from_obj(Z_OBJ_P(zv))
 #define Z_ODBC_CONNECTION_P(zv) Z_ODBC_LINK_P(zv)->connection
+#define odbc_result_from_obj(obj) ZEND_CONTAINER_OF(obj, odbc_result, std)
 #define Z_ODBC_RESULT_P(zv) odbc_result_from_obj(Z_OBJ_P(zv))
 
 static void odbc_insert_new_result(odbc_connection *connection, zval *result)
@@ -85,10 +85,7 @@ static void odbc_insert_new_result(odbc_connection *connection, zval *result)
 	Z_ADDREF_P(result);
 }
 
-static inline odbc_link *odbc_link_from_obj(zend_object *obj)
-{
-	return (odbc_link *)((char *)(obj) - XtOffsetOf(odbc_link, std));
-}
+#define odbc_link_from_obj(obj) ZEND_CONTAINER_OF(obj, odbc_link, std)
 
 static int _close_pconn_with_res(zval *zv, void *p)
 {
@@ -200,11 +197,6 @@ static void odbc_connection_free_obj(zend_object *obj)
 	}
 
 	zend_object_std_dtor(&link->std);
-}
-
-static inline odbc_result *odbc_result_from_obj(zend_object *obj)
-{
-	return (odbc_result *)((char *)(obj) - XtOffsetOf(odbc_result, std));
 }
 
 static zend_object *odbc_result_create_object(zend_class_entry *class_type)
@@ -507,7 +499,7 @@ PHP_MINIT_FUNCTION(odbc)
 	odbc_connection_ce->default_object_handlers = &odbc_connection_object_handlers;
 
 	memcpy(&odbc_connection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	odbc_connection_object_handlers.offset = XtOffsetOf(odbc_link, std);
+	odbc_connection_object_handlers.offset = offsetof(odbc_link, std);
 	odbc_connection_object_handlers.free_obj = odbc_connection_free_obj;
 	odbc_connection_object_handlers.get_constructor = odbc_connection_get_constructor;
 	odbc_connection_object_handlers.clone_obj = NULL;
@@ -519,7 +511,7 @@ PHP_MINIT_FUNCTION(odbc)
 	odbc_result_ce->default_object_handlers = &odbc_result_object_handlers;
 
 	memcpy(&odbc_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	odbc_result_object_handlers.offset = XtOffsetOf(odbc_result, std);
+	odbc_result_object_handlers.offset = offsetof(odbc_result, std);
 	odbc_result_object_handlers.free_obj = odbc_result_free_obj;
 	odbc_result_object_handlers.get_constructor = odbc_result_get_constructor;
 	odbc_result_object_handlers.clone_obj = NULL;
@@ -1951,9 +1943,9 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 				if (use_uid_arg) {
 					should_quote_uid = !php_odbc_connstr_is_quoted(uid) && php_odbc_connstr_should_quote(uid);
 					if (should_quote_uid) {
-						size_t estimated_length = php_odbc_connstr_estimate_quote_length(uid);
-						uid_quoted = emalloc(estimated_length);
-						php_odbc_connstr_quote(uid_quoted, uid, estimated_length);
+						size_t quoted_length = php_odbc_connstr_get_quoted_length(uid);
+						uid_quoted = emalloc(quoted_length);
+						php_odbc_connstr_quote(uid_quoted, uid, quoted_length);
 					} else {
 						uid_quoted = uid;
 					}
@@ -1966,9 +1958,9 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 				if (use_pwd_arg) {
 					should_quote_pwd = !php_odbc_connstr_is_quoted(pwd) && php_odbc_connstr_should_quote(pwd);
 					if (should_quote_pwd) {
-						size_t estimated_length = php_odbc_connstr_estimate_quote_length(pwd);
-						pwd_quoted = emalloc(estimated_length);
-						php_odbc_connstr_quote(pwd_quoted, pwd, estimated_length);
+						size_t quoted_length = php_odbc_connstr_get_quoted_length(pwd);
+						pwd_quoted = emalloc(quoted_length);
+						php_odbc_connstr_quote(pwd_quoted, pwd, quoted_length);
 					} else {
 						pwd_quoted = pwd;
 					}

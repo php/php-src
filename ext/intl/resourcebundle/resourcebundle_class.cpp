@@ -220,12 +220,12 @@ static zval *resource_bundle_array_fetch(
 	}
 
 	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING || INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
-		UErrorCode icuerror;
+		UErrorCode icuerror = U_ZERO_ERROR;
 		const char * locale = ures_getLocaleByType( rb->me, ULOC_ACTUAL_LOCALE, &icuerror );
 		if (is_numeric) {
-			spprintf(&pbuf, 0, "Cannot load element %d without fallback from to %s", index, locale);
+			spprintf(&pbuf, 0, "Cannot load element %d without fallback to %s", index, locale);
 		} else {
-			spprintf(&pbuf, 0, "Cannot load element '%s' without fallback from to %s", key, locale);
+			spprintf(&pbuf, 0, "Cannot load element '%s' without fallback to %s", key, locale);
 		}
 		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(rb), pbuf);
 		efree(pbuf);
@@ -424,7 +424,7 @@ U_CFUNC void resourcebundle_register_class( void )
 	ResourceBundle_ce_ptr->get_iterator = resourcebundle_get_iterator;
 
 	ResourceBundle_object_handlers = std_object_handlers;
-	ResourceBundle_object_handlers.offset = XtOffsetOf(ResourceBundle_object, zend);
+	ResourceBundle_object_handlers.offset = offsetof(ResourceBundle_object, zend);
 	ResourceBundle_object_handlers.clone_obj	  = NULL; /* ICU ResourceBundle has no clone implementation */
 	ResourceBundle_object_handlers.free_obj = ResourceBundle_object_free;
 	ResourceBundle_object_handlers.read_dimension = resourcebundle_array_get;

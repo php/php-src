@@ -61,7 +61,6 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     $test_macos = in_array('CI: macOS', $labels, true);
     $test_msan = in_array('CI: MSAN', $labels, true);
     $test_opcache_variation = in_array('CI: Opcache Variation', $labels, true);
-    $test_pecl = in_array('CI: PECL', $labels, true);
     $test_solaris = in_array('CI: Solaris', $labels, true);
     $test_windows = in_array('CI: Windows', $labels, true);
 
@@ -137,22 +136,24 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     if ($all_jobs || $test_opcache_variation) {
         $jobs['OPCACHE_VARIATION'] = true;
     }
-    if (($all_jobs && $ref === 'master') || $test_pecl) {
-        $jobs['PECL'] = true;
-    }
     if (version_compare($php_version, '8.6', '>=') && ($all_jobs || $test_solaris)) {
         $jobs['SOLARIS'] = true;
     }
     if ($all_jobs || !$no_jobs || $test_windows) {
-        $jobs['WINDOWS']['matrix'] = $all_variations
-            ? ['include' => [
-                ['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true],
-                ['asan' => false, 'opcache' => false, 'x64' => false, 'zts' => false],
-            ]]
-            : ['include' => [['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true]]];
-        $jobs['WINDOWS']['config'] = version_compare($php_version, '8.4', '>=')
-            ? ['vs_crt_version' => 'vs17']
-            : ['vs_crt_version' => 'vs16'];
+        $matrix = [['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true]];
+        if ($all_variations) {
+            $matrix[] = ['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true];
+            $matrix[] = ['asan' => false, 'opcache' => false, 'x64' => false, 'zts' => false];
+            if (version_compare($php_version, '8.6', '>=')) {
+                $matrix[] = ['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true, 'clang' => true];
+            }
+        }
+        $jobs['WINDOWS']['matrix'] = ['include' => $matrix];
+        $jobs['WINDOWS']['config'] = match (true) {
+            version_compare($php_version, '8.6', '>=') => ['vs_crt_version' => 'vs18', 'runs_on' => 'windows-2025-vs2026'],
+            version_compare($php_version, '8.4', '>=') => ['vs_crt_version' => 'vs17', 'runs_on' => 'windows-2022'],
+            default => ['vs_crt_version' => 'vs16', 'runs_on' => 'windows-2022'],
+        };
     }
     if ($all_jobs || !$no_jobs || $test_freebsd) {
         $jobs['FREEBSD']['matrix'] = $all_variations && version_compare($php_version, '8.3', '>=')

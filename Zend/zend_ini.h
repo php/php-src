@@ -182,18 +182,18 @@ END_EXTERN_C()
 
 #ifdef ZTS
 #define STD_ZEND_INI_ENTRY(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
-	ZEND_INI_ENTRY2(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr##_id)
+	ZEND_INI_ENTRY2(name, default_value, modifiable, on_modify, (void *) offsetof(struct_type, property_name), (void *) &struct_ptr##_id)
 #define STD_ZEND_INI_ENTRY_EX(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr, displayer) \
-	ZEND_INI_ENTRY2_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr##_id, displayer)
+	ZEND_INI_ENTRY2_EX(name, default_value, modifiable, on_modify, (void *) offsetof(struct_type, property_name), (void *) &struct_ptr##_id, displayer)
 #define STD_ZEND_INI_BOOLEAN(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
-	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr##_id, NULL, zend_ini_boolean_displayer_cb)
+	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) offsetof(struct_type, property_name), (void *) &struct_ptr##_id, NULL, zend_ini_boolean_displayer_cb)
 #else
 #define STD_ZEND_INI_ENTRY(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
-	ZEND_INI_ENTRY2(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr)
+	ZEND_INI_ENTRY2(name, default_value, modifiable, on_modify, (void *) offsetof(struct_type, property_name), (void *) &struct_ptr)
 #define STD_ZEND_INI_ENTRY_EX(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr, displayer) \
-	ZEND_INI_ENTRY2_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, displayer)
+	ZEND_INI_ENTRY2_EX(name, default_value, modifiable, on_modify, (void *) offsetof(struct_type, property_name), (void *) &struct_ptr, displayer)
 #define STD_ZEND_INI_BOOLEAN(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
-	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, NULL, zend_ini_boolean_displayer_cb)
+	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) offsetof(struct_type, property_name), (void *) &struct_ptr, NULL, zend_ini_boolean_displayer_cb)
 #endif
 
 #define REGISTER_INI_ENTRIES() zend_register_ini_entries_ex(ini_entries, module_number, type)

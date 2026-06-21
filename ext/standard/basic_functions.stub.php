@@ -1641,7 +1641,10 @@ function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
  */
 function array_search(mixed $needle, array $haystack, bool $strict = false): int|string|false {}
 
-/** @prefer-ref $array */
+/**
+ * @prefer-ref $array
+ * @forbid-dynamic-calls
+ */
 function extract(array &$array, int $flags = EXTR_OVERWRITE, string $prefix = ""): int {}
 
 /**
@@ -1649,6 +1652,7 @@ function extract(array &$array, int $flags = EXTR_OVERWRITE, string $prefix = ""
  * @param array|string $var_names
  * @return array<string, mixed|ref>
  * @refcount 1
+ * @forbid-dynamic-calls
  */
 function compact($var_name, ...$var_names): array {}
 
@@ -3381,7 +3385,10 @@ function soundex(string $string): string {}
 
 /* streamsfuncs.c */
 
-function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null): int|false {}
+/**
+ * @param resource|null $context
+ */
+function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null, $context = null): int|false {}
 
 /**
  * @return resource
@@ -3477,6 +3484,11 @@ function stream_socket_sendto($socket, string $data, int $flags = 0, string $add
  */
 function stream_socket_enable_crypto($stream, bool $enable, ?int $crypto_method = null, $session_stream = null): int|bool {}
 
+/**
+ * @param resource $stream
+ */
+function stream_socket_get_crypto_status($stream): int {}
+
 #ifdef HAVE_SHUTDOWN
 /** @param resource $stream */
 function stream_socket_shutdown($stream, int $mode): bool {}
@@ -3484,17 +3496,19 @@ function stream_socket_shutdown($stream, int $mode): bool {}
 
 #ifdef HAVE_SOCKETPAIR
 /**
+ * @param resource|null $context
  * @return array<int, resource>|false
  * @refcount 1
  */
-function stream_socket_pair(int $domain, int $type, int $protocol): array|false {}
+function stream_socket_pair(int $domain, int $type, int $protocol, $context = null): array|false {}
 #endif
 
 /**
  * @param resource $from
  * @param resource $to
+ * @param resource|null $context
  */
-function stream_copy_to_stream($from, $to, ?int $length = null, int $offset = 0): int|false {}
+function stream_copy_to_stream($from, $to, ?int $length = null, int $offset = 0, $context = null): int|false {}
 
 /**
  * @param resource $stream
@@ -3555,13 +3569,23 @@ function stream_resolve_include_path(string $filename): string|false {}
 function stream_get_wrappers(): array {}
 
 /**
+ * @return array<int, StreamError>
+ */
+function stream_last_errors(): array {}
+
+function stream_clear_errors(): void {}
+
+/**
  * @return array<int, string>
  * @refcount 1
  */
 function stream_get_transports(): array {}
 
-/** @param resource|string $stream */
-function stream_is_local($stream): bool {}
+/**
+ * @param resource|string $stream
+ * @param resource|null $context
+ */
+function stream_is_local($stream, $context = null): bool {}
 
 /** @param resource $stream */
 function stream_isatty($stream): bool {}

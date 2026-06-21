@@ -77,7 +77,7 @@ U_CFUNC void calendar_object_construct(zval *object,
 /* {{{ clone handler for Calendar */
 static zend_object *Calendar_clone_obj(zend_object *object)
 {
-	Calendar_object *co_orig = php_intl_calendar_fetch_object(object);
+	const Calendar_object *co_orig = php_intl_calendar_fetch_object(object);
 	zend_object     *ret_val = Calendar_ce_ptr->create_object(object->ce);
 	Calendar_object  *co_new = php_intl_calendar_fetch_object(ret_val);
 
@@ -256,7 +256,7 @@ void calendar_register_IntlCalendar_class(void)
 
 	memcpy( &Calendar_handlers, &std_object_handlers,
 		sizeof Calendar_handlers);
-	Calendar_handlers.offset = XtOffsetOf(Calendar_object, zo);
+	Calendar_handlers.offset = offsetof(Calendar_object, zo);
 	Calendar_handlers.clone_obj = Calendar_clone_obj;
 	Calendar_handlers.get_debug_info = Calendar_get_debug_info;
 	Calendar_handlers.free_obj = Calendar_objects_free;

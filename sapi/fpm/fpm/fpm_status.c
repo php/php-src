@@ -522,8 +522,8 @@ int fpm_status_handle_request(void) /* {{{ */
 		if (full_syntax) {
 			unsigned int i;
 			int first;
-			zend_string *tmp_query_string;
-			char *query_string;
+			zend_string *tmp_query_string, *tmp_request_uri_string;
+			char *query_string, *request_uri_string;
 			struct timeval duration, now;
 			float cpu;
 
@@ -548,13 +548,36 @@ int fpm_status_handle_request(void) /* {{{ */
 					}
 				}
 
+				request_uri_string = NULL;
+				tmp_request_uri_string = NULL;
+				if (proc->request_uri[0] != '\0') {
+					if (encode_html) {
+						tmp_request_uri_string = php_escape_html_entities_ex(
+								(const unsigned char *) proc->request_uri,
+								strlen(proc->request_uri), 1, ENT_DISALLOWED | ENT_HTML_DOC_XML1 | ENT_COMPAT,
+								NULL, /* double_encode */ 1, /* quiet */ 0);
+						request_uri_string = ZSTR_VAL(tmp_request_uri_string);
+					} else if (encode_json) {
+						tmp_request_uri_string = php_json_encode_string(proc->request_uri,
+								strlen(proc->request_uri), PHP_JSON_INVALID_UTF8_IGNORE);
+						request_uri_string = ZSTR_VAL(tmp_request_uri_string);
+						/* remove quotes around the string */
+						if (ZSTR_LEN(tmp_request_uri_string) >= 2) {
+							request_uri_string[ZSTR_LEN(tmp_request_uri_string) - 1] = '\0';
+							++request_uri_string;
+						}
+					} else {
+						request_uri_string = proc->request_uri;
+					}
+				}
+
 				query_string = NULL;
 				tmp_query_string = NULL;
 				if (proc->query_string[0] != '\0') {
 					if (encode_html) {
 						tmp_query_string = php_escape_html_entities_ex(
 								(const unsigned char *) proc->query_string,
-								strlen(proc->query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT,
+								strlen(proc->query_string), 1, ENT_DISALLOWED | ENT_HTML_DOC_XML1 | ENT_COMPAT,
 								NULL, /* double_encode */ 1, /* quiet */ 0);
 					} else if (encode_json) {
 						tmp_query_string = php_json_encode_string(proc->query_string,
@@ -593,7 +616,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					proc->requests,
 					(unsigned long) (duration.tv_sec * 1000000UL + duration.tv_usec),
 					proc->request_method[0] != '\0' ? proc->request_method : "-",
-					proc->request_uri[0] != '\0' ? proc->request_uri : "-",
+					request_uri_string ? request_uri_string : "-",
 					query_string ? "?" : "",
 					query_string ? query_string : "",
 					proc->content_length,
@@ -604,6 +627,9 @@ int fpm_status_handle_request(void) /* {{{ */
 				PUTS(buffer);
 				efree(buffer);
 
+				if (tmp_request_uri_string) {
+					zend_string_free(tmp_request_uri_string);
+				}
 				if (tmp_query_string) {
 					zend_string_free(tmp_query_string);
 				}

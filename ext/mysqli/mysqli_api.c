@@ -530,6 +530,10 @@ PHP_FUNCTION(mysqli_execute_query)
 		MYSQLND_PARAM_BIND	*params;
 
 		if (!zend_array_is_list(input_params)) {
+			if (stmt->query) {
+				efree(stmt->query);
+				stmt->query = NULL;
+			}
 			mysqli_stmt_close(stmt->stmt, false);
 			stmt->stmt = NULL;
 			efree(stmt);
@@ -540,6 +544,10 @@ PHP_FUNCTION(mysqli_execute_query)
 		hash_num_elements = zend_hash_num_elements(input_params);
 		param_count = mysql_stmt_param_count(stmt->stmt);
 		if (hash_num_elements != param_count) {
+			if (stmt->query) {
+				efree(stmt->query);
+				stmt->query = NULL;
+			}
 			mysqli_stmt_close(stmt->stmt, false);
 			stmt->stmt = NULL;
 			efree(stmt);
@@ -1487,6 +1495,15 @@ PHP_FUNCTION(mysqli_stmt_data_seek)
 	}
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
+
+	if (!stmt->stmt->data || !stmt->stmt->data->result || !stmt->stmt->data->result->stored_data) {
+		if (hasThis()) {
+			zend_throw_error(NULL, "mysqli_stmt::data_seek(): No result set associated with the statement");
+		} else {
+			zend_throw_error(NULL, "mysqli_stmt_data_seek(): No result set associated with the statement");
+		}
+		RETURN_THROWS();
+	}
 
 	mysql_stmt_data_seek(stmt->stmt, offset);
 }

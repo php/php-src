@@ -266,7 +266,7 @@ static void xsl_libxslt_error_handler(void *ctx, const char *msg, ...)
 PHP_MINIT_FUNCTION(xsl)
 {
 	memcpy(&xsl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	xsl_object_handlers.offset = XtOffsetOf(xsl_object, std);
+	xsl_object_handlers.offset = offsetof(xsl_object, std);
 	xsl_object_handlers.clone_obj = NULL;
 	xsl_object_handlers.free_obj = xsl_objects_free_storage;
 	xsl_object_handlers.get_gc = xsl_objects_get_gc;

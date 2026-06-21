@@ -702,8 +702,9 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 			}
 			ssize_t to_fetch_byte = to_fetch_len + 1;
 			char *buf2 = emalloc(to_fetch_byte);
-			zend_string *str = zend_string_init(C->data, to_fetch_byte, 0);
-			size_t used = to_fetch_len;
+			ssize_t seed_len = to_fetch_len > (LONG_COLUMN_BUFFER_SIZE - 1) ? (LONG_COLUMN_BUFFER_SIZE - 1) : to_fetch_len;
+			zend_string *str = zend_string_init(C->data, seed_len + 1, 0);
+			size_t used = seed_len;
 
 			do {
 				C->fetched_len = 0;

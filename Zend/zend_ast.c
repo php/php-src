@@ -1636,6 +1636,23 @@ static ZEND_COLD void zend_ast_export_qstr(smart_str *str, char quote, const zen
 	}
 }
 
+static ZEND_COLD void zend_ast_export_quoted_str(smart_str *str, zend_string *s)
+{
+	size_t i;
+
+	for (i = 0; i < ZSTR_LEN(s); i++) {
+		if ((unsigned char) ZSTR_VAL(s)[i] < ' ') {
+			smart_str_appendc(str, '"');
+			zend_ast_export_qstr(str, '"', s);
+			smart_str_appendc(str, '"');
+			return;
+		}
+	}
+	smart_str_appendc(str, '\'');
+	zend_ast_export_str(str, s);
+	smart_str_appendc(str, '\'');
+}
+
 static ZEND_COLD void zend_ast_export_indent(smart_str *str, int indent)
 {
 	while (indent > 0) {
@@ -1675,19 +1692,6 @@ static ZEND_COLD void zend_ast_export_ns_name(smart_str *str, zend_ast *ast, int
 	zend_ast_export_ex(str, ast, priority, indent);
 }
 
-static ZEND_COLD bool zend_ast_valid_var_char(char ch)
-{
-	unsigned char c = (unsigned char)ch;
-
-	if (c != '_' && c < 127 &&
-	    (c < '0' || c > '9') &&
-	    (c < 'A' || c > 'Z') &&
-	    (c < 'a' || c > 'z')) {
-		return false;
-	}
-	return true;
-}
-
 static ZEND_COLD bool zend_ast_valid_var_name(const char *s, size_t len)
 {
 	unsigned char c;
@@ -1714,18 +1718,18 @@ static ZEND_COLD bool zend_ast_valid_var_name(const char *s, size_t len)
 	return true;
 }
 
-static ZEND_COLD bool zend_ast_var_needs_braces(char ch)
-{
-	return ch == '[' || zend_ast_valid_var_char(ch);
-}
-
 static ZEND_COLD void zend_ast_export_var(smart_str *str, zend_ast *ast, int indent)
 {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
-		if (Z_TYPE_P(zv) == IS_STRING &&
-		    zend_ast_valid_var_name(Z_STRVAL_P(zv), Z_STRLEN_P(zv))) {
-			smart_str_append(str, Z_STR_P(zv));
+		if (Z_TYPE_P(zv) == IS_STRING) {
+			if (zend_ast_valid_var_name(Z_STRVAL_P(zv), Z_STRLEN_P(zv))) {
+				smart_str_append(str, Z_STR_P(zv));
+			} else {
+				smart_str_appends(str, "{'");
+				zend_ast_export_str(str, Z_STR_P(zv));
+				smart_str_appends(str, "'}");
+			}
 			return;
 		}
 	} else if (ast->kind == ZEND_AST_VAR) {
@@ -1770,14 +1774,6 @@ static ZEND_COLD void zend_ast_export_encaps_list(smart_str *str, char quote, co
 
 			ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
 			zend_ast_export_qstr(str, quote, Z_STR_P(zv));
-		} else if (ast->kind == ZEND_AST_VAR &&
-		           ast->child[0]->kind == ZEND_AST_ZVAL &&
-		           (i + 1 == list->children ||
-		            list->child[i + 1]->kind != ZEND_AST_ZVAL ||
-		            !zend_ast_var_needs_braces(
-		                *Z_STRVAL_P(
-		                    zend_ast_get_zval(list->child[i + 1]))))) {
-			zend_ast_export_ex(str, ast, 0, indent);
 		} else {
 			smart_str_appendc(str, '{');
 			zend_ast_export_ex(str, ast, 0, indent);
@@ -1928,9 +1924,7 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, const zval *zv, int p
 				str, Z_DVAL_P(zv), (int) EG(precision), /* zero_fraction */ true);
 			break;
 		case IS_STRING:
-			smart_str_appendc(str, '\'');
-			zend_ast_export_str(str, Z_STR_P(zv));
-			smart_str_appendc(str, '\'');
+			zend_ast_export_quoted_str(str, Z_STR_P(zv));
 			break;
 		case IS_ARRAY: {
 			zend_long idx;
@@ -1945,9 +1939,8 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, const zval *zv, int p
 					smart_str_appends(str, ", ");
 				}
 				if (key) {
-					smart_str_appendc(str, '\'');
-					zend_ast_export_str(str, key);
-					smart_str_appends(str, "' => ");
+					zend_ast_export_quoted_str(str, key);
+					smart_str_appends(str, " => ");
 				} else {
 					smart_str_append_long(str, idx);
 					smart_str_appends(str, " => ");

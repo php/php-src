@@ -41,7 +41,7 @@ static const char *const zend_vm_kind_name[] = {
 /* HYBRID requires support for computed GOTO and global register variables*/
 #elif (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))
 # define ZEND_VM_KIND		ZEND_VM_KIND_HYBRID
-#elif defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && (defined(__x86_64__) || defined(__aarch64__))
+#elif defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && (defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__))
 # define ZEND_VM_KIND		ZEND_VM_KIND_TAILCALL
 #else
 # define ZEND_VM_KIND		ZEND_VM_KIND_CALL

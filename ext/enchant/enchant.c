@@ -48,9 +48,7 @@ typedef struct _dict_struct {
 zend_class_entry *enchant_broker_ce;
 static zend_object_handlers enchant_broker_handlers;
 
-static inline enchant_broker *enchant_broker_from_obj(zend_object *obj) {
-	return (enchant_broker *)((char *)(obj) - XtOffsetOf(enchant_broker, std));
-}
+#define enchant_broker_from_obj(obj) ZEND_CONTAINER_OF(obj, enchant_broker, std)
 
 #define Z_ENCHANT_BROKER_P(zv) enchant_broker_from_obj(Z_OBJ_P(zv))
 
@@ -66,9 +64,7 @@ static zend_object *enchant_broker_create_object(zend_class_entry *class_type) {
 zend_class_entry *enchant_dict_ce;
 static zend_object_handlers enchant_dict_handlers;
 
-static inline enchant_dict *enchant_dict_from_obj(zend_object *obj) {
-	return (enchant_dict *)((char *)(obj) - XtOffsetOf(enchant_dict, std));
-}
+#define enchant_dict_from_obj(obj) ZEND_CONTAINER_OF(obj, enchant_dict, std)
 
 #define Z_ENCHANT_DICT_P(zv) enchant_dict_from_obj(Z_OBJ_P(zv))
 
@@ -190,7 +186,7 @@ PHP_MINIT_FUNCTION(enchant)
 	enchant_broker_ce->default_object_handlers = &enchant_broker_handlers;
 
 	memcpy(&enchant_broker_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	enchant_broker_handlers.offset = XtOffsetOf(enchant_broker, std);
+	enchant_broker_handlers.offset = offsetof(enchant_broker, std);
 	enchant_broker_handlers.free_obj = php_enchant_broker_free;
 	enchant_broker_handlers.clone_obj = NULL;
 	enchant_broker_handlers.compare = zend_objects_not_comparable;
@@ -200,7 +196,7 @@ PHP_MINIT_FUNCTION(enchant)
 	enchant_dict_ce->default_object_handlers = &enchant_dict_handlers;
 
 	memcpy(&enchant_dict_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	enchant_dict_handlers.offset = XtOffsetOf(enchant_dict, std);
+	enchant_dict_handlers.offset = offsetof(enchant_dict, std);
 	enchant_dict_handlers.free_obj = php_enchant_dict_free;
 	enchant_dict_handlers.clone_obj = NULL;
 	enchant_dict_handlers.compare = zend_objects_not_comparable;

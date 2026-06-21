@@ -322,7 +322,7 @@ PHP_FUNCTION(com_get_active_object)
 		IDispatch_Release(obj);
 	}
 	if (unk) {
-		IUnknown_Release(obj);
+		IUnknown_Release(unk);
 	}
 	efree(module);
 }

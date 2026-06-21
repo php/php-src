@@ -1,7 +1,5 @@
 --TEST--
 Test UrlValidationErrorType singleton
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

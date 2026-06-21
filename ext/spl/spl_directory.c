@@ -48,11 +48,7 @@ PHPAPI zend_class_entry *spl_ce_GlobIterator;
 PHPAPI zend_class_entry *spl_ce_SplFileObject;
 PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
-/* Object helper */
-static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_filesystem_object*)((char*)(obj) - XtOffsetOf(spl_filesystem_object, std));
-}
-/* }}} */
+#define spl_filesystem_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_filesystem_object, std)
 
 /* define an overloaded iterator structure */
 typedef struct {
@@ -188,8 +184,8 @@ static zend_object *spl_filesystem_object_new(zend_class_entry *class_type)
 	intern = emalloc(sizeof(spl_filesystem_object) + zend_object_properties_size(class_type));
 	/* Avoid initializing the entirety of spl_filesystem_object.u.dir.entry. */
 	memset(intern, 0,
-		MAX(XtOffsetOf(spl_filesystem_object, u.dir.entry),
-			XtOffsetOf(spl_filesystem_object, u.file.escape) + sizeof(int)));
+		MAX(offsetof(spl_filesystem_object, u.dir.entry),
+			offsetof(spl_filesystem_object, u.file.escape) + sizeof(int)));
 	/* intern->type = SPL_FS_INFO; done by set 0 */
 	intern->file_class = spl_ce_SplFileObject;
 	intern->info_class = spl_ce_SplFileInfo;
@@ -2099,7 +2095,11 @@ PHP_METHOD(SplFileObject, fgets)
 		spl_filesystem_file_free_line(intern);
 		intern->u.file.current_line_num++;
 	} else {
-		if (spl_filesystem_file_read_ex(intern, /* silent */ false, /* line_add */ 1, /* csv */ false) == FAILURE) {
+		if (spl_filesystem_file_read_ex(intern, /* silent */ true, /* line_add */ 1, /* csv */ false) == FAILURE) {
+			if (php_stream_eof(intern->u.file.stream)) {
+				RETURN_EMPTY_STRING();
+			}
+			spl_filesystem_file_cannot_read(intern);
 			RETURN_THROWS();
 		}
 		RETVAL_STR_COPY(intern->u.file.current_line);
@@ -2678,7 +2678,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 	spl_ce_SplFileInfo->default_object_handlers = &spl_filesystem_object_handlers;
 
 	memcpy(&spl_filesystem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	spl_filesystem_object_handlers.offset = XtOffsetOf(spl_filesystem_object, std);
+	spl_filesystem_object_handlers.offset = offsetof(spl_filesystem_object, std);
 	spl_filesystem_object_handlers.clone_obj = spl_filesystem_object_clone;
 	spl_filesystem_object_handlers.dtor_obj = spl_filesystem_object_destroy_object;
 	spl_filesystem_object_handlers.free_obj = spl_filesystem_object_free_storage;

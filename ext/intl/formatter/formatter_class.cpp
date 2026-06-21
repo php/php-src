@@ -12,8 +12,6 @@
    +----------------------------------------------------------------------+
  */
 
-#include <unicode/unum.h>
-
 #include "formatter_class.h"
 extern "C" {
 #include "php_intl.h"
@@ -64,7 +62,7 @@ U_CFUNC zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 /* {{{ NumberFormatter_object_clone */
 U_CFUNC zend_object *NumberFormatter_object_clone(zend_object *object)
 {
-	NumberFormatter_object     *nfo = php_intl_number_format_fetch_object(object);
+	const NumberFormatter_object     *nfo = php_intl_number_format_fetch_object(object);
 	zend_object            *new_obj = NumberFormatter_ce_ptr->create_object(object->ce);
 	NumberFormatter_object *new_nfo = php_intl_number_format_fetch_object(new_obj);
 
@@ -72,10 +70,9 @@ U_CFUNC zend_object *NumberFormatter_object_clone(zend_object *object)
 	zend_objects_clone_members(&new_nfo->zo, &nfo->zo);
 
 	/* clone formatter object. It may fail, the destruction code must handle this case */
-	if (FORMATTER_OBJECT(nfo) != NULL) {
-		UErrorCode error = U_ZERO_ERROR;
-		FORMATTER_OBJECT(new_nfo) = unum_clone(FORMATTER_OBJECT(nfo), &error);
-		if (U_FAILURE(error)) {
+	if (FORMATTER_OBJECT(nfo) != nullptr) {
+		FORMATTER_OBJECT(new_nfo) = FORMATTER_OBJECT(nfo)->clone();
+		if (FORMATTER_OBJECT(new_nfo) == nullptr) {
 			zend_throw_error(NULL, "Failed to clone NumberFormatter");
 		}
 	} else {
@@ -101,7 +98,7 @@ U_CFUNC void formatter_register_class( void )
 
 	memcpy(&NumberFormatter_handlers, &std_object_handlers,
 		sizeof(NumberFormatter_handlers));
-	NumberFormatter_handlers.offset = XtOffsetOf(NumberFormatter_object, zo);
+	NumberFormatter_handlers.offset = offsetof(NumberFormatter_object, zo);
 	NumberFormatter_handlers.clone_obj = NumberFormatter_object_clone;
 	NumberFormatter_handlers.free_obj = NumberFormatter_object_free;
 }

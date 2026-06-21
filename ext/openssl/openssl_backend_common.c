@@ -108,7 +108,7 @@ void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name, 
 
 void php_openssl_add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str)
 {
-	add_assoc_stringl(val, key, (char *)str->data, str->length);
+	add_assoc_stringl(val, key, (const char *)ASN1_STRING_get0_data(str), ASN1_STRING_length(str));
 }
 
 time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
@@ -140,12 +140,12 @@ time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 	}
 
 	if (timestr_len < 13) {
-		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", timestr->data);
+		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", ASN1_STRING_get0_data(timestr));
 		return (time_t)-1;
 	}
 
 	if (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME && timestr_len < 15) {
-		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", timestr->data);
+		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", ASN1_STRING_get0_data(timestr));
 		return (time_t)-1;
 	}
 
@@ -626,8 +626,8 @@ int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 	}
 
 	extension_data = X509_EXTENSION_get_data(extension);
-	p = extension_data->data;
-	length = extension_data->length;
+	p = ASN1_STRING_get0_data(extension_data);
+	length = ASN1_STRING_length(extension_data);
 	if (method->it) {
 		names = (GENERAL_NAMES*) (ASN1_item_d2i(NULL, &p, length,
 			ASN1_ITEM_ptr(method->it)));
@@ -1650,10 +1650,14 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 {
 	int cipher_mode = EVP_CIPHER_mode(cipher_type);
 	memset(mode, 0, sizeof(struct php_openssl_cipher_mode));
+
 	switch (cipher_mode) {
 		case EVP_CIPH_GCM_MODE:
 		case EVP_CIPH_CCM_MODE:
-		/* We check for EVP_CIPH_OCB_MODE, because LibreSSL does not support it. */
+		/* We check for EVP_CIPH_SIV_MODE and EVP_CIPH_SIV_MODE, because older OpenSSL and LibreSSL do not support them. */
+#ifdef EVP_CIPH_SIV_MODE
+		case EVP_CIPH_SIV_MODE:
+#endif
 #ifdef EVP_CIPH_OCB_MODE
 		case EVP_CIPH_OCB_MODE:
 			/* For OCB mode, explicitly set the tag length even when decrypting,
@@ -1663,6 +1667,9 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 			php_openssl_set_aead_flags(mode);
 			mode->set_tag_length_when_encrypting = cipher_mode == EVP_CIPH_CCM_MODE;
 			mode->is_single_run_aead = cipher_mode == EVP_CIPH_CCM_MODE;
+#ifdef EVP_CIPH_SIV_MODE
+			mode->aad_supports_vector = cipher_mode == EVP_CIPH_SIV_MODE;
+#endif
 			break;
 #ifdef NID_chacha20_poly1305
 		default:
@@ -1803,6 +1810,13 @@ zend_result php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		const char *aad, size_t aad_len, int enc)
 {
 	int i = 0;
+	size_t outlen = data_len + EVP_CIPHER_block_size(cipher_type);
+
+	/* For AEAD modes that do not support vector AAD, treat NULL AAD as zero-length AAD */
+	if (!mode->aad_supports_vector && aad == NULL) {
+		aad_len = 0;
+		aad = "";
+	}
 
 	if (mode->is_single_run_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, NULL, (int)data_len)) {
 		php_openssl_store_errors();
@@ -1810,13 +1824,27 @@ zend_result php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		return FAILURE;
 	}
 
-	if (mode->is_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, (const unsigned char *) aad, (int) aad_len)) {
+	/* Only pass AAD to OpenSSL if caller provided it.
+	   This makes NULL mean zero AAD items, while "" with len 0 means one empty AAD item. */
+	if (mode->is_aead && aad != NULL && !EVP_CipherUpdate(cipher_ctx, NULL, &i, (const unsigned char *)aad, (int)aad_len)) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Setting of additional application data failed");
 		return FAILURE;
 	}
 
-	*poutbuf = zend_string_alloc((int)data_len + EVP_CIPHER_block_size(cipher_type), 0);
+#ifdef EVP_CIPH_WRAP_MODE
+	if ((EVP_CIPHER_mode(cipher_type)) == EVP_CIPH_WRAP_MODE) {
+		/*
+		 * RFC 5649 wrap-with-padding rounds the input up to the block size
+		 * and prepends an integrity block, we reserve one extra block.
+		 * See EVP_EncryptUpdate(3): wrap mode may write up to
+		 * inl + cipher_block_size bytes.
+		 */
+		outlen += EVP_CIPHER_block_size(cipher_type);
+	}
+#endif
+
+	*poutbuf = zend_string_alloc(outlen, false);
 
 	if (!EVP_CipherUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(*poutbuf),
 					&i, (const unsigned char *)data, (int)data_len)) {

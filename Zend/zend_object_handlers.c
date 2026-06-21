@@ -1825,6 +1825,18 @@ ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(
 }
 /* }}} */
 
+ZEND_API void zend_free_trampoline(zend_function *func)
+{
+	ZEND_ASSERT(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
+
+	if (func == &EG(trampoline)) {
+		EG(trampoline).common.attributes = NULL;
+		EG(trampoline).common.function_name = NULL;
+	} else {
+		efree(func);
+	}
+}
+
 static ZEND_FUNCTION(zend_parent_hook_get_trampoline)
 {
 	zend_object *obj = Z_PTR_P(ZEND_THIS);
@@ -2176,12 +2188,16 @@ ZEND_API ZEND_COLD bool zend_std_unset_static_property(const zend_class_entry *c
 static ZEND_COLD zend_never_inline void zend_bad_constructor_call(const zend_function *constructor, const zend_class_entry *scope) /* {{{ */
 {
 	if (scope) {
-		zend_throw_error(NULL, "Call to %s %s::%s() from scope %s",
-			zend_visibility_string(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name),
-			ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(scope->name)
+		zend_throw_error(NULL, "Call to %s %s::__construct() from scope %s",
+			zend_visibility_string(constructor->common.fn_flags),
+			ZSTR_VAL(constructor->common.scope->name),
+			ZSTR_VAL(scope->name)
 		);
 	} else {
-		zend_throw_error(NULL, "Call to %s %s::%s() from global scope", zend_visibility_string(constructor->common.fn_flags), ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
+		zend_throw_error(NULL, "Call to %s %s::__construct() from global scope",
+			zend_visibility_string(constructor->common.fn_flags),
+			ZSTR_VAL(constructor->common.scope->name)
+		);
 	}
 }
 /* }}} */

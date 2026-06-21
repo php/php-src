@@ -533,21 +533,21 @@ static bool php_filter_validate_domain_ex(const zend_string *domain, zend_long f
 	}
 
 	/* First char must be alphanumeric */
-	if(*s == '.' || (hostname && !isalnum((int)*(unsigned char *)s))) {
+	if(*s == '.' || (hostname && !isalnum((unsigned char)*s))) {
 		return false;
 	}
 
 	while (s < e) {
 		if (*s == '.') {
 			/* The first and the last character of a label must be alphanumeric */
-			if (*(s + 1) == '.' || (hostname && (!isalnum((int)*(unsigned char *)(s - 1)) || !isalnum((int)*(unsigned char *)(s + 1))))) {
+			if (*(s + 1) == '.' || (hostname && (!isalnum((unsigned char)s[-1]) || !isalnum((unsigned char)s[1])))) {
 				return false;
 			}
 
 			/* Reset label length counter */
 			i = 1;
 		} else {
-			if (i > 63 || (hostname && (*s != '-' || *(s + 1) == '\0') && !isalnum((int)*(unsigned char *)s))) {
+			if (i > 63 || (hostname && (*s != '-' || *(s + 1) == '\0') && !isalnum((unsigned char)*s))) {
 				return false;
 			}
 
@@ -575,9 +575,9 @@ static bool is_userinfo_valid(const zend_string *str)
 	const char *p = ZSTR_VAL(str);
 	while (p - ZSTR_VAL(str) < ZSTR_LEN(str)) {
 		static const char *valid = "-._~!$&'()*+,;=:";
-		if (isalpha(*p) || isdigit(*p) || strchr(valid, *p)) {
+		if (isalpha((unsigned char)*p) || isdigit((unsigned char)*p) || strchr(valid, *p)) {
 			p++;
-		} else if (*p == '%' && p - ZSTR_VAL(str) <= ZSTR_LEN(str) - 3 && isdigit(*(p+1)) && isxdigit(*(p+2))) {
+		} else if (*p == '%' && p - ZSTR_VAL(str) <= ZSTR_LEN(str) - 3 && isdigit((unsigned char)p[1]) && isxdigit((unsigned char)p[2])) {
 			p += 3;
 		} else {
 			return false;

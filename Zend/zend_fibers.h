@@ -154,7 +154,7 @@ static zend_always_inline zend_fiber *zend_fiber_from_context(zend_fiber_context
 {
 	ZEND_ASSERT(context->kind == zend_ce_fiber && "Fiber context does not belong to a Zend fiber");
 
-	return (zend_fiber *)(((char *) context) - XtOffsetOf(zend_fiber, context));
+	return ZEND_CONTAINER_OF(context, zend_fiber, context);
 }
 
 static zend_always_inline zend_fiber_context *zend_fiber_get_context(zend_fiber *fiber)

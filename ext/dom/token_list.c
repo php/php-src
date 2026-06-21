@@ -484,7 +484,7 @@ static bool dom_validate_tokens_varargs(const zval *args, uint32_t argc)
 {
 	for (uint32_t i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_STRING) {
-			zend_argument_type_error(i + 1, "must be of type string, %s given", zend_zval_value_name(&args[i]));
+			zend_wrong_parameter_type_error(i + 1, Z_EXPECTED_STRING, &args[i]);
 			return false;
 		}
 
@@ -575,7 +575,7 @@ PHP_METHOD(Dom_TokenList, toggle)
 	HashTable *token_set = TOKEN_LIST_GET_SET(intern);
 	zval *found_token = zend_hash_find(token_set, token);
 	if (found_token != NULL) {
-		ZEND_ASSERT(XtOffsetOf(Bucket, val) == 0 && "the cast only works if this is true");
+		ZEND_ASSERT(offsetof(Bucket, val) == 0 && "the cast only works if this is true");
 		Bucket *bucket = (Bucket *) found_token;
 
 		/* 3.1. If force is either not given or is false, then remove token from this’s token set,
@@ -625,7 +625,7 @@ PHP_METHOD(Dom_TokenList, replace)
 	}
 
 	/* 4. Replace token in this’s token set with newToken. */
-	ZEND_ASSERT(XtOffsetOf(Bucket, val) == 0 && "the cast only works if this is true");
+	ZEND_ASSERT(offsetof(Bucket, val) == 0 && "the cast only works if this is true");
 	Bucket *bucket = (Bucket *) found_token;
 	if (zend_hash_set_bucket_key(token_set, bucket, new_token) == NULL) {
 		/* It already exists, remove token instead. */

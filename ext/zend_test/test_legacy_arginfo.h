@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: b46026edf6f5c15f6b1a30a9d1e97c54ce8bfebe
+ * Stub hash: 7cf0b303c1dec2c9a3e544242ee2960f6c3ef222
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_use_internal_traits_zero, 0, 0, 0)
@@ -109,6 +109,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_call_method_if_exists, 0, 0, 2)
 	ZEND_ARG_INFO(0, obj)
 	ZEND_ARG_INFO(0, method)
 	ZEND_ARG_VARIADIC_INFO(0, args)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_call_with_consumed_args, 0, 0, 3)
+	ZEND_ARG_INFO(0, cb)
+	ZEND_ARG_INFO(0, args)
+	ZEND_ARG_INFO(0, consumed_args)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_refcount, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_zend_ini_parse_quantity arginfo_zend_create_unterminated_string
@@ -289,6 +299,8 @@ static ZEND_FUNCTION(zend_get_current_func_name);
 static ZEND_FUNCTION(zend_call_method);
 static ZEND_FUNCTION(zend_object_init_with_constructor);
 static ZEND_FUNCTION(zend_call_method_if_exists);
+static ZEND_FUNCTION(zend_test_call_with_consumed_args);
+static ZEND_FUNCTION(zend_test_refcount);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
 static ZEND_FUNCTION(zend_test_zend_ini_str);
@@ -397,6 +409,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_call_method, arginfo_zend_call_method)
 	ZEND_FE(zend_object_init_with_constructor, arginfo_zend_object_init_with_constructor)
 	ZEND_FE(zend_call_method_if_exists, arginfo_zend_call_method_if_exists)
+	ZEND_FE(zend_test_call_with_consumed_args, arginfo_zend_test_call_with_consumed_args)
+	ZEND_FE(zend_test_refcount, arginfo_zend_test_refcount)
 	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
 	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
 	ZEND_FE(zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str)
@@ -541,8 +555,16 @@ static const zend_function_entry class_ZendTestChildClassWithMethodWithParameter
 };
 
 static const zend_function_entry class_ZendTestForbidDynamicCall_methods[] = {
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_ME(ZendTestForbidDynamicCall, call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_FENTRY_FLAGS(ZEND_ACC_PUBLIC, ZEND_ACC2_FORBID_DYN_CALLS))
+#elif (PHP_VERSION_ID >= 70000)
 	ZEND_ME(ZendTestForbidDynamicCall, call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_ACC_PUBLIC)
+#endif
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_ME(ZendTestForbidDynamicCall, callStatic, arginfo_class_ZendTestForbidDynamicCall_callStatic, ZEND_FENTRY_FLAGS(ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, ZEND_ACC2_FORBID_DYN_CALLS))
+#elif (PHP_VERSION_ID >= 70000)
 	ZEND_ME(ZendTestForbidDynamicCall, callStatic, arginfo_class_ZendTestForbidDynamicCall_callStatic, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+#endif
 	ZEND_FE_END
 };
 

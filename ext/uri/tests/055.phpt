@@ -1,7 +1,5 @@
 --TEST--
 Test InvalidUrlException constructor error handling
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

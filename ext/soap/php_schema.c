@@ -53,6 +53,28 @@ static bool node_is_equal_xsd(xmlNodePtr node, const char *name)
 	return node_is_equal_ex_one_of(node, name, ns);
 }
 
+static int schema_parse_int(const xmlChar *value, const char *name, bool allow_negative)
+{
+	const char *str = (const char *) value;
+	zend_long lval = 0;
+	int oflow_info = 0;
+	uint8_t type = is_numeric_string_ex(str, strlen(str), &lval, NULL, true, &oflow_info, NULL);
+
+	if (type != IS_LONG) {
+		errno = 0;
+		lval = ZEND_STRTOL(str, NULL, 10);
+		if (oflow_info || (errno == ERANGE && lval != 0)) {
+			soap_error1(E_ERROR, "Parsing Schema: %s value is out of range", name);
+		}
+	}
+
+	if (ZEND_LONG_EXCEEDS_INT(lval) || (!allow_negative && lval < 0)) {
+		soap_error1(E_ERROR, "Parsing Schema: %s value is out of range", name);
+	}
+
+	return (int) lval;
+}
+
 static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlChar *ns, const xmlChar *type)
 {
 	smart_str nscat = {0};
@@ -854,7 +876,7 @@ static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valp
 		soap_error0(E_ERROR, "Parsing Schema: missing restriction value");
 	}
 
-	(*valptr)->value = atoi((char*)value->children->content);
+	(*valptr)->value = schema_parse_int(value->children->content, (const char *) val->name, true);
 
 	return TRUE;
 }
@@ -1016,7 +1038,7 @@ void schema_min_max(xmlNodePtr node, sdlContentModelPtr model)
 	xmlAttrPtr attr = get_attribute(node->properties, "minOccurs");
 
 	if (attr) {
-		model->min_occurs = atoi((char*)attr->children->content);
+		model->min_occurs = schema_parse_int(attr->children->content, "minOccurs", false);
 	} else {
 		model->min_occurs = 1;
 	}
@@ -1026,7 +1048,7 @@ void schema_min_max(xmlNodePtr node, sdlContentModelPtr model)
 		if (!strncmp((char*)attr->children->content, "unbounded", sizeof("unbounded"))) {
 			model->max_occurs = -1;
 		} else {
-			model->max_occurs = atoi((char*)attr->children->content);
+			model->max_occurs = schema_parse_int(attr->children->content, "maxOccurs", false);
 		}
 	} else {
 		model->max_occurs = 1;

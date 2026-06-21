@@ -1,7 +1,5 @@
 --TEST--
 Test array cast
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

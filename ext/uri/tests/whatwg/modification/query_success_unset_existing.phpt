@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - query - unsetting existing
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

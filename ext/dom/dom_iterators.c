@@ -54,7 +54,7 @@ static dom_nnodemap_object *php_dom_iterator_get_nnmap(const php_dom_iterator *i
 	return nnmap->ptr;
 }
 
-xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID) /* {{{ */
+xmlNodePtr create_notation(xmlDtdPtr parent_dtd, const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID) /* {{{ */
 {
 	xmlEntityPtr ret = xmlMalloc(sizeof(xmlEntity));
 	memset(ret, 0, sizeof(xmlEntity));
@@ -62,7 +62,20 @@ xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const
 	ret->name = xmlStrdup(name);
 	ret->ExternalID = xmlStrdup(ExternalID);
 	ret->SystemID = xmlStrdup(SystemID);
+	if (parent_dtd != NULL) {
+		ret->parent = parent_dtd;
+		ret->doc = parent_dtd->doc;
+	}
 	return (xmlNodePtr) ret;
+}
+/* }}} */
+
+void dom_free_notation(xmlEntityPtr entity) /* {{{ */
+{
+	xmlFree((xmlChar *) entity->name);
+	xmlFree((xmlChar *) entity->ExternalID);
+	xmlFree((xmlChar *) entity->SystemID);
+	xmlFree(entity);
 }
 /* }}} */
 

@@ -164,7 +164,11 @@ typedef union _align_test {
 	zend_long  lng;
 } align_test;
 
-#if ZEND_GCC_VERSION >= 2000
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
+# define PLATFORM_ALIGNMENT (alignof(align_test) < 8 ? 8 : alignof(align_test))
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+# define PLATFORM_ALIGNMENT (_Alignof(align_test) < 8 ? 8 : _Alignof(align_test))
+#elif ZEND_GCC_VERSION >= 2000 || defined(__clang__)
 # define PLATFORM_ALIGNMENT (__alignof__(align_test) < 8 ? 8 : __alignof__(align_test))
 #else
 # define PLATFORM_ALIGNMENT (sizeof(align_test))

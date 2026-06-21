@@ -21,7 +21,7 @@
 # include <stdint.h>
 
 # if !defined(__SIZEOF_INT128__) || defined(PHP_RANDOM_FORCE_EMULATE_128)
-typedef struct _php_random_uint128_t {
+typedef struct php_random_uint128_t {
 	uint64_t hi;
 	uint64_t lo;
 } php_random_uint128_t;

@@ -1,7 +1,5 @@
 --TEST--
 Test percent-decoding of reserved characters in the path
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

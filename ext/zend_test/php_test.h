@@ -41,11 +41,13 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_show_init_backtrace;
 	int observer_show_opcode;
 	char *observer_show_opcode_in_user_handler;
+	int observer_set_vm_interrupt_on_begin;
 	int observer_nesting_depth;
 	int observer_fiber_init;
 	int observer_fiber_switch;
 	int observer_fiber_destroy;
 	int observer_execute_internal;
+	int observer_reserve_op_array_handle;
 	HashTable *global_weakmap;
 	int replace_zend_execute_ex;
 	int register_passes;

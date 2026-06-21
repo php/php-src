@@ -1,7 +1,5 @@
 --TEST--
 Test recomposition of URIs
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

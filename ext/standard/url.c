@@ -101,7 +101,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 		p = s;
 		while (p < e) {
 			/* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
-			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
+			if (!isalpha((unsigned char)*p) && !isdigit((unsigned char)*p) && *p != '+' && *p != '.' && *p != '-') {
 				if (e + 1 < ue && e < binary_strcspn(s, ue, "?#")) {
 					goto parse_port;
 				} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
@@ -130,7 +130,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 			 * correctly parse things like a.com:80
 			 */
 			p = e + 1;
-			while (p < ue && isdigit(*p)) {
+			while (p < ue && isdigit((unsigned char)*p)) {
 				p++;
 			}
 
@@ -170,7 +170,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 		p = e + 1;
 		pp = p;
 
-		while (pp < ue && pp - p < 6 && isdigit(*pp)) {
+		while (pp < ue && pp - p < 6 && isdigit((unsigned char)*pp)) {
 			pp++;
 		}
 
@@ -589,8 +589,8 @@ PHPAPI size_t php_url_decode_ex(char *dest, const char *src, size_t src_len)
 		if (*data == '+') {
 			*dest = ' ';
 		}
-		else if (*data == '%' && src_len >= 2 && isxdigit((int) *(data + 1))
-				 && isxdigit((int) *(data + 2))) {
+		else if (*data == '%' && src_len >= 2 && isxdigit((unsigned char)data[1])
+				 && isxdigit((unsigned char)data[2])) {
 			*dest = (char) php_htoi(data + 1);
 			data += 2;
 			src_len -= 2;
@@ -662,8 +662,8 @@ PHPAPI size_t php_raw_url_decode_ex(char *dest, const char *src, size_t src_len)
 	const char *data = src;
 
 	while (src_len--) {
-		if (*data == '%' && src_len >= 2 && isxdigit((int) *(data + 1))
-			&& isxdigit((int) *(data + 2))) {
+		if (*data == '%' && src_len >= 2 && isxdigit((unsigned char)data[1])
+			&& isxdigit((unsigned char)data[2])) {
 			*dest = (char) php_htoi(data + 1);
 			data += 2;
 			src_len -= 2;
@@ -730,7 +730,7 @@ no_name_header:
 				c = *p;
 				*p = '\0';
 				s = p + 1;
-				while (isspace((int)*(unsigned char *)s)) {
+				while (isspace((unsigned char)*s)) {
 					s++;
 				}
 

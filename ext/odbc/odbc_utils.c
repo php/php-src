@@ -57,7 +57,7 @@ PHP_FUNCTION(odbc_connection_string_quote)
 		Z_PARAM_STR(str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	size_t new_size = php_odbc_connstr_estimate_quote_length(ZSTR_VAL(str));
+	size_t new_size = php_odbc_connstr_get_quoted_length(ZSTR_VAL(str));
 	zend_string *new_string = zend_string_alloc(new_size, 0);
 	php_odbc_connstr_quote(ZSTR_VAL(new_string), ZSTR_VAL(str), new_size);
 	/* reset length */
