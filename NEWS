@@ -50,6 +50,8 @@ PHP                                                                        NEWS
     and later. (Graham Campbell)
   . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
     fallback locale when a language tag cannot be canonicalized. (Weilin Du)
+  . Fixed memory leaks when calling Collator::__construct() or
+    Spoofchecker::__construct() twice. (Weilin Du)
 
 - mysqli:
   . Fix stmt->query leak in mysqli_execute_query() validation errors.
