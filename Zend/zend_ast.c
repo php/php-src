@@ -2544,7 +2544,7 @@ simple_list:
 					break;
 				default:
 					smart_str_appendc(str, '(');
-					zend_ast_export_ns_name(str, left, 0, indent);
+					zend_ast_export_ex(str, left, 0, indent);
 					smart_str_appendc(str, ')');
 					break;
 			}
