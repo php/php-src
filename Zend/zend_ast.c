@@ -1940,11 +1940,10 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, const zval *zv, int p
 				}
 				if (key) {
 					zend_ast_export_quoted_str(str, key);
-					smart_str_appends(str, " => ");
 				} else {
 					smart_str_append_long(str, idx);
-					smart_str_appends(str, " => ");
 				}
+				smart_str_appends(str, " => ");
 				zend_ast_export_zval(str, val, 0, indent);
 			} ZEND_HASH_FOREACH_END();
 			smart_str_appendc(str, ']');
