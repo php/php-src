@@ -234,7 +234,7 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 
 	RETCODE ret;
 	char *id = NULL;
-	size_t len;
+	DBINT len;
 	zend_string *ret_id;
 
 	/*
@@ -270,6 +270,11 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 	id = emalloc(40);
 	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)40);
 	dbcancel(H->link);
+
+	if (len < 0) {
+		efree(id);
+		return NULL;
+	}
 
 	ret_id = zend_string_init(id, len, 0);
 	efree(id);
