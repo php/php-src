@@ -542,7 +542,7 @@ PHP_FUNCTION(imageloadfont)
 	 */
 	font = (gdFontPtr) emalloc(sizeof(gdFont));
 	b = 0;
-	while (b < hdr_size && (n = php_stream_read(stream, (char*)&font[b], hdr_size - b)) > 0) {
+	while (b < hdr_size && (n = php_stream_read(stream, (char *) font + b, hdr_size - b)) > 0) {
 		b += n;
 	}
 
