@@ -440,4 +440,7 @@ zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr)
 
 zend_ast * ZEND_FASTCALL zend_ast_call_get_args(zend_ast *ast);
 
+/* Recognize parent::$prop::get() pattern. */
+bool zend_ast_is_parent_hook_call(const zend_ast *ast);
+
 #endif
