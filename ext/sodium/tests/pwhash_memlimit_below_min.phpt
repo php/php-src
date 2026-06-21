@@ -12,13 +12,13 @@ $salt = str_repeat("a", SODIUM_CRYPTO_PWHASH_SALTBYTES);
 
 try {
     sodium_crypto_pwhash(32, "password", $salt, SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE, 1);
-} catch (SodiumException $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     sodium_crypto_pwhash_str("password", SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE, 1);
-} catch (SodiumException $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 ?>
