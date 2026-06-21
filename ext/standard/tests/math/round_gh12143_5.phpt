@@ -1,0 +1,27 @@
+--TEST--
+GH-12143: Test rounding of 1.4999999999999998.
+--FILE--
+<?php
+foreach ([
+    1.4999999999999998,
+    -1.4999999999999998,
+] as $number) {
+    foreach ([
+        'PHP_ROUND_HALF_UP',
+        'PHP_ROUND_HALF_DOWN',
+        'PHP_ROUND_HALF_EVEN',
+        'PHP_ROUND_HALF_ODD',
+    ] as $mode) {
+        printf("%-20s: %+.17g -> %+.17g\n", $mode, $number, round($number, 0, constant($mode)));
+    }
+}
+?>
+--EXPECT--
+PHP_ROUND_HALF_UP   : +1.4999999999999998 -> +1
+PHP_ROUND_HALF_DOWN : +1.4999999999999998 -> +1
+PHP_ROUND_HALF_EVEN : +1.4999999999999998 -> +1
+PHP_ROUND_HALF_ODD  : +1.4999999999999998 -> +1
+PHP_ROUND_HALF_UP   : -1.4999999999999998 -> -1
+PHP_ROUND_HALF_DOWN : -1.4999999999999998 -> -1
+PHP_ROUND_HALF_EVEN : -1.4999999999999998 -> -1
+PHP_ROUND_HALF_ODD  : -1.4999999999999998 -> -1
