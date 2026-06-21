@@ -30,16 +30,16 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 		PS(in_save_handler) = 0;
 		ZVAL_UNDEF(retval);
 		php_error_docref(NULL, E_WARNING, "Cannot call session save handler in a recursive manner");
-		return;
+	} else {
+		PS(in_save_handler) = 1;
+		if (call_user_function(NULL, NULL, func, retval, argc, argv) == FAILURE) {
+			zval_ptr_dtor(retval);
+			ZVAL_UNDEF(retval);
+		} else if (Z_ISUNDEF_P(retval)) {
+			ZVAL_NULL(retval);
+		}
+		PS(in_save_handler) = 0;
 	}
-	PS(in_save_handler) = 1;
-	if (call_user_function(NULL, NULL, func, retval, argc, argv) == FAILURE) {
-		zval_ptr_dtor(retval);
-		ZVAL_UNDEF(retval);
-	} else if (Z_ISUNDEF_P(retval)) {
-		ZVAL_NULL(retval);
-	}
-	PS(in_save_handler) = 0;
 	for (i = 0; i < argc; i++) {
 		zval_ptr_dtor(&argv[i]);
 	}
