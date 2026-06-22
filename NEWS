@@ -13,6 +13,12 @@ PHP                                                                        NEWS
     through the wrong run_time_cache slot on megamorphic calls). (ptondereau,
     iliaal)
 
+- Intl:
+  . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
+    fallback locale when a language tag cannot be canonicalized. (Weilin Du)
+  . Fixed memory leaks when calling Collator::__construct() or
+    Spoofchecker::__construct() twice. (Weilin Du)
+
 - Reflection:
   . Fixed bug GH-22324 (Ignore leading namespace separator in
     ReflectionParameter::__construct()). (jorgsowa)
@@ -46,10 +52,6 @@ PHP                                                                        NEWS
     (Weilin Du)
   . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
     for invalid display types. (Weilin Du)
-  . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
-    fallback locale when a language tag cannot be canonicalized. (Weilin Du)
-  . Fixed memory leaks when calling Collator::__construct() or
-    Spoofchecker::__construct() twice. (Weilin Du)
 
 - Opcache:
   . Fixed bug GH-22265 (Another tailcall vm_interrupt bug). (Levi Morrison)
