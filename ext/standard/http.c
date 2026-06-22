@@ -247,7 +247,7 @@ PHP_FUNCTION(http_build_query)
 }
 /* }}} */
 
-static zend_result cache_request_parse_body_option(HashTable *options, zval *option, int cache_offset)
+static zend_result cache_request_parse_body_option(zval *option, int cache_offset, const char *non_negative_option_name)
 {
 	if (option) {
 		zend_long result;
@@ -264,6 +264,11 @@ static zend_result cache_request_parse_body_option(HashTable *options, zval *opt
 		} else {
 			zend_value_error("Invalid %s value in $options argument", zend_zval_value_name(option));
 			return FAILURE;
+		}
+		if (non_negative_option_name && result < 0) {
+			zend_error(E_WARNING, "\"%s\" option in $options argument must be greater than or equal to 0", non_negative_option_name);
+			SG(request_parse_body_context).options_cache[cache_offset].set = false;
+			return SUCCESS;
 		}
 		SG(request_parse_body_context).options_cache[cache_offset].set = true;
 		SG(request_parse_body_context).options_cache[cache_offset].value = result;
@@ -290,7 +295,15 @@ static zend_result cache_request_parse_body_options(HashTable *options)
 
 #define CHECK_OPTION(name) \
 	if (zend_string_equals_literal_ci(key, #name)) { \
-		if (cache_request_parse_body_option(options, value, REQUEST_PARSE_BODY_OPTION_ ## name) == FAILURE) { \
+		if (cache_request_parse_body_option(value, REQUEST_PARSE_BODY_OPTION_ ## name, NULL) == FAILURE) { \
+			return FAILURE; \
+		} \
+		continue; \
+	}
+
+#define CHECK_NON_NEGATIVE_OPTION(name) \
+	if (zend_string_equals_literal_ci(key, #name)) { \
+		if (cache_request_parse_body_option(value, REQUEST_PARSE_BODY_OPTION_ ## name, #name) == FAILURE) { \
 			return FAILURE; \
 		} \
 		continue; \
@@ -300,7 +313,7 @@ static zend_result cache_request_parse_body_options(HashTable *options)
 			case 'm':
 			case 'M':
 				CHECK_OPTION(max_file_uploads);
-				CHECK_OPTION(max_input_vars);
+				CHECK_NON_NEGATIVE_OPTION(max_input_vars);
 				CHECK_OPTION(max_multipart_body_parts);
 				break;
 			case 'p':
@@ -317,7 +330,8 @@ static zend_result cache_request_parse_body_options(HashTable *options)
 		return FAILURE;
 	} ZEND_HASH_FOREACH_END();
 
-#undef CACHE_OPTION
+#undef CHECK_OPTION
+#undef CHECK_NON_NEGATIVE_OPTION
 
 	return SUCCESS;
 }

@@ -265,6 +265,9 @@ PHP                                                                        NEWS
     null bytes. (Weilin Du)
   . parse_str() now raises a ValueError when the $string argument contains
     null bytes. (Weilin Du)
+  . request_parse_body() now emits a warning and falls back to the
+    max_input_vars ini setting for negative max_input_vars option values.
+    (Xu Chen)
   . proc_open() now raises a ValueError when the $cwd argument contains
     null bytes. (Weilin Du)
   . ini_get_all() now includes the built-in default value in the details.

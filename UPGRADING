@@ -157,6 +157,9 @@ PHP 8.6 UPGRADE NOTES
     null bytes.
   . parse_str() now raises a ValueError when the $string argument contains
     null bytes.
+  . request_parse_body() now emits a warning and falls back to the
+    max_input_vars ini setting when the $options argument contains a negative
+    max_input_vars value.
   . linkinfo() now raises a ValueError when the $path argument is empty.
   . pathinfo() now raises a ValueError when an invalid $flag
     argument value is passed.
