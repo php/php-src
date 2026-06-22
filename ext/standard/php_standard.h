@@ -47,3 +47,5 @@
 #define phpext_standard_ptr basic_functions_module_ptr
 PHP_MINIT_FUNCTION(standard_filters);
 PHP_MSHUTDOWN_FUNCTION(standard_filters);
+
+PHPAPI php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, bool persistent);
