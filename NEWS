@@ -18,6 +18,8 @@ PHP                                                                        NEWS
     fallback locale when a language tag cannot be canonicalized. (Weilin Du)
   . Fixed memory leaks when calling Collator::__construct() or
     Spoofchecker::__construct() twice. (Weilin Du)
+  . Fixed memory leak when calling IntlListFormatter::__construct() twice.
+    (Weilin Du)
 
 - Reflection:
   . Fixed bug GH-22324 (Ignore leading namespace separator in
