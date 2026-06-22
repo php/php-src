@@ -42,6 +42,10 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *erro
 
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 	COLLATOR_METHOD_FETCH_OBJECT;
+	if (co->ucoll) {
+		zend_throw_error(NULL, "Collator object is already constructed");
+		return FAILURE;
+	}
 
 	if(locale_len == 0) {
 		locale = (char *)intl_locale_get_default();
