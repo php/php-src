@@ -36,8 +36,6 @@ PHP_METHOD(Spoofchecker, __construct)
 		RETURN_THROWS();
 	}
 
-	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
-
 	co->uspoof = uspoof_open(SPOOFCHECKER_ERROR_CODE_P(co));
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(co))) {
 		zend_throw_exception(IntlException_ce_ptr,
