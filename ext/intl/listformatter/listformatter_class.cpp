@@ -74,6 +74,11 @@ PHP_METHOD(IntlListFormatter, __construct)
         Z_PARAM_LONG(width)
     ZEND_PARSE_PARAMETERS_END();
 
+    if (LISTFORMATTER_OBJECT(obj)) {
+        zend_throw_error(NULL, "IntlListFormatter object is already constructed");
+        RETURN_THROWS();
+    }
+
     if(locale_len == 0) {
         locale = (char *)intl_locale_get_default();
     }
