@@ -892,6 +892,11 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t pat
 	if (ftp == NULL) {
 		return 0;
 	}
+	if (ftp->in_use) {
+		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
+		return 0;
+	}
+	ftp->in_use = true;
 	if (!ftp_type(ftp, type)) {
 		goto bail;
 	}
@@ -967,9 +972,11 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t pat
 		goto bail;
 	}
 
+	ftp->in_use = false;
 	return 1;
 bail:
 	data_close(ftp);
+	ftp->in_use = false;
 	return 0;
 }
 /* }}} */
@@ -1057,6 +1064,11 @@ ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *inst
 	if (ftp == NULL) {
 		return 0;
 	}
+	if (ftp->in_use) {
+		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
+		return 0;
+	}
+	ftp->in_use = true;
 	if (!ftp_type(ftp, type)) {
 		goto bail;
 	}
@@ -1097,9 +1109,11 @@ ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *inst
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250 && ftp->resp != 200)) {
 		goto bail;
 	}
+	ftp->in_use = false;
 	return 1;
 bail:
 	data_close(ftp);
+	ftp->in_use = false;
 	return 0;
 }
 /* }}} */
@@ -1114,6 +1128,11 @@ ftp_append(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *i
 	if (ftp == NULL) {
 		return 0;
 	}
+	if (ftp->in_use) {
+		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
+		return 0;
+	}
+	ftp->in_use = true;
 	if (!ftp_type(ftp, type)) {
 		goto bail;
 	}
@@ -1141,9 +1160,11 @@ ftp_append(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *i
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250 && ftp->resp != 200)) {
 		goto bail;
 	}
+	ftp->in_use = false;
 	return 1;
 bail:
 	data_close(ftp);
+	ftp->in_use = false;
 	return 0;
 }
 /* }}} */
@@ -2055,6 +2076,10 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *pa
 	char		**entry;
 	char		*text;
 
+	if (ftp->in_use) {
+		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
+		return NULL;
+	}
 
 	if ((tmpstream = php_stream_fopen_tmpfile()) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to create temporary file.  Check permissions in temporary files directory.");
@@ -2156,6 +2181,11 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t 
 		return PHP_FTP_FAILED;
 	}
 
+	if (ftp->in_use) {
+		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
+		return PHP_FTP_FAILED;
+	}
+
 	if (ftp->data != NULL) {
 		/* If there is a transfer in action, abort it.
 		 * If we don't, we get an invalid state and memory leaks when the new connection gets opened. */
@@ -2223,11 +2253,17 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 
 	data = ftp->data;
 
+	if (ftp->in_use) {
+		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
+		return PHP_FTP_FAILED;
+	}
+
 	/* check if there is already more data */
 	if (!data_available(ftp, data->fd, false)) {
 		return PHP_FTP_MOREDATA;
 	}
 
+	ftp->in_use = true;
 	type = ftp->type;
 
 	lastch = ftp->lastch;
@@ -2251,6 +2287,7 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 		}
 
 		ftp->lastch = lastch;
+		ftp->in_use = false;
 		return PHP_FTP_MOREDATA;
 	}
 
@@ -2265,9 +2302,11 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 	}
 
 	ftp->nb = 0;
+	ftp->in_use = false;
 	return PHP_FTP_FINISHED;
 bail:
 	ftp->nb = 0;
+	ftp->in_use = false;
 	data_close(ftp);
 	return PHP_FTP_FAILED;
 }
@@ -2282,6 +2321,10 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *i
 
 	if (ftp == NULL) {
 		return 0;
+	}
+	if (ftp->in_use) {
+		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
+		return PHP_FTP_FAILED;
 	}
 	if (!ftp_type(ftp, type)) {
 		goto bail;
@@ -2330,16 +2373,24 @@ bail:
 int
 ftp_nb_continue_write(ftpbuf_t *ftp)
 {
+	if (ftp->in_use) {
+		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
+		return PHP_FTP_FAILED;
+	}
+
 	/* check if we can write more data */
 	if (!data_writeable(ftp, ftp->data->fd)) {
 		return PHP_FTP_MOREDATA;
 	}
+
+	ftp->in_use = true;
 
 	if (ftp_send_stream_to_data_socket(ftp, ftp->data, ftp->stream, ftp->type, true) != SUCCESS) {
 		goto bail;
 	}
 
 	if (!php_stream_eof(ftp->stream)) {
+		ftp->in_use = false;
 		return PHP_FTP_MOREDATA;
 	}
 
@@ -2349,10 +2400,12 @@ ftp_nb_continue_write(ftpbuf_t *ftp)
 		goto bail;
 	}
 	ftp->nb = 0;
+	ftp->in_use = false;
 	return PHP_FTP_FINISHED;
 bail:
 	data_close(ftp);
 	ftp->nb = 0;
+	ftp->in_use = false;
 	return PHP_FTP_FAILED;
 }
 /* }}} */
