@@ -61,7 +61,7 @@ Warning: stream_filter_append(): Compression level must be between -1 and 9, 10 
 Warning: stream_filter_append(): Unable to create or locate filter "zlib.deflate" in %s on line %d
 bool(false)
 
-Warning: stream_filter_append(): Window size must be of type int, string given in %s on line %d
+Warning: stream_filter_append(): Memory level must be of type int, string given in %s on line %d
 
 Warning: stream_filter_append(): Unable to create or locate filter "zlib.deflate" in %s on line %d
 bool(false)
