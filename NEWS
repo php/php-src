@@ -2,6 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.24
 
+- Intl:
+  . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
+    fallback locale when a language tag cannot be canonicalized. (Weilin Du)
+  . Fixed memory leaks when calling Collator::__construct() or
+    Spoofchecker::__construct() twice. (Weilin Du)
+
 - Reflection:
   . Fixed bug GH-22324 (Ignore leading namespace separator in
     ReflectionParameter::__construct()). (jorgsowa)
@@ -52,10 +58,6 @@ PHP                                                                        NEWS
     for invalid display types. (Weilin Du)
   . Fixed Spoofchecker restriction-level APIs to only be exposed with ICU 53
     and later. (Graham Campbell)
-  . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
-    fallback locale when a language tag cannot be canonicalized. (Weilin Du)
-  . Fixed memory leaks when calling Collator::__construct() or
-    Spoofchecker::__construct() twice. (Weilin Du)
 
 - mysqli:
   . Fix stmt->query leak in mysqli_execute_query() validation errors.
