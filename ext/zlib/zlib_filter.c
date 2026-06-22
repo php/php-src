@@ -385,6 +385,12 @@ static php_zlib_filter_data *php_zlib_filter_data_new(bool persistent)
 	return data;
 }
 
+static void php_zlib_filter_data_free(php_zlib_filter_data *data, bool persistent) {
+	pefree(data->strm.next_in, persistent);
+	pefree(data->strm.next_out, persistent);
+	pefree(data, persistent);
+}
+
 static php_stream_filter *php_zlib_deflate_filter_create(zval *filter_params, bool persistent)
 {
 	php_stream_filter_seekable_t write_seekable = PSFS_SEEKABLE_ALWAYS;
@@ -414,7 +420,7 @@ static php_stream_filter *php_zlib_deflate_filter_create(zval *filter_params, bo
 					/* Memory Level (1 - 9) */
 					const zend_long memory = zval_try_get_long(memory_zv, &failed);
 					if (UNEXPECTED(failed)) {
-						php_error_docref(NULL, E_WARNING, "Window size must be of type int, %s given", zend_zval_type_name(memory_zv));
+						php_error_docref(NULL, E_WARNING, "Memory level must be of type int, %s given", zend_zval_type_name(memory_zv));
 						return NULL;
 					} else if (memory < 1 || memory > MAX_MEM_LEVEL) {
 						php_error_docref(NULL, E_WARNING, "Memory level must be between 1 and %d, " ZEND_LONG_FMT " given", MAX_MEM_LEVEL, memory);
@@ -487,15 +493,16 @@ factory_setlevel:
 	}
 
 	php_zlib_filter_data *data = php_zlib_filter_data_new(persistent);
+	if (UNEXPECTED(data == NULL)) {
+		return NULL;
+	}
 	/* Save configuration for reset */
 	data->windowBits = windowBits;
 
 	const int status = deflateInit2(&(data->strm), level, Z_DEFLATED, windowBits, memLevel, 0);
 	if (UNEXPECTED(status != Z_OK)) {
 		/* Unspecified (probably strm) error, let stream-filter error do its own whining */
-		pefree(data->strm.next_in, persistent);
-		pefree(data->strm.next_out, persistent);
-		pefree(data, persistent);
+		php_zlib_filter_data_free(data, persistent);
 		return NULL;
 	}
 	data->finished = true;
@@ -541,15 +548,16 @@ static php_stream_filter *php_zlib_inflate_filter_create(zval *filter_params, bo
 	}
 
 	php_zlib_filter_data *data = php_zlib_filter_data_new(persistent);
+	if (UNEXPECTED(data == NULL)) {
+		return NULL;
+	}
 	/* Save configuration for reset */
 	data->windowBits = windowBits;
 
 	const int status = inflateInit2(&(data->strm), windowBits);
 	if (UNEXPECTED(status != Z_OK)) {
 		/* Unspecified (probably strm) error, let stream-filter error do its own whining */
-		pefree(data->strm.next_in, persistent);
-		pefree(data->strm.next_out, persistent);
-		pefree(data, persistent);
+		php_zlib_filter_data_free(data, persistent);
 		return NULL;
 	}
 	/* RFC 1951 Inflate */
