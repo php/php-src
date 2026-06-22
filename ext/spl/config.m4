@@ -24,6 +24,7 @@ PHP_INSTALL_HEADERS([ext/spl], m4_normalize([
   spl_iterators.h
   spl_observer.h
 ]))
+PHP_ADD_EXTENSION_DEP(spl, opcache)
 PHP_ADD_EXTENSION_DEP(spl, pcre, true)
 PHP_ADD_EXTENSION_DEP(spl, standard, true)
 PHP_ADD_EXTENSION_DEP(spl, json)

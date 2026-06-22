@@ -2908,6 +2908,11 @@ static zend_always_inline void zend_fetch_dimension_address(zval *result, zval *
 
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 try_array:
+		if (UNEXPECTED((type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) &&
+			EG(tracked_mutation_hooks_active))
+		) {
+			zend_maybe_track_hash_mutation(Z_ARRVAL_P(container), false);
+		}
 		SEPARATE_ARRAY(container);
 fetch_from_array:
 		if (dim == NULL) {
@@ -3507,6 +3512,20 @@ static zend_never_inline bool zend_handle_fetch_obj_flags(
 	return 1;
 }
 
+static zend_always_inline void zend_track_property_array_indirect_mutation(zval *ptr, int type)
+{
+	zval *tracked = ptr;
+
+	if (UNEXPECTED((type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) &&
+		EG(tracked_mutation_hooks_active))
+	) {
+		ZVAL_DEREF(tracked);
+		if (Z_TYPE_P(tracked) == IS_ARRAY) {
+			zend_maybe_track_hash_mutation(Z_ARRVAL_P(tracked), false);
+		}
+	}
+}
+
 static zend_always_inline void zend_fetch_property_address(
 	zval *result,
 	const zval *container,
@@ -3591,6 +3610,7 @@ static zend_always_inline void zend_fetch_property_address(
 						zend_handle_fetch_obj_flags(result, ptr, NULL, prop_info, flags);
 					}
 				}
+				zend_track_property_array_indirect_mutation(ptr, type);
 				return;
 			}
 		} else if (UNEXPECTED(IS_HOOKED_PROPERTY_OFFSET(prop_offset))) {
@@ -3606,6 +3626,7 @@ static zend_always_inline void zend_fetch_property_address(
 			ptr = zend_hash_find_known_hash(zobj->properties, Z_STR_P(prop_ptr));
 			if (EXPECTED(ptr)) {
 				ZVAL_INDIRECT(result, ptr);
+				zend_track_property_array_indirect_mutation(ptr, type);
 				return;
 			}
 		}
@@ -3653,6 +3674,7 @@ static zend_always_inline void zend_fetch_property_address(
 			}
 		}
 	}
+	zend_track_property_array_indirect_mutation(ptr, type);
 
 end:
 	if (prop_info_p) {
@@ -3827,6 +3849,12 @@ static zend_always_inline zval* zend_fetch_static_property_address(zend_property
 	 && EXPECTED(CACHED_PTR(cache_slot + sizeof(void *)) != NULL)) {
 		result = CACHED_PTR(cache_slot + sizeof(void *));
 		property_info = CACHED_PTR(cache_slot + sizeof(void *) * 2);
+
+		if (UNEXPECTED(EG(static_cache_class_access_active) &&
+			zend_class_static_access_hook != NULL)
+		) {
+			zend_class_static_access_hook(property_info->ce);
+		}
 
 		if ((fetch_type == BP_VAR_R || fetch_type == BP_VAR_RW)
 				&& UNEXPECTED(Z_TYPE_P(result) == IS_UNDEF)
@@ -4100,6 +4128,20 @@ ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, ui
 		GC_DTOR_NO_REF(garbage);
 	}
 	return result;
+}
+
+zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_track_object_mutation_slow(zend_object *zobj)
+{
+	if (zobj != NULL && zend_tracked_object_mutation_hook != NULL && EG(exception) == NULL) {
+		zend_tracked_object_mutation_hook(zobj);
+	}
+}
+
+zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_track_object_mutation_with_value_slow(zend_object *zobj, zval *value)
+{
+	if (zobj != NULL && zend_tracked_object_mutation_hook != NULL && EG(exception) == NULL && value != &EG(error_zval)) {
+		zend_tracked_object_mutation_hook(zobj);
+	}
 }
 
 ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(const zend_property_info *prop_info, zval *orig_val, bool strict, zend_verify_prop_assignable_by_ref_context context) {

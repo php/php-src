@@ -29,4 +29,6 @@ void zend_accel_register_ini_entries(void);
 
 void zend_accel_override_file_functions(void);
 
+bool zend_opcache_validate_api_restriction(void);
+
 #endif /* _ZEND_ACCELERATOR_MODULE_H */

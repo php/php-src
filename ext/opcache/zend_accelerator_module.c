@@ -20,7 +20,10 @@
 #include <time.h>
 
 #include "php.h"
+#include "php_ini.h"
+
 #include "ZendAccelerator.h"
+#include "Zend/zend_attributes.h"
 #include "zend_API.h"
 #include "zend_closures.h"
 #include "zend_extensions.h"
@@ -28,12 +31,13 @@
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_blacklist.h"
 #include "zend_file_cache.h"
-#include "php_ini.h"
-#include "SAPI.h"
 #include "zend_virtual_cwd.h"
+#include "zend_static_cache.h"
+
+#include "SAPI.h"
+
 #include "ext/standard/info.h"
 #include "ext/date/php_date.h"
-#include "opcache_arginfo.h"
 
 #ifdef HAVE_JIT
 #include "jit/zend_jit.h"
@@ -59,7 +63,7 @@ static zif_handler orig_file_exists = NULL;
 static zif_handler orig_is_file = NULL;
 static zif_handler orig_is_readable = NULL;
 
-static bool validate_api_restriction(void)
+bool zend_opcache_validate_api_restriction(void)
 {
 	if (ZCG(accel_directives).restrict_api && *ZCG(accel_directives).restrict_api) {
 		size_t len = strlen(ZCG(accel_directives).restrict_api);
@@ -72,6 +76,80 @@ static bool validate_api_restriction(void)
 		}
 	}
 	return true;
+}
+
+static ZEND_INI_MH(OnUpdateStaticCacheVolatileSizeMb)
+{
+	zend_long *p, memsize;
+
+	if (accel_startup_ok) {
+		if (strcmp(sapi_module.name, "fpm-fcgi") == 0) {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.static_cache.volatile_size_mb cannot be changed when OPcache is already set up. Are you using php_admin_value[opcache.static_cache.volatile_size_mb] in an individual pool's configuration?\n");
+		} else {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.static_cache.volatile_size_mb cannot be changed when OPcache is already set up.\n");
+		}
+		return FAILURE;
+	}
+
+	p = ZEND_INI_GET_ADDR();
+	memsize = atoi(ZSTR_VAL(new_value));
+
+	/* zero disables the volatile cache */
+	if (memsize == 0) {
+		*p = 0;
+		return SUCCESS;
+	}
+
+	/* sanity check we must use at least 8 MB */
+	if (memsize < 8) {
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache.static_cache.volatile_size_mb is set below the required 8MB.\n");
+		return FAILURE;
+	}
+
+	if (UNEXPECTED(memsize > ZEND_LONG_MAX / (1024 * 1024))) {
+		*p = ZEND_LONG_MAX & ~(1024 * 1024 - 1);
+	} else {
+		*p = memsize * (1024 * 1024);
+	}
+
+	return SUCCESS;
+}
+
+static ZEND_INI_MH(OnUpdateStaticCacheStableSizeMb)
+{
+	zend_long *p, memsize;
+
+	if (accel_startup_ok) {
+		if (strcmp(sapi_module.name, "fpm-fcgi") == 0) {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.static_cache.stable_size_mb cannot be changed when OPcache is already set up. Are you using php_admin_value[opcache.static_cache.stable_size_mb] in an individual pool's configuration?\n");
+		} else {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.static_cache.stable_size_mb cannot be changed when OPcache is already set up.\n");
+		}
+		return FAILURE;
+	}
+
+	p = ZEND_INI_GET_ADDR();
+	memsize = atoi(ZSTR_VAL(new_value));
+
+	/* zero disables the stable cache */
+	if (memsize == 0) {
+		*p = 0;
+		return SUCCESS;
+	}
+
+	/* sanity check we must use at least 8 MB */
+	if (memsize < 8) {
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache.static_cache.stable_size_mb is set below the required 8MB.\n");
+		return FAILURE;
+	}
+
+	if (UNEXPECTED(memsize > ZEND_LONG_MAX / (1024 * 1024))) {
+		*p = ZEND_LONG_MAX & ~(1024 * 1024 - 1);
+	} else {
+		*p = memsize * (1024 * 1024);
+	}
+
+	return SUCCESS;
 }
 
 static ZEND_INI_MH(OnUpdateMemoryConsumption)
@@ -292,6 +370,8 @@ ZEND_INI_BEGIN()
 
 	STD_PHP_INI_ENTRY("opcache.log_verbosity_level"   , "1"   , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.log_verbosity_level,       zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.memory_consumption"    , "128"  , PHP_INI_SYSTEM, OnUpdateMemoryConsumption,    accel_directives.memory_consumption,        zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.static_cache.volatile_size_mb", "8", PHP_INI_SYSTEM, OnUpdateStaticCacheVolatileSizeMb, accel_directives.static_cache_volatile_size_mb, zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.static_cache.stable_size_mb", "8", PHP_INI_SYSTEM, OnUpdateStaticCacheStableSizeMb, accel_directives.static_cache_stable_size_mb, zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.interned_strings_buffer", "8"  , PHP_INI_SYSTEM, OnUpdateInternedStringsBuffer,	 accel_directives.interned_strings_buffer,   zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_accelerated_files" , "10000", PHP_INI_SYSTEM, OnUpdateMaxAcceleratedFiles,	 accel_directives.max_accelerated_files,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_wasted_percentage" , "5"   , PHP_INI_SYSTEM, OnUpdateMaxWastedPercentage,	 accel_directives.max_wasted_percentage,     zend_accel_globals, accel_globals)
@@ -443,9 +523,19 @@ static ZEND_NAMED_FUNCTION(accel_is_readable)
 
 static ZEND_MINIT_FUNCTION(zend_accelerator)
 {
+	if (zend_opcache_register_functions(type) == FAILURE) {
+		return FAILURE;
+	}
+
 	start_accel_extension();
+	zend_opcache_static_cache_minit();
 
 	return SUCCESS;
+}
+
+static ZEND_RSHUTDOWN_FUNCTION(zend_accelerator)
+{
+	return zend_opcache_static_cache_rshutdown();
 }
 
 void zend_accel_register_ini_entries(void)
@@ -484,6 +574,7 @@ static ZEND_MSHUTDOWN_FUNCTION(zend_accelerator)
 {
 	(void)type; /* keep the compiler happy */
 
+	zend_opcache_static_cache_mshutdown();
 	UNREGISTER_INI_ENTRIES();
 	accel_shutdown();
 
@@ -499,6 +590,28 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	} else {
 		php_info_print_table_row(2, "Opcode Caching", "Disabled");
 	}
+
+	if (!zend_opcache_static_cache_volatile_is_enabled()) {
+		php_info_print_table_row(2, "Volatile Static Cache", "Disabled");
+	} else if (zend_opcache_static_cache_volatile_is_available()) {
+		php_info_print_table_row(2, "Volatile Static Cache", "Enabled");
+	} else {
+		php_info_print_table_row(2, "Volatile Static Cache", "Unavailable");
+		if (zend_opcache_static_cache_volatile_failure_reason()) {
+			php_info_print_table_row(2, "Volatile Static Cache Failure", zend_opcache_static_cache_volatile_failure_reason());
+		}
+	}
+	if (!zend_opcache_static_cache_stable_is_enabled()) {
+		php_info_print_table_row(2, "Stable Static Cache", "Disabled");
+	} else if (zend_opcache_static_cache_stable_is_available()) {
+		php_info_print_table_row(2, "Stable Static Cache", "Enabled");
+	} else {
+		php_info_print_table_row(2, "Stable Static Cache", "Unavailable");
+		if (zend_opcache_static_cache_stable_failure_reason()) {
+			php_info_print_table_row(2, "Stable Static Cache Failure", zend_opcache_static_cache_stable_failure_reason());
+		}
+	}
+
 	if (ZCG(enabled) && accel_startup_ok && ZCG(accel_directives).optimization_level) {
 		php_info_print_table_row(2, "Optimization", "Enabled");
 	} else {
@@ -602,11 +715,11 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 zend_module_entry opcache_module_entry = {
 	STANDARD_MODULE_HEADER,
 	ACCELERATOR_PRODUCT_NAME,
-	ext_functions,
+	NULL,
 	ZEND_MINIT(zend_accelerator),
 	ZEND_MSHUTDOWN(zend_accelerator),
 	ZEND_RINIT(zend_accelerator),
-	NULL,
+	ZEND_RSHUTDOWN(zend_accelerator),
 	zend_accel_info,
 	PHP_VERSION,
 	NO_MODULE_GLOBALS,
@@ -665,14 +778,14 @@ static int accelerator_get_scripts(zval *return_value)
 ZEND_FUNCTION(opcache_get_status)
 {
 	zend_long reqs;
-	zval memory_usage, statistics, scripts;
+	zval memory_usage, statistics, scripts, volatile_cache, stable_cache;
 	bool fetch_scripts = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &fetch_scripts) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (!validate_api_restriction()) {
+	if (!zend_opcache_validate_api_restriction()) {
 		RETURN_FALSE;
 	}
 
@@ -688,6 +801,13 @@ ZEND_FUNCTION(opcache_get_status)
 	if (ZCG(accel_directives).file_cache) {
 		add_assoc_string(return_value, "file_cache", ZCG(accel_directives).file_cache);
 	}
+
+	/* Static cache */
+	zend_opcache_static_cache_volatile_get_status(&volatile_cache);
+	add_assoc_zval(return_value, "volatile_cache", &volatile_cache);
+	zend_opcache_static_cache_stable_get_status(&stable_cache);
+	add_assoc_zval(return_value, "stable_cache", &stable_cache);
+
 	if (file_cache_only) {
 		add_assoc_bool(return_value, "file_cache_only", 1);
 		return;
@@ -801,7 +921,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (!validate_api_restriction()) {
+	if (!zend_opcache_validate_api_restriction()) {
 		RETURN_FALSE;
 	}
 
@@ -809,34 +929,36 @@ ZEND_FUNCTION(opcache_get_configuration)
 
 	/* directives */
 	array_init(&directives);
-	add_assoc_bool(&directives, "opcache.enable",              ZCG(enabled));
-	add_assoc_bool(&directives, "opcache.enable_cli",          ZCG(accel_directives).enable_cli);
-	add_assoc_bool(&directives, "opcache.use_cwd",             ZCG(accel_directives).use_cwd);
-	add_assoc_bool(&directives, "opcache.validate_timestamps", ZCG(accel_directives).validate_timestamps);
-	add_assoc_bool(&directives, "opcache.validate_permission", ZCG(accel_directives).validate_permission);
+	add_assoc_bool(&directives,   "opcache.enable",              			ZCG(enabled));
+	add_assoc_bool(&directives,   "opcache.enable_cli",          			ZCG(accel_directives).enable_cli);
+	add_assoc_bool(&directives,   "opcache.use_cwd",             			ZCG(accel_directives).use_cwd);
+	add_assoc_bool(&directives,   "opcache.validate_timestamps", 			ZCG(accel_directives).validate_timestamps);
+	add_assoc_bool(&directives,   "opcache.validate_permission", 			ZCG(accel_directives).validate_permission);
 #ifndef ZEND_WIN32
-	add_assoc_bool(&directives, "opcache.validate_root",       ZCG(accel_directives).validate_root);
+	add_assoc_bool(&directives,   "opcache.validate_root",       			ZCG(accel_directives).validate_root);
 #endif
-	add_assoc_bool(&directives, "opcache.dups_fix",            ZCG(accel_directives).ignore_dups);
-	add_assoc_bool(&directives, "opcache.revalidate_path",     ZCG(accel_directives).revalidate_path);
+	add_assoc_bool(&directives,   "opcache.dups_fix",            			ZCG(accel_directives).ignore_dups);
+	add_assoc_bool(&directives,   "opcache.revalidate_path",     			ZCG(accel_directives).revalidate_path);
 
-	add_assoc_long(&directives,   "opcache.log_verbosity_level",    ZCG(accel_directives).log_verbosity_level);
-	add_assoc_long(&directives,	 "opcache.memory_consumption",     ZCG(accel_directives).memory_consumption);
-	add_assoc_long(&directives,	 "opcache.interned_strings_buffer",ZCG(accel_directives).interned_strings_buffer);
-	add_assoc_long(&directives, 	 "opcache.max_accelerated_files",  ZCG(accel_directives).max_accelerated_files);
-	add_assoc_double(&directives, "opcache.max_wasted_percentage",  ZCG(accel_directives).max_wasted_percentage);
-	add_assoc_long(&directives, 	 "opcache.force_restart_timeout",  ZCG(accel_directives).force_restart_timeout);
-	add_assoc_long(&directives, 	 "opcache.revalidate_freq",        ZCG(accel_directives).revalidate_freq);
-	add_assoc_string(&directives, "opcache.preferred_memory_model", STRING_NOT_NULL(ZCG(accel_directives).memory_model));
-	add_assoc_string(&directives, "opcache.blacklist_filename",     STRING_NOT_NULL(ZCG(accel_directives).user_blacklist_filename));
-	add_assoc_long(&directives,   "opcache.max_file_size",          ZCG(accel_directives).max_file_size);
-	add_assoc_string(&directives, "opcache.error_log",              STRING_NOT_NULL(ZCG(accel_directives).error_log));
+	add_assoc_long(&directives,   "opcache.log_verbosity_level",    		ZCG(accel_directives).log_verbosity_level);
+	add_assoc_long(&directives,	  "opcache.memory_consumption",     		ZCG(accel_directives).memory_consumption);
+	add_assoc_long(&directives,	  "opcache.static_cache.volatile_size_mb",	ZCG(accel_directives).static_cache_volatile_size_mb);
+	add_assoc_long(&directives,	  "opcache.static_cache.stable_size_mb", 	ZCG(accel_directives).static_cache_stable_size_mb);
+	add_assoc_long(&directives,	  "opcache.interned_strings_buffer",		ZCG(accel_directives).interned_strings_buffer);
+	add_assoc_long(&directives,   "opcache.max_accelerated_files",  		ZCG(accel_directives).max_accelerated_files);
+	add_assoc_double(&directives, "opcache.max_wasted_percentage",  		ZCG(accel_directives).max_wasted_percentage);
+	add_assoc_long(&directives,   "opcache.force_restart_timeout",  		ZCG(accel_directives).force_restart_timeout);
+	add_assoc_long(&directives,   "opcache.revalidate_freq",        		ZCG(accel_directives).revalidate_freq);
+	add_assoc_string(&directives, "opcache.preferred_memory_model", 		STRING_NOT_NULL(ZCG(accel_directives).memory_model));
+	add_assoc_string(&directives, "opcache.blacklist_filename",     		STRING_NOT_NULL(ZCG(accel_directives).user_blacklist_filename));
+	add_assoc_long(&directives,   "opcache.max_file_size",          		ZCG(accel_directives).max_file_size);
+	add_assoc_string(&directives, "opcache.error_log",              		STRING_NOT_NULL(ZCG(accel_directives).error_log));
 
-	add_assoc_bool(&directives,   "opcache.protect_memory",         ZCG(accel_directives).protect_memory);
-	add_assoc_bool(&directives,   "opcache.save_comments",          ZCG(accel_directives).save_comments);
-	add_assoc_bool(&directives,   "opcache.record_warnings",        ZCG(accel_directives).record_warnings);
-	add_assoc_bool(&directives,   "opcache.enable_file_override",   ZCG(accel_directives).file_override_enabled);
-	add_assoc_long(&directives, 	 "opcache.optimization_level",     ZCG(accel_directives).optimization_level);
+	add_assoc_bool(&directives,   "opcache.protect_memory",         		ZCG(accel_directives).protect_memory);
+	add_assoc_bool(&directives,   "opcache.save_comments",          		ZCG(accel_directives).save_comments);
+	add_assoc_bool(&directives,   "opcache.record_warnings",        		ZCG(accel_directives).record_warnings);
+	add_assoc_bool(&directives,   "opcache.enable_file_override",   		ZCG(accel_directives).file_override_enabled);
+	add_assoc_long(&directives,   "opcache.optimization_level",     		ZCG(accel_directives).optimization_level);
 
 #ifndef ZEND_WIN32
 	add_assoc_string(&directives, "opcache.lockfile_path",          STRING_NOT_NULL(ZCG(accel_directives).lockfile_path));
@@ -906,7 +1028,7 @@ ZEND_FUNCTION(opcache_reset)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (!validate_api_restriction()) {
+	if (!zend_opcache_validate_api_restriction()) {
 		RETURN_FALSE;
 	}
 
@@ -917,6 +1039,8 @@ ZEND_FUNCTION(opcache_reset)
 	) {
 		RETURN_FALSE;
 	}
+
+	zend_opcache_static_cache_invalidate_all();
 
 	/* exclusive lock */
 	zend_shared_alloc_lock();
@@ -935,7 +1059,7 @@ ZEND_FUNCTION(opcache_invalidate)
 		RETURN_THROWS();
 	}
 
-	if (!validate_api_restriction()) {
+	if (!zend_opcache_validate_api_restriction()) {
 		RETURN_FALSE;
 	}
 
@@ -1017,7 +1141,7 @@ ZEND_FUNCTION(opcache_is_script_cached)
 		Z_PARAM_STR(script_name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!validate_api_restriction()) {
+	if (!zend_opcache_validate_api_restriction()) {
 		RETURN_FALSE;
 	}
 
@@ -1037,7 +1161,7 @@ ZEND_FUNCTION(opcache_is_script_cached_in_file_cache)
 		Z_PARAM_STR(script_name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!validate_api_restriction()) {
+	if (!zend_opcache_validate_api_restriction()) {
 		RETURN_FALSE;
 	}
 

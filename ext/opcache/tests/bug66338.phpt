@@ -28,7 +28,6 @@ file_put_contents( "$root-clientUK.php", '<?php
     ' );
 
 include "php_cli_server.inc";
-$uri = sprintf("http://%s/%s", PHP_CLI_SERVER_ADDRESS, basename(__FILE__));
 $opt = -1;   # This test works if $opt = 0
 php_cli_server_start("-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.optimization_level=$opt -d opcache.file_update_protection=0" );
 

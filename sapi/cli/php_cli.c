@@ -52,6 +52,7 @@
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/dl_arginfo.h"
+#include "ext/opcache/zend_static_cache.h" /* for OPcache Static Cache opt-in */
 #include "cli.h"
 #ifdef PHP_WIN32
 #include <io.h>
@@ -390,6 +391,12 @@ static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_c
 
 static int php_cli_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
+	/* The CLI runs a single trusted program per process, so it owns the Static
+	 * Cache trust boundary for the lifetime of the runtime and opts in. This
+	 * runs before module startup so the backend is enabled while OPcache
+	 * initializes. */
+	zend_opcache_static_cache_opt_in();
+
 	return php_module_startup(sapi_module_ptr, NULL);
 }
 /* }}} */
