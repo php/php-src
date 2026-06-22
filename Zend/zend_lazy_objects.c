@@ -417,7 +417,18 @@ static void zend_lazy_object_revert_init(zend_object *obj, zval *properties_tabl
 			}
 
 			zval *p = &properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
-			zend_object_dtor_property(obj, p);
+			if (Z_REFCOUNTED_P(p)) {
+				if (UNEXPECTED(Z_ISREF_P(p)) &&
+						(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(p)))) {
+					if (ZEND_TYPE_IS_SET(prop_info->type)) {
+						ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+					}
+				}
+				zval garbage;
+				ZVAL_COPY_VALUE(&garbage, p);
+				ZVAL_UNDEF(p);
+				zval_ptr_dtor(&garbage);
+			}
 			ZVAL_COPY_VALUE_PROP(p, &properties_table_snapshot[OBJ_PROP_TO_NUM(prop_info->offset)]);
 
 			if (Z_ISREF_P(p) && ZEND_TYPE_IS_SET(prop_info->type)) {
@@ -430,15 +441,17 @@ static void zend_lazy_object_revert_init(zend_object *obj, zval *properties_tabl
 	if (properties_snapshot) {
 		if (obj->properties != properties_snapshot) {
 			ZEND_ASSERT((GC_FLAGS(properties_snapshot) & IS_ARRAY_IMMUTABLE) || GC_REFCOUNT(properties_snapshot) >= 1);
-			zend_release_properties(obj->properties);
+			HashTable *garbage = obj->properties;
 			obj->properties = properties_snapshot;
+			zend_release_properties(garbage);
 		} else {
 			ZEND_ASSERT((GC_FLAGS(properties_snapshot) & IS_ARRAY_IMMUTABLE) || GC_REFCOUNT(properties_snapshot) > 1);
 			zend_release_properties(properties_snapshot);
 		}
 	} else if (obj->properties) {
-		zend_release_properties(obj->properties);
+		HashTable *garbage = obj->properties;
 		obj->properties = NULL;
+		zend_release_properties(garbage);
 	}
 
 	OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED;
@@ -529,16 +542,27 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 
 	/* unset() properties of the proxy. This ensures that all accesses are be
 	 * delegated to the backing instance from now on. */
-	zend_object_dtor_dynamic_properties(obj);
+	HashTable *garbage_ht = obj->properties;
 	obj->properties = NULL;
+	zend_release_properties(garbage_ht);
 
 	for (int i = 0; i < Z_OBJ(retval)->ce->default_properties_count; i++) {
 		zend_property_info *prop_info = Z_OBJ(retval)->ce->properties_info_table[i];
 		if (EXPECTED(prop_info)) {
 			zval *prop = &obj->properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
-			zend_object_dtor_property(obj, prop);
+			zval garbage;
+			ZVAL_COPY_VALUE(&garbage, prop);
 			ZVAL_UNDEF(prop);
 			Z_PROP_FLAG_P(prop) = IS_PROP_UNINIT | IS_PROP_LAZY;
+			if (Z_REFCOUNTED(garbage)) {
+				if (UNEXPECTED(Z_ISREF(garbage)) &&
+						(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF(garbage)))) {
+					if (ZEND_TYPE_IS_SET(prop_info->type)) {
+						ZEND_REF_DEL_TYPE_SOURCE(Z_REF(garbage), prop_info);
+					}
+				}
+				zval_ptr_dtor(&garbage);
+			}
 		}
 	}
 
