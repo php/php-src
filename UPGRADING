@@ -28,6 +28,10 @@ PHP 8.6 UPGRADE NOTES
     from global scope" instead of the prior readonly modification error.
     ReflectionProperty::isWritable() also reports these properties
     accurately.
+  . Dom\Notation and DOMNotation: $parentNode now returns null and
+    $isConnected returns false, matching the W3C DOM Level 3 Core
+    specification. The previous wiring caused a use-after-free when the
+    owning DocType was removed.
 
 - GD:
   . imagesetstyle(), imagefilter() and imagecrop() filter their

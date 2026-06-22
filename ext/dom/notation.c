@@ -69,4 +69,17 @@ zend_result dom_notation_system_id_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
+zend_result dom_notation_parent_node_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+	ZVAL_NULL(retval);
+	return SUCCESS;
+}
+
+zend_result dom_notation_is_connected_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+	ZVAL_FALSE(retval);
+	return SUCCESS;
+}
 #endif
