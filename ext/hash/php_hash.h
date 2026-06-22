@@ -166,13 +166,7 @@ static inline void *php_hash_alloc_context(const php_hash_ops *ops) {
 
 static inline void php_hash_bin2hex(char *out, const unsigned char *in, size_t in_len)
 {
-	static const char hexits[17] = "0123456789abcdef";
-	size_t i;
-
-	for(i = 0; i < in_len; i++) {
-		out[i * 2]       = hexits[in[i] >> 4];
-		out[(i * 2) + 1] = hexits[in[i] &  0x0F];
-	}
+	zend_bin2hex(out, in, in_len);
 }
 
 #endif	/* PHP_HASH_H */
