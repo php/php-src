@@ -2169,7 +2169,7 @@ OUPUT_EXAMPLE
 
                 $methodSynopsis->appendChild($methodparam);
                 foreach ($arg->attributes as $attribute) {
-                    $attribute = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
+                    $attribute = $doc->createElement("modifier", (string) $attribute);
                     $attribute->setAttribute("role", "attribute");
 
                     $methodparam->appendChild($attribute);
@@ -3354,6 +3354,24 @@ class AttributeInfo {
         public readonly string $class,
         private readonly array $args,
     ) {}
+
+    public function __toString(): string {
+        $code = '#[\\' . $this->class;
+        if (!empty($this->args)) {
+            $prettyPrinter = new Standard;
+            $args = [];
+            foreach ($this->args as $arg) {
+                $argStr = $prettyPrinter->prettyPrintExpr($arg->value);
+                if ($arg->name !== null) {
+                    $argStr = $arg->name->name . ': ' . $argStr;
+                }
+                $args[] = $argStr;
+            }
+            $code .= '(' . implode(', ', $args) . ')';
+        }
+        $code .= ']';
+        return $code;
+    }
 
     /**
      * @param array<string, ConstInfo> $allConstInfos
