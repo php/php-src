@@ -8,6 +8,13 @@ PHP                                                                        NEWS
   . Fixed memory leaks when calling Collator::__construct() or
     Spoofchecker::__construct() twice. (Weilin Du)
 
+- Phar:
+  . Fixed inconsistent handling of the magic ".phar" directory. Paths such as
+    "/.phar" remain protected, while non-magic paths that merely start with
+    ".phar" are handled consistently across file and directory creation,
+    copying, ArrayAccess, stream lookup, directory iteration and extraction.
+    (Weilin Du)
+
 - Reflection:
   . Fixed bug GH-22324 (Ignore leading namespace separator in
     ReflectionParameter::__construct()). (jorgsowa)

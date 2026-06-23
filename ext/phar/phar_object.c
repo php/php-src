@@ -1619,7 +1619,7 @@ phar_spl_fileinfo:
 		return ZEND_HASH_APPLY_STOP;
 	}
 after_open_fp:
-	if (str_key_len >= sizeof(".phar")-1 && !memcmp(str_key, ".phar", sizeof(".phar")-1)) {
+	if (phar_path_is_magic_phar_ex(str_key, str_key_len)) {
 		/* silently skip any files that would be added to the magic .phar directory */
 		if (save) {
 			efree(save);
@@ -3468,14 +3468,14 @@ PHP_METHOD(Phar, copy)
 		RETURN_THROWS();
 	}
 
-	if (zend_string_starts_with_literal(old_file, ".phar")) {
+	if (phar_is_magic_phar(old_file)) {
 		/* can't copy a meta file */
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 			"file \"%s\" cannot be copied to file \"%s\", cannot copy Phar meta-file in %s", ZSTR_VAL(old_file), ZSTR_VAL(new_file), phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
 
-	if (zend_string_starts_with_literal(new_file, ".phar")) {
+	if (phar_is_magic_phar(new_file)) {
 		/* can't copy a meta file */
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 			"file \"%s\" cannot be copied to file \"%s\", cannot copy to Phar meta-file in %s", ZSTR_VAL(old_file), ZSTR_VAL(new_file), phar_obj->archive->fname);
@@ -3562,11 +3562,8 @@ PHP_METHOD(Phar, offsetExists)
 			}
 		}
 
-		if (zend_string_starts_with_literal(file_name, ".phar")) {
-			/* none of these are real files, so they don't exist */
-			RETURN_FALSE;
-		}
-		RETURN_TRUE;
+		/* none of these are real files, so they don't exist */
+		RETURN_BOOL(!phar_is_magic_phar(file_name));
 	} else {
 		/* If the info class is not based on PharFileInfo, directories are not directly instantiable */
 		if (UNEXPECTED(!instanceof_function(phar_obj->spl.info_class, phar_ce_entry))) {
@@ -3609,7 +3606,7 @@ PHP_METHOD(Phar, offsetGet)
 			RETURN_THROWS();
 		}
 
-		if (zend_string_starts_with_literal(file_name, ".phar")) {
+		if (phar_is_magic_phar(file_name)) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot directly get any files or directories in magic \".phar\" directory");
 			RETURN_THROWS();
 		}
@@ -3640,16 +3637,9 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 	ALLOCA_FLAG(filename_use_heap)
 #endif
 
-	if (
-		zend_string_starts_with_literal(file_name, ".phar")
-		|| zend_string_starts_with_literal(file_name, "/.phar")
-	) {
-		size_t prefix_len = (ZSTR_VAL(file_name)[0] == '/') + sizeof(".phar")-1;
-		char next_char = ZSTR_VAL(file_name)[prefix_len];
-		if (next_char == '/' || next_char == '\\' || next_char == '\0') {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create any files in magic \".phar\" directory");
-			return;
-		}
+	if (phar_is_magic_phar(file_name)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create any files in magic \".phar\" directory");
+		return;
 	}
 
 	/* TODO How to handle Windows path normalisation with zend_string ? */
@@ -3796,7 +3786,7 @@ PHP_METHOD(Phar, offsetSet)
 		RETURN_THROWS();
 	}
 
-	if (zend_string_starts_with_literal(file_name, ".phar")) {
+	if (phar_is_magic_phar(file_name)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot set any files or directories in magic \".phar\" directory");
 		RETURN_THROWS();
 	}
@@ -3863,16 +3853,9 @@ PHP_METHOD(Phar, addEmptyDir)
 
 	PHAR_ARCHIVE_OBJECT();
 
-	if (
-		zend_string_starts_with_literal(dir_name, ".phar")
-		|| zend_string_starts_with_literal(dir_name, "/.phar")
-	) {
-		size_t prefix_len = (ZSTR_VAL(dir_name)[0] == '/') + sizeof(".phar")-1;
-		char next_char = ZSTR_VAL(dir_name)[prefix_len];
-		if (next_char == '/' || next_char == '\\' || next_char == '\0') {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create a directory in magic \".phar\" directory");
-			RETURN_THROWS();
-		}
+	if (phar_is_magic_phar(dir_name)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create a directory in magic \".phar\" directory");
+		RETURN_THROWS();
 	}
 
 	phar_mkdir(&phar_obj->archive, dir_name);
@@ -4178,7 +4161,7 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 		return SUCCESS;
 	}
 
-	if (entry->filename_len >= sizeof(".phar")-1 && !memcmp(entry->filename, ".phar", sizeof(".phar")-1)) {
+	if (phar_path_is_magic_phar_ex(entry->filename, entry->filename_len)) {
 		return SUCCESS;
 	}
 	/* strip .. from path and restrict it to be under dest directory */
