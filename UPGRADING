@@ -186,6 +186,14 @@ PHP 8.6 UPGRADE NOTES
   . It is now possible to define the `__debugInfo()` magic method on enums.
     RFC: https://wiki.php.net/rfc/debugable-enums
 
+- Curl:
+  . Added CURLOPT_SEEKFUNCTION to register a callback that repositions a
+    streamed request body so libcurl can rewind and resend it on a redirect,
+    multi-pass authentication, or a retried reused connection instead of
+    failing with CURLE_SEND_FAIL_REWIND. The callback receives the CurlHandle,
+    offset and origin, and must return one of CURL_SEEKFUNC_OK,
+    CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK.
+
 - Fileinfo:
   . finfo_file() now works with remote streams.
 
@@ -398,6 +406,12 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- Curl:
+  . CURLOPT_SEEKFUNCTION.
+  . CURL_SEEKFUNC_OK.
+  . CURL_SEEKFUNC_FAIL.
+  . CURL_SEEKFUNC_CANTSEEK.
 
 - Sockets:
   . TCP_USER_TIMEOUT (Linux only).

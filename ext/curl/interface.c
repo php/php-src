@@ -456,6 +456,10 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.write_header->stream);
 	}
 
+	if (ZEND_FCC_INITIALIZED(curl->handlers.seek)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.seek);
+	}
+
 	if (ZEND_FCC_INITIALIZED(curl->handlers.progress)) {
 		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.progress);
 	}
@@ -831,6 +835,52 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 }
 /* }}} */
 
+/* {{{ curl_seek */
+static int curl_seek(void *clientp, curl_off_t offset, int origin)
+{
+	php_curl *ch = (php_curl *)clientp;
+	int rval = CURL_SEEKFUNC_CANTSEEK; /* safe default if unset or the callback misbehaves */
+
+#if PHP_CURL_DEBUG
+	fprintf(stderr, "curl_seek() called\n");
+	fprintf(stderr, "clientp = %x, offset = %ld, origin = %d\n", clientp, offset, origin);
+#endif
+	if (!ZEND_FCC_INITIALIZED(ch->handlers.seek)) {
+		return rval;
+	}
+
+	zval args[3];
+	zval retval;
+
+	GC_ADDREF(&ch->std);
+	ZVAL_OBJ(&args[0], &ch->std);
+	ZVAL_LONG(&args[1], offset);
+	ZVAL_LONG(&args[2], origin);
+
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.seek, &retval, /* param_count */ 3, args, /* named_params */ NULL);
+	ch->in_callback = false;
+
+	if (!Z_ISUNDEF(retval)) {
+		_php_curl_verify_handlers(ch, /* reporterror */ true);
+		if (Z_TYPE(retval) == IS_LONG) {
+			zend_long retval_long = Z_LVAL(retval);
+			if (retval_long == CURL_SEEKFUNC_OK || retval_long == CURL_SEEKFUNC_FAIL || retval_long == CURL_SEEKFUNC_CANTSEEK) {
+				rval = retval_long;
+			} else {
+				zend_value_error("The CURLOPT_SEEKFUNCTION callback must return one of CURL_SEEKFUNC_OK, CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK");
+			}
+		} else {
+			zend_type_error("The CURLOPT_SEEKFUNCTION callback must return one of CURL_SEEKFUNC_OK, CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK");
+		}
+		zval_ptr_dtor(&retval);
+	}
+
+	zval_ptr_dtor(&args[0]);
+	return rval;
+}
+/* }}} */
+
 /* {{{ curl_write_header */
 static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx)
 {
@@ -1038,6 +1088,7 @@ void init_curl_handle(php_curl *ch)
 	ch->handlers.write = ecalloc(1, sizeof(php_curl_write));
 	ch->handlers.write_header = ecalloc(1, sizeof(php_curl_write));
 	ch->handlers.read = ecalloc(1, sizeof(php_curl_read));
+	ch->handlers.seek = empty_fcall_info_cache;
 	ch->handlers.progress = empty_fcall_info_cache;
 	ch->handlers.xferinfo = empty_fcall_info_cache;
 	ch->handlers.fnmatch = empty_fcall_info_cache;
@@ -1208,6 +1259,7 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA,         (void *) ch);
 
+	php_curl_copy_fcc_with_option(ch, CURLOPT_SEEKDATA, &ch->handlers.seek, &source->handlers.seek);
 	php_curl_copy_fcc_with_option(ch, CURLOPT_PROGRESSDATA, &ch->handlers.progress, &source->handlers.progress);
 	php_curl_copy_fcc_with_option(ch, CURLOPT_XFERINFODATA, &ch->handlers.xferinfo, &source->handlers.xferinfo);
 	php_curl_copy_fcc_with_option(ch, CURLOPT_FNMATCH_DATA, &ch->handlers.fnmatch, &source->handlers.fnmatch);
@@ -1577,6 +1629,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(ch, CURLOPT_HEADER, write_header, PHP_CURL_IGNORE);
 		HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(ch, CURLOPT_READ, read, PHP_CURL_DIRECT);
 
+		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_SEEK, handlers.seek, curl_seek);
 		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_PROGRESS, handlers.progress, curl_progress);
 		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_XFERINFO, handlers.xferinfo, curl_xferinfo);
 		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_FNMATCH_, handlers.fnmatch, curl_fnmatch);
@@ -2781,6 +2834,9 @@ static void curl_free_obj(zend_object *object)
 	efree(ch->handlers.write_header);
 	efree(ch->handlers.read);
 
+	if (ZEND_FCC_INITIALIZED(ch->handlers.seek)) {
+		zend_fcc_dtor(&ch->handlers.seek);
+	}
 	if (ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
 		zend_fcc_dtor(&ch->handlers.progress);
 	}
@@ -2863,6 +2919,10 @@ static void _php_curl_reset_handlers(php_curl *ch)
 	if (!Z_ISUNDEF(ch->handlers.std_err)) {
 		zval_ptr_dtor(&ch->handlers.std_err);
 		ZVAL_UNDEF(&ch->handlers.std_err);
+	}
+
+	if (ZEND_FCC_INITIALIZED(ch->handlers.seek)) {
+		zend_fcc_dtor(&ch->handlers.seek);
 	}
 
 	if (ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
