@@ -100,6 +100,8 @@ PHP                                                                        NEWS
   . Fixed a memory leak in array_merge_recursive() when the recursive merge of
     an object converted to an array fails. (David Carlier)
   . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
+  . Fixed bug GH-22410 (Incorrect float behavior with large numbers).
+    (arshidkv12)
 
 - SimpleXML:
   . Fixed writing to a dimension of the object returned by attributes() not
