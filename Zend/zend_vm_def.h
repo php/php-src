@@ -6010,7 +6010,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, UNUSED|CACHE_SLOT, N
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
+	constructor = ce->constructor;
 	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */

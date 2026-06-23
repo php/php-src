@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_generators.stub.php instead.
- * Stub hash: d376e984db0db6ccd9356f632f9d7e1382b2afb7 */
+ * Stub hash: 923b63f7385bcb1157ac45d8ff15564e57deb085 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Generator_rewind, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -57,6 +57,14 @@ static zend_class_entry *register_class_Generator(zend_class_entry *class_entry_
 	INIT_CLASS_ENTRY(ce, "Generator", class_Generator_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
+
+	zend_string *attribute_name_NonInstantiableClass_class_Generator_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_Generator_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_Generator_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_Generator_0, true);
+	zend_string *attribute_NonInstantiableClass_class_Generator_0_arg0_str = zend_string_init("The \"Generator\" class is reserved for internal use and cannot be manually instantiated", strlen("The \"Generator\" class is reserved for internal use and cannot be manually instantiated"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_Generator_0->args[0].value, attribute_NonInstantiableClass_class_Generator_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

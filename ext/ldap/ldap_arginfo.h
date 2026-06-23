@@ -1,5 +1,5 @@
 /* This is a generated file, edit ldap.stub.php instead.
- * Stub hash: 0dde8fd813f43640dee842c03365d7431858a56d */
+ * Stub hash: 908a50f948c3c80ab77a2a6b1541bb533993c1d7 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -775,6 +775,14 @@ static zend_class_entry *register_class_LDAP_Connection(void)
 	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Connection", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_string *attribute_name_NonInstantiableClass_class_LDAP_Connection_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_LDAP_Connection_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_LDAP_Connection_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_LDAP_Connection_0, true);
+	zend_string *attribute_NonInstantiableClass_class_LDAP_Connection_0_arg0_str = zend_string_init("Cannot directly construct LDAP\\Connection, use ldap_connect() instead", strlen("Cannot directly construct LDAP\\Connection, use ldap_connect() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_LDAP_Connection_0->args[0].value, attribute_NonInstantiableClass_class_LDAP_Connection_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
+
 	return class_entry;
 }
 
@@ -785,6 +793,14 @@ static zend_class_entry *register_class_LDAP_Result(void)
 	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Result", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_string *attribute_name_NonInstantiableClass_class_LDAP_Result_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_LDAP_Result_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_LDAP_Result_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_LDAP_Result_0, true);
+	zend_string *attribute_NonInstantiableClass_class_LDAP_Result_0_arg0_str = zend_string_init("Cannot directly construct LDAP\\Result, use the dedicated functions instead", strlen("Cannot directly construct LDAP\\Result, use the dedicated functions instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_LDAP_Result_0->args[0].value, attribute_NonInstantiableClass_class_LDAP_Result_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
+
 	return class_entry;
 }
 
@@ -794,6 +810,14 @@ static zend_class_entry *register_class_LDAP_ResultEntry(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "LDAP", "ResultEntry", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_string *attribute_name_NonInstantiableClass_class_LDAP_ResultEntry_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_LDAP_ResultEntry_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_LDAP_ResultEntry_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_LDAP_ResultEntry_0, true);
+	zend_string *attribute_NonInstantiableClass_class_LDAP_ResultEntry_0_arg0_str = zend_string_init("Cannot directly construct LDAP\\ResultEntry, use the dedicated functions instead", strlen("Cannot directly construct LDAP\\ResultEntry, use the dedicated functions instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_LDAP_ResultEntry_0->args[0].value, attribute_NonInstantiableClass_class_LDAP_ResultEntry_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

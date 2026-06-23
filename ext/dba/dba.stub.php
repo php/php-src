@@ -7,6 +7,7 @@ namespace Dba {
      * @strict-properties
      * @not-serializable
      */
+    #[\NonInstantiableClass("Cannot directly construct Dba\\Connection, use dba_open() or dba_popen() instead")]
     final class Connection
     {
     }

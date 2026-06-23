@@ -51,6 +51,10 @@ PHP 8.6 UPGRADE NOTES
     resource lookups with "without fallback to <locale>" instead of the
     malformed "without fallback from to <locale>".
 
+- MySQLi:
+  . mysqli_fetch_object() no longer accepts classes with non-public
+    constructors.
+
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
     lower than zero or greater than platform's UINT_MAX.
@@ -61,6 +65,10 @@ PHP 8.6 UPGRADE NOTES
   . preg_grep() now returns false instead of a partial array when a PCRE
     execution error occurs (e.g. malformed UTF-8 input with the /u modifier).
     This is consistent with other preg_* functions.
+
+- PDO:
+  . PDOStatement::fetchObject() no longer accepts classes with non-public
+    constructors.
 
 - Phar:
   . Phar::mungServer() now raises a ValueError when an invalid
@@ -77,6 +85,8 @@ PHP 8.6 UPGRADE NOTES
     $constructor_args argument instead of $class. Errors raised when
     the requested class is not instantiable (abstract, interface, enum)
     now surface before the row is fetched.
+  . pg_fetch_object() no longer accepts classes with non-public
+    constructors.
 
 - Posix:
   . posix_access() now raises a ValueError when an invalid $flags

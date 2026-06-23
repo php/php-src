@@ -32,6 +32,7 @@ const MSG_EXCEPT = UNKNOWN;
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct SysvMessageQueue, use msg_get_queue() instead")]
 final class SysvMessageQueue
 {
 }

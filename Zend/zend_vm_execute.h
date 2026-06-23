@@ -11403,7 +11403,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_CONS
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
+	constructor = ce->constructor;
 	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */
@@ -30085,7 +30085,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_VAR_
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
+	constructor = ce->constructor;
 	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */
@@ -37133,7 +37133,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NEW_SPEC_UNUS
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
+	constructor = ce->constructor;
 	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */
@@ -63990,7 +63990,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_CONST_UNU
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
+	constructor = ce->constructor;
 	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */
@@ -82572,7 +82572,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_VAR_UNUSE
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
+	constructor = ce->constructor;
 	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */
@@ -89620,7 +89620,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NEW_SPEC_UNUSED_UN
 		HANDLE_EXCEPTION();
 	}
 
-	constructor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
+	constructor = ce->constructor;
 	if (constructor == NULL) {
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */

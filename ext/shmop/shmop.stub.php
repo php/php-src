@@ -6,6 +6,7 @@
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct Shmop, use shmop_open() instead")]
 final class Shmop {}
 
 function shmop_open(int $key, string $mode, int $permissions, int $size): Shmop|false {}

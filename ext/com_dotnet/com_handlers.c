@@ -524,7 +524,6 @@ zend_object_handlers php_com_object_handlers = {
 	com_dimension_delete,
 	com_properties_get,
 	com_method_get,
-	zend_std_get_constructor,
 	com_class_name_get,
 	com_object_cast,
 	com_object_count,

@@ -27,6 +27,7 @@
 #include "php_pdo.h"
 #include "php_pdo_driver.h"
 #include "php_pdo_int.h"
+#include "zend_attributes.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "php_memory_streams.h"
@@ -1087,6 +1088,11 @@ PHP_METHOD(PDOStatement, fetchObject)
 		ce = zend_standard_class_def;
 	}
 
+	if (UNEXPECTED(!zend_is_class_instantiable_ignoring_ctor_visibility(ce))) {
+		zend_argument_value_error(1, "Class \"%s\" cannot be instantiated", ZSTR_VAL(ce->name));
+		RETURN_THROWS();
+	}
+
 	if (ctor_args && zend_hash_num_elements(ctor_args) && ce->constructor == NULL) {
 		zend_argument_value_error(2, "must be empty when class provided in argument #1 ($class) does not have a constructor");
 		RETURN_THROWS();
@@ -1189,6 +1195,10 @@ PHP_METHOD(PDOStatement, fetchAll)
 				}
 			} else {
 				fetch_class = zend_standard_class_def;
+			}
+			if (UNEXPECTED(!zend_is_class_instantiable_ignoring_ctor_visibility(fetch_class))) {
+				zend_throw_error(NULL, "Cannot instantiate an object of class %s", ZSTR_VAL(fetch_class->name));
+				RETURN_THROWS();
 			}
 
 			if (ctor_args && zend_hash_num_elements(ctor_args) > 0) {
@@ -1706,6 +1716,10 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 					zend_argument_type_error(arg1_arg_num, "must be a valid class");
 					return false;
 				}
+				if (UNEXPECTED(!zend_is_class_instantiable_ignoring_ctor_visibility(cep))) {
+					zend_throw_error(NULL, "Cannot instantiate an object of class %s", ZSTR_VAL(cep->name));
+					return false;
+				}
 				/* Verify constructor_args (args[1]) is ?array */
 				/* TODO: Improve logic? */
 				if (variadic_num_args == 2) {
@@ -1714,7 +1728,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 						return false;
 					}
 					if (Z_TYPE(args[1]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL(args[1]))) {
-						if (cep->constructor == NULL) {
+						if (UNEXPECTED(cep->constructor == NULL)) {
 							zend_argument_value_error(3, "must be empty when class provided in argument #2 ($class) does not have a constructor");
 							return false;
 						}
@@ -2374,12 +2388,6 @@ static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose 
 	return props;
 }
 
-static zend_function *row_get_ctor(zend_object *object)
-{
-	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You may not create a PDORow manually");
-	return NULL;
-}
-
 static zval *pdo_row_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
 	ZEND_IGNORE_VALUE(object);
@@ -2446,6 +2454,5 @@ void pdo_stmt_init(void)
 	pdo_row_object_handlers.has_dimension = row_dim_exists;
 	pdo_row_object_handlers.unset_dimension = row_dim_delete;
 	pdo_row_object_handlers.get_properties_for = row_get_properties_for;
-	pdo_row_object_handlers.get_constructor = row_get_ctor;
 	pdo_row_object_handlers.compare = zend_objects_not_comparable;
 }

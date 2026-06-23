@@ -6,6 +6,7 @@
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct SysvSemaphore, use sem_get() instead")]
 final class SysvSemaphore
 {
 }

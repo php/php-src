@@ -4,6 +4,7 @@
 
 namespace {
 	/** @not-serializable */
+    #[\NonInstantiableClass("Instantiation of FFI is not allowed")]
     final class FFI
     {
         /** @cvalue __BIGGEST_ALIGNMENT__ */
@@ -72,10 +73,12 @@ namespace {
 namespace FFI {
 
 	/** @not-serializable */
+    #[\NonInstantiableClass("Instantiation of FFI\\CData is not allowed")]
     final class CData {
     }
 
 	/** @not-serializable */
+    #[\NonInstantiableClass("Instantiation of FFI\\CType is not allowed")]
     final class CType {
         /** @cvalue ZEND_FFI_TYPE_VOID */
         public const int TYPE_VOID = UNKNOWN;

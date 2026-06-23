@@ -157,9 +157,8 @@ PHP                                                                        NEWS
 - PGSQL:
   . Enabled 64 bits support for pg_lo_truncate()/pg_lo_tell()
     if the server supports it. (KentarouTakeda)
-  . pg_fetch_object() now surfaces non-instantiable class errors
-    before fetching, resolves the constructor via the get_constructor
-    handler, and reports the empty-constructor ValueError on the
+  . pg_fetch_object() now surfaces non-instantiable class errors before
+    fetching, and reports the empty-constructor ValueError on the
     $constructor_args argument. (David Carlier)
 
 - Phar:

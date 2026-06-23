@@ -463,12 +463,14 @@ const PNG_ALL_FILTERS = 0x08 | 0x10 | 0x20 | 0x40 | 0x80;
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct GdImage, use an appropriate image* function instead")]
 final class GdImage {}
 
 /**
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct GdFont, use imageloadfont() instead")]
 final class GdFont {}
 
 /**

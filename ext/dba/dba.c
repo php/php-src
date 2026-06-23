@@ -31,6 +31,7 @@
 #include "php_dba.h"
 #include "ext/standard/info.h"
 #include "ext/standard/flock_compat.h" /* Compatibility for Windows */
+#include "zend_attributes.h"
 
 #include "php_gdbm.h"
 #include "php_ndbm.h"
@@ -316,12 +317,6 @@ static zend_object *dba_connection_create_object(zend_class_entry *class_type)
 	return &intern->std;
 }
 
-static zend_function *dba_connection_get_constructor(zend_object *object)
-{
-	zend_throw_error(NULL, "Cannot directly construct Dba\\Connection, use dba_open() or dba_popen() instead");
-	return NULL;
-}
-
 static zend_result dba_connection_cast_object(zend_object *obj, zval *result, int type)
 {
 	if (type == IS_LONG) {
@@ -408,7 +403,6 @@ PHP_MINIT_FUNCTION(dba)
 	memcpy(&dba_connection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	dba_connection_object_handlers.offset = offsetof(dba_connection, std);
 	dba_connection_object_handlers.free_obj = dba_connection_free_obj;
-	dba_connection_object_handlers.get_constructor = dba_connection_get_constructor;
 	dba_connection_object_handlers.clone_obj = NULL;
 	dba_connection_object_handlers.cast_object = dba_connection_cast_object;
 	dba_connection_object_handlers.compare = zend_objects_not_comparable;

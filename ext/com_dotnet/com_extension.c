@@ -23,6 +23,7 @@
 #include "ext/standard/info.h"
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
+#include "Zend/zend_attributes.h"
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_interfaces.h"
 

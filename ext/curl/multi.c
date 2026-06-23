@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "Zend/zend_smart_str.h"
+#include "zend_attributes.h"
 
 #include "curl_private.h"
 
@@ -536,11 +537,6 @@ static zend_object *curl_multi_create_object(zend_class_entry *class_type) {
 	return &intern->std;
 }
 
-static zend_function *curl_multi_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct CurlMultiHandle, use curl_multi_init() instead");
-	return NULL;
-}
-
 static void curl_multi_free_obj(zend_object *object)
 {
 	php_curlm *mh = curl_multi_from_obj(object);
@@ -606,7 +602,6 @@ void curl_multi_register_handlers(void) {
 	curl_multi_handlers.offset = offsetof(php_curlm, std);
 	curl_multi_handlers.free_obj = curl_multi_free_obj;
 	curl_multi_handlers.get_gc = curl_multi_get_gc;
-	curl_multi_handlers.get_constructor = curl_multi_get_constructor;
 	curl_multi_handlers.clone_obj = NULL;
 	curl_multi_handlers.cast_object = curl_cast_object;
 	curl_multi_handlers.compare = zend_objects_not_comparable;

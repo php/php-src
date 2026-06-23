@@ -103,3 +103,13 @@ final class NoDiscard
  */
 #[Attribute(Attribute::TARGET_ALL)]
 final class DelayedTargetValidation {}
+
+/**
+ * @strict-properties
+ */
+#[Attribute(Attribute::TARGET_CLASS)]
+final class NonInstantiableClass {
+    public readonly string $message;
+
+    public function __construct(string $message) {}
+}

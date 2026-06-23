@@ -195,7 +195,11 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 		return;
 	}
 
-	ce->constructor = parent->constructor;
+	if (zend_is_non_instantiable_constructor(parent->constructor)) {
+		ce->constructor = NULL;
+	} else {
+		ce->constructor = parent->constructor;
+	}
 }
 /* }}} */
 

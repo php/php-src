@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_closures.stub.php instead.
- * Stub hash: e0626e52adb2d38dad1140c1a28cc7774cc84500 */
+ * Stub hash: 95468c1d70556f6ba07327ecc64c396ab4be9206 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Closure___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -50,6 +50,14 @@ static zend_class_entry *register_class_Closure(void)
 
 	INIT_CLASS_ENTRY(ce, "Closure", class_Closure_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_string *attribute_name_NonInstantiableClass_class_Closure_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_Closure_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_Closure_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_Closure_0, true);
+	zend_string *attribute_NonInstantiableClass_class_Closure_0_arg0_str = zend_string_init("Instantiation of class Closure is not allowed", strlen("Instantiation of class Closure is not allowed"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_Closure_0->args[0].value, attribute_NonInstantiableClass_class_Closure_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

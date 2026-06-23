@@ -1,5 +1,5 @@
 /* This is a generated file, edit dir.stub.php instead.
- * Stub hash: e21d382cd4001001874c49d8c5244efb57613910 */
+ * Stub hash: 51ee840fe6f7af828d6f031730136b046f8ffc55 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Directory_close, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -69,6 +69,14 @@ static zend_class_entry *register_class_Directory(void)
 	zend_string *property_handle_name = zend_string_init("handle", sizeof("handle") - 1, true);
 	zend_declare_typed_property(class_entry, property_handle_name, &property_handle_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 	zend_string_release_ex(property_handle_name, true);
+
+	zend_string *attribute_name_NonInstantiableClass_class_Directory_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_Directory_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_Directory_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_Directory_0, true);
+	zend_string *attribute_NonInstantiableClass_class_Directory_0_arg0_str = zend_string_init("Cannot directly construct Directory, use dir() instead", strlen("Cannot directly construct Directory, use dir() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_Directory_0->args[0].value, attribute_NonInstantiableClass_class_Directory_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

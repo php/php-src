@@ -82,12 +82,6 @@ static zend_object *shmop_create_object(zend_class_entry *class_type)
 	return &intern->std;
 }
 
-static zend_function *shmop_get_constructor(zend_object *object)
-{
-	zend_throw_error(NULL, "Cannot directly construct Shmop, use shmop_open() instead");
-	return NULL;
-}
-
 static void shmop_free_obj(zend_object *object)
 {
 	php_shmop *shmop = shmop_from_obj(object);
@@ -107,7 +101,6 @@ PHP_MINIT_FUNCTION(shmop)
 	memcpy(&shmop_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	shmop_object_handlers.offset = offsetof(php_shmop, std);
 	shmop_object_handlers.free_obj = shmop_free_obj;
-	shmop_object_handlers.get_constructor = shmop_get_constructor;
 	shmop_object_handlers.clone_obj = NULL;
 	shmop_object_handlers.compare = zend_objects_not_comparable;
 

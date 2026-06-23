@@ -3394,8 +3394,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			/* New objects without constructors cannot escape. */
 			if (ce
 			 && !ce->constructor
-			 && !ce->create_object
-			 && ce->default_object_handlers->get_constructor == zend_std_get_constructor) {
+			 && !ce->create_object) {
 				tmp &= ~MAY_BE_RCN;
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);

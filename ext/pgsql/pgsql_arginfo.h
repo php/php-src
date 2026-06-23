@@ -1,5 +1,5 @@
 /* This is a generated file, edit pgsql.stub.php instead.
- * Stub hash: f25b5a574c96d4bc2f08b8cacab16f499a164a6b */
+ * Stub hash: 93b2a5552d8409f2f31be6162b7be0836e771b28 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -1031,6 +1031,14 @@ static zend_class_entry *register_class_PgSql_Connection(void)
 	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Connection", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_string *attribute_name_NonInstantiableClass_class_PgSql_Connection_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_PgSql_Connection_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_PgSql_Connection_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_PgSql_Connection_0, true);
+	zend_string *attribute_NonInstantiableClass_class_PgSql_Connection_0_arg0_str = zend_string_init("Cannot directly construct PgSql\\Connection, use pg_connect() or pg_pconnect() instead", strlen("Cannot directly construct PgSql\\Connection, use pg_connect() or pg_pconnect() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_PgSql_Connection_0->args[0].value, attribute_NonInstantiableClass_class_PgSql_Connection_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
+
 	return class_entry;
 }
 
@@ -1041,6 +1049,14 @@ static zend_class_entry *register_class_PgSql_Result(void)
 	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Result", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_string *attribute_name_NonInstantiableClass_class_PgSql_Result_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_PgSql_Result_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_PgSql_Result_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_PgSql_Result_0, true);
+	zend_string *attribute_NonInstantiableClass_class_PgSql_Result_0_arg0_str = zend_string_init("Cannot directly construct PgSql\\Result, use a dedicated function instead", strlen("Cannot directly construct PgSql\\Result, use a dedicated function instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_PgSql_Result_0->args[0].value, attribute_NonInstantiableClass_class_PgSql_Result_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
+
 	return class_entry;
 }
 
@@ -1050,6 +1066,14 @@ static zend_class_entry *register_class_PgSql_Lob(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Lob", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_string *attribute_name_NonInstantiableClass_class_PgSql_Lob_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_PgSql_Lob_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_PgSql_Lob_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_PgSql_Lob_0, true);
+	zend_string *attribute_NonInstantiableClass_class_PgSql_Lob_0_arg0_str = zend_string_init("Cannot directly construct PgSql\\Connection, use pg_lo_open() instead", strlen("Cannot directly construct PgSql\\Connection, use pg_lo_open() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_PgSql_Lob_0->args[0].value, attribute_NonInstantiableClass_class_PgSql_Lob_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

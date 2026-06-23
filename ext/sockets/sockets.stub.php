@@ -2201,6 +2201,7 @@ const EAI_IDN_ENCODE = UNKNOWN;
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct Socket, use socket_create() instead")]
 final class Socket
 {
 }
@@ -2209,6 +2210,7 @@ final class Socket
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct AddressInfo, use socket_addrinfo_lookup() instead")]
 final class AddressInfo
 {
 }

@@ -153,7 +153,6 @@ typedef zend_array *(*zend_object_get_properties_for_t)(zend_object *object, zen
 /* Andi - EX(fbc) (function being called) needs to be initialized already in the INIT fcall opcode so that the parameters can be parsed the right way. We need to add another callback for this.
  */
 typedef zend_function *(*zend_object_get_method_t)(zend_object **object, zend_string *method, const zval *key);
-typedef zend_function *(*zend_object_get_constructor_t)(zend_object *object);
 
 /* free_obj should release any resources the object holds, without freeing the
  * object structure itself. The object does not need to be in a valid state after
@@ -221,7 +220,6 @@ struct _zend_object_handlers {
 	zend_object_unset_dimension_t			unset_dimension;      /* required */
 	zend_object_get_properties_t			get_properties;       /* required */
 	zend_object_get_method_t				get_method;           /* required */
-	zend_object_get_constructor_t			get_constructor;      /* required */
 	zend_object_get_class_name_t			get_class_name;       /* required */
 	zend_object_cast_t						cast_object;          /* required */
 	zend_object_count_elements_t			count_elements;       /* optional */
@@ -250,7 +248,6 @@ ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, z
 ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend_string *property_name, int type, struct _zend_property_info **prop_info);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type);
 ZEND_API ZEND_COLD bool zend_std_unset_static_property(const zend_class_entry *ce, const zend_string *property_name);
-ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
 ZEND_API struct _zend_property_info *zend_get_property_info(const zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);
 ZEND_API HashTable *zend_get_properties_no_lazy_init(zend_object *zobj);

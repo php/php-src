@@ -7,6 +7,7 @@ namespace Odbc {
      * @strict-properties
      * @not-serializable
      */
+    #[\NonInstantiableClass("Cannot directly construct Odbc\\Connection, use odbc_connect() or odbc_pconnect() instead")]
     class Connection
     {
     }
@@ -15,6 +16,7 @@ namespace Odbc {
      * @strict-properties
      * @not-serializable
      */
+    #[\NonInstantiableClass("Cannot directly construct Odbc\\Result, use an appropriate odbc_* function instead")]
     class Result
     {
     }

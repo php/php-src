@@ -833,6 +833,7 @@ namespace LDAP {
      * @strict-properties
      * @not-serializable
      */
+    #[\NonInstantiableClass("Cannot directly construct LDAP\\Connection, use ldap_connect() instead")]
     final class Connection
     {
     }
@@ -841,6 +842,7 @@ namespace LDAP {
      * @strict-properties
      * @not-serializable
      */
+    #[\NonInstantiableClass("Cannot directly construct LDAP\\Result, use the dedicated functions instead")]
     final class Result
     {
     }
@@ -849,6 +851,7 @@ namespace LDAP {
      * @strict-properties
      * @not-serializable
      */
+    #[\NonInstantiableClass("Cannot directly construct LDAP\\ResultEntry, use the dedicated functions instead")]
     final class ResultEntry
     {
     }

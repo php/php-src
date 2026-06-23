@@ -5705,9 +5705,8 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 
 	const zend_function *fbc = NULL;
 	if (ce
-			&& ce->default_object_handlers->get_constructor == zend_std_get_constructor
-			&& ce->constructor
-			&& is_func_accessible(ce->constructor)) {
+		&& ce->constructor
+		&& is_func_accessible(ce->constructor)) {
 		fbc = ce->constructor;
 	}
 
@@ -9530,6 +9529,35 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 	zend_type_release(type, 0);
 }
 
+static ZEND_FUNCTION(non_instantiable_constructor)
+{
+	ZEND_ASSERT(hasThis());
+	zend_cannot_instantiate_class(Z_OBJCE_P(ZEND_THIS), NULL);
+}
+
+static zend_arg_info zend_non_instantiable_constructor_arg_info[1] = {0};
+ZEND_API const zend_internal_function zend_non_instantiable_constructor = {
+	ZEND_INTERNAL_FUNCTION, /* type */
+	{0, 0, 0},        /* arg_flags */
+	ZEND_ACC_PRIVATE,     /* fn_flags */
+	NULL,            /* name */
+	NULL,                  /* scope */
+	NULL,               /* prototype */
+	0,                  /* num_args */
+	0,            /* required_num_args */
+	zend_non_instantiable_constructor_arg_info + 1, /* arg_info */
+	NULL,               /* attributes */
+	NULL,        /* run_time_cache */
+	NULL,            /* doc_comment */
+	0,                        /* T */
+	0,                   /* fn_flags2 */
+	NULL,                /* prop_info */
+	ZEND_FN(non_instantiable_constructor), /* handler */
+	NULL,                 /* module */
+	NULL,     /* frameless_function_infos */
+	{NULL,NULL,NULL,NULL}   /* reserved */
+};
+
 static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool toplevel) /* {{{ */
 {
 	const zend_ast_decl *decl = (const zend_ast_decl *) ast;
@@ -9649,6 +9677,15 @@ static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool top
 
 	if (toplevel) {
 		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
+	}
+
+	/* Add zend_non_instantiable_constructor constructor if class cannot be manually instantiated */
+	const zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
+	if (non_instantiable_class) {
+		if (UNEXPECTED(ce->constructor)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot apply #[\\NonInstantiableClass] to class %s which defines a constructor", ZSTR_VAL(name));
+		}
+		ce->constructor = (zend_function *) &zend_non_instantiable_constructor;
 	}
 
 	/* We currently don't early-bind classes that implement interfaces or use traits */

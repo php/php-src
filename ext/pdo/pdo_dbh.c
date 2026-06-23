@@ -626,6 +626,11 @@ PHP_METHOD(PDO, prepare)
 			zend_type_error("PDO::ATTR_STATEMENT_CLASS class must be derived from PDOStatement");
 			RETURN_THROWS();
 		}
+		if (UNEXPECTED(!zend_is_class_instantiable_ignoring_ctor_visibility(dbstmt_ce))) {
+			zend_cannot_instantiate_class(dbstmt_ce, NULL);
+			RETURN_THROWS();
+		}
+		/* Ignore default constructor as it will always be public */
 		if (dbstmt_ce->constructor && !(dbstmt_ce->constructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED))) {
 			zend_type_error("User-supplied statement class cannot have a public constructor");
 			RETURN_THROWS();
@@ -922,6 +927,11 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value, u
 				zend_argument_type_error(value_arg_num, "PDO::ATTR_STATEMENT_CLASS class must be derived from PDOStatement");
 				return false;
 			}
+			if (UNEXPECTED(!zend_is_class_instantiable_ignoring_ctor_visibility(pce))) {
+				zend_cannot_instantiate_class(pce, NULL);
+				return false;
+			}
+			/* Ignore default constructor as it will always be public */
 			if (pce->constructor && !(pce->constructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED))) {
 				zend_argument_type_error(value_arg_num, "User-supplied statement class cannot have a public constructor");
 				return false;

@@ -32,6 +32,7 @@ namespace Openssl {
     /**
      * @strict-properties
      */
+    #[\NonInstantiableClass("Cannot directly construct Openssl\\Session, use Openssl\\Session::import() or TLS session callbacks")]
     final class Session
     {
         public readonly string $id;
@@ -474,6 +475,7 @@ const OPENSSL_ENCODING_PEM = UNKNOWN;
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct OpenSSLCertificate, use openssl_x509_read() instead")]
 final class OpenSSLCertificate
 {
 }
@@ -482,6 +484,7 @@ final class OpenSSLCertificate
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct OpenSSLCertificateSigningRequest, use openssl_csr_new() instead")]
 final class OpenSSLCertificateSigningRequest
 {
 }
@@ -490,6 +493,7 @@ final class OpenSSLCertificateSigningRequest
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct OpenSSLAsymmetricKey, use openssl_pkey_new() instead")]
 final class OpenSSLAsymmetricKey
 {
 }

@@ -3711,6 +3711,7 @@ const CURLOPT_SAFE_UPLOAD = UNKNOWN;
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct CurlHandle, use curl_init() instead")]
 final class CurlHandle
 {
 }
@@ -3719,6 +3720,7 @@ final class CurlHandle
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct CurlMultiHandle, use curl_multi_init() instead")]
 final class CurlMultiHandle
 {
 }
@@ -3727,6 +3729,7 @@ final class CurlMultiHandle
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct CurlShareHandle, use curl_share_init() instead")]
 final class CurlShareHandle
 {
 }
@@ -3735,6 +3738,7 @@ final class CurlShareHandle
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct CurlSharePersistentHandle, use curl_share_init_persistent() instead")]
 final class CurlSharePersistentHandle
 {
     public readonly array $options;

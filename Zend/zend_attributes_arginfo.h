@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_attributes.stub.php instead.
- * Stub hash: b868cb33f41d9442f42d0cec84e33fcc09f5d88c */
+ * Stub hash: 674dafdc1e2bdff88a7af7b2c6de13284ec2c445 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -33,6 +33,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NoDiscard___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, message, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NonInstantiableClass___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Attribute, __construct);
 ZEND_METHOD(ReturnTypeWillChange, __construct);
 ZEND_METHOD(AllowDynamicProperties, __construct);
@@ -43,6 +47,7 @@ ZEND_METHOD(SensitiveParameterValue, __debugInfo);
 ZEND_METHOD(Override, __construct);
 ZEND_METHOD(Deprecated, __construct);
 ZEND_METHOD(NoDiscard, __construct);
+ZEND_METHOD(NonInstantiableClass, __construct);
 
 static const zend_function_entry class_Attribute_methods[] = {
 	ZEND_ME(Attribute, __construct, arginfo_class_Attribute___construct, ZEND_ACC_PUBLIC)
@@ -83,6 +88,11 @@ static const zend_function_entry class_Deprecated_methods[] = {
 
 static const zend_function_entry class_NoDiscard_methods[] = {
 	ZEND_ME(NoDiscard, __construct, arginfo_class_NoDiscard___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_NonInstantiableClass_methods[] = {
+	ZEND_ME(NonInstantiableClass, __construct, arginfo_class_NonInstantiableClass___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -288,6 +298,25 @@ static zend_class_entry *register_class_DelayedTargetValidation(void)
 	zend_attribute *attribute_Attribute_class_DelayedTargetValidation_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_DelayedTargetValidation_0, 1);
 	zend_string_release_ex(attribute_name_Attribute_class_DelayedTargetValidation_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_DelayedTargetValidation_0->args[0].value, ZEND_ATTRIBUTE_TARGET_ALL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_NonInstantiableClass(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "NonInstantiableClass", class_NonInstantiableClass_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zval property_message_default_value;
+	ZVAL_UNDEF(&property_message_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_MESSAGE), &property_message_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+
+	zend_string *attribute_name_Attribute_class_NonInstantiableClass_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
+	zend_attribute *attribute_Attribute_class_NonInstantiableClass_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_NonInstantiableClass_0, 1);
+	zend_string_release_ex(attribute_name_Attribute_class_NonInstantiableClass_0, true);
+	ZVAL_LONG(&attribute_Attribute_class_NonInstantiableClass_0->args[0].value, ZEND_ATTRIBUTE_TARGET_CLASS);
 
 	return class_entry;
 }

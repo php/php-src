@@ -165,7 +165,6 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 				if (ce
 				 && !ce->parent
 				 && !ce->create_object
-				 && ce->default_object_handlers->get_constructor == zend_std_get_constructor
 				 && ce->default_object_handlers->dtor_obj == zend_objects_destroy_object
 				 && !ce->constructor
 				 && !ce->destructor
@@ -234,7 +233,6 @@ static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int va
 					script, op_array, opline);
 				if (ce
 				 && !ce->create_object
-				 && ce->default_object_handlers->get_constructor == zend_std_get_constructor
 				 && ce->default_object_handlers->dtor_obj == zend_objects_destroy_object
 				 && !ce->constructor
 				 && !ce->destructor

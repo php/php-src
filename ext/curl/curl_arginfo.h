@@ -1,5 +1,5 @@
 /* This is a generated file, edit curl.stub.php instead.
- * Stub hash: 10ebdc94560ed19ecd6b61a11b3dab5d32989d66 */
+ * Stub hash: 028c7c273b18c285ba9fa090dcd030f7dd48148f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -1014,6 +1014,14 @@ static zend_class_entry *register_class_CurlHandle(void)
 	INIT_CLASS_ENTRY(ce, "CurlHandle", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_string *attribute_name_NonInstantiableClass_class_CurlHandle_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_CurlHandle_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_CurlHandle_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_CurlHandle_0, true);
+	zend_string *attribute_NonInstantiableClass_class_CurlHandle_0_arg0_str = zend_string_init("Cannot directly construct CurlHandle, use curl_init() instead", strlen("Cannot directly construct CurlHandle, use curl_init() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_CurlHandle_0->args[0].value, attribute_NonInstantiableClass_class_CurlHandle_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
+
 	return class_entry;
 }
 
@@ -1024,6 +1032,14 @@ static zend_class_entry *register_class_CurlMultiHandle(void)
 	INIT_CLASS_ENTRY(ce, "CurlMultiHandle", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_string *attribute_name_NonInstantiableClass_class_CurlMultiHandle_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_CurlMultiHandle_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_CurlMultiHandle_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_CurlMultiHandle_0, true);
+	zend_string *attribute_NonInstantiableClass_class_CurlMultiHandle_0_arg0_str = zend_string_init("Cannot directly construct CurlMultiHandle, use curl_multi_init() instead", strlen("Cannot directly construct CurlMultiHandle, use curl_multi_init() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_CurlMultiHandle_0->args[0].value, attribute_NonInstantiableClass_class_CurlMultiHandle_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
+
 	return class_entry;
 }
 
@@ -1033,6 +1049,14 @@ static zend_class_entry *register_class_CurlShareHandle(void)
 
 	INIT_CLASS_ENTRY(ce, "CurlShareHandle", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_string *attribute_name_NonInstantiableClass_class_CurlShareHandle_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_CurlShareHandle_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_CurlShareHandle_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_CurlShareHandle_0, true);
+	zend_string *attribute_NonInstantiableClass_class_CurlShareHandle_0_arg0_str = zend_string_init("Cannot directly construct CurlShareHandle, use curl_share_init() instead", strlen("Cannot directly construct CurlShareHandle, use curl_share_init() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_CurlShareHandle_0->args[0].value, attribute_NonInstantiableClass_class_CurlShareHandle_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }
@@ -1049,6 +1073,14 @@ static zend_class_entry *register_class_CurlSharePersistentHandle(void)
 	zend_string *property_options_name = zend_string_init("options", sizeof("options") - 1, true);
 	zend_declare_typed_property(class_entry, property_options_name, &property_options_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
 	zend_string_release_ex(property_options_name, true);
+
+	zend_string *attribute_name_NonInstantiableClass_class_CurlSharePersistentHandle_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_CurlSharePersistentHandle_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_CurlSharePersistentHandle_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_CurlSharePersistentHandle_0, true);
+	zend_string *attribute_NonInstantiableClass_class_CurlSharePersistentHandle_0_arg0_str = zend_string_init("Cannot directly construct CurlSharePersistentHandle, use curl_share_init_persistent() instead", strlen("Cannot directly construct CurlSharePersistentHandle, use curl_share_init_persistent() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_CurlSharePersistentHandle_0->args[0].value, attribute_NonInstantiableClass_class_CurlSharePersistentHandle_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

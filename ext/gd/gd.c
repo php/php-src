@@ -138,12 +138,6 @@ typedef struct _gd_ext_image_object {
 
 static zend_object_handlers php_gd_image_object_handlers;
 
-static zend_function *php_gd_image_object_get_constructor(zend_object *object)
-{
-	zend_throw_error(NULL, "You cannot initialize a GdImage object except through helper functions");
-	return NULL;
-}
-
 #define php_gd_exgdimage_from_zobj_p(obj) ZEND_CONTAINER_OF(obj, php_gd_image_object, std)
 
 /**
@@ -197,7 +191,6 @@ static void php_gd_object_minit_helper(void)
 	memcpy(&php_gd_image_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_gd_image_object_handlers.clone_obj = NULL;
 	php_gd_image_object_handlers.free_obj = php_gd_image_object_free;
-	php_gd_image_object_handlers.get_constructor = php_gd_image_object_get_constructor;
 	php_gd_image_object_handlers.compare = zend_objects_not_comparable;
 	php_gd_image_object_handlers.offset = offsetof(php_gd_image_object, std);
 }
@@ -248,12 +241,6 @@ static void php_gd_font_object_free(zend_object *zobj)
 	zend_object_std_dtor(zobj);
 }
 
-static zend_function *php_gd_font_object_get_constructor(zend_object *object)
-{
-	zend_throw_error(NULL, "You cannot initialize a GdFont object except through helper functions");
-	return NULL;
-}
-
 static void php_gd_font_minit_helper(void)
 {
 	gd_font_ce = register_class_GdFont();
@@ -263,7 +250,6 @@ static void php_gd_font_minit_helper(void)
 	memcpy(&php_gd_font_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_gd_font_object_handlers.clone_obj = NULL;
 	php_gd_font_object_handlers.free_obj = php_gd_font_object_free;
-	php_gd_font_object_handlers.get_constructor = php_gd_font_object_get_constructor;
 	php_gd_font_object_handlers.offset = offsetof(php_gd_font_object, std);
 }
 

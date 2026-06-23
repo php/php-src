@@ -1,5 +1,5 @@
 /* This is a generated file, edit sockets.stub.php instead.
- * Stub hash: 5e71ef16f2121bd6c75794673d0e0a394759ff8b */
+ * Stub hash: 38a80f6141e44f7d517df52f5e8e82e0accd3e33 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1118,6 +1118,14 @@ static zend_class_entry *register_class_Socket(void)
 	INIT_CLASS_ENTRY(ce, "Socket", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_string *attribute_name_NonInstantiableClass_class_Socket_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_Socket_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_Socket_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_Socket_0, true);
+	zend_string *attribute_NonInstantiableClass_class_Socket_0_arg0_str = zend_string_init("Cannot directly construct Socket, use socket_create() instead", strlen("Cannot directly construct Socket, use socket_create() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_Socket_0->args[0].value, attribute_NonInstantiableClass_class_Socket_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
+
 	return class_entry;
 }
 
@@ -1127,6 +1135,14 @@ static zend_class_entry *register_class_AddressInfo(void)
 
 	INIT_CLASS_ENTRY(ce, "AddressInfo", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_string *attribute_name_NonInstantiableClass_class_AddressInfo_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_AddressInfo_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_AddressInfo_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_AddressInfo_0, true);
+	zend_string *attribute_NonInstantiableClass_class_AddressInfo_0_arg0_str = zend_string_init("Cannot directly construct AddressInfo, use socket_addrinfo_lookup() instead", strlen("Cannot directly construct AddressInfo, use socket_addrinfo_lookup() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_AddressInfo_0->args[0].value, attribute_NonInstantiableClass_class_AddressInfo_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

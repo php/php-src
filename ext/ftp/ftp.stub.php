@@ -141,6 +141,7 @@ namespace FTP {
      * @strict-properties
      * @not-serializable
      */
+    #[\NonInstantiableClass("Cannot directly construct FTP\\Connection, use ftp_connect() or ftp_ssl_connect() instead")]
     final class Connection
     {
     }

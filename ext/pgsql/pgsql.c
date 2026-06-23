@@ -164,11 +164,6 @@ static zend_object *pgsql_link_create_object(zend_class_entry *class_type) {
 	return &intern->std;
 }
 
-static zend_function *pgsql_link_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct PgSql\\Connection, use pg_connect() or pg_pconnect() instead");
-	return NULL;
-}
-
 static void pgsql_link_free(pgsql_link_handle *link)
 {
 	PGresult *res;
@@ -218,11 +213,6 @@ static zend_object *pgsql_result_create_object(zend_class_entry *class_type) {
 	return &intern->std;
 }
 
-static zend_function *pgsql_result_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct PgSql\\Result, use a dedicated function instead");
-	return NULL;
-}
-
 static void pgsql_result_free(pgsql_result_handle *pg_result)
 {
 	PQclear(pg_result->result);
@@ -251,11 +241,6 @@ static zend_object *pgsql_lob_create_object(zend_class_entry *class_type) {
 	object_properties_init(&intern->std, class_type);
 
 	return &intern->std;
-}
-
-static zend_function *pgsql_lob_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct PgSql\\Lob, use pg_lo_open() instead");
-	return NULL;
 }
 
 static void pgsql_lob_free_obj(zend_object *obj)
@@ -570,7 +555,6 @@ PHP_MINIT_FUNCTION(pgsql)
 	memcpy(&pgsql_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pgsql_link_object_handlers.offset = offsetof(pgsql_link_handle, std);
 	pgsql_link_object_handlers.free_obj = pgsql_link_free_obj;
-	pgsql_link_object_handlers.get_constructor = pgsql_link_get_constructor;
 	pgsql_link_object_handlers.clone_obj = NULL;
 	pgsql_link_object_handlers.compare = zend_objects_not_comparable;
 
@@ -581,7 +565,6 @@ PHP_MINIT_FUNCTION(pgsql)
 	memcpy(&pgsql_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pgsql_result_object_handlers.offset = offsetof(pgsql_result_handle, std);
 	pgsql_result_object_handlers.free_obj = pgsql_result_free_obj;
-	pgsql_result_object_handlers.get_constructor = pgsql_result_get_constructor;
 	pgsql_result_object_handlers.clone_obj = NULL;
 	pgsql_result_object_handlers.compare = zend_objects_not_comparable;
 
@@ -592,7 +575,6 @@ PHP_MINIT_FUNCTION(pgsql)
 	memcpy(&pgsql_lob_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pgsql_lob_object_handlers.offset = offsetof(pgLofp, std);
 	pgsql_lob_object_handlers.free_obj = pgsql_lob_free_obj;
-	pgsql_lob_object_handlers.get_constructor = pgsql_lob_get_constructor;
 	pgsql_lob_object_handlers.clone_obj = NULL;
 	pgsql_lob_object_handlers.compare = zend_objects_not_comparable;
 
@@ -2123,7 +2105,20 @@ PHP_FUNCTION(pg_fetch_object)
 		ce = zend_standard_class_def;
 	}
 
-	if (UNEXPECTED(object_init_ex(return_value, ce) == FAILURE)) {
+	if (UNEXPECTED(!zend_is_class_instantiable(ce))) {
+		zend_argument_value_error(3, "Class \"%s\" cannot be instantiated", ZSTR_VAL(ce->name));
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(!ce->constructor && ctor_params && zend_hash_num_elements(ctor_params) > 0)) {
+		zend_argument_value_error(4,
+			"must be empty when the specified class (%s) does not have a constructor",
+			ZSTR_VAL(ce->name)
+		);
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(object_init_instantiable_class(return_value, ce) == FAILURE)) {
 		RETURN_THROWS();
 	}
 
@@ -2142,26 +2137,8 @@ PHP_FUNCTION(pg_fetch_object)
 	}
 
 	zend_object *obj = Z_OBJ_P(return_value);
-	const zend_class_entry *old = EG(fake_scope);
-	EG(fake_scope) = ce;
-	zend_function *constructor = obj->handlers->get_constructor(obj);
-	EG(fake_scope) = old;
-
-	if (UNEXPECTED(EG(exception))) {
-		/* visibility error or override refused - VM dtors return_value */
-		return;
-	}
-
-	if (UNEXPECTED(!constructor && ctor_params && zend_hash_num_elements(ctor_params) > 0)) {
-		zend_argument_value_error(4,
-			"must be empty when the specified class (%s) does not have a constructor",
-			ZSTR_VAL(ce->name)
-		);
-		RETURN_THROWS();
-	}
-
-	if (constructor) {
-		zend_call_known_function(constructor, obj, ce,
+	if (ce->constructor) {
+		zend_call_known_function(ce->constructor, obj, ce,
 			/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
 		if (EG(exception)) {
 			zend_object_store_ctor_failed(obj);

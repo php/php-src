@@ -20,6 +20,7 @@
 #include "php_ffi.h"
 #include "ext/standard/info.h"
 #include "php_scandir.h"
+#include "zend_attributes.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 #include "zend_weakrefs.h"
@@ -5123,13 +5124,6 @@ static char *zend_ffi_parse_directives(const char *filename, char *code_pos, cha
 }
 /* }}} */
 
-static ZEND_COLD zend_function *zend_fake_get_constructor(zend_object *object) /* {{{ */
-{
-	zend_throw_error(NULL, "Instantiation of %s is not allowed", ZSTR_VAL(object->ce->name));
-	return NULL;
-}
-/* }}} */
-
 static ZEND_COLD zend_never_inline void zend_bad_array_access(zend_class_entry *ce) /* {{{ */
 {
 	zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
@@ -5482,7 +5476,6 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_post_startup_cb = ffi_fixup_temporaries;
 
 	memcpy(&zend_ffi_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	zend_ffi_handlers.get_constructor      = zend_fake_get_constructor;
 	zend_ffi_handlers.free_obj             = zend_ffi_free_obj;
 	zend_ffi_handlers.clone_obj            = NULL;
 	zend_ffi_handlers.read_property        = zend_ffi_read_var;
@@ -5508,7 +5501,6 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_ce->get_iterator = zend_ffi_cdata_get_iterator;
 
 	memcpy(&zend_ffi_cdata_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	zend_ffi_cdata_handlers.get_constructor      = zend_fake_get_constructor;
 	zend_ffi_cdata_handlers.free_obj             = zend_ffi_cdata_free_obj;
 	zend_ffi_cdata_handlers.clone_obj            = zend_ffi_cdata_clone_obj;
 	zend_ffi_cdata_handlers.read_property        = zend_ffi_cdata_read_field;
@@ -5532,7 +5524,6 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_handlers.get_gc               = zend_fake_get_gc;
 
 	memcpy(&zend_ffi_cdata_value_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	zend_ffi_cdata_value_handlers.get_constructor      = zend_fake_get_constructor;
 	zend_ffi_cdata_value_handlers.free_obj             = zend_ffi_cdata_free_obj;
 	zend_ffi_cdata_value_handlers.clone_obj            = zend_ffi_cdata_clone_obj;
 	zend_ffi_cdata_value_handlers.read_property        = zend_ffi_cdata_get;
@@ -5555,7 +5546,6 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_value_handlers.get_gc               = zend_fake_get_gc;
 
 	memcpy(&zend_ffi_cdata_free_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	zend_ffi_cdata_free_handlers.get_constructor      = zend_fake_get_constructor;
 	zend_ffi_cdata_free_handlers.free_obj             = zend_ffi_cdata_free_obj;
 	zend_ffi_cdata_free_handlers.clone_obj            = zend_ffi_free_clone_obj;
 	zend_ffi_cdata_free_handlers.read_property        = zend_ffi_free_read_property;
@@ -5582,7 +5572,6 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_ctype_ce->default_object_handlers = &zend_ffi_ctype_handlers;
 
 	memcpy(&zend_ffi_ctype_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	zend_ffi_ctype_handlers.get_constructor      = zend_fake_get_constructor;
 	zend_ffi_ctype_handlers.free_obj             = zend_ffi_ctype_free_obj;
 	zend_ffi_ctype_handlers.clone_obj            = NULL;
 	zend_ffi_ctype_handlers.read_property        = zend_fake_read_property;

@@ -26,9 +26,10 @@
 #include <sys/sem.h>
 #include <errno.h>
 
-#include "sysvsem_arginfo.h"
 #include "php_sysvsem.h"
 #include "ext/standard/info.h"
+#include "zend_attributes.h"
+#include "sysvsem_arginfo.h"
 
 #ifndef HAVE_UNION_SEMUN
 union semun {
@@ -95,11 +96,6 @@ static zend_object *sysvsem_create_object(zend_class_entry *class_type) {
 	return &intern->std;
 }
 
-static zend_function *sysvsem_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct SysvSemaphore, use sem_get() instead");
-	return NULL;
-}
-
 static void sysvsem_free_obj(zend_object *object)
 {
 	sysvsem_sem *sem_ptr = sysvsem_from_obj(object);
@@ -147,7 +143,6 @@ PHP_MINIT_FUNCTION(sysvsem)
 	memcpy(&sysvsem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvsem_object_handlers.offset = offsetof(sysvsem_sem, std);
 	sysvsem_object_handlers.free_obj = sysvsem_free_obj;
-	sysvsem_object_handlers.get_constructor = sysvsem_get_constructor;
 	sysvsem_object_handlers.clone_obj = NULL;
 	sysvsem_object_handlers.compare = zend_objects_not_comparable;
 

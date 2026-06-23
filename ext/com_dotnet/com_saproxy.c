@@ -321,12 +321,6 @@ static zend_function *saproxy_method_get(zend_object **object, zend_string *name
 	return NULL;
 }
 
-static zend_function *saproxy_constructor_get(zend_object *object)
-{
-	zend_throw_error(NULL, "Cannot directly construct com_safeproxy_array; it is for internal usage only");
-	return NULL;
-}
-
 static zend_string* saproxy_class_name_get(const zend_object *object)
 {
 	return zend_string_copy(php_com_saproxy_class_entry->name);
@@ -412,7 +406,6 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_dimension_delete,
 	saproxy_properties_get,
 	saproxy_method_get,
-	saproxy_constructor_get,
 	saproxy_class_name_get,
 	saproxy_object_cast,
 	saproxy_count_elements,

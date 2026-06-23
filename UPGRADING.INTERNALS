@@ -117,6 +117,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added ZEND_CONTAINER_OF().
   . The OPENBASEDIR_CHECKPATH() compatibility macro has been removed, instead
     use php_check_open_basedir() directly.
+  . The get_constructor object handler has been removed.
+    Instead to mark an internal class as not instantiable the new
+    #[\NonInstantiableClass("Reason")] attribute should be attached to the
+    class definition in the stubs.
 
 ========================
 2. Build system changes

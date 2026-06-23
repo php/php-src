@@ -7,6 +7,7 @@ namespace Soap {
      * @strict-properties
      * @not-serializable
      */
+    #[\NonInstantiableClass("Cannot directly construct Soap\\Url")]
     final class Url
     {
     }
@@ -15,6 +16,7 @@ namespace Soap {
      * @strict-properties
      * @not-serializable
      */
+    #[\NonInstantiableClass("Cannot directly construct Soap\\Sdl")]
     final class Sdl
     {
     }

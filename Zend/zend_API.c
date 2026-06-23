@@ -25,6 +25,7 @@
 #include "zend_hash.h"
 #include "zend_modules.h"
 #include "zend_extensions.h"
+#include "zend_attributes.h"
 #include "zend_constants.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
@@ -1796,22 +1797,17 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
  * class and all props being public. If only a subset is given or the class
  * has protected members then you need to merge the properties separately by
  * calling zend_merge_properties(). */
-static zend_always_inline zend_result _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties) /* {{{ */
+static zend_always_inline zend_result _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties, bool known_instantiable) /* {{{ */
 {
-	if (UNEXPECTED(class_type->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
-		if (class_type->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_throw_error(NULL, "Cannot instantiate interface %s", ZSTR_VAL(class_type->name));
-		} else if (class_type->ce_flags & ZEND_ACC_TRAIT) {
-			zend_throw_error(NULL, "Cannot instantiate trait %s", ZSTR_VAL(class_type->name));
-		} else if (class_type->ce_flags & ZEND_ACC_ENUM) {
-			zend_throw_error(NULL, "Cannot instantiate enum %s", ZSTR_VAL(class_type->name));
-		} else {
-			ZEND_ASSERT(class_type->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
-			zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(class_type->name));
+	if (!known_instantiable) {
+		if (UNEXPECTED(class_type->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
+			zend_cannot_instantiate_class(class_type, NULL);
+			ZVAL_NULL(arg);
+			Z_OBJ_P(arg) = NULL;
+			return FAILURE;
 		}
-		ZVAL_NULL(arg);
-		Z_OBJ_P(arg) = NULL;
-		return FAILURE;
+	} else {
+		ZEND_ASSERT((class_type->ce_flags & ZEND_ACC_UNINSTANTIABLE) == 0);
 	}
 
 	if (UNEXPECTED(!(class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
@@ -1840,39 +1836,38 @@ static zend_always_inline zend_result _object_and_properties_init(zval *arg, zen
 
 ZEND_API zend_result object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties) /* {{{ */
 {
-	return _object_and_properties_init(arg, class_type, properties);
+	return _object_and_properties_init(arg, class_type, properties, false);
 }
 /* }}} */
 
 ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *class_type) /* {{{ */
 {
-	return _object_and_properties_init(arg, class_type, NULL);
+	return _object_and_properties_init(arg, class_type, NULL, false);
 }
 /* }}} */
 
+ZEND_API zend_result object_init_instantiable_class(zval *arg, zend_class_entry *class_type) /* {{{ */
+{
+	return _object_and_properties_init(arg, class_type, NULL, true);
+}
+
 ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
 {
-	zend_result status = _object_and_properties_init(arg, class_type, NULL);
+	if (UNEXPECTED(!zend_check_class_is_instantiable_or_throw(class_type, zend_get_executed_scope()))) {
+		ZVAL_UNDEF(arg);
+		return FAILURE;
+	}
+
+	zend_result status = _object_and_properties_init(arg, class_type, NULL, true);
 	if (UNEXPECTED(status == FAILURE)) {
 		ZVAL_UNDEF(arg);
 		return FAILURE;
 	}
 	zend_object *obj = Z_OBJ_P(arg);
-	zend_function *constructor = obj->handlers->get_constructor(obj);
-	if (constructor == NULL) {
-		/* The constructor can be NULL for 2 different reasons:
-		 * - It is not defined
-		 * - We are not allowed to call the constructor (e.g. private, or internal opaque class)
-		 *   and an exception has been thrown
-		 * in the former case, we are (mostly) done and the object is initialized,
-		 * in the latter we need to destroy the object as initialization failed
-		 */
-		if (UNEXPECTED(EG(exception))) {
-			zval_ptr_dtor(arg);
-			ZVAL_UNDEF(arg);
-			return FAILURE;
-		}
 
+	zend_function *constructor = class_type->constructor;
+	/* No constructor, so no need to call it */
+	if (constructor == NULL) {
 		/* Surprisingly, this is the only case where internal classes will allow to pass extra arguments
 		 * However, if there are named arguments (and it is not empty),
 		 * an Error must be thrown to be consistent with new ClassName() */
@@ -1891,6 +1886,7 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 			return SUCCESS;
 		}
 	}
+
 	/* A constructor should not return a value, however if an exception is thrown
 	 * zend_call_known_function() will set the retval to IS_UNDEF */
 	zval retval;

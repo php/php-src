@@ -1,5 +1,5 @@
 /* This is a generated file, edit odbc.stub.php instead.
- * Stub hash: f9ba28767b256dbcea087a65aa4bb5f5b509d6f3 */
+ * Stub hash: 7b35a7bbf36fdec269eebb54afe46bdfd6a0cc3b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -408,6 +408,14 @@ static zend_class_entry *register_class_Odbc_Connection(void)
 	INIT_NS_CLASS_ENTRY(ce, "Odbc", "Connection", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_string *attribute_name_NonInstantiableClass_class_Odbc_Connection_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_Odbc_Connection_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_Odbc_Connection_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_Odbc_Connection_0, true);
+	zend_string *attribute_NonInstantiableClass_class_Odbc_Connection_0_arg0_str = zend_string_init("Cannot directly construct Odbc\\Connection, use odbc_connect() or odbc_pconnect() instead", strlen("Cannot directly construct Odbc\\Connection, use odbc_connect() or odbc_pconnect() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_Odbc_Connection_0->args[0].value, attribute_NonInstantiableClass_class_Odbc_Connection_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
+
 	return class_entry;
 }
 
@@ -417,6 +425,14 @@ static zend_class_entry *register_class_Odbc_Result(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "Odbc", "Result", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_string *attribute_name_NonInstantiableClass_class_Odbc_Result_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_Odbc_Result_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_Odbc_Result_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_Odbc_Result_0, true);
+	zend_string *attribute_NonInstantiableClass_class_Odbc_Result_0_arg0_str = zend_string_init("Cannot directly construct Odbc\\Result, use an appropriate odbc_* function instead", strlen("Cannot directly construct Odbc\\Result, use an appropriate odbc_* function instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_Odbc_Result_0->args[0].value, attribute_NonInstantiableClass_class_Odbc_Result_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

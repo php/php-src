@@ -1,5 +1,5 @@
 /* This is a generated file, edit zlib.stub.php instead.
- * Stub hash: 4c5bea6d9f290c244c7bb27c77fe8007d43a40db */
+ * Stub hash: 58b0352e30109a3207350f0bc8932304794cb169 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ob_gzhandler, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
@@ -234,6 +234,14 @@ static zend_class_entry *register_class_InflateContext(void)
 	INIT_CLASS_ENTRY(ce, "InflateContext", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
+	zend_string *attribute_name_NonInstantiableClass_class_InflateContext_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_InflateContext_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_InflateContext_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_InflateContext_0, true);
+	zend_string *attribute_NonInstantiableClass_class_InflateContext_0_arg0_str = zend_string_init("Cannot directly construct InflateContext, use inflate_init() instead", strlen("Cannot directly construct InflateContext, use inflate_init() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_InflateContext_0->args[0].value, attribute_NonInstantiableClass_class_InflateContext_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
+
 	return class_entry;
 }
 
@@ -243,6 +251,14 @@ static zend_class_entry *register_class_DeflateContext(void)
 
 	INIT_CLASS_ENTRY(ce, "DeflateContext", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_string *attribute_name_NonInstantiableClass_class_DeflateContext_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_DeflateContext_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_DeflateContext_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_DeflateContext_0, true);
+	zend_string *attribute_NonInstantiableClass_class_DeflateContext_0_arg0_str = zend_string_init("Cannot directly construct DeflateContext, use deflate_init() instead", strlen("Cannot directly construct DeflateContext, use deflate_init() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_DeflateContext_0->args[0].value, attribute_NonInstantiableClass_class_DeflateContext_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

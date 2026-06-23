@@ -202,6 +202,7 @@ function xml_parser_get_option(XMLParser $parser, int $option): string|int|bool 
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct XMLParser, use xml_parser_create() or xml_parser_create_ns() instead")]
 final class XMLParser
 {
 }

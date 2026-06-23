@@ -23,7 +23,11 @@ $db->exec("INSERT INTO pdo_fetch_class_opaque_object VALUES(3, 'CC')");
 $stmt = $db->prepare('SELECT path FROM pdo_fetch_class_opaque_object');
 $stmt->execute();
 
-var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'Directory', []));
+try {
+    var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'Directory', []));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 ?>
 --CLEAN--
 <?php
@@ -31,27 +35,5 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_fetch_class_opaque_object");
 ?>
---EXPECTF--
-array(3) {
-  [0]=>
-  object(Directory)#%s (1) {
-    ["path"]=>
-    string(2) "AA"
-    ["handle"]=>
-    uninitialized(mixed)
-  }
-  [1]=>
-  object(Directory)#%s (1) {
-    ["path"]=>
-    string(2) "BB"
-    ["handle"]=>
-    uninitialized(mixed)
-  }
-  [2]=>
-  object(Directory)#%s (1) {
-    ["path"]=>
-    string(2) "CC"
-    ["handle"]=>
-    uninitialized(mixed)
-  }
-}
+--EXPECT--
+Error: Cannot instantiate an object of class Directory

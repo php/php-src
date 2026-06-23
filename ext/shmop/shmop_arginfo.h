@@ -1,5 +1,5 @@
 /* This is a generated file, edit shmop.stub.php instead.
- * Stub hash: e7f250077b6721539caee96afe4ed392396018f9 */
+ * Stub hash: 0a6a1bf8f5803c3b41ccffe587b5111515b83bf5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_shmop_open, 0, 4, Shmop, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -66,6 +66,14 @@ static zend_class_entry *register_class_Shmop(void)
 
 	INIT_CLASS_ENTRY(ce, "Shmop", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_string *attribute_name_NonInstantiableClass_class_Shmop_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_Shmop_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_Shmop_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_Shmop_0, true);
+	zend_string *attribute_NonInstantiableClass_class_Shmop_0_arg0_str = zend_string_init("Cannot directly construct Shmop, use shmop_open() instead", strlen("Cannot directly construct Shmop, use shmop_open() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_Shmop_0->args[0].value, attribute_NonInstantiableClass_class_Shmop_0_arg0_str);
+
+	class_entry->constructor = (zend_function *) &zend_non_instantiable_constructor;
 
 	return class_entry;
 }

@@ -89,6 +89,7 @@ const SCANDIR_SORT_NONE = UNKNOWN;
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct Directory, use dir() instead")]
 final class Directory
 {
     public readonly string $path;

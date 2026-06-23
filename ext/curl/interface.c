@@ -214,7 +214,6 @@ static zend_object_handlers curl_object_handlers;
 static zend_object *curl_create_object(zend_class_entry *class_type);
 static void curl_free_obj(zend_object *object);
 static HashTable *curl_get_gc(zend_object *object, zval **table, int *n);
-static zend_function *curl_get_constructor(zend_object *object);
 static zend_object *curl_clone_obj(zend_object *object);
 php_curl *init_curl_handle_into_zval(zval *curl);
 static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpostfields);
@@ -360,7 +359,6 @@ PHP_MINIT_FUNCTION(curl)
 	curl_object_handlers.offset = offsetof(php_curl, std);
 	curl_object_handlers.free_obj = curl_free_obj;
 	curl_object_handlers.get_gc = curl_get_gc;
-	curl_object_handlers.get_constructor = curl_get_constructor;
 	curl_object_handlers.clone_obj = curl_clone_obj;
 	curl_object_handlers.cast_object = curl_cast_object;
 	curl_object_handlers.compare = zend_objects_not_comparable;
@@ -389,11 +387,6 @@ static zend_object *curl_create_object(zend_class_entry *class_type) {
 	object_properties_init(&intern->std, class_type);
 
 	return &intern->std;
-}
-
-static zend_function *curl_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct CurlHandle, use curl_init() instead");
-	return NULL;
 }
 
 static zend_object *curl_clone_obj(zend_object *object) {

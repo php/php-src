@@ -124,12 +124,6 @@ static sapi_module_struct fuzzer_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-static ZEND_COLD zend_function *disable_class_get_constructor_handler(zend_object *obj) /* {{{ */
-{
-	zend_throw_error(NULL, "Cannot construct class %s, as it is disabled", ZSTR_VAL(obj->ce->name));
-	return NULL;
-}
-
 static void fuzzer_disable_classes(void)
 {
 	/* Overwrite built-in constructor for InfiniteIterator as it
@@ -137,10 +131,7 @@ static void fuzzer_disable_classes(void)
 	/* Lowercase as this is how the CE as stored */
 	zend_class_entry *InfiniteIterator_class = zend_hash_str_find_ptr(CG(class_table), "infiniteiterator", strlen("infiniteiterator"));
 
-	static zend_object_handlers handlers;
-	memcpy(&handlers, InfiniteIterator_class->default_object_handlers, sizeof(handlers));
-	handlers.get_constructor = disable_class_get_constructor_handler;
-	InfiniteIterator_class->default_object_handlers = &handlers;
+	zend_class_entry *InfiniteIterator_class->constructor = (zend_function *) &zend_non_instantiable_constructor;
 }
 
 int fuzzer_init_php(const char *extra_ini)
