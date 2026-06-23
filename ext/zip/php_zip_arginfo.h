@@ -1,6 +1,8 @@
 /* This is a generated file, edit php_zip.stub.php instead.
  * Stub hash: d623efdfe5ac46f07aebf8fb120050c818f3d793 */
 
+#include "zend_attributes.h"
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()

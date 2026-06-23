@@ -1,6 +1,8 @@
 /* This is a generated file, edit zend_constants.stub.php instead.
  * Stub hash: 569ccba4e0a93a9ce49c81c76955413188df390e */
 
+#include "zend_attributes.h"
+
 static void register_zend_constants_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("E_ERROR", E_ERROR, CONST_PERSISTENT);

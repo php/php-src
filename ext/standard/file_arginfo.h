@@ -1,6 +1,8 @@
 /* This is a generated file, edit file.stub.php instead.
  * Stub hash: 0c62c6fb217a87010a9e2e63d4b104cde0138655 */
 
+#include "zend_attributes.h"
+
 static void register_file_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("SEEK_SET", SEEK_SET, CONST_PERSISTENT);

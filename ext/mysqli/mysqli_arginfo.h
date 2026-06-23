@@ -1,6 +1,8 @@
 /* This is a generated file, edit mysqli.stub.php instead.
  * Stub hash: dc804bc50cd0a0e14dafc0e03564d5699d641db0 */
 
+#include "zend_attributes.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
 ZEND_END_ARG_INFO()
