@@ -35,6 +35,8 @@ extern "C" {
 #include <unicode/ubrk.h>
 #include <unicode/usearch.h>
 
+#include "../intl_icu_compat.h"
+
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
 /* }}} */
@@ -390,12 +392,6 @@ U_CFUNC UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCo
 		INTL_G(grapheme_iterator) = global_break_iterator;
 	}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 69
-	return ubrk_clone(global_break_iterator, status);
-#else
-	int32_t buffer_size = U_BRK_SAFECLONE_BUFFERSIZE;
-
-	return ubrk_safeClone(global_break_iterator, stack_buffer, &buffer_size, status);
-#endif
+	return intl_icu_compat_ubrk_clone(global_break_iterator, stack_buffer, status);
 }
 /* }}} */
