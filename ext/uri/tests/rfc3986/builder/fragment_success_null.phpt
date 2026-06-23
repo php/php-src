@@ -1,10 +1,11 @@
 --TEST--
-Test Uri\Rfc3986\UriBuilder::setPath() - success - empty string
+Test Uri\Rfc3986\UriBuilder::setFragment() - success - null
 --FILE--
 <?php
 
 $builder = new Uri\Rfc3986\UriBuilder();
-$builder->setPath("");
+$builder->setFragment("foo");
+$builder->setFragment(null);
 $uri = $builder->build();
 
 var_dump($uri->toRawString());

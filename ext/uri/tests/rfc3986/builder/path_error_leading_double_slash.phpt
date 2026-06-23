@@ -14,4 +14,4 @@ try {
 
 ?>
 --EXPECT--
-Uri\InvalidUriException: The path must not begin with "//" when the URI doesn't contain a host
+Uri\InvalidUriException: The path must not begin with "//" when the URI does not contain a host

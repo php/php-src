@@ -1,10 +1,10 @@
 --TEST--
-Test Uri\Rfc3986\UriBuilder::setPath() - success - empty string
+Test Uri\Rfc3986\UriBuilder::setFragment() - success - basic
 --FILE--
 <?php
 
 $builder = new Uri\Rfc3986\UriBuilder();
-$builder->setPath("");
+$builder->setFragment("foo");
 $uri = $builder->build();
 
 var_dump($uri->toRawString());
@@ -13,7 +13,7 @@ var_dump($uri->equals(new Uri\Rfc3986\Uri($uri->toRawString())));
 
 ?>
 --EXPECTF--
-string(0) ""
+string(4) "#foo"
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   NULL
@@ -30,6 +30,6 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["query"]=>
   NULL
   ["fragment"]=>
-  NULL
+  string(3) "foo"
 }
 bool(true)

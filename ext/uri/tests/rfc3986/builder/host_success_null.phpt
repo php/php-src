@@ -4,6 +4,7 @@ Test Uri\Rfc3986\UriBuilder::setHost() - success - null
 <?php
 
 $builder = new Uri\Rfc3986\UriBuilder();
+$builder->setHost("example.com");
 $builder->setHost(null);
 $uri = $builder->build();
 

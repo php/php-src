@@ -4,11 +4,13 @@ Test Uri\Rfc3986\UriBuilder::setScheme() - success - null
 <?php
 
 $builder = new Uri\Rfc3986\UriBuilder();
+$builder->setScheme("https");
 $builder->setScheme(null);
 $uri = $builder->build();
 
 var_dump($uri->toRawString());
 var_dump($uri);
+var_dump($uri->equals(new Uri\Rfc3986\Uri($uri->toRawString())));
 
 ?>
 --EXPECTF--
@@ -31,3 +33,4 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
+bool(true)

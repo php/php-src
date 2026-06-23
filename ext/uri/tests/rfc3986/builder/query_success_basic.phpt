@@ -9,11 +9,12 @@ $uri = $builder->build();
 
 var_dump($uri->toRawString());
 var_dump($uri);
+var_dump($uri->equals(new Uri\Rfc3986\Uri($uri->toRawString())));
 
 ?>
 --EXPECTF--
 string(14) "?foo=1&bar=baz"
-object(Uri\Rfc3986\Uri)#2 (8) {
+object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   NULL
   ["username"]=>
@@ -31,3 +32,4 @@ object(Uri\Rfc3986\Uri)#2 (8) {
   ["fragment"]=>
   NULL
 }
+bool(true)

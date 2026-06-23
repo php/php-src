@@ -805,12 +805,12 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2,3,4,5,6,7,8) php_uri_parser_rfc3986_uris *php_uri_
 	php_uri_parser_rfc3986_uris *uriparser_uris = uriparser_create_uris();
 
 	if (Z_STRLEN_P(path) > 0) {
-		/* The first segment of the path must not contain ":" if the URI doesn't contain a scheme */
+		/* The first segment of the path must not contain ":" if the URI does not contain a scheme */
 		if (Z_TYPE_P(scheme) == IS_NULL) {
 			const char *p = Z_STRVAL_P(path);
 			while (*p != '\0' && *p != '/') {
 				if (*p == ':') {
-					zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \":\" when the URI doesn't contain a scheme", 0);
+					zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \":\" when the URI does not contain a scheme", 0);
 					goto failure;
 				}
 
@@ -818,9 +818,9 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2,3,4,5,6,7,8) php_uri_parser_rfc3986_uris *php_uri_
 			}
 		}
 
-		/* The path must not begin with "//" if the URI doesn't contain a host */
+		/* The path must not begin with "//" if the URI does not contain a host */
 		if (Z_TYPE_P(host) == IS_NULL && zend_string_starts_with_literal(Z_STR_P(path), "//")) {
-			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \"//\" when the URI doesn't contain a host", 0);
+			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \"//\" when the URI does not contain a host", 0);
 			goto failure;
 		}
 	}
