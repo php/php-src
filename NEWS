@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22324 (Ignore leading namespace separator in
     ReflectionParameter::__construct()). (jorgsowa)
 
+- Standard:
+  . Fixed bug GH-22395 (base_convert() outputs at most 64 characters).
+    (Weilin Du)
+
 02 Jul 2026, PHP 8.5.8
 
 - Core:
