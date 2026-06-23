@@ -43,6 +43,32 @@
 #include "ext/standard/url.h"
 #include "curl_private.h"
 
+#ifdef HAVE_SOCKETS
+/* For the CURLOPT_SOCKOPT/OPENSOCKET/CLOSESOCKET callbacks, which bridge the
+ * libcurl socket file descriptor to ext/sockets Socket objects. The dependency
+ * on ext/sockets is optional at runtime: we never reference socket_ce as an
+ * exported symbol, we look up the Socket class lazily by name at MINIT. This
+ * keeps curl loadable on installs that do not ship ext/sockets. */
+#include "ext/sockets/php_sockets.h"
+# ifdef PHP_WIN32
+#  include <ws2tcpip.h>
+# else
+#  include <netdb.h>
+#  include <unistd.h>
+# endif
+# ifndef NI_MAXHOST
+#  define NI_MAXHOST 1025
+# endif
+# ifndef NI_MAXSERV
+#  define NI_MAXSERV 32
+# endif
+
+/* Cached pointer to the ext/sockets Socket class. NULL when ext/sockets is not
+ * loaded; in that case the CURLOPT_*SOCKET*FUNCTION options throw a clear error
+ * at setopt time and curl itself stays fully functional for every other option. */
+static zend_class_entry *curl_socket_ce = NULL;
+#endif
+
 #ifdef __GNUC__
 /* don't complain about deprecated CURLOPT_* we're exposing to PHP; we
    need to keep using those to avoid breaking PHP API compatibility */
@@ -170,9 +196,26 @@ void _php_curl_verify_handlers(php_curl *ch, bool reporterror) /* {{{ */
 }
 /* }}} */
 
+#ifdef HAVE_SOCKETS
+static const zend_module_dep curl_deps[] = {
+	/* The socket callbacks (CURLOPT_SOCKOPT/OPENSOCKET/CLOSESOCKETFUNCTION) hand
+	 * Socket objects to userland. The dependency is OPTIONAL so curl keeps
+	 * loading on installs without ext/sockets: only the three socket-callback
+	 * options become unavailable in that configuration. When ext/sockets is
+	 * loaded, it is initialised before curl so we can resolve the Socket class. */
+	ZEND_MOD_OPTIONAL("sockets")
+	ZEND_MOD_END
+};
+#endif
+
 /* {{{ curl_module_entry */
 zend_module_entry curl_module_entry = {
+#ifdef HAVE_SOCKETS
+	STANDARD_MODULE_HEADER_EX, NULL,
+	curl_deps,
+#else
 	STANDARD_MODULE_HEADER,
+#endif
 	"curl",
 	ext_functions,
 	PHP_MINIT(curl),
@@ -352,6 +395,15 @@ PHP_MINIT_FUNCTION(curl)
 		return FAILURE;
 	}
 
+#ifdef HAVE_SOCKETS
+	/* Resolve the Socket class lazily so we do not need a link-time symbol
+	 * reference to ext/sockets. ZEND_MOD_OPTIONAL("sockets") guarantees that if
+	 * ext/sockets is loaded its MINIT has already registered the class by the
+	 * time we get here. When ext/sockets is not loaded, the lookup returns NULL
+	 * and the CURLOPT_*SOCKET*FUNCTION setopt cases will throw a clear error. */
+	curl_socket_ce = zend_hash_str_find_ptr(CG(class_table), "socket", strlen("socket"));
+#endif
+
 	curl_ce = register_class_CurlHandle();
 	curl_ce->create_object = curl_create_object;
 	curl_ce->default_object_handlers = &curl_object_handlers;
@@ -481,6 +533,18 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	if (ZEND_FCC_INITIALIZED(curl->handlers.sshhostkey)) {
 		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.sshhostkey);
+	}
+#endif
+
+#ifdef HAVE_SOCKETS
+	if (ZEND_FCC_INITIALIZED(curl->handlers.sockopt)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.sockopt);
+	}
+	if (ZEND_FCC_INITIALIZED(curl->handlers.opensocket)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.opensocket);
+	}
+	if (ZEND_FCC_INITIALIZED(curl->handlers.closesocket)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.closesocket);
 	}
 #endif
 
@@ -779,6 +843,211 @@ static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key,
 }
 #endif
 
+#ifdef HAVE_SOCKETS
+/* {{{ Wrap a libcurl socket descriptor in a fresh ext/sockets Socket object.
+ * When the descriptor's lifetime is owned by libcurl (CURLOPT_SOCKOPTFUNCTION),
+ * the caller must detach it again with php_curl_socket_object_detach() before
+ * releasing the object, otherwise the Socket destructor would close it. */
+static void php_curl_socket_object_init(zval *zsocket, curl_socket_t sockfd)
+{
+	/* curl_socket_ce is non-NULL here: setopt refuses to register the C
+	 * callbacks when ext/sockets is not loaded, so we never reach this code path
+	 * without a resolved Socket class. */
+	object_init_ex(zsocket, curl_socket_ce);
+	/* Only the descriptor needs to be set; the Socket constructor already
+	 * initialized type to PF_UNSPEC and blocking to 1. We deliberately avoid
+	 * socket_import_file_descriptor() here: it calls getsockname(), which fails
+	 * with WSAEINVAL on Windows for a socket that libcurl has created but not yet
+	 * connected (the CURLOPT_SOCKOPTFUNCTION phase), emitting a spurious warning. */
+	Z_SOCKET_P(zsocket)->bsd_socket = sockfd;
+}
+
+/* Detach the descriptor so releasing the Socket object does not close it.
+ * ext/sockets treats a negative bsd_socket as invalid on all platforms. */
+static zend_always_inline void php_curl_socket_object_detach(zval *zsocket)
+{
+	Z_SOCKET_P(zsocket)->bsd_socket = -1;
+}
+
+/* {{{ curl_sockoptfunction */
+static int curl_sockoptfunction(void *clientp, curl_socket_t curlfd, curlsocktype purpose)
+{
+	php_curl *ch = (php_curl *)clientp;
+	int rval = CURL_SOCKOPT_OK;
+
+	/* See the note in the reset-on-null setopt handling: a registered callback
+	 * always has an initialized FCC, but guard defensively anyway. */
+	if (!ZEND_FCC_INITIALIZED(ch->handlers.sockopt)) {
+		return rval;
+	}
+
+	zval args[3];
+	zval retval;
+
+	GC_ADDREF(&ch->std);
+	ZVAL_OBJ(&args[0], &ch->std);
+	php_curl_socket_object_init(&args[1], curlfd);
+	ZVAL_LONG(&args[2], purpose);
+
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.sockopt, &retval, /* param_count */ 3, args, /* named_params */ NULL);
+	ch->in_callback = false;
+
+	if (EG(exception)) {
+		/* Match the abort behaviour of opensocket/ssh_hostkey/prereq when the
+		 * userland callback throws — for a security-sensitive hook, connecting
+		 * anyway after an exception would be surprising. */
+		rval = CURL_SOCKOPT_ERROR;
+	} else if (!Z_ISUNDEF(retval)) {
+		_php_curl_verify_handlers(ch, /* reporterror */ true);
+		if (Z_TYPE(retval) == IS_LONG) {
+			zend_long retval_long = Z_LVAL(retval);
+			if (retval_long == CURL_SOCKOPT_OK || retval_long == CURL_SOCKOPT_ERROR || retval_long == CURL_SOCKOPT_ALREADY_CONNECTED) {
+				rval = (int) retval_long;
+			} else {
+				zend_value_error("The CURLOPT_SOCKOPTFUNCTION callback must return one of CURL_SOCKOPT_OK, CURL_SOCKOPT_ERROR or CURL_SOCKOPT_ALREADY_CONNECTED");
+				rval = CURL_SOCKOPT_ERROR;
+			}
+		} else {
+			zend_type_error("The CURLOPT_SOCKOPTFUNCTION callback must return one of CURL_SOCKOPT_OK, CURL_SOCKOPT_ERROR or CURL_SOCKOPT_ALREADY_CONNECTED");
+			zval_ptr_dtor(&retval);
+			rval = CURL_SOCKOPT_ERROR;
+		}
+	}
+
+	/* The descriptor is owned by libcurl; do not let the Socket object close it. */
+	php_curl_socket_object_detach(&args[1]);
+
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[1]);
+	return rval;
+}
+/* }}} */
+
+/* {{{ curl_opensocketfunction */
+static curl_socket_t curl_opensocketfunction(void *clientp, curlsocktype purpose, struct curl_sockaddr *address)
+{
+	php_curl *ch = (php_curl *)clientp;
+
+	if (!ZEND_FCC_INITIALIZED(ch->handlers.opensocket)) {
+		/* Unreachable in practice (a null option restores libcurl's default), but
+		 * fall back to the default socket creation just in case. */
+		return socket(address->family, address->socktype, address->protocol);
+	}
+
+	zval args[3];
+	zval retval;
+	curl_socket_t sockfd = CURL_SOCKET_BAD;
+
+	GC_ADDREF(&ch->std);
+	ZVAL_OBJ(&args[0], &ch->std);
+	ZVAL_LONG(&args[1], purpose);
+
+	array_init(&args[2]);
+	add_assoc_long(&args[2], "family", address->family);
+	add_assoc_long(&args[2], "socktype", address->socktype);
+	add_assoc_long(&args[2], "protocol", address->protocol);
+
+	char host[NI_MAXHOST];
+	char serv[NI_MAXSERV];
+	if (getnameinfo((struct sockaddr *) &address->addr, address->addrlen,
+			host, sizeof(host), serv, sizeof(serv),
+			NI_NUMERICHOST | NI_NUMERICSERV) == 0) {
+		add_assoc_string(&args[2], "ip", host);
+		add_assoc_long(&args[2], "port", strtol(serv, NULL, 10));
+	} else {
+		add_assoc_string(&args[2], "ip", "");
+		add_assoc_long(&args[2], "port", 0);
+	}
+
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.opensocket, &retval, /* param_count */ 3, args, /* named_params */ NULL);
+	ch->in_callback = false;
+
+	if (!Z_ISUNDEF(retval)) {
+		_php_curl_verify_handlers(ch, /* reporterror */ true);
+		if (Z_TYPE(retval) == IS_FALSE) {
+			sockfd = CURL_SOCKET_BAD;
+		} else if (Z_TYPE(retval) == IS_OBJECT && instanceof_function(Z_OBJCE(retval), curl_socket_ce)) {
+			php_socket *socket = Z_SOCKET_P(&retval);
+			/* Reject stream-backed Sockets (socket_import_stream): when zstream is
+			 * set, socket_free_obj() bypasses the bsd_socket check entirely and
+			 * delegates close to the stream's destructor — our detach below would
+			 * be ignored, and libcurl + the stream would each close the same fd. */
+			if (!Z_ISUNDEF(socket->zstream)) {
+				zend_type_error("The CURLOPT_OPENSOCKETFUNCTION callback must return a Socket whose descriptor it owns; stream-backed Sockets (socket_import_stream) are not supported");
+			} else if (IS_INVALID_SOCKET(socket)) {
+				/* The callback would otherwise hand libcurl an invalid descriptor
+				 * and bury the real cause under a generic CURLE_COULDNT_CONNECT. */
+				zend_type_error("The CURLOPT_OPENSOCKETFUNCTION callback must return an open Socket");
+			} else {
+				sockfd = socket->bsd_socket;
+				/* libcurl owns the descriptor from now on; detach it from the Socket
+				 * object so releasing it does not close the descriptor. */
+				socket->bsd_socket = -1;
+			}
+		} else {
+			zend_type_error("The CURLOPT_OPENSOCKETFUNCTION callback must return a Socket or false");
+		}
+		zval_ptr_dtor(&retval);
+	}
+
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[2]);
+	return sockfd;
+}
+/* }}} */
+
+/* {{{ curl_closesocketfunction */
+static int curl_closesocketfunction(void *clientp, curl_socket_t item)
+{
+	php_curl *ch = (php_curl *)clientp;
+
+	if (!ZEND_FCC_INITIALIZED(ch->handlers.closesocket)) {
+		/* Unreachable in practice; close the descriptor as libcurl would. */
+#ifdef PHP_WIN32
+		closesocket(item);
+#else
+		close(item);
+#endif
+		return 0;
+	}
+
+	zval args[2];
+	zval retval;
+
+	GC_ADDREF(&ch->std);
+	ZVAL_OBJ(&args[0], &ch->std);
+	php_curl_socket_object_init(&args[1], item);
+
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.closesocket, &retval, /* param_count */ 2, args, /* named_params */ NULL);
+	ch->in_callback = false;
+
+	if (!Z_ISUNDEF(retval)) {
+		_php_curl_verify_handlers(ch, /* reporterror */ true);
+		zval_ptr_dtor(&retval);
+	}
+
+	/* libcurl delegates closing to this callback. If userland did not close the
+	 * socket (e.g. via socket_close()), close it now so the descriptor cannot leak. */
+	php_socket *socket = Z_SOCKET_P(&args[1]);
+	if (!IS_INVALID_SOCKET(socket)) {
+#ifdef PHP_WIN32
+		closesocket(socket->bsd_socket);
+#else
+		close(socket->bsd_socket);
+#endif
+		socket->bsd_socket = -1;
+	}
+
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[1]);
+	return 0;
+}
+/* }}} */
+#endif
+
 /* {{{ curl_read */
 static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 {
@@ -1048,6 +1317,11 @@ void init_curl_handle(php_curl *ch)
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	ch->handlers.sshhostkey = empty_fcall_info_cache;
 #endif
+#ifdef HAVE_SOCKETS
+	ch->handlers.sockopt = empty_fcall_info_cache;
+	ch->handlers.opensocket = empty_fcall_info_cache;
+	ch->handlers.closesocket = empty_fcall_info_cache;
+#endif
 	ch->clone = emalloc(sizeof(uint32_t));
 	*ch->clone = 1;
 
@@ -1217,6 +1491,11 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 #endif
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	php_curl_copy_fcc_with_option(ch, CURLOPT_SSH_HOSTKEYDATA, &ch->handlers.sshhostkey, &source->handlers.sshhostkey);
+#endif
+#ifdef HAVE_SOCKETS
+	php_curl_copy_fcc_with_option(ch, CURLOPT_SOCKOPTDATA, &ch->handlers.sockopt, &source->handlers.sockopt);
+	php_curl_copy_fcc_with_option(ch, CURLOPT_OPENSOCKETDATA, &ch->handlers.opensocket, &source->handlers.opensocket);
+	php_curl_copy_fcc_with_option(ch, CURLOPT_CLOSESOCKETDATA, &ch->handlers.closesocket, &source->handlers.closesocket);
 #endif
 
 	ZVAL_COPY(&ch->private_data, &source->private_data);
@@ -1566,6 +1845,31 @@ static bool php_curl_set_callable_handler(zend_fcall_info_cache *const handler_f
 		break; \
 	}
 
+/* Like HANDLE_CURL_OPTION_CALLABLE, but with two adjustments for the socket
+ * callbacks: when the callback is set to null the curl option is reset to NULL
+ * so libcurl falls back to its native default (creating/closing the descriptor
+ * itself), and the call is rejected with a clear error when ext/sockets is not
+ * loaded — Socket objects cannot be handed to userland in that configuration. */
+#define HANDLE_CURL_OPTION_SOCKET_CALLABLE(curl_ptr, constant_no_function, handler_fcc, c_callback) \
+	case constant_no_function##FUNCTION: { \
+		if (curl_socket_ce == NULL) { \
+			zend_throw_error(NULL, "Using " #constant_no_function "FUNCTION requires the sockets extension to be loaded"); \
+			return FAILURE; \
+		} \
+		bool result = php_curl_set_callable_handler(&curl_ptr->handler_fcc, zvalue, is_array_config, #constant_no_function "FUNCTION"); \
+		if (!result) { \
+			return FAILURE; \
+		} \
+		if (ZEND_FCC_INITIALIZED(curl_ptr->handler_fcc)) { \
+			curl_easy_setopt(curl_ptr->cp, constant_no_function##FUNCTION, (c_callback)); \
+			curl_easy_setopt(curl_ptr->cp, constant_no_function##DATA, curl_ptr); \
+		} else { \
+			curl_easy_setopt(curl_ptr->cp, constant_no_function##FUNCTION, NULL); \
+			curl_easy_setopt(curl_ptr->cp, constant_no_function##DATA, NULL); \
+		} \
+		break; \
+	}
+
 static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool is_array_config) /* {{{ */
 {
 	CURLcode error = CURLE_OK;
@@ -1587,6 +1891,12 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 #endif
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_SSH_HOSTKEY, handlers.sshhostkey, curl_ssh_hostkeyfunction);
+#endif
+
+#ifdef HAVE_SOCKETS
+		HANDLE_CURL_OPTION_SOCKET_CALLABLE(ch, CURLOPT_SOCKOPT, handlers.sockopt, curl_sockoptfunction);
+		HANDLE_CURL_OPTION_SOCKET_CALLABLE(ch, CURLOPT_OPENSOCKET, handlers.opensocket, curl_opensocketfunction);
+		HANDLE_CURL_OPTION_SOCKET_CALLABLE(ch, CURLOPT_CLOSESOCKET, handlers.closesocket, curl_closesocketfunction);
 #endif
 
 		/* Long options */
@@ -2746,6 +3056,21 @@ static void curl_free_obj(zend_object *object)
 
 	_php_curl_verify_handlers(ch, /* reporterror */ false);
 
+#ifdef HAVE_SOCKETS
+	/* curl_easy_cleanup() closes any pooled sockets, which fires the userland
+	 * CURLOPT_CLOSESOCKETFUNCTION callback during handle destruction (and
+	 * potentially during GC or request shutdown). Calling into PHP from there
+	 * is unsafe — an exception thrown from the callback would surface outside
+	 * any try/catch around curl_exec() / unset(). Setting the option back to
+	 * NULL on the easy handle is not enough: libcurl caches the function
+	 * pointer per connection. Tear down the PHP-side FCC instead so the
+	 * curl_closesocketfunction() trampoline falls through to its native-close
+	 * fallback when libcurl invokes it. */
+	if (ZEND_FCC_INITIALIZED(ch->handlers.closesocket)) {
+		zend_fcc_dtor(&ch->handlers.closesocket);
+	}
+#endif
+
 	curl_easy_cleanup(ch->cp);
 
 	/* cURL destructors should be invoked only by last curl handle */
@@ -2801,6 +3126,17 @@ static void curl_free_obj(zend_object *object)
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	if (ZEND_FCC_INITIALIZED(ch->handlers.sshhostkey)) {
 		zend_fcc_dtor(&ch->handlers.sshhostkey);
+	}
+#endif
+#ifdef HAVE_SOCKETS
+	if (ZEND_FCC_INITIALIZED(ch->handlers.sockopt)) {
+		zend_fcc_dtor(&ch->handlers.sockopt);
+	}
+	if (ZEND_FCC_INITIALIZED(ch->handlers.opensocket)) {
+		zend_fcc_dtor(&ch->handlers.opensocket);
+	}
+	if (ZEND_FCC_INITIALIZED(ch->handlers.closesocket)) {
+		zend_fcc_dtor(&ch->handlers.closesocket);
 	}
 #endif
 
@@ -2890,6 +3226,18 @@ static void _php_curl_reset_handlers(php_curl *ch)
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	if (ZEND_FCC_INITIALIZED(ch->handlers.sshhostkey)) {
 		zend_fcc_dtor(&ch->handlers.sshhostkey);
+	}
+#endif
+
+#ifdef HAVE_SOCKETS
+	if (ZEND_FCC_INITIALIZED(ch->handlers.sockopt)) {
+		zend_fcc_dtor(&ch->handlers.sockopt);
+	}
+	if (ZEND_FCC_INITIALIZED(ch->handlers.opensocket)) {
+		zend_fcc_dtor(&ch->handlers.opensocket);
+	}
+	if (ZEND_FCC_INITIALIZED(ch->handlers.closesocket)) {
+		zend_fcc_dtor(&ch->handlers.closesocket);
 	}
 #endif
 }
