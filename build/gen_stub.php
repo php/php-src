@@ -2075,7 +2075,7 @@ OUPUT_EXAMPLE
         $methodSynopsis->appendChild(new DOMText("\n   "));
 
         foreach ($this->attributes as $attribute) {
-            $modifier = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
+            $modifier = $doc->createElement("modifier", (string) $attribute);
             $modifier->setAttribute("role", "attribute");
             $methodSynopsis->appendChild($modifier);
             $methodSynopsis->appendChild(new DOMText("\n   "));
@@ -2112,7 +2112,7 @@ OUPUT_EXAMPLE
 
                 $methodSynopsis->appendChild($methodparam);
                 foreach ($arg->attributes as $attribute) {
-                    $attribute = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
+                    $attribute = $doc->createElement("modifier", (string) $attribute);
                     $attribute->setAttribute("role", "attribute");
 
                     $methodparam->appendChild($attribute);
@@ -3294,6 +3294,24 @@ class AttributeInfo {
         private readonly array $args,
     ) {}
 
+    public function __toString(): string {
+        $code = '#[\\' . $this->class;
+        if (!empty($this->args)) {
+            $prettyPrinter = new Standard;
+            $args = [];
+            foreach ($this->args as $arg) {
+                $argStr = $prettyPrinter->prettyPrintExpr($arg->value);
+                if ($arg->name !== null) {
+                    $argStr = $arg->name->name . ': ' . $argStr;
+                }
+                $args[] = $argStr;
+            }
+            $code .= '(' . implode(', ', $args) . ')';
+        }
+        $code .= ']';
+        return $code;
+    }
+
     /**
      * @param array<string, ConstInfo> $allConstInfos
      * @param array<string, string> &$declaredStrings Map of string content to
@@ -3959,7 +3977,7 @@ class ClassInfo {
             $ooElement->appendChild(new DOMText("\n$indentation "));
         } elseif ($isMainClass) {
             foreach ($classInfo->attributes as $attribute) {
-                $modifier = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
+                $modifier = $doc->createElement("modifier", (string) $attribute);
                 $modifier->setAttribute("role", "attribute");
                 $ooElement->appendChild($modifier);
                 $ooElement->appendChild(new DOMText("\n$indentation "));
