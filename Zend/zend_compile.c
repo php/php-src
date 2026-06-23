@@ -11081,6 +11081,10 @@ static void zend_compile_instanceof(znode *result, zend_ast *ast) /* {{{ */
 	if (class_ast->kind == ZEND_AST_ZVAL
 			&& Z_TYPE_P(zend_ast_get_zval(class_ast)) == IS_STRING
 			&& zend_string_equals_ci(zend_ast_get_str(class_ast), ZSTR_KNOWN(ZEND_STR_OBJECT))) {
+		if ((class_ast->attr & ZEND_NAME_NOT_FQ) != ZEND_NAME_NOT_FQ) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Type declaration 'object' must be unqualified");
+		}
 		opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &obj_node, NULL);
 		opline->extended_value = (1 << IS_OBJECT);
 		return;
