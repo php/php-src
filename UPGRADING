@@ -186,6 +186,13 @@ PHP 8.6 UPGRADE NOTES
   . It is now possible to define the `__debugInfo()` magic method on enums.
     RFC: https://wiki.php.net/rfc/debugable-enums
 
+- Curl:
+  . curl_getinfo() return array now includes a new size_delivered key,
+    which indicates the total number of bytes passed to the download
+    write callback. This value can also be obtained by passing
+    CURLINFO_SIZE_DELIVERED as the $option parameter.
+    Requires libcurl 8.20.0 or later.
+
 - Fileinfo:
   . finfo_file() now works with remote streams.
 
@@ -398,6 +405,9 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- Curl:
+  . CURLINFO_SIZE_DELIVERED (libcurl >= 8.20.0).
 
 - Sockets:
   . TCP_USER_TIMEOUT (Linux only).

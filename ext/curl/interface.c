@@ -2456,6 +2456,11 @@ PHP_FUNCTION(curl_getinfo)
 		if (curl_easy_getinfo(ch->cp, CURLINFO_SIZE_DOWNLOAD, &d_code) == CURLE_OK) {
 			CAAD("size_download", d_code);
 		}
+#if LIBCURL_VERSION_NUM >= 0x081400 /* Available since 8.20.0 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_SIZE_DELIVERED , &l_code) == CURLE_OK) {
+			CAAL("size_delivered", l_code);
+		}
+#endif
 		if (curl_easy_getinfo(ch->cp, CURLINFO_SPEED_DOWNLOAD, &d_code) == CURLE_OK) {
 			CAAD("speed_download", d_code);
 		}
