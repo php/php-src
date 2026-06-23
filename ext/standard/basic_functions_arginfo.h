@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 3b1649a3abb3cfb5cb39d93f30a97765fe862d67
+ * Stub hash: 495de4268238b02405c847cc0d5ce602f8de0f68
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -2146,6 +2146,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_var_dump, 0, 1, IS_VOID, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, values, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dd, 0, 1, IS_NEVER, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, values, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_var_export, 0, 1, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, return, _IS_BOOL, 0, "false")
@@ -2892,6 +2897,7 @@ ZEND_FUNCTION(stream_filter_register);
 ZEND_FUNCTION(convert_uuencode);
 ZEND_FUNCTION(convert_uudecode);
 ZEND_FUNCTION(var_dump);
+ZEND_FUNCTION(dd);
 ZEND_FUNCTION(var_export);
 ZEND_FUNCTION(debug_zval_dump);
 ZEND_FUNCTION(serialize);
@@ -3516,6 +3522,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("convert_uuencode", zif_convert_uuencode, arginfo_convert_uuencode, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("convert_uudecode", zif_convert_uudecode, arginfo_convert_uudecode, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(var_dump, arginfo_var_dump)
+	ZEND_FE(dd, arginfo_dd)
 	ZEND_FE(var_export, arginfo_var_export)
 	ZEND_FE(debug_zval_dump, arginfo_debug_zval_dump)
 	ZEND_RAW_FENTRY("serialize", zif_serialize, arginfo_serialize, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)

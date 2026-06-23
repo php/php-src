@@ -3813,6 +3813,8 @@ function convert_uudecode(string $string): string|false {}
 
 function var_dump(mixed $value, mixed ...$values): void {}
 
+function dd(mixed $value, mixed ...$values): never {}
+
 /** @refcount 1 */
 function var_export(mixed $value, bool $return = false): ?string {}
 

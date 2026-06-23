@@ -255,6 +255,15 @@ PHP_FUNCTION(var_dump)
 }
 /* }}} */
 
+/* {{{ Dumps a string representation of variable to output and ends the script */
+PHP_FUNCTION(dd)
+{
+	ZEND_FN(var_dump)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
+	zend_bailout();
+}
+/* }}} */
+
 static void zval_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
