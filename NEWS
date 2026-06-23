@@ -37,6 +37,9 @@ PHP                                                                        NEWS
 - BZ2:
   . Reject oversized input in bzdecompress(). (arshidkv12)
 
+- Curl:
+  . Add support for CURLINFO_SIZE_DELIVERED (libcurl >= 8.20.0). (Ayesh)
+
 - Date:
   . Update timelib to 2022.16. (Derick)
 
