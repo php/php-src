@@ -22,6 +22,7 @@
 #include "zend_exceptions.h"
 #include "zend_multiply.h"
 #include "zend_portability.h"
+#include "zend_strtod.h"
 
 #include <float.h>
 #include <math.h>
@@ -1001,7 +1002,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 	if (Z_TYPE_P(arg) == IS_DOUBLE) {
 		double fvalue = floor(Z_DVAL_P(arg)); /* floor it just in case */
 		char *ptr, *end;
-		char buf[(sizeof(double) << 3) + 1];
+		char buf[ZEND_DOUBLE_MAX_LENGTH];
 
 		/* Don't try to convert +/- infinity */
 		if (fvalue == ZEND_INFINITY || fvalue == -ZEND_INFINITY) {
