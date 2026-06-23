@@ -4860,6 +4860,7 @@ function parseStubFile(string $code): FileInfo {
     $lexer = new PhpParser\Lexer\Emulative();
     $parser = new PhpParser\Parser\Php7($lexer);
     $nodeTraverser = new PhpParser\NodeTraverser;
+    $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\CloningVisitor);
     $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
     $prettyPrinter = new class extends Standard {
         protected function pName_FullyQualified(Name\FullyQualified $node): string {
@@ -5038,7 +5039,7 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): 
 function generateCodeWithConditions(
     iterable $infos, string $separator, Closure $codeGenerator, ?string $parentCond = null): string {
     $code = "";
-    
+
     // For combining the conditional blocks of the infos with the same condition
     $openCondition = null;
     foreach ($infos as $info) {
