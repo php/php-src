@@ -4425,6 +4425,7 @@ class FileInfo {
     public static function parseStubFile(string $code): FileInfo {
         $parser = new PhpParser\Parser\Php7(new PhpParser\Lexer\Emulative());
         $nodeTraverser = new PhpParser\NodeTraverser;
+        $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\CloningVisitor);
         $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
         $prettyPrinter = new class extends Standard {
             protected function pName_FullyQualified(Name\FullyQualified $node): string {
