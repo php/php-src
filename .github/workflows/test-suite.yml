@@ -437,7 +437,6 @@ jobs:
       matrix: ${{ fromJson(inputs.branch).jobs.COMMUNITY.matrix }}
     name: "COMMUNITY_${{ matrix.type }}"
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
-    timeout-minutes: 180
     env:
       ASAN_OPTIONS: exitcode=139
       UBSAN_OPTIONS: print_stacktrace=1
