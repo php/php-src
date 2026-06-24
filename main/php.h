@@ -205,12 +205,8 @@ typedef unsigned int socklen_t;
 #include <string.h>
 
 #ifdef HAVE_PWD_H
-# ifdef PHP_WIN32
-#include "win32/param.h"
-# else
-#include <pwd.h>
-#include <sys/param.h>
-# endif
+# include <pwd.h>
+# include <sys/param.h>
 #endif
 
 #include <limits.h>
