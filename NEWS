@@ -30,6 +30,8 @@ PHP                                                                        NEWS
     string interpolation). (timwolla)
   . Fixed bug GH-22373 (AST pretty-printing drops meaningful parentheses
     surrounding property access). (timwolla)
+  . Fixed GH-22422 (zend_arena layout mismatch leaked memory in separately
+    built extensions under AddressSanitizer). (iliaal)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)

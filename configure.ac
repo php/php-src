@@ -1539,8 +1539,10 @@ AS_VAR_IF([PHP_ADDRESS_SANITIZER], [yes],
   ]))])
 
   AX_CHECK_COMPILE_FLAG([-fsanitize=address], [
-    CFLAGS="$CFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
-    CXXFLAGS="$CXXFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
+    CFLAGS="$CFLAGS -fsanitize=address"
+    CXXFLAGS="$CXXFLAGS -fsanitize=address"
+    AC_DEFINE([ZEND_TRACK_ARENA_ALLOC], [1],
+      [Whether to track arena allocations individually for AddressSanitizer.])
   ], [AC_MSG_ERROR([AddressSanitizer is not available])])
 ])
 
