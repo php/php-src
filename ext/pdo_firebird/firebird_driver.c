@@ -1392,6 +1392,10 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 		char const *dpb_values[] = { dbh->username, dbh->password, vars[1].optval, vars[2].optval };
 		char dpb_buffer[256] = { isc_dpb_version1 }, *dpb;
 
+		if (EG(exception)) {
+			break;
+		}
+
 		dpb = dpb_buffer + 1;
 
 		/* loop through all the provided arguments and set dpb fields accordingly */
@@ -1428,7 +1432,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 		}
 	}
 
-	if (!dbh->methods) {
+	if (!dbh->methods && !EG(exception)) {
 		char errmsg[512];
 		const ISC_STATUS *s = H->isc_status;
 		fb_interpret(errmsg, sizeof(errmsg),&s);
