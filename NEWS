@@ -206,6 +206,10 @@ PHP                                                                        NEWS
   . Changed defaults of session.use_strict_mode (now 1), session.cookie_httponly
     (now 1) and session.cookie_samesite (now "Lax"). (jorgsowa)
 
+- Shmop:
+  . Fixed bug GH-9945 (shmop_open() silently truncates keys outside the key_t
+    range). (Weilin Du)
+
 - Soap:
   . Soap::__setCookie() when cookie name is a digit is now not stored and
     represented as a string anymore but a int. (David Carlier)
@@ -235,6 +239,10 @@ PHP                                                                        NEWS
     SplFileObject iterator desync bugs). (iliaal)
   . Fix bug GH-22062 (SplDoublyLinkedList iterator UAF
     via destructor releasing next node). (David Carlier)
+
+- Sysvshm:
+  . Fixed shm_attach() to throw ValueError for keys outside the key_t range.
+    (Weilin Du)
 
 - Sqlite3:
   . Fix NUL byte truncation in sqlite3 TEXT column handling. (ndossche)
