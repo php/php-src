@@ -62,6 +62,10 @@ zend_string* intl_charFromString(const UnicodeString &from, UErrorCode *status)
 
 	//the number of UTF-8 code units is not larger than that of UTF-16 code
 	//units * 3
+	if (UNEXPECTED(from.length() > INT32_MAX / 3)) {
+		*status = U_BUFFER_OVERFLOW_ERROR;
+		return NULL;
+	}
 	int32_t capacity = from.length() * 3;
 
 	if (from.isEmpty()) {
