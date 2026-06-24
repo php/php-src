@@ -1,0 +1,141 @@
+name: JIT Hang Bisect
+# Manually-triggered bisect for the Symfony Console OutputFormatter tracing-JIT
+# hang seen in the nightly COMMUNITY_asan job. Runs on a native x86-64 runner
+# (the bug does not reproduce on ARM or under qemu emulation).
+on:
+  workflow_dispatch:
+    inputs:
+      good:
+        description: 'Known-GOOD commit/tag (bug absent)'
+        default: 'php-8.3.0'
+      bad:
+        description: 'Known-BAD commit/tag (hang)'
+        default: '27c10ddce6302912a46d72a4dcd47c89f1209544'
+      symfony_commit:
+        description: 'Symfony commit to test against (CI nightly pin)'
+        default: 'dce1b899ab0c0e4cef9159c083ef535387a8db12'
+      test_timeout:
+        description: 'Per-step test timeout in seconds (hang detector)'
+        default: '300'
+      use_asan:
+        description: 'Build with ASAN+UBSAN (matches COMMUNITY_asan exactly)'
+        default: 'true'
+
+permissions:
+  contents: read
+
+jobs:
+  bisect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    env:
+      SYMFONY_DIR: ${{ runner.temp }}/symfony
+      TEST_TIMEOUT: ${{ inputs.test_timeout }}
+      USE_ASAN: ${{ inputs.use_asan }}
+      # Mirror the COMMUNITY_asan runtime environment
+      USE_ZEND_ALLOC: '0'
+      USE_TRACKED_ALLOC: '1'
+      ASAN_OPTIONS: 'exitcode=139'
+      UBSAN_OPTIONS: 'print_stacktrace=1'
+      SYMFONY_DEPRECATIONS_HELPER: 'max[total]=999'
+    steps:
+      - name: Checkout php-src (full history)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Ensure bisect endpoints & tags are present
+        run: |
+          git remote add upstream https://github.com/php/php-src.git || true
+          git fetch --tags --quiet upstream
+          git rev-parse "${{ inputs.good }}^{commit}"
+          git rev-parse "${{ inputs.bad }}^{commit}"
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential autoconf automake libtool bison re2c pkg-config ccache \
+            libxml2-dev libsqlite3-dev libonig-dev libssl-dev zlib1g-dev \
+            php-cli php-xml php-mbstring composer
+
+      - name: Set up Symfony test bed (pinned commit)
+        run: |
+          git clone --no-checkout --filter=blob:none https://github.com/symfony/symfony.git "$SYMFONY_DIR"
+          git -C "$SYMFONY_DIR" fetch --depth=1 origin "${{ inputs.symfony_commit }}"
+          git -C "$SYMFONY_DIR" checkout "${{ inputs.symfony_commit }}"
+          ( cd "$SYMFONY_DIR" && composer install --no-progress --ignore-platform-req=php+ && php ./phpunit install )
+
+      - name: Write bisect predicate
+        run: |
+          cat > "${{ runner.temp }}/bisect_step.sh" <<'STEP'
+          #!/usr/bin/env bash
+          # exit 0=GOOD, 1=BAD(hang), 125=SKIP(untestable)
+          set -u
+          NCPU="$(nproc)"
+          WS="$PWD"
+          rev="$(git rev-parse --short HEAD)"
+          export CC="ccache gcc" CXX="ccache g++"
+
+          make distclean >/dev/null 2>&1
+          ./buildconf --force >/tmp/bc.log 2>&1 || { echo "[$rev] buildconf fail -> skip"; exit 125; }
+
+          CONF=( --enable-debug --enable-zts --enable-opcache
+                 --enable-mbstring --enable-tokenizer
+                 --with-libxml --enable-dom --enable-xml --enable-xmlwriter --enable-xmlreader --enable-simplexml
+                 --enable-ctype --enable-filter --enable-fileinfo --enable-phar --enable-posix --enable-pcntl
+                 --disable-cgi )
+          if [ "${USE_ASAN:-true}" = "true" ]; then
+            CONF+=( "CFLAGS=-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC"
+                    "LDFLAGS=-fsanitize=undefined,address" )
+          fi
+          ./configure "${CONF[@]}" >/tmp/conf.log 2>&1 || { echo "[$rev] configure fail -> skip"; tail -5 /tmp/conf.log; exit 125; }
+          make -j"$NCPU" >/tmp/make.log 2>&1 || { echo "[$rev] make fail -> skip"; tail -15 /tmp/make.log; exit 125; }
+
+          PHP_BIN="$WS/sapi/cli/php"
+          OC="$(find "$WS" -name opcache.so -path '*/modules/*' | head -1)"
+          [ -x "$PHP_BIN" ] && [ -n "$OC" ] || { echo "[$rev] no binary -> skip"; exit 125; }
+          JIT=( -dzend_extension="$OC" -dopcache.enable_cli=1 -dopcache.jit=tracing -dopcache.jit_buffer_size=1G
+                -dopcache.jit_hot_loop=1 -dopcache.jit_hot_func=1 -dopcache.jit_hot_return=1
+                -dopcache.jit_hot_side_exit=1 -dmemory_limit=-1 )
+          "$PHP_BIN" "${JIT[@]}" -r 'exit((opcache_get_status(false)["jit"]["enabled"]??false)?0:3);' \
+            || { echo "[$rev] JIT not enabled -> skip"; exit 125; }
+
+          cd "$SYMFONY_DIR" || { echo "[$rev] no symfony -> skip"; exit 125; }
+          echo "[$rev] running Console suite (timeout ${TEST_TIMEOUT}s)..."
+          timeout "${TEST_TIMEOUT}" "$PHP_BIN" "${JIT[@]}" ./phpunit src/Symfony/Component/Console \
+              --exclude-group tty --exclude-group benchmark --exclude-group intl-data \
+              --exclude-group transient --exclude-group skip >/tmp/test.log 2>&1
+          rc=$?
+          case "$rc" in
+            124) echo "[$rev] HANG (timeout) -> BAD"; exit 1 ;;
+            0|1|2) echo "[$rev] completed rc=$rc -> GOOD"; exit 0 ;;
+            *) echo "[$rev] abnormal rc=$rc (asan abort / crash) -> SKIP"; tail -5 /tmp/test.log; exit 125 ;;
+          esac
+          STEP
+          chmod +x "${{ runner.temp }}/bisect_step.sh"
+
+      - name: Run git bisect
+        run: |
+          git bisect reset >/dev/null 2>&1 || true
+          git bisect start
+          git bisect bad  "${{ inputs.bad }}"
+          git bisect good "${{ inputs.good }}"
+          set +e
+          git bisect run "${{ runner.temp }}/bisect_step.sh" | tee "${{ runner.temp }}/bisect_out.txt"
+          set -e
+
+      - name: Report first-bad commit
+        if: always()
+        run: |
+          {
+            echo "## JIT hang bisect result"
+            echo '```'
+            grep -E "is the first bad commit" -A0 "${{ runner.temp }}/bisect_out.txt" || echo "(no clear first-bad — see log below)"
+            echo '```'
+            echo "### Full bisect log"
+            echo '```'
+            git bisect log 2>/dev/null || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          git bisect reset >/dev/null 2>&1 || true
