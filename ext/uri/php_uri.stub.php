@@ -153,7 +153,7 @@ namespace Uri\WhatWg {
         case InvalidUrlUnit;
         case SpecialSchemeMissingFollowingSolidus;
         case MissingSchemeNonRelativeUrl;
-        case InvalidReverseSoldius;
+        case InvalidReverseSolidus;
         case InvalidCredentials;
         case HostMissing;
         case PortOutOfRange;
