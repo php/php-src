@@ -626,7 +626,7 @@ try_again:
 			}
 		} else if (FG(user_agent)) {
 			smart_str_append_const(&soap_headers, "User-Agent: ");
-			smart_str_appends(&soap_headers, FG(user_agent));
+			smart_str_append(&soap_headers, FG(user_agent));
 			smart_str_append_const(&soap_headers, "\r\n");
 		} else {
 			smart_str_append_const(&soap_headers, "User-Agent: PHP-SOAP/"PHP_VERSION"\r\n");
