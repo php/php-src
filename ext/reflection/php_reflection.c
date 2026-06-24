@@ -4762,11 +4762,7 @@ ZEND_METHOD(ReflectionClass, hasConstant)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (zend_hash_exists(&ce->constants_table, name)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(zend_hash_exists(&ce->constants_table, name));
 }
 /* }}} */
 
