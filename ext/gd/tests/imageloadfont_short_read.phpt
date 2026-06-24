@@ -7,7 +7,9 @@ gd
 /* A user-space wrapper returns one byte per read, so php_stream_read() hands
  * imageloadfont()'s header loop a short read on every iteration. The header
  * (4 ints) plus a single 1x1 glyph byte form a valid font, which only loads
- * when each short read lands at the correct byte offset. */
+ * when each short read lands at the correct byte offset. imageloadfont() reads
+ * the header as native-endian ints, so pack the fields with 'i' (not 'V') to
+ * keep the font valid on big-endian hosts too. */
 class drip
 {
     public $context;
@@ -16,7 +18,7 @@ class drip
 
     public function stream_open($path, $mode, $options, &$opened): bool
     {
-        $this->data = pack('V4', 1, 32, 1, 1) . "\x00";
+        $this->data = pack('i4', 1, 32, 1, 1) . "\x00";
         return true;
     }
 
