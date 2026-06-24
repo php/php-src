@@ -24,10 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22046 (The unserialize function can lead to segfault when
     non-Serializable internal classes are serialized back with the C format).
     (kocsismate)
-  . Fixed bug GH-22292 (AST pretty printing does not correctly handle
-    invalid variable names). (timwolla)
-  . Fixed bug GH-22291 (AST pretty printing does not correctly handle braces
-    in string interpolation). (timwolla)
+  . Fixed bug GH-22292 (AST pretty printing does not correctly handle invalid
+    variable names). (timwolla)
+  . Fixed bug GH-22291 (AST pretty printing does not correctly handle braces in
+    string interpolation). (timwolla)
   . Fixed bug GH-22373 (AST pretty-printing drops meaningful parentheses
     surrounding property access). (timwolla)
 
@@ -44,17 +44,16 @@ PHP                                                                        NEWS
   . Update timelib to 2022.16. (Derick)
 
 - DOM:
-  . Removed LIBXML_XINCLUDE from valid options for XMLDocument,
-    as it was a no-op. (ndossche)
+  . Removed LIBXML_XINCLUDE from valid options for XMLDocument, as it was a
+    no-op. (ndossche)
   . Readonly DOM properties are now declared with asymmetric visibility
     (public private(set)). ReflectionProperty::isWritable() reports them
     correctly, and external writes raise "Cannot modify private(set)
     property" instead of the previous readonly modification error.
     (David Carlier)
-  . Fixed Dom\Notation nodes missing tree connection, so that
-    ownerDocument, parentNode, isConnected and baseURI now return correct
-    values, and textContent returns NULL per the DOM specification.
-    (jordikroon)
+  . Fixed Dom\Notation nodes missing tree connection, so that ownerDocument,
+    parentNode, isConnected and baseURI now return correct values, and
+    textContent returns NULL per the DOM specification. (jordikroon)
 
 - EXIF:
   . Added support for reading EXIF metadata from WebP images (GH-19904).
@@ -71,8 +70,8 @@ PHP                                                                        NEWS
 
 - GMP:
   . gmp_fact() reject values larger than unsigned long. (David Carlier)
-  . gmp_pow/binomial/root/rootrem and shift/pow operators reject values
-    larger than unsigned long. (David Carlier)
+  . gmp_pow/binomial/root/rootrem and shift/pow operators reject values larger
+    than unsigned long. (David Carlier)
   . GMP exponentiation and shift operators now emit a deprecation warning
     when converting a float right operand to int loses precision. (Weilin Du)
 
@@ -111,8 +110,8 @@ PHP                                                                        NEWS
     (Juan Morales)
 
 - Fibers:
-  . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
-    small value). (David Carlier)
+  . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI small
+    value). (David Carlier)
 
 - Mail:
   . Fixed bug GH-20862 (null pointer dereference in
@@ -158,12 +157,12 @@ PHP                                                                        NEWS
     (KentarouTakeda)
 
 - PGSQL:
-  . Enabled 64 bits support for pg_lo_truncate()/pg_lo_tell()
-    if the server supports it. (KentarouTakeda)
-  . pg_fetch_object() now surfaces non-instantiable class errors
-    before fetching, resolves the constructor via the get_constructor
-    handler, and reports the empty-constructor ValueError on the
-    $constructor_args argument. (David Carlier)
+  . Enabled 64 bits support for pg_lo_truncate()/pg_lo_tell() if the server
+    supports it. (KentarouTakeda)
+  . pg_fetch_object() now surfaces non-instantiable class errors before
+    fetching, resolves the constructor via the get_constructor handler, and
+    reports the empty-constructor ValueError on the $constructor_args argument.
+    (David Carlier)
 
 - Phar:
   . Support reference values in Phar::mungServer(). (ndossche)
@@ -186,8 +185,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
   . Added ReflectionConstant::inNamespace(). (Khaled Alam)
-  . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
-    (ilutov)
+  . Added ReflectionProperty::isReadable() and ::isWritable(). (ilutov)
   . Fixed bug GH-21362 (ReflectionMethod::invoke/invokeArgs() did not verify
     Closure instance identity for Closure::__invoke()). (Ilia Alshanetsky)
   . Added ReflectionParameter::getDocComment(). (chschneider)
@@ -233,12 +231,12 @@ PHP                                                                        NEWS
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
-  . Fixed bug GH-21831 (SplObjectStorage::removeAllExcept() use-after-free
-    with re-entrant getHash()). (Pratik Bhujel)
+  . Fixed bug GH-21831 (SplObjectStorage::removeAllExcept() use-after-free with
+    re-entrant getHash()). (Pratik Bhujel)
   . Fix bugs GH-8561, GH-8562, GH-8563, and GH-8564 (Fixing various
     SplFileObject iterator desync bugs). (iliaal)
-  . Fix bug GH-22062 (SplDoublyLinkedList iterator UAF
-    via destructor releasing next node). (David Carlier)
+  . Fix bug GH-22062 (SplDoublyLinkedList iterator UAF via destructor releasing
+    next node). (David Carlier)
 
 - Sysvshm:
   . Fixed shm_attach() to throw ValueError for keys outside the key_t range.
@@ -269,19 +267,19 @@ PHP                                                                        NEWS
   . linkinfo() now raises a ValueError when the argument is an empty string.
     (Weilin Du)
   . getenv() and putenv() now raises a ValueError when the first argument
-    contains null bytes. (Weilin Du)
-  . dl() now raises a ValueError when the $extension_filename argument
-    contains null bytes. (Weilin Du)
-  . openlog() now raises a ValueError when the $prefix argument contains
-    null bytes. (Weilin Du)
-  . parse_str() now raises a ValueError when the $string argument contains
-    null bytes. (Weilin Du)
-  . proc_open() now raises a ValueError when the $cwd argument contains
-    null bytes. (Weilin Du)
+    contains NUL bytes. (Weilin Du)
+  . dl() now raises a ValueError when the $extension_filename argument contains
+    NUL bytes. (Weilin Du)
+  . openlog() now raises a ValueError when the $prefix argument contains NUL
+    bytes. (Weilin Du)
+  . parse_str() now raises a ValueError when the $string argument contains NUL
+    bytes. (Weilin Du)
+  . proc_open() now raises a ValueError when the $cwd argument contains NUL
+    bytes. (Weilin Du)
   . ini_get_all() now includes the built-in default value in the details.
     (sebastian)
-  . Fixed bug GH-22171 (Invalid auth header generation in
-    http(s) stream wrapper). (David Carlier)
+  . Fixed bug GH-22171 (Invalid auth header generation in http(s) stream
+    wrapper). (David Carlier)
 
 - Streams:
   . Added new stream errors API including new StreamException, StreamError
@@ -303,12 +301,11 @@ PHP                                                                        NEWS
     filters). (Jakub Zelenka)
 
 - URI:
-  . Added Uri\Rfc3986\Uri:getUriType() and Uri\WhatWg\Url:isSpecialScheme().
+  . Added Uri\Rfc3986\Uri::getUriType() and Uri\WhatWg\Url::isSpecialScheme().
     (kocsismate)
-  . Added Uri\Rfc3986\Uri:getHostType() and Uri\WhatWg\Url:getHostType().
+  . Added Uri\Rfc3986\Uri::getHostType() and Uri\WhatWg\Url::getHostType().
     (kocsismate)
-  . Added Uri\Rfc3986\UriBuilder.
-    (kocsismate)
+  . Added Uri\Rfc3986\UriBuilder. (kocsismate)
 
 - Zip:
   . Fixed ZipArchive callback being called after executor has shut down.
