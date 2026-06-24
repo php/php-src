@@ -1686,6 +1686,19 @@ static ZEND_COLD void zend_ast_export_ns_name(smart_str *str, zend_ast *ast, int
 	}
 	zend_ast_export_ex(str, ast, priority, indent);
 }
+static ZEND_COLD void zend_ast_export_ns_name_or_expression(smart_str *str, zend_ast *ast, int priority, int indent)
+{
+	switch (ast->kind) {
+		case ZEND_AST_ZVAL:
+		case ZEND_AST_VAR:
+			zend_ast_export_ns_name(str, ast, priority, indent);
+			break;
+		default:
+			smart_str_appendc(str, '(');
+			zend_ast_export_ex(str, ast, priority, indent);
+			smart_str_appendc(str, ')');
+	}
+}
 
 static ZEND_COLD bool zend_ast_valid_var_name(const char *s, size_t len)
 {
@@ -2523,25 +2536,12 @@ simple_list:
 			zend_ast_export_var(str, ast->child[1], indent);
 			break;
 		case ZEND_AST_STATIC_PROP:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			zend_ast_export_ns_name_or_expression(str, ast->child[0], 0, indent);
 			smart_str_appends(str, "::$");
 			zend_ast_export_var(str, ast->child[1], indent);
 			break;
 		case ZEND_AST_CALL: {
-			zend_ast *left = ast->child[0];
-			switch (left->kind) {
-				/* ZEND_AST_ZVAL is a regular function call. */
-				case ZEND_AST_ZVAL:
-				/* ZEND_AST_VAR ($foo()) is unambiguous without parens. */
-				case ZEND_AST_VAR:
-					zend_ast_export_ns_name(str, left, 0, indent);
-					break;
-				default:
-					smart_str_appendc(str, '(');
-					zend_ast_export_ex(str, left, 0, indent);
-					smart_str_appendc(str, ')');
-					break;
-			}
+			zend_ast_export_ns_name_or_expression(str, ast->child[0], 0, indent);
 			smart_str_appendc(str, '(');
 			zend_ast_export_ex(str, ast->child[1], 0, indent);
 			smart_str_appendc(str, ')');
@@ -2553,7 +2553,7 @@ simple_list:
 			goto simple_list;
 		}
 		case ZEND_AST_CLASS_CONST:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			zend_ast_export_ns_name_or_expression(str, ast->child[0], 0, indent);
 			smart_str_appends(str, "::");
 			zend_ast_export_name(str, ast->child[1], 0, indent);
 			break;
@@ -2570,7 +2570,7 @@ simple_list:
 					default: ZEND_UNREACHABLE();
 				}
 			} else {
-				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+				zend_ast_export_ns_name_or_expression(str, ast->child[0], 0, indent);
 			}
 			smart_str_appends(str, "::class");
 			break;
@@ -2649,7 +2649,7 @@ simple_list:
 				}
 				zend_ast_export_class_no_header(str, decl, indent);
 			} else {
-				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+				zend_ast_export_ns_name_or_expression(str, ast->child[0], 0, indent);
 				smart_str_appendc(str, '(');
 				zend_ast_export_ex(str, ast->child[1], 0, indent);
 				smart_str_appendc(str, ')');
@@ -2658,7 +2658,7 @@ simple_list:
 		case ZEND_AST_INSTANCEOF:
 			zend_ast_export_ex(str, ast->child[0], 0, indent);
 			smart_str_appends(str, " instanceof ");
-			zend_ast_export_ns_name(str, ast->child[1], 0, indent);
+			zend_ast_export_ns_name_or_expression(str, ast->child[1], 0, indent);
 			break;
 		case ZEND_AST_YIELD:
 			if (priority > 70) smart_str_appendc(str, '(');
@@ -2851,7 +2851,12 @@ simple_list:
 			smart_str_appendc(str, ')');
 			break;
 		case ZEND_AST_STATIC_CALL:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			if (zend_ast_is_parent_hook_call(ast)) {
+				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			} else {
+				zend_ast_export_ns_name_or_expression(str, ast->child[0], 0, indent);
+			}
+
 			smart_str_appends(str, "::");
 			zend_ast_export_var(str, ast->child[1], indent);
 			smart_str_appendc(str, '(');
@@ -3081,4 +3086,23 @@ zend_ast * ZEND_FASTCALL zend_ast_call_get_args(zend_ast *ast)
 
 	ZEND_UNREACHABLE();
 	return NULL;
+}
+
+bool zend_ast_is_parent_hook_call(const zend_ast *ast)
+{
+	ZEND_ASSERT(ast->kind == ZEND_AST_STATIC_CALL);
+
+	const zend_ast *class_ast = ast->child[0];
+	zend_ast *method_ast = ast->child[1];
+
+	return class_ast->kind == ZEND_AST_STATIC_PROP
+		&& !(class_ast->attr & ZEND_PARENTHESIZED_STATIC_PROP)
+		&& class_ast->child[0]->kind == ZEND_AST_ZVAL
+		&& Z_TYPE_P(zend_ast_get_zval(class_ast->child[0])) == IS_STRING
+		&& zend_get_class_fetch_type(zend_ast_get_str(class_ast->child[0])) == ZEND_FETCH_CLASS_PARENT
+		&& class_ast->child[1]->kind == ZEND_AST_ZVAL
+		&& method_ast->kind == ZEND_AST_ZVAL
+		&& Z_TYPE_P(zend_ast_get_zval(method_ast)) == IS_STRING
+		&& (zend_string_equals_literal_ci(zend_ast_get_str(method_ast), "get")
+		|| zend_string_equals_literal_ci(zend_ast_get_str(method_ast), "set"));
 }

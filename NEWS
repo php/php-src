@@ -30,6 +30,8 @@ PHP                                                                        NEWS
     in string interpolation). (timwolla)
   . Fixed bug GH-22373 (AST pretty-printing drops meaningful parentheses
     surrounding property access). (timwolla)
+  . Fixed bug GH-22387 (AST pretty-printing drops meaningful parentheses around
+    RHS of instanceof). (timwolla)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
