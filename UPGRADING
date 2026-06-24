@@ -254,6 +254,8 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/uri_followup#uri_type_detection
   . Added Uri\Rfc3986\Uri:getHostType() and Uri\WhatWg\Url:getHostType().
     RFC: https://wiki.php.net/rfc/uri_followup#host_type_detection
+  . Added Uri\Rfc3986\UriBuilder.
+    RFC: https://wiki.php.net/rfc/uri_followup#uri_building
 
 ========================================
 3. Changes in SAPI modules
