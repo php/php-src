@@ -673,6 +673,11 @@ ZEND_API zend_object *zend_enum_get_case_cstr(zend_class_entry *ce, const char *
 	return zend_enum_case_from_class_constant(c);
 }
 
+ZEND_API zend_object *zend_enum_get_case_by_id(zend_class_entry *ce, int id) {
+	zend_class_constant *c = Z_PTR(CE_CONSTANTS_TABLE(ce)->arData[id - 1].val);
+	return zend_enum_case_from_class_constant(c);
+}
+
 void zend_enum_startup(void)
 {
 	for (size_t i = 0; i < sizeof(zarginfo_class_UnitEnum_cases)/sizeof(zend_arg_info); i++) {
