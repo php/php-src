@@ -283,6 +283,8 @@ PHP                                                                        NEWS
     (sebastian)
   . Fixed bug GH-22171 (Invalid auth header generation in http(s) stream
     wrapper). (David Carlier)
+  . Fixed bug GH-17384 (number_format() may exhaust memory with decimals
+    outside the range from -2147483648 to 2147483647). (Weilin Du)
 
 - Streams:
   . Added new stream errors API including new StreamException, StreamError
