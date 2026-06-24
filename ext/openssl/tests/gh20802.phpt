@@ -58,5 +58,5 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--
 %a
+PHP Warning:  stream_socket_accept(): SNI_server_certs options values must be of type array|string in %s(%d) : eval()'d code on line %d
 PHP Warning:  stream_socket_accept(): Failed to enable crypto in %s(%d) : eval()'d code on line %d
-PHP Warning:  stream_socket_accept(): Accept failed: Cannot enable crypto in %s(%d) : eval()'d code on line %d

@@ -86,6 +86,7 @@ enum StreamErrorCode
     case InvalidParam;
     case RedirectLimit;
     case AuthFailed;
+    case TimeOut;
 
     /* Encoding/decoding/archiving operations */
     case ArchivingFailed;
