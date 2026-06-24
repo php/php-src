@@ -688,7 +688,11 @@ static void php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ 
 	array_init(&array_members);
 	zend_hash_real_init_packed(Z_ARRVAL(array_members));
 
-	add_assoc_string(array_group, "name", g->gr_name);
+	if (g->gr_name) {
+		add_assoc_string(array_group, "name", g->gr_name);
+	} else {
+		add_assoc_null(array_group, "name");
+	}
 	if (g->gr_passwd) {
 		add_assoc_string(array_group, "passwd", g->gr_passwd);
 	} else {
