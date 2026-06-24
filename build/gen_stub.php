@@ -4434,7 +4434,7 @@ class FileInfo {
         };
 
         $stmts = $parser->parse($code);
-        $nodeTraverser->traverse($stmts);
+        $stmts = $nodeTraverser->traverse($stmts);
 
         $fileTags = DocCommentTag::parseDocComments(self::getFileDocComments($stmts));
         $fileInfo = new FileInfo($fileTags);
