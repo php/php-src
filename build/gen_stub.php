@@ -4869,7 +4869,7 @@ function parseStubFile(string $code): FileInfo {
     };
 
     $stmts = $parser->parse($code);
-    $nodeTraverser->traverse($stmts);
+    $stmts = $nodeTraverser->traverse($stmts);
 
     $fileInfo = new FileInfo;
     $fileDocComments = getFileDocComments($stmts);
