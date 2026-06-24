@@ -10,8 +10,8 @@ var_dump(hexdec("12345"));
 var_dump(hexdec("q12345"));
 var_dump(hexdec("12345+?!"));
 var_dump(hexdec("12345q"));
-var_dump((float)hexdec("1234500001"));
-var_dump((float)hexdec("17fffffff"));
+var_dump(hexdec("12345678901234567"));
+var_dump(hexdec("17fffffffffffffff"));
 
 ?>
 --EXPECTF--
@@ -26,5 +26,9 @@ int(74565)
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(74565)
-float(78187069441)
-float(6442450943)
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
+float(2.0988295476557332E+19)
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
+float(2.7670116110564327E+19)

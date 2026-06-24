@@ -30,18 +30,24 @@ foreach ($octLongStrs as $strVal) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 --- testing: 777777777777777777777 ---
 int(9223372036854775807)
 --- testing: 1777777777777777777777 ---
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(1.8446744073709552E+19)
 --- testing: 17777777777 ---
 int(2147483647)
 --- testing: 37777777777 ---
 int(4294967295)
 --- testing: 377777777777777777777777 ---
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(2.3611832414348226E+21)
 --- testing: 17777777777777777777777777 ---
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(7.555786372591432E+22)
 --- testing: 377777777777 ---
 int(34359738367)

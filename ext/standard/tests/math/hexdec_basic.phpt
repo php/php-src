@@ -32,11 +32,17 @@ for ($i = 0; $i < count($values); $i++) {
 --EXPECTF--
 int(18433668)
 int(126895953)
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(142929835591)
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(142929835592)
 int(1194684)
 int(7904751)
 int(2147483647)
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(2147483648)
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d

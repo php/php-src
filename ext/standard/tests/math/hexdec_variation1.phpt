@@ -86,9 +86,13 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 int(9029)
 
 -- Iteration 5 --
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(285960729237)
 
 -- Iteration 6 --
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(285960729238)
 
 -- Iteration 7 --
@@ -102,9 +106,13 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 int(261)
 
 -- Iteration 9 --
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(20015998341120)
 
 -- Iteration 10 --
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 float(1250999896553)

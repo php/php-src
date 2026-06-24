@@ -30,18 +30,24 @@ foreach ($binLongStrs as $strVal) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 --- testing: 0111111111111111111111111111111111111111111111111111111111111111 ---
 int(9223372036854775807)
 --- testing: 1111111111111111111111111111111111111111111111111111111111111111 ---
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(1.8446744073709552E+19)
 --- testing: 01111111111111111111111111111111 ---
 int(2147483647)
 --- testing: 11111111111111111111111111111111 ---
 int(4294967295)
 --- testing: 01111111111111111111111111111111111111111111111111111111111111111 ---
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(1.8446744073709552E+19)
 --- testing: 11111111111111111111111111111111111111111111111111111111111111111 ---
+
+Notice: Input number exceeds maximum integer value, precision has been lost in conversion in %s on line %d
 float(3.6893488147419103E+19)
 --- testing: 011111111111111111111111111111111 ---
 int(4294967295)
