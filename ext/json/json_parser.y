@@ -311,14 +311,11 @@ PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parse
 	return parser->scanner.errcode;
 }
 
-PHP_JSON_API size_t php_json_parser_error_line(const php_json_parser *parser)
+PHP_JSON_API void php_json_parser_error_details(const php_json_parser *parser, php_json_error_details *out)
 {
-	return parser->scanner.errloc.first_line;
-}
-
-PHP_JSON_API size_t php_json_parser_error_column(const php_json_parser *parser)
-{
-	return parser->scanner.errloc.first_column;
+	out->code = parser->scanner.errcode;
+	out->line = parser->scanner.errloc.first_line;
+	out->column = parser->scanner.errloc.first_column;
 }
 
 static const php_json_parser_methods default_parser_methods =
