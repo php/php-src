@@ -145,6 +145,9 @@ PHP 8.6 UPGRADE NOTES
 - Standard:
   . Form feed (\f) is now added in the default trimmed characters of trim(),
     rtrim() and ltrim(). RFC: https://wiki.php.net/rfc/trim_form_feed
+  . sscanf() and fscanf() %c conversions now correctly read whitespace
+    characters, restoring ANSI C behavior. Previously, they stopped at
+    whitespace.
   . array_filter() now raises a ValueError when an invalid $mode
     argument value is passed.
   . array_change_key_case() now raises a ValueError when an invalid $case
