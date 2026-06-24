@@ -46,6 +46,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, __construct)
 			"Spoofchecker::__construct(): unable to open ICU Spoof Checker", 0);
 	}
 
+	/* Applies the default spoof checker behavior consistently across ICU versions. */
 	intl_icu_compat_uspoof_init_checker(co->uspoof, &co->uspoofres, SPOOFCHECKER_ERROR_CODE_P(co));
 }
 /* }}} */

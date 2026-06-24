@@ -47,7 +47,9 @@ UBreakIterator *intl_icu_compat_ubrk_clone(const UBreakIterator *break_iterator,
 void intl_icu_compat_uspoof_init_checker(USpoofChecker *checker, IntlIcuSpoofCheckResult **check_result, UErrorCode *status)
 {
 #if INTL_ICU_HAS_SPOOFCHECKER_CHECK_RESULT
-	/* ICU 58 replaced WSC/MSC handling with restriction levels and extended check results. */
+	/* ICU 58 removed WSC/MSC handling in favor of TR39 restriction levels.
+	 * Keep the default highly restrictive behavior and allocate the extended
+	 * check result used by uspoof_check2*(). */
 	uspoof_setRestrictionLevel(checker, USPOOF_HIGHLY_RESTRICTIVE);
 	*check_result = uspoof_openCheckResult(status);
 #else
