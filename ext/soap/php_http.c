@@ -1151,8 +1151,10 @@ try_again:
 				zend_string_release_ex(http_body, 0);
 				if (new_url->scheme == NULL && new_url->path != NULL) {
 					new_url->scheme = phpurl->scheme ? zend_string_copy(phpurl->scheme) : NULL;
-					new_url->host = phpurl->host ? zend_string_copy(phpurl->host) : NULL;
-					new_url->port = phpurl->port;
+					if (new_url->host == NULL) {
+						new_url->host = phpurl->host ? zend_string_copy(phpurl->host) : NULL;
+						new_url->port = phpurl->port;
+					}
 					if (new_url->path && ZSTR_VAL(new_url->path)[0] != '/') {
 						if (phpurl->path) {
 							char *t = ZSTR_VAL(phpurl->path);
