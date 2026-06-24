@@ -3,6 +3,8 @@ name: JIT Hang Bisect
 # hang seen in the nightly COMMUNITY_asan job. Runs on a native x86-64 runner
 # (the bug does not reproduce on ARM or under qemu emulation).
 on:
+  pull_request:
+    types: [opened, reopened]
   workflow_dispatch:
     inputs:
       good:
@@ -30,8 +32,8 @@ jobs:
     timeout-minutes: 350
     env:
       SYMFONY_DIR: ${{ runner.temp }}/symfony
-      TEST_TIMEOUT: ${{ inputs.test_timeout }}
-      USE_ASAN: ${{ inputs.use_asan }}
+      TEST_TIMEOUT: ${{ inputs.test_timeout || '300' }}
+      USE_ASAN: ${{ inputs.use_asan || 'true' }}
       # Mirror the COMMUNITY_asan runtime environment
       USE_ZEND_ALLOC: '0'
       USE_TRACKED_ALLOC: '1'
@@ -48,8 +50,8 @@ jobs:
         run: |
           git remote add upstream https://github.com/php/php-src.git || true
           git fetch --tags --quiet upstream
-          git rev-parse "${{ inputs.good }}^{commit}"
-          git rev-parse "${{ inputs.bad }}^{commit}"
+          git rev-parse "${{ inputs.good || 'php-8.3.0' }}^{commit}"
+          git rev-parse "${{ inputs.bad || '27c10ddce6302912a46d72a4dcd47c89f1209544' }}^{commit}"
 
       - name: Install build dependencies
         run: |
@@ -62,8 +64,8 @@ jobs:
       - name: Set up Symfony test bed (pinned commit)
         run: |
           git clone --no-checkout --filter=blob:none https://github.com/symfony/symfony.git "$SYMFONY_DIR"
-          git -C "$SYMFONY_DIR" fetch --depth=1 origin "${{ inputs.symfony_commit }}"
-          git -C "$SYMFONY_DIR" checkout "${{ inputs.symfony_commit }}"
+          git -C "$SYMFONY_DIR" fetch --depth=1 origin "${{ inputs.symfony_commit || 'dce1b899ab0c0e4cef9159c083ef535387a8db12' }}"
+          git -C "$SYMFONY_DIR" checkout "${{ inputs.symfony_commit || 'dce1b899ab0c0e4cef9159c083ef535387a8db12' }}"
           ( cd "$SYMFONY_DIR" && composer install --no-progress --ignore-platform-req=php+ && php ./phpunit install )
 
       - name: Write bisect predicate
@@ -119,8 +121,8 @@ jobs:
         run: |
           git bisect reset >/dev/null 2>&1 || true
           git bisect start
-          git bisect bad  "${{ inputs.bad }}"
-          git bisect good "${{ inputs.good }}"
+          git bisect bad  "${{ inputs.bad || '27c10ddce6302912a46d72a4dcd47c89f1209544' }}"
+          git bisect good "${{ inputs.good || 'php-8.3.0' }}"
           set +e
           git bisect run "${{ runner.temp }}/bisect_step.sh" | tee "${{ runner.temp }}/bisect_out.txt"
           set -e
