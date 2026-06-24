@@ -262,11 +262,9 @@ void zend_accel_build_delayed_early_binding_list(zend_persistent_script *persist
 
 	for (zend_op *opline = op_array->opcodes; opline < end; opline++) {
 		if (opline->opcode == ZEND_DECLARE_CLASS_DELAYED) {
-			const zval *lcname = RT_CONSTANT(opline, opline->op1);
-			early_binding->lcname = zend_string_copy(Z_STR_P(lcname));
-			early_binding->rtd_key = zend_string_copy(Z_STR_P(lcname + 1));
-			early_binding->lc_parent_name =
-				zend_string_copy(Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+			const zval *name = RT_CONSTANT(opline, opline->op1);
+			early_binding->name = zend_string_copy(Z_STR_P(name));
+			early_binding->rtd_key = zend_string_copy(Z_STR_P(name + 1));
 			early_binding->cache_slot = (uint32_t) -1;
 			early_binding++;
 		}
@@ -309,9 +307,8 @@ void zend_accel_free_delayed_early_binding_list(zend_persistent_script *persiste
 	if (persistent_script->num_early_bindings) {
 		for (uint32_t i = 0; i < persistent_script->num_early_bindings; i++) {
 			const zend_early_binding *early_binding = &persistent_script->early_bindings[i];
-			zend_string_release(early_binding->lcname);
+			zend_string_release(early_binding->name);
 			zend_string_release(early_binding->rtd_key);
-			zend_string_release(early_binding->lc_parent_name);
 		}
 		efree(persistent_script->early_bindings);
 		persistent_script->early_bindings = NULL;
@@ -335,22 +332,26 @@ static void zend_accel_do_delayed_early_binding(
 	CG(in_compilation) = 1;
 	for (uint32_t i = 0; i < persistent_script->num_early_bindings; i++) {
 		const zend_early_binding *early_binding = &persistent_script->early_bindings[i];
-		zend_class_entry *ce = zend_hash_find_ex_ptr(EG(class_table), early_binding->lcname, 1);
+		zend_class_entry *ce = zend_hash_find_ex_ptr(EG(class_table), early_binding->name, 1);
 		if (!ce) {
 			zval *zv = zend_hash_find_known_hash(EG(class_table), early_binding->rtd_key);
 			if (zv) {
 				zend_class_entry *orig_ce = Z_CE_P(zv);
-				zend_class_entry *parent_ce = !(orig_ce->ce_flags & ZEND_ACC_LINKED)
-					? zend_hash_find_ex_ptr(EG(class_table), early_binding->lc_parent_name, 1)
+				/* parent_name is a union with the resolved parent pointer; an
+				 * unlinked persisted class must still carry the string form */
+				ZEND_ASSERT((orig_ce->ce_flags & ZEND_ACC_LINKED)
+					|| !(orig_ce->ce_flags & ZEND_ACC_RESOLVED_PARENT));
+				zend_class_entry *parent_ce = !(orig_ce->ce_flags & ZEND_ACC_LINKED) && orig_ce->parent_name
+					? zend_hash_find_ptr(EG(class_table), orig_ce->parent_name)
 					: NULL;
 				if (parent_ce || (orig_ce->ce_flags & ZEND_ACC_LINKED)) {
-					ce = zend_try_early_bind(orig_ce, parent_ce, early_binding->lcname, zv);
-				} else if (ZSTR_LEN(early_binding->lc_parent_name) == 0) {
+					ce = zend_try_early_bind(orig_ce, parent_ce, early_binding->name, zv);
+				} else if (!orig_ce->parent_name) {
 					/* Parentless class: use the same binding path as the VM handler */
-					zval lcname_zv[2];
-					ZVAL_STR(&lcname_zv[0], early_binding->lcname);
-					ZVAL_STR(&lcname_zv[1], early_binding->rtd_key);
-					ce = zend_bind_class_in_slot(zv, lcname_zv, early_binding->lc_parent_name);
+					zval name_zv[2];
+					ZVAL_STR(&name_zv[0], early_binding->name);
+					ZVAL_STR(&name_zv[1], early_binding->rtd_key);
+					ce = zend_bind_class_in_slot(zv, name_zv);
 				}
 			}
 			if (ce && early_binding->cache_slot != (uint32_t) -1) {

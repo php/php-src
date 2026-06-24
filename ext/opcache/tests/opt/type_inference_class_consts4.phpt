@@ -49,7 +49,7 @@ $_main:
      ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 DECLARE_CLASS string("test4")
+0000 DECLARE_CLASS string("Test4")
 0001 RETURN int(1)
 
 Test4::getSelfA:

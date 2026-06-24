@@ -1,5 +1,5 @@
 --TEST--
-SPL: RecursiveIteratorIterator - Exception thrown in nextelement which should be handled in next()
+SPL: RecursiveIteratorIterator - Exception thrown in nextElement which should be handled in next()
 --FILE--
 <?php
 
@@ -10,7 +10,7 @@ $recArrIt = new RecursiveArrayIterator([
 
 class MyRecursiveIteratorIterator extends RecursiveIteratorIterator {
 
-    function nextelement(): void {
+    function nextElement(): void {
         throw new Exception;
     }
 }
@@ -30,7 +30,7 @@ NULL
 
 Fatal error: Uncaught Exception in %s
 Stack trace:
-#0 [internal function]: MyRecursiveIteratorIterator->nextelement()
+#0 [internal function]: MyRecursiveIteratorIterator->nextElement()
 #1 %s: RecursiveIteratorIterator->next()
 #2 {main}
   thrown in %s on line %d

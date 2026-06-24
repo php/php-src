@@ -7,7 +7,7 @@ com_dotnet
 error_reporting(E_ALL);
 
 try {
-    $v = new VARIANT(array("123", "456", "789"));
+    $v = new variant(array("123", "456", "789"));
     var_dump($v);
     print $v[0] . "\n";
     print $v[1] . "\n";

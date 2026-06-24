@@ -3,7 +3,7 @@ spl_autoload_register() function - warn when using false as second argument for 
 --FILE--
 <?php
 function customAutolader($class) {
-    require_once __DIR__ . '/testclass.class.inc';
+    require_once __DIR__ . '/TestClass.class.inc';
 }
 spl_autoload_register('customAutolader', false);
 
@@ -12,5 +12,5 @@ var_dump(class_exists('TestClass', false));
 ?>
 --EXPECTF--
 Notice: spl_autoload_register(): Argument #2 ($do_throw) has been ignored, spl_autoload_register() will always throw in %s on line %d
-%stestclass.class.inc
+%sTestClass.class.inc
 bool(true)

@@ -1,6 +1,6 @@
 <?php
 
-function test_helper(DOM\ParentNode $dom, string $selector, bool $only_name = false)
+function test_helper(Dom\ParentNode $dom, string $selector, bool $only_name = false)
 {
     echo "--- Selector: $selector ---\n";
 
@@ -20,7 +20,7 @@ function test_helper(DOM\ParentNode $dom, string $selector, bool $only_name = fa
             continue;
         }
 
-        echo $dom->saveXML($node), "\n";
+        echo $dom->saveXml($node), "\n";
     }
 
     // If the element is in the list, then it must match, otherwise it must not
@@ -28,13 +28,13 @@ function test_helper(DOM\ParentNode $dom, string $selector, bool $only_name = fa
     foreach ($dom->querySelectorAll('*') as $node) {
         if (in_array($node, $list, true) !== $node->matches($selector)) {
             var_dump($node, $selector, in_array($node, $list, true), $node->matches($selector));
-            echo $dom->saveXML($node), "\n";
+            echo $dom->saveXml($node), "\n";
             throw new Exception('Bug in Element::matches()');
         }
     }
 }
 
-function test_failure(DOM\ParentNode $dom, string $selector)
+function test_failure(Dom\ParentNode $dom, string $selector)
 {
     echo "--- Selector: $selector ---\n";
 

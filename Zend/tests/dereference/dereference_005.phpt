@@ -5,7 +5,7 @@ Testing array dereference on object that implements ArrayAccess
 
 error_reporting(E_ALL);
 
-class obj implements arrayaccess {
+class obj implements ArrayAccess {
     private $container = array();
     public function __construct() {
         $this->container = array(

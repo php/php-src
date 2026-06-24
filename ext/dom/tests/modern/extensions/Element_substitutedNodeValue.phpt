@@ -10,17 +10,17 @@ $dom = Dom\XMLDocument::createFromString('<root/>');
 $dom->documentElement->substitutedNodeValue = "&#x31;";
 var_dump($dom->documentElement->substitutedNodeValue);
 var_dump($dom->documentElement->nodeValue); // Should always be NULL for elements
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $dom->documentElement->substitutedNodeValue = "&lt;&gt;";
 var_dump($dom->documentElement->substitutedNodeValue);
 var_dump($dom->documentElement->nodeValue); // Should always be NULL for elements
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $dom->documentElement->substitutedNodeValue = "";
 var_dump($dom->documentElement->substitutedNodeValue);
 var_dump($dom->documentElement->nodeValue); // Should always be NULL for elements
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECTF--

@@ -14,6 +14,24 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+  . Function, class, and method tables (EG(function_table), EG(class_table),
+    zend_class_entry.function_table) are now keyed by the canonical (declared)
+    name instead of its lowercase form, and lookups are case-sensitive.
+    Extensions performing lowercased lookups in these tables must pass the
+    exact name instead. Related changes:
+      - zend_class_name lost its lc_name field and zend_attribute lost its
+        lcname field.
+      - zend_get_attribute_str() and zend_get_parameter_attribute_str() now
+        match attribute names case-sensitively; pass the exact attribute name
+        instead of a lowercased one.
+      - The "key" argument of the get_method and get_static_method object
+        handlers is no longer a pre-lowercased copy of the method name; when
+        non-NULL it holds the same string as the method name itself (with a
+        precomputed hash).
+      - zend_perform_class_autoload() lost its lowercase-name parameter;
+        autoloaders receive the case-preserved class name.
+      - do_bind_class() and zend_bind_class_in_slot() changed signatures
+        (the separate lowercase-name literal no longer exists).
   . ZSTR_INIT_LITERAL(), zend_string_starts_with_literal(), and
     zend_string_starts_with_literal_ci() now support strings containing NUL
     bytes. Passing non-literal char* is no longer supported.

@@ -9,7 +9,7 @@ dom
 <?php
 
 //offset to large
-$dom = new DomDocument();
+$dom = new DOMDocument();
 $comment = $dom->createComment('test-comment');
 try {
   $comment->replaceData(999,4,'-inserted');

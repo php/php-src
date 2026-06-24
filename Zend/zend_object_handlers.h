@@ -152,6 +152,9 @@ typedef zend_array *(*zend_object_get_properties_for_t)(zend_object *object, zen
 /* args on stack! */
 /* Andi - EX(fbc) (function being called) needs to be initialized already in the INIT fcall opcode so that the parameters can be parsed the right way. We need to add another callback for this.
  */
+/* If non-NULL, "key" is the method-name literal usable as a method-table hash
+ * key with a precomputed hash. Method names are case-sensitive, so it holds the
+ * same string as "method" (before PHP 8.6 it was a pre-lowercased copy). */
 typedef zend_function *(*zend_object_get_method_t)(zend_object **object, zend_string *method, const zval *key);
 typedef zend_function *(*zend_object_get_constructor_t)(zend_object *object);
 

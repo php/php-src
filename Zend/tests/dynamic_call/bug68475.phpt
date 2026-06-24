@@ -19,8 +19,8 @@ class TestClass
 $callback = 'TestClass::staticMethod';
 $callback();
 
-// Case should not matter.
-$callback = 'testclass::staticmethod';
+// Method names are case-sensitive; use the declared case.
+$callback = 'TestClass::staticMethod';
 $callback();
 
 $args = ['arg1', 'arg2', 'arg3'];

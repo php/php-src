@@ -7,7 +7,7 @@ zip
 $dest = __DIR__ . "/bug40228-mb";
 $arc_name = __DIR__ . "/bug40228私はガラスを食べられます.zip";
 $zip = new ZipArchive;
-$zip->open($arc_name, ZIPARCHIVE::CREATE);
+$zip->open($arc_name, ZipArchive::CREATE);
 $zip->extractTo($dest);
 if (is_dir($dest . '/test/empty')) {
     echo "Ok\n";

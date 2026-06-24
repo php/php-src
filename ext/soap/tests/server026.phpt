@@ -11,7 +11,7 @@ class Foo {
 }
 
 $foo = new Foo();
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
+$server = new SoapServer(null,array('uri'=>"http://testuri.org"));
 $server->setObject($foo);
 
 $HTTP_RAW_POST_DATA = <<<EOF

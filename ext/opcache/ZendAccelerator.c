@@ -2308,7 +2308,7 @@ static zend_always_inline zend_inheritance_cache_entry* zend_accel_inheritance_c
 			}
 			if (found && entry->dependencies) {
 				for (i = 0; i < entry->dependencies_count; i++) {
-					const zend_class_entry *dependency_ce = zend_lookup_class_ex(entry->dependencies[i].name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+					const zend_class_entry *dependency_ce = zend_lookup_class_ex(entry->dependencies[i].name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
 					if (dependency_ce != entry->dependencies[i].ce) {
 						if (!dependency_ce) {
@@ -2352,7 +2352,7 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 			}
 
 			for (uint32_t i = 0; i < entry->dependencies_count; i++) {
-				const zend_class_entry *dependency_ce = zend_lookup_class_ex(entry->dependencies[i].name, NULL, 0);
+				const zend_class_entry *dependency_ce = zend_lookup_class_ex(entry->dependencies[i].name, 0);
 
 				if (dependency_ce == NULL) {
 					return NULL;
@@ -3847,9 +3847,7 @@ static zend_result preload_resolve_deps(preload_error *error, const zend_class_e
 	memset(error, 0, sizeof(preload_error));
 
 	if (ce->parent_name) {
-		zend_string *key = zend_string_tolower(ce->parent_name);
-		const zend_class_entry *parent = zend_hash_find_ptr(EG(class_table), key);
-		zend_string_release(key);
+		const zend_class_entry *parent = zend_hash_find_ptr(EG(class_table), ce->parent_name);
 		if (!parent) {
 			error->kind = "Unknown parent ";
 			error->name = ZSTR_VAL(ce->parent_name);
@@ -3860,7 +3858,7 @@ static zend_result preload_resolve_deps(preload_error *error, const zend_class_e
 	if (ce->num_interfaces) {
 		for (uint32_t i = 0; i < ce->num_interfaces; i++) {
 			const zend_class_entry *interface =
-				zend_hash_find_ptr(EG(class_table), ce->interface_names[i].lc_name);
+				zend_hash_find_ptr(EG(class_table), ce->interface_names[i].name);
 			if (!interface) {
 				error->kind = "Unknown interface ";
 				error->name = ZSTR_VAL(ce->interface_names[i].name);
@@ -3872,7 +3870,7 @@ static zend_result preload_resolve_deps(preload_error *error, const zend_class_e
 	if (ce->num_traits) {
 		for (uint32_t i = 0; i < ce->num_traits; i++) {
 			const zend_class_entry *trait =
-				zend_hash_find_ptr(EG(class_table), ce->trait_names[i].lc_name);
+				zend_hash_find_ptr(EG(class_table), ce->trait_names[i].name);
 			if (!trait) {
 				error->kind = "Unknown trait ";
 				error->name = ZSTR_VAL(ce->trait_names[i].name);
@@ -4058,21 +4056,22 @@ static void preload_link(void)
 				continue;
 			}
 
-			zend_string *lcname = zend_string_tolower(ce->name);
+			/* Held across linking: ce may be replaced or destroyed on bailout */
+			zend_string *key_name = zend_string_copy(ce->name);
 			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
-				if (zend_hash_exists(EG(class_table), lcname)) {
-					zend_string_release(lcname);
+				if (zend_hash_exists(EG(class_table), key_name)) {
+					zend_string_release(key_name);
 					continue;
 				}
 			}
 
 			preload_error error_info;
 			if (preload_resolve_deps(&error_info, ce) == FAILURE) {
-				zend_string_release(lcname);
+				zend_string_release(key_name);
 				continue;
 			}
 
-			zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, lcname);
+			zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key_name);
 			ZEND_ASSERT(zv && "We already checked above that the class doesn't exist yet");
 
 			/* Set the FILE_CACHED flag to force a lazy load, and the CACHED flag to
@@ -4095,7 +4094,7 @@ static void preload_link(void)
 			CG(compiled_filename) = ce->info.user.filename;
 			CG(zend_lineno) = ce->info.user.line_start;
 			zend_try {
-				ce = zend_do_link_class(ce, NULL, lcname);
+				ce = zend_do_link_class(ce, key_name);
 				if (!ce) {
 					ZEND_ASSERT(0 && "Class linking failed?");
 				}
@@ -4128,7 +4127,7 @@ static void preload_link(void)
 			CG(in_compilation) = false;
 			CG(compiled_filename) = NULL;
 			zend_free_recorded_errors();
-			zend_string_release(lcname);
+			zend_string_release(key_name);
 		} ZEND_HASH_FOREACH_END();
 	} while (changed);
 
@@ -4171,10 +4170,9 @@ static void preload_link(void)
 
 		if ((ce->ce_flags & (ZEND_ACC_TOP_LEVEL|ZEND_ACC_ANON_CLASS))
 				&& !(ce->ce_flags & ZEND_ACC_LINKED)) {
-			zend_string *lcname = zend_string_tolower(ce->name);
 			preload_error error;
 			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)
-			 && zend_hash_exists(EG(class_table), lcname)) {
+			 && zend_hash_exists(EG(class_table), ce->name)) {
 				zend_error_at(
 					E_WARNING, ce->info.user.filename, ce->info.user.line_start,
 					"Can't preload already declared class %s", ZSTR_VAL(ce->name));
@@ -4190,7 +4188,6 @@ static void preload_link(void)
 					"Can't preload unlinked class %s: %s",
 					ZSTR_VAL(ce->name), ZSTR_VAL(error->message));
 			}
-			zend_string_release(lcname);
 		}
 	} ZEND_HASH_FOREACH_END();
 

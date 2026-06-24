@@ -5,7 +5,7 @@ Mark Baker mark@lange.demon.co.uk at the PHPNW2017 Conference for PHP Testfest 2
 --FILE--
 <?php
 
-$datettimeObject = new DateTimeImmutable('2017-10-06 23:30:00', new DateTimezone('UTC'));
+$datettimeObject = new DateTimeImmutable('2017-10-06 23:30:00', new DateTimeZone('UTC'));
 
 $datetimeState = var_export($datettimeObject, true);
 

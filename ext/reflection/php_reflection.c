@@ -859,7 +859,6 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 {
 	smart_str param_indent = {0};
 	zend_function *overwrites;
-	zend_string *lc_name;
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?)
 	 * What's "wrong" is that any whitespace before the doc comment start is
@@ -885,13 +884,11 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 		if (fptr->common.scope != scope) {
 			smart_str_append_printf(str, ", inherits %s", ZSTR_VAL(fptr->common.scope->name));
 		} else if (fptr->common.scope->parent) {
-			lc_name = zend_string_tolower(fptr->common.function_name);
-			if ((overwrites = zend_hash_find_ptr(&fptr->common.scope->parent->function_table, lc_name)) != NULL) {
+			if ((overwrites = zend_hash_find_ptr(&fptr->common.scope->parent->function_table, fptr->common.function_name)) != NULL) {
 				if (fptr->common.scope != overwrites->common.scope && !(overwrites->common.fn_flags & ZEND_ACC_PRIVATE)) {
 					smart_str_append_printf(str, ", overwrites %s", ZSTR_VAL(overwrites->common.scope->name));
 				}
 			}
-			zend_string_release_ex(lc_name, 0);
 		}
 	}
 	if (fptr->common.prototype && fptr->common.prototype->common.scope) {
@@ -1267,17 +1264,14 @@ static zend_result read_attributes(zval *ret, HashTable *attributes, zend_class_
 	zval tmp;
 
 	if (name) {
-		// Name based filtering using lowercased key.
-		zend_string *filter = zend_string_tolower(name);
-
+		// Name based filtering (case-sensitive, like class names).
 		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
-			if (attr->offset == offset && zend_string_equals(attr->lcname, filter)) {
+			if (attr->offset == offset && zend_string_equals(attr->name, name)) {
 				reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
 				add_next_index_zval(ret, &tmp);
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		zend_string_release(filter);
 		return SUCCESS;
 	}
 
@@ -1288,7 +1282,7 @@ static zend_result read_attributes(zval *ret, HashTable *attributes, zend_class_
 
 		if (base) {
 			// Base type filtering.
-			zend_class_entry *ce = zend_lookup_class_ex(attr->name, attr->lcname, 0);
+			zend_class_entry *ce = zend_lookup_class_ex(attr->name, 0);
 
 			if (ce == NULL) {
 				// Bailout on error, otherwise ignore unavailable class.
@@ -1714,7 +1708,7 @@ ZEND_METHOD(ReflectionFunction, __construct)
 	zend_object *closure_obj = NULL;
 	reflection_object *intern;
 	zend_function *fptr;
-	zend_string *fname, *lcname;
+	zend_string *fname, *name;
 
 	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
@@ -1728,15 +1722,11 @@ ZEND_METHOD(ReflectionFunction, __construct)
 	} else {
 		if (UNEXPECTED(ZSTR_VAL(fname)[0] == '\\')) {
 			/* Ignore leading "\" */
-			ALLOCA_FLAG(use_heap)
-			ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(fname) - 1, use_heap);
-			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(fname) + 1, ZSTR_LEN(fname) - 1);
-			fptr = zend_fetch_function(lcname);
-			ZSTR_ALLOCA_FREE(lcname, use_heap);
+			name = zend_string_init(ZSTR_VAL(fname) + 1, ZSTR_LEN(fname) - 1, 0);
+			fptr = zend_fetch_function(name);
+			zend_string_release_ex(name, 0);
 		} else {
-			lcname = zend_string_tolower(fname);
-			fptr = zend_fetch_function(lcname);
-			zend_string_release(lcname);
+			fptr = zend_fetch_function(fname);
 		}
 
 		if (fptr == NULL) {
@@ -2478,18 +2468,13 @@ ZEND_METHOD(ReflectionParameter, __construct)
 		case IS_STRING:
 			{
 				zend_string *fname = Z_STR_P(reference);
-				zend_string *lcname;
 				if (UNEXPECTED(ZSTR_VAL(fname)[0] == '\\')) {
 					/* Ignore leading "\" */
-					ALLOCA_FLAG(use_heap)
-					ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(fname) - 1, use_heap);
-					zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(fname) + 1, ZSTR_LEN(fname) - 1);
-					fptr = zend_fetch_function(lcname);
-					ZSTR_ALLOCA_FREE(lcname, use_heap);
+					zend_string *name = zend_string_init(ZSTR_VAL(fname) + 1, ZSTR_LEN(fname) - 1, 0);
+					fptr = zend_fetch_function(name);
+					zend_string_release_ex(name, 0);
 				} else {
-					lcname = zend_string_tolower(fname);
-					fptr = zend_fetch_function(lcname);
-					zend_string_release(lcname);
+					fptr = zend_fetch_function(fname);
 				}
 				if (!fptr) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -2503,7 +2488,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 		case IS_ARRAY: {
 				zval *classref;
 				zval *method;
-				zend_string *name, *lcname;
+				zend_string *name;
 
 				if (((classref = zend_hash_index_find(Z_ARRVAL_P(reference), 0)) == NULL)
 					|| ((method = zend_hash_index_find(Z_ARRVAL_P(reference), 1)) == NULL))
@@ -2533,21 +2518,18 @@ ZEND_METHOD(ReflectionParameter, __construct)
 					return;
 				}
 
-				lcname = zend_string_tolower(name);
-				if (Z_TYPE_P(classref) == IS_OBJECT && is_closure_invoke(ce, lcname)
+				if (Z_TYPE_P(classref) == IS_OBJECT && is_closure_invoke(ce, name)
 					&& (fptr = zend_get_closure_invoke_method(Z_OBJ_P(classref))) != NULL)
 				{
 					/* nothing to do. don't set is_closure since is the invoke handler,
 					   not the closure itself */
-				} else if ((fptr = zend_hash_find_ptr(&ce->function_table, lcname)) == NULL) {
+				} else if ((fptr = zend_hash_find_ptr(&ce->function_table, name)) == NULL) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 					zend_string_release(name);
-					zend_string_release(lcname);
 					RETURN_THROWS();
 				}
 				zend_string_release(name);
-				zend_string_release(lcname);
 			}
 			break;
 
@@ -3243,7 +3225,6 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	zend_string *class_name = NULL;
 	char *method_name;
 	size_t method_name_len;
-	char *lcname;
 
 	zval *object;
 	reflection_object *intern;
@@ -3319,22 +3300,18 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	}
 	intern = Z_REFLECTION_P(object);
 
-	lcname = zend_str_tolower_dup(method_name, method_name_len);
-
 	if (ce == zend_ce_closure && orig_obj && (method_name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
-		&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
+		&& memcmp(method_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 		&& (mptr = zend_get_closure_invoke_method(orig_obj)) != NULL)
 	{
 		/* Store the original closure object so we can validate it in invoke/invokeArgs.
 		 * Each closure has a unique __invoke signature, so we must reject different closures. */
 		ZVAL_OBJ_COPY(&intern->obj, orig_obj);
-	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, method_name_len)) == NULL) {
-		efree(lcname);
+	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, method_name, method_name_len)) == NULL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Method %s::%s() does not exist", ZSTR_VAL(ce->name), method_name);
 		RETURN_THROWS();
 	}
-	efree(lcname);
 
 	ZVAL_STR_COPY(reflection_prop_name(object), mptr->common.function_name);
 	ZVAL_STR_COPY(reflection_prop_class(object), mptr->common.scope->name);
@@ -4473,16 +4450,14 @@ ZEND_METHOD(ReflectionClass, hasMethod)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	zend_string *name, *lc_name;
+	zend_string *name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	lc_name = zend_string_tolower(name);
-	RETVAL_BOOL(zend_hash_exists(&ce->function_table, lc_name) || is_closure_invoke(ce, lc_name));
-	zend_string_release(lc_name);
+	RETVAL_BOOL(zend_hash_exists(&ce->function_table, name) || is_closure_invoke(ce, name));
 }
 /* }}} */
 
@@ -4493,33 +4468,31 @@ ZEND_METHOD(ReflectionClass, getMethod)
 	zend_class_entry *ce;
 	zend_function *mptr;
 	zval obj_tmp;
-	zend_string *name, *lc_name;
+	zend_string *name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	lc_name = zend_string_tolower(name);
-	if (!Z_ISUNDEF(intern->obj) && is_closure_invoke(ce, lc_name)
+	if (!Z_ISUNDEF(intern->obj) && is_closure_invoke(ce, name)
 		&& (mptr = zend_get_closure_invoke_method(Z_OBJ(intern->obj))) != NULL)
 	{
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
 		reflection_method_factory(ce, mptr, NULL, return_value);
-	} else if (Z_ISUNDEF(intern->obj) && is_closure_invoke(ce, lc_name)
+	} else if (Z_ISUNDEF(intern->obj) && is_closure_invoke(ce, name)
 		&& object_init_ex(&obj_tmp, ce) == SUCCESS && (mptr = zend_get_closure_invoke_method(Z_OBJ(obj_tmp))) != NULL) {
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
 		reflection_method_factory(ce, mptr, NULL, return_value);
 		zval_ptr_dtor(&obj_tmp);
-	} else if ((mptr = zend_hash_find_ptr(&ce->function_table, lc_name)) != NULL) {
+	} else if ((mptr = zend_hash_find_ptr(&ce->function_table, name)) != NULL) {
 		reflection_method_factory(ce, mptr, NULL, return_value);
 	} else {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	}
-	zend_string_release(lc_name);
 }
 /* }}} */
 
@@ -5398,8 +5371,7 @@ ZEND_METHOD(ReflectionClass, getTraits)
 		zval trait;
 		zend_class_entry *trait_ce;
 
-		trait_ce = zend_fetch_class_by_name(ce->trait_names[i].name,
-			ce->trait_names[i].lc_name, ZEND_FETCH_CLASS_TRAIT);
+		trait_ce = zend_fetch_class_by_name(ce->trait_names[i].name, ZEND_FETCH_CLASS_TRAIT);
 		ZEND_ASSERT(trait_ce);
 		zend_reflection_class_factory(trait_ce, &trait);
 		zend_hash_update(Z_ARRVAL_P(return_value), ce->trait_names[i].name, &trait);
@@ -5452,18 +5424,16 @@ ZEND_METHOD(ReflectionClass, getTraitAliases)
 
 				if (!class_name) {
 					uint32_t j = 0;
-					zend_string *lcname = zend_string_tolower(cur_ref->method_name);
 
 					for (j = 0; j < ce->num_traits; j++) {
 						zend_class_entry *trait =
-							zend_hash_find_ptr(CG(class_table), ce->trait_names[j].lc_name);
+							zend_hash_find_ptr(CG(class_table), ce->trait_names[j].name);
 						ZEND_ASSERT(trait && "Trait must exist");
-						if (zend_hash_exists(&trait->function_table, lcname)) {
+						if (zend_hash_exists(&trait->function_table, cur_ref->method_name)) {
 							class_name = trait->name;
 							break;
 						}
 					}
-					zend_string_release_ex(lcname, 0);
 					ZEND_ASSERT(class_name != NULL);
 				}
 
@@ -7552,7 +7522,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		RETURN_THROWS();
 	}
 
-	if (NULL == (marker = zend_get_attribute_str(ce->attributes, ZEND_STRL("attribute")))) {
+	if (NULL == (marker = zend_get_attribute_str(ce->attributes, ZEND_STRL("Attribute")))) {
 		zend_throw_error(NULL, "Attempting to use non-attribute class \"%s\" as attribute", ZSTR_VAL(attr->data->name));
 		RETURN_THROWS();
 	}
@@ -7600,8 +7570,8 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 #if ZEND_DEBUG
 		zend_attribute *delayed_target_validation = zend_get_attribute_str(
 			attr->attributes,
-			"delayedtargetvalidation",
-			strlen("delayedtargetvalidation")
+			"DelayedTargetValidation",
+			strlen("DelayedTargetValidation")
 		);
 		ZEND_ASSERT(delayed_target_validation != NULL);
 #endif
@@ -7964,21 +7934,13 @@ ZEND_METHOD(ReflectionConstant, __construct)
 		Z_PARAM_STR(name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Build name with lowercased ns. */
+	/* Strip a leading backslash; the rest of the name is case-sensitive. */
 	bool backslash_prefixed = ZSTR_VAL(name)[0] == '\\';
-	char *source = ZSTR_VAL(name) + backslash_prefixed;
-	size_t source_len = ZSTR_LEN(name) - backslash_prefixed;
-	zend_string *lc_name = zend_string_alloc(source_len, /* persistent */ false);
-	const char *ns_end = zend_memrchr(source, '\\', source_len);
-	size_t ns_len = 0;
-	if (ns_end) {
-		ns_len = ns_end - ZSTR_VAL(name);
-		zend_str_tolower_copy(ZSTR_VAL(lc_name), source, ns_len);
-	}
-	memcpy(ZSTR_VAL(lc_name) + ns_len, source + ns_len, source_len - ns_len);
+	zend_string *lookup_name = zend_string_init(
+		ZSTR_VAL(name) + backslash_prefixed, ZSTR_LEN(name) - backslash_prefixed, 0);
 
-	zend_constant *const_ = zend_get_constant_ptr(lc_name);
-	zend_string_release_ex(lc_name, /* persistent */ false);
+	zend_constant *const_ = zend_get_constant_ptr(lookup_name);
+	zend_string_release_ex(lookup_name, /* persistent */ false);
 	if (!const_) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant \"%s\" does not exist", ZSTR_VAL(name));
 		RETURN_THROWS();

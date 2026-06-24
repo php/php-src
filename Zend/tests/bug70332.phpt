@@ -6,7 +6,7 @@ function & test($arg) {
     return $arg;
 }
 
-$arg = new Stdclass();
+$arg = new stdClass();
 $arg->name = array();
 
 test($arg)->name[1] = "xxxx";

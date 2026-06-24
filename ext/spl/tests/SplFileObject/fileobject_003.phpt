@@ -21,11 +21,11 @@ function test($name, $lc, $lp)
     try {
         $f = new SplFileObject($name);
         var_dump($name);
-        var_dump($f->getPathName());
-        $l = substr($f->getPathName(), -1);
+        var_dump($f->getPathname());
+        $l = substr($f->getPathname(), -1);
         var_dump($l != '/' && $l != '\\' && $l == $lc);
-        var_dump($f->getFileName());
-        $l = substr($f->getFileName(), -1);
+        var_dump($f->getFilename());
+        $l = substr($f->getFilename(), -1);
         var_dump($l != '/' && $l != '\\' && $l == $lc);
         var_dump($f->getPath());
         $l = substr($f->getPath(), -1);
@@ -35,7 +35,7 @@ function test($name, $lc, $lp)
     }
     try {
         $fo = $o->openFile();
-        var_dump($fo->getPathName(), $fo->getFileName(), $fo->getPath());
+        var_dump($fo->getPathname(), $fo->getFilename(), $fo->getPath());
     } catch (LogicException $e) {
         echo "LogicException: ".$e->getMessage()."\n";
     }

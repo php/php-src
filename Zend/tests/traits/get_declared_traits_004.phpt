@@ -13,4 +13,4 @@ foreach (get_declared_traits() as $name) {
 echo "\n";
 ?>
 --EXPECT--
-Ta
+TA

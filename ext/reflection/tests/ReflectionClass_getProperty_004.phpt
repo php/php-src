@@ -80,8 +80,8 @@ showInfo("B::pubC");
 showInfo("B::protC");
 showInfo("B::privC");
 
-showInfo("c::pubC");
-showInfo("c::PUBC");
+showInfo("C::pubC");
+showInfo("C::PUBC");
 showInfo("C::pubC");
 showInfo("C::protC");
 showInfo("C::privC");
@@ -205,7 +205,7 @@ object(ReflectionProperty)#%d (2) {
   string(1) "B"
 }
 string(10) "privC in B"
---- (Reflecting on c::pubC) ---
+--- (Reflecting on C::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
   string(4) "pubC"
@@ -213,7 +213,7 @@ object(ReflectionProperty)#%d (2) {
   string(1) "C"
 }
 string(9) "pubC in C"
---- (Reflecting on c::PUBC) ---
+--- (Reflecting on C::PUBC) ---
 Property C::$PUBC does not exist
 --- (Reflecting on C::pubC) ---
 object(ReflectionProperty)#%d (2) {

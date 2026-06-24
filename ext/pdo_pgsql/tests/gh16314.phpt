@@ -20,10 +20,10 @@ var_dump($pdo->query('SELECT 1;')->fetchAll());
 $pdo = PDOTest::test_factory(__DIR__ . '/common.phpt', Pdo\Pgsql::class, true);
 var_dump($pdo->query('SELECT 1;')->fetchAll());
 
-$pdo = PDOTest::test_factory(__DIR__ . '/common.phpt', Pdo::class, false);
+$pdo = PDOTest::test_factory(__DIR__ . '/common.phpt', PDO::class, false);
 var_dump($pdo->query('SELECT 1;')->fetchAll());
 
-$pdo = PDOTest::test_factory(__DIR__ . '/common.phpt', Pdo::class, true);
+$pdo = PDOTest::test_factory(__DIR__ . '/common.phpt', PDO::class, true);
 var_dump($pdo->query('SELECT 1;')->fetchAll());
 ?>
 --EXPECT--

@@ -29,7 +29,7 @@ class A {
         echo "A\n";
     }
 
-    public static function mycatch() {
+    public static function myCatch() {
         try {
             static::who();
             B::throwException_after();

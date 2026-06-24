@@ -18,7 +18,7 @@ Catchable fatal error [2]
     set_error_handler('error');
 
     try {
-        blah (new StdClass);
+        blah (new stdClass);
     } catch (Error $ex) {
         echo $ex->getMessage(), "\n";
     }

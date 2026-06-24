@@ -23,7 +23,7 @@ function printInfo(ReflectionMethod $methodInfo) {
 
 printInfo(new ReflectionMethod(DateTimeZone::class, 'listIdentifiers'));
 printInfo(new ReflectionMethod(MyDateTimeZone::class, 'listIdentifiers'));
-printInfo(new ReflectionMethod(FileSystemIterator::class, 'current'));
+printInfo(new ReflectionMethod(FilesystemIterator::class, 'current'));
 
 ?>
 --EXPECTF--

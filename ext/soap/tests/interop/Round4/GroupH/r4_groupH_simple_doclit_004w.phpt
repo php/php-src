@@ -11,8 +11,8 @@ $client = new SoapClient(__DIR__."/round4_groupH_simple_doclit.wsdl",array("trac
 $client->echoMultipleFaults1(array("whichFault" => 1,
                                    "param1" => "Hello world",
                                    "param2" => array(12.345,45,678)));
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round4_groupH_simple_doclit.inc");
 echo "ok\n";
 ?>

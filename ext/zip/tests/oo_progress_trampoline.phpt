@@ -32,7 +32,7 @@ $callbackThrow = [$o, 'trampolineThrow'];
 
 
 $zip = new ZipArchive;
-if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
+if (!$zip->open($file, ZipArchive::CREATE)) {
     exit('failed');
 }
 var_dump($zip->registerProgressCallback(0.5, $callback));
@@ -50,7 +50,7 @@ unlink($file);
 unset($zip);
 
 $zip = new ZipArchive;
-if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
+if (!$zip->open($file, ZipArchive::CREATE)) {
     exit('failed');
 }
 

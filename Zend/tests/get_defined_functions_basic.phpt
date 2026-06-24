@@ -39,7 +39,7 @@ if (!is_array($func["user"])) {
 }
 
 $user = $func["user"];
-if (count($user) == 2 && in_array("foo", $user) && in_array("helloworld", $user)) {
+if (count($user) == 2 && in_array("foo", $user) && in_array("HelloWorld", $user)) {
     echo "TEST PASSED\n";
 } else {
     echo "TEST FAILED: missing elements from 'user' array\n";

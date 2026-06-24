@@ -31,8 +31,8 @@ $param =   new SoapParam(new SoapVar(array(
   ),SOAP_ENC_ARRAY,"ArrayOfSOAPStruct","http://soapinterop.org/xsd"), "inputStructArray");
 $client = new SoapClient(NULL,array("location"=>"test://","uri"=>"http://soapinterop.org/","trace"=>1,"exceptions"=>0));
 $client->__soapCall("echoStructArray", array($param), array("soapaction"=>"http://soapinterop.org/","uri"=>"http://soapinterop.org/"));
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round2_base.inc");
 echo "ok\n";
 ?>

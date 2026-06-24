@@ -527,7 +527,7 @@ TODO:
 	} else if (text[0] == '#' && text[1] != '[') {
 		retval = cli_completion_generator_ini(text, textlen, &cli_completion_state);
 	} else {
-		char *lc_text;
+		char *member_text;
 		const char *class_name_end;
 		zend_string *class_name = NULL;
 		zend_class_entry *ce = NULL;
@@ -535,22 +535,21 @@ TODO:
 		class_name_end = strstr(text, "::");
 		if (class_name_end) {
 			size_t class_name_len = class_name_end - text;
-			class_name = zend_string_alloc(class_name_len, 0);
-			zend_str_tolower_copy(ZSTR_VAL(class_name), text, class_name_len);
+			class_name = zend_string_init(text, class_name_len, 0);
 			if ((ce = zend_lookup_class(class_name)) == NULL) {
 				zend_string_release_ex(class_name, 0);
 				return NULL;
 			}
-			lc_text = zend_str_tolower_dup(class_name_end + 2, textlen - 2 - class_name_len);
+			member_text = estrndup(class_name_end + 2, textlen - 2 - class_name_len);
 			textlen -= (class_name_len + 2);
 		} else {
-			lc_text = zend_str_tolower_dup(text, textlen);
+			member_text = estrndup(text, textlen);
 		}
 
 		switch (cli_completion_state) {
 			case 0:
 			case 1:
-				retval = cli_completion_generator_func(lc_text, textlen, &cli_completion_state, ce ? &ce->function_table : EG(function_table));
+				retval = cli_completion_generator_func(member_text, textlen, &cli_completion_state, ce ? &ce->function_table : EG(function_table));
 				if (retval) {
 					break;
 				}
@@ -564,12 +563,12 @@ TODO:
 				ZEND_FALLTHROUGH;
 			case 4:
 			case 5:
-				retval = cli_completion_generator_class(lc_text, textlen, &cli_completion_state);
+				retval = cli_completion_generator_class(member_text, textlen, &cli_completion_state);
 				break;
 			default:
 				break;
 		}
-		efree(lc_text);
+		efree(member_text);
 		if (class_name) {
 			zend_string_release_ex(class_name, 0);
 		}

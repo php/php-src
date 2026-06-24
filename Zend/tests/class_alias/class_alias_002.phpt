@@ -5,8 +5,8 @@ Trying redeclare class with class_alias()
 
 class foo { }
 
-class_alias('foo', 'FOO');
+class_alias('foo', 'foo');
 
 ?>
 --EXPECTF--
-Warning: Cannot redeclare class FOO (previously declared in %s:%d) in %s on line %d
+Warning: Cannot redeclare class foo (previously declared in %s:%d) in %s on line %d

@@ -371,7 +371,7 @@ static zend_result spl_filesystem_file_open(spl_filesystem_object *intern, bool 
 	intern->u.file.escape = (unsigned char) '\\';
 	intern->u.file.is_escape_default = true;
 
-	intern->u.file.func_getCurr = zend_hash_str_find_ptr(&intern->std.ce->function_table, "getcurrentline", sizeof("getcurrentline") - 1);
+	intern->u.file.func_getCurr = zend_hash_str_find_ptr(&intern->std.ce->function_table, "getCurrentLine", sizeof("getCurrentLine") - 1);
 
 	return SUCCESS;
 } /* }}} */

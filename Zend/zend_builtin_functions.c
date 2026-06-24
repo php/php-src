@@ -712,7 +712,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, bool only_subclass) /* {{{ *
 		RETURN_TRUE;
 	}
 
-	const zend_class_entry *ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+	const zend_class_entry *ce = zend_lookup_class_ex(class_name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 	if (!ce) {
 		RETURN_FALSE;
 	}
@@ -953,7 +953,6 @@ ZEND_FUNCTION(method_exists)
 {
 	zval *klass;
 	zend_string *method_name;
-	zend_string *lcname;
 	zend_class_entry *ce;
 	zend_function *func;
 
@@ -974,9 +973,7 @@ ZEND_FUNCTION(method_exists)
 		RETURN_THROWS();
 	}
 
-	lcname = zend_string_tolower(method_name);
-	func = zend_hash_find_ptr(&ce->function_table, lcname);
-	zend_string_release_ex(lcname, 0);
+	func = zend_hash_find_ptr(&ce->function_table, method_name);
 
 	if (func) {
 		/* Exclude shadow properties when checking a method on a specific class. Include
@@ -993,7 +990,7 @@ ZEND_FUNCTION(method_exists)
 			if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				/* Returns true for the fake Closure's __invoke */
 				RETVAL_BOOL(func->common.scope == zend_ce_closure
-					&& zend_string_equals_literal_ci(method_name, ZEND_INVOKE_FUNC_NAME));
+					&& zend_string_equals_literal(method_name, ZEND_INVOKE_FUNC_NAME));
 
 				zend_string_release_ex(func->common.function_name, 0);
 				zend_free_trampoline(func);
@@ -1004,7 +1001,7 @@ ZEND_FUNCTION(method_exists)
 	} else {
 	    /* Returns true for fake Closure::__invoke */
 	    if (ce == zend_ce_closure
-	        && zend_string_equals_literal_ci(method_name, ZEND_INVOKE_FUNC_NAME)) {
+	        && zend_string_equals_literal(method_name, ZEND_INVOKE_FUNC_NAME)) {
 	        RETURN_TRUE;
 	    }
 	}
@@ -1073,7 +1070,6 @@ flf_clean:;
 
 static zend_always_inline void _class_exists_impl(zval *return_value, zend_string *name, bool autoload, int flags, int skip_flags) /* {{{ */
 {
-	zend_string *lcname;
 	const zend_class_entry *ce;
 
 	if (ZSTR_HAS_CE_CACHE(name)) {
@@ -1085,15 +1081,13 @@ static zend_always_inline void _class_exists_impl(zval *return_value, zend_strin
 
 	if (!autoload) {
 		if (ZSTR_VAL(name)[0] == '\\') {
-			/* Ignore leading "\" */
-			lcname = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+			/* Skip leading \\ — class table keys carry no leading backslash */
+			zend_string *lookup_name = zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
+			ce = zend_hash_find_ptr(EG(class_table), lookup_name);
+			zend_string_release_ex(lookup_name, 0);
 		} else {
-			lcname = zend_string_tolower(name);
+			ce = zend_hash_find_ptr(EG(class_table), name);
 		}
-
-		ce = zend_hash_find_ptr(EG(class_table), lcname);
-		zend_string_release_ex(lcname, 0);
 	} else {
 		ce = zend_lookup_class(name);
 	}
@@ -1175,7 +1169,7 @@ ZEND_FUNCTION(function_exists)
 {
 	zend_string *name;
 	bool exists;
-	zend_string *lcname;
+	ALLOCA_FLAG(use_heap)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(name)
@@ -1183,14 +1177,13 @@ ZEND_FUNCTION(function_exists)
 
 	if (ZSTR_VAL(name)[0] == '\\') {
 		/* Ignore leading "\" */
-		lcname = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
-		zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+		zend_string *stripped;
+		ZSTR_ALLOCA_INIT(stripped, ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, use_heap);
+		exists = zend_hash_find_ptr(EG(function_table), stripped) != NULL;
+		ZSTR_ALLOCA_FREE(stripped, use_heap);
 	} else {
-		lcname = zend_string_tolower(name);
+		exists = zend_hash_find_ptr(EG(function_table), name) != NULL;
 	}
-
-	exists = zend_hash_exists(EG(function_table), lcname);
-	zend_string_release_ex(lcname, 0);
 
 	RETURN_BOOL(exists);
 }
@@ -1211,7 +1204,7 @@ ZEND_FUNCTION(class_alias)
 		Z_PARAM_BOOL(autoload)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ce = zend_lookup_class_ex(class_name, NULL, !autoload ? ZEND_FETCH_CLASS_NO_AUTOLOAD : 0);
+	ce = zend_lookup_class_ex(class_name, !autoload ? ZEND_FETCH_CLASS_NO_AUTOLOAD : 0);
 
 	if (ce) {
 		if (zend_register_class_alias_ex(ZSTR_VAL(alias_name), ZSTR_LEN(alias_name), ce, false) == SUCCESS) {
@@ -1699,8 +1692,8 @@ static bool backtrace_is_arg_sensitive(const zend_execute_data *call, uint32_t o
 {
 	const zend_attribute *attribute = zend_get_parameter_attribute_str(
 		call->func->common.attributes,
-		"sensitiveparameter",
-		sizeof("sensitiveparameter") - 1,
+		"SensitiveParameter",
+		sizeof("SensitiveParameter") - 1,
 		offset
 	);
 

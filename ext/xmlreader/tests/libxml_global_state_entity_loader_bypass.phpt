@@ -17,7 +17,7 @@ libxml_use_internal_errors(true);
 zend_test_override_libxml_global_state();
 
 echo "--- String test ---\n";
-$reader = XMLReader::xml($xml);
+$reader = XMLReader::XML($xml);
 $reader->read();
 
 echo "--- File test ---\n";

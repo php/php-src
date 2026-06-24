@@ -10,7 +10,7 @@ $s = serialize($z);
 
 class Name {
     public function __toString(): string {
-        return 'Foo';
+        return 'foo';
     }
 }
 

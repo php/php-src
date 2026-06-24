@@ -6,7 +6,7 @@ zend.enable_gc = 1
 <?php
 $a = new stdClass();
 $a->a = array();
-$a->a[0] = new Stdclass();
+$a->a[0] = new stdClass();
 $a->a[0]->a = $a;
 $a->a[1] = &$a->a;
 

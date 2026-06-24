@@ -11,14 +11,14 @@ if (file_exists($file)) {
 }
 
 $zip = new ZipArchive;
-if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
+if (!$zip->open($file, ZipArchive::CREATE)) {
     exit('failed');
 }
 $zip->addFromString('entry1.txt', 'entry #1');
 $zip->addFromString('entry2.txt', 'entry #2');
 $zip->addFromString('dir/entry2.txt', 'entry #2');
 
-if ($zip->status == ZIPARCHIVE::ER_OK) {
+if ($zip->status == ZipArchive::ER_OK) {
     $zip->close();
     echo "ok\n";
 } else {
@@ -26,7 +26,7 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
     echo "failed\n";
 }
 
-if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
+if (!$zip->open($file, ZipArchive::CREATE)) {
     exit('failed');
 }
 

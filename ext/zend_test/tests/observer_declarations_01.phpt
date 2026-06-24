@@ -38,16 +38,16 @@ foo();
 ?>
 --EXPECTF--
 <!-- declared function 'foo' -->
-<!-- declared class 'a' -->
-<!-- declared class 'b' -->
+<!-- declared class 'A' -->
+<!-- declared class 'B' -->
 <!-- init '%s' -->
 <file '%s'>
   <!-- init time() -->
   <time>
   </time>
   <!-- declared function 'nested' -->
-  <!-- declared class 'c' -->
-  <!-- declared class 'd' -->
+  <!-- declared class 'C' -->
+  <!-- declared class 'D' -->
   <!-- init foo() -->
   <foo>
 foo

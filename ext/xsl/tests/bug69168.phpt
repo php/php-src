@@ -27,10 +27,10 @@ $proc = new XSLTProcessor();
 $proc->registerPHPFunctions();
 $xslDoc = new DOMDocument();
 $xslDoc->loadXML($xsl);
-@$proc->importStyleSheet($xslDoc);
+@$proc->importStylesheet($xslDoc);
 $xmlDoc = new DOMDocument();
 $xmlDoc->loadXML($xml);
-echo @$proc->transformToXML($xmlDoc);
+echo @$proc->transformToXml($xmlDoc);
 
 // Tests modification of the nodes
 var_dump($xmlDoc->firstChild->firstChild->firstChild->getNodePath());

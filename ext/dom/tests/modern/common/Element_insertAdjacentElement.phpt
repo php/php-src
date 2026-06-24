@@ -10,16 +10,16 @@ $container = $dom->documentElement;
 $p = $container->firstElementChild;
 
 var_dump($p->insertAdjacentElement(Dom\AdjacentPosition::BeforeBegin, $dom->createElement('A'))->tagName);
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 var_dump($p->insertAdjacentElement(Dom\AdjacentPosition::AfterBegin, $dom->createElement('B'))->tagName);
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 var_dump($p->insertAdjacentElement(Dom\AdjacentPosition::BeforeEnd, $dom->createElement('C'))->tagName);
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 var_dump($p->insertAdjacentElement(Dom\AdjacentPosition::AfterEnd, $dom->createElement('D'))->tagName);
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

@@ -7,7 +7,7 @@ com_dotnet
 error_reporting(E_ALL);
 
 try {
-    $dict = new COM("Scripting.Dictionary");
+    $dict = new com("Scripting.Dictionary");
     $dict->add('foo', array());
     print sizeof($dict['foo'])."\n";
     $dict->add('bar', array(23));

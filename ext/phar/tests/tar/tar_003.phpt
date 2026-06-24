@@ -17,8 +17,8 @@ $tar->init();
 $tar->addFile('.phar/stub.php', "<?php // tar-based phar archive stub file\n__HALT_COMPILER();");
 $tar->addFile('tar_003.phpt', $g = fopen(__FILE__, 'r'));
 $tar->addFile('internal/file/here', "hi there!\n");
-$tar->mkDir('internal/dir');
-$tar->mkDir('dir');
+$tar->mkdir('internal/dir');
+$tar->mkdir('dir');
 $tar->close();
 
 fclose($g);

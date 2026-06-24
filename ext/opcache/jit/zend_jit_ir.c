@@ -8115,7 +8115,7 @@ static int zend_jit_fetch_constant(zend_jit_ctx         *jit,
                                    const zend_ssa_op    *ssa_op,
                                    zend_jit_addr         res_addr)
 {
-	zval *zv = RT_CONSTANT(opline, opline->op2) + 1;
+	zval *zv = RT_CONSTANT(opline, opline->op2);
 	uint32_t res_info = RES_INFO();
 	ir_ref ref, ref2, if_set, if_special, not_set_path, special_path, fast_path;
 
@@ -8142,7 +8142,7 @@ static int zend_jit_fetch_constant(zend_jit_ctx         *jit,
 		ir_IF_FALSE_cold(if_set);
 	}
 
-	// JIT: zend_jit_get_constant(RT_CONSTANT(opline, opline->op2) + 1, opline->op1.num);
+	// JIT: zend_jit_get_constant(RT_CONSTANT(opline, opline->op2), opline->op1.num);
 	jit_SET_EX_OPLINE(jit, opline);
 	ref2 = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_get_constant),
 		ir_CONST_ADDR(zv),
@@ -8893,7 +8893,7 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 					cache_slot_ref);
 			} else if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_find_func_helper),
-					ir_CONST_ADDR(Z_STR_P(zv + 1)),
+					ir_CONST_ADDR(Z_STR_P(zv)),
 					cache_slot_ref);
 			} else if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 				ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_find_ns_func_helper),

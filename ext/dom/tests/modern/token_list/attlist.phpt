@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE root [
     <!ELEMENT root EMPTY>
@@ -22,7 +22,7 @@ var_dump($list);
 $list->remove('first');
 
 var_dump($list);
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

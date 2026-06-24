@@ -9,7 +9,7 @@ class Test {
 }
 $test = new Test;
 $ref =& $test->prop;
-print_R(intltz_get_canonical_id('Portugal', $ref));
+print_r(intltz_get_canonical_id('Portugal', $ref));
 var_dump($test);
 ?>
 --EXPECT--

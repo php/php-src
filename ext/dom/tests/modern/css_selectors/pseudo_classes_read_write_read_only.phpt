@@ -7,7 +7,7 @@ dom
 
 require __DIR__ . '/test_utils.inc';
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <html xmlns="http://www.w3.org/1999/xhtml">
     <input type="text" readonly="" />
     <textarea readonly="" />

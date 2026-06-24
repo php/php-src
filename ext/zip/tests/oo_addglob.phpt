@@ -40,7 +40,7 @@ $options['flags'] = ZipArchive::FL_OVERWRITE;
 if (!$zip->addGlob($dirname . '*.{txt,baz}', GLOB_BRACE, $options)) {
     echo "failed 3\n";
 }
-if ($zip->status == ZIPARCHIVE::ER_OK) {
+if ($zip->status == ZipArchive::ER_OK) {
         if (!verify_entries($zip, [
             "bar",
             "foobar/",

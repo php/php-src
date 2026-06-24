@@ -991,9 +991,9 @@ static zend_class_entry *register_class_ZendAttributeTest(void)
 	ZVAL_STR(&attribute_ZendTestPropertyAttribute_property_testProp_1->args[0].value, attribute_ZendTestPropertyAttribute_property_testProp_1_arg0_str);
 
 
-	zend_string *attribute_name_ZendTestAttribute_func_testmethod_0 = zend_string_init_interned("ZendTestAttribute", sizeof("ZendTestAttribute") - 1, true);
-	zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "testmethod", sizeof("testmethod") - 1), attribute_name_ZendTestAttribute_func_testmethod_0, 0);
-	zend_string_release_ex(attribute_name_ZendTestAttribute_func_testmethod_0, true);
+	zend_string *attribute_name_ZendTestAttribute_func_testMethod_0 = zend_string_init_interned("ZendTestAttribute", sizeof("ZendTestAttribute") - 1, true);
+	zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "testMethod", sizeof("testMethod") - 1), attribute_name_ZendTestAttribute_func_testMethod_0, 0);
+	zend_string_release_ex(attribute_name_ZendTestAttribute_func_testMethod_0, true);
 
 	return class_entry;
 }

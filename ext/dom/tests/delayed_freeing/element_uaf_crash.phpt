@@ -4,7 +4,7 @@ Delayed freeing should not cause a UAF
 dom
 --FILE--
 <?php
-$xml = new DomDocument();
+$xml = new DOMDocument();
 $d = $xml->createElement("div");
 $d->appendChild($b = $xml->createElement("b"));
 $ret = $d->appendChild($xml->createElement("xxx"));

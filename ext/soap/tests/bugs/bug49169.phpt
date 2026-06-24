@@ -29,9 +29,9 @@ function test2($input) {
   return strlen($input);
 }
 
-$server = new soapserver(__DIR__.'/bug49169.wsdl', []);
-$server->addfunction("test");
-$server->addfunction("test2");
+$server = new SoapServer(__DIR__.'/bug49169.wsdl', []);
+$server->addFunction("test");
+$server->addFunction("test2");
 $_SERVER["HTTP_SOAPACTION"] = "#test";
 $server->handle();
 $_SERVER["HTTP_SOAPACTION"] = "#test2";

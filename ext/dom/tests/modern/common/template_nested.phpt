@@ -16,7 +16,7 @@ HTML;
 $dom = Dom\HTMLDocument::createFromString($html);
 $template = $dom->body->firstElementChild;
 var_dump($template->innerHTML);
-echo $dom->saveXML();
+echo $dom->saveXml();
 
 ?>
 --EXPECT--

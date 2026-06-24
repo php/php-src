@@ -17,8 +17,8 @@ if (!$reader->open($filename)) {
 
 // Only go through
 while ($reader->read()) {
-    if ($reader->nodeType != XMLREADER::END_ELEMENT) {
-        if ($reader->nodeType == XMLREADER::ELEMENT && $reader->hasAttributes) {
+    if ($reader->nodeType != XMLReader::END_ELEMENT) {
+        if ($reader->nodeType == XMLReader::ELEMENT && $reader->hasAttributes) {
             $attr = $reader->moveToFirstAttribute();
             echo $reader->name . ": ";
             echo $reader->value . "\n";

@@ -18,7 +18,7 @@ $xml = <<< XML
 XML;
 
 $doc = Dom\XMLDocument::createFromString($xml, LIBXML_NOENT | LIBXML_NO_XXE);
-echo $doc->saveXML();
+echo $doc->saveXml();
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="utf-8"?>

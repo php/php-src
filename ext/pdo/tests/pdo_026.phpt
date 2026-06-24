@@ -46,7 +46,7 @@ class PDODatabase extends PDO
     function query($sql, ...$rest): PDOStatement|false
     {
         echo __METHOD__ . "()\n";
-        $stmt = $this->prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx', array($this))));
+        $stmt = $this->prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementX', array($this))));
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute();
         return $stmt;

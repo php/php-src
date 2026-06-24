@@ -10,7 +10,7 @@ if (!class_exists("dotnet")) die("skip mscoree not available");
 --FILE--
 <?php
 
-$stack = new DOTNET("mscorlib", "System.Collections.Stack", -2200000000);
+$stack = new dotnet("mscorlib", "System.Collections.Stack", -2200000000);
 $stack->Push(".Net");
 $stack->Push("Hello ");
 echo $stack->Pop() . $stack->Pop();

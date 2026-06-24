@@ -35,13 +35,13 @@ $xpath = new Dom\XPath($dom);
 var_dump($xpath->query('//div'));
 
 echo "=== HTML serialization ===\n";
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 echo "=== HTML serialization of <template> ===\n";
-echo $dom->saveHTML($template), "\n";
+echo $dom->saveHtml($template), "\n";
 echo "=== XML serialization ===\n";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 echo "=== XML serialization of <template> ===\n";
-echo $dom->saveXML($template), "\n";
+echo $dom->saveXml($template), "\n";
 
 // Should not crash
 $template->remove();

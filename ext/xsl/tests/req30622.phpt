@@ -27,7 +27,7 @@ $xslDom->loadXML(<<<'XML'
 XML);
 
 $proc = new XSLTProcessor();
-$proc->importStyleSheet($xslDom);
+$proc->importStylesheet($xslDom);
 
 echo "--- Set both empty and non-empty namespace ---\n";
 
@@ -36,7 +36,7 @@ $proc->setParameter("http://www.php.net/test", "foo", "SET2");
 var_dump($proc->getParameter("", "foo"));
 var_dump($proc->getParameter("http://www.php.net/test", "foo"));
 
-print $proc->transformToXML($xmlDom);
+print $proc->transformToXml($xmlDom);
 
 echo "--- Remove empty namespace entry ---\n";
 
@@ -44,7 +44,7 @@ var_dump($proc->removeParameter("", "foo"));
 var_dump($proc->getParameter("", "foo"));
 var_dump($proc->getParameter("http://www.php.net/test", "foo"));
 
-print $proc->transformToXML($xmlDom);
+print $proc->transformToXml($xmlDom);
 
 echo "--- Remove non-empty namespace entry ---\n";
 
@@ -52,14 +52,14 @@ var_dump($proc->removeParameter("http://www.php.net/test", "foo"));
 var_dump($proc->getParameter("", "foo"));
 var_dump($proc->getParameter("http://www.php.net/test", "foo"));
 
-print $proc->transformToXML($xmlDom);
+print $proc->transformToXml($xmlDom);
 
 echo "--- Set via array ---\n";
 
 $proc->setParameter("", ["foo" => "SET1"]);
 $proc->setParameter("http://www.php.net/test", ["foo" => "SET2"]);
 
-print $proc->transformToXML($xmlDom);
+print $proc->transformToXml($xmlDom);
 
 ?>
 --EXPECT--

@@ -12,7 +12,7 @@ $o = new x;
 $o->z = 1000;
 $o->zzz = 3;
 
-var_dump($h = new reflectionproperty($o, 'z'));
+var_dump($h = new ReflectionProperty($o, 'z'));
 var_dump($h->isDefault());
 var_dump($h->isPublic());
 var_dump($h->isStatic());
@@ -22,12 +22,12 @@ var_dump($h->getValue($o));
 
 print "---------------------------\n";
 try {
-    var_dump(new reflectionproperty($o, 'zz'));
+    var_dump(new ReflectionProperty($o, 'zz'));
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
 
-var_dump(new reflectionproperty($o, 'zzz'));
+var_dump(new ReflectionProperty($o, 'zzz'));
 
 class test {
     protected $a = 1;
@@ -39,7 +39,7 @@ class bar extends test {
         $this->foobar = 2;
         $this->a = 200;
 
-        $p = new reflectionproperty($this, 'foobar');
+        $p = new ReflectionProperty($this, 'foobar');
         var_dump($p->getValue($this), $p->isDefault(), $p->isPublic());
     }
 }

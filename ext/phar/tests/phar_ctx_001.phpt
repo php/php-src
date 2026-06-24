@@ -38,16 +38,16 @@ file_put_contents($pname . '/d', 'new d', 0, $context2);
 $phar = new Phar($fname);
 var_dump(file_get_contents($pname . '/a'));
 var_dump($phar['a']->isCompressed());
-var_dump($phar['a']->getMetaData());
+var_dump($phar['a']->getMetadata());
 var_dump(file_get_contents($pname . '/b'));
 var_dump($phar['b']->isCompressed());
-var_dump($phar['b']->getMetaData());
+var_dump($phar['b']->getMetadata());
 var_dump(file_get_contents($pname . '/c'));
 var_dump($phar['c']->isCompressed());
-var_dump($phar['c']->getMetaData());
+var_dump($phar['c']->getMetadata());
 var_dump(file_get_contents($pname . '/d'));
 var_dump($phar['d']->isCompressed());
-var_dump($phar['d']->getMetaData());
+var_dump($phar['d']->getMetadata());
 $context2 = stream_context_create(array('phar' => array('metadata' => array(4))));
 $fp = fopen($pname . '/b', 'r+', 0, $context2);
 fclose($fp);
@@ -56,7 +56,7 @@ fclose($fp);
 <?php
 var_dump(file_get_contents($pname . '/b'));
 var_dump($phar['b']->isCompressed());
-var_dump($phar['b']->getMetaData());
+var_dump($phar['b']->getMetadata());
 ?>
 --CLEAN--
 <?php

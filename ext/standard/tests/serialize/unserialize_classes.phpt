@@ -66,7 +66,9 @@ array(3) {
 }
 array(3) {
   [0]=>
-  object(foo)#%d (1) {
+  object(__PHP_Incomplete_Class)#%d (2) {
+    ["__PHP_Incomplete_Class_Name"]=>
+    string(3) "foo"
     ["x"]=>
     string(3) "bar"
   }
@@ -77,7 +79,9 @@ array(3) {
 }
 array(3) {
   [0]=>
-  object(foo)#%d (1) {
+  object(__PHP_Incomplete_Class)#%d (2) {
+    ["__PHP_Incomplete_Class_Name"]=>
+    string(3) "foo"
     ["x"]=>
     string(3) "bar"
   }

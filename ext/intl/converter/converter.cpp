@@ -509,7 +509,7 @@ static void php_converter_resolve_callback(
 	const char *callback_name,
 	size_t callback_name_len
 ) {
-	zend_function *fn = reinterpret_cast<zend_function *>(zend_hash_str_find_ptr_lc(&obj->ce->function_table, callback_name, callback_name_len));
+	zend_function *fn = reinterpret_cast<zend_function *>(zend_hash_str_find_ptr(&obj->ce->function_table, callback_name, callback_name_len));
 	ZEND_ASSERT(fn != nullptr);
 
 	fcc->function_handler = fn;

@@ -3,7 +3,7 @@ Object serialization / unserialization: real references and COW references
 --FILE--
 <?php
 echo "\n\nArray containing same object twice:\n";
-$obj = new stdclass;
+$obj = new stdClass;
 $a[0] = $obj;
 $a[1] = $a[0];
 var_dump($a);
@@ -20,7 +20,7 @@ var_dump($ua);
 
 
 echo "\n\nArray containing object and reference to that object:\n";
-$obj = new stdclass;
+$obj = new stdClass;
 $a[0] = $obj;
 $a[1] = &$a[0];
 var_dump($a);
@@ -36,8 +36,8 @@ $ua[0] = "a0.changed";
 var_dump($ua);
 
 echo "\n\nObject containing same object twice:";
-$obj = new stdclass;
-$contaner = new stdclass;
+$obj = new stdClass;
+$contaner = new stdClass;
 $contaner->a = $obj;
 $contaner->b = $contaner->a;
 var_dump($contaner);
@@ -54,8 +54,8 @@ var_dump($ucontainer);
 
 
 echo "\n\nObject containing object and reference to that object:\n";
-$obj = new stdclass;
-$contaner = new stdclass;
+$obj = new stdClass;
+$contaner = new stdClass;
 $contaner->a = $obj;
 $contaner->b = &$contaner->a;
 var_dump($contaner);

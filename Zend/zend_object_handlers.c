@@ -1943,23 +1943,9 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 	zend_object *zobj = *obj_ptr;
 	zval *func;
 	zend_function *fbc;
-	zend_string *lc_method_name;
-	ALLOCA_FLAG(use_heap);
+	zend_string *lookup_name = (key != NULL) ? Z_STR_P(key) : method_name;
 
-	if (EXPECTED(key != NULL)) {
-		lc_method_name = Z_STR_P(key);
-#ifdef ZEND_ALLOCA_MAX_SIZE
-		use_heap = 0;
-#endif
-	} else {
-		ZSTR_ALLOCA_ALLOC(lc_method_name, ZSTR_LEN(method_name), use_heap);
-		zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method_name), ZSTR_LEN(method_name));
-	}
-
-	if (UNEXPECTED((func = zend_hash_find(&zobj->ce->function_table, lc_method_name)) == NULL)) {
-		if (UNEXPECTED(!key)) {
-			ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
-		}
+	if (UNEXPECTED((func = zend_hash_find(&zobj->ce->function_table, lookup_name)) == NULL)) {
 		if (zobj->ce->__call) {
 			return zend_get_call_trampoline_func(zobj->ce->__call, method_name);
 		} else {
@@ -1975,7 +1961,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 
 		if (fbc->common.scope != scope) {
 			if (fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
-				zend_function *updated_fbc = zend_get_parent_private_method(scope, zobj->ce, lc_method_name);
+				zend_function *updated_fbc = zend_get_parent_private_method(scope, zobj->ce, lookup_name);
 
 				if (EXPECTED(updated_fbc != NULL)) {
 					fbc = updated_fbc;
@@ -2000,9 +1986,6 @@ exit:
 	if (fbc && UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 		zend_abstract_method_call(fbc);
 		fbc = NULL;
-	}
-	if (UNEXPECTED(!key)) {
-		ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
 	}
 	return fbc;
 }
@@ -2029,15 +2012,10 @@ static zend_always_inline zend_function *get_static_method_fallback(
 
 ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, zend_string *function_name, const zval *key) /* {{{ */
 {
-	zend_string *lc_function_name;
-	if (EXPECTED(key != NULL)) {
-		lc_function_name = Z_STR_P(key);
-	} else {
-		lc_function_name = zend_string_tolower(function_name);
-	}
+	zend_string *lookup_name = (key != NULL) ? Z_STR_P(key) : function_name;
 
 	zend_function *fbc;
-	zval *func = zend_hash_find(&ce->function_table, lc_function_name);
+	zval *func = zend_hash_find(&ce->function_table, lookup_name);
 	if (EXPECTED(func)) {
 		fbc = Z_FUNC_P(func);
 		if (!(fbc->common.fn_flags & ZEND_ACC_PUBLIC)) {
@@ -2053,10 +2031,6 @@ ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, z
 		}
 	} else {
 		fbc = get_static_method_fallback(ce, function_name);
-	}
-
-	if (UNEXPECTED(!key)) {
-		zend_string_release_ex(lc_function_name, 0);
 	}
 
 	if (EXPECTED(fbc)) {

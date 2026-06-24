@@ -6,7 +6,7 @@ class A {
     public $_;
     public function __get($name) {
         global $obj;
-        $obj->f =& $this->b - $x > $y = new StdClass;
+        $obj->f =& $this->b - $x > $y = new stdClass;
         static $a = $a;
         $t = 'x';
         foreach (get_defined_vars() as $key => $e) {}

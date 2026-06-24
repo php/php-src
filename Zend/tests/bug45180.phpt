@@ -5,11 +5,11 @@ Testing callback formats within class method
 
 class foo {
     public function test() {
-        call_user_func(array('FOO', 'ABC'));
+        call_user_func(array('foo', 'ABC'));
         call_user_func(array($this, 'ABC'));
         foo::XYZ();
         self::WWW();
-        call_user_func('FOO::ABC');
+        call_user_func('foo::ABC');
     }
     function __call($a, $b) {
         print "__call:\n";
@@ -29,7 +29,7 @@ $x::A();
 
 foo::B();
 
-$f = 'FOO';
+$f = 'foo';
 
 $f::C();
 
@@ -56,6 +56,6 @@ string(1) "B"
 __callstatic:
 string(1) "C"
 __callstatic:
-string(3) "FOO"
+string(3) "foo"
 __callstatic:
-string(3) "FOO"
+string(3) "foo"

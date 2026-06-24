@@ -9,7 +9,7 @@ phar.readonly=0
 <?php
 $phar = __DIR__ . '/files/stuboflength1041.phar';
 foreach (new RecursiveIteratorIterator(new Phar($phar, alias: 'stuboflength1041.phar')) as $item) {
-    var_dump($item->getFileName());
+    var_dump($item->getFilename());
 }
 ?>
 --EXPECT--

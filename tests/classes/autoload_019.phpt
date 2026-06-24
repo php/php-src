@@ -1,5 +1,5 @@
 --TEST--
-Ensure __autoload() recursion is guarded for multiple lookups of same class using difference case.
+Ensure __autoload() recursion is guarded for multiple lookups of the same class, and that differently-cased names are distinct classes.
 --FILE--
 <?php
 spl_autoload_register(function ($name) {
@@ -11,3 +11,4 @@ class_exists("unDefinedClass");
 ?>
 --EXPECT--
 autoload unDefinedClass
+autoload undefinedCLASS

@@ -61,19 +61,19 @@ try {
 }
 
 try {
-    var_dump($stmt->fetchAll(PDO::FETCH_FUNC, ['bar', 'instanceMethod']));
+    var_dump($stmt->fetchAll(PDO::FETCH_FUNC, ['Bar', 'instanceMethod']));
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }
 
 try {
-    var_dump($stmt->fetchAll(PDO::FETCH_FUNC, ['bar', 'privateStatic']));
+    var_dump($stmt->fetchAll(PDO::FETCH_FUNC, ['Bar', 'privateStatic']));
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }
 
 try {
-    var_dump($stmt->fetchAll(PDO::FETCH_FUNC, ['bar', 'nonexistent']));
+    var_dump($stmt->fetchAll(PDO::FETCH_FUNC, ['Bar', 'nonexistent']));
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }

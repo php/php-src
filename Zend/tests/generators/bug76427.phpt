@@ -6,8 +6,8 @@ $func = function () {
     yield 2;
 };
 
-$a  = new stdclass();
-$b =  new stdclass();
+$a  = new stdClass();
+$b =  new stdClass();
 $a->b = $b;
 $b->a = $a;
 

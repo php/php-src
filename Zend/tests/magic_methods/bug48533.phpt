@@ -13,7 +13,7 @@ class foo {
     protected function c() {
         var_dump(3);
     }
-    static function __callstatic($a, $b) {
+    static function __callStatic($a, $b) {
         var_dump('__callStatic::'. $a);
     }
     public function __call($a, $b) {

@@ -27,7 +27,7 @@ $doc = new DOMDocument();
 
 $proc = new XSLTProcessor;
 $proc->maxTemplateDepth = 2;
-$proc->importStyleSheet($xsl);
+$proc->importStylesheet($xsl);
 $proc->transformToDoc($doc);
 
 ?>

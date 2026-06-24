@@ -9,7 +9,7 @@ $dir = __DIR__;
 $file = '__tmp14962.txt';
 $fullpath = $dir . '/' . $file;
 $za = new ZipArchive;
-$za->open($dir . '/__14962.zip', ZIPARCHIVE::CREATE);
+$za->open($dir . '/__14962.zip', ZipArchive::CREATE);
 $za->addFromString($file, '1234');
 $za->close();
 

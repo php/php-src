@@ -13,8 +13,8 @@ class Person {
 $person = new Person(32,12345,'Shane',TRUE);
 $client = new SoapClient(__DIR__."/round3_groupD_compound1.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoPerson($person);
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round3_groupD_compound1.inc");
 echo "ok\n";
 ?>

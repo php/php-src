@@ -8,7 +8,7 @@ class A {
     function __destruct() {
         if (self::$max-- < 0) return;
         $x = 'y';
-        $$x = new a;
+        $$x = new A;
     }
 }
 new A;

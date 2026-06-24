@@ -8,7 +8,7 @@ Test "or null"/"or be null" in type-checking errors for userland functions
 function unloadedClass(?I\Dont\Exist $param) {}
 
 try {
-    unloadedClass(new \StdClass);
+    unloadedClass(new \stdClass);
 } catch (\TypeError $e) {
     echo $e, PHP_EOL;
 }
@@ -20,13 +20,13 @@ function loadedClass(?RealClass $param) {}
 function loadedInterface(?RealInterface $param) {}
 
 try {
-    loadedClass(new \StdClass);
+    loadedClass(new \stdClass);
 } catch (\TypeError $e) {
     echo $e, PHP_EOL;
 }
 
 try {
-    loadedInterface(new \StdClass);
+    loadedInterface(new \stdClass);
 } catch (\TypeError $e) {
     echo $e, PHP_EOL;
 }
@@ -60,13 +60,13 @@ try {
 function intF(?int $param) {}
 
 try {
-    intF(new StdClass);
+    intF(new stdClass);
 } catch (\TypeError $e) {
     echo $e, PHP_EOL;
 }
 
 function returnUnloadedClass(): ?I\Dont\Exist {
-    return new \StdClass;
+    return new \stdClass;
 }
 
 try {
@@ -76,7 +76,7 @@ try {
 }
 
 function returnLoadedClass(): ?RealClass {
-    return new \StdClass;
+    return new \stdClass;
 }
 
 try {
@@ -86,7 +86,7 @@ try {
 }
 
 function returnLoadedInterface(): ?RealInterface {
-    return new \StdClass;
+    return new \stdClass;
 }
 
 try {
@@ -136,7 +136,7 @@ try {
 }
 
 function returnInt(): ?int {
-    return new \StdClass;
+    return new \stdClass;
 }
 
 try {

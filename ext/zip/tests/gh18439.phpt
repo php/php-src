@@ -12,7 +12,7 @@ function &cb() {
 
 $file = __DIR__ . '/gh18439.zip';
 $zip = new ZipArchive;
-$zip->open($file, ZIPARCHIVE::CREATE);
+$zip->open($file, ZipArchive::CREATE);
 $zip->registerCancelCallback(cb(...));
 $zip->addFromString('test', 'test');
 echo "Done\n";

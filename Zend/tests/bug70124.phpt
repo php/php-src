@@ -13,7 +13,7 @@ class A {
 }
 
 try  {
-    echo base_convert([array_search(chr(48),chr(48),chr(48),chr(48),chr(48),a::y("test"))],chr(48));
+    echo base_convert([array_search(chr(48),chr(48),chr(48),chr(48),chr(48),A::y("test"))],chr(48));
 } catch (Error $e) {
     var_dump($e->getMessage());
 }
