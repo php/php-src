@@ -32,6 +32,12 @@ PHP                                                                        NEWS
   . Fixed bug GH-22324 (Ignore leading namespace separator in
     ReflectionParameter::__construct()). (jorgsowa)
 
+- SPL:
+  . Fix	class_parents for classes with leading slash in non-autoload mode.                                                                     
+    (jorgsowa)
+  . Ignore leading back-slash in class_parents(), class_implements(), and
+    class_uses(). (jorgsowa)
+
 - Standard:
   . Fixed bug GH-22395 (base_convert() outputs at most 64 characters).
     (Weilin Du)
