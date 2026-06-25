@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
     declares a default value for the attribute). (iliaal)
+  . Fixed bug GH-22447 (UAF at dom_objects_free_storage when setting an
+    attribute node that collides by local name with a namespaced
+    attribute). (David Carlier)
 
 - Sockets:
   . Fixed various memory related issues in ext/sockets. (David Carlier)
