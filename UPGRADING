@@ -498,6 +498,8 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of array_map() with multiple arrays passed.
   . Improved performance of array_sum() and array_product() for
     integer-only arrays.
+  . Improved performance of min() and max() for integer-only and float-only
+    arrays.
   . Improved performance of array_unshift().
   . Improved performance of array_walk().
   . Improved performance of intval('+0b...', 2) and intval('0b...', 2).
