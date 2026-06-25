@@ -57,10 +57,7 @@ static int					resource_types_table_size;
 /* Reserved space for fast globals access */
 static size_t tsrm_reserved_pos  = 0;
 static size_t tsrm_reserved_size = 0;
-/* Fixed-offset front region (before the TLS entry) and the pending offset for
- * the next ts_allocate_fast_id() that should land in it. */
 static size_t tsrm_reserved_front = 0;
-static ptrdiff_t tsrm_fixed_offset = 0;
 
 static MUTEX_T tsmm_mutex;	  /* thread-safe memory manager mutex */
 static MUTEX_T tsrm_env_mutex; /* tsrm environ mutex */
@@ -337,6 +334,27 @@ TSRM_API void tsrm_reserve_fast_front(size_t size)
 /* allocates a new fast thread-safe-resource id */
 TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
 {/*{{{*/
+	ptrdiff_t fixed_offset;
+
+	tsrm_mutex_lock(tsmm_mutex);
+	size = TSRM_ALIGNED_SIZE(size);
+	if (tsrm_reserved_size - tsrm_reserved_pos < size) {
+		TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate space for fast resource"));
+		*rsrc_id = 0;
+		*offset = 0;
+		tsrm_mutex_unlock(tsmm_mutex);
+		return 0;
+	}
+	fixed_offset = TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_pos;
+	tsrm_reserved_pos += size;
+	tsrm_mutex_unlock(tsmm_mutex);
+
+	return ts_allocate_fast_id_at(rsrc_id, offset, fixed_offset, size, ctor, dtor);
+}/*}}}*/
+
+
+TSRM_API ts_rsrc_id ts_allocate_fast_id_at(ts_rsrc_id *rsrc_id, size_t *offset, ptrdiff_t fixed_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
+{/*{{{*/
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtaining a new fast resource id, %d bytes", size));
 
 	tsrm_mutex_lock(tsmm_mutex);
@@ -346,20 +364,7 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtained resource id %d", *rsrc_id));
 
 	size = TSRM_ALIGNED_SIZE(size);
-	if (tsrm_fixed_offset) {
-		/* Fixed (negative) offset into the reserved front region. */
-		*offset = (size_t) tsrm_fixed_offset;
-		tsrm_fixed_offset = 0;
-	} else if (tsrm_reserved_size - tsrm_reserved_pos < size) {
-		TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate space for fast resource"));
-		*rsrc_id = 0;
-		*offset = 0;
-		tsrm_mutex_unlock(tsmm_mutex);
-		return 0;
-	} else {
-		*offset = TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_pos;
-		tsrm_reserved_pos += size;
-	}
+	*offset = (size_t) fixed_offset;
 
 	/* store the new resource type in the resource sizes table */
 	if (resource_types_table_size < id_count) {
@@ -385,16 +390,6 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully allocated new resource id %d", *rsrc_id));
 	return *rsrc_id;
-}/*}}}*/
-
-
-/* Allocate a fast resource id at a fixed, compile-time-constant offset (a
- * negative offset into the reserved front region). Like tsrm_reserve(), assumes
- * single-threaded startup. */
-TSRM_API ts_rsrc_id ts_allocate_fast_id_at(ts_rsrc_id *rsrc_id, size_t *offset, ptrdiff_t fixed_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
-{/*{{{*/
-	tsrm_fixed_offset = fixed_offset;
-	return ts_allocate_fast_id(rsrc_id, offset, size, ctor, dtor);
 }/*}}}*/
 
 static void set_thread_local_storage_resource_to(tsrm_tls_entry *thread_resource)
