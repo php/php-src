@@ -15,12 +15,11 @@
 #ifndef INTL_ICU_COMPAT_H
 #define INTL_ICU_COMPAT_H
 
+#include <unicode/ubrk.h>
+#include <unicode/ucnv.h>
+#include <unicode/uspoof.h>
 #include <unicode/utypes.h>
 #include <unicode/uversion.h>
-
-typedef struct UBreakIterator UBreakIterator;
-typedef struct UConverter UConverter;
-typedef struct USpoofChecker USpoofChecker;
 
 #define INTL_ICU_VERSION_AT_LEAST(major, minor) \
 	(U_ICU_VERSION_MAJOR_NUM > (major) || \
@@ -32,7 +31,6 @@ typedef struct USpoofChecker USpoofChecker;
 #define INTL_ICU_HAS_USET_SIMPLE_CASE_INSENSITIVE INTL_ICU_VERSION_AT_LEAST(73, 0)
 
 #if INTL_ICU_HAS_SPOOFCHECKER_CHECK_RESULT
-typedef struct USpoofCheckResult USpoofCheckResult;
 typedef USpoofCheckResult IntlIcuSpoofCheckResult;
 #else
 typedef void IntlIcuSpoofCheckResult;
