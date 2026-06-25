@@ -2189,6 +2189,16 @@ PHP_FUNCTION(realpath)
 		Z_PARAM_PATH(filename, filename_len)
 	ZEND_PARSE_PARAMETERS_END();
 
+	const char *path_to_open = filename;
+	php_stream_wrapper *wrapper = php_stream_locate_url_wrapper(filename, &path_to_open, 0);
+	if (wrapper && wrapper != &php_plain_files_wrapper && !wrapper->is_url && wrapper->wops && wrapper->wops->url_stat) {
+		php_stream_statbuf ssb;
+		if (wrapper->wops->url_stat(wrapper, path_to_open, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL) == 0) {
+			RETURN_STRINGL(filename, filename_len);
+		}
+		RETURN_FALSE;
+	}
+
 	if (VCWD_REALPATH(filename, resolved_path_buff)) {
 		if (php_check_open_basedir(resolved_path_buff)) {
 			RETURN_FALSE;
