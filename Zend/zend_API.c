@@ -5041,8 +5041,8 @@ ZEND_API void zend_update_property_string(const zend_class_entry *scope, zend_ob
 	zval tmp;
 
 	ZVAL_STRING(&tmp, value);
-	Z_SET_REFCOUNT(tmp, 0);
 	zend_update_property(scope, object, name, name_length, &tmp);
+	zval_ptr_dtor(&tmp);
 }
 /* }}} */
 
@@ -5051,8 +5051,8 @@ ZEND_API void zend_update_property_stringl(const zend_class_entry *scope, zend_o
 	zval tmp;
 
 	ZVAL_STRINGL(&tmp, value, value_len);
-	Z_SET_REFCOUNT(tmp, 0);
 	zend_update_property(scope, object, name, name_length, &tmp);
+	zval_ptr_dtor(&tmp);
 }
 /* }}} */
 
@@ -5142,8 +5142,9 @@ ZEND_API zend_result zend_update_static_property_string(zend_class_entry *scope,
 	zval tmp;
 
 	ZVAL_STRING(&tmp, value);
-	Z_SET_REFCOUNT(tmp, 0);
-	return zend_update_static_property(scope, name, name_length, &tmp);
+	zend_result retval = zend_update_static_property(scope, name, name_length, &tmp);
+	zval_ptr_dtor(&tmp);
+	return retval;
 }
 /* }}} */
 
@@ -5152,8 +5153,9 @@ ZEND_API zend_result zend_update_static_property_stringl(zend_class_entry *scope
 	zval tmp;
 
 	ZVAL_STRINGL(&tmp, value, value_len);
-	Z_SET_REFCOUNT(tmp, 0);
-	return zend_update_static_property(scope, name, name_length, &tmp);
+	zend_result retval = zend_update_static_property(scope, name, name_length, &tmp);
+	zval_ptr_dtor(&tmp);
+	return retval;
 }
 /* }}} */
 
