@@ -28,6 +28,10 @@ PHP 8.6 UPGRADE NOTES
     from global scope" instead of the prior readonly modification error.
     ReflectionProperty::isWritable() also reports these properties
     accurately.
+  . Custom XPath functions registered via DOMXPath::registerPhpFunctionNS
+    or Dom\XPath::registerPhpFunctionNS returning 'int' or 'float' numbers
+    now provide XPath 'number' scalars. Very large integers >= 2^53 are
+    still returned as XPath strings to not lose precision.
 
 - GD:
   . imagesetstyle(), imagefilter() and imagecrop() filter their array arguments
