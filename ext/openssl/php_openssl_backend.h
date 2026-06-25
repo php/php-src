@@ -35,6 +35,12 @@
 #include <openssl/pkcs12.h>
 #include <openssl/cms.h>
 
+#if defined(OPENSSL_VERSION_MAJOR) && OPENSSL_VERSION_MAJOR >= 4
+typedef const X509_EXTENSION PHP_OPENSSL_X509_EXTENSION;
+#else
+typedef X509_EXTENSION PHP_OPENSSL_X509_EXTENSION;
+#endif
+
 /* number conversion flags checks */
 #define PHP_OPENSSL_CHECK_NUMBER_CONVERSION(_cond, _name, _arg_num) \
 	do { \
@@ -166,8 +172,8 @@ struct php_x509_request {
 	const EVP_CIPHER * priv_key_encrypt_cipher;
 };
 
-void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname);
-void php_openssl_add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str);
+void php_openssl_add_assoc_name_entry(zval * val, char * key, const X509_NAME * name, int shortname);
+void php_openssl_add_assoc_asn1_string(zval * val, char * key, const ASN1_STRING * str);
 time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr);
 int php_openssl_config_check_syntax(const char * section_label, const char * config_filename, const char * section, CONF *config);
 char *php_openssl_conf_get_string(CONF *conf, const char *group, const char *name);
@@ -264,7 +270,7 @@ X509 *php_openssl_x509_from_zval(
 
 zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw);
 
-int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension);
+int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extension);
 
 STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 		char *cert_file, size_t cert_file_len, uint32_t arg_num);
