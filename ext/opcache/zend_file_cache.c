@@ -1970,17 +1970,23 @@ zend_persistent_script *zend_file_cache_script_load_ex(zend_file_handle *file_ha
 	}
 
 	/* verify timestamp */
-	if (ZCG(accel_directives).validate_timestamps &&
-	    zend_get_file_handle_timestamp(file_handle, NULL) != info.timestamp) {
-		if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
-			zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
+	if (ZCG(accel_directives).validate_timestamps) {
+		accel_time_t ts = zend_get_file_handle_timestamp(file_handle, NULL);
+		if (ts != info.timestamp) {
+			if (ts == 0 && ZCG(accel_directives).file_cache_only) {
+				/* Source file missing — serve from cache. */
+			} else {
+				if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
+					zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
+				}
+				close(fd);
+				if (!ZCG(accel_directives).file_cache_read_only) {
+					zend_file_cache_unlink(filename);
+				}
+				efree(filename);
+				return NULL;
+			}
 		}
-		close(fd);
-		if (!ZCG(accel_directives).file_cache_read_only) {
-			zend_file_cache_unlink(filename);
-		}
-		efree(filename);
-		return NULL;
 	}
 
 	/* return here if validating */
