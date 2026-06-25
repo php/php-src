@@ -15,6 +15,7 @@
 #include "php.h"
 #include "fopen_wrappers.h"
 #include "php_globals.h"
+#include "Zend/zend_permissions.h"
 
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -568,6 +569,10 @@ PHP_FUNCTION(chmod)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_validate_file_permission(mode, 2, "mode") == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {

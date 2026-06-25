@@ -54,7 +54,7 @@ foreach($perms_array as $permission) {
     printf("%o", fileperms($file_name) );
     echo "\n";
     clearstatcache();
-  } catch (TypeError $e) {
+  } catch (TypeError|ValueError $e) {
     echo $e->getMessage(), "\n";
   }
 
@@ -63,7 +63,7 @@ foreach($perms_array as $permission) {
     printf("%o", fileperms($dir_name) );
     echo "\n";
     clearstatcache();
-  } catch (TypeError $e) {
+  } catch (TypeError|ValueError $e) {
     echo $e->getMessage(), "\n";
   }
   $count++;
@@ -97,45 +97,33 @@ bool(true)
 bool(true)
 41000
 -- Iteration 4 --
-bool(true)
-101111
-bool(true)
-41111
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
 -- Iteration 5 --
-bool(true)
-107001
-bool(true)
-47001
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
 -- Iteration 6 --
-bool(true)
-100001
-bool(true)
-40001
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
 -- Iteration 7 --
 bool(true)
 101411
 bool(true)
 41411
 -- Iteration 8 --
-bool(true)
-107141
-bool(true)
-47141
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
 -- Iteration 9 --
-bool(true)
-100637
-bool(true)
-40637
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
 -- Iteration 10 --
 bool(true)
 103567
 bool(true)
 43567
 -- Iteration 11 --
-bool(true)
-103567
-bool(true)
-43567
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
 -- Iteration 12 --
 chmod(): Argument #2 ($permissions) must be of type int, string given
 chmod(): Argument #2 ($permissions) must be of type int, string given

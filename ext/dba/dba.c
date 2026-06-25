@@ -22,6 +22,7 @@
 #ifdef HAVE_DBA
 
 #include "php_ini.h"
+#include "Zend/zend_permissions.h"
 #include <stdio.h>
 #include <fcntl.h>
 #ifdef HAVE_SYS_FILE_H
@@ -563,7 +564,11 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 		zend_argument_must_not_be_empty_error(3);
 		RETURN_THROWS();
 	}
-	// TODO Check Value for permission
+
+	if (zend_validate_file_permission(permission, 4, "file permission") == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	if (map_size < 0) {
 		zend_argument_value_error(5, "must be greater than or equal to 0");
 		RETURN_THROWS();

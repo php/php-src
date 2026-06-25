@@ -42,6 +42,7 @@
 #include "zend.h"
 #include "zend_types.h"
 #include "zend_extensions.h"
+#include "zend_permissions.h"
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_main.h"
@@ -772,6 +773,22 @@ static PHP_INI_MH(OnChangeMailForceExtra)
 }
 /* }}} */
 
+/* {{{ PHP_INI_MH */
+static PHP_INI_MH(OnUpdateFilePermission)
+{
+	zend_long value = zend_ini_parse_quantity_warn(new_value, entry->name);
+
+    if (zend_validate_file_permission(value, 1, ZSTR_VAL(entry->name)) == FAILURE) {
+        return FAILURE;
+    }
+
+    zend_long *p = ZEND_INI_GET_ADDR();
+    *p = value;
+
+    return SUCCESS;
+}
+/* }}} */
+
 /* defined in browscap.c */
 PHP_INI_MH(OnChangeBrowscap);
 
@@ -837,7 +854,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("input_encoding",			NULL,			PHP_INI_ALL,	OnUpdateInputEncoding,				input_encoding,		php_core_globals, core_globals)
 	STD_PHP_INI_ENTRY("output_encoding",		NULL,			PHP_INI_ALL,	OnUpdateOutputEncoding,				output_encoding,	php_core_globals, core_globals)
 	STD_PHP_INI_ENTRY("error_log",				NULL,			PHP_INI_ALL,		OnUpdateErrorLog,				error_log,				php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("error_log_mode",			"0644",			PHP_INI_ALL,		OnUpdateLong,					error_log_mode,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("error_log_mode",			"0644",			PHP_INI_ALL,		OnUpdateFilePermission,					error_log_mode,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("extension_dir",			PHP_EXTENSION_DIR,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("sys_temp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	sys_temp_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("include_path",			PHP_INCLUDE_PATH,		PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,			php_core_globals,	core_globals)
