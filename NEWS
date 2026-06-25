@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-22324 (Ignore leading namespace separator in
     ReflectionParameter::__construct()). (jorgsowa)
+  . Fixed bug GH-22441 (ReflectionClass::hasProperty() and getProperty() ignore
+    dynamic properties shadowing a private parent property). (iliaal)
 
 - SPL:
   . Fix class_parents for classes with leading slash in non-autoload mode.
