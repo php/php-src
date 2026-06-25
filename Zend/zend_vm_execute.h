@@ -8290,7 +8290,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_DECLARE_CONST
 	val   = RT_CONSTANT(opline, opline->op2);
 
 	ZVAL_COPY(&c.value, val);
-	if (Z_OPT_CONSTANT(c.value)) {
+	if (Z_OPT_TYPE(c.value) == IS_CONSTANT_AST) {
 		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
 			zval_ptr_dtor_nogc(&c.value);
 
@@ -8325,7 +8325,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_DECLARE_ATTRI
 	val   = RT_CONSTANT(opline, opline->op2);
 
 	ZVAL_COPY(&c.value, val);
-	if (Z_OPT_CONSTANT(c.value)) {
+	if (Z_OPT_TYPE(c.value) == IS_CONSTANT_AST) {
 		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
 			zval_ptr_dtor_nogc(&c.value);
 
@@ -60979,7 +60979,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DECLARE_CONST_SPEC
 	val   = RT_CONSTANT(opline, opline->op2);
 
 	ZVAL_COPY(&c.value, val);
-	if (Z_OPT_CONSTANT(c.value)) {
+	if (Z_OPT_TYPE(c.value) == IS_CONSTANT_AST) {
 		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
 			zval_ptr_dtor_nogc(&c.value);
 
@@ -61014,7 +61014,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DECLARE_ATTRIBUTED
 	val   = RT_CONSTANT(opline, opline->op2);
 
 	ZVAL_COPY(&c.value, val);
-	if (Z_OPT_CONSTANT(c.value)) {
+	if (Z_OPT_TYPE(c.value) == IS_CONSTANT_AST) {
 		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
 			zval_ptr_dtor_nogc(&c.value);
 
