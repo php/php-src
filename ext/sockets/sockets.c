@@ -710,7 +710,7 @@ PHP_FUNCTION(socket_create_listen)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(return_value, socket_ce);
+	object_init_instantiable_class(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
 
 	if (!php_open_listen_sock(php_sock, (unsigned short)port, backlog)) {
@@ -738,7 +738,7 @@ PHP_FUNCTION(socket_accept)
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
 
-	object_init_ex(return_value, socket_ce);
+	object_init_instantiable_class(return_value, socket_ce);
 	new_sock = Z_SOCKET_P(return_value);
 
 	if (!php_accept_connect(php_sock, new_sock, (struct sockaddr*)&sa, &php_sa_len)) {
@@ -1180,7 +1180,7 @@ PHP_FUNCTION(socket_create)
 
 	PHP_ETH_PROTO_CHECK(protocol, domain);
 
-	object_init_ex(return_value, socket_ce);
+	object_init_instantiable_class(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
 
 	php_sock->bsd_socket = socket(domain, type, protocol);
@@ -2420,10 +2420,10 @@ PHP_FUNCTION(socket_create_pair)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(&retval[0], socket_ce);
+	object_init_instantiable_class(&retval[0], socket_ce);
 	php_sock[0] = Z_SOCKET_P(&retval[0]);
 
-	object_init_ex(&retval[1], socket_ce);
+	object_init_instantiable_class(&retval[1], socket_ce);
 	php_sock[1] = Z_SOCKET_P(&retval[1]);
 
 	php_sock[0]->bsd_socket = fds_array[0];
@@ -2606,7 +2606,7 @@ PHP_FUNCTION(socket_import_stream)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, socket_ce);
+	object_init_instantiable_class(return_value, socket_ce);
 	retsock = Z_SOCKET_P(return_value);
 
 	if (!socket_import_file_descriptor(socket, retsock)) {
@@ -2851,7 +2851,7 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 				) {
 			zval zaddr;
 
-			object_init_ex(&zaddr, address_info_ce);
+			object_init_instantiable_class(&zaddr, address_info_ce);
 			res = Z_ADDRESS_INFO_P(&zaddr);
 
 			memcpy(&res->addrinfo, rp, sizeof(struct addrinfo));
@@ -2888,7 +2888,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 
 	PHP_ETH_PROTO_CHECK(ai->addrinfo.ai_protocol, ai->addrinfo.ai_family);
 
-	object_init_ex(return_value, socket_ce);
+	object_init_instantiable_class(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
 
 	php_sock->bsd_socket = socket(ai->addrinfo.ai_family, ai->addrinfo.ai_socktype, ai->addrinfo.ai_protocol);
@@ -2930,7 +2930,7 @@ PHP_FUNCTION(socket_addrinfo_connect)
 
 	PHP_ETH_PROTO_CHECK(ai->addrinfo.ai_protocol, ai->addrinfo.ai_family);
 
-	object_init_ex(return_value, socket_ce);
+	object_init_instantiable_class(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
 
 	php_sock->bsd_socket = socket(ai->addrinfo.ai_family, ai->addrinfo.ai_socktype, ai->addrinfo.ai_protocol);
@@ -3113,7 +3113,7 @@ PHP_FUNCTION(socket_wsaprotocol_info_import)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, socket_ce);
+	object_init_instantiable_class(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
 
 	php_sock->bsd_socket = sock;

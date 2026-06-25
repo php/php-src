@@ -68,7 +68,7 @@ U_CFUNC void resourcebundle_extract_value( zval *return_value, ResourceBundle_ob
 
 		case URES_ARRAY:
 		case URES_TABLE:
-			object_init_ex( return_value, ResourceBundle_ce_ptr );
+			object_init_instantiable_class( return_value, ResourceBundle_ce_ptr );
 			newrb = Z_INTL_RESOURCEBUNDLE_P(return_value);
 			newrb->me = source->child;
 			source->child = NULL;

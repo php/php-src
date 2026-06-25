@@ -39,7 +39,7 @@ void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, .
 		return;
 	}
 
-	object_init_ex(&sql_ex, mysqli_exception_class_entry);
+	object_init_instantiable_class(&sql_ex, mysqli_exception_class_entry);
 
 	if (message) {
 		zend_update_property_string(

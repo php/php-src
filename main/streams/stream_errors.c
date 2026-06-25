@@ -35,7 +35,7 @@ static void php_stream_error_entry_free(php_stream_error_entry *entry);
 /* Helper to create a single StreamError object from an entry */
 static void php_stream_error_create_object(zval *zv, php_stream_error_entry *entry)
 {
-	object_init_ex(zv, php_ce_stream_error);
+	object_init_instantiable_class(zv, php_ce_stream_error);
 
 	const char *case_name = NULL;
 	if (entry->code > 0 && entry->code <= ZEND_ENUM_StreamErrorCode_CASE_COUNT) {
@@ -375,7 +375,7 @@ static void php_stream_throw_exception_with_errors(php_stream_error_operation *o
 	}
 
 	zval ex;
-	object_init_ex(&ex, php_ce_stream_exception);
+	object_init_instantiable_class(&ex, php_ce_stream_exception);
 
 	/* Set message from first error */
 	zend_update_property_string(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("message"),

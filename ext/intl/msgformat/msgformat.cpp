@@ -103,7 +103,7 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 /* {{{ Create formatter. */
 U_CFUNC PHP_FUNCTION( msgfmt_create )
 {
-	object_init_ex( return_value, MessageFormatter_ce_ptr );
+	object_init_instantiable_class( return_value, MessageFormatter_ce_ptr );
 	if (msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();

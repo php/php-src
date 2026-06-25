@@ -589,7 +589,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 				RETURN_FALSE;
 			}
 
-			object_init_ex(return_value, dba_connection_ce);
+			object_init_instantiable_class(return_value, dba_connection_ce);
 			dba_connection *connection = Z_DBA_CONNECTION_P(return_value);
 			connection->info = (dba_info *)le->ptr;
 			connection->hash = zend_string_dup(resource_key, /* persistent */ true);
@@ -783,7 +783,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	zval *connection_zval;
 	dba_connection *connection;
 	if ((connection_zval = zend_hash_find(&DBA_G(connections), resource_key)) == NULL) {
-		object_init_ex(return_value, dba_connection_ce);
+		object_init_instantiable_class(return_value, dba_connection_ce);
 		connection = Z_DBA_CONNECTION_P(return_value);
 
 		connection->info = pecalloc(1, sizeof(dba_info), persistent);

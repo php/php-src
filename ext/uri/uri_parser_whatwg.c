@@ -72,7 +72,7 @@ static const char *fill_errors(zval *errors)
 	lexbor_plog_entry_t *lxb_error;
 	while ((lxb_error = lexbor_array_obj_pop(&lexbor_parser.log->list)) != NULL) {
 		zval error;
-		object_init_ex(&error, php_uri_ce_whatwg_url_validation_error);
+		object_init_instantiable_class(&error, php_uri_ce_whatwg_url_validation_error);
 		zend_update_property_string(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZEND_STRL("context"), (const char *) lxb_error->data);
 
 		const char *error_str;

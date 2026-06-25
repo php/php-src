@@ -1038,7 +1038,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (date_str) {
-		object_init_ex(&zv_tmp, php_date_get_date_ce());
+		object_init_instantiable_class(&zv_tmp, php_date_get_date_ce());
 		ZVAL_STR(&zv_arg, date_str);
 		zend_call_known_instance_method_with_1_params(Z_OBJCE(zv_tmp)->constructor, Z_OBJ(zv_tmp), NULL, &zv_arg);
 		date_obj = Z_OBJ(zv_tmp);
@@ -1148,7 +1148,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 	/* resources allocated from now on */
 
 	/* Finally, instantiate object and call constructor */
-	object_init_ex(return_value, php_date_get_date_ce());
+	object_init_instantiable_class(return_value, php_date_get_date_ce());
 	zend_call_known_instance_method_with_2_params(
 		Z_OBJCE_P(return_value)->constructor, Z_OBJ_P(return_value), NULL, &ts_zval, timezone_zval);
 	if (EG(exception)) {

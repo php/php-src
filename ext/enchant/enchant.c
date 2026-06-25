@@ -262,7 +262,7 @@ PHP_FUNCTION(enchant_broker_init)
 
 	pbroker = enchant_broker_init();
 	if (pbroker) {
-		object_init_ex(return_value, enchant_broker_ce);
+		object_init_instantiable_class(return_value, enchant_broker_ce);
 		broker = Z_ENCHANT_BROKER_P(return_value);
 		broker->pbroker = pbroker;
 		broker->nb_dict = 0;
@@ -434,7 +434,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 	if (pdict) {
 		pbroker->nb_dict++;
 
-		object_init_ex(return_value, enchant_dict_ce);
+		object_init_instantiable_class(return_value, enchant_dict_ce);
 		dict = Z_ENCHANT_DICT_P(return_value);
 		dict->pdict = pdict;
 		ZVAL_COPY(&dict->zbroker, broker);
@@ -468,7 +468,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 	if (pdict) {
 		pbroker->nb_dict++;
 
-		object_init_ex(return_value, enchant_dict_ce);
+		object_init_instantiable_class(return_value, enchant_dict_ce);
 		dict = Z_ENCHANT_DICT_P(return_value);
 		dict->pdict = pdict;
 		ZVAL_COPY(&dict->zbroker, broker);

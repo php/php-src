@@ -133,7 +133,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 /* {{{ Create number formatter. */
 U_CFUNC PHP_FUNCTION( numfmt_create )
 {
-	object_init_ex( return_value, NumberFormatter_ce_ptr );
+	object_init_instantiable_class( return_value, NumberFormatter_ce_ptr );
 	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();

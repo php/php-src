@@ -72,7 +72,7 @@ static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 U_CFUNC PHP_METHOD( IntlDatePatternGenerator, create )
 {
-    object_init_ex( return_value, IntlDatePatternGenerator_ce_ptr );
+    object_init_instantiable_class( return_value, IntlDatePatternGenerator_ce_ptr );
     if (dtpg_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();

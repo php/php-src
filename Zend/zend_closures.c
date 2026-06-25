@@ -762,7 +762,7 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 	zend_closure *closure;
 	void *ptr;
 
-	object_init_ex(res, zend_ce_closure);
+	object_init_instantiable_class(res, zend_ce_closure);
 
 	closure = (zend_closure *)Z_OBJ_P(res);
 

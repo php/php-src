@@ -130,7 +130,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	php_set_default_dir(dirp->res);
 
 	if (createobject) {
-		object_init_ex(return_value, dir_class_entry_ptr);
+		object_init_instantiable_class(return_value, dir_class_entry_ptr);
 		ZVAL_STRINGL(Z_DIRECTORY_PATH_P(return_value), dirname, dir_len);
 		ZVAL_RES(Z_DIRECTORY_HANDLE_P(return_value), dirp->res);
 		php_stream_auto_cleanup(dirp); /* so we don't get warnings under debug */

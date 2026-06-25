@@ -380,7 +380,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 				ZVAL_EMPTY_ARRAY(&retval);
 			}
 
-			object_init_ex(return_value, dom_get_nodelist_ce(modern));
+			object_init_instantiable_class(return_value, dom_get_nodelist_ce(modern));
 			nodeobj = Z_DOMOBJ_P(return_value);
 			dom_nnodemap_object *mapptr = nodeobj->ptr;
 

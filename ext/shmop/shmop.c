@@ -151,7 +151,7 @@ PHP_FUNCTION(shmop_open)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(return_value, shmop_ce);
+	object_init_instantiable_class(return_value, shmop_ce);
 	shmop = Z_SHMOP_P(return_value);
 	shmop->key = key;
 	shmop->shmflg |= mode;

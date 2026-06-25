@@ -139,7 +139,7 @@ bool php_openssl_is_pkey_ce(zval *val)
 
 void php_openssl_pkey_object_init(zval *zv, EVP_PKEY *pkey, bool is_private)
 {
-	object_init_ex(zv, php_openssl_pkey_ce);
+	object_init_instantiable_class(zv, php_openssl_pkey_ce);
 	php_openssl_pkey_object *obj = Z_OPENSSL_PKEY_P(zv);
 	obj->pkey = pkey;
 	obj->is_private = is_private;
@@ -259,7 +259,7 @@ SSL_SESSION *php_openssl_session_from_zval(zval *zv)
 
 void php_openssl_session_object_init(zval *zv, SSL_SESSION *session)
 {
-	object_init_ex(zv, php_openssl_session_ce);
+	object_init_instantiable_class(zv, php_openssl_session_ce);
 	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(zv);
 	obj->session = session;
 
@@ -1651,7 +1651,7 @@ PHP_FUNCTION(openssl_x509_read)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, php_openssl_certificate_ce);
+	object_init_instantiable_class(return_value, php_openssl_certificate_ce);
 	x509_cert_obj = Z_OPENSSL_CERTIFICATE_P(return_value);
 	x509_cert_obj->x509 = cert_obj ? X509_dup(cert) : cert;
 }
@@ -2252,7 +2252,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 
-	object_init_ex(return_value, php_openssl_certificate_ce);
+	object_init_instantiable_class(return_value, php_openssl_certificate_ce);
 	cert_object = Z_OPENSSL_CERTIFICATE_P(return_value);
 	cert_object->x509 = new_cert;
 	new_cert_used = true;
@@ -2325,7 +2325,7 @@ PHP_FUNCTION(openssl_csr_new)
 						RETVAL_TRUE;
 
 						if (X509_REQ_sign(csr, req.priv_key, req.digest)) {
-							object_init_ex(return_value, php_openssl_request_ce);
+							object_init_instantiable_class(return_value, php_openssl_request_ce);
 							x509_request_obj = Z_OPENSSL_REQUEST_P(return_value);
 							x509_request_obj->csr = csr;
 							csr = NULL;

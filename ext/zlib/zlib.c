@@ -909,7 +909,7 @@ PHP_FUNCTION(inflate_init)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(return_value, inflate_context_ce);
+	object_init_instantiable_class(return_value, inflate_context_ce);
 	ctx = Z_INFLATE_CONTEXT_P(return_value);
 
 	ctx->Z.zalloc = php_zlib_alloc;
@@ -1159,7 +1159,7 @@ PHP_FUNCTION(deflate_init)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(return_value, deflate_context_ce);
+	object_init_instantiable_class(return_value, deflate_context_ce);
 	ctx = Z_DEFLATE_CONTEXT_P(return_value);
 
 	ctx->Z.zalloc = php_zlib_alloc;

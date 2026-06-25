@@ -351,9 +351,9 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 		}
 	} else {
 		if (EX(func)->common.fn_flags & ZEND_ACC_STATIC) {
-			object_init_ex(return_value, Z_CE_P(ZEND_THIS));
+			object_init_instantiable_class(return_value, Z_CE_P(ZEND_THIS));
 		} else {
-			object_init_ex(return_value, Z_OBJCE_P(ZEND_THIS));
+			object_init_instantiable_class(return_value, Z_OBJCE_P(ZEND_THIS));
 		}
 		uri_object = Z_URI_OBJECT_P(return_value);
 	}

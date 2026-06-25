@@ -1487,7 +1487,7 @@ static void create_date_period_datetime(timelib_time *datetime, zend_class_entry
 	if (datetime) {
 		php_date_obj *date_obj;
 
-		zend_result result = object_init_ex(zv, ce);
+		zend_result result = object_init_instantiable_class(zv, ce);
 		ZEND_ASSERT(result == SUCCESS && "should succeed as it reuses an existing object's ce");
 		date_obj = Z_PHPDATE_P(zv);
 		date_obj->time = timelib_time_clone(datetime);
@@ -1501,7 +1501,7 @@ static void create_date_period_interval(timelib_rel_time *interval, zval *zv)
 	if (interval) {
 		php_interval_obj *interval_obj;
 
-		object_init_ex(zv, date_ce_interval);
+		object_init_instantiable_class(zv, date_ce_interval);
 		interval_obj = Z_PHPINTERVAL_P(zv);
 		interval_obj->diff = timelib_rel_time_clone(interval);
 		interval_obj->initialized = true;
@@ -5838,7 +5838,7 @@ PHP_METHOD(DatePeriod, __set_state)
 		Z_PARAM_ARRAY_HT(myht)
 	ZEND_PARSE_PARAMETERS_END();
 
-	object_init_ex(return_value, date_ce_period);
+	object_init_instantiable_class(return_value, date_ce_period);
 	period_obj = Z_PHPPERIOD_P(return_value);
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");

@@ -750,7 +750,7 @@ PHP_METHOD(SplFixedArray, fromArray)
 		spl_fixedarray_init(&array, 0);
 	}
 
-	object_init_ex(return_value, spl_ce_SplFixedArray);
+	object_init_instantiable_class(return_value, spl_ce_SplFixedArray);
 
 	intern = Z_SPLFIXEDARRAY_P(return_value);
 	intern->array = array;

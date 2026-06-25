@@ -1792,26 +1792,34 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 }
 /* }}} */
 
+static ZEND_COLD zend_never_inline void zend_cannot_instantiate_class(zend_class_entry *class_type) {
+	if (class_type->ce_flags & ZEND_ACC_INTERFACE) {
+		zend_throw_error(NULL, "Cannot instantiate interface %s", ZSTR_VAL(class_type->name));
+	} else if (class_type->ce_flags & ZEND_ACC_TRAIT) {
+		zend_throw_error(NULL, "Cannot instantiate trait %s", ZSTR_VAL(class_type->name));
+	} else if (class_type->ce_flags & ZEND_ACC_ENUM) {
+		zend_throw_error(NULL, "Cannot instantiate enum %s", ZSTR_VAL(class_type->name));
+	} else {
+		ZEND_ASSERT(class_type->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
+		zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(class_type->name));
+	}
+}
+
 /* This function requires 'properties' to contain all props declared in the
  * class and all props being public. If only a subset is given or the class
  * has protected members then you need to merge the properties separately by
  * calling zend_merge_properties(). */
-static zend_always_inline zend_result _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties) /* {{{ */
+static zend_always_inline zend_result _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties, bool known_instantiable) /* {{{ */
 {
-	if (UNEXPECTED(class_type->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
-		if (class_type->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_throw_error(NULL, "Cannot instantiate interface %s", ZSTR_VAL(class_type->name));
-		} else if (class_type->ce_flags & ZEND_ACC_TRAIT) {
-			zend_throw_error(NULL, "Cannot instantiate trait %s", ZSTR_VAL(class_type->name));
-		} else if (class_type->ce_flags & ZEND_ACC_ENUM) {
-			zend_throw_error(NULL, "Cannot instantiate enum %s", ZSTR_VAL(class_type->name));
-		} else {
-			ZEND_ASSERT(class_type->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
-			zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(class_type->name));
+	if (!known_instantiable) {
+		if (UNEXPECTED(class_type->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
+			zend_cannot_instantiate_class(class_type);
+			ZVAL_NULL(arg);
+			Z_OBJ_P(arg) = NULL;
+			return FAILURE;
 		}
-		ZVAL_NULL(arg);
-		Z_OBJ_P(arg) = NULL;
-		return FAILURE;
+	} else {
+		ZEND_ASSERT((class_type->ce_flags & ZEND_ACC_UNINSTANTIABLE) == 0);
 	}
 
 	if (UNEXPECTED(!(class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
@@ -1840,19 +1848,24 @@ static zend_always_inline zend_result _object_and_properties_init(zval *arg, zen
 
 ZEND_API zend_result object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties) /* {{{ */
 {
-	return _object_and_properties_init(arg, class_type, properties);
+	return _object_and_properties_init(arg, class_type, properties, false);
 }
 /* }}} */
 
 ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *class_type) /* {{{ */
 {
-	return _object_and_properties_init(arg, class_type, NULL);
+	return _object_and_properties_init(arg, class_type, NULL, false);
 }
 /* }}} */
 
+ZEND_API zend_result object_init_instantiable_class(zval *arg, zend_class_entry *class_type) /* {{{ */
+{
+	return _object_and_properties_init(arg, class_type, NULL, true);
+}
+
 ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
 {
-	zend_result status = _object_and_properties_init(arg, class_type, NULL);
+	zend_result status = _object_and_properties_init(arg, class_type, NULL, false);
 	if (UNEXPECTED(status == FAILURE)) {
 		ZVAL_UNDEF(arg);
 		return FAILURE;

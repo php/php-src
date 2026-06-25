@@ -231,7 +231,7 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 {
 	IntlIterator_object *ii;
 
-	object_init_ex(object, IntlPartsIterator_ce_ptr);
+	object_init_instantiable_class(object, IntlPartsIterator_ce_ptr);
 	ii = Z_INTL_ITERATOR_P(object);
 
 	ii->iterator = (zend_object_iterator*)emalloc(sizeof(zoi_break_iter_parts));

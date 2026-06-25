@@ -133,7 +133,7 @@ static const zend_object_iterator_funcs string_enum_object_iterator_funcs = {
 U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object)
 {
 	IntlIterator_object *ii;
-	object_init_ex(object, IntlIterator_ce_ptr);
+	object_init_instantiable_class(object, IntlIterator_ce_ptr);
 	ii = Z_INTL_ITERATOR_P(object);
 	ii->iterator = (zend_object_iterator*)emalloc(sizeof(zoi_with_current));
 	zend_iterator_init(ii->iterator);

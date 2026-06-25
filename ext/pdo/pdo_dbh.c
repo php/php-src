@@ -39,7 +39,7 @@ void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_e
 {
 		zval error_info,pdo_exception;
 
-		object_init_ex(&pdo_exception, php_pdo_get_exception());
+		object_init_instantiable_class(&pdo_exception, php_pdo_get_exception());
 		array_init(&error_info);
 
 		add_next_index_string(&error_info, *pdo_error);
@@ -107,7 +107,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlst
 		zval ex, info;
 		zend_class_entry *pdo_ex = php_pdo_get_exception();
 
-		object_init_ex(&ex, pdo_ex);
+		object_init_instantiable_class(&ex, pdo_ex);
 
 		zend_update_property_str(zend_ce_exception, Z_OBJ(ex), "message", sizeof("message")-1, message);
 		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "code", sizeof("code")-1, *pdo_err);
@@ -182,7 +182,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 		zval ex;
 		zend_class_entry *pdo_ex = php_pdo_get_exception();
 
-		object_init_ex(&ex, pdo_ex);
+		object_init_instantiable_class(&ex, pdo_ex);
 
 		zend_update_property_str(zend_ce_exception, Z_OBJ(ex), "message", sizeof("message") - 1, message);
 		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "code", sizeof("code") - 1, *pdo_err);

@@ -263,7 +263,7 @@ found_weakref:
 static zend_always_inline void zend_weakref_create(zend_object *referent, zval *return_value) {
 	zend_weakref *wr;
 
-	object_init_ex(return_value, zend_ce_weakref);
+	object_init_instantiable_class(return_value, zend_ce_weakref);
 
 	wr = zend_weakref_fetch(return_value);
 	wr->referent = referent;

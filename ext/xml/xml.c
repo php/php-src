@@ -1096,7 +1096,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 		ns_param = ":";
 	}
 
-	object_init_ex(return_value, xml_parser_ce);
+	object_init_instantiable_class(return_value, xml_parser_ce);
 	parser = Z_XMLPARSER_P(return_value);
 	parser->parser = XML_ParserCreate_MM((auto_detect ? NULL : encoding),
 	                                     &php_xml_mem_hdlrs, (XML_Char*)ns_param);

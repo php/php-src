@@ -183,7 +183,7 @@ static void php_gd_image_object_free(zend_object *intern)
  */
 void php_gd_assign_libgdimageptr_as_extgdimage(zval *val, gdImagePtr image)
 {
-	object_init_ex(val, gd_image_ce);
+	object_init_instantiable_class(val, gd_image_ce);
 	php_gd_exgdimage_from_zobj_p(Z_OBJ_P(val))->image = image;
 }
 
@@ -600,7 +600,7 @@ PHP_FUNCTION(imageloadfont)
 	}
 	php_stream_close(stream);
 
-	object_init_ex(return_value, gd_font_ce);
+	object_init_instantiable_class(return_value, gd_font_ce);
 	php_gd_font_object_from_zend_object(Z_OBJ_P(return_value))->font = font;
 }
 /* }}} */

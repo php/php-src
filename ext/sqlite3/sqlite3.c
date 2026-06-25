@@ -509,7 +509,7 @@ PHP_METHOD(SQLite3, prepare)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, php_sqlite3_stmt_entry);
+	object_init_instantiable_class(return_value, php_sqlite3_stmt_entry);
 	stmt_obj = Z_SQLITE3_STMT_P(return_value);
 	stmt_obj->db_obj = db_obj;
 	Z_ADDREF_P(object);
@@ -561,7 +561,7 @@ PHP_METHOD(SQLite3, query)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(&stmt, php_sqlite3_stmt_entry);
+	object_init_instantiable_class(&stmt, php_sqlite3_stmt_entry);
 	stmt_obj = Z_SQLITE3_STMT_P(&stmt);
 	stmt_obj->db_obj = db_obj;
 	Z_ADDREF_P(object);
@@ -575,7 +575,7 @@ PHP_METHOD(SQLite3, query)
 
 	stmt_obj->initialised = true;
 
-	object_init_ex(return_value, php_sqlite3_result_entry);
+	object_init_instantiable_class(return_value, php_sqlite3_result_entry);
 	result = Z_SQLITE3_RESULT_P(return_value);
 	result->db_obj = db_obj;
 	result->stmt_obj = stmt_obj;
@@ -1863,7 +1863,7 @@ PHP_METHOD(SQLite3Stmt, execute)
 		case SQLITE_DONE: /* Valid but no results */
 		{
 			sqlite3_reset(stmt_obj->stmt);
-			object_init_ex(return_value, php_sqlite3_result_entry);
+			object_init_instantiable_class(return_value, php_sqlite3_result_entry);
 			result = Z_SQLITE3_RESULT_P(return_value);
 
 			result->is_prepared_statement = true;

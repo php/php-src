@@ -58,7 +58,7 @@ U_CFUNC	void breakiterator_object_create(zval *object,
 	}
 
 	if (brand_new) {
-		object_init_ex(object, ce);
+		object_init_instantiable_class(object, ce);
 	}
 	breakiterator_object_construct(object, biter);
 }

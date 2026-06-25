@@ -1030,7 +1030,7 @@ PHP_FUNCTION(ldap_connect)
 			LDAPG(tls_newctx) = false;
 		}
 #endif
-		object_init_ex(return_value, ldap_link_ce);
+		object_init_instantiable_class(return_value, ldap_link_ce);
 		ld = Z_LDAP_LINK_P(return_value);
 
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
@@ -1108,7 +1108,7 @@ PHP_FUNCTION(ldap_connect_wallet) {
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, ldap_link_ce);
+	object_init_instantiable_class(return_value, ldap_link_ce);
 	ld = Z_LDAP_LINK_P(return_value);
 
 	{
@@ -1256,7 +1256,7 @@ PHP_FUNCTION(ldap_bind_ext)
 		}
 
 		/* return a PHP control object */
-		object_init_ex(return_value, ldap_result_ce);
+		object_init_instantiable_class(return_value, ldap_result_ce);
 		ldap_resultdata *result = Z_LDAP_RESULT_P(return_value);
 		result->result = ldap_res;
 	}
@@ -1692,7 +1692,7 @@ process:
 			}
 			if (rcs[i] != -1) {
 				zval object;
-				object_init_ex(&object, ldap_result_ce);
+				object_init_instantiable_class(&object, ldap_result_ce);
 				result = Z_LDAP_RESULT_P(&object);
 				result->result = ldap_res;
 				add_next_index_zval(return_value, &object);
@@ -1762,7 +1762,7 @@ cleanup_parallel:
 				php_error_docref(NULL, E_WARNING, "Partial search results returned: Adminlimit exceeded");
 			}
 #endif
-			object_init_ex(return_value, ldap_result_ce);
+			object_init_instantiable_class(return_value, ldap_result_ce);
 			result = Z_LDAP_RESULT_P(return_value);
 			result->result = ldap_res;
 		}
@@ -1869,7 +1869,7 @@ PHP_FUNCTION(ldap_first_entry)
 	if ((entry = ldap_first_entry(ld->link, ldap_result->result)) == NULL) {
 		RETVAL_FALSE;
 	} else {
-		object_init_ex(return_value, ldap_result_entry_ce);
+		object_init_instantiable_class(return_value, ldap_result_entry_ce);
 		ldap_result_entry *resultentry = Z_LDAP_RESULT_ENTRY_P(return_value);
 		ZVAL_COPY(&resultentry->res, result);
 		resultentry->data = entry;
@@ -1898,7 +1898,7 @@ PHP_FUNCTION(ldap_next_entry)
 	if ((entry_next = ldap_next_entry(ld->link, resultentry->data)) == NULL) {
 		RETVAL_FALSE;
 	} else {
-		object_init_ex(return_value, ldap_result_entry_ce);
+		object_init_instantiable_class(return_value, ldap_result_entry_ce);
 		ldap_result_entry *resultentry_next = Z_LDAP_RESULT_ENTRY_P(return_value);
 		ZVAL_COPY(&resultentry_next->res, &resultentry->res);
 		resultentry_next->data = entry_next;
@@ -2402,7 +2402,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 			}
 
 			/* return a PHP control object */
-			object_init_ex(return_value, ldap_result_ce);
+			object_init_instantiable_class(return_value, ldap_result_ce);
 			result = Z_LDAP_RESULT_P(return_value);
 			result->result = ldap_res;
 		} else RETVAL_TRUE;
@@ -2424,7 +2424,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 			}
 
 			/* return a PHP control object */
-			object_init_ex(return_value, ldap_result_ce);
+			object_init_instantiable_class(return_value, ldap_result_ce);
 			result = Z_LDAP_RESULT_P(return_value);
 			result->result = ldap_res;
 		} else {
@@ -2559,7 +2559,7 @@ static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, bool ext)
 		}
 
 		/* return a PHP control object */
-		object_init_ex(return_value, ldap_result_ce);
+		object_init_instantiable_class(return_value, ldap_result_ce);
 		ldap_resultdata *result = Z_LDAP_RESULT_P(return_value);
 		result->result = ldap_res;
 	} else {
@@ -3530,7 +3530,7 @@ PHP_FUNCTION(ldap_first_reference)
 	if ((entry = ldap_first_reference(ld->link, ldap_result->result)) == NULL) {
 		RETVAL_FALSE;
 	} else {
-		object_init_ex(return_value, ldap_result_entry_ce);
+		object_init_instantiable_class(return_value, ldap_result_entry_ce);
 		ldap_result_entry *resultentry = Z_LDAP_RESULT_ENTRY_P(return_value);
 		ZVAL_COPY(&resultentry->res, result);
 		resultentry->data = entry;
@@ -3559,7 +3559,7 @@ PHP_FUNCTION(ldap_next_reference)
 	if ((entry_next = ldap_next_reference(ld->link, resultentry->data)) == NULL) {
 		RETVAL_FALSE;
 	} else {
-		object_init_ex(return_value, ldap_result_entry_ce);
+		object_init_instantiable_class(return_value, ldap_result_entry_ce);
 		ldap_result_entry *resultentry_next = Z_LDAP_RESULT_ENTRY_P(return_value);
 		ZVAL_COPY(&resultentry_next->res, &resultentry->res);
 		resultentry_next->data = entry_next;
@@ -3674,7 +3674,7 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, bool ext)
 		}
 
 		/* return a PHP control object */
-		object_init_ex(return_value, ldap_result_ce);
+		object_init_instantiable_class(return_value, ldap_result_ce);
 		ldap_resultdata *result = Z_LDAP_RESULT_P(return_value);
 		result->result = ldap_res;
 	} else {
@@ -4126,7 +4126,7 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 	}
 
 	/* return a PHP control object */
-	object_init_ex(return_value, ldap_result_ce);
+	object_init_instantiable_class(return_value, ldap_result_ce);
 	result = Z_LDAP_RESULT_P(return_value);
 	result->result = ldap_res;
 

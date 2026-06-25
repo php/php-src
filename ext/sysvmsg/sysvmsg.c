@@ -213,7 +213,7 @@ PHP_FUNCTION(msg_get_queue)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(return_value, sysvmsg_queue_ce);
+	object_init_instantiable_class(return_value, sysvmsg_queue_ce);
 	mq = Z_SYSVMSG_QUEUE_P(return_value);
 
 	mq->key = key;

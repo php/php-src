@@ -63,7 +63,7 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 /* {{{ Create collator. */
 U_CFUNC PHP_FUNCTION( collator_create )
 {
-	object_init_ex( return_value, Collator_ce_ptr );
+	object_init_instantiable_class( return_value, Collator_ce_ptr );
 	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
