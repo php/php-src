@@ -22,8 +22,17 @@ try {
         printf("%s: %s\n", $e::class, $e->getMessage());
     }
 }
+
+/* By-ref type violation: the slot is reset to the property default. */
+class Test { public int $i; public array $a; }
+try {
+    var_dump(unserialize('O:4:"Test":2:{s:1:"i";N;s:1:"a";R:2;}'));
+} catch (\Throwable $e) {
+    printf("%s: %s\n", $e::class, $e->getMessage());
+}
 echo "OK\n";
 ?>
 --EXPECTF--
 Warning: unserialize(): Error at offset %d of %d bytes in %s on line %d
+TypeError: Cannot assign null to property Test::$i of type int
 OK

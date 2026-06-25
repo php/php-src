@@ -152,6 +152,17 @@ static zend_never_inline void var_push_dtor_value(php_unserialize_data_t *var_ha
 	}
 }
 
+static zend_always_inline void var_restore_prop_default(php_unserialize_data_t *var_hash, zend_object *obj, zend_property_info *info, zval *data)
+{
+	/* A partially/incorrectly unserialized value may violate the property's
+	 * declared type, so restore the default and keep the slot consistent. */
+	zval *tmp = &obj->ce->default_properties_table[OBJ_PROP_TO_NUM(info->offset)];
+	if (Z_REFCOUNTED_P(data)) {
+		var_push_dtor_value(var_hash, data);
+	}
+	ZVAL_COPY_OR_DUP_PROP(data, tmp);
+}
+
 static zend_always_inline zval *tmp_var(php_unserialize_data_t *var_hashx, zend_long num)
 {
     var_dtor_entries *var_hash;
@@ -681,13 +692,7 @@ second_try:
 				if (Z_ISREF_P(data)) {
 					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
 				} else {
-					/* "partially unserialized" value might violate the property
-					 * declared type so we restore the default */
-					zval *tmp = &obj->ce->default_properties_table[OBJ_PROP_TO_NUM(info->offset)];
-					if (Z_REFCOUNTED_P(data)) {
-						var_push_dtor_value(var_hash, data);
-					}
-					ZVAL_COPY_OR_DUP(data, tmp);
+					var_restore_prop_default(var_hash, obj, info, data);
 				}
 			}
 			goto failure;
@@ -695,8 +700,7 @@ second_try:
 
 		if (UNEXPECTED(info)) {
 			if (!zend_verify_prop_assignable_by_ref(info, data, /* strict */ 1)) {
-				zval_ptr_dtor(data);
-				ZVAL_UNDEF(data);
+				var_restore_prop_default(var_hash, obj, info, data);
 				goto failure;
 			}
 
