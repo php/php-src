@@ -42,6 +42,8 @@ typedef struct {
 	ts_allocate_ctor ctor;
 	ts_allocate_dtor dtor;
 	size_t fast_offset;
+	/* When set, storage comes from __thread memory instead of being allocated by TSRM. */
+	void *(*tls_addr)(void);
 	int done;
 } tsrm_resource_type;
 
@@ -163,14 +165,19 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 
 static void ts_free_resources(tsrm_tls_entry *thread_resources)
 {
+	bool own_thread = thread_resources->thread_id == tsrm_thread_id();
+
 	/* Need to destroy in reverse order to respect dependencies. */
 	for (int i = thread_resources->count - 1; i >= 0; i--) {
 		if (!resource_types_table[i].done) {
+			if (resource_types_table[i].tls_addr && !own_thread) {
+				continue;
+			}
 			if (resource_types_table[i].dtor) {
 				resource_types_table[i].dtor(thread_resources->storage[i]);
 			}
 
-			if (!resource_types_table[i].fast_offset) {
+			if (!resource_types_table[i].fast_offset && !resource_types_table[i].tls_addr) {
 				free(thread_resources->storage[i]);
 			}
 		}
@@ -256,7 +263,10 @@ static void tsrm_update_active_threads(void)
 
 				p->storage = (void *) realloc(p->storage, sizeof(void *)*id_count);
 				for (j=p->count; j<id_count; j++) {
-					if (resource_types_table[j].fast_offset) {
+					if (resource_types_table[j].tls_addr) {
+						TSRM_ASSERT(p->thread_id == tsrm_thread_id());
+						p->storage[j] = resource_types_table[j].tls_addr();
+					} else if (resource_types_table[j].fast_offset) {
 						p->storage[j] = (void *) (((char*)p) + resource_types_table[j].fast_offset);
 					} else {
 						p->storage[j] = (void *) malloc(resource_types_table[j].size);
@@ -301,6 +311,7 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].ctor = ctor;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].dtor = dtor;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].fast_offset = 0;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].tls_addr = NULL;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].done = 0;
 
 	tsrm_update_active_threads();
@@ -359,12 +370,48 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].ctor = ctor;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].dtor = dtor;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].fast_offset = *offset;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].tls_addr = NULL;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].done = 0;
 
 	tsrm_update_active_threads();
 	tsrm_mutex_unlock(tsmm_mutex);
 
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully allocated new resource id %d", *rsrc_id));
+	return *rsrc_id;
+}/*}}}*/
+
+/* allocates a resource id whose per-thread storage is a native __thread block */
+TSRM_API ts_rsrc_id ts_allocate_tls_id(ts_rsrc_id *rsrc_id, void *(*tls_addr)(void), size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
+{/*{{{*/
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtaining a new TLS resource id, %d bytes", size));
+
+	tsrm_mutex_lock(tsmm_mutex);
+
+	*rsrc_id = TSRM_SHUFFLE_RSRC_ID(id_count++);
+
+	if (resource_types_table_size < id_count) {
+		tsrm_resource_type *_tmp;
+		_tmp = (tsrm_resource_type *) realloc(resource_types_table, sizeof(tsrm_resource_type)*id_count);
+		if (!_tmp) {
+			TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate storage for resource"));
+			*rsrc_id = 0;
+			tsrm_mutex_unlock(tsmm_mutex);
+			return 0;
+		}
+		resource_types_table = _tmp;
+		resource_types_table_size = id_count;
+	}
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].size = size;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].ctor = ctor;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].dtor = dtor;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].fast_offset = 0;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].tls_addr = tls_addr;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].done = 0;
+
+	tsrm_update_active_threads();
+	tsrm_mutex_unlock(tsmm_mutex);
+
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully allocated new TLS resource id %d", *rsrc_id));
 	return *rsrc_id;
 }/*}}}*/
 
@@ -397,7 +444,9 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 		if (resource_types_table[i].done) {
 			(*thread_resources_ptr)->storage[i] = NULL;
 		} else {
-			if (resource_types_table[i].fast_offset) {
+			if (resource_types_table[i].tls_addr) {
+				(*thread_resources_ptr)->storage[i] = resource_types_table[i].tls_addr();
+			} else if (resource_types_table[i].fast_offset) {
 				(*thread_resources_ptr)->storage[i] = (void *) (((char*)(*thread_resources_ptr)) + resource_types_table[i].fast_offset);
 			} else {
 				(*thread_resources_ptr)->storage[i] = (void *) malloc(resource_types_table[i].size);
@@ -486,6 +535,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 		 * use the global pointer, we need to setup the global pointer temporarily here. */
 		set_thread_local_storage_resource_to(thread_resources);
 		/* Free up the old resource from the old thread instance */
+		thread_resources->thread_id = 0;
 		ts_free_resources(thread_resources);
 		free(thread_resources);
 		/* Allocate a new resource at the same point in the linked list, and relink the next pointer */
@@ -559,7 +609,7 @@ void ts_free_id(ts_rsrc_id id)
 						if (resource_types_table[rsrc_id].dtor) {
 							resource_types_table[rsrc_id].dtor(p->storage[rsrc_id]);
 						}
-						if (!resource_types_table[rsrc_id].fast_offset) {
+						if (!resource_types_table[rsrc_id].fast_offset && !resource_types_table[rsrc_id].tls_addr) {
 							free(p->storage[rsrc_id]);
 						}
 					}
@@ -773,7 +823,10 @@ TSRM_API void *tsrm_get_ls_cache(void)
 /* Returns offset of tsrm_ls_cache slot from Thread Control Block address */
 TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 {/*{{{*/
-#if defined(__APPLE__) && defined(__x86_64__)
+#if defined(TSRM_TLS_MODEL_GLOBAL_DYNAMIC)
+	/* No constant TCB offset under global-dynamic, can't use fast path */
+	return 0;
+#elif defined(__APPLE__) && defined(__x86_64__)
     // TODO: Implement support for fast JIT ZTS code ???
 	return 0;
 #elif defined(__x86_64__) && defined(__GNUC__) && !defined(__FreeBSD__) && \

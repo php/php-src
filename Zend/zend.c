@@ -52,14 +52,29 @@ static bool startup_done = false;
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
-ZEND_API size_t compiler_globals_offset;
-ZEND_API size_t executor_globals_offset;
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache = {0};
+#if defined(_WIN64) && defined(ZEND_TLS_DIRECT)
+/* Holds &_tsrm_ls_cache in a TEB TLS slot (filled by DllMain) so EG()/CG() reach it
+ * with a single gs:[] load rather than the 3-load __declspec(thread) lookup. */
+ZEND_TLS_API unsigned long zend_win_tsrm_cache_slot = 0;
+ZEND_API void zend_win_tsrm_cache_init(bool alloc)
+{
+	if (alloc) {
+		zend_win_tsrm_cache_slot = TlsAlloc();
+		ZEND_ASSERT(zend_win_tsrm_cache_slot < 64); /* must be a direct TEB TlsSlot */
+	}
+	TlsSetValue(zend_win_tsrm_cache_slot, &_tsrm_ls_cache);
+}
+#endif
+/* ts_allocate_tls_id takes a callback so each thread resolves its own block.
+ * A plain &..._tls would capture only the registering thread's address. */
+static void *executor_globals_tls_addr(void) { return &_tsrm_ls_cache.eg; }
+static void *compiler_globals_tls_addr(void) { return &_tsrm_ls_cache.cg; }
 static HashTable *global_function_table = NULL;
 static HashTable *global_class_table = NULL;
 static HashTable *global_constants_table = NULL;
 static HashTable *global_auto_globals_table = NULL;
 static HashTable *global_persistent_list = NULL;
-TSRMLS_MAIN_CACHE_DEFINE()
 # define GLOBAL_FUNCTION_TABLE		global_function_table
 # define GLOBAL_CLASS_TABLE			global_class_table
 # define GLOBAL_CONSTANTS_TABLE		global_constants_table
@@ -801,6 +816,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 
 static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{{ */
 {
+	_tsrm_ls_cache.self = &_tsrm_ls_cache;
 	zend_startup_constants();
 	zend_copy_constants(executor_globals->zend_constants, GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist();
@@ -1019,8 +1035,8 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	zend_init_rsrc_list_dtors();
 
 #ifdef ZTS
-	ts_allocate_fast_id(&compiler_globals_id, &compiler_globals_offset, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
-	ts_allocate_fast_id(&executor_globals_id, &executor_globals_offset, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
+	ts_allocate_tls_id(&compiler_globals_id, compiler_globals_tls_addr, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
+	ts_allocate_tls_id(&executor_globals_id, executor_globals_tls_addr, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
 	ts_allocate_fast_id(&language_scanner_globals_id, &language_scanner_globals_offset, sizeof(zend_php_scanner_globals), (ts_allocate_ctor) php_scanner_globals_ctor, NULL);
 	ts_allocate_fast_id(&ini_scanner_globals_id, &ini_scanner_globals_offset, sizeof(zend_ini_scanner_globals), (ts_allocate_ctor) ini_scanner_globals_ctor, NULL);
 	compiler_globals = ts_resource(compiler_globals_id);

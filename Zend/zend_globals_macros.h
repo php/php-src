@@ -26,11 +26,39 @@ typedef struct _zend_executor_globals zend_executor_globals;
 typedef struct _zend_php_scanner_globals zend_php_scanner_globals;
 typedef struct _zend_ini_scanner_globals zend_ini_scanner_globals;
 
+#ifdef ZEND_WIN32
+# define ZEND_TLS_API
+# ifdef LIBZEND_EXPORTS
+#  define ZEND_TLS_DIRECT 1
+# endif
+#else
+# define ZEND_TLS_API ZEND_API
+# define ZEND_TLS_DIRECT 1
+#endif
+
 BEGIN_EXTERN_C()
+
+#ifdef ZTS
+typedef struct _zend_tsrm_ls_cache zend_tsrm_ls_cache;
+# ifdef ZEND_TLS_DIRECT
+extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache;
+/* See zenc.c: zend_win_tsrm_cache_init */
+#  if defined(_WIN64)
+extern ZEND_TLS_API unsigned long zend_win_tsrm_cache_slot;
+#   define ZEND_TSRM_CACHE_PTR ((zend_tsrm_ls_cache*)__readgsqword(0x1480 + zend_win_tsrm_cache_slot * 8))
+#  else
+#   define ZEND_TSRM_CACHE_PTR (&_tsrm_ls_cache)
+#  endif
+# endif
+#endif
 
 /* Compiler */
 #ifdef ZTS
-# define CG(v) ZEND_TSRMG_FAST(compiler_globals_offset, zend_compiler_globals *, v)
+# ifdef ZEND_TLS_DIRECT
+#  define CG(v) (ZEND_TSRM_CACHE_PTR->cg.v)
+# else
+#  define CG(v) ZEND_TSRMG(compiler_globals_id, zend_compiler_globals *, v)
+# endif
 #else
 # define CG(v) (compiler_globals.v)
 extern ZEND_API struct _zend_compiler_globals compiler_globals;
@@ -40,7 +68,11 @@ ZEND_API int zendparse(void);
 
 /* Executor */
 #ifdef ZTS
-# define EG(v) ZEND_TSRMG_FAST(executor_globals_offset, zend_executor_globals *, v)
+# ifdef ZEND_TLS_DIRECT
+#  define EG(v) (ZEND_TSRM_CACHE_PTR->eg.v)
+# else
+#  define EG(v) ZEND_TSRMG(executor_globals_id, zend_executor_globals *, v)
+# endif
 #else
 # define EG(v) (executor_globals.v)
 extern ZEND_API zend_executor_globals executor_globals;

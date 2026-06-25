@@ -178,6 +178,11 @@ AC_MSG_RESULT([$ZEND_ZTS])
 AS_VAR_IF([ZEND_ZTS], [yes], [
   AC_DEFINE([ZTS], [1], [Define to 1 if thread safety (ZTS) is enabled.])
   AS_VAR_APPEND([CFLAGS], [" -DZTS"])
+
+  dnl -mtls-size=12 drops the dead high-bits offset add from TLS access,
+  dnl valid while the thread-local block stays under 4 KiB.
+  AX_CHECK_COMPILE_FLAG([-mtls-size=12],
+    [AS_VAR_APPEND([CFLAGS], [" -mtls-size=12"])])
 ])
 
 AC_MSG_CHECKING([whether to enable Zend debugging])

@@ -93,6 +93,8 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 /* Fast resource in reserved (pre-allocated) space */
 TSRM_API void tsrm_reserve(size_t size);
 TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
+/* Must be called at startup before any other thread exists. */
+TSRM_API ts_rsrc_id ts_allocate_tls_id(ts_rsrc_id *rsrc_id, void *(*tls_addr)(void), size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
 /* fetches the requested resource for the current thread */
 TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id);
@@ -155,9 +157,14 @@ TSRM_API bool tsrm_is_managed_thread(void);
 #if !__has_attribute(tls_model) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__MUSL__) || defined(__HAIKU__)
 # define TSRM_TLS_MODEL_ATTR
 # define TSRM_TLS_MODEL_DEFAULT
-#elif __PIC__
-# define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))
-# define TSRM_TLS_MODEL_INITIAL_EXEC
+#elif __PIC__ && !defined(__PIE__)
+# if defined(TSRM_TLS_MODEL_USE_GLOBAL_DYNAMIC)
+#  define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("global-dynamic")))
+#  define TSRM_TLS_MODEL_GLOBAL_DYNAMIC
+# else
+#  define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))
+#  define TSRM_TLS_MODEL_INITIAL_EXEC
+# endif
 #else
 # define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("local-exec")))
 # define TSRM_TLS_MODEL_LOCAL_EXEC
@@ -175,17 +182,27 @@ TSRM_API bool tsrm_is_managed_thread(void);
 #define TSRMG_BULK_STATIC(id, type)	((type) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(id)])
 #define TSRMG_FAST_STATIC(offset, type, element)	(TSRMG_FAST_BULK_STATIC(offset, type)->element)
 #define TSRMG_FAST_BULK_STATIC(offset, type)	((type) (((char*) TSRMLS_CACHE)+(offset)))
-#ifdef __cplusplus
-#define TSRMLS_MAIN_CACHE_EXTERN() extern "C" { extern TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR; }
-#define TSRMLS_CACHE_EXTERN() extern "C" { extern TSRM_TLS void *TSRMLS_CACHE; }
+struct _zend_tsrm_ls_cache;
+#if defined(ZEND_WIN32) && !defined(LIBZEND_EXPORTS)
+/* Windows can't dllexport the TLS struct, so outside Zend each module
+ * keeps a per-module `void *` pointer and reaches EG/CG via the resource-id indirection. */
+# define ZEND_TSRMLS_CACHE_T void *
+# define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *_tsrm_ls_cache TSRM_TLS_MODEL_ATTR = NULL;
+# define TSRMLS_CACHE_DEFINE() TSRM_TLS void *_tsrm_ls_cache = NULL;
 #else
-#define TSRMLS_MAIN_CACHE_EXTERN() extern TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR;
-#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS void *TSRMLS_CACHE;
+# define ZEND_TSRMLS_CACHE_T struct _zend_tsrm_ls_cache
+# define TSRMLS_MAIN_CACHE_DEFINE()
+# define TSRMLS_CACHE_DEFINE()
 #endif
-#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;
-#define TSRMLS_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE = NULL;
+#ifdef __cplusplus
+#define TSRMLS_MAIN_CACHE_EXTERN() extern "C" { extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache TSRM_TLS_MODEL_ATTR; }
+#define TSRMLS_CACHE_EXTERN() extern "C" { extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache; }
+#else
+#define TSRMLS_MAIN_CACHE_EXTERN() extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache TSRM_TLS_MODEL_ATTR;
+#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache;
+#endif
 #define TSRMLS_CACHE_UPDATE() TSRMLS_CACHE = tsrm_get_ls_cache()
-#define TSRMLS_CACHE _tsrm_ls_cache
+#define TSRMLS_CACHE (*(void **) &_tsrm_ls_cache)
 
 #ifdef __cplusplus
 }
