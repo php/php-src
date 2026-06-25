@@ -37,6 +37,8 @@ PHP                                                                        NEWS
     (jorgsowa)
   . Ignore leading back-slash in class_parents(), class_implements(), and
     class_uses(). (jorgsowa)
+  . Fixed bug GH-16217 (SplFileObject::fputcsv() on an uninitialized object
+    segfaults). (iliaal)
 
 - Standard:
   . Fixed bug GH-22395 (base_convert() outputs at most 64 characters).

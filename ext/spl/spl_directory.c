@@ -2210,6 +2210,8 @@ PHP_METHOD(SplFileObject, next)
 		RETURN_THROWS();
 	}
 
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
+
 	spl_filesystem_file_free_line(intern);
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
 		spl_filesystem_file_read_line(ZEND_THIS, intern, true);
@@ -2361,6 +2363,8 @@ PHP_METHOD(SplFileObject, fputcsv)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|ssSS", &fields, &delim, &d_len, &enclo, &e_len, &escape_str, &eol) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	if (delim) {
 		if (d_len != 1) {
