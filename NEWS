@@ -79,6 +79,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-21972 (Corrupted variable type when a typed by-value return
     contains a reference wrapper). (Weilin Du)
 
+- Opcache:
+  . Fixed bug GH-22216 (spurious opcache.memory_consumption warning on each new
+    ZTS thread; the directive is also reported as 0 in worker threads).
+    (Daisuke Komazaki)
+
 - Phar:
   . Fixed a bypass of the magic ".phar" directory protection in
     Phar::addEmptyDir() for paths starting with "/.phar", while allowing
