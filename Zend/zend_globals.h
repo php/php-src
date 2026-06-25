@@ -330,12 +330,11 @@ struct _zend_executor_globals {
 };
 
 #ifdef ZTS
-/* Fixed compile-time offsets of the hot globals in the TSRM fast space.
- * AG is last, sizeof(zend_alloc_globals) isn't header-visible. */
-# define ZEND_CG_OFFSET   (TSRM_FAST_RESERVED_BASE)
-# define ZEND_EG_OFFSET   (ZEND_CG_OFFSET + TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)))
-# define ZEND_SCNG_OFFSET (ZEND_EG_OFFSET + TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)))
-# define ZEND_AG_OFFSET   (ZEND_SCNG_OFFSET + TSRM_ALIGNED_SIZE(sizeof(zend_php_scanner_globals)))
+/* Compile-time offsets of the hot globals, in a reserved region just before the
+ * cache pointer. ZEND_AG_OFFSET is furthest, in zend_alloc.c. */
+# define ZEND_CG_OFFSET   (-(ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)))
+# define ZEND_EG_OFFSET   (ZEND_CG_OFFSET - (ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)))
+# define ZEND_SCNG_OFFSET (ZEND_EG_OFFSET - (ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_php_scanner_globals)))
 #endif
 
 #define EG_FLAGS_INITIAL				(0)

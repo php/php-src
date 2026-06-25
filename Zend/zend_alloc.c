@@ -2614,6 +2614,7 @@ typedef struct _zend_alloc_globals {
 #ifdef ZTS
 static int alloc_globals_id;
 static size_t alloc_globals_offset;
+# define ZEND_AG_OFFSET (ZEND_SCNG_OFFSET - (ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_alloc_globals)))
 # define AG(v) ZEND_TSRMG_FAST(ZEND_AG_OFFSET, zend_alloc_globals *, v)
 #else
 # define AG(v) (alloc_globals.v)

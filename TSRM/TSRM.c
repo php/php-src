@@ -36,21 +36,11 @@ struct _tsrm_tls_entry {
 	tsrm_tls_entry *next;
 };
 
-#if defined(__cplusplus) || defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 202311L)
-# define TSRM_STATIC_ASSERT(c, m) static_assert((c), m)
-#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) /* C11 */
-# define TSRM_STATIC_ASSERT(c, m) _Static_assert((c), m)
-#else
-# define TSRM_STATIC_ASSERT(c, m)
-#endif
-TSRM_STATIC_ASSERT(TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) == TSRM_FAST_RESERVED_BASE,
-	"TSRM_FAST_RESERVED_BASE must equal the tsrm_tls_entry header size");
-
 typedef struct {
 	size_t size;
 	ts_allocate_ctor ctor;
 	ts_allocate_dtor dtor;
-	size_t fast_offset;
+	ptrdiff_t fast_offset;
 	int done;
 } tsrm_resource_type;
 
@@ -67,6 +57,10 @@ static int					resource_types_table_size;
 /* Reserved space for fast globals access */
 static size_t tsrm_reserved_pos  = 0;
 static size_t tsrm_reserved_size = 0;
+/* Fixed-offset front region (before the TLS entry) and the pending offset for
+ * the next ts_allocate_fast_id() that should land in it. */
+static size_t tsrm_reserved_front = 0;
+static ptrdiff_t tsrm_fixed_offset = 0;
 
 static MUTEX_T tsmm_mutex;	  /* thread-safe memory manager mutex */
 static MUTEX_T tsrm_env_mutex; /* tsrm environ mutex */
@@ -164,6 +158,7 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 
 	tsrm_reserved_pos  = 0;
 	tsrm_reserved_size = 0;
+	tsrm_reserved_front = 0;
 
 	tsrm_env_mutex = tsrm_mutex_alloc();
 
@@ -214,7 +209,7 @@ TSRM_API void tsrm_shutdown(void)
 			} else {
 				free(p->storage);
 			}
-			free(p);
+			free((char *) p - tsrm_reserved_front);
 			p = next_p;
 		}
 	}
@@ -241,6 +236,7 @@ TSRM_API void tsrm_shutdown(void)
 
 	tsrm_reserved_pos  = 0;
 	tsrm_reserved_size = 0;
+	tsrm_reserved_front = 0;
 }/*}}}*/
 
 /* {{{ */
@@ -328,11 +324,13 @@ TSRM_API void tsrm_reserve(size_t size)
 }/*}}}*/
 
 
-/* Reserve the front of the fast space for fixed-offset fast resources, so the
- * bump-allocated ones (ts_allocate_fast_id) are placed after it. */
+/* Carve a fixed-offset front region out of the reserved space. It is placed
+ * before the TLS entry, so the hot globals get compile-time-constant negative
+ * offsets from the cache pointer. */
 TSRM_API void tsrm_reserve_fast_front(size_t size)
 {/*{{{*/
-	tsrm_reserved_pos = TSRM_ALIGNED_SIZE(size);
+	tsrm_reserved_front = TSRM_ALIGNED_SIZE(size);
+	tsrm_reserved_size -= tsrm_reserved_front;
 }/*}}}*/
 
 
@@ -348,16 +346,20 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtained resource id %d", *rsrc_id));
 
 	size = TSRM_ALIGNED_SIZE(size);
-	if (tsrm_reserved_size - tsrm_reserved_pos < size) {
+	if (tsrm_fixed_offset) {
+		/* Fixed (negative) offset into the reserved front region. */
+		*offset = (size_t) tsrm_fixed_offset;
+		tsrm_fixed_offset = 0;
+	} else if (tsrm_reserved_size - tsrm_reserved_pos < size) {
 		TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate space for fast resource"));
 		*rsrc_id = 0;
 		*offset = 0;
 		tsrm_mutex_unlock(tsmm_mutex);
 		return 0;
+	} else {
+		*offset = TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_pos;
+		tsrm_reserved_pos += size;
 	}
-
-	*offset = TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_pos;
-	tsrm_reserved_pos += size;
 
 	/* store the new resource type in the resource sizes table */
 	if (resource_types_table_size < id_count) {
@@ -386,25 +388,13 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 }/*}}}*/
 
 
-/* Allocate a fast resource id at a fixed, compile-time-constant offset.
- * Like tsrm_reserve(), assumes single-threaded startup. */
-TSRM_API ts_rsrc_id ts_allocate_fast_id_at(ts_rsrc_id *rsrc_id, size_t *offset, size_t fixed_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
+/* Allocate a fast resource id at a fixed, compile-time-constant offset (a
+ * negative offset into the reserved front region). Like tsrm_reserve(), assumes
+ * single-threaded startup. */
+TSRM_API ts_rsrc_id ts_allocate_fast_id_at(ts_rsrc_id *rsrc_id, size_t *offset, ptrdiff_t fixed_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
 {/*{{{*/
-	size_t saved_pos = tsrm_reserved_pos;
-
-	if (fixed_offset - TSRM_FAST_RESERVED_BASE > tsrm_reserved_size) {
-		TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate space for fixed fast resource"));
-		*rsrc_id = 0;
-		*offset = 0;
-		return 0;
-	}
-	tsrm_reserved_pos = fixed_offset - TSRM_FAST_RESERVED_BASE;
-	ts_allocate_fast_id(rsrc_id, offset, size, ctor, dtor);
-	/* keep ordinary (bump-allocated) fast resources past the high-water mark */
-	if (tsrm_reserved_pos < saved_pos) {
-		tsrm_reserved_pos = saved_pos;
-	}
-	return *rsrc_id;
+	tsrm_fixed_offset = fixed_offset;
+	return ts_allocate_fast_id(rsrc_id, offset, size, ctor, dtor);
 }/*}}}*/
 
 static void set_thread_local_storage_resource_to(tsrm_tls_entry *thread_resource)
@@ -417,7 +407,10 @@ static void set_thread_local_storage_resource_to(tsrm_tls_entry *thread_resource
 static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_T thread_id)
 {/*{{{*/
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Creating data structures for thread %x", thread_id));
-	(*thread_resources_ptr) = (tsrm_tls_entry *) malloc(TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_size);
+	/* The entry follows the fixed-offset front region.
+	 * hot globals live at negative offsets from the TLS cache pointer. */
+	char *block = (char *) malloc(tsrm_reserved_front + TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_size);
+	(*thread_resources_ptr) = (tsrm_tls_entry *) (block + tsrm_reserved_front);
 	(*thread_resources_ptr)->storage = NULL;
 	if (id_count > 0) {
 		(*thread_resources_ptr)->storage = (void **) malloc(sizeof(void *)*id_count);
@@ -526,7 +519,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 		set_thread_local_storage_resource_to(thread_resources);
 		/* Free up the old resource from the old thread instance */
 		ts_free_resources(thread_resources);
-		free(thread_resources);
+		free((char *) thread_resources - tsrm_reserved_front);
 		/* Allocate a new resource at the same point in the linked list, and relink the next pointer */
 		allocate_new_resource(last_thread_resources, thread_id);
 		thread_resources = *last_thread_resources;
@@ -568,7 +561,7 @@ void ts_free_thread(void)
 				tsrm_tls_table[hash_value] = thread_resources->next;
 			}
 			tsrm_tls_set(0);
-			free(thread_resources);
+			free((char *) thread_resources - tsrm_reserved_front);
 			break;
 		}
 		if (thread_resources->next) {
