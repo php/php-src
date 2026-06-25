@@ -908,6 +908,11 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 	DBG_ENTER("mysqlnd_sha256_auth_get_auth_data");
 	DBG_INF_FMT("salt(%zu)=[%.*s]", auth_plugin_data_len, (int) auth_plugin_data_len, auth_plugin_data);
 
+	if (auth_plugin_data_len < SCRAMBLE_LENGTH) {
+		SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "The server sent wrong length for scramble");
+		DBG_ERR_FMT("The server sent wrong length for scramble %zu. Expected %u", auth_plugin_data_len, SCRAMBLE_LENGTH);
+		DBG_RETURN(NULL);
+	}
 
 	if (conn->vio->data->ssl) {
 		DBG_INF("simple clear text under SSL");
