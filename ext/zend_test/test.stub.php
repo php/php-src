@@ -57,6 +57,12 @@ namespace {
         public static $_StaticProp;
         public static int $staticIntProp = 123;
 
+        /* If there's a problem with escapes in quotes in generated headers,
+         * the generated header won't compile. (tests/gh22169.phpt) */
+        public static string $doubleQuoteEscaped = "BEGIN \n\r\t\v\e\f\\\$\"\101\x41\u{41} END";
+        public static string $singleQuoteEscaped = 'BEGIN \n\r\t\v\e\f\\\$\"\101\x41\u{41} END';
+        public static string $escapeInterpolated = "begin \$ \\$ end";
+
         public int $intProp = 123;
         public ?stdClass $classProp = null;
         public stdClass|Iterator|null $classUnionProp = null;

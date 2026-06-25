@@ -1,7 +1,5 @@
 --TEST--
 Test var_export
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

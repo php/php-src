@@ -277,7 +277,7 @@ PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *
 }
 
 PHPAPI zend_result php_stream_filter_parse_write_seek_mode(
-		zval *filterparams,
+		const zval *filterparams,
 		php_stream_filter_seekable_t *write_seekable)
 {
 	*write_seekable = PSFS_SEEKABLE_ALWAYS;
@@ -285,18 +285,17 @@ PHPAPI zend_result php_stream_filter_parse_write_seek_mode(
 	if (filterparams == NULL) {
 		return SUCCESS;
 	}
-	if (Z_TYPE_P(filterparams) != IS_ARRAY && Z_TYPE_P(filterparams) != IS_OBJECT) {
+	if (Z_TYPE_P(filterparams) != IS_ARRAY) {
 		return SUCCESS;
 	}
 
-	zval *tmp = zend_hash_str_find_ind(HASH_OF(filterparams),
-			"write_seek_mode", sizeof("write_seek_mode") - 1);
-	if (tmp == NULL) {
+	const zval *write_seek_mode = zend_hash_str_find(Z_ARR_P(filterparams), ZEND_STRL("write_seek_mode"));
+	if (write_seek_mode == NULL) {
 		return SUCCESS;
 	}
 
 	zend_string *tmp_str;
-	zend_string *str = zval_get_tmp_string(tmp, &tmp_str);
+	const zend_string *str = zval_get_tmp_string(write_seek_mode, &tmp_str);
 	zend_result result = SUCCESS;
 
 	if (zend_string_equals_literal(str, "preserve")) {

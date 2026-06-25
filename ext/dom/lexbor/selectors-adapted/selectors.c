@@ -2,7 +2,7 @@
  * Copyright (C) 2021-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
- * Adapted for PHP + libxml2 by: Niels Dossche <nielsdos@php.net>
+ * Adapted for PHP + libxml2 by: Nora Dossche  <ndossche@php.net>
  * Based on Lexbor (upstream commit 5291cde0d40f77e7c4ea364b7cd726269e0bf1f9)
  */
 

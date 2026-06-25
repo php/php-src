@@ -1,7 +1,5 @@
 --TEST--
 Test property mutation - host
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

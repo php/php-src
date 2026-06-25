@@ -39,17 +39,28 @@ static inline void phar_write_16(char buffer[2], uint32_t value)
 # define PHAR_SET_32(var, value) phar_write_32(var, (uint32_t) (value));
 # define PHAR_SET_16(var, value) phar_write_16(var, (uint16_t) (value));
 
-static zend_result phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16_t len) /* {{{ */
+static zend_result phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16_t extra_len) /* {{{ */
 {
 	union {
 		phar_zip_extra_field_header header;
 		phar_zip_unix3 unix3;
 		phar_zip_unix_time time;
 	} h;
+	size_t len = extra_len;
 	size_t read;
 
-	do {
+	while (len) {
+		size_t header_size;
+
+		if (len < sizeof(h.header)) {
+			return FAILURE;
+		}
 		if (sizeof(h.header) != php_stream_read(fp, (char *) &h.header, sizeof(h.header))) {
+			return FAILURE;
+		}
+		len -= sizeof(h.header);
+		header_size = PHAR_GET_16(h.header.size);
+		if (header_size > len) {
 			return FAILURE;
 		}
 
@@ -60,7 +71,6 @@ static zend_result phar_zip_process_extra(php_stream *fp, phar_entry_info *entry
 			 * We only store the modification time in the entry, so only read that.
 			 */
 			const size_t min_size = 5;
-			uint16_t header_size = PHAR_GET_16(h.header.size);
 			if (header_size >= min_size) {
 				read = php_stream_read(fp, &h.time.flags, min_size);
 				if (read != min_size) {
@@ -71,12 +81,11 @@ static zend_result phar_zip_process_extra(php_stream *fp, phar_entry_info *entry
 					entry->timestamp = PHAR_GET_32(h.time.time);
 				}
 
-				len -= header_size + 4;
-
 				/* Consume remaining bytes */
-				if (header_size != read) {
-					php_stream_seek(fp, header_size - read, SEEK_CUR);
+				if (header_size != read && -1 == php_stream_seek(fp, header_size - read, SEEK_CUR)) {
+					return FAILURE;
 				}
+				len -= header_size;
 				continue;
 			}
 			/* Fallthrough to next if to skip header */
@@ -84,23 +93,36 @@ static zend_result phar_zip_process_extra(php_stream *fp, phar_entry_info *entry
 
 		if (h.header.tag[0] != 'n' || h.header.tag[1] != 'u') {
 			/* skip to next header */
-			php_stream_seek(fp, PHAR_GET_16(h.header.size), SEEK_CUR);
-			len -= PHAR_GET_16(h.header.size) + 4;
+			if (header_size && -1 == php_stream_seek(fp, header_size, SEEK_CUR)) {
+				return FAILURE;
+			}
+			len -= header_size;
 			continue;
 		}
 
 		/* unix3 header found */
-		read = php_stream_read(fp, (char *) &(h.unix3.crc32), sizeof(h.unix3) - sizeof(h.header));
-		len -= read + 4;
-
-		if (sizeof(h.unix3) - sizeof(h.header) != read) {
+		size_t unix3_size = sizeof(h.unix3) - sizeof(h.header);
+		size_t field_size = header_size;
+		if (field_size == unix3_size - sizeof(h.unix3.crc32)) {
+			/* Some archives omit the CRC32 from the unix3 size field. */
+			field_size = unix3_size;
+		}
+		if (field_size < unix3_size || field_size > len) {
 			return FAILURE;
 		}
 
-		if (PHAR_GET_16(h.unix3.size) > sizeof(h.unix3) - 4) {
-			/* skip symlink filename - we may add this support in later */
-			php_stream_seek(fp, PHAR_GET_16(h.unix3.size) - sizeof(h.unix3.size), SEEK_CUR);
+		read = php_stream_read(fp, (char *) &(h.unix3.crc32), unix3_size);
+		if (unix3_size != read) {
+			return FAILURE;
 		}
+
+		if (field_size > unix3_size) {
+			/* skip symlink filename - we may add this support in later */
+			if (-1 == php_stream_seek(fp, field_size - unix3_size, SEEK_CUR)) {
+				return FAILURE;
+			}
+		}
+		len -= field_size;
 
 		/* set permissions */
 		entry->flags &= PHAR_ENT_COMPRESSION_MASK;
@@ -111,7 +133,7 @@ static zend_result phar_zip_process_extra(php_stream *fp, phar_entry_info *entry
 			entry->flags |= PHAR_GET_16(h.unix3.perms) & PHAR_ENT_PERM_MASK;
 		}
 
-	} while (len);
+	}
 
 	return SUCCESS;
 }

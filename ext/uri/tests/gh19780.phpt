@@ -1,7 +1,5 @@
 --TEST--
 GH-19780 (InvalidUrlException should check $errors argument)
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

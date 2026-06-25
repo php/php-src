@@ -1377,7 +1377,6 @@ PHP_FUNCTION(proc_open)
 
 	if (newprocok == FALSE) {
 		DWORD dw = GetLastError();
-		close_all_descriptors(descriptors, ndesc);
 		char *msg = php_win32_error_to_msg(dw);
 		php_error_docref(NULL, E_WARNING, "CreateProcess failed: %s", msg);
 		php_win32_error_msg_free(msg);
@@ -1394,7 +1393,6 @@ PHP_FUNCTION(proc_open)
 
 	if (close_parentends_of_pipes(&factions, descriptors, ndesc) == FAILURE) {
 		posix_spawn_file_actions_destroy(&factions);
-		close_all_descriptors(descriptors, ndesc);
 		goto exit_fail;
 	}
 
@@ -1414,7 +1412,6 @@ PHP_FUNCTION(proc_open)
 	}
 	posix_spawn_file_actions_destroy(&factions);
 	if (r != 0) {
-		close_all_descriptors(descriptors, ndesc);
 		php_error_docref(NULL, E_WARNING, "posix_spawn() failed: %s", strerror(r));
 		goto exit_fail;
 	}
@@ -1456,7 +1453,6 @@ PHP_FUNCTION(proc_open)
 		_exit(127);
 	} else if (child < 0) {
 		/* Failed to fork() */
-		close_all_descriptors(descriptors, ndesc);
 		php_error_docref(NULL, E_WARNING, "Fork failed: %s", strerror(errno));
 		goto exit_fail;
 	}
@@ -1546,6 +1542,9 @@ PHP_FUNCTION(proc_open)
 	} else {
 exit_fail:
 		_php_free_envp(env);
+		if (descriptors) {
+			close_all_descriptors(descriptors, ndesc);
+		}
 		RETVAL_FALSE;
 	}
 

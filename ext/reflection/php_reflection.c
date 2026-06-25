@@ -2477,9 +2477,20 @@ ZEND_METHOD(ReflectionParameter, __construct)
 	switch (Z_TYPE_P(reference)) {
 		case IS_STRING:
 			{
-				zend_string *lcname = zend_string_tolower(Z_STR_P(reference));
-				fptr = zend_hash_find_ptr(EG(function_table), lcname);
-				zend_string_release(lcname);
+				zend_string *fname = Z_STR_P(reference);
+				zend_string *lcname;
+				if (UNEXPECTED(ZSTR_VAL(fname)[0] == '\\')) {
+					/* Ignore leading "\" */
+					ALLOCA_FLAG(use_heap)
+					ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(fname) - 1, use_heap);
+					zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(fname) + 1, ZSTR_LEN(fname) - 1);
+					fptr = zend_fetch_function(lcname);
+					ZSTR_ALLOCA_FREE(lcname, use_heap);
+				} else {
+					lcname = zend_string_tolower(fname);
+					fptr = zend_fetch_function(lcname);
+					zend_string_release(lcname);
+				}
 				if (!fptr) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Function %s() does not exist", Z_STRVAL_P(reference));
@@ -4635,9 +4646,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 	str_name = ZSTR_VAL(name);
 	if ((tmp = strstr(ZSTR_VAL(name), "::")) != NULL) {
 		classname_len = tmp - ZSTR_VAL(name);
-		classname = zend_string_alloc(classname_len, 0);
-		zend_str_tolower_copy(ZSTR_VAL(classname), ZSTR_VAL(name), classname_len);
-		ZSTR_VAL(classname)[classname_len] = '\0';
+		classname = zend_string_init(ZSTR_VAL(name), classname_len, 0);
 		str_name_len = ZSTR_LEN(name) - (classname_len + 2);
 		str_name = tmp + 2;
 
@@ -4753,11 +4762,7 @@ ZEND_METHOD(ReflectionClass, hasConstant)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (zend_hash_exists(&ce->constants_table, name)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(zend_hash_exists(&ce->constants_table, name));
 }
 /* }}} */
 

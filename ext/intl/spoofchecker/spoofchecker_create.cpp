@@ -38,6 +38,10 @@ U_CFUNC PHP_METHOD(Spoofchecker, __construct)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK;
+	if (co->uspoof) {
+		zend_throw_error(NULL, "Spoofchecker object is already constructed");
+		RETURN_THROWS();
+	}
 
 	co->uspoof = uspoof_open(SPOOFCHECKER_ERROR_CODE_P(co));
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(co))) {

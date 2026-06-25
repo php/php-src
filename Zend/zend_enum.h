@@ -55,6 +55,7 @@ ZEND_API void zend_enum_add_case(zend_class_entry *ce, zend_string *case_name, z
 ZEND_API void zend_enum_add_case_cstr(zend_class_entry *ce, const char *name, zval *value);
 ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name);
 ZEND_API zend_object *zend_enum_get_case_cstr(zend_class_entry *ce, const char *name);
+ZEND_API zend_object *zend_enum_get_case_by_id(zend_class_entry *ce, int id);
 ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_class_entry *ce, zend_long long_key, zend_string *string_key, bool try_from);
 
 static zend_always_inline int zend_enum_fetch_case_id(zend_object *zobj)

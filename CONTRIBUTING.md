@@ -152,9 +152,8 @@ about what you're working on, you can contact us via the
 issues.
 
 Although not a formal channel, you can also find a number of core developers on
-the #php.pecl channel on [EFnet](http://www.efnet.org/). Similarly, many
-documentation writers can be found on #php.doc. Windows development IRC channel
-is available at #winphp-dev on FreeNode.
+the [php community discord server](https://phpc.chat/) (`#php-internals` channel)
+where many people are eager to help.
 
 ## PHP source code directory structure
 

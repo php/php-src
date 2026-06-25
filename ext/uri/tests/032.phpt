@@ -1,7 +1,5 @@
 --TEST--
 Test JSON encoding
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

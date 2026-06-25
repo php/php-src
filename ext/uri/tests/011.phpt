@@ -1,7 +1,5 @@
 --TEST--
 Test encoding and normalization
---EXTENSIONS--
-uri
 --FILE--
 <?php
 
