@@ -4618,6 +4618,7 @@ skip_property_storage:
 
 	property_info->name = zend_new_interned_string(property_info->name);
 	property_info->flags = access_type;
+	property_info->line = 0;
 	property_info->doc_comment = doc_comment;
 	property_info->attributes = NULL;
 	property_info->prototype = property_info;
@@ -4862,6 +4863,7 @@ ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry
 	c->attributes = NULL;
 	c->ce = ce;
 	c->type = type;
+	c->line = 0;
 
 	if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;

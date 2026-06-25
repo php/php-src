@@ -467,6 +467,7 @@ typedef struct _zend_property_info {
 	uint32_t offset; /* property offset for object properties or
 	                      property index for static properties */
 	uint32_t flags;
+	uint32_t line;
 	zend_string *name;
 	zend_string *doc_comment;
 	HashTable *attributes;
@@ -493,6 +494,7 @@ typedef struct _zend_class_constant {
 	HashTable *attributes;
 	zend_class_entry *ce;
 	zend_type type;
+	uint32_t line;
 } zend_class_constant;
 
 #define ZEND_CLASS_CONST_FLAGS(c) Z_CONSTANT_FLAGS((c)->value)

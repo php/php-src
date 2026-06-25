@@ -1308,27 +1308,48 @@ static inheritance_status full_property_types_compatible(
 static ZEND_COLD void emit_incompatible_property_error(
 		const zend_property_info *child, const zend_property_info *parent, prop_variance variance) {
 	zend_string *type_str = zend_type_to_string_resolved(parent->type, parent->ce);
-	zend_error_noreturn(E_COMPILE_ERROR,
-		"Type of %s::$%s must be %s%s (as in class %s)",
-		ZSTR_VAL(child->ce->name),
-		zend_get_unmangled_property_name(child->name),
-		variance == PROP_INVARIANT ? "" :
-		variance == PROP_COVARIANT ? "subtype of " : "supertype of ",
-		ZSTR_VAL(type_str),
-		ZSTR_VAL(parent->ce->name));
+	if (child->line && child->ce->type == ZEND_USER_CLASS) {
+		zend_error_at_noreturn(E_COMPILE_ERROR, child->ce->info.user.filename, child->line,
+			"Type of %s::$%s must be %s%s (as in class %s)",
+			ZSTR_VAL(child->ce->name),
+			zend_get_unmangled_property_name(child->name),
+			variance == PROP_INVARIANT ? "" :
+			variance == PROP_COVARIANT ? "subtype of " : "supertype of ",
+			ZSTR_VAL(type_str),
+			ZSTR_VAL(parent->ce->name));
+	} else {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Type of %s::$%s must be %s%s (as in class %s)",
+			ZSTR_VAL(child->ce->name),
+			zend_get_unmangled_property_name(child->name),
+			variance == PROP_INVARIANT ? "" :
+			variance == PROP_COVARIANT ? "subtype of " : "supertype of ",
+			ZSTR_VAL(type_str),
+			ZSTR_VAL(parent->ce->name));
+	}
 }
 
 static ZEND_COLD void emit_set_hook_type_error(const zend_property_info *child, const zend_property_info *parent)
 {
 	zend_type set_type = parent->hooks[ZEND_PROPERTY_HOOK_SET]->common.arg_info[0].type;
 	zend_string *type_str = zend_type_to_string_resolved(set_type, parent->ce);
-	zend_error_noreturn(E_COMPILE_ERROR,
-		"Set type of %s::$%s must be supertype of %s (as in %s %s)",
-		ZSTR_VAL(child->ce->name),
-		zend_get_unmangled_property_name(child->name),
-		ZSTR_VAL(type_str),
-		zend_get_object_type_case(parent->ce, false),
-		ZSTR_VAL(parent->ce->name));
+	if (child->line && child->ce->type == ZEND_USER_CLASS) {
+		zend_error_at_noreturn(E_COMPILE_ERROR, child->ce->info.user.filename, child->line,
+			"Set type of %s::$%s must be supertype of %s (as in %s %s)",
+			ZSTR_VAL(child->ce->name),
+			zend_get_unmangled_property_name(child->name),
+			ZSTR_VAL(type_str),
+			zend_get_object_type_case(parent->ce, false),
+			ZSTR_VAL(parent->ce->name));
+	} else {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Set type of %s::$%s must be supertype of %s (as in %s %s)",
+			ZSTR_VAL(child->ce->name),
+			zend_get_unmangled_property_name(child->name),
+			ZSTR_VAL(type_str),
+			zend_get_object_type_case(parent->ce, false),
+			ZSTR_VAL(parent->ce->name));
+	}
 }
 
 static inheritance_status verify_property_type_compatibility(
@@ -1621,13 +1642,23 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 static void emit_incompatible_class_constant_error(
 		const zend_class_constant *child, const zend_class_constant *parent, const zend_string *const_name) {
 	zend_string *type_str = zend_type_to_string_resolved(parent->type, parent->ce);
-	zend_error_noreturn(E_COMPILE_ERROR,
-		"Type of %s::%s must be compatible with %s::%s of type %s",
-		ZSTR_VAL(child->ce->name),
-		ZSTR_VAL(const_name),
-		ZSTR_VAL(parent->ce->name),
-		ZSTR_VAL(const_name),
-		ZSTR_VAL(type_str));
+	if (child->line && child->ce->type == ZEND_USER_CLASS) {
+		zend_error_at_noreturn(E_COMPILE_ERROR, child->ce->info.user.filename, child->line,
+			"Type of %s::%s must be compatible with %s::%s of type %s",
+			ZSTR_VAL(child->ce->name),
+			ZSTR_VAL(const_name),
+			ZSTR_VAL(parent->ce->name),
+			ZSTR_VAL(const_name),
+			ZSTR_VAL(type_str));
+	} else {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Type of %s::%s must be compatible with %s::%s of type %s",
+			ZSTR_VAL(child->ce->name),
+			ZSTR_VAL(const_name),
+			ZSTR_VAL(parent->ce->name),
+			ZSTR_VAL(const_name),
+			ZSTR_VAL(type_str));
+	}
 }
 
 static inheritance_status class_constant_types_compatible(const zend_class_constant *parent, const zend_class_constant *child)
