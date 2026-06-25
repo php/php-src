@@ -1802,6 +1802,19 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_IDENT(T_READONLY);
 }
 
+/*
+ * The friend keyword must be followed by whitespace and another identifier.
+ * This avoids the BC break of using friend in classes, namespaces, functions and constants.
+ */
+<ST_IN_SCRIPTING>"friend"{WHITESPACE_OR_COMMENTS}("extends"|"implements") {
+	yyless(6);
+	RETURN_TOKEN_WITH_STR(T_STRING, 0);
+}
+<ST_IN_SCRIPTING>"friend"{WHITESPACE_OR_COMMENTS}[a-zA-Z_\x80-\xff] {
+	yyless(6);
+	RETURN_TOKEN_WITH_IDENT(T_FRIEND);
+}
+
 <ST_IN_SCRIPTING>"unset" {
 	RETURN_TOKEN_WITH_IDENT(T_UNSET);
 }

@@ -1842,6 +1842,7 @@ static ZEND_COLD void zend_ast_export_stmt(smart_str *str, zend_ast *ast, int in
 			case ZEND_AST_METHOD:
 			case ZEND_AST_CLASS:
 			case ZEND_AST_USE_TRAIT:
+			case ZEND_AST_FRIEND:
 			case ZEND_AST_NAMESPACE:
 			case ZEND_AST_DECLARE:
 				break;
@@ -2506,6 +2507,11 @@ simple_list:
 			APPEND_NODE_1("break");
 		case ZEND_AST_CONTINUE:
 			APPEND_NODE_1("continue");
+		case ZEND_AST_FRIEND:
+			smart_str_appends(str, "friend ");
+			zend_ast_export_name(str, ast->child[0], 0, indent);
+			smart_str_appendc(str, ';');
+			break;
 
 		/* 2 child nodes */
 		case ZEND_AST_DIM:

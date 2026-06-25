@@ -594,6 +594,14 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 				ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
 			}
 		}
+
+		if (ce->num_friends) {
+			for (uint32_t i = 0; i < ce->num_friends; i++) {
+				ADD_INTERNED_STRING(ce->friend_names[i].name);
+				ADD_INTERNED_STRING(ce->friend_names[i].lc_name);
+			}
+			ADD_SIZE(sizeof(zend_class_name) * ce->num_friends);
+		}
 	}
 }
 
