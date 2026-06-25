@@ -33,4 +33,4 @@ New value: 1
 >00002: header_register_callback(function() { echo "sent";});
  00003: $a = [0];
  00004: $a[0] = 1;
-prompt> [$a[0] has been removed, removing watchpoint]
+prompt>

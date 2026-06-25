@@ -37,6 +37,5 @@ New value: 1
 prompt> sent0
 New value: 1
 
-[$a[0] has been removed, removing watchpoint]
 [Script ended normally]
 prompt>

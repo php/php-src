@@ -801,6 +801,7 @@ void phpdbg_dequeue_elements_for_recreation(void) {
 void phpdbg_clean_watch_element(phpdbg_watch_element *element);
 
 void phpdbg_free_watch_element(phpdbg_watch_element *element) {
+	zend_hash_del(&PHPDBG_G(watch_recreation), element->str);
 	zend_string_release(element->str);
 	if (element->name_in_parent) {
 		zend_string_release(element->name_in_parent);
@@ -856,6 +857,9 @@ void phpdbg_remove_watch_element(phpdbg_watch_element *element) {
 }
 
 void phpdbg_backup_watch_element(phpdbg_watch_element *element) {
+	if (!element->watch) {
+		return;
+	}
 	memcpy(&element->backup, &element->watch->backup, /* element->watch->size */ sizeof(element->backup));
 }
 
@@ -974,6 +978,7 @@ void phpdbg_clean_watch_element(phpdbg_watch_element *element) {
 		if (zend_hash_num_elements(elements) == 0) {
 			phpdbg_remove_watchpoint(element->watch);
 		}
+		element->watch = NULL;
 	}
 }
 
@@ -1501,15 +1506,27 @@ void phpdbg_setup_watchpoints(void) {
 #endif
 }
 
-void phpdbg_destroy_watchpoints(void) {
+void phpdbg_destroy_watch_request_state(void) {
 	phpdbg_watch_element *element;
 
-	/* unconditionally free all remaining elements to avoid memory leaks */
 	ZEND_HASH_MAP_FOREACH_PTR(&PHPDBG_G(watch_recreation), element) {
 		phpdbg_automatic_dequeue_free(element);
 	} ZEND_HASH_FOREACH_END();
 
-	/* upon fatal errors etc. (i.e. CG(unclean_shutdown) == 1), some watchpoints may still be active. Ensure memory is not watched anymore for next run. Do not care about memory freeing here, shutdown is unclean and near anyway. */
+	phpdbg_btree_init(&PHPDBG_G(watchpoint_tree), sizeof(void *) * 8);
+	phpdbg_btree_init(&PHPDBG_G(watch_HashTables), sizeof(void *) * 8);
+
+	zend_hash_destroy(&PHPDBG_G(watch_elements));
+	zend_hash_init(&PHPDBG_G(watch_elements), 8, NULL, NULL, 0);
+	zend_hash_destroy(&PHPDBG_G(watch_recreation));
+	zend_hash_init(&PHPDBG_G(watch_recreation), 8, NULL, NULL, 0);
+	zend_hash_destroy(&PHPDBG_G(watch_free));
+	zend_hash_init(&PHPDBG_G(watch_free), 8, NULL, NULL, 0);
+	zend_hash_destroy(&PHPDBG_G(watch_collisions));
+	zend_hash_init(&PHPDBG_G(watch_collisions), 8, NULL, NULL, 0);
+}
+
+void phpdbg_destroy_watchpoints(void) {
     phpdbg_purge_watchpoint_tree();
 
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
@@ -1519,7 +1536,7 @@ void phpdbg_destroy_watchpoints(void) {
 	}
 #endif
 
-	zend_hash_destroy(&PHPDBG_G(watch_elements)); PHPDBG_G(watch_elements).nNumOfElements = 0; /* phpdbg_watch_efree() is checking against this arrays size */
+	zend_hash_destroy(&PHPDBG_G(watch_elements));
 	zend_hash_destroy(&PHPDBG_G(watch_recreation));
 	zend_hash_destroy(&PHPDBG_G(watch_free));
 	zend_hash_destroy(&PHPDBG_G(watch_collisions));

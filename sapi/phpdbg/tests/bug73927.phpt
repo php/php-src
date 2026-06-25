@@ -1,11 +1,5 @@
 --TEST--
 Bug #73927 (phpdbg fails with windows error prompt at "watch array")
---SKIPIF--
-<?php
-if (getenv('SKIP_ASAN')) {
-    die("skip intentionally causes segfaults");
-}
-?>
 --PHPDBG--
 b 19
 r
@@ -26,8 +20,7 @@ prompt> [Breakpoint #0 at %s:%d, hits: 2]
  00021:     } else {
 prompt> [Added watchpoint #0 for $value]
 prompt> [Added watchpoint #1 for $lower[0]]
-prompt> [$lower[0] has been removed, removing watchpoint]
-[$value has been removed, removing watchpoint]
+prompt>
 --FILE--
 <?php
 

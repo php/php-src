@@ -43,9 +43,8 @@ Old value: aa
 New value: ab
 >00008: exit;
  00009: 
-prompt> [$a has been removed, removing watchpoint recursively]
-[Script ended normally]
-prompt> 
+prompt> [Script ended normally]
+prompt>
 --FILE--
 <?php
 
