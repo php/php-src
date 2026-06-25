@@ -16,6 +16,7 @@ jobs:
     name: LINUX_PPC64_ASAN_DEBUG_ZTS
     # This runs on a self-hosted runner; see https://wiki.php.net/systems/ci
     runs-on: [self-hosted, gentoo, ppc64]
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -55,6 +56,7 @@ jobs:
     if: ${{ fromJson(inputs.branch).jobs.ALPINE }}
     name: ALPINE_X64_ASAN_DEBUG_ZTS
     runs-on: ubuntu-24.04
+    timeout-minutes: 180
     container:
       image: 'alpine:3.22'
     steps:
@@ -130,6 +132,7 @@ jobs:
       matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X64.matrix }}
     name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -228,6 +231,7 @@ jobs:
       matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X32.matrix }}
     name: "LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     container:
       image: ubuntu:${{ fromJson(inputs.branch).config.ubuntu_version }}
     env:
@@ -309,6 +313,7 @@ jobs:
       matrix: ${{ fromJson(inputs.branch).jobs.MACOS.matrix }}
     name: "MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: macos-${{ matrix.arch == 'X64' && '15-intel' || fromJson(inputs.branch).jobs.MACOS.config.arm64_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -386,6 +391,7 @@ jobs:
           FIREBIRD_USER: test
           FIREBIRD_PASSWORD: test
     runs-on: ubuntu-24.04
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -642,6 +648,7 @@ jobs:
           FIREBIRD_PASSWORD: test
     name: OPCACHE_VARIATION
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -705,6 +712,7 @@ jobs:
     if: ${{ fromJson(inputs.branch).jobs.MSAN }}
     name: MSAN
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -796,6 +804,7 @@ jobs:
     if: ${{ fromJson(inputs.branch).jobs.LIBMYSQLCLIENT }}
     name: LIBMYSQLCLIENT
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -834,6 +843,7 @@ jobs:
       matrix: ${{ fromJson(inputs.branch).jobs.WINDOWS.matrix }}
     name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}${{ matrix.clang && '_CLANG' || ''}}"
     runs-on: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.runs_on }}
+    timeout-minutes: 180
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
