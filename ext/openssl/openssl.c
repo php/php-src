@@ -1911,6 +1911,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 		zout = zend_try_array_init(zout);
 		if (!zout) {
+			sk_X509_pop_free(ca, X509_free);
 			goto cleanup;
 		}
 
@@ -4697,6 +4698,7 @@ PHP_FUNCTION(openssl_seal)
 
 	iv_len = EVP_CIPHER_iv_length(cipher);
 	if (!iv && iv_len > 0) {
+		php_openssl_release_evp_cipher(cipher);
 		zend_argument_value_error(6, "cannot be null for the chosen cipher algorithm");
 		RETURN_THROWS();
 	}
@@ -4783,6 +4785,7 @@ clean_exit:
 	efree(eks);
 	efree(eksl);
 	efree(pkeys);
+	php_openssl_release_evp_cipher(cipher);
 }
 /* }}} */
 
@@ -4859,6 +4862,7 @@ PHP_FUNCTION(openssl_open)
 	EVP_CIPHER_CTX_free(ctx);
 out_pkey:
 	EVP_PKEY_free(pkey);
+	php_openssl_release_evp_cipher(cipher);
 }
 /* }}} */
 
