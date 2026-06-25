@@ -1065,6 +1065,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	str_serial = i2s_ASN1_INTEGER(NULL, asn1_serial);
 	/* Can return NULL on error or memory allocation failure */
 	if (!str_serial) {
+		OPENSSL_free(hex_serial);
 		php_openssl_store_errors();
 		goto err;
 	}
@@ -1251,9 +1252,20 @@ PHP_FUNCTION(openssl_x509_read)
 		RETURN_FALSE;
 	}
 
+	X509 *obj_x509;
+	if (cert_obj) {
+		obj_x509 = X509_dup(cert);
+		if (!obj_x509) {
+			php_error_docref(NULL, E_WARNING, "X.509 Certificate could not be duplicated");
+			RETURN_FALSE;
+		}
+	} else {
+		obj_x509 = cert;
+	}
+
 	object_init_ex(return_value, php_openssl_certificate_ce);
 	x509_cert_obj = Z_OPENSSL_CERTIFICATE_P(return_value);
-	x509_cert_obj->x509 = cert_obj ? X509_dup(cert) : cert;
+	x509_cert_obj->x509 = obj_x509;
 }
 /* }}} */
 
