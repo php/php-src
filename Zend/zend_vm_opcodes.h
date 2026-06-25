@@ -77,46 +77,51 @@ typedef const void* zend_vm_opcode_handler_t;
 # error
 #endif
 
-#define ZEND_VM_OP_SPEC          0x00000001
-#define ZEND_VM_OP_CONST         0x00000002
-#define ZEND_VM_OP_TMPVAR        0x00000004
-#define ZEND_VM_OP_TMPVARCV      0x00000008
-#define ZEND_VM_OP_MASK          0x000000f0
-#define ZEND_VM_OP_NUM           0x00000010
-#define ZEND_VM_OP_JMP_ADDR      0x00000020
-#define ZEND_VM_OP_TRY_CATCH     0x00000030
-#define ZEND_VM_OP_LOOP_END      0x00000040
-#define ZEND_VM_OP_THIS          0x00000050
-#define ZEND_VM_OP_NEXT          0x00000060
-#define ZEND_VM_OP_CLASS_FETCH   0x00000070
-#define ZEND_VM_OP_CONSTRUCTOR   0x00000080
-#define ZEND_VM_OP_CONST_FETCH   0x00000090
-#define ZEND_VM_OP_CACHE_SLOT    0x000000a0
-#define ZEND_VM_EXT_VAR_FETCH    0x00010000
-#define ZEND_VM_EXT_ISSET        0x00020000
-#define ZEND_VM_EXT_CACHE_SLOT   0x00040000
-#define ZEND_VM_EXT_ARRAY_INIT   0x00080000
-#define ZEND_VM_EXT_REF          0x00100000
-#define ZEND_VM_EXT_FETCH_REF    0x00200000
-#define ZEND_VM_EXT_DIM_WRITE    0x00400000
-#define ZEND_VM_EXT_MASK         0x0f000000
-#define ZEND_VM_EXT_NUM          0x01000000
-#define ZEND_VM_EXT_LAST_CATCH   0x02000000
-#define ZEND_VM_EXT_JMP_ADDR     0x03000000
-#define ZEND_VM_EXT_OP           0x04000000
-#define ZEND_VM_EXT_TYPE         0x07000000
-#define ZEND_VM_EXT_EVAL         0x08000000
-#define ZEND_VM_EXT_TYPE_MASK    0x09000000
-#define ZEND_VM_EXT_SRC          0x0b000000
-#define ZEND_VM_NO_CONST_CONST   0x40000000
-#define ZEND_VM_COMMUTATIVE      0x80000000
-#define ZEND_VM_OP1_FLAGS(flags) (flags & 0xff)
-#define ZEND_VM_OP2_FLAGS(flags) ((flags >> 8) & 0xff)
+#define ZEND_VM_OP_SHIFT         0x00000010
+#define ZEND_VM_OP_SPEC_MASK     0x000000ff
+#define ZEND_VM_OP_CONST         0x00000001
+#define ZEND_VM_OP_TMP           0x00000002
+#define ZEND_VM_OP_VAR           0x00000004
+#define ZEND_VM_OP_UNUSED        0x00000008
+#define ZEND_VM_OP_CV            0x00000010
+#define ZEND_VM_OP_TMPVAR        0x00000020
+#define ZEND_VM_OP_TMPVARCV      0x00000040
+#define ZEND_VM_OP_MASK          0x0000f000
+#define ZEND_VM_OP_NUM           0x00001000
+#define ZEND_VM_OP_JMP_ADDR      0x00002000
+#define ZEND_VM_OP_TRY_CATCH     0x00003000
+#define ZEND_VM_OP_LOOP_END      0x00004000
+#define ZEND_VM_OP_THIS          0x00005000
+#define ZEND_VM_OP_NEXT          0x00006000
+#define ZEND_VM_OP_CLASS_FETCH   0x00007000
+#define ZEND_VM_OP_CONSTRUCTOR   0x00008000
+#define ZEND_VM_OP_CONST_FETCH   0x00009000
+#define ZEND_VM_OP_CACHE_SLOT    0x0000a000
+#define ZEND_VM_EXT_VAR_FETCH    (UINT64_C(0x00010000) << 32)
+#define ZEND_VM_EXT_ISSET        (UINT64_C(0x00020000) << 32)
+#define ZEND_VM_EXT_CACHE_SLOT   (UINT64_C(0x00040000) << 32)
+#define ZEND_VM_EXT_ARRAY_INIT   (UINT64_C(0x00080000) << 32)
+#define ZEND_VM_EXT_REF          (UINT64_C(0x00100000) << 32)
+#define ZEND_VM_EXT_FETCH_REF    (UINT64_C(0x00200000) << 32)
+#define ZEND_VM_EXT_DIM_WRITE    (UINT64_C(0x00400000) << 32)
+#define ZEND_VM_EXT_MASK         (UINT64_C(0x0f000000) << 32)
+#define ZEND_VM_EXT_NUM          (UINT64_C(0x01000000) << 32)
+#define ZEND_VM_EXT_LAST_CATCH   (UINT64_C(0x02000000) << 32)
+#define ZEND_VM_EXT_JMP_ADDR     (UINT64_C(0x03000000) << 32)
+#define ZEND_VM_EXT_OP           (UINT64_C(0x04000000) << 32)
+#define ZEND_VM_EXT_TYPE         (UINT64_C(0x07000000) << 32)
+#define ZEND_VM_EXT_EVAL         (UINT64_C(0x08000000) << 32)
+#define ZEND_VM_EXT_TYPE_MASK    (UINT64_C(0x09000000) << 32)
+#define ZEND_VM_EXT_SRC          (UINT64_C(0x0b000000) << 32)
+#define ZEND_VM_NO_CONST_CONST   (UINT64_C(0x40000000) << 32)
+#define ZEND_VM_COMMUTATIVE      (UINT64_C(0x80000000) << 32)
+#define ZEND_VM_OP1_FLAGS(flags) (flags & 0x0000ffff)
+#define ZEND_VM_OP2_FLAGS(flags) ((flags >> 16) & 0x0000ffff)
 
 BEGIN_EXTERN_C()
 
 ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode);
-ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode);
+ZEND_API uint64_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode);
 ZEND_API uint8_t zend_get_opcode_id(const char *name, size_t length);
 
 END_EXTERN_C()
