@@ -567,7 +567,58 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 		zend_error_noreturn(E_COMPILE_ERROR, "zend_stream_mmap() failed");
 	}
 
-	if (CG(skip_shebang)) {
+	/* Pure-code PHP files via .phpc extension (RFC: optional_php_tags).
+	 *
+	 * Files whose name ends in ".phpc" are parsed as pure PHP: the lexer
+	 * starts directly in ST_IN_SCRIPTING, with no opening "<?php" required.
+	 * A leading UTF-8 BOM and an optional CLI shebang line (#!.*\n) are
+	 * silently skipped. The closing tag "?>" and __halt_compiler() retain
+	 * their current semantics, so a .phpc file remains free to drop into
+	 * inline output mode or terminate compilation, if desired.
+	 *
+	 * Files whose name does NOT end in ".phpc" (in particular: every .php
+	 * file, every .phar entry, every stream wrapper without a .phpc name,
+	 * every eval()/stdin/highlight invocation) take the historical code
+	 * path unchanged. .phpc detection is purely additive.
+	 */
+	bool is_phpc_file = false;
+	{
+		zend_string *fname = file_handle->opened_path
+			? file_handle->opened_path : file_handle->filename;
+		if (fname && ZSTR_LEN(fname) >= sizeof(".phpc") - 1) {
+			const char *tail = ZSTR_VAL(fname) + ZSTR_LEN(fname) - (sizeof(".phpc") - 1);
+			if (memcmp(tail, ".phpc", sizeof(".phpc") - 1) == 0) {
+				is_phpc_file = true;
+			}
+		}
+	}
+
+	uint32_t phpc_start_lineno = 1;
+	if (is_phpc_file) {
+		unsigned char *p = (unsigned char *)buf;
+		unsigned char *limit = p + size;
+
+		/* Skip a UTF-8 BOM if present. */
+		if (limit - p >= 3 && p[0] == 0xEF && p[1] == 0xBB && p[2] == 0xBF) {
+			p += 3;
+		}
+
+		/* Skip a shebang line in CLI mode. .phpc files can be #!-scripts. */
+		if (CG(skip_shebang) && limit - p >= 2 && p[0] == '#' && p[1] == '!') {
+			while (p < limit && *p != '\n') {
+				p++;
+			}
+			if (p < limit) {
+				p++; /* consume the newline */
+				phpc_start_lineno = 2;
+			}
+		}
+
+		if (p != (unsigned char *)buf) {
+			SCNG(yy_cursor) = p;
+		}
+		BEGIN(ST_IN_SCRIPTING);
+	} else if (CG(skip_shebang)) {
 		BEGIN(SHEBANG);
 	} else {
 		BEGIN(INITIAL);
@@ -585,7 +636,7 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 	SCNG(on_event) = NULL;
 	SCNG(on_event_context) = NULL;
 	RESET_DOC_COMMENT();
-	CG(zend_lineno) = 1;
+	CG(zend_lineno) = phpc_start_lineno;
 	CG(increment_lineno) = 0;
 	return SUCCESS;
 }
