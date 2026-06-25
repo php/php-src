@@ -10221,10 +10221,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			 && ZEND_MAP_PTR_IS_OFFSET(func->op_array.run_time_cache)) {
 				run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_CG(map_ptr_base)),
 					(uintptr_t)ZEND_MAP_PTR(func->op_array.run_time_cache)));
-			} else if ((func && (func->op_array.fn_flags & ZEND_ACC_CLOSURE)) ||
-					(JIT_G(current_frame) &&
-					 JIT_G(current_frame)->call &&
-					 TRACE_FRAME_IS_CLOSURE_CALL(JIT_G(current_frame)->call))) {
+			} else if (func && (func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 				/* Closures always use direct pointers */
 				ir_ref local_func_ref = func_ref ? func_ref : ir_LOAD_A(jit_CALL(rx, func));
 

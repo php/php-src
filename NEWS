@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-22158 (Tracing JIT dispatches the observer begin handler
     through the wrong run_time_cache slot on megamorphic calls). (ptondereau,
     iliaal)
+  . Fixed bug GH-22443 (Tracing JIT SIGSEGV on megamorphic dynamic calls from
+    an undereferenced run_time_cache map_ptr offset). (iliaal)
 
 - Intl:
   . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
