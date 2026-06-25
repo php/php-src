@@ -2842,7 +2842,7 @@ PHPAPI bool php_tsrm_startup_ex(int expected_threads)
 {
 	bool ret = tsrm_startup(expected_threads, 1, 0, NULL);
 	php_reserve_tsrm_memory();
-	/* Must reserve exactly the prefix laid out by ZEND_*_OFFSET (zend_globals.h). */
+	/* Must cover the total size of every ZEND_*_OFFSET global, or the furthest underflows the block. */
 	tsrm_reserve_fast_front(
 		TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)) +
