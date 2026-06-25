@@ -597,6 +597,7 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool r
 		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		return NULL;
 	} else if (!X509_digest(peer, mdtype, md, &n)) {
+		php_openssl_release_evp_md(mdtype);
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_ERROR, "Could not generate signature");
 		return NULL;
@@ -610,6 +611,7 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool r
 		ZSTR_VAL(ret)[n * 2] = '\0';
 	}
 
+	php_openssl_release_evp_md(mdtype);
 	return ret;
 }
 
