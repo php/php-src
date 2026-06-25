@@ -1,5 +1,5 @@
 /* This is a generated file, edit pdo_sqlite.stub.php instead.
- * Stub hash: 721c46905fa8fb1e18d7196ed85c37f56049ea33 */
+ * Stub hash: 7f1470a568f9610eb7cd17e5acfa41ebfc19b2c5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -38,6 +38,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_setAuthorizer, 
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_backup, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, destination, Pdo\\Sqlite, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sourceDatabase, IS_STRING, 0, "\"main\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, destinationDatabase, IS_STRING, 0, "\"main\"")
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Pdo_Sqlite, createAggregate);
 ZEND_METHOD(Pdo_Sqlite, createCollation);
 ZEND_METHOD(Pdo_Sqlite, createFunction);
@@ -46,6 +52,7 @@ ZEND_METHOD(Pdo_Sqlite, loadExtension);
 #endif
 ZEND_METHOD(Pdo_Sqlite, openBlob);
 ZEND_METHOD(Pdo_Sqlite, setAuthorizer);
+ZEND_METHOD(Pdo_Sqlite, backup);
 
 static const zend_function_entry class_Pdo_Sqlite_methods[] = {
 	ZEND_ME(Pdo_Sqlite, createAggregate, arginfo_class_Pdo_Sqlite_createAggregate, ZEND_ACC_PUBLIC)
@@ -56,6 +63,7 @@ static const zend_function_entry class_Pdo_Sqlite_methods[] = {
 #endif
 	ZEND_ME(Pdo_Sqlite, openBlob, arginfo_class_Pdo_Sqlite_openBlob, ZEND_ACC_PUBLIC)
 	ZEND_ME(Pdo_Sqlite, setAuthorizer, arginfo_class_Pdo_Sqlite_setAuthorizer, ZEND_ACC_PUBLIC)
+	ZEND_ME(Pdo_Sqlite, backup, arginfo_class_Pdo_Sqlite_backup, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
