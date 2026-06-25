@@ -669,7 +669,7 @@ static zend_result mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND *
 /* }}} */
 
 /* {{{ mysqlnd_zval_array_from_mysqlnd_array */
-static zend_result mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_array)
+static void mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_array)
 {
 	MYSQLND **p = in_array;
 	zval dest_array;
@@ -686,10 +686,8 @@ static zend_result mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zva
 			MY_MYSQL *mysql;
 			MYSQLI_RESOURCE *my_res;
 			mysqli_object *intern = Z_MYSQLI_P(elem);
-			if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
-				zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(intern->zo.ce->name));
-				return FAILURE;
-		  	}
+			my_res = (MYSQLI_RESOURCE *)intern->ptr;
+			ZEND_ASSERT(my_res);
 			mysql = (MY_MYSQL *) my_res->ptr;
 			if (mysql->mysql == *p) {
 				dest_elem = zend_hash_next_index_insert(Z_ARRVAL(dest_array), elem);
@@ -704,8 +702,6 @@ static zend_result mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zva
 	/* destroy old array and add new one */
 	zval_ptr_dtor(out_array);
 	ZVAL_COPY_VALUE(out_array, &dest_array);
-
-	return SUCCESS;
 }
 /* }}} */
 
