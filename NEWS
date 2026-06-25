@@ -50,6 +50,9 @@ PHP                                                                        NEWS
 - DOM:
   . Fix GH-22219 (Dom\XMLDocument::schemaValidate fails to resolve
     xs:QName with prefix from imported schema). (David Carlier)
+  . Fixed bug GH-22447 (UAF at dom_objects_free_storage when setting an
+    attribute node that collides by local name with a namespaced
+    attribute). (David Carlier)
 
 - Exif:
   . Read correct value for single and double tags. (ndossche)
