@@ -19,8 +19,13 @@ interface Reflector extends Stringable
 {
 }
 
+interface ReflectionAttributeTarget extends Reflector
+{
+    public function getAttributes(?string $name = null, int $flags = 0): array {}
+}
+
 /** @not-serializable */
-abstract class ReflectionFunctionAbstract implements Reflector
+abstract class ReflectionFunctionAbstract implements Reflector, ReflectionAttributeTarget
 {
     public string $name;
 
@@ -234,7 +239,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 }
 
 /** @not-serializable */
-class ReflectionClass implements Reflector
+class ReflectionClass implements Reflector, ReflectionAttributeTarget
 {
     /**
      * @cvalue ZEND_ACC_IMPLICIT_ABSTRACT_CLASS
@@ -450,7 +455,7 @@ enum PropertyHookType: string
 }
 
 /** @not-serializable */
-class ReflectionProperty implements Reflector
+class ReflectionProperty implements Reflector, ReflectionAttributeTarget
 {
     /** @cvalue ZEND_ACC_STATIC */
     public const int IS_STATIC = UNKNOWN;
@@ -581,7 +586,7 @@ class ReflectionProperty implements Reflector
 }
 
 /** @not-serializable */
-class ReflectionClassConstant implements Reflector
+class ReflectionClassConstant implements Reflector, ReflectionAttributeTarget
 {
     /** @cvalue ZEND_ACC_PUBLIC */
     public const int IS_PUBLIC = UNKNOWN;
@@ -640,7 +645,7 @@ class ReflectionClassConstant implements Reflector
 }
 
 /** @not-serializable */
-class ReflectionParameter implements Reflector
+class ReflectionParameter implements Reflector, ReflectionAttributeTarget
 {
     public string $name;
 
@@ -850,6 +855,7 @@ class ReflectionAttribute implements Reflector
 
     public function getName(): string {}
     public function getTarget(): int {}
+    public function getReflectionTarget(): ReflectionAttributeTarget {}
     public function isRepeated(): bool {}
     public function getArguments(): array {}
     public function newInstance(): object {}
@@ -859,6 +865,8 @@ class ReflectionAttribute implements Reflector
     private function __clone(): void {}
 
     private function __construct() {}
+
+    public static function getCurrent(): ReflectionAttribute {}
 }
 
 class ReflectionEnum extends ReflectionClass
@@ -913,7 +921,7 @@ final class ReflectionFiber
  * @strict-properties
  * @not-serializable
  */
-class ReflectionConstant implements Reflector
+class ReflectionConstant implements Reflector, ReflectionAttributeTarget
 {
     public string $name;
 
