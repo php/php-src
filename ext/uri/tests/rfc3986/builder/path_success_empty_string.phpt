@@ -4,6 +4,7 @@ Test Uri\Rfc3986\UriBuilder::setPath() - success - empty string
 <?php
 
 $builder = new Uri\Rfc3986\UriBuilder();
+$builder->setPath("/foo/bar");
 $builder->setPath("");
 $uri = $builder->build();
 
