@@ -2944,7 +2944,6 @@ static void zend_convert_internal_arg_info_type(zend_type *type, bool persistent
 		// temporary workaround, we support union types by splitting
 		// the type name on `|` characters if necessary.
 		const char *class_name = ZEND_TYPE_LITERAL_NAME(*type);
-		type->type_mask &= ~_ZEND_TYPE_LITERAL_NAME_BIT;
 
 		size_t num_types = 1;
 		const char *p = class_name;
@@ -2958,7 +2957,7 @@ static void zend_convert_internal_arg_info_type(zend_type *type, bool persistent
 			zend_string *str = zend_string_init_interned(class_name, strlen(class_name), persistent);
 			zend_alloc_ce_cache(str);
 			ZEND_TYPE_SET_PTR(*type, str);
-			type->type_mask |= _ZEND_TYPE_NAME_BIT;
+			type->kind = ZEND_TYPE_KIND_NAME;
 		} else {
 			/* Union type */
 			zend_type_list *list = pemalloc(ZEND_TYPE_LIST_SIZE(num_types), persistent);
