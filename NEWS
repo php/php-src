@@ -298,6 +298,8 @@ PHP                                                                        NEWS
   . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)
   . Fixed bug GH-21221 (Prevent closing of innerstream of php://temp stream).
     (ilutov)
+  . Fixed bug GH-21700 (Assertion failure in _php_stream_seek when a user
+    stream returns a negative position). (lacatoire)
   . Improved stream_socket_server() bind failure error reporting. (ilutov)
   . Fixed bug #49874 (ftell() and fseek() inconsistency when using stream
     filters). (Jakub Zelenka)

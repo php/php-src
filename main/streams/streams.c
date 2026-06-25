@@ -1344,19 +1344,31 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 				} else {
 					offset = stream->position + offset;
 				}
- 				whence = SEEK_SET;
-				break;
+				whence = SEEK_SET;
+				ZEND_FALLTHROUGH;
 			case SEEK_SET:
 				if (offset < 0) {
 					return -1;
 				}
+				break;
 		}
+		zend_off_t saved_position = stream->position;
 		ret = stream->ops->seek(stream, offset, whence, &stream->position);
 
 		if (((stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) || ret == 0) {
 			if (ret == 0) {
-				stream->eof = 0;
-				stream->fatal_error = 0;
+				if (UNEXPECTED(stream->position < 0)) {
+					/* The seek operation reported success but updated
+					 * stream->position to a negative value (e.g. a user
+					 * stream's stream_tell() returned a negative offset).
+					 * Treat as failure and restore the original position
+					 * to keep the invariant stream->position >= 0. */
+					stream->position = saved_position;
+					ret = -1;
+				} else {
+					stream->eof = 0;
+					stream->fatal_error = 0;
+				}
 			}
 
 			/* invalidate the buffer contents */
@@ -2300,7 +2312,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		zend_off_t newpos = 0;
 
 		/* if opened for append, we need to revise our idea of the initial file position */
-		if (0 == stream->ops->seek(stream, 0, SEEK_CUR, &newpos)) {
+		if (0 == stream->ops->seek(stream, 0, SEEK_CUR, &newpos) && newpos >= 0) {
 			stream->position = newpos;
 		}
 	}
