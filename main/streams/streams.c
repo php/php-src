@@ -1414,7 +1414,8 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 					offset = stream->position + offset;
 				}
  				whence = SEEK_SET;
-				break;
+				/* fall through to reject a possible negative offset */
+				ZEND_FALLTHROUGH;
 			case SEEK_SET:
 				if (offset < 0) {
 					return -1;
