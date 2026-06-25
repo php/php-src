@@ -16,7 +16,7 @@
 #include <config.h>
 #endif
 
-#include <php.h>
+#include <stddef.h>
 
 #include "intl_icu_compat.h"
 #include <unicode/ubrk.h>
