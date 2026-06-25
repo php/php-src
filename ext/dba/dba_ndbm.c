@@ -147,7 +147,7 @@ DBA_SYNC_FUNC(ndbm)
 
 DBA_INFO_FUNC(ndbm)
 {
-	return estrdup("NDBM");
+	return zend_string_init(NDBM, strlen(NDBM), false);
 }
 
 #endif

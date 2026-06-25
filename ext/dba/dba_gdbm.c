@@ -189,7 +189,7 @@ DBA_SYNC_FUNC(gdbm)
 
 DBA_INFO_FUNC(gdbm)
 {
-	return estrdup(gdbm_version);
+	return zend_string_init(gdbm_version, strlen(gdbm_version), false);
 }
 
 #endif

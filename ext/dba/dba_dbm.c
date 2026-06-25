@@ -188,11 +188,11 @@ DBA_INFO_FUNC(dbm)
 {
 #ifdef DBA_GDBM
 	if (!strcmp(DBM_VERSION, "GDBM"))
-	{
+	{	
 		return dba_info_gdbm(hnd, info);
 	}
 #endif
-	return estrdup(DBM_VERSION);
+	return zend_string_init(DBM_VERSION, strlen(DBM_VERSION), false);
 }
 
 #endif

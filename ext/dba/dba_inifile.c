@@ -186,7 +186,8 @@ DBA_SYNC_FUNC(inifile)
 
 DBA_INFO_FUNC(inifile)
 {
-	return estrdup(inifile_version());
+	const char* version = inifile_version();
+	return zend_string_init(version, strlen(version), false);
 }
 
 #endif

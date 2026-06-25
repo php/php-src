@@ -177,7 +177,7 @@ DBA_SYNC_FUNC(db1)
 
 DBA_INFO_FUNC(db1)
 {
-	return estrdup(DB1_VERSION);
+	return zend_string_init(DB1_VERSION, strlen(DB1_VERSION), false);
 }
 
 #endif

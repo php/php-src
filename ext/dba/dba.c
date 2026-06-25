@@ -1282,10 +1282,8 @@ PHP_FUNCTION(dba_handlers)
 
 	for (const dba_handler *hptr = handler; hptr->name; hptr++) {
 		if (full_info) {
-			// TODO: avoid reallocation ???
-			char *str = hptr->info(hptr, NULL);
-			add_assoc_string(return_value, hptr->name, str);
-			efree(str);
+			zend_string *str = hptr->info(hptr, NULL);
+			add_assoc_str(return_value, hptr->name, str);
 		} else {
 			add_next_index_string(return_value, hptr->name);
 		}
