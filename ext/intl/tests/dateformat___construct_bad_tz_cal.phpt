@@ -23,6 +23,6 @@ try {
 ?>
 --EXPECT--
 IntlException: IntlDateFormatter::__construct(): No such time zone: "bad timezone"
-IntlException: IntlDateFormatter::__construct(): Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object
+IntlException: IntlDateFormatter::__construct(): Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN or IntlDateFormatter::PROLEPTIC_GREGORIAN. Alternatively, it can be an IntlCalendar object
 TypeError: IntlDateFormatter::__construct(): Argument #5 ($calendar) must be of type IntlCalendar|int|null, stdClass given
 
