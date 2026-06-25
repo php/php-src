@@ -52,6 +52,18 @@ typedef enum {
 	PHP_JSON_ERROR_NON_BACKED_ENUM,
 } php_json_error_code;
 
+typedef struct php_json_error_details {
+	php_json_error_code code;
+	size_t line;
+	size_t column;
+} php_json_error_details;
+
+static inline void php_json_error_details_clear(php_json_error_details *out) {
+	out->code = PHP_JSON_ERROR_NONE;
+	out->line = 0;
+	out->column = 0;
+}
+
 /* json_decode() options */
 #define PHP_JSON_OBJECT_AS_ARRAY            (1<<0)
 #define PHP_JSON_BIGINT_AS_STRING           (1<<1)
@@ -83,9 +95,7 @@ typedef enum {
 ZEND_BEGIN_MODULE_GLOBALS(json)
 	int encoder_depth;
 	int encode_max_depth;
-	php_json_error_code error_code;
-	size_t error_line;
-	size_t error_column;
+	php_json_error_details error_details;
 ZEND_END_MODULE_GLOBALS(json)
 
 PHP_JSON_API ZEND_EXTERN_MODULE_GLOBALS(json)
