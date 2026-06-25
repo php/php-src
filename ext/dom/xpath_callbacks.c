@@ -10,7 +10,7 @@
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
-   |          Niels Dossche <nielsdos@php.net>                            |
+   |          Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
  */
 
