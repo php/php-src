@@ -21,13 +21,13 @@
 extern "C" {
 #endif
 #include "intl_common.h"
-#include "intl_icu_compat.h"
 #include "intl_error.h"
 #include "intl_data.h"
 #ifdef __cplusplus
 }
 #endif
 
+#include "intl_icu_compat.h"
 #include <unicode/uspoof.h>
 
 typedef struct {
