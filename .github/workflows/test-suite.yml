@@ -396,7 +396,7 @@ jobs:
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: Install gcovr
-        run: sudo -H pip install gcovr
+        run: sudo -H pip install 'gcovr==8.4'
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -407,12 +407,16 @@ jobs:
         uses: ./.github/actions/install-linux
       - name: Setup
         uses: ./.github/actions/setup-x64
-      # We only test with OpCache, the difference in coverage is negligible
-      - name: Test OpCache
+      - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
           enableOpcache: true
           jitType: tracing
+      - name: Test Function JIT
+        uses: ./.github/actions/test-linux
+        with:
+          enableOpcache: true
+          jitType: function
       - name: Generate coverage report
         if: ${{ !cancelled() }}
         run: make gcovr-xml
