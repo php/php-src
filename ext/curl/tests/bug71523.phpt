@@ -4,7 +4,6 @@ Bug #71523 (Copied handle with new option CURLOPT_HTTPHEADER crashes while curl_
 curl
 --SKIPIF--
 <?php
-if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
 if (curl_version()['version_number'] === 0x080a00) {
     // https://github.com/php/php-src/issues/15997
     die('xfail due to a libcurl bug');
@@ -12,8 +11,10 @@ if (curl_version()['version_number'] === 0x080a00) {
 ?>
 --FILE--
 <?php
+include 'server.inc';
+$host = curl_cli_server_start();
 
-$base = curl_init('http://www.google.com/');
+$base = curl_init($host);
 curl_setopt($base, CURLOPT_RETURNTRANSFER, true);
 $mh = curl_multi_init();
 
