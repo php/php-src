@@ -100,6 +100,11 @@ PHP_FUNCTION(textdomain)
 
 	retval = textdomain(domain_name);
 
+	if (UNEXPECTED(retval == NULL)) {
+		zend_throw_error(NULL, "Could not set text domain");
+		RETURN_THROWS();
+	}
+
 	RETURN_STRING(retval);
 }
 /* }}} */
@@ -212,6 +217,11 @@ PHP_FUNCTION(bindtextdomain)
 	}
 
 	retval = bindtextdomain(ZSTR_VAL(domain), dir_name);
+
+	if (UNEXPECTED(retval == NULL)) {
+		zend_throw_error(NULL, "Could not bind text domain");
+		RETURN_THROWS();
+	}
 
 	RETURN_STRING(retval);
 }
