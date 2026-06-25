@@ -1785,6 +1785,13 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 					ZSTR_VAL(object->ce->name), h);
 			}
 
+			HashTable *ht = zend_std_get_properties_ex(object);
+
+			if (UNEXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
+				zend_hash_real_init_mixed(ht);
+				HT_FLAGS(ht) &= ~HASH_FLAG_UNINITIALIZED;
+			}
+
 			prop = zend_hash_index_update(zend_std_get_properties_ex(object), h, prop);
 			zval_add_ref(prop);
 		}
