@@ -433,6 +433,7 @@ static const struct pdo_dbh_methods dblib_methods = {
 	dblib_fetch_error, /* fetch error */
 	dblib_get_attribute, /* get attr */
 	NULL, /* check liveness */
+	NULL, /* reset_connection */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	NULL, /* in transaction, use PDO's internal tracking mechanism */

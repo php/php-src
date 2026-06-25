@@ -783,6 +783,7 @@ static const struct pdo_dbh_methods sqlite_methods = {
 	pdo_sqlite_fetch_error_func,
 	pdo_sqlite_get_attribute,
 	NULL,	/* check_liveness: not needed */
+	NULL,	/* reset_connection */
 	get_driver_methods,
 	pdo_sqlite_request_shutdown,
 	pdo_sqlite_in_transaction,
