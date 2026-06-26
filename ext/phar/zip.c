@@ -126,7 +126,7 @@ static time_t phar_zip_d2u_time(char *cdtime, char *cddate) /* {{{ */
 	struct tm *tm, tmbuf;
 	time_t now;
 
-	now = time(NULL);
+	now = source_date_epoch_time(NULL);
 	tm = php_localtime_r(&now, &tmbuf);
 
 	tm->tm_year = ((ddate>>9)&127) + 1980 - 1900;
@@ -1221,7 +1221,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 
 	pass.error = &temperr;
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
-	entry.timestamp = time(NULL);
+	entry.timestamp = source_date_epoch_time(NULL);
 	entry.is_modified = 1;
 	entry.is_zip = 1;
 	entry.phar = phar;
