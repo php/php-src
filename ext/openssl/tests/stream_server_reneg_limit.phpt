@@ -25,7 +25,7 @@ $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'stream_server_reneg_limit.pem.tmp';
 
 $serverCode = <<<'CODE'
     $printed = false;
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
@@ -42,7 +42,7 @@ $serverCode = <<<'CODE'
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify(message: stream_socket_get_name($server, false));
 
     $clients = [];
     while (1) {
@@ -71,9 +71,9 @@ CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
-    phpt_wait();
+    $serverUri = trim(phpt_wait());
 
-    $cmd = 'openssl s_client -connect 127.0.0.1:64321';
+    $cmd = 'openssl s_client -connect ' . escapeshellarg($serverUri);
     $descriptorSpec = [["pipe", "r"], ["pipe", "w"], ["pipe", "w"]];
     $process = proc_open($cmd, $descriptorSpec, $pipes);
 

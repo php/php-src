@@ -8,7 +8,7 @@ if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
 require_once 'skipifconnectfailure.inc';
 ?>
 --CONFLICTS--
-all
+mysql
 --FILE--
 <?php
     require_once 'connect.inc';
