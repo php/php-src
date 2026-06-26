@@ -2044,6 +2044,7 @@ PHP                                                                        NEWS
     invalid quality parameter. (David Carlier)
   . Check overflow/underflow for imagescale/imagefilter. (David Carlier)
   . Added gdImageClone to bundled libgd. (David Carlier)
+  . Fixed bug GH-21163 (Integer overflow in gdImageCopy* functions). (Pierre Joye, Jordi Kroon)
 
 - Gettext:
   . bind_textdomain_codeset, textdomain and d(*)gettext functions
