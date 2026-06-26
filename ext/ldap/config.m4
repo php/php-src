@@ -134,7 +134,6 @@ if test "$PHP_LDAP" != "no"; then
   dnl nor ldap_start_tls_s()
   AC_CHECK_FUNCS(m4_normalize([
     ldap_control_find
-    ldap_extended_operation
     ldap_extended_operation_s
     ldap_parse_extended_result
     ldap_parse_reference
