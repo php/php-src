@@ -208,6 +208,7 @@ typedef struct _zend_oparray_context {
 	zend_property_hook_kind active_property_hook_kind;
 	bool       in_jmp_frameless_branch;
 	bool has_assigned_to_http_response_header;
+	zend_op_array *scope_func_parent_op_array;
 } zend_oparray_context;
 
 /* Class, property and method flags                  class|meth.|prop.|const*/
@@ -412,11 +413,15 @@ typedef struct _zend_oparray_context {
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
 /*                                                        |     |     |     */
-/* Function Flags 2 (fn_flags2) (unused: 1-31)            |     |     |     */
+/* Function Flags 2 (fn_flags2) (unused: 3-31)            |     |     |     */
 /* ============================                           |     |     |     */
 /*                                                        |     |     |     */
 /* Function forbids dynamic calls                         |     |     |     */
-#define ZEND_ACC2_FORBID_DYN_CALLS       (1 << 0)  /*     |  X  |     |     */
+#define ZEND_ACC2_FORBID_DYN_CALLS        (1 << 0) /*     |  X  |     |     */
+/* Scope functions                                        |     |     |     */
+#define ZEND_ACC2_SCOPE_FUNC              (1 << 1) /*     |  X  |     |     */
+/* Functions with tracked temporaries                     |     |     |     */
+#define ZEND_ACC2_HAS_TRACKED_TEMPORARIES (1 << 2) /*     |  X  |     |     */
 
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
 #define ZEND_ACC_PPP_SET_MASK  (ZEND_ACC_PUBLIC_SET | ZEND_ACC_PROTECTED_SET | ZEND_ACC_PRIVATE_SET)
@@ -670,10 +675,13 @@ struct _zend_execute_data {
 #define ZEND_CALL_GENERATOR          (1 << 24)
 #define ZEND_CALL_DYNAMIC            (1 << 25)
 #define ZEND_CALL_MAY_HAVE_UNDEF     (1 << 26)
-#define ZEND_CALL_HAS_EXTRA_NAMED_PARAMS (1 << 27)
+#define ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS (1 << 27)
+#define ZEND_CALL_TRACKED_TEMPORARIES ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS /* shared with extra named params; field is NULL when only tracked TMPs */
 #define ZEND_CALL_OBSERVED           (1 << 28) /* "fcall_begin" observer handler may set this flag */
                                                /* to prevent optimization in RETURN handler and    */
                                                /* keep all local variables for "fcall_end" handler */
+#define ZEND_CALL_SCOPE_FN           ZEND_CALL_OBSERVED /* aliased to OBSERVED so ZEND_RETURN's cv-to-result */
+                                                        /* move is skipped (otherwise it would null parent CVs) */
 #define ZEND_CALL_JIT_RESERVED       (1 << 29) /* reserved for tracing JIT */
 #define ZEND_CALL_NEEDS_REATTACH     (1 << 30)
 #define ZEND_CALL_SEND_ARG_BY_REF    (1u << 31)
@@ -1009,6 +1017,16 @@ ZEND_API void zend_recalc_live_ranges(
 	zend_op_array *op_array, zend_needs_live_range_cb needs_live_range);
 
 ZEND_API void pass_two(zend_op_array *op_array);
+
+/* Reserve and revert TMP slots for each DECLARE_SCOPE_FUNC's scope_ex frame plus tracked-temp entries */
+ZEND_API void zend_pass_two_install_scope_fn_reservations(zend_op_array *op_array);
+ZEND_API void zend_pass_two_revert_scope_fn_reservations(zend_op_array *op_array);
+
+/* Remove or add the temporary offsets for a scope fn op_array. */
+/* When temporarily removing the offsets, pass the return value of zend_unfixup_scope_func_self as scope_T to revert. */
+ZEND_API uint32_t zend_unfixup_scope_func_self(zend_op_array *scope_op, uint32_t scope_T);
+ZEND_API void zend_refixup_scope_func_self(zend_op_array *scope_op, uint32_t scope_ex_offset, uint32_t scope_T);
+
 ZEND_API bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_handlers);
@@ -1218,6 +1236,9 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 
 /* Used to disallow pipes with arrow functions that lead to confusing parse trees. */
 #define ZEND_PARENTHESIZED_ARROW_FUNC 1
+
+/* Distinguishing normal from scope closures. */
+#define ZEND_ATTR_SCOPE_FUNC 1
 
 /* For "use" AST nodes and the seen symbol table */
 #define ZEND_SYMBOL_CLASS    (1<<0)

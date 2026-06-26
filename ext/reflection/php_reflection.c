@@ -1803,6 +1803,19 @@ ZEND_METHOD(ReflectionFunctionAbstract, isClosure)
 }
 /* }}} */
 
+/* {{{ Returns whether this is a scope function */
+ZEND_METHOD(ReflectionFunctionAbstract, isScopeFunction)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	RETURN_BOOL(fptr->common.fn_flags2 & ZEND_ACC2_SCOPE_FUNC);
+}
+/* }}} */
+
 /* {{{ Returns this pointer bound to closure */
 ZEND_METHOD(ReflectionFunctionAbstract, getClosureThis)
 {

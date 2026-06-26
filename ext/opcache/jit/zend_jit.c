@@ -3217,6 +3217,11 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 
 static void zend_jit_setup_hot_counters_ex(zend_op_array *op_array, zend_cfg *cfg)
 {
+	/* TODO: Currently we just skip scope-fn op_arrays (negative var offsets) and their parents. */
+	if (op_array->fn_flags2 & (ZEND_ACC2_SCOPE_FUNC | ZEND_ACC2_HAS_TRACKED_TEMPORARIES)) {
+		return;
+	}
+
 	if (JIT_G(hot_func)) {
 		zend_op *opline = op_array->opcodes;
 
@@ -3301,6 +3306,12 @@ int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 {
 	if (dasm_ptr == NULL) {
 		return FAILURE;
+	}
+
+	/* Scope-fn op_arrays use negative var offsets; parents reserve TMPs and
+	 * carry DECLARE_SCOPE_FUNC opcodes the JIT does not model. Skip both. */
+	if (op_array->fn_flags2 & (ZEND_ACC2_SCOPE_FUNC | ZEND_ACC2_HAS_TRACKED_TEMPORARIES)) {
+		return SUCCESS;
 	}
 
 	if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC) {
@@ -3416,6 +3427,12 @@ int zend_jit_script(zend_script *script)
 		}
 	} else if (JIT_G(trigger) == ZEND_JIT_ON_SCRIPT_LOAD) {
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			/* TODO: Scope-fn op_arrays use negative offsets and parents reserve fixed TMPs, which breaks current SSA construction.
+			 * Drop FUNC_INFO so the subsequent usages just skip them. */
+			if (call_graph.op_arrays[i]->fn_flags2 & (ZEND_ACC2_SCOPE_FUNC | ZEND_ACC2_HAS_TRACKED_TEMPORARIES)) {
+				ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+				continue;
+			}
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
 				if (zend_jit_op_array_analyze1(call_graph.op_arrays[i], script, &info->ssa) != SUCCESS) {

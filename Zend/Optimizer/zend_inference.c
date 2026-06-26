@@ -4010,8 +4010,11 @@ static zend_always_inline zend_result _zend_update_type_info(
 			UPDATE_SSA_TYPE(MAY_BE_BOOL, ssa_op->result_def);
 			break;
 		case ZEND_DECLARE_LAMBDA_FUNCTION:
+		case ZEND_DECLARE_SCOPE_FUNC:
 			UPDATE_SSA_TYPE(MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN, ssa_op->result_def);
 			UPDATE_SSA_OBJ_TYPE(zend_ce_closure, /* is_instanceof */ false, ssa_op->result_def);
+			break;
+		case ZEND_ENTER_SCOPE_FUNC:
 			break;
 		case ZEND_PRE_DEC_STATIC_PROP:
 		case ZEND_PRE_INC_STATIC_PROP:
