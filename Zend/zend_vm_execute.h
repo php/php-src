@@ -3738,6 +3738,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_HANDLER
 		zend_frameless_function_2 function = (zend_frameless_function_2)ZEND_FLF_HANDLER(opline);
 		function(result, arg1, arg2);
 	}
+	if (UNEXPECTED(EG(frameless_reentry_copies))) {
+		zend_frameless_cleanup_reentry_copies_for_handler(execute_data, opline);
+	}
 
 	FREE_OP(opline->op1_type, opline->op1.var);
 	/* Set OP1 to UNDEF in case FREE_OP(opline->op2_type, opline->op2.var) throws. */
@@ -3771,6 +3774,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_OBSERVE
 	{
 		zend_frameless_function_2 function = (zend_frameless_function_2)ZEND_FLF_HANDLER(opline);
 		function(result, arg1, arg2);
+	}
+	if (UNEXPECTED(EG(frameless_reentry_copies))) {
+		zend_frameless_cleanup_reentry_copies_for_handler(execute_data, opline);
 	}
 
 	FREE_OP(opline->op1_type, opline->op1.var);
@@ -3807,6 +3813,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_HANDLER
 	{
 		zend_frameless_function_3 function = (zend_frameless_function_3)ZEND_FLF_HANDLER(opline);
 		function(result, arg1, arg2, arg3);
+	}
+	if (UNEXPECTED(EG(frameless_reentry_copies))) {
+		zend_frameless_cleanup_reentry_copies_for_handler(execute_data, opline);
 	}
 
 	FREE_OP(opline->op1_type, opline->op1.var);
@@ -3847,6 +3856,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_OBSERVE
 	{
 		zend_frameless_function_3 function = (zend_frameless_function_3)ZEND_FLF_HANDLER(opline);
 		function(result, arg1, arg2, arg3);
+	}
+	if (UNEXPECTED(EG(frameless_reentry_copies))) {
+		zend_frameless_cleanup_reentry_copies_for_handler(execute_data, opline);
 	}
 
 	FREE_OP(opline->op1_type, opline->op1.var);
@@ -4273,6 +4285,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_1_SPEC_UNUSED_
 		zend_frameless_function_1 function = (zend_frameless_function_1)ZEND_FLF_HANDLER(opline);
 		function(result, arg1);
 	}
+	if (UNEXPECTED(EG(frameless_reentry_copies))) {
+		zend_frameless_cleanup_reentry_copies_for_handler(execute_data, opline);
+	}
 	FREE_OP(opline->op1_type, opline->op1.var);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -4298,6 +4313,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_1_SPEC_OBSERVE
 	{
 		zend_frameless_function_1 function = (zend_frameless_function_1)ZEND_FLF_HANDLER(opline);
 		function(result, arg1);
+	}
+	if (UNEXPECTED(EG(frameless_reentry_copies))) {
+		zend_frameless_cleanup_reentry_copies_for_handler(execute_data, opline);
 	}
 	FREE_OP(opline->op1_type, opline->op1.var);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -38395,6 +38413,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_0_SPEC_UNUSED_
 		zend_frameless_function_0 function = (zend_frameless_function_0)ZEND_FLF_HANDLER(opline);
 		function(EX_VAR(opline->result.var));
 	}
+	if (UNEXPECTED(EG(frameless_reentry_copies))) {
+		zend_frameless_cleanup_reentry_copies_for_handler(execute_data, opline);
+	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -38414,6 +38435,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_0_SPEC_OBSERVE
 	{
 		zend_frameless_function_0 function = (zend_frameless_function_0)ZEND_FLF_HANDLER(opline);
 		function(EX_VAR(opline->result.var));
+	}
+	if (UNEXPECTED(EG(frameless_reentry_copies))) {
+		zend_frameless_cleanup_reentry_copies_for_handler(execute_data, opline);
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
