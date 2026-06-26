@@ -37,6 +37,7 @@
 
 ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	zend_autoload = zend_perform_class_autoload;
+	zend_function_autoload = zend_perform_function_autoload;
 	zend_register_default_classes();
 
 	zend_standard_class_def = register_class_stdClass();
@@ -1174,11 +1175,14 @@ ZEND_FUNCTION(enum_exists)
 ZEND_FUNCTION(function_exists)
 {
 	zend_string *name;
+	bool autoload = true;
 	bool exists;
 	zend_string *lcname;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(autoload)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_VAL(name)[0] == '\\') {
@@ -1190,6 +1194,12 @@ ZEND_FUNCTION(function_exists)
 	}
 
 	exists = zend_hash_exists(EG(function_table), lcname);
+
+	if (!exists && autoload) {
+		zend_function *fbc = zend_lookup_function(name, lcname);
+		exists = (fbc != NULL);
+	}
+
 	zend_string_release_ex(lcname, 0);
 
 	RETURN_BOOL(exists);

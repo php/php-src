@@ -3903,11 +3903,19 @@ ZEND_VM_HOT_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
 		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name+1));
 		if (UNEXPECTED(func == NULL)) {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
-		}
-		fbc = Z_FUNC_P(func);
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
+			SAVE_OPLINE();
+			fbc = zend_lookup_function(Z_STR_P(function_name), Z_STR_P(function_name+1));
+			if (UNEXPECTED(fbc == NULL)) {
+				if (EG(exception)) {
+					HANDLE_EXCEPTION();
+				}
+				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
+			}
+		} else {
+			fbc = Z_FUNC_P(func);
+			if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+				init_func_run_time_cache(&fbc->op_array);
+			}
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
@@ -4059,7 +4067,17 @@ ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 		if (func == NULL) {
 			func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
 			if (UNEXPECTED(func == NULL)) {
-				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
+				/* Autoload with the fully qualified name */
+				SAVE_OPLINE();
+				fbc = zend_lookup_function(Z_STR_P(func_name), Z_STR_P(func_name + 1));
+				if (UNEXPECTED(fbc == NULL)) {
+					if (EG(exception)) {
+						HANDLE_EXCEPTION();
+					}
+					ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
+				}
+				CACHE_PTR(opline->result.num, fbc);
+				ZEND_VM_C_GOTO(ns_fcall_init);
 			}
 		}
 		fbc = Z_FUNC_P(func);
@@ -4069,6 +4087,7 @@ ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 		CACHE_PTR(opline->result.num, fbc);
 	}
 
+ZEND_VM_C_LABEL(ns_fcall_init):
 	call = _zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, NULL);
 	call->prev_execute_data = EX(call);

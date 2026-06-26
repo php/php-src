@@ -51,6 +51,7 @@
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
+ZEND_API zend_function *(*zend_function_autoload)(zend_string *name, zend_string *lc_name);
 
 #ifdef ZEND_WIN32
 ZEND_TLS HANDLE tq_timer = NULL;
@@ -155,6 +156,7 @@ void init_executor(void) /* {{{ */
 
 	zend_hash_init(&EG(included_files), 8, NULL, NULL, 0);
 	zend_hash_init(&EG(autoload_current_classnames), 8, NULL, NULL, 0);
+	zend_hash_init(&EG(autoload_current_functionnames), 8, NULL, NULL, 0);
 
 	EG(ticks_count) = 0;
 
@@ -502,6 +504,7 @@ void shutdown_executor(void) /* {{{ */
 
 		zend_hash_destroy(&EG(included_files));
 		zend_hash_destroy(&EG(autoload_current_classnames));
+		zend_hash_destroy(&EG(autoload_current_functionnames));
 
 		zend_stack_destroy(&EG(user_error_handlers_error_reporting));
 		zend_stack_destroy(&EG(user_error_handlers));
@@ -1296,6 +1299,60 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name) /* {{{ */
 {
 	return zend_lookup_class_ex(name, NULL, 0);
+}
+/* }}} */
+
+ZEND_API zend_function *zend_lookup_function(zend_string *name, zend_string *lc_name) /* {{{ */
+{
+	zval *func = zend_hash_find(EG(function_table), lc_name);
+	if (func) {
+		zend_function *fbc = Z_FUNC_P(func);
+		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+			zend_init_func_run_time_cache(&fbc->op_array);
+		}
+		return fbc;
+	}
+
+	/* The compiler is not-reentrant. Make sure we autoload only during run-time. */
+	if (zend_is_compiling()) {
+		return NULL;
+	}
+
+	if (!zend_function_autoload) {
+		return NULL;
+	}
+
+	/* Verify function name before passing it to the autoloader. */
+	if (!ZSTR_LEN(name) || !zend_is_valid_function_name(name)) {
+		return NULL;
+	}
+
+	if (zend_hash_add_empty_element(&EG(autoload_current_functionnames), lc_name) == NULL) {
+		return NULL;
+	}
+
+	zend_string *autoload_name;
+	if (ZSTR_VAL(name)[0] == '\\') {
+		autoload_name = zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
+	} else {
+		autoload_name = zend_string_copy(name);
+	}
+
+	zend_string *previous_filename = EG(filename_override);
+	zend_long previous_lineno = EG(lineno_override);
+	EG(filename_override) = NULL;
+	EG(lineno_override) = -1;
+	zend_function *fbc = zend_function_autoload(autoload_name, lc_name);
+	EG(filename_override) = previous_filename;
+	EG(lineno_override) = previous_lineno;
+
+	zend_string_release_ex(autoload_name, 0);
+	zend_hash_del(&EG(autoload_current_functionnames), lc_name);
+
+	if (fbc && EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+		zend_init_func_run_time_cache(&fbc->op_array);
+	}
+	return fbc;
 }
 /* }}} */
 
