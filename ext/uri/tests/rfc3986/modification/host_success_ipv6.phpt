@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\Rfc3986\Uri component modification - host - IPv6 address
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

@@ -27,9 +27,7 @@ typedef struct _dom_object {
 	zend_object std;
 } dom_object;
 
-static inline dom_object *php_dom_obj_from_obj(zend_object *obj) {
-	return (dom_object*)((char*)(obj) - XtOffsetOf(dom_object, std));
-}
+#define php_dom_obj_from_obj(obj) ZEND_CONTAINER_OF(obj, dom_object, std)
 
 #define Z_DOMOBJ_P(zv)  php_dom_obj_from_obj(Z_OBJ_P((zv)))
 

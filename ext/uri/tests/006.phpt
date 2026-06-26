@@ -1,7 +1,5 @@
 --TEST--
 Test successful manual Uri child instance creation
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

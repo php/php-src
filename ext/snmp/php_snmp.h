@@ -56,9 +56,7 @@ typedef struct _php_snmp_object {
 	zend_object zo;
 } php_snmp_object;
 
-static inline php_snmp_object *php_snmp_fetch_object(zend_object *obj) {
-	return (php_snmp_object *)((char*)(obj) - XtOffsetOf(php_snmp_object, zo));
-}
+#define php_snmp_fetch_object(obj) ZEND_CONTAINER_OF(obj, php_snmp_object, zo)
 
 #define Z_SNMP_P(zv) php_snmp_fetch_object(Z_OBJ_P((zv)))
 

@@ -1,7 +1,6 @@
 --TEST--
 Test the handling large ports for the uri struct
 --EXTENSIONS--
-uri
 zend_test
 --FILE--
 <?php

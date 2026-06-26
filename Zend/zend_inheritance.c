@@ -188,9 +188,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 
 	if (ce->constructor) {
 		if (parent->constructor && UNEXPECTED(parent->constructor->common.fn_flags & ZEND_ACC_FINAL)) {
-			zend_error_noreturn(E_ERROR, "Cannot override final %s::%s() with %s::%s()",
-				ZSTR_VAL(parent->name), ZSTR_VAL(parent->constructor->common.function_name),
-				ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
+			zend_error_noreturn(E_ERROR, "Cannot override final %s::__construct() with %s::__construct()",
+				ZSTR_VAL(parent->name),
+				ZSTR_VAL(ce->name));
 		}
 		return;
 	}
@@ -1595,11 +1595,7 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 
 	ce_num = ce->num_interfaces;
 
-	if (ce->type == ZEND_INTERNAL_CLASS) {
-		ce->interfaces = (zend_class_entry **) realloc(ce->interfaces, sizeof(zend_class_entry *) * (ce_num + if_num));
-	} else {
-		ce->interfaces = (zend_class_entry **) erealloc(ce->interfaces, sizeof(zend_class_entry *) * (ce_num + if_num));
-	}
+	ce->interfaces = (zend_class_entry **) perealloc(ce->interfaces, sizeof(zend_class_entry *) * (ce_num + if_num), ce->type == ZEND_INTERNAL_CLASS);
 
 	/* Inherit the interfaces, only if they're not already inherited by the class */
 	while (if_num--) {
@@ -2234,11 +2230,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		if (ce->num_interfaces >= current_iface_num) {
-			if (ce->type == ZEND_INTERNAL_CLASS) {
-				ce->interfaces = (zend_class_entry **) realloc(ce->interfaces, sizeof(zend_class_entry *) * (++current_iface_num));
-			} else {
-				ce->interfaces = (zend_class_entry **) erealloc(ce->interfaces, sizeof(zend_class_entry *) * (++current_iface_num));
-			}
+			ce->interfaces = (zend_class_entry **) perealloc(ce->interfaces, sizeof(zend_class_entry *) * (++current_iface_num), ce->type == ZEND_INTERNAL_CLASS);
 		}
 		ce->interfaces[ce->num_interfaces++] = iface;
 
@@ -3765,6 +3757,11 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		if (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
 			resolve_delayed_variance_obligations(ce);
 		}
+		/* Delayed variance resolution can re-enter linking before the full
+		 * hierarchy is linked. See ext/opcache/tests/gh20469*.phpt. */
+		if (CG(unlinked_uses) && zend_hash_index_exists(CG(unlinked_uses), (zend_long)(uintptr_t) ce)) {
+			ce->ce_flags &= ~ZEND_ACC_CACHEABLE;
+		}
 		if (ce->ce_flags & ZEND_ACC_CACHEABLE) {
 			ce->ce_flags &= ~ZEND_ACC_CACHEABLE;
 		} else {
@@ -3772,6 +3769,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		}
 	}
 
+	bool was_cacheable = is_cacheable;
 	if (!CG(current_linking_class)) {
 		is_cacheable = 0;
 	}
@@ -3792,6 +3790,13 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zend_hash_destroy(ht);
 			FREE_HASHTABLE(ht);
 		}
+	} else if (was_cacheable && ce->inheritance_cache) {
+		/* Cacheability can be disabled after dependency tracking prepared
+		 * an inheritance-cache dependency table. Discard it here. */
+		HashTable *ht = (HashTable*)ce->inheritance_cache;
+		ce->inheritance_cache = NULL;
+		zend_hash_destroy(ht);
+		FREE_HASHTABLE(ht);
 	}
 
 	if (!orig_record_errors) {

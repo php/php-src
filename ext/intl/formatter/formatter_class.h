@@ -15,7 +15,7 @@
 #ifndef FORMATTER_CLASS_H
 #define FORMATTER_CLASS_H
 
-#include <php.h>
+#include "formatter_data.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,7 +23,6 @@ extern "C" {
 #include "intl_common.h"
 #include "intl_error.h"
 #include "intl_data.h"
-#include "formatter_data.h"
 #ifdef __cplusplus
 }
 #endif
@@ -33,9 +32,7 @@ typedef struct {
 	zend_object     zo;
 } NumberFormatter_object;
 
-static inline NumberFormatter_object *php_intl_number_format_fetch_object(zend_object *obj) {
-	return (NumberFormatter_object *)((char*)(obj) - XtOffsetOf(NumberFormatter_object, zo));
-}
+#define php_intl_number_format_fetch_object(obj) ZEND_CONTAINER_OF(obj, NumberFormatter_object, zo)
 #define Z_INTL_NUMBERFORMATTER_P(zv) php_intl_number_format_fetch_object(Z_OBJ_P(zv))
 
 #ifdef __cplusplus

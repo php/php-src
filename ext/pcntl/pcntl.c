@@ -152,6 +152,7 @@ typedef psetid_t cpu_set_t;
 #include "Zend/zend_max_execution_timer.h"
 
 #include "pcntl_arginfo.h"
+#include "pcntl_decl.h"
 static zend_class_entry *QosClass_ce;
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
@@ -675,7 +676,11 @@ PHP_FUNCTION(pcntl_exec)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (args != NULL) {
-		// TODO Check array is a list?
+		if (!zend_array_is_list(Z_ARRVAL_P(args))) {
+			zend_argument_value_error(2, "must be a list array");
+			RETURN_THROWS();
+		}
+
 		/* Build argument list */
 		SEPARATE_ARRAY(args);
 		const HashTable *args_ht = Z_ARRVAL_P(args);
@@ -1835,28 +1840,28 @@ static qos_class_t qos_enum_to_pthread(zend_enum_Pcntl_QosClass entry)
 
 static zend_object *qos_lval_to_zval(qos_class_t qos_class)
 {
-	const char *entryname;
+	int entry_id;
 	switch (qos_class)
 	{
 	case QOS_CLASS_USER_INTERACTIVE:
-		entryname = "UserInteractive";
+		entry_id = ZEND_ENUM_Pcntl_QosClass_UserInteractive;
 		break;
 	case QOS_CLASS_USER_INITIATED:
-		entryname = "UserInitiated";
+		entry_id = ZEND_ENUM_Pcntl_QosClass_UserInitiated;
 		break;
 	case QOS_CLASS_UTILITY:
-		entryname = "Utility";
+		entry_id = ZEND_ENUM_Pcntl_QosClass_Utility;
 		break;
 	case QOS_CLASS_BACKGROUND:
-		entryname = "Background";
+		entry_id = ZEND_ENUM_Pcntl_QosClass_Background;
 		break;
 	case QOS_CLASS_DEFAULT:
 	default:
-		entryname = "Default";
+		entry_id = ZEND_ENUM_Pcntl_QosClass_Default;
 		break;
 	}
 
-	return zend_enum_get_case_cstr(QosClass_ce, entryname);
+	return zend_enum_get_case_by_id(QosClass_ce, entry_id);
 }
 
 PHP_FUNCTION(pcntl_getqos_class)

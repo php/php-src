@@ -190,7 +190,7 @@ static void phpdbg_line_init(char *cmd, struct phpdbg_init_state *state) {
 
 	state->line++;
 
-	while (cmd_len > 0L && isspace(cmd[cmd_len-1])) {
+	while (cmd_len > 0L && isspace((unsigned char)cmd[cmd_len-1])) {
 		cmd_len--;
 	}
 
@@ -215,9 +215,9 @@ static void phpdbg_line_init(char *cmd, struct phpdbg_init_state *state) {
 
 		if (state->in_code) {
 			if (state->code == NULL) {
-				state->code = malloc(cmd_len + 1);
+				state->code = pemalloc(cmd_len + 1, true);
 			} else {
-				state->code = realloc(state->code, state->code_len + cmd_len + 1);
+				state->code = perealloc(state->code, state->code_len + cmd_len + 1, true);
 			}
 
 			if (state->code) {

@@ -714,6 +714,9 @@ void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 		if (Z_TYPE_P(pg_rows) == IS_ARRAY) {
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), tmp) {
 				if (!_pdo_pgsql_send_copy_data(H, tmp)) {
+					if (EG(exception)) {
+						RETURN_THROWS();
+					}
 					pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
 					PDO_HANDLE_DBH_ERR();
 					RETURN_FALSE;
@@ -736,6 +739,9 @@ void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 				tmp = iter->funcs->get_current_data(iter);
 				if (!_pdo_pgsql_send_copy_data(H, tmp)) {
 					zend_iterator_dtor(iter);
+					if (EG(exception)) {
+						RETURN_THROWS();
+					}
 					pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
 					PDO_HANDLE_DBH_ERR();
 					RETURN_FALSE;

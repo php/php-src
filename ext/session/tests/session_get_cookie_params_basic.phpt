@@ -30,7 +30,7 @@ var_dump(session_set_cookie_params([
   "domain" => "baz",
   "secure" => FALSE,
   "httponly" => FALSE,
-  "samesite" => "please"]));
+  "samesite" => "Strict"]));
 var_dump(session_get_cookie_params());
 var_dump(session_set_cookie_params([
   "secure" => TRUE,
@@ -107,7 +107,7 @@ array(7) {
   ["httponly"]=>
   bool(false)
   ["samesite"]=>
-  string(6) "please"
+  string(6) "Strict"
 }
 bool(true)
 array(7) {
@@ -124,6 +124,6 @@ array(7) {
   ["httponly"]=>
   bool(false)
   ["samesite"]=>
-  string(6) "please"
+  string(6) "Strict"
 }
 Done

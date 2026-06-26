@@ -50,6 +50,27 @@ extern PHPAPI zend_class_entry *reflection_lazy_object_ptr;
 
 PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object);
 
+/* Sets the value of a property, bypassing a set hook if defined.
+ * 'prop': The property to set
+ * 'unmangled_name': The name of the property
+ * 'cache_slot': An opaque pointer used as an internal cache. The same
+ * cache_slot can be used again with the same 'unmangled_name' and 'scope'.
+ * Must be zeroed on first use. May be NULL.
+ * 'scope': The scope from which to set the property
+ * 'object': The object to set the value on
+ * 'value': The value to set
+ */
+PHPAPI void zend_reflection_property_set_raw_value(
+		zend_property_info *prop, zend_string *unmangled_name,
+		void *cache_slot[3], zend_class_entry *scope,
+		zend_object *object, zval *value);
+
+/* Same as zend_reflection_property_set_raw_value(), but skips lazy object initialization. */
+PHPAPI void zend_reflection_property_set_raw_value_without_lazy_initialization(
+		zend_property_info *prop, zend_string *unmangled_name,
+		void *cache_slot[3], zend_class_entry *scope,
+		zend_object *object, zval *value);
+
 END_EXTERN_C()
 
 #endif /* PHP_REFLECTION_H */

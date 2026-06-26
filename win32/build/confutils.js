@@ -1494,6 +1494,9 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		ADD_FLAG("CFLAGS_PHP", "/D COMPILE_DL_" + EXT);
 	} else {
 		STDOUT.WriteLine("Enabling extension " + extname_for_printing);
+		/* Statically linked extensions share the engine's _tsrm_ls_cache symbol,
+		 * so in ZTS builds they can read the TSRMLS cache directly. */
+		cflags = "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 " + cflags;
 	}
 
 	MFO.WriteBlankLines(1);
@@ -3175,7 +3178,7 @@ function toolset_get_compiler_name(short)
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
 
 		if (version >= 1950) {
-			// skip
+			name = short ? "VS18" : "Visual C++ 2026";
 		} else if (version >= 1930) {
 			name = short ? "VS17" : "Visual C++ 2022";
 		} else if (version >= 1920) {

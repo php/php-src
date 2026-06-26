@@ -479,7 +479,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_INI_ENTRIES();
 
 	memcpy(&mysqli_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	mysqli_object_handlers.offset = XtOffsetOf(mysqli_object, zo);
+	mysqli_object_handlers.offset = offsetof(mysqli_object, zo);
 	mysqli_object_handlers.free_obj = mysqli_objects_free_storage;
 	mysqli_object_handlers.clone_obj = NULL;
 	mysqli_object_handlers.read_property = mysqli_read_property;

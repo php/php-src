@@ -4,7 +4,7 @@ Test for timelib #124: Problem with large negative timestamps
 date.timezone=UTC
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 8) echo "skip this test is for 64-bit only";
+if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 if (getenv('SKIP_ASAN')) die('skip triggers undefined behavior');
 ?>
 --FILE--

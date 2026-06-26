@@ -1,7 +1,5 @@
 --TEST--
 Test Uri getters
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

@@ -67,6 +67,8 @@
 #      include <uriparser/UriDefsUnicode.h>
 #    endif
 
+#    include <stdbool.h>
+
 /* Used to point to from empty path segments.
  * X.first and X.afterLast must be the same non-NULL value then. */
 extern const URI_CHAR * const URI_FUNC(SafeToPointTo);
@@ -77,7 +79,7 @@ void URI_FUNC(ResetUri)(URI_TYPE(Uri) * uri);
 
 int URI_FUNC(FreeUriPath)(URI_TYPE(Uri) * uri, UriMemoryManager * memory);
 
-int URI_FUNC(CompareRange)(const URI_TYPE(TextRange) * a, const URI_TYPE(TextRange) * b);
+bool URI_FUNC(RangeEquals)(const URI_TYPE(TextRange) * a, const URI_TYPE(TextRange) * b);
 
 UriBool URI_FUNC(CopyRange)(URI_TYPE(TextRange) * destRange,
                             const URI_TYPE(TextRange) * sourceRange,

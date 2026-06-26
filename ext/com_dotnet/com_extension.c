@@ -116,11 +116,11 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 		}
 
 		/* Remove leading/training white spaces on search_string */
-		while (isspace(*typelib_name)) {/* Ends on '\0' in worst case */
+		while (isspace((unsigned char)*typelib_name)) {/* Ends on '\0' in worst case */
 			typelib_name ++;
 		}
 		ptr = typelib_name + strlen(typelib_name) - 1;
-		while ((ptr != typelib_name) && isspace(*ptr)) {
+		while ((ptr != typelib_name) && isspace((unsigned char)*ptr)) {
 			*ptr = '\0';
 			ptr--;
 		}

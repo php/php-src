@@ -57,6 +57,12 @@ namespace {
         public static $_StaticProp;
         public static int $staticIntProp = 123;
 
+        /* If there's a problem with escapes in quotes in generated headers,
+         * the generated header won't compile. (tests/gh22169.phpt) */
+        public static string $doubleQuoteEscaped = "BEGIN \n\r\t\v\e\f\\\$\"\101\x41\u{41} END";
+        public static string $singleQuoteEscaped = 'BEGIN \n\r\t\v\e\f\\\$\"\101\x41\u{41} END';
+        public static string $escapeInterpolated = "begin \$ \\$ end";
+
         public int $intProp = 123;
         public ?stdClass $classProp = null;
         public stdClass|Iterator|null $classUnionProp = null;
@@ -304,6 +310,10 @@ namespace {
     function zend_object_init_with_constructor(string $class, mixed ...$args): mixed {}
 
     function zend_call_method_if_exists(object $obj, string $method, mixed ...$args): mixed {}
+
+    function zend_test_call_with_consumed_args(callable $cb, array $args, int $consumed_args): array {}
+
+    function zend_test_refcount(mixed $value): int {}
 
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}

@@ -16,6 +16,7 @@ jobs:
     name: LINUX_PPC64_ASAN_DEBUG_ZTS
     # This runs on a self-hosted runner; see https://wiki.php.net/systems/ci
     runs-on: [self-hosted, gentoo, ppc64]
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -55,6 +56,7 @@ jobs:
     if: ${{ fromJson(inputs.branch).jobs.ALPINE }}
     name: ALPINE_X64_ASAN_DEBUG_ZTS
     runs-on: ubuntu-24.04
+    timeout-minutes: 180
     container:
       image: 'alpine:3.22'
     steps:
@@ -130,6 +132,7 @@ jobs:
       matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X64.matrix }}
     name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -228,6 +231,7 @@ jobs:
       matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X32.matrix }}
     name: "LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     container:
       image: ubuntu:${{ fromJson(inputs.branch).config.ubuntu_version }}
     env:
@@ -309,6 +313,7 @@ jobs:
       matrix: ${{ fromJson(inputs.branch).jobs.MACOS.matrix }}
     name: "MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: macos-${{ matrix.arch == 'X64' && '15-intel' || fromJson(inputs.branch).jobs.MACOS.config.arm64_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -386,6 +391,7 @@ jobs:
           FIREBIRD_USER: test
           FIREBIRD_PASSWORD: test
     runs-on: ubuntu-24.04
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -567,6 +573,10 @@ jobs:
           php -r '$c = file_get_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php"); $c = str_replace("public function testSanitizeDeepNestedString()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testSanitizeDeepNestedString()", $c); file_put_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php", $c);'
           # Buggy FFI test in Symfony, see https://github.com/symfony/symfony/issues/47668
           php -r '$c = file_get_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php"); $c = str_replace("public function testCastNonTrailingCharPointer()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testCastNonTrailingCharPointer()", $c); file_put_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php", $c);'
+          # Causes massive amounts of system calls with USE_ZEND_ALLOC=0, exceeding the timeout
+          if [ -e 'src/Symfony/Component/Console/Tests/Helper/FileInputHelperTest.php' ]; then
+            php -r '$c = file_get_contents("src/Symfony/Component/Console/Tests/Helper/FileInputHelperTest.php"); $c = str_replace("public function testReadWithPasteDetectionAbortsBeyondMaxBytes()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testReadWithPasteDetectionAbortsBeyondMaxBytes()", $c); file_put_contents("src/Symfony/Component/Console/Tests/Helper/FileInputHelperTest.php", $c);'
+          fi
           export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
@@ -642,6 +652,7 @@ jobs:
           FIREBIRD_PASSWORD: test
     name: OPCACHE_VARIATION
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -705,6 +716,7 @@ jobs:
     if: ${{ fromJson(inputs.branch).jobs.MSAN }}
     name: MSAN
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -796,6 +808,7 @@ jobs:
     if: ${{ fromJson(inputs.branch).jobs.LIBMYSQLCLIENT }}
     name: LIBMYSQLCLIENT
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -827,126 +840,19 @@ jobs:
         uses: ./.github/actions/test-libmysqlclient
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-  PECL:
-    if: ${{ fromJson(inputs.branch).jobs.PECL }}
-    runs-on: ubuntu-24.04
-    steps:
-      - name: git checkout PHP
-        uses: actions/checkout@v6
-        with:
-          path: php
-          ref: ${{ fromJson(inputs.branch).ref }}
-      # Used for ccache action
-      - name: Move .github
-        run: mv php/.github .
-      - name: git checkout apcu
-        uses: actions/checkout@v6
-        with:
-          repository: krakjoe/apcu
-          path: apcu
-      - name: git checkout imagick
-        uses: actions/checkout@v6
-        with:
-          repository: Imagick/imagick
-          path: imagick
-      - name: git checkout memcached
-        uses: actions/checkout@v6
-        with:
-          repository: php-memcached-dev/php-memcached
-          path: memcached
-      - name: git checkout redis
-        if: ${{ false }}
-        uses: actions/checkout@v6
-        with:
-          repository: phpredis/phpredis
-          path: redis
-      - name: git checkout xdebug
-        uses: actions/checkout@v6
-        with:
-          repository: xdebug/xdebug
-          path: xdebug
-      - name: git checkout yaml
-        uses: actions/checkout@v6
-        with:
-          repository: php/pecl-file_formats-yaml
-          path: yaml
-      - name: apt
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            ccache \
-            libmemcached-dev \
-            imagemagick \
-            libmagickwand-dev \
-            bison \
-            re2c
-      - name: ccache
-        uses: ./.github/actions/ccache
-        with:
-          name: "${{ github.job }}"
-          php_directory: php
-      - name: build PHP
-        run: |
-          cd php
-          ./buildconf --force
-          ./configure \
-            --enable-option-checking=fatal \
-            --prefix=/opt/php \
-            --enable-cli \
-            --disable-all \
-            --enable-session \
-            --enable-werror
-          make -j$(/usr/bin/nproc)
-          sudo make install
-      - name: build apcu
-        run: |
-          cd apcu
-          /opt/php/bin/phpize
-          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
-          make -j$(/usr/bin/nproc)
-      - name: build imagick
-        run: |
-          cd imagick
-          /opt/php/bin/phpize
-          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
-          make -j$(/usr/bin/nproc)
-      - name: build memcached
-        run: |
-          cd memcached
-          /opt/php/bin/phpize
-          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
-          make -j$(/usr/bin/nproc)
-      - name: build redis
-        if: ${{ false }}
-        run: |
-          cd redis
-          /opt/php/bin/phpize
-          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
-          make -j$(/usr/bin/nproc)
-      - name: build xdebug
-        run: |
-          cd xdebug
-          /opt/php/bin/phpize
-          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
-          make -j$(/usr/bin/nproc)
-      - name: build yaml
-        run: |
-          cd yaml
-          /opt/php/bin/phpize
-          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
-          make -j$(/usr/bin/nproc)
   WINDOWS:
     if: ${{ fromJson(inputs.branch).jobs.WINDOWS }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.WINDOWS.matrix }}
     name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}${{ matrix.clang && '_CLANG' || ''}}"
-    runs-on: windows-2022
+    runs-on: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.runs_on }}
+    timeout-minutes: 180
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.5.0
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.7.1
       PHP_BUILD_CRT: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.vs_crt_version }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"

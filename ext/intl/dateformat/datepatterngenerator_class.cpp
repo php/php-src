@@ -36,7 +36,7 @@ zend_object_handlers IntlDatePatternGenerator_handlers;
 
 static zend_object *IntlDatePatternGenerator_object_clone(zend_object *object)
 {
-	IntlDatePatternGenerator_object *dtpgo_orig = php_intl_datepatterngenerator_fetch_object(object);
+	const IntlDatePatternGenerator_object *dtpgo_orig = php_intl_datepatterngenerator_fetch_object(object);
 	zend_object                        *ret_val = IntlDatePatternGenerator_ce_ptr->create_object(object->ce);
 	IntlDatePatternGenerator_object  *dtpgo_new = php_intl_datepatterngenerator_fetch_object(ret_val);
 
@@ -106,7 +106,7 @@ void dateformat_register_IntlDatePatternGenerator_class( void )
 
 	memcpy(&IntlDatePatternGenerator_handlers, &std_object_handlers,
 		sizeof IntlDatePatternGenerator_handlers);
-	IntlDatePatternGenerator_handlers.offset = XtOffsetOf(IntlDatePatternGenerator_object, zo);
+	IntlDatePatternGenerator_handlers.offset = offsetof(IntlDatePatternGenerator_object, zo);
 	IntlDatePatternGenerator_handlers.clone_obj = IntlDatePatternGenerator_object_clone;
 	IntlDatePatternGenerator_handlers.free_obj = IntlDatePatternGenerator_object_free;
 }

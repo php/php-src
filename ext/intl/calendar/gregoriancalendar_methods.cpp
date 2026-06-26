@@ -143,7 +143,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS, bool
 
 	if (variant <= 2) {
 		// From timezone and locale (0 to 2 arguments)
-		TimeZone *tz = timezone_process_timezone_argument(timezone_object, timezone_string, nullptr);
+		TimeZone *tz = timezone_process_timezone_argument(timezone_object, timezone_string, nullptr, 1);
 		if (tz == nullptr) {
 			// TODO: Exception should always occur already?
 			if (!EG(exception)) {
@@ -176,7 +176,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS, bool
 		// From date/time (3, 5 or 6 arguments)
 		GregorianCalendar *tmp;
 		for (int i = 0; i < variant; i++) {
-			ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(largs[i], hasThis() ? (i-1) : i);
+			ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(largs[i], i + 1);
 		}
 
 		if (variant == 3) {

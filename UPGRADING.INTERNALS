@@ -17,6 +17,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . ZSTR_INIT_LITERAL(), zend_string_starts_with_literal(), and
     zend_string_starts_with_literal_ci() now support strings containing NUL
     bytes. Passing non-literal char* is no longer supported.
+  . Added zend_string_equals_cstr_ci().
   . The misnamed ZVAL_IS_NULL() has been removed. Use Z_ISNULL() instead.
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
     added, given the primary flags were running out of bits.
@@ -64,6 +65,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_enum_RoundingMode parameter.
   . Added Z_PARAM_ENUM().
   . Added zend_enum_fetch_case_id().
+  . Added zend_enum_get_case_by_id().
   . ZEND_INI_GET_ADDR() is now a void* pointer instead of a char* pointer. This
     more correctly represents the generic nature of the returned pointer and
     allows to remove explicit casts, but possibly breaks pointer arithmetic
@@ -91,6 +93,35 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Functions using zend_forbid_dynamic_call() *must* be flagged with
     ZEND_ACC2_FORBID_DYN_CALLS (@forbid-dynamic-calls in stubs). In debug
     builds, failing to include that flag will lead to assertion failures.
+  . The ZEND_RESULT_CODE type has been removed. Use zend_result directly.
+  . The zend_parse_parameters_none_throw(), zend_parse_parameters_throw(),
+    and ZEND_PARSE_PARAMS_THROW have been removed due to being misleading,
+    since ZPP always throws, unless ZEND_PARSE_PARAMS_QUIET is given. Use
+    the non-throw versions.
+  . The XtOffsetOf() alias of C’s offsetof() macro has been removed. Use
+    offsetof() directly.
+  . The deprecated Z_COPYABLE(), Z_COPYABLE_P(), Z_OPT_COPYABLE(), and
+    Z_OPT_COPYABLE_P() macros have been removed. Check for IS_ARRAY directly.
+  . The deprecated Z_IMMUTABLE(), Z_IMMUTABLE_P(), Z_OPT_IMMUTABLE(), and
+    Z_OPT_IMMUTABLE_P() macros have been removed. Check for
+    IS_ARRAY && !REFCOUNTED directly.
+  . The unused Z_GC_*() macros have been removed. Use the corresponding
+    GC_*() macro on the result of Z_COUNTED().
+  . The zend_binary_zval_strcmp() and zend_binary_zval_strncmp() functions
+    have been removed, because they are unsafe by relying on the zvals
+    having a specific type. Use zend_binary_strcmp() / zend_binary_strncmp(),
+    string_compare_function() or similar instead.
+  . Added zend_fcall_info.consumed_args together with
+    zend_fci_consumed_arg(), which allows moving a selected callback argument
+    instead of copying it in zend_call_function(). Currently only a single
+    consumed argument is supported.
+  . Added ZEND_CONTAINER_OF().
+  . The OPENBASEDIR_CHECKPATH() compatibility macro has been removed, instead
+    use php_check_open_basedir() directly.
+  . Added zend_reflection_property_set_raw_value_without_lazy_initialization(),
+    zend_reflection_property_set_raw_value() to expose the functionality of
+    ReflectionProperty::setRawValueWithoutLazyInitialization() and
+    ReflectionProperty::setRawValue() to C extensions.
 
 ========================
 2. Build system changes
@@ -116,6 +147,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     . --with-pic is now --enable-pic. The old flag will result in an error.
   . Symbol HAVE_ST_BLOCKS has been removed from php_config.h (use
     HAVE_STRUCT_STAT_ST_BLOCKS).
+  . Added a new configure option --disable-apache2-conf to prevent apxs from
+    editing httpd.conf during installation.
 
 - Windows build system changes:
   . Function SETUP_OPENSSL() doesn't accept 6th argument anymore and doesn't
@@ -160,6 +193,11 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . _php_error_log() now accepts zend_string* values instead of char*.
   . _php_error_log_ex() has been removed.
   . php_mail()'s extra_cmd parameter is now a zend_string*.
+
+- ext/uri:
+  . The value parameter of the php_uri_property_handler_write callback is now
+    const zval * instead of zval *, reflecting that write handlers must
+    not modify the input zval.
 
 - ext/xml:
   . Removed the XML_ExpatVersion() libxml compatibility wrapper,

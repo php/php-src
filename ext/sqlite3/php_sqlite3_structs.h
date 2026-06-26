@@ -72,9 +72,7 @@ typedef struct _php_sqlite3_db_object  {
 	zend_object zo;
 } php_sqlite3_db_object;
 
-static inline php_sqlite3_db_object *php_sqlite3_db_from_obj(zend_object *obj) {
-	return (php_sqlite3_db_object*)((char*)(obj) - XtOffsetOf(php_sqlite3_db_object, zo));
-}
+#define php_sqlite3_db_from_obj(obj) ZEND_CONTAINER_OF(obj, php_sqlite3_db_object, zo)
 
 #define Z_SQLITE3_DB_P(zv)  php_sqlite3_db_from_obj(Z_OBJ_P((zv)))
 
@@ -101,9 +99,7 @@ struct _php_sqlite3_result_object  {
 	zend_object zo;
 };
 
-static inline php_sqlite3_result *php_sqlite3_result_from_obj(zend_object *obj) {
-	return (php_sqlite3_result*)((char*)(obj) - XtOffsetOf(php_sqlite3_result, zo));
-}
+#define php_sqlite3_result_from_obj(obj) ZEND_CONTAINER_OF(obj, php_sqlite3_result, zo)
 
 #define Z_SQLITE3_RESULT_P(zv)  php_sqlite3_result_from_obj(Z_OBJ_P((zv)))
 
@@ -119,9 +115,7 @@ struct _php_sqlite3_stmt_object  {
 	zend_object zo;
 };
 
-static inline php_sqlite3_stmt *php_sqlite3_stmt_from_obj(zend_object *obj) {
-	return (php_sqlite3_stmt*)((char*)(obj) - XtOffsetOf(php_sqlite3_stmt, zo));
-}
+#define php_sqlite3_stmt_from_obj(obj) ZEND_CONTAINER_OF(obj, php_sqlite3_stmt, zo)
 
 #define Z_SQLITE3_STMT_P(zv)  php_sqlite3_stmt_from_obj(Z_OBJ_P((zv)))
 

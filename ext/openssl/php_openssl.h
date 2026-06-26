@@ -30,8 +30,10 @@ extern zend_module_entry openssl_module_entry;
 #define PHP_OPENSSL_API_VERSION 0x10100
 #elif OPENSSL_VERSION_NUMBER < 0x30200000L
 #define PHP_OPENSSL_API_VERSION 0x30000
-#else
+#elif OPENSSL_VERSION_NUMBER < 0x30300000L
 #define PHP_OPENSSL_API_VERSION 0x30200
+#else
+#define PHP_OPENSSL_API_VERSION 0x30300
 #endif
 
 #define PHP_OPENSSL_ERR_BUFFER_SIZE 16
@@ -161,9 +163,7 @@ typedef struct _php_openssl_certificate_object {
 
 extern zend_class_entry *php_openssl_certificate_ce;
 
-static inline php_openssl_certificate_object *php_openssl_certificate_from_obj(zend_object *obj) {
-	return (php_openssl_certificate_object *)((char *)(obj) - XtOffsetOf(php_openssl_certificate_object, std));
-}
+#define php_openssl_certificate_from_obj(obj) ZEND_CONTAINER_OF(obj, php_openssl_certificate_object, std)
 
 #define Z_OPENSSL_CERTIFICATE_P(zv) php_openssl_certificate_from_obj(Z_OBJ_P(zv))
 
@@ -176,9 +176,7 @@ typedef struct _php_openssl_x509_request_object {
 	zend_object std;
 } php_openssl_request_object;
 
-static inline php_openssl_request_object *php_openssl_request_from_obj(zend_object *obj) {
-	return (php_openssl_request_object *)((char *)(obj) - XtOffsetOf(php_openssl_request_object, std));
-}
+#define php_openssl_request_from_obj(obj) ZEND_CONTAINER_OF(obj, php_openssl_request_object, std)
 
 #define Z_OPENSSL_REQUEST_P(zv) php_openssl_request_from_obj(Z_OBJ_P(zv))
 
@@ -192,14 +190,46 @@ typedef struct _php_openssl_pkey_object {
 	zend_object std;
 } php_openssl_pkey_object;
 
-static inline php_openssl_pkey_object *php_openssl_pkey_from_obj(zend_object *obj) {
-	return (php_openssl_pkey_object *)((char *)(obj) - XtOffsetOf(php_openssl_pkey_object, std));
-}
+#define php_openssl_pkey_from_obj(obj) ZEND_CONTAINER_OF(obj, php_openssl_pkey_object, std)
 
 #define Z_OPENSSL_PKEY_P(zv) php_openssl_pkey_from_obj(Z_OBJ_P(zv))
 
 bool php_openssl_is_pkey_ce(zval *val);
 void php_openssl_pkey_object_init(zval *zv, EVP_PKEY *pkey, bool is_private);
+
+/* Openssl\Psk class */
+
+/* Matches OpenSSL's PSK_MAX_PSK_LEN and PSK_MAX_IDENTITY_LEN */
+#define PHP_OPENSSL_PSK_MAX_PSK_LEN      256
+#define PHP_OPENSSL_PSK_MAX_IDENTITY_LEN 128
+
+extern zend_class_entry *php_openssl_psk_ce;
+
+bool php_openssl_is_psk_ce(zval *val);
+zend_string *php_openssl_psk_get_psk(zval *psk_zv);
+zend_string *php_openssl_psk_get_identity(zval *psk_zv);
+
+/* Openssl\Session class */
+
+#include <openssl/ssl.h>
+
+typedef struct _php_openssl_session_object {
+	SSL_SESSION *session;
+	zend_object std;
+} php_openssl_session_object;
+
+static inline php_openssl_session_object *php_openssl_session_from_obj(zend_object *obj) {
+	return (php_openssl_session_object *)((char *)(obj) - offsetof(php_openssl_session_object, std));
+}
+
+#define Z_OPENSSL_SESSION_P(zv) php_openssl_session_from_obj(Z_OBJ_P(zv))
+
+/* Extern declarations for xp_ssl.c */
+extern zend_class_entry *php_openssl_session_ce;
+
+void php_openssl_session_object_init(zval *zv, SSL_SESSION *session);
+bool php_openssl_is_session_ce(zval *val);
+SSL_SESSION *php_openssl_session_from_zval(zval *zv);
 
 #if defined(HAVE_OPENSSL_ARGON2)
 

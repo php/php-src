@@ -69,7 +69,7 @@ PHP_MINFO_FUNCTION(exif)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "EXIF Support", "enabled");
 	php_info_print_table_row(2, "Supported EXIF Version", "0220");
-	php_info_print_table_row(2, "Supported filetypes", "JPEG, TIFF");
+	php_info_print_table_row(2, "Supported filetypes", "JPEG, TIFF, HEIF, WebP");
 
 	if (USE_MBSTRING) {
 		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "enabled");
@@ -2318,13 +2318,13 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 #ifdef EXIF_DEBUG
 						php_error_docref(NULL, E_WARNING, "Found value of type single");
 #endif
-						info_value->f = php_ifd_get_float(value);
+						info_value->f = php_ifd_get_float(vptr);
 						break;
 					case TAG_FMT_DOUBLE:
 #ifdef EXIF_DEBUG
 						php_error_docref(NULL, E_WARNING, "Found value of type double");
 #endif
-						info_value->d = php_ifd_get_double(value);
+						info_value->d = php_ifd_get_double(vptr);
 						break;
 				}
 			}
@@ -3750,7 +3750,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 static void exif_process_APP1(image_info_type *ImageInfo, char *CharBuf, size_t length, size_t displacement)
 {
 	/* Check the APP1 for Exif Identifier Code */
-	static const uchar ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
+	static const uchar ExifHeader[] = {'E', 'x', 'i', 'f', 0, 0};
 	if (length <= 8 || memcmp(CharBuf+2, ExifHeader, 6)) {
 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Incorrect APP1 Exif Identifier Code");
 		return;
@@ -4445,6 +4445,53 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 	return ret;
 }
 
+static bool exif_scan_WEBP_header(image_info_type *ImageInfo, size_t riff_size)
+{
+	static const uchar ExifHeader[] = {'E', 'x', 'i', 'f', 0, 0};
+	unsigned char chunk_header[8];
+	size_t offset = 12;
+	size_t riff_end = riff_size <= ImageInfo->FileSize - 8 ? riff_size + 8 : ImageInfo->FileSize;
+
+	while (offset + 8 <= riff_end) {
+		if ((php_stream_seek(ImageInfo->infile, offset, SEEK_SET) < 0) ||
+			(exif_read_from_stream_file_looped(ImageInfo->infile, (char*)chunk_header, 8) != 8)) {
+			return false;
+		}
+
+		size_t chunk_size = php_ifd_get32u(chunk_header + 4, 0);
+		size_t payload_offset = offset + 8;
+
+		if (chunk_size > riff_end - payload_offset) {
+			return false;
+		}
+
+		if (!memcmp(chunk_header, "EXIF", 4)) {
+			size_t skip = 0;
+			bool ret = false;
+
+			if (chunk_size < 8) {
+				return false;
+			}
+
+			char *data = emalloc(chunk_size);
+			if (exif_read_from_stream_file_looped(ImageInfo->infile, data, chunk_size) == chunk_size) {
+				if (chunk_size >= sizeof(ExifHeader) + 8 && !memcmp(data, ExifHeader, sizeof(ExifHeader))) {
+					skip = sizeof(ExifHeader);
+				}
+				exif_process_TIFF_in_JPEG(ImageInfo, data + skip, chunk_size - skip, payload_offset + skip);
+				ret = true;
+			}
+			efree(data);
+			return ret;
+		}
+
+		/* RIFF chunks are word-aligned: an odd payload is followed by a pad byte. */
+		offset = payload_offset + chunk_size + (chunk_size & 1);
+	}
+
+	return false;
+}
+
 /* {{{ exif_scan_FILE_header
  * Parse the marker stream until SOS or EOI is seen; */
 static bool exif_scan_FILE_header(image_info_type *ImageInfo)
@@ -4519,6 +4566,17 @@ static bool exif_scan_FILE_header(image_info_type *ImageInfo)
 				return true;
 			} else {
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid HEIF file");
+				return false;
+			}
+		} else if ((ImageInfo->FileSize >= 16) &&
+			   (!memcmp(file_header, "RIFF", 4)) &&
+			   (exif_read_from_stream_file_looped(ImageInfo->infile, (char*)(file_header + 8), 4) == 4) &&
+			   (!memcmp(file_header + 8, "WEBP", 4))) {
+			if (exif_scan_WEBP_header(ImageInfo, php_ifd_get32u(file_header + 4, 0))) {
+				ImageInfo->FileType = IMAGE_FILETYPE_WEBP;
+				return true;
+			} else {
+				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid WebP file");
 				return false;
 			}
 		} else {

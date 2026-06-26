@@ -100,9 +100,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(ldap)
 #endif
 
-static inline ldap_linkdata *ldap_link_from_obj(zend_object *obj) {
-	return (ldap_linkdata *)((char *)(obj) - XtOffsetOf(ldap_linkdata, std));
-}
+#define ldap_link_from_obj(obj) ZEND_CONTAINER_OF(obj, ldap_linkdata, std)
 
 #define Z_LDAP_LINK_P(zv) ldap_link_from_obj(Z_OBJ_P(zv))
 
@@ -147,9 +145,7 @@ static void ldap_link_free_obj(zend_object *obj)
 	zend_object_std_dtor(&ld->std);
 }
 
-static inline ldap_resultdata *ldap_result_from_obj(zend_object *obj) {
-	return (ldap_resultdata *)((char *)(obj) - XtOffsetOf(ldap_resultdata, std));
-}
+#define ldap_result_from_obj(obj) ZEND_CONTAINER_OF(obj, ldap_resultdata, std)
 
 #define Z_LDAP_RESULT_P(zv) ldap_result_from_obj(Z_OBJ_P(zv))
 
@@ -184,9 +180,7 @@ static void ldap_result_free_obj(zend_object *obj)
 	zend_object_std_dtor(&result->std);
 }
 
-static inline ldap_result_entry *ldap_result_entry_from_obj(zend_object *obj) {
-	return (ldap_result_entry *)((char *)(obj) - XtOffsetOf(ldap_result_entry, std));
-}
+#define ldap_result_entry_from_obj(obj) ZEND_CONTAINER_OF(obj, ldap_result_entry, std)
 
 #define Z_LDAP_RESULT_ENTRY_P(zv) ldap_result_entry_from_obj(Z_OBJ_P(zv))
 
@@ -271,7 +265,7 @@ static zend_string* php_ldap_try_get_ldap_value_from_zval(zval *zv) {
 
 /* The char pointer MUST refer to the char* of a zend_string struct */
 static void php_ldap_zend_string_release_from_char_pointer(char *ptr) {
-	zend_string_release((zend_string*) (ptr - XtOffsetOf(zend_string, val)));
+	zend_string_release((zend_string*) (ptr - offsetof(zend_string, val)));
 }
 
 /* {{{ Parse controls from and to arrays */
@@ -583,6 +577,7 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 
 			uint32_t num_keys = zend_hash_num_elements(Z_ARRVAL_P(val));
 			sort_keys = safe_emalloc((num_keys+1), sizeof(LDAPSortKey*), 0);
+			memset(sort_keys, 0, (num_keys+1) * sizeof(LDAPSortKey*));
 			tmpstrings1 = safe_emalloc(num_keys, sizeof(zend_string*), 0);
 			tmpstrings2 = safe_emalloc(num_keys, sizeof(zend_string*), 0);
 			num_tmpstrings1 = 0;
@@ -877,7 +872,7 @@ PHP_MINIT_FUNCTION(ldap)
 	ldap_link_ce->default_object_handlers = &ldap_link_object_handlers;
 
 	memcpy(&ldap_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	ldap_link_object_handlers.offset = XtOffsetOf(ldap_linkdata, std);
+	ldap_link_object_handlers.offset = offsetof(ldap_linkdata, std);
 	ldap_link_object_handlers.free_obj = ldap_link_free_obj;
 	ldap_link_object_handlers.get_constructor = ldap_link_get_constructor;
 	ldap_link_object_handlers.clone_obj = NULL;
@@ -888,7 +883,7 @@ PHP_MINIT_FUNCTION(ldap)
 	ldap_result_ce->default_object_handlers = &ldap_result_object_handlers;
 
 	memcpy(&ldap_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	ldap_result_object_handlers.offset = XtOffsetOf(ldap_resultdata, std);
+	ldap_result_object_handlers.offset = offsetof(ldap_resultdata, std);
 	ldap_result_object_handlers.free_obj = ldap_result_free_obj;
 	ldap_result_object_handlers.get_constructor = ldap_result_get_constructor;
 	ldap_result_object_handlers.clone_obj = NULL;
@@ -899,7 +894,7 @@ PHP_MINIT_FUNCTION(ldap)
 	ldap_result_entry_ce->default_object_handlers = &ldap_result_entry_object_handlers;
 
 	memcpy(&ldap_result_entry_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	ldap_result_entry_object_handlers.offset = XtOffsetOf(ldap_result_entry, std);
+	ldap_result_entry_object_handlers.offset = offsetof(ldap_result_entry, std);
 	ldap_result_entry_object_handlers.free_obj = ldap_result_entry_free_obj;
 	ldap_result_entry_object_handlers.get_constructor = ldap_result_entry_get_constructor;
 	ldap_result_entry_object_handlers.clone_obj = NULL;

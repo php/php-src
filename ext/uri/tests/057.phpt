@@ -1,7 +1,5 @@
 --TEST--
 Test assigning errors by reference fails
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

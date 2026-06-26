@@ -121,7 +121,7 @@ static void timezone_throw_exception_with_call_location(const char *msg, const c
 /* {{{ timezone_process_timezone_argument
  * TimeZone argument processor. outside_error may be nullptr (for static functions/constructors) */
 U_CFUNC TimeZone *timezone_process_timezone_argument(
-	zend_object *timezone_object, zend_string *timezone_string, intl_error *outside_error)
+	zend_object *timezone_object, zend_string *timezone_string, intl_error *outside_error, uint32_t arg_num)
 {
 	std::unique_ptr<TimeZone>	timeZone;
 	bool free_string = false;
@@ -160,8 +160,9 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(
 				free_string = true;
 			} else {
 				if (!EG(exception)) {
-					// TODO Proper type error
-					zend_throw_error(nullptr, "Object of class %s could not be converted to string", ZSTR_VAL(timezone_object->ce->name));
+					zend_argument_type_error(arg_num,
+						"Object of class %s could not be converted to string",
+						ZSTR_VAL(timezone_object->ce->name));
 				}
 				return nullptr;
 			}
@@ -206,7 +207,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(
 /* {{{ clone handler for TimeZone */
 static zend_object *TimeZone_clone_obj(zend_object *object)
 {
-	TimeZone_object *to_orig = php_intl_timezone_fetch_object(object);
+	const TimeZone_object *to_orig = php_intl_timezone_fetch_object(object);
 	zend_object     *ret_val = TimeZone_ce_ptr->create_object(object->ce);
 	TimeZone_object  *to_new = php_intl_timezone_fetch_object(ret_val);
 
@@ -291,7 +292,7 @@ static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
 	zend_hash_str_update(debug_info, "id", sizeof("id") - 1, &zv);
 
 	int32_t rawOffset, dstOffset;
-	UDate now = Calendar::getNow();
+	const UDate now = Calendar::getNow();
 	tz->getOffset(now, false, rawOffset, dstOffset, uec);
 	if (U_FAILURE(uec)) {
 		return debug_info;
@@ -357,7 +358,7 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 
 	memcpy(&TimeZone_handlers, &std_object_handlers,
 		sizeof TimeZone_handlers);
-	TimeZone_handlers.offset = XtOffsetOf(TimeZone_object, zo);
+	TimeZone_handlers.offset = offsetof(TimeZone_object, zo);
 	TimeZone_handlers.clone_obj = TimeZone_clone_obj;
 	TimeZone_handlers.compare = TimeZone_compare_objects;
 	TimeZone_handlers.get_debug_info = TimeZone_get_debug_info;

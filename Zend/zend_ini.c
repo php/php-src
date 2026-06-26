@@ -561,6 +561,11 @@ ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
 
 ZEND_API bool zend_ini_parse_bool(const zend_string *str)
 {
+	/* May happen if an unknown INI setting is queried via zend_ini_bool_literal(),
+	 * as zend_ini_str() would return NULL */
+	if (UNEXPECTED(str == NULL)) {
+		return false;
+	}
 	if (zend_string_equals_literal_ci(str, "true")
 			|| zend_string_equals_literal_ci(str, "yes")
 			|| zend_string_equals_literal_ci(str, "on")
@@ -584,7 +589,7 @@ static const char *zend_ini_consume_quantity_prefix(const char *const digits, co
 		++digits_consumed;
 	}
 
-	if (digits_consumed[0] == '0' && !isdigit(digits_consumed[1])) {
+	if (digits_consumed[0] == '0' && !isdigit((unsigned char)digits_consumed[1])) {
 		/* Value is just 0 */
 		if ((digits_consumed+1) == str_end) {
 			return digits_consumed;
@@ -642,7 +647,7 @@ static zend_ulong zend_ini_parse_quantity_internal(const zend_string *value, zen
 	}
 
 	/* if there is no digit after +/- */
-	if (!isdigit(digits[0])) {
+	if (!isdigit((unsigned char)digits[0])) {
 		/* Escape the string to avoid null bytes and to make non-printable chars
 		 * visible */
 		smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
@@ -656,7 +661,7 @@ static zend_ulong zend_ini_parse_quantity_internal(const zend_string *value, zen
 	}
 
 	int base = 0;
-	if (digits[0] == '0' && !isdigit(digits[1])) {
+	if (digits[0] == '0' && !isdigit((unsigned char)digits[1])) {
 		/* Value is just 0 */
 		if ((digits+1) == str_end) {
 			*errstr = NULL;

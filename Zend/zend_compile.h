@@ -368,7 +368,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_USES_THIS               (1 << 17) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* call through user function trampoline. e.g.            |     |     |     */
-/* __call, __callstatic                                   |     |     |     */
+/* __call, __callStatic                                   |     |     |     */
 #define ZEND_ACC_CALL_VIA_TRAMPOLINE     (1 << 18) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* disable inline caching                                 |     |     |     */
@@ -481,7 +481,7 @@ typedef struct _zend_property_info {
 #define OBJ_PROP_NUM(obj, num) \
 	(&(obj)->properties_table[(num)])
 #define OBJ_PROP_TO_OFFSET(num) \
-	((uint32_t)(XtOffsetOf(zend_object, properties_table) + sizeof(zval) * (num)))
+	((uint32_t)(offsetof(zend_object, properties_table) + sizeof(zval) * (num)))
 #define OBJ_PROP_TO_NUM(offset) \
 	(((offset) - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 #define OBJ_PROP_SLOT_TO_OFFSET(obj, slot) \
@@ -1249,10 +1249,18 @@ END_EXTERN_C()
 #define ZEND_UNSET_FUNC_NAME        "__unset"
 #define ZEND_ISSET_FUNC_NAME        "__isset"
 #define ZEND_CALL_FUNC_NAME         "__call"
-#define ZEND_CALLSTATIC_FUNC_NAME   "__callstatic"
-#define ZEND_TOSTRING_FUNC_NAME     "__tostring"
+#define ZEND_CALLSTATIC_FUNC_NAME   "__callStatic"
+#define ZEND_CALLSTATIC_FUNC_LCNAME "__callstatic"
+#define ZEND_TOSTRING_FUNC_NAME     "__toString"
+#define ZEND_TOSTRING_FUNC_LCNAME   "__tostring"
 #define ZEND_INVOKE_FUNC_NAME       "__invoke"
-#define ZEND_DEBUGINFO_FUNC_NAME    "__debuginfo"
+#define ZEND_DEBUGINFO_FUNC_NAME    "__debugInfo"
+#define ZEND_DEBUGINFO_FUNC_LCNAME  "__debuginfo"
+#define ZEND_SLEEP_FUNC_NAME        "__sleep"
+#define ZEND_WAKEUP_FUNC_NAME       "__wakeup"
+#define ZEND_SERIALIZE_FUNC_NAME    "__serialize"
+#define ZEND_UNSERIALIZE_FUNC_NAME  "__unserialize"
+#define ZEND_SET_STATE_FUNC_NAME    "__set_state"
 
 /* The following constants may be combined in CG(compiler_options)
  * to change the default compiler behavior */

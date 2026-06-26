@@ -61,7 +61,7 @@ PHP_FUNCTION(openlog)
 	size_t ident_len;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_STRING(ident, ident_len)
+		Z_PARAM_PATH(ident, ident_len)
 		Z_PARAM_LONG(option)
 		Z_PARAM_LONG(facility)
 	ZEND_PARSE_PARAMETERS_END();

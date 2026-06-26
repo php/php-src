@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_zip.stub.php instead.
- * Stub hash: bf6706496639628a3287d0026f68f57ecebc4a55 */
+ * Stub hash: 206d9be6640ee7e94d68d7e075ab61bf3188cab3 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -45,8 +45,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_ZipArchive_open,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ZipArchive_openString, 0, 1, MAY_BE_BOOL|MAY_BE_LONG)
-	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ZipArchive_openString, 0, 0, MAY_BE_BOOL|MAY_BE_LONG)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, data, IS_STRING, 0, "\'\'")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_setPassword, 0, 1, _IS_BOOL, 0)
@@ -56,7 +57,17 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_close, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ZipArchive_closeString, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_count, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive___serialize, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive___unserialize, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_getStatusString, 0, 0, IS_STRING, 0)
@@ -320,7 +331,10 @@ ZEND_METHOD(ZipArchive, open);
 ZEND_METHOD(ZipArchive, openString);
 ZEND_METHOD(ZipArchive, setPassword);
 ZEND_METHOD(ZipArchive, close);
+ZEND_METHOD(ZipArchive, closeString);
 ZEND_METHOD(ZipArchive, count);
+ZEND_METHOD(ZipArchive, __serialize);
+ZEND_METHOD(ZipArchive, __unserialize);
 ZEND_METHOD(ZipArchive, getStatusString);
 ZEND_METHOD(ZipArchive, clearError);
 ZEND_METHOD(ZipArchive, addEmptyDir);
@@ -399,7 +413,10 @@ static const zend_function_entry class_ZipArchive_methods[] = {
 	ZEND_ME(ZipArchive, openString, arginfo_class_ZipArchive_openString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, setPassword, arginfo_class_ZipArchive_setPassword, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, close, arginfo_class_ZipArchive_close, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, closeString, arginfo_class_ZipArchive_closeString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, count, arginfo_class_ZipArchive_count, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, __serialize, arginfo_class_ZipArchive___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, __unserialize, arginfo_class_ZipArchive___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, getStatusString, arginfo_class_ZipArchive_getStatusString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, clearError, arginfo_class_ZipArchive_clearError, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, addEmptyDir, arginfo_class_ZipArchive_addEmptyDir, ZEND_ACC_PUBLIC)

@@ -199,7 +199,7 @@ static void _mysqlnd_efree(void *ptr MYSQLND_MEM_D)
 
 #if PHP_DEBUG
 	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
+		const char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
 		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
 	}
 #endif
@@ -230,7 +230,7 @@ static void _mysqlnd_pefree(void *ptr, bool persistent MYSQLND_MEM_D)
 
 #if PHP_DEBUG
 	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
+		const char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
 		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
 	}
 #endif
@@ -262,7 +262,7 @@ static char * _mysqlnd_pememdup(const char * const ptr, size_t length, bool pers
 
 #if PHP_DEBUG
 	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
+		const char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
 		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
 	}
 #endif
@@ -293,7 +293,7 @@ static char * _mysqlnd_pestrndup(const char * const ptr, size_t length, bool per
 
 #if PHP_DEBUG
 	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
+		const char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
 		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
 	}
 #endif
@@ -334,7 +334,7 @@ static char * _mysqlnd_pestrdup(const char * const ptr, bool persistent MYSQLND_
 	TRACE_ALLOC_ENTER(mysqlnd_pestrdup_name);
 #if PHP_DEBUG
 	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
+		const char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
 		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
 	}
 #endif

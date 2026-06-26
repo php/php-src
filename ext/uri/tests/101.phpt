@@ -1,7 +1,6 @@
 --TEST--
 Test the Lexbor-based URI parser
 --EXTENSIONS--
-uri
 zend_test
 --FILE--
 <?php

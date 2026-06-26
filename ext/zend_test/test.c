@@ -39,6 +39,7 @@
 #include "zend_mm_custom_handlers.h"
 #include "ext/uri/php_uri.h"
 #include "zend_observer.h"
+#include "test_decl.h"
 
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
@@ -543,13 +544,86 @@ static ZEND_FUNCTION(zend_call_method_if_exists)
 		}
 		RETURN_NULL();
 	}
+	if (Z_TYPE_P(return_value) == IS_REFERENCE) {
+		zend_unwrap_reference(return_value);
+	}
+}
+
+static ZEND_FUNCTION(zend_test_call_with_consumed_args)
+{
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	zval *args;
+	zend_long consumed_args;
+	zval retval;
+	uint32_t actual_consumed_args = 0;
+	uint32_t i;
+	zend_result call_result;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_ARRAY(args)
+		Z_PARAM_LONG(consumed_args)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(consumed_args < 0 || consumed_args > UINT32_MAX)) {
+		zend_argument_value_error(3, "must be between 0 and 4294967295");
+		RETURN_THROWS();
+	}
+
+	zend_fcall_info_args(&fci, args);
+
+	ZVAL_UNDEF(&retval);
+	fci.retval = &retval;
+	fci.consumed_args = (uint32_t) consumed_args;
+
+	call_result = zend_call_function(&fci, &fcc);
+
+	for (i = 0; i < fci.param_count && i < 32; i++) {
+		if (Z_ISUNDEF(fci.params[i])) {
+			actual_consumed_args |= (1u << i);
+		}
+	}
+
+	zend_fcall_info_args_clear(&fci, true);
+
+	if (call_result == FAILURE || EG(exception)) {
+		if (!Z_ISUNDEF(retval)) {
+			zval_ptr_dtor(&retval);
+		}
+		RETURN_THROWS();
+	}
+
+	array_init(return_value);
+	add_assoc_long(return_value, "consumed_args", actual_consumed_args);
+
+	if (Z_ISUNDEF(retval)) {
+		add_assoc_null(return_value, "retval");
+	} else {
+		add_assoc_zval(return_value, "retval", &retval);
+	}
+}
+
+static ZEND_FUNCTION(zend_test_refcount)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_REFCOUNTED_P(value)) {
+		RETURN_LONG(-1);
+	}
+
+	RETURN_LONG(Z_REFCOUNT_P(value));
 }
 
 static ZEND_FUNCTION(zend_get_unit_enum)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_OBJ_COPY(zend_enum_get_case_cstr(zend_test_unit_enum, "Foo"));
+	RETURN_OBJ_COPY(zend_enum_get_case_by_id(zend_test_unit_enum, ZEND_ENUM_ZendTestUnitEnum_Foo));
 }
 
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity)
@@ -1044,7 +1118,7 @@ static zend_object *zend_test_class_new(zend_class_entry *class_type)
 
 static void zend_test_class_free_obj(zend_object *object)
 {
-	zend_test_object *intern = (zend_test_object*)((char*)object - XtOffsetOf(zend_test_object, std));
+	zend_test_object *intern = ZEND_CONTAINER_OF(object, zend_test_object, std);
 
 	if (intern->tmp_method) {
 		zend_internal_function *func = intern->tmp_method;
@@ -1059,7 +1133,7 @@ static void zend_test_class_free_obj(zend_object *object)
 
 static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key)
 {
-	zend_test_object *intern = (zend_test_object*)((char*)(*object) - XtOffsetOf(zend_test_object, std));
+	zend_test_object *intern = ZEND_CONTAINER_OF(*object, zend_test_object, std);
 
 	if (zend_string_equals_literal_ci(name, "test")) {
 		zend_internal_function *fptr;
@@ -1526,7 +1600,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
 	zend_test_class_handlers.clone_obj = NULL;
 	zend_test_class_handlers.free_obj = zend_test_class_free_obj;
-	zend_test_class_handlers.offset = XtOffsetOf(zend_test_object, std);
+	zend_test_class_handlers.offset = offsetof(zend_test_object, std);
 
 	zend_test_gen_stub_flag_compatibility_test = register_class_ZendTestGenStubFlagCompatibilityTest();
 

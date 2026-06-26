@@ -43,7 +43,7 @@ PHPAPI PHP_FUNCTION(dl)
 	size_t filename_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(filename, filename_len)
+		Z_PARAM_PATH(filename, filename_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PG(enable_dl)) {
@@ -91,7 +91,7 @@ PHPAPI void *php_load_shlib(const char *path, char **errp)
 			size_t i = strlen(err);
 			(*errp)=estrdup(err);
 			php_win32_error_msg_free(err);
-			while (i > 0 && isspace((*errp)[i-1])) { (*errp)[i-1] = '\0'; i--; }
+			while (i > 0 && isspace((unsigned char)(*errp)[i-1])) { (*errp)[i-1] = '\0'; i--; }
 		} else {
 			(*errp) = estrdup("<No message>");
 		}

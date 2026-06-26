@@ -457,7 +457,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , const char* t
 		efree( mod_loc_name);
 	}
 
-	tag_value->len = strlen(tag_value->val);
+	tag_value->len = buflen;
 	return tag_value;
 }
 /* }}} */
@@ -736,7 +736,7 @@ U_CFUNC PHP_FUNCTION( locale_get_keywords )
 		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
+	INTL_CHECK_LOCALE_LEN(loc_name_len);
 
 	if(loc_name_len == 0) {
 		loc_name = (char *)intl_locale_get_default();
@@ -1127,7 +1127,7 @@ U_CFUNC PHP_FUNCTION(locale_parse)
 		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
+	INTL_CHECK_LOCALE_LEN(loc_name_len);
 
 	if(loc_name_len == 0) {
 		loc_name = (char *)intl_locale_get_default();
@@ -1217,7 +1217,7 @@ static int strToMatch(const char* str ,char *retstr)
 			if( *str == '-' ){
 				*retstr =  '_';
 			} else {
-				*retstr = tolower(*str);
+				*retstr = tolower((unsigned char)*str);
 			}
 				str++;
 				retstr++;
@@ -1318,7 +1318,7 @@ U_CFUNC PHP_FUNCTION(locale_filter_matches)
 
 		if( token && (token==cur_lang_tag) ){
 			/* check if the char. after match is SEPARATOR */
-			chrcheck = token + (strlen(cur_loc_range));
+			chrcheck = token + can_loc_range->len;
 			if( isIDSeparator(*chrcheck) || isKeywordSeparator(*chrcheck) || isEndOfTag(*chrcheck) ){
 				efree( cur_lang_tag );
 				efree( cur_loc_range );
@@ -1350,14 +1350,14 @@ U_CFUNC PHP_FUNCTION(locale_filter_matches)
 	} /* end of if isCanonical */
 	else{
 		/* Convert to lower case for case-insensitive comparison */
-		cur_lang_tag = reinterpret_cast<char *>(ecalloc( 1, strlen(lang_tag ) + 1));
+		cur_lang_tag = reinterpret_cast<char *>(ecalloc(1, lang_tag_len + 1));
 
 		result = strToMatch( lang_tag , cur_lang_tag);
 		if( result == 0) {
 			efree( cur_lang_tag );
 			RETURN_FALSE;
 		}
-		cur_loc_range = reinterpret_cast<char *>(ecalloc( 1, strlen(loc_range ) + 1));
+		cur_loc_range = reinterpret_cast<char *>(ecalloc(1, loc_range_len + 1));
 		result = strToMatch( loc_range , cur_loc_range );
 		if( result == 0) {
 			efree( cur_lang_tag );
@@ -1370,7 +1370,7 @@ U_CFUNC PHP_FUNCTION(locale_filter_matches)
 
 		if( token && (token==cur_lang_tag) ){
 			/* check if the char. after match is SEPARATOR */
-			chrcheck = token + (strlen(cur_loc_range));
+			chrcheck = token + loc_range_len;
 			if( isIDSeparator(*chrcheck) || isEndOfTag(*chrcheck) ){
 				efree( cur_lang_tag );
 				efree( cur_loc_range );
@@ -1435,14 +1435,15 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 			zend_argument_value_error(2, "must not contain any null bytes");
 			LOOKUP_CLEAN_RETURN(NULL);
 		}
-		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
-		result = strToMatch(Z_STRVAL_P(ele_value), cur_arr[cur_arr_len*2]);
+		i = cur_arr_len*2;
+		cur_arr[i] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
+		cur_arr_len++;
+		result = strToMatch(Z_STRVAL_P(ele_value), cur_arr[i]);
 		if(result == 0) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "unable to canonicalize lang_tag");
 			LOOKUP_CLEAN_RETURN(NULL);
 		}
-		cur_arr[cur_arr_len*2+1] = Z_STRVAL_P(ele_value);
-		cur_arr_len++ ;
+		cur_arr[i+1] = Z_STRVAL_P(ele_value);
 	} ZEND_HASH_FOREACH_END(); /* end of for */
 
 	/* Canonicalize array elements */
@@ -1562,6 +1563,15 @@ U_CFUNC PHP_FUNCTION(locale_lookup)
 	}
 
 	result_str = lookup_loc_range(loc_range, hash_arr, boolCanonical);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+	if (U_FAILURE(intl_error_get_code(NULL))) {
+		if (result_str) {
+			zend_string_release_ex(result_str, 0);
+		}
+		RETURN_NULL();
+	}
 	if(result_str == NULL || ZSTR_VAL(result_str)[0] == '\0') {
 		if( fallback_loc_str ) {
 			result_str = zend_string_copy(fallback_loc_str);
@@ -1650,7 +1660,7 @@ U_CFUNC PHP_FUNCTION(locale_add_likely_subtags)
 		locale = (char *)intl_locale_get_default();
 	}
 
-	int32_t maximized_locale_len = uloc_addLikelySubtags(locale, maximized_locale, sizeof(maximized_locale), &status);
+	const int32_t maximized_locale_len = uloc_addLikelySubtags(locale, maximized_locale, sizeof(maximized_locale), &status);
 	INTL_CHECK_STATUS(status, "invalid locale");
 	if (maximized_locale_len < 0) {
 		RETURN_FALSE;
@@ -1673,7 +1683,7 @@ U_CFUNC PHP_FUNCTION(locale_minimize_subtags)
 		locale = (char *)intl_locale_get_default();
 	}
 
-	int32_t minimized_locale_len = uloc_minimizeSubtags(locale, minimized_locale, sizeof(minimized_locale), &status);
+	const int32_t minimized_locale_len = uloc_minimizeSubtags(locale, minimized_locale, sizeof(minimized_locale), &status);
 	INTL_CHECK_STATUS(status, "invalid locale");
 	if (minimized_locale_len < 0) {
 		RETURN_FALSE;

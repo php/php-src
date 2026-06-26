@@ -1,5 +1,5 @@
 /* This is a generated file, edit user_filters.stub.php instead.
- * Stub hash: 593afbcb51bb35207b93ac7556b92ac845043116 */
+ * Stub hash: 01be6d52377ecd1940c14e3d508df28a70456c58 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_filter, 0, 4, IS_LONG, 0)
 	ZEND_ARG_INFO(0, in)
@@ -8,9 +8,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_
 	ZEND_ARG_TYPE_INFO(0, closing, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_seek, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_seek, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, whence, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, chain, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_onCreate, 0, 0, _IS_BOOL, 0)

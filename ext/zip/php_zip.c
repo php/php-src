@@ -25,6 +25,7 @@
 #include "ext/standard/php_filestat.h"
 #include "zend_attributes.h"
 #include "zend_interfaces.h"
+#include "zend_exceptions.h"
 #include "php_zip.h"
 #include "php_zip_arginfo.h"
 
@@ -309,11 +310,15 @@ static zend_result php_zip_add_file(ze_zip_object *obj, const char *filename, si
 		}
 		flags ^= ZIP_FL_OPEN_FILE_NOW;
 		zs = zip_source_filep(obj->za, fd, offset_start, offset_len);
+		if (!zs) {
+			fclose(fd);
+			return FAILURE;
+		}
 	} else {
 		zs = zip_source_file(obj->za, resolved_path, offset_start, offset_len);
-	}
-	if (!zs) {
-		return FAILURE;
+		if (!zs) {
+			return FAILURE;
+		}
 	}
 	/* Replace */
 	if (replace >= 0) {
@@ -573,8 +578,12 @@ static char * php_zipobj_get_zip_comment(ze_zip_object *obj, int *len) /* {{{ */
 }
 /* }}} */
 
-/* Close and free the zip_t */
-static bool php_zipobj_close(ze_zip_object *obj) /* {{{ */
+/* Close and free the zip_t. If the archive was opened as a string, the
+ * final contents of the archive will be assigned to *out_str and that
+ * string will afterwards be owned by the caller.
+ *
+ * If out_str is NULL, the final string contents, if any, will be discarded. */
+static bool php_zipobj_close(ze_zip_object *obj, zend_string **out_str) /* {{{ */
 {
 	struct zip *intern = obj->za;
 	bool success = false;
@@ -606,7 +615,19 @@ static bool php_zipobj_close(ze_zip_object *obj) /* {{{ */
 		obj->filename_len = 0;
 	}
 
+	if (obj->out_str) {
+		if (out_str) {
+			*out_str = obj->out_str;
+		} else {
+			zend_string_release(obj->out_str);
+		}
+		obj->out_str = NULL;
+	} else {
+		ZEND_ASSERT(!out_str);
+	}
+
 	obj->za = NULL;
+	obj->from_string = false;
 	return success;
 }
 /* }}} */
@@ -781,7 +802,10 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 			if ((path_len + namelist_len + 1) >= MAXPATHLEN) {
 				php_error_docref(NULL, E_WARNING, "add_path string too long (max: %u, %zu given)",
 						MAXPATHLEN - 1, (path_len + namelist_len + 1));
-				zend_string_release_ex(namelist[i], false);
+				/* The loop isn't continued, so all remaining file names must get freed. */
+				for (; i < files_cnt; i++) {
+					zend_string_release_ex(namelist[i], false);
+				}
 				break;
 			}
 
@@ -1060,7 +1084,7 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 {
 	ze_zip_object * intern = php_zip_fetch_object(object);
 
-	php_zipobj_close(intern);
+	php_zipobj_close(intern, NULL);
 
 #ifdef HAVE_PROGRESS_CALLBACK
 	/* if not properly called by libzip */
@@ -1467,7 +1491,7 @@ PHP_METHOD(ZipArchive, open)
 	}
 
 	/* If we already have an opened zip, free it */
-	php_zipobj_close(ze_obj);
+	php_zipobj_close(ze_obj, NULL);
 
 	/* open for write without option to empty the archive */
 	if ((flags & (ZIP_TRUNCATE | ZIP_RDONLY)) == 0) {
@@ -1491,28 +1515,34 @@ PHP_METHOD(ZipArchive, open)
 	ze_obj->filename = resolved_path;
 	ze_obj->filename_len = strlen(resolved_path);
 	ze_obj->za = intern;
+	ze_obj->from_string = false;
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ Create new read-only zip using given string */
+/* {{{ Create new zip from a string, or a create an empty zip to be saved to a string */
 PHP_METHOD(ZipArchive, openString)
 {
-	zend_string *buffer;
+	zend_string *buffer = NULL;
+	zend_long flags = 0;
 	zval *self = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &buffer) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|Sl", &buffer, &flags) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	if (!buffer) {
+		buffer = ZSTR_EMPTY_ALLOC();
 	}
 
 	ze_zip_object *ze_obj = Z_ZIP_P(self);
 
-	php_zipobj_close(ze_obj);
+	php_zipobj_close(ze_obj, NULL);
 
 	zip_error_t err;
 	zip_error_init(&err);
 
-	zip_source_t * zip_source = php_zip_create_string_source(buffer, NULL, &err);
+	zip_source_t * zip_source = php_zip_create_string_source(buffer, &ze_obj->out_str, &err);
 
 	if (!zip_source) {
 		ze_obj->err_zip = zip_error_code_zip(&err);
@@ -1521,7 +1551,7 @@ PHP_METHOD(ZipArchive, openString)
 		RETURN_LONG(ze_obj->err_zip);
 	}
 
-	struct zip *intern = zip_open_from_source(zip_source, ZIP_RDONLY, &err);
+	struct zip *intern = zip_open_from_source(zip_source, flags, &err);
 	if (!intern) {
 		ze_obj->err_zip = zip_error_code_zip(&err);
 		ze_obj->err_sys = zip_error_code_system(&err);
@@ -1530,6 +1560,7 @@ PHP_METHOD(ZipArchive, openString)
 		RETURN_LONG(ze_obj->err_zip);
 	}
 
+	ze_obj->from_string = true;
 	ze_obj->za = intern;
 	zip_error_fini(&err);
 	RETURN_TRUE;
@@ -1568,7 +1599,34 @@ PHP_METHOD(ZipArchive, close)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	RETURN_BOOL(php_zipobj_close(Z_ZIP_P(self)));
+	RETURN_BOOL(php_zipobj_close(Z_ZIP_P(self), NULL));
+}
+/* }}} */
+
+/* {{{ close the zip archive and get the result as a string */
+PHP_METHOD(ZipArchive, closeString)
+{
+	struct zip *intern;
+	zval *self = ZEND_THIS;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZIP_FROM_OBJECT(intern, self);
+
+	if (!Z_ZIP_P(self)->from_string) {
+		zend_throw_error(NULL, "ZipArchive::closeString can only be called on "
+				"an archive opened with ZipArchive::openString");
+		RETURN_THROWS();
+	}
+
+	zend_string *ret = NULL;
+	bool success = php_zipobj_close(Z_ZIP_P(self), &ret);
+	ZEND_ASSERT(ret);
+	if (success) {
+		RETURN_STR(ret);
+	}
+	zend_string_release(ret);
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -1587,6 +1645,30 @@ PHP_METHOD(ZipArchive, count)
 	RETVAL_LONG(MIN(num, ZEND_LONG_MAX));
 }
 /* }}} */
+
+PHP_METHOD(ZipArchive, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_throw_exception_ex(NULL, 0,
+		"Serialization of '%s' is not allowed, override __serialize() and __unserialize() to implement it",
+		ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+}
+
+PHP_METHOD(ZipArchive, __unserialize)
+{
+	zval *data;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	(void) data;
+
+	zend_throw_exception_ex(NULL, 0,
+		"Unserialization of '%s' is not allowed, override __serialize() and __unserialize() to implement it",
+		ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+}
 
 /* {{{ clear the internal status */
 PHP_METHOD(ZipArchive, clearError)
@@ -2811,6 +2893,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	buffer = zend_string_safe_alloc(1, len, 0, false);
 	zip_int64_t n = zip_fread(zf, ZSTR_VAL(buffer), ZSTR_LEN(buffer));
 	if (n < 1) {
+		zip_fclose(zf);
 		zend_string_efree(buffer);
 		RETURN_EMPTY_STRING();
 	}
@@ -3051,7 +3134,7 @@ static void php_zip_free_prop_handler(zval *el) /* {{{ */ {
 static PHP_MINIT_FUNCTION(zip)
 {
 	memcpy(&zip_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	zip_object_handlers.offset = XtOffsetOf(ze_zip_object, zo);
+	zip_object_handlers.offset = offsetof(ze_zip_object, zo);
 	zip_object_handlers.free_obj = php_zip_object_free_storage;
 	zip_object_handlers.dtor_obj = php_zip_object_dtor;
 	zip_object_handlers.clone_obj = NULL;

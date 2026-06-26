@@ -76,7 +76,7 @@ U_CFUNC void collator_register_Collator_symbols(int module_number)
 		sizeof Collator_handlers);
 	/* Collator has no usable clone semantics - ucol_cloneBinary/ucol_openBinary require binary buffer
 	   for which we don't have the place to keep */
-	Collator_handlers.offset = XtOffsetOf(Collator_object, zo);
+	Collator_handlers.offset = offsetof(Collator_object, zo);
 	Collator_handlers.clone_obj = nullptr;
 	Collator_handlers.free_obj = Collator_objects_free;
 }

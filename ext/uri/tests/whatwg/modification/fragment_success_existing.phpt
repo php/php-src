@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - fragment - changing an existing one
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

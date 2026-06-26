@@ -20,6 +20,9 @@
 
 PHPAPI extern const php_uri_parser php_uri_parser_whatwg;
 
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_whatwg_is_special(const lxb_url_t *lexbor_uri);
+ZEND_ATTRIBUTE_NONNULL void php_uri_parser_whatwg_host_type_read(const lxb_url_t *lexbor_uri, zval *retval);
+
 lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent);
 
 PHP_RINIT_FUNCTION(uri_parser_whatwg);

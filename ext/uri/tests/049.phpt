@@ -1,7 +1,5 @@
 --TEST--
 Test percent-encoding normalization - special case
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

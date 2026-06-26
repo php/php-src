@@ -65,9 +65,7 @@ ZEND_GET_MODULE(sysvmsg)
 zend_class_entry *sysvmsg_queue_ce;
 static zend_object_handlers sysvmsg_queue_object_handlers;
 
-static inline sysvmsg_queue_t *sysvmsg_queue_from_obj(zend_object *obj) {
-	return (sysvmsg_queue_t *)((char *)(obj) - XtOffsetOf(sysvmsg_queue_t, std));
-}
+#define sysvmsg_queue_from_obj(obj) ZEND_CONTAINER_OF(obj, sysvmsg_queue_t, std)
 
 #define Z_SYSVMSG_QUEUE_P(zv) sysvmsg_queue_from_obj(Z_OBJ_P(zv))
 
@@ -101,7 +99,7 @@ PHP_MINIT_FUNCTION(sysvmsg)
 	sysvmsg_queue_ce->default_object_handlers = &sysvmsg_queue_object_handlers;
 
 	memcpy(&sysvmsg_queue_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	sysvmsg_queue_object_handlers.offset = XtOffsetOf(sysvmsg_queue_t, std);
+	sysvmsg_queue_object_handlers.offset = offsetof(sysvmsg_queue_t, std);
 	sysvmsg_queue_object_handlers.free_obj = sysvmsg_queue_free_obj;
 	sysvmsg_queue_object_handlers.get_constructor = sysvmsg_queue_get_constructor;
 	sysvmsg_queue_object_handlers.clone_obj = NULL;

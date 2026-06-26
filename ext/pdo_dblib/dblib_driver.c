@@ -231,8 +231,8 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	RETCODE ret;
-	BYTE id[32];
-	size_t len;
+	BYTE id[40];
+	DBINT len;
 
 	/*
 	 * Would use scope_identity() but it's not implemented on Sybase
@@ -264,8 +264,12 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 		return NULL;
 	}
 
-	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
+	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)sizeof(id));
 	dbcancel(H->link);
+
+	if (len < 0) {
+		return NULL;
+	}
 
 	return zend_string_init((const char *) id, len, 0);
 }
@@ -420,6 +424,17 @@ static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_valu
 	return 1;
 }
 
+static zend_result dblib_handle_check_liveness(pdo_dbh_t *dbh)
+{
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+
+	if (dbdead(H->link)) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 static const struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_closer,
 	dblib_handle_preparer,
@@ -432,7 +447,7 @@ static const struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_last_id, /* last insert id */
 	dblib_fetch_error, /* fetch error */
 	dblib_get_attribute, /* get attr */
-	NULL, /* check liveness */
+	dblib_handle_check_liveness, /* check_liveness */
 	NULL, /* reset_connection */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
@@ -534,7 +549,6 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		}
 
 		if (i==nvers) {
-			printf("Invalid version '%s'\n", vars[5].optval);
 			pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Invalid version specified in connection string.");
 			goto cleanup; /* unknown version specified */
 		}

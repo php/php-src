@@ -61,9 +61,7 @@ typedef struct _mysqli_object {
 	zend_object 		zo;
 } mysqli_object; /* extends zend_object */
 
-static inline mysqli_object *php_mysqli_fetch_object(zend_object *obj) {
-	return (mysqli_object *)((char*)(obj) - XtOffsetOf(mysqli_object, zo));
-}
+#define php_mysqli_fetch_object(obj) ZEND_CONTAINER_OF(obj, mysqli_object, zo)
 
 #define Z_MYSQLI_P(zv) php_mysqli_fetch_object(Z_OBJ_P((zv)))
 

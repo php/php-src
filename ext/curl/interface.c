@@ -357,7 +357,7 @@ PHP_MINIT_FUNCTION(curl)
 	curl_ce->default_object_handlers = &curl_object_handlers;
 
 	memcpy(&curl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	curl_object_handlers.offset = XtOffsetOf(php_curl, std);
+	curl_object_handlers.offset = offsetof(php_curl, std);
 	curl_object_handlers.free_obj = curl_free_obj;
 	curl_object_handlers.get_gc = curl_get_gc;
 	curl_object_handlers.get_constructor = curl_get_constructor;
@@ -2456,6 +2456,11 @@ PHP_FUNCTION(curl_getinfo)
 		if (curl_easy_getinfo(ch->cp, CURLINFO_SIZE_DOWNLOAD, &d_code) == CURLE_OK) {
 			CAAD("size_download", d_code);
 		}
+#if LIBCURL_VERSION_NUM >= 0x081400 /* Available since 8.20.0 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_SIZE_DELIVERED , &l_code) == CURLE_OK) {
+			CAAL("size_delivered", l_code);
+		}
+#endif
 		if (curl_easy_getinfo(ch->cp, CURLINFO_SPEED_DOWNLOAD, &d_code) == CURLE_OK) {
 			CAAD("speed_download", d_code);
 		}

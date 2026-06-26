@@ -481,7 +481,7 @@ PS_VALIDATE_SID_FUNC(mm)
 	PS_MM_DATA;
 
 	mm_lock(data->mm, MM_LOCK_RD);
-	zend_result ret = ps_mm_key_exists(data, key)
+	zend_result ret = ps_mm_key_exists(data, key);
 	mm_unlock(data->mm);
 	return ret;
 }

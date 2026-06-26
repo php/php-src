@@ -444,6 +444,7 @@ AC_CHECK_HEADERS(m4_normalize([
 ])
 
 PHP_FOPENCOOKIE
+PHP_POLL_MECHANISMS
 PHP_BROKEN_GETCWD
 AS_VAR_IF([GCC], [yes], [PHP_BROKEN_GCC_STRLEN_OPT])
 
@@ -1538,8 +1539,10 @@ AS_VAR_IF([PHP_ADDRESS_SANITIZER], [yes],
   ]))])
 
   AX_CHECK_COMPILE_FLAG([-fsanitize=address], [
-    CFLAGS="$CFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
-    CXXFLAGS="$CXXFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
+    CFLAGS="$CFLAGS -fsanitize=address"
+    CXXFLAGS="$CXXFLAGS -fsanitize=address"
+    AC_DEFINE([ZEND_TRACK_ARENA_ALLOC], [1],
+      [Whether to track arena allocations individually for AddressSanitizer.])
   ], [AC_MSG_ERROR([AddressSanitizer is not available])])
 ])
 
@@ -1682,6 +1685,17 @@ PHP_ADD_SOURCES_X([main],
   [PHP_FASTCGI_OBJS],
   [no])
 
+PHP_ADD_SOURCES([main/poll], m4_normalize([
+    poll_backend_epoll.c
+    poll_backend_eventport.c
+    poll_backend_kqueue.c
+    poll_backend_poll.c
+    poll_core.c
+    poll_fd_table.c
+    poll_handle.c
+  ]),
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+
 PHP_ADD_SOURCES([main/streams], m4_normalize([
     cast.c
     filter.c
@@ -1689,6 +1703,7 @@ PHP_ADD_SOURCES([main/streams], m4_normalize([
     memory.c
     mmap.c
     plain_wrapper.c
+    stream_errors.c
     streams.c
     transports.c
     userspace.c
@@ -1804,6 +1819,7 @@ AC_DEFINE([HAVE_BUILD_DEFS_H], [1],
 
 PHP_ADD_BUILD_DIR([
   main
+  main/poll
   main/streams
   scripts
   scripts/man1

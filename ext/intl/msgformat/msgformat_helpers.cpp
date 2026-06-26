@@ -184,7 +184,7 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 						(void*)&bogusType, sizeof(bogusType));
 			}
 		} else if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NUMBER) {
-			int32_t argNumber = name_part.getValue();
+			const int32_t argNumber = name_part.getValue();
 			if (argNumber < 0) {
 				intl_errors_set(&err, U_INVALID_FORMAT_ERROR,
 					"Found part with negative number");
@@ -341,7 +341,7 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		}
 
 		if (used_tz == NULL) {
-			used_tz = timezone_process_timezone_argument(nullptr, nullptr, &err);
+			used_tz = timezone_process_timezone_argument(nullptr, nullptr, &err, 1);
 			if (used_tz == NULL) {
 				continue;
 			}
@@ -364,7 +364,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 								UChar **formatted,
 								int32_t *formatted_len)
 {
-	int arg_count = zend_hash_num_elements(args);
+	const int arg_count = zend_hash_num_elements(args);
 	std::vector<Formattable> fargs;
 	std::vector<UnicodeString> farg_names;
 	MessageFormat *mf = (MessageFormat *)mfo->mf_data.umsgf;
@@ -408,7 +408,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 			}
 
 		   UChar temp[16];
-		   int32_t len = u_sprintf(temp, "%u", (uint32_t)num_index);
+		   const int32_t len = u_sprintf(temp, "%u", (uint32_t)num_index);
 		   key.append(temp, len);
 
 		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, num_index);
@@ -467,7 +467,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 				}
 			case Formattable::kDouble:
 				{
-					double d = zval_get_double(elem);
+					const double d = zval_get_double(elem);
 					formattable.setDouble(d);
 					break;
 				}
@@ -523,7 +523,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 				}
 			case Formattable::kDate:
 				{
-					double dd = intl_zval_to_millis(elem, &err);
+					const double dd = intl_zval_to_millis(elem, &err);
 					if (U_FAILURE(err.code)) {
 						char *message;
 						zend_string *u8key;
@@ -649,7 +649,7 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UCh
 
         case Formattable::kInt64:
             aInt64 = fargs[i].getInt64();
-			if(aInt64 > ZEND_LONG_MAX || aInt64 < -ZEND_LONG_MAX) {
+			if(aInt64 > ZEND_LONG_MAX || aInt64 < ZEND_LONG_MIN) {
 				ZVAL_DOUBLE(&(*args)[i], (double)aInt64);
 			} else {
 				ZVAL_LONG(&(*args)[i], (zend_long)aInt64);

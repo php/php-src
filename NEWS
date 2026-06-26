@@ -18,21 +18,52 @@ PHP                                                                        NEWS
     initialization). (Arnaud)
   . Enabled the TAILCALL VM on Windows when compiling with Clang >= 19 x86_64.
     (henderkes)
+  . Deprecate specifying a nullable return type for __debugInfo(). (timwolla)
+  . Fixed bug GH-22142 (Assertion failure in zendi_try_get_long() on IS_UNDEF).
+    (David Carlier)
+  . Fixed bug GH-22046 (The unserialize function can lead to segfault when
+    non-Serializable internal classes are serialized back with the C format).
+    (kocsismate)
+  . Fixed bug GH-22292 (AST pretty printing does not correctly handle invalid
+    variable names). (timwolla)
+  . Fixed bug GH-22291 (AST pretty printing does not correctly handle braces in
+    string interpolation). (timwolla)
+  . Fixed bug GH-22373 (AST pretty-printing drops meaningful parentheses
+    surrounding property access). (timwolla)
+  . Fixed GH-22422 (zend_arena layout mismatch leaked memory in separately
+    built extensions under AddressSanitizer). (iliaal)
+  . TSRM: use local-exec TLS in PIE executables. (henderkes)
+  . perf: make all static extensions use TSRMG_STATIC. (henderkes)
+  . Fixed bug GH-22257 (type confusion in Exception::getTraceAsString()).
+    (David Carlier)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
+
+- BZ2:
+  . Reject oversized input in bzdecompress(). (arshidkv12)
+
+- Curl:
+  . Add support for CURLINFO_SIZE_DELIVERED (libcurl >= 8.20.0). (Ayesh)
 
 - Date:
   . Update timelib to 2022.16. (Derick)
 
 - DOM:
-  . Removed LIBXML_XINCLUDE from valid options for XMLDocument,
-    as it was a no-op. (ndossche)
+  . Removed LIBXML_XINCLUDE from valid options for XMLDocument, as it was a
+    no-op. (ndossche)
   . Readonly DOM properties are now declared with asymmetric visibility
     (public private(set)). ReflectionProperty::isWritable() reports them
     correctly, and external writes raise "Cannot modify private(set)
     property" instead of the previous readonly modification error.
     (David Carlier)
+  . Fixed Dom\Notation nodes missing tree connection, so that ownerDocument,
+    parentNode, isConnected and baseURI now return correct values, and
+    textContent returns NULL per the DOM specification. (jordikroon)
+
+- EXIF:
+  . Added support for reading EXIF metadata from WebP images (GH-19904).
+    (iliaal)
 
 - Fileinfo:
   . Fixed bug GH-20679 (finfo_file() doesn't work on remote resources).
@@ -45,27 +76,48 @@ PHP                                                                        NEWS
 
 - GMP:
   . gmp_fact() reject values larger than unsigned long. (David Carlier)
-  . gmp_pow/binomial/root/rootrem and shift/pow operators reject values
-    larger than unsigned long. (David Carlier)
+  . gmp_pow/binomial/root/rootrem and shift/pow operators reject values larger
+    than unsigned long. (David Carlier)
+  . GMP exponentiation and shift operators now emit a deprecation warning
+    when converting a float right operand to int loses precision. (Weilin Du)
 
 - Hash:
   . Upgrade xxHash to 0.8.2. (timwolla)
 
 - Intl:
+  . Fixed malformed ResourceBundle::get() error message when fallback is
+    disabled. (Weilin Du)
+  . Fix incorrect argument positions for invalid start/end arguments in
+    transliterator_transliterate(). (Weilin Du)
+  . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
+    for invalid display types. (Weilin Du)
+  . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
+    fallback locale when a language tag cannot be canonicalized. (Weilin Du)
   . Added IntlNumberRangeFormatter class to format an interval of two numbers
     with a given skeleton, locale, collapse type and identity fallback.
     (BogdanUngureanu)
   . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
     suggests missing constants). (DanielEScherzer)
   . Added grapheme_strrev (Yuya Hamada)
+  . Passing a non-stringable object as a time zone to Intl time zone
+    argument handling now raises TypeError instead of Error. (Weilin Du)
+  . IntlBreakIterator::getLocale() now raises ValueError for invalid locale
+    types. (Weilin Du)
+  . Fixed MessageFormatter::parse() and parseMessage() returning PHP_INT_MIN
+    as float rather than int on 64-bit platforms. (Weilin Du)
+  . Fixed UConverter::transcode() silently truncating from_subst and to_subst
+    option lengths greater than 127 bytes. (Weilin Du)
+
+- IO:
+  . Added new polling API. (Jakub Zelenka)
 
 - JSON:
   . Enriched JSON last error / exception message with error location.
     (Juan Morales)
 
 - Fibers:
-  . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
-    small value). (David Carlier)
+  . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI small
+    value). (David Carlier)
 
 - Mail:
   . Fixed bug GH-20862 (null pointer dereference in
@@ -79,6 +131,7 @@ PHP                                                                        NEWS
     recursive array references). (alexandre-daubois)
   . Fixed bug GH-21223; mb_guess_encoding no longer crashes when passed huge
     list of candidate encodings (with 200,000+ entries). (Jordi Kroon)
+  . mbregex has been deprecated. (youkidearitai)
 
 - Mysqli:
   . Added mysqli_quote_string() and mysqli::quote_string(). (Kamil Tekiela)
@@ -88,21 +141,44 @@ PHP                                                                        NEWS
     preloading). (Arnaud, welcomycozyhom)
 
 - OpenSSL:
+  . Added AES-SIV support. (jordikroon)
   . Implemented GH-20310 (No critical extension indication in
     openssl_x509_parse() output). (StephenWall)
+  . Added TLS session resumption support for streams with new context options
+    and Openssl\Session class. (Jakub Zelenka)
+  . Added TLS external PSK support for streams with new context options and
+    Openssl\Psk class. (Jakub Zelenka)
+  . Added stream crypto status for exposing OpenSSL WANT_READ / WANT_WRITE.
+    (Jakub Zelenka)
+
+- PCNTL:
+  . pcntl_exec() now throws a ValueError if the $args array is not a list
+    array. (Weilin Du)
+
+- PDO_DBLIB;
+  . Added dblib_handle_check_liveness handler. (freddy77)
 
 - PDO_PGSQL:
   . Clear session-local state disconnect-equivalent processing.
     (KentarouTakeda)
 
 - PGSQL:
-  . Enabled 64 bits support for pg_lo_truncate()/pg_lo_tell()
-    if the server supports it. (KentarouTakeda)
+  . Enabled 64 bits support for pg_lo_truncate()/pg_lo_tell() if the server
+    supports it. (KentarouTakeda)
+  . pg_fetch_object() now surfaces non-instantiable class errors before
+    fetching, resolves the constructor via the get_constructor handler, and
+    reports the empty-constructor ValueError on the $constructor_args argument.
+    (David Carlier)
 
 - Phar:
   . Support reference values in Phar::mungServer(). (ndossche)
   . Invalid values now throw in Phar::mungServer() instead of being silently
     ignored. (ndossche)
+  . Fixed a bypass of the magic ".phar" directory protection in
+    Phar::addEmptyDir() for paths starting with "/.phar". (Weilin Du)
+  . Fixed an integer underflow when parsing ZIP extra fields. (Weilin Du)
+  . Phar::addEmptyDir() now allows non-magic directory names that merely
+    share the ".phar" prefix. (Weilin Du)
   . Support overridden methods in SplFileInfo for getMTime() and getPathname()
     when building a phar. (ndossche)
   . Mark Phar::buildFromIterator() base directory argument as a path.
@@ -115,8 +191,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
   . Added ReflectionConstant::inNamespace(). (Khaled Alam)
-  . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
-    (ilutov)
+  . Added ReflectionProperty::isReadable() and ::isWritable(). (ilutov)
   . Fixed bug GH-21362 (ReflectionMethod::invoke/invokeArgs() did not verify
     Closure instance identity for Closure::__invoke()). (Ilia Alshanetsky)
   . Added ReflectionParameter::getDocComment(). (chschneider)
@@ -124,12 +199,29 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug 71162 (updateTimestamp never called when session data is empty).
     (Girgias)
+  . Null bytes in session.cookie_path, session.cookie_domain, and
+    session.cache_limiter are now rejected with a warning. (jorgsowa)
+  . session.cookie_samesite now rejects invalid values with a warning; only
+    "Strict", "Lax", "None", or "" are accepted. (jorgsowa)
+  . session.cookie_lifetime now rejects non-integer and out-of-range values
+    with a warning. (jorgsowa)
+  . Session file GC now recursively cleans nested subdirectories when
+    session.save_path uses the dirdepth prefix. (jorgsowa)
+  . Changed defaults of session.use_strict_mode (now 1), session.cookie_httponly
+    (now 1) and session.cookie_samesite (now "Lax"). (jorgsowa)
+
+- Shmop:
+  . Fixed bug GH-9945 (shmop_open() silently truncates keys outside the key_t
+    range). (Weilin Du)
 
 - Soap:
   . Soap::__setCookie() when cookie name is a digit is now not stored and
     represented as a string anymore but a int. (David Carlier)
   . Fixed bug GH-21421 (SoapClient typemap property breaks engine assumptions).
     (ndossche)
+  . WSDL/XML Schema parsing now rejects out-of-range integer values for
+    occurrence constraints and integer restriction facets. Negative minOccurs
+    and maxOccurs values are rejected as well. (Weilin Du)
 
 - Sockets:
   . Added the TCP_USER_TIMEOUT constant for Linux to set the maximum time in
@@ -141,12 +233,22 @@ PHP                                                                        NEWS
 
 - Sodium:
   . Added support for libsodium 1.0.21 IPcrypt and XOF APIs. (jedisct1)
+  . pwhash argument-validation errors now throw ValueError instead of
+    SodiumException. (iliaal)
 
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
+  . Fixed bug GH-21831 (SplObjectStorage::removeAllExcept() use-after-free with
+    re-entrant getHash()). (Pratik Bhujel)
   . Fix bugs GH-8561, GH-8562, GH-8563, and GH-8564 (Fixing various
     SplFileObject iterator desync bugs). (iliaal)
+  . Fix bug GH-22062 (SplDoublyLinkedList iterator UAF via destructor releasing
+    next node). (David Carlier)
+
+- Sysvshm:
+  . Fixed shm_attach() to throw ValueError for keys outside the key_t range.
+    (Weilin Du)
 
 - Sqlite3:
   . Fix NUL byte truncation in sqlite3 TEXT column handling. (ndossche)
@@ -173,13 +275,32 @@ PHP                                                                        NEWS
   . linkinfo() now raises a ValueError when the argument is an empty string.
     (Weilin Du)
   . getenv() and putenv() now raises a ValueError when the first argument
-    contains null bytes. (Weilin Du)
+    contains NUL bytes. (Weilin Du)
+  . dl() now raises a ValueError when the $extension_filename argument contains
+    NUL bytes. (Weilin Du)
+  . openlog() now raises a ValueError when the $prefix argument contains NUL
+    bytes. (Weilin Du)
+  . parse_str() now raises a ValueError when the $string argument contains NUL
+    bytes. (Weilin Du)
+  . proc_open() now raises a ValueError when the $cwd argument contains NUL
+    bytes. (Weilin Du)
+  . ini_get_all() now includes the built-in default value in the details.
+    (sebastian)
+  . Fixed bug GH-22171 (Invalid auth header generation in http(s) stream
+    wrapper). (David Carlier)
+  . Fixed bug GH-17384 (number_format() may exhaust memory with decimals
+    outside the range from -2147483648 to 2147483647). (Weilin Du)
 
 - Streams:
+  . Added new stream errors API including new StreamException, StreamError
+    classes, StreamErrorStore, StreamErrorMode, StreamErrorCode enums,
+    stream_last_errors() and stream_clear_errors() functions, error_mode,
+    error_store and error_handler stream context options and extending some
+    stream functions with context param. (Jakub Zelenka)
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
-    socket context options.
+    socket context options. (Jakub Zelenka)
   . Added so_reuseaddr streams context socket option that allows disabling
-    address reuse.
+    address reuse. (Jakub Zelenka)
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
   . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)
@@ -189,12 +310,29 @@ PHP                                                                        NEWS
   . Fixed bug #49874 (ftell() and fseek() inconsistency when using stream
     filters). (Jakub Zelenka)
 
+- URI:
+  . Added Uri\Rfc3986\Uri::getUriType() and Uri\WhatWg\Url::isSpecialScheme().
+    (kocsismate)
+  . Added Uri\Rfc3986\Uri::getHostType() and Uri\WhatWg\Url::getHostType().
+    (kocsismate)
+  . Added Uri\Rfc3986\UriBuilder. (kocsismate)
+
 - Zip:
+  . Fixed bug GH-21682 (ZipArchive instances should not be serializable).
+    serialize()/unserialize() now throw unless a subclass overrides
+    __serialize()/__unserialize(). (iliaal)
   . Fixed ZipArchive callback being called after executor has shut down.
     (ilutov)
   . Support minimum version for libzip dependency updated to 1.0.0.
     (David Carlier)
   . Added ZipArchive::openString() method.
     (Tim Starling, Soner Sayakci, Ghaith Olabi)
+
+- Zlib:
+  . deflate_init() now raises a TypeError when the value for option
+    "level", "memory", "window", or "strategy" is not of type int.
+    (Weilin Du)
+  . inflate_init() now raises a TypeError when the value for option
+    "window" is not of type int. (Weilin Du)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

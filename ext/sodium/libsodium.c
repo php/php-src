@@ -1429,23 +1429,28 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 		RETURN_THROWS();
 	}
 	if (hash_len <= 0) {
-		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
+		zend_argument_value_error(1, "must be greater than 0");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (hash_len >= 0xffffffff) {
-		zend_argument_error(sodium_exception_ce, 1, "is too large");
+		zend_argument_value_error(1, "must be less than 4294967295 bytes");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (passwd_len >= 0xffffffff) {
-		zend_argument_error(sodium_exception_ce, 2, "is too long");
+		zend_argument_value_error(2, "must be less than 4294967295 bytes");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (opslimit <= 0) {
-		zend_argument_error(sodium_exception_ce, 4, "must be greater than 0");
+		zend_argument_value_error(4, "must be greater than 0");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (memlimit <= 0 || memlimit > SIZE_MAX) {
-		zend_argument_error(sodium_exception_ce, 5, "must be greater than 0");
+		zend_argument_value_error(5, "must be greater than 0");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (alg != crypto_pwhash_ALG_ARGON2I13
@@ -1460,15 +1465,19 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 		zend_error(E_WARNING, "empty password");
 	}
 	if (salt_len != crypto_pwhash_SALTBYTES) {
-		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_PWHASH_SALTBYTES bytes long");
+		zend_argument_value_error(3, "must be SODIUM_CRYPTO_PWHASH_SALTBYTES bytes long");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (opslimit < crypto_pwhash_OPSLIMIT_MIN) {
-		zend_argument_error(sodium_exception_ce, 4, "must be greater than or equal to %d", crypto_pwhash_OPSLIMIT_MIN);
+		zend_argument_value_error(4, "must be greater than or equal to %d", crypto_pwhash_OPSLIMIT_MIN);
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (memlimit < crypto_pwhash_MEMLIMIT_MIN) {
-		zend_argument_error(sodium_exception_ce, 5, "must be greater than or equal to %d", crypto_pwhash_MEMLIMIT_MIN);
+		zend_argument_value_error(5, "must be greater than or equal to %d", crypto_pwhash_MEMLIMIT_MIN);
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
 	}
 	hash = zend_string_alloc((size_t) hash_len, 0);
 	ret = -1;
@@ -1512,25 +1521,32 @@ PHP_FUNCTION(sodium_crypto_pwhash_str)
 		RETURN_THROWS();
 	}
 	if (opslimit <= 0) {
-		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
+		zend_argument_value_error(2, "must be greater than 0");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (memlimit <= 0 || memlimit > SIZE_MAX) {
-		zend_argument_error(sodium_exception_ce, 3, "must be greater than 0");
+		zend_argument_value_error(3, "must be greater than 0");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (passwd_len >= 0xffffffff) {
-		zend_argument_error(sodium_exception_ce, 1, "is too long");
+		zend_argument_value_error(1, "must be less than 4294967295 bytes");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (passwd_len <= 0) {
 		zend_error(E_WARNING, "empty password");
 	}
 	if (opslimit < crypto_pwhash_OPSLIMIT_MIN) {
-		zend_argument_error(sodium_exception_ce, 2, "must be greater than or equal to %d", crypto_pwhash_OPSLIMIT_MIN);
+		zend_argument_value_error(2, "must be greater than or equal to %d", crypto_pwhash_OPSLIMIT_MIN);
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
 	}
 	if (memlimit < crypto_pwhash_MEMLIMIT_MIN) {
-		zend_argument_error(sodium_exception_ce, 3, "must be greater than or equal to %d", crypto_pwhash_MEMLIMIT_MIN);
+		zend_argument_value_error(3, "must be greater than or equal to %d", crypto_pwhash_MEMLIMIT_MIN);
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
 	}
 	hash_str = zend_string_alloc(crypto_pwhash_STRBYTES - 1, 0);
 	if (crypto_pwhash_str
@@ -1616,29 +1632,37 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 		RETURN_THROWS();
 	}
 	if (hash_len <= 0 || hash_len >= ZSTR_MAX_LEN || hash_len > 0x1fffffffe0ULL) {
-		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
+		zend_argument_value_error(1, "must be greater than 0");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (opslimit <= 0) {
-		zend_argument_error(sodium_exception_ce, 4, "must be greater than 0");
+		zend_argument_value_error(4, "must be greater than 0");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (memlimit <= 0 || memlimit > SIZE_MAX) {
-		zend_argument_error(sodium_exception_ce, 5, "must be greater than 0");
+		zend_argument_value_error(5, "must be greater than 0");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (passwd_len <= 0) {
 		zend_error(E_WARNING, "empty password");
 	}
 	if (salt_len != crypto_pwhash_scryptsalsa208sha256_SALTBYTES) {
-		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_SALTBYTES bytes long");
+		zend_argument_value_error(3, "must be SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_SALTBYTES bytes long");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE) {
-		zend_argument_error(sodium_exception_ce, 4, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE);
+		zend_argument_value_error(4, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE);
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
 	}
 	if (memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE) {
-		zend_argument_error(sodium_exception_ce, 5, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE);
+		zend_argument_value_error(5, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE);
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
 	}
 	hash = zend_string_alloc((size_t) hash_len, 0);
 	if (crypto_pwhash_scryptsalsa208sha256
@@ -1669,21 +1693,27 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str)
 		RETURN_THROWS();
 	}
 	if (opslimit <= 0) {
-		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
+		zend_argument_value_error(2, "must be greater than 0");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (memlimit <= 0 || memlimit > SIZE_MAX) {
-		zend_argument_error(sodium_exception_ce, 3, "must be greater than 0");
+		zend_argument_value_error(3, "must be greater than 0");
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
 	if (passwd_len <= 0) {
 		zend_error(E_WARNING, "empty password");
 	}
 	if (opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE) {
-		zend_argument_error(sodium_exception_ce, 2, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE);
+		zend_argument_value_error(2, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE);
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
 	}
 	if (memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE) {
-		zend_argument_error(sodium_exception_ce, 3, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE);
+		zend_argument_value_error(3, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE);
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
 	}
 	hash_str = zend_string_alloc
 		(crypto_pwhash_scryptsalsa208sha256_STRBYTES - 1, 0);

@@ -527,7 +527,8 @@ TODO:
 	} else if (text[0] == '#' && text[1] != '[') {
 		retval = cli_completion_generator_ini(text, textlen, &cli_completion_state);
 	} else {
-		char *lc_text, *class_name_end;
+		char *lc_text;
+		const char *class_name_end;
 		zend_string *class_name = NULL;
 		zend_class_entry *ce = NULL;
 
@@ -659,6 +660,7 @@ static int readline_shell_run(void) /* {{{ */
 				zend_string_release_ex(prompt, 0);
 				/* TODO: This might be wrong! */
 				prompt = cli_get_prompt("php", '>');
+				free(line);
 				continue;
 			}
 		}

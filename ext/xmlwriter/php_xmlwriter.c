@@ -1048,7 +1048,7 @@ PHP_FUNCTION(xmlwriter_flush)
 static PHP_MINIT_FUNCTION(xmlwriter)
 {
 	memcpy(&xmlwriter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	xmlwriter_object_handlers.offset = XtOffsetOf(ze_xmlwriter_object, std);
+	xmlwriter_object_handlers.offset = offsetof(ze_xmlwriter_object, std);
 	xmlwriter_object_handlers.dtor_obj = xmlwriter_object_dtor;
 	xmlwriter_object_handlers.clone_obj = NULL;
 	xmlwriter_class_entry_ce = register_class_XMLWriter();
