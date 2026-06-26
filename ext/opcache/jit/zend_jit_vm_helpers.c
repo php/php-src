@@ -915,6 +915,24 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 			}
 		}
 
+		if (opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
+		 && opline->op1_type != IS_CONST
+		 && opline->op2_type == IS_CONST
+		 && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_STRING) {
+			zval *obj = (opline->op1_type == IS_UNUSED) ? &EX(This) : EX_VAR(opline->op1.var);
+			if (Z_TYPE_P(obj) == IS_OBJECT) {
+				zend_property_info *prop_info = zend_get_property_info(Z_OBJCE_P(obj),
+					Z_STR_P(RT_CONSTANT(opline, opline->op2)), 1);
+				if (prop_info
+				 && prop_info != ZEND_WRONG_PROPERTY_INFO
+				 && prop_info->hooks
+				 && prop_info->hooks[ZEND_PROPERTY_HOOK_GET]) {
+					stop = ZEND_JIT_TRACE_STOP_PROP_HOOK_CALL;
+					break;
+				}
+			}
+		}
+
 		TRACE_RECORD_VM(ZEND_JIT_TRACE_VM, opline, op1_type, op2_type, op3_type);
 
 		if (ce1) {
