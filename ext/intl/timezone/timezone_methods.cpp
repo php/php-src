@@ -176,7 +176,7 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 		RETURN_FALSE;
 	}
 
-	int32_t result = TimeZone::countEquivalentIDs(id);
+	const int32_t result = TimeZone::countEquivalentIDs(id);
 	RETURN_LONG((zend_long)result);
 }
 
@@ -279,7 +279,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_region)
 		RETURN_FALSE;
 	}
 
-	int32_t region_len = TimeZone::getRegion(id, outbuf, sizeof(outbuf), status);
+	const int32_t region_len = TimeZone::getRegion(id, outbuf, sizeof(outbuf), status);
 	INTL_CHECK_STATUS(status, "error obtaining region");
 
 	RETURN_STRINGL(outbuf, region_len);

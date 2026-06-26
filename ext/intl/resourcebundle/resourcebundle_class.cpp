@@ -174,7 +174,7 @@ static zval *resource_bundle_array_fetch(
 {
 	int32_t index = 0;
 	char *key = NULL;
-	bool is_numeric = offset_str == NULL;
+	const bool is_numeric = offset_str == NULL;
 	char *pbuf;
 	ResourceBundle_object *rb;
 

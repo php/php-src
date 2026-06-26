@@ -25,10 +25,10 @@ extern "C" {
 
 #define IC_METHOD(mname) PHP_METHOD(IntlChar, mname)
 
-static inline int convert_cp(UChar32* pcp, zend_string *string_codepoint, zend_long int_codepoint) {
+static inline int convert_cp(UChar32* pcp, const zend_string *string_codepoint, zend_long int_codepoint) {
 	if (string_codepoint != NULL) {
 		int32_t i = 0;
-		size_t string_codepoint_length = ZSTR_LEN(string_codepoint);
+		const size_t string_codepoint_length = ZSTR_LEN(string_codepoint);
 
 		if (ZEND_SIZE_T_INT_OVFL(string_codepoint_length)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
