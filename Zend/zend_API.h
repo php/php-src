@@ -368,6 +368,7 @@ ZEND_API zend_result zend_parse_parameters(uint32_t num_args, const char *type_s
 ZEND_API zend_result zend_parse_parameters_ex(int flags, uint32_t num_args, const char *type_spec, ...);
 ZEND_API const char *zend_zval_type_name(const zval *arg);
 ZEND_API const char *zend_zval_value_name(const zval *arg);
+ZEND_API const char *zend_zval_numeric_string_value_name(const zval *arg);
 ZEND_API zend_string *zend_zval_get_legacy_type(const zval *arg);
 
 ZEND_API zend_result zend_parse_method_parameters(uint32_t num_args, zval *this_ptr, const char *type_spec, ...);
