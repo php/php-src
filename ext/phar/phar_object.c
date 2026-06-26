@@ -3741,33 +3741,32 @@ PHP_METHOD(Phar, offsetUnset)
 		RETURN_THROWS();
 	}
 
-	if (zend_hash_exists(&phar_obj->archive->manifest, file_name)) {
-		phar_entry_info *entry = zend_hash_find_ptr(&phar_obj->archive->manifest, file_name);
-		if (entry) {
-			if (entry->is_deleted) {
-				/* entry is deleted, but has not been flushed to disk yet */
-				return;
-			}
+	phar_entry_info *entry = zend_hash_find_ptr(&phar_obj->archive->manifest, file_name);
+	if (entry) {
+		if (entry->is_deleted) {
+			/* entry is deleted, but has not been flushed to disk yet */
+			return;
+		}
 
-			if (phar_obj->archive->is_persistent) {
-				if (FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
-					zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", ZSTR_VAL(phar_obj->archive->fname));
-					RETURN_THROWS();
-				}
-				/* re-populate entry after copy on write */
-				entry = zend_hash_find_ptr(&phar_obj->archive->manifest, file_name);
+		if (phar_obj->archive->is_persistent) {
+			if (FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
+				zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", ZSTR_VAL(phar_obj->archive->fname));
+				RETURN_THROWS();
 			}
-			entry->is_modified = 0;
-			entry->is_deleted = 1;
-			/* we need to "flush" the stream to save the newly deleted file on disk */
-			phar_flush(phar_obj->archive, &error);
+			/* re-populate entry after copy on write */
+			entry = zend_hash_find_ptr(&phar_obj->archive->manifest, file_name);
+		}
+		entry->is_modified = 0;
+		entry->is_deleted = 1;
+		/* we need to "flush" the stream to save the newly deleted file on disk */
+		phar_flush(phar_obj->archive, &error);
 
-			if (error) {
-				zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
-				efree(error);
-			}
+		if (error) {
+			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
+			efree(error);
 		}
 	}
+	
 }
 /* }}} */
 
