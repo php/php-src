@@ -33,6 +33,8 @@ PHP                                                                        NEWS
   . Fixed GH-22422 (zend_arena layout mismatch leaked memory in separately
     built extensions under AddressSanitizer). (iliaal)
   . TSRM: use local-exec TLS in PIE executables. (henderkes)
+  . Fixed GH-22060 (Use-after-free when an autoloader unregisters itself
+    during dispatch). (iliaal)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
@@ -247,6 +249,8 @@ PHP                                                                        NEWS
 
 - Sqlite3:
   . Fix NUL byte truncation in sqlite3 TEXT column handling. (ndossche)
+  . Fixed GH-22122 (Use-after-free in the authorizer callback when it releases
+    the authorizer). (iliaal)
 
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
