@@ -581,6 +581,11 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zend_obje
 
 	ZEND_GUARD_PROTECT_RECURSION(guard, JSON);
 
+	/* jsonSerialize() may run a user error handler that drops the last
+	 * reference to the object; keep it alive so the recursion guard and the
+	 * identity check below stay valid. */
+	GC_ADDREF(obj);
+
 	zend_function *json_serialize_method = zend_hash_str_find_ptr(&ce->function_table, ZEND_STRL("jsonserialize"));
 	ZEND_ASSERT(json_serialize_method != NULL && "This should be guaranteed prior to calling this function");
 	zend_call_known_function(json_serialize_method, obj, ce, &retval, 0, NULL, NULL);
@@ -590,6 +595,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zend_obje
 			smart_str_appendl(buf, "null", 4);
 		}
 		ZEND_GUARD_UNPROTECT_RECURSION(guard, JSON);
+		OBJ_RELEASE(obj);
 		return FAILURE;
 	}
 
@@ -604,6 +610,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zend_obje
 	}
 
 	zval_ptr_dtor(&retval);
+	OBJ_RELEASE(obj);
 
 	return return_code;
 }
