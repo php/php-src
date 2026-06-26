@@ -1415,6 +1415,11 @@ PHP_FUNCTION(number_format)
 		thousand_sep_len = 1;
 	}
 
+	if (UNEXPECTED(dec > INT_MAX || dec < INT_MIN)) {
+		zend_argument_value_error(2, "must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_THROWS();
+	}
+
 	switch (Z_TYPE_P(num)) {
 		case IS_LONG:
 			RETURN_STR(_php_math_number_format_long(Z_LVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
@@ -1429,11 +1434,7 @@ PHP_FUNCTION(number_format)
 				RETURN_STR(_php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 			}
 
-			if (dec >= 0) {
-				dec_int = ZEND_LONG_INT_OVFL(dec) ? INT_MAX : (int)dec;
-			} else {
-				dec_int = ZEND_LONG_INT_UDFL(dec) ? INT_MIN : (int)dec;
-			}
+			dec_int = (int) dec;
 			RETURN_STR(_php_math_number_format_ex(Z_DVAL_P(num), dec_int, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 
 		default: ZEND_UNREACHABLE();
