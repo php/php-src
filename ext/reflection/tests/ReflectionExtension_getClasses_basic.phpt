@@ -8,7 +8,7 @@ $ext = new ReflectionExtension('reflection');
 var_dump($ext->getClasses());
 ?>
 --EXPECTF--
-array(26) {
+array(29) {
   ["ReflectionException"]=>
   object(ReflectionClass)#%d (1) {
     ["name"]=>
@@ -138,5 +138,20 @@ array(26) {
   object(ReflectionEnum)#%d (1) {
     ["name"]=>
     string(16) "PropertyHookType"
+  }
+  ["ReflectionGenericVariance"]=>
+  object(ReflectionEnum)#%d (1) {
+    ["name"]=>
+    string(25) "ReflectionGenericVariance"
+  }
+  ["ReflectionGenericTypeParameter"]=>
+  object(ReflectionClass)#%d (1) {
+    ["name"]=>
+    string(30) "ReflectionGenericTypeParameter"
+  }
+  ["ReflectionTypeParameterReference"]=>
+  object(ReflectionClass)#%d (1) {
+    ["name"]=>
+    string(32) "ReflectionTypeParameterReference"
   }
 }

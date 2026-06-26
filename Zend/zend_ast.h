@@ -69,6 +69,9 @@ enum _zend_ast_kind {
 	ZEND_AST_ATTRIBUTE_GROUP,
 	ZEND_AST_MATCH_ARM_LIST,
 	ZEND_AST_MODIFIER_LIST,
+	ZEND_AST_GENERIC_TYPE_PARAMETER_LIST,
+	ZEND_AST_GENERIC_TYPE_ARGUMENT_LIST,
+	ZEND_AST_GENERIC_CALL_TYPE_ARGUMENT_LIST,
 
 	/* 0 child nodes */
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -117,7 +120,6 @@ enum _zend_ast_kind {
 	ZEND_AST_PROP,
 	ZEND_AST_NULLSAFE_PROP,
 	ZEND_AST_STATIC_PROP,
-	ZEND_AST_CALL,
 	ZEND_AST_CLASS_CONST,
 	ZEND_AST_ASSIGN,
 	ZEND_AST_ASSIGN_REF,
@@ -128,7 +130,6 @@ enum _zend_ast_kind {
 	ZEND_AST_AND,
 	ZEND_AST_OR,
 	ZEND_AST_ARRAY_ELEM,
-	ZEND_AST_NEW,
 	ZEND_AST_INSTANCEOF,
 	ZEND_AST_YIELD,
 	ZEND_AST_COALESCE,
@@ -148,23 +149,23 @@ enum _zend_ast_kind {
 	ZEND_AST_USE_ELEM,
 	ZEND_AST_TRAIT_ALIAS,
 	ZEND_AST_GROUP_USE,
-	ZEND_AST_ATTRIBUTE,
 	ZEND_AST_MATCH,
 	ZEND_AST_MATCH_ARM,
 	ZEND_AST_NAMED_ARG,
 	ZEND_AST_PIPE,
+	ZEND_AST_GENERIC_NAMED_TYPE,
 
 	/* 3 child nodes */
-	ZEND_AST_METHOD_CALL = 3 << ZEND_AST_NUM_CHILDREN_SHIFT,
-	ZEND_AST_NULLSAFE_METHOD_CALL,
-	ZEND_AST_STATIC_CALL,
-	ZEND_AST_CONDITIONAL,
-
+	ZEND_AST_CONDITIONAL = 3 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_TRY,
 	ZEND_AST_CATCH,
 	ZEND_AST_PROP_GROUP,
 	ZEND_AST_CONST_ELEM,
 	ZEND_AST_CLASS_CONST_GROUP,
+	ZEND_AST_CALL,
+	ZEND_AST_NEW,
+	ZEND_AST_GENERIC_TYPE_PARAMETER,
+	ZEND_AST_ATTRIBUTE,
 
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -175,7 +176,13 @@ enum _zend_ast_kind {
 	// Pseudo node for initializing enums
 	ZEND_AST_CONST_ENUM_INIT,
 
+	/* Method call forms with optional call_type_arguments slot. */
+	ZEND_AST_METHOD_CALL,
+	ZEND_AST_NULLSAFE_METHOD_CALL,
+
 	/* 5 child nodes */
+	/* Static call: class, method, args, call_type_arguments, class_type_arguments. */
+	ZEND_AST_STATIC_CALL = 5 << ZEND_AST_NUM_CHILDREN_SHIFT,
 
 	/* 6 child nodes */
 	ZEND_AST_PARAM = 6 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -225,7 +232,7 @@ typedef struct _zend_ast_decl {
 	uint32_t flags;
 	zend_string *doc_comment;
 	zend_string *name;
-	zend_ast *child[5];
+	zend_ast *child[6];
 } zend_ast_decl;
 
 // TODO: rename
@@ -337,7 +344,8 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_arg_list_add(zend_ast *list, zend_ast
 
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
-	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4
+	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3,
+	zend_ast *child4, zend_ast *child5
 );
 
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_fcc(zend_ast *args);

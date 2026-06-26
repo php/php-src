@@ -1734,12 +1734,45 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 					uint32_t fn_flags2 = op_array->fn_flags2;
 					zend_function *prototype = op_array->prototype;
 					HashTable *ht = op_array->static_variables;
+					zend_arg_info *arg_info = op_array->arg_info;
+					bool arg_info_substituted = (arg_info != orig_op_array->arg_info);
 
 					*op_array = *orig_op_array;
 					op_array->fn_flags = fn_flags;
 					op_array->fn_flags2 = fn_flags2;
 					op_array->prototype = prototype;
 					op_array->static_variables = ht;
+					if (arg_info_substituted) {
+						op_array->arg_info = arg_info;
+					}
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		zend_property_info *prop;
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->properties_info, name, prop) {
+			if (!(prop->flags & ZEND_ACC_GENERIC_CLONE) || !prop->hooks) {
+				continue;
+			}
+
+			const zend_property_info *parent_prop = zend_hash_find_ptr(&prop->ce->properties_info, name);
+			if (!parent_prop || !parent_prop->hooks) {
+				continue;
+			}
+
+			for (uint32_t hi = 0; hi < ZEND_PROPERTY_HOOK_COUNT; hi++) {
+				zend_function *clone_hook = prop->hooks[hi];
+				zend_function *parent_hook = parent_prop->hooks[hi];
+				if (!clone_hook || !parent_hook || clone_hook == parent_hook) {
+					continue;
+				}
+
+				zend_arg_info *arg_info = clone_hook->op_array.arg_info;
+				bool arg_info_substituted = (arg_info != parent_hook->op_array.arg_info);
+
+				clone_hook->op_array = parent_hook->op_array;
+				if (arg_info_substituted) {
+					clone_hook->op_array.arg_info = arg_info;
 				}
 			}
 		} ZEND_HASH_FOREACH_END();

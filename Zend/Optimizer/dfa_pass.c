@@ -292,6 +292,15 @@ static inline bool can_elide_list_type(
 static inline bool can_elide_return_type_check(
 		const zend_script *script, zend_op_array *op_array, zend_ssa *ssa, zend_ssa_op *ssa_op) {
 	zend_arg_info *arg_info = &op_array->arg_info[-1];
+	/* T-bearing returns must not be elided: a substituted child clone reads
+	 * arg_info[-1] dynamically and may bind T to a stricter type than the
+	 * parent's compile-time bound. */
+	if (op_array->generic_types
+			&& op_array->generic_types->return_type
+			&& ZEND_TYPE_HAS_TYPE_PARAMETER(*op_array->generic_types->return_type)) {
+		return false;
+	}
+
 	zend_ssa_var_info *use_info = &ssa->var_info[ssa_op->op1_use];
 	uint32_t use_type = use_info->type & (MAY_BE_ANY|MAY_BE_UNDEF);
 	if (use_type & MAY_BE_REF) {
