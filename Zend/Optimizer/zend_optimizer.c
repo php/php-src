@@ -1467,14 +1467,13 @@ static void zend_optimize_op_array(zend_op_array      *op_array,
 
 static void zend_adjust_fcall_stack_size(const zend_op_array *op_array, const zend_optimizer_ctx *ctx)
 {
-	zend_function *func;
 	zend_op *opline;
 
 	opline = op_array->opcodes;
 	const zend_op* end = opline + op_array->last;
 	while (opline < end) {
 		if (opline->opcode == ZEND_INIT_FCALL) {
-			func = zend_hash_find_ptr(
+			const zend_function *func = zend_hash_find_ptr(
 				&ctx->script->function_table,
 				Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 			if (func) {

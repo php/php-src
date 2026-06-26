@@ -41,26 +41,27 @@ typedef struct _literal_info {
 		info[n].num_related = (related); \
 	} while (0)
 
-static uint32_t add_static_slot(HashTable     *hash,
-                                zend_op_array *op_array,
-                                uint32_t       op1,
-                                uint32_t       op2,
-                                uint32_t       kind,
-                                uint32_t       *cache_size)
-{
+static uint32_t add_static_slot(
+	HashTable *hash,
+	const zend_op_array *op_array,
+	uint32_t op1,
+	uint32_t op2,
+	uint32_t kind,
+	uint32_t *cache_size
+) {
 	uint32_t ret;
-	zval *class_name = &op_array->literals[op1];
-	zval *prop_name = &op_array->literals[op2];
-	zval *pos, tmp;
+	const zval *class_name = &op_array->literals[op1];
+	const zval *prop_name = &op_array->literals[op2];
 
 	zend_string *key = zend_create_member_string(Z_STR_P(class_name), Z_STR_P(prop_name));
 	ZSTR_H(key) = zend_string_hash_func(key);
 	ZSTR_H(key) += kind;
 
-	pos = zend_hash_find(hash, key);
+	const zval *pos = zend_hash_find(hash, key);
 	if (pos) {
 		ret = Z_LVAL_P(pos);
 	} else {
+		zval tmp;
 		ret = *cache_size;
 		*cache_size += (kind == LITERAL_STATIC_PROPERTY ? 3 : 2) * sizeof(void *);
 		ZVAL_LONG(&tmp, ret);
@@ -77,7 +78,7 @@ static inline void bias_key(zend_string *key, uint32_t bias)
 	ZSTR_H(key) = zend_string_hash_val(key) + bias;
 }
 
-static zend_string *create_str_cache_key(zval *literal, uint8_t num_related)
+static zend_string *create_str_cache_key(const zval *literal, uint8_t num_related)
 {
 	ZEND_ASSERT(Z_TYPE_P(literal) == IS_STRING);
 	if (num_related == 1) {
