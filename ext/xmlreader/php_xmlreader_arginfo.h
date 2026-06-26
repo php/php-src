@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_xmlreader.stub.php instead.
- * Stub hash: 80288a0f40eabc7802a928963386616ea31e448d */
+ * Stub hash: 11cf6e4c523d9ebbe2775d5bd127be303402336f */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_close, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
@@ -176,7 +176,7 @@ static zend_class_entry *register_class_XMLReader(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "XMLReader", class_XMLReader_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_NONE_value;
 	ZVAL_LONG(&const_NONE_value, XML_READER_TYPE_NONE);
