@@ -230,6 +230,8 @@ PHP                                                                        NEWS
 
 - Sodium:
   . Added support for libsodium 1.0.21 IPcrypt and XOF APIs. (jedisct1)
+  . pwhash argument-validation errors now throw ValueError instead of
+    SodiumException. (iliaal)
 
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger

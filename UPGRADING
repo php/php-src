@@ -127,6 +127,15 @@ PHP 8.6 UPGRADE NOTES
     occurrence constraints and integer restriction facets. Negative minOccurs
     and maxOccurs values are rejected as well.
 
+- Sodium:
+  . The password-hashing functions sodium_crypto_pwhash(),
+    sodium_crypto_pwhash_str(),
+    sodium_crypto_pwhash_scryptsalsa208sha256() and
+    sodium_crypto_pwhash_scryptsalsa208sha256_str() now throw ValueError
+    instead of SodiumException when an argument is out of range, such as an
+    opslimit or memlimit below the documented minimum. SodiumException is
+    still thrown for internal libsodium failures.
+
 - SPL:
   . SplObjectStorage::getHash() implementations may no longer mutate any
     SplObjectStorage instance. Attempting to do so now throws an Error.
