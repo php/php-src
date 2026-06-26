@@ -381,11 +381,19 @@ static zval *php_dom_xpath_callback_fetch_args(xmlXPathParserContextPtr ctxt, ui
 	return params;
 }
 
-static void php_dom_xpath_callback_cleanup_args(zval *params, uint32_t param_count)
+static void php_dom_xpath_callback_cleanup_args(php_dom_xpath_callbacks *xpath_callbacks, zval *params, uint32_t param_count)
 {
 	if (params) {
 		for (uint32_t i = 0; i < param_count; i++) {
-			zval_ptr_dtor(&params[i]);
+			zval *param = &params[i];
+			if (Z_TYPE_P(param) == IS_OBJECT || Z_TYPE_P(param) == IS_ARRAY) {
+				if (xpath_callbacks->node_list == NULL) {
+					xpath_callbacks->node_list = zend_new_array(0);
+				}
+				zend_hash_next_index_insert_new(xpath_callbacks->node_list, param);
+			} else {
+				zval_ptr_dtor(param);
+			}
 		}
 		efree(params);
 	}
@@ -483,7 +491,7 @@ PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_php_ns(php_dom_xpath_cal
 
 cleanup:
 	xmlXPathFreeObject(obj);
-	php_dom_xpath_callback_cleanup_args(params, param_count);
+	php_dom_xpath_callback_cleanup_args(xpath_callbacks, params, param_count);
 cleanup_no_obj:
 	if (UNEXPECTED(result != SUCCESS)) {
 		/* Push sentinel value */
@@ -511,7 +519,7 @@ PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_custom_ns(php_dom_xpath_
 
 	zend_result result = php_dom_xpath_callback_dispatch(xpath_callbacks, ns, ctxt, params, param_count, function_name, function_name_length);
 
-	php_dom_xpath_callback_cleanup_args(params, param_count);
+	php_dom_xpath_callback_cleanup_args(xpath_callbacks, params, param_count);
 	if (UNEXPECTED(result != SUCCESS)) {
 		/* Push sentinel value */
 		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
