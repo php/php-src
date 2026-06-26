@@ -19,6 +19,10 @@ PHP 8.6 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- COM
+  . It is no longer possible to clone variant objects, this is because
+    the cloning behaviour was ill defined.
+
 - DOM:
   . Properties previously documented as @readonly (e.g. DOMNode::$nodeType,
     DOMDocument::$xmlEncoding, DOMEntity::$actualEncoding, ::$encoding,
