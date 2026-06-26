@@ -249,6 +249,8 @@ PHP                                                                        NEWS
 
 - Sqlite3:
   . Fix NUL byte truncation in sqlite3 TEXT column handling. (ndossche)
+  . Fixed bug GH-22051 (Inconsistent error reporting in SQLite3Result::reset()
+    and SQLite3Result::finalize()). (iliaal)
 
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
