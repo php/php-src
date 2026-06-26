@@ -65,7 +65,7 @@ static void _breakiterator_move_forward(zend_object_iterator *iter)
 		return;
 	}
 
-	int32_t pos = biter->next();
+	const int32_t pos = biter->next();
 	if (pos != BreakIterator::DONE) {
 		ZVAL_LONG(&zoi_iter->current, (zend_long)pos);
 	} //else we've reached the end of the enum, nothing more is required
@@ -76,7 +76,7 @@ static void _breakiterator_rewind(zend_object_iterator *iter)
 	BreakIterator *biter = _breakiter_prolog(iter);
 	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
 
-	int32_t pos = biter->first();
+	const int32_t pos = biter->first();
 	ZVAL_LONG(&zoi_iter->current, (zend_long)pos);
 }
 

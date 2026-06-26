@@ -226,7 +226,7 @@ static void _php_intlcal_field_uec_ret_in32t_method(
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	int32_t result = (co->ucal->*func)(
+	const int32_t result = (co->ucal->*func)(
 		(UCalendarDateFields)field, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
@@ -250,7 +250,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_time)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	UDate result = co->ucal->getTime(CALENDAR_ERROR_CODE(co));
+	const UDate result = co->ucal->getTime(CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "error calling ICU Calendar::getTime");
 
 	RETURN_DOUBLE((double)result);
@@ -377,7 +377,7 @@ static void _php_intlcal_before_after(
 		RETURN_THROWS();
 	}
 
-	UBool res = (co->ucal->*func)(*when_co->ucal, CALENDAR_ERROR_CODE(co));
+	const UBool res = (co->ucal->*func)(*when_co->ucal, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "Error calling ICU method");
 
 	RETURN_BOOL((int)res);
@@ -401,7 +401,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 
 	object = getThis();
 
-	int arg_num = ZEND_NUM_ARGS() - (object ? 0 : 1);
+	const int arg_num = ZEND_NUM_ARGS() - (object ? 0 : 1);
 
 	if (object && arg_num > 2) {
 		zend_error(E_DEPRECATED, "Calling IntlCalendar::set() with more than 2 arguments is deprecated, "
@@ -564,7 +564,7 @@ U_CFUNC PHP_FUNCTION(intlcal_field_difference)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	int32_t result = co->ucal->fieldDifference((UDate)when,
+	const int32_t result = co->ucal->fieldDifference((UDate)when,
 		(UCalendarDateFields)field, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
@@ -597,7 +597,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	int32_t result = co->ucal->getDayOfWeekType(
+	const int32_t result = co->ucal->getDayOfWeekType(
 		(UCalendarDaysOfWeek)dow, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
@@ -615,7 +615,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_first_day_of_week)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	int32_t result = co->ucal->getFirstDayOfWeek(CALENDAR_ERROR_CODE(co));
+	const int32_t result = co->ucal->getFirstDayOfWeek(CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
 	RETURN_LONG((zend_long)result);
@@ -637,7 +637,7 @@ static void _php_intlcal_field_ret_in32t_method(
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	int32_t result = (co->ucal->*func)((UCalendarDateFields)field);
+	const int32_t result = (co->ucal->*func)((UCalendarDateFields)field);
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
 	RETURN_LONG((zend_long)result);
@@ -696,7 +696,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_minimal_days_in_first_week)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	uint8_t result = co->ucal->getMinimalDaysInFirstWeek();
+	const uint8_t result = co->ucal->getMinimalDaysInFirstWeek();
 	/* TODO Is it really a failure? */
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
@@ -758,7 +758,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_weekend_transition)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	int32_t res = co->ucal->getWeekendTransition((UCalendarDaysOfWeek)dow,
+	const int32_t res = co->ucal->getWeekendTransition((UCalendarDaysOfWeek)dow,
 		CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "Error calling ICU method");
 
@@ -776,7 +776,7 @@ U_CFUNC PHP_FUNCTION(intlcal_in_daylight_time)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	UBool ret = co->ucal->inDaylightTime(CALENDAR_ERROR_CODE(co));
+	const UBool ret = co->ucal->inDaylightTime(CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "Error calling ICU method");
 
 	RETURN_BOOL((int)ret);
@@ -852,7 +852,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
 	if (date_is_null) {
 		RETURN_BOOL((int)co->ucal->isWeekend());
 	} else {
-		UBool ret = co->ucal->isWeekend((UDate)date, CALENDAR_ERROR_CODE(co));
+		const UBool ret = co->ucal->isWeekend((UDate)date, CALENDAR_ERROR_CODE(co));
 		INTL_METHOD_CHECK_STATUS(co, "Error calling ICU method");
 		RETURN_BOOL((int)ret);
 	}
@@ -937,7 +937,7 @@ U_CFUNC PHP_FUNCTION(intlcal_equals)
 		RETURN_THROWS();
 	}
 
-	UBool result = co->ucal->equals(*other_co->ucal, CALENDAR_ERROR_CODE(co));
+	const UBool result = co->ucal->equals(*other_co->ucal, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "error calling ICU Calendar::equals");
 
 	RETURN_BOOL((int)result);
@@ -1116,7 +1116,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 
 	/* There are no exported functions in ext/date to this
 	 * in a more native fashion */
-	double	date = co->ucal->getTime(CALENDAR_ERROR_CODE(co)) / 1000.;
+	const double	date = co->ucal->getTime(CALENDAR_ERROR_CODE(co)) / 1000.;
 	int64_t	ts;
 	char	ts_str[sizeof("@-9223372036854775808")];
 	int		ts_str_len;

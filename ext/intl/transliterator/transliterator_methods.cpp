@@ -31,7 +31,7 @@ extern "C" {
 
 #include <zend_exceptions.h>
 
-static int create_transliterator( char *str_id, size_t str_id_len, zend_long direction, zval *object )
+static int create_transliterator( const char *str_id, size_t str_id_len, zend_long direction, zval *object )
 {
 	Transliterator_object *to;
 	UChar	              *ustr_id    = nullptr;

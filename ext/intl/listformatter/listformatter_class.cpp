@@ -138,7 +138,7 @@ PHP_METHOD(IntlListFormatter, format)
 
     intl_errors_reset(LISTFORMATTER_ERROR_P(obj));
 
-    uint32_t count = zend_hash_num_elements(ht);
+    const uint32_t count = zend_hash_num_elements(ht);
     if (count == 0) {
         RETURN_EMPTY_STRING();
     }

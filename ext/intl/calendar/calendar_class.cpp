@@ -192,7 +192,7 @@ static HashTable *Calendar_get_debug_info(zend_object *object, int *is_temp)
 			 i++) {
 		UErrorCode	uec		= U_ZERO_ERROR;
 		const char	*name	= debug_info_fields[i].name;
-		int32_t		res		= cal->get(debug_info_fields[i].field, uec);
+		const int32_t	res		= cal->get(debug_info_fields[i].field, uec);
 		if (U_SUCCESS(uec)) {
 			add_assoc_long(&zfields, name, (zend_long)res);
 		} else {

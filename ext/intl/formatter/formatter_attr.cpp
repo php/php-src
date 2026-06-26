@@ -74,7 +74,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_attribute )
 			break;
 		case UNUM_ROUNDING_INCREMENT:
 		{
-			double value_double = unum_getDoubleAttribute(FORMATTER_UNUM(nfo), attribute);
+			const double value_double = unum_getDoubleAttribute(FORMATTER_UNUM(nfo), attribute);
 			if(value_double == -1) {
 				INTL_DATA_ERROR_CODE(nfo) = U_UNSUPPORTED_ERROR;
 			} else {

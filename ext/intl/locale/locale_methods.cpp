@@ -1660,7 +1660,7 @@ U_CFUNC PHP_FUNCTION(locale_add_likely_subtags)
 		locale = (char *)intl_locale_get_default();
 	}
 
-	int32_t maximized_locale_len = uloc_addLikelySubtags(locale, maximized_locale, sizeof(maximized_locale), &status);
+	const int32_t maximized_locale_len = uloc_addLikelySubtags(locale, maximized_locale, sizeof(maximized_locale), &status);
 	INTL_CHECK_STATUS(status, "invalid locale");
 	if (maximized_locale_len < 0) {
 		RETURN_FALSE;
@@ -1683,7 +1683,7 @@ U_CFUNC PHP_FUNCTION(locale_minimize_subtags)
 		locale = (char *)intl_locale_get_default();
 	}
 
-	int32_t minimized_locale_len = uloc_minimizeSubtags(locale, minimized_locale, sizeof(minimized_locale), &status);
+	const int32_t minimized_locale_len = uloc_minimizeSubtags(locale, minimized_locale, sizeof(minimized_locale), &status);
 	INTL_CHECK_STATUS(status, "invalid locale");
 	if (minimized_locale_len < 0) {
 		RETURN_FALSE;

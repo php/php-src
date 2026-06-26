@@ -184,7 +184,7 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 						(void*)&bogusType, sizeof(bogusType));
 			}
 		} else if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NUMBER) {
-			int32_t argNumber = name_part.getValue();
+			const int32_t argNumber = name_part.getValue();
 			if (argNumber < 0) {
 				intl_errors_set(&err, U_INVALID_FORMAT_ERROR,
 					"Found part with negative number");
@@ -364,7 +364,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 								UChar **formatted,
 								int32_t *formatted_len)
 {
-	int arg_count = zend_hash_num_elements(args);
+	const int arg_count = zend_hash_num_elements(args);
 	std::vector<Formattable> fargs;
 	std::vector<UnicodeString> farg_names;
 	MessageFormat *mf = (MessageFormat *)mfo->mf_data.umsgf;
@@ -408,7 +408,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 			}
 
 		   UChar temp[16];
-		   int32_t len = u_sprintf(temp, "%u", (uint32_t)num_index);
+		   const int32_t len = u_sprintf(temp, "%u", (uint32_t)num_index);
 		   key.append(temp, len);
 
 		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, num_index);
@@ -467,7 +467,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 				}
 			case Formattable::kDouble:
 				{
-					double d = zval_get_double(elem);
+					const double d = zval_get_double(elem);
 					formattable.setDouble(d);
 					break;
 				}
@@ -523,7 +523,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 				}
 			case Formattable::kDate:
 				{
-					double dd = intl_zval_to_millis(elem, &err);
+					const double dd = intl_zval_to_millis(elem, &err);
 					if (U_FAILURE(err.code)) {
 						char *message;
 						zend_string *u8key;
