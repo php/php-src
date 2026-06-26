@@ -3642,8 +3642,8 @@ static bool exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start
 	 * There are 2 IDFs, the second one holds the keys (0x0201 and 0x0202) to the thumbnail
 	 */
 	if (!exif_offset_info_contains(info, dir_start+2+NumDirEntries*12, 4)) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size");
-		return false;
+		/* No offset to a next IFD follows the entries, so there is none. */
+		return true;
 	}
 
 	if (tag != TAG_EXIF_IFD_POINTER && tag != TAG_GPS_IFD_POINTER) {
