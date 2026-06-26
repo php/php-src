@@ -371,7 +371,9 @@ PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, p
 
 		bucket = php_stream_bucket_new(stream, (char*) stream->readbuf + stream->readpos, stream->writepos - stream->readpos, 0, 0);
 		php_stream_bucket_append(brig_inp, bucket);
+		chain->in_iteration++;
 		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL);
+		chain->in_iteration--;
 
 		if (stream->readpos + consumed > (uint32_t)stream->writepos) {
 			/* No behaving filter should cause this. */
@@ -465,15 +467,17 @@ PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool fini
 	chain = filter->chain;
 	stream = chain->stream;
 
-	for(current = filter; current; current = current->next) {
+	chain->in_iteration++;
+	for (current = filter; current; current = current->next) {
 		php_stream_filter_status_t status;
 
 		status = current->fops->filter(stream, current, inp, outp, NULL, flags);
 		if (status == PSFS_FEED_ME) {
-			/* We've flushed the data far enough */
+			chain->in_iteration--;
 			return SUCCESS;
 		}
 		if (status == PSFS_ERR_FATAL) {
+			chain->in_iteration--;
 			return FAILURE;
 		}
 		/* Otherwise we have data available to PASS_ON
@@ -486,6 +490,7 @@ PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool fini
 
 		flags = PSFS_FLAG_NORMAL;
 	}
+	chain->in_iteration--;
 
 	/* Last filter returned data via PSFS_PASS_ON
 		Do something with it */

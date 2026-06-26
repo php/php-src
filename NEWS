@@ -306,6 +306,8 @@ PHP                                                                        NEWS
   . Improved stream_socket_server() bind failure error reporting. (ilutov)
   . Fixed bug #49874 (ftell() and fseek() inconsistency when using stream
     filters). (Jakub Zelenka)
+  . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
+    callback). (iliaal)
 
 - URI:
   . Added Uri\Rfc3986\Uri::getUriType() and Uri\WhatWg\Url::isSpecialScheme().

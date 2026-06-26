@@ -1390,6 +1390,11 @@ PHP_FUNCTION(stream_filter_remove)
 		RETURN_THROWS();
 	}
 
+	if (filter->chain && filter->chain->in_iteration > 0) {
+		php_error_docref(NULL, E_WARNING, "Cannot remove filter while it is being applied");
+		RETURN_FALSE;
+	}
+
 	if (php_stream_filter_flush(filter, 1) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Unable to flush filter, not removing");
 		RETURN_FALSE;
