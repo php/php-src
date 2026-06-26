@@ -598,6 +598,8 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val
 
 	ZEND_GUARD_PROTECT_RECURSION(guard, JSON);
 
+	GC_ADDREF(obj);
+
 	ZVAL_STRING(&fname, "jsonSerialize");
 
 	if (FAILURE == call_user_function(NULL, val, &fname, &retval, 0, NULL) || Z_TYPE(retval) == IS_UNDEF) {
@@ -610,6 +612,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val
 			smart_str_appendl(buf, "null", 4);
 		}
 		ZEND_GUARD_UNPROTECT_RECURSION(guard, JSON);
+		OBJ_RELEASE(obj);
 		return FAILURE;
 	}
 
@@ -622,6 +625,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val
 			smart_str_appendl(buf, "null", 4);
 		}
 		ZEND_GUARD_UNPROTECT_RECURSION(guard, JSON);
+		OBJ_RELEASE(obj);
 		return FAILURE;
 	}
 
@@ -638,6 +642,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val
 
 	zval_ptr_dtor(&retval);
 	zval_ptr_dtor(&fname);
+	OBJ_RELEASE(obj);
 
 	return return_code;
 }
