@@ -1173,3 +1173,11 @@ SAPI_API void sapi_add_request_header(const char *var, unsigned int var_len, cha
 	}
 }
 /* }}} */
+
+SAPI_API bool sapi_is_single_request(void)
+{
+	if (!sapi_module.is_single_request) {
+		return false;
+	}
+	return sapi_module.is_single_request();
+}
