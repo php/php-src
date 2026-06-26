@@ -1361,6 +1361,7 @@ static zend_result php_array_walk(
 {
 	zval args[3],		/* Arguments to userland function */
 		 retval,		/* Return value - unused */
+		 temp,
 		 *zv;
 	HashTable *target_hash = HASH_OF(array);
 	HashPosition pos;
@@ -1374,6 +1375,10 @@ static zend_result php_array_walk(
 	if (zend_hash_num_elements(target_hash) == 0) {
 		return result;
 	}
+
+	zend_function *callback = context->fci_cache.function_handler;
+	bool callback_by_ref = callback != NULL
+		&& ARG_SHOULD_BE_SENT_BY_REF(callback, 1);
 
 	/* Set up known arguments */
 	ZVAL_UNDEF(&args[1]);
@@ -1390,6 +1395,8 @@ static zend_result php_array_walk(
 
 	/* Iterate through hash */
 	do {
+		bool used_temp = false;
+
 		/* Retrieve value */
 		zv = zend_hash_get_current_data_ex(target_hash, &pos);
 		if (zv == NULL) {
@@ -1407,10 +1414,23 @@ static zend_result php_array_walk(
 			/* Add type source for property references. */
 			if (Z_TYPE_P(zv) != IS_REFERENCE && Z_TYPE_P(array) == IS_OBJECT) {
 				zend_property_info *prop_info =
-					zend_get_typed_property_info_for_slot(Z_OBJ_P(array), zv);
+					zend_get_property_info_for_slot(Z_OBJ_P(array), zv);
 				if (prop_info) {
-					ZVAL_NEW_REF(zv, zv);
-					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(zv), prop_info);
+					if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+						if (callback_by_ref) {
+							zend_throw_error(NULL,
+								"Cannot acquire reference to readonly property %s::$%s",
+								ZSTR_VAL(prop_info->ce->name),
+								zend_get_unmangled_property_name(prop_info->name));
+							break;
+						}
+						ZVAL_COPY(&temp, zv);
+						zv = &temp;
+						used_temp = true;
+					} else if (ZEND_TYPE_IS_SET(prop_info->type)) {
+						ZVAL_NEW_REF(zv, zv);
+						ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(zv), prop_info);
+					}
 				}
 			}
 		}
@@ -1460,6 +1480,10 @@ static zend_result php_array_walk(
 		}
 
 		zval_ptr_dtor_str(&args[1]);
+
+		if (used_temp) {
+			zval_ptr_dtor(&temp);
+		}
 
 		if (result == FAILURE) {
 			break;
