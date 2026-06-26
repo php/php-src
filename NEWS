@@ -138,6 +138,9 @@ PHP                                                                        NEWS
     contains a reference wrapper). (Weilin Du)
   . Fixed tracing JIT crash when a VM interrupt is handled during an observed
     user function call. (Levi Morrison)
+  . Fixed bug GH-8739 (OPcache restart corrupts shared memory under threaded
+    SAPIs: fcntl()-based reader tracking cannot see threads of the same
+    process). (Yoan Arnaudov)
   . Fixed bug GH-22004 (Assertion failure at ext/opcache/jit/zend_jit_trace.c).
     (Arnaud)
 
