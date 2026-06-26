@@ -7493,6 +7493,58 @@ ZEND_METHOD(ReflectionAttribute, getName)
 }
 /* }}} */
 
+/* Returns whether this attribute name comes from a namespace */
+ZEND_METHOD(ReflectionAttribute, inNamespace)
+{
+	reflection_object *intern;
+	attribute_reference *attr;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(attr);
+
+	const zend_string *name = attr->data->name;
+	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	RETURN_BOOL(backslash);
+}
+/* }}} */
+
+/* Returns the name of namespace where this attribute comes from */
+ZEND_METHOD(ReflectionAttribute, getNamespaceName)
+{
+	reflection_object *intern;
+	attribute_reference *attr;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(attr);
+
+	const zend_string *name = attr->data->name;
+	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	if (backslash) {
+		RETURN_STRINGL(ZSTR_VAL(name), backslash - ZSTR_VAL(name));
+	}
+	RETURN_EMPTY_STRING();
+}
+
+/* Returns the short name of the attribute (without namespace part) */
+ZEND_METHOD(ReflectionAttribute, getShortName)
+{
+	reflection_object *intern;
+	attribute_reference *attr;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(attr);
+
+	zend_string *name = attr->data->name;
+	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	if (backslash) {
+		RETURN_STRINGL(backslash + 1, ZSTR_LEN(name) - (backslash - ZSTR_VAL(name) + 1));
+	}
+	RETURN_STR_COPY(name);
+}
+
 /* {{{ Returns the target of the attribute */
 ZEND_METHOD(ReflectionAttribute, getTarget)
 {
