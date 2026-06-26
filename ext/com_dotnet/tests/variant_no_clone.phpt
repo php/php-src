@@ -2,7 +2,6 @@
 Prevent cloning of Variant types as it's broken
 --EXTENSIONS--
 com_dotnet
-
 --FILE--
 <?php
 
