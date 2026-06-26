@@ -33,6 +33,7 @@ const php_hash_ops php_hash_joaat_ops = {
 	4,
 	4,
 	sizeof(PHP_JOAAT_CTX),
+	0,
 	0
 };
 
