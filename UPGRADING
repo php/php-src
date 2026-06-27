@@ -501,6 +501,9 @@ PHP 8.6 UPGRADE NOTES
     when using PHP_JSON_PRETTY_PRINT.
 
 - Intl:
+  . Improved performance of IntlCalendar::getAvailableLocales() and
+    IntlDateFormatter::localtime() / datefmt_localtime() by pre-allocating
+    their returned arrays.
   . Improved performance of transliterator_list_ids() and
     resourcebundle_locales() by pre-allocating their returned arrays.
 
@@ -518,10 +521,14 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of str_split().
 
 - URI:
+  . Improved performance of Uri\WhatWg\Url::parse() when collecting
+    validation errors by pre-allocating the error array.
   . Reduced allocations when reading IPv6/IPFuture hosts and paths with
     Uri\Rfc3986\Uri.
   . Improved performance and memory consumption when using normalizing
     (non-raw) getters on already-normalized URIs with Uri\Rfc3986\Uri.
 
 - Zip:
+  . Improved performance of ZipArchive::addGlob() and
+    ZipArchive::addPattern() by pre-allocating their returned arrays.
   . Avoid string copies in ZipArchive::addFromString().
