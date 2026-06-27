@@ -30,6 +30,18 @@
 
 static const char digits[] = "0123456789abcdef";
 
+static const uint32_t charmap[8] = {
+	0xffffffff, 0x500080c4, 0x10000000, 0x00000000,
+	0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
+
+static zend_always_inline void php_json_append_quoted(smart_str *buf, const char *s, size_t len)
+{
+	char *dst = smart_str_extend(buf, len + 2);
+	dst[0] = '"';
+	memcpy(dst + 1, s, len);
+	dst[len + 1] = '"';
+}
+
 static zend_always_inline bool php_json_check_stack_limit(void)
 {
 #ifdef ZEND_CHECK_STACK_LIMIT
@@ -104,6 +116,7 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 			GC_TRY_UNPROTECT_RECURSION(_tmp_ht); \
 		} \
 	} while (0)
+
 
 static zend_result php_json_encode_array(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
@@ -374,6 +387,18 @@ zend_result php_json_escape_string(
 		}
 
 	}
+	/* fast path: no characters in the string require escaping allows us to single alloc and memcpy */
+	{
+		size_t i = 0;
+		while (i < len && !ZEND_BIT_TEST(charmap, (unsigned char)s[i])) {
+			i++;
+		}
+		if (EXPECTED(i == len)) {
+			php_json_append_quoted(buf, s, len);
+			return SUCCESS;
+		}
+	}
+
 	checkpoint = buf->s ? ZSTR_LEN(buf->s) : 0;
 
 	/* pre-allocate for string length plus 2 quotes */
@@ -383,10 +408,6 @@ zend_result php_json_escape_string(
 	pos = 0;
 
 	do {
-		static const uint32_t charmap[8] = {
-			0xffffffff, 0x500080c4, 0x10000000, 0x00000000,
-			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
-
 		unsigned int us = (unsigned char)s[pos];
 		if (EXPECTED(!ZEND_BIT_TEST(charmap, us))) {
 			pos++;
