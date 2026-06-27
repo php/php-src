@@ -689,11 +689,7 @@ second_try:
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash)) {
 			if (info) {
-				if (Z_ISREF_P(data)) {
-					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
-				} else {
-					var_restore_prop_default(var_hash, obj, info, data);
-				}
+				var_restore_prop_default(var_hash, obj, info, data);
 			}
 			goto failure;
 		}
