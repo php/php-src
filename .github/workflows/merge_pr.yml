@@ -1,0 +1,124 @@
+name: Merge PR
+
+on:
+  pull_request_target:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  merge_pr:
+    name: Merge PR
+    if: github.event.label.name == 'Merge'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
+
+      - name: git checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          ref: ${{ github.event.pull_request.base.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+
+      - name: git config
+        run: |
+          git config --local url."https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
+          git config user.name "PHP Merge Bot"
+          git config user.email "287303856+php-merge-bot@users.noreply.github.com"
+          git config merge.NEWS.name "Keep the NEWS file"
+          git config merge.NEWS.driver "touch %A"
+          git config merge.log true
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v7
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          git_commit_gpgsign: true
+          git_user_signingkey: true
+
+      - name: Fetch PR head
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git fetch origin "refs/pull/${PR_NUMBER}/head"
+
+      - name: Merge PR
+        id: merge
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_REF: ${{ github.event.pull_request.head.ref }}
+          PR_REPO_URL: ${{ github.event.pull_request.head.repo.clone_url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_DESCRIPTION: ${{ github.event.pull_request.body }}
+          TARGET_SHA: ${{ github.event.pull_request.base.sha }}
+          TARGET_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          # Use merge script from master to avoid syncing to lower branches.
+          git show origin/master:.github/scripts/merge_pr.php > "$RUNNER_TEMP/merge_pr.php"
+          php "$RUNNER_TEMP/merge_pr.php"
+
+      - name: Report failure
+        if: failure()
+        uses: actions/github-script@v9
+        env:
+          FAIL_REASON: ${{ steps.merge.outputs.fail_reason }}
+        with:
+          script: |
+            const reason = process.env.FAIL_REASON || 'Unknown error.';
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `Merge failed: ${reason}\n\n[View workflow run](${runUrl}).`,
+            });
+
+      - name: Remove Merge label
+        if: ${{ always() }}
+        uses: actions/github-script@v9
+        with:
+          script: |
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                name: 'Merge',
+              });
+            } catch (e) {
+              core.warning(`Could not remove the 'Merge' label: ${e.message}`);
+            }
+
+      - name: Close PR
+        if: ${{ steps.merge.outputs.close_pr == '1' }}
+        uses: actions/github-script@v9
+        with:
+          script: |
+            try {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                state: 'closed',
+              });
+            } catch (e) {
+              core.warning(`Could not close the PR: ${e.message}`);
+            }
