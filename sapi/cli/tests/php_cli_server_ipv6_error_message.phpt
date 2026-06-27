@@ -14,8 +14,12 @@ $descriptorspec = array(
     2 => array("pipe", "w")
 );
 
+$php = getenv('TEST_PHP_EXECUTABLE');
+$args = getenv('TEST_PHP_EXTRA_ARGS');
+$cmd = "$php $args" . ' -S "[2001:db8::]:8080"';
+
 $process = proc_open(
-    PHP_BINARY . ' -S "[2001:db8::]:8080"',
+    $cmd,
     $descriptorspec,
     $pipes
 );
