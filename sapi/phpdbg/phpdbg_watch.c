@@ -501,8 +501,39 @@ void phpdbg_free_watch_element(phpdbg_watch_element *element);
 void phpdbg_remove_watchpoint(phpdbg_watchpoint_t *watch);
 void phpdbg_watch_parent_ht(phpdbg_watch_element *element);
 
-phpdbg_watch_element *phpdbg_add_watch_element(phpdbg_watchpoint_t *watch, phpdbg_watch_element *element) {
+static bool phpdbg_watch_element_collides(void *addr, phpdbg_watchtype type, phpdbg_watch_element *element) {
+	phpdbg_watch_element *old;
+	phpdbg_btree_result *res = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong) addr);
+
+	if (res) {
+		phpdbg_watchpoint_t *watch = res->ptr;
+		if (watch->type == type && (old = zend_hash_find_ptr(&watch->elements, element->str)) && old != element) {
+			return true;
+		}
+	}
+
+	return (old = zend_hash_find_ptr(&PHPDBG_G(watch_recreation), element->str)) && old != element;
+}
+
+static bool phpdbg_ht_watch_element_collides(zval *zv, phpdbg_watch_element *element) {
+	HashTable *ht = HT_FROM_ZVP(zv);
+
+	if (!ht) {
+		return false;
+	}
+
+	return phpdbg_watch_element_collides(HT_WATCH_OFFSET + (char *) ht, WATCH_ON_HASHTABLE, element);
+}
+
+static bool phpdbg_bucket_watch_element_collides(zval *zv, phpdbg_watch_element *element) {
+	return phpdbg_watch_element_collides((Bucket *) zv, WATCH_ON_BUCKET, element);
+}
+
+phpdbg_watch_element *phpdbg_add_watch_element(phpdbg_watchpoint_t *watch, phpdbg_watch_element *element, bool *is_new) {
 	phpdbg_btree_result *res;
+	if (is_new) {
+		*is_new = true;
+	}
 	if ((res = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong) watch->addr.ptr)) == NULL) {
 		phpdbg_watchpoint_t *mem = emalloc(sizeof(*mem));
 		*mem = *watch;
@@ -520,6 +551,9 @@ phpdbg_watch_element *phpdbg_add_watch_element(phpdbg_watchpoint_t *watch, phpdb
 			if (element != old_element) {
 				phpdbg_free_watch_element(element);
 			}
+			if (is_new) {
+				*is_new = false;
+			}
 			return old_element;
 		}
 	}
@@ -534,17 +568,27 @@ phpdbg_watch_element *phpdbg_add_watch_element(phpdbg_watchpoint_t *watch, phpdb
 	return element;
 }
 
-phpdbg_watch_element *phpdbg_add_bucket_watch_element(Bucket *bucket, phpdbg_watch_element *element) {
+phpdbg_watch_element *phpdbg_add_bucket_watch_element(Bucket *bucket, phpdbg_watch_element *element, bool *is_new) {
 	phpdbg_watchpoint_t watch;
 	phpdbg_set_bucket_watchpoint(bucket, &watch);
-	element = phpdbg_add_watch_element(&watch, element);
-	phpdbg_watch_parent_ht(element);
-	return element;
+	bool added_new;
+	phpdbg_watch_element *added = phpdbg_add_watch_element(&watch, element, &added_new);
+	if (added_new) {
+		phpdbg_watch_parent_ht(added);
+	}
+	if (is_new) {
+		*is_new = added_new;
+	}
+	return added;
 }
 
-phpdbg_watch_element *phpdbg_add_ht_watch_element(zval *zv, phpdbg_watch_element *element) {
+phpdbg_watch_element *phpdbg_add_ht_watch_element(zval *zv, phpdbg_watch_element *element, bool *is_new) {
 	phpdbg_watchpoint_t watch;
 	HashTable *ht = HT_FROM_ZVP(zv);
+
+	if (is_new) {
+		*is_new = false;
+	}
 
 	if (!ht) {
 		return NULL;
@@ -552,7 +596,7 @@ phpdbg_watch_element *phpdbg_add_ht_watch_element(zval *zv, phpdbg_watch_element
 
 	element->flags |= Z_TYPE_P(zv) == IS_ARRAY ? PHPDBG_WATCH_ARRAY : PHPDBG_WATCH_OBJECT;
 	phpdbg_set_ht_watchpoint(ht, &watch);
-	return phpdbg_add_watch_element(&watch, element);
+	return phpdbg_add_watch_element(&watch, element, is_new);
 }
 
 bool phpdbg_is_recursively_watched(void *ptr, phpdbg_watch_element *element) {
@@ -588,8 +632,15 @@ void phpdbg_add_recursive_watch_from_ht(phpdbg_watch_element *element, zend_long
 	child->parent = element;
 	child->child = NULL;
 	child->parent_container = HT_WATCH_HT(element->watch);
-	zend_hash_add_ptr(&element->child_container, child->str, child);
-	phpdbg_add_bucket_watch_element((Bucket *) zv, child);
+	if (phpdbg_bucket_watch_element_collides(zv, child)) {
+		phpdbg_free_watch_element(child);
+		return;
+	}
+	bool added_new;
+	phpdbg_add_bucket_watch_element((Bucket *) zv, child, &added_new);
+	if (added_new) {
+		zend_hash_add_ptr(&element->child_container, child->str, child);
+	}
 }
 
 void phpdbg_recurse_watch_element(phpdbg_watch_element *element) {
@@ -627,8 +678,13 @@ void phpdbg_recurse_watch_element(phpdbg_watch_element *element) {
 			child->child = NULL;
 			element->child = child;
 		}
+		if (phpdbg_ht_watch_element_collides(zv, child)) {
+			phpdbg_free_watch_element(child);
+			element->child = NULL;
+			return;
+		}
 		zend_hash_init(&child->child_container, 8, NULL, NULL, 0);
-		phpdbg_add_ht_watch_element(zv, child);
+		phpdbg_add_ht_watch_element(zv, child, NULL);
 	} else if (zend_hash_num_elements(&element->child_container) == 0) {
 		zend_string *str;
 		zend_long idx;
@@ -727,7 +783,10 @@ bool phpdbg_try_re_adding_watch_element(zval *parent, phpdbg_watch_element *elem
 			phpdbg_print_watch_diff(WATCH_ON_HASHTABLE, element->str, oldPtr, htPtr);
 		}
 
-		phpdbg_add_ht_watch_element(parent, element);
+		if ((element->flags & PHPDBG_WATCH_RECURSIVE) && phpdbg_ht_watch_element_collides(parent, element)) {
+			return false;
+		}
+		element = phpdbg_add_ht_watch_element(parent, element, NULL);
 	} else if ((zv = zend_symtable_find(ht, element->name_in_parent))) {
 		if (element->flags & PHPDBG_WATCH_IMPLICIT) {
 			zval *next = zv;
@@ -746,9 +805,11 @@ bool phpdbg_try_re_adding_watch_element(zval *parent, phpdbg_watch_element *elem
 			phpdbg_print_watch_diff(WATCH_ON_ZVAL, element->str, &element->backup.zv, zv);
 		}
 
+		if ((element->flags & PHPDBG_WATCH_RECURSIVE) && phpdbg_bucket_watch_element_collides(zv, element)) {
+			return false;
+		}
 		element->parent_container = ht;
-		phpdbg_add_bucket_watch_element((Bucket *) zv, element);
-		phpdbg_watch_parent_ht(element);
+		element = phpdbg_add_bucket_watch_element((Bucket *) zv, element, NULL);
 	} else {
 		return false;
 	}
@@ -1010,7 +1071,8 @@ void phpdbg_check_watchpoint(phpdbg_watchpoint_t *watch) {
 	zend_string *name = NULL;
 	void *comparePtr;
 
-	if (watch->type == WATCH_ON_HASHTABLE) {
+	if (watch->type == WATCH_ON_HASHTABLE
+			&& phpdbg_check_watch_diff(WATCH_ON_HASHTABLE, (char *) &watch->backup.ht + HT_WATCH_OFFSET, watch->addr.ptr)) {
 		phpdbg_watch_element *element;
 		zend_string *str;
 		zend_long idx;
@@ -1248,49 +1310,80 @@ void phpdbg_list_watchpoints(void) {
 	} ZEND_HASH_FOREACH_END();
 }
 
-static int phpdbg_create_simple_watchpoint(zval *zv, phpdbg_watch_element *element) {
-	element->flags = PHPDBG_WATCH_SIMPLE;
-	phpdbg_add_bucket_watch_element((Bucket *) zv, element);
-	return SUCCESS;
+typedef enum {
+	PHPDBG_WATCH_ADD_OK,
+	PHPDBG_WATCH_ADD_FAILED,
+	PHPDBG_WATCH_ADD_DUPLICATE,
+} phpdbg_watch_add_result;
+
+static phpdbg_watch_add_result phpdbg_create_simple_watchpoint(zval *zv, phpdbg_watch_element **element) {
+	phpdbg_watch_element *added;
+	(*element)->flags = PHPDBG_WATCH_SIMPLE;
+	bool added_new;
+	added = phpdbg_add_bucket_watch_element((Bucket *) zv, *element, &added_new);
+	if (!added_new) {
+		*element = added;
+		return PHPDBG_WATCH_ADD_DUPLICATE;
+	}
+	return PHPDBG_WATCH_ADD_OK;
 }
 
-static int phpdbg_create_array_watchpoint(zval *zv, phpdbg_watch_element *element) {
-	phpdbg_watch_element *new;
+static phpdbg_watch_add_result phpdbg_create_array_watchpoint(zval *zv, phpdbg_watch_element **element_ptr) {
+	phpdbg_watch_element *element = *element_ptr;
+	phpdbg_watch_element *new, *added;
 	zend_string *str;
 	zval *orig_zv = zv;
 
 	ZVAL_DEREF(zv);
 	if (Z_TYPE_P(zv) != IS_ARRAY && Z_TYPE_P(zv) != IS_OBJECT) {
-		return FAILURE;
+		return PHPDBG_WATCH_ADD_FAILED;
 	}
-
-	new = ecalloc(1, sizeof(phpdbg_watch_element));
 
 	str = strpprintf(0, "%.*s[]", (int) ZSTR_LEN(element->str), ZSTR_VAL(element->str));
 	zend_string_release(element->str);
 	element->str = str;
 	element->flags = PHPDBG_WATCH_IMPLICIT;
-	phpdbg_add_bucket_watch_element((Bucket *) orig_zv, element);
-	element->child = new;
+	bool added_new;
+	added = phpdbg_add_bucket_watch_element((Bucket *) orig_zv, element, &added_new);
+	if (!added_new) {
+		*element_ptr = added;
+		return PHPDBG_WATCH_ADD_DUPLICATE;
+	}
+	element = added;
 
+	new = ecalloc(1, sizeof(phpdbg_watch_element));
 	new->flags = PHPDBG_WATCH_SIMPLE;
 	new->str = zend_string_copy(str);
 	new->parent = element;
-	phpdbg_add_ht_watch_element(zv, new);
-	return SUCCESS;
+	added = phpdbg_add_ht_watch_element(zv, new, &added_new);
+	if (added != NULL && !added_new) {
+		phpdbg_clean_watch_element(element);
+		phpdbg_free_watch_element(element);
+		*element_ptr = added;
+		return PHPDBG_WATCH_ADD_DUPLICATE;
+	}
+	element->child = new;
+	*element_ptr = element;
+	return PHPDBG_WATCH_ADD_OK;
 }
 
-static int phpdbg_create_recursive_watchpoint(zval *zv, phpdbg_watch_element *element) {
-	element->flags = PHPDBG_WATCH_RECURSIVE | PHPDBG_WATCH_RECURSIVE_ROOT;
-	element->child = NULL;
-	phpdbg_add_bucket_watch_element((Bucket *) zv, element);
-	return SUCCESS;
+static phpdbg_watch_add_result phpdbg_create_recursive_watchpoint(zval *zv, phpdbg_watch_element **element) {
+	phpdbg_watch_element *added;
+	(*element)->flags = PHPDBG_WATCH_RECURSIVE | PHPDBG_WATCH_RECURSIVE_ROOT;
+	(*element)->child = NULL;
+	bool added_new;
+	added = phpdbg_add_bucket_watch_element((Bucket *) zv, *element, &added_new);
+	if (!added_new) {
+		*element = added;
+		return PHPDBG_WATCH_ADD_DUPLICATE;
+	}
+	return PHPDBG_WATCH_ADD_OK;
 }
 
-typedef struct { int (*callback)(zval *zv, phpdbg_watch_element *); zend_string *str; } phpdbg_watch_parse_struct;
+typedef struct { phpdbg_watch_add_result (*callback)(zval *zv, phpdbg_watch_element **); zend_string *str; } phpdbg_watch_parse_struct;
 
 static int phpdbg_watchpoint_parse_wrapper(char *name, size_t namelen, char *key, size_t keylen, HashTable *parent, zval *zv, phpdbg_watch_parse_struct *info) {
-	int ret;
+	int ret = SUCCESS;
 	phpdbg_watch_element *element = ecalloc(1, sizeof(phpdbg_watch_element));
 	element->str = zend_string_init(name, namelen, 0);
 	element->name_in_parent = zend_string_init(key, keylen, 0);
@@ -1298,13 +1391,25 @@ static int phpdbg_watchpoint_parse_wrapper(char *name, size_t namelen, char *key
 	element->parent = PHPDBG_G(watch_tmp);
 	element->child = NULL;
 
-	ret = info->callback(zv, element);
+	phpdbg_watch_add_result result = info->callback(zv, &element);
 
 	efree(name);
 	efree(key);
 
-	if (ret != SUCCESS) {
+	if (result == PHPDBG_WATCH_ADD_FAILED) {
 		phpdbg_remove_watch_element(element);
+		ret = FAILURE;
+	} else if (result == PHPDBG_WATCH_ADD_DUPLICATE) {
+		phpdbg_notice("%.*s is already being watched", (int) ZSTR_LEN(element->str), ZSTR_VAL(element->str));
+		while (PHPDBG_G(watch_tmp) && PHPDBG_G(watch_tmp)->child == NULL) {
+			phpdbg_watch_element *parent = PHPDBG_G(watch_tmp)->parent;
+			phpdbg_clean_watch_element(PHPDBG_G(watch_tmp));
+			phpdbg_free_watch_element(PHPDBG_G(watch_tmp));
+			if (parent) {
+				parent->child = NULL;
+			}
+			PHPDBG_G(watch_tmp) = parent;
+		}
 	} else {
 		if (PHPDBG_G(watch_tmp)) {
 			PHPDBG_G(watch_tmp)->child = element;
@@ -1346,7 +1451,7 @@ static int phpdbg_watchpoint_parse_step(char *name, size_t namelen, char *key, s
 	element->name_in_parent = zend_string_init(key, keylen, 0);
 	element->parent_container = parent;
 	element->parent = PHPDBG_G(watch_tmp);
-	element = phpdbg_add_bucket_watch_element((Bucket *) zv, element);
+	element = phpdbg_add_bucket_watch_element((Bucket *) zv, element, NULL);
 
 	efree(name);
 	efree(key);
@@ -1359,7 +1464,7 @@ static int phpdbg_watchpoint_parse_step(char *name, size_t namelen, char *key, s
 	return SUCCESS;
 }
 
-static int phpdbg_watchpoint_parse_symtables(char *input, size_t len, int (*callback)(zval *, phpdbg_watch_element *)) {
+static int phpdbg_watchpoint_parse_symtables(char *input, size_t len, phpdbg_watch_add_result (*callback)(zval *, phpdbg_watch_element **)) {
 	zend_class_entry *scope = zend_get_executed_scope();
 	phpdbg_watch_parse_struct info;
 	int ret;
@@ -1527,6 +1632,37 @@ void phpdbg_destroy_watchpoints(void) {
 	free(PHPDBG_G(original_watchlist_mem));
 	zend_hash_destroy(PHPDBG_G(watchlist_mem_backup));
 	free(PHPDBG_G(watchlist_mem_backup));
+}
+
+void phpdbg_release_watch_elements(void) {
+	phpdbg_watch_element *element;
+	uint32_t guard;
+
+	ZEND_HASH_MAP_FOREACH_PTR(&PHPDBG_G(watch_recreation), element) {
+		phpdbg_automatic_dequeue_free(element);
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_clean(&PHPDBG_G(watch_recreation));
+
+	guard = zend_hash_num_elements(&PHPDBG_G(watch_elements)) + 1;
+	while (zend_hash_num_elements(&PHPDBG_G(watch_elements)) > 0 && guard-- > 0) {
+		ZEND_HASH_FOREACH_PTR(&PHPDBG_G(watch_elements), element) {
+			phpdbg_remove_watch_element(element);
+			break;
+		} ZEND_HASH_FOREACH_END();
+	}
+	zend_hash_clean(&PHPDBG_G(watch_recreation));
+
+	phpdbg_btree_clean(&PHPDBG_G(watchpoint_tree));
+	phpdbg_btree_clean(&PHPDBG_G(watch_HashTables));
+
+	zend_hash_destroy(&PHPDBG_G(watch_elements));
+	zend_hash_init(&PHPDBG_G(watch_elements), 8, NULL, NULL, 0);
+	zend_hash_destroy(&PHPDBG_G(watch_recreation));
+	zend_hash_init(&PHPDBG_G(watch_recreation), 8, NULL, NULL, 0);
+	zend_hash_destroy(&PHPDBG_G(watch_free));
+	zend_hash_init(&PHPDBG_G(watch_free), 8, NULL, NULL, 0);
+	zend_hash_destroy(&PHPDBG_G(watch_collisions));
+	zend_hash_init(&PHPDBG_G(watch_collisions), 8, NULL, NULL, 0);
 }
 
 void phpdbg_purge_watchpoint_tree(void) {
