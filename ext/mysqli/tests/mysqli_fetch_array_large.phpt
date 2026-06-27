@@ -8,7 +8,7 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 require_once 'skipifconnectfailure.inc';
 ?>
 --CONFLICTS--
-all
+mysql
 --INI--
 memory_limit=-1
 --FILE--

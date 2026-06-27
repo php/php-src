@@ -4,7 +4,7 @@ openssl_pkcs12_export_to_file() error tests
 openssl
 --FILE--
 <?php
-$pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
+$pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file_error__pkcsfile.tmp";
 
 $cert_file = __DIR__ . "/public.crt";
 $cert = file_get_contents($cert_file);
@@ -21,7 +21,7 @@ var_dump(openssl_pkcs12_export_to_file($cert, '.', $priv, $pass));
 ?>
 --CLEAN--
 <?php
-$pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
+$pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file_error__pkcsfile.tmp";
 if (file_exists($pkcsfile)) {
     unlink($pkcsfile);
 }
