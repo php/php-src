@@ -41,7 +41,7 @@ extern "C" {
 #endif
 
 UConverter *intl_icu_compat_ucnv_clone(const UConverter *converter, UErrorCode *status);
-UBreakIterator *intl_icu_compat_ubrk_clone(const UBreakIterator *break_iterator, void *stack_buffer, UErrorCode *status);
+UBreakIterator *intl_icu_compat_ubrk_clone(const UBreakIterator *break_iterator, UErrorCode *status);
 void intl_icu_compat_uspoof_init_checker(USpoofChecker *checker, IntlIcuSpoofCheckResult **check_result, UErrorCode *status);
 void intl_icu_compat_uspoof_close_check_result(IntlIcuSpoofCheckResult *check_result);
 int32_t intl_icu_compat_uspoof_check_utf8(const USpoofChecker *checker, const char *text, int32_t length, IntlIcuSpoofCheckResult *check_result, UErrorCode *status);

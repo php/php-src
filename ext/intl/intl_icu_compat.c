@@ -33,14 +33,12 @@ UConverter *intl_icu_compat_ucnv_clone(const UConverter *converter, UErrorCode *
 #endif
 }
 
-UBreakIterator *intl_icu_compat_ubrk_clone(const UBreakIterator *break_iterator, void *stack_buffer, UErrorCode *status)
+UBreakIterator *intl_icu_compat_ubrk_clone(const UBreakIterator *break_iterator, UErrorCode *status)
 {
 #if INTL_ICU_HAS_UBRK_CLONE
 	return ubrk_clone(break_iterator, status);
 #else
-	int32_t buffer_size = U_BRK_SAFECLONE_BUFFERSIZE;
-
-	return ubrk_safeClone(break_iterator, stack_buffer, &buffer_size, status);
+	return ubrk_safeClone(break_iterator, NULL, NULL, status);
 #endif
 }
 
