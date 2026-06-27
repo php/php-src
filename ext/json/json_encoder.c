@@ -30,16 +30,23 @@
 
 static const char digits[] = "0123456789abcdef";
 
-static const uint32_t charmap[8] = {
-	0xffffffff, 0x500080c4, 0x10000000, 0x00000000,
-	0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
-
 static zend_always_inline void php_json_append_quoted(smart_str *buf, const char *s, size_t len)
 {
 	char *dst = smart_str_extend(buf, len + 2);
 	dst[0] = '"';
 	memcpy(dst + 1, s, len);
 	dst[len + 1] = '"';
+}
+
+static zend_always_inline void php_json_append_unicode_escape(smart_str *buf, unsigned int us)
+{
+	char *dst = smart_str_extend(buf, 6);
+	dst[0] = '\\';
+	dst[1] = 'u';
+	dst[2] = digits[(us >> 12) & 0xf];
+	dst[3] = digits[(us >> 8) & 0xf];
+	dst[4] = digits[(us >> 4) & 0xf];
+	dst[5] = digits[us & 0xf];
 }
 
 static zend_always_inline bool php_json_check_stack_limit(void)
@@ -124,23 +131,23 @@ static zend_result php_json_encode_identifier(
 		smart_str *buf, const char *s, size_t len,
 		int options, php_json_encoder *encoder)
 {
+	size_t pos, checkpoint;
+
 	/* fast path: no characters require escaping (PHP identifiers contain no JSON-special ASCII bytes) */
-	{
-		size_t i = 0;
-		while (i < len && (unsigned char)s[i] < 0x80) {
-			i++;
-		}
-		if (EXPECTED(i == len)) {
-			php_json_append_quoted(buf, s, len);
-			return SUCCESS;
-		}
+	pos = 0;
+	while (pos < len && (unsigned char)s[pos] < 0x80) {
+		pos++;
+	}
+	if (EXPECTED(pos == len)) {
+		php_json_append_quoted(buf, s, len);
+		return SUCCESS;
 	}
 
-	size_t checkpoint = buf->s ? ZSTR_LEN(buf->s) : 0;
+	checkpoint = buf->s ? ZSTR_LEN(buf->s) : 0;
 	smart_str_alloc(buf, len + 2, 0);
 	smart_str_appendc(buf, '"');
 
-	size_t pos = 0;
+	pos = 0;
 	do {
 		unsigned int us = (unsigned char)s[pos];
 		if (EXPECTED(us < 0x80)) {
@@ -181,28 +188,15 @@ static zend_result php_json_encode_identifier(
 						|| us < 0x2028 || us > 0x2029)) {
 				smart_str_appendl(buf, s, pos);
 			} else {
-				char *dst;
 				if (us >= 0x10000) {
 					unsigned int next_us;
 					us -= 0x10000;
 					next_us = (unsigned short)((us & 0x3ff) | 0xdc00);
 					us = (unsigned short)((us >> 10) | 0xd800);
-					dst = smart_str_extend(buf, 6);
-					dst[0] = '\\';
-					dst[1] = 'u';
-					dst[2] = digits[(us >> 12) & 0xf];
-					dst[3] = digits[(us >> 8) & 0xf];
-					dst[4] = digits[(us >> 4) & 0xf];
-					dst[5] = digits[us & 0xf];
+					php_json_append_unicode_escape(buf, us);
 					us = next_us;
 				}
-				dst = smart_str_extend(buf, 6);
-				dst[0] = '\\';
-				dst[1] = 'u';
-				dst[2] = digits[(us >> 12) & 0xf];
-				dst[3] = digits[(us >> 8) & 0xf];
-				dst[4] = digits[(us >> 4) & 0xf];
-				dst[5] = digits[us & 0xf];
+				php_json_append_unicode_escape(buf, us);
 			}
 			s += pos;
 			len -= pos;
@@ -459,6 +453,9 @@ zend_result php_json_escape_string(
 		smart_str *buf, const char *s, size_t len,
 		int options, php_json_encoder *encoder) /* {{{ */
 {
+	static const uint32_t charmap[8] = {
+		0xffffffff, 0x500080c4, 0x10000000, 0x00000000,
+		0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
 	size_t pos, checkpoint;
 	char *dst;
 
@@ -484,15 +481,13 @@ zend_result php_json_escape_string(
 
 	}
 	/* fast path: no characters in the string require escaping allows us to single alloc and memcpy */
-	{
-		size_t i = 0;
-		while (i < len && !ZEND_BIT_TEST(charmap, (unsigned char)s[i])) {
-			i++;
-		}
-		if (EXPECTED(i == len)) {
-			php_json_append_quoted(buf, s, len);
-			return SUCCESS;
-		}
+	pos = 0;
+	while (pos < len && !ZEND_BIT_TEST(charmap, (unsigned char)s[pos])) {
+		pos++;
+	}
+	if (EXPECTED(pos == len)) {
+		php_json_append_quoted(buf, s, len);
+		return SUCCESS;
 	}
 
 	checkpoint = buf->s ? ZSTR_LEN(buf->s) : 0;
@@ -558,22 +553,10 @@ zend_result php_json_escape_string(
 						us -= 0x10000;
 						next_us = (unsigned short)((us & 0x3ff) | 0xdc00);
 						us = (unsigned short)((us >> 10) | 0xd800);
-						dst = smart_str_extend(buf, 6);
-						dst[0] = '\\';
-						dst[1] = 'u';
-						dst[2] = digits[(us >> 12) & 0xf];
-						dst[3] = digits[(us >> 8) & 0xf];
-						dst[4] = digits[(us >> 4) & 0xf];
-						dst[5] = digits[us & 0xf];
+						php_json_append_unicode_escape(buf, us);
 						us = next_us;
 					}
-					dst = smart_str_extend(buf, 6);
-					dst[0] = '\\';
-					dst[1] = 'u';
-					dst[2] = digits[(us >> 12) & 0xf];
-					dst[3] = digits[(us >> 8) & 0xf];
-					dst[4] = digits[(us >> 4) & 0xf];
-					dst[5] = digits[us & 0xf];
+					php_json_append_unicode_escape(buf, us);
 				}
 				s += pos;
 				len -= pos;
