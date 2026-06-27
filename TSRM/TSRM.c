@@ -325,17 +325,15 @@ TSRM_API void tsrm_reserve(size_t size)
  * before the TLS entry, so the hot globals get compile-time-constant negative
  * offsets from the cache pointer. */
 TSRM_API void tsrm_reserve_fast_front(size_t size)
-{/*{{{*/
+{
 	tsrm_reserved_front = TSRM_ALIGNED_SIZE(size);
 	tsrm_reserved_size -= tsrm_reserved_front;
-}/*}}}*/
+}
 
 
 /* allocates a new fast thread-safe-resource id */
 TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
 {/*{{{*/
-	ptrdiff_t fixed_offset;
-
 	tsrm_mutex_lock(tsmm_mutex);
 	size = TSRM_ALIGNED_SIZE(size);
 	if (tsrm_reserved_size - tsrm_reserved_pos < size) {
@@ -345,7 +343,7 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 		tsrm_mutex_unlock(tsmm_mutex);
 		return 0;
 	}
-	fixed_offset = TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_pos;
+	ptrdiff_t fixed_offset = TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_pos;
 	tsrm_reserved_pos += size;
 	tsrm_mutex_unlock(tsmm_mutex);
 
@@ -354,7 +352,7 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 
 
 TSRM_API ts_rsrc_id ts_allocate_fast_id_at(ts_rsrc_id *rsrc_id, size_t *offset, ptrdiff_t fixed_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
-{/*{{{*/
+{
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtaining a new fast resource id, %d bytes", size));
 
 	tsrm_mutex_lock(tsmm_mutex);
@@ -390,7 +388,7 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id_at(ts_rsrc_id *rsrc_id, size_t *offset, 
 
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully allocated new resource id %d", *rsrc_id));
 	return *rsrc_id;
-}/*}}}*/
+}
 
 static void set_thread_local_storage_resource_to(tsrm_tls_entry *thread_resource)
 {
