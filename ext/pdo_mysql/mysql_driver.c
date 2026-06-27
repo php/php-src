@@ -610,6 +610,27 @@ static zend_result pdo_mysql_check_liveness(pdo_dbh_t *dbh)
 }
 /* }}} */
 
+#ifdef PDO_USE_MYSQLND
+/* {{{ pdo_mysql_reset_connection */
+static zend_result pdo_mysql_reset_connection(pdo_dbh_t *dbh)
+{
+	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+
+	PDO_DBG_ENTER("pdo_mysql_reset_connection");
+	PDO_DBG_INF_FMT("dbh=%p", dbh);
+
+	/* Reset the server-side session state (user variables, temporary tables,
+	 * transaction state, ...) of the persistent connection being reused. This
+	 * also doubles as a liveness check: a failure means the connection can no
+	 * longer be used. */
+	if (mysqlnd_restart_psession(H->server) != PASS) {
+		PDO_DBG_RETURN(FAILURE);
+	}
+	PDO_DBG_RETURN(SUCCESS);
+}
+/* }}} */
+#endif
+
 /* {{{ pdo_mysql_request_shutdown */
 static void pdo_mysql_request_shutdown(pdo_dbh_t *dbh)
 {
@@ -654,6 +675,11 @@ static const struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_fetch_error_func,
 	pdo_mysql_get_attribute,
 	pdo_mysql_check_liveness,
+#ifdef PDO_USE_MYSQLND
+	pdo_mysql_reset_connection,
+#else
+	NULL, /* reset_connection */
+#endif
 	NULL,
 	pdo_mysql_request_shutdown,
 	pdo_mysql_in_transaction,
@@ -724,11 +750,6 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		pdo_mysql_error(dbh);
 		goto cleanup;
 	}
-#ifdef PDO_USE_MYSQLND
-	if (dbh->is_persistent) {
-		mysqlnd_restart_psession(H->server);
-	}
-#endif
 
 	dbh->driver_data = H;
 

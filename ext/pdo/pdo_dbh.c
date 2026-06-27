@@ -414,8 +414,17 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 				if (le->type == php_pdo_list_entry()) {
 					pdbh = (pdo_dbh_t*)le->ptr;
 
-					/* is the connection still alive ? */
-					if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
+					/* Reset/validate the pooled connection before reuse. A
+					 * driver-provided reset_connection both clears server-side
+					 * session state and confirms liveness; otherwise fall back
+					 * to a plain liveness check. */
+					zend_result alive = SUCCESS;
+					if (pdbh->methods->reset_connection) {
+						alive = (pdbh->methods->reset_connection)(pdbh);
+					} else if (pdbh->methods->check_liveness) {
+						alive = (pdbh->methods->check_liveness)(pdbh);
+					}
+					if (FAILURE == alive) {
 						/* nope... need to kill it */
 						pdbh->refcount--;
 						zend_list_close(le);

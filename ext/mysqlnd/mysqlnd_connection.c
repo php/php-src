@@ -354,14 +354,19 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_server_option)(MYSQLND_CONN_DATA * const c
 
 
 /* {{{ mysqlnd_conn_data::restart_psession */
-static void
+static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, restart_psession)(MYSQLND_CONN_DATA * conn)
 {
 	DBG_ENTER("mysqlnd_conn_data::restart_psession");
-	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CONNECT_REUSED);
-	conn->current_result = NULL;
-	conn->last_message.s = NULL;
-	DBG_VOID_RETURN;
+
+	enum_func_status ret = conn->command->reset_connection(conn);
+	if (ret == PASS) {
+		MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CONNECT_REUSED);
+		conn->current_result = NULL;
+		conn->last_message.s = NULL;
+	}
+
+	DBG_RETURN(ret);
 }
 /* }}} */
 
