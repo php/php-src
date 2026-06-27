@@ -39,7 +39,6 @@ int json_yydebug = 1;
 
 }
 
-%locations
 %define api.prefix {php_json_yy}
 %define api.pure full
 %param  { php_json_parser *parser  }
@@ -64,8 +63,8 @@ int json_yydebug = 1;
 %destructor { zval_ptr_dtor_nogc(&$$); } <value>
 
 %code {
-static int php_json_yylex(union YYSTYPE *value, YYLTYPE *location, php_json_parser *parser);
-static void php_json_yyerror(YYLTYPE *location, php_json_parser *parser, char const *msg);
+static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser);
+static void php_json_yyerror(php_json_parser *parser, char const *msg);
 static int php_json_parser_array_create(php_json_parser *parser, zval *array);
 static int php_json_parser_object_create(php_json_parser *parser, zval *array);
 
@@ -275,7 +274,7 @@ static int php_json_parser_object_update_validate(php_json_parser *parser, zval 
 	return SUCCESS;
 }
 
-static int php_json_yylex(union YYSTYPE *value, YYLTYPE *location, php_json_parser *parser)
+static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser)
 {
 	int token = php_json_scan(&parser->scanner);
 
@@ -291,15 +290,10 @@ static int php_json_yylex(union YYSTYPE *value, YYLTYPE *location, php_json_pars
 		value->value = parser->scanner.value;
 	}
 
-	location->first_column = PHP_JSON_SCANNER_LOCATION(parser->scanner, first_column);
-	location->first_line = PHP_JSON_SCANNER_LOCATION(parser->scanner, first_line);
-	location->last_column = PHP_JSON_SCANNER_LOCATION(parser->scanner, last_column);
-	location->last_line = PHP_JSON_SCANNER_LOCATION(parser->scanner, last_line);
-
 	return token;
 }
 
-static void php_json_yyerror(YYLTYPE *location, php_json_parser *parser, char const *msg)
+static void php_json_yyerror(php_json_parser *parser, char const *msg)
 {
 	if (!parser->scanner.errcode) {
 		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
@@ -313,12 +307,65 @@ PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parse
 
 PHP_JSON_API size_t php_json_parser_error_line(const php_json_parser *parser)
 {
-	return parser->scanner.errloc.first_line;
+	return parser->scanner.line;
+}
+
+static zend_always_inline bool php_json_is_hex(php_json_ctype c, php_json_ctype lo, php_json_ctype hi)
+{
+	php_json_ctype l = c | 0x20; /* fold ASCII case */
+	return l >= (lo | 0x20) && l <= (hi | 0x20);
 }
 
 PHP_JSON_API size_t php_json_parser_error_column(const php_json_parser *parser)
 {
-	return parser->scanner.errloc.first_column;
+	const php_json_scanner *s = &parser->scanner;
+	const php_json_ctype *p = s->line_start;
+	const php_json_ctype *end = s->token;
+	/* Column is computed lazily here (only on error), by replaying the scanner's
+	 * per-token column rules over the bytes between the start of the current line
+	 * and the failing token. This keeps the decode success path free of any
+	 * per-character column bookkeeping while preserving the reported columns:
+	 * each \uXXXX escape and each \uXXXX\uXXXX surrogate pair counts as one
+	 * column, a \X escape as two, and every other code point as one. */
+	size_t column = 1;
+	bool in_string = false;
+
+	while (p < end) {
+		php_json_ctype c = *p;
+		if (!in_string) {
+			if (c == '"') {
+				in_string = true;
+			}
+			column++;
+			p++;
+		} else if (c == '"') {
+			in_string = false;
+			column++;
+			p++;
+		} else if (c == '\\') {
+			if (p + 5 < end && (p[1] | 0x20) == 'u') {
+				/* \uXXXX, possibly the high half of a surrogate pair */
+				if (php_json_is_hex(p[2], 'd', 'd') && php_json_is_hex(p[3], '8', 'b')
+						&& p + 11 < end && p[6] == '\\' && (p[7] | 0x20) == 'u'
+						&& php_json_is_hex(p[8], 'd', 'd') && php_json_is_hex(p[9], 'c', 'f')) {
+					p += 12;
+				} else {
+					p += 6;
+				}
+				column++;
+			} else {
+				column += 2;
+				p += 2;
+			}
+		} else if ((c & 0xC0) == 0x80) {
+			/* UTF-8 continuation byte: counted with its leading byte */
+			p++;
+		} else {
+			column++;
+			p++;
+		}
+	}
+	return column;
 }
 
 static const php_json_parser_methods default_parser_methods =
