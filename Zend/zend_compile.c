@@ -12270,6 +12270,7 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 			case ZEND_AST_METHOD_CALL:
 			case ZEND_AST_NULLSAFE_METHOD_CALL:
 			case ZEND_AST_STATIC_CALL:
+			case ZEND_AST_PIPE:
 				zend_compile_memoized_expr(result, ast, BP_VAR_W);
 				/* This might not actually produce an opcode, e.g. for expressions evaluated at comptime. */
 				return NULL;
