@@ -94,6 +94,16 @@ class Locale
 
     /**
      * @tentative-return-type
+     * @alias locale_get_display_keyword
+     */
+    public static function getDisplayKeyword(string $keyword, ?string $displayLocale = null): string|false {}
+
+    /**
+     * @alias locale_get_display_keyword_value
+     */
+    public static function getDisplayKeywordValue(string $locale, string $keyword, ?string $displayLocale = null): string|false {}
+
+    /**
      * @alias locale_compose
      */
     public static function composeLocale(array $subtags): string|false {}

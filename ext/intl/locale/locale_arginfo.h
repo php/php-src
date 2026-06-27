@@ -1,5 +1,5 @@
 /* This is a generated file, edit locale.stub.php instead.
- * Stub hash: ff1f75bd34a52f57210734e2f5e29efb87566137 */
+ * Stub hash: 28f8c2d4dbad083f1d2305b6b65f97863fc71fba */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -33,7 +33,18 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Locale_getDisplayVariant arginfo_class_Locale_getDisplayScript
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Locale_composeLocale, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Locale_getDisplayKeyword, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, keyword, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, displayLocale, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Locale_getDisplayKeywordValue, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, keyword, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, displayLocale, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Locale_composeLocale, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, subtags, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
@@ -83,6 +94,8 @@ ZEND_FUNCTION(locale_get_display_region);
 ZEND_FUNCTION(locale_get_display_name);
 ZEND_FUNCTION(locale_get_display_language);
 ZEND_FUNCTION(locale_get_display_variant);
+ZEND_FUNCTION(locale_get_display_keyword);
+ZEND_FUNCTION(locale_get_display_keyword_value);
 ZEND_FUNCTION(locale_compose);
 ZEND_FUNCTION(locale_parse);
 ZEND_FUNCTION(locale_get_all_variants);
@@ -106,6 +119,8 @@ static const zend_function_entry class_Locale_methods[] = {
 	ZEND_RAW_FENTRY("getDisplayName", zif_locale_get_display_name, arginfo_class_Locale_getDisplayName, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getDisplayLanguage", zif_locale_get_display_language, arginfo_class_Locale_getDisplayLanguage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getDisplayVariant", zif_locale_get_display_variant, arginfo_class_Locale_getDisplayVariant, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getDisplayKeyword", zif_locale_get_display_keyword, arginfo_class_Locale_getDisplayKeyword, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getDisplayKeywordValue", zif_locale_get_display_keyword_value, arginfo_class_Locale_getDisplayKeywordValue, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("composeLocale", zif_locale_compose, arginfo_class_Locale_composeLocale, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("parseLocale", zif_locale_parse, arginfo_class_Locale_parseLocale, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getAllVariants", zif_locale_get_all_variants, arginfo_class_Locale_getAllVariants, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
