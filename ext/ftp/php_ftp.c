@@ -1220,6 +1220,10 @@ PHP_FUNCTION(ftp_close)
 
 	obj = ftp_object_from_zend_object(Z_OBJ_P(z_ftp));
 	if (obj->ftp) {
+		if (obj->ftp->in_use) {
+			zend_throw_error(NULL, "Cannot close FTP\\Connection while a transfer is in progress");
+			RETURN_THROWS();
+		}
 		success = ftp_quit(obj->ftp);
 		ftp_close(obj->ftp);
 		obj->ftp = NULL;
