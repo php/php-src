@@ -250,6 +250,10 @@ static void spl_recursive_it_move_forward_ex(spl_recursive_it_object *object, zv
 	zend_class_entry          *ce;
 	zval                      retval, child;
 	zend_object_iterator      *sub_iter;
+	zend_object               *sub_object;
+	uint32_t                  prev_level;
+	zend_result               valid_result;
+	bool                      reentered;
 
 	SPL_FETCH_SUB_ITERATOR(iterator, object);
 
@@ -269,7 +273,17 @@ next_step:
 				iterator = object->iterators[object->level].iterator;
 				ZEND_FALLTHROUGH;
 			case RS_START:
-				if (iterator->funcs->valid(iterator) == FAILURE) {
+				sub_object = Z_OBJ(object->iterators[object->level].zobject);
+				prev_level = object->level;
+				GC_ADDREF(sub_object);
+				valid_result = iterator->funcs->valid(iterator);
+				reentered = object->level != prev_level
+					|| object->iterators[object->level].iterator != iterator;
+				OBJ_RELEASE(sub_object);
+				if (reentered) {
+					return;
+				}
+				if (valid_result == FAILURE) {
 					break;
 				}
 				object->iterators[object->level].state = RS_TEST;
@@ -417,7 +431,7 @@ next_step:
 					}
 				}
 			}
-			if (object->level > 0) {
+			if (object->level > 0 && object->iterators[object->level].iterator == iterator) {
 				zval garbage;
 				ZVAL_COPY_VALUE(&garbage, &object->iterators[object->level].zobject);
 				ZVAL_UNDEF(&object->iterators[object->level].zobject);
