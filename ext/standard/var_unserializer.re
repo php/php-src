@@ -557,7 +557,8 @@ static int is_property_visibility_changed(zend_class_entry *ce, zval *key)
 			existing_propinfo = zend_hash_find_ptr(&ce->properties_info, Z_STR_P(key));
 		} else {
 			if (!strcmp(unmangled_class, "*")
-			 || !strcasecmp(unmangled_class, ZSTR_VAL(ce->name))) {
+			 || !strcasecmp(unmangled_class, ZSTR_VAL(ce->name))
+			 || zend_hash_str_find_ptr_lc(EG(class_table), unmangled_class, strlen(unmangled_class)) == ce) {
 				existing_propinfo = zend_hash_str_find_ptr(
 					&ce->properties_info, unmangled_prop, unmangled_prop_len);
 			}
