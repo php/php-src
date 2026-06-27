@@ -743,6 +743,11 @@ class ReflectionNamedType extends ReflectionType
     public function isBuiltin(): bool {}
 }
 
+class ReflectionLiteralScalarType extends ReflectionType
+{
+    public function getValue(): int|float|string {}
+}
+
 class ReflectionUnionType extends ReflectionType
 {
     public function getTypes(): array {}

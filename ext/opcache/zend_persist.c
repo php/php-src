@@ -384,6 +384,16 @@ static void zend_persist_type(zend_type *type) {
 				zend_accel_get_class_name_map_ptr(type_name);
 			}
 		}
+		if (ZEND_TYPE_HAS_LITERAL(*single_type)) {
+			zval *new_zv = zend_shared_memdup(ZEND_TYPE_LITERAL_VALUE(*single_type), sizeof(zval));
+			if (Z_TYPE_P(new_zv) == IS_STRING) {
+				zend_string *str = Z_STR_P(new_zv);
+				zend_accel_store_interned_string(str);
+				ZVAL_STR(new_zv, str);
+			}
+
+			ZEND_TYPE_SET_PTR(*single_type, new_zv);
+		}
 	} ZEND_TYPE_FOREACH_END();
 }
 

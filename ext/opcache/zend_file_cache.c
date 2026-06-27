@@ -487,6 +487,16 @@ static void zend_file_cache_serialize_type(
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
 		SERIALIZE_STR(type_name);
 		ZEND_TYPE_SET_PTR(*type, type_name);
+	} else if (ZEND_TYPE_HAS_LITERAL(*type)) {
+		zval *zv = ZEND_TYPE_LITERAL_VALUE(*type);
+		SERIALIZE_PTR(zv);
+		ZEND_TYPE_SET_PTR(*type, zv);
+		UNSERIALIZE_PTR(zv);
+		if (Z_TYPE_P(zv) == IS_STRING) {
+			zend_string *str = Z_STR_P(zv);
+			SERIALIZE_STR(str);
+			ZVAL_STR(zv, str);
+		}
 	}
 }
 
@@ -1406,6 +1416,15 @@ static void zend_file_cache_unserialize_type(
 			zend_accel_get_class_name_map_ptr(type_name);
 		} else {
 			zend_alloc_ce_cache(type_name);
+		}
+	} else if (ZEND_TYPE_HAS_LITERAL(*type)) {
+		zval *zv = ZEND_TYPE_LITERAL_VALUE(*type);
+		UNSERIALIZE_PTR(zv);
+		ZEND_TYPE_SET_PTR(*type, zv);
+		if (Z_TYPE_P(zv) == IS_STRING) {
+			zend_string *str = Z_STR_P(zv);
+			UNSERIALIZE_STR(str);
+			ZVAL_STR(zv, str);
 		}
 	}
 }
