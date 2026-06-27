@@ -35,6 +35,8 @@ extern "C" {
 #include <unicode/ubrk.h>
 #include <unicode/usearch.h>
 
+#include "../intl_icu_compat.h"
+
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
 /* }}} */
@@ -105,7 +107,6 @@ U_CFUNC int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char 
 {
 	UChar *uhaystack = NULL, *uneedle = NULL;
 	int32_t uhaystack_len = 0, uneedle_len = 0, char_pos, ret_pos, offset_pos = 0;
-	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UBreakIterator* bi = NULL;
 	UErrorCode status;
 	UStringSearch* src = NULL;
@@ -125,7 +126,7 @@ U_CFUNC int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char 
 
 	/* get a pointer to the haystack taking into account the offset */
 	status = U_ZERO_ERROR;
-	bi = grapheme_get_break_iterator(u_break_iterator_buffer, &status );
+	bi = grapheme_get_break_iterator(&status);
 	STRPOS_CHECK_STATUS(status, "Failed to get iterator");
 	status = U_ZERO_ERROR;
 	ubrk_setText(bi, uhaystack, uhaystack_len, &status);
@@ -235,12 +236,11 @@ U_CFUNC zend_long grapheme_ascii_check(const unsigned char *day, size_t len)
 /* {{{ grapheme_split_string: find and optionally return grapheme boundaries */
 U_CFUNC int32_t grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len )
 {
-	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UErrorCode		status = U_ZERO_ERROR;
 	int ret_len, pos;
 	UBreakIterator* bi;
 
-	bi = grapheme_get_break_iterator((void*)u_break_iterator_buffer, &status );
+	bi = grapheme_get_break_iterator(&status);
 
 	if( U_FAILURE(status) ) {
 		return -1;
@@ -375,7 +375,7 @@ U_CFUNC zend_long grapheme_strrpos_ascii(char *haystack, size_t haystack_len, ch
 /* }}} */
 
 /* {{{ grapheme_get_break_iterator: get a clone of the global character break iterator */
-U_CFUNC UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status )
+U_CFUNC UBreakIterator* grapheme_get_break_iterator(UErrorCode *status )
 {
 	UBreakIterator *global_break_iterator = INTL_G( grapheme_iterator );
 
@@ -390,12 +390,6 @@ U_CFUNC UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCo
 		INTL_G(grapheme_iterator) = global_break_iterator;
 	}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 69
-	return ubrk_clone(global_break_iterator, status);
-#else
-	int32_t buffer_size = U_BRK_SAFECLONE_BUFFERSIZE;
-
-	return ubrk_safeClone(global_break_iterator, stack_buffer, &buffer_size, status);
-#endif
+	return intl_icu_compat_ubrk_clone(global_break_iterator, status);
 }
 /* }}} */
