@@ -48,6 +48,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22395 (base_convert() outputs at most 64 characters).
     (Weilin Du)
 
+- URI:
+  . Fixed behavior of Uri\WhatWg\Url wither methods with regards to empty
+    opaque hosts. (kocsismate)
+
 02 Jul 2026, PHP 8.5.8
 
 - Core:
