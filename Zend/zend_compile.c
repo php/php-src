@@ -7188,6 +7188,14 @@ static void zend_compile_try(const zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static bool zend_encoding_declaration_can_be_ignored_without_warning(const zend_string *encoding_name)
+{
+	return zend_string_equals_literal_ci(encoding_name, "UTF-8")
+		|| zend_string_equals_literal_ci(encoding_name, "UTF8")
+		|| zend_string_equals_literal_ci(encoding_name, "ASCII")
+		|| zend_string_equals_literal_ci(encoding_name, "US-ASCII");
+}
+
 /* Encoding declarations must already be handled during parsing */
 bool zend_handle_encoding_declaration(zend_ast *ast) /* {{{ */
 {
@@ -7230,8 +7238,14 @@ bool zend_handle_encoding_declaration(zend_ast *ast) /* {{{ */
 
 				zend_string_release_ex(encoding_name, 0);
 			} else {
-				zend_error(E_COMPILE_WARNING, "declare(encoding=...) ignored because "
-					"Zend multibyte feature is turned off by settings");
+				zend_string *encoding_name = zval_get_string(zend_ast_get_zval(value_ast));
+
+				if (!zend_encoding_declaration_can_be_ignored_without_warning(encoding_name)) {
+					zend_error(E_COMPILE_WARNING, "declare(encoding=...) ignored because "
+						"Zend multibyte feature is turned off by settings");
+				}
+
+				zend_string_release_ex(encoding_name, 0);
 			}
 		}
 	}
