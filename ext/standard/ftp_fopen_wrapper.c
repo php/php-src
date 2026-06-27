@@ -361,8 +361,14 @@ static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, size_t ip_
 			tpath++;
 		}
 		tpath[-1] = '\0';
-		memcpy(ip, hoststart, ip_size);
-		ip[ip_size-1] = '\0';
+		/* hoststart is now NUL-terminated; copy only its length so a long 227
+		 * message can't drive the fixed-size read past the end of tmp_line */
+		size_t hostlen = (size_t)(tpath - 1 - hoststart);
+		if (hostlen >= ip_size) {
+			hostlen = ip_size - 1;
+		}
+		memcpy(ip, hoststart, hostlen);
+		ip[hostlen] = '\0';
 		hoststart = ip;
 
 		/* pull out the MSB of the port */
