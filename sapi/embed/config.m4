@@ -1,10 +1,3 @@
-PHP_ARG_ENABLE([embed],,
-  [AS_HELP_STRING([[--enable-embed[=TYPE]]],
-    [Enable building of embedded SAPI library TYPE is either
-    'shared' or 'static'. [TYPE=shared]])],
-  [no],
-  [no])
-
 AC_MSG_CHECKING([for embedded SAPI library support])
 
 if test "$PHP_EMBED" != "no"; then
@@ -33,6 +26,12 @@ if test "$PHP_EMBED" != "no"; then
       [php_embed.c],
       [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
     PHP_INSTALL_HEADERS([sapi/embed], [php_embed.h])
+
+    dnl Include CLI sources for do_php_cli() in libphp.
+    PHP_ADD_SOURCES([sapi/cli],
+      [php_cli.c php_http_parser.c php_cli_server.c ps_title.c php_cli_process_title.c],
+      [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
+      [sapi])
   ])
 else
   AC_MSG_RESULT([no])
