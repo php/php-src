@@ -126,7 +126,7 @@ U_CFUNC int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char 
 
 	/* get a pointer to the haystack taking into account the offset */
 	status = U_ZERO_ERROR;
-	bi = grapheme_get_break_iterator(&status );
+	bi = grapheme_get_break_iterator(&status);
 	STRPOS_CHECK_STATUS(status, "Failed to get iterator");
 	status = U_ZERO_ERROR;
 	ubrk_setText(bi, uhaystack, uhaystack_len, &status);
@@ -240,7 +240,7 @@ U_CFUNC int32_t grapheme_split_string(const UChar *text, int32_t text_length, in
 	int ret_len, pos;
 	UBreakIterator* bi;
 
-	bi = grapheme_get_break_iterator(&status );
+	bi = grapheme_get_break_iterator(&status);
 
 	if( U_FAILURE(status) ) {
 		return -1;

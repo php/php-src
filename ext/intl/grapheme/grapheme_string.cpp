@@ -406,7 +406,7 @@ U_CFUNC PHP_FUNCTION(grapheme_substr)
 		RETURN_FALSE;
 	}
 
-	bi = grapheme_get_break_iterator(&status );
+	bi = grapheme_get_break_iterator(&status);
 
 	if( U_FAILURE(status) ) {
 		RETURN_FALSE;
@@ -827,7 +827,7 @@ U_CFUNC PHP_FUNCTION(grapheme_extract)
 
 	bi = nullptr;
 	status = U_ZERO_ERROR;
-	bi = grapheme_get_break_iterator(&status );
+	bi = grapheme_get_break_iterator(&status);
 
 	ubrk_setUText(bi, &ut, &status);
 	/* if the caller put us in the middle of a grapheme, we can't detect it in all cases since we
@@ -888,7 +888,7 @@ U_CFUNC PHP_FUNCTION(grapheme_str_split)
 
 	bi = nullptr;
 	ustatus = U_ZERO_ERROR;
-	bi = grapheme_get_break_iterator(&ustatus );
+	bi = grapheme_get_break_iterator(&ustatus);
 
 	if( U_FAILURE(ustatus) ) {
 		RETURN_FALSE;
@@ -1162,7 +1162,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 	bi = nullptr;
 	ustatus = U_ZERO_ERROR;
 
-	bi = grapheme_get_break_iterator(&ustatus );
+	bi = grapheme_get_break_iterator(&ustatus);
 	ret = zend_string_alloc(ZSTR_LEN(string), 0);
 	p = ZSTR_VAL(ret);
 
