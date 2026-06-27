@@ -21,6 +21,8 @@
 #include <unicode/unistr.h>
 #endif
 
+#include <unicode/uenum.h>
+
 extern "C" {
 #include "php_intl.h"
 #include "intl_data.h"
@@ -226,6 +228,7 @@ U_CFUNC PHP_FUNCTION( transliterator_list_ids )
 	UEnumeration  *en;
 	const UChar	  *elem;
 	int32_t		  elem_len;
+	int32_t		  count;
 	UErrorCode	  status = U_ZERO_ERROR;
 
 	intl_error_reset( nullptr );
@@ -236,7 +239,14 @@ U_CFUNC PHP_FUNCTION( transliterator_list_ids )
 	INTL_CHECK_STATUS( status,
 		"Failed to obtain registered transliterators" );
 
-	array_init( return_value );
+	count = uenum_count( en, &status );
+	if( U_FAILURE( status ) )
+	{
+		count = 0;
+		status = U_ZERO_ERROR;
+	}
+
+	array_init_size( return_value, count );
 	while( (elem = uenum_unext( en, &elem_len, &status )) )
 	{
 		zend_string *el = intl_convert_utf16_to_utf8(elem, elem_len, &status );

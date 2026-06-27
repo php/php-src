@@ -500,6 +500,10 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of indentation generation in json_encode()
     when using PHP_JSON_PRETTY_PRINT.
 
+- Intl:
+  . Improved performance of transliterator_list_ids() and
+    resourcebundle_locales() by pre-allocating their returned arrays.
+
 - Phar:
   . Reduced temporary allocations when iterating Phar directories.
 
