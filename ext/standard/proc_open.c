@@ -266,7 +266,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	php_process_handle *proc = (php_process_handle*)rsrc->ptr;
 #ifdef PHP_WIN32
 	DWORD wstatus;
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	int wstatus;
 	int waitpid_options = 0;
 	pid_t wait_pid;
@@ -297,7 +297,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	}
 	CloseHandle(proc->childHandle);
 
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	if (!FG(pclose_wait)) {
 		waitpid_options = WNOHANG;
 	}
@@ -389,7 +389,7 @@ PHP_FUNCTION(proc_get_status)
 	php_process_handle *proc;
 #ifdef PHP_WIN32
 	DWORD wstatus;
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	int wstatus;
 	pid_t wait_pid;
 #endif
@@ -418,7 +418,7 @@ PHP_FUNCTION(proc_get_status)
 	 * even if the child has already exited. This is because the result stays available
 	 * until the child handle is closed. Hence no caching is used on Windows. */
 	add_assoc_bool(return_value, "cached", false);
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	wait_pid = waitpid_cached(proc, &wstatus, WNOHANG|WUNTRACED);
 
 	if (wait_pid == proc->child) {
