@@ -23,10 +23,6 @@
 # include <langinfo.h>
 #endif
 
-#ifdef HAVE_LIBINTL
-# include <libintl.h> /* For LC_MESSAGES */
-#endif
-
 #include "scanf.h"
 #include "zend_API.h"
 #include "zend_execute.h"
@@ -5763,7 +5759,7 @@ PHP_FUNCTION(substr_count)
 
 static void php_str_pad_fill(zend_string *result, size_t pad_chars, const char *pad_str, size_t pad_str_len) {
 	char *p = ZSTR_VAL(result) + ZSTR_LEN(result);
-	
+
 	if (pad_str_len == 1) {
 		memset(p, pad_str[0], pad_chars);
 		ZSTR_LEN(result) += pad_chars;
@@ -5778,7 +5774,7 @@ static void php_str_pad_fill(zend_string *result, size_t pad_chars, const char *
 	if (p < end) {
 		memcpy(p, pad_str, end - p);
 	}
-	
+
 	ZSTR_LEN(result) += pad_chars;
 }
 
