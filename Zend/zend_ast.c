@@ -1098,8 +1098,14 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 
 				zend_function *ctor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
 				if (ctor) {
+					zend_string *prev_filename = EG(filename_override);
+					zend_long prev_lineno = EG(lineno_override);
+					EG(filename_override) = NULL;
+					EG(lineno_override) = -1;
 					zend_call_known_function(
 						ctor, Z_OBJ_P(result), Z_OBJCE_P(result), NULL, 0, NULL, args);
+					EG(filename_override) = prev_filename;
+					EG(lineno_override) = prev_lineno;
 				}
 
 				zend_array_destroy(args);
@@ -1119,8 +1125,14 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 
 				zend_function *ctor = Z_OBJ_HT_P(result)->get_constructor(Z_OBJ_P(result));
 				if (ctor) {
+					zend_string *prev_filename = EG(filename_override);
+					zend_long prev_lineno = EG(lineno_override);
+					EG(filename_override) = NULL;
+					EG(lineno_override) = -1;
 					zend_call_known_instance_method(
 						ctor, Z_OBJ_P(result), NULL, args_ast->children, args);
+					EG(filename_override) = prev_filename;
+					EG(lineno_override) = prev_lineno;
 				}
 
 				for (uint32_t i = 0; i < args_ast->children; i++) {
