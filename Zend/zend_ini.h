@@ -142,12 +142,6 @@ ZEND_API zend_long zend_ini_parse_quantity(const zend_string *value, zend_string
  */
 ZEND_API zend_ulong zend_ini_parse_uquantity(const zend_string *value, zend_string **errstr);
 
-/**
- * Strict variant of zend_ini_parse_quantity. Ill-formatted values fail instead
- * of returning a backwards-compatible interpretation.
- */
-ZEND_API zend_result zend_ini_parse_quantity_strict(const zend_string *value, zend_long *result, zend_string **errstr);
-
 ZEND_API zend_long zend_ini_parse_quantity_warn(const zend_string *value, zend_string *setting);
 
 ZEND_API zend_ulong zend_ini_parse_uquantity_warn(const zend_string *value, zend_string *setting);
@@ -213,7 +207,6 @@ END_EXTERN_C()
 BEGIN_EXTERN_C()
 ZEND_API ZEND_INI_MH(OnUpdateBool);
 ZEND_API ZEND_INI_MH(OnUpdateLong);
-ZEND_API ZEND_INI_MH(OnUpdateLongStrict);
 ZEND_API ZEND_INI_MH(OnUpdateLongGEZero);
 ZEND_API ZEND_INI_MH(OnUpdateReal);
 /* char* versions */

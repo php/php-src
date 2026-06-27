@@ -32,8 +32,6 @@ PHP                                                                        NEWS
     surrounding property access). (timwolla)
   . Fixed GH-22422 (zend_arena layout mismatch leaked memory in separately
     built extensions under AddressSanitizer). (iliaal)
-  . Added validation for invalid upload_max_filesize and post_max_size values
-    (GH-14695). (Weilin Du)
   . TSRM: use local-exec TLS in PIE executables. (henderkes)
   . perf: make all static extensions use TSRMG_STATIC. (henderkes)
   . Fixed bug GH-22257 (type confusion in Exception::getTraceAsString()).

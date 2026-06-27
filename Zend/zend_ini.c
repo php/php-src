@@ -614,12 +614,7 @@ static const char *zend_ini_consume_quantity_prefix(const char *const digits, co
 	return digits_consumed;
 }
 
-static zend_ulong zend_ini_parse_quantity_internal(
-	const zend_string *value,
-	zend_ini_parse_quantity_signed_result_t signed_result,
-	zend_string **errstr,
-	bool strict
-) /* {{{ */
+static zend_ulong zend_ini_parse_quantity_internal(const zend_string *value, zend_ini_parse_quantity_signed_result_t signed_result, zend_string **errstr) /* {{{ */
 {
 	char *digits_end = NULL;
 	const char *str = ZSTR_VAL(value);
@@ -639,18 +634,6 @@ static zend_ulong zend_ini_parse_quantity_internal(
 	while (digits < str_end && zend_is_whitespace(*(str_end-1))) {--str_end;}
 
 	if (digits == str_end) {
-		if (strict) {
-			if (ZSTR_LEN(value) == 0) {
-				*errstr = zend_strpprintf(0, "Invalid quantity \"\": no valid leading digits");
-			} else {
-				smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
-				smart_str_0(&invalid);
-				*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no valid leading digits",
-								ZSTR_VAL(invalid.s));
-				smart_str_free(&invalid);
-			}
-			return 0;
-		}
 		*errstr = NULL;
 		return 0;
 	}
@@ -670,13 +653,8 @@ static zend_ulong zend_ini_parse_quantity_internal(
 		smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
 		smart_str_0(&invalid);
 
-		if (strict) {
-			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no valid leading digits",
-							ZSTR_VAL(invalid.s));
-		} else {
-			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no valid leading digits, interpreting as \"0\" for backwards compatibility",
-							ZSTR_VAL(invalid.s));
-		}
+		*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no valid leading digits, interpreting as \"0\" for backwards compatibility",
+						ZSTR_VAL(invalid.s));
 
 		smart_str_free(&invalid);
 		return 0;
@@ -712,12 +690,8 @@ static zend_ulong zend_ini_parse_quantity_internal(
 				base = 2;
 				break;
 			default:
-				if (strict) {
-					*errstr = zend_strpprintf(0, "Invalid prefix \"0%c\"", digits[1]);
-				} else {
-					*errstr = zend_strpprintf(0, "Invalid prefix \"0%c\", interpreting as \"0\" for backwards compatibility",
-						digits[1]);
-				}
+				*errstr = zend_strpprintf(0, "Invalid prefix \"0%c\", interpreting as \"0\" for backwards compatibility",
+					digits[1]);
 				return 0;
         }
         digits += 2;
@@ -728,13 +702,8 @@ static zend_ulong zend_ini_parse_quantity_internal(
 			smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
 			smart_str_0(&invalid);
 
-			if (strict) {
-				*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no digits after base prefix",
-								ZSTR_VAL(invalid.s));
-			} else {
-				*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no digits after base prefix, interpreting as \"0\" for backwards compatibility",
-								ZSTR_VAL(invalid.s));
-			}
+			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no digits after base prefix, interpreting as \"0\" for backwards compatibility",
+							ZSTR_VAL(invalid.s));
 
 			smart_str_free(&invalid);
 			return 0;
@@ -775,13 +744,8 @@ static zend_ulong zend_ini_parse_quantity_internal(
 		smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
 		smart_str_0(&invalid);
 
-		if (strict) {
-			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no valid leading digits",
-							ZSTR_VAL(invalid.s));
-		} else {
-			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no valid leading digits, interpreting as \"0\" for backwards compatibility",
-							ZSTR_VAL(invalid.s));
-		}
+		*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no valid leading digits, interpreting as \"0\" for backwards compatibility",
+						ZSTR_VAL(invalid.s));
 
 		smart_str_free(&invalid);
 		return 0;
@@ -817,13 +781,8 @@ static zend_ulong zend_ini_parse_quantity_internal(
 			smart_str_append_escaped(&chr, str_end-1, 1);
 			smart_str_0(&chr);
 
-			if (strict) {
-				*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": unknown multiplier \"%s\"",
-							ZSTR_VAL(invalid.s), ZSTR_VAL(chr.s));
-			} else {
-				*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": unknown multiplier \"%s\", interpreting as \"%s\" for backwards compatibility",
-							ZSTR_VAL(invalid.s), ZSTR_VAL(chr.s), ZSTR_VAL(interpreted.s));
-			}
+			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": unknown multiplier \"%s\", interpreting as \"%s\" for backwards compatibility",
+						ZSTR_VAL(invalid.s), ZSTR_VAL(chr.s), ZSTR_VAL(interpreted.s));
 
 			smart_str_free(&invalid);
 			smart_str_free(&interpreted);
@@ -856,13 +815,8 @@ static zend_ulong zend_ini_parse_quantity_internal(
 		smart_str_append_escaped(&chr, str_end-1, 1);
 		smart_str_0(&chr);
 
-		if (strict) {
-			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": invalid characters before multiplier \"%s\"",
-							ZSTR_VAL(invalid.s), ZSTR_VAL(chr.s));
-		} else {
-			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\", interpreting as \"%s%s\" for backwards compatibility",
-							ZSTR_VAL(invalid.s), ZSTR_VAL(interpreted.s), ZSTR_VAL(chr.s));
-		}
+		*errstr = zend_strpprintf(0, "Invalid quantity \"%s\", interpreting as \"%s%s\" for backwards compatibility",
+						ZSTR_VAL(invalid.s), ZSTR_VAL(interpreted.s), ZSTR_VAL(chr.s));
 
 		smart_str_free(&invalid);
 		smart_str_free(&interpreted);
@@ -879,13 +833,8 @@ end:
 		/* Not specifying the resulting value here because the caller may make
 		 * additional conversions. Not specifying the allowed range
 		 * because the caller may do narrower range checks. */
-		if (strict) {
-			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": value is out of range",
-							ZSTR_VAL(invalid.s));
-		} else {
-			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": value is out of range, using overflow result for backwards compatibility",
-							ZSTR_VAL(invalid.s));
-		}
+		*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": value is out of range, using overflow result for backwards compatibility",
+						ZSTR_VAL(invalid.s));
 
 		smart_str_free(&invalid);
 		smart_str_free(&interpreted);
@@ -901,25 +850,13 @@ end:
 
 ZEND_API zend_long zend_ini_parse_quantity(const zend_string *value, zend_string **errstr) /* {{{ */
 {
-	return (zend_long) zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_SIGNED, errstr, false);
+	return (zend_long) zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_SIGNED, errstr);
 }
 /* }}} */
 
 ZEND_API zend_ulong zend_ini_parse_uquantity(const zend_string *value, zend_string **errstr) /* {{{ */
 {
-	return zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_UNSIGNED, errstr, false);
-}
-/* }}} */
-
-ZEND_API zend_result zend_ini_parse_quantity_strict(const zend_string *value, zend_long *result, zend_string **errstr) /* {{{ */
-{
-	zend_long retval = (zend_long) zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_SIGNED, errstr, true);
-	if (*errstr) {
-		return FAILURE;
-	}
-
-	*result = retval;
-	return SUCCESS;
+	return zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_UNSIGNED, errstr);
 }
 /* }}} */
 
@@ -1033,23 +970,6 @@ ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 {
 	zend_long *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_quantity_warn(new_value, entry->name);
-	return SUCCESS;
-}
-/* }}} */
-
-ZEND_API ZEND_INI_MH(OnUpdateLongStrict) /* {{{ */
-{
-	zend_long tmp;
-	zend_string *errstr;
-	if (UNEXPECTED(zend_ini_parse_quantity_strict(new_value, &tmp, &errstr) == FAILURE)) {
-		zend_error(E_WARNING, "Invalid \"%s\" setting. %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
-		zend_string_release(errstr);
-		return FAILURE;
-	}
-
-	zend_long *p = ZEND_INI_GET_ADDR();
-	*p = tmp;
-
 	return SUCCESS;
 }
 /* }}} */

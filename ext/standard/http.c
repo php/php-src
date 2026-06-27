@@ -247,17 +247,17 @@ PHP_FUNCTION(http_build_query)
 }
 /* }}} */
 
-static zend_result cache_request_parse_body_option(zval *option, const char *option_name, int cache_offset)
+static zend_result cache_request_parse_body_option(HashTable *options, zval *option, int cache_offset)
 {
 	if (option) {
 		zend_long result;
 		ZVAL_DEREF(option);
 		if (Z_TYPE_P(option) == IS_STRING) {
 			zend_string *errstr;
-			if (UNEXPECTED(zend_ini_parse_quantity_strict(Z_STR_P(option), &result, &errstr) == FAILURE)) {
-				zend_value_error("Invalid \"%s\" value in $options argument: %s", option_name, ZSTR_VAL(errstr));
+			result = zend_ini_parse_quantity(Z_STR_P(option), &errstr);
+			if (errstr) {
+				zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
 				zend_string_release(errstr);
-				return FAILURE;
 			}
 		} else if (Z_TYPE_P(option) == IS_LONG) {
 			result = Z_LVAL_P(option);
@@ -290,7 +290,7 @@ static zend_result cache_request_parse_body_options(HashTable *options)
 
 #define CHECK_OPTION(name) \
 	if (zend_string_equals_literal_ci(key, #name)) { \
-		if (cache_request_parse_body_option(value, #name, REQUEST_PARSE_BODY_OPTION_ ## name) == FAILURE) { \
+		if (cache_request_parse_body_option(options, value, REQUEST_PARSE_BODY_OPTION_ ## name) == FAILURE) { \
 			return FAILURE; \
 		} \
 		continue; \
