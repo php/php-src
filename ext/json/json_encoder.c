@@ -117,6 +117,102 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 		} \
 	} while (0)
 
+/* encode a PHP identifier (property name) as a JSON string key.
+ * PHP identifiers cannot contain ASCII characters that require JSON escaping,
+ * so the fast path only scans for multi-byte UTF-8 sequences (bytes >= 0x80). */
+static zend_result php_json_encode_identifier(
+		smart_str *buf, const char *s, size_t len,
+		int options, php_json_encoder *encoder)
+{
+	/* fast path: no characters require escaping (PHP identifiers contain no JSON-special ASCII bytes) */
+	{
+		size_t i = 0;
+		while (i < len && (unsigned char)s[i] < 0x80) {
+			i++;
+		}
+		if (EXPECTED(i == len)) {
+			php_json_append_quoted(buf, s, len);
+			return SUCCESS;
+		}
+	}
+
+	size_t checkpoint = buf->s ? ZSTR_LEN(buf->s) : 0;
+	smart_str_alloc(buf, len + 2, 0);
+	smart_str_appendc(buf, '"');
+
+	size_t pos = 0;
+	do {
+		unsigned int us = (unsigned char)s[pos];
+		if (EXPECTED(us < 0x80)) {
+			pos++;
+			len--;
+			if (len == 0) {
+				smart_str_appendl(buf, s, pos);
+				break;
+			}
+		} else {
+			if (pos) {
+				smart_str_appendl(buf, s, pos);
+				s += pos;
+				pos = 0;
+			}
+			zend_result status;
+			us = php_next_utf8_char((unsigned char *)s, len, &pos, &status);
+
+			if (UNEXPECTED(status != SUCCESS)) {
+				if (options & PHP_JSON_INVALID_UTF8_IGNORE) {
+					/* ignore invalid UTF-8 byte */
+				} else if (options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
+					if (options & PHP_JSON_UNESCAPED_UNICODE) {
+						smart_str_appendl(buf, "\xef\xbf\xbd", 3);
+					} else {
+						smart_str_appendl(buf, "\\ufffd", 6);
+					}
+				} else {
+					ZSTR_LEN(buf->s) = checkpoint;
+					encoder->error_code = PHP_JSON_ERROR_UTF8;
+					if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
+						smart_str_appendl(buf, "null", 4);
+					}
+					return FAILURE;
+				}
+			} else if ((options & PHP_JSON_UNESCAPED_UNICODE)
+					&& ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
+						|| us < 0x2028 || us > 0x2029)) {
+				smart_str_appendl(buf, s, pos);
+			} else {
+				char *dst;
+				if (us >= 0x10000) {
+					unsigned int next_us;
+					us -= 0x10000;
+					next_us = (unsigned short)((us & 0x3ff) | 0xdc00);
+					us = (unsigned short)((us >> 10) | 0xd800);
+					dst = smart_str_extend(buf, 6);
+					dst[0] = '\\';
+					dst[1] = 'u';
+					dst[2] = digits[(us >> 12) & 0xf];
+					dst[3] = digits[(us >> 8) & 0xf];
+					dst[4] = digits[(us >> 4) & 0xf];
+					dst[5] = digits[us & 0xf];
+					us = next_us;
+				}
+				dst = smart_str_extend(buf, 6);
+				dst[0] = '\\';
+				dst[1] = 'u';
+				dst[2] = digits[(us >> 12) & 0xf];
+				dst[3] = digits[(us >> 8) & 0xf];
+				dst[4] = digits[(us >> 4) & 0xf];
+				dst[5] = digits[us & 0xf];
+			}
+			s += pos;
+			len -= pos;
+			pos = 0;
+		}
+	} while (len);
+
+	smart_str_appendc(buf, '"');
+	return SUCCESS;
+}
 
 static zend_result php_json_encode_array(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
@@ -175,7 +271,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 			php_json_pretty_print_char(buf, options, '\n');
 			php_json_pretty_print_indent(buf, options, encoder);
 
-			if (php_json_escape_string(buf, ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name),
+			if (php_json_encode_identifier(buf, ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name),
 					options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE &&
 					(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) &&
 					buf->s) {

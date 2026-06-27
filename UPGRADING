@@ -499,6 +499,8 @@ PHP 8.6 UPGRADE NOTES
   . Improve performance of encoding arrays and objects.
   . Improved performance of indentation generation in json_encode()
     when using PHP_JSON_PRETTY_PRINT.
+  . Improved performance of json_encode() for strings without special
+    characters and for objects with declared properties.
 
 - Phar:
   . Reduced temporary allocations when iterating Phar directories.
