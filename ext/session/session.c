@@ -1767,8 +1767,19 @@ static bool php_session_abort(void)
 {
 	if (PS(session_status) == php_session_active) {
 		if (PS(mod_data) || PS(mod_user_implemented)) {
-			PS(mod)->s_close(&PS(mod_data));
+			zend_try {
+				PS(mod)->s_close(&PS(mod_data));
+			} zend_end_try();
 		}
+		if (PS(id)) {
+			zend_string_release_ex(PS(id), false);
+			PS(id) = NULL;
+		}
+		if (PS(session_vars)) {
+			zend_string_release_ex(PS(session_vars), false);
+			PS(session_vars) = NULL;
+		}
+		php_session_cleanup_filename();
 		PS(session_status) = php_session_none;
 		return true;
 	}
