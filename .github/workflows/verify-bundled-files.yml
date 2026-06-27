@@ -5,6 +5,10 @@ on:
     paths: &paths
       - '.github/scripts/download-bundled/**'
       - 'Zend/asm/**'
+      - 'Zend/zend_simd.h'
+      - 'ext/date/lib/**'
+      - 'ext/hash/xxhash/**'
+      - 'ext/mbstring/**'
       - 'ext/pcre/pcre2lib/**'
       - 'ext/uri/uriparser/**'
   pull_request:
@@ -34,6 +38,18 @@ jobs:
             'boost-context':
               - '.github/scripts/download-bundled/boost-context.*'
               - 'Zend/asm/**'
+            xsse:
+              - '.github/scripts/download-bundled/xsse.*'
+              - 'Zend/zend_simd.h'
+            timelib:
+              - '.github/scripts/download-bundled/timelib.*'
+              - 'ext/date/lib/**'
+            xxhash:
+              - '.github/scripts/download-bundled/xxhash.*'
+              - 'ext/hash/xxhash/**'
+            'unicode-character-database':
+              - '.github/scripts/download-bundled/unicode-character-database.*'
+              - 'ext/mbstring/**'
             pcre2:
               - '.github/scripts/download-bundled/pcre2.*'
               - 'ext/pcre/pcre2lib/**'
@@ -48,7 +64,43 @@ jobs:
           .github/scripts/download-bundled/boost-context.sh
           echo "::endgroup::"
           echo "::group::Verify files"
-          .github/scripts/test-directory-unchanged.sh Zend/asm
+          .github/scripts/test-directory-unchanged.sh 'Zend/asm'
+          echo "::endgroup::"
+      - name: XSSE
+        if: ${{ !cancelled() && (steps.changes.outputs.xsse == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        run: |
+          echo "::group::Download"
+          .github/scripts/download-bundled/xsse.sh
+          echo "::endgroup::"
+          echo "::group::Verify files"
+          .github/scripts/test-directory-unchanged.sh 'Zend/zend_simd.h'
+          echo "::endgroup::"
+      - name: timelib
+        if: ${{ !cancelled() && (steps.changes.outputs.timelib == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        run: |
+          echo "::group::Download"
+          .github/scripts/download-bundled/timelib.sh
+          echo "::endgroup::"
+          echo "::group::Verify files"
+          .github/scripts/test-directory-unchanged.sh 'ext/date/lib'
+          echo "::endgroup::"
+      - name: xxHash
+        if: ${{ !cancelled() && (steps.changes.outputs.xxhash == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        run: |
+          echo "::group::Download"
+          .github/scripts/download-bundled/xxhash.sh
+          echo "::endgroup::"
+          echo "::group::Verify files"
+          .github/scripts/test-directory-unchanged.sh 'ext/hash/xxhash'
+          echo "::endgroup::"
+      - name: 'Unicode Character Database'
+        if: ${{ !cancelled() && (steps.changes.outputs.unicode-character-database == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+        run: |
+          echo "::group::Download"
+          .github/scripts/download-bundled/unicode-character-database.sh
+          echo "::endgroup::"
+          echo "::group::Verify files"
+          .github/scripts/test-directory-unchanged.sh 'ext/mbstring'
           echo "::endgroup::"
       - name: PCRE2
         if: ${{ !cancelled() && (steps.changes.outputs.pcre2 == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
@@ -57,7 +109,7 @@ jobs:
           .github/scripts/download-bundled/pcre2.sh
           echo "::endgroup::"
           echo "::group::Verify files"
-          .github/scripts/test-directory-unchanged.sh ext/pcre/pcre2lib
+          .github/scripts/test-directory-unchanged.sh 'ext/pcre/pcre2lib'
           echo "::endgroup::"
       - name: uriparser
         if: ${{ !cancelled() && (steps.changes.outputs.uriparser == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
@@ -66,5 +118,5 @@ jobs:
           .github/scripts/download-bundled/uriparser.sh
           echo "::endgroup::"
           echo "::group::Verify files"
-          .github/scripts/test-directory-unchanged.sh ext/uri/uriparser
+          .github/scripts/test-directory-unchanged.sh 'ext/uri/uriparser'
           echo "::endgroup::"
