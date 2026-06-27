@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Implemented partial function application RFC. (Arnaud)
+  . Fixed bug GH-22263 (reset typed property default on every unserialize
+    failure path). (David Carlier)
 
 - DOM:
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
