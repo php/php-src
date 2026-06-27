@@ -847,6 +847,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 #endif
 
 	add_assoc_string(&directives, "opcache.file_cache",                    ZCG(accel_directives).file_cache ? ZCG(accel_directives).file_cache : "");
+	add_assoc_long(&directives,   "opcache.file_cache_permissions",        ZCG(accel_directives).file_cache_permissions);
 	add_assoc_bool(&directives,   "opcache.file_cache_read_only",          ZCG(accel_directives).file_cache_read_only);
 	add_assoc_bool(&directives,   "opcache.file_cache_only",               ZCG(accel_directives).file_cache_only);
 	add_assoc_bool(&directives,   "opcache.file_cache_consistency_checks", ZCG(accel_directives).file_cache_consistency_checks);
