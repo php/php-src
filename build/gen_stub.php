@@ -2122,7 +2122,7 @@ OUPUT_EXAMPLE
 
                 $methodSynopsis->appendChild($methodparam);
                 foreach ($arg->attributes as $attribute) {
-                    $attribute = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
+                    $attribute = $doc->createElement("modifier", (string) $attribute);
                     $attribute->setAttribute("role", "attribute");
 
                     $methodparam->appendChild($attribute);
@@ -3128,6 +3128,24 @@ class AttributeInfo {
     public function __construct(string $class, array $args) {
         $this->class = $class;
         $this->args = $args;
+    }
+
+    public function __toString(): string {
+        $code = '#[\\' . $this->class;
+        if (!empty($this->args)) {
+            $prettyPrinter = new Standard;
+            $args = [];
+            foreach ($this->args as $arg) {
+                $argStr = $prettyPrinter->prettyPrintExpr($arg->value);
+                if ($arg->name !== null) {
+                    $argStr = $arg->name->name . ': ' . $argStr;
+                }
+                $args[] = $argStr;
+            }
+            $code .= '(' . implode(', ', $args) . ')';
+        }
+        $code .= ']';
+        return $code;
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
@@ -4842,6 +4860,7 @@ function parseStubFile(string $code): FileInfo {
     $lexer = new PhpParser\Lexer\Emulative();
     $parser = new PhpParser\Parser\Php7($lexer);
     $nodeTraverser = new PhpParser\NodeTraverser;
+    $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\CloningVisitor);
     $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
     $prettyPrinter = new class extends Standard {
         protected function pName_FullyQualified(Name\FullyQualified $node): string {
@@ -4850,7 +4869,7 @@ function parseStubFile(string $code): FileInfo {
     };
 
     $stmts = $parser->parse($code);
-    $nodeTraverser->traverse($stmts);
+    $stmts = $nodeTraverser->traverse($stmts);
 
     $fileInfo = new FileInfo;
     $fileDocComments = getFileDocComments($stmts);
@@ -5020,7 +5039,7 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): 
 function generateCodeWithConditions(
     iterable $infos, string $separator, Closure $codeGenerator, ?string $parentCond = null): string {
     $code = "";
-    
+
     // For combining the conditional blocks of the infos with the same condition
     $openCondition = null;
     foreach ($infos as $info) {
