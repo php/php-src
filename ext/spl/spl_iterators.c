@@ -266,6 +266,7 @@ next_step:
 						zend_clear_exception();
 					}
 				}
+				iterator = object->iterators[object->level].iterator;
 				ZEND_FALLTHROUGH;
 			case RS_START:
 				if (iterator->funcs->valid(iterator) == FAILURE) {
