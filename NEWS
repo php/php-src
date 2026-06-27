@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.24
 
+- Exif:
+  . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
+    warning when an IFD is not followed by a next-IFD offset). (Eyüp Can Akman)
+
 - Intl:
   . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
     fallback locale when a language tag cannot be canonicalized. (Weilin Du)
