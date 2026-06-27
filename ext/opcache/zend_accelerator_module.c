@@ -18,6 +18,7 @@
 */
 
 #include <time.h>
+#include <fcntl.h>
 
 #include "php.h"
 #include "ZendAccelerator.h"
@@ -320,6 +321,7 @@ ZEND_INI_BEGIN()
 #endif
 
 	STD_PHP_INI_ENTRY("opcache.file_cache"                    , NULL  , PHP_INI_SYSTEM, OnUpdateFileCache, accel_directives.file_cache,                    zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.file_cache_permissions", "384" /* S_IRUSR | S_IWUSR */, PHP_INI_SYSTEM, OnUpdateLong, accel_directives.file_cache_permissions, zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.file_cache_read_only"          , "0"   , PHP_INI_SYSTEM, OnUpdateBool,    accel_directives.file_cache_read_only,          zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.file_cache_only"               , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_only,               zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.file_cache_consistency_checks" , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_consistency_checks, zend_accel_globals, accel_globals)
@@ -845,6 +847,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 #endif
 
 	add_assoc_string(&directives, "opcache.file_cache",                    ZCG(accel_directives).file_cache ? ZCG(accel_directives).file_cache : "");
+	add_assoc_long(&directives,   "opcache.file_cache_permissions",        ZCG(accel_directives).file_cache_permissions);
 	add_assoc_bool(&directives,   "opcache.file_cache_read_only",          ZCG(accel_directives).file_cache_read_only);
 	add_assoc_bool(&directives,   "opcache.file_cache_only",               ZCG(accel_directives).file_cache_only);
 	add_assoc_bool(&directives,   "opcache.file_cache_consistency_checks", ZCG(accel_directives).file_cache_consistency_checks);
