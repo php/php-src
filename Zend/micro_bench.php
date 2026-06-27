@@ -231,6 +231,30 @@ function ternary2($n) {
     }
 }
 
+class JsonObj {
+    public function __construct(
+        public int $id,
+        public string $name,
+        public bool $active,
+        public string $category,
+        public int $score
+    ) {}
+}
+
+function json_encode_obj($n) {
+    $obj = new JsonObj(1, 'test', true, 'category', 42);
+    for ($i = 0; $i < $n; $i++) {
+        json_encode($obj);
+    }
+}
+
+function json_encode_arr($n) {
+    $arr = ['id' => 1, 'name' => 'test', 'active' => true, 'category' => 'cat', 'score' => 42];
+    for ($i = 0; $i < $n; $i++) {
+        json_encode($arr);
+    }
+}
+
 /*****/
 
 function empty_loop($n) {
@@ -355,4 +379,8 @@ ternary(N);
 $t = end_test($t, '$x = $f ? $f : $a', $overhead);
 ternary2(N);
 $t = end_test($t, '$x = $f ? $f : tmp', $overhead);
+json_encode_obj(N/50);
+$t = end_test($t, 'json_encode(obj)', $overhead);
+json_encode_arr(N/50);
+$t = end_test($t, 'json_encode(arr)', $overhead);
 total($t0, "Total");
