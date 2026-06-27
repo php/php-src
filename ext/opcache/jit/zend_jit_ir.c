@@ -14894,6 +14894,11 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		}
 	}
 
+	/* The optimizer proved the assigned value already satisfies the (typed)
+	 * property, so the run-time type check can be skipped (see dfa_pass.c). */
+	bool skip_type_check = prop_info
+		&& ((opline + 1)->extended_value & ZEND_ASSIGN_OBJ_SKIP_TYPE_CHECK);
+
 	if (!prop_info) {
 		ir_ref run_time_cache = ir_LOAD_A(jit_EX(run_time_cache));
 		ir_ref ref = ir_LOAD_A(ir_ADD_OFFSET(run_time_cache, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS));
@@ -14986,7 +14991,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			ir_END_list(slow_inputs);
 			ir_IF_TRUE(if_def);
 		}
-		if (ZEND_TYPE_IS_SET(prop_info->type)) {
+		if (ZEND_TYPE_IS_SET(prop_info->type) && !skip_type_check) {
 			ir_ref ref, arg3, arg4;
 
 			// JIT: value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
@@ -15028,7 +15033,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		}
 	}
 
-	if (!prop_info || !ZEND_TYPE_IS_SET(prop_info->type)) {
+	if (!prop_info || !ZEND_TYPE_IS_SET(prop_info->type) || skip_type_check) {
 		if (Z_MODE(val_addr) != IS_REG
 		 && (res_addr == 0 || Z_MODE(res_addr) != IS_REG)
 		 && opline->result_type == IS_UNUSED) {

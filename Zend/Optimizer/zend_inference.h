@@ -223,6 +223,8 @@ ZEND_API uint32_t zend_array_element_type(uint32_t t1, uint8_t op_type, bool wri
 
 ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op* ssa_op, int var, zend_ssa_range *tmp);
 
+ZEND_API const zend_property_info *zend_fetch_prop_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op);
+
 ZEND_API uint32_t zend_fetch_arg_info_type(
 	const zend_script *script, const zend_arg_info *arg_info, zend_class_entry **pce);
 ZEND_API void zend_init_func_return_info(

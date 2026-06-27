@@ -2432,7 +2432,7 @@ static const zend_property_info *lookup_prop_info(const zend_class_entry *ce, ze
 	return NULL;
 }
 
-static const zend_property_info *zend_fetch_prop_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op)
+ZEND_API const zend_property_info *zend_fetch_prop_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op)
 {
 	const zend_property_info *prop_info = NULL;
 	if (opline->op2_type == IS_CONST) {
