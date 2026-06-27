@@ -27,11 +27,23 @@ function build_frame(string $dst, string $src, int $ethertype, string $payload):
     return str_pad($frame, 60, "\x00");
 }
 
-// Drain any pending packets from a socket.
-function drain_socket(Socket $s): void {
+// An ETH_P_ALL socket bound to 'lo' captures every frame on loopback, including
+// unrelated localhost traffic from the parallel test runner. Read frames until
+// one starts with our own ethernet header, discarding foreign packets, so the
+// assertions never run against someone else's frame. Bounded by a deadline.
+function recv_matching(Socket $s, string $header, int $maxlen = 65536, ?string &$addr = null, &$port = null): string|false {
     socket_set_nonblock($s);
-    while (@socket_recvfrom($s, $buf, 65536, 0, $addr) !== false) {}
-    socket_set_block($s);
+    $deadline = microtime(true) + 5.0;
+    while (microtime(true) < $deadline) {
+        $bytes = @socket_recvfrom($s, $buf, $maxlen, 0, $addr, $port);
+        if ($bytes !== false && is_string($buf) && str_starts_with($buf, $header)) {
+            return $buf;
+        }
+        if ($bytes === false) {
+            usleep(1000);
+        }
+    }
+    return false;
 }
 
 echo "--- ETH_P_ALL send and receive ---\n";
@@ -39,17 +51,17 @@ $s_send = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 $s_recv = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 socket_bind($s_send, 'lo');
 socket_bind($s_recv, 'lo');
-drain_socket($s_recv);
 
+$header = $dst_mac . $src_mac . pack("n", 0x9000);
 $frame = build_frame($dst_mac, $src_mac, 0x9000, "ETH_P_ALL test");
 $sent = socket_sendto($s_send, $frame, strlen($frame), 0, "lo", 1);
 var_dump($sent >= 60);
 
-$bytes = socket_recvfrom($s_recv, $buf, 65536, 0, $addr);
-var_dump($bytes >= 60);
+$buf = recv_matching($s_recv, $header, 65536, $addr);
+var_dump($buf !== false && strlen($buf) >= 60);
 var_dump(is_string($buf));
 var_dump($addr === 'lo');
-var_dump(str_contains($buf, "ETH_P_ALL test"));
+var_dump(is_string($buf) && str_contains($buf, "ETH_P_ALL test"));
 
 socket_close($s_send);
 socket_close($s_recv);
@@ -59,17 +71,17 @@ $s_send = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 $s_recv = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 socket_bind($s_send, 'lo');
 socket_bind($s_recv, 'lo');
-drain_socket($s_recv);
 
+$header = $dst_mac . $src_mac . pack("n", ETH_P_LOOP);
 $frame = build_frame($dst_mac, $src_mac, ETH_P_LOOP, "loopback payload");
 $sent = socket_sendto($s_send, $frame, strlen($frame), 0, "lo", 1);
 var_dump($sent >= 60);
 
-$bytes = socket_recvfrom($s_recv, $buf, 65536, 0, $addr);
-var_dump($bytes >= 60);
+$buf = recv_matching($s_recv, $header, 65536, $addr);
+var_dump($buf !== false && strlen($buf) >= 60);
 // Verify ETH_P_LOOP ethertype at offset 12-13.
-var_dump(unpack("n", $buf, 12)[1] === ETH_P_LOOP);
-var_dump(str_contains($buf, "loopback payload"));
+var_dump(is_string($buf) && unpack("n", $buf, 12)[1] === ETH_P_LOOP);
+var_dump(is_string($buf) && str_contains($buf, "loopback payload"));
 
 socket_close($s_send);
 socket_close($s_recv);
@@ -79,18 +91,18 @@ $s_send = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 $s_recv = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
 socket_bind($s_send, 'lo');
 socket_bind($s_recv, 'lo');
-drain_socket($s_recv);
 
+$header = $dst_mac . $src_mac . pack("n", 0x9000);
 $payload = random_bytes(1024);
 $frame = build_frame($dst_mac, $src_mac, 0x9000, $payload);
 $sent = socket_sendto($s_send, $frame, strlen($frame), 0, "lo", 1);
 var_dump($sent >= strlen($frame));
 
-$bytes = socket_recvfrom($s_recv, $buf, 65536, 0, $addr, $port);
-var_dump($bytes >= strlen($frame));
+$buf = recv_matching($s_recv, $header, 65536, $addr, $port);
+var_dump($buf !== false && strlen($buf) >= strlen($frame));
 var_dump(is_int($port));
 // Verify the payload is intact in the raw buffer.
-var_dump(str_contains($buf, $payload));
+var_dump(is_string($buf) && str_contains($buf, $payload));
 
 socket_close($s_send);
 socket_close($s_recv);
