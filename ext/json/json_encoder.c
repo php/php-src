@@ -147,6 +147,12 @@ static zend_result php_json_encode_identifier(
 	smart_str_alloc(buf, len + 2, 0);
 	smart_str_appendc(buf, '"');
 
+	/* flush the clean ASCII prefix found by the fast path scan */
+	if (pos) {
+		smart_str_appendl(buf, s, pos);
+		s += pos;
+		len -= pos;
+	}
 	pos = 0;
 	do {
 		unsigned int us = (unsigned char)s[pos];
@@ -496,6 +502,12 @@ zend_result php_json_escape_string(
 	smart_str_alloc(buf, len+2, 0);
 	smart_str_appendc(buf, '"');
 
+	/* flush the clean ASCII prefix found by the fast path scan */
+	if (pos) {
+		smart_str_appendl(buf, s, pos);
+		s += pos;
+		len -= pos;
+	}
 	pos = 0;
 
 	do {
