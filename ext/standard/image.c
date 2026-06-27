@@ -711,6 +711,8 @@ PHPAPI const int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8,
 /* compressed images only */
 #define TAG_COMP_IMAGEWIDTH         0xA002
 #define TAG_COMP_IMAGEHEIGHT        0xA003
+/* pointer to the Exif sub-IFD */
+#define TAG_EXIF_IFD_POINTER        0x8769
 
 #define TAG_FMT_BYTE       1
 #define TAG_FMT_STRING     2
@@ -1171,6 +1173,369 @@ static void php_avif_stream_skip(void* stream, size_t num_bytes) {
 }
 /* }}} */
 
+#define HEIF_META_MAX_SIZE   (1 * 1024 * 1024)
+#define HEIF_EXIF_MAX_SIZE   (128 * 1024)
+
+/* {{{ php_heif_buf_get */
+static uint64_t php_heif_buf_get(const unsigned char *buf, unsigned int size)
+{
+	uint64_t value = 0;
+	while (size-- > 0) {
+		value = (value << 8) | *buf++;
+	}
+	return value;
+}
+/* }}} */
+
+/* {{{ php_heif_exif_ifd_dims */
+static bool php_heif_exif_ifd_dims(const unsigned char *tiff, size_t tiff_len,
+		int motorola, uint32_t ifd_off, size_t *width, size_t *height,
+		uint32_t *sub_ifd)
+{
+	if (ifd_off > tiff_len || tiff_len - ifd_off < 2) {
+		return false;
+	}
+	unsigned int num_entries = php_ifd_get16u((void *) (tiff + ifd_off), motorola);
+	if ((size_t) num_entries > (tiff_len - ifd_off - 2) / 12) {
+		return false;
+	}
+	for (unsigned int i = 0; i < num_entries; i++) {
+		const unsigned char *entry = tiff + ifd_off + 2 + i * 12;
+		unsigned int tag = php_ifd_get16u((void *) entry, motorola);
+		unsigned int type = php_ifd_get16u((void *) (entry + 2), motorola);
+		size_t value;
+
+		switch (type) {
+			case TAG_FMT_BYTE:
+				value = entry[8];
+				break;
+			case TAG_FMT_USHORT:
+				value = php_ifd_get16u((void *) (entry + 8), motorola);
+				break;
+			case TAG_FMT_ULONG:
+				value = php_ifd_get32u((void *) (entry + 8), motorola);
+				break;
+			default:
+				continue;
+		}
+		switch (tag) {
+			case TAG_IMAGEWIDTH:
+			case TAG_COMP_IMAGEWIDTH:
+				*width = value;
+				break;
+			case TAG_IMAGEHEIGHT:
+			case TAG_COMP_IMAGEHEIGHT:
+				*height = value;
+				break;
+			case TAG_EXIF_IFD_POINTER:
+				*sub_ifd = (uint32_t) value;
+				break;
+		}
+	}
+	return true;
+}
+/* }}} */
+
+/* {{{ php_heif_exif_tiff_dims */
+static bool php_heif_exif_tiff_dims(const unsigned char *tiff, size_t tiff_len,
+		size_t *out_w, size_t *out_h)
+{
+	int motorola;
+	if (tiff_len < 8) {
+		return false;
+	}
+	if (!memcmp(tiff, "MM", 2)) {
+		motorola = 1;
+	} else if (!memcmp(tiff, "II", 2)) {
+		motorola = 0;
+	} else {
+		return false;
+	}
+
+	uint32_t ifd0 = php_ifd_get32u((void *) (tiff + 4), motorola);
+	size_t w0 = 0, h0 = 0;
+	uint32_t sub_ifd = 0;
+	if (!php_heif_exif_ifd_dims(tiff, tiff_len, motorola, ifd0, &w0, &h0, &sub_ifd)) {
+		return false;
+	}
+
+	size_t ws = 0, hs = 0;
+	if (sub_ifd != 0) {
+		uint32_t ignore = 0;
+		php_heif_exif_ifd_dims(tiff, tiff_len, motorola, sub_ifd, &ws, &hs, &ignore);
+	}
+
+	size_t w = ws ? ws : w0;
+	size_t h = hs ? hs : h0;
+	if (w == 0 || h == 0) {
+		return false;
+	}
+	*out_w = w;
+	*out_h = h;
+	return true;
+}
+/* }}} */
+
+/* {{{ php_heif_find_exif_item */
+static bool php_heif_find_exif_item(const unsigned char *meta, size_t meta_len,
+		uint64_t *file_off, uint64_t *length)
+{
+	uint32_t exif_id = 0;
+	bool have_exif_id = false;
+	size_t p = 0;
+
+	const unsigned char *iinf = NULL, *iloc = NULL;
+	size_t iinf_len = 0, iloc_len = 0;
+	while (p + 8 <= meta_len) {
+		uint64_t box_size = php_heif_buf_get(meta + p, 4);
+		size_t hdr = 8;
+		if (box_size == 1) {
+			if (p + 16 > meta_len) {
+				break;
+			}
+			box_size = php_heif_buf_get(meta + p + 8, 8);
+			hdr = 16;
+		} else if (box_size == 0) {
+			box_size = meta_len - p;
+		}
+		if (box_size < hdr || box_size > meta_len - p) {
+			break;
+		}
+		if (!memcmp(meta + p + 4, "iinf", 4)) {
+			iinf = meta + p + hdr;
+			iinf_len = (size_t) box_size - hdr;
+		} else if (!memcmp(meta + p + 4, "iloc", 4)) {
+			iloc = meta + p + hdr;
+			iloc_len = (size_t) box_size - hdr;
+		}
+		p += (size_t) box_size;
+	}
+	if (iinf == NULL || iloc == NULL) {
+		return false;
+	}
+
+	if (iinf_len < 6) {
+		return false;
+	}
+	unsigned int iinf_ver = iinf[0];
+	size_t q = 4;
+	unsigned int count_bytes = (iinf_ver == 0) ? 2 : 4;
+	if (q + count_bytes > iinf_len) {
+		return false;
+	}
+	uint32_t entry_count = (uint32_t) php_heif_buf_get(iinf + q, count_bytes);
+	q += count_bytes;
+	for (uint32_t i = 0; i < entry_count && q + 8 <= iinf_len; i++) {
+		uint64_t isz = php_heif_buf_get(iinf + q, 4);
+		if (isz < 12 || isz > iinf_len - q) {
+			break;
+		}
+		if (!memcmp(iinf + q + 4, "infe", 4)) {
+			unsigned int infe_ver = iinf[q + 8];
+			if (infe_ver == 2 && isz >= 20) {
+				uint32_t iid = (uint32_t) php_heif_buf_get(iinf + q + 12, 2);
+				if (!memcmp(iinf + q + 16, "Exif", 4)) {
+					exif_id = iid;
+					have_exif_id = true;
+				}
+			} else if (infe_ver >= 3 && isz >= 24) {
+				uint32_t iid = (uint32_t) php_heif_buf_get(iinf + q + 12, 4);
+				if (!memcmp(iinf + q + 18, "Exif", 4)) {
+					exif_id = iid;
+					have_exif_id = true;
+				}
+			}
+		}
+		q += (size_t) isz;
+	}
+	if (!have_exif_id) {
+		return false;
+	}
+
+	if (iloc_len < 8) {
+		return false;
+	}
+	unsigned int iloc_ver = iloc[0];
+	size_t r = 4;
+	unsigned int offset_size = (iloc[r] >> 4) & 0xf;
+	unsigned int length_size = iloc[r] & 0xf;
+	unsigned int base_offset_size = (iloc[r + 1] >> 4) & 0xf;
+	unsigned int index_size = (iloc_ver == 1 || iloc_ver == 2) ? (iloc[r + 1] & 0xf) : 0;
+	r += 2;
+	unsigned int item_count_bytes = (iloc_ver < 2) ? 2 : 4;
+	if (r + item_count_bytes > iloc_len) {
+		return false;
+	}
+	uint32_t item_count = (uint32_t) php_heif_buf_get(iloc + r, item_count_bytes);
+	r += item_count_bytes;
+	unsigned int id_bytes = (iloc_ver < 2) ? 2 : 4;
+
+	for (uint32_t i = 0; i < item_count; i++) {
+		if (r + id_bytes > iloc_len) {
+			return false;
+		}
+		uint32_t item_id = (uint32_t) php_heif_buf_get(iloc + r, id_bytes);
+		r += id_bytes;
+		unsigned int construction_method = 0;
+		if (iloc_ver == 1 || iloc_ver == 2) {
+			if (r + 2 > iloc_len) {
+				return false;
+			}
+			construction_method = php_heif_buf_get(iloc + r, 2) & 0xf;
+			r += 2;
+		}
+		if (r + 2 > iloc_len) {
+			return false;
+		}
+		r += 2;
+		if (r + base_offset_size > iloc_len) {
+			return false;
+		}
+		uint64_t base_offset = php_heif_buf_get(iloc + r, base_offset_size);
+		r += base_offset_size;
+		if (r + 2 > iloc_len) {
+			return false;
+		}
+		uint32_t extent_count = (uint32_t) php_heif_buf_get(iloc + r, 2);
+		r += 2;
+		for (uint32_t e = 0; e < extent_count; e++) {
+			if (index_size) {
+				if (r + index_size > iloc_len) {
+					return false;
+				}
+				r += index_size;
+			}
+			if (r + offset_size + length_size > iloc_len) {
+				return false;
+			}
+			uint64_t ext_off = php_heif_buf_get(iloc + r, offset_size);
+			r += offset_size;
+			uint64_t ext_len = php_heif_buf_get(iloc + r, length_size);
+			r += length_size;
+			if (item_id == exif_id && construction_method == 0 && e == 0) {
+				if (ext_off > UINT64_MAX - base_offset) {
+					return false;
+				}
+				*file_off = base_offset + ext_off;
+				*length = ext_len;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+/* }}} */
+
+/* {{{ php_handle_heif_exif */
+static struct php_gfxinfo *php_handle_heif_exif(php_stream *stream)
+{
+	struct php_gfxinfo *result = NULL;
+	unsigned char header[8];
+
+	if (php_stream_rewind(stream)) {
+		return NULL;
+	}
+
+	uint64_t meta_hdr = 0, meta_size = 0;
+	for (;;) {
+		if (php_stream_read(stream, (char *) header, 8) != 8) {
+			return NULL;
+		}
+		uint64_t box_size = php_heif_buf_get(header, 4);
+		uint64_t hdr = 8;
+		if (box_size == 1) {
+			unsigned char ext[8];
+			if (php_stream_read(stream, (char *) ext, 8) != 8) {
+				return NULL;
+			}
+			box_size = php_heif_buf_get(ext, 8);
+			hdr = 16;
+		} else if (box_size == 0) {
+			zend_off_t cur = php_stream_tell(stream);
+			if (cur < 0 || php_stream_seek(stream, 0, SEEK_END)) {
+				return NULL;
+			}
+			zend_off_t end = php_stream_tell(stream);
+			if (end < cur || php_stream_seek(stream, cur, SEEK_SET)) {
+				return NULL;
+			}
+			box_size = (uint64_t) (end - cur) + hdr;
+		}
+		if (box_size < hdr) {
+			return NULL;
+		}
+		if (!memcmp(header + 4, "meta", 4)) {
+			meta_hdr = hdr;
+			meta_size = box_size;
+			break;
+		}
+		if (php_stream_seek(stream, (zend_off_t) (box_size - hdr), SEEK_CUR)) {
+			return NULL;
+		}
+	}
+
+	if (meta_size <= meta_hdr + 4) {
+		return NULL;
+	}
+	uint64_t meta_body_len = meta_size - meta_hdr - 4;
+	if (meta_body_len == 0 || meta_body_len > HEIF_META_MAX_SIZE) {
+		return NULL;
+	}
+	if (php_stream_seek(stream, 4, SEEK_CUR)) {
+		return NULL;
+	}
+
+	unsigned char *meta = emalloc((size_t) meta_body_len);
+	if (php_stream_read(stream, (char *) meta, (size_t) meta_body_len) != (ssize_t) meta_body_len) {
+		efree(meta);
+		return NULL;
+	}
+
+	uint64_t exif_off = 0, exif_len = 0;
+	bool found = php_heif_find_exif_item(meta, (size_t) meta_body_len, &exif_off, &exif_len);
+	efree(meta);
+	if (!found || exif_len < 4) {
+		return NULL;
+	}
+
+	if (php_stream_seek(stream, (zend_off_t) exif_off, SEEK_SET)) {
+		return NULL;
+	}
+	unsigned char prefix[4];
+	if (php_stream_read(stream, (char *) prefix, 4) != 4) {
+		return NULL;
+	}
+	uint64_t tiff_skip = php_heif_buf_get(prefix, 4);
+	if (tiff_skip > exif_len - 4) {
+		return NULL;
+	}
+	uint64_t tiff_len = exif_len - 4 - tiff_skip;
+	if (tiff_len < 8) {
+		return NULL;
+	}
+	if (tiff_len > HEIF_EXIF_MAX_SIZE) {
+		tiff_len = HEIF_EXIF_MAX_SIZE;
+	}
+	if (tiff_skip && php_stream_seek(stream, (zend_off_t) tiff_skip, SEEK_CUR)) {
+		return NULL;
+	}
+	unsigned char *tiff = emalloc((size_t) tiff_len);
+	if (php_stream_read(stream, (char *) tiff, (size_t) tiff_len) != (ssize_t) tiff_len) {
+		efree(tiff);
+		return NULL;
+	}
+
+	size_t w = 0, h = 0;
+	if (php_heif_exif_tiff_dims(tiff, (size_t) tiff_len, &w, &h)) {
+		result = ecalloc(1, sizeof(struct php_gfxinfo));
+		result->width = (unsigned int) w;
+		result->height = (unsigned int) h;
+	}
+	efree(tiff);
+	return result;
+}
+/* }}} */
+
 /* {{{ php_handle_avif
  * Parse AVIF features
  *
@@ -1192,6 +1557,8 @@ static struct php_gfxinfo *php_handle_avif(php_stream * stream) {
 		result->height = features.height;
 		result->bits = features.bit_depth;
 		result->channels = features.num_channels;
+	} else {
+		result = php_handle_heif_exif(stream);
 	}
 	return result;
 }
