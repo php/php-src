@@ -722,6 +722,8 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	nsp = attrp->ns;
 	if (use_ns && nsp != NULL) {
 		existattrp = xmlHasNsProp(nodep, attrp->name, nsp->href);
+	} else if (nsp == NULL) {
+		existattrp = xmlHasNsProp(nodep, attrp->name, NULL);
 	} else {
 		existattrp = xmlHasProp(nodep, attrp->name);
 	}
