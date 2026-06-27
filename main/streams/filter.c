@@ -447,6 +447,20 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 	}
 }
 
+PHPAPI zend_long php_stream_filter_count(php_stream_filter_chain *chain) {
+    if (chain->head == NULL) {
+        return 0;
+    }
+
+    zend_long count = 1;
+    php_stream_filter *node = chain->head;
+    while (node != chain->tail) {
+        count += 1;
+        node = node->next;
+    }
+    return count;
+}
+
 PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool finish)
 {
 	php_stream_bucket_brigade brig_a = { NULL, NULL }, brig_b = { NULL, NULL }, *inp = &brig_a, *outp = &brig_b, *brig_temp;
