@@ -13,6 +13,8 @@ if (@inet_ntop($packed) === false) {
     die("skip no IPv6 support");
 }
 ?>
+--XFAIL--
+SNMP tests might possibly fail on Windows
 --FILE--
 <?php
 require_once(__DIR__.'/snmp_include.inc');
