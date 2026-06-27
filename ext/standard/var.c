@@ -179,15 +179,20 @@ again:
 			}
 			ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
 
+			/* zend_get_properties_for() may invoke __debugInfo(), which can run
+			 * a user error handler that drops the last reference to the object.
+			 * Keep it alive and use the captured zobj rather than re-reading
+			 * struc, whose zval the handler may also have overwritten. */
+			GC_ADDREF(zobj);
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
 			if (ce->ce_flags & ZEND_ACC_ENUM) {
-				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(struc));
+				zval *case_name_zval = zend_enum_fetch_case_name(zobj);
 				php_printf("%senum(%s::%s) (%d) {\n", COMMON, ZSTR_VAL(ce->name), Z_STRVAL_P(case_name_zval), myht ? zend_array_count(myht) : 0);
 			} else {
-				class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
-				const char *prefix = php_var_dump_object_prefix(Z_OBJ_P(struc));
+				class_name = zobj->handlers->get_class_name(zobj);
+				const char *prefix = php_var_dump_object_prefix(zobj);
 
-				php_printf("%s%sobject(%s)#%d (%d) {\n", COMMON, prefix, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0);
+				php_printf("%s%sobject(%s)#%d (%d) {\n", COMMON, prefix, ZSTR_VAL(class_name), zobj->handle, myht ? zend_array_count(myht) : 0);
 				zend_string_release_ex(class_name, 0);
 			}
 
@@ -202,7 +207,7 @@ again:
 					if (Z_TYPE_P(val) == IS_INDIRECT) {
 						val = Z_INDIRECT_P(val);
 						if (key) {
-							prop_info = zend_get_typed_property_info_for_slot(Z_OBJ_P(struc), val);
+							prop_info = zend_get_typed_property_info_for_slot(zobj, val);
 						}
 					}
 
@@ -217,6 +222,7 @@ again:
 			}
 			PUTS("}\n");
 			ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, DEBUG, zobj);
+			OBJ_RELEASE(zobj);
 			break;
 		}
 		case IS_RESOURCE: {
@@ -382,11 +388,16 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		}
 		ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
 
+		/* zend_get_properties_for() may invoke __debugInfo(), which can run a
+		 * user error handler that drops the last reference to the object. Keep
+		 * it alive across the call and report the refcount excluding this
+		 * temporary reference. */
+		GC_ADDREF(zobj);
 		myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
-		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
-		const char *prefix = php_var_dump_object_prefix(Z_OBJ_P(struc));
+		class_name = zobj->handlers->get_class_name(zobj);
+		const char *prefix = php_var_dump_object_prefix(zobj);
 
-		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", prefix, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
+		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", prefix, ZSTR_VAL(class_name), zobj->handle, myht ? zend_array_count(myht) : 0, GC_REFCOUNT(zobj) - 1);
 		zend_string_release_ex(class_name, 0);
 		if (myht) {
 			ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
@@ -395,7 +406,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 				if (Z_TYPE_P(val) == IS_INDIRECT) {
 					val = Z_INDIRECT_P(val);
 					if (key) {
-						prop_info = zend_get_typed_property_info_for_slot(Z_OBJ_P(struc), val);
+						prop_info = zend_get_typed_property_info_for_slot(zobj, val);
 					}
 				}
 
@@ -410,6 +421,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		}
 		PUTS("}\n");
 		ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, DEBUG, zobj);
+		OBJ_RELEASE(zobj);
 		break;
 	}
 	case IS_RESOURCE: {
@@ -608,13 +620,19 @@ again:
 				return SUCCESS;
 			}
 			ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, EXPORT, zobj);
+			/* zend_get_properties_for() and the property hooks read below may
+			 * run userland (a get hook, a custom get_properties) that drops the
+			 * last reference to the object. Keep it alive and use the captured
+			 * zobj rather than re-reading struc, which the handler may also have
+			 * overwritten. */
+			GC_ADDREF(zobj);
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
 			if (level > 1) {
 				smart_str_appendc(buf, '\n');
 				buffer_append_spaces(buf, level - 1);
 			}
 
-			zend_class_entry *ce = Z_OBJCE_P(struc);
+			zend_class_entry *ce = zobj->ce;
 			bool is_enum = ce->ce_flags & ZEND_ACC_ENUM;
 
 			/* stdClass has no __set_state method, but can be casted to */
@@ -624,7 +642,6 @@ again:
 				smart_str_appendc(buf, '\\');
 				smart_str_append(buf, ce->name);
 				if (is_enum) {
-					zend_object *zobj = Z_OBJ_P(struc);
 					zval *case_name_zval = zend_enum_fetch_case_name(zobj);
 					smart_str_appendl(buf, "::", 2);
 					smart_str_append(buf, Z_STR_P(case_name_zval));
@@ -650,6 +667,7 @@ again:
 							if (EG(exception)) {
 								ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, EXPORT, zobj);
 								zend_release_properties(myht);
+								OBJ_RELEASE(zobj);
 								return FAILURE;
 							}
 						}
@@ -662,6 +680,7 @@ again:
 				zend_release_properties(myht);
 			}
 			ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, EXPORT, zobj);
+			OBJ_RELEASE(zobj);
 			if (level > 1 && !is_enum) {
 				buffer_append_spaces(buf, level - 1);
 			}
