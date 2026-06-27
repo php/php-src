@@ -16,11 +16,9 @@
 #include <config.h>
 #endif
 
-#include "php.h"
+# include "php.h"
 
 #ifdef HAVE_MSCOREE_H
-# include "php_ini.h"
-# include "ext/standard/info.h"
 # include "php_com_dotnet.h"
 # include "php_com_dotnet_internal.h"
 # include "Zend/zend_exceptions.h"
