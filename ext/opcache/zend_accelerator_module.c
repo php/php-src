@@ -18,6 +18,7 @@
 */
 
 #include <time.h>
+#include <fcntl.h>
 
 #include "php.h"
 #include "ZendAccelerator.h"
