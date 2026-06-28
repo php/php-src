@@ -9,6 +9,7 @@ if test "$PHP_INTL" != "no"; then
   INTL_COMMON_FLAGS="$ICU_CFLAGS -Wno-write-strings -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   PHP_NEW_EXTENSION([intl], m4_normalize([
       intl_convert.c
+      intl_icu_compat.c
       intl_error.c
       php_intl.c
     ]),

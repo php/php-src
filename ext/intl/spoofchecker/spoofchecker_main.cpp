@@ -43,21 +43,14 @@ U_CFUNC PHP_METHOD(Spoofchecker, isSuspicious)
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
 
-#if U_ICU_VERSION_MAJOR_NUM >= 58
-	ret = uspoof_check2UTF8(co->uspoof, ZSTR_VAL(text), ZSTR_LEN(text), co->uspoofres, SPOOFCHECKER_ERROR_CODE_P(co));
-#else
-	ret = uspoof_checkUTF8(co->uspoof, ZSTR_VAL(text), ZSTR_LEN(text), NULL, SPOOFCHECKER_ERROR_CODE_P(co));
-#endif
+	ret = intl_icu_compat_uspoof_check_utf8(co->uspoof, ZSTR_VAL(text), ZSTR_LEN(text), co->uspoofres, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
-#if U_ICU_VERSION_MAJOR_NUM >= 58
-		errmask = uspoof_getCheckResultChecks(co->uspoofres, SPOOFCHECKER_ERROR_CODE_P(co));
 
-		if (errmask != ret) {
+		if (intl_icu_compat_uspoof_check_result_mismatch(co->uspoofres, ret, &errmask, SPOOFCHECKER_ERROR_CODE_P(co))) {
 			php_error_docref(NULL, E_WARNING, "unexpected error (%d), does not relate to the flags passed to setChecks (%d)", ret, errmask);
 		}
-#endif
 		RETURN_TRUE;
 	}
 
@@ -206,19 +199,8 @@ U_CFUNC PHP_METHOD(Spoofchecker, setAllowedChars)
 	USet *set = uset_openEmpty();
 
 	/* pattern is either USE_IGNORE_SPACE alone or in conjunction with the following flags (but mutually exclusive) */
-	if (pattern_option &&
-            pattern_option != USET_IGNORE_SPACE &&
-#if U_ICU_VERSION_MAJOR_NUM >= 73
-            pattern_option != (USET_IGNORE_SPACE|USET_SIMPLE_CASE_INSENSITIVE) &&
-#endif
-            pattern_option != (USET_IGNORE_SPACE|USET_CASE_INSENSITIVE) &&
-            pattern_option != (USET_IGNORE_SPACE|USET_ADD_CASE_MAPPINGS)) {
-		zend_argument_value_error(2, "must be a valid pattern option, 0 or (SpoofChecker::IGNORE_SPACE|(<none> or SpoofChecker::CASE_INSENSITIVE or SpoofChecker::ADD_CASE_MAPPINGS"
-#if U_ICU_VERSION_MAJOR_NUM >= 73
-				" or SpoofChecker::SIMPLE_CASE_INSENSITIVE"
-#endif
-				"))"
-		);
+	if (!intl_icu_compat_uspoof_is_allowed_chars_pattern_option(pattern_option)) {
+		zend_argument_value_error(2, "%s", intl_icu_compat_uspoof_allowed_chars_pattern_option_error_message());
 		uset_close(set);
 		efree(upattern);
 		RETURN_THROWS();
