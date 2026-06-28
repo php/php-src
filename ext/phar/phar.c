@@ -831,7 +831,6 @@ static zend_result phar_parse_pharfile(php_stream *fp, const char *fname, size_t
 
 	SAFE_PHAR_GET_32(buffer, endbuffer, manifest_flags);
 
-	manifest_flags &= ~PHAR_HDR_COMPRESSION_MASK;
 	manifest_flags &= ~PHAR_FILE_COMPRESSION_MASK;
 	/* remember whether this entire phar was compressed with gz/bzip2 */
 	manifest_flags |= compression;
