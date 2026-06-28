@@ -911,7 +911,7 @@ ZEND_API zend_ulong zend_ini_parse_uquantity(const zend_string *value, zend_stri
 }
 /* }}} */
 
-ZEND_API zend_result zend_ini_parse_quantity_strict(const zend_string *value, zend_long *result, zend_string **errstr) /* {{{ */
+ZEND_API zend_result zend_ini_parse_quantity_strict(const zend_string *value, zend_long *result, zend_string **errstr)
 {
 	zend_long retval = (zend_long) zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_SIGNED, errstr, true);
 	if (*errstr) {
@@ -921,7 +921,6 @@ ZEND_API zend_result zend_ini_parse_quantity_strict(const zend_string *value, ze
 	*result = retval;
 	return SUCCESS;
 }
-/* }}} */
 
 ZEND_API zend_long zend_ini_parse_quantity_warn(const zend_string *value, zend_string *setting) /* {{{ */
 {
@@ -1037,7 +1036,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 }
 /* }}} */
 
-ZEND_API ZEND_INI_MH(OnUpdateLongStrict) /* {{{ */
+ZEND_API ZEND_INI_MH(OnUpdateLongStrict)
 {
 	zend_long tmp;
 	zend_string *errstr;
@@ -1052,7 +1051,6 @@ ZEND_API ZEND_INI_MH(OnUpdateLongStrict) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
 ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 {
