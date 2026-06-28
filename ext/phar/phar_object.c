@@ -3865,15 +3865,11 @@ PHP_METHOD(Phar, getStub)
 					RETURN_THROWS();
 				}
 				if (stub->flags & PHAR_ENT_COMPRESSION_MASK) {
-					const char *filter_name = phar_decompress_filter(stub, false);
-
-					if (filter_name != NULL) {
-						filter = php_stream_filter_create(filter_name, NULL, php_stream_is_persistent(fp));
-					} else {
-						filter = NULL;
-					}
-					if (!filter) {
-						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "phar error: unable to read stub of phar \"%s\" (cannot create %s filter)", ZSTR_VAL(phar_obj->archive->fname), phar_decompress_filter(stub, true));
+					const char *decompression_filter_name = phar_get_decompress_filter_name(stub);
+					ZEND_ASSERT(decompression_filter_name && "Must have as this has a decompression flag set");
+					filter = php_stream_filter_create(decompression_filter_name, NULL, php_stream_is_persistent(fp));
+					if (UNEXPECTED(filter == NULL)) {
+						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "phar error: unable to read stub of phar \"%s\" (cannot create %s filter)", ZSTR_VAL(phar_obj->archive->fname), decompression_filter_name);
 						RETURN_THROWS();
 					}
 					php_stream_filter_append(&fp->readfilters, filter);

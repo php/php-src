@@ -442,8 +442,8 @@ ZEND_ATTRIBUTE_NONNULL zend_string* phar_create_signature(phar_archive_data *pha
 
 /* utility functions */
 zend_string *phar_create_default_stub(const zend_string *php_index_str, const zend_string *web_index_str, char **error);
-const char *phar_decompress_filter(const phar_entry_info *entry, bool return_unknown);
-const char *phar_compress_filter(const phar_entry_info *entry, bool return_unknown);
+const char *phar_get_decompress_filter_name(const phar_entry_info *entry);
+const char *phar_get_compress_filter_name(const phar_entry_info *entry);
 
 /* void phar_remove_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len); */
 void phar_add_virtual_dirs(phar_archive_data *phar, const char *filename, size_t filename_len);
