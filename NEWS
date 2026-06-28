@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.4.24
 
 - Intl:
+  . Fixed IntlChar methods leaving stale global error state after successful
+    calls. (Xuyang Zhang)
   . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
     fallback locale when a language tag cannot be canonicalized. (Weilin Du)
   . Fixed memory leaks when calling Collator::__construct() or
