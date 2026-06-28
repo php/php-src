@@ -3199,6 +3199,25 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 				resolved_name, true);
 		}
 		opline->extended_value = zend_alloc_cache_slot();
+	} else if (obj_ast->kind == ZEND_AST_CLASS_CONST
+			&& (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET
+				|| type == BP_VAR_FUNC_ARG)) {
+		/* Like global constants, fetch the class constant at runtime so the
+		 * write operates on the actual object rather than a compile-time
+		 * temporary. */
+		zend_ast *class_ast = obj_ast->child[0];
+		zend_ast *const_ast = obj_ast->child[1];
+		znode class_node, const_node;
+
+		zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
+		zend_compile_expr(&const_node, const_ast);
+
+		opline = zend_emit_op(&obj_node, ZEND_FETCH_CLASS_CONSTANT, NULL, &const_node);
+		zend_set_class_name_op1(opline, &class_node);
+
+		if (opline->op1_type == IS_CONST || opline->op2_type == IS_CONST) {
+			opline->extended_value = zend_alloc_cache_slots(2);
+		}
 	} else {
 		zend_short_circuiting_mark_inner(obj_ast);
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, false);
