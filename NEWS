@@ -35,6 +35,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22395 (base_convert() outputs at most 64 characters).
     (Weilin Du)
 
+- Streams:
+  . Fixed bug GH-15836 (Use-after-free when a user stream filter accesses
+    $this->stream during the close flush). (iliaal)
+
 02 Jul 2026, PHP 8.4.23
 
 - Core:
