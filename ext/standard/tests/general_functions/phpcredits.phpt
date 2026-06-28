@@ -33,6 +33,9 @@ Language Design & Concept
 %wPHP Documentation%w
 %a
 
+%wPHP Quality Assurance Team%w
+%a
+
 %wWebsites and Infrastructure team%w
 %a
 bool(true)
