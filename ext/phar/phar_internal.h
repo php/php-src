@@ -38,10 +38,6 @@
 #define PHAR_API_MAJORVER_MASK    0xF000
 #define PHAR_API_VER_MASK         0xFFF0
 
-#define PHAR_HDR_COMPRESSION_MASK 0x0000F000
-#define PHAR_HDR_COMPRESSED_NONE  0x00000000
-#define PHAR_HDR_COMPRESSED_GZ    0x00001000
-#define PHAR_HDR_COMPRESSED_BZ2   0x00002000
 #define PHAR_HDR_SIGNATURE        0x00010000
 
 /* flags for defining that the entire file should be compressed */
