@@ -1045,7 +1045,7 @@ ZEND_API ZEND_INI_MH(OnUpdateFilePermission)
 	
 	zend_long value = zend_ini_parse_quantity_warn(new_value, entry->name);
 
-    if (zend_is_valid_file_permission(value) == FAILURE) {
+    if (!zend_is_valid_file_permission(value)) {
         return FAILURE;
     }
 
