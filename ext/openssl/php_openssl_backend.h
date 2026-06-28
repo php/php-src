@@ -262,7 +262,8 @@ X509 *php_openssl_x509_from_param(
 X509 *php_openssl_x509_from_zval(
 		zval *val, bool *free_cert, uint32_t arg_num, bool is_from_array, const char *option_name);
 
-zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw);
+zend_string* php_openssl_x509_fingerprint(
+		X509 *peer, const char *method, bool raw, struct _php_stream *stream);
 
 int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension);
 

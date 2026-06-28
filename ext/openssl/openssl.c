@@ -651,7 +651,8 @@ static void php_openssl_check_path_error(uint32_t arg_num, int type, const char 
 /* openssl file path check extended */
 bool php_openssl_check_path_ex(
 		const char *file_path, size_t file_path_len, char *real_path, uint32_t arg_num,
-		bool contains_file_protocol, bool is_from_array, const char *option_name)
+		bool contains_file_protocol, bool is_from_array, const char *option_name,
+		php_stream *stream)
 {
 	const char *fs_file_path;
 	size_t fs_file_path_len;
@@ -686,8 +687,13 @@ bool php_openssl_check_path_ex(
 		if (arg_num == 0) {
 			const char *option_title = option_name ? option_name : "unknown";
 			const char *option_label = is_from_array ? "array item" : "option";
-			php_error_docref(NULL, E_WARNING, "Path for %s %s %s",
-					option_title, option_label, error_msg);
+			if (stream != NULL) {
+				php_stream_warn(stream, InvalidPath, "Path for %s %s %s",
+						option_title, option_label, error_msg);
+			} else {
+				php_error_docref(NULL, E_WARNING, "Path for %s %s %s",
+						option_title, option_label, error_msg);
+			}
 		} else if (is_from_array && option_name != NULL) {
 			php_openssl_check_path_error(
 					arg_num, error_type, "option %s array item %s", option_name, error_msg);
@@ -1294,7 +1300,7 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 		RETURN_FALSE;
 	}
 
-	fingerprint = php_openssl_x509_fingerprint(cert, method, raw_output);
+	fingerprint = php_openssl_x509_fingerprint(cert, method, raw_output, NULL);
 	if (fingerprint) {
 		RETVAL_STR(fingerprint);
 	} else {

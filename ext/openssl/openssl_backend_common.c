@@ -307,7 +307,7 @@ int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args
 
 	/* read in the oids */
 	str = php_openssl_conf_get_string(req->req_config, NULL, "oid_file");
-	if (str != NULL && php_openssl_check_path_ex(str, strlen(str), path, 0, false, false, "oid_file")) {
+	if (str != NULL && php_openssl_check_path_ex(str, strlen(str), path, 0, false, false, "oid_file", NULL)) {
 		BIO *oid_bio = BIO_new_file(path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 		if (oid_bio) {
 			OBJ_create_objects(oid_bio);
@@ -513,7 +513,7 @@ X509 *php_openssl_x509_from_str(
 	BIO *in;
 
 	if (ZSTR_LEN(cert_str) > 7 && memcmp(ZSTR_VAL(cert_str), "file://", sizeof("file://") - 1) == 0) {
-		if (!php_openssl_check_path_str_ex(cert_str, cert_path, arg_num, true, is_from_array, option_name)) {
+		if (!php_openssl_check_path_str_ex(cert_str, cert_path, arg_num, true, is_from_array, option_name, NULL)) {
 			return NULL;
 		}
 
@@ -582,7 +582,7 @@ X509 *php_openssl_x509_from_zval(
 	return cert;
 }
 
-zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw)
+zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw, php_stream *stream)
 {
 	unsigned char md[EVP_MAX_MD_SIZE];
 	const EVP_MD *mdtype;
@@ -590,12 +590,20 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool r
 	zend_string *ret;
 
 	if (!(mdtype = php_openssl_get_evp_md_by_name(method))) {
-		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
+		if (stream != NULL) {
+			php_stream_warn(stream, Generic, "Unknown digest algorithm");
+		} else {
+			php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
+		}
 		return NULL;
 	} else if (!X509_digest(peer, mdtype, md, &n)) {
 		php_openssl_release_evp_md(mdtype);
 		php_openssl_store_errors();
-		php_error_docref(NULL, E_ERROR, "Could not generate signature");
+		if (stream != NULL) {
+			php_stream_warn(stream, EncodingFailed, "Could not generate signature");
+		} else {
+			php_error_docref(NULL, E_WARNING, "Could not generate signature");
+		}
 		return NULL;
 	}
 
@@ -792,7 +800,7 @@ X509_STORE *php_openssl_setup_verify(zval *calist, uint32_t arg_num)
 				return NULL;
 			}
 
-			if (!php_openssl_check_path_str_ex(str, file_path, arg_num, false, true, NULL)) {
+			if (!php_openssl_check_path_str_ex(str, file_path, arg_num, false, true, NULL, NULL)) {
 				zend_string_release(str);
 				continue;
 			}
