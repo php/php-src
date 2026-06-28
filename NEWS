@@ -107,6 +107,8 @@ PHP                                                                        NEWS
     as float rather than int on 64-bit platforms. (Weilin Du)
   . Fixed UConverter::transcode() silently truncating from_subst and to_subst
     option lengths greater than 127 bytes. (Weilin Du)
+  . Fixed IntlIterator::current() to return NULL instead of an undefined value
+    when the iterator is not positioned on a valid element. (Weilin Du)
 
 - IO:
   . Added new polling API. (Jakub Zelenka)
