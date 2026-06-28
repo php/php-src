@@ -2724,7 +2724,9 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 			entry->compressed_filesize = entry->uncompressed_filesize;
 			continue;
 		}
-		filter = php_stream_filter_create(phar_compress_filter(entry, false), NULL, 0);
+		const char *compression_filter_name = phar_get_compress_filter_name(entry);
+		ZEND_ASSERT(compression_filter_name && "Must have as this has a compression flag set");
+		filter = php_stream_filter_create(compression_filter_name, NULL, false);
 		if (!filter) {
 			if (must_close_old_file) {
 				php_stream_close(oldfile);
