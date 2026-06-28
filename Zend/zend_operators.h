@@ -106,6 +106,8 @@ ZEND_API uint8_t ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t len
 
 ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end);
 ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end);
+ZEND_API bool ZEND_FASTCALL zend_is_valid_file_permission(zend_long permission);
+ZEND_API zend_result ZEND_FASTCALL zend_validate_file_permission(zend_long permission, uint32_t arg_num, const char *name);
 
 #if SIZEOF_ZEND_LONG == 4
 #	define ZEND_DOUBLE_FITS_LONG(d) (!((d) > (double)ZEND_LONG_MAX || (d) < (double)ZEND_LONG_MIN))

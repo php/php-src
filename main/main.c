@@ -42,7 +42,6 @@
 #include "zend.h"
 #include "zend_types.h"
 #include "zend_extensions.h"
-#include "zend_permissions.h"
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_main.h"
@@ -770,22 +769,6 @@ static PHP_INI_MH(OnChangeMailForceExtra)
 			return FAILURE;
 	}
 	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_INI_MH */
-static PHP_INI_MH(OnUpdateFilePermission)
-{
-	zend_long value = zend_ini_parse_quantity_warn(new_value, entry->name);
-
-    if (zend_validate_file_permission(value, 1, ZSTR_VAL(entry->name)) == FAILURE) {
-        return FAILURE;
-    }
-
-    zend_long *p = ZEND_INI_GET_ADDR();
-    *p = value;
-
-    return SUCCESS;
 }
 /* }}} */
 

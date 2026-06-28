@@ -15,7 +15,6 @@
 #include "php.h"
 #include "fopen_wrappers.h"
 #include "php_globals.h"
-#include "Zend/zend_permissions.h"
 
 #include <stdlib.h>
 #include <sys/stat.h>

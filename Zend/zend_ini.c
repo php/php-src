@@ -1035,3 +1035,23 @@ ZEND_API ZEND_INI_MH(OnUpdateStrNotEmpty) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
+
+ZEND_API ZEND_INI_MH(OnUpdateFilePermission)
+{
+
+	if (new_value && ZSTR_LEN(new_value) == 0) {
+		return FAILURE;
+	}
+	
+	zend_long value = zend_ini_parse_quantity_warn(new_value, entry->name);
+
+    if (zend_is_valid_file_permission(value) == FAILURE) {
+        return FAILURE;
+    }
+
+    zend_long *p = ZEND_INI_GET_ADDR();
+    *p = value;
+
+    return SUCCESS;
+}
+/* }}} */

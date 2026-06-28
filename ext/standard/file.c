@@ -26,7 +26,6 @@
 #include "ext/standard/basic_functions.h"
 #include "php_ini.h"
 #include "zend_smart_str.h"
-#include "zend_permissions.h"
 
 #include <stdio.h>
 #include <stdlib.h>

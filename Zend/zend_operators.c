@@ -3848,6 +3848,26 @@ ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const 
 }
 /* }}} */
 
+ZEND_API bool ZEND_FASTCALL zend_is_valid_file_permission(zend_long permission)
+{
+	return permission >= 0 && (permission & ~07777) == 0;
+}
+/* }}} */
+
+
+ZEND_API zend_result ZEND_FASTCALL zend_validate_file_permission(zend_long permission, uint32_t arg_num, const char *name
+)
+{
+    if (!zend_is_valid_file_permission(permission)) {
+        zend_argument_value_error(arg_num, "Invalid %s value (must be between 0 and 07777)", name);
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+/* }}} */
+
+
 #if SIZEOF_ZEND_LONG == 4
 ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d) /* {{{ */
 {

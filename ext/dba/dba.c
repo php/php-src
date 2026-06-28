@@ -22,7 +22,6 @@
 #ifdef HAVE_DBA
 
 #include "php_ini.h"
-#include "Zend/zend_permissions.h"
 #include <stdio.h>
 #include <fcntl.h>
 #ifdef HAVE_SYS_FILE_H
