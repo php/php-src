@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Thu, 24 Aug 2023 22:57:48 +0200
-Subject: [PATCH 3/7] Patch utilities and data structure to be able to generate
+Subject: [PATCH 3/8] Patch utilities and data structure to be able to generate
  smaller lookup tables
 
 Changed the generation script to check if everything fits in 32-bits.
