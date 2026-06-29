@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed memory leaks when calling Collator::__construct() or
     Spoofchecker::__construct() twice. (Weilin Du)
 
+- PDO_ODBC:
+  . Fixed bug GH-20726 (Crash with ODBC connection pooling when the DSN
+    carries no credentials). (iliaal)
+
 - Phar:
   . Fixed inconsistent handling of the magic ".phar" directory. Paths such as
     "/.phar" remain protected, while non-magic paths that merely start with
