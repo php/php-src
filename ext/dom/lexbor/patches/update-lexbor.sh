@@ -29,6 +29,7 @@ for patch in "${patches[@]}"; do
 done
 
 # Refresh patches
+rm "$PATCHES_DIR"/*.patch
 NUM_PATCHES=${#patches[@]}
 git format-patch "HEAD~$NUM_PATCHES" -o "$PATCHES_DIR"
 
