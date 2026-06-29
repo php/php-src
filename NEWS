@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.31
+?? ??? ????, PHP 8.3.32
+
+- OpenSSL:
+  . Fixed bug GH-22187 (Memory corruption (zend_mm_heap corrupted) in
+    openssl_encrypt with AES-WRAP-PAD). (David Carlier)
+
+07 May 2026, PHP 8.3.31
 
 - Curl:
   . Add support for brotli and zstd on Windows. (Shivam Mathur)
