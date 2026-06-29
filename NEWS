@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     fallback locale when a language tag cannot be canonicalized. (Weilin Du)
   . Fixed memory leaks when calling Collator::__construct() or
     Spoofchecker::__construct() twice. (Weilin Du)
+  . Fixed IntlChar methods leaving stale global error state after successful
+    calls. (Xuyang Zhang)
 
 - Phar:
   . Fixed inconsistent handling of the magic ".phar" directory. Paths such as
