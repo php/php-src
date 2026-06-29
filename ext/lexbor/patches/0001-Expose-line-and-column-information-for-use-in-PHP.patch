@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Sat, 26 Aug 2023 15:08:59 +0200
-Subject: [PATCH 1/8] Expose line and column information for use in PHP
+Subject: [PATCH 1/9] Expose line and column information for use in PHP
 
 ---
  source/lexbor/dom/interfaces/node.h  |  2 ++
