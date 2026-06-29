@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2024 Alexander Borisov
  *
- * Author: Nora Dossche  <ndossche@php.net>
+ * Author: Niels Dossche <nielsdos@php.net>
  */
 
 #ifndef LEXBOR_SWAR_H
