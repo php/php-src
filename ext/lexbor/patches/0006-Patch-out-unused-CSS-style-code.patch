@@ -1,4 +1,4 @@
-From 54399ee441d922d89c32909e2028f899f6091cd6 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Sun, 7 Jan 2024 21:59:28 +0100
 Subject: [PATCH 6/6] Patch out unused CSS style code
@@ -27,6 +27,3 @@ index 308dced..d192a01 100644
  }
  
  lxb_inline void
--- 
-2.51.2
-
