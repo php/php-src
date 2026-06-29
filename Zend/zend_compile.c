@@ -343,6 +343,7 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context, zend_op_arra
 	CG(context).brk_cont_array = NULL;
 	CG(context).labels = NULL;
 	CG(context).in_jmp_frameless_branch = false;
+	CG(context).in_finally = false;
 	CG(context).active_property_info_name = NULL;
 	CG(context).active_property_hook_kind = (zend_property_hook_kind)-1;
 }
@@ -5993,6 +5994,10 @@ static void zend_compile_return(const zend_ast *ast) /* {{{ */
 		zend_compile_expr(&expr_node, expr_ast);
 	}
 
+	if (CG(context).in_finally) {
+		zend_error(E_DEPRECATED, "Returning from a finally block is deprecated");
+	}
+
 	if ((CG(active_op_array)->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)
 	 && (expr_node.op_type == IS_CV || (by_ref && expr_node.op_type == IS_VAR))
 	 && zend_has_finally()) {
@@ -7163,7 +7168,10 @@ static void zend_compile_try(const zend_ast *ast) /* {{{ */
 
 		zend_emit_op(NULL, ZEND_JMP, NULL, NULL);
 
+		bool orig_in_finally = CG(context).in_finally;
+		CG(context).in_finally = true;
 		zend_compile_stmt(finally_ast);
+		CG(context).in_finally = orig_in_finally;
 
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_op = opnum_jmp + 1;
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_end

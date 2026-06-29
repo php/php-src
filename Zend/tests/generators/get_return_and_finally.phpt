@@ -41,7 +41,8 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
 int(42)
 gen2() throw
 Cannot get return value of a generator that hasn't returned
