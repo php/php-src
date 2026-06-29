@@ -1522,6 +1522,16 @@ PHP_FUNCTION(socket_recvfrom)
 	php_sock = Z_SOCKET_P(zsocket);
 	ENSURE_SOCKET_VALID(php_sock);
 
+#if defined(AF_PACKET) && defined(MSG_TRUNC)
+	/* On packet sockets MSG_TRUNC makes recvfrom() report the untruncated
+	 * frame length, which can exceed the buffer. Reject it rather than
+	 * silently changing the meaning of the return value. */
+	if (php_sock->type == AF_PACKET && (flags & MSG_TRUNC)) {
+		zend_argument_value_error(4, "must not contain MSG_TRUNC for AF_PACKET sockets");
+		RETURN_THROWS();
+	}
+#endif
+
 	/* overflow check */
 	/* Shouldthrow ? */
 
@@ -1544,7 +1554,7 @@ PHP_FUNCTION(socket_recvfrom)
 				zend_string_efree(recv_buf);
 				RETURN_FALSE;
 			}
-			ZSTR_LEN(recv_buf) = retval;
+			ZSTR_LEN(recv_buf) = MIN((size_t)retval, (size_t)length);
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
 			ZEND_TRY_ASSIGN_REF_NEW_STR(zdata, recv_buf);
@@ -1572,7 +1582,7 @@ PHP_FUNCTION(socket_recvfrom)
 				zend_string_efree(recv_buf);
 				RETURN_FALSE;
 			}
-			ZSTR_LEN(recv_buf) = retval;
+			ZSTR_LEN(recv_buf) = MIN((size_t)retval, (size_t)length);
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
 			address = inet_ntop(AF_INET, &sin.sin_addr, addrbuf, sizeof(addrbuf));
@@ -1603,7 +1613,7 @@ PHP_FUNCTION(socket_recvfrom)
 				zend_string_efree(recv_buf);
 				RETURN_FALSE;
 			}
-			ZSTR_LEN(recv_buf) = retval;
+			ZSTR_LEN(recv_buf) = MIN((size_t)retval, (size_t)length);
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
 			inet_ntop(AF_INET6, &sin6.sin6_addr,  addrbuf, sizeof(addrbuf));
@@ -1619,7 +1629,6 @@ PHP_FUNCTION(socket_recvfrom)
 
 			slen = sizeof(sll);
 			memset(&sll, 0, slen);
-			sll.sll_family = AF_PACKET;
 
 			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), length, flags, (struct sockaddr *)&sll, (socklen_t *)&slen);
 
@@ -1628,7 +1637,7 @@ PHP_FUNCTION(socket_recvfrom)
 				zend_string_efree(recv_buf);
 				RETURN_FALSE;
 			}
-			ZSTR_LEN(recv_buf) = retval;
+			ZSTR_LEN(recv_buf) = MIN((size_t)retval, (size_t)length);
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
 			if (UNEXPECTED(!if_indextoname(sll.sll_ifindex, ifrname))) {

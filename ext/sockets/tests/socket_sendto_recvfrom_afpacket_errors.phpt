@@ -46,6 +46,17 @@ $ret = @socket_recvfrom($s, $buf, 65536, 0, $addr);
 var_dump($ret === false);
 socket_close($s);
 
+echo "--- recvfrom with MSG_TRUNC is rejected ---\n";
+$s = socket_create(AF_PACKET, SOCK_RAW, ETH_P_ALL);
+socket_bind($s, 'lo');
+
+try {
+    socket_recvfrom($s, $buf, 65536, MSG_TRUNC, $addr);
+} catch (ValueError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+socket_close($s);
+
 ?>
 --EXPECT--
 --- sendto without port (ifindex) ---
@@ -54,3 +65,5 @@ socket_sendto(): Argument #6 ($port) cannot be null when the socket type is AF_P
 bool(true)
 --- recvfrom on non-blocking socket with no data ---
 bool(true)
+--- recvfrom with MSG_TRUNC is rejected ---
+socket_recvfrom(): Argument #4 ($flags) must not contain MSG_TRUNC for AF_PACKET sockets
