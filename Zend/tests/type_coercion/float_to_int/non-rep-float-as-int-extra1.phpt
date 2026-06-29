@@ -14,5 +14,5 @@ var_dump($b | 1);
 
 ?>
 --EXPECTF--
-Implicit conversion from float-string "1.0E+4%d" to int loses precision
 int(%d)
+Implicit conversion from float-string "1.0E+4%d" to int loses precision

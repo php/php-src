@@ -24,7 +24,7 @@ var_dump(new C());
 
 ?>
 --EXPECTF--
-Exception: Return type of C::getTimezone() should either be compatible with DateTime::getTimezone(): DateTimeZone|false, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice
+Exception: Return type of C::getTimestamp() should either be compatible with DateTime::getTimestamp(): int, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice
 object(C)#%d (3) {
   ["date"]=>
   string(%d) "%s"

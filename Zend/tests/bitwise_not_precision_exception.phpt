@@ -12,4 +12,5 @@ try {
 }
 ?>
 --EXPECT--
+int(-1)
 The float INF is not representable as an int, cast occurred

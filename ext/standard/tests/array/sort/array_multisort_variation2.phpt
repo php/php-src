@@ -107,7 +107,7 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_multisort() : usage variation ***
 
 --int 0--

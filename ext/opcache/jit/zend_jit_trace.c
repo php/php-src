@@ -5596,7 +5596,6 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 							}
 						} else {
 							int j;
-							int may_throw = 0;
 							bool left_frame = 0;
 
 							if (!zend_jit_return(&ctx, opline, op_array,
@@ -5638,17 +5637,12 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 										if (!zend_jit_free_cv(&ctx, info, j)) {
 											goto jit_failure;
 										}
-										if (info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_RESOURCE)) {
-											if (info & MAY_BE_RC1) {
-												may_throw = 1;
-											}
-										}
 									}
 								}
 							}
 							if (!zend_jit_leave_func(&ctx, op_array, opline, op1_info, left_frame,
 									p + 1, &zend_jit_traces[ZEND_JIT_TRACE_NUM],
-									(op_array_ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) != 0, may_throw)) {
+									(op_array_ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) != 0)) {
 								goto jit_failure;
 							}
 						}

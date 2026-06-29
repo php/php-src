@@ -7,19 +7,32 @@ set_error_handler(function($no, $msg) {
     throw new Exception($msg);
 });
 
-try {
+function smart_branch() {
     if ($a === null) { // ZEND_VM_SMART_BRANCH
-        undefined_function('Null');
+        return 'branch';
     }
-} catch (Exception $e) {
+    return 'no branch';
 }
 
-try  {
+function next_opcode() {
     $c === 3; // ZEND_VM_NEXT_OPCODE
-    undefined_function();
-} catch (Exception $e) {
+    return 'done';
 }
+
+try {
+    smart_branch();
+} catch (Exception $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+    next_opcode();
+} catch (Exception $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+echo "okey\n";
 ?>
-okey
 --EXPECT--
+Undefined variable $a
+Undefined variable $c
 okey

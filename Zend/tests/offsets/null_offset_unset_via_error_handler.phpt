@@ -14,6 +14,5 @@ $b = [0, null => $a];
 echo "\nSuccess\n";
 ?>
 --EXPECTF--
-string(72) "Using null as an array offset is deprecated, use an empty string instead"
-
 Success
+string(72) "Using null as an array offset is deprecated, use an empty string instead"
