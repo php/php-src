@@ -14,13 +14,13 @@ unset($x);
 var_dump(++$x);
 ?>
 --EXPECT--
-Undefined variable $x
-Decrement on type null has no effect, this will change in the next major version of PHP
-NULL
-Undefined variable $x
 NULL
 Undefined variable $x
 Decrement on type null has no effect, this will change in the next major version of PHP
 NULL
 Undefined variable $x
+NULL
+Undefined variable $x
+Decrement on type null has no effect, this will change in the next major version of PHP
 int(1)
+Undefined variable $x

@@ -192,6 +192,7 @@ void init_executor(void) /* {{{ */
 
 	EG(record_errors) = false;
 	memset(&EG(errors), 0, sizeof(EG(errors)));
+	memset(&EG(deferred_errors), 0, sizeof(EG(deferred_errors)));
 
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
@@ -444,6 +445,8 @@ void shutdown_executor(void) /* {{{ */
 #else
 	bool fast_shutdown = is_zend_mm() && !EG(full_tables_cleanup);
 #endif
+
+	zend_free_deferred_errors();
 
 	zend_try {
 		zend_stream_shutdown();

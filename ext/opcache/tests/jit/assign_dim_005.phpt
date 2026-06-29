@@ -16,6 +16,11 @@ $a[$c] = 'x' ;
 var_dump($a);
 ?>
 --EXPECT--
+array(1) {
+  [""]=>
+  string(1) "x"
+}
 Error: Undefined variable $c
+Error: Using null as an array offset is deprecated, use an empty string instead
 Error: Undefined variable $c
-NULL
+Error: Using null as an array offset is deprecated, use an empty string instead

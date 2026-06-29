@@ -87,57 +87,57 @@ var_dump(--$c->a);
 unset($c->a);
 ?>
 --EXPECT--
-string(87) "Decrement on type null has no effect, this will change in the next major version of PHP"
 NULL
+string(87) "Decrement on type null has no effect, this will change in the next major version of PHP"
 NULL (only --)
 POST DEC
-string(87) "Decrement on type null has no effect, this will change in the next major version of PHP"
 NULL
+string(87) "Decrement on type null has no effect, this will change in the next major version of PHP"
 PRE DEC
-string(87) "Decrement on type null has no effect, this will change in the next major version of PHP"
 NULL
+string(87) "Decrement on type null has no effect, this will change in the next major version of PHP"
 Empty string
 POST INC
-string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
 string(0) ""
+string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
 POST DEC
-string(54) "Decrement on empty string is deprecated as non-numeric"
 string(0) ""
-PRE INC
-string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
-string(1) "1"
-PRE DEC
 string(54) "Decrement on empty string is deprecated as non-numeric"
+PRE INC
+string(1) "1"
+string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
+PRE DEC
 int(-1)
+string(54) "Decrement on empty string is deprecated as non-numeric"
 Non fill ASCII (only ++)
 POST INC
-string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
 string(4) " ad "
+string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
 PRE INC
-string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
 string(4) " ad "
+string(74) "Increment on non-numeric string is deprecated, use str_increment() instead"
 Bool
 POST INC
-string(87) "Increment on type bool has no effect, this will change in the next major version of PHP"
 bool(false)
+string(87) "Increment on type bool has no effect, this will change in the next major version of PHP"
 POST DEC
-string(87) "Decrement on type bool has no effect, this will change in the next major version of PHP"
 bool(false)
+string(87) "Decrement on type bool has no effect, this will change in the next major version of PHP"
 PRE INC
+bool(false)
 string(87) "Increment on type bool has no effect, this will change in the next major version of PHP"
-bool(false)
 PRE DEC
-string(87) "Decrement on type bool has no effect, this will change in the next major version of PHP"
 bool(false)
+string(87) "Decrement on type bool has no effect, this will change in the next major version of PHP"
 POST INC
-string(87) "Increment on type bool has no effect, this will change in the next major version of PHP"
 bool(true)
+string(87) "Increment on type bool has no effect, this will change in the next major version of PHP"
 POST DEC
-string(87) "Decrement on type bool has no effect, this will change in the next major version of PHP"
 bool(true)
+string(87) "Decrement on type bool has no effect, this will change in the next major version of PHP"
 PRE INC
+bool(true)
 string(87) "Increment on type bool has no effect, this will change in the next major version of PHP"
-bool(true)
 PRE DEC
-string(87) "Decrement on type bool has no effect, this will change in the next major version of PHP"
 bool(true)
+string(87) "Decrement on type bool has no effect, this will change in the next major version of PHP"

@@ -32,4 +32,5 @@ foreach ($tests as $obj) {
 --EXPECT--
 int(1)
 string(3) "str"
+NULL
 Exception: Undefined property: B::$b

@@ -4316,13 +4316,17 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
 	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
-	} else if (zend_interrupt_function) {
-		zend_interrupt_function(call);
+	} else {
+		zend_flush_deferred_errors();
+		if (zend_interrupt_function) {
+			zend_interrupt_function(call);
+		}
 	}
 }
 
 #define ZEND_VM_INTERRUPT_CHECK() do { \
 		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+			SAVE_OPLINE(); \
 			ZEND_VM_INTERRUPT(); \
 		} \
 	} while (0)

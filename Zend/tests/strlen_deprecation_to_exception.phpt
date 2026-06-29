@@ -13,5 +13,9 @@ try {
 }
 
 ?>
---EXPECT--
-strlen(): Passing null to parameter #1 ($string) of type string is deprecated
+--EXPECTF--
+Fatal error: Uncaught Exception: strlen(): Passing null to parameter #1 ($string) of type string is deprecated in %s:%d
+Stack trace:
+#0 %s(%d): {closure:%s:%d}(%s)
+#1 {main}
+  thrown in %s on line %d

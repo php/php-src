@@ -15,6 +15,18 @@ var_dump($a);
 
 ?>
 --EXPECT--
-NULL
-NULL
-NULL
+array(1) {
+  [""]=>
+  string(1) "x"
+}
+array(1) {
+  [""]=>
+  string(1) "x"
+}
+array(1) {
+  [""]=>
+  array(1) {
+    [""]=>
+    string(1) "x"
+  }
+}
