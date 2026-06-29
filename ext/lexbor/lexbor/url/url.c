@@ -499,6 +499,7 @@ lxb_url_scheme_length = sizeof(lxb_url_scheme_res) / sizeof(lxb_url_scheme_data_
             if (tmp == NULL) {                                                \
                 return NULL;                                                  \
             }                                                                 \
+            memcpy(tmp, (sbuf_begin), offset);                                \
         }                                                                     \
         else {                                                                \
             tmp = lexbor_realloc((sbuf_begin), new_len);                      \
@@ -509,7 +510,7 @@ lxb_url_scheme_length = sizeof(lxb_url_scheme_res) / sizeof(lxb_url_scheme_data_
         }                                                                     \
                                                                               \
         (sbuf) = tmp + offset;                                                \
-        (last) = sbuf + lst;                                                  \
+        (last) = tmp + lst;                                                   \
         (sbuf_begin) = tmp;                                                   \
         (sbuf_end) = tmp + new_len;                                           \
     }                                                                         \

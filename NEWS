@@ -29,6 +29,9 @@ PHP                                                                        NEWS
   . Fixed IntlChar methods leaving stale global error state after successful
     calls. (Xuyang Zhang)
 
+- Lexbor:
+  . Merge patch c3a6847. (ilutov, timwolla)
+
 - Phar:
   . Fixed inconsistent handling of the magic ".phar" directory. Paths such as
     "/.phar" remain protected, while non-magic paths that merely start with
