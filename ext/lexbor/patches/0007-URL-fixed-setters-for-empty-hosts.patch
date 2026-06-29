@@ -1,7 +1,7 @@
-From cf07699ca0f5fa4e1f7fd05c2135fd38e6d196c2 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alexander Borisov <lex.borisov@gmail.com>
 Date: Fri, 26 Jun 2026 18:55:56 +0300
-Subject: [PATCH] URL: fixed setters for empty hosts.
+Subject: [PATCH 7/7] URL: fixed setters for empty hosts.
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -22,13 +22,13 @@ This relates to #387 issue on GitHub.
  3 files changed, 86 insertions(+), 9 deletions(-)
 
 diff --git a/source/lexbor/url/url.c b/source/lexbor/url/url.c
-index ced4462b..e1da2c38 100644
+index 5a11434..86bcf8f 100644
 --- a/source/lexbor/url/url.c
 +++ b/source/lexbor/url/url.c
-@@ -1116,11 +1116,13 @@ lxb_url_host_copy(const lxb_url_host_t *src, lxb_url_host_t *dst,
-
+@@ -1115,11 +1115,13 @@ lxb_url_host_copy(const lxb_url_host_t *src, lxb_url_host_t *dst,
+ 
      dst->type = src->type;
-
+ 
 -    if (src->type <= LXB_URL_HOST_TYPE_OPAQUE) {
 -        if (src->type == LXB_URL_HOST_TYPE__UNDEF) {
 -            return LXB_STATUS_OK;
@@ -38,15 +38,15 @@ index ced4462b..e1da2c38 100644
 +    {
 +        return LXB_STATUS_OK;
 +    }
-
+ 
 +    if (src->type <= LXB_URL_HOST_TYPE_OPAQUE) {
          return lxb_url_str_copy(&src->u.domain,
                                  &dst->u.domain, dst_mraw);
      }
-@@ -1153,6 +1155,24 @@ lxb_url_host_set_empty(lxb_url_host_t *host, lexbor_mraw_t *mraw)
+@@ -1152,6 +1154,24 @@ lxb_url_host_set_empty(lxb_url_host_t *host, lexbor_mraw_t *mraw)
      host->type = LXB_URL_HOST_TYPE_EMPTY;
  }
-
+ 
 +lxb_inline bool
 +lxb_url_host_is_empty(const lxb_url_host_t *host)
 +{
@@ -68,7 +68,7 @@ index ced4462b..e1da2c38 100644
  static bool
  lxb_url_host_eq(lxb_url_host_t *host, const lxb_char_t *data, size_t length)
  {
-@@ -1252,7 +1272,7 @@ lxb_url_normalized_windows_drive_letter(const lxb_char_t *data,
+@@ -1251,7 +1271,7 @@ lxb_url_normalized_windows_drive_letter(const lxb_char_t *data,
  static bool
  lxb_url_cannot_have_user_pass_port(lxb_url_t *url)
  {
@@ -77,20 +77,20 @@ index ced4462b..e1da2c38 100644
      || url->host.type == LXB_URL_HOST_TYPE__UNDEF
      || url->scheme.type == LXB_URL_SCHEMEL_TYPE_FILE;
  }
-@@ -3979,6 +3999,11 @@ lxb_url_opaque_host_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
+@@ -3978,6 +3998,11 @@ lxb_url_opaque_host_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
      lxb_status_t status;
      const lxb_char_t *p;
-
+ 
 +    if (data == end) {
 +        lxb_url_host_set_empty(host, mraw);
 +        return LXB_STATUS_OK;
 +    }
 +
      p = data;
-
+ 
      while (p < end) {
 diff --git a/test/files/lexbor/url/changes.ton b/test/files/lexbor/url/changes.ton
-index 07bc9449..1a0b6e35 100644
+index 07bc944..1a0b6e3 100644
 --- a/test/files/lexbor/url/changes.ton
 +++ b/test/files/lexbor/url/changes.ton
 @@ -1,5 +1,5 @@
@@ -167,7 +167,7 @@ index 07bc9449..1a0b6e35 100644
      }
  ]
 diff --git a/test/files/lexbor/url/url.ton b/test/files/lexbor/url/url.ton
-index 2baa4bc2..85794c5b 100644
+index 2baa4bc..85794c5 100644
 --- a/test/files/lexbor/url/url.ton
 +++ b/test/files/lexbor/url/url.ton
 @@ -1,5 +1,5 @@
