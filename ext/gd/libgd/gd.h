@@ -11,6 +11,10 @@ extern "C" {
 
 #include "php_compat.h"
 
+/* Bundled libgd has no separate symbol visibility requirements. */
+#define BGD_DECLARE(rt) rt
+#define ARG_NOT_USED(arg) (void)(arg)
+
 #define GD_MAJOR_VERSION 2
 #define GD_MINOR_VERSION 0
 #define GD_RELEASE_VERSION 35
@@ -577,6 +581,43 @@ void gdImagePaletteCopy(gdImagePtr dst, gdImagePtr src);
 void gdImagePng(gdImagePtr im, FILE *out);
 void gdImagePngCtx(gdImagePtr im, gdIOCtx *out);
 
+typedef struct gdImageMetadata gdImageMetadata;
+
+#define GD_META_OK 0
+#define GD_META_ERR_FORMAT -1
+#define GD_META_ERR_PARSE -2
+#define GD_META_ERR_NOMEM -3
+#define GD_META_ERR_LIMIT -4
+#define GD_META_ERR_UNSUPPORTED -5
+#define GD_META_ERR_INVALID -6
+
+#define GD_METADATA_DEFAULT_MAX_PROFILE_SIZE ((size_t)64 * 1024 * 1024)
+#define GD_METADATA_DEFAULT_MAX_TOTAL_SIZE ((size_t)256 * 1024 * 1024)
+
+gdImageMetadata *gdImageMetadataCreate(void);
+void gdImageMetadataFree(gdImageMetadata *metadata);
+void gdImageMetadataReset(gdImageMetadata *metadata);
+int gdImageMetadataSetLimits(gdImageMetadata *metadata,
+							 size_t max_profile_size, size_t max_total_size);
+void gdImageMetadataGetLimits(const gdImageMetadata *metadata,
+							  size_t *max_profile_size, size_t *max_total_size);
+int gdImageMetadataSetProfile(gdImageMetadata *metadata, const char *key,
+							  const unsigned char *data, size_t size);
+const unsigned char *gdImageMetadataGetProfile(
+	const gdImageMetadata *metadata, const char *key, size_t *size);
+int gdImageMetadataRemoveProfile(gdImageMetadata *metadata, const char *key);
+size_t gdImageMetadataGetProfileCount(const gdImageMetadata *metadata);
+int gdImageMetadataGetProfileAt(const gdImageMetadata *metadata, size_t index,
+								const char **key, const unsigned char **data,
+								size_t *size);
+
+gdImagePtr gdImageCreateFromPngCtxWithMetadata(gdIOCtxPtr in,
+											gdImageMetadata *metadata);
+gdImagePtr gdImageCreateFromPngPtrWithMetadata(int size, void *data,
+											gdImageMetadata *metadata);
+void gdImagePngCtxWithMetadata(gdImagePtr im, gdIOCtxPtr out,
+								 const gdImageMetadata *metadata);
+
 #define GD_PNG_FILTER_AUTO 0U
 #define GD_PNG_FILTER_NONE (1U << 0)
 #define GD_PNG_FILTER_SUB (1U << 1)
@@ -595,8 +636,6 @@ enum {
 	GD_PNG_COMPRESSION_STRATEGY_FIXED
 };
 
-typedef struct gdImageMetadata gdImageMetadata;
-
 typedef struct {
 	size_t struct_size;
 	int compression_level;
@@ -612,6 +651,14 @@ int gdImagePngCtxWithOptions(gdImagePtr im, gdIOCtxPtr out,
 							 const gdPngWriteOptions *options);
 void *gdImagePngPtrWithOptions(gdImagePtr im, int *size,
 							  const gdPngWriteOptions *options);
+void *gdImagePngPtrWithMetadata(gdImagePtr im, int *size,
+								 const gdImageMetadata *metadata);
+void *gdImagePngPtrExWithMetadata(gdImagePtr im, int *size, int level,
+								   const gdImageMetadata *metadata);
+void gdImagePngCtxExWithMetadata(gdImagePtr im, gdIOCtxPtr out, int level,
+								   const gdImageMetadata *metadata);
+int gdImageMetadataInjectPng(void **data, int *size,
+							 const gdImageMetadata *metadata);
 void gdImageGif(gdImagePtr im, FILE *out);
 void gdImageGifCtx(gdImagePtr im, gdIOCtx *out);
 

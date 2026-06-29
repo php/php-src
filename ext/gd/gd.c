@@ -299,6 +299,15 @@ PHP_INI_END()
 /* {{{ php_gd_error_method */
 void php_gd_error_method(int type, const char *format, va_list args)
 {
+	/* Keep PHP's historical PNG warning text while bundled gd_png.c stays
+	 * identical to upstream libgd. */
+	if (strcmp(format, "gd-png: fatal libpng error: %s\n") == 0) {
+		format = "gd-png:  fatal libpng error: %s";
+	} else if (strncmp(format, "gd-png error: setjmp returns error condition",
+			sizeof("gd-png error: setjmp returns error condition") - 1) == 0) {
+		format = "gd-png error: setjmp returns error condition";
+	}
+
 	switch (type) {
 #ifndef PHP_WIN32
 		case GD_DEBUG:

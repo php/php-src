@@ -1,5 +1,14 @@
 #ifndef GD_INTERN_H
 #define GD_INTERN_H
+#include <limits.h>
+
+#if defined(_MSC_VER)
+#define UNUSED_PARAM(x) x
+#elif defined(__GNUC__) || defined(__clang__)
+#define UNUSED_PARAM(x) x __attribute__((unused))
+#else
+#define UNUSED_PARAM(x) x
+#endif
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif

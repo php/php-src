@@ -237,6 +237,7 @@ if test "$PHP_GD" != "no"; then
       libgd/gd_io.c
       libgd/gd_jpeg.c
       libgd/gd_matrix.c
+      libgd/gd_metadata.c
       libgd/gd_png.c
       libgd/gd_rotate.c
       libgd/gd_security.c
