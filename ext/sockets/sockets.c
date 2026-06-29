@@ -1522,13 +1522,36 @@ PHP_FUNCTION(socket_recvfrom)
 	php_sock = Z_SOCKET_P(zsocket);
 	ENSURE_SOCKET_VALID(php_sock);
 
-#if defined(AF_PACKET) && defined(MSG_TRUNC)
-	/* On packet sockets MSG_TRUNC makes recvfrom() report the untruncated
-	 * frame length, which can exceed the buffer. Reject it rather than
-	 * silently changing the meaning of the return value. */
-	if (php_sock->type == AF_PACKET && (flags & MSG_TRUNC)) {
-		zend_argument_value_error(4, "must not contain MSG_TRUNC for AF_PACKET sockets");
-		RETURN_THROWS();
+#ifdef AF_PACKET
+	/* On packet sockets, restrict flags to a finite safe subset. In
+	 * particular MSG_TRUNC must be excluded: it makes recvfrom() report the
+	 * untruncated frame length, which can exceed the buffer. */
+	if (php_sock->type == AF_PACKET) {
+		const zend_long allowed_flags = 0
+#ifdef MSG_OOB
+			| MSG_OOB
+#endif
+#ifdef MSG_PEEK
+			| MSG_PEEK
+#endif
+#ifdef MSG_WAITALL
+			| MSG_WAITALL
+#endif
+#ifdef MSG_DONTWAIT
+			| MSG_DONTWAIT
+#endif
+#ifdef MSG_ERRQUEUE
+			| MSG_ERRQUEUE
+#endif
+#ifdef MSG_CMSG_CLOEXEC
+			| MSG_CMSG_CLOEXEC
+#endif
+			;
+
+		if (flags & ~allowed_flags) {
+			zend_argument_value_error(4, "must be a combination of MSG_OOB, MSG_PEEK, MSG_WAITALL, MSG_DONTWAIT, MSG_ERRQUEUE, and MSG_CMSG_CLOEXEC for AF_PACKET sockets");
+			RETURN_THROWS();
+		}
 	}
 #endif
 

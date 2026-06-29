@@ -66,4 +66,4 @@ bool(true)
 --- recvfrom on non-blocking socket with no data ---
 bool(true)
 --- recvfrom with MSG_TRUNC is rejected ---
-socket_recvfrom(): Argument #4 ($flags) must not contain MSG_TRUNC for AF_PACKET sockets
+socket_recvfrom(): Argument #4 ($flags) must be a combination of MSG_OOB, MSG_PEEK, MSG_WAITALL, MSG_DONTWAIT, MSG_ERRQUEUE, and MSG_CMSG_CLOEXEC for AF_PACKET sockets
