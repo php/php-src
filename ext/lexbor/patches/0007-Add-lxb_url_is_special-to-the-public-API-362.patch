@@ -1,7 +1,7 @@
-From 9181fce509ab9b37c02994545f3971687433e770 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?M=C3=A1t=C3=A9=20Kocsis?= <kocsismate@woohoolabs.com>
 Date: Sun, 17 May 2026 22:17:14 +0200
-Subject: [PATCH] Add lxb_url_is_special() to the public API (#362)
+Subject: [PATCH 7/8] Add lxb_url_is_special() to the public API (#362)
 
 As https://wiki.php.net/rfc/uri_followup#uri_type_detection relies on this information.
 ---
@@ -10,7 +10,7 @@ As https://wiki.php.net/rfc/uri_followup#uri_type_detection relies on this infor
  2 files changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/source/lexbor/url/url.c b/source/lexbor/url/url.c
-index 5a114346..a5b323f2 100644
+index 5a11434..a5b323f 100644
 --- a/source/lexbor/url/url.c
 +++ b/source/lexbor/url/url.c
 @@ -860,7 +860,7 @@ lxb_url_is_url_codepoint(lxb_codepoint_t cp)
@@ -23,7 +23,7 @@ index 5a114346..a5b323f2 100644
  {
      return url->scheme.type != LXB_URL_SCHEMEL_TYPE__UNKNOWN;
 diff --git a/source/lexbor/url/url.h b/source/lexbor/url/url.h
-index 4ed3f32a..6cc6f108 100644
+index 4ed3f32..6cc6f10 100644
 --- a/source/lexbor/url/url.h
 +++ b/source/lexbor/url/url.h
 @@ -763,6 +763,15 @@ LXB_API lxb_status_t
