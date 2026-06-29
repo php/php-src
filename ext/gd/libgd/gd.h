@@ -576,6 +576,42 @@ void gdImageColorTransparent(gdImagePtr im, int color);
 void gdImagePaletteCopy(gdImagePtr dst, gdImagePtr src);
 void gdImagePng(gdImagePtr im, FILE *out);
 void gdImagePngCtx(gdImagePtr im, gdIOCtx *out);
+
+#define GD_PNG_FILTER_AUTO 0U
+#define GD_PNG_FILTER_NONE (1U << 0)
+#define GD_PNG_FILTER_SUB (1U << 1)
+#define GD_PNG_FILTER_UP (1U << 2)
+#define GD_PNG_FILTER_AVERAGE (1U << 3)
+#define GD_PNG_FILTER_PAETH (1U << 4)
+#define GD_PNG_FILTER_ALL                                                    \
+	(GD_PNG_FILTER_NONE | GD_PNG_FILTER_SUB | GD_PNG_FILTER_UP |             \
+	 GD_PNG_FILTER_AVERAGE | GD_PNG_FILTER_PAETH)
+
+enum {
+	GD_PNG_COMPRESSION_STRATEGY_DEFAULT = 0,
+	GD_PNG_COMPRESSION_STRATEGY_FILTERED,
+	GD_PNG_COMPRESSION_STRATEGY_HUFFMAN_ONLY,
+	GD_PNG_COMPRESSION_STRATEGY_RLE,
+	GD_PNG_COMPRESSION_STRATEGY_FIXED
+};
+
+typedef struct gdImageMetadata gdImageMetadata;
+
+typedef struct {
+	size_t struct_size;
+	int compression_level;
+	unsigned int filters;
+	int compression_strategy;
+	const gdImageMetadata *metadata;
+} gdPngWriteOptions;
+
+void gdPngWriteOptionsInit(gdPngWriteOptions *options);
+int gdImagePngWithOptions(gdImagePtr im, FILE *out,
+						  const gdPngWriteOptions *options);
+int gdImagePngCtxWithOptions(gdImagePtr im, gdIOCtxPtr out,
+							 const gdPngWriteOptions *options);
+void *gdImagePngPtrWithOptions(gdImagePtr im, int *size,
+							  const gdPngWriteOptions *options);
 void gdImageGif(gdImagePtr im, FILE *out);
 void gdImageGifCtx(gdImagePtr im, gdIOCtx *out);
 
@@ -588,8 +624,8 @@ void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression);
  * compression (smallest files) but takes a long time to compress, and
  * -1 selects the default compiled into the zlib library.
  */
-void gdImagePngEx(gdImagePtr im, FILE * out, int level, int basefilter);
-void gdImagePngCtxEx(gdImagePtr im, gdIOCtx * out, int level, int basefilter);
+void gdImagePngEx(gdImagePtr im, FILE *out, int level);
+void gdImagePngCtxEx(gdImagePtr im, gdIOCtx *out, int level);
 
 void gdImageWBMP(gdImagePtr image, int fg, FILE *out);
 void gdImageWBMPCtx(gdImagePtr image, int fg, gdIOCtx *out);
@@ -654,7 +690,7 @@ void* gdImagePngPtr(gdImagePtr im, int *size);
 
 /* Best to free this memory with gdFree(), not free() */
 void* gdImageGdPtr(gdImagePtr im, int *size);
-void *gdImagePngPtrEx(gdImagePtr im, int *size, int level, int basefilter);
+void *gdImagePngPtrEx(gdImagePtr im, int *size, int level);
 
 /* Best to free this memory with gdFree(), not free() */
 void* gdImageGd2Ptr(gdImagePtr im, int cs, int fmt, int *size);

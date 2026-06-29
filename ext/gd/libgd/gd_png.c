@@ -9,6 +9,7 @@
 #ifdef HAVE_LIBPNG
 
 #include "png.h"		/* includes zlib.h and setjmp.h */
+#include "zlib.h"
 #include "gdhelpers.h"
 
 #define TRUE 1
@@ -442,51 +443,146 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	return im;
 }
 
-void gdImagePngEx (gdImagePtr im, FILE * outFile, int level, int basefilter)
+static int _gdImagePngCtxWithOptions(gdImagePtr im, gdIOCtx *outfile,
+	const gdPngWriteOptions *options);
+
+void gdPngWriteOptionsInit(gdPngWriteOptions *options)
 {
-	gdIOCtx *out = gdNewFileCtx(outFile);
-	gdImagePngCtxEx(im, out, level, basefilter);
-	out->gd_free(out);
+	if (options == NULL) {
+		return;
+	}
+	memset(options, 0, sizeof(*options));
+	options->struct_size = sizeof(*options);
+	options->compression_level = -1;
 }
 
-void gdImagePng (gdImagePtr im, FILE * outFile)
+static int gdPngWriteOptionsValid(const gdPngWriteOptions *options)
 {
-	gdIOCtx *out = gdNewFileCtx(outFile);
-  	gdImagePngCtxEx(im, out, -1, -1);
-	out->gd_free(out);
+	if (options->struct_size < sizeof(*options)) {
+		gd_error("gd-png error: invalid options structure size");
+		return FALSE;
+	}
+	if (options->compression_level < -1 || options->compression_level > 9) {
+		gd_error("gd-png error: compression level must be -1 through 9");
+		return FALSE;
+	}
+	if ((options->filters & ~GD_PNG_FILTER_ALL) != 0) {
+		gd_error("gd-png error: invalid filter mask");
+		return FALSE;
+	}
+	if (options->compression_strategy < GD_PNG_COMPRESSION_STRATEGY_DEFAULT ||
+		options->compression_strategy > GD_PNG_COMPRESSION_STRATEGY_FIXED) {
+		gd_error("gd-png error: invalid compression strategy");
+		return FALSE;
+	}
+	if (options->metadata != NULL) {
+		gd_error("gd-png error: metadata is not supported by this build");
+		return FALSE;
+	}
+	return TRUE;
 }
 
-void * gdImagePngPtr (gdImagePtr im, int *size)
+int gdImagePngCtxWithOptions(gdImagePtr im, gdIOCtx *outfile,
+	const gdPngWriteOptions *options)
 {
-	void *rv;
-	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
-	gdImagePngCtxEx(im, out, -1, -1);
-	rv = gdDPExtractData(out, size);
-	out->gd_free(out);
+	gdPngWriteOptions defaults;
+	if (im == NULL || outfile == NULL) {
+		return 1;
+	}
+	if (options == NULL) {
+		gdPngWriteOptionsInit(&defaults);
+		options = &defaults;
+	}
+	if (!gdPngWriteOptionsValid(options)) {
+		return 1;
+	}
+	return _gdImagePngCtxWithOptions(im, outfile, options);
+}
 
+int gdImagePngWithOptions(gdImagePtr im, FILE *outFile,
+	const gdPngWriteOptions *options)
+{
+	gdIOCtx *out;
+	int status;
+	if (im == NULL || outFile == NULL) {
+		return 1;
+	}
+	out = gdNewFileCtx(outFile);
+	if (out == NULL) {
+		return 1;
+	}
+	status = gdImagePngCtxWithOptions(im, out, options);
+	out->gd_free(out);
+	return status;
+}
+
+void *gdImagePngPtrWithOptions(gdImagePtr im, int *size,
+	const gdPngWriteOptions *options)
+{
+	void *rv = NULL;
+	gdIOCtx *out;
+	if (size != NULL) {
+		*size = 0;
+	}
+	if (im == NULL || size == NULL) {
+		return NULL;
+	}
+	out = gdNewDynamicCtx(2048, NULL);
+	if (out == NULL) {
+		return NULL;
+	}
+	if (gdImagePngCtxWithOptions(im, out, options) == 0) {
+		rv = gdDPExtractData(out, size);
+	}
+	out->gd_free(out);
 	return rv;
 }
 
-void * gdImagePngPtrEx (gdImagePtr im, int *size, int level, int basefilter)
+void gdImagePngEx(gdImagePtr im, FILE *outFile, int level)
 {
-	void *rv;
-	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
-	gdImagePngCtxEx(im, out, level, basefilter);
-	rv = gdDPExtractData(out, size);
-	out->gd_free(out);
-	return rv;
+	gdPngWriteOptions options;
+	gdPngWriteOptionsInit(&options);
+	options.compression_level = level;
+	(void) gdImagePngWithOptions(im, outFile, &options);
 }
 
-void gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
+void gdImagePng(gdImagePtr im, FILE *outFile)
 {
-	gdImagePngCtxEx(im, outfile, -1, -1);
+	(void) gdImagePngWithOptions(im, outFile, NULL);
+}
+
+void *gdImagePngPtr(gdImagePtr im, int *size)
+{
+	return gdImagePngPtrWithOptions(im, size, NULL);
+}
+
+void *gdImagePngPtrEx(gdImagePtr im, int *size, int level)
+{
+	gdPngWriteOptions options;
+	gdPngWriteOptionsInit(&options);
+	options.compression_level = level;
+	return gdImagePngPtrWithOptions(im, size, &options);
+}
+
+void gdImagePngCtx(gdImagePtr im, gdIOCtx *outfile)
+{
+	(void) gdImagePngCtxWithOptions(im, outfile, NULL);
+}
+
+void gdImagePngCtxEx(gdImagePtr im, gdIOCtx *outfile, int level)
+{
+	gdPngWriteOptions options;
+	gdPngWriteOptionsInit(&options);
+	options.compression_level = level;
+	(void) gdImagePngCtxWithOptions(im, outfile, &options);
 }
 
 /* This routine is based in part on code from Dale Lutz (Safe Software Inc.)
  *  and in part on demo code from Chapter 15 of "PNG: The Definitive Guide"
  *  (http://www.cdrom.com/pub/png/pngbook.html).
  */
-void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilter)
+static int _gdImagePngCtxWithOptions(gdImagePtr im, gdIOCtx *outfile,
+	const gdPngWriteOptions *options)
 {
 	int i, j, bit_depth = 0, interlace_type;
 	int width = im->sx;
@@ -499,8 +595,14 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 	png_color palette[gdMaxColors];
 	png_structp png_ptr;
 	png_infop info_ptr;
+	png_bytep *row_pointers = NULL;
 	volatile int transparent = im->transparent;
 	volatile int remap = FALSE;
+	int ret = 0;
+
+	if (width == 0 || height == 0) {
+		return 1;
+	}
 #ifdef PNG_SETJMP_SUPPORTED
 	jmpbuf_wrapper jbw;
 
@@ -510,7 +612,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 #endif
 	if (png_ptr == NULL) {
 		gd_error("gd-png error: cannot allocate libpng main struct");
-		return;
+		return 1;
 	}
 
 	info_ptr = png_create_info_struct(png_ptr);
@@ -518,19 +620,26 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 		gd_error("gd-png error: cannot allocate libpng info struct");
 		png_destroy_write_struct (&png_ptr, (png_infopp) NULL);
 
-		return;
+		return 1;
     }
 
 #ifdef PNG_SETJMP_SUPPORTED
 	if (setjmp(jbw.jmpbuf)) {
 		gd_error("gd-png error: setjmp returns error condition");
 		png_destroy_write_struct (&png_ptr, &info_ptr);
+		if (row_pointers != NULL) {
+			for (i = 0; i < height; ++i) {
+				gdFree(row_pointers[i]);
+			}
+			gdFree(row_pointers);
+		}
 
-		return;
+		return 1;
 	}
 #endif
 
 	png_set_write_fn(png_ptr, (void *) outfile, gdPngWriteData, gdPngFlushData);
+	png_set_user_limits(png_ptr, 0x7fffffffL, 0x7fffffffL);
 
 	/* This is best for palette images, and libpng defaults to it for
 	 * palette images anyway, so we don't need to do it explicitly.
@@ -542,13 +651,25 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 	/*  png_set_filter(png_ptr, 0, PNG_FILTER_NONE);  */
 
 	/* 2.0.12: this is finally a parameter */
-	if (level != -1 && (level < 0 || level > 9)) {
-		gd_error("gd-png error: compression level must be 0 through 9");
-		return;
+	png_set_compression_level(png_ptr, options->compression_level);
+	if (options->filters != GD_PNG_FILTER_AUTO) {
+		int filters = 0;
+		if (options->filters & GD_PNG_FILTER_NONE) filters |= PNG_FILTER_NONE;
+		if (options->filters & GD_PNG_FILTER_SUB) filters |= PNG_FILTER_SUB;
+		if (options->filters & GD_PNG_FILTER_UP) filters |= PNG_FILTER_UP;
+		if (options->filters & GD_PNG_FILTER_AVERAGE) filters |= PNG_FILTER_AVG;
+		if (options->filters & GD_PNG_FILTER_PAETH) filters |= PNG_FILTER_PAETH;
+		png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, filters);
 	}
-	png_set_compression_level(png_ptr, level);
-	if (basefilter >= 0) {
-		png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, basefilter);
+	if (options->compression_strategy != GD_PNG_COMPRESSION_STRATEGY_DEFAULT) {
+		int strategy = Z_DEFAULT_STRATEGY;
+		switch (options->compression_strategy) {
+			case GD_PNG_COMPRESSION_STRATEGY_FILTERED: strategy = Z_FILTERED; break;
+			case GD_PNG_COMPRESSION_STRATEGY_HUFFMAN_ONLY: strategy = Z_HUFFMAN_ONLY; break;
+			case GD_PNG_COMPRESSION_STRATEGY_RLE: strategy = Z_RLE; break;
+			case GD_PNG_COMPRESSION_STRATEGY_FIXED: strategy = Z_FIXED; break;
+		}
+		png_set_compression_strategy(png_ptr, strategy);
 	}
 
 #ifdef PNG_pHYs_SUPPORTED
@@ -582,6 +703,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 		}
 		if (colors == 0) {
 			gd_error("gd-png error: no colors in palette");
+			ret = 1;
 			goto bail;
 		}
 		if (colors < im->colorsTotal) {
@@ -709,7 +831,6 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 		/* performance optimizations by Phong Tran */
 		int channels = im->saveAlphaFlag ? 4 : 3;
 		/* Our little 7-bit alpha channel trick costs us a bit here. */
-		png_bytep *row_pointers;
 		unsigned char* pOutputRow;
 		int **ptpixels = im->tpixels;
 		int *pThisRow;
@@ -718,10 +839,29 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 		png_bytep *prow_pointers;
 		int saveAlphaFlag = im->saveAlphaFlag;
 
-		row_pointers = safe_emalloc(sizeof(png_bytep), height, 0);
+		if (overflow2(sizeof(png_bytep), height)) {
+			ret = 1;
+			goto bail;
+		}
+		row_pointers = gdCalloc(height, sizeof(png_bytep));
+		if (row_pointers == NULL) {
+			gd_error("gd-png error: unable to allocate row_pointers");
+			ret = 1;
+			goto bail;
+		}
 		prow_pointers = row_pointers;
 		for (j = 0; j < height; ++j) {
-			*prow_pointers = (png_bytep) safe_emalloc(width, channels, 0);
+			if (overflow2(width, channels) ||
+				((*prow_pointers = (png_bytep) gdMalloc(width * channels)) == NULL)) {
+				gd_error("gd-png error: unable to allocate rows");
+				for (i = 0; i < j; ++i) {
+					gdFree(row_pointers[i]);
+				}
+				gdFree(row_pointers);
+				row_pointers = NULL;
+				ret = 1;
+				goto bail;
+			}
 			pOutputRow = *prow_pointers++;
 			pThisRow = *ptpixels++;
 			for (i = 0; i < width; ++i) {
@@ -751,12 +891,31 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 		}
 
 		gdFree(row_pointers);
+		row_pointers = NULL;
 	} else {
 		if (remap) {
-			png_bytep *row_pointers;
-			row_pointers = safe_emalloc(height, sizeof(png_bytep), 0);
+			if (overflow2(sizeof(png_bytep), height)) {
+				ret = 1;
+				goto bail;
+			}
+			row_pointers = gdMalloc(sizeof(png_bytep) * height);
+			if (row_pointers == NULL) {
+				gd_error("gd-png error: unable to allocate row_pointers");
+				ret = 1;
+				goto bail;
+			}
 			for (j = 0; j < height; ++j) {
 				row_pointers[j] = (png_bytep) gdMalloc(width);
+				if (row_pointers[j] == NULL) {
+					gd_error("gd-png error: unable to allocate rows");
+					for (i = 0; i < j; ++i) {
+						gdFree(row_pointers[i]);
+					}
+					gdFree(row_pointers);
+					row_pointers = NULL;
+					ret = 1;
+					goto bail;
+				}
 				for (i = 0; i < width; ++i) {
 					row_pointers[j][i] = mapping[im->pixels[j][i]];
 				}
@@ -770,6 +929,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 			}
 
 			gdFree(row_pointers);
+			row_pointers = NULL;
 		} else {
 			png_write_image(png_ptr, im->pixels);
 			png_write_end(png_ptr, info_ptr);
@@ -778,6 +938,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 	/* 1.6.3: maybe we should give that memory BACK! TBB */
  bail:
 	png_destroy_write_struct(&png_ptr, &info_ptr);
+	return ret;
 }
 
 #endif /* HAVE_LIBPNG */

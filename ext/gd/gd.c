@@ -1928,7 +1928,28 @@ PHP_FUNCTION(imagepng)
 	}
 
 #ifdef HAVE_GD_BUNDLED
-	gdImagePngCtxEx(im, ctx, (int) quality, (int) basefilter);
+	{
+		gdPngWriteOptions options;
+		unsigned int filters = GD_PNG_FILTER_AUTO;
+		unsigned int unknown_filters;
+
+		gdPngWriteOptionsInit(&options);
+		options.compression_level = (int) quality;
+		if (basefilter >= 0) {
+			unsigned long php_filters = (unsigned long) basefilter;
+			if (php_filters & 0x08) filters |= GD_PNG_FILTER_NONE;
+			if (php_filters & 0x10) filters |= GD_PNG_FILTER_SUB;
+			if (php_filters & 0x20) filters |= GD_PNG_FILTER_UP;
+			if (php_filters & 0x40) filters |= GD_PNG_FILTER_AVERAGE;
+			if (php_filters & 0x80) filters |= GD_PNG_FILTER_PAETH;
+			unknown_filters = (unsigned int) (php_filters & ~0xf8UL);
+			if (unknown_filters != 0) {
+				filters |= 1U << 31;
+			}
+		}
+		options.filters = filters;
+		(void) gdImagePngCtxWithOptions(im, ctx, &options);
+	}
 #else
 	gdImagePngCtxEx(im, ctx, (int) quality);
 #endif
