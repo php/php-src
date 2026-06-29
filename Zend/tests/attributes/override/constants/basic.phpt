@@ -15,12 +15,16 @@ interface II extends I {
 class P {
     public const C1 = 'C1';
     public const C2 = 'C2';
+    public const C3 = 'C3';
+    public const C4 = 'C4';
 }
 
 class PP extends P {
     #[\Override]
     public const C1 = 'C1';
     public const C2 = 'C2';
+    #[\Override]
+    public const C3 = 'C3';
 }
 
 class C extends PP implements I {
@@ -28,7 +32,11 @@ class C extends PP implements I {
     public const I = 'I';
     #[\Override]
     public const C1 = 'C1';
+    #[\Override]
     public const C2 = 'C2';
+    public const C3 = 'C3';
+    #[\Override]
+    public const C4 = 'C4';
     public const C = 'C';
 }
 
