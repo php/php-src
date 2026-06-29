@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22206 (missing return in global register detection).
     (P3p111n0)
 
+- Hash:
+  . Fixed bug GH-18173 (ext/hash relies on implementation-defined malloc
+    alignment). (iliaal)
+
 - Opcache:
   . Fixed bug GH-22158 (Tracing JIT dispatches the observer begin handler
     through the wrong run_time_cache slot on megamorphic calls). (ptondereau,

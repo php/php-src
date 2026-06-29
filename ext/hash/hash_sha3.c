@@ -251,7 +251,8 @@ const php_hash_ops php_hash_sha3_##bits##_ops = { \
 	bits >> 3, \
 	(1600 - (2 * bits)) >> 3, \
 	sizeof(PHP_SHA3_##bits##_CTX), \
-	1 \
+	1, \
+	0 \
 }
 
 #else
@@ -339,7 +340,8 @@ const php_hash_ops php_hash_sha3_##bits##_ops = { \
 	bits >> 3, \
 	(1600 - (2 * bits)) >> 3, \
 	sizeof(PHP_SHA3_CTX), \
-	1 \
+	1, \
+	0 \
 }
 
 #endif
