@@ -31,7 +31,7 @@ done
 # Refresh patches
 rm "$PATCHES_DIR"/*.patch
 NUM_PATCHES=${#patches[@]}
-git format-patch --no-signature "HEAD~$NUM_PATCHES" -o "$PATCHES_DIR"
+git format-patch --no-signature --zero-commit "HEAD~$NUM_PATCHES" -o "$PATCHES_DIR"
 
 # Run code-generation tools
 (cd "$LEXBOR_TMP_DIR/utils/lexbor/encoding" && python3 single-byte.py)
