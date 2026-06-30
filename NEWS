@@ -37,6 +37,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-22257 (type confusion in Exception::getTraceAsString()).
     (David Carlier)
   . TSRM: make CG, EG, SCNG and AG compile-time offsets. (henderkes)
+  . Deprecate returning values from __construct() and __destruct(). (timwolla)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
