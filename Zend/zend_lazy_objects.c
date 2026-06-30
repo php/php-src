@@ -161,7 +161,9 @@ zend_lazy_object_flags_t zend_lazy_object_get_flags(const zend_object *obj)
 void zend_lazy_object_del_info(const zend_object *obj)
 {
 	zend_result res = zend_hash_index_del(&EG(lazy_objects_store).infos, obj->handle);
-	ZEND_ASSERT(res == SUCCESS);
+	if (UNEXPECTED(res != SUCCESS)) {
+		return;
+	}
 }
 
 bool zend_lazy_object_decr_lazy_props(const zend_object *obj)
