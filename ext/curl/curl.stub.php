@@ -3117,6 +3117,13 @@ const CURLINFO_POSTTRANSFER_TIME_T = UNKNOWN;
  */
 const CURLINFO_CONN_ID = UNKNOWN;
 #endif
+#if LIBCURL_VERSION_NUM >= 0x081400 /* Available since 8.20.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_SIZE_DELIVERED
+ */
+const CURLINFO_SIZE_DELIVERED = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue CURLOPT_DISALLOW_USERNAME_IN_URL

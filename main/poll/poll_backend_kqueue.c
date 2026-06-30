@@ -27,7 +27,7 @@
 #define KQUEUE_FD_GARBAGE_WRITE    (1 << 3)  /* Write filter fired, needs read cleanup */
 #define KQUEUE_FD_HAS_GARBAGE      (KQUEUE_FD_GARBAGE_READ | KQUEUE_FD_GARBAGE_WRITE)
 
-typedef struct {
+typedef struct kqueue_backend_data {
 	int kqueue_fd;
 	struct kevent *events;
 	int events_capacity;
@@ -420,10 +420,8 @@ static int kqueue_backend_wait(
 
 			if (garbage_events > 0) {
 				/* Clean up orphaned filters from complete oneshot FDs */
-				zend_ulong fd_key;
-				zval *tracking;
 				struct kevent cleanup_change;
-				ZEND_HASH_FOREACH_NUM_KEY_VAL(backend_data->fd_tracking, fd_key, tracking)
+				ZEND_HASH_FOREACH_NUM_KEY_VAL(backend_data->fd_tracking, zend_ulong fd_key, zval *tracking)
 				{
 					zend_long flags = Z_LVAL_P(tracking);
 					if (flags & KQUEUE_FD_HAS_GARBAGE) {

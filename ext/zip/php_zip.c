@@ -25,6 +25,7 @@
 #include "ext/standard/php_filestat.h"
 #include "zend_attributes.h"
 #include "zend_interfaces.h"
+#include "zend_exceptions.h"
 #include "php_zip.h"
 #include "php_zip_arginfo.h"
 
@@ -1644,6 +1645,30 @@ PHP_METHOD(ZipArchive, count)
 	RETVAL_LONG(MIN(num, ZEND_LONG_MAX));
 }
 /* }}} */
+
+PHP_METHOD(ZipArchive, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_throw_exception_ex(NULL, 0,
+		"Serialization of '%s' is not allowed, override __serialize() and __unserialize() to implement it",
+		ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+}
+
+PHP_METHOD(ZipArchive, __unserialize)
+{
+	zval *data;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	(void) data;
+
+	zend_throw_exception_ex(NULL, 0,
+		"Unserialization of '%s' is not allowed, override __serialize() and __unserialize() to implement it",
+		ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+}
 
 /* {{{ clear the internal status */
 PHP_METHOD(ZipArchive, clearError)

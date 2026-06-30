@@ -93,8 +93,8 @@ typedef struct {
 	size_t def_chunk_size;
 	bool auto_detect_line_endings;
 	zend_long default_socket_timeout;
-	char *user_agent; /* for the http wrapper */
-	char *from_address; /* for the ftp and http wrappers */
+	zend_string *user_agent; /* for the http wrapper */
+	zend_string *from_address; /* for the ftp and http wrappers */
 	const char *user_stream_current_filename; /* for simple recursion protection */
 	php_stream_context *default_context;
 	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */

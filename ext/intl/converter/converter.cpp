@@ -20,6 +20,8 @@
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
 
+#include "../intl_icu_compat.h"
+
 extern "C" {
 #include "converter.h"
 #include "php_intl.h"
@@ -159,7 +161,7 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 			return;
 		case IS_LONG:
 		{
-			zend_long lval = Z_LVAL_P(val);
+			const zend_long lval = Z_LVAL_P(val);
 			if ((lval < 0) || (lval > 0x10FFFF)) {
 				php_converter_throw_failure(objval, U_ILLEGAL_ARGUMENT_ERROR, "Invalid codepoint U+%04lx", lval);
 				return;
@@ -265,7 +267,7 @@ static void php_converter_append_fromUnicode_target(zval *val, UConverterFromUni
 			return;
 		case IS_STRING:
 		{
-			size_t vallen = Z_STRLEN_P(val);
+			const size_t vallen = Z_STRLEN_P(val);
 			if (TARGET_CHECK(args, vallen)) {
 				args->target = reinterpret_cast<char *>(zend_mempcpy(args->target, Z_STRVAL_P(val), vallen));
 			}
@@ -682,7 +684,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 }
 /* }}} */
 
-static void php_converter_set_subst_chars(UConverter *cnv, zend_string *subst, UErrorCode *error)
+static void php_converter_set_subst_chars(UConverter *cnv, const zend_string *subst, UErrorCode *error)
 {
 	if (ZSTR_LEN(subst) > SCHAR_MAX) {
 		*error = U_ILLEGAL_ARGUMENT_ERROR;
@@ -949,18 +951,10 @@ static zend_object *php_converter_clone_object(zend_object *object) {
 	zend_object *retval = php_converter_object_ctor(object->ce, &objval);
 	UErrorCode error = U_ZERO_ERROR;
 
-#if U_ICU_VERSION_MAJOR_NUM > 70
-	objval->src = ucnv_clone(oldobj->src, &error);
-#else
-	objval->src = ucnv_safeClone(oldobj->src, NULL, NULL, &error);
-#endif
+	objval->src = intl_icu_compat_ucnv_clone(oldobj->src, &error);
 	if (U_SUCCESS(error)) {
 		error = U_ZERO_ERROR;
-#if U_ICU_VERSION_MAJOR_NUM > 70
-		objval->dest = ucnv_clone(oldobj->dest, &error);
-#else
-		objval->dest = ucnv_safeClone(oldobj->dest, NULL, NULL, &error);
-#endif
+		objval->dest = intl_icu_compat_ucnv_clone(oldobj->dest, &error);
 	}
 
 	if (U_FAILURE(error)) {

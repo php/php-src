@@ -132,7 +132,7 @@ zend_string * intl_error_get_message( intl_error* err )
 		return ZSTR_EMPTY_ALLOC();
 
 	uErrorName = u_errorName( err->code );
-	size_t uErrorLen = strlen(uErrorName);
+	const size_t uErrorLen = strlen(uErrorName);
 
 	/* Format output string */
 	if (err->custom_error_message) {

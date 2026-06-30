@@ -171,7 +171,7 @@ U_CFUNC PHP_FUNCTION( numfmt_parse_currency )
 		ZEND_TRY_ASSIGN_REF_LONG(zposition, pp.getIndex());
 	}
 
-	double number = currAmt->getNumber().getDouble(INTL_DATA_ERROR_CODE(nfo));
+	const double number = currAmt->getNumber().getDouble(INTL_DATA_ERROR_CODE(nfo));
 
 	/* Convert parsed currency to UTF-8 and pass it back to caller. */
 	icu::UnicodeString ucurrency(currAmt->getISOCurrency());

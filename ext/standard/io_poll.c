@@ -18,6 +18,7 @@
 #include "php_network.h"
 #include "php_poll.h"
 #include "io_poll_arginfo.h"
+#include "io_poll_decl.h"
 
 /* Class entries */
 static zend_class_entry *php_io_poll_backend_class_entry;
@@ -44,7 +45,7 @@ static zend_object_handlers php_io_poll_watcher_object_handlers;
 static zend_object_handlers php_io_poll_handle_object_handlers;
 
 /* Watcher object structure */
-typedef struct {
+typedef struct php_io_poll_watcher_object {
 	php_poll_handle_object *handle;
 	uint32_t watched_events;
 	uint32_t triggered_events;
@@ -55,23 +56,22 @@ typedef struct {
 } php_io_poll_watcher_object;
 
 /* Context object structure */
-typedef struct {
+typedef struct php_io_poll_context_object {
 	php_poll_ctx *ctx;
 	HashTable *watchers; /* Maps handle pointer -> watcher object */
 	zend_object std;
 } php_io_poll_context_object;
 
 /* Stream poll handle specific data */
-typedef struct {
+typedef struct php_stream_poll_handle_data {
 	php_stream *stream;
+	zend_resource *res;
 } php_stream_poll_handle_data;
 
 /* Accessor macros */
-#define PHP_POLL_CONTEXT_OBJ_FROM_ZOBJ(_obj) \
-	((php_io_poll_context_object *) ((char *) (_obj) - offsetof(php_io_poll_context_object, std)))
+#define PHP_POLL_CONTEXT_OBJ_FROM_ZOBJ(_obj) ZEND_CONTAINER_OF(_obj, php_io_poll_context_object, std)
 
-#define PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(_obj) \
-	((php_io_poll_watcher_object *) ((char *) (_obj) - offsetof(php_io_poll_watcher_object, std)))
+#define PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(_obj) ZEND_CONTAINER_OF(_obj, php_io_poll_watcher_object, std)
 
 #define PHP_POLL_WATCHER_OBJ_FROM_ZV(_zv) PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(Z_OBJ_P(_zv))
 #define PHP_POLL_CONTEXT_OBJ_FROM_ZV(_zv) PHP_POLL_CONTEXT_OBJ_FROM_ZOBJ(Z_OBJ_P(_zv))
@@ -86,32 +86,12 @@ static inline void php_io_poll_throw_failed_operation(
 /* Event enum to bit mask mapping */
 static uint32_t php_io_poll_event_enum_to_bit(zend_object *event_enum)
 {
-	zval *case_name = zend_enum_fetch_case_name(event_enum);
-	const char *name = Z_STRVAL_P(case_name);
-
-	if (strcmp(name, "Read") == 0) {
-		return PHP_POLL_READ;
-	} else if (strcmp(name, "Write") == 0) {
-		return PHP_POLL_WRITE;
-	} else if (strcmp(name, "Error") == 0) {
-		return PHP_POLL_ERROR;
-	} else if (strcmp(name, "HangUp") == 0) {
-		return PHP_POLL_HUP;
-	} else if (strcmp(name, "ReadHangUp") == 0) {
-		return PHP_POLL_RDHUP;
-	} else if (strcmp(name, "OneShot") == 0) {
-		return PHP_POLL_ONESHOT;
-	} else if (strcmp(name, "EdgeTriggered") == 0) {
-		return PHP_POLL_ET;
-	}
-
-	return 0;
+	return 1 << (zend_enum_fetch_case_id(event_enum) - 1);
 }
 
 static uint32_t php_io_poll_event_enums_to_events(zval *event_enums)
 {
 	HashTable *ht;
-	zval *entry;
 	uint32_t events = 0;
 
 	if (Z_TYPE_P(event_enums) != IS_ARRAY) {
@@ -120,7 +100,7 @@ static uint32_t php_io_poll_event_enums_to_events(zval *event_enums)
 
 	ht = Z_ARRVAL_P(event_enums);
 
-	ZEND_HASH_FOREACH_VAL(ht, entry) {
+	ZEND_HASH_FOREACH_VAL(ht, zval *entry) {
 		if (Z_TYPE_P(entry) != IS_OBJECT
 				|| !instanceof_function(Z_OBJCE_P(entry), php_io_poll_event_class_entry)) {
 			return 0;
@@ -139,38 +119,31 @@ static zend_result php_io_poll_events_to_event_enums(uint32_t events, zval *even
 	array_init(event_enums);
 
 	if (events & PHP_POLL_READ) {
-		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "Read"));
-		GC_ADDREF(Z_OBJ(enum_case));
+		ZVAL_OBJ_COPY(&enum_case, zend_enum_get_case_by_id(php_io_poll_event_class_entry, ZEND_ENUM_Io_Poll_Event_Read));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 	if (events & PHP_POLL_WRITE) {
-		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "Write"));
-		GC_ADDREF(Z_OBJ(enum_case));
+		ZVAL_OBJ_COPY(&enum_case, zend_enum_get_case_by_id(php_io_poll_event_class_entry, ZEND_ENUM_Io_Poll_Event_Write));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 	if (events & PHP_POLL_ERROR) {
-		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "Error"));
-		GC_ADDREF(Z_OBJ(enum_case));
+		ZVAL_OBJ_COPY(&enum_case, zend_enum_get_case_by_id(php_io_poll_event_class_entry, ZEND_ENUM_Io_Poll_Event_Error));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 	if (events & PHP_POLL_HUP) {
-		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "HangUp"));
-		GC_ADDREF(Z_OBJ(enum_case));
+		ZVAL_OBJ_COPY(&enum_case, zend_enum_get_case_by_id(php_io_poll_event_class_entry, ZEND_ENUM_Io_Poll_Event_HangUp));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 	if (events & PHP_POLL_RDHUP) {
-		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "ReadHangUp"));
-		GC_ADDREF(Z_OBJ(enum_case));
+		ZVAL_OBJ_COPY(&enum_case, zend_enum_get_case_by_id(php_io_poll_event_class_entry, ZEND_ENUM_Io_Poll_Event_ReadHangUp));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 	if (events & PHP_POLL_ONESHOT) {
-		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "OneShot"));
-		GC_ADDREF(Z_OBJ(enum_case));
+		ZVAL_OBJ_COPY(&enum_case, zend_enum_get_case_by_id(php_io_poll_event_class_entry, ZEND_ENUM_Io_Poll_Event_OneShot));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 	if (events & PHP_POLL_ET) {
-		ZVAL_OBJ(&enum_case, zend_enum_get_case_cstr(php_io_poll_event_class_entry, "EdgeTriggered"));
-		GC_ADDREF(Z_OBJ(enum_case));
+		ZVAL_OBJ_COPY(&enum_case, zend_enum_get_case_by_id(php_io_poll_event_class_entry, ZEND_ENUM_Io_Poll_Event_EdgeTriggered));
 		add_next_index_zval(event_enums, &enum_case);
 	}
 
@@ -180,24 +153,7 @@ static zend_result php_io_poll_events_to_event_enums(uint32_t events, zval *even
 /* Backend enum name to backend type mapping */
 static php_poll_backend_type php_io_poll_backend_enum_to_type(zend_object *backend_enum)
 {
-	zval *case_name = zend_enum_fetch_case_name(backend_enum);
-	const char *name = Z_STRVAL_P(case_name);
-
-	if (strcmp(name, "Auto") == 0) {
-		return PHP_POLL_BACKEND_AUTO;
-	} else if (strcmp(name, "Poll") == 0) {
-		return PHP_POLL_BACKEND_POLL;
-	} else if (strcmp(name, "Epoll") == 0) {
-		return PHP_POLL_BACKEND_EPOLL;
-	} else if (strcmp(name, "Kqueue") == 0) {
-		return PHP_POLL_BACKEND_KQUEUE;
-	} else if (strcmp(name, "EventPorts") == 0) {
-		return PHP_POLL_BACKEND_EVENTPORT;
-	} else if (strcmp(name, "WSAPoll") == 0) {
-		return PHP_POLL_BACKEND_WSAPOLL;
-	}
-
-	return PHP_POLL_BACKEND_AUTO;
+	return zend_enum_fetch_case_id(backend_enum) - 2;
 }
 
 static const char *php_io_poll_backend_type_to_name(php_poll_backend_type type)
@@ -223,7 +179,7 @@ static const char *php_io_poll_backend_type_to_name(php_poll_backend_type type)
 
 static php_socket_t php_stream_poll_handle_get_fd(php_poll_handle_object *handle)
 {
-	php_stream_poll_handle_data *data = (php_stream_poll_handle_data *) handle->handle_data;
+	php_stream_poll_handle_data *data = handle->handle_data;
 	php_socket_t fd;
 
 	if (!data || !data->stream) {
@@ -242,15 +198,17 @@ static php_socket_t php_stream_poll_handle_get_fd(php_poll_handle_object *handle
 
 static int php_stream_poll_handle_is_valid(php_poll_handle_object *handle)
 {
-	php_stream_poll_handle_data *data = (php_stream_poll_handle_data *) handle->handle_data;
+	php_stream_poll_handle_data *data = handle->handle_data;
 	return data && data->stream && !php_stream_eof(data->stream);
 }
 
 static void php_stream_poll_handle_cleanup(php_poll_handle_object *handle)
 {
-	php_stream_poll_handle_data *data = (php_stream_poll_handle_data *) handle->handle_data;
+	php_stream_poll_handle_data *data = handle->handle_data;
 	if (data) {
-		/* Don't close the stream - user still owns it */
+		if (data->res) {
+			zend_list_delete(data->res);
+		}
 		efree(data);
 		handle->handle_data = NULL;
 	}
@@ -331,6 +289,14 @@ static void php_io_poll_context_free_object(zend_object *obj)
 {
 	php_io_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZOBJ(obj);
 
+	if (intern->watchers) {
+		ZEND_HASH_FOREACH_VAL(intern->watchers, zval *zv) {
+			php_io_poll_watcher_object *watcher = PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(Z_OBJ_P(zv));
+			watcher->active = false;
+			watcher->poll_ctx = NULL;
+		} ZEND_HASH_FOREACH_END();
+	}
+
 	if (intern->ctx) {
 		php_poll_destroy(intern->ctx);
 	}
@@ -341,6 +307,35 @@ static void php_io_poll_context_free_object(zend_object *obj)
 	}
 
 	zend_object_std_dtor(&intern->std);
+}
+
+static HashTable *php_io_poll_watcher_get_gc(zend_object *obj, zval **table, int *n)
+{
+	php_io_poll_watcher_object *intern = PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(obj);
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+
+	zend_get_gc_buffer_add_zval(gc_buffer, &intern->data);
+	if (intern->handle) {
+		zend_get_gc_buffer_add_obj(gc_buffer, &intern->handle->std);
+	}
+
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+	return NULL;
+}
+
+static HashTable *php_io_poll_context_get_gc(zend_object *obj, zval **table, int *n)
+{
+	php_io_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZOBJ(obj);
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+
+	if (intern->watchers) {
+		ZEND_HASH_FOREACH_VAL(intern->watchers, zval *zv) {
+			zend_get_gc_buffer_add_zval(gc_buffer, zv);
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+	return NULL;
 }
 
 /* Utility functions */
@@ -448,13 +443,19 @@ PHP_METHOD(StreamPollHandle, __construct)
 
 	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(getThis());
 
+	if (intern->handle_data) {
+		zend_throw_error(NULL, "StreamPollHandle object is already constructed");
+		RETURN_THROWS();
+	}
+
 	/* Set up stream-specific data */
 	php_stream_poll_handle_data *data = emalloc(sizeof(php_stream_poll_handle_data));
 	data->stream = stream;
+	data->res = stream->res;
 	intern->handle_data = data;
 
 	/* Add reference to stream */
-	GC_ADDREF(stream->res);
+	GC_ADDREF(data->res);
 }
 
 PHP_METHOD(StreamPollHandle, getStream)
@@ -462,7 +463,7 @@ PHP_METHOD(StreamPollHandle, getStream)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(getThis());
-	php_stream_poll_handle_data *data = (php_stream_poll_handle_data *) intern->handle_data;
+	php_stream_poll_handle_data *data = intern->handle_data;
 
 	if (!data || !data->stream) {
 		RETURN_NULL();
@@ -657,6 +658,11 @@ PHP_METHOD(Io_Poll_Context, __construct)
 
 	php_io_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZV(getThis());
 
+	if (intern->ctx) {
+		zend_throw_error(NULL, "Io\\Poll\\Context object is already constructed");
+		RETURN_THROWS();
+	}
+
 	php_poll_backend_type backend_type = PHP_POLL_BACKEND_AUTO;
 	if (backend_obj != NULL) {
 		backend_type = php_io_poll_backend_enum_to_type(Z_OBJ_P(backend_obj));
@@ -800,7 +806,7 @@ PHP_METHOD(Io_Poll_Context, wait)
 		RETURN_THROWS();
 	}
 
-	php_poll_event *events = emalloc(sizeof(php_poll_event) * max_events);
+	php_poll_event *events = safe_emalloc(max_events, sizeof(*events), 0);
 	int num_events = php_poll_wait(intern->ctx, events, (int) max_events, timeout);
 
 	if (num_events < 0) {
@@ -861,6 +867,7 @@ PHP_MINIT_FUNCTION(poll)
 	memcpy(&php_io_poll_handle_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_io_poll_handle_object_handlers.offset = offsetof(php_poll_handle_object, std);
 	php_io_poll_handle_object_handlers.free_obj = php_poll_handle_object_free;
+	php_io_poll_handle_object_handlers.clone_obj = NULL;
 	php_stream_poll_handle_class_entry->default_object_handlers = &php_io_poll_handle_object_handlers;
 
 	/* Register Watcher class */
@@ -871,6 +878,8 @@ PHP_MINIT_FUNCTION(poll)
 			sizeof(zend_object_handlers));
 	php_io_poll_watcher_object_handlers.offset = offsetof(php_io_poll_watcher_object, std);
 	php_io_poll_watcher_object_handlers.free_obj = php_io_poll_watcher_free_object;
+	php_io_poll_watcher_object_handlers.get_gc = php_io_poll_watcher_get_gc;
+	php_io_poll_watcher_object_handlers.clone_obj = NULL;
 	php_io_poll_watcher_class_entry->default_object_handlers = &php_io_poll_watcher_object_handlers;
 
 	/* Register Context class */
@@ -881,6 +890,8 @@ PHP_MINIT_FUNCTION(poll)
 			sizeof(zend_object_handlers));
 	php_io_poll_context_object_handlers.offset = offsetof(php_io_poll_context_object, std);
 	php_io_poll_context_object_handlers.free_obj = php_io_poll_context_free_object;
+	php_io_poll_context_object_handlers.get_gc = php_io_poll_context_get_gc;
+	php_io_poll_context_object_handlers.clone_obj = NULL;
 	php_io_poll_context_class_entry->default_object_handlers = &php_io_poll_context_object_handlers;
 
 	/* Register exception hierarchy */

@@ -60,7 +60,7 @@ zend_object *IntlNumberRangeFormatter_object_create(zend_class_entry *ce)
     return &intern->zo;
 }
 
-static icu::Formattable rangeformatter_create_formattable(zval *number)
+static icu::Formattable rangeformatter_create_formattable(const zval *number)
 {
     icu::Formattable formattable;
 

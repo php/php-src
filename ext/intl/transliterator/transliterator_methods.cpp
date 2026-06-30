@@ -21,6 +21,8 @@
 #include <unicode/unistr.h>
 #endif
 
+#include <unicode/uenum.h>
+
 extern "C" {
 #include "php_intl.h"
 #include "intl_data.h"
@@ -31,7 +33,7 @@ extern "C" {
 
 #include <zend_exceptions.h>
 
-static int create_transliterator( char *str_id, size_t str_id_len, zend_long direction, zval *object )
+static int create_transliterator( const char *str_id, size_t str_id_len, zend_long direction, zval *object )
 {
 	Transliterator_object *to;
 	UChar	              *ustr_id    = nullptr;
@@ -226,6 +228,7 @@ U_CFUNC PHP_FUNCTION( transliterator_list_ids )
 	UEnumeration  *en;
 	const UChar	  *elem;
 	int32_t		  elem_len;
+	int32_t		  count;
 	UErrorCode	  status = U_ZERO_ERROR;
 
 	intl_error_reset( nullptr );
@@ -236,7 +239,14 @@ U_CFUNC PHP_FUNCTION( transliterator_list_ids )
 	INTL_CHECK_STATUS( status,
 		"Failed to obtain registered transliterators" );
 
-	array_init( return_value );
+	count = uenum_count( en, &status );
+	if( U_FAILURE( status ) )
+	{
+		count = 0;
+		status = U_ZERO_ERROR;
+	}
+
+	array_init_size( return_value, count );
 	while( (elem = uenum_unext( en, &elem_len, &status )) )
 	{
 		zend_string *el = intl_convert_utf16_to_utf8(elem, elem_len, &status );
@@ -276,14 +286,16 @@ U_CFUNC PHP_FUNCTION( transliterator_transliterate )
 	zend_long	start		= 0,
 				limit		= -1;
 	int			success     = 0;
+	bool		is_method;
 	zval 		tmp_object;
 	TRANSLITERATOR_METHOD_INIT_VARS;
 
 	object = getThis();
+	is_method = object != NULL;
 
 	ZVAL_UNDEF(&tmp_object);
 
-	if (object == nullptr) {
+	if (!is_method) {
 		/* in non-OOP version, accept both a transliterator and a string */
 		zend_string *arg1_str;
 		zend_object *arg1_obj;
@@ -320,17 +332,17 @@ U_CFUNC PHP_FUNCTION( transliterator_transliterate )
 	}
 
 	if (limit < -1) {
-		zend_argument_value_error(object ? 3 : 4, "must be greater than or equal to -1");
+		zend_argument_value_error(is_method ? 3 : 4, "must be greater than or equal to -1");
 		goto cleanup_object;
 	}
 
 	if (start < 0) {
-		zend_argument_value_error(object ? 2 : 3, "must be greater than or equal to 0");
+		zend_argument_value_error(is_method ? 2 : 3, "must be greater than or equal to 0");
 		goto cleanup_object;
 	}
 
 	if (limit != -1 && start > limit) {
-		zend_argument_value_error(object ? 2 : 3, "must be less than or equal to argument #%d ($end)", object ? 3 : 4);
+		zend_argument_value_error(is_method ? 2 : 3, "must be less than or equal to argument #%d ($end)", is_method ? 3 : 4);
 		goto cleanup_object;
 	}
 

@@ -129,13 +129,20 @@ PHP_MINFO_FUNCTION(shmop)
 /* {{{ gets and attaches a shared memory segment */
 PHP_FUNCTION(shmop_open)
 {
-	zend_long key, mode, size;
+	zend_long key_arg, mode, size;
+	key_t key;
 	php_shmop *shmop;
 	struct shmid_ds shm;
 	char *flags;
 	size_t flags_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lsll", &key, &flags, &flags_len, &mode, &size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lsll", &key_arg, &flags, &flags_len, &mode, &size) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	key = (key_t) key_arg;
+	if ((zend_long) key != key_arg) {
+		zend_argument_value_error(1, "is out of range");
 		RETURN_THROWS();
 	}
 
@@ -217,7 +224,6 @@ PHP_FUNCTION(shmop_read)
 	zend_long start, count;
 	php_shmop *shmop;
 	char *startaddr;
-	int bytes;
 	zend_string *return_string;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oll", &shmid, shmop_ce, &start, &count) == FAILURE) {
@@ -237,7 +243,7 @@ PHP_FUNCTION(shmop_read)
 	}
 
 	startaddr = shmop->addr + start;
-	bytes = count ? count : shmop->size - start;
+	zend_long bytes = count ? count : shmop->size - start;
 
 	return_string = zend_string_init(startaddr, bytes, 0);
 

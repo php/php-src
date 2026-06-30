@@ -20,6 +20,7 @@
 # include <main/php_config.h>
 #endif
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -94,6 +95,11 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 TSRM_API void tsrm_reserve(size_t size);
 TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
+/* Fast resources at caller-chosen, compile-time-constant offsets. The fixed
+ * front region must be reserved after tsrm_reserve() and before any fast id. */
+TSRM_API void tsrm_reserve_fast_front(size_t size);
+TSRM_API ts_rsrc_id ts_allocate_fast_id_at(ts_rsrc_id *rsrc_id, size_t *offset, ptrdiff_t fixed_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
+
 /* fetches the requested resource for the current thread */
 TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id);
 #define ts_resource(id)			ts_resource_ex(id, NULL)
@@ -155,7 +161,7 @@ TSRM_API bool tsrm_is_managed_thread(void);
 #if !__has_attribute(tls_model) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__MUSL__) || defined(__HAIKU__)
 # define TSRM_TLS_MODEL_ATTR
 # define TSRM_TLS_MODEL_DEFAULT
-#elif __PIC__
+#elif defined(__PIC__) && !defined(__PIE__)
 # define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))
 # define TSRM_TLS_MODEL_INITIAL_EXEC
 #else

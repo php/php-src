@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
 
 namespace Io {
     class IoException extends \Exception {}
@@ -8,6 +11,7 @@ namespace Io {
 
 namespace Io\Poll {
 
+    // Keep in sync with main/php_poll.h!
     enum Backend
     {
         case Auto;
@@ -25,6 +29,7 @@ namespace Io\Poll {
         public function supportsEdgeTriggering(): bool {}
     }
 
+    // Keep in sync with main/php_poll.h!
     enum Event {
         case Read;
         case Write;
@@ -39,7 +44,7 @@ namespace Io\Poll {
     {
     }
 
-    /*
+    /**
      * @strict-properties
      * @not-serializable
      */
@@ -70,7 +75,7 @@ namespace Io\Poll {
         public function remove(): void {}
     }
 
-    /*
+    /**
      * @strict-properties
      * @not-serializable
      */
@@ -145,7 +150,7 @@ namespace Io\Poll {
 }
 
 namespace {
-    /*
+    /**
      * @strict-properties
      * @not-serializable
      */

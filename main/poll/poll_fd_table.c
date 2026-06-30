@@ -34,9 +34,7 @@ php_poll_fd_table *php_poll_fd_table_init(int initial_capacity, bool persistent)
 void php_poll_fd_table_cleanup(php_poll_fd_table *table)
 {
 	if (table) {
-		zval *zv;
-
-		ZEND_HASH_FOREACH_VAL(&table->entries_ht, zv)
+		ZEND_HASH_FOREACH_VAL(&table->entries_ht, zval *zv)
 		{
 			php_poll_fd_entry *entry = Z_PTR_P(zv);
 			pefree(entry, table->persistent);
@@ -105,10 +103,7 @@ typedef bool (*php_poll_fd_iterator_func_t)(int fd, php_poll_fd_entry *entry, vo
 void php_poll_fd_table_foreach(
 		php_poll_fd_table *table, php_poll_fd_iterator_func_t callback, void *user_data)
 {
-	zend_ulong fd;
-	zval *zv;
-
-	ZEND_HASH_FOREACH_NUM_KEY_VAL(&table->entries_ht, fd, zv)
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(&table->entries_ht, zend_ulong fd, zval *zv)
 	{
 		php_poll_fd_entry *entry = Z_PTR_P(zv);
 		if (entry->active && !callback((int) fd, entry, user_data)) {

@@ -938,10 +938,14 @@ AC_DEFUN([PHP_NEW_EXTENSION],[
 
   ifelse($5,,ac_extra=,[ac_extra=$(echo "m4_normalize(m4_expand([$5]))"|$SED s#@ext_srcdir@#$ext_srcdir#g|$SED s#@ext_builddir@#$ext_builddir#g)])
 
+  dnl Statically linked extensions share the engine's _tsrm_ls_cache symbol,
+  dnl so in ZTS builds they can read the TSRMLS cache directly.
+  ac_extra_static="$ac_extra -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
     [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
-    PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,)
+    PHP_ADD_SOURCES($ext_dir,$2,$ac_extra_static,)
     EXT_STATIC="$EXT_STATIC $1;$ext_dir"
     if test "$3" != "nocli"; then
       EXT_CLI_STATIC="$EXT_CLI_STATIC $1;$ext_dir"
@@ -962,11 +966,11 @@ dnl ---------------------------------------------- CLI static module
     [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
     case "$PHP_SAPI" in
       cgi|embed|phpdbg[)]
-        PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,)
+        PHP_ADD_SOURCES($ext_dir,$2,$ac_extra_static,)
         EXT_STATIC="$EXT_STATIC $1;$ext_dir"
         ;;
       *[)]
-        PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,cli)
+        PHP_ADD_SOURCES($ext_dir,$2,$ac_extra_static,cli)
         ;;
     esac
     EXT_CLI_STATIC="$EXT_CLI_STATIC $1;$ext_dir"
@@ -1396,7 +1400,11 @@ AC_DEFUN([PHP_POLL_MECHANISMS],
     AC_DEFINE([HAVE_EPOLL], [1], [Define if epoll is available])
     poll_mechanisms="$poll_mechanisms epoll"
 
-    AC_CHECK_FUNCS([epoll_pwait2], [], [], [#include <sys/epoll.h>])
+    AC_CHECK_FUNCS([epoll_pwait2], [],
+      [AC_CHECK_DECL([epoll_pwait2],
+        [AC_DEFINE([HAVE_EPOLL_PWAIT2], [1])],
+        [],
+        [#include <sys/epoll.h>])])
   ])
 
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([

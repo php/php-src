@@ -100,6 +100,7 @@ const php_hash_ops php_hash_crc32_ops = {
 	4, /* what to say here? */
 	4,
 	sizeof(PHP_CRC32_CTX),
+	0,
 	0
 };
 
@@ -115,6 +116,7 @@ const php_hash_ops php_hash_crc32b_ops = {
 	4, /* what to say here? */
 	4,
 	sizeof(PHP_CRC32_CTX),
+	0,
 	0
 };
 
@@ -130,5 +132,6 @@ const php_hash_ops php_hash_crc32c_ops = {
 	4, /* what to say here? */
 	4,
 	sizeof(PHP_CRC32_CTX),
+	0,
 	0
 };

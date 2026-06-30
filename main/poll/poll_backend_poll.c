@@ -16,7 +16,7 @@
 
 #ifndef PHP_WIN32
 
-typedef struct {
+typedef struct poll_backend_data {
 	php_poll_fd_table *fd_table;
 	struct pollfd *temp_fds;
 	int temp_fds_capacity;
@@ -162,7 +162,7 @@ static zend_result poll_backend_remove(php_poll_ctx *ctx, int fd)
 }
 
 /* Context for building struct pollfd array */
-typedef struct {
+typedef struct poll_build_context {
 	struct pollfd *fds;
 	int index;
 } poll_build_context;

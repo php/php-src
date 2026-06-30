@@ -850,6 +850,7 @@ bool ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_
 		goto bail;
 	}
 
+	bool pending_cr = false;
 	while ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
 		if (rcvd == (size_t)-1) {
 			goto bail;
@@ -869,13 +870,30 @@ bool ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_
 			php_stream_write(outstream, ptr, (e - ptr));
 			ptr = e;
 #else
-			while (e > ptr && (s = memchr(ptr, '\r', (e - ptr)))) {
-				php_stream_write(outstream, ptr, (s - ptr));
-				if (*(s + 1) == '\n') {
-					s++;
+			if (pending_cr) {
+				pending_cr = false;
+				if (*ptr == '\n') {
 					php_stream_putc(outstream, '\n');
+					ptr++;
+				} else {
+					php_stream_putc(outstream, '\r');
 				}
-				ptr = s + 1;
+			}
+			while (e > ptr && (s = memchr(ptr, '\r', (e - ptr)))) {
+				if (s + 1 < e) {
+					if (*(s + 1) == '\n') {
+						php_stream_write(outstream, ptr, (s - ptr));
+						php_stream_putc(outstream, '\n');
+						ptr = s + 2;
+					} else {
+						php_stream_write(outstream, ptr, (s - ptr) + 1);
+						ptr = s + 1;
+					}
+				} else {
+					php_stream_write(outstream, ptr, (s - ptr));
+					pending_cr = true;
+					ptr = s + 1;
+				}
 			}
 #endif
 			if (ptr < e) {
@@ -884,6 +902,9 @@ bool ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_
 		} else if (rcvd != php_stream_write(outstream, data->buf, rcvd)) {
 			goto bail;
 		}
+	}
+	if (pending_cr) {
+		php_stream_putc(outstream, '\r');
 	}
 
 	data_close(ftp);
@@ -1252,7 +1273,7 @@ static bool ftp_readline(ftpbuf_t *ftp)
 		}
 
 		data = eol;
-		if ((rcvd = my_recv(ftp, ftp->fd, data, size)) < 1) {
+		if (size < 2 || (rcvd = my_recv(ftp, ftp->fd, data, size - 1)) < 1) {
 			*data = 0;
 			return false;
 		}

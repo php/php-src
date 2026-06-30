@@ -1,5 +1,5 @@
 /* This is a generated file, edit stream_errors.stub.php instead.
- * Stub hash: 3e9ee6f0fdd8ecf3ded82728487a9e774137036a
+ * Stub hash: 4cddf758cc9f2041802d8cbbaaa45593022a5db1
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamException_getErrors, 0, 0, IS_ARRAY, 0)
@@ -37,6 +37,8 @@ static zend_class_entry *register_class_StreamErrorCode(void)
 	zend_enum_add_case_cstr(class_entry, "BindFailed", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "ListenFailed", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "AcceptFailed", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "NotWritable", NULL);
 
@@ -145,6 +147,8 @@ static zend_class_entry *register_class_StreamErrorCode(void)
 	zend_enum_add_case_cstr(class_entry, "RedirectLimit", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "AuthFailed", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "TimeOut", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "ArchivingFailed", NULL);
 

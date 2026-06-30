@@ -39,6 +39,7 @@
 #include "zend_mm_custom_handlers.h"
 #include "ext/uri/php_uri.h"
 #include "zend_observer.h"
+#include "test_decl.h"
 
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
@@ -622,7 +623,7 @@ static ZEND_FUNCTION(zend_get_unit_enum)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_OBJ_COPY(zend_enum_get_case_cstr(zend_test_unit_enum, "Foo"));
+	RETURN_OBJ_COPY(zend_enum_get_case_by_id(zend_test_unit_enum, ZEND_ENUM_ZendTestUnitEnum_Foo));
 }
 
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity)

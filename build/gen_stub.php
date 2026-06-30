@@ -2344,9 +2344,28 @@ class EvaluatedValue
         // $this->expr has all its PHP constants replaced by C constants
         $prettyPrinter = new Standard;
         $expr = $prettyPrinter->prettyPrintExpr($this->expr);
-        // PHP single-quote to C double-quote string
         if ($this->type->isString()) {
-            $expr = preg_replace("/(^'|'$)/", '"', $expr);
+            // The string in $expr has had the octal, hex, and unicode
+            // backslash sequences already applied for double-quoted strings,
+            // but not the other sequences.
+            //
+            // PHP has single quote strings, C doesn't (they're one char).
+            // Single-quoted strings need handling to replace their escapes
+            // with the double-quoted equivalent; namely single quote escapes.
+            //
+            // Double-quoted strings have similar escape sequences as C does,
+            // so we can pass them through directly. However, C does *not*
+            // support the \$ escape sequence (in ""), so strip that. Variable
+            // interpolation shouldn't be possible in a stub, so we don't need
+            // to worry about mangling such a case.
+            if (preg_match("/(^'|'$)/", $expr)) {
+                $expr = substr($expr, 1, -1); // strip quotes, readd later
+                $expr = str_replace("\\'", "'", $expr);
+                $expr = addcslashes($expr, "\\\"");
+                $expr = "\"$expr\"";
+            } else {
+                $expr = str_replace('\$', "$", $expr);
+            }
         }
         return $expr[0] == '"' ? $expr : preg_replace('(\bnull\b)', 'NULL', str_replace('\\', '', $expr));
     }

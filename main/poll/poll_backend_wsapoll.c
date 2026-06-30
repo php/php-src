@@ -19,7 +19,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-typedef struct {
+typedef struct wsapoll_backend_data {
 	php_poll_fd_table *fd_table;
 	WSAPOLLFD *temp_fds;
 	int temp_fds_capacity;
@@ -167,7 +167,7 @@ static zend_result wsapoll_backend_remove(php_poll_ctx *ctx, int fd)
 }
 
 /* Context for building WSAPOLLFD array */
-typedef struct {
+typedef struct wsapoll_build_context {
 	WSAPOLLFD *fds;
 	int index;
 } wsapoll_build_context;

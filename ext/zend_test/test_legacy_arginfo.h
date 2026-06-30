@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 4bb5b467b9d62c0e0c6a7c1e069e8755403a0af9
+ * Stub hash: 8ca2fc33013d5a1c325bf5f0090cc6416a242297
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, 0)
@@ -649,6 +649,27 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	zend_string *property_staticIntProp_name = zend_string_init("staticIntProp", sizeof("staticIntProp") - 1, true);
 	zend_declare_property_ex(class_entry, property_staticIntProp_name, &property_staticIntProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL);
 	zend_string_release_ex(property_staticIntProp_name, true);
+
+	zval property_doubleQuoteEscaped_default_value;
+	zend_string *property_doubleQuoteEscaped_default_value_str = zend_string_init("BEGIN \n\r\t\v\x1b\f\\$\"AAA END", strlen("BEGIN \n\r\t\v\x1b\f\\$\"AAA END"), 1);
+	ZVAL_STR(&property_doubleQuoteEscaped_default_value, property_doubleQuoteEscaped_default_value_str);
+	zend_string *property_doubleQuoteEscaped_name = zend_string_init("doubleQuoteEscaped", sizeof("doubleQuoteEscaped") - 1, true);
+	zend_declare_property_ex(class_entry, property_doubleQuoteEscaped_name, &property_doubleQuoteEscaped_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL);
+	zend_string_release_ex(property_doubleQuoteEscaped_name, true);
+
+	zval property_singleQuoteEscaped_default_value;
+	zend_string *property_singleQuoteEscaped_default_value_str = zend_string_init("BEGIN \\n\\r\\t\\v\\e\\f\\\\\\\\$\\\"\\101\\x41\\u{41} END", strlen("BEGIN \\n\\r\\t\\v\\e\\f\\\\\\\\$\\\"\\101\\x41\\u{41} END"), 1);
+	ZVAL_STR(&property_singleQuoteEscaped_default_value, property_singleQuoteEscaped_default_value_str);
+	zend_string *property_singleQuoteEscaped_name = zend_string_init("singleQuoteEscaped", sizeof("singleQuoteEscaped") - 1, true);
+	zend_declare_property_ex(class_entry, property_singleQuoteEscaped_name, &property_singleQuoteEscaped_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL);
+	zend_string_release_ex(property_singleQuoteEscaped_name, true);
+
+	zval property_escapeInterpolated_default_value;
+	zend_string *property_escapeInterpolated_default_value_str = zend_string_init("begin $ \\$ end", strlen("begin $ \\$ end"), 1);
+	ZVAL_STR(&property_escapeInterpolated_default_value, property_escapeInterpolated_default_value_str);
+	zend_string *property_escapeInterpolated_name = zend_string_init("escapeInterpolated", sizeof("escapeInterpolated") - 1, true);
+	zend_declare_property_ex(class_entry, property_escapeInterpolated_name, &property_escapeInterpolated_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL);
+	zend_string_release_ex(property_escapeInterpolated_name, true);
 
 	zval property_intProp_default_value;
 	ZVAL_LONG(&property_intProp_default_value, 123);

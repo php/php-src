@@ -24,7 +24,7 @@
 
 /* clang-format off */
 
-/* Event types */
+/* Event types. Keep in sync with io_poll.stub.php! */
 #define PHP_POLL_READ    0x01
 #define PHP_POLL_WRITE   0x02
 #define PHP_POLL_ERROR   0x04
@@ -37,8 +37,8 @@
 #define PHP_POLL_FLAG_PERSISTENT 0x01
 #define PHP_POLL_FLAG_RAW_EVENTS 0x02
 
-/* Poll backend types */
-typedef enum {
+/* Poll backend types. Keep in sync with io_poll.stub.php! */
+typedef enum php_poll_backend_type {
 	PHP_POLL_BACKEND_AUTO = -1,
 	PHP_POLL_BACKEND_POLL = 0,
 	PHP_POLL_BACKEND_EPOLL,
@@ -62,7 +62,7 @@ typedef enum {
 #define PHP_POLL_ERROR_CODE_NOSUPPORT   11
 
 /* Error codes */
-typedef enum {
+typedef enum php_poll_error {
 	PHP_POLL_ERR_NONE        = PHP_POLL_ERROR_CODE_NONE,        /* No error */
 	PHP_POLL_ERR_SYSTEM      = PHP_POLL_ERROR_CODE_SYSTEM,      /* Generic system error */
 	PHP_POLL_ERR_NOMEM       = PHP_POLL_ERROR_CODE_NOMEM,       /* Out of memory (ENOMEM) */
@@ -158,8 +158,7 @@ struct php_poll_handle_object {
 	zend_object std;
 };
 
-#define PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(obj) \
-	((php_poll_handle_object *) ((char *) (obj) - offsetof(php_poll_handle_object, std)))
+#define PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(obj) ZEND_CONTAINER_OF(obj, php_poll_handle_object, std)
 
 #define PHP_POLL_HANDLE_OBJ_FROM_ZV(zv) PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(Z_OBJ_P(zv))
 

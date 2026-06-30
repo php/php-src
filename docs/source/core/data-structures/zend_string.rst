@@ -29,9 +29,9 @@ in bytes, and the ``val`` field contains the actual string data.
 
 You may wonder why the ``val`` field is declared as ``char val[1]``. This is called the `struct
 hack`_ in C. It is used to create structs with a flexible size, namely by allowing the last element
-to be expanded arbitrarily. In this case, the size of ``zend_string`` depends on the string's length,
-which is determined at runtime (see ``_ZSTR_STRUCT_SIZE``). When allocating the string, we append
-enough bytes to the allocation to hold the strings content.
+to be expanded arbitrarily. In this case, the size of ``zend_string`` depends on the string's
+length, which is determined at runtime (see ``_ZSTR_STRUCT_SIZE``). When allocating the string, we
+append enough bytes to the allocation to hold the strings content.
 
 .. _struct hack: https://www.geeksforgeeks.org/struct-hack/
 
