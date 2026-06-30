@@ -162,7 +162,7 @@ void zend_lazy_object_del_info(const zend_object *obj)
 {
 	zend_result res = zend_hash_index_del(&EG(lazy_objects_store).infos, obj->handle);
 	if (UNEXPECTED(res != SUCCESS)) {
-		return;
+		return;  
 	}
 }
 

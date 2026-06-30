@@ -9,26 +9,22 @@ memory_limit=2M
 --FILE--
 <?php
 
-class A {
-    public int $x = 1;
+class C {
+    public $a;
 }
 
+$str = str_repeat('a', 1024 * 1024 * 1.25);
+
 try {
-    $r = new ReflectionClass(A::class);
-
-    // Force lazy ghost creation under low memory pressure
-    $obj = $r->newLazyGhost(function () {
-        return new A();
-    });
-
-    // Try to trigger shutdown GC edge case
-    unset($obj);
-
-    echo "OK\n";
+    $reflector = new ReflectionClass(C::class);
+    for ($i = 0; $i < 10000; $i++) {
+        $obj = $reflector->newLazyGhost(function ($obj) {});
+        $reflector->getProperty('a')->setRawValueWithoutLazyInitialization($obj, $obj);
+    }
 } catch (Throwable $e) {
     echo "Caught: " . $e->getMessage() . "\n";
 }
 
 ?>
 --EXPECTF--
-OK
+Fatal error: Allowed memory size of %d bytes exhausted at /Users/arshid/Downloads/php-src/Zend/zend_objects_API.c:131 (tried to allocate 16416 bytes) in %s on line %d
