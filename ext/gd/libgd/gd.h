@@ -163,7 +163,7 @@ typedef enum {
 /* define struct with name and func ptr and add it to gdImageStruct gdInterpolationMethod interpolation; */
 
 /* Interpolation function ptr */
-typedef double (* interpolation_method )(double);
+typedef double (* interpolation_method )(double, double);
 
 
 /**
@@ -206,7 +206,124 @@ typedef const char *gdHeifChroma;
 #define GD_HEIF_CHROMA_422 "422"
 #define GD_HEIF_CHROMA_444 "444"
 
+/**
+ * Group: UltraHDR
+ *
+ * UltraHDR (gain map) APIs are separate from <gdImage>. The UltraHDR handle
+ * type is opaque and cannot be passed to existing <gdImage*> functions.
+ */
 
+/**
+ * Constants: gdUhdrStatus
+ *
+ * Return status values used by UltraHDR APIs.
+ *
+ *  GD_UHDR_SUCCESS        - operation succeeded
+ *  GD_UHDR_NOT_AVAILABLE  - libgd was built without UltraHDR support
+ *  GD_UHDR_E_INVALID      - invalid argument or state
+ *  GD_UHDR_E_UNSUPPORTED  - unsupported format or operation
+ *  GD_UHDR_E_ENCODE       - encode failure
+ *  GD_UHDR_E_DECODE       - decode failure
+ */
+#define GD_UHDR_SUCCESS 0
+#define GD_UHDR_NOT_AVAILABLE -1
+#define GD_UHDR_E_INVALID -2
+#define GD_UHDR_E_UNSUPPORTED -3
+#define GD_UHDR_E_ENCODE -4
+#define GD_UHDR_E_DECODE -5
+
+/**
+ * Constants: gdUhdrMirrorAxis
+ *
+ * Mirror axis values used by <gdUhdrImageMirror>.
+ *
+ *  GD_UHDR_MIRROR_HORIZONTAL
+ *  GD_UHDR_MIRROR_VERTICAL
+ */
+#define GD_UHDR_MIRROR_HORIZONTAL 0
+#define GD_UHDR_MIRROR_VERTICAL 1
+
+/**
+ * Enum: gdUhdrFormat
+ *
+ * UltraHDR container format selector.
+ *
+ *  GD_UHDR_FORMAT_JPEG - UltraHDR JPEG (currently supported)
+ *  GD_UHDR_FORMAT_WEBP - reserved for future support
+ *  GD_UHDR_FORMAT_HEIF - reserved for future support
+ */
+typedef enum {
+	GD_UHDR_FORMAT_JPEG = 0,
+	GD_UHDR_FORMAT_WEBP = 1,
+	GD_UHDR_FORMAT_HEIF = 2
+} gdUhdrFormat;
+
+/**
+ * Typedef: gdUhdrImage
+ *
+ * Opaque UltraHDR image handle.
+ */
+typedef struct gdUhdrImageStruct gdUhdrImage;
+
+/**
+ * Typedef: gdUhdrImagePtr
+ *
+ * Pointer to <gdUhdrImage>.
+ */
+typedef gdUhdrImage *gdUhdrImagePtr;
+
+/**
+ * Typedef: gdUhdrError
+ *
+ * Structured error details for UltraHDR APIs.
+ *
+ * Fields:
+ *  code          - libgd UltraHDR status code (GD_UHDR_*)
+ *  provider_code - underlying provider error code, if any
+ *  message       - optional human-readable detail string
+ */
+typedef struct {
+	int code;
+	int provider_code;
+	char message[128];
+} gdUhdrError;
+
+/**
+ * Typedef: gdUhdrErrorPtr
+ *
+ * Pointer to <gdUhdrError>.
+ */
+typedef gdUhdrError *gdUhdrErrorPtr;
+
+/* define struct with name and func ptr and add it to gdImageStruct
+ * gdInterpolationMethod interpolation; */
+
+/* Interpolation function ptr */
+typedef double (*interpolation_method)(double, double);
+
+/*
+   Group: Types
+
+   typedef: gdImage
+
+   typedef: gdImagePtr
+
+   The data structure in which gd stores images. <gdImageCreate>,
+   <gdImageCreateTrueColor> and the various image file-loading functions
+   return a pointer to this type, and the other functions expect to
+   receive a pointer to this type as their first argument.
+
+   *gdImagePtr* is a pointer to *gdImage*.
+
+   See also:
+	 <Accessor Macros>
+
+   (Previous versions of this library encouraged directly manipulating
+   the contents of the struct but we are attempting to move away from
+   this practice so the fields are no longer documented here.  If you
+   need to poke at the internals of this struct, feel free to look at
+   *gd.h*.)
+*/
 typedef struct gdImageStruct {
 	/* Palette-based image pixels */
 	unsigned char ** pixels;
