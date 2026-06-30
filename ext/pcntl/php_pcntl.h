@@ -15,6 +15,7 @@
 #ifndef PHP_PCNTL_H
 #define PHP_PCNTL_H
 
+#include "Zend/zend_bitset.h"
 #include "pcntl_decl.h"
 
 #if defined(HAVE_DECL_WCONTINUED) && HAVE_DECL_WCONTINUED == 1 && defined(HAVE_WIFCONTINUED)
@@ -48,6 +49,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	uint16_t num_signals;
 	int last_error;
 	struct php_pcntl_pending_signal *head, *tail, *spares;
+	zend_bitset restart_syscalls;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
 #if defined(ZTS) && defined(COMPILE_DL_PCNTL)
