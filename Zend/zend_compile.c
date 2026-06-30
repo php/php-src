@@ -9374,7 +9374,8 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 			const zend_attribute *override = zend_get_attribute_str(c->attributes, "override", sizeof("override") - 1);
 			if (override) {
 				ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_OVERRIDE;
-				/* We need to be able to remove the flag */
+				/* We need to be able to remove the flag once the override is
+				 * resolved. See ZEND_ACC_DEPRECATED above. */
 				ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
 				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 			}
