@@ -513,9 +513,9 @@ gdWebpWriteAddImage(gdWebpWritePtr webp, gdImagePtr image, int durationMs);
 BGD_DECLARE(void) gdWebpWriteClose(gdWebpWritePtr webp);
 BGD_DECLARE(void *) gdWebpWritePtrFinish(gdWebpWritePtr webp, int *size);
 
-gdImagePtr gdImageCreateFromTga( FILE * fp );
-gdImagePtr gdImageCreateFromTgaCtx(gdIOCtx* ctx);
-gdImagePtr gdImageCreateFromTgaPtr(int size, void *data);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromTga(FILE *fp);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromTgaCtx(gdIOCtxPtr ctx);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromTgaPtr(int size, void *data);
 
 BGD_DECLARE(gdImagePtr) gdImageCreateFromJxl(FILE *inFile);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromJxlPtr(int size, void *data);
