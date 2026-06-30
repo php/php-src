@@ -2264,7 +2264,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zend_reset_lc_ctype_locale();
 	zend_update_current_locale();
 
-#if HAVE_TZSET
+#ifdef HAVE_TZSET
 	tzset();
 #endif
 
@@ -2842,6 +2842,12 @@ PHPAPI bool php_tsrm_startup_ex(int expected_threads)
 {
 	bool ret = tsrm_startup(expected_threads, 1, 0, NULL);
 	php_reserve_tsrm_memory();
+	/* Must cover the total size of every ZEND_*_OFFSET global, or the furthest underflows the block. */
+	tsrm_reserve_fast_front(
+		TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)) +
+		TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)) +
+		TSRM_ALIGNED_SIZE(sizeof(zend_php_scanner_globals)) +
+		TSRM_ALIGNED_SIZE(zend_mm_globals_size())); // AG size, exposed through function call
 	(void)ts_resource(0);
 	return ret;
 }

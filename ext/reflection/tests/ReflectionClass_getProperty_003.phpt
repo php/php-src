@@ -244,4 +244,4 @@ Fully qualified property name X::$privC does not specify a base class of C
 --- (Reflecting on X::doesNotExist) ---
 Fully qualified property name X::$doesNotExist does not specify a base class of C
 --- (Reflecting on doesNotexist::doesNotExist) ---
-Class "doesnotexist" does not exist
+Class "doesNotexist" does not exist

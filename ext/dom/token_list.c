@@ -8,7 +8,7 @@
    |                                                                      |
    | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Authors: Niels Dossche <nielsdos@php.net>                            |
+   | Authors: Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -484,7 +484,7 @@ static bool dom_validate_tokens_varargs(const zval *args, uint32_t argc)
 {
 	for (uint32_t i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_STRING) {
-			zend_argument_type_error(i + 1, "must be of type string, %s given", zend_zval_value_name(&args[i]));
+			zend_wrong_parameter_type_error(i + 1, Z_EXPECTED_STRING, &args[i]);
 			return false;
 		}
 

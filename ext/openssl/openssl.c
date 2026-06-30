@@ -504,6 +504,12 @@ PHP_METHOD(Openssl_Session, __unserialize)
 		Z_PARAM_ARRAY_HT(data)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(ZEND_THIS);
+	if (obj->session != NULL) {
+		zend_throw_error(NULL, "Cannot call Openssl\\Session::__unserialize() on an already-initialized session");
+		RETURN_THROWS();
+	}
+
 	zval *pem_zv = zend_hash_str_find(data, ZEND_STRL("pem"));
 	if (!pem_zv || Z_TYPE_P(pem_zv) != IS_STRING) {
 		zend_throw_exception(php_openssl_exception_ce, "Invalid serialization data", 0);
@@ -524,7 +530,6 @@ PHP_METHOD(Openssl_Session, __unserialize)
 		RETURN_THROWS();
 	}
 
-	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(ZEND_THIS);
 	obj->session = session;
 
 	/* Populate id property */
@@ -646,7 +651,8 @@ static void php_openssl_check_path_error(uint32_t arg_num, int type, const char 
 /* openssl file path check extended */
 bool php_openssl_check_path_ex(
 		const char *file_path, size_t file_path_len, char *real_path, uint32_t arg_num,
-		bool contains_file_protocol, bool is_from_array, const char *option_name)
+		bool contains_file_protocol, bool is_from_array, const char *option_name,
+		php_stream *stream)
 {
 	const char *fs_file_path;
 	size_t fs_file_path_len;
@@ -681,8 +687,13 @@ bool php_openssl_check_path_ex(
 		if (arg_num == 0) {
 			const char *option_title = option_name ? option_name : "unknown";
 			const char *option_label = is_from_array ? "array item" : "option";
-			php_error_docref(NULL, E_WARNING, "Path for %s %s %s",
-					option_title, option_label, error_msg);
+			if (stream != NULL) {
+				php_stream_warn(stream, InvalidPath, "Path for %s %s %s",
+						option_title, option_label, error_msg);
+			} else {
+				php_error_docref(NULL, E_WARNING, "Path for %s %s %s",
+						option_title, option_label, error_msg);
+			}
 		} else if (is_from_array && option_name != NULL) {
 			php_openssl_check_path_error(
 					arg_num, error_type, "option %s array item %s", option_name, error_msg);
@@ -1289,7 +1300,7 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 		RETURN_FALSE;
 	}
 
-	fingerprint = php_openssl_x509_fingerprint(cert, method, raw_output);
+	fingerprint = php_openssl_x509_fingerprint(cert, method, raw_output, NULL);
 	if (fingerprint) {
 		RETVAL_STR(fingerprint);
 	} else {
@@ -1450,6 +1461,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	str_serial = i2s_ASN1_INTEGER(NULL, asn1_serial);
 	/* Can return NULL on error or memory allocation failure */
 	if (!str_serial) {
+		OPENSSL_free(hex_serial);
 		php_openssl_store_errors();
 		goto err;
 	}
@@ -1646,9 +1658,20 @@ PHP_FUNCTION(openssl_x509_read)
 		RETURN_FALSE;
 	}
 
+	X509 *obj_x509;
+	if (cert_obj) {
+		obj_x509 = X509_dup(cert);
+		if (!obj_x509) {
+			php_error_docref(NULL, E_WARNING, "X.509 Certificate could not be duplicated");
+			RETURN_FALSE;
+		}
+	} else {
+		obj_x509 = cert;
+	}
+
 	object_init_ex(return_value, php_openssl_certificate_ce);
 	x509_cert_obj = Z_OPENSSL_CERTIFICATE_P(return_value);
-	x509_cert_obj->x509 = cert_obj ? X509_dup(cert) : cert;
+	x509_cert_obj->x509 = obj_x509;
 }
 /* }}} */
 
@@ -1894,6 +1917,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 		zout = zend_try_array_init(zout);
 		if (!zout) {
+			sk_X509_pop_free(ca, X509_free);
 			goto cleanup;
 		}
 
@@ -4680,6 +4704,7 @@ PHP_FUNCTION(openssl_seal)
 
 	iv_len = EVP_CIPHER_iv_length(cipher);
 	if (!iv && iv_len > 0) {
+		php_openssl_release_evp_cipher(cipher);
 		zend_argument_value_error(6, "cannot be null for the chosen cipher algorithm");
 		RETURN_THROWS();
 	}
@@ -4766,6 +4791,7 @@ clean_exit:
 	efree(eks);
 	efree(eksl);
 	efree(pkeys);
+	php_openssl_release_evp_cipher(cipher);
 }
 /* }}} */
 
@@ -4842,6 +4868,7 @@ PHP_FUNCTION(openssl_open)
 	EVP_CIPHER_CTX_free(ctx);
 out_pkey:
 	EVP_PKEY_free(pkey);
+	php_openssl_release_evp_cipher(cipher);
 }
 /* }}} */
 

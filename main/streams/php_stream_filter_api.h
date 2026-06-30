@@ -144,7 +144,7 @@ PHPAPI void php_stream_filter_free(php_stream_filter *filter);
 PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops,
 		void *abstract, bool persistent, php_stream_filter_seekable_t read_seekable,
 		php_stream_filter_seekable_t write_seekable STREAMS_DC);
-PHPAPI zend_result php_stream_filter_parse_write_seek_mode(zval *filterparams,
+PHPAPI zend_result php_stream_filter_parse_write_seek_mode(const zval *filterparams,
 		php_stream_filter_seekable_t *write_seekable);
 PHPAPI int php_stream_filter_get_chain_type(php_stream *stream, php_stream_filter *filter);
 

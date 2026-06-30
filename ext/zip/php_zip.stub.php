@@ -661,6 +661,10 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function count(): int {}
 
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
+
     /** @tentative-return-type */
     public function getStatusString(): string {}
 

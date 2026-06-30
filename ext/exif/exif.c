@@ -2318,13 +2318,13 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 #ifdef EXIF_DEBUG
 						php_error_docref(NULL, E_WARNING, "Found value of type single");
 #endif
-						info_value->f = php_ifd_get_float(value);
+						info_value->f = php_ifd_get_float(vptr);
 						break;
 					case TAG_FMT_DOUBLE:
 #ifdef EXIF_DEBUG
 						php_error_docref(NULL, E_WARNING, "Found value of type double");
 #endif
-						info_value->d = php_ifd_get_double(value);
+						info_value->d = php_ifd_get_double(vptr);
 						break;
 				}
 			}
@@ -3750,7 +3750,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 static void exif_process_APP1(image_info_type *ImageInfo, char *CharBuf, size_t length, size_t displacement)
 {
 	/* Check the APP1 for Exif Identifier Code */
-	static const uchar ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
+	static const uchar ExifHeader[] = {'E', 'x', 'i', 'f', 0, 0};
 	if (length <= 8 || memcmp(CharBuf+2, ExifHeader, 6)) {
 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Incorrect APP1 Exif Identifier Code");
 		return;
@@ -4447,8 +4447,7 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 
 static bool exif_scan_WEBP_header(image_info_type *ImageInfo, size_t riff_size)
 {
-	/* "Exif\0\0" identifier code */
-	static const uchar ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
+	static const uchar ExifHeader[] = {'E', 'x', 'i', 'f', 0, 0};
 	unsigned char chunk_header[8];
 	size_t offset = 12;
 	size_t riff_end = riff_size <= ImageInfo->FileSize - 8 ? riff_size + 8 : ImageInfo->FileSize;

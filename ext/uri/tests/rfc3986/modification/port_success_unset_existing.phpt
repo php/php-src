@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\Rfc3986\Uri component modification - port - unsetting existing
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

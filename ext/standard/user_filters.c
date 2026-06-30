@@ -337,6 +337,10 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		return NULL;
 	}
 
+	if (UNEXPECTED(BG(user_filter_map) == NULL)) {
+		return NULL;
+	}
+
 	len = strlen(filtername);
 
 	/* determine the classname/class entry */

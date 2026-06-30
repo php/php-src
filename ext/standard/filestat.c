@@ -54,11 +54,7 @@
 #endif
 
 #ifdef HAVE_PWD_H
-# ifdef PHP_WIN32
-#  include "win32/pwd.h"
-# else
-#  include <pwd.h>
-# endif
+# include <pwd.h>
 #endif
 
 #ifdef HAVE_GRP_H

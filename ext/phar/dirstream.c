@@ -149,12 +149,12 @@ static int phar_compare_dir_name(Bucket *f, Bucket *s)  /* {{{ */
 static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const HashTable *manifest) /* {{{ */
 {
 	HashTable *data;
-	char *entry;
+	const char *entry;
 
 	ALLOC_HASHTABLE(data);
 	zend_hash_init(data, 64, NULL, NULL, 0);
 
-	if ((*dir == '/' && dirlen == 1 && (manifest->nNumOfElements == 0)) || (dirlen >= sizeof(".phar")-1 && !memcmp(dir, ".phar", sizeof(".phar")-1))) {
+	if ((*dir == '/' && dirlen == 1 && (manifest->nNumOfElements == 0)) || phar_path_is_magic_phar_ex(dir, dirlen)) {
 		/* make empty root directory for empty phar */
 		/* make empty directory for .phar magic directory */
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
@@ -171,7 +171,7 @@ static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const Has
 
 		if (*dir == '/') {
 			/* root directory */
-			if (zend_string_starts_with_literal(str_key, ".phar")) {
+			if (phar_is_magic_phar(str_key)) {
 				/* do not add any magic entries to this directory */
 				continue;
 			}
@@ -181,9 +181,7 @@ static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const Has
 				/* the entry has a path separator and is a subdirectory */
 				keylen = has_slash - ZSTR_VAL(str_key);
 			}
-			entry = safe_emalloc(keylen, 1, 1);
-			memcpy(entry, ZSTR_VAL(str_key), keylen);
-			entry[keylen] = '\0';
+			entry = ZSTR_VAL(str_key);
 		} else {
 			if (0 != memcmp(ZSTR_VAL(str_key), dir, dirlen)) {
 				/* entry in directory not found */
@@ -201,16 +199,12 @@ static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const Has
 			if (has_slash) {
 				/* is subdirectory */
 				save -= dirlen + 1;
-				entry = safe_emalloc(has_slash - save + dirlen, 1, 1);
-				memcpy(entry, save + dirlen + 1, has_slash - save - dirlen - 1);
 				keylen = has_slash - save - dirlen - 1;
-				entry[keylen] = '\0';
+				entry = save + dirlen + 1;
 			} else {
 				/* is file */
 				save -= dirlen + 1;
-				entry = safe_emalloc(keylen - dirlen, 1, 1);
-				memcpy(entry, save + dirlen + 1, keylen - dirlen - 1);
-				entry[keylen - dirlen - 1] = '\0';
+				entry = save + dirlen + 1;
 				keylen = keylen - dirlen - 1;
 			}
 		}
@@ -227,8 +221,6 @@ static php_stream *phar_make_dirstream(const char *dir, size_t dirlen, const Has
 			ZVAL_NULL(&dummy);
 			zend_hash_str_update(data, entry, keylen, &dummy);
 		}
-
-		efree(entry);
 	} ZEND_HASH_FOREACH_END();
 
 	if (FAILURE != zend_hash_has_more_elements(data)) {

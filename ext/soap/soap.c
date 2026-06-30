@@ -1414,7 +1414,7 @@ PHP_METHOD(SoapServer, handle)
 					}
 				}
 
-			    if ((soap_action_z = zend_hash_str_find(Z_ARRVAL_P(server_vars), ZEND_STRL("HTTP_SOAPACTION"))) != NULL && Z_TYPE_P(soap_action_z) == IS_STRING) {
+			    if ((soap_action_z = zend_hash_str_find(Z_ARRVAL_P(server_vars), ZEND_STRL("HTTP_SOAPACTION"))) != NULL && Z_TYPE_P(soap_action_z) == IS_STRING && Z_STRLEN_P(soap_action_z) > 0) {
 				    soap_action = Z_STRVAL_P(soap_action_z);
 			    }
 			}
@@ -3177,6 +3177,10 @@ static sdlFunctionPtr find_function_using_soap_action(const sdl *sdl, const char
 		}
 		soap_action++;
 		soap_action_length -= 2;
+	}
+
+	if (UNEXPECTED(soap_action_length == 0)) {
+		return NULL;
 	}
 
 	/* TODO: This may depend on a particular target namespace, in which case this won't find a match when multiple different

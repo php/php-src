@@ -152,6 +152,17 @@ static zend_never_inline void var_push_dtor_value(php_unserialize_data_t *var_ha
 	}
 }
 
+static zend_always_inline void var_restore_prop_default(php_unserialize_data_t *var_hash, zend_object *obj, zend_property_info *info, zval *data)
+{
+	/* A partially/incorrectly unserialized value may violate the property's
+	 * declared type, so restore the default and keep the slot consistent. */
+	zval *tmp = &obj->ce->default_properties_table[OBJ_PROP_TO_NUM(info->offset)];
+	if (Z_REFCOUNTED_P(data)) {
+		var_push_dtor_value(var_hash, data);
+	}
+	ZVAL_COPY_OR_DUP_PROP(data, tmp);
+}
+
 static zend_always_inline zval *tmp_var(php_unserialize_data_t *var_hashx, zend_long num)
 {
     var_dtor_entries *var_hash;
@@ -677,18 +688,19 @@ second_try:
 		}
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash)) {
-			if (info && Z_ISREF_P(data)) {
-				/* Add type source even if we failed to unserialize.
-				 * The data is still stored in the property. */
-				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
+			if (info) {
+				if (Z_ISREF_P(data)) {
+					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
+				} else {
+					var_restore_prop_default(var_hash, obj, info, data);
+				}
 			}
 			goto failure;
 		}
 
 		if (UNEXPECTED(info)) {
 			if (!zend_verify_prop_assignable_by_ref(info, data, /* strict */ 1)) {
-				zval_ptr_dtor(data);
-				ZVAL_UNDEF(data);
+				var_restore_prop_default(var_hash, obj, info, data);
 				goto failure;
 			}
 
@@ -770,7 +782,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 
 	if (ce->unserialize == NULL) {
 		zend_error(E_WARNING, "Class %s has no unserializer", ZSTR_VAL(ce->name));
-		object_init_ex(rval, ce);
+		return 0;
 	} else if (ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash) != SUCCESS) {
 		return 0;
 	}

@@ -1552,14 +1552,15 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 			zend_argument_value_error(2, "must not contain any null bytes");
 			LOOKUP_CLEAN_RETURN(NULL);
 		}
-		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
-		result = strToMatch(Z_STRVAL_P(ele_value), cur_arr[cur_arr_len*2]);
+		i = cur_arr_len*2;
+		cur_arr[i] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
+		cur_arr_len++;
+		result = strToMatch(Z_STRVAL_P(ele_value), cur_arr[i]);
 		if(result == 0) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "unable to canonicalize lang_tag");
 			LOOKUP_CLEAN_RETURN(NULL);
 		}
-		cur_arr[cur_arr_len*2+1] = Z_STRVAL_P(ele_value);
-		cur_arr_len++ ;
+		cur_arr[i+1] = Z_STRVAL_P(ele_value);
 	} ZEND_HASH_FOREACH_END(); /* end of for */
 
 	/* Canonicalize array elements */
@@ -1679,6 +1680,15 @@ U_CFUNC PHP_FUNCTION(locale_lookup)
 	}
 
 	result_str = lookup_loc_range(loc_range, hash_arr, boolCanonical);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+	if (U_FAILURE(intl_error_get_code(NULL))) {
+		if (result_str) {
+			zend_string_release_ex(result_str, 0);
+		}
+		RETURN_NULL();
+	}
 	if(result_str == NULL || ZSTR_VAL(result_str)[0] == '\0') {
 		if( fallback_loc_str ) {
 			result_str = zend_string_copy(fallback_loc_str);
@@ -1767,7 +1777,7 @@ U_CFUNC PHP_FUNCTION(locale_add_likely_subtags)
 		locale = (char *)intl_locale_get_default();
 	}
 
-	int32_t maximized_locale_len = uloc_addLikelySubtags(locale, maximized_locale, sizeof(maximized_locale), &status);
+	const int32_t maximized_locale_len = uloc_addLikelySubtags(locale, maximized_locale, sizeof(maximized_locale), &status);
 	INTL_CHECK_STATUS(status, "invalid locale");
 	if (maximized_locale_len < 0) {
 		RETURN_FALSE;
@@ -1790,7 +1800,7 @@ U_CFUNC PHP_FUNCTION(locale_minimize_subtags)
 		locale = (char *)intl_locale_get_default();
 	}
 
-	int32_t minimized_locale_len = uloc_minimizeSubtags(locale, minimized_locale, sizeof(minimized_locale), &status);
+	const int32_t minimized_locale_len = uloc_minimizeSubtags(locale, minimized_locale, sizeof(minimized_locale), &status);
 	INTL_CHECK_STATUS(status, "invalid locale");
 	if (minimized_locale_len < 0) {
 		RETURN_FALSE;

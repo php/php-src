@@ -1,7 +1,7 @@
-From ae9d7254ac129cc3be34de6fd34af27baf3bb396 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Wed, 29 Nov 2023 21:26:47 +0100
-Subject: [PATCH 4/6] Remove unused upper case tag static data
+Subject: [PATCH 4/9] Remove unused upper case tag static data
 
 ---
  source/lexbor/tag/res.h | 2 ++
@@ -48,6 +48,3 @@ index 780bc47..be5bb30 100644
  
  /*
   * No inline functions for ABI.
--- 
-2.51.2
-

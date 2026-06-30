@@ -758,20 +758,27 @@ ZEND_API void zend_fcall_info_argn(zend_fcall_info *fci, uint32_t argc, ...);
 ZEND_API zend_result zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *retval, zval *args);
 
 /* Zend FCC API to store and handle PHP userland functions */
+ZEND_API bool zend_fcc_closure_equals_ex(const zend_fcall_info_cache* a, const zend_fcall_info_cache* b);
+
 static zend_always_inline bool zend_fcc_equals(const zend_fcall_info_cache* a, const zend_fcall_info_cache* b)
 {
+	if (a->closure || b->closure) {
+		return a->object == b->object
+			&& a->calling_scope == b->calling_scope
+			&& a->called_scope == b->called_scope
+			&& (a->closure == b->closure || zend_fcc_closure_equals_ex(a, b))
+		;
+	}
 	if (UNEXPECTED((a->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) &&
 		(b->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))) {
 		return a->object == b->object
 			&& a->calling_scope == b->calling_scope
-			&& a->closure == b->closure
 			&& zend_string_equals(a->function_handler->common.function_name, b->function_handler->common.function_name)
 		;
 	}
 	return a->function_handler == b->function_handler
 		&& a->object == b->object
 		&& a->calling_scope == b->calling_scope
-		&& a->closure == b->closure
 	;
 }
 

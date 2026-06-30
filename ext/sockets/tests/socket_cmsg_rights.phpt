@@ -58,7 +58,7 @@ if ($data["control"]) {
     if ($control["level"] == SOL_SOCKET &&
         $control["type"]  == SCM_RIGHTS) {
         foreach ($control["data"] as $resource) {
-            if (!is_resource($resource)) {
+            if (!is_resource($resource) && !($resource instanceof Socket)) {
                 echo "FAIL RES\n";
                 var_dump($data);
                 exit;

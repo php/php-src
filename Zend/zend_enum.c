@@ -92,21 +92,21 @@ static void zend_verify_enum_magic_methods(const zend_class_entry *ce)
 {
 	// Only __get, __call, __debugInfo and __invoke are allowed
 
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(constructor, "__construct");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(destructor, "__destruct");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(clone, "__clone");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__get, "__get");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__set, "__set");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unset, "__unset");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__isset, "__isset");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__tostring, "__toString");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__serialize, "__serialize");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unserialize, "__unserialize");
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(constructor, ZEND_CONSTRUCTOR_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(destructor, ZEND_DESTRUCTOR_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(clone, ZEND_CLONE_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__get, ZEND_GET_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__set, ZEND_SET_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unset, ZEND_UNSET_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__isset, ZEND_ISSET_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__tostring, ZEND_TOSTRING_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__serialize, ZEND_SERIALIZE_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unserialize, ZEND_UNSERIALIZE_FUNC_NAME);
 
 	static const char *const forbidden_methods[] = {
-		"__sleep",
-		"__wakeup",
-		"__set_state",
+		ZEND_SLEEP_FUNC_NAME,
+		ZEND_WAKEUP_FUNC_NAME,
+		ZEND_SET_STATE_FUNC_NAME,
 	};
 
 	uint32_t forbidden_methods_length = sizeof(forbidden_methods) / sizeof(forbidden_methods[0]);
@@ -670,6 +670,11 @@ ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name
 
 ZEND_API zend_object *zend_enum_get_case_cstr(zend_class_entry *ce, const char *name) {
 	zend_class_constant *c = zend_hash_str_find_ptr(CE_CONSTANTS_TABLE(ce), name, strlen(name));
+	return zend_enum_case_from_class_constant(c);
+}
+
+ZEND_API zend_object *zend_enum_get_case_by_id(zend_class_entry *ce, int id) {
+	zend_class_constant *c = Z_PTR(CE_CONSTANTS_TABLE(ce)->arData[id - 1].val);
 	return zend_enum_case_from_class_constant(c);
 }
 

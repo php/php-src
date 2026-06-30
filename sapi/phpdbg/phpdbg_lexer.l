@@ -166,6 +166,13 @@ INPUT       ("\\"[#"']|["]("\\\\"|"\\"["]|[^\n\000"])*["]|[']("\\"[']|"\\\\"|[^\
 	return T_ID;
 }
 
+<NORMAL>["'] {
+	phpdbg_init_param(yylval, STR_PARAM);
+	yylval->str = estrndup(yytext, yyleng);
+	yylval->len = yyleng;
+	return T_ID;
+}
+
 <RAW>{INPUT} {
 	phpdbg_init_param(yylval, STR_PARAM);
 	yylval->str = estrdup(yytext);
