@@ -89,7 +89,7 @@ PHP                                                                        NEWS
   . Fixed malformed ResourceBundle::get() error message when fallback is
     disabled. (Weilin Du)
   . Added Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue(),
-    with the alias of locale_get_display_keyword(), and
+    with the alias of locale_get_display_keyword() and
     locale_get_display_keyword_value() respectively. (Weilin Du)
   . Fix incorrect argument positions for invalid start/end arguments in
     transliterator_transliterate(). (Weilin Du)
