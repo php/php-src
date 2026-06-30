@@ -60,6 +60,9 @@ if ($client !== false) {
     // server -> client: feed s_server's stdin, it relays to the client.
     fwrite($pipes[0], "PONG\n");
 
+    // stream_select() on the dtls:// stream exercises the transport cast op.
+    $r = [$client]; $w = $e = [];
+    var_dump(stream_select($r, $w, $e, 10) === 1);
     var_dump(rtrim((string) fread($client, 8192)) === 'PONG');
 
     $srvOut = '';
@@ -81,6 +84,7 @@ proc_close($server);
 @unlink($certFile);
 ?>
 --EXPECT--
+bool(true)
 bool(true)
 bool(true)
 bool(true)
