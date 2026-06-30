@@ -15,6 +15,9 @@ extern "C" {
 #ifndef BGD_EXPORT_DATA_PROT
 #define BGD_EXPORT_DATA_PROT
 #endif
+#ifndef BGD_STDCALL
+#define BGD_STDCALL
+#endif
 #ifndef BGD_DECLARE
 #define BGD_DECLARE(rt) rt
 #endif

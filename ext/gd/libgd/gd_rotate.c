@@ -11,11 +11,10 @@
 #ifdef ROTATE_PI
 #undef ROTATE_PI
 #endif /* ROTATE_PI */
-
+typedef int(BGD_STDCALL *FuncPtr)(gdImagePtr, int, int);
 #define ROTATE_DEG2RAD  3.1415926535897932384626433832795/180
 void gdImageSkewX (gdImagePtr dst, gdImagePtr src, int uRow, int iOffset, double dWeight, int clrBack, int ignoretransparent)
 {
-	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	int i, r, g, b, a, clrBackR, clrBackG, clrBackB, clrBackA;
 	FuncPtr f;
 
@@ -112,7 +111,6 @@ void gdImageSkewX (gdImagePtr dst, gdImagePtr src, int uRow, int iOffset, double
 
 void gdImageSkewY (gdImagePtr dst, gdImagePtr src, int uCol, int iOffset, double dWeight, int clrBack, int ignoretransparent)
 {
-	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	int i, iYPos=0, r, g, b, a;
 	FuncPtr f;
 	int pxlOldLeft, pxlLeft=0, pxlSrc;
@@ -198,8 +196,7 @@ void gdImageSkewY (gdImagePtr dst, gdImagePtr src, int uCol, int iOffset, double
 }
 
 /* Rotates an image by 90 degrees (counter clockwise) */
-gdImagePtr gdImageRotate90 (gdImagePtr src, int ignoretransparent)
-{
+gdImagePtr gdImageRotate90(gdImagePtr src, int ignoretransparent) {
 	int uY, uX;
 	int c,r,g,b,a;
 	gdImagePtr dst;
@@ -232,7 +229,8 @@ gdImagePtr gdImageRotate90 (gdImagePtr src, int ignoretransparent)
 					c = gdTrueColorAlpha(r, g, b, a);
 				}
 				if (ignoretransparent && c == dst->transparent) {
-					gdImageSetPixel(dst, uY, (dst->sy - uX - 1), dst->transparent);
+					gdImageSetPixel(dst, uY, (dst->sy - uX - 1),
+									dst->transparent);
 				} else {
 					gdImageSetPixel(dst, uY, (dst->sy - uX - 1), c);
 				}
@@ -245,12 +243,10 @@ gdImagePtr gdImageRotate90 (gdImagePtr src, int ignoretransparent)
 }
 
 /* Rotates an image by 180 degrees (counter clockwise) */
-gdImagePtr gdImageRotate180 (gdImagePtr src, int ignoretransparent)
-{
+gdImagePtr gdImageRotate180(gdImagePtr src, int ignoretransparent) {
 	int uY, uX;
 	int c,r,g,b,a;
 	gdImagePtr dst;
-	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
 
 	if (src->trueColor) {
@@ -280,9 +276,11 @@ gdImagePtr gdImageRotate180 (gdImagePtr src, int ignoretransparent)
 				}
 
 				if (ignoretransparent && c == dst->transparent) {
-					gdImageSetPixel(dst, (dst->sx - uX - 1), (dst->sy - uY - 1), dst->transparent);
+					gdImageSetPixel(dst, (dst->sx - uX - 1), (dst->sy - uY - 1),
+									dst->transparent);
 				} else {
-					gdImageSetPixel(dst, (dst->sx - uX - 1), (dst->sy - uY - 1), c);
+					gdImageSetPixel(dst, (dst->sx - uX - 1), (dst->sy - uY - 1),
+									c);
 				}
 			}
 		}
@@ -293,12 +291,10 @@ gdImagePtr gdImageRotate180 (gdImagePtr src, int ignoretransparent)
 }
 
 /* Rotates an image by 270 degrees (counter clockwise) */
-gdImagePtr gdImageRotate270 (gdImagePtr src, int ignoretransparent)
-{
+gdImagePtr gdImageRotate270(gdImagePtr src, int ignoretransparent) {
 	int uY, uX;
 	int c,r,g,b,a;
 	gdImagePtr dst;
-	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
 
 	if (src->trueColor) {
@@ -328,7 +324,8 @@ gdImagePtr gdImageRotate270 (gdImagePtr src, int ignoretransparent)
 				}
 
 				if (ignoretransparent && c == dst->transparent) {
-					gdImageSetPixel(dst, (dst->sx - uY - 1), uX, dst->transparent);
+					gdImageSetPixel(dst, (dst->sx - uY - 1), uX,
+									dst->transparent);
 				} else {
 					gdImageSetPixel(dst, (dst->sx - uY - 1), uX, c);
 				}
