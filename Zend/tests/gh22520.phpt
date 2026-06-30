@@ -29,4 +29,4 @@ try {
 
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of %d bytes exhausted %s in %s on line %d
