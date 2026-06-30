@@ -437,24 +437,163 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromJpegPtr(int size, void *data);
 BGD_DECLARE(gdImagePtr)
 gdImageCreateFromJpegPtrEx(int size, void *data, int ignore_warning);
 BGD_DECLARE(gdImagePtr)
-gdImageCreateFromJpegPtrWithMetadata(int size, void *data,
-									 gdImageMetadata *metadata);
-BGD_DECLARE(gdImagePtr)
-gdImageCreateFromJpegPtrExWithMetadata(int size, void *data,
-									   int ignore_warning,
-									   gdImageMetadata *metadata);
-BGD_DECLARE(const char *) gdJpegGetVersionString(void);
-gdImagePtr gdImageCreateFromWebp(FILE *fd);
-gdImagePtr gdImageCreateFromWebpCtx(gdIOCtxPtr in);
-gdImagePtr gdImageCreateFromWebpPtr (int size, void *data);
+gdImageCreateFromJpegPtrWithMetadata(int size, void *data, gdImageMetadata *metadata);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromJpegPtrExWithMetadata(int size, void *data, int ignore_warning, gdImageMetadata *metadata);
+BGD_DECLARE(const char *) gdJpegGetVersionString();
+BGD_DECLARE(gdImagePtr) gdImageCreateFromWebp(FILE *inFile);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromWebpPtr(int size, void *data);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromWebpCtx(gdIOCtxPtr infile);
 
-gdImagePtr gdImageCreateFromAvif(FILE *infile);
-gdImagePtr gdImageCreateFromAvifPtr(int size, void *data);
-gdImagePtr gdImageCreateFromAvifCtx(gdIOCtx *infile);
+typedef struct gdWebpReadStruct *gdWebpReadPtr;
+typedef struct gdWebpWriteStruct *gdWebpWritePtr;
+
+typedef struct {
+	int width;
+	int height;
+	int frameCount;
+	int loopCount;
+	int backgroundColor;
+	int formatFlags;
+} gdWebpInfo;
+
+typedef struct {
+	int frameIndex;
+	int x;
+	int y;
+	int width;
+	int height;
+	int duration;
+	int timestamp;
+	int dispose;
+	int blend;
+	int hasAlpha;
+	int complete;
+} gdWebpFrameInfo;
+
+typedef struct {
+	int canvasWidth;
+	int canvasHeight;
+	int loopCount;
+	int backgroundColor;
+	int quality;
+	int lossless;
+	int method;
+	int minimizeSize;
+	int kmin;
+	int kmax;
+	int allowMixed;
+} gdWebpWriteOptions;
+
+enum { gdWebpDisposeNone, gdWebpDisposeBackground };
+enum { gdWebpBlendAlpha, gdWebpBlendNone };
+
+BGD_DECLARE(int) gdWebpIsAnimated(FILE *fd);
+BGD_DECLARE(int) gdWebpIsAnimatedCtx(gdIOCtxPtr in);
+BGD_DECLARE(int) gdWebpIsAnimatedPtr(int size, void *data);
+BGD_DECLARE(gdWebpReadPtr) gdWebpReadOpen(FILE *fd);
+BGD_DECLARE(gdWebpReadPtr) gdWebpReadOpenCtx(gdIOCtxPtr in);
+BGD_DECLARE(gdWebpReadPtr) gdWebpReadOpenPtr(int size, void *data);
+BGD_DECLARE(void) gdWebpReadClose(gdWebpReadPtr webp);
+BGD_DECLARE(int) gdWebpReadGetInfo(gdWebpReadPtr webp, gdWebpInfo *info);
+BGD_DECLARE(int)
+gdWebpReadNextFrame(gdWebpReadPtr webp, gdWebpFrameInfo *info,
+					gdImagePtr *frame);
+BGD_DECLARE(int)
+gdWebpReadNextImage(gdWebpReadPtr webp, gdWebpFrameInfo *info,
+					gdImagePtr *image);
+BGD_DECLARE(gdImagePtr) gdWebpReadCloneImage(gdWebpReadPtr webp);
+BGD_DECLARE(gdWebpWritePtr)
+gdWebpWriteOpen(FILE *outFile, const gdWebpWriteOptions *options);
+BGD_DECLARE(gdWebpWritePtr)
+gdWebpWriteOpenCtx(gdIOCtxPtr out, const gdWebpWriteOptions *options);
+BGD_DECLARE(gdWebpWritePtr)
+gdWebpWriteOpenPtr(const gdWebpWriteOptions *options);
+BGD_DECLARE(int)
+gdWebpWriteAddImage(gdWebpWritePtr webp, gdImagePtr image, int durationMs);
+BGD_DECLARE(void) gdWebpWriteClose(gdWebpWritePtr webp);
+BGD_DECLARE(void *) gdWebpWritePtrFinish(gdWebpWritePtr webp, int *size);
 
 gdImagePtr gdImageCreateFromTga( FILE * fp );
 gdImagePtr gdImageCreateFromTgaCtx(gdIOCtx* ctx);
 gdImagePtr gdImageCreateFromTgaPtr(int size, void *data);
+
+BGD_DECLARE(gdImagePtr) gdImageCreateFromJxl(FILE *inFile);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromJxlPtr(int size, void *data);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromJxlCtx(gdIOCtxPtr infile);
+
+BGD_DECLARE(void) gdImageJxl(gdImagePtr im, FILE *outFile);
+BGD_DECLARE(void) gdImageJxlEx(gdImagePtr im, FILE *outFile,
+                                int lossless, float distance, int effort);
+BGD_DECLARE(void *) gdImageJxlPtr(gdImagePtr im, int *size);
+BGD_DECLARE(void *) gdImageJxlPtrEx(gdImagePtr im, int *size,
+                                     int lossless, float distance, int effort);
+BGD_DECLARE(void) gdImageJxlCtx(gdImagePtr im, gdIOCtxPtr outfile);
+BGD_DECLARE(void) gdImageJxlCtxEx(gdImagePtr im, gdIOCtxPtr outfile,
+                                   int lossless, float distance, int effort);
+
+/* Animation API */
+typedef struct gdJxlAnimReader *gdJxlAnimReaderPtr;
+typedef struct gdJxlAnim      *gdJxlAnimPtr;
+
+typedef struct {
+    int delay_ms;
+    int x_offset;
+    int y_offset;
+    int width;
+    int height;
+    int blend_mode;
+    int is_last;
+} gdJxlFrameInfo;
+
+#define GD_JXL_BLEND_REPLACE  0
+#define GD_JXL_BLEND_ADD      1
+#define GD_JXL_BLEND_BLEND    2
+#define GD_JXL_BLEND_MULADD   3
+#define GD_JXL_BLEND_MUL      4
+
+BGD_DECLARE(gdJxlAnimReaderPtr) gdImageJxlAnimReaderCreate(FILE *inFile);
+BGD_DECLARE(gdJxlAnimReaderPtr) gdImageJxlAnimReaderCreatePtr(int size, void *data);
+BGD_DECLARE(gdJxlAnimReaderPtr) gdImageJxlAnimReaderCreateCtx(gdIOCtxPtr inCtx);
+
+BGD_DECLARE(gdImagePtr) gdJxlReadNextImage(
+    gdJxlAnimReaderPtr reader,
+    int *delay_ms);
+
+BGD_DECLARE(gdJxlAnimReaderPtr) gdImageJxlAnimReaderCreateRaw(FILE *inFile);
+BGD_DECLARE(gdJxlAnimReaderPtr) gdImageJxlAnimReaderCreateRawPtr(int size, void *data);
+BGD_DECLARE(gdJxlAnimReaderPtr) gdImageJxlAnimReaderCreateRawCtx(gdIOCtxPtr inCtx);
+
+BGD_DECLARE(gdImagePtr) gdJxlReadNextFrame(
+    gdJxlAnimReaderPtr reader,
+    gdJxlFrameInfo *info);
+
+BGD_DECLARE(void) gdImageJxlAnimReaderDestroy(gdJxlAnimReaderPtr reader);
+
+BGD_DECLARE(gdJxlAnimPtr) gdImageJxlAnimBegin(
+    FILE *outFile,
+    int width, int height,
+    int lossless, float distance, int effort);
+
+BGD_DECLARE(gdJxlAnimPtr) gdImageJxlAnimBeginCtx(
+    gdIOCtxPtr outCtx,
+    int width, int height,
+    int lossless, float distance, int effort);
+
+BGD_DECLARE(gdJxlAnimPtr) gdImageJxlAnimBeginPtr(
+    int width, int height,
+    int lossless, float distance, int effort);
+
+BGD_DECLARE(int) gdImageJxlAnimAddFrame(
+    gdJxlAnimPtr anim,
+    gdImagePtr im,
+    int delay_ms);
+
+BGD_DECLARE(int) gdImageJxlAnimEnd(gdJxlAnimPtr anim);
+BGD_DECLARE(void *) gdImageJxlAnimEndPtr(gdJxlAnimPtr anim, int *size);
+
+BGD_DECLARE(gdImagePtr) gdImageCreateFromAvif(FILE *inFile);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromAvifPtr(int size, void *data);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromAvifCtx(gdIOCtxPtr infile);
 
 gdImagePtr gdImageCreateFromBmp (FILE * inFile);
 gdImagePtr gdImageCreateFromBmpPtr (int size, void *data);
