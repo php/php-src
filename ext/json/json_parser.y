@@ -305,55 +305,19 @@ PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parse
 	return parser->scanner.errcode;
 }
 
-static zend_always_inline bool php_json_is_hex(php_json_ctype c, php_json_ctype lo, php_json_ctype hi)
-{
-	php_json_ctype l = c | 0x20; /* fold ASCII case */
-	return l >= (lo | 0x20) && l <= (hi | 0x20);
-}
-
 static size_t php_json_compute_error_column(const php_json_scanner *s)
 {
 	const php_json_ctype *p = s->line_start;
 	const php_json_ctype *end = s->token;
-	/* Replay the scanner's per-token column rules from the line start to the
-	 * failing token, keeping the decode success path free of column bookkeeping. */
+	/* Count characters from the start of the line to the failing token,
+	 * folding UTF-8 continuation bytes into their leading byte. */
 	size_t column = 1;
-	bool in_string = false;
 
 	while (p < end) {
-		php_json_ctype c = *p;
-		if (!in_string) {
-			if (c == '"') {
-				in_string = true;
-			}
+		if ((*p & 0xC0) != 0x80) {
 			column++;
-			p++;
-		} else if (c == '"') {
-			in_string = false;
-			column++;
-			p++;
-		} else if (c == '\\') {
-			if (p + 5 < end && (p[1] | 0x20) == 'u') {
-				/* \uXXXX, possibly the high half of a surrogate pair */
-				if (php_json_is_hex(p[2], 'd', 'd') && php_json_is_hex(p[3], '8', 'b')
-						&& p + 11 < end && p[6] == '\\' && (p[7] | 0x20) == 'u'
-						&& php_json_is_hex(p[8], 'd', 'd') && php_json_is_hex(p[9], 'c', 'f')) {
-					p += 12;
-				} else {
-					p += 6;
-				}
-				column++;
-			} else {
-				column += 2;
-				p += 2;
-			}
-		} else if ((c & 0xC0) == 0x80) {
-			/* UTF-8 continuation byte: counted with its leading byte */
-			p++;
-		} else {
-			column++;
-			p++;
 		}
+		p++;
 	}
 	return column;
 }
