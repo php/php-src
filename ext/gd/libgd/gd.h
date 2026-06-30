@@ -219,24 +219,75 @@ typedef struct gdImageStruct {
 		have that capability. JPEG doesn't. */
 	int saveAlphaFlag;
 
+	/* There should NEVER BE ACCESSOR MACROS FOR ITEMS BELOW HERE, so this
+	   part of the structure can be safely changed in new releases. */
+
 	/* 2.0.12: anti-aliased globals. 2.0.26: just a few vestiges after
 	  switching to the fast, memory-cheap implementation from PHP-gd. */
 	int AA;
 	int AA_color;
 	int AA_dont_blend;
 
-	/* 2.0.12: simple clipping rectangle. These values must be checked for safety when set; please use gdImageSetClip */
+	/* 2.0.12: simple clipping rectangle. These values
+	  must be checked for safety when set; please use
+	  gdImageSetClip */
 	int cx1;
 	int cy1;
 	int cx2;
 	int cy2;
+
+	/* 2.1.0: allows to specify resolution in dpi */
 	unsigned int res_x;
 	unsigned int res_y;
+
+	/* Selects quantization method, see gdImageTrueColorToPaletteSetMethod() and
+	 * gdPaletteQuantizationMethod enum. */
+	int paletteQuantizationMethod;
+	/* speed/quality trade-off. 1 = best quality, 10 = best speed. 0 =
+	   method-specific default. Applicable to GD_QUANT_LIQ and
+	   GD_QUANT_NEUQUANT. */
+	int paletteQuantizationSpeed;
+	/* Image will remain true-color if conversion to palette cannot achieve
+	   given quality. Value from 1 to 100, 1 = ugly, 100 = perfect. Applicable
+	   to GD_QUANT_LIQ.*/
+	int paletteQuantizationMinQuality;
+	/* Image will use minimum number of palette colors needed to achieve given
+	   quality. Must be higher than paletteQuantizationMinQuality Value from 1
+	   to 100, 1 = ugly, 100 = perfect. Applicable to GD_QUANT_LIQ.*/
+	int paletteQuantizationMaxQuality;
 	gdInterpolationMethod interpolation_id;
 	interpolation_method interpolation;
 } gdImage;
 
 typedef gdImage * gdImagePtr;
+
+typedef struct gdImageMetadata gdImageMetadata;
+
+#define GD_META_OK 0
+#define GD_META_ERR_FORMAT -1
+#define GD_META_ERR_PARSE -2
+#define GD_META_ERR_NOMEM -3
+#define GD_META_ERR_LIMIT -4
+#define GD_META_ERR_UNSUPPORTED -5
+#define GD_META_ERR_INVALID -6
+
+#define GD_METADATA_DEFAULT_MAX_PROFILE_SIZE ((size_t)64 * 1024 * 1024)
+#define GD_METADATA_DEFAULT_MAX_TOTAL_SIZE ((size_t)256 * 1024 * 1024)
+
+gdImageMetadata * gdImageMetadataCreate(void);
+void gdImageMetadataFree(gdImageMetadata *metadata);
+void gdImageMetadataReset(gdImageMetadata *metadata);
+int gdImageMetadataSetLimits(gdImageMetadata *metadata, size_t max_profile_size, size_t max_total_size);
+void gdImageMetadataGetLimits(const gdImageMetadata *metadata,
+						 size_t *max_profile_size, size_t *max_total_size);
+int gdImageMetadataSetProfile(gdImageMetadata *metadata, const char *key,
+						  const unsigned char *data, size_t size);
+const unsigned char * gdImageMetadataGetProfile(const gdImageMetadata *metadata, const char *key, size_t *size);
+int gdImageMetadataRemoveProfile(gdImageMetadata *metadata, const char *key);
+size_t gdImageMetadataGetProfileCount(const gdImageMetadata *metadata);
+int gdImageMetadataGetProfileAt(const gdImageMetadata *metadata, size_t index,
+							const char **key, const unsigned char **data,
+							size_t *size);
 
 /* Point type for use in polygon drawing. */
 
@@ -343,6 +394,18 @@ gdImagePtr gdImageCreateTrueColor(int sx, int sy);
 	JPEG is always truecolor. */
 gdImagePtr gdImageCreateFromPng(FILE *fd);
 gdImagePtr gdImageCreateFromPngCtx(gdIOCtxPtr in);
+gdImagePtr
+gdImageCreateFromPngCtxWithMetadata(gdIOCtxPtr in, gdImageMetadata *metadata);
+gdImagePtr gdImageCreateFromPngPtr(int size, void *data);
+gdImagePtr
+gdImageCreateFromPngPtrWithMetadata(int size, void *data, gdImageMetadata *metadata);
+gdImagePtr gdImageCreateFromQoi(FILE *fd);
+gdImagePtr gdImageCreateFromQoiCtx(gdIOCtxPtr in);
+gdImagePtr
+gdImageCreateFromQoiCtxWithMetadata(gdIOCtxPtr in, gdImageMetadata *metadata);
+gdImagePtr gdImageCreateFromQoiPtr(int size, void *data);
+gdImagePtr
+gdImageCreateFromQoiPtrWithMetadata(int size, void *data, gdImageMetadata *metadata);
 gdImagePtr gdImageCreateFromWBMP(FILE *inFile);
 gdImagePtr gdImageCreateFromWBMPCtx(gdIOCtx *infile);
 gdImagePtr gdImageCreateFromJpeg(FILE *infile);
@@ -645,20 +708,22 @@ typedef struct {
 } gdPngWriteOptions;
 
 void gdPngWriteOptionsInit(gdPngWriteOptions *options);
-int gdImagePngWithOptions(gdImagePtr im, FILE *out,
-						  const gdPngWriteOptions *options);
-int gdImagePngCtxWithOptions(gdImagePtr im, gdIOCtxPtr out,
-							 const gdPngWriteOptions *options);
-void *gdImagePngPtrWithOptions(gdImagePtr im, int *size,
-							  const gdPngWriteOptions *options);
-void *gdImagePngPtrWithMetadata(gdImagePtr im, int *size,
-								 const gdImageMetadata *metadata);
-void *gdImagePngPtrExWithMetadata(gdImagePtr im, int *size, int level,
-								   const gdImageMetadata *metadata);
-void gdImagePngCtxExWithMetadata(gdImagePtr im, gdIOCtxPtr out, int level,
-								   const gdImageMetadata *metadata);
-int gdImageMetadataInjectPng(void **data, int *size,
-							 const gdImageMetadata *metadata);
+int gdImagePngWithOptions(gdImagePtr im, FILE *out, const gdPngWriteOptions *options);
+int gdImagePngCtxWithOptions(gdImagePtr im, gdIOCtxPtr out, const gdPngWriteOptions *options);
+void *gdImagePngPtrWithOptions(gdImagePtr im, int *size, const gdPngWriteOptions *options);
+void *gdImagePngPtrWithMetadata(gdImagePtr im, int *size, const gdImageMetadata *metadata);
+void *gdImagePngPtrExWithMetadata(gdImagePtr im, int *size, int level, const gdImageMetadata *metadata);
+void gdImagePngCtxExWithMetadata(gdImagePtr im, gdIOCtxPtr out, int level, const gdImageMetadata *metadata);
+int gdImageMetadataInjectPng(void **data, int *size, const gdImageMetadata *metadata);
+
+enum { GD_QOI_SRGB = 0, GD_QOI_LINEAR = 1 };
+
+void gdImageQoiEx(gdImagePtr im, FILE *out, int colorspace);
+void gdImageQoiCtxEx(gdImagePtr im, gdIOCtxPtr out, int colorspace);
+void gdImageQoiCtxExWithMetadata(gdImagePtr im, gdIOCtxPtr out, int colorspace,
+							const gdImageMetadata *metadata);
+
+
 void gdImageGif(gdImagePtr im, FILE *out);
 void gdImageGifCtx(gdImagePtr im, gdIOCtx *out);
 
@@ -734,6 +799,12 @@ void gdImageGd2(gdImagePtr im, FILE *out, int cs, int fmt);
 
 /* Best to free this memory with gdFree(), not free() */
 void* gdImagePngPtr(gdImagePtr im, int *size);
+
+void * gdImageQoiPtr(gdImagePtr im, int *size);
+void * gdImageQoiPtrEx(gdImagePtr im, int *size, int colorspace);
+void * gdImageQoiPtrWithMetadata(gdImagePtr im, int *size, const gdImageMetadata *metadata);
+void * gdImageQoiPtrExWithMetadata(gdImagePtr im, int *size, int colorspace, const gdImageMetadata *metadata);
+int gdImageMetadataInjectQoi(void **data, int *size, const gdImageMetadata *metadata);
 
 /* Best to free this memory with gdFree(), not free() */
 void* gdImageGdPtr(gdImagePtr im, int *size);
