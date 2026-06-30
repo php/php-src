@@ -1431,6 +1431,15 @@ ZEND_API zend_result zend_eval_string_ex(const char *str, zval *retval_ptr, cons
 }
 /* }}} */
 
+ZEND_API zend_signal_interrupt_result zend_signal_interrupt(void)
+{
+	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+		return ZEND_SIGNAL_INTERRUPT;
+	}
+
+	return ZEND_SIGNAL_RESTART;
+}
+
 static void zend_set_timeout_ex(zend_long seconds, bool reset_signals);
 
 ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */

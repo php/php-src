@@ -54,6 +54,8 @@
 #elif defined(_AIX)
 # undef  ZEND_HRTIME_PLATFORM_AIX
 # define ZEND_HRTIME_PLATFORM_AIX 1
+#else
+# error
 #endif
 
 #define ZEND_HRTIME_AVAILABLE (ZEND_HRTIME_PLATFORM_POSIX || ZEND_HRTIME_PLATFORM_WINDOWS || ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE || ZEND_HRTIME_PLATFORM_APPLE_GETTIME_NSEC || ZEND_HRTIME_PLATFORM_HPUX || ZEND_HRTIME_PLATFORM_AIX)
@@ -76,6 +78,7 @@ ZEND_API extern clockid_t zend_hrtime_posix_clock_id;
 
 #endif
 
+#define ZEND_HRTIME_T_MAX UINT64_MAX
 #define ZEND_NANO_IN_SEC UINT64_C(1000000000)
 
 typedef uint64_t zend_hrtime_t;
@@ -93,7 +96,7 @@ static zend_always_inline zend_hrtime_t zend_hrtime(void)
 #elif ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE
 	return (zend_hrtime_t)mach_absolute_time() * zend_hrtime_timerlib_info.numer / zend_hrtime_timerlib_info.denom;
 #elif ZEND_HRTIME_PLATFORM_POSIX
-	struct timespec ts = { .tv_sec = 0, .tv_nsec = 0 };
+	struct timespec ts;
 	clock_gettime(zend_hrtime_posix_clock_id, &ts);
 	return ((zend_hrtime_t) ts.tv_sec * (zend_hrtime_t)ZEND_NANO_IN_SEC) + ts.tv_nsec;
 #elif ZEND_HRTIME_PLATFORM_HPUX
@@ -104,7 +107,7 @@ static zend_always_inline zend_hrtime_t zend_hrtime(void)
 	time_base_to_time(&t, TIMEBASE_SZ);
 	return (zend_hrtime_t) t.tb_high * (zend_hrtime_t)NANO_IN_SEC + t.tb_low;
 #else
-	return 0;
+# error
 #endif
 }
 
