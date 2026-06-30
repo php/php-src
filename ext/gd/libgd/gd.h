@@ -12,6 +12,9 @@ extern "C" {
 #include "php_compat.h"
 
 /* Bundled libgd has no separate symbol visibility requirements. */
+#ifndef BGD_EXPORT_DATA_PROT
+#define BGD_EXPORT_DATA_PROT
+#endif
 #ifndef BGD_DECLARE
 #define BGD_DECLARE(rt) rt
 #endif
@@ -625,7 +628,8 @@ gdImagePtr gdImageCreateFromGd2PartCtx(gdIOCtxPtr in, int srcx, int srcy, int w,
 gdImagePtr gdImageCreateFromXbm(FILE *fd);
 void gdImageXbmCtx(gdImagePtr image, char* file_name, int fg, gdIOCtx * out);
 
-gdImagePtr gdImageCreateFromXpm (char *filename);
+/* NOTE: filename, not FILE */
+BGD_DECLARE(gdImagePtr) gdImageCreateFromXpm(char *filename);
 
 void gdImageDestroy(gdImagePtr im);
 

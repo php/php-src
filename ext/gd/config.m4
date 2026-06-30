@@ -82,7 +82,8 @@ AC_DEFUN([PHP_GD_AVIF], [
 
 AC_DEFUN([PHP_GD_WEBP],[
   AS_VAR_IF([PHP_WEBP], [no],, [
-    PKG_CHECK_MODULES([WEBP], [libwebp >= 0.2.0])
+    PKG_CHECK_MODULES([WEBP],
+      [libwebp >= 0.2.0 libwebpdemux libwebpmux])
     PHP_EVAL_LIBLINE([$WEBP_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$WEBP_CFLAGS])
     AC_DEFINE([HAVE_LIBWEBP], [1],
@@ -110,6 +111,7 @@ AC_DEFUN([PHP_GD_XPM],[
     PHP_EVAL_LIBLINE([$XPM_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$XPM_CFLAGS])
     AC_DEFINE([HAVE_XPM], [1], [Define to 1 if you have the xpm library.])
+    AC_DEFINE([HAVE_LIBXPM], [1], [Define to 1 if you have the xpm library.])
     AC_DEFINE([HAVE_GD_XPM], [1],
       [Define to 1 if gd extension has XPM support.])
   ])
@@ -263,6 +265,7 @@ if test "$PHP_GD" != "no"; then
       libgd/wbmp.c
       libgd/gd_qoi.c
       libgd/gd_jxl.c
+      libgd/gd_color_map.c
     "])
 
     AC_DEFINE([HAVE_GD_BUNDLED], [1],

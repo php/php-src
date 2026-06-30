@@ -23,7 +23,7 @@
 #include "webp/encode.h"
 #include "webp/mux.h"
 
-#define GD_WEBP_ALLOC_STEP (4*1024)
+#define GD_WEBP_ALLOC_STEP (4 * 1024)
 
 struct gdWebpReadStruct {
 	uint8_t *data;
@@ -240,7 +240,7 @@ static gdImagePtr WebpDecodeFirstImage(const uint8_t *filedata, size_t size) {
 		WebPAnimDecoderDelete(decoder);
 		return NULL;
 	}
-{
+	{
 		WebPAnimInfo info;
 		if (!WebPAnimDecoderGetInfo(decoder, &info)) {
 			WebPAnimDecoderDelete(decoder);
@@ -327,22 +327,23 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromWebpPtr(int size, void *data) {
 	See <gdImageCreateFromWebp>.
 */
 BGD_DECLARE(gdImagePtr) gdImageCreateFromWebpCtx(gdIOCtx *infile) {
-	int    width, height;
-	uint8_t   *filedata = NULL;
-	uint8_t    *argb = NULL;
+	int width, height;
+	uint8_t *filedata = NULL;
+	uint8_t *argb = NULL;
 	size_t size = 0;
 	gdImagePtr im;
 
 	filedata = WebpReadCtxData(infile, &size);
 	if (filedata == NULL) {
-			return NULL;
-		}
+		gd_error("gd-webp cannot get webp info");
+		return NULL;
+	}
 
-	if (WebPGetInfo(filedata,size, &width, &height) == 0) {
+	if (WebPGetInfo(filedata, size, &width, &height) == 0) {
 		im = WebpDecodeFirstImage(filedata, size);
 		if (im == NULL) {
-		gd_error("gd-webp cannot get webp info");
-	}
+			gd_error("gd-webp cannot get webp info");
+		}
 		gdFree(filedata);
 		return im;
 	}
@@ -350,7 +351,7 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromWebpCtx(gdIOCtx *infile) {
 	if (!argb) {
 		im = WebpDecodeFirstImage(filedata, size);
 		if (im == NULL) {
-		gd_error("gd-webp cannot allocate temporary buffer");
+			gd_error("gd-webp cannot allocate temporary buffer");
 		}
 		gdFree(filedata);
 		return im;
@@ -429,11 +430,11 @@ BGD_DECLARE(gdWebpReadPtr) gdWebpReadOpen(FILE *fdFile) {
 	fd = gdNewFileCtx(fdFile);
 	if (fd == NULL) {
 		return NULL;
-		}
+	}
 	webp = gdWebpReadOpenCtx(fd);
 	fd->gd_free(fd);
 	return webp;
-	}
+}
 
 BGD_DECLARE(gdWebpReadPtr) gdWebpReadOpenPtr(int size, void *data) {
 	gdIOCtx *in;
@@ -634,14 +635,15 @@ static int _gdImageWebpCtx(gdImagePtr im, gdIOCtx *outfile, int quality) {
 	uint8_t *p;
 	uint8_t *out;
 	size_t out_size;
+	size_t ret = 0;
 
 	if (im == NULL) {
-		return;
+		return 1;
 	}
 
 	if (!gdImageTrueColor(im)) {
 		gd_error("Palette image not supported by webp");
-		return;
+		return 1;
 	}
 
 	if (quality == -1) {
@@ -649,16 +651,16 @@ static int _gdImageWebpCtx(gdImagePtr im, gdIOCtx *outfile, int quality) {
 	}
 
 	if (overflow2(gdImageSX(im), 4)) {
-		return;
+		return 1;
 	}
 
 	if (overflow2(gdImageSX(im) * 4, gdImageSY(im))) {
-		return;
+		return 1;
 	}
 
 	argb = (uint8_t *)gdMalloc(gdImageSX(im) * 4 * gdImageSY(im));
 	if (!argb) {
-		return;
+		return 1;
 	}
 	p = argb;
 	for (y = 0; y < gdImageSY(im); y++) {
@@ -678,56 +680,601 @@ static int _gdImageWebpCtx(gdImagePtr im, gdIOCtx *outfile, int quality) {
 			*(p++) = a;
 		}
 	}
-
 	if (quality >= gdWebpLossless) {
 		out_size = WebPEncodeLosslessRGBA(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * 4, &out);
 	} else {
 		out_size = WebPEncodeRGBA(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * 4, quality, &out);
 	}
-
 	if (out_size == 0) {
 		gd_error("gd-webp encoding failed");
+		ret = 1;
 		goto freeargb;
 	}
-	gdPutBuf(out, out_size, outfile);
-	free(out);
+
+	int res = gdPutBuf(out, out_size, outfile);
+	WebPFree(out);
+	if (res < 0 || (size_t)res != out_size) {
+		gd_error("gd-webp write error\n");
+		ret = 1;
+	}
 
 freeargb:
 	gdFree(argb);
+
+	return ret;
 }
 
-void gdImageWebpEx (gdImagePtr im, FILE * outFile, int quality)
-{
+/*
+  Function: gdImageWebpCtx
+
+	Write the image as WebP data via a <gdIOCtx>. See <gdImageWebpEx>
+	for more details.
+
+  Parameters:
+
+	im      - The image to write.
+	outfile - The output sink.
+	quality - Image quality.
+
+  Returns:
+
+	Nothing.
+*/
+BGD_DECLARE(void) gdImageWebpCtx(gdImagePtr im, gdIOCtx *outfile, int quality) {
+	_gdImageWebpCtx(im, outfile, quality);
+}
+
+/*
+  Function: gdImageWebpEx
+
+	<gdImageWebpEx> outputs the specified image to the specified file in
+	WebP format. The file must be open for writing. Under MSDOS and
+	all versions of Windows, it is important to use "wb" as opposed to
+	simply "w" as the mode when opening the file, and under Unix there
+	is no penalty for doing so. <gdImageWebpEx> does not close the file;
+	your code must do so.
+
+	If _quality_ is -1, a reasonable quality value (which should yield a
+	good general quality / size tradeoff for most situations) is used. Otherwise
+	_quality_ should be a value in the range 0-100, higher quality values
+	usually implying both higher quality and larger image sizes.
+
+	If _quality_ is greater than or equal to <gdWebpLossless> then the image
+	will be written in the lossless WebP format.
+
+  Variants:
+
+	<gdImageWebpCtx> stores the image using a <gdIOCtx> struct.
+
+	<gdImageWebpPtrEx> stores the image to RAM.
+
+  Parameters:
+
+	im      - The image to save.
+	outFile - The FILE pointer to write to.
+	quality - Compression quality (0-100).
+
+  Returns:
+
+	Nothing.
+*/
+BGD_DECLARE(void) gdImageWebpEx(gdImagePtr im, FILE *outFile, int quality) {
 	gdIOCtx *out = gdNewFileCtx(outFile);
-	gdImageWebpCtx(im, out, quality);
+	if (out == NULL) {
+		return;
+	}
+	_gdImageWebpCtx(im, out, quality);
 	out->gd_free(out);
 }
 
-void gdImageWebp (gdImagePtr im, FILE * outFile)
-{
+/*
+  Function: gdImageWebp
+
+	Variant of <gdImageWebpEx> which uses the default quality (-1).
+
+  Parameters:
+
+	im      - The image to save
+	outFile - The FILE pointer to write to.
+
+  Returns:
+
+	Nothing.
+*/
+BGD_DECLARE(void) gdImageWebp(gdImagePtr im, FILE *outFile) {
 	gdIOCtx *out = gdNewFileCtx(outFile);
-	gdImageWebpCtx(im, out, -1);
+	if (out == NULL) {
+		return;
+	}
+	_gdImageWebpCtx(im, out, -1);
 	out->gd_free(out);
 }
 
-void * gdImageWebpPtr (gdImagePtr im, int *size)
-{
+/*
+  Function: gdImageWebpPtr
+
+	See <gdImageWebpEx>.
+*/
+BGD_DECLARE(void *) gdImageWebpPtr(gdImagePtr im, int *size) {
 	void *rv;
 	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
-	gdImageWebpCtx(im, out, -1);
-	rv = gdDPExtractData(out, size);
+	if (out == NULL) {
+		return NULL;
+	}
+	if (_gdImageWebpCtx(im, out, -1)) {
+		rv = NULL;
+	} else {
+		rv = gdDPExtractData(out, size);
+	}
 	out->gd_free(out);
 
 	return rv;
 }
 
-void * gdImageWebpPtrEx (gdImagePtr im, int *size, int quality)
-{
+/*
+  Function: gdImageWebpPtrEx
+
+	See <gdImageWebpEx>.
+*/
+BGD_DECLARE(void *) gdImageWebpPtrEx(gdImagePtr im, int *size, int quality) {
 	void *rv;
+
 	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
-	gdImageWebpCtx(im, out, quality);
-	rv = gdDPExtractData(out, size);
+	if (out == NULL) {
+		return NULL;
+	}
+	if (_gdImageWebpCtx(im, out, quality)) {
+		rv = NULL;
+	} else {
+		rv = gdDPExtractData(out, size);
+	}
 	out->gd_free(out);
 	return rv;
 }
+
+static void WebpWriteFree(gdWebpWritePtr webp) {
+	if (webp == NULL) {
+		return;
+	}
+	if (webp->encoder != NULL) {
+		WebPAnimEncoderDelete(webp->encoder);
+	}
+	if (webp->ownsCtx && webp->out != NULL) {
+		webp->out->gd_free(webp->out);
+	}
+	gdFree(webp);
+}
+
+static int WebpWriteEnsureEncoder(gdWebpWritePtr webp, gdImagePtr image) {
+	WebPAnimEncoderOptions encOptions;
+
+	if (webp->encoder != NULL) {
+		return 1;
+	}
+	if (image == NULL) {
+		return 0;
+	}
+	webp->canvasWidth = webp->options.canvasWidth > 0
+							? webp->options.canvasWidth
+							: gdImageSX(image);
+	webp->canvasHeight = webp->options.canvasHeight > 0
+							 ? webp->options.canvasHeight
+							 : gdImageSY(image);
+	if (webp->canvasWidth <= 0 || webp->canvasHeight <= 0) {
+		return 0;
+	}
+	if (!WebPAnimEncoderOptionsInit(&encOptions)) {
+		return 0;
+	}
+	encOptions.anim_params.loop_count = webp->options.loopCount;
+	encOptions.anim_params.bgcolor = (uint32_t)webp->options.backgroundColor;
+	if (webp->options.minimizeSize) {
+		encOptions.minimize_size = webp->options.minimizeSize;
+	}
+	if (webp->options.kmin || webp->options.kmax) {
+		encOptions.kmin = webp->options.kmin;
+		encOptions.kmax = webp->options.kmax;
+	}
+	if (webp->options.allowMixed) {
+		encOptions.allow_mixed = webp->options.allowMixed;
+	}
+	webp->encoder =
+		WebPAnimEncoderNew(webp->canvasWidth, webp->canvasHeight, &encOptions);
+	return webp->encoder != NULL;
+}
+
+static int WebpImageToRGBA(gdImagePtr im, uint8_t **rgba) {
+	uint8_t *p;
+	int x, y;
+
+	*rgba = NULL;
+	if (im == NULL || !gdImageTrueColor(im)) {
+		gd_error("Palette image not supported by webp");
+		return 0;
+	}
+	if (overflow2(gdImageSX(im), 4) ||
+		overflow2(gdImageSX(im) * 4, gdImageSY(im))) {
+		return 0;
+	}
+	*rgba = (uint8_t *)gdMalloc(gdImageSX(im) * 4 * gdImageSY(im));
+	if (*rgba == NULL) {
+		return 0;
+	}
+	p = *rgba;
+	for (y = 0; y < gdImageSY(im); y++) {
+		for (x = 0; x < gdImageSX(im); x++) {
+			int c = im->tpixels[y][x];
+			*(p++) = gdTrueColorGetRed(c);
+			*(p++) = gdTrueColorGetGreen(c);
+			*(p++) = gdTrueColorGetBlue(c);
+			*(p++) = WebpGdAlphaToWebp(gdTrueColorGetAlpha(c));
+		}
+	}
+	return 1;
+}
+
+static int WebpWriteAssemble(gdWebpWritePtr webp) {
+	WebPData webpData;
+	int ok = 0;
+
+	if (webp == NULL || webp->out == NULL || webp->finalized) {
+		return 0;
+	}
+	if (webp->encoder == NULL || webp->frameCount == 0) {
+		gd_error("gd-webp animation has no frames");
+		return 0;
+	}
+	WebPDataInit(&webpData);
+	if (!WebPAnimEncoderAdd(webp->encoder, NULL, webp->timestamp, NULL)) {
+		gd_error("gd-webp animation flush failed: %s",
+				 WebPAnimEncoderGetError(webp->encoder));
+		goto done;
+	}
+	if (!WebPAnimEncoderAssemble(webp->encoder, &webpData)) {
+		gd_error("gd-webp animation assembly failed: %s",
+				 WebPAnimEncoderGetError(webp->encoder));
+		goto done;
+	}
+	if ((size_t)gdPutBuf(webpData.bytes, webpData.size, webp->out) !=
+		webpData.size) {
+		gd_error("gd-webp animation write error");
+		goto done;
+	}
+	webp->finalized = 1;
+	ok = 1;
+done:
+	WebPDataClear(&webpData);
+	return ok;
+}
+
+BGD_DECLARE(gdWebpWritePtr)
+gdWebpWriteOpen(FILE *outFile, const gdWebpWriteOptions *options) {
+	gdIOCtx *out;
+	gdWebpWritePtr webp;
+
+	if (outFile == NULL) {
+		return NULL;
+	}
+	out = gdNewFileCtx(outFile);
+	if (out == NULL) {
+		return NULL;
+	}
+	webp = gdWebpWriteOpenCtx(out, options);
+	if (webp == NULL) {
+		out->gd_free(out);
+		return NULL;
+	}
+	webp->ownsCtx = 1;
+	return webp;
+}
+
+BGD_DECLARE(gdWebpWritePtr)
+gdWebpWriteOpenCtx(gdIOCtxPtr out, const gdWebpWriteOptions *options) {
+	gdWebpWritePtr webp;
+
+	if (out == NULL) {
+		return NULL;
+	}
+	webp = (gdWebpWritePtr)gdCalloc(1, sizeof(struct gdWebpWriteStruct));
+	if (webp == NULL) {
+		return NULL;
+	}
+	webp->out = out;
+	webp->ownsCtx = 0;
+	if (options != NULL) {
+		webp->options = *options;
+	}
+	if (webp->options.quality == 0) {
+		webp->options.quality = -1;
+	}
+	return webp;
+}
+
+BGD_DECLARE(gdWebpWritePtr)
+gdWebpWriteOpenPtr(const gdWebpWriteOptions *options) {
+	gdIOCtx *out;
+	gdWebpWritePtr webp;
+
+	out = gdNewDynamicCtx(2048, NULL);
+	if (out == NULL) {
+		return NULL;
+	}
+	webp = gdWebpWriteOpenCtx(out, options);
+	if (webp == NULL) {
+		out->gd_free(out);
+		return NULL;
+	}
+	webp->ownsCtx = 1;
+	webp->memoryWriter = 1;
+	return webp;
+}
+
+BGD_DECLARE(int)
+gdWebpWriteAddImage(gdWebpWritePtr webp, gdImagePtr image, int durationMs) {
+	WebPConfig config;
+	WebPPicture picture;
+	uint8_t *rgba = NULL;
+	int ok = 0;
+
+	if (webp == NULL || image == NULL || durationMs < 0 || webp->finalized) {
+		return 0;
+	}
+	if (!WebpWriteEnsureEncoder(webp, image)) {
+		return 0;
+	}
+	if (gdImageSX(image) != webp->canvasWidth ||
+		gdImageSY(image) != webp->canvasHeight) {
+		gd_error("gd-webp animation frames must match canvas size");
+		return 0;
+	}
+	if (!WebpImageToRGBA(image, &rgba)) {
+		return 0;
+	}
+	if (!WebPConfigInit(&config) || !WebPPictureInit(&picture)) {
+		goto done;
+	}
+	config.quality =
+		webp->options.quality == -1 ? 80.0f : (float)webp->options.quality;
+	if (webp->options.lossless || webp->options.quality >= gdWebpLossless) {
+		config.lossless = 1;
+		if (config.quality > 100.0f) {
+			config.quality = 100.0f;
+		}
+	}
+	if (webp->options.method >= 0) {
+		config.method = webp->options.method;
+	}
+	if (!WebPValidateConfig(&config)) {
+		gd_error("gd-webp invalid animation encoder configuration");
+		goto done;
+	}
+	picture.width = gdImageSX(image);
+	picture.height = gdImageSY(image);
+	picture.use_argb = 1;
+	if (!WebPPictureImportRGBA(&picture, rgba, gdImageSX(image) * 4)) {
+		goto free_picture;
+	}
+	if (!WebPAnimEncoderAdd(webp->encoder, &picture, webp->timestamp,
+							&config)) {
+		gd_error("gd-webp animation add frame failed: %s",
+				 WebPAnimEncoderGetError(webp->encoder));
+		goto free_picture;
+	}
+	webp->timestamp += durationMs;
+	webp->frameCount++;
+	ok = 1;
+free_picture:
+	WebPPictureFree(&picture);
+done:
+	gdFree(rgba);
+	return ok;
+}
+
+BGD_DECLARE(void) gdWebpWriteClose(gdWebpWritePtr webp) {
+	if (webp == NULL) {
+		return;
+	}
+	if (!webp->memoryWriter) {
+		WebpWriteAssemble(webp);
+	}
+	WebpWriteFree(webp);
+}
+
+BGD_DECLARE(void *) gdWebpWritePtrFinish(gdWebpWritePtr webp, int *size) {
+	void *rv = NULL;
+
+	if (size != NULL) {
+		*size = 0;
+	}
+	if (webp == NULL || !webp->memoryWriter) {
+		WebpWriteFree(webp);
+		return NULL;
+	}
+	if (WebpWriteAssemble(webp)) {
+		rv = gdDPExtractData(webp->out, size);
+	}
+	WebpWriteFree(webp);
+	return rv;
+}
+
+#else /* !HAVE_LIBWEBP */
+
+static void _noWebpError(void) {
+	gd_error("WEBP image support has been disabled\n");
+}
+
+BGD_DECLARE(gdImagePtr) gdImageCreateFromWebp(FILE *inFile) {
+	ARG_NOT_USED(inFile);
+	_noWebpError();
+	return NULL;
+}
+
+BGD_DECLARE(gdImagePtr) gdImageCreateFromWebpPtr(int size, void *data) {
+	ARG_NOT_USED(size);
+	ARG_NOT_USED(data);
+	_noWebpError();
+	return NULL;
+}
+
+BGD_DECLARE(gdImagePtr) gdImageCreateFromWebpCtx(gdIOCtx *infile) {
+	ARG_NOT_USED(infile);
+	_noWebpError();
+	return NULL;
+}
+
+BGD_DECLARE(void) gdImageWebpCtx(gdImagePtr im, gdIOCtx *outfile, int quality) {
+	ARG_NOT_USED(im);
+	ARG_NOT_USED(outfile);
+	ARG_NOT_USED(quality);
+	_noWebpError();
+}
+
+BGD_DECLARE(void) gdImageWebpEx(gdImagePtr im, FILE *outFile, int quality) {
+	ARG_NOT_USED(im);
+	ARG_NOT_USED(outFile);
+	ARG_NOT_USED(quality);
+	_noWebpError();
+}
+
+BGD_DECLARE(void) gdImageWebp(gdImagePtr im, FILE *outFile) {
+	ARG_NOT_USED(im);
+	ARG_NOT_USED(outFile);
+	_noWebpError();
+}
+
+BGD_DECLARE(void *) gdImageWebpPtr(gdImagePtr im, int *size) {
+	ARG_NOT_USED(im);
+	ARG_NOT_USED(size);
+	_noWebpError();
+	return NULL;
+}
+
+BGD_DECLARE(void *) gdImageWebpPtrEx(gdImagePtr im, int *size, int quality) {
+	ARG_NOT_USED(im);
+	ARG_NOT_USED(size);
+	ARG_NOT_USED(quality);
+	_noWebpError();
+	return NULL;
+}
+
+BGD_DECLARE(int) gdWebpIsAnimated(FILE *fd) {
+	ARG_NOT_USED(fd);
+	_noWebpError();
+	return -1;
+}
+
+BGD_DECLARE(int) gdWebpIsAnimatedCtx(gdIOCtxPtr in) {
+	ARG_NOT_USED(in);
+	_noWebpError();
+	return -1;
+}
+
+BGD_DECLARE(int) gdWebpIsAnimatedPtr(int size, void *data) {
+	ARG_NOT_USED(size);
+	ARG_NOT_USED(data);
+	_noWebpError();
+	return -1;
+}
+
+BGD_DECLARE(gdWebpReadPtr) gdWebpReadOpen(FILE *fd) {
+	ARG_NOT_USED(fd);
+	_noWebpError();
+	return NULL;
+}
+
+BGD_DECLARE(gdWebpReadPtr) gdWebpReadOpenCtx(gdIOCtxPtr in) {
+	ARG_NOT_USED(in);
+	_noWebpError();
+	return NULL;
+}
+
+BGD_DECLARE(gdWebpReadPtr) gdWebpReadOpenPtr(int size, void *data) {
+	ARG_NOT_USED(size);
+	ARG_NOT_USED(data);
+	_noWebpError();
+	return NULL;
+}
+
+BGD_DECLARE(void) gdWebpReadClose(gdWebpReadPtr webp) {
+	ARG_NOT_USED(webp);
+	_noWebpError();
+}
+
+BGD_DECLARE(int) gdWebpReadGetInfo(gdWebpReadPtr webp, gdWebpInfo *info) {
+	ARG_NOT_USED(webp);
+	ARG_NOT_USED(info);
+	_noWebpError();
+	return 0;
+}
+
+BGD_DECLARE(int)
+gdWebpReadNextFrame(gdWebpReadPtr webp, gdWebpFrameInfo *info,
+					gdImagePtr *frame) {
+	ARG_NOT_USED(webp);
+	ARG_NOT_USED(info);
+	ARG_NOT_USED(frame);
+	_noWebpError();
+	return -1;
+}
+
+BGD_DECLARE(int)
+gdWebpReadNextImage(gdWebpReadPtr webp, gdWebpFrameInfo *info,
+					gdImagePtr *image) {
+	ARG_NOT_USED(webp);
+	ARG_NOT_USED(info);
+	ARG_NOT_USED(image);
+	_noWebpError();
+	return -1;
+}
+
+BGD_DECLARE(gdImagePtr) gdWebpReadCloneImage(gdWebpReadPtr webp) {
+	ARG_NOT_USED(webp);
+	_noWebpError();
+	return NULL;
+}
+
+BGD_DECLARE(gdWebpWritePtr)
+gdWebpWriteOpen(FILE *outFile, const gdWebpWriteOptions *options) {
+	ARG_NOT_USED(outFile);
+	ARG_NOT_USED(options);
+	_noWebpError();
+	return NULL;
+}
+
+BGD_DECLARE(gdWebpWritePtr)
+gdWebpWriteOpenCtx(gdIOCtxPtr out, const gdWebpWriteOptions *options) {
+	ARG_NOT_USED(out);
+	ARG_NOT_USED(options);
+	_noWebpError();
+	return NULL;
+}
+
+BGD_DECLARE(gdWebpWritePtr)
+gdWebpWriteOpenPtr(const gdWebpWriteOptions *options) {
+	ARG_NOT_USED(options);
+	_noWebpError();
+	return NULL;
+}
+
+BGD_DECLARE(int)
+gdWebpWriteAddImage(gdWebpWritePtr webp, gdImagePtr image, int durationMs) {
+	ARG_NOT_USED(webp);
+	ARG_NOT_USED(image);
+	ARG_NOT_USED(durationMs);
+	_noWebpError();
+	return 0;
+}
+
+BGD_DECLARE(void) gdWebpWriteClose(gdWebpWritePtr webp) {
+	ARG_NOT_USED(webp);
+	_noWebpError();
+}
+
+BGD_DECLARE(void *) gdWebpWritePtrFinish(gdWebpWritePtr webp, int *size) {
+	ARG_NOT_USED(webp);
+	ARG_NOT_USED(size);
+	_noWebpError();
+	return NULL;
+}
+
 #endif /* HAVE_LIBWEBP */
