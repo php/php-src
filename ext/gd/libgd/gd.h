@@ -165,6 +165,48 @@ typedef enum {
 /* Interpolation function ptr */
 typedef double (* interpolation_method )(double);
 
+
+/**
+ * Group: HEIF Coding Format
+ *
+ * Values that select the HEIF coding format.
+ *
+ * Constants: gdHeifCodec
+ *
+ *  GD_HEIF_CODEC_UNKNOWN
+ *  GD_HEIF_CODEC_HEVC
+ *  GD_HEIF_CODEC_AV1
+ *
+ * See also:
+ *  - <gdImageHeif>
+ */
+typedef enum {
+	GD_HEIF_CODEC_UNKNOWN = 0,
+	GD_HEIF_CODEC_HEVC,
+	GD_HEIF_CODEC_AV1 = 4,
+} gdHeifCodec;
+
+/**
+ * Group: HEIF Chroma Subsampling
+ *
+ * Values that select the HEIF chroma subsampling.
+ *
+ * Constants: gdHeifCompression
+ *
+ *  GD_HEIF_CHROMA_420
+ *  GD_HEIF_CHROMA_422
+ *  GD_HEIF_CHROMA_444
+ *
+ * See also:
+ *  - <gdImageHeif>
+ */
+typedef const char *gdHeifChroma;
+
+#define GD_HEIF_CHROMA_420 "420"
+#define GD_HEIF_CHROMA_422 "422"
+#define GD_HEIF_CHROMA_444 "444"
+
+
 typedef struct gdImageStruct {
 	/* Palette-based image pixels */
 	unsigned char ** pixels;
@@ -593,6 +635,10 @@ BGD_DECLARE(int) gdImageJxlAnimAddFrame(
 
 BGD_DECLARE(int) gdImageJxlAnimEnd(gdJxlAnimPtr anim);
 BGD_DECLARE(void *) gdImageJxlAnimEndPtr(gdJxlAnimPtr anim, int *size);
+
+BGD_DECLARE(gdImagePtr) gdImageCreateFromHeif(FILE *inFile);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromHeifPtr(int size, void *data);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromHeifCtx(gdIOCtxPtr infile);
 
 BGD_DECLARE(gdImagePtr) gdImageCreateFromAvif(FILE *inFile);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromAvifPtr(int size, void *data);
