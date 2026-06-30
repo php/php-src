@@ -20,6 +20,7 @@
 #include "ext/standard/file.h"
 #include "streams/php_streams_int.h"
 #include "php_openssl.h"
+#include "php_openssl_backend.h"
 #include "php_network.h"
 #include <openssl/ssl.h>
 #include <openssl/bio.h>
@@ -34,6 +35,25 @@ typedef struct _php_openssl_dtls_data_t {
 	SSL_CTX *ctx;
 	SSL *ssl_handle;
 } php_openssl_dtls_data_t;
+
+/* Read an option from the "ssl" stream context into the local `val`. */
+#define GET_VER_OPT(_name) \
+	(PHP_STREAM_CONTEXT(stream) && (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", _name)) != NULL)
+#define GET_VER_OPT_STRING(_name, _str) \
+	do { \
+		if (GET_VER_OPT(_name)) { \
+			if (try_convert_to_string(val)) _str = Z_STRVAL_P(val); \
+		} \
+	} while (0)
+#define GET_VER_OPT_STRINGL(_name, _str, _len) \
+	do { \
+		if (GET_VER_OPT(_name)) { \
+			if (try_convert_to_string(val)) { \
+				_str = Z_STRVAL_P(val); \
+				_len = Z_STRLEN_P(val); \
+			} \
+		} \
+	} while (0)
 
 /* The socket is non-blocking, so on WANT_* we poll (up to the read timeout when
  * blocking) and retry. */
@@ -71,6 +91,7 @@ static ssize_t php_openssl_dtls_io(bool read, php_stream *stream, char *buf, siz
 		ERR_clear_error();
 		int n = read ? SSL_read(ssl, buf, (int)count) : SSL_write(ssl, buf, (int)count);
 		if (n > 0) {
+			php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), n, 0);
 			return n;
 		}
 
@@ -93,9 +114,10 @@ static ssize_t php_openssl_dtls_io(bool read, php_stream *stream, char *buf, siz
 				return -1;
 		}
 
-		/* Non-blocking: nothing available right now. */
-		if (!dtlssock->s.is_blocked) {
-			return -1;
+		/* Non-blocking, or a zero read timeout: don't wait, report would-block. */
+		if (!dtlssock->s.is_blocked
+				|| (dtlssock->s.timeout.tv_sec == 0 && dtlssock->s.timeout.tv_usec == 0)) {
+			return 0;
 		}
 
 		int wait_ms = -1;
@@ -208,14 +230,117 @@ static char *php_openssl_dtls_parse_ip_address(php_stream_xport_param *xparam, i
 	return estrndup(str, colon - str);
 }
 
+/* Supply the passphrase for an encrypted local_pk from the "passphrase" option. */
+static int php_openssl_dtls_passwd_callback(char *buf, int num, int verify, void *data)
+{
+	php_stream *stream = (php_stream *)data;
+	zval *val = NULL;
+	char *passphrase = NULL;
+
+	GET_VER_OPT_STRING("passphrase", passphrase);
+
+	if (passphrase != NULL && Z_STRLEN_P(val) < (size_t)num - 1) {
+		memcpy(buf, Z_STRVAL_P(val), Z_STRLEN_P(val) + 1);
+		return (int)Z_STRLEN_P(val);
+	}
+	return 0;
+}
+
+/* Apply the "ssl" context options to the SSL_CTX: peer verification, ciphers and
+ * the local certificate. Set on the context so SSL_new() inherits them. */
+static int php_openssl_dtls_apply_context(php_stream *stream, php_openssl_dtls_data_t *dtlssock)
+{
+	SSL_CTX *ctx = dtlssock->ctx;
+	char *cafile = NULL, *capath = NULL, *cipherlist = NULL, *certfile = NULL;
+	size_t certfile_len = 0;
+	zval *val;
+
+	/* DTLS 1.0 is deprecated; require DTLS 1.2 or higher. */
+	SSL_CTX_set_min_proto_version(ctx, DTLS1_2_VERSION);
+
+	/* Peer verification, on by default. A peer_fingerprint authenticates the peer
+	 * by itself (checked after the handshake), so it overrides CA verification. */
+	bool verify_peer = !(GET_VER_OPT("verify_peer") && !zend_is_true(val));
+	bool has_fingerprint = GET_VER_OPT("peer_fingerprint");
+	if (!verify_peer || has_fingerprint) {
+		SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+	} else {
+		GET_VER_OPT_STRING("cafile", cafile);
+		GET_VER_OPT_STRING("capath", capath);
+		if (cafile != NULL || capath != NULL) {
+			if (SSL_CTX_load_verify_locations(ctx, cafile, capath) != 1) {
+				php_stream_warn(stream, CreateFailed, "Failed to load the CA verify locations");
+				return -1;
+			}
+		} else if (SSL_CTX_set_default_verify_paths(ctx) != 1) {
+			php_stream_warn(stream, CreateFailed, "Failed to set the default CA verify paths");
+			return -1;
+		}
+		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+	}
+
+	GET_VER_OPT_STRING("ciphers", cipherlist);
+	if (cipherlist != NULL && SSL_CTX_set_cipher_list(ctx, cipherlist) != 1) {
+		php_stream_warn(stream, CreateFailed, "Failed to set the cipher list");
+		return -1;
+	}
+
+	/* Local certificate and private key as file paths. */
+	GET_VER_OPT_STRINGL("local_cert", certfile, certfile_len);
+	if (certfile != NULL) {
+		char resolved[MAXPATHLEN];
+		char *private_key = NULL;
+		size_t private_key_len = 0;
+
+		if (!php_openssl_check_path_ex(certfile, certfile_len, resolved, 0, false, false,
+				"local_cert in ssl stream context", stream)) {
+			return -1;
+		}
+		if (SSL_CTX_use_certificate_chain_file(ctx, resolved) != 1) {
+			php_stream_warn(stream, WriteFailed, "Unable to set local cert chain file `%s'", certfile);
+			return -1;
+		}
+
+		/* A passphrase for an encrypted private key. */
+		if (GET_VER_OPT("passphrase")) {
+			SSL_CTX_set_default_passwd_cb_userdata(ctx, stream);
+			SSL_CTX_set_default_passwd_cb(ctx, php_openssl_dtls_passwd_callback);
+		}
+
+		/* local_pk defaults to the certificate file (combined PEM). */
+		GET_VER_OPT_STRINGL("local_pk", private_key, private_key_len);
+		if (private_key != NULL && !php_openssl_check_path_ex(private_key, private_key_len, resolved, 0,
+				false, false, "local_pk in ssl stream context", stream)) {
+			return -1;
+		}
+		if (SSL_CTX_use_PrivateKey_file(ctx, resolved, SSL_FILETYPE_PEM) != 1) {
+			php_stream_warn(stream, WriteFailed, "Unable to set private key file `%s'", resolved);
+			return -1;
+		}
+		if (SSL_CTX_check_private_key(ctx) != 1) {
+			php_stream_warn(stream, PermissionDenied, "Private key does not match certificate!");
+		}
+	}
+
+	return 0;
+}
+
 /* Create the DTLS context, SSL object and datagram BIO. */
-static int php_openssl_dtls_setup_crypto(php_stream *stream, php_openssl_dtls_data_t *dtlssock)
+static int php_openssl_dtls_setup_crypto(php_stream *stream, php_openssl_dtls_data_t *dtlssock,
+		const char *peer_host)
 {
 	BIO *bio;
+	zval *val;
 
 	dtlssock->ctx = SSL_CTX_new(DTLS_client_method());
 	if (dtlssock->ctx == NULL) {
 		php_stream_warn(stream, CreateFailed, "DTLS context creation failure");
+		return -1;
+	}
+
+	if (php_openssl_dtls_apply_context(stream, dtlssock) != 0) {
+		SSL_CTX_free(dtlssock->ctx);
+		dtlssock->ctx = NULL;
 		return -1;
 	}
 
@@ -225,6 +350,22 @@ static int php_openssl_dtls_setup_crypto(php_stream *stream, php_openssl_dtls_da
 		SSL_CTX_free(dtlssock->ctx);
 		dtlssock->ctx = NULL;
 		return -1;
+	}
+
+	/* Hostname verification needs the SSL object; the verify mode is inherited
+	 * from the context. */
+	bool verify_peer = !(GET_VER_OPT("verify_peer") && !zend_is_true(val));
+	bool verify_name = !(GET_VER_OPT("verify_peer_name") && !zend_is_true(val));
+	if (verify_peer && verify_name) {
+		const char *name = peer_host;
+		GET_VER_OPT_STRING("peer_name", name);
+		if (name != NULL) {
+			/* An IP literal needs IP-address matching, not DNS-name matching. */
+			X509_VERIFY_PARAM *param = SSL_get0_param(dtlssock->ssl_handle);
+			if (X509_VERIFY_PARAM_set1_ip_asc(param, name) != 1) {
+				SSL_set1_host(dtlssock->ssl_handle, name);
+			}
+		}
 	}
 
 	bio = BIO_new_dgram(dtlssock->s.socket, BIO_NOCLOSE);
@@ -260,7 +401,24 @@ static int php_openssl_dtls_handshake(php_stream *stream, php_openssl_dtls_data_
 {
 	SSL *ssl = dtlssock->ssl_handle;
 
+	/* Always bound the handshake so a silent peer can't make OpenSSL's DTLS timer
+	 * retransmit forever: use the connect timeout, else the default socket timeout. */
+	struct timeval *tmo = xparam->inputs.timeout;
+	struct timeval deadline;
+	gettimeofday(&deadline, NULL);
+	if (tmo != NULL && (tmo->tv_sec > 0 || tmo->tv_usec > 0)) {
+		deadline.tv_sec += tmo->tv_sec;
+		deadline.tv_usec += tmo->tv_usec;
+		if (deadline.tv_usec >= 1000000) {
+			deadline.tv_sec++;
+			deadline.tv_usec -= 1000000;
+		}
+	} else {
+		deadline.tv_sec += (time_t) FG(default_socket_timeout);
+	}
+
 	for (;;) {
+		ERR_clear_error();
 		int n = SSL_do_handshake(ssl);
 		if (n == 1) {
 			return 0;
@@ -293,11 +451,25 @@ static int php_openssl_dtls_handshake(php_stream *stream, php_openssl_dtls_data_
 		}
 
 		struct timeval tv;
-		int timeout = DTLSv1_get_timeout(ssl, &tv)
+		int wait_ms = DTLSv1_get_timeout(ssl, &tv)
 				? (int)(tv.tv_sec * 1000 + tv.tv_usec / 1000)
 				: -1;
 
-		int ready = php_pollfd_for_ms(dtlssock->s.socket, events, timeout);
+		struct timeval now;
+		gettimeofday(&now, NULL);
+		long remaining = (deadline.tv_sec - now.tv_sec) * 1000L
+				+ (deadline.tv_usec - now.tv_usec) / 1000;
+		if (remaining <= 0) {
+			if (xparam->want_errortext) {
+				xparam->outputs.error_text = ZSTR_INIT_LITERAL("DTLS handshake timed out", 0);
+			}
+			return -1;
+		}
+		if (wait_ms < 0 || wait_ms > remaining) {
+			wait_ms = (int)remaining;
+		}
+
+		int ready = php_pollfd_for_ms(dtlssock->s.socket, events, wait_ms);
 		if (ready == 0) {
 			/* Timer fired: let OpenSSL resend the last flight. */
 			if (DTLSv1_handle_timeout(ssl) < 0) {
@@ -314,6 +486,87 @@ static int php_openssl_dtls_handshake(php_stream *stream, php_openssl_dtls_data_
 			return -1;
 		}
 	}
+}
+
+static bool php_openssl_dtls_fingerprint_is_equal(php_stream *stream, X509 *peer, const char *method,
+		zend_string *expected)
+{
+	zend_string *fingerprint = php_openssl_x509_fingerprint(peer, method, false, stream);
+	bool is_equal = false;
+
+	if (fingerprint != NULL) {
+		is_equal = zend_string_equals_ci(fingerprint, expected);
+		zend_string_release_ex(fingerprint, false);
+	}
+
+	return is_equal;
+}
+
+/* Match the peer certificate against a md5/sha1 hash (by length) or an
+ * [algo => hash] map. */
+static bool php_openssl_dtls_fingerprint_match(php_stream *stream, X509 *peer, zval *val)
+{
+	if (Z_TYPE_P(val) == IS_STRING) {
+		const char *method = NULL;
+		switch (Z_STRLEN_P(val)) {
+			case 32: method = "md5"; break;
+			case 40: method = "sha1"; break;
+		}
+		if (method == NULL) {
+			php_stream_warn(stream, AuthFailed, "peer_fingerprint length doesn't match a md5 or sha1 hash");
+			return false;
+		}
+		return php_openssl_dtls_fingerprint_is_equal(stream, peer, method, Z_STR_P(val));
+	}
+
+	if (Z_TYPE_P(val) == IS_ARRAY) {
+		zval *current;
+		zend_string *key;
+
+		if (zend_hash_num_elements(Z_ARRVAL_P(val)) == 0) {
+			php_stream_warn(stream, Generic, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
+			return false;
+		}
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), key, current) {
+			if (key == NULL || Z_TYPE_P(current) != IS_STRING) {
+				php_stream_warn(stream, Generic, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
+				return false;
+			}
+			if (!php_openssl_dtls_fingerprint_is_equal(stream, peer, ZSTR_VAL(key), Z_STR_P(current))) {
+				return false;
+			}
+		} ZEND_HASH_FOREACH_END();
+		return true;
+	}
+
+	php_stream_warn(stream, Generic, "Invalid peer_fingerprint; a string or [algo => fingerprint] array required");
+	return false;
+}
+
+/* Verify the peer certificate against the peer_fingerprint option, if set. This
+ * lets the caller authenticate the peer by fingerprint instead of a CA chain. */
+static int php_openssl_dtls_check_fingerprint(php_stream *stream, php_openssl_dtls_data_t *dtlssock,
+		php_stream_xport_param *xparam)
+{
+	zval *val;
+	if (!GET_VER_OPT("peer_fingerprint")) {
+		return 0;
+	}
+
+	X509 *peer = SSL_get_peer_certificate(dtlssock->ssl_handle);
+	bool match = peer != NULL && php_openssl_dtls_fingerprint_match(stream, peer, val);
+	if (peer != NULL) {
+		X509_free(peer);
+	}
+
+	if (!match) {
+		if (xparam->want_errortext) {
+			xparam->outputs.error_text = ZSTR_INIT_LITERAL("peer_fingerprint match failure", 0);
+		}
+		return -1;
+	}
+
+	return 0;
 }
 
 /* Connect the UDP socket and run the DTLS handshake. */
@@ -337,9 +590,9 @@ static int php_openssl_dtls_connect(php_stream *stream, php_openssl_dtls_data_t 
 			&err, NULL, 0, STREAM_SOCKOP_NONE);
 
 	xparam->outputs.error_code = err;
-	efree(host);
 
 	if (dtlssock->s.socket == SOCK_ERR) {
+		efree(host);
 		return -1;
 	}
 
@@ -347,11 +600,18 @@ static int php_openssl_dtls_connect(php_stream *stream, php_openssl_dtls_data_t 
 	 * non-blocking for the handshake and I/O loops. */
 	php_set_sock_blocking(dtlssock->s.socket, 0);
 
-	if (php_openssl_dtls_setup_crypto(stream, dtlssock) != 0) {
+	if (php_openssl_dtls_setup_crypto(stream, dtlssock, host) != 0) {
+		efree(host);
 		return -1;
 	}
 
-	return php_openssl_dtls_handshake(stream, dtlssock, xparam);
+	efree(host);
+
+	if (php_openssl_dtls_handshake(stream, dtlssock, xparam) != 0) {
+		return -1;
+	}
+
+	return php_openssl_dtls_check_fingerprint(stream, dtlssock, xparam);
 }
 
 /* Expose the fd for stream_select(); the raw fd is not handed out otherwise,
@@ -364,7 +624,8 @@ static int php_openssl_dtls_sockop_cast(php_stream *stream, int castas, void **r
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 			if (ret != NULL) {
 				/* Decrypted data buffered in OpenSSL is invisible to select(), so push
-				 * it into the read buffer. TODO: same idiom as xp_ssl.c. */
+				 * it into the read buffer.
+				 * TODO: same idiom as php_openssl_sockop_cast() in xp_ssl.c. */
 				size_t pending;
 				if (stream->writepos == stream->readpos
 						&& dtlssock->ssl_handle != NULL
@@ -389,6 +650,34 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 	php_stream_xport_param *xparam;
 
 	switch (option) {
+		case PHP_STREAM_OPTION_META_DATA_API: {
+			if (dtlssock->ssl_handle != NULL) {
+				zval crypto;
+				char *proto_str;
+				const SSL_CIPHER *cipher;
+
+				array_init(&crypto);
+				switch (SSL_version(dtlssock->ssl_handle)) {
+					case DTLS1_2_VERSION: proto_str = "DTLSv1.2"; break;
+					case DTLS1_VERSION:   proto_str = "DTLSv1.0"; break;
+					default:              proto_str = "UNKNOWN"; break;
+				}
+				add_assoc_string(&crypto, "protocol", proto_str);
+
+				cipher = SSL_get_current_cipher(dtlssock->ssl_handle);
+				if (cipher != NULL) {
+					add_assoc_string(&crypto, "cipher_name", (char *) SSL_CIPHER_get_name(cipher));
+					add_assoc_long(&crypto, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
+					add_assoc_string(&crypto, "cipher_version", (char *) SSL_CIPHER_get_version(cipher));
+				}
+				add_assoc_zval((zval *)ptrparam, "crypto", &crypto);
+			}
+			add_assoc_bool((zval *)ptrparam, "timed_out", dtlssock->s.timeout_event);
+			add_assoc_bool((zval *)ptrparam, "blocked", dtlssock->s.is_blocked);
+			add_assoc_bool((zval *)ptrparam, "eof", stream->eof);
+			return PHP_STREAM_OPTION_RETURN_OK;
+		}
+
 		case PHP_STREAM_OPTION_XPORT_API:
 			xparam = (php_stream_xport_param *)ptrparam;
 
@@ -410,15 +699,11 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 			dtlssock->s.is_blocked = value;
 			return old;
 		}
-
-		case PHP_STREAM_OPTION_META_DATA_API:
-		case PHP_STREAM_OPTION_READ_TIMEOUT:
-			/* The embedded base socket data is what these operate on. */
-			return php_stream_socket_ops.set_option(stream, option, value, ptrparam);
-
-		default:
-			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	}
+
+	/* Read timeout, liveness check and the rest operate on the embedded base
+	 * socket data, so defer to the generic socket handler. */
+	return php_stream_socket_ops.set_option(stream, option, value, ptrparam);
 }
 
 static const php_stream_ops php_openssl_dtls_socket_ops = {
