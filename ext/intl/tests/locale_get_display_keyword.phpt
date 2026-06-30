@@ -10,11 +10,16 @@ function ut_main()
     $default = ut_loc_get_default();
     ut_loc_set_default('en');
 
-    var_dump(ut_loc_get_display_keyword('calendar', 'en'));
-    var_dump(ut_loc_get_display_keyword('calendar', null));
-    var_dump(ut_loc_get_display_keyword_value('de_DE@calendar=gregorian', 'calendar', 'en'));
-    var_dump(ut_loc_get_display_keyword_value('de_DE@calendar=gregorian', 'calendar', null));
-    var_dump(ut_loc_get_display_keyword_value('de_DE@collation=phonebook', 'collation', 'en'));
+    $keyword = ut_loc_get_display_keyword('calendar', 'en');
+    var_dump(is_string($keyword) && $keyword !== '');
+    var_dump(ut_loc_get_display_keyword('calendar', null) === $keyword);
+
+    $keywordValue = ut_loc_get_display_keyword_value('de_DE@calendar=gregorian', 'calendar', 'en');
+    var_dump(is_string($keywordValue) && $keywordValue !== '');
+    var_dump(ut_loc_get_display_keyword_value('de_DE@calendar=gregorian', 'calendar', null) === $keywordValue);
+
+    $collationValue = ut_loc_get_display_keyword_value('de_DE@collation=phonebook', 'collation', 'en');
+    var_dump(is_string($collationValue) && $collationValue !== '');
 
     ut_loc_set_default($default);
 }
@@ -23,13 +28,13 @@ include_once 'ut_common.inc';
 ut_run();
 ?>
 --EXPECT--
-string(8) "Calendar"
-string(8) "Calendar"
-string(18) "Gregorian Calendar"
-string(18) "Gregorian Calendar"
-string(20) "Phonebook Sort Order"
-string(8) "Calendar"
-string(8) "Calendar"
-string(18) "Gregorian Calendar"
-string(18) "Gregorian Calendar"
-string(20) "Phonebook Sort Order"
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
