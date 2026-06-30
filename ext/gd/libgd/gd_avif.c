@@ -668,8 +668,8 @@ gdImageAvifEx(gdImagePtr im, FILE *outFile, int quality, int speed) {
 	if (out == NULL)
 		return;
 
-		gdImageAvifCtx(im, out, quality, speed);
-		out->gd_free(out);
+	gdImageAvifCtx(im, out, quality, speed);
+	out->gd_free(out);
 }
 
 BGD_DECLARE(void) gdImageAvif(gdImagePtr im, FILE *outFile) {
