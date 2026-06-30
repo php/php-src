@@ -27,4 +27,4 @@ try {
 
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of %d bytes exhausted at /Users/arshid/Downloads/php-src/Zend/zend_objects_API.c:131 (tried to allocate 16416 bytes) in %s on line %d
+Fatal error: Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes) in %s on line %d
