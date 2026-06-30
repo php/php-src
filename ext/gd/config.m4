@@ -262,6 +262,7 @@ if test "$PHP_GD" != "no"; then
       libgd/gdxpm.c
       libgd/wbmp.c
       libgd/gd_qoi.c
+      libgd/gd_jxl.c
     "])
 
     AC_DEFINE([HAVE_GD_BUNDLED], [1],
