@@ -76,6 +76,13 @@ PHP_ARG_WITH([imagequant],
   [no],
   [no])
 
+PHP_ARG_WITH([tiff],
+  [for libtiff],
+  [AS_HELP_STRING([--with-tiff],
+    [GD: Enable TIFF support (only for bundled libgd)])],
+  [no],
+  [no])
+
 dnl
 dnl Checks for the configure options
 dnl
@@ -202,6 +209,18 @@ AC_DEFUN([PHP_GD_IMAGEQUANT], [
       ],
       [AC_MSG_ERROR([libimagequant library not found])],
       [-limagequant])
+  ])
+])
+
+AC_DEFUN([PHP_GD_TIFF], [
+  AS_VAR_IF([PHP_TIFF], [no],, [
+    PKG_CHECK_MODULES([TIFF], [libtiff-4])
+    PHP_EVAL_LIBLINE([$TIFF_LIBS], [GD_SHARED_LIBADD])
+    PHP_EVAL_INCLINE([$TIFF_CFLAGS])
+    AC_DEFINE([HAVE_LIBTIFF], [1],
+      [Define to 1 if you have the libtiff library.])
+    AC_DEFINE([HAVE_GD_TIFF], [1],
+      [Define to 1 if gd extension has TIFF support.])
   ])
 ])
 
@@ -338,6 +357,7 @@ if test "$PHP_GD" != "no"; then
       libgd/gd_uhdr.c
       libgd/gd_nnquant.c
       libgd/gd_color.c
+      libgd/gd_tiff.c
     "])
 
     AC_DEFINE([HAVE_GD_BUNDLED], [1],
@@ -359,6 +379,7 @@ dnl Various checks for GD features
     PHP_GD_FREETYPE2
     PHP_GD_JISX0208
     PHP_GD_IMAGEQUANT
+    PHP_GD_TIFF
 
     PHP_NEW_EXTENSION([gd],
       [gd.c $extra_sources],

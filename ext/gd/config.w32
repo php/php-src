@@ -83,6 +83,15 @@ if (PHP_GD != "no") {
 			}
 		}
 
+		if (PHP_TIFF != "no") {
+			if (CHECK_LIB("tiff.lib", "gd", PHP_GD) &&
+				CHECK_HEADER("tiff.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include")) {
+				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBTIFF /D HAVE_GD_TIFF");
+			} else {
+				WARNING("libtiff not enabled; library and headers not found");
+			}
+		}
+
 		CHECK_LIB("User32.lib", "gd", PHP_GD);
 		CHECK_LIB("Gdi32.lib", "gd", PHP_GD);
 

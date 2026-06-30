@@ -242,7 +242,7 @@ static int _gd2ReadChunk (int offset, char *compBuf, int compSize, char *chunkBu
 	return TRUE;
 }
 
-gdImagePtr gdImageCreateFromGd2 (FILE * inFile)
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2 (FILE * inFile)
 {
 	gdIOCtx *in = gdNewFileCtx(inFile);
 	gdImagePtr im;
@@ -254,7 +254,7 @@ gdImagePtr gdImageCreateFromGd2 (FILE * inFile)
 	return im;
 }
 
-gdImagePtr gdImageCreateFromGd2Ptr (int size, void *data)
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Ptr (int size, void *data)
 {
 	gdImagePtr im;
 	gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
@@ -264,7 +264,7 @@ gdImagePtr gdImageCreateFromGd2Ptr (int size, void *data)
 	return im;
 }
 
-gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 {
 	int sx, sy;
 	int i;
@@ -409,7 +409,7 @@ fail2:
 	return 0;
 }
 
-gdImagePtr gdImageCreateFromGd2PartPtr (int size, void *data, int srcx, int srcy, int w, int h)
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2PartPtr (int size, void *data, int srcx, int srcy, int w, int h)
 {
 	gdImagePtr im;
 	gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
@@ -419,7 +419,7 @@ gdImagePtr gdImageCreateFromGd2PartPtr (int size, void *data, int srcx, int srcy
 	return im;
 }
 
-gdImagePtr gdImageCreateFromGd2Part (FILE * inFile, int srcx, int srcy, int w, int h)
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Part (FILE * inFile, int srcx, int srcy, int w, int h)
 {
 	gdImagePtr im;
 	gdIOCtx *in = gdNewFileCtx(inFile);
@@ -431,7 +431,7 @@ gdImagePtr gdImageCreateFromGd2Part (FILE * inFile, int srcx, int srcy, int w, i
 	return im;
 }
 
-gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w, int h)
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w, int h)
 {
 	int scx, scy, ecx, ecy, fsx, fsy;
 	int nc, ncx, ncy, cs, cx, cy;
@@ -829,7 +829,7 @@ fail:
 	GD2_DBG(gd_error("Done"));
 }
 
-void gdImageGd2 (gdImagePtr im, FILE * outFile, int cs, int fmt)
+BGD_DECLARE(void) gdImageGd2 (gdImagePtr im, FILE * outFile, int cs, int fmt)
 {
 	gdIOCtx *out = gdNewFileCtx(outFile);
 
@@ -838,7 +838,7 @@ void gdImageGd2 (gdImagePtr im, FILE * outFile, int cs, int fmt)
 	out->gd_free(out);
 }
 
-void *gdImageGd2Ptr (gdImagePtr im, int cs, int fmt, int *size)
+BGD_DECLARE(void *) gdImageGd2Ptr (gdImagePtr im, int cs, int fmt, int *size)
 {
 	void *rv;
 	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
