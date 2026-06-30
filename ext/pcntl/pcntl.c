@@ -148,11 +148,14 @@ typedef psetid_t cpu_set_t;
 
 #define LONG_CONST(c) (zend_long) c
 
+#include "Zend/zend_bitset.h"
 #include "Zend/zend_enum.h"
 #include "Zend/zend_max_execution_timer.h"
 
 #include "pcntl_arginfo.h"
 #include "pcntl_decl.h"
+
+static zend_class_entry *SignalReturn_ce;
 static zend_class_entry *QosClass_ce;
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
@@ -183,12 +186,14 @@ ZEND_GET_MODULE(pcntl)
 #endif
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
+static zend_signal_interrupt_result (*orig_signal_interrupt_function)(void);
 
 static void pcntl_signal_handler(int, siginfo_t*, void*);
 static void pcntl_siginfo_to_zval(int, siginfo_t*, zval*);
-static void pcntl_signal_dispatch(void);
+static zend_signal_interrupt_result pcntl_signal_dispatch(void);
 static void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer);
 static void pcntl_interrupt_function(zend_execute_data *execute_data);
+static zend_signal_interrupt_result pcntl_signal_interrupt_function(void);
 
 static PHP_GINIT_FUNCTION(pcntl)
 {
@@ -213,15 +218,19 @@ PHP_RINIT_FUNCTION(pcntl)
 		PCNTL_G(num_signals) = SIGRTMAX + 1;
 	}
 #endif
+	PCNTL_G(restart_syscalls) = ecalloc(zend_bitset_len(PCNTL_G(num_signals)), ZEND_BITSET_ELM_SIZE);
 	return SUCCESS;
 }
 
 PHP_MINIT_FUNCTION(pcntl)
 {
+	SignalReturn_ce = register_class_Pcntl_SignalReturn();
 	QosClass_ce = register_class_Pcntl_QosClass();
 	register_pcntl_symbols(module_number);
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = pcntl_interrupt_function;
+	orig_signal_interrupt_function = zend_signal_interrupt_function;
+	zend_signal_interrupt_function = pcntl_signal_interrupt_function;
 
 	return SUCCESS;
 }
@@ -251,6 +260,8 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 		PCNTL_G(spares) = sig->next;
 		efree(sig);
 	}
+
+	efree(PCNTL_G(restart_syscalls));
 
 	return SUCCESS;
 }
@@ -850,11 +861,19 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_THROWS();
 	}
 
-	/* Register with the OS first so that on failure we don't record a handler that was never installed */
-	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (void *)SIG_ERR) {
+	/* Register with the OS first so that on failure we don't record a handler that was never installed.
+	 * Always clear SA_RESTART so that interrupted syscalls return EINTR; zend_signal_interrupt_function
+	 * decides whether to restart based on the handler return value and restart_syscalls. */
+	if (php_signal4(signo, pcntl_signal_handler, false, 1) == (void *)SIG_ERR) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
+	}
+
+	if (restart_syscalls) {
+		zend_bitset_incl(PCNTL_G(restart_syscalls), signo);
+	} else {
+		zend_bitset_excl(PCNTL_G(restart_syscalls), signo);
 	}
 
 	/* Add the function name to our signal table */
@@ -1351,15 +1370,16 @@ static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	}
 }
 
-void pcntl_signal_dispatch(void)
+zend_signal_interrupt_result pcntl_signal_dispatch(void)
 {
 	zval params[2], *handle, retval;
 	struct php_pcntl_pending_signal *queue, *next;
 	sigset_t mask;
 	sigset_t old_mask;
+	bool interrupt = false;
 
 	if(!PCNTL_G(pending_signals)) {
-		return;
+		return ZEND_SIGNAL_RESTART;
 	}
 
 	/* Mask all signals */
@@ -1367,9 +1387,10 @@ void pcntl_signal_dispatch(void)
 	sigprocmask(SIG_BLOCK, &mask, &old_mask);
 
 	/* Bail if the queue is empty or if we are already playing the queue */
+	// TODO: For the purpose of EINTR handling, processing next signals here would be useful
 	if (!PCNTL_G(head) || PCNTL_G(processing_signal_queue)) {
 		sigprocmask(SIG_SETMASK, &old_mask, NULL);
-		return;
+		return ZEND_SIGNAL_RESTART;
 	}
 
 	/* Prevent switching fibers when handling signals */
@@ -1382,7 +1403,6 @@ void pcntl_signal_dispatch(void)
 	PCNTL_G(head) = NULL; /* simple stores are atomic */
 	PCNTL_G(tail) = NULL;
 
-	/* Allocate */
 	while (queue) {
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
@@ -1390,12 +1410,27 @@ void pcntl_signal_dispatch(void)
 				array_init(&params[1]);
 				pcntl_siginfo_to_zval(queue->signo, &queue->siginfo, &params[1]);
 
-				/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
 				call_user_function(NULL, NULL, handle, &retval, 2, params);
-				zval_ptr_dtor(&retval);
 				zval_ptr_dtor(&params[1]);
 
+				if (Z_TYPE(retval) == IS_OBJECT && Z_OBJCE(retval) == SignalReturn_ce) {
+					if (zend_enum_fetch_case_id(Z_OBJ(retval)) == ZEND_ENUM_Pcntl_SignalReturn_Interrupt) {
+						interrupt = true;
+					} else if (!zend_bitset_in(PCNTL_G(restart_syscalls), queue->signo)) {
+						interrupt = true;
+					}
+				} else if (Z_TYPE(retval) > IS_NULL) {
+					zend_type_error("Signal handler must return a Pcntl\\SignalReturn or no value, %s returned",
+						zend_zval_value_name(&retval));
+					interrupt = true;
+				} else if (!zend_bitset_in(PCNTL_G(restart_syscalls), queue->signo)) {
+					interrupt = true;
+				}
+
+				zval_ptr_dtor(&retval);
+
 				if (EG(exception)) {
+					interrupt = true;
 					break;
 				}
 			}
@@ -1425,11 +1460,13 @@ void pcntl_signal_dispatch(void)
 
 	/* return signal mask to previous state */
 	sigprocmask(SIG_SETMASK, &old_mask, NULL);
+
+	return interrupt ? ZEND_SIGNAL_INTERRUPT : ZEND_SIGNAL_RESTART;
 }
 
 static void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer)
 {
-	return pcntl_signal_dispatch();
+	pcntl_signal_dispatch();
 }
 
 /* {{{ Enable/disable asynchronous signal handling and return the old setting. */
@@ -1907,4 +1944,14 @@ static void pcntl_interrupt_function(zend_execute_data *execute_data)
 	if (orig_interrupt_function) {
 		orig_interrupt_function(execute_data);
 	}
+}
+
+static zend_signal_interrupt_result pcntl_signal_interrupt_function(void)
+{
+	zend_signal_interrupt_result result = pcntl_signal_dispatch();
+	if (orig_signal_interrupt_function() == ZEND_SIGNAL_INTERRUPT) {
+		result = ZEND_SIGNAL_INTERRUPT;
+	}
+
+	return result;
 }

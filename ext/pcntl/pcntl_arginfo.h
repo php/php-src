@@ -1,5 +1,5 @@
 /* This is a generated file, edit pcntl.stub.php instead.
- * Stub hash: 04e7b30c6fb23cf6ce6bc26fe094fd5b4dbfe826
+ * Stub hash: 2be6f0046170cad02be1d01227b749412af7b51f
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
@@ -660,6 +660,17 @@ static void register_pcntl_symbols(int module_number)
 #if defined(ECAPMODE)
 	REGISTER_LONG_CONSTANT("PCNTL_ECAPMODE", ECAPMODE, CONST_PERSISTENT);
 #endif
+}
+
+static zend_class_entry *register_class_Pcntl_SignalReturn(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Pcntl\\SignalReturn", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Default", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Interrupt", NULL);
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class_Pcntl_QosClass(void)

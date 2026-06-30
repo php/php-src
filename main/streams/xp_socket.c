@@ -16,6 +16,8 @@
 #include "ext/standard/file.h"
 #include "php_streams.h"
 #include "php_io.h"
+#include "php_network.h"
+#include "php_deadline.h"
 
 #if defined(PHP_WIN32) || defined(__riscos__)
 # undef AF_UNIX
@@ -66,23 +68,30 @@ static ssize_t php_sockop_write(php_stream *stream, const char *buf, size_t coun
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	ssize_t didwrite;
-	struct timeval *ptimeout;
 
 	if (!sock || sock->socket == -1) {
 		return 0;
 	}
 
-	if (sock->timeout.tv_sec == -1)
-		ptimeout = NULL;
-	else
-		ptimeout = &sock->timeout;
+	/* Compute deadline once so that signal-restart loops don't extend the timeout. */
+	php_deadline deadline;
+	php_deadline_init(&deadline, &sock->timeout);
+	bool finite_timeout = !php_deadline_is_infinite(&deadline);
 
 retry:
-	didwrite = send(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && ptimeout) ? MSG_DONTWAIT : 0);
+	if (php_stream_check_signals(stream) == ZEND_SIGNAL_INTERRUPT) {
+		return -1;
+	}
+
+	didwrite = send(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && finite_timeout) ? MSG_DONTWAIT : 0);
 
 	if (didwrite <= 0) {
 		char *estr;
 		int err = php_socket_errno();
+
+		if (err == EINTR) {
+			goto retry;
+		}
 
 		if (PHP_IS_TRANSIENT_ERROR(err)) {
 			if (sock->is_blocked) {
@@ -90,21 +99,15 @@ retry:
 
 				sock->timeout_event = false;
 
-				do {
-					retval = php_pollfd_for(sock->socket, POLLOUT, ptimeout);
+				retval = php_pollfd_deadline(stream, sock->socket, POLLOUT, &deadline);
 
-					if (retval == 0) {
-						sock->timeout_event = true;
-						break;
-					}
+				if (retval == 0) {
+					sock->timeout_event = true;
+				} else if (retval > 0) {
+					goto retry;
+				}
 
-					if (retval > 0) {
-						/* writable now; retry */
-						goto retry;
-					}
-
-					err = php_socket_errno();
-				} while (err == EINTR);
+				err = php_socket_errno();
 			} else {
 				/* EWOULDBLOCK/EAGAIN is not an error for a non-blocking stream.
 				 * Report zero byte write instead. */
@@ -112,7 +115,7 @@ retry:
 			}
 		}
 
-		if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
+		if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS) && err != EINTR) {
 			estr = php_socket_strerror(err, NULL, 0);
 			php_stream_warn(stream, NetworkSendFailed,
 					"Send of %zu bytes failed with errno=%d %s", count, err, estr);
@@ -127,40 +130,31 @@ retry:
 	return didwrite;
 }
 
-static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock, bool has_buffered_data)
+static zend_result php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock, bool has_buffered_data, php_deadline *deadline)
 {
 	int retval;
-	struct timeval *ptimeout, zero_timeout;
 
 	if (!sock || sock->socket == -1) {
-		return;
+		return FAILURE;
 	}
 
 	sock->timeout_event = false;
 
+	php_deadline nonblock;
 	if (has_buffered_data) {
-		/* If there is already buffered data, use no timeout. */
-		zero_timeout.tv_sec = 0;
-		zero_timeout.tv_usec = 0;
-		ptimeout = &zero_timeout;
-	} else if (sock->timeout.tv_sec == -1) {
-		ptimeout = NULL;
-	} else {
-		ptimeout = &sock->timeout;
+		/* If there is already buffered data, do not block. */
+		php_deadline_init_nonblock(&nonblock);
+		deadline = &nonblock;
 	}
 
-	while(1) {
-		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
-
-		if (retval == 0)
-			sock->timeout_event = true;
-
-		if (retval >= 0)
-			break;
-
-		if (php_socket_errno() != EINTR)
-			break;
+	retval = php_pollfd_deadline(stream, sock->socket, PHP_POLLREADABLE, deadline);
+	if (retval == 0) {
+		sock->timeout_event = true;
+	} else if (retval < 0 && php_socket_errno() == EINTR) {
+		return FAILURE;
 	}
+
+	return SUCCESS;
 }
 
 static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
@@ -168,6 +162,17 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 
 	if (!sock || sock->socket == -1) {
+		return -1;
+	}
+
+	/* Compute deadline once so that signal-restart loops don't extend the timeout. */
+	php_deadline deadline;
+	if (sock->is_blocked) {
+		php_deadline_init(&deadline, &sock->timeout);
+	}
+
+restart:
+	if (zend_signal_interrupt_function() == ZEND_SIGNAL_INTERRUPT) {
 		return -1;
 	}
 
@@ -187,10 +192,13 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 		/* If the wait is needed or it is a platform without MSG_DONTWAIT support (e.g. Windows),
 		 * then poll for data. */
 		if (!dont_wait || MSG_DONTWAIT == 0) {
-			php_sock_stream_wait_for_data(stream, sock, has_buffered_data);
+			zend_result wait_result = php_sock_stream_wait_for_data(stream, sock, has_buffered_data, &deadline);
 			if (sock->timeout_event) {
 				/* It is ok to timeout if there is any data buffered so return 0, otherwise -1. */
 				return has_buffered_data ? 0 : -1;
+			}
+			if (wait_result != SUCCESS) {
+				return -1;
 			}
 		}
 	}
@@ -199,7 +207,9 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	int err = php_socket_errno();
 
 	if (nr_bytes < 0) {
-		if (PHP_IS_TRANSIENT_ERROR(err)) {
+		if (err == EINTR) {
+			goto restart;
+		} else if (PHP_IS_TRANSIENT_ERROR(err)) {
 			nr_bytes = 0;
 		} else {
 			stream->eof = 1;
@@ -219,9 +229,6 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 static int php_sockop_close(php_stream *stream, int close_handle)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-#ifdef PHP_WIN32
-	int n;
-#endif
 
 	if (!sock) {
 		return 0;
@@ -244,9 +251,10 @@ static int php_sockop_close(php_stream *stream, int close_handle)
 			 * We use a small timeout which should encourage the OS to send the data,
 			 * but at the same time avoid hanging indefinitely.
 			 * */
-			do {
-				n = php_pollfd_for_ms(sock->socket, POLLOUT, 500);
-			} while (n == -1 && php_socket_errno() == EINTR);
+			php_deadline deadline;
+			struct timeval timeout = {.tv_sec = 0, .tv_usec = 500000};
+			php_deadline_init(&deadline, &timeout);
+			php_pollfd_deadline(stream, sock->socket, POLLOUT, &deadline);
 #endif
 			closesocket(sock->socket);
 			sock->socket = SOCK_ERR;
@@ -279,24 +287,49 @@ static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb)
 #endif
 }
 
-static inline int sock_sendto(php_netstream_data_t *sock, const char *buf, size_t buflen, int flags,
+static inline int sock_sendto(php_stream *stream, php_netstream_data_t *sock, const char *buf, size_t buflen, int flags,
 		struct sockaddr *addr, socklen_t addrlen
 		)
 {
 	int ret;
 	if (addr) {
-		ret = sendto(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags, addr, XP_SOCK_BUF_SIZE(addrlen));
+		while (1) {
+			ret = sendto(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags, addr, XP_SOCK_BUF_SIZE(addrlen));
+
+			if (ret >= 0 || php_socket_errno() != EINTR) {
+				break;
+			}
+
+			if (php_stream_check_signals(stream) == ZEND_SIGNAL_INTERRUPT) {
+				php_socket_set_errno(EINTR);
+				break;
+			}
+		}
 
 		return (ret == SOCK_CONN_ERR) ? -1 : ret;
 	}
+
+	while (1) {
 #ifdef PHP_WIN32
-	return ((ret = send(sock->socket, buf, buflen > INT_MAX ? INT_MAX : (int)buflen, flags)) == SOCK_CONN_ERR) ? -1 : ret;
+		ret = send(sock->socket, buf, buflen > INT_MAX ? INT_MAX : (int)buflen, flags);
 #else
-	return ((ret = send(sock->socket, buf, buflen, flags)) == SOCK_CONN_ERR) ? -1 : ret;
+		ret = send(sock->socket, buf, buflen, flags);
 #endif
+
+		if (ret >= 0 || php_socket_errno() != EINTR) {
+			break;
+		}
+
+		if (php_stream_check_signals(stream) == ZEND_SIGNAL_INTERRUPT) {
+			php_socket_set_errno(EINTR);
+			break;
+		}
+	}
+
+	return (ret == SOCK_CONN_ERR) ? -1 : ret;
 }
 
-static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t buflen, int flags,
+static inline int sock_recvfrom(php_stream *stream, php_netstream_data_t *sock, char *buf, size_t buflen, int flags,
 		zend_string **textaddr,
 		struct sockaddr **addr, socklen_t *addrlen
 		)
@@ -306,15 +339,28 @@ static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t bu
 
 	if (want_addr) {
 		php_sockaddr_storage sa;
-		socklen_t sl = sizeof(sa);
-		ret = recvfrom(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags, (struct sockaddr*)&sa, &sl);
-		ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
+		socklen_t sl;
+
+		while (1) {
+			sl = sizeof(sa);
+			ret = recvfrom(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags, (struct sockaddr*)&sa, &sl);
+			ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
 #ifdef PHP_WIN32
-		/* POSIX discards excess bytes without signalling failure; emulate this on Windows */
-		if (ret == -1 && WSAGetLastError() == WSAEMSGSIZE) {
-			ret = buflen;
-		}
+			/* POSIX discards excess bytes without signalling failure; emulate this on Windows */
+			if (ret == -1 && WSAGetLastError() == WSAEMSGSIZE) {
+				ret = buflen;
+			}
 #endif
+			if (ret != -1 || php_socket_errno() != EINTR) {
+				break;
+			}
+
+			if (php_stream_check_signals(stream) == ZEND_SIGNAL_INTERRUPT) {
+				php_socket_set_errno(EINTR);
+				break;
+			}
+		}
+
 		if (sl) {
 			php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 					textaddr, addr, addrlen);
@@ -328,8 +374,19 @@ static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t bu
 			}
 		}
 	} else {
-		ret = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags);
-		ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
+		while (1) {
+			ret = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags);
+			ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
+
+			if (ret != -1 || php_socket_errno() != EINTR) {
+				break;
+			}
+
+			if (php_stream_check_signals(stream) == ZEND_SIGNAL_INTERRUPT) {
+				php_socket_set_errno(EINTR);
+				break;
+			}
+		}
 	}
 
 	return ret;
@@ -351,6 +408,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 				struct timeval tv;
 				char buf;
 				int alive = 1;
+				php_deadline deadline;
 
 				if (value == -1) {
 					if (sock->timeout.tv_sec == -1) {
@@ -364,6 +422,8 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 					tv.tv_usec = 0;
 				}
 
+				php_deadline_init(&deadline, &tv);
+
 				if (sock->socket == -1) {
 					alive = 0;
 				} else if (
@@ -372,7 +432,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 						!(stream->flags & PHP_STREAM_FLAG_NO_IO) &&
 						((MSG_DONTWAIT != 0) || !sock->is_blocked)
 					) ||
-					php_pollfd_for(sock->socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0
+					php_pollfd_deadline(stream, sock->socket, PHP_POLLREADABLE|POLLPRI, &deadline) > 0
 				) {
 					/* the poll() call was skipped if the socket is non-blocking (or MSG_DONTWAIT is available) and if the timeout is zero */
 #ifdef PHP_WIN32
@@ -381,6 +441,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 					ssize_t ret;
 #endif
 
+					/* Non-blocking: no EINTR handling */
 					ret = recv(sock->socket, &buf, sizeof(buf), MSG_PEEK|MSG_DONTWAIT);
 					if (0 == ret) {
 						/* the counterpart did properly shutdown */
@@ -444,7 +505,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 					if ((xparam->inputs.flags & STREAM_OOB) == STREAM_OOB) {
 						flags |= MSG_OOB;
 					}
-					xparam->outputs.returncode = sock_sendto(sock,
+					xparam->outputs.returncode = sock_sendto(stream, sock,
 							xparam->inputs.buf, xparam->inputs.buflen,
 							flags,
 							xparam->inputs.addr,
@@ -464,7 +525,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 					if ((xparam->inputs.flags & STREAM_PEEK) == STREAM_PEEK) {
 						flags |= MSG_PEEK;
 					}
-					xparam->outputs.returncode = sock_recvfrom(sock,
+					xparam->outputs.returncode = sock_recvfrom(stream, sock,
 							xparam->inputs.buf, xparam->inputs.buflen,
 							flags,
 							xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
@@ -840,7 +901,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 
 		parse_unix_address(stream, xparam, &unix_addr);
 
-		ret = php_network_connect_socket(sock->socket,
+		ret = php_network_connect_socket(stream, sock->socket,
 				(const struct sockaddr *)&unix_addr, (socklen_t) offsetof(struct sockaddr_un, sun_path) + xparam->inputs.namelen,
 				xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC, xparam->inputs.timeout,
 				xparam->want_errortext ? &xparam->outputs.error_text : NULL,
@@ -931,7 +992,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	 * want the default to be TCP sockets so that the openssl extension can
 	 * re-use this code. */
 
-	sock->socket = php_network_connect_socket_to_host_ex(host, portno,
+	sock->socket = php_network_connect_socket_to_host_ex(stream, host, portno,
 			PHP_STREAM_XPORT_IS_UDP(stream) ? SOCK_DGRAM : SOCK_STREAM,
 			xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC,
 			xparam->inputs.timeout,

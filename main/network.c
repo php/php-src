@@ -16,6 +16,7 @@
 /*#define DEBUG_MAIN_NETWORK 1*/
 
 #include "php.h"
+#include "php_deadline.h"
 
 #include <stddef.h>
 #include <errno.h>
@@ -327,7 +328,8 @@ static inline void php_network_set_limit_time(struct timeval *limit_time,
  * enable non-blocking mode on the socket.
  * */
 /* {{{ php_network_connect_socket */
-PHPAPI int php_network_connect_socket(php_socket_t sockfd,
+PHPAPI int php_network_connect_socket(php_stream *stream,
+		php_socket_t sockfd,
 		const struct sockaddr *addr,
 		socklen_t addrlen,
 		int asynchronous,
@@ -343,6 +345,7 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 
 	SET_SOCKET_BLOCKING_MODE(sockfd, orig_flags);
 
+	/* Non-blocking: no EINTR handling */
 	if ((n = connect(sockfd, addr, addrlen)) != 0) {
 		error = php_socket_errno();
 
@@ -378,49 +381,20 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 #else
 	int events = PHP_POLLREADABLE|POLLOUT;
 #endif
-	struct timeval working_timeout;
-#ifdef HAVE_GETTIMEOFDAY
-	struct timeval limit_time, time_now;
-#endif
-	if (timeout) {
-		memcpy(&working_timeout, timeout, sizeof(working_timeout));
-#ifdef HAVE_GETTIMEOFDAY
-		php_network_set_limit_time(&limit_time, &working_timeout);
-#endif
-	}
-
-	while (true) {
-		n = php_pollfd_for(sockfd, events, timeout ? &working_timeout : NULL);
-		if (n < 0) {
-			if (errno == EINTR) {
-#ifdef HAVE_GETTIMEOFDAY
-				if (timeout) {
-					gettimeofday(&time_now, NULL);
-
-					if (!timercmp(&time_now, &limit_time, <)) {
-						/* time limit expired; no need for another poll */
-						error = PHP_TIMEOUT_ERROR_VALUE;
-						break;
-					} else {
-						/* work out remaining time */
-						sub_times(limit_time, time_now, &working_timeout);
-					}
-				}
-#endif
-				continue;
-			}
+	php_deadline deadline;
+	php_deadline_init(&deadline, timeout);
+	n = php_pollfd_deadline(stream, sockfd, events, &deadline);
+	if (n < 0) {
+		ret = -1;
+	} else if (n == 0) {
+		error = PHP_TIMEOUT_ERROR_VALUE;
+	} else {
+		len = sizeof(error);
+		/* BSD-derived systems set errno correctly.
+		 * Solaris returns -1 from getsockopt in case of error. */
+		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len) != 0) {
 			ret = -1;
-		} else if (n == 0) {
-			error = PHP_TIMEOUT_ERROR_VALUE;
-		} else {
-			len = sizeof(error);
-			/* BSD-derived systems set errno correctly.
-			 * Solaris returns -1 from getsockopt in case of error. */
-			if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len) != 0) {
-				ret = -1;
-			}
 		}
-		break;
 	}
 
 ok:
@@ -883,7 +857,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
  * enable non-blocking mode on the socket.
  * Returns the connected (or connecting) socket, or -1 on failure.
  * */
-php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned short port,
+php_socket_t php_network_connect_socket_to_host_ex(php_stream *stream, const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
 		int *error_code, const char *bindto, unsigned short bindport, long sockopts, php_sockvals *sockvals
 		)
@@ -1043,7 +1017,7 @@ php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned sh
 #endif
 		}
 
-		n = php_network_connect_socket(sock, sa, socklen, asynchronous,
+		n = php_network_connect_socket(stream, sock, sa, socklen, asynchronous,
 				timeout ? &working_timeout : NULL,
 				error_string, error_code);
 
@@ -1095,7 +1069,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 		int *error_code, const char *bindto, unsigned short bindport, long sockopts
 		)
 {
-	return php_network_connect_socket_to_host_ex(host, port, socktype, asynchronous, timeout,
+	return php_network_connect_socket_to_host_ex(NULL, host, port, socktype, asynchronous, timeout,
 			error_string, error_code, bindto, bindport, sockopts, NULL);
 }
 
