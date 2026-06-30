@@ -27,21 +27,16 @@
 
 #ifndef OPENSSL_NO_DTLS
 
-/* Stream data backing a dtls:// transport. The datagram BIO is owned by
- * ssl_handle (attached with SSL_set_bio) and freed with it. The socket stays
- * non-blocking for the DTLS timers, so is_blocked tracks the stream-level mode
- * and timeout is the read timeout, both honoured by the I/O loop. */
+/* The base socket data is embedded first so the generic socket option handlers
+ * can be reused; the datagram BIO is owned by ssl_handle (freed with it). */
 typedef struct _php_openssl_dtls_data_t {
-	php_socket_t socket;
+	php_netstream_data_t s;
 	SSL_CTX *ctx;
 	SSL *ssl_handle;
-	bool is_blocked;
-	struct timeval timeout;
 } php_openssl_dtls_data_t;
 
-/* Datagram I/O: each SSL_read/SSL_write maps to one DTLS record. The socket is
- * non-blocking, so when OpenSSL wants more I/O we poll (up to the read timeout
- * for a blocking stream) and retry. */
+/* The socket is non-blocking, so on WANT_* we poll (up to the read timeout when
+ * blocking) and retry. */
 static ssize_t php_openssl_dtls_io(bool read, php_stream *stream, char *buf, size_t count)
 {
 	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
@@ -56,9 +51,20 @@ static ssize_t php_openssl_dtls_io(bool read, php_stream *stream, char *buf, siz
 		count = INT_MAX;
 	}
 
-	int timeout_ms = -1;
-	if (dtlssock->is_blocked && (dtlssock->timeout.tv_sec > 0 || dtlssock->timeout.tv_usec > 0)) {
-		timeout_ms = (int)(dtlssock->timeout.tv_sec * 1000 + dtlssock->timeout.tv_usec / 1000);
+	dtlssock->s.timeout_event = false;
+
+	/* Bound the total time across retries, not each individual poll. */
+	struct timeval deadline;
+	bool has_deadline = false;
+	if (dtlssock->s.is_blocked && (dtlssock->s.timeout.tv_sec > 0 || dtlssock->s.timeout.tv_usec > 0)) {
+		gettimeofday(&deadline, NULL);
+		deadline.tv_sec += dtlssock->s.timeout.tv_sec;
+		deadline.tv_usec += dtlssock->s.timeout.tv_usec;
+		if (deadline.tv_usec >= 1000000) {
+			deadline.tv_sec++;
+			deadline.tv_usec -= 1000000;
+		}
+		has_deadline = true;
 	}
 
 	for (;;) {
@@ -77,7 +83,7 @@ static ssize_t php_openssl_dtls_io(bool read, php_stream *stream, char *buf, siz
 				events = POLLOUT;
 				break;
 			case SSL_ERROR_ZERO_RETURN:
-				/* The peer sent a close_notify alert. */
+				/* Peer sent close_notify. */
 				stream->eof = 1;
 				return 0;
 			default:
@@ -87,28 +93,48 @@ static ssize_t php_openssl_dtls_io(bool read, php_stream *stream, char *buf, siz
 				return -1;
 		}
 
-		/* Non-blocking stream: report that no data is available right now. */
-		if (!dtlssock->is_blocked) {
+		/* Non-blocking: nothing available right now. */
+		if (!dtlssock->s.is_blocked) {
 			return -1;
 		}
 
-		if (php_pollfd_for_ms(dtlssock->socket, events, timeout_ms) <= 0) {
-			/* Timed out or poll error. */
+		int wait_ms = -1;
+		if (has_deadline) {
+			struct timeval now;
+			gettimeofday(&now, NULL);
+			long remaining = (deadline.tv_sec - now.tv_sec) * 1000L
+					+ (deadline.tv_usec - now.tv_usec) / 1000;
+			if (remaining <= 0) {
+				dtlssock->s.timeout_event = true;
+				return -1;
+			}
+			wait_ms = remaining > INT_MAX ? INT_MAX : (int)remaining;
+		}
+
+		int ready = php_pollfd_for_ms(dtlssock->s.socket, events, wait_ms);
+		if (ready == 0) {
+			dtlssock->s.timeout_event = true;
+			return -1;
+		}
+		if (ready < 0) {
 			return -1;
 		}
 	}
 }
 
+/* Send one datagram of application data. */
 static ssize_t php_openssl_dtls_sockop_write(php_stream *stream, const char *buf, size_t count)
 {
 	return php_openssl_dtls_io(false, stream, (char *)buf, count);
 }
 
+/* Receive one datagram of application data. */
 static ssize_t php_openssl_dtls_sockop_read(php_stream *stream, char *buf, size_t count)
 {
 	return php_openssl_dtls_io(true, stream, buf, count);
 }
 
+/* Free the DTLS objects and close the socket. */
 static int php_openssl_dtls_sockop_close(php_stream *stream, int close_handle)
 {
 	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
@@ -117,8 +143,8 @@ static int php_openssl_dtls_sockop_close(php_stream *stream, int close_handle)
 		return 0;
 	}
 
-	/* SSL_free also frees the datagram BIO attached with SSL_set_bio; the BIO was
-	 * created BIO_NOCLOSE, so the socket itself is closed separately below. */
+	/* SSL_free also frees the BIO (created BIO_NOCLOSE), so the socket is closed
+	 * separately below. */
 	if (dtlssock->ssl_handle != NULL) {
 		SSL_free(dtlssock->ssl_handle);
 		dtlssock->ssl_handle = NULL;
@@ -128,9 +154,9 @@ static int php_openssl_dtls_sockop_close(php_stream *stream, int close_handle)
 		dtlssock->ctx = NULL;
 	}
 
-	if (close_handle && dtlssock->socket != SOCK_ERR) {
-		closesocket(dtlssock->socket);
-		dtlssock->socket = SOCK_ERR;
+	if (close_handle && dtlssock->s.socket != SOCK_ERR) {
+		closesocket(dtlssock->s.socket);
+		dtlssock->s.socket = SOCK_ERR;
 	}
 
 	pefree(dtlssock, php_stream_is_persistent(stream));
@@ -139,9 +165,9 @@ static int php_openssl_dtls_sockop_close(php_stream *stream, int close_handle)
 	return 0;
 }
 
-/* Split "host:port" (or "[ipv6]:port") from the resource name into host and
- * port. Returns an emalloc'd host the caller must efree, or NULL on a parse
- * error, with xparam->outputs.error_text set when requested. */
+/* Returns an emalloc'd host (caller frees) and a port, or NULL on error.
+ *
+ * TODO: duplicates the static parse_ip_address_ex() in xp_socket.c. */
 static char *php_openssl_dtls_parse_ip_address(php_stream_xport_param *xparam, int *portno)
 {
 	const char *str = xparam->inputs.name;
@@ -182,8 +208,7 @@ static char *php_openssl_dtls_parse_ip_address(php_stream_xport_param *xparam, i
 	return estrndup(str, colon - str);
 }
 
-/* Create the DTLS context and SSL object and bind a datagram BIO to the
- * connected UDP socket. */
+/* Create the DTLS context, SSL object and datagram BIO. */
 static int php_openssl_dtls_setup_crypto(php_stream *stream, php_openssl_dtls_data_t *dtlssock)
 {
 	BIO *bio;
@@ -202,7 +227,7 @@ static int php_openssl_dtls_setup_crypto(php_stream *stream, php_openssl_dtls_da
 		return -1;
 	}
 
-	bio = BIO_new_dgram(dtlssock->socket, BIO_NOCLOSE);
+	bio = BIO_new_dgram(dtlssock->s.socket, BIO_NOCLOSE);
 	if (bio == NULL) {
 		php_stream_warn(stream, CreateFailed, "DTLS datagram BIO creation failure");
 		SSL_free(dtlssock->ssl_handle);
@@ -212,29 +237,26 @@ static int php_openssl_dtls_setup_crypto(php_stream *stream, php_openssl_dtls_da
 		return -1;
 	}
 
-	/* A datagram BIO defaults to sendto() with an empty peer address, which
-	 * fails with EINVAL on our connected socket. Tell it the socket is connected
-	 * (and to whom) so it uses send()/recv() instead. */
+	/* A datagram BIO defaults to sendto() with an empty peer, which fails with
+	 * EINVAL on a connected socket; mark it connected so it uses send()/recv(). */
 	{
 		struct sockaddr_storage peer;
 		socklen_t peerlen = sizeof(peer);
-		if (getpeername(dtlssock->socket, (struct sockaddr *)&peer, &peerlen) == 0) {
+		if (getpeername(dtlssock->s.socket, (struct sockaddr *)&peer, &peerlen) == 0) {
 			BIO_ctrl(bio, BIO_CTRL_DGRAM_SET_CONNECTED, 0, &peer);
 		}
 	}
 
-	/* The UDP socket is already connected, so one datagram BIO serves both
-	 * reads and writes. */
 	SSL_set_bio(dtlssock->ssl_handle, bio, bio);
 	SSL_set_connect_state(dtlssock->ssl_handle);
 
 	return 0;
 }
 
-/* Drive the DTLS handshake to completion. The socket is non-blocking, so the
- * loop waits for readability or for the next retransmission timeout, after
- * which OpenSSL resends the last flight. */
-static int php_openssl_dtls_handshake(php_stream *stream, php_openssl_dtls_data_t *dtlssock)
+/* The socket is non-blocking, so poll between flights and resend on the
+ * retransmission timeout. */
+static int php_openssl_dtls_handshake(php_stream *stream, php_openssl_dtls_data_t *dtlssock,
+		php_stream_xport_param *xparam)
 {
 	SSL *ssl = dtlssock->ssl_handle;
 
@@ -243,6 +265,7 @@ static int php_openssl_dtls_handshake(php_stream *stream, php_openssl_dtls_data_
 		if (n == 1) {
 			return 0;
 		}
+		int saved_errno = errno;
 
 		int events;
 		switch (SSL_get_error(ssl, n)) {
@@ -257,9 +280,14 @@ static int php_openssl_dtls_handshake(php_stream *stream, php_openssl_dtls_data_
 				unsigned long ecode = ERR_get_error();
 				if (ecode != 0) {
 					ERR_error_string_n(ecode, buf, sizeof(buf));
+				} else if (saved_errno != 0) {
+					/* SSL_ERROR_SYSCALL with an empty queue: report the syscall. */
+					snprintf(buf, sizeof(buf), "%s", strerror(saved_errno));
 				}
-				php_stream_warn(stream, ProtocolError, "DTLS handshake failed: %s",
-						buf[0] != '\0' ? buf : "unexpected error");
+				if (xparam->want_errortext) {
+					xparam->outputs.error_text = strpprintf(0, "DTLS handshake failed: %s",
+							buf[0] != '\0' ? buf : "unexpected error");
+				}
 				return -1;
 			}
 		}
@@ -269,22 +297,26 @@ static int php_openssl_dtls_handshake(php_stream *stream, php_openssl_dtls_data_
 				? (int)(tv.tv_sec * 1000 + tv.tv_usec / 1000)
 				: -1;
 
-		int ready = php_pollfd_for_ms(dtlssock->socket, events, timeout);
+		int ready = php_pollfd_for_ms(dtlssock->s.socket, events, timeout);
 		if (ready == 0) {
-			/* The retransmission timer fired: let OpenSSL resend the last flight. */
+			/* Timer fired: let OpenSSL resend the last flight. */
 			if (DTLSv1_handle_timeout(ssl) < 0) {
-				php_stream_warn(stream, ProtocolError, "DTLS handshake timed out");
+				if (xparam->want_errortext) {
+					xparam->outputs.error_text = ZSTR_INIT_LITERAL("DTLS handshake timed out", 0);
+				}
 				return -1;
 			}
 		} else if (ready < 0) {
-			php_stream_warn(stream, ProtocolError, "DTLS handshake failed while waiting for the socket");
+			if (xparam->want_errortext) {
+				xparam->outputs.error_text =
+						ZSTR_INIT_LITERAL("DTLS handshake failed while waiting for the socket", 0);
+			}
 			return -1;
 		}
 	}
 }
 
-/* Create the UDP socket, connect it to the peer, attach the DTLS objects and
- * run the handshake. */
+/* Connect the UDP socket and run the DTLS handshake. */
 static int php_openssl_dtls_connect(php_stream *stream, php_openssl_dtls_data_t *dtlssock,
 		php_stream_xport_param *xparam)
 {
@@ -297,7 +329,7 @@ static int php_openssl_dtls_connect(php_stream *stream, php_openssl_dtls_data_t 
 		return -1;
 	}
 
-	dtlssock->socket = php_network_connect_socket_to_host(host, (unsigned short)portno,
+	dtlssock->s.socket = php_network_connect_socket_to_host(host, (unsigned short)portno,
 			SOCK_DGRAM,
 			xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC,
 			xparam->inputs.timeout,
@@ -307,24 +339,23 @@ static int php_openssl_dtls_connect(php_stream *stream, php_openssl_dtls_data_t 
 	xparam->outputs.error_code = err;
 	efree(host);
 
-	if (dtlssock->socket == SOCK_ERR) {
+	if (dtlssock->s.socket == SOCK_ERR) {
 		return -1;
 	}
 
 	/* DTLS drives its own retransmission timers, so the socket must be
-	 * non-blocking for the handshake and datagram I/O loops. */
-	php_set_sock_blocking(dtlssock->socket, 0);
+	 * non-blocking for the handshake and I/O loops. */
+	php_set_sock_blocking(dtlssock->s.socket, 0);
 
 	if (php_openssl_dtls_setup_crypto(stream, dtlssock) != 0) {
 		return -1;
 	}
 
-	return php_openssl_dtls_handshake(stream, dtlssock);
+	return php_openssl_dtls_handshake(stream, dtlssock, xparam);
 }
 
-/* Expose the underlying fd so stream_select() and friends can wait on the
- * dtls:// stream. The raw fd/FILE* is never handed out otherwise, since DTLS is
- * always encrypted. */
+/* Expose the fd for stream_select(); the raw fd is not handed out otherwise,
+ * since DTLS is always encrypted. */
 static int php_openssl_dtls_sockop_cast(php_stream *stream, int castas, void **ret)
 {
 	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
@@ -332,8 +363,8 @@ static int php_openssl_dtls_sockop_cast(php_stream *stream, int castas, void **r
 	switch (castas) {
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 			if (ret != NULL) {
-				/* Data already decrypted and buffered in OpenSSL would not show up
-				 * in a select() on the socket, so surface it into the read buffer. */
+				/* Decrypted data buffered in OpenSSL is invisible to select(), so push
+				 * it into the read buffer. TODO: same idiom as xp_ssl.c. */
 				size_t pending;
 				if (stream->writepos == stream->readpos
 						&& dtlssock->ssl_handle != NULL
@@ -342,7 +373,7 @@ static int php_openssl_dtls_sockop_cast(php_stream *stream, int castas, void **r
 							? pending
 							: stream->chunk_size);
 				}
-				*(php_socket_t *)ret = dtlssock->socket;
+				*(php_socket_t *)ret = dtlssock->s.socket;
 			}
 			return SUCCESS;
 
@@ -351,6 +382,7 @@ static int php_openssl_dtls_sockop_cast(php_stream *stream, int castas, void **r
 	}
 }
 
+/* Handle transport and stream options. */
 static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam)
 {
 	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
@@ -372,16 +404,17 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 			}
 
 		case PHP_STREAM_OPTION_BLOCKING: {
-			/* The fd stays non-blocking for the DTLS timers; the stream-level
-			 * blocking mode is emulated with poll in the I/O loop. */
-			int old = dtlssock->is_blocked;
-			dtlssock->is_blocked = value;
+			/* The fd must stay non-blocking for the DTLS timers, so only track the
+			 * stream-level mode (the base handler would flip the fd too). */
+			int old = dtlssock->s.is_blocked;
+			dtlssock->s.is_blocked = value;
 			return old;
 		}
 
+		case PHP_STREAM_OPTION_META_DATA_API:
 		case PHP_STREAM_OPTION_READ_TIMEOUT:
-			dtlssock->timeout = *(struct timeval *)ptrparam;
-			return PHP_STREAM_OPTION_RETURN_OK;
+			/* The embedded base socket data is what these operate on. */
+			return php_stream_socket_ops.set_option(stream, option, value, ptrparam);
 
 		default:
 			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
@@ -398,6 +431,7 @@ static const php_stream_ops php_openssl_dtls_socket_ops = {
 	php_openssl_dtls_sockop_set_option,
 };
 
+/* Allocate a dtls:// stream. */
 php_stream *php_openssl_dtls_socket_factory(const char *proto, size_t protolen,
 		const char *resourcename, size_t resourcenamelen,
 		const char *persistent_id, int options, int flags,
@@ -409,10 +443,10 @@ php_stream *php_openssl_dtls_socket_factory(const char *proto, size_t protolen,
 
 	dtlssock = pemalloc(sizeof(*dtlssock), persistent_id ? 1 : 0);
 	memset(dtlssock, 0, sizeof(*dtlssock));
-	dtlssock->socket = -1;
-	dtlssock->is_blocked = true;
-	dtlssock->timeout.tv_sec = (time_t)FG(default_socket_timeout);
-	dtlssock->timeout.tv_usec = 0;
+	dtlssock->s.socket = -1;
+	dtlssock->s.is_blocked = true;
+	dtlssock->s.timeout.tv_sec = (time_t)FG(default_socket_timeout);
+	dtlssock->s.timeout.tv_usec = 0;
 
 	stream = php_stream_alloc_rel(&php_openssl_dtls_socket_ops, dtlssock, persistent_id, "r+");
 	if (stream == NULL) {

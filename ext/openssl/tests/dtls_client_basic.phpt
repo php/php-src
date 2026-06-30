@@ -73,6 +73,11 @@ if ($client !== false) {
     }
     var_dump(strpos($srvOut, 'PING') !== false);
 
+    // A read with nothing pending times out; the metadata reflects it.
+    stream_set_timeout($client, 0, 200000);
+    fread($client, 8192);
+    var_dump(stream_get_meta_data($client)['timed_out']);
+
     fclose($client);
 }
 
@@ -84,6 +89,7 @@ proc_close($server);
 @unlink($certFile);
 ?>
 --EXPECT--
+bool(true)
 bool(true)
 bool(true)
 bool(true)
