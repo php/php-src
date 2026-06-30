@@ -732,6 +732,10 @@ PHP_FUNCTION(imagetruecolortopalette)
 		RETURN_THROWS();
 	}
 
+	/* Preserve PHP's historical palette conversion behavior regardless of
+	 * whether bundled libgd was built with libimagequant support. */
+	gdImageTrueColorToPaletteSetMethod(im, GD_QUANT_JQUANT, 0);
+
 	if (gdImageTrueColorToPalette(im, dither, (int)ncolors)) {
 		RETURN_TRUE;
 	} else {
@@ -1889,6 +1893,8 @@ PHP_FUNCTION(imagegif)
 	gdImagePtr im;
 	gdIOCtx *ctx;
 	zval *to_zval = NULL;
+	int quantization_method;
+	int quantization_speed;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!", &imgind, gd_image_ce, &to_zval) == FAILURE) {
 		RETURN_THROWS();
@@ -1901,7 +1907,18 @@ PHP_FUNCTION(imagegif)
 		RETURN_FALSE;
 	}
 
+	quantization_method = im->paletteQuantizationMethod;
+	quantization_speed = im->paletteQuantizationSpeed;
+	if (im->trueColor) {
+		/* GIF conversion historically used JQUANT in PHP. Keep output stable
+		 * when bundled libgd has a build-dependent default such as LIQ. */
+		gdImageTrueColorToPaletteSetMethod(im, GD_QUANT_JQUANT, 0);
+	}
 	gdImageGifCtx(im, ctx);
+	if (im->trueColor) {
+		gdImageTrueColorToPaletteSetMethod(im, quantization_method,
+										 quantization_speed);
+	}
 
 	ctx->gd_free(ctx);
 

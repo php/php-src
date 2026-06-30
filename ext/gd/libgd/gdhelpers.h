@@ -21,6 +21,10 @@ extern char *gd_strtok_r(char *s, char *sep, char **state);
 #define gdPFree(ptr)		pefree(ptr, 1)
 #define gdPEstrdup(ptr)		pestrdup(ptr, 1)
 
+/* The extended version of gdReallocEx will free *ptr if the
+ * realloc fails. */
+void *gdReallocEx(void *ptr, size_t size);
+
 /* Returns nonzero if multiplying the two quantities will
 	result in integer overflow. Also returns nonzero if
 	either quantity is negative. By Phil Knirsch based on
@@ -49,4 +53,3 @@ int overflowMul3(int a, int b, int c);
 #define DPI2DPM(dpi)   (unsigned int)((dpi)/0.0254 + 0.5)
 
 #endif /* GDHELPERS_H */
-

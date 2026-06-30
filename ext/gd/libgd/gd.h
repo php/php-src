@@ -1263,6 +1263,43 @@ void gdImageAlphaBlending(gdImagePtr im, int alphaBlendingArg);
 void gdImageAntialias(gdImagePtr im, int antialias);
 void gdImageSaveAlpha(gdImagePtr im, int saveAlphaArg);
 
+
+/**
+ * Group: Color Quantization
+ *
+ * Enum: gdPaletteQuantizationMethod
+ *
+ * Constants:
+ *   GD_QUANT_DEFAULT  - GD_QUANT_LIQ if libimagequant is available,
+ *                       GD_QUANT_JQUANT otherwise.
+ *   GD_QUANT_JQUANT   - libjpeg's old median cut. Fast, but only uses 16-bit
+ *                       color.
+ *   GD_QUANT_NEUQUANT - NeuQuant - approximation using Kohonen neural network.
+ *   GD_QUANT_LIQ      - A combination of algorithms used in libimagequant
+ *                       aiming for the highest quality at cost of speed.
+ *
+ * Note that GD_QUANT_JQUANT does not retain the alpha channel, and
+ * GD_QUANT_NEUQUANT does not support dithering.
+ *
+ * See also:
+ *   - <gdImageTrueColorToPaletteSetMethod>
+ */
+enum gdPaletteQuantizationMethod {
+	GD_QUANT_DEFAULT = 0,
+	GD_QUANT_JQUANT = 1,
+	GD_QUANT_NEUQUANT = 2,
+	GD_QUANT_LIQ = 3
+};
+BGD_DECLARE(gdImagePtr)
+gdImageNeuQuant(gdImagePtr im, const int max_color, int sample_factor);
+
+BGD_DECLARE(int)
+gdImageTrueColorToPaletteSetMethod(gdImagePtr im, int method, int speed);
+
+BGD_DECLARE(void)
+gdImageTrueColorToPaletteSetQuality(gdImagePtr im, int min_quality,
+									int max_quality);
+
 enum gdPixelateMode {
 	GD_PIXELATE_UPPERLEFT,
 	GD_PIXELATE_AVERAGE

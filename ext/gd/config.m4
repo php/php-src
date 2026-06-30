@@ -69,6 +69,13 @@ PHP_ARG_WITH([heif],
   [no],
   [no])
 
+PHP_ARG_WITH([imagequant],
+  [for libimagequant],
+  [AS_HELP_STRING([--with-imagequant],
+    [GD: Enable libimagequant support (only for bundled libgd)])],
+  [no],
+  [no])
+
 dnl
 dnl Checks for the configure options
 dnl
@@ -178,6 +185,23 @@ AC_DEFUN([PHP_GD_JISX0208],[
       [Define to 1 if gd extension has JIS-mapped Japanese font support.])
     AC_DEFINE([JISX0208], [1],
       [Define to 1 if GD library has JIS-mapped Japanese font support.])
+  ])
+])
+
+AC_DEFUN([PHP_GD_IMAGEQUANT], [
+  AS_VAR_IF([PHP_IMAGEQUANT], [no],, [
+    AC_CHECK_HEADER([libimagequant.h], [],
+      [AC_MSG_ERROR([libimagequant header not found])])
+    PHP_CHECK_LIBRARY([imagequant], [liq_attr_create],
+      [
+        PHP_ADD_LIBRARY([imagequant], [], [GD_SHARED_LIBADD])
+        AC_DEFINE([HAVE_LIBIMAGEQUANT], [1],
+          [Define to 1 if you have the libimagequant library.])
+        AC_DEFINE([HAVE_GD_IMAGEQUANT], [1],
+          [Define to 1 if gd extension has libimagequant support.])
+      ],
+      [AC_MSG_ERROR([libimagequant library not found])],
+      [-limagequant])
   ])
 ])
 
@@ -312,6 +336,7 @@ if test "$PHP_GD" != "no"; then
       libgd/gd_color_map.c
       libgd/gd_heif.c
       libgd/gd_uhdr.c
+      libgd/gd_nnquant.c
     "])
 
     AC_DEFINE([HAVE_GD_BUNDLED], [1],
@@ -332,6 +357,7 @@ dnl Various checks for GD features
     PHP_GD_XPM
     PHP_GD_FREETYPE2
     PHP_GD_JISX0208
+    PHP_GD_IMAGEQUANT
 
     PHP_NEW_EXTENSION([gd],
       [gd.c $extra_sources],

@@ -74,6 +74,15 @@ if (PHP_GD != "no") {
 			}
 		}
 
+		if (PHP_IMAGEQUANT != "no") {
+			if (CHECK_LIB("imagequant.lib", "gd", PHP_GD) &&
+				CHECK_HEADER("libimagequant.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include")) {
+				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBIMAGEQUANT /D HAVE_GD_IMAGEQUANT");
+			} else {
+				WARNING("libimagequant not enabled; library and headers not found");
+			}
+		}
+
 		CHECK_LIB("User32.lib", "gd", PHP_GD);
 		CHECK_LIB("Gdi32.lib", "gd", PHP_GD);
 
@@ -85,7 +94,7 @@ if (PHP_GD != "no") {
 			gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c gd_xbm.c gd_security.c gd_transform.c \
 			gd_filter.c gd_rotate.c gd_color_match.c gd_webp.c gd_avif.c \
 			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c gd_qoi.c gd_jxl.c gd_color_map.c \ 
-			gd_heif.c gd_uhdr.c", "gd");
+			gd_heif.c gd_uhdr.c gd_nnquant.c", "gd");
 		AC_DEFINE('HAVE_GD_BUNDLED', 1, "Define to 1 if gd extension uses GD library bundled in PHP.");
 		AC_DEFINE('HAVE_GD_PNG', 1, "Define to 1 if gd extension has PNG support.");
 		AC_DEFINE('HAVE_LIBPNG', 1, "Define to 1 if you have the libpng library.");
