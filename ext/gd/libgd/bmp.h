@@ -1,4 +1,3 @@
-/* $Id$ */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -26,7 +25,10 @@ extern "C" {
 #define BMP_PALETTE_4 2
 
 #define BMP_WINDOWS_V3 40
+#define BMP_WINDOWS_V2 52
+#define BMP_WINDOWS_V3_ALPHA 56
 #define BMP_OS2_V1 12
+#define BMP_OS2_V2_SHORT 16
 #define BMP_OS2_V2 64
 #define BMP_WINDOWS_V4 108
 #define BMP_WINDOWS_V5 124
@@ -37,6 +39,7 @@ extern "C" {
 #define BMP_BI_BITFIELDS 3
 #define BMP_BI_JPEG 4
 #define BMP_BI_PNG 5
+#define BMP_BI_ALPHABITFIELDS 6
 
 #define BMP_RLE_COMMAND 0
 #define BMP_RLE_ENDOFLINE 0
@@ -100,11 +103,22 @@ extern "C" {
 		/* 32bit - The number of color indices used by the bitmap. */
 		signed int numcolors;
 
-		/* 32bit - The number of color indices important for displaying the bitmap. */
+	/* 32bit - The number of color indices important for displaying the bitmap.
+	 */
 		signed int mincolors;
+
+	/* 32bit - Color masks for BI_BITFIELDS and v4/v5 headers. */
+	unsigned int red_mask;
+	unsigned int green_mask;
+	unsigned int blue_mask;
+	unsigned int alpha_mask;
 
 	} bmp_info_t;
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #ifdef __cplusplus
