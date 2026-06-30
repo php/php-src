@@ -367,7 +367,7 @@ PHP_RSHUTDOWN_FUNCTION(gd)
 /* }}} */
 
 #ifdef HAVE_GD_BUNDLED
-#define PHP_GD_VERSION_STRING "bundled (2.1.0 compatible)"
+#define PHP_GD_VERSION_STRING "bundled (2.4.0 compatible)"
 #else
 # define PHP_GD_VERSION_STRING GD_VERSION_STRING
 #endif

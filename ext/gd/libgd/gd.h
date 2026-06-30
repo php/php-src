@@ -1418,14 +1418,14 @@ void gdImageFlipBoth(gdImagePtr im);
  * Group: Crop
  *
  * Constants: gdCropMode
- *  GD_CROP_DEFAULT - Default crop mode (4 corners or background)
+ *  GD_CROP_DEFAULT     - Same as GD_CROP_TRANSPARENT
  *  GD_CROP_TRANSPARENT - Crop using the transparent color
  *  GD_CROP_BLACK - Crop black borders
  *  GD_CROP_WHITE - Crop white borders
  *  GD_CROP_SIDES - Crop using colors of the 4 corners
  *
  * See also:
- *  <gdImageAutoCrop>
+ *   - <gdImageCropAuto>
  **/
 enum gdCropMode {
 	GD_CROP_DEFAULT = 0,
@@ -1436,9 +1436,11 @@ enum gdCropMode {
 	GD_CROP_THRESHOLD
 };
 
-gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop);
-gdImagePtr gdImageCropAuto(gdImagePtr im, const unsigned int mode);
-gdImagePtr gdImageCropThreshold(gdImagePtr im, const unsigned int color, const float threshold);
+BGD_DECLARE(gdImagePtr) gdImageCrop(gdImagePtr src, const gdRect *crop);
+BGD_DECLARE(gdImagePtr) gdImageCropAuto(gdImagePtr im, const unsigned int mode);
+BGD_DECLARE(gdImagePtr)
+gdImageCropThreshold(gdImagePtr im, const unsigned int color,
+					 const float threshold);
 
 BGD_DECLARE(int)
 gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id);
