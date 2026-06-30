@@ -54,8 +54,8 @@ typedef enum {
 
 typedef struct php_json_error_details {
 	php_json_error_code code;
-	size_t line;
-	size_t column;
+	uint64_t line;
+	uint64_t column;
 } php_json_error_details;
 
 static inline void php_json_error_details_clear(php_json_error_details *out) {

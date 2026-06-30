@@ -305,16 +305,16 @@ PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parse
 	return parser->scanner.errcode;
 }
 
-static size_t php_json_compute_error_column(const php_json_scanner *s)
+static uint64_t php_json_compute_error_column(const php_json_scanner *s)
 {
 	const php_json_ctype *p = s->line_start;
 	const php_json_ctype *end = s->token;
 	/* Count characters from the start of the line to the failing token,
 	 * folding UTF-8 continuation bytes into their leading byte. */
-	size_t column = 1;
+	uint64_t column = 1;
 
 	while (p < end) {
-		if ((*p & 0xC0) != 0x80) {
+		if ((*p & 0b11000000) != 0b10000000) {
 			column++;
 		}
 		p++;
