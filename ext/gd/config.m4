@@ -55,6 +55,13 @@ PHP_ARG_ENABLE([gd-jis-conv],
   [no],
   [no])
 
+PHP_ARG_WITH([heif],
+  [for libheif],
+  [AS_HELP_STRING([--with-heif],
+    [GD: Enable HEIF support (only for bundled libgd)])],
+  [no],
+  [no])
+
 dnl
 dnl Checks for the configure options
 dnl
@@ -77,6 +84,17 @@ AC_DEFUN([PHP_GD_AVIF], [
       [Define to 1 if you have the libavif library.])
     AC_DEFINE([HAVE_GD_AVIF], [1],
       [Define to 1 if gd extension has AVIF support.])
+  ])
+])
+AC_DEFUN([PHP_GD_HEIF], [
+  AS_VAR_IF([PHP_HEIF], [no],, [
+    PKG_CHECK_MODULES([HEIF], [libheif >= 1.7.0])
+    PHP_EVAL_LIBLINE([$HEIF_LIBS], [GD_SHARED_LIBADD])
+    PHP_EVAL_INCLINE([$HEIF_CFLAGS])
+    AC_DEFINE([HAVE_LIBHEIF], [1],
+      [Define to 1 if you have the libheif library.])
+    AC_DEFINE([HAVE_GD_HEIF], [1],
+      [Define to 1 if gd extension has HEIF support.])
   ])
 ])
 
@@ -196,6 +214,7 @@ AS_VAR_POPDEF([php_var])
 AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_GD_CHECK_FORMAT([Png],  [AC_DEFINE([HAVE_GD_PNG], [1])])
   PHP_GD_CHECK_FORMAT([Avif], [AC_DEFINE([HAVE_GD_AVIF], [1])])
+  PHP_GD_CHECK_FORMAT([Heif], [AC_DEFINE([HAVE_GD_HEIF], [1])])
   PHP_GD_CHECK_FORMAT([Webp], [AC_DEFINE([HAVE_GD_WEBP], [1])])
   PHP_GD_CHECK_FORMAT([Jpeg], [AC_DEFINE([HAVE_GD_JPG], [1])])
   PHP_GD_CHECK_FORMAT([Xpm],  [AC_DEFINE([HAVE_GD_XPM], [1])])
@@ -266,6 +285,7 @@ if test "$PHP_GD" != "no"; then
       libgd/gd_qoi.c
       libgd/gd_jxl.c
       libgd/gd_color_map.c
+      libgd/gd_heif.c
     "])
 
     AC_DEFINE([HAVE_GD_BUNDLED], [1],
@@ -279,6 +299,7 @@ dnl Various checks for GD features
     PHP_SETUP_ZLIB([GD_SHARED_LIBADD])
     PHP_GD_PNG
     PHP_GD_AVIF
+    PHP_GD_HEIF
     PHP_GD_WEBP
     PHP_GD_JPEG
     PHP_GD_XPM
