@@ -2873,12 +2873,8 @@ PHP_FUNCTION(array_fill_keys)
 #define RANGE_CHECK_LONG_INIT_ARRAY(start, end, _step) do { \
 		zend_ulong __calc_size = ((zend_ulong) start - end) / (_step); \
 		if (__calc_size > HT_MAX_SIZE - 1) { \
-			uint64_t __excess = __calc_size - (HT_MAX_SIZE - 1); \
 			zend_value_error(\
-				"The supplied range exceeds the maximum array size by %" PRIu64 " elements: " \
-				"start=" ZEND_LONG_FMT ", end=" ZEND_LONG_FMT ", step=" ZEND_LONG_FMT ". " \
-				"Calculated size: %" PRIu64 ". Maximum size: %" PRIu64 ".", \
-				__excess, end, start, (_step), (uint64_t)__calc_size + 1, (uint64_t)HT_MAX_SIZE); \
+				"The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT " step=" ZEND_LONG_FMT, end, start, (_step)); \
 			RETURN_THROWS(); \
 		} \
 		size = (uint32_t)(__calc_size + 1); \

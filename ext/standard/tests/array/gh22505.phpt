@@ -24,5 +24,5 @@ try {
 echo 'Done';
 ?>
 --EXPECT--
-The supplied range exceeds the maximum array size by 1 elements: start=0, end=1073741824, step=1. Calculated size: 1073741825. Maximum size: 1073741824.
+The supplied range exceeds the maximum array size: start=0 end=1073741824 step=1
 Done
