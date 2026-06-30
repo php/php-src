@@ -29,12 +29,12 @@ ut_run();
 ?>
 --EXPECTREGEX--
 string\([1-9][0-9]*\) "[A-Za-z ]*Calendar[A-Za-z ]*"
-bool(true)
+bool\(true\)
 string\([1-9][0-9]*\) "[A-Za-z ]*Gregorian[A-Za-z ]*"
-bool(true)
+bool\(true\)
 string\([1-9][0-9]*\) "[A-Za-z ]*Phonebook[A-Za-z ]*"
 string\([1-9][0-9]*\) "[A-Za-z ]*Calendar[A-Za-z ]*"
-bool(true)
+bool\(true\)
 string\([1-9][0-9]*\) "[A-Za-z ]*Gregorian[A-Za-z ]*"
-bool(true)
+bool\(true\)
 string\([1-9][0-9]*\) "[A-Za-z ]*Phonebook[A-Za-z ]*"
