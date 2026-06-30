@@ -2,7 +2,9 @@
 GH-22520: Lazy object OOM should not crash zend_lazy_object_del_info
 --SKIPIF--
 <?php
-if (getenv('SKIP_SLOW_TESTS')) die("skip slow test");
+if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
+if (getenv('SKIP_SLOW_TESTS')) die('skip slow test');
+if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --INI--
 memory_limit=2M
