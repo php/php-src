@@ -11,15 +11,15 @@ function ut_main()
     ut_loc_set_default('en');
 
     $keyword = ut_loc_get_display_keyword('calendar', 'en');
-    var_dump(is_string($keyword) && $keyword !== '');
+    var_dump($keyword);
     var_dump(ut_loc_get_display_keyword('calendar', null) === $keyword);
 
     $keywordValue = ut_loc_get_display_keyword_value('de_DE@calendar=gregorian', 'calendar', 'en');
-    var_dump(is_string($keywordValue) && $keywordValue !== '');
+    var_dump($keywordValue);
     var_dump(ut_loc_get_display_keyword_value('de_DE@calendar=gregorian', 'calendar', null) === $keywordValue);
 
     $collationValue = ut_loc_get_display_keyword_value('de_DE@collation=phonebook', 'collation', 'en');
-    var_dump(is_string($collationValue) && $collationValue !== '');
+    var_dump($collationValue);
 
     ut_loc_set_default($default);
 }
@@ -27,14 +27,14 @@ function ut_main()
 include_once 'ut_common.inc';
 ut_run();
 ?>
---EXPECT--
+--EXPECTREGEX--
+string\([1-9][0-9]*\) "[^"\n]+"
 bool(true)
+string\([1-9][0-9]*\) "[^"\n]+"
 bool(true)
+string\([1-9][0-9]*\) "[^"\n]+"
+string\([1-9][0-9]*\) "[^"\n]+"
 bool(true)
+string\([1-9][0-9]*\) "[^"\n]+"
 bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
+string\([1-9][0-9]*\) "[^"\n]+"
