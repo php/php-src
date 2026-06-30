@@ -530,6 +530,12 @@ ZEND_API bool zend_is_compiling(void) /* {{{ */
 }
 /* }}} */
 
+static bool zend_is_constructor(const zend_string *name) /* {{{ */
+{
+	return zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME);
+}
+/* }}} */
+
 static zend_always_inline uint32_t get_temporary_variable(void) /* {{{ */
 {
 	return (uint32_t)CG(active_op_array)->T++;
@@ -5549,12 +5555,6 @@ static void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type
 }
 /* }}} */
 
-static bool zend_is_constructor(const zend_string *name) /* {{{ */
-{
-	return zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME);
-}
-/* }}} */
-
 static bool is_func_accessible(const zend_function *fbc)
 {
 	if ((fbc->common.fn_flags & ZEND_ACC_PUBLIC) || fbc->common.scope == CG(active_class_entry)) {
@@ -5991,6 +5991,16 @@ static void zend_compile_return(const zend_ast *ast) /* {{{ */
 		zend_compile_var(&expr_node, expr_ast, BP_VAR_W, true);
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);
+	}
+
+	if (expr_ast) {
+		if (CG(active_class_entry) != NULL) {
+			if (zend_is_constructor(CG(active_op_array)->function_name)) {
+				zend_error(E_DEPRECATED, "Returning a value from a constructor is deprecated");
+			} else if (zend_string_equals_literal_ci(CG(active_op_array)->function_name, ZEND_DESTRUCTOR_FUNC_NAME)) {
+				zend_error(E_DEPRECATED, "Returning a value from a destructor is deprecated");
+			}
+		}
 	}
 
 	if ((CG(active_op_array)->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)
@@ -8843,6 +8853,14 @@ static zend_op_array *zend_compile_func_decl_ex(
 	zend_compile_params(params_ast, return_type_ast,
 		is_method && zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_LCNAME) ? IS_STRING : 0);
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		if (CG(active_class_entry) != NULL) {
+			if (zend_is_constructor(CG(active_op_array)->function_name)) {
+				zend_error(E_DEPRECATED, "Making a constructor a Generator is deprecated");
+			} else if (zend_string_equals_literal_ci(CG(active_op_array)->function_name, ZEND_DESTRUCTOR_FUNC_NAME)) {
+				zend_error(E_DEPRECATED, "Making a destructor a Generator is deprecated");
+			}
+		}
+
 		zend_mark_function_as_generator();
 		zend_emit_op(NULL, ZEND_GENERATOR_CREATE, NULL, NULL);
 	}

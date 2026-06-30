@@ -283,6 +283,10 @@ PHP 8.6 UPGRADE NOTES
 - Core:
   . Specifying a return type of array|null / ?array for __debugInfo() is now
     deprecated. Specify array instead.
+  . Returning values from __construct() and __destruct() is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecate-return-value-from-construct
+  . Making __construct() and __destruct() a Generator is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecate-return-value-from-construct
 
 - GMP
   . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
