@@ -322,6 +322,35 @@ static int php_openssl_dtls_connect(php_stream *stream, php_openssl_dtls_data_t 
 	return php_openssl_dtls_handshake(stream, dtlssock);
 }
 
+/* Expose the underlying fd so stream_select() and friends can wait on the
+ * dtls:// stream. The raw fd/FILE* is never handed out otherwise, since DTLS is
+ * always encrypted. */
+static int php_openssl_dtls_sockop_cast(php_stream *stream, int castas, void **ret)
+{
+	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
+
+	switch (castas) {
+		case PHP_STREAM_AS_FD_FOR_SELECT:
+			if (ret != NULL) {
+				/* Data already decrypted and buffered in OpenSSL would not show up
+				 * in a select() on the socket, so surface it into the read buffer. */
+				size_t pending;
+				if (stream->writepos == stream->readpos
+						&& dtlssock->ssl_handle != NULL
+						&& (pending = (size_t)SSL_pending(dtlssock->ssl_handle)) > 0) {
+					php_stream_fill_read_buffer(stream, pending < stream->chunk_size
+							? pending
+							: stream->chunk_size);
+				}
+				*(php_socket_t *)ret = dtlssock->socket;
+			}
+			return SUCCESS;
+
+		default:
+			return FAILURE;
+	}
+}
+
 static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam)
 {
 	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
@@ -364,7 +393,7 @@ static const php_stream_ops php_openssl_dtls_socket_ops = {
 	php_openssl_dtls_sockop_close, NULL, /* flush */
 	"udp_socket/dtls",
 	NULL, /* seek */
-	NULL, /* cast */
+	php_openssl_dtls_sockop_cast,
 	NULL, /* stat */
 	php_openssl_dtls_sockop_set_option,
 };
