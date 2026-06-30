@@ -12,8 +12,12 @@ extern "C" {
 #include "php_compat.h"
 
 /* Bundled libgd has no separate symbol visibility requirements. */
+#ifndef BGD_DECLARE
 #define BGD_DECLARE(rt) rt
+#endif
+#ifndef ARG_NOT_USED
 #define ARG_NOT_USED(arg) (void)(arg)
+#endif
 
 #define GD_MAJOR_VERSION 2
 #define GD_MINOR_VERSION 0
@@ -274,18 +278,27 @@ typedef struct gdImageMetadata gdImageMetadata;
 #define GD_METADATA_DEFAULT_MAX_PROFILE_SIZE ((size_t)64 * 1024 * 1024)
 #define GD_METADATA_DEFAULT_MAX_TOTAL_SIZE ((size_t)256 * 1024 * 1024)
 
-gdImageMetadata * gdImageMetadataCreate(void);
-void gdImageMetadataFree(gdImageMetadata *metadata);
-void gdImageMetadataReset(gdImageMetadata *metadata);
-int gdImageMetadataSetLimits(gdImageMetadata *metadata, size_t max_profile_size, size_t max_total_size);
-void gdImageMetadataGetLimits(const gdImageMetadata *metadata,
+BGD_DECLARE(gdImageMetadata *) gdImageMetadataCreate(void);
+BGD_DECLARE(void) gdImageMetadataFree(gdImageMetadata *metadata);
+BGD_DECLARE(void) gdImageMetadataReset(gdImageMetadata *metadata);
+BGD_DECLARE(int)
+gdImageMetadataSetLimits(gdImageMetadata *metadata, size_t max_profile_size,
+						 size_t max_total_size);
+BGD_DECLARE(void)
+gdImageMetadataGetLimits(const gdImageMetadata *metadata,
 						 size_t *max_profile_size, size_t *max_total_size);
-int gdImageMetadataSetProfile(gdImageMetadata *metadata, const char *key,
+BGD_DECLARE(int)
+gdImageMetadataSetProfile(gdImageMetadata *metadata, const char *key,
 						  const unsigned char *data, size_t size);
-const unsigned char * gdImageMetadataGetProfile(const gdImageMetadata *metadata, const char *key, size_t *size);
-int gdImageMetadataRemoveProfile(gdImageMetadata *metadata, const char *key);
-size_t gdImageMetadataGetProfileCount(const gdImageMetadata *metadata);
-int gdImageMetadataGetProfileAt(const gdImageMetadata *metadata, size_t index,
+BGD_DECLARE(const unsigned char *)
+gdImageMetadataGetProfile(const gdImageMetadata *metadata, const char *key,
+						  size_t *size);
+BGD_DECLARE(int)
+gdImageMetadataRemoveProfile(gdImageMetadata *metadata, const char *key);
+BGD_DECLARE(size_t)
+gdImageMetadataGetProfileCount(const gdImageMetadata *metadata);
+BGD_DECLARE(int)
+gdImageMetadataGetProfileAt(const gdImageMetadata *metadata, size_t index,
 							const char **key, const unsigned char **data,
 							size_t *size);
 
@@ -392,28 +405,45 @@ gdImagePtr gdImageCreateTrueColor(int sx, int sy);
 	nature of the file being loaded. Truecolor PNG
 	stays truecolor; palette PNG stays palette-based;
 	JPEG is always truecolor. */
-gdImagePtr gdImageCreateFromPng(FILE *fd);
-gdImagePtr gdImageCreateFromPngCtx(gdIOCtxPtr in);
-gdImagePtr
+BGD_DECLARE(gdImagePtr) gdImageCreateFromPng(FILE *fd);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromPngCtx(gdIOCtxPtr in);
+BGD_DECLARE(gdImagePtr)
 gdImageCreateFromPngCtxWithMetadata(gdIOCtxPtr in, gdImageMetadata *metadata);
-gdImagePtr gdImageCreateFromPngPtr(int size, void *data);
-gdImagePtr
+BGD_DECLARE(gdImagePtr) gdImageCreateFromPngPtr(int size, void *data);
+BGD_DECLARE(gdImagePtr)
 gdImageCreateFromPngPtrWithMetadata(int size, void *data, gdImageMetadata *metadata);
-gdImagePtr gdImageCreateFromQoi(FILE *fd);
-gdImagePtr gdImageCreateFromQoiCtx(gdIOCtxPtr in);
-gdImagePtr
+BGD_DECLARE(gdImagePtr) gdImageCreateFromQoi(FILE *fd);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromQoiCtx(gdIOCtxPtr in);
+BGD_DECLARE(gdImagePtr)
 gdImageCreateFromQoiCtxWithMetadata(gdIOCtxPtr in, gdImageMetadata *metadata);
-gdImagePtr gdImageCreateFromQoiPtr(int size, void *data);
-gdImagePtr
+BGD_DECLARE(gdImagePtr) gdImageCreateFromQoiPtr(int size, void *data);
+BGD_DECLARE(gdImagePtr)
 gdImageCreateFromQoiPtrWithMetadata(int size, void *data, gdImageMetadata *metadata);
 gdImagePtr gdImageCreateFromWBMP(FILE *inFile);
 gdImagePtr gdImageCreateFromWBMPCtx(gdIOCtx *infile);
-gdImagePtr gdImageCreateFromJpeg(FILE *infile);
-gdImagePtr gdImageCreateFromJpegEx(FILE *infile, int ignore_warning);
-gdImagePtr gdImageCreateFromJpegCtx(gdIOCtx *infile);
-gdImagePtr gdImageCreateFromJpegCtxEx(gdIOCtx *infile, int ignore_warning);
-gdImagePtr gdImageCreateFromJpegPtr (int size, void *data);
-gdImagePtr gdImageCreateFromJpegPtrEx (int size, void *data, int ignore_warning);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromJpeg(FILE *infile);
+BGD_DECLARE(gdImagePtr)
+gdImageCreateFromJpegEx(FILE *infile, int ignore_warning);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromJpegCtx(gdIOCtxPtr infile);
+BGD_DECLARE(gdImagePtr)
+gdImageCreateFromJpegCtxEx(gdIOCtxPtr infile, int ignore_warning);
+BGD_DECLARE(gdImagePtr)
+gdImageCreateFromJpegCtxWithMetadata(gdIOCtxPtr infile,
+									 gdImageMetadata *metadata);
+BGD_DECLARE(gdImagePtr)
+gdImageCreateFromJpegCtxExWithMetadata(gdIOCtxPtr infile, int ignore_warning,
+									   gdImageMetadata *metadata);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromJpegPtr(int size, void *data);
+BGD_DECLARE(gdImagePtr)
+gdImageCreateFromJpegPtrEx(int size, void *data, int ignore_warning);
+BGD_DECLARE(gdImagePtr)
+gdImageCreateFromJpegPtrWithMetadata(int size, void *data,
+									 gdImageMetadata *metadata);
+BGD_DECLARE(gdImagePtr)
+gdImageCreateFromJpegPtrExWithMetadata(int size, void *data,
+									   int ignore_warning,
+									   gdImageMetadata *metadata);
+BGD_DECLARE(const char *) gdJpegGetVersionString(void);
 gdImagePtr gdImageCreateFromWebp(FILE *fd);
 gdImagePtr gdImageCreateFromWebpCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromWebpPtr (int size, void *data);
@@ -431,8 +461,6 @@ gdImagePtr gdImageCreateFromBmpPtr (int size, void *data);
 gdImagePtr gdImageCreateFromBmpCtx (gdIOCtxPtr infile);
 
 const char * gdPngGetVersionString(void);
-
-const char * gdJpegGetVersionString(void);
 
 /* A custom data source. */
 /* The source function must return -1 on error, otherwise the number
@@ -641,45 +669,12 @@ int gdImageColorMatch(gdImagePtr im1, gdImagePtr im2);
 void gdImageColorTransparent(gdImagePtr im, int color);
 
 void gdImagePaletteCopy(gdImagePtr dst, gdImagePtr src);
-void gdImagePng(gdImagePtr im, FILE *out);
-void gdImagePngCtx(gdImagePtr im, gdIOCtx *out);
+BGD_DECLARE(void) gdImagePng(gdImagePtr im, FILE *out);
+BGD_DECLARE(void) gdImagePngCtx(gdImagePtr im, gdIOCtx *out);
 
-typedef struct gdImageMetadata gdImageMetadata;
-
-#define GD_META_OK 0
-#define GD_META_ERR_FORMAT -1
-#define GD_META_ERR_PARSE -2
-#define GD_META_ERR_NOMEM -3
-#define GD_META_ERR_LIMIT -4
-#define GD_META_ERR_UNSUPPORTED -5
-#define GD_META_ERR_INVALID -6
-
-#define GD_METADATA_DEFAULT_MAX_PROFILE_SIZE ((size_t)64 * 1024 * 1024)
-#define GD_METADATA_DEFAULT_MAX_TOTAL_SIZE ((size_t)256 * 1024 * 1024)
-
-gdImageMetadata *gdImageMetadataCreate(void);
-void gdImageMetadataFree(gdImageMetadata *metadata);
-void gdImageMetadataReset(gdImageMetadata *metadata);
-int gdImageMetadataSetLimits(gdImageMetadata *metadata,
-							 size_t max_profile_size, size_t max_total_size);
-void gdImageMetadataGetLimits(const gdImageMetadata *metadata,
-							  size_t *max_profile_size, size_t *max_total_size);
-int gdImageMetadataSetProfile(gdImageMetadata *metadata, const char *key,
-							  const unsigned char *data, size_t size);
-const unsigned char *gdImageMetadataGetProfile(
-	const gdImageMetadata *metadata, const char *key, size_t *size);
-int gdImageMetadataRemoveProfile(gdImageMetadata *metadata, const char *key);
-size_t gdImageMetadataGetProfileCount(const gdImageMetadata *metadata);
-int gdImageMetadataGetProfileAt(const gdImageMetadata *metadata, size_t index,
-								const char **key, const unsigned char **data,
-								size_t *size);
-
-gdImagePtr gdImageCreateFromPngCtxWithMetadata(gdIOCtxPtr in,
-											gdImageMetadata *metadata);
-gdImagePtr gdImageCreateFromPngPtrWithMetadata(int size, void *data,
-											gdImageMetadata *metadata);
-void gdImagePngCtxWithMetadata(gdImagePtr im, gdIOCtxPtr out,
-								 const gdImageMetadata *metadata);
+BGD_DECLARE(void)
+gdImagePngCtxWithMetadata(gdImagePtr im, gdIOCtxPtr out,
+						  const gdImageMetadata *metadata);
 
 #define GD_PNG_FILTER_AUTO 0U
 #define GD_PNG_FILTER_NONE (1U << 0)
@@ -707,20 +702,22 @@ typedef struct {
 	const gdImageMetadata *metadata;
 } gdPngWriteOptions;
 
-void gdPngWriteOptionsInit(gdPngWriteOptions *options);
-int gdImagePngWithOptions(gdImagePtr im, FILE *out, const gdPngWriteOptions *options);
-int gdImagePngCtxWithOptions(gdImagePtr im, gdIOCtxPtr out, const gdPngWriteOptions *options);
-void *gdImagePngPtrWithOptions(gdImagePtr im, int *size, const gdPngWriteOptions *options);
-void *gdImagePngPtrWithMetadata(gdImagePtr im, int *size, const gdImageMetadata *metadata);
-void *gdImagePngPtrExWithMetadata(gdImagePtr im, int *size, int level, const gdImageMetadata *metadata);
-void gdImagePngCtxExWithMetadata(gdImagePtr im, gdIOCtxPtr out, int level, const gdImageMetadata *metadata);
-int gdImageMetadataInjectPng(void **data, int *size, const gdImageMetadata *metadata);
+BGD_DECLARE(void) gdPngWriteOptionsInit(gdPngWriteOptions *options);
+BGD_DECLARE(int) gdImagePngWithOptions(gdImagePtr im, FILE *out, const gdPngWriteOptions *options);
+BGD_DECLARE(int) gdImagePngCtxWithOptions(gdImagePtr im, gdIOCtxPtr out, const gdPngWriteOptions *options);
+BGD_DECLARE(void *) gdImagePngPtrWithOptions(gdImagePtr im, int *size, const gdPngWriteOptions *options);
 
 enum { GD_QOI_SRGB = 0, GD_QOI_LINEAR = 1 };
 
-void gdImageQoiEx(gdImagePtr im, FILE *out, int colorspace);
-void gdImageQoiCtxEx(gdImagePtr im, gdIOCtxPtr out, int colorspace);
-void gdImageQoiCtxExWithMetadata(gdImagePtr im, gdIOCtxPtr out, int colorspace,
+BGD_DECLARE(void) gdImageQoi(gdImagePtr im, FILE *out);
+BGD_DECLARE(void) gdImageQoiCtx(gdImagePtr im, gdIOCtxPtr out);
+BGD_DECLARE(void)
+gdImageQoiCtxWithMetadata(gdImagePtr im, gdIOCtxPtr out,
+						  const gdImageMetadata *metadata);
+BGD_DECLARE(void) gdImageQoiEx(gdImagePtr im, FILE *out, int colorspace);
+BGD_DECLARE(void) gdImageQoiCtxEx(gdImagePtr im, gdIOCtxPtr out, int colorspace);
+BGD_DECLARE(void)
+gdImageQoiCtxExWithMetadata(gdImagePtr im, gdIOCtxPtr out, int colorspace,
 							const gdImageMetadata *metadata);
 
 
@@ -751,8 +748,11 @@ void *gdImageWBMPPtr(gdImagePtr im, int *size, int fg);
 
 /* 100 is highest quality (there is always a little loss with JPEG).
        0 is lowest. 10 is about the lowest useful setting. */
-void gdImageJpeg(gdImagePtr im, FILE *out, int quality);
-void gdImageJpegCtx(gdImagePtr im, gdIOCtx *out, int quality);
+BGD_DECLARE(void) gdImageJpeg(gdImagePtr im, FILE *out, int quality);
+BGD_DECLARE(void) gdImageJpegCtx(gdImagePtr im, gdIOCtxPtr out, int quality);
+BGD_DECLARE(void)
+gdImageJpegCtxWithMetadata(gdImagePtr im, gdIOCtxPtr out, int quality,
+						   const gdImageMetadata *metadata);
 
 /**
  * Group: WebP
@@ -770,7 +770,10 @@ void gdImageJpegCtx(gdImagePtr im, gdIOCtx *out, int quality);
 void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality);
 
 /* Best to free this memory with gdFree(), not free() */
-void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);
+BGD_DECLARE(void *) gdImageJpegPtr(gdImagePtr im, int *size, int quality);
+BGD_DECLARE(void *)
+gdImageJpegPtrWithMetadata(gdImagePtr im, int *size, int quality,
+						   const gdImageMetadata *metadata);
 
 gdImagePtr gdImageCreateFromGif(FILE *fd);
 gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr in);
@@ -798,17 +801,30 @@ void gdImageGd(gdImagePtr im, FILE *out);
 void gdImageGd2(gdImagePtr im, FILE *out, int cs, int fmt);
 
 /* Best to free this memory with gdFree(), not free() */
-void* gdImagePngPtr(gdImagePtr im, int *size);
+BGD_DECLARE(void *) gdImagePngPtr(gdImagePtr im, int *size);
 
-void * gdImageQoiPtr(gdImagePtr im, int *size);
-void * gdImageQoiPtrEx(gdImagePtr im, int *size, int colorspace);
-void * gdImageQoiPtrWithMetadata(gdImagePtr im, int *size, const gdImageMetadata *metadata);
-void * gdImageQoiPtrExWithMetadata(gdImagePtr im, int *size, int colorspace, const gdImageMetadata *metadata);
-int gdImageMetadataInjectQoi(void **data, int *size, const gdImageMetadata *metadata);
+BGD_DECLARE(void *) gdImagePngPtrEx(gdImagePtr im, int *size, int level);
+BGD_DECLARE(void *)
+gdImagePngPtrWithMetadata(gdImagePtr im, int *size,
+						  const gdImageMetadata *metadata);
+BGD_DECLARE(void *)
+gdImagePngPtrExWithMetadata(gdImagePtr im, int *size, int level,
+							const gdImageMetadata *metadata);
+BGD_DECLARE(void)
+gdImagePngCtxExWithMetadata(gdImagePtr im, gdIOCtxPtr out, int level,
+							const gdImageMetadata *metadata);
+BGD_DECLARE(int)
+gdImageMetadataInjectPng(void **data, int *size,
+						 const gdImageMetadata *metadata);
+BGD_DECLARE(void *) gdImageQoiPtr(gdImagePtr im, int *size);
+BGD_DECLARE(void *) gdImageQoiPtrEx(gdImagePtr im, int *size, int colorspace);
+BGD_DECLARE(void *) gdImageQoiPtrWithMetadata(gdImagePtr im, int *size, const gdImageMetadata *metadata);
+BGD_DECLARE(void *) gdImageQoiPtrExWithMetadata(gdImagePtr im, int *size, int colorspace, const gdImageMetadata *metadata);
+BGD_DECLARE(int) gdImageMetadataInjectQoi(void **data, int *size, const gdImageMetadata *metadata);
+BGD_DECLARE(void) gdImageQoiToSink(gdImagePtr im, gdSinkPtr out);
 
 /* Best to free this memory with gdFree(), not free() */
 void* gdImageGdPtr(gdImagePtr im, int *size);
-void *gdImagePngPtrEx(gdImagePtr im, int *size, int level);
 
 /* Best to free this memory with gdFree(), not free() */
 void* gdImageGd2Ptr(gdImagePtr im, int cs, int fmt, int *size);

@@ -203,7 +203,7 @@ static int _gdImageQoiCtx(gdImagePtr im, gdIOCtx *outfile, int colorspace) {
 	return result;
 }
 
-gdImagePtr gdImageCreateFromQoi(FILE *inFile) {
+BGD_DECLARE(gdImagePtr) gdImageCreateFromQoi(FILE *inFile) {
 	gdImagePtr im;
 	gdIOCtx *in = gdNewFileCtx(inFile);
 	if (in == NULL) {
@@ -214,18 +214,18 @@ gdImagePtr gdImageCreateFromQoi(FILE *inFile) {
 	return im;
 }
 
-gdImagePtr gdImageCreateFromQoiPtr(int size, void *data) {
+BGD_DECLARE(gdImagePtr) gdImageCreateFromQoiPtr(int size, void *data) {
 	return gdImageCreateFromQoiPtrWithMetadata(size, data, NULL);
 }
 
-gdImagePtr
+BGD_DECLARE(gdImagePtr)
 gdImageCreateFromQoiPtrWithMetadata(int size, void *data,
 									gdImageMetadata *metadata) {
 	ARG_NOT_USED(metadata);
 	return gdImageCreateFromQoiBytes(data, size);
 }
 
-gdImagePtr
+BGD_DECLARE(gdImagePtr)
 gdImageCreateFromQoiCtxWithMetadata(gdIOCtx *infile,
 									gdImageMetadata *metadata) {
 	void *data;
@@ -242,11 +242,11 @@ gdImageCreateFromQoiCtxWithMetadata(gdIOCtx *infile,
 	return im;
 }
 
-gdImagePtr gdImageCreateFromQoiCtx(gdIOCtx *infile) {
+BGD_DECLARE(gdImagePtr) gdImageCreateFromQoiCtx(gdIOCtx *infile) {
 	return gdImageCreateFromQoiCtxWithMetadata(infile, NULL);
 }
 
-gdImagePtr gdImageCreateFromQoiSource(gdSourcePtr inSource) {
+BGD_DECLARE(gdImagePtr) gdImageCreateFromQoiSource(gdSourcePtr inSource) {
 	gdImagePtr im;
 	gdIOCtx *in;
 	if (inSource == NULL) {
@@ -261,7 +261,7 @@ gdImagePtr gdImageCreateFromQoiSource(gdSourcePtr inSource) {
 	return im;
 }
 
-void gdImageQoiEx(gdImagePtr im, FILE *outFile, int colorspace) {
+BGD_DECLARE(void) gdImageQoiEx(gdImagePtr im, FILE *outFile, int colorspace) {
 	gdIOCtx *out = gdNewFileCtx(outFile);
 	if (out == NULL) {
 		return;
@@ -270,15 +270,15 @@ void gdImageQoiEx(gdImagePtr im, FILE *outFile, int colorspace) {
 	out->gd_free(out);
 }
 
-void gdImageQoi(gdImagePtr im, FILE *outFile) {
+BGD_DECLARE(void) gdImageQoi(gdImagePtr im, FILE *outFile) {
 	gdImageQoiEx(im, outFile, GD_QOI_SRGB);
 }
 
-void *gdImageQoiPtr(gdImagePtr im, int *size) {
+BGD_DECLARE(void *) gdImageQoiPtr(gdImagePtr im, int *size) {
 	return gdImageQoiPtrEx(im, size, GD_QOI_SRGB);
 }
 
-void * gdImageQoiPtrEx(gdImagePtr im, int *size, int colorspace) {
+BGD_DECLARE(void *) gdImageQoiPtrEx(gdImagePtr im, int *size, int colorspace) {
 	gdIOCtx *out;
 	void *rv = NULL;
 
@@ -300,20 +300,20 @@ void * gdImageQoiPtrEx(gdImagePtr im, int *size, int colorspace) {
 	return rv;
 }
 
-void *
+BGD_DECLARE(void *)
 gdImageQoiPtrWithMetadata(gdImagePtr im, int *size,
 						  const gdImageMetadata *metadata) {
 	return gdImageQoiPtrExWithMetadata(im, size, GD_QOI_SRGB, metadata);
 }
 
-void *
+BGD_DECLARE(void *)
 gdImageQoiPtrExWithMetadata(gdImagePtr im, int *size, int colorspace,
 							const gdImageMetadata *metadata) {
 	ARG_NOT_USED(metadata);
 	return gdImageQoiPtrEx(im, size, colorspace);
 }
 
-int
+BGD_DECLARE(int)
 gdImageMetadataInjectQoi(void **data, int *size,
 						 const gdImageMetadata *metadata) {
 	ARG_NOT_USED(data);
@@ -322,28 +322,29 @@ gdImageMetadataInjectQoi(void **data, int *size,
 	return GD_META_OK;
 }
 
-void gdImageQoiCtx(gdImagePtr im, gdIOCtx *outfile) {
+BGD_DECLARE(void) gdImageQoiCtx(gdImagePtr im, gdIOCtx *outfile) {
 	gdImageQoiCtxEx(im, outfile, GD_QOI_SRGB);
 }
 
-void gdImageQoiCtxWithMetadata(gdImagePtr im, gdIOCtx *outfile,
+BGD_DECLARE(void)
+gdImageQoiCtxWithMetadata(gdImagePtr im, gdIOCtx *outfile,
 						  const gdImageMetadata *metadata) {
 	gdImageQoiCtxExWithMetadata(im, outfile, GD_QOI_SRGB, metadata);
 }
 
-void
+BGD_DECLARE(void)
 gdImageQoiCtxEx(gdImagePtr im, gdIOCtx *outfile, int colorspace) {
 	_gdImageQoiCtx(im, outfile, colorspace);
 }
 
-void
+BGD_DECLARE(void)
 gdImageQoiCtxExWithMetadata(gdImagePtr im, gdIOCtx *outfile, int colorspace,
 							const gdImageMetadata *metadata) {
 	ARG_NOT_USED(metadata);
 	_gdImageQoiCtx(im, outfile, colorspace);
 }
 
-void gdImageQoiToSink(gdImagePtr im, gdSinkPtr outSink) {
+BGD_DECLARE(void) gdImageQoiToSink(gdImagePtr im, gdSinkPtr outSink) {
 	gdIOCtx *out;
 	if (outSink == NULL) {
 		return;
