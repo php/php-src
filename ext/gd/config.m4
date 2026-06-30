@@ -20,6 +20,13 @@ PHP_ARG_WITH([avif],
   [no],
   [no])
 
+PHP_ARG_WITH([uhdr],
+  [for libuhdr],
+  [AS_HELP_STRING([--with-uhdr],
+    [GD: Enable UltraHDR support (only for bundled libgd)])],
+  [no],
+  [no])
+
 PHP_ARG_WITH([webp],
   [for libwebp],
   [AS_HELP_STRING([--with-webp],
@@ -86,6 +93,7 @@ AC_DEFUN([PHP_GD_AVIF], [
       [Define to 1 if gd extension has AVIF support.])
   ])
 ])
+
 AC_DEFUN([PHP_GD_HEIF], [
   AS_VAR_IF([PHP_HEIF], [no],, [
     PKG_CHECK_MODULES([HEIF], [libheif >= 1.7.0])
@@ -95,6 +103,23 @@ AC_DEFUN([PHP_GD_HEIF], [
       [Define to 1 if you have the libheif library.])
     AC_DEFINE([HAVE_GD_HEIF], [1],
       [Define to 1 if gd extension has HEIF support.])
+  ])
+])
+
+AC_DEFUN([PHP_GD_UHDR], [
+  AS_VAR_IF([PHP_UHDR], [no],, [
+    PKG_CHECK_MODULES([UHDR], [libuhdr >= 1.4.0])
+    PHP_EVAL_LIBLINE([$UHDR_LIBS], [GD_SHARED_LIBADD])
+    PHP_EVAL_INCLINE([$UHDR_CFLAGS])
+
+    PKG_CHECK_VAR([UHDR_WRITE_XMP], [libuhdr], [UHDR_WRITE_XMP])
+    AS_VAR_IF([UHDR_WRITE_XMP], [], [],
+      [AC_MSG_ERROR([libuhdr was compiled with UHDR_WRITE_XMP enabled, but this extension requires it to be OFF.])])
+
+    AC_DEFINE([HAVE_LIBUHDR], [1],
+      [Define to 1 if you have the libuhdr library.])
+    AC_DEFINE([HAVE_GD_UHDR], [1],
+      [Define to 1 if gd extension has UltraHDR support.])
   ])
 ])
 
@@ -286,6 +311,7 @@ if test "$PHP_GD" != "no"; then
       libgd/gd_jxl.c
       libgd/gd_color_map.c
       libgd/gd_heif.c
+      libgd/gd_uhdr.c
     "])
 
     AC_DEFINE([HAVE_GD_BUNDLED], [1],
@@ -300,6 +326,7 @@ dnl Various checks for GD features
     PHP_GD_PNG
     PHP_GD_AVIF
     PHP_GD_HEIF
+    PHP_GD_UHDR
     PHP_GD_WEBP
     PHP_GD_JPEG
     PHP_GD_XPM

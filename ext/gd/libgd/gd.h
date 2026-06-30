@@ -157,14 +157,16 @@ typedef enum {
 	GD_TRIANGLE,
 	GD_WEIGHTED4,
 	GD_LINEAR,
-	GD_METHOD_COUNT = 22
+	GD_LANCZOS3,
+	GD_LANCZOS8,
+	GD_BLACKMAN_BESSEL,
+	GD_BLACKMAN_SINC,
+	GD_QUADRATIC_BSPLINE,
+	GD_CUBIC_SPLINE,
+	GD_COSINE,
+	GD_WELSH,
+	GD_METHOD_COUNT = 30
 } gdInterpolationMethod;
-
-/* define struct with name and func ptr and add it to gdImageStruct gdInterpolationMethod interpolation; */
-
-/* Interpolation function ptr */
-typedef double (* interpolation_method )(double, double);
-
 
 /**
  * Group: HEIF Coding Format
@@ -766,7 +768,15 @@ gdImagePtr gdImageCreateFromBmpPtr (int size, void *data);
 gdImagePtr gdImageCreateFromBmpCtx (gdIOCtxPtr infile);
 
 const char * gdPngGetVersionString(void);
+/* UltraHDR load API */
 
+BGD_DECLARE(gdUhdrImagePtr)
+gdUhdrImageCreateFromFile(const char *filename, int format, gdUhdrErrorPtr err);
+BGD_DECLARE(gdUhdrImagePtr)
+gdUhdrImageCreateFromCtx(gdIOCtxPtr ctx, int format, gdUhdrErrorPtr err);
+BGD_DECLARE(gdUhdrImagePtr)
+gdUhdrImageCreateFromPtr(int size, void *data, int format, gdUhdrErrorPtr err);
+BGD_DECLARE(void) gdUhdrImageDestroy(gdUhdrImagePtr im);
 /* A custom data source. */
 /* The source function must return -1 on error, otherwise the number
         of bytes fetched. 0 is EOF, not an error! */
@@ -1073,6 +1083,31 @@ void gdImagePngCtxEx(gdImagePtr im, gdIOCtx *out, int level);
 void gdImageWBMP(gdImagePtr image, int fg, FILE *out);
 void gdImageWBMPCtx(gdImagePtr image, int fg, gdIOCtx *out);
 
+BGD_DECLARE(int) gdUhdrIsAvailable(void);
+BGD_DECLARE(int) gdUhdrImageWidth(gdUhdrImagePtr im);
+BGD_DECLARE(int) gdUhdrImageHeight(gdUhdrImagePtr im);
+BGD_DECLARE(int) gdUhdrImageHasGainMap(gdUhdrImagePtr im);
+BGD_DECLARE(int)
+gdUhdrImageResize(gdUhdrImagePtr im, int width, int height, gdUhdrErrorPtr err);
+BGD_DECLARE(int)
+gdUhdrImageCrop(gdUhdrImagePtr im, int left, int top, int width, int height,
+				gdUhdrErrorPtr err);
+BGD_DECLARE(int)
+gdUhdrImageRotate(gdUhdrImagePtr im, int degrees, gdUhdrErrorPtr err);
+BGD_DECLARE(int)
+gdUhdrImageMirror(gdUhdrImagePtr im, int axis, gdUhdrErrorPtr err);
+BGD_DECLARE(int)
+gdUhdrImageFile(gdUhdrImagePtr im, const char *filename, int format,
+				int quality, gdUhdrErrorPtr err);
+BGD_DECLARE(int)
+gdUhdrImageCtx(gdUhdrImagePtr im, gdIOCtxPtr ctx, int format, int quality,
+			   gdUhdrErrorPtr err);
+BGD_DECLARE(void *)
+gdUhdrImageWritePtr(gdUhdrImagePtr im, int *size, int format, int quality,
+					gdUhdrErrorPtr err);
+BGD_DECLARE(gdImagePtr)
+gdUhdrImageGetSdr(gdUhdrImagePtr im, gdUhdrErrorPtr err);
+
 /* Guaranteed to correctly free memory returned
 	by the gdImage*Ptr functions */
 void gdFree(void *m);
@@ -1365,57 +1400,102 @@ gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop);
 gdImagePtr gdImageCropAuto(gdImagePtr im, const unsigned int mode);
 gdImagePtr gdImageCropThreshold(gdImagePtr im, const unsigned int color, const float threshold);
 
-int gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id);
-gdInterpolationMethod gdImageGetInterpolationMethod(gdImagePtr im);
+BGD_DECLARE(int)
+gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id);
+BGD_DECLARE(gdInterpolationMethod) gdImageGetInterpolationMethod(gdImagePtr im);
 
-gdImagePtr gdImageScale(const gdImagePtr src, const unsigned int new_width, const unsigned int new_height);
+BGD_DECLARE(gdImagePtr)
+gdImageScale(const gdImagePtr src, const unsigned int new_width,
+			 const unsigned int new_height);
 
-gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor);
+BGD_DECLARE(gdImagePtr)
+gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor);
 
 typedef enum {
 	GD_AFFINE_TRANSLATE = 0,
 	GD_AFFINE_SCALE,
 	GD_AFFINE_ROTATE,
 	GD_AFFINE_SHEAR_HORIZONTAL,
-	GD_AFFINE_SHEAR_VERTICAL,
+	GD_AFFINE_SHEAR_VERTICAL
 } gdAffineStandardMatrix;
 
-int gdAffineApplyToPointF (gdPointFPtr dst, const gdPointFPtr src, const double affine[6]);
-int gdAffineInvert (double dst[6], const double src[6]);
-int gdAffineFlip (double dst_affine[6], const double src_affine[6], const int flip_h, const int flip_v);
-int gdAffineConcat (double dst[6], const double m1[6], const double m2[6]);
+BGD_DECLARE(int)
+gdAffineApplyToPointF(gdPointFPtr dst, const gdPointFPtr src,
+					  const double affine[6]);
+BGD_DECLARE(int) gdAffineInvert(double dst[6], const double src[6]);
+BGD_DECLARE(int)
+gdAffineFlip(double dst_affine[6], const double src_affine[6], const int flip_h,
+			 const int flip_v);
+BGD_DECLARE(int)
+gdAffineConcat(double dst[6], const double m1[6], const double m2[6]);
 
-int gdAffineIdentity (double dst[6]);
-int gdAffineScale (double dst[6], const double scale_x, const double scale_y);
-int gdAffineRotate (double dst[6], const double angle);
-int gdAffineShearHorizontal (double dst[6], const double angle);
-int gdAffineShearVertical(double dst[6], const double angle);
-int gdAffineTranslate (double dst[6], const double offset_x, const double offset_y);
-double gdAffineExpansion (const double src[6]);
-int gdAffineRectilinear (const double src[6]);
-int gdAffineEqual (const double matrix1[6], const double matrix2[6]);
-int gdTransformAffineGetImage(gdImagePtr *dst, const gdImagePtr src, gdRectPtr src_area, const double affine[6]);
-int gdTransformAffineCopy(gdImagePtr dst, int dst_x, int dst_y, const gdImagePtr src, gdRectPtr src_region, const double affine[6]);
+BGD_DECLARE(int) gdAffineIdentity(double dst[6]);
+BGD_DECLARE(int)
+gdAffineScale(double dst[6], const double scale_x, const double scale_y);
+BGD_DECLARE(int) gdAffineRotate(double dst[6], const double angle);
+BGD_DECLARE(int) gdAffineShearHorizontal(double dst[6], const double angle);
+BGD_DECLARE(int) gdAffineShearVertical(double dst[6], const double angle);
+BGD_DECLARE(int)
+gdAffineTranslate(double dst[6], const double offset_x, const double offset_y);
+BGD_DECLARE(double) gdAffineExpansion(const double src[6]);
+BGD_DECLARE(int) gdAffineRectilinear(const double src[6]);
+BGD_DECLARE(int)
+gdAffineEqual(const double matrix1[6], const double matrix2[6]);
+BGD_DECLARE(int)
+gdTransformAffineGetImage(gdImagePtr *dst, const gdImagePtr src,
+						  gdRectPtr src_area, const double affine[6]);
+BGD_DECLARE(int)
+gdTransformAffineCopy(gdImagePtr dst, int dst_x, int dst_y,
+					  const gdImagePtr src, gdRectPtr src_region,
+					  const double affine[6]);
 /*
 gdTransformAffineCopy(gdImagePtr dst, int x0, int y0, int x1, int y1,
 			const gdImagePtr src, int src_width, int src_height,
 			const double affine[6]);
 */
-int gdTransformAffineBoundingBox(gdRectPtr src, const double affine[6], gdRectPtr bbox);
+BGD_DECLARE(int)
+gdTransformAffineBoundingBox(gdRectPtr src, const double affine[6],
+							 gdRectPtr bbox);
 
-
-#define GD_CMP_IMAGE		1	/* Actual image IS different */
-#define GD_CMP_NUM_COLORS	2	/* Number of Colours in palette differ */
-#define GD_CMP_COLOR		4	/* Image colours differ */
-#define GD_CMP_SIZE_X		8	/* Image width differs */
-#define GD_CMP_SIZE_Y		16	/* Image heights differ */
-#define GD_CMP_TRANSPARENT	32	/* Transparent colour */
-#define GD_CMP_BACKGROUND	64	/* Background colour */
-#define GD_CMP_INTERLACE	128	/* Interlaced setting */
-#define GD_CMP_TRUECOLOR	256	/* Truecolor vs palette differs */
+/**
+ * Group: Image Comparison
+ *
+ * Constants:
+ *   GD_CMP_IMAGE       - Actual image IS different
+ *   GD_CMP_NUM_COLORS  - Number of colors in pallette differ
+ *   GD_CMP_COLOR       - Image colors differ
+ *   GD_CMP_SIZE_X      - Image width differs
+ *   GD_CMP_SIZE_Y      - Image heights differ
+ *   GD_CMP_TRANSPARENT - Transparent color differs
+ *   GD_CMP_BACKGROUND  - Background color differs
+ *   GD_CMP_INTERLACE   - Interlaced setting differs
+ *   GD_CMP_TRUECOLOR   - Truecolor vs palette differs
+ *
+ * See also:
+ *   - <gdImageCompare>
+ */
+#define GD_CMP_IMAGE 1
+#define GD_CMP_NUM_COLORS 2
+#define GD_CMP_COLOR 4
+#define GD_CMP_SIZE_X 8
+#define GD_CMP_SIZE_Y 16
+#define GD_CMP_TRANSPARENT 32
+#define GD_CMP_BACKGROUND 64
+#define GD_CMP_INTERLACE 128
+#define GD_CMP_TRUECOLOR 256
 
 /* resolution affects ttf font rendering, particularly hinting */
 #define GD_RESOLUTION           96      /* pixels per inch */
+
+/* Version information functions */
+BGD_DECLARE(int) gdMajorVersion(void);
+BGD_DECLARE(int) gdMinorVersion(void);
+BGD_DECLARE(int) gdReleaseVersion(void);
+BGD_DECLARE(const char *) gdExtraVersion(void);
+BGD_DECLARE(const char *) gdVersionString(void);
+
+/* newfangled special effects */
+#include "gdfx.h"
 
 #ifdef __cplusplus
 }
