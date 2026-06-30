@@ -19,7 +19,7 @@ extern void gdImageGd (gdImagePtr im, FILE * out);
 /* */
 /* Shared code to read color tables from gd file. */
 /* */
-int _gdGetColors (gdIOCtx * in, gdImagePtr im, int gd2xFlag)
+BGD_DECLARE(int) _gdGetColors (gdIOCtx * in, gdImagePtr im, int gd2xFlag)
 {
 	int i;
 	if (gd2xFlag) {
@@ -139,7 +139,7 @@ fail1:
 	return 0;
 }
 
-gdImagePtr gdImageCreateFromGd (FILE * inFile)
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd (FILE * inFile)
 {
 	gdImagePtr im;
 	gdIOCtx *in;
@@ -152,7 +152,7 @@ gdImagePtr gdImageCreateFromGd (FILE * inFile)
 	return im;
 }
 
-gdImagePtr gdImageCreateFromGdPtr (int size, void *data)
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGdPtr (int size, void *data)
 {
 	gdImagePtr im;
 	gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
@@ -162,7 +162,7 @@ gdImagePtr gdImageCreateFromGdPtr (int size, void *data)
 	return im;
 }
 
-gdImagePtr gdImageCreateFromGdCtx (gdIOCtxPtr in)
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGdCtx (gdIOCtxPtr in)
 {
 	int sx, sy;
 	int x, y;
@@ -262,14 +262,14 @@ static void _gdImageGd (gdImagePtr im, gdIOCtx * out)
 	}
 }
 
-void gdImageGd (gdImagePtr im, FILE * outFile)
+BGD_DECLARE(void) gdImageGd (gdImagePtr im, FILE * outFile)
 {
 	gdIOCtx *out = gdNewFileCtx(outFile);
 	_gdImageGd(im, out);
 	out->gd_free(out);
 }
 
-void *gdImageGdPtr (gdImagePtr im, int *size)
+BGD_DECLARE(void *) gdImageGdPtr (gdImagePtr im, int *size)
 {
 	void *rv;
 	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);

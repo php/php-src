@@ -43,11 +43,9 @@ extern "C" {
  * documentation. */
 
 /* stdio is needed for file I/O. */
-#include <stdio.h>
 #include "gd_io.h"
-
-/* va_list needed in gdErrorMethod */
 #include <stdarg.h>
+#include <stdio.h>
 
 /* The maximum number of palette entries in palette-based images.
 	In the wonderful new world of gd 2.0, you can of course have
@@ -64,7 +62,7 @@ extern "C" {
 	pixels are represented by integers, which
 	must be 32 bits wide or more.
 
-	True colors are repsented as follows:
+	True colors are represented as follows:
 
 	ARGB
 
@@ -82,10 +80,85 @@ extern "C" {
 #define gdRedMax 255
 #define gdGreenMax 255
 #define gdBlueMax 255
+
+/**
+ * Group: Color Decomposition
+ */
+
+/**
+ * Macro: gdTrueColorGetAlpha
+ *
+ * Gets the alpha channel value
+ *
+ * Parameters:
+ *   c - The color
+ *
+ * See also:
+ *   - <gdTrueColorAlpha>
+ */
 #define gdTrueColorGetAlpha(c) (((c) & 0x7F000000) >> 24)
+
+/**
+ * Macro: gdTrueColorGetRed
+ *
+ * Gets the red channel value
+ *
+ * Parameters:
+ *   c - The color
+ *
+ * See also:
+ *   - <gdTrueColorAlpha>
+ */
 #define gdTrueColorGetRed(c) (((c) & 0xFF0000) >> 16)
+
+/**
+ * Macro: gdTrueColorGetGreen
+ *
+ * Gets the green channel value
+ *
+ * Parameters:
+ *   c - The color
+ *
+ * See also:
+ *   - <gdTrueColorAlpha>
+ */
 #define gdTrueColorGetGreen(c) (((c) & 0x00FF00) >> 8)
+
+/**
+ * Macro: gdTrueColorGetBlue
+ *
+ * Gets the blue channel value
+ *
+ * Parameters:
+ *   c - The color
+ *
+ * See also:
+ *   - <gdTrueColorAlpha>
+ */
 #define gdTrueColorGetBlue(c) ((c) & 0x0000FF)
+
+/**
+ * Group: Effects
+ *
+ * The layering effect
+ *
+ * When pixels are drawn the new colors are "mixed" with the background
+ * depending on the effect.
+ *
+ * Note that the effect does not apply to palette images, where pixels
+ * are always replaced.
+ *
+ * Modes:
+ *   gdEffectReplace    - replace pixels
+ *   gdEffectAlphaBlend - blend pixels, see <gdAlphaBlend>
+ *   gdEffectNormal     - default mode; same as gdEffectAlphaBlend
+ *   gdEffectOverlay    - overlay pixels, see <gdLayerOverlay>
+ *   gdEffectMultiply   - overlay pixels with multiply effect, see
+ *                        <gdLayerMultiply>
+ *
+ * See also:
+ *   - <gdImageAlphaBlending>
+ */
 #define gdEffectReplace 0
 #define gdEffectAlphaBlend 1
 #define gdEffectNormal 2
@@ -96,46 +169,50 @@ extern "C" {
 #define GD_FALSE 0
 
 #define GD_EPSILON 1e-6
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 /* This function accepts truecolor pixel values only. The
 	source color is composited with the destination color
 	based on the alpha channel value of the source color.
 	The resulting color is opaque. */
 
-int gdAlphaBlend(int dest, int src);
-int gdLayerOverlay(int dst, int src);
-int gdLayerMultiply(int dest, int src);
+BGD_DECLARE(int) gdAlphaBlend(int dest, int src);
+BGD_DECLARE(int) gdLayerOverlay(int dest, int src);
+BGD_DECLARE(int) gdLayerMultiply(int dest, int src);
 
 /**
  * Group: Transform
  *
  * Constants: gdInterpolationMethod
-
- *  GD_BELL				 - Bell
+ *
+ *  GD_BELL			 - Bell
  *  GD_BESSEL			 - Bessel
- *  GD_BILINEAR_FIXED 	 - fixed point bilinear
+ *  GD_BILINEAR_FIXED		 - compatibility alias for bilinear
  *  GD_BICUBIC 			 - Bicubic
- *  GD_BICUBIC_FIXED 	 - fixed point bicubic integer
+ *  GD_BICUBIC_FIXED		 - compatibility alias for bicubic
  *  GD_BLACKMAN			 - Blackman
- *  GD_BOX				 - Box
+ *  GD_BOX			 - Box
  *  GD_BSPLINE			 - BSpline
  *  GD_CATMULLROM		 - Catmullrom
  *  GD_GAUSSIAN			 - Gaussian
- *  GD_GENERALIZED_CUBIC - Generalized cubic
+ *  GD_GENERALIZED_CUBIC	 - Generalized cubic
  *  GD_HERMITE			 - Hermite
  *  GD_HAMMING			 - Hamming
  *  GD_HANNING			 - Hannig
  *  GD_MITCHELL			 - Mitchell
- *  GD_NEAREST_NEIGHBOUR - Nearest neighbour interpolation
+ *  GD_NEAREST_NEIGHBOUR	 - Nearest neighbour interpolation
  *  GD_POWER			 - Power
  *  GD_QUADRATIC		 - Quadratic
- *  GD_SINC				 - Sinc
+ *  GD_SINC			 - Sinc
  *  GD_TRIANGLE			 - Triangle
  *  GD_WEIGHTED4		 - 4 pixels weighted bilinear interpolation
+ *  GD_LINEAR            - bilinear interpolation
  *
  * See also:
- *  <gdSetInterpolationMethod>
- **/
+ *  - <gdImageSetInterpolationMethod>
+ */
 typedef enum {
 	GD_DEFAULT          = 0,
 	GD_BELL,
@@ -486,12 +563,50 @@ gdImageMetadataGetProfileAt(const gdImageMetadata *metadata, size_t index,
  * See also:
  *  <gdImageCreate>, <gdImageCreateTrueColor>,
  **/
-typedef struct
-{
+typedef struct {
 	double x, y;
-}
-gdPointF, *gdPointFPtr;
+} gdPointF, *gdPointFPtr;
 
+/*
+  Group: Types
+
+  typedef: gdFont
+
+  typedef: gdFontPtr
+
+  A font structure, containing the bitmaps of all characters in a
+  font.  Used to declare the characteristics of a font. Text-output
+  functions expect these as their second argument, following the
+  <gdImagePtr> argument.  <gdFontGetSmall> and <gdFontGetLarge> both
+  return one.
+
+  You can provide your own font data by providing such a structure and
+  the associated pixel array. You can determine the width and height
+  of a single character in a font by examining the w and h members of
+  the structure. If you will not be creating your own fonts, you will
+  not need to concern yourself with the rest of the components of this
+  structure.
+
+  Please see the files gdfontl.c and gdfontl.h for an example of
+  the proper declaration of this structure.
+
+  > typedef struct {
+  >   // # of characters in font
+  >   int nchars;
+  >   // First character is numbered... (usually 32 = space)
+  >   int offset;
+  >   // Character width and height
+  >   int w;
+  >   int h;
+  >   // Font data; array of characters, one row after another.
+  >   // Easily included in code, also easily loaded from
+  >   // data files.
+  >   char *data;
+  > } gdFont;
+
+  gdFontPtr is a pointer to gdFont.
+
+*/
 typedef struct {
 	/* # of characters in font */
 	int nchars;
@@ -511,39 +626,41 @@ typedef gdFont *gdFontPtr;
 
 typedef void(*gdErrorMethod)(int, const char *, va_list);
 
-void gdSetErrorMethod(gdErrorMethod);
-void gdClearErrorMethod(void);
-
-/**
- * Group: Types
- *
- * typedef: gdRect
- *  Defines a rectilinear region.
- *
- *  x - left position
- *  y - right position
- *  width - Rectangle width
- *  height - Rectangle height
- *
- * typedef: gdRectPtr
- *  Pointer to a <gdRect>
- *
- * See also:
- *  <gdSetInterpolationMethod>
- **/
-typedef struct
-{
-	int x, y;
-	int width, height;
-}
-gdRect, *gdRectPtr;
+BGD_DECLARE(void) gdSetErrorMethod(gdErrorMethod);
+BGD_DECLARE(void) gdClearErrorMethod(void);
 
 /* For backwards compatibility only. Use gdImageSetStyle()
 	for MUCH more flexible line drawing. Also see
 	gdImageSetBrush(). */
 #define gdDashSize 4
 
-/* Special colors. */
+/**
+ * Group: Colors
+ *
+ * Colors are always of type int which is supposed to be at least 32 bit large.
+ *
+ * Kinds of colors:
+ *   true colors     - ARGB values where the alpha channel is stored as most
+ *                     significant, and the blue channel as least significant
+ *                     byte. Note that the alpha channel only uses the 7 least
+ *                     significant bits.
+ *                     Don't rely on the internal representation, though, and
+ *                     use <gdTrueColorAlpha> to compose a truecolor value, and
+ *                     <gdTrueColorGetAlpha>, <gdTrueColorGetRed>,
+ *                     <gdTrueColorGetGreen> and <gdTrueColorGetBlue> to access
+ *                     the respective channels.
+ *   palette indexes - The index of a color palette entry (0-255).
+ *   special colors  - As listed in the following section.
+ *
+ * Constants: Special Colors
+ *   gdStyled        - use the current style, see <gdImageSetStyle>
+ *   gdBrushed       - use the current brush, see <gdImageSetBrush>
+ *   gdStyledBrushed - use the current style and brush
+ *   gdTiled         - use the current tile, see <gdImageSetTile>
+ *   gdTransparent   - indicate transparency, what is not the same as the
+ *                     transparent color index; used for lines only
+ *   gdAntiAliased   - draw anti aliased
+ */
 
 #define gdStyled (-2)
 #define gdBrushed (-3)
@@ -559,13 +676,13 @@ gdRect, *gdRectPtr;
 /* Functions to manipulate images. */
 
 /* Creates a palette-based image (up to 256 colors). */
-gdImagePtr gdImageCreate(int sx, int sy);
+BGD_DECLARE(gdImagePtr) gdImageCreate(int sx, int sy);
 
 /* An alternate name for the above (2.0). */
 #define gdImageCreatePalette gdImageCreate
 
 /* Creates a truecolor image (millions of colors). */
-gdImagePtr gdImageCreateTrueColor(int sx, int sy);
+BGD_DECLARE(gdImagePtr) gdImageCreateTrueColor(int sx, int sy);
 
 /* Creates an image from various file types. These functions
 	return a palette or truecolor image based on the
@@ -680,10 +797,6 @@ gdWebpWriteAddImage(gdWebpWritePtr webp, gdImagePtr image, int durationMs);
 BGD_DECLARE(void) gdWebpWriteClose(gdWebpWritePtr webp);
 BGD_DECLARE(void *) gdWebpWritePtrFinish(gdWebpWritePtr webp, int *size);
 
-BGD_DECLARE(gdImagePtr) gdImageCreateFromTga(FILE *fp);
-BGD_DECLARE(gdImagePtr) gdImageCreateFromTgaCtx(gdIOCtxPtr ctx);
-BGD_DECLARE(gdImagePtr) gdImageCreateFromTgaPtr(int size, void *data);
-
 BGD_DECLARE(gdImagePtr) gdImageCreateFromJxl(FILE *inFile);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromJxlPtr(int size, void *data);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromJxlCtx(gdIOCtxPtr infile);
@@ -766,6 +879,12 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromAvif(FILE *inFile);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromAvifPtr(int size, void *data);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromAvifCtx(gdIOCtxPtr infile);
 
+
+BGD_DECLARE(gdImagePtr) gdImageCreateFromTga(FILE *fp);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromTgaCtx(gdIOCtxPtr ctx);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromTgaPtr(int size, void *data);
+
+
 gdImagePtr gdImageCreateFromBmp (FILE * inFile);
 gdImagePtr gdImageCreateFromBmpPtr (int size, void *data);
 gdImagePtr gdImageCreateFromBmpCtx (gdIOCtxPtr infile);
@@ -785,15 +904,48 @@ BGD_DECLARE(void) gdUhdrImageDestroy(gdUhdrImagePtr im);
         of bytes fetched. 0 is EOF, not an error! */
 /* context will be passed to your source function. */
 
+/*
+  Group: Types
+
+  typedef: gdSource
+
+  typedef: gdSourcePtr
+
+	*Note:* This interface is *obsolete* and kept only for
+	*compatibility.  Use <gdIOCtx> instead.
+
+	Represents a source from which a PNG can be read. Programmers who
+	do not wish to read PNGs from a file can provide their own
+	alternate input mechanism, using the <gdImageCreateFromPngSource>
+	function. See the documentation of that function for an example of
+	the proper use of this type.
+
+	> typedef struct {
+	>         int (*source) (void *context, char *buffer, int len);
+	>         void *context;
+	> } gdSource, *gdSourcePtr;
+
+	The source function must return -1 on error, otherwise the number
+	of bytes fetched. 0 is EOF, not an error!
+
+   'context' will be passed to your source function.
+
+*/
 typedef struct {
         int (*source) (void *context, char *buffer, int len);
         void *context;
 } gdSource, *gdSourcePtr;
 
-gdImagePtr gdImageCreateFromPngSource(gdSourcePtr in);
+/* Deprecated in favor of gdImageCreateFromPngCtx */
+BGD_DECLARE(gdImagePtr) gdImageCreateFromPngSource(gdSourcePtr in);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromQoiSource(gdSourcePtr in);
 
-gdImagePtr gdImageCreateFromGd(FILE *in);
-gdImagePtr gdImageCreateFromGdCtx(gdIOCtxPtr in);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd(FILE *in);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGdCtx(gdIOCtxPtr in);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGdPtr(int size, void *data);
+/* Best to free this memory with gdFree(), not free() */
+BGD_DECLARE(void *) gdImageGdPtr(gdImagePtr im, int *size);
+BGD_DECLARE(void) gdImageGd(gdImagePtr im, FILE *out);
 
 gdImagePtr gdImageCreateFromGd2(FILE *in);
 gdImagePtr gdImageCreateFromGd2Ctx(gdIOCtxPtr in);
@@ -807,187 +959,6 @@ void gdImageXbmCtx(gdImagePtr image, char* file_name, int fg, gdIOCtx * out);
 /* NOTE: filename, not FILE */
 BGD_DECLARE(gdImagePtr) gdImageCreateFromXpm(char *filename);
 
-void gdImageDestroy(gdImagePtr im);
-
-/* Replaces or blends with the background depending on the
-	most recent call to gdImageAlphaBlending and the
-	alpha channel value of 'color'; default is to overwrite.
-	Tiling and line styling are also implemented
-	here. All other gd drawing functions pass through this call,
-	allowing for many useful effects. */
-
-void gdImageSetPixel(gdImagePtr im, int x, int y, int color);
-
-int gdImageGetTrueColorPixel (gdImagePtr im, int x, int y);
-int gdImageGetPixel(gdImagePtr im, int x, int y);
-
-void gdImageAABlend(gdImagePtr im);
-
-void gdImageLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
-void gdImageAALine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
-
-/* For backwards compatibility only. Use gdImageSetStyle()
-	for much more flexible line drawing. */
-void gdImageDashedLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
-/* Corners specified (not width and height). Upper left first, lower right
- 	second. */
-void gdImageRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
-/* Solid bar. Upper left corner first, lower right corner second. */
-void gdImageFilledRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
-void gdImageSetClip(gdImagePtr im, int x1, int y1, int x2, int y2);
-void gdImageGetClip(gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P);
-void gdImageSetResolution(gdImagePtr im, const unsigned int res_x, const unsigned int res_y);
-void gdImageChar(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
-void gdImageCharUp(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
-void gdImageString(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color);
-void gdImageStringUp(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color);
-void gdImageString16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color);
-void gdImageStringUp16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color);
-
-/*
- * The following functions are required to be called prior to the
- * use of any sort of threads in a module load / shutdown function
- * respectively.
- */
-void gdFontCacheMutexSetup(void);
-void gdFontCacheMutexShutdown(void);
-
-/* 2.0.16: for thread-safe use of gdImageStringFT and friends,
- * call this before allowing any thread to call gdImageStringFT.
- * Otherwise it is invoked by the first thread to invoke
- * gdImageStringFT, with a very small but real risk of a race condition.
- * Return 0 on success, nonzero on failure to initialize freetype.
- */
-int gdFontCacheSetup(void);
-
-/* Optional: clean up after application is done using fonts in gdImageStringFT(). */
-void gdFontCacheShutdown(void);
-
-/* Calls gdImageStringFT. Provided for backwards compatibility only. */
-char *gdImageStringTTF(gdImage *im, int *brect, int fg, char *fontlist,
-                double ptsize, double angle, int x, int y, char *string);
-
-/* FreeType 2 text output */
-char *gdImageStringFT(gdImage *im, int *brect, int fg, char *fontlist,
-                double ptsize, double angle, int x, int y, char *string);
-
-typedef struct {
-	double linespacing;	/* fine tune line spacing for '\n' */
-	int flags;		/* Logical OR of gdFTEX_ values */
-	int charmap;		/* TBB: 2.0.12: may be gdFTEX_Unicode,
-				   gdFTEX_Shift_JIS, gdFTEX_Big5 or gdFTEX_MacRoman;
-				   when not specified, maps are searched
-				   for in the above order. */
-	int hdpi;
-	int vdpi;
-}
- gdFTStringExtra, *gdFTStringExtraPtr;
-
-#define gdFTEX_LINESPACE 1
-#define gdFTEX_CHARMAP 2
-#define gdFTEX_RESOLUTION 4
-
-/* These are NOT flags; set one in 'charmap' if you set the gdFTEX_CHARMAP bit in 'flags'. */
-#define gdFTEX_Unicode 0
-#define gdFTEX_Shift_JIS 1
-#define gdFTEX_Big5 2
-#define gdFTEX_MacRoman 3
-
-/* FreeType 2 text output with fine tuning */
-char *
-gdImageStringFTEx(gdImage * im, int *brect, int fg, char * fontlist,
-		double ptsize, double angle, int x, int y, char * string,
-		gdFTStringExtraPtr strex);
-
-
-/* Point type for use in polygon drawing. */
-typedef struct {
-	int x, y;
-} gdPoint, *gdPointPtr;
-
-void gdImagePolygon(gdImagePtr im, gdPointPtr p, int n, int c);
-void gdImageOpenPolygon(gdImagePtr im, gdPointPtr p, int n, int c);
-void gdImageFilledPolygon(gdImagePtr im, gdPointPtr p, int n, int c);
-
-/* These functions still work with truecolor images,
-	for which they never return error. */
-int gdImageColorAllocate(gdImagePtr im, int r, int g, int b);
-/* gd 2.0: palette entries with non-opaque transparency are permitted. */
-int gdImageColorAllocateAlpha(gdImagePtr im, int r, int g, int b, int a);
-/* Assumes opaque is the preferred alpha channel value */
-int gdImageColorClosest(gdImagePtr im, int r, int g, int b);
-/* Closest match taking all four parameters into account.
-	A slightly different color with the same transparency
-	beats the exact same color with radically different
-	transparency */
-int gdImageColorClosestAlpha(gdImagePtr im, int r, int g, int b, int a);
-/* An alternate method */
-int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
-/* Returns exact, 100% opaque matches only */
-int gdImageColorExact(gdImagePtr im, int r, int g, int b);
-/* Returns an exact match only, including alpha */
-int gdImageColorExactAlpha(gdImagePtr im, int r, int g, int b, int a);
-/* Opaque only */
-int gdImageColorResolve(gdImagePtr im, int r, int g, int b);
-/* Based on gdImageColorExactAlpha and gdImageColorClosestAlpha */
-int gdImageColorResolveAlpha(gdImagePtr im, int r, int g, int b, int a);
-
-/* A simpler way to obtain an opaque truecolor value for drawing on a
-	truecolor image. Not for use with palette images! */
-
-#define gdTrueColor(r, g, b) (((r) << 16) + \
-	((g) << 8) + \
-	(b))
-
-/* Returns a truecolor value with an alpha channel component.
-	gdAlphaMax (127, **NOT 255**) is transparent, 0 is completely
-	opaque. */
-
-#define gdTrueColorAlpha(r, g, b, a) (((a) << 24) + \
-	((r) << 16) + \
-	((g) << 8) + \
-	(b))
-
-void gdImageColorDeallocate(gdImagePtr im, int color);
-
-/* Converts a truecolor image to a palette-based image,
-	using a high-quality two-pass quantization routine
-	which attempts to preserve alpha channel information
-	as well as R/G/B color information when creating
-	a palette. If ditherFlag is set, the image will be
-	dithered to approximate colors better, at the expense
-	of some obvious "speckling." colorsWanted can be
-	anything up to 256. If the original source image
-	includes photographic information or anything that
-	came out of a JPEG, 256 is strongly recommended.
-
-	Better yet, don't use this function -- write real
-	truecolor PNGs and JPEGs. The disk space gain of
-        conversion to palette is not great (for small images
-        it can be negative) and the quality loss is ugly. */
-
-gdImagePtr gdImageCreatePaletteFromTrueColor (gdImagePtr im, int ditherFlag, int colorsWanted);
-
-int gdImageTrueColorToPalette(gdImagePtr im, int ditherFlag, int colorsWanted);
-int gdImagePaletteToTrueColor(gdImagePtr src);
-
-/* An attempt at getting the results of gdImageTrueColorToPalette
-	to look a bit more like the original (im1 is the original
-	and im2 is the palette version */
-int gdImageColorMatch(gdImagePtr im1, gdImagePtr im2);
-
-/* Specifies a color index (if a palette image) or an
-	RGB color (if a truecolor image) which should be
-	considered 100% transparent. FOR TRUECOLOR IMAGES,
-	THIS IS IGNORED IF AN ALPHA CHANNEL IS BEING
-	SAVED. Use gdImageSaveAlpha(im, 0); to
-	turn off the saving of a full alpha channel in
-	a truecolor image. Note that gdImageColorTransparent
-	is usually compatible with older browsers that
-	do not understand full alpha channels well. TBB */
-void gdImageColorTransparent(gdImagePtr im, int color);
-
-void gdImagePaletteCopy(gdImagePtr dst, gdImagePtr src);
 BGD_DECLARE(void) gdImagePng(gdImagePtr im, FILE *out);
 BGD_DECLARE(void) gdImagePngCtx(gdImagePtr im, gdIOCtx *out);
 
@@ -1169,7 +1140,7 @@ typedef struct {
 
 void gdImagePngToSink(gdImagePtr im, gdSinkPtr out);
 
-void gdImageGd(gdImagePtr im, FILE *out);
+
 void gdImageGd2(gdImagePtr im, FILE *out, int cs, int fmt);
 
 /* Best to free this memory with gdFree(), not free() */
@@ -1186,8 +1157,7 @@ BGD_DECLARE(void)
 gdImagePngCtxExWithMetadata(gdImagePtr im, gdIOCtxPtr out, int level,
 							const gdImageMetadata *metadata);
 BGD_DECLARE(int)
-gdImageMetadataInjectPng(void **data, int *size,
-						 const gdImageMetadata *metadata);
+gdImageMetadataInjectPng(void **data, int *size, const gdImageMetadata *metadata);
 BGD_DECLARE(void *) gdImageQoiPtr(gdImagePtr im, int *size);
 BGD_DECLARE(void *) gdImageQoiPtrEx(gdImagePtr im, int *size, int colorspace);
 BGD_DECLARE(void *) gdImageQoiPtrWithMetadata(gdImagePtr im, int *size, const gdImageMetadata *metadata);
@@ -1196,12 +1166,301 @@ BGD_DECLARE(int) gdImageMetadataInjectQoi(void **data, int *size, const gdImageM
 BGD_DECLARE(void) gdImageQoiToSink(gdImagePtr im, gdSinkPtr out);
 
 /* Best to free this memory with gdFree(), not free() */
-void* gdImageGdPtr(gdImagePtr im, int *size);
-
-/* Best to free this memory with gdFree(), not free() */
 void* gdImageGd2Ptr(gdImagePtr im, int cs, int fmt, int *size);
 
-void gdImageEllipse(gdImagePtr im, int cx, int cy, int w, int h, int c);
+void gdImageDestroy(gdImagePtr im);
+
+/* These functions still work with truecolor images,
+	for which they never return error. */
+int gdImageColorAllocate(gdImagePtr im, int r, int g, int b);
+/* gd 2.0: palette entries with non-opaque transparency are permitted. */
+int gdImageColorAllocateAlpha(gdImagePtr im, int r, int g, int b, int a);
+/* Assumes opaque is the preferred alpha channel value */
+int gdImageColorClosest(gdImagePtr im, int r, int g, int b);
+/* Closest match taking all four parameters into account.
+	A slightly different color with the same transparency
+	beats the exact same color with radically different
+	transparency */
+int gdImageColorClosestAlpha(gdImagePtr im, int r, int g, int b, int a);
+/* An alternate method */
+int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
+/* Returns exact, 100% opaque matches only */
+int gdImageColorExact(gdImagePtr im, int r, int g, int b);
+/* Returns an exact match only, including alpha */
+int gdImageColorExactAlpha(gdImagePtr im, int r, int g, int b, int a);
+/* Opaque only */
+int gdImageColorResolve(gdImagePtr im, int r, int g, int b);
+/* Based on gdImageColorExactAlpha and gdImageColorClosestAlpha */
+int gdImageColorResolveAlpha(gdImagePtr im, int r, int g, int b, int a);
+
+/* A simpler way to obtain an opaque truecolor value for drawing on a
+	truecolor image. Not for use with palette images! */
+
+#define gdTrueColor(r, g, b) (((r) << 16) + \
+	((g) << 8) + \
+	(b))
+
+/**
+ * Group: Color Composition
+ *
+ * Macro: gdTrueColorAlpha
+ *
+ * Compose a truecolor value from its components
+ *
+ * Parameters:
+ *   r - The red channel (0-255)
+ *   g - The green channel (0-255)
+ *   b - The blue channel (0-255)
+ *   a - The alpha channel (0-127, where 127 is fully transparent, and 0 is
+ *       completely opaque).
+ *
+ * See also:
+ *   - <gdTrueColorGetAlpha>
+ *   - <gdTrueColorGetRed>
+ *   - <gdTrueColorGetGreen>
+ *   - <gdTrueColorGetBlue>
+ *   - <gdImageColorExactAlpha>
+ */
+#define gdTrueColorAlpha(r, g, b, a)                                           \
+	(((a) << 24) + ((r) << 16) + ((g) << 8) + (b))
+
+BGD_DECLARE(void) gdImageColorDeallocate(gdImagePtr im, int color);
+
+/* Converts a truecolor image to a palette-based image,
+	using a high-quality two-pass quantization routine
+	which attempts to preserve alpha channel information
+	as well as R/G/B color information when creating
+	a palette. If ditherFlag is set, the image will be
+	dithered to approximate colors better, at the expense
+	of some obvious "speckling." colorsWanted can be
+	anything up to 256. If the original source image
+	includes photographic information or anything that
+	came out of a JPEG, 256 is strongly recommended.
+
+	Better yet, don't use these function -- write real
+	truecolor PNGs and JPEGs. The disk space gain of
+        conversion to palette is not great (for small images
+	it can be negative) and the quality loss is ugly.
+
+	DIFFERENCES: gdImageCreatePaletteFromTrueColor creates and
+	returns a new image. gdImageTrueColorToPalette modifies
+	an existing image, and the truecolor pixels are discarded.
+
+	gdImageTrueColorToPalette() returns TRUE on success, FALSE on failure.
+*/
+gdImagePtr gdImageCreatePaletteFromTrueColor (gdImagePtr im, int ditherFlag, int colorsWanted);
+
+BGD_DECLARE(gdImagePtr)
+gdImageCreatePaletteFromTrueColor(gdImagePtr im, int ditherFlag, int colorsWanted);
+int gdImagePaletteToTrueColor(gdImagePtr src);
+
+BGD_DECLARE(int)
+gdImageTrueColorToPalette(gdImagePtr im, int ditherFlag, int colorsWanted);
+
+BGD_DECLARE(int) gdImagePaletteToTrueColor(gdImagePtr src);
+
+/* An attempt at getting the results of gdImageTrueColorToPalette to
+ * look a bit more like the original (im1 is the original and im2 is
+ * the palette version */
+
+BGD_DECLARE(int) gdImageColorMatch(gdImagePtr im1, gdImagePtr im2);
+
+/* Selects quantization method used for subsequent gdImageTrueColorToPalette
+   calls. See gdPaletteQuantizationMethod enum (e.g. GD_QUANT_NEUQUANT,
+   GD_QUANT_LIQ). Speed is from 1 (highest quality) to 10 (fastest). Speed 0
+   selects method-specific default (recommended).
+
+   Returns FALSE if the given method is invalid or not available.
+*/
+BGD_DECLARE(int)
+gdImageTrueColorToPaletteSetMethod(gdImagePtr im, int method, int speed);
+
+/*
+  Chooses quality range that subsequent call to gdImageTrueColorToPalette will
+  aim for. Min and max quality is in range 1-100 (1 = ugly, 100 = perfect). Max
+  must be higher than min. If palette cannot represent image with at least
+  min_quality, then image will remain true-color. If palette can represent image
+  with quality better than max_quality, then lower number of colors will be
+  used. This function has effect only when GD_QUANT_LIQ method has been selected
+  and the source image is true-color.
+*/
+BGD_DECLARE(void)
+gdImageTrueColorToPaletteSetQuality(gdImagePtr im, int min_quality, int max_quality);
+
+/* Specifies a color index (if a palette image) or an
+	RGB color (if a truecolor image) which should be
+	considered 100% transparent. FOR TRUECOLOR IMAGES,
+	THIS IS IGNORED IF AN ALPHA CHANNEL IS BEING
+	SAVED. Use gdImageSaveAlpha(im, 0); to
+	turn off the saving of a full alpha channel in
+	a truecolor image. Note that gdImageColorTransparent
+	is usually compatible with older browsers that
+	do not understand full alpha channels well. TBB */
+void gdImageColorTransparent(gdImagePtr im, int color);
+
+void gdImagePaletteCopy(gdImagePtr dst, gdImagePtr src);
+/* Replaces or blends with the background depending on the
+	most recent call to gdImageAlphaBlending and the
+	alpha channel value of 'color'; default is to overwrite.
+	Tiling and line styling are also implemented
+	here. All other gd drawing functions pass through this call,
+	allowing for many useful effects. */
+
+void gdImageSetPixel(gdImagePtr im, int x, int y, int color);
+
+int gdImageGetTrueColorPixel (gdImagePtr im, int x, int y);
+int gdImageGetPixel(gdImagePtr im, int x, int y);
+
+void gdImageAABlend(gdImagePtr im);
+
+void gdImageLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+void gdImageAALine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+
+/* For backwards compatibility only. Use gdImageSetStyle()
+	for much more flexible line drawing. */
+void gdImageDashedLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+/* Corners specified (not width and height). Upper left first, lower right
+ 	second. */
+void gdImageRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+/* Solid bar. Upper left corner first, lower right corner second. */
+void gdImageFilledRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+void gdImageSetClip(gdImagePtr im, int x1, int y1, int x2, int y2);
+void gdImageGetClip(gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P);
+void gdImageSetResolution(gdImagePtr im, const unsigned int res_x, const unsigned int res_y);
+void gdImageChar(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
+void gdImageCharUp(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
+void gdImageString(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color);
+void gdImageStringUp(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color);
+void gdImageString16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color);
+void gdImageStringUp16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color);
+
+/*
+ * The following functions are required to be called prior to the
+ * use of any sort of threads in a module load / shutdown function
+ * respectively.
+ */
+void gdFontCacheMutexSetup(void);
+void gdFontCacheMutexShutdown(void);
+
+/* 2.0.16: for thread-safe use of gdImageStringFT and friends,
+ * call this before allowing any thread to call gdImageStringFT.
+ * Otherwise it is invoked by the first thread to invoke
+ * gdImageStringFT, with a very small but real risk of a race condition.
+ * Return 0 on success, nonzero on failure to initialize freetype.
+ */
+int gdFontCacheSetup(void);
+
+/* Optional: clean up after application is done using fonts in gdImageStringFT(). */
+void gdFontCacheShutdown(void);
+
+/* Calls gdImageStringFT. Provided for backwards compatibility only. */
+char *gdImageStringTTF(gdImage *im, int *brect, int fg, char *fontlist,
+                double ptsize, double angle, int x, int y, char *string);
+
+/* FreeType 2 text output */
+char *gdImageStringFT(gdImage *im, int *brect, int fg, char *fontlist,
+                double ptsize, double angle, int x, int y, char *string);
+
+/*
+  Group: Types
+
+  typedef: gdFTStringExtra
+
+  typedef: gdFTStringExtraPtr
+
+  A structure and associated pointer type used to pass additional
+  parameters to the <gdImageStringFTEx> function. See
+  <gdImageStringFTEx> for the structure definition.
+
+  Thanks to Wez Furlong.
+*/
+
+/* 2.0.5: provides an extensible way to pass additional parameters.
+   Thanks to Wez Furlong, sorry for the delay. */
+typedef struct {
+	int flags;		/* Logical OR of gdFTEX_ values */
+	double linespacing;	/* fine tune line spacing for '\n' */
+	int charmap;		/* TBB: 2.0.12: may be gdFTEX_Unicode,
+				   gdFTEX_Shift_JIS, gdFTEX_Big5 or gdFTEX_MacRoman;
+				   when not specified, maps are searched
+				   for in the above order. */
+	int hdpi;
+	int vdpi;
+}
+ gdFTStringExtra, *gdFTStringExtraPtr;
+
+#define gdFTEX_LINESPACE 1
+#define gdFTEX_CHARMAP 2
+#define gdFTEX_RESOLUTION 4
+
+/* These are NOT flags; set one in 'charmap' if you set the gdFTEX_CHARMAP bit in 'flags'. */
+#define gdFTEX_Unicode 0
+#define gdFTEX_Shift_JIS 1
+#define gdFTEX_Big5 2
+#define gdFTEX_MacRoman 3
+
+/* FreeType 2 text output with fine tuning */
+char *
+gdImageStringFTEx(gdImage * im, int *brect, int fg, char * fontlist,
+		double ptsize, double angle, int x, int y, char * string,
+		gdFTStringExtraPtr strex);
+
+/*
+  Group: Types
+
+  typedef: gdPoint
+
+  typedef: gdPointPtr
+
+  Represents a point in the coordinate space of the image; used by
+  <gdImagePolygon>, <gdImageOpenPolygon> and <gdImageFilledPolygon>
+  for polygon drawing.
+
+  > typedef struct {
+  >     int x, y;
+  > } gdPoint, *gdPointPtr;
+
+*/
+typedef struct {
+	int x, y;
+} gdPoint, *gdPointPtr;
+
+/**
+ * Typedef: gdRect
+ *
+ * A rectangle in the coordinate space of the image
+ *
+ * Members:
+ *   x      - The x-coordinate of the upper left corner.
+ *   y      - The y-coordinate of the upper left corner.
+ *   width  - The width.
+ *   height - The height.
+ *
+ * Typedef: gdRectPtr
+ *
+ * A pointer to a <gdRect>
+ */
+typedef struct {
+	int x, y;
+	int width, height;
+} gdRect, *gdRectPtr;
+
+BGD_DECLARE(void) gdImagePolygon(gdImagePtr im, gdPointPtr p, int n, int c);
+BGD_DECLARE(void) gdImageOpenPolygon(gdImagePtr im, gdPointPtr p, int n, int c);
+BGD_DECLARE(void)
+gdImageFilledPolygon(gdImagePtr im, gdPointPtr p, int n, int c);
+
+BGD_DECLARE(void)
+gdImageFilledArc(gdImagePtr im, int cx, int cy, int w, int h, int s, int e,
+				 int color, int style);
+BGD_DECLARE(void)
+gdImageArc(gdImagePtr im, int cx, int cy, int w, int h, int s, int e,
+		   int color);
+BGD_DECLARE(void)
+gdImageEllipse(gdImagePtr im, int cx, int cy, int w, int h, int color);
+BGD_DECLARE(void)
+gdImageFilledEllipse(gdImagePtr im, int cx, int cy, int w, int h, int color);
+
 
 /* Style is a bitwise OR ( | operator ) of these.
 	gdArc and gdChord are mutually exclusive;
@@ -1220,9 +1479,6 @@ void gdImageEllipse(gdImagePtr im, int cx, int cy, int w, int h, int c);
 #define gdNoFill 2
 #define gdEdged 4
 
-void gdImageFilledArc(gdImagePtr im, int cx, int cy, int w, int h, int s, int e, int color, int style);
-void gdImageArc(gdImagePtr im, int cx, int cy, int w, int h, int s, int e, int color);
-void gdImageFilledEllipse(gdImagePtr im, int cx, int cy, int w, int h, int color);
 void gdImageFillToBorder(gdImagePtr im, int x, int y, int border, int color);
 void gdImageFill(gdImagePtr im, int x, int y, int color);
 void gdImageCopy(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w, int h);
@@ -1293,19 +1549,19 @@ enum gdPaletteQuantizationMethod {
 BGD_DECLARE(gdImagePtr)
 gdImageNeuQuant(gdImagePtr im, const int max_color, int sample_factor);
 
+
+
+/* filters section
+ *
+ * Negate the imag src, white becomes black,
+ * The red, green, and blue intensities of an image are negated.
+ * White becomes black, yellow becomes blue, etc.
+ */
+
+enum gdPixelateMode { GD_PIXELATE_UPPERLEFT, GD_PIXELATE_AVERAGE };
+
 BGD_DECLARE(int)
-gdImageTrueColorToPaletteSetMethod(gdImagePtr im, int method, int speed);
-
-BGD_DECLARE(void)
-gdImageTrueColorToPaletteSetQuality(gdImagePtr im, int min_quality,
-									int max_quality);
-
-enum gdPixelateMode {
-	GD_PIXELATE_UPPERLEFT,
-	GD_PIXELATE_AVERAGE
-};
-
-int gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode);
+gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode);
 
 typedef struct {
 	int sub;
@@ -1315,48 +1571,244 @@ typedef struct {
 	unsigned int seed;
 } gdScatter, *gdScatterPtr;
 
-int gdImageScatter(gdImagePtr im, int sub, int plus);
-int gdImageScatterColor(gdImagePtr im, int sub, int plus, int colors[], unsigned int num_colors);
-int gdImageScatterEx(gdImagePtr im, gdScatterPtr s);
+BGD_DECLARE(int) gdImageScatter(gdImagePtr im, int sub, int plus);
+BGD_DECLARE(int)
+gdImageScatterColor(gdImagePtr im, int sub, int plus, int colors[],
+					unsigned int num_colors);
+BGD_DECLARE(int) gdImageScatterEx(gdImagePtr im, gdScatterPtr s);
+BGD_DECLARE(int) gdImageSmooth(gdImagePtr im, float weight);
+BGD_DECLARE(int) gdImageMeanRemoval(gdImagePtr im);
+BGD_DECLARE(int) gdImageEmboss(gdImagePtr im);
+BGD_DECLARE(int) gdImageGaussianBlur(gdImagePtr im);
+BGD_DECLARE(int) gdImageEdgeDetectQuick(gdImagePtr src);
+BGD_DECLARE(int) gdImageSelectiveBlur(gdImagePtr src);
+BGD_DECLARE(int)
+gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div,
+				   float offset);
+BGD_DECLARE(int)
+gdImageColor(gdImagePtr src, const int red, const int green, const int blue,
+			 const int alpha);
+BGD_DECLARE(int) gdImageContrast(gdImagePtr src, double contrast);
+BGD_DECLARE(int) gdImageBrightness(gdImagePtr src, int brightness);
+BGD_DECLARE(int) gdImageGrayScale(gdImagePtr src);
+BGD_DECLARE(int) gdImageNegate(gdImagePtr src);
 
-/* Macros to access information about images. */
+BGD_DECLARE(gdImagePtr)
+gdImageCopyGaussianBlurred(gdImagePtr src, int radius, double sigma);
 
-/* Returns nonzero if the image is a truecolor image,
-	zero for a palette image. */
+/**
+ * Group: Accessor Macros
+ */
 
+/**
+ * Macro: gdImageTrueColor
+ *
+ * Whether an image is a truecolor image.
+ *
+ * Parameters:
+ *   im - The image.
+ *
+ * Returns:
+ *   Non-zero if the image is a truecolor image, zero for palette images.
+ */
 #define gdImageTrueColor(im) ((im)->trueColor)
 
+/**
+ * Macro: gdImageSX
+ *
+ * Gets the width (in pixels) of an image.
+ *
+ * Parameters:
+ *   im - The image.
+ */
 #define gdImageSX(im) ((im)->sx)
+
+/**
+ * Macro: gdImageSY
+ *
+ * Gets the height (in pixels) of an image.
+ *
+ * Parameters:
+ *   im - The image.
+ */
 #define gdImageSY(im) ((im)->sy)
+
+/**
+ * Macro: gdImageColorsTotal
+ *
+ * Gets the number of colors in the palette.
+ *
+ * This macro is only valid for palette images.
+ *
+ * Parameters:
+ *   im - The image
+ */
 #define gdImageColorsTotal(im) ((im)->colorsTotal)
-#define gdImageRed(im, c) ((im)->trueColor ? gdTrueColorGetRed(c) : \
-	(im)->red[(c)])
-#define gdImageGreen(im, c) ((im)->trueColor ? gdTrueColorGetGreen(c) : \
-	(im)->green[(c)])
-#define gdImageBlue(im, c) ((im)->trueColor ? gdTrueColorGetBlue(c) : \
-	(im)->blue[(c)])
-#define gdImageAlpha(im, c) ((im)->trueColor ? gdTrueColorGetAlpha(c) : \
-	(im)->alpha[(c)])
+
+/**
+ * Macro: gdImageRed
+ *
+ * Gets the red component value of a given color.
+ *
+ * Parameters:
+ *   im - The image.
+ *   c  - The color.
+ */
+#define gdImageRed(im, c)                                                      \
+	((im)->trueColor ? gdTrueColorGetRed(c) : (im)->red[(c)])
+
+/**
+ * Macro: gdImageGreen
+ *
+ * Gets the green component value of a given color.
+ *
+ * Parameters:
+ *   im - The image.
+ *   c  - The color.
+ */
+#define gdImageGreen(im, c)                                                    \
+	((im)->trueColor ? gdTrueColorGetGreen(c) : (im)->green[(c)])
+
+/**
+ * Macro: gdImageBlue
+ *
+ * Gets the blue component value of a given color.
+ *
+ * Parameters:
+ *   im - The image.
+ *   c  - The color.
+ */
+#define gdImageBlue(im, c)                                                     \
+	((im)->trueColor ? gdTrueColorGetBlue(c) : (im)->blue[(c)])
+
+/**
+ * Macro: gdImageAlpha
+ *
+ * Gets the alpha component value of a given color.
+ *
+ * Parameters:
+ *   im - The image.
+ *   c  - The color.
+ */
+#define gdImageAlpha(im, c)                                                    \
+	((im)->trueColor ? gdTrueColorGetAlpha(c) : (im)->alpha[(c)])
+
+/**
+ * Macro: gdImageGetTransparent
+ *
+ * Gets the transparent color of the image.
+ *
+ * Parameters:
+ *   im - The image.
+ *
+ * See also:
+ *   - <gdImageColorTransparent>
+ */
 #define gdImageGetTransparent(im) ((im)->transparent)
+
+/**
+ * Macro: gdImageGetInterlaced
+ *
+ * Whether an image is interlaced.
+ *
+ * Parameters:
+ *   im - The image.
+ *
+ * Returns:
+ *   Non-zero for interlaced images, zero otherwise.
+ *
+ * See also:
+ *   - <gdImageInterlace>
+ */
 #define gdImageGetInterlaced(im) ((im)->interlace)
 
-/* These macros provide direct access to pixels in
-	palette-based and truecolor images, respectively.
-	If you use these macros, you must perform your own
-	bounds checking. Use of the macro for the correct type
-	of image is also your responsibility. */
+/**
+ * Macro: gdImagePalettePixel
+ *
+ * Gets the color of a pixel.
+ *
+ * Calling this macro is only valid for palette images.
+ * No bounds checking is done for the coordinates.
+ *
+ * Parameters:
+ *   im - The image.
+ *   x  - The x-coordinate.
+ *   y  - The y-coordinate.
+ *
+ * See also:
+ *   - <gdImageTrueColorPixel>
+ *   - <gdImageGetPixel>
+ */
 #define gdImagePalettePixel(im, x, y) (im)->pixels[(y)][(x)]
+
+/**
+ * Macro: gdImageTrueColorPixel
+ *
+ * Gets the color of a pixel.
+ *
+ * Calling this macro is only valid for truecolor images.
+ * No bounds checking is done for the coordinates.
+ *
+ * Parameters:
+ *   im - The image.
+ *   x  - The x-coordinate.
+ *   y  - The y-coordinate.
+ *
+ * See also:
+ *   - <gdImagePalettePixel>
+ *   - <gdImageGetTrueColorPixel>
+ */
 #define gdImageTrueColorPixel(im, x, y) (im)->tpixels[(y)][(x)]
+
+/**
+ * Macro: gdImageResolutionX
+ *
+ * Gets the horizontal resolution in DPI.
+ *
+ * Parameters:
+ *   im - The image.
+ *
+ * See also:
+ *   - <gdImageResolutionY>
+ *   - <gdImageSetResolution>
+ */
 #define gdImageResolutionX(im) (im)->res_x
+
+/**
+ * Macro: gdImageResolutionY
+ *
+ * Gets the vertical resolution in DPI.
+ *
+ * Parameters:
+ *   im - The image.
+ *
+ * See also:
+ *   - <gdImageResolutionX>
+ *   - <gdImageSetResolution>
+ */
 #define gdImageResolutionY(im) (im)->res_y
 
 /* I/O Support routines. */
 
-gdIOCtx* gdNewFileCtx(FILE*);
-gdIOCtx* gdNewDynamicCtx(int, void*);
-gdIOCtx *gdNewDynamicCtxEx(int size, void *data, int freeFlag);
-gdIOCtx* gdNewSSCtx(gdSourcePtr in, gdSinkPtr out);
-void* gdDPExtractData(struct gdIOCtx* ctx, int *size);
+BGD_DECLARE(gdIOCtxPtr) gdNewFileCtx(FILE *);
+/* If data is null, size is ignored and an initial data buffer is
+   allocated automatically. NOTE: this function assumes gd has the right
+   to free or reallocate "data" at will! Also note that gd will free
+   "data" when the IO context is freed. If data is not null, it must point
+   to memory allocated with gdMalloc, or by a call to gdImage[something]Ptr.
+   If not, see gdNewDynamicCtxEx for an alternative. */
+BGD_DECLARE(gdIOCtxPtr) gdNewDynamicCtx(int size, void *data);
+/* 2.0.21: if freeFlag is nonzero, gd will free and/or reallocate "data" as
+   needed as described above. If freeFlag is zero, gd will never free
+   or reallocate "data", which means that the context should only be used
+   for *reading* an image from a memory buffer, or writing an image to a
+   memory buffer which is already large enough. If the memory buffer is
+   not large enough and an image write is attempted, the write operation
+   will fail. Those wishing to write an image to a buffer in memory have
+   a much simpler alternative in the gdImage[something]Ptr functions. */
+BGD_DECLARE(gdIOCtxPtr) gdNewDynamicCtxEx(int size, void *data, int freeFlag);
+BGD_DECLARE(gdIOCtxPtr) gdNewSSCtx(gdSourcePtr in, gdSinkPtr out);
+BGD_DECLARE(void *) gdDPExtractData(gdIOCtxPtr ctx, int *size);
 
 #define GD2_CHUNKSIZE           128
 #define GD2_CHUNKSIZE_MIN	64
@@ -1367,52 +1819,12 @@ void* gdDPExtractData(struct gdIOCtx* ctx, int *size);
 #define GD2_FMT_RAW             1
 #define GD2_FMT_COMPRESSED      2
 
-
-/* filters section
- *
- * Negate the imag src, white becomes black,
- * The red, green, and blue intensities of an image are negated.
- * White becomes black, yellow becomes blue, etc.
- */
-int gdImageNegate(gdImagePtr src);
-
-/* Convert the image src to a grayscale image */
-int gdImageGrayScale(gdImagePtr src);
-
-/* Set the brightness level <brightness> for the image src */
-int gdImageBrightness(gdImagePtr src, int brightness);
-
-/* Set the contrast level <contrast> for the image <src> */
-int gdImageContrast(gdImagePtr src, double contrast);
-
-/* Simply adds or subtracts respectively red, green or blue to a pixel */
-int gdImageColor(gdImagePtr src, const int red, const int green, const int blue, const int alpha);
-
-/* Image convolution by a 3x3 custom matrix */
-int gdImageConvolution(gdImagePtr src, float ft[3][3], float filter_div, float offset);
-
-int gdImageEdgeDetectQuick(gdImagePtr src);
-
-int gdImageGaussianBlur(gdImagePtr im);
-
-int gdImageSelectiveBlur( gdImagePtr src);
-
-int gdImageEmboss(gdImagePtr im);
-
-int gdImageMeanRemoval(gdImagePtr im);
-
-int gdImageSmooth(gdImagePtr im, float weight);
-
 /* Image comparison definitions */
-int gdImageCompare(gdImagePtr im1, gdImagePtr im2);
+BGD_DECLARE(int) gdImageCompare(gdImagePtr im1, gdImagePtr im2);
 
-void gdImageFlipHorizontal(gdImagePtr im);
-void gdImageFlipVertical(gdImagePtr im);
-void gdImageFlipBoth(gdImagePtr im);
-
-#define GD_FLIP_HORIZONTAL 1
-#define GD_FLIP_VERTICAL 2
-#define GD_FLIP_BOTH 3
+BGD_DECLARE(void) gdImageFlipHorizontal(gdImagePtr im);
+BGD_DECLARE(void) gdImageFlipVertical(gdImagePtr im);
+BGD_DECLARE(void) gdImageFlipBoth(gdImagePtr im);
 
 /**
  * Group: Crop

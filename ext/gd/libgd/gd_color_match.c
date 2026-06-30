@@ -1,14 +1,16 @@
 #include "gd.h"
 #include "gdhelpers.h"
+#include <string.h>
 
 #include "gd_intern.h"
 #include "php.h"
 
-/* bring the palette colors in im2 to be closer to im1
- *
+/*
+	Function: gdImageColorMatch
+
+	Bring the palette colors in im2 to be closer to im1.
  */
-int gdImageColorMatch (gdImagePtr im1, gdImagePtr im2)
-{
+BGD_DECLARE(int) gdImageColorMatch(gdImagePtr im1, gdImagePtr im2) {
 	unsigned long *buf; /* stores our calculations */
 	unsigned long *bp; /* buf ptr */
 	int color, rgb;
@@ -27,8 +29,8 @@ int gdImageColorMatch (gdImagePtr im1, gdImagePtr im2)
 	if (im2->colorsTotal<1) {
 		return -4; /* At least 1 color must be allocated */
 	}
-
-	buf = (unsigned long *)safe_emalloc(sizeof(unsigned long), 5 * gdMaxColors, 0);
+	// gdMaxColors == 255
+	buf = (unsigned long *)gdMalloc(sizeof(unsigned long) * 5 * gdMaxColors);
 	memset( buf, 0, sizeof(unsigned long) * 5 * gdMaxColors );
 
 	for (x=0; x<im1->sx; x++) {

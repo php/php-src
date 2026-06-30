@@ -1,6 +1,11 @@
+/**
+ * File: Image Filters
+ */
+
 #include "gd.h"
 
 #include "gd_intern.h"
+#include "gdhelpers.h"
 
 #ifdef _WIN32
 # include <windows.h>
@@ -11,18 +16,19 @@
 #include <stdlib.h>
 #include <time.h>
 
-/* Filters function added on 2003/12
- * by Pierre-Alain Joye (pierre@php.net)
- *
- * Scatter filter added in libgd 2.1.0
- * by Kalle Sommer Nielsen (kalle@php.net)
- **/
+#undef NDEBUG
+/* Comment out this line to enable asserts.
+ * TODO: This logic really belongs in cmake and configure.
+ */
+#define NDEBUG 1
+#include <assert.h>
 
-/* Begin filters function */
-#define GET_PIXEL_FUNCTION(src)(src->trueColor?gdImageGetTrueColorPixel:gdImageGetPixel)
+typedef int(BGD_STDCALL *FuncPtr)(gdImagePtr, int, int);
 
-static int gdClampFloatToByte(float value)
-{
+#define GET_PIXEL_FUNCTION(src)                                                \
+	(src->trueColor ? gdImageGetTrueColorPixel : gdImageGetPixel)
+
+static int gdClampFloatToByte(float value) {
 	if (!isfinite(value)) {
 		return value > 0.0f ? 255 : 0;
 	}
@@ -41,8 +47,10 @@ static int gdClampFloatToByte(float value)
 # define GD_SCATTER_SEED() (unsigned int)(time(0) * getpid())
 #endif
 
-int gdImageScatter(gdImagePtr im, int sub, int plus)
-{
+/*
+	Function: gdImageScatter
+ */
+BGD_DECLARE(int) gdImageScatter(gdImagePtr im, int sub, int plus) {
 	gdScatter s;
 
 	s.sub = sub;
@@ -52,8 +60,12 @@ int gdImageScatter(gdImagePtr im, int sub, int plus)
 	return gdImageScatterEx(im, &s);
 }
 
-int gdImageScatterColor(gdImagePtr im, int sub, int plus, int colors[], unsigned int num_colors)
-{
+/*
+	Function: gdImageScatterColor
+ */
+BGD_DECLARE(int)
+gdImageScatterColor(gdImagePtr im, int sub, int plus, int colors[],
+					unsigned int num_colors) {
 	gdScatter s;
 
 	s.sub = sub;
@@ -64,8 +76,10 @@ int gdImageScatterColor(gdImagePtr im, int sub, int plus, int colors[], unsigned
 	return gdImageScatterEx(im, &s);
 }
 
-int gdImageScatterEx(gdImagePtr im, gdScatterPtr scatter)
-{
+/*
+	Function: gdImageScatterEx
+ */
+BGD_DECLARE(int) gdImageScatterEx(gdImagePtr im, gdScatterPtr scatter) {
 	register int x, y;
 	int dest_x, dest_y;
 	int pxl, new_pxl;
@@ -74,8 +88,7 @@ int gdImageScatterEx(gdImagePtr im, gdScatterPtr scatter)
 
 	if (plus == 0 && sub == 0) {
 		return 1;
-	}
-	else if (sub >= plus) {
+	} else if (sub >= plus) {
 		return 0;
 	}
 
@@ -102,8 +115,7 @@ int gdImageScatterEx(gdImagePtr im, gdScatterPtr scatter)
 				}
 			}
 		}
-	}
-	else {
+	} else {
 		for (y = 0; y < im->sy; y++) {
 			for (x = 0; x < im->sx; x++) {
 				dest_x = (int)(x + ((rand() % (plus - sub)) + sub));
@@ -125,8 +137,11 @@ int gdImageScatterEx(gdImagePtr im, gdScatterPtr scatter)
 	return 1;
 }
 
-int gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode)
-{
+/*
+	Function: gdImagePixelate
+ */
+BGD_DECLARE(int)
+gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode) {
 	int x, y;
 
 	if (block_size <= 0) {
@@ -140,7 +155,8 @@ int gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode)
 			for (x = 0; x < im->sx; x += block_size) {
 				if (gdImageBoundsSafe(im, x, y)) {
 					int c = gdImageGetPixel(im, x, y);
-					gdImageFilledRectangle(im, x, y, x + block_size - 1, y + block_size - 1, c);
+					gdImageFilledRectangle(im, x, y, x + block_size - 1,
+										   y + block_size - 1, c);
 				}
 			}
 		}
@@ -169,8 +185,10 @@ int gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode)
 				}
 				/* drawing */
 				if (total > 0) {
-					c = gdImageColorResolveAlpha(im, r / total, g / total, b / total, a / total);
-					gdImageFilledRectangle(im, x, y, x + block_size - 1, y + block_size - 1, c);
+					c = gdImageColorResolveAlpha(im, r / total, g / total,
+												 b / total, a / total);
+					gdImageFilledRectangle(im, x, y, x + block_size - 1,
+										   y + block_size - 1, c);
 				}
 			}
 		}
@@ -181,13 +199,21 @@ int gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode)
 	return 1;
 }
 
-/* invert src image */
-int gdImageNegate(gdImagePtr src)
-{
+/**
+ * Function: gdImageNegate
+ *
+ * Invert an image
+ *
+ * Parameters:
+ *   src - The image.
+ *
+ * Returns:
+ *   Non-zero on success, zero on failure.
+ */
+BGD_DECLARE(int) gdImageNegate(gdImagePtr src) {
 	int x, y;
 	int r,g,b,a;
 	int new_pxl, pxl;
-	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
 
 	if (src==NULL) {
@@ -204,9 +230,11 @@ int gdImageNegate(gdImagePtr src)
 			b = gdImageBlue(src, pxl);
 			a = gdImageAlpha(src, pxl);
 
-			new_pxl = gdImageColorAllocateAlpha(src, 255-r, 255-g, 255-b, a);
+			new_pxl =
+				gdImageColorAllocateAlpha(src, 255 - r, 255 - g, 255 - b, a);
 			if (new_pxl == -1) {
-				new_pxl = gdImageColorClosestAlpha(src, 255-r, 255-g, 255-b, a);
+				new_pxl =
+					gdImageColorClosestAlpha(src, 255 - r, 255 - g, 255 - b, a);
 			}
 			gdImageSetPixel (src, x, y, new_pxl);
 		}
@@ -214,17 +242,29 @@ int gdImageNegate(gdImagePtr src)
 	return 1;
 }
 
-/* Convert the image src to a grayscale image */
-int gdImageGrayScale(gdImagePtr src)
-{
+/**
+ * Function: gdImageGrayScale
+ *
+ * Convert an image to grayscale
+ *
+ * The red, green and blue components of each pixel are replaced by their
+ * weighted sum using the same coefficients as the REC.601 luma (Y')
+ * calculation. The alpha components are retained.
+ *
+ * For palette images the result may differ due to palette limitations.
+ *
+ * Parameters:
+ *   src - The image.
+ *
+ * Returns:
+ *   Non-zero on success, zero on failure.
+ */
+BGD_DECLARE(int) gdImageGrayScale(gdImagePtr src) {
 	int x, y;
 	int r,g,b,a;
 	int new_pxl, pxl;
-	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
 	int alpha_blending;
-
-	f = GET_PIXEL_FUNCTION(src);
 
 	if (src==NULL) {
 		return 0;
@@ -232,6 +272,8 @@ int gdImageGrayScale(gdImagePtr src)
 
 	alpha_blending = src->alphaBlendingFlag;
 	gdImageAlphaBlending(src, gdEffectReplace);
+
+	f = GET_PIXEL_FUNCTION(src);
 
 	for (y=0; y<src->sy; ++y) {
 		for (x=0; x<src->sx; ++x) {
@@ -254,15 +296,27 @@ int gdImageGrayScale(gdImagePtr src)
 	return 1;
 }
 
-/* Set the brightness level <level> for the image src */
-int gdImageBrightness(gdImagePtr src, int brightness)
-{
+/**
+ * Function: gdImageBrightness
+ *
+ * Change the brightness of an image
+ *
+ * Parameters:
+ *   src        - The image.
+ *   brightness - The value to add to the color channels of all pixels.
+ *
+ * Returns:
+ *   Non-zero on success, zero on failure.
+ *
+ * See also:
+ *   - <gdImageContrast>
+ *   - <gdImageColor>
+ */
+BGD_DECLARE(int) gdImageBrightness(gdImagePtr src, int brightness) {
 	int x, y;
 	int r,g,b,a;
 	int new_pxl, pxl;
-	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
-	f = GET_PIXEL_FUNCTION(src);
 
 	if (src==NULL || (brightness < -255 || brightness>255)) {
 		return 0;
@@ -271,6 +325,8 @@ int gdImageBrightness(gdImagePtr src, int brightness)
 	if (brightness==0) {
 		return 1;
 	}
+
+	f = GET_PIXEL_FUNCTION(src);
 
 	for (y=0; y<src->sy; ++y) {
 		for (x=0; x<src->sx; ++x) {
@@ -291,7 +347,8 @@ int gdImageBrightness(gdImagePtr src, int brightness)
 
 			new_pxl = gdImageColorAllocateAlpha(src, (int)r, (int)g, (int)b, a);
 			if (new_pxl == -1) {
-				new_pxl = gdImageColorClosestAlpha(src, (int)r, (int)g, (int)b, a);
+				new_pxl =
+					gdImageColorClosestAlpha(src, (int)r, (int)g, (int)b, a);
 			}
 			gdImageSetPixel (src, x, y, new_pxl);
 		}
@@ -299,21 +356,36 @@ int gdImageBrightness(gdImagePtr src, int brightness)
 	return 1;
 }
 
-
-int gdImageContrast(gdImagePtr src, double contrast)
-{
+/**
+ * Function: gdImageContrast
+ *
+ * Change the contrast of an image
+ *
+ * Parameters:
+ *   src      - The image.
+ *   contrast - The contrast adjustment value. Negative values increase, postive
+ *              values decrease the contrast. The larger the absolute value, the
+ *              stronger the effect.
+ *
+ * Returns:
+ *   Non-zero on success, zero on failure.
+ *
+ * See also:
+ *   - <gdImageBrightness>
+ */
+BGD_DECLARE(int) gdImageContrast(gdImagePtr src, double contrast) {
 	int x, y;
 	int r,g,b,a;
 	double rf,gf,bf;
 	int new_pxl, pxl;
-	typedef int (*FuncPtr)(gdImagePtr, int, int);
 
 	FuncPtr f;
-	f = GET_PIXEL_FUNCTION(src);
 
 	if (src==NULL) {
 		return 0;
 	}
+
+	f = GET_PIXEL_FUNCTION(src);
 
 	contrast = (double)(100.0-contrast)/100.0;
 	contrast = contrast*contrast;
@@ -349,9 +421,11 @@ int gdImageContrast(gdImagePtr src, double contrast)
 			gf = (gf > 255.0)? 255.0 : ((gf < 0.0)? 0.0:gf);
 			bf = (bf > 255.0)? 255.0 : ((bf < 0.0)? 0.0:bf);
 
-			new_pxl = gdImageColorAllocateAlpha(src, (int)rf, (int)gf, (int)bf, a);
+			new_pxl =
+				gdImageColorAllocateAlpha(src, (int)rf, (int)gf, (int)bf, a);
 			if (new_pxl == -1) {
-				new_pxl = gdImageColorClosestAlpha(src, (int)rf, (int)gf, (int)bf, a);
+				new_pxl =
+					gdImageColorClosestAlpha(src, (int)rf, (int)gf, (int)bf, a);
 			}
 			gdImageSetPixel (src, x, y, new_pxl);
 		}
@@ -359,12 +433,29 @@ int gdImageContrast(gdImagePtr src, double contrast)
 	return 1;
 }
 
-
-int gdImageColor(gdImagePtr src, const int red, const int green, const int blue, const int alpha)
-{
+/**
+ * Function: gdImageColor
+ *
+ * Change channel values of an image
+ *
+ * Parameters:
+ *   src   - The image.
+ *   red   - The value to add to the red channel of all pixels.
+ *   green - The value to add to the green channel of all pixels.
+ *   blue  - The value to add to the blue channel of all pixels.
+ *   alpha - The value to add to the alpha channel of all pixels.
+ *
+ * Returns:
+ *   Non-zero on success, zero on failure.
+ *
+ * See also:
+ *   - <gdImageBrightness>
+ */
+BGD_DECLARE(int)
+gdImageColor(gdImagePtr src, const int red, const int green, const int blue,
+			 const int alpha) {
 	int x, y;
 	int new_pxl, pxl;
-	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
 
 	if (src == NULL) {
@@ -403,13 +494,37 @@ int gdImageColor(gdImagePtr src, const int red, const int green, const int blue,
 	return 1;
 }
 
-int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, float offset)
-{
+/**
+ * Function: gdImageConvolution
+ *
+ * Apply a convolution matrix to an image
+ *
+ * Depending on the matrix a wide range of effects can be accomplished, e.g.
+ * blurring, sharpening, embossing and edge detection.
+ *
+ * Parameters:
+ *   src        - The image.
+ *   filter     - The 3x3 convolution matrix.
+ *   filter_div - The value to divide the convoluted channel values by.
+ *   offset     - The value to add to the convoluted channel values.
+ *
+ * Returns:
+ *   Non-zero on success, zero on failure.
+ *
+ * See also:
+ *   - <gdImageEdgeDetectQuick>
+ *   - <gdImageGaussianBlur>
+ *   - <gdImageEmboss>
+ *   - <gdImageMeanRemoval>
+ *   - <gdImageSmooth>
+ */
+BGD_DECLARE(int)
+gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div,
+				   float offset) {
 	int         x, y, i, j, new_a;
 	float       new_r, new_g, new_b;
 	int         new_pxl, pxl=0;
 	gdImagePtr  srcback;
-	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
 
 	if (src==NULL) {
@@ -455,9 +570,11 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 			new_gi = gdClampFloatToByte(new_g);
 			new_bi = gdClampFloatToByte(new_b);
 
-			new_pxl = gdImageColorAllocateAlpha(src, new_ri, new_gi, new_bi, new_a);
+			new_pxl =
+				gdImageColorAllocateAlpha(src, new_ri, new_gi, new_bi, new_a);
 			if (new_pxl == -1) {
-				new_pxl = gdImageColorClosestAlpha(src, new_ri, new_gi, new_bi, new_a);
+				new_pxl = gdImageColorClosestAlpha(src, new_ri, new_gi, new_bi,
+												   new_a);
 			}
 			gdImageSetPixel (src, x, y, new_pxl);
 		}
@@ -466,8 +583,10 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 	return 1;
 }
 
-int gdImageSelectiveBlur( gdImagePtr src)
-{
+/*
+	Function: gdImageSelectiveBlur
+ */
+BGD_DECLARE(int) gdImageSelectiveBlur(gdImagePtr src) {
 	int         x, y, i, j;
 	float       new_r, new_g, new_b;
 	int         new_pxl, cpxl, pxl, new_a=0;
@@ -477,7 +596,6 @@ int gdImageSelectiveBlur( gdImagePtr src)
 	float flt_r_sum, flt_g_sum, flt_b_sum;
 
 	gdImagePtr srcback;
-	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
 
 	if (src==NULL) {
@@ -506,7 +624,8 @@ int gdImageSelectiveBlur( gdImagePtr src)
 						pxl = f(src, x-(3>>1)+i, y-(3>>1)+j);
 						new_a = gdImageAlpha(srcback, pxl);
 
-						new_r = ((float)gdImageRed(srcback, cpxl)) - ((float)gdImageRed (srcback, pxl));
+						new_r = ((float)gdImageRed(srcback, cpxl)) -
+								((float)gdImageRed(srcback, pxl));
 
 						if (new_r < 0.0f) {
 							new_r = -new_r;
@@ -517,7 +636,8 @@ int gdImageSelectiveBlur( gdImagePtr src)
 							flt_r[j][i] = 1.0f;
 						}
 
-						new_g = ((float)gdImageGreen(srcback, cpxl)) - ((float)gdImageGreen(srcback, pxl));
+						new_g = ((float)gdImageGreen(srcback, cpxl)) -
+								((float)gdImageGreen(srcback, pxl));
 
 						if (new_g < 0.0f) {
 							new_g = -new_g;
@@ -528,7 +648,8 @@ int gdImageSelectiveBlur( gdImagePtr src)
 							flt_g[j][i] = 1.0f;
 						}
 
-						new_b = ((float)gdImageBlue(srcback, cpxl)) - ((float)gdImageBlue(srcback, pxl));
+						new_b = ((float)gdImageBlue(srcback, cpxl)) -
+								((float)gdImageBlue(srcback, pxl));
 
 						if (new_b < 0.0f) {
 							new_b = -new_b;
@@ -574,9 +695,11 @@ int gdImageSelectiveBlur( gdImagePtr src)
 			new_r = (new_r > 255.0f)? 255.0f : ((new_r < 0.0f)? 0.0f:new_r);
 			new_g = (new_g > 255.0f)? 255.0f : ((new_g < 0.0f)? 0.0f:new_g);
 			new_b = (new_b > 255.0f)? 255.0f : ((new_b < 0.0f)? 0.0f:new_b);
-			new_pxl = gdImageColorAllocateAlpha(src, (int)new_r, (int)new_g, (int)new_b, new_a);
+			new_pxl = gdImageColorAllocateAlpha(src, (int)new_r, (int)new_g,
+												(int)new_b, new_a);
 			if (new_pxl == -1) {
-				new_pxl = gdImageColorClosestAlpha(src, (int)new_r, (int)new_g, (int)new_b, new_a);
+				new_pxl = gdImageColorClosestAlpha(src, (int)new_r, (int)new_g,
+												   (int)new_b, new_a);
 			}
 			gdImageSetPixel (src, x, y, new_pxl);
 		}
@@ -585,55 +708,348 @@ int gdImageSelectiveBlur( gdImagePtr src)
 	return 1;
 }
 
-int gdImageEdgeDetectQuick(gdImagePtr src)
-{
-	float filter[3][3] =	{{-1.0,0.0,-1.0},
-				{0.0,4.0,0.0},
-				{-1.0,0.0,-1.0}};
+/**
+ * Function: gdImageEdgeDetectQuick
+ *
+ * Edge detection of an image
+ *
+ * (see edge_detect_quick.jpg)
+ *
+ * Parameters:
+ *   src - The image.
+ *
+ * Returns:
+ *   Non-zero on success, zero on failure.
+ *
+ * See also:
+ *   - <gdImageMeanRemoval>
+ *   - <gdImageConvolution>
+ */
+BGD_DECLARE(int) gdImageEdgeDetectQuick(gdImagePtr src) {
+	float filter[3][3] = {
+		{-1.0, 0.0, -1.0}, {0.0, 4.0, 0.0}, {-1.0, 0.0, -1.0}};
 
 	return gdImageConvolution(src, filter, 1, 127);
 }
 
-int gdImageGaussianBlur(gdImagePtr im)
-{
-	float filter[3][3] =	{{1.0,2.0,1.0},
-				{2.0,4.0,2.0},
-				{1.0,2.0,1.0}};
+/*
+  Function: gdImageGaussianBlur
+
+	<gdImageGaussianBlur> performs a Gaussian blur of radius 1 on the
+	image.  The image is modified in place.
+
+	*NOTE:* You will almost certain want to use
+	<gdImageCopyGaussianBlurred> instead, as it allows you to change
+	your kernel size and sigma value.  Future versions of this
+	function may fall back to calling it instead of
+	<gdImageConvolution>, causing subtle changes so be warned.
+
+  Parameters:
+	im  - The image to blur
+
+  Returns:
+	GD_TRUE (1) on success, GD_FALSE (0) on failure.
+
+*/
+
+BGD_DECLARE(int) gdImageGaussianBlur(gdImagePtr im) {
+	float filter[3][3] = {{1.0, 2.0, 1.0}, {2.0, 4.0, 2.0}, {1.0, 2.0, 1.0}};
 
 	return gdImageConvolution(im, filter, 16, 0);
 }
 
-int gdImageEmboss(gdImagePtr im)
-{
+/**
+ * Function: gdImageEmboss
+ *
+ * Emboss an image
+ *
+ * (see emboss.jpg)
+ *
+ * Parameters:
+ *   im - The image.
+ *
+ * Returns:
+ *   Non-zero on success, zero on failure.
+ *
+ * See also:
+ *   - <gdImageConvolution>
+ */
+BGD_DECLARE(int) gdImageEmboss(gdImagePtr im) {
 /*
 	float filter[3][3] =	{{1.0,1.0,1.0},
 				{0.0,0.0,0.0},
 				{-1.0,-1.0,-1.0}};
 */
-	float filter[3][3] =	{{ 1.5, 0.0, 0.0},
-				 { 0.0, 0.0, 0.0},
-				 { 0.0, 0.0,-1.5}};
+	float filter[3][3] = {{1.5, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, -1.5}};
 
 	return gdImageConvolution(im, filter, 1, 127);
 }
 
-int gdImageMeanRemoval(gdImagePtr im)
-{
-	float filter[3][3] =	{{-1.0,-1.0,-1.0},
-				{-1.0,9.0,-1.0},
-				{-1.0,-1.0,-1.0}};
+/**
+ * Function: gdImageMeanRemoval
+ *
+ * Mean removal of an image
+ *
+ * (see mean_removal.jpg)
+ *
+ * Parameters:
+ *   im - The image.
+ *
+ * Returns:
+ *   Non-zero on success, zero on failure.
+ *
+ * See also:
+ *   - <gdImageEdgeDetectQuick>
+ *   - <gdImageConvolution>
+ */
+BGD_DECLARE(int) gdImageMeanRemoval(gdImagePtr im) {
+	float filter[3][3] = {
+		{-1.0, -1.0, -1.0}, {-1.0, 9.0, -1.0}, {-1.0, -1.0, -1.0}};
 
 	return gdImageConvolution(im, filter, 1, 0);
 }
 
-int gdImageSmooth(gdImagePtr im, float weight)
-{
-	float filter[3][3] =	{{1.0,1.0,1.0},
-				{1.0,0.0,1.0},
-				{1.0,1.0,1.0}};
+/**
+ * Function: gdImageSmooth
+ *
+ * Smooth an image
+ *
+ * (see smooth.jpg)
+ *
+ * Parameters:
+ *   im     - The image.
+ *   weight - The strength of the smoothing.
+ *
+ * Returns:
+ *   Non-zero on success, zero on failure.
+ *
+ * See also:
+ *   - <gdImageConvolution>
+ */
+BGD_DECLARE(int) gdImageSmooth(gdImagePtr im, float weight) {
+	float filter[3][3] = {{1.0, 1.0, 1.0}, {1.0, 0.0, 1.0}, {1.0, 1.0, 1.0}};
 
 	filter[1][1] = weight;
 
 	return gdImageConvolution(im, filter, weight+8, 0);
 }
+
+/* Return an array of coefficients for 'radius' and 'sigma' (sigma >=
+ * 0 means compute it).  Result length is 2*radius+1. */
+static double *gaussian_coeffs(int radius, double sigmaArg) {
+	const double sigma = (sigmaArg <= 0.0) ? (2.0 / 3.0) * radius : sigmaArg;
+	const double s = 2.0 * sigma * sigma;
+	double *result;
+	double sum = 0;
+	int x, n, count;
+
+	count = 2 * radius + 1;
+
+	result = gdMalloc(sizeof(double) * count);
+	if (!result) {
+		return NULL;
+	} /* if */
+
+	for (x = -radius; x <= radius; x++) {
+		double coeff = exp(-(x * x) / s);
+
+		sum += coeff;
+		result[x + radius] = coeff;
+	} /* for */
+
+	for (n = 0; n < count; n++) {
+		result[n] /= sum;
+	} /* for */
+
+	return result;
+} /* gaussian_coeffs*/
+
+static inline int reflect(int max, int x) {
+	assert(x > -max && x < 2 * max);
+
+	if (x < 0)
+		return -x;
+	if (x >= max)
+		return max - (x - max) - 1;
+	return x;
+} /* reflect*/
+
+static inline void applyCoeffsLine(gdImagePtr src, gdImagePtr dst, int line,
+								   int linelen, double *coeffs, int radius,
+								   gdAxis axis) {
+	int ndx;
+
+	for (ndx = 0; ndx < linelen; ndx++) {
+		double r = 0, g = 0, b = 0, a = 0;
+		int cndx;
+		int *dest = (axis == HORIZONTAL) ? &dst->tpixels[line][ndx]
+										 : &dst->tpixels[ndx][line];
+
+		for (cndx = -radius; cndx <= radius; cndx++) {
+			const double coeff = coeffs[cndx + radius];
+			const int rndx = reflect(linelen, ndx + cndx);
+
+			const int srcpx = (axis == HORIZONTAL) ? src->tpixels[line][rndx]
+												   : src->tpixels[rndx][line];
+
+			r += coeff * (double)gdTrueColorGetRed(srcpx);
+			g += coeff * (double)gdTrueColorGetGreen(srcpx);
+			b += coeff * (double)gdTrueColorGetBlue(srcpx);
+			a += coeff * (double)gdTrueColorGetAlpha(srcpx);
+		} /* for */
+
+		*dest = gdTrueColorAlpha(uchar_clamp(r, 0xFF), uchar_clamp(g, 0xFF),
+								 uchar_clamp(b, 0xFF), uchar_clamp(a, 0x7F));
+	} /* for */
+} /* applyCoeffsLine*/
+
+static void applyCoeffs(gdImagePtr src, gdImagePtr dst, double *coeffs,
+						int radius, gdAxis axis) {
+	int line, numlines, linelen;
+
+	if (axis == HORIZONTAL) {
+		numlines = src->sy;
+		linelen = src->sx;
+	} else {
+		numlines = src->sx;
+		linelen = src->sy;
+	} /* if .. else*/
+
+	for (line = 0; line < numlines; line++) {
+		applyCoeffsLine(src, dst, line, linelen, coeffs, radius, axis);
+	} /* for */
+} /* applyCoeffs*/
+
+/*
+  Function: gdImageCopyGaussianBlurred
+
+	Return a copy of the source image _src_ blurred according to the
+	parameters using the Gaussian Blur algorithm.
+
+	_radius_ is a radius, not a diameter so a radius of 2 (for
+	example) will blur across a region 5 pixels across (2 to the
+	center, 1 for the center itself and another 2 to the other edge).
+
+	_sigma_ represents the "fatness" of the curve (lower == fatter).
+	If _sigma_ is less than or equal to 0,
+	<gdImageCopyGaussianBlurred> ignores it and instead computes an
+	"optimal" value.  Be warned that future versions of this function
+	may compute sigma differently.
+
+	The resulting image is always truecolor.
+
+  More Details:
+
+	A Gaussian Blur is generated by replacing each pixel's color
+	values with the average of the surrounding pixels' colors.  This
+	region is a circle whose radius is given by argument _radius_.
+	Thus, a larger radius will yield a blurrier image.
+
+	This average is not a simple mean of the values.  Instead, values
+	are weighted using the Gaussian function (roughly a bell curve
+	centered around the destination pixel) giving it much more
+	influence on the result than its neighbours.  Thus, a fatter curve
+	will give the center pixel more weight and make the image less
+	blurry; lower _sigma_ values will yield flatter curves.
+
+	Currently, <gdImageCopyGaussianBlurred> computes the default sigma
+	as
+
+		(2/3)*radius
+
+	Note, however that we reserve the right to change this if we find
+	a better ratio.  If you absolutely need the current sigma value,
+	you should set it yourself.
+
+  Parameters:
+
+	src     - the source image
+	radius  - the blur radius (*not* diameter--range is 2*radius + 1)
+	sigma   - the sigma value or a value <= 0.0 to use the computed default
+
+  Returns:
+
+	The new image or NULL if an error occurred.  The result is always
+	truecolor.
+
+  Example:
+	(start code)
+
+	FILE *in;
+	gdImagePtr result, src;
+
+	in = fopen("foo.png", "rb");
+	src = gdImageCreateFromPng(in);
+
+	result = gdImageCopyGaussianBlurred(im, src->sx / 10, -1.0);
+
+	(end code)
+*/
+
+/* TODO: Look into turning this into a generic seperable filter
+ * function with Gaussian Blur being one special case.  (At the
+ * moment, I can't find any other useful separable filter so for not,
+ * it's just blur.) */
+BGD_DECLARE(gdImagePtr)
+gdImageCopyGaussianBlurred(gdImagePtr src, int radius, double sigma) {
+	gdImagePtr tmp = NULL, result = NULL;
+	double *coeffs;
+	int freeSrc = 0;
+
+	if (radius < 1) {
+		return NULL;
+	} /* if */
+
+	/* Compute the coefficients. */
+	coeffs = gaussian_coeffs(radius, sigma);
+	if (!coeffs) {
+		return NULL;
+	} /* if */
+
+	/* If the image is not truecolor, we first make a truecolor
+	 * scratch copy. */
+	if (!src->trueColor) {
+		int tcstat;
+
+		src = gdImageClone(src);
+		if (!src) {
+			gdFree(coeffs);
+			return NULL;
+		}
+
+		tcstat = gdImagePaletteToTrueColor(src);
+		if (!tcstat) {
+			gdImageDestroy(src);
+			gdFree(coeffs);
+			return NULL;
+		} /* if */
+
+		freeSrc = 1;
+	} /* if */
+
+	/* Apply the filter horizontally. */
+	tmp = gdImageCreateTrueColor(src->sx, src->sy);
+	if (!tmp) {
+		if (freeSrc) {
+			gdImageDestroy(src);
+		}
+		gdFree(coeffs);
+		return NULL;
+	}
+	applyCoeffs(src, tmp, coeffs, radius, HORIZONTAL);
+
+	/* Apply the filter vertically. */
+	result = gdImageCreateTrueColor(src->sx, src->sy);
+	if (result) {
+		applyCoeffs(tmp, result, coeffs, radius, VERTICAL);
+	} /* if */
+
+	gdImageDestroy(tmp);
+	gdFree(coeffs);
+
+	if (freeSrc)
+		gdImageDestroy(src);
+
+	return result;
+} /* gdImageCopyGaussianBlurred*/
 /* End filters function */

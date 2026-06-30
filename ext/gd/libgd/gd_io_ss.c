@@ -38,7 +38,7 @@ typedef struct ssIOCtx
 
 typedef struct ssIOCtx *ssIOCtxPtr;
 
-gdIOCtx *gdNewSSCtx (gdSourcePtr src, gdSinkPtr snk);
+//gdIOCtx *gdNewSSCtx (gdSourcePtr src, gdSinkPtr snk);
 
 static int sourceGetbuf (gdIOCtx *, void *, int);
 static int sourceGetchar (gdIOCtx * ctx);
@@ -47,7 +47,7 @@ static void sinkPutchar (gdIOCtx * ctx, int a);
 static void gdFreeSsCtx (gdIOCtx * ctx);
 
 /* return data as a dynamic pointer */
-gdIOCtx * gdNewSSCtx (gdSourcePtr src, gdSinkPtr snk)
+BGD_DECLARE(gdIOCtx *) gdNewSSCtx (gdSourcePtr src, gdSinkPtr snk)
 {
 	ssIOCtxPtr ctx;
 
@@ -74,7 +74,6 @@ static void gdFreeSsCtx (gdIOCtx * ctx)
 {
 	gdFree(ctx);
 }
-
 
 static int sourceGetbuf (gdIOCtx * ctx, void *buf, int size)
 {

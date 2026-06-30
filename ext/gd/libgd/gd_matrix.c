@@ -8,6 +8,27 @@
 /**
  * Title: Matrix
  * Group: Affine Matrix
+ *
+ * Matrix functions to initialize, transform and various other operations
+ * on these matrices.
+ * They can be used with gdTransformAffineCopy and are also used in various
+ * transformations functions in GD.
+ *
+ * matrix are create using a 6 elements double array:
+ * (start code)
+ * matrix[0] == xx
+ * matrix[1] == yx
+ * matrix[2] == xy
+ * matrix[3] == xy
+ * matrix[4] == x0
+ * matrix[5] == y0
+ * (end code)
+ * where the transformation of a given point (x,y) is given by:
+ *
+ * (start code)
+ * x_new = xx * x + xy * y + x0;
+ * y_new = yx * x + yy * y + y0;
+ * (end code)
  */
 
 /**
@@ -24,9 +45,9 @@
  * Returns:
  *  GD_TRUE if the affine is rectilinear or GD_FALSE
  */
-int gdAffineApplyToPointF (gdPointFPtr dst, const gdPointFPtr src,
-		  const double affine[6])
-{
+BGD_DECLARE(int)
+gdAffineApplyToPointF(gdPointFPtr dst, const gdPointFPtr src,
+					  const double affine[6]) {
 	double x = src->x;
 	double y = src->y;
 	dst->x = x * affine[0] + y * affine[2] + affine[4];
@@ -55,11 +76,13 @@ int gdAffineApplyToPointF (gdPointFPtr dst, const gdPointFPtr src,
  * Returns:
  *  GD_TRUE on success or GD_FALSE on failure
  */
-int gdAffineInvert (double dst[6], const double src[6])
-{
+BGD_DECLARE(int) gdAffineInvert(double dst[6], const double src[6]) {
 	double r_det = (src[0] * src[3] - src[1] * src[2]);
 
-	if (r_det <= 0.0) {
+	if (!isfinite(r_det)) {
+		return GD_FALSE;
+	}
+	if (r_det == 0) {
 		return GD_FALSE;
 	}
 
@@ -88,10 +111,11 @@ int gdAffineInvert (double dst[6], const double src[6])
  *  flip_v - Whether or not to flip vertically
  *
  * Returns:
- *  GD_SUCCESS on success or GD_FAILURE
+ *  GD_TRUE on success or GD_FALSE
  */
-int gdAffineFlip (double dst[6], const double src[6], const int flip_h, const int flip_v)
-{
+BGD_DECLARE(int)
+gdAffineFlip(double dst[6], const double src[6], const int flip_h,
+			 const int flip_v) {
 	dst[0] = flip_h ? - src[0] : src[0];
 	dst[1] = flip_h ? - src[1] : src[1];
 	dst[2] = flip_v ? - src[2] : src[2];
@@ -116,10 +140,10 @@ int gdAffineFlip (double dst[6], const double src[6], const int flip_h, const in
  *  m2 - Second affine matrix
  *
  * Returns:
- *  GD_SUCCESS on success or GD_FAILURE
+ *  GD_TRUE on success or GD_FALSE
  */
-int gdAffineConcat (double dst[6], const double m1[6], const double m2[6])
-{
+BGD_DECLARE(int)
+gdAffineConcat(double dst[6], const double m1[6], const double m2[6]) {
 	double dst0, dst1, dst2, dst3, dst4, dst5;
 
 	dst0 = m1[0] * m2[0] + m1[1] * m2[2];
@@ -145,10 +169,9 @@ int gdAffineConcat (double dst[6], const double m1[6], const double m2[6])
  * 	dst - Where to store the resulting affine transform
  *
  * Returns:
- *  GD_SUCCESS on success or GD_FAILURE
+ *  GD_TRUE on success or GD_FALSE
  */
-int gdAffineIdentity (double dst[6])
-{
+BGD_DECLARE(int) gdAffineIdentity(double dst[6]) {
 	dst[0] = 1;
 	dst[1] = 0;
 	dst[2] = 0;
@@ -167,10 +190,10 @@ int gdAffineIdentity (double dst[6])
  * 	scale_y - Y scale factor
  *
  * Returns:
- *  GD_SUCCESS on success or GD_FAILURE
+ *  GD_TRUE on success or GD_FALSE
  */
-int gdAffineScale (double dst[6], const double scale_x, const double scale_y)
-{
+BGD_DECLARE(int)
+gdAffineScale(double dst[6], const double scale_x, const double scale_y) {
 	dst[0] = scale_x;
 	dst[1] = 0;
 	dst[2] = 0;
@@ -192,10 +215,9 @@ int gdAffineScale (double dst[6], const double scale_x, const double scale_y)
  * 	angle - Rotation angle in degrees
  *
  * Returns:
- *  GD_SUCCESS on success or GD_FAILURE
+ *  GD_TRUE on success or GD_FALSE
  */
-int gdAffineRotate (double dst[6], const double angle)
-{
+BGD_DECLARE(int) gdAffineRotate(double dst[6], const double angle) {
 	const double sin_t = sin (angle * M_PI / 180.0);
 	const double cos_t = cos (angle * M_PI / 180.0);
 
@@ -217,10 +239,9 @@ int gdAffineRotate (double dst[6], const double angle)
  * 	angle - Shear angle in degrees
  *
  * Returns:
- *  GD_SUCCESS on success or GD_FAILURE
+ *  GD_TRUE on success or GD_FALSE
  */
-int gdAffineShearHorizontal(double dst[6], const double angle)
-{
+BGD_DECLARE(int) gdAffineShearHorizontal(double dst[6], const double angle) {
 	dst[0] = 1;
 	dst[1] = 0;
 	dst[2] = tan(angle * M_PI / 180.0);
@@ -239,10 +260,9 @@ int gdAffineShearHorizontal(double dst[6], const double angle)
  * 	angle - Shear angle in degrees
  *
  * Returns:
- *  GD_SUCCESS on success or GD_FAILURE
+ *  GD_TRUE on success or GD_FALSE
  */
-int gdAffineShearVertical(double dst[6], const double angle)
-{
+BGD_DECLARE(int) gdAffineShearVertical(double dst[6], const double angle) {
 	dst[0] = 1;
 	dst[1] = tan(angle * M_PI / 180.0);
 	dst[2] = 0;
@@ -262,10 +282,10 @@ int gdAffineShearVertical(double dst[6], const double angle)
  * 	offset_y - Vertical translation amount
  *
  * Returns:
- *  GD_SUCCESS on success or GD_FAILURE
+ *  GD_TRUE on success or GD_FALSE
  */
-int gdAffineTranslate (double dst[6], const double offset_x, const double offset_y)
-{
+BGD_DECLARE(int)
+gdAffineTranslate(double dst[6], const double offset_x, const double offset_y) {
 	dst[0] = 1;
 	dst[1] = 0;
 	dst[2] = 0;
@@ -284,10 +304,9 @@ int gdAffineTranslate (double dst[6], const double offset_x, const double offset
  * composed of scaling, rotation, shearing, and translation, returns
  * the amount of scaling.
  *
- *  GD_SUCCESS on success or GD_FAILURE
+ *  GD_TRUE on success or GD_FALSE
  **/
-double gdAffineExpansion (const double src[6])
-{
+BGD_DECLARE(double) gdAffineExpansion(const double src[6]) {
   return sqrt (fabs (src[0] * src[3] - src[1] * src[2]));
 }
 
@@ -302,8 +321,7 @@ double gdAffineExpansion (const double src[6])
  * Returns:
  *  GD_TRUE if the affine is rectilinear or GD_FALSE
  */
-int gdAffineRectilinear (const double m[6])
-{
+BGD_DECLARE(int) gdAffineRectilinear(const double m[6]) {
   return ((fabs (m[1]) < GD_EPSILON && fabs (m[2]) < GD_EPSILON) ||
 	  (fabs (m[0]) < GD_EPSILON && fabs (m[3]) < GD_EPSILON));
 }
@@ -318,14 +336,11 @@ int gdAffineRectilinear (const double m[6])
  * 	m2 - The first affine transformation
  *
  * Returns:
- * 	GD_SUCCESS on success or GD_FAILURE
+ * 	GD_TRUE on success or GD_FALSE
  */
-int gdAffineEqual (const double m1[6], const double m2[6])
-{
-  return (fabs (m1[0] - m2[0]) < GD_EPSILON &&
-	  fabs (m1[1] - m2[1]) < GD_EPSILON &&
-	  fabs (m1[2] - m2[2]) < GD_EPSILON &&
-	  fabs (m1[3] - m2[3]) < GD_EPSILON &&
-	  fabs (m1[4] - m2[4]) < GD_EPSILON &&
-	  fabs (m1[5] - m2[5]) < GD_EPSILON);
+BGD_DECLARE(int) gdAffineEqual(const double m1[6], const double m2[6]) {
+	return (
+		fabs(m1[0] - m2[0]) < GD_EPSILON && fabs(m1[1] - m2[1]) < GD_EPSILON &&
+		fabs(m1[2] - m2[2]) < GD_EPSILON && fabs(m1[3] - m2[3]) < GD_EPSILON &&
+		fabs(m1[4] - m2[4]) < GD_EPSILON && fabs(m1[5] - m2[5]) < GD_EPSILON);
 }

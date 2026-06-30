@@ -46,7 +46,7 @@ static long fileTell (struct gdIOCtx *);
 static void gdFreeFileCtx (gdIOCtx * ctx);
 
 /* return data as a dynamic pointer */
-gdIOCtx * gdNewFileCtx (FILE * f)
+BGD_DECLARE(gdIOCtx *) gdNewFileCtx (FILE * f)
 {
 	fileIOCtx *ctx;
 

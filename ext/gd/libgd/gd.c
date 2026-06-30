@@ -120,7 +120,7 @@ void gd_error_ex(int priority, const char *format, ...)
 /*
 	Function: gdSetErrorMethod
 */
-void gdSetErrorMethod(gdErrorMethod error_method)
+BGD_DECLARE(void) gdSetErrorMethod(gdErrorMethod error_method)
 {
 	gd_error_method = error_method;
 }
@@ -128,7 +128,7 @@ void gdSetErrorMethod(gdErrorMethod error_method)
 /*
 	Function: gdClearErrorMethod
 */
-void gdClearErrorMethod(void)
+BGD_DECLARE(void) gdClearErrorMethod(void)
 {
 	gd_error_method = gd_stderr_error;
 }
@@ -138,7 +138,7 @@ static void gdImageTileApply(gdImagePtr im, int x, int y);
 static int gdAlphaOverlayColor(int src, int dst, int max);
 int gdImageGetTrueColorPixel(gdImagePtr im, int x, int y);
 
-gdImagePtr gdImageCreate (int sx, int sy)
+BGD_DECLARE(gdImagePtr) gdImageCreate (int sx, int sy)
 {
 	int i;
 	gdImagePtr im;
@@ -192,7 +192,7 @@ gdImagePtr gdImageCreate (int sx, int sy)
 	return im;
 }
 
-gdImagePtr gdImageCreateTrueColor (int sx, int sy)
+BGD_DECLARE(gdImagePtr) gdImageCreateTrueColor (int sx, int sy)
 {
 	int i;
 	gdImagePtr im;
@@ -594,7 +594,7 @@ int gdImageColorResolveAlpha (gdImagePtr im, int r, int g, int b, int a)
   return op;			/* Return newly allocated color */
 }
 
-void gdImageColorDeallocate (gdImagePtr im, int color)
+BGD_DECLARE(void) gdImageColorDeallocate (gdImagePtr im, int color)
 {
 	if (im->trueColor) {
 		return;
@@ -1776,7 +1776,7 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
  * as well as the midpoint algorithm.
  */
 
-void gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
+BGD_DECLARE(void) gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
 {
 	int x=0,mx1=0,mx2=0,my1=0,my2=0;
 	int64_t aq,bq,dx,dy,r,rx,ry,a,b;
@@ -1818,7 +1818,7 @@ void gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
 	}
 }
 
-void gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
+BGD_DECLARE(void) gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
 {
 	int x=0,mx1=0,mx2=0,my1=0,my2=0;
 	int64_t aq,bq,dx,dy,r,rx,ry,a,b;
@@ -2709,7 +2709,7 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 	}
 }
 
-void gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
+BGD_DECLARE(void) gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 {
 	if (n <= 0) {
 		return;
@@ -2720,7 +2720,7 @@ void gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 	gdImageOpenPolygon (im, p, n, c);
 }
 
-void gdImageOpenPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
+BGD_DECLARE(void) gdImageOpenPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 {
 	int i;
 	int lx, ly;
@@ -2747,7 +2747,7 @@ void gdImageOpenPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
  * interior_extrema.
  */
 
-void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
+BGD_DECLARE(void) gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 {
 	int i;
 	int j;
@@ -2947,7 +2947,7 @@ void gdImageInterlace (gdImagePtr im, int interlaceArg)
 	im->interlace = interlaceArg;
 }
 
-int gdImageCompare (gdImagePtr im1, gdImagePtr im2)
+BGD_DECLARE(int) gdImageCompare (gdImagePtr im1, gdImagePtr im2)
 {
 	int x, y;
 	int p1, p2;
