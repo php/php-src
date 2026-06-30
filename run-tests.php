@@ -2769,6 +2769,9 @@ case "$1" in
 "valgrind")
     USE_ZEND_ALLOC=0 valgrind $2 {$orig_cmd}
     ;;
+"strace")
+    strace -o /tmp/strace -tt -ff $2 {$orig_cmd}
+    ;;
 "rr")
     rr record $2 {$orig_cmd}
     ;;
