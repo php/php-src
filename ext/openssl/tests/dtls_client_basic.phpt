@@ -49,10 +49,15 @@ while (microtime(true) < $deadline) {
     }
 }
 
-$client = $ready ? stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 10) : false;
+// Self-signed s_server cert: skip verification for this round-trip scenario.
+$ctx = stream_context_create(['ssl' => ['verify_peer' => false]]);
+$client = $ready
+    ? stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $ctx)
+    : false;
 var_dump($client !== false);
 
 if ($client !== false) {
+    var_dump(stream_get_meta_data($client)['crypto']['protocol'] === 'DTLSv1.2');
     stream_set_timeout($client, 10);
 
     // client -> server: our datagram should show up on s_server's stdout.
@@ -78,6 +83,10 @@ if ($client !== false) {
     fread($client, 8192);
     var_dump(stream_get_meta_data($client)['timed_out']);
 
+    // A non-blocking read with nothing pending returns '' (would block), not false.
+    stream_set_blocking($client, false);
+    var_dump(fread($client, 8192));
+
     fclose($client);
 }
 
@@ -86,7 +95,10 @@ foreach ($pipes as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
 }
 proc_close($server);
-@unlink($certFile);
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'dtls_client_basic.pem.tmp');
 ?>
 --EXPECT--
 bool(true)
@@ -94,3 +106,5 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+bool(true)
+string(0) ""
