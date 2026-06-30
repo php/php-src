@@ -70,6 +70,9 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed malformed ResourceBundle::get() error message when fallback is
     disabled. (Weilin Du)
+  . Added Locale::getDisplayKeyword(), Locale::getDisplayKeywordValue(),
+    locale_get_display_keyword(), and locale_get_display_keyword_value().
+    (Weilin Du)
   . Added IntlNumberRangeFormatter class to format an interval of two numbers
     with a given skeleton, locale, collapse type and identity fallback.
     (BogdanUngureanu)
