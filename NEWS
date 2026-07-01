@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
     for invalid display types. (Weilin Du)
 
+- Lexbor:
+  . Merge patch c3a6847. (ilutov, timwolla)
+
 - Opcache:
   . Fixed bug GH-22265 (Another tailcall vm_interrupt bug). (Levi Morrison)
   . Fixed bug GH-20469 (Unsafe inheritance cache replay with reentrant
