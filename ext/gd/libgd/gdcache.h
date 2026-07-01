@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * gdcache.h
  *
@@ -8,7 +12,9 @@
  * John Ellson  (ellson@graphviz.org)  Oct 31, 1997
  *
  * Test this with:
- *		 gcc -o gdcache -g -Wall -DTEST gdcache.c
+ *		 gcc -o gdcache -g -Wall -DTEST -DNEED_CACHE gdcache.c -lgd
+ *		 or
+ *		 gcc -o gdcache -g -Wall -DTEST -DNEED_CACHE gdcache.c libgd.a
  *
  * The cache is implemented by a singly-linked list of elements
  * each containing a pointer to a user struct that is being managed by
@@ -69,15 +75,14 @@ struct gdCache_head_s {
 };
 
 /* function templates */
-gdCache_head_t *
-gdCacheCreate(
-	int					size,
-	gdCacheTestFn_t		gdCacheTest,
+gdCache_head_t *gdCacheCreate(int size, gdCacheTestFn_t gdCacheTest,
 	gdCacheFetchFn_t	gdCacheFetch,
 	gdCacheReleaseFn_t	gdCacheRelease );
 
-void
-gdCacheDelete( gdCache_head_t *head );
+void gdCacheDelete(gdCache_head_t *head);
 
-void *
-gdCacheGet( gdCache_head_t *head, void *keydata );
+void *gdCacheGet(gdCache_head_t *head, void *keydata);
+
+#ifdef __cplusplus
+}
+#endif

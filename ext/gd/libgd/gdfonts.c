@@ -1,5 +1,3 @@
-
-
 /*
    This is a header file for gd font, generated using
    bdftogd version 0.5 by Jan Pazdziora, adelton@fi.muni.cz
@@ -9,6 +7,14 @@
    No copyright info was found in the original bdf.
  */
 
+/**
+ * File: Small Font
+ *
+ * A small ISO-8859-2 raster font (6x13 pixels).
+ *
+ * The font is supposed to be used with <gdImageChar> and <gdImageString>
+ * and their variants.
+ */
 
 #include "gdfonts.h"
 
@@ -3856,21 +3862,16 @@ static const char gdFontSmallData[] =
 
 
 };
+gdFont gdFontSmallRep = {256, 0, 6, 13, gdFontSmallData};
 
-gdFont gdFontSmallRep =
-{
-  256,
-  0,
-  6,
-  13,
-  (char*)gdFontSmallData
-};
+BGD_EXPORT_DATA_PROT gdFontPtr gdFontSmall = &gdFontSmallRep;
 
-gdFontPtr gdFontSmall = &gdFontSmallRep;
-
-gdFontPtr gdFontGetSmall(void)
-{
-	return gdFontSmall;
-}
+/**
+ * Function: gdFontGetSmall
+ *
+ * Returns the built-in small font.
+ */
+BGD_DECLARE(gdFontPtr)
+gdFontGetSmall(void) { return gdFontSmall; }
 
 /* This file has not been truncated. */

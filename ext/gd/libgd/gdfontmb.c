@@ -1,5 +1,3 @@
-
-
 /*
    This is a header file for gd font, generated using
    bdftogd version 0.5 by Jan Pazdziora, adelton@fi.muni.cz
@@ -9,10 +7,18 @@
    No copyright info was found in the original bdf.
  */
 
+/**
+ * File: Medium Bold Font
+ *
+ * A medium bold ISO-8859-2 raster font (7x13 pixels).
+ *
+ * The font is supposed to be used with <gdImageChar> and <gdImageString>
+ * and their variants.
+ */
 
 #include "gdfontmb.h"
 
-static const char gdFontMediumBoldData[] =
+const char gdFontMediumBoldData[] =
 {
 /* Char 0 */
   0, 0, 0, 0, 0, 0, 0,
@@ -3857,20 +3863,16 @@ static const char gdFontMediumBoldData[] =
 
 };
 
-gdFont gdFontMediumBoldRep =
-{
-  256,
-  0,
-  7,
-  13,
-  (char*)gdFontMediumBoldData
-};
+gdFont gdFontMediumBoldRep = {256, 0, 7, 13, gdFontMediumBoldData};
 
-gdFontPtr gdFontMediumBold = &gdFontMediumBoldRep;
+BGD_EXPORT_DATA_PROT gdFontPtr gdFontMediumBold = &gdFontMediumBoldRep;
 
-gdFontPtr gdFontGetMediumBold(void)
-{
-	return gdFontMediumBold;
-}
+/**
+ * Function: gdFontGetMediumBold
+ *
+ * Returns the built-in medium bold font.
+ */
+BGD_DECLARE(gdFontPtr)
+gdFontGetMediumBold(void) { return gdFontMediumBold; }
 
 /* This file has not been truncated. */

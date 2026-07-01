@@ -1,5 +1,3 @@
-
-
 /*
    This is a header file for gd font, generated using
    bdftogd version 0.51 by Jan Pazdziora, adelton@fi.muni.cz
@@ -10,11 +8,17 @@
    "Libor Skarvada, libor@informatics.muni.cz"
  */
 
-
+/**
+ * File: Giant Font
+ *
+ * A very large ISO-8859-2 raster font (9x15 pixels).
+ *
+ * The font is supposed to be used with <gdImageChar> and <gdImageString>
+ * and their variants.
+ */
 #include "gdfontg.h"
 
-static const char gdFontGiantData[] =
-{
+char gdFontGiantData[] = {
 /* Char 0 */
   0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -4370,20 +4374,15 @@ static const char gdFontGiantData[] =
 
 };
 
-gdFont gdFontGiantRep =
-{
-  256,
-  0,
-  9,
-  15,
-  (char*)gdFontGiantData
-};
+gdFont gdFontGiantRep = {256, 0, 9, 15, gdFontGiantData};
 
-gdFontPtr gdFontGiant = &gdFontGiantRep;
+BGD_EXPORT_DATA_PROT gdFontPtr gdFontGiant = &gdFontGiantRep;
 
-gdFontPtr gdFontGetGiant(void)
-{
-	return gdFontGiant;
-}
+/**
+ * Function: gdFontGetGiant
+ *
+ * Returns the built-in giant font.
+ */
+BGD_DECLARE(gdFontPtr) gdFontGetGiant(void) { return gdFontGiant; }
 
 /* This file has not been truncated. */
