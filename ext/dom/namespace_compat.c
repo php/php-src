@@ -246,11 +246,12 @@ PHP_DOM_EXPORT void php_dom_ns_compat_mark_attribute_list(php_dom_libxml_ns_mapp
 	xmlNsPtr ns = node->nsDef;
 	xmlAttrPtr last_added = NULL;
 	do {
-		last_added = php_dom_ns_compat_mark_attribute(mapper, node, ns);
-		php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(mapper, ns);
 		xmlNsPtr next = ns->next;
+		node->nsDef = next;
 		ns->next = NULL;
 		php_libxml_set_old_ns(node->doc, ns);
+		last_added = php_dom_ns_compat_mark_attribute(mapper, node, ns);
+		php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(mapper, ns);
 		ns = next;
 	} while (ns != NULL);
 
@@ -264,8 +265,6 @@ PHP_DOM_EXPORT void php_dom_ns_compat_mark_attribute_list(php_dom_libxml_ns_mapp
 		/* Nothing added, so nothing changed. Only really possible on OOM. */
 		node->properties = attr;
 	}
-
-	node->nsDef = NULL;
 }
 
 PHP_DOM_EXPORT bool php_dom_ns_is_fast_ex(xmlNsPtr ns, const php_dom_ns_magic_token *magic_token)
