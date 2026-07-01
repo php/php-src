@@ -102,7 +102,7 @@ if (PHP_GD != "no") {
 			gd_io_file.c gd_io_ss.c gd_jpeg.c gdkanji.c gd_metadata.c gd_png.c gd_ss.c \
 			gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c gd_xbm.c gd_security.c gd_transform.c \
 			gd_filter.c gd_rotate.c gd_color_match.c gd_webp.c gd_avif.c \
-			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c gd_qoi.c gd_jxl.c gd_color_map.c \ 
+			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c gd_qoi.c gd_jxl.c gd_color_map.c \
 			gd_heif.c gd_uhdr.c gd_nnquant.c gd_color.c gd_readimage.c gd_filename.c \
 			ftraster/gd_ft_math.c ftraster/gd_ft_raster.c ftraster/gd_ft_stroker.c gd_array.c gd_span_rle.c \
 			gd_surface.c gd_version.c gd_compositor.c gd_gradient.c gd_path.c gd_path_arc.c gd_path_dash.c \
