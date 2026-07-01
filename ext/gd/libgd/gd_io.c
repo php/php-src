@@ -14,6 +14,7 @@
 
 #include "gd.h"
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -101,71 +102,70 @@ int gdGetWordLSB(signed short int *result, gdIOCtx *ctx) {
 
 int gdGetInt(int *result, gdIOCtx *ctx) {
 	int r;
+	uint32_t value;
 
 	r = (ctx->getC) (ctx);
 	if (r == EOF) {
 		return 0;
 	}
 
-	*result = r << 24;
+	value = (uint32_t)r << 24;
 
 	r = (ctx->getC) (ctx);
 	if (r == EOF) {
 		return 0;
 	}
 
-	*result += r << 16;
+	value |= (uint32_t)r << 16;
 
 	r = (ctx->getC) (ctx);
 	if (r == EOF) {
 		return 0;
 	}
 
-	*result += r << 8;
+	value |= (uint32_t)r << 8;
 
 	r = (ctx->getC) (ctx);
 	if (r == EOF) {
 		return 0;
 	}
 
-	*result += r;
+	value |= (uint32_t)r;
+	*result = (int32_t)value;
 
 	return 1;
 }
 
 int gdGetIntLSB(signed int *result, gdIOCtx *ctx) {
 	int c;
-	unsigned int r = 0;
+	uint32_t r;
 
 	c = (ctx->getC) (ctx);
 	if (c == EOF) {
 		return 0;
 	}
-	r |= (c << 24);
-	r >>= 8;
+	r = (uint32_t)c;
 
 	c = (ctx->getC) (ctx);
 	if (c == EOF) {
 		return 0;
 	}
-	r |= (c << 24);
-	r >>= 8;
+	r |= (uint32_t)c << 8;
 
 	c = (ctx->getC) (ctx);
 	if (c == EOF) {
 		return 0;
 	}
-	r |= (c << 24);
-	r >>= 8;
+	r |= (uint32_t)c << 16;
 
 	c = (ctx->getC) (ctx);
 	if (c == EOF) {
 		return 0;
 	}
-	r |= (c << 24);
+	r |= (uint32_t)c << 24;
 
 	if (result) {
-		*result = (signed int)r;
+		*result = (int32_t)r;
 	}
 
 	return 1;
