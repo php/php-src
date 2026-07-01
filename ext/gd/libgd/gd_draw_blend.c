@@ -152,23 +152,6 @@ _surface_fetch_pixel_bilinear(gdSurfacePtr image, gd_fixed_t x, gd_fixed_t y, gd
     return bilinear_interpolation(tl, tr, bl, br, distx, disty);
 }
 
-static inline void memfill32(uint32_t* dest, uint32_t value, int length)
-{
-    for(int i = 0 ;i < length;i++)
-        *dest++ = value;
-}
-
-static inline uint32_t argb32_interpolate_pixel(uint32_t src, uint32_t src_alpha, uint32_t dst, uint32_t dst_alpha)
-{
-    uint32_t t = (src & 0xff00ff) * src_alpha + (dst & 0xff00ff) * dst_alpha;
-    t >>= 8;
-    t &= 0xff00ff;
-    src = ((src >> 8) & 0xff00ff) * src_alpha + ((dst >> 8) & 0xff00ff) * dst_alpha;
-    src &= 0xff00ff00;
-    src |= t;
-    return src;
-}
-
 #define ALPHA(c) ((c) >> 24)
 static void operator_argb_color_source(uint32_t* dest, int length, uint32_t color, uint32_t alpha)
 {
