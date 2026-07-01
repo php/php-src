@@ -38,6 +38,10 @@ PHP 8.6 UPGRADE NOTES
     types / values and raise a TypeError / ValueError accordingly.
 
 - Intl:
+  . IntlDateFormatter::parse()/datefmt_parse() and
+    IntlDateFormatter::localtime()/datefmt_localtime() now raise a TypeError
+    when the offset argument is not of type int instead of silently converting
+    the value.
   . Passing a non-stringable object as a time zone to Intl APIs that accept
     time zone objects or strings now raises a TypeError instead of an Error.
   . IntlBreakIterator::getLocale() now raises a ValueError when the type is
