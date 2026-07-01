@@ -363,6 +363,7 @@ if test "$PHP_GD" != "no"; then
       libgd/gd_nnquant.c
       libgd/gd_color.c
       libgd/gd_tiff.c
+      libgd/gd_readimage.c
     "])
 
     AC_DEFINE([HAVE_GD_BUNDLED], [1],

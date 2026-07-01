@@ -1170,6 +1170,11 @@ BGD_DECLARE(gdUhdrImagePtr)
 gdUhdrImageCreateFromPtr(int size, void *data, int format, gdUhdrErrorPtr err);
 BGD_DECLARE(void) gdUhdrImageDestroy(gdUhdrImagePtr im);
 
+BGD_DECLARE(gdImagePtr) gdImageCreateFromFile(const char *filename);
+BGD_DECLARE(gdImagePtr) gdImageReadFile(const char *filename);
+BGD_DECLARE(gdImagePtr) gdImageReadCtx(gdIOCtxPtr ctx);
+
+
 /*
   Group: Types
 
@@ -1204,7 +1209,7 @@ typedef struct {
 
 /* Deprecated in favor of gdImageCreateFromPngCtx */
 BGD_DECLARE(gdImagePtr) gdImageCreateFromPngSource(gdSourcePtr in);
-
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGifSource(gdSourcePtr in);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromGd(FILE *in);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromGdCtx(gdIOCtxPtr in);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromGdPtr(int size, void *data);
@@ -1321,9 +1326,6 @@ BGD_DECLARE(void *)
 gdImageJpegPtrWithMetadata(gdImagePtr im, int *size, int quality,
 						   const gdImageMetadata *metadata);
 
-gdImagePtr gdImageCreateFromGif(FILE *fd);
-gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr in);
-gdImagePtr gdImageCreateFromGifSource(gdSourcePtr in);
 
 void gdImageAvif(gdImagePtr im, FILE *outfile);
 void gdImageAvifEx(gdImagePtr im, FILE *outfile, int quality, int speed);

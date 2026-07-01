@@ -99,7 +99,7 @@ static int LWZReadByte (gdIOCtx *fd, LZW_STATIC_DATA *sd, char flag, int input_c
 
 static void ReadImage (gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)[256], int interlace, int *ZeroDataBlockP); /*1.4//, int ignore); */
 
-gdImagePtr gdImageCreateFromGifSource(gdSourcePtr inSource) /* {{{ */
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGifSource(gdSourcePtr inSource) /* {{{ */
 {
 	gdIOCtx         *in = gdNewSSCtx(inSource, NULL);
 	gdImagePtr      im;
@@ -112,7 +112,7 @@ gdImagePtr gdImageCreateFromGifSource(gdSourcePtr inSource) /* {{{ */
 }
 /* }}} */
 
-gdImagePtr gdImageCreateFromGif(FILE *fdFile) /* {{{ */
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGif(FILE *fdFile) /* {{{ */
 {
 	gdIOCtx		*fd = gdNewFileCtx(fdFile);
 	gdImagePtr    	im = 0;
