@@ -30,6 +30,8 @@ static void zend_perf_stat_disable(void) {}
 # include <sys/stat.h>
 # include <unistd.h>
 
+# include "Zend/zend.h"
+
 # define ZPS_CTL_FIFO_ENV "PERF_STAT_CTL_FIFO"
 # define ZPS_ACK_FIFO_ENV "PERF_STAT_ACK_FIFO"
 
@@ -49,13 +51,15 @@ static int zps_open_fifo(const char *env_name, int flags)
 # endif
 	int fd = open(path, flags | O_NONBLOCK);
 	if (fd < 0) {
-		return -1;
+		fprintf(stderr, "Failed to open fifo %s\n", path);
+		zend_bailout();
 	}
 
 	struct stat st;
 	if (fstat(fd, &st) != 0 || !S_ISFIFO(st.st_mode)) {
 		close(fd);
-		return -1;
+		fprintf(stderr, "File %s is not a fifo\n", path);
+		zend_bailout();
 	}
 	return fd;
 }
