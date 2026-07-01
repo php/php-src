@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.32
+02 Jul 2026, PHP 8.3.32
 
 - Streams:
   . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
