@@ -307,6 +307,7 @@
 #define gdImagePngPtr php_gd_gdImagePngPtr
 #define gdImagePngPtrEx php_gd_gdImagePngPtrEx
 #define gdImagePngToSink php_gd_gdImagePngToSink
+#define gdPngGetVersionString php_gd_gdPngGetVersionString
 #define gdImagePolygon php_gd_gdImagePolygon
 #define gdImageRectangle php_gd_gdImageRectangle
 #define gdImageRotate php_gd_gdImageRotate
