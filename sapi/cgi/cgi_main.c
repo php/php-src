@@ -95,6 +95,8 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 # endif
 #endif
 
+#include "zend_perf_stat.h"
+
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
 static struct sigaction act, old_term, old_quit, old_int;
@@ -1733,6 +1735,7 @@ int main(int argc, char *argv[])
 	int warmup_repeats = 0;
 	int repeats = 1;
 	int benchmark = 0;
+	bool perf_enabled = false;
 #ifdef HAVE_GETTIMEOFDAY
 	struct timeval start, end;
 #else
@@ -2441,14 +2444,16 @@ do_repeat:
 				}
 			} /* end !cgi && !fastcgi */
 
-#ifdef HAVE_VALGRIND
 			if (warmup_repeats == 0) {
+				zend_perf_stat_enable();
+				perf_enabled = true;
+#ifdef HAVE_VALGRIND
 				CALLGRIND_START_INSTRUMENTATION;
 # ifdef HAVE_VALGRIND_CACHEGRIND_H
 				CACHEGRIND_START_INSTRUMENTATION;
 # endif
-			}
 #endif
+			}
 
 			/* request startup only after we've done all we can to
 			 * get path_translated */
@@ -2568,6 +2573,10 @@ fastcgi_request_done:
 				SG(request_info).query_string = NULL;
 			}
 
+			if (perf_enabled) {
+				zend_perf_stat_disable();
+				perf_enabled = false;
+			}
 #ifdef HAVE_VALGRIND
 			/* We're not interested in measuring shutdown */
 			CALLGRIND_STOP_INSTRUMENTATION;
