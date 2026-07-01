@@ -52,6 +52,9 @@
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/dl_arginfo.h"
+
+#include "ext/opcache/zend_user_cache.h"
+
 #include "cli.h"
 #ifdef PHP_WIN32
 #include <io.h>
@@ -390,7 +393,14 @@ static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_c
 
 static int php_cli_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	return php_module_startup(sapi_module_ptr, NULL);
+	int result;
+
+	result = php_module_startup(sapi_module_ptr, NULL);
+	if (result == SUCCESS) {
+		zend_opcache_user_cache_opt_in();
+	}
+
+	return result;
 }
 /* }}} */
 

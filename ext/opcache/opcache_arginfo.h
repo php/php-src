@@ -1,8 +1,10 @@
 /* This is a generated file, edit opcache.stub.php instead.
- * Stub hash: a8de025fa96a78db3a26d53a18bb2b365d094eca */
+ * Stub hash: 1eaa355c203af73871d5c9068de8d4a742847ffa */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_opcache_reset, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_opcache_user_cache_reset arginfo_opcache_reset
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_opcache_get_status, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, include_scripts, _IS_BOOL, 0, "true")
@@ -29,6 +31,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_opcache_is_script_cached_in_file_cache arginfo_opcache_compile_file
 
 ZEND_FUNCTION(opcache_reset);
+ZEND_FUNCTION(opcache_user_cache_reset);
 ZEND_FUNCTION(opcache_get_status);
 ZEND_FUNCTION(opcache_compile_file);
 ZEND_FUNCTION(opcache_invalidate);
@@ -39,6 +42,7 @@ ZEND_FUNCTION(opcache_is_script_cached_in_file_cache);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(opcache_reset, arginfo_opcache_reset)
+	ZEND_FE(opcache_user_cache_reset, arginfo_opcache_user_cache_reset)
 	ZEND_FE(opcache_get_status, arginfo_opcache_get_status)
 	ZEND_FE(opcache_compile_file, arginfo_opcache_compile_file)
 	ZEND_FE(opcache_invalidate, arginfo_opcache_invalidate)

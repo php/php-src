@@ -26,6 +26,7 @@
 #include "spl_fixedarray.h"
 #include "spl_exceptions.h"
 #include "ext/json/php_json.h" /* For php_json_serializable_ce */
+#include "ext/opcache/zend_user_cache.h"
 
 static zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
@@ -576,20 +577,21 @@ PHP_METHOD(SplFixedArray, __wakeup)
 	}
 }
 
-PHP_METHOD(SplFixedArray, __serialize)
+static void spl_fixedarray_object_serialize(zval *object, zval *return_value)
 {
-	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(object);
+	HashTable *ht;
+	uint32_t num_properties;
 	zval *current;
 	zend_string *key;
+	zend_long i;
 
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	HashTable *ht = zend_std_get_properties(&intern->std);
-	uint32_t num_properties = zend_hash_num_elements(ht);
+	ht = zend_std_get_properties(&intern->std);
+	num_properties = zend_hash_num_elements(ht);
 	array_init_size(return_value, intern->array.size + num_properties);
 
 	/* elements */
-	for (zend_long i = 0; i < intern->array.size; i++) {
+	for (i = 0; i < intern->array.size; i++) {
 		current = &intern->array.elements[i];
 		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), current);
 		Z_TRY_ADDREF_P(current);
@@ -607,17 +609,12 @@ PHP_METHOD(SplFixedArray, __serialize)
 	} ZEND_HASH_FOREACH_END();
 }
 
-PHP_METHOD(SplFixedArray, __unserialize)
+static void spl_fixedarray_object_unserialize(zval *object, HashTable *data)
 {
-	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
-	HashTable *data;
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(object);
 	zval members_zv, *elem;
 	zend_string *key;
 	zend_long size;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
-		RETURN_THROWS();
-	}
 
 	if (intern->array.size == 0) {
 		size = zend_hash_num_elements(data);
@@ -650,6 +647,164 @@ PHP_METHOD(SplFixedArray, __unserialize)
 		object_properties_load(&intern->std, Z_ARRVAL(members_zv));
 		zval_ptr_dtor(&members_zv);
 	}
+}
+
+PHP_METHOD(SplFixedArray, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	spl_fixedarray_object_serialize(ZEND_THIS, return_value);
+}
+
+PHP_METHOD(SplFixedArray, __unserialize)
+{
+	HashTable *data;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	spl_fixedarray_object_unserialize(ZEND_THIS, data);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+}
+
+static bool spl_fixedarray_object_copy_user_cache_state(
+		void *context,
+		zend_object *old_object,
+		zend_object *new_object,
+		zend_opcache_user_cache_safe_direct_clone_value_func_t clone_value)
+{
+	zval old_zv, new_zv, state_zv, cloned_state_zv, elements_zv, copied_elem, *elem;
+	zend_string *key;
+	bool result;
+
+	if (clone_value == NULL) {
+		return false;
+	}
+
+	result = false;
+	ZVAL_OBJ(&old_zv, old_object);
+	ZVAL_OBJ(&new_zv, new_object);
+	ZVAL_UNDEF(&state_zv);
+	ZVAL_UNDEF(&cloned_state_zv);
+
+	spl_fixedarray_object_serialize(&old_zv, &state_zv);
+	if (EG(exception) || Z_TYPE(state_zv) != IS_ARRAY) {
+		goto cleanup;
+	}
+
+	array_init_size(&elements_zv, zend_hash_num_elements(Z_ARRVAL(state_zv)));
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL(state_zv), key, elem) {
+		if (key == NULL) {
+			ZVAL_COPY(&copied_elem, elem);
+			zend_hash_next_index_insert(Z_ARRVAL(elements_zv), &copied_elem);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	zval_ptr_dtor(&state_zv);
+	ZVAL_COPY_VALUE(&state_zv, &elements_zv);
+
+	if (!clone_value(context, &cloned_state_zv, &state_zv) ||
+			Z_TYPE(cloned_state_zv) != IS_ARRAY) {
+		goto cleanup;
+	}
+
+	spl_fixedarray_object_unserialize(&new_zv, Z_ARRVAL(cloned_state_zv));
+	result = !EG(exception);
+
+cleanup:
+	if (Z_TYPE(cloned_state_zv) != IS_UNDEF) {
+		zval_ptr_dtor(&cloned_state_zv);
+	}
+
+	if (Z_TYPE(state_zv) != IS_UNDEF) {
+		zval_ptr_dtor(&state_zv);
+	}
+
+	return result;
+}
+
+static bool spl_fixedarray_object_user_cache_state_has_unstorable(
+		void *context,
+		const zval *object,
+		zend_opcache_user_cache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
+{
+	zval state_zv;
+	bool result;
+
+	if (value_has_unstorable == NULL) {
+		return false;
+	}
+
+	result = false;
+	ZVAL_UNDEF(&state_zv);
+	spl_fixedarray_object_serialize((zval *) object, &state_zv);
+
+	if (EG(exception) || Z_TYPE(state_zv) == IS_UNDEF) {
+		return true;
+	}
+
+	result = value_has_unstorable(context, &state_zv);
+	zval_ptr_dtor(&state_zv);
+
+	return result;
+}
+
+static bool spl_fixedarray_object_serialize_user_cache_state(const zval *object, zval *state)
+{
+	zval serialized_state, copied_elem;
+	zval *elem;
+	zend_string *key;
+
+	ZVAL_UNDEF(state);
+	ZVAL_UNDEF(&serialized_state);
+	spl_fixedarray_object_serialize((zval *) object, &serialized_state);
+
+	if (EG(exception) || Z_TYPE(serialized_state) != IS_ARRAY) {
+		if (Z_TYPE(serialized_state) != IS_UNDEF) {
+			zval_ptr_dtor(&serialized_state);
+		}
+
+		return false;
+	}
+
+	array_init_size(state, zend_hash_num_elements(Z_ARRVAL(serialized_state)));
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL(serialized_state), key, elem) {
+		if (key == NULL) {
+			ZVAL_COPY(&copied_elem, elem);
+			zend_hash_next_index_insert(Z_ARRVAL_P(state), &copied_elem);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	zval_ptr_dtor(&serialized_state);
+
+	return true;
+}
+
+static bool spl_fixedarray_object_unserialize_user_cache_state(zval *object, zval *state)
+{
+	if (Z_TYPE_P(state) != IS_ARRAY) {
+		return false;
+	}
+
+	spl_fixedarray_object_unserialize(object, Z_ARRVAL_P(state));
+
+	return !EG(exception);
+}
+
+static const zend_opcache_user_cache_safe_direct_handlers *spl_fixedarray_object_get_user_cache_handlers(void)
+{
+	static const zend_opcache_user_cache_safe_direct_handlers handlers = {
+		false,
+		spl_fixedarray_object_copy_user_cache_state,
+		spl_fixedarray_object_user_cache_state_has_unstorable,
+		spl_fixedarray_object_serialize_user_cache_state,
+		spl_fixedarray_object_unserialize_user_cache_state
+	};
+
+	return &handlers;
 }
 
 PHP_METHOD(SplFixedArray, count)
@@ -959,6 +1114,11 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_handler_SplFixedArray.get_properties_for = spl_fixedarray_object_get_properties_for;
 	spl_handler_SplFixedArray.get_gc          = spl_fixedarray_object_get_gc;
 	spl_handler_SplFixedArray.free_obj        = spl_fixedarray_object_free_storage;
+
+	zend_opcache_user_cache_safe_direct_register_class(
+		spl_ce_SplFixedArray,
+		spl_fixedarray_object_get_user_cache_handlers()
+	);
 
 	return SUCCESS;
 }

@@ -45,6 +45,7 @@
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 #include "zend_file_cache.h"
+#include "zend_user_cache.h"
 #include "zend_system_id.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/basic_functions.h"
@@ -2819,6 +2820,8 @@ zend_result accel_post_deactivate(void)
 		zend_string_release_ex(ZCG(cwd), 0);
 		ZCG(cwd) = NULL;
 	}
+
+	zend_opcache_user_cache_post_deactivate();
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return SUCCESS;

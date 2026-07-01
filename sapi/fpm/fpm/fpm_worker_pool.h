@@ -5,6 +5,7 @@
 
 #include "fpm_conf.h"
 #include "fpm_shm.h"
+#include "ext/opcache/zend_user_cache.h"
 
 struct fpm_worker_pool_s;
 struct fpm_child_s;
@@ -38,6 +39,7 @@ struct fpm_worker_pool_s {
 	struct fpm_scoreboard_s *scoreboard;
 	int log_fd;
 	char **limit_extensions;
+	zend_opcache_user_cache_partition *user_cache_partition;
 
 	/* for ondemand PM */
 	struct fpm_event_s *ondemand_event;

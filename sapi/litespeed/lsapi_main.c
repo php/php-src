@@ -26,6 +26,8 @@
 #include "lsapilib.h"
 #include "lsapi_main_arginfo.h"
 
+#include "ext/opcache/zend_user_cache.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -51,6 +53,7 @@
 #endif
 
 #define SAPI_LSAPI_MAX_HEADER_LENGTH LSAPI_RESP_HTTP_HEADER_MAX
+#define LSAPI_USER_CACHE_MAX_BOUNDARY_PARTITIONS 32
 
 /* Key for each cache entry is dirname(PATH_TRANSLATED).
  *
@@ -63,6 +66,15 @@ typedef struct _user_config_cache_entry {
     time_t expires;
     HashTable user_config;
 } user_config_cache_entry;
+
+typedef struct _lsapi_user_cache_boundary_partition {
+    char *boundary;
+    size_t boundary_len;
+    zend_ulong boundary_hash;
+    zend_opcache_user_cache_partition *partition;
+    struct _lsapi_user_cache_boundary_partition *next;
+} lsapi_user_cache_boundary_partition;
+
 static HashTable user_config_cache;
 
 static int  lsapi_mode       = 0;
@@ -73,6 +85,10 @@ static int  ignore_php_ini   = 0;
 static char * argv0 = NULL;
 static int  engine = 1;
 static int  parse_user_ini   = 0;
+static lsapi_user_cache_boundary_partition *lsapi_user_cache_partitions = NULL;
+static uint32_t lsapi_user_cache_partition_count = 0;
+static bool lsapi_user_cache_partition_limit_logged = false;
+static bool lsapi_user_cache_partition_startup_failed_logged = false;
 
 #ifdef ZTS
 zend_compiler_globals    *compiler_globals;
@@ -97,6 +113,7 @@ static int php_lsapi_startup(sapi_module_struct *sapi_module)
     if (php_module_startup(sapi_module, NULL)==FAILURE) {
         return FAILURE;
     }
+    zend_opcache_user_cache_opt_in();
     argv0 = sapi_module->executable_location;
     return SUCCESS;
 }
@@ -175,6 +192,8 @@ static int sapi_lsapi_deactivate(void)
         efree( SG(request_info).path_translated );
         SG(request_info).path_translated = NULL;
     }
+
+    zend_opcache_user_cache_partition_activate(NULL);
 
     return SUCCESS;
 }
@@ -513,6 +532,208 @@ static void sapi_lsapi_log_message(const char *message, int syslog_type_int)
 }
 /* }}} */
 
+static lsapi_user_cache_boundary_partition *lsapi_user_cache_find_boundary_partition(
+        const char *boundary,
+        size_t boundary_len,
+        zend_ulong boundary_hash)
+{
+    lsapi_user_cache_boundary_partition *entry;
+
+    for (entry = lsapi_user_cache_partitions; entry != NULL; entry = entry->next) {
+        if (entry->boundary_hash == boundary_hash &&
+            entry->boundary_len == boundary_len &&
+            memcmp(entry->boundary, boundary, boundary_len) == 0
+        ) {
+            return entry;
+        }
+    }
+
+    return NULL;
+}
+
+static lsapi_user_cache_boundary_partition *lsapi_user_cache_create_boundary_partition(
+        const char *boundary,
+        size_t boundary_len,
+        zend_ulong boundary_hash)
+{
+    lsapi_user_cache_boundary_partition *entry;
+    char partition_name[128];
+
+    if (lsapi_user_cache_partition_count >= LSAPI_USER_CACHE_MAX_BOUNDARY_PARTITIONS) {
+        if (!lsapi_user_cache_partition_limit_logged) {
+            sapi_lsapi_log_message("OPcache User Cache disabled for this request because the LSAPI cache boundary partition limit was reached", 0);
+            lsapi_user_cache_partition_limit_logged = true;
+        }
+
+        return NULL;
+    }
+
+    entry = calloc(1, sizeof(*entry));
+    if (entry == NULL) {
+        return NULL;
+    }
+
+    entry->boundary = malloc(boundary_len + 1);
+    if (entry->boundary == NULL) {
+        free(entry);
+
+        return NULL;
+    }
+
+    memcpy(entry->boundary, boundary, boundary_len);
+    entry->boundary[boundary_len] = '\0';
+    entry->boundary_len = boundary_len;
+    entry->boundary_hash = boundary_hash;
+
+    snprintf(
+        partition_name,
+        sizeof(partition_name),
+        "litespeed:%ld:%u:" ZEND_ULONG_FMT,
+        (long) getpid(),
+        lsapi_user_cache_partition_count,
+        boundary_hash
+    );
+
+    entry->partition = zend_opcache_user_cache_partition_create(partition_name);
+    if (entry->partition == NULL) {
+        free(entry->boundary);
+        free(entry);
+
+        return NULL;
+    }
+
+    entry->next = lsapi_user_cache_partitions;
+    lsapi_user_cache_partitions = entry;
+    lsapi_user_cache_partition_count++;
+
+    return entry;
+}
+
+static char *lsapi_user_cache_build_boundary_key(const char *boundary, size_t *boundary_key_len)
+{
+    char *boundary_key;
+    size_t boundary_len, prefix_len = 0;
+#if !defined(PHP_WIN32) && defined(HAVE_UNISTD_H)
+    char prefix[64];
+    int prefix_result;
+#endif
+
+    boundary_len = strlen(boundary);
+
+#if !defined(PHP_WIN32) && defined(HAVE_UNISTD_H)
+    prefix_result = snprintf(
+        prefix,
+        sizeof(prefix),
+        "uid:%ld:gid:%ld:",
+        (long) geteuid(),
+        (long) getegid()
+    );
+    if (prefix_result < 0 || (size_t) prefix_result >= sizeof(prefix)) {
+        return NULL;
+    }
+    prefix_len = (size_t) prefix_result;
+#endif
+
+    if (boundary_len > SIZE_MAX - prefix_len - 1) {
+        return NULL;
+    }
+
+    boundary_key = malloc(prefix_len + boundary_len + 1);
+    if (boundary_key == NULL) {
+        return NULL;
+    }
+
+#if !defined(PHP_WIN32) && defined(HAVE_UNISTD_H)
+    memcpy(boundary_key, prefix, prefix_len);
+#endif
+    memcpy(boundary_key + prefix_len, boundary, boundary_len + 1);
+    *boundary_key_len = prefix_len + boundary_len;
+
+    return boundary_key;
+}
+
+static zend_opcache_user_cache_partition *lsapi_user_cache_get_partition_for_boundary(const char *boundary)
+{
+    lsapi_user_cache_boundary_partition *entry;
+    char *boundary_key;
+    size_t boundary_len;
+    zend_ulong boundary_hash;
+
+    boundary_key = lsapi_user_cache_build_boundary_key(boundary, &boundary_len);
+    if (boundary_key == NULL) {
+        return NULL;
+    }
+
+    boundary_hash = zend_inline_hash_func(boundary_key, boundary_len);
+    entry = lsapi_user_cache_find_boundary_partition(boundary_key, boundary_len, boundary_hash);
+    if (entry == NULL) {
+        entry = lsapi_user_cache_create_boundary_partition(boundary_key, boundary_len, boundary_hash);
+        if (entry == NULL) {
+            free(boundary_key);
+
+            return NULL;
+        }
+    }
+
+    free(boundary_key);
+
+    if (!zend_opcache_user_cache_partition_startup_storage(entry->partition) &&
+        !lsapi_user_cache_partition_startup_failed_logged
+    ) {
+        sapi_lsapi_log_message("OPcache User Cache partition startup failed; User Cache will be unavailable", 0);
+        lsapi_user_cache_partition_startup_failed_logged = true;
+    }
+
+    return entry->partition;
+}
+
+static zend_opcache_user_cache_partition *lsapi_user_cache_get_request_partition(void)
+{
+    const char *boundary;
+
+    boundary = sapi_lsapi_getenv("DOCUMENT_ROOT", 0);
+    if (boundary == NULL || boundary[0] == '\0') {
+        boundary = sapi_lsapi_getenv("SERVER_NAME", 0);
+    }
+    if (boundary == NULL || boundary[0] == '\0') {
+        return NULL;
+    }
+
+    return lsapi_user_cache_get_partition_for_boundary(boundary);
+}
+
+static void lsapi_user_cache_activate_request_partition(void)
+{
+    zend_opcache_user_cache_partition *partition;
+
+    partition = lsapi_user_cache_get_request_partition();
+    if (partition == NULL) {
+        zend_opcache_user_cache_activate_request_unavailable("LSAPI cache boundary is not available");
+
+        return;
+    }
+
+    zend_opcache_user_cache_partition_activate(partition);
+}
+
+static void lsapi_user_cache_shutdown_boundary_partitions(void)
+{
+    lsapi_user_cache_boundary_partition *entry, *next;
+
+    entry = lsapi_user_cache_partitions;
+    while (entry != NULL) {
+        next = entry->next;
+        free(entry->boundary);
+        free(entry);
+        entry = next;
+    }
+
+    lsapi_user_cache_partitions = NULL;
+    lsapi_user_cache_partition_count = 0;
+    lsapi_user_cache_partition_limit_logged = false;
+    lsapi_user_cache_partition_startup_failed_logged = false;
+}
+
 /* Set to 1 to turn on log messages useful during development:
  */
 #if 0
@@ -583,6 +804,7 @@ static int sapi_lsapi_activate(void)
     if (parse_user_ini && lsapi_activate_user_ini() == FAILURE) {
         return FAILURE;
     }
+    lsapi_user_cache_activate_request_partition();
     return SUCCESS;
 }
 /* {{{ sapi_module_struct cgi_sapi_module */
@@ -736,6 +958,7 @@ static void lsapi_atexit(void)
 static int lsapi_module_main(int show_source)
 {
     struct sigaction act;
+    lsapi_user_cache_activate_request_partition();
     if (php_request_startup() == FAILURE ) {
         return -1;
     }
@@ -1517,6 +1740,8 @@ int main( int argc, char * argv[] )
         return FAILURE;
     }
 
+    zend_opcache_user_cache_opt_in();
+
     if ( climode ) {
         return cli_main(argc, argv);
     }
@@ -1627,6 +1852,7 @@ static PHP_MINIT_FUNCTION(litespeed)
 static PHP_MSHUTDOWN_FUNCTION(litespeed)
 {
     zend_hash_destroy(&user_config_cache);
+    lsapi_user_cache_shutdown_boundary_partitions();
 
     /* UNREGISTER_INI_ENTRIES(); */
     return SUCCESS;

@@ -18,6 +18,7 @@
 
 #include "php.h"
 #include "ext/standard/php_var.h"
+#include "ext/opcache/zend_user_cache.h"
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
@@ -1506,6 +1507,205 @@ PHP_METHOD(ArrayObject, __unserialize)
 }
 /* }}} */
 
+static void spl_array_object_build_user_cache_state(zval *object, zval *return_value)
+{
+	spl_array_object *intern;
+	zval tmp;
+
+	intern = Z_SPLARRAY_P(object);
+	array_init_size(return_value, 3);
+
+	ZVAL_LONG(&tmp, (intern->ar_flags & SPL_ARRAY_CLONE_MASK));
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+
+	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
+		ZVAL_NULL(&tmp);
+	} else {
+		ZVAL_COPY(&tmp, &intern->array);
+	}
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+
+	if (intern->ce_get_iterator == spl_ce_ArrayIterator) {
+		ZVAL_NULL(&tmp);
+	} else {
+		ZVAL_STR_COPY(&tmp, intern->ce_get_iterator->name);
+	}
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+}
+
+static void spl_array_object_unserialize_user_cache_state_ex(zval *object, HashTable *data)
+{
+	spl_array_object *intern;
+	zend_long flags;
+	zend_class_entry *ce;
+	zval *flags_zv, *storage_zv, *iterator_class_zv;
+
+	intern = Z_SPLARRAY_P(object);
+	flags_zv = zend_hash_index_find(data, 0);
+	storage_zv = zend_hash_index_find(data, 1);
+	iterator_class_zv = zend_hash_index_find(data, 2);
+
+	if (!flags_zv || !storage_zv ||
+		Z_TYPE_P(flags_zv) != IS_LONG ||
+		(iterator_class_zv && (Z_TYPE_P(iterator_class_zv) != IS_NULL &&
+			Z_TYPE_P(iterator_class_zv) != IS_STRING))
+	) {
+		zend_throw_exception(spl_ce_UnexpectedValueException, "Incomplete or ill-typed serialization data", 0);
+
+		return;
+	}
+
+	flags = Z_LVAL_P(flags_zv);
+	intern->ar_flags &= ~SPL_ARRAY_CLONE_MASK;
+	intern->ar_flags |= flags & SPL_ARRAY_CLONE_MASK;
+
+	if (flags & SPL_ARRAY_IS_SELF) {
+		zval_ptr_dtor(&intern->array);
+		ZVAL_UNDEF(&intern->array);
+	} else {
+		if (Z_TYPE_P(storage_zv) != IS_OBJECT && Z_TYPE_P(storage_zv) != IS_ARRAY) {
+			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object", 0);
+
+			return;
+		}
+
+		spl_array_set_array(object, intern, storage_zv, flags & SPL_ARRAY_CLONE_MASK, true);
+	}
+
+	if (iterator_class_zv && Z_TYPE_P(iterator_class_zv) == IS_STRING) {
+		ce = zend_lookup_class(Z_STR_P(iterator_class_zv));
+
+		if (!ce) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
+				"Cannot deserialize ArrayObject with iterator class '%s'; no such class exists",
+				ZSTR_VAL(Z_STR_P(iterator_class_zv)))
+			;
+
+			return;
+		}
+
+		if (!instanceof_function(ce, zend_ce_iterator)) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
+				"Cannot deserialize ArrayObject with iterator class '%s'; this class does not implement the Iterator interface",
+				ZSTR_VAL(Z_STR_P(iterator_class_zv)))
+			;
+
+			return;
+		}
+
+		intern->ce_get_iterator = ce;
+	}
+}
+
+static bool spl_array_object_copy_user_cache_state(
+		void *context,
+		zend_object *old_object,
+		zend_object *new_object,
+		zend_opcache_user_cache_safe_direct_clone_value_func_t clone_value)
+{
+	spl_array_object *old_intern, *new_intern;
+	zval new_zv, cloned_storage_zv;
+	bool result;
+
+	result = false;
+	old_intern = spl_array_from_obj(old_object);
+	new_intern = spl_array_from_obj(new_object);
+
+	if (clone_value == NULL) {
+		return false;
+	}
+
+	ZVAL_OBJ(&new_zv, new_object);
+	ZVAL_UNDEF(&cloned_storage_zv);
+
+	new_intern->ar_flags &= ~SPL_ARRAY_CLONE_MASK;
+	new_intern->ar_flags |= old_intern->ar_flags & SPL_ARRAY_CLONE_MASK;
+	new_intern->ce_get_iterator = old_intern->ce_get_iterator;
+
+	if (old_intern->ar_flags & SPL_ARRAY_IS_SELF) {
+		zval_ptr_dtor(&new_intern->array);
+		ZVAL_UNDEF(&new_intern->array);
+		result = true;
+
+		goto cleanup;
+	}
+
+	if (!clone_value(context, &cloned_storage_zv, &old_intern->array) ||
+		(Z_TYPE(cloned_storage_zv) != IS_OBJECT && Z_TYPE(cloned_storage_zv) != IS_ARRAY)
+	) {
+		goto cleanup;
+	}
+
+	spl_array_set_array(&new_zv, new_intern, &cloned_storage_zv, old_intern->ar_flags & SPL_ARRAY_CLONE_MASK, true);
+	result = !EG(exception);
+
+cleanup:
+	if (Z_TYPE(cloned_storage_zv) != IS_UNDEF) {
+		zval_ptr_dtor(&cloned_storage_zv);
+	}
+
+	return result;
+}
+
+static bool spl_array_object_user_cache_state_has_unstorable(
+		void *context,
+		const zval *object,
+		zend_opcache_user_cache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
+{
+	spl_array_object *intern;
+
+	if (value_has_unstorable == NULL) {
+		return false;
+	}
+
+	intern = Z_SPLARRAY_P(object);
+	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
+		return false;
+	}
+
+	return value_has_unstorable(context, &intern->array);
+}
+
+static bool spl_array_object_serialize_user_cache_state(const zval *object, zval *state)
+{
+	ZVAL_UNDEF(state);
+	spl_array_object_build_user_cache_state((zval *) object, state);
+	if (EG(exception) || Z_TYPE_P(state) != IS_ARRAY) {
+		if (Z_TYPE_P(state) != IS_UNDEF) {
+			zval_ptr_dtor(state);
+		}
+		ZVAL_UNDEF(state);
+
+		return false;
+	}
+
+	return true;
+}
+
+static bool spl_array_object_unserialize_user_cache_state(zval *object, zval *state)
+{
+	if (Z_TYPE_P(state) != IS_ARRAY) {
+		return false;
+	}
+
+	spl_array_object_unserialize_user_cache_state_ex(object, Z_ARRVAL_P(state));
+
+	return !EG(exception);
+}
+
+static const zend_opcache_user_cache_safe_direct_handlers *spl_array_object_get_user_cache_handlers(void)
+{
+	static const zend_opcache_user_cache_safe_direct_handlers handlers = {
+		false,
+		spl_array_object_copy_user_cache_state,
+		spl_array_object_user_cache_state_has_unstorable,
+		spl_array_object_serialize_user_cache_state,
+		spl_array_object_unserialize_user_cache_state
+	};
+
+	return &handlers;
+}
+
 /* {{{ */
 PHP_METHOD(ArrayObject, __debugInfo)
 {
@@ -1853,6 +2053,8 @@ PHP_METHOD(RecursiveArrayIterator, getChildren)
 /* {{{ PHP_MINIT_FUNCTION(spl_array) */
 PHP_MINIT_FUNCTION(spl_array)
 {
+	const zend_opcache_user_cache_safe_direct_handlers *handlers;
+
 	spl_ce_ArrayObject = register_class_ArrayObject(zend_ce_aggregate, zend_ce_arrayaccess, zend_ce_serializable, zend_ce_countable);
 	spl_ce_ArrayObject->create_object = spl_array_object_new;
 	spl_ce_ArrayObject->default_object_handlers = &spl_handler_ArrayObject;
@@ -1887,6 +2089,12 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_ce_RecursiveArrayIterator = register_class_RecursiveArrayIterator(spl_ce_ArrayIterator, spl_ce_RecursiveIterator);
 	spl_ce_RecursiveArrayIterator->create_object = spl_array_object_new;
 	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
+
+	handlers = spl_array_object_get_user_cache_handlers();
+
+	zend_opcache_user_cache_safe_direct_register_class(spl_ce_ArrayObject, handlers);
+	zend_opcache_user_cache_safe_direct_register_class(spl_ce_ArrayIterator, handlers);
+	zend_opcache_user_cache_safe_direct_register_class(spl_ce_RecursiveArrayIterator, handlers);
 
 	return SUCCESS;
 }

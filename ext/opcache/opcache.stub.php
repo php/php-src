@@ -4,6 +4,8 @@
 
 function opcache_reset(): bool {}
 
+function opcache_user_cache_reset(): bool {}
+
 /**
  * @return array<string, mixed>|false
  * @refcount 1

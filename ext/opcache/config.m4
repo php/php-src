@@ -331,6 +331,10 @@ PHP_NEW_EXTENSION([opcache], m4_normalize([
     zend_accelerator_hash.c
     zend_accelerator_module.c
     zend_accelerator_util_funcs.c
+    zend_user_cache.c
+    zend_user_cache_storage.c
+    zend_user_cache_shared_graph.c
+    zend_user_cache_entries.c
     zend_file_cache.c
     zend_persist_calc.c
     zend_persist.c

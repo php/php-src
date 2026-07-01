@@ -63,6 +63,7 @@
 #include "ext/standard/php_standard.h"
 #include "ext/standard/dl_arginfo.h"
 #include "ext/standard/url.h"
+#include "ext/opcache/zend_user_cache.h"
 
 #ifdef PHP_WIN32
 # include <io.h>
@@ -131,10 +132,23 @@ static pid_t pgroup;
 #define PHP_MODE_HIGHLIGHT	2
 #define PHP_MODE_LINT		4
 #define PHP_MODE_STRIP		5
+#define PHP_CGI_USER_CACHE_MAX_BOUNDARY_PARTITIONS 32
+
+typedef struct _cgi_user_cache_boundary_partition {
+	char *boundary;
+	size_t boundary_len;
+	zend_ulong boundary_hash;
+	zend_opcache_user_cache_partition *partition;
+	struct _cgi_user_cache_boundary_partition *next;
+} cgi_user_cache_boundary_partition;
 
 static char *php_optarg = NULL;
 static int php_optind = 1;
 static zend_module_entry cgi_module_entry;
+static cgi_user_cache_boundary_partition *cgi_user_cache_partitions = NULL;
+static uint32_t cgi_user_cache_partition_count = 0;
+static bool cgi_user_cache_partition_limit_logged = false;
+static bool cgi_user_cache_partition_startup_failed_logged = false;
 
 static const opt_struct OPTIONS[] = {
 	{'a', 0, "interactive"},
@@ -776,6 +790,228 @@ static void sapi_cgi_log_message(const char *message, int syslog_type_int)
 	}
 }
 
+static const char *cgi_user_cache_get_boundary_value(const char *name)
+{
+	const char *value;
+	fcgi_request *request;
+	int name_len;
+
+	if (SG(server_context) != NULL && SG(server_context) != (void *) 1) {
+		request = (fcgi_request*) SG(server_context);
+		if (fcgi_has_env(request)) {
+			name_len = (int) strlen(name);
+			value = fcgi_getenv(request, name, name_len);
+			if (value != NULL) {
+				return value;
+			}
+		}
+	}
+
+	return getenv(name);
+}
+
+static cgi_user_cache_boundary_partition *cgi_user_cache_find_boundary_partition(
+		const char *boundary,
+		size_t boundary_len,
+		zend_ulong boundary_hash)
+{
+	cgi_user_cache_boundary_partition *entry;
+
+	for (entry = cgi_user_cache_partitions; entry != NULL; entry = entry->next) {
+		if (entry->boundary_hash == boundary_hash &&
+			entry->boundary_len == boundary_len &&
+			memcmp(entry->boundary, boundary, boundary_len) == 0
+		) {
+			return entry;
+		}
+	}
+
+	return NULL;
+}
+
+static cgi_user_cache_boundary_partition *cgi_user_cache_create_boundary_partition(
+		const char *boundary,
+		size_t boundary_len,
+		zend_ulong boundary_hash)
+{
+	cgi_user_cache_boundary_partition *entry;
+	char partition_name[128];
+
+	if (cgi_user_cache_partition_count >= PHP_CGI_USER_CACHE_MAX_BOUNDARY_PARTITIONS) {
+		if (!cgi_user_cache_partition_limit_logged) {
+			sapi_cgi_log_message("OPcache User Cache disabled for this request because the CGI/FastCGI cache boundary partition limit was reached", 0);
+			cgi_user_cache_partition_limit_logged = true;
+		}
+
+		return NULL;
+	}
+
+	entry = calloc(1, sizeof(*entry));
+	if (entry == NULL) {
+		return NULL;
+	}
+
+	entry->boundary = malloc(boundary_len + 1);
+	if (entry->boundary == NULL) {
+		free(entry);
+
+		return NULL;
+	}
+
+	memcpy(entry->boundary, boundary, boundary_len);
+	entry->boundary[boundary_len] = '\0';
+	entry->boundary_len = boundary_len;
+	entry->boundary_hash = boundary_hash;
+
+	snprintf(
+		partition_name,
+		sizeof(partition_name),
+		"cgi-fcgi:%ld:%u:" ZEND_ULONG_FMT,
+		(long) getpid(),
+		cgi_user_cache_partition_count,
+		boundary_hash
+	);
+
+	entry->partition = zend_opcache_user_cache_partition_create(partition_name);
+	if (entry->partition == NULL) {
+		free(entry->boundary);
+		free(entry);
+
+		return NULL;
+	}
+
+	entry->next = cgi_user_cache_partitions;
+	cgi_user_cache_partitions = entry;
+	cgi_user_cache_partition_count++;
+
+	return entry;
+}
+
+static char *cgi_user_cache_build_boundary_key(const char *boundary, size_t *boundary_key_len)
+{
+	char *boundary_key;
+	size_t boundary_len, prefix_len = 0;
+#if !defined(PHP_WIN32) && defined(HAVE_UNISTD_H)
+	char prefix[64];
+	int prefix_result;
+#endif
+
+	boundary_len = strlen(boundary);
+
+#if !defined(PHP_WIN32) && defined(HAVE_UNISTD_H)
+	prefix_result = snprintf(
+		prefix,
+		sizeof(prefix),
+		"uid:%ld:gid:%ld:",
+		(long) geteuid(),
+		(long) getegid()
+	);
+	if (prefix_result < 0 || (size_t) prefix_result >= sizeof(prefix)) {
+		return NULL;
+	}
+	prefix_len = (size_t) prefix_result;
+#endif
+
+	if (boundary_len > SIZE_MAX - prefix_len - 1) {
+		return NULL;
+	}
+
+	boundary_key = malloc(prefix_len + boundary_len + 1);
+	if (boundary_key == NULL) {
+		return NULL;
+	}
+
+#if !defined(PHP_WIN32) && defined(HAVE_UNISTD_H)
+	memcpy(boundary_key, prefix, prefix_len);
+#endif
+	memcpy(boundary_key + prefix_len, boundary, boundary_len + 1);
+	*boundary_key_len = prefix_len + boundary_len;
+
+	return boundary_key;
+}
+
+static zend_opcache_user_cache_partition *cgi_user_cache_get_partition_for_boundary(const char *boundary)
+{
+	cgi_user_cache_boundary_partition *entry;
+	char *boundary_key;
+	size_t boundary_len;
+	zend_ulong boundary_hash;
+
+	boundary_key = cgi_user_cache_build_boundary_key(boundary, &boundary_len);
+	if (boundary_key == NULL) {
+		return NULL;
+	}
+
+	boundary_hash = zend_inline_hash_func(boundary_key, boundary_len);
+	entry = cgi_user_cache_find_boundary_partition(boundary_key, boundary_len, boundary_hash);
+	if (entry == NULL) {
+		entry = cgi_user_cache_create_boundary_partition(boundary_key, boundary_len, boundary_hash);
+		if (entry == NULL) {
+			free(boundary_key);
+
+			return NULL;
+		}
+	}
+
+	free(boundary_key);
+
+	if (!zend_opcache_user_cache_partition_startup_storage(entry->partition) &&
+		!cgi_user_cache_partition_startup_failed_logged
+	) {
+		sapi_cgi_log_message("OPcache User Cache partition startup failed; User Cache will be unavailable", 0);
+		cgi_user_cache_partition_startup_failed_logged = true;
+	}
+
+	return entry->partition;
+}
+
+static zend_opcache_user_cache_partition *cgi_user_cache_get_request_partition(void)
+{
+	const char *boundary;
+
+	boundary = cgi_user_cache_get_boundary_value("DOCUMENT_ROOT");
+	if (boundary == NULL || boundary[0] == '\0') {
+		boundary = cgi_user_cache_get_boundary_value("SERVER_NAME");
+	}
+	if (boundary == NULL || boundary[0] == '\0') {
+		return NULL;
+	}
+
+	return cgi_user_cache_get_partition_for_boundary(boundary);
+}
+
+static void cgi_user_cache_activate_request_partition(void)
+{
+	zend_opcache_user_cache_partition *partition;
+
+	partition = cgi_user_cache_get_request_partition();
+	if (partition == NULL) {
+		zend_opcache_user_cache_activate_request_unavailable("CGI/FastCGI cache boundary is not available");
+
+		return;
+	}
+
+	zend_opcache_user_cache_partition_activate(partition);
+}
+
+static void cgi_user_cache_shutdown_boundary_partitions(void)
+{
+	cgi_user_cache_boundary_partition *entry, *next;
+
+	entry = cgi_user_cache_partitions;
+	while (entry != NULL) {
+		next = entry->next;
+		free(entry->boundary);
+		free(entry);
+		entry = next;
+	}
+
+	cgi_user_cache_partitions = NULL;
+	cgi_user_cache_partition_count = 0;
+	cgi_user_cache_partition_limit_logged = false;
+	cgi_user_cache_partition_startup_failed_logged = false;
+}
+
 /* {{{ php_cgi_ini_activate_user_config */
 static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const char *doc_root, size_t doc_root_len)
 {
@@ -941,6 +1177,8 @@ static int sapi_cgi_activate(void)
 		efree(path);
 	}
 
+	cgi_user_cache_activate_request_partition();
+
 	return SUCCESS;
 }
 
@@ -961,12 +1199,20 @@ static int sapi_cgi_deactivate(void)
 			sapi_cgi_flush(SG(server_context));
 		}
 	}
+	zend_opcache_user_cache_partition_activate(NULL);
+
 	return SUCCESS;
 }
 
 static int php_cgi_startup(sapi_module_struct *sapi_module_ptr)
 {
-	return php_module_startup(sapi_module_ptr, &cgi_module_entry);
+	if (php_module_startup(sapi_module_ptr, &cgi_module_entry) == FAILURE) {
+		return FAILURE;
+	}
+
+	zend_opcache_user_cache_opt_in();
+
+	return SUCCESS;
 }
 
 /* {{{ sapi_module_struct cgi_sapi_module */
@@ -1545,6 +1791,7 @@ static PHP_MINIT_FUNCTION(cgi)
 static PHP_MSHUTDOWN_FUNCTION(cgi)
 {
 	zend_hash_destroy(&CGIG(user_config_cache));
+	cgi_user_cache_shutdown_boundary_partitions();
 
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -2285,6 +2532,7 @@ parent_loop_end:
 		while (!fastcgi || fcgi_accept_request(request) >= 0) {
 			SG(server_context) = fastcgi ? (void *)request : (void *) 1;
 			init_request_info(request);
+			cgi_user_cache_activate_request_partition();
 
 			if (!cgi && !fastcgi) {
 				while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {

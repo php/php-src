@@ -28,6 +28,7 @@
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_blacklist.h"
 #include "zend_file_cache.h"
+#include "zend_user_cache.h"
 #include "php_ini.h"
 #include "SAPI.h"
 #include "zend_virtual_cwd.h"
@@ -97,6 +98,34 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 	} else {
 		*p = memsize * (1024 * 1024);
 	}
+	return SUCCESS;
+}
+
+static ZEND_INI_MH(OnUpdateUserCacheShmSize)
+{
+	zend_long *p, size;
+
+	if (accel_startup_ok) {
+		if (sapi_module.name != NULL && strcmp(sapi_module.name, "fpm-fcgi") == 0) {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.user_cache_shm_size cannot be changed when OPcache is already set up. Are you using php_admin_value[opcache.user_cache_shm_size] in an individual pool's configuration?\n");
+		} else {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.user_cache_shm_size cannot be changed when OPcache is already set up.\n");
+		}
+
+		return FAILURE;
+	}
+
+	p = ZEND_INI_GET_ADDR();
+	size = zend_ini_parse_quantity_warn(new_value, entry->name);
+
+	if (size < 0) {
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache.user_cache_shm_size must be greater than or equal to 0, " ZEND_LONG_FMT " given.\n", size);
+
+		return FAILURE;
+	}
+
+	*p = size;
+
 	return SUCCESS;
 }
 
@@ -292,6 +321,7 @@ ZEND_INI_BEGIN()
 
 	STD_PHP_INI_ENTRY("opcache.log_verbosity_level"   , "1"   , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.log_verbosity_level,       zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.memory_consumption"    , "128"  , PHP_INI_SYSTEM, OnUpdateMemoryConsumption,    accel_directives.memory_consumption,        zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.user_cache_shm_size",    "16M"  , PHP_INI_SYSTEM, OnUpdateUserCacheShmSize,     accel_directives.user_cache_shm_size,       zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.interned_strings_buffer", "8"  , PHP_INI_SYSTEM, OnUpdateInternedStringsBuffer,	 accel_directives.interned_strings_buffer,   zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_accelerated_files" , "10000", PHP_INI_SYSTEM, OnUpdateMaxAcceleratedFiles,	 accel_directives.max_accelerated_files,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_wasted_percentage" , "5"   , PHP_INI_SYSTEM, OnUpdateMaxWastedPercentage,	 accel_directives.max_wasted_percentage,     zend_accel_globals, accel_globals)
@@ -444,6 +474,7 @@ static ZEND_NAMED_FUNCTION(accel_is_readable)
 static ZEND_MINIT_FUNCTION(zend_accelerator)
 {
 	start_accel_extension();
+	zend_opcache_user_cache_minit();
 
 	return SUCCESS;
 }
@@ -485,9 +516,15 @@ static ZEND_MSHUTDOWN_FUNCTION(zend_accelerator)
 	(void)type; /* keep the compiler happy */
 
 	UNREGISTER_INI_ENTRIES();
+	zend_opcache_user_cache_mshutdown();
 	accel_shutdown();
 
 	return SUCCESS;
+}
+
+static ZEND_RSHUTDOWN_FUNCTION(zend_accelerator)
+{
+	return zend_opcache_user_cache_rshutdown();
 }
 
 void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
@@ -606,7 +643,7 @@ zend_module_entry opcache_module_entry = {
 	ZEND_MINIT(zend_accelerator),
 	ZEND_MSHUTDOWN(zend_accelerator),
 	ZEND_RINIT(zend_accelerator),
-	NULL,
+	ZEND_RSHUTDOWN(zend_accelerator),
 	zend_accel_info,
 	PHP_VERSION,
 	NO_MODULE_GLOBALS,
@@ -822,6 +859,7 @@ ZEND_FUNCTION(opcache_get_configuration)
 
 	add_assoc_long(&directives,   "opcache.log_verbosity_level",    ZCG(accel_directives).log_verbosity_level);
 	add_assoc_long(&directives,	 "opcache.memory_consumption",     ZCG(accel_directives).memory_consumption);
+	add_assoc_long(&directives,	 "opcache.user_cache_shm_size",    ZCG(accel_directives).user_cache_shm_size);
 	add_assoc_long(&directives,	 "opcache.interned_strings_buffer",ZCG(accel_directives).interned_strings_buffer);
 	add_assoc_long(&directives, 	 "opcache.max_accelerated_files",  ZCG(accel_directives).max_accelerated_files);
 	add_assoc_double(&directives, "opcache.max_wasted_percentage",  ZCG(accel_directives).max_wasted_percentage);
@@ -922,6 +960,20 @@ ZEND_FUNCTION(opcache_reset)
 	zend_shared_alloc_lock();
 	zend_accel_schedule_restart(ACCEL_RESTART_USER);
 	zend_shared_alloc_unlock();
+	zend_opcache_user_cache_invalidate_all();
+	RETURN_TRUE;
+}
+
+ZEND_FUNCTION(opcache_user_cache_reset)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (!validate_api_restriction()) {
+		RETURN_FALSE;
+	}
+
+	zend_opcache_user_cache_invalidate_all();
+
 	RETURN_TRUE;
 }
 

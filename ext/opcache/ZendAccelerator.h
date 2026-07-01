@@ -141,6 +141,7 @@ typedef struct _zend_persistent_script {
 
 typedef struct _zend_accel_directives {
 	zend_long           memory_consumption;
+	zend_long           user_cache_shm_size;
 	zend_long           max_accelerated_files;
 	double         max_wasted_percentage;
 	char          *user_blacklist_filename;
