@@ -44,8 +44,6 @@ static inline uint32_t fetch_pixel_general (gdSurfacePtr surface, int x, int y, 
     return src[y * surface->stride/4  + x];
 }
 
-#define SIZEOF_LONG 8
-
 static inline uint32_t bilinear_interpolation (uint32_t tl, uint32_t tr, uint32_t bl, uint32_t br, int distx, int disty)
 {
     uint64_t distxy, distxiy, distixy, distixiy;
@@ -118,20 +116,6 @@ static inline int _update_w_repeat (gdExtendMode repeat, int *c, int size)
 }
 
 static inline uint32_t
-bits_image_fetch_pixel_nearest (gdSurfacePtr image, gd_fixed_t x, gd_fixed_t y, gdExtendMode repeat_mode)
-{
-    int x0 = gd_fixed_to_int (x - gd_fixed_e);
-    int y0 = gd_fixed_to_int (y - gd_fixed_e);
-    if (repeat_mode != GD_EXTEND_NONE) {
-        _update_w_repeat(repeat_mode, &x0, image->width);
-        _update_w_repeat(repeat_mode, &y0, image->height);
-        return fetch_pixel_general(image, x0, y0, 0);
-    } else {
-        return fetch_pixel_general(image, x0, y0, 1);
-    }
-}
-
-static inline uint32_t
 _surface_fetch_pixel_bilinear(gdSurfacePtr image, gd_fixed_t x, gd_fixed_t y, gdExtendMode repeat_mode)
 {
     int width = image->width;
@@ -166,18 +150,6 @@ _surface_fetch_pixel_bilinear(gdSurfacePtr image, gd_fixed_t x, gd_fixed_t y, gd
         br = fetch_pixel_general(image, x2, y2, 1);
     }
     return bilinear_interpolation(tl, tr, bl, br, distx, disty);
-}
-
-static inline uint32_t BYTE_MUL(uint32_t x, uint32_t a)
-{
-    uint32_t t = (x & 0xff00ff) * a;
-    t = (t + ((t >> 8) & 0xff00ff) + 0x800080) >> 8;
-    t &= 0xff00ff;
-    x = ((x >> 8) & 0xff00ff) * a;
-    x = (x + ((x >> 8) & 0xff00ff) + 0x800080);
-    x &= 0xff00ff00;
-    x |= t;
-    return x;
 }
 
 static inline void memfill32(uint32_t* dest, uint32_t value, int length)

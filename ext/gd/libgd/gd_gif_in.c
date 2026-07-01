@@ -1145,17 +1145,14 @@ static int DoExtension(gdIOCtx *fd, int label, int *Transparent,
 				*Transparent = buf[3];
 		}
 
-		while (GetDataBlock(fd, (unsigned char *)buf, ZeroDataBlockP) > 0)
-			;
-
-			return FALSE;
+		while (GetDataBlock(fd, (unsigned char *)buf, ZeroDataBlockP) > 0);
+		return FALSE;
 
 		default:
 			break;
 	}
 
-       while (GetDataBlock(fd, (unsigned char*) buf, ZeroDataBlockP) > 0)
-		;
+    while (GetDataBlock(fd, (unsigned char*) buf, ZeroDataBlockP) > 0);
 
 	return FALSE;
 }
