@@ -1344,17 +1344,15 @@ typedef struct {
         void *context;
 } gdSink, *gdSinkPtr;
 
-void gdImagePngToSink(gdImagePtr im, gdSinkPtr out);
+BGD_DECLARE(void) gdImagePngToSink(gdImagePtr im, gdSinkPtr out);
+BGD_DECLARE(void) gdImageQoiToSink(gdImagePtr im, gdSinkPtr out);
 
-
-void gdImageGd2(gdImagePtr im, FILE *out, int cs, int fmt);
-
-
+BGD_DECLARE(void) gdImageGd2(gdImagePtr im, FILE *out, int cs, int fmt);
 
 /* Best to free this memory with gdFree(), not free() */
-void* gdImageGd2Ptr(gdImagePtr im, int cs, int fmt, int *size);
+BGD_DECLARE(void *) gdImageGd2Ptr(gdImagePtr im, int cs, int fmt, int *size);
 
-void gdImageDestroy(gdImagePtr im);
+BGD_DECLARE(void) gdImageDestroy(gdImagePtr im);
 
 /* These functions still work with truecolor images,
 	for which they never return error. */
@@ -1367,24 +1365,25 @@ int gdImageColorClosest(gdImagePtr im, int r, int g, int b);
 	A slightly different color with the same transparency
 	beats the exact same color with radically different
 	transparency */
-int gdImageColorClosestAlpha(gdImagePtr im, int r, int g, int b, int a);
+BGD_DECLARE(int)
+gdImageColorClosestAlpha(gdImagePtr im, int r, int g, int b, int a);
 /* An alternate method */
-int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
+BGD_DECLARE(int) gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
 /* Returns exact, 100% opaque matches only */
-int gdImageColorExact(gdImagePtr im, int r, int g, int b);
+BGD_DECLARE(int) gdImageColorExact(gdImagePtr im, int r, int g, int b);
 /* Returns an exact match only, including alpha */
-int gdImageColorExactAlpha(gdImagePtr im, int r, int g, int b, int a);
+BGD_DECLARE(int)
+gdImageColorExactAlpha(gdImagePtr im, int r, int g, int b, int a);
 /* Opaque only */
-int gdImageColorResolve(gdImagePtr im, int r, int g, int b);
+BGD_DECLARE(int) gdImageColorResolve(gdImagePtr im, int r, int g, int b);
 /* Based on gdImageColorExactAlpha and gdImageColorClosestAlpha */
-int gdImageColorResolveAlpha(gdImagePtr im, int r, int g, int b, int a);
+BGD_DECLARE(int)
+gdImageColorResolveAlpha(gdImagePtr im, int r, int g, int b, int a);
 
 /* A simpler way to obtain an opaque truecolor value for drawing on a
 	truecolor image. Not for use with palette images! */
 
-#define gdTrueColor(r, g, b) (((r) << 16) + \
-	((g) << 8) + \
-	(b))
+#define gdTrueColor(r, g, b) (((r) << 16) + ((g) << 8) + (b))
 
 /**
  * Group: Color Composition
@@ -1434,11 +1433,8 @@ BGD_DECLARE(void) gdImageColorDeallocate(gdImagePtr im, int color);
 
 	gdImageTrueColorToPalette() returns TRUE on success, FALSE on failure.
 */
-gdImagePtr gdImageCreatePaletteFromTrueColor (gdImagePtr im, int ditherFlag, int colorsWanted);
-
 BGD_DECLARE(gdImagePtr)
 gdImageCreatePaletteFromTrueColor(gdImagePtr im, int ditherFlag, int colorsWanted);
-int gdImagePaletteToTrueColor(gdImagePtr src);
 
 BGD_DECLARE(int)
 gdImageTrueColorToPalette(gdImagePtr im, int ditherFlag, int colorsWanted);
@@ -1482,20 +1478,33 @@ gdImageTrueColorToPaletteSetQuality(gdImagePtr im, int min_quality, int max_qual
 	a truecolor image. Note that gdImageColorTransparent
 	is usually compatible with older browsers that
 	do not understand full alpha channels well. TBB */
-void gdImageColorTransparent(gdImagePtr im, int color);
+BGD_DECLARE(void) gdImageColorTransparent(gdImagePtr im, int color);
 
-void gdImagePaletteCopy(gdImagePtr dst, gdImagePtr src);
+BGD_DECLARE(void) gdImagePaletteCopy(gdImagePtr dst, gdImagePtr src);
+
+typedef int (*gdCallbackImageColor)(gdImagePtr im, int src);
+
+BGD_DECLARE(int) gdImageColorReplace(gdImagePtr im, int src, int dst);
+BGD_DECLARE(int)
+gdImageColorReplaceThreshold(gdImagePtr im, int src, int dst, float threshold);
+BGD_DECLARE(int)
+gdImageColorReplaceArray(gdImagePtr im, int len, int *src, int *dst);
+BGD_DECLARE(int)
+gdImageColorReplaceCallback(gdImagePtr im, gdCallbackImageColor callback);
+
 /* Replaces or blends with the background depending on the
-	most recent call to gdImageAlphaBlending and the
-	alpha channel value of 'color'; default is to overwrite.
-	Tiling and line styling are also implemented
-	here. All other gd drawing functions pass through this call,
-	allowing for many useful effects. */
+   most recent call to gdImageAlphaBlending and the
+   alpha channel value of 'color'; default is to overwrite.
+   Tiling and line styling are also implemented
+   here. All other gd drawing functions pass through this call,
+   allowing for many useful effects.
+   Overlay and multiply effects are used when gdImageAlphaBlending
+   is passed gdEffectOverlay and gdEffectMultiply */
 
-void gdImageSetPixel(gdImagePtr im, int x, int y, int color);
+BGD_DECLARE(void) gdImageSetPixel(gdImagePtr im, int x, int y, int color);
 
-int gdImageGetTrueColorPixel (gdImagePtr im, int x, int y);
-int gdImageGetPixel(gdImagePtr im, int x, int y);
+BGD_DECLARE(int) gdImageGetPixel(gdImagePtr im, int x, int y);
+BGD_DECLARE(int) gdImageGetTrueColorPixel(gdImagePtr im, int x, int y);
 
 void gdImageAABlend(gdImagePtr im);
 
@@ -1676,7 +1685,8 @@ void gdImageCopyMergeGray(gdImagePtr dst, gdImagePtr src, int dstX, int dstY,
 /* Stretches or shrinks to fit, as needed. Does NOT attempt
 	to average the entire set of source pixels that scale down onto the
 	destination pixel. */
-void gdImageCopyResized(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int dstW, int dstH, int srcW, int srcH);
+BGD_DECLARE(void)
+gdImageCopyResized(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int dstW, int dstH, int srcW, int srcH);
 
 /* gd 2.0: stretches or shrinks to fit, as needed. When called with a
 	truecolor destination image, this function averages the
@@ -1687,23 +1697,32 @@ void gdImageCopyResized(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int 
 	on modern hardware, except for some embedded devices. If the
 	destination is a palette image, gdImageCopyResized is
 	substituted automatically. */
-void gdImageCopyResampled(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int dstW, int dstH, int srcW, int srcH);
+BGD_DECLARE(void)
+gdImageCopyResampled(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int dstW, int dstH, int srcW, int srcH);
 
-gdImagePtr gdImageClone(gdImagePtr src);
+/* Source is a rectangle, with its upper left corner at
+   srcX and srcY. Destination is the *center* of
+   the rotated copy. Angle is in degrees, same as
+   gdImageArc. Floating point destination center
+   coordinates allow accurate rotation of
+   objects of odd-numbered width or height. */
+BGD_DECLARE(void) gdImageCopyRotated(gdImagePtr dst, gdImagePtr src, double dstX, double dstY, int srcX, int srcY, int srcWidth, int srcHeight, int angle);
 
-void gdImageSetBrush(gdImagePtr im, gdImagePtr brush);
-void gdImageSetTile(gdImagePtr im, gdImagePtr tile);
-void gdImageSetAntiAliased(gdImagePtr im, int c);
-void gdImageSetAntiAliasedDontBlend(gdImagePtr im, int c, int dont_blend);
-void gdImageSetStyle(gdImagePtr im, int *style, int noOfPixels);
+BGD_DECLARE(gdImagePtr) gdImageClone(gdImagePtr src);
+
+BGD_DECLARE(void) gdImageSetBrush(gdImagePtr im, gdImagePtr brush);
+BGD_DECLARE(void) gdImageSetTile(gdImagePtr im, gdImagePtr tile);
+BGD_DECLARE(void) gdImageSetAntiAliased(gdImagePtr im, int c);
+BGD_DECLARE(void) gdImageSetAntiAliasedDontBlend(gdImagePtr im, int c, int dont_blend);
+BGD_DECLARE(void) gdImageSetStyle(gdImagePtr im, int *style, int noOfPixels);
+
 /* Line thickness (defaults to 1). Affects lines, ellipses,
-	rectangles, polygons and so forth. */
-void gdImageSetThickness(gdImagePtr im, int thickness);
+   rectangles, polygons and so forth. */
+BGD_DECLARE(void) gdImageSetThickness(gdImagePtr im, int thickness);
 /* On or off (1 or 0) for all three of these. */
-void gdImageInterlace(gdImagePtr im, int interlaceArg);
-void gdImageAlphaBlending(gdImagePtr im, int alphaBlendingArg);
-void gdImageAntialias(gdImagePtr im, int antialias);
-void gdImageSaveAlpha(gdImagePtr im, int saveAlphaArg);
+BGD_DECLARE(void) gdImageInterlace(gdImagePtr im, int interlaceArg);
+BGD_DECLARE(void) gdImageAlphaBlending(gdImagePtr im, int alphaBlendingArg);
+BGD_DECLARE(void) gdImageSaveAlpha(gdImagePtr im, int saveAlphaArg);
 
 
 /**
