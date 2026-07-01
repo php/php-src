@@ -29,9 +29,6 @@ PHP                                                                        NEWS
   . Fixed IntlChar methods leaving stale global error state after successful
     calls. (Xuyang Zhang)
 
-- Lexbor:
-  . Merge patch c3a6847. (ilutov, timwolla)
-
 - PDO_ODBC:
   . Fixed bug GH-20726 (Crash with ODBC connection pooling when the DSN
     carries no credentials). (iliaal)
@@ -97,6 +94,9 @@ PHP                                                                        NEWS
     (Weilin Du)
   . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
     for invalid display types. (Weilin Du)
+
+- Lexbor:
+  . Merge patch c3a6847. (ilutov, timwolla)
 
 - Opcache:
   . Fixed bug GH-22265 (Another tailcall vm_interrupt bug). (Levi Morrison)
