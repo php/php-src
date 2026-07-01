@@ -52,6 +52,7 @@ static int zps_open_fifo(const char *env_name, int flags)
 	int fd = open(path, flags | O_NONBLOCK);
 	if (fd < 0) {
 		fprintf(stderr, "Failed to open fifo %s\n", path);
+		fflush(stderr);
 		zend_bailout();
 	}
 
@@ -59,6 +60,7 @@ static int zps_open_fifo(const char *env_name, int flags)
 	if (fstat(fd, &st) != 0 || !S_ISFIFO(st.st_mode)) {
 		close(fd);
 		fprintf(stderr, "File %s is not a fifo\n", path);
+		fflush(stderr);
 		zend_bailout();
 	}
 	return fd;
