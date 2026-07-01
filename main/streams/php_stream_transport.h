@@ -183,7 +183,12 @@ typedef enum {
 	/* TLS equates to TLS_ANY as of PHP 7.2 */
 	STREAM_CRYPTO_METHOD_TLS_SERVER = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6)),
 	STREAM_CRYPTO_METHOD_TLS_ANY_SERVER = ((1 << 3) | (1 << 4) | (1 << 5) | (1 << 6)),
-	STREAM_CRYPTO_METHOD_ANY_SERVER = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6))
+	STREAM_CRYPTO_METHOD_ANY_SERVER = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6)),
+	/* DTLS 1.2 (DTLS 1.0 is deprecated and not offered) */
+	STREAM_CRYPTO_METHOD_DTLSv1_2_CLIENT = (1 << 7 | 1),
+	STREAM_CRYPTO_METHOD_DTLS_CLIENT = (1 << 7 | 1),
+	STREAM_CRYPTO_METHOD_DTLSv1_2_SERVER = (1 << 7),
+	STREAM_CRYPTO_METHOD_DTLS_SERVER = (1 << 7)
 } php_stream_xport_crypt_method_t;
 
 /* Flags for crypto status */
