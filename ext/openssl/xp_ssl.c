@@ -567,7 +567,11 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 static bool php_openssl_matches_common_name(php_stream *stream, const X509 *peer, const char *subject_name) /* {{{ */
 {
 	unsigned char *cert_name = NULL;
+#if PHP_OPENSSL_API_VERSION < 0x30000
+	X509_NAME *name;
+#else
 	const X509_NAME *name;
+#endif
 	const X509_NAME_ENTRY *name_entry;
 	const ASN1_STRING *name_asn1;
 	bool is_match = false;
