@@ -336,8 +336,18 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 							&& ((obj->ce->ce_flags & ZEND_ACC_FINAL) || (prop_info->flags & ZEND_ACC_FINAL))) {
 						continue;
 					}
-					zend_object_dtor_property(obj, p);
+					zval garbage;
+					ZVAL_COPY_VALUE(&garbage, p);
 					ZVAL_UNDEF(p);
+					if (Z_REFCOUNTED(garbage)) {
+						if (UNEXPECTED(Z_ISREF(garbage)) &&
+								(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF(garbage)))) {
+							if (ZEND_TYPE_IS_SET(prop_info->type)) {
+								ZEND_REF_DEL_TYPE_SOURCE(Z_REF(garbage), prop_info);
+							}
+						}
+						zval_ptr_dtor(&garbage);
+					}
 				}
 				Z_PROP_FLAG_P(p) = IS_PROP_UNINIT | IS_PROP_LAZY;
 				lazy_properties_count++;
