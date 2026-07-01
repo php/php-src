@@ -826,8 +826,11 @@ PHP_MINIT_FUNCTION(openssl)
 	php_stream_xport_register("tlsv1.3", php_openssl_ssl_socket_factory);
 
 #ifndef OPENSSL_NO_DTLS
+	/* override the default udp socket provider so udp:// can enable DTLS */
+	php_stream_xport_register("udp", php_openssl_dtls_socket_factory);
 	php_stream_xport_register("dtls", php_openssl_dtls_socket_factory);
 	php_stream_xport_register("dtlsv1.2", php_openssl_dtls_socket_factory);
+
 #endif
 
 	/* override the default tcp socket provider */
@@ -907,6 +910,8 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 #ifndef OPENSSL_NO_DTLS
 	php_stream_xport_unregister("dtls");
 	php_stream_xport_unregister("dtlsv1.2");
+	/* reinstate the default udp handler */
+	php_stream_xport_register("udp", php_stream_generic_socket_factory);
 #endif
 
 	/* reinstate the default tcp handler */
@@ -2751,7 +2756,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 	array_init(return_value);
 	add_assoc_long(return_value, "bits", EVP_PKEY_bits(pkey));
 	add_assoc_stringl(return_value, "key", pbio, pbio_len);
-	
+
 	zend_long ktype = php_openssl_pkey_get_details(return_value, pkey);
 
 	add_assoc_long(return_value, "type", ktype);
