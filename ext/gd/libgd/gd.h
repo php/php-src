@@ -1548,14 +1548,14 @@ int gdFontCacheSetup(void);
 /* Optional: clean up after application is done using fonts in gdImageStringFT(). */
 void gdFontCacheShutdown(void);
 
+BGD_DECLARE(void) gdFreeFontCache(void);
+
 /* Calls gdImageStringFT. Provided for backwards compatibility only. */
-char *gdImageStringTTF(gdImage *im, int *brect, int fg, char *fontlist,
-                double ptsize, double angle, int x, int y, char *string);
+BGD_DECLARE(char *) gdImageStringTTF(gdImagePtr im, int *brect, int fg, const char *fontlist,
+                double ptsize, double angle, int x, int y, const char *string);
 
 /* FreeType 2 text output */
-char *gdImageStringFT(gdImage *im, int *brect, int fg, char *fontlist,
-                double ptsize, double angle, int x, int y, char *string);
-
+BGD_DECLARE(char *) gdImageStringFT(gdImagePtr im, int *brect, int fg, const char *fontlist, double ptsize, double angle, int x, int y, const char *string);
 /*
   Group: Types
 
@@ -1573,33 +1573,36 @@ char *gdImageStringFT(gdImage *im, int *brect, int fg, char *fontlist,
 /* 2.0.5: provides an extensible way to pass additional parameters.
    Thanks to Wez Furlong, sorry for the delay. */
 typedef struct {
-	int flags;		/* Logical OR of gdFTEX_ values */
-	double linespacing;	/* fine tune line spacing for '\n' */
-	int charmap;		/* TBB: 2.0.12: may be gdFTEX_Unicode,
-				   gdFTEX_Shift_JIS, gdFTEX_Big5 or gdFTEX_MacRoman;
-				   when not specified, maps are searched
-				   for in the above order. */
-	int hdpi;
-	int vdpi;
-}
- gdFTStringExtra, *gdFTStringExtraPtr;
+	int flags;       /* Logical OR of gdFTEX_ values */
+	double linespacing; /* fine tune line spacing for '\n' */
+	int charmap;     /* gdFTEX_Unicode, gdFTEX_Shift_JIS, gdFTEX_Big5,
+	                  or gdFTEX_Adobe_Custom/gdFTEX_MacRoman */
+	int hdpi;        /* if (flags & gdFTEX_RESOLUTION) */
+	int vdpi;        /* if (flags & gdFTEX_RESOLUTION) */
+	char *xshow;     /* gdMalloc'ed result if gdFTEX_XSHOW is set */
+	char *fontpath;  /* gdMalloc'ed result if gdFTEX_RETURNFONTPATHNAME is set */
+} gdFTStringExtra, *gdFTStringExtraPtr;
 
 #define gdFTEX_LINESPACE 1
 #define gdFTEX_CHARMAP 2
 #define gdFTEX_RESOLUTION 4
+#define gdFTEX_DISABLE_KERNING 8
+#define gdFTEX_XSHOW 16
+#define gdFTEX_FONTPATHNAME 32
+#define gdFTEX_FONTCONFIG 64
+#define gdFTEX_RETURNFONTPATHNAME 128
+
+BGD_DECLARE(int) gdFTUseFontConfig(int flag);
 
 /* These are NOT flags; set one in 'charmap' if you set the gdFTEX_CHARMAP bit in 'flags'. */
 #define gdFTEX_Unicode 0
 #define gdFTEX_Shift_JIS 1
 #define gdFTEX_Big5 2
-#define gdFTEX_MacRoman 3
+#define gdFTEX_Adobe_Custom 3
+#define gdFTEX_MacRoman gdFTEX_Adobe_Custom
 
 /* FreeType 2 text output with fine tuning */
-char *
-gdImageStringFTEx(gdImage * im, int *brect, int fg, char * fontlist,
-		double ptsize, double angle, int x, int y, char * string,
-		gdFTStringExtraPtr strex);
-
+BGD_DECLARE(char *) gdImageStringFTEx(gdImagePtr im, int *brect, int fg, const char *fontlist, double ptsize, double angle, int x, int y, const char *string, gdFTStringExtraPtr strex);
 /*
   Group: Types
 

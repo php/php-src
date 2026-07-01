@@ -378,7 +378,10 @@
 #define gdCacheGet php_gd_gdCacheGet
 #define gdFontCacheSetup php_gd_gdFontCacheSetup
 #define gdFontCacheShutdown php_gd_gdFontCacheShutdown
+#define gdFontCacheMutexSetup php_gd_gdFontCacheMutexSetup
+#define gdFontCacheMutexShutdown php_gd_gdFontCacheMutexShutdown
 #define gdFreeFontCache php_gd_gdFreeFontCache
+#define gdFTUseFontConfig php_gd_gdFTUseFontConfig
 #endif /* HAVE_GD_BUNDLED */
 
 /* Define to specify how much context to retain around the current parse
