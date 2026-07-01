@@ -295,6 +295,11 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
       [Define to 1 if GD library has the 'gdVersionString' function.])],
     [],
     [$GD_SHARED_LIBADD])
+  PHP_CHECK_LIBRARY([gd], [gdPngGetVersionString],
+    [AC_DEFINE([HAVE_GD_PNG_GET_VERSION_STRING], [1],
+      [Define to 1 if GD library has the 'gdPngGetVersionString' function.])],
+    [],
+    [$GD_SHARED_LIBADD])
   PHP_CHECK_LIBRARY([gd], [gdImageGetInterpolationMethod],
     [AC_DEFINE([HAVE_GD_GET_INTERPOLATION], [1],
       [Define to 1 if GD library has the 'gdImageGetInterpolationMethod'
@@ -366,6 +371,9 @@ if test "$PHP_GD" != "no"; then
     AC_DEFINE([HAVE_GD_GET_INTERPOLATION], [1],
       [Define to 1 if GD library has the 'gdImageGetInterpolationMethod'
       function.])
+
+    AC_DEFINE([HAVE_GD_PNG_GET_VERSION_STRING], [1],
+      [Define to 1 if GD library has the 'gdPngGetVersionString' function.])
 
 dnl Various checks for GD features
     PHP_SETUP_ZLIB([GD_SHARED_LIBADD])

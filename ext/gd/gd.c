@@ -422,7 +422,7 @@ PHP_MINFO_FUNCTION(gd)
 
 #ifdef HAVE_GD_PNG
 	php_info_print_table_row(2, "PNG Support", "enabled");
-#ifdef HAVE_GD_BUNDLED
+#ifdef HAVE_GD_PNG_GET_VERSION_STRING
 	php_info_print_table_row(2, "libPNG Version", gdPngGetVersionString());
 #endif
 #endif

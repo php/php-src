@@ -752,7 +752,7 @@ BGD_DECLARE(void) gdPngWriteOptionsInit(gdPngWriteOptions *options);
 BGD_DECLARE(int) gdImagePngWithOptions(gdImagePtr im, FILE *out, const gdPngWriteOptions *options);
 BGD_DECLARE(int) gdImagePngCtxWithOptions(gdImagePtr im, gdIOCtxPtr out, const gdPngWriteOptions *options);
 BGD_DECLARE(void *) gdImagePngPtrWithOptions(gdImagePtr im, int *size, const gdPngWriteOptions *options);
-const char * gdPngGetVersionString(void);
+BGD_DECLARE(const char *) gdPngGetVersionString(void);
 
 /* QOI */
 BGD_DECLARE(gdImagePtr) gdImageCreateFromQoi(FILE *fd);
@@ -784,7 +784,6 @@ gdImageQoiCtxEx(gdImagePtr im, gdIOCtxPtr out, int colorspace);
 BGD_DECLARE(void)
 gdImageQoiCtxExWithMetadata(gdImagePtr im, gdIOCtxPtr out, int colorspace,
 							const gdImageMetadata *metadata);
-
 /* GIF */
 /* These read the first frame only */
 BGD_DECLARE(gdImagePtr) gdImageCreateFromGif(FILE *fd);
@@ -1252,16 +1251,6 @@ BGD_DECLARE(void)
 gdImageBmpCtxEx(gdImagePtr im, gdIOCtxPtr out, int bpp, int compression,
 				int flags);
 
-BGD_DECLARE(void) gdImageQoi(gdImagePtr im, FILE *out);
-BGD_DECLARE(void) gdImageQoiCtx(gdImagePtr im, gdIOCtxPtr out);
-BGD_DECLARE(void)
-gdImageQoiCtxWithMetadata(gdImagePtr im, gdIOCtxPtr out,
-						  const gdImageMetadata *metadata);
-BGD_DECLARE(void) gdImageQoiEx(gdImagePtr im, FILE *out, int colorspace);
-BGD_DECLARE(void) gdImageQoiCtxEx(gdImagePtr im, gdIOCtxPtr out, int colorspace);
-BGD_DECLARE(void)
-gdImageQoiCtxExWithMetadata(gdImagePtr im, gdIOCtxPtr out, int colorspace,
-							const gdImageMetadata *metadata);
 
 void * gdImageBmpPtr(gdImagePtr im, int *size, int compression);
 void gdImageBmp(gdImagePtr im, FILE *outFile, int compression);

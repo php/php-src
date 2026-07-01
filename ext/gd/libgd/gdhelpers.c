@@ -8,10 +8,6 @@
 #ifdef HAVE_LIBPNG
 #include <png.h>
 
-const char *gdPngGetVersionString(void)
-{
-	return PNG_LIBPNG_VER_STRING;
-}
 #endif
 #include <stdlib.h>
 #include <string.h>

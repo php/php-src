@@ -24,6 +24,12 @@
 static const unsigned char gdPngSignature[8] = {137, 80, 78, 71,
 												13,	 10, 26, 10};
 
+
+BGD_DECLARE(const char *) gdPngGetVersionString(void)
+{
+	return PNG_LIBPNG_VER_STRING;
+}
+
 static unsigned int gdPngGetUint32(const unsigned char *data) {
 	return ((unsigned int)data[0] << 24) | ((unsigned int)data[1] << 16) |
 		   ((unsigned int)data[2] << 8) | (unsigned int)data[3];
