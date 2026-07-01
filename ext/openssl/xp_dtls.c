@@ -37,7 +37,7 @@ typedef struct _php_openssl_dtls_data_t {
 	SSL_CTX *ctx;
 	SSL *ssl_handle;
 	int method;             /* STREAM_CRYPTO_METHOD_DTLS_* */
-	int enable_on_connect;  /* dtls:// scheme: run the handshake on connect */
+	int enable_on_connect;  /* dtls:// scheme (vs plain udp://): set up DTLS on connect/bind */
 } php_openssl_dtls_data_t;
 
 static const php_stream_ops php_openssl_dtls_socket_ops;
@@ -61,7 +61,12 @@ static const php_stream_ops php_openssl_dtls_socket_ops;
 		} \
 	} while (0)
 
-/* The socket is non-blocking, so on WANT_* we poll (up to the read timeout when
+/* Datagram semantics: like udp:// (and tls://) the stream is buffered, so a read
+ * yields the data of a single DTLS record and a write emits one record (atomic,
+ * no partial writes). EOF is the peer's close_notify, which UDP need not deliver,
+ * so it is best-effort.
+ *
+ * The socket is non-blocking, so on WANT_* we poll (up to the read timeout when
  * blocking) and retry. */
 static ssize_t php_openssl_dtls_io(bool read, php_stream *stream, char *buf, size_t count)
 {
@@ -283,9 +288,12 @@ static int php_openssl_dtls_apply_context(php_stream *stream, php_openssl_dtls_d
 	/* DTLS 1.0 is deprecated; require DTLS 1.2 or higher. */
 	SSL_CTX_set_min_proto_version(ctx, DTLS1_2_VERSION);
 
-	/* Peer verification, on by default. A peer_fingerprint authenticates the peer
-	 * by itself (checked after the handshake), so it overrides CA verification. */
-	bool verify_peer = !(GET_VER_OPT("verify_peer") && !zend_is_true(val));
+	/* Clients verify the server by default; a server does not request a client
+	 * certificate unless verify_peer is set explicitly. A peer_fingerprint
+	 * authenticates the peer by itself (checked after the handshake), so it
+	 * overrides CA verification. */
+	bool is_server = !(dtlssock->method & 1);
+	bool verify_peer = GET_VER_OPT("verify_peer") ? zend_is_true(val) : !is_server;
 	bool has_fingerprint = GET_VER_OPT("peer_fingerprint");
 	if (!verify_peer || has_fingerprint) {
 		SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
@@ -301,7 +309,12 @@ static int php_openssl_dtls_apply_context(php_stream *stream, php_openssl_dtls_d
 			php_stream_warn(stream, CreateFailed, "Failed to set the default CA verify paths");
 			return -1;
 		}
-		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+		int verify_mode = SSL_VERIFY_PEER;
+		if (is_server) {
+			/* A server that verifies peers must require the client certificate. */
+			verify_mode |= SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
+		}
+		SSL_CTX_set_verify(ctx, verify_mode, NULL);
 	}
 
 	GET_VER_OPT_STRING("ciphers", cipherlist);
@@ -666,11 +679,17 @@ static int php_openssl_dtls_server_ctx(php_stream *stream, php_openssl_dtls_data
 	return 0;
 }
 
-/* Accept one peer: run the cookie exchange with DTLSv1_listen, move to a socket
- * connected to that peer (sharing the local port), and finish the handshake. */
+/* Accept one peer: run the cookie exchange with DTLSv1_listen, connect the
+ * listening socket to that peer, and finish the handshake on it. */
 static int php_openssl_dtls_accept(php_stream *stream, php_openssl_dtls_data_t *listen,
 		php_stream_xport_param *xparam)
 {
+	if (listen->s.socket == SOCK_ERR) {
+		/* The listening socket is handed to the first accepted peer. */
+		php_error_docref(NULL, E_WARNING, "This dtls:// server has already accepted its peer");
+		return -1;
+	}
+
 	SSL *ssl = SSL_new(listen->ctx);
 	if (ssl == NULL) {
 		php_stream_warn(stream, CreateFailed, "DTLS handle creation failure");
@@ -733,47 +752,39 @@ static int php_openssl_dtls_accept(php_stream *stream, php_openssl_dtls_data_t *
 		return -1;
 	}
 
-	/* A fresh socket bound to the same local address and connected to the peer
-	 * keeps the listening socket free for the next accept. */
-	struct sockaddr_storage local;
-	socklen_t locallen = sizeof(local);
-	php_socket_t clifd;
-	int on = 1;
-
-	if (getsockname(listen->s.socket, (struct sockaddr *)&local, &locallen) != 0
-			|| (clifd = socket(peer.ss_family, SOCK_DGRAM, 0)) == SOCK_ERR) {
+	/* Connect the listening socket to this peer and hand it to the accepted
+	 * stream. Serving one peer per server stream avoids SO_REUSEPORT (which
+	 * would let another process bind the same port and steal datagrams). */
+	if (connect(listen->s.socket, (struct sockaddr *)&peer, peerlen) != 0) {
 		SSL_free(ssl);
 		return -1;
 	}
-	setsockopt(clifd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on));
-#ifdef SO_REUSEPORT
-	setsockopt(clifd, SOL_SOCKET, SO_REUSEPORT, (char *)&on, sizeof(on));
-#endif
-	if (bind(clifd, (struct sockaddr *)&local, locallen) != 0
-			|| connect(clifd, (struct sockaddr *)&peer, peerlen) != 0) {
-		closesocket(clifd);
-		SSL_free(ssl);
-		return -1;
-	}
-	php_set_sock_blocking(clifd, 0);
-
-	BIO_set_fd(bio, clifd, BIO_NOCLOSE);
 	BIO_ctrl(bio, BIO_CTRL_DGRAM_SET_CONNECTED, 0, &peer);
 
 	php_openssl_dtls_data_t *clisock = pemalloc(sizeof(*clisock), 0);
 	memset(clisock, 0, sizeof(*clisock));
-	clisock->s.socket = clifd;
+	clisock->s.socket = listen->s.socket;
 	clisock->s.is_blocked = true;
 	clisock->s.timeout.tv_sec = (time_t)FG(default_socket_timeout);
 	clisock->ssl_handle = ssl;
 	clisock->method = STREAM_CRYPTO_METHOD_DTLS_SERVER;
 
+	/* The socket now belongs to the accepted stream. */
+	listen->s.socket = SOCK_ERR;
+
 	php_stream *clistream = php_stream_alloc_rel(&php_openssl_dtls_socket_ops, clisock, NULL, "r+");
 	if (clistream == NULL) {
 		SSL_free(ssl);
-		closesocket(clifd);
+		closesocket(clisock->s.socket);
 		pefree(clisock, 0);
 		return -1;
+	}
+
+	/* The accepted stream inherits the listener's context (cert options,
+	 * keying material requests, ...). */
+	clistream->ctx = stream->ctx;
+	if (stream->ctx) {
+		GC_ADDREF(stream->ctx);
 	}
 
 	/* Finish the handshake (SSL_do_handshake performs the accept). */
@@ -865,6 +876,45 @@ static int php_openssl_dtls_sockop_cast(php_stream *stream, int castas, void **r
 	}
 }
 
+/* stream_socket_enable_crypto() on a udp:// stream: set up the DTLS client
+ * handshake over the already-connected socket. Servers use the dtls:// scheme. */
+static int php_openssl_dtls_crypto_setup(php_stream *stream, php_openssl_dtls_data_t *dtlssock,
+		php_stream_xport_crypto_param *cparam)
+{
+	if (dtlssock->ssl_handle != NULL) {
+		php_error_docref(NULL, E_WARNING, "DTLS is already active on this stream");
+		return -1;
+	}
+	/* The LSB of the crypto method marks a client; only client crypto can be
+	 * layered onto an existing socket this way. */
+	if (!(cparam->inputs.method & 1)) {
+		php_error_docref(NULL, E_WARNING,
+				"Only DTLS client crypto can be enabled on a udp:// stream; use the dtls:// server transport instead");
+		return -1;
+	}
+	dtlssock->method = cparam->inputs.method;
+	return php_openssl_dtls_setup_crypto(stream, dtlssock, NULL);
+}
+
+static int php_openssl_dtls_crypto_enable(php_stream *stream, php_openssl_dtls_data_t *dtlssock)
+{
+	if (dtlssock->ssl_handle == NULL) {
+		return -1;
+	}
+
+	php_stream_xport_param p;
+	memset(&p, 0, sizeof(p));
+	if (php_openssl_dtls_handshake(stream, dtlssock, &p) != 0
+			|| php_openssl_dtls_check_fingerprint(stream, dtlssock, &p) != 0) {
+		SSL_free(dtlssock->ssl_handle);
+		dtlssock->ssl_handle = NULL;
+		return -1;
+	}
+	/* >0 tells stream_socket_enable_crypto() the handshake finished (0 means
+	 * "in progress", -1 means failure). */
+	return 1;
+}
+
 /* Handle transport and stream options. */
 static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam)
 {
@@ -877,6 +927,7 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 				zval crypto;
 				char *proto_str;
 				const SSL_CIPHER *cipher;
+				zval *val;
 
 				array_init(&crypto);
 				switch (SSL_version(dtlssock->ssl_handle)) {
@@ -892,12 +943,50 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 					add_assoc_long(&crypto, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
 					add_assoc_string(&crypto, "cipher_version", (char *) SSL_CIPHER_get_version(cipher));
 				}
+
+				/* RFC 5705 exported keying material (e.g. DTLS-SRTP keys),
+				 * requested via the keying_material_label/length context options. */
+				char *km_label = NULL;
+				size_t km_label_len = 0;
+				GET_VER_OPT_STRINGL("keying_material_label", km_label, km_label_len);
+				if (km_label != NULL && GET_VER_OPT("keying_material_length")) {
+					zend_long km_len = zval_get_long(val);
+					if (km_len > 0 && km_len <= 1024) {
+						zend_string *km = zend_string_alloc((size_t)km_len, 0);
+						if (SSL_export_keying_material(dtlssock->ssl_handle,
+								(unsigned char *)ZSTR_VAL(km), (size_t)km_len,
+								km_label, km_label_len, NULL, 0, 0) == 1) {
+							ZSTR_VAL(km)[km_len] = '\0';
+							add_assoc_str(&crypto, "keying_material", km);
+						} else {
+							zend_string_release(km);
+						}
+					}
+				}
+
 				add_assoc_zval((zval *)ptrparam, "crypto", &crypto);
 			}
 			add_assoc_bool((zval *)ptrparam, "timed_out", dtlssock->s.timeout_event);
 			add_assoc_bool((zval *)ptrparam, "blocked", dtlssock->s.is_blocked);
 			add_assoc_bool((zval *)ptrparam, "eof", stream->eof);
 			return PHP_STREAM_OPTION_RETURN_OK;
+		}
+
+		case PHP_STREAM_OPTION_CRYPTO_API: {
+			php_stream_xport_crypto_param *cparam = (php_stream_xport_crypto_param *)ptrparam;
+
+			switch (cparam->op) {
+				case STREAM_XPORT_CRYPTO_OP_SETUP:
+					cparam->outputs.returncode =
+							php_openssl_dtls_crypto_setup(stream, dtlssock, cparam);
+					return PHP_STREAM_OPTION_RETURN_OK;
+				case STREAM_XPORT_CRYPTO_OP_ENABLE:
+					cparam->outputs.returncode =
+							php_openssl_dtls_crypto_enable(stream, dtlssock);
+					return PHP_STREAM_OPTION_RETURN_OK;
+				default:
+					return PHP_STREAM_OPTION_RETURN_NOTIMPL;
+			}
 		}
 
 		case PHP_STREAM_OPTION_XPORT_API:
@@ -917,10 +1006,8 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 						xparam->outputs.returncode = -1;
 						return PHP_STREAM_OPTION_RETURN_OK;
 					}
-					/* REUSEADDR+REUSEPORT so each accepted peer can bind a fresh
-					 * socket on this same local address. */
 					dtlssock->s.socket = php_network_bind_socket_to_local_addr(host, portno, SOCK_DGRAM,
-							STREAM_SOCKOP_SO_REUSEADDR | STREAM_SOCKOP_SO_REUSEPORT,
+							STREAM_SOCKOP_SO_REUSEADDR,
 							xparam->want_errortext ? &xparam->outputs.error_text : NULL, &err);
 					efree(host);
 					xparam->outputs.error_code = err;
@@ -929,11 +1016,17 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 						return PHP_STREAM_OPTION_RETURN_OK;
 					}
 					php_set_sock_blocking(dtlssock->s.socket, 0);
-					dtlssock->method = STREAM_CRYPTO_METHOD_DTLS_SERVER;
-					xparam->outputs.returncode = php_openssl_dtls_server_ctx(stream, dtlssock);
-					if (xparam->outputs.returncode != 0) {
-						closesocket(dtlssock->s.socket);
-						dtlssock->s.socket = SOCK_ERR;
+					if (dtlssock->enable_on_connect) {
+						/* dtls:// server: set up the DTLS context and cookies now. */
+						dtlssock->method = STREAM_CRYPTO_METHOD_DTLS_SERVER;
+						xparam->outputs.returncode = php_openssl_dtls_server_ctx(stream, dtlssock);
+						if (xparam->outputs.returncode != 0) {
+							closesocket(dtlssock->s.socket);
+							dtlssock->s.socket = SOCK_ERR;
+						}
+					} else {
+						/* Plain udp:// bind; DTLS is enabled later, if at all. */
+						xparam->outputs.returncode = 0;
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
 				}
