@@ -10,14 +10,71 @@
    *
  */
 
-#include <stdio.h>
-#include <errno.h>
-#include <math.h>
-#include <string.h>
-#include <stdlib.h>
+/**
+ * File: GD2 IO
+ *
+ * Read and write GD2 images.
+ *
+ * The GD2 image format is a proprietary image format of libgd. *It has to be*
+ * *regarded as being obsolete, and should only be used for development and*
+ * *testing purposes.*
+ *
+ * Structure of a GD2 image file:
+ *  - file header
+ *  - chunk headers (only for compressed data)
+ *  - color header (either truecolor or palette)
+ *  - chunks of image data (chunk-row-major, top to bottom, left to right)
+ *
+ * All numbers are stored in big-endian format.
+ *
+ * File header structure:
+ *  signature     - 4 bytes (always "gd2\0")
+ *  version       - 1 word (e.g. "\0\002")
+ *  width         - 1 word
+ *  height        - 1 word
+ *  chunk_size    - 1 word
+ *  format        - 1 word
+ *  x_chunk_count - 1 word
+ *  y_chunk_count - 1 word
+ *
+ * Recognized formats:
+ *  1 - raw palette image data
+ *  2 - compressed palette image data
+ *  3 - raw truecolor image data
+ *  4 - compressed truecolor image data
+ *
+ * Chunk header:
+ *  offset - 1 dword
+ *  size   - 1 dword
+ *
+ * There are x_chunk_count * y_chunk_count chunk headers.
+ *
+ * Truecolor image color header:
+ *  truecolor   - 1 byte (always "\001")
+ *  transparent - 1 dword (ARGB color); "\377\377\377\377" means that no
+ *				  transparent color is set
+ *
+ * Palette image color header:
+ *  truecolor   - 1 byte (always "\0")
+ *  count       - 1 word (the number of used palette colors)
+ *  transparent - 1 dword (palette index); "\377\377\377\377" means that no
+ *				  transparent color is set
+ *  palette     - 256 dwords (RGBA colors)
+ *
+ * Chunk structure:
+ *  Sequential pixel data of a rectangular area (chunk_size x chunk_size),
+ *  row-major from top to bottom, left to right:
+ *  - 1 byte per pixel for palette images
+ *  - 1 dword (ARGB) per pixel for truecolor images
+ *
+ *  Depending on format, the chunk may be ZLIB compressed.
+ */
 #include "gd.h"
 #include "gd_errors.h"
 #include "gdhelpers.h"
+#include <limits.h>
+#include <math.h>
+#include <string.h>
 
 #include <zlib.h>
 
@@ -40,8 +97,7 @@
 /* #define GD2_DBG(s) (s) */
 #define GD2_DBG(s)
 
-typedef struct
-{
+typedef struct {
 	int offset;
 	int size;
 } t_chunk_info;
@@ -52,8 +108,7 @@ extern void _gdPutColors(gdImagePtr im, gdIOCtx * out);
 /* */
 /* Read the extra info in the gd2 header. */
 /* */
-static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, int *fmt, int *ncx, int *ncy, t_chunk_info ** chunkIdx)
-{
+static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, int *fmt, int *ncx, int *ncy, t_chunk_info ** chunkIdx) {
 	int i;
 	int ch;
 	char id[5];
@@ -67,9 +122,9 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 		ch = gdGetC(in);
 		if (ch == EOF) {
 			goto fail1;
-		}
+		};
 		id[i] = ch;
-	}
+	};
 	id[4] = 0;
 
 	GD2_DBG(gd_error("Got file code: %s", id));
@@ -78,18 +133,18 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 	if (strcmp(id, GD2_ID) != 0) {
 		GD2_DBG(gd_error("Not a valid gd2 file"));
 		goto fail1;
-	}
+	};
 
 	/* Version */
 	if (gdGetWord(vers, in) != 1) {
 		goto fail1;
-	}
+	};
 	GD2_DBG(gd_error("Version: %d", *vers));
 
 	if ((*vers != 1) && (*vers != 2)) {
 		GD2_DBG(gd_error("Bad version: %d", *vers));
 		goto fail1;
-	}
+	};
 
 	/* Image Size */
 	if (!gdGetWord(sx, in)) {
@@ -105,35 +160,35 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 	/* Chunk Size (pixels, not bytes!) */
 	if (gdGetWord(cs, in) != 1) {
 		goto fail1;
-	}
+	};
 	GD2_DBG(gd_error("ChunkSize: %d", *cs));
 
 	if ((*cs < GD2_CHUNKSIZE_MIN) || (*cs > GD2_CHUNKSIZE_MAX)) {
 		GD2_DBG(gd_error("Bad chunk size: %d", *cs));
 		goto fail1;
-	}
+	};
 
 	/* Data Format */
 	if (gdGetWord(fmt, in) != 1) {
 		goto fail1;
-	}
+	};
 	GD2_DBG(gd_error("Format: %d", *fmt));
 
 	if ((*fmt != GD2_FMT_RAW) && (*fmt != GD2_FMT_COMPRESSED) && (*fmt != GD2_FMT_TRUECOLOR_RAW) && (*fmt != GD2_FMT_TRUECOLOR_COMPRESSED)) {
 		GD2_DBG(gd_error("Bad data format: %d", *fmt));
 		goto fail1;
-	}
+	};
 
 	/* # of chunks wide */
 	if (gdGetWord(ncx, in) != 1) {
 		goto fail1;
-	}
+	};
 	GD2_DBG(gd_error("%d Chunks Wide", *ncx));
 
 	/* # of chunks high */
 	if (gdGetWord(ncy, in) != 1) {
 		goto fail1;
-	}
+	};
 	GD2_DBG(gd_error("%d Chunks vertically", *ncy));
 
 	if (gd2_compressed(*fmt)) {
@@ -150,6 +205,7 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 		if (sidx <= 0) {
 			goto fail1;
 		}
+
 		cidx = gdCalloc(sidx, 1);
 		if (cidx == NULL) {
 			goto fail1;
@@ -157,25 +213,23 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 
 		for (i = 0; i < nc; i++) {
 			if (gdGetInt(&cidx[i].offset, in) != 1) {
-				gdFree(cidx);
-				goto fail1;
-			}
+				goto fail2;
+			};
 			if (gdGetInt(&cidx[i].size, in) != 1) {
-				gdFree(cidx);
-				goto fail1;
-			}
-			if (cidx[i].offset < 0 || cidx[i].size < 0) {
-				gdFree(cidx);
-				goto fail1;
-			}
-		}
+				goto fail2;
+			};
+			if (cidx[i].offset < 0 || cidx[i].size < 0 ||
+				cidx[i].size == INT_MAX)
+				goto fail2;
+		};
 		*chunkIdx = cidx;
-	}
+	};
 
 	GD2_DBG(gd_error("gd2 header complete"));
 
 	return 1;
-
+fail2:
+	gdFree(cidx);
 fail1:
 	return 0;
 }
@@ -241,12 +295,57 @@ static int _gd2ReadChunk (int offset, char *compBuf, int compSize, char *chunkBu
 
 	return TRUE;
 }
+/*
+  Function: gdImageCreateFromGd2
 
-BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2 (FILE * inFile)
-{
+	<gdImageCreateFromGd2> is called to load images from gd2 format
+	files. Invoke <gdImageCreateFromGd2> with an already opened
+	pointer to a file containing the desired image in the gd2 file
+	format, which is specific to gd2 and intended for fast loading of
+	parts of large images. (It is a compressed format, but generally
+	not as good as maximum compression of the entire image would be.)
+
+	<gdImageCreateFromGd2> returns a <gdImagePtr> to the new image, or
+	NULL if unable to load the image (most often because the file is
+	corrupt or does not contain a gd format
+	image). <gdImageCreateFromGd2> does not close the file. You can
+	inspect the sx and sy members of the image to determine its
+	size. The image must eventually be destroyed using
+	<gdImageDestroy>.
+
+
+  Variants:
+
+	<gdImageCreateFromGd2Ptr> creates an image from GD data (i.e. the
+	contents of a GD2 file) already in memory.
+
+	<gdImageCreateFromGd2Ctx> reads in an image using the functions in
+	a <gdIOCtx> struct.
+
+  Parameters:
+
+	infile - The input FILE pointer
+
+  Returns:
+
+	A pointer to the new image or NULL if an error occurred.
+
+  Example:
+
+	> gdImagePtr im;
+	> FILE *in;
+	> in = fopen("mygd.gd2", "rb");
+	> im = gdImageCreateFromGd2(in);
+	> fclose(in);
+	> // ... Use the image ...
+	> gdImageDestroy(im);
+*/
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2(FILE *inFile) {
 	gdIOCtx *in = gdNewFileCtx(inFile);
 	gdImagePtr im;
 
+	if (in == NULL)
+		return NULL;
 	im = gdImageCreateFromGd2Ctx(in);
 
 	in->gd_free(in);
@@ -254,18 +353,34 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2 (FILE * inFile)
 	return im;
 }
 
-BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Ptr (int size, void *data)
-{
+/*
+  Function: gdImageCreateFromGd2Ptr
+
+  Parameters:
+
+	size - size of GD2 data in bytes.
+	data - GD2 data (i.e. contents of a GIF file).
+
+  See <gdImageCreateFromGd2>.
+*/
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Ptr(int size, void *data) {
 	gdImagePtr im;
 	gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
+	if (!in)
+		return 0;
 	im = gdImageCreateFromGd2Ctx(in);
 	in->gd_free(in);
 
 	return im;
 }
 
-BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
-{
+/*
+  Function: gdImageCreateFromGd2Ctx
+
+  Reads in a GD2 image via a <gdIOCtx> struct.  See
+  <gdImageCreateFromGd2>.
+*/
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Ctx(gdIOCtxPtr in) {
 	int sx, sy;
 	int i;
 	int ncx, ncy, nc, cs, cx, cy;
@@ -289,7 +404,13 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 	}
 
 	bytesPerPixel = im->trueColor ? 4 : 1;
+	if (overflow2(ncx, ncy))
+		goto fail;
 	nc = ncx * ncy;
+
+	if (overflow2(ncy, cs) || overflow2(ncx, cs) ||
+		overflow2(bytesPerPixel, cs))
+		goto fail;
 
 	if (gd2_compressed(fmt)) {
 		/* Find the maximum compressed chunk size. */
@@ -303,14 +424,18 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 
 		/* Allocate buffers */
 		chunkMax = cs * bytesPerPixel * cs;
-		if (chunkMax <= 0) {
-			return 0;
-		}
 		chunkBuf = gdCalloc(chunkMax, 1);
+		if (!chunkBuf) {
+			goto fail;
+		}
 		compBuf = gdCalloc(compMax, 1);
-
-		GD2_DBG(gd_error("Largest compressed chunk is %d bytes", compMax));
+		if (!compBuf) {
+			goto fail;
 	}
+
+	GD2_DBG(printf("Largest compressed chunk is %d bytes\n", compMax));
+	};
+
 
 	/* Read the data... */
 	for (cy = 0; (cy < ncy); cy++) {
@@ -328,7 +453,7 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 
 				if (!_gd2ReadChunk(chunkIdx[chunkNum].offset, compBuf, chunkIdx[chunkNum].size, (char *) chunkBuf, &chunkLen, in)) {
 					GD2_DBG(gd_error("Error reading comproessed chunk"));
-					goto fail2;
+					goto fail;
 				}
 
 				chunkPos = 0;
@@ -346,15 +471,13 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 						if (im->trueColor) {
 							if (!gdGetInt(&im->tpixels[y][x], in)) {
 								gd_error("gd2: EOF while reading\n");
-								gdImageDestroy(im);
-								return NULL;
+								goto fail;
 							}
 						} else {
 							int ch;
 							if (!gdGetByte(&ch, in)) {
 								gd_error("gd2: EOF while reading\n");
-								gdImageDestroy(im);
-								return NULL;
+								goto fail;
 							}
 							im->pixels[y][x] = ch;
 						}
@@ -394,7 +517,7 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 
 	return im;
 
-fail2:
+fail:
 	gdImageDestroy(im);
 	if (chunkBuf) {
 		gdFree(chunkBuf);
@@ -409,21 +532,41 @@ fail2:
 	return 0;
 }
 
-BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2PartPtr (int size, void *data, int srcx, int srcy, int w, int h)
-{
-	gdImagePtr im;
-	gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
-	im = gdImageCreateFromGd2PartCtx(in, srcx, srcy, w, h);
-	in->gd_free(in);
+/*
+  Function: gdImageCreateFromGd2Part
 
-	return im;
-}
+	<gdImageCreateFromGd2Part> is called to load parts of images from
+	gd2 format files. Invoked in the same way as <gdImageCreateFromGd2>,
+	but with extra parameters indicating the source (x, y) and
+	width/height of the desired image. <gdImageCreateFromGd2Part>
+	returns a <gdImagePtr> to the new image, or NULL if unable to load
+	the image. The image must eventually be destroyed using
+	<gdImageDestroy>.
 
-BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Part (FILE * inFile, int srcx, int srcy, int w, int h)
-{
+  Variants:
+
+	<gdImageCreateFromGd2PartPtr> creates an image from GD2 data
+	(i.e. the contents of a GD2 file) already in memory.
+
+	<gdImageCreateFromGd2Ctx> reads in an image using the functions in
+	a <gdIOCtx> struct.
+
+  Parameters:
+
+	infile      - The input FILE pointer
+	srcx, srcy  - The source X and Y coordinates
+	w, h        - The resulting image's width and height
+
+  Returns:
+
+	A pointer to the new image or NULL if an error occurred.
+
+*/
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Part(FILE *inFile, int srcx, int srcy, int w, int h) {
 	gdImagePtr im;
 	gdIOCtx *in = gdNewFileCtx(inFile);
-
+	if (in == NULL)
+		return NULL;
 	im = gdImageCreateFromGd2PartCtx(in, srcx, srcy, w, h);
 
 	in->gd_free(in);
@@ -431,8 +574,42 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2Part (FILE * inFile, int srcx, int s
 	return im;
 }
 
-BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w, int h)
-{
+/*
+  Function: gdImageCreateFromGd2PartPtr
+
+  Parameters:
+
+	size        - size of GD data in bytes.
+	data        - GD data (i.e. contents of a GIF file).
+	srcx, srcy  - The source X and Y coordinates
+	w, h        - The resulting image's width and height
+
+  Reads in part of a GD2 image file stored from memory. See
+  <gdImageCreateFromGd2Part>.
+*/
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2PartPtr(int size, void *data, int srcx, int srcy, int w, int h) {
+	gdImagePtr im;
+	gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
+	if (!in)
+		return 0;
+	im = gdImageCreateFromGd2PartCtx(in, srcx, srcy, w, h);
+	in->gd_free(in);
+	return im;
+}
+
+/*
+  Function: gdImageCreateFromGd2PartCtx
+
+  Parameters:
+
+	in          - The data source.
+	srcx, srcy  - The source X and Y coordinates
+	w, h        - The resulting image's width and height
+
+  Reads in part of a GD2 data image file via a <gdIOCtx> struct.  See
+  <gdImageCreateFromGd2Part>.
+*/
+BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2PartCtx(gdIOCtx *in, int srcx, int srcy, int w, int h) {
 	int scx, scy, ecx, ecy, fsx, fsy;
 	int nc, ncx, ncy, cs, cx, cy;
 	int x, y, ylo, yhi, xlo, xhi;
@@ -451,7 +628,6 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int
 	char *compBuf = NULL;
 
 	gdImagePtr im;
-
 	if (w<1 || h <1) {
 		return 0;
 	}
@@ -504,7 +680,13 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int
 		}
 
 		chunkBuf = gdCalloc(chunkMax, 1);
+		if (!chunkBuf) {
+			goto fail2;
+		}
 		compBuf = gdCalloc(compMax, 1);
+		if (!compBuf) {
+			goto fail2;
+		}
 	}
 
 	/* Work out start/end chunks */
@@ -538,7 +720,7 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int
 			yhi = fsy;
 		}
 
-		for (cx = scx; cx <= ecx; cx++) {
+		for (cx = scx; (cx <= ecx); cx++) {
 
 			xlo = cx * cs;
 			xhi = xlo + cs;
@@ -575,7 +757,6 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int
 			}
 
 			GD2_DBG(gd_error("   into (%d, %d) - (%d, %d)", xlo, ylo, xhi, yhi));
-
 			for (y = ylo; (y < yhi); y++) {
 				for (x = xlo; x < xhi; x++) {
 					if (!gd2_compressed(fmt)) {
@@ -622,7 +803,6 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int
 	if (chunkIdx) {
 		gdFree(chunkIdx);
 	}
-
 	return im;
 
 fail2:
@@ -637,7 +817,6 @@ fail1:
 	if (chunkIdx) {
 		gdFree(chunkIdx);
 	}
-
 	return 0;
 }
 
@@ -661,8 +840,9 @@ static void _gd2PutHeader (gdImagePtr im, gdIOCtx * out, int cs, int fmt, int cx
 	gdPutWord(cy, out);
 }
 
-static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
-{
+/* returns 0 on success, 1 on failure */
+static int _gdImageGd2(gdImagePtr im, gdIOCtx *out, int cs, int fmt) {
+	int ret = 0;
 	int ncx, ncy, cx, cy;
 	int x, y, ylo, yhi, xlo, xhi;
 	int chunkLen;
@@ -707,20 +887,21 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 	if (gd2_compressed(fmt)) {
 		/* Work out size of buffer for compressed data, If CHUNKSIZE is large,
 	 	 * then these will be large!
-	 	 */
-
-		/* The zlib notes say output buffer size should be (input size) * 1.01 * 12
+		 * The zlib notes say output buffer size should be (input size) * 1.01 * 12
 		 * - we'll use 1.02 to be paranoid.
 		 */
 		compMax = (int)(cs * bytesPerPixel * cs * 1.02f) + 12;
 
-		/* Allocate the buffers.  */
-		chunkData = safe_emalloc(cs * bytesPerPixel, cs, 0);
-		memset(chunkData, 0, cs * bytesPerPixel * cs);
-		if (compMax <= 0) {
+		chunkData = gdCalloc(cs * bytesPerPixel * cs, 1);
+		if (!chunkData) {
+			ret = 1;
 			goto fail;
 		}
 		compData = gdCalloc(compMax, 1);
+		if (!compData) {
+			ret = 1;
+			goto fail;
+		}
 
 		/* Save the file position of chunk index, and allocate enough space for
 		 * each chunk_info block .
@@ -730,8 +911,11 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 		GD2_DBG(gd_error("Index size is %d", idxSize));
 		gdSeek(out, idxPos + idxSize);
 
-		chunkIdx = safe_emalloc(idxSize, sizeof(t_chunk_info), 0);
-		memset(chunkIdx, 0, idxSize * sizeof(t_chunk_info));
+		chunkIdx = gdCalloc(idxSize * sizeof(t_chunk_info), 1);
+		if (!chunkIdx) {
+			ret = 1;
+			goto fail;
+		}
 	}
 
 	_gdPutColors (im, out);
@@ -750,7 +934,6 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 			GD2_DBG(gd_error("Processing Chunk (%dx%d), y from %d to %d", cx, cy, ylo, yhi));
 			chunkLen = 0;
 			for (y = ylo; (y < yhi); y++) {
-				GD2_DBG(gd_error("y=%d: ",y));
 				xlo = cx * cs;
 				xhi = xlo + cs;
 				if (xhi > im->sx) {
@@ -759,7 +942,6 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 
 				if (gd2_compressed(fmt)) {
 					for (x = xlo; x < xhi; x++) {
-						GD2_DBG(gd_error("%d...",x));
 						if (im->trueColor) {
 							int p = im->tpixels[y][x];
 							chunkData[chunkLen++] = gdTrueColorGetAlpha(p);
@@ -772,8 +954,6 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 					}
 				} else {
 					for (x = xlo; x < xhi; x++) {
-						GD2_DBG(gd_error("%d, ",x));
-
 						if (im->trueColor) {
 							gdPutInt(im->tpixels[y][x], out);
 						} else {
@@ -781,9 +961,7 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 						}
 					}
 				}
-				GD2_DBG(gd_error("y=%d done.",y));
 			}
-
 			if (gd2_compressed(fmt)) {
 				compLen = compMax;
 				if (compress((unsigned char *) &compData[0], &compLen, (unsigned char *) &chunkData[0], chunkLen) != Z_OK) {
@@ -801,7 +979,6 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 			}
 		}
     	}
-
 	if (gd2_compressed(fmt)) {
 		/* Save the position, write the index, restore position (paranoia). */
 		GD2_DBG(gd_error("Seeking %d to write index", idxPos));
@@ -827,25 +1004,36 @@ fail:
 		gdFree(chunkIdx);
 	}
 	GD2_DBG(gd_error("Done"));
+
+	return ret;
 }
 
-BGD_DECLARE(void) gdImageGd2 (gdImagePtr im, FILE * outFile, int cs, int fmt)
-{
+/*
+	Function: gdImageGd2
+*/
+BGD_DECLARE(void) gdImageGd2(gdImagePtr im, FILE *outFile, int cs, int fmt) {
 	gdIOCtx *out = gdNewFileCtx(outFile);
-
+	if (out == NULL)
+		return;
 	_gdImageGd2(im, out, cs, fmt);
-
 	out->gd_free(out);
 }
 
-BGD_DECLARE(void *) gdImageGd2Ptr (gdImagePtr im, int cs, int fmt, int *size)
-{
+/*
+	Function: gdImageGd2Ptr
+*/
+BGD_DECLARE(void *) gdImageGd2Ptr(gdImagePtr im, int cs, int fmt, int *size) {
 	void *rv;
 	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
+	if (out == NULL)
+		return NULL;
 
-	_gdImageGd2(im, out, cs, fmt);
-	rv = gdDPExtractData(out, size);
+	if (_gdImageGd2(im, out, cs, fmt)) {
+		rv = NULL;
+	} else {
+		rv = gdDPExtractData(out, size);
+	}
+
 	out->gd_free(out);
-
 	return rv;
 }
