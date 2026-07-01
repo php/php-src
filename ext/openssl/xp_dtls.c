@@ -363,6 +363,35 @@ static int php_openssl_dtls_apply_context(php_stream *stream, php_openssl_dtls_d
 	return 0;
 }
 
+/* Keep the handshake within the path MTU: enable path-MTU discovery so the
+ * kernel drops-and-signals oversized datagrams (OpenSSL then shrinks its DTLS
+ * MTU and retransmits), and honour an explicit dtls_link_mtu context option. */
+static void php_openssl_dtls_configure_mtu(php_stream *stream, SSL *ssl, php_socket_t fd, int family)
+{
+	zval *val;
+
+#if defined(IP_MTU_DISCOVER) && defined(IP_PMTUDISC_DO)
+	if (family == AF_INET) {
+		int mode = IP_PMTUDISC_DO;
+		setsockopt(fd, IPPROTO_IP, IP_MTU_DISCOVER, (char *)&mode, sizeof(mode));
+	}
+#endif
+#if defined(IPV6_MTU_DISCOVER) && defined(IPV6_PMTUDISC_DO)
+	if (family == AF_INET6) {
+		int mode = IPV6_PMTUDISC_DO;
+		setsockopt(fd, IPPROTO_IPV6, IPV6_MTU_DISCOVER, (char *)&mode, sizeof(mode));
+	}
+#endif
+
+	if (GET_VER_OPT("dtls_link_mtu")) {
+		zend_long mtu = zval_get_long(val);
+		if (mtu > 0) {
+			DTLS_set_link_mtu(ssl, mtu);
+			SSL_set_options(ssl, SSL_OP_NO_QUERY_MTU);
+		}
+	}
+}
+
 /* Create the DTLS context, SSL object and datagram BIO. */
 static int php_openssl_dtls_setup_crypto(php_stream *stream, php_openssl_dtls_data_t *dtlssock,
 		const char *peer_host)
@@ -423,6 +452,8 @@ static int php_openssl_dtls_setup_crypto(php_stream *stream, php_openssl_dtls_da
 		socklen_t peerlen = sizeof(peer);
 		if (getpeername(dtlssock->s.socket, (struct sockaddr *)&peer, &peerlen) == 0) {
 			BIO_ctrl(bio, BIO_CTRL_DGRAM_SET_CONNECTED, 0, &peer);
+			php_openssl_dtls_configure_mtu(stream, dtlssock->ssl_handle, dtlssock->s.socket,
+					peer.ss_family);
 		}
 	}
 
@@ -760,6 +791,7 @@ static int php_openssl_dtls_accept(php_stream *stream, php_openssl_dtls_data_t *
 		return -1;
 	}
 	BIO_ctrl(bio, BIO_CTRL_DGRAM_SET_CONNECTED, 0, &peer);
+	php_openssl_dtls_configure_mtu(stream, ssl, listen->s.socket, peer.ss_family);
 
 	php_openssl_dtls_data_t *clisock = pemalloc(sizeof(*clisock), 0);
 	memset(clisock, 0, sizeof(*clisock));
