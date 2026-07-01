@@ -266,6 +266,8 @@
 #define gdImageCreateFromWBMPCtx php_gd_gdImageCreateFromWBMPCtx
 #define gdImageCreateFromWBMPPtr php_gd_gdImageCreateFromWBMPPtr
 #define gdImageCreateFromXbm php_gd_gdImageCreateFromXbm
+#define gdImageWebp php_gd_gdImageWebp
+#define gdImageHeif php_gd_gdImageHeif
 #define gdImageCreatePaletteFromTrueColor php_gd_gdImageCreatePaletteFromTrueColor
 #define gdImageCreateTrueColor php_gd_gdImageCreateTrueColor
 #define gdImageDashedLine php_gd_gdImageDashedLine

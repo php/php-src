@@ -248,135 +248,6 @@ typedef enum {
 	GD_METHOD_COUNT = 30
 } gdInterpolationMethod;
 
-/**
- * Group: HEIF Coding Format
- *
- * Values that select the HEIF coding format.
- *
- * Constants: gdHeifCodec
- *
- *  GD_HEIF_CODEC_UNKNOWN
- *  GD_HEIF_CODEC_HEVC
- *  GD_HEIF_CODEC_AV1
- *
- * See also:
- *  - <gdImageHeif>
- */
-typedef enum {
-	GD_HEIF_CODEC_UNKNOWN = 0,
-	GD_HEIF_CODEC_HEVC,
-	GD_HEIF_CODEC_AV1 = 4,
-} gdHeifCodec;
-
-/**
- * Group: HEIF Chroma Subsampling
- *
- * Values that select the HEIF chroma subsampling.
- *
- * Constants: gdHeifCompression
- *
- *  GD_HEIF_CHROMA_420
- *  GD_HEIF_CHROMA_422
- *  GD_HEIF_CHROMA_444
- *
- * See also:
- *  - <gdImageHeif>
- */
-typedef const char *gdHeifChroma;
-
-#define GD_HEIF_CHROMA_420 "420"
-#define GD_HEIF_CHROMA_422 "422"
-#define GD_HEIF_CHROMA_444 "444"
-
-/**
- * Group: UltraHDR
- *
- * UltraHDR (gain map) APIs are separate from <gdImage>. The UltraHDR handle
- * type is opaque and cannot be passed to existing <gdImage*> functions.
- */
-
-/**
- * Constants: gdUhdrStatus
- *
- * Return status values used by UltraHDR APIs.
- *
- *  GD_UHDR_SUCCESS        - operation succeeded
- *  GD_UHDR_NOT_AVAILABLE  - libgd was built without UltraHDR support
- *  GD_UHDR_E_INVALID      - invalid argument or state
- *  GD_UHDR_E_UNSUPPORTED  - unsupported format or operation
- *  GD_UHDR_E_ENCODE       - encode failure
- *  GD_UHDR_E_DECODE       - decode failure
- */
-#define GD_UHDR_SUCCESS 0
-#define GD_UHDR_NOT_AVAILABLE -1
-#define GD_UHDR_E_INVALID -2
-#define GD_UHDR_E_UNSUPPORTED -3
-#define GD_UHDR_E_ENCODE -4
-#define GD_UHDR_E_DECODE -5
-
-/**
- * Constants: gdUhdrMirrorAxis
- *
- * Mirror axis values used by <gdUhdrImageMirror>.
- *
- *  GD_UHDR_MIRROR_HORIZONTAL
- *  GD_UHDR_MIRROR_VERTICAL
- */
-#define GD_UHDR_MIRROR_HORIZONTAL 0
-#define GD_UHDR_MIRROR_VERTICAL 1
-
-/**
- * Enum: gdUhdrFormat
- *
- * UltraHDR container format selector.
- *
- *  GD_UHDR_FORMAT_JPEG - UltraHDR JPEG (currently supported)
- *  GD_UHDR_FORMAT_WEBP - reserved for future support
- *  GD_UHDR_FORMAT_HEIF - reserved for future support
- */
-typedef enum {
-	GD_UHDR_FORMAT_JPEG = 0,
-	GD_UHDR_FORMAT_WEBP = 1,
-	GD_UHDR_FORMAT_HEIF = 2
-} gdUhdrFormat;
-
-/**
- * Typedef: gdUhdrImage
- *
- * Opaque UltraHDR image handle.
- */
-typedef struct gdUhdrImageStruct gdUhdrImage;
-
-/**
- * Typedef: gdUhdrImagePtr
- *
- * Pointer to <gdUhdrImage>.
- */
-typedef gdUhdrImage *gdUhdrImagePtr;
-
-/**
- * Typedef: gdUhdrError
- *
- * Structured error details for UltraHDR APIs.
- *
- * Fields:
- *  code          - libgd UltraHDR status code (GD_UHDR_*)
- *  provider_code - underlying provider error code, if any
- *  message       - optional human-readable detail string
- */
-typedef struct {
-	int code;
-	int provider_code;
-	char message[128];
-} gdUhdrError;
-
-/**
- * Typedef: gdUhdrErrorPtr
- *
- * Pointer to <gdUhdrError>.
- */
-typedef gdUhdrError *gdUhdrErrorPtr;
-
 /* define struct with name and func ptr and add it to gdImageStruct
  * gdInterpolationMethod interpolation; */
 
@@ -1051,9 +922,51 @@ BGD_DECLARE(int) gdImageJxlAnimEnd(gdJxlAnimPtr anim);
 BGD_DECLARE(void *) gdImageJxlAnimEndPtr(gdJxlAnimPtr anim, int *size);
 
 /* HEIF */
+
+/**
+ * Group: HEIF Coding Format
+ *
+ * Values that select the HEIF coding format.
+ *
+ * Constants: gdHeifCodec
+ *
+ *  GD_HEIF_CODEC_UNKNOWN
+ *  GD_HEIF_CODEC_HEVC
+ *  GD_HEIF_CODEC_AV1
+ *
+ * See also:
+ *  - <gdImageHeif>
+ */
+typedef enum {
+	GD_HEIF_CODEC_UNKNOWN = 0,
+	GD_HEIF_CODEC_HEVC,
+	GD_HEIF_CODEC_AV1 = 4,
+} gdHeifCodec;
+
+/**
+ * Group: HEIF Chroma Subsampling
+ *
+ * Values that select the HEIF chroma subsampling.
+ *
+ * Constants: gdHeifCompression
+ *
+ *  GD_HEIF_CHROMA_420
+ *  GD_HEIF_CHROMA_422
+ *  GD_HEIF_CHROMA_444
+ *
+ * See also:
+ *  - <gdImageHeif>
+ */
+typedef const char *gdHeifChroma;
+
+#define GD_HEIF_CHROMA_420 "420"
+#define GD_HEIF_CHROMA_422 "422"
+#define GD_HEIF_CHROMA_444 "444"
+
 BGD_DECLARE(gdImagePtr) gdImageCreateFromHeif(FILE *inFile);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromHeifPtr(int size, void *data);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromHeifCtx(gdIOCtxPtr infile);
+BGD_DECLARE(void) gdImageHeif(gdImagePtr im, FILE *outFile);
 
 /* AVIF */
 BGD_DECLARE(gdImagePtr) gdImageCreateFromAvif(FILE *inFile);
@@ -1160,8 +1073,97 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromBmp(FILE *inFile);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromBmpPtr(int size, void *data);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromBmpCtx(gdIOCtxPtr infile);
 
-
 /* UltraHDR  */
+
+/**
+ * Group: UltraHDR
+ *
+ * UltraHDR (gain map) APIs are separate from <gdImage>. The UltraHDR handle
+ * type is opaque and cannot be passed to existing <gdImage*> functions.
+ */
+
+/**
+ * Constants: gdUhdrStatus
+ *
+ * Return status values used by UltraHDR APIs.
+ *
+ *  GD_UHDR_SUCCESS        - operation succeeded
+ *  GD_UHDR_NOT_AVAILABLE  - libgd was built without UltraHDR support
+ *  GD_UHDR_E_INVALID      - invalid argument or state
+ *  GD_UHDR_E_UNSUPPORTED  - unsupported format or operation
+ *  GD_UHDR_E_ENCODE       - encode failure
+ *  GD_UHDR_E_DECODE       - decode failure
+ */
+#define GD_UHDR_SUCCESS 0
+#define GD_UHDR_NOT_AVAILABLE -1
+#define GD_UHDR_E_INVALID -2
+#define GD_UHDR_E_UNSUPPORTED -3
+#define GD_UHDR_E_ENCODE -4
+#define GD_UHDR_E_DECODE -5
+
+/**
+ * Constants: gdUhdrMirrorAxis
+ *
+ * Mirror axis values used by <gdUhdrImageMirror>.
+ *
+ *  GD_UHDR_MIRROR_HORIZONTAL
+ *  GD_UHDR_MIRROR_VERTICAL
+ */
+#define GD_UHDR_MIRROR_HORIZONTAL 0
+#define GD_UHDR_MIRROR_VERTICAL 1
+
+/**
+ * Enum: gdUhdrFormat
+ *
+ * UltraHDR container format selector.
+ *
+ *  GD_UHDR_FORMAT_JPEG - UltraHDR JPEG (currently supported)
+ *  GD_UHDR_FORMAT_WEBP - reserved for future support
+ *  GD_UHDR_FORMAT_HEIF - reserved for future support
+ */
+typedef enum {
+	GD_UHDR_FORMAT_JPEG = 0,
+	GD_UHDR_FORMAT_WEBP = 1,
+	GD_UHDR_FORMAT_HEIF = 2
+} gdUhdrFormat;
+
+/**
+ * Typedef: gdUhdrImage
+ *
+ * Opaque UltraHDR image handle.
+ */
+typedef struct gdUhdrImageStruct gdUhdrImage;
+
+/**
+ * Typedef: gdUhdrImagePtr
+ *
+ * Pointer to <gdUhdrImage>.
+ */
+typedef gdUhdrImage *gdUhdrImagePtr;
+
+/**
+ * Typedef: gdUhdrError
+ *
+ * Structured error details for UltraHDR APIs.
+ *
+ * Fields:
+ *  code          - libgd UltraHDR status code (GD_UHDR_*)
+ *  provider_code - underlying provider error code, if any
+ *  message       - optional human-readable detail string
+ */
+typedef struct {
+	int code;
+	int provider_code;
+	char message[128];
+} gdUhdrError;
+
+/**
+ * Typedef: gdUhdrErrorPtr
+ *
+ * Pointer to <gdUhdrError>.
+ */
+typedef gdUhdrError *gdUhdrErrorPtr;
+
 BGD_DECLARE(gdUhdrImagePtr)
 gdUhdrImageCreateFromFile(const char *filename, int format, gdUhdrErrorPtr err);
 BGD_DECLARE(gdUhdrImagePtr)
@@ -1209,6 +1211,9 @@ typedef struct {
 
 /* Deprecated in favor of gdImageCreateFromPngCtx */
 BGD_DECLARE(gdImagePtr) gdImageCreateFromPngSource(gdSourcePtr in);
+/* for completeness with Sink 2.x APIs, will be removed in 3.0 with all Sink APIs */
+BGD_DECLARE(gdImagePtr) gdImageCreateFromQoiSource(gdSourcePtr in);
+
 BGD_DECLARE(gdImagePtr) gdImageCreateFromGifSource(gdSourcePtr in);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromGd(FILE *in);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromGdCtx(gdIOCtxPtr in);
@@ -1254,16 +1259,11 @@ BGD_DECLARE(void)
 gdImageBmpEx(gdImagePtr im, FILE *outFile, int bpp, int compression, int flags);
 BGD_DECLARE(void)
 gdImageBmpCtxEx(gdImagePtr im, gdIOCtxPtr out, int bpp, int compression,
-				int flags);
+			int flags);
 
+BGD_DECLARE(void) gdImageWBMP(gdImagePtr image, int fg, FILE *out);
+BGD_DECLARE(void) gdImageWBMPCtx(gdImagePtr image, int fg, gdIOCtxPtr out);
 
-void * gdImageBmpPtr(gdImagePtr im, int *size, int compression);
-void gdImageBmp(gdImagePtr im, FILE *outFile, int compression);
-void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression);
-
-
-void gdImageWBMP(gdImagePtr image, int fg, FILE *out);
-void gdImageWBMPCtx(gdImagePtr image, int fg, gdIOCtx *out);
 
 BGD_DECLARE(int) gdUhdrIsAvailable(void);
 BGD_DECLARE(int) gdUhdrImageWidth(gdUhdrImagePtr im);
@@ -1319,6 +1319,7 @@ gdImageJpegCtxWithMetadata(gdImagePtr im, gdIOCtxPtr out, int quality,
 #define gdWebpLossless 101
 
 void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality);
+BGD_DECLARE(void) gdImageWebp(gdImagePtr im, FILE *outFile);
 
 /* Best to free this memory with gdFree(), not free() */
 BGD_DECLARE(void *) gdImageJpegPtr(gdImagePtr im, int *size, int quality);
