@@ -165,7 +165,7 @@ PHP                                                                        NEWS
   . pcntl_exec() now throws a ValueError if the $args array is not a list
     array. (Weilin Du)
 
-- PDO_DBLIB;
+- PDO_DBLIB:
   . Added dblib_handle_check_liveness handler. (freddy77)
 
 - PDO_PGSQL:
