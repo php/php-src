@@ -18,6 +18,8 @@ PHP                                                                        NEWS
     iliaal)
   . Fixed bug GH-22443 (Tracing JIT SIGSEGV on megamorphic dynamic calls from
     an undereferenced run_time_cache map_ptr offset). (iliaal)
+  . Fixed bug GH-21770 (Infinite recursion in property hook getter in opcache
+    preloaded trait). (iliaal)
 
 - OpenSSL:
   . Fixed timeout for supplemental read at end of a blocking stream in SSL
