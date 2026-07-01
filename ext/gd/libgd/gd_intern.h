@@ -1,7 +1,7 @@
 #ifndef GD_INTERN_H
 #define GD_INTERN_H
 #include <limits.h>
-
+#include "gd.h"
 #if defined(_MSC_VER)
 #define UNUSED_PARAM(x) x
 #elif defined(__GNUC__) || defined(__clang__)
