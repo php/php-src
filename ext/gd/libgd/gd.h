@@ -1508,26 +1508,26 @@ BGD_DECLARE(int) gdImageGetTrueColorPixel(gdImagePtr im, int x, int y);
 
 void gdImageAABlend(gdImagePtr im);
 
-void gdImageLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
-void gdImageAALine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+BGD_DECLARE(void) gdImageLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+BGD_DECLARE(void) gdImageAALine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
 
 /* For backwards compatibility only. Use gdImageSetStyle()
 	for much more flexible line drawing. */
-void gdImageDashedLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+BGD_DECLARE(void) gdImageDashedLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
 /* Corners specified (not width and height). Upper left first, lower right
  	second. */
-void gdImageRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+BGD_DECLARE(void) gdImageRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
 /* Solid bar. Upper left corner first, lower right corner second. */
-void gdImageFilledRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
-void gdImageSetClip(gdImagePtr im, int x1, int y1, int x2, int y2);
-void gdImageGetClip(gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P);
-void gdImageSetResolution(gdImagePtr im, const unsigned int res_x, const unsigned int res_y);
-void gdImageChar(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
-void gdImageCharUp(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
-void gdImageString(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color);
-void gdImageStringUp(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color);
-void gdImageString16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color);
-void gdImageStringUp16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color);
+BGD_DECLARE(void) gdImageFilledRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+BGD_DECLARE(void) gdImageSetClip(gdImagePtr im, int x1, int y1, int x2, int y2);
+BGD_DECLARE(void) gdImageGetClip(gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P);
+BGD_DECLARE(void) gdImageSetResolution(gdImagePtr im, const unsigned int res_x, const unsigned int res_y);
+BGD_DECLARE(void) gdImageChar(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
+BGD_DECLARE(void) gdImageCharUp(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
+BGD_DECLARE(void) gdImageString(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color);
+BGD_DECLARE(void) gdImageStringUp(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color);
+BGD_DECLARE(void) gdImageString16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color);
+BGD_DECLARE(void) gdImageStringUp16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color);
 
 /*
  * The following functions are required to be called prior to the

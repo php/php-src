@@ -1646,121 +1646,12 @@ TBB: but watch out for /0! */
 	}
 }
 
-
-/*
- * Added on 2003/12 by Pierre-Alain Joye (pajoye@pearfr.org)
- * */
-#define BLEND_COLOR(a, nc, c, cc) \
-nc = (cc) + (((((c) - (cc)) * (a)) + ((((c) - (cc)) * (a)) >> 8) + 0x80) >> 8);
-
-inline static void gdImageSetAAPixelColor(gdImagePtr im, int x, int y, int color, int t)
-{
-	int dr,dg,db,p,r,g,b;
-	dr = gdTrueColorGetRed(color);
-	dg = gdTrueColorGetGreen(color);
-	db = gdTrueColorGetBlue(color);
-
-	p = gdImageGetPixel(im,x,y);
-	r = gdTrueColorGetRed(p);
-	g = gdTrueColorGetGreen(p);
-	b = gdTrueColorGetBlue(p);
-
-	BLEND_COLOR(t, dr, r, dr);
-	BLEND_COLOR(t, dg, g, dg);
-	BLEND_COLOR(t, db, b, db);
-	im->tpixels[y][x]=gdTrueColorAlpha(dr, dg, db,  gdAlphaOpaque);
-}
-
-/*
- * Added on 2003/12 by Pierre-Alain Joye (pajoye@pearfr.org)
- **/
-void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
-{
-	/* keep them as 32bits */
-	long x, y, inc, frac;
-	long dx, dy,tmp;
-
-	if (!im->trueColor) {
-		/* TBB: don't crash when the image is of the wrong type */
-		gdImageLine(im, x1, y1, x2, y2, col);
-		return;
-	}
-
-	/* TBB: use the clipping rectangle */
-	if (clip_1d (&x1, &y1, &x2, &y2, im->cx1, im->cx2) == 0)
-		return;
-	if (clip_1d (&y1, &x1, &y2, &x2, im->cy1, im->cy2) == 0)
-		return;
-
-	dx = x2 - x1;
-	dy = y2 - y1;
-
-	if (dx == 0 && dy == 0) {
-		return;
-	}
-	if (abs((int)dx) > abs((int)dy)) {
-		if (dx < 0) {
-			tmp = x1;
-			x1 = x2;
-			x2 = tmp;
-			tmp = y1;
-			y1 = y2;
-			y2 = tmp;
-			dx = x2 - x1;
-			dy = y2 - y1;
-		}
-		y = y1;
-		inc = (dy * 65536) / dx;
-		frac = 0;
-		for (x = x1; x <= x2; x++) {
-			gdImageSetAAPixelColor(im, x, y, col, (frac >> 8) & 0xFF);
-			if (y + 1 < im->sy) {
-				gdImageSetAAPixelColor(im, x, y + 1, col, (~frac >> 8) & 0xFF);
-			}
-			frac += inc;
-			if (frac >= 65536) {
-				frac -= 65536;
-				y++;
-			} else if (frac < 0) {
-				frac += 65536;
-				y--;
-			}
-		}
-	} else {
-		if (dy < 0) {
-			tmp = x1;
-			x1 = x2;
-			x2 = tmp;
-			tmp = y1;
-			y1 = y2;
-			y2 = tmp;
-			dx = x2 - x1;
-			dy = y2 - y1;
-		}
-		x = x1;
-		inc = (dx * 65536) / dy;
-		frac = 0;
-		for (y = y1; y <= y2; y++) {
-			gdImageSetAAPixelColor(im, x, y, col, (frac >> 8) & 0xFF);
-			if (x + 1 < im->sx) {
-				gdImageSetAAPixelColor(im, x + 1, y, col, (~frac >> 8) & 0xFF);
-			}
-			frac += inc;
-			if (frac >= 65536) {
-				frac -= 65536;
-				x++;
-			} else if (frac < 0) {
-				frac += 65536;
-				x--;
-			}
-		}
-	}
-}
-
 static void dashedSet (gdImagePtr im, int x, int y, int color, int *onP, int *dashStepP, int wid, int vert);
 
-void gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
-{
+/*
+	Function: gdImageDashedLine
+*/
+BGD_DECLARE(void) gdImageDashedLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color) {
 	int dx, dy, incr1, incr2, d, x, y, xend, yend, xdirflag, ydirflag;
 	int dashStep = 0;
 	int on = 1;
@@ -1872,8 +1763,7 @@ void gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color
 	}
 }
 
-static void dashedSet (gdImagePtr im, int x, int y, int color, int *onP, int *dashStepP, int wid, int vert)
-{
+static void dashedSet (gdImagePtr im, int x, int y, int color, int *onP, int *dashStepP, int wid, int vert) {
 	int dashStep = *dashStepP;
 	int on = *onP;
 	int w, wstart;
@@ -1900,8 +1790,27 @@ static void dashedSet (gdImagePtr im, int x, int y, int color, int *onP, int *da
 	*onP = on;
 }
 
-void gdImageChar (gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
-{
+
+/**
+ * Function: gdImageChar
+ *
+ * Draws a single character.
+ *
+ * Parameters:
+ *  im    - The image to draw onto.
+ *  f     - The raster font.
+ *  x     - The x coordinate of the upper left pixel.
+ *  y     - The y coordinate of the upper left pixel.
+ *  c     - The character.
+ *  color - The color.
+ *
+ * Variants:
+ *  - <gdImageCharUp>
+ *
+ * See also:
+ *  - <gdFontPtr>
+ */
+BGD_DECLARE(void) gdImageChar(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color) {
 	int cx, cy;
 	int px, py;
 	int fline;
@@ -1928,8 +1837,10 @@ void gdImageChar (gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 	}
 }
 
-void gdImageCharUp (gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
-{
+/**
+ * Function: gdImageCharUp
+ */
+BGD_DECLARE(void) gdImageCharUp(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color) {
 	int cx, cy;
 	int px, py;
 	int fline;
@@ -1956,8 +1867,30 @@ void gdImageCharUp (gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 	}
 }
 
-void gdImageString (gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color)
-{
+/**
+ * Function: gdImageString
+ *
+ * Draws a character string.
+ *
+ * Parameters:
+ *  im    - The image to draw onto.
+ *  f     - The raster font.
+ *  x     - The x coordinate of the upper left pixel.
+ *  y     - The y coordinate of the upper left pixel.
+ *  c     - The character string.
+ *  color - The color.
+ *
+ * Variants:
+ *  - <gdImageStringUp>
+ *  - <gdImageString16>
+ *  - <gdImageStringUp16>
+ *
+ * See also:
+ *  - <gdFontPtr>
+ *  - <gdImageStringTTF>
+ */
+BGD_DECLARE(void)
+gdImageString(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color) {
 	int i;
 	int l;
 	l = strlen ((char *) s);
@@ -1967,8 +1900,10 @@ void gdImageString (gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, 
 	}
 }
 
-void gdImageStringUp (gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color)
-{
+/**
+ * Function: gdImageStringUp
+ */
+BGD_DECLARE(void) gdImageStringUp(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color) {
 	int i;
 	int l;
 	l = strlen ((char *) s);
@@ -1980,8 +1915,10 @@ void gdImageStringUp (gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s
 
 static int strlen16 (unsigned short *s);
 
-void gdImageString16 (gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color)
-{
+/**
+ * Function: gdImageString16
+ */
+BGD_DECLARE(void) gdImageString16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color) {
 	int i;
 	int l;
 	l = strlen16(s);
@@ -1991,19 +1928,20 @@ void gdImageString16 (gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *
 	}
 }
 
-void gdImageStringUp16 (gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color)
-{
+/**
+ * Function: gdImageStringUp16
+ */
+BGD_DECLARE(void) gdImageStringUp16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short *s, int color) {
 	int i;
 	int l;
 	l = strlen16(s);
-	for (i = 0; i < l; i++) {
+	for (i = 0; (i < l); i++) {
 		gdImageCharUp(im, f, x, y, s[i], color);
 		y -= f->w;
 	}
 }
 
-static int strlen16 (unsigned short *s)
-{
+static int strlen16(unsigned short *s) {
 	int len = 0;
 	while (*s) {
 		s++;
@@ -2028,13 +1966,18 @@ long lsqrt (long n)
    cx and cy are the center in pixels; w and h are the horizontal
    and vertical diameter in pixels. */
 
-void gdImageArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e, int color)
-{
+/*
+	Function: gdImageArc
+*/
+BGD_DECLARE(void)
+gdImageArc(gdImagePtr im, int cx, int cy, int w, int h, int s, int e, int color) {
 	gdImageFilledArc(im, cx, cy, w, h, s, e, color, gdNoFill);
 }
 
-void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e, int color, int style)
-{
+/*
+	Function: gdImageFilledArc
+*/
+BGD_DECLARE(void) gdImageFilledArc(gdImagePtr im, int cx, int cy, int w, int h, int s, int e, int color, int style) {
 	gdPoint pts[363];
 	int i, pti;
 	int lx = 0, ly = 0;
@@ -2042,7 +1985,8 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 	int startx = -1, starty = -1, endx = -1, endy = -1;
 
     if ((s % 360)  == (e % 360)) {
-		s = 0; e = 360;
+		s = 0;
+		e = 360;
 	} else {
 		if (s > 360) {
 			s = s % 360;
@@ -2060,11 +2004,12 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 			e += 360;
 		}
 		if (s == e) {
-			s = 0; e = 360;
+			s = 0;
+			e = 360;
 		}
 	}
 
-	for (i = s, pti = 1; i <= e; i++, pti++) {
+	for (i = s, pti = 1; (i <= e); i++, pti++) {
 		int x, y;
 		x = endx = ((long) gdCosT[i % 360] * (long) w / (2 * 1024)) + cx;
 		y = endy = ((long) gdSinT[i % 360] * (long) h / (2 * 1024)) + cy;
@@ -2147,15 +2092,30 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 	}
 }
 
-/**
- * Integer Ellipse functions (gdImageEllipse and gdImageFilledEllipse)
- * Function added by Pierre-Alain Joye 02/08/2003 (paj@pearfr.org)
- * See the ellipse function simplification for the equation
- * as well as the midpoint algorithm.
+/*
+ * Function: gdImageEllipse
+ *
+ * Draw an ellipse, stroke only.
+ *
+ * Note:
+ *   This function does not support <gdImageSetThickness>. GD 3.0 supports
+ * actual 2D vectors operation, you may rely on it if you need better 2D drawing
+ * operations.
+ *
+ * Parameters:
+ *   im   - The destination image.
+ *   src  - The source image.
+ *   mx   - x-coordinate of the center.
+ *   my   - y-coordinate of the center.
+ *   w    - The ellipse width.
+ *   h    - The ellipse height.
+ *   c    - The color of the ellipse. A color identifier created with one of the
+ * image color allocate functions.
+ *
+ * See also:
+ *   - <gdImageFilledEllipse>
  */
-
-BGD_DECLARE(void) gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
-{
+BGD_DECLARE(void) gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c) {
 	int x=0,mx1=0,mx2=0,my1=0,my2=0;
 	int64_t aq,bq,dx,dy,r,rx,ry,a,b;
 
@@ -2166,8 +2126,10 @@ BGD_DECLARE(void) gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, in
 	}
 	gdImageSetPixel(im,mx+a, my, c);
 	gdImageSetPixel(im,mx-a, my, c);
-	mx1 = mx-a;my1 = my;
-	mx2 = mx+a;my2 = my;
+	mx1 = mx - a;
+	my1 = my;
+	mx2 = mx + a;
+	my2 = my;
 
 	aq = a * a;
 	bq = b * b;
@@ -2179,13 +2141,15 @@ BGD_DECLARE(void) gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, in
 	x = a;
 	while (x > 0){
 		if (r > 0) {
-			my1++;my2--;
+			my1++;
+			my2--;
 			ry +=dx;
 			r  -=ry;
 		}
 		if (r <= 0){
 			x--;
-			mx1++;mx2--;
+			mx1++;
+			mx2--;
 			rx -=dy;
 			r  +=rx;
 		}
@@ -2196,8 +2160,11 @@ BGD_DECLARE(void) gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, in
 	}
 }
 
-BGD_DECLARE(void) gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
-{
+/*
+	Function: gdImageFilledEllipse
+*/
+BGD_DECLARE(void)
+gdImageFilledEllipse(gdImagePtr im, int mx, int my, int w, int h, int c) {
 	int x=0,mx1=0,mx2=0,my1=0,my2=0;
 	int64_t aq,bq,dx,dy,r,rx,ry,a,b;
 	int i;
@@ -2212,8 +2179,10 @@ BGD_DECLARE(void) gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, in
 		gdImageSetPixel(im, x, my, c);
 	}
 
-	mx1 = mx-a;my1 = my;
-	mx2 = mx+a;my2 = my;
+	mx1 = mx - a;
+	my1 = my;
+	mx2 = mx + a;
+	my2 = my;
 
 	aq = a * a;
 	bq = b * b;
@@ -2226,13 +2195,15 @@ BGD_DECLARE(void) gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, in
 	old_y2=-2;
 	while (x > 0){
 		if (r > 0) {
-			my1++;my2--;
+			my1++;
+			my2--;
 			ry +=dx;
 			r  -=ry;
 		}
 		if (r <= 0){
 			x--;
-			mx1++;mx2--;
+			mx1++;
+			mx2--;
 			rx -=dy;
 			r  +=rx;
 		}
@@ -3500,19 +3471,49 @@ gdImageCopyResampled(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int src
 	}
 }
 
-BGD_DECLARE(void) gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
-{
+/**
+ * Group: Polygons
+ */
+
+/**
+ * Function: gdImagePolygon
+ *
+ * Draws a closed polygon
+ *
+ * Parameters:
+ *   im - The image.
+ *   p  - The vertices as array of <gdPoint>s.
+ *   n  - The number of vertices.
+ *   c  - The color.
+ *
+ * See also:
+ *   - <gdImageOpenPolygon>
+ *   - <gdImageFilledPolygon>
+ */
+BGD_DECLARE(void) gdImagePolygon(gdImagePtr im, gdPointPtr p, int n, int c) {
 	if (n <= 0) {
 		return;
 	}
-
 
 	gdImageLine (im, p->x, p->y, p[n - 1].x, p[n - 1].y, c);
 	gdImageOpenPolygon (im, p, n, c);
 }
 
-BGD_DECLARE(void) gdImageOpenPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
-{
+/**
+ * Function: gdImageOpenPolygon
+ *
+ * Draws an open polygon
+ *
+ * Parameters:
+ *   im - The image.
+ *   p  - The vertices as array of <gdPoint>s.
+ *   n  - The number of vertices.
+ *   c  - The color
+ *
+ * See also:
+ *   - <gdImagePolygon>
+ */
+BGD_DECLARE(void) gdImageOpenPolygon(gdImagePtr im, gdPointPtr p, int n, int c) {
 	int i;
 	int lx, ly;
 
@@ -3522,7 +3523,7 @@ BGD_DECLARE(void) gdImageOpenPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 
 	lx = p->x;
 	ly = p->y;
-	for (i = 1; i < n; i++) {
+	for (i = 1; (i < n); i++) {
 		p++;
 		gdImageLine(im, lx, ly, p->x, p->y, c);
 		lx = p->x;
@@ -3532,14 +3533,30 @@ BGD_DECLARE(void) gdImageOpenPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 
 /* THANKS to Kirsten Schulz for the polygon fixes! */
 
-/* The intersection finding technique of this code could be improved
- * by remembering the previous intertersection, and by using the slope.
- * That could help to adjust intersections  to produce a nice
- * interior_extrema.
- */
+/* The intersection finding technique of this code could be improved  */
+/* by remembering the previous intersection, and by using the slope. */
+/* That could help to adjust intersections  to produce a nice */
+/* interior_extrema. */
 
-BGD_DECLARE(void) gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
-{
+/**
+ * Function: gdImageFilledPolygon
+ *
+ * Draws a filled polygon
+ *
+ * The polygon is filled using the even-odd fillrule what can leave unfilled
+ * regions inside of self-intersecting polygons. This behavior might change in
+ * a future version.
+ *
+ * Parameters:
+ *   im - The image.
+ *   p  - The vertices as array of <gdPoint>s.
+ *   n  - The number of vertices.
+ *   c  - The color
+ *
+ * See also:
+ *   - <gdImagePolygon>
+ */
+BGD_DECLARE(void) gdImageFilledPolygon(gdImagePtr im, gdPointPtr p, int n, int c) {
 	int i;
 	int j;
 	int index;
@@ -3555,18 +3572,19 @@ BGD_DECLARE(void) gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int 
 		return;
 	}
 
-	if (overflow2(sizeof(int), n)) {
-		return;
-	}
-
 	if (c == gdAntiAliased) {
 		fill_color = im->AA_color;
 	} else {
 		fill_color = c;
 	}
-
 	if (!im->polyAllocated) {
+		if (overflow2(sizeof(int), n)) {
+			return;
+		}
 		im->polyInts = (int *) gdMalloc(sizeof(int) * n);
+		if (!im->polyInts) {
+			return;
+		}
 		im->polyAllocated = n;
 	}
 	if (im->polyAllocated < n) {
@@ -3576,11 +3594,14 @@ BGD_DECLARE(void) gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int 
 		if (overflow2(sizeof(int), im->polyAllocated)) {
 			return;
 		}
-		im->polyInts = (int *) gdRealloc(im->polyInts, sizeof(int) * im->polyAllocated);
+		im->polyInts = (int *)gdReallocEx(im->polyInts, sizeof(int) * im->polyAllocated);
+		if (!im->polyInts) {
+			return;
+		}
 	}
 	miny = p[0].y;
 	maxy = p[0].y;
-	for (i = 1; i < n; i++) {
+	for (i = 1; (i < n); i++) {
 		if (p[i].y < miny) {
 			miny = p[i].y;
 		}
@@ -3611,12 +3632,9 @@ BGD_DECLARE(void) gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int 
 		maxy = im->cy2;
 	}
 	/* Fix in 1.3: count a vertex only once */
-	for (y = miny; y <= maxy; y++) {
-		/*1.4           int interLast = 0; */
-		/*              int dirLast = 0; */
-		/*              int interFirst = 1; */
+	for (y = miny; (y <= maxy); y++) {
 		ints = 0;
-		for (i = 0; i < n; i++) {
+		for (i = 0; (i < n); i++) {
 			if (!i) {
 				ind1 = n - 1;
 				ind2 = 0;
@@ -3637,13 +3655,14 @@ BGD_DECLARE(void) gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int 
 			} else {
 				continue;
 			}
-			/* Do the following math as float intermediately, and round to ensure
-			 * that Polygon and FilledPolygon for the same set of points have the
-			 * same footprint.
-			 */
-			if (y >= y1 && y < y2) {
-				im->polyInts[ints++] = (float) ((y - y1) * (x2 - x1)) / (float) (y2 - y1) + 0.5 + x1;
-			} else if (y == pmaxy && y == y2) {
+
+			/* Do the following math as float intermediately, and round to
+			 * ensure that Polygon and FilledPolygon for the same set of points
+			 * have the same footprint. */
+
+			if ((y >= y1) && (y < y2)) {
+				im->polyInts[ints++] = (int)((float)((y - y1) * (x2 - x1)) / (float)(y2 - y1) +  0.5 + x1);
+			} else if ((y == pmaxy) && (y == y2)) {
 				im->polyInts[ints++] = x2;
 			}
 		}
@@ -3662,19 +3681,34 @@ BGD_DECLARE(void) gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int 
 			}
 			im->polyInts[j] = index;
 		}
-		for (i = 0; i < ints - 1; i += 2) {
+		for (i = 0; (i < (ints - 1)); i += 2) {
 			gdImageLine(im, im->polyInts[i], y, im->polyInts[i + 1], y, fill_color);
 		}
 	}
-
 	/* If we are drawing this AA, then redraw the border with AA lines. */
 	if (c == gdAntiAliased) {
 		gdImagePolygon(im, p, n, c);
 	}
 }
 
-BGD_DECLARE(void) gdImageSetStyle (gdImagePtr im, int *style, int noOfPixels)
-{
+/**
+ * Group: other
+ */
+
+static void gdImageSetAAPixelColor(gdImagePtr im, int x, int y, int color,
+								   int t);
+
+/**
+ * Function: gdImageSetStyle
+ *
+ * Sets the style for following drawing operations
+ *
+ * Parameters:
+ *   im        - The image.
+ *   style     - An array of color values.
+ *   noOfPixel - The number of color values.
+ */
+BGD_DECLARE(void) gdImageSetStyle(gdImagePtr im, int *style, int noOfPixels) {
 	if (overflow2(sizeof (int), noOfPixels)) {
 		return;
 	}
@@ -3682,22 +3716,41 @@ BGD_DECLARE(void) gdImageSetStyle (gdImagePtr im, int *style, int noOfPixels)
 		gdFree(im->style);
 	}
 	im->style = (int *) gdMalloc(sizeof(int) * noOfPixels);
+	if (!im->style) {
+		return;
+	}
 	memcpy(im->style, style, sizeof(int) * noOfPixels);
 	im->styleLength = noOfPixels;
 	im->stylePos = 0;
 }
 
-BGD_DECLARE(void) gdImageSetThickness (gdImagePtr im, int thickness)
-{
+/**
+ * Function: gdImageSetThickness
+ *
+ * Sets the thickness for following drawing operations
+ *
+ * Parameters:
+ *   im        - The image.
+ *   thickness - The thickness in pixels.
+ */
+BGD_DECLARE(void) gdImageSetThickness(gdImagePtr im, int thickness) {
 	im->thick = thickness;
 }
 
-BGD_DECLARE(void) gdImageSetBrush (gdImagePtr im, gdImagePtr brush)
-{
+/**
+ * Function: gdImageSetBrush
+ *
+ * Sets the brush for following drawing operations
+ *
+ * Parameters:
+ *   im    - The image.
+ *   brush - The brush image.
+ */
+BGD_DECLARE(void) gdImageSetBrush(gdImagePtr im, gdImagePtr brush) {
 	int i;
 	im->brush = brush;
-	if (!im->trueColor && !im->brush->trueColor) {
-		for (i = 0; i < gdImageColorsTotal(brush); i++) {
+	if ((!im->trueColor) && (!im->brush->trueColor)) {
+		for (i = 0; (i < gdImageColorsTotal(brush)); i++) {
 			int index;
 			index = gdImageColorResolveAlpha(im, gdImageRed(brush, i), gdImageGreen(brush, i), gdImageBlue(brush, i), gdImageAlpha(brush, i));
 			im->brushColorMap[i] = index;
@@ -3705,12 +3758,14 @@ BGD_DECLARE(void) gdImageSetBrush (gdImagePtr im, gdImagePtr brush)
 	}
 }
 
-BGD_DECLARE(void) gdImageSetTile (gdImagePtr im, gdImagePtr tile)
-{
+/*
+	Function: gdImageSetTile
+*/
+BGD_DECLARE(void) gdImageSetTile(gdImagePtr im, gdImagePtr tile) {
 	int i;
 	im->tile = tile;
-	if (!im->trueColor && !im->tile->trueColor) {
-		for (i = 0; i < gdImageColorsTotal(tile); i++) {
+	if ((!im->trueColor) && (!im->tile->trueColor)) {
+		for (i = 0; (i < gdImageColorsTotal(tile)); i++) {
 			int index;
 			index = gdImageColorResolveAlpha(im, gdImageRed(tile, i), gdImageGreen(tile, i), gdImageBlue(tile, i), gdImageAlpha(tile, i));
 			im->tileColorMap[i] = index;
@@ -3718,28 +3773,85 @@ BGD_DECLARE(void) gdImageSetTile (gdImagePtr im, gdImagePtr tile)
 	}
 }
 
-BGD_DECLARE(void) gdImageSetAntiAliased (gdImagePtr im, int c)
-{
+/**
+ * Function: gdImageSetAntiAliased
+ *
+ * Set the color for subsequent anti-aliased drawing
+ *
+ * If <gdAntiAliased> is passed as color to drawing operations that support
+ * anti-aliased drawing (such as <gdImageLine> and <gdImagePolygon>), the actual
+ * color to be used can be set with this function.
+ *
+ * Example: draw an anti-aliased blue line:
+ * | gdImageSetAntiAliased(im, gdTrueColorAlpha(0, 0, gdBlueMax,
+ * gdAlphaOpaque)); | gdImageLine(im, 10,10, 20,20, gdAntiAliased);
+ *
+ * Parameters:
+ *   im - The image.
+ *   c  - The color.
+ *
+ * See also:
+ *   - <gdImageSetAntiAliasedDontBlend>
+ */
+BGD_DECLARE(void) gdImageSetAntiAliased(gdImagePtr im, int c) {
 	im->AA = 1;
 	im->AA_color = c;
 	im->AA_dont_blend = -1;
 }
 
-BGD_DECLARE(void) gdImageSetAntiAliasedDontBlend (gdImagePtr im, int c, int dont_blend)
-{
+/**
+ * Function: gdImageSetAntiAliasedDontBlend
+ *
+ * Set the color and "dont_blend" color for subsequent anti-aliased drawing
+ *
+ * This extended variant of <gdImageSetAntiAliased> allows to also specify a
+ * (background) color that will not be blended in anti-aliased drawing
+ * operations.
+ *
+ * Parameters:
+ *   im         - The image.
+ *   c          - The color.
+ *   dont_blend - Whether to blend.
+ */
+BGD_DECLARE(void) gdImageSetAntiAliasedDontBlend(gdImagePtr im, int c, int dont_blend) {
 	im->AA = 1;
 	im->AA_color = c;
 	im->AA_dont_blend = dont_blend;
 }
 
-
-BGD_DECLARE(void) gdImageInterlace (gdImagePtr im, int interlaceArg)
-{
+/**
+ * Function: gdImageInterlace
+ *
+ * Sets whether an image is interlaced
+ *
+ * This is relevant only when saving the image in a format that supports
+ * interlacing.
+ *
+ * Parameters:
+ *   im           - The image.
+ *   interlaceArg - Whether the image is interlaced.
+ *
+ * See also:
+ *   - <gdImageGetInterlaced>
+ */
+BGD_DECLARE(void) gdImageInterlace(gdImagePtr im, int interlaceArg) {
 	im->interlace = interlaceArg;
 }
 
-BGD_DECLARE(int) gdImageCompare (gdImagePtr im1, gdImagePtr im2)
-{
+/**
+ * Function: gdImageCompare
+ *
+ * Compare two images
+ *
+ * Parameters:
+ *   im1 - An image.
+ *   im2 - Another image.
+ *
+ * Returns:
+ *   A bitmask of <Image Comparison> flags where each set flag signals
+ *   which attributes of the images are different.
+ */
+BGD_DECLARE(int) gdImageCompare(gdImagePtr im1, gdImagePtr im2) {
 	int x, y;
 	int p1, p2;
 	int cmpStatus = 0;
@@ -3777,11 +3889,10 @@ BGD_DECLARE(int) gdImageCompare (gdImagePtr im1, gdImagePtr im2)
 		cmpStatus |= GD_CMP_NUM_COLORS;
 	}
 
-	for (y = 0; y < sy; y++) {
-		for (x = 0; x < sx; x++) {
+	for (y = 0; (y < sy); y++) {
+		for (x = 0; (x < sx); x++) {
 			p1 = im1->trueColor ? gdImageTrueColorPixel(im1, x, y) : gdImagePalettePixel(im1, x, y);
 			p2 = im2->trueColor ? gdImageTrueColorPixel(im2, x, y) : gdImagePalettePixel(im2, x, y);
-
 			if (gdImageRed(im1, p1) != gdImageRed(im2, p2)) {
 				cmpStatus |= GD_CMP_COLOR + GD_CMP_IMAGE;
 				break;
@@ -3804,13 +3915,35 @@ BGD_DECLARE(int) gdImageCompare (gdImagePtr im1, gdImagePtr im2)
 		}
 		if (cmpStatus & GD_CMP_COLOR) {
 			break;
-		}
+		};
 	}
 
 	return cmpStatus;
 }
 
+/* Thanks to Frank Warmerdam for this superior implementation
+	of gdAlphaBlend(), which merges alpha in the
+	destination color much better. */
+
+/**
+ * Function: gdAlphaBlend
+ *
+ * Blend two colors
+ *
+ * Parameters:
+ *   dst - The color to blend onto.
+ *   src - The color to blend.
+ *
+ * See also:
+ *   - <gdImageAlphaBlending>
+ *   - <gdLayerOverlay>
+ *   - <gdLayerMultiply>
+ */
 BGD_DECLARE(int) gdAlphaBlend (int dst, int src) {
+#if ENABLE_CORRECTED_LEGACY_COMPOSITING
+	return gdCompositePixelToGd(gdCompositePixel(
+		GD_OP_OVER, gdCompositePixelFromGd(src), gdCompositePixelFromGd(dst), 1.0f));
+#else
     int src_alpha = gdTrueColorGetAlpha(src);
     int dst_alpha, alpha, red, green, blue;
     int src_weight, dst_weight, tot_weight;
@@ -3841,53 +3974,65 @@ BGD_DECLARE(int) gdAlphaBlend (int dst, int src) {
 /* -------------------------------------------------------------------- */
     alpha = src_alpha * dst_alpha / gdAlphaMax;
 
-    red = (gdTrueColorGetRed(src) * src_weight
-           + gdTrueColorGetRed(dst) * dst_weight) / tot_weight;
-    green = (gdTrueColorGetGreen(src) * src_weight
-           + gdTrueColorGetGreen(dst) * dst_weight) / tot_weight;
-    blue = (gdTrueColorGetBlue(src) * src_weight
-           + gdTrueColorGetBlue(dst) * dst_weight) / tot_weight;
+	red = (gdTrueColorGetRed(src) * src_weight +
+		   gdTrueColorGetRed(dst) * dst_weight) /
+		  tot_weight;
+	green = (gdTrueColorGetGreen(src) * src_weight +
+			 gdTrueColorGetGreen(dst) * dst_weight) /
+			tot_weight;
+	blue = (gdTrueColorGetBlue(src) * src_weight +
+			gdTrueColorGetBlue(dst) * dst_weight) /
+		   tot_weight;
 
 /* -------------------------------------------------------------------- */
 /*      Return merged result.                                           */
 /* -------------------------------------------------------------------- */
     return ((alpha << 24) + (red << 16) + (green << 8) + blue);
-
+#endif
 }
 
-BGD_DECLARE(void) gdImageAlphaBlending (gdImagePtr im, int alphaBlendingArg)
-{
-	im->alphaBlendingFlag = alphaBlendingArg;
-}
+#if !ENABLE_CORRECTED_LEGACY_COMPOSITING
+static int gdAlphaOverlayColor(int src, int dst, int max);
+#endif
 
-BGD_DECLARE(void) gdImageSaveAlpha (gdImagePtr im, int saveAlphaArg)
-{
-	im->saveAlphaFlag = saveAlphaArg;
-}
-
-BGD_DECLARE(int) gdLayerOverlay (int dst, int src)
-{
+/**
+ * Function: gdLayerOverlay
+ *
+ * Overlay two colors
+ *
+ * Parameters:
+ *   dst - The color to overlay onto.
+ *   src - The color to overlay.
+ *
+ * See also:
+ *   - <gdImageAlphaBlending>
+ *   - <gdAlphaBlend>
+ *   - <gdLayerMultiply>
+ */
+BGD_DECLARE(int) gdLayerOverlay(int dst, int src) {
+#if ENABLE_CORRECTED_LEGACY_COMPOSITING
+	return gdCompositePixelToGd(gdCompositePixel(
+		GD_OP_OVERLAY, gdCompositePixelFromGd(src), gdCompositePixelFromGd(dst), 1.0f));
+#else
 	int a1, a2;
 	a1 = gdAlphaMax - gdTrueColorGetAlpha(dst);
 	a2 = gdAlphaMax - gdTrueColorGetAlpha(src);
 	return ( ((gdAlphaMax - a1*a2/gdAlphaMax) << 24) +
-		(gdAlphaOverlayColor( gdTrueColorGetRed(src), gdTrueColorGetRed(dst), gdRedMax ) << 16) +
-		(gdAlphaOverlayColor( gdTrueColorGetGreen(src), gdTrueColorGetGreen(dst), gdGreenMax ) << 8) +
-		(gdAlphaOverlayColor( gdTrueColorGetBlue(src), gdTrueColorGetBlue(dst), gdBlueMax ))
-		);
+			(gdAlphaOverlayColor(gdTrueColorGetRed(src), gdTrueColorGetRed(dst),
+								 gdRedMax)
+			 << 16) +
+			(gdAlphaOverlayColor(gdTrueColorGetGreen(src),
+								 gdTrueColorGetGreen(dst), gdGreenMax)
+			 << 8) +
+			(gdAlphaOverlayColor(gdTrueColorGetBlue(src),
+								 gdTrueColorGetBlue(dst), gdBlueMax)));
+#endif
 }
 
-static int gdAlphaOverlayColor (int src, int dst, int max )
-{
-	/* this function implements the algorithm
-	 *
-	 * for dst[rgb] < 0.5,
-	 *   c[rgb] = 2.src[rgb].dst[rgb]
-	 * and for dst[rgb] > 0.5,
-	 *   c[rgb] = -2.src[rgb].dst[rgb] + 2.dst[rgb] + 2.src[rgb] - 1
-	 *
-	 */
-
+/* Apply 'overlay' effect - background pixels are colourised by the foreground
+ * colour */
+#if !ENABLE_CORRECTED_LEGACY_COMPOSITING
+static int gdAlphaOverlayColor(int src, int dst, int max) {
 	dst = dst << 1;
 	if( dst > max ) {
 		/* in the "light" zone */
@@ -3897,9 +4042,27 @@ static int gdAlphaOverlayColor (int src, int dst, int max )
 		return dst * src / max;
 	}
 }
+#endif
 
-BGD_DECLARE(int) gdLayerMultiply (int dst, int src)
-{
+/**
+ * Function: gdLayerMultiply
+ *
+ * Overlay two colors with multiply effect
+ *
+ * Parameters:
+ *   dst - The color to overlay onto.
+ *   src - The color to overlay.
+ *
+ * See also:
+ *   - <gdImageAlphaBlending>
+ *   - <gdAlphaBlend>
+ *   - <gdLayerOverlay>
+ */
+BGD_DECLARE(int) gdLayerMultiply(int dst, int src) {
+#if ENABLE_CORRECTED_LEGACY_COMPOSITING
+	return gdCompositePixelToGd(gdCompositePixel(
+		GD_OP_MULTIPLY, gdCompositePixelFromGd(src), gdCompositePixelFromGd(dst), 1.0f));
+#else
 	int a1, a2, r1, r2, g1, g2, b1, b2;
 	a1 = gdAlphaMax - gdTrueColorGetAlpha(src);
 	a2 = gdAlphaMax - gdTrueColorGetAlpha(dst);
@@ -3913,15 +4076,62 @@ BGD_DECLARE(int) gdLayerMultiply (int dst, int src)
 
 	a1 = gdAlphaMax - a1;
 	a2 = gdAlphaMax - a2;
-	return ( ((a1*a2/gdAlphaMax) << 24) +
-			 ((r1*r2/gdRedMax) << 16) +
-			 ((g1*g2/gdGreenMax) << 8) +
-			 ((b1*b2/gdBlueMax))
-		);
+	return (((a1 * a2 / gdAlphaMax) << 24) + ((r1 * r2 / gdRedMax) << 16) +
+			((g1 * g2 / gdGreenMax) << 8) + ((b1 * b2 / gdBlueMax)));
+#endif
 }
 
-BGD_DECLARE(void) gdImageSetClip (gdImagePtr im, int x1, int y1, int x2, int y2)
-{
+/**
+ *	Function: gdImageAlphaBlending
+ *
+ *	Set the effect for subsequent drawing operations
+ *
+ *	Note that the effect is used for truecolor images only.
+ *
+ * Parameters:
+ *   im               - The image.
+ *   alphaBlendingArg - The effect.
+ *
+ * See also:
+ *   - <Effects>
+ */
+BGD_DECLARE(void) gdImageAlphaBlending(gdImagePtr im, int alphaBlendingArg) {
+	im->alphaBlendingFlag = alphaBlendingArg;
+}
+
+/**
+ * Function: gdImageSaveAlpha
+ *
+ * Sets the save alpha flag
+ *
+ * The save alpha flag specifies whether the alpha channel of the pixels should
+ * be saved. This is supported only for image formats that support full alpha
+ * transparency, e.g. PNG.
+ */
+BGD_DECLARE(void) gdImageSaveAlpha(gdImagePtr im, int saveAlphaArg) {
+	im->saveAlphaFlag = saveAlphaArg;
+}
+
+/**
+ * Function: gdImageSetClip
+ *
+ * Sets the clipping rectangle
+ *
+ * The clipping rectangle restricts the drawing area for following drawing
+ * operations.
+ *
+ * Parameters:
+ *   im - The image.
+ *   x1 - The x-coordinate of the upper left corner.
+ *   y1 - The y-coordinate of the upper left corner.
+ *   x2 - The x-coordinate of the lower right corner.
+ *   y2 - The y-coordinate of the lower right corner.
+ *
+ * See also:
+ *   - <gdImageGetClip>
+ */
+BGD_DECLARE(void)
+gdImageSetClip(gdImagePtr im, int x1, int y1, int x2, int y2) {
 	if (x1 < 0) {
 		x1 = 0;
 	}
@@ -3952,23 +4162,214 @@ BGD_DECLARE(void) gdImageSetClip (gdImagePtr im, int x1, int y1, int x2, int y2)
 	im->cy2 = y2;
 }
 
-void gdImageGetClip (gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P)
-{
+/**
+ * Function: gdImageGetClip
+ *
+ * Gets the current clipping rectangle
+ *
+ * Parameters:
+ *   im - The image.
+ *   x1P - (out) The x-coordinate of the upper left corner.
+ *   y1P - (out) The y-coordinate of the upper left corner.
+ *   x2P - (out) The x-coordinate of the lower right corner.
+ *   y2P - (out) The y-coordinate of the lower right corner.
+ *
+ * See also:
+ *   - <gdImageSetClip>
+ */
+BGD_DECLARE(void) gdImageGetClip(gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P) {
 	*x1P = im->cx1;
 	*y1P = im->cy1;
 	*x2P = im->cx2;
 	*y2P = im->cy2;
 }
 
-void gdImageSetResolution(gdImagePtr im, const unsigned int res_x, const unsigned int res_y)
-{
-	if (res_x > 0) im->res_x = res_x;
-	if (res_y > 0) im->res_y = res_y;
+/**
+ * Function: gdImageSetResolution
+ *
+ * Sets the resolution of an image.
+ *
+ * Parameters:
+ *   im    - The image.
+ *   res_x - The horizontal resolution in DPI.
+ *   res_y - The vertical resolution in DPI.
+ *
+ * See also:
+ *   - <gdImageResolutionX>
+ *   - <gdImageResolutionY>
+ */
+BGD_DECLARE(void)
+gdImageSetResolution(gdImagePtr im, const unsigned int res_x,
+					 const unsigned int res_y) {
+	if (res_x > 0)
+		im->res_x = res_x;
+	if (res_y > 0)
+		im->res_y = res_y;
 }
 
-/* convert a palette image to true color */
-int gdImagePaletteToTrueColor(gdImagePtr src)
-{
+#define BLEND_COLOR(a, nc, c, cc)                                              \
+	nc = (cc) +                                                                \
+		 (((((c) - (cc)) * (a)) + ((((c) - (cc)) * (a)) >> 8) + 0x80) >> 8);
+
+static void gdImageSetAAPixelColor(gdImagePtr im, int x, int y, int color,
+								   int t) {
+	int dr, dg, db, p, r, g, b;
+
+	/* 2.0.34: watch out for out of range calls */
+	if (!gdImageBoundsSafeMacro(im, x, y)) {
+		return;
+	}
+	p = gdImageGetPixel(im, x, y);
+	/* TBB: we have to implement the dont_blend stuff to provide
+	  the full feature set of the old implementation */
+	if ((p == color) || ((p == im->AA_dont_blend) && (t != 0x00))) {
+		return;
+	}
+	dr = gdTrueColorGetRed(color);
+	dg = gdTrueColorGetGreen(color);
+	db = gdTrueColorGetBlue(color);
+
+	r = gdTrueColorGetRed(p);
+	g = gdTrueColorGetGreen(p);
+	b = gdTrueColorGetBlue(p);
+
+	BLEND_COLOR(t, dr, r, dr);
+	BLEND_COLOR(t, dg, g, dg);
+	BLEND_COLOR(t, db, b, db);
+	im->tpixels[y][x] = gdTrueColorAlpha(dr, dg, db, gdAlphaOpaque);
+}
+
+BGD_DECLARE(void) gdImageAALine(gdImagePtr im, int x1, int y1, int x2, int y2,
+						  int col) {
+	/* keep them as 32bits */
+	long x, y, inc, frac;
+	long dx, dy, tmp;
+	int w, wid, wstart;
+	int thick = im->thick;
+
+	if (!im->trueColor) {
+		/* TBB: don't crash when the image is of the wrong type */
+		gdImageLine(im, x1, y1, x2, y2, col);
+		return;
+	}
+
+	/* TBB: use the clipping rectangle */
+	if (clip_1d(&x1, &y1, &x2, &y2, im->cx1, im->cx2) == 0)
+		return;
+	if (clip_1d(&y1, &x1, &y2, &x2, im->cy1, im->cy2) == 0)
+		return;
+
+	dx = x2 - x1;
+	dy = y2 - y1;
+
+	if (dx == 0 && dy == 0) {
+		/* TBB: allow setting points */
+		gdImageSetPixel(im, x1, y1, col);
+		return;
+	} else {
+		double ag;
+		/* Cast the long to an int to avoid compiler warnings about truncation.
+		 * This isn't a problem as computed dy/dx values came from ints above.
+		 */
+		ag = fabs(abs((int)dy) < abs((int)dx) ? cos(atan2(dy, dx))
+											  : sin(atan2(dy, dx)));
+		if (ag != 0) {
+			wid = thick / ag;
+		} else {
+			wid = 1;
+		}
+		if (wid == 0) {
+			wid = 1;
+		}
+	}
+
+	/* Axis aligned lines */
+	if (dx == 0) {
+		gdImageVLine(im, x1, y1, y2, col);
+		return;
+	} else if (dy == 0) {
+		gdImageHLine(im, y1, x1, x2, col);
+		return;
+	}
+
+	if (abs((int)dx) > abs((int)dy)) {
+		if (dx < 0) {
+			tmp = x1;
+			x1 = x2;
+			x2 = tmp;
+			tmp = y1;
+			y1 = y2;
+			y2 = tmp;
+			dx = x2 - x1;
+			dy = y2 - y1;
+		}
+		y = y1;
+		inc = (dy * 65536) / dx;
+		frac = 0;
+		/* TBB: set the last pixel for consistency (<=) */
+		for (x = x1; x <= x2; x++) {
+			wstart = y - wid / 2;
+			for (w = wstart; w < wstart + wid; w++) {
+				gdImageSetAAPixelColor(im, x, w, col, (frac >> 8) & 0xFF);
+				gdImageSetAAPixelColor(im, x, w + 1, col, (~frac >> 8) & 0xFF);
+			}
+			frac += inc;
+			if (frac >= 65536) {
+				frac -= 65536;
+				y++;
+			} else if (frac < 0) {
+				frac += 65536;
+				y--;
+			}
+		}
+	} else {
+		if (dy < 0) {
+			tmp = x1;
+			x1 = x2;
+			x2 = tmp;
+			tmp = y1;
+			y1 = y2;
+			y2 = tmp;
+			dx = x2 - x1;
+			dy = y2 - y1;
+		}
+		x = x1;
+		inc = (dx * 65536) / dy;
+		frac = 0;
+		/* TBB: set the last pixel for consistency (<=) */
+		for (y = y1; y <= y2; y++) {
+			wstart = x - wid / 2;
+			for (w = wstart; w < wstart + wid; w++) {
+				gdImageSetAAPixelColor(im, w, y, col, (frac >> 8) & 0xFF);
+				gdImageSetAAPixelColor(im, w + 1, y, col, (~frac >> 8) & 0xFF);
+			}
+			frac += inc;
+			if (frac >= 65536) {
+				frac -= 65536;
+				x++;
+			} else if (frac < 0) {
+				frac += 65536;
+				x--;
+			}
+		}
+	}
+}
+
+/**
+ * Function: gdImagePaletteToTrueColor
+ *
+ * Convert a palette image to true color
+ *
+ * Parameters:
+ *   src - The image.
+ *
+ * Returns:
+ *   Non-zero if the conversion succeeded, zero otherwise.
+ *
+ * See also:
+ *   - <gdImageTrueColorToPalette>
+ */
+BGD_DECLARE(int) gdImagePaletteToTrueColor(gdImagePtr src) {
 	unsigned int y;
 	unsigned int yy;
 
