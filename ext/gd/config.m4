@@ -365,6 +365,22 @@ if test "$PHP_GD" != "no"; then
       libgd/gd_tiff.c
       libgd/gd_readimage.c
       libgd/gd_filename.c
+      libgd/ftraster/gd_ft_math.c
+      libgd/ftraster/gd_ft_raster.c
+      libgd/ftraster/gd_ft_stroker.c
+      libgd/gd_array.c
+      libgd/gd_span_rle.c
+	    libgd/gd_surface.c
+      libgd/gd_version.c
+      libgd/gd_compositor.c
+      libgd/gd_gradient.c
+      libgd/gd_path.c
+      libgd/gd_path_arc.c
+      libgd/gd_path_dash.c
+      libgd/gd_path_matrix.c
+      libgd/gd_path_stroke.c
+      libgd/gd_draw.c
+      libgd/gd_draw_blend.c
     "])
 
     AC_DEFINE([HAVE_GD_BUNDLED], [1],
@@ -396,6 +412,7 @@ dnl Various checks for GD features
       [$ext_shared],,
       [-Wno-strict-prototypes -I@ext_srcdir@/libgd])
     PHP_ADD_BUILD_DIR([$ext_builddir/libgd])
+    PHP_ADD_BUILD_DIR([$ext_builddir/libgd/ftraster])
 
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h libgd/])
 
