@@ -21,16 +21,15 @@
    *
  */
 
-#include <math.h>
-#include <string.h>
-#include <stdlib.h>
 #include "gd.h"
 #include "gdhelpers.h"
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* this is used for creating images in main memory */
 
-typedef struct ssIOCtx
-{
+typedef struct ssIOCtx {
 	gdIOCtx ctx;
 	gdSourcePtr src;
 	gdSinkPtr snk;
@@ -38,20 +37,24 @@ typedef struct ssIOCtx
 
 typedef struct ssIOCtx *ssIOCtxPtr;
 
-//gdIOCtx *gdNewSSCtx (gdSourcePtr src, gdSinkPtr snk);
-
 static int sourceGetbuf (gdIOCtx *, void *, int);
 static int sourceGetchar (gdIOCtx * ctx);
 static int sinkPutbuf (gdIOCtx * ctx, const void *buf, int size);
 static void sinkPutchar (gdIOCtx * ctx, int a);
 static void gdFreeSsCtx (gdIOCtx * ctx);
 
-/* return data as a dynamic pointer */
-BGD_DECLARE(gdIOCtx *) gdNewSSCtx (gdSourcePtr src, gdSinkPtr snk)
-{
+/*
+	Function: gdNewSSCtx
+
+	Return data as a dynamic pointer.
+*/
+BGD_DECLARE(gdIOCtx *) gdNewSSCtx(gdSourcePtr src, gdSinkPtr snk) {
 	ssIOCtxPtr ctx;
 
 	ctx = (ssIOCtxPtr) gdMalloc (sizeof (ssIOCtx));
+	if (ctx == NULL) {
+		return NULL;
+	}
 
 	ctx->src = src;
 	ctx->snk = snk;
@@ -70,13 +73,9 @@ BGD_DECLARE(gdIOCtx *) gdNewSSCtx (gdSourcePtr src, gdSinkPtr snk)
 	return (gdIOCtx *) ctx;
 }
 
-static void gdFreeSsCtx (gdIOCtx * ctx)
-{
-	gdFree(ctx);
-}
+static void gdFreeSsCtx(gdIOCtx *ctx) { gdFree(ctx); }
 
-static int sourceGetbuf (gdIOCtx * ctx, void *buf, int size)
-{
+static int sourceGetbuf(gdIOCtx *ctx, void *buf, int size) {
 	ssIOCtx *lctx;
 	int res;
 
@@ -90,7 +89,7 @@ static int sourceGetbuf (gdIOCtx * ctx, void *buf, int size)
 	 */
 
 	if (res == 0) {
-		return EOF;
+		return 0;
 	} else if (res < 0) {
 		return 0;
 	} else {
@@ -98,8 +97,7 @@ static int sourceGetbuf (gdIOCtx * ctx, void *buf, int size)
 	}
 }
 
-static int sourceGetchar (gdIOCtx * ctx)
-{
+static int sourceGetchar(gdIOCtx *ctx) {
 	int res;
 	unsigned char buf;
 
@@ -112,8 +110,7 @@ static int sourceGetchar (gdIOCtx * ctx)
 	}
 }
 
-static int sinkPutbuf (gdIOCtx * ctx, const void *buf, int size)
-{
+static int sinkPutbuf(gdIOCtx *ctx, const void *buf, int size) {
 	ssIOCtxPtr lctx;
 	int res;
 
@@ -128,10 +125,10 @@ static int sinkPutbuf (gdIOCtx * ctx, const void *buf, int size)
 	}
 }
 
-static void sinkPutchar (gdIOCtx * ctx, int a)
-{
+static void sinkPutchar(gdIOCtx *ctx, int a) {
 	unsigned char b;
 
 	b = a;
+
 	sinkPutbuf (ctx, &b, 1);
 }
