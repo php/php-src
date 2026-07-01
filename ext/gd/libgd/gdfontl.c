@@ -22,7 +22,7 @@
 
 #include "gdfontl.h"
 
-const char gdFontLargeData[] =
+char gdFontLargeData[] =
 {
 /* Char 0 */
   0, 0, 0, 0, 0, 0, 0, 0,

@@ -18,7 +18,7 @@
 
 #include "gdfontmb.h"
 
-const char gdFontMediumBoldData[] =
+char gdFontMediumBoldData[] =
 {
 /* Char 0 */
   0, 0, 0, 0, 0, 0, 0,

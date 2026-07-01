@@ -18,7 +18,7 @@
 
 #include "gdfonts.h"
 
-static const char gdFontSmallData[] =
+char gdFontSmallData[] =
 {
 /* Char 0 */
   0, 0, 0, 0, 0, 0,
