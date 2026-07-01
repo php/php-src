@@ -678,31 +678,7 @@ slightly different steps. We'll call attention where the steps differ.
     git push upstream master
     ```
 
-14. Switch to your local clone of the `web-php` repository and update the
-    `web-php-distributions` submodule.
-
-    ```shell
-    cd /path/to/repos/php/web-php
-    git pull --rebase upstream master
-    git submodule init
-    git submodule update
-    cd distributions
-    git fetch --all
-    git pull --rebase upstream master
-    cd ..
-    git commit distributions -m "X.Y.Z tarballs"
-    git push upstream master
-    ```
-
-    > 💬 **Hint** \
-    > This fetches the last commit ID from `web-php-distributions` and pins the
-    > "distributions" submodule in `web-php` to this commit ID.
-    >
-    > When the website syncs, which should happen within an hour, the tarballs
-    > will be available from `https://www.php.net/distributions/php-X.Y.Z.tar.gz`,
-    > etc.
-
-15. Once the release is tagged, contact the release-managers@php.net distribution
+14. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
     be found at https://windows.php.net/qa/.
 
