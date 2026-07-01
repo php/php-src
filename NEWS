@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22443 (Tracing JIT SIGSEGV on megamorphic dynamic calls from
     an undereferenced run_time_cache map_ptr offset). (iliaal)
 
+- OpenSSL:
+  . Fixed timeout for supplemental read at end of a blocking stream in SSL
+    stream wrapper. (ilutov)
+
 - Intl:
   . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
     fallback locale when a language tag cannot be canonicalized. (Weilin Du)
