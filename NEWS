@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.32
+02 Jul 2026, PHP 8.2.32
 
 - OpenSSL:
   . Fixed bug GH-22187 (Memory corruption (zend_mm_heap corrupted) in
