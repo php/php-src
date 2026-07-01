@@ -40,6 +40,9 @@ PHP 8.6 UPGRADE NOTES
 - Intl:
   . Passing a non-stringable object as a time zone to Intl APIs that accept
     time zone objects or strings now raises a TypeError instead of an Error.
+  . IntlIterator::current() now returns null when called before the iterator is
+    positioned, or after the iterator becomes invalid, instead of exposing an
+    undefined value.
   . IntlBreakIterator::getLocale() now raises a ValueError when the type is
     neither Locale::ACTUAL_LOCALE nor Locale::VALID_LOCALE instead of
     returning false.
@@ -126,6 +129,11 @@ PHP 8.6 UPGRADE NOTES
         to 1).
     RFC: https://wiki.php.net/rfc/session_security_defaults
 
+- Shmop:
+  . shmop_open() now raises a ValueError when the $key argument is outside the
+    platform's key_t range instead of passing a truncated key to the operating
+    system.
+
 - SOAP:
   . WSDL/XML Schema parsing now rejects out-of-range integer values for
     occurrence constraints and integer restriction facets. Negative minOccurs
@@ -174,8 +182,15 @@ PHP 8.6 UPGRADE NOTES
     passed.
   . scandir() now raises a ValueError when an invalid $sorting_order argument
     value is passed.
+  . number_format() now raises a ValueError when $decimals is outside the
+    integer range instead of silently clamping very large positive values.
   . proc_open() now raises a ValueError when the $cwd argument contains NUL
     bytes.
+
+- Sysvshm:
+  . shm_attach() now raises a ValueError when the $key argument is outside the
+    platform's key_t range instead of passing a truncated key to the operating
+    system.
 
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the files argument if one
