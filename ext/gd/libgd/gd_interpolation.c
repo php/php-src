@@ -67,7 +67,7 @@ copyresized/resampled)
 /* Comment out this line to enable asserts.
  * TODO: This logic really belongs in cmake and configure.
  */
-#define NDEBUG 1
+/* #define NDEBUG 1 */
 #include <assert.h>
 
 #include "gd.h"
