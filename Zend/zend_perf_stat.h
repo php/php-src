@@ -93,13 +93,9 @@ static void zps_wait_ack(void)
 
 	char ack[sizeof("ack\n") - 1];
 	ssize_t bytes_read;
-	while ((bytes_read = read(ack_fd, ack, sizeof(ack))) > 0) {
-		for (ssize_t i = 0; i < bytes_read; i++) {
-			if (ack[i] == '\n') {
-				return;
-			}
-		}
-	}
+	do {
+		bytes_read = read(ack_fd, ack, sizeof(ack));
+	} while (bytes_read > 0);
 }
 
 static void zps_control(const char *command, size_t command_len)
