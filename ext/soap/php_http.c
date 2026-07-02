@@ -19,8 +19,8 @@
 #include "ext/uri/php_uri.h"
 
 static char *get_http_header_value_nodup(char *headers, char *type, size_t *len);
-static char *get_http_header_value(char *headers, char *type);
-static zend_string *get_http_body(php_stream *socketd, bool close, char *headers);
+static char *get_http_header_value(zend_string *headers, char *type);
+static zend_string *get_http_body(php_stream *socketd, bool close, zend_string *headers);
 static zend_string *get_http_headers(php_stream *socketd);
 
 #define smart_str_append_const(str, const) \
@@ -946,7 +946,7 @@ try_again:
 			/* Check to see what HTTP status was sent */
 			http_1_1 = false;
 			http_status = 0;
-			http_version = get_http_header_value(ZSTR_VAL(http_headers), "HTTP/");
+			http_version = get_http_header_value(http_headers, "HTTP/");
 			if (http_version) {
 				char *tmp;
 
@@ -1070,7 +1070,7 @@ try_again:
 	if (http_1_1) {
 		http_close = false;
 		if (use_proxy && !use_ssl) {
-			connection = get_http_header_value(ZSTR_VAL(http_headers), "Proxy-Connection:");
+			connection = get_http_header_value(http_headers, "Proxy-Connection:");
 			if (connection) {
 				if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
 					http_close = true;
@@ -1079,7 +1079,7 @@ try_again:
 			}
 		}
 		if (http_close == false) {
-			connection = get_http_header_value(ZSTR_VAL(http_headers), "Connection:");
+			connection = get_http_header_value(http_headers, "Connection:");
 			if (connection) {
 				if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
 					http_close = true;
@@ -1090,7 +1090,7 @@ try_again:
 	} else {
 		http_close = true;
 		if (use_proxy && !use_ssl) {
-			connection = get_http_header_value(ZSTR_VAL(http_headers), "Proxy-Connection:");
+			connection = get_http_header_value(http_headers, "Proxy-Connection:");
 			if (connection) {
 				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
 					http_close = false;
@@ -1099,7 +1099,7 @@ try_again:
 			}
 		}
 		if (http_close == true) {
-			connection = get_http_header_value(ZSTR_VAL(http_headers), "Connection:");
+			connection = get_http_header_value(http_headers, "Connection:");
 			if (connection) {
 				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
 					http_close = false;
@@ -1110,7 +1110,7 @@ try_again:
 	}
 
 
-	http_body = get_http_body(stream, http_close, ZSTR_VAL(http_headers));
+	http_body = get_http_body(stream, http_close, http_headers);
 	if (!http_body) {
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
@@ -1142,7 +1142,7 @@ try_again:
 	if (http_status >= 300 && http_status < 400) {
 		char *loc;
 
-		if ((loc = get_http_header_value(ZSTR_VAL(http_headers), "Location:")) != NULL) {
+		if ((loc = get_http_header_value(http_headers, "Location:")) != NULL) {
 			const php_uri_parser *uri_parser = php_uri_get_parser(uri_parser_class);
 			if (uri_parser == NULL) {
 				efree(loc);
@@ -1195,7 +1195,7 @@ try_again:
 		zval *digest = Z_CLIENT_DIGEST_P(this_ptr);
 		zval *login = Z_CLIENT_LOGIN_P(this_ptr);
 		zval *password = Z_CLIENT_PASSWORD_P(this_ptr);
-		char *auth = get_http_header_value(ZSTR_VAL(http_headers), "WWW-Authenticate:");
+		char *auth = get_http_header_value(http_headers, "WWW-Authenticate:");
 		if (auth && strstr(auth, "Digest") == auth && Z_TYPE_P(digest) != IS_ARRAY
 				&& Z_TYPE_P(login) == IS_STRING && Z_TYPE_P(password) == IS_STRING) {
 			char *s;
@@ -1265,7 +1265,7 @@ try_again:
 	smart_str_free(&soap_headers_z);
 
 	/* Check and see if the server even sent a xml document */
-	content_type = get_http_header_value(ZSTR_VAL(http_headers), "Content-Type:");
+	content_type = get_http_header_value(http_headers, "Content-Type:");
 	if (content_type) {
 		char *pos = NULL;
 		int cmplen;
@@ -1295,7 +1295,7 @@ try_again:
 	}
 
 	/* Decompress response */
-	content_encoding = get_http_header_value(ZSTR_VAL(http_headers), "Content-Encoding:");
+	content_encoding = get_http_header_value(http_headers, "Content-Encoding:");
 	if (content_encoding) {
 		zval retval;
 		zval params[1];
@@ -1429,12 +1429,12 @@ static char *get_http_header_value_nodup(char *headers, char *type, size_t *len)
 	return NULL;
 }
 
-static char *get_http_header_value(char *headers, char *type)
+static char *get_http_header_value(zend_string *headers, char *type)
 {
 	size_t len;
 	char *value;
 
-	value = get_http_header_value_nodup(headers, type, &len);
+	value = get_http_header_value_nodup(ZSTR_VAL(headers), type, &len);
 
 	if (value) {
 		return estrndup(value, len);
@@ -1443,7 +1443,7 @@ static char *get_http_header_value(char *headers, char *type)
 	return NULL;
 }
 
-static zend_string* get_http_body(php_stream *stream, bool close, char *headers)
+static zend_string* get_http_body(php_stream *stream, bool close, zend_string *headers)
 {
 	zend_string *http_buf = NULL;
 	char *header;
