@@ -41,6 +41,8 @@ PHP                                                                        NEWS
     returning the first entity or notation. (Weilin Du)
   . Fixed bug GH-22623 (use after free with namespace nodes from
     XSLTProcessor::registerFunctions())/ (David Carlier)
+  . Fixed bug GH-22554 (use-after-free with XPath callback returning a node
+    from a foreign document). (David Carlier)
 
 - Exif:
   . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
