@@ -49,12 +49,12 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level);
 
 static void clear_soap_fault(zval *obj);
 static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fault_code, const char *fault_string, const char *fault_actor, zval *fault_detail, zend_string *name, zend_string *lang);
-static void add_soap_fault_en(zval *obj, char *fault_code, char *fault_string);
-static void add_soap_fault_ex(zval *fault, zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail, zend_string *lang);
-static void add_soap_fault_ex_en(zval *fault, zval *obj, char *fault_code, char *fault_string);
-static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *actor, zval* details, zend_string *name, zend_string *lang);
+static void add_soap_fault_en(zval *obj, const char *fault_code, const char *fault_string);
+static void add_soap_fault_ex(zval *fault, zval *obj, const char *fault_code, const char *fault_string, const char *fault_actor, zval *fault_detail, zend_string *lang);
+static void add_soap_fault_ex_en(zval *fault, zval *obj, const char *fault_code, const char *fault_string);
+static ZEND_NORETURN void soap_server_fault(const char *code, const char *string, const char *actor, zval* details, zend_string *name, zend_string *lang);
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader* hdr);
-static ZEND_NORETURN void soap_server_fault_en(char* code, char* string, char *actor, zval* details, zend_string *name);
+static ZEND_NORETURN void soap_server_fault_en(const char *code, const char *string, const char *actor, zval* details, zend_string *name);
 
 static sdlParamPtr get_param(sdlFunctionPtr function, const char *param_name, zend_ulong index, int);
 static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name, size_t function_name_length);
@@ -1875,7 +1875,7 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 }
 /* }}} */
 
-static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *actor, zval* details, zend_string* name, zend_string *lang) /* {{{ */
+static ZEND_NORETURN void soap_server_fault(const char *code, const char *string, const char *actor, zval* details, zend_string* name, zend_string *lang) /* {{{ */
 {
 	zval ret;
 
@@ -1887,7 +1887,7 @@ static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *acto
 }
 /* }}} */
 
-static ZEND_NORETURN void soap_server_fault_en(char* code, char* string, char *actor, zval* details, zend_string* name)
+static ZEND_NORETURN void soap_server_fault_en(const char *code, const char *string, const char *actor, zval* details, zend_string* name)
 {
 	soap_server_fault(code, string, actor, details, name, soap_lang_en);
 }
@@ -2953,7 +2953,7 @@ static void clear_soap_fault(zval *obj) /* {{{ */
 }
 /* }}} */
 
-static void add_soap_fault_ex(zval *fault, zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail, zend_string *lang) /* {{{ */
+static void add_soap_fault_ex(zval *fault, zval *obj, const char *fault_code, const char *fault_string, const char *fault_actor, zval *fault_detail, zend_string *lang) /* {{{ */
 {
 	ZVAL_NULL(fault);
 	set_soap_fault(fault, NULL, fault_code, fault_string, fault_actor, fault_detail, NULL, lang);
@@ -2970,19 +2970,19 @@ static void add_soap_fault_ex(zval *fault, zval *obj, char *fault_code, char *fa
 }
 /* }}} */
 
-static void add_soap_fault_ex_en(zval *fault, zval *obj, char *fault_code, char *fault_string)
+static void add_soap_fault_ex_en(zval *fault, zval *obj, const char *fault_code, const char *fault_string)
 {
 	add_soap_fault_ex(fault, obj, fault_code, fault_string, NULL, NULL, soap_lang_en);
 }
 
-void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail, zend_string *lang) /* {{{ */
+void add_soap_fault(zval *obj, const char *fault_code, const char *fault_string, const char *fault_actor, zval *fault_detail, zend_string *lang) /* {{{ */
 {
 	zval fault;
 	add_soap_fault_ex(&fault, obj, fault_code, fault_string, fault_actor, fault_detail, lang);
 }
 /* }}} */
 
-static void add_soap_fault_en(zval *obj, char *fault_code, char *fault_string)
+static void add_soap_fault_en(zval *obj, const char *fault_code, const char *fault_string)
 {
 	add_soap_fault(obj, fault_code, fault_string, NULL, NULL, soap_lang_en);
 }
