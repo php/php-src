@@ -2213,9 +2213,11 @@ PHP_FUNCTION(ldap_explode_dn)
 	}
 
 	array_init(return_value);
-	int i;
+	int i = 0;
 	
-	for (i = 0; ldap_value[i] != NULL; i++);
+	while (ldap_value[i] != NULL) {
+		i++;
+	}
 
 	add_assoc_long(return_value, "count", i);
 
