@@ -193,12 +193,12 @@ static inline bool is_closure_invoke(const zend_class_entry *ce, const zend_stri
 static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 {
 	if (fptr
-		&& (fptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
+		&& (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 	{
 		zend_function *copy_fptr;
 		copy_fptr = emalloc(sizeof(zend_function));
 		memcpy(copy_fptr, fptr, sizeof(zend_function));
-		copy_fptr->internal_function.function_name = zend_string_copy(fptr->internal_function.function_name);
+		copy_fptr->common.function_name = zend_string_copy(fptr->common.function_name);
 		return copy_fptr;
 	} else {
 		/* no copy needed */
@@ -210,9 +210,9 @@ static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 static void _free_function(zend_function *fptr) /* {{{ */
 {
 	if (fptr
-		&& (fptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
+		&& (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 	{
-		zend_string_release_ex(fptr->internal_function.function_name, false);
+		zend_string_release_ex(fptr->common.function_name, false);
 		zend_free_trampoline(fptr);
 	}
 }
@@ -930,7 +930,7 @@ static void _function_string(smart_str *str, const zend_function *fptr, const ze
 		smart_str_appends(str, "function ");
 	}
 
-	if (fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+	if (fptr->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 		smart_str_appendc(str, '&');
 	}
 	smart_str_append_printf(str, "%s ] {\n", ZSTR_VAL(fptr->common.function_name));
@@ -948,7 +948,7 @@ static void _function_string(smart_str *str, const zend_function *fptr, const ze
 	}
 	_function_parameter_string(str, fptr, ZSTR_VAL(param_indent.s));
 	smart_str_free(&param_indent);
-	if ((fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+	if ((fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 		smart_str_append_printf(str, "  %s- %s [ ", indent, ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1]) ? "Tentative return" : "Return");
 		if (ZEND_TYPE_IS_SET(fptr->common.arg_info[-1].type)) {
 			zend_string *type_str = zend_type_to_string(fptr->common.arg_info[-1].type);
@@ -2160,7 +2160,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, returnsReference)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	RETURN_BOOL((fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0);
+	RETURN_BOOL((fptr->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0);
 }
 /* }}} */
 
@@ -2392,8 +2392,8 @@ ZEND_METHOD(ReflectionGenerator, getFunction)
 		zval closure;
 		ZVAL_OBJ(&closure, ZEND_CLOSURE_OBJECT(func));
 		reflection_function_factory(func, &closure, return_value);
-	} else if (func->op_array.scope) {
-		reflection_method_factory(func->op_array.scope, func, NULL, return_value);
+	} else if (func->common.scope) {
+		reflection_method_factory(func->common.scope, func, NULL, return_value);
 	} else {
 		reflection_function_factory(func, NULL, return_value);
 	}
@@ -3650,7 +3650,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasReturnType)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	RETVAL_BOOL((fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) && !ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1]));
+	RETVAL_BOOL((fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) && !ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1]));
 }
 /* }}} */
 
@@ -3664,7 +3664,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getReturnType)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	if (!(fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) || ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1])) {
+	if (!(fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) || ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1])) {
 		RETURN_NULL();
 	}
 
@@ -3682,7 +3682,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasTentativeReturnType)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	RETVAL_BOOL(fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1]));
+	RETVAL_BOOL(fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1]));
 }
 /* }}} */
 
@@ -3696,7 +3696,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getTentativeReturnType)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	if (!(fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) || !ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1])) {
+	if (!(fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) || !ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1])) {
 		RETURN_NULL();
 	}
 
