@@ -1574,7 +1574,7 @@ static void reflection_property_factory_str(zend_class_entry *ce, const char *na
 {
 	zend_string *name = zend_string_init(name_str, name_len, false);
 	reflection_property_factory(ce, name, prop, object);
-	zend_string_release(name);
+	zend_string_release_ex(name, false);
 }
 
 /* {{{ reflection_class_constant_factory */
