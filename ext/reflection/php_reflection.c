@@ -3672,7 +3672,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getReturnType)
 }
 /* }}} */
 
-/* {{{ Return whether the function has a return type */
+/* {{{ Return whether the function has a tentative return type */
 ZEND_METHOD(ReflectionFunctionAbstract, hasTentativeReturnType)
 {
 	reflection_object *intern;
@@ -3686,7 +3686,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasTentativeReturnType)
 }
 /* }}} */
 
-/* {{{ Returns the return type associated with the function */
+/* {{{ Returns the tentative return type associated with the function */
 ZEND_METHOD(ReflectionFunctionAbstract, getTentativeReturnType)
 {
 	reflection_object *intern;
