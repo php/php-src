@@ -2,8 +2,19 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0alpha2
 
+- DBA:
+  . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
+
+- Exif:
+  . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
+    warning when an IFD is not followed by a next-IFD offset). (Eyüp Can Akman)
+
 - OpenSSL:
   . Fixed stream_socket_get_crypto_status() after supplemental read. (ilutov)
+
+- Session:
+  . Fixed bug GH-21314 (Different session garbage collector behavior between
+    PHP 8.3 and PHP 8.5). (jorgsowa)
 
 02 Jul 2026, PHP 8.6.0alpha1
 
