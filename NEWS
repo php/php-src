@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.24
 
+- DBA:
+  . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
+
 - Exif:
   . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
     warning when an IFD is not followed by a next-IFD offset). (Eyüp Can Akman)
@@ -41,6 +44,10 @@ PHP                                                                        NEWS
     ReflectionParameter::__construct()). (jorgsowa)
   . Fixed bug GH-22441 (ReflectionClass::hasProperty() and getProperty() ignore
     dynamic properties shadowing a private parent property). (iliaal)
+
+- Session:
+  . Fixed bug GH-21314 (Different session garbage collector behavior between
+    PHP 8.3 and PHP 8.5). (jorgsowa)
 
 - SPL:
   . Fix class_parents for classes with leading slash in non-autoload mode.
