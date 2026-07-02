@@ -39,7 +39,7 @@ static void master_to_zval_with_doc_cleanup(zval *ret, encodePtr encode, xmlNode
 }
 
 /* SOAP client calls this function to parse response from SOAP server */
-bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctionPtr fn, char *fn_name, zval *return_value, zval *soap_headers)
+bool parse_packet_soap(zval *this_ptr, zend_string *buffer, sdlFunctionPtr fn, zval *return_value, zval *soap_headers)
 {
 	char* envelope_ns = NULL;
 	xmlDocPtr response;
@@ -52,12 +52,12 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 	ZVAL_NULL(return_value);
 
 	/* Response for one-way operation */
-	if (buffer_size == 0) {
+	if (ZSTR_LEN(buffer) == 0) {
 		return true;
 	}
 
 	/* Parse XML packet */
-	response = soap_xmlParseMemory(buffer, buffer_size);
+	response = soap_xmlParseMemory(ZSTR_VAL(buffer), ZSTR_LEN(buffer));
 
 	if (!response) {
 		add_soap_fault(this_ptr, "Client", "looks like we got no XML document", NULL, NULL, soap_lang_en);
