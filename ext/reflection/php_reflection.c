@@ -1065,12 +1065,12 @@ static void _property_string(smart_str *str, const zend_property_info *prop, con
 }
 /* }}} */
 
-static void _extension_ini_string(const zend_ini_entry *ini_entry, smart_str *str, const char *indent, int number) /* {{{ */
+static void _extension_ini_string(const zend_ini_entry *ini_entry, smart_str *str, int number) /* {{{ */
 {
 	char *comma = "";
 
 	if (number == ini_entry->module_number) {
-		smart_str_append_printf(str, "    %sEntry [ %s <", indent, ZSTR_VAL(ini_entry->name));
+		smart_str_append_printf(str, "    Entry [ %s <", ZSTR_VAL(ini_entry->name));
 		if (ini_entry->modifiable == ZEND_INI_ALL) {
 			smart_str_appends(str, "ALL");
 		} else {
@@ -1088,11 +1088,11 @@ static void _extension_ini_string(const zend_ini_entry *ini_entry, smart_str *st
 		}
 
 		smart_str_appends(str, "> ]\n");
-		smart_str_append_printf(str, "    %s  Current = '%s'\n", indent, ini_entry->value ? ZSTR_VAL(ini_entry->value) : "");
+		smart_str_append_printf(str, "      Current = '%s'\n", ini_entry->value ? ZSTR_VAL(ini_entry->value) : "");
 		if (ini_entry->modified) {
-			smart_str_append_printf(str, "    %s  Default = '%s'\n", indent, ini_entry->orig_value ? ZSTR_VAL(ini_entry->orig_value) : "");
+			smart_str_append_printf(str, "      Default = '%s'\n", ini_entry->orig_value ? ZSTR_VAL(ini_entry->orig_value) : "");
 		}
-		smart_str_append_printf(str, "    %s}\n", indent);
+		smart_str_appends(str, "    }\n");
 	}
 }
 /* }}} */
@@ -1162,7 +1162,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module) /
 		smart_str str_ini = {0};
 		zend_ini_entry *ini_entry;
 		ZEND_HASH_MAP_FOREACH_PTR(EG(ini_directives), ini_entry) {
-			_extension_ini_string(ini_entry, &str_ini, "", module->module_number);
+			_extension_ini_string(ini_entry, &str_ini, module->module_number);
 		} ZEND_HASH_FOREACH_END();
 		if (smart_str_get_len(&str_ini) > 0) {
 			smart_str_appends(str, "\n  - INI {\n");
