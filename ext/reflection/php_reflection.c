@@ -1767,7 +1767,7 @@ ZEND_METHOD(ReflectionFunction, __toString)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(fptr);
-	_function_string(&str, fptr, intern->ce, "");
+	_function_string(&str, fptr, NULL, "");
 	RETURN_STR(smart_str_extract(&str));
 }
 /* }}} */
