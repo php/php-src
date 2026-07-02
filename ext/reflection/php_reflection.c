@@ -3364,7 +3364,7 @@ ZEND_METHOD(ReflectionMethod, __toString)
 }
 /* }}} */
 
-/* {{{ Invokes the function */
+/* {{{ Returns a dynamically created closure for the function */
 ZEND_METHOD(ReflectionMethod, getClosure)
 {
 	reflection_object *intern;
