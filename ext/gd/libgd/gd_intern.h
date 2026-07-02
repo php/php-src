@@ -2,6 +2,15 @@
 #define GD_INTERN_H
 #include <limits.h>
 #include "gd.h"
+#ifdef _MSC_VER
+#ifndef SSIZE_MAX
+#ifdef _WIN64
+#define SSIZE_MAX _I64_MAX
+#else
+#define SSIZE_MAX INT_MAX
+#endif
+#endif
+#endif
 #if defined(_MSC_VER)
 #define UNUSED_PARAM(x) x
 #elif defined(__GNUC__) || defined(__clang__)
