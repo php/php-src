@@ -1396,8 +1396,8 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object)
 }
 /* }}} */
 
-/* {{{ reflection_extension_factory_ex */
-static void reflection_extension_factory_ex(zval *object, zend_module_entry *module)
+/* {{{ reflection_extension_factory */
+static void reflection_extension_factory(zval *object, zend_module_entry *module)
 {
 	object_init_ex(object, reflection_extension_ptr);
 	reflection_object *intern = Z_REFLECTION_P(object);
@@ -2246,7 +2246,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getExtension)
 
 	internal = (zend_internal_function *)fptr;
 	if (internal->module) {
-		reflection_extension_factory_ex(return_value, internal->module);
+		reflection_extension_factory(return_value, internal->module);
 	} else {
 		RETURN_NULL();
 	}
@@ -5567,7 +5567,7 @@ ZEND_METHOD(ReflectionClass, getExtension)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if ((ce->type == ZEND_INTERNAL_CLASS) && ce->info.internal.module) {
-		reflection_extension_factory_ex(return_value, ce->info.internal.module);
+		reflection_extension_factory(return_value, ce->info.internal.module);
 	}
 }
 /* }}} */
@@ -8103,7 +8103,7 @@ static void reflection_constant_find_ext(INTERNAL_FUNCTION_PARAMETERS, bool only
 		if (only_name) {
 			RETURN_STRING(module->name);
 		}
-		reflection_extension_factory_ex(return_value, module);
+		reflection_extension_factory(return_value, module);
 		return;
 	} ZEND_HASH_FOREACH_END();
 
