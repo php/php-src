@@ -2447,7 +2447,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 					encode_reset_ns();
 					zend_try {
-						ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), fn, NULL, return_value, output_headers);
+						ret = parse_packet_soap(this_ptr, Z_STR(response), fn, return_value, output_headers);
 					} zend_catch {
 						parse_bailout = true;
 					} zend_end_try();
@@ -2501,7 +2501,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 					encode_reset_ns();
 					zend_try {
-						ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), NULL, NULL, return_value, output_headers);
+						ret = parse_packet_soap(this_ptr, Z_STR(response), NULL, return_value, output_headers);
 					} zend_catch {
 						parse_bailout = true;
 					} zend_end_try();
