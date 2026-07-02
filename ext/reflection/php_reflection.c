@@ -1862,44 +1862,47 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureUsedVariables)
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT();
 
+	if (Z_ISUNDEF(intern->obj)) {
+		RETURN_EMPTY_ARRAY();
+	}
+
+	closure_func = zend_get_closure_method_def(Z_OBJ(intern->obj));
+	if (closure_func == NULL ||
+		closure_func->type != ZEND_USER_FUNCTION ||
+		closure_func->op_array.static_variables == NULL
+	) {
+		RETURN_EMPTY_ARRAY();
+	}
+
+	const zend_op_array *ops = &closure_func->op_array;
+
+	HashTable *static_variables = ZEND_MAP_PTR_GET(ops->static_variables_ptr);
+
+	if (!static_variables) {
+		RETURN_EMPTY_ARRAY();
+	}
+
 	array_init(return_value);
-	if (!Z_ISUNDEF(intern->obj)) {
-		closure_func = zend_get_closure_method_def(Z_OBJ(intern->obj));
-		if (closure_func == NULL ||
-			closure_func->type != ZEND_USER_FUNCTION ||
-			closure_func->op_array.static_variables == NULL) {
-			return;
+	zend_op *opline = ops->opcodes + ops->num_args;
+	if (ops->fn_flags & ZEND_ACC_VARIADIC) {
+		opline++;
+	}
+
+	for (; opline->opcode == ZEND_BIND_STATIC; opline++)  {
+		if (!(opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
+			continue;
 		}
 
-		const zend_op_array *ops = &closure_func->op_array;
+		Bucket *bucket = (Bucket*)
+			(((char*)static_variables->arData) +
+			(opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
 
-		HashTable *static_variables = ZEND_MAP_PTR_GET(ops->static_variables_ptr);
-
-		if (!static_variables) {
-			return;
+		if (Z_ISUNDEF(bucket->val)) {
+			continue;
 		}
 
-		zend_op *opline = ops->opcodes + ops->num_args;
-		if (ops->fn_flags & ZEND_ACC_VARIADIC) {
-			opline++;
-		}
-
-		for (; opline->opcode == ZEND_BIND_STATIC; opline++)  {
-			if (!(opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
-				continue;
-			}
-
-			Bucket *bucket = (Bucket*)
-				(((char*)static_variables->arData) +
-				(opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
-
-			if (Z_ISUNDEF(bucket->val)) {
-				continue;
-			}
-
-			zend_hash_add_new(Z_ARRVAL_P(return_value), bucket->key, &bucket->val);
-			Z_TRY_ADDREF(bucket->val);
-		}
+		zend_hash_add_new(Z_ARRVAL_P(return_value), bucket->key, &bucket->val);
+		Z_TRY_ADDREF(bucket->val);
 	}
 } /* }}} */
 
