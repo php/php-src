@@ -5504,7 +5504,7 @@ ZEND_METHOD(ReflectionClass, isSubclassOf)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	RETURN_BOOL((ce != class_ce && instanceof_function(ce, class_ce)));
+	RETURN_BOOL(ce != class_ce && instanceof_function(ce, class_ce));
 }
 /* }}} */
 
