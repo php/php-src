@@ -25,12 +25,6 @@ extern "C" {
 #define ARG_NOT_USED(arg) (void)(arg)
 #endif
 
-#ifdef _MSC_VER
-#ifndef strcasecmp
-#define strcasecmp _stricmp
-#endif
-#endif
-
 #define GD_MAJOR_VERSION 2
 #define GD_MINOR_VERSION 0
 #define GD_RELEASE_VERSION 35

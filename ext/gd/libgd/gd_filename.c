@@ -10,6 +10,12 @@
 
 #include "gd.h"
 
+#ifdef _MSC_VER
+#define gd_strcasecmp _stricmp
+#else
+#define gd_strcasecmp strcasecmp
+#endif
+
 typedef gdImagePtr(BGD_STDCALL *ReadFn)(FILE *in);
 typedef void(BGD_STDCALL *WriteFn)(gdImagePtr im, FILE *out);
 typedef gdImagePtr(BGD_STDCALL *LoadFn)(char *filename);
@@ -102,7 +108,7 @@ static const struct FileType *ftype(const char *filename) {
 		return NULL;
 
 	for (n = 0; Types[n].ext; n++) {
-		if (strcasecmp(ext, Types[n].ext) == 0) {
+		if (gd_strcasecmp(ext, Types[n].ext) == 0) {
 			return &Types[n];
 		} /* if */
 	} /* for */

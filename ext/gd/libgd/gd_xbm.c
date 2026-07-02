@@ -182,7 +182,7 @@ BGD_DECLARE(void) gdImageXbmCtx(gdImagePtr image, char* file_name, int fg, gdIOC
 	if ((f = strrchr(name, '/')) != NULL) name = f+1;
 	if ((f = strrchr(name, '\\')) != NULL) name = f+1;
 	name = estrdup(name);
-	if ((f = strrchr(name, '.')) != NULL && !strcasecmp(f, ".XBM")) *f = '\0';
+	if ((f = strrchr(name, '.')) != NULL && !gd_strcasecmp(f, ".XBM")) *f = '\0';
 	if ((l = strlen(name)) == 0) {
 		efree(name);
 		name = estrdup("image");
