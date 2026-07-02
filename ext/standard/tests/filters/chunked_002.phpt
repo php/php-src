@@ -39,7 +39,7 @@ fclose($buffer);
 $buffer = fopen('php://temp', 'w+');
 stream_filter_append($buffer, 'dechunk', STREAM_FILTER_WRITE);
 
-fwrite($buffer, "5\r\nHello\r\n");
+fwrite($buffer, "5\r\nHello\r\n0\r\n");
 $data = stream_get_contents($buffer, -1, 0);
 var_dump($data);
 

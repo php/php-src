@@ -1949,6 +1949,11 @@ static php_stream_filter_status_t php_chunked_filter(
 		*bytes_consumed = consumed;
 	}
 
+	if ((flags & PSFS_FLAG_FLUSH_CLOSE) && data->state != CHUNK_TRAILER) {
+		php_error_docref(NULL, E_WARNING, "Stream filter (dechunk): unexpected end of stream");
+		return PSFS_ERR_FATAL;
+	}
+
 	return PSFS_PASS_ON;
 }
 
