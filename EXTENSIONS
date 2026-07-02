@@ -402,6 +402,7 @@ PRIMARY MAINTAINER:  Greg Beaver <cellog@php.net> (2008 - 2009)
                      Marcus Börger <helly@php.net> (2008 - 2008)
                      Steph Fox <sfox@php.net> (2008 - 2008)
                      Bishop Bettini <bishop@php.net> (2018 - 2019)
+                     Weilin Du <weilindu@php.net> (2026 - 2026)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
@@ -499,7 +500,8 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           zip
 PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net> (2006 - 2011)
-                     Remi Collet <remi@php.net> (2013-2020)
+                     Remi Collet <remi@php.net> (2013 - 2020)
+                     Weilin Du <weilindu@php.net> (2026 - 2026)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
