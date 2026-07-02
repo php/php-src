@@ -153,6 +153,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23758 (PDO_Firebird returns null for non-null empty BLOBs).
     (Lazizbek Ergashev)
 
+- Phar:
+  . Fixed bug GH-22556 (OOM DoS via oversized ././@LongLink entry in TAR phar).
+    (crystarm)
+
 - Readline:
   . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
     set to an empty string. (Ilia Alshanetsky)

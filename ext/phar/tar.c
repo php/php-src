@@ -435,8 +435,10 @@ bail:
 			/* support the ././@LongLink system for storing long filenames */
 			entry.filename_len = entry.uncompressed_filesize;
 
-			/* Check for overflow - bug 61065 */
-			if (entry.filename_len == 0 || entry.filename_len > totalsize) {
+			/* Check for empty, truncated, or excessively large ././@LongLink filename entries - bug 61065 */
+			if (entry.filename_len == 0
+					|| entry.filename_len > totalsize
+					|| entry.filename_len > UINT16_MAX) {
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (invalid entry size)", fname);
 				}
