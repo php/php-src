@@ -27,6 +27,7 @@
 #include <openssl/err.h>
 #include <openssl/hmac.h>
 #include <openssl/rand.h>
+#include <openssl/crypto.h>
 
 #ifndef OPENSSL_NO_DTLS
 
@@ -688,7 +689,8 @@ static int php_openssl_dtls_cookie_verify(SSL *ssl, const unsigned char *cookie,
 	}
 	HMAC(EVP_sha256(), php_openssl_dtls_cookie_secret, sizeof(php_openssl_dtls_cookie_secret),
 			(const unsigned char *)&peer, peerlen, expected, &len);
-	return (cookie_len == len && memcmp(cookie, expected, len) == 0) ? 1 : 0;
+	/* Constant-time compare: the cookie is derived from a secret HMAC. */
+	return (cookie_len == len && CRYPTO_memcmp(cookie, expected, len) == 0) ? 1 : 0;
 }
 
 /* Set up the server SSL_CTX (cert/verify options plus the cookie callbacks that
@@ -733,9 +735,21 @@ static int php_openssl_dtls_accept(php_stream *stream, php_openssl_dtls_data_t *
 	}
 	SSL_set_bio(ssl, bio, bio);
 
-	int timeout_ms = xparam->inputs.timeout != NULL
-			? (int)(xparam->inputs.timeout->tv_sec * 1000 + xparam->inputs.timeout->tv_usec / 1000)
-			: -1;
+	/* Bound the whole accept by a deadline (not each poll), so a bogus-ClientHello
+	 * flood can't keep DTLSv1_listen() spinning past the timeout; with no timeout
+	 * we block. */
+	struct timeval *tmo = xparam->inputs.timeout;
+	struct timeval deadline;
+	bool has_deadline = tmo != NULL && (tmo->tv_sec > 0 || tmo->tv_usec > 0);
+	if (has_deadline) {
+		gettimeofday(&deadline, NULL);
+		deadline.tv_sec += tmo->tv_sec;
+		deadline.tv_usec += tmo->tv_usec;
+		if (deadline.tv_usec >= 1000000) {
+			deadline.tv_sec++;
+			deadline.tv_usec -= 1000000;
+		}
+	}
 
 	BIO_ADDR *client_addr = BIO_ADDR_new();
 	if (client_addr == NULL) {
@@ -747,7 +761,26 @@ static int php_openssl_dtls_accept(php_stream *stream, php_openssl_dtls_data_t *
 		if (ret > 0) {
 			break;
 		}
-		if (ret < 0 || php_pollfd_for_ms(listen->s.socket, POLLIN, timeout_ms) <= 0) {
+		if (ret < 0) {
+			BIO_ADDR_free(client_addr);
+			SSL_free(ssl);
+			return -1;
+		}
+
+		int wait_ms = -1;
+		if (has_deadline) {
+			struct timeval now;
+			gettimeofday(&now, NULL);
+			long remaining = (deadline.tv_sec - now.tv_sec) * 1000L
+					+ (deadline.tv_usec - now.tv_usec) / 1000;
+			if (remaining <= 0) {
+				BIO_ADDR_free(client_addr);
+				SSL_free(ssl);
+				return -1;
+			}
+			wait_ms = remaining > INT_MAX ? INT_MAX : (int)remaining;
+		}
+		if (php_pollfd_for_ms(listen->s.socket, POLLIN, wait_ms) <= 0) {
 			BIO_ADDR_free(client_addr);
 			SSL_free(ssl);
 			return -1;
