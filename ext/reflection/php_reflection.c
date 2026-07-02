@@ -1194,14 +1194,14 @@ static void _extension_string(smart_str *str, const zend_module_entry *module, c
 
 	{
 		zend_function *fptr;
-		int first = 1;
+		bool first = true;
 
 		ZEND_HASH_MAP_FOREACH_PTR(CG(function_table), fptr) {
 			if (fptr->common.type==ZEND_INTERNAL_FUNCTION
 				&& fptr->internal_function.module == module) {
 				if (first) {
 					smart_str_appends(str, "\n  - Functions {\n");
-					first = 0;
+					first = false;
 				}
 				_function_string(str, fptr, NULL, "    ");
 			}
@@ -3402,7 +3402,7 @@ ZEND_METHOD(ReflectionMethod, getClosure)
 /* }}} */
 
 /* {{{ reflection_method_invoke */
-static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
+static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, bool variadic)
 {
 	zval retval;
 	zval *params = NULL, *object;
@@ -3503,14 +3503,14 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 /* {{{ Invokes the method. */
 ZEND_METHOD(ReflectionMethod, invoke)
 {
-	reflection_method_invoke(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	reflection_method_invoke(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
 /* {{{ Invokes the function and pass its arguments as array. */
 ZEND_METHOD(ReflectionMethod, invokeArgs)
 {
-	reflection_method_invoke(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	reflection_method_invoke(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
 
@@ -4053,7 +4053,7 @@ ZEND_METHOD(ReflectionClassConstant, isDeprecated)
 }
 
 /* {{{ reflection_class_object_ctor */
-static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_object)
+static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, bool is_object)
 {
 	zval *object;
 	zend_string *arg_class = NULL;
@@ -4100,7 +4100,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 /* {{{ Constructor. Takes a string or an instance as an argument */
 ZEND_METHOD(ReflectionClass, __construct)
 {
-	reflection_class_object_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	reflection_class_object_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
 
@@ -5652,7 +5652,7 @@ ZEND_METHOD(ReflectionClass, getShortName)
 /* {{{ Constructor. Takes an instance as an argument */
 ZEND_METHOD(ReflectionObject, __construct)
 {
-	reflection_class_object_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	reflection_class_object_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
@@ -5662,7 +5662,7 @@ ZEND_METHOD(ReflectionProperty, __construct)
 	zend_string *classname_str;
 	zend_object *classname_obj;
 	zend_string *name;
-	int dynam_prop = 0;
+	bool dynam_prop = false;
 	zval *object;
 	reflection_object *intern;
 	zend_class_entry *ce;
@@ -5693,10 +5693,10 @@ ZEND_METHOD(ReflectionProperty, __construct)
 		/* Check for dynamic properties */
 		if (property_info == NULL && classname_obj) {
 			if (zend_hash_exists(classname_obj->handlers->get_properties(classname_obj), name)) {
-				dynam_prop = 1;
+				dynam_prop = true;
 			}
 		}
-		if (dynam_prop == 0) {
+		if (!dynam_prop) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0, "Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 			RETURN_THROWS();
 		}
@@ -5706,7 +5706,7 @@ ZEND_METHOD(ReflectionProperty, __construct)
 	zval_ptr_dtor(prop_name);
 	ZVAL_STR_COPY(prop_name, name);
 	/* Note: class name are always interned, no need to destroy them */
-	if (dynam_prop == 0) {
+	if (!dynam_prop) {
 		ZVAL_STR_COPY(reflection_prop_class(object), property_info->ce->name);
 	} else {
 		ZVAL_STR_COPY(reflection_prop_class(object), ce->name);
@@ -7624,7 +7624,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 
 ZEND_METHOD(ReflectionEnum, __construct)
 {
-	reflection_class_object_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	reflection_class_object_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
