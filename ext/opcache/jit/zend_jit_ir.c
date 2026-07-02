@@ -6141,6 +6141,27 @@ static int zend_jit_long_math(zend_jit_ctx *jit, const zend_op *opline, uint32_t
 	return 1;
 }
 
+/* Inlined ZEND_BW_NOT for the definitely-LONG case. ~x == x ^ -1; using the
+ * inlined XOR path (rather than the ZEND_BW_NOT_SPEC helper) avoids a helper
+ * call whose result slot could alias a spilled loop-carried CV. */
+static int zend_jit_bw_not(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, uint32_t res_info, zend_jit_addr res_addr)
+{
+	ir_ref op1_lval_ref, ref;
+
+	ZEND_ASSERT((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_LONG);
+
+	op1_lval_ref = jit_Z_LVAL(jit, op1_addr);
+	ref = ir_XOR_L(op1_lval_ref, ir_CONST_LONG(-1));
+	jit_set_Z_LVAL(jit, res_addr, ref);
+	if (Z_MODE(res_addr) != IS_REG) {
+		jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
+	}
+	if (!zend_jit_store_var_if_necessary(jit, opline->result.var, res_addr, res_info)) {
+		return 0;
+	}
+	return 1;
+}
+
 static int zend_jit_concat_helper(zend_jit_ctx   *jit,
                                   const zend_op  *opline,
                                   uint8_t         op1_type,
