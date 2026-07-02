@@ -5741,7 +5741,7 @@ ZEND_METHOD(ReflectionProperty, __toString)
 }
 /* }}} */
 
-/* {{{ Returns the class' name */
+/* {{{ Returns the property's name */
 ZEND_METHOD(ReflectionProperty, getName)
 {
 	reflection_object *intern;
