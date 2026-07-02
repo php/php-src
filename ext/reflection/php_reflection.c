@@ -4050,14 +4050,7 @@ ZEND_METHOD(ReflectionClassConstant, isEnumCase)
 
 ZEND_METHOD(ReflectionClassConstant, isDeprecated)
 {
-	reflection_object *intern;
-	zend_constant *ref;
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	GET_REFLECTION_OBJECT_PTR(ref);
-
-	RETURN_BOOL(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_ACC_DEPRECATED);
+	_class_constant_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_DEPRECATED);
 }
 
 /* {{{ reflection_class_object_ctor */
