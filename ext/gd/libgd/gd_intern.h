@@ -29,6 +29,12 @@
 #define CLAMP(x, low, high)                                                    \
 	(((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
+#ifdef _MSC_VER
+#define gd_strcasecmp _stricmp
+#else
+#define gd_strcasecmp strcasecmp
+#endif
+
 typedef enum {
 	HORIZONTAL,
 	VERTICAL,

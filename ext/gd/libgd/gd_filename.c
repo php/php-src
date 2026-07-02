@@ -9,12 +9,7 @@
 #include <string.h>
 
 #include "gd.h"
-
-#ifdef _MSC_VER
-#define gd_strcasecmp _stricmp
-#else
-#define gd_strcasecmp strcasecmp
-#endif
+#include "gd_intern.h"
 
 typedef gdImagePtr(BGD_STDCALL *ReadFn)(FILE *in);
 typedef void(BGD_STDCALL *WriteFn)(gdImagePtr im, FILE *out);
