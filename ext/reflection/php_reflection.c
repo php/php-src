@@ -1128,7 +1128,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module) /
 
 		smart_str_appends(str, "\n  - Dependencies {\n");
 
-		while(dep->name) {
+		while (dep->name) {
 			smart_str_append_printf(str, "    Dependency [ %s (", dep->name);
 
 			switch(dep->type) {
@@ -3751,13 +3751,13 @@ ZEND_METHOD(ReflectionMethod, getDeclaringClass)
 /* {{{ Returns whether a method has a prototype or not */
 ZEND_METHOD(ReflectionMethod, hasPrototype)
 {
-    reflection_object *intern;
-    zend_function *mptr;
+	reflection_object *intern;
+	zend_function *mptr;
 
-    ZEND_PARSE_PARAMETERS_NONE();
+	ZEND_PARSE_PARAMETERS_NONE();
 
-    GET_REFLECTION_OBJECT_PTR(mptr);
-    RETURN_BOOL(mptr->common.prototype != NULL);
+	GET_REFLECTION_OBJECT_PTR(mptr);
+	RETURN_BOOL(mptr->common.prototype != NULL);
 }
 /* }}} */
 
@@ -7099,13 +7099,12 @@ ZEND_METHOD(ReflectionExtension, getDependencies)
 
 	dep = module->deps;
 
-	if (!dep)
-	{
+	if (!dep) {
 		RETURN_EMPTY_ARRAY();
 	}
 
 	array_init(return_value);
-	while(dep->name) {
+	while (dep->name) {
 		zend_string *relation;
 		char *rel_type;
 		size_t len = 0;
@@ -7933,9 +7932,7 @@ static zval *_reflection_write_property(zend_object *object, zend_string *name, 
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Cannot set read-only property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
 		return &EG(uninitialized_zval);
-	}
-	else
-	{
+	} else {
 		return zend_std_write_property(object, name, value, cache_slot);
 	}
 }
