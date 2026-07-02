@@ -4362,15 +4362,22 @@ ZEND_METHOD(ReflectionClass, isUserDefined)
 }
 /* }}} */
 
-/* {{{ Returns whether this class is anonymous */
-ZEND_METHOD(ReflectionClass, isAnonymous)
+/* {{{ _class_check_flag */
+static void _class_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(ce);
-	RETURN_BOOL(ce->ce_flags & ZEND_ACC_ANON_CLASS);
+	RETVAL_BOOL(ce->ce_flags & mask);
+}
+/* }}} */
+
+/* {{{ Returns whether this class is anonymous */
+ZEND_METHOD(ReflectionClass, isAnonymous)
+{
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_ANON_CLASS);
 }
 /* }}} */
 
@@ -4877,18 +4884,6 @@ ZEND_METHOD(ReflectionClass, getReflectionConstant)
 		RETURN_FALSE;
 	}
 	reflection_class_constant_factory(name, constant, return_value);
-}
-/* }}} */
-
-/* {{{ _class_check_flag */
-static void _class_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
-{
-	reflection_object *intern;
-	zend_class_entry *ce;
-
-	ZEND_PARSE_PARAMETERS_NONE();
-	GET_REFLECTION_OBJECT_PTR(ce);
-	RETVAL_BOOL(ce->ce_flags & mask);
 }
 /* }}} */
 
