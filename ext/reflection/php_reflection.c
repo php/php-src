@@ -3735,7 +3735,7 @@ ZEND_METHOD(ReflectionMethod, isDestructor)
 }
 /* }}} */
 
-/* {{{ Returns a bitfield of the access modifiers for this method */
+/* {{{ Returns a bitfield of the modifiers for this method */
 ZEND_METHOD(ReflectionMethod, getModifiers)
 {
 	reflection_object *intern;
@@ -3959,7 +3959,7 @@ ZEND_METHOD(ReflectionClassConstant, isFinal)
 	_class_constant_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_FINAL);
 }
 
-/* {{{ Returns a bitfield of the access modifiers for this constant */
+/* {{{ Returns a bitfield of the modifiers for this constant */
 ZEND_METHOD(ReflectionClassConstant, getModifiers)
 {
 	reflection_object *intern;
@@ -4965,7 +4965,7 @@ ZEND_METHOD(ReflectionClass, isAbstract)
 }
 /* }}} */
 
-/* {{{ Returns a bitfield of the access modifiers for this class */
+/* {{{ Returns a bitfield of the modifiers for this class */
 ZEND_METHOD(ReflectionClass, getModifiers)
 {
 	reflection_object *intern;
@@ -5865,7 +5865,7 @@ ZEND_METHOD(ReflectionProperty, isPromoted)
 }
 /* }}} */
 
-/* {{{ Returns a bitfield of the access modifiers for this property */
+/* {{{ Returns a bitfield of the modifiers for this property */
 ZEND_METHOD(ReflectionProperty, getModifiers)
 {
 	reflection_object *intern;
