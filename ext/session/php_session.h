@@ -179,10 +179,12 @@ typedef struct _php_ps_globals {
 	bool rfc1867_enabled; /* session.upload_progress.enabled */
 	bool rfc1867_cleanup; /* session.upload_progress.cleanup */
 
-	bool mod_user_implemented;
-	bool mod_user_is_open;
-	bool mod_user_uses_object_methods_as_handlers;
-	bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
+	bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
+	bool lazy_write; /* omit session write when it is possible */
+	bool in_save_handler; /* state if session is in save handler or not */
+	bool set_handler;     /* state if session module i setting handler or not */
+	bool random_seeded;
+	zend_string *session_vars; /* serialized original session data */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;

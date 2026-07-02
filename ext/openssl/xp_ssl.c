@@ -2874,7 +2874,11 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 
 	/* Only do this if SSL is active. */
 	if (sslsock->ssl_active) {
-		int retry = 1;
+		/* We have already returned some buffered data. Don't retry and don't
+		 * block. We're just trying to fill the buffer more, but the stream might
+		 * be empty, so we don't want to wait in vain. */
+		bool supplemental = stream->has_buffered_data;
+		int retry = !supplemental;
 		struct timeval start_time;
 		struct timeval *timeout = NULL;
 		bool began_blocked = sslsock->s.is_blocked;
@@ -2887,11 +2891,11 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 		}
 
 		/* never use a timeout with non-blocking sockets */
-		if (began_blocked) {
+		if (began_blocked && !supplemental) {
 			timeout = &sslsock->s.timeout;
 		}
 
-		if (timeout) {
+		if (timeout || supplemental) {
 			php_openssl_set_blocking(sslsock, 0);
 		}
 
@@ -2966,7 +2970,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 				}
 
 				/* Don't loop indefinitely in non-blocking mode if no data is available */
-				if (began_blocked == 0) {
+				if (began_blocked == 0 || supplemental) {
 					break;
 				}
 

@@ -3,20 +3,206 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.6.0alpha1
 
 - Core:
-  . Added first-class callable cache to share instances for the duration of the
-    request. (ilutov)
-  . It is now possible to use reference assign on WeakMap without the key
-    needing to be present beforehand. (ndossche)
-  . Added `clamp()`. (kylekatarnls, thinkverse)
-  . Fix OSS-Fuzz #429429090 (Failed assertion on unset() with uninitialized
-    container). (ilutov)
-  . Fixed GH-20564 (Don't call autoloaders with pending exception). (ilutov)
-  . Fix deprecation now showing when accessing null key of an array with JIT.
-    (alexandre-daubois)
-  . Fixed bug GH-20174 (Assertion failure in
-    ReflectionProperty::skipLazyInitialization after failed LazyProxy
-    initialization). (Arnaud)
-  . Enabled the TAILCALL VM on Windows when compiling with Clang >= 19 x86_64.
+  . Fixed bug GH-22290 (AST pretty printing does not correctly handle strings
+    containing NUL). (iliaal)
+  . Fixed bug GH-22206 (missing return in global register detection).
+    (P3p111n0)
+
+- DBA:
+  . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
+
+- Exif:
+  . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
+    warning when an IFD is not followed by a next-IFD offset). (Eyüp Can Akman)
+
+- Hash:
+  . Fixed bug GH-18173 (ext/hash relies on implementation-defined malloc
+    alignment). (iliaal)
+
+- Opcache:
+  . Fixed bug GH-22158 (Tracing JIT dispatches the observer begin handler
+    through the wrong run_time_cache slot on megamorphic calls). (ptondereau,
+    iliaal)
+  . Fixed bug GH-22443 (Tracing JIT SIGSEGV on megamorphic dynamic calls from
+    an undereferenced run_time_cache map_ptr offset). (iliaal)
+  . Fixed bug GH-21770 (Infinite recursion in property hook getter in opcache
+    preloaded trait). (iliaal)
+
+- OpenSSL:
+  . Fixed timeout for supplemental read at end of a blocking stream in SSL
+    stream wrapper. (ilutov)
+
+- Intl:
+  . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
+    fallback locale when a language tag cannot be canonicalized. (Weilin Du)
+  . Fixed memory leaks when calling Collator::__construct() or
+    Spoofchecker::__construct() twice. (Weilin Du)
+  . Fixed memory leak when calling IntlListFormatter::__construct() twice.
+    (Weilin Du)
+  . Fixed IntlChar methods leaving stale global error state after successful
+    calls. (Xuyang Zhang)
+
+- PDO_ODBC:
+  . Fixed bug GH-20726 (Crash with ODBC connection pooling when the DSN
+    carries no credentials). (iliaal)
+
+- Phar:
+  . Fixed inconsistent handling of the magic ".phar" directory. Paths such as
+    "/.phar" remain protected, while non-magic paths that merely start with
+    ".phar" are handled consistently across file and directory creation,
+    copying, ArrayAccess, stream lookup, directory iteration and extraction.
+    (Weilin Du)
+
+- PHPDBG:
+  . Fixed bug GH-17387 (Trivial crash in phpdbg lexer). (iliaal)
+
+- Reflection:
+  . Fixed bug GH-22324 (Ignore leading namespace separator in
+    ReflectionParameter::__construct()). (jorgsowa)
+  . Fixed bug GH-22441 (ReflectionClass::hasProperty() and getProperty() ignore
+    dynamic properties shadowing a private parent property). (iliaal)
+
+- Session:
+  . Fixed bug GH-21314 (Different session garbage collector behavior between
+    PHP 8.3 and PHP 8.5). (jorgsowa)
+
+- SPL:
+  . Fix	class_parents for classes with leading slash in non-autoload mode.                                                                     
+    (jorgsowa)
+  . Ignore leading back-slash in class_parents(), class_implements(), and
+    class_uses(). (jorgsowa)
+  . Fixed bug GH-16217 (SplFileObject::fputcsv() on an uninitialized object
+    segfaults). (iliaal)
+
+- Standard:
+  . Fixed bug GH-22395 (base_convert() outputs at most 64 characters).
+    (Weilin Du)
+
+- URI:
+  . Fixed behavior of Uri\WhatWg\Url wither methods with regards to empty
+    opaque hosts. (kocsismate)
+
+02 Jul 2026, PHP 8.5.8
+
+- Core:
+  . Fixed bug GH-22280 (Incorrect compile error for goto to label preceding
+    try/finally block). (Pratik Bhujel)
+  . Fixed bug GH-22112 (Assertion when error handler throws during NaN to
+    bool/string coercion). (iliaal)
+
+- BCMath:
+  . Fixed issues with oversized allocations and signed overflow in bcround()
+    and BcMath\Number::round(). (edorian)
+
+- Date:
+  . Fix incorrect recurrence check of DatePeriod::createFromISO8601String().
+    (ndossche)
+
+- Exif:
+  . Read correct value for single and double tags. (ndossche)
+
+- GD:
+  . Fixed bug GH-22121 (Double free in gdImageSetStyle() after
+    overflow-triggered early return). (iliaal)
+
+- Intl:
+  . Fix incorrect argument positions for invalid start/end arguments in
+    transliterator_transliterate().
+    (Weilin Du)
+  . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
+    for invalid display types. (Weilin Du)
+
+- Lexbor:
+  . Merge patch c3a6847. (ilutov, timwolla)
+
+- Opcache:
+  . Fixed bug GH-22265 (Another tailcall vm_interrupt bug). (Levi Morrison)
+  . Fixed bug GH-20469 (Unsafe inheritance cache replay with reentrant
+    autoloading). (Levi Morrison)
+  . Fixed bug GH-21972 (Corrupted variable type when a typed by-value return
+    contains a reference wrapper). (Weilin Du)
+
+- Phar:
+  . Fixed a bypass of the magic ".phar" directory protection in
+    Phar::addEmptyDir() for paths starting with "/.phar", while allowing
+    non-magic directory names that merely share the ".phar" prefix. (Weilin Du)
+  . Fixed an integer underflow when parsing ZIP extra fields. (Weilin Du)
+
+- Reflection:
+  . Preserve class-name case in ReflectionClass::getProperty() error messages
+    and autoloading. (jorgsowa)
+
+- SOAP:
+  . Fixed bug GH-22218 (SoapServer::handle() crash on $_SERVER not being
+    an array). (David Carlier / Rex-Reynolds)
+  . Fixed bug GH-22285 (Soap server requires the raw input to be passed
+    to $server->handle). (David Carlier / ndossche)
+
+- Sqlite:
+  . Fix error checks for column retrieval. (ndossche)
+
+- URI:
+  . Add LEXBOR_STATIC to CFLAGS_URI on Windows so ext/uri does not see
+    LXB_API as __declspec(dllimport) when linked statically into PHP.
+    (Luther Monson)
+  . Clean error logs before each Uri\WhatWg\Url wither call so that errors from
+    previous wither calls are not returned the next time a UrlValidationError
+    is thrown. (kocsismate)
+
+- Zip:
+  . Fixed error-related memory leaks. (ndossche)
+
+- Zlib:
+  . Fixed memory leak if deflate initialization fails and there is a dict.
+    (ndossche)
+  . Fixed memory leak in inflate_add(). (ndossche)
+
+02 Jun 2026, PHP 8.5.7
+
+- CLI:
+  . Fixed bug GH-21901 (Stale getopt() optional value). (onthebed)
+
+- Core:
+  . Fixed bug GH-22071 (JIT assertion on abstract static method call).
+    (David Carlier)
+
+- Date:
+  . Fixed bug GH-18422 (int overflow in php_date_llabs). (iliaal)
+
+- DOM:
+  . Fixed bug GH-22077 (UAF in custom XPath function).
+    (afflerbach/David Carlier)
+
+- Opcache:
+  . Fixed tracing JIT crash when a VM interrupt is handled during an observed
+    user function call. (Levi Morrison)
+  . Fixed bug GH-21746 (Segfault with tracing JIT). (Arnaud)
+  . Fixed bug GH-22004 (Assertion failure at ext/opcache/jit/zend_jit_trace.c).
+    (Arnaud)
+  . Fixed tailcall VM crash when a VM interrupt is handled from a VM helper.
+    (Levi Morrison, Arnaud)
+
+- OpenSSL:
+  . Fix compatibility issues with OpenSSL 4.0. (jordikroon, Remi)
+
+- Standard:
+  . Fixed bug GH-21689 (version_compare() incorrectly handles versions ending
+    with a dot). (timwolla)
+
+- URI:
+  . Fixed CVE-2026-44927 (In uriparser before 1.0.2, there is pointer
+    difference truncation to int in various places). (CVE-2026-44927)
+    (Sebastian Pipping)
+  . Fixed CVE-2026-44928 (In uriparser before 1.0.2, the function family
+    EqualsUri can misclassify two unequal URIs as equal). (CVE-2026-44928)
+    (Sebastian Pipping)
+
+07 May 2026, PHP 8.5.6
+
+- Core:
+  . Fixed bug GH-19983 (GC assertion failure with fibers, generators and
+    destructors). (iliaal)
+  . Fixed ZEND_API mismatch on zend_ce_closure forward decl for Windows+Clang.
     (henderkes)
   . Deprecate specifying a nullable return type for __debugInfo(). (timwolla)
   . Fixed bug GH-22142 (Assertion failure in zendi_try_get_long() on IS_UNDEF).

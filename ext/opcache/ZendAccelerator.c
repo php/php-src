@@ -4379,6 +4379,7 @@ static void preload_fix_trait_op_array(zend_op_array *op_array)
 	uint32_t fn_flags2 = op_array->fn_flags2;
 	zend_function *prototype = op_array->prototype;
 	HashTable *ht = op_array->static_variables;
+	const zend_property_info *prop_info = op_array->prop_info;
 	*op_array = *orig_op_array;
 	op_array->function_name = function_name;
 	op_array->scope = scope;
@@ -4386,6 +4387,7 @@ static void preload_fix_trait_op_array(zend_op_array *op_array)
 	op_array->fn_flags2 = fn_flags2;
 	op_array->prototype = prototype;
 	op_array->static_variables = ht;
+	op_array->prop_info = prop_info;
 }
 
 static void preload_fix_trait_methods(const zend_class_entry *ce)
