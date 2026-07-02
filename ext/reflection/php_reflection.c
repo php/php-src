@@ -6392,7 +6392,7 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 }
 /* }}} */
 
-/* {{{ Sets whether non-public properties can be requested */
+/* {{{ No-op; previously controlled whether non-public properties can be requested */
 ZEND_METHOD(ReflectionProperty, setAccessible)
 {
 	bool visible;
