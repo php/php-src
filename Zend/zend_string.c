@@ -53,7 +53,7 @@ ZEND_API zend_string  *zend_one_char_string[256];
 ZEND_API zend_string **zend_known_strings = NULL;
 
 /* this is read-only, so it's ok */
-ZEND_SET_ALIGNED(16, static const char zend_hexconvtab_lower[]) = "0123456789abcdef";
+ZEND_SET_ALIGNED(16, static const char zend_hexconvtab[]) = "0123456789abcdef";
 
 static zend_always_inline void zend_bin2hex_impl(char *out, const unsigned char *in, size_t in_len, const char *hexconvtab)
 {
@@ -75,7 +75,7 @@ ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len)
 
 ZEND_API void ZEND_FASTCALL zend_bin2hex(char *out, const unsigned char *in, size_t in_len)
 {
-	zend_bin2hex_impl(out, in, in_len, zend_hexconvtab_lower);
+	zend_bin2hex_impl(out, in, in_len, zend_hexconvtab);
 }
 
 ZEND_API zend_string *zend_bin2hex_str(const unsigned char *in, size_t in_len)
