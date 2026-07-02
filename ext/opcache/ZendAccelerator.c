@@ -3847,9 +3847,7 @@ static zend_result preload_resolve_deps(preload_error *error, const zend_class_e
 	memset(error, 0, sizeof(preload_error));
 
 	if (ce->parent_name) {
-		zend_string *key = zend_string_tolower(ce->parent_name);
-		const zend_class_entry *parent = zend_hash_find_ptr(EG(class_table), key);
-		zend_string_release(key);
+		const zend_class_entry *parent = zend_hash_find_ptr_lc(EG(class_table), ce->parent_name);
 		if (!parent) {
 			error->kind = "Unknown parent ";
 			error->name = ZSTR_VAL(ce->parent_name);
