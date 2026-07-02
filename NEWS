@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0alpha2
 
+- Phar:
+  . Fixed bug GH-22556 (OOM DoS via oversized ././@LongLink entry in TAR phar).
+    (crystarm)
+
 - DBA:
   . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
 
