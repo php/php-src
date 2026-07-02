@@ -966,13 +966,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function *f
 	}
 
 	if (ops->function_name) {
-		phpdbg_breakbase_t *brake;
-		zend_string *fname = zend_string_tolower(ops->function_name);
-
-		brake = zend_hash_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], fname);
-
-		zend_string_release(fname);
-		return brake;
+		return zend_hash_find_ptr_lc(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], ops->function_name);
 	} else {
 		return zend_hash_str_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], ZEND_STRL("main"));
 	}
@@ -982,17 +976,11 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array *o
 {
 	HashTable *class_table;
 	phpdbg_breakbase_t *brake = NULL;
-	zend_string *class_lcname = zend_string_tolower(ops->scope->name);
 
-	if ((class_table = zend_hash_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], class_lcname))) {
-		zend_string *lcname = zend_string_tolower(ops->function_name);
-
-		brake = zend_hash_find_ptr(class_table, lcname);
-
-		zend_string_release(lcname);
+	if ((class_table = zend_hash_find_ptr_lc(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], ops->scope->name))) {
+		brake = zend_hash_find_ptr_lc(class_table, ops->function_name);
 	}
 
-	zend_string_release(class_lcname);
 	return brake;
 } /* }}} */
 

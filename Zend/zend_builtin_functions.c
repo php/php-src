@@ -953,7 +953,6 @@ ZEND_FUNCTION(method_exists)
 {
 	zval *klass;
 	zend_string *method_name;
-	zend_string *lcname;
 	zend_class_entry *ce;
 	zend_function *func;
 
@@ -974,9 +973,7 @@ ZEND_FUNCTION(method_exists)
 		RETURN_THROWS();
 	}
 
-	lcname = zend_string_tolower(method_name);
-	func = zend_hash_find_ptr(&ce->function_table, lcname);
-	zend_string_release_ex(lcname, 0);
+	func = zend_hash_find_ptr_lc(&ce->function_table, method_name);
 
 	if (func) {
 		/* Exclude shadow properties when checking a method on a specific class. Include
@@ -2219,7 +2216,6 @@ ZEND_FUNCTION(extension_loaded)
 ZEND_FUNCTION(get_extension_funcs)
 {
 	zend_string *extension_name;
-	zend_string *lcname;
 	bool array;
 	zend_module_entry *module;
 	zend_function *zif;
@@ -2228,9 +2224,7 @@ ZEND_FUNCTION(get_extension_funcs)
 		RETURN_THROWS();
 	}
 	if (strncasecmp(ZSTR_VAL(extension_name), "zend", sizeof("zend"))) {
-		lcname = zend_string_tolower(extension_name);
-		module = zend_hash_find_ptr(&module_registry, lcname);
-		zend_string_release_ex(lcname, 0);
+		module = zend_hash_find_ptr_lc(&module_registry, extension_name);
 	} else {
 		module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core") - 1);
 	}

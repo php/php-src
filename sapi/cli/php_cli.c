@@ -1093,10 +1093,9 @@ do_repeat:
 		case PHP_CLI_MODE_REFLECTION_EXT_INFO:
 			{
 				size_t len = strlen(reflection_what);
-				char *lcname = zend_str_tolower_dup(reflection_what, len);
 				zend_module_entry *module;
 
-				if ((module = zend_hash_str_find_ptr(&module_registry, lcname, len)) == NULL) {
+				if ((module = zend_hash_str_find_ptr_lc(&module_registry, reflection_what, len)) == NULL) {
 					if (!strcmp(reflection_what, "main")) {
 						display_ini_entries(NULL);
 					} else {
@@ -1107,7 +1106,6 @@ do_repeat:
 					php_info_print_module(module);
 				}
 
-				efree(lcname);
 				break;
 			}
 
