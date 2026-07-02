@@ -4772,8 +4772,13 @@ ZEND_METHOD(ReflectionClass, getConstants)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
+	const HashTable *constants_table = CE_CONSTANTS_TABLE(ce);
+	if (zend_hash_num_elements(constants_table) == 0) {
+		RETURN_EMPTY_ARRAY();
+	}
+
 	array_init(return_value);
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(CE_CONSTANTS_TABLE(ce), key, constant) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(constants_table, key, constant) {
 		if (UNEXPECTED(Z_TYPE(constant->value) == IS_CONSTANT_AST && zend_update_class_constant(constant, key, constant->ce) != SUCCESS)) {
 			RETURN_THROWS();
 		}
@@ -4806,8 +4811,13 @@ ZEND_METHOD(ReflectionClass, getReflectionConstants)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
+	const HashTable *constants_table = CE_CONSTANTS_TABLE(ce);
+	if (zend_hash_num_elements(constants_table) == 0) {
+		RETURN_EMPTY_ARRAY();
+	}
+
 	array_init(return_value);
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(CE_CONSTANTS_TABLE(ce), name, constant) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(constants_table, name, constant) {
 		if (ZEND_CLASS_CONST_FLAGS(constant) & filter) {
 			zval class_const;
 			reflection_class_constant_factory(name, constant, &class_const);
