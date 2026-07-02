@@ -3074,11 +3074,10 @@ ZEND_METHOD(ReflectionType, allowsNull)
 /* For BC with iterable for named types */
 static zend_string *zend_named_reflection_type_to_string(zend_type type) {
 	if (ZEND_TYPE_IS_ITERABLE_FALLBACK(type)) {
-		zend_string *iterable = ZSTR_KNOWN(ZEND_STR_ITERABLE);
 		if (ZEND_TYPE_FULL_MASK(type) & MAY_BE_NULL) {
-			return zend_string_concat2("?", strlen("?"), ZSTR_VAL(iterable), ZSTR_LEN(iterable));
+			return ZSTR_INIT_LITERAL("?iterable", false);
 		}
-		return iterable;
+		return ZSTR_KNOWN(ZEND_STR_ITERABLE);
 	}
 	return zend_type_to_string(type);
 }
