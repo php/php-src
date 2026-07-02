@@ -81,6 +81,8 @@ PHP                                                                        NEWS
     PDOStatement::setFetchMode). (SakiTakamachi)
 
 - Phar:
+  . Fixed bug GH-22556 (OOM DoS via oversized ././@LongLink entry in TAR phar).
+    (crystarm)
   . Fixed bug GH-23418 (Use-after-free when looking up mounted directories).
     (Weilin Du)
   . Fixed bug GH-23477 (Memory leak on duplicate native Phar manifest entries).
