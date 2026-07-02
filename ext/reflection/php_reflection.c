@@ -7504,6 +7504,10 @@ ZEND_METHOD(ReflectionAttribute, getArguments)
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(attr);
 
+	if (attr->data->argc == 0) {
+		RETURN_EMPTY_ARRAY();
+	}
+
 	array_init(return_value);
 
 	for (i = 0; i < attr->data->argc; i++) {
