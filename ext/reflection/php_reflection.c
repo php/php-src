@@ -3058,7 +3058,7 @@ ZEND_METHOD(ReflectionParameter, isPromoted)
 }
 /* }}} */
 
-/* {{{ Returns whether parameter MAY be null */
+/* {{{ Returns whether the type MAY be null */
 ZEND_METHOD(ReflectionType, allowsNull)
 {
 	reflection_object *intern;
