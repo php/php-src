@@ -63,6 +63,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22395 (base_convert() outputs at most 64 characters).
     (Weilin Du)
 
+- Zip:
+  . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
+    is freed while the stream is still open). (Eyüp Can Akman)
+
 02 Jul 2026, PHP 8.4.23
 
 - Core:

@@ -34,6 +34,7 @@ struct php_zip_stream_data_t {
 	struct zip_file *zf;
 	size_t cursor;
 	php_stream *stream;
+	ze_zip_object *owner;
 };
 
 #define STREAM_DATA_FROM_STREAM() \
@@ -100,6 +101,12 @@ static int php_zip_ops_close(php_stream *stream, int close_handle)
 			zip_close(self->za);
 			self->za = NULL;
 		}
+	}
+
+	/* the pinned object ref is tied to self, so release it regardless of close_handle */
+	if (self->owner) {
+		OBJ_RELEASE(&self->owner->zo);
+		self->owner = NULL;
 	}
 	efree(self);
 	stream->abstract = NULL;
@@ -234,8 +241,9 @@ const php_stream_ops php_stream_zipio_ops = {
 };
 
 /* {{{ php_stream_zip_open */
-php_stream *php_stream_zip_open(struct zip *arch, struct zip_stat *sb, const char *mode, zip_flags_t flags STREAMS_DC)
+php_stream *php_stream_zip_open(ze_zip_object *obj, struct zip_stat *sb, const char *mode, zip_flags_t flags STREAMS_DC)
 {
+	struct zip *arch = obj->za;
 	struct zip_file *zf = NULL;
 
 	php_stream *stream = NULL;
@@ -254,6 +262,9 @@ php_stream *php_stream_zip_open(struct zip *arch, struct zip_stat *sb, const cha
 			self->zf = zf;
 			self->stream = NULL;
 			self->cursor = 0;
+			/* keep the archive object alive while the stream borrows its zip_t */
+			self->owner = obj;
+			GC_ADDREF(&obj->zo);
 #if LIBZIP_ATLEAST(1,9,1)
 			if (zip_file_is_seekable(zf) > 0) {
 				stream = php_stream_alloc(&php_stream_zipio_seek_ops, self, NULL, mode);
@@ -339,6 +350,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 			self->zf = zf;
 			self->stream = NULL;
 			self->cursor = 0;
+			self->owner = NULL;
 #if LIBZIP_ATLEAST(1,9,1)
 			if (zip_file_is_seekable(zf) > 0) {
 				stream = php_stream_alloc(&php_stream_zipio_seek_ops, self, NULL, mode);
