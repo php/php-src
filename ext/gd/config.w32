@@ -3,7 +3,7 @@
 ARG_WITH("gd", "Bundled GD support", "yes,shared");
 ARG_WITH("libwebp", "webp support", "yes");
 ARG_WITH("libavif", "avif support", "yes");
-ARG_WITH("heif", "HEIF support", "yes");
+ARG_WITH("heif", "HEIF support", "no");
 ARG_WITH("uhdr", "UltraHDR support", "yes");
 ARG_WITH("imagequant", "libimagequant support", "no");
 ARG_WITH("tiff", "TIFF support", "no");
