@@ -4045,12 +4045,7 @@ ZEND_METHOD(ReflectionClassConstant, getAttributes)
 
 ZEND_METHOD(ReflectionClassConstant, isEnumCase)
 {
-	reflection_object *intern;
-	zend_class_constant *ref;
-
-	GET_REFLECTION_OBJECT_PTR(ref);
-
-	RETURN_BOOL(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_CLASS_CONST_IS_CASE);
+	_class_constant_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_CLASS_CONST_IS_CASE);
 }
 
 ZEND_METHOD(ReflectionClassConstant, isDeprecated)
