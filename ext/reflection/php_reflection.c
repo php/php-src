@@ -1847,7 +1847,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureCalledClass)
 		if (Z_OBJ_HANDLER(intern->obj, get_closure)
 		 && Z_OBJ_HANDLER(intern->obj, get_closure)(Z_OBJ(intern->obj), &called_scope, &closure_func, &object, true) == SUCCESS
 		 && closure_func && (called_scope || closure_func->common.scope)) {
-			zend_reflection_class_factory(called_scope ? (zend_class_entry *) called_scope : closure_func->common.scope, return_value);
+			zend_reflection_class_factory(called_scope ? called_scope : closure_func->common.scope, return_value);
 		}
 	}
 }
