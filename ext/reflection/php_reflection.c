@@ -3699,7 +3699,7 @@ ZEND_METHOD(ReflectionMethod, isConstructor)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(mptr);
-	/* we need to check if the ctor is the ctor of the class level we we
+	/* we need to check if the ctor is the ctor of the class level we are
 	 * looking at since we might be looking at an inherited old style ctor
 	 * defined in base class. */
 	RETURN_BOOL((mptr->common.fn_flags & ZEND_ACC_CTOR) && intern->ce->constructor && intern->ce->constructor->common.scope == mptr->common.scope);
