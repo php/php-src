@@ -6426,7 +6426,7 @@ ZEND_METHOD(ReflectionProperty, getSettableType)
 
 	const zend_property_info *prop = ref->prop;
 	/* Dynamic property is untyped. */
-	if (!ref->prop) {
+	if (!prop) {
 		RETURN_NULL();
 	}
 
@@ -6448,10 +6448,10 @@ ZEND_METHOD(ReflectionProperty, getSettableType)
 	}
 
 	/* Fall back to property type */
-	if (!ZEND_TYPE_IS_SET(ref->prop->type)) {
+	if (!ZEND_TYPE_IS_SET(prop->type)) {
 		RETURN_NULL();
 	}
-	reflection_type_factory(ref->prop->type, return_value, true);
+	reflection_type_factory(prop->type, return_value, true);
 }
 
 /* {{{ Returns whether property has a type */
