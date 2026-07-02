@@ -300,7 +300,7 @@ static void _property_string(smart_str *str, const zend_property_info *prop, con
 static void _class_const_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char* indent);
 static void _enum_case_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char* indent);
 static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent);
-static void _extension_string(smart_str *str, const zend_module_entry *module, const char *indent);
+static void _extension_string(smart_str *str, const zend_module_entry *module);
 static void _zend_extension_string(smart_str *str, const zend_extension *extension, const char *indent);
 
 /* {{{ _class_string */
@@ -1110,9 +1110,9 @@ static void _extension_class_string(zend_class_entry *ce, zend_string *key, smar
 }
 /* }}} */
 
-static void _extension_string(smart_str *str, const zend_module_entry *module, const char *indent) /* {{{ */
+static void _extension_string(smart_str *str, const zend_module_entry *module) /* {{{ */
 {
-	smart_str_append_printf(str, "%sExtension [ ", indent);
+	smart_str_appends(str, "Extension [ ");
 	if (module->type == MODULE_PERSISTENT) {
 		smart_str_appends(str, "<persistent>");
 	}
@@ -1129,7 +1129,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module, c
 		smart_str_appends(str, "\n  - Dependencies {\n");
 
 		while(dep->name) {
-			smart_str_append_printf(str, "%s    Dependency [ %s (", indent, dep->name);
+			smart_str_append_printf(str, "    Dependency [ %s (", dep->name);
 
 			switch(dep->type) {
 			case MODULE_DEP_REQUIRED:
@@ -1155,19 +1155,19 @@ static void _extension_string(smart_str *str, const zend_module_entry *module, c
 			smart_str_appends(str, ") ]\n");
 			dep++;
 		}
-		smart_str_append_printf(str, "%s  }\n", indent);
+		smart_str_appends(str, "  }\n");
 	}
 
 	{
 		smart_str str_ini = {0};
 		zend_ini_entry *ini_entry;
 		ZEND_HASH_MAP_FOREACH_PTR(EG(ini_directives), ini_entry) {
-			_extension_ini_string(ini_entry, &str_ini, indent, module->module_number);
+			_extension_ini_string(ini_entry, &str_ini, "", module->module_number);
 		} ZEND_HASH_FOREACH_END();
 		if (smart_str_get_len(&str_ini) > 0) {
 			smart_str_appends(str, "\n  - INI {\n");
 			smart_str_append_smart_str(str, &str_ini);
-			smart_str_append_printf(str, "%s  }\n", indent);
+			smart_str_appends(str, "  }\n");
 		}
 		smart_str_free(&str_ini);
 	}
@@ -1187,7 +1187,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module, c
 		if (num_constants) {
 			smart_str_append_printf(str, "\n  - Constants [%d] {\n", num_constants);
 			smart_str_append_smart_str(str, &str_constants);
-			smart_str_append_printf(str, "%s  }\n", indent);
+			smart_str_appends(str, "  }\n");
 		}
 		smart_str_free(&str_constants);
 	}
@@ -1207,30 +1207,28 @@ static void _extension_string(smart_str *str, const zend_module_entry *module, c
 			}
 		} ZEND_HASH_FOREACH_END();
 		if (!first) {
-			smart_str_append_printf(str, "%s  }\n", indent);
+			smart_str_appends(str, "  }\n");
 		}
 	}
 
 	{
-		zend_string *sub_indent = strpprintf(0, "%s    ", indent);
 		smart_str str_classes = {0};
 		zend_string *key;
 		zend_class_entry *ce;
 		int num_classes = 0;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
-			_extension_class_string(ce, key, &str_classes, ZSTR_VAL(sub_indent), module, &num_classes);
+			_extension_class_string(ce, key, &str_classes, "    ", module, &num_classes);
 		} ZEND_HASH_FOREACH_END();
 		if (num_classes) {
 			smart_str_append_printf(str, "\n  - Classes [%d] {", num_classes);
 			smart_str_append_smart_str(str, &str_classes);
-			smart_str_append_printf(str, "%s  }\n", indent);
+			smart_str_appends(str, "  }\n");
 		}
 		smart_str_free(&str_classes);
-		zend_string_release_ex(sub_indent, false);
 	}
 
-	smart_str_append_printf(str, "%s}\n", indent);
+	smart_str_appends(str, "}\n");
 }
 /* }}} */
 
@@ -6921,7 +6919,7 @@ ZEND_METHOD(ReflectionExtension, __toString)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(module);
-	_extension_string(&str, module, "");
+	_extension_string(&str, module);
 	RETURN_STR(smart_str_extract(&str));
 }
 /* }}} */
