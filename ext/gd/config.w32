@@ -3,6 +3,10 @@
 ARG_WITH("gd", "Bundled GD support", "yes,shared");
 ARG_WITH("libwebp", "webp support", "yes");
 ARG_WITH("libavif", "avif support", "yes");
+ARG_WITH("heif", "HEIF support", "yes");
+ARG_WITH("uhdr", "UltraHDR support", "yes");
+ARG_WITH("imagequant", "libimagequant support", "no");
+ARG_WITH("tiff", "TIFF support", "no");
 
 if (PHP_GD != "no") {
 	if (
@@ -67,7 +71,7 @@ if (PHP_GD != "no") {
 		// requires UHDR_WRITE_XMP=Off, for the windows build team, when adding/updating libuhdr
 		if (PHP_UHDR != "no") {
 			if (CHECK_LIB("uhdr.lib", "gd", PHP_GD) &&
-				CHECK_HEADER("ultrahdr_api.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\ultrahdr")) {
+				CHECK_HEADER("ultrahdr_api.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include")) {
 				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBUHDR /D HAVE_GD_UHDR");
 			} else {
 				WARNING("libuhdr not enabled; library and headers not found");
