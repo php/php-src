@@ -591,9 +591,9 @@ static bool php_openssl_matches_common_name(php_stream *stream, const X509 *peer
 		return false;
 	}
 	name_asn1 = X509_NAME_ENTRY_get_data(name_entry);
-	cert_name_len = ASN1_STRING_to_UTF8(&cert_name, name_asn1);
-	if (cert_name_len < 0) {
-		php_openssl_store_errors();
+	cert_name_len = ASN1_STRING_length(name_asn1);
+	cert_name = (unsigned char *) OPENSSL_strndup((const char *) ASN1_STRING_get0_data(name_asn1), cert_name_len);
+	if (cert_name == NULL) {
 		php_stream_warn(stream, NetworkRecvFailed, "Unable to locate peer certificate CN");
 		return false;
 	}
