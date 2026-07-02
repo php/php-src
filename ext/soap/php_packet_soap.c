@@ -261,7 +261,7 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 				master_to_zval_with_doc_cleanup(&details, NULL, tmp, response);
 			}
 		}
-		add_soap_fault(this_ptr, faultcode, faultstring ? ZSTR_VAL(faultstring) : NULL, faultactor ? ZSTR_VAL(faultactor) : NULL, &details, lang);
+		add_soap_fault(this_ptr, faultcode, faultstring ? ZSTR_VAL(faultstring) : NULL, faultactor, &details, lang);
 		if (faultstring) {
 			zend_string_release_ex(faultstring, 0);
 		}
