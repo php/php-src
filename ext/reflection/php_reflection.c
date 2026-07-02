@@ -301,7 +301,7 @@ static void _class_const_string(smart_str *str, const zend_string *name, zend_cl
 static void _enum_case_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char* indent);
 static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent);
 static void _extension_string(smart_str *str, const zend_module_entry *module);
-static void _zend_extension_string(smart_str *str, const zend_extension *extension, const char *indent);
+static void _zend_extension_string(smart_str *str, const zend_extension *extension);
 
 /* {{{ _class_string */
 static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent)
@@ -1347,9 +1347,9 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 }
 /* }}} */
 
-static void _zend_extension_string(smart_str *str, const zend_extension *extension, const char *indent) /* {{{ */
+static void _zend_extension_string(smart_str *str, const zend_extension *extension) /* {{{ */
 {
-	smart_str_append_printf(str, "%sZend Extension [ %s ", indent, extension->name);
+	smart_str_append_printf(str, "Zend Extension [ %s ", extension->name);
 
 	if (extension->version) {
 		smart_str_append_printf(str, "%s ", extension->version);
@@ -7230,7 +7230,7 @@ ZEND_METHOD(ReflectionZendExtension, __toString)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(extension);
-	_zend_extension_string(&str, extension, "");
+	_zend_extension_string(&str, extension);
 	RETURN_STR(smart_str_extract(&str));
 }
 /* }}} */
