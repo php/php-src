@@ -3080,11 +3080,6 @@ static zend_string *zend_named_reflection_type_to_string(zend_type type) {
 	return zend_type_to_string(type);
 }
 
-static zend_string *zend_type_to_string_without_null(zend_type type) {
-	ZEND_TYPE_FULL_MASK(type) &= ~MAY_BE_NULL;
-	return zend_named_reflection_type_to_string(type);
-}
-
 /* {{{ Return the text of the type hint */
 ZEND_METHOD(ReflectionType, __toString)
 {
@@ -3107,10 +3102,12 @@ ZEND_METHOD(ReflectionNamedType, getName)
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(param);
 
+	// Make a copy so that we don't modify the stored type information
+	zend_type type = param->type;
 	if (param->legacy_behavior) {
-		RETURN_STR(zend_type_to_string_without_null(param->type));
+		ZEND_TYPE_FULL_MASK(type) &= ~MAY_BE_NULL;
 	}
-	RETURN_STR(zend_named_reflection_type_to_string(param->type));
+	RETURN_STR(zend_named_reflection_type_to_string(type));
 }
 /* }}} */
 
