@@ -1408,19 +1408,6 @@ static void reflection_extension_factory_ex(zval *object, zend_module_entry *mod
 }
 /* }}} */
 
-/* {{{ reflection_extension_factory */
-static void reflection_extension_factory(zval *object, const char *name_str)
-{
-	size_t name_len = strlen(name_str);
-	struct _zend_module_entry *module = zend_hash_str_find_ptr_lc(&module_registry, name_str, name_len);
-	if (!module) {
-		return;
-	}
-
-	reflection_extension_factory_ex(object, module);
-}
-/* }}} */
-
 /* {{{ reflection_parameter_factory */
 static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, uint32_t offset, bool required, zval *object)
 {
@@ -2259,7 +2246,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getExtension)
 
 	internal = (zend_internal_function *)fptr;
 	if (internal->module) {
-		reflection_extension_factory(return_value, internal->module->name);
+		reflection_extension_factory_ex(return_value, internal->module);
 	} else {
 		RETURN_NULL();
 	}
@@ -5580,7 +5567,7 @@ ZEND_METHOD(ReflectionClass, getExtension)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if ((ce->type == ZEND_INTERNAL_CLASS) && ce->info.internal.module) {
-		reflection_extension_factory(return_value, ce->info.internal.module->name);
+		reflection_extension_factory_ex(return_value, ce->info.internal.module);
 	}
 }
 /* }}} */
