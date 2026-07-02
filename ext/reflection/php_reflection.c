@@ -4159,7 +4159,17 @@ ZEND_METHOD(ReflectionClass, getStaticProperties)
 		RETURN_THROWS();
 	}
 
-	if (ce->default_static_members_count && !CE_STATIC_MEMBERS(ce)) {
+	// default_static_members_count includes inherited static members, see
+	// zend_do_inheritance_ex().
+	// PHP does not support *dynamic* static properties the same way non-static
+	// properties can be dynamic (i.e. present on an object without having been
+	// declared on the class). Thus, default_static_members_count will always
+	// reflect the count of all static members that a class might have.
+	if (ce->default_static_members_count == 0) {
+		RETURN_EMPTY_ARRAY();
+	}
+
+	if (!CE_STATIC_MEMBERS(ce)) {
 		zend_class_init_statics(ce);
 	}
 
