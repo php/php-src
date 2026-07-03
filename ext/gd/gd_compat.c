@@ -15,7 +15,7 @@ int overflow2(int a, int b)
 		return 1;
 	}
 	if(a > INT_MAX / b) {
-		php_error_docref(NULL, E_WARNING, "Product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully\n");
+		php_error_docref(NULL, E_WARNING, "product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully\n");
 		return 1;
 	}
 	return 0;
