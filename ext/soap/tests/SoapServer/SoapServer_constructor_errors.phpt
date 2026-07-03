@@ -78,6 +78,7 @@ try {
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
+
 ?>
 --EXPECT--
 TypeError: SoapServer::__construct(): Argument #2 ($options) "uri" option must be of type string, int given

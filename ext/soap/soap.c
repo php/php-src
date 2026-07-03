@@ -972,7 +972,7 @@ PHP_METHOD(SoapServer, __construct)
 			}
 			service->uri = estrndup(Z_STRVAL_P(uri_zv), Z_STRLEN_P(uri_zv));
 		} else if (!wsdl) {
-			zend_argument_type_error(2, "\"uri\" option is required when argument #1 ($wsdl) is null");
+			zend_argument_value_error(2, "\"uri\" option is required when argument #1 ($wsdl) is null");
 			goto cleanup;
 		}
 
@@ -1082,7 +1082,7 @@ PHP_METHOD(SoapServer, __construct)
 			}
 		}
 	} else if (!wsdl) {
-		zend_argument_type_error(2, "\"uri\" option is required when argument #1 ($wsdl) is null");
+		zend_argument_value_error(2, "\"uri\" option is required when argument #1 ($wsdl) is null");
 		goto cleanup;
 	}
 

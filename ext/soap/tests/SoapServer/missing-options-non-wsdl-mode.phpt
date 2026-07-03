@@ -48,9 +48,9 @@ try {
 ?>
 --EXPECT--
 $options not provided
-TypeError: SoapServer::__construct(): Argument #2 ($options) "uri" option is required when argument #1 ($wsdl) is null
-TypeError: SoapServer::__construct(): Argument #2 ($options) "uri" option is required when argument #1 ($wsdl) is null
+ValueError: SoapServer::__construct(): Argument #2 ($options) "uri" option is required when argument #1 ($wsdl) is null
+ValueError: SoapServer::__construct(): Argument #2 ($options) "uri" option is required when argument #1 ($wsdl) is null
 Empty $options array
-TypeError: SoapServer::__construct(): Argument #2 ($options) "uri" option is required when argument #1 ($wsdl) is null
-TypeError: SoapServer::__construct(): Argument #2 ($options) "uri" option is required when argument #1 ($wsdl) is null
+ValueError: SoapServer::__construct(): Argument #2 ($options) "uri" option is required when argument #1 ($wsdl) is null
+ValueError: SoapServer::__construct(): Argument #2 ($options) "uri" option is required when argument #1 ($wsdl) is null
 $options array only sets "uri" option

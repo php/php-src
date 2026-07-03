@@ -1,5 +1,5 @@
 --TEST--
-SoapServer constructor with an invalid encoding option
+SoapServer constructor with an invalid soap_version option
 --EXTENSIONS--
 soap
 --FILE--
