@@ -18,13 +18,13 @@ gdPathDashPtr gdPathDashCreate(const double *data, int size, double offset)
     if (data == NULL || size == 0)
         return NULL;
 
-    gdPathDashPtr dash = gdVector2dMalloc(sizeof(gdPathDash));
+    gdPathDashPtr dash = gdMalloc(sizeof(gdPathDash));
     if (!dash)
     {
         return NULL;
     }
     dash->offset = offset;
-    dash->data = gdVector2dMalloc((size_t)size * sizeof(double));
+    dash->data = gdMalloc((size_t)size * sizeof(double));
     if (!dash->data)
     {
         gdFree(dash);

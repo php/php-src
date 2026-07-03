@@ -28,7 +28,7 @@ int overflow2(int a, int b) {
 	}
 	if(a > INT_MAX / b) {
 		gd_error_ex(GD_WARNING,
-					"Product of memory allocation multiplication would exceed "
+					"product of memory allocation multiplication would exceed "
 					"INT_MAX, failing operation gracefully\n");
 		return 1;
 	}

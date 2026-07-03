@@ -20,7 +20,8 @@ char *gd_strtok_r(char *s, const char *sep, char **state) {
   char separators[256];
   char *result = 0;
   memset (separators, 0, sizeof (separators));
-    while (*sep) {separators[*((const unsigned char *)sep)] = 1;
+  while (*sep) {
+    separators[*((const unsigned char *)sep)] = 1;
     sep++;
   }
   if (!s) {
@@ -63,23 +64,8 @@ char *gd_strtok_r(char *s, const char *sep, char **state) {
   return result;
 }
 
-static int gd_vector2d_allocation_failure_countdown = -1;
 
-void gdVector2dTestSetAllocationFailureCountdown(int countdown)
-{
-	gd_vector2d_allocation_failure_countdown = countdown;
-}
 
-void *gdVector2dMalloc(size_t size)
-{
-	if (gd_vector2d_allocation_failure_countdown == 0) {
-		gd_vector2d_allocation_failure_countdown = -1;
-		return NULL;
-	}
-	if (gd_vector2d_allocation_failure_countdown > 0)
-		gd_vector2d_allocation_failure_countdown--;
-	return gdMalloc(size);
-}
 
 void *gdReallocEx(void *ptr, size_t size) {
 	void *newPtr = gdRealloc(ptr, size);

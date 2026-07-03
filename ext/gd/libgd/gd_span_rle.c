@@ -28,7 +28,7 @@
 
 gdSpanRlePtr gdSpanRleCreate()
 {
-    gdSpanRlePtr rle = gdVector2dMalloc(sizeof(gdSpanRle));
+    gdSpanRlePtr rle = gdMalloc(sizeof(gdSpanRle));
     if (!rle)
         return NULL;
     rle->ref = 1;
@@ -70,13 +70,13 @@ gdSpanRlePtr gdSpanRleClone(gdSpanRlePtr rle)
 {
     if (rle == NULL) return NULL;
 
-    gdSpanRlePtr clone = gdVector2dMalloc(sizeof(gdSpanRle));
+    gdSpanRlePtr clone = gdMalloc(sizeof(gdSpanRle));
     if (!clone) return NULL;
 
     clone->ref = 1;
     _rle_spans_init(clone->spans);
     if (rle->spans.size > 0) {
-        clone->spans.data = gdVector2dMalloc((size_t)rle->spans.size * sizeof(gdSpan));
+        clone->spans.data = gdMalloc((size_t)rle->spans.size * sizeof(gdSpan));
         if (!clone->spans.data) {
             gdFree(clone);
             return NULL;
@@ -95,7 +95,7 @@ gdSpanRlePtr gdSpanRleClone(gdSpanRlePtr rle)
 #define DIV255(x) (((x) + ((x) >> 8) + 0x80) >> 8)
 gdSpanRlePtr gdSpanHorizontalClip(const gdSpanRlePtr a, const gdSpanRlePtr b)
 {
-    gdSpanRlePtr result = gdVector2dMalloc(sizeof(gdSpanRle));
+    gdSpanRlePtr result = gdMalloc(sizeof(gdSpanRle));
     if (!result)
     {
         return NULL;
@@ -112,7 +112,7 @@ gdSpanRlePtr gdSpanHorizontalClip(const gdSpanRlePtr a, const gdSpanRlePtr b)
     }
     int capacity = MAX(a->spans.size, b->spans.size);
     if (capacity > 0) {
-        result->spans.data = gdVector2dMalloc((size_t)capacity * sizeof(gdSpan));
+        result->spans.data = gdMalloc((size_t)capacity * sizeof(gdSpan));
         if (!result->spans.data) {
             gdFree(result);
             return NULL;

@@ -309,7 +309,7 @@ gdContextSave(gdContextPtr context)
         return 0;
     }
     current = context->state;
-    saved = gdVector2dMalloc(sizeof(gdState));
+    saved = gdMalloc(sizeof(gdState));
     if (!saved) {
         gd_error("gdContextSave: failed to allocate graphics state");
         return 0;
