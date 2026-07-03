@@ -10,6 +10,9 @@ PHP                                                                        NEWS
     warning when an IFD is not followed by a next-IFD offset). (Eyüp Can Akman)
 
 - Intl:
+  . Fixed NumberFormatter::parse() and NumberFormatter::parseCurrency() to
+    reject offset values outside the 32-bit range instead of silently
+    truncating them. (Weilin Du)
   . IntlDateFormatter::parse()/datefmt_parse() and
     IntlDateFormatter::localtime()/datefmt_localtime() now raise TypeError
     when the offset argument is not of type int. (Weilin Du)
