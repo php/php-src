@@ -50,12 +50,7 @@ U_CFUNC PHP_FUNCTION( numfmt_parse )
 	}
 
 	if (zposition) {
-		zend_long long_position = zval_get_long(zposition);
-		if (ZEND_LONG_EXCEEDS_INT(long_position)) {
-			zend_argument_value_error(hasThis() ? 3 : 4, "must be between %d and %d", INT32_MIN, INT32_MAX);
-			RETURN_THROWS();
-		}
-		position = (int32_t) long_position;
+		position = (int32_t) zval_get_long(zposition);
 	}
 
 	/* Fetch the object. */
@@ -160,13 +155,8 @@ U_CFUNC PHP_FUNCTION( numfmt_parse_currency )
 	intl_stringFromChar(ustr, str, str_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
 
-	if (zposition) {
-		zend_long long_position = zval_get_long(zposition);
-		if (ZEND_LONG_EXCEEDS_INT(long_position)) {
-			zend_argument_value_error(hasThis() ? 3 : 4, "must be between %d and %d", INT32_MIN, INT32_MAX);
-			RETURN_THROWS();
-		}
-		position = (int32_t) long_position;
+	if(zposition) {
+		position = (int32_t) zval_get_long(zposition);
 	}
 
 	icu::ParsePosition pp(position);
