@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20726 (Crash with ODBC connection pooling when the DSN
     carries no credentials). (iliaal)
 
+- PHPDBG:
+  . Fixed fleaked lowercased lookup keys in phpdbg_resolve_opline_break.
+    (jorgsowa)
+
 - Session:
   . Fixed bug GH-21314 (Different session garbage collector behavior between
     PHP 8.3 and PHP 8.5). (jorgsowa)
