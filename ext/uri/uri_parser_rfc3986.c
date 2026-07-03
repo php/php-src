@@ -743,7 +743,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_host(const ze
 		}
 
 		return php_uri_parser_rfc3986_validate_component_result(
-			uriIsWellFormedHostIp6A(p + 1, p + len - 1) == URI_SUCCESS,
+			uriIsWellFormedHostIp6MmA(p + 1, p + len - 1, mm) == URI_SUCCESS,
 			"host"
 		);
 	}
