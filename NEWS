@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.27
 
+- CLI
+  . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
+    request activation). (matyhtf)
+
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
     registrations are freed while still reachable from the cycle collector.
