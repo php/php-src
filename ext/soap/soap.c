@@ -933,103 +933,157 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht) /* {{{ */
 /* {{{ SoapServer constructor */
 PHP_METHOD(SoapServer, __construct)
 {
-	soapServicePtr service;
-	zval *options = NULL;
+	HashTable *options = NULL;
 	zend_string *wsdl;
 	int version = SOAP_1_1;
 	zend_long cache_wsdl;
 	HashTable *typemap_ht = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S!|a", &wsdl, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S!|h", &wsdl, &options) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	SOAP_SERVER_BEGIN_CODE();
-
-	service = emalloc(sizeof(soapService));
+	soapServicePtr service = emalloc(sizeof(soapService));
 	memset(service, 0, sizeof(soapService));
-	service->send_errors = 1;
+	service->send_errors = true;
 
 	cache_wsdl = SOAP_GLOBAL(cache_enabled) ? SOAP_GLOBAL(cache_mode) : 0;
 
 	if (options != NULL) {
-		HashTable *ht = Z_ARRVAL_P(options);
-		zval *tmp;
-
-		if ((tmp = zend_hash_str_find(ht, "soap_version", sizeof("soap_version")-1)) != NULL) {
-			if (Z_TYPE_P(tmp) == IS_LONG &&
-			    (Z_LVAL_P(tmp) == SOAP_1_1 || Z_LVAL_P(tmp) == SOAP_1_2)) {
-				version = Z_LVAL_P(tmp);
-			} else {
-				php_error_docref(NULL, E_ERROR, "'soap_version' option must be SOAP_1_1 or SOAP_1_2");
+		const zval *soap_version_zv = zend_hash_str_find(options, ZEND_STRL("soap_version"));
+		if (soap_version_zv) {
+			if (UNEXPECTED(Z_TYPE_P(soap_version_zv) != IS_LONG)) {
+				zend_argument_type_error(2, "\"soap_version\" option must be of type int, %s given", zend_zval_type_name(soap_version_zv));
+				goto cleanup;
 			}
+			zend_long soap_version = Z_LVAL_P(soap_version_zv);
+			if (UNEXPECTED(soap_version != SOAP_1_1 && soap_version != SOAP_1_2)) {
+				zend_argument_value_error(2, "\"soap_version\" option must be SOAP_1_1 or SOAP_1_2");
+				goto cleanup;
+			}
+			version = soap_version;
 		}
 
-		if ((tmp = zend_hash_str_find(ht, "uri", sizeof("uri")-1)) != NULL &&
-		    Z_TYPE_P(tmp) == IS_STRING) {
-			service->uri = estrndup(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+		const zval *uri_zv = zend_hash_str_find(options, ZEND_STRL("uri"));
+		if (uri_zv) {
+			if (UNEXPECTED(Z_TYPE_P(uri_zv) != IS_STRING)) {
+				zend_argument_type_error(2, "\"uri\" option must be of type string, %s given", zend_zval_type_name(uri_zv));
+				goto cleanup;
+			}
+			service->uri = estrndup(Z_STRVAL_P(uri_zv), Z_STRLEN_P(uri_zv));
 		} else if (!wsdl) {
-			php_error_docref(NULL, E_ERROR, "'uri' option is required in nonWSDL mode");
+			zend_argument_type_error(2, "\"uri\" option is required when argument #1 ($wsdl) is null");
+			goto cleanup;
 		}
 
-		if ((tmp = zend_hash_str_find(ht, "actor", sizeof("actor")-1)) != NULL &&
-		    Z_TYPE_P(tmp) == IS_STRING) {
-			service->actor = estrndup(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+		const zval *actor_zv = zend_hash_str_find(options, ZEND_STRL("actor"));
+		if (actor_zv) {
+			if (UNEXPECTED(Z_TYPE_P(actor_zv) != IS_STRING)) {
+				zend_argument_type_error(2, "\"actor\" option must be of type string, %s given", zend_zval_type_name(actor_zv));
+				goto cleanup;
+			}
+			service->actor = estrndup(Z_STRVAL_P(actor_zv), Z_STRLEN_P(actor_zv));
 		}
 
-		if ((tmp = zend_hash_str_find(ht, "encoding", sizeof("encoding")-1)) != NULL &&
-		    Z_TYPE_P(tmp) == IS_STRING) {
-			xmlCharEncodingHandlerPtr encoding;
+		const zval *encoding_zv = zend_hash_str_find(options, ZEND_STRL("encoding"));
+		if (encoding_zv) {
+			if (UNEXPECTED(Z_TYPE_P(encoding_zv) != IS_STRING)) {
+				zend_argument_type_error(2, "\"encoding\" option must be of type string, %s given", zend_zval_type_name(encoding_zv));
+				goto cleanup;
+			}
 
-			encoding = xmlFindCharEncodingHandler(Z_STRVAL_P(tmp));
-			if (encoding == NULL) {
-				php_error_docref(NULL, E_ERROR, "Invalid 'encoding' option - '%s'", Z_STRVAL_P(tmp));
-			} else {
-			  service->encoding = encoding;
+			// TODO Check for null bytes?
+			xmlCharEncodingHandlerPtr encoding = xmlFindCharEncodingHandler(Z_STRVAL_P(encoding_zv));
+			if (UNEXPECTED(encoding == NULL)) {
+				zend_argument_value_error(2, "\"encoding\" option must be a valid encoding, \"%s\" given", Z_STRVAL_P(encoding_zv));
+				goto cleanup;
+			}
+			service->encoding = encoding;
+		}
+
+		const zval *class_map_zv = zend_hash_str_find(options, ZEND_STRL("classmap"));
+		if (class_map_zv) {
+			if (UNEXPECTED(Z_TYPE_P(class_map_zv) != IS_ARRAY)) {
+				zend_argument_type_error(2, "\"classmap\" option must be of type array, %s given", zend_zval_type_name(class_map_zv));
+				goto cleanup;
+			}
+			// TODO: this still accepts mixed keys arrays and not all numerically indexed arrays are packed
+			if (HT_IS_PACKED(Z_ARRVAL_P(class_map_zv))) {
+				zend_argument_value_error(2, "\"classmap\" option must be an associative array");
+				goto cleanup;
+			}
+			service->class_map = zend_array_dup(Z_ARR_P(class_map_zv));
+		}
+
+		const zval *type_map_zv = zend_hash_str_find(options, ZEND_STRL("typemap"));
+		if (type_map_zv) {
+			if (UNEXPECTED(Z_TYPE_P(type_map_zv) != IS_ARRAY)) {
+				zend_argument_type_error(2, "\"typemap\" option must be of type array, %s given", zend_zval_type_name(type_map_zv));
+				goto cleanup;
+			}
+			if (zend_hash_num_elements(Z_ARR_P(type_map_zv)) > 0) {
+				typemap_ht = Z_ARRVAL_P(type_map_zv);
 			}
 		}
 
-		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
-			Z_TYPE_P(tmp) == IS_ARRAY) {
-			if (HT_IS_PACKED(Z_ARRVAL_P(tmp))) {
-				php_error_docref(NULL, E_ERROR, "'classmap' option must be an associative array");
+		const zval *features_zv = zend_hash_str_find(options, ZEND_STRL("features"));
+		if (features_zv) {
+			if (UNEXPECTED(Z_TYPE_P(features_zv) != IS_LONG)) {
+				zend_argument_type_error(2, "\"features\" option must be of type int, %s given", zend_zval_type_name(features_zv));
+				goto cleanup;
 			}
-			service->class_map = zend_array_dup(Z_ARRVAL_P(tmp));
+			service->features = Z_LVAL_P(features_zv);
 		}
 
-		if ((tmp = zend_hash_str_find(ht, "typemap", sizeof("typemap")-1)) != NULL &&
-			Z_TYPE_P(tmp) == IS_ARRAY &&
-			zend_hash_num_elements(Z_ARRVAL_P(tmp)) > 0) {
-			typemap_ht = Z_ARRVAL_P(tmp);
+		const zval *cache_wsdl_zv = zend_hash_str_find(options, ZEND_STRL("cache_wsdl"));
+		if (cache_wsdl_zv) {
+			if (UNEXPECTED(Z_TYPE_P(cache_wsdl_zv) != IS_LONG)) {
+				zend_argument_type_error(2, "\"cache_wsdl\" option must be of type int, %s given", zend_zval_type_name(cache_wsdl_zv));
+				goto cleanup;
+			}
+			cache_wsdl = Z_LVAL_P(cache_wsdl_zv);
 		}
 
-		if ((tmp = zend_hash_str_find(ht, "features", sizeof("features")-1)) != NULL &&
-			Z_TYPE_P(tmp) == IS_LONG) {
-			service->features = Z_LVAL_P(tmp);
-		}
-
-		if ((tmp = zend_hash_str_find(ht, "cache_wsdl", sizeof("cache_wsdl")-1)) != NULL &&
-		    Z_TYPE_P(tmp) == IS_LONG) {
-			cache_wsdl = Z_LVAL_P(tmp);
-		}
-
-		if ((tmp = zend_hash_str_find(ht, "send_errors", sizeof("send_errors")-1)) != NULL) {
-			if (Z_TYPE_P(tmp) == IS_FALSE) {
-				service->send_errors = 0;
-			} else if (Z_TYPE_P(tmp) == IS_TRUE) {
-				service->send_errors = 1;
-			} else if (Z_TYPE_P(tmp) == IS_LONG) {
-				service->send_errors = Z_LVAL_P(tmp);
+		const zval *send_errors_zv = zend_hash_str_find(options, ZEND_STRL("send_errors"));
+		if (send_errors_zv) {
+			if (UNEXPECTED(Z_TYPE_P(send_errors_zv) != IS_FALSE && Z_TYPE_P(send_errors_zv) != IS_TRUE && Z_TYPE_P(send_errors_zv) != IS_LONG)) {
+				zend_argument_type_error(2, "\"send_errors\" option must be of type bool, %s given", zend_zval_type_name(send_errors_zv));
+				goto cleanup;
+			}
+			switch (Z_TYPE_P(send_errors_zv)) {
+				case IS_FALSE:
+					service->send_errors = false;
+					break;
+				case IS_TRUE:
+					service->send_errors = true;
+					break;
+				case IS_LONG:
+					service->send_errors = Z_LVAL_P(send_errors_zv);
+					break;
 			}
 		}
 
-		if ((tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_TRACE))) != NULL &&
-		    (Z_TYPE_P(tmp) == IS_TRUE ||
-		     (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) == 1))) {
-			service->trace = true;
+		const zval *trace_zv = zend_hash_find(options, ZSTR_KNOWN(ZEND_STR_TRACE));
+		if (trace_zv) {
+			if (UNEXPECTED(Z_TYPE_P(trace_zv) != IS_FALSE && Z_TYPE_P(trace_zv) != IS_TRUE && Z_TYPE_P(trace_zv) != IS_LONG)) {
+				zend_argument_type_error(2, "\"trace\" option must be of type bool, %s given", zend_zval_type_name(trace_zv));
+				goto cleanup;
+			}
+			switch (Z_TYPE_P(trace_zv)) {
+				case IS_FALSE:
+					service->trace = false;
+					break;
+				case IS_TRUE:
+					service->trace = true;
+					break;
+				case IS_LONG:
+					service->trace = Z_LVAL_P(trace_zv);
+					break;
+			}
 		}
 	} else if (!wsdl) {
-		php_error_docref(NULL, E_ERROR, "'uri' option is required in nonWSDL mode");
+		zend_argument_type_error(2, "\"uri\" option is required when argument #1 ($wsdl) is null");
+		goto cleanup;
 	}
 
 	service->version = version;
@@ -1037,6 +1091,7 @@ PHP_METHOD(SoapServer, __construct)
 	service->soap_functions.functions_all = FALSE;
 	service->soap_functions.ft = zend_new_array(0);
 
+	SOAP_SERVER_BEGIN_CODE();
 	if (wsdl) {
 		zend_try {
 			service->sdl = get_sdl(ZEND_THIS, ZSTR_VAL(wsdl), cache_wsdl);
@@ -1063,6 +1118,11 @@ PHP_METHOD(SoapServer, __construct)
 	server_obj->service = service;
 
 	SOAP_SERVER_END_CODE();
+	return;
+
+cleanup:
+	delete_service(service);
+	RETURN_THROWS();
 }
 /* }}} */
 

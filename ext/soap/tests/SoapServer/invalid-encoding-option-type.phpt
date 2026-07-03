@@ -25,6 +25,5 @@ try {
 
 ?>
 --EXPECT--
-<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>WSDL</faultcode><faultstring>SOAP-ERROR: Parsing WSDL: Couldn't load from 'irrelevant' : failed to load external entity "irrelevant"
-</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>
+TypeError: SoapServer::__construct(): Argument #2 ($options) "encoding" option must be of type string, int given
+TypeError: SoapServer::__construct(): Argument #2 ($options) "encoding" option must be of type string, int given

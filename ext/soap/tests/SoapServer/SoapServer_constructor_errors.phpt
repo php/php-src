@@ -80,6 +80,11 @@ try {
 }
 ?>
 --EXPECT--
-<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>WSDL</faultcode><faultstring>SOAP-ERROR: Parsing WSDL: Couldn't load from 'irrelevant' : failed to load external entity "irrelevant"
-</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>
+TypeError: SoapServer::__construct(): Argument #2 ($options) "uri" option must be of type string, int given
+TypeError: SoapServer::__construct(): Argument #2 ($options) "actor" option must be of type string, int given
+TypeError: SoapServer::__construct(): Argument #2 ($options) "classmap" option must be of type array, int given
+TypeError: SoapServer::__construct(): Argument #2 ($options) "typemap" option must be of type array, int given
+TypeError: SoapServer::__construct(): Argument #2 ($options) "features" option must be of type int, string given
+TypeError: SoapServer::__construct(): Argument #2 ($options) "cache_wsdl" option must be of type int, string given
+TypeError: SoapServer::__construct(): Argument #2 ($options) "send_errors" option must be of type bool, string given
+TypeError: SoapServer::__construct(): Argument #2 ($options) "trace" option must be of type bool, string given
