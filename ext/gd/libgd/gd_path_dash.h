@@ -21,6 +21,7 @@
     } while(0)
 
 gdPathDashPtr gdPathDashCreate(const double *data, int size, double offset);
+gdPathDashPtr gdPathDashClone(const gdPathDashPtr dash);
 void gdPathDashDestroy(gdPathDashPtr dash);
 gdPathPtr gdPathApplyDash(const gdPathDashPtr dash, const gdPathPtr path);
 #endif // GD_PATH_DASH_H

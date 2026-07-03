@@ -28,9 +28,10 @@
 
 gdSpanRlePtr gdSpanRleCreate()
 {
-    gdSpanRlePtr rle = gdMalloc(sizeof(gdSpanRle));
+    gdSpanRlePtr rle = gdVector2dMalloc(sizeof(gdSpanRle));
     if (!rle)
         return NULL;
+    rle->ref = 1;
     _rle_spans_init(rle->spans);
     rle->x = 0;
     rle->y = 0;
@@ -39,9 +40,18 @@ gdSpanRlePtr gdSpanRleCreate()
     return rle;
 }
 
+gdSpanRlePtr gdSpanRleRetain(gdSpanRlePtr rle)
+{
+    if (rle != NULL)
+        rle->ref++;
+    return rle;
+}
+
 void gdSpanRleDestroy(gdSpanRlePtr rle)
 {
     if (rle == NULL)
+        return;
+    if (--rle->ref > 0)
         return;
     gdFree(rle->spans.data);
     gdFree(rle);
@@ -60,12 +70,20 @@ gdSpanRlePtr gdSpanRleClone(gdSpanRlePtr rle)
 {
     if (rle == NULL) return NULL;
 
-    gdSpanRlePtr clone = gdMalloc(sizeof(gdSpanRle));
+    gdSpanRlePtr clone = gdVector2dMalloc(sizeof(gdSpanRle));
     if (!clone) return NULL;
 
+    clone->ref = 1;
     _rle_spans_init(clone->spans);
-    _rle_spans_allocate(clone->spans, rle->spans.size);
+    if (rle->spans.size > 0) {
+        clone->spans.data = gdVector2dMalloc((size_t)rle->spans.size * sizeof(gdSpan));
+        if (!clone->spans.data) {
+            gdFree(clone);
+            return NULL;
+        }
+        clone->spans.capacity = rle->spans.size;
     memcpy(clone->spans.data, rle->spans.data, (size_t)rle->spans.size * sizeof(gdSpan));
+    }
     clone->spans.size = rle->spans.size;
     clone->x = rle->x;
     clone->y = rle->y;
@@ -77,14 +95,30 @@ gdSpanRlePtr gdSpanRleClone(gdSpanRlePtr rle)
 #define DIV255(x) (((x) + ((x) >> 8) + 0x80) >> 8)
 gdSpanRlePtr gdSpanHorizontalClip(const gdSpanRlePtr a, const gdSpanRlePtr b)
 {
-    gdSpanRlePtr result = gdMalloc(sizeof(gdSpanRle));
+    gdSpanRlePtr result = gdVector2dMalloc(sizeof(gdSpanRle));
     if (!result)
     {
         return NULL;
     }
 
+    result->ref = 1;
     _rle_spans_init(result->spans);
-    _rle_spans_allocate(result->spans, MAX(a->spans.size, b->spans.size));
+    if (a->spans.size == 0 || b->spans.size == 0) {
+        result->x = 0;
+        result->y = 0;
+        result->w = 0;
+        result->h = 0;
+        return result;
+    }
+    int capacity = MAX(a->spans.size, b->spans.size);
+    if (capacity > 0) {
+        result->spans.data = gdVector2dMalloc((size_t)capacity * sizeof(gdSpan));
+        if (!result->spans.data) {
+            gdFree(result);
+            return NULL;
+        }
+        result->spans.capacity = capacity;
+    }
 
     gdSpanPtr a_spans = a->spans.data;
     gdSpanPtr a_end = a_spans + a->spans.size;

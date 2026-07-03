@@ -6,13 +6,13 @@
 
 /* TBB: strtok_r is not universal; provide an implementation of it. */
 
-extern char *gd_strtok_r(char *s, char *sep, char **state);
+char *gd_strtok_r(char *s, const char *sep, char **state);
 
 /* These functions wrap memory management. gdFree is
 	in gd.h, where callers can utilize it to correctly
 	free memory allocated by these functions with the
 	right version of free(). */
-#define gdCalloc(nmemb, size)	ecalloc(nmemb, size)
+#define gdCalloc(nmemb, size)	ecalloc((nmemb), (size))
 #define gdMalloc(size)		emalloc(size)
 #define gdRealloc(ptr, size)	erealloc(ptr, size)
 #define gdEstrdup(ptr)		estrdup(ptr)
@@ -24,6 +24,10 @@ extern char *gd_strtok_r(char *s, char *sep, char **state);
 /* The extended version of gdReallocEx will free *ptr if the
  * realloc fails. */
 void *gdReallocEx(void *ptr, size_t size);
+
+/* Internal deterministic allocation hook used by the vector2d failure tests. */
+void *gdVector2dMalloc(size_t size);
+void gdVector2dTestSetAllocationFailureCountdown(int countdown);
 
 /* Returns nonzero if multiplying the two quantities will
 	result in integer overflow. Also returns nonzero if

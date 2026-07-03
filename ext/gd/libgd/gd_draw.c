@@ -238,26 +238,39 @@ gdContextFill(gdContextPtr context)
     gdContextNewPath(context);
 }
 
-BGD_DECLARE(void)
+BGD_DECLARE(int)
 gdContextClipPreserve(gdContextPtr context)
 {
     unsigned int context_path_size;
-    const gdPathPtr currentPath = context->path;
-    gdStatePtr state = context->state;
+    gdPathPtr currentPath;
+    gdStatePtr state;
+    gdSpanRlePtr newclip;
+
+    if (context == NULL) {
+        gd_error("gdContextClipPreserve: context must not be NULL");
+        return 0;
+    }
+    currentPath = context->path;
+    state = context->state;
     context_path_size = gdArrayNumElements(&currentPath->elements);
 
     if (context_path_size == 0)
-        return;
+        return 1;
 
-    if (state->clippath)
-    {
-        gdSpanRleClear(context->rle);
-        gdSpanRleRasterize(context->rle, context->path, &state->matrix, &context->clip, NULL, state->winding);
-        gdSpanRlePathClip(state->clippath, context->rle);
+    gdSpanRleClear(context->rle);
+    gdSpanRleRasterize(context->rle, context->path, &state->matrix, &context->clip, NULL, state->winding);
+    if (state->clippath) {
+        newclip = gdSpanHorizontalClip(state->clippath, context->rle);
     } else {
-        state->clippath = gdSpanRleCreate();
-        gdSpanRleRasterize(state->clippath, context->path, &state->matrix, &context->clip, NULL, state->winding);
+        newclip = gdSpanRleClone(context->rle);
     }
+    if (!newclip) {
+        gd_error("gdContextClipPreserve: failed to allocate clip state");
+        return 0;
+    }
+    gdSpanRleDestroy(state->clippath);
+    state->clippath = newclip;
+    return 1;
 }
 
 BGD_DECLARE(void)
@@ -276,11 +289,65 @@ gdContextPaint(gdContextPtr context)
     gdPathBlend(context, rle);
 }
 
-BGD_DECLARE(void)
+BGD_DECLARE(int)
 gdContextClip(gdContextPtr context)
 {
-    gdContextClipPreserve(context);
+    if (!gdContextClipPreserve(context))
+        return 0;
     gdContextNewPath(context);
+    return 1;
+}
+
+BGD_DECLARE(int)
+gdContextSave(gdContextPtr context)
+{
+    gdStatePtr current;
+    gdStatePtr saved;
+
+    if (context == NULL) {
+        gd_error("gdContextSave: context must not be NULL");
+        return 0;
+    }
+    current = context->state;
+    saved = gdVector2dMalloc(sizeof(gdState));
+    if (!saved) {
+        gd_error("gdContextSave: failed to allocate graphics state");
+        return 0;
+    }
+    *saved = *current;
+    saved->source = gdPaintAddRef(current->source);
+    saved->clippath = gdSpanRleRetain(current->clippath);
+    saved->stroke.dash = gdPathDashClone(current->stroke.dash);
+    if (current->stroke.dash != NULL && saved->stroke.dash == NULL) {
+        gdSpanRleDestroy(saved->clippath);
+        gdPaintDestroy(saved->source);
+        gdFree(saved);
+        gd_error("gdContextSave: failed to clone dash state");
+        return 0;
+    }
+    saved->next = current;
+    context->state = saved;
+    return 1;
+}
+
+BGD_DECLARE(int)
+gdContextRestore(gdContextPtr context)
+{
+    gdStatePtr restored;
+
+    if (context == NULL) {
+        gd_error("gdContextRestore: context must not be NULL");
+        return 0;
+    }
+    if (context->state->next == NULL) {
+        gd_error("gdContextRestore: no saved graphics state");
+        return 0;
+    }
+    restored = context->state->next;
+    context->state->next = NULL;
+    gdStateDestroy(context->state);
+    context->state = restored;
+    return 1;
 }
 
 BGD_DECLARE(void)
@@ -297,7 +364,12 @@ gdContextDestroy(gdContextPtr context)
         }
         gdSurfaceDestroy(context->surface);
         gdPathDestroy(context->path);
+        while (context->state) {
+            gdStatePtr next = context->state->next;
+            context->state->next = NULL;
         gdStateDestroy(context->state);
+            context->state = next;
+        }
         gdSpanRleDestroy(context->clippath);
         gdSpanRleDestroy(context->rle);
         gdFree(context);

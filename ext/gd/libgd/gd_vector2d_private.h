@@ -25,6 +25,7 @@ typedef gdRectF *gdRectFPtr;
 typedef struct gdSpanStruct { short x, y; unsigned short len; unsigned char coverage; } gdSpan;
 typedef gdSpan *gdSpanPtr;
 typedef struct gdSpanRleStruct {
+	int ref;
 	struct { gdSpanPtr data; int size, capacity; } spans;
 	int x, y, w, h;
 } gdSpanRle;

@@ -1,5 +1,8 @@
+/* Internal header for random common utility functions. */
+
 #ifndef GD_INTERN_H
 #define GD_INTERN_H
+
 #include <limits.h>
 #include "gd.h"
 #ifdef _MSC_VER

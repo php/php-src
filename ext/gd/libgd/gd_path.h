@@ -31,6 +31,7 @@ static inline int _doubleIsZero(double f)
 #define ARRAY_LENGTH(__array) ((int) (sizeof (__array) / sizeof (__array[0])))
 
 gdPaintPtr gdPaintCreateRgba(double r, double g, double b, double a);
+gdPaintPtr gdPaintAddRef(gdPaintPtr paint);
 BGD_DECLARE(void) gdPaintDestroy(gdPaintPtr paint);
 BGD_DECLARE(void) gdContextSetSource(gdContextPtr context, gdPaintPtr source);
 

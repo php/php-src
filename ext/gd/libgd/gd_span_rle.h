@@ -20,9 +20,11 @@
     } while(0)
 
 gdSpanRlePtr gdSpanRleCreate();
+gdSpanRlePtr gdSpanRleRetain(gdSpanRlePtr rle);
 void gdSpanRleDestroy(gdSpanRlePtr rle);
 void gdSpanRleClear(gdSpanRlePtr rle);
 void gdSpanRleRasterize(gdSpanRlePtr rle, const gdPathPtr path, const gdPathMatrixPtr matrix, const gdRectFPtr clip, const gdStrokePtr stroke, gdFillRule winding);
 void gdSpanRlePathClip(gdSpanRlePtr rle, const gdSpanRlePtr clip);
 gdSpanRlePtr gdSpanRleClone(gdSpanRlePtr rle);
+gdSpanRlePtr gdSpanHorizontalClip(const gdSpanRlePtr a, const gdSpanRlePtr b);
 #endif // GD_SPAN_RLE_H
