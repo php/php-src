@@ -663,16 +663,16 @@ static STACK_OF(X509) * php_openssl_load_all_certs_from_file(
 		char *cert_file, size_t cert_file_len, uint32_t arg_num);
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req);
 
-static void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname) /* {{{ */
+static void php_openssl_add_assoc_name_entry(zval * val, char * key, const X509_NAME * name, int shortname) /* {{{ */
 {
 	zval *data;
 	zval subitem, tmp;
 	int i;
 	char *sname;
 	int nid;
-	X509_NAME_ENTRY * ne;
-	ASN1_STRING * str = NULL;
-	ASN1_OBJECT * obj;
+	const X509_NAME_ENTRY * ne;
+	const ASN1_STRING * str = NULL;
+	const ASN1_OBJECT * obj;
 
 	if (key != NULL) {
 		array_init(&subitem);
@@ -737,7 +737,7 @@ static void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME *
 }
 /* }}} */
 
-static void php_openssl_add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str) /* {{{ */
+static void php_openssl_add_assoc_asn1_string(zval * val, char * key, const ASN1_STRING * str) /* {{{ */
 {
 	add_assoc_stringl(val, key, (const char *)ASN1_STRING_get0_data(str), ASN1_STRING_length(str));
 }
@@ -1324,7 +1324,7 @@ PHP_MINIT_FUNCTION(openssl)
 	}
 
 	php_stream_xport_register("ssl", php_openssl_ssl_socket_factory);
-#ifndef OPENSSL_NO_SSL3
+#if OPENSSL_VERSION_NUMBER < 0x40000000L && !defined(OPENSSL_NO_SSL3)
 	php_stream_xport_register("sslv3", php_openssl_ssl_socket_factory);
 #endif
 	php_stream_xport_register("tls", php_openssl_ssl_socket_factory);
@@ -1410,7 +1410,7 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	php_unregister_url_stream_wrapper("ftps");
 
 	php_stream_xport_unregister("ssl");
-#ifndef OPENSSL_NO_SSL3
+#if OPENSSL_VERSION_NUMBER < 0x40000000L && !defined(OPENSSL_NO_SSL3)
 	php_stream_xport_unregister("sslv3");
 #endif
 	php_stream_xport_unregister("tls");
@@ -2026,11 +2026,11 @@ PHP_FUNCTION(openssl_x509_verify)
  * Christian Heimes
  */
 
-static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
+static int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extension)
 {
 	GENERAL_NAMES *names;
 	const X509V3_EXT_METHOD *method = NULL;
-	ASN1_OCTET_STRING *extension_data;
+	const ASN1_OCTET_STRING *extension_data;
 	long i, length, num;
 	const unsigned char *p;
 
@@ -2103,8 +2103,8 @@ PHP_FUNCTION(openssl_x509_parse)
 	bool useshortnames = 1;
 	char * tmpstr;
 	zval subitem;
-	X509_EXTENSION *extension;
-	X509_NAME *subject_name;
+	PHP_OPENSSL_X509_EXTENSION *extension;
+	const X509_NAME *subject_name;
 	char *cert_name;
 	char *extname;
 	BIO *bio_out;
@@ -2989,7 +2989,12 @@ static zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ 
 		zval *item, *subitem;
 		zend_string *strindex = NULL;
 
-		subj = X509_REQ_get_subject_name(csr);
+		subj = X509_NAME_new();
+		if (subj == NULL) {
+			php_openssl_store_errors();
+			return FAILURE;
+		}
+
 		/* apply values from the dn hash */
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(dn), strindex, item) {
 			if (strindex) {
@@ -2998,10 +3003,12 @@ static zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ 
 					if (Z_TYPE_P(item) == IS_ARRAY) {
 						ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(item), i, subitem) {
 							if (php_openssl_csr_add_subj_entry(subitem, subj, nid) == FAILURE) {
+								X509_NAME_free(subj);
 								return FAILURE;
 							}
 						} ZEND_HASH_FOREACH_END();
 					} else if (php_openssl_csr_add_subj_entry(item, subj, nid) == FAILURE) {
+						X509_NAME_free(subj);
 						return FAILURE;
 					}
 				} else {
@@ -3052,13 +3059,23 @@ static zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ 
 			if (!X509_NAME_add_entry_by_txt(subj, type, MBSTRING_UTF8, (unsigned char*)v->value, -1, -1, 0)) {
 				php_openssl_store_errors();
 				php_error_docref(NULL, E_WARNING, "add_entry_by_txt %s -> %s (failed)", type, v->value);
+				X509_NAME_free(subj);
 				return FAILURE;
 			}
 			if (!X509_NAME_entry_count(subj)) {
 				php_error_docref(NULL, E_WARNING, "No objects specified in config file");
+				X509_NAME_free(subj);
 				return FAILURE;
 			}
 		}
+
+		if (!X509_REQ_set_subject_name(csr, subj)) {
+			php_openssl_store_errors();
+			X509_NAME_free(subj);
+			return FAILURE;
+		}
+		X509_NAME_free(subj);
+
 		if (attribs) {
 			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(attribs), strindex, item) {
 				int nid;
@@ -3547,7 +3564,7 @@ PHP_FUNCTION(openssl_csr_get_subject)
 	zend_object *csr_obj;
 	zend_string *csr_str;
 	bool use_shortnames = 1;
-	X509_NAME *subject;
+	const X509_NAME *subject;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
@@ -4697,7 +4714,7 @@ static EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 		}
 
 		OPENSSL_PKEY_SET_BN(data, cofactor);
-		if (!OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_EC_COFACTOR, cofactor) ||
+		if ((cofactor && !OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_EC_COFACTOR, cofactor)) ||
 			!EC_GROUP_set_generator(group, point_g, order, cofactor)) {
 			goto cleanup;
 		}

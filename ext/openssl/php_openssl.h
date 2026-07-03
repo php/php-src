@@ -25,7 +25,9 @@ extern zend_module_entry openssl_module_entry;
 #include "php_version.h"
 #define PHP_OPENSSL_VERSION PHP_VERSION
 
+#include <openssl/opensslconf.h>
 #include <openssl/opensslv.h>
+#include <openssl/x509.h>
 #ifdef LIBRESSL_VERSION_NUMBER
 /* LibreSSL version check */
 #if LIBRESSL_VERSION_NUMBER < 0x20700000L
@@ -42,6 +44,12 @@ extern zend_module_entry openssl_module_entry;
 #else
 #define PHP_OPENSSL_API_VERSION 0x30200
 #endif
+#endif
+
+#if defined(OPENSSL_VERSION_MAJOR) && OPENSSL_VERSION_MAJOR >= 4
+typedef const X509_EXTENSION PHP_OPENSSL_X509_EXTENSION;
+#else
+typedef X509_EXTENSION PHP_OPENSSL_X509_EXTENSION;
 #endif
 
 #define PHP_OPENSSL_ERR_BUFFER_SIZE 16
