@@ -65,6 +65,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22395 (base_convert() outputs at most 64 characters).
     (Weilin Du)
 
+- Zip:
+  . Fixed bug GH-21705 (ZipArchive::getFromIndex() ignores
+    ZipArchive::FL_UNCHANGED for deleted entries). (Weilin Du)
+
 02 Jul 2026, PHP 8.4.23
 
 - Core:
