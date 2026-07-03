@@ -4370,7 +4370,7 @@ static void _class_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(ce);
-	RETVAL_BOOL(ce->ce_flags & mask);
+	RETURN_BOOL(ce->ce_flags & mask);
 }
 /* }}} */
 
