@@ -698,36 +698,46 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_none(const zen
 	return SUCCESS;
 }
 
-static zend_always_inline bool php_uri_parser_whatwg_is_alpha(unsigned char c)
+static zend_always_inline bool php_uri_whatwg_is_ascii_tab_or_newline(const unsigned char c)
+{
+	return c == 0x09 || c == 0x0A || c == 0x0D; /* \t \n \r */
+}
+
+static zend_always_inline bool php_uri_parser_whatwg_is_alpha(const unsigned char c)
 {
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
-static zend_always_inline bool php_uri_parser_whatwg_is_digit(unsigned char c)
+static zend_always_inline bool php_uri_parser_whatwg_is_digit(const unsigned char c)
 {
 	return c >= '0' && c <= '9';
+}
+
+static zend_always_inline unsigned char php_uri_ascii_to_lowercase(const unsigned char c)
+{
+	return c >= 'A' && c <= 'Z' ? (unsigned char) (c + ('a' - 'A')) : c;
 }
 
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_scheme(const zend_string *scheme)
 {
 	const char *p = ZSTR_VAL(scheme);
-	const size_t len = ZSTR_LEN(scheme);
+	const char *end = p + ZSTR_LEN(scheme);
 	bool seen_first = false;
 
-	for (size_t i = 0; i < len; i++) {
-		const unsigned char c = (unsigned char)p[i];
+	for (const char *c = p; c < end; c++) {
+		const unsigned char uc = (unsigned char) *c;
 
-		if (c == '\t' || c == '\n' || c == '\r') {
+		if (php_uri_whatwg_is_ascii_tab_or_newline(uc)) {
 			continue;
 		}
 
 		if (!seen_first) {
-			if (!php_uri_parser_whatwg_is_alpha(c)) {
+			if (!php_uri_parser_whatwg_is_alpha(uc)) {
 				return php_uri_parser_whatwg_validate_component_result(false, "scheme");
 			}
 			seen_first = true;
 		} else {
-			if (!php_uri_parser_whatwg_is_alpha(c) && !php_uri_parser_whatwg_is_digit(c) && c != '+' && c != '-' && c != '.') {
+			if (!php_uri_parser_whatwg_is_alpha(uc) && !php_uri_parser_whatwg_is_digit(uc) && uc != '+' && uc != '-' && uc != '.') {
 				return php_uri_parser_whatwg_validate_component_result(false, "scheme");
 			}
 		}
@@ -747,26 +757,45 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_port(const zen
 	return php_uri_parser_whatwg_validate_component_result(well_formed, "port");
 }
 
-ZEND_ATTRIBUTE_NONNULL static bool php_uri_parser_whatwg_is_special_scheme(const zval *scheme)
+ZEND_ATTRIBUTE_NONNULL static bool php_uri_parser_whatwg_is_special_scheme(const zend_string *scheme)
 {
-	ZEND_ASSERT(Z_TYPE_P(scheme) == IS_STRING);
+    const char *p = ZSTR_VAL(scheme);
+    const char *end = p + ZSTR_LEN(scheme);
 
-	const zend_string *str = Z_STR_P(scheme);
+    /*
+     * Create a normalized buffer from the rest of the characters, leaving out tab and newline characters.
+     * The longest special scheme "https" is 5 characters, therefore 6 bytes is enough.
+     */
+    char buf[6];
+    size_t buf_len = 0;
 
-	switch (ZSTR_LEN(str)) {
-		case 2:
-			return zend_string_equals_literal_ci(str, "ws");
-		case 3:
-			return zend_string_equals_literal_ci(str, "ftp")
-				|| zend_string_equals_literal_ci(str, "wss");
-		case 4:
-			return zend_string_equals_literal_ci(str, "http")
-				|| zend_string_equals_literal_ci(str, "file");
-		case 5:
-			return zend_string_equals_literal_ci(str, "https");
-		default:
-			return false;
-	}
+    for (const char *c = p; c < end; c++) {
+        const unsigned char uc = (unsigned char) *c;
+
+        if (php_uri_whatwg_is_ascii_tab_or_newline(uc)) {
+            continue;
+        }
+
+        if (buf_len == sizeof(buf) - 1) {
+        	/* Longer than any special scheme */
+            return false;
+        }
+
+        buf[buf_len++] = (char) php_uri_ascii_to_lowercase(uc);
+    }
+
+    switch (buf_len) {
+        case 2:
+            return memcmp(buf, "ws", 2) == 0;
+        case 3:
+            return memcmp(buf, "ftp", 3) == 0 || memcmp(buf, "wss", 3) == 0;
+        case 4:
+            return memcmp(buf, "http", 4) == 0 || memcmp(buf, "file", 4) == 0;
+        case 5:
+            return memcmp(buf, "https", 5) == 0;
+        default:
+            return false;
+    }
 }
 
 ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors(zval *errors)
@@ -779,7 +808,6 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors(zval *erro
 
 	if (Z_TYPE_P(errors) != IS_ARRAY) {
 		zval_ptr_dtor(errors);
-		ZVAL_EMPTY_ARRAY(errors);
 		array_init_size(errors, log_len);
 	}
 
@@ -793,7 +821,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 ) {
 	lxb_url_parser_clean(&lexbor_parser);
 
-	lxb_url_t *lexbor_url = lexbor_mraw_calloc(lexbor_parser.mraw, sizeof(lxb_url_t));
+	lxb_url_t *lexbor_url = lexbor_mraw_calloc(lexbor_parser.mraw, sizeof(*lexbor_url));
 	if (lexbor_url == NULL) {
 		zend_throw_exception(php_uri_ce_whatwg_invalid_url_exception, "Memory allocation error", 0);
 		return NULL;
@@ -805,7 +833,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 	 * The URL is initialized as LXB_URL_SCHEMEL_TYPE__UNDEF but this would prevent the scheme to be updated
 	 * in case of non-special schemes due to https://github.com/php/php-src/blob/27d7b799c0a13578ee0506b428b8ddc209ffb010/ext/lexbor/lexbor/url/url.c#L1402
 	 */
-	if (!php_uri_parser_whatwg_is_special_scheme(scheme)) {
+	if (!php_uri_parser_whatwg_is_special_scheme(Z_STR_P(scheme))) {
 		lexbor_url->scheme.type = LXB_URL_SCHEMEL_TYPE__UNKNOWN;
 	}
 
