@@ -414,18 +414,33 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 				if (le->type == php_pdo_list_entry()) {
 					pdbh = (pdo_dbh_t*)le->ptr;
 
-					/* Reset/validate the pooled connection before reuse. A
-					 * driver-provided reset_connection both clears server-side
-					 * session state and confirms liveness; otherwise fall back
-					 * to a plain liveness check. */
-					zend_result alive = SUCCESS;
-					if (pdbh->methods->reset_connection) {
-						alive = (pdbh->methods->reset_connection)(pdbh);
-					} else if (pdbh->methods->check_liveness) {
-						alive = (pdbh->methods->check_liveness)(pdbh);
-					}
-					if (FAILURE == alive) {
-						/* nope... need to kill it */
+					if (pdbh->refcount == 1) {
+						/* refcount 1 means no other open handle is using this
+						 * pooled connection, so we can reset its server-side
+						 * session state before handing it out. reset_connection
+						 * doubles as a liveness check; drivers without it fall
+						 * back to check_liveness. */
+						zend_result alive = SUCCESS;
+						if (pdbh->methods->reset_connection) {
+							alive = (pdbh->methods->reset_connection)(pdbh);
+						} else if (pdbh->methods->check_liveness) {
+							alive = (pdbh->methods->check_liveness)(pdbh);
+						}
+						if (FAILURE == alive) {
+							/* Removing it from the persistent list runs the
+							 * persistent destructor, which closes and frees the
+							 * connection. Only correct because refcount is 1. */
+							zend_hash_del(&EG(persistent_list), hash_key);
+							pdbh = NULL;
+						}
+					} else if (pdbh->methods->check_liveness
+							&& FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
+						/* Another open handle shares this connection, so we must
+						 * not reset it: that would discard session state (open
+						 * transactions, temporary tables, user variables) the
+						 * other handle relies on. If it has died, drop our
+						 * reference and stop reusing it; it is closed once the
+						 * last handle referencing it is released. */
 						pdbh->refcount--;
 						zend_list_close(le);
 						pdbh = NULL;

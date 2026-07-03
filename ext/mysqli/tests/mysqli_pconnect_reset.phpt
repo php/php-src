@@ -47,11 +47,10 @@ if ($row['v'] !== null) {
 }
 mysqli_free_result($res);
 
-$res = mysqli_query($link, "SHOW TABLES LIKE 'test_reset_tmp'");
-if (mysqli_num_rows($res) !== 0) {
+/* SHOW TABLES never lists temporary tables, so probe by selecting from it */
+if (false !== @mysqli_query($link, 'SELECT COUNT(*) FROM test_reset_tmp')) {
     printf("[006] Temporary table should not exist after reset\n");
 }
-mysqli_free_result($res);
 
 mysqli_close($link);
 

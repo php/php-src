@@ -44,8 +44,8 @@ $tmp = $db2->query('SELECT @test_var')->fetchColumn();
 if (null !== $tmp)
     printf("[003] User variable should have been reset, got %s\n", var_export($tmp, true));
 
-$stmt = $db2->query("SHOW TABLES LIKE 'pdo_reset_tmp'");
-if (false !== $stmt->fetch())
+/* SHOW TABLES never lists temporary tables, so probe by selecting from it */
+if (false !== $db2->query('SELECT COUNT(*) FROM pdo_reset_tmp'))
     printf("[004] Temporary table should not exist after reset\n");
 
 echo "done!";
