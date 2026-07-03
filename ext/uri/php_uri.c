@@ -12,7 +12,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_smart_str.h"
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -1258,6 +1257,8 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, build)
 
 PHP_METHOD(Uri_WhatWg_UrlBuilder, reset)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zval_ptr_dtor(Z_WHATWG_URL_PROP_SCHEME_P(ZEND_THIS));
 	ZVAL_EMPTY_STRING(Z_WHATWG_URL_PROP_SCHEME_P(ZEND_THIS));
 	convert_to_null(Z_WHATWG_URL_PROP_USERNAME_P(ZEND_THIS));
