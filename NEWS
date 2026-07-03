@@ -55,6 +55,8 @@ PHP                                                                        NEWS
 
 - PHPDBG:
   . Fixed bug GH-17387 (Trivial crash in phpdbg lexer). (iliaal)
+  . Fixed fleaked lowercased lookup keys in phpdbg_resolve_opline_break.
+    (jorgsowa)
 
 - Reflection:
   . Fixed bug GH-22324 (Ignore leading namespace separator in
