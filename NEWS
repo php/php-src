@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
     warning when an IFD is not followed by a next-IFD offset). (Eyüp Can Akman)
 
+- GMP:
+  . Fixed bug GH-22549 (Assertion failure / UB on a compound GMP power or shift
+    assignment with a negative exponent). (iliaal)
+
 - Intl:
   . Fixed NumberFormatter::parse() and NumberFormatter::parseCurrency() to
     reject offset values outside the 32-bit range instead of silently
