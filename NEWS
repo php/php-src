@@ -132,6 +132,9 @@ PHP                                                                        NEWS
     locale_get_display_keyword_value() respectively. (Weilin Du)
   . Fix incorrect argument positions for invalid start/end arguments in
     transliterator_transliterate(). (Weilin Du)
+  . IntlDateFormatter::parse()/datefmt_parse() and
+    IntlDateFormatter::localtime()/datefmt_localtime() now raise TypeError
+    when the offset argument is not of type int. (Weilin Du)
   . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
     for invalid display types. (Weilin Du)
   . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the

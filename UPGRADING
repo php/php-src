@@ -56,6 +56,10 @@ PHP 8.6 UPGRADE NOTES
   . ResourceBundle::get() and resourcebundle_get() now report fallback-disabled
     resource lookups with "without fallback to <locale>" instead of the
     malformed "without fallback from to <locale>".
+  . IntlDateFormatter::parse()/datefmt_parse() and
+    IntlDateFormatter::localtime()/datefmt_localtime() now raise a TypeError
+    when the offset argument is not of type int instead of silently converting
+    the value.
 
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
