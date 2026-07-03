@@ -1,5 +1,5 @@
 --TEST--
-GH-22558 (Tracing JIT: bitwise-NOT high bits leak past a mask into a typed int property)
+GH-22559 (Tracing JIT: bitwise-NOT high bits leak past a mask into a typed int property)
 --EXTENSIONS--
 opcache
 --INI--
