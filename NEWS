@@ -84,6 +84,10 @@ PHP                                                                        NEWS
   . Fixed behavior of Uri\WhatWg\Url wither methods with regards to empty
     opaque hosts. (kocsismate)
 
+- Zip:
+  . Fixed bug GH-21705 (ZipArchive::getFromIndex() ignores
+    ZipArchive::FL_UNCHANGED for deleted entries). (Weilin Du)
+
 02 Jul 2026, PHP 8.5.8
 
 - Core:
