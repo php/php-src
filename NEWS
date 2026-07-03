@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
     and a proxy set). (CVE-2026-12184) (ndossche)
 
+- Zip:
+  . Fixed bug GH-21705 (ZipArchive::getFromIndex() ignores
+    ZipArchive::FL_UNCHANGED for deleted entries). (Weilin Du)
+
 02 Jul 2026, PHP 8.6.0alpha1
 
 - Core:

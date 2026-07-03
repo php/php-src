@@ -2870,7 +2870,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 		ZIP_FROM_OBJECT(intern, self);
 
-		PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
+		PHP_ZIP_STAT_INDEX(intern, index, flags, sb);
 	}
 
 	if (sb.size < 1) {
