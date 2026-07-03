@@ -737,7 +737,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_host(const ze
 
 		if (len >= 2 && (p[1] == 'v' || p[1] == 'V')) {
 			return php_uri_parser_rfc3986_validate_component_result(
-				uriIsWellFormedHostIpFutureA(p + 1, p + len - 1) == URI_SUCCESS,
+				uriIsWellFormedHostIpFutureMmA(p + 1, p + len - 1, mm) == URI_SUCCESS,
 				"host"
 			);
 		}
