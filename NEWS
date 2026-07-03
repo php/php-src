@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 - DBA:
   . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
 
+- DOM:
+  . Fixed bug GH-22570 (Stack overflow when serializing a deeply nested
+    Dom\XMLDocument). (iliaal)
+
 - Exif:
   . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
     warning when an IFD is not followed by a next-IFD offset). (Eyüp Can Akman)
