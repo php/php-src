@@ -352,6 +352,15 @@ static void sapi_cli_log_message(const char *message, int syslog_type_int) /* {{
 }
 /* }}} */
 
+static int sapi_cli_activate(void) /* {{{ */
+{
+#if defined(PHP_WIN32) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+	return SUCCESS;
+}
+/* }}} */
+
 static int sapi_cli_deactivate(void) /* {{{ */
 {
 	fflush(stdout);
@@ -416,7 +425,7 @@ static sapi_module_struct cli_sapi_module = {
 	php_cli_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
-	NULL,							/* activate */
+	sapi_cli_activate,				/* activate */
 	sapi_cli_deactivate,			/* deactivate */
 
 	sapi_cli_ub_write,		    	/* unbuffered write */
