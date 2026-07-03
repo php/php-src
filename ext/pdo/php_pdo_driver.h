@@ -316,13 +316,13 @@ struct pdo_dbh_methods {
 	pdo_dbh_fetch_error_func	fetch_err;
 	pdo_dbh_get_attr_func   	get_attribute;
 	pdo_dbh_check_liveness_func	check_liveness;
-	pdo_dbh_reset_connection_func	reset_connection;
 	pdo_dbh_get_driver_methods_func get_driver_methods;
 	pdo_dbh_request_shutdown	persistent_shutdown;
 	/* if defined to NULL, PDO will use its internal transaction tracking state */
 	pdo_dbh_txn_func		in_transaction;
 	pdo_dbh_get_gc_func		get_gc;
 	pdo_dbh_sql_scanner		scanner;
+	pdo_dbh_reset_connection_func	reset_connection;
 };
 
 /* }}} */

@@ -1335,12 +1335,12 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	pdo_firebird_fetch_error_func,
 	pdo_firebird_get_attribute,
 	pdo_firebird_check_liveness,
-	NULL, /* reset_connection */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	pdo_firebird_in_manually_transaction,
 	NULL, /* get gc */
-	NULL /* scanner */
+	NULL, /* scanner */
+	NULL, /* reset_connection */
 };
 /* }}} */
 

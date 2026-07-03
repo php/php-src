@@ -675,16 +675,16 @@ static const struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_fetch_error_func,
 	pdo_mysql_get_attribute,
 	pdo_mysql_check_liveness,
+	NULL,
+	pdo_mysql_request_shutdown,
+	pdo_mysql_in_transaction,
+	NULL, /* get_gc */
+	pdo_mysql_scanner,
 #ifdef PDO_USE_MYSQLND
 	pdo_mysql_reset_connection,
 #else
 	NULL, /* reset_connection */
 #endif
-	NULL,
-	pdo_mysql_request_shutdown,
-	pdo_mysql_in_transaction,
-	NULL, /* get_gc */
-    pdo_mysql_scanner
 };
 /* }}} */
 
