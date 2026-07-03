@@ -867,14 +867,24 @@ static PHP_INI_MH(OnUpdateSessionDivisor)
 
 static PHP_INI_MH(OnUpdateRfc1867Freq)
 {
-	int new_freq = ZEND_ATOL(ZSTR_VAL(new_value));
+	const char *str = ZSTR_VAL(new_value);
+	size_t len = ZSTR_LEN(new_value);
+	bool is_percentage = len > 0 && str[len - 1] == '%';
+	size_t numeric_len = is_percentage ? len - 1 : len;
+
+	zend_long new_freq = 0;
+	uint8_t type = is_numeric_string_ex(str, numeric_len, &new_freq, NULL, false, NULL, NULL);
+	if (type != IS_LONG) {
+		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be of type int");
+		return FAILURE;
+	}
 
 	if (new_freq < 0) {
 		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be greater than or equal to 0");
 		return FAILURE;
 	}
 
-	if (ZSTR_LEN(new_value) > 0 && ZSTR_VAL(new_value)[ZSTR_LEN(new_value) - 1] == '%') {
+	if (is_percentage) {
 		if (new_freq > 100) {
 			php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be less than or equal to 100%%");
 			return FAILURE;
