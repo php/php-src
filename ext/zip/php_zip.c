@@ -3184,7 +3184,6 @@ static PHP_MINFO_FUNCTION(zip)
 	php_info_print_table_start();
 
 	php_info_print_table_row(2, "Zip", "enabled");
-	php_info_print_table_row(2, "Zip version", PHP_ZIP_VERSION);
 #ifdef HAVE_LIBZIP_VERSION
 	if (strcmp(LIBZIP_VERSION, zip_libzip_version())) {
 		php_info_print_table_row(2, "Libzip headers version", LIBZIP_VERSION);
