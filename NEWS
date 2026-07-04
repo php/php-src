@@ -37,6 +37,8 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fixed fleaked lowercased lookup keys in phpdbg_resolve_opline_break.
     (jorgsowa)
+  . Fixed off-by-one in phpdbg_safe_class_lookup() causing class lookups to
+    always fail during phpdbg's signal-safe interruption path. (jorgsowa)
 
 - Session:
   . Fixed bug GH-21314 (Different session garbage collector behavior between
