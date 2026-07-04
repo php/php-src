@@ -1500,33 +1500,24 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type) /* {{{ */
 				switch (brake->type) {
 					case PHPDBG_BREAK_METHOD_OPLINE:
 						str_type = "method";
-						goto print_opline;
+						break;
 					case PHPDBG_BREAK_FUNCTION_OPLINE:
 						str_type = "function";
-						goto print_opline;
+						break;
 					case PHPDBG_BREAK_FILE_OPLINE:
-						str_type = "method";
-
-					print_opline: {
-						if (brake->type == PHPDBG_BREAK_METHOD_OPLINE) {
-							str_type = "method";
-						} else if (brake->type == PHPDBG_BREAK_FUNCTION_OPLINE) {
-							str_type = "function";
-						} else if (brake->type == PHPDBG_BREAK_FILE_OPLINE) {
-							str_type = "file";
-						}
-
-						phpdbg_writeln("#%d\t\t#"ZEND_ULONG_FMT"\t\t(%s breakpoint)%s",
-							brake->id, brake->opline, str_type,
-							((phpdbg_breakbase_t *) brake)->disabled ? " [disabled]" : "");
-					} break;
+						str_type = "file";
+						break;
 
 					default:
 						phpdbg_writeln("#%d\t\t#"ZEND_ULONG_FMT"%s",
 							brake->id, brake->opline,
 							((phpdbg_breakbase_t *) brake)->disabled ? " [disabled]" : "");
-						break;
+						continue;
 				}
+
+				phpdbg_writeln("#%d\t\t#"ZEND_ULONG_FMT"\t\t(%s breakpoint)%s",
+					brake->id, brake->opline, str_type,
+					((phpdbg_breakbase_t *) brake)->disabled ? " [disabled]" : "");
 			} ZEND_HASH_FOREACH_END();
 		} break;
 
