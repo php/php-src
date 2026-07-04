@@ -48,12 +48,20 @@ extern ZEND_API zend_executor_globals executor_globals;
 
 /* Language Scanner */
 #ifdef ZTS
-# define LANG_SCNG(v) ZEND_TSRMG_FAST(ZEND_SCNG_OFFSET, zend_php_scanner_globals *, v)
 extern ZEND_API ts_rsrc_id language_scanner_globals_id;
-extern ZEND_API size_t language_scanner_globals_offset;
+# if defined(ZEND_WIN32) && !defined(LIBZEND_EXPORTS)
+# define LANG_SCNG(v) TSRMG(language_scanner_globals_id, zend_php_scanner_globals *, v)
+# else
+#  ifdef ZEND_WIN32
+extern TSRM_TLS zend_php_scanner_globals language_scanner_globals;
+#  else
+extern ZEND_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_php_scanner_globals language_scanner_globals;
+#  endif
+#  define LANG_SCNG(v) (language_scanner_globals.v)
+# endif
 #else
-# define LANG_SCNG(v) (language_scanner_globals.v)
 extern ZEND_API zend_php_scanner_globals language_scanner_globals;
+# define LANG_SCNG(v) (language_scanner_globals.v)
 #endif
 
 
