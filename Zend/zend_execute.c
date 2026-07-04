@@ -2600,6 +2600,19 @@ ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(co
 	}
 }
 
+/* function_name and function_name[1] (the lowercased key) are adjacent RT_CONSTANT literals;
+ * for INIT_NS_FCALL_BY_NAME with a namespace prefix, function_name[2] is the global fallback */
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_function_error(zval *function_name)
+{
+	zend_string *lc_key = Z_STR_P(function_name + 1);
+	zend_string *suggestion = zend_find_similar_function(ZSTR_VAL(lc_key), ZSTR_LEN(lc_key));
+	if (suggestion) {
+		zend_throw_error(NULL, "Call to undefined function %s() (did you mean %s()?)", Z_STRVAL_P(function_name), ZSTR_VAL(suggestion));
+	} else {
+		zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+	}
+}
+
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_invalid_method_call(const zval *object, const zval *function_name)
 {
 	zend_throw_error(NULL, "Call to a member function %s() on %s",
