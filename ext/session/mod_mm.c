@@ -111,7 +111,7 @@ static ps_sd *ps_sd_new(ps_mm *data, zend_string *key)
 	ps_sd *sd;
 
 	sd = mm_malloc(data->mm, sizeof(ps_sd) + ZSTR_LEN(key));
-	if (!sd) {
+	if (UNEXPECTED(!sd)) {
 
 		php_error_docref(NULL, E_WARNING, "mm_malloc failed, avail %ld, err %s", mm_available(data->mm), mm_error());
 		return NULL;
@@ -222,14 +222,14 @@ static zend_result ps_mm_initialize(ps_mm *data, const char *path)
 {
 	data->owner = getpid();
 	data->mm = mm_create(0, path);
-	if (!data->mm) {
+	if (UNEXPECTED(!data->mm)) {
 		return FAILURE;
 	}
 
 	data->hash_cnt = 0;
 	data->hash_max = 511;
 	data->hash = mm_calloc(data->mm, data->hash_max + 1, sizeof(ps_sd *));
-	if (!data->hash) {
+	if (UNEXPECTED(!data->hash)) {
 		mm_destroy(data->mm);
 		return FAILURE;
 	}
@@ -269,7 +269,7 @@ PHP_MINIT_FUNCTION(ps_mm)
 	zend_result ret;
 
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
-	if (!ps_mm_instance) {
+	if (UNEXPECTED(!ps_mm_instance)) {
 		return FAILURE;
 	}
 
@@ -376,7 +376,7 @@ PS_WRITE_FUNC(mm)
 			sd->alloclen = val->len + 1;
 			sd->data = mm_malloc(data->mm, sd->alloclen);
 
-			if (!sd->data) {
+			if (UNEXPECTED(!sd->data)) {
 				ps_sd_destroy(data, sd);
 				php_error_docref(NULL, E_WARNING, "Cannot allocate new data segment");
 				sd = NULL;

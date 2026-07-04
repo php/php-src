@@ -84,7 +84,7 @@
 # ifndef O_NOFOLLOW
 #  define O_NOFOLLOW 0
 # endif
-#define SESS_FILE_BUF_SIZE(sz) ((unsigned int)(sz > INT_MAX ? INT_MAX : (unsigned int)sz))
+#define SESS_FILE_BUF_SIZE(sz) ((unsigned int)(UNEXPECTED((sz) > INT_MAX) ? INT_MAX : (unsigned int)sz))
 #endif
 
 typedef struct {
@@ -292,7 +292,7 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 		return -1;
 	}
 
-	if (ZSTR_LEN(dirname) >= MAXPATHLEN) {
+	if (UNEXPECTED(ZSTR_LEN(dirname) >= MAXPATHLEN)) {
 		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: dirname(%s) is too long", ZSTR_VAL(dirname));
 		closedir(dir);
 		return -1;
@@ -413,7 +413,7 @@ PS_OPEN_FUNC(files)
 	if (argc > 1) {
 		errno = 0;
 		dirdepth = (size_t) ZEND_STRTOL(argv[0], NULL, 10);
-		if (errno == ERANGE) {
+		if (UNEXPECTED(errno == ERANGE)) {
 			php_error(E_WARNING, "The first parameter in session.save_path is invalid");
 			return FAILURE;
 		}
@@ -422,7 +422,7 @@ PS_OPEN_FUNC(files)
 	if (argc > 2) {
 		errno = 0;
 		filemode = (int)ZEND_STRTOL(argv[1], NULL, 8);
-		if (errno == ERANGE || filemode < 0 || filemode > 07777) {
+		if (UNEXPECTED(errno == ERANGE || filemode < 0 || filemode > 07777)) {
 			php_error(E_WARNING, "The second parameter in session.save_path is invalid");
 			return FAILURE;
 		}

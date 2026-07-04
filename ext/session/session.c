@@ -365,11 +365,11 @@ PHPAPI zend_result php_session_valid_key(const char *key)
 
 	for (p = key; (c = *p); p++) {
 		/* valid characters are [a-z], [A-Z], [0-9], - (hyphen) and , (comma) */
-		if (!((c >= 'a' && c <= 'z')
+		if (UNEXPECTED(!((c >= 'a' && c <= 'z')
 				|| (c >= 'A' && c <= 'Z')
 				|| (c >= '0' && c <= '9')
 				|| c == ','
-				|| c == '-')) {
+				|| c == '-'))) {
 			return FAILURE;
 		}
 	}
@@ -378,7 +378,7 @@ PHPAPI zend_result php_session_valid_key(const char *key)
 
 	/* Somewhat arbitrary length limit here, but should be way more than
 	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
-	if (key_len == 0 || key_len > PS_MAX_SID_LENGTH) {
+	if (UNEXPECTED(key_len == 0 || key_len > PS_MAX_SID_LENGTH)) {
 		return FAILURE;
 	}
 
@@ -728,7 +728,7 @@ static PHP_INI_MH(OnUpdateCookieLifetime)
 		}
 		return FAILURE;
 	}
-	if (lval < 0 || lval > maxcookie) {
+	if (UNEXPECTED(lval < 0 || lval > maxcookie)) {
 		php_error_docref(NULL, E_WARNING, "session.cookie_lifetime must be between 0 and " ZEND_LONG_FMT, maxcookie);
 		return FAILURE;
 	}
@@ -795,7 +795,7 @@ static PHP_INI_MH(OnUpdateSidLength)
 		php_error_docref("session.configuration", E_DEPRECATED, "session.sid_length INI setting is deprecated");
 	}
 
-	if (!endptr || (*endptr != '\0') || (val < 22) || (val > PS_MAX_SID_LENGTH)) {
+	if (UNEXPECTED(!endptr || (*endptr != '\0') || (val < 22) || (val > PS_MAX_SID_LENGTH))) {
 		php_error_docref(NULL, E_WARNING, "session.configuration \"session.sid_length\" must be between 22 and 256");
 		return FAILURE;
 	}
@@ -819,7 +819,7 @@ static PHP_INI_MH(OnUpdateSidBits)
 		php_error_docref("session.configuration", E_DEPRECATED, "session.sid_bits_per_character INI setting is deprecated");
 	}
 
-	if (!endptr || (*endptr != '\0') || (val < 4) || (val > 6)) {
+	if (UNEXPECTED(!endptr || (*endptr != '\0') || (val < 4) || (val > 6))) {
 		php_error_docref(NULL, E_WARNING, "session.configuration \"session.sid_bits_per_character\" must be between 4 and 6");
 		return FAILURE;
 	}
@@ -836,7 +836,7 @@ static PHP_INI_MH(OnUpdateSessionGcProbability)
 
 	zend_long new_probability = zend_ini_parse_quantity_warn(new_value, entry->name);
 
-	if (new_probability < 0) {
+	if (UNEXPECTED(new_probability < 0)) {
 		php_error_docref("session.gc_probability", E_WARNING, "session.gc_probability must be greater than or equal to 0");
 		return FAILURE;
 	}
@@ -854,7 +854,7 @@ static PHP_INI_MH(OnUpdateSessionDivisor)
 
 	zend_long new_divisor = zend_ini_parse_quantity_warn(new_value, entry->name);
 
-	if (new_divisor <= 0) {
+	if (UNEXPECTED(new_divisor <= 0)) {
 		php_error_docref("session.gc_divisor", E_WARNING, "session.gc_divisor must be greater than 0");
 		return FAILURE;
 	}
@@ -869,13 +869,13 @@ static PHP_INI_MH(OnUpdateRfc1867Freq)
 {
 	int new_freq = ZEND_ATOL(ZSTR_VAL(new_value));
 
-	if (new_freq < 0) {
+	if (UNEXPECTED(new_freq < 0)) {
 		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be greater than or equal to 0");
 		return FAILURE;
 	}
 
 	if (ZSTR_LEN(new_value) > 0 && ZSTR_VAL(new_value)[ZSTR_LEN(new_value) - 1] == '%') {
-		if (new_freq > 100) {
+		if (UNEXPECTED(new_freq > 100)) {
 			php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be less than or equal to 100%%");
 			return FAILURE;
 		}
@@ -2464,7 +2464,7 @@ PHP_FUNCTION(session_create_id)
 	}
 
 	if (prefix && ZSTR_LEN(prefix)) {
-		if (ZSTR_LEN(prefix) > PS_MAX_SID_LENGTH) {
+		if (UNEXPECTED(ZSTR_LEN(prefix) > PS_MAX_SID_LENGTH)) {
 			zend_argument_value_error(1, "cannot be longer than %d characters", PS_MAX_SID_LENGTH);
 			RETURN_THROWS();
 		}

@@ -259,7 +259,7 @@ PHPAPI zend_result php_session_reset_id(void);
 	/* protect against user interference */ \
 	ZVAL_COPY(&_zv, Z_REFVAL(PS(http_session_vars))); \
 	ZEND_HASH_FOREACH_KEY(Z_ARRVAL(_zv), zend_ulong num_key, zend_string * key) { \
-		if (key == NULL) { \
+		if (UNEXPECTED(key == NULL)) { \
 			php_error_docref(NULL, E_WARNING, \
 					"Skipping numeric key " ZEND_LONG_FMT, num_key); \
 			continue; \
