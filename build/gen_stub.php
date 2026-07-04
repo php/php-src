@@ -84,7 +84,7 @@ function processDirectory(string $dir, Context $context): array {
         RecursiveIteratorIterator::LEAVES_ONLY
     );
     foreach ($it as $file) {
-        $pathName = $file->getPathName();
+        $pathName = $file->getPathname();
         if (str_ends_with($pathName, '.stub.php')) {
             $pathNames[] = $pathName;
         }
@@ -5560,7 +5560,7 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
     );
 
     foreach ($it as $file) {
-        $pathName = $file->getPathName();
+        $pathName = $file->getPathname();
         if (!preg_match('/(?:[\w\.]*constants[\w\._]*|tokens).xml$/i', basename($pathName))) {
             continue;
         }
@@ -5741,7 +5741,7 @@ function replaceClassSynopses(
     );
 
     foreach ($it as $file) {
-        $pathName = $file->getPathName();
+        $pathName = $file->getPathname();
         if (!preg_match('/\.xml$/i', $pathName)) {
             continue;
         }
@@ -5958,7 +5958,7 @@ function replaceMethodSynopses(
     );
 
     foreach ($it as $file) {
-        $pathName = $file->getPathName();
+        $pathName = $file->getPathname();
         if (!preg_match('/\.xml$/i', $pathName)) {
             continue;
         }
