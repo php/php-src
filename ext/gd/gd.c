@@ -1956,7 +1956,7 @@ PHP_FUNCTION(imagepng)
 #ifdef HAVE_GD_BUNDLED
 	{
 		gdPngWriteOptions options;
-		unsigned int filters = GD_PNG_FILTER_AUTO;
+		unsigned int filters = GD_PNG_FILTER_NONE;
 		unsigned int unknown_filters;
 
 		gdPngWriteOptionsInit(&options);
