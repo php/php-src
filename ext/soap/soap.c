@@ -2273,6 +2273,10 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 		return false;
 	}
 
+	ZVAL_UNDEF(&params[0]);
+	ZVAL_UNDEF(&params[1]);
+	ZVAL_UNDEF(&params[2]);
+
 	zend_try {
 		ZVAL_STRINGL(&params[0], buf, buf_size);
 		ZVAL_STRING(&params[1], location);
