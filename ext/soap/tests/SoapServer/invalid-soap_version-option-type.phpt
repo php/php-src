@@ -1,5 +1,5 @@
 --TEST--
-SoapServer constructor with an invalid encoding option
+SoapServer constructor with an invalid soap_version option
 --EXTENSIONS--
 soap
 --FILE--
@@ -9,7 +9,7 @@ class ExtendedSoapServer extends SoapServer {}
 
 $wsdl = 'irrelevant';
 $options = [
-    'encoding' => 'non-sense',
+    'soap_version' => "I am not an integer",
 ];
 try {
     $client = new SoapServer($wsdl, $options);
@@ -25,5 +25,5 @@ try {
 
 ?>
 --EXPECT--
-ValueError: SoapServer::__construct(): Argument #2 ($options) "encoding" option must be a valid encoding, "non-sense" given
-ValueError: SoapServer::__construct(): Argument #2 ($options) "encoding" option must be a valid encoding, "non-sense" given
+TypeError: SoapServer::__construct(): Argument #2 ($options) "soap_version" option must be of type int, string given
+TypeError: SoapServer::__construct(): Argument #2 ($options) "soap_version" option must be of type int, string given

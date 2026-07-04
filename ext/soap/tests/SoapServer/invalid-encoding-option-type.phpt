@@ -9,7 +9,7 @@ class ExtendedSoapServer extends SoapServer {}
 
 $wsdl = 'irrelevant';
 $options = [
-    'encoding' => 'non-sense',
+    'encoding' => 25,
 ];
 try {
     $client = new SoapServer($wsdl, $options);
@@ -25,5 +25,5 @@ try {
 
 ?>
 --EXPECT--
-ValueError: SoapServer::__construct(): Argument #2 ($options) "encoding" option must be a valid encoding, "non-sense" given
-ValueError: SoapServer::__construct(): Argument #2 ($options) "encoding" option must be a valid encoding, "non-sense" given
+TypeError: SoapServer::__construct(): Argument #2 ($options) "encoding" option must be of type string, int given
+TypeError: SoapServer::__construct(): Argument #2 ($options) "encoding" option must be of type string, int given
