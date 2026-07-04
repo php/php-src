@@ -1,3 +1,30 @@
+/*
+  +----------------------------------------------------------------------+
+  | Copyright (c) The PHP Group                                          |
+  +----------------------------------------------------------------------+
+  | This source file is subject to version 3.01 of the PHP license,      |
+  | that is bundled with this package in the file LICENSE, and is        |
+  | available through the world-wide-web at the following url:           |
+  | https://www.php.net/license/3_01.txt                                 |
+  +----------------------------------------------------------------------+
+  | Author: Sepehr Mahmoudi                                              |
+  +----------------------------------------------------------------------+
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <php.h>
+#include "php_intl.h"
+#include "grapheme_util.h"
+#include "intl_common.h"
+#include "intl_error.h"
+#include "zend_exceptions.h"
+
+#include <unicode/ubrk.h>
+#include <unicode/utext.h>
+
 /* {{{ Validate that mask_char is exactly one grapheme cluster */
 static bool grapheme_mask_validate_mask_char(zend_string *mask_char)
 {
@@ -40,7 +67,8 @@ static bool grapheme_mask_validate_mask_char(zend_string *mask_char)
 }
 /* }}} */
 
-/* {{{ proto string|false grapheme_mask(string $string, string $mask_char = "*", int $offset = 0, ?int $length = null) */
+/* {{{ proto string|false grapheme_mask(string $string, string $mask_char = "*", int $offset = 0, ?int $length = null)
+   Masks a portion of a string respecting grapheme cluster boundaries */
 PHP_FUNCTION(grapheme_mask)
 {
     zend_string *str, *mask_char;
@@ -97,15 +125,27 @@ PHP_FUNCTION(grapheme_mask)
     /* Phase 1: Cache all grapheme boundaries */
     uint32_t alloc_graphemes = 16;
     int32_t *boundaries = emalloc(alloc_graphemes * sizeof(int32_t));
+    if (!boundaries) {
+        utext_close(ut);
+        ubrk_close(bi);
+        RETURN_FALSE;
+    }
+
     int32_t idx = 0;
     int32_t pos = ubrk_first(bi);
-
     boundaries[idx++] = pos;  /* First boundary (0) */
 
     while ((pos = ubrk_next(bi)) != UBRK_DONE) {
         if (idx >= alloc_graphemes) {
             alloc_graphemes *= 2;
-            boundaries = erealloc(boundaries, alloc_graphemes * sizeof(int32_t));
+            int32_t *new_boundaries = erealloc(boundaries, alloc_graphemes * sizeof(int32_t));
+            if (!new_boundaries) {
+                efree(boundaries);
+                utext_close(ut);
+                ubrk_close(bi);
+                RETURN_FALSE;
+            }
+            boundaries = new_boundaries;
         }
         boundaries[idx++] = pos;
     }
