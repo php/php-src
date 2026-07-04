@@ -865,12 +865,30 @@ static PHP_INI_MH(OnUpdateSessionDivisor)
 	return SUCCESS;
 }
 
+static bool php_session_is_ini_whitespace(char c)
+{
+	return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v' || c == '\f';
+}
+
 static PHP_INI_MH(OnUpdateRfc1867Freq)
 {
 	const char *str = ZSTR_VAL(new_value);
 	size_t len = ZSTR_LEN(new_value);
+
+	/* Ignore trailing whitespace so it doesn't hide the '%' suffix (leading
+	 * whitespace is already tolerated by is_numeric_string_ex() below). */
+	while (len > 0 && php_session_is_ini_whitespace(str[len - 1])) {
+		len--;
+	}
+
 	bool is_percentage = len > 0 && str[len - 1] == '%';
 	size_t numeric_len = is_percentage ? len - 1 : len;
+
+	/* Whitespace directly before the '%' (e.g. "5 %") is rejected. */
+	if (is_percentage && numeric_len > 0 && php_session_is_ini_whitespace(str[numeric_len - 1])) {
+		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be of type int");
+		return FAILURE;
+	}
 
 	zend_long new_freq = 0;
 	uint8_t type = is_numeric_string_ex(str, numeric_len, &new_freq, NULL, false, NULL, NULL);
@@ -893,6 +911,12 @@ static PHP_INI_MH(OnUpdateRfc1867Freq)
 	} else {
 		PS(rfc1867_freq) = new_freq;
 	}
+
+	/* Store a whitespace-free canonical value so ini_get() doesn't echo back stray whitespace. */
+	char buf[MAX_LENGTH_OF_LONG + 2];
+	int normalized_len = snprintf(buf, sizeof(buf), is_percentage ? ZEND_LONG_FMT "%%" : ZEND_LONG_FMT, new_freq);
+	entry->value = zend_string_init(buf, (size_t) normalized_len, true);
+	GC_MAKE_PERSISTENT_LOCAL(entry->value);
 
 	return SUCCESS;
 }
