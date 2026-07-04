@@ -40,7 +40,7 @@ static bool grapheme_mask_validate_mask_char(zend_string *mask_char)
 }
 /* }}} */
 
-/* {{{ proto string|false grapheme_mask(string $string, string $mask_char, int $start = 0, ?int $length = null) */
+/* {{{ proto string|false grapheme_mask(string $string, string $mask_char = "*", int $offset = 0, ?int $length = null) */
 PHP_FUNCTION(grapheme_mask)
 {
     zend_string *str, *mask_char;
@@ -48,9 +48,9 @@ PHP_FUNCTION(grapheme_mask)
     zend_long length = 0;
     bool length_is_null = true;
 
-    ZEND_PARSE_PARAMETERS_START(2, 4)
+    ZEND_PARSE_PARAMETERS_START(1, 4)
         Z_PARAM_STR(str)
-        Z_PARAM_STR(mask_char)
+        Z_PARAM_STR_DEFAULT(mask_char, "*")
         Z_PARAM_OPTIONAL
         Z_PARAM_LONG(offset)
         Z_PARAM_LONG_OR_NULL(length, length_is_null)
@@ -99,9 +99,9 @@ PHP_FUNCTION(grapheme_mask)
     int32_t *boundaries = emalloc(alloc_graphemes * sizeof(int32_t));
     int32_t idx = 0;
     int32_t pos = ubrk_first(bi);
-    
+
     boundaries[idx++] = pos;  /* First boundary (0) */
-    
+
     while ((pos = ubrk_next(bi)) != UBRK_DONE) {
         if (idx >= alloc_graphemes) {
             alloc_graphemes *= 2;
@@ -109,10 +109,10 @@ PHP_FUNCTION(grapheme_mask)
         }
         boundaries[idx++] = pos;
     }
-    
+
     utext_close(ut);
     ubrk_close(bi);
-    
+
     int32_t total_graphemes = idx - 1;  /* Number of grapheme clusters */
 
     /* Phase 2: Calculate start and length in grapheme units */
@@ -150,13 +150,13 @@ PHP_FUNCTION(grapheme_mask)
     /* Phase 3: Get byte offsets */
     int32_t start_byte_offset = boundaries[start];
     int32_t end_byte_offset;
-    
+
     if (start + mask_len == total_graphemes) {
         end_byte_offset = ZSTR_LEN(str);
     } else {
         end_byte_offset = boundaries[start + mask_len];
     }
-    
+
     efree(boundaries);
 
     /* Phase 4: Build result */
@@ -190,4 +190,3 @@ PHP_FUNCTION(grapheme_mask)
     RETURN_NEW_STR(result);
 }
 /* }}} */
-
