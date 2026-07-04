@@ -5,7 +5,7 @@ cd "$(dirname "$0")/../../.."
 tmp_dir=/tmp/php-src-download-bundled/boost-context
 rm -rf "$tmp_dir"
 
-revision=refs/tags/boost-1.86.0
+revision=refs/tags/boost-1.91.0
 
 git clone --depth 1 --revision="$revision" https://github.com/boostorg/context.git "$tmp_dir"
 

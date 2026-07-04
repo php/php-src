@@ -41,6 +41,7 @@
 .file "make_mips32_o32_elf_gas.S"
 .text
 .globl make_fcontext
+.hidden make_fcontext
 .align 2
 .type make_fcontext,@function
 .ent make_fcontext

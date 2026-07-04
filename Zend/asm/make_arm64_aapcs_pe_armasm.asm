@@ -73,7 +73,7 @@ make_fcontext proc
 
     ; save top address of context_stack as 'base'
     str  x3, [x0, #0xa0]
-    ; save bottom address of context-stack as 'limit' and 'dealloction stack'
+    ; save bottom address of context-stack as 'limit' and 'deallocation stack'
     sub  x3, x3, x1
     stp  x3, x3, [x0, #0xa8]
     ; save 0 as 'fiber data'
