@@ -2551,17 +2551,19 @@ ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_index_write(HashTable *ht,
 	return retval;
 }
 
-static zend_string *zend_find_similar_in_function_table(HashTable *ht, const char *lcname, size_t lcname_len)
+static zend_string *zend_find_similar_in_function_table(const HashTable *ht, const char *lcname, size_t lcname_len)
 {
 	zend_long threshold = lcname_len >= 8 ? 2 : 1;
 	zend_long best_dist = threshold + 1;
 	zend_string *best = NULL;
-	zend_string *key;
-	zval *val;
 
-	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht, key, val) {
-		if (!key || ZSTR_VAL(key)[0] == '\0') continue;
-		if (llabs((zend_long)lcname_len - (zend_long)ZSTR_LEN(key)) > threshold) continue;
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht, zend_string *key, zval *val) {
+		if (!key || ZSTR_VAL(key)[0] == '\0') {
+			continue;
+		}
+		if (llabs((zend_long)lcname_len - (zend_long)ZSTR_LEN(key)) > threshold) {
+			continue;
+		}
 		zend_long dist = zend_levenshtein(lcname, lcname_len, ZSTR_VAL(key), ZSTR_LEN(key));
 		if (dist > 0 && dist <= threshold && dist < best_dist) {
 			best_dist = dist;
@@ -2574,17 +2576,22 @@ static zend_string *zend_find_similar_in_function_table(HashTable *ht, const cha
 
 static zend_string *zend_find_similar_function(const char *lcname, size_t lcname_len)
 {
-	if (memchr(lcname, '\\', lcname_len)) return NULL;
-	if (lcname_len < 3) return NULL;
+	if (memchr(lcname, '\\', lcname_len)) {
+		return NULL;
+	}
+	if (lcname_len < 3) {
+		return NULL;
+	}
 	return zend_find_similar_in_function_table(EG(function_table), lcname, lcname_len);
 }
 
 static zend_string *zend_find_similar_method(const zend_class_entry *ce, const zend_string *method)
 {
-	zend_string *lc_method = zend_string_tolower((zend_string *)method);
+	zend_string *lc_method = zend_string_alloc(ZSTR_LEN(method), 0);
 	zend_string *best = NULL;
+	zend_str_tolower_copy(ZSTR_VAL(lc_method), ZSTR_VAL(method), ZSTR_LEN(method));
 	if (ZSTR_LEN(lc_method) >= 3) {
-		best = zend_find_similar_in_function_table((HashTable *)&ce->function_table, ZSTR_VAL(lc_method), ZSTR_LEN(lc_method));
+		best = zend_find_similar_in_function_table(&ce->function_table, ZSTR_VAL(lc_method), ZSTR_LEN(lc_method));
 	}
 	zend_string_release(lc_method);
 	return best;

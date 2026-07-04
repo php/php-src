@@ -66,8 +66,8 @@ ZEND_API zend_long zend_levenshtein(const char *s1, size_t l1, const char *s2, s
 		size_t tmp_l = l1; l1 = l2; l2 = tmp_l;
 	}
 
-	p1 = emalloc((l2 + 1) * sizeof(zend_long));
-	p2 = emalloc((l2 + 1) * sizeof(zend_long));
+	p1 = safe_emalloc(l2 + 1, sizeof(*p1), 0);
+	p2 = safe_emalloc(l2 + 1, sizeof(*p2), 0);
 
 	for (i2 = 0; i2 <= l2; i2++) {
 		p1[i2] = (zend_long)i2;

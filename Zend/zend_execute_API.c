@@ -1692,12 +1692,14 @@ static zend_string *zend_find_similar_in_class_table(const char *lcname, size_t 
 	zend_long threshold = lcname_len >= 8 ? 2 : 1;
 	zend_long best_dist = threshold + 1;
 	zend_string *best = NULL;
-	zend_string *key;
-	zval *val;
 
-	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, val) {
-		if (!key || ZSTR_VAL(key)[0] == '\0' || Z_TYPE_P(val) == IS_ALIAS_PTR) continue;
-		if (llabs((zend_long)lcname_len - (zend_long)ZSTR_LEN(key)) > threshold) continue;
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), zend_string *key, zval *val) {
+		if (!key || ZSTR_VAL(key)[0] == '\0' || Z_TYPE_P(val) == IS_ALIAS_PTR) {
+			continue;
+		}
+		if (llabs((zend_long)lcname_len - (zend_long)ZSTR_LEN(key)) > threshold) {
+			continue;
+		}
 		zend_long dist = zend_levenshtein(lcname, lcname_len, ZSTR_VAL(key), ZSTR_LEN(key));
 		if (dist > 0 && dist <= threshold && dist < best_dist) {
 			best_dist = dist;
@@ -1710,8 +1712,9 @@ static zend_string *zend_find_similar_in_class_table(const char *lcname, size_t 
 
 static zend_string *zend_find_similar_class(const zend_string *class_name)
 {
-	zend_string *lc_name = zend_string_tolower((zend_string *)class_name);
+	zend_string *lc_name = zend_string_alloc(ZSTR_LEN(class_name), 0);
 	zend_string *best = NULL;
+	zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(class_name), ZSTR_LEN(class_name));
 	if (ZSTR_LEN(lc_name) >= 3) {
 		best = zend_find_similar_in_class_table(ZSTR_VAL(lc_name), ZSTR_LEN(lc_name));
 	}
