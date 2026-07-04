@@ -403,10 +403,6 @@ static void apc_init_heap(void)
 
 */
 
-#ifdef ZTS
-size_t zend_mm_globals_size(void);
-#endif
-
 END_EXTERN_C()
 
 #endif

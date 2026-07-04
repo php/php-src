@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Lock unmodified readonly properties for modification after clone-with.
     (NickSdot)
   . abort() instead of exit() on hard OOM. (realFlowControl)
+  . perf: ZTS: move AG and SCNG into native __thread storage. (henderkes)
 
 - Calendar:
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
