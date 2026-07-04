@@ -1,8 +1,8 @@
 #ifndef GRAPHEME_MASK_H
 #define GRAPHEME_MASK_H
 
-#include <php.h>
+#include <stdbool.h>
 
-PHP_FUNCTION(grapheme_mask);
+bool grapheme_mask_validate_mask_char(const char *mask_str, size_t mask_str_len);
 
 #endif /* GRAPHEME_MASK_H */
