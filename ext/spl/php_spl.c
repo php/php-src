@@ -249,7 +249,7 @@ PHP_FUNCTION(spl_classes)
 }
 /* }}} */
 
-static bool spl_autoload(const char *name, size_t name_len, zend_string *lc_name, const char *ext, size_t ext_len) /* {{{ */
+static bool spl_autoload(const char *name, size_t name_len, const char *ext, size_t ext_len) /* {{{ */
 {
 	zend_string *class_file;
 	zval dummy;
@@ -294,7 +294,7 @@ static bool spl_autoload(const char *name, size_t name_len, zend_string *lc_name
 			efree(new_op_array);
 			zval_ptr_dtor(&result);
 
-			ret = zend_hash_exists(EG(class_table), lc_name);
+			ret = zend_hash_str_find_ptr_lc(EG(class_table), name, name_len) != NULL;
 		}
 	}
 	zend_destroy_file_handle(&file_handle);
@@ -307,7 +307,7 @@ PHP_FUNCTION(spl_autoload)
 {
 	size_t pos_len, pos1_len;
 	char *pos, *pos1;
-	zend_string *class_name, *lc_name, *file_exts = NULL;
+	zend_string *class_name, *file_exts = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S!", &class_name, &file_exts) == FAILURE) {
 		RETURN_THROWS();
@@ -332,9 +332,6 @@ PHP_FUNCTION(spl_autoload)
 		name_len--;
 	}
 
-	lc_name = zend_string_alloc(name_len, 0);
-	zend_str_tolower_copy(ZSTR_VAL(lc_name), name, name_len);
-
 	while (pos && *pos && !EG(exception)) {
 		pos1 = strchr(pos, ',');
 		if (pos1) {
@@ -342,13 +339,12 @@ PHP_FUNCTION(spl_autoload)
 		} else {
 			pos1_len = pos_len;
 		}
-		if (spl_autoload(name, name_len, lc_name, pos, pos1_len)) {
+		if (spl_autoload(name, name_len, pos, pos1_len)) {
 			break; /* loaded */
 		}
 		pos = pos1 ? pos1 + 1 : NULL;
 		pos_len = pos1? pos_len - pos1_len - 1 : 0;
 	}
-	zend_string_release(lc_name);
 } /* }}} */
 
 /* {{{ Register and return default file extensions for spl_autoload */
