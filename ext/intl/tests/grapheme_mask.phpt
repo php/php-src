@@ -1,37 +1,28 @@
 --TEST--
-grapheme_mask() basic test
+grapheme_mask() - Basic functionality
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
+<?php
+if (!extension_loaded('intl')) die('skip intl extension not enabled');
+?>
 --FILE--
 <?php
-
-// Test 1: Basic ASCII string masking
-var_dump(grapheme_mask("Hello World", "eo", 0, 0, "X"));
-
-// Test 2: Unicode string masking (Persian with a mask character)
-var_dump(grapheme_mask("سلام دنیا", "ا", 0, 0, "*"));
-
-// Test 3: With start and length parameters
-var_dump(grapheme_mask("abcdefghij", "aeiou", 1, 5, "#"));
-
-// Test 4: Default mask character (*)
-var_dump(grapheme_mask("test", "t"));
-
-// Test 5: Mask character more than one grapheme → should return false
-var_dump(grapheme_mask("hello", "l", 0, 0, "ab"));
-
-// Test 6: Empty maskChars → nothing masked
-var_dump(grapheme_mask("hello", ""));
-
-// Test 7: Multibyte mask character (e.g., Persian character as mask)
-var_dump(grapheme_mask("a b c", " ", 0, 0, "🌟"));
-
+var_dump(grapheme_mask("Hello World", "X"));
+var_dump(grapheme_mask("Hello World", "X", 3));
+var_dump(grapheme_mask("Hello World", "X", 3, 2));
+var_dump(grapheme_mask("Hello World", "X", -5, 3));
+var_dump(grapheme_mask("Hello World", "X", 0, 0));
+var_dump(grapheme_mask("", "X"));
+var_dump(grapheme_mask("Hello World", "👍"));
+var_dump(grapheme_mask("Hello World", "ab")); // should throw ValueError
 ?>
---EXPECT--
-string(11) "HXllo World"
-string(13) "س*لم دنی*"
-string(10) "abcde#ghij"
-string(4) "*es*"
+--EXPECTF--
+string(11) "XXXXX XXXXX"
+string(11) "HelXX XXXXX"
+string(11) "HelXXo XXXXX"
+string(11) "Hello WXXld"
+string(11) "Hello World"
+string(0) ""
+string(11) "👍👍👍👍👍 👍👍👍👍👍"
+
+Warning: grapheme_mask(): Argument #2 ($mask_char) must be exactly one grapheme cluster in %s on line %d
 bool(false)
-string(5) "hello"
-string(5) "a🌟b🌟c"
