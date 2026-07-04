@@ -11,7 +11,7 @@ $s=serialize($y);
 var_dump($s);
 $x=unserialize($s);
 var_dump($x);
-vaR_dump(serialize($x));
+var_dump(serialize($x));
 ?>
 --EXPECTF--
 array(1) {

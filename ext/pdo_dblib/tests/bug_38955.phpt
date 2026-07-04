@@ -28,7 +28,7 @@ $db->query("INSERT INTO test38955(val) values(5)");
 $db->query("INSERT INTO test38955(val) values(6)");
 $db->query("INSERT INTO test38955(val) values(7)");
 $db->query("INSERT INTO test38955(val) values(8)");
-$db->rollback();
+$db->rollBack();
 
 $rs = $db->query("SELECT * FROM test38955");
 $rows = $rs->fetchAll(PDO::FETCH_ASSOC);

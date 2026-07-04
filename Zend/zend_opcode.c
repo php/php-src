@@ -216,7 +216,6 @@ static void _destroy_zend_class_traits_info(zend_class_entry *ce)
 
 	for (i = 0; i < ce->num_traits; i++) {
 		zend_string_release_ex(ce->trait_names[i].name, 0);
-		zend_string_release_ex(ce->trait_names[i].lc_name, 0);
 	}
 	efree(ce->trait_names);
 
@@ -367,7 +366,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 
 					for (i = 0; i < ce->num_interfaces; i++) {
 						zend_string_release_ex(ce->interface_names[i].name, 0);
-						zend_string_release_ex(ce->interface_names[i].lc_name, 0);
 					}
 					efree(ce->interface_names);
 				}

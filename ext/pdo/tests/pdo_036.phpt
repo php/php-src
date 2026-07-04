@@ -5,7 +5,7 @@ pdo
 --FILE--
 <?php
 
-$instance = new reflectionclass('pdostatement');
+$instance = new ReflectionClass('PDOStatement');
 $x = $instance->newInstance();
 var_dump($x);
 
@@ -20,7 +20,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-$instance = new reflectionclass('pdorow');
+$instance = new ReflectionClass('PDORow');
 $x = $instance->newInstance();
 var_dump($x);
 

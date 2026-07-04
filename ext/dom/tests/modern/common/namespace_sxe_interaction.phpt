@@ -32,14 +32,14 @@ echo file_get_contents(__DIR__ . "/namespace_sxe_interaction2.xml"), "\n";
 
 echo "=== serialize DOM ===\n";
 
-echo $dom->saveXML(), "\n\n";
+echo $dom->saveXml(), "\n\n";
 
 echo "=== serialize imported DOM ===\n";
 
 // Importing should yield the exact same document
 $new_dom = Dom\XMLDocument::createEmpty();
 $new_dom->append($new_dom->importNode($dom->documentElement, true));
-echo $new_dom->saveXML(), "\n";
+echo $new_dom->saveXml(), "\n";
 
 ?>
 --CLEAN--

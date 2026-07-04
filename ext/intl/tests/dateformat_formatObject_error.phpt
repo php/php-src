@@ -21,7 +21,7 @@ try {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
-var_dump(IntlDateFormatter::formatObject(new stdclass));
+var_dump(IntlDateFormatter::formatObject(new stdClass));
 var_dump(intl_get_error_message());
 var_dump(IntlDateFormatter::formatObject(new A));
 var_dump(intl_get_error_message());

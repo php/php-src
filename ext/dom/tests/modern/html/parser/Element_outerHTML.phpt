@@ -8,16 +8,16 @@ dom
 $dom = Dom\HTMLDocument::createFromString('<p>foo</p>', LIBXML_NOERROR);
 $p = $dom->body->firstChild;
 $p->outerHTML = '<div></div>&nbsp;<p>'; // intentionally unclosed
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 echo $dom->saveHtml(), "\n";
 $div = $dom->body->firstChild;
 $div->outerHTML = "invalid\xffutf-8𐍈𐍈𐍈";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 echo $dom->saveHtml(), "\n";
 
 $dom->body->outerHTML = '<template><p>foo</p></template>';
 var_dump($dom->body->querySelector('p')); // Should be NULL because the template contents do not participate in the DOM tree
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 echo $dom->saveHtml(), "\n";
 
 ?>

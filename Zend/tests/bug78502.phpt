@@ -14,7 +14,7 @@ $tree = [
     ],
 ];
 
-function tree_map($tree, $recursive_attr, closure $callback){
+function tree_map($tree, $recursive_attr, Closure $callback){
     if(isset($tree[$recursive_attr])){
         $tree[$recursive_attr] = array_map(function($c) use($recursive_attr, $callback){
             return tree_map($c, $recursive_attr, $callback);

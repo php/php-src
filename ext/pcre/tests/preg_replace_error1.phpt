@@ -25,7 +25,7 @@ $subject = 'a';
 foreach ($regex_array as $regex_value) {
     var_dump(preg_replace($regex_value, $replace, $subject));
 }
-$regex_value = new stdclass(); //Object
+$regex_value = new stdClass(); //Object
 try {
     var_dump(preg_replace($regex_value, $replace, $subject));
 } catch (Error $e) {

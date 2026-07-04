@@ -486,7 +486,7 @@ static zend_class_entry *register_class_Uri_Rfc3986_UriBuilder(void)
 	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_FRAGMENT), &property_fragment_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setuserinfo", sizeof("setuserinfo") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setUserInfo", sizeof("setUserInfo") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }
@@ -499,7 +499,7 @@ static zend_class_entry *register_class_Uri_Rfc3986_Uri(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_READONLY_CLASS);
 
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withuserinfo", sizeof("withuserinfo") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withUserInfo", sizeof("withUserInfo") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }
@@ -637,7 +637,7 @@ static zend_class_entry *register_class_Uri_WhatWg_Url(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_READONLY_CLASS);
 
 
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withpassword", sizeof("withpassword") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withPassword", sizeof("withPassword") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }

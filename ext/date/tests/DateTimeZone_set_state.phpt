@@ -5,7 +5,7 @@ Mark Baker mark@lange.demon.co.uk at the PHPNW2017 Conference for PHP Testfest 2
 --FILE--
 <?php
 
-$datetimezoneObject = new DateTimezone('UTC');
+$datetimezoneObject = new DateTimeZone('UTC');
 
 $datetimezoneState = var_export($datetimezoneObject, true);
 

@@ -15,7 +15,7 @@ $dirname = dirname(__FILE__) . '/';
 $file = $dirname . '__tmp_oo_progress.zip';
 
 $zip = new ZipArchive;
-if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
+if (!$zip->open($file, ZipArchive::CREATE)) {
     exit('failed');
 }
 

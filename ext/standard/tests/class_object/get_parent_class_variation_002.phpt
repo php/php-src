@@ -59,7 +59,7 @@ $values = array(
       'String',
 
       // object data
-      new stdclass(),
+      new stdClass(),
 
       // undefined data
       $undefined_var,

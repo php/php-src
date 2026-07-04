@@ -7,7 +7,7 @@ Steve Seear <stevseea@php.net>
 <?php
 
 echo "An object is in an array and is referenced. As expected, var_dumping the array shows '&':\n";
-$a = array(new stdclass);
+$a = array(new stdClass);
 $b =& $a[0];
 var_dump($a);
 

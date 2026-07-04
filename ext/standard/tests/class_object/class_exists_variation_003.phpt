@@ -8,5 +8,5 @@ var_dump(class_exists('casesensitivitytest'));
 echo "Done"
 ?>
 --EXPECT--
-bool(true)
+bool(false)
 Done

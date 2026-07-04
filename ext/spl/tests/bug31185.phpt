@@ -40,7 +40,7 @@ catch (Exception $e)
     echo "CAUGHT: " . $e->getMessage() . "\n";
 }
 
-print_R($foo);
+print_r($foo);
 ?>
 --EXPECT--
 FooBar::offsetSet(0, 0)

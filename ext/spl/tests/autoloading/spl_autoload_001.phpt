@@ -74,15 +74,15 @@ try {
 --EXPECTF--
 ===EMPTY===
 string(9) ".inc,.php"
-%stestclass.inc
+%sTestClass.inc
 Class TestClass could not be loaded
 ===()===
 Class TestClass could not be loaded
 ===(1)===
 Class TestClass could not be loaded
 ===(.inc,,.php.inc)===
-%stestclass
-%stestclass.php.inc
+%sTestClass
+%sTestClass.php.inc
 Class TestClass could not be loaded
 ===()===
 Class TestClass could not be loaded
@@ -97,7 +97,7 @@ bool(false)
 ===LOAD===
 TestFunc1(TestClass)
 TestFunc2(TestClass)
-%stestclass.class.inc
+%sTestClass.class.inc
 bool(true)
 ===NOFUNCTION===
 spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, function "unavailable_autoload_function" not found or invalid function name

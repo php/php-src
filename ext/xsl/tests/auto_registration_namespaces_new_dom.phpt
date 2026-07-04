@@ -36,7 +36,7 @@ $processor = new XSLTProcessor();
 $processor->importStylesheet($sheet);
 $processor->registerPHPFunctions();
 $processor->registerPHPFunctionNS('urn:test', 'reverse', 'strrev');
-echo $processor->transformToXML($input), "\n";
+echo $processor->transformToXml($input), "\n";
 
 ?>
 --EXPECT--

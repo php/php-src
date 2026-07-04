@@ -20,4 +20,4 @@ var_dump(interface_exists('FOO\\ITEST'));
 --EXPECT--
 bool(false)
 bool(true)
-bool(true)
+bool(false)

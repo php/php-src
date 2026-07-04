@@ -40,7 +40,7 @@ $values = [
     FALSE,
     NULL,
     [],
-    new StdClass,
+    new stdClass,
     new StringCapable,
     fopen("data:text/plain,foobar", "r")
 ];

@@ -1094,13 +1094,13 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					function->binding = tmpbinding;
 
 					{
+						/* Operation names are stored in canonical case — XML names
+						 * and PHP function names are case-sensitive. */
 						size_t function_name_len = strlen(function->functionName);
-						char *lc_function_name = zend_str_tolower_dup(function->functionName, function_name_len);
 
-						if (zend_hash_str_add_ptr(&ctx.sdl->functions, lc_function_name, function_name_len, function) == NULL) {
+						if (zend_hash_str_add_ptr(&ctx.sdl->functions, function->functionName, function_name_len, function) == NULL) {
 							zend_hash_next_index_insert_ptr(&ctx.sdl->functions, function);
 						}
-						efree(lc_function_name);
 
 						if (function->requestName != NULL && strcmp(function->requestName,function->functionName) != 0) {
 							if (ctx.sdl->requests == NULL) {
@@ -1108,10 +1108,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 								zend_hash_init(ctx.sdl->requests, 0, NULL, NULL, 0);
 							}
 
-							size_t request_name_len = strlen(function->requestName);
-							char *lc_request_name = zend_str_tolower_dup(function->requestName, request_name_len);
-							zend_hash_str_add_ptr(ctx.sdl->requests, lc_request_name, request_name_len, function);
-							efree(lc_request_name);
+							zend_hash_str_add_ptr(ctx.sdl->requests, function->requestName, strlen(function->requestName), function);
 						}
 					}
 					trav2 = trav2->next;
@@ -1150,7 +1147,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 0x10
+#define WSDL_CACHE_VERSION 0x11
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
 #define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((unsigned)(*buf)[3]<<24); *buf += 4;

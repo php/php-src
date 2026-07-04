@@ -9,7 +9,7 @@ if (PHP_INT_SIZE < 8) die('skip'); // skip for 32bit builds - there is another t
 --FILE--
 <?php
 $num = 100004313234244; // notice this exceeds 32 bits
-$conn = new sqlite3(':memory:');
+$conn = new SQLite3(':memory:');
 $conn->query('CREATE TABLE users (id INTEGER NOT NULL, num INTEGER NOT NULL, PRIMARY KEY(id))');
 
 $stmt = $conn->prepare('insert into users (id, num) values (:id, :num)');

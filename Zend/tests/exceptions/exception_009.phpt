@@ -11,11 +11,11 @@ class my_file
          }
 }
 
-class my_exception extends exception
+class my_exception extends Exception
 {
          public  function __construct()
          {
-                 $this->message = new stdclass ;
+                 $this->message = new stdClass ;
                  $this->file = new my_file ;
                  $this->line = "12" ;
          }

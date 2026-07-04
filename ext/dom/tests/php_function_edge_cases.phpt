@@ -7,9 +7,9 @@ dom
 
 $doc = new DOMDocument();
 $doc->loadHTML('<a href="https://php.net">hello</a>');
-$xpath = new DOMXpath($doc);
+$xpath = new DOMXPath($doc);
 $xpath->registerNamespace("php", "http://php.net/xpath");
-$xpath->registerPHPFunctions();
+$xpath->registerPhpFunctions();
 try {
     $xpath->query("//a[php:function(3)]");
 } catch (TypeError $e) {

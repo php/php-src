@@ -4,7 +4,7 @@ Overriding an EXSLT builtin
 xsl
 --SKIPIF--
 <?php
-$proc = new xsltprocessor;
+$proc = new XSLTProcessor;
 if (!$proc->hasExsltSupport()) die('skip EXSLT support not available');
 if (LIBXSLT_VERSION < 10130) die('skip too old libxsl');
 require __DIR__.'/skip_upstream_issue113.inc';
@@ -49,11 +49,11 @@ $proc->importStylesheet($xsldoc);
 
 // Should override the builtin function
 $proc->registerPHPFunctionNS('http://exslt.org/dates-and-times', 'year', dummy_year(...));
-echo $proc->transformToXML($xmldoc), "\n";
+echo $proc->transformToXml($xmldoc), "\n";
 
 // Should not exit
 $proc->registerPHPFunctionNS('http://www.w3.org/1999/XSL/Transform', 'value-of', dummy_exit(...));
-echo $proc->transformToXML($xmldoc), "\n";
+echo $proc->transformToXml($xmldoc), "\n";
 
 ?>
 --EXPECT--

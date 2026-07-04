@@ -30,7 +30,7 @@ $serialized = serialize($dom);
 var_dump($serialized);
 $unserialized = unserialize($serialized);
 
-echo "Serialized:\n-----------\n$serialized\n-----------\nRestored:\n-----------\n{$unserialized->saveXml()}";
+echo "Serialized:\n-----------\n$serialized\n-----------\nRestored:\n-----------\n{$unserialized->saveXML()}";
 
 echo "=== __serialize and __unserialize ===\n";
 
@@ -53,7 +53,7 @@ $dom->loadXML('<tag>value</tag>');
 $serialized = serialize($dom);
 $unserialized = unserialize($serialized);
 
-echo "Serialized:\n-----------\n$serialized\n-----------\nRestored:\n-----------\n{$unserialized->saveXml()}";
+echo "Serialized:\n-----------\n$serialized\n-----------\nRestored:\n-----------\n{$unserialized->saveXML()}";
 
 echo "=== serialize and unserialize ===\n";
 
@@ -76,7 +76,7 @@ $dom->loadXML('<tag>value</tag>');
 $serialized = serialize($dom);
 $unserialized = unserialize($serialized);
 
-echo "Serialized:\n-----------\n$serialized\n-----------\nRestored:\n-----------\n{$unserialized->saveXml()}";
+echo "Serialized:\n-----------\n$serialized\n-----------\nRestored:\n-----------\n{$unserialized->saveXML()}";
 
 ?>
 --EXPECTF--

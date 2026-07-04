@@ -34,7 +34,7 @@ $stmt = $db->prepare("SELECT * FROM gh9372 WHERE col = ?");
 $stream = fopen("php://memory", "w+");
 fwrite($stream, 'something else');
 rewind($stream);
-$stmt->bindvalue(1, $stream, PDO::PARAM_LOB);
+$stmt->bindValue(1, $stream, PDO::PARAM_LOB);
 try {
     $stmt->execute();
 } catch (PDOException $ex) {

@@ -16,7 +16,7 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
-    mime_content_type(new stdclass);
+    mime_content_type(new stdClass);
 } catch (\TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }

@@ -309,7 +309,6 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 		zend_attribute *copy = zend_shared_memdup_put_free(attr, ZEND_ATTRIBUTE_SIZE(attr->argc));
 
 		zend_accel_store_interned_string(copy->name);
-		zend_accel_store_interned_string(copy->lcname);
 		if (copy->validation_error) {
 			zend_accel_store_interned_string(copy->validation_error);
 		}
@@ -1071,7 +1070,6 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 
 			for (i = 0; i < ce->num_interfaces; i++) {
 				zend_accel_store_interned_string(ce->interface_names[i].name);
-				zend_accel_store_interned_string(ce->interface_names[i].lc_name);
 			}
 			ce->interface_names = zend_shared_memdup_free(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
 		}
@@ -1081,7 +1079,6 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 
 			for (i = 0; i < ce->num_traits; i++) {
 				zend_accel_store_interned_string(ce->trait_names[i].name);
-				zend_accel_store_interned_string(ce->trait_names[i].lc_name);
 			}
 			ce->trait_names = zend_shared_memdup_free(ce->trait_names, sizeof(zend_class_name) * ce->num_traits);
 
@@ -1185,7 +1182,7 @@ void zend_update_parent_ce(zend_class_entry *ce)
 		if (ce->iterator_funcs_ptr) {
 			memset(ce->iterator_funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
 			if (zend_class_implements_interface(ce, zend_ce_aggregate)) {
-				ce->iterator_funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&ce->function_table, "getiterator", sizeof("getiterator") - 1);
+				ce->iterator_funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&ce->function_table, "getIterator", sizeof("getIterator") - 1);
 			}
 			if (zend_class_implements_interface(ce, zend_ce_iterator)) {
 				ce->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&ce->function_table, "rewind", sizeof("rewind") - 1);
@@ -1198,10 +1195,10 @@ void zend_update_parent_ce(zend_class_entry *ce)
 
 		if (ce->arrayaccess_funcs_ptr) {
 			ZEND_ASSERT(zend_class_implements_interface(ce, zend_ce_arrayaccess));
-			ce->arrayaccess_funcs_ptr->zf_offsetget = zend_hash_str_find_ptr(&ce->function_table, "offsetget", sizeof("offsetget") - 1);
-			ce->arrayaccess_funcs_ptr->zf_offsetexists = zend_hash_str_find_ptr(&ce->function_table, "offsetexists", sizeof("offsetexists") - 1);
-			ce->arrayaccess_funcs_ptr->zf_offsetset = zend_hash_str_find_ptr(&ce->function_table, "offsetset", sizeof("offsetset") - 1);
-			ce->arrayaccess_funcs_ptr->zf_offsetunset = zend_hash_str_find_ptr(&ce->function_table, "offsetunset", sizeof("offsetunset") - 1);
+			ce->arrayaccess_funcs_ptr->zf_offsetget = zend_hash_str_find_ptr(&ce->function_table, "offsetGet", sizeof("offsetGet") - 1);
+			ce->arrayaccess_funcs_ptr->zf_offsetexists = zend_hash_str_find_ptr(&ce->function_table, "offsetExists", sizeof("offsetExists") - 1);
+			ce->arrayaccess_funcs_ptr->zf_offsetset = zend_hash_str_find_ptr(&ce->function_table, "offsetSet", sizeof("offsetSet") - 1);
+			ce->arrayaccess_funcs_ptr->zf_offsetunset = zend_hash_str_find_ptr(&ce->function_table, "offsetUnset", sizeof("offsetUnset") - 1);
 		}
 	}
 
@@ -1413,9 +1410,8 @@ static zend_early_binding *zend_persist_early_bindings(
 		early_bindings = zend_shared_memdup_free(
 			early_bindings, num_early_bindings * sizeof(zend_early_binding));
 		for (uint32_t i = 0; i < num_early_bindings; i++) {
-			zend_accel_store_interned_string(early_bindings[i].lcname);
+			zend_accel_store_interned_string(early_bindings[i].name);
 			zend_accel_store_interned_string(early_bindings[i].rtd_key);
-			zend_accel_store_interned_string(early_bindings[i].lc_parent_name);
 		}
 	}
 	return early_bindings;

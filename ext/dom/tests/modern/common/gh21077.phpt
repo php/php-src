@@ -15,7 +15,7 @@ var_dump($node->baseURI);
 $dom = Dom\XMLDocument::createEmpty();
 $dom->append($node = $dom->importNode($node));
 
-var_dump($dom->saveXML());
+var_dump($dom->saveXml());
 
 var_dump($node->baseURI);
 

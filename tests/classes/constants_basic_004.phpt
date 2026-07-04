@@ -36,7 +36,7 @@ Test properties with array default values using class constants as keys and valu
   var_dump(X::$sa_x, B::$sa_b, C::$sa_b, C::$sa_c_parent, C::$sa_c_self);
 
   echo "\nInstance properties:\n";
-  $x = new x;
+  $x = new X;
   $b = new B;
   $c = new C;
   var_dump($x, $b, $c);

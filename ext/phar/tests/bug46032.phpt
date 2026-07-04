@@ -10,18 +10,18 @@ phar
 $a = __DIR__ .'/mytest';
 
 try {
-    new phar($a);
-} catch (exception $e) { }
+    new Phar($a);
+} catch (Exception $e) { }
 
 var_dump($a);
 
 try {
-    new phar($a);
-} catch (exception $e) { }
+    new Phar($a);
+} catch (Exception $e) { }
 
 var_dump($a);
 
-new phardata('0000000000000000000');
+new PharData('0000000000000000000');
 ?>
 ===DONE===
 --EXPECTF--

@@ -438,8 +438,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(SOAP_GLOBAL(class_map), type_name, tmp) {
 				ZVAL_DEREF(tmp);
 				if (Z_TYPE_P(tmp) == IS_STRING &&
-				    ZSTR_LEN(ce->name) == Z_STRLEN_P(tmp) &&
-				    zend_binary_strncasecmp(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), Z_STRVAL_P(tmp), ZSTR_LEN(ce->name), ZSTR_LEN(ce->name)) == 0 &&
+				    zend_string_equals_cstr(ce->name, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp)) &&
 				    type_name) {
 
 					/* TODO: namespace isn't stored */

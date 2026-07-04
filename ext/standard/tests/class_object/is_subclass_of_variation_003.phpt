@@ -16,5 +16,5 @@ echo "Done"
 --EXPECT--
 *** Testing is_subclass_of() : usage variations ***
 *** Testing is_a() : usage variations ***
-bool(true)
+bool(false)
 Done

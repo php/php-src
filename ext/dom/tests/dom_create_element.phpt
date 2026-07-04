@@ -7,7 +7,7 @@ dom
 
 print " 1 DOMDocument::createElement('valid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElement('valid');
     print "valid\n";
 } catch (Exception $e) {
@@ -16,7 +16,7 @@ try {
 
 print " 2 DOMDocument::createElement('-invalid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElement('-invalid');
     print "valid\n";
 } catch (Exception $e) {
@@ -25,7 +25,7 @@ try {
 
 print " 3 DOMDocument::createElement(' ')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElement(' ');
     print "valid\n";
 } catch (Exception $e) {
@@ -34,7 +34,7 @@ try {
 
 print " 4 DOMDocument::createElement('prefix:valid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElement('prefix:valid');
     print "valid\n";
 } catch (Exception $e) {
@@ -43,7 +43,7 @@ try {
 
 print " 5 DOMDocument::createElementNS('http://valid.com', 'valid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('http://valid.com', 'valid');
     print "valid\n";
 } catch (Exception $e) {
@@ -52,7 +52,7 @@ try {
 
 print " 6 DOMDocument::createElementNS('http://valid.com', 'prefix:valid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('http://valid.com', 'prefix:valid');
     print "valid\n";
 } catch (Exception $e) {
@@ -61,7 +61,7 @@ try {
 
 print " 7 DOMDocument::createElementNS('http://valid.com', '-invalid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('http://valid.com', '-invalid');
     print "valid\n";
 } catch (Exception $e) {
@@ -70,7 +70,7 @@ try {
 
 print " 8 DOMDocument::createElementNS('http://valid.com', 'prefix:-invalid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('http://valid.com', 'prefix:-invalid');
     print "valid\n";
 } catch (Exception $e) {
@@ -79,7 +79,7 @@ try {
 
 print " 9 DOMDocument::createElementNS('', 'prefix:invalid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('', 'prefix:invalid');
     print "valid\n";
 } catch (Exception $e) {
@@ -88,7 +88,7 @@ try {
 
 print "10 DOMDocument::createElementNS('http://valid.com', 'prefix:valid:invalid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('http://valid.com', 'prefix:valid:invalid');
     print "valid\n";
 } catch (Exception $e) {
@@ -97,7 +97,7 @@ try {
 
 print "11 DOMDocument::createElementNS('http://valid.com', '-prefix:valid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('http://valid.com', '-prefix:valid');
     print "valid\n";
 } catch (Exception $e) {
@@ -106,7 +106,7 @@ try {
 
 print "12 DOMDocument::createElementNS('-', 'prefix:valid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('-', 'prefix:valid');
     print "valid\n";
 } catch (Exception $e) {
@@ -116,7 +116,7 @@ try {
 
 print "13 DOMElement::__construct('valid')\n";
 try {
-    $element = new DomElement('valid');
+    $element = new DOMElement('valid');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -124,7 +124,7 @@ try {
 
 print "14 DOMElement::__construct('-invalid')\n";
 try {
-    $element = new DomElement('-invalid');
+    $element = new DOMElement('-invalid');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -132,7 +132,7 @@ try {
 
 print "15 DOMElement::__construct(' ')\n";
 try {
-    $element = new DomElement(' ');
+    $element = new DOMElement(' ');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -140,7 +140,7 @@ try {
 
 print "16 DOMElement::__construct('prefix:valid')\n";
 try {
-    $element = new DomElement('prefix:valid');
+    $element = new DOMElement('prefix:valid');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -148,7 +148,7 @@ try {
 
 print "17 DOMElement::__construct('valid', '', 'http://valid.com')\n";
 try {
-    $element = new DomElement('valid', '', 'http://valid.com');
+    $element = new DOMElement('valid', '', 'http://valid.com');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -156,7 +156,7 @@ try {
 
 print "18 DOMElement::__construct('prefix:valid', '', 'http://valid.com')\n";
 try {
-    $element = new DomElement('prefix:valid', '', 'http://valid.com');
+    $element = new DOMElement('prefix:valid', '', 'http://valid.com');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -164,7 +164,7 @@ try {
 
 print "19 DOMElement::__construct('-invalid', '', 'http://valid.com')\n";
 try {
-    $element = new DomElement('-invalid', '', 'http://valid.com');
+    $element = new DOMElement('-invalid', '', 'http://valid.com');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -172,7 +172,7 @@ try {
 
 print "20 DOMElement::__construct('prefix:-invalid', '', 'http://valid.com')\n";
 try {
-    $element = new DomElement('prefix:-invalid', '', 'http://valid.com');
+    $element = new DOMElement('prefix:-invalid', '', 'http://valid.com');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -180,7 +180,7 @@ try {
 
 print "21 DOMElement::__construct('prefix:invalid', '', '')\n";
 try {
-    $element = new DomElement('prefix:invalid', '', '');
+    $element = new DOMElement('prefix:invalid', '', '');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -188,7 +188,7 @@ try {
 
 print "22 DOMElement::__construct('prefix:valid:invalid', '', 'http://valid.com')\n";
 try {
-    $element = new DomElement('prefix:valid:invalid', '', 'http://valid.com');
+    $element = new DOMElement('prefix:valid:invalid', '', 'http://valid.com');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -196,7 +196,7 @@ try {
 
 print "23 DOMElement::__construct('-prefix:valid', '', 'http://valid.com')\n";
 try {
-    $element = new DomElement('-prefix:valid', '', 'http://valid.com');
+    $element = new DOMElement('-prefix:valid', '', 'http://valid.com');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -204,7 +204,7 @@ try {
 
 print "24 DOMElement::__construct('prefix:valid', '', '-')\n";
 try {
-    $element = new DomElement('prefix:valid', '', '-');
+    $element = new DOMElement('prefix:valid', '', '-');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -214,7 +214,7 @@ try {
 
 print "25 DOMDocument::createElementNS('', 'prefix:valid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('', 'prefix:valid');
     print "valid\n";
 } catch (Exception $e) {
@@ -226,7 +226,7 @@ try {
 
 print "26 DOMDocument::createElementNS('http://wrong.namespaceURI.com', 'xml:valid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('http://wrong.namespaceURI.com', 'xml:valid');
     print "valid\n";
 } catch (Exception $e) {
@@ -235,7 +235,7 @@ try {
 
 print "27 DOMElement::__construct('xml:valid', '', 'http://wrong.namespaceURI.com')\n";
 try {
-    $element = new DomElement('xml:valid', '', 'http://wrong.namespaceURI.com');
+    $element = new DOMElement('xml:valid', '', 'http://wrong.namespaceURI.com');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -244,7 +244,7 @@ try {
 /* This is okay because we reuse the xml namespace from the document */
 print "28 DOMDocument::createElementNS('http://www.w3.org/XML/1998/namespace', 'xml:valid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('http://www.w3.org/XML/1998/namespace', 'xml:valid');
     print "valid\n";
 } catch (Exception $e) {
@@ -262,7 +262,7 @@ try {
 
 print "30 DOMDocument::createElementNS('http://wrong.namespaceURI.com', 'xmlns:valid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('http://wrong.namespaceURI.com', 'xmlns:valid');
     print "valid\n";
 } catch (Exception $e) {
@@ -271,7 +271,7 @@ try {
 
 print "31 DOMElement::__construct('xmlns:valid', '', 'http://wrong.namespaceURI.com')\n";
 try {
-    $element = new DomElement('xmlns:valid', '', 'http://wrong.namespaceURI.com');
+    $element = new DOMElement('xmlns:valid', '', 'http://wrong.namespaceURI.com');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -279,7 +279,7 @@ try {
 
 print "32 DOMDocument::createElementNS('http://www.w3.org/2000/xmlns/', 'xmlns:valid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('http://www.w3.org/2000/xmlns/', 'xmlns:valid');
     print "valid\n";
 } catch (Exception $e) {
@@ -288,7 +288,7 @@ try {
 
 print "33 DOMElement::__construct('xmlns:valid', '', 'http://www.w3.org/2000/xmlns/')\n";
 try {
-    $element = new DomElement('xmlns:valid', '', 'http://www.w3.org/2000/xmlns/');
+    $element = new DOMElement('xmlns:valid', '', 'http://www.w3.org/2000/xmlns/');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
@@ -299,7 +299,7 @@ try {
 
 print "34 DOMDocument::createElementNS('http://www.w3.org/2000/xmlns/', 'wrongprefix:valid')\n";
 try {
-    $dom = new domDocument;
+    $dom = new DOMDocument;
     $dom->createElementNS('http://www.w3.org/2000/xmlns/', 'wrongprefix:valid');
     print "valid\n";
 } catch (Exception $e) {
@@ -308,7 +308,7 @@ try {
 
 print "35 DOMElement::__construct('wrongprefix:valid', '', 'http://www.w3.org/2000/xmlns/')\n";
 try {
-    $element = new DomElement('wrongprefix:valid', '', 'http://www.w3.org/2000/xmlns/');
+    $element = new DOMElement('wrongprefix:valid', '', 'http://www.w3.org/2000/xmlns/');
     print "valid\n";
 } catch (Exception $e) {
     print $e->getMessage() . "\n";

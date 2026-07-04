@@ -22,13 +22,13 @@ var_dump($g = gmp_sub(10000, -1));
 var_dump(gmp_strval($g));
 
 try {
-    var_dump($g = gmp_sub(10000, new stdclass));
+    var_dump($g = gmp_sub(10000, new stdClass));
     var_dump(gmp_strval($g));
 } catch (\TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
-    var_dump($g = gmp_sub(new stdclass, 100));
+    var_dump($g = gmp_sub(new stdClass, 100));
     var_dump(gmp_strval($g));
 } catch (\TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;

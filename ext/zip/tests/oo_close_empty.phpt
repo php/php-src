@@ -14,7 +14,7 @@ function run($name, $keep) {
     copy(__DIR__ . '/test.zip', $name);
 
     $zip = new ZipArchive();
-    $zip->open($name, ZIPARCHIVE::CREATE);
+    $zip->open($name, ZipArchive::CREATE);
 	if ($keep) {
         echo "\nClose and keep\n";
         var_dump($zip->setArchiveFlag(ZipArchive::AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE, 1), $zip->status === ZipArchive::ER_OK);

@@ -4,11 +4,11 @@ Bug #28721 (appendChild() and insertBefore() unset DOMText)
 dom
 --FILE--
 <?php
-function print_node(DomNode $node) {
+function print_node(DOMNode $node) {
   echo "name (value): " . $node->nodeName . " (" . $node->nodeValue . ")\n";
 }
 
-function print_node_r(DomNode $node) {
+function print_node_r(DOMNode $node) {
   static $indent = "";
   echo "\n" . $indent;
   print_node($node);
@@ -50,7 +50,7 @@ function err_handler($errno, $errstr, $errfile, $errline) {
 // Record 'DocumentFragment is empty' warnings
 set_error_handler("err_handler", E_WARNING);
 
-$xml = new DomDocument();
+$xml = new DOMDocument();
 
 $p = $xml->createElement("p");
 
@@ -94,7 +94,7 @@ $frag = $xml->createDocumentFragment();
 $t5 = $frag->appendChild($xml->createTextNode(" t5 "));
 $frag->appendChild($i = $xml->createElement("i"));
 $i->appendChild($xml->createTextNode(" frob "));
-$frag->appendChild($xml->createTextNOde(" t6 "));
+$frag->appendChild($xml->createTextNode(" t6 "));
 
 echo "\np:\n";
 print_node_r($p);

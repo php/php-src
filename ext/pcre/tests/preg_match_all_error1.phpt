@@ -29,7 +29,7 @@ foreach ($regex_array as $regex_value) {
     }
     var_dump($matches1);
 }
-$regex_value = new stdclass(); //Object
+$regex_value = new stdClass(); //Object
 try {
     var_dump(preg_match_all($regex_value, $subject, $matches));
 } catch (TypeError $e) {

@@ -4,7 +4,7 @@ Bug #79299 (com_print_typeinfo prints duplicate variables)
 com_dotnet
 --FILE--
 <?php
-$dict = new COM("Scripting.Dictionary");
+$dict = new com("Scripting.Dictionary");
 ob_start();
 com_print_typeinfo($dict);
 $typeinfo = ob_get_clean();

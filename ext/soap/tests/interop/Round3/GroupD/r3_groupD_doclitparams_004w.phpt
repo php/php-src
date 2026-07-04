@@ -8,8 +8,8 @@ soap.wsdl_cache_enabled=0
 <?php
 $client = new SoapClient(__DIR__."/round3_groupD_doclitparams.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoVoid();
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round3_groupD_doclitparams.inc");
 echo "ok\n";
 ?>

@@ -8,13 +8,13 @@ Class caseSensitivityTest {
     public function myMethod() {}
 }
 
-var_dump(method_exists(new casesensitivitytest, 'myMetHOD'));
+var_dump(method_exists(new caseSensitivityTest, 'myMetHOD'));
 var_dump(method_exists('casesensiTivitytest', 'myMetHOD'));
 
 echo "Done";
 ?>
 --EXPECT--
 *** Testing method_exists() : variation ***
-bool(true)
-bool(true)
+bool(false)
+bool(false)
 Done

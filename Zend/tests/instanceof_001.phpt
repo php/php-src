@@ -6,7 +6,7 @@ Testing instanceof operator with several operators
 $a = new stdClass;
 var_dump($a instanceof stdClass);
 
-var_dump(new stdCLass instanceof stdClass);
+var_dump(new stdClass instanceof stdClass);
 
 $b = function() { return new stdClass; };
 var_dump($b() instanceof stdClass);

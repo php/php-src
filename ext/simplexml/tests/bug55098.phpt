@@ -17,7 +17,7 @@ function test($nodes, $name, $callable) {
     }
 }
 
-test($nodes, "asXml", fn ($n) => $n->asXml());
+test($nodes, "asXml", fn ($n) => $n->asXML());
 test($nodes, "attributes", fn ($n) => $n->attributes());
 test($nodes, "children", fn ($n) => $n->children());
 test($nodes, "getNamespaces", fn ($n) => $n->getNamespaces());

@@ -12,7 +12,7 @@ class foo {
     }
 }
 
-class_alias('FOO', 'bar');
+class_alias('foo', 'bar');
 
 call_user_func(array('bar', 'test'));
 

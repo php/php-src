@@ -39,7 +39,7 @@ $Variation_arr = array(
    array(),  // zero elements
    array(1, 2, 3, 12345666, -2344),
    array(0, 1, 2, 3.333, -4, -5.555, TRUE, FALSE, NULL, "", '', " ",
-         array(), array(1,2,array()), "string", new stdclass
+         array(), array(1,2,array()), "string", new stdClass
         ),
    &$arr_var,  // Reference to an array
 

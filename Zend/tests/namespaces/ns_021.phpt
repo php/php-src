@@ -16,7 +16,7 @@ function foo() {
 
 foo();
 \test\foo();
-\test\test::foo();
+\test\Test::foo();
 ?>
 --EXPECT--
 test\foo

@@ -717,7 +717,7 @@ ZEND_METHOD(Exception, __toString)
 	base_ce = i_get_exception_base(Z_OBJ_P(exception));
 
 	/* As getTraceAsString method is final we can grab it once */
-	zend_function *getTraceAsString = zend_hash_str_find_ptr(&base_ce->function_table, ZEND_STRL("gettraceasstring"));
+	zend_function *getTraceAsString = zend_hash_str_find_ptr(&base_ce->function_table, ZEND_STRL("getTraceAsString"));
 	ZEND_ASSERT(getTraceAsString && "Method getTraceAsString must exist");
 
 

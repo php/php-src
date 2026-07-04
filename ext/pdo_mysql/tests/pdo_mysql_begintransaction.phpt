@@ -88,7 +88,7 @@ MySQLPDOTest::skipNotTransactionalEngine();
     if (1 !== $db->exec(sprintf('DELETE FROM %s WHERE id = %d', $table, $row['id'])))
         printf("[017] DELETE should have indicated 1 deleted row, [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (!$db->rollback())
+    if (!$db->rollBack())
         printf("[018] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
     if (true !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
@@ -173,7 +173,7 @@ MySQLPDOTest::skipNotTransactionalEngine();
             $db->errorCode(), implode(' ', $db->errorInfo()));
 
     // Should cause a Server warning but no error
-    if (!$db->rollback())
+    if (!$db->rollBack())
         printf("[037] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
     var_dump($db->errorCode());

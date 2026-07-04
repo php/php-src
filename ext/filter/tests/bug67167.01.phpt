@@ -5,7 +5,7 @@ filter
 --FILE--
 <?php
 var_dump(filter_var(
-    new \StdClass(),
+    new \stdClass(),
     FILTER_VALIDATE_BOOLEAN,
     FILTER_NULL_ON_FAILURE
 ));

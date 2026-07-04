@@ -16,7 +16,7 @@ $xml = <<<XML
 </root>
 XML;
 
-$dom = DOM\XMLDocument::createFromString($xml);
+$dom = Dom\XMLDocument::createFromString($xml);
 
 function test($el, $selector) {
   echo "--- Selector: $selector ---\n";

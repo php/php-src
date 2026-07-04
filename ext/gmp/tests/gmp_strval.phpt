@@ -57,7 +57,7 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
-    var_dump(gmp_strval(new stdclass));
+    var_dump(gmp_strval(new stdClass));
 } catch (\TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }

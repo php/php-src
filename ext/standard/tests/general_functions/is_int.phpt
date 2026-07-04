@@ -68,7 +68,7 @@ $not_int_types = array (
   10.5e+5,
 
   /* objects */
-  new stdclass,
+  new stdClass,
 
   /* resources */
   $fp,

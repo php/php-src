@@ -18,7 +18,7 @@ class twoFuncs {
 try {
     $ciTF = new twoFuncs;
 
-    $oScript = new COM("MSScriptControl.ScriptControl");
+    $oScript = new com("MSScriptControl.ScriptControl");
     $oScript->Language = "VBScript";
 
     $oScript->AddObject ("tfA", $ciTF, true);

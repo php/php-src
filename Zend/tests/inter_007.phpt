@@ -8,7 +8,7 @@ interface d {
 }
 
 interface c {
-    function b();
+    function B();
 }
 
 class_alias('c', 'w');

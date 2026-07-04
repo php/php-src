@@ -45,31 +45,31 @@ foreach($classes as $class) {
 Reflecting on class pubf: 
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)
-  --> Check for F(): bool(true)
+  --> Check for F(): bool(false)
   --> Check for doesNotExist(): bool(false)
 Reflecting on class subpubf: 
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)
-  --> Check for F(): bool(true)
+  --> Check for F(): bool(false)
   --> Check for doesNotExist(): bool(false)
 Reflecting on class protf: 
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)
-  --> Check for F(): bool(true)
+  --> Check for F(): bool(false)
   --> Check for doesNotExist(): bool(false)
 Reflecting on class subprotf: 
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)
-  --> Check for F(): bool(true)
+  --> Check for F(): bool(false)
   --> Check for doesNotExist(): bool(false)
 Reflecting on class privf: 
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)
-  --> Check for F(): bool(true)
+  --> Check for F(): bool(false)
   --> Check for doesNotExist(): bool(false)
 Reflecting on class subprivf: 
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)
-  --> Check for F(): bool(true)
+  --> Check for F(): bool(false)
   --> Check for doesNotExist(): bool(false)
   

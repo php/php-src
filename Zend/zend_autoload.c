@@ -43,7 +43,7 @@ static Bucket *autoload_find_registered_function(const HashTable *autoloader_tab
 	return NULL;
 }
 
-ZEND_API zend_class_entry *zend_perform_class_autoload(zend_string *class_name, zend_string *lc_name)
+ZEND_API zend_class_entry *zend_perform_class_autoload(zend_string *class_name)
 {
 	if (!zend_class_autoload_functions) {
 		return NULL;
@@ -72,7 +72,7 @@ ZEND_API zend_class_entry *zend_perform_class_autoload(zend_string *class_name, 
 			return (zend_class_entry*)ZSTR_GET_CE_CACHE(class_name);
 		}
 
-		zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), lc_name);
+		zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), class_name);
 		if (ce) {
 			return ce;
 		}

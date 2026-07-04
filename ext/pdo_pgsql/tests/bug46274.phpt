@@ -29,11 +29,11 @@ $blob = fopen('php://memory', 'a');
 fwrite($blob, $data);
 rewind($blob);
 
-$stmt->bindparam(':foo', $blob, PDO::PARAM_LOB);
+$stmt->bindParam(':foo', $blob, PDO::PARAM_LOB);
 $stmt->execute();
 
 $blob = '';
-$stmt->bindparam(':foo', $blob, PDO::PARAM_LOB);
+$stmt->bindParam(':foo', $blob, PDO::PARAM_LOB);
 $stmt->execute();
 
 $data = '';
@@ -41,11 +41,11 @@ $blob = fopen('php://memory', 'a');
 fwrite($blob, $data);
 rewind($blob);
 
-$stmt->bindparam(':foo', $blob, PDO::PARAM_LOB);
+$stmt->bindParam(':foo', $blob, PDO::PARAM_LOB);
 $stmt->execute();
 
 $blob = NULL;
-$stmt->bindparam(':foo', $blob, PDO::PARAM_LOB);
+$stmt->bindParam(':foo', $blob, PDO::PARAM_LOB);
 $stmt->execute();
 
 $res = $db->query("SELECT blob1 from test_one_blob_46274_1");

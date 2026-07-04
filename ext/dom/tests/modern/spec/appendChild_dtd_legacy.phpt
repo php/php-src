@@ -27,7 +27,7 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $other->saveXml();
+echo $other->saveXML();
 
 ?>
 --EXPECT--

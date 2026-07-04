@@ -5,7 +5,7 @@ GH-22077 (UAF in custom XPath function)
 $document = new DOMDocument;
 $xpath = new DOMXPath($document);
 $xpath->registerNamespace("my", "my.ns");
-$xpath->registerPHPFunctionNS('my.ns', 'include', function(): DOMElement {
+$xpath->registerPhpFunctionNS('my.ns', 'include', function(): DOMElement {
     $includedDocument = new DOMDocument;
     $includedDocument->loadXML('<root><uaf/><node/><uaf/></root>');
     return $includedDocument->documentElement;

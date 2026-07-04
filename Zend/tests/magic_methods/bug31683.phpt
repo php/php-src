@@ -67,30 +67,5 @@ for ($i=0; $i < 2; $i++) {
   echo "---\n";
 }
 ?>
---EXPECT--
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-NULL
-string(2) "ok"
-string(2) "ok"
----
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-NULL
-string(2) "ok"
-string(2) "ok"
----
+--EXPECTF--
+Fatal error: Class Foo contains 4 abstract methods and must therefore be declared abstract or implement the remaining methods (ArrayAccess::offsetExists, ArrayAccess::offsetGet, ArrayAccess::offsetSet, ...) in %s on line %d

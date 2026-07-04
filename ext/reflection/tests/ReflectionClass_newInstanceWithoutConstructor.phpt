@@ -15,7 +15,7 @@ class Foo
 $class = new ReflectionClass('Foo');
 var_dump($class->newInstanceWithoutConstructor());
 
-$class = new ReflectionClass('StdClass');
+$class = new ReflectionClass('stdClass');
 var_dump($class->newInstanceWithoutConstructor());
 
 $class = new ReflectionClass('DateTime');

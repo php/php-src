@@ -23,6 +23,58 @@ PHP 8.6 UPGRADE NOTES
   . It is no longer possible to clone variant objects, this is because
     the cloning behaviour was ill defined.
 
+- Core:
+  . PHP is now case-sensitive for function and class names. The global function
+    table and class table are now keyed by the canonical (declared) name rather
+    than its lowercase equivalent. As a result, calling a function with
+    incorrect casing (e.g. STRLEN() instead of strlen()) now raises a fatal
+    Error ("Call to undefined function STRLEN()"), and referencing a class,
+    interface, trait, or enum with incorrect casing (e.g. new FOO() when the
+    class is declared as Foo) now raises a fatal Error ("Class 'FOO' not
+    found"). This applies to all language constructs and APIs that perform a
+    name lookup: new, instanceof, catch, extends, implements, use (trait), type
+    declarations, callable strings/arrays, class_exists() and related
+    introspection functions, Closure::bind()/bindTo(), Reflection constructors
+    and methods, and the SOAP classmap option.
+    RFC: https://wiki.php.net/rfc/case_sensitive_php
+  . Namespace segments in use imports are now matched case-sensitively. A use
+    import whose path does not match the canonical casing of the target
+    namespace segment will produce a fatal Error when the imported name is
+    first resolved.
+    RFC: https://wiki.php.net/rfc/case_sensitive_php
+  . Declaring a magic method with incorrect casing (e.g. __tostring() instead
+    of __toString()) is now a compile-time fatal Error. Previously magic
+    method names were matched case-insensitively; under case-sensitive method
+    names a wrong-cased declaration would otherwise silently lose its magic
+    behavior.
+    RFC: https://wiki.php.net/rfc/case_sensitive_php
+  . Attribute names are now matched case-sensitively, consistent with class
+    names. Internal attributes such as #[\Deprecated], #[\Override] or
+    #[\AllowDynamicProperties] are only recognized with their exact casing,
+    and the name filter of ReflectionFunctionAbstract::getAttributes() and
+    related methods compares case-sensitively. The "self", "parent" and
+    "static" keywords in callable strings remain case-insensitive.
+    RFC: https://wiki.php.net/rfc/case_sensitive_php
+  . The namespace portion of constant names is now case-sensitive, matching
+    the constant base name. Referencing a namespaced constant with incorrect
+    namespace casing (e.g. myapp\FOO when defined as MyApp\FOO) now raises
+    an "Undefined constant" Error, including via constant() and defined().
+    RFC: https://wiki.php.net/rfc/case_sensitive_php
+
+- SOAP:
+  . WSDL operation names are now matched case-sensitively when dispatching
+    requests and when calling operations through SoapClient. This matches
+    XML, where element names are case-sensitive. SoapServer::addFunction()
+    also requires the exact case of the registered PHP function.
+    RFC: https://wiki.php.net/rfc/case_sensitive_php
+
+- SPL:
+  . The default spl_autoload() implementation now builds the include file
+    name from the case-preserved class name instead of its lowercased form.
+    On case-sensitive file systems the file name must match the class name
+    casing (e.g. MyClass.php instead of myclass.php).
+    RFC: https://wiki.php.net/rfc/case_sensitive_php
+
 - DOM:
   . Properties previously documented as @readonly (e.g. DOMNode::$nodeType,
     DOMDocument::$xmlEncoding, DOMEntity::$actualEncoding, ::$encoding,

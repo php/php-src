@@ -200,14 +200,12 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					} else if (fcall->opcode == ZEND_INIT_FCALL_BY_NAME) {
 						fcall->opcode = ZEND_INIT_FCALL;
 						fcall->op1.num = zend_vm_calc_used_stack(fcall->extended_value, call_stack[call].func);
-						literal_dtor(&ZEND_OP2_LITERAL(fcall));
-						fcall->op2.constant = fcall->op2.constant + 1;
 					} else if (fcall->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 						fcall->opcode = ZEND_INIT_FCALL;
 						fcall->op1.num = zend_vm_calc_used_stack(fcall->extended_value, call_stack[call].func);
-						literal_dtor(&op_array->literals[fcall->op2.constant]);
-						literal_dtor(&op_array->literals[fcall->op2.constant + 2]);
-						fcall->op2.constant = fcall->op2.constant + 1;
+						/* The func was resolved by the ns-qualified name (slot 0);
+						 * drop the unqualified fallback (slot 1). */
+						literal_dtor(&op_array->literals[fcall->op2.constant + 1]);
 					} else if (fcall->opcode == ZEND_INIT_STATIC_METHOD_CALL
 							|| fcall->opcode == ZEND_INIT_METHOD_CALL
 							|| fcall->opcode == ZEND_INIT_PARENT_PROPERTY_HOOK_CALL

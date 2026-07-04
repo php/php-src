@@ -9,10 +9,10 @@ date.timezone=Europe/Amsterdam
 <?php
 
 $cal = IntlCalendar::createInstance();
-print_R($cal->getTimeZone());
-print_R($cal->getLocale(Locale::ACTUAL_LOCALE));
+print_r($cal->getTimeZone());
+print_r($cal->getLocale(Locale::ACTUAL_LOCALE));
 echo "\n";
-print_R($cal->getType());
+print_r($cal->getType());
 echo "\n";
 
 $timeMillis = $cal->getTime();

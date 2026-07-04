@@ -1055,7 +1055,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 		goto error;
 	}
 
-	zend_call_method_with_0_params(date_obj, php_date_get_date_ce(), NULL, "gettimestamp", &zv_timestamp);
+	zend_call_method_with_0_params(date_obj, php_date_get_date_ce(), NULL, "getTimestamp", &zv_timestamp);
 	if (Z_TYPE(zv_timestamp) != IS_LONG) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"bad DateTime; call to DateTime::getTimestamp() failed");
@@ -1162,7 +1162,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 	zval_ptr_dtor(&ts_zval);
 
 	/* due to bug #40743, we have to set the time zone again */
-	zend_call_method_with_1_params(Z_OBJ_P(return_value), NULL, NULL, "settimezone",
+	zend_call_method_with_1_params(Z_OBJ_P(return_value), NULL, NULL, "setTimezone",
 			&retval, timezone_zval);
 	if (Z_ISUNDEF(retval) || Z_TYPE(retval) == IS_FALSE) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,

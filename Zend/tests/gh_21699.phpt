@@ -6,7 +6,7 @@ set_error_handler(function () {
     throw new Exception;
 });
 class bar {
-    public static function __callstatic($fusion, $b)
+    public static function __callStatic($fusion, $b)
     {
     }
     public function test()

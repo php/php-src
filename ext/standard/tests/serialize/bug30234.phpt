@@ -15,7 +15,7 @@ spl_autoload_register(function ($class_name) {
 var_dump(interface_exists('autoload_interface', false));
 var_dump(class_exists('autoload_implements', false));
 
-$o = unserialize('O:19:"Autoload_Implements":0:{}');
+$o = unserialize('O:19:"autoload_implements":0:{}');
 
 var_dump($o);
 var_dump($o instanceof autoload_interface);
@@ -29,7 +29,7 @@ var_dump(class_exists('autoload_implements', false));
 bool(false)
 bool(false)
 {closure:%s:%d}(autoload_interface)
-{closure:%s:%d}(Autoload_Implements)
+{closure:%s:%d}(autoload_implements)
 object(autoload_implements)#%d (0) {
 }
 bool(true)

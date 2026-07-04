@@ -8,7 +8,7 @@ dom
 --FILE--
 <?php
     try {
-        $section = new DOMCDataSection();
+        $section = new DOMCdataSection();
     } catch (TypeError $e) {
         echo $e->getMessage();
     }

@@ -50,7 +50,7 @@
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
-ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
+ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name);
 
 #ifdef ZEND_WIN32
 ZEND_TLS HANDLE tq_timer = NULL;
@@ -1176,12 +1176,12 @@ ZEND_API bool zend_is_valid_class_name(const zend_string *name) {
 	return 1;
 }
 
-ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *key, uint32_t flags) /* {{{ */
+ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, uint32_t flags) /* {{{ */
 {
 	zend_class_entry *ce = NULL;
 	zval *zv;
-	zend_string *lc_name;
-	zend_string *autoload_name;
+	zend_string *lookup_name;
+	bool release_lookup_name = false;
 	uint32_t ce_cache = 0;
 
 	if (ZSTR_HAS_CE_CACHE(name) && ZSTR_VALID_CE_CACHE(name)) {
@@ -1192,25 +1192,21 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		}
 	}
 
-	if (key) {
-		lc_name = key;
-	} else {
-		if (!ZSTR_LEN(name)) {
-			return NULL;
-		}
-
-		if (ZSTR_VAL(name)[0] == '\\') {
-			lc_name = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
-		} else {
-			lc_name = zend_string_tolower(name);
-		}
+	if (!ZSTR_LEN(name)) {
+		return NULL;
 	}
 
-	zv = zend_hash_find(EG(class_table), lc_name);
+	if (UNEXPECTED(ZSTR_VAL(name)[0] == '\\')) {
+		lookup_name = zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
+		release_lookup_name = true;
+	} else {
+		lookup_name = name;
+	}
+
+	zv = zend_hash_find(EG(class_table), lookup_name);
 	if (zv) {
-		if (!key) {
-			zend_string_release_ex(lc_name, 0);
+		if (release_lookup_name) {
+			zend_string_release_ex(lookup_name, 0);
 		}
 		ce = (zend_class_entry*)Z_PTR_P(zv);
 		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
@@ -1237,51 +1233,34 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 
 	/* The compiler is not-reentrant. Make sure we autoload only during run-time. */
 	if ((flags & ZEND_FETCH_CLASS_NO_AUTOLOAD) || zend_is_compiling()) {
-		if (!key) {
-			zend_string_release_ex(lc_name, 0);
-		}
-		return NULL;
+		goto fail;
 	}
 
 	if (!zend_autoload) {
-		if (!key) {
-			zend_string_release_ex(lc_name, 0);
-		}
-		return NULL;
+		goto fail;
 	}
 
 	/* Verify class name before passing it to the autoloader. */
-	if (!key && !ZSTR_HAS_CE_CACHE(name) && !zend_is_valid_class_name(name)) {
-		zend_string_release_ex(lc_name, 0);
-		return NULL;
+	if (!ZSTR_HAS_CE_CACHE(name) && !zend_is_valid_class_name(lookup_name)) {
+		goto fail;
 	}
 
-	if (zend_hash_add_empty_element(&EG(autoload_current_classnames), lc_name) == NULL) {
-		if (!key) {
-			zend_string_release_ex(lc_name, 0);
-		}
-		return NULL;
-	}
-
-	if (ZSTR_VAL(name)[0] == '\\') {
-		autoload_name = zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
-	} else {
-		autoload_name = zend_string_copy(name);
+	if (zend_hash_add_empty_element(&EG(autoload_current_classnames), lookup_name) == NULL) {
+		goto fail;
 	}
 
 	zend_string *previous_filename = EG(filename_override);
 	zend_long previous_lineno = EG(lineno_override);
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
-	ce = zend_autoload(autoload_name, lc_name);
+	ce = zend_autoload(lookup_name);
 	EG(filename_override) = previous_filename;
 	EG(lineno_override) = previous_lineno;
 
-	zend_string_release_ex(autoload_name, 0);
-	zend_hash_del(&EG(autoload_current_classnames), lc_name);
+	zend_hash_del(&EG(autoload_current_classnames), lookup_name);
 
-	if (!key) {
-		zend_string_release_ex(lc_name, 0);
+	if (release_lookup_name) {
+		zend_string_release_ex(lookup_name, 0);
 	}
 	if (ce) {
 		ZEND_ASSERT(!CG(in_compilation));
@@ -1290,12 +1269,18 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		}
 	}
 	return ce;
+
+fail:
+	if (release_lookup_name) {
+		zend_string_release_ex(lookup_name, 0);
+	}
+	return NULL;
 }
 /* }}} */
 
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name) /* {{{ */
 {
-	return zend_lookup_class_ex(name, NULL, 0);
+	return zend_lookup_class_ex(name, 0);
 }
 /* }}} */
 
@@ -1748,7 +1733,7 @@ check_fetch_type:
 			break;
 	}
 
-	ce = zend_lookup_class_ex(class_name, NULL, fetch_type);
+	ce = zend_lookup_class_ex(class_name, fetch_type);
 	if (!ce) {
 		report_class_fetch_error(class_name, fetch_type);
 		return NULL;
@@ -1782,7 +1767,7 @@ zend_class_entry *zend_fetch_class_with_scope(
 		default: ZEND_UNREACHABLE();
 	}
 
-	ce = zend_lookup_class_ex(class_name, NULL, fetch_type);
+	ce = zend_lookup_class_ex(class_name, fetch_type);
 	if (!ce) {
 		report_class_fetch_error(class_name, fetch_type);
 		return NULL;
@@ -1790,9 +1775,9 @@ zend_class_entry *zend_fetch_class_with_scope(
 	return ce;
 }
 
-zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *key, uint32_t fetch_type) /* {{{ */
+zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, uint32_t fetch_type) /* {{{ */
 {
-	zend_class_entry *ce = zend_lookup_class_ex(class_name, key, fetch_type);
+	zend_class_entry *ce = zend_lookup_class_ex(class_name, fetch_type);
 	if (!ce) {
 		report_class_fetch_error(class_name, fetch_type);
 		return NULL;

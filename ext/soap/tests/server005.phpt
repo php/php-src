@@ -10,8 +10,8 @@ class Foo {
   }
 }
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->setclass("Foo");
+$server = new SoapServer(null,array('uri'=>"http://testuri.org"));
+$server->setClass("Foo");
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>

@@ -15,9 +15,9 @@ var_dump(Locale::addLikelySubtags("%%%invalid%%%locale%%%"));
 var_dump(intl_get_error_message());
 var_dump(Locale::minimizeSubtags("%%%Invalid%%%maximized%%%locale%%%"));
 var_dump(intl_get_error_message());
-var_dump(Locale::addLikelySubTags(str_repeat($locale, 1024)));
+var_dump(Locale::addLikelySubtags(str_repeat($locale, 1024)));
 var_dump(intl_get_error_message());
-var_dump(Locale::minimizeSubTags(str_repeat($max, 1024)));
+var_dump(Locale::minimizeSubtags(str_repeat($max, 1024)));
 var_dump(intl_get_error_message());
 ?>
 --EXPECTF--

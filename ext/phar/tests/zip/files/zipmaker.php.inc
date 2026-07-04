@@ -9,13 +9,13 @@ class zipmaker
      */
     protected $archive;
     /**
-     * @var ZIPArchive
+     * @var ZipArchive
      */
     protected $zip;
     protected $path;
     function __construct($path)
     {
-        if (!class_exists('ZIPArchive')) {
+        if (!class_exists('ZipArchive')) {
             throw new Exception(
                 'Zip extension is not available');
         }
@@ -42,7 +42,7 @@ class zipmaker
     function init()
     {
         $this->zip = new ZipArchive;
-        if (true !== $this->zip->open($this->path, ZIPARCHIVE::CREATE)) {
+        if (true !== $this->zip->open($this->path, ZipArchive::CREATE)) {
             throw new Exception(
                 'Cannot open ZIP archive ' . $this->path
             );

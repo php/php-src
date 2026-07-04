@@ -71,7 +71,7 @@ $Value_object = new Value();
 $concreteClass_object = new concreteClass();
 
 $valid_objects = array(
-                  "new stdclass" => new stdclass,
+                  "new stdClass" => new stdClass,
                   "new foo" => new foo,
                   "new concreteClass" => new concreteClass,
                   "new Value" => new Value,
@@ -100,7 +100,7 @@ foreach($valid_objects as $key => $obj) {
 
 *** Output for objects ***
 
--- Iteration: new stdclass --
+-- Iteration: new stdClass --
 (object) array(
 )
 (object) array(

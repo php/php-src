@@ -4,9 +4,9 @@ SPL: SplObjectStorage addAll/removeAll
 <?php
 class A extends SplObjectStorage { }
 
-$o1 = new StdClass;
-$o2 = new StdClass;
-$o3 = new StdClass;
+$o1 = new stdClass;
+$o2 = new stdClass;
+$o3 = new stdClass;
 
 $a = new A;
 $a->offsetSet($o1);

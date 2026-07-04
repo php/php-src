@@ -4,7 +4,7 @@ Bug #69939 (Casting object to bool returns false)
 com_dotnet
 --FILE--
 <?php
-var_dump((bool) new COM('WScript.Shell'));
+var_dump((bool) new com('WScript.Shell'));
 ?>
 --EXPECT--
 bool(true)

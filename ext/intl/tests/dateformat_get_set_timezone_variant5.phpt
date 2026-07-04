@@ -14,7 +14,7 @@ function d(IntlDateFormatter $df) {
 global $ts;
 echo $df->format($ts), "\n";
 var_dump(
-$df->getTimeZoneID(),
+$df->getTimeZoneId(),
 $df->getTimeZone()->getID());
 echo "\n";
 }

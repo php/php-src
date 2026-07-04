@@ -15,7 +15,7 @@ var_dump($item->otherAttribute);
 $a = array();
 
 try {
-    $item->$a = new stdclass;
+    $item->$a = new stdClass;
 } catch (TypeError $exception) {
     echo $exception->getMessage() . "\n";
 }

@@ -3,7 +3,7 @@ json_encode() & endless loop - 2
 --FILE--
 <?php
 
-$a = new stdclass;
+$a = new stdClass;
 $a->prop = $a;
 
 var_dump($a);
