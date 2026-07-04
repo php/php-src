@@ -2235,6 +2235,10 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 		return false;
 	}
 
+	ZVAL_UNDEF(&params[0]);
+	ZVAL_UNDEF(&params[1]);
+	ZVAL_UNDEF(&params[2]);
+
 	zend_try {
 		zval *trace = Z_CLIENT_TRACE_P(this_ptr);
 		if (Z_TYPE_P(trace) == IS_TRUE) {
