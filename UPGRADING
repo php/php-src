@@ -164,6 +164,10 @@ PHP 8.6 UPGRADE NOTES
   . SplFileObject::next() past EOF no longer increments key() without bound.
     SplFileObject::seek() past EOF now produces the same key() value as
     SplTempFileObject; the two previously returned different values.
+  . The default spl_autoload() implementation now builds the include file
+    name from the case-preserved class name instead of its lowercased form.
+    On case-sensitive file systems the file name must match the class name
+    casing (e.g. MyClass.php instead of myclass.php).
 
 - Standard:
   . Form feed (\f) is now added in the default trimmed characters of trim(),

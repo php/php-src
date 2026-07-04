@@ -42,6 +42,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-21314 (Different session garbage collector behavior between
     PHP 8.3 and PHP 8.5). (jorgsowa)
 
+- SPL:
+  . spl_autoload() now builds the include file name from the case-preserved
+    class name instead of lowercasing it, fixing autoloading of classes with
+    non-lowercase names on case-sensitive file systems. (jorgsowa)
+
 - Streams:
   . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
     and a proxy set). (CVE-2026-12184) (ndossche)
