@@ -16,7 +16,10 @@ register_shutdown_function(static function (): void {
 });
 
 $fiber = new Fiber(static function (): void {
-    str_repeat('X', PHP_INT_MAX);
+    $x = 'X';
+    while (true) {
+        $x .= $x;
+    }
 });
 $fiber->start();
 
