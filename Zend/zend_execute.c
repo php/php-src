@@ -2050,7 +2050,7 @@ static zend_always_inline bool zend_string_offset_extend_exceeds_memory(size_t n
 		return false;
 	}
 	size_t limit = zend_memory_limit();
-	size_t usage = zend_memory_usage(true);
+	size_t usage = zend_memory_usage(false);
 	size_t available = (limit > usage) ? (limit - usage) : 0;
 	return new_len > available;
 }

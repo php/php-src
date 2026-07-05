@@ -539,7 +539,7 @@ ZEND_API bool zend_string_alloc_size_exceeds_memory(size_t nmemb, size_t size, s
 			return false;
 		}
 		size_t limit = zend_memory_limit();
-		size_t usage = zend_memory_usage(true);
+		size_t usage = zend_memory_usage(false);
 		size_t available = (limit > usage) ? (limit - usage) : 0;
 		if (needed <= available) {
 			return false;
