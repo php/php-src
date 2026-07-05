@@ -59,7 +59,7 @@ U_CFUNC void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t
 	int32_t str_len2 = (int32_t)str_len; /* in order to avoid signed/unsigned problems */
 	*sub_str = NULL;
 
-	if(str_len > INT32_MAX) {
+	if (UNEXPECTED(str_len > INT32_MAX)) {
 		/* We cannot return long strings from ICU functions, so we won't here too */
 		return;
 	}

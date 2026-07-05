@@ -353,7 +353,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , const char* t
 	int32_t      buflen         = 512;
 	UErrorCode   status         = U_ZERO_ERROR;
 
-	if (strlen(loc_name) > INTL_MAX_LOCALE_LEN) {
+	if (UNEXPECTED(strlen(loc_name) > INTL_MAX_LOCALE_LEN)) {
 		return NULL;
 	}
 
@@ -575,7 +575,7 @@ static void get_icu_disp_value_src_php( const char* tag_name, INTERNAL_FUNCTION_
 		Z_PARAM_PATH_OR_NULL(disp_loc_name, disp_loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if(loc_name_len > ULOC_FULLNAME_CAPACITY) {
+	if (UNEXPECTED(loc_name_len > ULOC_FULLNAME_CAPACITY)) {
 		/* See bug 67397: overlong locale names cause trouble in uloc_getDisplayName */
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,  "name too long");
 		RETURN_FALSE;
@@ -710,7 +710,7 @@ static void get_icu_disp_keyword_value_src_php(const char* tag_name, INTERNAL_FU
 			Z_PARAM_PATH_OR_NULL(disp_loc_name, disp_loc_name_len)
 		ZEND_PARSE_PARAMETERS_END();
 
-		if (loc_name_len > ULOC_FULLNAME_CAPACITY) {
+		if (UNEXPECTED(loc_name_len > ULOC_FULLNAME_CAPACITY)) {
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "name too long");
 			RETURN_FALSE;
 		}
@@ -1715,7 +1715,7 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(http_accept, http_accept_len)
 	ZEND_PARSE_PARAMETERS_END();
-	if(http_accept_len > ULOC_FULLNAME_CAPACITY) {
+	if (UNEXPECTED(http_accept_len > ULOC_FULLNAME_CAPACITY)) {
 		/* check each fragment, if any bigger than capacity, can't do it due to bug #72533 */
 		char *start = http_accept;
 		char *end;
@@ -1723,7 +1723,7 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 		do {
 			end = strchr(start, ',');
 			len = end ? end-start : http_accept_len-(start-http_accept);
-			if(len > ULOC_FULLNAME_CAPACITY) {
+			if (UNEXPECTED(len > ULOC_FULLNAME_CAPACITY)) {
 				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 						"locale string too long");
 				RETURN_FALSE;
@@ -1740,7 +1740,7 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 						&outResult, http_accept, available, &status);
 	uenum_close(available);
 	INTL_CHECK_STATUS(status, "failed to find acceptable locale");
-	if (len < 0 || outResult == ULOC_ACCEPT_FAILED) {
+	if (UNEXPECTED(len < 0 || outResult == ULOC_ACCEPT_FAILED)) {
 		RETURN_FALSE;
 	}
 	RETURN_STRINGL(resultLocale, len);
@@ -1779,7 +1779,7 @@ U_CFUNC PHP_FUNCTION(locale_add_likely_subtags)
 
 	const int32_t maximized_locale_len = uloc_addLikelySubtags(locale, maximized_locale, sizeof(maximized_locale), &status);
 	INTL_CHECK_STATUS(status, "invalid locale");
-	if (maximized_locale_len < 0) {
+	if (UNEXPECTED(maximized_locale_len < 0)) {
 		RETURN_FALSE;
 	}
 
@@ -1802,7 +1802,7 @@ U_CFUNC PHP_FUNCTION(locale_minimize_subtags)
 
 	const int32_t minimized_locale_len = uloc_minimizeSubtags(locale, minimized_locale, sizeof(minimized_locale), &status);
 	INTL_CHECK_STATUS(status, "invalid locale");
-	if (minimized_locale_len < 0) {
+	if (UNEXPECTED(minimized_locale_len < 0)) {
 		RETURN_FALSE;
 	}
 

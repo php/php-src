@@ -331,17 +331,17 @@ U_CFUNC PHP_FUNCTION( transliterator_transliterate )
 		RETURN_THROWS();
 	}
 
-	if (limit < -1) {
+	if (UNEXPECTED(limit < -1)) {
 		zend_argument_value_error(is_method ? 3 : 4, "must be greater than or equal to -1");
 		goto cleanup_object;
 	}
 
-	if (start < 0) {
+	if (UNEXPECTED(start < 0)) {
 		zend_argument_value_error(is_method ? 2 : 3, "must be greater than or equal to 0");
 		goto cleanup_object;
 	}
 
-	if (limit != -1 && start > limit) {
+	if (UNEXPECTED(limit != -1 && start > limit)) {
 		zend_argument_value_error(is_method ? 2 : 3, "must be less than or equal to argument #%d ($end)", is_method ? 3 : 4);
 		goto cleanup_object;
 	}
@@ -355,7 +355,7 @@ U_CFUNC PHP_FUNCTION( transliterator_transliterate )
 
 	/* we've started allocating resources, goto from now on */
 
-	if( ( start > ustr_len ) || (( limit != -1 ) && (limit > ustr_len ) ) )
+	if (UNEXPECTED((start > ustr_len) || ((limit != -1) && (limit > ustr_len))))
 	{
 		char *msg;
 		spprintf( &msg, 0,

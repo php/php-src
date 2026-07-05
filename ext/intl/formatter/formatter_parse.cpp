@@ -51,7 +51,7 @@ U_CFUNC PHP_FUNCTION( numfmt_parse )
 
 	if (zposition) {
 		zend_long long_position = zval_get_long(zposition);
-		if (long_position < INT32_MIN || long_position > INT32_MAX) {
+		if (UNEXPECTED(long_position < INT32_MIN || long_position > INT32_MAX)) {
 			zend_argument_value_error(hasThis() ? 3 : 4, "must be between %d and %d", INT32_MIN, INT32_MAX);
 			RETURN_THROWS();
 		}
@@ -162,7 +162,7 @@ U_CFUNC PHP_FUNCTION( numfmt_parse_currency )
 
 	if (zposition) {
 		zend_long long_position = zval_get_long(zposition);
-		if (long_position < INT32_MIN || long_position > INT32_MAX) {
+		if (UNEXPECTED(long_position < INT32_MIN || long_position > INT32_MAX)) {
 			zend_argument_value_error(hasThis() ? 3 : 4, "must be between %d and %d", INT32_MIN, INT32_MAX);
 			RETURN_THROWS();
 		}
