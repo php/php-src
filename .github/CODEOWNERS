@@ -22,7 +22,7 @@
 /ext/dba @Girgias
 /ext/dom @devnexen
 /ext/ffi @dstogov
-/ext/gd @devnexen
+/ext/gd @pierrejoye @devnexen
 /ext/gettext @devnexen
 /ext/gmp @Girgias
 /ext/intl @devnexen @LamentXU123
