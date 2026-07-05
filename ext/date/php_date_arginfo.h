@@ -1025,65 +1025,47 @@ static zend_class_entry *register_class_DateTimeImmutable(zend_class_entry *clas
 	ZVAL_STR(&attribute_Deprecated_func___wakeup_0->args[1].value, attribute_Deprecated_func___wakeup_0_arg1_str);
 	attribute_Deprecated_func___wakeup_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_NoDiscard_func_modify_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
-	zend_attribute *attribute_NoDiscard_func_modify_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "modify", sizeof("modify") - 1), attribute_name_NoDiscard_func_modify_0, 1);
-	zend_string_release_ex(attribute_name_NoDiscard_func_modify_0, true);
+	zend_attribute *attribute_NoDiscard_func_modify_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "modify", sizeof("modify") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 1);
 	zend_string *attribute_NoDiscard_func_modify_0_arg0_str = zend_string_init("as DateTimeImmutable::modify() does not modify the object itself", strlen("as DateTimeImmutable::modify() does not modify the object itself"), 1);
 	ZVAL_STR(&attribute_NoDiscard_func_modify_0->args[0].value, attribute_NoDiscard_func_modify_0_arg0_str);
 	attribute_NoDiscard_func_modify_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_NoDiscard_func_add_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
-	zend_attribute *attribute_NoDiscard_func_add_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "add", sizeof("add") - 1), attribute_name_NoDiscard_func_add_0, 1);
-	zend_string_release_ex(attribute_name_NoDiscard_func_add_0, true);
+	zend_attribute *attribute_NoDiscard_func_add_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "add", sizeof("add") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 1);
 	zend_string *attribute_NoDiscard_func_add_0_arg0_str = zend_string_init("as DateTimeImmutable::add() does not modify the object itself", strlen("as DateTimeImmutable::add() does not modify the object itself"), 1);
 	ZVAL_STR(&attribute_NoDiscard_func_add_0->args[0].value, attribute_NoDiscard_func_add_0_arg0_str);
 	attribute_NoDiscard_func_add_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_NoDiscard_func_sub_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
-	zend_attribute *attribute_NoDiscard_func_sub_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "sub", sizeof("sub") - 1), attribute_name_NoDiscard_func_sub_0, 1);
-	zend_string_release_ex(attribute_name_NoDiscard_func_sub_0, true);
+	zend_attribute *attribute_NoDiscard_func_sub_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "sub", sizeof("sub") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 1);
 	zend_string *attribute_NoDiscard_func_sub_0_arg0_str = zend_string_init("as DateTimeImmutable::sub() does not modify the object itself", strlen("as DateTimeImmutable::sub() does not modify the object itself"), 1);
 	ZVAL_STR(&attribute_NoDiscard_func_sub_0->args[0].value, attribute_NoDiscard_func_sub_0_arg0_str);
 	attribute_NoDiscard_func_sub_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_NoDiscard_func_settimezone_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
-	zend_attribute *attribute_NoDiscard_func_settimezone_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "settimezone", sizeof("settimezone") - 1), attribute_name_NoDiscard_func_settimezone_0, 1);
-	zend_string_release_ex(attribute_name_NoDiscard_func_settimezone_0, true);
+	zend_attribute *attribute_NoDiscard_func_settimezone_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "settimezone", sizeof("settimezone") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 1);
 	zend_string *attribute_NoDiscard_func_settimezone_0_arg0_str = zend_string_init("as DateTimeImmutable::setTimezone() does not modify the object itself", strlen("as DateTimeImmutable::setTimezone() does not modify the object itself"), 1);
 	ZVAL_STR(&attribute_NoDiscard_func_settimezone_0->args[0].value, attribute_NoDiscard_func_settimezone_0_arg0_str);
 	attribute_NoDiscard_func_settimezone_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_NoDiscard_func_settime_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
-	zend_attribute *attribute_NoDiscard_func_settime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "settime", sizeof("settime") - 1), attribute_name_NoDiscard_func_settime_0, 1);
-	zend_string_release_ex(attribute_name_NoDiscard_func_settime_0, true);
+	zend_attribute *attribute_NoDiscard_func_settime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "settime", sizeof("settime") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 1);
 	zend_string *attribute_NoDiscard_func_settime_0_arg0_str = zend_string_init("as DateTimeImmutable::setTime() does not modify the object itself", strlen("as DateTimeImmutable::setTime() does not modify the object itself"), 1);
 	ZVAL_STR(&attribute_NoDiscard_func_settime_0->args[0].value, attribute_NoDiscard_func_settime_0_arg0_str);
 	attribute_NoDiscard_func_settime_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_NoDiscard_func_setdate_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
-	zend_attribute *attribute_NoDiscard_func_setdate_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setdate", sizeof("setdate") - 1), attribute_name_NoDiscard_func_setdate_0, 1);
-	zend_string_release_ex(attribute_name_NoDiscard_func_setdate_0, true);
+	zend_attribute *attribute_NoDiscard_func_setdate_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setdate", sizeof("setdate") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 1);
 	zend_string *attribute_NoDiscard_func_setdate_0_arg0_str = zend_string_init("as DateTimeImmutable::setDate() does not modify the object itself", strlen("as DateTimeImmutable::setDate() does not modify the object itself"), 1);
 	ZVAL_STR(&attribute_NoDiscard_func_setdate_0->args[0].value, attribute_NoDiscard_func_setdate_0_arg0_str);
 	attribute_NoDiscard_func_setdate_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_NoDiscard_func_setisodate_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
-	zend_attribute *attribute_NoDiscard_func_setisodate_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setisodate", sizeof("setisodate") - 1), attribute_name_NoDiscard_func_setisodate_0, 1);
-	zend_string_release_ex(attribute_name_NoDiscard_func_setisodate_0, true);
+	zend_attribute *attribute_NoDiscard_func_setisodate_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setisodate", sizeof("setisodate") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 1);
 	zend_string *attribute_NoDiscard_func_setisodate_0_arg0_str = zend_string_init("as DateTimeImmutable::setISODate() does not modify the object itself", strlen("as DateTimeImmutable::setISODate() does not modify the object itself"), 1);
 	ZVAL_STR(&attribute_NoDiscard_func_setisodate_0->args[0].value, attribute_NoDiscard_func_setisodate_0_arg0_str);
 	attribute_NoDiscard_func_setisodate_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_NoDiscard_func_settimestamp_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
-	zend_attribute *attribute_NoDiscard_func_settimestamp_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "settimestamp", sizeof("settimestamp") - 1), attribute_name_NoDiscard_func_settimestamp_0, 1);
-	zend_string_release_ex(attribute_name_NoDiscard_func_settimestamp_0, true);
+	zend_attribute *attribute_NoDiscard_func_settimestamp_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "settimestamp", sizeof("settimestamp") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 1);
 	zend_string *attribute_NoDiscard_func_settimestamp_0_arg0_str = zend_string_init("as DateTimeImmutable::setTimestamp() does not modify the object itself", strlen("as DateTimeImmutable::setTimestamp() does not modify the object itself"), 1);
 	ZVAL_STR(&attribute_NoDiscard_func_settimestamp_0->args[0].value, attribute_NoDiscard_func_settimestamp_0_arg0_str);
 	attribute_NoDiscard_func_settimestamp_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_string *attribute_name_NoDiscard_func_setmicrosecond_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, true);
-	zend_attribute *attribute_NoDiscard_func_setmicrosecond_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setmicrosecond", sizeof("setmicrosecond") - 1), attribute_name_NoDiscard_func_setmicrosecond_0, 1);
-	zend_string_release_ex(attribute_name_NoDiscard_func_setmicrosecond_0, true);
+	zend_attribute *attribute_NoDiscard_func_setmicrosecond_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setmicrosecond", sizeof("setmicrosecond") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 1);
 	zend_string *attribute_NoDiscard_func_setmicrosecond_0_arg0_str = zend_string_init("as DateTimeImmutable::setMicrosecond() does not modify the object itself", strlen("as DateTimeImmutable::setMicrosecond() does not modify the object itself"), 1);
 	ZVAL_STR(&attribute_NoDiscard_func_setmicrosecond_0->args[0].value, attribute_NoDiscard_func_setmicrosecond_0_arg0_str);
 	attribute_NoDiscard_func_setmicrosecond_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
