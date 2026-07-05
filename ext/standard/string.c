@@ -2143,6 +2143,10 @@ static zend_string *php_chunk_split(const char *src, size_t srclen, const char *
 		chunks++;
 	}
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(chunks, endlen, srclen))) {
+		return NULL;
+	}
+
 	dest = zend_string_safe_alloc(chunks, endlen, srclen, 0);
 
 	for (p = src, q = ZSTR_VAL(dest); p < (src + srclen - chunklen + 1); ) {
@@ -2198,6 +2202,9 @@ PHP_FUNCTION(chunk_split)
 	}
 
 	result = php_chunk_split(ZSTR_VAL(str), ZSTR_LEN(str), end, endlen, (size_t)chunklen);
+	if (UNEXPECTED(!result)) {
+		RETURN_THROWS();
+	}
 
 	RETURN_STR(result);
 }
