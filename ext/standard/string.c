@@ -5488,6 +5488,10 @@ PHP_FUNCTION(str_repeat)
 	if (ZSTR_LEN(input_str) == 0 || mult == 0)
 		RETURN_EMPTY_STRING();
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(ZSTR_LEN(input_str), mult, 0))) {
+		RETURN_THROWS();
+	}
+
 	/* Initialize the result string */
 	result = zend_string_safe_alloc(ZSTR_LEN(input_str), mult, 0, 0);
 	result_len = ZSTR_LEN(input_str) * mult;
@@ -5797,6 +5801,9 @@ PHP_FUNCTION(str_pad)
 	}
 
 	num_pad_chars = pad_length - ZSTR_LEN(input);
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(1, ZSTR_LEN(input), num_pad_chars))) {
+		RETURN_THROWS();
+	}
 	result = zend_string_safe_alloc(1, ZSTR_LEN(input), num_pad_chars, 0);
 	ZSTR_LEN(result) = 0;
 
