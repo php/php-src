@@ -22,6 +22,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_variables.h"
+#include "zend_exceptions.h"
 #include "mbstring.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_mail.h"
@@ -5933,6 +5934,10 @@ PHP_FUNCTION(mb_str_pad)
 
 	size_t num_mb_pad_chars = pad_to_length - input_length;
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(num_mb_pad_chars, 1, ZSTR_LEN(input)))) {
+		RETURN_THROWS();
+	}
+
 	/* We need to figure out the left/right padding lengths. */
 	size_t left_pad = 0, right_pad = 0; /* Initialize here to silence compiler warnings. */
 	switch (pad_type_val) {
@@ -6013,7 +6018,7 @@ overflow:
 	zend_string_release_ex(remaining_left_pad_str, false);
 	zend_string_release_ex(remaining_right_pad_str, false);
 overflow_no_release:
-	zend_throw_error(NULL, "String size overflow");
+	zend_throw_error(zend_ce_memory_error, "The resulting string is too large to fit in the configured memory limit");
 	RETURN_THROWS();
 }
 
