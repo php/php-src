@@ -38,36 +38,16 @@ static UBool grapheme_mask_validate_mask_char(const char *mask_char, size_t mask
     }
 
     UErrorCode status = U_ZERO_ERROR;
-    UText *ut = NULL;
-    UBreakIterator *bi = NULL;
-    UBool retval = 0;
-
-    ut = utext_openUTF8(ut, mask_char, mask_char_len, &status);
+    UText *ut = utext_openUTF8(NULL, mask_char, mask_char_len, &status);
     if (U_FAILURE(status)) {
         return 0;
     }
 
-    bi = ubrk_open(UBRK_CHARACTER, NULL, NULL, 0, &status);
-    if (U_FAILURE(status)) {
-        utext_close(ut);
-        return 0;
-    }
-    ubrk_setUText(bi, ut, &status);
-    if (U_FAILURE(status)) {
-        ubrk_close(bi);
-        utext_close(ut);
-        return 0;
-    }
-
-    int32_t first = ubrk_first(bi);
-    int32_t second = ubrk_next(bi);
-    int32_t third = ubrk_next(bi);
-
-    retval = (first == 0 && second == (int32_t)mask_char_len && third == UBRK_DONE);
-
-    ubrk_close(bi);
+    /* Use the existing grapheme_count_graphemes function */
+    int32_t count = grapheme_count_graphemes(ut);
     utext_close(ut);
-    return retval;
+    
+    return (count == 1);
 }
 /* }}} */
 
@@ -106,10 +86,16 @@ PHP_FUNCTION(grapheme_mask)
         RETURN_THROWS();
     }
 
-    /* validate UTF-8 input */
-    if (!grapheme_validate_utf8(ZSTR_VAL(str), ZSTR_LEN(str))) {
-        intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "Invalid UTF-8 string", 1);
-        RETURN_FALSE;
+    /* validate UTF-8 input - using existing helper */
+    if (!grapheme_ascii_check(ZSTR_VAL(str), ZSTR_LEN(str))) {
+        /* Not ASCII, need to validate UTF-8 */
+        UErrorCode status = U_ZERO_ERROR;
+        UText *ut = utext_openUTF8(NULL, ZSTR_VAL(str), ZSTR_LEN(str), &status);
+        if (U_FAILURE(status)) {
+            intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "Invalid UTF-8 string", 1);
+            RETURN_FALSE;
+        }
+        utext_close(ut);
     }
 
     /* build cache of all grapheme boundaries */
@@ -118,17 +104,19 @@ PHP_FUNCTION(grapheme_mask)
         UText *ut = NULL;
         UBreakIterator *bi = NULL;
 
-        ut = utext_openUTF8(ut, ZSTR_VAL(str), ZSTR_LEN(str), &status);
+        ut = utext_openUTF8(NULL, ZSTR_VAL(str), ZSTR_LEN(str), &status);
         if (U_FAILURE(status)) {
             intl_error_set(NULL, status, "utext_openUTF8 failed", 1);
             RETURN_FALSE;
         }
-        bi = ubrk_open(UBRK_CHARACTER, NULL, NULL, 0, &status);
+
+        bi = grapheme_get_break_iterator(&status);
         if (U_FAILURE(status)) {
             utext_close(ut);
-            intl_error_set(NULL, status, "ubrk_open failed", 1);
+            intl_error_set(NULL, status, "grapheme_get_break_iterator failed", 1);
             RETURN_FALSE;
         }
+
         ubrk_setUText(bi, ut, &status);
         if (U_FAILURE(status)) {
             ubrk_close(bi);
@@ -144,18 +132,19 @@ PHP_FUNCTION(grapheme_mask)
         while (pos != UBRK_DONE) {
             if (total_graphemes >= boundaries_capacity) {
                 boundaries_capacity *= 2;
-                boundaries = erealloc(boundaries, boundaries_capacity * sizeof(int32_t));
-                if (!boundaries) {
+                int32_t *new_boundaries = erealloc(boundaries, boundaries_capacity * sizeof(int32_t));
+                if (!new_boundaries) {
                     ubrk_close(bi);
                     utext_close(ut);
+                    efree(boundaries);
                     zend_error(E_ERROR, "Memory allocation failed");
                 }
+                boundaries = new_boundaries;
             }
             boundaries[total_graphemes] = pos;
             total_graphemes++;
             pos = ubrk_next(bi);
         }
-        /* Last stored boundary is ZSTR_LEN(str), total_graphemes = number of breaks (including start and end) */
 
         ubrk_close(bi);
         utext_close(ut);
@@ -211,8 +200,10 @@ PHP_FUNCTION(grapheme_mask)
         p = ZSTR_VAL(result);
 
         /* Copy prefix (bytes before masking) */
-        memcpy(p, ZSTR_VAL(str), prefix_len);
-        p += prefix_len;
+        if (prefix_len > 0) {
+            memcpy(p, ZSTR_VAL(str), prefix_len);
+            p += prefix_len;
+        }
 
         /* Write mask_char for each grapheme to be masked */
         for (int32_t i = 0; i < mask_len; i++) {
