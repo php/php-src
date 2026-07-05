@@ -224,20 +224,6 @@ static const char *zend_asymmetric_visibility_string(uint32_t fn_flags) /* {{{ *
 	}
 }
 
-static const char *zend_set_visibility_string(uint32_t set_visibility) /* {{{ */
-{
-	switch (set_visibility) {
-		case ZEND_ACC_PUBLIC_SET:
-			return "public(set)";
-		case ZEND_ACC_PROTECTED_SET:
-			return "protected(set)";
-		case ZEND_ACC_PRIVATE_SET:
-			return "private(set)";
-		default:
-			ZEND_UNREACHABLE();
-	}
-}
-
 static zend_string *resolve_class_name(const zend_class_entry *scope, zend_string *name) {
 	ZEND_ASSERT(scope);
 	if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_PARENT)) && scope->parent) {
@@ -1489,6 +1475,20 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 						ZSTR_VAL(ce->name), ZSTR_VAL(key));
 				}
 			}
+			if (parent_info->hooks
+			 && parent_info->hooks[ZEND_PROPERTY_HOOK_SET]
+			 && parent_info->hooks[ZEND_PROPERTY_HOOK_SET]->common.fn_flags & ZEND_ACC_ABSTRACT
+			 && child_info->flags & ZEND_ACC_READONLY
+			 && !property_has_operation(child_info, ZEND_PROPERTY_HOOK_SET)) {
+				zend_error_noreturn(
+					E_COMPILE_ERROR,
+					"Readonly property %s::$%s cannot implement set hook required by %s %s::$%s",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(key),
+					zend_get_object_type_case(parent_info->ce, false),
+					ZSTR_VAL(parent_info->ce->name),
+					ZSTR_VAL(key));
+			}
 			if (UNEXPECTED((child_info->flags & ZEND_ACC_PPP_SET_MASK))
 			 /* Get-only virtual properties have no set visibility, so any child visibility is fine. */
 			 && !(parent_info->hooks && (parent_info->flags & ZEND_ACC_VIRTUAL) && !parent_info->hooks[ZEND_PROPERTY_HOOK_SET])) {
@@ -1500,17 +1500,6 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				}
 				uint32_t child_set_visibility = child_info->flags & ZEND_ACC_PPP_SET_MASK;
 				if (child_set_visibility > parent_set_visibility) {
-					if (child_info->flags & ZEND_ACC_READONLY) {
-						zend_error_noreturn(
-							E_COMPILE_ERROR,
-							"Set access level of readonly property %s::$%s is %s, but must be %s (as in %s %s)%s",
-							ZSTR_VAL(ce->name), ZSTR_VAL(key),
-							zend_set_visibility_string(child_set_visibility),
-							zend_set_visibility_string(parent_set_visibility),
-							zend_get_object_type_case(parent_info->ce, false),
-							ZSTR_VAL(parent_info->ce->name),
-							!(parent_info->flags & ZEND_ACC_PPP_SET_MASK) ? "" : " or weaker");
-					}
 					zend_error_noreturn(
 						E_COMPILE_ERROR,
 						"Set access level of %s::$%s must be %s (as in class %s)%s",
