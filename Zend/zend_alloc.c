@@ -2918,6 +2918,20 @@ ZEND_API zend_result zend_set_memory_limit(size_t memory_limit)
 	return SUCCESS;
 }
 
+ZEND_API size_t zend_memory_limit(void)
+{
+#if ZEND_MM_LIMIT
+	return AG(mm_heap)->limit;
+#else
+	return (size_t)Z_L(-1) >> 1;
+#endif
+}
+
+ZEND_API bool zend_memory_limit_is_unlimited(void)
+{
+	return zend_memory_limit() == ((size_t)Z_L(-1) >> 1);
+}
+
 ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void)
 {
 #if ZEND_MM_LIMIT
