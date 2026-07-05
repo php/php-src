@@ -1679,6 +1679,9 @@ PHP_FUNCTION(mb_str_split)
 	if (char_len) {
 		unsigned int chunk_len = char_len * split_len;
 		unsigned int chunks = ((ZSTR_LEN(str) / chunk_len) + split_len - 1) / split_len; /* round up */
+		if (UNEXPECTED(zend_array_alloc_size_exceeds_memory(chunks, true))) {
+			RETURN_THROWS();
+		}
 		array_init_size(return_value, chunks);
 		while (p < e) {
 			add_next_index_stringl(return_value, (const char*)p, MIN(chunk_len, e - p));
@@ -1688,6 +1691,9 @@ PHP_FUNCTION(mb_str_split)
 		unsigned char const *mbtab = enc->mblen_table;
 
 		/* Assume that we have 1-byte characters */
+		if (UNEXPECTED(zend_array_alloc_size_exceeds_memory((ZSTR_LEN(str) + split_len - 1) / split_len, true))) {
+			RETURN_THROWS();
+		}
 		array_init_size(return_value, (ZSTR_LEN(str) + split_len - 1) / split_len);
 
 		while (p < e) {
@@ -1703,6 +1709,9 @@ PHP_FUNCTION(mb_str_split)
 		}
 	} else {
 		/* Assume that we have 1-byte characters */
+		if (UNEXPECTED(zend_array_alloc_size_exceeds_memory((ZSTR_LEN(str) + split_len - 1) / split_len, true))) {
+			RETURN_THROWS();
+		}
 		array_init_size(return_value, (ZSTR_LEN(str) + split_len - 1) / split_len);
 
 		uint32_t wchar_buf[128];
