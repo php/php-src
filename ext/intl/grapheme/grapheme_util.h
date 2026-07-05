@@ -1,17 +1,3 @@
-/*
-   +----------------------------------------------------------------------+
-   | Copyright © The PHP Group and Contributors.                          |
-   +----------------------------------------------------------------------+
-   | This source file is subject to the Modified BSD License that is      |
-   | bundled with this package in the file LICENSE, and is available      |
-   | through the World Wide Web at <https://www.php.net/license/>.        |
-   |                                                                      |
-   | SPDX-License-Identifier: BSD-3-Clause                                |
-   +----------------------------------------------------------------------+
-   | Authors: Ed Batutis <ed@batutis.com>                                 |
-   +----------------------------------------------------------------------+
- */
-
 #ifndef GRAPHEME_GRAPHEME_UTIL_H
 #define GRAPHEME_GRAPHEME_UTIL_H
 
@@ -33,16 +19,15 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 
 int32_t grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len );
 
-int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t string_len);
+int32_t grapheme_count_graphemes(UText *ut);  /* تغییر: UBreakIterator* → UText* */
 
 int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset);
 
-UBreakIterator* grapheme_get_break_iterator(UErrorCode *status );
-#ifdef __cplusplus
-}
-#endif
+/* توابع UTF-8 که در grapheme_string.c تعریف شدن */
+int32_t grapheme_strpos_utf8(const char *haystack, size_t haystack_len, 
+                             const char *needle, size_t needle_len,
+                             int32_t offset, int32_t *puchar_pos);
 
-/* OUTSIDE_STRING: check if (possibly negative) long offset is outside the string with int32_t length */
-#define OUTSIDE_STRING(offset, max_len) ( offset <= INT32_MIN || offset > INT32_MAX || (offset < 0 ? -offset > (zend_long) max_len : offset > (zend_long) max_len) )
-
-#endif // GRAPHEME_GRAPHEME_UTIL_H
+int32_t grapheme_stripos_utf8(const char *haystack, size_t haystack_len,
+                              const char *needle, size_t needle_len,
+                              int32_t offset, int32
