@@ -574,7 +574,7 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 
 	/* Parse the URI. */
 	const int result = uriParseSingleUriExMmA(&uri, uri_str, uri_str + uri_str_len, NULL, mm);
-	if (UNEXPECTED(result != URI_SUCCESS)) {
+	if (result != URI_SUCCESS) {
 		if (!silent) {
 			switch (result) {
 				case URI_ERROR_SYNTAX:

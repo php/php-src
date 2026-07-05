@@ -135,7 +135,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri_internal *php_uri_parse(const php_uri_pars
 {
 	void *uri = uri_parser->parse(uri_str, uri_str_len, NULL, NULL, silent);
 
-	if (UNEXPECTED(uri == NULL)) {
+	if (uri == NULL) {
 		return NULL;
 	}
 
@@ -198,7 +198,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
 	const php_uri_parser *uri_parser, const char *uri_str, size_t uri_str_len, php_uri_component_read_mode read_mode, bool silent
 ) {
 	php_uri_internal *uri_internal = php_uri_parse(uri_parser, uri_str, uri_str_len, silent);
-	if (UNEXPECTED(uri_internal == NULL)) {
+	if (uri_internal == NULL) {
 		return NULL;
 	}
 
@@ -372,7 +372,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 	}
 
 	void *uri = uri_parser->parse(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), base_url, errors_zv != NULL ? &errors : NULL, !should_throw);
-	if (UNEXPECTED(uri == NULL)) {
+	if (uri == NULL) {
 		if (should_throw) {
 			zval_ptr_dtor(&errors);
 			RETURN_THROWS();
