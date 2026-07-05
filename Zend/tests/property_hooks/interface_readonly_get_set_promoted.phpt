@@ -1,15 +1,12 @@
 --TEST--
-Readonly public(set) property cannot implement set hook of get/set interface property
+Readonly promoted property cannot implement set hook of get/set interface property
 --FILE--
 <?php
 interface I {
     public int $prop { get; set; }
 }
 class C implements I {
-    public public(set) readonly int $prop;
-    public function __construct(int $prop) {
-        $this->prop = $prop;
-    }
+    public function __construct(public readonly int $prop) {}
 }
 ?>
 --EXPECTF--
