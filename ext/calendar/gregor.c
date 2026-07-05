@@ -229,7 +229,6 @@ zend_long GregorianToSdn(
 	} else {
 		year = inputYear + 4800;
 	}
-	
 	/* Adjust the start of the year. */
 	if (inputMonth > 2) {
 		month = inputMonth - 3;
