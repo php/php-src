@@ -162,7 +162,7 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 		case IS_LONG:
 		{
 			const zend_long lval = Z_LVAL_P(val);
-			if ((lval < 0) || (lval > 0x10FFFF)) {
+			if (UNEXPECTED((lval < 0) || (lval > 0x10FFFF))) {
 				php_converter_throw_failure(objval, U_ILLEGAL_ARGUMENT_ERROR, "Invalid codepoint U+%04lx", lval);
 				return;
 			}
@@ -636,7 +636,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 	zend_string	*ret;
 	UChar		*temp;
 
-	if (!src_cnv || !dest_cnv) {
+	if (UNEXPECTED(!src_cnv || !dest_cnv)) {
 		php_converter_throw_failure(objval, U_INVALID_STATE_ERROR,
 		                            "Internal converters not initialized");
 		return nullptr;
@@ -686,7 +686,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 
 static void php_converter_set_subst_chars(UConverter *cnv, const zend_string *subst, UErrorCode *error)
 {
-	if (ZSTR_LEN(subst) > SCHAR_MAX) {
+	if (UNEXPECTED(ZSTR_LEN(subst) > SCHAR_MAX)) {
 		*error = U_ILLEGAL_ARGUMENT_ERROR;
 		return;
 	}

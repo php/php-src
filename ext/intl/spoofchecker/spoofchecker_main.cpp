@@ -77,7 +77,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, areConfusable)
 	ZEND_PARSE_PARAMETERS_END();
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
-	if(ZSTR_LEN(s1) > INT32_MAX || ZSTR_LEN(s2) > INT32_MAX) {
+	if (UNEXPECTED(ZSTR_LEN(s1) > INT32_MAX || ZSTR_LEN(s2) > INT32_MAX)) {
 		SPOOFCHECKER_ERROR_CODE(co) = U_BUFFER_OVERFLOW_ERROR;
 	} else {
 		ret = uspoof_areConfusableUTF8(co->uspoof, ZSTR_VAL(s1), (int32_t)ZSTR_LEN(s1), ZSTR_VAL(s2), (int32_t)ZSTR_LEN(s2), SPOOFCHECKER_ERROR_CODE_P(co));
@@ -179,7 +179,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, setAllowedChars)
 	ZEND_PARSE_PARAMETERS_END();
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
 
-	if (ZSTR_LEN(pattern) > INT32_MAX) {
+	if (UNEXPECTED(ZSTR_LEN(pattern) > INT32_MAX)) {
 		zend_argument_value_error(1, "must be less than or equal to " ZEND_LONG_FMT " bytes long", INT32_MAX);
 		RETURN_THROWS();
 	}

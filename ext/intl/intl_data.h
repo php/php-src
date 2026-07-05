@@ -114,7 +114,7 @@ typedef struct _intl_data {
 #define INTL_MAX_LOCALE_LEN (ULOC_FULLNAME_CAPACITY-1)
 
 #define INTL_CHECK_LOCALE_LEN(locale_len)												\
-	if((locale_len) > INTL_MAX_LOCALE_LEN) {											\
+	if (UNEXPECTED((locale_len) > INTL_MAX_LOCALE_LEN)) {								\
 		char *_msg; \
 		spprintf(&_msg, 0, "Locale string too long, should be no longer than %d characters", INTL_MAX_LOCALE_LEN);			\
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	_msg); \
@@ -123,7 +123,7 @@ typedef struct _intl_data {
 	}
 
 #define INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len)									\
-	if((locale_len) > INTL_MAX_LOCALE_LEN) {											\
+	if (UNEXPECTED((locale_len) > INTL_MAX_LOCALE_LEN)) {								\
 		char *_msg; \
 		spprintf(&_msg, 0, "Locale string too long, should be no longer than %d characters", INTL_MAX_LOCALE_LEN);			\
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	_msg); 								\

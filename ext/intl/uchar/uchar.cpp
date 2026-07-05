@@ -30,21 +30,21 @@ static inline int convert_cp(UChar32* pcp, const zend_string *string_codepoint, 
 		int32_t i = 0;
 		const size_t string_codepoint_length = ZSTR_LEN(string_codepoint);
 
-		if (ZEND_SIZE_T_INT_OVFL(string_codepoint_length)) {
+		if (UNEXPECTED(ZEND_SIZE_T_INT_OVFL(string_codepoint_length))) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "Input string is too long.");
 			return FAILURE;
 		}
 
 		U8_NEXT(ZSTR_VAL(string_codepoint), i, string_codepoint_length, int_codepoint);
-		if ((size_t)i != string_codepoint_length) {
+		if (UNEXPECTED((size_t)i != string_codepoint_length)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "Passing a UTF-8 character for codepoint requires a string which is exactly one UTF-8 codepoint long.");
 			return FAILURE;
 		}
 	}
 
-	if ((int_codepoint < UCHAR_MIN_VALUE) || (int_codepoint > UCHAR_MAX_VALUE)) {
+	if (UNEXPECTED((int_codepoint < UCHAR_MIN_VALUE) || (int_codepoint > UCHAR_MAX_VALUE))) {
 		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 		intl_error_set_custom_msg(NULL, "Codepoint out of range");
 		return FAILURE;
