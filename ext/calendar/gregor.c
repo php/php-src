@@ -223,14 +223,13 @@ zend_long GregorianToSdn(
 			return (0);
 		}
 	}
-
 	/* Make year always a positive number. */
 	if (inputYear < 0) {
 		year = inputYear + 4801;
 	} else {
 		year = inputYear + 4800;
 	}
-
+	
 	/* Adjust the start of the year. */
 	if (inputMonth > 2) {
 		month = inputMonth - 3;
