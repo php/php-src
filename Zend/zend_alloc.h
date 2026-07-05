@@ -219,6 +219,11 @@ ZEND_API size_t zend_memory_limit(void);
 ZEND_API bool zend_memory_limit_is_unlimited(void);
 ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void);
 
+/* Throws a catchable MemoryError and returns true when allocating "nmemb *
+ * size + offset" bytes would overflow or exceed the configured memory limit;
+ * returns false (without throwing) otherwise. */
+ZEND_API bool zend_alloc_size_exceeds_memory(size_t nmemb, size_t size, size_t offset, const char *kind);
+
 ZEND_API void start_memory_manager(void);
 ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown);
 ZEND_API void refresh_memory_manager(void);

@@ -57,6 +57,7 @@
 #include "zend_operators.h"
 #include "zend_multiply.h"
 #include "zend_bitset.h"
+#include "zend_exceptions.h"
 #include "zend_mmap.h"
 #include "zend_portability.h"
 #include <signal.h>
@@ -2930,6 +2931,28 @@ ZEND_API size_t zend_memory_limit(void)
 ZEND_API bool zend_memory_limit_is_unlimited(void)
 {
 	return zend_memory_limit() == ((size_t)Z_L(-1) >> 1);
+}
+
+ZEND_API bool zend_alloc_size_exceeds_memory(size_t nmemb, size_t size, size_t offset, const char *kind)
+{
+	bool overflow;
+	size_t needed = zend_safe_address(nmemb, size, offset, &overflow);
+
+	if (!overflow) {
+		if (zend_memory_limit_is_unlimited()) {
+			return false;
+		}
+		size_t limit = zend_memory_limit();
+		size_t usage = zend_memory_usage(false);
+		size_t available = (limit > usage) ? (limit - usage) : 0;
+		if (needed <= available) {
+			return false;
+		}
+	}
+
+	zend_throw_error(zend_ce_memory_error,
+		"The resulting %s is too large to fit in the configured memory limit", kind);
+	return true;
 }
 
 ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void)

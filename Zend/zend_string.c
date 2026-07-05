@@ -18,7 +18,6 @@
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_multiply.h"
-#include "zend_exceptions.h"
 
 #ifdef HAVE_VALGRIND
 # include "valgrind/callgrind.h"
@@ -531,24 +530,7 @@ ZEND_API zend_string *zend_string_concat3(
 
 ZEND_API bool zend_string_alloc_size_exceeds_memory(size_t nmemb, size_t size, size_t offset)
 {
-	bool overflow;
-	size_t needed = zend_safe_address(nmemb, size, offset, &overflow);
-
-	if (!overflow) {
-		if (zend_memory_limit_is_unlimited()) {
-			return false;
-		}
-		size_t limit = zend_memory_limit();
-		size_t usage = zend_memory_usage(false);
-		size_t available = (limit > usage) ? (limit - usage) : 0;
-		if (needed <= available) {
-			return false;
-		}
-	}
-
-	zend_throw_error(zend_ce_memory_error,
-		"The resulting string is too large to fit in the configured memory limit");
-	return true;
+	return zend_alloc_size_exceeds_memory(nmemb, size, offset, "string");
 }
 
 /* strlcpy and strlcat are not always intercepted by msan, so we need to do it
