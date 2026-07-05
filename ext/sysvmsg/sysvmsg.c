@@ -287,6 +287,10 @@ PHP_FUNCTION(msg_receive)
 
 	mq = Z_SYSVMSG_QUEUE_P(queue);
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(maxsize, 1, sizeof(struct php_msgbuf)))) {
+		RETURN_THROWS();
+	}
+
 	messagebuffer = (struct php_msgbuf *) safe_emalloc(maxsize, 1, sizeof(struct php_msgbuf));
 
 	result = msgrcv(mq->id, messagebuffer, maxsize, desiredmsgtype, realflags);
