@@ -222,6 +222,11 @@ zend_long GregorianToSdn(
 			return (0);
 		}
 	}
+
+	if (inputYear > INT_MAX - 4800) {
+		return (0);
+	}
+
 	/* Make year always a positive number. */
 	if (inputYear < 0) {
 		year = inputYear + 4801;
