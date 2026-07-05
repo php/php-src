@@ -400,6 +400,15 @@ static int php_openssl_dtls_setup_crypto(php_stream *stream, php_openssl_dtls_da
 		return -1;
 	}
 
+	/* Resume a previous session (abbreviated handshake) if session_data holds an
+	 * OpenSSLSession; SSL_set_session takes its own reference. */
+	if (GET_VER_OPT("session_data") && php_openssl_is_session_ce(val)) {
+		SSL_SESSION *session = php_openssl_session_from_zval(val);
+		if (session != NULL) {
+			SSL_set_session(dtlssock->ssl_handle, session);
+		}
+	}
+
 	/* Hostname verification needs the SSL object; the verify mode is inherited
 	 * from the context. */
 	bool verify_peer = !(GET_VER_OPT("verify_peer") && !zend_is_true(val));
@@ -963,6 +972,17 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 						}
 					}
 				}
+
+				/* Expose the negotiated session so the caller can resume it later
+				 * (session_data), and whether this handshake was resumed. */
+				SSL_SESSION *session = SSL_get1_session(dtlssock->ssl_handle);
+				if (session != NULL) {
+					zval zsession;
+					php_openssl_session_object_init(&zsession, session);
+					add_assoc_zval(&crypto, "session", &zsession);
+				}
+				add_assoc_bool(&crypto, "session_reused",
+						SSL_session_reused(dtlssock->ssl_handle) == 1);
 
 				add_assoc_zval((zval *)ptrparam, "crypto", &crypto);
 			}
