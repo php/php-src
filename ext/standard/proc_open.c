@@ -44,8 +44,24 @@
 #include <spawn.h>
 #define USE_POSIX_SPAWN
 
-/* The non-_np variant is in macOS 26 (and _np deprecated) */
-#ifdef HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR
+/* The non-_np variant is in POSIX and macOS 26 (which deprecated _np). On Apple, the configure
+ * link check succeeds whenever the SDK exports the symbol even if the running OS is older - the
+ * reference is then weakly linked and resolves to NULL at runtime - so when the deployment target
+ * is older than macOS 26, the variant has to be picked at runtime. */
+#if defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR) \
+		&& defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NP) && defined(__APPLE__) \
+		&& (!defined(__MAC_OS_X_VERSION_MIN_REQUIRED) || __MAC_OS_X_VERSION_MIN_REQUIRED < 260000)
+static int php_posix_spawn_file_actions_addchdir(
+		posix_spawn_file_actions_t *file_actions, const char *path)
+{
+	if (__builtin_available(macOS 26.0, *)) {
+		return posix_spawn_file_actions_addchdir(file_actions, path);
+	} else {
+		return posix_spawn_file_actions_addchdir_np(file_actions, path);
+	}
+}
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR php_posix_spawn_file_actions_addchdir
+#elif defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR)
 #define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir
 #else
 #define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir_np
