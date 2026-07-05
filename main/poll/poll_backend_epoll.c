@@ -195,6 +195,8 @@ static int epoll_backend_wait(
 			events[i].revents = epoll_events_from_native(backend_data->events[i].events);
 			events[i].data = backend_data->events[i].data.ptr;
 		}
+	} else if (nfds < 0) {
+		php_poll_set_current_errno_error(ctx);
 	}
 
 	return nfds;
