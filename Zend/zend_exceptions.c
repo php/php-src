@@ -47,6 +47,7 @@ ZEND_API zend_class_entry *zend_ce_argument_count_error;
 ZEND_API zend_class_entry *zend_ce_value_error;
 ZEND_API zend_class_entry *zend_ce_arithmetic_error;
 ZEND_API zend_class_entry *zend_ce_division_by_zero_error;
+ZEND_API zend_class_entry *zend_ce_memory_error;
 ZEND_API zend_class_entry *zend_ce_unhandled_match_error;
 ZEND_API zend_class_entry *zend_ce_request_parse_body_exception;
 
@@ -853,6 +854,9 @@ void zend_register_default_exception(void) /* {{{ */
 
 	zend_ce_division_by_zero_error = register_class_DivisionByZeroError(zend_ce_arithmetic_error);
 	zend_init_exception_class_entry(zend_ce_division_by_zero_error);
+
+	zend_ce_memory_error = register_class_MemoryError(zend_ce_error);
+	zend_init_exception_class_entry(zend_ce_memory_error);
 
 	zend_ce_unhandled_match_error = register_class_UnhandledMatchError(zend_ce_error);
 	zend_init_exception_class_entry(zend_ce_unhandled_match_error);
