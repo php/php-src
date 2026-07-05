@@ -912,6 +912,10 @@ PHPAPI PHP_FUNCTION(fgets)
 			RETURN_THROWS();
 		}
 
+		if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(len, 1, 0))) {
+			RETURN_THROWS();
+		}
+
 		str = zend_string_alloc(len, 0);
 		buf = php_stream_get_line(stream, ZSTR_VAL(str), len, &line_len);
 		php_stream_error_operation_end_for_stream(stream);
@@ -1615,6 +1619,10 @@ PHPAPI PHP_FUNCTION(fread)
 
 	if (len <= 0) {
 		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(len, 1, 0))) {
 		RETURN_THROWS();
 	}
 
