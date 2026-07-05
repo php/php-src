@@ -6154,6 +6154,10 @@ PHP_FUNCTION(str_split)
 		return;
 	}
 
+	if (UNEXPECTED(zend_array_alloc_size_exceeds_memory(((ZSTR_LEN(str) - 1) / split_length) + 1, true))) {
+		RETURN_THROWS();
+	}
+
 	array_init_size(return_value, (uint32_t)(((ZSTR_LEN(str) - 1) / split_length) + 1));
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
