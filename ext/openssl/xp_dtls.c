@@ -37,8 +37,7 @@ typedef struct _php_openssl_dtls_data_t {
 	php_netstream_data_t s;
 	SSL_CTX *ctx;
 	SSL *ssl_handle;
-	int method;             /* STREAM_CRYPTO_METHOD_DTLS_* */
-	int enable_on_connect;  /* dtls:// scheme (vs plain udp://): set up DTLS on connect/bind */
+	bool is_server;
 } php_openssl_dtls_data_t;
 
 static const php_stream_ops php_openssl_dtls_socket_ops;
@@ -74,6 +73,10 @@ static ssize_t php_openssl_dtls_io(bool read, php_stream *stream, char *buf, siz
 	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
 	SSL *ssl = dtlssock->ssl_handle;
 
+	if (ssl == NULL) {
+		return -1;
+	}
+
 	/* OpenSSL takes an int length. */
 	if (count > INT_MAX) {
 		count = INT_MAX;
@@ -98,51 +101,28 @@ static ssize_t php_openssl_dtls_io(bool read, php_stream *stream, char *buf, siz
 	for (;;) {
 		int events;
 
-		if (ssl != NULL) {
-			ERR_clear_error();
-			int n = read ? SSL_read(ssl, buf, (int)count) : SSL_write(ssl, buf, (int)count);
-			if (n > 0) {
-				php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), n, 0);
-				return n;
-			}
-			switch (SSL_get_error(ssl, n)) {
-				case SSL_ERROR_WANT_READ:
-					events = POLLIN;
-					break;
-				case SSL_ERROR_WANT_WRITE:
-					events = POLLOUT;
-					break;
-				case SSL_ERROR_ZERO_RETURN:
-					/* Peer sent close_notify. */
-					stream->eof = 1;
-					return 0;
-				default:
-					if (read) {
-						stream->eof = 1;
-					}
-					return -1;
-			}
-		} else {
-			/* Plain UDP: crypto not enabled (e.g. a udp:// stream before
-			 * stream_socket_enable_crypto()). */
-			ssize_t n = read
-					? recv(dtlssock->s.socket, buf, count, 0)
-					: send(dtlssock->s.socket, buf, count, 0);
-			if (n > 0) {
-				php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), (size_t)n, 0);
-				return n;
-			}
-			if (n == 0) {
+		ERR_clear_error();
+		int n = read ? SSL_read(ssl, buf, (int)count) : SSL_write(ssl, buf, (int)count);
+		if (n > 0) {
+			php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), n, 0);
+			return n;
+		}
+		switch (SSL_get_error(ssl, n)) {
+			case SSL_ERROR_WANT_READ:
+				events = POLLIN;
+				break;
+			case SSL_ERROR_WANT_WRITE:
+				events = POLLOUT;
+				break;
+			case SSL_ERROR_ZERO_RETURN:
+				/* Peer sent close_notify. */
+				stream->eof = 1;
 				return 0;
-			}
-			if (errno != EAGAIN
-#if EAGAIN != EWOULDBLOCK
-					&& errno != EWOULDBLOCK
-#endif
-			) {
+			default:
+				if (read) {
+					stream->eof = 1;
+				}
 				return -1;
-			}
-			events = read ? POLLIN : POLLOUT;
 		}
 
 		/* Non-blocking, or a zero read timeout: don't wait, report would-block. */
@@ -293,7 +273,7 @@ static int php_openssl_dtls_apply_context(php_stream *stream, php_openssl_dtls_d
 	 * certificate unless verify_peer is set explicitly. A peer_fingerprint
 	 * authenticates the peer by itself (checked after the handshake), so it
 	 * overrides CA verification. */
-	bool is_server = !(dtlssock->method & 1);
+	bool is_server = dtlssock->is_server;
 	bool verify_peer = GET_VER_OPT("verify_peer") ? zend_is_true(val) : !is_server;
 	bool has_fingerprint = GET_VER_OPT("peer_fingerprint");
 	if (!verify_peer || has_fingerprint) {
@@ -832,7 +812,7 @@ static int php_openssl_dtls_accept(php_stream *stream, php_openssl_dtls_data_t *
 	clisock->s.is_blocked = true;
 	clisock->s.timeout.tv_sec = (time_t)FG(default_socket_timeout);
 	clisock->ssl_handle = ssl;
-	clisock->method = STREAM_CRYPTO_METHOD_DTLS_SERVER;
+	clisock->is_server = true;
 
 	/* The socket now belongs to the accepted stream. */
 	listen->s.socket = SOCK_ERR;
@@ -892,12 +872,6 @@ static int php_openssl_dtls_connect(php_stream *stream, php_openssl_dtls_data_t 
 	/* The I/O loop emulates blocking with poll, so the fd stays non-blocking. */
 	php_set_sock_blocking(dtlssock->s.socket, 0);
 
-	if (!dtlssock->enable_on_connect) {
-		/* Plain udp:// stream; DTLS is enabled later via stream_socket_enable_crypto(). */
-		efree(host);
-		return 0;
-	}
-
 	if (php_openssl_dtls_setup_crypto(stream, dtlssock, host) != 0) {
 		efree(host);
 		return -1;
@@ -939,45 +913,6 @@ static int php_openssl_dtls_sockop_cast(php_stream *stream, int castas, void **r
 		default:
 			return FAILURE;
 	}
-}
-
-/* stream_socket_enable_crypto() on a udp:// stream: set up the DTLS client
- * handshake over the already-connected socket. Servers use the dtls:// scheme. */
-static int php_openssl_dtls_crypto_setup(php_stream *stream, php_openssl_dtls_data_t *dtlssock,
-		php_stream_xport_crypto_param *cparam)
-{
-	if (dtlssock->ssl_handle != NULL) {
-		php_error_docref(NULL, E_WARNING, "DTLS is already active on this stream");
-		return -1;
-	}
-	/* The LSB of the crypto method marks a client; only client crypto can be
-	 * layered onto an existing socket this way. */
-	if (!(cparam->inputs.method & 1)) {
-		php_error_docref(NULL, E_WARNING,
-				"Only DTLS client crypto can be enabled on a udp:// stream; use the dtls:// server transport instead");
-		return -1;
-	}
-	dtlssock->method = cparam->inputs.method;
-	return php_openssl_dtls_setup_crypto(stream, dtlssock, NULL);
-}
-
-static int php_openssl_dtls_crypto_enable(php_stream *stream, php_openssl_dtls_data_t *dtlssock)
-{
-	if (dtlssock->ssl_handle == NULL) {
-		return -1;
-	}
-
-	php_stream_xport_param p;
-	memset(&p, 0, sizeof(p));
-	if (php_openssl_dtls_handshake(stream, dtlssock, &p) != 0
-			|| php_openssl_dtls_check_fingerprint(stream, dtlssock, &p) != 0) {
-		SSL_free(dtlssock->ssl_handle);
-		dtlssock->ssl_handle = NULL;
-		return -1;
-	}
-	/* >0 tells stream_socket_enable_crypto() the handshake finished (0 means
-	 * "in progress", -1 means failure). */
-	return 1;
 }
 
 /* Handle transport and stream options. */
@@ -1037,23 +972,6 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 			return PHP_STREAM_OPTION_RETURN_OK;
 		}
 
-		case PHP_STREAM_OPTION_CRYPTO_API: {
-			php_stream_xport_crypto_param *cparam = (php_stream_xport_crypto_param *)ptrparam;
-
-			switch (cparam->op) {
-				case STREAM_XPORT_CRYPTO_OP_SETUP:
-					cparam->outputs.returncode =
-							php_openssl_dtls_crypto_setup(stream, dtlssock, cparam);
-					return PHP_STREAM_OPTION_RETURN_OK;
-				case STREAM_XPORT_CRYPTO_OP_ENABLE:
-					cparam->outputs.returncode =
-							php_openssl_dtls_crypto_enable(stream, dtlssock);
-					return PHP_STREAM_OPTION_RETURN_OK;
-				default:
-					return PHP_STREAM_OPTION_RETURN_NOTIMPL;
-			}
-		}
-
 		case PHP_STREAM_OPTION_XPORT_API:
 			xparam = (php_stream_xport_param *)ptrparam;
 
@@ -1081,17 +999,11 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 						return PHP_STREAM_OPTION_RETURN_OK;
 					}
 					php_set_sock_blocking(dtlssock->s.socket, 0);
-					if (dtlssock->enable_on_connect) {
-						/* dtls:// server: set up the DTLS context and cookies now. */
-						dtlssock->method = STREAM_CRYPTO_METHOD_DTLS_SERVER;
-						xparam->outputs.returncode = php_openssl_dtls_server_ctx(stream, dtlssock);
-						if (xparam->outputs.returncode != 0) {
-							closesocket(dtlssock->s.socket);
-							dtlssock->s.socket = SOCK_ERR;
-						}
-					} else {
-						/* Plain udp:// bind; DTLS is enabled later, if at all. */
-						xparam->outputs.returncode = 0;
+					dtlssock->is_server = true;
+					xparam->outputs.returncode = php_openssl_dtls_server_ctx(stream, dtlssock);
+					if (xparam->outputs.returncode != 0) {
+						closesocket(dtlssock->s.socket);
+						dtlssock->s.socket = SOCK_ERR;
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
 				}
@@ -1150,13 +1062,6 @@ php_stream *php_openssl_dtls_socket_factory(const char *proto, size_t protolen,
 	dtlssock->s.is_blocked = true;
 	dtlssock->s.timeout.tv_sec = (time_t)FG(default_socket_timeout);
 	dtlssock->s.timeout.tv_usec = 0;
-	dtlssock->method = STREAM_CRYPTO_METHOD_DTLS_CLIENT;
-
-	/* dtls:// runs the handshake on connect; a plain udp:// enables it on demand
-	 * (stream_socket_enable_crypto). */
-	if (protolen != strlen("udp") || strncmp(proto, "udp", protolen) != 0) {
-		dtlssock->enable_on_connect = 1;
-	}
 
 	stream = php_stream_alloc_rel(&php_openssl_dtls_socket_ops, dtlssock, persistent_id, "r+");
 	if (stream == NULL) {
