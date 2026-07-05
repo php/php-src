@@ -1889,6 +1889,10 @@ PHP_FUNCTION(fgetcsv)
 			RETURN_FALSE;
 		}
 	} else {
+		if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(len, 1, 1))) {
+			php_stream_error_operation_end_for_stream(stream);
+			RETURN_THROWS();
+		}
 		buf = emalloc(len + 1);
 		if (php_stream_get_line(stream, buf, len + 1, &buf_len) == NULL) {
 			efree(buf);
