@@ -13,9 +13,23 @@ var_dump(grapheme_mask("Hello World", "X", -5, 3));
 var_dump(grapheme_mask("Hello World", "X", 0, 0));
 var_dump(grapheme_mask("", "X"));
 var_dump(grapheme_mask("Hello World", "👍"));
-var_dump(grapheme_mask("Hello World", "ab")); // should throw ValueError
+
+try {
+    var_dump(grapheme_mask("Hello World", "ab"));
+} catch (ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
+
+// Test with emoji sequence (should work - single grapheme cluster)
+var_dump(grapheme_mask("Hello", "👨‍👩‍👧‍👦"));
+
+// Test with combining characters (should work - single grapheme cluster)
+var_dump(grapheme_mask("Hello", "c\u0301")); // c with acute accent
+
+// Test with ZWJ sequence (should work - single grapheme cluster)
+var_dump(grapheme_mask("Hello", "👨‍💻"));
 ?>
---EXPECTF--
+--EXPECT--
 string(11) "XXXXX XXXXX"
 string(11) "HelXX XXXXX"
 string(11) "HelXXo XXXXX"
@@ -23,6 +37,7 @@ string(11) "Hello WXXld"
 string(11) "Hello World"
 string(0) ""
 string(11) "👍👍👍👍👍 👍👍👍👍👍"
-
-Warning: grapheme_mask(): Argument #2 ($mask_char) must be exactly one grapheme cluster in %s on line %d
-bool(false)
+grapheme_mask(): Argument #2 ($mask_char) must be exactly one grapheme cluster
+string(5) "👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦"
+string(5) "ććććć"
+string(5) "👨‍💻👨‍💻👨‍💻👨‍💻👨‍💻"
