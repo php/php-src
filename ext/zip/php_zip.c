@@ -2999,7 +2999,7 @@ static void php_zip_progress_callback(zip_t *arch, double state, void *ptr)
 {
 	ze_zip_object *obj = ptr;
 
-	if (!EG(active) || obj->bailout_callback) {
+	if (UNEXPECTED(!EG(active) || obj->bailout_callback)) {
 		return;
 	}
 
@@ -3054,7 +3054,7 @@ static int php_zip_cancel_callback(zip_t *arch, void *ptr)
 	zval cb_retval;
 	ze_zip_object *obj = ptr;
 
-	if (!EG(active) || obj->bailout_callback) {
+	if (UNEXPECTED(!EG(active) || obj->bailout_callback)) {
 		return 0;
 	}
 
