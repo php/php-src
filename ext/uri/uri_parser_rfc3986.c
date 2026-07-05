@@ -337,7 +337,7 @@ static zend_result php_uri_parser_rfc3986_host_write(void *uri, const zval *valu
 
 ZEND_ATTRIBUTE_NONNULL static zend_long port_str_to_zend_long_checked(const char *str, const size_t len)
 {
-	if (len > MAX_LENGTH_OF_LONG) {
+	if (UNEXPECTED(len > MAX_LENGTH_OF_LONG)) {
 		return -1;
 	}
 
@@ -346,7 +346,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_long port_str_to_zend_long_checked(const char
 
 	zend_ulong result = ZEND_STRTOUL(buf, NULL, 10);
 
-	if (result > ZEND_LONG_MAX) {
+	if (UNEXPECTED(result > ZEND_LONG_MAX)) {
 		return -1;
 	}
 
@@ -549,7 +549,7 @@ static zend_result php_uri_parser_rfc3986_add_base_url(
 	UriUriA *tmp, const UriUriA *uri, const php_uri_parser_rfc3986_uris *uriparser_base_urls, const bool silent
 ) {
 	const int result = uriAddBaseUriExMmA(tmp, uri, &uriparser_base_urls->uri, URI_RESOLVE_STRICTLY, mm);
-	if (result != URI_SUCCESS) {
+	if (UNEXPECTED(result != URI_SUCCESS)) {
 		if (!silent) {
 			switch (result) {
 				case URI_ERROR_ADDBASE_REL_BASE:
@@ -574,7 +574,7 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 
 	/* Parse the URI. */
 	const int result = uriParseSingleUriExMmA(&uri, uri_str, uri_str + uri_str_len, NULL, mm);
-	if (result != URI_SUCCESS) {
+	if (UNEXPECTED(result != URI_SUCCESS)) {
 		if (!silent) {
 			switch (result) {
 				case URI_ERROR_SYNTAX:
@@ -595,7 +595,7 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 
 		/* Combine the parsed URI with the base URI and store the result in 'tmp',
 		 * since the target and source URLs must be distinct. */
-		if (php_uri_parser_rfc3986_add_base_url(&tmp, &uri, uriparser_base_urls, silent) == FAILURE) {
+		if (UNEXPECTED(php_uri_parser_rfc3986_add_base_url(&tmp, &uri, uriparser_base_urls, silent) == FAILURE)) {
 			goto fail;
 		}
 
@@ -608,7 +608,7 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 	uriMakeOwnerMmA(&uri, mm);
 
 	if (has_text_range(&uri.portText) && get_text_range_length(&uri.portText) > 0) {
-		if (port_str_to_zend_long_checked(uri.portText.first, get_text_range_length(&uri.portText)) == -1) {
+		if (UNEXPECTED(port_str_to_zend_long_checked(uri.portText.first, get_text_range_length(&uri.portText)) == -1)) {
 			if (!silent) {
 				zend_throw_exception(php_uri_ce_invalid_uri_exception, "The port is out of range", 0);
 			}
@@ -809,7 +809,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2,3,4,5,6,7,8) php_uri_parser_rfc3986_uris *php_uri_
 		if (Z_TYPE_P(scheme) == IS_NULL) {
 			const char *p = Z_STRVAL_P(path);
 			while (*p != '\0' && *p != '/') {
-				if (*p == ':') {
+				if (UNEXPECTED(*p == ':')) {
 					zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \":\" when the URI does not contain a scheme", 0);
 					goto failure;
 				}
@@ -819,47 +819,47 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2,3,4,5,6,7,8) php_uri_parser_rfc3986_uris *php_uri_
 		}
 
 		/* The path must not begin with "//" if the URI does not contain a host */
-		if (Z_TYPE_P(host) == IS_NULL && zend_string_starts_with_literal(Z_STR_P(path), "//")) {
+		if (UNEXPECTED(Z_TYPE_P(host) == IS_NULL && zend_string_starts_with_literal(Z_STR_P(path), "//"))) {
 			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The path must not begin with \"//\" when the URI does not contain a host", 0);
 			goto failure;
 		}
 	}
 
 	zend_result result = php_uri_parser_rfc3986_scheme_write(uriparser_uris, scheme, NULL);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto failure;
 	}
 	result = php_uri_parser_rfc3986_host_write(uriparser_uris, host, NULL);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto failure;
 	}
 	/* Intentionally writing userinfo after host to avoid error when the userinfo is set but the host is missing */
 	result = php_uri_parser_rfc3986_userinfo_write(uriparser_uris, userinfo, NULL);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto failure;
 	}
 	/* Intentionally writing userinfo after host to avoid error when the port is set but the host is missing */
 	result = php_uri_parser_rfc3986_port_write(uriparser_uris, port, NULL);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto failure;
 	}
 	result = php_uri_parser_rfc3986_path_write(uriparser_uris, path, NULL);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto failure;
 	}
 	result = php_uri_parser_rfc3986_query_write(uriparser_uris, query, NULL);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto failure;
 	}
 	result = php_uri_parser_rfc3986_fragment_write(uriparser_uris, fragment, NULL);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto failure;
 	}
 
 	if (uriparser_base_uris != NULL) {
 		UriUriA tmp = {0};
 
-		if (php_uri_parser_rfc3986_add_base_url(&tmp, &uriparser_uris->uri, uriparser_base_uris, false) == FAILURE) {
+		if (UNEXPECTED(php_uri_parser_rfc3986_add_base_url(&tmp, &uriparser_uris->uri, uriparser_base_uris, false) == FAILURE)) {
 			goto failure;
 		}
 

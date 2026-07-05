@@ -135,7 +135,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri_internal *php_uri_parse(const php_uri_pars
 {
 	void *uri = uri_parser->parse(uri_str, uri_str_len, NULL, NULL, silent);
 
-	if (uri == NULL) {
+	if (UNEXPECTED(uri == NULL)) {
 		return NULL;
 	}
 
@@ -198,7 +198,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
 	const php_uri_parser *uri_parser, const char *uri_str, size_t uri_str_len, php_uri_component_read_mode read_mode, bool silent
 ) {
 	php_uri_internal *uri_internal = php_uri_parse(uri_parser, uri_str, uri_str_len, silent);
-	if (uri_internal == NULL) {
+	if (UNEXPECTED(uri_internal == NULL)) {
 		return NULL;
 	}
 
@@ -207,7 +207,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
 	zend_result result;
 
 	result = php_uri_get_scheme(uri_internal, read_mode, &tmp);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto error;
 	}
 	if (Z_TYPE(tmp) == IS_STRING) {
@@ -215,7 +215,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
 	}
 
 	result = php_uri_get_username(uri_internal, read_mode, &tmp);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto error;
 	}
 	if (Z_TYPE(tmp) == IS_STRING) {
@@ -223,7 +223,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
 	}
 
 	result = php_uri_get_password(uri_internal, read_mode, &tmp);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto error;
 	}
 	if (Z_TYPE(tmp) == IS_STRING) {
@@ -231,7 +231,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
 	}
 
 	result = php_uri_get_host(uri_internal, read_mode, &tmp);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto error;
 	}
 	if (Z_TYPE(tmp) == IS_STRING) {
@@ -239,7 +239,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
 	}
 
 	result = php_uri_get_port(uri_internal, read_mode, &tmp);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto error;
 	}
 	if (Z_TYPE(tmp) == IS_LONG) {
@@ -247,7 +247,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
 	}
 
 	result = php_uri_get_path(uri_internal, read_mode, &tmp);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto error;
 	}
 	if (Z_TYPE(tmp) == IS_STRING) {
@@ -255,7 +255,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
 	}
 
 	result = php_uri_get_query(uri_internal, read_mode, &tmp);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto error;
 	}
 	if (Z_TYPE(tmp) == IS_STRING) {
@@ -263,7 +263,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
 	}
 
 	result = php_uri_get_fragment(uri_internal, read_mode, &tmp);
-	if (result == FAILURE) {
+	if (UNEXPECTED(result == FAILURE)) {
 		goto error;
 	}
 	if (Z_TYPE(tmp) == IS_STRING) {
@@ -330,7 +330,7 @@ static zend_result pass_errors_by_ref_and_free(zval *errors_zv, zval *errors)
 	}
 
 	ZEND_TRY_ASSIGN_REF_TMP(errors_zv, errors);
-	if (EG(exception)) {
+	if (UNEXPECTED(EG(exception))) {
 		return FAILURE;
 	}
 
@@ -377,7 +377,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 			zval_ptr_dtor(&errors);
 			RETURN_THROWS();
 		} else {
-			if (pass_errors_by_ref_and_free(errors_zv, &errors) == FAILURE) {
+			if (UNEXPECTED(pass_errors_by_ref_and_free(errors_zv, &errors) == FAILURE)) {
 				RETURN_THROWS();
 			}
 			zval_ptr_dtor(return_value);
@@ -385,7 +385,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 		}
 	}
 
-	if (pass_errors_by_ref_and_free(errors_zv, &errors) == FAILURE) {
+	if (UNEXPECTED(pass_errors_by_ref_and_free(errors_zv, &errors) == FAILURE)) {
 		uri_parser->destroy(uri);
 		RETURN_THROWS();
 	}
@@ -454,7 +454,7 @@ PHP_METHOD(Uri_WhatWg_InvalidUrlException, __construct)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(previous, zend_ce_throwable)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_update_exception_properties(INTERNAL_FUNCTION_PARAM_PASSTHRU, message, code, previous) == FAILURE) {
+	if (UNEXPECTED(zend_update_exception_properties(INTERNAL_FUNCTION_PARAM_PASSTHRU, message, code, previous) == FAILURE)) {
 		RETURN_THROWS();
 	}
 
@@ -463,14 +463,14 @@ PHP_METHOD(Uri_WhatWg_InvalidUrlException, __construct)
 		ZVAL_EMPTY_ARRAY(&tmp);
 		zend_update_property(php_uri_ce_whatwg_invalid_url_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), &tmp);
 	} else {
-		if (!is_list_of_whatwg_validation_errors(Z_ARR_P(errors))) {
+		if (UNEXPECTED(!is_list_of_whatwg_validation_errors(Z_ARR_P(errors)))) {
 			zend_argument_value_error(2, "must be a list of %s", ZSTR_VAL(php_uri_ce_whatwg_url_validation_error->name));
 			RETURN_THROWS();
 		}
 
 		zend_update_property(php_uri_ce_whatwg_invalid_url_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), errors);
 	}
-	if (EG(exception)) {
+	if (UNEXPECTED(EG(exception))) {
 		RETURN_THROWS();
 	}
 }
@@ -488,19 +488,19 @@ PHP_METHOD(Uri_WhatWg_UrlValidationError, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_update_property_str(php_uri_ce_whatwg_url_validation_error, Z_OBJ_P(ZEND_THIS), ZEND_STRL("context"), context);
-	if (EG(exception)) {
+	if (UNEXPECTED(EG(exception))) {
 		RETURN_THROWS();
 	}
 
 	zend_update_property_ex(php_uri_ce_whatwg_url_validation_error, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_TYPE), type);
-	if (EG(exception)) {
+	if (UNEXPECTED(EG(exception))) {
 		RETURN_THROWS();
 	}
 
 	zval failure_zv;
 	ZVAL_BOOL(&failure_zv, failure);
 	zend_update_property(php_uri_ce_whatwg_url_validation_error, Z_OBJ_P(ZEND_THIS), ZEND_STRL("failure"), &failure_zv);
-	if (EG(exception)) {
+	if (UNEXPECTED(EG(exception))) {
 		RETURN_THROWS();
 	}
 }
@@ -599,7 +599,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 	ZEND_ASSERT(old_uri_object->uri != NULL);
 
 	zend_object *new_object = old_uri_object->std.handlers->clone_obj(&old_uri_object->std);
-	if (new_object == NULL) {
+	if (UNEXPECTED(new_object == NULL)) {
 		RETURN_THROWS();
 	}
 
@@ -737,14 +737,14 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, php_uri_object *that_object
 
 	zend_string *this_str = this_object->parser->to_string(
 		this_object->uri, PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII, exclude_fragment);
-	if (this_str == NULL) {
+	if (UNEXPECTED(this_str == NULL)) {
 		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
 	}
 
 	zend_string *that_str = that_object->parser->to_string(
 		that_object->uri, PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII, exclude_fragment);
-	if (that_str == NULL) {
+	if (UNEXPECTED(that_str == NULL)) {
 		zend_string_release(this_str);
 		throw_cannot_recompose_uri_to_string(that_object);
 		RETURN_THROWS();
@@ -778,7 +778,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toRawString)
 	ZEND_ASSERT(uri_object->uri != NULL);
 
 	zend_string *uri_str = uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
-	if (uri_str == NULL) {
+	if (UNEXPECTED(uri_str == NULL)) {
 		throw_cannot_recompose_uri_to_string(uri_object);
 		RETURN_THROWS();
 	}
@@ -794,7 +794,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toString)
 	ZEND_ASSERT(uri_object->uri != NULL);
 
 	zend_string *uri_str = uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII, false);
-	if (uri_str == NULL) {
+	if (UNEXPECTED(uri_str == NULL)) {
 		throw_cannot_recompose_uri_to_string(uri_object);
 		RETURN_THROWS();
 	}
@@ -823,7 +823,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 
 	/* Serialize state: "uri" key in the first array */
 	zend_string *uri_str = uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
-	if (uri_str == NULL) {
+	if (UNEXPECTED(uri_str == NULL)) {
 		throw_cannot_recompose_uri_to_string(uri_object);
 		RETURN_THROWS();
 	}
@@ -851,7 +851,7 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_uri_object *uri_object = php_uri_object_from_obj(Z_OBJ_P(ZEND_THIS));
-	if (uri_object->uri != NULL) {
+	if (UNEXPECTED(uri_object->uri != NULL)) {
 		/* Intentionally throw two exceptions for proper chaining. */
 		zend_throw_error(NULL, "Cannot modify readonly object of class %s", ZSTR_VAL(uri_object->std.ce->name));
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
@@ -859,45 +859,45 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
-	if (zend_hash_num_elements(data) != 2) {
+	if (UNEXPECTED(zend_hash_num_elements(data) != 2)) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	/* Unserialize state: "uri" key in the first array */
 	zval *arr = zend_hash_index_find(data, 0);
-	if (arr == NULL || Z_TYPE_P(arr) != IS_ARRAY) {
+	if (UNEXPECTED(arr == NULL || Z_TYPE_P(arr) != IS_ARRAY)) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	/* Verify the expected number of elements inside the first array, this implicitly ensures that no additional elements are present. */
-	if (zend_hash_num_elements(Z_ARRVAL_P(arr)) != 1) {
+	if (UNEXPECTED(zend_hash_num_elements(Z_ARRVAL_P(arr)) != 1)) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	zval *uri_zv = zend_hash_str_find(Z_ARRVAL_P(arr), ZEND_STRL(PHP_URI_SERIALIZE_URI_FIELD_NAME));
-	if (uri_zv == NULL || Z_TYPE_P(uri_zv) != IS_STRING) {
+	if (UNEXPECTED(uri_zv == NULL || Z_TYPE_P(uri_zv) != IS_STRING)) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	uri_object->uri = uri_object->parser->parse(Z_STRVAL_P(uri_zv), Z_STRLEN_P(uri_zv), NULL, NULL, true);
-	if (uri_object->uri == NULL) {
+	if (UNEXPECTED(uri_object->uri == NULL)) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	/* Unserialize regular properties: second array */
 	arr = zend_hash_index_find(data, 1);
-	if (arr == NULL || Z_TYPE_P(arr) != IS_ARRAY) {
+	if (UNEXPECTED(arr == NULL || Z_TYPE_P(arr) != IS_ARRAY)) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	/* Verify that there is no regular property in the second array, because the URI classes have no properties and they are final. */
-	if (zend_hash_num_elements(Z_ARRVAL_P(arr)) > 0) {
+	if (UNEXPECTED(zend_hash_num_elements(Z_ARRVAL_P(arr)) > 0)) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
@@ -1032,7 +1032,7 @@ PHP_METHOD(Uri_WhatWg_Url, __serialize)
 
 	/* Serialize state: "uri" key in the first array */
 	zend_string *uri_str = this_object->parser->to_string(this_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
-	if (uri_str == NULL) {
+	if (UNEXPECTED(uri_str == NULL)) {
 		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
 	}
@@ -1091,7 +1091,7 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string(
 		Z_PARAM_STR(component)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (validator(component) == FAILURE) {
+	if (UNEXPECTED(validator(component) == FAILURE)) {
 		RETURN_THROWS();
 	}
 
@@ -1113,7 +1113,7 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_builder_set_component_string_or_null(
 	if (component == NULL) {
 		zend_update_property_null(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), name, name_length);
 	} else {
-		if (validator(component) == FAILURE) {
+		if (UNEXPECTED(validator(component) == FAILURE)) {
 			RETURN_THROWS();
 		}
 
@@ -1137,7 +1137,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1) static void php_uri_builder_set_component_long_or
 	if (component_is_null) {
 		zend_update_property_null(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), name, name_length);
 	} else {
-		if (validator(component) == FAILURE) {
+		if (UNEXPECTED(validator(component) == FAILURE)) {
 			RETURN_THROWS();
 		}
 
@@ -1235,7 +1235,7 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, build)
 	php_uri_parser_rfc3986_uris *uriparser_uris = php_uri_parser_rfc3986_build_from_zval(
 		base_uris, scheme, userinfo, host, port, path, query, fragment
 	);
-	if (uriparser_uris == NULL) {
+	if (UNEXPECTED(uriparser_uris == NULL)) {
 		RETURN_THROWS();
 	}
 
@@ -1346,15 +1346,15 @@ static PHP_MINIT_FUNCTION(uri)
 
 	zend_hash_init(&uri_parsers, 4, NULL, NULL, true);
 
-	if (php_uri_parser_register(&php_uri_parser_rfc3986) == FAILURE) {
+	if (UNEXPECTED(php_uri_parser_register(&php_uri_parser_rfc3986) == FAILURE)) {
 		return FAILURE;
 	}
 
-	if (php_uri_parser_register(&php_uri_parser_whatwg) == FAILURE) {
+	if (UNEXPECTED(php_uri_parser_register(&php_uri_parser_whatwg) == FAILURE)) {
 		return FAILURE;
 	}
 
-	if (php_uri_parser_register(&php_uri_parser_php_parse_url) == FAILURE) {
+	if (UNEXPECTED(php_uri_parser_register(&php_uri_parser_php_parse_url) == FAILURE)) {
 		return FAILURE;
 	}
 
@@ -1383,7 +1383,7 @@ static PHP_MSHUTDOWN_FUNCTION(uri)
 
 PHP_RINIT_FUNCTION(uri)
 {
-	if (PHP_RINIT(uri_parser_whatwg)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE) {
+	if (UNEXPECTED(PHP_RINIT(uri_parser_whatwg)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE)) {
 		return FAILURE;
 	}
 
@@ -1392,7 +1392,7 @@ PHP_RINIT_FUNCTION(uri)
 
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(uri)
 {
-	if (ZEND_MODULE_POST_ZEND_DEACTIVATE_N(uri_parser_whatwg)() == FAILURE) {
+	if (UNEXPECTED(ZEND_MODULE_POST_ZEND_DEACTIVATE_N(uri_parser_whatwg)() == FAILURE)) {
 		return FAILURE;
 	}
 

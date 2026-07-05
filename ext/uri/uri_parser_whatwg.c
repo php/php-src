@@ -615,7 +615,7 @@ lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, const size_t uri_
 	if ((url == NULL && !silent) || errors != NULL) {
 		zval err;
 		const char *reason = fill_errors(&err);
-		if (url == NULL && !silent) {
+		if (UNEXPECTED(url == NULL && !silent)) {
 			zend_object *exception = zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URI is malformed%s%s%s", reason ? " (" : "", reason ? reason : "", reason ? ")" : "");
 			zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &err);
 		}
