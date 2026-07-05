@@ -54,6 +54,11 @@ ZEND_API zend_string *zend_string_concat3(
 	const char *str2, size_t str2_len,
 	const char *str3, size_t str3_len);
 
+/* Throws a catchable MemoryError and returns true when allocating a string of
+ * "nmemb * size + offset" bytes would overflow or exceed the configured memory
+ * limit; returns false (without throwing) otherwise. */
+ZEND_API bool zend_string_alloc_size_exceeds_memory(size_t nmemb, size_t size, size_t offset);
+
 ZEND_API void zend_interned_strings_init(void);
 ZEND_API void zend_interned_strings_dtor(void);
 ZEND_API void zend_interned_strings_activate(void);
