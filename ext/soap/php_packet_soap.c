@@ -59,11 +59,11 @@ bool parse_packet_soap(zval *this_ptr, zend_string *buffer, sdlFunctionPtr fn, z
 	/* Parse XML packet */
 	response = soap_xmlParseMemory(ZSTR_VAL(buffer), ZSTR_LEN(buffer));
 
-	if (!response) {
+	if (UNEXPECTED(!response)) {
 		add_soap_fault(this_ptr, "Client", "looks like we got no XML document", NULL, NULL, soap_lang_en);
 		return false;
 	}
-	if (xmlGetIntSubset(response) != NULL) {
+	if (UNEXPECTED(xmlGetIntSubset(response) != NULL)) {
 		add_soap_fault(this_ptr, "Client", "DTD are not supported by SOAP", NULL, NULL, soap_lang_en);
 		xmlFreeDoc(response);
 		return false;
@@ -90,7 +90,7 @@ bool parse_packet_soap(zval *this_ptr, zend_string *buffer, sdlFunctionPtr fn, z
 		}
 		trav = trav->next;
 	}
-	if (env == NULL) {
+	if (UNEXPECTED(env == NULL)) {
 		add_soap_fault(this_ptr, "Client", "looks like we got XML without \"Envelope\" element", NULL, NULL, soap_lang_en);
 		xmlFreeDoc(response);
 		return false;
@@ -139,7 +139,7 @@ bool parse_packet_soap(zval *this_ptr, zend_string *buffer, sdlFunctionPtr fn, z
 	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
 		trav = trav->next;
 	}
-	if (body == NULL) {
+	if (UNEXPECTED(body == NULL)) {
 		add_soap_fault(this_ptr, "Client", "Body must be present in a SOAP envelope", NULL, NULL, soap_lang_en);
 		xmlFreeDoc(response);
 		return false;
@@ -165,7 +165,7 @@ bool parse_packet_soap(zval *this_ptr, zend_string *buffer, sdlFunctionPtr fn, z
 		}
 		attr = attr->next;
 	}
-	if (trav != NULL && soap_version == SOAP_1_2) {
+	if (UNEXPECTED(trav != NULL && soap_version == SOAP_1_2)) {
 		add_soap_fault(this_ptr, "Client", "A SOAP 1.2 envelope can contain only Header and Body", NULL, NULL, soap_lang_en);
 		xmlFreeDoc(response);
 		return false;

@@ -1008,7 +1008,7 @@ PHP_METHOD(SoapServer, __construct)
 				goto cleanup;
 			}
 			// TODO: this still accepts mixed keys arrays and not all numerically indexed arrays are packed
-			if (HT_IS_PACKED(Z_ARRVAL_P(class_map_zv))) {
+			if (UNEXPECTED(HT_IS_PACKED(Z_ARRVAL_P(class_map_zv)))) {
 				zend_argument_value_error(2, "\"classmap\" option must be an associative array");
 				goto cleanup;
 			}
@@ -2224,7 +2224,7 @@ PHP_METHOD(SoapClient, __construct)
 			xmlCharEncodingHandlerPtr encoding;
 
 			encoding = xmlFindCharEncodingHandler(Z_STRVAL_P(tmp));
-			if (encoding == NULL) {
+			if (UNEXPECTED(encoding == NULL)) {
 				php_error_docref(NULL, E_ERROR, "Invalid 'encoding' option - '%s'", Z_STRVAL_P(tmp));
 			} else {
 				xmlCharEncCloseFunc(encoding);
@@ -2233,7 +2233,7 @@ PHP_METHOD(SoapClient, __construct)
 		}
 		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_ARRAY) {
-			if (HT_IS_PACKED(Z_ARRVAL_P(tmp))) {
+			if (UNEXPECTED(HT_IS_PACKED(Z_ARRVAL_P(tmp)))) {
 				php_error_docref(NULL, E_ERROR, "'classmap' option must be an associative array");
 			}
 			ZVAL_COPY(Z_CLIENT_CLASSMAP_P(this_ptr), tmp);

@@ -1488,7 +1488,7 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 				if (buf_size > 0) {
 					size_t len_size = 0;
 
-					if (http_buf_size + buf_size + 1 < 0) {
+					if (UNEXPECTED(http_buf_size + buf_size + 1 < 0)) {
 						if (http_buf) {
 							zend_string_release_ex(http_buf, 0);
 						}
@@ -1503,7 +1503,7 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 
 					while (len_size < buf_size) {
 						ssize_t len_read = php_stream_read(stream, http_buf->val + http_buf_size, buf_size - len_size);
-						if (len_read <= 0) {
+						if (UNEXPECTED(len_read <= 0)) {
 							/* Error or EOF */
 							done = true;
 						  break;
@@ -1517,7 +1517,7 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 					if (ch == '\r') {
 						ch = php_stream_getc(stream);
 					}
-					if (ch != '\n') {
+					if (UNEXPECTED(ch != '\n')) {
 						/* Something wrong in chunked encoding */
 						if (http_buf) {
 							zend_string_release_ex(http_buf, 0);
@@ -1555,13 +1555,13 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 		}
 
 	} else if (header_length) {
-		if (header_length < 0 || header_length >= INT_MAX) {
+		if (UNEXPECTED(header_length < 0 || header_length >= INT_MAX)) {
 			return NULL;
 		}
 		http_buf = zend_string_alloc(header_length, 0);
 		while (http_buf_size < header_length) {
 			ssize_t len_read = php_stream_read(stream, http_buf->val + http_buf_size, header_length - http_buf_size);
-			if (len_read <= 0) {
+			if (UNEXPECTED(len_read <= 0)) {
 				break;
 			}
 			http_buf_size += len_read;

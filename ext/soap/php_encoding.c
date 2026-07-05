@@ -2052,7 +2052,7 @@ static int calc_dimension_12(const char* str)
 
 static void soap_array_position_add_digit(int *position, int digit)
 {
-	if (*position > (INT_MAX - digit) / 10) {
+	if (UNEXPECTED(*position > (INT_MAX - digit) / 10)) {
 		soap_error0(E_ERROR, "Encoding: array index out of range");
 	}
 
@@ -2697,7 +2697,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			i = dimension;
 			while (i > 0) {
 				i--;
-				if (pos[i] == INT_MAX) {
+				if (UNEXPECTED(pos[i] == INT_MAX)) {
 					efree(dims);
 					efree(pos);
 					zval_ptr_dtor(ret);

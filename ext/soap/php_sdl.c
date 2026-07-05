@@ -1524,22 +1524,22 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len
 	char *in, *buf;
 
 	f = open(fn, O_RDONLY|O_BINARY);
-	if (f < 0) {
+	if (UNEXPECTED(f < 0)) {
 		return NULL;
 	}
-	if (fstat(f, &st) != 0) {
+	if (UNEXPECTED(fstat(f, &st) != 0)) {
 		close(f);
 		return NULL;
 	}
 	buf = in = emalloc(st.st_size);
-	if (read(f, in, st.st_size) != st.st_size) {
+	if (UNEXPECTED(read(f, in, st.st_size) != st.st_size)) {
 		close(f);
 		efree(in);
 		return NULL;
 	}
 	close(f);
 
-	if (strncmp(in,"wsdl",4) != 0 || in[4] != WSDL_CACHE_VERSION || in[5] != '\0') {
+	if (UNEXPECTED(strncmp(in,"wsdl",4) != 0 || in[4] != WSDL_CACHE_VERSION || in[5] != '\0')) {
 		unlink(fn);
 		efree(buf);
 		return NULL;
@@ -2096,7 +2096,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	zend_string *temp_file_path;
 	f = php_open_temporary_fd_ex(SOAP_GLOBAL(cache_dir), "tmp.wsdl.", &temp_file_path, PHP_TMP_FILE_SILENT);
 
-	if (f < 0) {return;}
+	if (UNEXPECTED(f < 0)) {return;}
 
 	zend_hash_init(&tmp_types, 0, NULL, NULL, 0);
 	zend_hash_init(&tmp_encoders, 0, NULL, NULL, 0);
