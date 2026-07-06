@@ -189,6 +189,11 @@ struct _php_stream_wrapper	{
 
 #define PHP_STREAM_FLAG_NO_IO						0x400
 
+/* Stream is in-use: accessing it would be unsafe. This is set when a stream
+ * operation is interrupted by a signal, before calling signal handlers.
+ * Stream ops and public stream APIs check this flag before proceeding. */
+#define PHP_STREAM_FLAG_IN_USE						0x800
+
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
 struct _php_stream  {
@@ -679,6 +684,32 @@ static inline bool php_is_stream_path(const char *filename)
 	     *p == '+' || *p == '-' || *p == '.';
 	     p++);
 	return ((p != filename) && (p[0] == ':') && (p[1] == '/') && (p[2] == '/'));
+}
+
+static inline zend_signal_interrupt_result php_stream_check_signals(php_stream *stream)
+{
+	if (stream != NULL && zend_signal_interrupt_function != zend_signal_interrupt) {
+		uint32_t orig_in_use = stream->flags & PHP_STREAM_FLAG_IN_USE;
+		stream->flags |= PHP_STREAM_FLAG_IN_USE;
+		zend_signal_interrupt_result result = zend_signal_interrupt_function();
+		stream->flags &= ~PHP_STREAM_FLAG_IN_USE;
+		stream->flags |= orig_in_use;
+		return result;
+	}
+
+	return zend_signal_interrupt_function();
+}
+
+PHPAPI ZEND_COLD void php_stream_in_use_error(void);
+
+/* See PHP_STREAM_FLAG_IN_USE */
+static inline zend_result php_stream_check_in_use(php_stream *stream)
+{
+	if (UNEXPECTED(stream->flags & PHP_STREAM_FLAG_IN_USE)) {
+		php_stream_in_use_error();
+		return FAILURE;
+	}
+	return SUCCESS;
 }
 
 END_EXTERN_C()

@@ -69,6 +69,10 @@ static ssize_t php_sockop_write(php_stream *stream, const char *buf, size_t coun
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	ssize_t didwrite;
 
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return -1;
+	}
+
 	if (!sock || sock->socket == -1) {
 		return 0;
 	}
@@ -161,6 +165,10 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return -1;
+	}
+
 	if (!sock || sock->socket == -1) {
 		return -1;
 	}
@@ -172,7 +180,7 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	}
 
 restart:
-	if (zend_signal_interrupt_function() == ZEND_SIGNAL_INTERRUPT) {
+	if (php_stream_check_signals(stream) == ZEND_SIGNAL_INTERRUPT) {
 		return -1;
 	}
 
@@ -230,6 +238,12 @@ static int php_sockop_close(php_stream *stream, int close_handle)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 
+	/* Not using php_stream_check_in_use() as we want to allow releasing file descriptors during resource shutdown */
+	if (UNEXPECTED((stream->flags & PHP_STREAM_FLAG_IN_USE) && !(EG(flags) & EG_FLAGS_IN_RESOURCE_SHUTDOWN))) {
+		php_stream_in_use_error();
+		return -1;
+	}
+
 	if (!sock) {
 		return 0;
 	}
@@ -270,6 +284,10 @@ static int php_sockop_close(php_stream *stream, int close_handle)
 static int php_sockop_flush(php_stream *stream)
 {
 #if 0
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return -1;
+	}
+
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	return fsync(sock->socket);
 #endif
@@ -282,6 +300,10 @@ static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb)
 	return 0;
 #else
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
+
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return -1;
+	}
 
 	return zend_fstat(sock->socket, &ssb->sb);
 #endif
@@ -564,6 +586,10 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 static int php_sockop_cast(php_stream *stream, int castas, void **ret)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
+
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return FAILURE;
+	}
 
 	if (!sock) {
 		return FAILURE;
@@ -1082,6 +1108,10 @@ static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, 
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	php_stream_xport_param *xparam;
+
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return -1;
+	}
 
 	switch(option) {
 		case PHP_STREAM_OPTION_XPORT_API:
