@@ -9224,7 +9224,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		if (*value_ast_ptr) {
 			zend_const_expr_to_zval(&value_zv, value_ast_ptr, /* allow_dynamic */ false);
 
-			if (ZEND_TYPE_IS_SET(type) && !Z_CONSTANT(value_zv)
+			if (ZEND_TYPE_IS_SET(type) && Z_TYPE(value_zv) != IS_CONSTANT_AST
 					&& !zend_is_valid_default_value(type, &value_zv)) {
 				zend_string *str = zend_type_to_string(type);
 				if (Z_TYPE(value_zv) == IS_NULL && !ZEND_TYPE_IS_INTERSECTION(type)) {
@@ -9348,7 +9348,7 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 
 		zend_const_expr_to_zval(&value_zv, value_ast_ptr, /* allow_dynamic */ false);
 
-		if (!Z_CONSTANT(value_zv) && ZEND_TYPE_IS_SET(type) && !zend_is_valid_default_value(type, &value_zv)) {
+		if (Z_TYPE(value_zv) != IS_CONSTANT_AST && ZEND_TYPE_IS_SET(type) && !zend_is_valid_default_value(type, &value_zv)) {
 			zend_string *type_str = zend_type_to_string(type);
 
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as value for class constant %s::%s of type %s",

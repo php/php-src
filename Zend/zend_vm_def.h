@@ -8323,7 +8323,7 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 	val   = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	ZVAL_COPY(&c.value, val);
-	if (Z_OPT_CONSTANT(c.value)) {
+	if (Z_OPT_TYPE(c.value) == IS_CONSTANT_AST) {
 		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
 			zval_ptr_dtor_nogc(&c.value);
 			FREE_OP1();
@@ -8355,7 +8355,7 @@ ZEND_VM_HANDLER(210, ZEND_DECLARE_ATTRIBUTED_CONST, CONST, CONST)
 	val   = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	ZVAL_COPY(&c.value, val);
-	if (Z_OPT_CONSTANT(c.value)) {
+	if (Z_OPT_TYPE(c.value) == IS_CONSTANT_AST) {
 		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
 			zval_ptr_dtor_nogc(&c.value);
 			FREE_OP1();

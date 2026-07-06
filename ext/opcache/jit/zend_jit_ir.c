@@ -10924,7 +10924,7 @@ static int zend_jit_recv_init(zend_jit_ctx *jit, const zend_op *opline, const ze
 			zv, true);
 	}
 
-	if (Z_CONSTANT_P(zv)) {
+	if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
 		jit_SET_EX_OPLINE(jit, opline);
 		ref = ir_CALL_2(IR_I32, ir_CONST_FC_FUNC(zval_update_constant_ex),
 			jit_ZVAL_ADDR(jit, res_addr),
