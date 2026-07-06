@@ -1133,6 +1133,18 @@ PHP_FUNCTION(sleep)
 		RETURN_THROWS();
 	}
 
+#ifdef PHP_WIN32
+	if (num > (zend_long) (UINT_MAX / 1000)) {
+		zend_argument_value_error(1, "must be less than or equal to %u", UINT_MAX / 1000);
+		RETURN_THROWS();
+	}
+#else
+	if (ZEND_LONG_UINT_OVFL(num)) {
+		zend_argument_value_error(1, "must be less than or equal to %u", UINT_MAX);
+		RETURN_THROWS();
+	}
+#endif
+
 	RETURN_LONG(php_sleep((unsigned int)num));
 }
 /* }}} */
@@ -1148,6 +1160,10 @@ PHP_FUNCTION(usleep)
 
 	if (num < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+	if (ZEND_LONG_UINT_OVFL(num)) {
+		zend_argument_value_error(1, "must be less than or equal to %u", UINT_MAX);
 		RETURN_THROWS();
 	}
 

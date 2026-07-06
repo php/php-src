@@ -51,6 +51,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22585 (OOM on bailout with uninitialized
     do_request() parameters). (David Carlier)
 
+- Standard:
+  . Fixed sleep() and usleep() to reject values that overflow the underlying
+    unsigned int timeout. (Weilin Du)
+
 - Streams:
   . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
     and a proxy set). (CVE-2026-12184) (ndossche)
