@@ -34,6 +34,8 @@ PHP                                                                        NEWS
     incremental flush). (David Carlier)
   . Fixed bug GH-22395 (base_convert() outputs at most 64 characters).
     (Weilin Du)
+  . Fixed integer overflow in getimagesize() and getimagesizefromstring() when
+    parsing an IFF chunk with a size of INT_MAX. (David Carlier, Weilin Du)
 
 02 Jul 2026, PHP 8.4.23
 
