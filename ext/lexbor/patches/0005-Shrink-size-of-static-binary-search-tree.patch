@@ -1,7 +1,7 @@
-From 19cf6183813e013dfe0eb2303c15eaf6e01b9faf Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Wed, 29 Nov 2023 21:29:31 +0100
-Subject: [PATCH 5/6] Shrink size of static binary search tree
+Subject: [PATCH 5/9] Shrink size of static binary search tree
 
 This also makes it more efficient on the data cache.
 ---
@@ -111,6 +111,3 @@ index 2370c66..c41e645 100755
              self.buffer.append(line)
          fh.close()
  
--- 
-2.51.2
-

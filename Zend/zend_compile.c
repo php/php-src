@@ -530,6 +530,12 @@ ZEND_API bool zend_is_compiling(void) /* {{{ */
 }
 /* }}} */
 
+static bool zend_is_constructor(const zend_string *name) /* {{{ */
+{
+	return zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME);
+}
+/* }}} */
+
 static zend_always_inline uint32_t get_temporary_variable(void) /* {{{ */
 {
 	return (uint32_t)CG(active_op_array)->T++;
@@ -667,12 +673,10 @@ static int zend_add_const_name_literal(zend_string *name, bool unqualified) /* {
 
 	int ret = zend_add_literal_string(&name);
 
-	size_t ns_len = 0, after_ns_len = ZSTR_LEN(name);
-	const char *after_ns = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (after_ns) {
-		after_ns += 1;
-		ns_len = after_ns - ZSTR_VAL(name) - 1;
-		after_ns_len = ZSTR_LEN(name) - ns_len - 1;
+	const char *after_ns;
+	size_t after_ns_len;
+	if (zend_get_unqualified_name(name, &after_ns, &after_ns_len)) {
+		size_t ns_len = after_ns - ZSTR_VAL(name) - 1;
 
 		/* lowercased namespace name & original constant name */
 		tmp_name = zend_string_init(ZSTR_VAL(name), ZSTR_LEN(name), 0);
@@ -684,6 +688,7 @@ static int zend_add_const_name_literal(zend_string *name, bool unqualified) /* {
 		}
 	} else {
 		after_ns = ZSTR_VAL(name);
+		after_ns_len = ZSTR_LEN(name);
 	}
 
 	/* original unqualified constant name */
@@ -5539,12 +5544,6 @@ static void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type
 }
 /* }}} */
 
-static bool zend_is_constructor(const zend_string *name) /* {{{ */
-{
-	return zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME);
-}
-/* }}} */
-
 static bool is_func_accessible(const zend_function *fbc)
 {
 	if ((fbc->common.fn_flags & ZEND_ACC_PUBLIC) || fbc->common.scope == CG(active_class_entry)) {
@@ -5981,6 +5980,16 @@ static void zend_compile_return(const zend_ast *ast) /* {{{ */
 		zend_compile_var(&expr_node, expr_ast, BP_VAR_W, true);
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);
+	}
+
+	if (expr_ast) {
+		if (CG(active_class_entry) != NULL) {
+			if (zend_is_constructor(CG(active_op_array)->function_name)) {
+				zend_error(E_DEPRECATED, "Returning a value from a constructor is deprecated");
+			} else if (zend_string_equals_literal_ci(CG(active_op_array)->function_name, ZEND_DESTRUCTOR_FUNC_NAME)) {
+				zend_error(E_DEPRECATED, "Returning a value from a destructor is deprecated");
+			}
+		}
 	}
 
 	if ((CG(active_op_array)->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)
@@ -8833,6 +8842,14 @@ static zend_op_array *zend_compile_func_decl_ex(
 	zend_compile_params(params_ast, return_type_ast,
 		is_method && zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_LCNAME) ? IS_STRING : 0);
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		if (CG(active_class_entry) != NULL) {
+			if (zend_is_constructor(CG(active_op_array)->function_name)) {
+				zend_error(E_DEPRECATED, "Making a constructor a Generator is deprecated");
+			} else if (zend_string_equals_literal_ci(CG(active_op_array)->function_name, ZEND_DESTRUCTOR_FUNC_NAME)) {
+				zend_error(E_DEPRECATED, "Making a destructor a Generator is deprecated");
+			}
+		}
+
 		zend_mark_function_as_generator();
 		zend_emit_op(NULL, ZEND_GENERATOR_CREATE, NULL, NULL);
 	}
@@ -9342,6 +9359,15 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 				ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
 				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 			}
+
+			const zend_attribute *override = zend_get_attribute_str(c->attributes, "override", sizeof("override") - 1);
+			if (override) {
+				ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_OVERRIDE;
+				/* We need to be able to remove the flag once the override is
+				 * resolved. See ZEND_ACC_DEPRECATED above. */
+				ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
+				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+			}
 		}
 	}
 }
@@ -9800,6 +9826,16 @@ static void zend_compile_enum_case(zend_ast *ast)
 
 		if (deprecated) {
 			ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_DEPRECATED;
+		}
+
+		const zend_attribute *override = zend_get_attribute_str(c->attributes, "override", sizeof("override") - 1);
+		if (override) {
+			ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_OVERRIDE;
+			/* We need to be able to remove the flag once the override is
+			 * resolved. See ZEND_ACC_DEPRECATED handling in
+			 * zend_compile_class_const_decl(). */
+			enum_class->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
+			enum_class->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
 	}
 }
@@ -12260,6 +12296,7 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 			case ZEND_AST_METHOD_CALL:
 			case ZEND_AST_NULLSAFE_METHOD_CALL:
 			case ZEND_AST_STATIC_CALL:
+			case ZEND_AST_PIPE:
 				zend_compile_memoized_expr(result, ast, BP_VAR_W);
 				/* This might not actually produce an opcode, e.g. for expressions evaluated at comptime. */
 				return NULL;

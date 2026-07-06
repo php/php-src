@@ -192,7 +192,7 @@ PHP_NEW_EXTENSION([lexbor], m4_normalize([
     $LEXBOR_DIR/url/url.c
   ]),
   [no],,
-  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $PHP_LEXBOR_CFLAGS])
+  [$PHP_LEXBOR_CFLAGS])
 
 PHP_ADD_BUILD_DIR([
   $ext_builddir/

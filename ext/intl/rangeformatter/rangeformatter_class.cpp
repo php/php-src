@@ -60,7 +60,7 @@ zend_object *IntlNumberRangeFormatter_object_create(zend_class_entry *ce)
     return &intern->zo;
 }
 
-static icu::Formattable rangeformatter_create_formattable(zval *number)
+static icu::Formattable rangeformatter_create_formattable(const zval *number)
 {
     icu::Formattable formattable;
 
@@ -99,7 +99,7 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
         locale = (char *)intl_locale_get_default();
     }
 
-    if (locale_len > INTL_MAX_LOCALE_LEN) {
+    if (UNEXPECTED(locale_len > INTL_MAX_LOCALE_LEN)) {
         zend_argument_value_error(2, "must be no longer than %d characters", INTL_MAX_LOCALE_LEN);
         RETURN_THROWS();
     }

@@ -44,6 +44,7 @@
 /ext/pdo_pgsql @devnexen @SakiTakamachi
 /ext/pdo_sqlite @SakiTakamachi
 /ext/pgsql @devnexen
+/ext/phar @LamentXU123
 /ext/random @TimWolla @zeriyoshi
 /ext/reflection @DanielEScherzer
 /ext/session @Girgias
@@ -57,6 +58,7 @@
 /ext/xmlreader @devnexen
 /ext/xmlwriter @devnexen
 /ext/xsl @devnexen
+/ext/zip @LamentXU123
 /main @bukka
 /sapi/fpm @bukka
 /Zend/Optimizer @dstogov

@@ -320,6 +320,11 @@ static int kqueue_backend_wait(
 	int nfds = kevent(
 			backend_data->kqueue_fd, NULL, 0, backend_data->events, required_capacity, timeout);
 
+	if (nfds < 0) {
+		php_poll_set_current_errno_error(ctx);
+		return -1;
+	}
+
 	if (nfds > 0) {
 		if (ctx->raw_events) {
 			/* Raw events mode - direct 1:1 mapping, no grouping */

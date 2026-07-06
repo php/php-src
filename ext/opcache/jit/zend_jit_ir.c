@@ -10242,10 +10242,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			 && ZEND_MAP_PTR_IS_OFFSET(func->op_array.run_time_cache)) {
 				run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_CG(map_ptr_base)),
 					(uintptr_t)ZEND_MAP_PTR(func->op_array.run_time_cache)));
-			} else if ((func && (func->op_array.fn_flags & ZEND_ACC_CLOSURE)) ||
-					(JIT_G(current_frame) &&
-					 JIT_G(current_frame)->call &&
-					 TRACE_FRAME_IS_CLOSURE_CALL(JIT_G(current_frame)->call))) {
+			} else if (func && (func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 				/* Closures always use direct pointers */
 				ir_ref local_func_ref = func_ref ? func_ref : ir_LOAD_A(jit_CALL(rx, func));
 
@@ -14234,6 +14231,26 @@ static int zend_jit_class_guard(zend_jit_ctx *jit, const zend_op *opline, ir_ref
 	ir_GUARD(ir_EQ(ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, ce))), ir_CONST_ADDR(ce)),
 		ir_CONST_ADDR(exit_addr));
 
+	return 1;
+}
+
+static int zend_jit_func_arg_by_ref_guard(zend_jit_ctx *jit, const zend_op *opline)
+{
+	int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+	ir_ref rx, call_info;
+
+	if (!exit_addr) {
+		return 0;
+	}
+	if (jit->reuse_ip) {
+		rx = jit_IP(jit);
+	} else {
+		rx = ir_LOAD_A(jit_EX(call));
+	}
+	call_info = ir_LOAD_U32(jit_CALL(rx, This.u1.type_info));
+	ir_GUARD_NOT(ir_AND_U32(call_info, ir_CONST_U32(ZEND_CALL_SEND_ARG_BY_REF)),
+		ir_CONST_ADDR(exit_addr));
 	return 1;
 }
 

@@ -45,6 +45,7 @@ static void php_stream_error_create_object(zval *zv, php_stream_error_entry *ent
 		case_name = "Generic";
 	}
 
+	/* TODO: migrate to zend_enum_get_case_by_id() */
 	zend_object *enum_obj = zend_enum_get_case_cstr(php_ce_stream_error_code, case_name);
 	ZEND_ASSERT(enum_obj != NULL);
 

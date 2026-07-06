@@ -499,6 +499,7 @@ lxb_url_scheme_length = sizeof(lxb_url_scheme_res) / sizeof(lxb_url_scheme_data_
             if (tmp == NULL) {                                                \
                 return NULL;                                                  \
             }                                                                 \
+            memcpy(tmp, (sbuf_begin), offset);                                \
         }                                                                     \
         else {                                                                \
             tmp = lexbor_realloc((sbuf_begin), new_len);                      \
@@ -509,7 +510,7 @@ lxb_url_scheme_length = sizeof(lxb_url_scheme_res) / sizeof(lxb_url_scheme_data_
         }                                                                     \
                                                                               \
         (sbuf) = tmp + offset;                                                \
-        (last) = sbuf + lst;                                                  \
+        (last) = tmp + lst;                                                   \
         (sbuf_begin) = tmp;                                                   \
         (sbuf_end) = tmp + new_len;                                           \
     }                                                                         \
@@ -1115,11 +1116,13 @@ lxb_url_host_copy(const lxb_url_host_t *src, lxb_url_host_t *dst,
 
     dst->type = src->type;
 
-    if (src->type <= LXB_URL_HOST_TYPE_OPAQUE) {
-        if (src->type == LXB_URL_HOST_TYPE__UNDEF) {
-            return LXB_STATUS_OK;
-        }
+    if (src->type == LXB_URL_HOST_TYPE__UNDEF
+        || src->type == LXB_URL_HOST_TYPE_EMPTY)
+    {
+        return LXB_STATUS_OK;
+    }
 
+    if (src->type <= LXB_URL_HOST_TYPE_OPAQUE) {
         return lxb_url_str_copy(&src->u.domain,
                                 &dst->u.domain, dst_mraw);
     }
@@ -1150,6 +1153,24 @@ lxb_url_host_set_empty(lxb_url_host_t *host, lexbor_mraw_t *mraw)
     lxb_url_host_destroy(host, mraw);
 
     host->type = LXB_URL_HOST_TYPE_EMPTY;
+}
+
+lxb_inline bool
+lxb_url_host_is_empty(const lxb_url_host_t *host)
+{
+    if (host->type == LXB_URL_HOST_TYPE_EMPTY) {
+        return true;
+    }
+
+    if (host->type == LXB_URL_HOST_TYPE_DOMAIN) {
+        return host->u.domain.length == 0;
+    }
+
+    if (host->type == LXB_URL_HOST_TYPE_OPAQUE) {
+        return host->u.opaque.length == 0;
+    }
+
+    return false;
 }
 
 static bool
@@ -1251,7 +1272,7 @@ lxb_url_normalized_windows_drive_letter(const lxb_char_t *data,
 static bool
 lxb_url_cannot_have_user_pass_port(lxb_url_t *url)
 {
-    return url->host.type == LXB_URL_HOST_TYPE_EMPTY
+    return lxb_url_host_is_empty(&url->host)
     || url->host.type == LXB_URL_HOST_TYPE__UNDEF
     || url->scheme.type == LXB_URL_SCHEMEL_TYPE_FILE;
 }
@@ -3977,6 +3998,11 @@ lxb_url_opaque_host_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
     lxb_char_t c;
     lxb_status_t status;
     const lxb_char_t *p;
+
+    if (data == end) {
+        lxb_url_host_set_empty(host, mraw);
+        return LXB_STATUS_OK;
+    }
 
     p = data;
 

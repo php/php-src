@@ -339,7 +339,7 @@ PHP_NEW_EXTENSION([opcache], m4_normalize([
     $ZEND_JIT_SRC
   ]),
   [no],,
-  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $JIT_CFLAGS],,
+  [$JIT_CFLAGS],,
   [yes])
 
 PHP_ADD_EXTENSION_DEP(opcache, date)

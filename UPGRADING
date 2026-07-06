@@ -19,6 +19,10 @@ PHP 8.6 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- COM
+  . It is no longer possible to clone variant objects, this is because
+    the cloning behaviour was ill defined.
+
 - DOM:
   . Properties previously documented as @readonly (e.g. DOMNode::$nodeType,
     DOMDocument::$xmlEncoding, DOMEntity::$actualEncoding, ::$encoding,
@@ -30,13 +34,15 @@ PHP 8.6 UPGRADE NOTES
     accurately.
 
 - GD:
-  . imagesetstyle(), imagefilter() and imagecrop() filter their
-    array arguments types/values and raise a TypeError/ValueError
-    accordingly.
+  . imagesetstyle(), imagefilter() and imagecrop() filter their array arguments
+    types / values and raise a TypeError / ValueError accordingly.
 
 - Intl:
   . Passing a non-stringable object as a time zone to Intl APIs that accept
     time zone objects or strings now raises a TypeError instead of an Error.
+  . IntlIterator::current() now returns null when called before the iterator is
+    positioned, or after the iterator becomes invalid, instead of exposing an
+    undefined value.
   . IntlBreakIterator::getLocale() now raises a ValueError when the type is
     neither Locale::ACTUAL_LOCALE nor Locale::VALID_LOCALE instead of
     returning false.
@@ -50,6 +56,10 @@ PHP 8.6 UPGRADE NOTES
   . ResourceBundle::get() and resourcebundle_get() now report fallback-disabled
     resource lookups with "without fallback to <locale>" instead of the
     malformed "without fallback from to <locale>".
+  . IntlDateFormatter::parse()/datefmt_parse() and
+    IntlDateFormatter::localtime()/datefmt_localtime() now raise a TypeError
+    when the offset argument is not of type int instead of silently converting
+    the value.
 
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
@@ -63,13 +73,13 @@ PHP 8.6 UPGRADE NOTES
     This is consistent with other preg_* functions.
 
 - Phar:
-  . Phar::mungServer() now raises a ValueError when an invalid
-    argument value is passed instead of being silently ignored.
-  . Phar::addEmptyDir() now rejects `/.phar` paths in addition to `.phar`
+  . Phar::mungServer() now raises a ValueError when an invalid argument value
+    is passed instead of being silently ignored.
+  . Phar::addEmptyDir() now rejects "/.phar" paths in addition to ".phar"
     paths, and raises the same BadMethodCallException for attempts to create
     the reserved magic ".phar" directory through that form.
   . Phar::addEmptyDir() now treats non-magic names that merely share the
-    `.phar` prefix as ordinary directories.
+    ".phar" prefix as ordinary directories.
 
 - PGSQL:
   . pg_fetch_object() now reports the ValueError for a non-empty
@@ -86,11 +96,11 @@ PHP 8.6 UPGRADE NOTES
 
 - Session:
   . Setting session.cookie_path, session.cookie_domain, or session.cache_limiter
-    to a value containing null bytes now emits a warning and leaves the setting
-    unchanged. Previously, null bytes were silently accepted: for cookie_path and
-    cookie_domain this caused the SAPI to drop the Set-Cookie header; for
-    cache_limiter the value was silently truncated at the null byte.
-  . A ValueError is not thrown if $name is a string containing null bytes in
+    to a value containing NUL bytes now emits a warning and leaves the setting
+    unchanged. Previously, NUL bytes were silently accepted: for cookie_path
+    and cookie_domain this caused the SAPI to drop the Set-Cookie header; for
+    cache_limiter the value was silently truncated at the NUL byte.
+  . A ValueError is not thrown if $name is a string containing NUL bytes in
     session_module_name().
   . session_encode() now returns an empty string instead of false for empty
     sessions. It only returns false now when the session data could not be
@@ -123,58 +133,78 @@ PHP 8.6 UPGRADE NOTES
         to 1).
     RFC: https://wiki.php.net/rfc/session_security_defaults
 
+- Shmop:
+  . shmop_open() now raises a ValueError when the $key argument is outside the
+    platform's key_t range instead of passing a truncated key to the operating
+    system.
+
 - SOAP:
   . WSDL/XML Schema parsing now rejects out-of-range integer values for
     occurrence constraints and integer restriction facets. Negative minOccurs
     and maxOccurs values are rejected as well.
 
+- Sodium:
+  . The password-hashing functions sodium_crypto_pwhash(),
+    sodium_crypto_pwhash_str(),
+    sodium_crypto_pwhash_scryptsalsa208sha256() and
+    sodium_crypto_pwhash_scryptsalsa208sha256_str() now throw ValueError
+    instead of SodiumException when an argument is out of range, such as an
+    opslimit or memlimit below the documented minimum. SodiumException is
+    still thrown for internal libsodium failures.
+
 - SPL:
   . SplObjectStorage::getHash() implementations may no longer mutate any
     SplObjectStorage instance. Attempting to do so now throws an Error.
   . SplFileObject::next() now advances the stream when no prior current()
-    call has cached a line. A subsequent current() call returns the new
-    line rather than the previous one.
-  . SplFileObject::fgets() no longer caches the returned line for
-    subsequent current() calls. current() now re-reads from the current
-    stream position instead of returning the line fgets() just returned.
-  . SplFileObject::next() past EOF no longer increments key() without
-    bound. SplFileObject::seek() past EOF now produces the same key()
-    value as SplTempFileObject; the two previously returned different
-    values.
+    call has cached a line. A subsequent current() call returns the new line
+    rather than the previous one.
+  . SplFileObject::fgets() no longer caches the returned line for subsequent
+    current() calls. current() now re-reads from the current stream position
+    instead of returning the line fgets() just returned.
+  . SplFileObject::next() past EOF no longer increments key() without bound.
+    SplFileObject::seek() past EOF now produces the same key() value as
+    SplTempFileObject; the two previously returned different values.
 
 - Standard:
   . Form feed (\f) is now added in the default trimmed characters of trim(),
-    rtrim() and ltrim(). RFC: https://wiki.php.net/rfc/trim_form_feed
-  . array_filter() now raises a ValueError when an invalid $mode
-    argument value is passed.
+    rtrim() and ltrim().
+    RFC: https://wiki.php.net/rfc/trim_form_feed
+  . array_filter() now raises a ValueError when an invalid $mode argument value
+    is passed.
   . array_change_key_case() now raises a ValueError when an invalid $case
     argument value is passed.
   . getenv() and putenv() now raises a ValueError when the first argument
-    contains null bytes.
-  . dl() now raises a ValueError when the $extension_filename argument
-    contains null bytes.
-  . openlog() now raises a ValueError when the $prefix argument contains
-    null bytes.
-  . parse_str() now raises a ValueError when the $string argument contains
-    null bytes.
+    contains NUL bytes.
+  . dl() now raises a ValueError when the $extension_filename argument contains
+    NUL bytes.
+  . openlog() now raises a ValueError when the $prefix argument contains NUL
+    bytes.
+  . parse_str() now raises a ValueError when the $string argument contains NUL
+    bytes.
   . linkinfo() now raises a ValueError when the $path argument is empty.
-  . pathinfo() now raises a ValueError when an invalid $flag
-    argument value is passed.
-  . scandir() now raises a ValueError when an invalid $sorting_order
-    argument value is passed.
-  . proc_open() now raises a ValueError when the $cwd argument contains
-    null bytes.
+  . pathinfo() now raises a ValueError when an invalid $flag argument value is
+    passed.
+  . scandir() now raises a ValueError when an invalid $sorting_order argument
+    value is passed.
+  . number_format() now raises a ValueError when $decimals is outside the
+    integer range instead of silently clamping very large positive values.
+  . proc_open() now raises a ValueError when the $cwd argument contains NUL
+    bytes.
+
+- Sysvshm:
+  . shm_attach() now raises a ValueError when the $key argument is outside the
+    platform's key_t range instead of passing a truncated key to the operating
+    system.
 
 - Zip:
-  . ZipArchive::extractTo now raises a TypeError for the
-    files argument if one or more of the entries is not
-    a string.
+  . ZipArchive::extractTo now raises a TypeError for the files argument if one
+    or more of the entries is not a string.
 
 - Zlib:
-  . deflate_init() now raises a TypeError when the value for option
-    "level", "memory", "window", or "strategy" is not of type int.
-  . inflate_init() now raises a TypeError when the value for option
-    "window" is not of type int.
+  . deflate_init() now raises a TypeError when the value for option "level",
+    "memory", "window", or "strategy" is not of type int.
+  . inflate_init() now raises a TypeError when the value for option "window" is
+    not of type int.
 
 ========================================
 2. New Features
@@ -183,13 +213,26 @@ PHP 8.6 UPGRADE NOTES
 - Core:
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand.
-  . It is now possible to define the `__debugInfo()` magic method on enums.
+  . It is now possible to define the __debugInfo() magic method on enums.
     RFC: https://wiki.php.net/rfc/debugable-enums
+  . #[\Override] can now be applied to class constants, including enum cases.
+    RFC: https://wiki.php.net/rfc/override_constants
+
+- Curl:
+  . curl_getinfo() return array now includes a new size_delivered key, which
+    indicates the total number of bytes passed to the download write callback.
+    This value can also be obtained by passing CURLINFO_SIZE_DELIVERED as the
+    $option parameter.
+    Requires libcurl 8.20.0 or later.
 
 - Fileinfo:
   . finfo_file() now works with remote streams.
 
 - Intl:
+  . Added Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue(),
+    with the alias of locale_get_display_keyword() and
+    locale_get_display_keyword_value() respectively.
+    RFC: https://wiki.php.net/rfc/getdisplaykeyword_and_getdisplaykeywordvalue
   . Added IntlNumberRangeFormatter class to format an interval of two numbers
     with a given skeleton, locale, IntlNumberRangeFormatter::COLLAPSE_AUTO,
     IntlNumberRangeFormatter::COLLAPSE_NONE,
@@ -243,10 +286,12 @@ PHP 8.6 UPGRADE NOTES
     value is one of the following strings "preserve", "reset", or "strict".
 
 - URI:
-  . Added Uri\Rfc3986\Uri:getUriType() and Uri\WhatWg\Url:isSpecialScheme().
+  . Added Uri\Rfc3986\Uri::getUriType() and Uri\WhatWg\Url::isSpecialScheme().
     RFC: https://wiki.php.net/rfc/uri_followup#uri_type_detection
-  . Added Uri\Rfc3986\Uri:getHostType() and Uri\WhatWg\Url:getHostType().
+  . Added Uri\Rfc3986\Uri::getHostType() and Uri\WhatWg\Url::getHostType().
     RFC: https://wiki.php.net/rfc/uri_followup#host_type_detection
+  . Added Uri\Rfc3986\UriBuilder.
+    RFC: https://wiki.php.net/rfc/uri_followup#uri_building
 
 ========================================
 3. Changes in SAPI modules
@@ -259,6 +304,10 @@ PHP 8.6 UPGRADE NOTES
 - Core:
   . Specifying a return type of array|null / ?array for __debugInfo() is now
     deprecated. Specify array instead.
+  . Returning values from __construct() and __destruct() is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecate-return-value-from-construct
+  . Making __construct() and __destruct() a Generator is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecate-return-value-from-construct
 
 - GMP
   . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
@@ -275,21 +324,20 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 
 - GMP:
-  . gmp_fact() now throws a ValueError() if $num does not fit into
-    a unsigned long.
+  . gmp_fact() now throws a ValueError() if $num does not fit into a unsigned
+    long.
   . gmp_pow(), gmp_binomial(), gmp_root() and gmp_rootrem() now throw a
     ValueError if their second argument does not fit into an unsigned long.
-  . The shift (<<, >>) and exponentiation (**) operators on GMP objects
-    now throw a ValueError if the right operand does not fit into an
-    unsigned long.
-  . gmp_powm() modulo-by-zero now raises a DivisionByZeroError whose
-    message includes the function name and argument index ($modulus).
+  . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
+    throw a ValueError if the right operand does not fit into an unsigned long.
+  . gmp_powm() modulo-by-zero now raises a DivisionByZeroError whose message
+    includes the function name and argument index ($modulus).
 
 - mysqli:
-  . The return structure of mysqli_get_charset() no longer contains
-    the undocumented "comment" element. The value of "charsetnr" is
-    now set to a constant 0 as this number was an implementation detail
-    that should not have been exposed to the public.
+  . The return structure of mysqli_get_charset() no longer contains the
+    undocumented "comment" element. The value of "charsetnr" is now set to a
+    constant 0 as this number was an implementation detail that should not have
+    been exposed to the public.
 
 - OpenSSL:
   . Output of openssl_x509_parse() contains criticalExtensions listing all
@@ -309,9 +357,9 @@ PHP 8.6 UPGRADE NOTES
 
 - Standard:
   . ini_get_all() now includes a "builtin_default_value" element for each
-    directive when $details is true. It holds the built-in default value of
-    the directive (or null if it has none), independent of values set in
-    php.ini, on the command line, or at runtime.
+    directive when $details is true. It holds the built-in default value of the
+    directive (or null if it has none), independent of values set in php.ini,
+    on the command line, or at runtime.
 
 ========================================
 6. New Functions
@@ -319,30 +367,30 @@ PHP 8.6 UPGRADE NOTES
 
 - Reflection:
   . ReflectionConstant::inNamespace()
-  . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
+  . ReflectionProperty::isReadable() and ReflectionProperty::isWritable()
     RFC: https://wiki.php.net/rfc/isreadable-iswriteable
-  . Added ReflectionParameter::getDocComment().
+  . ReflectionParameter::getDocComment().
     RFC: https://wiki.php.net/rfc/parameter-doccomments
 
 - Intl:
-  . `grapheme_strrev()` returns strrev for grapheme cluster unit.
+  . grapheme_strrev() returns strrev for grapheme cluster unit.
     RFC: https://wiki.php.net/rfc/grapheme_strrev
 
 - mysqli:
-  . Added `mysqli::quote_string()` and `mysqli_quote_string()`.
+  . Added mysqli::quote_string() and mysqli_quote_string().
     RFC: https://wiki.php.net/rfc/mysqli_quote_string
 
 - Standard:
-  . `clamp()` returns the given value if in range, else return the nearest
+  . clamp() returns the given value if in range, else return the nearest
     bound.
     RFC: https://wiki.php.net/rfc/clamp_v2
-  . `stream_last_errors()` and `stream_clear_errors()`.
+  . stream_last_errors() and stream_clear_errors().
     RFC: https://wiki.php.net/rfc/stream_errors
-  . stream_socket_get_crypto_status()
+  . stream_socket_get_crypto_status().
 
 - Zip:
-  . Added ZipArchive::openString() method.
-  . Added ZipArchive::closeString() method.
+  . ZipArchive::openString()
+  . ZipArchive::closeString()
 
 ========================================
 7. New Classes and Interfaces
@@ -398,6 +446,9 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- Curl:
+  . CURLINFO_SIZE_DELIVERED (libcurl >= 8.20.0).
 
 - Sockets:
   . TCP_USER_TIMEOUT (Linux only).
@@ -459,7 +510,7 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 
 - Core:
-  . `printf()` using only `%s` and `%d` will be compiled into the equivalent
+  . printf() using only "%s" and "%d" will be compiled into the equivalent
     string interpolation, avoiding the overhead of a function call and
     repeatedly parsing the format string.
   . Arguments are now passed more efficiently to known constructors (e.g. when
@@ -472,6 +523,7 @@ PHP 8.6 UPGRADE NOTES
   . The performance of the TAILCALL VM has been improved.
   . The TAILCALL VM is now enabled on Windows when compiling with Clang >= 19
     x86_64.
+  . The performance of ZTS builds has been improved.
 
 - DOM:
   . Made splitText() faster and consume less memory.
@@ -480,6 +532,16 @@ PHP 8.6 UPGRADE NOTES
   . Improve performance of encoding arrays and objects.
   . Improved performance of indentation generation in json_encode()
     when using PHP_JSON_PRETTY_PRINT.
+
+- Intl:
+  . Improved performance of IntlCalendar::getAvailableLocales() and
+    IntlDateFormatter::localtime() / datefmt_localtime() by pre-allocating
+    their returned arrays.
+  . Improved performance of transliterator_list_ids() and
+    resourcebundle_locales() by pre-allocating their returned arrays.
+
+- Phar:
+  . Reduced temporary allocations when iterating Phar directories.
 
 - Standard:
   . Improved performance of array_fill_keys().
@@ -492,10 +554,14 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of str_split().
 
 - URI:
+  . Improved performance of Uri\WhatWg\Url::parse() when collecting
+    validation errors by pre-allocating the error array.
   . Reduced allocations when reading IPv6/IPFuture hosts and paths with
     Uri\Rfc3986\Uri.
   . Improved performance and memory consumption when using normalizing
     (non-raw) getters on already-normalized URIs with Uri\Rfc3986\Uri.
 
 - Zip:
+  . Improved performance of ZipArchive::addGlob() and
+    ZipArchive::addPattern() by pre-allocating their returned arrays.
   . Avoid string copies in ZipArchive::addFromString().

@@ -74,7 +74,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_attribute )
 			break;
 		case UNUM_ROUNDING_INCREMENT:
 		{
-			double value_double = unum_getDoubleAttribute(FORMATTER_UNUM(nfo), attribute);
+			const double value_double = unum_getDoubleAttribute(FORMATTER_UNUM(nfo), attribute);
 			if(value_double == -1) {
 				INTL_DATA_ERROR_CODE(nfo) = U_UNSUPPORTED_ERROR;
 			} else {
@@ -234,7 +234,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_symbol )
 
 	UNumberFormatSymbol symbol = static_cast<UNumberFormatSymbol>(lsymbol);
 
-	if(symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
+	if (UNEXPECTED(symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0)) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"invalid symbol value");
 		RETURN_FALSE;
 	}
@@ -276,7 +276,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_symbol )
 
 	UNumberFormatSymbol symbol = static_cast<UNumberFormatSymbol>(lsymbol);
 
-	if (symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
+	if (UNEXPECTED(symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0)) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"invalid symbol value");
 		RETURN_FALSE;
 	}

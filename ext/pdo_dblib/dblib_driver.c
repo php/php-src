@@ -232,7 +232,7 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 
 	RETCODE ret;
 	BYTE id[40];
-	size_t len;
+	DBINT len;
 
 	/*
 	 * Would use scope_identity() but it's not implemented on Sybase
@@ -266,6 +266,10 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 
 	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)sizeof(id));
 	dbcancel(H->link);
+
+	if (len < 0) {
+		return NULL;
+	}
 
 	return zend_string_init((const char *) id, len, 0);
 }

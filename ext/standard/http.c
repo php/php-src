@@ -317,7 +317,7 @@ static zend_result cache_request_parse_body_options(HashTable *options)
 		return FAILURE;
 	} ZEND_HASH_FOREACH_END();
 
-#undef CACHE_OPTION
+#undef CHECK_OPTION
 
 	return SUCCESS;
 }

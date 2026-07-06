@@ -25,6 +25,7 @@
 #include "ext/standard/php_filestat.h"
 #include "zend_attributes.h"
 #include "zend_interfaces.h"
+#include "zend_exceptions.h"
 #include "php_zip.h"
 #include "php_zip_arginfo.h"
 
@@ -627,6 +628,12 @@ static bool php_zipobj_close(ze_zip_object *obj, zend_string **out_str) /* {{{ *
 
 	obj->za = NULL;
 	obj->from_string = false;
+
+	if (obj->bailout_callback) {
+		obj->bailout_callback = false;
+		zend_bailout();
+	}
+
 	return success;
 }
 /* }}} */
@@ -1072,10 +1079,16 @@ static void php_zip_object_dtor(zend_object *object)
 
 	if (intern->za) {
 		if (zip_close(intern->za) != 0) {
-			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
+			if (!intern->bailout_callback) {
+				php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
+			}
 			zip_discard(intern->za);
 		}
 		intern->za = NULL;
+		if (intern->bailout_callback) {
+			intern->bailout_callback = false;
+			zend_bailout();
+		}
 	}
 }
 
@@ -1644,6 +1657,30 @@ PHP_METHOD(ZipArchive, count)
 	RETVAL_LONG(MIN(num, ZEND_LONG_MAX));
 }
 /* }}} */
+
+PHP_METHOD(ZipArchive, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_throw_exception_ex(NULL, 0,
+		"Serialization of '%s' is not allowed, override __serialize() and __unserialize() to implement it",
+		ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+}
+
+PHP_METHOD(ZipArchive, __unserialize)
+{
+	zval *data;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	(void) data;
+
+	zend_throw_exception_ex(NULL, 0,
+		"Unserialization of '%s' is not allowed, override __serialize() and __unserialize() to implement it",
+		ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+}
 
 /* {{{ clear the internal status */
 PHP_METHOD(ZipArchive, clearError)
@@ -2845,7 +2882,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 		ZIP_FROM_OBJECT(intern, self);
 
-		PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
+		PHP_ZIP_STAT_INDEX(intern, index, flags, sb);
 	}
 
 	if (sb.size < 1) {
@@ -2960,15 +2997,21 @@ PHP_METHOD(ZipArchive, getStream)
 #ifdef HAVE_PROGRESS_CALLBACK
 static void php_zip_progress_callback(zip_t *arch, double state, void *ptr)
 {
-	if (!EG(active)) {
+	ze_zip_object *obj = ptr;
+
+	if (UNEXPECTED(!EG(active) || obj->bailout_callback)) {
 		return;
 	}
 
 	zval cb_args[1];
-	ze_zip_object *obj = ptr;
 
 	ZVAL_DOUBLE(&cb_args[0], state);
-	zend_call_known_fcc(&obj->progress_callback, NULL, 1, cb_args, NULL);
+
+	zend_try {
+		zend_call_known_fcc(&obj->progress_callback, NULL, 1, cb_args, NULL);
+	} zend_catch {
+		obj->bailout_callback = true;
+	} zend_end_try();
 }
 
 /* {{{ register a progression callback: void callback(double state); */
@@ -3011,11 +3054,18 @@ static int php_zip_cancel_callback(zip_t *arch, void *ptr)
 	zval cb_retval;
 	ze_zip_object *obj = ptr;
 
-	if (!EG(active)) {
+	if (UNEXPECTED(!EG(active) || obj->bailout_callback)) {
 		return 0;
 	}
 
-	zend_call_known_fcc(&obj->cancel_callback, &cb_retval, 0, NULL, NULL);
+	zend_try {
+		zend_call_known_fcc(&obj->cancel_callback, &cb_retval, 0, NULL, NULL);
+	} zend_catch {
+		obj->bailout_callback = true;
+		/* Cancel if a bailout occurs to allow cleanup to happen */
+		return -1;
+	} zend_end_try();
+
 	if (Z_ISUNDEF(cb_retval)) {
 		/* Cancel if an exception has been thrown */
 		return -1;

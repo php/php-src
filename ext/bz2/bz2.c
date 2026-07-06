@@ -544,7 +544,7 @@ PHP_FUNCTION(bzdecompress)
 			/* no reason to continue if we're going to drop it anyway */
 			break;
 		}
-		dest = zend_string_safe_realloc(dest, 1, bzs.avail_out+1, (size_t) size, 0);
+		dest = zend_string_safe_realloc(dest, 1, (size_t) bzs.avail_out + 1, (size_t) size, 0);
 		bzs.next_out = ZSTR_VAL(dest) + size;
 	}
 

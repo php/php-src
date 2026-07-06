@@ -1,6 +1,41 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: a3b4696ac001d537cc34b818715c7eb382c17c5b
+ * Stub hash: 1a396b7a5b170b968d84a2c64a5bcf7d962653db
  * Has decl header: yes */
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_reset, 0, 0, IS_STATIC, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_setScheme, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_setUserInfo, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, userInfo, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_setHost, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_setPort, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, port, IS_LONG, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_setPath, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_setQuery, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_setFragment, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, fragment, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_build, 0, 0, Uri\\Rfc3986\\\125ri, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, baseUrl, Uri\\Rfc3986\\\125ri, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -20,9 +55,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_Rfc3986_Uri_getRawScheme arginfo_class_Uri_Rfc3986_Uri_getScheme
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_withScheme, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Uri_Rfc3986_Uri_withScheme arginfo_class_Uri_Rfc3986_UriBuilder_setScheme
 
 #define arginfo_class_Uri_Rfc3986_Uri_getUserInfo arginfo_class_Uri_Rfc3986_Uri_getScheme
 
@@ -47,41 +80,31 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_getHostType, 0, 0, Uri\\Rfc3986\\\125riHostType, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_withHost, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Uri_Rfc3986_Uri_withHost arginfo_class_Uri_Rfc3986_UriBuilder_setHost
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_getPort, 0, 0, IS_LONG, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_withPort, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, port, IS_LONG, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Uri_Rfc3986_Uri_withPort arginfo_class_Uri_Rfc3986_UriBuilder_setPort
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_getPath, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_Rfc3986_Uri_getRawPath arginfo_class_Uri_Rfc3986_Uri_getPath
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_withPath, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Uri_Rfc3986_Uri_withPath arginfo_class_Uri_Rfc3986_UriBuilder_setPath
 
 #define arginfo_class_Uri_Rfc3986_Uri_getQuery arginfo_class_Uri_Rfc3986_Uri_getScheme
 
 #define arginfo_class_Uri_Rfc3986_Uri_getRawQuery arginfo_class_Uri_Rfc3986_Uri_getScheme
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_withQuery, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Uri_Rfc3986_Uri_withQuery arginfo_class_Uri_Rfc3986_UriBuilder_setQuery
 
 #define arginfo_class_Uri_Rfc3986_Uri_getFragment arginfo_class_Uri_Rfc3986_Uri_getScheme
 
 #define arginfo_class_Uri_Rfc3986_Uri_getRawFragment arginfo_class_Uri_Rfc3986_Uri_getScheme
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_withFragment, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, fragment, IS_STRING, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Uri_Rfc3986_Uri_withFragment arginfo_class_Uri_Rfc3986_UriBuilder_setFragment
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_equals, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, uri, Uri\\Rfc3986\\\125ri, 0)
@@ -158,23 +181,23 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_WhatWg_Url_getHostType, 0, 0, Uri\\WhatWg\\\125rlHostType, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Uri_WhatWg_Url_withHost arginfo_class_Uri_Rfc3986_Uri_withHost
+#define arginfo_class_Uri_WhatWg_Url_withHost arginfo_class_Uri_Rfc3986_UriBuilder_setHost
 
 #define arginfo_class_Uri_WhatWg_Url_getPort arginfo_class_Uri_Rfc3986_Uri_getPort
 
-#define arginfo_class_Uri_WhatWg_Url_withPort arginfo_class_Uri_Rfc3986_Uri_withPort
+#define arginfo_class_Uri_WhatWg_Url_withPort arginfo_class_Uri_Rfc3986_UriBuilder_setPort
 
 #define arginfo_class_Uri_WhatWg_Url_getPath arginfo_class_Uri_Rfc3986_Uri_getPath
 
-#define arginfo_class_Uri_WhatWg_Url_withPath arginfo_class_Uri_Rfc3986_Uri_withPath
+#define arginfo_class_Uri_WhatWg_Url_withPath arginfo_class_Uri_Rfc3986_UriBuilder_setPath
 
 #define arginfo_class_Uri_WhatWg_Url_getQuery arginfo_class_Uri_Rfc3986_Uri_getScheme
 
-#define arginfo_class_Uri_WhatWg_Url_withQuery arginfo_class_Uri_Rfc3986_Uri_withQuery
+#define arginfo_class_Uri_WhatWg_Url_withQuery arginfo_class_Uri_Rfc3986_UriBuilder_setQuery
 
 #define arginfo_class_Uri_WhatWg_Url_getFragment arginfo_class_Uri_Rfc3986_Uri_getScheme
 
-#define arginfo_class_Uri_WhatWg_Url_withFragment arginfo_class_Uri_Rfc3986_Uri_withFragment
+#define arginfo_class_Uri_WhatWg_Url_withFragment arginfo_class_Uri_Rfc3986_UriBuilder_setFragment
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_equals, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, url, Uri\\WhatWg\\\125rl, 0)
@@ -196,6 +219,15 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url___debugInfo arginfo_class_Uri_Rfc3986_Uri___serialize
 
+ZEND_METHOD(Uri_Rfc3986_UriBuilder, reset);
+ZEND_METHOD(Uri_Rfc3986_UriBuilder, setScheme);
+ZEND_METHOD(Uri_Rfc3986_UriBuilder, setUserInfo);
+ZEND_METHOD(Uri_Rfc3986_UriBuilder, setHost);
+ZEND_METHOD(Uri_Rfc3986_UriBuilder, setPort);
+ZEND_METHOD(Uri_Rfc3986_UriBuilder, setPath);
+ZEND_METHOD(Uri_Rfc3986_UriBuilder, setQuery);
+ZEND_METHOD(Uri_Rfc3986_UriBuilder, setFragment);
+ZEND_METHOD(Uri_Rfc3986_UriBuilder, build);
 ZEND_METHOD(Uri_Rfc3986_Uri, parse);
 ZEND_METHOD(Uri_Rfc3986_Uri, __construct);
 ZEND_METHOD(Uri_Rfc3986_Uri, getUriType);
@@ -250,6 +282,19 @@ ZEND_METHOD(Uri_WhatWg_Url, resolve);
 ZEND_METHOD(Uri_WhatWg_Url, __serialize);
 ZEND_METHOD(Uri_WhatWg_Url, __unserialize);
 ZEND_METHOD(Uri_WhatWg_Url, __debugInfo);
+
+static const zend_function_entry class_Uri_Rfc3986_UriBuilder_methods[] = {
+	ZEND_ME(Uri_Rfc3986_UriBuilder, reset, arginfo_class_Uri_Rfc3986_UriBuilder_reset, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_UriBuilder, setScheme, arginfo_class_Uri_Rfc3986_UriBuilder_setScheme, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_UriBuilder, setUserInfo, arginfo_class_Uri_Rfc3986_UriBuilder_setUserInfo, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_UriBuilder, setHost, arginfo_class_Uri_Rfc3986_UriBuilder_setHost, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_UriBuilder, setPort, arginfo_class_Uri_Rfc3986_UriBuilder_setPort, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_UriBuilder, setPath, arginfo_class_Uri_Rfc3986_UriBuilder_setPath, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_UriBuilder, setQuery, arginfo_class_Uri_Rfc3986_UriBuilder_setQuery, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_UriBuilder, setFragment, arginfo_class_Uri_Rfc3986_UriBuilder_setFragment, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_UriBuilder, build, arginfo_class_Uri_Rfc3986_UriBuilder_build, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
 
 static const zend_function_entry class_Uri_Rfc3986_Uri_methods[] = {
 	ZEND_ME(Uri_Rfc3986_Uri, parse, arginfo_class_Uri_Rfc3986_Uri_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -399,6 +444,49 @@ static zend_class_entry *register_class_Uri_Rfc3986_UriHostType(void)
 	zend_enum_add_case_cstr(class_entry, "IPvFuture", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "RegisteredName", NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Uri_Rfc3986_UriBuilder(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Uri\\Rfc3986", "UriBuilder", class_Uri_Rfc3986_UriBuilder_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+
+	zval property_scheme_default_value;
+	ZVAL_NULL(&property_scheme_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_SCHEME), &property_scheme_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+
+	zval property_userinfo_default_value;
+	ZVAL_NULL(&property_userinfo_default_value);
+	zend_string *property_userinfo_name = zend_string_init("userinfo", sizeof("userinfo") - 1, true);
+	zend_declare_typed_property(class_entry, property_userinfo_name, &property_userinfo_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release_ex(property_userinfo_name, true);
+
+	zval property_host_default_value;
+	ZVAL_NULL(&property_host_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_HOST), &property_host_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+
+	zval property_port_default_value;
+	ZVAL_NULL(&property_port_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PORT), &property_port_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+
+	zval property_path_default_value;
+	ZVAL_EMPTY_STRING(&property_path_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PATH), &property_path_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+
+	zval property_query_default_value;
+	ZVAL_NULL(&property_query_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_QUERY), &property_query_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+
+	zval property_fragment_default_value;
+	ZVAL_NULL(&property_fragment_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_FRAGMENT), &property_fragment_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setuserinfo", sizeof("setuserinfo") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }

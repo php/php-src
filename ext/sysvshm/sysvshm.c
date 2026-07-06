@@ -126,10 +126,17 @@ PHP_FUNCTION(shm_attach)
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
-	zend_long shm_key, shm_id, shm_size, shm_flag = 0666;
+	zend_long shm_key_arg, shm_id, shm_size, shm_flag = 0666;
+	key_t shm_key;
 	bool shm_size_is_null = true;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &shm_key, &shm_size, &shm_size_is_null, &shm_flag)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &shm_key_arg, &shm_size, &shm_size_is_null, &shm_flag)) {
+		RETURN_THROWS();
+	}
+
+	shm_key = (key_t) shm_key_arg;
+	if ((zend_long) shm_key != shm_key_arg) {
+		zend_argument_value_error(1, "is out of range");
 		RETURN_THROWS();
 	}
 
@@ -145,17 +152,17 @@ PHP_FUNCTION(shm_attach)
 	/* get the id from a specified key or create new shared memory */
 	if ((shm_id = shmget(shm_key, 0, 0)) < 0) {
 		if (shm_size < (zend_long)sizeof(sysvshm_chunk_head)) {
-			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": memorysize too small", shm_key);
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": memorysize too small", shm_key_arg);
 			RETURN_FALSE;
 		}
 		if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL)) < 0) {
-			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key_arg, strerror(errno));
 			RETURN_FALSE;
 		}
 	}
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
-		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key_arg, strerror(errno));
 		RETURN_FALSE;
 	}
 

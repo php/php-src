@@ -36,6 +36,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The zval_dtor() alias of zval_ptr_dtor_nogc() has been removed.
     Call zval_ptr_dtor_nogc() directly instead.
   . The internal zend_copy_parameters_array() function is no longer exposed.
+  . The internal zend_hash_minmax() function is no longer exposed. Scan the
+    HashTable directly and use zend_compare() for value comparisons instead.
   . The zend_make_callable() function has been removed, if a callable zval
     needs to be obtained use the zend_get_callable_zval_from_fcc() function
     instead. If this was used to store a callable, then an FCC should be
@@ -65,6 +67,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_enum_RoundingMode parameter.
   . Added Z_PARAM_ENUM().
   . Added zend_enum_fetch_case_id().
+  . Added zend_enum_get_case_by_id().
   . ZEND_INI_GET_ADDR() is now a void* pointer instead of a char* pointer. This
     more correctly represents the generic nature of the returned pointer and
     allows to remove explicit casts, but possibly breaks pointer arithmetic
@@ -117,6 +120,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added ZEND_CONTAINER_OF().
   . The OPENBASEDIR_CHECKPATH() compatibility macro has been removed, instead
     use php_check_open_basedir() directly.
+  . Added zend_reflection_property_set_raw_value_without_lazy_initialization(),
+    zend_reflection_property_set_raw_value() to expose the functionality of
+    ReflectionProperty::setRawValueWithoutLazyInitialization() and
+    ReflectionProperty::setRawValue() to C extensions.
 
 ========================
 2. Build system changes

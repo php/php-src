@@ -9,7 +9,7 @@
    | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Benjamin Eberlei <beberlei@php.net>                         |
-   |          Niels Dossche <nielsdos@php.net>                            |
+   |          Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
