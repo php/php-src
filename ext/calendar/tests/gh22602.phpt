@@ -1,5 +1,5 @@
 --TEST--
-Bug GH-22602: (gregoriantojd() integer overflow with INT_MAX year)
+Bug GH-22602: (gregoriantojd() and juliantojd() integer overflow with INT_MAX year)
 --EXTENSIONS--
 calendar
 --FILE--

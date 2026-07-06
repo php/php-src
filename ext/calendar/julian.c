@@ -227,6 +227,7 @@ zend_long JulianToSdn(
 		inputDay <= 0 || inputDay > 31) {
 		return (0);
 	}
+	
 	/* check for dates before SDN 1 (Jan 2, 4713 B.C.) */
 	if (inputYear == -4713) {
 		if (inputMonth == 1 && inputDay == 1) {
