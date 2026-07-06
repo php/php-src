@@ -673,12 +673,10 @@ static int zend_add_const_name_literal(zend_string *name, bool unqualified) /* {
 
 	int ret = zend_add_literal_string(&name);
 
-	size_t ns_len = 0, after_ns_len = ZSTR_LEN(name);
-	const char *after_ns = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (after_ns) {
-		after_ns += 1;
-		ns_len = after_ns - ZSTR_VAL(name) - 1;
-		after_ns_len = ZSTR_LEN(name) - ns_len - 1;
+	const char *after_ns;
+	size_t after_ns_len;
+	if (zend_get_unqualified_name(name, &after_ns, &after_ns_len)) {
+		size_t ns_len = after_ns - ZSTR_VAL(name) - 1;
 
 		/* lowercased namespace name & original constant name */
 		tmp_name = zend_string_init(ZSTR_VAL(name), ZSTR_LEN(name), 0);
@@ -690,6 +688,7 @@ static int zend_add_const_name_literal(zend_string *name, bool unqualified) /* {
 		}
 	} else {
 		after_ns = ZSTR_VAL(name);
+		after_ns_len = ZSTR_LEN(name);
 	}
 
 	/* original unqualified constant name */
