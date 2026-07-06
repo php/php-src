@@ -1,22 +1,22 @@
 
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "gd_vector2d_private.h"
 #include "gd_intern.h"
+#include "gd_vector2d_private.h"
 #include "gdhelpers.h"
 
-#include "gd_path_matrix.h"
-#include "gd_span_rle.h"
+#include "gd_compositor.h"
+#include "gd_gradient.h"
 #include "gd_path.h"
 #include "gd_path_arc.h"
 #include "gd_path_dash.h"
-#include "gd_gradient.h"
-#include "gd_compositor.h"
+#include "gd_path_matrix.h"
+#include "gd_span_rle.h"
 
 static gdSurfacePtr gdSurfaceSnapshotImage(gdImagePtr image)
 {
@@ -53,10 +53,8 @@ BGD_DECLARE(void) gdPaintDestroy(gdPaintPtr paint)
         return;
     paint->ref--;
 
-    if (paint->ref == 0)
-    {
-        switch (paint->type)
-        {
+    if (paint->ref == 0) {
+        switch (paint->type) {
         case gdPaintTypeColor:
             gdFree(paint->color);
             break;
@@ -69,8 +67,7 @@ BGD_DECLARE(void) gdPaintDestroy(gdPaintPtr paint)
         case gdPaintTypePattern:
             gdPathPatternDestroy(paint->pattern);
             break;
-        default:
-        {
+        default: {
         }
         }
         gdFree(paint);
@@ -120,11 +117,10 @@ BGD_DECLARE(gdPathPatternPtr) gdPathPatternCreateForImage(gdImagePtr image)
 
 BGD_DECLARE(void) gdPathPatternDestroy(gdPathPatternPtr pattern)
 {
-    if(pattern == NULL)
+    if (pattern == NULL)
         return;
 
-    if(--pattern->ref==0)
-    {
+    if (--pattern->ref == 0) {
         gdSurfaceDestroy(pattern->surface);
         gdFree(pattern);
     }
@@ -132,14 +128,16 @@ BGD_DECLARE(void) gdPathPatternDestroy(gdPathPatternPtr pattern)
 
 void gdPathPatternAddRef(gdPathPatternPtr pattern)
 {
-    if(pattern==NULL)  return;
+    if (pattern == NULL)
+        return;
     pattern->ref++;
 }
 
 BGD_DECLARE(gdPaintPtr) gdPaintCreateFromPattern(gdPathPatternPtr pattern)
 {
     gdPaintPtr paint = gdMalloc(sizeof(gdPaint));
-    if (!paint) return NULL;
+    if (!paint)
+        return NULL;
     paint->ref = 1;
     paint->type = gdPaintTypePattern;
     paint->pattern = pattern;
@@ -147,7 +145,8 @@ BGD_DECLARE(gdPaintPtr) gdPaintCreateFromPattern(gdPathPatternPtr pattern)
     return paint;
 }
 
-gdPaintPtr gdPaintCreateForSurface(gdSurfacePtr surface) {
+gdPaintPtr gdPaintCreateForSurface(gdSurfacePtr surface)
+{
     gdPathPatternPtr pattern = gdPathPatternCreate(surface);
     gdPaintPtr paint = gdPaintCreateFromPattern(pattern);
     gdPathPatternDestroy(pattern);
@@ -179,7 +178,7 @@ void gdPaintSetSourceSurface(gdContextPtr context, gdSurfacePtr surface, double 
     gdPathPatternSetExtend(pattern, GD_EXTEND_NONE);
     gdPathMatrixMultiply(&matrix, &matrix, &context->state->matrix);
     gdPathMatrixInitTranslate(&matrix, x, y);
-    gdPathPatternSetMatrix (pattern, &matrix);
+    gdPathPatternSetMatrix(pattern, &matrix);
     paint = gdPaintCreateFromPattern(pattern);
     gdContextSetSource(context, paint);
 }
@@ -187,13 +186,11 @@ void gdPaintSetSourceSurface(gdContextPtr context, gdSurfacePtr surface, double 
 gdPaintPtr gdPaintCreateRgba(double r, double g, double b, double a)
 {
     gdPaintPtr paint = gdMalloc(sizeof(gdPaint));
-    if (!paint)
-    {
+    if (!paint) {
         return NULL;
     }
     paint->color = gdMalloc(sizeof(gdColor));
-    if (!paint->color)
-    {
+    if (!paint->color) {
         gdFree(paint);
         return NULL;
     }
@@ -224,14 +221,12 @@ void gdContextSetSourceColorRgb(gdContextPtr context, double r, double g, double
 gdStatePtr gdStateCreate()
 {
     gdStatePtr state = gdMalloc(sizeof(gdState));
-    if (!state)
-    {
+    if (!state) {
         return NULL;
     }
-    //state->font = NULL;
+    // state->font = NULL;
     state->source = gdPaintCreateRgba(0, 0, 0, 1.0);
-    if (!state->source)
-    {
+    if (!state->source) {
         gdFree(state);
         return NULL;
     }
@@ -243,7 +238,7 @@ gdStatePtr gdStateCreate()
     state->stroke.join = gdLineJoinMiter;
     state->stroke.dash = NULL;
     state->op = GD_OP_OVER;
-    //state->fontsize = 12.0;
+    // state->fontsize = 12.0;
     state->opacity = 1.0;
     state->clippath = NULL;
     state->next = NULL;
@@ -252,7 +247,7 @@ gdStatePtr gdStateCreate()
 
 void gdStateDestroy(gdStatePtr state)
 {
-    //state->font
+    // state->font
     gdSpanRleDestroy(state->clippath);
     gdPaintDestroy(state->source);
     gdPathDashDestroy(state->stroke.dash);
@@ -280,11 +275,9 @@ gdPathPtr gdPathDuplicate(const gdPathPtr path)
         return NULL;
     gdArrayInit(&result->elements, sizeof(gdPathOps));
     gdArrayInit(&result->points, sizeof(gdPointF));
-    gdArrayAppendMultiple(&result->elements,
-                          gdArrayGetData(&path->elements),
+    gdArrayAppendMultiple(&result->elements, gdArrayGetData(&path->elements),
                           gdArrayNumElements(&path->elements));
-    gdArrayAppendMultiple(&result->points,
-                          gdArrayGetData(&path->points),
+    gdArrayAppendMultiple(&result->points, gdArrayGetData(&path->points),
                           gdArrayNumElements(&path->points));
 
     result->contours = path->contours;
@@ -293,14 +286,11 @@ gdPathPtr gdPathDuplicate(const gdPathPtr path)
     return result;
 }
 
-
 BGD_DECLARE(void) gdPathAppendPath(gdPathPtr path, const gdPathPtr source)
 {
-    gdArrayAppendMultiple(&path->elements,
-                          gdArrayGetData(&source->elements),
+    gdArrayAppendMultiple(&path->elements, gdArrayGetData(&source->elements),
                           gdArrayNumElements(&source->elements));
-    gdArrayAppendMultiple(&path->points,
-                          gdArrayGetData(&source->points),
+    gdArrayAppendMultiple(&path->points, gdArrayGetData(&source->points),
                           gdArrayNumElements(&source->points));
 
     path->contours += source->contours;
@@ -313,9 +303,8 @@ BGD_DECLARE(void) gdPathTransform(gdPathPtr path, const gdPathMatrixPtr matrix)
     unsigned int numElements = gdArrayNumElements(&path->points);
     unsigned int i;
 
-    //memset(p, 0, sizeof(gdPointF) * 3);
-    for (i = 0; i < numElements; i++)
-    {
+    // memset(p, 0, sizeof(gdPointF) * 3);
+    for (i = 0; i < numElements; i++) {
         p = (gdPointFPtr)gdArrayIndex(&path->points, i);
         gdPathMatrixMapPoint(matrix, p, p);
     }
@@ -331,18 +320,15 @@ static inline void _path_get_current_point(const gdPathPtr path, double *x, doub
     if (numElems < 1)
         return;
     gdPointFPtr point = gdArrayIndex(&path->points, numElems - 1);
-    if (x)
-    {
+    if (x) {
         *x = point->x;
     }
-    if (y)
-    {
+    if (y) {
         *y = point->y;
     }
 }
 
-typedef struct
-{
+typedef struct {
     double x1;
     double y1;
     double x2;
@@ -353,7 +339,7 @@ typedef struct
     double y4;
 } cubic_points;
 
-static inline void split(const cubic_points* b, cubic_points* first, cubic_points* second)
+static inline void split(const cubic_points *b, cubic_points *first, cubic_points *second)
 {
     double c = (b->x2 + b->x3) * 0.5;
     first->x2 = (b->x1 + b->x2) * 0.5;
@@ -375,11 +361,8 @@ static inline void split(const cubic_points* b, cubic_points* first, cubic_point
 }
 
 /* See http://agg.sourceforge.net/antigrain.com/research/adaptive_bezier/index.html */
-static void _cubic_flatten(gdPathPtr path,
-                    const gdPointFPtr p0,
-                    const gdPointFPtr p1,
-                    const gdPointFPtr p2,
-                    const gdPointFPtr p3)
+static void _cubic_flatten(gdPathPtr path, const gdPointFPtr p0, const gdPointFPtr p1,
+                           const gdPointFPtr p2, const gdPointFPtr p3)
 {
     cubic_points beziers[32];
     beziers[0].x1 = p0->x;
@@ -397,29 +380,24 @@ static void _cubic_flatten(gdPathPtr path,
     const double tolerance = 0.1;
 
     cubic_points *b = beziers;
-    while (b >= beziers)
-    {
+    while (b >= beziers) {
         double y4y1 = b->y4 - b->y1;
         double x4x1 = b->x4 - b->x1;
         double l = fabs(x4x1) + fabs(y4y1);
         double d;
-        if (l > 1.0)
-        {
-            d = fabs((x4x1) * (b->y1 - b->y2) - (y4y1) * (b->x1 - b->x2)) + fabs((x4x1) * (b->y1 - b->y3) - (y4y1) * (b->x1 - b->x3));
-        }
-        else
-        {
-            d = fabs(b->x1 - b->x2) + fabs(b->y1 - b->y2) + fabs(b->x1 - b->x3) + fabs(b->y1 - b->y3);
+        if (l > 1.0) {
+            d = fabs((x4x1) * (b->y1 - b->y2) - (y4y1) * (b->x1 - b->x2)) +
+                fabs((x4x1) * (b->y1 - b->y3) - (y4y1) * (b->x1 - b->x3));
+        } else {
+            d = fabs(b->x1 - b->x2) + fabs(b->y1 - b->y2) + fabs(b->x1 - b->x3) +
+                fabs(b->y1 - b->y3);
             l = 1.0;
         }
 
-        if (d < tolerance * l || b == beziers + 31)
-        {
+        if (d < tolerance * l || b == beziers + 31) {
             gdPathLineTo(path, b->x4, b->y4);
             --b;
-        }
-        else
-        {
+        } else {
             split(b, b + 1, b);
             ++b;
         }
@@ -434,31 +412,28 @@ gdPathPtr gdPathDuplicateFlattened(const gdPathPtr path)
     gdArrayReallocBy(&result->points, gdArrayNumElements(&path->points));
 
     gdPointFPtr points = gdArrayGetData(&path->points);
-    for (unsigned int i = 0; i < gdArrayNumElements(&path->elements); i++)
-    {
+    for (unsigned int i = 0; i < gdArrayNumElements(&path->elements); i++) {
         const gdPathOpsPtr cur_elem = gdArrayIndex(&path->elements, i);
-        switch (*cur_elem)
-        {
-            case gdPathOpsMoveTo:
-                gdPathMoveTo(result, points[0].x, points[0].y);
-                points += 1;
-                break;
-            case gdPathOpsLineTo:
-            case gdPathOpsClose:
-                gdPathLineTo(result, points[0].x, points[0].y);
-                points += 1;
-                break;
-            case gdPathOpsCubicTo:
-            {
-                gdPointF p0;
-                _path_get_current_point(result, &p0.x, &p0.y);
-                _cubic_flatten(result, &p0, points, points + 1, points + 2);
-                points += 3;
-                break;
-            }
-            default:
-                // Only to silent compiler
-                break;
+        switch (*cur_elem) {
+        case gdPathOpsMoveTo:
+            gdPathMoveTo(result, points[0].x, points[0].y);
+            points += 1;
+            break;
+        case gdPathOpsLineTo:
+        case gdPathOpsClose:
+            gdPathLineTo(result, points[0].x, points[0].y);
+            points += 1;
+            break;
+        case gdPathOpsCubicTo: {
+            gdPointF p0;
+            _path_get_current_point(result, &p0.x, &p0.y);
+            _cubic_flatten(result, &p0, points, points + 1, points + 2);
+            points += 3;
+            break;
+        }
+        default:
+            // Only to silent compiler
+            break;
         }
     }
     return result;
@@ -477,8 +452,7 @@ BGD_DECLARE(void) gdPathDestroy(gdPathPtr path)
     if (path == NULL)
         return;
     path->ref--;
-    if (path->ref == 0)
-    {
+    if (path->ref == 0) {
         gdArrayDestroy(&path->elements);
         gdArrayDestroy(&path->points);
         gdFree(path);
@@ -498,7 +472,7 @@ void gdPathClear(gdPathPtr path)
 Not exported, only for debugging purposes here */
 void gdPathDumpPathTransform(const gdPathPtr path, const gdPathMatrixPtr matrix)
 {
-    //GD_FT_Outline* outline = gd_ft_outline_create(path->points.size, path->contours);
+    // GD_FT_Outline* outline = gd_ft_outline_create(path->points.size, path->contours);
     gdPointF p[3];
     unsigned int numElements = gdArrayNumElements(&path->elements);
     unsigned int pointsIndex = 0;
@@ -506,36 +480,39 @@ void gdPathDumpPathTransform(const gdPathPtr path, const gdPathMatrixPtr matrix)
 
     memset(p, 0, sizeof(gdPointF) * 3);
     printf("NEWOUTLINE CONVERT\n");
-    for (i = 0; i < numElements; i++)
-    {
+    for (i = 0; i < numElements; i++) {
         gdPathOpsPtr element = (gdPathOpsPtr)gdArrayIndex(&path->elements, i);
         gdPointFPtr point = gdArrayIndex(&path->points, pointsIndex);
         printf("-------\n");
-        switch (*element)
-        {
+        switch (*element) {
         case gdPathOpsMoveTo:
-            if (matrix) gdPathMatrixMapPoint(matrix, point, &p[0]);
+            if (matrix)
+                gdPathMatrixMapPoint(matrix, point, &p[0]);
             printf("MoveTo(%f, %f)", point->x, point->y);
             printf("(%f, %f)", p[0].x, p[0].y);
             pointsIndex += 1;
             break;
         case gdPathOpsLineTo:
-            if (matrix) gdPathMatrixMapPoint(matrix, point, &p[0]);
+            if (matrix)
+                gdPathMatrixMapPoint(matrix, point, &p[0]);
             printf("LineTo(%f, %f)", point->x, point->y);
             printf("(%f, %f)", p[0].x, p[0].y);
             pointsIndex += 1;
             break;
         case gdPathOpsCubicTo:
             printf("CubicTo(%f, %f)", point->x, point->y);
-            if (matrix) gdPathMatrixMapPoint(matrix, point, &p[0]);
+            if (matrix)
+                gdPathMatrixMapPoint(matrix, point, &p[0]);
             printf("(%f, %f)", p[0].x, p[0].y);
 
             point = gdArrayIndex(&path->points, pointsIndex + 1);
-            if (matrix) gdPathMatrixMapPoint(matrix, point, &p[1]);
+            if (matrix)
+                gdPathMatrixMapPoint(matrix, point, &p[1]);
             printf("(%f, %f)", p[1].x, p[1].y);
 
             point = gdArrayIndex(&path->points, pointsIndex + 2);
-            if (matrix) gdPathMatrixMapPoint(matrix, point, &p[2]);
+            if (matrix)
+                gdPathMatrixMapPoint(matrix, point, &p[2]);
             printf("(%f, %f)", p[2].x, p[2].y);
             pointsIndex += 3;
             break;
@@ -544,7 +521,7 @@ void gdPathDumpPathTransform(const gdPathPtr path, const gdPathMatrixPtr matrix)
             pointsIndex += 1;
             break;
         default:
-                break;
+            break;
         }
         printf("\n-------\n");
     }
@@ -590,7 +567,8 @@ BGD_DECLARE(void) gdPathRelLineTo(gdPathPtr path, double dx, double dy)
     gdPathLineTo(path, dx, dy);
 }
 
-BGD_DECLARE(void) gdPathCurveTo(gdPathPtr path, double x1, double y1, double x2, double y2, double x3, double y3)
+BGD_DECLARE(void)
+gdPathCurveTo(gdPathPtr path, double x1, double y1, double x2, double y2, double x3, double y3)
 {
     const gdPathOps op = gdPathOpsCubicTo;
     gdPointF points[3];
@@ -620,7 +598,8 @@ BGD_DECLARE(void) gdPathQuadTo(gdPathPtr path, double x1, double y1, double x2, 
 /*
 Based on http://www.whizkidtech.redprince.net/bezier/circle/kappa/
 */
-void gdPathAddArc(gdPathPtr path, double cx, double cy, double radius, double angle1, double angle2, int ccw)
+void gdPathAddArc(gdPathPtr path, double cx, double cy, double radius, double angle1, double angle2,
+                  int ccw)
 {
     if (ccw)
         _gd_arc_path_negative(path, cx, cy, radius, angle1, angle2);
@@ -632,15 +611,13 @@ void gdPathArcTo(gdPathPtr path, double x1, double y1, double x2, double y2, dou
 {
     double x0, y0;
     _path_get_current_point(path, &x0, &y0);
-    if ((x0 == x1 && y0 == y1) || (x1 == x2 && y1 == y2) || radius == 0.0)
-    {
+    if ((x0 == x1 && y0 == y1) || (x1 == x2 && y1 == y2) || radius == 0.0) {
         gdPathLineTo(path, x1, y2);
         return;
     }
 
     double dir = (x2 - x1) * (y0 - y1) + (y2 - y1) * (x1 - x0);
-    if (dir == 0.0)
-    {
+    if (dir == 0.0) {
         gdPathLineTo(path, x1, y2);
         return;
     }
@@ -689,8 +666,7 @@ BGD_DECLARE(void) gdPathClose(gdPathPtr path)
     const gdPathOps OpClose = gdPathOpsClose;
     if (numElements == 0)
         return;
-    const gdPathOpsPtr lastOpPtr = gdArrayIndex(&path->elements,
-                                                (unsigned int)numElements - 1);
+    const gdPathOpsPtr lastOpPtr = gdArrayIndex(&path->elements, (unsigned int)numElements - 1);
     if (*lastOpPtr == gdPathOpsClose)
         return;
 

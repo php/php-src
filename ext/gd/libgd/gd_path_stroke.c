@@ -1,13 +1,13 @@
-#include "gd_vector2d_private.h"
-#include "gdhelpers.h"
+#include "ftraster/gd_ft_raster.h"
+#include "ftraster/gd_ft_stroker.h"
 #include "gd_path.h"
 #include "gd_path_matrix.h"
 #include "gd_path_outline.h"
-#include "ftraster/gd_ft_stroker.h"
-#include "ftraster/gd_ft_raster.h"
+#include "gd_vector2d_private.h"
+#include "gdhelpers.h"
 #include <math.h>
 
-static gdPathPtr ft_outline_to_gdpath(const GD_FT_Outline* outline)
+static gdPathPtr ft_outline_to_gdpath(const GD_FT_Outline *outline)
 {
     if (!outline || outline->n_points == 0)
         return NULL;
@@ -58,27 +58,25 @@ static gdPathPtr ft_outline_to_gdpath(const GD_FT_Outline* outline)
                 GD_FT_Vector control = current;
                 for (;;) {
                     if (point > last) {
-                        gdPathQuadTo(path, control.x / 64.0, control.y / 64.0,
-                                    start.x / 64.0, start.y / 64.0);
+                        gdPathQuadTo(path, control.x / 64.0, control.y / 64.0, start.x / 64.0,
+                                     start.y / 64.0);
                         break;
                     }
 
                     tag = GD_FT_CURVE_TAG(outline->tags[point]);
                     current = outline->points[point++];
                     if (tag == GD_FT_CURVE_TAG_ON) {
-                        gdPathQuadTo(path, control.x / 64.0, control.y / 64.0,
-                                    current.x / 64.0, current.y / 64.0);
+                        gdPathQuadTo(path, control.x / 64.0, control.y / 64.0, current.x / 64.0,
+                                     current.y / 64.0);
                         break;
                     }
                     if (tag != GD_FT_CURVE_TAG_CONIC)
                         goto invalid_outline;
 
-                    GD_FT_Vector middle = {
-                        (control.x + current.x) / 2,
-                        (control.y + current.y) / 2
-                    };
-                    gdPathQuadTo(path, control.x / 64.0, control.y / 64.0,
-                                middle.x / 64.0, middle.y / 64.0);
+                    GD_FT_Vector middle = {(control.x + current.x) / 2,
+                                           (control.y + current.y) / 2};
+                    gdPathQuadTo(path, control.x / 64.0, control.y / 64.0, middle.x / 64.0,
+                                 middle.y / 64.0);
                     control = current;
                 }
                 continue;
@@ -96,9 +94,8 @@ static gdPathPtr ft_outline_to_gdpath(const GD_FT_Outline* outline)
                     goto invalid_outline;
                 end = outline->points[point++];
             }
-            gdPathCurveTo(path, control1.x / 64.0, control1.y / 64.0,
-                          control2.x / 64.0, control2.y / 64.0,
-                          end.x / 64.0, end.y / 64.0);
+            gdPathCurveTo(path, control1.x / 64.0, control1.y / 64.0, control2.x / 64.0,
+                          control2.y / 64.0, end.x / 64.0, end.y / 64.0);
         }
 
         gdPathClose(path);
@@ -112,7 +109,8 @@ invalid_outline:
     return NULL;
 }
 
-GD_VECTOR2D_INTERNAL gdPathPtr gdPathStrokeToPath(const gdPathPtr path, const gdStrokePtr stroke, const gdPathMatrixPtr matrix)
+GD_VECTOR2D_INTERNAL gdPathPtr gdPathStrokeToPath(const gdPathPtr path, const gdStrokePtr stroke,
+                                                  const gdPathMatrixPtr matrix)
 {
     if (!path || !stroke || stroke->width <= 0)
         return NULL;
@@ -129,33 +127,31 @@ GD_VECTOR2D_INTERNAL gdPathPtr gdPathStrokeToPath(const gdPathPtr path, const gd
     GD_FT_Fixed ftMiterLimit = (GD_FT_Fixed)(stroke->miterlimit * 65536);
 
     GD_FT_Stroker_LineCap ftCap;
-    switch (stroke->cap)
-    {
-        case gdLineCapSquare:
-            ftCap = GD_FT_STROKER_LINECAP_SQUARE;
-            break;
-        case gdLineCapRound:
-            ftCap = GD_FT_STROKER_LINECAP_ROUND;
-            break;
-        case gdLineCapButt:
-        default:
-            ftCap = GD_FT_STROKER_LINECAP_BUTT;
-            break;
+    switch (stroke->cap) {
+    case gdLineCapSquare:
+        ftCap = GD_FT_STROKER_LINECAP_SQUARE;
+        break;
+    case gdLineCapRound:
+        ftCap = GD_FT_STROKER_LINECAP_ROUND;
+        break;
+    case gdLineCapButt:
+    default:
+        ftCap = GD_FT_STROKER_LINECAP_BUTT;
+        break;
     }
 
     GD_FT_Stroker_LineJoin ftJoin;
-    switch (stroke->join)
-    {
-        case gdLineJoinBevel:
-            ftJoin = GD_FT_STROKER_LINEJOIN_BEVEL;
-            break;
-        case gdLineJoinRound:
-            ftJoin = GD_FT_STROKER_LINEJOIN_ROUND;
-            break;
-        case gdLineJoinMiter:
-        default:
-            ftJoin = GD_FT_STROKER_LINEJOIN_MITER_FIXED;
-            break;
+    switch (stroke->join) {
+    case gdLineJoinBevel:
+        ftJoin = GD_FT_STROKER_LINEJOIN_BEVEL;
+        break;
+    case gdLineJoinRound:
+        ftJoin = GD_FT_STROKER_LINEJOIN_ROUND;
+        break;
+    case gdLineJoinMiter:
+    default:
+        ftJoin = GD_FT_STROKER_LINEJOIN_MITER_FIXED;
+        break;
     }
 
     GD_FT_Stroker_Set(stroker, ftWidth, ftCap, ftJoin, ftMiterLimit);
@@ -166,8 +162,7 @@ GD_VECTOR2D_INTERNAL gdPathPtr gdPathStrokeToPath(const gdPathPtr path, const gd
     GD_FT_Stroker_GetCounts(stroker, &points, &contours);
 
     GD_FT_Outline *strokeOutline = gd_ft_outline_create((int)points, (int)contours);
-    if (!strokeOutline)
-    {
+    if (!strokeOutline) {
         GD_FT_Stroker_Done(stroker);
         gd_ft_outline_destroy(outline);
         return NULL;
@@ -182,8 +177,7 @@ GD_VECTOR2D_INTERNAL gdPathPtr gdPathStrokeToPath(const gdPathPtr path, const gd
     gd_ft_outline_destroy(outline);
     gd_ft_outline_destroy(strokeOutline);
 
-    if (!strokePath)
-    {
+    if (!strokePath) {
         return NULL;
     }
 

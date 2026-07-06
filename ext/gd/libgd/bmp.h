@@ -1,25 +1,25 @@
 #ifndef BMP_H
-#define BMP_H	1
+#define BMP_H 1
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	/*
-		gd_bmp.c
+/*
+        gd_bmp.c
 
-		Bitmap format support for libgd
+        Bitmap format support for libgd
 
-		* Written 2007, Scott MacVicar
-		---------------------------------------------------------------------------
+        * Written 2007, Scott MacVicar
+        ---------------------------------------------------------------------------
 
-		Todo:
+        Todo:
 
-		RLE4, RLE8 and Bitfield encoding
-		Add full support for Windows v4 and Windows v5 header formats
+        RLE4, RLE8 and Bitfield encoding
+        Add full support for Windows v4 and Windows v5 header formats
 
-		----------------------------------------------------------------------------
-	 */
+        ----------------------------------------------------------------------------
+ */
 
 #define BMP_PALETTE_3 1
 #define BMP_PALETTE_4 2
@@ -49,71 +49,71 @@ extern "C" {
 #define BMP_RLE_TYPE_RAW 0
 #define BMP_RLE_TYPE_RLE 1
 
-	/* BMP header. */
-	typedef struct {
-		/* 16 bit - header identifying the type */
-		signed short int magic;
+/* BMP header. */
+typedef struct {
+    /* 16 bit - header identifying the type */
+    signed short int magic;
 
-		/* 32bit - size of the file */
-		int size;
+    /* 32bit - size of the file */
+    int size;
 
-		/* 16bit - these two are in the spec but "reserved" */
-		signed short int reserved1;
-		signed short int reserved2;
+    /* 16bit - these two are in the spec but "reserved" */
+    signed short int reserved1;
+    signed short int reserved2;
 
-		/* 32 bit - offset of the bitmap header from data in bytes */
-		signed int off;
+    /* 32 bit - offset of the bitmap header from data in bytes */
+    signed int off;
 
-	} bmp_hdr_t;
+} bmp_hdr_t;
 
-	/* BMP info. */
-	typedef struct {
-		/* 16bit - Type, ie Windows or OS/2 for the palette info */
-		signed short int type;
-		/* 32bit - The length of the bitmap information header in bytes. */
-		signed int len;
+/* BMP info. */
+typedef struct {
+    /* 16bit - Type, ie Windows or OS/2 for the palette info */
+    signed short int type;
+    /* 32bit - The length of the bitmap information header in bytes. */
+    signed int len;
 
-		/* 32bit - The width of the bitmap in pixels. */
-		signed int width;
+    /* 32bit - The width of the bitmap in pixels. */
+    signed int width;
 
-		/* 32bit - The height of the bitmap in pixels. */
-		signed int height;
+    /* 32bit - The height of the bitmap in pixels. */
+    signed int height;
 
-		/* 8 bit - The bitmap data is specified in top-down order. */
-		signed char topdown;
+    /* 8 bit - The bitmap data is specified in top-down order. */
+    signed char topdown;
 
-		/* 16 bit - The number of planes.  This must be set to a value of one. */
-		signed short int numplanes;
+    /* 16 bit - The number of planes.  This must be set to a value of one. */
+    signed short int numplanes;
 
-		/* 16 bit - The number of bits per pixel. */
-		signed short int depth;
+    /* 16 bit - The number of bits per pixel. */
+    signed short int depth;
 
-		/* 32bit - The type of compression used. */
-		signed int enctype;
+    /* 32bit - The type of compression used. */
+    signed int enctype;
 
-		/* 32bit - The size of the image in bytes. */
-		signed int size;
+    /* 32bit - The size of the image in bytes. */
+    signed int size;
 
-		/* 32bit - The horizontal resolution in pixels/metre. */
-		signed int hres;
+    /* 32bit - The horizontal resolution in pixels/metre. */
+    signed int hres;
 
-		/* 32bit - The vertical resolution in pixels/metre. */
-		signed int vres;
+    /* 32bit - The vertical resolution in pixels/metre. */
+    signed int vres;
 
-		/* 32bit - The number of color indices used by the bitmap. */
-		signed int numcolors;
+    /* 32bit - The number of color indices used by the bitmap. */
+    signed int numcolors;
 
-	/* 32bit - The number of color indices important for displaying the bitmap.
-	 */
-		signed int mincolors;
+    /* 32bit - The number of color indices important for displaying the bitmap.
+     */
+    signed int mincolors;
 
-	/* 32bit - Color masks for BI_BITFIELDS and v4/v5 headers. */
-	unsigned int red_mask;
-	unsigned int green_mask;
-	unsigned int blue_mask;
-	unsigned int alpha_mask;
+    /* 32bit - Color masks for BI_BITFIELDS and v4/v5 headers. */
+    unsigned int red_mask;
+    unsigned int green_mask;
+    unsigned int blue_mask;
+    unsigned int alpha_mask;
 
-	} bmp_info_t;
+} bmp_info_t;
 
 #endif
 

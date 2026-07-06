@@ -1,32 +1,32 @@
-#include <stdio.h>
 #include <math.h>
-#include <string.h>
-#include <stdlib.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+#include "gd_errors.h"
 #include "gd_intern.h"
 #include "gd_vector2d_private.h"
 #include "gdhelpers.h"
-#include "gd_errors.h"
 
-#include "gd_surface.h"
 #include "gd_array.h"
+#include "gd_surface.h"
 
-static int checkOverflowAndType(int width, int height, unsigned type) {
+static int checkOverflowAndType(int width, int height, unsigned type)
+{
     int bytes_per_pixel;
     if (type == GD_SURFACE_NONE || type >= GD_SURFACE_COUNT || width <= 0 || height <= 0) {
-		gd_error("gdSurface: invalid dimensions or surface type\n");
+        gd_error("gdSurface: invalid dimensions or surface type\n");
         return 1;
     }
-	bytes_per_pixel = type == GD_SURFACE_A8 ? 1 : 4;
-	if (overflow2(width, bytes_per_pixel) ||
-		overflow2(width * bytes_per_pixel, height)) {
-		return 1;
-	}
+    bytes_per_pixel = type == GD_SURFACE_A8 ? 1 : 4;
+    if (overflow2(width, bytes_per_pixel) || overflow2(width * bytes_per_pixel, height)) {
+        return 1;
+    }
     return 0;
 }
 
@@ -41,17 +41,17 @@ GD_VECTOR2D_INTERNAL gdSurfacePtr gdSurfaceCreate(int width, int height, unsigne
         return NULL;
     }
     surface = gdMalloc(sizeof(gdSurface));
-	if (!surface) {
-		return NULL;
-	}
+    if (!surface) {
+        return NULL;
+    }
 
     const int bytes_per_pixel = type == GD_SURFACE_A8 ? 1 : 4;
     const size_t size = (size_t)width * (size_t)height * (size_t)bytes_per_pixel;
     surface->data = gdCalloc(1, size);
-	if (!surface->data) {
+    if (!surface->data) {
         gdFree(surface);
-		return NULL;
-	}
+        return NULL;
+    }
     surface->type = type;
     surface->ref = 1;
     surface->gdOwned = 1;
@@ -61,7 +61,8 @@ GD_VECTOR2D_INTERNAL gdSurfacePtr gdSurfaceCreate(int width, int height, unsigne
     return surface;
 }
 
-GD_VECTOR2D_INTERNAL gdSurfacePtr gdSurfaceCreateForData(unsigned char* data, int width, int height, int stride, unsigned int type)
+GD_VECTOR2D_INTERNAL gdSurfacePtr gdSurfaceCreateForData(unsigned char *data, int width, int height,
+                                                         int stride, unsigned int type)
 {
     gdSurfacePtr surface;
 
@@ -76,9 +77,9 @@ GD_VECTOR2D_INTERNAL gdSurfacePtr gdSurfaceCreateForData(unsigned char* data, in
     }
 
     surface = gdMalloc(sizeof(gdSurface));
-	if (!surface) {
-		return NULL;
-	}
+    if (!surface) {
+        return NULL;
+    }
     surface->ref = 1;
     surface->gdOwned = 0;
     surface->data = data;
@@ -91,7 +92,7 @@ GD_VECTOR2D_INTERNAL gdSurfacePtr gdSurfaceCreateForData(unsigned char* data, in
 
 GD_VECTOR2D_INTERNAL gdSurfacePtr gdSurfaceAddRef(gdSurfacePtr surface)
 {
-    if(surface==NULL) {
+    if (surface == NULL) {
         return NULL;
     }
     surface->ref++;
@@ -100,7 +101,7 @@ GD_VECTOR2D_INTERNAL gdSurfacePtr gdSurfaceAddRef(gdSurfacePtr surface)
 
 GD_VECTOR2D_INTERNAL unsigned char *gdSurfaceGetData(const gdSurfacePtr surface)
 {
-    if(surface==NULL) {
+    if (surface == NULL) {
         return NULL;
     }
     return surface->data;
@@ -108,28 +109,19 @@ GD_VECTOR2D_INTERNAL unsigned char *gdSurfaceGetData(const gdSurfacePtr surface)
 
 GD_VECTOR2D_INTERNAL gdSurfaceType gdSurfaceGetType(const gdSurfacePtr surface)
 {
-    if(surface==NULL) {
+    if (surface == NULL) {
         return GD_SURFACE_NONE;
     }
     return surface->type;
 }
 
-GD_VECTOR2D_INTERNAL int gdSurfaceGetWidth(const gdSurfacePtr surface)
-{
-    return surface->width;
-}
+GD_VECTOR2D_INTERNAL int gdSurfaceGetWidth(const gdSurfacePtr surface) { return surface->width; }
 
-GD_VECTOR2D_INTERNAL int gdSurfaceGetHeight(const gdSurfacePtr surface)
-{
-    return surface->height;
-}
+GD_VECTOR2D_INTERNAL int gdSurfaceGetHeight(const gdSurfacePtr surface) { return surface->height; }
 
-GD_VECTOR2D_INTERNAL int gdSurfaceGetStride(const gdSurfacePtr surface)
-{
-    return surface->stride;
-}
+GD_VECTOR2D_INTERNAL int gdSurfaceGetStride(const gdSurfacePtr surface) { return surface->stride; }
 
-GD_VECTOR2D_INTERNAL void gdSurfaceDestroy (gdSurfacePtr surface)
+GD_VECTOR2D_INTERNAL void gdSurfaceDestroy(gdSurfacePtr surface)
 {
     if (!surface) {
         return;
@@ -140,5 +132,4 @@ GD_VECTOR2D_INTERNAL void gdSurfaceDestroy (gdSurfacePtr surface)
         }
         gdFree(surface);
     }
-
 }

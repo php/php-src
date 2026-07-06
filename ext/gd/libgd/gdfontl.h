@@ -6,14 +6,14 @@ extern "C" {
 #endif
 
 /*
-	This is a header file for gd font, generated using
-	bdftogd version 0.5 by Jan Pazdziora, adelton@fi.muni.cz
-	from bdf font
-	-misc-fixed-medium-r-normal--16-140-75-75-c-80-iso8859-2
-	at Tue Jan  6 19:39:27 1998.
+        This is a header file for gd font, generated using
+        bdftogd version 0.5 by Jan Pazdziora, adelton@fi.muni.cz
+        from bdf font
+        -misc-fixed-medium-r-normal--16-140-75-75-c-80-iso8859-2
+        at Tue Jan  6 19:39:27 1998.
 
-	The original bdf was holding following copyright:
-	"Libor Skarvada, libor@informatics.muni.cz"
+        The original bdf was holding following copyright:
+        "Libor Skarvada, libor@informatics.muni.cz"
  */
 
 #include "gd.h"

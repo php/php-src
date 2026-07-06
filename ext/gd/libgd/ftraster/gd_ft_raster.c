@@ -57,16 +57,16 @@
 
 #include "gd_ft_raster.h"
 #include "gd_ft_math.h"
-#include "gd_vector2d_private.h"
 #include "gd_path_matrix.h"
+#include "gd_vector2d_private.h"
 
 /* Auxiliary macros for token concatenation. */
 #define GD_FT_ERR_XCAT(x, y) x##y
 #define GD_FT_ERR_CAT(x, y) GD_FT_ERR_XCAT(x, y)
 
 #define GD_FT_BEGIN_STMNT do {
-#define GD_FT_END_STMNT \
-    }                   \
+#define GD_FT_END_STMNT                                                                            \
+    }                                                                                              \
     while (0)
 
 #include <limits.h>
@@ -106,45 +106,43 @@ typedef ptrdiff_t GD_FT_PtrDist;
 /* to do all of its work.                                                */
 #define GD_FT_RENDER_POOL_SIZE 16384L
 
-typedef int (*GD_FT_Outline_MoveToFunc)(const GD_FT_Vector* to, void* user);
+typedef int (*GD_FT_Outline_MoveToFunc)(const GD_FT_Vector *to, void *user);
 
 #define GD_FT_Outline_MoveTo_Func GD_FT_Outline_MoveToFunc
 
-typedef int (*GD_FT_Outline_LineToFunc)(const GD_FT_Vector* to, void* user);
+typedef int (*GD_FT_Outline_LineToFunc)(const GD_FT_Vector *to, void *user);
 
 #define GD_FT_Outline_LineTo_Func GD_FT_Outline_LineToFunc
 
-typedef int (*GD_FT_Outline_ConicToFunc)(const GD_FT_Vector* control,
-                                         const GD_FT_Vector* to, void* user);
+typedef int (*GD_FT_Outline_ConicToFunc)(const GD_FT_Vector *control, const GD_FT_Vector *to,
+                                         void *user);
 
 #define GD_FT_Outline_ConicTo_Func GD_FT_Outline_ConicToFunc
 
-typedef int (*GD_FT_Outline_CubicToFunc)(const GD_FT_Vector* control1,
-                                         const GD_FT_Vector* control2,
-                                         const GD_FT_Vector* to, void* user);
+typedef int (*GD_FT_Outline_CubicToFunc)(const GD_FT_Vector *control1, const GD_FT_Vector *control2,
+                                         const GD_FT_Vector *to, void *user);
 
 #define GD_FT_Outline_CubicTo_Func GD_FT_Outline_CubicToFunc
 
 typedef struct GD_FT_Outline_Funcs_ {
-    GD_FT_Outline_MoveToFunc  move_to;
-    GD_FT_Outline_LineToFunc  line_to;
+    GD_FT_Outline_MoveToFunc move_to;
+    GD_FT_Outline_LineToFunc line_to;
     GD_FT_Outline_ConicToFunc conic_to;
     GD_FT_Outline_CubicToFunc cubic_to;
 
-    int       shift;
+    int shift;
     GD_FT_Pos delta;
 
 } GD_FT_Outline_Funcs;
 
-#define GD_FT_DEFINE_OUTLINE_FUNCS(class_, move_to_, line_to_, conic_to_,      \
-                                   cubic_to_, shift_, delta_)                  \
-    static const GD_FT_Outline_Funcs class_ = {move_to_,  line_to_, conic_to_, \
+#define GD_FT_DEFINE_OUTLINE_FUNCS(class_, move_to_, line_to_, conic_to_, cubic_to_, shift_,       \
+                                   delta_)                                                         \
+    static const GD_FT_Outline_Funcs class_ = {move_to_,  line_to_, conic_to_,                     \
                                                cubic_to_, shift_,   delta_};
 
-#define GD_FT_DEFINE_RASTER_FUNCS(class_, raster_new_, raster_reset_, \
-                                  raster_render_, raster_done_)       \
-    const GD_FT_Raster_Funcs class_ = {raster_new_, raster_reset_,    \
-                                       raster_render_, raster_done_};
+#define GD_FT_DEFINE_RASTER_FUNCS(class_, raster_new_, raster_reset_, raster_render_,              \
+                                  raster_done_)                                                    \
+    const GD_FT_Raster_Funcs class_ = {raster_new_, raster_reset_, raster_render_, raster_done_};
 
 #ifndef GD_FT_MEM_SET
 #define GD_FT_MEM_SET(d, s, c) ft_memset(d, s, c)
@@ -205,13 +203,13 @@ typedef struct GD_FT_Outline_Funcs_ {
 /* Compute `dividend / divisor' and return both its quotient and     */
 /* remainder, cast to a specific type.  This macro also ensures that */
 /* the remainder is always positive.                                 */
-#define GD_FT_DIV_MOD(type, dividend, divisor, quotient, remainder) \
-    GD_FT_BEGIN_STMNT(quotient) = (type)((dividend) / (divisor));   \
-    (remainder) = (type)((dividend) % (divisor));                   \
-    if ((remainder) < 0) {                                          \
-        (quotient)--;                                               \
-        (remainder) += (type)(divisor);                             \
-    }                                                               \
+#define GD_FT_DIV_MOD(type, dividend, divisor, quotient, remainder)                                \
+    GD_FT_BEGIN_STMNT(quotient) = (type)((dividend) / (divisor));                                  \
+    (remainder) = (type)((dividend) % (divisor));                                                  \
+    if ((remainder) < 0) {                                                                         \
+        (quotient)--;                                                                              \
+        (remainder) += (type)(divisor);                                                            \
+    }                                                                                              \
     GD_FT_END_STMNT
 
 #ifdef __arm__
@@ -221,23 +219,21 @@ typedef struct GD_FT_Outline_Funcs_ {
 /*                                                                   */
 /*  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43721                */
 #undef GD_FT_DIV_MOD
-#define GD_FT_DIV_MOD(type, dividend, divisor, quotient, remainder) \
-    GD_FT_BEGIN_STMNT(quotient) = (type)((dividend) / (divisor));   \
-    (remainder) = (type)((dividend) - (quotient) * (divisor));      \
-    if ((remainder) < 0) {                                          \
-        (quotient)--;                                               \
-        (remainder) += (type)(divisor);                             \
-    }                                                               \
+#define GD_FT_DIV_MOD(type, dividend, divisor, quotient, remainder)                                \
+    GD_FT_BEGIN_STMNT(quotient) = (type)((dividend) / (divisor));                                  \
+    (remainder) = (type)((dividend) - (quotient) * (divisor));                                     \
+    if ((remainder) < 0) {                                                                         \
+        (quotient)--;                                                                              \
+        (remainder) += (type)(divisor);                                                            \
+    }                                                                                              \
     GD_FT_END_STMNT
 #endif /* __arm__ */
 
 /* These macros speed up repetitive divisions by replacing them */
 /* with multiplications and right shifts.                       */
-#define GD_FT_UDIVPREP(b) \
-    long b##_r = (long)(GD_FT_ULONG_MAX >> PIXEL_BITS) / (b)
-#define GD_FT_UDIV(a, b)                              \
-    (((unsigned long)(a) * (unsigned long)(b##_r)) >> \
-     (sizeof(long) * GD_FT_CHAR_BIT - PIXEL_BITS))
+#define GD_FT_UDIVPREP(b) long b##_r = (long)(GD_FT_ULONG_MAX >> PIXEL_BITS) / (b)
+#define GD_FT_UDIV(a, b)                                                                           \
+    (((unsigned long)(a) * (unsigned long)(b##_r)) >> (sizeof(long) * GD_FT_CHAR_BIT - PIXEL_BITS))
 
 /*************************************************************************/
 /*                                                                       */
@@ -263,7 +259,7 @@ typedef int TArea;
 
 /* approximately determine the size of integers using an ANSI-C header */
 #if GD_FT_UINT_MAX == 0xFFFFU
-typedef long        TArea;
+typedef long TArea;
 #else
 typedef int TArea;
 #endif
@@ -273,13 +269,13 @@ typedef int TArea;
 /* maximum number of gray spans in a call to the span callback */
 #define GD_FT_MAX_GRAY_SPANS 256
 
-typedef struct TCell_* PCell;
+typedef struct TCell_ *PCell;
 
 typedef struct TCell_ {
-    TPos   x;     /* same with gray_TWorker.ex    */
+    TPos x;       /* same with gray_TWorker.ex    */
     TCoord cover; /* same with gray_TWorker.cover */
-    TArea  area;
-    PCell  next;
+    TArea area;
+    PCell next;
 
 } TCell;
 
@@ -293,54 +289,53 @@ typedef struct TCell_ {
 
 typedef struct gray_TWorker_ {
     TCoord ex, ey;
-    TPos   min_ex, max_ex;
-    TPos   min_ey, max_ey;
-    TPos   count_ex, count_ey;
+    TPos min_ex, max_ex;
+    TPos min_ey, max_ey;
+    TPos count_ex, count_ey;
 
-    TArea  area;
+    TArea area;
     TCoord cover;
-    int    invalid;
+    int invalid;
 
-    PCell         cells;
+    PCell cells;
     GD_FT_PtrDist max_cells;
     GD_FT_PtrDist num_cells;
 
     TPos x, y;
 
     GD_FT_Vector bez_stack[32 * 3 + 1];
-    int          lev_stack[32];
+    int lev_stack[32];
 
     GD_FT_Outline outline;
-    GD_FT_BBox    clip_box;
+    GD_FT_BBox clip_box;
 
-    int           bound_left;
-    int           bound_top;
-    int           bound_right;
-    int           bound_bottom;
+    int bound_left;
+    int bound_top;
+    int bound_right;
+    int bound_bottom;
 
     GD_FT_Span gray_spans[GD_FT_MAX_GRAY_SPANS];
-    int        num_gray_spans;
+    int num_gray_spans;
 
     GD_FT_Raster_Span_Func render_span;
-    void*                  render_span_data;
+    void *render_span_data;
 
     int band_size;
     int band_shoot;
 
     ft_jmp_buf jump_buffer;
 
-    void* buffer;
-    long  buffer_size;
+    void *buffer;
+    long buffer_size;
 
-    PCell* ycells;
-    TPos   ycount;
+    PCell *ycells;
+    TPos ycount;
 
     /* Source abstraction for direct path rendering */
     struct gray_TSource_ *source;
 } gray_TWorker, *gray_PWorker;
 
-typedef struct gray_TSource_
-{
+typedef struct gray_TSource_ {
     int (*get_cbox)(void *source, GD_FT_BBox *box);
     int (*decompose)(void *source, void *worker);
     void *source;
@@ -357,7 +352,7 @@ static gray_TWorker ras;
 #endif
 
 typedef struct gray_TRaster_ {
-    void* memory;
+    void *memory;
 
 } gray_TRaster, *gray_PRaster;
 
@@ -365,12 +360,12 @@ typedef struct gray_TRaster_ {
 /*                                                                       */
 /* Initialize the cells table.                                           */
 /*                                                                       */
-static void gray_init_cells(RAS_ARG_ void* buffer, long byte_size)
+static void gray_init_cells(RAS_ARG_ void *buffer, long byte_size)
 {
     ras.buffer = buffer;
     ras.buffer_size = byte_size;
 
-    ras.ycells = (PCell*)buffer;
+    ras.ycells = (PCell *)buffer;
     ras.cells = NULL;
     ras.max_cells = 0;
     ras.num_cells = 0;
@@ -403,9 +398,9 @@ static void gray_compute_cbox(RAS_ARG)
     }
 
     /* Fallback to outline */
-    GD_FT_Outline* outline = &ras.outline;
-    GD_FT_Vector*  vec = outline->points;
-    GD_FT_Vector*  limit = vec + outline->n_points;
+    GD_FT_Outline *outline = &ras.outline;
+    GD_FT_Vector *vec = outline->points;
+    GD_FT_Vector *limit = vec + outline->n_points;
 
     if (outline->n_points <= 0) {
         ras.min_ex = ras.max_ex = 0;
@@ -422,10 +417,14 @@ static void gray_compute_cbox(RAS_ARG)
         TPos x = vec->x;
         TPos y = vec->y;
 
-        if (x < ras.min_ex) ras.min_ex = x;
-        if (x > ras.max_ex) ras.max_ex = x;
-        if (y < ras.min_ey) ras.min_ey = y;
-        if (y > ras.max_ey) ras.max_ey = y;
+        if (x < ras.min_ex)
+            ras.min_ex = x;
+        if (x > ras.max_ex)
+            ras.max_ex = x;
+        if (y < ras.min_ey)
+            ras.min_ey = y;
+        if (y > ras.max_ey)
+            ras.max_ey = y;
     }
 
     /* truncate the bounding box to integer pixels */
@@ -442,21 +441,25 @@ static void gray_compute_cbox(RAS_ARG)
 static PCell gray_find_cell(RAS_ARG)
 {
     PCell *pcell, cell;
-    TPos   x = ras.ex;
+    TPos x = ras.ex;
 
-    if (x > ras.count_ex) x = ras.count_ex;
+    if (x > ras.count_ex)
+        x = ras.count_ex;
 
     pcell = &ras.ycells[ras.ey];
     for (;;) {
         cell = *pcell;
-        if (cell == NULL || cell->x > x) break;
+        if (cell == NULL || cell->x > x)
+            break;
 
-        if (cell->x == x) goto Exit;
+        if (cell->x == x)
+            goto Exit;
 
         pcell = &cell->next;
     }
 
-    if (ras.num_cells >= ras.max_cells) ft_longjmp(ras.jump_buffer, 1);
+    if (ras.num_cells >= ras.max_cells)
+        ft_longjmp(ras.jump_buffer, 1);
 
     cell = ras.cells + ras.num_cells++;
     cell->x = x;
@@ -500,15 +503,18 @@ static void gray_set_cell(RAS_ARG_ TCoord ex, TCoord ey)
     /* min_ex - 1 horizontal position.                                 */
     ey -= ras.min_ey;
 
-    if (ex > ras.max_ex) ex = ras.max_ex;
+    if (ex > ras.max_ex)
+        ex = ras.max_ex;
 
     ex -= ras.min_ex;
-    if (ex < 0) ex = -1;
+    if (ex < 0)
+        ex = -1;
 
     /* are we moving to a different cell ? */
     if (ex != ras.ex || ey != ras.ey) {
         /* record the current one if it is valid */
-        if (!ras.invalid) gray_record_cell(RAS_VAR);
+        if (!ras.invalid)
+            gray_record_cell(RAS_VAR);
 
         ras.area = 0;
         ras.cover = 0;
@@ -516,8 +522,7 @@ static void gray_set_cell(RAS_ARG_ TCoord ex, TCoord ey)
         ras.ey = ey;
     }
 
-    ras.invalid =
-        ((unsigned)ey >= (unsigned)ras.count_ey || ex >= ras.count_ex);
+    ras.invalid = ((unsigned)ey >= (unsigned)ras.count_ey || ex >= ras.count_ex);
 }
 
 /*************************************************************************/
@@ -526,9 +531,11 @@ static void gray_set_cell(RAS_ARG_ TCoord ex, TCoord ey)
 /*                                                                       */
 static void gray_start_cell(RAS_ARG_ TCoord ex, TCoord ey)
 {
-    if (ex > ras.max_ex) ex = (TCoord)(ras.max_ex);
+    if (ex > ras.max_ex)
+        ex = (TCoord)(ras.max_ex);
 
-    if (ex < ras.min_ex) ex = (TCoord)(ras.min_ex - 1);
+    if (ex < ras.min_ex)
+        ex = (TCoord)(ras.min_ex - 1);
 
     ras.area = 0;
     ras.cover = 0;
@@ -545,7 +552,7 @@ static void gray_start_cell(RAS_ARG_ TCoord ex, TCoord ey)
 /*                                                                       */
 static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
 {
-    TPos   dx, dy, fx1, fy1, fx2, fy2;
+    TPos dx, dy, fx1, fy1, fx2, fy2;
     TCoord ex1, ex2, ey1, ey2;
 
     ex1 = TRUNC(ras.x);
@@ -554,8 +561,7 @@ static void gray_render_line(RAS_ARG_ TPos to_x, TPos to_y)
     ey2 = TRUNC(to_y);
 
     /* perform vertical clipping */
-    if ((ey1 >= ras.max_ey && ey2 >= ras.max_ey) ||
-        (ey1 < ras.min_ey && ey2 < ras.min_ey))
+    if ((ey1 >= ras.max_ey && ey2 >= ras.max_ey) || (ey1 < ras.min_ey && ey2 < ras.min_ey))
         goto End;
 
     dx = to_x - ras.x;
@@ -659,33 +665,32 @@ End:
     ras.y = to_y;
 }
 
-static void gray_split_conic(GD_FT_Vector* base)
+static void gray_split_conic(GD_FT_Vector *base)
 {
-    TPos  a, b;
+    TPos a, b;
 
     base[4].x = base[2].x;
     a = base[0].x + base[1].x;
     b = base[1].x + base[2].x;
     base[3].x = b >> 1;
-    base[2].x = ( a + b ) >> 2;
+    base[2].x = (a + b) >> 2;
     base[1].x = a >> 1;
 
     base[4].y = base[2].y;
     a = base[0].y + base[1].y;
     b = base[1].y + base[2].y;
     base[3].y = b >> 1;
-    base[2].y = ( a + b ) >> 2;
+    base[2].y = (a + b) >> 2;
     base[1].y = a >> 1;
 }
 
-static void gray_render_conic(RAS_ARG_ const GD_FT_Vector* control,
-                              const GD_FT_Vector*          to)
+static void gray_render_conic(RAS_ARG_ const GD_FT_Vector *control, const GD_FT_Vector *to)
 {
-    TPos          dx, dy;
-    TPos          min, max, y;
-    int           top, level;
-    int*          levels;
-    GD_FT_Vector* arc;
+    TPos dx, dy;
+    TPos min, max, y;
+    int top, level;
+    int *levels;
+    GD_FT_Vector *arc;
 
     levels = ras.lev_stack;
 
@@ -700,22 +705,29 @@ static void gray_render_conic(RAS_ARG_ const GD_FT_Vector* control,
 
     dx = GD_FT_ABS(arc[2].x + arc[0].x - 2 * arc[1].x);
     dy = GD_FT_ABS(arc[2].y + arc[0].y - 2 * arc[1].y);
-    if (dx < dy) dx = dy;
+    if (dx < dy)
+        dx = dy;
 
-    if (dx < ONE_PIXEL / 4) goto Draw;
+    if (dx < ONE_PIXEL / 4)
+        goto Draw;
 
     /* short-cut the arc that crosses the current band */
     min = max = arc[0].y;
 
     y = arc[1].y;
-    if (y < min) min = y;
-    if (y > max) max = y;
+    if (y < min)
+        min = y;
+    if (y > max)
+        max = y;
 
     y = arc[2].y;
-    if (y < min) min = y;
-    if (y > max) max = y;
+    if (y < min)
+        min = y;
+    if (y > max)
+        max = y;
 
-    if (TRUNC(min) >= ras.max_ey || TRUNC(max) < ras.min_ey) goto Draw;
+    if (TRUNC(min) >= ras.max_ey || TRUNC(max) < ras.min_ey)
+        goto Draw;
 
     level = 0;
     do {
@@ -743,10 +755,9 @@ static void gray_render_conic(RAS_ARG_ const GD_FT_Vector* control,
     } while (top >= 0);
 }
 
-static void gray_split_cubic(GD_FT_Vector* base)
+static void gray_split_cubic(GD_FT_Vector *base)
 {
-    TPos  a, b, c;
-
+    TPos a, b, c;
 
     base[6].x = base[3].x;
     a = base[0].x + base[1].x;
@@ -758,7 +769,7 @@ static void gray_split_cubic(GD_FT_Vector* base)
     base[1].x = a >> 1;
     a += b;
     base[2].x = a >> 2;
-    base[3].x = ( a + c ) >> 3;
+    base[3].x = (a + c) >> 3;
 
     base[6].y = base[3].y;
     a = base[0].y + base[1].y;
@@ -770,72 +781,64 @@ static void gray_split_cubic(GD_FT_Vector* base)
     base[1].y = a >> 1;
     a += b;
     base[2].y = a >> 2;
-    base[3].y = ( a + c ) >> 3;
+    base[3].y = (a + c) >> 3;
 }
 
-
-static void
-gray_render_cubic(RAS_ARG_ const GD_FT_Vector* control1,
-                              const GD_FT_Vector*          control2,
-                              const GD_FT_Vector*          to)
+static void gray_render_cubic(RAS_ARG_ const GD_FT_Vector *control1, const GD_FT_Vector *control2,
+                              const GD_FT_Vector *to)
 {
-    GD_FT_Vector* arc = ras.bez_stack;
+    GD_FT_Vector *arc = ras.bez_stack;
 
-    arc[0].x = UPSCALE( to->x );
-    arc[0].y = UPSCALE( to->y );
-    arc[1].x = UPSCALE( control2->x );
-    arc[1].y = UPSCALE( control2->y );
-    arc[2].x = UPSCALE( control1->x );
-    arc[2].y = UPSCALE( control1->y );
+    arc[0].x = UPSCALE(to->x);
+    arc[0].y = UPSCALE(to->y);
+    arc[1].x = UPSCALE(control2->x);
+    arc[1].y = UPSCALE(control2->y);
+    arc[2].x = UPSCALE(control1->x);
+    arc[2].y = UPSCALE(control1->y);
     arc[3].x = ras.x;
     arc[3].y = ras.y;
 
     /* short-cut the arc that crosses the current band */
-    if ( ( TRUNC( arc[0].y ) >= ras.max_ey &&
-           TRUNC( arc[1].y ) >= ras.max_ey &&
-           TRUNC( arc[2].y ) >= ras.max_ey &&
-           TRUNC( arc[3].y ) >= ras.max_ey ) ||
-         ( TRUNC( arc[0].y ) <  ras.min_ey &&
-           TRUNC( arc[1].y ) <  ras.min_ey &&
-           TRUNC( arc[2].y ) <  ras.min_ey &&
-           TRUNC( arc[3].y ) <  ras.min_ey ) )
-    {
-      ras.x = arc[0].x;
-      ras.y = arc[0].y;
-      return;
+    if ((TRUNC(arc[0].y) >= ras.max_ey && TRUNC(arc[1].y) >= ras.max_ey &&
+         TRUNC(arc[2].y) >= ras.max_ey && TRUNC(arc[3].y) >= ras.max_ey) ||
+        (TRUNC(arc[0].y) < ras.min_ey && TRUNC(arc[1].y) < ras.min_ey &&
+         TRUNC(arc[2].y) < ras.min_ey && TRUNC(arc[3].y) < ras.min_ey)) {
+        ras.x = arc[0].x;
+        ras.y = arc[0].y;
+        return;
     }
 
-    for (;;)
-    {
-      /* with each split, control points quickly converge towards  */
-      /* chord trisection points and the vanishing distances below */
-      /* indicate when the segment is flat enough to draw          */
-      if ( GD_FT_ABS( 2 * arc[0].x - 3 * arc[1].x + arc[3].x ) > ONE_PIXEL / 2 ||
-           GD_FT_ABS( 2 * arc[0].y - 3 * arc[1].y + arc[3].y ) > ONE_PIXEL / 2 ||
-           GD_FT_ABS( arc[0].x - 3 * arc[2].x + 2 * arc[3].x ) > ONE_PIXEL / 2 ||
-           GD_FT_ABS( arc[0].y - 3 * arc[2].y + 2 * arc[3].y ) > ONE_PIXEL / 2 )
-        goto Split;
+    for (;;) {
+        /* with each split, control points quickly converge towards  */
+        /* chord trisection points and the vanishing distances below */
+        /* indicate when the segment is flat enough to draw          */
+        if (GD_FT_ABS(2 * arc[0].x - 3 * arc[1].x + arc[3].x) > ONE_PIXEL / 2 ||
+            GD_FT_ABS(2 * arc[0].y - 3 * arc[1].y + arc[3].y) > ONE_PIXEL / 2 ||
+            GD_FT_ABS(arc[0].x - 3 * arc[2].x + 2 * arc[3].x) > ONE_PIXEL / 2 ||
+            GD_FT_ABS(arc[0].y - 3 * arc[2].y + 2 * arc[3].y) > ONE_PIXEL / 2)
+            goto Split;
 
-      gray_render_line( RAS_VAR_ arc[0].x, arc[0].y );
+        gray_render_line(RAS_VAR_ arc[0].x, arc[0].y);
 
-      if ( arc == ras.bez_stack )
-        return;
+        if (arc == ras.bez_stack)
+            return;
 
-      arc -= 3;
-      continue;
+        arc -= 3;
+        continue;
 
     Split:
-      gray_split_cubic( arc );
-      arc += 3;
+        gray_split_cubic(arc);
+        arc += 3;
     }
 }
 
-static int gray_move_to(const GD_FT_Vector* to, gray_PWorker worker)
+static int gray_move_to(const GD_FT_Vector *to, gray_PWorker worker)
 {
     TPos x, y;
 
     /* record current cell, if any */
-    if (!ras.invalid) gray_record_cell(RAS_VAR);
+    if (!ras.invalid)
+        gray_record_cell(RAS_VAR);
 
     /* start to a new position */
     x = UPSCALE(to->x);
@@ -848,22 +851,20 @@ static int gray_move_to(const GD_FT_Vector* to, gray_PWorker worker)
     return 0;
 }
 
-static int gray_line_to(const GD_FT_Vector* to, gray_PWorker worker)
+static int gray_line_to(const GD_FT_Vector *to, gray_PWorker worker)
 {
     gray_render_line(RAS_VAR_ UPSCALE(to->x), UPSCALE(to->y));
     return 0;
 }
 
-static int gray_conic_to(const GD_FT_Vector* control, const GD_FT_Vector* to,
-                         gray_PWorker worker)
+static int gray_conic_to(const GD_FT_Vector *control, const GD_FT_Vector *to, gray_PWorker worker)
 {
     gray_render_conic(RAS_VAR_ control, to);
     return 0;
 }
 
-static int gray_cubic_to(const GD_FT_Vector* control1,
-                         const GD_FT_Vector* control2, const GD_FT_Vector* to,
-                         gray_PWorker worker)
+static int gray_cubic_to(const GD_FT_Vector *control1, const GD_FT_Vector *control2,
+                         const GD_FT_Vector *to, gray_PWorker worker)
 {
     gray_render_cubic(RAS_VAR_ control1, control2, to);
     return 0;
@@ -880,7 +881,8 @@ static void gray_hline(RAS_ARG_ TCoord x, TCoord y, TPos area, TCoord acount)
     /*                                                           */
     coverage = (int)(area >> (PIXEL_BITS * 2 + 1 - 8));
     /* use range 0..256 */
-    if (coverage < 0) coverage = -coverage;
+    if (coverage < 0)
+        coverage = -coverage;
 
     if (ras.outline.flags & GD_FT_OUTLINE_EVEN_ODD_FILL) {
         coverage &= 511;
@@ -891,27 +893,34 @@ static void gray_hline(RAS_ARG_ TCoord x, TCoord y, TPos area, TCoord acount)
             coverage = 255;
     } else {
         /* normal non-zero winding rule */
-        if (coverage >= 256) coverage = 255;
+        if (coverage >= 256)
+            coverage = 255;
     }
 
     y += (TCoord)ras.min_ey;
     x += (TCoord)ras.min_ex;
 
     /* GD_FT_Span.x is a 16-bit short, so limit our coordinates appropriately */
-    if (x >= 32767) x = 32767;
+    if (x >= 32767)
+        x = 32767;
 
     /* GD_FT_Span.y is an integer, so limit our coordinates appropriately */
-    if (y >= GD_FT_INT_MAX) y = GD_FT_INT_MAX;
+    if (y >= GD_FT_INT_MAX)
+        y = GD_FT_INT_MAX;
 
     if (coverage) {
-        GD_FT_Span* span;
-        int         count;
+        GD_FT_Span *span;
+        int count;
 
         // update bounding box.
-        if (x < ras.bound_left) ras.bound_left = x;
-        if (y < ras.bound_top) ras.bound_top = y;
-        if (y > ras.bound_bottom) ras.bound_bottom = y;
-        if (x + acount > ras.bound_right) ras.bound_right = x + acount;
+        if (x < ras.bound_left)
+            ras.bound_left = x;
+        if (y < ras.bound_top)
+            ras.bound_top = y;
+        if (y > ras.bound_bottom)
+            ras.bound_bottom = y;
+        if (x + acount > ras.bound_right)
+            ras.bound_right = x + acount;
 
         /* see whether we can add this span to the current list */
         count = ras.num_gray_spans;
@@ -961,12 +970,13 @@ static void gray_sweep(RAS_ARG)
 {
     int yindex;
 
-    if (ras.num_cells == 0) return;
+    if (ras.num_cells == 0)
+        return;
 
     ras.num_gray_spans = 0;
 
     for (yindex = 0; yindex < ras.ycount; yindex++) {
-        PCell  cell = ras.ycells[yindex];
+        PCell cell = ras.ycells[yindex];
         TCoord cover = 0;
         TCoord x = 0;
 
@@ -974,8 +984,7 @@ static void gray_sweep(RAS_ARG)
             TPos area;
 
             if (cell->x > x && cover != 0)
-                gray_hline(RAS_VAR_ x, yindex, cover * (ONE_PIXEL * 2),
-                           cell->x - x);
+                gray_hline(RAS_VAR_ x, yindex, cover * (ONE_PIXEL * 2), cell->x - x);
 
             cover += cell->cover;
             area = cover * (ONE_PIXEL * 2) - cell->area;
@@ -987,13 +996,11 @@ static void gray_sweep(RAS_ARG)
         }
 
         if (cover != 0)
-            gray_hline(RAS_VAR_ x, yindex, cover * (ONE_PIXEL * 2),
-                       ras.count_ex - x);
+            gray_hline(RAS_VAR_ x, yindex, cover * (ONE_PIXEL * 2), ras.count_ex - x);
     }
 
     if (ras.render_span && ras.num_gray_spans > 0)
-        ras.render_span(ras.num_gray_spans, ras.gray_spans,
-                        ras.render_span_data);
+        ras.render_span(ras.num_gray_spans, ras.gray_spans, ras.render_span_data);
 }
 
 /*************************************************************************/
@@ -1030,9 +1037,8 @@ static void gray_sweep(RAS_ARG)
 /* <Return>                                                              */
 /*    Error code.  0 means success.                                      */
 /*                                                                       */
-static int GD_FT_Outline_Decompose(const GD_FT_Outline*       outline,
-                                   const GD_FT_Outline_Funcs* func_interface,
-                                   void*                      user)
+static int GD_FT_Outline_Decompose(const GD_FT_Outline *outline,
+                                   const GD_FT_Outline_Funcs *func_interface, void *user)
 {
 #undef SCALED
 #define SCALED(x) (((TPos)(x) * (1L << shift)) - delta)
@@ -1041,20 +1047,21 @@ static int GD_FT_Outline_Decompose(const GD_FT_Outline*       outline,
     GD_FT_Vector v_control;
     GD_FT_Vector v_start;
 
-    GD_FT_Vector* point;
-    GD_FT_Vector* limit;
-    char*         tags;
+    GD_FT_Vector *point;
+    GD_FT_Vector *limit;
+    char *tags;
 
     int error;
 
-    int  n;     /* index of contour in outline     */
-    int  first; /* index of first point in contour */
-    char tag;   /* current point's state           */
+    int n;     /* index of contour in outline     */
+    int first; /* index of first point in contour */
+    char tag;  /* current point's state           */
 
-    int  shift;
+    int shift;
     TPos delta;
 
-    if (!outline || !func_interface) return GD_FT_THROW(Invalid_Argument);
+    if (!outline || !func_interface)
+        return GD_FT_THROW(Invalid_Argument);
 
     shift = func_interface->shift;
     delta = func_interface->delta;
@@ -1064,7 +1071,8 @@ static int GD_FT_Outline_Decompose(const GD_FT_Outline*       outline,
         int last; /* index of last point in contour */
 
         last = outline->contours[n];
-        if (last < 0) goto Invalid_Outline;
+        if (last < 0)
+            goto Invalid_Outline;
         limit = outline->points + last;
 
         v_start = outline->points[first];
@@ -1082,7 +1090,8 @@ static int GD_FT_Outline_Decompose(const GD_FT_Outline*       outline,
         tag = GD_FT_CURVE_TAG(tags[0]);
 
         /* A contour cannot start with a cubic control point! */
-        if (tag == GD_FT_CURVE_TAG_CUBIC) goto Invalid_Outline;
+        if (tag == GD_FT_CURVE_TAG_CUBIC)
+            goto Invalid_Outline;
 
         /* check first point to determine origin */
         if (tag == GD_FT_CURVE_TAG_CONIC) {
@@ -1103,7 +1112,8 @@ static int GD_FT_Outline_Decompose(const GD_FT_Outline*       outline,
         }
 
         error = func_interface->move_to(&v_start, user);
-        if (error) goto Exit;
+        if (error)
+            goto Exit;
 
         while (point < limit) {
             point++;
@@ -1119,7 +1129,8 @@ static int GD_FT_Outline_Decompose(const GD_FT_Outline*       outline,
                 vec.y = SCALED(point->y);
 
                 error = func_interface->line_to(&vec, user);
-                if (error) goto Exit;
+                if (error)
+                    goto Exit;
                 continue;
             }
 
@@ -1140,20 +1151,21 @@ static int GD_FT_Outline_Decompose(const GD_FT_Outline*       outline,
                     vec.y = SCALED(point->y);
 
                     if (tag == GD_FT_CURVE_TAG_ON) {
-                        error =
-                            func_interface->conic_to(&v_control, &vec, user);
-                        if (error) goto Exit;
+                        error = func_interface->conic_to(&v_control, &vec, user);
+                        if (error)
+                            goto Exit;
                         continue;
                     }
 
-                    if (tag != GD_FT_CURVE_TAG_CONIC) goto Invalid_Outline;
+                    if (tag != GD_FT_CURVE_TAG_CONIC)
+                        goto Invalid_Outline;
 
                     v_middle.x = (v_control.x + vec.x) / 2;
                     v_middle.y = (v_control.y + vec.y) / 2;
 
-                    error =
-                        func_interface->conic_to(&v_control, &v_middle, user);
-                    if (error) goto Exit;
+                    error = func_interface->conic_to(&v_control, &v_middle, user);
+                    if (error)
+                        goto Exit;
 
                     v_control = vec;
                     goto Do_Conic;
@@ -1166,8 +1178,7 @@ static int GD_FT_Outline_Decompose(const GD_FT_Outline*       outline,
             {
                 GD_FT_Vector vec1, vec2;
 
-                if (point + 1 > limit ||
-                    GD_FT_CURVE_TAG(tags[1]) != GD_FT_CURVE_TAG_CUBIC)
+                if (point + 1 > limit || GD_FT_CURVE_TAG(tags[1]) != GD_FT_CURVE_TAG_CUBIC)
                     goto Invalid_Outline;
 
                 point += 2;
@@ -1186,7 +1197,8 @@ static int GD_FT_Outline_Decompose(const GD_FT_Outline*       outline,
                     vec.y = SCALED(point->y);
 
                     error = func_interface->cubic_to(&vec1, &vec2, &vec, user);
-                    if (error) goto Exit;
+                    if (error)
+                        goto Exit;
                     continue;
                 }
 
@@ -1200,7 +1212,8 @@ static int GD_FT_Outline_Decompose(const GD_FT_Outline*       outline,
         error = func_interface->line_to(&v_start, user);
 
     Close:
-        if (error) goto Exit;
+        if (error)
+            goto Exit;
 
         first = last + 1;
     }
@@ -1219,8 +1232,7 @@ typedef struct gray_TBand_ {
 
 } gray_TBand;
 
-GD_FT_DEFINE_OUTLINE_FUNCS(func_interface,
-                           (GD_FT_Outline_MoveTo_Func)gray_move_to,
+GD_FT_DEFINE_OUTLINE_FUNCS(func_interface, (GD_FT_Outline_MoveTo_Func)gray_move_to,
                            (GD_FT_Outline_LineTo_Func)gray_line_to,
                            (GD_FT_Outline_ConicTo_Func)gray_conic_to,
                            (GD_FT_Outline_CubicTo_Func)gray_cubic_to, 0, 0)
@@ -1235,7 +1247,8 @@ static int gray_convert_glyph_inner(RAS_ARG)
         } else {
             error = GD_FT_Outline_Decompose(&ras.outline, &func_interface, &ras);
         }
-        if (!ras.invalid) gray_record_cell(RAS_VAR);
+        if (!ras.invalid)
+            gray_record_cell(RAS_VAR);
     } else
         error = GD_FT_THROW(Memory_Overflow);
 
@@ -1245,10 +1258,10 @@ static int gray_convert_glyph_inner(RAS_ARG)
 static int gray_convert_glyph(RAS_ARG)
 {
     gray_TBand bands[40];
-    gray_TBand* volatile band;
+    gray_TBand *volatile band;
     int volatile n, num_bands;
     TPos volatile min, max, max_y;
-    GD_FT_BBox* clip;
+    GD_FT_BBox *clip;
 
     /* Set up state in the raster object */
     gray_compute_cbox(RAS_VAR);
@@ -1256,23 +1269,29 @@ static int gray_convert_glyph(RAS_ARG)
     /* clip to target bitmap, exit if nothing to do */
     clip = &ras.clip_box;
 
-    if (ras.max_ex <= clip->xMin || ras.min_ex >= clip->xMax ||
-        ras.max_ey <= clip->yMin || ras.min_ey >= clip->yMax)
+    if (ras.max_ex <= clip->xMin || ras.min_ex >= clip->xMax || ras.max_ey <= clip->yMin ||
+        ras.min_ey >= clip->yMax)
         return 0;
 
-    if (ras.min_ex < clip->xMin) ras.min_ex = clip->xMin;
-    if (ras.min_ey < clip->yMin) ras.min_ey = clip->yMin;
+    if (ras.min_ex < clip->xMin)
+        ras.min_ex = clip->xMin;
+    if (ras.min_ey < clip->yMin)
+        ras.min_ey = clip->yMin;
 
-    if (ras.max_ex > clip->xMax) ras.max_ex = clip->xMax;
-    if (ras.max_ey > clip->yMax) ras.max_ey = clip->yMax;
+    if (ras.max_ex > clip->xMax)
+        ras.max_ex = clip->xMax;
+    if (ras.max_ey > clip->yMax)
+        ras.max_ey = clip->yMax;
 
     ras.count_ex = ras.max_ex - ras.min_ex;
     ras.count_ey = ras.max_ey - ras.min_ey;
 
     /* set up vertical bands */
     num_bands = (int)((ras.max_ey - ras.min_ey) / ras.band_size);
-    if (num_bands == 0) num_bands = 1;
-    if (num_bands >= 39) num_bands = 39;
+    if (num_bands == 0)
+        num_bands = 1;
+    if (num_bands >= 39)
+        num_bands = 39;
 
     ras.band_shoot = 0;
 
@@ -1281,7 +1300,8 @@ static int gray_convert_glyph(RAS_ARG)
 
     for (n = 0; n < num_bands; n++, min = max) {
         max = min + ras.band_size;
-        if (n == num_bands - 1 || max > max_y) max = max_y;
+        if (n == num_bands - 1 || max > max_y)
+            max = max_y;
 
         bands[0].min = min;
         bands[0].max = max;
@@ -1289,29 +1309,32 @@ static int gray_convert_glyph(RAS_ARG)
 
         while (band >= bands) {
             TPos bottom, top, middle;
-            int  error;
+            int error;
 
             {
                 PCell cells_max;
-                int   yindex;
-                long  cell_start, cell_end, cell_mod;
+                int yindex;
+                long cell_start, cell_end, cell_mod;
 
-                ras.ycells = (PCell*)ras.buffer;
+                ras.ycells = (PCell *)ras.buffer;
                 ras.ycount = band->max - band->min;
 
                 cell_start = sizeof(PCell) * ras.ycount;
                 cell_mod = cell_start % sizeof(TCell);
-                if (cell_mod > 0) cell_start += sizeof(TCell) - cell_mod;
+                if (cell_mod > 0)
+                    cell_start += sizeof(TCell) - cell_mod;
 
                 cell_end = ras.buffer_size;
                 cell_end -= cell_end % sizeof(TCell);
 
-                cells_max = (PCell)((char*)ras.buffer + cell_end);
-                ras.cells = (PCell)((char*)ras.buffer + cell_start);
-                if (ras.cells >= cells_max) goto ReduceBands;
+                cells_max = (PCell)((char *)ras.buffer + cell_end);
+                ras.cells = (PCell)((char *)ras.buffer + cell_start);
+                if (ras.cells >= cells_max)
+                    goto ReduceBands;
 
                 ras.max_cells = cells_max - ras.cells;
-                if (ras.max_cells < 2) goto ReduceBands;
+                if (ras.max_cells < 2)
+                    goto ReduceBands;
 
                 for (yindex = 0; yindex < ras.ycount; yindex++)
                     ras.ycells[yindex] = NULL;
@@ -1344,7 +1367,8 @@ static int gray_convert_glyph(RAS_ARG)
                 return 1;
             }
 
-            if (bottom - top >= ras.band_size) ras.band_shoot++;
+            if (bottom - top >= ras.band_size)
+                ras.band_shoot++;
 
             band[1].min = bottom;
             band[1].max = middle;
@@ -1360,30 +1384,29 @@ static int gray_convert_glyph(RAS_ARG)
     return 0;
 }
 
-static int gray_raster_render(gray_PRaster               raster,
-                              const GD_FT_Raster_Params* params)
+static int gray_raster_render(gray_PRaster raster, const GD_FT_Raster_Params *params)
 {
     GD_FT_UNUSED(raster);
-    const GD_FT_Outline* outline = (const GD_FT_Outline*)params->source;
+    const GD_FT_Outline *outline = (const GD_FT_Outline *)params->source;
 
     gray_TWorker worker[1];
 
     TCell buffer[GD_FT_RENDER_POOL_SIZE / sizeof(TCell)];
-    long  buffer_size = sizeof(buffer);
-    int   band_size = (int)(buffer_size / (long)(sizeof(TCell) * 8));
+    long buffer_size = sizeof(buffer);
+    int band_size = (int)(buffer_size / (long)(sizeof(TCell) * 8));
 
-    if (!outline) return GD_FT_THROW(Invalid_Outline);
+    if (!outline)
+        return GD_FT_THROW(Invalid_Outline);
 
     /* return immediately if the outline is empty */
-    if (outline->n_points == 0 || outline->n_contours <= 0) return 0;
+    if (outline->n_points == 0 || outline->n_contours <= 0)
+        return 0;
 
     if (!outline->contours || !outline->points)
         return GD_FT_THROW(Invalid_Outline);
 
     if (outline->n_points != outline->contours[outline->n_contours - 1] + 1)
         return GD_FT_THROW(Invalid_Outline);
-
-
 
     if (params->flags & GD_FT_RASTER_FLAG_CLIP)
         ras.clip_box = params->clip_box;
@@ -1408,8 +1431,7 @@ static int gray_raster_render(gray_PRaster               raster,
 
     gray_convert_glyph(RAS_VAR);
     if (ras.bound_right > ras.bound_left && ras.bound_bottom > ras.bound_top) {
-        params->bbox_cb(ras.bound_left, ras.bound_top,
-                        ras.bound_right - ras.bound_left,
+        params->bbox_cb(ras.bound_left, ras.bound_top, ras.bound_right - ras.bound_left,
                         ras.bound_bottom - ras.bound_top + 1, params->user);
     }
     return 1;
@@ -1418,7 +1440,7 @@ static int gray_raster_render(gray_PRaster               raster,
 /**** RASTER OBJECT CREATION: In stand-alone mode, we simply use *****/
 /****                         a static object.                   *****/
 
-static int gray_raster_new(GD_FT_Raster* araster)
+static int gray_raster_new(GD_FT_Raster *araster)
 {
     static gray_TRaster the_raster;
 
@@ -1434,8 +1456,7 @@ static void gray_raster_done(GD_FT_Raster raster)
     GD_FT_UNUSED(raster);
 }
 
-static void gray_raster_reset(GD_FT_Raster raster, char* pool_base,
-                              long pool_size)
+static void gray_raster_reset(GD_FT_Raster raster, char *pool_base, long pool_size)
 {
     GD_FT_UNUSED(raster);
     GD_FT_UNUSED(pool_base);
@@ -1449,14 +1470,12 @@ GD_FT_DEFINE_RASTER_FUNCS(gd_ft_grays_raster,
                           (GD_FT_Raster_Render_Func)gray_raster_render,
                           (GD_FT_Raster_Done_Func)gray_raster_done)
 
-typedef struct gdPathRasterSource_
-{
+typedef struct gdPathRasterSource_ {
     gdPathPtr path;
     gdPathMatrixPtr matrix;
 } gdPathRasterSource;
 
-static void gdpath_include_point(GD_FT_BBox *box, int *first,
-                                 const gdPointF *point)
+static void gdpath_include_point(GD_FT_BBox *box, int *first, const gdPointF *point)
 {
     TPos x = (TPos)(point->x * 64.0);
     TPos y = (TPos)(point->y * 64.0);
@@ -1468,18 +1487,19 @@ static void gdpath_include_point(GD_FT_BBox *box, int *first,
         return;
     }
 
-    if (x < box->xMin) box->xMin = x;
-    if (x > box->xMax) box->xMax = x;
-    if (y < box->yMin) box->yMin = y;
-    if (y > box->yMax) box->yMax = y;
+    if (x < box->xMin)
+        box->xMin = x;
+    if (x > box->xMax)
+        box->xMax = x;
+    if (y < box->yMin)
+        box->yMin = y;
+    if (y > box->yMax)
+        box->yMax = y;
 }
 
 static GD_FT_Vector gdpath_vector(const gdPointF *point)
 {
-    GD_FT_Vector vector = {
-        (GD_FT_Pos)(point->x * 64.0),
-        (GD_FT_Pos)(point->y * 64.0)
-    };
+    GD_FT_Vector vector = {(GD_FT_Pos)(point->x * 64.0), (GD_FT_Pos)(point->y * 64.0)};
     return vector;
 }
 
@@ -1640,11 +1660,8 @@ static int gdpath_decompose(void *source, void *worker_data)
 
 /* END */
 
-GD_FT_Error gd_ft_raster_render_path(
-    const gdPathPtr path,
-    gdPathMatrixPtr matrix,
-    GD_FT_Raster_Params *params,
-    int outline_flags)
+GD_FT_Error gd_ft_raster_render_path(const gdPathPtr path, gdPathMatrixPtr matrix,
+                                     GD_FT_Raster_Params *params, int outline_flags)
 {
     if (!path || !params)
         return GD_FT_THROW(Invalid_Argument);
@@ -1695,10 +1712,8 @@ GD_FT_Error gd_ft_raster_render_path(
     ras = save_ras;
 #endif
 
-    if (!error && params->bbox_cb &&
-        bound_right > bound_left && bound_bottom > bound_top) {
-        params->bbox_cb(bound_left, bound_top,
-                        bound_right - bound_left,
+    if (!error && params->bbox_cb && bound_right > bound_left && bound_bottom > bound_top) {
+        params->bbox_cb(bound_left, bound_top, bound_right - bound_left,
                         bound_bottom - bound_top + 1, params->user);
     }
 

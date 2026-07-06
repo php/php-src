@@ -8,16 +8,16 @@
 #include "gd_intern.h"
 
 /* 2.03: don't include zlib here or we can't build without PNG */
-#include "gd_vector2d_private.h"
-#include "gdhelpers.h"
 #include "gd_color.h"
+#include "gd_compositor.h"
+#include "gd_draw_blend.h"
 #include "gd_errors.h"
 #include "gd_path.h"
-#include "gd_span_rle.h"
-#include "gd_draw_blend.h"
-#include "gd_path_matrix.h"
 #include "gd_path_dash.h"
-#include "gd_compositor.h"
+#include "gd_path_matrix.h"
+#include "gd_span_rle.h"
+#include "gd_vector2d_private.h"
+#include "gdhelpers.h"
 
 /* Conversion helpers: legacy gdImage truecolor <-> premultiplied ARGB32 */
 static inline uint32_t gdcolor_to_premul(int gdcolor)
@@ -46,8 +46,8 @@ gdContextSetSourceRgb(gdContextPtr context, double r, double g, double b)
     gdPaintDestroy(source);
 }
 
-GD_VECTOR2D_INTERNAL void
-gdContextSetSourceSurface(gdContextPtr context, gdSurfacePtr surface, double x, double y)
+GD_VECTOR2D_INTERNAL void gdContextSetSourceSurface(gdContextPtr context, gdSurfacePtr surface,
+                                                    double x, double y)
 {
     gdPaintSetSourceSurface(context, surface, x, y);
 }
@@ -95,43 +95,35 @@ gdContextSetOpacity(gdContextPtr context, double opacity)
 }
 
 BGD_DECLARE(void)
-gdContextNewPath(gdContextPtr context)
-{
-    gdPathClear(context->path);
-}
+gdContextNewPath(gdContextPtr context) { gdPathClear(context->path); }
 
 BGD_DECLARE(void) gdContextAppendPath(gdContextPtr cr, gdPathPtr source)
 {
     gdPathAppendPath(cr->path, source);
 }
 
-GD_VECTOR2D_INTERNAL gdContextPtr
-gdContextCreate(gdSurfacePtr surface)
+GD_VECTOR2D_INTERNAL gdContextPtr gdContextCreate(gdSurfacePtr surface)
 {
     gdContextPtr context = gdMalloc(sizeof(gdContext));
-    if (!context)
-    {
+    if (!context) {
         return NULL;
     }
     context->state = gdStateCreate();
-    if (!context->state)
-    {
+    if (!context->state) {
         goto failState;
     }
     context->path = gdPathCreate();
-    if (!context->path)
-    {
+    if (!context->path) {
         goto failPath;
     }
     context->rle = gdSpanRleCreate();
-    if (!context->rle)
-    {
+    if (!context->rle) {
         goto failRle;
     }
     context->ref = 1;
     context->surface = gdSurfaceAddRef(surface);
     context->image = NULL;
-    context->clippath= NULL;
+    context->clippath = NULL;
     context->clip.x = 0.0;
     context->clip.y = 0.0;
     context->clip.w = surface->width;
@@ -149,33 +141,28 @@ failState:
 BGD_DECLARE(gdContextPtr)
 gdContextCreateForImage(gdImagePtr im)
 {
-    if (!im || !im->trueColor)
-    {
+    if (!im || !im->trueColor) {
         return NULL;
     }
 
     gdSurfacePtr scratch = gdSurfaceCreate(im->sx, im->sy, GD_SURFACE_ARGB32);
-    if (!scratch)
-    {
+    if (!scratch) {
         return NULL;
     }
 
-    for (int y = 0; y < im->sy; y++)
-    {
+    for (int y = 0; y < im->sy; y++) {
         uint32_t *dst = (uint32_t *)(scratch->data + y * scratch->stride);
-        for (int x = 0; x < im->sx; x++)
-        {
+        for (int x = 0; x < im->sx; x++) {
             dst[x] = gdcolor_to_premul(im->tpixels[y][x]);
         }
     }
 
     gdContextPtr ctx = gdContextCreate(scratch);
-    if (!ctx)
-    {
+    if (!ctx) {
         gdSurfaceDestroy(scratch);
         return NULL;
     }
-	gdSurfaceDestroy(scratch);
+    gdSurfaceDestroy(scratch);
 
     ctx->image = im;
     ctx->imageOwned = 0;
@@ -185,35 +172,30 @@ gdContextCreateForImage(gdImagePtr im)
 BGD_DECLARE(void)
 gdContextFlushImage(gdContextPtr ctx)
 {
-    if (!ctx || !ctx->image)
-    {
+    if (!ctx || !ctx->image) {
         return;
     }
     gdImagePtr im = ctx->image;
     gdSurfacePtr scratch = ctx->surface;
 
-    for (int y = 0; y < im->sy; y++)
-    {
+    for (int y = 0; y < im->sy; y++) {
         uint32_t *src = (uint32_t *)(scratch->data + y * scratch->stride);
-        for (int x = 0; x < im->sx; x++)
-        {
+        for (int x = 0; x < im->sx; x++) {
             im->tpixels[y][x] = premul_to_gdcolor(src[x]);
         }
     }
 }
 
 BGD_DECLARE(gdImagePtr)
-gdContextGetImage(gdContextPtr ctx)
-{
-    return ctx ? ctx->image : NULL;
-}
+gdContextGetImage(gdContextPtr ctx) { return ctx ? ctx->image : NULL; }
 
 BGD_DECLARE(void)
 gdContextStrokePreserve(gdContextPtr context)
 {
     gdStatePtr state = context->state;
     gdSpanRleClear(context->rle);
-    gdSpanRleRasterize(context->rle, context->path, &state->matrix, &context->clip, &state->stroke, gdFillRuleNonZero);
+    gdSpanRleRasterize(context->rle, context->path, &state->matrix, &context->clip, &state->stroke,
+                       gdFillRuleNonZero);
     if (!gdCompositeOperatorIsUnbounded(state->op))
         gdSpanRlePathClip(context->rle, state->clippath);
     gdPathBlend(context, context->rle);
@@ -224,8 +206,9 @@ gdContextFillPreserve(gdContextPtr context)
 {
     gdStatePtr state = context->state;
     gdSpanRleClear(context->rle);
-    //gdPathDumpPathTransform(context->path, NULL);
-    gdSpanRleRasterize(context->rle, context->path, &state->matrix, &context->clip, NULL, state->winding);
+    // gdPathDumpPathTransform(context->path, NULL);
+    gdSpanRleRasterize(context->rle, context->path, &state->matrix, &context->clip, NULL,
+                       state->winding);
     if (!gdCompositeOperatorIsUnbounded(state->op))
         gdSpanRlePathClip(context->rle, state->clippath);
     gdPathBlend(context, context->rle);
@@ -258,7 +241,8 @@ gdContextClipPreserve(gdContextPtr context)
         return 1;
 
     gdSpanRleClear(context->rle);
-    gdSpanRleRasterize(context->rle, context->path, &state->matrix, &context->clip, NULL, state->winding);
+    gdSpanRleRasterize(context->rle, context->path, &state->matrix, &context->clip, NULL,
+                       state->winding);
     if (state->clippath) {
         newclip = gdSpanHorizontalClip(state->clippath, context->rle);
     } else {
@@ -278,11 +262,13 @@ gdContextPaint(gdContextPtr context)
 {
     gdSpanRlePtr rle;
     gdStatePtr state = context->state;
-    if(state->clippath==NULL && context->clippath == NULL) {
+    if (state->clippath == NULL && context->clippath == NULL) {
         gdPathPtr path = gdPathCreate();
-        gdPathAddRectangle(path, context->clip.x, context->clip.y, context->clip.w, context->clip.h);
+        gdPathAddRectangle(path, context->clip.x, context->clip.y, context->clip.w,
+                           context->clip.h);
         context->clippath = gdSpanRleCreate();
-        gdSpanRleRasterize(context->clippath, path, &state->matrix, &context->clip, NULL, gdFillRuleNonZero);
+        gdSpanRleRasterize(context->clippath, path, &state->matrix, &context->clip, NULL,
+                           gdFillRuleNonZero);
         gdPathDestroy(path);
     }
     rle = state->clippath ? state->clippath : context->clippath;
@@ -356,10 +342,8 @@ gdContextDestroy(gdContextPtr context)
     if (context == NULL)
         return;
     context->ref--;
-    if (context->ref == 0)
-    {
-        if (context->image)
-        {
+    if (context->ref == 0) {
+        if (context->image) {
             gdContextFlushImage(context);
         }
         gdSurfaceDestroy(context->surface);
@@ -367,7 +351,7 @@ gdContextDestroy(gdContextPtr context)
         while (context->state) {
             gdStatePtr next = context->state->next;
             context->state->next = NULL;
-        gdStateDestroy(context->state);
+            gdStateDestroy(context->state);
             context->state = next;
         }
         gdSpanRleDestroy(context->clippath);
@@ -377,16 +361,10 @@ gdContextDestroy(gdContextPtr context)
 }
 
 BGD_DECLARE(void)
-gdContextMoveTo(gdContextPtr context, double x, double y)
-{
-    gdPathMoveTo(context->path, x, y);
-}
+gdContextMoveTo(gdContextPtr context, double x, double y) { gdPathMoveTo(context->path, x, y); }
 
 BGD_DECLARE(void)
-gdContextLineTo(gdContextPtr context, double x, double y)
-{
-    gdPathLineTo(context->path, x, y);
-}
+gdContextLineTo(gdContextPtr context, double x, double y) { gdPathLineTo(context->path, x, y); }
 
 BGD_DECLARE(void)
 gdContextRelLineTo(gdContextPtr context, double x, double y)
@@ -395,37 +373,31 @@ gdContextRelLineTo(gdContextPtr context, double x, double y)
 }
 
 BGD_DECLARE(void)
-gdContextSetLineWidth(gdContextPtr context, double width)
-{
-    context->state->stroke.width = width;
-}
+gdContextSetLineWidth(gdContextPtr context, double width) { context->state->stroke.width = width; }
 
-BGD_DECLARE(void) gdContextSetDash(gdContextPtr context, double offset, const double* data, int size)
+BGD_DECLARE(void)
+gdContextSetDash(gdContextPtr context, double offset, const double *data, int size)
 {
     gdPathDashDestroy(context->state->stroke.dash);
     context->state->stroke.dash = gdPathDashCreate(data, size, offset);
 }
 
 BGD_DECLARE(void)
-gdContextSetLineCap(gdContextPtr context, gdLineCap cap)
-{
-    context->state->stroke.cap = cap;
-}
+gdContextSetLineCap(gdContextPtr context, gdLineCap cap) { context->state->stroke.cap = cap; }
 
 BGD_DECLARE(void)
-gdContextSetLineJoin(gdContextPtr context, gdLineJoin join)
-{
-    context->state->stroke.join = join;
-}
+gdContextSetLineJoin(gdContextPtr context, gdLineJoin join) { context->state->stroke.join = join; }
 
 BGD_DECLARE(void)
-gdContextCurveTo(gdContextPtr context, double x1, double y1, double x2, double y2, double x3, double y3)
+gdContextCurveTo(gdContextPtr context, double x1, double y1, double x2, double y2, double x3,
+                 double y3)
 {
     gdPathCurveTo(context->path, x1, y1, x2, y2, x3, y3);
 }
 
 BGD_DECLARE(void)
-gdContextQuadTo(gdContextPtr context, double x1, double y1, double x2, double y2) {
+gdContextQuadTo(gdContextPtr context, double x1, double y1, double x2, double y2)
+{
     gdPathQuadTo(context->path, x1, y1, x2, y2);
 }
 
@@ -442,7 +414,7 @@ gdContextNegativeArc(gdContextPtr context, double cx, double cy, double r, doubl
 }
 
 BGD_DECLARE(void)
-    gdContextRectangle(gdContextPtr context, double x, double y, double w, double h)
+gdContextRectangle(gdContextPtr context, double x, double y, double w, double h)
 {
     gdPathAddRectangle(context->path, x, y, w, h);
 }

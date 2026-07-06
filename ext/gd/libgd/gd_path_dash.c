@@ -3,10 +3,10 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "gd_vector2d_private.h"
-#include "gd_intern.h"
-#include "gdhelpers.h"
 #include "gd_errors.h"
+#include "gd_intern.h"
+#include "gd_vector2d_private.h"
+#include "gdhelpers.h"
 
 #include "gd_array.h"
 #include "gd_path.h"
@@ -19,14 +19,12 @@ gdPathDashPtr gdPathDashCreate(const double *data, int size, double offset)
         return NULL;
 
     gdPathDashPtr dash = gdMalloc(sizeof(gdPathDash));
-    if (!dash)
-    {
+    if (!dash) {
         return NULL;
     }
     dash->offset = offset;
     dash->data = gdMalloc((size_t)size * sizeof(double));
-    if (!dash->data)
-    {
+    if (!dash->data) {
         gdFree(dash);
         return NULL;
     }
@@ -62,19 +60,18 @@ gdPathPtr gdPathApplyDash(const gdPathDashPtr dash, const gdPathPtr path)
     int toggle = 1;
     int offset = 0;
     double phase = dash->offset;
-    while(phase >= dash->data[offset])
-    {
+    while (phase >= dash->data[offset]) {
         toggle = !toggle;
         phase -= dash->data[offset];
-        if(++offset == dash->size) offset = 0;
+        if (++offset == dash->size)
+            offset = 0;
     }
 
     gdPathOpsPtr elements = (gdPathOpsPtr)gdArrayGetData(&flat->elements);
     gdPathOpsPtr end = elements + gdArrayNumElements(&flat->elements);
     gdPointFPtr points = (gdPointFPtr)gdArrayGetData(&flat->points);
 
-    while(elements < end)
-    {
+    while (elements < end) {
         int itoggle = toggle;
         int ioffset = offset;
         double iphase = phase;
@@ -82,31 +79,31 @@ gdPathPtr gdPathApplyDash(const gdPathDashPtr dash, const gdPathPtr path)
         double x0 = points->x;
         double y0 = points->y;
 
-        if(itoggle) gdPathMoveTo(result, x0, y0);
+        if (itoggle)
+            gdPathMoveTo(result, x0, y0);
         ++elements;
         ++points;
-        while(elements < end
-         && *elements==gdPathOpsLineTo)
-        {
+        while (elements < end && *elements == gdPathOpsLineTo) {
             double dx = points->x - x0;
             double dy = points->y - y0;
-            double dist0 = sqrt(dx*dx + dy*dy);
+            double dist0 = sqrt(dx * dx + dy * dy);
             double dist1 = 0;
-            while(dist0 - dist1 > dash->data[ioffset] - iphase)
-            {
+            while (dist0 - dist1 > dash->data[ioffset] - iphase) {
                 dist1 += dash->data[ioffset] - iphase;
                 double a = dist1 / dist0;
                 double x = x0 + a * dx;
                 double y = y0 + a * dy;
 
-                if(itoggle) gdPathLineTo(result, x, y);
+                if (itoggle)
+                    gdPathLineTo(result, x, y);
                 else {
-                     gdPathMoveTo(result, x, y);
+                    gdPathMoveTo(result, x, y);
                 }
 
                 itoggle = !itoggle;
                 iphase = 0;
-                if(++ioffset==dash->size) ioffset = 0;
+                if (++ioffset == dash->size)
+                    ioffset = 0;
             }
 
             iphase += dist0 - dist1;
@@ -114,7 +111,8 @@ gdPathPtr gdPathApplyDash(const gdPathDashPtr dash, const gdPathPtr path)
             x0 = points->x;
             y0 = points->y;
 
-            if(itoggle) gdPathLineTo(result, x0, y0);
+            if (itoggle)
+                gdPathLineTo(result, x0, y0);
 
             ++elements;
             ++points;

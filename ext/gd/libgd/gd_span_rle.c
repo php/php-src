@@ -1,28 +1,28 @@
-#include <stdio.h>
 #include <math.h>
-#include <string.h>
-#include <stdlib.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "gd_vector2d_private.h"
-#include "gd_intern.h"
-#include "gdhelpers.h"
 #include "gd_errors.h"
+#include "gd_intern.h"
+#include "gd_vector2d_private.h"
+#include "gdhelpers.h"
 
-#include "gd_surface.h"
-#include "gd_array.h"
-#include "gd_span_rle.h"
-#include "gd_path_matrix.h"
-#include "gd_path.h"
-#include "gd_path_outline.h"
-#include "gd_path_dash.h"
+#include "ftraster/gd_ft_math.h"
 #include "ftraster/gd_ft_raster.h"
 #include "ftraster/gd_ft_stroker.h"
 #include "ftraster/gd_ft_types.h"
-#include "ftraster/gd_ft_math.h"
+#include "gd_array.h"
+#include "gd_path.h"
+#include "gd_path_dash.h"
+#include "gd_path_matrix.h"
+#include "gd_path_outline.h"
+#include "gd_span_rle.h"
+#include "gd_surface.h"
 
 #define SQRT2 1.41421356237309504880
 
@@ -68,10 +68,12 @@ void gdSpanRleClear(gdSpanRlePtr rle)
 
 gdSpanRlePtr gdSpanRleClone(gdSpanRlePtr rle)
 {
-    if (rle == NULL) return NULL;
+    if (rle == NULL)
+        return NULL;
 
     gdSpanRlePtr clone = gdMalloc(sizeof(gdSpanRle));
-    if (!clone) return NULL;
+    if (!clone)
+        return NULL;
 
     clone->ref = 1;
     _rle_spans_init(clone->spans);
@@ -82,7 +84,7 @@ gdSpanRlePtr gdSpanRleClone(gdSpanRlePtr rle)
             return NULL;
         }
         clone->spans.capacity = rle->spans.size;
-    memcpy(clone->spans.data, rle->spans.data, (size_t)rle->spans.size * sizeof(gdSpan));
+        memcpy(clone->spans.data, rle->spans.data, (size_t)rle->spans.size * sizeof(gdSpan));
     }
     clone->spans.size = rle->spans.size;
     clone->x = rle->x;
@@ -96,8 +98,7 @@ gdSpanRlePtr gdSpanRleClone(gdSpanRlePtr rle)
 gdSpanRlePtr gdSpanHorizontalClip(const gdSpanRlePtr a, const gdSpanRlePtr b)
 {
     gdSpanRlePtr result = gdMalloc(sizeof(gdSpanRle));
-    if (!result)
-    {
+    if (!result) {
         return NULL;
     }
 
@@ -126,16 +127,13 @@ gdSpanRlePtr gdSpanHorizontalClip(const gdSpanRlePtr a, const gdSpanRlePtr b)
     gdSpanPtr b_spans = b->spans.data;
     gdSpanPtr b_end = b_spans + b->spans.size;
 
-    while (a_spans < a_end && b_spans < b_end)
-    {
-        if (b_spans->y > a_spans->y)
-        {
+    while (a_spans < a_end && b_spans < b_end) {
+        if (b_spans->y > a_spans->y) {
             ++a_spans;
             continue;
         }
 
-        if (a_spans->y != b_spans->y)
-        {
+        if (a_spans->y != b_spans->y) {
             ++b_spans;
             continue;
         }
@@ -145,22 +143,19 @@ gdSpanRlePtr gdSpanHorizontalClip(const gdSpanRlePtr a, const gdSpanRlePtr b)
         int bx1 = b_spans->x;
         int bx2 = bx1 + b_spans->len;
 
-        if (bx1 < ax1 && bx2 < ax1)
-        {
+        if (bx1 < ax1 && bx2 < ax1) {
             ++b_spans;
             continue;
         }
 
-        if (ax1 < bx1 && ax2 < bx1)
-        {
+        if (ax1 < bx1 && ax2 < bx1) {
             ++a_spans;
             continue;
         }
 
         int x = MAX(ax1, bx1);
         int len = MIN(ax2, bx2) - x;
-        if (len)
-        {
+        if (len) {
             gdSpanPtr span = result->spans.data + result->spans.size;
             span->x = (short)x;
             span->len = (unsigned short)len;
@@ -169,18 +164,14 @@ gdSpanRlePtr gdSpanHorizontalClip(const gdSpanRlePtr a, const gdSpanRlePtr b)
             result->spans.size += 1;
         }
 
-        if (ax2 < bx2)
-        {
+        if (ax2 < bx2) {
             ++a_spans;
-        }
-        else
-        {
+        } else {
             ++b_spans;
         }
     }
 
-    if (result->spans.size == 0)
-    {
+    if (result->spans.size == 0) {
         result->x = 0;
         result->y = 0;
         result->w = 0;
@@ -193,8 +184,7 @@ gdSpanRlePtr gdSpanHorizontalClip(const gdSpanRlePtr a, const gdSpanRlePtr b)
     int y1 = spans[0].y;
     int x2 = 0;
     int y2 = spans[result->spans.size - 1].y;
-    for (int i = 0; i < result->spans.size; i++)
-    {
+    for (int i = 0; i < result->spans.size; i++) {
         if (spans[i].x < x1)
             x1 = spans[i].x;
         if (spans[i].x + spans[i].len > x2)
@@ -219,8 +209,7 @@ void gdSpanRlePathClip(gdSpanRlePtr rle, const gdSpanRlePtr clip)
     }
     _rle_spans_allocate(rle->spans, result->spans.size);
     if (result->spans.size > 0) {
-        memcpy(rle->spans.data, result->spans.data,
-               (size_t)result->spans.size * sizeof(gdSpan));
+        memcpy(rle->spans.data, result->spans.data, (size_t)result->spans.size * sizeof(gdSpan));
     }
     rle->spans.size = result->spans.size;
     rle->x = result->x;
@@ -259,21 +248,19 @@ void gd_ft_outline_close(GD_FT_Outline *ft)
 
 void gd_ft_outline_end(GD_FT_Outline *ft)
 {
-    if (ft->n_points)
-    {
+    if (ft->n_points) {
         ft->contours[ft->n_contours] = ft->n_points - 1;
         ft->n_contours++;
     }
 }
 
-#define FT_COORD(x) (GD_FT_Pos)((x)*64)
+#define FT_COORD(x) (GD_FT_Pos)((x) * 64)
 void gd_ft_outline_move_to(GD_FT_Outline *ft, double x, double y)
 {
     ft->points[ft->n_points].x = FT_COORD(x);
     ft->points[ft->n_points].y = FT_COORD(y);
     ft->tags[ft->n_points] = GD_FT_CURVE_TAG_ON;
-    if (ft->n_points)
-    {
+    if (ft->n_points) {
         ft->contours[ft->n_contours] = ft->n_points - 1;
         ft->n_contours++;
     }
@@ -290,7 +277,8 @@ void gd_ft_outline_line_to(GD_FT_Outline *ft, double x, double y)
     ft->n_points++;
 }
 
-void gd_ft_outline_cubic_to(GD_FT_Outline *ft, double x1, double y1, double x2, double y2, double x3, double y3)
+void gd_ft_outline_cubic_to(GD_FT_Outline *ft, double x1, double y1, double x2, double y2,
+                            double x3, double y3)
 {
     ft->points[ft->n_points].x = FT_COORD(x1);
     ft->points[ft->n_points].y = FT_COORD(y1);
@@ -326,8 +314,8 @@ GD_FT_Outline *gd_ft_outline_convert(const gdPathPtr path, const gdPathMatrixPtr
     /* A path may begin with LineTo/CurveTo.  The outline bridge treats that
        prefix as an implicit contour before the first explicit MoveTo. */
     int contour_capacity = path->contours + 1;
-    GD_FT_Outline *outline = gd_ft_outline_create(
-        gdArrayNumElements(&path->points), contour_capacity);
+    GD_FT_Outline *outline =
+        gd_ft_outline_create(gdArrayNumElements(&path->points), contour_capacity);
     gdPointF p[3];
     unsigned int numElements = gdArrayNumElements(&path->elements);
     unsigned int pointsIndex = 0;
@@ -337,12 +325,10 @@ GD_FT_Outline *gd_ft_outline_convert(const gdPathPtr path, const gdPathMatrixPtr
     memset(p, 0, sizeof(gdPointF) * 3);
     if (!outline)
         return NULL;
-    for (i = 0; i < numElements; i++)
-    {
+    for (i = 0; i < numElements; i++) {
         gdPathOpsPtr element = (gdPathOpsPtr)gdArrayIndex(&path->elements, i);
         gdPointFPtr point = gdArrayIndex(&path->points, pointsIndex);
-        switch (*element)
-        {
+        switch (*element) {
         case gdPathOpsMoveTo:
             gdPathMatrixMapPoint(matrix, point, &p[0]);
             gd_ft_outline_move_to(outline, p[0].x, p[0].y);
@@ -366,8 +352,7 @@ GD_FT_Outline *gd_ft_outline_convert(const gdPathPtr path, const gdPathMatrixPtr
             point = gdArrayIndex(&path->points, pointsIndex + 2);
             gdPathMatrixMapPoint(matrix, point, &p[2]);
             if (contour_open)
-                gd_ft_outline_cubic_to(outline, p[0].x, p[0].y,
-                                       p[1].x, p[1].y, p[2].x, p[2].y);
+                gd_ft_outline_cubic_to(outline, p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y);
             else {
                 gd_ft_outline_move_to(outline, p[2].x, p[2].y);
                 contour_open = 1;
@@ -381,13 +366,12 @@ GD_FT_Outline *gd_ft_outline_convert(const gdPathPtr path, const gdPathMatrixPtr
             }
             pointsIndex += 1;
             break;
-         case gdPathOpsQuadTo:
+        case gdPathOpsQuadTo:
             gdPathMatrixMapPoint(matrix, point, &p[0]);
             point = gdArrayIndex(&path->points, pointsIndex + 1);
             gdPathMatrixMapPoint(matrix, point, &p[1]);
             if (contour_open)
-                gd_ft_outline_conic_to(outline, p[0].x, p[0].y,
-                                       p[1].x, p[1].y);
+                gd_ft_outline_conic_to(outline, p[0].x, p[0].y, p[1].x, p[1].y);
             else {
                 gd_ft_outline_move_to(outline, p[1].x, p[1].y);
                 contour_open = 1;
@@ -428,7 +412,8 @@ static void bbox_callback(int x, int y, int w, int h, void *user)
     rle->h = h;
 }
 
-static void _rasterize_fill(gdSpanRlePtr rle, const gdPathPtr path, const gdPathMatrixPtr matrix, const gdRectFPtr clip, gdFillRule winding)
+static void _rasterize_fill(gdSpanRlePtr rle, const gdPathPtr path, const gdPathMatrixPtr matrix,
+                            const gdRectFPtr clip, gdFillRule winding)
 {
     static gdPathMatrix identity_matrix = {1.0, 0.0, 0.0, 1.0, 0.0, 0.0};
     GD_FT_Raster_Params params = {0};
@@ -437,8 +422,7 @@ static void _rasterize_fill(gdSpanRlePtr rle, const gdPathPtr path, const gdPath
     params.bbox_cb = bbox_callback;
     params.user = rle;
 
-    if (clip)
-    {
+    if (clip) {
         params.flags |= GD_FT_RASTER_FLAG_CLIP;
         params.clip_box.xMin = (GD_FT_Pos)clip->x;
         params.clip_box.yMin = (GD_FT_Pos)clip->y;
@@ -448,26 +432,24 @@ static void _rasterize_fill(gdSpanRlePtr rle, const gdPathPtr path, const gdPath
 
     gd_ft_raster_render_path(path, matrix ? matrix : &identity_matrix, &params,
                              winding == gdFillRulEvenOdd ? GD_FT_OUTLINE_EVEN_ODD_FILL
-                                                        : GD_FT_OUTLINE_NONE);
+                                                         : GD_FT_OUTLINE_NONE);
 }
 
-void gdSpanRleRasterize(gdSpanRlePtr rle, const gdPathPtr path, const gdPathMatrixPtr matrix, const gdRectFPtr clip, const gdStrokePtr stroke, gdFillRule winding)
+void gdSpanRleRasterize(gdSpanRlePtr rle, const gdPathPtr path, const gdPathMatrixPtr matrix,
+                        const gdRectFPtr clip, const gdStrokePtr stroke, gdFillRule winding)
 {
-    if (stroke && stroke->width > 0)
-    {
+    if (stroke && stroke->width > 0) {
         gdPathPtr pathToStroke = (gdPathPtr)path;
 
         // Apply dash pattern to original path BEFORE stroke conversion
-        if (stroke->dash)
-        {
+        if (stroke->dash) {
             pathToStroke = gdPathApplyDash(stroke->dash, path);
             if (!pathToStroke)
                 return;
         }
 
         gdPathPtr strokePath = gdPathStrokeToPath(pathToStroke, stroke, matrix);
-        if (!strokePath)
-        {
+        if (!strokePath) {
             if (pathToStroke != path)
                 gdPathDestroy(pathToStroke);
             return;
@@ -478,9 +460,7 @@ void gdSpanRleRasterize(gdSpanRlePtr rle, const gdPathPtr path, const gdPathMatr
 
         _rasterize_fill(rle, strokePath, NULL, clip, winding);
         gdPathDestroy(strokePath);
-    }
-    else
-    {
+    } else {
         _rasterize_fill(rle, path, matrix, clip, winding);
     }
 }

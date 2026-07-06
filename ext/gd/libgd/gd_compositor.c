@@ -6,38 +6,39 @@
 #include "config.h"
 #endif
 
-#include "gd_vector2d_private.h"
 #include "gd_compositor.h"
+#include "gd_vector2d_private.h"
 
 typedef enum {
-    FACTOR_ZERO, FACTOR_ONE, FACTOR_SRC_ALPHA, FACTOR_DST_ALPHA,
-    FACTOR_ONE_MINUS_SRC_ALPHA, FACTOR_ONE_MINUS_DST_ALPHA,
+    FACTOR_ZERO,
+    FACTOR_ONE,
+    FACTOR_SRC_ALPHA,
+    FACTOR_DST_ALPHA,
+    FACTOR_ONE_MINUS_SRC_ALPHA,
+    FACTOR_ONE_MINUS_DST_ALPHA,
     FACTOR_SATURATE
 } FactorKind;
 
-typedef struct { FactorKind src, dst; } Factors;
+typedef struct {
+    FactorKind src, dst;
+} Factors;
 
-static const Factors porter_duff[] = {
-    {FACTOR_ZERO, FACTOR_ZERO},
-    {FACTOR_ONE, FACTOR_ZERO},
-    {FACTOR_ONE, FACTOR_ONE_MINUS_SRC_ALPHA},
-    {FACTOR_DST_ALPHA, FACTOR_ZERO},
-    {FACTOR_ONE_MINUS_DST_ALPHA, FACTOR_ZERO},
-    {FACTOR_DST_ALPHA, FACTOR_ONE_MINUS_SRC_ALPHA},
-    {FACTOR_ZERO, FACTOR_ONE},
-    {FACTOR_ONE_MINUS_DST_ALPHA, FACTOR_ONE},
-    {FACTOR_ZERO, FACTOR_SRC_ALPHA},
-    {FACTOR_ZERO, FACTOR_ONE_MINUS_SRC_ALPHA},
-    {FACTOR_ONE_MINUS_DST_ALPHA, FACTOR_SRC_ALPHA},
-    {FACTOR_ONE_MINUS_DST_ALPHA, FACTOR_ONE_MINUS_SRC_ALPHA},
-    {FACTOR_ONE, FACTOR_ONE},
-    {FACTOR_SATURATE, FACTOR_ONE}
-};
+static const Factors porter_duff[] = {{FACTOR_ZERO, FACTOR_ZERO},
+                                      {FACTOR_ONE, FACTOR_ZERO},
+                                      {FACTOR_ONE, FACTOR_ONE_MINUS_SRC_ALPHA},
+                                      {FACTOR_DST_ALPHA, FACTOR_ZERO},
+                                      {FACTOR_ONE_MINUS_DST_ALPHA, FACTOR_ZERO},
+                                      {FACTOR_DST_ALPHA, FACTOR_ONE_MINUS_SRC_ALPHA},
+                                      {FACTOR_ZERO, FACTOR_ONE},
+                                      {FACTOR_ONE_MINUS_DST_ALPHA, FACTOR_ONE},
+                                      {FACTOR_ZERO, FACTOR_SRC_ALPHA},
+                                      {FACTOR_ZERO, FACTOR_ONE_MINUS_SRC_ALPHA},
+                                      {FACTOR_ONE_MINUS_DST_ALPHA, FACTOR_SRC_ALPHA},
+                                      {FACTOR_ONE_MINUS_DST_ALPHA, FACTOR_ONE_MINUS_SRC_ALPHA},
+                                      {FACTOR_ONE, FACTOR_ONE},
+                                      {FACTOR_SATURATE, FACTOR_ONE}};
 
-static float clamp01(float v)
-{
-    return v < 0.0f ? 0.0f : (v > 1.0f ? 1.0f : v);
-}
+static float clamp01(float v) { return v < 0.0f ? 0.0f : (v > 1.0f ? 1.0f : v); }
 
 static gdPremulPixelF clamp_pixel(gdPremulPixelF p)
 {
@@ -50,7 +51,10 @@ static gdPremulPixelF clamp_pixel(gdPremulPixelF p)
 
 static gdPremulPixelF scale_pixel(gdPremulPixelF p, float scale)
 {
-    p.r *= scale; p.g *= scale; p.b *= scale; p.a *= scale;
+    p.r *= scale;
+    p.g *= scale;
+    p.b *= scale;
+    p.a *= scale;
     return p;
 }
 
@@ -68,21 +72,26 @@ static gdPremulPixelF lerp_pixel(gdPremulPixelF a, gdPremulPixelF b, float t)
 static float factor(FactorKind kind, float sa, float da)
 {
     switch (kind) {
-    case FACTOR_ZERO: return 0.0f;
-    case FACTOR_ONE: return 1.0f;
-    case FACTOR_SRC_ALPHA: return sa;
-    case FACTOR_DST_ALPHA: return da;
-    case FACTOR_ONE_MINUS_SRC_ALPHA: return 1.0f - sa;
-    case FACTOR_ONE_MINUS_DST_ALPHA: return 1.0f - da;
+    case FACTOR_ZERO:
+        return 0.0f;
+    case FACTOR_ONE:
+        return 1.0f;
+    case FACTOR_SRC_ALPHA:
+        return sa;
+    case FACTOR_DST_ALPHA:
+        return da;
+    case FACTOR_ONE_MINUS_SRC_ALPHA:
+        return 1.0f - sa;
+    case FACTOR_ONE_MINUS_DST_ALPHA:
+        return 1.0f - da;
     case FACTOR_SATURATE:
         return sa > 0.0f ? fminf(1.0f, (1.0f - da) / sa) : 0.0f;
     }
     return 0.0f;
 }
 
-static gdPremulPixelF composite_porter_duff(gdCompositeOperator op,
-                                             gdPremulPixelF s,
-                                             gdPremulPixelF d)
+static gdPremulPixelF composite_porter_duff(gdCompositeOperator op, gdPremulPixelF s,
+                                            gdPremulPixelF d)
 {
     const Factors f = porter_duff[op];
     const float sf = factor(f.src, s.a, d.a);
@@ -98,40 +107,43 @@ static gdPremulPixelF composite_porter_duff(gdCompositeOperator op,
 static float blend_channel(gdCompositeOperator op, float s, float d)
 {
     switch (op) {
-    case GD_OP_MULTIPLY: return s * d;
-    case GD_OP_SCREEN: return s + d - s * d;
+    case GD_OP_MULTIPLY:
+        return s * d;
+    case GD_OP_SCREEN:
+        return s + d - s * d;
     case GD_OP_OVERLAY:
-        return d <= 0.5f ? 2.0f * s * d
-                         : 1.0f - 2.0f * (1.0f - s) * (1.0f - d);
-    case GD_OP_DARKEN: return fminf(s, d);
-    case GD_OP_LIGHTEN: return fmaxf(s, d);
+        return d <= 0.5f ? 2.0f * s * d : 1.0f - 2.0f * (1.0f - s) * (1.0f - d);
+    case GD_OP_DARKEN:
+        return fminf(s, d);
+    case GD_OP_LIGHTEN:
+        return fmaxf(s, d);
     case GD_OP_COLOR_DODGE:
         return s >= 1.0f ? 1.0f : fminf(1.0f, d / (1.0f - s));
     case GD_OP_COLOR_BURN:
         return s <= 0.0f ? 0.0f : 1.0f - fminf(1.0f, (1.0f - d) / s);
     case GD_OP_HARD_LIGHT:
-        return s <= 0.5f ? 2.0f * s * d
-                         : 1.0f - 2.0f * (1.0f - s) * (1.0f - d);
+        return s <= 0.5f ? 2.0f * s * d : 1.0f - 2.0f * (1.0f - s) * (1.0f - d);
     case GD_OP_SOFT_LIGHT:
         if (s <= 0.5f)
             return d - (1.0f - 2.0f * s) * d * (1.0f - d);
         else {
-            float g = d <= 0.25f ? ((16.0f * d - 12.0f) * d + 4.0f) * d
-                                  : sqrtf(d);
+            float g = d <= 0.25f ? ((16.0f * d - 12.0f) * d + 4.0f) * d : sqrtf(d);
             return d + (2.0f * s - 1.0f) * (g - d);
         }
-    case GD_OP_DIFFERENCE: return fabsf(d - s);
-    case GD_OP_EXCLUSION: return s + d - 2.0f * s * d;
-    default: return s;
+    case GD_OP_DIFFERENCE:
+        return fabsf(d - s);
+    case GD_OP_EXCLUSION:
+        return s + d - 2.0f * s * d;
+    default:
+        return s;
     }
 }
 
-typedef struct { float r, g, b; } StraightColor;
+typedef struct {
+    float r, g, b;
+} StraightColor;
 
-static float color_lum(StraightColor c)
-{
-    return 0.30f * c.r + 0.59f * c.g + 0.11f * c.b;
-}
+static float color_lum(StraightColor c) { return 0.30f * c.r + 0.59f * c.g + 0.11f * c.b; }
 
 static float color_sat(StraightColor c)
 {
@@ -162,7 +174,9 @@ static StraightColor clip_color(StraightColor c)
 static StraightColor set_lum(StraightColor c, float l)
 {
     float d = l - color_lum(c);
-    c.r += d; c.g += d; c.b += d;
+    c.r += d;
+    c.g += d;
+    c.b += d;
     return clip_color(c);
 }
 
@@ -170,9 +184,21 @@ static StraightColor set_sat(StraightColor c, float s)
 {
     float *v[3] = {&c.r, &c.g, &c.b};
     float *tmp;
-    if (*v[0] > *v[1]) { tmp = v[0]; v[0] = v[1]; v[1] = tmp; }
-    if (*v[1] > *v[2]) { tmp = v[1]; v[1] = v[2]; v[2] = tmp; }
-    if (*v[0] > *v[1]) { tmp = v[0]; v[0] = v[1]; v[1] = tmp; }
+    if (*v[0] > *v[1]) {
+        tmp = v[0];
+        v[0] = v[1];
+        v[1] = tmp;
+    }
+    if (*v[1] > *v[2]) {
+        tmp = v[1];
+        v[1] = v[2];
+        v[2] = tmp;
+    }
+    if (*v[0] > *v[1]) {
+        tmp = v[0];
+        v[0] = v[1];
+        v[1] = tmp;
+    }
     if (*v[2] > *v[0]) {
         *v[1] = (*v[1] - *v[0]) * s / (*v[2] - *v[0]);
         *v[2] = s;
@@ -183,25 +209,36 @@ static StraightColor set_sat(StraightColor c, float s)
     return c;
 }
 
-static StraightColor blend_hsl(gdCompositeOperator op, StraightColor s,
-                               StraightColor d)
+static StraightColor blend_hsl(gdCompositeOperator op, StraightColor s, StraightColor d)
 {
     switch (op) {
-    case GD_OP_HSL_HUE: return set_lum(set_sat(s, color_sat(d)), color_lum(d));
-    case GD_OP_HSL_SATURATION: return set_lum(set_sat(d, color_sat(s)), color_lum(d));
-    case GD_OP_HSL_COLOR: return set_lum(s, color_lum(d));
-    case GD_OP_HSL_LUMINOSITY: return set_lum(d, color_lum(s));
-    default: return s;
+    case GD_OP_HSL_HUE:
+        return set_lum(set_sat(s, color_sat(d)), color_lum(d));
+    case GD_OP_HSL_SATURATION:
+        return set_lum(set_sat(d, color_sat(s)), color_lum(d));
+    case GD_OP_HSL_COLOR:
+        return set_lum(s, color_lum(d));
+    case GD_OP_HSL_LUMINOSITY:
+        return set_lum(d, color_lum(s));
+    default:
+        return s;
     }
 }
 
-static gdPremulPixelF composite_blend(gdCompositeOperator op,
-                                      gdPremulPixelF s, gdPremulPixelF d)
+static gdPremulPixelF composite_blend(gdCompositeOperator op, gdPremulPixelF s, gdPremulPixelF d)
 {
     StraightColor cs = {0, 0, 0}, cd = {0, 0, 0}, b;
     gdPremulPixelF r;
-    if (s.a > 0.0f) { cs.r = s.r/s.a; cs.g = s.g/s.a; cs.b = s.b/s.a; }
-    if (d.a > 0.0f) { cd.r = d.r/d.a; cd.g = d.g/d.a; cd.b = d.b/d.a; }
+    if (s.a > 0.0f) {
+        cs.r = s.r / s.a;
+        cs.g = s.g / s.a;
+        cs.b = s.b / s.a;
+    }
+    if (d.a > 0.0f) {
+        cd.r = d.r / d.a;
+        cd.g = d.g / d.a;
+        cd.b = d.b / d.a;
+    }
     if (op >= GD_OP_HSL_HUE)
         b = blend_hsl(op, cs, cd);
     else {
@@ -210,9 +247,9 @@ static gdPremulPixelF composite_blend(gdCompositeOperator op,
         b.b = blend_channel(op, cs.b, cd.b);
     }
     r.a = s.a + d.a * (1.0f - s.a);
-    r.r = (1.0f-d.a)*s.r + (1.0f-s.a)*d.r + s.a*d.a*b.r;
-    r.g = (1.0f-d.a)*s.g + (1.0f-s.a)*d.g + s.a*d.a*b.g;
-    r.b = (1.0f-d.a)*s.b + (1.0f-s.a)*d.b + s.a*d.a*b.b;
+    r.r = (1.0f - d.a) * s.r + (1.0f - s.a) * d.r + s.a * d.a * b.r;
+    r.g = (1.0f - d.a) * s.g + (1.0f - s.a) * d.g + s.a * d.a * b.g;
+    r.b = (1.0f - d.a) * s.b + (1.0f - s.a) * d.b + s.a * d.a * b.b;
     return clamp_pixel(r);
 }
 
@@ -223,12 +260,11 @@ int gdCompositeOperatorIsValid(gdCompositeOperator op)
 
 int gdCompositeOperatorIsUnbounded(gdCompositeOperator op)
 {
-    return op == GD_OP_IN || op == GD_OP_OUT ||
-           op == GD_OP_DEST_IN || op == GD_OP_DEST_ATOP;
+    return op == GD_OP_IN || op == GD_OP_OUT || op == GD_OP_DEST_IN || op == GD_OP_DEST_ATOP;
 }
 
-gdPremulPixelF gdCompositePixel(gdCompositeOperator op, gdPremulPixelF src,
-                                gdPremulPixelF dst, float coverage)
+gdPremulPixelF gdCompositePixel(gdCompositeOperator op, gdPremulPixelF src, gdPremulPixelF dst,
+                                float coverage)
 {
     gdPremulPixelF result;
     coverage = clamp01(coverage);
@@ -246,9 +282,8 @@ gdPremulPixelF gdCompositePixel(gdCompositeOperator op, gdPremulPixelF src,
     return composite_blend(op, src, dst);
 }
 
-void gdCompositeSpan(gdCompositeOperator op, const gdPremulPixelF *src,
-                     ptrdiff_t src_stride, gdPremulPixelF *dst,
-                     const float *coverage, size_t n)
+void gdCompositeSpan(gdCompositeOperator op, const gdPremulPixelF *src, ptrdiff_t src_stride,
+                     gdPremulPixelF *dst, const float *coverage, size_t n)
 {
     size_t i;
     for (i = 0; i < n; i++) {

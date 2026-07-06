@@ -10,7 +10,7 @@
 ** Header file
 */
 #ifndef __WBMP_H
-#define __WBMP_H	1
+#define __WBMP_H 1
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -24,29 +24,27 @@
 **
 */
 
-typedef struct Wbmp_
-{
-    int type;           /* type of the wbmp */
-    int width;          /* width of the image */
-    int height;         /* height of the image */
-    int *bitmap;        /* pointer to data: 0 = WHITE , 1 = BLACK */
+typedef struct Wbmp_ {
+    int type;    /* type of the wbmp */
+    int width;   /* width of the image */
+    int height;  /* height of the image */
+    int *bitmap; /* pointer to data: 0 = WHITE , 1 = BLACK */
 } Wbmp;
 
-#define WBMP_WHITE  1
-#define WBMP_BLACK  0
-
+#define WBMP_WHITE 1
+#define WBMP_BLACK 0
 
 /* Proto's
 ** -------
 **
 */
-void		putmbi( int i, void (*putout)(int c, void *out), void *out);
-int 	getmbi ( int (*getin)(void *in), void *in );
-int     skipheader( int (*getin)(void *in), void *in );
-Wbmp   *createwbmp( int width, int height, int color );
-int     readwbmp( int (*getin)(void *in), void *in, Wbmp **wbmp );
-int		writewbmp( Wbmp *wbmp, void (*putout)( int c, void *out), void *out);
-void    freewbmp( Wbmp *wbmp );
-void    printwbmp( Wbmp *wbmp );
+void putmbi(int i, void (*putout)(int c, void *out), void *out);
+int getmbi(int (*getin)(void *in), void *in);
+int skipheader(int (*getin)(void *in), void *in);
+Wbmp *createwbmp(int width, int height, int color);
+int readwbmp(int (*getin)(void *in), void *in, Wbmp **wbmp);
+int writewbmp(Wbmp *wbmp, void (*putout)(int c, void *out), void *out);
+void freewbmp(Wbmp *wbmp);
+void printwbmp(Wbmp *wbmp);
 
 #endif

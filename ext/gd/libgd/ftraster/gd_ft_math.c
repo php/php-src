@@ -20,55 +20,57 @@
 
 #if defined(_MSC_VER)
 #include <intrin.h>
-static unsigned int __inline clz(unsigned int x) {
-	unsigned long r = 0;
-	if (x != 0)
-	{
-		_BitScanReverse(&r, x);
-	}
-	return  r;
+static unsigned int __inline clz(unsigned int x)
+{
+    unsigned long r = 0;
+    if (x != 0) {
+        _BitScanReverse(&r, x);
+    }
+    return r;
 }
-#define GD_FT_MSB(x)  (clz(x))
+#define GD_FT_MSB(x) (clz(x))
 #elif defined(__GNUC__)
-#define GD_FT_MSB(x)  (31 - __builtin_clz(x))
+#define GD_FT_MSB(x) (31 - __builtin_clz(x))
 #else
-static unsigned int __inline clz(unsigned int x) {
-	int c = 31;
-	x &= ~x + 1;
-	if (n & 0x0000FFFF) c -= 16;
-	if (n & 0x00FF00FF) c -= 8;
-	if (n & 0x0F0F0F0F) c -= 4;
-	if (n & 0x33333333) c -= 2;
-	if (n & 0x55555555) c -= 1;
-	return c;
+static unsigned int __inline clz(unsigned int x)
+{
+    int c = 31;
+    x &= ~x + 1;
+    if (n & 0x0000FFFF)
+        c -= 16;
+    if (n & 0x00FF00FF)
+        c -= 8;
+    if (n & 0x0F0F0F0F)
+        c -= 4;
+    if (n & 0x33333333)
+        c -= 2;
+    if (n & 0x55555555)
+        c -= 1;
+    return c;
 }
-#define GD_FT_MSB(x)  (clz(x))
+#define GD_FT_MSB(x) (clz(x))
 #endif
 
-
-
-
-
-#define GD_FT_PAD_FLOOR(x, n) ((x) & ~((n)-1))
+#define GD_FT_PAD_FLOOR(x, n) ((x) & ~((n) - 1))
 #define GD_FT_PAD_ROUND(x, n) GD_FT_PAD_FLOOR((x) + ((n) / 2), n)
-#define GD_FT_PAD_CEIL(x, n) GD_FT_PAD_FLOOR((x) + ((n)-1), n)
+#define GD_FT_PAD_CEIL(x, n) GD_FT_PAD_FLOOR((x) + ((n) - 1), n)
 
 #define GD_FT_BEGIN_STMNT do {
-#define GD_FT_END_STMNT \
-    }                   \
+#define GD_FT_END_STMNT                                                                            \
+    }                                                                                              \
     while (0)
 /* transfer sign leaving a positive number */
-#define GD_FT_MOVE_SIGN(x, s) \
-    GD_FT_BEGIN_STMNT         \
-    if (x < 0) {              \
-        x = -x;               \
-        s = -s;               \
-    }                         \
+#define GD_FT_MOVE_SIGN(x, s)                                                                      \
+    GD_FT_BEGIN_STMNT                                                                              \
+    if (x < 0) {                                                                                   \
+        x = -x;                                                                                    \
+        s = -s;                                                                                    \
+    }                                                                                              \
     GD_FT_END_STMNT
 
 GD_FT_Long GD_FT_MulFix(GD_FT_Long a, GD_FT_Long b)
 {
-    GD_FT_Int  s = 1;
+    GD_FT_Int s = 1;
     GD_FT_Long c;
 
     GD_FT_MOVE_SIGN(a, s);
@@ -81,7 +83,7 @@ GD_FT_Long GD_FT_MulFix(GD_FT_Long a, GD_FT_Long b)
 
 GD_FT_Long GD_FT_MulDiv(GD_FT_Long a, GD_FT_Long b, GD_FT_Long c)
 {
-    GD_FT_Int  s = 1;
+    GD_FT_Int s = 1;
     GD_FT_Long d;
 
     GD_FT_MOVE_SIGN(a, s);
@@ -95,14 +97,13 @@ GD_FT_Long GD_FT_MulDiv(GD_FT_Long a, GD_FT_Long b, GD_FT_Long c)
 
 GD_FT_Long GD_FT_DivFix(GD_FT_Long a, GD_FT_Long b)
 {
-    GD_FT_Int  s = 1;
+    GD_FT_Int s = 1;
     GD_FT_Long q;
 
     GD_FT_MOVE_SIGN(a, s);
     GD_FT_MOVE_SIGN(b, s);
 
-    q = (GD_FT_Long)(b > 0 ? (((GD_FT_UInt64)a << 16) + (b >> 1)) / b
-                           : 0x7FFFFFFFL);
+    q = (GD_FT_Long)(b > 0 ? (((GD_FT_UInt64)a << 16) + (b >> 1)) / b : 0x7FFFFFFFL);
 
     return (s < 0 ? -q : q);
 }
@@ -132,9 +133,8 @@ GD_FT_Long GD_FT_DivFix(GD_FT_Long a, GD_FT_Long b)
 #define GD_FT_TRIG_MAX_ITERS 23
 
 static const GD_FT_Fixed ft_trig_arctan_table[] = {
-    1740967L, 919879L, 466945L, 234379L, 117304L, 58666L, 29335L, 14668L,
-    7334L,    3667L,   1833L,   917L,    458L,    229L,   115L,   57L,
-    29L,      14L,     7L,      4L,      2L,      1L};
+    1740967L, 919879L, 466945L, 234379L, 117304L, 58666L, 29335L, 14668L, 7334L, 3667L, 1833L,
+    917L,     458L,    229L,    115L,    57L,     29L,    14L,    7L,     4L,    2L,    1L};
 
 /* multiply a given value by the CORDIC shrink factor */
 static GD_FT_Fixed ft_trig_downscale(GD_FT_Fixed val)
@@ -152,7 +152,7 @@ static GD_FT_Fixed ft_trig_downscale(GD_FT_Fixed val)
 }
 
 /* undefined and never called for zero vector */
-static GD_FT_Int ft_trig_prenorm(GD_FT_Vector* vec)
+static GD_FT_Int ft_trig_prenorm(GD_FT_Vector *vec)
 {
     GD_FT_Pos x, y;
     GD_FT_Int shift;
@@ -176,11 +176,11 @@ static GD_FT_Int ft_trig_prenorm(GD_FT_Vector* vec)
     return shift;
 }
 
-static void ft_trig_pseudo_rotate(GD_FT_Vector* vec, GD_FT_Angle theta)
+static void ft_trig_pseudo_rotate(GD_FT_Vector *vec, GD_FT_Angle theta)
 {
-    GD_FT_Int          i;
-    GD_FT_Fixed        x, y, xtemp, b;
-    const GD_FT_Fixed* arctanptr;
+    GD_FT_Int i;
+    GD_FT_Fixed x, y, xtemp, b;
+    const GD_FT_Fixed *arctanptr;
 
     x = vec->x;
     y = vec->y;
@@ -223,12 +223,12 @@ static void ft_trig_pseudo_rotate(GD_FT_Vector* vec, GD_FT_Angle theta)
     vec->y = y;
 }
 
-static void ft_trig_pseudo_polarize(GD_FT_Vector* vec)
+static void ft_trig_pseudo_polarize(GD_FT_Vector *vec)
 {
-    GD_FT_Angle        theta;
-    GD_FT_Int          i;
-    GD_FT_Fixed        x, y, xtemp, b;
-    const GD_FT_Fixed* arctanptr;
+    GD_FT_Angle theta;
+    GD_FT_Int i;
+    GD_FT_Fixed x, y, xtemp, b;
+    const GD_FT_Fixed *arctanptr;
 
     x = vec->x;
     y = vec->y;
@@ -300,10 +300,7 @@ GD_FT_Fixed GD_FT_Cos(GD_FT_Angle angle)
 
 /* documentation is in fttrigon.h */
 
-GD_FT_Fixed GD_FT_Sin(GD_FT_Angle angle)
-{
-    return GD_FT_Cos(GD_FT_ANGLE_PI2 - angle);
-}
+GD_FT_Fixed GD_FT_Sin(GD_FT_Angle angle) { return GD_FT_Cos(GD_FT_ANGLE_PI2 - angle); }
 
 /* documentation is in fttrigon.h */
 
@@ -324,7 +321,8 @@ GD_FT_Angle GD_FT_Atan2(GD_FT_Fixed dx, GD_FT_Fixed dy)
 {
     GD_FT_Vector v;
 
-    if (dx == 0 && dy == 0) return 0;
+    if (dx == 0 && dy == 0)
+        return 0;
 
     v.x = dx;
     v.y = dy;
@@ -336,7 +334,7 @@ GD_FT_Angle GD_FT_Atan2(GD_FT_Fixed dx, GD_FT_Fixed dy)
 
 /* documentation is in fttrigon.h */
 
-void GD_FT_Vector_Unit(GD_FT_Vector* vec, GD_FT_Angle angle)
+void GD_FT_Vector_Unit(GD_FT_Vector *vec, GD_FT_Angle angle)
 {
     vec->x = GD_FT_TRIG_SCALE >> 8;
     vec->y = 0;
@@ -354,9 +352,9 @@ void GD_FT_Vector_Unit(GD_FT_Vector* vec, GD_FT_Angle angle)
 
 /* documentation is in fttrigon.h */
 
-void GD_FT_Vector_Rotate(GD_FT_Vector* vec, GD_FT_Angle angle)
+void GD_FT_Vector_Rotate(GD_FT_Vector *vec, GD_FT_Angle angle)
 {
-    GD_FT_Int    shift;
+    GD_FT_Int shift;
     GD_FT_Vector v;
 
     v.x = vec->x;
@@ -383,9 +381,9 @@ void GD_FT_Vector_Rotate(GD_FT_Vector* vec, GD_FT_Angle angle)
 
 /* documentation is in fttrigon.h */
 
-GD_FT_Fixed GD_FT_Vector_Length(GD_FT_Vector* vec)
+GD_FT_Fixed GD_FT_Vector_Length(GD_FT_Vector *vec)
 {
-    GD_FT_Int    shift;
+    GD_FT_Int shift;
     GD_FT_Vector v;
 
     v = *vec;
@@ -403,37 +401,36 @@ GD_FT_Fixed GD_FT_Vector_Length(GD_FT_Vector* vec)
 
     v.x = ft_trig_downscale(v.x);
 
-    if (shift > 0) return (v.x + (1 << (shift - 1))) >> shift;
+    if (shift > 0)
+        return (v.x + (1 << (shift - 1))) >> shift;
 
     return (GD_FT_Fixed)((GD_FT_UInt32)v.x << -shift);
 }
 
 /* documentation is in fttrigon.h */
 
-void GD_FT_Vector_Polarize(GD_FT_Vector* vec, GD_FT_Fixed* length,
-                           GD_FT_Angle* angle)
+void GD_FT_Vector_Polarize(GD_FT_Vector *vec, GD_FT_Fixed *length, GD_FT_Angle *angle)
 {
-    GD_FT_Int    shift;
+    GD_FT_Int shift;
     GD_FT_Vector v;
 
     v = *vec;
 
-    if (v.x == 0 && v.y == 0) return;
+    if (v.x == 0 && v.y == 0)
+        return;
 
     shift = ft_trig_prenorm(&v);
     ft_trig_pseudo_polarize(&v);
 
     v.x = ft_trig_downscale(v.x);
 
-    *length = (shift >= 0) ? (v.x >> shift)
-                           : (GD_FT_Fixed)((GD_FT_UInt32)v.x << -shift);
+    *length = (shift >= 0) ? (v.x >> shift) : (GD_FT_Fixed)((GD_FT_UInt32)v.x << -shift);
     *angle = v.y;
 }
 
 /* documentation is in fttrigon.h */
 
-void GD_FT_Vector_From_Polar(GD_FT_Vector* vec, GD_FT_Fixed length,
-                             GD_FT_Angle angle)
+void GD_FT_Vector_From_Polar(GD_FT_Vector *vec, GD_FT_Fixed length, GD_FT_Angle angle)
 {
     vec->x = length;
     vec->y = 0;
@@ -443,17 +440,17 @@ void GD_FT_Vector_From_Polar(GD_FT_Vector* vec, GD_FT_Fixed length,
 
 /* documentation is in fttrigon.h */
 
-GD_FT_Angle GD_FT_Angle_Diff( GD_FT_Angle  angle1, GD_FT_Angle  angle2 )
+GD_FT_Angle GD_FT_Angle_Diff(GD_FT_Angle angle1, GD_FT_Angle angle2)
 {
-  GD_FT_Angle  delta = angle2 - angle1;
+    GD_FT_Angle delta = angle2 - angle1;
 
-  while ( delta <= -GD_FT_ANGLE_PI )
-    delta += GD_FT_ANGLE_2PI;
+    while (delta <= -GD_FT_ANGLE_PI)
+        delta += GD_FT_ANGLE_2PI;
 
-  while ( delta > GD_FT_ANGLE_PI )
-    delta -= GD_FT_ANGLE_2PI;
+    while (delta > GD_FT_ANGLE_PI)
+        delta -= GD_FT_ANGLE_2PI;
 
-  return delta;
+    return delta;
 }
 
 /* END */
