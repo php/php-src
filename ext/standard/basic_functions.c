@@ -1123,27 +1123,20 @@ PHP_FUNCTION(flush)
 PHP_FUNCTION(sleep)
 {
 	zend_long num;
+#ifdef PHP_WIN32
+	const unsigned int max = UINT_MAX / 1000;
+#else
+	const unsigned int max = UINT_MAX;
+#endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(num)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (num < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
+	if (num < 0 || (zend_ulong) num > max) {
+		zend_argument_value_error(1, "must be between 0 and %u", max);
 		RETURN_THROWS();
 	}
-
-#ifdef PHP_WIN32
-	if (num > (zend_long) (UINT_MAX / 1000)) {
-		zend_argument_value_error(1, "must be less than or equal to %u", UINT_MAX / 1000);
-		RETURN_THROWS();
-	}
-#else
-	if (ZEND_LONG_UINT_OVFL(num)) {
-		zend_argument_value_error(1, "must be less than or equal to %u", UINT_MAX);
-		RETURN_THROWS();
-	}
-#endif
 
 	RETURN_LONG(php_sleep((unsigned int)num));
 }
@@ -1158,12 +1151,8 @@ PHP_FUNCTION(usleep)
 		Z_PARAM_LONG(num)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (num < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
-	if (ZEND_LONG_UINT_OVFL(num)) {
-		zend_argument_value_error(1, "must be less than or equal to %u", UINT_MAX);
+	if (num < 0 || (zend_ulong) num > UINT_MAX) {
+		zend_argument_value_error(1, "must be between 0 and %u", UINT_MAX);
 		RETURN_THROWS();
 	}
 

@@ -21,5 +21,5 @@ foreach (['sleep', 'usleep'] as $function) {
 --EXPECTF--
 int(0)
 usleep(0) ok
-sleep(): Argument #1 ($seconds) must be less than or equal to %d
-usleep(): Argument #1 ($microseconds) must be less than or equal to 4294967295
+sleep(): Argument #1 ($seconds) must be between 0 and %d
+usleep(): Argument #1 ($microseconds) must be between 0 and 4294967295
