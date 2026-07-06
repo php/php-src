@@ -83,9 +83,7 @@ PHP_JSON_API void php_json_parser_init(
 
 PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser);
 
-PHP_JSON_API size_t php_json_parser_error_line(const php_json_parser *parser);
-
-PHP_JSON_API size_t php_json_parser_error_column(const php_json_parser *parser);
+PHP_JSON_API void php_json_parser_error_details(const php_json_parser *parser, php_json_error_details *out);
 
 PHP_JSON_API int php_json_parse(php_json_parser *parser);
 

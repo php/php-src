@@ -22,6 +22,7 @@ enum StreamErrorCode
     case ConnectFailed;
     case BindFailed;
     case ListenFailed;
+    case AcceptFailed;
     case NotWritable;
     case NotReadable;
 
@@ -86,6 +87,7 @@ enum StreamErrorCode
     case InvalidParam;
     case RedirectLimit;
     case AuthFailed;
+    case TimeOut;
 
     /* Encoding/decoding/archiving operations */
     case ArchivingFailed;

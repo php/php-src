@@ -108,7 +108,7 @@ static zend_result resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		locale = (char *)intl_locale_get_default();
 	}
 
-	if (bundlename_len >= MAXPATHLEN) {
+	if (UNEXPECTED(bundlename_len >= MAXPATHLEN)) {
 		zend_argument_value_error(2, "is too long");
 		return FAILURE;
 	}
@@ -174,7 +174,7 @@ static zval *resource_bundle_array_fetch(
 {
 	int32_t index = 0;
 	char *key = NULL;
-	bool is_numeric = offset_str == NULL;
+	const bool is_numeric = offset_str == NULL;
 	char *pbuf;
 	ResourceBundle_object *rb;
 
@@ -339,6 +339,7 @@ U_CFUNC PHP_FUNCTION( resourcebundle_locales )
 	size_t    bundlename_len = 0;
 	const char * entry;
 	int entry_len;
+	int32_t count;
 	UEnumeration *icuenum;
 	UErrorCode   icuerror = U_ZERO_ERROR;
 
@@ -348,7 +349,7 @@ U_CFUNC PHP_FUNCTION( resourcebundle_locales )
 		Z_PARAM_STRING(bundlename, bundlename_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (bundlename_len >= MAXPATHLEN) {
+	if (UNEXPECTED(bundlename_len >= MAXPATHLEN)) {
 		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
@@ -364,7 +365,13 @@ U_CFUNC PHP_FUNCTION( resourcebundle_locales )
 	uenum_reset( icuenum, &icuerror );
 	INTL_CHECK_STATUS(icuerror, "Cannot iterate locales list");
 
-	array_init( return_value );
+	count = uenum_count( icuenum, &icuerror );
+	if (U_FAILURE(icuerror)) {
+		count = 0;
+		icuerror = U_ZERO_ERROR;
+	}
+
+	array_init_size( return_value, count );
 	while ((entry = uenum_next( icuenum, &entry_len, &icuerror ))) {
 		add_next_index_stringl( return_value, (char *) entry, entry_len);
 	}

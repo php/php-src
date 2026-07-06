@@ -302,6 +302,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(browscap)
 	BASIC_MINIT_SUBMODULE(standard_filters)
 	BASIC_MINIT_SUBMODULE(user_filters)
+	BASIC_MINIT_SUBMODULE(poll)
 	BASIC_MINIT_SUBMODULE(password)
 	BASIC_MINIT_SUBMODULE(image)
 
@@ -1122,13 +1123,18 @@ PHP_FUNCTION(flush)
 PHP_FUNCTION(sleep)
 {
 	zend_long num;
+#ifdef PHP_WIN32
+	const unsigned int max = UINT_MAX / 1000;
+#else
+	const unsigned int max = UINT_MAX;
+#endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(num)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (num < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
+	if (num < 0 || (zend_ulong) num > max) {
+		zend_argument_value_error(1, "must be between 0 and %u", max);
 		RETURN_THROWS();
 	}
 
@@ -1145,8 +1151,8 @@ PHP_FUNCTION(usleep)
 		Z_PARAM_LONG(num)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (num < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
+	if (num < 0 || (zend_ulong) num > UINT_MAX) {
+		zend_argument_value_error(1, "must be between 0 and %u", UINT_MAX);
 		RETURN_THROWS();
 	}
 

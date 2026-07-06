@@ -136,6 +136,11 @@ static inline zend_property_info *zend_get_typed_property_info_for_slot(zend_obj
 	return NULL;
 }
 
+static zend_always_inline zend_class_entry *zend_get_function_root_class(const zend_function *fbc)
+{
+	return fbc->common.prototype ? fbc->common.prototype->common.scope : fbc->common.scope;
+}
+
 static zend_always_inline bool zend_check_method_accessible(const zend_function *fn, const zend_class_entry *scope)
 {
 	if (!(fn->common.fn_flags & ZEND_ACC_PUBLIC)

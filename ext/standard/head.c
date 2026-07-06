@@ -218,14 +218,23 @@ static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_
 		if (zend_string_equals_literal_ci(key, "expires")) {
 			*expires = zval_get_long(value);
 		} else if (zend_string_equals_literal_ci(key, "path")) {
+			if (*path) {
+				zend_string_release(*path);
+			}
 			*path = zval_get_string(value);
 		} else if (zend_string_equals_literal_ci(key, "domain")) {
+			if (*domain) {
+				zend_string_release(*domain);
+			}
 			*domain = zval_get_string(value);
 		} else if (zend_string_equals_literal_ci(key, "secure")) {
 			*secure = zend_is_true(value);
 		} else if (zend_string_equals_literal_ci(key, "httponly")) {
 			*httponly = zend_is_true(value);
 		} else if (zend_string_equals_literal_ci(key, "samesite")) {
+			if (*samesite) {
+				zend_string_release(*samesite);
+			}
 			*samesite = zval_get_string(value);
 		} else if (zend_string_equals_literal_ci(key, "partitioned")) {
 			*partitioned = zend_is_true(value);

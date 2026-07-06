@@ -24,10 +24,6 @@
 #ifdef PHP_WIN32
 # include <Ws2tcpip.h>
 # include "win32/winutil.h"
-# define O_RDONLY _O_RDONLY
-# include "win32/param.h"
-#else
-#include <sys/param.h>
 #endif
 
 #include <sys/types.h>
@@ -44,7 +40,7 @@
 #endif
 #ifdef HAVE_POLL_H
 #include <poll.h>
-#elif HAVE_SYS_POLL_H
+#elif defined(HAVE_SYS_POLL_H)
 #include <sys/poll.h>
 #endif
 

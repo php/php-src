@@ -19,4 +19,4 @@ bool\(true\)
 
 Warning: ZipArchive::closeString\(\): (Zip archive inconsistent|Unexpected length of data).*
 bool\(false\)
-(Zip archive inconsistent|Unexpected length of data)
+(Zip archive inconsistent|Unexpected length of data).*

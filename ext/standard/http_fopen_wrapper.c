@@ -33,13 +33,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef PHP_WIN32
-#define O_RDONLY _O_RDONLY
-#include "win32/param.h"
-#else
-#include <sys/param.h>
-#endif
-
 #include "php_standard.h"
 
 #ifdef HAVE_SYS_SOCKET_H
@@ -351,6 +344,23 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 	return NULL;
 }
 
+static inline void smart_str_append_header_value(smart_str *dest, const zend_string *value, const char *header_name)
+{
+	const char *src = ZSTR_VAL(value);
+	size_t len = ZSTR_LEN(value);
+	size_t i = 0;
+	while (i < len && src[i] != '\r' && src[i] != '\n') {
+		i++;
+	}
+	if (i < len) {
+		smart_str_appendl(dest, src, i);
+		php_error_docref(NULL, E_WARNING,
+			"Header %s value contains newline characters and has been truncated", header_name);
+	} else {
+		smart_str_append(dest, value);
+	}
+}
+
 static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		const char *path, const char *mode, int options, zend_string **opened_path,
 		php_stream_context *context, int redirect_max, int flags,
@@ -361,7 +371,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	int use_ssl;
 	int use_proxy = 0;
 	zend_string *tmp = NULL;
-	char *ua_str = NULL;
+	zend_string *ua_str = NULL;
 	zval *ua_zval = NULL, *tmpzval = NULL, ssl_proxy_peer_name;
 	int reqok = 0;
 	char *http_header_line = NULL;
@@ -788,7 +798,7 @@ finish:
 	/* if the user has configured who they are, send a From: line */
 	if (!(have_header & HTTP_HEADER_FROM) && FG(from_address)) {
 		smart_str_appends(&req_buf, "From: ");
-		smart_str_appends(&req_buf, FG(from_address));
+		smart_str_append_header_value(&req_buf, FG(from_address), "From");
 		smart_str_appends(&req_buf, "\r\n");
 	}
 
@@ -817,30 +827,15 @@ finish:
 	if (context &&
 	    (ua_zval = php_stream_context_get_option(context, "http", "user_agent")) != NULL &&
 		Z_TYPE_P(ua_zval) == IS_STRING) {
-		ua_str = Z_STRVAL_P(ua_zval);
+		ua_str = Z_STR_P(ua_zval);
 	} else if (FG(user_agent)) {
 		ua_str = FG(user_agent);
 	}
 
-	if (((have_header & HTTP_HEADER_USER_AGENT) == 0) && ua_str) {
-#define _UA_HEADER "User-Agent: %s\r\n"
-		char *ua;
-		size_t ua_len;
-
-		ua_len = sizeof(_UA_HEADER) + strlen(ua_str);
-
-		/* ensure the header is only sent if user_agent is not blank */
-		if (ua_len > sizeof(_UA_HEADER)) {
-			ua = emalloc(ua_len + 1);
-			if ((ua_len = slprintf(ua, ua_len, _UA_HEADER, ua_str)) > 0) {
-				ua[ua_len] = 0;
-				smart_str_appendl(&req_buf, ua, ua_len);
-			} else {
-				php_stream_wrapper_warn_nt(wrapper, context, options, InvalidHeader,
-					"Cannot construct User-agent header");
-			}
-			efree(ua);
-		}
+	if (((have_header & HTTP_HEADER_USER_AGENT) == 0) && ua_str && ZSTR_LEN(ua_str)) {
+		smart_str_appends(&req_buf, "User-Agent: ");
+		smart_str_append_header_value(&req_buf, ua_str, "User-Agent");
+		smart_str_appends(&req_buf, "\r\n");
 	}
 
 	if (user_headers) {

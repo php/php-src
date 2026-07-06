@@ -17,8 +17,6 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
@@ -322,7 +320,7 @@ PHP_FUNCTION(com_get_active_object)
 		IDispatch_Release(obj);
 	}
 	if (unk) {
-		IUnknown_Release(obj);
+		IUnknown_Release(unk);
 	}
 	efree(module);
 }

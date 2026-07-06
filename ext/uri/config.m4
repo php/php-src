@@ -39,7 +39,7 @@ else
   PHP_EVAL_INCLINE([$LIBURIPARSER_CFLAGS])
 fi
 
-PHP_NEW_EXTENSION(uri, [php_uri.c php_uri_common.c uri_parser_rfc3986.c uri_parser_whatwg.c uri_parser_php_parse_url.c $URIPARSER_SOURCES], [no],,[$URI_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+PHP_NEW_EXTENSION(uri, [php_uri.c php_uri_common.c uri_parser_rfc3986.c uri_parser_whatwg.c uri_parser_php_parse_url.c $URIPARSER_SOURCES], [no],,[$URI_CFLAGS])
 PHP_ADD_EXTENSION_DEP(uri, lexbor)
 
 if test "$PHP_EXTERNAL_URIPARSER" = "no"; then

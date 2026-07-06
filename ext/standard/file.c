@@ -61,11 +61,7 @@
 #include "file.h"
 
 #ifdef HAVE_PWD_H
-# ifdef PHP_WIN32
-#  include "win32/pwd.h"
-# else
-#  include <pwd.h>
-# endif
+# include <pwd.h>
 #endif
 
 #include "fsock.h"
@@ -147,8 +143,8 @@ static PHP_INI_MH(OnUpdateAutoDetectLineEndings)
 }
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("user_agent", NULL, PHP_INI_ALL, OnUpdateString, user_agent, php_file_globals, file_globals)
-	STD_PHP_INI_ENTRY("from", NULL, PHP_INI_ALL, OnUpdateString, from_address, php_file_globals, file_globals)
+	STD_PHP_INI_ENTRY("user_agent", NULL, PHP_INI_ALL, OnUpdateStr, user_agent, php_file_globals, file_globals)
+	STD_PHP_INI_ENTRY("from", NULL, PHP_INI_ALL, OnUpdateStr, from_address, php_file_globals, file_globals)
 	STD_PHP_INI_ENTRY("default_socket_timeout", "60", PHP_INI_ALL, OnUpdateLong, default_socket_timeout, php_file_globals, file_globals)
 	STD_PHP_INI_BOOLEAN("auto_detect_line_endings", "0", PHP_INI_ALL, OnUpdateAutoDetectLineEndings, auto_detect_line_endings, php_file_globals, file_globals)
 PHP_INI_END()

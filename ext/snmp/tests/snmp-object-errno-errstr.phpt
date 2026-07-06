@@ -9,6 +9,8 @@ snmp
 require_once(__DIR__.'/skipif.inc');
 if (getenv('SKIP_ASAN')) die('skip Timeouts under ASAN');
 ?>
+--XFAIL--
+SNMP tests might possibly fail on Windows
 --FILE--
 <?php
 require_once(__DIR__.'/snmp_include.inc');

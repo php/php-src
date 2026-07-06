@@ -104,9 +104,7 @@ zend_result zend_optimizer_eval_special_func_call(
 		zval *result, const zend_string *name, zend_string *arg) {
 	if (zend_string_equals_literal(name, "function_exists") ||
 			zend_string_equals_literal(name, "is_callable")) {
-		zend_string *lc_name = zend_string_tolower(arg);
-		const zend_internal_function *func = zend_hash_find_ptr(EG(function_table), lc_name);
-		zend_string_release_ex(lc_name, 0);
+		const zend_internal_function *func = zend_hash_find_ptr_lc(EG(function_table), arg);
 
 		if (func && func->type == ZEND_INTERNAL_FUNCTION
 				&& func->module->type == MODULE_PERSISTENT
@@ -120,9 +118,7 @@ zend_result zend_optimizer_eval_special_func_call(
 		return FAILURE;
 	}
 	if (zend_string_equals_literal(name, "extension_loaded")) {
-		zend_string *lc_name = zend_string_tolower(arg);
-		zend_module_entry *m = zend_hash_find_ptr(&module_registry, lc_name);
-		zend_string_release_ex(lc_name, 0);
+		zend_module_entry *m = zend_hash_find_ptr_lc(&module_registry, arg);
 
 		if (!m) {
 			if (PG(enable_dl)) {

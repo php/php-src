@@ -31,7 +31,8 @@ const php_hash_ops php_hash_ripemd128_ops = {
 	16,
 	64,
 	sizeof(PHP_RIPEMD128_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_ripemd160_ops = {
@@ -46,7 +47,8 @@ const php_hash_ops php_hash_ripemd160_ops = {
 	20,
 	64,
 	sizeof(PHP_RIPEMD160_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_ripemd256_ops = {
@@ -61,7 +63,8 @@ const php_hash_ops php_hash_ripemd256_ops = {
 	32,
 	64,
 	sizeof(PHP_RIPEMD256_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_ripemd320_ops = {
@@ -76,7 +79,8 @@ const php_hash_ops php_hash_ripemd320_ops = {
 	40,
 	64,
 	sizeof(PHP_RIPEMD320_CTX),
-	1
+	1,
+	0
 };
 
 /* {{{ PHP_RIPEMD128Init

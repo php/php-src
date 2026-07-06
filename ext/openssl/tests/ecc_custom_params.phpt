@@ -5,6 +5,30 @@ openssl
 --SKIPIF--
 <?php
 if (!defined("OPENSSL_KEYTYPE_EC")) die("skip EC disabled");
+
+if (OPENSSL_VERSION_NUMBER >= 0x40000000) {
+    $d = hex2bin('8D0AC65AAEA0D6B96254C65817D4A143A9E7A03876F1A37D');
+    $p = hex2bin('BDB6F4FE3E8B1D9E0DA8C0D46F4C318CEFE4AFE3B6B8551F');
+    $a = hex2bin('BB8E5E8FBC115E139FE6A814FE48AAA6F0ADA1AA5DF91985');
+    $b = hex2bin('1854BEBDC31B21B7AEFC80AB0ECD10D5B1B3308E6DBF11C1');
+    $g_x = hex2bin('4AD5F7048DE709AD51236DE65E4D4B482C836DC6E4106640');
+    $g_y = hex2bin('02BB3A02D4AAADACAE24817A4CA3A1B014B5270432DB27D2');
+    $order = hex2bin('BDB6F4FE3E8B1D9E0DA8C0D40FC962195DFAE76F56564677');
+
+    if (@openssl_pkey_new(array(
+        'ec' => array(
+            'p' => $p,
+            'a' => $a,
+            'b' => $b,
+            'order' => $order,
+            'g_x' => $g_x,
+            'g_y' => $g_y,
+            'd' => $d,
+        ),
+    )) === false) {
+        die("skip EC custom params unsupported with OpenSSL 4");
+    }
+}
 ?>
 --FILE--
 <?php

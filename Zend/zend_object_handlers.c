@@ -1825,6 +1825,18 @@ ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(
 }
 /* }}} */
 
+ZEND_API void zend_free_trampoline(zend_function *func)
+{
+	ZEND_ASSERT(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
+
+	if (func == &EG(trampoline)) {
+		EG(trampoline).common.attributes = NULL;
+		EG(trampoline).common.function_name = NULL;
+	} else {
+		efree(func);
+	}
+}
+
 static ZEND_FUNCTION(zend_parent_hook_get_trampoline)
 {
 	zend_object *obj = Z_PTR_P(ZEND_THIS);

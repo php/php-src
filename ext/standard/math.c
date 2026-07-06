@@ -22,6 +22,7 @@
 #include "zend_exceptions.h"
 #include "zend_multiply.h"
 #include "zend_portability.h"
+#include "zend_strtod.h"
 
 #include <float.h>
 #include <math.h>
@@ -1001,7 +1002,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 	if (Z_TYPE_P(arg) == IS_DOUBLE) {
 		double fvalue = floor(Z_DVAL_P(arg)); /* floor it just in case */
 		char *ptr, *end;
-		char buf[(sizeof(double) << 3) + 1];
+		char buf[ZEND_DOUBLE_MAX_LENGTH];
 
 		/* Don't try to convert +/- infinity */
 		if (fvalue == ZEND_INFINITY || fvalue == -ZEND_INFINITY) {
@@ -1414,6 +1415,11 @@ PHP_FUNCTION(number_format)
 		thousand_sep_len = 1;
 	}
 
+	if (UNEXPECTED(dec > INT_MAX || dec < INT_MIN)) {
+		zend_argument_value_error(2, "must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_THROWS();
+	}
+
 	switch (Z_TYPE_P(num)) {
 		case IS_LONG:
 			RETURN_STR(_php_math_number_format_long(Z_LVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
@@ -1428,11 +1434,7 @@ PHP_FUNCTION(number_format)
 				RETURN_STR(_php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 			}
 
-			if (dec >= 0) {
-				dec_int = ZEND_LONG_INT_OVFL(dec) ? INT_MAX : (int)dec;
-			} else {
-				dec_int = ZEND_LONG_INT_UDFL(dec) ? INT_MIN : (int)dec;
-			}
+			dec_int = (int) dec;
 			RETURN_STR(_php_math_number_format_ex(Z_DVAL_P(num), dec_int, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 
 		default: ZEND_UNREACHABLE();

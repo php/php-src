@@ -296,10 +296,10 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 				filter_func.name,
 				ZSTR_VAL(copy_for_throwing)
 			);
-			zend_string_delref(copy_for_throwing);
+			zend_string_release(copy_for_throwing);
 			return;
 		}
-		zend_string_delref(copy_for_throwing);
+		zend_string_release(copy_for_throwing);
 		copy_for_throwing = NULL;
 	}
 

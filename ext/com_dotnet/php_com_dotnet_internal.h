@@ -66,7 +66,6 @@ extern zend_class_entry *php_com_variant_class_entry, *php_com_exception_class_e
 
 /* com_handlers.c */
 zend_object* php_com_object_new(zend_class_entry *ce);
-zend_object* php_com_object_clone(zend_object *object);
 void php_com_object_free_storage(zend_object *object);
 extern zend_object_handlers php_com_object_handlers;
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, bool enable);
@@ -115,9 +114,11 @@ PHP_COM_DOTNET_API zend_result php_com_zval_from_variant(zval *z, VARIANT *v, in
 PHP_COM_DOTNET_API zend_result php_com_copy_variant(VARIANT *dst, VARIANT *src);
 
 /* com_dotnet.c */
+#ifdef HAVE_MSCOREE_H
 PHP_METHOD(dotnet, __construct);
 void php_com_dotnet_rshutdown(void);
 void php_com_dotnet_mshutdown(void);
+#endif
 
 /* com_misc.c */
 void php_com_throw_exception(HRESULT code, char *message);

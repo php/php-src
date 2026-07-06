@@ -266,7 +266,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	php_process_handle *proc = (php_process_handle*)rsrc->ptr;
 #ifdef PHP_WIN32
 	DWORD wstatus;
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	int wstatus;
 	int waitpid_options = 0;
 	pid_t wait_pid;
@@ -297,7 +297,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	}
 	CloseHandle(proc->childHandle);
 
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	if (!FG(pclose_wait)) {
 		waitpid_options = WNOHANG;
 	}
@@ -389,7 +389,7 @@ PHP_FUNCTION(proc_get_status)
 	php_process_handle *proc;
 #ifdef PHP_WIN32
 	DWORD wstatus;
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	int wstatus;
 	pid_t wait_pid;
 #endif
@@ -418,7 +418,7 @@ PHP_FUNCTION(proc_get_status)
 	 * even if the child has already exited. This is because the result stays available
 	 * until the child handle is closed. Hence no caching is used on Windows. */
 	add_assoc_bool(return_value, "cached", false);
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	wait_pid = waitpid_cached(proc, &wstatus, WNOHANG|WUNTRACED);
 
 	if (wait_pid == proc->child) {
@@ -1377,7 +1377,6 @@ PHP_FUNCTION(proc_open)
 
 	if (newprocok == FALSE) {
 		DWORD dw = GetLastError();
-		close_all_descriptors(descriptors, ndesc);
 		char *msg = php_win32_error_to_msg(dw);
 		php_error_docref(NULL, E_WARNING, "CreateProcess failed: %s", msg);
 		php_win32_error_msg_free(msg);
@@ -1394,7 +1393,6 @@ PHP_FUNCTION(proc_open)
 
 	if (close_parentends_of_pipes(&factions, descriptors, ndesc) == FAILURE) {
 		posix_spawn_file_actions_destroy(&factions);
-		close_all_descriptors(descriptors, ndesc);
 		goto exit_fail;
 	}
 
@@ -1414,7 +1412,6 @@ PHP_FUNCTION(proc_open)
 	}
 	posix_spawn_file_actions_destroy(&factions);
 	if (r != 0) {
-		close_all_descriptors(descriptors, ndesc);
 		php_error_docref(NULL, E_WARNING, "posix_spawn() failed: %s", strerror(r));
 		goto exit_fail;
 	}
@@ -1456,7 +1453,6 @@ PHP_FUNCTION(proc_open)
 		_exit(127);
 	} else if (child < 0) {
 		/* Failed to fork() */
-		close_all_descriptors(descriptors, ndesc);
 		php_error_docref(NULL, E_WARNING, "Fork failed: %s", strerror(errno));
 		goto exit_fail;
 	}
@@ -1546,6 +1542,9 @@ PHP_FUNCTION(proc_open)
 	} else {
 exit_fail:
 		_php_free_envp(env);
+		if (descriptors) {
+			close_all_descriptors(descriptors, ndesc);
+		}
 		RETVAL_FALSE;
 	}
 

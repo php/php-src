@@ -22,7 +22,13 @@
 #include "zend_gc.h"
 #include "zend_alloc.h"
 
+#include "zend_errors.h"
+
 BEGIN_EXTERN_C()
+
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+
+#include "zend_multiply.h"
 
 typedef void (*zend_string_copy_storage_func_t)(void);
 typedef zend_string *(ZEND_FASTCALL *zend_new_interned_string_func_t)(zend_string *str);
@@ -331,6 +337,48 @@ static zend_always_inline zend_string *zend_string_safe_realloc(zend_string *s, 
 	return ret;
 }
 
+static zend_always_inline char *zend_cstr_append_char(const char *str, size_t len, char c) {
+	char *res = (char *)safe_emalloc(len, 1, 2);
+	if (len > 0) {
+		memcpy(res, str, len);
+	}
+	res[len] = c;
+	res[len + 1] = '\0';
+	return res;
+}
+
+static zend_always_inline char *zend_cstr_concat(const char *s1, size_t len1, const char *s2, size_t len2) {
+	size_t size = zend_safe_address_guarded(1, len1, len2);
+	size = zend_safe_address_guarded(1, size, 1);
+	char *res = (char *)emalloc(size);
+	if (len1 > 0) {
+		memcpy(res, s1, len1);
+	}
+	if (len2 > 0) {
+		memcpy(res + len1, s2, len2);
+	}
+	res[len1 + len2] = '\0';
+	return res;
+}
+
+static zend_always_inline char *zend_cstr_concat3(const char *s1, size_t len1, const char *s2, size_t len2, const char *s3, size_t len3) {
+	size_t size = zend_safe_address_guarded(1, len1, len2);
+	size = zend_safe_address_guarded(1, size, len3);
+	size = zend_safe_address_guarded(1, size, 1);
+	char *res = (char *)emalloc(size);
+	if (len1 > 0) {
+		memcpy(res, s1, len1);
+	}
+	if (len2 > 0) {
+		memcpy(res + len1, s2, len2);
+	}
+	if (len3 > 0) {
+		memcpy(res + len1 + len2, s3, len3);
+	}
+	res[len1 + len2 + len3] = '\0';
+	return res;
+}
+
 static zend_always_inline void zend_string_free(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
@@ -397,11 +445,22 @@ static zend_always_inline bool zend_string_equals(const zend_string *s1, const z
 	return s1 == s2 || zend_string_equal_content(s1, s2);
 }
 
-#define zend_string_equals_ci(s1, s2) \
-	(ZSTR_LEN(s1) == ZSTR_LEN(s2) && !zend_binary_strcasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2)))
+BEGIN_EXTERN_C()
+ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp(const char *s1, size_t len1, const char *s2, size_t len2);
+END_EXTERN_C()
 
-#define zend_string_equals_literal_ci(str, c) \
-	(ZSTR_LEN(str) == sizeof("" c) - 1 && !zend_binary_strcasecmp(ZSTR_VAL(str), ZSTR_LEN(str), (c), sizeof(c) - 1))
+static zend_always_inline bool zend_string_equals_cstr_ci(const zend_string *s1, const char *s2, size_t s2_length)
+{
+	return ZSTR_LEN(s1) == s2_length && !zend_binary_strcasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), s2, s2_length);
+}
+
+#define zend_string_equals_literal_ci(str, literal) \
+	zend_string_equals_cstr_ci(str, "" literal, sizeof(literal) - 1)
+
+static zend_always_inline bool zend_string_equals_ci(const zend_string *s1, const zend_string *s2)
+{
+	return zend_string_equals_cstr_ci(s1, ZSTR_VAL(s2), ZSTR_LEN(s2));
+}
 
 #define zend_string_equals_literal(str, literal) \
 	zend_string_equals_cstr(str, "" literal, sizeof(literal) - 1)
@@ -650,6 +709,7 @@ default: ZEND_UNREACHABLE();
 	_(ZEND_STR_CONST_EXPR_PLACEHOLDER, "[constant expression]") \
 	_(ZEND_STR_DEPRECATED_CAPITALIZED, "Deprecated") \
 	_(ZEND_STR_SINCE,                  "since") \
+	_(ZEND_STR_NODISCARD,              "NoDiscard") \
 	_(ZEND_STR_GET,                    "get") \
 	_(ZEND_STR_SET,                    "set") \
 	_(ZEND_STR_8_DOT_0,                "8.0") \

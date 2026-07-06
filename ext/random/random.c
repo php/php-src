@@ -45,10 +45,6 @@
 # include <sys/time.h>
 #endif
 
-#ifdef HAVE_SYS_PARAM_H
-# include <sys/param.h>
-#endif
-
 #include "random_arginfo.h"
 
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(random)

@@ -207,7 +207,7 @@ zend_result phar_mount_entry(phar_archive_data *phar, const char *filename, size
 		return FAILURE;
 	}
 
-	if (path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (phar_path_is_magic_phar_ex(path, path_len)) {
 		/* no creating magic phar files by mounting them */
 		return FAILURE;
 	}
@@ -787,7 +787,6 @@ static void phar_set_fp_type(phar_entry_info *entry, enum phar_fp_type type, zen
  */
 ZEND_ATTRIBUTE_NONNULL zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, bool follow_links) /* {{{ */
 {
-	php_stream_filter *filter;
 	phar_archive_data *phar = entry->phar;
 	zend_off_t loc;
 	php_stream *ufp;
@@ -852,15 +851,16 @@ ZEND_ATTRIBUTE_NONNULL zend_result phar_open_entry_fp(phar_entry_info *entry, ch
 
 	ufp = phar_get_entrypufp(entry);
 
-	const char *filter_name = phar_decompress_filter(entry, false);
-	if (filter_name != NULL) {
-		filter = php_stream_filter_create(filter_name, NULL, 0);
-	} else {
-		filter = NULL;
+	const char *decompression_filter_name = phar_get_decompress_filter_name(entry);
+	if (UNEXPECTED(!decompression_filter_name)) {
+		spprintf(error, 4096, "phar error: unable to read phar \"%s\" (file \"%s\" is compressed with an unknown compression algorithm)", ZSTR_VAL(phar->fname), ZSTR_VAL(entry->filename));
+		return FAILURE;
 	}
 
+	php_stream_filter *filter = php_stream_filter_create(decompression_filter_name, NULL, 0);
+
 	if (!filter) {
-		spprintf(error, 4096, "phar error: unable to read phar \"%s\" (cannot create %s filter while decompressing file \"%s\")", ZSTR_VAL(phar->fname), phar_decompress_filter(entry, true), ZSTR_VAL(entry->filename));
+		spprintf(error, 4096, "phar error: unable to read phar \"%s\" (cannot create %s filter while decompressing file \"%s\")", ZSTR_VAL(phar->fname), decompression_filter_name, ZSTR_VAL(entry->filename));
 		return FAILURE;
 	}
 
@@ -1115,7 +1115,7 @@ phar_archive_data* phar_get_archive(const char *fname, size_t fname_len, const c
 /**
  * Determine which stream compression filter (if any) we need to read this file
  */
-const char * phar_compress_filter(const phar_entry_info *entry, bool return_unknown) /* {{{ */
+const char * phar_get_compress_filter_name(const phar_entry_info *entry)
 {
 	switch (entry->flags & PHAR_ENT_COMPRESSION_MASK) {
 	case PHAR_ENT_COMPRESSED_GZ:
@@ -1123,15 +1123,14 @@ const char * phar_compress_filter(const phar_entry_info *entry, bool return_unkn
 	case PHAR_ENT_COMPRESSED_BZ2:
 		return "bzip2.compress";
 	default:
-		return return_unknown ? "unknown" : NULL;
+		return NULL;
 	}
 }
-/* }}} */
 
 /**
  * Determine which stream decompression filter (if any) we need to read this file
  */
-const char * phar_decompress_filter(const phar_entry_info *entry, bool return_unknown) /* {{{ */
+const char * phar_get_decompress_filter_name(const phar_entry_info *entry)
 {
 	uint32_t flags;
 
@@ -1147,10 +1146,9 @@ const char * phar_decompress_filter(const phar_entry_info *entry, bool return_un
 		case PHAR_ENT_COMPRESSED_BZ2:
 			return "bzip2.decompress";
 		default:
-			return return_unknown ? "unknown" : NULL;
+			return NULL;
 	}
 }
-/* }}} */
 
 /**
  * retrieve information on a file contained within a phar, or null if it ain't there
@@ -1181,7 +1179,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 		*error = NULL;
 	}
 
-	if (security && path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (security && phar_path_is_magic_phar_ex(path, path_len)) {
 		if (error) {
 			spprintf(error, 4096, "phar error: cannot directly access magic \".phar\" directory or files within it");
 		}

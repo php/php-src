@@ -3847,9 +3847,7 @@ static zend_result preload_resolve_deps(preload_error *error, const zend_class_e
 	memset(error, 0, sizeof(preload_error));
 
 	if (ce->parent_name) {
-		zend_string *key = zend_string_tolower(ce->parent_name);
-		const zend_class_entry *parent = zend_hash_find_ptr(EG(class_table), key);
-		zend_string_release(key);
+		const zend_class_entry *parent = zend_hash_find_ptr_lc(EG(class_table), ce->parent_name);
 		if (!parent) {
 			error->kind = "Unknown parent ";
 			error->name = ZSTR_VAL(ce->parent_name);
@@ -4379,6 +4377,7 @@ static void preload_fix_trait_op_array(zend_op_array *op_array)
 	uint32_t fn_flags2 = op_array->fn_flags2;
 	zend_function *prototype = op_array->prototype;
 	HashTable *ht = op_array->static_variables;
+	const zend_property_info *prop_info = op_array->prop_info;
 	*op_array = *orig_op_array;
 	op_array->function_name = function_name;
 	op_array->scope = scope;
@@ -4386,6 +4385,7 @@ static void preload_fix_trait_op_array(zend_op_array *op_array)
 	op_array->fn_flags2 = fn_flags2;
 	op_array->prototype = prototype;
 	op_array->static_variables = ht;
+	op_array->prop_info = prop_info;
 }
 
 static void preload_fix_trait_methods(const zend_class_entry *ce)

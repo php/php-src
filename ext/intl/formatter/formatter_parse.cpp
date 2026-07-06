@@ -50,7 +50,12 @@ U_CFUNC PHP_FUNCTION( numfmt_parse )
 	}
 
 	if (zposition) {
-		position = (int32_t) zval_get_long(zposition);
+		zend_long long_position = zval_get_long(zposition);
+		if (UNEXPECTED(long_position < INT32_MIN || long_position > INT32_MAX)) {
+			zend_argument_value_error(hasThis() ? 3 : 4, "must be between %d and %d", INT32_MIN, INT32_MAX);
+			RETURN_THROWS();
+		}
+		position = (int32_t) long_position;
 	}
 
 	/* Fetch the object. */
@@ -155,8 +160,13 @@ U_CFUNC PHP_FUNCTION( numfmt_parse_currency )
 	intl_stringFromChar(ustr, str, str_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
 
-	if(zposition) {
-		position = (int32_t) zval_get_long(zposition);
+	if (zposition) {
+		zend_long long_position = zval_get_long(zposition);
+		if (UNEXPECTED(long_position < INT32_MIN || long_position > INT32_MAX)) {
+			zend_argument_value_error(hasThis() ? 3 : 4, "must be between %d and %d", INT32_MIN, INT32_MAX);
+			RETURN_THROWS();
+		}
+		position = (int32_t) long_position;
 	}
 
 	icu::ParsePosition pp(position);
@@ -171,7 +181,7 @@ U_CFUNC PHP_FUNCTION( numfmt_parse_currency )
 		ZEND_TRY_ASSIGN_REF_LONG(zposition, pp.getIndex());
 	}
 
-	double number = currAmt->getNumber().getDouble(INTL_DATA_ERROR_CODE(nfo));
+	const double number = currAmt->getNumber().getDouble(INTL_DATA_ERROR_CODE(nfo));
 
 	/* Convert parsed currency to UTF-8 and pass it back to caller. */
 	icu::UnicodeString ucurrency(currAmt->getISOCurrency());

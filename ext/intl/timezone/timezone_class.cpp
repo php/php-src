@@ -292,7 +292,7 @@ static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
 	zend_hash_str_update(debug_info, "id", sizeof("id") - 1, &zv);
 
 	int32_t rawOffset, dstOffset;
-	UDate now = Calendar::getNow();
+	const UDate now = Calendar::getNow();
 	tz->getOffset(now, false, rawOffset, dstOffset, uec);
 	if (U_FAILURE(uec)) {
 		return debug_info;

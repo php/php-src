@@ -264,11 +264,7 @@ static zend_class_entry *lookup_class_ex(
 	bool in_preload = CG(compiler_options) & ZEND_COMPILE_PRELOAD;
 
 	if (UNEXPECTED(!EG(active) && !in_preload)) {
-		zend_string *lc_name = zend_string_tolower(name);
-
-		ce = zend_hash_find_ptr(CG(class_table), lc_name);
-
-		zend_string_release(lc_name);
+		ce = zend_hash_find_ptr_lc(CG(class_table), name);
 
 		if (register_unresolved && !ce) {
 			zend_error_noreturn(
@@ -2119,6 +2115,12 @@ static bool do_inherit_constant_check(
 		);
 	}
 
+	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE)) {
+		if (child_constant->ce == ce) {
+			ZEND_CLASS_CONST_FLAGS(child_constant) &= ~ZEND_ACC_OVERRIDE;
+		}
+	}
+
 	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE) && ZEND_TYPE_IS_SET(parent_constant->type)) {
 		inheritance_status status = class_constant_types_compatible(parent_constant, child_constant);
 		if (status == INHERITANCE_ERROR) {
@@ -2318,6 +2320,15 @@ void zend_inheritance_check_override(const zend_class_entry *ce)
 				E_COMPILE_ERROR, f->op_array.filename, f->op_array.line_start,
 				"%s::%s() has #[\\Override] attribute, but no matching parent method exists",
 				ZEND_FN_SCOPE_NAME(f), ZSTR_VAL(f->common.function_name));
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->constants_table, zend_string *name, zend_class_constant *c) {
+		if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_OVERRIDE) {
+			zend_error_noreturn(
+				E_COMPILE_ERROR,
+				"%s::%s has #[\\Override] attribute, but no matching parent constant exists",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -2530,7 +2541,6 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 	size_t i, j = 0;
 	zend_trait_precedence *cur_precedence;
 	zend_trait_method_reference *cur_method_ref;
-	zend_string *lc_trait_name;
 	zend_string *lcname;
 	HashTable **exclude_tables = NULL;
 	zend_class_entry **aliases = NULL;
@@ -2545,9 +2555,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 		while ((cur_precedence = precedences[i])) {
 			/** Resolve classes for all precedence operations. */
 			cur_method_ref = &cur_precedence->trait_method;
-			lc_trait_name = zend_string_tolower(cur_method_ref->class_name);
-			trait = zend_hash_find_ptr(EG(class_table), lc_trait_name);
-			zend_string_release_ex(lc_trait_name, 0);
+			trait = zend_hash_find_ptr_lc(EG(class_table), cur_method_ref->class_name);
 			if (!trait || !(trait->ce_flags & ZEND_ACC_LINKED)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
 			}
@@ -2574,9 +2582,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 				zend_class_entry *exclude_ce;
 				uint32_t trait_num;
 
-				lc_trait_name = zend_string_tolower(class_name);
-				exclude_ce = zend_hash_find_ptr(EG(class_table), lc_trait_name);
-				zend_string_release_ex(lc_trait_name, 0);
+				exclude_ce = zend_hash_find_ptr_lc(EG(class_table), class_name);
 				if (!exclude_ce || !(exclude_ce->ce_flags & ZEND_ACC_LINKED)) {
 					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(class_name));
 				}
@@ -2619,9 +2625,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 			lcname = zend_string_tolower(cur_method_ref->method_name);
 			if (cur_method_ref->class_name) {
 				/* For all aliases with an explicit class name, resolve the class now. */
-				lc_trait_name = zend_string_tolower(cur_method_ref->class_name);
-				trait = zend_hash_find_ptr(EG(class_table), lc_trait_name);
-				zend_string_release_ex(lc_trait_name, 0);
+				trait = zend_hash_find_ptr_lc(EG(class_table), cur_method_ref->class_name);
 				if (!trait || !(trait->ce_flags & ZEND_ACC_LINKED)) {
 					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
 				}
@@ -3757,6 +3761,11 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		if (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
 			resolve_delayed_variance_obligations(ce);
 		}
+		/* Delayed variance resolution can re-enter linking before the full
+		 * hierarchy is linked. See ext/opcache/tests/gh20469*.phpt. */
+		if (CG(unlinked_uses) && zend_hash_index_exists(CG(unlinked_uses), (zend_long)(uintptr_t) ce)) {
+			ce->ce_flags &= ~ZEND_ACC_CACHEABLE;
+		}
 		if (ce->ce_flags & ZEND_ACC_CACHEABLE) {
 			ce->ce_flags &= ~ZEND_ACC_CACHEABLE;
 		} else {
@@ -3764,6 +3773,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		}
 	}
 
+	bool was_cacheable = is_cacheable;
 	if (!CG(current_linking_class)) {
 		is_cacheable = 0;
 	}
@@ -3784,6 +3794,13 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zend_hash_destroy(ht);
 			FREE_HASHTABLE(ht);
 		}
+	} else if (was_cacheable && ce->inheritance_cache) {
+		/* Cacheability can be disabled after dependency tracking prepared
+		 * an inheritance-cache dependency table. Discard it here. */
+		HashTable *ht = (HashTable*)ce->inheritance_cache;
+		ce->inheritance_cache = NULL;
+		zend_hash_destroy(ht);
+		FREE_HASHTABLE(ht);
 	}
 
 	if (!orig_record_errors) {

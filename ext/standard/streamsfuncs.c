@@ -325,7 +325,7 @@ PHP_FUNCTION(stream_socket_accept)
 		if (peername) {
 			zend_string_release(peername);
 		}
-		php_error_docref(NULL, E_WARNING, "Accept failed: %s", errstr ? ZSTR_VAL(errstr) : "Unknown error");
+		php_stream_warn(stream, AcceptFailed, "Accept failed: %s", errstr ? ZSTR_VAL(errstr) : "Unknown error");
 		RETVAL_FALSE;
 	}
 

@@ -132,12 +132,8 @@ U_CFUNC void spoofchecker_object_destroy(Spoofchecker_object* co)
 		co->uspoof = NULL;
 	}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 58
-	if (co->uspoofres) {
-		uspoof_closeCheckResult(co->uspoofres);
-		co->uspoofres = NULL;
-	}
-#endif
+	intl_icu_compat_uspoof_close_check_result(co->uspoofres);
+	co->uspoofres = NULL;
 
 	intl_error_reset(SPOOFCHECKER_ERROR_P(co));
 }
