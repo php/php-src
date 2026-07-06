@@ -185,9 +185,9 @@ static zend_always_inline uint32_t prop_get_flags(const property_reference *ref)
 	return ref->prop ? ref->prop->flags : ZEND_ACC_PUBLIC;
 }
 
-static inline bool is_closure_invoke(const zend_class_entry *ce, const zend_string *lcname) {
+static inline bool is_closure_invoke(const zend_class_entry *ce, const zend_string *name) {
 	return ce == zend_ce_closure
-		&& zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
+		&& zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
 }
 
 static zend_function *_copy_function(zend_function *fptr) /* {{{ */
@@ -4409,7 +4409,7 @@ ZEND_METHOD(ReflectionClass, hasMethod)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 	RETVAL_BOOL(zend_hash_find_ptr_lc(&ce->function_table, name) != NULL
-		|| (ce == zend_ce_closure && zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))));
+		|| is_closure_invoke(ce, name));
 }
 /* }}} */
 
@@ -4428,7 +4428,7 @@ ZEND_METHOD(ReflectionClass, getMethod)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	is_invoke = ce == zend_ce_closure && zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
+	is_invoke = is_closure_invoke(ce, name);
 	if (!Z_ISUNDEF(intern->obj) && is_invoke
 		&& (mptr = zend_get_closure_invoke_method(Z_OBJ(intern->obj))) != NULL)
 	{
