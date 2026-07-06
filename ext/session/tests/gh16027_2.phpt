@@ -1,16 +1,11 @@
 --TEST--
-Bug #60634 (Segmentation fault when trying to die() in SessionHandler::write()) - exception in write during exec
---INI--
-session.save_path=
-session.name=PHPSESSID
-session.save_handler=files
+GH-16027 (close() throwing while a write() exception is pending chains it as previous)
 --EXTENSIONS--
 session
+--SKIPIF--
+<?php include('skipif.inc'); ?>
 --FILE--
 <?php
-
-ob_start();
-
 class MySessionHandler implements SessionHandlerInterface {
     function open($save_path, $session_name): bool {
         return true;
@@ -18,7 +13,7 @@ class MySessionHandler implements SessionHandlerInterface {
 
     function close(): bool {
         echo "close: goodbye cruel world\n";
-        return true;
+        throw new Exception('close failed');
     }
 
     function read($id): string|false {
@@ -27,7 +22,7 @@ class MySessionHandler implements SessionHandlerInterface {
 
     function write($id, $session_data): bool {
         echo "write: goodbye cruel world\n";
-        throw new Exception;
+        throw new Exception('write failed');
     }
 
     function destroy($id): bool {
@@ -35,23 +30,24 @@ class MySessionHandler implements SessionHandlerInterface {
     }
 
     function gc($maxlifetime): int {
-        return true;
+        return 1;
     }
 }
 
 session_set_save_handler(new MySessionHandler());
 session_start();
-session_write_close();
-echo "um, hi\n";
 
+try {
+    session_write_close();
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+    $previous = $e->getPrevious();
+    echo 'previous: ';
+    var_dump($previous ? $previous->getMessage() : null);
+}
 ?>
---EXPECTF--
+--EXPECT--
 write: goodbye cruel world
 close: goodbye cruel world
-
-Fatal error: Uncaught Exception in %s
-Stack trace:
-#0 [internal function]: MySessionHandler->write('%s', '')
-#1 %s(%d): session_write_close()
-#2 {main}
-  thrown in %s on line %d
+Exception: close failed
+previous: string(12) "write failed"

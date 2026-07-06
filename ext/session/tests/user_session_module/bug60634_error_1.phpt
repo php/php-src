@@ -43,14 +43,10 @@ session_start();
 session_write_close();
 echo "um, hi\n";
 
-/*
-FIXME: Something wrong. It should try to close after error, otherwise session
-may keep "open" state.
-*/
-
 ?>
 --EXPECTF--
 write: goodbye cruel world
+close: goodbye cruel world
 
 Fatal error: Uncaught Error: Call to undefined function undefined_function() in %s:%d
 Stack trace:

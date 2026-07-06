@@ -17,6 +17,7 @@
 #include "php.h"
 #include "php_session.h"
 #include "mod_user.h"
+#include "zend_exceptions.h"
 
 const ps_module ps_mod_user = {
 	PS_MOD_UPDATE_TIMESTAMP(user)
@@ -112,12 +113,19 @@ PS_CLOSE_FUNC(user)
 	bool bailout = 0;
 	zval retval;
 	zend_result ret = FAILURE;
+	zend_object *old_exception = NULL;
 
 	ZEND_ASSERT(!Z_ISUNDEF(PSF(close)));
 
 	if (!PS(mod_user_implemented)) {
 		/* already closed */
 		return SUCCESS;
+	}
+
+	/* Run close() even with a pending exception, so the handler releases its resources; skip real exit()/die() (bug #60634). */
+	if (EG(exception) && !zend_is_unwind_exit(EG(exception)) && !zend_is_graceful_exit(EG(exception))) {
+		old_exception = EG(exception);
+		EG(exception) = NULL;
 	}
 
 	zend_try {
@@ -127,6 +135,17 @@ PS_CLOSE_FUNC(user)
 	} zend_end_try();
 
 	PS(mod_user_implemented) = 0;
+
+	if (old_exception) {
+		if (!EG(exception)) {
+			EG(exception) = old_exception;
+		} else if (!zend_is_unwind_exit(EG(exception)) && !zend_is_graceful_exit(EG(exception))) {
+			zend_exception_set_previous(EG(exception), old_exception);
+		} else {
+			/* close() itself exited/died: that takes precedence, the stashed exception is moot. */
+			OBJ_RELEASE(old_exception);
+		}
+	}
 
 	if (bailout) {
 		if (!Z_ISUNDEF(retval)) {
