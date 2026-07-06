@@ -1,5 +1,8 @@
 #ifndef GD_PATH_ARC_H
 #define GD_PATH_ARC_H
+
+#include "gd_vector2d.h"
+
 void _gd_arc_path(gdPathPtr path, double xc, double yc, double radius, double angle1,
                   double angle2);
 

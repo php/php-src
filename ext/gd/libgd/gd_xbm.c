@@ -1,15 +1,7 @@
-/*
-   +----------------------------------------------------------------------+
-   | Copyright © The PHP Group and Contributors.                          |
-   +----------------------------------------------------------------------+
-   | This source file is subject to the Modified BSD License that is      |
-   | bundled with this package in the file LICENSE, and is available      |
-   | through the World Wide Web at <https://www.php.net/license/>.        |
-   |                                                                      |
-   | SPDX-License-Identifier: BSD-3-Clause                                |
-   +----------------------------------------------------------------------+
-   | Author: Marcus Boerger <helly@php.net>                               |
-   +----------------------------------------------------------------------+
+/**
+ * File: XBM IO
+ *
+ * Read and write XBM images.
  */
 
 /* $Id$ */
@@ -18,16 +10,54 @@
 #include "gd_errors.h"
 #include "gd_intern.h"
 #include "gdhelpers.h"
+#include <ctype.h>
 #include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "php.h"
-
 #define MAX_XBM_LINE_SIZE 255
 
-/* {{{ gdImagePtr gdImageCreateFromXbm */
+/*
+  Function: gdImageCreateFromXbm
+
+        <gdImageCreateFromXbm> is called to load images from X bitmap
+        format files. Invoke <gdImageCreateFromXbm> with an already opened
+        pointer to a file containing the desired
+        image. <gdImageCreateFromXbm> returns a <gdImagePtr> to the new
+        image, or NULL if unable to load the image (most often because the
+        file is corrupt or does not contain an X bitmap format
+        image). <gdImageCreateFromXbm> does not close the file.
+
+        You can inspect the sx and sy members of the image to determine
+        its size. The image must eventually be destroyed using
+        <gdImageDestroy>.
+
+        X11 X bitmaps (which define a char[]) as well as X10 X bitmaps (which define
+        a short[]) are supported.
+
+  Parameters:
+
+        fd - The input FILE pointer
+
+  Returns:
+
+        A pointer to the new image or NULL if an error occurred.
+
+  Example:
+        (start code)
+
+        gdImagePtr im;
+        FILE *in;
+        in = fopen("myxbm.xbm", "rb");
+        im = gdImageCreateFromXbm(in);
+        fclose(in);
+        // ... Use the image ...
+        gdImageDestroy(im);
+
+        (end code)
+*/
 BGD_DECLARE(gdImagePtr) gdImageCreateFromXbm(FILE *fd)
 {
     char fline[MAX_XBM_LINE_SIZE];
@@ -153,10 +183,9 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromXbm(FILE *fd)
     gdImageDestroy(im);
     return 0;
 }
-/* }}} */
 
 /* {{{ gdCtxPrintf */
-void gdCtxPrintf(gdIOCtx *out, const char *format, ...)
+static void gdCtxPrintf(gdIOCtx *out, const char *format, ...)
 {
     char *buf;
     int len;
@@ -166,12 +195,30 @@ void gdCtxPrintf(gdIOCtx *out, const char *format, ...)
     len = vspprintf(&buf, 0, format, args);
     va_end(args);
     out->putBuf(out, buf, len);
-    efree(buf);
+    gdFree(buf);
 }
 /* }}} */
 
-/* {{{ gdImageXbmCtx */
-BGD_DECLARE(void) gdImageXbmCtx(gdImagePtr image, char *file_name, int fg, gdIOCtx *out)
+/* The compiler will optimize strlen(constant) to a constant number. */
+#define gdCtxPuts(out, s) out->putBuf(out, s, strlen(s))
+
+/**
+ * Function: gdImageXbmCtx
+ *
+ *  Writes an image to an IO context in X11 bitmap format.
+ *
+ * Parameters:
+ *
+ *  image     - The <gdImagePtr> to write.
+ *  file_name - The prefix of the XBM's identifiers. Illegal characters are
+ *              automatically stripped.
+ *  gd        - Which color to use as forground color. All pixels with another
+ *              color are unset.
+ *  out       - The <gdIOCtx> to write the image file to.
+ *
+ */
+BGD_DECLARE(void)
+gdImageXbmCtx(gdImagePtr image, char *file_name, int fg, gdIOCtx *out)
 {
     int x, y, c, b, sx, sy, p;
     char *name, *f;
@@ -186,23 +233,44 @@ BGD_DECLARE(void) gdImageXbmCtx(gdImagePtr image, char *file_name, int fg, gdIOC
     if ((f = strrchr(name, '.')) != NULL && !gd_strcasecmp(f, ".XBM"))
         *f = '\0';
     if ((l = strlen(name)) == 0) {
-        efree(name);
+        gdFree(name);
         name = estrdup("image");
     } else {
         for (i = 0; i < l; i++) {
-            /* only in C-locale isalnum() would work */
-            if (!isupper((unsigned char)name[i]) && !islower((unsigned char)name[i]) &&
-                !isdigit((unsigned char)name[i])) {
+            char c = name[i];
+            // Explicitly check for valid ASCII ranges and the underscore
+            if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ||
+                  (c == '_'))) {
+
+                // Anything else (spaces, punctuation, accents, UTF-8 bytes)
+                // becomes '_'
                 name[i] = '_';
             }
         }
     }
 
-    gdCtxPrintf(out, "#define %s_width %d\n", name, gdImageSX(image));
-    gdCtxPrintf(out, "#define %s_height %d\n", name, gdImageSY(image));
-    gdCtxPrintf(out, "static unsigned char %s_bits[] = {\n  ", name);
+    /* Since "name" comes from the user, run it through a direct puts.
+     * Trying to printf it into a local buffer means we'd need a large
+     * or dynamic buffer to hold it all. */
 
-    efree(name);
+    /* #define <name>_width 1234 */
+    gdCtxPuts(out, "#define ");
+    gdCtxPuts(out, name);
+    gdCtxPuts(out, "_width ");
+    gdCtxPrintf(out, "%d\n", gdImageSX(image));
+
+    /* #define <name>_height 1234 */
+    gdCtxPuts(out, "#define ");
+    gdCtxPuts(out, name);
+    gdCtxPuts(out, "_height ");
+    gdCtxPrintf(out, "%d\n", gdImageSY(image));
+
+    /* static unsigned char <name>_bits[] = {\n */
+    gdCtxPuts(out, "static unsigned char ");
+    gdCtxPuts(out, name);
+    gdCtxPuts(out, "_bits[] = {\n  ");
+
+    gdFree(name);
 
     b = 1;
     p = 0;
@@ -217,9 +285,9 @@ BGD_DECLARE(void) gdImageXbmCtx(gdImagePtr image, char *file_name, int fg, gdIOC
             if ((b == 128) || (x == sx - 1)) {
                 b = 1;
                 if (p) {
-                    gdCtxPrintf(out, ", ");
+                    gdCtxPuts(out, ", ");
                     if (!(p % 12)) {
-                        gdCtxPrintf(out, "\n  ");
+                        gdCtxPuts(out, "\n  ");
                         p = 12;
                     }
                 }
@@ -231,6 +299,5 @@ BGD_DECLARE(void) gdImageXbmCtx(gdImagePtr image, char *file_name, int fg, gdIOC
             }
         }
     }
-    gdCtxPrintf(out, "};\n");
+    gdCtxPuts(out, "};\n");
 }
-/* }}} */

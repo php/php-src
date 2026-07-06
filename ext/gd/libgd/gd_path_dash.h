@@ -1,6 +1,8 @@
 #ifndef GD_PATH_DASH_H
 #define GD_PATH_DASH_H
 
+#include "gd_vector2d_private.h"
+
 #define _dash_init(dash)                                                                           \
     do {                                                                                           \
         dash.data = NULL;                                                                          \

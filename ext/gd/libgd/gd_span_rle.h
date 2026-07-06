@@ -1,6 +1,8 @@
 #ifndef GD_SPAN_RLE_H
 #define GD_SPAN_RLE_H
 
+#include "gd_vector2d_private.h"
+
 #define _rle_spans_init(rle_s)                                                                     \
     do {                                                                                           \
         rle_s.data = NULL;                                                                         \
