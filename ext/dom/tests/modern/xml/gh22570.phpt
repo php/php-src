@@ -15,13 +15,15 @@ if (getenv('SKIP_ASAN')) {
 zend.max_allowed_stack_size=512K
 --FILE--
 <?php
-// Build via the DOM API, not the parser: libxml caps parse depth even with
-// LIBXML_PARSEHUGE on some platforms; the serializer recursion is the bug.
+// Build bottom-up so the insertion cycle-check stays O(1); top-down is O(n^2).
 $doc = Dom\XMLDocument::createEmpty();
-$node = $doc->appendChild($doc->createElement('root'));
+$node = $doc->createElement('a');
 for ($i = 0; $i < 100000; $i++) {
-    $node = $node->appendChild($doc->createElement('a'));
+    $parent = $doc->createElement('a');
+    $parent->appendChild($node);
+    $node = $parent;
 }
+$doc->appendChild($node);
 
 try {
     $doc->saveXml();
