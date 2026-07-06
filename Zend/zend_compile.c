@@ -5353,17 +5353,7 @@ static bool zend_compile_parent_property_hook_call(znode *result, const zend_ast
 	const zend_ast *class_ast = ast->child[0];
 	zend_ast *method_ast = ast->child[1];
 
-	/* Recognize parent::$prop::get() pattern. */
-	if (class_ast->kind != ZEND_AST_STATIC_PROP
-	 || (class_ast->attr & ZEND_PARENTHESIZED_STATIC_PROP)
-	 || class_ast->child[0]->kind != ZEND_AST_ZVAL
-	 || Z_TYPE_P(zend_ast_get_zval(class_ast->child[0])) != IS_STRING
-	 || zend_get_class_fetch_type(zend_ast_get_str(class_ast->child[0])) != ZEND_FETCH_CLASS_PARENT
-	 || class_ast->child[1]->kind != ZEND_AST_ZVAL
-	 || method_ast->kind != ZEND_AST_ZVAL
-	 || Z_TYPE_P(zend_ast_get_zval(method_ast)) != IS_STRING
-	 || (!zend_string_equals_literal_ci(zend_ast_get_str(method_ast), "get")
-	  && !zend_string_equals_literal_ci(zend_ast_get_str(method_ast), "set"))) {
+	if (!zend_ast_is_parent_hook_call(ast)) {
 		return false;
 	}
 

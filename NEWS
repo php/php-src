@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Sync Boost.Context assembly with 1.91.0. (kn1g78)
+  . Fixed bug GH-22387 (AST pretty-printing drops meaningful parentheses around
+    RHS of instanceof). (timwolla)
 
 - DBA:
   . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
