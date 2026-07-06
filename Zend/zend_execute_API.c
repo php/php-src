@@ -1468,7 +1468,7 @@ ZEND_API zend_result zend_eval_string_ex(const char *str, zval *retval_ptr, cons
 
 ZEND_API zend_signal_interrupt_result zend_signal_interrupt(void)
 {
-	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+	if (atomic_load(&EG(timed_out))) {
 		return ZEND_SIGNAL_INTERRUPT;
 	}
 

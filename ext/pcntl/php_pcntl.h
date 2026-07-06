@@ -42,13 +42,14 @@ struct php_pcntl_pending_signal {
 
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	HashTable php_signal_table;
-	bool processing_signal_queue;
 	volatile bool pending_signals;
 	bool async_signals;
 	/* some OSes define NSIG to be > UINT8_MAX */
 	uint16_t num_signals;
 	int last_error;
-	struct php_pcntl_pending_signal *head, *tail, *spares;
+	struct php_pcntl_pending_signal *pending_signals_queue; /* ring buffer */
+	atomic_int pending_signals_head;                   /* consumer position */
+	atomic_int pending_signals_tail;                   /* producer position */
 	zend_bitset restart_syscalls;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
