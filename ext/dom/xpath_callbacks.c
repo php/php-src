@@ -347,15 +347,15 @@ static zval *php_dom_xpath_callback_fetch_args(xmlXPathParserContextPtr ctxt, ui
 							xmlNodePtr node = obj->nodesetval->nodeTab[j];
 							zval child;
 							if (UNEXPECTED(node->type == XML_NAMESPACE_DECL)) {
-								xmlNodePtr nsparent = node->_private;
 								xmlNsPtr original = (xmlNsPtr) node;
 
 								/* Make sure parent dom object exists, so we can take an extra reference. */
 								zval parent_zval; /* don't destroy me, my lifetime is transferred to the fake namespace decl */
-								php_dom_create_object(nsparent, &parent_zval, intern);
+								proxy_factory(node->_private, &parent_zval, intern, ctxt);
 								dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
+								xmlNodePtr parent = dom_object_get_node(parent_intern);
 
-								php_dom_create_fake_namespace_decl(nsparent, original, &child, parent_intern);
+								php_dom_create_fake_namespace_decl(parent, original, &child, parent_intern);
 							} else {
 								proxy_factory(node, &child, intern, ctxt);
 							}
