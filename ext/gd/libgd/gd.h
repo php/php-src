@@ -11,6 +11,11 @@ extern "C" {
 
 #include "php_compat.h"
 
+#define GD_MAJOR_VERSION 2
+#define GD_MINOR_VERSION 4
+#define GD_RELEASE_VERSION 0
+#define GD_EXTRA_VERSION ""
+
 /* Bundled libgd has no separate symbol visibility requirements. */
 #ifndef BGD_EXPORT_DATA_PROT
 #define BGD_EXPORT_DATA_PROT
@@ -25,11 +30,7 @@ extern "C" {
 #define ARG_NOT_USED(arg) (void)(arg)
 #endif
 
-#define GD_MAJOR_VERSION 2
-#define GD_MINOR_VERSION 0
-#define GD_RELEASE_VERSION 35
-#define GD_EXTRA_VERSION ""
-#define GD_VERSION_STRING "2.0.35"
+#define GD_VERSION_STRING "2.4.0"
 
 /* gd.h: declarations file for the graphic-draw module.
  * Permission to use, copy, modify, and distribute this software and its
@@ -948,12 +949,30 @@ typedef const char *gdHeifChroma;
 BGD_DECLARE(gdImagePtr) gdImageCreateFromHeif(FILE *inFile);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromHeifPtr(int size, void *data);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromHeifCtx(gdIOCtxPtr infile);
+
+BGD_DECLARE(void)
+gdImageHeifEx(gdImagePtr im, FILE *outFile, int quality, gdHeifCodec codec, gdHeifChroma chroma);
 BGD_DECLARE(void) gdImageHeif(gdImagePtr im, FILE *outFile);
+BGD_DECLARE(void *) gdImageHeifPtr(gdImagePtr im, int *size);
+BGD_DECLARE(void *)
+gdImageHeifPtrEx(gdImagePtr im, int *size, int quality, gdHeifCodec codec, gdHeifChroma chroma);
+BGD_DECLARE(void)
+gdImageHeifCtx(gdImagePtr im, gdIOCtxPtr outfile, int quality, gdHeifCodec codec,
+               gdHeifChroma chroma);
 
 /* AVIF */
 BGD_DECLARE(gdImagePtr) gdImageCreateFromAvif(FILE *inFile);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromAvifPtr(int size, void *data);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromAvifCtx(gdIOCtxPtr infile);
+
+BGD_DECLARE(void) gdImageAvif(gdImagePtr im, FILE *outFile);
+BGD_DECLARE(void)
+gdImageAvifEx(gdImagePtr im, FILE *outFile, int quality, int speed);
+BGD_DECLARE(void *) gdImageAvifPtr(gdImagePtr im, int *size);
+BGD_DECLARE(void *)
+gdImageAvifPtrEx(gdImagePtr im, int *size, int quality, int speed);
+BGD_DECLARE(void)
+gdImageAvifCtx(gdImagePtr im, gdIOCtxPtr outfile, int quality, int speed);
 
 /* TIFF */
 BGD_DECLARE(gdImagePtr) gdImageCreateFromTiff(FILE *inFile);
@@ -1265,12 +1284,16 @@ gdUhdrImageWritePtr(gdUhdrImagePtr im, int *size, int format, int quality, gdUhd
 BGD_DECLARE(gdImagePtr)
 gdUhdrImageGetSdr(gdUhdrImagePtr im, gdUhdrErrorPtr err);
 
+
+BGD_DECLARE(int) gdImageFile(gdImagePtr im, const char *filename);
+BGD_DECLARE(int) gdSupportsFileType(const char *filename, int writing);
+
 /* Guaranteed to correctly free memory returned
         by the gdImage*Ptr functions */
 void gdFree(void *m);
 
 /* Best to free this memory with gdFree(), not free() */
-void *gdImageWBMPPtr(gdImagePtr im, int *size, int fg);
+BGD_DECLARE(void *) gdImageWBMPPtr(gdImagePtr im, int *size, int fg);
 
 /* 100 is highest quality (there is always a little loss with JPEG).
        0 is lowest. 10 is about the lowest useful setting. */
@@ -1279,6 +1302,11 @@ BGD_DECLARE(void) gdImageJpegCtx(gdImagePtr im, gdIOCtxPtr out, int quality);
 BGD_DECLARE(void)
 gdImageJpegCtxWithMetadata(gdImagePtr im, gdIOCtxPtr out, int quality,
                            const gdImageMetadata *metadata);
+
+/* Best to free this memory with gdFree(), not free() */
+BGD_DECLARE(void *) gdImageJpegPtr(gdImagePtr im, int *size, int quality);
+BGD_DECLARE(void *)
+gdImageJpegPtrWithMetadata(gdImagePtr im, int *size, int quality, const gdImageMetadata *metadata);
 
 /**
  * Group: WebP
@@ -1289,29 +1317,47 @@ gdImageJpegCtxWithMetadata(gdImagePtr im, gdIOCtxPtr out, int quality,
  * <gdWebpLossless>, the image will be written in the lossless WebP format.
  *
  * See also:
- *   - <gdImageWebpCtx>
+ *   - <gdImageWebpEx>
  */
 #define gdWebpLossless 101
 
-void gdImageWebpCtx(gdImagePtr im, gdIOCtx *outfile, int quality);
+BGD_DECLARE(void) gdImageWebpEx(gdImagePtr im, FILE *outFile, int quantization);
 BGD_DECLARE(void) gdImageWebp(gdImagePtr im, FILE *outFile);
-
-/* Best to free this memory with gdFree(), not free() */
-BGD_DECLARE(void *) gdImageJpegPtr(gdImagePtr im, int *size, int quality);
+BGD_DECLARE(void *) gdImageWebpPtr(gdImagePtr im, int *size);
 BGD_DECLARE(void *)
-gdImageJpegPtrWithMetadata(gdImagePtr im, int *size, int quality, const gdImageMetadata *metadata);
+gdImageWebpPtrEx(gdImagePtr im, int *size, int quantization);
+BGD_DECLARE(void)
+gdImageWebpCtx(gdImagePtr im, gdIOCtxPtr outfile, int quantization);
 
-void gdImageAvif(gdImagePtr im, FILE *outfile);
-void gdImageAvifEx(gdImagePtr im, FILE *outfile, int quality, int speed);
-void *gdImageAvifPtr(gdImagePtr im, int *size);
-void *gdImageAvifPtrEx(gdImagePtr im, int *size, int quality, int speed);
-void gdImageAvifCtx(gdImagePtr im, gdIOCtx *outfile, int quality, int speed);
 
-/* A custom data sink. For backwards compatibility. Use
-        gdIOCtx instead. */
-/* The sink function must return -1 on error, otherwise the number
-        of bytes written, which must be equal to len. */
-/* context will be passed to your sink function. */
+/*
+  Group: Types
+
+  typedef: gdSink
+
+  typedef: gdSinkPtr
+
+        *Note:* This interface is *obsolete* and kept only for
+        *compatibility*.  Use <gdIOCtx> instead.
+
+        Represents a "sink" (destination) to which a PNG can be
+        written. Programmers who do not wish to write PNGs to a file can
+        provide their own alternate output mechanism, using the
+        <gdImagePngToSink> function. See the documentation of that
+        function for an example of the proper use of this type.
+
+        > typedef struct {
+        >     int (*sink) (void *context, char *buffer, int len);
+        >     void *context;
+        > } gdSink, *gdSinkPtr;
+
+        The _sink_ function must return -1 on error, otherwise the number of
+        bytes written, which must be equal to len.
+
+        _context_ will be passed to your sink function.
+
+*/
+
 typedef struct {
     int (*sink)(void *context, const char *buffer, int len);
     void *context;
@@ -1329,11 +1375,12 @@ BGD_DECLARE(void) gdImageDestroy(gdImagePtr im);
 
 /* These functions still work with truecolor images,
         for which they never return error. */
-int gdImageColorAllocate(gdImagePtr im, int r, int g, int b);
+BGD_DECLARE(int) gdImageColorAllocate(gdImagePtr im, int r, int g, int b);
 /* gd 2.0: palette entries with non-opaque transparency are permitted. */
-int gdImageColorAllocateAlpha(gdImagePtr im, int r, int g, int b, int a);
+BGD_DECLARE(int)
+gdImageColorAllocateAlpha(gdImagePtr im, int r, int g, int b, int a);
 /* Assumes opaque is the preferred alpha channel value */
-int gdImageColorClosest(gdImagePtr im, int r, int g, int b);
+BGD_DECLARE(int) gdImageColorClosest(gdImagePtr im, int r, int g, int b);
 /* Closest match taking all four parameters into account.
         A slightly different color with the same transparency
         beats the exact same color with radically different
@@ -1478,7 +1525,7 @@ BGD_DECLARE(void) gdImageSetPixel(gdImagePtr im, int x, int y, int color);
 BGD_DECLARE(int) gdImageGetPixel(gdImagePtr im, int x, int y);
 BGD_DECLARE(int) gdImageGetTrueColorPixel(gdImagePtr im, int x, int y);
 
-void gdImageAABlend(gdImagePtr im);
+BGD_DECLARE(void) gdImageAABlend(gdImagePtr im);
 
 BGD_DECLARE(void) gdImageLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
 BGD_DECLARE(void) gdImageAALine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
@@ -1536,6 +1583,7 @@ gdImageStringTTF(gdImagePtr im, int *brect, int fg, const char *fontlist, double
 BGD_DECLARE(char *)
 gdImageStringFT(gdImagePtr im, int *brect, int fg, const char *fontlist, double ptsize,
                 double angle, int x, int y, const char *string);
+
 /*
   Group: Types
 
@@ -1574,17 +1622,18 @@ typedef struct {
 
 BGD_DECLARE(int) gdFTUseFontConfig(int flag);
 
-/* These are NOT flags; set one in 'charmap' if you set the gdFTEX_CHARMAP bit in 'flags'. */
+/* These are NOT flags; set one in 'charmap' if you set the
+   gdFTEX_CHARMAP bit in 'flags'. */
 #define gdFTEX_Unicode 0
 #define gdFTEX_Shift_JIS 1
 #define gdFTEX_Big5 2
 #define gdFTEX_Adobe_Custom 3
 #define gdFTEX_MacRoman gdFTEX_Adobe_Custom
 
-/* FreeType 2 text output with fine tuning */
 BGD_DECLARE(char *)
 gdImageStringFTEx(gdImagePtr im, int *brect, int fg, const char *fontlist, double ptsize,
                   double angle, int x, int y, const char *string, gdFTStringExtraPtr strex);
+
 /*
   Group: Types
 
@@ -1656,14 +1705,17 @@ gdImageFilledEllipse(gdImagePtr im, int cx, int cy, int w, int h, int color);
 #define gdNoFill 2
 #define gdEdged 4
 
-void gdImageFillToBorder(gdImagePtr im, int x, int y, int border, int color);
-void gdImageFill(gdImagePtr im, int x, int y, int color);
-void gdImageCopy(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w,
-                 int h);
-void gdImageCopyMerge(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w,
+BGD_DECLARE(void)
+gdImageFillToBorder(gdImagePtr im, int x, int y, int border, int color);
+BGD_DECLARE(void) gdImageFill(gdImagePtr im, int x, int y, int color);
+BGD_DECLARE(void)
+gdImageCopy(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w, int h);
+BGD_DECLARE(void)
+gdImageCopyMerge(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w,
                       int h, int pct);
-void gdImageCopyMergeGray(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY,
-                          int w, int h, int pct);
+BGD_DECLARE(void)
+gdImageCopyMergeGray(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w,
+                     int h, int pct);
 
 /* Stretches or shrinks to fit, as needed. Does NOT attempt
         to average the entire set of source pixels that scale down onto the
@@ -2003,6 +2055,40 @@ BGD_DECLARE(void *) gdDPExtractData(gdIOCtxPtr ctx, int *size);
 
 /* Image comparison definitions */
 BGD_DECLARE(int) gdImageCompare(gdImagePtr im1, gdImagePtr im2);
+
+typedef enum {
+    GD_IMAGE_DIFF_NONE,
+    GD_IMAGE_DIFF_OVERLAY,
+    GD_IMAGE_DIFF_MASK
+} gdImageDiffMode;
+
+typedef struct {
+    gdImageDiffMode mode;
+    int highlight_color;
+} gdImagePerceptualDiffOptions;
+
+typedef struct {
+    unsigned int pixels_changed;
+    /* Largest normalized perceptual distance, in the range 0.0 to 1.0. */
+    double maximum_delta;
+} gdImagePerceptualDiffResult;
+
+/*
+ * Compare two equally sized images using a perceptual YIQ distance.
+ *
+ * A NULL options pointer selects an overlay with opaque red highlights. A
+ * non-NULL diff_image receives a newly allocated truecolor image for overlay
+ * and mask modes; the caller owns it and must call gdImageDestroy(). Passing
+ * NULL for diff_image computes statistics only. The result is always reset,
+ * including on failure.
+ *
+ * Returns 1 on success, or 0 for invalid arguments or allocation failure.
+ */
+BGD_DECLARE(int)
+gdImagePerceptualDiff(gdImagePtr image1, gdImagePtr image2, double threshold,
+                      const gdImagePerceptualDiffOptions *options,
+                      gdImagePtr *diff_image,
+                      gdImagePerceptualDiffResult *result);
 
 BGD_DECLARE(void) gdImageFlipHorizontal(gdImagePtr im);
 BGD_DECLARE(void) gdImageFlipVertical(gdImagePtr im);

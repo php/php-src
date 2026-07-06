@@ -268,17 +268,27 @@ BGD_DECLARE(gdPathPtr) gdPathCreate()
     return path;
 }
 
-gdPathPtr gdPathDuplicate(const gdPathPtr path)
+BGD_DECLARE(gdPathPtr) gdPathDuplicate(const gdPathPtr path)
 {
-    gdPathPtr result = gdPathCreate();
+    unsigned int num_elements;
+    unsigned int num_points;
+    gdPathPtr result;
+
+    if (!path)
+        return NULL;
+    result = gdPathCreate();
     if (!result)
         return NULL;
-    gdArrayInit(&result->elements, sizeof(gdPathOps));
-    gdArrayInit(&result->points, sizeof(gdPointF));
-    gdArrayAppendMultiple(&result->elements, gdArrayGetData(&path->elements),
-                          gdArrayNumElements(&path->elements));
-    gdArrayAppendMultiple(&result->points, gdArrayGetData(&path->points),
-                          gdArrayNumElements(&path->points));
+
+    num_elements = gdArrayNumElements(&path->elements);
+    num_points = gdArrayNumElements(&path->points);
+    if ((num_elements && !gdArrayAppendMultiple(&result->elements, gdArrayGetData(&path->elements),
+                                                num_elements)) ||
+        (num_points &&
+         !gdArrayAppendMultiple(&result->points, gdArrayGetData(&path->points), num_points))) {
+        gdPathDestroy(result);
+        return NULL;
+    }
 
     result->contours = path->contours;
     result->start = path->start;
@@ -550,6 +560,12 @@ BGD_DECLARE(void) gdPathMoveTo(gdPathPtr path, double x, double y)
     path->start.y = y;
 }
 
+BGD_DECLARE(void) gdPathRelMoveTo(gdPathPtr path, double dx, double dy)
+{
+    _relativeTo(path, &dx, &dy);
+    gdPathMoveTo(path, dx, dy);
+}
+
 BGD_DECLARE(void) gdPathLineTo(gdPathPtr path, double x, double y)
 {
     const gdPathOps op = gdPathOpsLineTo;
@@ -585,6 +601,16 @@ gdPathCurveTo(gdPathPtr path, double x1, double y1, double x2, double y2, double
     gdArrayAppend(&path->points, &points[2]);
 }
 
+BGD_DECLARE(void)
+gdPathRelCurveTo(gdPathPtr path, double dx1, double dy1, double dx2, double dy2, double dx3,
+                 double dy3)
+{
+    _relativeTo(path, &dx1, &dy1);
+    _relativeTo(path, &dx2, &dy2);
+    _relativeTo(path, &dx3, &dy3);
+    gdPathCurveTo(path, dx1, dy1, dx2, dy2, dx3, dy3);
+}
+
 BGD_DECLARE(void) gdPathQuadTo(gdPathPtr path, double x1, double y1, double x2, double y2)
 {
     const gdPathOps op = gdPathOpsQuadTo;
@@ -595,11 +621,18 @@ BGD_DECLARE(void) gdPathQuadTo(gdPathPtr path, double x1, double y1, double x2, 
     gdArrayAppend(&path->points, &points[1]);
 }
 
+BGD_DECLARE(void) gdPathRelQuadTo(gdPathPtr path, double dx1, double dy1, double dx2, double dy2)
+{
+    _relativeTo(path, &dx1, &dy1);
+    _relativeTo(path, &dx2, &dy2);
+    gdPathQuadTo(path, dx1, dy1, dx2, dy2);
+}
+
 /*
 Based on http://www.whizkidtech.redprince.net/bezier/circle/kappa/
 */
-void gdPathAddArc(gdPathPtr path, double cx, double cy, double radius, double angle1, double angle2,
-                  int ccw)
+static void _gdPathArc(gdPathPtr path, double cx, double cy, double radius, double angle1,
+                       double angle2, int ccw)
 {
     if (ccw)
         _gd_arc_path_negative(path, cx, cy, radius, angle1, angle2);
@@ -607,18 +640,31 @@ void gdPathAddArc(gdPathPtr path, double cx, double cy, double radius, double an
         _gd_arc_path(path, cx, cy, radius, angle1, angle2);
 }
 
-void gdPathArcTo(gdPathPtr path, double x1, double y1, double x2, double y2, double radius)
+BGD_DECLARE(void)
+gdPathArc(gdPathPtr path, double cx, double cy, double radius, double angle1, double angle2)
+{
+    _gdPathArc(path, cx, cy, radius, angle1, angle2, 0);
+}
+
+BGD_DECLARE(void)
+gdPathNegativeArc(gdPathPtr path, double cx, double cy, double radius, double angle1, double angle2)
+{
+    _gdPathArc(path, cx, cy, radius, angle1, angle2, 1);
+}
+
+BGD_DECLARE(void)
+gdPathArcTo(gdPathPtr path, double x1, double y1, double x2, double y2, double radius)
 {
     double x0, y0;
     _path_get_current_point(path, &x0, &y0);
-    if ((x0 == x1 && y0 == y1) || (x1 == x2 && y1 == y2) || radius == 0.0) {
-        gdPathLineTo(path, x1, y2);
+    if ((x0 == x1 && y0 == y1) || (x1 == x2 && y1 == y2) || radius <= 0.0) {
+        gdPathLineTo(path, x1, y1);
         return;
     }
 
     double dir = (x2 - x1) * (y0 - y1) + (y2 - y1) * (x1 - x0);
     if (dir == 0.0) {
-        gdPathLineTo(path, x1, y2);
+        gdPathLineTo(path, x1, y1);
         return;
     }
 
@@ -647,10 +693,10 @@ void gdPathArcTo(gdPathPtr path, double x1, double y1, double x2, double y2, dou
     double a1 = atan2(y4 - cy, x4 - cx);
 
     gdPathLineTo(path, x3, y3);
-    gdPathAddArc(path, cx, cy, radius, a0, a1, ccw);
+    _gdPathArc(path, cx, cy, radius, a0, a1, ccw);
 }
 
-void gdPathAddRectangle(gdPathPtr path, double x, double y, double w, double h)
+BGD_DECLARE(void) gdPathRectangle(gdPathPtr path, double x, double y, double w, double h)
 {
     gdPathMoveTo(path, x, y);
     gdPathLineTo(path, x + w, y);

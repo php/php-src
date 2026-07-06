@@ -431,7 +431,7 @@ static void _rasterize_fill(gdSpanRlePtr rle, const gdPathPtr path, const gdPath
     }
 
     gd_ft_raster_render_path(path, matrix ? matrix : &identity_matrix, &params,
-                             winding == gdFillRulEvenOdd ? GD_FT_OUTLINE_EVEN_ODD_FILL
+                             winding == gdFillRuleEvenOdd ? GD_FT_OUTLINE_EVEN_ODD_FILL
                                                          : GD_FT_OUTLINE_NONE);
 }
 

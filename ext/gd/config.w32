@@ -156,7 +156,7 @@ if (PHP_GD != "no") {
 			gd_heif.c gd_uhdr.c gd_tiff.c gd_nnquant.c gd_color.c gd_readimage.c gd_filename.c \
 			gd_array.c gd_span_rle.c \
 			gd_surface.c gd_version.c gd_compositor.c gd_gradient.c gd_path.c gd_path_arc.c gd_path_dash.c \
-			gd_path_matrix.c gd_path_stroke.c gd_draw.c gd_draw_blend.c", "gd");
+			gd_path_matrix.c gd_path_stroke.c gd_draw.c gd_draw_blend.c gd_perceptual_diff.c", "gd");
 		ADD_SOURCES("ext/gd/libgd/ftraster", "gd_ft_math.c gd_ft_raster.c gd_ft_stroker.c", "gd");
 		AC_DEFINE('HAVE_GD_BUNDLED', 1, "Define to 1 if gd extension uses GD library bundled in PHP.");
 		AC_DEFINE('HAVE_GD_PNG_GET_VERSION_STRING', 1, "Define to 1 if GD library has the 'gdPngGetVersionString' function.");

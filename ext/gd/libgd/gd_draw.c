@@ -264,8 +264,7 @@ gdContextPaint(gdContextPtr context)
     gdStatePtr state = context->state;
     if (state->clippath == NULL && context->clippath == NULL) {
         gdPathPtr path = gdPathCreate();
-        gdPathAddRectangle(path, context->clip.x, context->clip.y, context->clip.w,
-                           context->clip.h);
+        gdPathRectangle(path, context->clip.x, context->clip.y, context->clip.w, context->clip.h);
         context->clippath = gdSpanRleCreate();
         gdSpanRleRasterize(context->clippath, path, &state->matrix, &context->clip, NULL,
                            gdFillRuleNonZero);
@@ -364,12 +363,18 @@ BGD_DECLARE(void)
 gdContextMoveTo(gdContextPtr context, double x, double y) { gdPathMoveTo(context->path, x, y); }
 
 BGD_DECLARE(void)
+gdContextRelMoveTo(gdContextPtr context, double dx, double dy)
+{
+    gdPathRelMoveTo(context->path, dx, dy);
+}
+
+BGD_DECLARE(void)
 gdContextLineTo(gdContextPtr context, double x, double y) { gdPathLineTo(context->path, x, y); }
 
 BGD_DECLARE(void)
-gdContextRelLineTo(gdContextPtr context, double x, double y)
+gdContextRelLineTo(gdContextPtr context, double dx, double dy)
 {
-    gdPathRelLineTo(context->path, x, y);
+    gdPathRelLineTo(context->path, dx, dy);
 }
 
 BGD_DECLARE(void)
@@ -396,27 +401,40 @@ gdContextCurveTo(gdContextPtr context, double x1, double y1, double x2, double y
 }
 
 BGD_DECLARE(void)
+gdContextRelCurveTo(gdContextPtr context, double dx1, double dy1, double dx2, double dy2,
+                    double dx3, double dy3)
+{
+    gdPathRelCurveTo(context->path, dx1, dy1, dx2, dy2, dx3, dy3);
+}
+
+BGD_DECLARE(void)
 gdContextQuadTo(gdContextPtr context, double x1, double y1, double x2, double y2)
 {
     gdPathQuadTo(context->path, x1, y1, x2, y2);
 }
 
 BGD_DECLARE(void)
+gdContextRelQuadTo(gdContextPtr context, double dx1, double dy1, double dx2, double dy2)
+{
+    gdPathRelQuadTo(context->path, dx1, dy1, dx2, dy2);
+}
+
+BGD_DECLARE(void)
 gdContextArc(gdContextPtr context, double cx, double cy, double r, double a0, double a1)
 {
-    gdPathAddArc(context->path, cx, cy, r, a0, a1, 0);
+    gdPathArc(context->path, cx, cy, r, a0, a1);
 }
 
 BGD_DECLARE(void)
 gdContextNegativeArc(gdContextPtr context, double cx, double cy, double r, double a0, double a1)
 {
-    gdPathAddArc(context->path, cx, cy, r, a0, a1, 1);
+    gdPathNegativeArc(context->path, cx, cy, r, a0, a1);
 }
 
 BGD_DECLARE(void)
 gdContextRectangle(gdContextPtr context, double x, double y, double w, double h)
 {
-    gdPathAddRectangle(context->path, x, y, w, h);
+    gdPathRectangle(context->path, x, y, w, h);
 }
 
 BGD_DECLARE(void)

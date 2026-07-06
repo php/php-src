@@ -381,6 +381,7 @@ if test "$PHP_GD" != "no"; then
       libgd/gd_path_stroke.c
       libgd/gd_draw.c
       libgd/gd_draw_blend.c
+      libgd/gd_perceptual_diff.c
     "])
 
     AC_DEFINE([HAVE_GD_BUNDLED], [1],

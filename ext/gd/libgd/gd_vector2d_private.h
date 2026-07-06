@@ -26,10 +26,6 @@ typedef struct gdSurfaceStruct {
 } gdSurface;
 typedef gdSurface *gdSurfacePtr;
 
-typedef struct gdRectFStruct {
-    double x, y, w, h;
-} gdRectF;
-typedef gdRectF *gdRectFPtr;
 typedef struct gdSpanStruct {
     short x, y;
     unsigned short len;
