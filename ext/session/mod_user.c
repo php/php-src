@@ -113,7 +113,6 @@ PS_CLOSE_FUNC(user)
 	bool bailout = 0;
 	zval retval;
 	zend_result ret = FAILURE;
-	zend_object *old_exception = NULL;
 
 	ZEND_ASSERT(!Z_ISUNDEF(PSF(close)));
 
@@ -123,9 +122,9 @@ PS_CLOSE_FUNC(user)
 	}
 
 	/* Run close() even with a pending exception, so the handler releases its resources; skip real exit()/die() (bug #60634). */
-	if (EG(exception) && !zend_is_unwind_exit(EG(exception)) && !zend_is_graceful_exit(EG(exception))) {
-		old_exception = EG(exception);
-		EG(exception) = NULL;
+	bool clear_exception = EG(exception) && !zend_is_unwind_exit(EG(exception)) && !zend_is_graceful_exit(EG(exception));
+	if (clear_exception) {
+		zend_exception_save();
 	}
 
 	zend_try {
@@ -136,15 +135,8 @@ PS_CLOSE_FUNC(user)
 
 	PS(mod_user_implemented) = 0;
 
-	if (old_exception) {
-		if (!EG(exception)) {
-			EG(exception) = old_exception;
-		} else if (!zend_is_unwind_exit(EG(exception)) && !zend_is_graceful_exit(EG(exception))) {
-			zend_exception_set_previous(EG(exception), old_exception);
-		} else {
-			/* close() itself exited/died: that takes precedence, the stashed exception is moot. */
-			OBJ_RELEASE(old_exception);
-		}
+	if (clear_exception) {
+		zend_exception_restore();
 	}
 
 	if (bailout) {
