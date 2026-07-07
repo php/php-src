@@ -5649,6 +5649,7 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 /* }}} */
 
 static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool toplevel);
+static void zend_compile_extension_decl(zend_ast *ast);
 
 static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 {
@@ -9546,6 +9547,42 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 	zend_type_release(type, 0);
 }
 
+static void zend_compile_extension_decl(zend_ast *ast) /* {{{ */
+{
+	zend_ast *target_ast = ast->child[0];
+	zend_ast *class_ast = ast->child[1];
+	zend_ast_decl *decl = (zend_ast_decl *) class_ast;
+	zend_string *target_name, *target_lc;
+	znode class_node;
+	zend_op *opline;
+
+	/* v1 restriction: methods only (no properties, consts, or promoted state;
+	 * object layout is fixed at link time and shared under opcache). */
+	zend_ast_list *stmts = zend_ast_get_list(decl->child[2]);
+	for (uint32_t i = 0; i < stmts->children; i++) {
+		if (stmts->child[i] && stmts->child[i]->kind != ZEND_AST_METHOD) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Extension blocks may only declare methods");
+		}
+	}
+
+	target_name = zend_resolve_class_name_ast(target_ast);
+	target_lc = zend_string_tolower(target_name);
+
+	/* Compile the body as an anonymous, final, uninstantiable class. The
+	 * methods bind $this normally; their scope is the synthetic CE, so only
+	 * the target's public API is visible from extension bodies. */
+	zend_compile_class_decl(&class_node, class_ast, false);
+
+	/* Runtime registration once the synthetic CE is declared. */
+	opline = zend_emit_op(NULL, ZEND_BIND_EXTENSION, &class_node, NULL);
+	opline->op2_type = IS_CONST;
+	opline->op2.constant = zend_add_literal_string(&target_lc);
+
+	zend_string_release(target_name);
+}
+/* }}} */
+
 static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool toplevel) /* {{{ */
 {
 	const zend_ast_decl *decl = (const zend_ast_decl *) ast;
@@ -12084,6 +12121,9 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_USE_TRAIT:
 			zend_compile_use_trait(ast);
+			break;
+		case ZEND_AST_EXTENSION_DECL:
+			zend_compile_extension_decl(ast);
 			break;
 		case ZEND_AST_CLASS:
 			zend_compile_class_decl(NULL, ast, false);

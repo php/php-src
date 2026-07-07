@@ -25,6 +25,7 @@
 #include "zend_objects.h"
 #include "zend_objects_API.h"
 #include "zend_object_handlers.h"
+#include "zend_extension_methods.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
@@ -1957,14 +1958,21 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 	}
 
 	if (UNEXPECTED((func = zend_hash_find(&zobj->ce->function_table, lc_method_name)) == NULL)) {
+		zend_function *fbc_fallback;
+
+		if (zobj->ce->__call) {
+			/* An explicit __call catch-all is the object's own behavior and
+			 * always beats extension methods (mirrors "real members win"). */
+			if (UNEXPECTED(!key)) {
+				ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
+			}
+			return zend_get_call_trampoline_func(zobj->ce->__call, method_name);
+		}
+		fbc_fallback = zend_extension_methods_get(zobj->ce, lc_method_name);
 		if (UNEXPECTED(!key)) {
 			ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
 		}
-		if (zobj->ce->__call) {
-			return zend_get_call_trampoline_func(zobj->ce->__call, method_name);
-		} else {
-			return NULL;
-		}
+		return fbc_fallback; /* may be NULL -> undefined method error */
 	}
 
 	fbc = Z_FUNC_P(func);
