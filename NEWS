@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Sync Boost.Context assembly with 1.91.0. (kn1g78)
   . Fixed bug GH-22387 (AST pretty-printing drops meaningful parentheses around
     RHS of instanceof). (timwolla)
+  . Fixed bug GH-15672 and GH-15911 (Stack overflow when an internal function
+    recurses through zend_call_function, such as a self-attached SPL
+    iterator). (iliaal)
 
 - DBA:
   . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
