@@ -2604,6 +2604,7 @@ simple_list:
 			}
 			break;
 		case ZEND_AST_ASSIGN_COALESCE: BINARY_OP(" \?\?= ", 90, 91, 90);
+		case ZEND_AST_ASSIGN_PIPE:     BINARY_OP(" |>= ",  90, 91, 90);
 		case ZEND_AST_BINARY_OP:
 			switch (ast->attr) {
 				case ZEND_ADD:                 BINARY_OP(" + ",   200, 200, 201);
