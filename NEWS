@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22206 (missing return in global register detection).
     (P3p111n0)
 
+- Calendar:
+  . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
+    INT_MAX year). (arshidkv12)
+
 - DBA:
   . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
 
