@@ -297,6 +297,10 @@ PHP 8.6 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- CLI:
+  . The built-in development server now accepts requests using the QUERY HTTP
+    method instead of returning 501 Not Implemented.
+
 ========================================
 4. Deprecated Functionality
 ========================================
