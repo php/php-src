@@ -10,6 +10,10 @@ PHP                                                                        NEWS
     recurses through zend_call_function, such as a self-attached SPL
     iterator). (iliaal)
 
+- Calendar:
+  . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
+    INT_MAX year). (arshidkv12)
+
 - DBA:
   . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
 
