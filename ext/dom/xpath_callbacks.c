@@ -25,6 +25,11 @@
 #include "internal_helpers.h"
 #include <libxml/parserInternals.h>
 
+#ifndef DBL_MANT_DIG
+# define DBL_MANT_DIG 53
+#endif
+#define MAX_SAFE_INTEGER ((1LL << DBL_MANT_DIG) - 1)
+
 static void xpath_callbacks_entry_dtor(zval *zv)
 {
 	zend_fcall_info_cache *fcc = Z_PTR_P(zv);
@@ -446,6 +451,11 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 			valuePush(ctxt, xmlXPathNewNodeSet(nodep));
 		} else if (Z_TYPE(callback_retval) == IS_FALSE || Z_TYPE(callback_retval) == IS_TRUE) {
 			valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(callback_retval) == IS_TRUE));
+		} else if (Z_TYPE(callback_retval) == IS_LONG &&
+			 Z_LVAL(callback_retval) >= -MAX_SAFE_INTEGER && Z_LVAL(callback_retval) <= MAX_SAFE_INTEGER) {
+			valuePush(ctxt, xmlXPathNewFloat(Z_LVAL(callback_retval)));
+		} else if (Z_TYPE(callback_retval) == IS_DOUBLE) {
+			valuePush(ctxt, xmlXPathNewFloat(Z_DVAL(callback_retval)));
 		} else if (Z_TYPE(callback_retval) == IS_OBJECT) {
 			zend_type_error("Only objects that are instances of DOM nodes can be converted to an XPath expression");
 			zval_ptr_dtor(&callback_retval);
