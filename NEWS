@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.24
 
+- Calendar:
+  . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
+    INT_MAX year). (arshidkv12)
+
 - DBA:
   . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
 
