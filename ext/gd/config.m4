@@ -98,7 +98,7 @@ AC_DEFUN([PHP_GD_PNG],[
 
 AC_DEFUN([PHP_GD_AVIF], [
   AS_VAR_IF([PHP_AVIF], [no],, [
-    PKG_CHECK_MODULES([AVIF], [libavif >= 1.0.0])
+    PKG_CHECK_MODULES([AVIF], [libavif >= 0.8.2])
     PHP_EVAL_LIBLINE([$AVIF_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$AVIF_CFLAGS])
     AC_DEFINE([HAVE_LIBAVIF], [1],
@@ -221,10 +221,6 @@ AC_DEFUN([PHP_GD_TIFF], [
       [Define to 1 if you have the libtiff library.])
     AC_DEFINE([HAVE_GD_TIFF], [1],
       [Define to 1 if gd extension has TIFF support.])
-    AC_DEFINE([HAVE_GD_TIFF_WRITE_API], [1],
-      [Define to 1 if GD library has the TIFF writer API.])
-    AC_DEFINE([HAVE_GD_TIFF_READ_API], [1],
-      [Define to 1 if GD library has the TIFF reader API.])
   ])
 ])
 
@@ -398,9 +394,6 @@ if test "$PHP_GD" != "no"; then
     AC_DEFINE([HAVE_GD_PNG_GET_VERSION_STRING], [1],
       [Define to 1 if GD library has the 'gdPngGetVersionString' function.])
 
-    AC_DEFINE([HAVE_GD_PNG_WRITE_OPTIONS], [1],
-      [Define to 1 if GD library has the PNG write options API.])
-
 dnl Various checks for GD features
     PHP_SETUP_ZLIB([GD_SHARED_LIBADD])
     PHP_GD_PNG
@@ -415,11 +408,8 @@ dnl Various checks for GD features
     PHP_GD_IMAGEQUANT
     PHP_GD_TIFF
 
-    AC_DEFINE([HAVE_GD_QOI], [1],
-      [Define to 1 if GD library has QOI support.])
-
     PHP_NEW_EXTENSION([gd],
-      [gd.c gd_png.c gd_qoi.c gd_tiff.c $extra_sources],
+      [gd.c $extra_sources],
       [$ext_shared],,
       [-Wno-strict-prototypes -I@ext_srcdir@/libgd])
     PHP_ADD_BUILD_DIR([$ext_builddir/libgd])
@@ -447,35 +437,7 @@ dnl Various checks for GD features
       [Define to 1 if gd extension uses external system GD library.])
     PHP_GD_CHECK_VERSION
 
-    PHP_CHECK_LIBRARY([gd], [gdImagePngWithOptions],
-      [AC_DEFINE([HAVE_GD_PNG_WRITE_OPTIONS], [1],
-        [Define to 1 if GD library has the PNG write options API.])],
-      [],
-      [$GD_SHARED_LIBADD])
-
-    PHP_CHECK_LIBRARY([gd], [gdImageQoiPtrEx],
-      [AC_DEFINE([HAVE_GD_QOI], [1],
-        [Define to 1 if GD library has QOI support.])],
-      [],
-      [$GD_SHARED_LIBADD])
-
-    AC_CHECK_HEADER([tiff.h], [
-      PHP_CHECK_LIBRARY([gd], [gdTiffWriteOpenPtr],
-        [AC_DEFINE([HAVE_GD_TIFF_WRITE_API], [1],
-          [Define to 1 if GD library has the TIFF writer API.])],
-        [],
-        [$GD_SHARED_LIBADD])
-      PHP_CHECK_LIBRARY([gd], [gdTiffReadOpenPtr], [
-        PHP_CHECK_LIBRARY([gd], [gdTiffReadGetInfo], [
-          PHP_CHECK_LIBRARY([gd], [gdTiffReadNextImage],
-            [AC_DEFINE([HAVE_GD_TIFF_READ_API], [1],
-              [Define to 1 if GD library has the TIFF reader API.])],
-            [], [$GD_SHARED_LIBADD])
-        ], [], [$GD_SHARED_LIBADD])
-      ], [], [$GD_SHARED_LIBADD])
-    ])
-
-    PHP_NEW_EXTENSION([gd], [gd.c gd_png.c gd_qoi.c gd_tiff.c $extra_sources], [$ext_shared])
+    PHP_NEW_EXTENSION([gd], [gd.c $extra_sources], [$ext_shared])
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h])
     PHP_CHECK_LIBRARY([gd], [gdImageCreate],
       [],
@@ -484,5 +446,4 @@ dnl Various checks for GD features
   fi
 
   PHP_SUBST([GD_SHARED_LIBADD])
-  PHP_ADD_EXTENSION_DEP(gd, spl)
 fi
