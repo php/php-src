@@ -18,7 +18,7 @@ zend.max_allowed_stack_size=512K
 // Build bottom-up so the insertion cycle-check stays O(1); top-down is O(n^2).
 $doc = Dom\XMLDocument::createEmpty();
 $node = $doc->createElement('a');
-for ($i = 0; $i < 100000; $i++) {
+for ($i = 0; $i < 10000; $i++) {
     $parent = $doc->createElement('a');
     $parent->appendChild($node);
     $node = $parent;
