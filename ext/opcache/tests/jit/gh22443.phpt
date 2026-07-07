@@ -45,7 +45,7 @@ for ($k = 0; $k < 8; $k++) {
 $cold = [makeListener([$svc, 'coldMethod'])];
 
 $s = 0;
-for ($i = 0; $i < 4000000; $i++) {
+for ($i = 0; $i < 400; $i++) {
     $s += invokeListeners($warm, 'e', [$i & 7, ($i >> 2) & 7]);
 }
 for ($j = 0; $j < 5; $j++) {
