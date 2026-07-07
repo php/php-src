@@ -9,6 +9,10 @@ PHP                                                                        NEWS
     class constants via OBJ->prop = $val). (Khaled Alam)
   . Reverted GH-22833, which attempted to fix bug GH-18985. (ilutov)
 
+- DOM:
+  . Fixed bug GH-22624 (use-after-free via DOMNameSpaceNode after
+    DOMDocument::xinclude()). (David Carlier)
+
 - PDO_PGSQL:
   . Fixed several lazy fetch (PDO::ATTR_PREFETCH => 0) defects: an infinite
     loop when cleaning up a fetch left in a COPY, a use-after-free when a
