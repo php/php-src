@@ -1,0 +1,53 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * markup2php - show the plain PHP that native markup compiles to.
+ *
+ * Usage:
+ *   markup2php file.php       transpile a file
+ *   markup2php -              transpile stdin
+ *   markup2php -e '<?php ...' transpile an inline snippet
+ *
+ * Must be run with a PHP binary that has native markup support; the output is
+ * the engine's own AST exported back to source, so it is exactly what the
+ * compiler sees after markup lowering (not an approximation).
+ */
+
+if (!function_exists('Html\transpile')) {
+    fwrite(STDERR, "markup2php: this PHP binary has no native markup support (Html\\transpile missing)\n");
+    exit(1);
+}
+
+$arg = $argv[1] ?? null;
+
+if ($arg === null || $arg === '-h' || $arg === '--help') {
+    fwrite(STDERR, "usage: markup2php <file.php | - | -e 'code'>\n");
+    exit($arg === null ? 1 : 0);
+}
+
+if ($arg === '-e') {
+    $source = $argv[2] ?? '';
+    if ($source === '') {
+        fwrite(STDERR, "markup2php: -e requires a code argument\n");
+        exit(1);
+    }
+    if (!str_starts_with(ltrim($source), '<?php')) {
+        $source = "<?php\n" . $source;
+    }
+} elseif ($arg === '-') {
+    $source = stream_get_contents(STDIN);
+} else {
+    $source = @file_get_contents($arg);
+    if ($source === false) {
+        fwrite(STDERR, "markup2php: cannot read $arg\n");
+        exit(1);
+    }
+}
+
+try {
+    echo "<?php\n\n", Html\transpile($source);
+} catch (ParseError $e) {
+    fwrite(STDERR, "markup2php: parse error: {$e->getMessage()} on line {$e->getLine()}\n");
+    exit(1);
+}

@@ -26,6 +26,7 @@
 #include "zend_constants.h"
 #include "zend_language_scanner.h"
 #include "zend_exceptions.h"
+#include "zend_markup.h"
 
 #define YYSIZE_T size_t
 #define yytnamerr zend_yytnamerr
@@ -250,6 +251,21 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 /* Token used to force a parse error from the lexer */
 %token T_ERROR
 
+/* Native markup tokens. Declared last so they append to the token enum:
+ * inserting them mid-list would renumber every later token (T_INLINE_HTML
+ * onward), breaking code that hardcodes token integers. */
+%token <ast> T_MARKUP_NAME "markup tag name"
+%token <ast> T_MARKUP_SLOT_NAME "markup slot name"
+%token <ast> T_MARKUP_TEXT "markup text"
+%token <ast> T_MARKUP_ATTR_VALUE "markup attribute value"
+%token <ast> T_MARKUP_COMMENT "markup comment"
+%token T_MARKUP_OPEN "markup tag start"
+%token T_MARKUP_CLOSE_OPEN "markup closing tag start"
+%token T_MARKUP_TAG_END "markup tag end"
+%token T_MARKUP_SELF_CLOSE "markup self-close"
+%token T_MARKUP_INTERP_START "markup interpolation start"
+%token <ast> T_MARKUP_DOCTYPE "markup doctype"
+
 %type <ast> top_statement namespace_name name statement function_declaration_statement
 %type <ast> class_declaration_statement trait_declaration_statement legacy_namespace_name
 %type <ast> interface_declaration_statement interface_extends_list
@@ -283,6 +299,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> attributed_statement attributed_top_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
+%type <ast> markup_element markup_children markup_child markup_slot
+%type <ast> markup_attributes markup_attribute
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
@@ -1249,8 +1267,65 @@ new_non_dereferenceable:
 			{ $$ = zend_ast_create(ZEND_AST_NEW, $2, zend_ast_create_list(0, ZEND_AST_ARG_LIST)); }
 ;
 
+markup_element:
+		T_MARKUP_OPEN T_MARKUP_NAME markup_attributes T_MARKUP_TAG_END markup_children T_MARKUP_CLOSE_OPEN T_MARKUP_NAME T_MARKUP_TAG_END
+			{ $$ = zend_ast_create_markup_checked($2, $3, $5, $7); if (!$$) { YYERROR; } }
+	|	T_MARKUP_OPEN T_MARKUP_NAME markup_attributes T_MARKUP_SELF_CLOSE
+			{ $$ = zend_ast_create_markup_element($2, $3, zend_ast_create_list(0, ZEND_AST_ARRAY)); if (!$$) { YYERROR; } }
+	|	T_MARKUP_OPEN T_MARKUP_TAG_END markup_children T_MARKUP_CLOSE_OPEN T_MARKUP_TAG_END
+			{ $$ = zend_ast_create_markup_element(NULL, NULL, $3); if (!$$) { YYERROR; } }
+	|	T_MARKUP_OPEN T_VARIABLE markup_attributes T_MARKUP_TAG_END markup_children T_MARKUP_CLOSE_OPEN T_VARIABLE T_MARKUP_TAG_END
+			{ $$ = zend_ast_create_markup_dynamic_checked($2, $3, $5, $7); if (!$$) { YYERROR; } }
+	|	T_MARKUP_OPEN T_VARIABLE markup_attributes T_MARKUP_SELF_CLOSE
+			{ $$ = zend_ast_create_markup_dynamic($2, $3, zend_ast_create_list(0, ZEND_AST_ARRAY)); }
+	|	T_MARKUP_OPEN T_MARKUP_INTERP_START expr '}' markup_attributes T_MARKUP_TAG_END markup_children T_MARKUP_CLOSE_OPEN T_MARKUP_TAG_END
+			{ $$ = zend_ast_create_markup_dynamic_expr($3, $5, $7); }
+	|	T_MARKUP_OPEN T_MARKUP_INTERP_START expr '}' markup_attributes T_MARKUP_SELF_CLOSE
+			{ $$ = zend_ast_create_markup_dynamic_expr($3, $5, zend_ast_create_list(0, ZEND_AST_ARRAY)); }
+;
+
+markup_attributes:
+		%empty								{ $$ = zend_ast_create_list(0, ZEND_AST_ARRAY); }
+	|	markup_attributes markup_attribute	{ $$ = zend_ast_list_add($1, $2); }
+;
+
+markup_attribute:
+		T_MARKUP_NAME '=' T_MARKUP_ATTR_VALUE
+			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, $1); }
+	|	T_MARKUP_NAME '=' T_MARKUP_INTERP_START expr '}'
+			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $4, $1); }
+	|	T_MARKUP_NAME
+			{ zval t; ZVAL_TRUE(&t); $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, zend_ast_create_zval(&t), $1); }
+	|	T_MARKUP_INTERP_START T_ELLIPSIS expr '}'
+			{ $$ = zend_ast_create(ZEND_AST_UNPACK, $3); }
+;
+
+markup_children:
+		%empty							{ $$ = zend_ast_create_list(0, ZEND_AST_ARRAY); }
+	|	markup_children markup_child	{ $$ = zend_ast_list_add($1, $2); }
+;
+
+markup_child:
+		T_MARKUP_TEXT					{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $1, NULL); }
+	|	T_MARKUP_COMMENT				{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, zend_ast_create_markup_raw($1), NULL); }
+	|	T_MARKUP_DOCTYPE				{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, zend_ast_create_markup_raw($1), NULL); }
+	|	T_MARKUP_INTERP_START expr '}'	{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $2, NULL); }
+	|	T_MARKUP_INTERP_START '}'		{ zval n; ZVAL_NULL(&n); $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, zend_ast_create_zval(&n), NULL); }
+	|	markup_element					{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $1, NULL); }
+	|	markup_slot						{ $$ = $1; }
+;
+
+markup_slot:
+		T_MARKUP_OPEN T_MARKUP_SLOT_NAME markup_attributes T_MARKUP_TAG_END markup_children T_MARKUP_CLOSE_OPEN T_MARKUP_SLOT_NAME T_MARKUP_TAG_END
+			{ $$ = zend_ast_create_markup_slot($2, $3, $5, $7); if (!$$) { YYERROR; } }
+	|	T_MARKUP_OPEN T_MARKUP_SLOT_NAME markup_attributes T_MARKUP_SELF_CLOSE
+			{ $$ = zend_ast_create_markup_slot($2, $3, NULL, NULL); if (!$$) { YYERROR; } }
+;
+
 expr:
 		variable
+			{ $$ = $1; }
+	|	markup_element
 			{ $$ = $1; }
 	|	T_LIST '(' array_pair_list ')' '=' expr
 			{ $3->attr = ZEND_ARRAY_SYNTAX_LIST; $$ = zend_ast_create(ZEND_AST_ASSIGN, $3, $6); }

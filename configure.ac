@@ -1781,6 +1781,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_lazy_objects.c
     zend_list.c
     zend_llist.c
+    zend_markup.c
     zend_max_execution_timer.c
     zend_multibyte.c
     zend_object_handlers.c

@@ -1,0 +1,8 @@
+// vim:ft=javascript
+
+// Always enabled: the native markup syntax lowers into the Html\ symbols this
+// extension registers, so it cannot be disabled (compare ext/random).
+EXTENSION("html", "html.c", false /* never shared */);
+PHP_HTML = "yes";
+PHP_INSTALL_HEADERS("ext/html", "php_html.h");
+ADD_EXTENSION_DEP("html", "standard");

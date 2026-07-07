@@ -1,0 +1,2006 @@
+/*
+   +----------------------------------------------------------------------+
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the world-wide-web at the following url:                     |
+   | https://www.php.net/license/3_01.txt                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: Liam Hammett                                                 |
+   +----------------------------------------------------------------------+
+*/
+
+/* Native Markup runtime (RFC: Native Markup Expressions).
+ *
+ * This extension provides the `Html\` value-object tree that markup expressions
+ * lower into: Element, Fragment, Raw, the Htmlable interface, the Slot
+ * attribute, and the raw()/escape() helpers. It owns escaping and serialization
+ * so the escape-by-default safety guarantee lives in core, not userland.
+ *
+ * No parser/scanner changes live here; the markup syntax that lowers into these
+ * symbols lives in Zend/zend_language_scanner.l, Zend/zend_language_parser.y,
+ * and Zend/zend_markup.c (see Zend/zend_markup.h for the shared vocabulary). */
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#include "php.h"
+#include "php_html.h"
+
+#include "Zend/zend_attributes.h"
+#include "Zend/zend_markup.h"
+#include "Zend/zend_extensions.h"
+#include "Zend/zend_interfaces.h"
+#include "Zend/zend_iterators.h"
+#include "Zend/zend_observer.h"
+#include "Zend/zend_smart_str.h"
+#include "Zend/zend_exceptions.h"
+#include "Zend/zend_language_scanner.h"
+#include "ext/standard/html.h"
+#include "ext/standard/info.h"
+
+#include "html_arginfo.h"
+
+ZEND_DECLARE_MODULE_GLOBALS(html)
+
+zend_class_entry *html_ce_Htmlable;
+zend_class_entry *html_ce_Element;
+zend_class_entry *html_ce_Fragment;
+zend_class_entry *html_ce_Raw;
+zend_class_entry *html_ce_Slot;
+
+/* Method-table names of the default __toString() injected into userland
+ * Htmlable classes (see html_implement_htmlable). Permanent interned. */
+static zend_string *html_str_tostring;    /* "__toString" */
+static zend_string *html_str_tostring_lc; /* "__tostring" */
+
+/* arg_info for the injected default __toString(). The raw generated arginfo
+ * uses the registration-time zend_internal_arg_info layout; a function living
+ * in a class table must use the converted zend_arg_info layout (reflection and
+ * the VM assume it). Converted once at MINIT, exactly like zend_enum.c's
+ * zarginfo_* arrays for the injected cases()/from()/tryFrom(). */
+static zend_arg_info html_zarginfo_default_tostring[
+	sizeof(arginfo_class_Html_Htmlable___toString) / sizeof(zend_internal_arg_info)];
+
+static zend_string *html_render_htmlable(zval *value);
+
+/* DOM interop is kept decoupled from ext/dom: the DOM class entries are resolved
+ * lazily by name (no link dependency), so ext/html works whether or not ext/dom
+ * is loaded. Resolution is retried until found to tolerate module load order. */
+static zend_class_entry *html_lazy_ce(zend_class_entry **cache, const char *lcname, size_t len)
+{
+	if (*cache == NULL) {
+		*cache = zend_hash_str_find_ptr(CG(class_table), lcname, len);
+	}
+	return *cache;
+}
+
+static zend_class_entry *html_dom_document_ce(void)
+{
+	static zend_class_entry *ce = NULL;
+	return html_lazy_ce(&ce, ZEND_STRL("dom\\document"));
+}
+
+static zend_class_entry *html_dom_htmldocument_ce(void)
+{
+	static zend_class_entry *ce = NULL;
+	return html_lazy_ce(&ce, ZEND_STRL("dom\\htmldocument"));
+}
+
+static bool html_is_dom_node(zend_class_entry *ce)
+{
+	static zend_class_entry *modern = NULL, *legacy = NULL;
+	zend_class_entry *m = html_lazy_ce(&modern, ZEND_STRL("dom\\node"));
+	zend_class_entry *l = html_lazy_ce(&legacy, ZEND_STRL("domnode"));
+	return (m != NULL && instanceof_function(ce, m))
+		|| (l != NULL && instanceof_function(ce, l));
+}
+
+/* Serialize a DOM node to HTML via $node->ownerDocument->saveHtml($node). The
+ * method name is case-insensitive, so this covers modern Dom\Node (saveHtml) and
+ * legacy DOMNode (saveHTML). Returns a new string, or NULL with an exception. */
+static zend_string *html_serialize_dom_node(zval *node)
+{
+	/* A failed property read (e.g. a detached node with no owner document)
+	 * leaves owner_rv untouched and returns &EG(uninitialized_zval); initialize
+	 * so the unconditional zval_ptr_dtor(&owner_rv) below never frees garbage. */
+	zval owner_rv;
+	ZVAL_UNDEF(&owner_rv);
+	zval *owner = zend_read_property(Z_OBJCE_P(node), Z_OBJ_P(node), ZEND_STRL("ownerDocument"), 1, &owner_rv);
+	if (EG(exception)) {
+		zval_ptr_dtor(&owner_rv);
+		return NULL;
+	}
+	ZVAL_DEREF(owner);
+
+	/* A document node has no ownerDocument; serialize through itself. */
+	zval *doc = (Z_TYPE_P(owner) == IS_OBJECT) ? owner : node;
+
+	/* Probe for the method before calling: zend_call_method_with_1_params()
+	 * raises an unrecoverable E_CORE_ERROR when it is missing, which must not be
+	 * reachable from userland data (a detached node, an XML document). */
+	if (zend_hash_str_find_ptr(&Z_OBJCE_P(doc)->function_table, ZEND_STRL("savehtml")) == NULL) {
+		zval_ptr_dtor(&owner_rv);
+		zend_throw_error(NULL,
+			"Cannot serialize %s to HTML: %s has no saveHtml() method",
+			ZSTR_VAL(Z_OBJCE_P(node)->name), ZSTR_VAL(Z_OBJCE_P(doc)->name));
+		return NULL;
+	}
+
+	zval ret;
+	ZVAL_UNDEF(&ret);
+	zend_call_method_with_1_params(Z_OBJ_P(doc), Z_OBJCE_P(doc), NULL, "savehtml", &ret, node);
+	zval_ptr_dtor(&owner_rv);
+
+	if (EG(exception)) {
+		zval_ptr_dtor(&ret);
+		return NULL;
+	}
+	if (Z_TYPE(ret) == IS_STRING) {
+		return Z_STR(ret);
+	}
+	zval_ptr_dtor(&ret);
+	zend_throw_error(NULL, "Could not serialize the DOM node to HTML");
+	return NULL;
+}
+
+/* htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401). The charset
+ * hint is NULL so the ini default_charset applies (UTF-8 by default), exactly as
+ * htmlspecialchars() does - a non-UTF-8 application keeps working. */
+static zend_string *html_escape_string(const char *s, size_t len)
+{
+	return php_escape_html_entities(
+		(const unsigned char *) s, len, /* all */ 0,
+		ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, NULL);
+}
+
+static void html_append_escaped(smart_str *buf, zend_string *str)
+{
+	zend_string *escaped = html_escape_string(ZSTR_VAL(str), ZSTR_LEN(str));
+	smart_str_append(buf, escaped);
+	zend_string_release(escaped);
+}
+
+/* A tag name must start with a letter and contain only name-safe characters, so a
+ * dynamically-supplied tag (`new Element($x)`) can never break out of the markup. */
+static bool html_is_valid_tag_name(zend_string *tag)
+{
+	if (ZSTR_LEN(tag) == 0) {
+		return false;
+	}
+	const char *p = ZSTR_VAL(tag);
+	if (!((p[0] >= 'a' && p[0] <= 'z') || (p[0] >= 'A' && p[0] <= 'Z'))) {
+		return false;
+	}
+	for (size_t i = 1; i < ZSTR_LEN(tag); i++) {
+		char c = p[i];
+		if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+				|| (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.' || c == ':')) {
+			return false;
+		}
+	}
+	return true;
+}
+
+/* An attribute name may not contain characters that would let a dynamically
+ * supplied key (spread, `new Element(...)`) break out of the attribute (HTML5
+ * attribute-name production). */
+static bool html_is_valid_attr_name(zend_string *name)
+{
+	if (ZSTR_LEN(name) == 0) {
+		return false;
+	}
+	for (size_t i = 0; i < ZSTR_LEN(name); i++) {
+		unsigned char c = (unsigned char) ZSTR_VAL(name)[i];
+		if (c < 0x20 || c == 0x7f || c == ' ' || c == '"' || c == '\''
+				|| c == '>' || c == '/' || c == '=' || c == '<') {
+			return false;
+		}
+	}
+	return true;
+}
+
+/* HTML5 void elements: serialized without a closing tag or trailing slash. */
+static bool html_is_void_element(zend_string *tag)
+{
+	static const char *const void_elements[] = {
+		"area", "base", "br", "col", "embed", "hr", "img", "input",
+		"link", "meta", "param", "source", "track", "wbr", NULL,
+	};
+
+	for (const char *const *v = void_elements; *v != NULL; v++) {
+		size_t len = strlen(*v);
+		if (ZSTR_LEN(tag) == len
+				&& zend_binary_strcasecmp(ZSTR_VAL(tag), len, *v, len) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/* Bound the pure-C child recursion so a deeply nested array/Traversable cannot
+ * overflow the stack. HTML this deep is absurd; the limit only stops abuse. */
+#define HTML_MAX_DEPTH 1024
+
+static zend_result html_append_child(smart_str *buf, zval *value, uint32_t depth);
+
+/* Flatten a Traversable, coercing each yielded value recursively (RFC §6).
+ * Keys are ignored; only values render. */
+static zend_result html_append_traversable(smart_str *buf, zval *value, uint32_t depth)
+{
+	zend_class_entry *ce = Z_OBJCE_P(value);
+	zend_object_iterator *iter = ce->get_iterator(ce, value, /* by_ref */ 0);
+	zend_result result = SUCCESS;
+
+	if (iter == NULL || EG(exception)) {
+		return FAILURE;
+	}
+
+	if (iter->funcs->rewind) {
+		iter->funcs->rewind(iter);
+		if (EG(exception)) {
+			result = FAILURE;
+			goto done;
+		}
+	}
+
+	while (iter->funcs->valid(iter) == SUCCESS) {
+		if (EG(exception)) {
+			result = FAILURE;
+			break;
+		}
+
+		zval *element = iter->funcs->get_current_data(iter);
+		if (EG(exception) || element == NULL) {
+			result = FAILURE;
+			break;
+		}
+
+		if (html_append_child(buf, element, depth + 1) == FAILURE) {
+			result = FAILURE;
+			break;
+		}
+
+		iter->funcs->move_forward(iter);
+		if (EG(exception)) {
+			result = FAILURE;
+			break;
+		}
+	}
+
+done:
+	zend_iterator_dtor(iter);
+	return EG(exception) ? FAILURE : result;
+}
+
+/* Coerce and append a single child value (RFC §6 child-coercion table).
+ * Returns FAILURE with an exception pending on an unrenderable value. */
+static zend_result html_append_child(smart_str *buf, zval *value, uint32_t depth)
+{
+	if (depth > HTML_MAX_DEPTH) {
+		zend_throw_error(NULL, "Maximum markup nesting depth of %d exceeded", HTML_MAX_DEPTH);
+		return FAILURE;
+	}
+
+	switch (Z_TYPE_P(value)) {
+		case IS_NULL:
+		case IS_FALSE:
+			/* renders as "" */
+			return SUCCESS;
+
+		case IS_TRUE:
+			/* (string) true === "1" */
+			smart_str_appendc(buf, '1');
+			return SUCCESS;
+
+		case IS_LONG:
+			smart_str_append_long(buf, Z_LVAL_P(value));
+			return SUCCESS;
+
+		case IS_DOUBLE: {
+			zend_string *s = zend_double_to_str(Z_DVAL_P(value));
+			smart_str_append(buf, s);
+			zend_string_release(s);
+			return SUCCESS;
+		}
+
+		case IS_STRING:
+			html_append_escaped(buf, Z_STR_P(value));
+			return SUCCESS;
+
+		case IS_ARRAY: {
+			/* flatten, coercing each element recursively */
+			zval *element;
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), element) {
+				ZVAL_DEREF(element);
+				if (html_append_child(buf, element, depth + 1) == FAILURE) {
+					return FAILURE;
+				}
+			} ZEND_HASH_FOREACH_END();
+			return SUCCESS;
+		}
+
+		case IS_OBJECT: {
+			zend_class_entry *ce = Z_OBJCE_P(value);
+
+			/* Htmlable: already-safe HTML, passes through un-escaped. Resolved
+			 * through toHtml() to one of the internal node classes and then
+			 * serialized natively — never through __toString, so overriding a
+			 * component's string form cannot change what its markup renders as. */
+			if (instanceof_function(ce, html_ce_Htmlable)) {
+				zend_string *s = html_render_htmlable(value);
+				if (!s) {
+					return FAILURE;
+				}
+				smart_str_append(buf, s);
+				zend_string_release(s);
+				return SUCCESS;
+			}
+
+			/* Traversable: flatten, coercing each yielded value recursively. */
+			if (instanceof_function(ce, zend_ce_traversable)) {
+				return html_append_traversable(buf, value, depth);
+			}
+
+			/* A DOM node passes through as its own (already-valid) HTML serialization. */
+			if (html_is_dom_node(ce)) {
+				zend_string *s = html_serialize_dom_node(value);
+				if (!s) {
+					return FAILURE;
+				}
+				smart_str_append(buf, s);
+				zend_string_release(s);
+				return SUCCESS;
+			}
+
+			/* Stringable: cast then escape like a string. */
+			if (instanceof_function(ce, zend_ce_stringable)) {
+				zend_string *s = zval_try_get_string(value);
+				if (!s) {
+					return FAILURE;
+				}
+				html_append_escaped(buf, s);
+				zend_string_release(s);
+				return SUCCESS;
+			}
+
+			zend_type_error(
+				"Object of class %s cannot be rendered as a markup child: "
+				"it implements none of Html\\Htmlable, Stringable, or Traversable, "
+				"and is not a DOM node",
+				ZSTR_VAL(ce->name));
+			return FAILURE;
+		}
+
+		case IS_REFERENCE:
+			return html_append_child(buf, Z_REFVAL_P(value), depth);
+
+		default:
+			zend_type_error(
+				"Value of type %s cannot be rendered as a markup child",
+				zend_zval_value_name(value));
+			return FAILURE;
+	}
+}
+
+/* Coerce and append a single attribute value (RFC §5 attribute coercion). */
+static zend_result html_append_attribute(smart_str *buf, zend_string *name, zval *value)
+{
+	switch (Z_TYPE_P(value)) {
+		case IS_NULL:
+		case IS_FALSE:
+			/* attribute omitted */
+			return SUCCESS;
+
+		case IS_TRUE:
+			/* bare boolean attribute */
+			smart_str_appendc(buf, ' ');
+			smart_str_append(buf, name);
+			return SUCCESS;
+
+		case IS_LONG:
+			smart_str_appendc(buf, ' ');
+			smart_str_append(buf, name);
+			smart_str_appendl(buf, "=\"", 2);
+			smart_str_append_long(buf, Z_LVAL_P(value));
+			smart_str_appendc(buf, '"');
+			return SUCCESS;
+
+		case IS_DOUBLE: {
+			zend_string *s = zend_double_to_str(Z_DVAL_P(value));
+			smart_str_appendc(buf, ' ');
+			smart_str_append(buf, name);
+			smart_str_appendl(buf, "=\"", 2);
+			smart_str_append(buf, s);
+			smart_str_appendc(buf, '"');
+			zend_string_release(s);
+			return SUCCESS;
+		}
+
+		case IS_STRING:
+			smart_str_appendc(buf, ' ');
+			smart_str_append(buf, name);
+			smart_str_appendl(buf, "=\"", 2);
+			html_append_escaped(buf, Z_STR_P(value));
+			smart_str_appendc(buf, '"');
+			return SUCCESS;
+
+		case IS_OBJECT: {
+			zend_class_entry *value_ce = Z_OBJCE_P(value);
+
+			/* Htmlable (Html\raw(), Html\escape(), ...) is already-safe HTML and
+			 * passes through un-escaped, exactly as in child position — so
+			 * title={\Html\raw('&nbsp;')} emits the entity rather than
+			 * double-escaping it. The trust contract is the caller's: a raw
+			 * value containing '"' can break out of the attribute. */
+			if (instanceof_function(value_ce, html_ce_Htmlable)) {
+				zend_string *s = html_render_htmlable(value);
+				if (!s) {
+					return FAILURE;
+				}
+				smart_str_appendc(buf, ' ');
+				smart_str_append(buf, name);
+				smart_str_appendl(buf, "=\"", 2);
+				smart_str_append(buf, s);
+				smart_str_appendc(buf, '"');
+				zend_string_release(s);
+				return SUCCESS;
+			}
+
+			if (instanceof_function(value_ce, zend_ce_stringable)) {
+				zend_string *s = zval_try_get_string(value);
+				if (!s) {
+					return FAILURE;
+				}
+				smart_str_appendc(buf, ' ');
+				smart_str_append(buf, name);
+				smart_str_appendl(buf, "=\"", 2);
+				html_append_escaped(buf, s);
+				smart_str_appendc(buf, '"');
+				zend_string_release(s);
+				return SUCCESS;
+			}
+			ZEND_FALLTHROUGH;
+		}
+
+		default:
+			/* arrays are reserved for a future class/style helper */
+			zend_type_error(
+				"Attribute \"%s\" value must be of type string|int|float|bool|null|Stringable, %s given",
+				ZSTR_VAL(name), zend_zval_value_name(value));
+			return FAILURE;
+	}
+}
+
+static zend_result html_append_attributes(smart_str *buf, HashTable *attributes)
+{
+	zend_string *name;
+	zval *value;
+
+	ZEND_HASH_FOREACH_STR_KEY_VAL(attributes, name, value) {
+		if (name == NULL) {
+			zend_type_error(
+				"Attribute names must be strings, integer given");
+			return FAILURE;
+		}
+		if (!html_is_valid_attr_name(name)) {
+			zend_value_error("Invalid attribute name \"%s\"", ZSTR_VAL(name));
+			return FAILURE;
+		}
+		ZVAL_DEREF(value);
+		if (html_append_attribute(buf, name, value) == FAILURE) {
+			return FAILURE;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return SUCCESS;
+}
+
+/* Render an Html\Element to its smart_str buffer. */
+static zend_result html_render_element(smart_str *buf, zend_object *obj)
+{
+	zval rv_tag, rv_attrs, rv_children;
+	zval *tag = zend_read_property(html_ce_Element, obj, ZEND_STRL("tag"), /* silent */ true, &rv_tag);
+	zval *attributes = zend_read_property(html_ce_Element, obj, ZEND_STRL("attributes"), true, &rv_attrs);
+	zval *children = zend_read_property(html_ce_Element, obj, ZEND_STRL("children"), true, &rv_children);
+
+	ZVAL_DEREF(tag);
+	ZVAL_DEREF(attributes);
+	ZVAL_DEREF(children);
+
+	if (Z_TYPE_P(tag) != IS_STRING || Z_TYPE_P(attributes) != IS_ARRAY || Z_TYPE_P(children) != IS_ARRAY) {
+		zend_throw_error(NULL, "Html\\Element has not been initialized");
+		return FAILURE;
+	}
+
+	if (!html_is_valid_tag_name(Z_STR_P(tag))) {
+		zend_value_error("Invalid tag name \"%s\"", ZSTR_VAL(Z_STR_P(tag)));
+		return FAILURE;
+	}
+
+	smart_str_appendc(buf, '<');
+	smart_str_append(buf, Z_STR_P(tag));
+
+	if (html_append_attributes(buf, Z_ARRVAL_P(attributes)) == FAILURE) {
+		return FAILURE;
+	}
+
+	if (html_is_void_element(Z_STR_P(tag))) {
+		/* Clean HTML5 void element: no slash, no closing tag. Children would be
+		 * silently lost in serialization, so reject them outright. */
+		if (zend_hash_num_elements(Z_ARRVAL_P(children)) > 0) {
+			zend_throw_error(NULL,
+				"Void element <%s> cannot have children", ZSTR_VAL(Z_STR_P(tag)));
+			return FAILURE;
+		}
+		smart_str_appendc(buf, '>');
+		return SUCCESS;
+	}
+
+	smart_str_appendc(buf, '>');
+
+	if (html_append_child(buf, children, 0) == FAILURE) {
+		return FAILURE;
+	}
+
+	smart_str_appendl(buf, "</", 2);
+	smart_str_append(buf, Z_STR_P(tag));
+	smart_str_appendc(buf, '>');
+
+	return SUCCESS;
+}
+
+static zend_result html_render_fragment(smart_str *buf, zend_object *obj)
+{
+	zval rv;
+	zval *children = zend_read_property(html_ce_Fragment, obj, ZEND_STRL("children"), true, &rv);
+	ZVAL_DEREF(children);
+	if (Z_TYPE_P(children) != IS_ARRAY) {
+		zend_throw_error(NULL, "Html\\Fragment has not been initialized");
+		return FAILURE;
+	}
+	return html_append_child(buf, children, 0);
+}
+
+/* Bound the toHtml() resolution chain: a component may return another component,
+ * but a class whose toHtml() returns itself (or a cycle) must not spin forever. */
+#define HTML_TOHTML_MAX_DEPTH 64
+
+/* Resolve an Htmlable to one of the internal node classes (Element, Fragment,
+ * Raw) by calling toHtml() until it lands on one. On SUCCESS *node holds an
+ * owned reference; on FAILURE an exception is pending. */
+static zend_result html_resolve_htmlable(zval *value, zval *node)
+{
+	zval current;
+	ZVAL_COPY(&current, value);
+
+	for (uint32_t depth = 0; depth < HTML_TOHTML_MAX_DEPTH; depth++) {
+		zend_class_entry *ce = Z_OBJCE(current);
+		if (ce == html_ce_Element || ce == html_ce_Fragment || ce == html_ce_Raw) {
+			ZVAL_COPY_VALUE(node, &current);
+			return SUCCESS;
+		}
+
+		zval next;
+		ZVAL_UNDEF(&next);
+		zend_call_method_with_0_params(Z_OBJ(current), ce, NULL, "tohtml", &next);
+		zval_ptr_dtor(&current);
+		if (EG(exception)) {
+			zval_ptr_dtor(&next);
+			return FAILURE;
+		}
+		/* The declared return type already guarantees this for ordinary
+		 * methods; guard anyway (e.g. a __call-backed implementation). */
+		if (Z_TYPE(next) != IS_OBJECT || !instanceof_function(Z_OBJCE(next), html_ce_Htmlable)) {
+			zend_throw_error(NULL,
+				"%s::toHtml() did not return an Html\\Htmlable", ZSTR_VAL(ce->name));
+			zval_ptr_dtor(&next);
+			return FAILURE;
+		}
+		ZVAL_COPY_VALUE(&current, &next);
+	}
+
+	zend_throw_error(NULL,
+		"Maximum toHtml() resolution depth of %d exceeded (%s::toHtml() never produced an Html\\Element, Html\\Fragment, or Html\\Raw)",
+		HTML_TOHTML_MAX_DEPTH, ZSTR_VAL(Z_OBJCE(current)->name));
+	zval_ptr_dtor(&current);
+	return FAILURE;
+}
+
+/* Serialize one of the internal node classes to its final HTML string.
+ * Returns a new string, or NULL with an exception pending. */
+static zend_string *html_render_node(zval *node)
+{
+	zend_class_entry *ce = Z_OBJCE_P(node);
+
+	if (ce == html_ce_Raw) {
+		zval rv;
+		zval *html = zend_read_property(html_ce_Raw, Z_OBJ_P(node), ZEND_STRL("html"), true, &rv);
+		ZVAL_DEREF(html);
+		if (Z_TYPE_P(html) != IS_STRING) {
+			zend_throw_error(NULL, "Html\\Raw has not been initialized");
+			return NULL;
+		}
+		return zend_string_copy(Z_STR_P(html));
+	}
+
+	smart_str buf = {0};
+	zend_result rendered = (ce == html_ce_Element)
+		? html_render_element(&buf, Z_OBJ_P(node))
+		: html_render_fragment(&buf, Z_OBJ_P(node));
+	if (rendered == FAILURE) {
+		smart_str_free(&buf);
+		return NULL;
+	}
+	return smart_str_extract(&buf);
+}
+
+/* Render any Htmlable — a node class or a userland implementation — to its
+ * final HTML string: resolve through toHtml(), then serialize natively.
+ * Returns a new string, or NULL with an exception pending. */
+static zend_string *html_render_htmlable(zval *value)
+{
+	zval node;
+	if (html_resolve_htmlable(value, &node) == FAILURE) {
+		return NULL;
+	}
+	zend_string *result = html_render_node(&node);
+	zval_ptr_dtor(&node);
+	return result;
+}
+
+/* The default __toString() injected into userland Htmlable classes at
+ * class-link time (see html_implement_htmlable): render via toHtml(). */
+static ZEND_NAMED_FUNCTION(html_htmlable_default_tostring)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_string *s = html_render_htmlable(ZEND_THIS);
+	if (s == NULL) {
+		RETURN_THROWS();
+	}
+	RETURN_STR(s);
+}
+
+/* interface_gets_implemented handler for Html\Htmlable: give every userland
+ * implementing class a default __toString() unless it declares (or inherits)
+ * one of its own, so `echo $component` / `(string) $component` always work
+ * while toHtml() remains the only method a class must write.
+ *
+ * This runs during class linking, after the interface's methods were copied
+ * into the class but before zend_verify_abstract_class(), so replacing the
+ * inherited abstract __toString with a concrete function both satisfies
+ * Stringable and keeps the class instantiable. The injected function follows
+ * the engine's own precedent for enum cases()/from()/tryFrom(): an
+ * arena-allocated internal function inside a userland class
+ * (ZEND_ACC_ARENA_ALLOCATED is understood by class destruction, opcache
+ * persistence, and the inheritance cache). */
+static int html_implement_htmlable(zend_class_entry *iface, zend_class_entry *ce)
+{
+	if (ce->type != ZEND_USER_CLASS) {
+		/* An internal class must ship its own __toString (Element, Fragment,
+		 * and Raw do): injecting a request-arena-allocated default into a
+		 * permanent class would dangle across requests. */
+		if (ce->__tostring == NULL) {
+			zend_error_noreturn(E_CORE_ERROR,
+				"Internal class %s must declare __toString() to implement Html\\Htmlable",
+				ZSTR_VAL(ce->name));
+		}
+		return SUCCESS;
+	}
+
+	/* A __toString declared by the class, inherited from a parent class, or
+	 * flattened in from a trait wins; the default only fills the gap. When
+	 * the entry exists here but is abstract, it is the unimplemented
+	 * requirement inherited from Stringable through this interface. */
+	zval *zv = zend_hash_find(&ce->function_table, html_str_tostring_lc);
+	if (zv != NULL && !(((zend_function *) Z_PTR_P(zv))->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+		return SUCCESS;
+	}
+
+	zend_internal_function *zif = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
+	zif->type = ZEND_INTERNAL_FUNCTION;
+	zif->module = EG(current_module);
+	zif->scope = ce;
+	zif->function_name = html_str_tostring;
+	zif->handler = html_htmlable_default_tostring;
+	zif->doc_comment = NULL;
+	zif->fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_HAS_RETURN_TYPE | ZEND_ACC_ARENA_ALLOCATED;
+	zif->arg_info = html_zarginfo_default_tostring + 1;
+	zif->T = ZEND_OBSERVER_ENABLED;
+	if (EG(active)) { /* linking at run-time (the normal case for user classes) */
+		if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
+			zif->fn_flags |= ZEND_ACC_PRELOADED;
+		}
+		ZEND_MAP_PTR_INIT(zif->run_time_cache,
+			zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
+	} else {
+#ifdef ZTS
+		ZEND_MAP_PTR_NEW_STATIC(zif->run_time_cache);
+#else
+		ZEND_MAP_PTR_INIT(zif->run_time_cache, NULL);
+#endif
+	}
+
+	if (zv != NULL) {
+		/* Swap the abstract entry in place. The replaced pointer is the
+		 * interface's own method, owned by the interface — nothing to free,
+		 * and bypassing the hash dtor is exactly why this is not hash_update. */
+		Z_PTR_P(zv) = (zend_function *) zif;
+	} else {
+		/* The hook can also fire before method inheritance (a class
+		 * implementing an interface that extends Htmlable reaches here through
+		 * zend_do_inherit_interfaces); the later abstract-method copy then
+		 * finds this concrete implementation and accepts it. */
+		zend_hash_add_new_ptr(&ce->function_table, html_str_tostring_lc, zif);
+	}
+	ce->__tostring = (zend_function *) zif;
+
+	return SUCCESS;
+}
+
+/* Assigns a string to a (readonly) declared property during construction. */
+static void html_init_string_property(zend_class_entry *ce, zend_object *obj, const char *name, size_t name_len, zend_string *value)
+{
+	zval tmp;
+	ZVAL_STR_COPY(&tmp, value);
+	zend_update_property(ce, obj, name, name_len, &tmp);
+	zval_ptr_dtor(&tmp);
+}
+
+static void html_init_array_property(zend_class_entry *ce, zend_object *obj, const char *name, size_t name_len, zval *value /* may be NULL */)
+{
+	zval tmp;
+	if (value != NULL) {
+		ZVAL_COPY(&tmp, value);
+	} else {
+		ZVAL_EMPTY_ARRAY(&tmp);
+	}
+	zend_update_property(ce, obj, name, name_len, &tmp);
+	zval_ptr_dtor(&tmp);
+}
+
+PHP_METHOD(Html_Element, __construct)
+{
+	zend_string *tag;
+	zval *attributes = NULL, *children = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STR(tag)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY(attributes)
+		Z_PARAM_ARRAY(children)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_object *obj = Z_OBJ_P(ZEND_THIS);
+	html_init_string_property(html_ce_Element, obj, ZEND_STRL("tag"), tag);
+	html_init_array_property(html_ce_Element, obj, ZEND_STRL("attributes"), attributes);
+	html_init_array_property(html_ce_Element, obj, ZEND_STRL("children"), children);
+}
+
+/* The node classes are the base cases of toHtml() resolution: each returns
+ * itself. */
+PHP_METHOD(Html_Element, toHtml)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_COPY(ZEND_THIS);
+}
+
+PHP_METHOD(Html_Fragment, toHtml)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_COPY(ZEND_THIS);
+}
+
+PHP_METHOD(Html_Raw, toHtml)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_COPY(ZEND_THIS);
+}
+
+PHP_METHOD(Html_Element, __toString)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	smart_str buf = {0};
+	if (html_render_element(&buf, Z_OBJ_P(ZEND_THIS)) == FAILURE) {
+		smart_str_free(&buf);
+		RETURN_THROWS();
+	}
+	RETURN_STR(smart_str_extract(&buf));
+}
+
+PHP_METHOD(Html_Fragment, __construct)
+{
+	zval *children = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY(children)
+	ZEND_PARSE_PARAMETERS_END();
+
+	html_init_array_property(html_ce_Fragment, Z_OBJ_P(ZEND_THIS), ZEND_STRL("children"), children);
+}
+
+PHP_METHOD(Html_Fragment, __toString)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	smart_str buf = {0};
+	if (html_render_fragment(&buf, Z_OBJ_P(ZEND_THIS)) == FAILURE) {
+		smart_str_free(&buf);
+		RETURN_THROWS();
+	}
+	RETURN_STR(smart_str_extract(&buf));
+}
+
+PHP_METHOD(Html_Raw, __construct)
+{
+	zend_string *html;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(html)
+	ZEND_PARSE_PARAMETERS_END();
+
+	html_init_string_property(html_ce_Raw, Z_OBJ_P(ZEND_THIS), ZEND_STRL("html"), html);
+}
+
+PHP_METHOD(Html_Raw, __toString)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zval rv;
+	zval *html = zend_read_property(html_ce_Raw, Z_OBJ_P(ZEND_THIS), ZEND_STRL("html"), true, &rv);
+	ZVAL_DEREF(html);
+	if (Z_TYPE_P(html) != IS_STRING) {
+		zend_throw_error(NULL, "Html\\Raw has not been initialized");
+		RETURN_THROWS();
+	}
+	RETURN_STR(zend_string_copy(Z_STR_P(html)));
+}
+
+PHP_METHOD(Html_Slot, __construct)
+{
+	zend_string *name = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval tmp;
+	if (name != NULL) {
+		ZVAL_STR_COPY(&tmp, name);
+	} else {
+		ZVAL_NULL(&tmp);
+	}
+	zend_update_property(html_ce_Slot, Z_OBJ_P(ZEND_THIS), ZEND_STRL("name"), &tmp);
+	zval_ptr_dtor(&tmp);
+}
+
+/* Build an Html\Raw wrapping the given (already-final) HTML string. */
+static void html_return_raw(zval *return_value, zend_string *html)
+{
+	object_init_ex(return_value, html_ce_Raw);
+	html_init_string_property(html_ce_Raw, Z_OBJ_P(return_value), ZEND_STRL("html"), html);
+}
+
+PHP_FUNCTION(Html_raw)
+{
+	zend_string *html;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(html)
+	ZEND_PARSE_PARAMETERS_END();
+
+	html_return_raw(return_value, html);
+}
+
+PHP_FUNCTION(Html_escape)
+{
+	zend_string *text;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(text)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_string *escaped = html_escape_string(ZSTR_VAL(text), ZSTR_LEN(text));
+	html_return_raw(return_value, escaped);
+	zend_string_release(escaped);
+}
+
+/* Parse $code (a complete file, including the opening <?php tag) and export
+ * the AST back to source. Markup is lowered during parsing, so the export
+ * shows exactly the plain-PHP form markup compiles to. */
+PHP_FUNCTION(Html_transpile)
+{
+	zend_string *code;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(code)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_string *filename = ZSTR_INIT_LITERAL("Html\\transpile()'d code", 0);
+	zend_arena *ast_arena;
+	zend_ast *ast = zend_compile_string_to_ast(code, &ast_arena, filename);
+	zend_string_release(filename);
+
+	if (!ast) {
+		/* The parser threw ParseError (or a compile-time error was upgraded
+		 * to an exception); just propagate it. */
+		ZEND_ASSERT(EG(exception));
+		RETURN_THROWS();
+	}
+
+	zend_string *source = zend_ast_export("", ast, "");
+	zend_ast_destroy(ast);
+	zend_arena_destroy(ast_arena);
+
+	RETURN_STR(source);
+}
+
+/* Merge explicit props with slot content routed via #[Html\Slot] parameter
+ * attributes, producing the named-argument array for a component dispatch.
+ * Returns a new array (caller releases) or NULL with a pending exception. */
+static HashTable *html_route_component_args(
+	zend_function *fn, HashTable *props, zval *slot, HashTable *named_slots)
+{
+	HashTable *args = zend_new_array(props ? zend_hash_num_elements(props) : 0);
+	zend_string *anon_param = NULL;       /* param name for a bare #[Html\Slot] */
+	HashTable named_slot_params;          /* slot-name => param-name */
+	zend_hash_init(&named_slot_params, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+	/* 1. explicit props become named arguments */
+	if (props) {
+		zend_string *key;
+		zval *val;
+		ZEND_HASH_FOREACH_STR_KEY_VAL(props, key, val) {
+			if (key == NULL) {
+				zend_throw_error(NULL, "Component props must use string keys");
+				goto fail;
+			}
+			Z_TRY_ADDREF_P(val);
+			zend_hash_update(args, key, val);
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	/* 2. discover slot parameters from #[Html\Slot] attributes */
+	if (fn && fn->common.attributes) {
+		for (uint32_t i = 0; i < fn->common.num_args; i++) {
+			zend_attribute *attr = zend_get_parameter_attribute_str(
+				fn->common.attributes, ZEND_STRL("html\\slot"), i);
+			if (attr == NULL) {
+				continue;
+			}
+
+			zend_string *param_name = fn->common.arg_info[i].name;
+			zend_string *slot_name = NULL;
+			zval slot_name_zv;
+			ZVAL_UNDEF(&slot_name_zv);
+
+			if (attr->argc >= 1) {
+				if (zend_get_attribute_value(&slot_name_zv, attr, 0, fn->common.scope) == FAILURE) {
+					goto fail;
+				}
+				if (Z_TYPE(slot_name_zv) == IS_STRING) {
+					slot_name = Z_STR(slot_name_zv);
+				} else if (Z_TYPE(slot_name_zv) != IS_NULL) {
+					zval_ptr_dtor(&slot_name_zv);
+					zend_throw_error(NULL, "#[Html\\Slot] name must be a string or null");
+					goto fail;
+				}
+			}
+
+			if (slot_name == NULL) {
+				if (anon_param != NULL) {
+					zval_ptr_dtor(&slot_name_zv);
+					zend_throw_error(NULL, "Component has more than one anonymous #[Html\\Slot] parameter");
+					goto fail;
+				}
+				anon_param = param_name;
+			} else {
+				if (zend_hash_exists(&named_slot_params, slot_name)) {
+					zend_throw_error(NULL, "Duplicate #[Html\\Slot(\"%s\")] parameter", ZSTR_VAL(slot_name));
+					zval_ptr_dtor(&slot_name_zv);
+					goto fail;
+				}
+				zval pv;
+				ZVAL_STR_COPY(&pv, param_name);
+				zend_hash_add_new(&named_slot_params, slot_name, &pv);
+			}
+			zval_ptr_dtor(&slot_name_zv);
+		}
+
+		/* A slot is a single Fragment, so it cannot fill a variadic parameter
+		 * (which num_args excludes above); reject rather than silently ignore. */
+		if (fn->common.fn_flags & ZEND_ACC_VARIADIC
+				&& zend_get_parameter_attribute_str(
+					fn->common.attributes, ZEND_STRL("html\\slot"), fn->common.num_args) != NULL) {
+			zend_throw_error(NULL, "#[Html\\Slot] cannot be applied to a variadic parameter");
+			goto fail;
+		}
+	}
+
+	/* 3. route the anonymous body slot */
+	if (slot != NULL) {
+		if (anon_param == NULL) {
+			zend_throw_error(NULL, "Component received body content but has no anonymous #[Html\\Slot] parameter");
+			goto fail;
+		}
+		if (zend_hash_exists(args, anon_param)) {
+			zend_throw_error(NULL, "Parameter $%s is filled by both an attribute and body content", ZSTR_VAL(anon_param));
+			goto fail;
+		}
+		Z_ADDREF_P(slot);
+		zend_hash_add_new(args, anon_param, slot);
+	}
+
+	/* 4. route named slots */
+	if (named_slots) {
+		zend_string *sname;
+		zval *sval;
+		ZEND_HASH_FOREACH_STR_KEY_VAL(named_slots, sname, sval) {
+			if (sname == NULL) {
+				zend_throw_error(NULL, "Named slots must use string keys");
+				goto fail;
+			}
+			zval *pv = zend_hash_find(&named_slot_params, sname);
+			if (pv == NULL) {
+				zend_throw_error(NULL, "No #[Html\\Slot(\"%s\")] parameter accepts the <slot:%s> block", ZSTR_VAL(sname), ZSTR_VAL(sname));
+				goto fail;
+			}
+			zend_string *param_name = Z_STR_P(pv);
+			if (zend_hash_exists(args, param_name)) {
+				zend_throw_error(NULL, "Parameter $%s is filled by both an attribute and a slot", ZSTR_VAL(param_name));
+				goto fail;
+			}
+			Z_TRY_ADDREF_P(sval);
+			zend_hash_add_new(args, param_name, sval);
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	zend_hash_destroy(&named_slot_params);
+	return args;
+
+fail:
+	zend_hash_destroy(&named_slot_params);
+	zend_array_release(args);
+	return NULL;
+}
+
+/* One entry in a hook list: the callable plus an optional component scope.
+ * A NULL scope means the hook runs for every component; a non-NULL scope
+ * limits it to the one component whose resolved name matches (the same name
+ * the hook receives as its string argument). Scoped hooks let the dispatch
+ * skip non-matching handlers in C, before any userland call. */
+typedef struct {
+	zval callable;
+	zend_string *component;
+} html_handler;
+
+static void html_handler_dtor(zval *zv)
+{
+	html_handler *handler = Z_PTR_P(zv);
+	zval_ptr_dtor(&handler->callable);
+	if (handler->component != NULL) {
+		zend_string_release(handler->component);
+	}
+	efree(handler);
+}
+
+/* Component names are case-insensitive everywhere PHP resolves them (classes,
+ * functions, methods), so scope matching is too. */
+static zend_always_inline bool html_handler_matches(const html_handler *handler, zend_string *name)
+{
+	return handler->component == NULL || zend_string_equals_ci(handler->component, name);
+}
+
+/* Resolved component names never carry a leading backslash, but "\App\Card"
+ * is how userland habitually writes an FQCN; accept both. */
+static zend_string *html_normalize_component_scope(zend_string *component)
+{
+	if (ZSTR_LEN(component) > 0 && ZSTR_VAL(component)[0] == '\\') {
+		return zend_string_init(ZSTR_VAL(component) + 1, ZSTR_LEN(component) - 1, 0);
+	}
+	return zend_string_copy(component);
+}
+
+/* Append a callable to one of the request-scoped handler lists (allocating it on
+ * first use). Adds its own reference to the handler. Throws a TypeError and
+ * returns false when the value is not callable (like spl_autoload_register). */
+static bool html_register_handler(HashTable **list, zval *callable, zend_string *component, uint32_t arg_num)
+{
+	if (!zend_is_callable(callable, 0, NULL)) {
+		zend_argument_type_error(arg_num, "must be a valid callback");
+		return false;
+	}
+	if (*list == NULL) {
+		ALLOC_HASHTABLE(*list);
+		zend_hash_init(*list, 4, NULL, html_handler_dtor, 0);
+	}
+	html_handler *handler = emalloc(sizeof(html_handler));
+	ZVAL_COPY(&handler->callable, callable);
+	handler->component = component != NULL ? html_normalize_component_scope(component) : NULL;
+	zend_hash_next_index_insert_ptr(*list, handler);
+	return true;
+}
+
+/* Remove the first handler identical to the given callable *and* registered
+ * with the same scope (unscoped only matches unscoped). Returns whether one
+ * matched. Order of the remaining handlers is preserved. */
+static bool html_unregister_handler(HashTable *list, zval *callable, zend_string *component)
+{
+	if (list == NULL) {
+		return false;
+	}
+	zend_string *scope = component != NULL ? html_normalize_component_scope(component) : NULL;
+	bool removed = false;
+	zend_ulong idx;
+	html_handler *handler;
+	ZEND_HASH_FOREACH_NUM_KEY_PTR(list, idx, handler) {
+		if (!zend_is_identical(&handler->callable, callable)) {
+			continue;
+		}
+		if ((handler->component == NULL) != (scope == NULL)
+				|| (scope != NULL && !zend_string_equals_ci(handler->component, scope))) {
+			continue;
+		}
+		removed = zend_hash_index_del(list, idx) == SUCCESS;
+		break;
+	} ZEND_HASH_FOREACH_END();
+	if (scope != NULL) {
+		zend_string_release(scope);
+	}
+	return removed;
+}
+
+/* A fresh, always-refcounted array copy of the routed component arguments (or an
+ * empty array when there are none), safe to hand to a userland factory/invoker.
+ * Duplicating avoids force-refcounting a possibly-immutable borrowed array (an
+ * empty `[]` literal is the shared, read-only zend_empty_array) and stops a
+ * handler from mutating the engine's internal argument array. */
+static zend_array *html_args_for_handler(HashTable *args)
+{
+	return args != NULL ? zend_array_dup(args) : zend_new_array(0);
+}
+
+/* Snapshot the handlers in `chain` whose scope matches `name`, or NULL when
+ * none match. No user code runs during the scan, so iterating the live table
+ * is safe; the snapshot exists because the handlers themselves may
+ * (un)register hooks, which would otherwise rehash the table under a live
+ * iterator (a registration made during dispatch takes effect from the next
+ * dispatch). A fully non-matching dispatch allocates nothing. */
+static HashTable *html_matching_handlers(HashTable *chain, zend_string *name)
+{
+	HashTable *snapshot = NULL;
+	html_handler *handler;
+	ZEND_HASH_FOREACH_PTR(chain, handler) {
+		if (!html_handler_matches(handler, name)) {
+			continue;
+		}
+		if (snapshot == NULL) {
+			ALLOC_HASHTABLE(snapshot);
+			zend_hash_init(snapshot, 4, NULL, ZVAL_PTR_DTOR, 0);
+		}
+		Z_TRY_ADDREF(handler->callable);
+		zend_hash_next_index_insert_new(snapshot, &handler->callable);
+	} ZEND_HASH_FOREACH_END();
+	return snapshot;
+}
+
+/* Run a handler chain (component factories or invokers). Each in-scope handler
+ * is called as `handler(name, args)`; the first to return a non-null value
+ * takes over the dispatch. Returns 1 with *result set (owned) when a handler
+ * took it, 0 when every handler deferred (or none are in scope), or -1 when a
+ * handler threw. The userland args copy is only made once a handler is
+ * actually about to run. */
+static int html_run_handler_chain(HashTable *chain, zend_string *name, HashTable *args, zval *result)
+{
+	if (chain == NULL) {
+		return 0;
+	}
+	HashTable *snapshot = html_matching_handlers(chain, name);
+	if (snapshot == NULL) {
+		return 0;
+	}
+	zval name_zv, args_zv;
+	ZVAL_STR_COPY(&name_zv, name);
+	ZVAL_ARR(&args_zv, html_args_for_handler(args));
+	int outcome = 0;
+	zval *handler;
+	ZEND_HASH_FOREACH_VAL(snapshot, handler) {
+		zval params[2], ret;
+		ZVAL_COPY(&params[0], &name_zv);
+		ZVAL_COPY(&params[1], &args_zv);
+		ZVAL_UNDEF(&ret);
+		zend_result called = call_user_function(NULL, NULL, handler, &ret, 2, params);
+		zval_ptr_dtor(&params[0]);
+		zval_ptr_dtor(&params[1]);
+		if (called != SUCCESS || EG(exception)) {
+			zval_ptr_dtor(&ret);
+			outcome = -1;
+			break;
+		}
+		if (Z_TYPE(ret) != IS_NULL) {
+			ZVAL_COPY_VALUE(result, &ret);
+			outcome = 1;
+			break;
+		}
+		zval_ptr_dtor(&ret);
+	} ZEND_HASH_FOREACH_END();
+	zval_ptr_dtor(&name_zv);
+	zval_ptr_dtor(&args_zv);
+	zend_hash_release(snapshot);
+	return outcome;
+}
+
+PHP_FUNCTION(Html_register_component_factory)
+{
+	zval *factory;
+	zend_string *component = NULL;
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(factory)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(component)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!html_register_handler(&HTML_G(component_factories), factory, component, 1)) {
+		RETURN_THROWS();
+	}
+}
+
+PHP_FUNCTION(Html_unregister_component_factory)
+{
+	zval *factory;
+	zend_string *component = NULL;
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(factory)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(component)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(html_unregister_handler(HTML_G(component_factories), factory, component));
+}
+
+PHP_FUNCTION(Html_register_component_invoker)
+{
+	zval *invoker;
+	zend_string *component = NULL;
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(invoker)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(component)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!html_register_handler(&HTML_G(component_invokers), invoker, component, 1)) {
+		RETURN_THROWS();
+	}
+}
+
+PHP_FUNCTION(Html_unregister_component_invoker)
+{
+	zval *invoker;
+	zend_string *component = NULL;
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(invoker)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(component)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(html_unregister_handler(HTML_G(component_invokers), invoker, component));
+}
+
+PHP_FUNCTION(Html_register_component_decorator)
+{
+	zval *decorator;
+	zend_string *component = NULL;
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(decorator)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(component)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!html_register_handler(&HTML_G(component_decorators), decorator, component, 1)) {
+		RETURN_THROWS();
+	}
+}
+
+PHP_FUNCTION(Html_unregister_component_decorator)
+{
+	zval *decorator;
+	zend_string *component = NULL;
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(decorator)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(component)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(html_unregister_handler(HTML_G(component_decorators), decorator, component));
+}
+
+/* Run the produced Html\Htmlable through the decorator chain: each decorator is
+ * called as `decorator(Html\Htmlable $rendered, string $component)` and returns a
+ * possibly-wrapped Html\Htmlable, composed in registration order. Updates *html in
+ * place; on failure returns false with an exception pending and *html released. */
+static bool html_apply_decorators(zend_string *component, zval *html)
+{
+	if (HTML_G(component_decorators) == NULL) {
+		return true;
+	}
+	HashTable *decorators = html_matching_handlers(HTML_G(component_decorators), component);
+	if (decorators == NULL) {
+		return true;
+	}
+	zval name_zv;
+	ZVAL_STR_COPY(&name_zv, component);
+
+	zval *decorator;
+	ZEND_HASH_FOREACH_VAL(decorators, decorator) {
+		zval params[2], decorated;
+		ZVAL_COPY(&params[0], html);
+		ZVAL_COPY(&params[1], &name_zv);
+		ZVAL_UNDEF(&decorated);
+		zend_result called = call_user_function(NULL, NULL, decorator, &decorated, 2, params);
+		zval_ptr_dtor(&params[0]);
+		zval_ptr_dtor(&params[1]);
+		if (called != SUCCESS || EG(exception)) {
+			zval_ptr_dtor(&decorated);
+			goto fail;
+		}
+		if (Z_TYPE(decorated) != IS_OBJECT || !instanceof_function(Z_OBJCE(decorated), html_ce_Htmlable)) {
+			zend_throw_error(NULL,
+				"Component decorator for <%s> did not return an Html\\Htmlable",
+				ZSTR_VAL(component));
+			zval_ptr_dtor(&decorated);
+			goto fail;
+		}
+		zval_ptr_dtor(html);
+		ZVAL_COPY_VALUE(html, &decorated);
+	} ZEND_HASH_FOREACH_END();
+
+	zend_array_release(decorators);
+	zval_ptr_dtor(&name_zv);
+	return true;
+
+fail:
+	zend_array_release(decorators);
+	zval_ptr_dtor(&name_zv);
+	zval_ptr_dtor(html);
+	return false;
+}
+
+/* Resolve a "Class::method" component to a public static user-defined method.
+ * On FAILURE an exception is pending. */
+static zend_result html_resolve_static_method(
+	zend_string *component, const char *sep, zend_class_entry **ce_out, zend_function **fn_out)
+{
+	size_t class_len = sep - ZSTR_VAL(component);
+	zend_string *class_name = zend_string_init(ZSTR_VAL(component), class_len, 0);
+	zend_string *method_name = zend_string_init(sep + 2, ZSTR_LEN(component) - class_len - 2, 0);
+	zend_class_entry *ce;
+	zend_function *fn;
+	zend_result result = FAILURE;
+
+	ce = zend_lookup_class(class_name);
+	if (ce == NULL) {
+		zend_throw_error(NULL, "Component class \"%s\" not found", ZSTR_VAL(class_name));
+		goto out;
+	}
+
+	zend_string *lc_method = zend_string_tolower(method_name);
+	fn = zend_hash_find_ptr(&ce->function_table, lc_method);
+	zend_string_release(lc_method);
+
+	if (fn == NULL) {
+		zend_throw_error(NULL, "Component method %s::%s() not found",
+			ZSTR_VAL(class_name), ZSTR_VAL(method_name));
+		goto out;
+	}
+
+	/* The engine calls the method from no particular scope with no $this, so
+	 * only a public, non-abstract *static* method is a valid component target
+	 * (a raw function-table hit bypasses the VM's own checks). Internal
+	 * methods are rejected like internal functions. */
+	if (!(fn->common.fn_flags & ZEND_ACC_STATIC)
+			|| !(fn->common.fn_flags & ZEND_ACC_PUBLIC)
+			|| (fn->common.fn_flags & ZEND_ACC_ABSTRACT)
+			|| fn->type == ZEND_INTERNAL_FUNCTION) {
+		zend_throw_error(NULL,
+			"Component method %s::%s() must be a public static user-defined method",
+			ZSTR_VAL(class_name), ZSTR_VAL(method_name));
+		goto out;
+	}
+
+	*ce_out = ce;
+	*fn_out = fn;
+	result = SUCCESS;
+
+out:
+	zend_string_release(class_name);
+	zend_string_release(method_name);
+	return result;
+}
+
+/* Dispatch a class component: a registered factory may construct it (e.g.
+ * through a DI container) before the engine's own `new`. On SUCCESS the
+ * produced object is in *result; on FAILURE an exception is pending. Never
+ * releases `args` — the caller owns it. */
+static zend_result html_dispatch_new(
+	zend_class_entry *ce, zend_function *ctor, HashTable *args, zval *result)
+{
+	if (HTML_G(component_factories) != NULL) {
+		zval obj;
+		int handled = html_run_handler_chain(HTML_G(component_factories), ce->name, args, &obj);
+		if (handled < 0) {
+			return FAILURE;
+		}
+		if (handled) {
+			if (Z_TYPE(obj) != IS_OBJECT || !instanceof_function(Z_OBJCE(obj), ce)) {
+				zend_throw_error(NULL,
+					"Component factory for <%s> did not return an instance of it or null",
+					ZSTR_VAL(ce->name));
+				zval_ptr_dtor(&obj);
+				return FAILURE;
+			}
+			ZVAL_COPY_VALUE(result, &obj);
+			return SUCCESS;
+		}
+	}
+
+	/* Mirror what `new` enforces: the engine constructs from no particular
+	 * scope, so the constructor must be public; and a class without a
+	 * constructor cannot receive props/slots (dropping them silently would
+	 * hide the mistake). */
+	if (ctor != NULL && !(ctor->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		zend_throw_error(NULL, "Component class \"%s\" has a non-public constructor",
+			ZSTR_VAL(ce->name));
+		return FAILURE;
+	}
+	if (ctor == NULL && args != NULL && zend_hash_num_elements(args) > 0) {
+		zend_throw_error(NULL,
+			"Component class \"%s\" has no constructor, so it cannot accept attributes or slots",
+			ZSTR_VAL(ce->name));
+		return FAILURE;
+	}
+
+	zval obj;
+	if (object_init_ex(&obj, ce) != SUCCESS) {
+		return FAILURE;
+	}
+	if (ctor != NULL) {
+		zval ctor_ret;
+		ZVAL_UNDEF(&ctor_ret);
+		zend_call_known_function(ctor, Z_OBJ(obj), ce, &ctor_ret, 0, NULL, args);
+		zval_ptr_dtor(&ctor_ret);
+		if (EG(exception)) {
+			zval_ptr_dtor(&obj);
+			return FAILURE;
+		}
+	}
+	ZVAL_COPY_VALUE(result, &obj);
+	return SUCCESS;
+}
+
+/* Dispatch a function or static-method component: a registered invoker may
+ * call it (e.g. autowiring parameters via a DI container) before the engine's
+ * own call. Same contract as html_dispatch_new(). */
+static zend_result html_dispatch_call(
+	zend_function *fn, zend_class_entry *called_scope, zend_string *callable_name,
+	zend_string *component, HashTable *args, zval *result)
+{
+	if (HTML_G(component_invokers) != NULL) {
+		zval ret;
+		int handled = html_run_handler_chain(HTML_G(component_invokers), callable_name, args, &ret);
+		if (handled < 0) {
+			return FAILURE;
+		}
+		if (handled) {
+			if (Z_TYPE(ret) != IS_OBJECT || !instanceof_function(Z_OBJCE(ret), html_ce_Htmlable)) {
+				zend_throw_error(NULL,
+					"Component \"%s\" did not return an Html\\Htmlable", ZSTR_VAL(component));
+				zval_ptr_dtor(&ret);
+				return FAILURE;
+			}
+			ZVAL_COPY_VALUE(result, &ret);
+			return SUCCESS;
+		}
+	}
+
+	zval ret;
+	ZVAL_UNDEF(&ret);
+	zend_call_known_function(fn, NULL, called_scope, &ret, 0, NULL, args);
+	if (EG(exception)) {
+		zval_ptr_dtor(&ret);
+		return FAILURE;
+	}
+	if (Z_TYPE(ret) != IS_OBJECT || !instanceof_function(Z_OBJCE(ret), html_ce_Htmlable)) {
+		zend_throw_error(NULL,
+			"Component \"%s\" did not return an Html\\Htmlable", ZSTR_VAL(component));
+		zval_ptr_dtor(&ret);
+		return FAILURE;
+	}
+	ZVAL_COPY_VALUE(result, &ret);
+	return SUCCESS;
+}
+
+/* The body of Html\render_component(), shared with Html\render_dynamic()'s
+ * component path. Same contract as a PHP_FUNCTION body: the produced
+ * Html\Htmlable goes into *return_value, or an exception is left pending. */
+static void html_render_component_impl(
+	zend_string *component, HashTable *props, zend_object *slot_obj,
+	HashTable *named_slots, HashTable *function_candidates,
+	zend_string *function_component, zval *return_value)
+{
+	/* Props must be string-keyed, whichever dispatch path runs below. (On the
+	 * borrowed fast path, an integer key would silently become a positional
+	 * argument in zend_call_known_function.) */
+	if (props != NULL && zend_hash_num_elements(props) > 0) {
+		zend_string *key;
+		zval *val;
+		ZEND_HASH_FOREACH_STR_KEY_VAL(props, key, val) {
+			(void) val;
+			if (key == NULL) {
+				zend_throw_error(NULL, "Component props must use string keys");
+				RETURN_THROWS();
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	zend_function *fn = NULL;
+	zend_class_entry *ce = NULL;
+	zend_class_entry *called_scope = NULL;
+	/* The callable a registered invoker is handed for function/static components:
+	 * the resolved function name, or "Class::method" for a static method. */
+	zend_string *callable_name = NULL;
+	bool is_new = false;
+
+	/* Resolve the component to a dispatch target (RFC §4 resolution order). This
+	 * is the second stage of a two-stage resolution: the compiler already
+	 * resolved the *name* against use/namespace (see zend_ast_create_markup_component
+	 * in Zend/zend_markup.c); here we resolve that name to a callable
+	 * *symbol* — a static method, an Htmlable class, or a userland function. */
+	const char *end = ZSTR_VAL(component) + ZSTR_LEN(component);
+	const char *sep = zend_memnstr(ZSTR_VAL(component), "::", 2, end);
+
+	if (sep != NULL) {
+		/* "Class::method" - an explicit static-method component. */
+		if (html_resolve_static_method(component, sep, &ce, &fn) == FAILURE) {
+			RETURN_THROWS();
+		}
+		called_scope = ce;
+		callable_name = component; /* "Class::method" is itself a valid callable */
+	} else {
+		/* Bare tag: the class candidate ($component) implementing Htmlable wins,
+		 * then the function candidate; an internal function is the `date()`
+		 * footgun. The class and function candidates may differ because the
+		 * compiler resolved them through `use` and `use function` respectively;
+		 * a direct single-name call leaves $functionComponent null, so the one
+		 * name is tried both ways. */
+		ce = zend_lookup_class(component);
+		if (ce != NULL && instanceof_function(ce, html_ce_Htmlable)) {
+			fn = ce->constructor;
+			is_new = true;
+		} else {
+			/* The function candidate is a single resolved name, or the
+			 * compiler's candidate list for an unqualified name in a namespace
+			 * (namespaced then global), tried in order like an ordinary call. */
+			zend_function *func = NULL;
+			zend_string *fn_name = NULL;
+
+			if (function_candidates != NULL) {
+				zval *candidate;
+				ZEND_HASH_FOREACH_VAL(function_candidates, candidate) {
+					ZVAL_DEREF(candidate);
+					if (Z_TYPE_P(candidate) != IS_STRING) {
+						zend_argument_type_error(5,
+							"must contain only function-name strings, %s given",
+							zend_zval_value_name(candidate));
+						RETURN_THROWS();
+					}
+					zend_string *lc_name = zend_string_tolower(Z_STR_P(candidate));
+					func = zend_fetch_function(lc_name);
+					zend_string_release(lc_name);
+					if (func != NULL) {
+						fn_name = Z_STR_P(candidate);
+						break;
+					}
+				} ZEND_HASH_FOREACH_END();
+			} else {
+				fn_name = function_component ? function_component : component;
+				zend_string *lc_name = zend_string_tolower(fn_name);
+				func = zend_fetch_function(lc_name);
+				zend_string_release(lc_name);
+			}
+
+			if (func == NULL) {
+				zend_throw_error(NULL,
+					"\"%s\" is not a component: no class implementing Html\\Htmlable "
+					"and no user-defined function of that name", ZSTR_VAL(component));
+				RETURN_THROWS();
+			}
+			if (func->type == ZEND_INTERNAL_FUNCTION) {
+				zend_throw_error(NULL,
+					"<%s> resolved to the internal function %s(), which cannot be a component",
+					ZSTR_VAL(component), ZSTR_VAL(fn_name));
+				RETURN_THROWS();
+			}
+			fn = func;
+			callable_name = fn_name;
+		}
+	}
+
+	/* Build the named-argument array (props + routed slots). */
+	zval slot_zv;
+	zval *slot_ptr = NULL;
+	if (slot_obj != NULL) {
+		ZVAL_OBJ(&slot_zv, slot_obj);
+		slot_ptr = &slot_zv;
+	}
+
+	/* Fast path: with no slot content to route and no #[Html\Slot] parameters to
+	 * inspect, the named-argument array is exactly $props - pass it through
+	 * directly (borrowed) instead of allocating and copying a new HashTable. */
+	HashTable *args;
+	bool owns_args;
+	if (slot_ptr == NULL
+			&& (named_slots == NULL || zend_hash_num_elements(named_slots) == 0)
+			&& (fn == NULL || fn->common.attributes == NULL)) {
+		args = props; /* may be NULL when no attributes were given */
+		owns_args = false;
+	} else {
+		args = html_route_component_args(fn, props, slot_ptr, named_slots);
+		if (args == NULL) {
+			RETURN_THROWS();
+		}
+		owns_args = true;
+	}
+
+	/* Dispatch: either path produces the component's Html\Htmlable into `result`
+	 * and never releases `args`, so the single release below covers every
+	 * outcome. */
+	zval result;
+	ZVAL_UNDEF(&result);
+	zend_result dispatched = is_new
+		? html_dispatch_new(ce, fn, args, &result)
+		: html_dispatch_call(fn, called_scope, callable_name, component, args, &result);
+
+	if (owns_args) {
+		zend_array_release(args);
+	}
+	if (dispatched == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	/* Decorators wrap the produced Htmlable uniformly, whatever its kind. The
+	 * name they receive is the resolved dispatch target: the class name, the
+	 * function actually called, or "Class::method" — not merely the class-side
+	 * candidate, which can differ from the called function under `use function`. */
+	if (!html_apply_decorators(is_new ? ce->name : callable_name, &result)) {
+		RETURN_THROWS();
+	}
+
+	RETURN_COPY_VALUE(&result);
+}
+
+PHP_FUNCTION(Html_render_component)
+{
+	zend_string *component;
+	HashTable *props = NULL;
+	zend_object *slot_obj = NULL;
+	HashTable *named_slots = NULL;
+	zend_string *function_component = NULL;
+	HashTable *function_candidates = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 5)
+		Z_PARAM_STR(component)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT(props)
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(slot_obj, html_ce_Htmlable)
+		Z_PARAM_ARRAY_HT(named_slots)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(function_candidates, function_component)
+	ZEND_PARSE_PARAMETERS_END();
+
+	html_render_component_impl(component, props, slot_obj, named_slots,
+		function_candidates, function_component, return_value);
+}
+
+/* The runtime target of a dynamic tag `<$tag …>…</$tag>` (RFC §4). The value
+ * decides at runtime exactly what a static tag name decides at compile time,
+ * by the same classification rule (zend_markup_name_is_component): an
+ * uppercase first character, a "\", or a "::" dispatches as a component —
+ * through the full render_component machinery, hooks and decorators included —
+ * and anything else constructs a literal \Html\Element. Exposed as a public
+ * function like render_component, so the rule is directly testable. */
+PHP_FUNCTION(Html_render_dynamic)
+{
+	zend_string *tag;
+	zval *attributes = NULL;
+	zval *children = NULL;
+	zval *named_slots = NULL;
+
+	/* The array parameters are taken as zvals, not raw HashTables: they are
+	 * forwarded to constructor calls below, and a fresh ZVAL_ARR of a borrowed
+	 * table would mark an immutable array literal (e.g. a compiled []) as
+	 * refcounted, making the callee addref read-only memory. The caller's
+	 * zvals carry the correct type flags. */
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STR(tag)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY(attributes)
+		Z_PARAM_ARRAY(children)
+		Z_PARAM_ARRAY(named_slots)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(tag) == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	bool have_children = children != NULL && zend_hash_num_elements(Z_ARRVAL_P(children)) > 0;
+
+	if (zend_markup_name_is_component(tag)) {
+		/* Loose children become the anonymous-slot Fragment, exactly as the
+		 * compiler builds one for a static component tag. A dynamic component
+		 * name is already fully qualified (e.g. Foo::class), so there is no
+		 * separate function candidate: like a direct render_component call,
+		 * the one name is tried as a class and then as a function. */
+		zval slot;
+		zend_object *slot_obj = NULL;
+		ZVAL_UNDEF(&slot);
+		if (have_children) {
+			if (object_init_ex(&slot, html_ce_Fragment) != SUCCESS) {
+				RETURN_THROWS();
+			}
+			slot_obj = Z_OBJ(slot);
+			zend_call_known_function(html_ce_Fragment->constructor, slot_obj,
+				html_ce_Fragment, NULL, 1, children, NULL);
+			if (EG(exception)) {
+				zval_ptr_dtor(&slot);
+				RETURN_THROWS();
+			}
+		}
+		html_render_component_impl(tag,
+			attributes != NULL ? Z_ARRVAL_P(attributes) : NULL, slot_obj,
+			named_slots != NULL ? Z_ARRVAL_P(named_slots) : NULL,
+			NULL, NULL, return_value);
+		zval_ptr_dtor(&slot);
+		return;
+	}
+
+	/* A <slot:name> block routes content to a component parameter; against a
+	 * plain HTML element it has nowhere to go. */
+	if (named_slots != NULL && zend_hash_num_elements(Z_ARRVAL_P(named_slots)) > 0) {
+		zend_throw_error(NULL,
+			"Markup slot blocks are only allowed in a component body; \"%s\" is an HTML element",
+			ZSTR_VAL(tag));
+		RETURN_THROWS();
+	}
+
+	zval args[3];
+	ZVAL_STR(&args[0], tag);
+	if (attributes != NULL) {
+		ZVAL_COPY_VALUE(&args[1], attributes);
+	} else {
+		ZVAL_EMPTY_ARRAY(&args[1]);
+	}
+	if (children != NULL) {
+		ZVAL_COPY_VALUE(&args[2], children);
+	} else {
+		ZVAL_EMPTY_ARRAY(&args[2]);
+	}
+
+	if (object_init_ex(return_value, html_ce_Element) != SUCCESS) {
+		RETURN_THROWS();
+	}
+	zend_call_known_function(html_ce_Element->constructor, Z_OBJ_P(return_value),
+		html_ce_Element, NULL, 3, args, NULL);
+	if (EG(exception)) {
+		zval_ptr_dtor(return_value);
+		ZVAL_UNDEF(return_value);
+		RETURN_THROWS();
+	}
+}
+
+/* Build DOM nodes for `(string) $self` inside the given modern Dom\Document, by
+ * parsing the rendered HTML into a throwaway container element and moving the
+ * parsed children into a document fragment (which is returned). Reuses the DOM's
+ * own parser/serializer, so it handles Raw/components/any markup uniformly.
+ *
+ * Limitation: the fragment is parsed in <div> ("in body") context, so
+ * context-sensitive elements at the top level (<td>, <tr>, <caption>, ...) are
+ * handled by the HTML parser's error recovery - convert whole tables instead.
+ * The clean fix is parsing in <template> context, which accepts any content,
+ * but ext/dom does not yet expose HTMLTemplateElement::$content to move the
+ * parsed nodes out; revisit when it does. */
+static void html_to_dom_impl(zval *self, zval *doc, zval *return_value)
+{
+	zend_string *html = zval_try_get_string(self);
+	if (html == NULL) {
+		return; /* __toString threw */
+	}
+
+	zval div, container;
+	ZVAL_STRING(&div, "div");
+	ZVAL_UNDEF(&container);
+	zend_call_method_with_1_params(Z_OBJ_P(doc), Z_OBJCE_P(doc), NULL, "createelement", &container, &div);
+	zval_ptr_dtor(&div);
+	if (EG(exception) || Z_TYPE(container) != IS_OBJECT) {
+		zend_string_release(html);
+		zval_ptr_dtor(&container);
+		return;
+	}
+
+	/* container->innerHTML = html  (triggers the DOM fragment parser) */
+	zval html_zv;
+	ZVAL_STR(&html_zv, html);
+	zend_update_property(Z_OBJCE(container), Z_OBJ(container), ZEND_STRL("innerHTML"), &html_zv);
+	zval_ptr_dtor(&html_zv);
+	if (EG(exception)) {
+		zval_ptr_dtor(&container);
+		return;
+	}
+
+	zval frag;
+	ZVAL_UNDEF(&frag);
+	zend_call_method_with_0_params(Z_OBJ_P(doc), Z_OBJCE_P(doc), NULL, "createdocumentfragment", &frag);
+	if (EG(exception) || Z_TYPE(frag) != IS_OBJECT) {
+		zval_ptr_dtor(&container);
+		zval_ptr_dtor(&frag);
+		return;
+	}
+
+	/* Move each parsed child out of the container and into the fragment. */
+	for (;;) {
+		/* Like owner_rv above: a failed read leaves child_rv untouched. */
+		zval child_rv;
+		ZVAL_UNDEF(&child_rv);
+		zval *child = zend_read_property(Z_OBJCE(container), Z_OBJ(container), ZEND_STRL("firstChild"), 1, &child_rv);
+		if (EG(exception) || Z_TYPE_P(child) != IS_OBJECT) {
+			zval_ptr_dtor(&child_rv);
+			break;
+		}
+		zval append_ret;
+		ZVAL_UNDEF(&append_ret);
+		zend_call_method_with_1_params(Z_OBJ(frag), Z_OBJCE(frag), NULL, "appendchild", &append_ret, child);
+		zval_ptr_dtor(&append_ret);
+		zval_ptr_dtor(&child_rv);
+		if (EG(exception)) {
+			zval_ptr_dtor(&container);
+			zval_ptr_dtor(&frag);
+			return;
+		}
+	}
+
+	zval_ptr_dtor(&container);
+	RETVAL_COPY_VALUE(&frag);
+}
+
+/* Shared body for Element/Fragment/Raw::toDom(): require ext/dom, accept an
+ * optional target Dom\Document, and convert `(string) $this` into nodes it
+ * owns. With no document, an empty Dom\HTMLDocument is created to own the
+ * fragment; the fragment's ownerDocument reference keeps it alive. */
+static void html_common_to_dom(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zend_class_entry *doc_ce = html_dom_document_ce();
+	if (doc_ce == NULL) {
+		zend_throw_error(NULL, "toDom() requires the dom extension");
+		RETURN_THROWS();
+	}
+
+	zval *doc = NULL;
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(doc, doc_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (doc == NULL) {
+		zval new_doc;
+		ZVAL_UNDEF(&new_doc);
+		zend_call_method_with_0_params(NULL, html_dom_htmldocument_ce(), NULL, "createempty", &new_doc);
+		if (EG(exception) || Z_TYPE(new_doc) != IS_OBJECT) {
+			zval_ptr_dtor(&new_doc);
+			RETURN_THROWS();
+		}
+		html_to_dom_impl(ZEND_THIS, &new_doc, return_value);
+		zval_ptr_dtor(&new_doc);
+	} else {
+		html_to_dom_impl(ZEND_THIS, doc, return_value);
+	}
+}
+
+PHP_METHOD(Html_Element, toDom)
+{
+	html_common_to_dom(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_METHOD(Html_Fragment, toDom)
+{
+	html_common_to_dom(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_METHOD(Html_Raw, toDom)
+{
+	html_common_to_dom(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+static PHP_GINIT_FUNCTION(html)
+{
+	html_globals->component_factories = NULL;
+	html_globals->component_invokers = NULL;
+	html_globals->component_decorators = NULL;
+}
+
+PHP_RSHUTDOWN_FUNCTION(html)
+{
+	/* Component hooks are request-scoped; drop the ones registered this request. */
+	if (HTML_G(component_factories) != NULL) {
+		zend_hash_release(HTML_G(component_factories));
+		HTML_G(component_factories) = NULL;
+	}
+	if (HTML_G(component_invokers) != NULL) {
+		zend_hash_release(HTML_G(component_invokers));
+		HTML_G(component_invokers) = NULL;
+	}
+	if (HTML_G(component_decorators) != NULL) {
+		zend_hash_release(HTML_G(component_decorators));
+		HTML_G(component_decorators) = NULL;
+	}
+	return SUCCESS;
+}
+
+PHP_MINIT_FUNCTION(html)
+{
+	html_ce_Htmlable = register_class_Html_Htmlable(zend_ce_stringable);
+	html_ce_Htmlable->interface_gets_implemented = html_implement_htmlable;
+	html_str_tostring = zend_string_init_interned(ZEND_STRL("__toString"), true);
+	html_str_tostring_lc = zend_string_init_interned(ZEND_STRL("__tostring"), true);
+	for (size_t i = 0; i < sizeof(html_zarginfo_default_tostring) / sizeof(zend_arg_info); i++) {
+		zend_convert_internal_arg_info(&html_zarginfo_default_tostring[i],
+			&arginfo_class_Html_Htmlable___toString[i], i == 0, true);
+	}
+
+	html_ce_Element = register_class_Html_Element(html_ce_Htmlable);
+	html_ce_Fragment = register_class_Html_Fragment(html_ce_Htmlable);
+	html_ce_Raw = register_class_Html_Raw(html_ce_Htmlable);
+	html_ce_Slot = register_class_Html_Slot();
+
+	/* The parser lowers markup to these fully-qualified names (zend_markup.h);
+	 * assert the runtime registers exactly them so the two can never drift. */
+	ZEND_ASSERT(zend_string_equals_literal(html_ce_Element->name, ZEND_MARKUP_ELEMENT_FQ));
+	ZEND_ASSERT(zend_string_equals_literal(html_ce_Fragment->name, ZEND_MARKUP_FRAGMENT_FQ));
+
+	return SUCCESS;
+}
+
+PHP_MINFO_FUNCTION(html)
+{
+	php_info_print_table_start();
+	php_info_print_table_row(2, "html support", "enabled");
+	php_info_print_table_end();
+}
+
+zend_module_entry html_module_entry = {
+	STANDARD_MODULE_HEADER,
+	"html",					/* Extension name */
+	ext_functions,			/* zend_function_entry */
+	PHP_MINIT(html),		/* PHP_MINIT - Module initialization */
+	NULL,					/* PHP_MSHUTDOWN - Module shutdown */
+	NULL,					/* PHP_RINIT - Request initialization */
+	PHP_RSHUTDOWN(html),	/* PHP_RSHUTDOWN - Request shutdown */
+	PHP_MINFO(html),		/* PHP_MINFO - Module info */
+	PHP_HTML_VERSION,		/* Version */
+	PHP_MODULE_GLOBALS(html),	/* Module globals */
+	PHP_GINIT(html),		/* PHP_GINIT - Global initialization */
+	NULL,					/* PHP_GSHUTDOWN - Global shutdown */
+	NULL,					/* Post deactivate */
+	STANDARD_MODULE_PROPERTIES_EX,
+};
+
+#ifdef COMPILE_DL_HTML
+ZEND_GET_MODULE(html)
+#endif
