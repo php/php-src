@@ -20,8 +20,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-22570 (Stack overflow when serializing a deeply nested
     Dom\XMLDocument). (iliaal)
-  . Fixed Dom\DtdNamedNodeMap dimension access to throw for indexes outside the
-    int range instead of overflowing while converting to int.
+  . Fixed Dom\DtdNamedNodeMap dimension access to throw ValueError for indexes
+    outside the int range instead of overflowing while converting to int.
     (Weilin Du)
 
 - Exif:

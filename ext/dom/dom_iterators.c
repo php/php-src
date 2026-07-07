@@ -83,9 +83,6 @@ xmlNodePtr php_dom_libxml_hash_iter(xmlHashTable *ht, zend_long index)
 {
 	int htsize;
 
-	if (index < 0) {
-		return NULL;
-	}
 	if (UNEXPECTED(ZEND_LONG_INT_OVFL(index))) {
 		zend_value_error("must be between 0 and %d", INT_MAX);
 		return NULL;
