@@ -22,6 +22,9 @@
 #include "php_openssl.h"
 #include "php_openssl_backend.h"
 #include "php_network.h"
+#ifdef PHP_WIN32
+# include "win32/time.h"
+#endif
 #include <openssl/ssl.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
@@ -467,7 +470,7 @@ static int php_openssl_dtls_setup_crypto(php_stream *stream, php_openssl_dtls_da
 			/* An IP literal needs IP-address matching, not DNS-name matching. */
 			X509_VERIFY_PARAM *param = SSL_get0_param(dtlssock->ssl_handle);
 			if (X509_VERIFY_PARAM_set1_ip_asc(param, name) != 1) {
-				SSL_set1_host(dtlssock->ssl_handle, name);
+				X509_VERIFY_PARAM_set1_host(param, name, 0);
 			}
 		}
 	}
@@ -1056,6 +1059,9 @@ static int php_openssl_dtls_accept(php_stream *stream, php_openssl_dtls_data_t *
 		sin->sin_port = BIO_ADDR_rawport(client_addr);
 		BIO_ADDR_rawaddress(client_addr, &sin->sin_addr, &addrlen);
 		peerlen = sizeof(struct sockaddr_in);
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
+		sin->sin_len = sizeof(struct sockaddr_in);
+#endif
 	}
 #ifdef HAVE_IPV6
 	else if (family == AF_INET6) {
@@ -1065,6 +1071,9 @@ static int php_openssl_dtls_accept(php_stream *stream, php_openssl_dtls_data_t *
 		sin6->sin6_port = BIO_ADDR_rawport(client_addr);
 		BIO_ADDR_rawaddress(client_addr, &sin6->sin6_addr, &addrlen);
 		peerlen = sizeof(struct sockaddr_in6);
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
+		sin6->sin6_len = sizeof(struct sockaddr_in6);
+#endif
 	}
 #endif
 	BIO_ADDR_free(client_addr);
