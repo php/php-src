@@ -137,7 +137,7 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fixed bug GH-22187 (Memory corruption (zend_mm_heap corrupted) in
-    openssl_encrypt with AES-WRAP-PAD). (David Carlier)
+    openssl_encrypt with AES-WRAP-PAD). (CVE-2026-14355) (David Carlier)
 
 - Phar:
   . Fixed a bypass of the magic ".phar" directory protection in
@@ -311,7 +311,7 @@ PHP                                                                        NEWS
 
 - Streams:
   . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
-    and a proxy set). (ndossche)
+    and a proxy set). (CVE-2026-12184) (ndossche)
 
 - XSL:
   . Fixed bug GH-21600 (Segfault on module shutdown). (David Carlier)
