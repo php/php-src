@@ -1,5 +1,5 @@
 --TEST--
-Dom\DtdNamedNodeMap dimension access throws for indexes outside the int range
+Dom\DtdNamedNodeMap dimension access handles invalid integer indexes
 --EXTENSIONS--
 dom
 --SKIPIF--
@@ -28,10 +28,14 @@ function dump_access(Closure $callback): void {
     }
 }
 
+dump_access(fn() => $doc->doctype->entities[-1]);
 dump_access(fn() => $doc->doctype->entities[$overflow]);
 
+dump_access(fn() => $doc->doctype->notations[-1]);
 dump_access(fn() => $doc->doctype->notations[$overflow]);
 ?>
 --EXPECT--
+NULL
 must be between 0 and 2147483647
+NULL
 must be between 0 and 2147483647

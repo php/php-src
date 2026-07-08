@@ -20,9 +20,9 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-22570 (Stack overflow when serializing a deeply nested
     Dom\XMLDocument). (iliaal)
-  . Fixed Dom\DtdNamedNodeMap dimension access to throw ValueError for indexes
-    outside the int range instead of overflowing while converting to int.
-    (Weilin Du)
+  . Fixed Dom\DtdNamedNodeMap integer dimension access so negative indexes
+    return NULL and indexes outside the int range throw ValueError instead of
+    returning the first entity or notation. (Weilin Du)
 
 - Exif:
   . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
