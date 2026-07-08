@@ -21,7 +21,7 @@
 
 /* {{{ data structure */
 
-enum strm_status {
+C23_ENUM(strm_status, uint8_t) {
 	PHP_BZ2_UNINITIALIZED,
 	PHP_BZ2_RUNNING,
 	PHP_BZ2_FINISHED
@@ -34,12 +34,11 @@ typedef struct _php_bz2_filter_data {
 	size_t inbuf_len;
 	size_t outbuf_len;
 
-	enum strm_status status;              /* Decompress option */
-	unsigned int small_footprint : 1;     /* Decompress option */
-	unsigned int expect_concatenated : 1; /* Decompress option */
-	unsigned int is_flushed : 1;          /* only for compression */
-
-	int persistent;
+	bool persistent;
+	bool expect_concatenated : 1; /* Decompress option */
+	bool small_footprint : 1;     /* Decompress option */
+	bool is_flushed : 1;          /* only for compression */
+	strm_status status;           /* Decompress option */
 
 	/* Configuration for reset - immutable */
 	int blockSize100k;  /* compress only */
