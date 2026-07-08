@@ -749,7 +749,7 @@ PHP_METHOD(DirectoryIterator, key)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
-	RETURN_STRINGL(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name));
+	RETURN_LONG(intern->u.dir.index);
 }
 /* }}} */
 

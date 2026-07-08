@@ -29,8 +29,8 @@ rmdir($dir);
 ?>
 --EXPECT--
 bool(true)
-string(1) "."
-string(1) "."
+int(0)
+int(0)
 bool(true)
-string(5) "file2"
-string(5) "file2"
+int(3)
+int(3)

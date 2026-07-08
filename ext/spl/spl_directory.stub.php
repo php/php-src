@@ -124,10 +124,10 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
     public function valid(): bool {}
 
     /** @tentative-return-type */
-    public function key(): string {}
+    public function key(): int|string {}
 
     /** @tentative-return-type */
-    public function current(): string|SplFileInfo|RecursiveDirectoryIterator {}
+    public function current(): string|SplFileInfo|static {}
 
     /** @tentative-return-type */
     public function next(): void {}
@@ -175,7 +175,7 @@ class FilesystemIterator extends DirectoryIterator
     public function key(): string {}
 
     /** @tentative-return-type */
-    public function current(): string|SplFileInfo|FilesystemIterator {}
+    public function current(): string|SplFileInfo|static {}
 
     /** @tentative-return-type */
     public function getFlags(): int {}
