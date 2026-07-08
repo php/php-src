@@ -46,7 +46,6 @@ echo "um, hi\n";
 ?>
 --EXPECTF--
 write: goodbye cruel world
-close: goodbye cruel world
 
 Fatal error: Uncaught Error: Call to undefined function undefined_function() in %s:%d
 Stack trace:

@@ -1,5 +1,5 @@
 --TEST--
-GH-16027 (close() throwing while a write() exception is pending chains it as previous)
+GH-16027 (plain SessionHandlerInterface: close() stays unreachable under a pending write() exception)
 --EXTENSIONS--
 session
 --SKIPIF--
@@ -13,7 +13,7 @@ class MySessionHandler implements SessionHandlerInterface {
 
     function close(): bool {
         echo "close: goodbye cruel world\n";
-        throw new Exception('close failed');
+        return true;
     }
 
     function read($id): string|false {
@@ -41,13 +41,10 @@ try {
     session_write_close();
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
-    $previous = $e->getPrevious();
-    echo 'previous: ';
-    var_dump($previous ? $previous->getMessage() : null);
+    var_dump($e->getPrevious());
 }
 ?>
 --EXPECT--
 write: goodbye cruel world
-close: goodbye cruel world
-Exception: close failed
-previous: string(12) "write failed"
+Exception: write failed
+NULL

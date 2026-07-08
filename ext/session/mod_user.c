@@ -17,12 +17,22 @@
 #include "php.h"
 #include "php_session.h"
 #include "mod_user.h"
-#include "zend_exceptions.h"
 
 const ps_module ps_mod_user = {
 	PS_MOD_UPDATE_TIMESTAMP(user)
 };
 
+
+/* Releases the native handler SessionHandler wraps when its close() never ran. */
+static void ps_close_default_mod(void)
+{
+	if (PS(mod_user_is_open) && PS(default_mod)) {
+		PS(mod_user_is_open) = false;
+		zend_try {
+			PS(default_mod)->s_close(&PS(mod_data));
+		} zend_end_try();
+	}
+}
 
 static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 {
@@ -33,12 +43,17 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 		php_error_docref(NULL, E_WARNING, "Cannot call session save handler in a recursive manner");
 	} else {
 		PS(in_save_handler) = 1;
-		if (call_user_function(NULL, NULL, func, retval, argc, argv) == FAILURE) {
-			zval_ptr_dtor(retval);
-			ZVAL_UNDEF(retval);
-		} else if (Z_ISUNDEF_P(retval)) {
-			ZVAL_NULL(retval);
-		}
+		zend_try {
+			if (call_user_function(NULL, NULL, func, retval, argc, argv) == FAILURE) {
+				zval_ptr_dtor(retval);
+				ZVAL_UNDEF(retval);
+			} else if (Z_ISUNDEF_P(retval)) {
+				ZVAL_NULL(retval);
+			}
+		} zend_catch {
+			ps_close_default_mod();
+			zend_bailout();
+		} zend_end_try();
 		PS(in_save_handler) = 0;
 	}
 	for (i = 0; i < argc; i++) {
@@ -48,7 +63,7 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 
 #define PSF(a) PS(mod_user_names).ps_##a
 
-static zend_result verify_bool_return_type_userland_calls(const zval* value)
+static zend_result verify_bool_return_type_userland_calls(const zval *value)
 {
 	/* Exit or exception in userland call */
 	if (Z_TYPE_P(value) == IS_UNDEF) {
@@ -76,8 +91,8 @@ static zend_result verify_bool_return_type_userland_calls(const zval* value)
 	}
 	if (!EG(exception)) {
 		zend_type_error("Session callback must have a return value of type bool, %s returned", zend_zval_value_name(value)); \
-    }
-    return FAILURE;
+	}
+	return FAILURE;
 }
 
 PS_OPEN_FUNC(user)
@@ -121,23 +136,14 @@ PS_CLOSE_FUNC(user)
 		return SUCCESS;
 	}
 
-	/* Run close() even with a pending exception, so the handler releases its resources; skip real exit()/die() (bug #60634). */
-	bool clear_exception = EG(exception) && !zend_is_unwind_exit(EG(exception)) && !zend_is_graceful_exit(EG(exception));
-	if (clear_exception) {
-		zend_exception_save();
-	}
-
 	zend_try {
 		ps_call_handler(&PSF(close), 0, NULL, &retval);
 	} zend_catch {
 		bailout = 1;
 	} zend_end_try();
 
-	PS(mod_user_implemented) = 0;
-
-	if (clear_exception) {
-		zend_exception_restore();
-	}
+	PS(mod_user_implemented) = false;
+	ps_close_default_mod();
 
 	if (bailout) {
 		if (!Z_ISUNDEF(retval)) {

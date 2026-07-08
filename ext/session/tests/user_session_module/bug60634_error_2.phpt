@@ -47,7 +47,6 @@ echo "um, hi\n";
 ?>
 --EXPECTF--
 write: goodbye cruel world
-close: goodbye cruel world
 
 Fatal error: Uncaught Exception in %s
 Stack trace:

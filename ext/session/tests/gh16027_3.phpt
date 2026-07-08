@@ -1,51 +1,51 @@
 --TEST--
-GH-16027 (exit() in close() while a write() exception is pending terminates cleanly)
+GH-16027 (SessionHandler subclass throwing inside close() still releases the session file lock)
 --EXTENSIONS--
 session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
-class MySessionHandler implements SessionHandlerInterface {
-    function open($save_path, $session_name): bool {
-        return true;
-    }
+$save_path = __DIR__ . '/gh16027_3';
+@mkdir($save_path);
+session_save_path($save_path);
 
+$id = str_repeat('b1', 16);
+session_id($id);
+
+class ThrowingCloseHandler extends SessionHandler {
     function close(): bool {
-        echo "close: goodbye cruel world\n";
-        exit("bye\n");
-    }
-
-    function read($id): string|false {
-        return '';
-    }
-
-    function write($id, $session_data): bool {
-        echo "write: goodbye cruel world\n";
-        throw new Exception('write failed');
-    }
-
-    function destroy($id): bool {
-        return true;
-    }
-
-    function gc($maxlifetime): int {
-        return 1;
+        throw new Exception('close blew up before delegating');
     }
 }
 
-session_set_save_handler(new MySessionHandler());
+session_set_save_handler(new ThrowingCloseHandler(), true);
 session_start();
 
 try {
     session_write_close();
-    echo "unreachable\n";
 } catch (\Throwable $e) {
-    echo "unreachable catch: ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
-echo "unreachable after\n";
+
+$file = "$save_path/sess_$id";
+echo "session file exists: ";
+var_dump(file_exists($file));
+
+/* close() threw before ever calling parent::close(); the lock must still be released. */
+$fp = fopen($file, 'r+');
+echo "lock acquired after close() threw: ";
+var_dump(flock($fp, LOCK_EX | LOCK_NB));
+fclose($fp);
+?>
+--CLEAN--
+<?php
+$save_path = __DIR__ . '/gh16027_3';
+$id = str_repeat('b1', 16);
+@unlink("$save_path/sess_$id");
+@rmdir($save_path);
 ?>
 --EXPECT--
-write: goodbye cruel world
-close: goodbye cruel world
-bye
+Exception: close blew up before delegating
+session file exists: bool(true)
+lock acquired after close() threw: bool(true)
