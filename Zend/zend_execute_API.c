@@ -1695,6 +1695,41 @@ void zend_unset_timeout(void) /* {{{ */
 }
 /* }}} */
 
+static zend_string *zend_find_similar_in_class_table(const char *lcname, size_t lcname_len)
+{
+	zend_long threshold = lcname_len >= 8 ? 2 : 1;
+	zend_long best_dist = threshold + 1;
+	zend_string *best = NULL;
+
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), zend_string *key, zval *val) {
+		if (!key || ZSTR_VAL(key)[0] == '\0' || Z_TYPE_P(val) == IS_ALIAS_PTR) {
+			continue;
+		}
+		if (llabs((zend_long)lcname_len - (zend_long)ZSTR_LEN(key)) > threshold) {
+			continue;
+		}
+		zend_long dist = zend_levenshtein(lcname, lcname_len, ZSTR_VAL(key), ZSTR_LEN(key));
+		if (dist > 0 && dist <= threshold && dist < best_dist) {
+			best_dist = dist;
+			best = ((zend_class_entry *)Z_PTR_P(val))->name;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return best;
+}
+
+static zend_string *zend_find_similar_class(const zend_string *class_name)
+{
+	zend_string *lc_name = zend_string_alloc(ZSTR_LEN(class_name), 0);
+	zend_string *best = NULL;
+	zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(class_name), ZSTR_LEN(class_name));
+	if (ZSTR_LEN(lc_name) >= 3) {
+		best = zend_find_similar_in_class_table(ZSTR_VAL(lc_name), ZSTR_LEN(lc_name));
+	}
+	zend_string_release(lc_name);
+	return best;
+}
+
 static ZEND_COLD void report_class_fetch_error(const zend_string *class_name, uint32_t fetch_type)
 {
 	if (fetch_type & ZEND_FETCH_CLASS_SILENT) {
@@ -1708,12 +1743,15 @@ static ZEND_COLD void report_class_fetch_error(const zend_string *class_name, ui
 		return;
 	}
 
-	if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
-		zend_throw_or_error(fetch_type, NULL, "Interface \"%s\" not found", ZSTR_VAL(class_name));
-	} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
-		zend_throw_or_error(fetch_type, NULL, "Trait \"%s\" not found", ZSTR_VAL(class_name));
+	uint32_t mask = fetch_type & ZEND_FETCH_CLASS_MASK;
+	const char *kind = mask == ZEND_FETCH_CLASS_INTERFACE ? "Interface"
+	                 : mask == ZEND_FETCH_CLASS_TRAIT     ? "Trait"
+	                 :                                      "Class";
+	zend_string *suggestion = zend_find_similar_class(class_name);
+	if (suggestion) {
+		zend_throw_or_error(fetch_type, NULL, "%s \"%s\" not found (did you mean %s?)", kind, ZSTR_VAL(class_name), ZSTR_VAL(suggestion));
 	} else {
-		zend_throw_or_error(fetch_type, NULL, "Class \"%s\" not found", ZSTR_VAL(class_name));
+		zend_throw_or_error(fetch_type, NULL, "%s \"%s\" not found", kind, ZSTR_VAL(class_name));
 	}
 }
 

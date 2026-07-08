@@ -48,10 +48,10 @@ string(3) "bar"
 Warning: Undefined property: Foo::$baz in %s.php on line 20
 NULL
 string(3) "qux"
-string(36) "Call to undefined method Foo::quux()"
+string(58) "Call to undefined method Foo::quux() (did you mean qux()?)"
 string(3) "bar"
 
 Warning: Undefined property: Foo::$baz in %s.php on line 29
 NULL
 string(3) "qux"
-string(36) "Call to undefined method Foo::quux()"
+string(58) "Call to undefined method Foo::quux() (did you mean qux()?)"
