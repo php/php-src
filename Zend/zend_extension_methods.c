@@ -41,14 +41,10 @@ ZEND_API void zend_extension_methods_register(zend_string *target_lc, zend_class
 	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(&ext_ce->function_table, name, zv) {
 		zend_function *fn = Z_PTR_P(zv);
 		/* Real methods must always win; conflicts between extensions: first wins.
-		 * TODO(land): E_WARNING or fatal on duplicate registration. */
-		if (!zend_hash_add_ptr(methods, name, fn)) {
-			continue;
-		}
-		/* Keep out of the polymorphic inline cache for the prototype so we
-		 * never serve a stale fbc to a file... (correctness over speed; the
-		 * cached path + JIT support is future work). */
-		fn->common.fn_flags |= ZEND_ACC_NEVER_CACHE;
+		 * TODO(land): E_WARNING or fatal on duplicate registration.
+		 * NOTE: fn may live in opcache SHM and must not be written to here;
+		 * ZEND_ACC_NEVER_CACHE is applied at compile time (zend_compile.c). */
+		zend_hash_add_ptr(methods, name, fn);
 	} ZEND_HASH_FOREACH_END();
 }
 

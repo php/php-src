@@ -5648,7 +5648,7 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 }
 /* }}} */
 
-static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool toplevel);
+static zend_class_entry *zend_compile_class_decl(znode *result, const zend_ast *ast, bool toplevel);
 static void zend_compile_extension_decl(zend_ast *ast);
 
 static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
@@ -9572,7 +9572,16 @@ static void zend_compile_extension_decl(zend_ast *ast) /* {{{ */
 	/* Compile the body as an anonymous, final, uninstantiable class. The
 	 * methods bind $this normally; their scope is the synthetic CE, so only
 	 * the target's public API is visible from extension bodies. */
-	zend_compile_class_decl(&class_node, class_ast, false);
+	zend_class_entry *ext_ce = zend_compile_class_decl(&class_node, class_ast, false);
+
+	/* Keep extension methods out of the polymorphic inline cache for the
+	 * prototype (correctness over speed; the cached path + JIT support is
+	 * future work). Must happen at compile time: under opcache the CE is
+	 * persisted to (protected) shared memory and is immutable at runtime. */
+	zend_function *ext_fn;
+	ZEND_HASH_MAP_FOREACH_PTR(&ext_ce->function_table, ext_fn) {
+		ext_fn->common.fn_flags |= ZEND_ACC_NEVER_CACHE;
+	} ZEND_HASH_FOREACH_END();
 
 	/* Runtime registration once the synthetic CE is declared. */
 	opline = zend_emit_op(NULL, ZEND_BIND_EXTENSION, &class_node, NULL);
@@ -9583,7 +9592,7 @@ static void zend_compile_extension_decl(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool toplevel) /* {{{ */
+static zend_class_entry *zend_compile_class_decl(znode *result, const zend_ast *ast, bool toplevel) /* {{{ */
 {
 	const zend_ast_decl *decl = (const zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
@@ -9720,7 +9729,7 @@ static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool top
 				 && !zend_compile_ignore_class(parent_ce, ce->info.user.filename)) {
 					if (zend_try_early_bind(ce, parent_ce, lcname, NULL)) {
 						zend_string_release(lcname);
-						return;
+						return ce;
 					}
 				}
 			} else if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
@@ -9729,7 +9738,7 @@ static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool top
 				zend_inheritance_check_override(ce);
 				ce->ce_flags |= ZEND_ACC_LINKED;
 				zend_observer_class_linked_notify(ce, lcname);
-				return;
+				return ce;
 			} else {
 				goto link_unbound;
 			}
@@ -9799,6 +9808,7 @@ link_unbound:
 			opline->result.opline_num = -1;
 		}
 	}
+	return ce;
 }
 /* }}} */
 
