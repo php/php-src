@@ -13,7 +13,7 @@ fclose($fp);
 
 ?>
 --EXPECTF--
-Warning: stream_filter_append(): Filter parameters for bzip2.decompress filter must be of type array|bool, string given in %s on line %d
+Warning: stream_filter_append(): Filter parameters for bzip2.decompress filter must be of type array|object|bool, string given in %s on line %d
 
 Warning: stream_filter_append(): Unable to create or locate filter "bzip2.decompress" in %s on line %d
 bool(false)

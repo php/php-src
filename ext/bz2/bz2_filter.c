@@ -396,36 +396,42 @@ static php_stream_filter *php_bz2_decompress_filter_create(zval *filter_params, 
 	bool expect_concatenated = false;
 
 	if (filter_params) {
-		if (Z_TYPE_P(filter_params) == IS_TRUE || Z_TYPE_P(filter_params) == IS_FALSE) {
-			small_footprint = Z_TYPE_P(filter_params) == IS_TRUE;
-			goto allocate_decompress_filter;
-		}
-		if (UNEXPECTED(Z_TYPE_P(filter_params) != IS_ARRAY && Z_TYPE_P(filter_params) != IS_OBJECT)) {
+		if (UNEXPECTED(
+			Z_TYPE_P(filter_params) != IS_TRUE
+			&& Z_TYPE_P(filter_params) != IS_FALSE
+			&& Z_TYPE_P(filter_params) != IS_ARRAY
+			&& Z_TYPE_P(filter_params) != IS_OBJECT
+		)) {
 			php_error_docref(NULL, E_WARNING,
-				"Filter parameters for bzip2.decompress filter must be of type array|bool, %s given",
+				"Filter parameters for bzip2.decompress filter must be of type array|object|bool, %s given",
 				zend_zval_type_name(filter_params)
 			);
 			return NULL;
 		}
 
-		const HashTable *filter_params_ht = HASH_OF(filter_params);
-		/* TODO: convert php_stream_filter_parse_write_seek_mode() to take HashTable */
-		if (php_stream_filter_parse_write_seek_mode(filter_params, &write_seekable) == FAILURE) {
-			return NULL;
-		}
+		if (Z_TYPE_P(filter_params) == IS_TRUE || Z_TYPE_P(filter_params) == IS_FALSE) {
+			small_footprint = Z_TYPE_P(filter_params) == IS_TRUE;
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(filter_params) == IS_ARRAY || Z_TYPE_P(filter_params) == IS_OBJECT);
 
-		const zval *concatenated = zend_hash_str_find_ind(filter_params_ht, ZEND_STRL("concatenated"));
-		if (concatenated) {
-			expect_concatenated = zend_is_true(concatenated);
-		}
+			const HashTable *filter_params_ht = HASH_OF(filter_params);
+			/* TODO: convert php_stream_filter_parse_write_seek_mode() to take HashTable */
+			if (php_stream_filter_parse_write_seek_mode(filter_params, &write_seekable) == FAILURE) {
+				return NULL;
+			}
 
-		const zval *small = zend_hash_str_find_ind(filter_params_ht, ZEND_STRL("small"));
-		if (small) {
-			small_footprint = zend_is_true(small);
+			const zval *concatenated = zend_hash_str_find_ind(filter_params_ht, ZEND_STRL("concatenated"));
+			if (concatenated) {
+				expect_concatenated = zend_is_true(concatenated);
+			}
+
+			const zval *small = zend_hash_str_find_ind(filter_params_ht, ZEND_STRL("small"));
+			if (small) {
+				small_footprint = zend_is_true(small);
+			}
 		}
 	}
 
-allocate_decompress_filter:;
 	php_bz2_filter_data *data = php_bz2_filter_data_new(persistent);
 	/* Save configuration for reset */
 	data->small_footprint = small_footprint;
@@ -443,7 +449,7 @@ static php_stream_filter *php_bz2_compress_filter_create(zval *filter_params, bo
 	if (filter_params) {
 		if (UNEXPECTED(Z_TYPE_P(filter_params) != IS_ARRAY && Z_TYPE_P(filter_params) != IS_OBJECT)) {
 			php_error_docref(NULL, E_WARNING,
-				"Filter parameters for bzip2.compress filter must be of type array, %s given",
+				"Filter parameters for bzip2.compress filter must be of type array|object, %s given",
 				zend_zval_type_name(filter_params)
 			);
 			return NULL;

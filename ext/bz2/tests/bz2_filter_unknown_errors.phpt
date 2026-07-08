@@ -1,5 +1,5 @@
 --TEST--
-bzip2.decompress filter param errors
+bzip2 filter error on unknown filter name
 --EXTENSIONS--
 bz2
 --FILE--
