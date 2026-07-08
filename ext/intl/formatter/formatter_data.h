@@ -23,9 +23,8 @@ extern "C" {
 }
 #endif
 
-#include <unicode/numfmt.h>
-
 #ifdef __cplusplus
+#include <unicode/numfmt.h>
 using icu::NumberFormat;
 #else
 typedef void NumberFormat;
