@@ -972,7 +972,7 @@ static int php_openssl_dtls_server_ctx(php_stream *stream, php_openssl_dtls_data
 /* Accept one peer: run the cookie exchange with DTLSv1_listen, connect the
  * listening socket to that peer, and finish the handshake on it. */
 static int php_openssl_dtls_accept(php_stream *stream, php_openssl_dtls_data_t *listen,
-		php_stream_xport_param *xparam)
+		php_stream_xport_param *xparam STREAMS_DC)
 {
 	if (listen->s.socket == SOCK_ERR) {
 		/* The listening socket is handed to the first accepted peer. */
@@ -1310,7 +1310,7 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 					return PHP_STREAM_OPTION_RETURN_OK;
 
 				case STREAM_XPORT_OP_ACCEPT:
-					xparam->outputs.returncode = php_openssl_dtls_accept(stream, dtlssock, xparam);
+					xparam->outputs.returncode = php_openssl_dtls_accept(stream, dtlssock, xparam STREAMS_CC);
 					return PHP_STREAM_OPTION_RETURN_OK;
 
 				default:
