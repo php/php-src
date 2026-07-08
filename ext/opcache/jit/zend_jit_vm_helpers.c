@@ -1135,6 +1135,13 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 					break;
 				}
 
+				/* Never-cached callees (e.g. extension methods) are recorded
+				 * as unknown at INIT; do not follow into their bodies. */
+				if (EX(func)->op_array.fn_flags & ZEND_ACC_NEVER_CACHE) {
+					stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
+					break;
+				}
+
 				TRACE_RECORD(ZEND_JIT_TRACE_ENTER,
 					EX(return_value) != NULL ? ZEND_JIT_TRACE_RETURN_VALUE_USED : 0,
 					op_array);
