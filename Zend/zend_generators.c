@@ -768,13 +768,15 @@ ZEND_API void zend_generator_resume(zend_generator *orig_generator) /* {{{ */
 		return;
 	}
 
+	zend_generator *delegator = orig_generator;
+
 try_again:
 	if (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
 		zend_throw_error(NULL, "Cannot resume an already running generator");
 		return;
 	}
 
-	if (UNEXPECTED((orig_generator->flags & ZEND_GENERATOR_DO_INIT) != 0 && !Z_ISUNDEF(generator->value))) {
+	if (UNEXPECTED((delegator->flags & ZEND_GENERATOR_DO_INIT) != 0 && !Z_ISUNDEF(generator->value))) {
 		/* We must not advance Generator if we yield from a Generator being currently run */
 		orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 		return;
@@ -881,12 +883,19 @@ try_again:
 			generator = zend_generator_get_current(orig_generator);
 			zend_generator_throw_exception(generator, NULL);
 			orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
+			delegator = orig_generator;
 			goto try_again;
 		}
 	}
 
 	/* yield from was used, try another resume. */
-	if (UNEXPECTED((generator != orig_generator && !Z_ISUNDEF(generator->retval)) || (generator->execute_data && generator->execute_data->opline->opcode == ZEND_YIELD_FROM))) {
+	if (UNEXPECTED(generator->execute_data && generator->execute_data->opline->opcode == ZEND_YIELD_FROM)) {
+		delegator = generator;
+		generator = zend_generator_get_current(orig_generator);
+		goto try_again;
+	}
+	if (UNEXPECTED(generator != orig_generator && !Z_ISUNDEF(generator->retval))) {
+		delegator = orig_generator;
 		generator = zend_generator_get_current(orig_generator);
 		goto try_again;
 	}
