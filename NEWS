@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     iterator). (iliaal)
   . Lock unmodified readonly properties for modification after clone-with.
     (NickSdot)
+  . abort() instead of exit() on hard OOM. (realFlowControl)
 
 - Calendar:
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
