@@ -63,7 +63,7 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 
 #define PSF(a) PS(mod_user_names).ps_##a
 
-static zend_result verify_bool_return_type_userland_calls(const zval *value)
+static zend_result verify_bool_return_type_userland_calls(const zval* value)
 {
 	/* Exit or exception in userland call */
 	if (Z_TYPE_P(value) == IS_UNDEF) {
@@ -142,7 +142,7 @@ PS_CLOSE_FUNC(user)
 		bailout = 1;
 	} zend_end_try();
 
-	PS(mod_user_implemented) = false;
+	PS(mod_user_implemented) = 0;
 	ps_close_default_mod();
 
 	if (bailout) {
