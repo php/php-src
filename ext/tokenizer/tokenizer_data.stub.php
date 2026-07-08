@@ -399,6 +399,11 @@ const T_TRAIT = UNKNOWN;
 const T_INTERFACE = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_EXTENSION
+ */
+const T_EXTENSION = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_ENUM
  */
 const T_ENUM = UNKNOWN;
