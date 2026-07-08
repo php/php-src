@@ -2974,7 +2974,7 @@ ZEND_API void refresh_memory_manager(void)
 static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
 {
 	fprintf(stderr, "Out of memory\n");
-	exit(1);
+	abort();
 }
 
 #if ZEND_MM_CUSTOM
