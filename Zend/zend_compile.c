@@ -9564,6 +9564,19 @@ static void zend_compile_extension_decl(zend_ast *ast) /* {{{ */
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Extension blocks may only declare methods");
 		}
+		if (stmts->child[i]) {
+			/* Magic methods dispatch through dedicated class-entry slots and
+			 * handlers, never through the get_method miss path where
+			 * extension methods live, so none of them could ever work here.
+			 * The __ prefix is reserved for them; reject it wholesale. */
+			const zend_ast_decl *method = (const zend_ast_decl *) stmts->child[i];
+			if (ZSTR_LEN(method->name) >= 2
+			 && ZSTR_VAL(method->name)[0] == '_' && ZSTR_VAL(method->name)[1] == '_') {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Extension blocks may not declare magic method %s()",
+					ZSTR_VAL(method->name));
+			}
+		}
 	}
 
 	target_name = zend_resolve_class_name_ast(target_ast);
