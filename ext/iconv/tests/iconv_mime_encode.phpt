@@ -2,6 +2,8 @@
 iconv_mime_encode()
 --EXTENSIONS--
 iconv
+--INI--
+iconv.internal_charset=iso-8859-1
 --SKIPIF--
 <?php
 // ISO-2022-JP is a stateful encoding, so the right answer is not
@@ -11,11 +13,6 @@ iconv
 if (ICONV_IMPL == "unknown") {
     die("skip byte-comparison of stateful encoding with unknown iconv");
 }
-?>
---INI--
-iconv.internal_charset=iso-8859-1
---SKIPIF--
-<?php
 if (PHP_OS_FAMILY === 'Solaris') {
     die("skip Solaris native iconv does not support MIME encoding");
 }
@@ -36,7 +33,7 @@ $preference = array(
 for ($line_len= 0; $line_len < 80; ++$line_len) {
     print "-------- line length=$line_len\n";
     $preference["line-length"] = $line_len;
-    $result = iconv_mime_encode("From", "¥µ¥ó¥×¥ëÊ¸»úÎó¥µ¥ó¥×¥ëÊ¸»úÎóÆüËÜ¸ì¥Æ¥­¥¹¥È", $preference);
+    $result = iconv_mime_encode("From", "ï¿½ï¿½ï¿½ï¿½×¥ï¿½Ê¸ï¿½ï¿½ï¿½ó¥µ¥ï¿½×¥ï¿½Ê¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü¸ï¿½Æ¥ï¿½ï¿½ï¿½ï¿½ï¿½", $preference);
     var_dump($result);
     if ($result !== false) {
                 $max = max(array_map("strlen", explode("\n", $result)));
