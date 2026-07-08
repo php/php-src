@@ -32,6 +32,11 @@ PHP 8.6 UPGRADE NOTES
     from global scope" instead of the prior readonly modification error.
     ReflectionProperty::isWritable() also reports these properties
     accurately.
+  . Array access on Dom\DtdNamedNodeMap objects now returns null for negative
+    integer indexes instead of returning the first node.
+  . Array access on Dom\DtdNamedNodeMap objects now raises a ValueError when
+    the integer index is greater than INT_MAX instead of overflowing to a
+    smaller index.
 
 - GD:
   . imagesetstyle(), imagefilter() and imagecrop() filter their array arguments
@@ -188,6 +193,11 @@ PHP 8.6 UPGRADE NOTES
     value is passed.
   . number_format() now raises a ValueError when $decimals is outside the
     integer range instead of silently clamping very large positive values.
+  . sleep() now raises a ValueError when $seconds is greater than the platform
+    limit (UINT_MAX seconds, or UINT_MAX / 1000 seconds on Windows) instead of
+    allowing the value to overflow.
+  . usleep() now raises a ValueError when $microseconds is greater than
+    UINT_MAX instead of allowing the value to overflow.
   . proc_open() now raises a ValueError when the $cwd argument contains NUL
     bytes.
 
