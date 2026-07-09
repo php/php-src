@@ -14,6 +14,13 @@ PHP                                                                        NEWS
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
     INT_MAX year). (arshidkv12)
 
+- Date:
+  . Update timelib to 2022.17. (Derick)
+  . Fixed bug GH-19803 (Parsing a string with a single white space does create
+    an error). (Derick)
+  . Fixed Unix timestamps in February of the year 0 are misparsed with
+    @-notation. (LukasGelbmann)
+
 - DBA:
   . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
 
