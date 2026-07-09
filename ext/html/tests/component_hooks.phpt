@@ -1,5 +1,5 @@
 --TEST--
-Html components: factory hooks (DI), decorators, and per-component hook scoping (RFC §4)
+Html components: factory hooks (DI), decorators, and per-component hook scoping
 --EXTENSIONS--
 html
 --FILE--
@@ -147,7 +147,7 @@ var_dump(unregister_component_factory($cardFactory, 'Card'));
 var_dump(unregister_component_factory($anyFactory));
 echo <Card/>, "\n";
 
-// (4) A decorator scoped to Badge wraps only Badge's output — Card renders
+// (4) A decorator scoped to Badge wraps only Badge's output - Card renders
 // untouched.
 $badgeDecorator = fn(Html\Htmlable $h, string $c) => Html\raw("<<$h>>");
 register_component_decorator($badgeDecorator, Badge::class);

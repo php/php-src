@@ -34,7 +34,7 @@ echo (new Element('div', ['title' => 'a "b" & <c>'], []))->__toString(), "\n";
 $evil = '<script>alert(1)</script>';
 echo (new Element('span', [], [$evil]))->__toString(), "\n";
 
-// --- attribute value coercion (RFC §5) ---
+// --- attribute value coercion ---
 
 // null and false omit the attribute; true is a bare boolean attribute.
 echo (new Element('input', [

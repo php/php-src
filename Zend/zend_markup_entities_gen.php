@@ -1,14 +1,15 @@
 <?php
+
 /**
- * Generates zend_markup_entities.h — the named character reference table used
- * by native markup text/attribute decoding (RFC: Native Markup Expressions).
+ * Generates zend_markup_entities.h - the named character reference table used
+ * by native markup text/attribute decoding.
  *
  * Usage: php Zend/zend_markup_entities_gen.php > Zend/zend_markup_entities.h
  *
- * The source data is ext/standard/html_tables/ents_html5.txt — the same
+ * The source data is ext/standard/html_tables/ents_html5.txt - the same
  * WHATWG HTML5 named-reference table that feeds html_entity_decode(), so
  * there is a single copy of the data in the tree. The HTML standard
- * guarantees this list is frozen — no named entity will ever be added — so
+ * guarantees this list is frozen - no named entity will ever be added - so
  * the generated header only changes if this generator does. The table
  * contains only the canonical semicolon-terminated forms: markup requires
  * the well-formed "&name;" spelling and treats legacy forms like "&amp"
@@ -23,7 +24,8 @@ if ($lines === false) {
     exit(1);
 }
 
-function utf8_bytes(int $cp): string {
+function utf8_bytes(int $cp): string
+{
     if ($cp < 0x80) {
         return chr($cp);
     } elseif ($cp < 0x800) {
@@ -66,7 +68,7 @@ $maxUtf8 = max(array_map('strlen', $entities));
 $count = count($entities);
 
 echo <<<EOT
-/* This is a generated file — edit Zend/zend_markup_entities_gen.php instead.
+/* This is a generated file - edit Zend/zend_markup_entities_gen.php instead.
  * Source data: ext/standard/html_tables/ents_html5.txt (the WHATWG HTML5
  * named-reference table, frozen by the HTML standard; also feeds
  * html_entity_decode()). Canonical semicolon-terminated forms only; sorted

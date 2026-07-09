@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* Native markup (RFC: Native Markup Expressions) compile-time support:
+/* Native Markup Expressions compile-time support:
  *
  *   - text normalization and character-reference decoding, called by the
  *     lexer (Zend/zend_language_scanner.l) on markup text and literal
@@ -36,7 +36,7 @@
 #include "zend_markup.h"
 #include "zend_markup_entities.h"
 
-/* Native markup whitespace normalization (RFC §7), following the JSX/Babel rules:
+/* Native markup whitespace normalization, following the JSX/Babel rules:
  *   - split the text node into lines;
  *   - trim leading whitespace on every line but the first, and trailing
  *     whitespace on every line but the last;
@@ -44,12 +44,12 @@
  *   - join the surviving lines with a single space.
  * The net effect: indentation/newlines between block elements vanish, while a
  * meaningful single space between inline content is preserved. Returns a new
- * zend_string (possibly empty — the caller drops empty text nodes).
+ * zend_string (possibly empty - the caller drops empty text nodes).
  *
  * One streaming pass: because a non-first line is left-trimmed and a non-last
  * line is right-trimmed, any line that survives contains a non-whitespace
  * character, so "join surviving lines with a single space" is simply a space
- * before every surviving line except the first — no line table or lookahead
+ * before every surviving line except the first - no line table or lookahead
  * for the last non-blank line is needed. A single-line text is untouched apart
  * from the tab conversion, exactly as before. */
 zend_string *zend_markup_normalize_text(const char *text, size_t len)
@@ -108,13 +108,13 @@ zend_string *zend_markup_normalize_text(const char *text, size_t len)
 	return result;
 }
 
-/* Native markup character references (RFC §7). Markup text and literal
+/* Native markup character references. Markup text and literal
  * attribute values decode HTML character references at compile time: the
  * frozen WHATWG named set (semicolon-terminated forms only; the standard
  * guarantees the list will never grow) plus numeric &#123; / &#x1F600; forms.
  * Decoding is lenient like HTML and JSX: anything that does not parse as a
- * reference — a bare "&", an unknown name, an out-of-range or surrogate
- * codepoint — stays literal text, so "fish & chips" needs no escaping.
+ * reference - a bare "&", an unknown name, an out-of-range or surrogate
+ * codepoint - stays literal text, so "fish & chips" needs no escaping.
  * Decoded text is a plain string escaped at render time, so "&amp;" in source
  * round-trips to "&amp;" in output. Text decodes after whitespace
  * normalization, so "&#32;" survives it (the entity spelling of JSX's {' '}). */
@@ -256,7 +256,7 @@ zend_string *zend_markup_decode_entities(zend_string *str)
 	return smart_str_extract(&buf);
 }
 
-/* Native markup AST lowering (RFC: Native Markup Expressions, Phase 2/3).
+/* Native markup AST lowering.
  * Lower a markup element into an ordinary `new \Html\Element(tag, [], [children])`
  * (or `new \Html\Fragment([children])` when the tag name is empty) so no new AST
  * node kind or zend_compile.c support is needed. `name` is the tag-name zval AST
@@ -273,7 +273,7 @@ static zend_ast *zend_ast_markup_fq_name(const char *name, size_t len)
 	return ast;
 }
 
-/* Element vs component classification (RFC §4): a tag whose first character is
+/* Element vs component classification: a tag whose first character is
  * uppercase, which is namespace-qualified (contains "\"), or which names a
  * static method via "::", dispatches as a component; anything else is a literal
  * HTML element. The single home for this rule: the compiler applies it to
@@ -302,7 +302,7 @@ static zend_ast *zend_ast_wrap_fragment(zend_ast *children)
 }
 
 /* Wrap a string AST in a `\Html\raw(...)` call (trusted passthrough). Used for
- * `<!-- … -->` comments, which are emitted as literal HTML (RFC §7). */
+ * `<!-- … -->` comments, which are emitted as literal HTML. */
 zend_ast *zend_ast_create_markup_raw(zend_ast *str)
 {
 	zend_ast *fn = zend_ast_markup_fq_name(ZEND_STRL(ZEND_MARKUP_RAW_FQ));
@@ -311,16 +311,16 @@ zend_ast *zend_ast_create_markup_raw(zend_ast *str)
 }
 
 /* Wrap a children list in
- * `new \Html\LazyFragment(fn() => new \Html\Fragment([children]))` (RFC §5, the
- * `:lazy` directive). The arrow function defers building the child subtree —
- * and running any side effects in its interpolations — until the component
+ * `new \Html\LazyFragment(fn() => new \Html\Fragment([children]))` (the
+ * `:lazy` directive). The arrow function defers building the child subtree -
+ * and running any side effects in its interpolations - until the component
  * actually renders the slot, so a component that discards its body never
  * evaluates it. Consumes `children`. */
 static zend_ast *zend_ast_wrap_lazy_fragment(zend_ast *children, uint32_t lineno)
 {
 	zend_ast *frag = zend_ast_wrap_fragment(children);
 
-	/* fn() => new \Html\Fragment([...]) — an arrow function so its body
+	/* fn() => new \Html\Fragment([...]) - an arrow function so its body
 	 * auto-captures by value whatever it references, exactly as a hand-written
 	 * one would; only the expression evaluation is deferred. */
 	zend_ast *params = zend_ast_create_list(0, ZEND_AST_PARAM_LIST);
@@ -362,24 +362,24 @@ static bool zend_markup_extract_lazy(zend_ast *attrs)
 
 /* Lower a component tag (a capitalized or namespace-qualified name, or
  * "Class::method") into a call to \Html\render_component(component, props, slot)
- * (RFC §3). Attributes become the props array and the body content becomes a
+ * Attributes become the props array and the body content becomes a
  * single \Html\Fragment passed as the slot (or a lazy \Html\LazyFragment when
  * the `:lazy` directive is present).
  *
  * Component resolution is two-stage, and every tag resolves through the *class*
  * name rules only: a bare/qualified tag lowers to ZEND_AST_CLASS_NAME (the
  * `Component::class` machinery), and a "Class::method" tag lowers the class
- * part the same way with "::method" appended — both honor `use` imports and
+ * part the same way with "::method" appended - both honor `use` imports and
  * the current namespace, with a leading "\" fully qualified. The runtime then
  * resolves the name to a class implementing Html\Htmlable (instantiated) or a
- * public static method (called) — see PHP_FUNCTION(Html_render_component) in
+ * public static method (called) - see PHP_FUNCTION(Html_render_component) in
  * ext/html/html.c.
  *
  * Plain *function* components are deliberately out of v1: a bare tag gives no
  * signal whether a class or a function is meant, and functions resolve through
  * the separate `use function` import table, so supporting them would need a
  * second compile-time resolution and a new AST kind to carry it. A static
- * method has no such ambiguity — its class part resolves like any class. */
+ * method has no such ambiguity - its class part resolves like any class. */
 static zend_ast *zend_ast_create_markup_component(zend_ast *name, zend_ast *attrs, zend_ast *children)
 {
 	uint32_t lineno = zend_ast_get_lineno(name);
@@ -415,7 +415,7 @@ static zend_ast *zend_ast_create_markup_component(zend_ast *name, zend_ast *attr
 	}
 	attrs->attr = ZEND_ARRAY_SYNTAX_SHORT;
 
-	/* The `:lazy` directive is a compiler marker, not a prop — strip it first. */
+	/* The `:lazy` directive is a compiler marker, not a prop - strip it first. */
 	bool lazy = zend_markup_extract_lazy(attrs);
 
 	/* The body becomes a single slot Fragment, or null when there is no body.
@@ -465,7 +465,7 @@ zend_ast *zend_ast_create_markup_element(zend_ast *name, zend_ast *attrs, zend_a
 		? zend_ast_get_lineno(name) : zend_ast_get_lineno(children);
 
 	/* A capitalized name, a namespace-qualified name, or one containing "::"
-	 * is a component (RFC §3). */
+	 * is a component. */
 	if (name != NULL && zend_markup_name_is_component(zend_ast_get_str(name))) {
 		result = zend_ast_create_markup_component(name, attrs, children);
 		result->lineno = lineno;
@@ -500,7 +500,7 @@ zend_ast *zend_ast_create_markup_element(zend_ast *name, zend_ast *attrs, zend_a
 }
 
 /* Build a markup element (or, with `dynamic`, a dynamic tag) after checking
- * the closing tag matches the opener (RFC §7): `<div>…</span>` and
+ * the closing tag matches the opener: `<div>…</span>` and
  * `<$a>…</$b>` are compile errors alike. Both `open` and `close` NULL means a
  * `<>…</>` fragment. `close` is consumed. */
 zend_ast *zend_ast_create_markup_checked(zend_ast *open, zend_ast *attrs, zend_ast *children, zend_ast *close, bool dynamic)
@@ -568,7 +568,7 @@ static zend_ast *zend_markup_dynamic_call(zend_ast *tag_expr, zend_ast *attrs, z
 	return result;
 }
 
-/* Lower a dynamic tag `<$tag …>…</$tag>` (RFC §4) into a call to
+/* Lower a dynamic tag `<$tag …>…</$tag>` into a call to
  * \Html\render_dynamic($tag, attributes, children). The variable's runtime
  * value decides what a static tag name decides at compile time, by the same
  * classification rule (zend_markup_name_is_component); only classification
@@ -592,4 +592,3 @@ zend_ast *zend_ast_create_markup_dynamic_expr(zend_ast *expr, zend_ast *attrs, z
 {
 	return zend_markup_dynamic_call(expr, attrs, children, zend_ast_get_lineno(expr));
 }
-

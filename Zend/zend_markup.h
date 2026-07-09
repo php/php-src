@@ -20,7 +20,7 @@
 
 #include "zend_ast.h"
 
-/* The fully-qualified names that native markup (RFC: Native Markup Expressions)
+/* The fully-qualified names that Native Markup Expressions
  * lowers into. This is the single home for the markup-to-runtime vocabulary:
  * the parser (Zend/zend_language_parser.y) lowers markup expressions to exactly
  * these symbols, and the ext/html runtime registers exactly them (asserted at
@@ -40,9 +40,9 @@
 
 BEGIN_EXTERN_C()
 
-/* Element vs component classification (RFC §4): uppercase first character,
+/* Element vs component classification: uppercase first character,
  * a "\", or a "::" dispatches as a component; anything else is a literal HTML
- * element. The single home for this rule — the compiler applies it to static
+ * element. The single home for this rule - the compiler applies it to static
  * tag names, and Html\render_dynamic applies it to a dynamic tag's runtime
  * value, so `<$tag>` decides at runtime exactly what `<tag>` decides at
  * compile time. */

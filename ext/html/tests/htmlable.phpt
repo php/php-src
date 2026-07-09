@@ -6,7 +6,7 @@ html
 <?php
 declare(strict_types=1);
 
-// --- toHtml() contract (RFC §3) ---
+// --- toHtml() contract ---
 
 // toHtml() returns the markup tree directly: no string cast is needed even
 // under strict_types, and the produced Element stays inspectable as an object.

@@ -1,5 +1,5 @@
 --TEST--
-Html components: #[Html\Slot] body routing, slot validation errors, Slot attribute reflection (RFC §5)
+Html components: #[Html\Slot] body routing, slot validation errors, Slot attribute reflection
 --EXTENSIONS--
 html
 --FILE--

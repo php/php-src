@@ -1,5 +1,5 @@
 --TEST--
-Markup syntax: dynamic tags <$tag>/<{expr}> — classification, escaping, single evaluation, BC, error cases (RFC §4)
+Markup syntax: dynamic tags <$tag>/<{expr}> - classification, escaping, single evaluation, BC, error cases
 --EXTENSIONS--
 html
 --FILE--

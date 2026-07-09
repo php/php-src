@@ -1,5 +1,5 @@
 --TEST--
-Markup syntax: HTML character references decode in text/attributes; tokenizer keeps them raw (RFC §7)
+Markup syntax: HTML character references decode in text/attributes; tokenizer keeps them raw
 --EXTENSIONS--
 html
 tokenizer

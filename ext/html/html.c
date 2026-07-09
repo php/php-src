@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* Native Markup runtime (RFC: Native Markup Expressions).
+/* Native Markup Expressions.
  *
  * This extension provides the `Html\` value-object tree that markup expressions
  * lower into: Element, Fragment, Raw, the Htmlable interface, the Slot
@@ -197,7 +197,7 @@ static bool html_is_void_element(zend_string *tag)
 
 static zend_result html_append_child(smart_str *buf, zval *value, uint32_t depth);
 
-/* Flatten a Traversable, coercing each yielded value recursively (RFC §6).
+/* Flatten a Traversable, coercing each yielded value recursively.
  * Keys are ignored; only values render. */
 static zend_result html_append_traversable(smart_str *buf, zval *value, uint32_t depth)
 {
@@ -246,7 +246,7 @@ done:
 	return EG(exception) ? FAILURE : result;
 }
 
-/* Coerce and append a single child value (RFC §6 child-coercion table).
+/* Coerce and append a single child value.
  * Returns FAILURE with an exception pending on an unrenderable value. */
 static zend_result html_append_child(smart_str *buf, zval *value, uint32_t depth)
 {
@@ -298,7 +298,7 @@ static zend_result html_append_child(smart_str *buf, zval *value, uint32_t depth
 
 			/* Htmlable: already-safe HTML, passes through un-escaped. Resolved
 			 * through toHtml() to one of the internal node classes and then
-			 * serialized natively — never through __toString, so overriding a
+			 * serialized natively - never through __toString, so overriding a
 			 * component's string form cannot change what its markup renders as. */
 			if (instanceof_function(ce, html_ce_Htmlable)) {
 				zend_string *s = html_render_htmlable(value);
@@ -347,7 +347,7 @@ static zend_result html_append_child(smart_str *buf, zval *value, uint32_t depth
 /* Emit ` name="value"` into the buffer and release `value`. The `escape` flag
  * is the one security-relevant decision in attribute emission: every value is
  * escaped except an Htmlable's already-safe HTML (and numbers, which cannot
- * contain escapable characters). Values are always serialized double-quoted —
+ * contain escapable characters). Values are always serialized double-quoted -
  * no unquoted output form exists. */
 static void html_append_attr_value(smart_str *buf, zend_string *name, zend_string *value, bool escape)
 {
@@ -363,7 +363,7 @@ static void html_append_attr_value(smart_str *buf, zend_string *name, zend_strin
 	zend_string_release(value);
 }
 
-/* Coerce and append a single attribute value (RFC §5 attribute coercion). */
+/* Coerce and append a single attribute value. */
 static zend_result html_append_attribute(smart_str *buf, zend_string *name, zval *value)
 {
 	switch (Z_TYPE_P(value)) {
@@ -394,7 +394,7 @@ static zend_result html_append_attribute(smart_str *buf, zend_string *name, zval
 			zend_class_entry *value_ce = Z_OBJCE_P(value);
 
 			/* Htmlable (Html\raw(), Html\escape(), ...) is already-safe HTML and
-			 * passes through un-escaped, exactly as in child position — so
+			 * passes through un-escaped, exactly as in child position - so
 			 * title={\Html\raw('&nbsp;')} emits the entity rather than
 			 * double-escaping it. The trust contract is the caller's: a raw
 			 * value containing '"' can break out of the attribute. */
@@ -590,7 +590,7 @@ static zend_string *html_render_node(zval *node)
 	return smart_str_extract(&buf);
 }
 
-/* Render any Htmlable — a node class or a userland implementation — to its
+/* Render any Htmlable - a node class or a userland implementation - to its
  * final HTML string: resolve through toHtml(), then serialize natively.
  * Returns a new string, or NULL with an exception pending. */
 static zend_string *html_render_htmlable(zval *value)
@@ -679,7 +679,7 @@ static int html_implement_htmlable(zend_class_entry *iface, zend_class_entry *ce
 
 	if (zv != NULL) {
 		/* Swap the abstract entry in place. The replaced pointer is the
-		 * interface's own method, owned by the interface — nothing to free,
+		 * interface's own method, owned by the interface - nothing to free,
 		 * and bypassing the hash dtor is exactly why this is not hash_update. */
 		Z_PTR_P(zv) = (zend_function *) zif;
 	} else {
@@ -819,7 +819,7 @@ PHP_METHOD(Html_LazyFragment, __construct)
 
 /* Resolve the deferred body once and memoize it: toHtml() is the seam the render
  * path already calls, so a component that never renders the slot never runs the
- * thunk (RFC §5). */
+ * thunk. */
 PHP_METHOD(Html_LazyFragment, toHtml)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1331,7 +1331,7 @@ static zend_result html_dispatch_call(
 /* Dispatch a class component: a registered factory may construct it (e.g.
  * through a DI container) before the engine's own `new`. On SUCCESS the
  * produced object is in *result; on FAILURE an exception is pending. Never
- * releases `args` — the caller owns it. */
+ * releases `args` - the caller owns it. */
 static zend_result html_dispatch_new(
 	zend_class_entry *ce, zend_function *ctor, HashTable *args, zval *result)
 {
@@ -1395,12 +1395,12 @@ static void html_render_component_impl(
 	zend_string *component, HashTable *props, zend_object *slot_obj,
 	zval *return_value)
 {
-	/* Resolve the component to a dispatch target (RFC §4). This is the second
+	/* Resolve the component to a dispatch target. This is the second
 	 * stage of a two-stage resolution: the compiler already resolved the *name*
 	 * against use/namespace (see zend_ast_create_markup_component in
 	 * Zend/zend_markup.c); here that name resolves to a class implementing
 	 * Html\Htmlable (instantiated) or, for "Class::method", a public static
-	 * method (called). Class resolution is the only name machinery involved —
+	 * method (called). Class resolution is the only name machinery involved -
 	 * plain functions are not components (see the RFC's Future Scope). */
 	zend_function *fn;
 	zend_class_entry *ce;
@@ -1507,11 +1507,11 @@ PHP_FUNCTION(Html_render_component)
 	html_render_component_impl(component, props, slot_obj, return_value);
 }
 
-/* The runtime target of a dynamic tag `<$tag …>…</$tag>` (RFC §4). The value
+/* The runtime target of a dynamic tag `<$tag …>…</$tag>`. The value
  * decides at runtime exactly what a static tag name decides at compile time,
  * by the same classification rule (zend_markup_name_is_component): an
- * uppercase first character, a "\", or a "::" dispatches as a component —
- * through the full render_component machinery, hooks and decorators included —
+ * uppercase first character, a "\", or a "::" dispatches as a component -
+ * through the full render_component machinery, hooks and decorators included -
  * and anything else constructs a literal \Html\Element. Exposed as a public
  * function like render_component, so the rule is directly testable. */
 PHP_FUNCTION(Html_render_dynamic)

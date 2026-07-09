@@ -88,13 +88,11 @@ namespace Html {
      * (e.g. `<Layout header={<h1>Title</h1>}>…</Layout>`).
      */
     #[\Attribute(\Attribute::TARGET_PARAMETER)]
-    final class Slot
-    {
-    }
+    final class Slot {}
 
     /**
-     * A slot body whose evaluation is deferred: it builds the child subtree —
-     * and runs any side effects in its interpolations — only the first time it
+     * A slot body whose evaluation is deferred: it builds the child subtree -
+     * and runs any side effects in its interpolations - only the first time it
      * is rendered, memoizing the result. Produced by the `:lazy` directive on a
      * component tag (`<Auth :lazy>…</Auth>`), so a component that discards its
      * body never evaluates it. Because it is itself an Html\Htmlable, a
@@ -127,19 +125,19 @@ namespace Html {
     function escape(string $text): \Html\Htmlable {}
 
     /**
-     * Dispatches a component (RFC §3 and §5) and returns the Html\Htmlable it
+     * Dispatches a component and returns the Html\Htmlable it
      * produces. This is the runtime target a `<Component …/>` markup tag lowers
      * into; it is exposed as a public function so the dispatch and slot-routing
      * rules are directly testable, but user code is expected to write tags.
      *
      * A component is a class implementing Html\Htmlable, or a public static
      * method on a class ("Class::method"). $component is the already-resolved
-     * name (the compiler resolves the tag — the class part of a "::" tag
-     * included — against `use` imports and the current namespace, as
+     * name (the compiler resolves the tag - the class part of a "::" tag
+     * included - against `use` imports and the current namespace, as
      * `Component::class` does). A class name is looked up, confirmed to
      * implement Html\Htmlable, and instantiated; a "Class::method" name is
-     * called and must return an Html\Htmlable. Anything else — no such class,
-     * a class not implementing the interface, a non-public/non-static method —
+     * called and must return an Html\Htmlable. Anything else - no such class,
+     * a class not implementing the interface, a non-public/non-static method -
      * is a hard error. Plain functions are not components (Future Scope).
      *
      * $props become named arguments. The body $slot is routed to the parameter
@@ -156,7 +154,7 @@ namespace Html {
     ): \Html\Htmlable {}
 
     /**
-     * Renders a dynamic tag (RFC §4): the runtime target a `<$tag …>…</$tag>`
+     * Renders a dynamic tag: the runtime target a `<$tag …>…</$tag>`
      * or `<{expr} …>…</>` markup tag lowers into. $tag's value decides at runtime exactly what a
      * static tag name decides at compile time, by the same classification
      * rule: a name with an uppercase first character, a "\", or a "::"
@@ -193,7 +191,7 @@ namespace Html {
      * Passing $component (a class FQCN; case-insensitive, with or without a
      * leading backslash) scopes the factory to that one component: it only runs
      * when the resolved class name matches, and every other class component
-     * skips it entirely — no userland call is made. Scoped and unscoped
+     * skips it entirely - no userland call is made. Scoped and unscoped
      * factories share one chain, still tried in registration order.
      *
      * Example (Laravel):
@@ -219,7 +217,7 @@ namespace Html {
 
     /**
      * Register a decorator that runs on the Html\Htmlable every component
-     * produces — class and static-method alike — after it has been constructed
+     * produces - class and static-method alike - after it has been constructed
      * or called. This is the cross-cutting seam (as opposed to the factory
      * production seam): use it to wrap, transform, log, profile, or cache
      * component output uniformly.
@@ -231,8 +229,8 @@ namespace Html {
      * previous one's result. Registration is request-scoped.
      *
      * Passing $component scopes the decorator to that one component: it only
-     * runs when the resolved component name — the same name the decorator
-     * receives — matches (case-insensitive, with or without a leading
+     * runs when the resolved component name - the same name the decorator
+     * receives - matches (case-insensitive, with or without a leading
      * backslash). Every other component skips it entirely.
      *
      * Example: uppercase every component's output.

@@ -9,10 +9,9 @@ assert.exception=1
 <?php
 // A failed assert() exports the compiled expression back to source
 // (zend_ast_export). Markup is lowered during parsing, so the message shows
-// exactly the plain-PHP form each construct compiles to — with `false &&`
+// exactly the plain-PHP form each construct compiles to - with `false &&`
 // short-circuiting, nothing is ever evaluated or rendered. This pins the
-// documented desugarings (RFC "Desugaring at a glance") without any
-// dedicated introspection API.
+// documented desugarings without any dedicated introspection API.
 function desugar(string $expr): string {
     try {
         eval("assert(false && ($expr));");

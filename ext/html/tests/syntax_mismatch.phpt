@@ -1,5 +1,5 @@
 --TEST--
-Markup syntax: a mismatched closing tag is a compile error (RFC §7)
+Markup syntax: a mismatched closing tag is a compile error
 --EXTENSIONS--
 html
 --FILE--

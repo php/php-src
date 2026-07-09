@@ -1,5 +1,5 @@
 --TEST--
-Markup syntax: attributes — literal/{expr}/bare-boolean with coercion, {...spread}, ":"/"@" prefixed names (RFC §4, §5)
+Markup syntax: attributes - literal/{expr}/bare-boolean with coercion, {...spread}, ":"/"@" prefixed names
 --EXTENSIONS--
 html
 --FILE--

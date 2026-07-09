@@ -1,5 +1,5 @@
 --TEST--
-Markup syntax: <!DOCTYPE html> emission rules and non-doctype <! parse errors (RFC §6)
+Markup syntax: <!DOCTYPE html> emission rules and non-doctype <! parse errors
 --EXTENSIONS--
 html
 --FILE--

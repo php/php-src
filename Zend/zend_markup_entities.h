@@ -1,4 +1,4 @@
-/* This is a generated file — edit Zend/zend_markup_entities_gen.php instead.
+/* This is a generated file - edit Zend/zend_markup_entities_gen.php instead.
  * Source data: ext/standard/html_tables/ents_html5.txt (the WHATWG HTML5
  * named-reference table, frozen by the HTML standard; also feeds
  * html_entity_decode()). Canonical semicolon-terminated forms only; sorted

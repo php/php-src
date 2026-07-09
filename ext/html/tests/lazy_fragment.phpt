@@ -1,5 +1,5 @@
 --TEST--
-Markup syntax: the `:lazy` directive defers slot evaluation via Html\LazyFragment (RFC §5)
+Markup syntax: the `:lazy` directive defers slot evaluation via Html\LazyFragment
 --EXTENSIONS--
 html
 --FILE--

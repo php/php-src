@@ -1,5 +1,5 @@
 /* This is a generated file, edit html.stub.php instead.
- * Stub hash: fe87170919c07ffdb0869adffcf45cd108d3bd96 */
+ * Stub hash: eaef41e6bb5861baded549bcdab72debb58206f6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Html_raw, 0, 1, Html\\Htmlable, 0)
 	ZEND_ARG_TYPE_INFO(0, html, IS_STRING, 0)

@@ -1,5 +1,5 @@
 --TEST--
-Html\Element children: scalar coercion, recursive array flattening, Traversables, and the nesting-depth bound (RFC §6)
+Html\Element children: scalar coercion, recursive array flattening, Traversables, and the nesting-depth bound
 --EXTENSIONS--
 html
 --FILE--

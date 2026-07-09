@@ -1,5 +1,5 @@
 --TEST--
-Markup syntax: elements, fragments, interpolation, whitespace, childless/self-close, literal braces, comments (RFC §6, §7)
+Markup syntax: elements, fragments, interpolation, whitespace, childless/self-close, literal braces, comments
 --EXTENSIONS--
 html
 --FILE--

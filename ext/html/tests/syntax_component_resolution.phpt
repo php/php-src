@@ -1,5 +1,5 @@
 --TEST--
-Markup syntax: compile-time component-name resolution (use aliases, qualified/fully-qualified tags, static methods) (RFC §4)
+Markup syntax: compile-time component-name resolution (use aliases, qualified/fully-qualified tags, static methods)
 --EXTENSIONS--
 html
 --FILE--
@@ -78,7 +78,7 @@ namespace Other {
 
 // --- unimported bare tag fails: no global fallback ---
 namespace Wrong {
-    // Without an import, a bare tag resolves in the current namespace only —
+    // Without an import, a bare tag resolves in the current namespace only -
     // exactly how PHP resolves an unqualified class name (no global fallback).
     try {
         echo (<Card title="x"/>)->__toString(), "\n";

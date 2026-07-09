@@ -1,5 +1,5 @@
 --TEST--
-Html components: tag lowering, class/static-method dispatch, resolution errors, hyphenated attrs (RFC §4, §5)
+Html components: tag lowering, class/static-method dispatch, resolution errors, hyphenated attrs
 --EXTENSIONS--
 html
 --FILE--

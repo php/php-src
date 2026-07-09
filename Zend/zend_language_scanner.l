@@ -2192,7 +2192,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 }
 
 <ST_MARKUP_CONTENT>"<!--" {
-	/* An HTML comment, emitted verbatim (RFC §7). Scan to the closing "-->";
+	/* An HTML comment, emitted verbatim. Scan to the closing "-->";
 	 * content is literal (no interpolation). */
 	while (YYCURSOR < YYLIMIT) {
 		if (YYCURSOR + 2 < YYLIMIT && YYCURSOR[0] == '-' && YYCURSOR[1] == '-' && YYCURSOR[2] == '>') {
@@ -2207,7 +2207,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 }
 
 <ST_MARKUP_CONTENT>"<!doctype" {
-	/* An HTML doctype, emitted verbatim like a comment (RFC §6). Matches
+	/* An HTML doctype, emitted verbatim like a comment. Matches
 	 * case-insensitively (--case-inverted); scan to the closing ">";
 	 * content is literal (no interpolation). */
 	while (YYCURSOR < YYLIMIT) {
