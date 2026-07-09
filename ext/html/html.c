@@ -759,16 +759,23 @@ PHP_METHOD(Html_Raw, toHtml)
 	RETURN_COPY(ZEND_THIS);
 }
 
-PHP_METHOD(Html_Element, __toString)
+/* Shared __toString() body for the three node classes: serialize through
+ * html_render_node, the same function child-position rendering uses, so
+ * `(string) $el` and rendering $el as a child can never diverge. */
+static void html_node_tostring(INTERNAL_FUNCTION_PARAMETERS)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	smart_str buf = {0};
-	if (html_render_element(&buf, Z_OBJ_P(ZEND_THIS)) == FAILURE) {
-		smart_str_free(&buf);
+	zend_string *s = html_render_node(ZEND_THIS);
+	if (s == NULL) {
 		RETURN_THROWS();
 	}
-	RETURN_STR(smart_str_extract(&buf));
+	RETURN_STR(s);
+}
+
+PHP_METHOD(Html_Element, __toString)
+{
+	html_node_tostring(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(Html_Fragment, __construct)
@@ -785,14 +792,7 @@ PHP_METHOD(Html_Fragment, __construct)
 
 PHP_METHOD(Html_Fragment, __toString)
 {
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	smart_str buf = {0};
-	if (html_render_fragment(&buf, Z_OBJ_P(ZEND_THIS)) == FAILURE) {
-		smart_str_free(&buf);
-		RETURN_THROWS();
-	}
-	RETURN_STR(smart_str_extract(&buf));
+	html_node_tostring(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(Html_Raw, __construct)
@@ -808,16 +808,7 @@ PHP_METHOD(Html_Raw, __construct)
 
 PHP_METHOD(Html_Raw, __toString)
 {
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	zval rv;
-	zval *html = zend_read_property(html_ce_Raw, Z_OBJ_P(ZEND_THIS), ZEND_STRL("html"), true, &rv);
-	ZVAL_DEREF(html);
-	if (Z_TYPE_P(html) != IS_STRING) {
-		zend_throw_error(NULL, "Html\\Raw has not been initialized");
-		RETURN_THROWS();
-	}
-	RETURN_STR(zend_string_copy(Z_STR_P(html)));
+	html_node_tostring(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(Html_LazyFragment, __construct)
@@ -887,13 +878,11 @@ PHP_METHOD(Html_LazyFragment, toHtml)
 
 PHP_METHOD(Html_LazyFragment, __toString)
 {
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	zend_string *s = html_render_htmlable(ZEND_THIS);
-	if (s == NULL) {
-		RETURN_THROWS();
-	}
-	RETURN_STR(s);
+	/* Identical to the default __toString() injected into userland Htmlable
+	 * classes: resolve through toHtml() (running/memoizing the thunk), then
+	 * serialize. Declared explicitly because the injection skips internal
+	 * classes (see html_implement_htmlable). */
+	html_htmlable_default_tostring(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* Build an Html\Raw wrapping the given (already-final) HTML string. */
