@@ -5753,6 +5753,92 @@ PHP_FUNCTION(array_diff_ukey)
 }
 /* }}} */
 
+static zend_always_inline bool php_array_values_are_all_long(HashTable *ht)
+{
+	zval *value;
+
+	ZEND_HASH_FOREACH_VAL(ht, value) {
+		ZVAL_DEREF(value);
+		if (UNEXPECTED(Z_TYPE_P(value) != IS_LONG)) {
+			return false;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return true;
+}
+
+static zend_never_inline bool php_array_diff_long(zval *args, uint32_t argc, uint32_t exclude_count, zval *return_value)
+{
+	zend_bitset exclude;
+	zval *value, *entry;
+	zend_string *key;
+	zend_long idx, min = ZEND_LONG_MAX, max = ZEND_LONG_MIN;
+	zend_ulong span = 0, offset;
+	const uint64_t max_range = (uint64_t) exclude_count * 8;
+	uint32_t range, bitset_len;
+	uint32_t i;
+
+	/* The copy loop below cannot cheaply undo a partially built result, so
+	 * the first array must be checked upfront. */
+	if (!php_array_values_are_all_long(Z_ARRVAL(args[0]))) {
+		return false;
+	}
+
+	/* Check the value types and determine whether the values are dense enough
+	 * for a bitset. Limiting the range to eight bits per exclude element keeps
+	 * bitset memory proportional to the input, apart from word alignment. */
+	for (i = 1; i < argc; i++) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), value) {
+			ZVAL_DEREF(value);
+			if (UNEXPECTED(Z_TYPE_P(value) != IS_LONG)) {
+				return false;
+			}
+			if (Z_LVAL_P(value) < min) {
+				min = Z_LVAL_P(value);
+			}
+			if (Z_LVAL_P(value) > max) {
+				max = Z_LVAL_P(value);
+			}
+			span = (zend_ulong) max - (zend_ulong) min;
+			if (UNEXPECTED(span >= HT_MAX_SIZE || (uint64_t) span >= max_range)) {
+				return false;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	range = (uint32_t) span + 1;
+	bitset_len = zend_bitset_len(range);
+	exclude = safe_emalloc(bitset_len, ZEND_BITSET_ELM_SIZE, 0);
+	zend_bitset_clear(exclude, bitset_len);
+
+	for (i = 1; i < argc; i++) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), value) {
+			ZVAL_DEREF(value);
+			offset = (zend_ulong) Z_LVAL_P(value) - (zend_ulong) min;
+			ZEND_ASSERT(offset < range);
+			zend_bitset_incl(exclude, (uint32_t) offset);
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL(args[0])));
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(args[0]), idx, key, value) {
+		entry = value;
+		ZVAL_DEREF(entry);
+		offset = (zend_ulong) Z_LVAL_P(entry) - (zend_ulong) min;
+		if (offset >= range || !zend_bitset_in(exclude, (uint32_t) offset)) {
+			if (key) {
+				value = zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
+			} else {
+				value = zend_hash_index_add_new(Z_ARRVAL_P(return_value), idx, value);
+			}
+			zval_add_ref(value);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	efree(exclude);
+	return true;
+}
+
 /* {{{ Returns the entries of arr1 that have values which are not present in any of the others arguments. */
 PHP_FUNCTION(array_diff)
 {
@@ -5851,6 +5937,10 @@ PHP_FUNCTION(array_diff)
 	if (UNEXPECTED(num >= HT_MAX_SIZE)) {
 		zend_throw_error(NULL, "The total number of elements must be lower than %u", HT_MAX_SIZE);
 		RETURN_THROWS();
+	}
+
+	if (php_array_diff_long(args, argc, (uint32_t)num, return_value)) {
+		return;
 	}
 
 	ZVAL_NULL(&dummy);
