@@ -73,6 +73,8 @@ PHP                                                                        NEWS
 - GMP:
   . Fixed bug GH-22549 (Assertion failure / UB on a compound GMP power or shift
     assignment with a negative exponent). (iliaal)
+  . Fixed GMP power and shift operators to reject GMP right operands outside
+    the unsigned long range instead of silently truncating them. (Weilin Du)
 
 - Intl:
   . Fixed NumberFormatter::parse() and NumberFormatter::parseCurrency() to
