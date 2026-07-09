@@ -2244,13 +2244,9 @@ PHP_METHOD(ZipArchive, setCommentIndex)
 		RETURN_THROWS();
 	}
 
-	if (index < 0) {
-		RETURN_FALSE;
-	}
-
+	PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
 	idx = (zip_uint64_t) index;
 
-	PHP_ZIP_STAT_INDEX(intern, idx, 0, sb);
 	RETURN_BOOL(php_zip_set_file_comment(intern, idx, comment, comment_len));
 }
 /* }}} */
