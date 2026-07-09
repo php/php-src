@@ -322,6 +322,14 @@ ZEND_API zend_object *zend_objects_clone_obj_with(zend_object *old_object, const
 		} ZEND_HASH_FOREACH_END();
 
 		EG(fake_scope) = old_scope;
+
+		/* Lock readonly properties once more. */
+		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
+			for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
+				zval* prop = OBJ_PROP_NUM(new_object, i);
+				Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
+			}
+		}
 	}
 
 	return new_object;
