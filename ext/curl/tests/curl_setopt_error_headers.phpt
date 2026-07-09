@@ -10,7 +10,7 @@ $ch = curl_init();
 $bad_headers = [
     "LF injection" => ["Hello: world\nFoo: bar"],
     "CR injection" => ["Hello: world\rFoo: bar"],
-    "CRLF injection" => ["Hello: world\r\nFoo: bar"]
+    "CRLF injection" => ["Hello: world\r\nFoo: bar"],
 ];
 
 foreach ($bad_headers as $type => $headers) {

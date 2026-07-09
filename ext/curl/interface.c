@@ -2075,6 +2075,13 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 				ZVAL_DEREF(current);
 				val = zval_get_tmp_string(current, &tmp_val);
 
+				if (zend_str_has_nul_byte(val)) {
+					curl_slist_free_all(slist);
+					zend_tmp_string_release(tmp_val);
+					zend_value_error("%s(): cURL option must not contain any null bytes", get_active_function_name());
+					return FAILURE;
+				}
+
 				switch (option) {
 					case CURLOPT_HTTPHEADER:
 					case CURLOPT_PROXYHEADER:
