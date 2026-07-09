@@ -767,7 +767,7 @@ static void format_default_value(smart_str *str, const zval *value) {
 }
 
 /* {{{ _parameter_string */
-static void _parameter_string(smart_str *str, const zend_function *fptr, const struct _zend_arg_info *arg_info, uint32_t offset, bool required, char* indent)
+static void _parameter_string(smart_str *str, const zend_function *fptr, const struct _zend_arg_info *arg_info, uint32_t offset, bool required)
 {
 	smart_str_append_printf(str, "Parameter #%d [ ", offset);
 	if (!required) {
@@ -829,7 +829,7 @@ static void _function_parameter_string(smart_str *str, const zend_function *fptr
 	smart_str_append_printf(str, "%s- Parameters [%d] {\n", indent, num_args);
 	for (i = 0; i < num_args; i++) {
 		smart_str_append_printf(str, "%s  ", indent);
-		_parameter_string(str, fptr, arg_info, i, i < num_required, indent);
+		_parameter_string(str, fptr, arg_info, i, i < num_required);
 		smart_str_appendc(str, '\n');
 		arg_info++;
 	}
@@ -2671,7 +2671,7 @@ ZEND_METHOD(ReflectionParameter, __toString)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(param);
-	_parameter_string(&str, param->fptr, param->arg_info, param->offset, param->required, "");
+	_parameter_string(&str, param->fptr, param->arg_info, param->offset, param->required);
 	RETURN_STR(smart_str_extract(&str));
 }
 
