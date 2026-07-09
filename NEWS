@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     an error). (Derick)
   . Fixed Unix timestamps in February of the year 0 are misparsed with
     @-notation. (LukasGelbmann)
+  . Fixed bug GH-11310 (__debugInfo does nothing on userland classes extending
+    Date classes). (Derick)
 
 - DBA:
   . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)

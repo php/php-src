@@ -1995,12 +1995,22 @@ static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_
 	php_date_obj *dateobj;
 
 	switch (purpose) {
-		case ZEND_PROP_PURPOSE_DEBUG:
 		case ZEND_PROP_PURPOSE_SERIALIZE:
 		case ZEND_PROP_PURPOSE_VAR_EXPORT:
 		case ZEND_PROP_PURPOSE_JSON:
 		case ZEND_PROP_PURPOSE_ARRAY_CAST:
 			break;
+		case ZEND_PROP_PURPOSE_DEBUG: {
+			if (object->ce->__debugInfo) {
+				int is_temp = 0;
+				HashTable *ht = zend_std_get_debug_info(object, &is_temp);
+				if (ht && !is_temp) {
+					GC_TRY_ADDREF(ht);
+				}
+				return ht;
+			}
+			break;
+		}
 		default:
 			return zend_std_get_properties_for(object, purpose);
 	}
@@ -2117,12 +2127,22 @@ static HashTable *date_object_get_properties_for_timezone(zend_object *object, z
 	php_timezone_obj *tzobj;
 
 	switch (purpose) {
-		case ZEND_PROP_PURPOSE_DEBUG:
 		case ZEND_PROP_PURPOSE_SERIALIZE:
 		case ZEND_PROP_PURPOSE_VAR_EXPORT:
 		case ZEND_PROP_PURPOSE_JSON:
 		case ZEND_PROP_PURPOSE_ARRAY_CAST:
 			break;
+		case ZEND_PROP_PURPOSE_DEBUG: {
+			if (object->ce->__debugInfo) {
+				int is_temp = 0;
+				HashTable *ht = zend_std_get_debug_info(object, &is_temp);
+				if (ht && !is_temp) {
+					GC_TRY_ADDREF(ht);
+				}
+				return ht;
+			}
+			break;
+		}
 		default:
 			return zend_std_get_properties_for(object, purpose);
 	}
