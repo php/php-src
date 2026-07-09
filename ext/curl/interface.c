@@ -2078,7 +2078,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 				if (zend_str_has_nul_byte(val)) {
 					curl_slist_free_all(slist);
 					zend_tmp_string_release(tmp_val);
-					zend_value_error("%s(): cURL option must not contain any null bytes", get_active_function_name());
+					zend_value_error("%s(): cURL option %s must not contain any null bytes", get_active_function_name(), name);
 					return FAILURE;
 				}
 
