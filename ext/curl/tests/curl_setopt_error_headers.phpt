@@ -26,10 +26,10 @@ $ch = null;
 ?>
 --EXPECT--
 Testing LF injection:
-curl_setopt(): The CURLOPT_HTTPHEADER option array cannot contain strings with newline characters
+curl_setopt(): Header entries for the CURLOPT_HTTPHEADER option may not contain more than a single header, new line detected
 
 Testing CR injection:
-curl_setopt(): The CURLOPT_HTTPHEADER option array cannot contain strings with newline characters
+curl_setopt(): Header entries for the CURLOPT_HTTPHEADER option may not contain more than a single header, new line detected
 
 Testing CRLF injection:
-curl_setopt(): The CURLOPT_HTTPHEADER option array cannot contain strings with newline characters
+curl_setopt(): Header entries for the CURLOPT_HTTPHEADER option may not contain more than a single header, new line detected

@@ -2075,12 +2075,16 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 				ZVAL_DEREF(current);
 				val = zval_get_tmp_string(current, &tmp_val);
 
-				if ((option == CURLOPT_HTTPHEADER || option == CURLOPT_PROXYHEADER) && strpbrk(ZSTR_VAL(val), "\r\n")) {
-					curl_slist_free_all(slist);
-					zend_tmp_string_release(tmp_val);
-					zend_value_error("%s(): The %s option array cannot contain strings with newline characters", get_active_function_name(), name);
-					return FAILURE;
-				 }
+				switch (option) {
+					case CURLOPT_HTTPHEADER:
+					case CURLOPT_PROXYHEADER:
+						if (strpbrk(ZSTR_VAL(val), "\r\n")) {
+							curl_slist_free_all(slist);
+							zend_tmp_string_release(tmp_val);
+							zend_value_error("%s(): Header entries for the %s option may not contain more than a single header, new line detected", get_active_function_name(), name);
+							return FAILURE;
+						}
+				}
 
 				struct curl_slist *new_slist = curl_slist_append(slist, ZSTR_VAL(val));
 				zend_tmp_string_release(tmp_val);
