@@ -1,4 +1,4 @@
-# PHP RFC: Native Markup Expressions (JSX-style syntax)
+# Native Markup Expressions (JSX-style syntax)
 
 ## Introduction
 
@@ -40,7 +40,7 @@ The two headline benefits over every existing option are **composition** (compon
 
 ### Why this is worth doing
 
-Generating HTML is not a niche PHP task - it is arguably *the* PHP task, and essentially every major framework has independently built the same answer to it: an escape-by-default, composable template engine. Their adoption is enormous - on Packagist, `laravel/framework` (Blade) has over **540 million** installs and `twig/twig` over **460 million**, before counting Latte, Smarty, Plates, or hand-rolled templates that never appear in a dependency graph. 
+Generating HTML is not a niche PHP task - it is arguably *the* PHP task, and essentially every major framework has independently built the same answer to it: an escape-by-default, composable template engine. Their adoption is enormous - on Packagist, `laravel/framework` (Blade) has over **540 million** installs and `twig/twig` over **460 million**, before counting Latte, Smarty, Plates, or hand-rolled templates that never appear in a dependency graph.
 
 That every engine converged on the same two features is strong evidence the need is real and the language does not meet it: developers reach for a third-party compiler, a separate dialect, and a build step to obtain what the runtime could provide natively. And escape-by-default is no mere convenience - cross-site scripting has sat in the OWASP Top 10 for its entire existence, and automatic HTML escaping is one of the disciplines that prevents it.
 
@@ -222,7 +222,7 @@ The value is classified **at runtime by exactly the compile-time rule**: a strin
 
 Closing follows the form:
 - A variable tag closes by repeating the same variable such as `<$a>...</$a>`
-    - `<$a>...</$b>` is a compile error, exactly as `<div>...</span>` is 
+    - `<$a>...</$b>` is a compile error, exactly as `<div>...</span>` is
 - An expression tag with a brace closes **anonymously** with `</>`
     - A closing tag cannot restate the expression - re-evaluating it would run its side effects twice, and matching it textually is meaningless for a computed value; the expression is evaluated exactly once.
 - A self-closing `<$tag/>` / `<{expr}/>` needs no closer at all.
@@ -528,7 +528,7 @@ class Clock extends Component
 }
 ```
 
-## Parsing the `<` ambiguity
+## Backward Incompatible Changes
 
 `<` is heavily overloaded in PHP (`<`, `<=`, `<=>`, `<<`, `<>`, `<<<`), so this was the main design risk. It is resolved by the same technique JavaScript uses to tell regex from division: the scanner tracks whether it is in **operand position** (a value is expected) or **operator position** (a value just ended). Markup begins only when `<` is in operand position *and* is immediately followed by `[A-Za-z>]`, by `\` then a letter (a fully-qualified component tag such as `<\App\Card/>`), by `$` then a variable name, or by `{` (the dynamic tags `<$tag>` / `<{expr}>`):
 
@@ -536,15 +536,11 @@ class Clock extends Component
 * In `$a < \Foo::BAR`, `<` is in operator position → comparison, unchanged.
 * In `return <div>`, `<` is in operand position followed by a letter → markup.
 
-Because `<` followed by a letter, `$`, `{`, or `>` in operand position is *always a syntax error* in PHP today, reclaiming it does not change the meaning of any valid program. Every operand-ending context (`static`, `exit`, bare `yield`, postfix `++`/`--`, `::class`, closing `)`/`]`/`}`, heredoc terminators, string closers) is explicitly kept as a comparison, which compare the received value today and still do.
+Because `<` followed by a letter, `$`, `{`, or `>` in operand position is *always a syntax error* in PHP today, reclaiming it does not change the meaning of any valid program. Every operand-ending context is explicitly kept as a comparison, which compare the received value today and still do. `<>` is the legacy alias of `!=` and is preserved in infix position (`$a <> $b` is still not-equal). `<>` is only reinterpreted as a fragment opener in **operand position**, where it is currently a syntax error - so no valid program needs changes.
 
-This is **implemented and verified**: the full Zend and PHP language test suites pass with **zero regressions** (6000+ tests), and `token_get_all()` continues to tokenize ordinary code identically (the operand/operator tracking is one extra store per token, with no measurable overhead).
+This leaves just one backwards compatibility concern:
 
-## Backward Incompatible Changes
-
-1. **`<>` operator** - `<>` is the legacy alias of `!=`. It is **preserved in infix position** (`$a <> $b` is still not-equal). `<>` is only reinterpreted as a fragment opener in **operand position**, where it is currently a syntax error - so no valid program needs changes.
-2. **`<` in operand position followed by a letter** (or by `\`+letter for a fully-qualified component tag, or by `$`+name / `{` for a dynamic tag) - currently a syntax error in such positions; reclaimed for markup, so no valid program needs changes.
-3. **New `Html\` namespace** - introduces `Html\Htmlable`, `Html\Element`, `Html\Fragment`, `Html\Raw`, `Html\Slot`, `Html\raw()`, `Html\escape()`. Top-level `Html\` follows the established precedent for bundled extensions (`Random\`, `Dom\`, `Uri\`), and real-world top-level `Html\` packages are rare. No existing keywords are reserved and no new global reserved words are introduced (the syntax uses bare `<` and a `slot:` form valid only inside markup).
+1. **New `Html\` namespace** - introduces `Html\Htmlable`, `Html\Element`, `Html\Fragment`, `Html\Raw`, `Html\Slot`, `Html\raw()`, `Html\escape()`. Top-level `Html\` follows the established precedent for bundled extensions (`Random\`, `Dom\`, `Uri\`), and real-world top-level `Html\` packages are rare. No existing keywords are reserved and no new global reserved words are introduced (the syntax uses bare `<` and a `slot:` form valid only inside markup).
 
 ### Impact on tooling
 
