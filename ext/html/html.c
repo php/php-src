@@ -1395,21 +1395,6 @@ static void html_render_component_impl(
 	zend_string *component, HashTable *props, zend_object *slot_obj,
 	zval *return_value)
 {
-	/* Props must be string-keyed, whichever dispatch path runs below. (On the
-	 * borrowed fast path, an integer key would silently become a positional
-	 * argument in zend_call_known_function.) */
-	if (props != NULL && zend_hash_num_elements(props) > 0) {
-		zend_string *key;
-		zval *val;
-		ZEND_HASH_FOREACH_STR_KEY_VAL(props, key, val) {
-			(void) val;
-			if (key == NULL) {
-				zend_throw_error(NULL, "Component props must use string keys");
-				RETURN_THROWS();
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-
 	/* Resolve the component to a dispatch target (RFC §4). This is the second
 	 * stage of a two-stage resolution: the compiler already resolved the *name*
 	 * against use/namespace (see zend_ast_create_markup_component in
@@ -1452,11 +1437,23 @@ static void html_render_component_impl(
 
 	/* Fast path: with no slot content to route and no #[Html\Slot] parameters to
 	 * inspect, the named-argument array is exactly $props - pass it through
-	 * directly (borrowed) instead of allocating and copying a new HashTable. */
+	 * directly (borrowed) instead of allocating and copying a new HashTable.
+	 * Each path validates prop keys exactly once: here on the borrowed table
+	 * (an integer key would silently become a positional argument in
+	 * zend_call_known_function), or in html_route_component_args as it copies. */
 	HashTable *args;
 	bool owns_args;
 	if (slot_ptr == NULL
 			&& (fn == NULL || fn->common.attributes == NULL)) {
+		if (props != NULL) {
+			zend_string *key;
+			ZEND_HASH_FOREACH_STR_KEY(props, key) {
+				if (key == NULL) {
+					zend_throw_error(NULL, "Component props must use string keys");
+					RETURN_THROWS();
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
 		args = props; /* may be NULL when no attributes were given */
 		owns_args = false;
 	} else {
