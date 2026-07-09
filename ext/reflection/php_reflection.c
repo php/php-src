@@ -2875,7 +2875,7 @@ ZEND_METHOD(ReflectionParameter, allowsNull)
 }
 /* }}} */
 
-/* {{{ Returns whether this parameters is passed to by reference */
+/* {{{ Returns whether this parameter is passed to by reference */
 ZEND_METHOD(ReflectionParameter, isPassedByReference)
 {
 	reflection_object *intern;
