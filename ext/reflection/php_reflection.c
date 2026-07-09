@@ -199,10 +199,9 @@ static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 		memcpy(copy_fptr, fptr, sizeof(zend_function));
 		copy_fptr->common.function_name = zend_string_copy(fptr->common.function_name);
 		return copy_fptr;
-	} else {
-		/* no copy needed */
-		return fptr;
 	}
+	/* no copy needed */
+	return fptr;
 }
 /* }}} */
 
@@ -962,11 +961,11 @@ static zval *property_get_default(const zend_property_info *prop_info) {
 		zval *prop = &ce->default_static_members_table[prop_info->offset];
 		ZVAL_DEINDIRECT(prop);
 		return prop;
-	} else if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-		return NULL;
-	} else {
-		return &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 	}
+	if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+		return NULL;
+	}
+	return &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 }
 
 /* {{{ _property_string */
@@ -1072,44 +1071,45 @@ static void _property_string(smart_str *str, const zend_property_info *prop, con
 
 static void _extension_ini_string(const zend_ini_entry *ini_entry, smart_str *str, int number) /* {{{ */
 {
-	if (number == ini_entry->module_number) {
-		smart_str_append_printf(str, "    Entry [ %s <", ZSTR_VAL(ini_entry->name));
-		if (ini_entry->modifiable == ZEND_INI_ALL) {
-			smart_str_appends(str, "ALL");
-		} else {
-			char *comma = "";
-			if (ini_entry->modifiable & ZEND_INI_USER) {
-				smart_str_appends(str, "USER");
-				comma = ",";
-			}
-			if (ini_entry->modifiable & ZEND_INI_PERDIR) {
-				smart_str_append_printf(str, "%sPERDIR", comma);
-				comma = ",";
-			}
-			if (ini_entry->modifiable & ZEND_INI_SYSTEM) {
-				smart_str_append_printf(str, "%sSYSTEM", comma);
-			}
+	if (number != ini_entry->module_number) {
+		return;
+	}
+	smart_str_append_printf(str, "    Entry [ %s <", ZSTR_VAL(ini_entry->name));
+	if (ini_entry->modifiable == ZEND_INI_ALL) {
+		smart_str_appends(str, "ALL");
+	} else {
+		char *comma = "";
+		if (ini_entry->modifiable & ZEND_INI_USER) {
+			smart_str_appends(str, "USER");
+			comma = ",";
 		}
+		if (ini_entry->modifiable & ZEND_INI_PERDIR) {
+			smart_str_append_printf(str, "%sPERDIR", comma);
+			comma = ",";
+		}
+		if (ini_entry->modifiable & ZEND_INI_SYSTEM) {
+			smart_str_append_printf(str, "%sSYSTEM", comma);
+		}
+	}
 
-		smart_str_appends(str, "> ]\n");
-		if (ini_entry->value) {
-			smart_str_appends(str, "      Current = '");
-			smart_str_append(str, ini_entry->value);
+	smart_str_appends(str, "> ]\n");
+	if (ini_entry->value) {
+		smart_str_appends(str, "      Current = '");
+		smart_str_append(str, ini_entry->value);
+		smart_str_appends(str, "'\n");
+	} else {
+		smart_str_appends(str, "      Current = ''\n");
+	}
+	if (ini_entry->modified) {
+		if (ini_entry->orig_value) {
+			smart_str_appends(str, "      Default = '");
+			smart_str_append(str, ini_entry->orig_value);
 			smart_str_appends(str, "'\n");
 		} else {
-			smart_str_appends(str, "      Current = ''\n");
+			smart_str_appends(str, "      Default = ''\n");
 		}
-		if (ini_entry->modified) {
-			if (ini_entry->orig_value) {
-				smart_str_appends(str, "      Default = '");
-				smart_str_append(str, ini_entry->orig_value);
-				smart_str_appends(str, "'\n");
-			} else {
-				smart_str_appends(str, "      Default = ''\n");
-			}
-		}
-		smart_str_appends(str, "    }\n");
 	}
+	smart_str_appends(str, "    }\n");
 }
 /* }}} */
 
@@ -1608,15 +1608,14 @@ static zend_result get_parameter_default(zval *result, const parameter_reference
 			return FAILURE;
 		}
 		return zend_get_default_from_internal_arg_info(result, param->arg_info);
-	} else {
-		zval *default_value = get_default_from_recv((const zend_op_array *) param->fptr, param->offset);
-		if (!default_value) {
-			return FAILURE;
-		}
-
-		ZVAL_COPY(result, default_value);
-		return SUCCESS;
 	}
+	zval *default_value = get_default_from_recv((const zend_op_array *) param->fptr, param->offset);
+	if (!default_value) {
+		return FAILURE;
+	}
+
+	ZVAL_COPY(result, default_value);
+	return SUCCESS;
 }
 
 /* {{{ Preventing __clone from being called */
@@ -3320,26 +3319,25 @@ ZEND_METHOD(ReflectionMethod, getClosure)
 
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC)  {
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, mptr->common.scope, NULL);
-	} else {
-		if (!obj) {
-			zend_argument_value_error(1, "cannot be null for non-static methods");
-			RETURN_THROWS();
-		}
-
-		if (!instanceof_function(Z_OBJCE_P(obj), mptr->common.scope)) {
-			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this method was declared in", 0);
-			RETURN_THROWS();
-		}
-
-		/* This is an original closure object and __invoke is to be called. */
-		if (Z_OBJCE_P(obj) == zend_ce_closure &&
-			(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
-		{
-			RETURN_OBJ_COPY(Z_OBJ_P(obj));
-		} else {
-			zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_OBJCE_P(obj), obj);
-		}
+		return;
 	}
+	if (!obj) {
+		zend_argument_value_error(1, "cannot be null for non-static methods");
+		RETURN_THROWS();
+	}
+
+	if (!instanceof_function(Z_OBJCE_P(obj), mptr->common.scope)) {
+		zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this method was declared in", 0);
+		RETURN_THROWS();
+	}
+
+	/* This is an original closure object and __invoke is to be called. */
+	if (Z_OBJCE_P(obj) == zend_ce_closure &&
+		(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
+	{
+		RETURN_OBJ_COPY(Z_OBJ_P(obj));
+	}
+	zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_OBJCE_P(obj), obj);
 }
 /* }}} */
 
@@ -4494,25 +4492,26 @@ ZEND_METHOD(ReflectionClass, getMethods)
 	} ZEND_HASH_FOREACH_END();
 
 	// No need for instanceof_function, the Closure class is final
-	if (ce == zend_ce_closure) {
-		bool has_obj = Z_TYPE(intern->obj) != IS_UNDEF;
-		zval obj_tmp;
-		zend_object *obj;
-		if (!has_obj) {
-			object_init_ex(&obj_tmp, ce);
-			obj = Z_OBJ(obj_tmp);
-		} else {
-			obj = Z_OBJ(intern->obj);
-		}
-		zend_function *closure = zend_get_closure_invoke_method(obj);
-		if (closure
-			&& !_addmethod(closure, ce, Z_ARRVAL_P(return_value), filter)
-		) {
-			_free_function(closure);
-		}
-		if (!has_obj) {
-			zval_ptr_dtor(&obj_tmp);
-		}
+	if (ce != zend_ce_closure) {
+		return;
+	}
+	bool has_obj = Z_TYPE(intern->obj) != IS_UNDEF;
+	zval obj_tmp;
+	zend_object *obj;
+	if (!has_obj) {
+		object_init_ex(&obj_tmp, ce);
+		obj = Z_OBJ(obj_tmp);
+	} else {
+		obj = Z_OBJ(intern->obj);
+	}
+	zend_function *closure = zend_get_closure_invoke_method(obj);
+	if (closure
+		&& !_addmethod(closure, ce, Z_ARRVAL_P(return_value), filter)
+	) {
+		_free_function(closure);
+	}
+	if (!has_obj) {
+		zval_ptr_dtor(&obj_tmp);
 	}
 }
 /* }}} */
@@ -5347,41 +5346,38 @@ ZEND_METHOD(ReflectionClass, getTraitAliases)
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-
-	if (ce->trait_aliases) {
-		uint32_t i = 0;
-
-		array_init(return_value);
-		while (ce->trait_aliases[i]) {
-			zend_trait_method_reference *cur_ref = &ce->trait_aliases[i]->trait_method;
-
-			if (ce->trait_aliases[i]->alias) {
-				zend_string *class_name = cur_ref->class_name;
-
-				if (!class_name) {
-					zend_string *lcname = zend_string_tolower(cur_ref->method_name);
-
-					for (uint32_t j = 0; j < ce->num_traits; j++) {
-						zend_class_entry *trait =
-							zend_hash_find_ptr(CG(class_table), ce->trait_names[j].lc_name);
-						ZEND_ASSERT(trait && "Trait must exist");
-						if (zend_hash_exists(&trait->function_table, lcname)) {
-							class_name = trait->name;
-							break;
-						}
-					}
-					zend_string_release_ex(lcname, false);
-					ZEND_ASSERT(class_name != NULL);
-				}
-
-				zend_string *mname = zend_string_alloc(ZSTR_LEN(class_name) + ZSTR_LEN(cur_ref->method_name) + 2, false);
-				snprintf(ZSTR_VAL(mname), ZSTR_LEN(mname) + 1, "%s::%s", ZSTR_VAL(class_name), ZSTR_VAL(cur_ref->method_name));
-				add_assoc_str_ex(return_value, ZSTR_VAL(ce->trait_aliases[i]->alias), ZSTR_LEN(ce->trait_aliases[i]->alias), mname);
-			}
-			i++;
-		}
-	} else {
+	if (!ce->trait_aliases) {
 		RETURN_EMPTY_ARRAY();
+	}
+
+	array_init(return_value);
+	for (uint32_t i = 0; ce->trait_aliases[i]; i++) {
+		zend_trait_method_reference *cur_ref = &ce->trait_aliases[i]->trait_method;
+
+		if (!ce->trait_aliases[i]->alias) {
+			continue;
+		}
+		zend_string *class_name = cur_ref->class_name;
+
+		if (!class_name) {
+			zend_string *lcname = zend_string_tolower(cur_ref->method_name);
+
+			for (uint32_t j = 0; j < ce->num_traits; j++) {
+				zend_class_entry *trait =
+					zend_hash_find_ptr(CG(class_table), ce->trait_names[j].lc_name);
+				ZEND_ASSERT(trait && "Trait must exist");
+				if (zend_hash_exists(&trait->function_table, lcname)) {
+					class_name = trait->name;
+					break;
+				}
+			}
+			zend_string_release_ex(lcname, false);
+			ZEND_ASSERT(class_name != NULL);
+		}
+
+		zend_string *mname = zend_string_alloc(ZSTR_LEN(class_name) + ZSTR_LEN(cur_ref->method_name) + 2, false);
+		snprintf(ZSTR_VAL(mname), ZSTR_LEN(mname) + 1, "%s::%s", ZSTR_VAL(class_name), ZSTR_VAL(cur_ref->method_name));
+		add_assoc_str_ex(return_value, ZSTR_VAL(ce->trait_aliases[i]->alias), ZSTR_LEN(ce->trait_aliases[i]->alias), mname);
 	}
 }
 /* }}} */
@@ -5823,44 +5819,44 @@ ZEND_METHOD(ReflectionProperty, getValue)
 		if (member_p) {
 			RETURN_COPY_DEREF(member_p);
 		}
+		return;
+	}
+	if (!object) {
+		zend_argument_type_error(1, "must be provided for instance properties");
+		RETURN_THROWS();
+	}
+
+	/* TODO: Should this always use intern->ce? */
+	if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
+		zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
+		RETURN_THROWS();
+	}
+
+	if (ref->cache_slot[0] == Z_OBJCE_P(object)) {
+		uintptr_t prop_offset = (uintptr_t) ref->cache_slot[1];
+
+		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+			zval *retval = OBJ_PROP(Z_OBJ_P(object), prop_offset);
+			if (EXPECTED(!Z_ISUNDEF_P(retval))) {
+				RETURN_COPY_DEREF(retval);
+			}
+		}
+	}
+
+	zval rv;
+	const zend_class_entry *old_scope = EG(fake_scope);
+	EG(fake_scope) = intern->ce;
+	zval *member_p = Z_OBJ_P(object)->handlers->read_property(Z_OBJ_P(object),
+			ref->unmangled_name, BP_VAR_R, ref->cache_slot, &rv);
+	EG(fake_scope) = old_scope;
+
+	if (member_p != &rv) {
+		RETURN_COPY_DEREF(member_p);
 	} else {
-		if (!object) {
-			zend_argument_type_error(1, "must be provided for instance properties");
-			RETURN_THROWS();
+		if (Z_ISREF_P(member_p)) {
+			zend_unwrap_reference(member_p);
 		}
-
-		/* TODO: Should this always use intern->ce? */
-		if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
-			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
-			RETURN_THROWS();
-		}
-
-		if (ref->cache_slot[0] == Z_OBJCE_P(object)) {
-			uintptr_t prop_offset = (uintptr_t) ref->cache_slot[1];
-
-			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
-				zval *retval = OBJ_PROP(Z_OBJ_P(object), prop_offset);
-				if (EXPECTED(!Z_ISUNDEF_P(retval))) {
-					RETURN_COPY_DEREF(retval);
-				}
-			}
-		}
-
-		zval rv;
-		const zend_class_entry *old_scope = EG(fake_scope);
-		EG(fake_scope) = intern->ce;
-		zval *member_p = Z_OBJ_P(object)->handlers->read_property(Z_OBJ_P(object),
-				ref->unmangled_name, BP_VAR_R, ref->cache_slot, &rv);
-		EG(fake_scope) = old_scope;
-
-		if (member_p != &rv) {
-			RETURN_COPY_DEREF(member_p);
-		} else {
-			if (Z_ISREF_P(member_p)) {
-				zend_unwrap_reference(member_p);
-			}
-			RETURN_COPY_VALUE(member_p);
-		}
+		RETURN_COPY_VALUE(member_p);
 	}
 }
 /* }}} */
@@ -6233,35 +6229,34 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 			RETURN_BOOL(!Z_ISUNDEF_P(member_p));
 		}
 		RETURN_FALSE;
-	} else {
-		if (!object) {
-			zend_argument_type_error(1, "must be provided for instance properties");
-			RETURN_THROWS();
-		}
-
-		/* TODO: Should this always use intern->ce? */
-		if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
-			zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
-			RETURN_THROWS();
-		}
-
-		if (ref->cache_slot[0] == Z_OBJCE_P(object)) {
-			uintptr_t prop_offset = (uintptr_t) ref->cache_slot[1];
-
-			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
-				zval *value = OBJ_PROP(Z_OBJ_P(object), prop_offset);
-				RETURN_BOOL(!Z_ISUNDEF_P(value));
-			}
-		}
-
-		const zend_class_entry *old_scope = EG(fake_scope);
-		EG(fake_scope) = intern->ce;
-		int retval = Z_OBJ_HT_P(object)->has_property(Z_OBJ_P(object),
-				ref->unmangled_name, ZEND_PROPERTY_EXISTS, ref->cache_slot);
-		EG(fake_scope) = old_scope;
-
-		RETVAL_BOOL(retval);
 	}
+	if (!object) {
+		zend_argument_type_error(1, "must be provided for instance properties");
+		RETURN_THROWS();
+	}
+
+	/* TODO: Should this always use intern->ce? */
+	if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
+		zend_throw_exception(reflection_exception_ptr, "Given object is not an instance of the class this property was declared in", 0);
+		RETURN_THROWS();
+	}
+
+	if (ref->cache_slot[0] == Z_OBJCE_P(object)) {
+		uintptr_t prop_offset = (uintptr_t) ref->cache_slot[1];
+
+		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+			zval *value = OBJ_PROP(Z_OBJ_P(object), prop_offset);
+			RETURN_BOOL(!Z_ISUNDEF_P(value));
+		}
+	}
+
+	const zend_class_entry *old_scope = EG(fake_scope);
+	EG(fake_scope) = intern->ce;
+	int retval = Z_OBJ_HT_P(object)->has_property(Z_OBJ_P(object),
+			ref->unmangled_name, ZEND_PROPERTY_EXISTS, ref->cache_slot);
+	EG(fake_scope) = old_scope;
+
+	RETVAL_BOOL(retval);
 }
 /* }}} */
 
