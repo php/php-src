@@ -1,7 +1,8 @@
 /* This is a generated file — edit Zend/zend_markup_entities_gen.php instead.
- * Source data: https://html.spec.whatwg.org/entities.json (a frozen list; the
- * HTML standard guarantees no named character reference will ever be added).
- * Semicolon-terminated forms only; sorted by name in byte order for bsearch. */
+ * Source data: ext/standard/html_tables/ents_html5.txt (the WHATWG HTML5
+ * named-reference table, frozen by the HTML standard; also feeds
+ * html_entity_decode()). Canonical semicolon-terminated forms only; sorted
+ * by name in byte order for bsearch. */
 
 #ifndef ZEND_MARKUP_ENTITIES_H
 #define ZEND_MARKUP_ENTITIES_H
