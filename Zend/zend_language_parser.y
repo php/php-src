@@ -1268,19 +1268,19 @@ new_non_dereferenceable:
 
 markup_element:
 		T_MARKUP_OPEN T_MARKUP_NAME markup_attributes T_MARKUP_TAG_END markup_children T_MARKUP_CLOSE_OPEN T_MARKUP_NAME T_MARKUP_TAG_END
-			{ $$ = zend_ast_create_markup_checked($2, $3, $5, $7); if (!$$) { YYERROR; } }
+			{ $$ = zend_ast_create_markup_checked($2, $3, $5, $7, false); if (!$$) { YYERROR; } }
 	|	T_MARKUP_OPEN T_MARKUP_NAME markup_attributes T_MARKUP_SELF_CLOSE
-			{ $$ = zend_ast_create_markup_element($2, $3, zend_ast_create_list(0, ZEND_AST_ARRAY)); if (!$$) { YYERROR; } }
+			{ $$ = zend_ast_create_markup_element($2, $3, NULL); if (!$$) { YYERROR; } }
 	|	T_MARKUP_OPEN T_MARKUP_TAG_END markup_children T_MARKUP_CLOSE_OPEN T_MARKUP_TAG_END
 			{ $$ = zend_ast_create_markup_element(NULL, NULL, $3); if (!$$) { YYERROR; } }
 	|	T_MARKUP_OPEN T_VARIABLE markup_attributes T_MARKUP_TAG_END markup_children T_MARKUP_CLOSE_OPEN T_VARIABLE T_MARKUP_TAG_END
-			{ $$ = zend_ast_create_markup_dynamic_checked($2, $3, $5, $7); if (!$$) { YYERROR; } }
+			{ $$ = zend_ast_create_markup_checked($2, $3, $5, $7, true); if (!$$) { YYERROR; } }
 	|	T_MARKUP_OPEN T_VARIABLE markup_attributes T_MARKUP_SELF_CLOSE
-			{ $$ = zend_ast_create_markup_dynamic($2, $3, zend_ast_create_list(0, ZEND_AST_ARRAY)); }
+			{ $$ = zend_ast_create_markup_dynamic($2, $3, NULL); }
 	|	T_MARKUP_OPEN T_MARKUP_INTERP_START expr '}' markup_attributes T_MARKUP_TAG_END markup_children T_MARKUP_CLOSE_OPEN T_MARKUP_TAG_END
 			{ $$ = zend_ast_create_markup_dynamic_expr($3, $5, $7); }
 	|	T_MARKUP_OPEN T_MARKUP_INTERP_START expr '}' markup_attributes T_MARKUP_SELF_CLOSE
-			{ $$ = zend_ast_create_markup_dynamic_expr($3, $5, zend_ast_create_list(0, ZEND_AST_ARRAY)); }
+			{ $$ = zend_ast_create_markup_dynamic_expr($3, $5, NULL); }
 ;
 
 markup_attributes:

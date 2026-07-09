@@ -449,6 +449,12 @@ zend_ast *zend_ast_create_markup_element(zend_ast *name, zend_ast *attrs, zend_a
 {
 	zend_ast *class_name, *args, *result;
 
+	/* NULL children (a self-closed tag) means an empty list. A fragment always
+	 * has a children list (the grammar builds one as content begins). */
+	if (children == NULL) {
+		children = zend_ast_create_list(0, ZEND_AST_ARRAY);
+	}
+
 	/* The grammar reduces a markup element only once its closing tag has been
 	 * scanned, so nodes created here would inherit the *close* line. Stamp the
 	 * lowered expression with the line the element opens on instead, so errors
@@ -493,9 +499,11 @@ zend_ast *zend_ast_create_markup_element(zend_ast *name, zend_ast *attrs, zend_a
 	return result;
 }
 
-/* Build a markup element after checking the closing tag matches the opener
- * (RFC §7). Both NULL means a `<>…</>` fragment. `close` is consumed. */
-zend_ast *zend_ast_create_markup_checked(zend_ast *open, zend_ast *attrs, zend_ast *children, zend_ast *close)
+/* Build a markup element (or, with `dynamic`, a dynamic tag) after checking
+ * the closing tag matches the opener (RFC §7): `<div>…</span>` and
+ * `<$a>…</$b>` are compile errors alike. Both `open` and `close` NULL means a
+ * `<>…</>` fragment. `close` is consumed. */
+zend_ast *zend_ast_create_markup_checked(zend_ast *open, zend_ast *attrs, zend_ast *children, zend_ast *close, bool dynamic)
 {
 	bool match;
 	if (open == NULL || close == NULL) {
@@ -504,41 +512,34 @@ zend_ast *zend_ast_create_markup_checked(zend_ast *open, zend_ast *attrs, zend_a
 		match = zend_string_equals(Z_STR_P(zend_ast_get_zval(open)), Z_STR_P(zend_ast_get_zval(close)));
 	}
 	if (!match) {
+		const char *sigil = dynamic ? "$" : "";
 		zend_throw_exception_ex(zend_ce_compile_error, 0,
-			"Mismatched markup closing tag: expected </%s>, found </%s>",
-			open ? Z_STRVAL_P(zend_ast_get_zval(open)) : "",
-			close ? Z_STRVAL_P(zend_ast_get_zval(close)) : "");
-		goto fail;
+			"Mismatched markup closing tag: expected </%s%s>, found </%s%s>",
+			sigil, open ? Z_STRVAL_P(zend_ast_get_zval(open)) : "",
+			sigil, close ? Z_STRVAL_P(zend_ast_get_zval(close)) : "");
+		if (open != NULL) {
+			zend_ast_destroy(open);
+		}
+		if (attrs != NULL) {
+			zend_ast_destroy(attrs);
+		}
+		if (children != NULL) {
+			zend_ast_destroy(children);
+		}
+		if (close != NULL) {
+			zend_ast_destroy(close);
+		}
+		return NULL;
 	}
 	if (close != NULL) {
 		zend_ast_destroy(close);
-		close = NULL;
 	}
 
-	return zend_ast_create_markup_element(open, attrs, children);
-
-fail:
-	if (open != NULL) {
-		zend_ast_destroy(open);
-	}
-	if (attrs != NULL) {
-		zend_ast_destroy(attrs);
-	}
-	zend_ast_destroy(children);
-	if (close != NULL) {
-		zend_ast_destroy(close);
-	}
-	return NULL;
+	return dynamic
+		? zend_ast_create_markup_dynamic(open, attrs, children)
+		: zend_ast_create_markup_element(open, attrs, children);
 }
 
-/* Lower a dynamic tag `<$tag …>…</$tag>` (RFC §4) into a call to
- * \Html\render_dynamic($tag, attributes, children). The variable's runtime
- * value decides what a static tag name decides at compile time, by the same
- * classification rule (zend_markup_name_is_component): a component name
- * dispatches through render_component's machinery (children become the slot
- * Fragment, hooks and decorators included), anything else constructs a literal
- * \Html\Element. Only classification moves to runtime. `name` is the T_VARIABLE
- * zval AST (the name without the "$"). */
 /* Build the \Html\render_dynamic(tag_expr, attributes, children) call both
  * dynamic-tag forms lower into. `tag_expr` is an already-built expression AST
  * producing the tag name; `lineno` is the opening-tag line (see
@@ -567,6 +568,11 @@ static zend_ast *zend_markup_dynamic_call(zend_ast *tag_expr, zend_ast *attrs, z
 	return result;
 }
 
+/* Lower a dynamic tag `<$tag …>…</$tag>` (RFC §4) into a call to
+ * \Html\render_dynamic($tag, attributes, children). The variable's runtime
+ * value decides what a static tag name decides at compile time, by the same
+ * classification rule (zend_markup_name_is_component); only classification
+ * moves to runtime. `name` is the T_VARIABLE zval AST (without the "$"). */
 zend_ast *zend_ast_create_markup_dynamic(zend_ast *name, zend_ast *attrs, zend_ast *children)
 {
 	uint32_t lineno = zend_ast_get_lineno(name);
@@ -587,24 +593,3 @@ zend_ast *zend_ast_create_markup_dynamic_expr(zend_ast *expr, zend_ast *attrs, z
 	return zend_markup_dynamic_call(expr, attrs, children, zend_ast_get_lineno(expr));
 }
 
-/* Build a dynamic tag after checking the closing variable matches the opener:
- * `<$a>…</$b>` is a compile error, exactly as `<div>…</span>` is. `close` is
- * consumed. */
-zend_ast *zend_ast_create_markup_dynamic_checked(zend_ast *open, zend_ast *attrs, zend_ast *children, zend_ast *close)
-{
-	if (!zend_string_equals(Z_STR_P(zend_ast_get_zval(open)), Z_STR_P(zend_ast_get_zval(close)))) {
-		zend_throw_exception_ex(zend_ce_compile_error, 0,
-			"Mismatched markup closing tag: expected </$%s>, found </$%s>",
-			Z_STRVAL_P(zend_ast_get_zval(open)), Z_STRVAL_P(zend_ast_get_zval(close)));
-		zend_ast_destroy(open);
-		if (attrs != NULL) {
-			zend_ast_destroy(attrs);
-		}
-		zend_ast_destroy(children);
-		zend_ast_destroy(close);
-		return NULL;
-	}
-	zend_ast_destroy(close);
-
-	return zend_ast_create_markup_dynamic(open, attrs, children);
-}

@@ -58,9 +58,8 @@ zend_string *zend_markup_decode_entities(zend_string *str);
  * (e.g. a mismatched closing tag); the grammar action then YYERRORs. */
 zend_ast *zend_ast_create_markup_raw(zend_ast *str);
 zend_ast *zend_ast_create_markup_element(zend_ast *name, zend_ast *attrs, zend_ast *children);
-zend_ast *zend_ast_create_markup_checked(zend_ast *open, zend_ast *attrs, zend_ast *children, zend_ast *close);
+zend_ast *zend_ast_create_markup_checked(zend_ast *open, zend_ast *attrs, zend_ast *children, zend_ast *close, bool dynamic);
 zend_ast *zend_ast_create_markup_dynamic(zend_ast *name, zend_ast *attrs, zend_ast *children);
-zend_ast *zend_ast_create_markup_dynamic_checked(zend_ast *open, zend_ast *attrs, zend_ast *children, zend_ast *close);
 zend_ast *zend_ast_create_markup_dynamic_expr(zend_ast *expr, zend_ast *attrs, zend_ast *children);
 
 END_EXTERN_C()
