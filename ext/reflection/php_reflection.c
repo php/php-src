@@ -992,96 +992,98 @@ static zval *property_get_default(const zend_property_info *prop_info) {
 /* {{{ _property_string */
 static void _property_string(smart_str *str, const zend_property_info *prop, const zend_string *prop_name, const char* indent)
 {
-	if (prop && prop->doc_comment) {
+	if (!prop) {
+		// Dynamic property, known to have no doc comment, flags, etc.
+		ZEND_ASSERT(prop_name && "Properties without info must have a name provided");
+		smart_str_append_printf(str, "%sProperty [ <dynamic> public $", indent);
+		smart_str_append(str, prop_name);
+		smart_str_appends(str, " ]\n");
+		return;
+	}
+	if (prop->doc_comment) {
 		smart_str_appends(str, indent);
 		smart_str_append(str, prop->doc_comment);
 		smart_str_appendc(str, '\n');
 	}
 	smart_str_append_printf(str, "%sProperty [ ", indent);
-	if (!prop) {
-		ZEND_ASSERT(prop_name && "Properties without info must have a name provided");
-		smart_str_appends(str, "<dynamic> public $");
-		smart_str_append(str, prop_name);
+	if (prop->flags & ZEND_ACC_ABSTRACT) {
+		smart_str_appends(str, "abstract ");
+	}
+	if (prop->flags & ZEND_ACC_FINAL) {
+		smart_str_appends(str, "final ");
+	}
+	/* These are mutually exclusive */
+	switch (prop->flags & ZEND_ACC_PPP_MASK) {
+		case ZEND_ACC_PUBLIC:
+			smart_str_appends(str, "public ");
+			break;
+		case ZEND_ACC_PRIVATE:
+			smart_str_appends(str, "private ");
+			break;
+		case ZEND_ACC_PROTECTED:
+			smart_str_appends(str, "protected ");
+			break;
+	}
+	switch (prop->flags & ZEND_ACC_PPP_SET_MASK) {
+		case ZEND_ACC_PRIVATE_SET:
+			smart_str_appends(str, "private(set) ");
+			break;
+		case ZEND_ACC_PROTECTED_SET:
+			smart_str_appends(str, "protected(set) ");
+			break;
+		case ZEND_ACC_PUBLIC_SET:
+			ZEND_UNREACHABLE();
+			break;
+	}
+	if (prop->flags & ZEND_ACC_STATIC) {
+		smart_str_appends(str, "static ");
+	}
+	if (prop->flags & ZEND_ACC_READONLY) {
+		smart_str_appends(str, "readonly ");
+	}
+	if (prop->flags & ZEND_ACC_VIRTUAL) {
+		smart_str_appends(str, "virtual ");
+	}
+	if (ZEND_TYPE_IS_SET(prop->type)) {
+		zend_string *type_str = zend_type_to_string(prop->type);
+		smart_str_append(str, type_str);
+		smart_str_appendc(str, ' ');
+		zend_string_release(type_str);
+	}
+	smart_str_appendc(str, '$');
+	if (!prop_name) {
+		const char *class_name;
+		const char *prop_name_cstr;
+		zend_unmangle_property_name(prop->name, &class_name, &prop_name_cstr);
+		smart_str_appends(str, prop_name_cstr);
 	} else {
-		if (prop->flags & ZEND_ACC_ABSTRACT) {
-			smart_str_appends(str, "abstract ");
-		}
-		if (prop->flags & ZEND_ACC_FINAL) {
-			smart_str_appends(str, "final ");
-		}
-		/* These are mutually exclusive */
-		switch (prop->flags & ZEND_ACC_PPP_MASK) {
-			case ZEND_ACC_PUBLIC:
-				smart_str_appends(str, "public ");
-				break;
-			case ZEND_ACC_PRIVATE:
-				smart_str_appends(str, "private ");
-				break;
-			case ZEND_ACC_PROTECTED:
-				smart_str_appends(str, "protected ");
-				break;
-		}
-		switch (prop->flags & ZEND_ACC_PPP_SET_MASK) {
-			case ZEND_ACC_PRIVATE_SET:
-				smart_str_appends(str, "private(set) ");
-				break;
-			case ZEND_ACC_PROTECTED_SET:
-				smart_str_appends(str, "protected(set) ");
-				break;
-			case ZEND_ACC_PUBLIC_SET:
-				ZEND_UNREACHABLE();
-				break;
-		}
-		if (prop->flags & ZEND_ACC_STATIC) {
-			smart_str_appends(str, "static ");
-		}
-		if (prop->flags & ZEND_ACC_READONLY) {
-			smart_str_appends(str, "readonly ");
-		}
-		if (prop->flags & ZEND_ACC_VIRTUAL) {
-			smart_str_appends(str, "virtual ");
-		}
-		if (ZEND_TYPE_IS_SET(prop->type)) {
-			zend_string *type_str = zend_type_to_string(prop->type);
-			smart_str_append(str, type_str);
-			smart_str_appendc(str, ' ');
-			zend_string_release(type_str);
-		}
-		smart_str_appendc(str, '$');
-		if (!prop_name) {
-			const char *class_name;
-			const char *prop_name_cstr;
-			zend_unmangle_property_name(prop->name, &class_name, &prop_name_cstr);
-			smart_str_appends(str, prop_name_cstr);
-		} else {
-			smart_str_append(str, prop_name);
-		}
+		smart_str_append(str, prop_name);
+	}
 
-		const zval *default_value = property_get_default(prop);
-		if (default_value && !Z_ISUNDEF_P(default_value)) {
-			smart_str_appends(str, " = ");
-			format_default_value(str, default_value);
-		}
-		if (prop->hooks != NULL) {
-			smart_str_appends(str, " {");
-			const zend_function *get_hooked = prop->hooks[ZEND_PROPERTY_HOOK_GET];
-			if (get_hooked != NULL) {
-				if (get_hooked->common.fn_flags & ZEND_ACC_FINAL) {
-					smart_str_appends(str, " final get;");
-				} else {
-					smart_str_appends(str, " get;");
-				}
+	const zval *default_value = property_get_default(prop);
+	if (default_value && !Z_ISUNDEF_P(default_value)) {
+		smart_str_appends(str, " = ");
+		format_default_value(str, default_value);
+	}
+	if (prop->hooks != NULL) {
+		smart_str_appends(str, " {");
+		const zend_function *get_hooked = prop->hooks[ZEND_PROPERTY_HOOK_GET];
+		if (get_hooked != NULL) {
+			if (get_hooked->common.fn_flags & ZEND_ACC_FINAL) {
+				smart_str_appends(str, " final get;");
+			} else {
+				smart_str_appends(str, " get;");
 			}
-			const zend_function *set_hooked = prop->hooks[ZEND_PROPERTY_HOOK_SET];
-			if (set_hooked != NULL) {
-				if (set_hooked->common.fn_flags & ZEND_ACC_FINAL) {
-					smart_str_appends(str, " final set;");
-				} else {
-					smart_str_appends(str, " set;");
-				}
-			}
-			smart_str_appends(str, " }");
 		}
+		const zend_function *set_hooked = prop->hooks[ZEND_PROPERTY_HOOK_SET];
+		if (set_hooked != NULL) {
+			if (set_hooked->common.fn_flags & ZEND_ACC_FINAL) {
+				smart_str_appends(str, " final set;");
+			} else {
+				smart_str_appends(str, " set;");
+			}
+		}
+		smart_str_appends(str, " }");
 	}
 
 	smart_str_appends(str, " ]\n");
