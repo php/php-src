@@ -46,6 +46,27 @@ var_dump(never_exit());
 // The legacy `<>` operator is untouched in infix (operator) position.
 var_dump($a[0]<>2);
 
+// Plain variables, literals, and `)` end an operand too, with or without spaces.
+$lhs = 1; $rhs = 2;
+var_dump($lhs < $rhs);
+var_dump($lhs<$rhs);
+var_dump(3 < 4);
+var_dump(($lhs) < $rhs);
+
+// Other "<"-led operators are unchanged: spaceship, less-or-equal, shifts.
+var_dump($lhs <=> $rhs);
+var_dump($lhs <= $rhs);
+var_dump(1 << 4);
+var_dump(64 >> 2);
+
+// A heredoc body containing "<" stays literal text, not markup.
+echo <<<EOT
+literal <not-markup> text
+EOT, "\n";
+
+// Error suppression with "@" still works before an expression.
+$sup = []; var_dump(@$sup['missing']);
+
 // Bare `yield` is a complete operand: `<` and `<>` after it stay comparisons
 // ((yield) != 5, (yield) < FOO), with or without spaces. Yielding markup
 // therefore needs parentheses: `yield (<div/>)`.
@@ -94,6 +115,16 @@ bool(true)
 bool(false)
 bool(false)
 bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+int(-1)
+bool(true)
+int(16)
+int(16)
+literal <not-markup> text
+NULL
 bool(true)
 bool(true)
 bool(true)

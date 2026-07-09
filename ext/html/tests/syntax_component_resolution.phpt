@@ -1,9 +1,20 @@
 --TEST--
-Markup syntax: qualified/fully-qualified component tags and use resolution (RFC §4)
+Markup syntax: compile-time component-name resolution (use aliases, qualified/fully-qualified tags, static methods) (RFC §4)
 --EXTENSIONS--
 html
 --FILE--
 <?php
+// --- component definitions ---
+namespace App\Components {
+    use Html\Element as E;
+    class Card implements \Html\Htmlable {
+        public function __construct(public string $title) {}
+        public function toHtml(): \Html\Htmlable {
+            return new E('div', ['class' => 'card'], [$this->title]);
+        }
+    }
+}
+
 namespace App {
     class Greeting implements \Html\Htmlable {
         public function __construct(#[\Html\Slot] public ?\Html\Htmlable $slot = null) {}
@@ -24,12 +35,22 @@ namespace App {
     }
 }
 
+// --- use-alias resolution from another namespace ---
+namespace App\Views {
+    use App\Components\Card;
+    // <Card> resolves to App\Components\Card via the `use` alias, not a global Card.
+    echo (<Card title="Hi & ok"/>)->__toString(), "\n";
+    echo (<div><Card title="Nested"/></div>)->__toString(), "\n";
+}
+
+// --- qualified (namespace-relative) tags from global scope ---
 namespace {
     // A qualified name is namespace-relative; from global scope App\Greeting is App\Greeting.
     echo (<App\Greeting>hi</App\Greeting>)->__toString(), "\n";
     echo (<App\Card title="G"/>)->__toString(), "\n";
 }
 
+// --- fully-qualified tags, use imports, static-method class-part resolution ---
 namespace Views {
     // A fully-qualified <\...> tag ignores the current namespace.
     echo (<\App\Greeting>fq</\App\Greeting>)->__toString(), "\n";
@@ -45,6 +66,17 @@ namespace Views {
     echo (<Author::byline name="Grace"/>)->__toString(), "\n";
 }
 
+// --- component defined and used in the current namespace ---
+namespace Other {
+    use Html\Element as E;
+    class Box implements \Html\Htmlable {
+        public function __construct(public string $label) {}
+        public function toHtml(): \Html\Htmlable { return new E('b', [], [$this->label]); }
+    }
+    echo (<Box label="local"/>)->__toString(), "\n";
+}
+
+// --- unimported bare tag fails: no global fallback ---
 namespace Wrong {
     // Without an import, a bare tag resolves in the current namespace only —
     // exactly how PHP resolves an unqualified class name (no global fallback).
@@ -56,10 +88,13 @@ namespace Wrong {
 }
 ?>
 --EXPECT--
+<div class="card">Hi &amp; ok</div>
+<div><div class="card">Nested</div></div>
 <p>hi</p>
 <b>G</b>
 <p>fq</p>
 <b>C</b>
 <i>By Ada</i>
 <i>By Grace</i>
+<b>local</b>
 "Wrong\Card" is not a component: no such class implementing Html\Htmlable
