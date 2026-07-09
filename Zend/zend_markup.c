@@ -44,100 +44,59 @@
  *   - join the surviving lines with a single space.
  * The net effect: indentation/newlines between block elements vanish, while a
  * meaningful single space between inline content is preserved. Returns a new
- * zend_string (possibly empty — the caller drops empty text nodes). */
-typedef struct { const char *p; size_t n; } zend_markup_line;
-
-static zend_always_inline zend_markup_line *zend_markup_lines_grow(
-	zend_markup_line *lines, zend_markup_line *stackbuf, uint32_t count, uint32_t *cap)
-{
-	*cap *= 2;
-	zend_markup_line *grown = emalloc(*cap * sizeof(zend_markup_line));
-	memcpy(grown, lines, count * sizeof(zend_markup_line));
-	if (lines != stackbuf) {
-		efree(lines);
-	}
-	return grown;
-}
-
+ * zend_string (possibly empty — the caller drops empty text nodes).
+ *
+ * One streaming pass: because a non-first line is left-trimmed and a non-last
+ * line is right-trimmed, any line that survives contains a non-whitespace
+ * character, so "join surviving lines with a single space" is simply a space
+ * before every surviving line except the first — no line table or lookahead
+ * for the last non-blank line is needed. A single-line text is untouched apart
+ * from the tab conversion, exactly as before. */
 zend_string *zend_markup_normalize_text(const char *text, size_t len)
 {
-	zend_markup_line stackbuf[32];
-	zend_markup_line *lines = stackbuf;
-	uint32_t cap = 32, count = 0;
+	/* Output is never longer than the input. */
+	zend_string *result = zend_string_alloc(len, 0);
+	char *out = ZSTR_VAL(result);
+	size_t outlen = 0;
 	size_t pos = 0;
+	bool pending_join = false;
 
-	/* Split on \r\n | \n | \r (matching JS String.split), keeping a trailing
-	 * empty line after a final break so the previous line counts as "not last". */
+	/* Line terminators are \r\n | \n | \r (matching JS String.split). A line
+	 * is "last" when no terminator follows it, so text ending in a line break
+	 * still right-trims its final content line, as the split-based version did
+	 * via its synthetic trailing empty line. */
 	for (;;) {
 		size_t e = pos;
 		while (e < len && text[e] != '\n' && text[e] != '\r') {
 			e++;
 		}
-		if (count == cap) {
-			lines = zend_markup_lines_grow(lines, stackbuf, count, &cap);
-		}
-		lines[count].p = text + pos;
-		lines[count].n = e - pos;
-		count++;
+		bool is_first = (pos == 0);
+		bool is_last = (e >= len);
+		size_t s = pos, en = e;
 
-		if (e >= len) {
+		if (!is_first) {
+			while (s < en && (text[s] == ' ' || text[s] == '\t')) s++;
+		}
+		if (!is_last) {
+			while (en > s && (text[en - 1] == ' ' || text[en - 1] == '\t')) en--;
+		}
+		if (en > s) {
+			if (pending_join) {
+				out[outlen++] = ' ';
+			}
+			for (size_t x = s; x < en; x++) {
+				out[outlen++] = (text[x] == '\t') ? ' ' : text[x];
+			}
+			pending_join = true;
+		}
+
+		if (is_last) {
 			break;
 		}
 		if (text[e] == '\r' && e + 1 < len && text[e + 1] == '\n') {
 			e++;
 		}
 		pos = e + 1;
-		if (pos == len) {
-			if (count == cap) {
-				lines = zend_markup_lines_grow(lines, stackbuf, count, &cap);
-			}
-			lines[count].p = text + len;
-			lines[count].n = 0;
-			count++;
-			break;
-		}
-	}
-
-	/* Index of the last line containing a non-space/tab char (default 0, as in Babel). */
-	uint32_t last_nonblank = 0;
-	for (uint32_t k = 0; k < count; k++) {
-		for (size_t x = 0; x < lines[k].n; x++) {
-			if (lines[k].p[x] != ' ' && lines[k].p[x] != '\t') {
-				last_nonblank = k;
-				break;
-			}
-		}
-	}
-
-	/* Output is never longer than the input. */
-	zend_string *result = zend_string_alloc(len, 0);
-	char *out = ZSTR_VAL(result);
-	size_t outlen = 0;
-
-	for (uint32_t k = 0; k < count; k++) {
-		const char *p = lines[k].p;
-		size_t s = 0, en = lines[k].n;
-		bool is_first = (k == 0);
-		bool is_last = (k == count - 1);
-
-		if (!is_first) {
-			while (s < en && (p[s] == ' ' || p[s] == '\t')) s++;
-		}
-		if (!is_last) {
-			while (en > s && (p[en - 1] == ' ' || p[en - 1] == '\t')) en--;
-		}
-		if (en > s) {
-			for (size_t x = s; x < en; x++) {
-				out[outlen++] = (p[x] == '\t') ? ' ' : p[x];
-			}
-			if (k != last_nonblank) {
-				out[outlen++] = ' ';
-			}
-		}
-	}
-
-	if (lines != stackbuf) {
-		efree(lines);
 	}
 
 	if (outlen == 0) {
