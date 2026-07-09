@@ -10,5 +10,5 @@ var_dump( $r->getValue() );
 
 ?>
 --EXPECTF--
-Constant [ string DEMO ] { f }
+Constant [ string DEMO ] { f%0oo }
 string(4) "f%0oo"
