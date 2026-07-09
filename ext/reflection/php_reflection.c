@@ -2574,7 +2574,8 @@ ZEND_METHOD(ReflectionParameter, __construct)
 		case IS_OBJECT: {
 				ce = Z_OBJCE_P(reference);
 
-				if (instanceof_function(ce, zend_ce_closure)) {
+				// No need for instanceof_function, the Closure class is final
+				if (ce == zend_ce_closure) {
 					fptr = (zend_function *)zend_get_closure_method_def(Z_OBJ_P(reference));
 					Z_ADDREF_P(reference);
 					is_closure = true;
@@ -4585,7 +4586,8 @@ ZEND_METHOD(ReflectionClass, getMethods)
 		_addmethod(mptr, ce, Z_ARRVAL_P(return_value), filter);
 	} ZEND_HASH_FOREACH_END();
 
-	if (instanceof_function(ce, zend_ce_closure)) {
+	// No need for instanceof_function, the Closure class is final
+	if (ce == zend_ce_closure) {
 		bool has_obj = Z_TYPE(intern->obj) != IS_UNDEF;
 		zval obj_tmp;
 		zend_object *obj;
