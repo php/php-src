@@ -64,17 +64,26 @@ static int le_zip_entry;
 	}
 /* }}} */
 
-/* {{{ PHP_ZIP_SET_FILE_COMMENT(za, index, comment, comment_len) */
-#define PHP_ZIP_SET_FILE_COMMENT(za, index, comment, comment_len) \
-	if (comment_len == 0) { \
-		/* Passing NULL remove the existing comment */ \
-		if (zip_file_set_comment(za, index, NULL, 0, 0) < 0) { \
-			RETURN_FALSE; \
-		} \
-	} else if (zip_file_set_comment(za, index, comment, comment_len, 0) < 0) { \
-		RETURN_FALSE; \
-	} \
-	RETURN_TRUE;
+/* {{{ php_zip_set_file_comment */
+static bool php_zip_set_file_comment(struct zip *za, zip_uint64_t index, const char *comment, size_t comment_len)
+{
+	zip_uint32_t current_comment_len;
+	const char *current_comment = zip_file_get_comment(za, index, &current_comment_len, ZIP_FL_ENC_RAW);
+
+	/* Avoid a libzip use-after-free when resetting an unchanged inherited comment. */
+	if (current_comment && current_comment_len == comment_len
+			&& memcmp(current_comment, comment, comment_len) == 0) {
+		return true;
+	}
+
+	if (comment_len == 0) {
+		/* Passing NULL removes the existing comment. */
+		return zip_file_set_comment(za, index, NULL, 0, 0) == 0;
+	}
+
+	ZEND_ASSERT(comment_len <= 0xffff);
+	return zip_file_set_comment(za, index, comment, (zip_uint16_t) comment_len, 0) == 0;
+}
 /* }}} */
 
 # define add_ascii_assoc_string add_assoc_string
@@ -2185,7 +2194,7 @@ PHP_METHOD(ZipArchive, setCommentName)
 	zval *self = ZEND_THIS;
 	size_t comment_len, name_len;
 	char * comment, *name;
-	int idx;
+	zip_int64_t idx;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 			&name, &name_len, &comment, &comment_len) == FAILURE) {
@@ -2208,7 +2217,7 @@ PHP_METHOD(ZipArchive, setCommentName)
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
-	PHP_ZIP_SET_FILE_COMMENT(intern, idx, comment, comment_len);
+	RETURN_BOOL(php_zip_set_file_comment(intern, (zip_uint64_t) idx, comment, comment_len));
 }
 /* }}} */
 
@@ -2221,6 +2230,7 @@ PHP_METHOD(ZipArchive, setCommentIndex)
 	size_t comment_len;
 	char * comment;
 	struct zip_stat sb;
+	zip_uint64_t idx;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls",
 			&index, &comment, &comment_len) == FAILURE) {
@@ -2234,8 +2244,14 @@ PHP_METHOD(ZipArchive, setCommentIndex)
 		RETURN_THROWS();
 	}
 
-	PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
-	PHP_ZIP_SET_FILE_COMMENT(intern, index, comment, comment_len);
+	if (index < 0) {
+		RETURN_FALSE;
+	}
+
+	idx = (zip_uint64_t) index;
+
+	PHP_ZIP_STAT_INDEX(intern, idx, 0, sb);
+	RETURN_BOOL(php_zip_set_file_comment(intern, idx, comment, comment_len));
 }
 /* }}} */
 
