@@ -1447,6 +1447,9 @@ HNUM	"0x"[0-9a-fA-F]+(_[0-9a-fA-F]+)*
 BNUM	"0b"[01]+(_[01]+)*
 ONUM	"0o"[0-7]+(_[0-7]+)*
 LABEL	[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*
+/* Native markup: one segment of a tag or attribute name. Dots,
+ * colons and hyphens are allowed inside (<my-widget>, wire:poll.1s). */
+MARKUP_LABEL [a-zA-Z][a-zA-Z0-9_.:-]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
 TOKENS [;:,.|^&+-/*=%!~$<>?@]
@@ -2048,53 +2051,22 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 }
 
 
-/* Native markup (RFC: Native Markup Expressions). In operand position, "<tag"
- * begins a markup element and "<>" a fragment; in operator position both keep
- * their existing meaning ("<" comparison, "<>" not-equal). Nested elements
- * inside markup content use a bare "<" handled by ST_MARKUP_CONTENT. */
-<ST_IN_SCRIPTING>"<""\\"?[a-zA-Z] {
-	/* "<tag" or "<\Ns\Tag" (a fully-qualified component). Only markup in operand
-	 * position; in operator position "<" keeps its comparison meaning (e.g.
-	 * "$a < \Foo::BAR"). */
-	yyless(1);
-	if (zend_markup_operand_position()) {
-		yy_push_state(ST_MARKUP_TAG);
-		RETURN_TOKEN(T_MARKUP_OPEN);
-	}
-	RETURN_TOKEN('<');
-}
-
-<ST_IN_SCRIPTING>"<>" {
+/* Native markup (RFC: Native Markup Expressions). In operand position, "<"
+ * followed by a tag opener begins markup: "<tag" / "<\Ns\Tag" (element or
+ * component), "<>" (fragment), "<$var" / "<{expr}" (dynamic tags). In operator
+ * position everything keeps its existing meaning: "<" a comparison ("$a <$b",
+ * "$a < \Foo::BAR") and "<>" the legacy not-equal alias. The opener set here
+ * is mirrored by ST_MARKUP_CONTENT's nested-tag rule below. */
+<ST_IN_SCRIPTING>"<"("\\"?[a-zA-Z]|[>${]) {
 	if (zend_markup_operand_position()) {
 		yyless(1);
 		yy_push_state(ST_MARKUP_TAG);
 		RETURN_TOKEN(T_MARKUP_OPEN);
 	}
-	RETURN_TOKEN(T_IS_NOT_EQUAL);
-}
-
-<ST_IN_SCRIPTING>"<""$"{LABEL} {
-	/* "<$tag": a dynamic tag whose variable's runtime value names the element
-	 * or component (<$tag>…</$tag>). Only markup in operand position; in
-	 * operator position "<" keeps its comparison meaning ("$a <$b"). */
-	yyless(1);
-	if (zend_markup_operand_position()) {
-		yy_push_state(ST_MARKUP_TAG);
-		RETURN_TOKEN(T_MARKUP_OPEN);
+	if (yytext[1] == '>') {
+		RETURN_TOKEN(T_IS_NOT_EQUAL);
 	}
-	RETURN_TOKEN('<');
-}
-
-<ST_IN_SCRIPTING>"<{" {
-	/* "<{expr}": a dynamic tag computed by an arbitrary expression, closed
-	 * anonymously ("</>") or self-closed. The "{" is left for ST_MARKUP_TAG's
-	 * own interpolation rule. Only markup in operand position; in operator
-	 * position "<" keeps its comparison meaning. */
 	yyless(1);
-	if (zend_markup_operand_position()) {
-		yy_push_state(ST_MARKUP_TAG);
-		RETURN_TOKEN(T_MARKUP_OPEN);
-	}
 	RETURN_TOKEN('<');
 }
 
@@ -2105,14 +2077,14 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	goto return_whitespace;
 }
 
-<ST_MARKUP_TAG,ST_MARKUP_CLOSE>"\\"?[a-zA-Z][a-zA-Z0-9_.:-]*("\\"[a-zA-Z][a-zA-Z0-9_.:-]*)* {
+<ST_MARKUP_TAG,ST_MARKUP_CLOSE>"\\"?{MARKUP_LABEL}("\\"{MARKUP_LABEL})* {
 	/* A tag name, optionally namespace-qualified (<App\Card/>) or fully
 	 * qualified (<\App\Card/>). A name containing "\" always dispatches as a
 	 * component (see zend_markup_name_is_component in Zend/zend_markup.c). */
 	RETURN_TOKEN_WITH_STR(T_MARKUP_NAME, 0);
 }
 
-<ST_MARKUP_TAG>[:@][a-zA-Z][a-zA-Z0-9_.:-]* {
+<ST_MARKUP_TAG>[:@]{MARKUP_LABEL} {
 	/* An attribute name with a ":" or "@" shorthand prefix (Vue/Alpine:
 	 * :class, @click). Attribute position only: this can never lex as a tag
 	 * name, because every markup-open rule requires a letter, "\", "$", "{"
@@ -2218,19 +2190,19 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN(T_MARKUP_CLOSE_OPEN);
 }
 
-<ST_MARKUP_CONTENT>"<" {
+<ST_MARKUP_CONTENT>"<"("\\"?[a-zA-Z]|[>${]) {
 	/* A nested tag ("<div", "<\App\Card", dynamic "<$tag" / "<{expr}",
-	 * fragment "<>"); "</" and "<!--" have their own rules above. Anything
-	 * else is a stray "<" in text - give a clear error rather than a bare
-	 * syntax error on T_ERROR. */
-	if (YYCURSOR < YYLIMIT) {
-		unsigned char next = *YYCURSOR;
-		if ((next >= 'a' && next <= 'z') || (next >= 'A' && next <= 'Z')
-				|| next == '\\' || next == '>' || next == '$' || next == '{') {
-			yy_push_state(ST_MARKUP_TAG);
-			RETURN_TOKEN(T_MARKUP_OPEN);
-		}
-	}
+	 * fragment "<>") - the same opener set as the ST_IN_SCRIPTING rule, always
+	 * markup here (content is operand position by construction). "</",
+	 * "<!--" and "<!doctype" have their own rules above. */
+	yyless(1);
+	yy_push_state(ST_MARKUP_TAG);
+	RETURN_TOKEN(T_MARKUP_OPEN);
+}
+
+<ST_MARKUP_CONTENT>"<" {
+	/* A stray "<" in text - give a clear error rather than a bare syntax
+	 * error on T_ERROR. */
 	if (PARSER_MODE()) {
 		zend_throw_exception(zend_ce_parse_error,
 			"Unescaped \"<\" in markup text; write {'<'} for a literal less-than sign", 0);
