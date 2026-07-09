@@ -8,8 +8,11 @@ use Html\Element as E;
 
 // An Auth component that renders its body only when "logged in". With `:lazy`
 // the body is never evaluated when discarded.
-function Auth(bool $check, #[Html\Slot] ?Html\Htmlable $slot = null): Html\Htmlable {
-    return $check ? new E('div', [], [$slot]) : new Html\Fragment([]);
+class Auth implements Html\Htmlable {
+    public function __construct(public bool $check, #[Html\Slot] public ?Html\Htmlable $slot = null) {}
+    public function toHtml(): Html\Htmlable {
+        return $this->check ? new E('div', [], [$this->slot]) : new Html\Fragment([]);
+    }
 }
 
 $evaluated = 0;
@@ -21,8 +24,11 @@ var_dump($evaluated); // 0 - never evaluated
 
 // Logged in: the body evaluates exactly once, even though a component could
 // in principle render its slot twice (LazyFragment memoizes).
-function Twice(#[Html\Slot] Html\Htmlable $slot): Html\Htmlable {
-    return new Html\Fragment([$slot, $slot]);
+class Twice implements Html\Htmlable {
+    public function __construct(#[Html\Slot] public Html\Htmlable $slot) {}
+    public function toHtml(): Html\Htmlable {
+        return new Html\Fragment([$this->slot, $this->slot]);
+    }
 }
 $evaluated = 0;
 echo <Twice :lazy>x{track()}</Twice>, "\n";

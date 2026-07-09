@@ -20,8 +20,12 @@ echo new Html\Element('i', ['@x' => '1'], []), "\n";
 
 // On a component the names were never valid named-argument labels, so - like
 // data-* - they are collected by a variadic.
-function Btn(string $label, ...$attrs): Html\Htmlable {
-    return <button {...$attrs}>{$label}</button>;
+class Btn implements Html\Htmlable {
+    private array $attrs;
+    public function __construct(public string $label, ...$attrs) { $this->attrs = $attrs; }
+    public function toHtml(): Html\Htmlable {
+        return <button {...$this->attrs}>{$this->label}</button>;
+    }
 }
 echo <Btn label="Save" @click="save()" :class="btn"/>, "\n";
 

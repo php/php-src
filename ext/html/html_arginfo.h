@@ -1,5 +1,5 @@
 /* This is a generated file, edit html.stub.php instead.
- * Stub hash: c093f8bcc3519db91726c6a07e524d8b8723532c */
+ * Stub hash: 4a645196f8983f4d938e5e2eb3b25f34d1401ccd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Html_raw, 0, 1, Html\\Htmlable, 0)
 	ZEND_ARG_TYPE_INFO(0, html, IS_STRING, 0)
@@ -17,7 +17,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Html_render_component, 0, 1, Html
 	ZEND_ARG_TYPE_INFO(0, component, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, props, IS_ARRAY, 0, "[]")
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, slot, Html\\Htmlable, 1, "null")
-	ZEND_ARG_TYPE_MASK(0, functionComponent, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Html_render_dynamic, 0, 1, Html\\Htmlable, 0)
@@ -33,16 +32,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Html_unregister_component_factory, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, factory, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, component, IS_STRING, 1, "null")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Html_register_component_invoker, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, invoker, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, component, IS_STRING, 1, "null")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Html_unregister_component_invoker, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, invoker, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, component, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -111,8 +100,6 @@ ZEND_FUNCTION(Html_render_component);
 ZEND_FUNCTION(Html_render_dynamic);
 ZEND_FUNCTION(Html_register_component_factory);
 ZEND_FUNCTION(Html_unregister_component_factory);
-ZEND_FUNCTION(Html_register_component_invoker);
-ZEND_FUNCTION(Html_unregister_component_invoker);
 ZEND_FUNCTION(Html_register_component_decorator);
 ZEND_FUNCTION(Html_unregister_component_decorator);
 ZEND_METHOD(Html_Element, __construct);
@@ -139,8 +126,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "render_dynamic"), zif_Html_render_dynamic, arginfo_Html_render_dynamic, 0, NULL, NULL)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "register_component_factory"), zif_Html_register_component_factory, arginfo_Html_register_component_factory, 0, NULL, NULL)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "unregister_component_factory"), zif_Html_unregister_component_factory, arginfo_Html_unregister_component_factory, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "register_component_invoker"), zif_Html_register_component_invoker, arginfo_Html_register_component_invoker, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "unregister_component_invoker"), zif_Html_unregister_component_invoker, arginfo_Html_unregister_component_invoker, 0, NULL, NULL)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "register_component_decorator"), zif_Html_register_component_decorator, arginfo_Html_register_component_decorator, 0, NULL, NULL)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "unregister_component_decorator"), zif_Html_unregister_component_decorator, arginfo_Html_unregister_component_decorator, 0, NULL, NULL)
 	ZEND_FE_END

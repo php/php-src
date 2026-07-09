@@ -111,9 +111,6 @@ enum _zend_ast_kind {
 	ZEND_AST_BREAK,
 	ZEND_AST_CONTINUE,
 	ZEND_AST_PROPERTY_HOOK_SHORT_BODY,
-	/* Native markup: declared last in its group so it appends to the enum
-	 * instead of renumbering the kinds after it (which would break ext/php-ast). */
-	ZEND_AST_CALLABLE_NAME,
 
 	/* 2 child nodes */
 	ZEND_AST_DIM = 2 << ZEND_AST_NUM_CHILDREN_SHIFT,

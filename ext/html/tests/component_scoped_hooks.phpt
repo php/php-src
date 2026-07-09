@@ -5,7 +5,6 @@ html
 --FILE--
 <?php
 use function Html\{register_component_factory, unregister_component_factory,
-    register_component_invoker, unregister_component_invoker,
     register_component_decorator, unregister_component_decorator};
 
 class Card implements Html\Htmlable {
@@ -18,14 +17,6 @@ class Badge implements Html\Htmlable {
     public function __construct(public string $label = "?") {}
     public function toHtml(): Html\Htmlable {
         return new Html\Element('b', [], [$this->label]);
-    }
-}
-function Stamp(string $name = "?"): Html\Htmlable {
-    return new Html\Element('em', [], [$name]);
-}
-class Author {
-    public static function byline(string $name = "?"): Html\Htmlable {
-        return new Html\Element('p', [], [$name]);
     }
 }
 
@@ -58,30 +49,12 @@ var_dump(unregister_component_factory($cardFactory, 'Card'));
 var_dump(unregister_component_factory($anyFactory));
 echo <Card/>, "\n";
 
-// (4) Invokers scope on the resolved callable name: the function's name for
-// <Stamp/>, "Class::method" for <Author::byline/>.
-$stampInvoker = function (callable $fn, array $args) {
-    echo "invoke(", strtolower(is_string($fn) ? $fn : "?"), ")\n";
-    return new Html\Raw("[stamped]");
-};
-register_component_invoker($stampInvoker, 'STAMP');
-echo <Stamp name="a"/>, "\n";
-echo <Author::byline name="b"/>, "\n";
-var_dump(unregister_component_invoker($stampInvoker, 'stamp'));
-
-$bylineInvoker = fn(callable $fn, array $args) => new Html\Raw("[bylined]");
-register_component_invoker($bylineInvoker, 'author::BYLINE');
-echo <Stamp name="c"/>, "\n";
-echo <Author::byline name="d"/>, "\n";
-var_dump(unregister_component_invoker($bylineInvoker, '\Author::byline'));
-
-// (5) A decorator scoped to Badge wraps only Badge's output — Card, Stamp and
-// the rest render untouched.
+// (4) A decorator scoped to Badge wraps only Badge's output — Card renders
+// untouched.
 $badgeDecorator = fn(Html\Htmlable $h, string $c) => Html\raw("<<$h>>");
 register_component_decorator($badgeDecorator, Badge::class);
 echo <Badge label="B"/>, "\n";
 echo <Card title="C"/>, "\n";
-echo <Stamp name="s"/>, "\n";
 var_dump(unregister_component_decorator($badgeDecorator, 'badge'));
 echo <Badge label="B"/>, "\n";
 ?>
@@ -98,15 +71,7 @@ bool(false)
 bool(true)
 bool(true)
 <div>?</div>
-invoke(stamp)
-[stamped]
-<p>b</p>
-bool(true)
-<em>c</em>
-[bylined]
-bool(true)
 <<<b>B</b>>>
 <div>C</div>
-<em>s</em>
 bool(true)
 <b>B</b>

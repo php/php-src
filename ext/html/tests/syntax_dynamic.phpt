@@ -35,13 +35,14 @@ $component = Card::class;
 echo <$component title="Hi"/>, "\n";
 echo <$component title="Hi">Body</$component>, "\n";
 
-// A function component: capitalized value, resolved like a direct
-// render_component() call (class first, then function).
-function greeting(string $name): Html\Htmlable {
-    return <p>Hello {$name}</p>;
+// A "Class::method" value dispatches as a static-method component.
+class Author {
+    public static function byline(string $name): Html\Htmlable {
+        return <i>By {$name}</i>;
+    }
 }
-$component = 'Greeting';
-echo <$component name="Liam"/>, "\n";
+$component = 'Author::byline';
+echo <$component name="Ada"/>, "\n";
 
 // Interpolated content is still escaped, whatever the tag value.
 $tag = 'span';
@@ -84,7 +85,7 @@ bool(true)
 <div><em class="x">hi</em></div>
 <article><h1>Hi</h1></article>
 <article><h1>Hi</h1>Body</article>
-<p>Hello Liam</p>
+<i>By Ada</i>
 <span>&lt;script&gt;alert(1)&lt;/script&gt;</span>
 <div class="x">Hello</div>
 <strong>note</strong>

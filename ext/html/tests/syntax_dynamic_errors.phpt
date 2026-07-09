@@ -42,7 +42,7 @@ try {
 $tag = 'date';
 echo <$tag/>, "\n";
 
-// A capitalized value resolving to an internal function hits the footgun guard.
+// A capitalized value can never reach an internal function like Date().
 $tag = 'Date';
 try {
     echo <$tag/>;
@@ -57,6 +57,15 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
+
+// A "Class::method" value dispatches as a static-method component; a missing
+// class is the same hard error the static tag form gives.
+$tag = 'NoSuchRegistry::make';
+try {
+    echo <$tag/>;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
 Mismatched markup closing tag: expected </$a>, found </$b>
@@ -65,5 +74,6 @@ syntax error, unexpected variable "$t", expecting markup tag end
 Html\render_dynamic(): Argument #1 ($tag) cannot be empty
 Invalid tag name "di v"
 <date></date>
-<Date> resolved to the internal function Date(), which cannot be a component
-"NoSuchComponent" is not a component: no class implementing Html\Htmlable and no user-defined function of that name
+"Date" is not a component: no such class implementing Html\Htmlable
+"NoSuchComponent" is not a component: no such class implementing Html\Htmlable
+Component class "NoSuchRegistry" not found

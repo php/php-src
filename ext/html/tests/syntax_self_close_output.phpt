@@ -12,7 +12,9 @@ echo (<div/>)->__toString(), "\n";
 echo (<span class="x"/>)->__toString(), "\n";
 
 // Empty components and fragments are allowed (only HTML elements must self-close).
-function C(): Html\Htmlable { return Html\raw('C'); }
+class C implements Html\Htmlable {
+    public function toHtml(): Html\Htmlable { return Html\raw('C'); }
+}
 echo (<C></C>)->__toString(), "\n";
 var_dump((<></>)->__toString());
 ?>

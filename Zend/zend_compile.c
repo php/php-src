@@ -11425,40 +11425,6 @@ static void zend_compile_class_name(znode *result, const zend_ast *ast) /* {{{ *
 }
 /* }}} */
 
-/* Native markup (RFC: Native Markup Expressions). Resolve a component tag's name
- * against the *function* import table (`use function`) and current namespace,
- * yielding a compile-time constant: a single name, or a candidate list (current
- * namespace, then global) when an unqualified name in a namespace needs PHP's
- * usual global fallback. This is the function-table analogue of
- * ZEND_AST_CLASS_NAME: a `<Component/>` tag is lowered to two candidate names — a
- * class one (ZEND_AST_CLASS_NAME) and a function one (this) — so the runtime's
- * class-then-function dispatch can honor `use` and `use function` independently,
- * exactly as PHP resolves class vs call names. See zend_ast_create_markup_component
- * in Zend/zend_markup.c. */
-static void zend_compile_callable_name(znode *result, const zend_ast *ast) /* {{{ */
-{
-	zend_ast *name_ast = ast->child[0];
-	zend_string *name = zend_ast_get_str(name_ast);
-	bool is_fully_qualified;
-	zend_string *resolved =
-		zend_resolve_function_name(name, name_ast->attr, &is_fully_qualified);
-
-	result->op_type = IS_CONST;
-	if (!is_fully_qualified && !zend_string_equals(resolved, name)) {
-		/* An unqualified name inside a namespace resolves like an ordinary
-		 * call: current namespace first, then the global namespace. Pass both
-		 * candidates, in that order, for the runtime to try. */
-		zval candidates;
-		array_init_size(&candidates, 2);
-		add_next_index_str(&candidates, resolved);
-		add_next_index_str(&candidates, zend_string_copy(name));
-		ZVAL_COPY_VALUE(&result->u.constant, &candidates);
-	} else {
-		ZVAL_STR(&result->u.constant, resolved);
-	}
-}
-/* }}} */
-
 static zend_op *zend_compile_rope_add_ex(zend_op *opline, znode *result, uint32_t num, znode *elem_node) /* {{{ */
 {
 	if (num == 0) {
@@ -12256,9 +12222,6 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_CLASS_NAME:
 			zend_compile_class_name(result, ast);
-			return;
-		case ZEND_AST_CALLABLE_NAME:
-			zend_compile_callable_name(result, ast);
 			return;
 		case ZEND_AST_ENCAPS_LIST:
 			zend_compile_encaps_list(result, ast);

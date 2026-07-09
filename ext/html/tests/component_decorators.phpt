@@ -1,5 +1,5 @@
 --TEST--
-Html: component decorators wrap the output of every component kind uniformly (RFC §4)
+Html: component decorators wrap every component's output uniformly (RFC §4)
 --EXTENSIONS--
 html
 --FILE--
@@ -12,7 +12,12 @@ class Card implements Html\Htmlable {
         return new Html\Element('div', [], [$this->t]);
     }
 }
-function Note(string $t): Html\Htmlable { return new Html\Element('p', [], [$t]); }
+class Note implements Html\Htmlable {
+    public function __construct(public string $t) {}
+    public function toHtml(): Html\Htmlable {
+        return new Html\Element('p', [], [$this->t]);
+    }
+}
 class Author {
     public static function byline(string $t): Html\Htmlable {
         return new Html\Element('span', [], [$t]);
@@ -20,7 +25,7 @@ class Author {
 }
 
 // A decorator wrapping in a marker that records the component name; proves it
-// fires for a class, a function, and a static method alike.
+// fires for class and static-method components alike, with the resolved name.
 register_component_decorator(fn(Html\Htmlable $h, string $c)
     => Html\raw("[$c]" . $h . "[/$c]"));
 

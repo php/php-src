@@ -13,12 +13,17 @@ Yet PHP still has no native way to do it. Today authors choose between:
 This RFC proposes a **native markup expression syntax**, inspired by JSX, that produces an in-memory tree of objects which renders to safely-escaped HTML. Markup becomes a *value*: it can be returned, passed to functions, stored, and composed.
 
 ```php
-function Greeting(string $name, string $type): Html\Htmlable
+class Greeting implements Html\Htmlable
 {
-    return <>
-        <h1 class="title">Hello, {$name ?: ucfirst($type)}!</h1>
-        <p>Welcome to PHP, where markup is a first-class expression.</p>
-    </>;
+    public function __construct(public string $name, public string $type) {}
+
+    public function toHtml(): Html\Htmlable
+    {
+        return <>
+            <h1 class="title">Hello, {$this->name ?: ucfirst($this->type)}!</h1>
+            <p>Welcome to PHP, where markup is a first-class expression.</p>
+        </>;
+    }
 }
 
 echo <Greeting name="Rasmus" type="guest" />; // prints the rendered HTML, dynamic values escaped
@@ -94,18 +99,17 @@ Every construct in this proposal lowers the same way - at compile time, to a `ne
 
 // Components dispatch through Html\render_component()         (see Tags)
 <Card title="Hi" />
-// → \Html\render_component(Card::class, ['title' => 'Hi'], null, 'Card')
+// → \Html\render_component(Card::class, ['title' => 'Hi'])
 
 // Component body → slot; extra regions are markup-valued props   (see Children & slots)
 <Layout theme="dark" header={<h1>Title</h1>}>
     <p>Body content.</p>
 </Layout>
 // → \Html\render_component(
-//       Layout::class,                          // class-name candidate
+//       Layout::class,                          // resolved as a class name string
 //       ['theme' => 'dark',                     // props → named arguments
 //        'header' => new \Html\Element('h1', [], ['Title'])],
 //       new \Html\Fragment([/* <p>...</p> */]),   // body slot
-//       'Layout',                               // function-name candidate
 //   )
 
 // Dynamic tags: the value classifies at runtime                (see Tags)
@@ -138,27 +142,16 @@ Dispatch is purely **syntactic** (the compiler cannot know runtime types):
 | Tag form | Meaning |
 |---|---|
 | `<div>`, `<my-widget>` (lowercase / hyphenated) | literal HTML element → `Html\Element` |
-| `<Card>` (bare, capitalized) | a **component** - resolved as a name honoring `use` / `use function` / namespace |
-| `<App\Card>`, `<\App\Card>` (namespace-qualified) | a **component** - a namespace-qualified or fully-qualified name |
-| `<Author::byline>` | a **component** - a static method call on a class |
+| `<Card>` (bare, capitalized) | a **component** - resolved as a class name honoring `use` / namespace |
+| `<App\Card>`, `<\App\Card>` (namespace-qualified) | a **component** - a namespace-qualified or fully-qualified class name |
+| `<Author::byline>` | a **component** - a public static method on a class |
 | `<$tag>`, `<{expr}>` (a variable / any expression) | a **dynamic tag** - the runtime string value is classified by the same rule, at runtime |
 
 Any tag whose name is capitalized, contains a namespace separator (`\`), or names a static method (`::`) is a component; everything else is a literal HTML element.
 
-A **component is anything that produces `Html\Htmlable`.** There are three forms:
+A **component produces `Html\Htmlable`**, and every component tag resolves through the *class* name rules alone. There are two forms:
 
 ```php
-// Function
-function Time(DateTimeInterface $datetime): Html\Htmlable { /* ... */ }
-// <Time datetime={$datetime} />  →  Time(datetime: $datetime)
-
-// Static method - multiple components can live together on one class
-class Author {
-    public static function byline(string $name): Html\Htmlable { /* ... */ }
-    public static function avatar(string $src): Html\Htmlable { /* ... */ }
-}
-// <Author::byline name="Rasmus" />  →  Author::byline(name: 'Rasmus')
-
 // Class implementing Html\Htmlable - the instance IS the renderable
 class Card implements Html\Htmlable {
     public function __construct(public string $title) {}
@@ -167,33 +160,31 @@ class Card implements Html\Htmlable {
     }
 }
 // <Card title="Hi" />  →  new Card(title: 'Hi')
+
+// Static method - multiple small components can live together on one class
+class Author {
+    public static function byline(string $name): Html\Htmlable { /* ... */ }
+    public static function avatar(string $src): Html\Htmlable { /* ... */ }
+}
+// <Author::byline name="Rasmus" />  →  Author::byline(name: 'Rasmus')
 ```
 
-`toHtml()` returns markup, not a string, so it composes under `strict_types` with no cast, and callers can still reach the produced `Html\Element` tree. It may also return another `Htmlable` - e.g. delegate to another component instance.
+`toHtml()` returns markup, not a string, so it composes under `strict_types` with no cast, and callers can still reach the produced `Html\Element` tree. It may also return another `Htmlable` - e.g. delegate to another component instance. A static-method component must likewise return `Html\Htmlable`, and must be public, static, and user-defined.
+
+Both forms resolve through the class resolution every PHP developer already knows - a `<Author::byline/>` tag's *class part* resolves exactly as `Author::class` would. Plain *function* components are deferred to Future Scope: a bare `<Foo/>` gives no syntactic signal whether a class or a function is meant, and PHP resolves the two through separate `use` / `use function` import tables, so supporting functions means dual-candidate name resolution in the compiler and a class-vs-function dispatch order at runtime (plus guarding tags like `<Date/>` from resolving to internal functions such as `date()`). A static method has no such ambiguity.
 
 #### Bare-tag and qualified-tag resolution
 
-A component tag names a class or a function. PHP resolves class names and function names through **separate** rules and `use` tables, and a bare `<Foo/>` tag gives no syntactic signal which is meant, so the compiler resolves the name **both ways** and lets the runtime pick:
-
-* as a **class** name - honoring `use` and the current namespace (as `Foo::class` does);
-* as a **function** name - honoring `use function` and the current namespace.
-
-The two candidates are then dispatched at runtime in this order:
-
-1. the class candidate names a class implementing `Html\Htmlable` → instantiate it;
-2. else the function candidate names a userland function → call it (its result must be `Html\Htmlable`);
-3. else → a clear error.
-
-The consequence is that components follow ordinary PHP scoping exactly - a class component is imported with `use`, a function component with `use function`, and using the wrong keyword fails just as it would in a normal `new`/call:
+A component tag resolves exactly as a class name does - honoring `use` imports and the current namespace, precisely as `Foo::class` would where the tag appears. The same applies to the class part of a static-method tag:
 
 ```php
 namespace Views;
 
-use App\Card;               // a class component
-use function App\Greeting;  // a function component
+use App\Card;
+use App\Author;
 
-<Card title="Hi" />   // → new App\Card(title: 'Hi')
-<Greeting />          // → App\greeting()
+<Card title="Hi" />         // → new App\Card(title: 'Hi')
+<Author::byline name="R"/>  // → App\Author::byline(name: 'R')
 ```
 
 Tags may also be written **namespace-qualified** or **fully-qualified** directly; any tag containing `\` is a component regardless of the first letter's case:
@@ -228,19 +219,16 @@ Closing follows the form:
 
 #### Userland integration: dispatch hooks
 
-By default the engine constructs a class component with `new` and calls a function or static-method component directly. In userland, particularly within frameworks, they will often want to intervene - to resolve components through a dependency-injection container (autowiring the constructor/parameter dependencies the props do not supply), or to apply a cross-cutting transform to every component's output. Three request-scoped hook lists make this possible without touching any component's code. Each behaves like `spl_autoload_register` - handlers are kept in registration order, with a matching `unregister_*` that reports whether a handler matched:
+By default the engine constructs a class component with `new` and calls a static-method component directly. In userland, particularly within frameworks, they will often want to intervene - to resolve components through a dependency-injection container (autowiring the constructor dependencies the props do not supply), or to apply a cross-cutting transform to every component's output. Two request-scoped hook lists make this possible without touching any component's code. Each behaves like `spl_autoload_register` - handlers are kept in registration order, with a matching `unregister_*` that reports whether a handler matched:
 
 | Hook | Fires for | Signature | Purpose |
 |---|---|---|---|
 | `Html\register_component_factory` | class components | `(string $class, array $args): ?object` | replace `new` (e.g. container construction) |
-| `Html\register_component_invoker` | function & static-method components | `(callable $component, array $args): ?Html\Htmlable` | replace the call (e.g. parameter autowiring) |
 | `Html\register_component_decorator` | **every** component kind | `(Html\Htmlable $rendered, string $component): Html\Htmlable` | transform / wrap / log / cache the output |
 
-The engine always does the part only it can: resolve the name, confirm the target, and route props + `#[Html\Slot]` content into `$args`. A **factory** or **invoker** only changes *how the value is produced* - it returns the value, or `null` to defer to the next handler (and finally to the engine's own `new`/call); a factory's result must be an instance of the requested class, an invoker's must be `Html\Htmlable`.
+The engine always does the part only it can: resolve the name, confirm the target, and route props + `#[Html\Slot]` content into `$args`. A **factory** only changes *how a class component's instance is produced* - it returns an instance of the requested class, or `null` to defer to the next handler (and finally to the engine's own `new`). A **decorator** is the cross-cutting seam: it runs on the `Html\Htmlable` every component produces - class and static-method alike - composing in registration order. (Plain HTML elements such as `<div>` are not components; no hook fires for them. A static-method component's *call* has no production hook; a component that needs container construction is a class component.)
 
-Construction and invocation are separate hooks because a container needs different information to autowire each (the class name vs. the callable). A **decorator** is the cross-cutting seam: it runs on the `Html\Htmlable` every component produces, composing in registration order. (Plain HTML elements such as `<div>` are not components; no hook fires for them.)
-
-Every `register_*`/`unregister_*` function also takes an optional second argument, `?string $component = null`, that scopes the hook to a single component: the hook only fires when the resolved name it would receive - the class FQCN, the function name, or `"Class::method"` - matches (case-insensitively, with or without a leading backslash). Scoped and unscoped hooks share one chain in registration order, and the dispatch skips out-of-scope hooks inside the engine, before any userland call, so a hook registered for one component costs the others nothing. Unregistering matches on both the callable and the scope it was registered with.
+Every `register_*`/`unregister_*` function also takes an optional second argument, `?string $component = null`, that scopes the hook to a single component: the hook only fires when the resolved name it would receive - the class FQCN, or `"Class::method"` - matches (case-insensitively, with or without a leading backslash). Scoped and unscoped hooks share one chain in registration order, and the dispatch skips out-of-scope hooks inside the engine, before any userland call, so a hook registered for one component costs the others nothing. Unregistering matches on both the callable and the scope it was registered with.
 
 Registration is scoped to the current runtime, so a framework registers hooks during bootstrap; when nothing is registered the hooks add no cost - the default `new`/call path is unchanged.
 
@@ -250,9 +238,6 @@ $container = ...;
 // A framework's bootstrap: wire components to the service container...
 Html\register_component_factory(
     fn(string $class, array $args) => $container->make($class, $args)
-);
-Html\register_component_invoker(
-    fn(callable $fn, array $args) => $container->call($fn, $args)
 );
 
 // ...and a cross-cutting decorator (profiling, caching, wrapping, ...).
@@ -306,20 +291,23 @@ Children are an ordered list of child nodes (text, interpolations, sub-elements)
 
 #### Components - the body slot via `#[Html\Slot]`
 
-The body of a component is routed to a constructor/function/method parameter marked with the `#[Html\Slot]` attribute.
+The body of a component is routed to the constructor parameter marked with the `#[Html\Slot]` attribute.
 
 ```php
-function Time(
-    DateTimeInterface $datetime,
-    #[Html\Slot] ?Html\Htmlable $slot = null,
-): Html\Htmlable {
-    return <time datetime={$datetime->format('c')}>
-        {$slot ?? Html\escape($datetime->format('F j'))}
-    </time>;
+class Time implements Html\Htmlable {
+    public function __construct(
+        public DateTimeInterface $datetime,
+        #[Html\Slot] public ?Html\Htmlable $slot = null,
+    ) {}
+    public function toHtml(): Html\Htmlable {
+        return <time datetime={$this->datetime->format('c')}>
+            {$this->slot ?? Html\escape($this->datetime->format('F j'))}
+        </time>;
+    }
 }
 
-// <Time datetime={$d} />            →  Time(datetime: $d)
-// <Time datetime={$d}>July 4</Time> →  Time(datetime: $d, slot: <fragment "July 4">)
+// <Time datetime={$d} />            →  new Time(datetime: $d)
+// <Time datetime={$d}>July 4</Time> →  new Time(datetime: $d, slot: <fragment "July 4">)
 ```
 
 The slot value is always a single `Html\Fragment` (an `Html\Htmlable` whose children are each normalized to `Html\Htmlable`); `{$slot}` renders the whole body, correctly escaped. The fragment's children are introspectable as an opt-in (`$slot->children`).
@@ -336,11 +324,14 @@ Rules for the slot parameter:
 A component has exactly one body slot; any *additional* content regions are passed as ordinary props typed `Html\Htmlable`. Because an attribute value is an arbitrary expression and markup is a value, a chunk of markup passes straight through with no extra syntax:
 
 ```php
-function Layout(
-    #[Html\Slot] Html\Htmlable $body,
-    ?Html\Htmlable $header = null,
-    ?Html\Htmlable $footer = null,
-): Html\Htmlable { /* ... */ }
+class Layout implements Html\Htmlable {
+    public function __construct(
+        #[Html\Slot] public Html\Htmlable $body,
+        public ?Html\Htmlable $header = null,
+        public ?Html\Htmlable $footer = null,
+    ) {}
+    public function toHtml(): Html\Htmlable { /* ... */ }
+}
 
 <Layout
     header={<h1>Title</h1>}
@@ -361,11 +352,18 @@ Because a component invocation is an ordinary call, **the body is fully evaluate
 The `:lazy` directive on a component tag opts its body out of that rule:
 
 ```php
-function Auth(bool $check, #[Html\Slot] ?Html\Htmlable $slot = null): Html\Htmlable
+class Auth implements Html\Htmlable
 {
-    // When logged out we never reference $slot, so with :lazy the body's
-    // expressions never run.
-    return $check ? <div class="user">{$slot}</div> : <></>;
+    public function __construct(
+        public bool $check,
+        #[Html\Slot] public ?Html\Htmlable $slot = null,
+    ) {}
+    public function toHtml(): Html\Htmlable
+    {
+        // When logged out we never reference $slot, so with :lazy the body's
+        // expressions never run.
+        return $this->check ? <div class="user">{$this->slot}</div> : <></>;
+    }
 }
 
 // Eager: auth()->user()->name is evaluated before Auth runs - and would error
@@ -442,9 +440,9 @@ All under the `Html\` namespace:
 * Class `Html\LazyFragment` - a `final` `Html\Htmlable` wrapping a `Closure` thunk (`__construct(Closure $thunk)`). The `:lazy` directive lowers a component body into one; it evaluates the thunk on first render and memoizes the result (see Children & slots). Not typically written by hand.
 * Attribute `Html\Slot` (bare `#[Html\Slot]`, no arguments) marking the parameter that receives a component's body.
 * Functions `Html\raw(string $html): Html\Htmlable`, `Html\escape(string $text): Html\Htmlable`.
-* Function `Html\render_component()` - the runtime target a component tag lowers into (name resolution candidates, props, slots). It is a public function so the dispatch rules are testable and so generated code is honest, but user code is expected to write tags, not call it.
+* Function `Html\render_component()` - the runtime target a component tag lowers into (resolved class name, props, slot). It is a public function so the dispatch rules are testable and so generated code is honest, but user code is expected to write tags, not call it.
 * Function `Html\render_dynamic()` - the runtime target a dynamic tag `<$tag>` lowers into: classifies the value by the element-vs-component rule and either constructs an `Html\Element` or dispatches through the `render_component()` machinery. Public for the same reasons.
-* Dispatch hooks, each with a matching `unregister_*` returning `bool`: `Html\register_component_factory()`, `Html\register_component_invoker()`, `Html\register_component_decorator()`. Each takes an optional `?string $component = null` scoping the hook to one component. Registering a non-callable throws a `TypeError` immediately (as `spl_autoload_register()` does).
+* Dispatch hooks, each with a matching `unregister_*` returning `bool`: `Html\register_component_factory()`, `Html\register_component_decorator()`. Each takes an optional `?string $component = null` scoping the hook to one component. Registering a non-callable throws a `TypeError` immediately (as `spl_autoload_register()` does).
 
 ### Error handling
 
@@ -486,15 +484,22 @@ enum Variant: string
     case Secondary = 'btn-secondary';
 }
 
-function Button(Variant $variant, #[Html\Slot] Html\Htmlable $label): Html\Htmlable
+class Button implements Html\Htmlable
 {
-    return <button class={(match ($theme) {
-        'brand' => Variant::Primary,
-        default => Variant::Secondary,
-    })->value}>{$label}</button>;
+    public function __construct(
+        public Variant $variant,
+        #[Html\Slot] public Html\Htmlable $label,
+    ) {}
+    public function toHtml(): Html\Htmlable
+    {
+        return <button class={$this->variant->value}>{$this->label}</button>;
+    }
 }
 
-echo <Button variant={$theme}>Click me</Button>;
+echo <Button variant={match ($theme) {
+    'brand' => Variant::Primary,
+    default => Variant::Secondary,
+}}>Click me</Button>;
 
 // <button class="btn-secondary">Click me</button>
 ```
@@ -522,12 +527,12 @@ echo <div>{'{'}example{'}'}</div>;
 
 ### Components are testable values
 
-A component call is an ordinary call and its result an ordinary value object, so a component is unit-tested directly: call it, assert against the tree - no rendering, no string matching, no DOM parsing:
+A component is an ordinary object and its `toHtml()` result an ordinary value object, so a component is unit-tested directly: construct it, assert against the tree - no rendering, no string matching, no DOM parsing:
 
 ```php
 public function testSaleBadgeShownWhenOnSale(): void
 {
-    $el = ProductBadge(product: $this->saleProduct());
+    $el = (new ProductBadge(product: $this->saleProduct()))->toHtml();
 
     $this->assertInstanceOf(Html\Element::class, $el);
     $this->assertSame('span', $el->tag);
@@ -535,7 +540,7 @@ public function testSaleBadgeShownWhenOnSale(): void
 }
 ```
 
-Views decompose the way any other code does: a class of small component methods, each testable in isolation, composed by a top-level method returning the final page.
+Views decompose the way any other code does: small component classes, each testable in isolation, composed by a top-level component returning the final page.
 
 ### Framework components - a Livewire-style clock
 
@@ -590,6 +595,7 @@ Some natural extensions are deliberately left out of this RFC to keep its scope 
 * **Context-aware escaping** (URL/JS/CSS contexts), as in Go's `html/template` or Latte's escaping, - so that e.g. a `javascript:` URL in `href` is caught. This RFC escapes HTML context only; the value-tree model is designed so this can be layered on later without a syntax change. Some examples include:
   * A JavaScript escaping context inside `<script>` tags, `onload=""`, `onclick=""`, etc. attributes
   * A CSS escaping context inside `<style>` tags or `style=""` attributes
+* **Function components** - plain functions (`<Greeting/>` → `greeting()`) as component tags. Deferred because a bare tag gives no syntactic signal whether a class or a function is meant, and PHP resolves the two through separate `use` / `use function` import tables - supporting functions needs dual-candidate name resolution in the compiler (a function-name analogue of `Foo::class`), a class-then-function dispatch order at runtime, a guard against tags resolving to internal functions (`<Date/>` → `date()`), and an *invoker* hook alongside the factory so containers can autowire calls as well as construction. All of it is purely additive - no syntax change - and the reference implementation had a complete working version, so this is a natural first follow-up RFC. In v1 a small function component is a small class or a static method instead.
 * **A dedicated `<slot:name>` block form** for passing large named regions, as an ergonomic alternative to markup-valued props for content that reads better as a block than as an attribute value. It would be pure sugar over what props already express (see Children & slots), so it is deferred rather than shipped in v1.
 * **Further laziness controls** - the `:lazy` directive already defers a component's body (see Children & slots); a natural extension is deferring individual markup-valued props the same way, or a component declaring that its body is always lazy so callers need not write `:lazy`.
 * **XML support** more in line with XHP's original design.
@@ -598,7 +604,7 @@ Some natural extensions are deliberately left out of this RFC to keep its scope 
 
 ## Reference implementation status
 
-* **Zero regressions** across the `Zend/tests`, `tests/`, `ext/tokenizer` and `ext/dom` suites (6000+ tests); 30+ dedicated `ext/html` tests (including bare/qualified/fully-qualified resolution and the dispatch hooks).
+* **Zero regressions** across the `Zend/tests`, `tests/`, `ext/tokenizer` and `ext/dom` suites (6000+ tests); 50+ dedicated `ext/html` tests (including bare/qualified/fully-qualified resolution and the dispatch hooks).
 * **opcache-safe** - markup compiles to ordinary opcode literals that persist and restore through the file cache (verified).
 * **Safe by construction** - dynamically-supplied tag/attribute names are validated so a spread key or `new Element($x)` can never break out of the markup; child recursion is depth-bounded.
 * **No measurable cost to non-markup code** - the syntax itself is zero-cost versus the equivalent hand-written `Html\Element` objects (it compiles to exactly those), and the scanner change is within measurement noise on ordinary PHP.

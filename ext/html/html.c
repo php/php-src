@@ -1205,7 +1205,7 @@ static bool html_unregister_handler(HashTable *list, zval *callable, zend_string
 }
 
 /* A fresh, always-refcounted array copy of the routed component arguments (or an
- * empty array when there are none), safe to hand to a userland factory/invoker.
+ * empty array when there are none), safe to hand to a userland factory.
  * Duplicating avoids force-refcounting a possibly-immutable borrowed array (an
  * empty `[]` literal is the shared, read-only zend_empty_array) and stops a
  * handler from mutating the engine's internal argument array. */
@@ -1238,7 +1238,7 @@ static HashTable *html_matching_handlers(HashTable *chain, zend_string *name)
 	return snapshot;
 }
 
-/* Run a handler chain (component factories or invokers). Each in-scope handler
+/* Run a handler chain (component factories). Each in-scope handler
  * is called as `handler(name, args)`; the first to return a non-null value
  * takes over the dispatch. Returns 1 with *result set (owned) when a handler
  * took it, 0 when every handler deferred (or none are in scope), or -1 when a
@@ -1310,34 +1310,6 @@ PHP_FUNCTION(Html_unregister_component_factory)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_BOOL(html_unregister_handler(HTML_G(component_factories), factory, component));
-}
-
-PHP_FUNCTION(Html_register_component_invoker)
-{
-	zval *invoker;
-	zend_string *component = NULL;
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL(invoker)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(component)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (!html_register_handler(&HTML_G(component_invokers), invoker, component, 1)) {
-		RETURN_THROWS();
-	}
-}
-
-PHP_FUNCTION(Html_unregister_component_invoker)
-{
-	zval *invoker;
-	zend_string *component = NULL;
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL(invoker)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(component)
-	ZEND_PARSE_PARAMETERS_END();
-
-	RETURN_BOOL(html_unregister_handler(HTML_G(component_invokers), invoker, component));
 }
 
 PHP_FUNCTION(Html_register_component_decorator)
@@ -1471,6 +1443,30 @@ out:
 	return result;
 }
 
+/* Dispatch a static-method component: call it and require an Html\Htmlable
+ * back. Same contract as html_dispatch_new(): the result goes into *result on
+ * SUCCESS, an exception is pending on FAILURE, and `args` is never released. */
+static zend_result html_dispatch_call(
+	zend_function *fn, zend_class_entry *called_scope, zend_string *component,
+	HashTable *args, zval *result)
+{
+	zval ret;
+	ZVAL_UNDEF(&ret);
+	zend_call_known_function(fn, NULL, called_scope, &ret, 0, NULL, args);
+	if (EG(exception)) {
+		zval_ptr_dtor(&ret);
+		return FAILURE;
+	}
+	if (Z_TYPE(ret) != IS_OBJECT || !instanceof_function(Z_OBJCE(ret), html_ce_Htmlable)) {
+		zend_throw_error(NULL,
+			"Component \"%s\" did not return an Html\\Htmlable", ZSTR_VAL(component));
+		zval_ptr_dtor(&ret);
+		return FAILURE;
+	}
+	ZVAL_COPY_VALUE(result, &ret);
+	return SUCCESS;
+}
+
 /* Dispatch a class component: a registered factory may construct it (e.g.
  * through a DI container) before the engine's own `new`. On SUCCESS the
  * produced object is in *result; on FAILURE an exception is pending. Never
@@ -1531,55 +1527,12 @@ static zend_result html_dispatch_new(
 	return SUCCESS;
 }
 
-/* Dispatch a function or static-method component: a registered invoker may
- * call it (e.g. autowiring parameters via a DI container) before the engine's
- * own call. Same contract as html_dispatch_new(). */
-static zend_result html_dispatch_call(
-	zend_function *fn, zend_class_entry *called_scope, zend_string *callable_name,
-	zend_string *component, HashTable *args, zval *result)
-{
-	if (HTML_G(component_invokers) != NULL) {
-		zval ret;
-		int handled = html_run_handler_chain(HTML_G(component_invokers), callable_name, args, &ret);
-		if (handled < 0) {
-			return FAILURE;
-		}
-		if (handled) {
-			if (Z_TYPE(ret) != IS_OBJECT || !instanceof_function(Z_OBJCE(ret), html_ce_Htmlable)) {
-				zend_throw_error(NULL,
-					"Component \"%s\" did not return an Html\\Htmlable", ZSTR_VAL(component));
-				zval_ptr_dtor(&ret);
-				return FAILURE;
-			}
-			ZVAL_COPY_VALUE(result, &ret);
-			return SUCCESS;
-		}
-	}
-
-	zval ret;
-	ZVAL_UNDEF(&ret);
-	zend_call_known_function(fn, NULL, called_scope, &ret, 0, NULL, args);
-	if (EG(exception)) {
-		zval_ptr_dtor(&ret);
-		return FAILURE;
-	}
-	if (Z_TYPE(ret) != IS_OBJECT || !instanceof_function(Z_OBJCE(ret), html_ce_Htmlable)) {
-		zend_throw_error(NULL,
-			"Component \"%s\" did not return an Html\\Htmlable", ZSTR_VAL(component));
-		zval_ptr_dtor(&ret);
-		return FAILURE;
-	}
-	ZVAL_COPY_VALUE(result, &ret);
-	return SUCCESS;
-}
-
 /* The body of Html\render_component(), shared with Html\render_dynamic()'s
  * component path. Same contract as a PHP_FUNCTION body: the produced
  * Html\Htmlable goes into *return_value, or an exception is left pending. */
 static void html_render_component_impl(
 	zend_string *component, HashTable *props, zend_object *slot_obj,
-	HashTable *function_candidates,
-	zend_string *function_component, zval *return_value)
+	zval *return_value)
 {
 	/* Props must be string-keyed, whichever dispatch path runs below. (On the
 	 * borrowed fast path, an integer key would silently become a positional
@@ -1596,19 +1549,17 @@ static void html_render_component_impl(
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	zend_function *fn = NULL;
-	zend_class_entry *ce = NULL;
-	zend_class_entry *called_scope = NULL;
-	/* The callable a registered invoker is handed for function/static components:
-	 * the resolved function name, or "Class::method" for a static method. */
-	zend_string *callable_name = NULL;
-	bool is_new = false;
+	/* Resolve the component to a dispatch target (RFC §4). This is the second
+	 * stage of a two-stage resolution: the compiler already resolved the *name*
+	 * against use/namespace (see zend_ast_create_markup_component in
+	 * Zend/zend_markup.c); here that name resolves to a class implementing
+	 * Html\Htmlable (instantiated) or, for "Class::method", a public static
+	 * method (called). Class resolution is the only name machinery involved —
+	 * plain functions are not components (see the RFC's Future Scope). */
+	zend_function *fn;
+	zend_class_entry *ce;
+	bool is_new;
 
-	/* Resolve the component to a dispatch target (RFC §4 resolution order). This
-	 * is the second stage of a two-stage resolution: the compiler already
-	 * resolved the *name* against use/namespace (see zend_ast_create_markup_component
-	 * in Zend/zend_markup.c); here we resolve that name to a callable
-	 * *symbol* — a static method, an Htmlable class, or a userland function. */
 	const char *end = ZSTR_VAL(component) + ZSTR_LEN(component);
 	const char *sep = zend_memnstr(ZSTR_VAL(component), "::", 2, end);
 
@@ -1617,66 +1568,17 @@ static void html_render_component_impl(
 		if (html_resolve_static_method(component, sep, &ce, &fn) == FAILURE) {
 			RETURN_THROWS();
 		}
-		called_scope = ce;
-		callable_name = component; /* "Class::method" is itself a valid callable */
+		is_new = false;
 	} else {
-		/* Bare tag: the class candidate ($component) implementing Htmlable wins,
-		 * then the function candidate; an internal function is the `date()`
-		 * footgun. The class and function candidates may differ because the
-		 * compiler resolved them through `use` and `use function` respectively;
-		 * a direct single-name call leaves $functionComponent null, so the one
-		 * name is tried both ways. */
 		ce = zend_lookup_class(component);
-		if (ce != NULL && instanceof_function(ce, html_ce_Htmlable)) {
-			fn = ce->constructor;
-			is_new = true;
-		} else {
-			/* The function candidate is a single resolved name, or the
-			 * compiler's candidate list for an unqualified name in a namespace
-			 * (namespaced then global), tried in order like an ordinary call. */
-			zend_function *func = NULL;
-			zend_string *fn_name = NULL;
-
-			if (function_candidates != NULL) {
-				zval *candidate;
-				ZEND_HASH_FOREACH_VAL(function_candidates, candidate) {
-					ZVAL_DEREF(candidate);
-					if (Z_TYPE_P(candidate) != IS_STRING) {
-						zend_argument_type_error(4,
-							"must contain only function-name strings, %s given",
-							zend_zval_value_name(candidate));
-						RETURN_THROWS();
-					}
-					zend_string *lc_name = zend_string_tolower(Z_STR_P(candidate));
-					func = zend_fetch_function(lc_name);
-					zend_string_release(lc_name);
-					if (func != NULL) {
-						fn_name = Z_STR_P(candidate);
-						break;
-					}
-				} ZEND_HASH_FOREACH_END();
-			} else {
-				fn_name = function_component ? function_component : component;
-				zend_string *lc_name = zend_string_tolower(fn_name);
-				func = zend_fetch_function(lc_name);
-				zend_string_release(lc_name);
-			}
-
-			if (func == NULL) {
-				zend_throw_error(NULL,
-					"\"%s\" is not a component: no class implementing Html\\Htmlable "
-					"and no user-defined function of that name", ZSTR_VAL(component));
-				RETURN_THROWS();
-			}
-			if (func->type == ZEND_INTERNAL_FUNCTION) {
-				zend_throw_error(NULL,
-					"<%s> resolved to the internal function %s(), which cannot be a component",
-					ZSTR_VAL(component), ZSTR_VAL(fn_name));
-				RETURN_THROWS();
-			}
-			fn = func;
-			callable_name = fn_name;
+		if (ce == NULL || !instanceof_function(ce, html_ce_Htmlable)) {
+			zend_throw_error(NULL,
+				"\"%s\" is not a component: no such class implementing Html\\Htmlable",
+				ZSTR_VAL(component));
+			RETURN_THROWS();
 		}
+		fn = ce->constructor;
+		is_new = true;
 	}
 
 	/* Build the named-argument array (props + routed slots). */
@@ -1711,7 +1613,7 @@ static void html_render_component_impl(
 	ZVAL_UNDEF(&result);
 	zend_result dispatched = is_new
 		? html_dispatch_new(ce, fn, args, &result)
-		: html_dispatch_call(fn, called_scope, callable_name, component, args, &result);
+		: html_dispatch_call(fn, ce, component, args, &result);
 
 	if (owns_args) {
 		zend_array_release(args);
@@ -1720,11 +1622,11 @@ static void html_render_component_impl(
 		RETURN_THROWS();
 	}
 
-	/* Decorators wrap the produced Htmlable uniformly, whatever its kind. The
-	 * name they receive is the resolved dispatch target: the class name, the
-	 * function actually called, or "Class::method" — not merely the class-side
-	 * candidate, which can differ from the called function under `use function`. */
-	if (!html_apply_decorators(is_new ? ce->name : callable_name, &result)) {
+	/* Decorators wrap the produced Htmlable uniformly, whatever its kind. A
+	 * class component's name is the resolved ce->name (which may differ in
+	 * case/aliasing from the tag); a static method's is the "Class::method"
+	 * string, whose class part the compiler already resolved. */
+	if (!html_apply_decorators(is_new ? ce->name : component, &result)) {
 		RETURN_THROWS();
 	}
 
@@ -1736,19 +1638,15 @@ PHP_FUNCTION(Html_render_component)
 	zend_string *component;
 	HashTable *props = NULL;
 	zend_object *slot_obj = NULL;
-	zend_string *function_component = NULL;
-	HashTable *function_candidates = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(1, 4)
+	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(component)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT(props)
 		Z_PARAM_OBJ_OF_CLASS_OR_NULL(slot_obj, html_ce_Htmlable)
-		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(function_candidates, function_component)
 	ZEND_PARSE_PARAMETERS_END();
 
-	html_render_component_impl(component, props, slot_obj,
-		function_candidates, function_component, return_value);
+	html_render_component_impl(component, props, slot_obj, return_value);
 }
 
 /* The runtime target of a dynamic tag `<$tag …>…</$tag>` (RFC §4). The value
@@ -1786,9 +1684,8 @@ PHP_FUNCTION(Html_render_dynamic)
 	if (zend_markup_name_is_component(tag)) {
 		/* Body children become the slot Fragment, exactly as the compiler builds
 		 * one for a static component tag. A dynamic component name is already
-		 * fully qualified (e.g. Foo::class), so there is no separate function
-		 * candidate: like a direct render_component call, the one name is tried
-		 * as a class and then as a function. */
+		 * fully qualified (e.g. Foo::class, or "Class::method" for a static
+		 * method) and resolves directly. */
 		zval slot;
 		zend_object *slot_obj = NULL;
 		ZVAL_UNDEF(&slot);
@@ -1806,7 +1703,7 @@ PHP_FUNCTION(Html_render_dynamic)
 		}
 		html_render_component_impl(tag,
 			attributes != NULL ? Z_ARRVAL_P(attributes) : NULL, slot_obj,
-			NULL, NULL, return_value);
+			return_value);
 		zval_ptr_dtor(&slot);
 		return;
 	}
@@ -1961,7 +1858,6 @@ PHP_METHOD(Html_Raw, toDom)
 static PHP_GINIT_FUNCTION(html)
 {
 	html_globals->component_factories = NULL;
-	html_globals->component_invokers = NULL;
 	html_globals->component_decorators = NULL;
 }
 
@@ -1971,10 +1867,6 @@ PHP_RSHUTDOWN_FUNCTION(html)
 	if (HTML_G(component_factories) != NULL) {
 		zend_hash_release(HTML_G(component_factories));
 		HTML_G(component_factories) = NULL;
-	}
-	if (HTML_G(component_invokers) != NULL) {
-		zend_hash_release(HTML_G(component_invokers));
-		HTML_G(component_invokers) = NULL;
 	}
 	if (HTML_G(component_decorators) != NULL) {
 		zend_hash_release(HTML_G(component_decorators));

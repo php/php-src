@@ -26,20 +26,18 @@ extern zend_module_entry html_module_entry;
 
 /* Request-scoped userland hooks that let a framework take over how a component
  * tag is turned into an object (RFC §4). `component_factories` replace the `new`
- * for class components (e.g. resolve through a DI container); `component_invokers`
- * replace the call for function / static-method components (e.g. autowire params).
- * Both are the *production* seam and are specialized by kind. `component_decorators`
- * are the cross-cutting seam: they run on the produced Html\Htmlable of *every*
- * component kind, so output transforms / wrapping / logging apply uniformly.
- * Each is an ordered list of html_handler entries (callable + optional
- * per-component scope) tried in registration order, like spl_autoload_register;
- * a factory/invoker returns an object to take over the dispatch or null to
- * defer, while each decorator wraps the previous one's result. A scoped entry
- * is skipped in C — before any userland call — for every other component.
- * All are NULL until first registered and are cleared at request shutdown. */
+ * for a component (e.g. resolve through a DI container) — the *production* seam.
+ * `component_decorators` are the cross-cutting seam: they run on the produced
+ * Html\Htmlable of every component, so output transforms / wrapping / logging
+ * apply uniformly. Each is an ordered list of html_handler entries (callable +
+ * optional per-component scope) tried in registration order, like
+ * spl_autoload_register; a factory returns an object to take over the dispatch
+ * or null to defer, while each decorator wraps the previous one's result. A
+ * scoped entry is skipped in C — before any userland call — for every other
+ * component. Both are NULL until first registered and are cleared at request
+ * shutdown. */
 ZEND_BEGIN_MODULE_GLOBALS(html)
 	HashTable *component_factories;
-	HashTable *component_invokers;
 	HashTable *component_decorators;
 ZEND_END_MODULE_GLOBALS(html)
 

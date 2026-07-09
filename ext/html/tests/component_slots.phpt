@@ -11,17 +11,20 @@ use Html\Slot;
 
 // The body slot routes to the #[Slot] parameter; other content areas are
 // ordinary props typed Html\Htmlable (what named slots used to be).
-function Layout(
-    string $lang,
-    #[Slot] Html\Htmlable $body,
-    ?Html\Htmlable $header = null,
-    ?Html\Htmlable $footer = null,
-): Html\Htmlable {
-    return new E('main', ['lang' => $lang], [$header, $body, $footer]);
+class Layout implements Html\Htmlable {
+    public function __construct(
+        public string $lang,
+        #[Slot] public ?Html\Htmlable $body = null,
+        public ?Html\Htmlable $header = null,
+        public ?Html\Htmlable $footer = null,
+    ) {}
+    public function toHtml(): Html\Htmlable {
+        return new E('main', ['lang' => $this->lang], [$this->header, $this->body, $this->footer]);
+    }
 }
 
 $out = render_component(
-    'Layout',
+    Layout::class,
     [
         'lang'   => 'en',
         'header' => new E('h1', [], ['Title']),
@@ -31,7 +34,7 @@ $out = render_component(
 );
 echo $out, "\n";
 
-// A component on a class constructor, body slot only.
+// Body slot only.
 class Panel implements Html\Htmlable {
     public function __construct(
         public string $kind,

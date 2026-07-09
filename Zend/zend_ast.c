@@ -2574,16 +2574,6 @@ simple_list:
 			}
 			smart_str_appends(str, "::class");
 			break;
-		case ZEND_AST_CALLABLE_NAME:
-			/* Only produced by markup component lowering, which is a call and so
-			 * never reaches a const-expr export; handled for completeness. It
-			 * compiles to a constant function name (or candidate-name list, see
-			 * zend_compile_callable_name), so export the as-written name quoted
-			 * rather than as a bare constant. */
-			smart_str_appendc(str, '\'');
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
-			smart_str_appendc(str, '\'');
-			break;
 		case ZEND_AST_ASSIGN:            BINARY_OP(" = ",   90, 91, 90);
 		case ZEND_AST_ASSIGN_REF:        BINARY_OP(" =& ",  90, 91, 90);
 		case ZEND_AST_ASSIGN_OP:

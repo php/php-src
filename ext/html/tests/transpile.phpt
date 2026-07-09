@@ -16,6 +16,12 @@ echo Html\transpile(<<<'CODE'
 $page = <><Card title="Hi" {...$attrs}><b>f</b>body</Card></>;
 CODE);
 
+// A static-method tag resolves its class part like any class name.
+echo Html\transpile(<<<'CODE'
+<?php
+echo <Author::byline name="Ada"/>;
+CODE);
+
 // The `:lazy` directive wraps the body in a deferred Html\LazyFragment.
 echo Html\transpile(<<<'CODE'
 <?php
@@ -46,8 +52,9 @@ try {
 ?>
 --EXPECT--
 echo new \Html\Element('div', ['class' => 'box', 'id' => $id], ['Hello ', $name]);
-$page = new \Html\Fragment([\Html\render_component(Card::class, ['title' => 'Hi', ...$attrs], new \Html\Fragment([new \Html\Element('b', [], ['f']), 'body']), 'Card')]);
-$page = \Html\render_component(Auth::class, [], new \Html\LazyFragment(fn() => new \Html\Fragment(['Hello ', $name])), 'Auth');
+$page = new \Html\Fragment([\Html\render_component(Card::class, ['title' => 'Hi', ...$attrs], new \Html\Fragment([new \Html\Element('b', [], ['f']), 'body']))]);
+echo \Html\render_component(Author::class . '::byline', ['name' => 'Ada'], null);
+$page = \Html\render_component(Auth::class, [], new \Html\LazyFragment(fn() => new \Html\Fragment(['Hello ', $name])));
 echo new \Html\Element('p', [], ['Fish & chips — £5']);
 function double(int $x): int {
     return $x * 2;

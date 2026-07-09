@@ -315,11 +315,11 @@ static zend_ast *zend_ast_markup_fq_name(const char *name, size_t len)
 }
 
 /* Element vs component classification (RFC §4): a tag whose first character is
- * uppercase, which is namespace-qualified (contains "\"), or which names a static
- * method via "::", dispatches as a component; anything else is a literal HTML
- * element. The single home for this rule: the compiler applies it to static tag
- * names here, and Html\render_dynamic applies it to a dynamic tag's runtime
- * value (hence ZEND_API). */
+ * uppercase, which is namespace-qualified (contains "\"), or which names a
+ * static method via "::", dispatches as a component; anything else is a literal
+ * HTML element. The single home for this rule: the compiler applies it to
+ * static tag names here, and Html\render_dynamic applies it to a dynamic tag's
+ * runtime value (hence ZEND_API). */
 ZEND_API bool zend_markup_name_is_component(zend_string *tag)
 {
 	return (ZSTR_LEN(tag) > 0 && ZSTR_VAL(tag)[0] >= 'A' && ZSTR_VAL(tag)[0] <= 'Z')
@@ -401,24 +401,26 @@ static bool zend_markup_extract_lazy(zend_ast *attrs)
 	return false;
 }
 
-/* Lower a component tag (capitalized name, namespace-qualified name, or
- * "Class::method") into a call to
- * \Html\render_component(component, props, slot, functionComponent)
+/* Lower a component tag (a capitalized or namespace-qualified name, or
+ * "Class::method") into a call to \Html\render_component(component, props, slot)
  * (RFC §3). Attributes become the props array and the body content becomes a
  * single \Html\Fragment passed as the slot (or a lazy \Html\LazyFragment when
  * the `:lazy` directive is present).
  *
- * Component resolution is two-stage. A bare tag could name either a class
- * component or a function component, which PHP resolves through *separate* import
- * tables (`use` vs `use function`). So this pass resolves the name *both* ways —
- * a class candidate (ZEND_AST_CLASS_NAME, the `component` argument) and a function
- * candidate (ZEND_AST_CALLABLE_NAME, the `functionComponent` argument) — and the
- * runtime applies the dispatch order (Class::method, then Htmlable class, then
- * userland function) across the two, so `use App\C;` resolves a class and
- * `use function App\C;` resolves a function, exactly as ordinary PHP does. A
- * leading "\" makes both candidates fully qualified. A "Class::method" tag is
- * unambiguously a static method, so it has no function candidate. See
- * PHP_FUNCTION(Html_render_component) in ext/html/html.c for the second stage. */
+ * Component resolution is two-stage, and every tag resolves through the *class*
+ * name rules only: a bare/qualified tag lowers to ZEND_AST_CLASS_NAME (the
+ * `Component::class` machinery), and a "Class::method" tag lowers the class
+ * part the same way with "::method" appended — both honor `use` imports and
+ * the current namespace, with a leading "\" fully qualified. The runtime then
+ * resolves the name to a class implementing Html\Htmlable (instantiated) or a
+ * public static method (called) — see PHP_FUNCTION(Html_render_component) in
+ * ext/html/html.c.
+ *
+ * Plain *function* components are deliberately out of v1: a bare tag gives no
+ * signal whether a class or a function is meant, and functions resolve through
+ * the separate `use function` import table, so supporting them would need a
+ * second compile-time resolution and a new AST kind to carry it. A static
+ * method has no such ambiguity — its class part resolves like any class. */
 static zend_ast *zend_ast_create_markup_component(zend_ast *name, zend_ast *attrs, zend_ast *children)
 {
 	uint32_t lineno = zend_ast_get_lineno(name);
@@ -426,14 +428,12 @@ static zend_ast *zend_ast_create_markup_component(zend_ast *name, zend_ast *attr
 	const char *sep = strstr(ZSTR_VAL(tag), "::");
 	/* A leading "\" is a fully-qualified reference; otherwise resolve the name
 	 * (unqualified or qualified) against the current use/namespace. */
-	uint32_t name_type = (ZSTR_LEN(tag) > 0 && ZSTR_VAL(tag)[0] == '\\')
-		? ZEND_NAME_FQ : ZEND_NAME_NOT_FQ;
+	uint32_t name_type = (ZSTR_VAL(tag)[0] == '\\') ? ZEND_NAME_FQ : ZEND_NAME_NOT_FQ;
 	zend_ast *component_name;
-	zend_ast *function_name;
 
 	if (sep != NULL) {
 		/* "Class::method": resolve the class part as a class, then append
-		 * "::method". A static method is never a plain function. */
+		 * "::method". */
 		size_t class_len = sep - ZSTR_VAL(tag);
 		zend_ast *class_name = zend_ast_create_zval_from_str(
 			zend_string_init(ZSTR_VAL(tag), class_len, 0));
@@ -444,20 +444,10 @@ static zend_ast *zend_ast_create_markup_component(zend_ast *name, zend_ast *attr
 		component_name = zend_ast_create_concat_op(
 			zend_ast_create(ZEND_AST_CLASS_NAME, class_name),
 			zend_ast_create_zval(&suffix));
-
-		zval null_zv;
-		ZVAL_NULL(&null_zv);
-		function_name = zend_ast_create_zval(&null_zv);
 	} else {
-		/* Resolve the name both as a class (honors `use`) and as a function
-		 * (honors `use function`); the runtime picks between them. */
 		zend_ast *class_name = zend_ast_create_zval_from_str(zend_string_copy(tag));
 		class_name->attr = name_type;
 		component_name = zend_ast_create(ZEND_AST_CLASS_NAME, class_name);
-
-		zend_ast *func_name = zend_ast_create_zval_from_str(zend_string_copy(tag));
-		func_name->attr = name_type;
-		function_name = zend_ast_create(ZEND_AST_CALLABLE_NAME, func_name);
 	}
 	zend_ast_destroy(name);
 
@@ -492,7 +482,6 @@ static zend_ast *zend_ast_create_markup_component(zend_ast *name, zend_ast *attr
 	args = zend_ast_list_add(args, component_name);
 	args = zend_ast_list_add(args, attrs);
 	args = zend_ast_list_add(args, slot);
-	args = zend_ast_list_add(args, function_name);
 
 	return zend_ast_create(ZEND_AST_CALL, fn, args);
 }
@@ -510,7 +499,8 @@ zend_ast *zend_ast_create_markup_element(zend_ast *name, zend_ast *attrs, zend_a
 	uint32_t lineno = (name != NULL)
 		? zend_ast_get_lineno(name) : zend_ast_get_lineno(children);
 
-	/* A capitalized name, or one containing "::", is a component (RFC §3). */
+	/* A capitalized name, a namespace-qualified name, or one containing "::"
+	 * is a component (RFC §3). */
 	if (name != NULL && zend_markup_name_is_component(zend_ast_get_str(name))) {
 		result = zend_ast_create_markup_component(name, attrs, children);
 		result->lineno = lineno;

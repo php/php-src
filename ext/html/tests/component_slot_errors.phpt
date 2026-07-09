@@ -15,22 +15,33 @@ function err(callable $fn): string {
 }
 
 // Body content given, but a parameter+attribute would collide.
-function Solo(#[Slot] Html\Htmlable $body): Html\Htmlable { return new E('p', [], [$body]); }
-echo err(fn() => render_component('Solo', ['body' => 'x'], new Fragment([Html\raw('y')]))), "\n";
+class Solo implements Html\Htmlable {
+    public function __construct(#[Slot] public Html\Htmlable $body) {}
+    public function toHtml(): Html\Htmlable { return new E('p', [], [$this->body]); }
+}
+echo err(fn() => render_component(Solo::class, ['body' => 'x'], new Fragment([Html\raw('y')]))), "\n";
 
 // Body content given to a component that has no slot parameter.
-function NoSlot(string $x): Html\Htmlable { return new E('i', [], [$x]); }
-echo err(fn() => render_component('NoSlot', ['x' => 'hi'], new Fragment([Html\raw('body')]))), "\n";
+class NoSlot implements Html\Htmlable {
+    public function __construct(public string $x) {}
+    public function toHtml(): Html\Htmlable { return new E('i', [], [$this->x]); }
+}
+echo err(fn() => render_component(NoSlot::class, ['x' => 'hi'], new Fragment([Html\raw('body')]))), "\n";
 
 // More than one slot parameter is a definition error.
-function TwoSlots(#[Slot] Html\Htmlable $a, #[Slot] Html\Htmlable $b): Html\Htmlable {
-    return new Fragment([$a, $b]);
+class TwoSlots implements Html\Htmlable {
+    public function __construct(#[Slot] public ?Html\Htmlable $a = null, #[Slot] public ?Html\Htmlable $b = null) {}
+    public function toHtml(): Html\Htmlable { return new Fragment([$this->a, $this->b]); }
 }
-echo err(fn() => render_component('TwoSlots', [], new Fragment([]))), "\n";
+echo err(fn() => render_component(TwoSlots::class, [], new Fragment([]))), "\n";
 
 // #[Slot] on a variadic parameter is a definition error.
-function Variadic(#[Slot] Html\Htmlable ...$parts): Html\Htmlable { return new Fragment($parts); }
-echo err(fn() => render_component('Variadic', [], new Fragment([]))), "\n";
+class Variadic implements Html\Htmlable {
+    private array $parts;
+    public function __construct(#[Slot] Html\Htmlable ...$parts) { $this->parts = $parts; }
+    public function toHtml(): Html\Htmlable { return new Fragment($this->parts); }
+}
+echo err(fn() => render_component(Variadic::class, [], new Fragment([]))), "\n";
 ?>
 --EXPECTF--
 Error: Parameter $body is filled by both an attribute and body content

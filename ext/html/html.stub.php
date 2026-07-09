@@ -166,22 +166,15 @@ namespace Html {
      * into; it is exposed as a public function so the dispatch and slot-routing
      * rules are directly testable, but user code is expected to write tags.
      *
-     * A bare `<Component/>` tag could name either a class or a function, which PHP
-     * resolves through separate import tables (`use` vs `use function`). The
-     * compiler therefore passes two already-resolved candidates: $component (the
-     * class-resolved name) and $functionComponent (the function-resolved name; a
-     * list of names — current namespace first, then global — when an unqualified
-     * name in a namespace gets PHP's usual global function fallback, tried in
-     * order). They are resolved in this order:
-     *   1. "Class::method" in $component - a static-method component (explicit);
-     *   2. $component names a class implementing Html\Htmlable - instantiated;
-     *   3. $functionComponent (or $component, when $functionComponent is null)
-     *      names a userland function - called; its result must be Html\Htmlable;
-     *   4. otherwise (an internal/builtin function, or no such symbol) a hard
-     *      error - this is the `<Date/>` → `date()` footgun guard.
-     *
-     * When called directly with a single name, leave $functionComponent null: the
-     * one name is then tried as both a class and a function.
+     * A component is a class implementing Html\Htmlable, or a public static
+     * method on a class ("Class::method"). $component is the already-resolved
+     * name (the compiler resolves the tag — the class part of a "::" tag
+     * included — against `use` imports and the current namespace, as
+     * `Component::class` does). A class name is looked up, confirmed to
+     * implement Html\Htmlable, and instantiated; a "Class::method" name is
+     * called and must return an Html\Htmlable. Anything else — no such class,
+     * a class not implementing the interface, a non-public/non-static method —
+     * is a hard error. Plain functions are not components (Future Scope).
      *
      * $props become named arguments. The body $slot is routed to the parameter
      * marked with #[Html\Slot]. A parameter filled by both a prop and the body,
@@ -194,7 +187,6 @@ namespace Html {
         string $component,
         array $props = [],
         ?\Html\Htmlable $slot = null,
-        array|string|null $functionComponent = null,
     ): \Html\Htmlable {}
 
     /**
@@ -206,10 +198,8 @@ namespace Html {
      * `<Card/>`, hooks and decorators included, with $attributes as props and
      * $children as the body slot); anything else constructs a literal
      * `new \Html\Element($tag, $attributes, $children)` (so `$tag = 'div'`
-     * behaves like `<div>`). Like a direct render_component() call, a dynamic
-     * component name is tried as a class and then as a function; there is no
-     * compile-time `use` resolution, so pass a fully-qualified name
-     * (Foo::class).
+     * behaves like `<div>`). There is no compile-time `use` resolution, so pass
+     * a fully-qualified name (Foo::class).
      *
      * @param array<string, mixed> $attributes
      * @param array<int, mixed> $children
@@ -262,44 +252,11 @@ namespace Html {
     function unregister_component_factory(callable $factory, ?string $component = null): bool {}
 
     /**
-     * Register an invoker for *function* and *static-method* components
-     * (`<greeting/>`, `<Author::byline/>`), so a framework can call them through
-     * its container and autowire parameters the props don't supply. The engine
-     * still routes props + slots into named arguments.
-     *
-     * The invoker is called as `$invoker(callable $component, array $args): ?Html\Htmlable`
-     * with the component callable (a function name, or "Class::method") and the
-     * routed named-argument array. It must return the produced Html\Htmlable, or
-     * null to defer to the next invoker (and finally the engine's own call).
-     * Invokers are tried in registration order. Registration is request-scoped.
-     *
-     * Passing $component scopes the invoker to that one component: it only runs
-     * when the resolved callable name — the same name the invoker would receive,
-     * i.e. the function's FQCN or "Class::method" — matches (case-insensitive,
-     * with or without a leading backslash). Every other component skips it
-     * entirely, with no userland call.
-     *
-     * Example (Laravel):
-     *   Html\register_component_invoker(
-     *       fn(callable $fn, array $args) => app()->call($fn, $args)
-     *   );
-     */
-    function register_component_invoker(callable $invoker, ?string $component = null): void {}
-
-    /**
-     * Remove a previously registered component invoker. Returns whether one
-     * matched. The registration to remove is identified by both the callable
-     * and the $component scope it was registered with (null only matches an
-     * unscoped registration).
-     */
-    function unregister_component_invoker(callable $invoker, ?string $component = null): bool {}
-
-    /**
-     * Register a decorator that runs on the Html\Htmlable every component produces
-     * — class, function, and static-method alike — after it has been constructed
-     * or called. This is the cross-cutting seam (as opposed to the kind-specific
-     * factory/invoker production seams): use it to wrap, transform, log, profile,
-     * or cache component output uniformly.
+     * Register a decorator that runs on the Html\Htmlable every component
+     * produces — class and static-method alike — after it has been constructed
+     * or called. This is the cross-cutting seam (as opposed to the factory
+     * production seam): use it to wrap, transform, log, profile, or cache
+     * component output uniformly.
      *
      * The decorator is called as
      * `$decorator(Html\Htmlable $rendered, string $component): Html\Htmlable`

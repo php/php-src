@@ -26,8 +26,12 @@ echo (<Card {...$props}/>)->__toString(), "\n";
 echo (<Card title="Explicit" {...['tone' => 'soft']}/>)->__toString(), "\n";
 
 // A component variadic collects unknown (e.g. hyphenated) spread keys.
-function Box(string $kind, ...$attrs): Html\Htmlable {
-    return new E('div', ['class' => $kind, ...$attrs], ['box']);
+class Box implements Html\Htmlable {
+    private array $attrs;
+    public function __construct(public string $kind, ...$attrs) { $this->attrs = $attrs; }
+    public function toHtml(): Html\Htmlable {
+        return new E('div', ['class' => $this->kind, ...$this->attrs], ['box']);
+    }
 }
 echo (<Box kind="b" {...['data-x' => '1', 'role' => 'note']}/>)->__toString(), "\n";
 ?>

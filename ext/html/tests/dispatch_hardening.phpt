@@ -16,7 +16,6 @@ function expect_error(callable $f): void {
 
 // 1. Registering a non-callable hook is an immediate TypeError.
 expect_error(fn() => Html\register_component_factory("no_such_function_xyz"));
-expect_error(fn() => Html\register_component_invoker(42));
 expect_error(fn() => Html\register_component_decorator([new stdClass(), "nope"]));
 
 // 2. A void element cannot have children (they would be silently dropped).
@@ -54,7 +53,6 @@ expect_error(fn() => Html\render_component("Methods::nonStatic"));
 ?>
 --EXPECTF--
 TypeError: Html\register_component_factory(): Argument #1 ($factory) must be a valid callback
-TypeError: Html\register_component_invoker(): Argument #1 ($invoker) must be a valid callback
 TypeError: Html\register_component_decorator(): Argument #1 ($decorator) must be a valid callback
 Error: Void element <br> cannot have children
 Error: Component props must use string keys
