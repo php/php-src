@@ -344,6 +344,25 @@ static zend_result html_append_child(smart_str *buf, zval *value, uint32_t depth
 	}
 }
 
+/* Emit ` name="value"` into the buffer and release `value`. The `escape` flag
+ * is the one security-relevant decision in attribute emission: every value is
+ * escaped except an Htmlable's already-safe HTML (and numbers, which cannot
+ * contain escapable characters). Values are always serialized double-quoted —
+ * no unquoted output form exists. */
+static void html_append_attr_value(smart_str *buf, zend_string *name, zend_string *value, bool escape)
+{
+	smart_str_appendc(buf, ' ');
+	smart_str_append(buf, name);
+	smart_str_appendl(buf, "=\"", 2);
+	if (escape) {
+		html_append_escaped(buf, value);
+	} else {
+		smart_str_append(buf, value);
+	}
+	smart_str_appendc(buf, '"');
+	zend_string_release(value);
+}
+
 /* Coerce and append a single attribute value (RFC §5 attribute coercion). */
 static zend_result html_append_attribute(smart_str *buf, zend_string *name, zval *value)
 {
@@ -360,30 +379,15 @@ static zend_result html_append_attribute(smart_str *buf, zend_string *name, zval
 			return SUCCESS;
 
 		case IS_LONG:
-			smart_str_appendc(buf, ' ');
-			smart_str_append(buf, name);
-			smart_str_appendl(buf, "=\"", 2);
-			smart_str_append_long(buf, Z_LVAL_P(value));
-			smart_str_appendc(buf, '"');
+			html_append_attr_value(buf, name, zend_long_to_str(Z_LVAL_P(value)), false);
 			return SUCCESS;
 
-		case IS_DOUBLE: {
-			zend_string *s = zend_double_to_str(Z_DVAL_P(value));
-			smart_str_appendc(buf, ' ');
-			smart_str_append(buf, name);
-			smart_str_appendl(buf, "=\"", 2);
-			smart_str_append(buf, s);
-			smart_str_appendc(buf, '"');
-			zend_string_release(s);
+		case IS_DOUBLE:
+			html_append_attr_value(buf, name, zend_double_to_str(Z_DVAL_P(value)), false);
 			return SUCCESS;
-		}
 
 		case IS_STRING:
-			smart_str_appendc(buf, ' ');
-			smart_str_append(buf, name);
-			smart_str_appendl(buf, "=\"", 2);
-			html_append_escaped(buf, Z_STR_P(value));
-			smart_str_appendc(buf, '"');
+			html_append_attr_value(buf, name, zend_string_copy(Z_STR_P(value)), true);
 			return SUCCESS;
 
 		case IS_OBJECT: {
@@ -399,12 +403,7 @@ static zend_result html_append_attribute(smart_str *buf, zend_string *name, zval
 				if (!s) {
 					return FAILURE;
 				}
-				smart_str_appendc(buf, ' ');
-				smart_str_append(buf, name);
-				smart_str_appendl(buf, "=\"", 2);
-				smart_str_append(buf, s);
-				smart_str_appendc(buf, '"');
-				zend_string_release(s);
+				html_append_attr_value(buf, name, s, false);
 				return SUCCESS;
 			}
 
@@ -413,12 +412,7 @@ static zend_result html_append_attribute(smart_str *buf, zend_string *name, zval
 				if (!s) {
 					return FAILURE;
 				}
-				smart_str_appendc(buf, ' ');
-				smart_str_append(buf, name);
-				smart_str_appendl(buf, "=\"", 2);
-				html_append_escaped(buf, s);
-				smart_str_appendc(buf, '"');
-				zend_string_release(s);
+				html_append_attr_value(buf, name, s, true);
 				return SUCCESS;
 			}
 			ZEND_FALLTHROUGH;
