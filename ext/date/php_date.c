@@ -901,11 +901,10 @@ PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_
 /* }}} */
 
 /* {{{ php_idate */
-PHPAPI int php_idate(char format, time_t ts, bool localtime)
+PHPAPI bool php_idate(char format, time_t ts, bool localtime, int *result)
 {
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
-	int retval = -1;
 	timelib_time_offset *offset = NULL;
 	timelib_sll isoweek, isoyear;
 
@@ -947,46 +946,53 @@ PHPAPI int php_idate(char format, time_t ts, bool localtime)
 
 	switch (format) {
 		/* day */
-		case 'd': case 'j': retval = (int) t->d; break;
+		case 'd': case 'j': *result = (int) t->d; break;
 
-		case 'N': retval = (int) timelib_iso_day_of_week(t->y, t->m, t->d); break;
-		case 'w': retval = (int) timelib_day_of_week(t->y, t->m, t->d); break;
-		case 'z': retval = (int) timelib_day_of_year(t->y, t->m, t->d); break;
+		case 'N': *result = (int) timelib_iso_day_of_week(t->y, t->m, t->d); break;
+		case 'w': *result = (int) timelib_day_of_week(t->y, t->m, t->d); break;
+		case 'z': *result = (int) timelib_day_of_year(t->y, t->m, t->d); break;
 
 		/* week */
-		case 'W': retval = (int) isoweek; break; /* iso weeknr */
+		case 'W': *result = (int) isoweek; break; /* iso weeknr */
 
 		/* month */
-		case 'm': case 'n': retval = (int) t->m; break;
-		case 't': retval = (int) timelib_days_in_month(t->y, t->m); break;
+		case 'm': case 'n': *result = (int) t->m; break;
+		case 't': *result = (int) timelib_days_in_month(t->y, t->m); break;
 
 		/* year */
-		case 'L': retval = (int) timelib_is_leap((int) t->y); break;
-		case 'y': retval = (int) (t->y % 100); break;
-		case 'Y': retval = (int) t->y; break;
-		case 'o': retval = (int) isoyear; break; /* iso year */
+		case 'L': *result = (int) timelib_is_leap((int) t->y); break;
+		case 'y': *result = (int) (t->y % 100); break;
+		case 'Y': *result = (int) t->y; break;
+		case 'o': *result = (int) isoyear; break; /* iso year */
 
 		/* Swatch Beat a.k.a. Internet Time */
 		case 'B':
-			retval = ((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10);
-			if (retval < 0) {
-				retval += 864000;
+			*result = ((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10);
+			if (*result < 0) {
+				*result += 864000;
 			}
 			/* Make sure to do this on a positive int to avoid rounding errors */
-			retval = (retval / 864) % 1000;
+			*result = (*result / 864) % 1000;
 			break;
 
 		/* time */
-		case 'g': case 'h': retval = (int) ((t->h % 12) ? (int) t->h % 12 : 12); break;
-		case 'H': case 'G': retval = (int) t->h; break;
-		case 'i': retval = (int) t->i; break;
-		case 's': retval = (int) t->s; break;
+		case 'g': case 'h': *result = (int) ((t->h % 12) ? (int) t->h % 12 : 12); break;
+		case 'H': case 'G': *result = (int) t->h; break;
+		case 'i': *result = (int) t->i; break;
+		case 's': *result = (int) t->s; break;
 
 		/* timezone */
-		case 'I': retval = (int) (!localtime ? offset->is_dst : 0); break;
-		case 'Z': retval = (int) (!localtime ? offset->offset : 0); break;
+		case 'I': *result = (int) (!localtime ? offset->is_dst : 0); break;
+		case 'Z': *result = (int) (!localtime ? offset->offset : 0); break;
 
-		case 'U': retval = (int) t->sse; break;
+		case 'U': *result = (int) t->sse; break;
+
+		default:
+			if (!localtime) {
+				timelib_time_offset_dtor(offset);
+			}
+			timelib_time_dtor(t);
+			return false;
 	}
 
 	if (!localtime) {
@@ -994,7 +1000,7 @@ PHPAPI int php_idate(char format, time_t ts, bool localtime)
 	}
 	timelib_time_dtor(t);
 
-	return retval;
+	return true;
 }
 /* }}} */
 
@@ -1018,7 +1024,8 @@ PHP_FUNCTION(idate)
 	zend_string *format;
 	zend_long    ts;
 	bool    ts_is_null = 1;
-	int ret;
+	int ret = 0;
+	bool ok = false;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(format)
@@ -1035,8 +1042,8 @@ PHP_FUNCTION(idate)
 		ts = php_time();
 	}
 
-	ret = php_idate(ZSTR_VAL(format)[0], ts, 0);
-	if (ret == -1) {
+	ok = php_idate(ZSTR_VAL(format)[0], ts, 0, &ret);
+	if (!ok) {
 		php_error_docref(NULL, E_WARNING, "Unrecognized date format token");
 		RETURN_FALSE;
 	}
