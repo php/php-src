@@ -1096,7 +1096,7 @@ zend_value_error("Security protocol must be one of "
 # ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
  "\"AES256\", \"AES256C\", \"AES192\", \"AES192C\", "
 # endif
- \"AES128\", or \"AES\""
+ "\"AES128\", or \"AES\""
 );
 #elifndef NETSNMP_DISABLE_DES
 	zend_value_error("Security protocol must be \"DES\"");
