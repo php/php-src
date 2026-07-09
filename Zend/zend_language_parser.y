@@ -255,7 +255,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
  * inserting them mid-list would renumber every later token (T_INLINE_HTML
  * onward), breaking code that hardcodes token integers. */
 %token <ast> T_MARKUP_NAME "markup tag name"
-%token <ast> T_MARKUP_SLOT_NAME "markup slot name"
 %token <ast> T_MARKUP_TEXT "markup text"
 %token <ast> T_MARKUP_ATTR_VALUE "markup attribute value"
 %token <ast> T_MARKUP_COMMENT "markup comment"
@@ -299,7 +298,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> attributed_statement attributed_top_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
-%type <ast> markup_element markup_children markup_child markup_slot
+%type <ast> markup_element markup_children markup_child
 %type <ast> markup_attributes markup_attribute
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
@@ -1312,14 +1311,6 @@ markup_child:
 	|	T_MARKUP_INTERP_START expr '}'	{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $2, NULL); }
 	|	T_MARKUP_INTERP_START '}'		{ zval n; ZVAL_NULL(&n); $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, zend_ast_create_zval(&n), NULL); }
 	|	markup_element					{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $1, NULL); }
-	|	markup_slot						{ $$ = $1; }
-;
-
-markup_slot:
-		T_MARKUP_OPEN T_MARKUP_SLOT_NAME markup_attributes T_MARKUP_TAG_END markup_children T_MARKUP_CLOSE_OPEN T_MARKUP_SLOT_NAME T_MARKUP_TAG_END
-			{ $$ = zend_ast_create_markup_slot($2, $3, $5, $7); if (!$$) { YYERROR; } }
-	|	T_MARKUP_OPEN T_MARKUP_SLOT_NAME markup_attributes T_MARKUP_SELF_CLOSE
-			{ $$ = zend_ast_create_markup_slot($2, $3, NULL, NULL); if (!$$) { YYERROR; } }
 ;
 
 expr:

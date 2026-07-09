@@ -351,81 +351,62 @@ zend_ast *zend_ast_create_markup_raw(zend_ast *str)
 		zend_ast_create_list(1, ZEND_AST_ARG_LIST, str));
 }
 
-/* Build a `<slot:name>…</slot:name>` block (RFC §6) as a *keyed* array element
- * `'name' => new \Html\Fragment([children])`. The component builder later routes
- * keyed elements to render_component's namedSlots argument. `close` is consumed. */
-zend_ast *zend_ast_create_markup_slot(zend_ast *open, zend_ast *attrs, zend_ast *children, zend_ast *close)
+/* Wrap a children list in
+ * `new \Html\LazyFragment(fn() => new \Html\Fragment([children]))` (RFC §5, the
+ * `:lazy` directive). The arrow function defers building the child subtree —
+ * and running any side effects in its interpolations — until the component
+ * actually renders the slot, so a component that discards its body never
+ * evaluates it. Consumes `children`. */
+static zend_ast *zend_ast_wrap_lazy_fragment(zend_ast *children, uint32_t lineno)
 {
-	if (close != NULL) {
-		if (!zend_string_equals(Z_STR_P(zend_ast_get_zval(open)), Z_STR_P(zend_ast_get_zval(close)))) {
-			zend_throw_exception_ex(zend_ce_compile_error, 0,
-				"Mismatched markup closing tag: expected </slot:%s>, found </slot:%s>",
-				Z_STRVAL_P(zend_ast_get_zval(open)), Z_STRVAL_P(zend_ast_get_zval(close)));
-			zend_ast_destroy(open);
-			zend_ast_destroy(attrs);
-			if (children != NULL) {
-				zend_ast_destroy(children);
-			}
-			zend_ast_destroy(close);
-			return NULL;
-		}
-		zend_ast_destroy(close);
-	}
-	/* A slot block routes body content only; silently discarding written
-	 * attributes would hide a mistake. */
-	if (attrs != NULL && zend_ast_get_list(attrs)->children > 0) {
-		zend_throw_exception_ex(zend_ce_compile_error, 0,
-			"Markup slot <slot:%s> cannot have attributes",
-			Z_STRVAL_P(zend_ast_get_zval(open)));
-		zend_ast_destroy(open);
-		zend_ast_destroy(attrs);
-		if (children != NULL) {
-			zend_ast_destroy(children);
-		}
-		return NULL;
-	}
-	if (attrs != NULL) {
-		zend_ast_destroy(attrs);
-	}
-	return zend_ast_create(ZEND_AST_ARRAY_ELEM, zend_ast_wrap_fragment(children), open);
+	zend_ast *frag = zend_ast_wrap_fragment(children);
+
+	/* fn() => new \Html\Fragment([...]) — an arrow function so its body
+	 * auto-captures by value whatever it references, exactly as a hand-written
+	 * one would; only the expression evaluation is deferred. */
+	zend_ast *params = zend_ast_create_list(0, ZEND_AST_PARAM_LIST);
+	zend_ast *closure = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, 0, lineno,
+		NULL, NULL, params, NULL, frag, NULL, NULL);
+
+	zend_ast *lazy_class = zend_ast_markup_fq_name(ZEND_STRL(ZEND_MARKUP_LAZY_FRAGMENT_FQ));
+	return zend_ast_create(ZEND_AST_NEW, lazy_class,
+		zend_ast_create_list(1, ZEND_AST_ARG_LIST, closure));
 }
 
-/* Partition a markup body into loose content and <slot:name> blocks: keyed
- * elements are named slots, everything else forms the anonymous slot (RFC §6).
- * Consumes `children` (may be NULL); both outputs are fresh ZEND_AST_ARRAY
- * lists with ZEND_ARRAY_SYNTAX_SHORT set. */
-static void zend_markup_partition_children(zend_ast *children, zend_ast **anon_out, zend_ast **named_out)
+/* Detect and strip a bare `:lazy` directive from a component's attribute list.
+ * `:lazy` marks the component's body slot for lazy evaluation (see
+ * zend_ast_wrap_lazy_fragment); it is a compiler directive, not a prop, so it is
+ * removed from the list rather than passed on. Returns whether it was present. */
+static bool zend_markup_extract_lazy(zend_ast *attrs)
 {
-	zend_ast *anon = zend_ast_create_list(0, ZEND_AST_ARRAY);
-	zend_ast *named_slots = zend_ast_create_list(0, ZEND_AST_ARRAY);
-
-	if (children != NULL) {
-		zend_ast_list *clist = zend_ast_get_list(children);
-		for (uint32_t i = 0; i < clist->children; i++) {
-			zend_ast *elem = clist->child[i];
-			if (elem != NULL && elem->kind == ZEND_AST_ARRAY_ELEM && elem->child[1] != NULL) {
-				named_slots = zend_ast_list_add(named_slots, elem);
-			} else {
-				anon = zend_ast_list_add(anon, elem);
-			}
-		}
-		/* Detach the moved elements before freeing the now-empty container. */
-		clist->children = 0;
-		zend_ast_destroy(children);
+	if (attrs == NULL) {
+		return false;
 	}
-	anon->attr = ZEND_ARRAY_SYNTAX_SHORT;
-	named_slots->attr = ZEND_ARRAY_SYNTAX_SHORT;
-
-	*anon_out = anon;
-	*named_out = named_slots;
+	zend_ast_list *list = zend_ast_get_list(attrs);
+	for (uint32_t i = 0; i < list->children; i++) {
+		zend_ast *elem = list->child[i];
+		if (elem == NULL || elem->kind != ZEND_AST_ARRAY_ELEM || elem->child[1] == NULL) {
+			continue;
+		}
+		zval *key = zend_ast_get_zval(elem->child[1]);
+		if (Z_TYPE_P(key) == IS_STRING && zend_string_equals_literal(Z_STR_P(key), ":lazy")) {
+			zend_ast_destroy(elem);
+			for (uint32_t j = i; j + 1 < list->children; j++) {
+				list->child[j] = list->child[j + 1];
+			}
+			list->children--;
+			return true;
+		}
+	}
+	return false;
 }
 
 /* Lower a component tag (capitalized name, namespace-qualified name, or
  * "Class::method") into a call to
- * \Html\render_component(component, props, slot, namedSlots, functionComponent)
- * (RFC §3). Attributes become the props array; loose body content becomes a
- * single \Html\Fragment passed as the anonymous slot, and <slot:name> blocks
- * (keyed elements) are partitioned into the namedSlots array.
+ * \Html\render_component(component, props, slot, functionComponent)
+ * (RFC §3). Attributes become the props array and the body content becomes a
+ * single \Html\Fragment passed as the slot (or a lazy \Html\LazyFragment when
+ * the `:lazy` directive is present).
  *
  * Component resolution is two-stage. A bare tag could name either a class
  * component or a function component, which PHP resolves through *separate* import
@@ -440,6 +421,7 @@ static void zend_markup_partition_children(zend_ast *children, zend_ast **anon_o
  * PHP_FUNCTION(Html_render_component) in ext/html/html.c for the second stage. */
 static zend_ast *zend_ast_create_markup_component(zend_ast *name, zend_ast *attrs, zend_ast *children)
 {
+	uint32_t lineno = zend_ast_get_lineno(name);
 	zend_string *tag = zend_ast_get_str(name);
 	const char *sep = strstr(ZSTR_VAL(tag), "::");
 	/* A leading "\" is a fully-qualified reference; otherwise resolve the name
@@ -484,17 +466,21 @@ static zend_ast *zend_ast_create_markup_component(zend_ast *name, zend_ast *attr
 	}
 	attrs->attr = ZEND_ARRAY_SYNTAX_SHORT;
 
-	/* Partition the body: keyed elements are <slot:name> blocks (named slots);
-	 * everything else is loose content forming the anonymous slot (RFC §6). */
-	zend_ast *anon, *named_slots;
-	zend_markup_partition_children(children, &anon, &named_slots);
+	/* The `:lazy` directive is a compiler marker, not a prop — strip it first. */
+	bool lazy = zend_markup_extract_lazy(attrs);
 
-	/* Anonymous slot: a single Html\Fragment, or null when there is no loose body. */
+	/* The body becomes a single slot Fragment, or null when there is no body.
+	 * With `:lazy` the fragment is wrapped in a deferred Html\LazyFragment. */
 	zend_ast *slot;
-	if (zend_ast_get_list(anon)->children > 0) {
-		slot = zend_ast_wrap_fragment(anon);
+	if (children != NULL && zend_ast_get_list(children)->children > 0) {
+		children->attr = ZEND_ARRAY_SYNTAX_SHORT;
+		slot = lazy
+			? zend_ast_wrap_lazy_fragment(children, lineno)
+			: zend_ast_wrap_fragment(children);
 	} else {
-		zend_ast_destroy(anon);
+		if (children != NULL) {
+			zend_ast_destroy(children);
+		}
 		zval null_zv;
 		ZVAL_NULL(&null_zv);
 		slot = zend_ast_create_zval(&null_zv);
@@ -506,7 +492,6 @@ static zend_ast *zend_ast_create_markup_component(zend_ast *name, zend_ast *attr
 	args = zend_ast_list_add(args, component_name);
 	args = zend_ast_list_add(args, attrs);
 	args = zend_ast_list_add(args, slot);
-	args = zend_ast_list_add(args, named_slots);
 	args = zend_ast_list_add(args, function_name);
 
 	return zend_ast_create(ZEND_AST_CALL, fn, args);
@@ -530,27 +515,6 @@ zend_ast *zend_ast_create_markup_element(zend_ast *name, zend_ast *attrs, zend_a
 		result = zend_ast_create_markup_component(name, attrs, children);
 		result->lineno = lineno;
 		return result;
-	}
-
-	/* <slot:name> blocks lower to keyed children and are only routed by the
-	 * component builder above; in a plain element or fragment one would slip
-	 * into the children array as a stray string key. */
-	zend_ast_list *clist = zend_ast_get_list(children);
-	for (uint32_t i = 0; i < clist->children; i++) {
-		zend_ast *elem = clist->child[i];
-		if (elem != NULL && elem->kind == ZEND_AST_ARRAY_ELEM && elem->child[1] != NULL) {
-			zend_throw_exception_ex(zend_ce_compile_error, 0,
-				"Markup slot <slot:%s> is only allowed in a component body",
-				Z_STRVAL_P(zend_ast_get_zval(elem->child[1])));
-			if (name != NULL) {
-				zend_ast_destroy(name);
-			}
-			if (attrs != NULL) {
-				zend_ast_destroy(attrs);
-			}
-			zend_ast_destroy(children);
-			return NULL;
-		}
 	}
 
 	children->attr = ZEND_ARRAY_SYNTAX_SHORT;
@@ -619,19 +583,17 @@ fail:
 }
 
 /* Lower a dynamic tag `<$tag …>…</$tag>` (RFC §4) into a call to
- * \Html\render_dynamic($tag, attributes, children, namedSlots). The variable's
- * runtime value decides what a static tag name decides at compile time, by the
- * same classification rule (zend_markup_name_is_component): a component name
- * dispatches through render_component's machinery (children become the
- * anonymous-slot Fragment, hooks and decorators included), anything else
- * constructs a literal \Html\Element. Only classification moves to runtime;
- * the body is still partitioned into loose children vs <slot:name> blocks
- * here, at compile time. `name` is the T_VARIABLE zval AST (the name without
- * the "$"). */
-/* Build the \Html\render_dynamic(tag_expr, attributes, children, namedSlots)
- * call both dynamic-tag forms lower into. `tag_expr` is an already-built
- * expression AST producing the tag name; `lineno` is the opening-tag line
- * (see zend_ast_create_markup_element for why it is stamped explicitly). */
+ * \Html\render_dynamic($tag, attributes, children). The variable's runtime
+ * value decides what a static tag name decides at compile time, by the same
+ * classification rule (zend_markup_name_is_component): a component name
+ * dispatches through render_component's machinery (children become the slot
+ * Fragment, hooks and decorators included), anything else constructs a literal
+ * \Html\Element. Only classification moves to runtime. `name` is the T_VARIABLE
+ * zval AST (the name without the "$"). */
+/* Build the \Html\render_dynamic(tag_expr, attributes, children) call both
+ * dynamic-tag forms lower into. `tag_expr` is an already-built expression AST
+ * producing the tag name; `lineno` is the opening-tag line (see
+ * zend_ast_create_markup_element for why it is stamped explicitly). */
 static zend_ast *zend_markup_dynamic_call(zend_ast *tag_expr, zend_ast *attrs, zend_ast *children, uint32_t lineno)
 {
 	if (attrs == NULL) {
@@ -639,16 +601,17 @@ static zend_ast *zend_markup_dynamic_call(zend_ast *tag_expr, zend_ast *attrs, z
 	}
 	attrs->attr = ZEND_ARRAY_SYNTAX_SHORT;
 
-	zend_ast *anon, *named_slots;
-	zend_markup_partition_children(children, &anon, &named_slots);
+	if (children == NULL) {
+		children = zend_ast_create_list(0, ZEND_AST_ARRAY);
+	}
+	children->attr = ZEND_ARRAY_SYNTAX_SHORT;
 
 	zend_ast *fn = zend_ast_markup_fq_name(ZEND_STRL(ZEND_MARKUP_DYNAMIC_FQ));
 
 	zend_ast *args = zend_ast_create_list(0, ZEND_AST_ARG_LIST);
 	args = zend_ast_list_add(args, tag_expr);
 	args = zend_ast_list_add(args, attrs);
-	args = zend_ast_list_add(args, anon);
-	args = zend_ast_list_add(args, named_slots);
+	args = zend_ast_list_add(args, children);
 
 	zend_ast *result = zend_ast_create(ZEND_AST_CALL, fn, args);
 	result->lineno = lineno;

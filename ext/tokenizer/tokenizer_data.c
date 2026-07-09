@@ -176,7 +176,6 @@ char *get_token_type_name(int token_type)
 		case T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG: return "T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG";
 		case T_BAD_CHARACTER: return "T_BAD_CHARACTER";
 		case T_MARKUP_NAME: return "T_MARKUP_NAME";
-		case T_MARKUP_SLOT_NAME: return "T_MARKUP_SLOT_NAME";
 		case T_MARKUP_TEXT: return "T_MARKUP_TEXT";
 		case T_MARKUP_ATTR_VALUE: return "T_MARKUP_ATTR_VALUE";
 		case T_MARKUP_COMMENT: return "T_MARKUP_COMMENT";

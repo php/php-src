@@ -2105,11 +2105,6 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	goto return_whitespace;
 }
 
-<ST_MARKUP_TAG,ST_MARKUP_CLOSE>"slot:"[a-zA-Z][a-zA-Z0-9_.-]* {
-	/* a named-slot block <slot:name>…</slot:name>; strip the "slot:" prefix */
-	RETURN_TOKEN_WITH_STR(T_MARKUP_SLOT_NAME, sizeof("slot:") - 1);
-}
-
 <ST_MARKUP_TAG,ST_MARKUP_CLOSE>"\\"?[a-zA-Z][a-zA-Z0-9_.:-]*("\\"[a-zA-Z][a-zA-Z0-9_.:-]*)* {
 	/* A tag name, optionally namespace-qualified (<App\Card/>) or fully
 	 * qualified (<\App\Card/>). A name containing "\" always dispatches as a

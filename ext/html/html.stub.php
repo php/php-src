@@ -106,15 +106,36 @@ namespace Html {
     }
 
     /**
-     * Marks a component parameter as a slot. A bare `#[Html\Slot]` is the
-     * anonymous (default) slot; `#[Html\Slot('footer')]` is a named slot.
+     * Marks the component parameter that receives the component's body content
+     * (the slot). At most one parameter per component may carry it. Content for
+     * additional "slots" is passed as ordinary props whose type is Html\Htmlable
+     * (e.g. `<Layout header={<h1>Title</h1>}>…</Layout>`).
      */
     #[\Attribute(\Attribute::TARGET_PARAMETER)]
     final class Slot
     {
-        public readonly ?string $name;
+    }
 
-        public function __construct(?string $name = null) {}
+    /**
+     * A slot body whose evaluation is deferred: it builds the child subtree —
+     * and runs any side effects in its interpolations — only the first time it
+     * is rendered, memoizing the result. Produced by the `:lazy` directive on a
+     * component tag (`<Auth :lazy>…</Auth>`), so a component that discards its
+     * body never evaluates it. Because it is itself an Html\Htmlable, a
+     * component's slot parameter type is unchanged (`?Html\Htmlable`); laziness
+     * is transparent to the component.
+     *
+     * @strict-properties
+     */
+    final class LazyFragment implements \Html\Htmlable
+    {
+        /** The thunk builds the deferred body and is called at most once. */
+        public function __construct(\Closure $thunk) {}
+
+        /** Evaluates the thunk on first call (memoized) and returns its Html\Htmlable. */
+        public function toHtml(): \Html\Htmlable {}
+
+        public function __toString(): string {}
     }
 
     /**
@@ -162,20 +183,17 @@ namespace Html {
      * When called directly with a single name, leave $functionComponent null: the
      * one name is then tried as both a class and a function.
      *
-     * $props become named arguments. The anonymous body $slot is routed to the
-     * parameter marked with a bare #[Html\Slot]; each entry of $namedSlots is
-     * routed to the parameter marked #[Html\Slot(name)]. A parameter filled by
-     * both a prop and a slot, a slot with no matching parameter, more than one
-     * anonymous slot, or duplicate slot names are all errors.
+     * $props become named arguments. The body $slot is routed to the parameter
+     * marked with #[Html\Slot]. A parameter filled by both a prop and the body,
+     * more than one #[Html\Slot] parameter, or body content with no #[Html\Slot]
+     * parameter are all errors.
      *
      * @param array<string, mixed> $props
-     * @param array<string, \Html\Htmlable> $namedSlots
      */
     function render_component(
         string $component,
         array $props = [],
         ?\Html\Htmlable $slot = null,
-        array $namedSlots = [],
         array|string|null $functionComponent = null,
     ): \Html\Htmlable {}
 
@@ -185,24 +203,21 @@ namespace Html {
      * static tag name decides at compile time, by the same classification
      * rule: a name with an uppercase first character, a "\", or a "::"
      * dispatches as a component (so `$tag = Card::class` behaves like
-     * `<Card/>`, hooks and decorators included, with $attributes as props,
-     * loose $children as the anonymous slot, and $namedSlots routed to
-     * #[Html\Slot(name)] parameters); anything else constructs a literal
+     * `<Card/>`, hooks and decorators included, with $attributes as props and
+     * $children as the body slot); anything else constructs a literal
      * `new \Html\Element($tag, $attributes, $children)` (so `$tag = 'div'`
      * behaves like `<div>`). Like a direct render_component() call, a dynamic
      * component name is tried as a class and then as a function; there is no
      * compile-time `use` resolution, so pass a fully-qualified name
-     * (Foo::class). $namedSlots with an element-classified $tag is an error.
+     * (Foo::class).
      *
      * @param array<string, mixed> $attributes
      * @param array<int, mixed> $children
-     * @param array<string, \Html\Htmlable> $namedSlots
      */
     function render_dynamic(
         string $tag,
         array $attributes = [],
         array $children = [],
-        array $namedSlots = [],
     ): \Html\Htmlable {}
 
     /**

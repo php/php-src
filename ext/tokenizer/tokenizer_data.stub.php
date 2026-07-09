@@ -769,11 +769,6 @@ const T_BAD_CHARACTER = UNKNOWN;
 const T_MARKUP_NAME = UNKNOWN;
 /**
  * @var int
- * @cvalue T_MARKUP_SLOT_NAME
- */
-const T_MARKUP_SLOT_NAME = UNKNOWN;
-/**
- * @var int
  * @cvalue T_MARKUP_TEXT
  */
 const T_MARKUP_TEXT = UNKNOWN;

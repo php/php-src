@@ -43,19 +43,6 @@ function greeting(string $name): Html\Htmlable {
 $component = 'Greeting';
 echo <$component name="Liam"/>, "\n";
 
-// Named slots route into a dynamic component like a static one.
-class Layout implements Html\Htmlable {
-    public function __construct(
-        #[Html\Slot] private Html\Htmlable $body,
-        #[Html\Slot('footer')] private Html\Htmlable $footer,
-    ) {}
-    public function toHtml(): Html\Htmlable {
-        return <div>{$this->body}<footer>{$this->footer}</footer></div>;
-    }
-}
-$component = Layout::class;
-echo <$component>Main<slot:footer>Bye</slot:footer></$component>, "\n";
-
 // Interpolated content is still escaped, whatever the tag value.
 $tag = 'span';
 $evil = '<script>alert(1)</script>';
@@ -98,7 +85,6 @@ bool(true)
 <article><h1>Hi</h1></article>
 <article><h1>Hi</h1>Body</article>
 <p>Hello Liam</p>
-<div>Main<footer>Bye</footer></div>
 <span>&lt;script&gt;alert(1)&lt;/script&gt;</span>
 <div class="x">Hello</div>
 <strong>note</strong>

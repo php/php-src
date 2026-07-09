@@ -33,6 +33,7 @@
 #include "php_html.h"
 
 #include "Zend/zend_attributes.h"
+#include "Zend/zend_closures.h"
 #include "Zend/zend_markup.h"
 #include "Zend/zend_extensions.h"
 #include "Zend/zend_interfaces.h"
@@ -53,6 +54,53 @@ zend_class_entry *html_ce_Element;
 zend_class_entry *html_ce_Fragment;
 zend_class_entry *html_ce_Raw;
 zend_class_entry *html_ce_Slot;
+zend_class_entry *html_ce_LazyFragment;
+
+/* Html\LazyFragment carries internal state a plain property bag cannot: a
+ * Closure thunk plus a memoized result that is written on first render. A
+ * custom object holds both out of userland view; the class exposes no
+ * properties. */
+typedef struct {
+	zval thunk;     /* the Closure building the deferred body */
+	zval resolved;  /* memoized Html\Htmlable, IS_UNDEF until first render */
+	zend_object std;
+} html_lazy_fragment;
+
+static zend_object_handlers html_lazy_fragment_handlers;
+
+static zend_always_inline html_lazy_fragment *html_lazy_fragment_from_obj(zend_object *obj)
+{
+	return (html_lazy_fragment *)((char *)obj - offsetof(html_lazy_fragment, std));
+}
+
+static zend_object *html_lazy_fragment_create(zend_class_entry *ce)
+{
+	html_lazy_fragment *lf = zend_object_alloc(sizeof(html_lazy_fragment), ce);
+	zend_object_std_init(&lf->std, ce);
+	object_properties_init(&lf->std, ce);
+	ZVAL_UNDEF(&lf->thunk);
+	ZVAL_UNDEF(&lf->resolved);
+	lf->std.handlers = &html_lazy_fragment_handlers;
+	return &lf->std;
+}
+
+static void html_lazy_fragment_free(zend_object *obj)
+{
+	html_lazy_fragment *lf = html_lazy_fragment_from_obj(obj);
+	zval_ptr_dtor(&lf->thunk);
+	zval_ptr_dtor(&lf->resolved);
+	zend_object_std_dtor(&lf->std);
+}
+
+static HashTable *html_lazy_fragment_get_gc(zend_object *obj, zval **table, int *n)
+{
+	html_lazy_fragment *lf = html_lazy_fragment_from_obj(obj);
+	zend_get_gc_buffer *buf = zend_get_gc_buffer_create();
+	zend_get_gc_buffer_add_zval(buf, &lf->thunk);
+	zend_get_gc_buffer_add_zval(buf, &lf->resolved);
+	zend_get_gc_buffer_use(buf, table, n);
+	return zend_std_get_properties(obj);
+}
 
 /* Method-table names of the default __toString() injected into userland
  * Htmlable classes (see html_implement_htmlable). Permanent interned. */
@@ -864,23 +912,80 @@ PHP_METHOD(Html_Raw, __toString)
 	RETURN_STR(zend_string_copy(Z_STR_P(html)));
 }
 
-PHP_METHOD(Html_Slot, __construct)
+PHP_METHOD(Html_LazyFragment, __construct)
 {
-	zend_string *name = NULL;
+	zval *thunk;
 
-	ZEND_PARSE_PARAMETERS_START(0, 1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(name)
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(thunk, zend_ce_closure)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval tmp;
-	if (name != NULL) {
-		ZVAL_STR_COPY(&tmp, name);
-	} else {
-		ZVAL_NULL(&tmp);
+	html_lazy_fragment *lf = html_lazy_fragment_from_obj(Z_OBJ_P(ZEND_THIS));
+	ZVAL_COPY(&lf->thunk, thunk);
+}
+
+/* Resolve the deferred body once and memoize it: toHtml() is the seam the render
+ * path already calls, so a component that never renders the slot never runs the
+ * thunk (RFC §5). */
+PHP_METHOD(Html_LazyFragment, toHtml)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	html_lazy_fragment *lf = html_lazy_fragment_from_obj(Z_OBJ_P(ZEND_THIS));
+
+	if (Z_TYPE(lf->resolved) == IS_UNDEF) {
+		if (Z_TYPE(lf->thunk) != IS_OBJECT) {
+			zend_throw_error(NULL, "Html\\LazyFragment has not been initialized");
+			RETURN_THROWS();
+		}
+
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+		char *error = NULL;
+		if (zend_fcall_info_init(&lf->thunk, 0, &fci, &fcc, NULL, &error) == FAILURE) {
+			zend_throw_error(NULL, "Html\\LazyFragment thunk is not callable%s%s",
+				error ? ": " : "", error ? error : "");
+			if (error) {
+				efree(error);
+			}
+			RETURN_THROWS();
+		}
+		if (error) {
+			efree(error);
+		}
+
+		zval result;
+		ZVAL_UNDEF(&result);
+		fci.retval = &result;
+		zend_call_function(&fci, &fcc);
+
+		if (EG(exception)) {
+			zval_ptr_dtor(&result);
+			RETURN_THROWS();
+		}
+		if (Z_TYPE(result) != IS_OBJECT
+				|| !instanceof_function(Z_OBJCE(result), html_ce_Htmlable)) {
+			zend_throw_error(NULL, "Html\\LazyFragment thunk must return an Html\\Htmlable");
+			zval_ptr_dtor(&result);
+			RETURN_THROWS();
+		}
+
+		/* Move ownership into the memo. */
+		ZVAL_COPY_VALUE(&lf->resolved, &result);
 	}
-	zend_update_property(html_ce_Slot, Z_OBJ_P(ZEND_THIS), ZEND_STRL("name"), &tmp);
-	zval_ptr_dtor(&tmp);
+
+	RETURN_COPY(&lf->resolved);
+}
+
+PHP_METHOD(Html_LazyFragment, __toString)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_string *s = html_render_htmlable(ZEND_THIS);
+	if (s == NULL) {
+		RETURN_THROWS();
+	}
+	RETURN_STR(s);
 }
 
 /* Build an Html\Raw wrapping the given (already-final) HTML string. */
@@ -944,16 +1049,14 @@ PHP_FUNCTION(Html_transpile)
 	RETURN_STR(source);
 }
 
-/* Merge explicit props with slot content routed via #[Html\Slot] parameter
- * attributes, producing the named-argument array for a component dispatch.
+/* Merge explicit props with body content routed via a #[Html\Slot] parameter
+ * attribute, producing the named-argument array for a component dispatch.
  * Returns a new array (caller releases) or NULL with a pending exception. */
 static HashTable *html_route_component_args(
-	zend_function *fn, HashTable *props, zval *slot, HashTable *named_slots)
+	zend_function *fn, HashTable *props, zval *slot)
 {
 	HashTable *args = zend_new_array(props ? zend_hash_num_elements(props) : 0);
-	zend_string *anon_param = NULL;       /* param name for a bare #[Html\Slot] */
-	HashTable named_slot_params;          /* slot-name => param-name */
-	zend_hash_init(&named_slot_params, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_string *slot_param = NULL;       /* param name marked #[Html\Slot] */
 
 	/* 1. explicit props become named arguments */
 	if (props) {
@@ -969,7 +1072,7 @@ static HashTable *html_route_component_args(
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	/* 2. discover slot parameters from #[Html\Slot] attributes */
+	/* 2. discover the slot parameter from a #[Html\Slot] attribute */
 	if (fn && fn->common.attributes) {
 		for (uint32_t i = 0; i < fn->common.num_args; i++) {
 			zend_attribute *attr = zend_get_parameter_attribute_str(
@@ -977,46 +1080,14 @@ static HashTable *html_route_component_args(
 			if (attr == NULL) {
 				continue;
 			}
-
-			zend_string *param_name = fn->common.arg_info[i].name;
-			zend_string *slot_name = NULL;
-			zval slot_name_zv;
-			ZVAL_UNDEF(&slot_name_zv);
-
-			if (attr->argc >= 1) {
-				if (zend_get_attribute_value(&slot_name_zv, attr, 0, fn->common.scope) == FAILURE) {
-					goto fail;
-				}
-				if (Z_TYPE(slot_name_zv) == IS_STRING) {
-					slot_name = Z_STR(slot_name_zv);
-				} else if (Z_TYPE(slot_name_zv) != IS_NULL) {
-					zval_ptr_dtor(&slot_name_zv);
-					zend_throw_error(NULL, "#[Html\\Slot] name must be a string or null");
-					goto fail;
-				}
+			if (slot_param != NULL) {
+				zend_throw_error(NULL, "Component has more than one #[Html\\Slot] parameter");
+				goto fail;
 			}
-
-			if (slot_name == NULL) {
-				if (anon_param != NULL) {
-					zval_ptr_dtor(&slot_name_zv);
-					zend_throw_error(NULL, "Component has more than one anonymous #[Html\\Slot] parameter");
-					goto fail;
-				}
-				anon_param = param_name;
-			} else {
-				if (zend_hash_exists(&named_slot_params, slot_name)) {
-					zend_throw_error(NULL, "Duplicate #[Html\\Slot(\"%s\")] parameter", ZSTR_VAL(slot_name));
-					zval_ptr_dtor(&slot_name_zv);
-					goto fail;
-				}
-				zval pv;
-				ZVAL_STR_COPY(&pv, param_name);
-				zend_hash_add_new(&named_slot_params, slot_name, &pv);
-			}
-			zval_ptr_dtor(&slot_name_zv);
+			slot_param = fn->common.arg_info[i].name;
 		}
 
-		/* A slot is a single Fragment, so it cannot fill a variadic parameter
+		/* A slot is a single value, so it cannot fill a variadic parameter
 		 * (which num_args excludes above); reject rather than silently ignore. */
 		if (fn->common.fn_flags & ZEND_ACC_VARIADIC
 				&& zend_get_parameter_attribute_str(
@@ -1026,49 +1097,23 @@ static HashTable *html_route_component_args(
 		}
 	}
 
-	/* 3. route the anonymous body slot */
+	/* 3. route the body slot */
 	if (slot != NULL) {
-		if (anon_param == NULL) {
-			zend_throw_error(NULL, "Component received body content but has no anonymous #[Html\\Slot] parameter");
+		if (slot_param == NULL) {
+			zend_throw_error(NULL, "Component received body content but has no #[Html\\Slot] parameter");
 			goto fail;
 		}
-		if (zend_hash_exists(args, anon_param)) {
-			zend_throw_error(NULL, "Parameter $%s is filled by both an attribute and body content", ZSTR_VAL(anon_param));
+		if (zend_hash_exists(args, slot_param)) {
+			zend_throw_error(NULL, "Parameter $%s is filled by both an attribute and body content", ZSTR_VAL(slot_param));
 			goto fail;
 		}
 		Z_ADDREF_P(slot);
-		zend_hash_add_new(args, anon_param, slot);
+		zend_hash_add_new(args, slot_param, slot);
 	}
 
-	/* 4. route named slots */
-	if (named_slots) {
-		zend_string *sname;
-		zval *sval;
-		ZEND_HASH_FOREACH_STR_KEY_VAL(named_slots, sname, sval) {
-			if (sname == NULL) {
-				zend_throw_error(NULL, "Named slots must use string keys");
-				goto fail;
-			}
-			zval *pv = zend_hash_find(&named_slot_params, sname);
-			if (pv == NULL) {
-				zend_throw_error(NULL, "No #[Html\\Slot(\"%s\")] parameter accepts the <slot:%s> block", ZSTR_VAL(sname), ZSTR_VAL(sname));
-				goto fail;
-			}
-			zend_string *param_name = Z_STR_P(pv);
-			if (zend_hash_exists(args, param_name)) {
-				zend_throw_error(NULL, "Parameter $%s is filled by both an attribute and a slot", ZSTR_VAL(param_name));
-				goto fail;
-			}
-			Z_TRY_ADDREF_P(sval);
-			zend_hash_add_new(args, param_name, sval);
-		} ZEND_HASH_FOREACH_END();
-	}
-
-	zend_hash_destroy(&named_slot_params);
 	return args;
 
 fail:
-	zend_hash_destroy(&named_slot_params);
 	zend_array_release(args);
 	return NULL;
 }
@@ -1533,7 +1578,7 @@ static zend_result html_dispatch_call(
  * Html\Htmlable goes into *return_value, or an exception is left pending. */
 static void html_render_component_impl(
 	zend_string *component, HashTable *props, zend_object *slot_obj,
-	HashTable *named_slots, HashTable *function_candidates,
+	HashTable *function_candidates,
 	zend_string *function_component, zval *return_value)
 {
 	/* Props must be string-keyed, whichever dispatch path runs below. (On the
@@ -1597,7 +1642,7 @@ static void html_render_component_impl(
 				ZEND_HASH_FOREACH_VAL(function_candidates, candidate) {
 					ZVAL_DEREF(candidate);
 					if (Z_TYPE_P(candidate) != IS_STRING) {
-						zend_argument_type_error(5,
+						zend_argument_type_error(4,
 							"must contain only function-name strings, %s given",
 							zend_zval_value_name(candidate));
 						RETURN_THROWS();
@@ -1648,12 +1693,11 @@ static void html_render_component_impl(
 	HashTable *args;
 	bool owns_args;
 	if (slot_ptr == NULL
-			&& (named_slots == NULL || zend_hash_num_elements(named_slots) == 0)
 			&& (fn == NULL || fn->common.attributes == NULL)) {
 		args = props; /* may be NULL when no attributes were given */
 		owns_args = false;
 	} else {
-		args = html_route_component_args(fn, props, slot_ptr, named_slots);
+		args = html_route_component_args(fn, props, slot_ptr);
 		if (args == NULL) {
 			RETURN_THROWS();
 		}
@@ -1692,20 +1736,18 @@ PHP_FUNCTION(Html_render_component)
 	zend_string *component;
 	HashTable *props = NULL;
 	zend_object *slot_obj = NULL;
-	HashTable *named_slots = NULL;
 	zend_string *function_component = NULL;
 	HashTable *function_candidates = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(1, 5)
+	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(component)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT(props)
 		Z_PARAM_OBJ_OF_CLASS_OR_NULL(slot_obj, html_ce_Htmlable)
-		Z_PARAM_ARRAY_HT(named_slots)
 		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(function_candidates, function_component)
 	ZEND_PARSE_PARAMETERS_END();
 
-	html_render_component_impl(component, props, slot_obj, named_slots,
+	html_render_component_impl(component, props, slot_obj,
 		function_candidates, function_component, return_value);
 }
 
@@ -1721,19 +1763,17 @@ PHP_FUNCTION(Html_render_dynamic)
 	zend_string *tag;
 	zval *attributes = NULL;
 	zval *children = NULL;
-	zval *named_slots = NULL;
 
 	/* The array parameters are taken as zvals, not raw HashTables: they are
 	 * forwarded to constructor calls below, and a fresh ZVAL_ARR of a borrowed
 	 * table would mark an immutable array literal (e.g. a compiled []) as
 	 * refcounted, making the callee addref read-only memory. The caller's
 	 * zvals carry the correct type flags. */
-	ZEND_PARSE_PARAMETERS_START(1, 4)
+	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(tag)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(attributes)
 		Z_PARAM_ARRAY(children)
-		Z_PARAM_ARRAY(named_slots)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(tag) == 0) {
@@ -1744,11 +1784,11 @@ PHP_FUNCTION(Html_render_dynamic)
 	bool have_children = children != NULL && zend_hash_num_elements(Z_ARRVAL_P(children)) > 0;
 
 	if (zend_markup_name_is_component(tag)) {
-		/* Loose children become the anonymous-slot Fragment, exactly as the
-		 * compiler builds one for a static component tag. A dynamic component
-		 * name is already fully qualified (e.g. Foo::class), so there is no
-		 * separate function candidate: like a direct render_component call,
-		 * the one name is tried as a class and then as a function. */
+		/* Body children become the slot Fragment, exactly as the compiler builds
+		 * one for a static component tag. A dynamic component name is already
+		 * fully qualified (e.g. Foo::class), so there is no separate function
+		 * candidate: like a direct render_component call, the one name is tried
+		 * as a class and then as a function. */
 		zval slot;
 		zend_object *slot_obj = NULL;
 		ZVAL_UNDEF(&slot);
@@ -1766,19 +1806,9 @@ PHP_FUNCTION(Html_render_dynamic)
 		}
 		html_render_component_impl(tag,
 			attributes != NULL ? Z_ARRVAL_P(attributes) : NULL, slot_obj,
-			named_slots != NULL ? Z_ARRVAL_P(named_slots) : NULL,
 			NULL, NULL, return_value);
 		zval_ptr_dtor(&slot);
 		return;
-	}
-
-	/* A <slot:name> block routes content to a component parameter; against a
-	 * plain HTML element it has nowhere to go. */
-	if (named_slots != NULL && zend_hash_num_elements(Z_ARRVAL_P(named_slots)) > 0) {
-		zend_throw_error(NULL,
-			"Markup slot blocks are only allowed in a component body; \"%s\" is an HTML element",
-			ZSTR_VAL(tag));
-		RETURN_THROWS();
 	}
 
 	zval args[3];
@@ -1969,10 +1999,19 @@ PHP_MINIT_FUNCTION(html)
 	html_ce_Raw = register_class_Html_Raw(html_ce_Htmlable);
 	html_ce_Slot = register_class_Html_Slot();
 
+	html_ce_LazyFragment = register_class_Html_LazyFragment(html_ce_Htmlable);
+	html_ce_LazyFragment->create_object = html_lazy_fragment_create;
+	memcpy(&html_lazy_fragment_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	html_lazy_fragment_handlers.offset = offsetof(html_lazy_fragment, std);
+	html_lazy_fragment_handlers.free_obj = html_lazy_fragment_free;
+	html_lazy_fragment_handlers.get_gc = html_lazy_fragment_get_gc;
+	html_lazy_fragment_handlers.clone_obj = NULL;
+
 	/* The parser lowers markup to these fully-qualified names (zend_markup.h);
 	 * assert the runtime registers exactly them so the two can never drift. */
 	ZEND_ASSERT(zend_string_equals_literal(html_ce_Element->name, ZEND_MARKUP_ELEMENT_FQ));
 	ZEND_ASSERT(zend_string_equals_literal(html_ce_Fragment->name, ZEND_MARKUP_FRAGMENT_FQ));
+	ZEND_ASSERT(zend_string_equals_literal(html_ce_LazyFragment->name, ZEND_MARKUP_LAZY_FRAGMENT_FQ));
 
 	return SUCCESS;
 }

@@ -1,5 +1,5 @@
 /* This is a generated file, edit html.stub.php instead.
- * Stub hash: cdcacbff29cc0a4b55b54cbcb8d4080732c864e6 */
+ * Stub hash: c093f8bcc3519db91726c6a07e524d8b8723532c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Html_raw, 0, 1, Html\\Htmlable, 0)
 	ZEND_ARG_TYPE_INFO(0, html, IS_STRING, 0)
@@ -17,7 +17,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Html_render_component, 0, 1, Html
 	ZEND_ARG_TYPE_INFO(0, component, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, props, IS_ARRAY, 0, "[]")
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, slot, Html\\Htmlable, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, namedSlots, IS_ARRAY, 0, "[]")
 	ZEND_ARG_TYPE_MASK(0, functionComponent, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
@@ -25,7 +24,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Html_render_dynamic, 0, 1, Html\\
 	ZEND_ARG_TYPE_INFO(0, tag, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, attributes, IS_ARRAY, 0, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, children, IS_ARRAY, 0, "[]")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, namedSlots, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Html_register_component_factory, 0, 1, IS_VOID, 0)
@@ -98,9 +96,13 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Html_Raw_toDom arginfo_class_Html_Element_toDom
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Html_Slot___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Html_LazyFragment___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, thunk, Closure, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_Html_LazyFragment_toHtml arginfo_class_Html_Htmlable_toHtml
+
+#define arginfo_class_Html_LazyFragment___toString arginfo_class_Html_Htmlable___toString
 
 ZEND_FUNCTION(Html_raw);
 ZEND_FUNCTION(Html_escape);
@@ -125,7 +127,9 @@ ZEND_METHOD(Html_Raw, __construct);
 ZEND_METHOD(Html_Raw, toHtml);
 ZEND_METHOD(Html_Raw, __toString);
 ZEND_METHOD(Html_Raw, toDom);
-ZEND_METHOD(Html_Slot, __construct);
+ZEND_METHOD(Html_LazyFragment, __construct);
+ZEND_METHOD(Html_LazyFragment, toHtml);
+ZEND_METHOD(Html_LazyFragment, __toString);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "raw"), zif_Html_raw, arginfo_Html_raw, 0, NULL, NULL)
@@ -172,8 +176,10 @@ static const zend_function_entry class_Html_Raw_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Html_Slot_methods[] = {
-	ZEND_ME(Html_Slot, __construct, arginfo_class_Html_Slot___construct, ZEND_ACC_PUBLIC)
+static const zend_function_entry class_Html_LazyFragment_methods[] = {
+	ZEND_ME(Html_LazyFragment, __construct, arginfo_class_Html_LazyFragment___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Html_LazyFragment, toHtml, arginfo_class_Html_LazyFragment_toHtml, ZEND_ACC_PUBLIC)
+	ZEND_ME(Html_LazyFragment, __toString, arginfo_class_Html_LazyFragment___toString, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -255,17 +261,24 @@ static zend_class_entry *register_class_Html_Slot(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Html", "Slot", class_Html_Slot_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Html", "Slot", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
-
-	zval property_name_default_value;
-	ZVAL_UNDEF(&property_name_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 
 	zend_string *attribute_name_Attribute_class_Html_Slot_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
 	zend_attribute *attribute_Attribute_class_Html_Slot_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Html_Slot_0, 1);
 	zend_string_release_ex(attribute_name_Attribute_class_Html_Slot_0, true);
 	ZVAL_LONG(&attribute_Attribute_class_Html_Slot_0->args[0].value, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Html_LazyFragment(zend_class_entry *class_entry_Html_Htmlable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Html", "LazyFragment", class_Html_LazyFragment_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+	zend_class_implements(class_entry, 1, class_entry_Html_Htmlable);
 
 	return class_entry;
 }

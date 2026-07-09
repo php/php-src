@@ -1,5 +1,5 @@
 --TEST--
-Markup syntax: dynamic tag error cases (mismatched close, slots on elements, invalid names)
+Markup syntax: dynamic tag error cases (mismatched close, invalid names)
 --EXTENSIONS--
 html
 --FILE--
@@ -19,14 +19,6 @@ foreach (['$x = <{"div"}>a</div>;', '$x = <{"div"}>a</$t>;'] as $code) {
     } catch (ParseError $e) {
         echo $e->getMessage(), "\n";
     }
-}
-
-// A <slot:name> block against an element-classified value has nowhere to go.
-$tag = 'div';
-try {
-    $x = <$tag><slot:footer>x</slot:footer></$tag>;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
 }
 
 // An empty tag value is rejected up front.
@@ -70,7 +62,6 @@ try {
 Mismatched markup closing tag: expected </$a>, found </$b>
 syntax error, unexpected markup tag name "div", expecting markup tag end
 syntax error, unexpected variable "$t", expecting markup tag end
-Markup slot blocks are only allowed in a component body; "div" is an HTML element
 Html\render_dynamic(): Argument #1 ($tag) cannot be empty
 Invalid tag name "di v"
 <date></date>

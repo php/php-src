@@ -62,7 +62,7 @@ Practically, a *syntax* lives or dies by its ecosystem. Code using an extension-
 
 The goal of this RFC is a native, ergonomic syntax for building HTML - the output format the overwhelming majority of PHP produces - with escaping and composition built in.
 
-This RFC is deliberately narrower than XHP: it targets **HTML specifically**, not general XML. That choice is visible throughout - escaping uses `htmlspecialchars`; void elements serialize as HTML5 (`<br>`, not `<br/>`); text and attribute handling follow HTML, not XML, semantics. There is no XML namespace support, no CDATA, no DTD, and no requirement that output be well-formed XML (`<slot:footer>` *looks* like a namespaced XML element but is a compile-time construct, not a namespace). This keeps the surface small and the output aimed at the one thing PHP overwhelmingly produces: web pages. Emitting XML (RSS, SVG, SOAP) remains the job of the existing DOM / `XMLWriter` APIs and is out of scope.
+This RFC is deliberately narrower than XHP: it targets **HTML specifically**, not general XML. That choice is visible throughout - escaping uses `htmlspecialchars`; void elements serialize as HTML5 (`<br>`, not `<br/>`); text and attribute handling follow HTML, not XML, semantics. There is no XML namespace support, no CDATA, no DTD, and no requirement that output be well-formed XML. This keeps the surface small and the output aimed at the one thing PHP overwhelmingly produces: web pages. Emitting XML (RSS, SVG, SOAP) remains the job of the existing DOM / `XMLWriter` APIs and is out of scope.
 
 Semantic validation of attribute *values* is also not a goal - a `javascript:` URL in `href`/`src` escapes cleanly yet is not blocked: sometimes it is intentional, and the policy is the application's to set. (Latte nullifies such URLs and React warns; a framework can enforce the same here via a component decorator or userland wrapper.) Attribute and tag *names*, by contrast, are always validated - see Escape-by-default.
 
@@ -94,24 +94,23 @@ Every construct in this proposal lowers the same way - at compile time, to a `ne
 
 // Components dispatch through Html\render_component()         (see Tags)
 <Card title="Hi" />
-// → \Html\render_component(Card::class, ['title' => 'Hi'], null, [], 'Card')
+// → \Html\render_component(Card::class, ['title' => 'Hi'], null, 'Card')
 
-// Component body → anonymous slot; <slot:x> blocks → named slots   (see Children & slots)
-<Layout theme="dark">
-    <slot:header><h1>Title</h1></slot:header>
-    <p>Loose content.</p>
+// Component body → slot; extra regions are markup-valued props   (see Children & slots)
+<Layout theme="dark" header={<h1>Title</h1>}>
+    <p>Body content.</p>
 </Layout>
 // → \Html\render_component(
 //       Layout::class,                          // class-name candidate
-//       ['theme' => 'dark'],                    // props → named arguments
-//       new \Html\Fragment([/* <p>...</p> */]),   // anonymous slot
-//       ['header' => new \Html\Fragment([/* <h1>...</h1> */])],  // named slots
+//       ['theme' => 'dark',                     // props → named arguments
+//        'header' => new \Html\Element('h1', [], ['Title'])],
+//       new \Html\Fragment([/* <p>...</p> */]),   // body slot
 //       'Layout',                               // function-name candidate
 //   )
 
 // Dynamic tags: the value classifies at runtime                (see Tags)
 <$tag class="box">{$content}</$tag>
-// → \Html\render_dynamic($tag, ['class' => 'box'], [$content], [])
+// → \Html\render_dynamic($tag, ['class' => 'box'], [$content])
 ```
 
 Two properties fall directly out of this lowering. Markup is **zero-cost sugar** - writing the objects by hand produces the same AST and opcodes. And markup obeys **ordinary expression semantics** - attributes and children are argument expressions, evaluated eagerly, scoped and typed like any other PHP code.
@@ -299,13 +298,13 @@ final class UserCard implements Html\Htmlable {
 | `string` / `int` / `float` / `Stringable` | `="escaped value"` |
 | `array` / other | `TypeError` |
 
-### 5. Children, slots, and named slots
+### 5. Children and slots
 
 #### HTML elements
 
 Children are an ordered list of child nodes (text, interpolations, sub-elements).
 
-#### Components - slots via `#[Html\Slot]`
+#### Components - the body slot via `#[Html\Slot]`
 
 The body of a component is routed to a constructor/function/method parameter marked with the `#[Html\Slot]` attribute.
 
@@ -325,38 +324,69 @@ function Time(
 
 The slot value is always a single `Html\Fragment` (an `Html\Htmlable` whose children are each normalized to `Html\Htmlable`); `{$slot}` renders the whole body, correctly escaped. The fragment's children are introspectable as an opt-in (`$slot->children`).
 
-#### Named slots - `<slot:name>`
+Rules for the slot parameter:
 
-`#[Html\Slot]` takes an optional name. Bare `#[Html\Slot]` is the **default/anonymous** slot (receiving loose body content); `#[Html\Slot('footer')]` is a **named** slot, filled by a `<slot:footer>...</slot:footer>` block.
+* **At most one** parameter may carry `#[Html\Slot]`; more than one is an **error**.
+* Body content given to a component with no `#[Html\Slot]` parameter, or a parameter filled both by an attribute and by body content, is an **error**.
+* `#[Html\Slot]` on a variadic parameter → **error** (a slot is a single value).
+* The slot is an ordinary parameter, so a **required** slot (no default) left unfilled fails at runtime like any missing argument (`ArgumentCountError`). Declare a default (`?Html\Htmlable $slot = null`) to make it optional.
+
+#### Further content areas are markup-valued props
+
+A component has exactly one body slot; any *additional* content regions are passed as ordinary props typed `Html\Htmlable`. Because an attribute value is an arbitrary expression and markup is a value, a chunk of markup passes straight through with no extra syntax:
 
 ```php
 function Layout(
-    #[Html\Slot]            Html\Htmlable $body,
-    #[Html\Slot('header')] ?Html\Htmlable $header = null,
-    #[Html\Slot('footer')] ?Html\Htmlable $footer = null,
+    #[Html\Slot] Html\Htmlable $body,
+    ?Html\Htmlable $header = null,
+    ?Html\Htmlable $footer = null,
 ): Html\Htmlable { /* ... */ }
 
-<Layout>
-    <slot:header><h1>Title</h1></slot:header>
-    <p>Loose content flows to the anonymous slot.</p>
-    <slot:footer>© 2026</slot:footer>
+<Layout
+    header={<h1>Title</h1>}
+    footer={<>© 2026</>}
+>
+    <p>Body content flows to the slot.</p>
 </Layout>
 ```
 
-This is also this proposal's answer to **template inheritance**: what Twig, Latte and Blade's older syntax call a base template with overridable *blocks* is here a `Layout` component with named slots - a page fills the slots instead of extending the template, and layouts nest by composition.
+A "named slot" is therefore just a prop, checked against the component's real signature exactly like any other - a misspelled `heaer=` is the same `TypeError` a misspelled prop is, not a silent no-op. This keeps the whole surface consistent with the RFC's headline property that props are type-checkable named arguments.
 
-Rules for slots are as follows:
+This is also the proposal's answer to **template inheritance**: what Twig, Latte and Blade's older syntax call a base template with overridable *blocks* is here a `Layout` component whose regions are markup-valued props (and the body slot) filled by composition, rather than a template that is extended; layouts nest the same way. (A dedicated `<slot:name>` block form for large named regions is a possible future ergonomic addition - see Future Scope - but expresses nothing a prop cannot.)
 
-* Multiple `#[Html\Slot]` parameters are allowed only with **distinct names** and **at most one anonymous** slot; otherwise an **error**.
-* A `<slot:foo>` block with no matching `#[Html\Slot('foo')]` parameter → **error**.
-* Filling the same parameter both by attribute and by `<slot:>` block → **error**.
-* A `<slot:>` block is only allowed **directly in a component body** (not inside a plain element or fragment) and takes **no attributes** → **compile error** otherwise.
-* `#[Html\Slot]` on a variadic parameter → **error** (a slot is a single value).
-* Slots are ordinary parameters, so a **required** slot parameter (no default) left unfilled fails at runtime like any missing argument (`ArgumentCountError`). Declare a default (`?Html\Htmlable $footer = null`) to make a slot optional.
+#### Eager evaluation, and opting into laziness with `:lazy`
 
-#### Eager evaluation
+Because a component invocation is an ordinary call, **the body is fully evaluated before the component runs** (PHP evaluates arguments before the call). A component therefore cannot, by default, conditionally skip or defer rendering its body - the body has already been built by the time the component decides what to do with it.
 
-Because a component invocation is an ordinary call, **children are fully evaluated before the parent runs** (PHP evaluates arguments before the call). Consequently a component **cannot conditionally skip or defer rendering its children** out-of-the-box - regular control flow or closures can be used instead. Lazy children (via closures) are Future Scope.
+The `:lazy` directive on a component tag opts its body out of that rule:
+
+```php
+function Auth(bool $check, #[Html\Slot] ?Html\Htmlable $slot = null): Html\Htmlable
+{
+    // When logged out we never reference $slot, so with :lazy the body's
+    // expressions never run.
+    return $check ? <div class="user">{$slot}</div> : <></>;
+}
+
+// Eager: auth()->user()->name is evaluated before Auth runs - and would error
+// when logged out - even though Auth discards the body in that case.
+<Auth check={auth()->check()}>Hello, {auth()->user()->name}</Auth>
+
+// Lazy: the body is built, and its interpolations run, only if Auth renders it.
+<Auth :lazy check={auth()->check()}>Hello, {auth()->user()->name}</Auth>
+```
+
+With `:lazy` the body lowers to an `Html\LazyFragment` wrapping a closure, instead of an eager `Html\Fragment`:
+
+```php
+// <Auth :lazy>Hello, {$name}</Auth>
+// → \Html\render_component(Auth::class, [],
+//       new \Html\LazyFragment(fn() => new \Html\Fragment(['Hello, ', $name])), 'Auth')
+```
+
+`Html\LazyFragment` is *itself* an `Html\Htmlable`, so **the component's slot parameter type is unchanged** (`?Html\Htmlable`) and a component need not be written any differently to accept a lazy body - laziness is transparent to it. It evaluates its closure on first render and **memoizes** the result, so a body rendered more than once still runs its expressions once. Variables the body references are captured by value at the point of the tag (ordinary arrow-function semantics); only the *expressions* - method calls, property reads - are deferred to render time. A body that is never rendered is never evaluated.
+
+`:lazy` is deliberately the single point where markup departs from "an ordinary call with eager arguments," which is why it is explicit and opt-in; eager remains the default. (For a body that should be evaluated *repeatedly* rather than merely deferred, pass a closure as an ordinary prop and call it - e.g. `each={fn($x) => <li>{$x}</li>}`.)
 
 #### Child coercion
 
@@ -409,7 +439,8 @@ All under the `Html\` namespace:
 
 * Interface `Html\Htmlable extends Stringable` - the renderable contract. The one method a class writes is `toHtml(): Htmlable`, which returns markup (ultimately an `Element`/`Fragment`/`Raw`). The inherited `__toString(): string` requirement is satisfied automatically: a userland class that does not declare (or inherit) a `__toString` of its own receives a default implementation at class-link time - it serializes what `toHtml()` produces - exactly the way every enum receives `cases()`. So `echo`/`(string)` work on any markup value or component, while `strict_types` components can `return <div>...</div>;` directly and callers can still reach the object tree via `toHtml()`. A declared `__toString` wins for string casts; markup rendering always goes through `toHtml()`.
 * Classes `Html\Element`, `Html\Fragment` (and `Html\Raw`, the opaque passthrough that backs `raw()`/`escape()`). All are `final`, immutable value objects with `readonly` properties (`$tag`, `$attributes`, `$children` / `$html`), and each has a `toDom(?Dom\Document = null): Dom\DocumentFragment` method.
-* Attribute `Html\Slot` (`#[Html\Slot(?string $name = null)]`).
+* Class `Html\LazyFragment` - a `final` `Html\Htmlable` wrapping a `Closure` thunk (`__construct(Closure $thunk)`). The `:lazy` directive lowers a component body into one; it evaluates the thunk on first render and memoizes the result (see Children & slots). Not typically written by hand.
+* Attribute `Html\Slot` (bare `#[Html\Slot]`, no arguments) marking the parameter that receives a component's body.
 * Functions `Html\raw(string $html): Html\Htmlable`, `Html\escape(string $text): Html\Htmlable`.
 * Function `Html\render_component()` - the runtime target a component tag lowers into (name resolution candidates, props, slots). It is a public function so the dispatch rules are testable and so generated code is honest, but user code is expected to write tags, not call it.
 * Function `Html\render_dynamic()` - the runtime target a dynamic tag `<$tag>` lowers into: classifies the value by the element-vs-component rule and either constructs an `Html\Element` or dispatches through the `render_component()` machinery. Public for the same reasons.
@@ -417,7 +448,7 @@ All under the `Html\` namespace:
 
 ### Error handling
 
-Compile-time violations (mismatched closing tag, misplaced `<slot:>` block, a stray `<` in markup text) throw the standard **`CompileError`** / **`ParseError`**, catchable exactly like any other PHP syntax error. At runtime, unsupported attribute/child value types throw **`TypeError`**; invalid dynamically-supplied tag/attribute names throw **`ValueError`**; dispatch failures (unknown component, non-`Htmlable` return, misconfigured slots) throw **`Error`**.
+Compile-time violations (mismatched closing tag, a stray `<` in markup text) throw the standard **`CompileError`** / **`ParseError`**, catchable exactly like any other PHP syntax error. At runtime, unsupported attribute/child value types throw **`TypeError`**; invalid dynamically-supplied tag/attribute names throw **`ValueError`**; dispatch failures (unknown component, non-`Htmlable` return, a misconfigured slot) throw **`Error`**.
 
 ## Examples
 
@@ -430,12 +461,10 @@ A markup expression spans as many lines as it needs. It is an ordinary expressio
 ```php
 function ProductPage(Product $product, User $viewer): Html\Htmlable
 {
-    return <Layout title={$product->name}>
-        <slot:header>
+    return <Layout title={$product->name} header={<>
             <h1>{$product->name}</h1>
             {$product->onSale ? <span class="badge">Sale</span> : null}
-        </slot:header>
-
+        </>}>
         <p class="description">{$product->description}</p>
         <ul class="features">
             {array_map(fn($feature) => <li>{$feature}</li>, $product->features)}
@@ -540,7 +569,7 @@ Because `<` followed by a letter, `$`, `{`, or `>` in operand position is *alway
 
 This leaves just one backwards compatibility concern:
 
-1. **New `Html\` namespace** - introduces `Html\Htmlable`, `Html\Element`, `Html\Fragment`, `Html\Raw`, `Html\Slot`, `Html\raw()`, `Html\escape()`. Top-level `Html\` follows the established precedent for bundled extensions (`Random\`, `Dom\`, `Uri\`), and real-world top-level `Html\` packages are rare. No existing keywords are reserved and no new global reserved words are introduced (the syntax uses bare `<` and a `slot:` form valid only inside markup).
+1. **New `Html\` namespace** - introduces `Html\Htmlable`, `Html\Element`, `Html\Fragment`, `Html\Raw`, `Html\Slot`, `Html\raw()`, `Html\escape()`. Top-level `Html\` follows the established precedent for bundled extensions (`Random\`, `Dom\`, `Uri\`), and real-world top-level `Html\` packages are rare. No existing keywords are reserved and no new global reserved words are introduced (the syntax uses bare `<`, and the `:lazy` directive is only meaningful inside a markup tag).
 
 ### Impact on tooling
 
@@ -561,8 +590,8 @@ Some natural extensions are deliberately left out of this RFC to keep its scope 
 * **Context-aware escaping** (URL/JS/CSS contexts), as in Go's `html/template` or Latte's escaping, - so that e.g. a `javascript:` URL in `href` is caught. This RFC escapes HTML context only; the value-tree model is designed so this can be layered on later without a syntax change. Some examples include:
   * A JavaScript escaping context inside `<script>` tags, `onload=""`, `onclick=""`, etc. attributes
   * A CSS escaping context inside `<style>` tags or `style=""` attributes
-* **Lazy children** via closures, to allow a component to conditionally skip or defer
-  rendering its body (today children are eagerly evaluated, as with any function call).
+* **A dedicated `<slot:name>` block form** for passing large named regions, as an ergonomic alternative to markup-valued props for content that reads better as a block than as an attribute value. It would be pure sugar over what props already express (see Children & slots), so it is deferred rather than shipped in v1.
+* **Further laziness controls** - the `:lazy` directive already defers a component's body (see Children & slots); a natural extension is deferring individual markup-valued props the same way, or a component declaring that its body is always lazy so callers need not write `:lazy`.
 * **XML support** more in line with XHP's original design.
 * **Control structures** in the markup syntax, such as Vue's `v-if`.
 * **Dedicated template files**, potentially reigniting the `.phpc` file debate.

@@ -1,5 +1,5 @@
 --TEST--
-Html\render_component: slot routing to #[Html\Slot] parameters (RFC §6)
+Html\render_component: body content routes to the #[Html\Slot] parameter (RFC §5)
 --EXTENSIONS--
 html
 --FILE--
@@ -9,28 +9,29 @@ use Html\Element as E;
 use Html\Fragment;
 use Html\Slot;
 
-// Anonymous + named slots routed to author-named parameters.
+// The body slot routes to the #[Slot] parameter; other content areas are
+// ordinary props typed Html\Htmlable (what named slots used to be).
 function Layout(
     string $lang,
-    #[Slot]           Html\Htmlable $body,
-    #[Slot('header')] ?Html\Htmlable $header = null,
-    #[Slot('footer')] ?Html\Htmlable $footer = null,
+    #[Slot] Html\Htmlable $body,
+    ?Html\Htmlable $header = null,
+    ?Html\Htmlable $footer = null,
 ): Html\Htmlable {
     return new E('main', ['lang' => $lang], [$header, $body, $footer]);
 }
 
 $out = render_component(
     'Layout',
-    ['lang' => 'en'],
-    new Fragment([new E('p', [], ['loose body'])]),          // anonymous slot
-    [                                                          // named slots
+    [
+        'lang'   => 'en',
         'header' => new E('h1', [], ['Title']),
         'footer' => new Fragment([new E('small', [], ['(c) 2026'])]),
     ],
+    new Fragment([new E('p', [], ['loose body'])]),          // body slot
 );
 echo $out, "\n";
 
-// A component on a class constructor, anonymous slot only.
+// A component on a class constructor, body slot only.
 class Panel implements Html\Htmlable {
     public function __construct(
         public string $kind,
