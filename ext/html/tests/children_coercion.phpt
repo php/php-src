@@ -34,4 +34,4 @@ try {
 <ul><li>Ada</li><li>Linus</li><li>Grace</li></ul>
 <div><b>bold</b></div>
 <div><em>hi &amp; bye</em></div>
-TypeError: Object of class stdClass cannot be rendered as a markup child: it implements none of Html\Htmlable, Stringable, or Traversable, and is not a DOM node
+TypeError: Object of class stdClass cannot be rendered as a markup child: it implements none of Html\Htmlable, Stringable, or Traversable

@@ -117,86 +117,6 @@ static zend_arg_info html_zarginfo_default_tostring[
 
 static zend_string *html_render_htmlable(zval *value);
 
-/* DOM interop is kept decoupled from ext/dom: the DOM class entries are resolved
- * lazily by name (no link dependency), so ext/html works whether or not ext/dom
- * is loaded. Resolution is retried until found to tolerate module load order. */
-static zend_class_entry *html_lazy_ce(zend_class_entry **cache, const char *lcname, size_t len)
-{
-	if (*cache == NULL) {
-		*cache = zend_hash_str_find_ptr(CG(class_table), lcname, len);
-	}
-	return *cache;
-}
-
-static zend_class_entry *html_dom_document_ce(void)
-{
-	static zend_class_entry *ce = NULL;
-	return html_lazy_ce(&ce, ZEND_STRL("dom\\document"));
-}
-
-static zend_class_entry *html_dom_htmldocument_ce(void)
-{
-	static zend_class_entry *ce = NULL;
-	return html_lazy_ce(&ce, ZEND_STRL("dom\\htmldocument"));
-}
-
-static bool html_is_dom_node(zend_class_entry *ce)
-{
-	static zend_class_entry *modern = NULL, *legacy = NULL;
-	zend_class_entry *m = html_lazy_ce(&modern, ZEND_STRL("dom\\node"));
-	zend_class_entry *l = html_lazy_ce(&legacy, ZEND_STRL("domnode"));
-	return (m != NULL && instanceof_function(ce, m))
-		|| (l != NULL && instanceof_function(ce, l));
-}
-
-/* Serialize a DOM node to HTML via $node->ownerDocument->saveHtml($node). The
- * method name is case-insensitive, so this covers modern Dom\Node (saveHtml) and
- * legacy DOMNode (saveHTML). Returns a new string, or NULL with an exception. */
-static zend_string *html_serialize_dom_node(zval *node)
-{
-	/* A failed property read (e.g. a detached node with no owner document)
-	 * leaves owner_rv untouched and returns &EG(uninitialized_zval); initialize
-	 * so the unconditional zval_ptr_dtor(&owner_rv) below never frees garbage. */
-	zval owner_rv;
-	ZVAL_UNDEF(&owner_rv);
-	zval *owner = zend_read_property(Z_OBJCE_P(node), Z_OBJ_P(node), ZEND_STRL("ownerDocument"), 1, &owner_rv);
-	if (EG(exception)) {
-		zval_ptr_dtor(&owner_rv);
-		return NULL;
-	}
-	ZVAL_DEREF(owner);
-
-	/* A document node has no ownerDocument; serialize through itself. */
-	zval *doc = (Z_TYPE_P(owner) == IS_OBJECT) ? owner : node;
-
-	/* Probe for the method before calling: zend_call_method_with_1_params()
-	 * raises an unrecoverable E_CORE_ERROR when it is missing, which must not be
-	 * reachable from userland data (a detached node, an XML document). */
-	if (zend_hash_str_find_ptr(&Z_OBJCE_P(doc)->function_table, ZEND_STRL("savehtml")) == NULL) {
-		zval_ptr_dtor(&owner_rv);
-		zend_throw_error(NULL,
-			"Cannot serialize %s to HTML: %s has no saveHtml() method",
-			ZSTR_VAL(Z_OBJCE_P(node)->name), ZSTR_VAL(Z_OBJCE_P(doc)->name));
-		return NULL;
-	}
-
-	zval ret;
-	ZVAL_UNDEF(&ret);
-	zend_call_method_with_1_params(Z_OBJ_P(doc), Z_OBJCE_P(doc), NULL, "savehtml", &ret, node);
-	zval_ptr_dtor(&owner_rv);
-
-	if (EG(exception)) {
-		zval_ptr_dtor(&ret);
-		return NULL;
-	}
-	if (Z_TYPE(ret) == IS_STRING) {
-		return Z_STR(ret);
-	}
-	zval_ptr_dtor(&ret);
-	zend_throw_error(NULL, "Could not serialize the DOM node to HTML");
-	return NULL;
-}
-
 /* htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401). The charset
  * hint is NULL so the ini default_charset applies (UTF-8 by default), exactly as
  * htmlspecialchars() does - a non-UTF-8 application keeps working. */
@@ -395,17 +315,6 @@ static zend_result html_append_child(smart_str *buf, zval *value, uint32_t depth
 				return html_append_traversable(buf, value, depth);
 			}
 
-			/* A DOM node passes through as its own (already-valid) HTML serialization. */
-			if (html_is_dom_node(ce)) {
-				zend_string *s = html_serialize_dom_node(value);
-				if (!s) {
-					return FAILURE;
-				}
-				smart_str_append(buf, s);
-				zend_string_release(s);
-				return SUCCESS;
-			}
-
 			/* Stringable: cast then escape like a string. */
 			if (instanceof_function(ce, zend_ce_stringable)) {
 				zend_string *s = zval_try_get_string(value);
@@ -419,8 +328,7 @@ static zend_result html_append_child(smart_str *buf, zval *value, uint32_t depth
 
 			zend_type_error(
 				"Object of class %s cannot be rendered as a markup child: "
-				"it implements none of Html\\Htmlable, Stringable, or Traversable, "
-				"and is not a DOM node",
+				"it implements none of Html\\Htmlable, Stringable, or Traversable",
 				ZSTR_VAL(ce->name));
 			return FAILURE;
 		}
@@ -1731,128 +1639,6 @@ PHP_FUNCTION(Html_render_dynamic)
 		ZVAL_UNDEF(return_value);
 		RETURN_THROWS();
 	}
-}
-
-/* Build DOM nodes for `(string) $self` inside the given modern Dom\Document, by
- * parsing the rendered HTML into a throwaway container element and moving the
- * parsed children into a document fragment (which is returned). Reuses the DOM's
- * own parser/serializer, so it handles Raw/components/any markup uniformly.
- *
- * Limitation: the fragment is parsed in <div> ("in body") context, so
- * context-sensitive elements at the top level (<td>, <tr>, <caption>, ...) are
- * handled by the HTML parser's error recovery - convert whole tables instead.
- * The clean fix is parsing in <template> context, which accepts any content,
- * but ext/dom does not yet expose HTMLTemplateElement::$content to move the
- * parsed nodes out; revisit when it does. */
-static void html_to_dom_impl(zval *self, zval *doc, zval *return_value)
-{
-	zend_string *html = zval_try_get_string(self);
-	if (html == NULL) {
-		return; /* __toString threw */
-	}
-
-	zval div, container;
-	ZVAL_STRING(&div, "div");
-	ZVAL_UNDEF(&container);
-	zend_call_method_with_1_params(Z_OBJ_P(doc), Z_OBJCE_P(doc), NULL, "createelement", &container, &div);
-	zval_ptr_dtor(&div);
-	if (EG(exception) || Z_TYPE(container) != IS_OBJECT) {
-		zend_string_release(html);
-		zval_ptr_dtor(&container);
-		return;
-	}
-
-	/* container->innerHTML = html  (triggers the DOM fragment parser) */
-	zval html_zv;
-	ZVAL_STR(&html_zv, html);
-	zend_update_property(Z_OBJCE(container), Z_OBJ(container), ZEND_STRL("innerHTML"), &html_zv);
-	zval_ptr_dtor(&html_zv);
-	if (EG(exception)) {
-		zval_ptr_dtor(&container);
-		return;
-	}
-
-	zval frag;
-	ZVAL_UNDEF(&frag);
-	zend_call_method_with_0_params(Z_OBJ_P(doc), Z_OBJCE_P(doc), NULL, "createdocumentfragment", &frag);
-	if (EG(exception) || Z_TYPE(frag) != IS_OBJECT) {
-		zval_ptr_dtor(&container);
-		zval_ptr_dtor(&frag);
-		return;
-	}
-
-	/* Move each parsed child out of the container and into the fragment. */
-	for (;;) {
-		/* Like owner_rv above: a failed read leaves child_rv untouched. */
-		zval child_rv;
-		ZVAL_UNDEF(&child_rv);
-		zval *child = zend_read_property(Z_OBJCE(container), Z_OBJ(container), ZEND_STRL("firstChild"), 1, &child_rv);
-		if (EG(exception) || Z_TYPE_P(child) != IS_OBJECT) {
-			zval_ptr_dtor(&child_rv);
-			break;
-		}
-		zval append_ret;
-		ZVAL_UNDEF(&append_ret);
-		zend_call_method_with_1_params(Z_OBJ(frag), Z_OBJCE(frag), NULL, "appendchild", &append_ret, child);
-		zval_ptr_dtor(&append_ret);
-		zval_ptr_dtor(&child_rv);
-		if (EG(exception)) {
-			zval_ptr_dtor(&container);
-			zval_ptr_dtor(&frag);
-			return;
-		}
-	}
-
-	zval_ptr_dtor(&container);
-	RETVAL_COPY_VALUE(&frag);
-}
-
-/* Shared body for Element/Fragment/Raw::toDom(): require ext/dom, accept an
- * optional target Dom\Document, and convert `(string) $this` into nodes it
- * owns. With no document, an empty Dom\HTMLDocument is created to own the
- * fragment; the fragment's ownerDocument reference keeps it alive. */
-static void html_common_to_dom(INTERNAL_FUNCTION_PARAMETERS)
-{
-	zend_class_entry *doc_ce = html_dom_document_ce();
-	if (doc_ce == NULL) {
-		zend_throw_error(NULL, "toDom() requires the dom extension");
-		RETURN_THROWS();
-	}
-
-	zval *doc = NULL;
-	ZEND_PARSE_PARAMETERS_START(0, 1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(doc, doc_ce)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (doc == NULL) {
-		zval new_doc;
-		ZVAL_UNDEF(&new_doc);
-		zend_call_method_with_0_params(NULL, html_dom_htmldocument_ce(), NULL, "createempty", &new_doc);
-		if (EG(exception) || Z_TYPE(new_doc) != IS_OBJECT) {
-			zval_ptr_dtor(&new_doc);
-			RETURN_THROWS();
-		}
-		html_to_dom_impl(ZEND_THIS, &new_doc, return_value);
-		zval_ptr_dtor(&new_doc);
-	} else {
-		html_to_dom_impl(ZEND_THIS, doc, return_value);
-	}
-}
-
-PHP_METHOD(Html_Element, toDom)
-{
-	html_common_to_dom(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-
-PHP_METHOD(Html_Fragment, toDom)
-{
-	html_common_to_dom(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-
-PHP_METHOD(Html_Raw, toDom)
-{
-	html_common_to_dom(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 static PHP_GINIT_FUNCTION(html)

@@ -416,7 +416,7 @@ Conditionals use a ternary, not the JSX `{condition && <x/>}` idiom: in PHP, `&&
 * **Comments**: `<!-- ... -->` is emitted as a literal HTML comment; `{/* ... */}` renders   nothing (source-only).
 * **Doctype**: `<!DOCTYPE html>` is allowed in *content position* and emitted verbatim (case-insensitive, no interpolation). It does **not** begin a markup expression - a markup expression is a single root node, so a full document wraps it in a fragment, exactly as JSX handles sibling roots: `<> <!DOCTYPE html> <html>...</html> </>`. Position is not validated (browsers ignore a misplaced doctype; it is the author's responsibility). Other `<!` declarations (e.g. CDATA sections, which terminate at `]]>` and may contain `>`) are a parse error with a targeted message.
 
-### 7. Element model and DOM interoperability
+### 7. Element model
 
 Markup builds a **lightweight, immutable value-object tree** (`Html\Element`,`Html\Fragment`), *not* PHP 8.4's `Dom\*` tree. Reasons:
 
@@ -425,9 +425,7 @@ Markup builds a **lightweight, immutable value-object tree** (`Html\Element`,`Ht
 3. **`Html\raw()`** requires opaque byte passthrough to avoid confusion to end users, which a DOM cannot represent without parsing and reserializing (potentially altering it).
 4. **Component contract** - returning `Html\Htmlable` (one method) is far lighter than returning a document-owned `Dom\Node`.
 
-Interop is provided both ways: `Html\Element::toDom(?Dom\Document = null): Dom\DocumentFragment` (when no document is given, a fresh empty `Dom\HTMLDocument` is created to own the returned fragment), and a `Dom\Node` is accepted as a child/interpolation (serialized to `Html\Htmlable`).
-
-One documented `toDom()` limitation: the rendered HTML is parsed as a fragment in "in body" context, so context-sensitive elements at the *top level* of the converted value (`<td>`, `<tr>`, `<caption>`, ...) are subject to the HTML parser's error recovery - convert the enclosing `<table>` instead.
+The two worlds can still connect through the string boundary, in userland, with no dedicated API: markup renders to HTML (`Dom\HTMLDocument::createFromString((string) $el)` or a fragment parse via `innerHTML`), and a DOM node serializes to HTML that `Html\raw()` accepts as a child.
 
 ### 8. New symbols
 
@@ -436,7 +434,7 @@ The runtime lives in a new always-enabled bundled extension, `ext/html`. It cann
 All under the `Html\` namespace:
 
 * Interface `Html\Htmlable extends Stringable` - the renderable contract. The one method a class writes is `toHtml(): Htmlable`, which returns markup (ultimately an `Element`/`Fragment`/`Raw`). The inherited `__toString(): string` requirement is satisfied automatically: a userland class that does not declare (or inherit) a `__toString` of its own receives a default implementation at class-link time - it serializes what `toHtml()` produces - exactly the way every enum receives `cases()`. So `echo`/`(string)` work on any markup value or component, while `strict_types` components can `return <div>...</div>;` directly and callers can still reach the object tree via `toHtml()`. A declared `__toString` wins for string casts; markup rendering always goes through `toHtml()`.
-* Classes `Html\Element`, `Html\Fragment` (and `Html\Raw`, the opaque passthrough that backs `raw()`/`escape()`). All are `final`, immutable value objects with `readonly` properties (`$tag`, `$attributes`, `$children` / `$html`), and each has a `toDom(?Dom\Document = null): Dom\DocumentFragment` method.
+* Classes `Html\Element`, `Html\Fragment` (and `Html\Raw`, the opaque passthrough that backs `raw()`/`escape()`). All are `final`, immutable value objects with `readonly` properties (`$tag`, `$attributes`, `$children` / `$html`).
 * Class `Html\LazyFragment` - a `final` `Html\Htmlable` wrapping a `Closure` thunk (`__construct(Closure $thunk)`). The `:lazy` directive lowers a component body into one; it evaluates the thunk on first render and memoizes the result (see Children & slots). Not typically written by hand.
 * Attribute `Html\Slot` (bare `#[Html\Slot]`, no arguments) marking the parameter that receives a component's body.
 * Functions `Html\raw(string $html): Html\Htmlable`, `Html\escape(string $text): Html\Htmlable`.
@@ -598,6 +596,7 @@ Some natural extensions are deliberately left out of this RFC to keep its scope 
 * **Function components** - plain functions (`<Greeting/>` → `greeting()`) as component tags. Deferred because a bare tag gives no syntactic signal whether a class or a function is meant, and PHP resolves the two through separate `use` / `use function` import tables - supporting functions needs dual-candidate name resolution in the compiler (a function-name analogue of `Foo::class`), a class-then-function dispatch order at runtime, a guard against tags resolving to internal functions (`<Date/>` → `date()`), and an *invoker* hook alongside the factory so containers can autowire calls as well as construction. All of it is purely additive - no syntax change - and the reference implementation had a complete working version, so this is a natural first follow-up RFC. In v1 a small function component is a small class or a static method instead.
 * **A dedicated `<slot:name>` block form** for passing large named regions, as an ergonomic alternative to markup-valued props for content that reads better as a block than as an attribute value. It would be pure sugar over what props already express (see Children & slots), so it is deferred rather than shipped in v1.
 * **Further laziness controls** - the `:lazy` directive already defers a component's body (see Children & slots); a natural extension is deferring individual markup-valued props the same way, or a component declaring that its body is always lazy so callers need not write `:lazy`.
+* **DOM interoperability APIs** - a built-in `toDom(?Dom\Document): Dom\DocumentFragment` on the node classes, and accepting a `Dom\Node` directly as a markup child. Both are expressible in userland today through the string boundary (see Element model), so they are deferred; a native version would also want ext/dom to expose `HTMLTemplateElement::$content` first, so fragments can parse in `<template>` context instead of "in body" context (which mangles top-level `<td>`/`<tr>`).
 * **XML support** more in line with XHP's original design.
 * **Control structures** in the markup syntax, such as Vue's `v-if`.
 * **Dedicated template files**, potentially reigniting the `.phpc` file debate.

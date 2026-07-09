@@ -1,5 +1,5 @@
 /* This is a generated file, edit html.stub.php instead.
- * Stub hash: 4a645196f8983f4d938e5e2eb3b25f34d1401ccd */
+ * Stub hash: c9c142645c4f1a1bf9f02a44f5f193b25add2690 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Html_raw, 0, 1, Html\\Htmlable, 0)
 	ZEND_ARG_TYPE_INFO(0, html, IS_STRING, 0)
@@ -61,10 +61,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Html_Element___toString arginfo_class_Html_Htmlable___toString
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Html_Element_toDom, 0, 0, Dom\\DocumentFragment, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, document, Dom\\Document, 1, "null")
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Html_Fragment___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, children, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
@@ -73,8 +69,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Html_Fragment___toString arginfo_class_Html_Htmlable___toString
 
-#define arginfo_class_Html_Fragment_toDom arginfo_class_Html_Element_toDom
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Html_Raw___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, html, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -82,8 +76,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Html_Raw_toHtml arginfo_class_Html_Htmlable_toHtml
 
 #define arginfo_class_Html_Raw___toString arginfo_class_Html_Htmlable___toString
-
-#define arginfo_class_Html_Raw_toDom arginfo_class_Html_Element_toDom
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Html_LazyFragment___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, thunk, Closure, 0)
@@ -105,15 +97,12 @@ ZEND_FUNCTION(Html_unregister_component_decorator);
 ZEND_METHOD(Html_Element, __construct);
 ZEND_METHOD(Html_Element, toHtml);
 ZEND_METHOD(Html_Element, __toString);
-ZEND_METHOD(Html_Element, toDom);
 ZEND_METHOD(Html_Fragment, __construct);
 ZEND_METHOD(Html_Fragment, toHtml);
 ZEND_METHOD(Html_Fragment, __toString);
-ZEND_METHOD(Html_Fragment, toDom);
 ZEND_METHOD(Html_Raw, __construct);
 ZEND_METHOD(Html_Raw, toHtml);
 ZEND_METHOD(Html_Raw, __toString);
-ZEND_METHOD(Html_Raw, toDom);
 ZEND_METHOD(Html_LazyFragment, __construct);
 ZEND_METHOD(Html_LazyFragment, toHtml);
 ZEND_METHOD(Html_LazyFragment, __toString);
@@ -141,7 +130,6 @@ static const zend_function_entry class_Html_Element_methods[] = {
 	ZEND_ME(Html_Element, __construct, arginfo_class_Html_Element___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Html_Element, toHtml, arginfo_class_Html_Element_toHtml, ZEND_ACC_PUBLIC)
 	ZEND_ME(Html_Element, __toString, arginfo_class_Html_Element___toString, ZEND_ACC_PUBLIC)
-	ZEND_ME(Html_Element, toDom, arginfo_class_Html_Element_toDom, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -149,7 +137,6 @@ static const zend_function_entry class_Html_Fragment_methods[] = {
 	ZEND_ME(Html_Fragment, __construct, arginfo_class_Html_Fragment___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Html_Fragment, toHtml, arginfo_class_Html_Fragment_toHtml, ZEND_ACC_PUBLIC)
 	ZEND_ME(Html_Fragment, __toString, arginfo_class_Html_Fragment___toString, ZEND_ACC_PUBLIC)
-	ZEND_ME(Html_Fragment, toDom, arginfo_class_Html_Fragment_toDom, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -157,7 +144,6 @@ static const zend_function_entry class_Html_Raw_methods[] = {
 	ZEND_ME(Html_Raw, __construct, arginfo_class_Html_Raw___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Html_Raw, toHtml, arginfo_class_Html_Raw_toHtml, ZEND_ACC_PUBLIC)
 	ZEND_ME(Html_Raw, __toString, arginfo_class_Html_Raw___toString, ZEND_ACC_PUBLIC)
-	ZEND_ME(Html_Raw, toDom, arginfo_class_Html_Raw_toDom, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

@@ -44,14 +44,6 @@ namespace Html {
         public function toHtml(): \Html\Htmlable {}
 
         public function __toString(): string {}
-
-        /**
-         * Converts this markup to nodes owned by the given modern DOM document,
-         * or by a new empty `Dom\HTMLDocument` when none is given.
-         * Parsed in "in body" context: top-level context-sensitive elements
-         * (`<td>`, `<tr>`, ...) need their enclosing table converted with them.
-         */
-        public function toDom(?\Dom\Document $document = null): \Dom\DocumentFragment {}
     }
 
     /**
@@ -69,14 +61,6 @@ namespace Html {
         public function toHtml(): \Html\Htmlable {}
 
         public function __toString(): string {}
-
-        /**
-         * Converts this markup to nodes owned by the given modern DOM document,
-         * or by a new empty `Dom\HTMLDocument` when none is given.
-         * Parsed in "in body" context: top-level context-sensitive elements
-         * (`<td>`, `<tr>`, ...) need their enclosing table converted with them.
-         */
-        public function toDom(?\Dom\Document $document = null): \Dom\DocumentFragment {}
     }
 
     /**
@@ -95,14 +79,6 @@ namespace Html {
         public function toHtml(): \Html\Htmlable {}
 
         public function __toString(): string {}
-
-        /**
-         * Converts this markup to nodes owned by the given modern DOM document,
-         * or by a new empty `Dom\HTMLDocument` when none is given.
-         * Parsed in "in body" context: top-level context-sensitive elements
-         * (`<td>`, `<tr>`, ...) need their enclosing table converted with them.
-         */
-        public function toDom(?\Dom\Document $document = null): \Dom\DocumentFragment {}
     }
 
     /**
