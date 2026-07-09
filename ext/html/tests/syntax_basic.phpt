@@ -114,6 +114,21 @@ echo (<ul>
     <!-- first -->
     <li>one</li>
 </ul>)->__toString(), "\n";
+
+// --- operand positions: markup lexes after every operand-expecting token ---
+// (the scanner's allowlist; a comparison never silently changes meaning)
+echo "concat " . <u>c</u>, "\n";                      // after "."
+echo true ? <s>t</s> : <s>f</s>, "\n";                // after "?" and ":"
+echo null ?? <em>coal</em>, "\n";                     // after "??"
+echo (string) <p>cast</p>, "\n";                      // after a cast
+echo <div>pipe</div> |> strtoupper(...), "\n";        // after "|>"
+echo clone <span>cl</span>, "\n";                     // after `clone`
+print <p>print</p>; echo "\n";                        // after `print`
+echo [<b>a</b>, <b>b</b>][1], "\n";                   // after "[" and ","
+echo (fn() => <li>arrow</li>)(), "\n";                // after "=>"
+echo match(true) { true => <b>match</b> }, "\n";      // match arm "=>"
+function gen() { yield from [<i>yf</i>]; }            // after `yield from`
+echo iterator_to_array(gen())[0], "\n";
 ?>
 --EXPECT--
 bool(true)
@@ -148,3 +163,14 @@ string(0) ""
 <p>ab</p>
 <p>xy</p>
 <ul><!-- first --><li>one</li></ul>
+concat <u>c</u>
+<s>t</s>
+<em>coal</em>
+<p>cast</p>
+<DIV>PIPE</DIV>
+<span>cl</span>
+<p>print</p>
+<b>b</b>
+<li>arrow</li>
+<b>match</b>
+<i>yf</i>

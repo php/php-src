@@ -564,13 +564,18 @@ class Clock extends Component
 
 ## Backward Incompatible Changes
 
-`<` is heavily overloaded in PHP (`<`, `<=`, `<=>`, `<<`, `<>`, `<<<`), so this was the main design risk. It is resolved by the same technique JavaScript uses to tell regex from division: the scanner tracks whether it is in **operand position** (a value is expected) or **operator position** (a value just ended). Markup begins only when `<` is in operand position *and* is immediately followed by `[A-Za-z>]`, by `\` then a letter (a fully-qualified component tag such as `<\App\Card/>`), by `$` then a variable name, or by `{` (the dynamic tags `<$tag>` / `<{expr}>`):
+`<` is heavily overloaded in PHP (`<`, `<=`, `<=>`, `<<`, `<>`, `<<<`), so this was the main design risk. It is resolved by the same technique JavaScript uses to tell regex from division: the scanner tracks whether it is in **operand position** (a value is expected) or **operator position** (a value just ended), from the last significant token. Markup begins only when `<` is in operand position *and* is immediately followed by `[A-Za-z>]`, by `\` then a letter (a fully-qualified component tag such as `<\App\Card/>`), by `$` then a variable name, or by `{` (the dynamic tags `<$tag>` / `<{expr}>`):
 
 * In `$a < $b` (or the no-space `$a <$b`), `<` follows an operand → comparison, unchanged.
 * In `$a < \Foo::BAR`, `<` is in operator position → comparison, unchanged.
 * In `return <div>`, `<` is in operand position followed by a letter → markup.
 
-Because `<` followed by a letter, `$`, `{`, or `>` in operand position is *always a syntax error* in PHP today, reclaiming it does not change the meaning of any valid program. Every operand-ending context is explicitly kept as a comparison, which compare the received value today and still do. `<>` is the legacy alias of `!=` and is preserved in infix position (`$a <> $b` is still not-equal). `<>` is only reinterpreted as a fragment opener in **operand position**, where it is currently a syntax error - so no valid program needs changes.
+The operand-position decision is an explicit allowlist that **fails closed**: markup begins only after a token that *expects* an operand - `return`, `echo`, `=`, `(`, `,`, `=>`, binary and assignment operators, casts, and the other expression-introducing contexts - which are exactly the positions where an infix `<` cannot legally appear today, and where `<` followed by a letter, `$`, `{`, or `>` is *always a syntax error*. After every other token, `<` keeps its existing meaning. Two properties follow:
+
+* **No valid program changes meaning, by construction.** Reclaiming `<` only ever applies where the source could not previously compile.
+* **The design is future-proof in the safe direction.** If a token is missing from the allowlist (or a future PHP version adds a new operator and forgets to include it), the only consequence is that markup cannot directly follow that token - a loud, feature-side parse error worked around with parentheses and fixed by a one-line addition. A gap can never silently change what existing code means.
+
+`<>` is the legacy alias of `!=` and is preserved in infix position (`$a <> $b` is still not-equal). `<>` is only reinterpreted as a fragment opener in **operand position**, where it is currently a syntax error - so no valid program needs changes. Two positions are deliberately excluded from the allowlist because an infix `<` after them is (or may be) valid PHP: after a bare `yield` (`yield < LIM` is valid, so yielding markup is written `yield (<div/>)`) and after a closing `}` (which ends `match` and interpolation values), so markup as a bare expression statement immediately following a block is assigned or echoed instead.
 
 This leaves just one backwards compatibility concern:
 

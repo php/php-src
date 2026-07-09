@@ -1365,66 +1365,114 @@ static zend_result check_nesting_at_end(void)
 
 /* Native markup (RFC: Native Markup Expressions). A bare "<" in ST_IN_SCRIPTING
  * begins a markup expression only in *operand* position (where a value, not an
- * operator, is expected). We approximate operand-vs-operator position from the
- * last significant token: if it can end an operand, the "<" is a comparison;
- * otherwise a value is expected and "<tag"/"<>" begins markup. Because "<"
- * immediately followed by a letter or ">" in operand position is always a syntax
- * error today, reclaiming it is backward compatible.
+ * operator, is expected), decided from the last significant token. The decision
+ * is an allowlist that FAILS CLOSED: markup begins only after a token known to
+ * expect an operand - a position where an infix "<" cannot legally appear
+ * today - and after every other token "<" keeps its existing meaning. So a
+ * token missing from this list can never change what existing code means; the
+ * worst a gap can do is make markup unavailable in that one context (a loud
+ * feature-side parse error, fixed by parenthesizing - or by adding the token
+ * here). Contributors adding a new operator or expression-introducing keyword
+ * should add it to this list so markup can follow it directly.
  *
- * Known limitation: "}" must stay an operand ender (match/array/interpolation
- * results), so markup as an expression statement directly after a block —
- * `if ($c) { ... } <p>hi</p>;` — lexes as a comparison and fails to parse.
- * Assign or echo the markup instead. Contributors adding a new token that can
- * END an expression operand must add it to this switch, or "NEWTOKEN < X"
- * silently becomes a markup parse error. */
+ * Deliberate exclusions, each because "<" after it is (or may be) valid PHP:
+ *   - "}" ends match/interpolation values, so it must stay a comparison; the
+ *     cost is that markup as an expression statement directly after a block -
+ *     `if ($c) { ... } <p>hi</p>;` - fails to parse. Assign or echo it instead.
+ *   - bare `yield` is a complete operand (`yield < LIM`, `yield <> 5` are
+ *     valid PHP), so yielding markup needs parentheses: `yield (<div/>)`.
+ *     (`yield from` requires an operand, so markup after it just works.)
+ *   - ")" would enable `if ($c) <p>hi</p>;` but ends grouped operands
+ *     (`($a+$b) < $c`); parenthesized markup `(<p/>)` already works. */
 static bool zend_markup_operand_position(void)
 {
 	switch (SCNG(last_token)) {
-		/* tokens that END an operand → the following "<" is a comparison */
-		case T_VARIABLE:
-		case T_LNUMBER:
-		case T_DNUMBER:
-		case T_NUM_STRING:
-		case T_CONSTANT_ENCAPSED_STRING:
-		case T_STRING:
-		case T_NAME_FULLY_QUALIFIED:
-		case T_NAME_QUALIFIED:
-		case T_NAME_RELATIVE:
-		case T_LINE:
-		case T_FILE:
-		case T_DIR:
-		case T_CLASS_C:
-		case T_TRAIT_C:
-		case T_METHOD_C:
-		case T_FUNC_C:
-		case T_NS_C:
-		case T_PROPERTY_C:
-		case T_END_HEREDOC:
-		/* postfix increment/decrement and the `class` keyword in `Foo::class`
-		 * also END an operand: `$i++<N`, `$i--<N`, `Foo::class<N` are comparisons,
-		 * never markup (the `class` keyword is never followed by markup). */
-		case T_INC:
-		case T_DEC:
-		case T_CLASS:
-		/* `static` and bare `exit`/`die` are complete operands too
-		 * (`instanceof static < FOO`, `exit < FOO`), and markup can never
-		 * legally follow them, so a "<" after them stays a comparison. */
-		case T_STATIC:
-		case T_EXIT:
-		/* Bare `yield` is a complete operand as well: `yield <> 5` and
-		 * `yield < LIM` are valid PHP, so a "<" after `yield` stays a
-		 * comparison and BC is preserved. The cost is that yielding markup
-		 * needs parentheses — `yield (<div/>)` — which the RFC documents.
-		 * (`yield from` requires an operand, so markup after it just works.) */
-		case T_YIELD:
-		case ')':
-		case ']':
-		case '}':
-		case '"': /* doubles as the closing quote: string states intervene */
-		case '`':
-			return false;
-		default:
+		/* nothing scanned yet (an eval'd string can begin with an expression) */
+		case 0:
+		/* statement starts and separators */
+		case T_OPEN_TAG:
+		case T_OPEN_TAG_WITH_ECHO:
+		case ';':
+		case '{':
+		case ':': /* alternative syntax, case/default labels, ternary else */
+		/* grouping and lists */
+		case '(':
+		case '[':
+		case ',':
+		/* assignment */
+		case '=':
+		case T_PLUS_EQUAL:
+		case T_MINUS_EQUAL:
+		case T_MUL_EQUAL:
+		case T_DIV_EQUAL:
+		case T_MOD_EQUAL:
+		case T_CONCAT_EQUAL:
+		case T_AND_EQUAL:
+		case T_OR_EQUAL:
+		case T_XOR_EQUAL:
+		case T_SL_EQUAL:
+		case T_SR_EQUAL:
+		case T_POW_EQUAL:
+		case T_COALESCE_EQUAL:
+		case T_DOUBLE_ARROW:
+		/* unary and binary operators */
+		case '+':
+		case '-':
+		case '*':
+		case '/':
+		case '%':
+		case '.':
+		case '<':
+		case '>':
+		case '|':
+		case '^':
+		case '?':
+		case '!':
+		case '~':
+		case '@':
+		case T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG:
+		case T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG:
+		case T_SL:
+		case T_SR:
+		case T_POW:
+		case T_COALESCE:
+		case T_BOOLEAN_AND:
+		case T_BOOLEAN_OR:
+		case T_LOGICAL_AND:
+		case T_LOGICAL_OR:
+		case T_LOGICAL_XOR:
+		case T_IS_EQUAL:
+		case T_IS_NOT_EQUAL:
+		case T_IS_IDENTICAL:
+		case T_IS_NOT_IDENTICAL:
+		case T_IS_SMALLER_OR_EQUAL:
+		case T_IS_GREATER_OR_EQUAL:
+		case T_SPACESHIP:
+		case T_PIPE:
+		/* keywords that introduce an expression */
+		case T_RETURN:
+		case T_ECHO:
+		case T_PRINT:
+		case T_THROW:
+		case T_CLONE:
+		case T_CASE:
+		case T_YIELD_FROM:
+		case T_ELLIPSIS:
+		/* casts */
+		case T_INT_CAST:
+		case T_DOUBLE_CAST:
+		case T_STRING_CAST:
+		case T_ARRAY_CAST:
+		case T_OBJECT_CAST:
+		case T_BOOL_CAST:
+		case T_UNSET_CAST:
+		case T_VOID_CAST:
+		/* markup interpolation: `{` in markup content, child or attribute
+		 * position, restarts expression context (nested markup must lex) */
+		case T_MARKUP_INTERP_START:
 			return true;
+		default:
+			return false;
 	}
 }
 
