@@ -2048,12 +2048,8 @@ ZEND_METHOD(ReflectionFunctionAbstract, getDocComment)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
-		RETURN_STR_COPY(fptr->op_array.doc_comment);
-	}
-
-	if (fptr->type == ZEND_INTERNAL_FUNCTION && ((zend_internal_function *) fptr)->doc_comment) {
-		RETURN_STR_COPY(((zend_internal_function *) fptr)->doc_comment);
+	if (fptr->common.doc_comment) {
+		RETURN_STR_COPY(fptr->common.doc_comment);
 	}
 
 	RETURN_FALSE;
