@@ -927,36 +927,6 @@ PHP_FUNCTION(Html_escape)
 	zend_string_release(escaped);
 }
 
-/* Parse $code (a complete file, including the opening <?php tag) and export
- * the AST back to source. Markup is lowered during parsing, so the export
- * shows exactly the plain-PHP form markup compiles to. */
-PHP_FUNCTION(Html_transpile)
-{
-	zend_string *code;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(code)
-	ZEND_PARSE_PARAMETERS_END();
-
-	zend_string *filename = ZSTR_INIT_LITERAL("Html\\transpile()'d code", 0);
-	zend_arena *ast_arena;
-	zend_ast *ast = zend_compile_string_to_ast(code, &ast_arena, filename);
-	zend_string_release(filename);
-
-	if (!ast) {
-		/* The parser threw ParseError (or a compile-time error was upgraded
-		 * to an exception); just propagate it. */
-		ZEND_ASSERT(EG(exception));
-		RETURN_THROWS();
-	}
-
-	zend_string *source = zend_ast_export("", ast, "");
-	zend_ast_destroy(ast);
-	zend_arena_destroy(ast_arena);
-
-	RETURN_STR(source);
-}
-
 /* Merge explicit props with body content routed via a #[Html\Slot] parameter
  * attribute, producing the named-argument array for a component dispatch.
  * Returns a new array (caller releases) or NULL with a pending exception. */

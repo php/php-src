@@ -127,16 +127,6 @@ namespace Html {
     function escape(string $text): \Html\Htmlable {}
 
     /**
-     * Returns the plain-PHP source that $code compiles to, with markup
-     * expressions lowered to their new \Html\Element(...) /
-     * \Html\render_component(...) form. $code is a complete source file
-     * including its opening <?php tag. Throws ParseError on invalid code.
-     * A debugging and educational aid (see ext/html/markup2php); the output
-     * is equivalent source, not a supported compilation target.
-     */
-    function transpile(string $code): string {}
-
-    /**
      * Dispatches a component (RFC §3 and §5) and returns the Html\Htmlable it
      * produces. This is the runtime target a `<Component …/>` markup tag lowers
      * into; it is exposed as a public function so the dispatch and slot-routing

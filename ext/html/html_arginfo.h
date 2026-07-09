@@ -1,5 +1,5 @@
 /* This is a generated file, edit html.stub.php instead.
- * Stub hash: c9c142645c4f1a1bf9f02a44f5f193b25add2690 */
+ * Stub hash: fe87170919c07ffdb0869adffcf45cd108d3bd96 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Html_raw, 0, 1, Html\\Htmlable, 0)
 	ZEND_ARG_TYPE_INFO(0, html, IS_STRING, 0)
@@ -7,10 +7,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Html_escape, 0, 1, Html\\Htmlable, 0)
 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Html_transpile, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Html_render_component, 0, 1, Html\\Htmlable, 0)
@@ -87,7 +83,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(Html_raw);
 ZEND_FUNCTION(Html_escape);
-ZEND_FUNCTION(Html_transpile);
 ZEND_FUNCTION(Html_render_component);
 ZEND_FUNCTION(Html_render_dynamic);
 ZEND_FUNCTION(Html_register_component_factory);
@@ -110,7 +105,6 @@ ZEND_METHOD(Html_LazyFragment, __toString);
 static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "raw"), zif_Html_raw, arginfo_Html_raw, 0, NULL, NULL)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "escape"), zif_Html_escape, arginfo_Html_escape, 0, NULL, NULL)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "transpile"), zif_Html_transpile, arginfo_Html_transpile, 0, NULL, NULL)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "render_component"), zif_Html_render_component, arginfo_Html_render_component, 0, NULL, NULL)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "render_dynamic"), zif_Html_render_dynamic, arginfo_Html_render_dynamic, 0, NULL, NULL)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("Html", "register_component_factory"), zif_Html_register_component_factory, arginfo_Html_register_component_factory, 0, NULL, NULL)

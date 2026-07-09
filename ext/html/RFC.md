@@ -119,6 +119,8 @@ Every construct in this proposal lowers the same way - at compile time, to a `ne
 
 Two properties fall directly out of this lowering. Markup is **zero-cost sugar** - writing the objects by hand produces the same AST and opcodes. And markup obeys **ordinary expression semantics** - attributes and children are argument expressions, evaluated eagerly, scoped and typed like any other PHP code.
 
+Every lowering in this document can be reproduced on the reference implementation with no extra tooling: `php -d zend.assertions=1 -r 'assert(false && <markup />);'` prints the desugared form in the assertion message.
+
 ### 2. Escape-by-default
 
 This is a *templating* feature, and like every major PHP template engine (Blade, Twig, Latte) it **escapes by default**:
