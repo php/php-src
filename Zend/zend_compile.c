@@ -9579,6 +9579,16 @@ static void zend_compile_extension_decl(zend_ast *ast) /* {{{ */
 		}
 	}
 
+	/* Built-in type names are not classes and cannot be extended: reject
+	 * them rather than registering entries no object can ever match.
+	 * (Extension methods on the scalar value types are proposed separately.) */
+	if (target_ast->kind == ZEND_AST_ZVAL
+	 && target_ast->attr == ZEND_NAME_NOT_FQ
+	 && zend_is_reserved_class_name(zend_ast_get_str(target_ast))) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot extend reserved type %s", ZSTR_VAL(zend_ast_get_str(target_ast)));
+	}
+
 	target_name = zend_resolve_class_name_ast(target_ast);
 	target_lc = zend_string_tolower(target_name);
 
