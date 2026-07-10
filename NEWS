@@ -80,6 +80,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed sleep() and usleep() to reject values that overflow the underlying
     unsigned int timeout. (Weilin Du)
+  . Fixed bug GH-22671 (assert.bail aborts the process when the assert callback
+    throws an exception whose reporting re-throws). (iliaal)
 
 - Streams:
   . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
