@@ -2365,10 +2365,16 @@ function join(string|array $separator, ?array $array = null): string {}
  */
 function strtok(string $string, ?string $token = null): string|false {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ */
 function strtoupper(string $string): string {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ */
 function strtolower(string $string): string {}
 
 function str_increment(string $string): string {}
