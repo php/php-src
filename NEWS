@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed IntlChar methods leaving stale global error state after successful
     calls. (Xuyang Zhang)
 
+- ODBC:
+  . Fixed bug GH-22668 (Heap buffer over-read when a column value exceeds the
+    driver-reported display size). (iliaal)
+
 - OpenSSL:
   . Fixed timeout for supplemental read at end of a blocking stream in SSL
     stream wrapper. (ilutov)
