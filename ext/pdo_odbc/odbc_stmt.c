@@ -360,6 +360,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				param->driver_data = P;
 
 				P->len = 0; /* is re-populated each EXEC_PRE */
+				P->outbuflen = 0;
 				P->outbuf = NULL;
 
 				P->is_unicode = pdo_odbc_sqltype_is_unicode(S, sqltype);
@@ -384,6 +385,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 							P->len *= 2;
 						}
 						P->outbuf = emalloc(P->len + (P->is_unicode ? 2:1));
+						P->outbuflen = P->len;
 					}
 				}
 
@@ -481,10 +483,16 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 							case PDO_ODBC_CONV_FAIL:
 							case PDO_ODBC_CONV_NOT_REQUIRED:
 								P->len = Z_STRLEN_P(parameter);
+								if (P->len > P->outbuflen) {
+									P->len = P->outbuflen;
+								}
 								memcpy(P->outbuf, Z_STRVAL_P(parameter), P->len);
 								break;
 							case PDO_ODBC_CONV_OK:
 								P->len = ulen;
+								if (P->len > P->outbuflen) {
+									P->len = P->outbuflen;
+								}
 								memcpy(P->outbuf, S->convbuf, P->len);
 								break;
 						}
@@ -506,6 +514,9 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					zval_ptr_dtor(parameter);
 
 					if (P->len >= 0) {
+							if (P->len > P->outbuflen) {
+								P->len = P->outbuflen;
+							}
 							ZVAL_STRINGL(parameter, P->outbuf, P->len);
 							switch (pdo_odbc_ucs22utf8(stmt, P->is_unicode, parameter)) {
 								case PDO_ODBC_CONV_FAIL:
