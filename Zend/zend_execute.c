@@ -4871,14 +4871,14 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		size_t mname_length = ZSTR_LEN(function) - cname_length - (sizeof("::") - 1);
 
 		lcname = zend_string_init(ZSTR_VAL(function), cname_length, 0);
+		mname = zend_string_init(ZSTR_VAL(function) + (cname_length + sizeof("::") - 1), mname_length, 0);
 
 		called_scope = zend_fetch_class_by_name(lcname, NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 		if (UNEXPECTED(called_scope == NULL)) {
 			zend_string_release_ex(lcname, 0);
+			zend_string_release_ex(mname, 0);
 			return NULL;
 		}
-
-		mname = zend_string_init(ZSTR_VAL(function) + (cname_length + sizeof("::") - 1), mname_length, 0);
 
 		if (called_scope->get_static_method) {
 			fbc = called_scope->get_static_method(called_scope, mname);
@@ -5008,23 +5008,29 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 		}
 
 		if (Z_TYPE_P(obj) == IS_STRING) {
-			zend_class_entry *called_scope = zend_fetch_class_by_name(Z_STR_P(obj), NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			zend_string *class_name = zend_string_copy(Z_STR_P(obj));
+			zend_string *method_name = zend_string_copy(Z_STR_P(method));
+			zend_class_entry *called_scope = zend_fetch_class_by_name(class_name, NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			zend_string_release(class_name);
 
 			if (UNEXPECTED(called_scope == NULL)) {
+				zend_string_release(method_name);
 				return NULL;
 			}
 
 			if (called_scope->get_static_method) {
-				fbc = called_scope->get_static_method(called_scope, Z_STR_P(method));
+				fbc = called_scope->get_static_method(called_scope, method_name);
 			} else {
-				fbc = zend_std_get_static_method(called_scope, Z_STR_P(method), NULL);
+				fbc = zend_std_get_static_method(called_scope, method_name, NULL);
 			}
 			if (UNEXPECTED(fbc == NULL)) {
 				if (EXPECTED(!EG(exception))) {
-					zend_undefined_method(called_scope, Z_STR_P(method));
+					zend_undefined_method(called_scope, method_name);
 				}
+				zend_string_release(method_name);
 				return NULL;
 			}
+			zend_string_release(method_name);
 			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 				zend_non_static_method_call(fbc);
 				if (fbc->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
