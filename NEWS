@@ -91,6 +91,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-22176 (memory leak with ZipArchive::registerCancelBack()
     is used with reference returning function during shutdown).
     (David Carlier)
+  . ZipArchive::addGlob() and ZipArchive::addPattern() now raise a TypeError
+    for invalid "remove_all_path", "comp_method", "comp_flags", and
+    "enc_method" options instead of emitting a warning. (David Carlier)
 
 02 Jul 2026, PHP 8.6.0alpha1
 
