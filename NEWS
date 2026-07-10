@@ -65,6 +65,8 @@ PHP                                                                        NEWS
     ReflectionParameter::__construct()). (jorgsowa)
   . Fixed bug GH-22441 (ReflectionClass::hasProperty() and getProperty() ignore
     dynamic properties shadowing a private parent property). (iliaal)
+  . Fixed bug GH-22658 (ReflectionConstant::__toString() with a string value
+    with null bytes truncates output). (DanielEScherzer)
 
 - Session:
   . Fixed bug GH-21314 (Different session garbage collector behavior between
