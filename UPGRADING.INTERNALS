@@ -169,6 +169,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+- ext/date:
+  . php_idate() now returns the result state, and moves the return value into an
+    out parameter.
+
 - ext/mbstring:
   . Added GB18030-2022 to default encoding list for zh-CN.
 
