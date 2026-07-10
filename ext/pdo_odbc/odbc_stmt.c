@@ -744,7 +744,14 @@ in_data:
 		return 1;
 	} else if (C->fetched_len >= 0) {
 		/* it was stored perfectly */
-		ZVAL_STRINGL_FAST(result, C->data, C->fetched_len);
+		SQLLEN data_len = C->fetched_len;
+		if (!C->is_long) {
+			SQLLEN max_len = C->is_unicode ? (SQLLEN)C->datalen + 1 : (SQLLEN)C->datalen;
+			if (data_len > max_len) {
+				data_len = max_len;
+			}
+		}
+		ZVAL_STRINGL_FAST(result, C->data, data_len);
 		if (C->is_unicode) {
 			goto unicode_conv;
 		}

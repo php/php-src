@@ -45,6 +45,8 @@ PHP                                                                        NEWS
 - PDO_ODBC:
   . Fixed bug GH-20726 (Crash with ODBC connection pooling when the DSN
     carries no credentials). (iliaal)
+  . Fixed bug GH-22667 (Heap buffer over-read when a column value exceeds the
+    driver-reported display size). (iliaal)
 
 - Phar:
   . Fixed inconsistent handling of the magic ".phar" directory. Paths such as
