@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 8f5682d85611126ee12182af46cb2905a0bd0e57
+ * Stub hash: cf2ea35cd867f7091ee1fcf83bbfb543b51e5786
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -2246,6 +2246,18 @@ static const zend_frameless_function_info frameless_function_infos_implode[] = {
 	{ 0 },
 };
 
+ZEND_FRAMELESS_FUNCTION(strtoupper, 1);
+static const zend_frameless_function_info frameless_function_infos_strtoupper[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(strtoupper, 1), 1 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(strtolower, 1);
+static const zend_frameless_function_info frameless_function_infos_strtolower[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(strtolower, 1), 1 },
+	{ 0 },
+};
+
 ZEND_FRAMELESS_FUNCTION(dirname, 1);
 ZEND_FRAMELESS_FUNCTION(dirname, 2);
 static const zend_frameless_function_info frameless_function_infos_dirname[] = {
@@ -3168,8 +3180,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("implode", zif_implode, arginfo_implode, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_implode, NULL)
 	ZEND_RAW_FENTRY("join", zif_implode, arginfo_join, 0, NULL, NULL)
 	ZEND_FE(strtok, arginfo_strtok)
-	ZEND_RAW_FENTRY("strtoupper", zif_strtoupper, arginfo_strtoupper, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
-	ZEND_RAW_FENTRY("strtolower", zif_strtolower, arginfo_strtolower, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("strtoupper", zif_strtoupper, arginfo_strtoupper, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strtoupper, NULL)
+	ZEND_RAW_FENTRY("strtolower", zif_strtolower, arginfo_strtolower, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strtolower, NULL)
 	ZEND_FE(str_increment, arginfo_str_increment)
 	ZEND_FE(str_decrement, arginfo_str_decrement)
 	ZEND_FE(basename, arginfo_basename)

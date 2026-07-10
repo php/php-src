@@ -1,8 +1,8 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 8f5682d85611126ee12182af46cb2905a0bd0e57 */
+ * Stub hash: cf2ea35cd867f7091ee1fcf83bbfb543b51e5786 */
 
-#ifndef ZEND_BASIC_FUNCTIONS_DECL_8f5682d85611126ee12182af46cb2905a0bd0e57_H
-#define ZEND_BASIC_FUNCTIONS_DECL_8f5682d85611126ee12182af46cb2905a0bd0e57_H
+#ifndef ZEND_BASIC_FUNCTIONS_DECL_cf2ea35cd867f7091ee1fcf83bbfb543b51e5786_H
+#define ZEND_BASIC_FUNCTIONS_DECL_cf2ea35cd867f7091ee1fcf83bbfb543b51e5786_H
 
 typedef enum zend_enum_SortDirection {
 	ZEND_ENUM_SortDirection_Ascending = 1,
@@ -20,4 +20,4 @@ typedef enum zend_enum_RoundingMode {
 	ZEND_ENUM_RoundingMode_PositiveInfinity = 8,
 } zend_enum_RoundingMode;
 
-#endif /* ZEND_BASIC_FUNCTIONS_DECL_8f5682d85611126ee12182af46cb2905a0bd0e57_H */
+#endif /* ZEND_BASIC_FUNCTIONS_DECL_cf2ea35cd867f7091ee1fcf83bbfb543b51e5786_H */
