@@ -90,6 +90,8 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		errmsgsize = 0;
+	} else if ((size_t) errmsgsize >= sizeof(einfo->last_err_msg)) {
+		errmsgsize = sizeof(einfo->last_err_msg) - 1;
 	}
 
 	einfo->last_err_msg[errmsgsize] = '\0';
