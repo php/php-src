@@ -63,6 +63,7 @@ runs:
           snmp-mibs-downloader \
           freetds-dev \
           unixodbc-dev \
+          libsqliteodbc \
           llvm \
           clang \
           dovecot-core \
