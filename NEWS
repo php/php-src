@@ -85,6 +85,8 @@ PHP                                                                        NEWS
     (Weilin Du)
   . Fixed integer overflow in getimagesize() and getimagesizefromstring()
     when parsing an IFF chunk with a size of INT_MAX. (David Carlier, Weilin Du)
+  . Fixed bug GH-22678 (Use-after-free in array_multisort() when the comparator
+    mutates the array being sorted). (azchin, iliaal)
 
 - Zip:
   . Fixed bug GH-22649 (ZipArchive::setCommentName() and setCommentIndex()
