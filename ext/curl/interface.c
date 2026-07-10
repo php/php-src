@@ -2030,42 +2030,42 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			HashTable *ph;
 			zend_string *val, *tmp_val;
 			struct curl_slist *slist = NULL;
+			const char *name = NULL;
+
+			switch (option) {
+				case CURLOPT_HTTPHEADER:
+					name = "CURLOPT_HTTPHEADER";
+					break;
+				case CURLOPT_QUOTE:
+					name = "CURLOPT_QUOTE";
+					break;
+				case CURLOPT_HTTP200ALIASES:
+					name = "CURLOPT_HTTP200ALIASES";
+					break;
+				case CURLOPT_POSTQUOTE:
+					name = "CURLOPT_POSTQUOTE";
+					break;
+				case CURLOPT_PREQUOTE:
+					name = "CURLOPT_PREQUOTE";
+					break;
+				case CURLOPT_TELNETOPTIONS:
+					name = "CURLOPT_TELNETOPTIONS";
+					break;
+				case CURLOPT_MAIL_RCPT:
+					name = "CURLOPT_MAIL_RCPT";
+					break;
+				case CURLOPT_RESOLVE:
+					name = "CURLOPT_RESOLVE";
+					break;
+				case CURLOPT_PROXYHEADER:
+					name = "CURLOPT_PROXYHEADER";
+					break;
+				case CURLOPT_CONNECT_TO:
+					name = "CURLOPT_CONNECT_TO";
+					break;
+			}
 
 			if (Z_TYPE_P(zvalue) != IS_ARRAY) {
-				const char *name = NULL;
-				switch (option) {
-					case CURLOPT_HTTPHEADER:
-						name = "CURLOPT_HTTPHEADER";
-						break;
-					case CURLOPT_QUOTE:
-						name = "CURLOPT_QUOTE";
-						break;
-					case CURLOPT_HTTP200ALIASES:
-						name = "CURLOPT_HTTP200ALIASES";
-						break;
-					case CURLOPT_POSTQUOTE:
-						name = "CURLOPT_POSTQUOTE";
-						break;
-					case CURLOPT_PREQUOTE:
-						name = "CURLOPT_PREQUOTE";
-						break;
-					case CURLOPT_TELNETOPTIONS:
-						name = "CURLOPT_TELNETOPTIONS";
-						break;
-					case CURLOPT_MAIL_RCPT:
-						name = "CURLOPT_MAIL_RCPT";
-						break;
-					case CURLOPT_RESOLVE:
-						name = "CURLOPT_RESOLVE";
-						break;
-					case CURLOPT_PROXYHEADER:
-						name = "CURLOPT_PROXYHEADER";
-						break;
-					case CURLOPT_CONNECT_TO:
-						name = "CURLOPT_CONNECT_TO";
-						break;
-				}
-
 				zend_type_error("%s(): The %s option must have an array value", get_active_function_name(), name);
 				return FAILURE;
 			}
@@ -2074,6 +2074,25 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			ZEND_HASH_FOREACH_VAL(ph, current) {
 				ZVAL_DEREF(current);
 				val = zval_get_tmp_string(current, &tmp_val);
+
+				if (zend_str_has_nul_byte(val)) {
+					curl_slist_free_all(slist);
+					zend_tmp_string_release(tmp_val);
+					zend_value_error("%s(): cURL option %s must not contain any null bytes", get_active_function_name(), name);
+					return FAILURE;
+				}
+
+				switch (option) {
+					case CURLOPT_HTTPHEADER:
+					case CURLOPT_PROXYHEADER:
+						if (strpbrk(ZSTR_VAL(val), "\r\n")) {
+							curl_slist_free_all(slist);
+							zend_tmp_string_release(tmp_val);
+							zend_value_error("%s(): Header entries for the %s option may not contain more than a single header, new line detected", get_active_function_name(), name);
+							return FAILURE;
+						}
+				}
+
 				struct curl_slist *new_slist = curl_slist_append(slist, ZSTR_VAL(val));
 				zend_tmp_string_release(tmp_val);
 				if (!new_slist) {
