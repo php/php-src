@@ -11,8 +11,8 @@ var_dump( $r->getDocComment() );
 echo new ReflectionObject($obj);
 
 ?>
---EXPECT--
-Property [ <dynamic> public $F ]
+--EXPECTF--
+Property [ <dynamic> public $F%0oo ]
 bool(false)
 Object of class [ <internal:Core> class stdClass ] {
 
@@ -29,7 +29,7 @@ Object of class [ <internal:Core> class stdClass ] {
   }
 
   - Dynamic properties [1] {
-    Property [ <dynamic> public $F ]
+    Property [ <dynamic> public $F%0oo ]
   }
 
   - Methods [0] {

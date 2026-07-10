@@ -24,12 +24,12 @@ var_dump( $r->getDocComment() );
 
 ?>
 --EXPECTF--
-/** F
+/** F%0oo */
 Function [ <user> function demo ] {
   @@ %s(%d) : eval()'d code %d - %d
 }
 string(11) "/** F%0oo */"
-/** B
+/** B%0ar */
 Method [ <user> public method demo ] {
   @@ %s(%d) : eval()'d code %d - %d
 }

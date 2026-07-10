@@ -16,7 +16,7 @@ var_dump( $r->getINIEntries()['arg_separator.output'] );
 ?>
 --EXPECTF--
 Entry [ arg_separator.output <ALL> ]
-      Current = 'f'
+      Current = 'f%0oo'
       Default = '&'
     }
     

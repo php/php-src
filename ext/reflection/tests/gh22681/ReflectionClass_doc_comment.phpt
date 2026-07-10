@@ -15,7 +15,7 @@ var_dump( $r->getDocComment() );
 
 ?>
 --EXPECTF--
-/** F
+/** F%0oo */
 Class [ <user> class Demo ] {
   @@ %s(%d) : eval()'d code %d-%d
 

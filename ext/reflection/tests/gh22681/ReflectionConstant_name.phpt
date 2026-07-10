@@ -11,5 +11,5 @@ var_dump( $r->getName() );
 
 ?>
 --EXPECTF--
-Constant [ bool F ] { 1 }
+Constant [ bool F%0oo ] { 1 }
 string(4) "F%0oo"

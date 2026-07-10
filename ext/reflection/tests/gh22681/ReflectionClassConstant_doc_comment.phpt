@@ -19,14 +19,14 @@ echo new ReflectionClass(Demo::class);
 
 ?>
 --EXPECTF--
-/** F
+/** F%0oo */
 Constant [ public bool DEMO ] { 1 }
 string(11) "/** F%0oo */"
 Class [ <user> class Demo ] {
   @@ %s(%d) : eval()'d code %d-%d
 
   - Constants [1] {
-    /** F
+    /** F%0oo */
     Constant [ public bool DEMO ] { 1 }
   }
 

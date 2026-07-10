@@ -20,7 +20,7 @@ Class [ <user> final class Demo implements UnitEnum ] {
   @@ %s(%d) : eval()'d code %d-%d
 
   - Constants [1] {
-    /** F
+    /** F%0oo */
     Constant [ public Demo C ] { Object }
   }
 

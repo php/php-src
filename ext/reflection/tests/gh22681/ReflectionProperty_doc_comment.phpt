@@ -19,7 +19,7 @@ echo new ReflectionClass(Demo::class);
 
 ?>
 --EXPECTF--
-/** F
+/** F%0oo */
 Property [ public $prop = NULL ]
 string(11) "/** F%0oo */"
 Class [ <user> class Demo ] {
@@ -35,7 +35,7 @@ Class [ <user> class Demo ] {
   }
 
   - Properties [1] {
-    /** F
+    /** F%0oo */
     Property [ public $prop = NULL ]
   }
 
