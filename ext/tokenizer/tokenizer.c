@@ -332,8 +332,10 @@ static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *
 	zend_prepare_string_for_scanning(&source_zval, ZSTR_EMPTY_ALLOC());
 
 	LANG_SCNG(yy_state) = yycINITIAL;
-	zend_hash_init(&interned_strings, 0, NULL, NULL, 0);
-	array_init(return_value);
+	zend_hash_init(&interned_strings, 128, NULL, NULL, 0);
+	/* Rough estimate: one token per ~5 source bytes; presizing avoids
+	 * repeated doubling of the result array. */
+	array_init_size(return_value, ZSTR_LEN(source) / 5 + 8);
 
 	HashTable *return_value_ht = Z_ARRVAL_P(return_value);
 

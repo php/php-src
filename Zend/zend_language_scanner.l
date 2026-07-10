@@ -2540,7 +2540,11 @@ inline_char_handler:
 	HANDLE_NEWLINES(yytext, yyleng);
 
 	if (doc_com) {
-		CG(doc_comment) = zend_string_init(yytext, yyleng, 0);
+		/* Only the compiler consumes doc comments; tokenizing/highlighting
+		 * would copy and then discard them. */
+		if (PARSER_MODE()) {
+			CG(doc_comment) = zend_string_init(yytext, yyleng, 0);
+		}
 		RETURN_OR_SKIP_TOKEN(T_DOC_COMMENT);
 	}
 
