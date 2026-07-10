@@ -83,6 +83,9 @@ PHP                                                                        NEWS
     and a proxy set). (CVE-2026-12184) (ndossche)
 
 - Zip:
+  . Fixed bug GH-22649 (ZipArchive::setCommentName() and setCommentIndex()
+    could crash after overwriting an entry and resetting its inherited
+    unchanged comment). (Weilin Du)
   . Fixed bug GH-21705 (ZipArchive::getFromIndex() ignores
     ZipArchive::FL_UNCHANGED for deleted entries). (Weilin Du)
   . Fixed bug GH-22176 (memory leak with ZipArchive::registerCancelBack()
