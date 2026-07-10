@@ -188,7 +188,10 @@ static void ts_free_resources(tsrm_tls_entry *thread_resources)
 	free(thread_resources->storage);
 }
 
-/* Shutdown TSRM (call once for the entire process) */
+/* Shutdown TSRM (call once for the entire process). Tears down every thread left
+ * in the table, but can't run a foreign thread's __thread dtor safely
+ * because there are no guarantees the memory is still available. AG dtor therefore
+ * doesn't run and instead leaks on shutdown. */
 TSRM_API void tsrm_shutdown(void)
 {/*{{{*/
 	if (is_thread_shutdown) {

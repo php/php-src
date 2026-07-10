@@ -218,3 +218,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
+
+  . AG and SCNG now live in native __thread storage on ZTS builds.
+    A thread's __thread block cannot be safely reached from another thread, so when
+    the main thread runs tsrm_shutdown() and sweeps threads that never called
+    ts_free_thread(), it skips the dtors for those threads.
+    Prefer explicitly calling ts_free_thread() when shutting down a thread.
