@@ -29,16 +29,16 @@ $_main:
      ; %s
 0000 T1 = ISSET_ISEMPTY_CV (isset) CV0($badvar)
 0001 JMPNZ T1 0006
-0002 T3 = NEW 1 string("Exception")
+0002 T2 = NEW 1 string("Exception")
 0003 SEND_VAL%S string("Should happen") 1
 0004 DO_FCALL
-0005 THROW T3
+0005 THROW T2
 0006 JMP 0006
-0007 T6 = NEW 1 string("Exception")
+0007 T5 = NEW 1 string("Exception")
 0008 SEND_VAL%S string("Should not happen") 1
 0009 DO_FCALL
-0010 THROW T6
-0011 FAST_RET T5
+0010 THROW T5
+0011 FAST_RET T4
 EXCEPTION TABLE:
      0006, -, 0007, 0011
 
