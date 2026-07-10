@@ -907,6 +907,7 @@ PHPAPI bool php_idate(char format, time_t ts, bool localtime, int *result)
 	timelib_tzinfo *tzi;
 	timelib_time_offset *offset = NULL;
 	timelib_sll isoweek, isoyear;
+	bool success = true;
 
 	t = timelib_time_ctor();
 
@@ -988,11 +989,7 @@ PHPAPI bool php_idate(char format, time_t ts, bool localtime, int *result)
 		case 'U': *result = (int) t->sse; break;
 
 		default:
-			if (!localtime) {
-				timelib_time_offset_dtor(offset);
-			}
-			timelib_time_dtor(t);
-			return false;
+			success = false;
 	}
 
 	if (!localtime) {
@@ -1000,7 +997,7 @@ PHPAPI bool php_idate(char format, time_t ts, bool localtime, int *result)
 	}
 	timelib_time_dtor(t);
 
-	return true;
+	return success;
 }
 /* }}} */
 
@@ -1025,7 +1022,6 @@ PHP_FUNCTION(idate)
 	zend_long    ts;
 	bool    ts_is_null = 1;
 	int ret = 0;
-	bool ok = false;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(format)
@@ -1042,7 +1038,7 @@ PHP_FUNCTION(idate)
 		ts = php_time();
 	}
 
-	ok = php_idate(ZSTR_VAL(format)[0], ts, 0, &ret);
+	bool ok = php_idate(ZSTR_VAL(format)[0], ts, 0, &ret);
 	if (!ok) {
 		php_error_docref(NULL, E_WARNING, "Unrecognized date format token");
 		RETURN_FALSE;
