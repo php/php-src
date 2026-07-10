@@ -8113,7 +8113,12 @@ ZEND_VM_HANDLER(138, ZEND_INSTANCEOF, TMP|CV, UNUSED|CLASS_FETCH|CONST|VAR, CACH
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (OP1_TYPE == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 ZEND_VM_C_LABEL(try_instanceof):
@@ -8129,6 +8134,9 @@ ZEND_VM_C_LABEL(try_instanceof):
 				}
 			}
 		} else if (OP2_TYPE == IS_UNUSED) {
+			if (OP1_TYPE != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				FREE_OP1();
@@ -8144,6 +8152,7 @@ ZEND_VM_C_LABEL(try_instanceof):
 		ZEND_VM_C_GOTO(try_instanceof);
 	} else {
 		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;

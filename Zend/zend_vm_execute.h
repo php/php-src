@@ -19721,7 +19721,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INSTANCEOF_SP
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (IS_TMP_VAR == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
 try_instanceof:
@@ -19737,6 +19742,9 @@ try_instanceof:
 				}
 			}
 		} else if (IS_CONST == IS_UNUSED) {
+			if (IS_TMP_VAR != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -19752,6 +19760,7 @@ try_instanceof:
 		goto try_instanceof;
 	} else {
 		if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;
@@ -21375,7 +21384,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INSTANCEOF_SP
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (IS_TMP_VAR == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
 try_instanceof:
@@ -21391,6 +21405,9 @@ try_instanceof:
 				}
 			}
 		} else if (IS_VAR == IS_UNUSED) {
+			if (IS_TMP_VAR != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -21406,6 +21423,7 @@ try_instanceof:
 		goto try_instanceof;
 	} else {
 		if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;
@@ -21902,7 +21920,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INSTANCEOF_SP
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (IS_TMP_VAR == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
 try_instanceof:
@@ -21918,6 +21941,9 @@ try_instanceof:
 				}
 			}
 		} else if (IS_UNUSED == IS_UNUSED) {
+			if (IS_TMP_VAR != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -21933,6 +21959,7 @@ try_instanceof:
 		goto try_instanceof;
 	} else {
 		if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;
@@ -44681,7 +44708,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INSTANCEOF_SP
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (IS_CV == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = EX_VAR(opline->op1.var);
 
 try_instanceof:
@@ -44697,6 +44729,9 @@ try_instanceof:
 				}
 			}
 		} else if (IS_CONST == IS_UNUSED) {
+			if (IS_CV != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 
@@ -44713,6 +44748,7 @@ try_instanceof:
 		goto try_instanceof;
 	} else {
 		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;
@@ -48502,7 +48538,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INSTANCEOF_SP
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (IS_CV == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = EX_VAR(opline->op1.var);
 
 try_instanceof:
@@ -48518,6 +48559,9 @@ try_instanceof:
 				}
 			}
 		} else if (IS_VAR == IS_UNUSED) {
+			if (IS_CV != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 
@@ -48534,6 +48578,7 @@ try_instanceof:
 		goto try_instanceof;
 	} else {
 		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;
@@ -49882,7 +49927,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INSTANCEOF_SP
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (IS_CV == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = EX_VAR(opline->op1.var);
 
 try_instanceof:
@@ -49898,6 +49948,9 @@ try_instanceof:
 				}
 			}
 		} else if (IS_UNUSED == IS_UNUSED) {
+			if (IS_CV != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 
@@ -49914,6 +49967,7 @@ try_instanceof:
 		goto try_instanceof;
 	} else {
 		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;
@@ -72464,7 +72518,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INSTANCEOF_SPEC_TM
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (IS_TMP_VAR == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
 try_instanceof:
@@ -72480,6 +72539,9 @@ try_instanceof:
 				}
 			}
 		} else if (IS_CONST == IS_UNUSED) {
+			if (IS_TMP_VAR != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -72495,6 +72557,7 @@ try_instanceof:
 		goto try_instanceof;
 	} else {
 		if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;
@@ -74118,7 +74181,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INSTANCEOF_SPEC_TM
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (IS_TMP_VAR == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
 try_instanceof:
@@ -74134,6 +74202,9 @@ try_instanceof:
 				}
 			}
 		} else if (IS_VAR == IS_UNUSED) {
+			if (IS_TMP_VAR != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -74149,6 +74220,7 @@ try_instanceof:
 		goto try_instanceof;
 	} else {
 		if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;
@@ -74545,7 +74617,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INSTANCEOF_SPEC_TM
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (IS_TMP_VAR == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
 try_instanceof:
@@ -74561,6 +74638,9 @@ try_instanceof:
 				}
 			}
 		} else if (IS_UNUSED == IS_UNUSED) {
+			if (IS_TMP_VAR != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -74576,6 +74656,7 @@ try_instanceof:
 		goto try_instanceof;
 	} else {
 		if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;
@@ -97324,7 +97405,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INSTANCEOF_SPEC_CV
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (IS_CV == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = EX_VAR(opline->op1.var);
 
 try_instanceof:
@@ -97340,6 +97426,9 @@ try_instanceof:
 				}
 			}
 		} else if (IS_CONST == IS_UNUSED) {
+			if (IS_CV != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 
@@ -97356,6 +97445,7 @@ try_instanceof:
 		goto try_instanceof;
 	} else {
 		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;
@@ -101145,7 +101235,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INSTANCEOF_SPEC_CV
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (IS_CV == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = EX_VAR(opline->op1.var);
 
 try_instanceof:
@@ -101161,6 +101256,9 @@ try_instanceof:
 				}
 			}
 		} else if (IS_VAR == IS_UNUSED) {
+			if (IS_CV != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 
@@ -101177,6 +101275,7 @@ try_instanceof:
 		goto try_instanceof;
 	} else {
 		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;
@@ -102423,7 +102522,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INSTANCEOF_SPEC_CV
 	zval *expr;
 	bool result;
 
-	SAVE_OPLINE();
+	/* Opline is saved lazily: the object paths run no user code and
+	 * cannot throw; releasing a TMP operand may run a destructor, and
+	 * the undefined-variable warning path saves explicitly. */
+	if (IS_CV == IS_TMP_VAR) {
+		SAVE_OPLINE();
+	}
 	expr = EX_VAR(opline->op1.var);
 
 try_instanceof:
@@ -102439,6 +102543,9 @@ try_instanceof:
 				}
 			}
 		} else if (IS_UNUSED == IS_UNUSED) {
+			if (IS_CV != IS_TMP_VAR) {
+				SAVE_OPLINE();
+			}
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 
@@ -102455,6 +102562,7 @@ try_instanceof:
 		goto try_instanceof;
 	} else {
 		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 		}
 		result = 0;
