@@ -3614,6 +3614,25 @@ ZEND_VM_HANDLER(212, ZEND_BIND_EXTENSION, VAR, CONST)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HANDLER(213, ZEND_RECV_RECEIVER, ANY, ANY)
+{
+	USE_OPLINE
+	zval *cv = EX_VAR(opline->result.var);
+
+	/* Bind the extension method's receiver into its declared variable.
+	 * The receiver arrives through the frame's This slot via the normal
+	 * method calling convention. */
+	if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
+		ZVAL_OBJ_COPY(cv, Z_OBJ(EX(This)));
+		ZEND_VM_NEXT_OPCODE();
+	}
+	SAVE_OPLINE();
+	zend_throw_error(NULL, "No receiver is bound to extension method %s()",
+		ZSTR_VAL(EX(func)->common.function_name));
+	ZVAL_UNDEF(cv);
+	HANDLE_EXCEPTION();
+}
+
 ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMP|UNUSED|THIS|CV, CONST|TMP|CV, NUM|CACHE_SLOT)
 {
 	USE_OPLINE

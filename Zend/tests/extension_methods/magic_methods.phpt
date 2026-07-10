@@ -4,7 +4,7 @@ Extension blocks may not declare magic methods
 <?php
 class C {}
 
-extension C {
+extension C $c {
     public function __construct() {}
 }
 ?>

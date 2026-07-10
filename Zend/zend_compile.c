@@ -427,6 +427,7 @@ void zend_init_compiler_data_structures(void) /* {{{ */
 	CG(active_class_entry) = NULL;
 	CG(in_compilation) = 0;
 	CG(skip_shebang) = 0;
+	CG(extension_receiver) = NULL;
 
 	CG(encoding_declared) = 0;
 	CG(memoized_exprs) = NULL;
@@ -1787,6 +1788,13 @@ static zend_string *zend_resolve_const_class_name_reference(zend_ast *ast, const
 
 static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 {
+	if (fetch_type == ZEND_FETCH_CLASS_STATIC && UNEXPECTED(CG(extension_receiver) != NULL)) {
+		/* Late static binding has no meaningful referent in extension
+		 * methods: the scope is the synthetic extension class, and the
+		 * receiver is an ordinary variable, not $this. */
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use \"static\" in an extension method");
+	}
 	if (fetch_type != ZEND_FETCH_CLASS_DEFAULT && zend_is_scope_known()) {
 		zend_class_entry *ce = CG(active_class_entry);
 		if (!ce) {
@@ -2994,7 +3002,16 @@ static bool is_this_fetch(const zend_ast *ast) /* {{{ */
 {
 	if (ast->kind == ZEND_AST_VAR && ast->child[0]->kind == ZEND_AST_ZVAL) {
 		const zval *name = zend_ast_get_zval(ast->child[0]);
-		return Z_TYPE_P(name) == IS_STRING && zend_string_equals(Z_STR_P(name), ZSTR_KNOWN(ZEND_STR_THIS));
+		if (Z_TYPE_P(name) == IS_STRING && zend_string_equals(Z_STR_P(name), ZSTR_KNOWN(ZEND_STR_THIS))) {
+			if (UNEXPECTED(CG(extension_receiver) != NULL)) {
+				/* Extension bodies have no $this: the receiver is the
+				 * declared variable, an ordinary by-value local. */
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use $this in an extension method (use the declared receiver $%s)",
+					ZSTR_VAL(CG(extension_receiver)));
+			}
+			return true;
+		}
 	}
 
 	return false;
@@ -8842,6 +8859,29 @@ static zend_op_array *zend_compile_func_decl_ex(
 
 	zend_compile_params(params_ast, return_type_ast,
 		is_method && zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_LCNAME) ? IS_STRING : 0);
+
+	if (UNEXPECTED(CG(extension_receiver) != NULL) && is_method) {
+		/* Extension method: bind the receiver into its declared variable.
+		 * Emitted after the parameter RECVs so the engine's RECV-skip fast
+		 * path lands exactly on this opcode; before GENERATOR_CREATE so the
+		 * receiver CV is populated in the frame a generator would copy. */
+		znode recv_node;
+		zend_op *recv_op;
+
+		for (uint32_t i = 0; i < op_array->num_args; i++) {
+			if (zend_string_equals(op_array->arg_info[i].name, CG(extension_receiver))) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot redeclare extension receiver $%s as a parameter",
+					ZSTR_VAL(CG(extension_receiver)));
+			}
+		}
+
+		recv_node.op_type = IS_CV;
+		recv_node.u.op.var = lookup_cv(CG(extension_receiver));
+		recv_op = zend_emit_op(NULL, ZEND_RECV_RECEIVER, NULL, NULL);
+		SET_NODE(recv_op->result, &recv_node);
+	}
+
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		if (CG(active_class_entry) != NULL) {
 			if (zend_is_constructor(CG(active_op_array)->function_name)) {
@@ -9550,11 +9590,18 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 static void zend_compile_extension_decl(zend_ast *ast) /* {{{ */
 {
 	zend_ast *target_ast = ast->child[0];
-	zend_ast *class_ast = ast->child[1];
+	zend_ast *receiver_ast = ast->child[1];
+	zend_ast *class_ast = ast->child[2];
 	zend_ast_decl *decl = (zend_ast_decl *) class_ast;
 	zend_string *target_name, *target_lc;
 	znode class_node;
 	zend_op *opline;
+
+	zend_string *receiver_name = zend_ast_get_str(receiver_ast);
+	if (zend_string_equals(receiver_name, ZSTR_KNOWN(ZEND_STR_THIS))) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use $this as the extension receiver variable");
+	}
 
 	/* v1 restriction: methods only (no properties, consts, or promoted state;
 	 * object layout is fixed at link time and shared under opcache). */
@@ -9565,16 +9612,20 @@ static void zend_compile_extension_decl(zend_ast *ast) /* {{{ */
 				"Extension blocks may only declare methods");
 		}
 		if (stmts->child[i]) {
+			const zend_ast_decl *method = (const zend_ast_decl *) stmts->child[i];
 			/* Magic methods dispatch through dedicated class-entry slots and
 			 * handlers, never through the get_method miss path where
 			 * extension methods live, so none of them could ever work here.
 			 * The __ prefix is reserved for them; reject it wholesale. */
-			const zend_ast_decl *method = (const zend_ast_decl *) stmts->child[i];
 			if (ZSTR_LEN(method->name) >= 2
 			 && ZSTR_VAL(method->name)[0] == '_' && ZSTR_VAL(method->name)[1] == '_') {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Extension blocks may not declare magic method %s()",
 					ZSTR_VAL(method->name));
+			}
+			if (method->flags & ZEND_ACC_ABSTRACT) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Extension methods cannot be abstract");
 			}
 		}
 	}
@@ -9592,10 +9643,15 @@ static void zend_compile_extension_decl(zend_ast *ast) /* {{{ */
 	target_name = zend_resolve_class_name_ast(target_ast);
 	target_lc = zend_string_tolower(target_name);
 
-	/* Compile the body as an anonymous, final, uninstantiable class. The
-	 * methods bind $this normally; their scope is the synthetic CE, so only
-	 * the target's public API is visible from extension bodies. */
+	/* Compile the body as an anonymous, final, uninstantiable class. Its
+	 * methods have no $this: each receives the receiver in the declared
+	 * variable via ZEND_RECV_RECEIVER (see zend_compile_func_decl), so
+	 * extension bodies hold the receiver like any outside code would — and
+	 * consequently see only the target's public API. */
+	zend_string *orig_extension_receiver = CG(extension_receiver);
+	CG(extension_receiver) = receiver_name;
 	zend_class_entry *ext_ce = zend_compile_class_decl(&class_node, class_ast, false);
+	CG(extension_receiver) = orig_extension_receiver;
 
 	/* Keep extension methods out of the polymorphic inline cache for the
 	 * prototype (correctness over speed; the cached path + JIT support is

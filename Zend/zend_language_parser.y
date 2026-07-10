@@ -656,10 +656,10 @@ enum_declaration_statement:
 
 extension_declaration_statement:
 		T_EXTENSION { $<num>$ = CG(zend_lineno); }
-		class_name backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create(ZEND_AST_EXTENSION_DECL, $3,
-			       zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL, $<num>2, $4,
-			           NULL, NULL, NULL, $6, NULL, NULL)); }
+		class_name T_VARIABLE backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create(ZEND_AST_EXTENSION_DECL, $3, $4,
+			       zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL, $<num>2, $5,
+			           NULL, NULL, NULL, $7, NULL, NULL)); }
 ;
 
 enum_backing_type:

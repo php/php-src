@@ -118,6 +118,9 @@ struct _zend_compiler_globals {
 
 	bool skip_shebang;
 	bool increment_lineno;
+	/* Receiver variable name while compiling an `extension ... { }` block
+	 * body; NULL outside. $this and static:: are banned while set. */
+	zend_string *extension_receiver;
 
 	bool variable_width_locale;   /* UTF-8, Shift-JIS, Big5, ISO 2022, EUC, etc */
 	bool ascii_compatible_locale; /* locale uses ASCII characters as singletons */

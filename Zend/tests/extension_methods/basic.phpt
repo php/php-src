@@ -1,5 +1,5 @@
 --TEST--
-Swift-style extension methods: basic resolution, $this binding, real-method precedence
+Extension methods: basic resolution, receiver binding, real-method precedence
 --FILE--
 <?php
 class Money {
@@ -7,14 +7,14 @@ class Money {
     public function label(): string { return "real"; }
 }
 
-extension Money {
-    public function dollars(): float { return $this->cents / 100; }
+extension Money $m {
+    public function dollars(): float { return $m->cents / 100; }
     public function label(): string { return "extension"; } // must lose to real method
 }
 
-extension \DateTimeImmutable {
+extension \DateTimeImmutable $d {
     public function isWeekend(): bool {
-        return in_array((int)$this->format('N'), [6, 7], true);
+        return in_array((int)$d->format('N'), [6, 7], true);
     }
 }
 

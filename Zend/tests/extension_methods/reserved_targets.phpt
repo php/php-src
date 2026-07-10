@@ -2,7 +2,7 @@
 Reserved type names cannot be extension targets
 --FILE--
 <?php
-extension iterable {
+extension iterable $it {
     public function m(): int { return 1; }
 }
 ?>
