@@ -1995,7 +1995,7 @@ static zval *php_snmp_get_property_ptr_ptr(zend_object *object, zend_string *nam
 }
 
 /* {{{ */
-static int php_snmp_read_info(php_snmp_object *snmp_object, zval *retval)
+static zend_result php_snmp_read_info(php_snmp_object *snmp_object, zval *retval)
 {
 	zval val;
 
@@ -2019,7 +2019,7 @@ static int php_snmp_read_info(php_snmp_object *snmp_object, zval *retval)
 /* }}} */
 
 /* {{{ */
-static int php_snmp_read_max_oids(php_snmp_object *snmp_object, zval *retval)
+static zend_result php_snmp_read_max_oids(php_snmp_object *snmp_object, zval *retval)
 {
 	if (snmp_object->max_oids > 0) {
 		ZVAL_LONG(retval, snmp_object->max_oids);
@@ -2031,7 +2031,7 @@ static int php_snmp_read_max_oids(php_snmp_object *snmp_object, zval *retval)
 /* }}} */
 
 #define PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(name) \
-	static int php_snmp_read_##name(php_snmp_object *snmp_object, zval *retval) \
+	static zend_result php_snmp_read_##name(php_snmp_object *snmp_object, zval *retval) \
 	{ \
 		ZVAL_BOOL(retval, snmp_object->name); \
 		return SUCCESS; \
@@ -2042,7 +2042,7 @@ PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(quick_print)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(enum_print)
 
 #define PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(name) \
-	static int php_snmp_read_##name(php_snmp_object *snmp_object, zval *retval) \
+	static zend_result php_snmp_read_##name(php_snmp_object *snmp_object, zval *retval) \
 	{ \
 		ZVAL_LONG(retval, snmp_object->name); \
 		return SUCCESS; \
@@ -2053,7 +2053,7 @@ PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(oid_output_format)
 PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(exceptions_enabled)
 
 /* {{{ */
-static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
+static zend_result php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 {
 	zend_long lval;
 
@@ -2075,7 +2075,7 @@ static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 /* }}} */
 
 /* {{{ */
-static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *newval)
+static zend_result php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *newval)
 {
 	zend_long lval = zval_get_long(newval);
 
@@ -2091,7 +2091,7 @@ static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *new
 /* }}} */
 
 #define PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(name) \
-static int php_snmp_write_##name(php_snmp_object *snmp_object, zval *newval) \
+static zend_result php_snmp_write_##name(php_snmp_object *snmp_object, zval *newval) \
 { \
 	zval ztmp; \
 	ZVAL_COPY(&ztmp, newval); \
@@ -2108,7 +2108,7 @@ PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(enum_print)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(oid_increasing_check)
 
 /* {{{ */
-static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *newval)
+static zend_result php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *newval)
 {
 	zend_long lval = zval_get_long(newval);
 
@@ -2129,13 +2129,11 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 /* }}} */
 
 /* {{{ */
-static int php_snmp_write_exceptions_enabled(php_snmp_object *snmp_object, zval *newval)
+static zend_result php_snmp_write_exceptions_enabled(php_snmp_object *snmp_object, zval *newval)
 {
-	int ret = SUCCESS;
-
 	snmp_object->exceptions_enabled = zval_get_long(newval);
 
-	return ret;
+	return SUCCESS;
 }
 /* }}} */
 
