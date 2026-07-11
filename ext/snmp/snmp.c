@@ -1098,7 +1098,7 @@ zend_value_error("Security protocol must be one of "
 # endif
  "\"AES128\", or \"AES\""
 );
-#elifndef NETSNMP_DISABLE_DES
+#elif !defined(NETSNMP_DISABLE_DES)
 	zend_value_error("Security protocol must be \"DES\"");
 #else
 	zend_value_error("No security protocol supported");
