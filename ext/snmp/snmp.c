@@ -1502,13 +1502,13 @@ PHP_FUNCTION(snmp_get_quick_print)
 /* {{{ Return all objects including their respective object id within the specified one */
 PHP_FUNCTION(snmp_set_quick_print)
 {
-	bool a1;
+	bool quick_print;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &quick_print) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, (int)a1);
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, (int)quick_print);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1516,13 +1516,13 @@ PHP_FUNCTION(snmp_set_quick_print)
 /* {{{ Return all values that are enums with their enum value instead of the raw integer */
 PHP_FUNCTION(snmp_set_enum_print)
 {
-	bool a1;
+	bool enum_print;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &enum_print) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, (int) a1);
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, (int)enum_print);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1530,20 +1530,20 @@ PHP_FUNCTION(snmp_set_enum_print)
 /* {{{ Set the OID output format. */
 PHP_FUNCTION(snmp_set_oid_output_format)
 {
-	zend_long a1;
+	zend_long format;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &a1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &format) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	switch (a1) {
+	switch (format) {
 		case NETSNMP_OID_OUTPUT_SUFFIX:
 		case NETSNMP_OID_OUTPUT_MODULE:
 		case NETSNMP_OID_OUTPUT_FULL:
 		case NETSNMP_OID_OUTPUT_NUMERIC:
 		case NETSNMP_OID_OUTPUT_UCD:
 		case NETSNMP_OID_OUTPUT_NONE:
-			netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, a1);
+			netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, format);
 			RETURN_TRUE;
 		default:
 			zend_argument_value_error(1, "must be an SNMP_OID_OUTPUT_* constant");
@@ -1696,14 +1696,14 @@ PHP_METHOD(SNMP, __construct)
 {
 	php_snmp_object *snmp_object;
 	zval *object = ZEND_THIS;
-	zend_string *a1, *a2;
+	zend_string *hostname, *community;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
 	zend_long retries = SNMP_DEFAULT_RETRIES;
 	zend_long version = SNMP_DEFAULT_VERSION;
 
 	snmp_object = Z_SNMP_P(object);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lPP|ll", &version, &a1, &a2, &timeout, &retries) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lPP|ll", &version, &hostname, &community, &timeout, &retries) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1722,7 +1722,7 @@ PHP_METHOD(SNMP, __construct)
 		snmp_session_free(&(snmp_object->session));
 	}
 
-	if (!snmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries, 2, 4)) {
+	if (!snmp_session_init(&(snmp_object->session), version, hostname, community, timeout, retries, 2, 4)) {
 		return;
 	}
 	snmp_object->max_oids = 0;

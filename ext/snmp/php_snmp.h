@@ -46,11 +46,11 @@ typedef struct _php_snmp_object {
 	struct snmp_session *session;
 	int max_oids;
 	int valueretrieval;
-	int quick_print;
-	int enum_print;
+	bool quick_print;
+	bool enum_print;
 	int oid_output_format;
 	int snmp_errno;
-	int oid_increasing_check;
+	bool oid_increasing_check;
 	int exceptions_enabled;
 	char snmp_errstr[256];
 	zend_object zo;
