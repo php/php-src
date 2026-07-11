@@ -1538,7 +1538,7 @@ PHP_FUNCTION(snmp_set_enum_print)
 PHP_FUNCTION(snmp_set_mib_option)
 {
 	zend_long opt;
-        bool val;
+	bool val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lb", &opt, &val) == FAILURE) {
 		RETURN_THROWS();
@@ -1582,7 +1582,7 @@ PHP_FUNCTION(snmp_set_string_output_format)
 /* {{{ Set output format option. */
 PHP_FUNCTION(snmp_set_output_option)
 {
-	zend_long opt,
+	zend_long opt;
 	bool val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lb", &opt, &val) == FAILURE) {
