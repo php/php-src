@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
     INT_MAX year). (arshidkv12)
 
+- Core:
+  . Fixed use-after-free when a destructor bails out (memory_limit, timeout)
+    during zend_hash_clean(), e.g. from session_unset(). (iliaal)
+
 - Date:
   . Update timelib to 2022.17. (Derick)
   . Fixed bug GH-19803 (Parsing a string with a single white space does create
