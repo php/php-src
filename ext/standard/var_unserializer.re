@@ -81,6 +81,7 @@ PHPAPI php_unserialize_data_t php_var_unserialize_init(void) {
 
 PHPAPI void php_var_unserialize_destroy(php_unserialize_data_t d) {
 	/* fprintf(stderr, "UNSERIALIZE_DESTROY == lock: %u, level: %u\n", BG(serialize_lock), BG(unserialize).level); */
+	ZEND_DTOR_HAZARD_BEGIN();
 	if (BG(serialize_lock) || BG(unserialize).level == 1) {
 		var_destroy(&d);
 		efree(d);
@@ -88,6 +89,7 @@ PHPAPI void php_var_unserialize_destroy(php_unserialize_data_t d) {
 	if (!BG(serialize_lock) && !--BG(unserialize).level) {
 		BG(unserialize).data = NULL;
 	}
+	ZEND_DTOR_HAZARD_END();
 }
 
 PHPAPI HashTable *php_var_unserialize_get_allowed_classes(php_unserialize_data_t d) {

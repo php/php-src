@@ -696,7 +696,7 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
 	ZEND_ASSERT(GC_INFO(ref) == 0);
 
-	if (GC_G(gc_enabled) && !GC_G(gc_active)) {
+	if (GC_G(gc_enabled) && !GC_G(gc_active) && EG(dtor_hazard_depth) == 0) {
 		GC_ADDREF(ref);
 		gc_adjust_threshold(gc_collect_cycles());
 		if (UNEXPECTED(GC_DELREF(ref) == 0)) {

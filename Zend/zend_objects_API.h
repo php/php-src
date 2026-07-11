@@ -62,6 +62,20 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_destroy(zend_objects_store *objec
 ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object);
 ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object);
 
+ZEND_API void ZEND_FASTCALL zend_defer_destructor(zend_object *object);
+ZEND_API void zend_flush_deferred_destructors(void);
+
+#define ZEND_DTOR_HAZARD_BEGIN() do { \
+		EG(dtor_hazard_depth)++; \
+	} while (0)
+
+#define ZEND_DTOR_HAZARD_END() do { \
+		ZEND_ASSERT(EG(dtor_hazard_depth) > 0); \
+		if (--EG(dtor_hazard_depth) == 0 && EG(deferred_dtors_count)) { \
+			zend_flush_deferred_destructors(); \
+		} \
+	} while (0)
+
 /* Called when the ctor was terminated by an exception */
 static zend_always_inline void zend_object_store_ctor_failed(zend_object *obj)
 {

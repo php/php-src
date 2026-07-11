@@ -2075,9 +2075,12 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 	} while (0);
 
 has_op2_string:;
+	bool inner_dtor_deferred = false;
 	if (UNEXPECTED(ZSTR_LEN(op1_string) == 0)) {
 		if (EXPECTED(result != op2 || Z_TYPE_P(result) != IS_STRING)) {
 			if (result == orig_op1) {
+				ZEND_DTOR_HAZARD_BEGIN();
+				inner_dtor_deferred = true;
 				i_zval_ptr_dtor(result);
 			}
 			if (free_op2_string) {
@@ -2091,6 +2094,8 @@ has_op2_string:;
 	} else if (UNEXPECTED(ZSTR_LEN(op2_string) == 0)) {
 		if (EXPECTED(result != op1 || Z_TYPE_P(result) != IS_STRING)) {
 			if (result == orig_op1) {
+				ZEND_DTOR_HAZARD_BEGIN();
+				inner_dtor_deferred = true;
 				i_zval_ptr_dtor(result);
 			}
 			if (free_op1_string) {
@@ -2121,6 +2126,8 @@ has_op2_string:;
 		if (result == op1) {
 			/* Destroy the old result first to drop the refcount, such that $x .= ...; may happen in-place. */
 			if (free_op1_string) {
+				ZEND_DTOR_HAZARD_BEGIN();
+				inner_dtor_deferred = true;
 				/* op1_string will be used as the result, so we should not free it */
 				i_zval_ptr_dtor(result);
 				/* Set it to NULL in case that the extension will throw an out-of-memory error.
@@ -2142,6 +2149,8 @@ has_op2_string:;
 			result_str = zend_string_alloc(result_len, 0);
 			memcpy(ZSTR_VAL(result_str), ZSTR_VAL(op1_string), op1_len);
 			if (result == orig_op1) {
+				ZEND_DTOR_HAZARD_BEGIN();
+				inner_dtor_deferred = true;
 				i_zval_ptr_dtor(result);
 			}
 		}
@@ -2150,6 +2159,9 @@ has_op2_string:;
 		ZVAL_NEW_STR(result, result_str);
 		memcpy(ZSTR_VAL(result_str) + op1_len, ZSTR_VAL(op2_string), op2_len);
 		ZSTR_VAL(result_str)[result_len] = '\0';
+	}
+	if (inner_dtor_deferred) {
+		ZEND_DTOR_HAZARD_END();
 	}
 
 	if (free_op1_string) zend_string_release_ex(op1_string, false);
