@@ -1385,6 +1385,10 @@ static bool php_stream_are_filters_seekable(php_stream_filter *filter, bool is_s
 static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter *filter,
 		bool is_start_seeking, zend_off_t offset, int whence, int chain_type)
 {
+	php_stream_filter_chain *chain = filter ? filter->chain : NULL;
+	if (chain) {
+		chain->in_iteration++;
+	}
 	while (filter) {
 		php_stream_filter_seekable_t seekable = (chain_type == PHP_STREAM_FILTER_READ) ?
 				filter->read_seekable : filter->write_seekable;
@@ -1392,9 +1396,15 @@ static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter
 				seekable == PSFS_SEEKABLE_CHECK) &&
 				filter->fops->seek(stream, filter, offset, whence) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Stream filter seeking for %s failed", filter->fops->label);
+			if (chain) {
+				chain->in_iteration--;
+			}
 			return FAILURE;
 		}
 		filter = filter->next;
+	}
+	if (chain) {
+		chain->in_iteration--;
 	}
 	return SUCCESS;
 }
