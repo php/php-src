@@ -122,7 +122,7 @@ strings.
 
    -  -  ``ZSTR_HASH``
       -  ``Z_STRHASH[_P]``
-      -  Computes the string has if it hasn't already been, and returns it.
+      -  Computes the string hash if it hasn't already been, and returns it.
 
    -  -  ``ZSTR_H``
       -  \-
