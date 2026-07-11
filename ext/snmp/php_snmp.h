@@ -67,8 +67,8 @@ typedef struct _php_snmp_object {
 
 #define Z_SNMP_P(zv) php_snmp_fetch_object(Z_OBJ_P((zv)))
 
-typedef int (*php_snmp_read_t)(php_snmp_object *snmp_object, zval *retval);
-typedef int (*php_snmp_write_t)(php_snmp_object *snmp_object, zval *newval);
+typedef zend_result (*php_snmp_read_t)(php_snmp_object *snmp_object, zval *retval);
+typedef zend_result (*php_snmp_write_t)(php_snmp_object *snmp_object, zval *newval);
 
 typedef struct _ptp_snmp_prop_handler {
 	const char *name;
