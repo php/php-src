@@ -346,22 +346,20 @@ static void dom_map_get_by_class_name_item(dom_nnodemap_object *map, zend_long i
 	if (nodep && index >= 0) {
 		dom_node_idx_pair start_point = dom_obj_map_get_start_point(map, nodep, index);
 		if (start_point.node) {
-			if (start_point.index > 0) {
-				/* Only start iteration at next point if we actually have an index to seek to. */
-				itemnode = php_dom_next_in_tree_order(start_point.node, nodep);
-			} else {
-				itemnode = start_point.node;
-			}
+			itemnode = start_point.node;
 		} else {
 			itemnode = php_dom_first_child_of_container_node(nodep);
-		}
-
-		do {
-			--start_point.index;
 			while (itemnode != NULL && !dom_matches_class_name(map, itemnode)) {
 				itemnode = php_dom_next_in_tree_order(itemnode, nodep);
 			}
-		} while (start_point.index > 0 && itemnode);
+		}
+
+		for (; start_point.index > 0 && itemnode != NULL; --start_point.index) {
+			itemnode = php_dom_next_in_tree_order(itemnode, nodep);
+			while (itemnode != NULL && !dom_matches_class_name(map, itemnode)) {
+				itemnode = php_dom_next_in_tree_order(itemnode, nodep);
+			}
+		}
 	}
 	dom_ret_node_to_zobj(map, itemnode, return_value);
 	if (itemnode) {

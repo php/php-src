@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-22570 (Stack overflow when serializing a deeply nested
     Dom\XMLDocument). (iliaal)
+  . Fixed getElementsByClassName() item() returning the wrong element on
+    random access. (David Carlier)
 
 - Exif:
   . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
