@@ -1,0 +1,48 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?M=C3=A1t=C3=A9=20Kocsis?= <kocsismate@woohoolabs.com>
+Date: Thu, 9 Jul 2026 21:51:05 +0200
+Subject: [PATCH 9/9] Fix parsing for URL containing empty host and userinfo
+
+The returned error code (LXB_URL_ERROR_TYPE_INVALID_CREDENTIALS) apparently contradicts the specification:
+
+"If atSignSeen is true and buffer is the empty string, host-missing validation error, return failure."
+---
+ source/lexbor/url/url.c                     | 2 +-
+ test/files/lexbor/url/username_password.ton | 8 +++++++-
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/source/lexbor/url/url.c b/source/lexbor/url/url.c
+index b6c0a1e..19ec238 100644
+--- a/source/lexbor/url/url.c
++++ b/source/lexbor/url/url.c
+@@ -1814,7 +1814,7 @@ again:
+         if (at_sign) {
+             if (begin == p || begin == p - 1) {
+                 status = lxb_url_log_append(parser, p,
+-                                            LXB_URL_ERROR_TYPE_INVALID_CREDENTIALS);
++                                            LXB_URL_ERROR_TYPE_HOST_MISSING);
+                 if (status != LXB_STATUS_OK) {
+                     lxb_url_parse_return(orig_data, buf, status);
+                 }
+diff --git a/test/files/lexbor/url/username_password.ton b/test/files/lexbor/url/username_password.ton
+index 28a27fd..5a5e63e 100644
+--- a/test/files/lexbor/url/username_password.ton
++++ b/test/files/lexbor/url/username_password.ton
+@@ -1,5 +1,5 @@
+ [
+-    /* Test count: 11 */
++    /* Test count: 12 */
+     /* 1 */
+     {
+         "url": "https://user:password@lexbor.com",
+@@ -124,4 +124,10 @@
+         "failed": false,
+         "encoding": "utf-8"
+     }
++    /* 12 */
++    {
++        "url": "https://user:pass@",
++        "failed": true,
++        "encoding": "utf-8"
++    }
+ ]

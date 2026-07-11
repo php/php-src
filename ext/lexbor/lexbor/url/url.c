@@ -1814,7 +1814,7 @@ again:
         if (at_sign) {
             if (begin == p || begin == p - 1) {
                 status = lxb_url_log_append(parser, p,
-                                            LXB_URL_ERROR_TYPE_INVALID_CREDENTIALS);
+                                            LXB_URL_ERROR_TYPE_HOST_MISSING);
                 if (status != LXB_STATUS_OK) {
                     lxb_url_parse_return(orig_data, buf, status);
                 }
