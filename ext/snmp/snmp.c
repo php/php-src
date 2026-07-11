@@ -2217,13 +2217,11 @@ static zend_result php_snmp_write_oid_output_format(php_snmp_object *snmp_object
 /* }}} */
 
 /* {{{ */
-static int php_snmp_write_exceptions_enabled(php_snmp_object *snmp_object, zval *newval)
+static zend_result php_snmp_write_exceptions_enabled(php_snmp_object *snmp_object, zval *newval)
 {
-	int ret = SUCCESS;
-
 	snmp_object->exceptions_enabled = zval_get_long(newval);
 
-	return ret;
+	return SUCCESS;
 }
 /* }}} */
 
