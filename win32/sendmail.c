@@ -148,7 +148,7 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 				  NULL, header, strlen(header),
 				  replace,
 				  -1,
-				  NULL);
+				  NULL, 0);
 
 	zend_string_release_ex(replace, false);
 	zend_string_release_ex(regex, false);
@@ -164,7 +164,7 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 				   result, ZSTR_VAL(result), ZSTR_LEN(result),
 				   replace,
 				  -1,
-				  NULL);
+				  NULL, 0);
 	zend_string_release_ex(replace, false);
 	zend_string_release_ex(regex, false);
 	zend_string_release_ex(result, false);
