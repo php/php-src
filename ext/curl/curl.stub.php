@@ -2410,6 +2410,7 @@ const CURLOPT_TRANSFER_ENCODING = UNKNOWN;
  * @var int
  * @cvalue CURLAUTH_NTLM_WB
  */
+#[\Deprecated(since: '8.6', message: 'as libcurl 8.8.0 removed NTLM_WB support')]
 const CURLAUTH_NTLM_WB = UNKNOWN;
 /**
  * @var int
@@ -2430,6 +2431,7 @@ const CURLOPT_GSSAPI_DELEGATION = UNKNOWN;
  * @var int
  * @cvalue CURL_VERSION_NTLM_WB
  */
+#[\Deprecated(since: '8.6', message: 'as libcurl 8.8.0 removed NTLM_WB support')]
 const CURL_VERSION_NTLM_WB = UNKNOWN;
 
 /* Available since 7.24.0 */

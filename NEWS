@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Implemented partial function application RFC. (Arnaud)
 
+- Curl:
+  . Deprecated the CURLAUTH_NTLM_WB and CURL_VERSION_NTLM_WB constants, as
+    libcurl 8.8.0 removed NTLM_WB support. (Graham Campbell)
+
 - GMP:
   . Fixed GMP power and shift operators to reject GMP right operands outside
     the unsigned long range instead of silently truncating them. (Weilin Du)
