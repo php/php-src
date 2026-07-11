@@ -766,6 +766,7 @@ static zval *to_zval_base64(zval *ret, encodeTypePtr type, xmlNodePtr data)
 static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data)
 {
 	zend_string *str;
+	size_t content_len;
 	size_t i, j;
 	unsigned char c;
 
@@ -778,7 +779,12 @@ static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
 			return ret;
 		}
-		str = zend_string_alloc(strlen((char*)data->children->content) / 2, 0);
+		content_len = strlen((char*) data->children->content);
+		if (content_len % 2 != 0) {
+			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+			return ret;
+		}
+		str = zend_string_alloc(content_len / 2, 0);
 		for (i = j = 0; i < ZSTR_LEN(str); i++) {
 			c = data->children->content[j++];
 			if (c >= '0' && c <= '9') {
