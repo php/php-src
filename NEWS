@@ -78,6 +78,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug GH-22585 (OOM on bailout with uninitialized
     do_request() parameters). (David Carlier)
+  . Fixed xsd:hexBinary decoding to reject odd-length values instead of
+    silently truncating the last nibble. (Weilin Du)
 
 - Standard:
   . Fixed sleep() and usleep() to reject values that overflow the underlying
