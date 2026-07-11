@@ -3007,13 +3007,16 @@ static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser) 
 		return ZEND_HASH_APPLY_STOP;
 	}
 	if (iter->funcs->get_current_key) {
-		zval key;
+		zval key, data_copy;
+		ZVAL_COPY(&data_copy, data);
 		iter->funcs->get_current_key(iter, &key);
 		if (EG(exception)) {
+			zval_ptr_dtor(&data_copy);
 			return ZEND_HASH_APPLY_STOP;
 		}
-		array_set_zval_key(Z_ARRVAL_P(return_value), &key, data);
+		array_set_zval_key(Z_ARRVAL_P(return_value), &key, &data_copy);
 		zval_ptr_dtor(&key);
+		zval_ptr_dtor(&data_copy);
 	} else {
 		Z_TRY_ADDREF_P(data);
 		add_next_index_zval(return_value, data);

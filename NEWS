@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.24
 
+- Core:
+  . Fixed use-after-free in keyed foreach over a reentrant iterator.
+    (PuH4ck3rX)
+
 - Calendar:
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
     INT_MAX year). (arshidkv12)
@@ -73,6 +77,8 @@ PHP                                                                        NEWS
     PHP 8.3 and PHP 8.5). (jorgsowa)
 
 - SPL:
+  . Fixed use-after-free in iterator_to_array() with a reentrant key()
+    implementation. (PuH4ck3rX)
   . Fix class_parents for classes with leading slash in non-autoload mode.
     (jorgsowa)
   . Ignore leading back-slash in class_parents(), class_implements(), and
