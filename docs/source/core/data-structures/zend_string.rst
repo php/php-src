@@ -70,7 +70,7 @@ new strings.
    -  -  Function/Macro [#persistent]_
       -  Description
 
-   -  -  ``ZSTR_INIT(s, p)``
+   -  -  ``ZSTR_INIT_LITERAL(s, p)``
       -  Creates a new string from a string literal.
 
    -  -  ``zend_string_init(s, l, p)``
