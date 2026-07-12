@@ -2,6 +2,10 @@
 GH-19739 (integer overflow in imageellipse / imagefilledellipse)
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+    if (!GD_BUNDLED) die("skip requires bundled GD library\n");
+?>
 --FILE--
 <?php
 $im = imagecreatetruecolor(400, 300);
