@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?M=C3=A1t=C3=A9=20Kocsis?= <kocsismate@woohoolabs.com>
 Date: Thu, 9 Jul 2026 21:51:05 +0200
-Subject: [PATCH 10/10] Fix parsing for URL containing empty host and userinfo
+Subject: [PATCH 10/11] Fix parsing for URL containing empty host and userinfo
 
 The returned error code (LXB_URL_ERROR_TYPE_INVALID_CREDENTIALS) apparently contradicts the specification:
 

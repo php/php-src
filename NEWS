@@ -98,6 +98,8 @@ PHP                                                                        NEWS
     and a proxy set). (CVE-2026-12184) (ndossche)
 
 - URI:
+  . Fixed bug GH-22628 (Percent-encoding of caret in WHATWG URL paths is not
+    performed). (kocsismate)
   . Fixed bug GH-22629 (WHATWG Validation error incorrect with empty host and
     non-empty userinfo). (kocsismate)
 

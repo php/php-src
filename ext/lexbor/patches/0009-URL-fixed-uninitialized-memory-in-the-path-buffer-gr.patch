@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alexander Borisov <lex.borisov@gmail.com>
 Date: Fri, 5 Jun 2026 22:13:32 +0300
-Subject: [PATCH 09/10] URL: fixed uninitialized memory in the path buffer
+Subject: [PATCH 09/11] URL: fixed uninitialized memory in the path buffer
  growth.
 
 When a path was long enough to outgrow the on-stack buffer, the first

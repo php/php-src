@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?M=C3=A1t=C3=A9=20Kocsis?= <kocsismate@woohoolabs.com>
+Date: Fri, 10 Jul 2026 22:31:16 +0200
+Subject: [PATCH 11/11] Percent-encode the caret in the path
+
+The caret (^) is part of the path percent-encode set:
+
+"The path percent-encode set is a percent-encode set consisting of the query percent-encode set and U+003F (?), U+005E (^), U+0060 (`), U+007B ({), and U+007D (})."
+
+Until now, this character wasn't percent-encoded in the path likely due to a copy-paste error. This is mistake is fixed by adding LXB_URL_MAP_PATH to the lxb_url_map entry for the caret.
+
+Originally reported at https://github.com/php/php-src/issues/22628
+---
+ source/lexbor/url/url.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/source/lexbor/url/url.c b/source/lexbor/url/url.c
+index aed468a..8099c12 100644
+--- a/source/lexbor/url/url.c
++++ b/source/lexbor/url/url.c
+@@ -159,7 +159,7 @@ static const uint8_t lxb_url_map[256] =
+     LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5b ([) */
+     LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5c (\) */
+     LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5d (]) */
+-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5e (^) */
++    LXB_URL_MAP_USERINFO|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5e (^) */
+     LXB_URL_MAP_UNDEF, /* 0x5f (_) */
+     LXB_URL_MAP_PATH|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x60 (`) */
+     LXB_URL_MAP_UNDEF, /* 0x61 (a) */

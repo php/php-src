@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?M=C3=A1t=C3=A9=20Kocsis?= <kocsismate@woohoolabs.com>
 Date: Sun, 17 May 2026 22:17:14 +0200
-Subject: [PATCH 07/10] Add lxb_url_is_special() to the public API (#362)
+Subject: [PATCH 07/11] Add lxb_url_is_special() to the public API (#362)
 
 As https://wiki.php.net/rfc/uri_followup#uri_type_detection relies on this information.
 ---
