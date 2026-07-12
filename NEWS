@@ -97,6 +97,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
     and a proxy set). (CVE-2026-12184) (ndossche)
 
+- URI:
+  . Fixed bug GH-22629 (WHATWG Validation error incorrect with empty host and
+    non-empty userinfo). (kocsismate)
+
 - Zip:
   . Fixed bug GH-22649 (ZipArchive::setCommentName() and setCommentIndex()
     could crash after overwriting an entry and resetting its inherited
