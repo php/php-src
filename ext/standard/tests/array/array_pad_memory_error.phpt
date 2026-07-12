@@ -6,14 +6,16 @@ opcache.enable_cli=0
 --FILE--
 <?php
 
+$size = PHP_INT_SIZE > 4 ? 50_000_000 : 32_500_000;
+
 try {
-    array_pad([1, 2], 50000000, 0);
+    array_pad([1, 2], $size, 0);
 } catch (MemoryError $e) {
     echo $e::class . ': ' . $e->getMessage() . "\n";
 }
 
 try {
-    array_pad([1, 2], -50000000, 0);
+    array_pad([1, 2], -$size, 0);
 } catch (MemoryError $e) {
     echo 'negative: ' . $e::class . ': ' . $e->getMessage() . "\n";
 }

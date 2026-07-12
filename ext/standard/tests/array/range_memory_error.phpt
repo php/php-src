@@ -6,14 +6,16 @@ opcache.enable_cli=0
 --FILE--
 <?php
 
+$size = PHP_INT_SIZE > 4 ? 50_000_000 : 32_500_000;
+
 try {
-    range(0, 50000000);
+    range(0, $size);
 } catch (MemoryError $e) {
     echo 'int: ' . $e::class . ': ' . $e->getMessage() . "\n";
 }
 
 try {
-    range(0.5, 50000000.5);
+    range(0.5, $size + 0.5);
 } catch (MemoryError $e) {
     echo 'float: ' . $e::class . ': ' . $e->getMessage() . "\n";
 }

@@ -2,6 +2,8 @@
 shmop_read() throws a catchable MemoryError when the read size cannot fit in the memory limit
 --EXTENSIONS--
 shmop
+--SKIPIF--
+<?php if (PHP_OS_FAMILY === 'Darwin') die('skip MacOS does not allow shared memory size larger than 65,536 bytes'); ?>
 --INI--
 memory_limit=32M
 opcache.enable_cli=0

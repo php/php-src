@@ -10,7 +10,9 @@ opcache.enable_cli=0
 --FILE--
 <?php
 
-[$a, $b] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+$domain = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? STREAM_PF_INET : STREAM_PF_UNIX;
+
+[$a, $b] = stream_socket_pair($domain, STREAM_SOCK_STREAM, 0);
 fwrite($b, 'ping');
 
 try {

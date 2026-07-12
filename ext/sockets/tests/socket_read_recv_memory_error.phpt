@@ -12,7 +12,9 @@ opcache.enable_cli=0
 --FILE--
 <?php
 
-socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $pair);
+$domain = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? AF_INET : AF_UNIX;
+
+socket_create_pair($domain, SOCK_STREAM, 0, $pair);
 [$a, $b] = $pair;
 socket_write($b, 'ping');
 
