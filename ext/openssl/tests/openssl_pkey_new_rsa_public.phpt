@@ -38,8 +38,22 @@ openssl_public_encrypt('secret', $encrypted, $public);
 openssl_private_decrypt($encrypted, $decrypted, $private);
 var_dump($decrypted === 'secret');
 
-// Missing e (and d) is still an error: a public key needs the exponent.
-var_dump(@openssl_pkey_new(['rsa' => ['n' => $n]]));
+// The key is flagged as public: it cannot be used where a private key is required.
+var_dump(@openssl_sign($data, $ignored, $public, OPENSSL_ALGO_SHA256));
+
+// n and e are always required; anything less is an error.
+var_dump(@openssl_pkey_new(['rsa' => ['n' => $n]]));           // missing e
+var_dump(@openssl_pkey_new(['rsa' => ['e' => $e]]));           // missing n
+var_dump(@openssl_pkey_new(['rsa' => ['n' => $n, 'd' => $priv_details['rsa']['d']]])); // missing e
+
+// Private components without the private exponent d are rejected rather than
+// silently building a mislabeled key.
+var_dump(@openssl_pkey_new(['rsa' => [
+    'n' => $n,
+    'e' => $e,
+    'p' => $priv_details['rsa']['p'],
+    'q' => $priv_details['rsa']['q'],
+]]));
 ?>
 --EXPECT--
 bool(true)
@@ -54,4 +68,8 @@ bool(true)
 int(1)
 int(0)
 bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 bool(false)

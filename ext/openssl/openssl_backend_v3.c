@@ -100,18 +100,21 @@ EVP_PKEY *php_openssl_pkey_init_rsa(zval *data, bool *is_private)
 	OPENSSL_PKEY_SET_BN(data, dmq1);
 	OPENSSL_PKEY_SET_BN(data, iqmp);
 
+	/* The modulus n and public exponent e form the public key and are always
+	 * required. The key is private if the private exponent d is provided. The
+	 * remaining private components (p, q, dmp1, dmq1, iqmp) are meaningless
+	 * without d, so reject them rather than silently building a public key that
+	 * ignores them. */
 	*is_private = d != NULL;
 
-	if (!ctx || !bld || !n || (!d && !e)) {
+	if (!ctx || !bld || !n || !e || (!d && (p || q || dmp1 || dmq1 || iqmp))) {
 		goto cleanup;
 	}
 
 	OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_N, n);
+	OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_E, e);
 	if (d) {
 		OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_D, d);
-	}
-	if (e) {
-		OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_E, e);
 	}
 	if (p) {
 		OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_FACTOR1, p);

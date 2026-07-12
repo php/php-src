@@ -85,22 +85,42 @@ static bool php_openssl_pkey_init_rsa_data(RSA *rsa, zval *data, bool *is_privat
 	OPENSSL_PKEY_SET_BN(data, n);
 	OPENSSL_PKEY_SET_BN(data, e);
 	OPENSSL_PKEY_SET_BN(data, d);
-	*is_private = d != NULL;
-	if (!n || (!d && !e) || !RSA_set0_key(rsa, n, e, d)) {
+	/* The modulus n and public exponent e form the public key and are always
+	 * required; d is only present for a private key. */
+	if (!n || !e || !RSA_set0_key(rsa, n, e, d)) {
 		return false;
 	}
+	/* n, e and d are now owned by rsa. */
+	*is_private = d != NULL;
 
+	/* The factor and CRT components are meaningless without the private
+	 * exponent d, so reject them rather than silently ignoring them. */
 	OPENSSL_PKEY_SET_BN(data, p);
 	OPENSSL_PKEY_SET_BN(data, q);
-	if ((p || q) && !RSA_set0_factors(rsa, p, q)) {
-		return false;
+	if (p || q) {
+		if (!d) {
+			BN_free(p);
+			BN_free(q);
+			return false;
+		}
+		if (!RSA_set0_factors(rsa, p, q)) {
+			return false;
+		}
 	}
 
 	OPENSSL_PKEY_SET_BN(data, dmp1);
 	OPENSSL_PKEY_SET_BN(data, dmq1);
 	OPENSSL_PKEY_SET_BN(data, iqmp);
-	if ((dmp1 || dmq1 || iqmp) && !RSA_set0_crt_params(rsa, dmp1, dmq1, iqmp)) {
-		return false;
+	if (dmp1 || dmq1 || iqmp) {
+		if (!d) {
+			BN_free(dmp1);
+			BN_free(dmq1);
+			BN_free(iqmp);
+			return false;
+		}
+		if (!RSA_set0_crt_params(rsa, dmp1, dmq1, iqmp)) {
+			return false;
+		}
 	}
 
 	return true;
