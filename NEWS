@@ -104,6 +104,8 @@ PHP                                                                        NEWS
 - URI:
   . Fixed behavior of Uri\WhatWg\Url wither methods with regards to empty
     opaque hosts. (kocsismate)
+  . Fixed bug GH-22629 (WHATWG Validation error incorrect with empty host and
+    non-empty userinfo). (kocsismate)
 
 - Zip:
   . Fixed bug GH-22649 (ZipArchive::setCommentName() and setCommentIndex()
