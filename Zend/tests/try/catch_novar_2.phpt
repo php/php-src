@@ -11,16 +11,18 @@ class ThrowsOnDestruct extends Exception {
 try {
     throw new ThrowsOnDestruct();
 } catch (Exception) {
-    echo "Unreachable catch\n";
+    echo "Caught\n";
 }
-echo "Unreachable fallthrough\n";
+echo "After try/catch\n";
 
 ?>
 --EXPECTF--
+Caught
+After try/catch
 Throwing
 
 Fatal error: Uncaught RuntimeException: ThrowsOnDestruct::__destruct in %s:%d
 Stack trace:
-#0 %s(%d): ThrowsOnDestruct->__destruct()
+#0 [internal function]: ThrowsOnDestruct->__destruct()
 #1 {main}
   thrown in %s on line %d

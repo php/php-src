@@ -105,13 +105,13 @@ Userland class:
 Using new:
 object(TestUserWithoutConstructor)#1 (0) {
 }
-Destructor for TestUserWithoutConstructor
 Using zend_object_init_with_constructor():
-object(TestUserWithoutConstructor)#1 (0) {
-}
 Destructor for TestUserWithoutConstructor
+object(TestUserWithoutConstructor)#2 (0) {
+}
 Internal class:
 Using new:
+Destructor for TestUserWithoutConstructor
 object(_ZendTestMagicCall)#1 (0) {
 }
 Using zend_object_init_with_constructor():
@@ -123,17 +123,17 @@ Userland class:
 Using new:
 object(TestUserWithoutConstructor)#1 (0) {
 }
-Destructor for TestUserWithoutConstructor
 Using zend_object_init_with_constructor():
-object(TestUserWithoutConstructor)#1 (0) {
-}
 Destructor for TestUserWithoutConstructor
+object(TestUserWithoutConstructor)#2 (0) {
+}
 Internal class:
 Using new:
-object(_ZendTestMagicCall)#1 (0) {
+Destructor for TestUserWithoutConstructor
+object(_ZendTestMagicCall)#2 (0) {
 }
 Using zend_object_init_with_constructor():
-object(_ZendTestMagicCall)#1 (0) {
+object(_ZendTestMagicCall)#2 (0) {
 }
 
 #### Passing extra named args ####

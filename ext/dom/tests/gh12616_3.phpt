@@ -45,7 +45,7 @@ foreach ($xpath->query("/container/child2/namespace::*") as $ns) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 <?xml version="1.0"?>
 <container>
   <child1>
@@ -81,28 +81,6 @@ object(DOMNameSpaceNode)#4 (10) {
   string(22) "(object value omitted)"
 }
 --- Namespaces of child1/foo (both nodes) ---
-object(DOMNameSpaceNode)#5 (10) {
-  ["nodeName"]=>
-  string(9) "xmlns:xml"
-  ["nodeValue"]=>
-  string(36) "http://www.w3.org/XML/1998/namespace"
-  ["nodeType"]=>
-  int(18)
-  ["prefix"]=>
-  string(3) "xml"
-  ["localName"]=>
-  string(3) "xml"
-  ["namespaceURI"]=>
-  string(36) "http://www.w3.org/XML/1998/namespace"
-  ["isConnected"]=>
-  bool(true)
-  ["ownerDocument"]=>
-  string(22) "(object value omitted)"
-  ["parentNode"]=>
-  string(22) "(object value omitted)"
-  ["parentElement"]=>
-  string(22) "(object value omitted)"
-}
 object(DOMNameSpaceNode)#8 (10) {
   ["nodeName"]=>
   string(9) "xmlns:xml"
@@ -125,8 +103,7 @@ object(DOMNameSpaceNode)#8 (10) {
   ["parentElement"]=>
   string(22) "(object value omitted)"
 }
---- Namespaces of child2 ---
-object(DOMNameSpaceNode)#9 (10) {
+object(DOMNameSpaceNode)#10 (10) {
   ["nodeName"]=>
   string(9) "xmlns:xml"
   ["nodeValue"]=>
@@ -148,7 +125,30 @@ object(DOMNameSpaceNode)#9 (10) {
   ["parentElement"]=>
   string(22) "(object value omitted)"
 }
-object(DOMNameSpaceNode)#5 (10) {
+--- Namespaces of child2 ---
+object(DOMNameSpaceNode)#%d (10) {
+  ["nodeName"]=>
+  string(9) "xmlns:xml"
+  ["nodeValue"]=>
+  string(36) "http://www.w3.org/XML/1998/namespace"
+  ["nodeType"]=>
+  int(18)
+  ["prefix"]=>
+  string(3) "xml"
+  ["localName"]=>
+  string(3) "xml"
+  ["namespaceURI"]=>
+  string(36) "http://www.w3.org/XML/1998/namespace"
+  ["isConnected"]=>
+  bool(true)
+  ["ownerDocument"]=>
+  string(22) "(object value omitted)"
+  ["parentNode"]=>
+  string(22) "(object value omitted)"
+  ["parentElement"]=>
+  string(22) "(object value omitted)"
+}
+object(DOMNameSpaceNode)#%d (10) {
   ["nodeName"]=>
   string(7) "xmlns:x"
   ["nodeValue"]=>

@@ -335,6 +335,7 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_METHOD_CALL       (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
 #define ZEND_JIT_EXIT_INVALIDATE        (1<<10) /* invalidate current trace */
 #define ZEND_JIT_EXIT_CHECK_EXCEPTION   (1<<11)
+#define ZEND_JIT_EXIT_LOOP_INTERRUPT     (1<<12)
 
 #define ZEND_JIT_EXIT_FIXED         (1U<<31) /* the exit_info can't be changed by zend_jit_snapshot_handler() */
 

@@ -21,6 +21,6 @@ BUG::instance()->error;
 echo "this is still executed\n";
 ?>
 --EXPECT--
+this is still executed
 BUG
 please fix this thing, it wasted a nice part of my life!
-this is still executed

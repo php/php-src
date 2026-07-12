@@ -1460,7 +1460,12 @@ static void zend_call_user_error_handler(
 		return;
 	}
 
+	zend_flush_deferred_dtors();
 	zend_flush_deferred_errors();
+
+	if (UNEXPECTED(EG(exception))) {
+		return;
+	}
 
 	ZVAL_STR_COPY(&params[1], message);
 	ZVAL_LONG(&params[0], type);
@@ -2102,7 +2107,11 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 
 	zend_result ret = SUCCESS;
 	if (op_array) {
+		zend_execute_data *previous_execute_data = EG(current_execute_data);
 		zend_execute(op_array, retval);
+		EG(current_execute_data) = previous_execute_data;
+		zend_flush_deferred_dtors();
+		zend_surface_deferred_dtor_exception();
 		zend_flush_deferred_errors();
 		if (UNEXPECTED(EG(exception))) {
 			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {

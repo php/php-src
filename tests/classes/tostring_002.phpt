@@ -24,6 +24,6 @@ $o = new Test;
 ?>
 ====DONE====
 --EXPECT--
-Hello
 ====DONE====
+Hello
 Hello

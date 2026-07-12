@@ -1145,6 +1145,13 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
         return;
     }
 
+    /* zend_loop_interrupt_helper is only ever reached through the
+     * ZEND_VM_LOOP_INTERRUPT macro, which calls its non-tailcall function
+     * variant. A TAILCALL variant would be an unused static function. */
+    if ($kind == ZEND_VM_KIND_TAILCALL && $name === 'zend_loop_interrupt_helper') {
+        return;
+    }
+
     if ($spec && skip_extra_spec_function($op1, $op2, $extra_spec)) {
         return;
     }
@@ -2029,7 +2036,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG)\n");
                             out($f,"# define ZEND_VM_ENTER_EX()        ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
                             out($f,"# define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
-                            out($f,"# define ZEND_VM_LEAVE()           ZEND_VM_CONTINUE()\n");
+                            out($f,"# define ZEND_VM_LEAVE()           ZEND_VM_LOOP_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
                             out($f,"#elif defined(ZEND_VM_IP_GLOBAL_REG)\n");
                             out($f,"# define ZEND_VM_ENTER_EX()        return  1\n");
                             out($f,"# define ZEND_VM_ENTER()           opline = EG(current_execute_data)->opline; ZEND_VM_ENTER_EX()\n");
@@ -2042,9 +2049,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#endif\n");
                             out($f,"#define ZEND_VM_INTERRUPT()      ZEND_VM_TAIL_CALL(zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
                             out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
-                            out($f,"#define ZEND_VM_LOOP_INTERRUPT() zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
+                            out($f,"#define ZEND_VM_LOOP_INTERRUPT() zend_loop_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
                             out($f,"#else\n");
-                            out($f,"#define ZEND_VM_LOOP_INTERRUPT() opline = (zend_op*)((uintptr_t)zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU) & ~ZEND_VM_ENTER_BIT);\n");
+                            out($f,"#define ZEND_VM_LOOP_INTERRUPT() opline = (zend_op*)((uintptr_t)zend_loop_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU) & ~ZEND_VM_ENTER_BIT);\n");
                             out($f,"#endif\n");
                             if ($kind == ZEND_VM_KIND_HYBRID) {
                                 out($f,"#define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler_func(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
@@ -2053,6 +2060,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             }
                             out($f,"\n");
                             out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS);\n");
+                            out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_loop_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS);\n");
                             out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
                             out($f,"\n");
                             break;
@@ -2076,9 +2084,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#define ZEND_VM_RETURN()   return\n");
                             out($f,"#define ZEND_VM_ENTER_EX() ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
                             out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
-                            out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
+                            out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_LOOP_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
                             out($f,"#define ZEND_VM_INTERRUPT()              goto zend_interrupt_helper".($spec?"_SPEC":"").";\n");
-                            out($f,"#define ZEND_VM_LOOP_INTERRUPT()         goto zend_interrupt_helper".($spec?"_SPEC":"").";\n");
+                            out($f,"#define ZEND_VM_LOOP_INTERRUPT()         goto zend_loop_interrupt_helper".($spec?"_SPEC":"").";\n");
                             out($f,"#define ZEND_VM_DISPATCH(opcode, opline) dispatch_handler = zend_vm_get_opcode_handler(opcode, opline); goto zend_vm_dispatch;\n");
                             out($f,"\n");
                             break;
@@ -2107,9 +2115,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#define ZEND_VM_RETURN()   return\n");
                             out($f,"#define ZEND_VM_ENTER_EX() ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
                             out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
-                            out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
+                            out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_LOOP_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
                             out($f,"#define ZEND_VM_INTERRUPT()              goto zend_interrupt_helper".($spec?"_SPEC":"").";\n");
-                            out($f,"#define ZEND_VM_LOOP_INTERRUPT()         goto zend_interrupt_helper".($spec?"_SPEC":"").";\n");
+                            out($f,"#define ZEND_VM_LOOP_INTERRUPT()         goto zend_loop_interrupt_helper".($spec?"_SPEC":"").";\n");
                             out($f,"#define ZEND_VM_DISPATCH(opcode, opline) goto *(void**)(zend_vm_get_opcode_handler(opcode, opline));\n");
                             out($f,"\n");
                             break;
@@ -2158,7 +2166,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"# define ZEND_VM_DISPATCH_TO_LEAVE_HELPER(helper) opline = &call_leave_op; SAVE_OPLINE(); ZEND_VM_CONTINUE()\n");
                         out($f,"# define ZEND_VM_INTERRUPT()        ZEND_VM_TAIL_CALL(zend_interrupt_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))\n");
                         out($f,"# define ZEND_VM_ENTER_EX() ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
-                        out($f,"# define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
+                        out($f,"# define ZEND_VM_LEAVE()    ZEND_VM_LOOP_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
                         out($f,"\n");
                         out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_interrupt_helper".($spec?"_SPEC":"")."_TAILCALL(ZEND_OPCODE_HANDLER_ARGS);\n");
                         out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_interrupt(ZEND_OPCODE_HANDLER_ARGS);\n");

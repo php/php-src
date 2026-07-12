@@ -94,6 +94,59 @@ static void zend_weakref_unref(zend_object *object, void *tagged_ptr) {
 	}
 }
 
+static void zend_weakref_detach_single(
+		void *ptr, uintptr_t tag, zend_object *object)
+{
+	if (tag == ZEND_WEAKREF_TAG_REF) {
+		zend_weakref *wr = ptr;
+		wr->referent = NULL;
+	} else {
+		HashTable *ht = ptr;
+		ZEND_ASSERT(tag == ZEND_WEAKREF_TAG_MAP || tag == ZEND_WEAKREF_TAG_BARE_HT);
+		if (ht->pDestructor == ZVAL_PTR_DTOR) {
+			zval *zv = zend_hash_index_find(ht, zend_object_to_weakref_key(object));
+			if (zv) {
+				zend_dtor_buf *buf = &EG(deferred_dtors);
+				if (UNEXPECTED(buf->values_count == buf->values_capacity)) {
+					uint32_t capacity = buf->values_capacity ? buf->values_capacity + (buf->values_capacity >> 1) : 8;
+					buf->values = erealloc(buf->values, sizeof(zval) * capacity);
+					buf->values_capacity = capacity;
+				}
+				ZVAL_COPY_VALUE(&buf->values[buf->values_count++], zv);
+				ZVAL_UNDEF(zv);
+			}
+		}
+		zend_hash_index_del(ht, zend_object_to_weakref_key(object));
+	}
+}
+
+void zend_weakrefs_notify_detach(zend_object *object)
+{
+	const zend_ulong obj_key = zend_object_to_weakref_key(object);
+	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), obj_key);
+#if ZEND_DEBUG
+	ZEND_ASSERT(tagged_ptr && "Tracking of the IS_OBJ_WEAKLY_REFERENCE flag should be precise");
+#endif
+	if (tagged_ptr) {
+		void *ptr = ZEND_WEAKREF_GET_PTR(tagged_ptr);
+		uintptr_t tag = ZEND_WEAKREF_GET_TAG(tagged_ptr);
+		if (tag == ZEND_WEAKREF_TAG_HT) {
+			HashTable *ht = ptr;
+			void *inner_ptr;
+			ZEND_HASH_MAP_FOREACH_PTR(ht, inner_ptr) {
+				zend_weakref_detach_single(
+					ZEND_WEAKREF_GET_PTR(inner_ptr), ZEND_WEAKREF_GET_TAG(inner_ptr), object);
+			} ZEND_HASH_FOREACH_END();
+			zend_hash_destroy(ht);
+			FREE_HASHTABLE(ht);
+		} else {
+			zend_weakref_detach_single(ptr, tag, object);
+		}
+		zend_hash_index_del(&EG(weakrefs), obj_key);
+	}
+	GC_DEL_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
+}
+
 static void zend_weakref_register(zend_object *object, void *payload) {
 	GC_ADD_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
 

@@ -28,6 +28,6 @@ before yield in finally
 
 Fatal error: Uncaught Error: Cannot yield from finally in a force-closed generator in %s:%d
 Stack trace:
-#0 %s(%d): gen()
+#0 [internal function]: gen()
 #1 {main}
   thrown in %s on line %d

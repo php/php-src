@@ -43,9 +43,9 @@ object(Node)#1 (2) {
     }
   }
 }
-object(Node)#2 (2) {
+object(Node)#3 (2) {
   ["parent"]=>
-  object(Node)#1 (2) {
+  object(Node)#1 (1) {
     ["parent"]=>
     NULL
   }
@@ -53,9 +53,9 @@ object(Node)#2 (2) {
   array(0) {
   }
 }
-object(Node)#3 (2) {
+object(Node)#2 (2) {
   ["parent"]=>
-  object(Node)#1 (2) {
+  object(Node)#1 (1) {
     ["parent"]=>
     NULL
   }

@@ -24,8 +24,8 @@ object(SplFixedArray)#2 (1) {
   }
 }
 Replacing
-In destructor
 Dumping again
+In destructor
 object(SplFixedArray)#2 (1) {
   [0]=>
   object(stdClass)#3 (0) {

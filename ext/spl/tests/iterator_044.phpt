@@ -131,7 +131,7 @@ object(stdClass)#1 (0) {
 CachingIterator::offsetExists(): Argument #1 ($key) must be of type string, stdClass given
 CachingIterator::offsetGet(): Argument #1 ($key) must be of type string, stdClass given
 ===2===
-object(MyFoo)#2 (0) {
+object(MyFoo)#8 (0) {
 }
 bool(true)
 int(1)

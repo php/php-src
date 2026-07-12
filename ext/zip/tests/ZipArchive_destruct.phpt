@@ -24,5 +24,10 @@ $leak->addFromString('test', 'test');
 $file = __DIR__ . '/ZipArchive_destruct.zip';
 @unlink($file);
 ?>
---EXPECT--
-===DONE===
+--EXPECTF--
+Warning: Undefined variable $leak in %s on line 12
+
+Fatal error: Uncaught Error: Call to a member function open() on null in %s:12
+Stack trace:
+#0 {main}
+  thrown in %s on line 12

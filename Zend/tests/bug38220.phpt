@@ -67,6 +67,7 @@ A Object
 )
 func1(): 1
 after call func1
+before call func1
 A::__destruct()
 before call close
 A Object
@@ -75,7 +76,6 @@ A Object
 )
 close(): 1
 after call close
-before call func1
 A Object
 (
     [i] => 2

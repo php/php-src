@@ -732,6 +732,23 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
 }
 
+ZEND_API bool ZEND_FASTCALL zend_gc_is_condemned(zend_refcounted *ref)
+{
+	uint32_t idx = GC_REF_ADDRESS(ref);
+
+	if (idx == 0) {
+		return false;
+	}
+
+	gc_root_buffer *slot;
+	if (UNEXPECTED(GC_G(first_unused) >= GC_MAX_UNCOMPRESSED)) {
+		slot = gc_decompress(ref, idx);
+	} else {
+		slot = GC_IDX2PTR(idx);
+	}
+	return GC_IS_GARBAGE(slot->ref) || GC_IS_DTOR_GARBAGE(slot->ref);
+}
+
 /* Add a possible root node to the buffer.
  * Maybe perform a GC run. */
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
@@ -740,6 +757,11 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 	gc_root_buffer *newRoot;
 
 	if (UNEXPECTED(GC_G(gc_protected))) {
+		return;
+	}
+
+	if (UNEXPECTED(GC_TYPE(ref) == IS_OBJECT
+	 && (OBJ_EXTRA_FLAGS((zend_object*)ref) & IS_OBJ_DTOR_PENDING))) {
 		return;
 	}
 

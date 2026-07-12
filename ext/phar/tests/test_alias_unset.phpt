@@ -37,7 +37,10 @@ $a = file_get_contents($pname . '/file1.txt'); // this fails because $fname2 ref
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
 --EXPECTF--
-Cannot open archive "%stest_alias_unset.2.phar.php", alias is already in use by existing archive
-string(5) "first"
+Warning: fopen(phar://%stest_alias_unset.phar.php/file1.txt): Failed to open stream: Cannot open archive "%stest_alias_unset.phar.php", alias is already in use by existing archive in %stest_alias_unset.php on line %d
 
-Warning: file_get_contents(phar://%sfile1.txt): Failed to open stream: Cannot open archive "%stest_alias_unset.phar.php", alias is already in use by existing archive in %stest_alias_unset.php on line %d
+Fatal error: Uncaught TypeError: fclose(): Argument #1 ($stream) must be of type resource, false given in %stest_alias_unset.php:%d
+Stack trace:
+#0 %stest_alias_unset.php(%d): fclose(false)
+#1 {main}
+  thrown in %stest_alias_unset.php on line %d

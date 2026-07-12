@@ -43,7 +43,7 @@ object(SplFileInfo)#4 (2) {
 file1.gh12721
 gh12721
 file1.gh12721
-object(SplFileInfo)#3 (2) {
+object(SplFileInfo)#5 (2) {
   ["pathName":"SplFileInfo":private]=>
   string(15) "%sfile1.gh12721"
   ["fileName":"SplFileInfo":private]=>

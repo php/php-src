@@ -46,6 +46,7 @@ ZEND_API extern int (*gc_collect_cycles)(void);
 
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref);
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref);
+ZEND_API bool ZEND_FASTCALL zend_gc_is_condemned(zend_refcounted *ref);
 
 /* enable/disable automatic start of GC collection */
 ZEND_API bool gc_enable(bool enable);

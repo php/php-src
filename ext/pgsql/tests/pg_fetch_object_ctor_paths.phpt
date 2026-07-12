@@ -65,5 +65,5 @@ pg_query($db, "DROP TABLE IF EXISTS pg_fetch_object_ctor_paths");
 pg_fetch_object(): Argument #4 ($constructor_args) must be empty when the specified class (NoCtor) does not have a constructor
 caught: boom
 ctor sees: num=1, str=hello
-SeesProps::__destruct called
 Ok
+SeesProps::__destruct called

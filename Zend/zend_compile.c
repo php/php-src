@@ -6009,6 +6009,10 @@ static void zend_compile_return(const zend_ast *ast) /* {{{ */
 			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, false);
 	}
 
+	if (CG(context).try_catch_offset != (uint32_t)-1) {
+		zend_emit_op(NULL, ZEND_FLUSH_DEFERRED_DTORS, NULL, NULL);
+	}
+
 	uint32_t opnum_before_finally = get_next_op_number();
 
 	zend_handle_loops_and_finally((expr_node.op_type & (IS_TMP_VAR | IS_VAR)) ? &expr_node : NULL);
@@ -6076,6 +6080,8 @@ static void zend_compile_throw(znode *result, const zend_ast *ast) /* {{{ */
 	znode expr_node;
 	zend_compile_expr(&expr_node, expr_ast);
 
+	zend_emit_op(NULL, ZEND_FLUSH_DEFERRED_DTORS, NULL, NULL);
+
 	zend_op *opline = zend_emit_op(NULL, ZEND_THROW, &expr_node, NULL);
 	if (result) {
 		/* Mark this as an "expression throw" for opcache. */
@@ -6117,6 +6123,9 @@ static void zend_compile_break_continue(const zend_ast *ast) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "'%s' not in the 'loop' or 'switch' context",
 			ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 	} else {
+		if (CG(context).try_catch_offset != (uint32_t)-1) {
+			zend_emit_op(NULL, ZEND_FLUSH_DEFERRED_DTORS, NULL, NULL);
+		}
 		if (!zend_handle_loops_and_finally_ex(depth, NULL)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' " ZEND_LONG_FMT " level%s",
 				ast->kind == ZEND_AST_BREAK ? "break" : "continue",
@@ -6231,6 +6240,10 @@ static void zend_compile_goto(const zend_ast *ast) /* {{{ */
 	zend_op *opline;
 
 	zend_compile_expr(&label_node, label_ast);
+
+	if (CG(context).try_catch_offset != (uint32_t)-1) {
+		zend_emit_op(NULL, ZEND_FLUSH_DEFERRED_DTORS, NULL, NULL);
+	}
 
 	/* Label resolution and unwinding adjustments happen in pass two. */
 	uint32_t opnum_start = get_next_op_number();
@@ -7041,6 +7054,8 @@ static void zend_compile_try(const zend_ast *ast) /* {{{ */
 		} ZEND_HASH_FOREACH_END();
 	}
 
+	zend_emit_op(NULL, ZEND_FLUSH_DEFERRED_DTORS, NULL, NULL);
+
 	try_catch_offset = zend_add_try_element(get_next_op_number());
 
 	if (finally_ast) {
@@ -7061,6 +7076,8 @@ static void zend_compile_try(const zend_ast *ast) /* {{{ */
 	CG(context).try_catch_offset = try_catch_offset;
 
 	zend_compile_stmt(try_ast);
+
+	zend_emit_op(NULL, ZEND_FLUSH_DEFERRED_DTORS, NULL, NULL);
 
 	if (catches->children != 0) {
 		jmp_opnums[0] = zend_emit_jump(0);
@@ -7163,6 +7180,8 @@ static void zend_compile_try(const zend_ast *ast) /* {{{ */
 		zend_emit_op(NULL, ZEND_JMP, NULL, NULL);
 
 		zend_compile_stmt(finally_ast);
+
+		zend_emit_op(NULL, ZEND_FLUSH_DEFERRED_DTORS, NULL, NULL);
 
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_op = opnum_jmp + 1;
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_end

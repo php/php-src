@@ -23,5 +23,4 @@ echo 'Done';
 ?>
 --EXPECT--
 base::__construct
-base::__destruct
-Done
+Donebase::__destruct

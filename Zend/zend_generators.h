@@ -22,6 +22,7 @@
 #include <stdint.h>
 
 #include "zend_compile.h"
+#include "zend_globals.h"
 
 BEGIN_EXTERN_C()
 
@@ -90,6 +91,10 @@ struct _zend_generator {
 	/* The underlying function, equivalent to execute_data->func while
 	 * the generator is alive. */
 	zend_function *func;
+
+	zend_dtor_buf deferred_dtors;
+	uint32_t dtor_defer_gate;
+	uint32_t frame_teardown;
 
 	/* ZEND_GENERATOR_* flags */
 	uint8_t flags;

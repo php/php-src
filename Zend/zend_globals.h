@@ -87,6 +87,15 @@ typedef struct zend_err_buf {
 	zend_error_info **errors;
 } zend_err_buf;
 
+typedef struct zend_dtor_buf {
+	uint32_t count;
+	uint32_t capacity;
+	zend_object **objects;
+	uint32_t values_count;
+	uint32_t values_capacity;
+	zval *values;
+} zend_dtor_buf;
+
 struct _zend_compiler_globals {
 	zend_stack loop_var_stack;
 
@@ -310,6 +319,11 @@ struct _zend_executor_globals {
 	 * safepoint, so the handler cannot run mid-opcode and corrupt a
 	 * structure the opcode still holds a pointer into. */
 	zend_err_buf deferred_errors;
+
+	zend_dtor_buf deferred_dtors;
+	zend_object *deferred_dtor_exception;
+	uint32_t dtor_defer_gate;
+	uint32_t frame_teardown;
 
 	/* Override filename or line number of thrown errors and exceptions */
 	zend_string *filename_override;

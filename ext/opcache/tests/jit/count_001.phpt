@@ -61,8 +61,13 @@ for ($i = 0; $i < 5; $i++) {
 3
 4
 5
+Unreachable
 Caught In destructor
+Unreachable
 Caught In destructor
+Unreachable
 Caught In destructor
+Unreachable
 Caught In destructor
+Unreachable
 Caught In destructor

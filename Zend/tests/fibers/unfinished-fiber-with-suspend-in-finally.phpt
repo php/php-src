@@ -32,5 +32,5 @@ echo "done\n";
 --EXPECT--
 fiber
 inner finally
-outer finally
 done
+outer finally

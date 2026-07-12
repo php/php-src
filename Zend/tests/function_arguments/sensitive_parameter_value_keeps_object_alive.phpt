@@ -70,5 +70,5 @@ CustomDestructor::__construct - 2
 catch
 int(2)
 Before unset
-CustomDestructor::__destruct - 2
 After unset
+CustomDestructor::__destruct - 2

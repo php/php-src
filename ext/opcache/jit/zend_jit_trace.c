@@ -6202,6 +6202,9 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 						goto done;
 					case ZEND_FREE:
 					case ZEND_FE_FREE:
+						if (opline->extended_value & ZEND_FREE_ON_RETURN) {
+							break;
+						}
 						op1_info = OP1_INFO();
 						if (!zend_jit_free(&ctx, opline, op1_info,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
@@ -6464,6 +6467,11 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 							break;
 						}
 						if (!zend_jit_rope(&ctx, opline, op2_info)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_FLUSH_DEFERRED_DTORS:
+						if (!zend_jit_flush_deferred_dtors(&ctx, opline)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -7231,14 +7239,15 @@ done:
 				 || (ra
 				  && zend_jit_trace_stack_needs_deoptimization(stack, op_array->last_var + op_array->T))) {
 					/* Deoptimize to the first instruction of the loop */
-					uint32_t exit_point = zend_jit_trace_get_exit_point(trace_buffer[1].opline, ZEND_JIT_EXIT_TO_VM);
+					uint32_t exit_point = zend_jit_trace_get_exit_point(
+						trace_buffer[1].opline, ZEND_JIT_EXIT_TO_VM | ZEND_JIT_EXIT_LOOP_INTERRUPT);
 
 					timeout_exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 					if (!timeout_exit_addr) {
 						goto jit_failure;
 					}
 				} else {
-					timeout_exit_addr = zend_jit_stub_handlers[jit_stub_interrupt_handler];
+					timeout_exit_addr = zend_jit_stub_handlers[jit_stub_loop_interrupt_handler];
 				}
 			}
 
@@ -7302,13 +7311,15 @@ done:
 					for (i = 0; i < op_array->last_var + op_array->T; i++) {
 						SET_STACK_TYPE(stack, i, IS_UNKNOWN, 1);
 					}
-					exit_point = zend_jit_trace_get_exit_point(zend_jit_traces[t->link].opline, ZEND_JIT_EXIT_TO_VM);
+					exit_point = zend_jit_trace_get_exit_point(
+						zend_jit_traces[t->link].opline,
+						ZEND_JIT_EXIT_TO_VM | ZEND_JIT_EXIT_LOOP_INTERRUPT);
 					timeout_exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 					if (!timeout_exit_addr) {
 						goto jit_failure;
 					}
 				} else {
-					timeout_exit_addr = zend_jit_stub_handlers[jit_stub_interrupt_handler];
+					timeout_exit_addr = zend_jit_stub_handlers[jit_stub_loop_interrupt_handler];
 				}
 			}
 			zend_jit_trace_link_to_root(&ctx, &zend_jit_traces[t->link], timeout_exit_addr);
@@ -8814,6 +8825,10 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 
 		/* Set VM opline to continue interpretation */
 		EX(opline) = opline;
+	}
+
+	if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_LOOP_INTERRUPT) {
+		return ZEND_JIT_EXIT_LOOP_INTERRUPT;
 	}
 
 	if (zend_atomic_bool_load_ex(&EG(vm_interrupt)) || JIT_G(tracing)) {

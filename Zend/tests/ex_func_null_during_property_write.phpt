@@ -15,11 +15,11 @@ new a;
 --EXPECTF--
 Fatal error: Uncaught Error: Object of class a could not be converted to string in %s:%d
 Stack trace:
-#0 %s(%d): a->__destruct()
+#0 [internal function]: a->__destruct()
 #1 {main}
 
 Next Exception in %s:%d
 Stack trace:
-#0 %s(%d): a->__destruct()
+#0 [internal function]: a->__destruct()
 #1 {main}
   thrown in %s on line %d

@@ -85,8 +85,8 @@ array(1) {
 }
 bool(true)
 bool(true)
-StatementWithPublicDestructor::__destruct
 Class derived from PDOStatement, with private constructor:
+StatementWithPublicDestructor::__destruct
 bool(true)
 StatementWithPrivateConstructor::__construct
 object(StatementWithPrivateConstructor)#2 (1) {

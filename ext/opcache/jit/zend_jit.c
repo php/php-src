@@ -2544,6 +2544,9 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_FREE:
 					case ZEND_FE_FREE:
+						if (opline->extended_value & ZEND_FREE_ON_RETURN) {
+							break;
+						}
 						if (!zend_jit_free(&ctx, opline, OP1_INFO(),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
@@ -2896,6 +2899,11 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 					}
 
+					break;
+				case ZEND_FLUSH_DEFERRED_DTORS:
+					if (!zend_jit_flush_deferred_dtors(&ctx, opline)) {
+						goto jit_failure;
+					}
 					break;
 				default:
 					if (!zend_jit_handler(&ctx, opline,
