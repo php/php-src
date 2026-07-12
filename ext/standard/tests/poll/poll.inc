@@ -106,7 +106,12 @@ function pt_write_sleep($stream, $data, $delay = 10000): int|false {
 function pt_event_array_to_string(array $events): string {
     $names = [];
     foreach ($events as $event) {
-        $names[] = $event->name;
+        if (is_array($event)) {
+            // Optional slot, rendered in brackets.
+            $names[] = '[' . pt_event_array_to_string($event) . ']';
+        } else {
+            $names[] = $event->name;
+        }
     }
     return empty($names) ? 'NONE' : implode('|', $names);
 }
@@ -242,17 +247,48 @@ function pt_events_equal($actual, $expected): bool {
         return false;
     }
 
-    if (count($actual) !== count($expected)) {
-        return false;
+    // An expected item that is itself an array marks an optional slot: it may be
+    // absent, or filled by exactly one of the events it lists. Plain enums are
+    // required. This lets a backend accept e.g. Write with an optional HangUp
+    // that may not have propagated yet, without weakening the required events.
+    $required = [];
+    $optional_groups = [];
+    foreach ($expected as $item) {
+        if (is_array($item)) {
+            $optional_groups[] = array_map(fn($e) => $e->name, $item);
+        } else {
+            $required[] = $item->name;
+        }
     }
 
-    // Sort both arrays by event name for comparison
     $actual_names = array_map(fn($e) => $e->name, $actual);
-    $expected_names = array_map(fn($e) => $e->name, $expected);
-    sort($actual_names);
-    sort($expected_names);
 
-    return $actual_names === $expected_names;
+    // Every required event must be present.
+    foreach ($required as $name) {
+        $idx = array_search($name, $actual_names, true);
+        if ($idx === false) {
+            return false;
+        }
+        unset($actual_names[$idx]);
+    }
+
+    // Each leftover actual event must be accounted for by a distinct optional
+    // slot that lists it.
+    foreach ($actual_names as $name) {
+        $matched = false;
+        foreach ($optional_groups as $gi => $group) {
+            if (in_array($name, $group, true)) {
+                unset($optional_groups[$gi]);
+                $matched = true;
+                break;
+            }
+        }
+        if (!$matched) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 function pt_resolve_backend_specific_value($backend_map, $current_backend) {
@@ -318,4 +354,69 @@ function pt_print_mismatched_events($actual_watchers, $expected_watchers, $match
         }
         echo $match_status . "\n";
     }
+}
+
+/*
+ * Self-test for the pt_* event-matching helpers.
+ *
+ * This is deliberately NOT a .phpt: the CI only runs .phpt files, never .inc,
+ * so this never executes there. It only runs when poll.inc is executed as the
+ * main script, which lets the (fiddly) optional-slot matching logic be verified
+ * by hand:
+ *
+ *     sapi/cli/php ext/standard/tests/poll/poll.inc
+ */
+function pt_run_self_test(): void {
+    if (!enum_exists('Io\\Poll\\Event')) {
+        echo "Io\\Poll\\Event not available; build with poll support to run the self-test\n";
+        return;
+    }
+
+    $R = Io\Poll\Event::Read;
+    $W = Io\Poll\Event::Write;
+    $E = Io\Poll\Event::Error;
+    $H = Io\Poll\Event::HangUp;
+
+    $failures = 0;
+    $check = function (string $label, bool $cond) use (&$failures) {
+        if ($cond) {
+            echo "ok   - $label\n";
+        } else {
+            echo "FAIL - $label\n";
+            ++$failures;
+        }
+    };
+
+    // Plain required sets are order independent and exact.
+    $check('exact set matches', pt_events_equal([$W, $H], [$H, $W]));
+    $check('missing required fails', !pt_events_equal([$W], [$W, $H]));
+    $check('extra unexpected fails', !pt_events_equal([$W, $H], [$W]));
+
+    // Optional slot: [$W, [$H]] means Write required, HangUp allowed but not
+    // required.
+    $check('optional present matches', pt_events_equal([$W, $H], [$W, [$H]]));
+    $check('optional absent matches', pt_events_equal([$W], [$W, [$H]]));
+    $check('optional cannot satisfy a required event', !pt_events_equal([$H], [$W, [$H]]));
+    $check('unlisted extra with optional fails', !pt_events_equal([$W, $E], [$W, [$H]]));
+
+    // A single optional slot accepts at most one of its listed events; separate
+    // slots can each accept one.
+    $check('optional picks one of group', pt_events_equal([$W, $H], [$W, [$H, $E]]));
+    $check('optional group may stay empty', pt_events_equal([$W], [$W, [$H, $E]]));
+    $check('single slot rejects two', !pt_events_equal([$W, $H, $E], [$W, [$H, $E]]));
+    $check('two slots accept two', pt_events_equal([$W, $H, $E], [$W, [$H], [$E]]));
+
+    // Rendering.
+    $check('renders plain set', pt_event_array_to_string([$W, $H]) === 'Write|HangUp');
+    $check('renders optional slot', pt_event_array_to_string([$W, [$H]]) === 'Write|[HangUp]');
+    $check('renders empty as NONE', pt_event_array_to_string([]) === 'NONE');
+
+    echo $failures === 0
+        ? "\nAll self-tests passed\n"
+        : "\n$failures self-test(s) FAILED\n";
+}
+
+if (isset($_SERVER['SCRIPT_FILENAME'])
+        && realpath($_SERVER['SCRIPT_FILENAME']) === __FILE__) {
+    pt_run_self_test();
 }
