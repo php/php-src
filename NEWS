@@ -58,6 +58,9 @@ PHP                                                                        NEWS
     IntlDateFormatter::localtime()/datefmt_localtime() now raise TypeError
     when the offset argument is not of type int. (Weilin Du)
 
+- JSON:
+  . Report unterminated JSON strings as syntax errors. (timwolla)
+
 - Opcache:
   . Fixed bug GH-21770 (Infinite recursion in property hook getter in opcache
     preloaded trait). (iliaal)
