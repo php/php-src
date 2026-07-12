@@ -1,6 +1,125 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0alpha1
+?? ??? ????, PHP 8.6.0alpha2
+
+- Core:
+  . Sync Boost.Context assembly with 1.91.0. (kn1g78)
+  . Fixed bug GH-22387 (AST pretty-printing drops meaningful parentheses around
+    RHS of instanceof). (timwolla)
+  . Fixed bug GH-15672 and GH-15911 (Stack overflow when an internal function
+    recurses through zend_call_function, such as a self-attached SPL
+    iterator). (iliaal)
+
+- Calendar:
+  . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
+    INT_MAX year). (arshidkv12)
+
+- Curl:
+  . Added CURLOPT_SEEKFUNCTION and the CURL_SEEKFUNC_OK, CURL_SEEKFUNC_FAIL
+    and CURL_SEEKFUNC_CANTSEEK constants, letting libcurl rewind a streamed
+    request body to resend it on a redirect, multi-pass authentication or a
+    retried reused connection. (GrahamCampbell)
+
+- Date:
+  . Update timelib to 2022.17. (Derick)
+  . Fixed bug GH-19803 (Parsing a string with a single white space does create
+    an error). (Derick)
+  . Fixed Unix timestamps in February of the year 0 are misparsed with
+    @-notation. (LukasGelbmann)
+  . Fixed bug GH-11368 (idate() doesn't work for the year -1). (Derick)
+  . Fixed bug GH-11310 (__debugInfo does nothing on userland classes extending
+    Date classes). (Derick)
+
+- DBA:
+  . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
+
+- DOM:
+  . Fixed bug GH-22570 (Stack overflow when serializing a deeply nested
+    Dom\XMLDocument). (iliaal)
+  . Fixed Dom\DtdNamedNodeMap integer dimension access so negative indexes
+    return NULL and indexes outside the int range throw ValueError instead of
+    returning the first entity or notation. (Weilin Du)
+  . Fixed bug GH-22623 (use after free with namespace nodes from
+    XSLTProcessor::registerFunctions())/ (David Carlier)
+
+- Exif:
+  . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
+    warning when an IFD is not followed by a next-IFD offset). (Eyüp Can Akman)
+
+- GMP:
+  . Fixed bug GH-22549 (Assertion failure / UB on a compound GMP power or shift
+    assignment with a negative exponent). (iliaal)
+
+- Intl:
+  . Fixed NumberFormatter::parse() and NumberFormatter::parseCurrency() to
+    reject offset values outside the 32-bit range instead of silently
+    truncating them. (Weilin Du)
+  . IntlDateFormatter::parse()/datefmt_parse() and
+    IntlDateFormatter::localtime()/datefmt_localtime() now raise TypeError
+    when the offset argument is not of type int. (Weilin Du)
+
+- JSON:
+  . Report unterminated JSON strings as syntax errors. (timwolla)
+
+- Opcache:
+  . Fixed bug GH-21770 (Infinite recursion in property hook getter in opcache
+    preloaded trait). (iliaal)
+
+- OpenSSL:
+  . Fixed timeout for supplemental read at end of a blocking stream in SSL
+    stream wrapper. (ilutov)
+  . Fixed stream_socket_get_crypto_status() after supplemental read. (ilutov)
+
+- PDO_ODBC:
+  . Fixed bug GH-20726 (Crash with ODBC connection pooling when the DSN
+    carries no credentials). (iliaal)
+
+- PHPDBG:
+  . Fixed fleaked lowercased lookup keys in phpdbg_resolve_opline_break.
+    (jorgsowa)
+  . Fixed off-by-one in phpdbg_safe_class_lookup() causing class lookups to
+    always fail during phpdbg's signal-safe interruption path. (jorgsowa)
+
+- Session:
+  . Fixed bug GH-21314 (Different session garbage collector behavior between
+    PHP 8.3 and PHP 8.5). (jorgsowa)
+
+- SOAP:
+  . Fixed bug GH-22585 (OOM on bailout with uninitialized
+    do_request() parameters). (David Carlier)
+  . Fixed xsd:hexBinary decoding to reject odd-length values instead of
+    silently truncating the last nibble. (Weilin Du)
+
+- Standard:
+  . Fixed sleep() and usleep() to reject values that overflow the underlying
+    unsigned int timeout. (Weilin Du)
+  . Fixed bug GH-22671 (assert.bail aborts the process when the assert callback
+    throws an exception whose reporting re-throws). (iliaal)
+
+- Streams:
+  . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
+    and a proxy set). (CVE-2026-12184) (ndossche)
+
+- URI:
+  . Fixed bug GH-22628 (Percent-encoding of caret in WHATWG URL paths is not
+    performed). (kocsismate)
+  . Fixed bug GH-22629 (WHATWG Validation error incorrect with empty host and
+    non-empty userinfo). (kocsismate)
+
+- Zip:
+  . Fixed bug GH-22649 (ZipArchive::setCommentName() and setCommentIndex()
+    could crash after overwriting an entry and resetting its inherited
+    unchanged comment). (Weilin Du)
+  . Fixed bug GH-21705 (ZipArchive::getFromIndex() ignores
+    ZipArchive::FL_UNCHANGED for deleted entries). (Weilin Du)
+  . Fixed bug GH-22176 (memory leak with ZipArchive::registerCancelBack()
+    is used with reference returning function during shutdown).
+    (David Carlier)
+  . ZipArchive::addGlob() and ZipArchive::addPattern() now raise a TypeError
+    for invalid "remove_all_path", "comp_method", "comp_flags", and
+    "enc_method" options instead of emitting a warning. (David Carlier)
+
+02 Jul 2026, PHP 8.6.0alpha1
 
 - Core:
   . Added first-class callable cache to share instances for the duration of the
@@ -36,6 +155,8 @@ PHP                                                                        NEWS
   . perf: make all static extensions use TSRMG_STATIC. (henderkes)
   . Fixed bug GH-22257 (type confusion in Exception::getTraceAsString()).
     (David Carlier)
+  . TSRM: make CG, EG, SCNG and AG compile-time offsets. (henderkes)
+  . Deprecate returning values from __construct() and __destruct(). (timwolla)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
@@ -87,6 +208,9 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed malformed ResourceBundle::get() error message when fallback is
     disabled. (Weilin Du)
+  . Added Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue(),
+    with the alias of locale_get_display_keyword() and
+    locale_get_display_keyword_value() respectively. (Weilin Du)
   . Fix incorrect argument positions for invalid start/end arguments in
     transliterator_transliterate(). (Weilin Du)
   . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
@@ -107,6 +231,8 @@ PHP                                                                        NEWS
     as float rather than int on 64-bit platforms. (Weilin Du)
   . Fixed UConverter::transcode() silently truncating from_subst and to_subst
     option lengths greater than 127 bytes. (Weilin Du)
+  . Fixed IntlIterator::current() to return NULL instead of an undefined value
+    when the iterator is not positioned on a valid element. (Weilin Du)
 
 - IO:
   . Added new polling API. (Jakub Zelenka)
@@ -155,7 +281,7 @@ PHP                                                                        NEWS
   . pcntl_exec() now throws a ValueError if the $args array is not a list
     array. (Weilin Du)
 
-- PDO_DBLIB;
+- PDO_DBLIB:
   . Added dblib_handle_check_liveness handler. (freddy77)
 
 - PDO_PGSQL:
@@ -230,6 +356,8 @@ PHP                                                                        NEWS
     AF_INET* family only. (David Carlier)
   . Fixed GH-20532 (socket_addrinfo_lookup gives the error code with a new
     optional parameter). (David Carlier)
+  . Added AF_PACKET support completion for socket_sendto()/socket_recvfrom().
+    (David Carlier)
 
 - Sodium:
   . Added support for libsodium 1.0.21 IPcrypt and XOF APIs. (jedisct1)

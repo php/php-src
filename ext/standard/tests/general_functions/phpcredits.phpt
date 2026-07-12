@@ -33,7 +33,7 @@ Language Design & Concept
 %wPHP Documentation%w
 %a
 
-PHP Quality Assurance Team
+%wPHP Quality Assurance Team%w
 %a
 
 %wWebsites and Infrastructure team%w

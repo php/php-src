@@ -361,7 +361,6 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 			zend_ce_value_error, "%s must be between 0 and %lu",
 			opcode == ZEND_POW ? "Exponent" : "Shift", ULONG_MAX
 		);
-		ZVAL_UNDEF(return_value);
 		return FAILURE;
 	} else {
 		mpz_ptr gmpnum_op, gmpnum_result;

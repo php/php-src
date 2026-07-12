@@ -20,6 +20,8 @@
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
 
+#include "../intl_icu_compat.h"
+
 extern "C" {
 #include "converter.h"
 #include "php_intl.h"
@@ -160,7 +162,7 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 		case IS_LONG:
 		{
 			const zend_long lval = Z_LVAL_P(val);
-			if ((lval < 0) || (lval > 0x10FFFF)) {
+			if (UNEXPECTED((lval < 0) || (lval > 0x10FFFF))) {
 				php_converter_throw_failure(objval, U_ILLEGAL_ARGUMENT_ERROR, "Invalid codepoint U+%04lx", lval);
 				return;
 			}
@@ -634,7 +636,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 	zend_string	*ret;
 	UChar		*temp;
 
-	if (!src_cnv || !dest_cnv) {
+	if (UNEXPECTED(!src_cnv || !dest_cnv)) {
 		php_converter_throw_failure(objval, U_INVALID_STATE_ERROR,
 		                            "Internal converters not initialized");
 		return nullptr;
@@ -684,7 +686,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 
 static void php_converter_set_subst_chars(UConverter *cnv, const zend_string *subst, UErrorCode *error)
 {
-	if (ZSTR_LEN(subst) > SCHAR_MAX) {
+	if (UNEXPECTED(ZSTR_LEN(subst) > SCHAR_MAX)) {
 		*error = U_ILLEGAL_ARGUMENT_ERROR;
 		return;
 	}
@@ -949,18 +951,10 @@ static zend_object *php_converter_clone_object(zend_object *object) {
 	zend_object *retval = php_converter_object_ctor(object->ce, &objval);
 	UErrorCode error = U_ZERO_ERROR;
 
-#if U_ICU_VERSION_MAJOR_NUM > 70
-	objval->src = ucnv_clone(oldobj->src, &error);
-#else
-	objval->src = ucnv_safeClone(oldobj->src, NULL, NULL, &error);
-#endif
+	objval->src = intl_icu_compat_ucnv_clone(oldobj->src, &error);
 	if (U_SUCCESS(error)) {
 		error = U_ZERO_ERROR;
-#if U_ICU_VERSION_MAJOR_NUM > 70
-		objval->dest = ucnv_clone(oldobj->dest, &error);
-#else
-		objval->dest = ucnv_safeClone(oldobj->dest, NULL, NULL, &error);
-#endif
+		objval->dest = intl_icu_compat_ucnv_clone(oldobj->dest, &error);
 	}
 
 	if (U_FAILURE(error)) {

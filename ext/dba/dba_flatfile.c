@@ -167,7 +167,7 @@ DBA_SYNC_FUNC(flatfile)
 
 DBA_INFO_FUNC(flatfile)
 {
-	return estrdup(flatfile_version());
+	return flatfile_version();
 }
 
 #endif

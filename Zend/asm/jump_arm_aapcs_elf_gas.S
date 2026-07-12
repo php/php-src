@@ -41,6 +41,7 @@
 .file "jump_arm_aapcs_elf_gas.S"
 .text
 .globl jump_fcontext
+.hidden jump_fcontext
 .align 2
 .type jump_fcontext,%function
 .syntax unified
@@ -48,7 +49,37 @@ jump_fcontext:
     @ save LR as PC
     push {lr}
     @ save hidden,V1-V8,LR
+
+    #if __ARM_ARCH >= 7
+
     push {a1,v1-v8,lr}
+
+    #else
+
+    sub  sp, #40
+
+    str a1, [sp, #0]
+    str v1, [sp, #4]
+    str v2, [sp, #8]
+    str v3, [sp, #12]
+    str v4, [sp, #16]
+
+    mov v4, v5
+    str v4, [sp, #20]
+
+    mov v4, v6
+    str v4, [sp, #24]
+
+    mov v4, v7
+    str v4, [sp, #28]
+
+    mov v4, v8
+    str v4, [sp, #32]
+
+    mov v4, lr
+    str v4, [sp, #36]
+
+    #endif
 
     @ prepare stack for FPU
     sub  sp, sp, #64
@@ -71,7 +102,34 @@ jump_fcontext:
     add  sp, sp, #64
 
     @ restore hidden,V1-V8,LR
+    #if __ARM_ARCH >= 7
     pop {a4,v1-v8,lr}
+    #else
+
+    ldr v4, [sp, #20]
+    mov v5, v4
+
+    ldr v4, [sp, #24]
+    mov v6, v4
+
+    ldr v4, [sp, #28]
+    mov v7, v4
+
+    ldr v4, [sp, #32]
+    mov v8, v4
+
+    ldr v4, [sp, #36]
+    mov lr, v4
+
+    ldr a4, [sp, #0]
+    ldr v1, [sp, #4]
+    ldr v2, [sp, #8]
+    ldr v3, [sp, #12]
+    ldr v4, [sp, #16]
+
+    add sp, #40
+
+    #endif
 
     @ return transfer_t from jump
     str  a1, [a4, #0]

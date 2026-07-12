@@ -978,6 +978,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 					}
 				}
 				break;
+			case ZEND_FETCH_OBJ_FUNC_ARG:
 			case ZEND_FETCH_OBJ_R: {
 				if (opline->op2_type == IS_CONST) {
 					/* Remove the SIMPLE_GET flag to avoid inlining hooks. */
@@ -992,7 +993,6 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 			case ZEND_FETCH_OBJ_W:
 			case ZEND_FETCH_OBJ_RW:
 			case ZEND_FETCH_OBJ_IS:
-			case ZEND_FETCH_OBJ_FUNC_ARG:
 			case ZEND_FETCH_OBJ_UNSET:
 			case ZEND_ASSIGN_OBJ:
 			case ZEND_ASSIGN_OBJ_OP:

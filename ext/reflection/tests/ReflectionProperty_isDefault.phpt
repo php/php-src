@@ -1,5 +1,5 @@
 --TEST--
-ReflectionParameter::isDefault()
+ReflectionProperty::isDefault()
 --FILE--
 <?php
 #[AllowDynamicProperties]

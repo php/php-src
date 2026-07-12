@@ -27,7 +27,6 @@
 #ifndef HAVE_SCANDIR
 
 #ifdef PHP_WIN32
-#include "win32/param.h"
 #include "win32/readdir.h"
 #endif
 

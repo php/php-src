@@ -99,7 +99,7 @@ PHPAPI ZEND_COLD void php_print_credits(int flag) /* {{{ */
 
 	if (flag & PHP_CREDITS_QA) {
 		php_info_print_table_start();
-		php_info_print_table_header(1, "PHP Quality Assurance Team");
+		php_info_print_table_colspan_header(1, "PHP Quality Assurance Team");
 		php_info_print_table_row(1, "Ilia Alshanetsky, Joerg Behrens, Antony Dovgal, Stefan Esser, Moriyoshi Koizumi, Magnus Maatta, Sebastian Nohn, Derick Rethans, Melvyn Sopacua, Pierre-Alain Joye, Dmitry Stogov, Felipe Pena, David Soria Parra, Stanislav Malyshev, Julien Pauli, Stephen Zarkos, Anatol Belski, Remi Collet, Ferenc Kovacs");
 		php_info_print_table_end();
 	}

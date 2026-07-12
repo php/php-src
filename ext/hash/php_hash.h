@@ -58,6 +58,7 @@ typedef struct _php_hash_ops {
 	size_t block_size;
 	size_t context_size;
 	unsigned is_crypto: 1;
+	size_t context_align;
 } php_hash_ops;
 
 struct _php_hashcontext_object {
@@ -161,18 +162,24 @@ PHP_HASH_API hash_spec_result php_hash_unserialize_spec(php_hashcontext_object *
 
 static inline void *php_hash_alloc_context(const php_hash_ops *ops) {
 	/* Zero out context memory so serialization doesn't expose internals */
+	if (ops->context_align > 0) {
+		size_t align = ops->context_align;
+		char *base = ecalloc(1, ops->context_size + align);
+		size_t offset = align - ((uintptr_t)base & (align - 1));
+		char *ptr = base + offset;
+		ptr[-1] = (char)offset;
+		return ptr;
+	}
 	return ecalloc(1, ops->context_size);
 }
 
-static inline void php_hash_bin2hex(char *out, const unsigned char *in, size_t in_len)
-{
-	static const char hexits[17] = "0123456789abcdef";
-	size_t i;
-
-	for(i = 0; i < in_len; i++) {
-		out[i * 2]       = hexits[in[i] >> 4];
-		out[(i * 2) + 1] = hexits[in[i] &  0x0F];
+static inline void php_hash_free_context(const php_hash_ops *ops, void *ctx) {
+	if (ops->context_align > 0) {
+		unsigned char offset = ((unsigned char *)ctx)[-1];
+		efree((char *)ctx - offset);
+		return;
 	}
+	efree(ctx);
 }
 
 #endif	/* PHP_HASH_H */

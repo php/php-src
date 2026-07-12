@@ -17,6 +17,6 @@ headers_sent($obj,$generator);
 Fatal error: Uncaught Exception: Test in %s:%d
 Stack trace:
 #0 [internal function]: class@anonymous->__destruct()
-#1 %s(%d): headers_sent(NULL, 0)
+#1 %s(%d): headers_sent(NULL, NULL)
 #2 {main}
   thrown in %s on line %d

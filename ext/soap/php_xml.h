@@ -29,9 +29,9 @@ xmlDocPtr soap_xmlParseFile(const char *filename);
 xmlDocPtr soap_xmlParseMemory(const void *buf, size_t size);
 
 xmlNsPtr node_find_ns(xmlNodePtr node);
-int attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns);
-int node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns);
-int node_is_equal_ex_one_of(xmlNodePtr node, const char *name, const char *const *namespaces);
+bool attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns);
+bool node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns);
+bool node_is_equal_ex_one_of(xmlNodePtr node, const char *name, const char *const *namespaces);
 xmlAttrPtr get_attribute_any_ns(xmlAttrPtr node, const char *name);
 xmlAttrPtr get_attribute_ex(xmlAttrPtr node, const char *name, const char *ns);
 xmlNodePtr get_node_ex(xmlNodePtr node, const char *name, const char *ns);

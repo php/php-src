@@ -935,7 +935,6 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 
 	/* do extra field for perms later */
 	if (entry->is_modified) {
-		php_stream_filter *filter;
 		php_stream *efp;
 
 		if (entry->is_dir) {
@@ -981,7 +980,9 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 			goto not_compressed;
 		}
 
-		filter = php_stream_filter_create(phar_compress_filter(entry, false), NULL, 0);
+		const char *compression_filter_name = phar_get_compress_filter_name(entry);
+		ZEND_ASSERT(compression_filter_name && "Must have as this has a compression flag set");
+		php_stream_filter *filter = php_stream_filter_create(compression_filter_name, NULL, false);
 
 		if (!filter) {
 			if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {

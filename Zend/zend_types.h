@@ -446,20 +446,31 @@ struct _zend_array {
  */
 #if SIZEOF_SIZE_T == 4
 # define HT_MAX_SIZE 0x02000000
-# define HT_HASH_TO_BUCKET_EX(data, idx) \
-	((Bucket*)((char*)(data) + (idx)))
-# define HT_IDX_TO_HASH(idx) \
-	((idx) * sizeof(Bucket))
-# define HT_HASH_TO_IDX(idx) \
-	((idx) / sizeof(Bucket))
+
+static zend_always_inline Bucket *HT_HASH_TO_BUCKET_EX(Bucket *data, uint32_t idx) {
+	return ((Bucket*)((char*)(data) + (idx)));
+}
+
+ZEND_ATTRIBUTE_CONST static zend_always_inline uint32_t HT_IDX_TO_HASH(uint32_t idx) {
+	return idx * sizeof(Bucket);
+}
+
+ZEND_ATTRIBUTE_CONST static zend_always_inline uint32_t HT_HASH_TO_IDX(uint32_t idx) {
+	return idx / sizeof(Bucket);
+}
 #elif SIZEOF_SIZE_T == 8
 # define HT_MAX_SIZE 0x40000000
-# define HT_HASH_TO_BUCKET_EX(data, idx) \
-	((data) + (idx))
-# define HT_IDX_TO_HASH(idx) \
-	(idx)
-# define HT_HASH_TO_IDX(idx) \
-	(idx)
+static zend_always_inline Bucket *HT_HASH_TO_BUCKET_EX(Bucket *data, uint32_t idx) {
+	return data + idx;
+}
+
+ZEND_ATTRIBUTE_CONST static zend_always_inline uint32_t HT_IDX_TO_HASH(uint32_t idx) {
+	return idx;
+}
+
+ZEND_ATTRIBUTE_CONST static zend_always_inline uint32_t HT_HASH_TO_IDX(uint32_t idx) {
+	return idx;
+}
 #else
 # error "Unknown SIZEOF_SIZE_T"
 #endif
@@ -469,81 +480,96 @@ struct _zend_array {
 #define HT_HASH(ht, idx) \
 	HT_HASH_EX((ht)->arHash, idx)
 
-#define HT_SIZE_TO_MASK(nTableSize) \
-	((uint32_t)(-((nTableSize) + (nTableSize))))
-#define HT_HASH_SIZE(nTableMask) \
-	(((size_t)-(uint32_t)(nTableMask)) * sizeof(uint32_t))
-#define HT_DATA_SIZE(nTableSize) \
-	((size_t)(nTableSize) * sizeof(Bucket))
-#define HT_SIZE_EX(nTableSize, nTableMask) \
-	(HT_DATA_SIZE((nTableSize)) + HT_HASH_SIZE((nTableMask)))
-#define HT_SIZE(ht) \
-	HT_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
-#define HT_USED_SIZE(ht) \
-	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(Bucket)))
-#define HT_PACKED_DATA_SIZE(nTableSize) \
-	((size_t)(nTableSize) * sizeof(zval))
-#define HT_PACKED_SIZE_EX(nTableSize, nTableMask) \
-	(HT_PACKED_DATA_SIZE((nTableSize)) + HT_HASH_SIZE((nTableMask)))
-#define HT_PACKED_SIZE(ht) \
-	HT_PACKED_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
-#define HT_PACKED_USED_SIZE(ht) \
-	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(zval)))
+ZEND_ATTRIBUTE_CONST static zend_always_inline uint32_t HT_SIZE_TO_MASK(uint32_t nTableSize) {
+	return (uint32_t)(-(nTableSize + nTableSize));
+}
+
+ZEND_ATTRIBUTE_CONST static zend_always_inline size_t HT_HASH_SIZE(uint32_t nTableMask) {
+	return ((size_t)(-nTableMask)) * sizeof(uint32_t);
+}
+
+ZEND_ATTRIBUTE_CONST static zend_always_inline size_t HT_DATA_SIZE(uint32_t nTableSize) {
+	return ((size_t)nTableSize) * sizeof(Bucket);
+}
+
+ZEND_ATTRIBUTE_CONST static zend_always_inline size_t HT_SIZE_EX(uint32_t nTableSize, uint32_t nTableMask) {
+	return HT_DATA_SIZE(nTableSize) + HT_HASH_SIZE(nTableMask);
+}
+
+static zend_always_inline size_t HT_SIZE(const HashTable *ht) {
+	return HT_SIZE_EX(ht->nTableSize, ht->nTableMask);
+}
+
+static zend_always_inline size_t HT_USED_SIZE(const HashTable *ht) {
+	return HT_HASH_SIZE(ht->nTableMask) + ((size_t)ht->nNumUsed * sizeof(Bucket));
+}
+
+ZEND_ATTRIBUTE_CONST static zend_always_inline size_t HT_PACKED_DATA_SIZE(uint32_t nTableSize) {
+	return ((size_t)nTableSize) * sizeof(zval);
+}
+
+ZEND_ATTRIBUTE_CONST static zend_always_inline size_t HT_PACKED_SIZE_EX(uint32_t nTableSize, uint32_t nTableMask) {
+	return HT_PACKED_DATA_SIZE(nTableSize) + HT_HASH_SIZE(nTableMask);
+}
+
+static zend_always_inline size_t HT_PACKED_SIZE(const HashTable *ht) {
+	return HT_PACKED_SIZE_EX(ht->nTableSize, ht->nTableMask);
+}
+
+static zend_always_inline size_t HT_PACKED_USED_SIZE(const HashTable *ht) {
+	return HT_HASH_SIZE(ht->nTableMask) + ((size_t)ht->nNumUsed * sizeof(zval));
+}
+
+static zend_always_inline void HT_HASH_RESET(HashTable *ht) {
+	char *p = (char*)&HT_HASH(ht, ht->nTableMask);
+	size_t size = HT_HASH_SIZE(ht->nTableMask);
+
 #if defined(__AVX2__)
-# define HT_HASH_RESET(ht) do { \
-		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
-		size_t size = HT_HASH_SIZE((ht)->nTableMask); \
-		__m256i ymm0 = _mm256_setzero_si256(); \
-		ymm0 = _mm256_cmpeq_epi64(ymm0, ymm0); \
-		ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0)); \
-		do { \
-			_mm256_storeu_si256((__m256i*)p, ymm0); \
-			_mm256_storeu_si256((__m256i*)(p+32), ymm0); \
-			p += 64; \
-			size -= 64; \
-		} while (size != 0); \
-	} while (0)
+	__m256i ymm0 = _mm256_setzero_si256();
+	ymm0 = _mm256_cmpeq_epi64(ymm0, ymm0);
+	ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0));
+	do {
+		_mm256_storeu_si256((__m256i*)p, ymm0);
+		_mm256_storeu_si256((__m256i*)(p+32), ymm0);
+		p += 64;
+		size -= 64;
+	} while (size != 0);
 #elif defined(__SSE2__)
-# define HT_HASH_RESET(ht) do { \
-		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
-		size_t size = HT_HASH_SIZE((ht)->nTableMask); \
-		__m128i xmm0 = _mm_setzero_si128(); \
-		xmm0 = _mm_cmpeq_epi8(xmm0, xmm0); \
-		ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0)); \
-		do { \
-			_mm_storeu_si128((__m128i*)p, xmm0); \
-			_mm_storeu_si128((__m128i*)(p+16), xmm0); \
-			_mm_storeu_si128((__m128i*)(p+32), xmm0); \
-			_mm_storeu_si128((__m128i*)(p+48), xmm0); \
-			p += 64; \
-			size -= 64; \
-		} while (size != 0); \
-	} while (0)
+	__m128i xmm0 = _mm_setzero_si128();
+	xmm0 = _mm_cmpeq_epi8(xmm0, xmm0);
+	ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0));
+	do {
+		_mm_storeu_si128((__m128i*)p, xmm0);
+		_mm_storeu_si128((__m128i*)(p+16), xmm0);
+		_mm_storeu_si128((__m128i*)(p+32), xmm0);
+		_mm_storeu_si128((__m128i*)(p+48), xmm0);
+		p += 64;
+		size -= 64;
+	} while (size != 0);
 #elif defined(__aarch64__) || defined(_M_ARM64)
-# define HT_HASH_RESET(ht) do { \
-		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
-		size_t size = HT_HASH_SIZE((ht)->nTableMask); \
-		int32x4_t t = vdupq_n_s32(-1); \
-		ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0)); \
-		do { \
-			vst1q_s32((int32_t*)p, t); \
-			vst1q_s32((int32_t*)(p+16), t); \
-			vst1q_s32((int32_t*)(p+32), t); \
-			vst1q_s32((int32_t*)(p+48), t); \
-			p += 64; \
-			size -= 64; \
-		} while (size != 0); \
-	} while (0)
+	int32x4_t t = vdupq_n_s32(-1);
+	ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0));
+	do {
+		vst1q_s32((int32_t*)p, t);
+		vst1q_s32((int32_t*)(p+16), t);
+		vst1q_s32((int32_t*)(p+32), t);
+		vst1q_s32((int32_t*)(p+48), t);
+		p += 64;
+		size -= 64;
+	} while (size != 0);
 #else
-# define HT_HASH_RESET(ht) \
-	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE((ht)->nTableMask))
+	memset(p, HT_INVALID_IDX, size);
 #endif
-#define HT_HASH_RESET_PACKED(ht) do { \
-		HT_HASH(ht, -2) = HT_INVALID_IDX; \
-		HT_HASH(ht, -1) = HT_INVALID_IDX; \
-	} while (0)
-#define HT_HASH_TO_BUCKET(ht, idx) \
-	HT_HASH_TO_BUCKET_EX((ht)->arData, idx)
+}
+
+static zend_always_inline void HT_HASH_RESET_PACKED(HashTable *ht) {
+	HT_HASH(ht, -2) = HT_INVALID_IDX;
+	HT_HASH(ht, -1) = HT_INVALID_IDX;
+}
+
+static zend_always_inline Bucket *HT_HASH_TO_BUCKET(HashTable *ht, uint32_t idx) {
+	return HT_HASH_TO_BUCKET_EX(ht->arData, idx);
+}
 
 #define HT_SET_DATA_ADDR(ht, ptr) do { \
 		(ht)->arData = (Bucket*)(((char*)(ptr)) + HT_HASH_SIZE((ht)->nTableMask)); \
@@ -991,8 +1017,6 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 	} while(0)
 
 /* All data types < IS_STRING have their constructor/destructors skipped */
-#define Z_CONSTANT(zval)			(Z_TYPE(zval) == IS_CONSTANT_AST)
-#define Z_CONSTANT_P(zval_p)		Z_CONSTANT(*(zval_p))
 
 #if 1
 /* This optimized version assumes that we have a single "type_flag" */
@@ -1009,9 +1033,6 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 /* the following Z_OPT_* macros make better code when Z_TYPE_INFO accessed before */
 #define Z_OPT_TYPE(zval)			(Z_TYPE_INFO(zval) & Z_TYPE_MASK)
 #define Z_OPT_TYPE_P(zval_p)		Z_OPT_TYPE(*(zval_p))
-
-#define Z_OPT_CONSTANT(zval)		(Z_OPT_TYPE(zval) == IS_CONSTANT_AST)
-#define Z_OPT_CONSTANT_P(zval_p)	Z_OPT_CONSTANT(*(zval_p))
 
 #define Z_OPT_REFCOUNTED(zval)		Z_TYPE_INFO_REFCOUNTED(Z_TYPE_INFO(zval))
 #define Z_OPT_REFCOUNTED_P(zval_p)	Z_OPT_REFCOUNTED(*(zval_p))

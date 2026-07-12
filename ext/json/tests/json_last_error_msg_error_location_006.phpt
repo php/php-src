@@ -107,8 +107,8 @@ string(33) "Syntax error near location 1:1011"
 
 Error with very long key:
 bool(false)
-int(3)
-string(73) "Control character error, possibly incorrectly encoded near location 1:506"
+int(4)
+string(32) "Syntax error near location 1:506"
 
 Error after empty object:
 bool(false)
@@ -149,4 +149,3 @@ Error with mixed whitespace:
 bool(false)
 int(3)
 string(71) "Control character error, possibly incorrectly encoded near location 3:2"
-

@@ -43,6 +43,8 @@ ZEND_API extern zend_string_init_existing_interned_func_t zend_string_init_exist
 ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str);
 ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len);
 ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_string *str);
+ZEND_API void ZEND_FASTCALL zend_bin2hex(char *out, const unsigned char *in, size_t in_len);
+ZEND_API zend_string *zend_bin2hex_str(const unsigned char *in, size_t in_len);
 
 ZEND_API zend_string *zend_string_concat2(
 	const char *str1, size_t str1_len,
@@ -709,6 +711,7 @@ default: ZEND_UNREACHABLE();
 	_(ZEND_STR_CONST_EXPR_PLACEHOLDER, "[constant expression]") \
 	_(ZEND_STR_DEPRECATED_CAPITALIZED, "Deprecated") \
 	_(ZEND_STR_SINCE,                  "since") \
+	_(ZEND_STR_NODISCARD,              "NoDiscard") \
 	_(ZEND_STR_GET,                    "get") \
 	_(ZEND_STR_SET,                    "set") \
 	_(ZEND_STR_8_DOT_0,                "8.0") \

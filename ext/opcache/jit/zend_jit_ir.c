@@ -10924,7 +10924,7 @@ static int zend_jit_recv_init(zend_jit_ctx *jit, const zend_op *opline, const ze
 			zv, true);
 	}
 
-	if (Z_CONSTANT_P(zv)) {
+	if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
 		jit_SET_EX_OPLINE(jit, opline);
 		ref = ir_CALL_2(IR_I32, ir_CONST_FC_FUNC(zval_update_constant_ex),
 			jit_ZVAL_ADDR(jit, res_addr),
@@ -14231,6 +14231,26 @@ static int zend_jit_class_guard(zend_jit_ctx *jit, const zend_op *opline, ir_ref
 	ir_GUARD(ir_EQ(ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, ce))), ir_CONST_ADDR(ce)),
 		ir_CONST_ADDR(exit_addr));
 
+	return 1;
+}
+
+static int zend_jit_func_arg_by_ref_guard(zend_jit_ctx *jit, const zend_op *opline)
+{
+	int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+	ir_ref rx, call_info;
+
+	if (!exit_addr) {
+		return 0;
+	}
+	if (jit->reuse_ip) {
+		rx = jit_IP(jit);
+	} else {
+		rx = ir_LOAD_A(jit_EX(call));
+	}
+	call_info = ir_LOAD_U32(jit_CALL(rx, This.u1.type_info));
+	ir_GUARD_NOT(ir_AND_U32(call_info, ir_CONST_U32(ZEND_CALL_SEND_ARG_BY_REF)),
+		ir_CONST_ADDR(exit_addr));
 	return 1;
 }
 

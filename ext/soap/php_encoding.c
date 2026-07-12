@@ -766,6 +766,7 @@ static zval *to_zval_base64(zval *ret, encodeTypePtr type, xmlNodePtr data)
 static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data)
 {
 	zend_string *str;
+	size_t content_len;
 	size_t i, j;
 	unsigned char c;
 
@@ -778,7 +779,12 @@ static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
 			return ret;
 		}
-		str = zend_string_alloc(strlen((char*)data->children->content) / 2, 0);
+		content_len = strlen((char*) data->children->content);
+		if (content_len % 2 != 0) {
+			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+			return ret;
+		}
+		str = zend_string_alloc(content_len / 2, 0);
 		for (i = j = 0; i < ZSTR_LEN(str); i++) {
 			c = data->children->content[j++];
 			if (c >= '0' && c <= '9') {
@@ -2052,7 +2058,7 @@ static int calc_dimension_12(const char* str)
 
 static void soap_array_position_add_digit(int *position, int digit)
 {
-	if (*position > (INT_MAX - digit) / 10) {
+	if (UNEXPECTED(*position > (INT_MAX - digit) / 10)) {
 		soap_error0(E_ERROR, "Encoding: array index out of range");
 	}
 
@@ -2697,7 +2703,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			i = dimension;
 			while (i > 0) {
 				i--;
-				if (pos[i] == INT_MAX) {
+				if (UNEXPECTED(pos[i] == INT_MAX)) {
 					efree(dims);
 					efree(pos);
 					zval_ptr_dtor(ret);

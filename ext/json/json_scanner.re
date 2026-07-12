@@ -230,7 +230,14 @@ std:
 		s->errcode = PHP_JSON_ERROR_UTF8;
 		return PHP_JSON_T_ERROR;
 	}
-
+	<STR_P1>EOI             {
+		if (s->limit < s->cursor) {
+			s->errcode = PHP_JSON_ERROR_SYNTAX;
+		} else {
+			s->errcode = PHP_JSON_ERROR_CTRL_CHAR;
+		}
+		return PHP_JSON_T_ERROR;
+	}
 	<STR_P1>CTRL             {
 		s->errcode = PHP_JSON_ERROR_CTRL_CHAR;
 		return PHP_JSON_T_ERROR;
