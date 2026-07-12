@@ -78,14 +78,15 @@ EVP_PKEY_CTX *php_openssl_pkey_new_from_pkey(EVP_PKEY *pkey)
 	return EVP_PKEY_CTX_new(pkey, NULL);
 }
 
-static bool php_openssl_pkey_init_rsa_data(RSA *rsa, zval *data)
+static bool php_openssl_pkey_init_rsa_data(RSA *rsa, zval *data, bool *is_private)
 {
 	BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
 
 	OPENSSL_PKEY_SET_BN(data, n);
 	OPENSSL_PKEY_SET_BN(data, e);
 	OPENSSL_PKEY_SET_BN(data, d);
-	if (!n || !d || !RSA_set0_key(rsa, n, e, d)) {
+	*is_private = d != NULL;
+	if (!n || (!d && !e) || !RSA_set0_key(rsa, n, e, d)) {
 		return false;
 	}
 
@@ -105,7 +106,7 @@ static bool php_openssl_pkey_init_rsa_data(RSA *rsa, zval *data)
 	return true;
 }
 
-EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
+EVP_PKEY *php_openssl_pkey_init_rsa(zval *data, bool *is_private)
 {
 	EVP_PKEY *pkey = EVP_PKEY_new();
 	if (!pkey) {
@@ -120,7 +121,7 @@ EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
 		return NULL;
 	}
 
-	if (!php_openssl_pkey_init_rsa_data(rsa, data) || !EVP_PKEY_assign_RSA(pkey, rsa)) {
+	if (!php_openssl_pkey_init_rsa_data(rsa, data, is_private) || !EVP_PKEY_assign_RSA(pkey, rsa)) {
 		php_openssl_store_errors();
 		EVP_PKEY_free(pkey);
 		RSA_free(rsa);

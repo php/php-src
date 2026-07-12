@@ -2465,11 +2465,12 @@ PHP_FUNCTION(openssl_pkey_new)
 
 		if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "rsa", sizeof("rsa")-1)) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
-			pkey = php_openssl_pkey_init_rsa(data);
+			bool is_private;
+			pkey = php_openssl_pkey_init_rsa(data, &is_private);
 			if (!pkey) {
 				RETURN_FALSE;
 			}
-			php_openssl_pkey_object_init(return_value, pkey, /* is_private */ true);
+			php_openssl_pkey_object_init(return_value, pkey, is_private);
 			return;
 		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "dsa", sizeof("dsa") - 1)) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {

@@ -82,7 +82,7 @@ EVP_PKEY_CTX *php_openssl_pkey_new_from_pkey(EVP_PKEY *pkey)
 	return  EVP_PKEY_CTX_new_from_pkey(PHP_OPENSSL_LIBCTX, pkey, PHP_OPENSSL_PROPQ);
 }
 
-EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
+EVP_PKEY *php_openssl_pkey_init_rsa(zval *data, bool *is_private)
 {
 	BIGNUM *n = NULL, *e = NULL, *d = NULL, *p = NULL, *q = NULL;
 	BIGNUM *dmp1 = NULL, *dmq1 = NULL, *iqmp = NULL;
@@ -100,12 +100,16 @@ EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
 	OPENSSL_PKEY_SET_BN(data, dmq1);
 	OPENSSL_PKEY_SET_BN(data, iqmp);
 
-	if (!ctx || !bld || !n || !d) {
+	*is_private = d != NULL;
+
+	if (!ctx || !bld || !n || (!d && !e)) {
 		goto cleanup;
 	}
 
 	OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_N, n);
-	OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_D, d);
+	if (d) {
+		OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_D, d);
+	}
 	if (e) {
 		OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_E, e);
 	}
@@ -130,8 +134,9 @@ EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
 		goto cleanup;
 	}
 
+	int selection = *is_private ? EVP_PKEY_KEYPAIR : EVP_PKEY_PUBLIC_KEY;
 	if (EVP_PKEY_fromdata_init(ctx) <= 0 ||
-			EVP_PKEY_fromdata(ctx, &pkey, EVP_PKEY_KEYPAIR, params) <= 0) {
+			EVP_PKEY_fromdata(ctx, &pkey, selection, params) <= 0) {
 		goto cleanup;
 	}
 

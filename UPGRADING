@@ -360,6 +360,10 @@ PHP 8.6 UPGRADE NOTES
 - OpenSSL:
   . Output of openssl_x509_parse() contains criticalExtensions listing all
     critical certificate extensions.
+  . openssl_pkey_new() can now construct a public-only RSA key when only the
+    modulus "n" and public exponent "e" are given (without the private
+    exponent "d"), matching the behavior already available for DSA, DH and EC
+    keys.
 
 - PDO_DBLIB:
   . When using persistent connections, there is now a liveness check in the

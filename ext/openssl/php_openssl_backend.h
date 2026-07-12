@@ -326,7 +326,7 @@ void php_openssl_add_bn_to_array(zval *ary, const BIGNUM *bn, const char *name);
 EVP_PKEY_CTX *php_openssl_pkey_new_from_name(const char *name, int id);
 EVP_PKEY_CTX *php_openssl_pkey_new_from_pkey(EVP_PKEY *pkey);
 
-EVP_PKEY *php_openssl_pkey_init_rsa(zval *data);
+EVP_PKEY *php_openssl_pkey_init_rsa(zval *data, bool *is_private);
 EVP_PKEY *php_openssl_pkey_init_dsa(zval *data, bool *is_private);
 BIGNUM *php_openssl_dh_pub_from_priv(BIGNUM *priv_key, BIGNUM *g, BIGNUM *p);
 EVP_PKEY *php_openssl_pkey_init_dh(zval *data, bool *is_private);
