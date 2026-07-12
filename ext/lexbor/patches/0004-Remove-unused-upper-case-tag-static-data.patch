@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Wed, 29 Nov 2023 21:26:47 +0100
-Subject: [PATCH 4/8] Remove unused upper case tag static data
+Subject: [PATCH 4/9] Remove unused upper case tag static data
 
 ---
  source/lexbor/tag/res.h | 2 ++

@@ -11,4 +11,4 @@ try {
 
 ?>
 --EXPECT--
-Uri\WhatWg\InvalidUrlException: The specified URI is malformed
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (HostMissing)

@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alexander Borisov <lex.borisov@gmail.com>
 Date: Fri, 26 Jun 2026 18:55:56 +0300
-Subject: [PATCH 7/8] URL: fixed setters for empty hosts.
+Subject: [PATCH 7/9] URL: fixed setters for empty hosts.
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
