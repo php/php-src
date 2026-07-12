@@ -42,10 +42,20 @@
  * to be really buggy.
  */
 #include <spawn.h>
+#ifdef __APPLE__
+#include <AvailabilityMacros.h>
+#endif
 #define USE_POSIX_SPAWN
 
-/* The non-_np variant is in macOS 26 (and _np deprecated) */
-#ifdef HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR
+/* The non-_np variant is in macOS 26 (and _np deprecated). On Apple, it has to be selected by the
+ * deployment target rather than the configure check: the link check passes whenever the SDK
+ * exports the symbol even if the running system is older, in which case the weakly linked
+ * reference resolves to NULL at runtime. */
+#if defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED >= 260000
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir
+#elif defined(__APPLE__)
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir_np
+#elif defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR)
 #define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir
 #else
 #define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir_np
