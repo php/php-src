@@ -1886,7 +1886,12 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht)
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
 
+	bool dtor_deferred = false;
 	if (ht->nNumUsed) {
+		if (ht->pDestructor) {
+			ZEND_DTOR_HAZARD_BEGIN();
+			dtor_deferred = true;
+		}
 		if (HT_IS_PACKED(ht)) {
 			zval *zv = ht->arPacked;
 			zval *end = zv + ht->nNumUsed;
@@ -1956,6 +1961,9 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht)
 	ht->nNumOfElements = 0;
 	ht->nNextFreeElement = ZEND_LONG_MIN;
 	ht->nInternalPointer = 0;
+	if (dtor_deferred) {
+		ZEND_DTOR_HAZARD_END();
+	}
 }
 
 ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht)

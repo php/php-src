@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15672 and GH-15911 (Stack overflow when an internal function
     recurses through zend_call_function, such as a self-attached SPL
     iterator). (iliaal)
+  . Fixed bug GH-20477 (Use-after-free in string concatenation reachable from
+    a destructor). (iliaal)
+  . Fixed bug GH-22061 (Double free via re-entrant destructor in
+    zend_hash_clean()). (iliaal)
 
 - Calendar:
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
@@ -88,6 +92,8 @@ PHP                                                                        NEWS
     silently truncating the last nibble. (Weilin Du)
 
 - Standard:
+  . Fixed bug GH-21824 (Use-after-free in unserialize() teardown reachable from
+    a destructor). (iliaal)
   . Fixed sleep() and usleep() to reject values that overflow the underlying
     unsigned int timeout. (Weilin Du)
   . Fixed bug GH-22671 (assert.bail aborts the process when the assert callback

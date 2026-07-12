@@ -170,6 +170,11 @@ void init_executor(void) /* {{{ */
 	zend_objects_store_init(&EG(objects_store), 1024);
 	zend_lazy_objects_init(&EG(lazy_objects_store));
 
+	EG(dtor_hazard_depth) = 0;
+	EG(deferred_dtors_count) = 0;
+	EG(deferred_dtors_capacity) = 0;
+	EG(deferred_dtors) = NULL;
+
 	EG(full_tables_cleanup) = 0;
 	ZEND_ATOMIC_BOOL_INIT(&EG(vm_interrupt), false);
 	ZEND_ATOMIC_BOOL_INIT(&EG(timed_out), false);
@@ -448,6 +453,16 @@ void shutdown_executor(void) /* {{{ */
 	zend_try {
 		zend_stream_shutdown();
 	} zend_end_try();
+
+	EG(dtor_hazard_depth) = 0;
+	if (EG(deferred_dtors_count)) {
+		zend_flush_deferred_destructors();
+	}
+	if (EG(deferred_dtors)) {
+		efree(EG(deferred_dtors));
+		EG(deferred_dtors) = NULL;
+		EG(deferred_dtors_capacity) = 0;
+	}
 
 	zend_shutdown_executor_values(fast_shutdown);
 

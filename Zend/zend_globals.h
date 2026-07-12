@@ -261,6 +261,12 @@ struct _zend_executor_globals {
 
 	zend_objects_store objects_store;
 	zend_lazy_objects_store lazy_objects_store;
+
+	uint32_t dtor_hazard_depth;
+	uint32_t deferred_dtors_count;
+	uint32_t deferred_dtors_capacity;
+	zend_object **deferred_dtors;
+
 	zend_object *exception;
 	const zend_op *opline_before_exception;
 	zend_op exception_op[3];

@@ -156,6 +156,35 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object)
 	EG(objects_store).object_buckets[handle] = object;
 }
 
+ZEND_API void ZEND_FASTCALL zend_defer_destructor(zend_object *object) /* {{{ */
+{
+	if (UNEXPECTED(EG(deferred_dtors_count) == EG(deferred_dtors_capacity))) {
+		uint32_t new_capacity = EG(deferred_dtors_capacity) ? EG(deferred_dtors_capacity) * 2 : 16;
+		EG(deferred_dtors) = erealloc(EG(deferred_dtors), new_capacity * sizeof(zend_object*));
+		EG(deferred_dtors_capacity) = new_capacity;
+	}
+	EG(deferred_dtors)[EG(deferred_dtors_count)++] = object;
+}
+/* }}} */
+
+ZEND_API void zend_flush_deferred_destructors(void) /* {{{ */
+{
+	while (EG(deferred_dtors_count)) {
+		zend_object **batch = EG(deferred_dtors);
+		uint32_t count = EG(deferred_dtors_count);
+
+		EG(deferred_dtors) = NULL;
+		EG(deferred_dtors_count) = 0;
+		EG(deferred_dtors_capacity) = 0;
+
+		for (uint32_t i = 0; i < count; i++) {
+			OBJ_RELEASE(batch[i]);
+		}
+		efree(batch);
+	}
+}
+/* }}} */
+
 ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ */
 {
 	ZEND_ASSERT(GC_REFCOUNT(object) == 0);
@@ -170,10 +199,18 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 		when the refcount reaches 0 a second time
 	 */
 	if (!(OBJ_FLAGS(object) & IS_OBJ_DESTRUCTOR_CALLED)) {
+		bool has_dtor = (object->handlers->dtor_obj != zend_objects_destroy_object
+				|| object->ce->destructor);
+
+		if (UNEXPECTED(has_dtor && EG(dtor_hazard_depth) != 0)) {
+			GC_ADDREF(object);
+			zend_defer_destructor(object);
+			return;
+		}
+
 		GC_ADD_FLAGS(object, IS_OBJ_DESTRUCTOR_CALLED);
 
-		if (object->handlers->dtor_obj != zend_objects_destroy_object
-				|| object->ce->destructor) {
+		if (has_dtor) {
 			GC_SET_REFCOUNT(object, 1);
 			object->handlers->dtor_obj(object);
 			GC_DELREF(object);
