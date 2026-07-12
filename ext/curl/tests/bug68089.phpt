@@ -16,5 +16,5 @@ try {
 ?>
 Done
 --EXPECT--
-curl_setopt(): cURL option must not contain any null bytes
+curl_setopt(): cURL option CURLOPT_URL must not contain any null bytes
 Done
