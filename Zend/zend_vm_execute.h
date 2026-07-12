@@ -24479,7 +24479,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -24636,7 +24638,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -24791,7 +24795,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -27187,7 +27193,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -27343,7 +27351,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -27497,7 +27507,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -31014,7 +31026,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -31171,7 +31185,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -31326,7 +31342,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -33548,7 +33566,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -33706,7 +33726,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -33862,7 +33884,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -35646,7 +35670,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -35803,7 +35829,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -35958,7 +35986,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -38218,7 +38248,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -38376,7 +38408,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -38532,7 +38566,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -42587,7 +42623,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -42745,7 +42783,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -42901,7 +42941,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -46410,7 +46452,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -46567,7 +46611,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -46722,7 +46768,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -51529,7 +51577,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -51687,7 +51737,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -51843,7 +51895,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -76966,7 +77020,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -77123,7 +77179,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -77278,7 +77336,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -79674,7 +79734,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -79830,7 +79892,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -79984,7 +80048,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -83501,7 +83567,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -83658,7 +83726,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -83813,7 +83883,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -86035,7 +86107,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -86193,7 +86267,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -86349,7 +86425,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -88133,7 +88211,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -88290,7 +88370,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -88445,7 +88527,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -90705,7 +90789,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -90863,7 +90949,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -91019,7 +91107,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -95074,7 +95164,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -95232,7 +95324,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -95388,7 +95482,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -98897,7 +98993,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -99054,7 +99152,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -99209,7 +99309,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -103914,7 +104016,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -104072,7 +104176,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -104228,7 +104334,9 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						/* Cache-hit path: set access was verified when the
+						 * slot was populated. */
+						value = zend_assign_to_typed_prop_granted(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:

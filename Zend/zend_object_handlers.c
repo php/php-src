@@ -362,7 +362,15 @@ static zend_always_inline const zend_class_entry *get_fake_or_executed_scope(voi
 	}
 }
 
-static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, const zend_property_info **info_ptr) /* {{{ */
+/* Resolve a property for reading (write_access == false) or for
+ * writing/unsetting (write_access == true). Write-kind resolution verifies
+ * asymmetric set visibility at population time: when the running scope lacks
+ * set access, the result is still returned (the caller's state-dependent
+ * slow path decides between an error and the __set fallback), but the
+ * runtime cache is NOT populated. A populated write-site cache slot
+ * therefore guarantees set access, which lets the VM's cached direct-assign
+ * fast path skip the per-write asymmetric visibility check. */
+static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, const zend_property_info **info_ptr, bool write_access) /* {{{ */
 {
 	zval *zv;
 	zend_property_info *property_info;
@@ -440,6 +448,27 @@ found:
 		return ZEND_DYNAMIC_PROPERTY_OFFSET;
 	}
 
+	if (write_access
+	 && UNEXPECTED(flags & ZEND_ACC_PPP_SET_MASK)
+	 && !(flags & ZEND_ACC_PUBLIC_SET)) {
+		const zend_class_entry *scope = get_fake_or_executed_scope();
+
+		if (property_info->ce != scope
+		 && (!(flags & ZEND_ACC_PROTECTED_SET)
+			|| !is_protected_compatible_scope(property_info->prototype->ce, scope))) {
+			/* Set access denied for this scope: resolve as usual, but keep
+			 * the cache slot empty so every such write stays on the slow
+			 * path with its state-dependent handling. Invalidate the key
+			 * too: downstream code (e.g. the hooked simple-write marking)
+			 * assumes resolution populated the slot and would otherwise
+			 * flag a stale polymorphic entry. */
+			if (cache_slot) {
+				CACHE_PTR_EX(cache_slot, NULL);
+				cache_slot = NULL;
+			}
+		}
+	}
+
 	if (property_info->hooks) {
 		*info_ptr = property_info;
 		if (cache_slot) {
@@ -468,7 +497,7 @@ static ZEND_COLD void zend_wrong_offset(zend_class_entry *ce, zend_string *membe
 	const zend_property_info *dummy;
 
 	/* Trigger the correct error */
-	zend_get_property_offset(ce, member, 0, NULL, &dummy);
+	zend_get_property_offset(ce, member, 0, NULL, &dummy, false);
 }
 /* }}} */
 
@@ -749,7 +778,7 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 #endif
 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
-	property_offset = zend_get_property_offset(zobj->ce, name, (type == BP_VAR_IS) || (zobj->ce->__get != NULL), cache_slot, &prop_info);
+	property_offset = zend_get_property_offset(zobj->ce, name, (type == BP_VAR_IS) || (zobj->ce->__get != NULL), cache_slot, &prop_info, false);
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 try_again:
@@ -1072,7 +1101,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 	uint32_t *guard = NULL;
 	ZEND_ASSERT(!Z_ISREF_P(value));
 
-	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__set != NULL), cache_slot, &prop_info);
+	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__set != NULL), cache_slot, &prop_info, true);
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 try_again:
@@ -1434,7 +1463,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 	fprintf(stderr, "Ptr object #%d property: %s\n", zobj->handle, ZSTR_VAL(name));
 #endif
 
-	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__get != NULL), cache_slot, &prop_info);
+	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__get != NULL), cache_slot, &prop_info, true);
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 try_again:
@@ -1562,7 +1591,7 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 	const zend_property_info *prop_info = NULL;
 	uint32_t *guard = NULL;
 
-	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__unset != NULL), cache_slot, &prop_info);
+	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__unset != NULL), cache_slot, &prop_info, true);
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		zval *slot = OBJ_PROP(zobj, property_offset);
@@ -2372,7 +2401,7 @@ ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has
 	uintptr_t property_offset;
 	const zend_property_info *prop_info = NULL;
 
-	property_offset = zend_get_property_offset(zobj->ce, name, 1, cache_slot, &prop_info);
+	property_offset = zend_get_property_offset(zobj->ce, name, 1, cache_slot, &prop_info, false);
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 try_again:
