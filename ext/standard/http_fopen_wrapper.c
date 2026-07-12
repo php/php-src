@@ -33,13 +33,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef PHP_WIN32
-#define O_RDONLY _O_RDONLY
-#include "win32/param.h"
-#else
-#include <sys/param.h>
-#endif
-
 #include "php_standard.h"
 
 #ifdef HAVE_SYS_SOCKET_H

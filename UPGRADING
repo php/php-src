@@ -32,6 +32,11 @@ PHP 8.6 UPGRADE NOTES
     from global scope" instead of the prior readonly modification error.
     ReflectionProperty::isWritable() also reports these properties
     accurately.
+  . Array access on Dom\DtdNamedNodeMap objects now returns null for negative
+    integer indexes instead of returning the first node.
+  . Array access on Dom\DtdNamedNodeMap objects now raises a ValueError when
+    the integer index is greater than INT_MAX instead of overflowing to a
+    smaller index.
 
 - GD:
   . imagesetstyle(), imagefilter() and imagecrop() filter their array arguments
@@ -40,6 +45,9 @@ PHP 8.6 UPGRADE NOTES
 - Intl:
   . Passing a non-stringable object as a time zone to Intl APIs that accept
     time zone objects or strings now raises a TypeError instead of an Error.
+  . IntlIterator::current() now returns null when called before the iterator is
+    positioned, or after the iterator becomes invalid, instead of exposing an
+    undefined value.
   . IntlBreakIterator::getLocale() now raises a ValueError when the type is
     neither Locale::ACTUAL_LOCALE nor Locale::VALID_LOCALE instead of
     returning false.
@@ -53,6 +61,10 @@ PHP 8.6 UPGRADE NOTES
   . ResourceBundle::get() and resourcebundle_get() now report fallback-disabled
     resource lookups with "without fallback to <locale>" instead of the
     malformed "without fallback from to <locale>".
+  . IntlDateFormatter::parse()/datefmt_parse() and
+    IntlDateFormatter::localtime()/datefmt_localtime() now raise a TypeError
+    when the offset argument is not of type int instead of silently converting
+    the value.
 
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
@@ -126,6 +138,11 @@ PHP 8.6 UPGRADE NOTES
         to 1).
     RFC: https://wiki.php.net/rfc/session_security_defaults
 
+- Shmop:
+  . shmop_open() now raises a ValueError when the $key argument is outside the
+    platform's key_t range instead of passing a truncated key to the operating
+    system.
+
 - SOAP:
   . WSDL/XML Schema parsing now rejects out-of-range integer values for
     occurrence constraints and integer restriction facets. Negative minOccurs
@@ -174,12 +191,28 @@ PHP 8.6 UPGRADE NOTES
     passed.
   . scandir() now raises a ValueError when an invalid $sorting_order argument
     value is passed.
+  . number_format() now raises a ValueError when $decimals is outside the
+    integer range instead of silently clamping very large positive values.
+  . sleep() now raises a ValueError when $seconds is greater than the platform
+    limit (UINT_MAX seconds, or UINT_MAX / 1000 seconds on Windows) instead of
+    allowing the value to overflow.
+  . usleep() now raises a ValueError when $microseconds is greater than
+    UINT_MAX instead of allowing the value to overflow.
   . proc_open() now raises a ValueError when the $cwd argument contains NUL
     bytes.
+
+- Sysvshm:
+  . shm_attach() now raises a ValueError when the $key argument is outside the
+    platform's key_t range instead of passing a truncated key to the operating
+    system.
 
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the files argument if one
     or more of the entries is not a string.
+  . ZipArchive::addGlob() and ZipArchive::addPattern() now raise a TypeError
+    when the "remove_all_path" option is not of type bool, or when the
+    "comp_method", "comp_flags", or "enc_method" options are not of type int
+    (numeric strings are coerced), instead of emitting a warning.
 
 - Zlib:
   . deflate_init() now raises a TypeError when the value for option "level",
@@ -196,6 +229,8 @@ PHP 8.6 UPGRADE NOTES
     needing to be present beforehand.
   . It is now possible to define the __debugInfo() magic method on enums.
     RFC: https://wiki.php.net/rfc/debugable-enums
+  . #[\Override] can now be applied to class constants, including enum cases.
+    RFC: https://wiki.php.net/rfc/override_constants
 
 - Curl:
   . curl_getinfo() return array now includes a new size_delivered key, which
@@ -203,11 +238,21 @@ PHP 8.6 UPGRADE NOTES
     This value can also be obtained by passing CURLINFO_SIZE_DELIVERED as the
     $option parameter.
     Requires libcurl 8.20.0 or later.
+  . Added CURLOPT_SEEKFUNCTION to register a callback that repositions a
+    streamed request body so libcurl can rewind and resend it on a redirect,
+    multi-pass authentication, or a retried reused connection instead of
+    failing with CURLE_SEND_FAIL_REWIND. The callback receives the CurlHandle,
+    offset and origin, and must return one of CURL_SEEKFUNC_OK,
+    CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK.
 
 - Fileinfo:
   . finfo_file() now works with remote streams.
 
 - Intl:
+  . Added Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue(),
+    with the alias of locale_get_display_keyword() and
+    locale_get_display_keyword_value() respectively.
+    RFC: https://wiki.php.net/rfc/getdisplaykeyword_and_getdisplaykeywordvalue
   . Added IntlNumberRangeFormatter class to format an interval of two numbers
     with a given skeleton, locale, IntlNumberRangeFormatter::COLLAPSE_AUTO,
     IntlNumberRangeFormatter::COLLAPSE_NONE,
@@ -272,6 +317,10 @@ PHP 8.6 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- CLI:
+  . The built-in development server now accepts requests using the QUERY HTTP
+    method instead of returning 501 Not Implemented.
+
 ========================================
 4. Deprecated Functionality
 ========================================
@@ -279,6 +328,10 @@ PHP 8.6 UPGRADE NOTES
 - Core:
   . Specifying a return type of array|null / ?array for __debugInfo() is now
     deprecated. Specify array instead.
+  . Returning values from __construct() and __destruct() is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecate-return-value-from-construct
+  . Making __construct() and __destruct() a Generator is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecate-return-value-from-construct
 
 - GMP
   . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
@@ -420,6 +473,10 @@ PHP 8.6 UPGRADE NOTES
 
 - Curl:
   . CURLINFO_SIZE_DELIVERED (libcurl >= 8.20.0).
+  . CURLOPT_SEEKFUNCTION.
+  . CURL_SEEKFUNC_OK.
+  . CURL_SEEKFUNC_FAIL.
+  . CURL_SEEKFUNC_CANTSEEK.
 
 - Sockets:
   . TCP_USER_TIMEOUT (Linux only).

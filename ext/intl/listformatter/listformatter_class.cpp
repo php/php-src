@@ -83,7 +83,7 @@ PHP_METHOD(IntlListFormatter, __construct)
         locale = (char *)intl_locale_get_default();
     }
 
-    if (locale_len > INTL_MAX_LOCALE_LEN) {
+    if (UNEXPECTED(locale_len > INTL_MAX_LOCALE_LEN)) {
         zend_argument_value_error(1, "must be less than or equal to %d characters", INTL_MAX_LOCALE_LEN);
         RETURN_THROWS();
     }

@@ -82,6 +82,7 @@ static const char *method_strings[] =
   , "POST"
   , "PUT"
   , "PATCH"
+  , "QUERY"
   , "CONNECT"
   , "OPTIONS"
   , "TRACE"
@@ -521,6 +522,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case 'N': parser->method = PHP_HTTP_NOTIFY; break;
           case 'O': parser->method = PHP_HTTP_OPTIONS; break;
           case 'P': parser->method = PHP_HTTP_POST; /* or PROPFIND or PROPPATCH or PUT */ break;
+          case 'Q': parser->method = PHP_HTTP_QUERY; break;
           case 'R': parser->method = PHP_HTTP_REPORT; break;
           case 'S': parser->method = PHP_HTTP_SUBSCRIBE; /* or SEARCH */ break;
           case 'T': parser->method = PHP_HTTP_TRACE; break;

@@ -108,7 +108,7 @@ static zend_result resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		locale = (char *)intl_locale_get_default();
 	}
 
-	if (bundlename_len >= MAXPATHLEN) {
+	if (UNEXPECTED(bundlename_len >= MAXPATHLEN)) {
 		zend_argument_value_error(2, "is too long");
 		return FAILURE;
 	}
@@ -349,7 +349,7 @@ U_CFUNC PHP_FUNCTION( resourcebundle_locales )
 		Z_PARAM_STRING(bundlename, bundlename_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (bundlename_len >= MAXPATHLEN) {
+	if (UNEXPECTED(bundlename_len >= MAXPATHLEN)) {
 		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}

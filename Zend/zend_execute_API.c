@@ -861,6 +861,14 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 		}
 	}
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		zend_release_fcall_info_cache(fci_cache);
+		return SUCCESS;
+	}
+#endif
+
 	call = zend_vm_stack_push_call_frame(call_info,
 		func, fci->param_count, object_or_called_scope);
 	uint32_t consumed_args = fci->param_count ? fci->consumed_args : 0;

@@ -197,7 +197,7 @@ typedef zend_mm_bitset zend_mm_page_map[ZEND_MM_PAGE_MAP_LEN];     /* 64B */
 #define ZEND_MM_SRUN_BIN_NUM_MASK        0x0000001f
 #define ZEND_MM_SRUN_BIN_NUM_OFFSET      0
 
-#define ZEND_MM_SRUN_FREE_COUNTER_MASK   0x01ff0000
+#define ZEND_MM_SRUN_FREE_COUNTER_MASK   0x03ff0000
 #define ZEND_MM_SRUN_FREE_COUNTER_OFFSET 16
 
 #define ZEND_MM_NRUN_OFFSET_MASK         0x01ff0000

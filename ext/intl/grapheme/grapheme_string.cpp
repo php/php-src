@@ -104,7 +104,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strpos)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
+	if (UNEXPECTED(OUTSIDE_STRING(loffset, haystack_len))) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
@@ -158,7 +158,7 @@ U_CFUNC PHP_FUNCTION(grapheme_stripos)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
+	if (UNEXPECTED(OUTSIDE_STRING(loffset, haystack_len))) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
@@ -224,7 +224,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strrpos)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
+	if (UNEXPECTED(OUTSIDE_STRING(loffset, haystack_len))) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
@@ -283,7 +283,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strripos)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
+	if (UNEXPECTED(OUTSIDE_STRING(loffset, haystack_len))) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
@@ -358,7 +358,7 @@ U_CFUNC PHP_FUNCTION(grapheme_substr)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (lstart < INT32_MIN || lstart > INT32_MAX) {
+	if (UNEXPECTED(lstart < INT32_MIN || lstart > INT32_MAX)) {
 		zend_argument_value_error(2, "is too large");
 		RETURN_THROWS();
 	}
@@ -369,7 +369,7 @@ U_CFUNC PHP_FUNCTION(grapheme_substr)
 		length = str_len;
 	}
 
-	if (length < INT32_MIN || length > INT32_MAX) {
+	if (UNEXPECTED(length < INT32_MIN || length > INT32_MAX)) {
 		zend_argument_value_error(3, "is too large");
 		RETURN_THROWS();
 	}
@@ -758,17 +758,17 @@ U_CFUNC PHP_FUNCTION(grapheme_extract)
 		RETURN_THROWS();
 	}
 
-	if ( lstart > INT32_MAX || lstart < 0 || (size_t)lstart >= str_len ) {
+	if (UNEXPECTED(lstart > INT32_MAX || lstart < 0 || (size_t)lstart >= str_len)) {
 		intl_error_set( nullptr, U_ILLEGAL_ARGUMENT_ERROR, "start not contained in string");
 		RETURN_FALSE;
 	}
 
-	if (size < 0) {
+	if (UNEXPECTED(size < 0)) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
-	if (size > INT32_MAX) {
+	if (UNEXPECTED(size > INT32_MAX)) {
 		zend_argument_value_error(2, "is too large");
 		RETURN_THROWS();
 	}
@@ -864,7 +864,7 @@ U_CFUNC PHP_FUNCTION(grapheme_str_split)
 		Z_PARAM_LONG(split_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (split_len <= 0 || split_len > UINT_MAX / 4) {
+	if (UNEXPECTED(split_len <= 0 || split_len > UINT_MAX / 4)) {
 		zend_argument_value_error(2, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
 		RETURN_THROWS();
 	}
@@ -943,17 +943,17 @@ U_CFUNC PHP_FUNCTION(grapheme_levenshtein)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (cost_ins <= 0 || cost_ins > UINT_MAX / 4) {
+	if (UNEXPECTED(cost_ins <= 0 || cost_ins > UINT_MAX / 4)) {
 		zend_argument_value_error(3, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
 		RETURN_THROWS();
 	}
 
-	if (cost_rep <= 0 || cost_rep > UINT_MAX / 4) {
+	if (UNEXPECTED(cost_rep <= 0 || cost_rep > UINT_MAX / 4)) {
 		zend_argument_value_error(4, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
 		RETURN_THROWS();
 	}
 
-	if (cost_del <= 0 || cost_del > UINT_MAX / 4) {
+	if (UNEXPECTED(cost_del <= 0 || cost_del > UINT_MAX / 4)) {
 		zend_argument_value_error(5, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
 		RETURN_THROWS();
 	}

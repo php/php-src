@@ -93,7 +93,7 @@
 #define HAVE_SEC_LEVEL 1
 #endif
 
-#ifndef OPENSSL_NO_SSL3
+#if OPENSSL_VERSION_NUMBER < 0x40000000L && !defined(OPENSSL_NO_SSL3)
 #define HAVE_SSL3 1
 #define PHP_OPENSSL_MIN_PROTO_VERSION STREAM_CRYPTO_METHOD_SSLv3
 #else
@@ -274,7 +274,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 			errno = EAGAIN;
 			retry = is_init ? true : sslsock->s.is_blocked;
 			if (!retry) {
-				sslsock->last_status = err == SSL_ERROR_WANT_READ ? 
+				sslsock->last_status = err == SSL_ERROR_WANT_READ ?
 						STREAM_CRYPTO_STATUS_WANT_READ : STREAM_CRYPTO_STATUS_WANT_WRITE;
 			}
 			break;
@@ -566,25 +566,49 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 
 static bool php_openssl_matches_common_name(php_stream *stream, const X509 *peer, const char *subject_name) /* {{{ */
 {
-	char buf[1024];
-	X509_NAME *cert_name;
+	unsigned char *cert_name = NULL;
+#if PHP_OPENSSL_API_VERSION < 0x30000
+	X509_NAME *name;
+#else
+	const X509_NAME *name;
+#endif
+	const X509_NAME_ENTRY *name_entry;
+	const ASN1_STRING *name_asn1;
 	bool is_match = false;
+	int name_index;
 	int cert_name_len;
 
-	cert_name = X509_get_subject_name(peer);
-	cert_name_len = X509_NAME_get_text_by_NID(cert_name, NID_commonName, buf, sizeof(buf));
-
-	if (cert_name_len == -1) {
+	name = X509_get_subject_name(peer);
+	name_index = X509_NAME_get_index_by_NID(name, NID_commonName, -1);
+	if (name_index == -1) {
 		php_stream_warn(stream, NetworkRecvFailed, "Unable to locate peer certificate CN");
-	} else if ((size_t)cert_name_len != strlen(buf)) {
-		php_stream_warn(stream, AuthFailed, "Peer certificate CN=`%.*s' is malformed", cert_name_len, buf);
-	} else if (php_openssl_matches_wildcard_name(subject_name, buf)) {
+		return false;
+	}
+
+	name_entry = X509_NAME_get_entry(name, name_index);
+	if (name_entry == NULL) {
+		php_stream_warn(stream, NetworkRecvFailed, "Unable to locate peer certificate CN");
+		return false;
+	}
+	name_asn1 = X509_NAME_ENTRY_get_data(name_entry);
+	cert_name_len = ASN1_STRING_length(name_asn1);
+	cert_name = (unsigned char *) OPENSSL_strndup((const char *) ASN1_STRING_get0_data(name_asn1), cert_name_len);
+	if (cert_name == NULL) {
+		php_stream_warn(stream, NetworkRecvFailed, "Unable to locate peer certificate CN");
+		return false;
+	}
+
+	if ((size_t)cert_name_len != strlen((const char *)cert_name)) {
+		php_stream_warn(stream, AuthFailed, "Peer certificate CN=`%.*s' is malformed", cert_name_len, (const char *)cert_name);
+	} else if (php_openssl_matches_wildcard_name(subject_name, (const char *)cert_name)) {
 		is_match = true;
 	} else {
 		php_stream_warn(stream, AuthFailed,
 			"Peer certificate CN=`%.*s' did not match expected CN=`%s'",
-			cert_name_len, buf, subject_name);
+			cert_name_len, (const char *)cert_name, subject_name);
 	}
+
+	OPENSSL_free(cert_name);
 
 	return is_match;
 }
@@ -2874,7 +2898,11 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 
 	/* Only do this if SSL is active. */
 	if (sslsock->ssl_active) {
-		int retry = 1;
+		/* We have already returned some buffered data. Don't retry and don't
+		 * block. We're just trying to fill the buffer more, but the stream might
+		 * be empty, so we don't want to wait in vain. */
+		bool supplemental = stream->has_buffered_data;
+		int retry = !supplemental;
 		struct timeval start_time;
 		struct timeval *timeout = NULL;
 		bool began_blocked = sslsock->s.is_blocked;
@@ -2887,11 +2915,11 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 		}
 
 		/* never use a timeout with non-blocking sockets */
-		if (began_blocked) {
+		if (began_blocked && !supplemental) {
 			timeout = &sslsock->s.timeout;
 		}
 
-		if (timeout) {
+		if (timeout || supplemental) {
 			php_openssl_set_blocking(sslsock, 0);
 		}
 
@@ -2966,7 +2994,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 				}
 
 				/* Don't loop indefinitely in non-blocking mode if no data is available */
-				if (began_blocked == 0) {
+				if (began_blocked == 0 || supplemental) {
 					break;
 				}
 
@@ -3013,6 +3041,16 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 		/* Tell PHP if we read / wrote bytes. */
 		if (nr_bytes > 0) {
 			php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
+		}
+
+		/* This might be a supplemental read after consuming buffered data. If
+		 * the read returned nothing, ignore status WANT_READ. */
+		if (read &&
+			supplemental &&
+			nr_bytes <= 0 &&
+			sslsock->last_status == STREAM_CRYPTO_STATUS_WANT_READ
+		) {
+			sslsock->last_status = STREAM_CRYPTO_STATUS_NONE;
 		}
 
 		/* And if we were originally supposed to be blocking, let's reset the socket to that. */

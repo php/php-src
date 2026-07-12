@@ -50,7 +50,6 @@
 #include "ext/standard/basic_functions.h"
 
 #ifdef ZEND_WIN32
-# include "ext/hash/php_hash.h"
 # include "ext/standard/md5.h"
 #endif
 
@@ -2532,7 +2531,7 @@ static zend_result accel_gen_uname_id(void)
 	PHP_MD5Update(&ctx, (void *) uname, (unsize - 1) * sizeof(wchar_t));
 	PHP_MD5Update(&ctx, ZCG(accel_directives).cache_id, strlen(ZCG(accel_directives).cache_id));
 	PHP_MD5Final(digest, &ctx);
-	php_hash_bin2hex(accel_uname_id, digest, sizeof digest);
+	zend_bin2hex(accel_uname_id, digest, sizeof digest);
 	return SUCCESS;
 }
 #endif
@@ -3847,9 +3846,7 @@ static zend_result preload_resolve_deps(preload_error *error, const zend_class_e
 	memset(error, 0, sizeof(preload_error));
 
 	if (ce->parent_name) {
-		zend_string *key = zend_string_tolower(ce->parent_name);
-		const zend_class_entry *parent = zend_hash_find_ptr(EG(class_table), key);
-		zend_string_release(key);
+		const zend_class_entry *parent = zend_hash_find_ptr_lc(EG(class_table), ce->parent_name);
 		if (!parent) {
 			error->kind = "Unknown parent ";
 			error->name = ZSTR_VAL(ce->parent_name);
@@ -4379,6 +4376,7 @@ static void preload_fix_trait_op_array(zend_op_array *op_array)
 	uint32_t fn_flags2 = op_array->fn_flags2;
 	zend_function *prototype = op_array->prototype;
 	HashTable *ht = op_array->static_variables;
+	const zend_property_info *prop_info = op_array->prop_info;
 	*op_array = *orig_op_array;
 	op_array->function_name = function_name;
 	op_array->scope = scope;
@@ -4386,6 +4384,7 @@ static void preload_fix_trait_op_array(zend_op_array *op_array)
 	op_array->fn_flags2 = fn_flags2;
 	op_array->prototype = prototype;
 	op_array->static_variables = ht;
+	op_array->prop_info = prop_info;
 }
 
 static void preload_fix_trait_methods(const zend_class_entry *ce)

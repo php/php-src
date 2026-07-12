@@ -1484,7 +1484,6 @@ static zend_function *dbh_method_get(zend_object **object, zend_string *method_n
 {
 	zend_function *fbc = NULL;
 	pdo_dbh_object_t *dbh_obj = php_pdo_dbh_fetch_object(*object);
-	zend_string *lc_method_name;
 
 	if ((fbc = zend_std_get_method(object, method_name, key)) == NULL) {
 		/* not a pre-defined method, nor a user-defined method; check
@@ -1497,9 +1496,7 @@ static zend_function *dbh_method_get(zend_object **object, zend_string *method_n
 			}
 		}
 
-		lc_method_name = zend_string_tolower(method_name);
-		fbc = zend_hash_find_ptr(dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH], lc_method_name);
-		zend_string_release_ex(lc_method_name, 0);
+		fbc = zend_hash_find_ptr_lc(dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH], method_name);
 	}
 
 out:

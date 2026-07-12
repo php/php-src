@@ -106,7 +106,7 @@ char* canonicalize_locale_string(const char* locale) {
 
 	canonicalized_len = uloc_canonicalize(locale, canonicalized, sizeof(canonicalized), &status);
 
-	if (U_FAILURE(status) || canonicalized_len <= 0) {
+	if (UNEXPECTED(U_FAILURE(status) || canonicalized_len <= 0)) {
 		return NULL;
 	}
 

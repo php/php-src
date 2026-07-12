@@ -395,29 +395,20 @@ PHPDBG_API void phpdbg_set_async_io(int fd) {
 
 int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry **ce) {
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
-		char *lc_name, *lc_free;
-		int lc_length;
-
 		if (name == NULL || !name_length) {
 			return FAILURE;
 		}
 
-		lc_free = lc_name = emalloc(name_length + 1);
-		zend_str_tolower_copy(lc_name, name, name_length);
-		lc_length = name_length + 1;
-
-		if (lc_name[0] == '\\') {
-			lc_name += 1;
-			lc_length -= 1;
+		if (name[0] == '\\') {
+			name += 1;
+			name_length -= 1;
 		}
 
 		phpdbg_try_access {
-			*ce = zend_hash_str_find_ptr(EG(class_table), lc_name, lc_length);
+			*ce = zend_hash_str_find_ptr_lc(EG(class_table), name, name_length);
 		} phpdbg_catch_access {
 			phpdbg_error("Could not fetch class %.*s, invalid data source", name_length, name);
 		} phpdbg_end_try_access();
-
-		efree(lc_free);
 	} else {
 		zend_string *str_name = zend_string_init(name, name_length, 0);
 		*ce = zend_lookup_class(str_name);
