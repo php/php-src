@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     containing NUL). (iliaal)
   . Fixed bug GH-22206 (missing return in global register detection).
     (P3p111n0)
+  . Lock unmodified readonly properties for modification after clone-with.
+    (NickSdot)
 
 - Calendar:
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
