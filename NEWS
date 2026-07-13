@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-15672 and GH-15911 (Stack overflow when an internal function
     recurses through zend_call_function, such as a self-attached SPL
     iterator). (iliaal)
+  . Lock unmodified readonly properties for modification after clone-with.
+    (NickSdot)
 
 - Calendar:
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
