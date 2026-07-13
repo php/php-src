@@ -77,7 +77,8 @@ static void dom_xpath_proxy_factory(xmlNodePtr node, zval *child, dom_object *in
 
 	ZEND_ASSERT(node->type != XML_NAMESPACE_DECL);
 
-	php_dom_create_object(node, child, intern);
+	dom_xpath_object *xobj = php_xpath_obj_from_obj(&intern->std);
+	php_dom_create_object(node, child, dom_xpath_intern_for_doc(xobj, node->doc));
 }
 
 static dom_xpath_object *dom_xpath_ext_fetch_intern(xmlXPathParserContextPtr ctxt)

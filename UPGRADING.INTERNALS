@@ -173,6 +173,14 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . php_idate() now returns the result state, and moves the return value into an
     out parameter.
 
+- ext/intl:
+  . Added intl_icu_compat.h with helpers and feature macros for ICU
+    version-specific API differences. Code in ext/intl should use the
+    intl_icu_compat_* helpers and INTL_ICU_HAS_* macros instead of adding
+    direct U_ICU_VERSION_* guards for supported ICU API variants.
+  . The internal grapheme_get_break_iterator() helper no longer accepts a
+    stack buffer argument; pass only the UErrorCode* status argument.
+
 - ext/mbstring:
   . Added GB18030-2022 to default encoding list for zh-CN.
 

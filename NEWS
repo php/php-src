@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-15672 and GH-15911 (Stack overflow when an internal function
     recurses through zend_call_function, such as a self-attached SPL
     iterator). (iliaal)
+  . Lock unmodified readonly properties for modification after clone-with.
+    (NickSdot)
 
 - Calendar:
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
@@ -41,6 +43,8 @@ PHP                                                                        NEWS
     returning the first entity or notation. (Weilin Du)
   . Fixed bug GH-22623 (use after free with namespace nodes from
     XSLTProcessor::registerFunctions())/ (David Carlier)
+  . Fixed bug GH-22554 (use-after-free with XPath callback returning a node
+    from a foreign document). (David Carlier)
 
 - Exif:
   . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
@@ -95,6 +99,8 @@ PHP                                                                        NEWS
     unsigned int timeout. (Weilin Du)
   . Fixed bug GH-22671 (assert.bail aborts the process when the assert callback
     throws an exception whose reporting re-throws). (iliaal)
+  . Fixed bug GH-22678 (Use-after-free in array_multisort() when the comparator
+    mutates the array being sorted). (azchin, iliaal)
 
 - Streams:
   . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
