@@ -102,6 +102,13 @@ static zend_always_inline void soap_encoding_error_invalid_hex_length(encodeType
 	soap_error1(E_ERROR, "Encoding: Type '%s' value must contain an even number of hexadecimal digits", soap_type_name(type));
 }
 
+static zend_always_inline void soap_encoding_error_invalid_list_item(encodeTypePtr type, encodeTypePtr item_type)
+{
+	soap_error2(E_ERROR,
+		"Encoding: Failed to encode list item of type '%s' for list type '%s'",
+		soap_type_name(item_type), soap_type_name(type));
+}
+
 static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *out_type);
 
 static xmlNodePtr check_and_resolve_href(xmlNodePtr data);
@@ -765,13 +772,13 @@ static zval *to_zval_base64(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			whiteSpace_collapse(data->children->content);
 			str = php_base64_decode(data->children->content, strlen((char*)data->children->content));
 			if (!str) {
-				soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+				soap_encoding_error_invalid_value(type);
 			}
 			ZVAL_STR(ret, str);
 		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
 			str = php_base64_decode(data->children->content, strlen((char*)data->children->content));
 			if (!str) {
-				soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+				soap_encoding_error_invalid_value(type);
 			}
 			ZVAL_STR(ret, str);
 		} else {
@@ -3116,7 +3123,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 				}
 				smart_str_appends(&list, (char*)dummy->children->content);
 			} else {
-				soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+				soap_encoding_error_invalid_list_item(enc, &list_enc->details);
 			}
 			xmlUnlinkNode(dummy);
 			xmlFreeNode(dummy);
@@ -3158,7 +3165,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 				}
 				smart_str_appends(&list, (char*)dummy->children->content);
 			} else {
-				soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+				soap_encoding_error_invalid_list_item(enc, &list_enc->details);
 			}
 			xmlUnlinkNode(dummy);
 			xmlFreeNode(dummy);
