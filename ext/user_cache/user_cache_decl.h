@@ -1,0 +1,19 @@
+/* This is a generated file, edit user_cache.stub.php instead.
+ * Stub hash: f475d675d1f7d8fc96ecc58b290107267010d958 */
+
+#ifndef ZEND_USER_CACHE_DECL_f475d675d1f7d8fc96ecc58b290107267010d958_H
+#define ZEND_USER_CACHE_DECL_f475d675d1f7d8fc96ecc58b290107267010d958_H
+
+typedef enum zend_enum_UserCache_CacheAvailability {
+	ZEND_ENUM_UserCache_CacheAvailability_Available = 1,
+	ZEND_ENUM_UserCache_CacheAvailability_DisabledByIni = 2,
+	ZEND_ENUM_UserCache_CacheAvailability_DisabledBySapi = 3,
+	ZEND_ENUM_UserCache_CacheAvailability_UnavailableBySharedMemoryInitializationFailed = 4,
+	ZEND_ENUM_UserCache_CacheAvailability_UnavailableByBackendNotInitializedBeforeWorkerStartup = 5,
+	ZEND_ENUM_UserCache_CacheAvailability_UnavailableByBackendInitializedAfterWorkerStartup = 6,
+	ZEND_ENUM_UserCache_CacheAvailability_UnavailableByCgiFastCgiBoundary = 7,
+	ZEND_ENUM_UserCache_CacheAvailability_UnavailableByLsapiBoundary = 8,
+	ZEND_ENUM_UserCache_CacheAvailability_UnavailableByUnknownReason = 9,
+} zend_enum_UserCache_CacheAvailability;
+
+#endif /* ZEND_USER_CACHE_DECL_f475d675d1f7d8fc96ecc58b290107267010d958_H */
