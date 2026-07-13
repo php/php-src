@@ -1,7 +1,7 @@
 --TEST--
-Html\Htmlable: the injected default __toString() survives opcache (arena-allocated internal method)
+Markup\Html: the injected default __toString() survives opcache (arena-allocated internal method)
 --EXTENSIONS--
-html
+markup
 --SKIPIF--
 <?php if (!extension_loaded('Zend OPcache')) die('skip opcache not loaded'); ?>
 --INI--
@@ -11,9 +11,9 @@ opcache.enable_cli=1
 <?php
 declare(strict_types=1);
 
-class Card implements Html\Htmlable {
+class Card implements Markup\Html {
     public function __construct(private string $title) {}
-    public function toHtml(): Html\Htmlable {
+    public function toHtml(): Markup\Html {
         return <div class="card">{$this->title}</div>;
     }
 }

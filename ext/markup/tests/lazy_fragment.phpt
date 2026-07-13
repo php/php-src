@@ -1,17 +1,17 @@
 --TEST--
-Markup syntax: the `:lazy` directive defers slot evaluation via Html\LazyFragment
+Markup syntax: the `:lazy` directive defers slot evaluation via Markup\LazyFragment
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
-use Html\Element as E;
+use Markup\Element as E;
 
 // An Auth component that renders its body only when "logged in". With `:lazy`
 // the body is never evaluated when discarded.
-class Auth implements Html\Htmlable {
-    public function __construct(public bool $check, #[Html\Slot] public ?Html\Htmlable $slot = null) {}
-    public function toHtml(): Html\Htmlable {
-        return $this->check ? new E('div', [], [$this->slot]) : new Html\Fragment([]);
+class Auth implements Markup\Html {
+    public function __construct(public bool $check, #[Markup\Slot] public ?Markup\Html $slot = null) {}
+    public function toHtml(): Markup\Html {
+        return $this->check ? new E('div', [], [$this->slot]) : new Markup\Fragment([]);
     }
 }
 
@@ -24,10 +24,10 @@ var_dump($evaluated); // 0 - never evaluated
 
 // Logged in: the body evaluates exactly once, even though a component could
 // in principle render its slot twice (LazyFragment memoizes).
-class Twice implements Html\Htmlable {
-    public function __construct(#[Html\Slot] public Html\Htmlable $slot) {}
-    public function toHtml(): Html\Htmlable {
-        return new Html\Fragment([$this->slot, $this->slot]);
+class Twice implements Markup\Html {
+    public function __construct(#[Markup\Slot] public Markup\Html $slot) {}
+    public function toHtml(): Markup\Html {
+        return new Markup\Fragment([$this->slot, $this->slot]);
     }
 }
 $evaluated = 0;
@@ -39,15 +39,15 @@ $evaluated = 0;
 echo <Auth check={false}>Hello {track()}</Auth>, "\n";
 var_dump($evaluated); // 1 - evaluated eagerly
 
-// The lowered value is an Html\LazyFragment that is itself an Html\Htmlable.
-$lazy = new Html\LazyFragment(fn() => new E('span', [], ['built']));
-var_dump($lazy instanceof Html\Htmlable);
-var_dump($lazy->toHtml() instanceof Html\Element);
+// The lowered value is a Markup\LazyFragment that is itself a Markup\Html.
+$lazy = new Markup\LazyFragment(fn() => new E('span', [], ['built']));
+var_dump($lazy instanceof Markup\Html);
+var_dump($lazy->toHtml() instanceof Markup\Element);
 echo $lazy, "\n";
 
-// The thunk must return an Html\Htmlable.
+// The thunk must return a Markup\Html.
 try {
-    (new Html\LazyFragment(fn() => 'nope'))->toHtml();
+    (new Markup\LazyFragment(fn() => 'nope'))->toHtml();
 } catch (\Error $e) {
     echo $e->getMessage(), "\n";
 }
@@ -62,4 +62,4 @@ int(1)
 bool(true)
 bool(true)
 <span>built</span>
-Html\LazyFragment thunk must return an Html\Htmlable
+Markup\LazyFragment thunk must return a Markup\Html

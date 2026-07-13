@@ -1,10 +1,10 @@
 --TEST--
 Markup syntax: attributes - literal/{expr}/bare-boolean with coercion, {...spread}, ":"/"@" prefixed names
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
-use Html\Element as E;
+use Markup\Element as E;
 
 // --- literal, {expr}, bare boolean attributes with coercion ---
 $url = "/x?a=1&b=2";
@@ -33,9 +33,9 @@ echo (<a {...['class' => 'base']} class="explicit">x</a>)->__toString(), "\n";
 
 // --- {...$attrs} spread: components (named args) ---
 // Component: spread becomes named arguments (props).
-class Card implements Html\Htmlable {
+class Card implements Markup\Html {
     public function __construct(public string $title, public string $tone = 'plain') {}
-    public function toHtml(): Html\Htmlable {
+    public function toHtml(): Markup\Html {
         return new E('div', ['class' => 'card-' . $this->tone], [$this->title]);
     }
 }
@@ -44,10 +44,10 @@ echo (<Card {...$props}/>)->__toString(), "\n";
 echo (<Card title="Explicit" {...['tone' => 'soft']}/>)->__toString(), "\n";
 
 // A component variadic collects unknown (e.g. hyphenated) spread keys.
-class Box implements Html\Htmlable {
+class Box implements Markup\Html {
     private array $attrs;
     public function __construct(public string $kind, ...$attrs) { $this->attrs = $attrs; }
-    public function toHtml(): Html\Htmlable {
+    public function toHtml(): Markup\Html {
         return new E('div', ['class' => $this->kind, ...$this->attrs], ['box']);
     }
 }
@@ -66,14 +66,14 @@ echo <input @keydown.escape="close()" :aria-label="label"/>, "\n";
 // Prefixed keys also pass the runtime name validation: spread and new Element.
 $attrs = ['@click' => 'save()', ':class' => 'cls'];
 echo <span {...$attrs}>s</span>, "\n";
-echo new Html\Element('i', ['@x' => '1'], []), "\n";
+echo new Markup\Element('i', ['@x' => '1'], []), "\n";
 
 // On a component the names were never valid named-argument labels, so - like
 // data-* - they are collected by a variadic.
-class Btn implements Html\Htmlable {
+class Btn implements Markup\Html {
     private array $attrs;
     public function __construct(public string $label, ...$attrs) { $this->attrs = $attrs; }
-    public function toHtml(): Html\Htmlable {
+    public function toHtml(): Markup\Html {
         return <button {...$this->attrs}>{$this->label}</button>;
     }
 }

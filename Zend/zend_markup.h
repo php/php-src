@@ -23,27 +23,27 @@
 /* The fully-qualified names that Native Markup Expressions
  * lowers into. This is the single home for the markup-to-runtime vocabulary:
  * the parser (Zend/zend_language_parser.y) lowers markup expressions to exactly
- * these symbols, and the ext/html runtime registers exactly them (asserted at
- * MINIT, see PHP_MINIT_FUNCTION(html)).
+ * these symbols, and the ext/markup runtime registers exactly them (asserted at
+ * MINIT, see PHP_MINIT_FUNCTION(markup)).
  *
- * Renaming the markup namespace (e.g. the open `Html\` vs `PHP\Html\` question)
+ * Renaming the markup namespace (e.g. the open `Markup\` vs `PHP\Markup\` question)
  * is a one-line edit here rather than a hunt across the parser, stub, and
- * runtime. Keep in sync with ext/html/html.stub.php, which declares the classes
+ * runtime. Keep in sync with ext/markup/html.stub.php, which declares the classes
  * and functions these names refer to. */
 
-#define ZEND_MARKUP_ELEMENT_FQ        "Html\\Element"
-#define ZEND_MARKUP_FRAGMENT_FQ       "Html\\Fragment"
-#define ZEND_MARKUP_LAZY_FRAGMENT_FQ  "Html\\LazyFragment"
-#define ZEND_MARKUP_RAW_FQ            "Html\\raw"
-#define ZEND_MARKUP_COMPONENT_FQ      "Html\\render_component"
-#define ZEND_MARKUP_DYNAMIC_FQ        "Html\\render_dynamic"
+#define ZEND_MARKUP_ELEMENT_FQ        "Markup\\Element"
+#define ZEND_MARKUP_FRAGMENT_FQ       "Markup\\Fragment"
+#define ZEND_MARKUP_LAZY_FRAGMENT_FQ  "Markup\\LazyFragment"
+#define ZEND_MARKUP_RAW_FQ            "Markup\\raw"
+#define ZEND_MARKUP_COMPONENT_FQ      "Markup\\render_component"
+#define ZEND_MARKUP_DYNAMIC_FQ        "Markup\\render_dynamic"
 
 BEGIN_EXTERN_C()
 
 /* Element vs component classification: uppercase first character,
  * a "\", or a "::" dispatches as a component; anything else is a literal HTML
  * element. The single home for this rule - the compiler applies it to static
- * tag names, and Html\render_dynamic applies it to a dynamic tag's runtime
+ * tag names, and Markup\render_dynamic applies it to a dynamic tag's runtime
  * value, so `<$tag>` decides at runtime exactly what `<tag>` decides at
  * compile time. */
 ZEND_API bool zend_markup_name_is_component(zend_string *tag);

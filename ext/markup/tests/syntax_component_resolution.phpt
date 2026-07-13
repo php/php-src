@@ -1,36 +1,36 @@
 --TEST--
 Markup syntax: compile-time component-name resolution (use aliases, qualified/fully-qualified tags, static methods)
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
 // --- component definitions ---
 namespace App\Components {
-    use Html\Element as E;
-    class Card implements \Html\Htmlable {
+    use Markup\Element as E;
+    class Card implements \Markup\Html {
         public function __construct(public string $title) {}
-        public function toHtml(): \Html\Htmlable {
+        public function toHtml(): \Markup\Html {
             return new E('div', ['class' => 'card'], [$this->title]);
         }
     }
 }
 
 namespace App {
-    class Greeting implements \Html\Htmlable {
-        public function __construct(#[\Html\Slot] public ?\Html\Htmlable $slot = null) {}
-        public function toHtml(): \Html\Htmlable {
+    class Greeting implements \Markup\Html {
+        public function __construct(#[\Markup\Slot] public ?\Markup\Html $slot = null) {}
+        public function toHtml(): \Markup\Html {
             return <p>{$this->slot}</p>;
         }
     }
-    class Card implements \Html\Htmlable {
+    class Card implements \Markup\Html {
         public function __construct(public string $title) {}
-        public function toHtml(): \Html\Htmlable {
-            return new \Html\Element('b', [], [$this->title]);
+        public function toHtml(): \Markup\Html {
+            return new \Markup\Element('b', [], [$this->title]);
         }
     }
     class Author {
-        public static function byline(string $name): \Html\Htmlable {
-            return new \Html\Element('i', [], ['By ', $name]);
+        public static function byline(string $name): \Markup\Html {
+            return new \Markup\Element('i', [], ['By ', $name]);
         }
     }
 }
@@ -68,10 +68,10 @@ namespace Views {
 
 // --- component defined and used in the current namespace ---
 namespace Other {
-    use Html\Element as E;
-    class Box implements \Html\Htmlable {
+    use Markup\Element as E;
+    class Box implements \Markup\Html {
         public function __construct(public string $label) {}
-        public function toHtml(): \Html\Htmlable { return new E('b', [], [$this->label]); }
+        public function toHtml(): \Markup\Html { return new E('b', [], [$this->label]); }
     }
     echo (<Box label="local"/>)->__toString(), "\n";
 }
@@ -97,4 +97,4 @@ namespace Wrong {
 <i>By Ada</i>
 <i>By Grace</i>
 <b>local</b>
-"Wrong\Card" is not a component: no such class implementing Html\Htmlable
+"Wrong\Card" is not a component: no such class implementing Markup\Html

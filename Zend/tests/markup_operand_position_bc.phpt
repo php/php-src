@@ -80,7 +80,7 @@ $g = gen_lt_nospace(); $g->current(); $g->send("aaa");
 // Inverse direction: in operand position (after `=`, `(`, `,`, `=>`, `return`,
 // and parenthesized after `yield`) a "<tag" IS markup. Compile-time
 // classification only - never executed, so this parses even in builds where
-// the Html\ runtime classes are unavailable.
+// the Markup\ runtime classes are unavailable.
 function never_runs() {
     $x = <div/>;
     take(<p>hi</p>, <br/>);

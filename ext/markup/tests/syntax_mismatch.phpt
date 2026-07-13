@@ -1,7 +1,7 @@
 --TEST--
 Markup syntax: a mismatched closing tag is a compile error
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
 $x = <div>oops</span>;

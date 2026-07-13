@@ -1,7 +1,7 @@
 --TEST--
 Markup syntax: the exact plain-PHP lowering, pinned via zend_ast_export (assert)
 --EXTENSIONS--
-html
+markup
 --INI--
 zend.assertions=1
 assert.exception=1
@@ -30,10 +30,10 @@ echo desugar('<><Card title="Hi" {...$attrs}><b>f</b>body</Card></>'), "\n";
 // A static-method tag resolves its class part like any class name.
 echo desugar('<Author::byline name="Ada"/>'), "\n";
 
-// The `:lazy` directive wraps the body in a deferred Html\LazyFragment.
+// The `:lazy` directive wraps the body in a deferred Markup\LazyFragment.
 echo desugar('<Auth :lazy>Hello {$name}</Auth>'), "\n";
 
-// Dynamic tags lower to Html\render_dynamic.
+// Dynamic tags lower to Markup\render_dynamic.
 echo desugar('<$tag class="x">{$content}</$tag>'), "\n";
 
 // Character references are decoded at compile time, so the exported string
@@ -41,9 +41,9 @@ echo desugar('<$tag class="x">{$content}</$tag>'), "\n";
 echo desugar('<p>Fish &amp; chips &mdash; &pound;5</p>'), "\n";
 ?>
 --EXPECT--
-new \Html\Element('div', ['class' => 'box', 'id' => $id], ['Hello ', $name])
-new \Html\Fragment([\Html\render_component(Card::class, ['title' => 'Hi', ...$attrs], new \Html\Fragment([new \Html\Element('b', [], ['f']), 'body']))])
-\Html\render_component(Author::class . '::byline', ['name' => 'Ada'], null)
-\Html\render_component(Auth::class, [], new \Html\LazyFragment(fn() => new \Html\Fragment(['Hello ', $name])))
-\Html\render_dynamic($tag, ['class' => 'x'], [$content])
-new \Html\Element('p', [], ['Fish & chips — £5'])
+new \Markup\Element('div', ['class' => 'box', 'id' => $id], ['Hello ', $name])
+new \Markup\Fragment([\Markup\render_component(Card::class, ['title' => 'Hi', ...$attrs], new \Markup\Fragment([new \Markup\Element('b', [], ['f']), 'body']))])
+\Markup\render_component(Author::class . '::byline', ['name' => 'Ada'], null)
+\Markup\render_component(Auth::class, [], new \Markup\LazyFragment(fn() => new \Markup\Fragment(['Hello ', $name])))
+\Markup\render_dynamic($tag, ['class' => 'x'], [$content])
+new \Markup\Element('p', [], ['Fish & chips — £5'])

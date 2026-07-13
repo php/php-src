@@ -1,0 +1,8 @@
+// vim:ft=javascript
+
+// Always enabled: the native markup syntax lowers into the Markup\ symbols this
+// extension registers, so it cannot be disabled (compare ext/random).
+EXTENSION("markup", "markup.c", false /* never shared */);
+PHP_MARKUP = "yes";
+PHP_INSTALL_HEADERS("ext/markup", "php_markup.h");
+ADD_EXTENSION_DEP("markup", "standard");

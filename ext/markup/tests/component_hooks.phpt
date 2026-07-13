@@ -1,34 +1,34 @@
 --TEST--
 Html components: factory hooks (DI), decorators, and per-component hook scoping
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
-use function Html\{register_component_factory, unregister_component_factory,
+use function Markup\{register_component_factory, unregister_component_factory,
     register_component_decorator, unregister_component_decorator};
 
 // Shared components across the sections below.
-class Card implements Html\Htmlable {
+class Card implements Markup\Html {
     public function __construct(public string $title = "?") {}
-    public function toHtml(): Html\Htmlable {
-        return new Html\Element('div', [], [$this->title]);
+    public function toHtml(): Markup\Html {
+        return new Markup\Element('div', [], [$this->title]);
     }
 }
-class Badge implements Html\Htmlable {
+class Badge implements Markup\Html {
     public function __construct(public string $label = "?") {}
-    public function toHtml(): Html\Htmlable {
-        return new Html\Element('b', [], [$this->label]);
+    public function toHtml(): Markup\Html {
+        return new Markup\Element('b', [], [$this->label]);
     }
 }
-class Note implements Html\Htmlable {
+class Note implements Markup\Html {
     public function __construct(public string $t) {}
-    public function toHtml(): Html\Htmlable {
-        return new Html\Element('p', [], [$this->t]);
+    public function toHtml(): Markup\Html {
+        return new Markup\Element('p', [], [$this->t]);
     }
 }
 class Author {
-    public static function byline(string $t): Html\Htmlable {
-        return new Html\Element('span', [], [$t]);
+    public static function byline(string $t): Markup\Html {
+        return new Markup\Element('span', [], [$t]);
     }
 }
 
@@ -38,10 +38,10 @@ class Author {
 class Clock { public function now(): string { return "T"; } }
 
 // Class component: a DI dependency ($clock) plus a prop ($label).
-class TimeBadge implements Html\Htmlable {
+class TimeBadge implements Markup\Html {
     public function __construct(private Clock $clock, public string $label) {}
-    public function toHtml(): Html\Htmlable {
-        return new Html\Element('span', [], ["{$this->label}:{$this->clock->now()}"]);
+    public function toHtml(): Markup\Html {
+        return new Markup\Element('span', [], ["{$this->label}:{$this->clock->now()}"]);
     }
 }
 
@@ -93,7 +93,7 @@ catch (\Error $e) { echo "restored:  ", $e->getMessage(), "\n"; }
 
 // A decorator wrapping in a marker that records the component name; proves it
 // fires for class and static-method components alike, with the resolved name.
-$marker = fn(Html\Htmlable $h, string $c) => Html\raw("[$c]" . $h . "[/$c]");
+$marker = fn(Markup\Html $h, string $c) => Markup\raw("[$c]" . $h . "[/$c]");
 register_component_decorator($marker);
 
 echo <Card title="a"/>, "\n";
@@ -101,12 +101,12 @@ echo <Note t="b"/>, "\n";
 echo <Author::byline t="c"/>, "\n";
 
 // Decorators compose in registration order, each wrapping the previous result.
-$outer = fn(Html\Htmlable $h, string $c) => Html\raw("<<" . $h . ">>");
+$outer = fn(Markup\Html $h, string $c) => Markup\raw("<<" . $h . ">>");
 register_component_decorator($outer);
 echo <Note t="d"/>, "\n";
 
-// A decorator must return an Html\Htmlable.
-$badDecorator = fn(Html\Htmlable $h, string $c) => "not htmlable";
+// A decorator must return a Markup\Html.
+$badDecorator = fn(Markup\Html $h, string $c) => "not html";
 register_component_decorator($badDecorator);
 try { echo <Note t="e"/>; }
 catch (\Error $e) { echo $e->getMessage(), "\n"; }
@@ -149,7 +149,7 @@ echo <Card/>, "\n";
 
 // (4) A decorator scoped to Badge wraps only Badge's output - Card renders
 // untouched.
-$badgeDecorator = fn(Html\Htmlable $h, string $c) => Html\raw("<<$h>>");
+$badgeDecorator = fn(Markup\Html $h, string $c) => Markup\raw("<<$h>>");
 register_component_decorator($badgeDecorator, Badge::class);
 echo <Badge label="B"/>, "\n";
 echo <Card title="C"/>, "\n";
@@ -169,7 +169,7 @@ restored:  TimeBadge::__construct(): Argument #1 ($clock) not passed
 [Note]<p>b</p>[/Note]
 [Author::byline]<span>c</span>[/Author::byline]
 <<[Note]<p>d</p>[/Note]>>
-Component decorator for <Note> did not return an Html\Htmlable
+Component decorator for <Note> did not return a Markup\Html
 factory(Card)
 <div>made</div>
 <b>?</b>

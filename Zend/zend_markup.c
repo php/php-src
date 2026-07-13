@@ -22,7 +22,7 @@
  *     attribute values;
  *   - AST lowering, called by the grammar actions
  *     (Zend/zend_language_parser.y) to turn markup elements into ordinary
- *     `new \Html\Element(...)` / `\Html\render_component(...)` ASTs, so no
+ *     `new \Markup\Element(...)` / `\Markup\render_component(...)` ASTs, so no
  *     new AST node kinds or zend_compile.c support are needed.
  *
  * The lexing mechanics themselves (scanner states, operand-position
@@ -257,8 +257,8 @@ zend_string *zend_markup_decode_entities(zend_string *str)
 }
 
 /* Native markup AST lowering.
- * Lower a markup element into an ordinary `new \Html\Element(tag, [], [children])`
- * (or `new \Html\Fragment([children])` when the tag name is empty) so no new AST
+ * Lower a markup element into an ordinary `new \Markup\Element(tag, [], [children])`
+ * (or `new \Markup\Fragment([children])` when the tag name is empty) so no new AST
  * node kind or zend_compile.c support is needed. `name` is the tag-name zval AST
  * or NULL for a fragment; `children` is a ZEND_AST_ARRAY of ZEND_AST_ARRAY_ELEM.
  *
@@ -277,7 +277,7 @@ static zend_ast *zend_ast_markup_fq_name(const char *name, size_t len)
  * uppercase, which is namespace-qualified (contains "\"), or which names a
  * static method via "::", dispatches as a component; anything else is a literal
  * HTML element. The single home for this rule: the compiler applies it to
- * static tag names here, and Html\render_dynamic applies it to a dynamic tag's
+ * static tag names here, and Markup\render_dynamic applies it to a dynamic tag's
  * runtime value (hence ZEND_API). */
 ZEND_API bool zend_markup_name_is_component(zend_string *tag)
 {
@@ -286,7 +286,7 @@ ZEND_API bool zend_markup_name_is_component(zend_string *tag)
 		|| strstr(ZSTR_VAL(tag), "::") != NULL;
 }
 
-/* Wrap a list of children in `new \Html\Fragment([children])`. Consumes (and, if
+/* Wrap a list of children in `new \Markup\Fragment([children])`. Consumes (and, if
  * NULL, creates) the children list. */
 static zend_ast *zend_ast_wrap_fragment(zend_ast *children)
 {
@@ -301,7 +301,7 @@ static zend_ast *zend_ast_wrap_fragment(zend_ast *children)
 		zend_ast_create_list(1, ZEND_AST_ARG_LIST, children));
 }
 
-/* Wrap a string AST in a `\Html\raw(...)` call (trusted passthrough). Used for
+/* Wrap a string AST in a `\Markup\raw(...)` call (trusted passthrough). Used for
  * `<!-- … -->` comments, which are emitted as literal HTML. */
 zend_ast *zend_ast_create_markup_raw(zend_ast *str)
 {
@@ -311,7 +311,7 @@ zend_ast *zend_ast_create_markup_raw(zend_ast *str)
 }
 
 /* Wrap a children list in
- * `new \Html\LazyFragment(fn() => new \Html\Fragment([children]))` (the
+ * `new \Markup\LazyFragment(fn() => new \Markup\Fragment([children]))` (the
  * `:lazy` directive). The arrow function defers building the child subtree -
  * and running any side effects in its interpolations - until the component
  * actually renders the slot, so a component that discards its body never
@@ -320,7 +320,7 @@ static zend_ast *zend_ast_wrap_lazy_fragment(zend_ast *children, uint32_t lineno
 {
 	zend_ast *frag = zend_ast_wrap_fragment(children);
 
-	/* fn() => new \Html\Fragment([...]) - an arrow function so its body
+	/* fn() => new \Markup\Fragment([...]) - an arrow function so its body
 	 * auto-captures by value whatever it references, exactly as a hand-written
 	 * one would; only the expression evaluation is deferred. */
 	zend_ast *params = zend_ast_create_list(0, ZEND_AST_PARAM_LIST);
@@ -361,9 +361,9 @@ static bool zend_markup_extract_lazy(zend_ast *attrs)
 }
 
 /* Lower a component tag (a capitalized or namespace-qualified name, or
- * "Class::method") into a call to \Html\render_component(component, props, slot)
+ * "Class::method") into a call to \Markup\render_component(component, props, slot)
  * Attributes become the props array and the body content becomes a
- * single \Html\Fragment passed as the slot (or a lazy \Html\LazyFragment when
+ * single \Markup\Fragment passed as the slot (or a lazy \Markup\LazyFragment when
  * the `:lazy` directive is present).
  *
  * Component resolution is two-stage, and every tag resolves through the *class*
@@ -371,9 +371,9 @@ static bool zend_markup_extract_lazy(zend_ast *attrs)
  * `Component::class` machinery), and a "Class::method" tag lowers the class
  * part the same way with "::method" appended - both honor `use` imports and
  * the current namespace, with a leading "\" fully qualified. The runtime then
- * resolves the name to a class implementing Html\Htmlable (instantiated) or a
- * public static method (called) - see PHP_FUNCTION(Html_render_component) in
- * ext/html/html.c.
+ * resolves the name to a class implementing Markup\Html (instantiated) or a
+ * public static method (called) - see PHP_FUNCTION(Markup_render_component) in
+ * ext/markup/markup.c.
  *
  * Plain *function* components are deliberately out of v1: a bare tag gives no
  * signal whether a class or a function is meant, and functions resolve through
@@ -419,7 +419,7 @@ static zend_ast *zend_ast_create_markup_component(zend_ast *name, zend_ast *attr
 	bool lazy = zend_markup_extract_lazy(attrs);
 
 	/* The body becomes a single slot Fragment, or null when there is no body.
-	 * With `:lazy` the fragment is wrapped in a deferred Html\LazyFragment. */
+	 * With `:lazy` the fragment is wrapped in a deferred Markup\LazyFragment. */
 	zend_ast *slot;
 	if (children != NULL && zend_ast_get_list(children)->children > 0) {
 		children->attr = ZEND_ARRAY_SYNTAX_SHORT;
@@ -540,7 +540,7 @@ zend_ast *zend_ast_create_markup_checked(zend_ast *open, zend_ast *attrs, zend_a
 		: zend_ast_create_markup_element(open, attrs, children);
 }
 
-/* Build the \Html\render_dynamic(tag_expr, attributes, children) call both
+/* Build the \Markup\render_dynamic(tag_expr, attributes, children) call both
  * dynamic-tag forms lower into. `tag_expr` is an already-built expression AST
  * producing the tag name; `lineno` is the opening-tag line (see
  * zend_ast_create_markup_element for why it is stamped explicitly). */
@@ -569,7 +569,7 @@ static zend_ast *zend_markup_dynamic_call(zend_ast *tag_expr, zend_ast *attrs, z
 }
 
 /* Lower a dynamic tag `<$tag …>…</$tag>` into a call to
- * \Html\render_dynamic($tag, attributes, children). The variable's runtime
+ * \Markup\render_dynamic($tag, attributes, children). The variable's runtime
  * value decides what a static tag name decides at compile time, by the same
  * classification rule (zend_markup_name_is_component); only classification
  * moves to runtime. `name` is the T_VARIABLE zval AST (without the "$"). */

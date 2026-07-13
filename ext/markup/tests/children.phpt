@@ -1,12 +1,12 @@
 --TEST--
-Html\Element children: scalar coercion, recursive array flattening, Traversables, and the nesting-depth bound
+Markup\Element children: scalar coercion, recursive array flattening, Traversables, and the nesting-depth bound
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
-use Html\Element;
-use Html\Element as E;
-use function Html\raw;
+use Markup\Element;
+use Markup\Element as E;
+use function Markup\raw;
 
 // --- scalar and array child coercion ---
 
@@ -19,10 +19,10 @@ echo (new Element('ul', [], [
     array_map(fn($n) => new Element('li', [], [$n]), $items),
 ]))->__toString(), "\n";
 
-// A nested Htmlable passes through un-escaped.
+// A nested Html passes through un-escaped.
 echo (new Element('div', [], [raw('<b>bold</b>')]))->__toString(), "\n";
 
-// Nested elements are Htmlable too.
+// Nested elements are Html too.
 echo (new Element('div', [], [new Element('em', [], ['hi & bye'])]))->__toString(), "\n";
 
 // Non-Stringable object is a hard error.
@@ -41,7 +41,7 @@ function rows(): Generator {
 }
 echo (new Element('ul', [], [rows()]))->__toString(), "\n";
 
-// ArrayIterator (Iterator), mixing scalars and Htmlable, with keys ignored
+// ArrayIterator (Iterator), mixing scalars and Html, with keys ignored
 $it = new ArrayIterator(['a' => 'x & y', 'b' => new Element('b', [], ['z'])]);
 echo (new Element('p', [], [$it]))->__toString(), "\n";
 
@@ -85,7 +85,7 @@ echo (new E('ul', [], [[[new E('li', [], ['ok'])]]]))->__toString(), "\n";
 <ul><li>Ada</li><li>Linus</li><li>Grace</li></ul>
 <div><b>bold</b></div>
 <div><em>hi &amp; bye</em></div>
-TypeError: Object of class stdClass cannot be rendered as a markup child: it implements none of Html\Htmlable, Stringable, or Traversable
+TypeError: Object of class stdClass cannot be rendered as a markup child: it implements none of Markup\Html, Stringable, or Traversable
 <ul><li>one</li><li>two</li></ul>
 <p>x &amp; y<b>z</b></p>
 <div>before <span>nested</span> after</div>

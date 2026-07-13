@@ -1,7 +1,7 @@
 --TEST--
 Markup syntax: HTML character references decode in text/attributes; tokenizer keeps them raw
 --EXTENSIONS--
-html
+markup
 tokenizer
 --FILE--
 <?php

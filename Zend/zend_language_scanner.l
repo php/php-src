@@ -2142,7 +2142,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 
 <ST_MARKUP_TAG,ST_MARKUP_CLOSE>"$"{LABEL} {
 	/* A dynamic tag name (<$tag>…</$tag>): an ordinary variable whose runtime
-	 * value decides element vs component (see Html\render_dynamic). */
+	 * value decides element vs component (see Markup\render_dynamic). */
 	RETURN_TOKEN_WITH_STR(T_VARIABLE, 1);
 }
 

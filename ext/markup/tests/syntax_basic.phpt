@@ -1,7 +1,7 @@
 --TEST--
 Markup syntax: elements, fragments, interpolation, whitespace, childless/self-close, literal braces, comments
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
 // --- elements, interpolation, nesting, fragments ---
@@ -9,12 +9,12 @@ $name = "Ada & <friends>";
 
 // Element with interpolation and a nested element.
 $el = <div>Hello {$name} <em>world</em></div>;
-var_dump($el instanceof Html\Element);
+var_dump($el instanceof Markup\Element);
 echo $el->__toString(), "\n";
 
 // Fragment (no wrapper).
 $frag = <><h1>Title</h1><p>Body {$name}</p></>;
-var_dump($frag instanceof Html\Fragment);
+var_dump($frag instanceof Markup\Fragment);
 echo $frag->__toString(), "\n";
 
 // Interpolation can hold any expression; arrays flatten, null renders "".
@@ -72,8 +72,8 @@ echo (<div/>)->__toString(), "\n";
 echo (<span class="x"/>)->__toString(), "\n";
 
 // Empty components and fragments are allowed (only HTML elements must self-close).
-class C implements Html\Htmlable {
-    public function toHtml(): Html\Htmlable { return Html\raw('C'); }
+class C implements Markup\Html {
+    public function toHtml(): Markup\Html { return Markup\raw('C'); }
 }
 echo (<C></C>)->__toString(), "\n";
 var_dump((<></>)->__toString());
@@ -93,7 +93,7 @@ echo (<p>a } b</p>)->__toString(), "\n";
 
 // Literal JSON in a <script> uses the raw() island pattern (text children are
 // HTML-escaped, and browsers never entity-decode inside raw-text elements).
-echo (<script type="application/json" id="config">{Html\raw(<<<'JSON'
+echo (<script type="application/json" id="config">{Markup\raw(<<<'JSON'
 {"@type": "Article", "title": "Braces & quotes stay verbatim"}
 JSON)}</script>)->__toString(), "\n";
 

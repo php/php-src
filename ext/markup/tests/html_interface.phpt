@@ -1,7 +1,7 @@
 --TEST--
-Html\Htmlable: toHtml() contract and recursive resolution, injected default __toString vs declared __toString, cycles and throwing implementations
+Markup\Html: toHtml() contract and recursive resolution, injected default __toString vs declared __toString, cycles and throwing implementations
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
 declare(strict_types=1);
@@ -10,15 +10,15 @@ declare(strict_types=1);
 
 // toHtml() returns the markup tree directly: no string cast is needed even
 // under strict_types, and the produced Element stays inspectable as an object.
-class Card implements Html\Htmlable {
+class Card implements Markup\Html {
     public function __construct(private string $title) {}
-    public function toHtml(): Html\Htmlable {
+    public function toHtml(): Markup\Html {
         return <div class="card">{$this->title}</div>;
     }
 }
 
 $card = new Card('Hi & bye');
-var_dump($card->toHtml() instanceof Html\Element);
+var_dump($card->toHtml() instanceof Markup\Element);
 var_dump($card->toHtml()->tag);
 
 // The injected default __toString renders via toHtml(), so echo, (string),
@@ -34,10 +34,10 @@ echo <section>{$card}</section>, "\n";
 // And as a component tag.
 echo <Card title="Tagged"/>, "\n";
 
-// toHtml() may return another Htmlable (e.g. delegate to another component);
+// toHtml() may return another Html (e.g. delegate to another component);
 // resolution recurses until it reaches a node class.
-class Fancy implements Html\Htmlable {
-    public function toHtml(): Html\Htmlable {
+class Fancy implements Markup\Html {
+    public function toHtml(): Markup\Html {
         return new Card('delegated');
     }
 }
@@ -48,7 +48,7 @@ $el = <b>x</b>;
 var_dump($el->toHtml() === $el);
 $frag = <>y</>;
 var_dump($frag->toHtml() === $frag);
-$raw = Html\raw('<i>z</i>');
+$raw = Markup\raw('<i>z</i>');
 var_dump($raw->toHtml() === $raw);
 
 // --- injected default __toString vs declared __toString ---
@@ -56,8 +56,8 @@ var_dump($raw->toHtml() === $raw);
 // A __toString declared by the class wins for string casts; markup rendering
 // always goes through toHtml(), so the two can serve different audiences
 // (e.g. a log-friendly string form) without affecting markup output.
-class Custom implements Html\Htmlable {
-    public function toHtml(): Html\Htmlable { return <b>markup</b>; }
+class Custom implements Markup\Html {
+    public function toHtml(): Markup\Html { return <b>markup</b>; }
     public function __toString(): string { return 'CUSTOM'; }
 }
 echo new Custom(), "\n";
@@ -67,9 +67,9 @@ echo <i>{new Custom()}</i>, "\n";
 trait Loud {
     public function __toString(): string { return 'LOUD'; }
 }
-class UsesTrait implements Html\Htmlable {
+class UsesTrait implements Markup\Html {
     use Loud;
-    public function toHtml(): Html\Htmlable { return Html\raw('quiet'); }
+    public function toHtml(): Markup\Html { return Markup\raw('quiet'); }
 }
 echo new UsesTrait(), " / ", <u>{new UsesTrait()}</u>, "\n";
 
@@ -77,23 +77,23 @@ echo new UsesTrait(), " / ", <u>{new UsesTrait()}</u>, "\n";
 class StringyBase {
     public function __toString(): string { return 'BASE'; }
 }
-class ChildOfStringy extends StringyBase implements Html\Htmlable {
-    public function toHtml(): Html\Htmlable { return Html\raw('child'); }
+class ChildOfStringy extends StringyBase implements Markup\Html {
+    public function toHtml(): Markup\Html { return Markup\raw('child'); }
 }
 echo new ChildOfStringy(), " / ", <u>{new ChildOfStringy()}</u>, "\n";
 
-// An abstract class implementing Htmlable: concrete children inherit the
+// An abstract class implementing Html: concrete children inherit the
 // injected default.
-abstract class Widget implements Html\Htmlable {}
+abstract class Widget implements Markup\Html {}
 class Button extends Widget {
-    public function toHtml(): Html\Htmlable { return <button>ok</button>; }
+    public function toHtml(): Markup\Html { return <button>ok</button>; }
 }
 echo new Button(), "\n";
 
-// An interface extending Htmlable stays abstract; implementers get the default.
-interface Panel extends Html\Htmlable {}
+// An interface extending Html stays abstract; implementers get the default.
+interface Panel extends Markup\Html {}
 class SidePanel implements Panel {
-    public function toHtml(): Html\Htmlable { return <aside>side</aside>; }
+    public function toHtml(): Markup\Html { return <aside>side</aside>; }
 }
 echo new SidePanel(), "\n";
 
@@ -108,8 +108,8 @@ echo (new Button())->__toString(), "\n";
 // --- resolution cycles and throwing implementations ---
 
 // toHtml() returning $this can never produce a node class: bounded, then Error.
-class Selfish implements Html\Htmlable {
-    public function toHtml(): Html\Htmlable { return $this; }
+class Selfish implements Markup\Html {
+    public function toHtml(): Markup\Html { return $this; }
 }
 try { echo new Selfish(); }
 catch (Error $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
@@ -117,19 +117,19 @@ try { echo <div>{new Selfish()}</div>; }
 catch (Error $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
 
 // A two-class cycle is caught by the same bound.
-class Ping implements Html\Htmlable {
-    public function toHtml(): Html\Htmlable { return new Pong(); }
+class Ping implements Markup\Html {
+    public function toHtml(): Markup\Html { return new Pong(); }
 }
-class Pong implements Html\Htmlable {
-    public function toHtml(): Html\Htmlable { return new Ping(); }
+class Pong implements Markup\Html {
+    public function toHtml(): Markup\Html { return new Ping(); }
 }
 try { echo new Ping(); }
 catch (Error $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
 
 // An exception thrown inside toHtml() propagates cleanly through the injected
 // __toString (both directly and from child position).
-class Boom implements Html\Htmlable {
-    public function toHtml(): Html\Htmlable { throw new RuntimeException('boom'); }
+class Boom implements Markup\Html {
+    public function toHtml(): Markup\Html { throw new RuntimeException('boom'); }
 }
 try { echo new Boom(); }
 catch (RuntimeException $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
@@ -163,9 +163,9 @@ string(9) "SidePanel"
 bool(true)
 bool(true)
 <button>ok</button>
-Error: Maximum toHtml() resolution depth of 64 exceeded (Selfish::toHtml() never produced an Html\Element, Html\Fragment, or Html\Raw)
-Error: Maximum toHtml() resolution depth of 64 exceeded (Selfish::toHtml() never produced an Html\Element, Html\Fragment, or Html\Raw)
-Error: Maximum toHtml() resolution depth of 64 exceeded (Ping::toHtml() never produced an Html\Element, Html\Fragment, or Html\Raw)
+Error: Maximum toHtml() resolution depth of 64 exceeded (Selfish::toHtml() never produced a Markup\Element, Markup\Fragment, or Markup\Raw)
+Error: Maximum toHtml() resolution depth of 64 exceeded (Selfish::toHtml() never produced a Markup\Element, Markup\Fragment, or Markup\Raw)
+Error: Maximum toHtml() resolution depth of 64 exceeded (Ping::toHtml() never produced a Markup\Element, Markup\Fragment, or Markup\Raw)
 RuntimeException: boom
 RuntimeException: boom
 clean

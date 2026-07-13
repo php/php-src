@@ -1,14 +1,14 @@
 --TEST--
-Html\Element/Fragment/Raw construction API: rendering, escaping, attribute coercion, Htmlable attributes, void elements, raw()/escape(), name validation
+Markup\Element/Fragment/Raw construction API: rendering, escaping, attribute coercion, Html attributes, void elements, raw()/escape(), name validation
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
-use Html\Element;
-use Html\Element as E;
-use Html\Fragment;
-use function Html\raw;
-use function Html\escape;
+use Markup\Element;
+use Markup\Element as E;
+use Markup\Fragment;
+use function Markup\raw;
+use function Markup\escape;
 
 // --- basic rendering ---
 
@@ -16,7 +16,7 @@ $el = new Element('a', ['href' => 'https://php.net', 'class' => 'btn'], ['Click 
 echo $el->__toString(), "\n";
 echo $el, "\n"; // echo casts via __toString
 
-var_dump($el instanceof Html\Htmlable);
+var_dump($el instanceof Markup\Html);
 var_dump($el instanceof Stringable);
 var_dump($el->tag);
 var_dump($el->attributes);
@@ -59,18 +59,18 @@ try {
     echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
-// --- Htmlable attribute values (no double-escaping) ---
+// --- Html attribute values (no double-escaping) ---
 
-// Html\raw(): trusted content, emitted verbatim (the entity survives).
-echo <span title={\Html\raw('&nbsp;')}>x</span>, "\n";
+// Markup\raw(): trusted content, emitted verbatim (the entity survives).
+echo <span title={\Markup\raw('&nbsp;')}>x</span>, "\n";
 
-// Html\escape(): escaped exactly once, not re-escaped at render time.
-echo <span title={\Html\escape('a & b')}>x</span>, "\n";
+// Markup\escape(): escaped exactly once, not re-escaped at render time.
+echo <span title={\Markup\escape('a & b')}>x</span>, "\n";
 
 // Plain strings still escape by default.
 echo <span title={'a & b'}>x</span>, "\n";
 
-// A generic Stringable (not Htmlable) still escapes.
+// A generic Stringable (not Html) still escapes.
 class S { public function __toString(): string { return 'x & y'; } }
 echo <span title={new S}>x</span>, "\n";
 
@@ -95,7 +95,7 @@ $safe = escape('<b>x</b>');
 echo $safe->__toString(), "\n";
 echo (new Element('p', [], [$safe]))->__toString(), "\n"; // not escaped again
 
-var_dump(raw('y') instanceof Html\Htmlable);
+var_dump(raw('y') instanceof Markup\Html);
 
 // --- tag/attribute-name validation (security) ---
 

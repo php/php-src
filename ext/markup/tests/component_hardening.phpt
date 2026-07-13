@@ -1,10 +1,10 @@
 --TEST--
 Html components: dispatch guards (visibility, staticness, ctor, void children, hooks) and throwing-constructor safety
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
-use function Html\render_component;
+use function Markup\render_component;
 
 function expect_error(callable $f): void {
     try {
@@ -18,35 +18,35 @@ function expect_error(callable $f): void {
 // --- hook-registration TypeErrors ---
 
 // Registering a non-callable hook is an immediate TypeError.
-expect_error(fn() => Html\register_component_factory("no_such_function_xyz"));
-expect_error(fn() => Html\register_component_decorator([new stdClass(), "nope"]));
+expect_error(fn() => Markup\register_component_factory("no_such_function_xyz"));
+expect_error(fn() => Markup\register_component_decorator([new stdClass(), "nope"]));
 
 // --- void-element children guard ---
 
 // A void element cannot have children (they would be silently dropped).
-expect_error(fn() => (string) new Html\Element("br", [], ["x"]));
+expect_error(fn() => (string) new Markup\Element("br", [], ["x"]));
 
 // --- int-keyed props ---
 
 // Integer-keyed props are rejected on every dispatch path.
-class NoAttrs implements Html\Htmlable {
+class NoAttrs implements Markup\Html {
     public function __construct(public string $a = "") {}
-    public function toHtml(): Html\Htmlable { return Html\raw("no-attrs"); }
+    public function toHtml(): Markup\Html { return Markup\raw("no-attrs"); }
 }
 expect_error(fn() => render_component("NoAttrs", ["positional"]));
 
 // --- constructor visibility/absence guards ---
 
 // A non-public constructor cannot be dispatched by the engine.
-class PrivateCtor implements Html\Htmlable {
+class PrivateCtor implements Markup\Html {
     private function __construct() {}
-    public function toHtml(): Html\Htmlable { return Html\raw("private"); }
+    public function toHtml(): Markup\Html { return Markup\raw("private"); }
 }
 expect_error(fn() => render_component("PrivateCtor"));
 
 // A class with no constructor cannot silently swallow props.
-class NoCtor implements Html\Htmlable {
-    public function toHtml(): Html\Htmlable { return Html\raw("no-ctor"); }
+class NoCtor implements Markup\Html {
+    public function toHtml(): Markup\Html { return Markup\raw("no-ctor"); }
 }
 expect_error(fn() => render_component("NoCtor", ["title" => "x"]));
 echo render_component("NoCtor"), "\n"; // without props it is fine
@@ -55,8 +55,8 @@ echo render_component("NoCtor"), "\n"; // without props it is fine
 
 // Static-method components must be public, static, and non-abstract.
 class Methods {
-    private static function hidden(): Html\Htmlable { return new Html\Fragment([]); }
-    public function nonStatic(): Html\Htmlable { return new Html\Fragment([]); }
+    private static function hidden(): Markup\Html { return new Markup\Fragment([]); }
+    public function nonStatic(): Markup\Html { return new Markup\Fragment([]); }
 }
 expect_error(fn() => render_component("Methods::hidden"));
 expect_error(fn() => render_component("Methods::nonStatic"));
@@ -66,9 +66,9 @@ expect_error(fn() => render_component("Methods::nonStatic"));
 // A component whose constructor cannot be satisfied by the engine's own `new`
 // (a required, non-prop dependency). The thrown error must leave a clean heap:
 // the half-built object is released exactly once, not double-freed.
-class NeedsDep implements Html\Htmlable {
+class NeedsDep implements Markup\Html {
     public function __construct(private \stdClass $dep) {}
-    public function toHtml(): Html\Htmlable { return Html\raw("never"); }
+    public function toHtml(): Markup\Html { return Markup\raw("never"); }
 }
 
 for ($i = 0; $i < 3; $i++) {
@@ -80,9 +80,9 @@ for ($i = 0; $i < 3; $i++) {
 }
 
 // A constructor that throws from its body, too.
-class Boom implements Html\Htmlable {
+class Boom implements Markup\Html {
     public function __construct() { throw new \RuntimeException("boom"); }
-    public function toHtml(): Html\Htmlable { return Html\raw("never"); }
+    public function toHtml(): Markup\Html { return Markup\raw("never"); }
 }
 try {
     echo render_component('Boom')->__toString();
@@ -93,8 +93,8 @@ try {
 echo "clean\n";
 ?>
 --EXPECTF--
-TypeError: Html\register_component_factory(): Argument #1 ($factory) must be a valid callback
-TypeError: Html\register_component_decorator(): Argument #1 ($decorator) must be a valid callback
+TypeError: Markup\register_component_factory(): Argument #1 ($factory) must be a valid callback
+TypeError: Markup\register_component_decorator(): Argument #1 ($decorator) must be a valid callback
 Error: Void element <br> cannot have children
 Error: Component props must use string keys
 Error: Component class "PrivateCtor" has a non-public constructor

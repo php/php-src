@@ -14,35 +14,35 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_HTML_EXT_H
-#define PHP_HTML_EXT_H
+#ifndef PHP_MARKUP_EXT_H
+#define PHP_MARKUP_EXT_H
 
 #include "php.h"
 
-extern zend_module_entry html_module_entry;
-#define phpext_html_ptr &html_module_entry
+extern zend_module_entry markup_module_entry;
+#define phpext_markup_ptr &markup_module_entry
 
-#define PHP_HTML_VERSION PHP_VERSION
+#define PHP_MARKUP_VERSION PHP_VERSION
 
 /* Request-scoped userland hooks that let a framework take over how a component
  * tag is turned into an object. `component_factories` replace the `new`
  * for a component (e.g. resolve through a DI container) - the *production* seam.
  * `component_decorators` are the cross-cutting seam: they run on the produced
- * Html\Htmlable of every component, so output transforms / wrapping / logging
- * apply uniformly. Each is an ordered list of html_handler entries (callable +
+ * Markup\Html of every component, so output transforms / wrapping / logging
+ * apply uniformly. Each is an ordered list of markup_handler entries (callable +
  * optional per-component scope) tried in registration order, like
  * spl_autoload_register; a factory returns an object to take over the dispatch
  * or null to defer, while each decorator wraps the previous one's result. A
  * scoped entry is skipped in C - before any userland call - for every other
  * component. Both are NULL until first registered and are cleared at request
  * shutdown. */
-ZEND_BEGIN_MODULE_GLOBALS(html)
+ZEND_BEGIN_MODULE_GLOBALS(markup)
 	HashTable *component_factories;
 	HashTable *component_decorators;
-ZEND_END_MODULE_GLOBALS(html)
+ZEND_END_MODULE_GLOBALS(markup)
 
-ZEND_EXTERN_MODULE_GLOBALS(html)
+ZEND_EXTERN_MODULE_GLOBALS(markup)
 
-#define HTML_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(html, v)
+#define MARKUP_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(markup, v)
 
-#endif /* PHP_HTML_EXT_H */
+#endif /* PHP_MARKUP_EXT_H */

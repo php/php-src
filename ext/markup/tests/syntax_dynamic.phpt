@@ -1,14 +1,14 @@
 --TEST--
 Markup syntax: dynamic tags <$tag>/<{expr}> - classification, escaping, single evaluation, BC, error cases
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
 // --- <$tag> variable elements ---
 // An element name: behaves exactly like the static tag.
 $tag = 'div';
 $el = <$tag class="box">Hello</$tag>;
-var_dump($el instanceof Html\Element);
+var_dump($el instanceof Markup\Element);
 echo $el, "\n";
 
 // Self-close; void elements serialize as voids.
@@ -24,12 +24,12 @@ echo <div><$tag {...$attrs}>hi</$tag></div>, "\n";
 
 // --- runtime classification: components ---
 // A class-component name (::class gives the FQCN): full component dispatch.
-class Card implements Html\Htmlable {
+class Card implements Markup\Html {
     public function __construct(
         private string $title,
-        #[Html\Slot] private ?Html\Htmlable $body = null,
+        #[Markup\Slot] private ?Markup\Html $body = null,
     ) {}
-    public function toHtml(): Html\Htmlable {
+    public function toHtml(): Markup\Html {
         return <article><h1>{$this->title}</h1>{$this->body}</article>;
     }
 }
@@ -39,7 +39,7 @@ echo <$component title="Hi">Body</$component>, "\n";
 
 // A "Class::method" value dispatches as a static-method component.
 class Author {
-    public static function byline(string $name): Html\Htmlable {
+    public static function byline(string $name): Markup\Html {
         return <i>By {$name}</i>;
     }
 }
@@ -79,8 +79,8 @@ var_dump($a <$b, $b <$a);
 
 // --- render_dynamic() direct calls ---
 // The runtime target is a public function, same as render_component().
-echo Html\render_dynamic('p', ['class' => 'y'], ['direct']), "\n";
-echo Html\render_dynamic(Card::class, ['title' => 'Direct']), "\n";
+echo Markup\render_dynamic('p', ['class' => 'y'], ['direct']), "\n";
+echo Markup\render_dynamic(Card::class, ['title' => 'Direct']), "\n";
 
 // --- error cases ---
 // Mismatched closing variable is a compile error, like </div> for <span>.
@@ -102,7 +102,7 @@ foreach (['$x = <{"div"}>a</div>;', '$x = <{"div"}>a</$t>;'] as $code) {
 
 // An empty tag value is rejected up front.
 try {
-    Html\render_dynamic('');
+    Markup\render_dynamic('');
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -169,9 +169,9 @@ bool(false)
 Mismatched markup closing tag: expected </$a>, found </$b>
 syntax error, unexpected markup tag name "div", expecting markup tag end
 syntax error, unexpected variable "$t", expecting markup tag end
-Html\render_dynamic(): Argument #1 ($tag) cannot be empty
+Markup\render_dynamic(): Argument #1 ($tag) cannot be empty
 Invalid tag name "di v"
 <date></date>
-"Date" is not a component: no such class implementing Html\Htmlable
-"NoSuchComponent" is not a component: no such class implementing Html\Htmlable
+"Date" is not a component: no such class implementing Markup\Html
+"NoSuchComponent" is not a component: no such class implementing Markup\Html
 Component class "NoSuchRegistry" not found

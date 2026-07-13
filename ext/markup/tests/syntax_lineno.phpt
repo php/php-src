@@ -1,12 +1,12 @@
 --TEST--
 Markup syntax: multi-line elements report errors on the opening-tag line, like any multi-line call
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
-class Card implements Html\Htmlable {
+class Card implements Markup\Html {
     public function __construct(private string $title) {}
-    public function toHtml(): Html\Htmlable { return <div>{$this->title}</div>; }
+    public function toHtml(): Markup\Html { return <div>{$this->title}</div>; }
 }
 
 // Static component spanning lines: the render_component call site is the

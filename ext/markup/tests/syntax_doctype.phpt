@@ -1,7 +1,7 @@
 --TEST--
 Markup syntax: <!DOCTYPE html> emission rules and non-doctype <! parse errors
 --EXTENSIONS--
-html
+markup
 --FILE--
 <?php
 // --- doctype emission ---
