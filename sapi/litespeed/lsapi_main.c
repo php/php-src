@@ -26,6 +26,8 @@
 #include "lsapilib.h"
 #include "lsapi_main_arginfo.h"
 
+#include "ext/user_cache/php_user_cache.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -63,6 +65,7 @@ typedef struct _user_config_cache_entry {
     time_t expires;
     HashTable user_config;
 } user_config_cache_entry;
+
 static HashTable user_config_cache;
 
 static int  lsapi_mode       = 0;
@@ -175,6 +178,8 @@ static int sapi_lsapi_deactivate(void)
         efree( SG(request_info).path_translated );
         SG(request_info).path_translated = NULL;
     }
+
+    php_user_cache_partition_activate(NULL);
 
     return SUCCESS;
 }
@@ -513,6 +518,26 @@ static void sapi_lsapi_log_message(const char *message, int syslog_type_int)
 }
 /* }}} */
 
+static void lsapi_user_cache_log_message(const char *message)
+{
+    sapi_lsapi_log_message(message, 0);
+}
+
+static const char *lsapi_user_cache_get_boundary_value(const char *name)
+{
+    return sapi_lsapi_getenv(name, 0);
+}
+
+static void lsapi_user_cache_activate_request_partition(void)
+{
+    php_user_cache_activate_boundary_partition(
+        "litespeed",
+        lsapi_user_cache_get_boundary_value,
+        lsapi_user_cache_log_message,
+        PHP_USER_CACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE
+    );
+}
+
 /* Set to 1 to turn on log messages useful during development:
  */
 #if 0
@@ -540,6 +565,11 @@ static int sapi_lsapi_activate(void)
 {
     char *path, *server_name;
     size_t path_len, server_name_len;
+
+    /* Resolve the user-cache partition before any early return below: the
+     * activate return value is ignored by sapi_activate(), so bailing out
+     * first would leave the request without a partition. */
+    lsapi_user_cache_activate_request_partition();
 
     /* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
     if (!SG(request_info).path_translated) {
@@ -1517,6 +1547,8 @@ int main( int argc, char * argv[] )
         return FAILURE;
     }
 
+    php_user_cache_opt_in();
+
     if ( climode ) {
         return cli_main(argc, argv);
     }
@@ -1627,6 +1659,7 @@ static PHP_MINIT_FUNCTION(litespeed)
 static PHP_MSHUTDOWN_FUNCTION(litespeed)
 {
     zend_hash_destroy(&user_config_cache);
+    php_user_cache_boundary_partitions_shutdown();
 
     /* UNREGISTER_INI_ENTRIES(); */
     return SUCCESS;
