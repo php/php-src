@@ -119,7 +119,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 	HashTable hash;
 	zend_string *key = NULL;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
-	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot, *jmp_slot;
+	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot, *jmp_slot, *assign_property_slot;
 
 	if (op_array->last_literal) {
 		uint32_t j;
@@ -438,14 +438,15 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		zend_hash_clean(&hash);
 		op_array->last_literal = j;
 
-		const_slot = zend_arena_alloc(&ctx->arena, j * 7 * sizeof(int));
-		memset(const_slot, -1, j * 7 * sizeof(int));
+		const_slot = zend_arena_alloc(&ctx->arena, j * 8 * sizeof(int));
+		memset(const_slot, -1, j * 8 * sizeof(int));
 		class_slot = const_slot + j;
 		func_slot = class_slot + j;
 		bind_var_slot = func_slot + j;
 		property_slot = bind_var_slot + j;
 		method_slot = property_slot + j;
 		jmp_slot = method_slot + j;
+		assign_property_slot = jmp_slot + j;
 
 		/* Update opcodes to use new literals table */
 		cache_size = zend_op_array_extension_handles * sizeof(void*);
@@ -499,6 +500,26 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_ASSIGN_OBJ:
+					/* ASSIGN_OBJ must not share its cache slot with other
+					 * property opcodes: the asymmetric set-visibility check
+					 * runs when the slot is populated by the write handler,
+					 * and the cached direct-assign fast path relies on that
+					 * (see zend_assign_to_typed_prop_granted()). Slots are
+					 * shared among ASSIGN_OBJ oplines only, which all
+					 * populate through the set-checked write handler. */
+					if (opline->op2_type == IS_CONST) {
+						if (opline->op1_type == IS_UNUSED &&
+						    assign_property_slot[opline->op2.constant] >= 0) {
+							opline->extended_value = assign_property_slot[opline->op2.constant];
+						} else {
+							opline->extended_value = cache_size;
+							cache_size += 3 * sizeof(void *);
+							if (opline->op1_type == IS_UNUSED) {
+								assign_property_slot[opline->op2.constant] = opline->extended_value;
+							}
+						}
+					}
+					break;
 				case ZEND_ASSIGN_OBJ_REF:
 				case ZEND_FETCH_OBJ_R:
 				case ZEND_FETCH_OBJ_W:
