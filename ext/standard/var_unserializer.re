@@ -17,6 +17,7 @@
 #include "php_incomplete_class.h"
 #include "zend_portability.h"
 #include "zend_exceptions.h"
+#include "zend_objects.h"
 
 /* {{{ reference-handling for unserializer: var_* */
 #define VAR_ENTRIES_MAX 1018     /* 1024 - offsetof(php_unserialize_data, entries) / sizeof(void*) */
@@ -301,8 +302,10 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 					ZVAL_COPY(&param, &var_dtor_hash->data[i + 1]);
 
 					BG(serialize_lock)++;
+					zend_object_set_properties_reinitable(Z_OBJ_P(zv), /* reinitable */ true);
 					zend_call_known_instance_method_with_1_params(
 						Z_OBJCE_P(zv)->__unserialize, Z_OBJ_P(zv), NULL, &param);
+					zend_object_set_properties_reinitable(Z_OBJ_P(zv), /* reinitable */ false);
 					if (EG(exception)) {
 						delayed_call_failed = 1;
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
