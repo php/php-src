@@ -4179,6 +4179,7 @@ ZEND_API bool zend_is_callable_at_frame(
 	bool ret;
 	zend_fcall_info_cache fcc_local;
 	bool strict_class = 0;
+	zval callable_copy;
 
 	if (fcc == NULL) {
 		fcc = &fcc_local;
@@ -4205,9 +4206,11 @@ again:
 				fcc->called_scope = fcc->calling_scope;
 				return 1;
 			}
+			ZVAL_STR_COPY(&callable_copy, Z_STR_P(callable));
 
 check_func:
-			ret = zend_is_callable_check_func(callable, frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
+			ret = zend_is_callable_check_func(&callable_copy, frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
+			zval_ptr_dtor(&callable_copy);
 			if (fcc == &fcc_local) {
 				zend_release_fcall_info_cache(fcc);
 			}
@@ -4244,7 +4247,12 @@ check_func:
 						return 1;
 					}
 
-					if (!zend_is_callable_check_class(Z_STR_P(obj), get_scope(frame), frame, fcc, &strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS)) {
+					ZVAL_STR_COPY(&callable_copy, Z_STR_P(method));
+					zend_string *class_name = zend_string_copy(Z_STR_P(obj));
+					ret = zend_is_callable_check_class(class_name, get_scope(frame), frame, fcc, &strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
+					zend_string_release(class_name);
+					if (!ret) {
+						zval_ptr_dtor(&callable_copy);
 						return 0;
 					}
 				} else {
@@ -4256,9 +4264,9 @@ check_func:
 						fcc->called_scope = fcc->calling_scope;
 						return 1;
 					}
+					ZVAL_STR_COPY(&callable_copy, Z_STR_P(method));
 				}
 
-				callable = method;
 				goto check_func;
 			}
 			return 0;
