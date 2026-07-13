@@ -28,6 +28,7 @@
 #include "php_openssl.h"
 #include "php_openssl_backend.h"
 #include "php_network.h"
+#include "xp_common.h"
 #include <openssl/ssl.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
@@ -378,73 +379,8 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 }
 /* }}} */
 
-static bool php_openssl_x509_fingerprint_is_equal(php_stream *stream, X509 *peer, const char *method, const zend_string *expected)
-{
-	bool is_equal = false;
-	zend_string *fingerprint = php_openssl_x509_fingerprint(peer, method, false, stream);
-	if (fingerprint) {
-		is_equal = zend_string_equals_ci(fingerprint, expected);
-		zend_string_release_ex(fingerprint, false);
-	}
-
-	return is_equal;
-}
-
-static bool php_openssl_x509_fingerprint_match(php_stream *stream, X509 *peer, const zval *val)
-{
-	if (Z_TYPE_P(val) == IS_STRING) {
-		const char *method = NULL;
-
-		switch (Z_STRLEN_P(val)) {
-			case 32:
-				method = "md5";
-				break;
-
-			case 40:
-				method = "sha1";
-				break;
-		}
-
-		if (UNEXPECTED(method == NULL)) {
-			php_stream_warn(stream, AuthFailed, "peer_fingerprint length doesn't match a md5 or sha1 hash");
-			return false;
-		}
-		if (!php_openssl_x509_fingerprint_is_equal(stream, peer, method, Z_STR_P(val))) {
-			php_stream_warn(stream, AuthFailed, "peer_fingerprint match failure");
-			return false;
-		}
-		return true;
-	} else if (Z_TYPE_P(val) == IS_ARRAY) {
-		zval *current;
-		zend_string *key;
-
-		if (!zend_hash_num_elements(Z_ARRVAL_P(val))) {
-			// TODO: Should this be a ValueError (also must not be empty error)?
-			php_stream_warn(stream, Generic, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
-			return false;
-		}
-
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), key, current) {
-			if (key == NULL || Z_TYPE_P(current) != IS_STRING) {
-				// TODO: Should this be a ValueError?
-				php_stream_warn(stream, Generic, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
-				return false;
-			}
-			if (!php_openssl_x509_fingerprint_is_equal(stream, peer, ZSTR_VAL(key), Z_STR_P(current))) {
-				php_stream_warn(stream, AuthFailed, "peer_fingerprint match failure");
-				return false;
-			}
-		} ZEND_HASH_FOREACH_END();
-
-		return true;
-	} else {
-		// TODO: Should this be a TypeError?
-		php_stream_warn(stream, Generic,
-			"Invalid peer_fingerprint value; fingerprint string or array of the form [algo => fingerprint] required");
-	}
-
-	return false;
-}
+/* php_openssl_x509_fingerprint_is_equal() and php_openssl_x509_fingerprint_match()
+ * are shared with the dtls:// transport; see xp_common.c. */
 
 static bool php_openssl_matches_wildcard_name(const char *subjectname, const char *certname) /* {{{ */
 {
@@ -3499,16 +3435,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 						(xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC &&
 						xparam->outputs.returncode == 1 && xparam->outputs.error_code == EINPROGRESS)))
 					{
-						zval *val;
-						php_stream *session_stream = NULL;
-
-						if (GET_VER_OPT("session_stream")) {
-							php_stream_from_zval_no_verify(session_stream, val);
-						}
-
-						if (php_stream_xport_crypto_setup(stream, sslsock->method, session_stream) < 0 ||
-								php_stream_xport_crypto_enable(stream, 1) < 0) {
-							php_stream_warn(stream, ProtocolError, "Failed to enable crypto");
+						if (php_openssl_setup_crypto_on_connect(stream, sslsock->method) < 0) {
 							xparam->outputs.returncode = -1;
 						}
 					}
@@ -3619,47 +3546,7 @@ static zend_long php_openssl_get_crypto_method(
 }
 /* }}} */
 
-static char *php_openssl_get_url_name(const char *resourcename,
-		size_t resourcenamelen, int is_persistent, php_stream_context *context)  /* {{{ */
-{
-	if (!resourcename) {
-		return NULL;
-	}
-
-	const php_uri_parser *uri_parser = php_stream_context_get_uri_parser("ssl", context);
-	if (uri_parser == NULL) {
-		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
-		return NULL;
-	}
-
-	php_uri_internal *internal_uri = php_uri_parse(uri_parser, resourcename, resourcenamelen, true);
-	if (internal_uri == NULL) {
-		return NULL;
-	}
-
-	char * url_name = NULL;
-	zval host_zv;
-	zend_result result = php_uri_get_host(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &host_zv);
-	if (result == SUCCESS && Z_TYPE(host_zv) == IS_STRING) {
-		const char * host = Z_STRVAL(host_zv);
-		size_t len = Z_STRLEN(host_zv);
-
-		/* skip trailing dots */
-		while (len && host[len-1] == '.') {
-			--len;
-		}
-
-		if (len) {
-			url_name = pestrndup(host, len, is_persistent);
-		}
-	}
-
-	php_uri_free(internal_uri);
-	zval_ptr_dtor(&host_zv);
-
-	return url_name;
-}
-/* }}} */
+/* php_openssl_get_url_name() is shared with the dtls:// transport; see xp_common.c. */
 
 php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 		const char *resourcename, size_t resourcenamelen,
