@@ -1311,7 +1311,6 @@ static const php_stream_ops php_openssl_dtls_socket_ops = {
 	php_openssl_dtls_sockop_cast,
 	NULL, /* stat */
 	php_openssl_dtls_sockop_set_option,
-	true, /* is_dgram */
 };
 
 /* Allocate a dtls:// stream. */
@@ -1328,6 +1327,7 @@ php_stream *php_openssl_dtls_socket_factory(const char *proto, size_t protolen,
 	memset(dtlssock, 0, sizeof(*dtlssock));
 	dtlssock->s.socket = -1;
 	dtlssock->s.is_blocked = true;
+	dtlssock->s.is_dgram = true;
 	dtlssock->s.timeout.tv_sec = (time_t)FG(default_socket_timeout);
 	dtlssock->s.timeout.tv_usec = 0;
 	if (timeout != NULL) {

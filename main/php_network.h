@@ -357,6 +357,8 @@ struct _php_netstream_data_t	{
 	bool timeout_event;
 	struct timeval timeout;
 	size_t ownsize;
+	/* Datagram socket transport: the generic ops connect/bind with SOCK_DGRAM. */
+	bool is_dgram;
 };
 typedef struct _php_netstream_data_t php_netstream_data_t;
 PHPAPI extern const php_stream_ops php_stream_socket_ops;

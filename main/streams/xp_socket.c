@@ -57,7 +57,8 @@ static const php_stream_ops php_stream_unixdg_socket_ops;
 #define PHP_STREAM_XPORT_IS_UNIX(stream) false
 #endif
 #define PHP_STREAM_XPORT_IS_UDP(stream) \
-	(php_stream_is(stream, &php_stream_udp_socket_ops) || (stream)->ops->is_dgram)
+	(php_stream_is(stream, &php_stream_udp_socket_ops) \
+		|| ((php_netstream_data_t *)(stream)->abstract)->is_dgram)
 #define PHP_STREAM_XPORT_IS_TCP(stream) (!PHP_STREAM_XPORT_IS_UNIX(stream) && !PHP_STREAM_XPORT_IS_UDP(stream))
 
 static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam);
@@ -565,7 +566,6 @@ static const php_stream_ops php_stream_udp_socket_ops = {
 	php_sockop_cast,
 	php_sockop_stat,
 	php_tcp_sockop_set_option,
-	true, /* is_dgram */
 };
 
 #ifdef AF_UNIX

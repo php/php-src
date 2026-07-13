@@ -124,9 +124,6 @@ typedef struct _php_stream_ops  {
 	int (*cast)(php_stream *stream, int castas, void **ret);
 	int (*stat)(php_stream *stream, php_stream_statbuf *ssb);
 	int (*set_option)(php_stream *stream, int option, int value, void *ptrparam);
-
-	/* Datagram socket transport: the generic socket ops connect/bind with SOCK_DGRAM. */
-	bool is_dgram;
 } php_stream_ops;
 
 typedef struct _php_stream_wrapper_ops {
