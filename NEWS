@@ -65,6 +65,10 @@ PHP                                                                        NEWS
 
 - JSON:
   . Report unterminated JSON strings as syntax errors. (timwolla)
+  . Improve performance error position tracking during JSON decoding.
+    (henderkes)
+  . Fixed bug GH-22514 (Incorrect error column in PHP 8.6 JSON parser).
+    (henderkes, timwolla)
 
 - Opcache:
   . Fixed bug GH-21770 (Infinite recursion in property hook getter in opcache
