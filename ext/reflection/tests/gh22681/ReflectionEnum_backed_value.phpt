@@ -16,7 +16,7 @@ Enum [ <user> enum Demo: string implements UnitEnum, BackedEnum ] {
   @@ %s %d-%d
 
   - Enum cases [1] {
-    Case DEMO = F
+    Case DEMO = F%0oo
   }
 
   - Constants [0] {

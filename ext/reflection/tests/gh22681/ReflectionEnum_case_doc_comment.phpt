@@ -20,7 +20,7 @@ Enum [ <user> enum Demo implements UnitEnum ] {
   @@ %s(%d) : eval()'d code %d-%d
 
   - Enum cases [1] {
-    /** F
+    /** F%0oo */
     Case C
   }
 
