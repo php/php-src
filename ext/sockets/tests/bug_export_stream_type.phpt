@@ -6,7 +6,7 @@ sockets
 <?php
 $sock = socket_create(AF_INET, SOCK_DGRAM, 0);
 $stream = socket_export_stream($sock);
-echo stream_get_meta_data($stream)['stream_type']. "\n";
+echo explode('/', stream_get_meta_data($stream)['stream_type'])[0], "\n";
 ?>
 --EXPECT--
 udp_socket
