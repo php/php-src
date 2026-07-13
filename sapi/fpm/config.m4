@@ -462,6 +462,7 @@ if test "$PHP_FPM" != "no"; then
     fpm/fpm_status.c \
     fpm/fpm_stdio.c \
     fpm/fpm_unix.c \
+    fpm/fpm_user_cache.c \
     fpm/fpm_worker_pool.c \
     fpm/zlog.c \
     fpm/events/select.c \
