@@ -43,7 +43,16 @@ pt_expect_events($poll_ctx->wait(0, 100000), [
 
 fclose($socket1r);
 pt_expect_events($poll_ctx->wait(0, 100000), [
-    ['events' => [Io\Poll\Event::Write, Io\Poll\Event::HangUp], 'data' => 'socket2_data']
+    [
+        'events' => [
+            'default' => [Io\Poll\Event::Write, Io\Poll\Event::HangUp],
+            // On Solaris event ports the peer close may not be folded into a
+            // POLLHUP in the same snapshot as the POLLOUT readiness, so HangUp
+            // is optional here.
+            'EventPorts' => [Io\Poll\Event::Write, [Io\Poll\Event::HangUp]],
+        ],
+        'data' => 'socket2_data'
+    ]
 ], $poll_ctx);
 
 fclose($socket1w);

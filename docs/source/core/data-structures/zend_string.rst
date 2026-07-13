@@ -70,7 +70,7 @@ new strings.
    -  -  Function/Macro [#persistent]_
       -  Description
 
-   -  -  ``ZSTR_INIT(s, p)``
+   -  -  ``ZSTR_INIT_LITERAL(s, p)``
       -  Creates a new string from a string literal.
 
    -  -  ``zend_string_init(s, l, p)``
@@ -122,7 +122,7 @@ strings.
 
    -  -  ``ZSTR_HASH``
       -  ``Z_STRHASH[_P]``
-      -  Computes the string has if it hasn't already been, and returns it.
+      -  Computes the string hash if it hasn't already been, and returns it.
 
    -  -  ``ZSTR_H``
       -  \-

@@ -182,15 +182,4 @@ static inline void php_hash_free_context(const php_hash_ops *ops, void *ctx) {
 	efree(ctx);
 }
 
-static inline void php_hash_bin2hex(char *out, const unsigned char *in, size_t in_len)
-{
-	static const char hexits[17] = "0123456789abcdef";
-	size_t i;
-
-	for(i = 0; i < in_len; i++) {
-		out[i * 2]       = hexits[in[i] >> 4];
-		out[(i * 2) + 1] = hexits[in[i] &  0x0F];
-	}
-}
-
 #endif	/* PHP_HASH_H */

@@ -9,10 +9,28 @@ PHP                                                                        NEWS
   . Fixed bug GH-15672 and GH-15911 (Stack overflow when an internal function
     recurses through zend_call_function, such as a self-attached SPL
     iterator). (iliaal)
+  . Lock unmodified readonly properties for modification after clone-with.
+    (NickSdot)
 
 - Calendar:
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
     INT_MAX year). (arshidkv12)
+
+- Curl:
+  . Added CURLOPT_SEEKFUNCTION and the CURL_SEEKFUNC_OK, CURL_SEEKFUNC_FAIL
+    and CURL_SEEKFUNC_CANTSEEK constants, letting libcurl rewind a streamed
+    request body to resend it on a redirect, multi-pass authentication or a
+    retried reused connection. (GrahamCampbell)
+
+- Date:
+  . Update timelib to 2022.17. (Derick)
+  . Fixed bug GH-19803 (Parsing a string with a single white space does create
+    an error). (Derick)
+  . Fixed Unix timestamps in February of the year 0 are misparsed with
+    @-notation. (LukasGelbmann)
+  . Fixed bug GH-11368 (idate() doesn't work for the year -1). (Derick)
+  . Fixed bug GH-11310 (__debugInfo does nothing on userland classes extending
+    Date classes). (Derick)
 
 - DBA:
   . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
@@ -20,6 +38,13 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-22570 (Stack overflow when serializing a deeply nested
     Dom\XMLDocument). (iliaal)
+  . Fixed Dom\DtdNamedNodeMap integer dimension access so negative indexes
+    return NULL and indexes outside the int range throw ValueError instead of
+    returning the first entity or notation. (Weilin Du)
+  . Fixed bug GH-22623 (use after free with namespace nodes from
+    XSLTProcessor::registerFunctions())/ (David Carlier)
+  . Fixed bug GH-22554 (use-after-free with XPath callback returning a node
+    from a foreign document). (David Carlier)
 
 - Exif:
   . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
@@ -36,6 +61,9 @@ PHP                                                                        NEWS
   . IntlDateFormatter::parse()/datefmt_parse() and
     IntlDateFormatter::localtime()/datefmt_localtime() now raise TypeError
     when the offset argument is not of type int. (Weilin Du)
+
+- JSON:
+  . Report unterminated JSON strings as syntax errors. (timwolla)
 
 - Opcache:
   . Fixed bug GH-21770 (Infinite recursion in property hook getter in opcache
@@ -63,21 +91,39 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug GH-22585 (OOM on bailout with uninitialized
     do_request() parameters). (David Carlier)
+  . Fixed xsd:hexBinary decoding to reject odd-length values instead of
+    silently truncating the last nibble. (Weilin Du)
 
 - Standard:
   . Fixed sleep() and usleep() to reject values that overflow the underlying
     unsigned int timeout. (Weilin Du)
+  . Fixed bug GH-22671 (assert.bail aborts the process when the assert callback
+    throws an exception whose reporting re-throws). (iliaal)
+  . Fixed bug GH-22678 (Use-after-free in array_multisort() when the comparator
+    mutates the array being sorted). (azchin, iliaal)
 
 - Streams:
   . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
     and a proxy set). (CVE-2026-12184) (ndossche)
 
+- URI:
+  . Fixed bug GH-22628 (Percent-encoding of caret in WHATWG URL paths is not
+    performed). (kocsismate)
+  . Fixed bug GH-22629 (WHATWG Validation error incorrect with empty host and
+    non-empty userinfo). (kocsismate)
+
 - Zip:
+  . Fixed bug GH-22649 (ZipArchive::setCommentName() and setCommentIndex()
+    could crash after overwriting an entry and resetting its inherited
+    unchanged comment). (Weilin Du)
   . Fixed bug GH-21705 (ZipArchive::getFromIndex() ignores
     ZipArchive::FL_UNCHANGED for deleted entries). (Weilin Du)
   . Fixed bug GH-22176 (memory leak with ZipArchive::registerCancelBack()
     is used with reference returning function during shutdown).
     (David Carlier)
+  . ZipArchive::addGlob() and ZipArchive::addPattern() now raise a TypeError
+    for invalid "remove_all_path", "comp_method", "comp_flags", and
+    "enc_method" options instead of emitting a warning. (David Carlier)
 
 02 Jul 2026, PHP 8.6.0alpha1
 

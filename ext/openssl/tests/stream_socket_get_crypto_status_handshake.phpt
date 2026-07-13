@@ -27,6 +27,46 @@ $serverCode = <<<'CODE'
 CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
+/* Plain TCP proxy that forwards the server handshake flight in fragments, so the client's
+ * non-blocking handshake sees a partial TLS record and reports WANT_READ instead of completing
+ * in a single call (which can otherwise happen depending on timing). */
+$proxyCode = <<<'CODE'
+    $upstream = stream_socket_client("tcp://{{ ADDR }}", $errno, $errstr, 30, STREAM_CLIENT_CONNECT);
+    stream_set_blocking($upstream, false);
+
+    $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
+    $server = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr, $flags);
+    phpt_notify_server_start($server);
+
+    $conn = stream_socket_accept($server);
+    stream_set_blocking($conn, false);
+
+    $read = [$upstream, $conn];
+    while (stream_select($read, $write, $except, 1)) {
+        foreach ($read as $fp) {
+            $data = stream_get_contents($fp);
+            if ($data === '') {
+                continue;
+            }
+            if ($fp === $conn) {
+                fwrite($upstream, $data);
+            } else {
+                /* Fragment server -> client to force a partial TLS record. */
+                foreach (str_split($data, (int) ceil(strlen($data) / 3)) as $part) {
+                    fwrite($conn, $part);
+                    usleep(50000);
+                }
+            }
+        }
+        if (feof($upstream) || feof($conn)) {
+            break;
+        }
+        $read = [$upstream, $conn];
+    }
+
+    phpt_wait();
+CODE;
+
 /* Client connects over plain TCP, then completes the TLS handshake in non-blocking mode, using
  *  the reported crypto status to select the right direction to wait on. */
 $clientCode = <<<'CODE'
@@ -73,7 +113,8 @@ $clientCode = <<<'CODE'
 
     stream_set_blocking($client, true);
     echo trim(fgets($client)), "\n";
-    phpt_notify();
+    phpt_notify('server');
+    phpt_notify('proxy');
     fclose($client);
 CODE;
 $clientCode = sprintf($clientCode, $peerName);
@@ -83,7 +124,10 @@ $certificateGenerator = new CertificateGenerator();
 $certificateGenerator->saveNewCertAsFileWithKey($peerName, $certFile);
 
 include 'ServerClientTestCase.inc';
-ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+ServerClientTestCase::getInstance()->run($clientCode, [
+    'server' => $serverCode,
+    'proxy' => $proxyCode,
+]);
 ?>
 --CLEAN--
 <?php

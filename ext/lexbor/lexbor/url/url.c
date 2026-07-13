@@ -159,7 +159,7 @@ static const uint8_t lxb_url_map[256] =
     LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5b ([) */
     LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5c (\) */
     LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5d (]) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5e (^) */
+    LXB_URL_MAP_USERINFO|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5e (^) */
     LXB_URL_MAP_UNDEF, /* 0x5f (_) */
     LXB_URL_MAP_PATH|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x60 (`) */
     LXB_URL_MAP_UNDEF, /* 0x61 (a) */
@@ -1814,7 +1814,7 @@ again:
         if (at_sign) {
             if (begin == p || begin == p - 1) {
                 status = lxb_url_log_append(parser, p,
-                                            LXB_URL_ERROR_TYPE_INVALID_CREDENTIALS);
+                                            LXB_URL_ERROR_TYPE_HOST_MISSING);
                 if (status != LXB_STATUS_OK) {
                     lxb_url_parse_return(orig_data, buf, status);
                 }

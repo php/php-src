@@ -68,6 +68,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added Z_PARAM_ENUM().
   . Added zend_enum_fetch_case_id().
   . Added zend_enum_get_case_by_id().
+  . Added zend_bin2hex() and zend_bin2hex_str() as helper functions to remove
+    dependencies on /ext/hash in various extensions.
   . ZEND_INI_GET_ADDR() is now a void* pointer instead of a char* pointer. This
     more correctly represents the generic nature of the returned pointer and
     allows to remove explicit casts, but possibly breaks pointer arithmetic
@@ -166,6 +168,18 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 ========================
 3. Module changes
 ========================
+
+- ext/date:
+  . php_idate() now returns the result state, and moves the return value into an
+    out parameter.
+
+- ext/intl:
+  . Added intl_icu_compat.h with helpers and feature macros for ICU
+    version-specific API differences. Code in ext/intl should use the
+    intl_icu_compat_* helpers and INTL_ICU_HAS_* macros instead of adding
+    direct U_ICU_VERSION_* guards for supported ICU API variants.
+  . The internal grapheme_get_break_iterator() helper no longer accepts a
+    stack buffer argument; pass only the UErrorCode* status argument.
 
 - ext/mbstring:
   . Added GB18030-2022 to default encoding list for zh-CN.

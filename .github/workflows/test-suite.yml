@@ -166,10 +166,10 @@ jobs:
         with:
           configurationParameters: >-
             ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address"' || '' }}
-            ${{ matrix.variation && 'CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE" CXXFLAGS="-DZEND_VERIFY_TYPE_INFERENCE"' || '' }}
+            ${{ matrix.variation && 'CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE"' || '' }}
             ${{ (matrix.variation && fromJson(inputs.branch).jobs.LINUX_X64.config.variation_enable_zend_max_execution_timers) && '--enable-zend-max-execution-timers' || '' }}
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
-            ${{ matrix.debug && 'CXXFLAGS="-D_GLIBCXX_ASSERTIONS"' || '' }}
+            ${{ (matrix.variation || matrix.debug) && format('CXXFLAGS="{0} {1}"', matrix.variation && '-DZEND_VERIFY_TYPE_INFERENCE' || '', matrix.debug && '-D_GLIBCXX_ASSERTIONS' || '') || '' }}
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
           asan: ${{ matrix.asan && 'true' || 'false' }}
           skipSlow: ${{ (matrix.asan && !inputs.all_variations) && 'true' || 'false' }}
@@ -573,10 +573,6 @@ jobs:
           php -r '$c = file_get_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php"); $c = str_replace("public function testSanitizeDeepNestedString()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testSanitizeDeepNestedString()", $c); file_put_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php", $c);'
           # Buggy FFI test in Symfony, see https://github.com/symfony/symfony/issues/47668
           php -r '$c = file_get_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php"); $c = str_replace("public function testCastNonTrailingCharPointer()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testCastNonTrailingCharPointer()", $c); file_put_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php", $c);'
-          # Causes massive amounts of system calls with USE_ZEND_ALLOC=0, exceeding the timeout
-          if [ -e 'src/Symfony/Component/Console/Tests/Helper/FileInputHelperTest.php' ]; then
-            php -r '$c = file_get_contents("src/Symfony/Component/Console/Tests/Helper/FileInputHelperTest.php"); $c = str_replace("public function testReadWithPasteDetectionAbortsBeyondMaxBytes()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testReadWithPasteDetectionAbortsBeyondMaxBytes()", $c); file_put_contents("src/Symfony/Component/Console/Tests/Helper/FileInputHelperTest.php", $c);'
-          fi
           export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
