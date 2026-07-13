@@ -102,6 +102,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-22395 (base_convert() outputs at most 64 characters).
     (Weilin Du)
+  . Fixed bug GH-22678 (Use-after-free in array_multisort() when the comparator
+    mutates the array being sorted). (azchin, iliaal)
 
 - URI:
   . Fixed behavior of Uri\WhatWg\Url wither methods with regards to empty
