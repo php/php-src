@@ -14,6 +14,18 @@ class Test {
     }
 }
 
+class TestWithDefault {
+    public readonly int $prop = 1;
+
+    public function __construct() {
+        try {
+            $this->prop = 2;
+        } catch (Error $e) {
+            echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+        }
+    }
+}
+
 function byRef(&$ref) {}
 
 $test = new Test;
@@ -66,6 +78,8 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+var_dump(new TestWithDefault()->prop);
+
 ?>
 --EXPECT--
 int(1)
@@ -80,3 +94,5 @@ array(0) {
 }
 Cannot indirectly modify readonly property Test::$prop2
 Cannot indirectly modify readonly property Test::$prop2
+Error: Cannot modify readonly property TestWithDefault::$prop
+int(1)
