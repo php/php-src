@@ -262,29 +262,12 @@ static int php_openssl_dtls_sockop_close(php_stream *stream, int close_handle)
 	return 0;
 }
 
-/* Supply the passphrase for an encrypted local_pk from the "passphrase" option. */
-static int php_openssl_dtls_passwd_callback(char *buf, int num, int verify, void *data)
-{
-	php_stream *stream = (php_stream *)data;
-	zval *val = NULL;
-	char *passphrase = NULL;
-
-	GET_VER_OPT_STRING("passphrase", passphrase);
-
-	if (passphrase != NULL && Z_STRLEN_P(val) < (size_t)num - 1) {
-		memcpy(buf, Z_STRVAL_P(val), Z_STRLEN_P(val) + 1);
-		return (int)Z_STRLEN_P(val);
-	}
-	return 0;
-}
-
 /* Apply the "ssl" context options to the SSL_CTX: peer verification, ciphers and
  * the local certificate. Set on the context so SSL_new() inherits them. */
 static int php_openssl_dtls_apply_context(php_stream *stream, php_openssl_dtls_data_t *dtlssock)
 {
 	SSL_CTX *ctx = dtlssock->ctx;
-	char *cafile = NULL, *capath = NULL, *cipherlist = NULL, *certfile = NULL;
-	size_t certfile_len = 0;
+	char *cafile = NULL, *capath = NULL, *cipherlist = NULL;
 	zval *val;
 
 	/* DTLS 1.0 is deprecated; require DTLS 1.2 or higher. */
@@ -325,41 +308,15 @@ static int php_openssl_dtls_apply_context(php_stream *stream, php_openssl_dtls_d
 		return -1;
 	}
 
-	/* Local certificate and private key as file paths. */
-	GET_VER_OPT_STRINGL("local_cert", certfile, certfile_len);
-	if (certfile != NULL) {
-		char resolved[MAXPATHLEN];
-		char *private_key = NULL;
-		size_t private_key_len = 0;
+	/* A passphrase for an encrypted private key (used by set_local_cert below). */
+	if (GET_VER_OPT("passphrase")) {
+		SSL_CTX_set_default_passwd_cb_userdata(ctx, stream);
+		SSL_CTX_set_default_passwd_cb(ctx, php_openssl_passwd_callback);
+	}
 
-		if (!php_openssl_check_path_ex(certfile, certfile_len, resolved, 0, false, false,
-				"local_cert in ssl stream context", stream)) {
-			return -1;
-		}
-		if (SSL_CTX_use_certificate_chain_file(ctx, resolved) != 1) {
-			php_stream_warn(stream, WriteFailed, "Unable to set local cert chain file `%s'", certfile);
-			return -1;
-		}
-
-		/* A passphrase for an encrypted private key. */
-		if (GET_VER_OPT("passphrase")) {
-			SSL_CTX_set_default_passwd_cb_userdata(ctx, stream);
-			SSL_CTX_set_default_passwd_cb(ctx, php_openssl_dtls_passwd_callback);
-		}
-
-		/* local_pk defaults to the certificate file (combined PEM). */
-		GET_VER_OPT_STRINGL("local_pk", private_key, private_key_len);
-		if (private_key != NULL && !php_openssl_check_path_ex(private_key, private_key_len, resolved, 0,
-				false, false, "local_pk in ssl stream context", stream)) {
-			return -1;
-		}
-		if (SSL_CTX_use_PrivateKey_file(ctx, resolved, SSL_FILETYPE_PEM) != 1) {
-			php_stream_warn(stream, WriteFailed, "Unable to set private key file `%s'", resolved);
-			return -1;
-		}
-		if (SSL_CTX_check_private_key(ctx) != 1) {
-			php_stream_warn(stream, PermissionDenied, "Private key does not match certificate!");
-		}
+	/* Local certificate chain and private key as file paths. */
+	if (php_openssl_set_local_cert(ctx, stream) != SUCCESS) {
+		return -1;
 	}
 
 	return 0;

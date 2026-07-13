@@ -23,6 +23,7 @@
 #include "php.h"
 #include "php_network.h"
 
+#include <openssl/ssl.h>
 #include <openssl/x509.h>
 
 /* Match the peer certificate against the peer_fingerprint context option. */
@@ -37,5 +38,12 @@ char *php_openssl_get_url_name(const char *resourcename, size_t resourcenamelen,
 /* Turn on crypto right after the base transport connected (enable_on_connect). */
 int php_openssl_setup_crypto_on_connect(php_stream *stream,
 		php_stream_xport_crypt_method_t method);
+
+/* SSL_CTX default passphrase callback: supplies the "passphrase" context option. */
+int php_openssl_passwd_callback(char *buf, int num, int verify, void *data);
+
+/* Load the local_cert chain and local_pk private key onto the SSL_CTX. The caller
+ * must have installed the passphrase callback for an encrypted key. */
+zend_result php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream);
 
 #endif /* PHP_OPENSSL_XP_COMMON_H */

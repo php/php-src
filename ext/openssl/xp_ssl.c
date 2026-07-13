@@ -617,24 +617,7 @@ static zend_result php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *pe
 }
 /* }}} */
 
-static int php_openssl_passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
-{
-	php_stream *stream = (php_stream *)data;
-	zval *val = NULL;
-	char *passphrase = NULL;
-	/* TODO: could expand this to make a callback into PHP user-space */
-
-	GET_VER_OPT_STRING("passphrase", passphrase);
-
-	if (passphrase) {
-		if (Z_STRLEN_P(val) < (size_t)num - 1) {
-			memcpy(buf, Z_STRVAL_P(val), Z_STRLEN_P(val)+1);
-			return (int)Z_STRLEN_P(val);
-		}
-	}
-	return 0;
-}
-/* }}} */
+/* php_openssl_passwd_callback() is shared with the dtls:// transport; see xp_common.c. */
 
 #ifdef PHP_WIN32
 #define RETURN_CERT_VERIFY_FAILURE(code) X509_STORE_CTX_set_error(x509_store_ctx, code); return 0;
@@ -908,53 +891,7 @@ static void php_openssl_disable_peer_verification(SSL_CTX *ctx, php_stream *stre
 }
 /* }}} */
 
-static zend_result php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ */
-{
-	zval *val = NULL;
-	char *certfile = NULL;
-	size_t certfile_len;
-
-	GET_VER_OPT_STRINGL("local_cert", certfile, certfile_len);
-
-	if (certfile) {
-		char resolved_path_buff[MAXPATHLEN];
-		const char *private_key = NULL;
-		size_t private_key_len;
-
-		if (!php_openssl_check_path_ex(
-				certfile, certfile_len, resolved_path_buff, 0, false, false,
-				"local_cert in ssl stream context", stream)) {
-			php_stream_warn(stream, NotFound, "Unable to get real path of certificate file `%s'", certfile);
-			return FAILURE;
-		}
-		/* a certificate to use for authentication */
-		if (SSL_CTX_use_certificate_chain_file(ctx, resolved_path_buff) != 1) {
-			php_stream_warn(stream, WriteFailed,
-				"Unable to set local cert chain file `%s'; Check that your cafile/capath "
-				"settings include details of your certificate and its issuer",
-				certfile);
-			return FAILURE;
-		}
-
-		GET_VER_OPT_STRINGL("local_pk", private_key, private_key_len);
-		if (private_key && !php_openssl_check_path_ex(
-				private_key, private_key_len, resolved_path_buff, 0, false, false,
-				"local_pk in ssl stream context", stream)) {
-			php_stream_warn(stream, NotFound, "Unable to get real path of private key file `%s'", private_key);
-			return FAILURE;
-		}
-		if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
-			php_stream_warn(stream, WriteFailed, "Unable to set private key file `%s'", resolved_path_buff);
-			return FAILURE;
-		}
-		if (!SSL_CTX_check_private_key(ctx)) {
-			php_stream_warn(stream, PermissionDenied, "Private key does not match certificate!");
-		}
-	}
-
-	return SUCCESS;
-}
-/* }}} */
+/* php_openssl_set_local_cert() is shared with the dtls:// transport; see xp_common.c. */
 
 static inline int php_openssl_get_min_proto_version_flag(int flags) /* {{{ */
 {
