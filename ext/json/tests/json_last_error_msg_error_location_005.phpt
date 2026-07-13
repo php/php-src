@@ -69,12 +69,12 @@ string(31) "Syntax error near location 1:11"
 Error on unterminated value after UTF-16 key:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1:9"
+string(31) "Syntax error near location 1:24"
 
 Error with multiple UTF-16 keys:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1:22"
+string(31) "Syntax error near location 1:42"
 
 Error with BMP characters:
 bool(false)
@@ -89,12 +89,12 @@ string(31) "Syntax error near location 1:11"
 Error in array with UTF-16:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1:12"
+string(31) "Syntax error near location 1:22"
 
 Error in nested structure with UTF-16:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1:18"
+string(31) "Syntax error near location 1:28"
 
 Error with UTF-16 and control chars:
 bool(false)
