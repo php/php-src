@@ -533,6 +533,10 @@ PHP 8.6 UPGRADE NOTES
 13. Other Changes
 ========================================
 
+- Core:
+  . In case of a hard OOM PHP does abort() instead of exit() changing the exit
+    code to 134 from 1
+
 ========================================
 14. Performance Improvements
 ========================================
