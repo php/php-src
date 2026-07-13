@@ -81,6 +81,8 @@ PHP                                                                        NEWS
     segfaults). (iliaal)
 
 - Standard:
+  . Fixed use-after-free in serialize() when a nested magic callback releases
+    the current object. (PuH4ck3rX)
   . Fixed bug GH-22360 (convert.base64-encode corruption on
     incremental flush). (David Carlier)
   . Fixed bug GH-22395 (base_convert() outputs at most 64 characters).

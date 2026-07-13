@@ -726,10 +726,7 @@ PHP_FUNCTION(var_export)
 
 static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash, bool in_rcn_array, bool is_root);
 
-/**
- * @param bool in_rcn_array Whether the element appears in a potentially nested array with RC > 1.
- */
-static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var, bool in_rcn_array) /* {{{ */
+static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /* {{{ */
 {
 	zval *zv;
 	zend_ulong key;
@@ -740,13 +737,6 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var, b
 	if (is_ref) {
 		/* pass */
 	} else if (Z_TYPE_P(var) != IS_OBJECT) {
-		return 0;
-	} else if (!in_rcn_array
-	 && Z_REFCOUNT_P(var) == 1
-	 && (Z_OBJ_P(var)->properties == NULL || GC_REFCOUNT(Z_OBJ_P(var)->properties) == 1)
-	 /* __serialize and __sleep may arbitrarily increase the refcount */
-	 && Z_OBJCE_P(var)->__serialize == NULL
-	 && zend_hash_find_known_hash(&Z_OBJCE_P(var)->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP)) == NULL) {
 		return 0;
 	}
 
@@ -1008,7 +998,7 @@ static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable
 			 * since we already wrote the length of the array before */
 			if (Z_TYPE_P(data) == IS_ARRAY) {
 				if (UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))) {
-					php_add_var_hash(var_hash, struc, in_rcn_array);
+					php_add_var_hash(var_hash, struc);
 					smart_str_appendl(buf, "N;", 2);
 				} else {
 					php_var_serialize_intern(buf, data, var_hash, in_rcn_array, false);
@@ -1059,7 +1049,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_
 		return;
 	}
 
-	if (var_hash && (var_already = php_add_var_hash(var_hash, struc, in_rcn_array))) {
+	if (var_hash && (var_already = php_add_var_hash(var_hash, struc))) {
 		if (var_already == -1) {
 			/* Reference to an object that failed to serialize, replace with null. */
 			smart_str_appendl(buf, "N;", 2);
