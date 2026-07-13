@@ -193,6 +193,24 @@ ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 	return object;
 }
 
+ZEND_API void ZEND_FASTCALL zend_object_set_properties_reinitable(zend_object *object, bool reinitable)
+{
+	if (!ZEND_CLASS_HAS_READONLY_PROPS(object->ce)) {
+		return;
+	}
+
+	for (uint32_t i = 0; i < object->ce->default_properties_count; i++) {
+		zval *prop = OBJ_PROP_NUM(object, i);
+		if (reinitable) {
+			if (!Z_ISUNDEF_P(prop)) {
+				Z_PROP_FLAG_P(prop) |= IS_PROP_REINITABLE;
+			}
+		} else {
+			Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
+		}
+	}
+}
+
 ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, const zend_object *old_object)
 {
 	bool has_clone_method = old_object->ce->clone != NULL;
