@@ -93,6 +93,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-22683 (Reflection(Class)Constant::__toString() should not warn
     on NAN conversions). (Khaled Alam)
+  . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
+    (DanielEScherzer)
 
 - Session:
   . Fixed bug GH-21314 (Different session garbage collector behavior between

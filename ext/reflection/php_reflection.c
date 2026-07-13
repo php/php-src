@@ -294,9 +294,9 @@ static zend_object *reflection_objects_new(zend_class_entry *class_type) /* {{{ 
 }
 /* }}} */
 
-static void _const_string(smart_str *str, const char *name, zval *value, const char *indent);
+static void _const_string(smart_str *str, const zend_string *name, zval *value, const char *indent);
 static void _function_string(smart_str *str, const zend_function *fptr, const zend_class_entry *scope, const char* indent);
-static void _property_string(smart_str *str, const zend_property_info *prop, const char *prop_name, const char* indent);
+static void _property_string(smart_str *str, const zend_property_info *prop, const zend_string *prop_name, const char* indent);
 static void _class_const_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char* indent);
 static void _enum_case_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char* indent);
 static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent);
@@ -311,7 +311,8 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
 	if (ce->doc_comment) {
-		smart_str_append_printf(str, "%s%s", indent, ZSTR_VAL(ce->doc_comment));
+		smart_str_appends(str, indent);
+		smart_str_append(str, ce->doc_comment);
 		smart_str_appendc(str, '\n');
 	}
 
@@ -517,7 +518,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 				if (prop_name && ZSTR_LEN(prop_name) && ZSTR_VAL(prop_name)[0]) { /* skip all private and protected properties */
 					if (!zend_hash_exists(&ce->properties_info, prop_name)) {
 						count++;
-						_property_string(&prop_str, NULL, ZSTR_VAL(prop_name), ZSTR_VAL(sub_indent));
+						_property_string(&prop_str, NULL, prop_name, ZSTR_VAL(sub_indent));
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -572,7 +573,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 /* }}} */
 
 /* {{{ _const_string */
-static void _const_string(smart_str *str, const char *name, zval *value, const char *indent)
+static void _const_string(smart_str *str, const zend_string *name, zval *value, const char *indent)
 {
 	const char *type = zend_zval_type_name(value);
 	uint32_t flags = Z_CONSTANT_FLAGS_P(value);
@@ -602,7 +603,7 @@ static void _const_string(smart_str *str, const char *name, zval *value, const c
 
 	smart_str_appends(str, type);
 	smart_str_appendc(str, ' ');
-	smart_str_appends(str, name);
+	smart_str_append(str, name);
 	smart_str_appends(str, " ] { ");
 
 	if (Z_TYPE_P(value) == IS_ARRAY) {
@@ -635,7 +636,9 @@ static void _class_const_string(smart_str *str, const zend_string *name, zend_cl
 	const char *type = type_str ? ZSTR_VAL(type_str) : zend_zval_type_name(&c->value);
 
 	if (c->doc_comment) {
-		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(c->doc_comment));
+		smart_str_appends(str, indent);
+		smart_str_append(str, c->doc_comment);
+		smart_str_appendc(str, '\n');
 	}
 	smart_str_append_printf(str, "%sConstant [ %s%s %s %s ] { ",
 		indent, final, visibility, type, ZSTR_VAL(name));
@@ -869,9 +872,13 @@ static void _function_string(smart_str *str, const zend_function *fptr, const ze
 	 * swallowed, leading to an unaligned comment.
 	 */
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
-		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->op_array.doc_comment));
+		smart_str_appends(str, indent);
+		smart_str_append(str, fptr->op_array.doc_comment);
+		smart_str_appendc(str, '\n');
 	} else if (fptr->type == ZEND_INTERNAL_FUNCTION && fptr->internal_function.doc_comment) {
-		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->internal_function.doc_comment));
+		smart_str_appends(str, indent);
+		smart_str_append(str, fptr->internal_function.doc_comment);
+		smart_str_appendc(str, '\n');
 	}
 
 	smart_str_appends(str, indent);
@@ -979,14 +986,18 @@ static zval *property_get_default(const zend_property_info *prop_info) {
 }
 
 /* {{{ _property_string */
-static void _property_string(smart_str *str, const zend_property_info *prop, const char *prop_name, const char* indent)
+static void _property_string(smart_str *str, const zend_property_info *prop, const zend_string *prop_name, const char* indent)
 {
 	if (prop && prop->doc_comment) {
-		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(prop->doc_comment));
+		smart_str_appends(str, indent);
+		smart_str_append(str, prop->doc_comment);
+		smart_str_appendc(str, '\n');
 	}
 	smart_str_append_printf(str, "%sProperty [ ", indent);
 	if (!prop) {
-		smart_str_append_printf(str, "<dynamic> public $%s", prop_name);
+		ZEND_ASSERT(prop_name && "Properties without info must have a name provided");
+		smart_str_appends(str, "<dynamic> public $");
+		smart_str_append(str, prop_name);
 	} else {
 		if (prop->flags & ZEND_ACC_ABSTRACT) {
 			smart_str_appends(str, "abstract ");
@@ -1032,11 +1043,15 @@ static void _property_string(smart_str *str, const zend_property_info *prop, con
 			smart_str_appendc(str, ' ');
 			zend_string_release(type_str);
 		}
+		smart_str_appendc(str, '$');
 		if (!prop_name) {
 			const char *class_name;
-			zend_unmangle_property_name(prop->name, &class_name, &prop_name);
+			const char *prop_name_cstr;
+			zend_unmangle_property_name(prop->name, &class_name, &prop_name_cstr);
+			smart_str_appends(str, prop_name_cstr);
+		} else {
+			smart_str_append(str, prop_name);
 		}
-		smart_str_append_printf(str, "$%s", prop_name);
 
 		const zval *default_value = property_get_default(prop);
 		if (default_value && !Z_ISUNDEF_P(default_value)) {
@@ -1092,9 +1107,21 @@ static void _extension_ini_string(const zend_ini_entry *ini_entry, smart_str *st
 		}
 
 		smart_str_appends(str, "> ]\n");
-		smart_str_append_printf(str, "      Current = '%s'\n", ini_entry->value ? ZSTR_VAL(ini_entry->value) : "");
+		if (ini_entry->value) {
+			smart_str_appends(str, "      Current = '");
+			smart_str_append(str, ini_entry->value);
+			smart_str_appends(str, "'\n");
+		} else {
+			smart_str_appends(str, "      Current = ''\n");
+		}
 		if (ini_entry->modified) {
-			smart_str_append_printf(str, "      Default = '%s'\n", ini_entry->orig_value ? ZSTR_VAL(ini_entry->orig_value) : "");
+			if (ini_entry->orig_value) {
+				smart_str_appends(str, "      Default = '");
+				smart_str_append(str, ini_entry->orig_value);
+				smart_str_appends(str, "'\n");
+			} else {
+				smart_str_appends(str, "      Default = ''\n");
+			}
 		}
 		smart_str_appends(str, "    }\n");
 	}
@@ -1183,7 +1210,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module) /
 
 		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
 			if (ZEND_CONSTANT_MODULE_NUMBER(constant) == module->module_number) {
-				_const_string(&str_constants, ZSTR_VAL(constant->name), &constant->value, "    ");
+				_const_string(&str_constants, constant->name, &constant->value, "    ");
 				num_constants++;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -5744,7 +5771,7 @@ ZEND_METHOD(ReflectionProperty, __toString)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(ref);
-	_property_string(&str, ref->prop, ZSTR_VAL(ref->unmangled_name), "");
+	_property_string(&str, ref->prop, ref->unmangled_name, "");
 	RETURN_STR(smart_str_extract(&str));
 }
 /* }}} */
@@ -8167,7 +8194,7 @@ ZEND_METHOD(ReflectionConstant, __toString)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	GET_REFLECTION_OBJECT_PTR(const_);
-	_const_string(&str, ZSTR_VAL(const_->name), &const_->value, "");
+	_const_string(&str, const_->name, &const_->value, "");
 	RETURN_STR(smart_str_extract(&str));
 }
 
