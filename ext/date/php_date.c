@@ -17,6 +17,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_versioning.h"
+#include "ext/user_cache/php_user_cache.h"
 #include "php_date.h"
 #include "zend_attributes.h"
 #include "zend_interfaces.h"
@@ -441,6 +442,8 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)
 
 #define DATE_TIMEZONEDB      php_date_global_timezone_db ? php_date_global_timezone_db : timelib_builtin_db()
 
+static void php_date_register_user_cache_handlers(void);
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(date)
 {
@@ -451,6 +454,9 @@ PHP_MINIT_FUNCTION(date)
 	php_date_global_timezone_db = NULL;
 	php_date_global_timezone_db_enabled = 0;
 	DATEG(last_errors) = NULL;
+
+	php_date_register_user_cache_handlers();
+
 	return SUCCESS;
 }
 /* }}} */
@@ -4757,6 +4763,368 @@ static void php_date_interval_initialize_from_hash(php_interval_obj *intobj, con
 
 	intobj->initialized = true;
 } /* }}} */
+
+#define PHP_DATE_USER_CACHE_STATE_TIMEZONE "timezone"
+#define PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN (sizeof(PHP_DATE_USER_CACHE_STATE_TIMEZONE) - 1)
+#define PHP_DATE_USER_CACHE_STATE_CTIME "ctime"
+#define PHP_DATE_USER_CACHE_STATE_CTIME_LEN (sizeof(PHP_DATE_USER_CACHE_STATE_CTIME) - 1)
+
+static void php_date_user_cache_add_assoc_int64(zval *arr, const char *name, int64_t value)
+{
+#if PHP_DATE_SIZEOF_LONG == 8
+	add_assoc_long(arr, name, (zend_long) value);
+#else
+	add_assoc_str(arr, name, zend_strpprintf(0, "%lld", (long long) value));
+#endif
+}
+
+static void php_date_user_cache_copy_time_snapshot(timelib_time *dst, const timelib_time *src)
+{
+	memset(dst, 0, sizeof(*dst));
+
+	dst->y = src->y;
+	dst->m = src->m;
+	dst->d = src->d;
+	dst->h = src->h;
+	dst->i = src->i;
+	dst->s = src->s;
+	dst->us = src->us;
+	dst->z = src->z;
+	dst->dst = src->dst;
+	dst->relative = src->relative;
+	dst->sse = src->sse;
+	dst->have_time = src->have_time;
+	dst->have_date = src->have_date;
+	dst->have_zone = src->have_zone;
+	dst->have_relative = src->have_relative;
+	dst->have_weeknr_day = src->have_weeknr_day;
+	dst->sse_uptodate = src->sse_uptodate;
+	dst->tim_uptodate = src->tim_uptodate;
+	dst->is_localtime = src->is_localtime;
+	dst->zone_type = src->zone_type;
+}
+
+static bool php_date_copy_user_cache_state(
+		void *ctx,
+		zend_object *new_object,
+		zend_object *old_object,
+		php_user_cache_safe_direct_clone_value_func_t clone_value)
+{
+	php_date_obj *new_obj, *old_obj;
+	php_timezone_obj *new_tzobj, *old_tzobj;
+	php_interval_obj *new_intervalobj, *old_intervalobj;
+
+	(void) ctx;
+
+	if (clone_value == NULL) {
+		return false;
+	}
+
+	if (instanceof_function(old_object->ce, date_ce_date) ||
+		instanceof_function(old_object->ce, date_ce_immutable)
+	) {
+		old_obj = php_date_obj_from_obj(old_object);
+		new_obj = php_date_obj_from_obj(new_object);
+
+		if (old_obj->time == NULL) {
+			return true;
+		}
+
+		new_obj->time = timelib_time_clone(old_obj->time);
+
+		return new_obj->time != NULL;
+	}
+
+	if (instanceof_function(old_object->ce, date_ce_timezone)) {
+		old_tzobj = php_timezone_obj_from_obj(old_object);
+		new_tzobj = php_timezone_obj_from_obj(new_object);
+
+		if (!old_tzobj->initialized) {
+			return true;
+		}
+
+		new_tzobj->type = old_tzobj->type;
+		new_tzobj->initialized = true;
+		switch (new_tzobj->type) {
+			case TIMELIB_ZONETYPE_ID:
+				new_tzobj->tzi.tz = old_tzobj->tzi.tz;
+
+				return true;
+			case TIMELIB_ZONETYPE_OFFSET:
+				new_tzobj->tzi.utc_offset = old_tzobj->tzi.utc_offset;
+
+				return true;
+			case TIMELIB_ZONETYPE_ABBR:
+				new_tzobj->tzi.z.utc_offset = old_tzobj->tzi.z.utc_offset;
+				new_tzobj->tzi.z.dst = old_tzobj->tzi.z.dst;
+				new_tzobj->tzi.z.abbr = old_tzobj->tzi.z.abbr != NULL
+					? timelib_strdup(old_tzobj->tzi.z.abbr)
+					: NULL
+				;
+
+				return old_tzobj->tzi.z.abbr == NULL || new_tzobj->tzi.z.abbr != NULL;
+			default:
+				return false;
+		}
+	}
+
+	if (instanceof_function(old_object->ce, date_ce_interval)) {
+		old_intervalobj = php_interval_obj_from_obj(old_object);
+		new_intervalobj = php_interval_obj_from_obj(new_object);
+
+		new_intervalobj->civil_or_wall = old_intervalobj->civil_or_wall;
+		new_intervalobj->from_string = old_intervalobj->from_string;
+
+		if (old_intervalobj->date_string != NULL) {
+			new_intervalobj->date_string = zend_string_copy(old_intervalobj->date_string);
+		}
+
+		new_intervalobj->initialized = old_intervalobj->initialized;
+
+		if (old_intervalobj->diff != NULL) {
+			new_intervalobj->diff = timelib_rel_time_clone(old_intervalobj->diff);
+
+			return new_intervalobj->diff != NULL;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+static bool php_date_user_cache_timezone_pair_to_hash(php_date_obj *dateobj, HashTable *props)
+{
+	zval zv;
+
+	ZVAL_LONG(&zv, dateobj->time->zone_type);
+	zend_hash_str_update(props, "timezone_type", sizeof("timezone_type")-1, &zv);
+
+	switch (dateobj->time->zone_type) {
+		case TIMELIB_ZONETYPE_ID:
+			ZVAL_STRING(&zv, dateobj->time->tz_info->name);
+			break;
+		case TIMELIB_ZONETYPE_OFFSET:
+			ZVAL_NEW_STR(&zv, date_create_tz_offset_str(dateobj->time->z));
+			break;
+		case TIMELIB_ZONETYPE_ABBR:
+			ZVAL_STRING(&zv, dateobj->time->tz_abbr);
+			break;
+		default:
+			return false;
+	}
+	zend_hash_str_update(props, "timezone", sizeof("timezone")-1, &zv);
+
+	return true;
+}
+
+static bool php_date_serialize_datetime_user_cache_state(php_date_obj *dateobj, zval *state)
+{
+	timelib_time snapshot;
+	zval zv;
+
+	if (dateobj->time == NULL || !dateobj->time->is_localtime) {
+		return false;
+	}
+
+	/* ctime (binary timelib_time snapshot) plus timezone_type/timezone. The
+	 * "date" string of the regular __serialize is omitted; unserialize rebuilds
+	 * the time fields from the snapshot but still reads the timezone pair. */
+	array_init_size(state, 3);
+
+	php_date_user_cache_copy_time_snapshot(&snapshot, dateobj->time);
+
+	if (!php_date_user_cache_timezone_pair_to_hash(dateobj, Z_ARRVAL_P(state))) {
+		zval_ptr_dtor(state);
+		ZVAL_UNDEF(state);
+
+		return false;
+	}
+
+	ZVAL_STRINGL(&zv, (const char *) &snapshot, sizeof(snapshot));
+	zend_hash_str_update(Z_ARRVAL_P(state), PHP_DATE_USER_CACHE_STATE_CTIME, PHP_DATE_USER_CACHE_STATE_CTIME_LEN, &zv);
+
+	return true;
+}
+
+static bool php_date_serialize_user_cache_state(zval *state, const zval *object)
+{
+	php_timezone_obj *tzobj;
+	php_interval_obj *intervalobj;
+
+	ZVAL_UNDEF(state);
+
+	if (instanceof_function(Z_OBJCE_P(object), date_ce_date) ||
+		instanceof_function(Z_OBJCE_P(object), date_ce_immutable)
+	) {
+		return php_date_serialize_datetime_user_cache_state(Z_PHPDATE_P((zval *) object), state);
+	}
+
+	if (instanceof_function(Z_OBJCE_P(object), date_ce_timezone)) {
+		tzobj = Z_PHPTIMEZONE_P((zval *) object);
+
+		if (!tzobj->initialized) {
+			return false;
+		}
+
+		array_init_size(state, 2);
+		date_timezone_object_to_hash(tzobj, Z_ARRVAL_P(state));
+
+		return true;
+	}
+
+	if (instanceof_function(Z_OBJCE_P(object), date_ce_interval)) {
+		intervalobj = Z_PHPINTERVAL_P((zval *) object);
+
+		if (!intervalobj->initialized || intervalobj->diff == NULL) {
+			return false;
+		}
+
+		if (intervalobj->from_string && intervalobj->date_string == NULL) {
+			return false;
+		}
+
+		array_init_size(state, intervalobj->from_string ? 2 : 18);
+		date_interval_object_to_hash(intervalobj, Z_ARRVAL_P(state));
+
+		if (!intervalobj->from_string) {
+			add_assoc_long(state, "weekday", intervalobj->diff->weekday);
+			add_assoc_long(state, "weekday_behavior", intervalobj->diff->weekday_behavior);
+			add_assoc_long(state, "first_last_day_of", intervalobj->diff->first_last_day_of);
+			add_assoc_long(state, "special_type", intervalobj->diff->special.type);
+			php_date_user_cache_add_assoc_int64(state, "special_amount", intervalobj->diff->special.amount);
+			add_assoc_long(state, "have_weekday_relative", intervalobj->diff->have_weekday_relative);
+			add_assoc_long(state, "have_special_relative", intervalobj->diff->have_special_relative);
+			add_assoc_long(state, "civil_or_wall", intervalobj->civil_or_wall);
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+static bool php_date_unserialize_datetime_user_cache_state(zval *object, zval *state)
+{
+	php_date_obj *dateobj;
+	timelib_time *time;
+	timelib_tzinfo *tzi;
+	zval *z_ctime, *z_timezone;
+
+	z_ctime = zend_hash_str_find(Z_ARRVAL_P(state), PHP_DATE_USER_CACHE_STATE_CTIME, PHP_DATE_USER_CACHE_STATE_CTIME_LEN);
+	if (z_ctime == NULL) {
+		return false;
+	}
+
+	if (Z_TYPE_P(z_ctime) != IS_STRING || Z_STRLEN_P(z_ctime) != sizeof(timelib_time)) {
+		return false;
+	}
+
+	time = timelib_time_ctor();
+	if (time == NULL) {
+		return false;
+	}
+
+	memcpy(time, Z_STRVAL_P(z_ctime), sizeof(timelib_time));
+	time->tz_abbr = NULL;
+	time->tz_info = NULL;
+
+	switch (time->zone_type) {
+		case TIMELIB_ZONETYPE_ID:
+			z_timezone = zend_hash_str_find(Z_ARRVAL_P(state), PHP_DATE_USER_CACHE_STATE_TIMEZONE, PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN);
+			if (z_timezone == NULL || Z_TYPE_P(z_timezone) != IS_STRING ||
+				UNEXPECTED(zend_str_has_nul_byte(Z_STR_P(z_timezone)))
+			) {
+				timelib_time_dtor(time);
+
+				return false;
+			}
+
+			tzi = php_date_parse_tzfile(Z_STRVAL_P(z_timezone), DATE_TIMEZONEDB);
+			if (tzi == NULL) {
+				timelib_time_dtor(time);
+
+				return false;
+			}
+			time->tz_info = tzi;
+			break;
+		case TIMELIB_ZONETYPE_OFFSET:
+			break;
+		case TIMELIB_ZONETYPE_ABBR:
+			z_timezone = zend_hash_str_find(Z_ARRVAL_P(state), PHP_DATE_USER_CACHE_STATE_TIMEZONE, PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN);
+			if (z_timezone == NULL || Z_TYPE_P(z_timezone) != IS_STRING ||
+				UNEXPECTED(zend_str_has_nul_byte(Z_STR_P(z_timezone)))
+			) {
+				timelib_time_dtor(time);
+
+				return false;
+			}
+
+			time->tz_abbr = timelib_strdup(Z_STRVAL_P(z_timezone));
+			if (time->tz_abbr == NULL) {
+				timelib_time_dtor(time);
+
+				return false;
+			}
+			break;
+		default:
+			timelib_time_dtor(time);
+
+			return false;
+	}
+
+	dateobj = Z_PHPDATE_P(object);
+	if (dateobj->time != NULL) {
+		timelib_time_dtor(dateobj->time);
+	}
+	dateobj->time = time;
+
+	return true;
+}
+
+static bool php_date_unserialize_user_cache_state(zval *object, zval *state)
+{
+	php_timezone_obj *tzobj;
+
+	if (Z_TYPE_P(state) != IS_ARRAY) {
+		return false;
+	}
+
+	if (instanceof_function(Z_OBJCE_P(object), date_ce_date) ||
+		instanceof_function(Z_OBJCE_P(object), date_ce_immutable)
+	) {
+		return php_date_unserialize_datetime_user_cache_state(object, state);
+	}
+
+	if (instanceof_function(Z_OBJCE_P(object), date_ce_timezone)) {
+		tzobj = Z_PHPTIMEZONE_P(object);
+
+		return php_date_timezone_initialize_from_hash(&tzobj, Z_ARRVAL_P(state));
+	}
+
+	if (instanceof_function(Z_OBJCE_P(object), date_ce_interval)) {
+		php_date_interval_initialize_from_hash(Z_PHPINTERVAL_P(object), Z_ARRVAL_P(state));
+
+		return !EG(exception);
+	}
+
+	return false;
+}
+
+static const php_user_cache_safe_direct_handlers php_date_user_cache_handlers = {
+	.prefer_request_local_prototype = true,
+	.copy = php_date_copy_user_cache_state,
+	.state_serialize = php_date_serialize_user_cache_state,
+	.state_unserialize = php_date_unserialize_user_cache_state,
+};
+
+static void php_date_register_user_cache_handlers(void)
+{
+	php_user_cache_safe_direct_register_class(date_ce_date, &php_date_user_cache_handlers);
+	php_user_cache_safe_direct_register_class(date_ce_immutable, &php_date_user_cache_handlers);
+	php_user_cache_safe_direct_register_class(date_ce_timezone, &php_date_user_cache_handlers);
+	php_user_cache_safe_direct_register_class(date_ce_interval, &php_date_user_cache_handlers);
+}
 
 /* {{{ */
 PHP_METHOD(DateInterval, __set_state)
