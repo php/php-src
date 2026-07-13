@@ -80,8 +80,8 @@ PHP                                                                        NEWS
     do_request() parameters). (David Carlier)
   . Fixed xsd:hexBinary decoding to reject odd-length values instead of
     silently truncating the last nibble. (Weilin Du)
-  . Made SOAP scalar decoding errors report the affected type instead of the
-    generic "Violation of encoding rules" message. (Weilin Du)
+  . Made SOAP encoding errors report the affected type or failing operation
+    instead of the generic "Violation of encoding rules" message. (Weilin Du)
 
 - Standard:
   . Fixed sleep() and usleep() to reject values that overflow the underlying

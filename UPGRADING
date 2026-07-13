@@ -147,10 +147,10 @@ PHP 8.6 UPGRADE NOTES
   . WSDL/XML Schema parsing now rejects out-of-range integer values for
     occurrence constraints and integer restriction facets. Negative minOccurs
     and maxOccurs values are rejected as well.
-  . Scalar decoding errors now report the affected type and specific
-    validation failure in SoapFault::faultstring instead of the generic
-    "Encoding: Violation of encoding rules" message. Code that compares the
-    exact fault string may need to be updated.
+  . SOAP encoding errors now report the affected type or failing operation in
+    the error message instead of the generic "Encoding: Violation of encoding
+    rules" message. Code that compares the exact message may need to be
+    updated.
 
 - Sodium:
   . The password-hashing functions sodium_crypto_pwhash(),
