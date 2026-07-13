@@ -132,6 +132,84 @@ char *php_openssl_get_url_name(const char *resourcename, size_t resourcenamelen,
 	return url_name;
 }
 
+int php_openssl_passwd_callback(char *buf, int num, int verify, void *data)
+{
+	php_stream *stream = (php_stream *)data;
+	zval *val;
+
+	/* TODO: could expand this to make a callback into PHP user-space */
+	if (PHP_STREAM_CONTEXT(stream) == NULL) {
+		return 0;
+	}
+
+	val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "passphrase");
+	if (val == NULL || !try_convert_to_string(val)) {
+		return 0;
+	}
+
+	if (Z_STRLEN_P(val) < (size_t)num - 1) {
+		memcpy(buf, Z_STRVAL_P(val), Z_STRLEN_P(val) + 1);
+		return (int)Z_STRLEN_P(val);
+	}
+
+	return 0;
+}
+
+zend_result php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream)
+{
+	zval *val;
+	char *certfile = NULL;
+	size_t certfile_len = 0;
+
+	if (PHP_STREAM_CONTEXT(stream) != NULL
+			&& (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "local_cert")) != NULL
+			&& try_convert_to_string(val)) {
+		certfile = Z_STRVAL_P(val);
+		certfile_len = Z_STRLEN_P(val);
+	}
+
+	if (certfile) {
+		char resolved_path_buff[MAXPATHLEN];
+		char *private_key = NULL;
+		size_t private_key_len = 0;
+
+		if (!php_openssl_check_path_ex(certfile, certfile_len, resolved_path_buff, 0, false, false,
+				"local_cert in ssl stream context", stream)) {
+			php_stream_warn(stream, NotFound, "Unable to get real path of certificate file `%s'", certfile);
+			return FAILURE;
+		}
+		/* a certificate to use for authentication */
+		if (SSL_CTX_use_certificate_chain_file(ctx, resolved_path_buff) != 1) {
+			php_stream_warn(stream, WriteFailed,
+				"Unable to set local cert chain file `%s'; Check that your cafile/capath "
+				"settings include details of your certificate and its issuer",
+				certfile);
+			return FAILURE;
+		}
+
+		if (PHP_STREAM_CONTEXT(stream) != NULL
+				&& (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "local_pk")) != NULL
+				&& try_convert_to_string(val)) {
+			private_key = Z_STRVAL_P(val);
+			private_key_len = Z_STRLEN_P(val);
+		}
+		if (private_key && !php_openssl_check_path_ex(private_key, private_key_len, resolved_path_buff, 0, false, false,
+				"local_pk in ssl stream context", stream)) {
+			php_stream_warn(stream, NotFound, "Unable to get real path of private key file `%s'", private_key);
+			return FAILURE;
+		}
+		if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
+			php_stream_warn(stream, WriteFailed, "Unable to set private key file `%s'", resolved_path_buff);
+			return FAILURE;
+		}
+		if (!SSL_CTX_check_private_key(ctx)) {
+			php_stream_warn(stream, PermissionDenied, "Private key does not match certificate!");
+		}
+	}
+
+	return SUCCESS;
+}
+
 int php_openssl_setup_crypto_on_connect(php_stream *stream,
 		php_stream_xport_crypt_method_t method)
 {
