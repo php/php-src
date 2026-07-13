@@ -650,6 +650,11 @@ PHP_FUNCTION(ftp_nb_fget)
 	}
 
 	/* configuration */
+	if (ftp->in_use) {
+		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
+		RETURN_FALSE;
+	}
+
 	ftp->direction = 0;   /* recv */
 	ftp->closestream = 0; /* do not close */
 
@@ -760,6 +765,10 @@ PHP_FUNCTION(ftp_nb_get)
 		RETURN_THROWS();
 	}
 	GET_FTPBUF(ftp, z_ftp);
+	if (ftp->in_use) {
+		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
+		RETURN_FALSE;
+	}
 	XTYPE(xtype, mode);
 
 	/* ignore autoresume if autoseek is switched off */
@@ -797,8 +806,8 @@ PHP_FUNCTION(ftp_nb_get)
 	ftp->closestream = true; /* do close */
 
 	if ((ret = ftp_nb_get(ftp, outstream, remote, remote_len, xtype, resumepos)) == PHP_FTP_FAILED) {
-		php_stream_close(outstream);
 		ftp->stream = NULL;
+		php_stream_close(outstream);
 		VCWD_UNLINK(local);
 		if (*ftp->inbuf) {
 			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
@@ -807,8 +816,8 @@ PHP_FUNCTION(ftp_nb_get)
 	}
 
 	if (ret == PHP_FTP_FINISHED){
-		php_stream_close(outstream);
 		ftp->stream = NULL;
+		php_stream_close(outstream);
 	}
 
 	RETURN_LONG(ret);
@@ -946,6 +955,11 @@ PHP_FUNCTION(ftp_nb_fput)
 	}
 
 	/* configuration */
+	if (ftp->in_use) {
+		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
+		RETURN_FALSE;
+	}
+
 	ftp->direction = true;   /* send */
 	ftp->closestream = false; /* do not close */
 
@@ -1086,6 +1100,12 @@ PHP_FUNCTION(ftp_nb_put)
 		}
 	}
 
+	if (ftp->in_use) {
+		php_stream_close(instream);
+		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
+		RETURN_FALSE;
+	}
+
 	/* configuration */
 	ftp->direction = true;   /* send */
 	ftp->closestream = true; /* do close */
@@ -1093,8 +1113,8 @@ PHP_FUNCTION(ftp_nb_put)
 	ret = ftp_nb_put(ftp, remote, remote_len, instream, xtype, startpos);
 
 	if (ret != PHP_FTP_MOREDATA) {
-		php_stream_close(instream);
 		ftp->stream = NULL;
+		php_stream_close(instream);
 	}
 
 	if (ret == PHP_FTP_FAILED) {
@@ -1229,6 +1249,10 @@ PHP_FUNCTION(ftp_close)
 
 	obj = ftp_object_from_zend_object(Z_OBJ_P(z_ftp));
 	if (obj->ftp) {
+		if (obj->ftp->in_use) {
+			zend_throw_error(NULL, "Cannot close FTP\\Connection while a transfer is in progress");
+			RETURN_THROWS();
+		}
 		success = ftp_quit(obj->ftp);
 		ftp_close(obj->ftp);
 		obj->ftp = NULL;
