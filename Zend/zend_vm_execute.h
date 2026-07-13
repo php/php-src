@@ -2901,7 +2901,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fe_fetch_obj
 	USE_OPLINE
 	zval *array;
 	zval *value;
+	zval value_copy;
 	uint32_t value_type;
+	bool release_value = false;
 	HashTable *fe_ht;
 	HashPosition pos;
 	Bucket *p;
@@ -2987,11 +2989,15 @@ fe_fetch_r_exit:
 		}
 		if (RETURN_VALUE_USED(opline)) {
 			if (funcs->get_current_key) {
+				ZVAL_COPY(&value_copy, value);
+				release_value = true;
 				funcs->get_current_key(iter, EX_VAR(opline->result.var));
 				if (UNEXPECTED(EG(exception) != NULL)) {
+					zval_ptr_dtor(&value_copy);
 					UNDEF_RESULT();
 					HANDLE_EXCEPTION();
 				}
+				value = &value_copy;
 			} else {
 				ZVAL_LONG(EX_VAR(opline->result.var), iter->index);
 			}
@@ -3002,6 +3008,9 @@ fe_fetch_r_exit:
 	if (EXPECTED(opline->op2_type == IS_CV)) {
 		zval *variable_ptr = EX_VAR(opline->op2.var);
 		zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
+		if (release_value) {
+			zval_ptr_dtor(&value_copy);
+		}
 	} else {
 		zval *res = EX_VAR(opline->op2.var);
 		zend_refcounted *gc = Z_COUNTED_P(value);
@@ -3009,6 +3018,9 @@ fe_fetch_r_exit:
 		ZVAL_COPY_VALUE_EX(res, value, gc, value_type);
 		if (Z_TYPE_INFO_REFCOUNTED(value_type)) {
 			GC_ADDREF(gc);
+		}
+		if (release_value) {
+			zval_ptr_dtor(&value_copy);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
