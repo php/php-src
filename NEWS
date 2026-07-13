@@ -84,6 +84,8 @@ PHP                                                                        NEWS
     dynamic properties shadowing a private parent property). (iliaal)
   . Fixed bug GH-22658 (ReflectionConstant::__toString() with a string value
     with null bytes truncates output). (DanielEScherzer)
+  . Fixed bug GH-22683 (Reflection(Class)Constant::__toString() should not warn
+    on NAN conversions). (Khaled Alam)
 
 - Session:
   . Fixed bug GH-21314 (Different session garbage collector behavior between
