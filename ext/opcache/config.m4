@@ -31,10 +31,6 @@ AS_VAR_IF([PHP_OPCACHE_JIT], [yes], [
       PHP_OPCACHE_JIT=no
     ])
 
-  if test "$host_vendor" = "apple" && test "$host_cpu" = "aarch64" && test "$PHP_THREAD_SAFETY" = "yes"; then
-    AC_MSG_WARN([JIT not supported on Apple Silicon with ZTS])
-    PHP_OPCACHE_JIT=no
-  fi
 ])
 
 AS_VAR_IF([PHP_OPCACHE_JIT], [yes], [

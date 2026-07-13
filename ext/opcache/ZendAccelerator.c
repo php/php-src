@@ -3274,10 +3274,16 @@ static zend_result accel_post_startup(void)
 			}
 			jit_size = JIT_G(buffer_size);
 			jit_size = ZEND_MM_ALIGNED_SIZE_EX(jit_size, page_size);
+#ifndef ZEND_JIT_USE_APPLE_MAP_JIT
 			shm_size += jit_size;
+#endif
 		}
 
+#ifdef ZEND_JIT_USE_APPLE_MAP_JIT
+		switch (zend_shared_alloc_startup(shm_size, 0)) {
+#else
 		switch (zend_shared_alloc_startup(shm_size, jit_size)) {
+#endif
 #else
 		switch (zend_shared_alloc_startup(shm_size, 0)) {
 #endif
@@ -3334,10 +3340,15 @@ static zend_result accel_post_startup(void)
 			if (JIT_G(buffer_size) == 0) {
 				JIT_G(enabled) = false;
 				JIT_G(on) = false;
-			} else if (!ZSMMG(reserved)) {
-				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: could not use reserved buffer!");
 			} else {
+#ifdef ZEND_JIT_USE_APPLE_MAP_JIT
+				zend_jit_startup(NULL, jit_size, reattached);
+#else
+				if (!ZSMMG(reserved)) {
+					zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: could not use reserved buffer!");
+				}
 				zend_jit_startup(ZSMMG(reserved), jit_size, reattached);
+#endif
 				zend_jit_startup_ok = true;
 			}
 		}

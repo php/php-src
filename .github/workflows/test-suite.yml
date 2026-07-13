@@ -345,7 +345,6 @@ jobs:
         if: ${{ inputs.all_variations }}
         uses: ./.github/actions/test-macos
       - name: Test Tracing JIT
-        if: ${{ matrix.arch == 'X64' || !matrix.zts }}
         uses: ./.github/actions/test-macos
         with:
           enableOpcache: true
@@ -356,7 +355,7 @@ jobs:
         with:
           enableOpcache: true
       - name: Test Function JIT
-        if: ${{ inputs.all_variations && (matrix.arch == 'X64' || !matrix.zts) }}
+        if: ${{ inputs.all_variations }}
         uses: ./.github/actions/test-macos
         with:
           enableOpcache: true
