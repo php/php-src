@@ -145,6 +145,7 @@ typedef struct {
 	pdo_odbc_errinfo einfo;
 	char *convbuf;
 	zend_ulong convbufsize;
+	HashTable *out_buffers;
 	unsigned going_long:1;
 	unsigned assume_utf8:1;
 	signed col_count:16;

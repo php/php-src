@@ -55,6 +55,7 @@ PHP                                                                        NEWS
     longer than the declared maxlen). (iliaal)
   . Fixed bug GH-22665 (Out-of-bounds write when the ODBC driver reports a
     diagnostic message length beyond the error buffer). (iliaal)
+  . Fixed memory leak of the buffer bound for an output parameter. (iliaal)
 
 - Phar:
   . Fixed inconsistent handling of the magic ".phar" directory. Paths such as

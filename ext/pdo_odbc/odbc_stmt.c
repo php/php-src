@@ -133,6 +133,11 @@ static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S)
 	}
 }
 
+static void odbc_free_out_buffer(zval *el)
+{
+	efree(Z_PTR_P(el));
+}
+
 static int odbc_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
@@ -152,6 +157,10 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt)
 	free_cols(stmt, S);
 	if (S->convbuf) {
 		efree(S->convbuf);
+	}
+	if (S->out_buffers) {
+		zend_hash_destroy(S->out_buffers);
+		FREE_HASHTABLE(S->out_buffers);
 	}
 	efree(S);
 
@@ -386,6 +395,11 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 						}
 						P->outbuf = emalloc(P->len + (P->is_unicode ? 2:1));
 						P->outbuflen = P->len;
+						if (!S->out_buffers) {
+							ALLOC_HASHTABLE(S->out_buffers);
+							zend_hash_init(S->out_buffers, 8, NULL, odbc_free_out_buffer, 0);
+						}
+						zend_hash_next_index_insert_ptr(S->out_buffers, P->outbuf);
 					}
 				}
 
