@@ -670,6 +670,7 @@ void odbc_bindcols(odbc_result *result)
 
 	for(i = 0; i < result->numcols; i++) {
 		bool char_extra_alloc = false;
+		result->values[i].value_max_len = 0;
 		colfieldid = SQL_COLUMN_DISPLAY_SIZE;
 
 		rc = SQLColAttribute(result->stmt, (SQLUSMALLINT)(i+1), SQL_DESC_NAME,
@@ -749,6 +750,7 @@ void odbc_bindcols(odbc_result *result)
 					displaysize *= 4;
 				}
 				result->values[i].value = (char *)emalloc(displaysize + 1);
+				result->values[i].value_max_len = displaysize;
 				rc = SQLBindCol(result->stmt, (SQLUSMALLINT)(i+1), SQL_C_CHAR, result->values[i].value,
 							displaysize + 1, &result->values[i].vallen);
 				break;
@@ -1420,7 +1422,11 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 					ZVAL_FALSE(&tmp);
 					break;
 				}
-				ZVAL_STRINGL(&tmp, result->values[i].value, result->values[i].vallen);
+				SQLLEN str_len = result->values[i].vallen;
+				if (str_len > result->values[i].value_max_len) {
+					str_len = result->values[i].value_max_len;
+				}
+				ZVAL_STRINGL(&tmp, result->values[i].value, str_len);
 				break;
 		}
 
@@ -1570,7 +1576,11 @@ PHP_FUNCTION(odbc_fetch_into)
 					ZVAL_FALSE(&tmp);
 					break;
 				}
-				ZVAL_STRINGL(&tmp, result->values[i].value, result->values[i].vallen);
+				SQLLEN str_len = result->values[i].vallen;
+				if (str_len > result->values[i].value_max_len) {
+					str_len = result->values[i].value_max_len;
+				}
+				ZVAL_STRINGL(&tmp, result->values[i].value, str_len);
 				break;
 		}
 		zend_hash_index_update(Z_ARRVAL_P(pv_res_arr), i, &tmp);
@@ -1793,7 +1803,11 @@ PHP_FUNCTION(odbc_result)
 				php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", field_ind + 1);
 				RETURN_FALSE;
 			} else {
-				RETURN_STRINGL(result->values[field_ind].value, result->values[field_ind].vallen);
+				SQLLEN str_len = result->values[field_ind].vallen;
+				if (str_len > result->values[field_ind].value_max_len) {
+					str_len = result->values[field_ind].value_max_len;
+				}
+				RETURN_STRINGL(result->values[field_ind].value, str_len);
 			}
 			break;
 	}

@@ -92,6 +92,7 @@ typedef struct odbc_result_value {
 	char name[256];
 	char *value;
 	SQLLEN vallen;
+	SQLLEN value_max_len;
 	SQLLEN coltype;
 } odbc_result_value;
 

@@ -40,6 +40,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-18173 (ext/hash relies on implementation-defined malloc
     alignment). (iliaal)
 
+- ODBC:
+  . Fixed bug GH-22668 (Heap buffer over-read when a column value exceeds the
+    driver-reported display size). (iliaal)
+
 - Opcache:
   . Fixed bug GH-22158 (Tracing JIT dispatches the observer begin handler
     through the wrong run_time_cache slot on megamorphic calls). (ptondereau,
