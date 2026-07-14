@@ -24,7 +24,7 @@
 #if defined(ZEND_WIN32) && defined(_MSC_VER)
 # include <intrin.h>
 #endif
-#if !defined(ZEND_WIN32) && defined(__linux__)
+#ifndef ZEND_WIN32
 # include <pthread.h>
 #endif
 
