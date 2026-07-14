@@ -10624,10 +10624,10 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		}
 
 		if (may_have_extra_named_params) {
-			// JIT: if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS))
+			// JIT: if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS))
 			ir_ref if_has_named = ir_IF(ir_AND_U8(
 				ir_LOAD_U8(ir_ADD_OFFSET(rx, offsetof(zend_execute_data, This.u1.type_info) + 3)),
-				ir_CONST_U8(ZEND_CALL_HAS_EXTRA_NAMED_PARAMS >> 24)));
+				ir_CONST_U8(ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS >> 24)));
 			ir_IF_TRUE_cold(if_has_named);
 
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_free_extra_named_params),
@@ -11096,7 +11096,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 		/* ZEND_CALL_FAKE_CLOSURE handled on slow path to eliminate check for ZEND_CALL_CLOSURE on fast path */
 		call_info = ir_LOAD_U32(jit_EX(This.u1.type_info));
 		ref = ir_AND_U32(call_info,
-			ir_CONST_U32(ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_FAKE_CLOSURE));
+			ir_CONST_U32(ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_FAKE_CLOSURE));
 		if (trace && trace->op != ZEND_JIT_TRACE_END) {
 			ir_ref if_slow = ir_IF(ref);
 

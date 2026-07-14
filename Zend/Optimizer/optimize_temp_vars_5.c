@@ -122,6 +122,11 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 							}
 						}
 					}
+					/* DECLARE_SCOPE_FUNC op1 is never consumed, just used for itself.
+					 * It has to simply exist for the whole function, so it gets its own TMP. */
+					if (opline->opcode == ZEND_DECLARE_SCOPE_FUNC) {
+						use_new_var = 1;
+					}
 					if (use_new_var) {
 						i = ++max;
 						zend_bitset_incl(taken_T, i);

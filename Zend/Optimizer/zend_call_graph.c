@@ -25,12 +25,18 @@
 static void zend_op_array_calc(zend_op_array *op_array, void *context)
 {
 	zend_call_graph *call_graph = context;
+	if (op_array->fn_flags2 & ZEND_ACC2_SCOPE_FUNC) {
+		return;
+	}
 	call_graph->op_arrays_count++;
 }
 
 static void zend_op_array_collect(zend_op_array *op_array, void *context)
 {
 	zend_call_graph *call_graph = context;
+	if (op_array->fn_flags2 & ZEND_ACC2_SCOPE_FUNC) {
+		return;
+	}
 	zend_func_info *func_info = call_graph->func_infos + call_graph->op_arrays_count;
 
 	ZEND_SET_FUNC_INFO(op_array, func_info);

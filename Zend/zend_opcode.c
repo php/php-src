@@ -1138,6 +1138,8 @@ ZEND_API void pass_two(zend_op_array *op_array)
 
     op_array->T += ZEND_OBSERVER_ENABLED; // reserve last temporary for observers if enabled
 
+	zend_pass_two_install_scope_fn_reservations(op_array);
+
 	/* Needs to be set directly after the opcode/literal reallocation, to ensure destruction
 	 * happens correctly if any of the following fixups generate a fatal error. */
 	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;

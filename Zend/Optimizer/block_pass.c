@@ -942,6 +942,8 @@ optimize_const_unary_op:
 						src->opcode != ZEND_ADD_ARRAY_ELEMENT &&
 						src->opcode != ZEND_ADD_ARRAY_UNPACK &&
 						(src->opcode != ZEND_DECLARE_LAMBDA_FUNCTION ||
+						 src == opline -1) &&
+						(src->opcode != ZEND_DECLARE_SCOPE_FUNC ||
 						 src == opline -1)) {
 						src->result.var = opline->result.var;
 						VAR_SOURCE(opline->op1) = NULL;

@@ -1044,12 +1044,18 @@ zend_op *zend_optimizer_get_loop_var_def(const zend_op_array *op_array, zend_op 
 	return NULL;
 }
 
+static zend_always_inline bool zend_op_array_is_scope_fn(const zend_op_array *op_array) {
+	return (op_array->fn_flags2 & ZEND_ACC2_SCOPE_FUNC) != 0;
+}
+
 static void zend_optimize(zend_op_array      *op_array,
                           zend_optimizer_ctx *ctx)
 {
 	if (op_array->type == ZEND_EVAL_CODE) {
 		return;
 	}
+
+	bool is_scope_fn = zend_op_array_is_scope_fn(op_array);
 
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_OPTIMIZER) {
 		zend_dump_op_array(op_array, ZEND_DUMP_LIVE_RANGES, "before optimizer", NULL);
@@ -1102,9 +1108,13 @@ static void zend_optimize(zend_op_array      *op_array,
 
 	/* pass 6:
 	 * - DFA optimization
-	 */
+	 *
+	 * Skipped for scope-fn op_arrays: DCE on a body's CV write would
+	 * eliminate a store the parent later reads, but single-op_array SSA
+	 * cannot see that. Re-enabling needs cross-op-array DCE protection
+	 * (treat every body CV write as live-out). */
 	if ((ZEND_OPTIMIZER_PASS_6 & ctx->optimization_level) &&
-	    !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level)) {
+	    !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level) && !is_scope_fn) {
 		zend_optimize_dfa(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_6) {
 			zend_dump_op_array(op_array, 0, "after pass 6", NULL);
@@ -1137,7 +1147,8 @@ static void zend_optimize(zend_op_array      *op_array,
 	 */
 	if ((ZEND_OPTIMIZER_PASS_11 & ctx->optimization_level) &&
 	    (!(ZEND_OPTIMIZER_PASS_6 & ctx->optimization_level) ||
-	     !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level))) {
+	     !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level) ||
+	     is_scope_fn /* normally passes 6/7 would handle it, but scope fns are exempt */)) {
 		zend_optimizer_compact_literals(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_11) {
 			zend_dump_op_array(op_array, 0, "after pass 11", NULL);
@@ -1167,6 +1178,8 @@ static void zend_revert_pass_two(zend_op_array *op_array)
 	zend_op *opline;
 
 	ZEND_ASSERT((op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) != 0);
+
+	zend_pass_two_revert_scope_fn_reservations(op_array);
 
 	opline = op_array->opcodes;
 	const zend_op *end = opline + op_array->last;
@@ -1300,6 +1313,7 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 	}
 
 	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;
+	zend_pass_two_install_scope_fn_reservations(op_array);
 }
 
 static void zend_redo_pass_two_ex(zend_op_array *op_array, const zend_ssa *ssa)
@@ -1442,23 +1456,35 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, const zend_ssa *ssa)
 	}
 
 	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;
+	zend_pass_two_install_scope_fn_reservations(op_array);
 }
 
 static void zend_optimize_op_array(zend_op_array      *op_array,
                                    zend_optimizer_ctx *ctx)
 {
+	bool is_scope_fn = zend_op_array_is_scope_fn(op_array);
+
+	/* Make scope fns individually optimizeable first, before running optimizer. */
+	uint32_t saved_scope_T = is_scope_fn ? op_array->T : 0;
+	uint32_t saved_scope_ex_offset = is_scope_fn ? zend_unfixup_scope_func_self(op_array, saved_scope_T) : 0;
+
 	/* Revert pass_two() */
 	zend_revert_pass_two(op_array);
 
 	/* Do actual optimizations */
 	zend_optimize(op_array, ctx);
 
-	/* Redo pass_two() */
-	zend_redo_pass_two(op_array);
-
+	/* Live ranges must be recalculated before scope fn fixup. */
 	if (op_array->live_range) {
 		zend_recalc_live_ranges(op_array, NULL);
 	}
+
+	if (is_scope_fn) {
+		zend_refixup_scope_func_self(op_array, saved_scope_ex_offset, saved_scope_T);
+	}
+
+	/* Redo pass_two() */
+	zend_redo_pass_two(op_array);
 }
 
 static void zend_adjust_fcall_stack_size(const zend_op_array *op_array, const zend_optimizer_ctx *ctx)
@@ -1572,6 +1598,12 @@ static void step_optimize_op_array(zend_op_array *op_array, void *context) {
 	zend_optimize_op_array(op_array, (zend_optimizer_ctx *) context);
 }
 
+static void step_optimize_scope_fn_op_array(zend_op_array *op_array, void *context) {
+	if (zend_op_array_is_scope_fn(op_array)) {
+		zend_optimize_op_array(op_array, (zend_optimizer_ctx *) context);
+	}
+}
+
 static void step_adjust_fcall_stack_size(zend_op_array *op_array, void *context) {
 	zend_adjust_fcall_stack_size(op_array, (zend_optimizer_ctx *) context);
 }
@@ -1630,6 +1662,12 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 		}
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			/* Single-op_array SSA can't see scope-fn children's reads of
+			 * parent CVs. Subsequent DFA-based passes (DCE, SCCP) would
+			 * treat parent CVs only used by a child as dead. */
+			if (call_graph.op_arrays[i]->fn_flags2 & ZEND_ACC2_HAS_TRACKED_TEMPORARIES) {
+				continue;
+			}
 			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (func_info) {
 				if (zend_dfa_analyze_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa) == SUCCESS) {
@@ -1642,6 +1680,9 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 
 		//TODO: perform inner-script inference???
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			if (call_graph.op_arrays[i]->fn_flags2 & ZEND_ACC2_HAS_TRACKED_TEMPORARIES) {
+				continue;
+			}
 			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (func_info) {
 				zend_dfa_optimize_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa, func_info->call_map);
@@ -1681,14 +1722,9 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 			}
 		}
 
-		if (ZEND_OPTIMIZER_PASS_12 & optimization_level) {
-			for (i = 0; i < call_graph.op_arrays_count; i++) {
-				zend_adjust_fcall_stack_size_graph(call_graph.op_arrays[i]);
-			}
-		}
-
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			op_array = call_graph.op_arrays[i];
+			zend_op *old_opcodes = op_array->opcodes;
 			func_info = ZEND_FUNC_INFO(op_array);
 			if (func_info && func_info->ssa.var_info) {
 				zend_redo_pass_two_ex(op_array, &func_info->ssa);
@@ -1700,6 +1736,31 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 				if (op_array->live_range) {
 					zend_recalc_live_ranges(op_array, NULL);
 				}
+			}
+			/* Update offsets for pass 12, as zend_redo_pass_two may reallocate */
+			if (func_info && op_array->opcodes != old_opcodes) {
+				ptrdiff_t delta = op_array->opcodes - old_opcodes;
+				zend_call_info *call = func_info->callee_info;
+				while (call) {
+					if (call->caller_init_opline) {
+						call->caller_init_opline += delta;
+					}
+					if (call->caller_call_opline) {
+						call->caller_call_opline += delta;
+					}
+					call = call->next_callee;
+				}
+			}
+		}
+
+		/* zend_build_call_graph ignores scope fns, so explicitely optimize them here. */
+		zend_foreach_op_array(script, step_optimize_scope_fn_op_array, &ctx);
+
+		/* PASS_12 requires knowledge of the final callee->T to compute INIT_FCALL stack sizes;
+		 * for scope fns these change during zend_redo_pass_two, hence we do this late. */
+		if (ZEND_OPTIMIZER_PASS_12 & optimization_level) {
+			for (i = 0; i < call_graph.op_arrays_count; i++) {
+				zend_adjust_fcall_stack_size_graph(call_graph.op_arrays[i]);
 			}
 		}
 

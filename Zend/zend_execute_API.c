@@ -897,7 +897,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 						ZEND_CALL_NUM_ARGS(call) = i;
 cleanup_args:
 						zend_vm_stack_free_args(call);
-						if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+						if (ZEND_CALL_INFO(call) & ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS) {
 							zend_free_extra_named_params(call->extra_named_params);
 						}
 						zend_vm_stack_free_call_frame(call);
@@ -1056,7 +1056,7 @@ cleanup_args:
 		ZEND_OBSERVER_FCALL_END(call, fci->retval);
 		EG(current_execute_data) = call->prev_execute_data;
 		zend_vm_stack_free_args(call);
-		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
+		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_MAYBE_HAS_EXTRA_NAMED_PARAMS)) {
 			zend_array_release(call->extra_named_params);
 		}
 
@@ -1830,6 +1830,19 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 	}
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_SYMBOL_TABLE) {
 		return ex->symbol_table;
+	}
+
+	/* Scope functions share CVs with their parent: rebuild on the parent frame and adopt the result. */
+	if (zend_is_scope_ex(ex)) {
+		zend_execute_data *parent_ex = zend_scope_fn_parent_ex(ex);
+		ZEND_ASSERT(parent_ex);
+		zend_execute_data *saved = EG(current_execute_data);
+		EG(current_execute_data) = parent_ex;
+		symbol_table = zend_rebuild_symbol_table();
+		EG(current_execute_data) = saved;
+		ex->symbol_table = symbol_table;
+		ZEND_ADD_CALL_FLAG(ex, ZEND_CALL_HAS_SYMBOL_TABLE);
+		return symbol_table;
 	}
 
 	ZEND_ADD_CALL_FLAG(ex, ZEND_CALL_HAS_SYMBOL_TABLE);
