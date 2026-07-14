@@ -528,7 +528,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_write() called\n");
-	fprintf(stderr, "data = %s, size = %d, nmemb = %d, ctx = %x\n", data, size, nmemb, ctx);
+	fprintf(stderr, "data = %s, size = %zu, nmemb = %zu, ctx = %p\n", data, size, nmemb, (void *) ctx);
 #endif
 
 	switch (write_handler->method) {
@@ -610,7 +610,7 @@ static int curl_progress(void *clientp, double dltotal, double dlnow, double ult
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_progress() called\n");
-	fprintf(stderr, "clientp = %x, dltotal = %f, dlnow = %f, ultotal = %f, ulnow = %f\n", clientp, dltotal, dlnow, ultotal, ulnow);
+	fprintf(stderr, "clientp = %p, dltotal = %f, dlnow = %f, ultotal = %f, ulnow = %f\n", clientp, dltotal, dlnow, ultotal, ulnow);
 #endif
 	if (!ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
 		return rval;
@@ -651,7 +651,7 @@ static int curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, cu
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_xferinfo() called\n");
-	fprintf(stderr, "clientp = %x, dltotal = %ld, dlnow = %ld, ultotal = %ld, ulnow = %ld\n", clientp, dltotal, dlnow, ultotal, ulnow);
+	fprintf(stderr, "clientp = %p, dltotal = %ld, dlnow = %ld, ultotal = %ld, ulnow = %ld\n", clientp, dltotal, dlnow, ultotal, ulnow);
 #endif
 	if (!ZEND_FCC_INITIALIZED(ch->handlers.xferinfo)) {
 		return rval;
@@ -746,7 +746,7 @@ static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key,
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_ssh_hostkeyfunction() called\n");
-	fprintf(stderr, "clientp = %x, keytype = %d, key = %s, keylen = %zu\n", clientp, keytype, key, keylen);
+	fprintf(stderr, "clientp = %p, keytype = %d, key = %s, keylen = %zu\n", clientp, keytype, key, keylen);
 #endif
 
 	zval args[4];
@@ -2801,7 +2801,7 @@ static void curl_free_obj(zend_object *object)
 	php_curl *ch = curl_from_obj(object);
 
 #if PHP_CURL_DEBUG
-	fprintf(stderr, "DTOR CALLED, ch = %x\n", ch);
+	fprintf(stderr, "DTOR CALLED, ch = %p\n", (void *) ch);
 #endif
 
 	if (!ch->cp) {
