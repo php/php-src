@@ -669,7 +669,9 @@ static void _enum_case_string(smart_str *str, const zend_string *name, zend_clas
 	}
 
 	if (c->doc_comment) {
-		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(c->doc_comment));
+		smart_str_appends(str, indent);
+		smart_str_append(str, c->doc_comment);
+		smart_str_appendc(str, '\n');
 	}
 	smart_str_append_printf(str, "%sCase %s", indent, ZSTR_VAL(name));
 	if (c->ce->enum_backing_type == IS_UNDEF) {
@@ -683,7 +685,9 @@ static void _enum_case_string(smart_str *str, const zend_string *name, zend_clas
 		zval *enum_val = zend_enum_fetch_case_value(Z_OBJ(c->value));
 		zend_string *tmp_value_str;
 		zend_string *value_str = zval_get_tmp_string(enum_val, &tmp_value_str);
-		smart_str_append_printf(str, " = %s\n", ZSTR_VAL(value_str));
+		smart_str_appends(str, " = ");
+		smart_str_append(str, value_str);
+		smart_str_appendc(str, '\n');
 		zend_tmp_string_release(tmp_value_str);
 	}
 }
