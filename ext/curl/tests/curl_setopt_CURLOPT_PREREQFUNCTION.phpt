@@ -77,7 +77,7 @@ try {
 
 echo "\nTesting with invalid type\n";
 curl_setopt($ch, CURLOPT_PREREQFUNCTION, function() use ($port) {
-	return 'this should be an integer';
+	return str_repeat('this should be an integer', 20);
 });
 try {
     curl_exec($ch);
