@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0alpha3
 
+- Reflection:
+  . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
+    (DanielEScherzer)
 
 16 Jul 2026, PHP 8.6.0alpha2
 
