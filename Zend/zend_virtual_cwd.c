@@ -1301,6 +1301,27 @@ CWD_API int virtual_filepath(const char *path, char **filepath) /* {{{ */
 }
 /* }}} */
 
+#ifndef ZEND_WIN32
+/* An absolute path without dot segments doesn't need a per-thread CWD emulation */
+static zend_always_inline bool virtual_path_is_direct(const char *path)
+{
+	const char *s = path;
+
+	if (*s != '/') {
+		return false;
+	}
+	do {
+		if (s[1] == '.'
+		 && (s[2] == '\0' || s[2] == '/'
+		  || (s[2] == '.' && (s[3] == '\0' || s[3] == '/')))) {
+			return false;
+		}
+		s = strchr(s + 1, '/');
+	} while (s != NULL);
+	return true;
+}
+#endif
+
 CWD_API FILE *virtual_fopen(const char *path, const char *mode) /* {{{ */
 {
 	cwd_state new_state;
@@ -1309,6 +1330,12 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode) /* {{{ */
 	if (path[0] == '\0') { /* Fail to open empty path */
 		return NULL;
 	}
+
+#ifndef ZEND_WIN32
+	if (virtual_path_is_direct(path)) {
+		return fopen(path, mode);
+	}
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_EXPAND)) {
@@ -1332,6 +1359,12 @@ CWD_API int virtual_access(const char *pathname, int mode) /* {{{ */
 {
 	cwd_state new_state;
 	int ret;
+
+#ifndef ZEND_WIN32
+	if (virtual_path_is_direct(pathname)) {
+		return access(pathname, mode);
+	}
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, pathname, NULL, CWD_REALPATH)) {
@@ -1442,6 +1475,21 @@ CWD_API int virtual_open(const char *path, int flags, ...) /* {{{ */
 	cwd_state new_state;
 	int f;
 
+#ifndef ZEND_WIN32
+	if (virtual_path_is_direct(path)) {
+		if (flags & O_CREAT) {
+			mode_t mode;
+			va_list arg;
+
+			va_start(arg, flags);
+			mode = (mode_t) va_arg(arg, int);
+			va_end(arg);
+			return open(path, flags, mode);
+		}
+		return open(path, flags);
+	}
+#endif
+
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_FILEPATH)) {
 		CWD_STATE_FREE_ERR(&new_state);
@@ -1533,6 +1581,12 @@ CWD_API int virtual_stat(const char *path, zend_stat_t *buf) /* {{{ */
 	cwd_state new_state;
 	int retval;
 
+#ifndef ZEND_WIN32
+	if (virtual_path_is_direct(path)) {
+		return php_sys_stat(path, buf);
+	}
+#endif
+
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)) {
 		CWD_STATE_FREE_ERR(&new_state);
@@ -1550,6 +1604,12 @@ CWD_API int virtual_lstat(const char *path, zend_stat_t *buf) /* {{{ */
 {
 	cwd_state new_state;
 	int retval;
+
+#ifndef ZEND_WIN32
+	if (virtual_path_is_direct(path)) {
+		return php_sys_lstat(path, buf);
+	}
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_EXPAND)) {
@@ -1636,6 +1696,12 @@ CWD_API DIR *virtual_opendir(const char *pathname) /* {{{ */
 {
 	cwd_state new_state;
 	DIR *retval;
+
+#ifndef ZEND_WIN32
+	if (virtual_path_is_direct(pathname)) {
+		return opendir(pathname);
+	}
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, pathname, NULL, CWD_REALPATH)) {
