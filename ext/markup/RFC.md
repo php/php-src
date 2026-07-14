@@ -604,7 +604,8 @@ Some natural extensions are deliberately left out of this RFC to keep its scope 
 * **A dedicated `<slot:name>` block form** for passing large named regions, as an ergonomic alternative to markup-valued props for content that reads better as a block than as an attribute value. It would be pure sugar over what props already express (see Children & slots), so it is deferred rather than shipped in v1.
 * **Further laziness controls** - the `:lazy` directive already defers a component's body (see Children & slots); a natural extension is deferring individual markup-valued props the same way, or a component declaring that its body is always lazy so callers need not write `:lazy`.
 * **DOM interoperability APIs** - a built-in `toDom(?Dom\Document): Dom\DocumentFragment` on the node classes, and accepting a `Dom\Node` directly as a markup child. Both are expressible in userland today through the string boundary (see Element model), so they are deferred; a native version would also want ext/dom to expose `HTMLTemplateElement::$content` first, so fragments can parse in `<template>` context instead of "in body" context (which mangles top-level `<td>`/`<tr>`).
-* **XML support** more in line with XHP's original design.
+* **XML documents** - a markup expression opening with an XML declaration (`<?xml version="1.0"?><feed>...</feed>`) would evaluate to a `Markup\Xml` document that serializes the same `Markup\Element` tree under XML rules (empty elements self-close, no void-elements, no bare boolean attributes) instead of HTML rules.
+* **CDATA sections** in XML documents - `<![CDATA[...]]>` as a literal-text island (opaque to interpolation, entities, and whitespace normalization; in XML semantics a CDATA section *is* character data).
 * **Control structures** in the markup syntax, such as Vue's `v-if`.
 * **Dedicated template files**, potentially reigniting the `.phpc` file debate.
 
