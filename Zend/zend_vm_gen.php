@@ -53,22 +53,42 @@ const ZEND_VM_KIND_GOTO     = 3;
 const ZEND_VM_KIND_HYBRID   = 4;
 const ZEND_VM_KIND_TAILCALL = 5;
 
+// Per-operand flags
+// ZEND_VM_OP[12]_FLAGS(zend_get_opcode_flags(opcode))
 $vm_op_flags = array(
-    "ZEND_VM_OP_SPEC"         => 1<<0,
-    "ZEND_VM_OP_CONST"        => 1<<1,
-    "ZEND_VM_OP_TMPVAR"       => 1<<2,
-    "ZEND_VM_OP_TMPVARCV"     => 1<<3,
-    "ZEND_VM_OP_MASK"         => 0xf0,
-    "ZEND_VM_OP_NUM"          => 0x10,
-    "ZEND_VM_OP_JMP_ADDR"     => 0x20,
-    "ZEND_VM_OP_TRY_CATCH"    => 0x30,
-    "ZEND_VM_OP_LOOP_END"     => 0x40,
-    "ZEND_VM_OP_THIS"         => 0x50,
-    "ZEND_VM_OP_NEXT"         => 0x60,
-    "ZEND_VM_OP_CLASS_FETCH"  => 0x70,
-    "ZEND_VM_OP_CONSTRUCTOR"  => 0x80,
-    "ZEND_VM_OP_CONST_FETCH"  => 0x90,
-    "ZEND_VM_OP_CACHE_SLOT"   => 0xa0,
+    "ZEND_VM_OP_SHIFT"        => 16,
+
+    // An operand can have zero of more of these:
+    "ZEND_VM_OP_SPEC_MASK"    => 0xff,
+    "ZEND_VM_OP_CONST"        => 1<<0,
+    "ZEND_VM_OP_TMP"          => 1<<1,
+    "ZEND_VM_OP_VAR"          => 1<<2,
+    "ZEND_VM_OP_UNUSED"       => 1<<3,
+    "ZEND_VM_OP_CV"           => 1<<4,
+    "ZEND_VM_OP_TMPVAR"       => 1<<5,
+    "ZEND_VM_OP_TMPVARCV"     => 1<<6,
+    // unused in ZEND_VM_OP_SPEC_MASK: (1<<7)
+
+    // unused: (1<<8)-(1<<11)
+
+    // An operand can have at most one of these:
+    "ZEND_VM_OP_MASK"         => 0xf000,
+    "ZEND_VM_OP_NUM"          => 1<<12,
+    "ZEND_VM_OP_JMP_ADDR"     => 2<<12,
+    "ZEND_VM_OP_TRY_CATCH"    => 3<<12,
+    "ZEND_VM_OP_LOOP_END"     => 4<<12,
+    "ZEND_VM_OP_THIS"         => 5<<12,
+    "ZEND_VM_OP_NEXT"         => 6<<12,
+    "ZEND_VM_OP_CLASS_FETCH"  => 7<<12,
+    "ZEND_VM_OP_CONSTRUCTOR"  => 8<<12,
+    "ZEND_VM_OP_CONST_FETCH"  => 9<<12,
+    "ZEND_VM_OP_CACHE_SLOT"   => 10<<12,
+    // unused in ZEND_VM_OP_MASK: (11<<12)-(15<<12)
+);
+
+// Opcode-level flags
+$vm_ext_flags = array(
+    // unused: bits (1<<0)-(1<<15)
 
     "ZEND_VM_EXT_VAR_FETCH"   => 1<<16,
     "ZEND_VM_EXT_ISSET"       => 1<<17,
@@ -76,7 +96,7 @@ $vm_op_flags = array(
     "ZEND_VM_EXT_ARRAY_INIT"  => 1<<19,
     "ZEND_VM_EXT_REF"         => 1<<20,
     "ZEND_VM_EXT_FETCH_REF"   => 1<<21,
-    "ZEND_VM_EXT_DIM_WRITE"    => 1<<22,
+    "ZEND_VM_EXT_DIM_WRITE"   => 1<<22,
     "ZEND_VM_EXT_MASK"        => 0x0f000000,
     "ZEND_VM_EXT_NUM"         => 0x01000000,
     "ZEND_VM_EXT_LAST_CATCH"  => 0x02000000,
@@ -98,15 +118,19 @@ foreach ($vm_op_flags as $name => $val) {
     define($name, $val);
 }
 
+foreach ($vm_ext_flags as $name => $val) {
+    define($name, $val);
+}
+
 $vm_op_decode = array(
     "ANY"                  => 0,
-    "CONST"                => ZEND_VM_OP_SPEC | ZEND_VM_OP_CONST,
-    "TMP"                  => ZEND_VM_OP_SPEC,
-    "VAR"                  => ZEND_VM_OP_SPEC,
-    "UNUSED"               => ZEND_VM_OP_SPEC,
-    "CV"                   => ZEND_VM_OP_SPEC,
-    "TMPVAR"               => ZEND_VM_OP_SPEC | ZEND_VM_OP_TMPVAR,
-    "TMPVARCV"             => ZEND_VM_OP_SPEC | ZEND_VM_OP_TMPVARCV,
+    "CONST"                => ZEND_VM_OP_CONST,
+    "TMP"                  => ZEND_VM_OP_TMP,
+    "VAR"                  => ZEND_VM_OP_VAR,
+    "UNUSED"               => ZEND_VM_OP_UNUSED,
+    "CV"                   => ZEND_VM_OP_CV,
+    "TMPVAR"               => ZEND_VM_OP_TMPVAR,
+    "TMPVARCV"             => ZEND_VM_OP_TMPVARCV,
     "NUM"                  => ZEND_VM_OP_NUM,
     "JMP_ADDR"             => ZEND_VM_OP_JMP_ADDR,
     "TRY_CATCH"            => ZEND_VM_OP_TRY_CATCH,
@@ -2416,7 +2440,7 @@ function parse_operand_spec($def, $lineno, $str, &$flags) {
             die("ERROR ($def:$lineno): Wrong operand type '$str'\n");
         }
     }
-    if (!($flags & ZEND_VM_OP_SPEC)) {
+    if (!($flags & ZEND_VM_OP_SPEC_MASK)) {
         if (count($a) != 1) {
             die("ERROR ($def:$lineno): Wrong operand type '$str'\n");
         }
@@ -2425,18 +2449,32 @@ function parse_operand_spec($def, $lineno, $str, &$flags) {
     return array_flip($a);
 }
 
-function parse_ext_spec($def, $lineno, $str) {
+function parse_ext_spec($def, $lineno, $str, $spec_str) {
     global $vm_ext_decode;
 
     $flags = 0;
-    $a = explode("|",$str);
-    foreach ($a as $val) {
-        if (isset($vm_ext_decode[$val])) {
-            $flags |= $vm_ext_decode[$val];
-        } else {
-            die("ERROR ($def:$lineno): Wrong extended_value type '$str'\n");
+
+    if ($str !== '') {
+        $a = explode("|",$str);
+        foreach ($a as $val) {
+            if (isset($vm_ext_decode[$val])) {
+                $flags |= $vm_ext_decode[$val];
+            } else {
+                die("ERROR ($def:$lineno): Wrong extended_value type '$str'\n");
+            }
         }
     }
+    if ($spec_str !== '') {
+        $a = explode(",",$spec_str);
+        foreach ($a as $val) {
+            if (isset($vm_ext_decode[$val])) {
+                $flags |= $vm_ext_decode[$val];
+            } else {
+                // Spec flags are validated separately.
+            }
+        }
+    }
+
     return $flags;
 }
 
@@ -2491,7 +2529,7 @@ function parse_spec_rules($def, $lineno, $str) {
 }
 
 function gen_vm_opcodes_header(
-    array $opcodes, int $max_opcode, int $max_opcode_len, array $vm_op_flags
+    array $opcodes, int $max_opcode, int $max_opcode_len, array $vm_op_flags, array $vm_ext_flags
 ): string {
     $str = HEADER_TEXT;
     $str .= "#ifndef ZEND_VM_OPCODES_H\n#define ZEND_VM_OPCODES_H\n\n";
@@ -2565,12 +2603,15 @@ ENDNAMES;
     foreach ($vm_op_flags as $name => $val) {
         $str .= sprintf("#define %-24s 0x%08x\n", $name, $val);
     }
-    $str .= "#define ZEND_VM_OP1_FLAGS(flags) (flags & 0xff)\n";
-    $str .= "#define ZEND_VM_OP2_FLAGS(flags) ((flags >> 8) & 0xff)\n";
+    foreach ($vm_ext_flags as $name => $val) {
+        $str .= sprintf("#define %-24s (UINT64_C(0x%08x) << 32)\n", $name, $val);
+    }
+    $str .= sprintf("#define ZEND_VM_OP1_FLAGS(flags) (flags & 0x%08x)\n", (1<<ZEND_VM_OP_SHIFT)-1);
+    $str .= sprintf("#define ZEND_VM_OP2_FLAGS(flags) ((flags >> %d) & 0x%08x)\n", ZEND_VM_OP_SHIFT, (1<<ZEND_VM_OP_SHIFT)-1);
     $str .= "\n";
     $str .= "BEGIN_EXTERN_C()\n\n";
     $str .= "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode);\n";
-    $str .= "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode);\n";
+    $str .= "ZEND_API uint64_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode);\n";
     $str .= "ZEND_API uint8_t zend_get_opcode_id(const char *name, size_t length);\n\n";
     $str .= "END_EXTERN_C()\n\n";
 
@@ -2594,7 +2635,7 @@ ENDNAMES;
 function gen_vm($def, $skel) {
     global $definition_file, $skeleton_file, $executor_file,
         $op_types, $list, $opcodes, $helpers, $params, $opnames,
-        $vm_op_flags, $used_extra_spec;
+        $vm_op_flags, $vm_ext_flags, $used_extra_spec;
 
     // Load definition file
     $in = @file($def);
@@ -2659,10 +2700,8 @@ function gen_vm($def, $skel) {
             $len  = strlen($op);
             $op1  = parse_operand_spec($def, $lineno, $m[4], $flags1);
             $op2  = parse_operand_spec($def, $lineno, $m[5], $flags2);
-            $flags = $flags1 | ($flags2 << 8);
-            if (!empty($m[7])) {
-                $flags |= parse_ext_spec($def, $lineno, $m[7]);
-            }
+            $flags = $flags1 | ($flags2 << ZEND_VM_OP_SHIFT);
+            $ext_flags = parse_ext_spec($def, $lineno, $m[7] ?? '', $m[9] ?? '');
 
             if ($len > $max_opcode_len) {
                 $max_opcode_len = $len;
@@ -2676,14 +2715,14 @@ function gen_vm($def, $skel) {
             if (isset($opnames[$op])) {
                 die("ERROR ($def:$lineno): Opcode with name '$op' is already defined.\n");
             }
-            $opcodes[$code] = array("op"=>$op,"op1"=>$op1,"op2"=>$op2,"code"=>"","flags"=>$flags,"hot"=>$hot);
+            $opcodes[$code] = array("op"=>$op,"op1"=>$op1,"op2"=>$op2,"code"=>"","flags"=>$flags,"ext_flags"=>$ext_flags,"hot"=>$hot);
             if (isset($m[9])) {
                 $opcodes[$code]["spec"] = parse_spec_rules($def, $lineno, $m[9]);
                 if (isset($opcodes[$code]["spec"]["NO_CONST_CONST"])) {
-                    $opcodes[$code]["flags"] |= $vm_op_flags["ZEND_VM_NO_CONST_CONST"];
+                    $opcodes[$code]["ext_flags"] |= ZEND_VM_NO_CONST_CONST;
                 }
                 if (isset($opcodes[$code]["spec"]["COMMUTATIVE"])) {
-                    $opcodes[$code]["flags"] |= $vm_op_flags["ZEND_VM_COMMUTATIVE"];
+                    $opcodes[$code]["ext_flags"] |= ZEND_VM_COMMUTATIVE;
                 }
             }
             $opnames[$op] = $code;
@@ -2728,23 +2767,21 @@ function gen_vm($def, $skel) {
             $op = $m[4];
             $op1 = parse_operand_spec($def, $lineno, $m[5], $flags1);
             $op2 = parse_operand_spec($def, $lineno, $m[6], $flags2);
-            $flags = $flags1 | ($flags2 << 8);
-            if (!empty($m[8])) {
-                $flags |= parse_ext_spec($def, $lineno, $m[8]);
-            }
+            $flags = $flags1 | ($flags2 << ZEND_VM_OP_SHIFT);
+            $ext_flags = parse_ext_spec($def, $lineno, $m[8] ?? '', $m[10] ?? '');
 
             if (isset($opcodes[$code])) {
                 die("ERROR ($def:$lineno): Opcode with name '$code' is already defined.\n");
             }
             $used_extra_spec["TYPE"] = 1;
-            $opcodes[$code] = array("op"=>$op,"op1"=>$op1,"op2"=>$op2,"code"=>"","flags"=>$flags,"hot"=>$hot,"is_type_spec"=>true);
+            $opcodes[$code] = array("op"=>$op,"op1"=>$op1,"op2"=>$op2,"code"=>"","flags"=>$flags,"ext_flags"=>$ext_flags,"hot"=>$hot,"is_type_spec"=>true);
             if (isset($m[10])) {
                 $opcodes[$code]["spec"] = parse_spec_rules($def, $lineno, $m[10]);
                 if (isset($opcodes[$code]["spec"]["NO_CONST_CONST"])) {
-                    $opcodes[$code]["flags"] |= $vm_op_flags["ZEND_VM_NO_CONST_CONST"];
+                    $opcodes[$code]["ext_flags"] |= ZEND_VM_NO_CONST_CONST;
                 }
                 if (isset($opcodes[$code]["spec"]["COMMUTATIVE"])) {
-                    $opcodes[$code]["flags"] |= $vm_op_flags["ZEND_VM_COMMUTATIVE"];
+                    $opcodes[$code]["ext_flags"] |= ZEND_VM_COMMUTATIVE;
                 }
             }
             $opnames[$op] = $code;
@@ -2863,7 +2900,7 @@ function gen_vm($def, $skel) {
     }
 
     // Generate opcode #defines (zend_vm_opcodes.h)
-    $str = gen_vm_opcodes_header($opcodes, $max_opcode, $max_opcode_len, $vm_op_flags);
+    $str = gen_vm_opcodes_header($opcodes, $max_opcode, $max_opcode_len, $vm_op_flags, $vm_ext_flags);
     write_file_if_changed(__DIR__ . "/zend_vm_opcodes.h", $str);
     echo "zend_vm_opcodes.h generated successfully.\n";
 
@@ -2882,9 +2919,9 @@ function gen_vm($def, $skel) {
     }
     out($f, "};\n\n");
 
-    out($f,"static uint32_t zend_vm_opcodes_flags[".($max_opcode + 1)."] = {\n");
+    out($f,"static uint64_t zend_vm_opcodes_flags[".($max_opcode + 1)."] = {\n");
     for ($i = 0; $i <= $max_opcode; $i++) {
-        out($f, sprintf("\t0x%08x,\n", isset($opcodes[$i]["flags"]) ? $opcodes[$i]["flags"] : 0));
+        out($f, sprintf("\tUINT64_C(0x%08x) | (UINT64_C(0x%08x) << 32), /* %s */\n", $opcodes[$i]["flags"] ?? 0, $opcodes[$i]["ext_flags"] ?? 0, $opcodes[$i]["op"] ?? ''));
     }
     out($f, "};\n\n");
 
@@ -2895,7 +2932,7 @@ function gen_vm($def, $skel) {
     out($f, "\treturn zend_vm_opcodes_names[opcode];\n");
     out($f, "}\n");
 
-    out($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode) {\n");
+    out($f, "ZEND_API uint64_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode) {\n");
     out($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
     out($f, "\t\topcode = ZEND_NOP;\n");
     out($f, "\t}\n");

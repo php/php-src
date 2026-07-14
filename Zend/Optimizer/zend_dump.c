@@ -458,7 +458,7 @@ static void zend_dump_range_constraint(const zend_op_array *op_array, const zend
 ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const zend_ssa *ssa, const zend_ssa_op *ssa_op)
 {
 	const char *name = zend_get_opcode_name(opline->opcode);
-	uint32_t flags = zend_get_opcode_flags(opline->opcode);
+	uint64_t flags = zend_get_opcode_flags(opline->opcode);
 	uint32_t n = 0;
 
 	if (!ssa_op || ssa_op->result_use < 0) {
