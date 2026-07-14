@@ -330,6 +330,9 @@ PHP                                                                        NEWS
   . Mark Phar::buildFromIterator() base directory argument as a path.
     (ndossche)
 
+- phpdbg:
+  . Fixed bug GH-13230 (use-after-free at phpdbg shutdown). (iliaal)
+
 - Posix:
   . Added validity check to the flags argument for posix_access(). (arshidkv12)
 

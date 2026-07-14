@@ -33,9 +33,8 @@ prompt> [Breaking on watchpoint $a]
 Old value: aa
 New value: ab
 >00006: 
-prompt> [$a has been removed, removing watchpoint]
-[Script ended normally]
-prompt> 
+prompt> [Script ended normally]
+prompt>
 --FILE--
 <?php
 

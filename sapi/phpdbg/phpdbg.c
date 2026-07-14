@@ -231,6 +231,8 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 
 static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 {
+	phpdbg_destroy_watch_request_state();
+
 	if (PHPDBG_G(stdin_file)) {
 		fclose(PHPDBG_G(stdin_file));
 		PHPDBG_G(stdin_file) = NULL;
