@@ -32,15 +32,16 @@ $frame = str_pad($dst_mac . $src_mac . $ethertype . $payload, 60, "\x00");
 // ETH_P_ALL sockets on loopback can observe unrelated localhost traffic from
 // the parallel test runner. Read until we see our own frame, then validate the
 // address returned by recvfrom() without the optional port argument.
-function recv_matching(Socket $s, string $header, int $maxlen = 65536, ?string &$addr = null): string|false {
+function recv_matching(Socket $s, string $header, int $maxlen = 65536, ?string &$addr = null, &$bytes = null): string|false {
     socket_set_nonblock($s);
     $deadline = microtime(true) + 5.0;
     while (microtime(true) < $deadline) {
-        $bytes = @socket_recvfrom($s, $buf, $maxlen, 0, $addr);
-        if ($bytes !== false && is_string($buf) && str_starts_with($buf, $header)) {
+        $recvBytes = @socket_recvfrom($s, $buf, $maxlen, 0, $addr);
+        if ($recvBytes !== false && is_string($buf) && str_starts_with($buf, $header)) {
+            $bytes = $recvBytes;
             return $buf;
         }
-        if ($bytes === false) {
+        if ($recvBytes === false) {
             usleep(1000);
         }
     }
@@ -50,8 +51,9 @@ function recv_matching(Socket $s, string $header, int $maxlen = 65536, ?string &
 socket_sendto($s_send, $frame, strlen($frame), 0, "lo", 1);
 
 // recvfrom without the optional 6th argument (port/ifindex).
-$buf = recv_matching($s_recv, $dst_mac . $src_mac . $ethertype, 65536, $addr);
-var_dump($buf !== false && strlen($buf) >= 60);
+$bytes = 0;
+$buf = recv_matching($s_recv, $dst_mac . $src_mac . $ethertype, 65536, $addr, $bytes);
+var_dump($bytes >= 60);
 var_dump($addr === 'lo');
 
 socket_close($s_send);
