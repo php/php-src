@@ -1705,6 +1705,11 @@ static bool zend_try_ct_eval_const(zval *zv, zend_string *name, bool is_fully_qu
 		return true;
 	}
 	c = zend_hash_find_ptr(EG(zend_constants), name);
+#ifdef ZTS
+	if (!c) {
+		c = zend_hash_find_ptr(zend_global_constants_table, name);
+	}
+#endif
 	if (c && can_ct_eval_const(c)) {
 		ZVAL_COPY_OR_DUP(zv, &c->value);
 		return true;

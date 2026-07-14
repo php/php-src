@@ -99,8 +99,35 @@ ZEND_API zend_constant *zend_register_stringl_constant(const char *name, size_t 
 ZEND_API zend_constant *zend_register_constant(zend_constant *c);
 void zend_constant_add_attributes(zend_constant *c, HashTable *attributes);
 #ifdef ZTS
-void zend_copy_constants(HashTable *target, HashTable *source);
+extern ZEND_API HashTable *zend_global_constants_table;
 #endif
+
+/* Tables to scan for a full view of all defined constants, in definition
+ * order. In ZTS this is the shared persistent table followed by the
+ * per-thread table (unless they alias during startup). */
+static zend_always_inline unsigned int zend_get_constants_tables(HashTable **tables)
+{
+#ifdef ZTS
+	if (EXPECTED(zend_global_constants_table != EG(zend_constants))) {
+		tables[0] = zend_global_constants_table;
+		tables[1] = EG(zend_constants);
+		return 2;
+	}
+#endif
+	tables[0] = EG(zend_constants);
+	return 1;
+}
+
+static zend_always_inline uint32_t zend_get_constants_count(void)
+{
+	uint32_t count = zend_hash_num_elements(EG(zend_constants));
+#ifdef ZTS
+	if (EXPECTED(zend_global_constants_table != EG(zend_constants))) {
+		count += zend_hash_num_elements(zend_global_constants_table);
+	}
+#endif
+	return count;
+}
 
 ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t name_len);
 

@@ -59,13 +59,12 @@ ZEND_API size_t executor_globals_offset;
 static void *language_scanner_globals_tls_addr(void) { return &language_scanner_globals; }
 static HashTable *global_function_table = NULL;
 static HashTable *global_class_table = NULL;
-static HashTable *global_constants_table = NULL;
 static HashTable *global_auto_globals_table = NULL;
 static HashTable *global_persistent_list = NULL;
 TSRMLS_MAIN_CACHE_DEFINE()
 # define GLOBAL_FUNCTION_TABLE		global_function_table
 # define GLOBAL_CLASS_TABLE			global_class_table
-# define GLOBAL_CONSTANTS_TABLE		global_constants_table
+# define GLOBAL_CONSTANTS_TABLE		zend_global_constants_table
 # define GLOBAL_AUTO_GLOBALS_TABLE	global_auto_globals_table
 #else
 # define GLOBAL_FUNCTION_TABLE		CG(function_table)
@@ -715,19 +714,34 @@ static void auto_global_copy_ctor(zval *zv) /* {{{ */
 }
 /* }}} */
 
+/* Copy the source's bucket array as-is instead of copying entries one by one.
+ * The source must be frozen and contiguous. Entries remain owned by the
+ * source table and must not be destroyed with the copy, so
+ * compiler_globals_dtor() undefs them first. */
+static HashTable *zend_hash_clone_persistent(const HashTable *source)
+{
+	HashTable *ht = (HashTable *) malloc(sizeof(HashTable));
+
+	if (source->nNumUsed == 0) {
+		zend_hash_init(ht, source->nTableSize, NULL, source->pDestructor, 1);
+	} else {
+		*ht = *source;
+		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), 1));
+		memcpy(HT_GET_DATA_ADDR(ht), HT_GET_DATA_ADDR(source), HT_USED_SIZE(source));
+	}
+	return ht;
+}
+
 static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{{ */
 {
 	compiler_globals->compiled_filename = NULL;
 	compiler_globals->zend_lineno = 0;
 
-	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init(compiler_globals->function_table, 1024, NULL, ZEND_FUNCTION_DTOR, 1);
-	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL);
+	compiler_globals->function_table = zend_hash_clone_persistent(global_function_table);
 	compiler_globals->copied_functions_count = zend_hash_num_elements(compiler_globals->function_table);
 
-	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init(compiler_globals->class_table, 64, NULL, ZEND_CLASS_DTOR, 1);
-	zend_hash_copy(compiler_globals->class_table, global_class_table, zend_class_add_ref);
+	compiler_globals->class_table = zend_hash_clone_persistent(global_class_table);
+	compiler_globals->copied_classes_count = zend_hash_num_elements(compiler_globals->class_table);
 
 	zend_set_default_compile_time_values();
 
@@ -778,6 +792,21 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		free(compiler_globals->function_table);
 	}
 	if (compiler_globals->class_table != GLOBAL_CLASS_TABLE) {
+		uint32_t n = compiler_globals->copied_classes_count;
+
+	    /* Prevent destruction of classes copied from the main process context */
+		if (zend_hash_num_elements(compiler_globals->class_table) <= n) {
+			compiler_globals->class_table->nNumUsed = 0;
+		} else {
+			Bucket *p = compiler_globals->class_table->arData;
+
+			compiler_globals->class_table->nNumOfElements -= n;
+			while (n != 0) {
+				ZVAL_UNDEF(&p->val);
+				p++;
+				n--;
+			}
+		}
 		/* Child classes may reuse structures from parent classes, so destroy in reverse order. */
 		zend_hash_graceful_reverse_destroy(compiler_globals->class_table);
 		free(compiler_globals->class_table);
@@ -805,7 +834,6 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{{ */
 {
 	zend_startup_constants();
-	zend_copy_constants(executor_globals->zend_constants, GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
 	zend_init_call_trampoline_op();
@@ -1041,7 +1069,8 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	compiler_globals->auto_globals = GLOBAL_AUTO_GLOBALS_TABLE;
 
 	zend_hash_destroy(executor_globals->zend_constants);
-	*executor_globals->zend_constants = *GLOBAL_CONSTANTS_TABLE;
+	free(executor_globals->zend_constants);
+	executor_globals->zend_constants = GLOBAL_CONSTANTS_TABLE;
 #else
 	ini_scanner_globals_ctor(&ini_scanner_globals);
 	php_scanner_globals_ctor(&language_scanner_globals);
@@ -1096,6 +1125,31 @@ void zend_register_standard_ini_entries(void) /* {{{ */
 /* }}} */
 
 
+#ifdef ZTS
+/* All threads read constants from GLOBAL_CONSTANTS_TABLE without copying or
+ * refcounting, so any string still not interned at this point must be made
+ * immortal. In practice registration interns everything and this is a no-op. */
+static void zend_share_persistent_constants(void)
+{
+	zend_constant *c;
+
+	ZEND_HASH_MAP_FOREACH_PTR(GLOBAL_CONSTANTS_TABLE, c) {
+		if (!(ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)) {
+			continue;
+		}
+		if (!ZSTR_IS_INTERNED(c->name)) {
+			GC_ADD_FLAGS(c->name, IS_STR_INTERNED | IS_STR_PERMANENT);
+		}
+		if (c->filename && !ZSTR_IS_INTERNED(c->filename)) {
+			GC_ADD_FLAGS(c->filename, IS_STR_INTERNED | IS_STR_PERMANENT);
+		}
+		if (Z_TYPE(c->value) == IS_STRING && !ZSTR_IS_INTERNED(Z_STR(c->value))) {
+			GC_ADD_FLAGS(Z_STR(c->value), IS_STR_INTERNED | IS_STR_PERMANENT);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+#endif
+
 /* Unlink the global (r/o) copies of the class, function and constant tables,
  * and use a fresh r/w copy for the startup thread
  */
@@ -1122,7 +1176,11 @@ zend_result zend_post_startup(void) /* {{{ */
 #ifdef ZTS
 	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
 	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
-	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
+	/* zend_hash_clone_persistent() requires hole-free sources; disable_functions
+	 * etc. may have deleted entries. The tables are frozen from here on. */
+	zend_hash_rehash(GLOBAL_FUNCTION_TABLE);
+	zend_hash_rehash(GLOBAL_CLASS_TABLE);
+	zend_share_persistent_constants();
 	global_map_ptr_last = compiler_globals->map_ptr_last;
 
 	short_tags_default = CG(short_tags);
@@ -1148,7 +1206,8 @@ zend_result zend_post_startup(void) /* {{{ */
 	} else {
 		compiler_globals_ctor(compiler_globals);
 	}
-	free(EG(zend_constants));
+	/* Aliases GLOBAL_CONSTANTS_TABLE; the ctor allocates this thread's own
+	 * (empty) table for runtime constants. */
 	EG(zend_constants) = NULL;
 
 	executor_globals_ctor(executor_globals);

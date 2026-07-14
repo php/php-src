@@ -1632,6 +1632,9 @@ ZEND_FUNCTION(get_defined_constants)
 
 	array_init(return_value);
 
+	HashTable *const_tables[2];
+	unsigned int num_const_tables = zend_get_constants_tables(const_tables);
+
 	if (categorize) {
 		zend_constant *val;
 		int module_number;
@@ -1650,29 +1653,31 @@ ZEND_FUNCTION(get_defined_constants)
 		} ZEND_HASH_FOREACH_END();
 		module_names[i] = "user";
 
-		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), val) {
-			if (!val->name) {
-				/* skip special constants */
-				continue;
-			}
+		for (unsigned int t = 0; t < num_const_tables; t++) {
+			ZEND_HASH_MAP_FOREACH_PTR(const_tables[t], val) {
+				if (!val->name) {
+					/* skip special constants */
+					continue;
+				}
 
-			if (ZEND_CONSTANT_MODULE_NUMBER(val) == PHP_USER_CONSTANT) {
-				module_number = i;
-			} else if (ZEND_CONSTANT_MODULE_NUMBER(val) > i) {
-				/* should not happen */
-				continue;
-			} else {
-				module_number = ZEND_CONSTANT_MODULE_NUMBER(val);
-			}
+				if (ZEND_CONSTANT_MODULE_NUMBER(val) == PHP_USER_CONSTANT) {
+					module_number = i;
+				} else if (ZEND_CONSTANT_MODULE_NUMBER(val) > i) {
+					/* should not happen */
+					continue;
+				} else {
+					module_number = ZEND_CONSTANT_MODULE_NUMBER(val);
+				}
 
-			if (Z_TYPE(modules[module_number]) == IS_UNDEF) {
-				array_init(&modules[module_number]);
-				add_assoc_zval(return_value, module_names[module_number], &modules[module_number]);
-			}
+				if (Z_TYPE(modules[module_number]) == IS_UNDEF) {
+					array_init(&modules[module_number]);
+					add_assoc_zval(return_value, module_names[module_number], &modules[module_number]);
+				}
 
-			ZVAL_COPY_OR_DUP(&const_val, &val->value);
-			zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, &const_val);
-		} ZEND_HASH_FOREACH_END();
+				ZVAL_COPY_OR_DUP(&const_val, &val->value);
+				zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, &const_val);
+			} ZEND_HASH_FOREACH_END();
+		}
 
 		efree(module_names);
 		efree(modules);
@@ -1680,14 +1685,16 @@ ZEND_FUNCTION(get_defined_constants)
 		zend_constant *constant;
 		zval const_val;
 
-		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
-			if (!constant->name) {
-				/* skip special constants */
-				continue;
-			}
-			ZVAL_COPY_OR_DUP(&const_val, &constant->value);
-			zend_hash_add_new(Z_ARRVAL_P(return_value), constant->name, &const_val);
-		} ZEND_HASH_FOREACH_END();
+		for (unsigned int t = 0; t < num_const_tables; t++) {
+			ZEND_HASH_MAP_FOREACH_PTR(const_tables[t], constant) {
+				if (!constant->name) {
+					/* skip special constants */
+					continue;
+				}
+				ZVAL_COPY_OR_DUP(&const_val, &constant->value);
+				zend_hash_add_new(Z_ARRVAL_P(return_value), constant->name, &const_val);
+			} ZEND_HASH_FOREACH_END();
+		}
 	}
 }
 /* }}} */
