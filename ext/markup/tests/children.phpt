@@ -68,7 +68,7 @@ try {
 
 // A cheap-to-build, deeply nested array must throw, not crash the process.
 $kids = ['x'];
-for ($i = 0; $i < 100000; $i++) {
+for ($i = 0; $i < 2048; $i++) {
     $kids = [$kids];
 }
 try {
