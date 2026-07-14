@@ -236,7 +236,9 @@ $complexKey = 'cgi-boundary-complex-key';
 $action = $_GET['action'] ?? 'fetch';
 $host = $_SERVER['SERVER_NAME'] ?? 'unknown';
 
-if ($action === 'seed') {
+if ($action === 'clear') {
+    $cache->clear();
+} elseif ($action === 'seed') {
     $cache->store($key, $host . '-value');
     $cache->store($complexKey, ['host' => $host, 'nested' => ['value' => 42]]);
 }
@@ -273,6 +275,8 @@ try {
     stream_set_blocking($pipes[2], false);
 
     user_cache_cgi_wait($process, $pipes, $port, $alphaScript, $alphaRoot, 'alpha.local');
+    user_cache_cgi_request($port, $alphaScript, $alphaRoot, 'alpha.local', 'action=clear');
+    user_cache_cgi_request($port, $betaScript, $betaRoot, 'beta.local', 'action=clear');
 
     $checks = [
         [$alphaScript, $alphaRoot, 'alpha.local', 'action=seed', 'alpha.local:alpha.local-value:alpha.local:42:available'],

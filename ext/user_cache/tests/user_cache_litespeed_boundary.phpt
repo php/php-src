@@ -308,7 +308,9 @@ $key = 'litespeed-boundary-key';
 $action = $_GET['action'] ?? 'fetch';
 $host = $_SERVER['SERVER_NAME'] ?? 'unknown';
 
-if ($action === 'seed') {
+if ($action === 'clear') {
+    $cache->clear();
+} elseif ($action === 'seed') {
     $cache->store($key, $host . '-value');
 }
 
@@ -337,6 +339,10 @@ try {
 
     user_cache_lsapi_wait($processes[0][0], $processes[0][1], $alphaPort, $alphaScript, $alphaRoot, 'alpha.local');
     user_cache_lsapi_wait($processes[1][0], $processes[1][1], $betaPort, $betaScript, $betaRoot, 'beta.local');
+
+    user_cache_lsapi_request($alphaPort, $alphaScript, $alphaRoot, 'alpha.local', 'action=clear');
+    user_cache_lsapi_request($alphaPort, $otherScript, $otherRoot, 'other.local', 'action=clear');
+    user_cache_lsapi_request($betaPort, $betaScript, $betaRoot, 'beta.local', 'action=clear');
 
     $checks = [
         [$alphaPort, $alphaScript, $alphaRoot, 'alpha.local', 'action=seed', 'alpha.local:alpha.local-value:default'],
