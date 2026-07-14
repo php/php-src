@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - PDO_ODBC:
   . Fixed bug GH-22667 (Heap buffer over-read when a column value exceeds the
     driver-reported display size). (iliaal)
+  . Fixed bug GH-22666 (Heap buffer overflow when an output parameter value is
+    longer than the declared maxlen). (iliaal)
 
 - Reflection:
   . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
