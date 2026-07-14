@@ -5429,7 +5429,7 @@ void php_user_cache_decode_resolve_cache_release(void)
 {
 	user_cache_shared_graph_object_route_memo_release();
 
-	memset(UC_G(decode_resolve_direct_keys), 0, sizeof(UC_G(decode_resolve_direct_keys)));
+	memset((void *) UC_G(decode_resolve_direct_keys), 0, sizeof(UC_G(decode_resolve_direct_keys)));
 	memset(UC_G(decode_resolve_direct_values), 0, sizeof(UC_G(decode_resolve_direct_values)));
 
 	UC_G(decode_resolve_direct_next) = 0;
@@ -5447,7 +5447,7 @@ void php_user_cache_decode_resolve_cache_release(void)
 
 void php_user_cache_decode_shape_prototype_cache_release(void)
 {
-	memset(UC_G(decode_shape_prototype_direct_keys), 0, sizeof(UC_G(decode_shape_prototype_direct_keys)));
+	memset((void *) UC_G(decode_shape_prototype_direct_keys), 0, sizeof(UC_G(decode_shape_prototype_direct_keys)));
 	memset(UC_G(decode_shape_prototype_direct_values), 0, sizeof(UC_G(decode_shape_prototype_direct_values)));
 
 	UC_G(decode_shape_prototype_direct_next) = 0;
