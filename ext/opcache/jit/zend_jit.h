@@ -18,6 +18,9 @@
 #define HAVE_JIT_H
 
 #if defined(__APPLE__) && defined(__aarch64__) && defined(ZTS)
+# ifndef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+#  error "Apple Silicon ZTS JIT requires pthread_jit_write_protect_np()"
+# endif
 # define ZEND_JIT_USE_APPLE_MAP_JIT 1
 #endif
 

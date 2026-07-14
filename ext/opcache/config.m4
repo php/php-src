@@ -31,6 +31,9 @@ AS_VAR_IF([PHP_OPCACHE_JIT], [yes], [
       PHP_OPCACHE_JIT=no
     ])
 
+  AS_IF([test "$host_vendor" = "apple" && test "$host_cpu" = "aarch64" && test "$PHP_THREAD_SAFETY" = "yes"],
+    [AS_VAR_IF([ac_cv_func_pthread_jit_write_protect_np], [yes], [],
+      [AC_MSG_ERROR([OPcache JIT on Apple Silicon with ZTS requires pthread_jit_write_protect_np()])])])
 ])
 
 AS_VAR_IF([PHP_OPCACHE_JIT], [yes], [

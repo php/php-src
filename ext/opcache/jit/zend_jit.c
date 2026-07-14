@@ -3526,9 +3526,7 @@ jit_failure:
 void zend_jit_unprotect(void)
 {
 #ifdef ZEND_JIT_USE_APPLE_MAP_JIT
-# ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 	pthread_jit_write_protect_np(0);
-# endif
 #elif defined(HAVE_MPROTECT)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		int opts = PROT_READ | PROT_WRITE;
@@ -3565,9 +3563,7 @@ void zend_jit_unprotect(void)
 void zend_jit_protect(void)
 {
 #ifdef ZEND_JIT_USE_APPLE_MAP_JIT
-# ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 	pthread_jit_write_protect_np(1);
-# endif
 #elif defined(HAVE_MPROTECT)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 # ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
@@ -3812,18 +3808,12 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 			"Unable to share JIT buffer across fork using minherit(): %s (%d)",
 			strerror(error), error);
 	}
-# ifndef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-	munmap(buf, size);
-	zend_accel_error_noreturn(ACCEL_LOG_FATAL,
-		"Apple Silicon ZTS JIT requires pthread_jit_write_protect_np() support");
-# else
 	zend_write_protect = pthread_jit_write_protect_supported_np();
 	if (!zend_write_protect) {
 		munmap(buf, size);
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
 			"Apple Silicon ZTS JIT requires pthread_jit_write_protect_np() support");
 	}
-# endif
 #elif defined(HAVE_PTHREAD_JIT_WRITE_PROTECT_NP)
 	zend_write_protect = pthread_jit_write_protect_supported_np();
 #endif
@@ -3833,9 +3823,7 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 	dasm_ptr = dasm_end = (void*)(((char*)dasm_buf) + size - sizeof(*dasm_ptr) * 2);
 
 #ifdef ZEND_JIT_USE_APPLE_MAP_JIT
-# ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 	pthread_jit_write_protect_np(1);
-# endif
 #elif defined(HAVE_MPROTECT)
 # ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 	if (zend_write_protect) {
