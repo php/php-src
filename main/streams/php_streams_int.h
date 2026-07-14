@@ -62,3 +62,7 @@
  * any other function that expects standard modes and you allow non-standard
  * ones. result should be a char[5]. */
 void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *result);
+
+/* Escapes NUL and backslash bytes so a host containing them cannot truncate or
+ * collide the persistent stream hash key. */
+zend_string *php_stream_escape_persistent_key(const char *host, size_t hostlen);

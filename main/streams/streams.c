@@ -141,6 +141,27 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 
 /* }}} */
 
+zend_string *php_stream_escape_persistent_key(const char *host, size_t hostlen)
+{
+	zend_string *escaped = zend_string_safe_alloc(hostlen, 2, 0, 0);
+	char *ptr = ZSTR_VAL(escaped);
+	for (size_t i = 0; i < hostlen; i++) {
+		if (host[i] == '\0') {
+			*ptr++ = '\\';
+			*ptr++ = '0';
+		} else if (host[i] == '\\') {
+			*ptr++ = '\\';
+			*ptr++ = '\\';
+		} else {
+			*ptr++ = host[i];
+		}
+	}
+	*ptr = '\0';
+	ZSTR_LEN(escaped) = ptr - ZSTR_VAL(escaped);
+
+	return escaped;
+}
+
 static zend_llist *php_get_wrapper_errors_list(php_stream_wrapper *wrapper)
 {
 	if (!FG(wrapper_errors)) {
