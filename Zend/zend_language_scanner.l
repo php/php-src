@@ -2132,11 +2132,12 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_STR(T_MARKUP_NAME, 0);
 }
 
-<ST_MARKUP_TAG>[:@]{MARKUP_LABEL} {
-	/* An attribute name with a ":" or "@" shorthand prefix (Vue/Alpine:
-	 * :class, @click). Attribute position only: this can never lex as a tag
-	 * name, because every markup-open rule requires a letter, "\", "$", "{"
-	 * or ">" after "<", and ST_MARKUP_CLOSE is excluded here. */
+<ST_MARKUP_TAG>[:@#]{MARKUP_LABEL} {
+	/* An attribute name with a ":", "@" or "#" prefix (Vue/Alpine shorthands
+	 * like :class and @click, and compiler directives like #lazy). Attribute
+	 * position only: this can never lex as a tag name, because every
+	 * markup-open rule requires a letter, "\", "$", "{" or ">" after "<",
+	 * and ST_MARKUP_CLOSE is excluded here. */
 	RETURN_TOKEN_WITH_STR(T_MARKUP_NAME, 0);
 }
 

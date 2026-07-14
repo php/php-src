@@ -30,8 +30,8 @@ echo desugar('<><Card title="Hi" {...$attrs}><b>f</b>body</Card></>'), "\n";
 // A static-method tag resolves its class part like any class name.
 echo desugar('<Author::byline name="Ada"/>'), "\n";
 
-// The `:lazy` directive wraps the body in a deferred Markup\LazyFragment.
-echo desugar('<Auth :lazy>Hello {$name}</Auth>'), "\n";
+// The `#lazy` directive wraps the body in a deferred Markup\LazyFragment.
+echo desugar('<Auth #lazy>Hello {$name}</Auth>'), "\n";
 
 // Dynamic tags lower to Markup\render_dynamic.
 echo desugar('<$tag class="x">{$content}</$tag>'), "\n";

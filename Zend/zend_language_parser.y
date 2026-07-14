@@ -1276,11 +1276,11 @@ markup_element:
 	|	T_MARKUP_OPEN T_VARIABLE markup_attributes T_MARKUP_TAG_END markup_children T_MARKUP_CLOSE_OPEN T_VARIABLE T_MARKUP_TAG_END
 			{ $$ = zend_ast_create_markup_checked($2, $3, $5, $7, true); if (!$$) { YYERROR; } }
 	|	T_MARKUP_OPEN T_VARIABLE markup_attributes T_MARKUP_SELF_CLOSE
-			{ $$ = zend_ast_create_markup_dynamic($2, $3, NULL); }
+			{ $$ = zend_ast_create_markup_dynamic($2, $3, NULL); if (!$$) { YYERROR; } }
 	|	T_MARKUP_OPEN T_MARKUP_INTERP_START expr '}' markup_attributes T_MARKUP_TAG_END markup_children T_MARKUP_CLOSE_OPEN T_MARKUP_TAG_END
-			{ $$ = zend_ast_create_markup_dynamic_expr($3, $5, $7); }
+			{ $$ = zend_ast_create_markup_dynamic_expr($3, $5, $7); if (!$$) { YYERROR; } }
 	|	T_MARKUP_OPEN T_MARKUP_INTERP_START expr '}' markup_attributes T_MARKUP_SELF_CLOSE
-			{ $$ = zend_ast_create_markup_dynamic_expr($3, $5, NULL); }
+			{ $$ = zend_ast_create_markup_dynamic_expr($3, $5, NULL); if (!$$) { YYERROR; } }
 ;
 
 markup_attributes:

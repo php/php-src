@@ -312,7 +312,7 @@ zend_ast *zend_ast_create_markup_raw(zend_ast *str)
 
 /* Wrap a children list in
  * `new \Markup\LazyFragment(fn() => new \Markup\Fragment([children]))` (the
- * `:lazy` directive). The arrow function defers building the child subtree -
+ * `#lazy` directive). The arrow function defers building the child subtree -
  * and running any side effects in its interpolations - until the component
  * actually renders the slot, so a component that discards its body never
  * evaluates it. Consumes `children`. */
@@ -332,12 +332,13 @@ static zend_ast *zend_ast_wrap_lazy_fragment(zend_ast *children, uint32_t lineno
 		zend_ast_create_list(1, ZEND_AST_ARG_LIST, closure));
 }
 
-/* Detect and strip a bare `:lazy` directive from a component's attribute list.
- * `:lazy` marks the component's body slot for lazy evaluation (see
+/* Detect and strip a bare `#lazy` directive from a component's attribute list.
+ * `#lazy` marks the component's body slot for lazy evaluation (see
  * zend_ast_wrap_lazy_fragment); it is a compiler directive, not a prop, so it is
  * removed from the list rather than passed on. Returns whether it was present. */
 static bool zend_markup_extract_lazy(zend_ast *attrs)
 {
+	bool found = false;
 	if (attrs == NULL) {
 		return false;
 	}
@@ -348,23 +349,60 @@ static bool zend_markup_extract_lazy(zend_ast *attrs)
 			continue;
 		}
 		zval *key = zend_ast_get_zval(elem->child[1]);
-		if (Z_TYPE_P(key) == IS_STRING && zend_string_equals_literal(Z_STR_P(key), ":lazy")) {
+		if (Z_TYPE_P(key) == IS_STRING && zend_string_equals_literal(Z_STR_P(key), "#lazy")) {
 			zend_ast_destroy(elem);
 			for (uint32_t j = i; j + 1 < list->children; j++) {
 				list->child[j] = list->child[j + 1];
 			}
 			list->children--;
-			return true;
+			i--;
+			found = true;
 		}
 	}
-	return false;
+	return found;
+}
+
+/* `#`-prefixed attribute names are the compiler-directive namespace: `#lazy`
+ * on a component tag is the only directive in v1, and every other use - an
+ * unknown `#x` anywhere, or `#lazy` outside a component tag - is a compile
+ * error, so the rest of the space stays loudly reserved for future directives.
+ * (The `:`/`@` prefixes, by contrast, are always literal attribute names.)
+ * Throws and returns false on the first violation. */
+static bool zend_markup_check_directives(zend_ast *attrs, bool allow_lazy)
+{
+	if (attrs == NULL) {
+		return true;
+	}
+	zend_ast_list *list = zend_ast_get_list(attrs);
+	for (uint32_t i = 0; i < list->children; i++) {
+		zend_ast *elem = list->child[i];
+		if (elem == NULL || elem->kind != ZEND_AST_ARRAY_ELEM || elem->child[1] == NULL) {
+			continue;
+		}
+		zval *key = zend_ast_get_zval(elem->child[1]);
+		if (Z_TYPE_P(key) != IS_STRING || Z_STRVAL_P(key)[0] != '#') {
+			continue;
+		}
+		if (zend_string_equals_literal(Z_STR_P(key), "#lazy")) {
+			if (allow_lazy) {
+				continue;
+			}
+			zend_throw_exception_ex(zend_ce_compile_error, 0,
+				"The #lazy directive is only valid on a component tag");
+		} else {
+			zend_throw_exception_ex(zend_ce_compile_error, 0,
+				"Unknown markup directive \"%s\"", Z_STRVAL_P(key));
+		}
+		return false;
+	}
+	return true;
 }
 
 /* Lower a component tag (a capitalized or namespace-qualified name, or
  * "Class::method") into a call to \Markup\render_component(component, props, slot)
  * Attributes become the props array and the body content becomes a
  * single \Markup\Fragment passed as the slot (or a lazy \Markup\LazyFragment when
- * the `:lazy` directive is present).
+ * the `#lazy` directive is present).
  *
  * Component resolution is two-stage, and every tag resolves through the *class*
  * name rules only: a bare/qualified tag lowers to ZEND_AST_CLASS_NAME (the
@@ -415,11 +453,11 @@ static zend_ast *zend_ast_create_markup_component(zend_ast *name, zend_ast *attr
 	}
 	attrs->attr = ZEND_ARRAY_SYNTAX_SHORT;
 
-	/* The `:lazy` directive is a compiler marker, not a prop - strip it first. */
+	/* The `#lazy` directive is a compiler marker, not a prop - strip it first. */
 	bool lazy = zend_markup_extract_lazy(attrs);
 
 	/* The body becomes a single slot Fragment, or null when there is no body.
-	 * With `:lazy` the fragment is wrapped in a deferred Markup\LazyFragment. */
+	 * With `#lazy` the fragment is wrapped in a deferred Markup\LazyFragment. */
 	zend_ast *slot;
 	if (children != NULL && zend_ast_get_list(children)->children > 0) {
 		children->attr = ZEND_ARRAY_SYNTAX_SHORT;
@@ -466,7 +504,21 @@ zend_ast *zend_ast_create_markup_element(zend_ast *name, zend_ast *attrs, zend_a
 
 	/* A capitalized name, a namespace-qualified name, or one containing "::"
 	 * is a component. */
-	if (name != NULL && zend_markup_name_is_component(zend_ast_get_str(name))) {
+	bool is_component = name != NULL && zend_markup_name_is_component(zend_ast_get_str(name));
+
+	/* `#` attributes are directives; only `#lazy`, and only on a component. */
+	if (!zend_markup_check_directives(attrs, /* allow_lazy */ is_component)) {
+		if (name != NULL) {
+			zend_ast_destroy(name);
+		}
+		if (attrs != NULL) {
+			zend_ast_destroy(attrs);
+		}
+		zend_ast_destroy(children);
+		return NULL;
+	}
+
+	if (is_component) {
 		result = zend_ast_create_markup_component(name, attrs, children);
 		result->lineno = lineno;
 		return result;
@@ -546,6 +598,19 @@ zend_ast *zend_ast_create_markup_checked(zend_ast *open, zend_ast *attrs, zend_a
  * zend_ast_create_markup_element for why it is stamped explicitly). */
 static zend_ast *zend_markup_dynamic_call(zend_ast *tag_expr, zend_ast *attrs, zend_ast *children, uint32_t lineno)
 {
+	/* A dynamic tag's element-vs-component split happens at runtime, so no
+	 * compile-time directive can apply; reject them all, `#lazy` included. */
+	if (!zend_markup_check_directives(attrs, /* allow_lazy */ false)) {
+		zend_ast_destroy(tag_expr);
+		if (attrs != NULL) {
+			zend_ast_destroy(attrs);
+		}
+		if (children != NULL) {
+			zend_ast_destroy(children);
+		}
+		return NULL;
+	}
+
 	if (attrs == NULL) {
 		attrs = zend_ast_create_list(0, ZEND_AST_ARRAY);
 	}

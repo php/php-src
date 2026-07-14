@@ -93,8 +93,8 @@ namespace Markup {
     /**
      * A slot body whose evaluation is deferred: it builds the child subtree -
      * and runs any side effects in its interpolations - only the first time it
-     * is rendered, memoizing the result. Produced by the `:lazy` directive on a
-     * component tag (`<Auth :lazy>…</Auth>`), so a component that discards its
+     * is rendered, memoizing the result. Produced by the `#lazy` directive on a
+     * component tag (`<Auth #lazy>…</Auth>`), so a component that discards its
      * body never evaluates it. Because it is itself a Markup\Html, a
      * component's slot parameter type is unchanged (`?Markup\Html`); laziness
      * is transparent to the component.

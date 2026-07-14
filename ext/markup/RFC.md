@@ -347,11 +347,11 @@ A "named slot" is therefore just a prop, checked against the component's real si
 
 This is also the proposal's answer to **template inheritance**: what Twig, Latte and Blade's older syntax call a base template with overridable *blocks* is here a `Layout` component whose regions are markup-valued props (and the body slot) filled by composition, rather than a template that is extended; layouts nest the same way. (A dedicated `<slot:name>` block form for large named regions is a possible future ergonomic addition - see Future Scope - but expresses nothing a prop cannot.)
 
-#### Eager evaluation, and opting into laziness with `:lazy`
+#### Eager evaluation, and opting into laziness with `#lazy`
 
 Because a component invocation is an ordinary call, **the body is fully evaluated before the component runs** (PHP evaluates arguments before the call). A component therefore cannot, by default, conditionally skip or defer rendering its body - the body has already been built by the time the component decides what to do with it.
 
-The `:lazy` directive on a component tag opts its body out of that rule:
+The `#lazy` directive on a component tag opts its body out of that rule:
 
 ```php
 class Auth implements Markup\Html
@@ -362,7 +362,7 @@ class Auth implements Markup\Html
     ) {}
     public function toHtml(): Markup\Html
     {
-        // When logged out we never reference $slot, so with :lazy the body's
+        // When logged out we never reference $slot, so with #lazy the body's
         // expressions never run.
         return $this->check ? <div class="user">{$this->slot}</div> : <></>;
     }
@@ -373,20 +373,20 @@ class Auth implements Markup\Html
 <Auth check={auth()->check()}>Hello, {auth()->user()->name}</Auth>
 
 // Lazy: the body is built, and its interpolations run, only if Auth renders it.
-<Auth :lazy check={auth()->check()}>Hello, {auth()->user()->name}</Auth>
+<Auth #lazy check={auth()->check()}>Hello, {auth()->user()->name}</Auth>
 ```
 
-With `:lazy` the body lowers to a `Markup\LazyFragment` wrapping a closure, instead of an eager `Markup\Fragment`:
+With `#lazy` the body lowers to a `Markup\LazyFragment` wrapping a closure, instead of an eager `Markup\Fragment`:
 
 ```php
-// <Auth :lazy>Hello, {$name}</Auth>
+// <Auth #lazy>Hello, {$name}</Auth>
 // → \Markup\render_component(Auth::class, [],
 //       new \Markup\LazyFragment(fn() => new \Markup\Fragment(['Hello, ', $name])), 'Auth')
 ```
 
 `Markup\LazyFragment` is *itself* a `Markup\Html`, so **the component's slot parameter type is unchanged** (`?Markup\Html`) and a component need not be written any differently to accept a lazy body - laziness is transparent to it. It evaluates its closure on first render and **memoizes** the result, so a body rendered more than once still runs its expressions once. Variables the body references are captured by value at the point of the tag (ordinary arrow-function semantics); only the *expressions* - method calls, property reads - are deferred to render time. A body that is never rendered is never evaluated.
 
-`:lazy` is deliberately the single point where markup departs from "an ordinary call with eager arguments," which is why it is explicit and opt-in; eager remains the default. (For a body that should be evaluated *repeatedly* rather than merely deferred, pass a closure as an ordinary prop and call it - e.g. `each={fn($x) => <li>{$x}</li>}`.)
+`#lazy` is deliberately the single point where markup departs from "an ordinary call with eager arguments," which is why it is explicit and opt-in; eager remains the default. (For a body that should be evaluated *repeatedly* rather than merely deferred, pass a closure as an ordinary prop and call it - e.g. `each={fn($x) => <li>{$x}</li>}`.)
 
 #### Child coercion
 
@@ -437,7 +437,7 @@ All under the `Markup\` namespace:
 
 * Interface `Markup\Html extends Stringable` - the renderable contract. The one method a class writes is `toHtml(): Html`, which returns markup (ultimately an `Element`/`Fragment`/`Raw`). The inherited `__toString(): string` requirement is satisfied automatically: a userland class that does not declare (or inherit) a `__toString` of its own receives a default implementation at class-link time - it serializes what `toHtml()` produces - exactly the way every enum receives `cases()`. So `echo`/`(string)` work on any markup value or component, while `strict_types` components can `return <div>...</div>;` directly and callers can still reach the object tree via `toHtml()`. A declared `__toString` wins for string casts; markup rendering always goes through `toHtml()`.
 * Classes `Markup\Element`, `Markup\Fragment` (and `Markup\Raw`, the opaque passthrough that backs `raw()`/`escape()`). All are `final`, immutable value objects with `readonly` properties (`$tag`, `$attributes`, `$children` / `$html`).
-* Class `Markup\LazyFragment` - a `final` `Markup\Html` wrapping a `Closure` thunk (`__construct(Closure $thunk)`). The `:lazy` directive lowers a component body into one; it evaluates the thunk on first render and memoizes the result (see Children & slots). Not typically written by hand.
+* Class `Markup\LazyFragment` - a `final` `Markup\Html` wrapping a `Closure` thunk (`__construct(Closure $thunk)`). The `#lazy` directive lowers a component body into one; it evaluates the thunk on first render and memoizes the result (see Children & slots). Not typically written by hand.
 * Attribute `Markup\Slot` (bare `#[Markup\Slot]`, no arguments) marking the parameter that receives a component's body.
 * Functions `Markup\raw(string $html): Markup\Html`, `Markup\escape(string $text): Markup\Html`.
 * Function `Markup\render_component()` - the runtime target a component tag lowers into (resolved class name, props, slot). It is a public function so the dispatch rules are testable and so generated code is honest, but user code is expected to write tags, not call it.
@@ -579,7 +579,7 @@ The operand-position decision is an explicit allowlist that **fails closed**: ma
 
 This leaves just one backwards compatibility concern:
 
-1. **New `Markup\` namespace** - introduces `Markup\Html`, `Markup\Element`, `Markup\Fragment`, `Markup\Raw`, `Markup\Slot`, `Markup\raw()`, `Markup\escape()`. Top-level `Markup\` follows the established precedent for bundled extensions (`Random\`, `Dom\`, `Uri\`). Existing userland use of the prefix is minimal: a handful of Packagist packages autoload sub-namespaces such as `Markup\Json\` (which coexist with internal `Markup\` classes, exactly as userland `Random\*` sub-namespaces did when `Random\` shipped in PHP 8.2), and a public-code search finds no class or function whose fully-qualified name collides with the symbols introduced here. No existing keywords are reserved and no new global reserved words are introduced (the syntax uses bare `<`, and the `:lazy` directive is only meaningful inside a markup tag).
+1. **New `Markup\` namespace** - introduces `Markup\Html`, `Markup\Element`, `Markup\Fragment`, `Markup\Raw`, `Markup\Slot`, `Markup\raw()`, `Markup\escape()`. Top-level `Markup\` follows the established precedent for bundled extensions (`Random\`, `Dom\`, `Uri\`). Existing userland use of the prefix is minimal: a handful of Packagist packages autoload sub-namespaces such as `Markup\Json\` (which coexist with internal `Markup\` classes, exactly as userland `Random\*` sub-namespaces did when `Random\` shipped in PHP 8.2), and a public-code search finds no class or function whose fully-qualified name collides with the symbols introduced here. No existing keywords are reserved and no new global reserved words are introduced (the syntax uses bare `<`, and the `#lazy` directive is only meaningful inside a markup tag).
 
 ### Impact on tooling
 
@@ -602,7 +602,7 @@ Some natural extensions are deliberately left out of this RFC to keep its scope 
   * A CSS escaping context inside `<style>` tags or `style=""` attributes
 * **Function components** - plain functions (`<Greeting/>` → `greeting()`) as component tags. Deferred because a bare tag gives no syntactic signal whether a class or a function is meant, and PHP resolves the two through separate `use` / `use function` import tables - supporting functions needs dual-candidate name resolution in the compiler (a function-name analogue of `Foo::class`), a class-then-function dispatch order at runtime, a guard against tags resolving to internal functions (`<Date/>` → `date()`), and an *invoker* hook alongside the factory so containers can autowire calls as well as construction. All of it is purely additive - no syntax change - and the reference implementation had a complete working version, so this is a natural first follow-up RFC. In v1 a small function component is a small class or a static method instead.
 * **A dedicated `<slot:name>` block form** for passing large named regions, as an ergonomic alternative to markup-valued props for content that reads better as a block than as an attribute value. It would be pure sugar over what props already express (see Children & slots), so it is deferred rather than shipped in v1.
-* **Further laziness controls** - the `:lazy` directive already defers a component's body (see Children & slots); a natural extension is deferring individual markup-valued props the same way, or a component declaring that its body is always lazy so callers need not write `:lazy`.
+* **Further laziness controls** - the `#lazy` directive already defers a component's body (see Children & slots); a natural extension is deferring individual markup-valued props the same way, or a component declaring that its body is always lazy so callers need not write `#lazy`.
 * **DOM interoperability APIs** - a built-in `toDom(?Dom\Document): Dom\DocumentFragment` on the node classes, and accepting a `Dom\Node` directly as a markup child. Both are expressible in userland today through the string boundary (see Element model), so they are deferred; a native version would also want ext/dom to expose `HTMLTemplateElement::$content` first, so fragments can parse in `<template>` context instead of "in body" context (which mangles top-level `<td>`/`<tr>`).
 * **XML documents** - a markup expression opening with an XML declaration (`<?xml version="1.0"?><feed>...</feed>`) would evaluate to a `Markup\Xml` document that serializes the same `Markup\Element` tree under XML rules (empty elements self-close, no void-elements, no bare boolean attributes) instead of HTML rules.
 * **CDATA sections** in XML documents - `<![CDATA[...]]>` as a literal-text island (opaque to interpolation, entities, and whitespace normalization; in XML semantics a CDATA section *is* character data).
