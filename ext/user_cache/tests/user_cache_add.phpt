@@ -10,6 +10,7 @@ user_cache.shm_size=16M
 --FILE--
 <?php
 $cache = UserCache\Cache::getPool('add');
+$cache->clear();
 
 var_dump($cache->add('key', 'first'));
 var_dump($cache->add('key', 'second'));
