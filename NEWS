@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0alpha2
+16 Jul 2026, PHP 8.6.0alpha2
 
 - Core:
   . Sync Boost.Context assembly with 1.91.0. (kn1g78)
