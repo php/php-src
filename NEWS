@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0alpha3
 
+- PDO_ODBC:
+  . Fixed bug GH-22667 (Heap buffer over-read when a column value exceeds the
+    driver-reported display size). (iliaal)
+
 - Reflection:
   . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
     (DanielEScherzer)
