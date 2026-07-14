@@ -121,6 +121,8 @@ PHP                                                                        NEWS
 
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)
+  . Fixed bug GH-22480 (Use-after-free when re-watching an already-watched
+    variable). (Ilia Alshanetsky)
 
 - Readline:
   . Fixed a crash in readline_info() when completion_append_character
