@@ -843,7 +843,7 @@ static int curl_seek(void *clientp, curl_off_t offset, int origin)
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_seek() called\n");
-	fprintf(stderr, "clientp = %x, offset = %ld, origin = %d\n", clientp, offset, origin);
+	fprintf(stderr, "clientp = %p, offset = %ld, origin = %d\n", clientp, offset, origin);
 #endif
 	if (!ZEND_FCC_INITIALIZED(ch->handlers.seek)) {
 		return rval;
