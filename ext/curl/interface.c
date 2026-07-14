@@ -522,9 +522,11 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 /* {{{ curl_write */
 static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 {
+	ZEND_ASSERT(size == 1);
+
 	php_curl *ch = (php_curl *) ctx;
 	php_curl_write *write_handler = ch->handlers.write;
-	size_t length = size * nmemb;
+	size_t length = nmemb;
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_write() called\n");
@@ -786,6 +788,8 @@ static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key,
 /* {{{ curl_read */
 static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 {
+	ZEND_ASSERT(size == 1);
+
 	php_curl *ch = (php_curl *)ctx;
 	php_curl_read *read_handler = ch->handlers.read;
 	size_t length = 0;
@@ -808,7 +812,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			} else {
 				ZVAL_NULL(&argv[1]);
 			}
-			ZVAL_LONG(&argv[2], (int)size * nmemb);
+			ZVAL_LONG(&argv[2], (zend_long) nmemb);
 
 			ch->in_callback = true;
 			zend_call_known_fcc(&read_handler->fcc, &retval, /* param_count */ 3, argv, /* named_params */ NULL);
@@ -816,7 +820,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			if (!Z_ISUNDEF(retval)) {
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
 				if (Z_TYPE(retval) == IS_STRING) {
-					length = MIN(size * nmemb, Z_STRLEN(retval));
+					length = MIN(nmemb, Z_STRLEN(retval));
 					memcpy(data, Z_STRVAL(retval), length);
 				} else if (Z_TYPE(retval) == IS_LONG) {
 					length = Z_LVAL_P(&retval);
@@ -884,9 +888,11 @@ static int curl_seek(void *clientp, curl_off_t offset, int origin)
 /* {{{ curl_write_header */
 static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx)
 {
+	ZEND_ASSERT(size == 1);
+
 	php_curl *ch = (php_curl *) ctx;
 	php_curl_write *write_handler = ch->handlers.write_header;
-	size_t length = size * nmemb;
+	size_t length = nmemb;
 
 	switch (write_handler->method) {
 		case PHP_CURL_STDOUT:
