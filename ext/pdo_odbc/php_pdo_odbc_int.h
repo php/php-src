@@ -153,6 +153,7 @@ typedef struct {
 
 typedef struct {
 	SQLLEN len;
+	SQLLEN outbuflen;
 	SQLSMALLINT paramtype;
 	char *outbuf;
 	unsigned is_unicode:1;
