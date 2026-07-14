@@ -10,6 +10,7 @@ user_cache.shm_size=16M
 --FILE--
 <?php
 $cache = UserCache\Cache::getPool('ttl-semantics');
+$cache->clear();
 
 var_dump($cache->increment('counter', 1, 1));
 
