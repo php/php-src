@@ -1170,6 +1170,11 @@ PHP_FUNCTION(Markup_unregister_component_factory)
 		Z_PARAM_STR_OR_NULL(component)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (!zend_is_callable(factory, 0, NULL)) {
+		zend_argument_type_error(1, "must be a valid callback");
+		RETURN_THROWS();
+	}
+
 	RETURN_BOOL(markup_unregister_handler(MARKUP_G(component_factories), factory, component));
 }
 
@@ -1197,6 +1202,11 @@ PHP_FUNCTION(Markup_unregister_component_decorator)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(component)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (!zend_is_callable(decorator, 0, NULL)) {
+		zend_argument_type_error(1, "must be a valid callback");
+		RETURN_THROWS();
+	}
 
 	RETURN_BOOL(markup_unregister_handler(MARKUP_G(component_decorators), decorator, component));
 }
