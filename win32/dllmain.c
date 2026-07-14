@@ -27,9 +27,21 @@
 	eq. initializing something before the DLL even is
 	available to be called. */
 
+#if defined(_WIN64) && defined(ZTS)
+ZEND_API void zend_win_tsrm_cache_init(bool alloc);
+#endif
+
 BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 {
 	BOOL ret = TRUE;
+
+#if defined(_WIN64) && defined(ZTS)
+	if (reason == DLL_PROCESS_ATTACH) {
+		zend_win_tsrm_cache_init(true);
+	} else if (reason == DLL_THREAD_ATTACH) {
+		zend_win_tsrm_cache_init(false);
+	}
+#endif
 
 #ifdef HAVE_LIBXML
 	/* This imply that only LIBXML_STATIC_FOR_DLL is supported ATM.

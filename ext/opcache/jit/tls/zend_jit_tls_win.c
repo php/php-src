@@ -33,30 +33,21 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 	size_t *module_index,
 	size_t *module_offset
 ) {
-	/* To find offset of "_tsrm_ls_cache" in TLS segment we perform a linear scan of local TLS memory */
-	/* Probably, it might be better solution */
+	/* Offset of _tsrm_ls_cache within this module's TLS block. */
 #ifdef _WIN64
 	void ***tls_mem = ((void****)__readgsqword(0x58))[_tls_index];
 #else
 	void ***tls_mem = ((void****)__readfsdword(0x2c))[_tls_index];
 #endif
-	void *val = _tsrm_ls_cache;
-	size_t offset = 0;
 	size_t size = (char*)&_tls_end - (char*)&_tls_start;
-
-	while (offset < size) {
-		if (*tls_mem == val) {
-			*module_index  = _tls_index * sizeof(void*);
-			*module_offset = offset;
-			return SUCCESS;
-		}
-		tls_mem++;
-		offset += sizeof(void*);
-	}
+	size_t offset = (size_t)((char*)&_tsrm_ls_cache - (char*)tls_mem);
 
 	if (offset >= size) {
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: offset >= size");
+		return FAILURE;
 	}
 
-	return FAILURE;
+	*module_index  = _tls_index * sizeof(void*);
+	*module_offset = offset;
+	return SUCCESS;
 }
