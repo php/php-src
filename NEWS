@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0alpha2
+?? ??? ????, PHP 8.6.0alpha3
+
+- Reflection:
+  . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
+    (DanielEScherzer)
+
+16 Jul 2026, PHP 8.6.0alpha2
 
 - Core:
   . Sync Boost.Context assembly with 1.91.0. (kn1g78)
@@ -93,6 +99,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-22683 (Reflection(Class)Constant::__toString() should not warn
     on NAN conversions). (Khaled Alam)
+  . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
+    (DanielEScherzer)
 
 - Session:
   . Fixed bug GH-21314 (Different session garbage collector behavior between
@@ -103,6 +111,8 @@ PHP                                                                        NEWS
     do_request() parameters). (David Carlier)
   . Fixed xsd:hexBinary decoding to reject odd-length values instead of
     silently truncating the last nibble. (Weilin Du)
+  . Made SOAP encoding errors report the affected type or failing operation
+    instead of the generic "Violation of encoding rules" message. (Weilin Du)
 
 - Standard:
   . Fixed sleep() and usleep() to reject values that overflow the underlying
