@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     driver-reported display size). (iliaal)
   . Fixed bug GH-22666 (Heap buffer overflow when an output parameter value is
     longer than the declared maxlen). (iliaal)
+  . Fixed bug GH-22665 (Out-of-bounds write when the ODBC driver reports a
+    diagnostic message length beyond the error buffer). (iliaal)
 
 - Reflection:
   . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
