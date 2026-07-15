@@ -653,6 +653,21 @@ static int markup_implement_html(zend_class_entry *iface, zend_class_entry *ce)
 		return SUCCESS;
 	}
 
+	/* Injecting an arena-allocated internal method disqualifies the class
+	 * from opcache's inheritance cache, exactly like enums (zend_do_link_class
+	 * hardcodes "We will add internal methods" for ZEND_ACC_ENUM): if the
+	 * linked class were persisted, zend_persist_class_method() would give the
+	 * injected function a run_time_cache map-ptr slot that nothing fills in
+	 * per request, and the observer fcall-begin path dereferences it
+	 * (segfault under opcache + any observer). Clearing the flag makes
+	 * zend_do_link_class() skip zend_inheritance_cache_add(); nulling
+	 * CG(current_linking_class) stops now-pointless dependency tracking,
+	 * following the precedent of zend_link_hooked_object_iter(). */
+	ce->ce_flags &= ~ZEND_ACC_CACHEABLE;
+	if (CG(current_linking_class) == ce) {
+		CG(current_linking_class) = NULL;
+	}
+
 	zend_internal_function *zif = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
 	zif->type = ZEND_INTERNAL_FUNCTION;
 	zif->module = EG(current_module);
