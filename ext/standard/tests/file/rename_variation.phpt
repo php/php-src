@@ -55,7 +55,7 @@ bool(false)
 bool(true)
 -- Iteration 2 --
 
-Warning: rename(%s,%s): Not a directory in %s on line %d
+Warning: rename(): Not a directory in %s on line %d
 bool(false)
 bool(false)
 bool(false)

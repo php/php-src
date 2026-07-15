@@ -1385,8 +1385,8 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 						if (errno != EPERM) {
 							success = 0;
 						}
-						php_stream_wrapper_error_param2(wrapper, context, NULL, options, E_WARNING,
-								!success, PHP_STREAM_EC(ChownFailed), url_from, url_to,
+						php_stream_wrapper_error(wrapper, context, NULL, options, E_WARNING,
+								!success, PHP_STREAM_EC(ChownFailed),
 								"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 					}
 
@@ -1395,8 +1395,8 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 							if (errno != EPERM) {
 								success = 0;
 							}
-							php_stream_wrapper_error_param2(wrapper, context, NULL, options, E_WARNING,
-									!success, PHP_STREAM_EC(ChownFailed), url_from, url_to,
+							php_stream_wrapper_error(wrapper, context, NULL, options, E_WARNING,
+									!success, PHP_STREAM_EC(ChownFailed),
 									"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 						}
 					}
@@ -1405,13 +1405,11 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 						VCWD_UNLINK(url_from);
 					}
 				} else {
-					php_stream_wrapper_warn_param2_nt(wrapper, context, options, StatFailed,
-							url_from, url_to,
+					php_stream_wrapper_warn_nt(wrapper, context, options, StatFailed,
 							"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 				}
 			} else {
-				php_stream_wrapper_warn_param2_nt(wrapper, context, options, CopyFailed,
-						url_from, url_to,
+				php_stream_wrapper_warn_nt(wrapper, context, options, CopyFailed,
 						"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 			}
 #  if !defined(ZTS) && !defined(TSRM_WIN32)
@@ -1425,8 +1423,8 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 #ifdef PHP_WIN32
 		php_win32_docref2_from_error(GetLastError(), url_from, url_to);
 #else
-		php_stream_wrapper_warn_param2(wrapper, context, options,
-				RenameFailed, url_from, url_to,
+		php_stream_wrapper_warn(wrapper, context, options,
+				RenameFailed,
 				"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 #endif
 		return 0;
