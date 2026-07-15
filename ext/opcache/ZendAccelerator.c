@@ -3259,8 +3259,9 @@ static zend_result accel_post_startup(void)
 	file_cache_only = ZCG(accel_directives).file_cache_only;
 	if (!file_cache_only) {
 		size_t shm_size = ZCG(accel_directives).memory_consumption;
-#ifdef HAVE_JIT
 		size_t jit_size = 0;
+#ifdef HAVE_JIT
+		size_t jit_buffer_size = 0;
 		bool reattached = false;
 
 		if (JIT_G(enabled) && JIT_G(buffer_size)
@@ -3272,15 +3273,16 @@ static zend_result accel_post_startup(void)
 				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can't get page size.");
 				abort();
 			}
-			jit_size = JIT_G(buffer_size);
-			jit_size = ZEND_MM_ALIGNED_SIZE_EX(jit_size, page_size);
+			jit_buffer_size = JIT_G(buffer_size);
+			jit_buffer_size = ZEND_MM_ALIGNED_SIZE_EX(jit_buffer_size, page_size);
+# ifndef ZEND_JIT_USE_APPLE_MAP_JIT
+			jit_size = jit_buffer_size;
 			shm_size += jit_size;
+# endif
 		}
+#endif
 
 		switch (zend_shared_alloc_startup(shm_size, jit_size)) {
-#else
-		switch (zend_shared_alloc_startup(shm_size, 0)) {
-#endif
 			case ALLOC_SUCCESS:
 				if (zend_accel_init_shm() == FAILURE) {
 					accel_startup_ok = false;
@@ -3334,10 +3336,15 @@ static zend_result accel_post_startup(void)
 			if (JIT_G(buffer_size) == 0) {
 				JIT_G(enabled) = false;
 				JIT_G(on) = false;
-			} else if (!ZSMMG(reserved)) {
-				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: could not use reserved buffer!");
 			} else {
-				zend_jit_startup(ZSMMG(reserved), jit_size, reattached);
+# ifdef ZEND_JIT_USE_APPLE_MAP_JIT
+				zend_jit_startup(NULL, jit_buffer_size, reattached);
+# else
+				if (!ZSMMG(reserved)) {
+					zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: could not use reserved buffer!");
+				}
+				zend_jit_startup(ZSMMG(reserved), jit_buffer_size, reattached);
+# endif
 				zend_jit_startup_ok = true;
 			}
 		}

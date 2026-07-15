@@ -40,8 +40,10 @@
 
 #include "jit/zend_jit_internal.h"
 
-#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+#ifdef ZEND_JIT_USE_APPLE_MAP_JIT
+#include <mach/vm_inherit.h>
 #include <pthread.h>
+#include <sys/mman.h>
 #endif
 
 #ifdef ZTS
@@ -77,9 +79,6 @@ int16_t zend_jit_hot_counters[ZEND_HOT_COUNTERS_COUNT];
 
 const zend_op *zend_jit_halt_op = NULL;
 const zend_op *zend_jit_interrupt_op = NULL;
-#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-static int zend_write_protect = 1;
-#endif
 
 static void *dasm_buf = NULL;
 static void *dasm_end = NULL;
@@ -3517,17 +3516,14 @@ jit_failure:
 
 void zend_jit_unprotect(void)
 {
-#ifdef HAVE_MPROTECT
+#ifdef ZEND_JIT_USE_APPLE_MAP_JIT
+	pthread_jit_write_protect_np(0);
+#elif defined(HAVE_MPROTECT)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		int opts = PROT_READ | PROT_WRITE;
-#ifdef ZTS
-#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-		if (zend_write_protect) {
-			pthread_jit_write_protect_np(0);
-		}
-#endif
+# ifdef ZTS
 		opts |= PROT_EXEC;
-#endif
+# endif
 		if (mprotect(dasm_buf, dasm_size, opts) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
@@ -3535,11 +3531,11 @@ void zend_jit_unprotect(void)
 #elif defined(_WIN32)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		DWORD old, new;
-#ifdef ZTS
+# ifdef ZTS
 		new = PAGE_EXECUTE_READWRITE;
-#else
+# else
 		new = PAGE_READWRITE;
-#endif
+# endif
 		if (!VirtualProtect(dasm_buf, dasm_size, new, &old)) {
 			DWORD err = GetLastError();
 			char *msg = php_win32_error_to_msg(err);
@@ -3552,13 +3548,10 @@ void zend_jit_unprotect(void)
 
 void zend_jit_protect(void)
 {
-#ifdef HAVE_MPROTECT
+#ifdef ZEND_JIT_USE_APPLE_MAP_JIT
+	pthread_jit_write_protect_np(1);
+#elif defined(HAVE_MPROTECT)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
-#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-		if (zend_write_protect) {
-			pthread_jit_write_protect_np(1);
-		}
-#endif
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
@@ -3780,20 +3773,36 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 	zend_jit_interrupt_op = zend_get_interrupt_op();
 	zend_jit_profile_counter_rid = zend_get_op_array_extension_handle(ACCELERATOR_PRODUCT_NAME);
 
-#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-	zend_write_protect = pthread_jit_write_protect_supported_np();
+#ifdef ZEND_JIT_USE_APPLE_MAP_JIT
+	buf = mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC,
+		MAP_PRIVATE | MAP_ANON | MAP_JIT, -1, 0);
+	if (buf == MAP_FAILED) {
+		int error = errno;
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
+			"Unable to allocate %zu bytes for JIT buffer using MAP_JIT: %s (%d)",
+			size, strerror(error), error);
+	}
+	if (minherit(buf, size, VM_INHERIT_SHARE) != 0) {
+		int error = errno;
+		munmap(buf, size);
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
+			"Unable to share JIT buffer across fork using minherit(): %s (%d)",
+			strerror(error), error);
+	}
+	if (!pthread_jit_write_protect_supported_np()) {
+		munmap(buf, size);
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
+			"Apple Silicon ZTS JIT requires pthread_jit_write_protect_np() support");
+	}
 #endif
 
 	dasm_buf = buf;
 	dasm_size = size;
 	dasm_ptr = dasm_end = (void*)(((char*)dasm_buf) + size - sizeof(*dasm_ptr) * 2);
 
-#ifdef HAVE_MPROTECT
-#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-	if (zend_write_protect) {
-		pthread_jit_write_protect_np(1);
-	}
-#endif
+#ifdef ZEND_JIT_USE_APPLE_MAP_JIT
+	pthread_jit_write_protect_np(1);
+#elif defined(HAVE_MPROTECT)
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
@@ -3872,6 +3881,12 @@ void zend_jit_shutdown(void)
 	ts_free_id(jit_globals_id);
 #else
 	zend_jit_trace_free_caches(&jit_globals);
+#endif
+
+#ifdef ZEND_JIT_USE_APPLE_MAP_JIT
+	if (dasm_buf != NULL) {
+		munmap(dasm_buf, dasm_size);
+	}
 #endif
 
 	/* Reset global pointers to prevent use-after-free in `zend_jit_status()`
