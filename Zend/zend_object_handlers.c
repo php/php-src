@@ -448,7 +448,8 @@ found:
 		return ZEND_DYNAMIC_PROPERTY_OFFSET;
 	}
 
-	if (write_access
+	if (cache_slot
+	 && write_access
 	 && UNEXPECTED(flags & ZEND_ACC_PPP_SET_MASK)
 	 && !(flags & ZEND_ACC_PUBLIC_SET)) {
 		const zend_class_entry *scope = get_fake_or_executed_scope();
@@ -462,10 +463,8 @@ found:
 			 * too: downstream code (e.g. the hooked simple-write marking)
 			 * assumes resolution populated the slot and would otherwise
 			 * flag a stale polymorphic entry. */
-			if (cache_slot) {
-				CACHE_PTR_EX(cache_slot, NULL);
-				cache_slot = NULL;
-			}
+			CACHE_PTR_EX(cache_slot, NULL);
+			cache_slot = NULL;
 		}
 	}
 
