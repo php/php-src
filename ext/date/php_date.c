@@ -17,7 +17,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_versioning.h"
-#include "ext/user_cache/php_user_cache.h"
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 #include "php_date.h"
 #include "php_time.h"
 #include "zend_attributes.h"
@@ -4771,10 +4771,10 @@ static void php_date_interval_initialize_from_hash(php_interval_obj *intobj, con
 	intobj->initialized = true;
 } /* }}} */
 
-#define PHP_DATE_USER_CACHE_STATE_TIMEZONE "timezone"
-#define PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN (sizeof(PHP_DATE_USER_CACHE_STATE_TIMEZONE) - 1)
-#define PHP_DATE_USER_CACHE_STATE_CTIME "ctime"
-#define PHP_DATE_USER_CACHE_STATE_CTIME_LEN (sizeof(PHP_DATE_USER_CACHE_STATE_CTIME) - 1)
+#define PHP_DATE_USER_CACHE_STATE_TIMEZONE		"timezone"
+#define PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN	(sizeof(PHP_DATE_USER_CACHE_STATE_TIMEZONE) - 1)
+#define PHP_DATE_USER_CACHE_STATE_CTIME			"ctime"
+#define PHP_DATE_USER_CACHE_STATE_CTIME_LEN		(sizeof(PHP_DATE_USER_CACHE_STATE_CTIME) - 1)
 
 static void php_date_user_cache_add_assoc_int64(zval *arr, const char *name, int64_t value)
 {

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Cache                                                            |
-   +----------------------------------------------------------------------+
    | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
    | This source file is subject to the Modified BSD License that is      |
@@ -10,9 +8,9 @@
    |                                                                      |
    | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Author: Go Kudo <zeriyoshi@php.net>                                  |
+   | Authors: Go Kudo <zeriyoshi@php.net>                                 |
    +----------------------------------------------------------------------+
-*/
+ */
 
 #include "php.h"
 #include "php_user_cache.h"
@@ -32,9 +30,9 @@
 
 #include "SAPI.h"
 
-#define PHP_USER_CACHE_API_VALUE_TYPE "object|array|string|int|float|bool|null"
-#define PHP_USER_CACHE_STORAGE_KEY_CACHE_MAX 4096U
-#define PHP_USER_CACHE_MAX_BOUNDARY_PARTITIONS 32U
+#define PHP_USER_CACHE_API_VALUE_TYPE			"object|array|string|int|float|bool|null"
+#define PHP_USER_CACHE_STORAGE_KEY_CACHE_MAX	4096U
+#define PHP_USER_CACHE_MAX_BOUNDARY_PARTITIONS	32U
 
 #define PHP_USER_CACHE_DEFINE_OBJ_FROM_STD(type) \
 	static type *type##_from_obj(zend_object *obj) \
@@ -785,8 +783,8 @@ static zend_result user_cache_fetch_multiple_api(
 		zval *default_value,
 		zval *return_value)
 {
-	zend_string **prepared_keys, **storage_keys, *key, *storage_key;
 	php_user_cache_fetch_pending_seed *pending_seeds;
+	zend_string **prepared_keys, **storage_keys, *key, *storage_key;
 	zval val;
 	uint32_t count, i;
 	bool rlock_held;
@@ -832,6 +830,7 @@ static zend_result user_cache_fetch_multiple_api(
 	}
 
 	rlock_held = true;
+
 	zend_try {
 		for (i = 0; i < count; i++) {
 			key = prepared_keys[i];
@@ -1086,6 +1085,7 @@ static void user_cache_return_status(zval *return_value)
 
 	status->availability_reason = php_user_cache_active_runtime()->failure_reason;
 	user_cache_collect_info_stats(&status->stats);
+
 	status->initialized = true;
 }
 
@@ -1192,6 +1192,7 @@ static void user_cache_collect_pool_status(
 	}
 
 	entries = php_user_cache_entries_ptr(header);
+
 	/* Release the lock before propagating an allocation bailout. */
 	zend_try {
 		for (i = 0; i < header->capacity; i++) {
@@ -1230,12 +1231,14 @@ static void user_cache_return_pool_status(
 	php_user_cache_ensure_ready();
 
 	object_init_ex(return_value, php_user_cache_pool_status_ce);
+
 	status = php_user_cache_pool_status_object_from_obj(Z_OBJ_P(return_value));
 	status->scope = zend_string_copy(cache->scope);
 	status->scope_prefix = zend_string_copy(cache->scope_prefix);
 	status->context = cache->context;
 
 	array_init(&status->entry_keys);
+
 	user_cache_collect_pool_status(
 		status->context,
 		status->scope_prefix,
@@ -1360,6 +1363,7 @@ static void user_cache_release_pools(void)
 
 	zend_hash_destroy(UC_G(pool_table));
 	FREE_HASHTABLE(UC_G(pool_table));
+
 	UC_G(pool_table) = NULL;
 }
 
@@ -1387,6 +1391,7 @@ static zend_object *user_cache_get_or_create_pool(zend_string *pool)
 	cache->scope_prefix = user_cache_build_scope_prefix(pool);
 
 	ZVAL_OBJ(&pool_zv, obj);
+
 	if (zend_hash_add(pools, pool, &pool_zv) == NULL) {
 		OBJ_RELEASE(obj);
 
@@ -1427,6 +1432,7 @@ static zend_string *user_cache_storage_key_build(
 		ZSTR_VAL(key),
 		ZSTR_LEN(key)
 	);
+
 	zend_string_hash_val(storage_key);
 
 	if (cache->storage_key_cache == NULL) {
@@ -1555,6 +1561,7 @@ static bool user_cache_store_storage_key_prevalidated(zend_string *key, zval *va
 	} zend_catch {
 		php_user_cache_unlock_if_held();
 		php_user_cache_destroy_prepared_value(&prepared);
+
 		zend_bailout();
 	} zend_end_try();
 
@@ -1572,7 +1579,7 @@ static bool user_cache_store_storage_key_prevalidated(zend_string *key, zval *va
 static int user_cache_bulk_order_compare(const void *lhs_ptr, const void *rhs_ptr)
 {
 	const php_user_cache_bulk_order *lhs, *rhs;
-	size_t lhs_len, rhs_len, compare_len;
+	size_t lhs_len, rhs_len, cmp_len;
 	int result;
 
 	lhs = lhs_ptr;
@@ -1584,9 +1591,9 @@ static int user_cache_bulk_order_compare(const void *lhs_ptr, const void *rhs_pt
 
 	lhs_len = ZSTR_LEN(lhs->key);
 	rhs_len = ZSTR_LEN(rhs->key);
-	compare_len = lhs_len < rhs_len ? lhs_len : rhs_len;
+	cmp_len = lhs_len < rhs_len ? lhs_len : rhs_len;
 
-	result = memcmp(ZSTR_VAL(lhs->key), ZSTR_VAL(rhs->key), compare_len);
+	result = memcmp(ZSTR_VAL(lhs->key), ZSTR_VAL(rhs->key), cmp_len);
 	if (result != 0) {
 		return result < 0 ? -1 : 1;
 	}
@@ -1666,6 +1673,7 @@ static uint32_t user_cache_prepare_bulk_store_items(
 
 		if (!php_user_cache_prepare_value(storage_key, value, prep_opts, &items[i].prepared)) {
 			php_user_cache_destroy_prepared_value(&items[i].prepared);
+
 			zend_string_release(storage_key);
 
 			*result = false;
@@ -1757,7 +1765,6 @@ static bool user_cache_instance_store_multiple(
 	php_user_cache_bulk_store_item *items;
 	php_user_cache_bulk_order *order;
 	zend_string **storage_keys;
-	bool *acquired;
 	php_user_cache_prepare_options prep_opts = {
 		.caller_holds_write_lock = false,
 		.throw_on_failure = false,
@@ -1770,7 +1777,7 @@ static bool user_cache_instance_store_multiple(
 		.capture_replaced_entry = true,
 	};
 	uint32_t i, count, prepared_count, stored_count = 0;
-	bool result;
+	bool result, *acquired;
 
 	if (!user_cache_can_write()) {
 		return false;
@@ -1811,6 +1818,7 @@ static bool user_cache_instance_store_multiple(
 			);
 		} zend_catch {
 			php_user_cache_unlock_if_held();
+
 			zend_bailout();
 		} zend_end_try();
 
@@ -1825,6 +1833,7 @@ static bool user_cache_instance_store_multiple(
 
 	for (i = 0; i < prepared_count; i++) {
 		php_user_cache_destroy_prepared_value(&items[i].prepared);
+
 		zend_string_release(storage_keys[i]);
 	}
 
@@ -1878,6 +1887,7 @@ static bool user_cache_instance_delete_multiple(
 			}
 		} zend_catch {
 			php_user_cache_unlock_if_held();
+
 			zend_bailout();
 		} zend_end_try();
 
@@ -1945,6 +1955,7 @@ static void user_cache_partitions_shutdown(void)
 	php_user_cache_context *prev_ctx;
 
 	prev_ctx = UC_G(active_context_ptr);
+
 	partition = php_user_cache_partitions;
 	while (partition != NULL) {
 		next = partition->next;
@@ -2071,6 +2082,7 @@ static php_user_cache_boundary_partition *user_cache_create_boundary_partition(
 	}
 
 	memcpy(entry->boundary, boundary, boundary_len);
+
 	entry->boundary[boundary_len] = '\0';
 	entry->boundary_len = boundary_len;
 	entry->boundary_hash = boundary_hash;
@@ -2098,6 +2110,7 @@ static php_user_cache_boundary_partition *user_cache_create_boundary_partition(
 	entry->partition->context.boundary_shared = true;
 
 	entry->next = php_user_cache_boundary_partitions;
+
 	php_user_cache_boundary_partitions = entry;
 	php_user_cache_boundary_partition_count++;
 
@@ -2316,8 +2329,8 @@ ZEND_API void php_user_cache_activate_boundary_partition(
 		void (*log_message)(const char *message),
 		php_user_cache_reason failure_reason)
 {
-	php_user_cache_partition *partition = NULL;
 	const char *boundary;
+	php_user_cache_partition *partition = NULL;
 
 	boundary = get_env("DOCUMENT_ROOT");
 	if (boundary == NULL || boundary[0] == '\0') {
@@ -2417,6 +2430,7 @@ void php_user_cache_minit(void)
 	php_user_cache_runtime_opted_in = false;
 
 	user_cache_register_classes();
+
 	php_user_cache_safe_direct_handlers_init();
 	php_user_cache_optimistic_fork_setup();
 
@@ -2442,6 +2456,7 @@ void php_user_cache_mshutdown(void)
 	php_user_cache_restore_context(prev_ctx);
 
 	UC_G(active_partition) = NULL;
+
 	php_user_cache_runtime_opted_in = false;
 
 	php_user_cache_safe_direct_handlers_destroy();
@@ -2527,7 +2542,8 @@ static void user_cache_store_method(INTERNAL_FUNCTION_PARAMETERS, bool add_only)
 	}
 
 	if (!(user_cache_can_write() &&
-			user_cache_store_storage_key_prevalidated(storage_key, value, ttl, add_only))) {
+		user_cache_store_storage_key_prevalidated(storage_key, value, ttl, add_only))
+	) {
 		zend_string_release(storage_key);
 
 		if (EG(exception)) {
@@ -2580,6 +2596,7 @@ static void user_cache_atomic_update_method(INTERNAL_FUNCTION_PARAMETERS, bool d
 	}
 
 	updated = user_cache_atomic_update_api(storage_key, step, ttl, decrement, &result);
+
 	zend_string_release(storage_key);
 
 	if (result.is_type_error) {
@@ -2735,7 +2752,8 @@ ZEND_METHOD(UserCache_Cache, hasPool)
 	}
 
 	RETURN_BOOL(UC_G(pool_table) != NULL &&
-		zend_hash_exists(UC_G(pool_table), pool));
+		zend_hash_exists(UC_G(pool_table), pool)
+	);
 }
 
 ZEND_METHOD(UserCache_Cache, getPool)
