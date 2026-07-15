@@ -1845,11 +1845,6 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 		return xmlParam;
 	}
 
-	if (data && (Z_TYPE_P(data) == IS_OBJECT &&
-	    instanceof_function_slow(Z_OBJCE_P(data), php_date_get_interface_ce()))) {
-		return master_to_xml(get_conversion(XSD_DATETIME), data, style, parent);
-	}
-
 	if (Z_TYPE_P(data) == IS_OBJECT) {
 		prop = Z_OBJPROP_P(data);
 	} else if (Z_TYPE_P(data) == IS_ARRAY) {
@@ -2842,7 +2837,11 @@ static xmlNodePtr guess_xml_convert(encodeTypePtr type, zval *data, int style, x
 	xmlNodePtr ret;
 
 	if (data) {
-		enc = get_conversion(Z_TYPE_P(data));
+		if (Z_TYPE_P(data) == IS_OBJECT && instanceof_function_slow(Z_OBJCE_P(data), php_date_get_interface_ce())) {
+			enc = get_conversion(XSD_DATETIME);
+		} else {
+			enc = get_conversion(Z_TYPE_P(data));
+		}
 	} else {
 		enc = get_conversion(IS_NULL);
 	}
