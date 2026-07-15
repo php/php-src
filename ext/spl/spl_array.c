@@ -18,7 +18,7 @@
 
 #include "php.h"
 #include "ext/standard/php_var.h"
-#include "ext/user_cache/php_user_cache.h" #include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
