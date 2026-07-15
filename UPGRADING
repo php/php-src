@@ -486,6 +486,9 @@ PHP 8.6 UPGRADE NOTES
 - mysqli
   . Added new constant MYSQLI_OPT_COMPRESS.
 
+- Opcache
+  . JIT is now supported for ZTS builds on Apple Silicon.
+
 ========================================
 10. New Global Constants
 ========================================

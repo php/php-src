@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-22668 (Heap buffer over-read when a column value exceeds the
     driver-reported display size). (iliaal)
 
+- Opcache:
+  . Re-enable JIT for ZTS builds on Apple Silicon. (realFlowControl)
+
 - PDO_ODBC:
   . Fixed bug GH-22667 (Heap buffer over-read when a column value exceeds the
     driver-reported display size). (iliaal)
