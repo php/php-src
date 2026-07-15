@@ -5174,7 +5174,7 @@ static void date_period_reset(php_period_obj *period_obj)
 	if (period_obj->interval) {
 		timelib_rel_time_dtor(period_obj->interval);
 	}
-	memset(period_obj, 0, XtOffsetOf(php_period_obj, std));
+	memset(period_obj, 0, offsetof(php_period_obj, std));
 }
 
 /* {{{ Creates new DatePeriod object. */
