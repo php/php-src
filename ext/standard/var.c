@@ -1303,13 +1303,17 @@ again:
 				zend_release_properties(myht);
 				return;
 			}
-		case IS_ARRAY:
+		case IS_ARRAY: {
 			smart_str_appendl(buf, "a:", 2);
 			myht = Z_ARRVAL_P(struc);
+			bool rcn = !is_root && (in_rcn_array || GC_REFCOUNT(myht) > 1);
+			GC_TRY_ADDREF(myht);
 			php_var_serialize_nested_data(
 				buf, struc, myht, zend_array_count(myht), /* incomplete_class */ false, var_hash,
-				!is_root && (in_rcn_array || GC_REFCOUNT(myht) > 1));
+				rcn);
+			GC_TRY_DTOR_NO_REF(myht);
 			return;
+		}
 		case IS_REFERENCE:
 			struc = Z_REFVAL_P(struc);
 			goto again;
