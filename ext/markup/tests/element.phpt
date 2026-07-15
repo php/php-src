@@ -56,7 +56,7 @@ echo (new Element('a', ['data-x' => $s]))->__toString(), "\n";
 try {
     (new Element('div', ['class' => ['a', 'b']]))->__toString();
 } catch (\Throwable $e) {
-    echo get_class($e), ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // --- Html attribute values (no double-escaping) ---
@@ -101,7 +101,7 @@ var_dump(raw('y') instanceof Markup\Html);
 
 function err(callable $fn): string {
     try { return $fn()->__toString(); }
-    catch (\Throwable $e) { return get_class($e) . ': ' . $e->getMessage(); }
+    catch (\Throwable $e) { return $e::class . ': ' . $e->getMessage(); }
 }
 
 // Attribute name from an attacker-controlled spread key - must be rejected.

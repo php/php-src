@@ -11,7 +11,7 @@ function expect_error(callable $f): void {
         $f();
         echo "NO ERROR\n";
     } catch (Error $e) {
-        echo get_class($e), ": ", $e->getMessage(), "\n";
+        echo $e::class, ": ", $e->getMessage(), "\n";
     }
 }
 
@@ -87,7 +87,7 @@ class Boom implements Markup\Html {
 try {
     echo render_component('Boom')->__toString();
 } catch (\Throwable $e) {
-    echo get_class($e), ": ", $e->getMessage(), "\n";
+    echo $e::class, ": ", $e->getMessage(), "\n";
 }
 
 echo "clean\n";

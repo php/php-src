@@ -112,9 +112,9 @@ class Selfish implements Markup\Html {
     public function toHtml(): Markup\Html { return $this; }
 }
 try { echo new Selfish(); }
-catch (Error $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
+catch (Error $e) { echo $e::class, ": ", $e->getMessage(), "\n"; }
 try { echo <div>{new Selfish()}</div>; }
-catch (Error $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
+catch (Error $e) { echo $e::class, ": ", $e->getMessage(), "\n"; }
 
 // A two-class cycle is caught by the same bound.
 class Ping implements Markup\Html {
@@ -124,7 +124,7 @@ class Pong implements Markup\Html {
     public function toHtml(): Markup\Html { return new Ping(); }
 }
 try { echo new Ping(); }
-catch (Error $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
+catch (Error $e) { echo $e::class, ": ", $e->getMessage(), "\n"; }
 
 // An exception thrown inside toHtml() propagates cleanly through the injected
 // __toString (both directly and from child position).
@@ -132,9 +132,9 @@ class Boom implements Markup\Html {
     public function toHtml(): Markup\Html { throw new RuntimeException('boom'); }
 }
 try { echo new Boom(); }
-catch (RuntimeException $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
+catch (RuntimeException $e) { echo $e::class, ": ", $e->getMessage(), "\n"; }
 try { echo <div>{new Boom()}</div>; }
-catch (RuntimeException $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
+catch (RuntimeException $e) { echo $e::class, ": ", $e->getMessage(), "\n"; }
 
 echo "clean\n";
 ?>

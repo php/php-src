@@ -29,7 +29,7 @@ echo (new Element('div', [], [new Element('em', [], ['hi & bye'])]))->__toString
 try {
     (new Element('div', [], [new stdClass]))->__toString();
 } catch (\Throwable $e) {
-    echo get_class($e), ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // --- Traversable children: generators, Iterator, IteratorAggregate ---
@@ -61,7 +61,7 @@ function boom(): Generator {
 try {
     (new Element('div', [], [boom()]))->__toString();
 } catch (\Throwable $e) {
-    echo get_class($e), ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // --- nesting-depth bound ---
@@ -74,7 +74,7 @@ for ($i = 0; $i < 2048; $i++) {
 try {
     echo (new E('div', [], $kids))->__toString(), "\n";
 } catch (\Throwable $e) {
-    echo get_class($e), ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // Normal (shallow) nesting still renders.

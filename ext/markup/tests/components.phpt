@@ -10,7 +10,7 @@ use function Markup\render_component;
 
 function err(callable $fn): string {
     try { $fn(); return "no error"; }
-    catch (\Throwable $e) { return get_class($e) . ': ' . $e->getMessage(); }
+    catch (\Throwable $e) { return $e::class . ': ' . $e->getMessage(); }
 }
 
 // --- component tag lowering: class + static-method dispatch ---
