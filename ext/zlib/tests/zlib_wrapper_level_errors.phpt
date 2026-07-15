@@ -38,8 +38,9 @@ var_dump($size_oob);
 
 ?>
 --EXPECTF--
+Warning: fopen(): zlib "level" context option must be of type int, string given in %s on line %d
 int(%d)
 
-Warning: Object of class stdClass could not be converted to int in %s on line %d
+Warning: fopen(): zlib "level" context option must be of type int, stdClass given in %s on line %d
 int(%d)
 int(0)
