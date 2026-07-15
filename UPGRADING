@@ -21,6 +21,8 @@ PHP 8.7 UPGRADE NOTES
 
 - Curl:
   . curl_multi_exec() now throws a TypeError when still_running is not an int.
+  . Nested arrays in CURLOPT_POSTFIELDS now throw a TypeError, instead of being
+    silently converted to the string "Array".
 
 - PDO:
   . PDOStatement::bindColumn() now throws a ValueError when the column name is
@@ -35,6 +37,10 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 2. New Features
 ========================================
+
+- Curl:
+  . Multiple files can now be uploaded with the same field name by passing an
+    array of CURLFile or CURLStringFile objects to CURLOPT_POSTFIELDS.
 
 - Intl:
   . Locale::acceptFromHttp() and locale_accept_from_http() now accept an

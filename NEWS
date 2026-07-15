@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Curl:
   . curl_multi_exec() now throws a TypeError when still_running is not an int.
     (arshidkv12)
+  . Uploading multiple files with the same field name is now possible by
+    passing an array of CURLFile or CURLStringFile objects to
+    CURLOPT_POSTFIELDS. (Sjoerd Langkemper)
 
 - FPM:
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
