@@ -2215,7 +2215,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 	switch (format) {
 		case TAG_FMT_STRING:
 			if (length > value_len) {
-				exif_error_docref("exif_iif_add_value" EXIFERR_CC, image_info, E_WARNING, "length > value_len: %d > %zu", length, value_len);
+				exif_error_docref("exif_iif_add_value" EXIFERR_CC, image_info, E_WARNING, "length > value_len: %zu > %zu", length, value_len);
 				value = NULL;
 			}
 			if (value) {
@@ -2245,7 +2245,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			ZEND_FALLTHROUGH;
 		case TAG_FMT_UNDEFINED:
 			if (length > value_len) {
-				exif_error_docref("exif_iif_add_value" EXIFERR_CC, image_info, E_WARNING, "length > value_len: %d > %zu", length, value_len);
+				exif_error_docref("exif_iif_add_value" EXIFERR_CC, image_info, E_WARNING, "length > value_len: %zu > %zu", length, value_len);
 				value = NULL;
 			}
 			if (value) {
@@ -3304,7 +3304,7 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 			 * relative to the start of the TIFF header in APP1 section. */
 			// TODO: Shouldn't we also be taking "displacement" into account here?
 			if (byte_count > ImageInfo->FileSize || offset_val>ImageInfo->FileSize-byte_count || (ImageInfo->FileType!=IMAGE_FILETYPE_TIFF_II && ImageInfo->FileType!=IMAGE_FILETYPE_TIFF_MM && ImageInfo->FileType!=IMAGE_FILETYPE_JPEG)) {
-				exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", tag, exif_get_tagname_debug(tag, tag_table), offset_val, byte_count, offset_val+byte_count, ImageInfo->FileSize);
+				exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal pointer offset(x%04zX + x%04zX = x%04zX > x%04zX)", tag, exif_get_tagname_debug(tag, tag_table), offset_val, byte_count, offset_val+byte_count, ImageInfo->FileSize);
 				return false;
 			}
 			if (byte_count>sizeof(cbuf)) {
@@ -3326,7 +3326,7 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 			size_t fgot = php_stream_tell(ImageInfo->infile);
 			if (fgot!=displacement+offset_val) {
 				EFREE_IF(outside);
-				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Wrong file pointer: 0x%08X != 0x%08X", fgot, displacement+offset_val);
+				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Wrong file pointer: 0x%08zX != 0x%08zX", fgot, displacement+offset_val);
 				return false;
 			}
 			fgot = exif_read_from_stream_file_looped(ImageInfo->infile, value_ptr, byte_count);
@@ -3866,7 +3866,7 @@ static bool exif_scan_JPEG_header(image_info_type *ImageInfo)
 
 		got = exif_read_from_stream_file_looped(ImageInfo->infile, (char*)(Data+2), itemlen-2); /* Read the whole section. */
 		if (got != itemlen-2) {
-			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error reading from file: got=x%04X(=%d) != itemlen-2=x%04X(=%d)", got, got, itemlen-2, itemlen-2);
+			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error reading from file: got=x%04zX(=%zu) != itemlen-2=x%04zX(=%zu)", got, got, itemlen-2, itemlen-2);
 			return false;
 		}
 
@@ -4150,7 +4150,7 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 			if (ImageInfo->FileSize >= ImageInfo->file.list[sn].size && ImageInfo->FileSize - ImageInfo->file.list[sn].size >= dir_offset) {
 				if (ifd_size > dir_size) {
 					if (ImageInfo->FileSize < ifd_size || dir_offset > ImageInfo->FileSize - ifd_size) {
-						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than size of IFD(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, ifd_size);
+						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04zX) less than size of IFD(x%04zX + x%04zX)", ImageInfo->FileSize, dir_offset, ifd_size);
 						return false;
 					}
 					if (exif_file_sections_realloc(ImageInfo, sn, ifd_size)) {
@@ -4266,15 +4266,15 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 				}
 				return true;
 			} else {
-				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than size of IFD(x%04X)", ImageInfo->FileSize, dir_offset+ImageInfo->file.list[sn].size);
+				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04zX) less than size of IFD(x%04zX)", ImageInfo->FileSize, dir_offset+ImageInfo->file.list[sn].size);
 				return false;
 			}
 		} else {
-			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than size of IFD dir(x%04X)", ImageInfo->FileSize, dir_offset+dir_size);
+			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04zX) less than size of IFD dir(x%04zX)", ImageInfo->FileSize, dir_offset+dir_size);
 			return false;
 		}
 	} else {
-		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than start of IFD dir(x%04X)", ImageInfo->FileSize, dir_offset+2);
+		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04zX) less than start of IFD dir(x%04zX)", ImageInfo->FileSize, dir_offset+2);
 		return false;
 	}
 }
@@ -4507,7 +4507,7 @@ static bool exif_scan_FILE_header(image_info_type *ImageInfo)
 	ImageInfo->FileType = IMAGE_FILETYPE_UNKNOWN;
 
 	if (UNEXPECTED(ImageInfo->FileSize < 2)) {
-		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "File too small (%d)", ImageInfo->FileSize);
+		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "File too small (%zu)", ImageInfo->FileSize);
 		return false;
 	}
 
