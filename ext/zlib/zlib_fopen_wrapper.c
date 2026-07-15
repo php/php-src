@@ -31,11 +31,13 @@ struct php_gz_stream_data_t	{
 static void php_gziop_report_errors(php_stream *stream, size_t count, const char *verb)
 {
 	if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
-		struct php_gz_stream_data_t *self = stream->abstract;
+		const struct php_gz_stream_data_t *self = stream->abstract;
 		int error = 0;
 		gzerror(self->gz_file, &error);
 		if (error == Z_ERRNO) {
-			php_error_docref(NULL, E_NOTICE, "%s of %zu bytes failed with errno=%d %s", verb, count, errno, strerror(errno));
+			php_stream_notice(stream, ReadFailed,
+					"%s of %zu bytes failed with errno=%d %s",
+					verb, count, errno, strerror(errno));
 		}
 	}
 }
@@ -98,12 +100,13 @@ static ssize_t php_gziop_write(php_stream *stream, const char *buf, size_t count
 
 static int php_gziop_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs)
 {
-	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
+	const struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
 
-	assert(self != NULL);
+	ZEND_ASSERT(self != NULL);
 
 	if (whence == SEEK_END) {
-		php_error_docref(NULL, E_WARNING, "SEEK_END is not supported");
+		php_stream_wrapper_warn(NULL, PHP_STREAM_CONTEXT(stream), REPORT_ERRORS,
+				SeekNotSupported, "SEEK_END is not supported on this stream");
 		return -1;
 	}
 
@@ -171,14 +174,12 @@ const php_stream_ops php_stream_gzio_ops = {
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
 							  zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
-	struct php_gz_stream_data_t *self;
 	php_stream *stream = NULL, *innerstream = NULL;
 
 	/* sanity check the stream: it can be either read-only or write-only */
 	if (strchr(mode, '+')) {
-		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL, E_WARNING, "Cannot open a zlib stream for reading and writing at the same time!");
-		}
+		php_stream_wrapper_log_warn(wrapper, context, REPORT_ERRORS, ModeNotSupported,
+			"Cannot open a zlib stream for reading and writing at the same time!");
 		return NULL;
 	}
 
@@ -194,14 +195,24 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 		php_socket_t fd;
 
 		if (SUCCESS == php_stream_cast(innerstream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
-			self = emalloc(sizeof(*self));
+			struct php_gz_stream_data_t *self = emalloc(sizeof(*self));
 			self->stream = innerstream;
 			self->gz_file = gzdopen(dup(fd), mode);
 
 			if (self->gz_file) {
-				zval *zlevel = context ? php_stream_context_get_option(context, "zlib", "level") : NULL;
-				if (zlevel && (Z_OK != gzsetparams(self->gz_file, zval_get_long(zlevel), Z_DEFAULT_STRATEGY))) {
-					php_error(E_WARNING, "failed setting compression level");
+				const zval *zlevel = context ? php_stream_context_get_option(context, "zlib", "level") : NULL;
+
+				if (zlevel) {
+					bool failed = true;
+					const zend_long level = zval_try_get_long(zlevel, &failed);
+					if (UNEXPECTED(failed)) {
+						/* TODO: keep options arg instead of REPORT_ERRORS? Fix _php_stream_open_wrapper_ex() to not clear report errors flag? */
+						php_stream_wrapper_log_warn(wrapper, context, REPORT_ERRORS, InvalidParam,
+							"zlib \"level\" context option must be of type int, %s given", zend_zval_type_name(zlevel));
+					} else if (Z_OK != gzsetparams(self->gz_file, level, Z_DEFAULT_STRATEGY)) {
+						php_stream_wrapper_log_warn(wrapper, context, REPORT_ERRORS, Generic,
+							"failed setting compression level");
+					}
 				}
 
 				stream = php_stream_alloc_rel(&php_stream_gzio_ops, self, 0, mode);
@@ -214,9 +225,9 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 			}
 
 			efree(self);
-			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "gzopen failed");
-			}
+
+			php_stream_wrapper_log_warn(wrapper, context, options, OpenFailed,
+				"gzopen failed");
 		}
 
 		php_stream_close(innerstream);
