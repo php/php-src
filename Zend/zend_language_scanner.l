@@ -2127,7 +2127,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 
 <ST_MARKUP_TAG,ST_MARKUP_CLOSE>"\\"?{MARKUP_LABEL}("\\"{MARKUP_LABEL})* {
 	/* A tag name, optionally namespace-qualified (<App\Card/>) or fully
-	 * qualified (<\App\Card/>). A name containing "\" always dispatches as a
+	 * qualified (<\App\Card/>). A name containing a backslash always dispatches as a
 	 * component (see zend_markup_name_is_component in Zend/zend_markup.c). */
 	RETURN_TOKEN_WITH_STR(T_MARKUP_NAME, 0);
 }
@@ -2136,7 +2136,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	/* An attribute name with a ":", "@" or "#" prefix (Vue/Alpine shorthands
 	 * like :class and @click, and compiler directives like #lazy). Attribute
 	 * position only: this can never lex as a tag name, because every
-	 * markup-open rule requires a letter, "\", "$", "{" or ">" after "<",
+	 * markup-open rule requires a letter, backslash, "$", "{" or ">" after "<",
 	 * and ST_MARKUP_CLOSE is excluded here. */
 	RETURN_TOKEN_WITH_STR(T_MARKUP_NAME, 0);
 }
