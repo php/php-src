@@ -161,6 +161,27 @@ typedef struct {
 } php_stdio_stream_data;
 #define PHP_STDIOP_GET_FD(anfd, data)	anfd = (data)->file ? fileno((data)->file) : (data)->fd
 
+#ifdef PHP_WIN32
+static void php_win32_docref1_from_error(DWORD error, const char *param1) {
+	char *buf = php_win32_error_to_msg(error);
+	size_t buf_len;
+
+	buf_len = strlen(buf);
+	if (buf_len >= 2) {
+		buf[buf_len - 1] = '\0';
+		buf[buf_len - 2] = '\0';
+	}
+	php_error_docref1(NULL, param1, E_WARNING, "%s (code: %lu)", buf, error);
+	php_win32_error_msg_free(buf);
+}
+
+static ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
+	char *buf = php_win32_error_to_msg(error);
+	php_error_docref2(NULL, param1, param2, E_WARNING, "%s (code: %lu)", buf, error);
+	php_win32_error_msg_free(buf);
+}
+#endif
+
 static int do_fstat(php_stdio_stream_data *d, int force)
 {
 	if (!d->cached_fstat || (force && !d->no_forced_fstat)) {
