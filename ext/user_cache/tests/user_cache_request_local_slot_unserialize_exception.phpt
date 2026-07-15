@@ -1,5 +1,5 @@
 --TEST--
-UserCache\Cache: throwing __unserialize drops the entry and never seeds a request-local slot
+UserCache\Cache: throwing __unserialize propagates and keeps the entry
 --EXTENSIONS--
 user_cache
 --INI--
@@ -38,29 +38,32 @@ class SlotThrowingUnserialize
 	}
 }
 
+SlotThrowingUnserialize::$unserializeCalls = 0;
+
 var_dump($cache->store('key', new SlotThrowingUnserialize(7)));
 
-/* A failed restore drops the entry without seeding the local slot. */
+/* A throwing restore hook propagates like native unserialize(), and the entry
+ * is kept because it is not corrupt. No request-local slot is seeded. */
 SlotThrowingUnserialize::$failNext = true;
-var_dump($cache->fetch('key'));
+try {
+	$cache->fetch('key');
+	echo "no exception\n";
+} catch (RuntimeException $e) {
+	echo "caught: ", $e->getMessage(), "\n";
+}
 echo "calls after throwing fetch: ", SlotThrowingUnserialize::$unserializeCalls, "\n";
-echo "entry dropped: ";
-var_dump($cache->has('key') === false);
-var_dump($cache->fetch('key'));
+echo "entry kept: ";
+var_dump($cache->has('key'));
 
-var_dump($cache->store('key', new SlotThrowingUnserialize(8)));
-$cache->fetch('key');
-$cache->fetch('key');
-$cloned = $cache->fetch('key');
-echo "calls after re-store and three fetches: ", SlotThrowingUnserialize::$unserializeCalls, "\n";
-echo "restored value: ", $cloned->value, "\n";
+/* The next fetch no longer throws and restores the value, seeding the slot. */
+$restored = $cache->fetch('key');
+echo "restored value: ", $restored->value, "\n";
+echo "calls after successful fetch: ", SlotThrowingUnserialize::$unserializeCalls, "\n";
 ?>
 --EXPECT--
 bool(true)
-NULL
+caught: unserialize failure
 calls after throwing fetch: 1
-entry dropped: bool(true)
-NULL
-bool(true)
-calls after re-store and three fetches: 4
-restored value: 8
+entry kept: bool(true)
+restored value: 7
+calls after successful fetch: 2
