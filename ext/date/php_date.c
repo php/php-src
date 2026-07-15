@@ -4980,6 +4980,23 @@ PHP_METHOD(DatePeriod, createFromISO8601String)
 	}
 }
 
+static void date_period_reset(php_period_obj *period_obj)
+{
+	if (period_obj->start) {
+		timelib_time_dtor(period_obj->start);
+	}
+	if (period_obj->current) {
+		timelib_time_dtor(period_obj->current);
+	}
+	if (period_obj->end) {
+		timelib_time_dtor(period_obj->end);
+	}
+	if (period_obj->interval) {
+		timelib_rel_time_dtor(period_obj->interval);
+	}
+	memset(period_obj, 0, XtOffsetOf(php_period_obj, std));
+}
+
 /* {{{ Creates new DatePeriod object. */
 PHP_METHOD(DatePeriod, __construct)
 {
@@ -5001,7 +5018,7 @@ PHP_METHOD(DatePeriod, __construct)
 	}
 
 	dpobj = Z_PHPPERIOD_P(ZEND_THIS);
-	dpobj->current = NULL;
+	date_period_reset(dpobj);
 
 	if (isostr) {
 		if (!date_period_init_iso8601_string(dpobj, date_ce_date, isostr, isostr_len, options, &recurrences)) {
@@ -5013,6 +5030,7 @@ PHP_METHOD(DatePeriod, __construct)
 		if (end) {
 			DATE_CHECK_INITIALIZED(Z_PHPDATE_P(end)->time, date_ce_interface);
 		}
+		DATE_CHECK_INITIALIZED(Z_PHPINTERVAL_P(interval)->initialized, Z_OBJCE_P(interval));
 
 		/* init */
 		php_interval_obj *intobj = Z_PHPINTERVAL_P(interval);
