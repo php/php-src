@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.9
+16 Jul 2026, PHP 8.5.9RC1
 
 - Core:
   . Fixed bug GH-22290 (AST pretty printing does not correctly handle strings
