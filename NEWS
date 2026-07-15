@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.24
+16 Jul 2026, PHP 8.4.24RC1
 
 - Calendar:
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
