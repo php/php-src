@@ -147,6 +147,10 @@ PHP 8.6 UPGRADE NOTES
   . WSDL/XML Schema parsing now rejects out-of-range integer values for
     occurrence constraints and integer restriction facets. Negative minOccurs
     and maxOccurs values are rejected as well.
+  . SOAP encoding errors now report the affected type or failing operation in
+    the error message instead of the generic "Encoding: Violation of encoding
+    rules" message. Code that compares the exact message may need to be
+    updated.
 
 - Sodium:
   . The password-hashing functions sodium_crypto_pwhash(),
@@ -389,28 +393,36 @@ PHP 8.6 UPGRADE NOTES
 6. New Functions
 ========================================
 
-- Reflection:
-  . ReflectionConstant::inNamespace()
-  . ReflectionProperty::isReadable() and ReflectionProperty::isWritable()
-    RFC: https://wiki.php.net/rfc/isreadable-iswriteable
-  . ReflectionParameter::getDocComment().
-    RFC: https://wiki.php.net/rfc/parameter-doccomments
-
 - Intl:
-  . grapheme_strrev() returns strrev for grapheme cluster unit.
+  . grapheme_strrev()
     RFC: https://wiki.php.net/rfc/grapheme_strrev
+  . Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue()
+    RFC: https://wiki.php.net/rfc/getdisplaykeyword_and_getdisplaykeywordvalue
 
 - mysqli:
   . Added mysqli::quote_string() and mysqli_quote_string().
     RFC: https://wiki.php.net/rfc/mysqli_quote_string
 
+- Reflection:
+  . ReflectionConstant::inNamespace()
+  . ReflectionProperty::isReadable() and ReflectionProperty::isWritable()
+    RFC: https://wiki.php.net/rfc/isreadable-iswriteable
+  . ReflectionParameter::getDocComment()
+    RFC: https://wiki.php.net/rfc/parameter-doccomments
+
 - Standard:
   . clamp() returns the given value if in range, else return the nearest
     bound.
     RFC: https://wiki.php.net/rfc/clamp_v2
-  . stream_last_errors() and stream_clear_errors().
+  . stream_last_errors() and stream_clear_errors()
     RFC: https://wiki.php.net/rfc/stream_errors
-  . stream_socket_get_crypto_status().
+  . stream_socket_get_crypto_status()
+
+- URI:
+  . Uri\Rfc3986\Uri::getUriType() and Uri\WhatWg\Url::isSpecialScheme()
+    RFC: https://wiki.php.net/rfc/uri_followup#uri_type_detection
+  . Uri\Rfc3986\Uri::getHostType() and Uri\WhatWg\Url::getHostType()
+    RFC: https://wiki.php.net/rfc/uri_followup#host_type_detection
 
 - Zip:
   . ZipArchive::openString()
@@ -419,6 +431,9 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 7. New Classes and Interfaces
 ========================================
+
+- Intl:
+  . IntlNumberRangeFormatter
 
 - OpenSSL:
   . Openssl\OpensslException
@@ -452,6 +467,10 @@ PHP 8.6 UPGRADE NOTES
   . Io\Poll\HandleAlreadyWatchedException
   . Io\Poll\InvalidHandleException
   . StreamPollHandle
+
+- URI:
+  . Uri\Rfc3986\UriBuilder
+    RFC: https://wiki.php.net/rfc/uri_followup#uri_building
 
 ========================================
 8. Removed Extensions and SAPIs
@@ -532,6 +551,10 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 13. Other Changes
 ========================================
+
+- Core:
+  . In case of a hard OOM PHP now calls abort() instead of exit(1), changing
+    the exit code to 134 and possibly creating a core dump.
 
 ========================================
 14. Performance Improvements

@@ -19,8 +19,8 @@ json_validate_trycatchdump('{"test": "\uD83D\uDE00\uD83C\uDF89}');
 echo "\nError with mixed UTF-8 and UTF-16:\n";
 json_validate_trycatchdump('{"mixed": "Hello \u4E16\u754C world}');
 
-// UTF-16 in key and value
-echo "\nError with UTF-16 in key:\n";
+// Missing closing quote after a UTF-16 key
+echo "\nError on unterminated value after UTF-16 key:\n";
 json_validate_trycatchdump('{"\u30D7\u30EC\u30B9": "value}');
 
 // Multiple keys with UTF-16
@@ -66,15 +66,15 @@ bool(false)
 int(4)
 string(31) "Syntax error near location 1:11"
 
-Error with UTF-16 in key:
+Error on unterminated value after UTF-16 key:
 bool(false)
 int(4)
-string(30) "Syntax error near location 1:9"
+string(31) "Syntax error near location 1:24"
 
 Error with multiple UTF-16 keys:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1:22"
+string(31) "Syntax error near location 1:42"
 
 Error with BMP characters:
 bool(false)
@@ -89,12 +89,12 @@ string(31) "Syntax error near location 1:11"
 Error in array with UTF-16:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1:12"
+string(31) "Syntax error near location 1:22"
 
 Error in nested structure with UTF-16:
 bool(false)
 int(4)
-string(31) "Syntax error near location 1:18"
+string(31) "Syntax error near location 1:28"
 
 Error with UTF-16 and control chars:
 bool(false)

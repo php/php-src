@@ -239,6 +239,13 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+static ZEND_MODULE_POST_ZEND_DEACTIVATE_D(phpdbg) /* {{{ */
+{
+	phpdbg_release_watch_elements();
+
+	return SUCCESS;
+} /* }}} */
+
 /* {{{ Attempt to set the execution context for phpdbg
 	If the execution context was set previously it is returned
 	If the execution context was not set previously boolean true is returned
@@ -681,7 +688,9 @@ static zend_module_entry sapi_phpdbg_module_entry = {
 	PHP_RSHUTDOWN(phpdbg),
 	NULL,
 	PHPDBG_VERSION,
-	STANDARD_MODULE_PROPERTIES
+	NO_MODULE_GLOBALS,
+	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(phpdbg),
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* {{{ */

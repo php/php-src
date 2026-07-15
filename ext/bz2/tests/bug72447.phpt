@@ -16,4 +16,6 @@ fclose($fp);
 unlink('testfile');
 ?>
 --EXPECTF--
-Warning: stream_filter_append(): Invalid parameter given for number of blocks to allocate (0) in %s%ebug72447.php on line %d
+Warning: stream_filter_append(): Number of blocks parameter must be of type int, string given in %s on line %d
+
+Warning: stream_filter_append(): Unable to create or locate filter "bzip2.compress" in %s on line %d

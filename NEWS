@@ -1,6 +1,24 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0alpha2
+?? ??? ????, PHP 8.6.0alpha3
+
+- ODBC:
+  . Fixed bug GH-22668 (Heap buffer over-read when a column value exceeds the
+    driver-reported display size). (iliaal)
+
+- PDO_ODBC:
+  . Fixed bug GH-22667 (Heap buffer over-read when a column value exceeds the
+    driver-reported display size). (iliaal)
+  . Fixed bug GH-22666 (Heap buffer overflow when an output parameter value is
+    longer than the declared maxlen). (iliaal)
+  . Fixed bug GH-22665 (Out-of-bounds write when the ODBC driver reports a
+    diagnostic message length beyond the error buffer). (iliaal)
+
+- Reflection:
+  . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
+    (DanielEScherzer)
+
+16 Jul 2026, PHP 8.6.0alpha2
 
 - Core:
   . Sync Boost.Context assembly with 1.91.0. (kn1g78)
@@ -9,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15672 and GH-15911 (Stack overflow when an internal function
     recurses through zend_call_function, such as a self-attached SPL
     iterator). (iliaal)
+  . Lock unmodified readonly properties for modification after clone-with.
+    (NickSdot)
+  . abort() instead of exit() on hard OOM. (realFlowControl)
+  . perf: ZTS: move AG and SCNG into native __thread storage. (henderkes)
 
 - Calendar:
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
@@ -62,6 +84,10 @@ PHP                                                                        NEWS
 
 - JSON:
   . Report unterminated JSON strings as syntax errors. (timwolla)
+  . Improve performance error position tracking during JSON decoding.
+    (henderkes)
+  . Fixed bug GH-22514 (Incorrect error column in PHP 8.6 JSON parser).
+    (henderkes, timwolla)
 
 - Opcache:
   . Fixed bug GH-21770 (Infinite recursion in property hook getter in opcache
@@ -82,6 +108,12 @@ PHP                                                                        NEWS
   . Fixed off-by-one in phpdbg_safe_class_lookup() causing class lookups to
     always fail during phpdbg's signal-safe interruption path. (jorgsowa)
 
+- Reflection:
+  . Fixed bug GH-22683 (Reflection(Class)Constant::__toString() should not warn
+    on NAN conversions). (Khaled Alam)
+  . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
+    (DanielEScherzer)
+
 - Session:
   . Fixed bug GH-21314 (Different session garbage collector behavior between
     PHP 8.3 and PHP 8.5). (jorgsowa)
@@ -91,6 +123,8 @@ PHP                                                                        NEWS
     do_request() parameters). (David Carlier)
   . Fixed xsd:hexBinary decoding to reject odd-length values instead of
     silently truncating the last nibble. (Weilin Du)
+  . Made SOAP encoding errors report the affected type or failing operation
+    instead of the generic "Violation of encoding rules" message. (Weilin Du)
 
 - Standard:
   . Fixed sleep() and usleep() to reject values that overflow the underlying
@@ -313,6 +347,10 @@ PHP                                                                        NEWS
     when building a phar. (ndossche)
   . Mark Phar::buildFromIterator() base directory argument as a path.
     (ndossche)
+
+- phpdbg:
+  . Fixed GH-22480 (Use-after-free when re-watching an already-watched
+    variable). (iliaal)
 
 - Posix:
   . Added validity check to the flags argument for posix_access(). (arshidkv12)

@@ -34,4 +34,4 @@ try {
 }
 ?>
 --EXPECT--
-SOAP-ERROR: Encoding: Violation of encoding rules
+SOAP-ERROR: Encoding: Type 'hexBinary' value must contain an even number of hexadecimal digits

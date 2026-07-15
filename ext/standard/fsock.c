@@ -20,6 +20,7 @@
 #include <stddef.h>
 #include "php_network.h"
 #include "file.h"
+#include "streams/php_streams_int.h"
 
 static size_t php_fsockopen_format_host_port(char **message, const char *prefix, size_t prefix_len,
 	const char *host, size_t host_len, zend_long port)
@@ -82,8 +83,9 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	if (persistent) {
-		php_fsockopen_format_host_port(&hashkey, "pfsockopen__", strlen("pfsockopen__"), host,
-				host_len, port);
+		zend_string *escaped = php_stream_escape_persistent_key(host, host_len);
+		spprintf(&hashkey, 0, "pfsockopen__%s:"  ZEND_LONG_FMT, ZSTR_VAL(escaped), port);
+		zend_string_release_ex(escaped, false);
 	}
 
 	if (port > 0) {

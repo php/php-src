@@ -184,7 +184,7 @@ static zend_string *php_json_get_error_msg_with_location(const php_json_error_de
 	const char *base_msg = php_json_get_error_msg(details->code);
 	
 	if (details->line > 0 && details->column > 0) {
-		return zend_strpprintf(0, "%s near location %zu:%zu", base_msg, details->line, details->column);
+		return zend_strpprintf(0, "%s near location %" PRIu64 ":%" PRIu64, base_msg, details->line, details->column);
 	}
 	
 	return zend_string_init(base_msg, strlen(base_msg), 0);

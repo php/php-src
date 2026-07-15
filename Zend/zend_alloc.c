@@ -2613,13 +2613,12 @@ typedef struct _zend_alloc_globals {
 
 #ifdef ZTS
 static int alloc_globals_id;
-static size_t alloc_globals_offset;
-# define ZEND_AG_OFFSET (ZEND_SCNG_OFFSET - (ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_alloc_globals)))
-# define AG(v) ZEND_TSRMG_FAST(ZEND_AG_OFFSET, zend_alloc_globals *, v)
+static TSRM_TLS TSRM_TLS_MODEL_ATTR zend_alloc_globals alloc_globals;
+static void *alloc_globals_tls_addr(void) { return &alloc_globals; }
 #else
-# define AG(v) (alloc_globals.v)
 static zend_alloc_globals alloc_globals;
 #endif
+#define AG(v) (alloc_globals.v)
 
 ZEND_API bool is_zend_mm(void)
 {
@@ -2974,7 +2973,7 @@ ZEND_API void refresh_memory_manager(void)
 static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
 {
 	fprintf(stderr, "Out of memory\n");
-	exit(1);
+	abort();
 }
 
 #if ZEND_MM_CUSTOM
@@ -3336,8 +3335,7 @@ ZEND_API void start_memory_manager(void)
 #  endif
 #endif
 #ifdef ZTS
-	ts_allocate_fast_id_at(&alloc_globals_id, &alloc_globals_offset, ZEND_AG_OFFSET, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, (ts_allocate_dtor) alloc_globals_dtor);
-	ZEND_ASSERT(alloc_globals_offset == ZEND_AG_OFFSET);
+	ts_allocate_tls_id(&alloc_globals_id, alloc_globals_tls_addr, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, (ts_allocate_dtor) alloc_globals_dtor);
 #else
 	alloc_globals_ctor(&alloc_globals);
 #endif
@@ -3583,9 +3581,3 @@ ZEND_API char * __zend_strdup(const char *s)
 	zend_out_of_memory();
 }
 
-#ifdef ZTS
-size_t zend_mm_globals_size(void)
-{
-	return sizeof(zend_alloc_globals);
-}
-#endif
