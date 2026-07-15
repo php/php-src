@@ -1265,13 +1265,13 @@ static bool spl_heap_object_is_pqueue(zend_class_entry *ce)
 	return instanceof_function(ce, spl_ce_SplPriorityQueue);
 }
 
-/* Grows the heap backing store to hold at least `count` elements; used by the
- * user-cache safe-direct bulk restore path. */
 static void spl_heap_user_cache_ensure_capacity(spl_ptr_heap *heap, size_t count)
 {
+	size_t alloc_size;
+
 	while (count > heap->max_size) {
-		size_t alloc_size = heap->max_size * heap->elem_size;
-		/* we need to allocate more memory */
+		alloc_size = heap->max_size * heap->elem_size;
+
 		heap->elements  = safe_erealloc(heap->elements, 2, alloc_size, 0);
 		memset((char *) heap->elements + alloc_size, 0, alloc_size);
 		heap->max_size *= 2;
@@ -1335,9 +1335,11 @@ static bool spl_heap_object_copy_user_cache_state(
 
 			ZVAL_UNDEF(&cloned_data);
 			ZVAL_UNDEF(&cloned_priority);
+
 			if (!clone_value(ctx, &cloned_data, &old_elem->data)) {
 				return false;
 			}
+
 			if (!clone_value(ctx, &cloned_priority, &old_elem->priority)) {
 				zval_ptr_dtor(&cloned_data);
 
@@ -1350,7 +1352,9 @@ static bool spl_heap_object_copy_user_cache_state(
 			zval_ptr_dtor(&cloned_priority);
 		} else {
 			zv_old_elem = spl_heap_elem(old_intern->heap, i);
+
 			ZVAL_UNDEF(&cloned_elem);
+
 			if (!clone_value(ctx, &cloned_elem, zv_old_elem)) {
 				return false;
 			}
@@ -1390,7 +1394,8 @@ static bool spl_heap_object_user_cache_state_has_unstorable(
 			elem = spl_heap_elem(intern->heap, i);
 
 			if (value_has_unstorable(ctx, &elem->data) ||
-					value_has_unstorable(ctx, &elem->priority)) {
+				value_has_unstorable(ctx, &elem->priority)
+			) {
 				return true;
 			}
 		} else {
@@ -1409,8 +1414,7 @@ static bool spl_heap_object_serialize_user_cache_state(zval *state, const zval *
 {
 	spl_heap_object *intern;
 	spl_pqueue_elem *pqueue_elem;
-	zval *heap_elem;
-	zval elems, entry, tmp;
+	zval *heap_elem, elems, entry, tmp;
 	size_t i;
 	bool is_pqueue;
 
@@ -1432,8 +1436,10 @@ static bool spl_heap_object_serialize_user_cache_state(zval *state, const zval *
 			pqueue_elem = spl_heap_elem(intern->heap, i);
 
 			array_init_size(&entry, 2);
+
 			Z_TRY_ADDREF(pqueue_elem->data);
 			zend_hash_index_add_new(Z_ARRVAL(entry), 0, &pqueue_elem->data);
+
 			Z_TRY_ADDREF(pqueue_elem->priority);
 			zend_hash_index_add_new(Z_ARRVAL(entry), 1, &pqueue_elem->priority);
 			zend_hash_next_index_insert(Z_ARRVAL(elems), &entry);
@@ -1465,8 +1471,11 @@ static bool spl_heap_object_unserialize_user_cache_state(zval *object, zval *sta
 	data = Z_ARRVAL_P(state);
 	flags_zv = zend_hash_index_find(data, 0);
 	elements_zv = zend_hash_index_find(data, 1);
-	if (!flags_zv || !elements_zv ||
-		Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(elements_zv) != IS_ARRAY
+
+	if (!flags_zv ||
+		!elements_zv ||
+		Z_TYPE_P(flags_zv) != IS_LONG ||
+		Z_TYPE_P(elements_zv) != IS_ARRAY
 	) {
 		return false;
 	}
