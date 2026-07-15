@@ -19,7 +19,7 @@ $evaluated = 0;
 function track(): string { global $evaluated; $evaluated++; return 'secret'; }
 
 // Logged out: the body interpolation must never run.
-echo <Auth check={false} #lazy>Hello {track()}</Auth>, "\n";
+echo <Auth check={false} #lazy>Hello {track()}</Auth>, PHP_EOL;
 var_dump($evaluated); // 0 - never evaluated
 
 // Logged in: the body evaluates exactly once, even though a component could
@@ -31,25 +31,25 @@ class Twice implements Markup\Html {
     }
 }
 $evaluated = 0;
-echo <Twice #lazy>x{track()}</Twice>, "\n";
+echo <Twice #lazy>x{track()}</Twice>, PHP_EOL;
 var_dump($evaluated); // 1 - memoized across both renders
 
 // Without `#lazy` the body is eager: track() runs before Auth even sees it.
 $evaluated = 0;
-echo <Auth check={false}>Hello {track()}</Auth>, "\n";
+echo <Auth check={false}>Hello {track()}</Auth>, PHP_EOL;
 var_dump($evaluated); // 1 - evaluated eagerly
 
 // The lowered value is a Markup\LazyFragment that is itself a Markup\Html.
 $lazy = new Markup\LazyFragment(fn() => new E('span', [], ['built']));
 var_dump($lazy instanceof Markup\Html);
 var_dump($lazy->toHtml() instanceof Markup\Element);
-echo $lazy, "\n";
+echo $lazy, PHP_EOL;
 
 // The thunk must return a Markup\Html.
 try {
     (new Markup\LazyFragment(fn() => 'nope'))->toHtml();
 } catch (\Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--

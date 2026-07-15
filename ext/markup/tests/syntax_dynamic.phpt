@@ -9,18 +9,18 @@ markup
 $tag = 'div';
 $el = <$tag class="box">Hello</$tag>;
 var_dump($el instanceof Markup\Element);
-echo $el, "\n";
+echo $el, PHP_EOL;
 
 // Self-close; void elements serialize as voids.
 $tag = 'br';
-echo <$tag/>, "\n";
+echo <$tag/>, PHP_EOL;
 $tag = 'section';
-echo <$tag id="main" hidden>Text {1 + 1}</$tag>, "\n";
+echo <$tag id="main" hidden>Text {1 + 1}</$tag>, PHP_EOL;
 
 // Nested inside static markup, with spread attributes.
 $tag = 'em';
 $attrs = ['class' => 'x'];
-echo <div><$tag {...$attrs}>hi</$tag></div>, "\n";
+echo <div><$tag {...$attrs}>hi</$tag></div>, PHP_EOL;
 
 // --- runtime classification: components ---
 // A class-component name (::class gives the FQCN): full component dispatch.
@@ -34,8 +34,8 @@ class Card implements Markup\Html {
     }
 }
 $component = Card::class;
-echo <$component title="Hi"/>, "\n";
-echo <$component title="Hi">Body</$component>, "\n";
+echo <$component title="Hi"/>, PHP_EOL;
+echo <$component title="Hi">Body</$component>, PHP_EOL;
 
 // A "Class::method" value dispatches as a static-method component.
 class Author {
@@ -44,13 +44,13 @@ class Author {
     }
 }
 $component = 'Author::byline';
-echo <$component name="Ada"/>, "\n";
+echo <$component name="Ada"/>, PHP_EOL;
 
 // --- escaping ---
 // Interpolated content is still escaped, whatever the tag value.
 $tag = 'span';
 $evil = '<script>alert(1)</script>';
-echo <$tag>{$evil}</$tag>, "\n";
+echo <$tag>{$evil}</$tag>, PHP_EOL;
 
 // --- <{expr}> brace form: arbitrary expression, anonymous close ---
 // The brace form takes an arbitrary expression, evaluated once, and closes
@@ -59,18 +59,18 @@ class Registry {
     public function getComponentName(): string { return 'div'; }
 }
 $object = new Registry;
-echo <{$object->getComponentName()} class="x">Hello</>, "\n";
+echo <{$object->getComponentName()} class="x">Hello</>, PHP_EOL;
 $important = true;
-echo <{$important ? 'strong' : 'span'}>note</>, "\n";
-echo <{Card::class} title="Braced"/>, "\n";
+echo <{$important ? 'strong' : 'span'}>note</>, PHP_EOL;
+echo <{Card::class} title="Braced"/>, PHP_EOL;
 
 $calls = 0;
 function tag_once(): string { global $calls; $calls++; return 'p'; }
-echo <{tag_once()}>once</>, "\n";
+echo <{tag_once()}>once</>, PHP_EOL;
 var_dump($calls);
 
 // Brace tags nest like any other element.
-echo <div><{'em'}>in <b>here</b></></div>, "\n";
+echo <div><{'em'}>in <b>here</b></></div>, PHP_EOL;
 
 // --- operator-position "<$" keeps its comparison meaning (BC) ---
 $a = 5;
@@ -79,15 +79,15 @@ var_dump($a <$b, $b <$a);
 
 // --- render_dynamic() direct calls ---
 // The runtime target is a public function, same as render_component().
-echo Markup\render_dynamic('p', ['class' => 'y'], ['direct']), "\n";
-echo Markup\render_dynamic(Card::class, ['title' => 'Direct']), "\n";
+echo Markup\render_dynamic('p', ['class' => 'y'], ['direct']), PHP_EOL;
+echo Markup\render_dynamic(Card::class, ['title' => 'Direct']), PHP_EOL;
 
 // --- error cases ---
 // Mismatched closing variable is a compile error, like </div> for <span>.
 try {
     eval('$x = <$a>hi</$b>;');
 } catch (CompileError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e->getMessage(), PHP_EOL;
 }
 
 // A brace tag closes anonymously; a named or variable close is a parse error
@@ -96,7 +96,7 @@ foreach (['$x = <{"div"}>a</div>;', '$x = <{"div"}>a</$t>;'] as $code) {
     try {
         eval($code);
     } catch (ParseError $e) {
-        echo $e->getMessage(), "\n";
+        echo $e->getMessage(), PHP_EOL;
     }
 }
 
@@ -104,7 +104,7 @@ foreach (['$x = <{"div"}>a</div>;', '$x = <{"div"}>a</$t>;'] as $code) {
 try {
     Markup\render_dynamic('');
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e->getMessage(), PHP_EOL;
 }
 
 // A value that is no valid tag name fails at serialization (the existing
@@ -113,20 +113,20 @@ $tag = 'di v';
 try {
     echo (string) <$tag/>;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e->getMessage(), PHP_EOL;
 }
 
 // A lowercase value is always an element, even if a function of that name
 // exists (the same rule that makes static <date> an element).
 $tag = 'date';
-echo <$tag/>, "\n";
+echo <$tag/>, PHP_EOL;
 
 // A capitalized value can never reach an internal function like Date().
 $tag = 'Date';
 try {
     echo <$tag/>;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e->getMessage(), PHP_EOL;
 }
 
 // A capitalized value with no symbol behind it.
@@ -134,7 +134,7 @@ $tag = 'NoSuchComponent';
 try {
     echo <$tag/>;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e->getMessage(), PHP_EOL;
 }
 
 // A "Class::method" value dispatches as a static-method component; a missing
@@ -143,7 +143,7 @@ $tag = 'NoSuchRegistry::make';
 try {
     echo <$tag/>;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--

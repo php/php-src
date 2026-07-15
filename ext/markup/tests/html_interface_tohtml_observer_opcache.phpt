@@ -33,10 +33,10 @@ class Card implements Markup\Html {
 class FancyCard extends Card {}
 
 $c = new Card('a & b');
-echo $c, "\n";                     // string cast -> zend_call_known_function
+echo $c, PHP_EOL;                     // string cast -> zend_call_known_function
 var_dump($c->__toString());       // direct VM call
-echo new FancyCard('c'), "\n";     // inherited copy of the injected method
-echo <Card title="tag" />, "\n";   // component dispatch path
+echo new FancyCard('c'), PHP_EOL;     // inherited copy of the injected method
+echo <Card title="tag" />, PHP_EOL;   // component dispatch path
 ?>
 --EXPECT--
 <div class="card">a &amp; b</div>

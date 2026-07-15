@@ -10,7 +10,7 @@ function check(string $code): void {
         eval($code);
         echo "ok\n";
     } catch (CompileError $e) {
-        echo $e->getMessage(), "\n";
+        echo $e->getMessage(), PHP_EOL;
     }
 }
 

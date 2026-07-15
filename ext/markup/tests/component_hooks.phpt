@@ -64,14 +64,14 @@ $make = fn(string $class, array $args)
 
 // (1) Without hooks, the engine's own `new` runs and fails for the missing Clock.
 try { echo <TimeBadge label="x"/>; }
-catch (\Error $e) { echo "default:  ", $e->getMessage(), "\n"; }
+catch (\Error $e) { echo "default:  ", $e->getMessage(), PHP_EOL; }
 
 // $defer is first, so a working result proves the chain skips a null-returning
 // factory and falls through to $make.
 register_component_factory($defer);
 register_component_factory($make);
 
-echo "class:    ", <TimeBadge label="A"/>, "\n";
+echo "class:    ", <TimeBadge label="A"/>, PHP_EOL;
 
 // (2) A factory must return an instance of the requested class. Swap $make for a
 // bad factory so the chain becomes [$defer, $bad] and the bad one is reached.
@@ -79,7 +79,7 @@ var_dump(unregister_component_factory($make));
 $bad = fn(string $class, array $args) => new Clock();
 register_component_factory($bad);
 try { echo <TimeBadge label="e"/>; }
-catch (\Error $e) { echo "badreturn: ", $e->getMessage(), "\n"; }
+catch (\Error $e) { echo "badreturn: ", $e->getMessage(), PHP_EOL; }
 
 // (3) Unregistering everything restores the engine default. Unregister identity
 // is by callable; a fresh closure does not match.
@@ -87,7 +87,7 @@ var_dump(unregister_component_factory(fn($c, $a) => null));
 var_dump(unregister_component_factory($defer));
 var_dump(unregister_component_factory($bad));
 try { echo <TimeBadge label="f"/>; }
-catch (\Error $e) { echo "restored:  ", $e->getMessage(), "\n"; }
+catch (\Error $e) { echo "restored:  ", $e->getMessage(), PHP_EOL; }
 
 // --- decorators: uniform wrapping, composition, bad return ---
 
@@ -96,20 +96,20 @@ catch (\Error $e) { echo "restored:  ", $e->getMessage(), "\n"; }
 $marker = fn(Markup\Html $h, string $c) => Markup\raw("[$c]" . $h . "[/$c]");
 register_component_decorator($marker);
 
-echo <Card title="a"/>, "\n";
-echo <Note t="b"/>, "\n";
-echo <Author::byline t="c"/>, "\n";
+echo <Card title="a"/>, PHP_EOL;
+echo <Note t="b"/>, PHP_EOL;
+echo <Author::byline t="c"/>, PHP_EOL;
 
 // Decorators compose in registration order, each wrapping the previous result.
 $outer = fn(Markup\Html $h, string $c) => Markup\raw("<<" . $h . ">>");
 register_component_decorator($outer);
-echo <Note t="d"/>, "\n";
+echo <Note t="d"/>, PHP_EOL;
 
 // A decorator must return a Markup\Html.
 $badDecorator = fn(Markup\Html $h, string $c) => "not html";
 register_component_decorator($badDecorator);
 try { echo <Note t="e"/>; }
-catch (\Error $e) { echo $e->getMessage(), "\n"; }
+catch (\Error $e) { echo $e->getMessage(), PHP_EOL; }
 
 // Clean up this section's decorators so the next section starts from default.
 unregister_component_decorator($badDecorator);
@@ -126,8 +126,8 @@ $cardFactory = function (string $class, array $args) {
     return new Card("made");
 };
 register_component_factory($cardFactory, '\cArD');
-echo <Card/>, "\n";
-echo <Badge/>, "\n";
+echo <Card/>, PHP_EOL;
+echo <Badge/>, PHP_EOL;
 
 // (2) Scoped and unscoped factories share one chain in registration order:
 // the scoped one (registered first) wins for Card; the unscoped one sees Badge.
@@ -136,8 +136,8 @@ $anyFactory = function (string $class, array $args) {
     return null; // defer
 };
 register_component_factory($anyFactory);
-echo <Card/>, "\n";
-echo <Badge/>, "\n";
+echo <Card/>, PHP_EOL;
+echo <Badge/>, PHP_EOL;
 
 // (3) Unregister identity includes the scope: the callable alone (or with the
 // wrong scope) does not match; with its scope it does.
@@ -145,16 +145,16 @@ var_dump(unregister_component_factory($cardFactory));
 var_dump(unregister_component_factory($cardFactory, 'Badge'));
 var_dump(unregister_component_factory($cardFactory, 'Card'));
 var_dump(unregister_component_factory($anyFactory));
-echo <Card/>, "\n";
+echo <Card/>, PHP_EOL;
 
 // (4) A decorator scoped to Badge wraps only Badge's output - Card renders
 // untouched.
 $badgeDecorator = fn(Markup\Html $h, string $c) => Markup\raw("<<$h>>");
 register_component_decorator($badgeDecorator, Badge::class);
-echo <Badge label="B"/>, "\n";
-echo <Card title="C"/>, "\n";
+echo <Badge label="B"/>, PHP_EOL;
+echo <Card title="C"/>, PHP_EOL;
 var_dump(unregister_component_decorator($badgeDecorator, 'badge'));
-echo <Badge label="B"/>, "\n";
+echo <Badge label="B"/>, PHP_EOL;
 ?>
 --EXPECT--
 default:  TimeBadge::__construct(): Argument #1 ($clock) not passed

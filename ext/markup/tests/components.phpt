@@ -48,49 +48,49 @@ class Author {
 $who = 'Ada & co';
 
 // class component: attribute prop + body routed to the anonymous slot
-echo (<Card title={$who}><p>Hi {$who}</p></Card>)->__toString(), "\n";
+echo (<Card title={$who}><p>Hi {$who}</p></Card>)->__toString(), PHP_EOL;
 
 // self-closing class component (no body -> slot is null)
-echo (<Card title="Solo"/>)->__toString(), "\n";
+echo (<Card title="Solo"/>)->__toString(), PHP_EOL;
 
 // static-method component
-echo (<Author::byline name={$who}/>)->__toString(), "\n";
+echo (<Author::byline name={$who}/>)->__toString(), PHP_EOL;
 
 // the same dispatch, called directly by name
-echo render_component(Badge::class, ['label' => 'New &'])->__toString(), "\n";
+echo render_component(Badge::class, ['label' => 'New &'])->__toString(), PHP_EOL;
 
 // a component used as a child of an HTML element, and inside interpolation
-echo (<div class="wrap"><Badge label="x"/></div>)->__toString(), "\n";
-echo (<ul>{array_map(fn($t) => <Badge label={$t}/>, ['a', 'b'])}</ul>)->__toString(), "\n";
+echo (<div class="wrap"><Badge label="x"/></div>)->__toString(), PHP_EOL;
+echo (<ul>{array_map(fn($t) => <Badge label={$t}/>, ['a', 'b'])}</ul>)->__toString(), PHP_EOL;
 
 // --- resolution errors: a component is a class implementing Html ---
 
 // Unknown symbol -> hard error.
-echo err(fn() => render_component('NoSuchThing')), "\n";
+echo err(fn() => render_component('NoSuchThing')), PHP_EOL;
 
 // A function name is not a component (functions are Future Scope).
 function Chip(): Markup\Html { return Markup\raw('FROM FUNCTION'); }
-echo err(fn() => render_component('Chip')), "\n";
+echo err(fn() => render_component('Chip')), PHP_EOL;
 
 // A "date"-named tag can never reach the internal date() function.
-echo err(fn() => render_component('date', ['datetime' => 'now'])), "\n";
+echo err(fn() => render_component('date', ['datetime' => 'now'])), PHP_EOL;
 
 // A class that does NOT implement Html -> hard error.
 class Plain {}
-echo err(fn() => render_component('Plain')), "\n";
+echo err(fn() => render_component('Plain')), PHP_EOL;
 
 // "Class::method" resolves to a public static method and is called; the
 // result must be a Markup\Html.
-echo render_component('Author::byline', ['name' => 'Ada'])->__toString(), "\n";
-echo err(fn() => render_component('Author::broken')), "\n";
-echo err(fn() => render_component('NoSuchClass::method')), "\n";
+echo render_component('Author::byline', ['name' => 'Ada'])->__toString(), PHP_EOL;
+echo err(fn() => render_component('Author::broken')), PHP_EOL;
+echo err(fn() => render_component('NoSuchClass::method')), PHP_EOL;
 
 // A class implementing Html resolves, regardless of same-named functions.
 function Widget(): Markup\Html { return Markup\raw('FROM FUNCTION'); }
 class Widget implements Markup\Html {
     public function toHtml(): Markup\Html { return Markup\raw('FROM CLASS'); }
 }
-echo render_component('Widget')->__toString(), "\n";
+echo render_component('Widget')->__toString(), PHP_EOL;
 
 // --- hyphenated attributes route through named args ---
 
@@ -105,14 +105,14 @@ class Box implements Markup\Html {
 
 // Hyphenated attributes work directly on a component (no spread needed) - they
 // become named arguments and the variadic collects them.
-echo (<Box kind="note" data-id="7" aria-label="hi"/>), "\n";
+echo (<Box kind="note" data-id="7" aria-label="hi"/>), PHP_EOL;
 
 // A component without a variadic rejects an unknown (hyphenated) attribute.
 class Tight implements Markup\Html {
     public function __construct(public string $kind) {}
     public function toHtml(): Markup\Html { return new E('div', ['class' => $this->kind], ['y']); }
 }
-echo err(fn() => (<Tight kind="b" data-x="1"/>)->__toString()), "\n";
+echo err(fn() => (<Tight kind="b" data-x="1"/>)->__toString()), PHP_EOL;
 ?>
 --EXPECT--
 <section class="card"><h2>Ada &amp; co</h2><p>Hi Ada &amp; co</p></section>

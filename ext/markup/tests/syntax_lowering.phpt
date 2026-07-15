@@ -22,23 +22,23 @@ function desugar(string $expr): string {
 }
 
 // A plain element with a literal and an interpolated attribute.
-echo desugar('<div class="box" id={$id}>Hello {$name}</div>'), "\n";
+echo desugar('<div class="box" id={$id}>Hello {$name}</div>'), PHP_EOL;
 
 // Fragment, component with props + spread, nested element body.
-echo desugar('<><Card title="Hi" {...$attrs}><b>f</b>body</Card></>'), "\n";
+echo desugar('<><Card title="Hi" {...$attrs}><b>f</b>body</Card></>'), PHP_EOL;
 
 // A static-method tag resolves its class part like any class name.
-echo desugar('<Author::byline name="Ada"/>'), "\n";
+echo desugar('<Author::byline name="Ada"/>'), PHP_EOL;
 
 // The `#lazy` directive wraps the body in a deferred Markup\LazyFragment.
-echo desugar('<Auth #lazy>Hello {$name}</Auth>'), "\n";
+echo desugar('<Auth #lazy>Hello {$name}</Auth>'), PHP_EOL;
 
 // Dynamic tags lower to Markup\render_dynamic.
-echo desugar('<$tag class="x">{$content}</$tag>'), "\n";
+echo desugar('<$tag class="x">{$content}</$tag>'), PHP_EOL;
 
 // Character references are decoded at compile time, so the exported string
 // literal contains the decoded text.
-echo desugar('<p>Fish &amp; chips &mdash; &pound;5</p>'), "\n";
+echo desugar('<p>Fish &amp; chips &mdash; &pound;5</p>'), PHP_EOL;
 ?>
 --EXPECT--
 new \Markup\Element('div', ['class' => 'box', 'id' => $id], ['Hello ', $name])

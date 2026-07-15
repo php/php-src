@@ -11,25 +11,25 @@ use function Markup\raw;
 // --- scalar and array child coercion ---
 
 // Scalars: int/float stringify, true -> "1", false/null -> "".
-echo (new Element('p', [], [1, ' ', 2.5, ' ', true, false, null]))->__toString(), "\n";
+echo (new Element('p', [], [1, ' ', 2.5, ' ', true, false, null]))->__toString(), PHP_EOL;
 
 // Arrays flatten recursively (the array_map loop idiom).
 $items = ['Ada', 'Linus', 'Grace'];
 echo (new Element('ul', [], [
     array_map(fn($n) => new Element('li', [], [$n]), $items),
-]))->__toString(), "\n";
+]))->__toString(), PHP_EOL;
 
 // A nested Html passes through un-escaped.
-echo (new Element('div', [], [raw('<b>bold</b>')]))->__toString(), "\n";
+echo (new Element('div', [], [raw('<b>bold</b>')]))->__toString(), PHP_EOL;
 
 // Nested elements are Html too.
-echo (new Element('div', [], [new Element('em', [], ['hi & bye'])]))->__toString(), "\n";
+echo (new Element('div', [], [new Element('em', [], ['hi & bye'])]))->__toString(), PHP_EOL;
 
 // Non-Stringable object is a hard error.
 try {
     (new Element('div', [], [new stdClass]))->__toString();
 } catch (\Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 // --- Traversable children: generators, Iterator, IteratorAggregate ---
@@ -39,11 +39,11 @@ function rows(): Generator {
     yield new Element('li', [], ['one']);
     yield new Element('li', [], ['two']);
 }
-echo (new Element('ul', [], [rows()]))->__toString(), "\n";
+echo (new Element('ul', [], [rows()]))->__toString(), PHP_EOL;
 
 // ArrayIterator (Iterator), mixing scalars and Html, with keys ignored
 $it = new ArrayIterator(['a' => 'x & y', 'b' => new Element('b', [], ['z'])]);
-echo (new Element('p', [], [$it]))->__toString(), "\n";
+echo (new Element('p', [], [$it]))->__toString(), PHP_EOL;
 
 // IteratorAggregate, nested inside an array (recursive flattening)
 $agg = new class implements IteratorAggregate {
@@ -51,7 +51,7 @@ $agg = new class implements IteratorAggregate {
         return new ArrayIterator([new Element('span', [], ['nested'])]);
     }
 };
-echo (new Element('div', [], [['before ', $agg, ' after']]))->__toString(), "\n";
+echo (new Element('div', [], [['before ', $agg, ' after']]))->__toString(), PHP_EOL;
 
 // An exception thrown mid-iteration propagates.
 function boom(): Generator {
@@ -61,7 +61,7 @@ function boom(): Generator {
 try {
     (new Element('div', [], [boom()]))->__toString();
 } catch (\Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 // --- nesting-depth bound ---
@@ -72,13 +72,13 @@ for ($i = 0; $i < 2048; $i++) {
     $kids = [$kids];
 }
 try {
-    echo (new E('div', [], $kids))->__toString(), "\n";
+    echo (new E('div', [], $kids))->__toString(), PHP_EOL;
 } catch (\Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 // Normal (shallow) nesting still renders.
-echo (new E('ul', [], [[[new E('li', [], ['ok'])]]]))->__toString(), "\n";
+echo (new E('ul', [], [[[new E('li', [], ['ok'])]]]))->__toString(), PHP_EOL;
 ?>
 --EXPECTF--
 <p>1 2.5 1</p>

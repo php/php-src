@@ -11,7 +11,7 @@ function expect_error(callable $f): void {
         $f();
         echo "NO ERROR\n";
     } catch (Error $e) {
-        echo $e::class, ": ", $e->getMessage(), "\n";
+        echo $e::class, ": ", $e->getMessage(), PHP_EOL;
     }
 }
 
@@ -49,7 +49,7 @@ class NoCtor implements Markup\Html {
     public function toHtml(): Markup\Html { return Markup\raw("no-ctor"); }
 }
 expect_error(fn() => render_component("NoCtor", ["title" => "x"]));
-echo render_component("NoCtor"), "\n"; // without props it is fine
+echo render_component("NoCtor"), PHP_EOL; // without props it is fine
 
 // --- static-method visibility guards ---
 
@@ -75,7 +75,7 @@ for ($i = 0; $i < 3; $i++) {
     try {
         echo render_component('NeedsDep')->__toString();
     } catch (\Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e->getMessage(), PHP_EOL;
     }
 }
 
@@ -87,7 +87,7 @@ class Boom implements Markup\Html {
 try {
     echo render_component('Boom')->__toString();
 } catch (\Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), "\n";
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 echo "clean\n";

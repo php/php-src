@@ -39,7 +39,7 @@ $out = render_component(
     ],
     new Fragment([new E('p', [], ['loose body'])]),          // body slot
 );
-echo $out, "\n";
+echo $out, PHP_EOL;
 
 // Body slot only.
 class Panel implements Markup\Html {
@@ -51,7 +51,7 @@ class Panel implements Markup\Html {
         return new E('section', ['class' => $this->kind], [$this->content]);
     }
 }
-echo render_component(Panel::class, ['kind' => 'note'], new Fragment([Markup\raw('<b>hi</b>')]))->__toString(), "\n";
+echo render_component(Panel::class, ['kind' => 'note'], new Fragment([Markup\raw('<b>hi</b>')]))->__toString(), PHP_EOL;
 
 // --- slot-routing validation errors ---
 
@@ -60,21 +60,21 @@ class Solo implements Markup\Html {
     public function __construct(#[Slot] public Markup\Html $body) {}
     public function toHtml(): Markup\Html { return new E('p', [], [$this->body]); }
 }
-echo err(fn() => render_component(Solo::class, ['body' => 'x'], new Fragment([Markup\raw('y')]))), "\n";
+echo err(fn() => render_component(Solo::class, ['body' => 'x'], new Fragment([Markup\raw('y')]))), PHP_EOL;
 
 // Body content given to a component that has no slot parameter.
 class NoSlot implements Markup\Html {
     public function __construct(public string $x) {}
     public function toHtml(): Markup\Html { return new E('i', [], [$this->x]); }
 }
-echo err(fn() => render_component(NoSlot::class, ['x' => 'hi'], new Fragment([Markup\raw('body')]))), "\n";
+echo err(fn() => render_component(NoSlot::class, ['x' => 'hi'], new Fragment([Markup\raw('body')]))), PHP_EOL;
 
 // More than one slot parameter is a definition error.
 class TwoSlots implements Markup\Html {
     public function __construct(#[Slot] public ?Markup\Html $a = null, #[Slot] public ?Markup\Html $b = null) {}
     public function toHtml(): Markup\Html { return new Fragment([$this->a, $this->b]); }
 }
-echo err(fn() => render_component(TwoSlots::class, [], new Fragment([]))), "\n";
+echo err(fn() => render_component(TwoSlots::class, [], new Fragment([]))), PHP_EOL;
 
 // #[Slot] on a variadic parameter is a definition error.
 class Variadic implements Markup\Html {
@@ -82,7 +82,7 @@ class Variadic implements Markup\Html {
     public function __construct(#[Slot] Markup\Html ...$parts) { $this->parts = $parts; }
     public function toHtml(): Markup\Html { return new Fragment($this->parts); }
 }
-echo err(fn() => render_component(Variadic::class, [], new Fragment([]))), "\n";
+echo err(fn() => render_component(Variadic::class, [], new Fragment([]))), PHP_EOL;
 
 // --- Markup\Slot is a bare parameter-target marker attribute ---
 

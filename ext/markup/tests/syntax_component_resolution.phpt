@@ -39,31 +39,31 @@ namespace App {
 namespace App\Views {
     use App\Components\Card;
     // <Card> resolves to App\Components\Card via the `use` alias, not a global Card.
-    echo (<Card title="Hi & ok"/>)->__toString(), "\n";
-    echo (<div><Card title="Nested"/></div>)->__toString(), "\n";
+    echo (<Card title="Hi & ok"/>)->__toString(), PHP_EOL;
+    echo (<div><Card title="Nested"/></div>)->__toString(), PHP_EOL;
 }
 
 // --- qualified (namespace-relative) tags from global scope ---
 namespace {
     // A qualified name is namespace-relative; from global scope App\Greeting is App\Greeting.
-    echo (<App\Greeting>hi</App\Greeting>)->__toString(), "\n";
-    echo (<App\Card title="G"/>)->__toString(), "\n";
+    echo (<App\Greeting>hi</App\Greeting>)->__toString(), PHP_EOL;
+    echo (<App\Card title="G"/>)->__toString(), PHP_EOL;
 }
 
 // --- fully-qualified tags, use imports, static-method class-part resolution ---
 namespace Views {
     // A fully-qualified <\...> tag ignores the current namespace.
-    echo (<\App\Greeting>fq</\App\Greeting>)->__toString(), "\n";
+    echo (<\App\Greeting>fq</\App\Greeting>)->__toString(), PHP_EOL;
 
     // A class component is imported with `use`, like any class.
     use App\Card;
-    echo (<Card title="C"/>)->__toString(), "\n";
+    echo (<Card title="C"/>)->__toString(), PHP_EOL;
 
     // A static-method tag's class part resolves the same way: qualified,
     // fully-qualified, or through the class `use` table.
-    echo (<\App\Author::byline name="Ada"/>)->__toString(), "\n";
+    echo (<\App\Author::byline name="Ada"/>)->__toString(), PHP_EOL;
     use App\Author;
-    echo (<Author::byline name="Grace"/>)->__toString(), "\n";
+    echo (<Author::byline name="Grace"/>)->__toString(), PHP_EOL;
 }
 
 // --- component defined and used in the current namespace ---
@@ -73,7 +73,7 @@ namespace Other {
         public function __construct(public string $label) {}
         public function toHtml(): \Markup\Html { return new E('b', [], [$this->label]); }
     }
-    echo (<Box label="local"/>)->__toString(), "\n";
+    echo (<Box label="local"/>)->__toString(), PHP_EOL;
 }
 
 // --- unimported bare tag fails: no global fallback ---
@@ -81,9 +81,9 @@ namespace Wrong {
     // Without an import, a bare tag resolves in the current namespace only -
     // exactly how PHP resolves an unqualified class name (no global fallback).
     try {
-        echo (<Card title="x"/>)->__toString(), "\n";
+        echo (<Card title="x"/>)->__toString(), PHP_EOL;
     } catch (\Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e->getMessage(), PHP_EOL;
     }
 }
 ?>

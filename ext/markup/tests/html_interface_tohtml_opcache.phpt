@@ -22,9 +22,9 @@ class Card implements Markup\Html {
 // through opcache's inheritance cache / persistence paths.
 class FancyCard extends Card {}
 
-echo new Card('a & b'), "\n";
-echo new FancyCard('c'), "\n";
-echo <section>{new Card('nested')}</section>, "\n";
+echo new Card('a & b'), PHP_EOL;
+echo new FancyCard('c'), PHP_EOL;
+echo <section>{new Card('nested')}</section>, PHP_EOL;
 var_dump((new ReflectionMethod(FancyCard::class, '__toString'))->isInternal());
 ?>
 --EXPECT--

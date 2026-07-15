@@ -19,7 +19,7 @@ try {
 } catch (TypeError $e) {
     /* trace: [0] the internal ctor frame (no line), [1] the render_component
      * call site - which must be the opening-tag line. */
-    echo "component call site: line ", $e->getTrace()[1]['line'], "\n";
+    echo "component call site: line ", $e->getTrace()[1]['line'], PHP_EOL;
 }
 
 // Dynamic tag spanning lines: same rule.
@@ -29,7 +29,7 @@ try {
         body
     </$var>;
 } catch (TypeError $e) {
-    echo "dynamic tag: line ", $e->getLine(), "\n";
+    echo "dynamic tag: line ", $e->getLine(), PHP_EOL;
 }
 ?>
 --EXPECT--

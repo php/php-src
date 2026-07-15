@@ -23,16 +23,16 @@ var_dump($card->toHtml()->tag);
 
 // The injected default __toString renders via toHtml(), so echo, (string),
 // and interpolation all work without the class declaring __toString.
-echo $card, "\n";
-echo (string) $card, "\n";
+echo $card, PHP_EOL;
+echo (string) $card, PHP_EOL;
 echo "wrapped: {$card}\n";
 var_dump($card instanceof Stringable);
 
 // In markup child position the component renders through toHtml() natively.
-echo <section>{$card}</section>, "\n";
+echo <section>{$card}</section>, PHP_EOL;
 
 // And as a component tag.
-echo <Card title="Tagged"/>, "\n";
+echo <Card title="Tagged"/>, PHP_EOL;
 
 // toHtml() may return another Html (e.g. delegate to another component);
 // resolution recurses until it reaches a node class.
@@ -41,7 +41,7 @@ class Fancy implements Markup\Html {
         return new Card('delegated');
     }
 }
-echo new Fancy(), "\n";
+echo new Fancy(), PHP_EOL;
 
 // The node classes are the base cases: their toHtml() returns themselves.
 $el = <b>x</b>;
@@ -60,8 +60,8 @@ class Custom implements Markup\Html {
     public function toHtml(): Markup\Html { return <b>markup</b>; }
     public function __toString(): string { return 'CUSTOM'; }
 }
-echo new Custom(), "\n";
-echo <i>{new Custom()}</i>, "\n";
+echo new Custom(), PHP_EOL;
+echo <i>{new Custom()}</i>, PHP_EOL;
 
 // A __toString flattened in from a trait counts as declared.
 trait Loud {
@@ -71,7 +71,7 @@ class UsesTrait implements Markup\Html {
     use Loud;
     public function toHtml(): Markup\Html { return Markup\raw('quiet'); }
 }
-echo new UsesTrait(), " / ", <u>{new UsesTrait()}</u>, "\n";
+echo new UsesTrait(), " / ", <u>{new UsesTrait()}</u>, PHP_EOL;
 
 // A __toString inherited from a parent class also wins.
 class StringyBase {
@@ -80,7 +80,7 @@ class StringyBase {
 class ChildOfStringy extends StringyBase implements Markup\Html {
     public function toHtml(): Markup\Html { return Markup\raw('child'); }
 }
-echo new ChildOfStringy(), " / ", <u>{new ChildOfStringy()}</u>, "\n";
+echo new ChildOfStringy(), " / ", <u>{new ChildOfStringy()}</u>, PHP_EOL;
 
 // An abstract class implementing Html: concrete children inherit the
 // injected default.
@@ -88,14 +88,14 @@ abstract class Widget implements Markup\Html {}
 class Button extends Widget {
     public function toHtml(): Markup\Html { return <button>ok</button>; }
 }
-echo new Button(), "\n";
+echo new Button(), PHP_EOL;
 
 // An interface extending Html stays abstract; implementers get the default.
 interface Panel extends Markup\Html {}
 class SidePanel implements Panel {
     public function toHtml(): Markup\Html { return <aside>side</aside>; }
 }
-echo new SidePanel(), "\n";
+echo new SidePanel(), PHP_EOL;
 
 // The injected method is a real internal method: visible to reflection, with
 // the declared string return type, owned by the implementing class.
@@ -103,7 +103,7 @@ $rm = new ReflectionMethod(SidePanel::class, '__toString');
 var_dump($rm->isInternal(), (string) $rm->getReturnType(), $rm->getDeclaringClass()->getName());
 var_dump(method_exists(new Button(), '__toString'));
 var_dump(is_callable([new Button(), '__toString']));
-echo (new Button())->__toString(), "\n";
+echo (new Button())->__toString(), PHP_EOL;
 
 // --- resolution cycles and throwing implementations ---
 
@@ -112,9 +112,9 @@ class Selfish implements Markup\Html {
     public function toHtml(): Markup\Html { return $this; }
 }
 try { echo new Selfish(); }
-catch (Error $e) { echo $e::class, ": ", $e->getMessage(), "\n"; }
+catch (Error $e) { echo $e::class, ": ", $e->getMessage(), PHP_EOL; }
 try { echo <div>{new Selfish()}</div>; }
-catch (Error $e) { echo $e::class, ": ", $e->getMessage(), "\n"; }
+catch (Error $e) { echo $e::class, ": ", $e->getMessage(), PHP_EOL; }
 
 // A two-class cycle is caught by the same bound.
 class Ping implements Markup\Html {
@@ -124,7 +124,7 @@ class Pong implements Markup\Html {
     public function toHtml(): Markup\Html { return new Ping(); }
 }
 try { echo new Ping(); }
-catch (Error $e) { echo $e::class, ": ", $e->getMessage(), "\n"; }
+catch (Error $e) { echo $e::class, ": ", $e->getMessage(), PHP_EOL; }
 
 // An exception thrown inside toHtml() propagates cleanly through the injected
 // __toString (both directly and from child position).
@@ -132,9 +132,9 @@ class Boom implements Markup\Html {
     public function toHtml(): Markup\Html { throw new RuntimeException('boom'); }
 }
 try { echo new Boom(); }
-catch (RuntimeException $e) { echo $e::class, ": ", $e->getMessage(), "\n"; }
+catch (RuntimeException $e) { echo $e::class, ": ", $e->getMessage(), PHP_EOL; }
 try { echo <div>{new Boom()}</div>; }
-catch (RuntimeException $e) { echo $e::class, ": ", $e->getMessage(), "\n"; }
+catch (RuntimeException $e) { echo $e::class, ": ", $e->getMessage(), PHP_EOL; }
 
 echo "clean\n";
 ?>
