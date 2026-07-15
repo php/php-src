@@ -18,7 +18,7 @@
 
 #include "php.h"
 #include "ext/standard/php_var.h"
-#include "ext/user_cache/php_user_cache.h"
+#include "ext/user_cache/php_user_cache.h" #include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
@@ -1540,19 +1540,28 @@ static void spl_array_object_user_cache_serialize_state(zval *object, zval *retu
 static void spl_array_object_user_cache_unserialize_state(zval *object, HashTable *data)
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
+	zend_class_entry *ce;
 	zval *flags_zv, *storage_zv, *iterator_class_zv;
 	zend_long flags;
 
-	flags_zv          = zend_hash_index_find(data, 0);
-	storage_zv        = zend_hash_index_find(data, 1);
+	flags_zv = zend_hash_index_find(data, 0);
+	storage_zv = zend_hash_index_find(data, 1);
 	iterator_class_zv = zend_hash_index_find(data, 2);
 
 	if (!flags_zv || !storage_zv ||
 			Z_TYPE_P(flags_zv) != IS_LONG ||
-			(iterator_class_zv && (Z_TYPE_P(iterator_class_zv) != IS_NULL &&
-				Z_TYPE_P(iterator_class_zv) != IS_STRING))) {
-		zend_throw_exception(spl_ce_UnexpectedValueException,
-			"Incomplete or ill-typed serialization data", 0);
+			(iterator_class_zv &&
+				(
+					Z_TYPE_P(iterator_class_zv) != IS_NULL &&
+					Z_TYPE_P(iterator_class_zv) != IS_STRING
+				)
+			)
+		) {
+			zend_throw_exception(
+				spl_ce_UnexpectedValueException,
+				"Incomplete or ill-typed serialization data",
+				0
+			);
 		return;
 	}
 
@@ -1562,29 +1571,40 @@ static void spl_array_object_user_cache_unserialize_state(zval *object, HashTabl
 
 	if (flags & SPL_ARRAY_IS_SELF) {
 		zval_ptr_dtor(&intern->array);
+
 		ZVAL_UNDEF(&intern->array);
 	} else {
 		if (Z_TYPE_P(storage_zv) != IS_OBJECT && Z_TYPE_P(storage_zv) != IS_ARRAY) {
 			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object", 0);
+
 			return;
 		}
+
 		spl_array_set_array(object, intern, storage_zv, 0L, true);
 	}
 
 	if (iterator_class_zv && Z_TYPE_P(iterator_class_zv) == IS_STRING) {
-		zend_class_entry *ce = zend_lookup_class(Z_STR_P(iterator_class_zv));
+		ce = zend_lookup_class(Z_STR_P(iterator_class_zv));
 
 		if (!ce) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
+			zend_throw_exception_ex(
+				spl_ce_UnexpectedValueException,
+				0,
 				"Cannot deserialize ArrayObject with iterator class '%s'; no such class exists",
-				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
+				ZSTR_VAL(Z_STR_P(iterator_class_zv))
+			);
+
 			return;
 		}
 
 		if (!instanceof_function(ce, spl_ce_ArrayIterator)) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
+			zend_throw_exception_ex(
+				spl_ce_UnexpectedValueException,
+				0,
 				"Cannot deserialize ArrayObject with iterator class '%s'; this class is not derived from ArrayIterator",
-				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
+				ZSTR_VAL(Z_STR_P(iterator_class_zv))
+			);
+
 			return;
 		}
 
@@ -1619,7 +1639,9 @@ static bool spl_array_object_copy_user_cache_state(
 
 	if (old_intern->ar_flags & SPL_ARRAY_IS_SELF) {
 		zval_ptr_dtor(&new_intern->array);
+
 		ZVAL_UNDEF(&new_intern->array);
+
 		result = true;
 
 		goto cleanup;
@@ -1664,11 +1686,14 @@ static bool spl_array_object_user_cache_state_has_unstorable(
 static bool spl_array_object_serialize_user_cache_state(zval *state, const zval *object)
 {
 	ZVAL_UNDEF(state);
+
 	spl_array_object_user_cache_serialize_state((zval *) object, state);
+
 	if (EG(exception) || Z_TYPE_P(state) != IS_ARRAY) {
 		if (Z_TYPE_P(state) != IS_UNDEF) {
 			zval_ptr_dtor(state);
 		}
+
 		ZVAL_UNDEF(state);
 
 		return false;

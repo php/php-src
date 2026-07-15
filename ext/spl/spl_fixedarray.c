@@ -26,7 +26,7 @@
 #include "spl_fixedarray.h"
 #include "spl_exceptions.h"
 #include "ext/json/php_json.h" /* For php_json_serializable_ce */
-#include "ext/user_cache/php_user_cache.h"
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct support path */
 
 static zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
@@ -653,18 +653,18 @@ PHP_METHOD(SplFixedArray, __unserialize)
 	}
 }
 
-/* Builds an array containing only the fixed-size elements, without the object
- * properties (those are handled separately by the user cache). */
 static void spl_fixedarray_object_build_user_cache_elements(spl_fixedarray_object *intern, zval *return_value)
 {
-	zval *current;
 	zend_long i;
+	zval *current;
 
 	array_init_size(return_value, intern->array.size);
 
 	for (i = 0; i < intern->array.size; i++) {
 		current = &intern->array.elements[i];
+
 		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), current);
+
 		Z_TRY_ADDREF_P(current);
 	}
 }
@@ -699,11 +699,13 @@ static bool spl_fixedarray_object_copy_user_cache_state(
 
 	for (i = 0; i < size; i++) {
 		ZVAL_UNDEF(&cloned_elem);
+
 		if (!clone_value(ctx, &cloned_elem, &old_intern->array.elements[i])) {
 			return false;
 		}
 
 		ZVAL_COPY_DEREF(&new_intern->array.elements[i], &cloned_elem);
+
 		zval_ptr_dtor(&cloned_elem);
 	}
 
@@ -723,7 +725,9 @@ static bool spl_fixedarray_object_user_cache_state_has_unstorable(
 	}
 
 	spl_fixedarray_object_build_user_cache_elements(Z_SPLFIXEDARRAY_P((zval *) object), &state_zv);
+
 	result = value_has_unstorable(ctx, &state_zv);
+
 	zval_ptr_dtor(&state_zv);
 
 	return result;
@@ -736,25 +740,25 @@ static bool spl_fixedarray_object_serialize_user_cache_state(zval *state, const 
 	return true;
 }
 
-/* Restores the fixed-size elements from the user-cache state (elements only, no
- * object properties). */
 static void spl_fixedarray_object_user_cache_unserialize_state(zval *object, HashTable *data)
 {
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(object);
-	zval *elem;
 	zend_long size;
+	zval *elem;
 
 	if (intern->array.size != 0) {
 		return;
 	}
 
 	size = zend_hash_num_elements(data);
-	spl_fixedarray_init_non_empty_struct(&intern->array, size);
 	if (!size) {
 		return;
 	}
 
+	spl_fixedarray_init_non_empty_struct(&intern->array, size);
+
 	intern->array.size = 0;
+
 	ZEND_HASH_FOREACH_VAL(data, elem) {
 		ZVAL_COPY_DEREF(&intern->array.elements[intern->array.size], elem);
 		intern->array.size++;

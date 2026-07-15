@@ -17,7 +17,7 @@
 #endif
 
 #include "php.h"
-#include "ext/user_cache/php_user_cache.h"
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct support path */
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_hash.h"
@@ -1112,17 +1112,16 @@ static void spl_dllist_object_user_cache_serialize_state(zval *object, zval *ret
 
 	array_init(return_value);
 
-	/* flags */
 	ZVAL_LONG(&tmp, intern->flags);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 
-	/* elements */
 	array_init_size(&tmp, intern->llist->count);
 	while (current) {
 		zend_hash_next_index_insert(Z_ARRVAL(tmp), &current->data);
 		Z_TRY_ADDREF(current->data);
 		current = current->next;
 	}
+
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 }
 
@@ -1131,13 +1130,15 @@ static void spl_dllist_object_user_cache_serialize_state(zval *object, zval *ret
 static bool spl_dllist_object_user_cache_unserialize_state(zval *object, HashTable *data)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
-	zval *flags_zv, *storage_zv, *elem;
 	zend_long flags;
+	zval *flags_zv, *storage_zv, *elem;
 
 	flags_zv = zend_hash_index_find(data, 0);
 	storage_zv = zend_hash_index_find(data, 1);
-	if (!flags_zv || !storage_zv ||
-		Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(storage_zv) != IS_ARRAY
+	if (!flags_zv ||
+		!storage_zv ||
+		Z_TYPE_P(flags_zv) != IS_LONG ||
+		Z_TYPE_P(storage_zv) != IS_ARRAY
 	) {
 		return false;
 	}
@@ -1152,6 +1153,7 @@ static bool spl_dllist_object_user_cache_unserialize_state(zval *object, HashTab
 	}
 
 	intern->flags = (int) flags;
+
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(storage_zv), elem) {
 		spl_ptr_llist_push(intern->llist, elem);
 	} ZEND_HASH_FOREACH_END();
@@ -1183,12 +1185,15 @@ static bool spl_dllist_object_copy_user_cache_state(
 	current = old_intern->llist->head;
 	while (current) {
 		ZVAL_UNDEF(&cloned_elem);
+
 		if (!clone_value(ctx, &cloned_elem, &current->data)) {
 			return false;
 		}
 
 		spl_ptr_llist_push(new_intern->llist, &cloned_elem);
+
 		zval_ptr_dtor(&cloned_elem);
+
 		current = current->next;
 	}
 
