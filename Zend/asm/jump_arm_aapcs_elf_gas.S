@@ -50,7 +50,7 @@ jump_fcontext:
     push {lr}
     @ save hidden,V1-V8,LR
 
-    #if __ARM_ARCH >= 7
+    #if !defined(__ARM_ARCH_6M__)
 
     push {a1,v1-v8,lr}
 
@@ -102,7 +102,7 @@ jump_fcontext:
     add  sp, sp, #64
 
     @ restore hidden,V1-V8,LR
-    #if __ARM_ARCH >= 7
+    #if !defined(__ARM_ARCH_6M__)
     pop {a4,v1-v8,lr}
     #else
 
