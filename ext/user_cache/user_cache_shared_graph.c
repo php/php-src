@@ -445,12 +445,19 @@ static zend_always_inline bool user_cache_shared_graph_is_unmangled_property_nam
 	return ZSTR_LEN(prop_name) != 0 && ZSTR_VAL(prop_name)[0] != '\0';
 }
 
+/*
+ * The state table pointer is captured before recursing into the state graph:
+ * the memoized state zval lives in a HashTable whose bucket array is
+ * reallocated when nested objects add their own memo entries, so a pointer
+ * into that bucket must not be dereferenced afterwards. The referenced state
+ * array itself is stable, so its HashTable is safe to hold across recursion.
+ */
 static zend_always_inline bool user_cache_shared_graph_safe_direct_property_shadows_state(
-		zend_string *prop_name, zval *state)
+		zend_string *prop_name, const HashTable *state_ht)
 {
-	return user_cache_shared_graph_is_unmangled_property_name(prop_name) &&
-		Z_TYPE_P(state) == IS_ARRAY &&
-		zend_hash_exists(Z_ARRVAL_P(state), prop_name)
+	return state_ht != NULL &&
+		user_cache_shared_graph_is_unmangled_property_name(prop_name) &&
+		zend_hash_exists(state_ht, prop_name)
 	;
 }
 
@@ -1526,6 +1533,7 @@ static bool user_cache_shared_graph_calc_safe_direct_object(
 {
 	zend_string *prop_name;
 	zval *prop_val, *src_val, *state_ptr, state;
+	const HashTable *state_ht;
 	HashTable *props;
 	uint32_t prop_count;
 	bool result;
@@ -1539,6 +1547,9 @@ static bool user_cache_shared_graph_calc_safe_direct_object(
 	) {
 		return false;
 	}
+
+	/* state_ptr may dangle once recursion resizes the memo; keep the array. */
+	state_ht = Z_TYPE_P(state_ptr) == IS_ARRAY ? Z_ARRVAL_P(state_ptr) : NULL;
 
 	/* Reserve shared objects only once. */
 	if (!php_user_cache_seen_test_and_add(&ctx->seen_objects, obj)) {
@@ -1586,7 +1597,7 @@ static bool user_cache_shared_graph_calc_safe_direct_object(
 
 			if (user_cache_shared_graph_safe_direct_property_shadows_state(
 					prop_name,
-					state_ptr
+					state_ht
 				)
 			) {
 				continue;
@@ -2769,6 +2780,7 @@ static bool user_cache_shared_graph_copy_safe_direct_object(
 	zend_object *obj,
 	php_user_cache_shared_graph_value *dst)
 {
+	const HashTable *sd_state_ht;
 	php_user_cache_shared_graph_safe_direct_object *graph_safe_direct;
 	php_user_cache_shared_graph_property *graph_properties;
 	php_user_cache_copy_object_ref_result ref_result;
@@ -2799,6 +2811,9 @@ static bool user_cache_shared_graph_copy_safe_direct_object(
 	) {
 		return false;
 	}
+
+	/* sd_state_ptr may dangle once recursion resizes the memo; keep the array. */
+	sd_state_ht = Z_TYPE_P(sd_state_ptr) == IS_ARRAY ? Z_ARRVAL_P(sd_state_ptr) : NULL;
 
 	if (!user_cache_shared_graph_copy_alloc(
 			ctx,
@@ -2877,7 +2892,7 @@ static bool user_cache_shared_graph_copy_safe_direct_object(
 
 			if (user_cache_shared_graph_safe_direct_property_shadows_state(
 					prop_name,
-					sd_state_ptr
+					sd_state_ht
 				)
 			) {
 				++prop_idx;
