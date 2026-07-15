@@ -40,11 +40,9 @@
 
 #include "jit/zend_jit_internal.h"
 
-#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-#include <pthread.h>
-#endif
 #ifdef ZEND_JIT_USE_APPLE_MAP_JIT
 #include <mach/vm_inherit.h>
+#include <pthread.h>
 #include <sys/mman.h>
 #endif
 
@@ -81,9 +79,6 @@ int16_t zend_jit_hot_counters[ZEND_HOT_COUNTERS_COUNT];
 
 const zend_op *zend_jit_halt_op = NULL;
 const zend_op *zend_jit_interrupt_op = NULL;
-#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-static int zend_write_protect = 1;
-#endif
 
 static void *dasm_buf = NULL;
 static void *dasm_end = NULL;
@@ -3531,11 +3526,6 @@ void zend_jit_unprotect(void)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		int opts = PROT_READ | PROT_WRITE;
 # ifdef ZTS
-#  ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-		if (zend_write_protect) {
-			pthread_jit_write_protect_np(0);
-		}
-#  endif
 		opts |= PROT_EXEC;
 # endif
 		if (mprotect(dasm_buf, dasm_size, opts) != 0) {
@@ -3566,11 +3556,6 @@ void zend_jit_protect(void)
 	pthread_jit_write_protect_np(1);
 #elif defined(HAVE_MPROTECT)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
-# ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-		if (zend_write_protect) {
-			pthread_jit_write_protect_np(1);
-		}
-# endif
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
@@ -3808,14 +3793,11 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 			"Unable to share JIT buffer across fork using minherit(): %s (%d)",
 			strerror(error), error);
 	}
-	zend_write_protect = pthread_jit_write_protect_supported_np();
-	if (!zend_write_protect) {
+	if (!pthread_jit_write_protect_supported_np()) {
 		munmap(buf, size);
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
 			"Apple Silicon ZTS JIT requires pthread_jit_write_protect_np() support");
 	}
-#elif defined(HAVE_PTHREAD_JIT_WRITE_PROTECT_NP)
-	zend_write_protect = pthread_jit_write_protect_supported_np();
 #endif
 
 	dasm_buf = buf;
@@ -3825,11 +3807,6 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 #ifdef ZEND_JIT_USE_APPLE_MAP_JIT
 	pthread_jit_write_protect_np(1);
 #elif defined(HAVE_MPROTECT)
-# ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-	if (zend_write_protect) {
-		pthread_jit_write_protect_np(1);
-	}
-# endif
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
