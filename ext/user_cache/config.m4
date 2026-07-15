@@ -1,5 +1,3 @@
-dnl config.m4 for extension user_cache
-
 PHP_NEW_EXTENSION([user_cache], m4_normalize([
     user_cache.c
     user_cache_storage.c
