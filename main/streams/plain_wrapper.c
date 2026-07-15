@@ -162,22 +162,15 @@ typedef struct {
 #define PHP_STDIOP_GET_FD(anfd, data)	anfd = (data)->file ? fileno((data)->file) : (data)->fd
 
 #ifdef PHP_WIN32
-static void php_win32_docref1_from_error(DWORD error, const char *param1) {
+static ZEND_COLD void php_win32_stream_wrapper_warn_error(
+	php_stream_wrapper *wrapper,
+	php_stream_context *context,
+	int options,
+	zend_enum_StreamErrorCode code,
+	DWORD error
+) {
 	char *buf = php_win32_error_to_msg(error);
-	size_t buf_len;
-
-	buf_len = strlen(buf);
-	if (buf_len >= 2) {
-		buf[buf_len - 1] = '\0';
-		buf[buf_len - 2] = '\0';
-	}
-	php_error_docref1(NULL, param1, E_WARNING, "%s (code: %lu)", buf, error);
-	php_win32_error_msg_free(buf);
-}
-
-static ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
-	char *buf = php_win32_error_to_msg(error);
-	php_error_docref2(NULL, param1, param2, E_WARNING, "%s (code: %lu)", buf, error);
+	php_stream_wrapper_error(wrapper, context, NULL, options, E_WARNING, true, code, "%s (code: %lu)", buf, error);
 	php_win32_error_msg_free(buf);
 }
 #endif
@@ -1151,7 +1144,7 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, const
 
 #ifdef PHP_WIN32
 	if (!dir) {
-		php_win32_docref1_from_error(GetLastError(), path);
+		php_win32_stream_wrapper_warn_error(wrapper, context, options, PHP_STREAM_EC(OpenFailed), GetLastError());
 	}
 
 	if (dir && dir->finished) {
@@ -1357,11 +1350,11 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 
 #ifdef PHP_WIN32
 	if (!php_win32_check_trailing_space(url_from, strlen(url_from))) {
-		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to);
+		php_win32_stream_wrapper_warn_error(wrapper, context, options, PHP_STREAM_EC(InvalidPath), ERROR_INVALID_NAME);
 		return 0;
 	}
 	if (!php_win32_check_trailing_space(url_to, strlen(url_to))) {
-		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to);
+		php_win32_stream_wrapper_warn_error(wrapper, context, options, PHP_STREAM_EC(InvalidPath), ERROR_INVALID_NAME);
 		return 0;
 	}
 #endif
@@ -1442,7 +1435,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 #endif
 
 #ifdef PHP_WIN32
-		php_win32_docref2_from_error(GetLastError(), url_from, url_to);
+		php_win32_stream_wrapper_warn_error(wrapper, context, options, PHP_STREAM_EC(RenameFailed), GetLastError());
 #else
 		php_stream_wrapper_warn(wrapper, context, options,
 				RenameFailed,
