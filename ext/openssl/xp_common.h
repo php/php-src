@@ -46,4 +46,15 @@ int php_openssl_passwd_callback(char *buf, int num, int verify, void *data);
  * must have installed the passphrase callback for an encrypted key. */
 zend_result php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream);
 
+/* SSL_CTX verify callback: honours allow_self_signed and verify_depth. */
+int php_openssl_verify_callback(int preverify_ok, X509_STORE_CTX *ctx);
+
+/* Configure peer certificate verification on the SSL_CTX from the cafile/capath
+ * context options (is_client selects client- vs server-side behaviour). */
+zend_result php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream, bool is_client);
+void php_openssl_disable_peer_verification(SSL_CTX *ctx, php_stream *stream);
+
+/* Add the negotiated cipher_name/bits/version to a crypto metadata array. */
+void php_openssl_add_crypto_cipher(zval *crypto, SSL *ssl);
+
 #endif /* PHP_OPENSSL_XP_COMMON_H */

@@ -267,7 +267,7 @@ static int php_openssl_dtls_sockop_close(php_stream *stream, int close_handle)
 static int php_openssl_dtls_apply_context(php_stream *stream, php_openssl_dtls_data_t *dtlssock)
 {
 	SSL_CTX *ctx = dtlssock->ctx;
-	char *cafile = NULL, *capath = NULL, *cipherlist = NULL;
+	char *cipherlist = NULL;
 	zval *val;
 
 	/* DTLS 1.0 is deprecated; require DTLS 1.2 or higher. */
@@ -281,25 +281,16 @@ static int php_openssl_dtls_apply_context(php_stream *stream, php_openssl_dtls_d
 	bool verify_peer = GET_VER_OPT("verify_peer") ? zend_is_true(val) : !is_server;
 	bool has_fingerprint = GET_VER_OPT("peer_fingerprint");
 	if (!verify_peer || has_fingerprint) {
-		SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+		php_openssl_disable_peer_verification(ctx, stream);
 	} else {
-		GET_VER_OPT_STRING("cafile", cafile);
-		GET_VER_OPT_STRING("capath", capath);
-		if (cafile != NULL || capath != NULL) {
-			if (SSL_CTX_load_verify_locations(ctx, cafile, capath) != 1) {
-				php_stream_warn(stream, CreateFailed, "Failed to load the CA verify locations");
-				return -1;
-			}
-		} else if (SSL_CTX_set_default_verify_paths(ctx) != 1) {
-			php_stream_warn(stream, CreateFailed, "Failed to set the default CA verify paths");
+		if (php_openssl_enable_peer_verification(ctx, stream, !is_server) != SUCCESS) {
 			return -1;
 		}
-		int verify_mode = SSL_VERIFY_PEER;
 		if (is_server) {
 			/* A server that verifies peers must require the client certificate. */
-			verify_mode |= SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
+			SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+					php_openssl_verify_callback);
 		}
-		SSL_CTX_set_verify(ctx, verify_mode, NULL);
 	}
 
 	GET_VER_OPT_STRING("ciphers", cipherlist);
@@ -380,6 +371,9 @@ static int php_openssl_dtls_setup_crypto(php_stream *stream, php_openssl_dtls_da
 		dtlssock->ctx = NULL;
 		return -1;
 	}
+
+	/* Let the shared verify callback recover the stream (for allow_self_signed etc.). */
+	SSL_set_ex_data(dtlssock->ssl_handle, php_openssl_get_ssl_stream_data_index(), stream);
 
 	/* Resume a previous session (abbreviated handshake) if session_data holds an
 	 * Openssl\Session; SSL_set_session takes its own reference. The client cache
@@ -1114,7 +1108,6 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 			if (dtlssock->ssl_handle != NULL) {
 				zval crypto;
 				char *proto_str;
-				const SSL_CIPHER *cipher;
 				zval *val;
 
 				array_init(&crypto);
@@ -1125,12 +1118,7 @@ static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, in
 				}
 				add_assoc_string(&crypto, "protocol", proto_str);
 
-				cipher = SSL_get_current_cipher(dtlssock->ssl_handle);
-				if (cipher != NULL) {
-					add_assoc_string(&crypto, "cipher_name", (char *) SSL_CIPHER_get_name(cipher));
-					add_assoc_long(&crypto, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
-					add_assoc_string(&crypto, "cipher_version", (char *) SSL_CIPHER_get_version(cipher));
-				}
+				php_openssl_add_crypto_cipher(&crypto, dtlssock->ssl_handle);
 
 				/* RFC 5705 exported keying material (e.g. DTLS-SRTP keys),
 				 * requested via the keying_material_label/length context options. */

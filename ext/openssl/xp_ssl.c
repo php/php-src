@@ -341,43 +341,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 }
 /* }}} */
 
-static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
-{
-	php_stream *stream;
-	SSL *ssl;
-	int err, depth, ret;
-	zval *val;
-	zend_ulong allowed_depth = OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH;
-
-
-	ret = preverify_ok;
-
-	/* determine the status for the current cert */
-	err = X509_STORE_CTX_get_error(ctx);
-	depth = X509_STORE_CTX_get_error_depth(ctx);
-
-	/* conjure the stream & context to use */
-	ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
-	stream = (php_stream*)SSL_get_ex_data(ssl, php_openssl_get_ssl_stream_data_index());
-
-	/* if allow_self_signed is set, make sure that verification succeeds */
-	if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT &&
-		GET_VER_OPT("allow_self_signed") &&
-		zend_is_true(val)
-	) {
-		ret = 1;
-	}
-
-	/* check the depth */
-	GET_VER_OPT_LONG("verify_depth", allowed_depth);
-	if ((zend_ulong)depth > allowed_depth) {
-		ret = 0;
-		X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_CHAIN_TOO_LONG);
-	}
-
-	return ret;
-}
-/* }}} */
+/* verify_callback (now php_openssl_verify_callback) is shared with dtls://; see xp_common.c. */
 
 /* php_openssl_x509_fingerprint_is_equal() and php_openssl_x509_fingerprint_match()
  * are shared with the dtls:// transport; see xp_common.c. */
@@ -621,20 +585,19 @@ static zend_result php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *pe
 
 #ifdef PHP_WIN32
 #define RETURN_CERT_VERIFY_FAILURE(code) X509_STORE_CTX_set_error(x509_store_ctx, code); return 0;
-static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /* {{{ */
+int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /* {{{ */
 {
 	PCCERT_CONTEXT cert_ctx = NULL;
 	PCCERT_CHAIN_CONTEXT cert_chain_ctx = NULL;
 	X509 *cert = X509_STORE_CTX_get0_cert(x509_store_ctx);
+	SSL *ssl = X509_STORE_CTX_get_ex_data(x509_store_ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
 
 	php_stream *stream;
-	php_openssl_netstream_data_t *sslsock;
 	zval *val;
 	bool is_self_signed = false;
 
 
 	stream = (php_stream*)arg;
-	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
 	{ /* First convert the x509 struct back to a DER encoded buffer and let Windows decode it into a form it can work with */
 		unsigned char *der_buf = NULL;
@@ -713,7 +676,7 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 		CERT_CHAIN_POLICY_STATUS chain_policy_status = {sizeof(CERT_CHAIN_POLICY_STATUS)};
 		BOOL verify_result;
 
-		ssl_policy_params.dwAuthType = (sslsock->is_client) ? AUTHTYPE_SERVER : AUTHTYPE_CLIENT;
+		ssl_policy_params.dwAuthType = (!SSL_is_server(ssl)) ? AUTHTYPE_SERVER : AUTHTYPE_CLIENT;
 		/* we validate the name ourselves using the peer_name
 		   ctx option, so no need to use a server name here */
 		ssl_policy_params.pwszServerName = NULL;
@@ -748,148 +711,8 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 /* }}} */
 #endif
 
-static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *cafile) /* {{{ */
-{
-	php_stream *stream;
-	X509 *cert;
-	BIO *buffer;
-	int buffer_active = 0;
-	char *line = NULL;
-	size_t line_len;
-	long certs_added = 0;
+/* php_openssl_load_stream_cafile()/enable/disable_peer_verification() are shared; see xp_common.c. */
 
-	stream = php_stream_open_wrapper(cafile, "rb", 0, NULL);
-
-	if (stream == NULL) {
-		// TODO: no stream and no wrapper, cannot use php_stream_warn(stream, ReadFailed, ...) nor php_stream_wrapper_log_error()
-		php_error(E_WARNING, "failed loading cafile stream: `%s'", cafile);
-		return 0;
-	} else if (stream->wrapper->is_url) {
-		php_stream_warn(stream, PermissionDenied, "remote cafile streams are disabled for security purposes");
-		php_stream_close(stream);
-		return 0;
-	}
-
-	cert_start: {
-		line = php_stream_get_line(stream, NULL, 0, &line_len);
-		if (line == NULL) {
-			goto stream_complete;
-		} else if (!strcmp(line, "-----BEGIN CERTIFICATE-----\n") ||
-			!strcmp(line, "-----BEGIN CERTIFICATE-----\r\n")
-		) {
-			buffer = BIO_new(BIO_s_mem());
-			buffer_active = 1;
-			goto cert_line;
-		} else {
-			efree(line);
-			goto cert_start;
-		}
-	}
-
-	cert_line: {
-		BIO_puts(buffer, line);
-		efree(line);
-		line = php_stream_get_line(stream, NULL, 0, &line_len);
-		if (line == NULL) {
-			goto stream_complete;
-		} else if (!strcmp(line, "-----END CERTIFICATE-----") ||
-			!strcmp(line, "-----END CERTIFICATE-----\n") ||
-			!strcmp(line, "-----END CERTIFICATE-----\r\n")
-		) {
-			goto add_cert;
-		} else {
-			goto cert_line;
-		}
-	}
-
-	add_cert: {
-		BIO_puts(buffer, line);
-		efree(line);
-		cert = php_openssl_pem_read_bio_x509(buffer);
-		BIO_free(buffer);
-		buffer_active = 0;
-		if (cert && X509_STORE_add_cert(cert_store, cert)) {
-			++certs_added;
-		}
-		/* TODO: notify user when adding certificate failed? */
-		X509_free(cert);
-		goto cert_start;
-	}
-
-	stream_complete: {
-		php_stream_close(stream);
-		if (buffer_active == 1) {
-			BIO_free(buffer);
-		}
-	}
-
-	if (certs_added == 0) {
-		php_stream_warn(stream, DecodingFailed, "no valid certs found cafile stream: `%s'", cafile);
-	}
-
-	return certs_added;
-}
-/* }}} */
-
-static zend_result php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
-{
-	zval *val = NULL;
-	const char *cafile = NULL;
-	const char *capath = NULL;
-	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-
-	GET_VER_OPT_STRING("cafile", cafile);
-	GET_VER_OPT_STRING("capath", capath);
-
-	if (cafile == NULL) {
-		const zend_string *cafile_str = zend_ini_str_literal("openssl.cafile");
-		cafile = ZSTR_LEN(cafile_str) ? ZSTR_VAL(cafile_str) : NULL;
-	} else if (!sslsock->is_client) {
-		/* Servers need to load and assign CA names from the cafile */
-		STACK_OF(X509_NAME) *cert_names = SSL_load_client_CA_file(cafile);
-		if (cert_names != NULL) {
-			SSL_CTX_set_client_CA_list(ctx, cert_names);
-		} else {
-			php_stream_warn(stream, InvalidFormat, "SSL: failed loading CA names from cafile");
-			return FAILURE;
-		}
-	}
-
-	if (capath == NULL) {
-		const zend_string *capath_str = zend_ini_str_literal("openssl.capath");
-		capath = ZSTR_LEN(capath_str) ? ZSTR_VAL(capath_str) : NULL;
-	}
-
-	if (cafile || capath) {
-		if (!SSL_CTX_load_verify_locations(ctx, cafile, capath)) {
-			ERR_clear_error();
-			if (cafile && !php_openssl_load_stream_cafile(SSL_CTX_get_cert_store(ctx), cafile)) {
-				return FAILURE;
-			}
-		}
-	} else {
-#ifdef PHP_WIN32
-		SSL_CTX_set_cert_verify_callback(ctx, php_openssl_win_cert_verify_callback, (void *)stream);
-#else
-		if (sslsock->is_client && !SSL_CTX_set_default_verify_paths(ctx)) {
-			php_stream_warn(stream, ProtocolError,
-				"Unable to set default verify locations and no CA settings specified");
-			return FAILURE;
-		}
-#endif
-	}
-
-	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback);
-
-	return SUCCESS;
-}
-/* }}} */
-
-static void php_openssl_disable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
-{
-	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
-}
-/* }}} */
 
 /* php_openssl_set_local_cert() is shared with the dtls:// transport; see xp_common.c. */
 
@@ -1371,7 +1194,7 @@ static zend_result php_openssl_enable_server_sni(
 
 		if (!verify_peer) {
 			php_openssl_disable_peer_verification(ctx, stream);
-		} else if (FAILURE == php_openssl_enable_peer_verification(ctx, stream)) {
+		} else if (FAILURE == php_openssl_enable_peer_verification(ctx, stream, sslsock->is_client)) {
 			return FAILURE;
 		}
 
@@ -2325,7 +2148,7 @@ static zend_result php_openssl_create_server_ctx(php_stream *stream,
 		php_openssl_disable_peer_verification(sslsock->ctx, stream);
 	} else {
 		verify_peer = true;
-		if (FAILURE == php_openssl_enable_peer_verification(sslsock->ctx, stream)) {
+		if (FAILURE == php_openssl_enable_peer_verification(sslsock->ctx, stream, sslsock->is_client)) {
 			return FAILURE;
 		}
 	}
@@ -3141,7 +2964,6 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 			if (sslsock->ssl_active) {
 				zval tmp;
 				char *proto_str;
-				const SSL_CIPHER *cipher;
 
 				array_init(&tmp);
 
@@ -3162,12 +2984,8 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 					default: proto_str = "UNKNOWN";
 				}
 
-				cipher = SSL_get_current_cipher(sslsock->ssl_handle);
-
 				add_assoc_string(&tmp, "protocol", proto_str);
-				add_assoc_string(&tmp, "cipher_name", (char *) SSL_CIPHER_get_name(cipher));
-				add_assoc_long(&tmp, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
-				add_assoc_string(&tmp, "cipher_version", SSL_CIPHER_get_version(cipher));
+				php_openssl_add_crypto_cipher(&tmp, sslsock->ssl_handle);
 				add_assoc_bool(&tmp, "session_reused", SSL_session_reused(sslsock->ssl_handle));
 
 #ifdef HAVE_TLS_ALPN
