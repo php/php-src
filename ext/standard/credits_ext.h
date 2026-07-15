@@ -39,6 +39,7 @@ CREDIT_LINE("Multibyte String Functions", "Tsukada Takuya, Rui Hirokawa");
 CREDIT_LINE("MySQL driver for PDO", "George Schlossnagle, Wez Furlong, Ilia Alshanetsky, Johannes Schlueter");
 CREDIT_LINE("MySQLi", "Zak Greant, Georg Richter, Andrey Hristov, Ulf Wendel");
 CREDIT_LINE("MySQLnd", "Andrey Hristov, Ulf Wendel, Georg Richter, Johannes Schlüter");
+CREDIT_LINE("Native Markup Expressions", "Liam Hammett");
 CREDIT_LINE("ODBC driver for PDO", "Wez Furlong");
 CREDIT_LINE("ODBC", "Stig Bakken, Andreas Karajannis, Frank M. Kromann, Daniel R. Kalowsky");
 CREDIT_LINE("Opcache", "Andi Gutmans, Zeev Suraski, Stanislav Malyshev, Dmitry Stogov, Xinchen Hui");
