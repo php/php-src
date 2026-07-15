@@ -55,4 +55,4 @@ object(PDOStatement)#%s (1) {
   ["queryString"]=>
   string(54) "SELECT val1, val2 FROM pdo_fetch_class_change_ctor_two"
 }
-Error: Cannot change default fetch mode while fetching
+Error: Cannot perform another operation on this PDOStatement while an operation is in progress
