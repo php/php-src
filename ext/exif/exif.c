@@ -3227,7 +3227,7 @@ static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * val
 		return false;
 	}
 	if ((dir_start - value_ptr) > value_len - (2+NumDirEntries*12)) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: 0x%04zX > 0x%04zX", (size_t)((dir_start - value_ptr) + (2+NumDirEntries*12)), (size_t)value_len);
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: 0x%04X > 0x%04X", (dir_start - value_ptr) + (2+NumDirEntries*12), value_len);
 		return false;
 	}
 
