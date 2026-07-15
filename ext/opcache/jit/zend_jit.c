@@ -830,11 +830,7 @@ ZEND_EXT_API void zend_jit_status(zval *ret)
 	add_assoc_long(&stats, "opt_level", JIT_G(opt_level));
 	add_assoc_long(&stats, "opt_flags", JIT_G(opt_flags));
 	if (dasm_buf) {
-#ifdef ZEND_JIT_USE_APPLE_MAP_JIT
-		add_assoc_long(&stats, "buffer_size", dasm_size);
-#else
 		add_assoc_long(&stats, "buffer_size", (char*)dasm_end - (char*)dasm_buf);
-#endif
 		add_assoc_long(&stats, "buffer_free", (char*)dasm_end - (char*)*dasm_ptr);
 	} else {
 		add_assoc_long(&stats, "buffer_size", 0);
