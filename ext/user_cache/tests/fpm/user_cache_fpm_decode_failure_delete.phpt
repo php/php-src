@@ -1,5 +1,5 @@
 --TEST--
-FPM: UserCache\Cache deletes entries that fail to decode
+FPM: UserCache\Cache drops silently-corrupt entries but propagates decode exceptions
 --EXTENSIONS--
 user_cache
 --SKIPIF--
@@ -55,11 +55,29 @@ if ($action === 'fetch') {
         }
     });
 
+    /* A missing class with no autoloader hit fails to decode without an
+     * exception, so the entry is corrupt and dropped. */
     var_dump($cache->fetch('single', 'DEFAULT'));
     var_dump($cache->has('single'));
-    var_dump($cache->fetch('autoload-single', 'DEFAULT'));
+
+    /* A throwing autoloader is a genuine userland exception: it propagates and
+     * the entry is kept, matching native unserialize(). */
+    try {
+        $cache->fetch('autoload-single', 'DEFAULT');
+        echo "no exception\n";
+    } catch (Exception $e) {
+        echo "caught: ", $e->getMessage(), "\n";
+    }
     var_dump($cache->has('autoload-single'));
-    var_dump($cache->fetchMultiple(['multiple', 'missing', 'autoload-multiple'], 'DEFAULT'));
+
+    /* In a batch, the corrupt entry is dropped and the miss yields the default
+     * before the throwing autoloader aborts the whole fetch. */
+    try {
+        $cache->fetchMultiple(['multiple', 'missing', 'autoload-multiple'], 'DEFAULT');
+        echo "no exception\n";
+    } catch (Exception $e) {
+        echo "caught: ", $e->getMessage(), "\n";
+    }
     var_dump($cache->has('multiple'));
     var_dump($cache->has('autoload-multiple'));
     return;
@@ -87,18 +105,11 @@ $tester->request(query: 'action=seed')->expectBody(
 $tester->request(query: 'action=fetch')->expectBody(
     "string(7) \"DEFAULT\"\n" .
     "bool(false)\n" .
-    "string(7) \"DEFAULT\"\n" .
+    "caught: autoload failed\n" .
+    "bool(true)\n" .
+    "caught: autoload failed\n" .
     "bool(false)\n" .
-    "array(3) {\n" .
-    "  [\"multiple\"]=>\n" .
-    "  string(7) \"DEFAULT\"\n" .
-    "  [\"missing\"]=>\n" .
-    "  string(7) \"DEFAULT\"\n" .
-    "  [\"autoload-multiple\"]=>\n" .
-    "  string(7) \"DEFAULT\"\n" .
-    "}\n" .
-    "bool(false)\n" .
-    "bool(false)"
+    "bool(true)"
 );
 
 $tester->terminate();

@@ -607,7 +607,7 @@ static bool user_cache_fetch_if_present_api(
 		zval *return_value)
 {
 	php_user_cache_fetch_pending_seed pending_seed;
-	bool fetched, stack_overflowed, entry_found = false;
+	bool fetched, entry_found = false;
 
 	if (!user_cache_can_read()) {
 		return false;
@@ -624,12 +624,13 @@ static bool user_cache_fetch_if_present_api(
 	}
 
 	if (EG(exception)) {
-		stack_overflowed = UC_G(stack_overflowed);
+		/* A stack overflow in the lock-free path is not a real error and would
+		 * recur under the read lock, so surface a miss and drop the exception. */
+		if (UC_G(stack_overflowed)) {
+			UC_G(stack_overflowed) = false;
+			zend_clear_exception();
 
-		UC_G(stack_overflowed) = false;
-		zend_clear_exception();
-		if (!stack_overflowed) {
-			user_cache_delete_corrupt_entry_prevalidated(key);
+			return false;
 		}
 
 		return false;
@@ -667,9 +668,10 @@ static bool user_cache_fetch_if_present_api(
 	}
 
 	if (EG(exception)) {
-		zend_clear_exception();
+		return false;
 	}
 
+	/* Decode failed without an exception: the entry is corrupt, drop it. */
 	user_cache_delete_corrupt_entry_prevalidated(key);
 
 	return false;
@@ -737,11 +739,14 @@ static void user_cache_fetch_multiple_fetch_one(
 		}
 
 		ZVAL_COPY(out, default_value);
-	} else {
-		if (EG(exception)) {
-			zend_clear_exception();
-		}
+	} else if (EG(exception)) {
+		/* A restore hook or autoloader threw: propagate the userland exception
+		 * and keep the entry. Drop the batch lock so the caller can unwind. */
+		php_user_cache_unlock();
+		*rlock_held = false;
 
+		ZVAL_UNDEF(out);
+	} else {
 		php_user_cache_unlock();
 		*rlock_held = false;
 		user_cache_delete_corrupt_entry_prevalidated(storage_key);
@@ -844,6 +849,14 @@ static zend_result user_cache_fetch_multiple_api(
 				&pending_seeds[i]
 			);
 
+			/* A restore hook or autoloader threw: abort the batch and let the
+			 * userland exception propagate, matching native unserialize(). */
+			if (EG(exception)) {
+				zval_ptr_dtor(&val);
+
+				break;
+			}
+
 			zend_symtable_update(Z_ARRVAL_P(return_value), key, &val);
 		}
 	} zend_catch {
@@ -853,6 +866,27 @@ static zend_result user_cache_fetch_multiple_api(
 
 	if (rlock_held) {
 		php_user_cache_unlock();
+	}
+
+	if (EG(exception)) {
+		zval_ptr_dtor(return_value);
+		ZVAL_UNDEF(return_value);
+
+		for (i = 0; i < count; i++) {
+			zend_string_release(storage_keys[i]);
+		}
+
+		if (storage_keys != NULL) {
+			efree(storage_keys);
+		}
+
+		if (pending_seeds != NULL) {
+			efree(pending_seeds);
+		}
+
+		user_cache_release_key_list(prepared_keys, count);
+
+		return FAILURE;
 	}
 
 	/* Clone outside the shared-memory lock. */
@@ -3201,6 +3235,14 @@ ZEND_METHOD(UserCache_Cache, remember)
 		return;
 	}
 
+	/* A restore hook or autoloader threw while materializing the entry: the
+	 * entry exists, so propagate the exception instead of recomputing. */
+	if (EG(exception)) {
+		zend_string_release(storage_key);
+
+		RETURN_THROWS();
+	}
+
 	locked = user_cache_lock_api(storage_key, 0);
 
 	/* Another request may have populated the entry while the lock was acquired. */
@@ -3213,6 +3255,16 @@ ZEND_METHOD(UserCache_Cache, remember)
 		zend_string_release(storage_key);
 
 		return;
+	}
+
+	if (EG(exception)) {
+		if (locked) {
+			locked = user_cache_unlock_api(storage_key);
+		}
+
+		zend_string_release(storage_key);
+
+		RETURN_THROWS();
 	}
 
 	/* Do not return before zend_end_try() restores the bailout chain. */
