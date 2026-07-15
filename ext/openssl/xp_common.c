@@ -25,6 +25,21 @@
 #include "xp_common.h"
 #include "ext/uri/php_uri.h"
 
+/* Stores the php_stream on the SSL, so callbacks can recover it (defined in openssl.c). */
+extern int php_openssl_get_ssl_stream_data_index(void);
+#ifdef PHP_WIN32
+/* Defined in xp_ssl.c (needs the Windows cert-store headers). */
+extern int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg);
+#endif
+
+/* Read an option from the "ssl" stream context (same helpers as xp_ssl.c/xp_dtls.c). */
+#define GET_VER_OPT(_name) \
+	(PHP_STREAM_CONTEXT(stream) && (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", _name)) != NULL)
+#define GET_VER_OPT_STRING(_name, _str) \
+	do { if (GET_VER_OPT(_name)) { if (try_convert_to_string(val)) _str = Z_STRVAL_P(val); } } while (0)
+#define GET_VER_OPT_LONG(_name, _num) \
+	do { if (GET_VER_OPT(_name)) { _num = zval_get_long(val); } } while (0)
+
 bool php_openssl_x509_fingerprint_is_equal(php_stream *stream, X509 *peer,
 		const char *method, const zend_string *expected)
 {
@@ -155,6 +170,55 @@ int php_openssl_passwd_callback(char *buf, int num, int verify, void *data)
 	return 0;
 }
 
+int php_openssl_verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
+{
+	php_stream *stream;
+	SSL *ssl;
+	int err, depth, ret;
+	zval *val;
+	zend_ulong allowed_depth = OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH;
+
+	ret = preverify_ok;
+
+	/* determine the status for the current cert */
+	err = X509_STORE_CTX_get_error(ctx);
+	depth = X509_STORE_CTX_get_error_depth(ctx);
+
+	/* conjure the stream & context to use */
+	ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
+	stream = (php_stream *)SSL_get_ex_data(ssl, php_openssl_get_ssl_stream_data_index());
+
+	/* if allow_self_signed is set, make sure that verification succeeds */
+	if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT
+			&& PHP_STREAM_CONTEXT(stream) != NULL
+			&& (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "allow_self_signed")) != NULL
+			&& zend_is_true(val)) {
+		ret = 1;
+	}
+
+	/* check the depth */
+	if (PHP_STREAM_CONTEXT(stream) != NULL
+			&& (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "verify_depth")) != NULL) {
+		allowed_depth = zval_get_long(val);
+	}
+	if ((zend_ulong)depth > allowed_depth) {
+		ret = 0;
+		X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_CHAIN_TOO_LONG);
+	}
+
+	return ret;
+}
+
+void php_openssl_add_crypto_cipher(zval *crypto, SSL *ssl)
+{
+	const SSL_CIPHER *cipher = SSL_get_current_cipher(ssl);
+	if (cipher != NULL) {
+		add_assoc_string(crypto, "cipher_name", (char *)SSL_CIPHER_get_name(cipher));
+		add_assoc_long(crypto, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
+		add_assoc_string(crypto, "cipher_version", (char *)SSL_CIPHER_get_version(cipher));
+	}
+}
+
 zend_result php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream)
 {
 	zval *val;
@@ -209,6 +273,148 @@ zend_result php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream)
 
 	return SUCCESS;
 }
+
+static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *cafile) /* {{{ */
+{
+	php_stream *stream;
+	X509 *cert;
+	BIO *buffer;
+	int buffer_active = 0;
+	char *line = NULL;
+	size_t line_len;
+	long certs_added = 0;
+
+	stream = php_stream_open_wrapper(cafile, "rb", 0, NULL);
+
+	if (stream == NULL) {
+		// TODO: no stream and no wrapper, cannot use php_stream_warn(stream, ReadFailed, ...) nor php_stream_wrapper_log_error()
+		php_error(E_WARNING, "failed loading cafile stream: `%s'", cafile);
+		return 0;
+	} else if (stream->wrapper->is_url) {
+		php_stream_warn(stream, PermissionDenied, "remote cafile streams are disabled for security purposes");
+		php_stream_close(stream);
+		return 0;
+	}
+
+	cert_start: {
+		line = php_stream_get_line(stream, NULL, 0, &line_len);
+		if (line == NULL) {
+			goto stream_complete;
+		} else if (!strcmp(line, "-----BEGIN CERTIFICATE-----\n") ||
+			!strcmp(line, "-----BEGIN CERTIFICATE-----\r\n")
+		) {
+			buffer = BIO_new(BIO_s_mem());
+			buffer_active = 1;
+			goto cert_line;
+		} else {
+			efree(line);
+			goto cert_start;
+		}
+	}
+
+	cert_line: {
+		BIO_puts(buffer, line);
+		efree(line);
+		line = php_stream_get_line(stream, NULL, 0, &line_len);
+		if (line == NULL) {
+			goto stream_complete;
+		} else if (!strcmp(line, "-----END CERTIFICATE-----") ||
+			!strcmp(line, "-----END CERTIFICATE-----\n") ||
+			!strcmp(line, "-----END CERTIFICATE-----\r\n")
+		) {
+			goto add_cert;
+		} else {
+			goto cert_line;
+		}
+	}
+
+	add_cert: {
+		BIO_puts(buffer, line);
+		efree(line);
+		cert = php_openssl_pem_read_bio_x509(buffer);
+		BIO_free(buffer);
+		buffer_active = 0;
+		if (cert && X509_STORE_add_cert(cert_store, cert)) {
+			++certs_added;
+		}
+		/* TODO: notify user when adding certificate failed? */
+		X509_free(cert);
+		goto cert_start;
+	}
+
+	stream_complete: {
+		php_stream_close(stream);
+		if (buffer_active == 1) {
+			BIO_free(buffer);
+		}
+	}
+
+	if (certs_added == 0) {
+		php_stream_warn(stream, DecodingFailed, "no valid certs found cafile stream: `%s'", cafile);
+	}
+
+	return certs_added;
+}
+/* }}} */
+
+zend_result php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream, bool is_client) /* {{{ */
+{
+	zval *val = NULL;
+	const char *cafile = NULL;
+	const char *capath = NULL;
+
+	GET_VER_OPT_STRING("cafile", cafile);
+	GET_VER_OPT_STRING("capath", capath);
+
+	if (cafile == NULL) {
+		const zend_string *cafile_str = zend_ini_str_literal("openssl.cafile");
+		cafile = ZSTR_LEN(cafile_str) ? ZSTR_VAL(cafile_str) : NULL;
+	} else if (!is_client) {
+		/* Servers need to load and assign CA names from the cafile */
+		STACK_OF(X509_NAME) *cert_names = SSL_load_client_CA_file(cafile);
+		if (cert_names != NULL) {
+			SSL_CTX_set_client_CA_list(ctx, cert_names);
+		} else {
+			php_stream_warn(stream, InvalidFormat, "SSL: failed loading CA names from cafile");
+			return FAILURE;
+		}
+	}
+
+	if (capath == NULL) {
+		const zend_string *capath_str = zend_ini_str_literal("openssl.capath");
+		capath = ZSTR_LEN(capath_str) ? ZSTR_VAL(capath_str) : NULL;
+	}
+
+	if (cafile || capath) {
+		if (!SSL_CTX_load_verify_locations(ctx, cafile, capath)) {
+			ERR_clear_error();
+			if (cafile && !php_openssl_load_stream_cafile(SSL_CTX_get_cert_store(ctx), cafile)) {
+				return FAILURE;
+			}
+		}
+	} else {
+#ifdef PHP_WIN32
+		SSL_CTX_set_cert_verify_callback(ctx, php_openssl_win_cert_verify_callback, (void *)stream);
+#else
+		if (is_client && !SSL_CTX_set_default_verify_paths(ctx)) {
+			php_stream_warn(stream, ProtocolError,
+				"Unable to set default verify locations and no CA settings specified");
+			return FAILURE;
+		}
+#endif
+	}
+
+	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, php_openssl_verify_callback);
+
+	return SUCCESS;
+}
+/* }}} */
+
+void php_openssl_disable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
+{
+	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+}
+/* }}} */
 
 int php_openssl_setup_crypto_on_connect(php_stream *stream,
 		php_stream_xport_crypt_method_t method)
