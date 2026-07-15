@@ -3629,7 +3629,7 @@ static bool exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start
 	NumDirEntries = php_ifd_get16u(dir_start, ImageInfo->motorola_intel);
 
 	if (!exif_offset_info_contains(info, dir_start+2, NumDirEntries*12)) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: x%04zX + 2 + x%04X*12 = x%04zX > x%04zX", (size_t)dir_start+2-(size_t)info->valid_start, NumDirEntries, (size_t)dir_start+2+NumDirEntries*12-(size_t)info->valid_start, (size_t)(info->valid_end - info->valid_start));
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: x%04X + 2 + x%04X*12 = x%04X > x%04X", (int)((size_t)dir_start+2-(size_t)info->valid_start), NumDirEntries, (int)((size_t)dir_start+2+NumDirEntries*12-(size_t)info->valid_start), info->valid_end - info->valid_start);
 		return false;
 	}
 
