@@ -1446,6 +1446,59 @@ static zend_string *add_intersection_type(zend_string *str,
 	return str;
 }
 
+/* Render a string literal type as a single-quoted, escaped literal, e.g. 'fo\'o'. */
+static zend_string *zend_string_literal_type_to_string(const zend_string *s)
+{
+	size_t extra = 0;
+	for (size_t i = 0; i < ZSTR_LEN(s); i++) {
+		char c = ZSTR_VAL(s)[i];
+		if (c == '\'' || c == '\\') {
+			extra++;
+		}
+	}
+	zend_string *out = zend_string_alloc(ZSTR_LEN(s) + extra + 2, 0);
+	char *p = ZSTR_VAL(out);
+	*p++ = '\'';
+	for (size_t i = 0; i < ZSTR_LEN(s); i++) {
+		char c = ZSTR_VAL(s)[i];
+		if (c == '\'' || c == '\\') {
+			*p++ = '\\';
+		}
+
+		*p++ = c;
+	}
+	*p++ = '\'';
+	*p = '\0';
+	return out;
+}
+
+/* Render a literal type value to its source-level form. Floats use the
+ * serialize_precision=-1 (shortest round-trip) form so the rendering is
+ * deterministic and independent of ini settings. */
+static zend_string *zend_literal_type_to_string(const zval *zv)
+{
+	switch (Z_TYPE_P(zv)) {
+		case IS_LONG:
+			return zend_strpprintf(0, ZEND_LONG_FMT, Z_LVAL_P(zv));
+		case IS_DOUBLE: {
+			zend_string *s = zend_strpprintf_unchecked(0, "%.*H", -1, Z_DVAL_P(zv));
+			if (zend_finite(Z_DVAL_P(zv))
+					&& !memchr(ZSTR_VAL(s), '.', ZSTR_LEN(s))
+					&& !memchr(ZSTR_VAL(s), 'E', ZSTR_LEN(s))) {
+				zend_string *with_fraction = zend_strpprintf(0, "%s.0", ZSTR_VAL(s));
+				zend_string_release(s);
+				return with_fraction;
+			}
+			return s;
+		}
+		case IS_STRING:
+			return zend_string_literal_type_to_string(Z_STR_P(zv));
+		default:
+			ZEND_UNREACHABLE();
+	}
+	return NULL;
+}
+
 zend_string *zend_type_to_string_resolved(const zend_type type, const zend_class_entry *scope) {
 	zend_string *str = NULL;
 
@@ -1461,6 +1514,12 @@ zend_string *zend_type_to_string_resolved(const zend_type type, const zend_class
 				str = add_intersection_type(str, ZEND_TYPE_LIST(*list_type), /* is_bracketed */ true);
 				continue;
 			}
+			if (ZEND_TYPE_HAS_LITERAL(*list_type)) {
+				zend_string *literal_str = zend_literal_type_to_string(ZEND_TYPE_LITERAL_VALUE(*list_type));
+				str = add_type_string(str, literal_str, /* is_intersection */ false);
+				zend_string_release(literal_str);
+				continue;
+			}
 			ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
 			ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*list_type));
 
@@ -1471,6 +1530,8 @@ zend_string *zend_type_to_string_resolved(const zend_type type, const zend_class
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
+	} else if (ZEND_TYPE_HAS_LITERAL(type)) {
+		str = zend_literal_type_to_string(ZEND_TYPE_LITERAL_VALUE(type));
 	}
 
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
@@ -5146,7 +5207,7 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	 * breaking for the generated call.
 	 */
 	if (callback->kind == ZEND_AST_CALL
-	 && callback->child[0]->kind == ZEND_AST_ZVAL 
+	 && callback->child[0]->kind == ZEND_AST_ZVAL
 	 && Z_TYPE_P(zend_ast_get_zval(callback->child[0])) == IS_STRING
 	 && zend_string_equals_literal_ci(zend_ast_get_str(callback->child[0]), "assert")) {
 		return FAILURE;
@@ -7360,9 +7421,79 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 }
 /* }}} */
 
+/* Whether two literal type values denote the same type. Distinct base types
+ * (e.g. int 1 vs float 1.0) are never equal. */
+static bool zend_literal_types_equal(const zval *a, const zval *b)
+{
+	if (Z_TYPE_P(a) != Z_TYPE_P(b)) {
+		return false;
+	}
+
+	switch (Z_TYPE_P(a)) {
+		case IS_LONG:
+			return Z_LVAL_P(a) == Z_LVAL_P(b);
+		case IS_DOUBLE:
+			return Z_DVAL_P(a) == Z_DVAL_P(b);
+		case IS_STRING:
+			return zend_string_equals(Z_STR_P(a), Z_STR_P(b));
+		default:
+			ZEND_UNREACHABLE();
+	}
+
+	return false;
+}
+
+/* The MAY_BE_* bit for the base scalar kind a literal narrows. */
+static zend_always_inline uint32_t zend_literal_type_base_mask(const zval *zv)
+{
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_LONG || Z_TYPE_P(zv) == IS_DOUBLE || Z_TYPE_P(zv) == IS_STRING);
+	return 1u << Z_TYPE_P(zv);
+}
+
+/* Compile an int/float/string literal (optionally negated) into a literal type.
+ * The value zval is arena-allocated alongside the type; string literals are
+ * interned so they persist and compare cheaply. */
+static zend_type zend_compile_literal_typename(zend_ast *ast)
+{
+	bool negate = false;
+	zend_ast *zv_ast = ast;
+
+	if (ast->kind == ZEND_AST_UNARY_MINUS) {
+		negate = true;
+		zv_ast = ast->child[0];
+	}
+
+	ZEND_ASSERT(zv_ast->kind == ZEND_AST_ZVAL);
+
+	zval value;
+	ZVAL_COPY(&value, zend_ast_get_zval(zv_ast));
+
+	if (negate) {
+		if (Z_TYPE(value) == IS_LONG) {
+			ZVAL_LONG(&value, -Z_LVAL(value));
+		} else {
+			ZEND_ASSERT(Z_TYPE(value) == IS_DOUBLE);
+			ZVAL_DOUBLE(&value, -Z_DVAL(value));
+		}
+	}
+
+	if (Z_TYPE(value) == IS_STRING) {
+		ZVAL_STR(&value, zend_new_interned_string(Z_STR(value)));
+	}
+
+	zval *zv = zend_arena_alloc(&CG(arena), sizeof(zval));
+	ZVAL_COPY_VALUE(zv, &value);
+
+	return (zend_type) ZEND_TYPE_INIT_LITERAL(zv, 0);
+}
+
 static zend_type zend_compile_single_typename(zend_ast *ast)
 {
 	ZEND_ASSERT(!(ast->attr & ZEND_TYPE_NULLABLE));
+	if (ast->kind == ZEND_AST_TYPE_LITERAL) {
+		return zend_compile_literal_typename(ast->child[0]);
+	}
+
 	if (ast->kind == ZEND_AST_TYPE) {
 		if (ast->attr == IS_STATIC && !CG(active_class_entry) && zend_is_scope_known()) {
 			zend_error_noreturn(E_COMPILE_ERROR,
@@ -7520,6 +7651,10 @@ static void zend_is_type_list_redundant_by_single_type(const zend_type_list *typ
 {
 	ZEND_ASSERT(!ZEND_TYPE_IS_INTERSECTION(type));
 	for (size_t i = 0; i < type_list->num_types - 1; i++) {
+		if (ZEND_TYPE_HAS_LITERAL(type_list->types[i])) {
+			continue;
+		}
+
 		if (ZEND_TYPE_IS_INTERSECTION(type_list->types[i])) {
 			zend_is_intersection_type_redundant_by_single_type(type_list->types[i], type);
 			continue;
@@ -7617,6 +7752,51 @@ static zend_type zend_compile_typename_ex(
 			/* Clear MAY_BE_* type flags */
 			ZEND_TYPE_FULL_MASK(single_type) &= ~_ZEND_TYPE_MAY_BE_MASK;
 
+			if (ZEND_TYPE_HAS_LITERAL(single_type)) {
+				zval *literal = ZEND_TYPE_LITERAL_VALUE(single_type);
+				uint32_t base_mask = zend_literal_type_base_mask(literal);
+
+				if (ZEND_TYPE_PURE_MASK(type) & base_mask) {
+					zend_string *literal_str = zend_type_to_string(single_type);
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Literal type %s is redundant as the union already allows its base type", ZSTR_VAL(literal_str));
+				}
+
+				if (!ZEND_TYPE_HAS_LIST(type)) {
+					if (ZEND_TYPE_IS_COMPLEX(type)) {
+						type_list->num_types = 1;
+						type_list->types[0] = type;
+						ZEND_TYPE_FULL_MASK(type_list->types[0]) &= ~_ZEND_TYPE_MAY_BE_MASK;
+					}
+
+					ZEND_TYPE_SET_LIST(type, type_list);
+				}
+
+				for (uint32_t j = 0; j < type_list->num_types; j++) {
+					if (ZEND_TYPE_HAS_LITERAL(type_list->types[j])
+							&& zend_literal_types_equal(ZEND_TYPE_LITERAL_VALUE(type_list->types[j]), literal)) {
+						zend_string *literal_str = zend_type_to_string(single_type);
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"Literal type %s is redundant as it is already present in the union", ZSTR_VAL(literal_str));
+					}
+				}
+
+				type_list->types[type_list->num_types++] = single_type;
+				continue;
+			}
+
+			if ((single_type_mask & (MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING)) && ZEND_TYPE_HAS_LIST(type)) {
+				const zend_type_list *cur_list = ZEND_TYPE_LIST(type);
+				for (uint32_t j = 0; j < cur_list->num_types; j++) {
+					if (ZEND_TYPE_HAS_LITERAL(cur_list->types[j])
+							&& (zend_literal_type_base_mask(ZEND_TYPE_LITERAL_VALUE(cur_list->types[j])) & single_type_mask)) {
+						zend_string *literal_str = zend_type_to_string(cur_list->types[j]);
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"Literal type %s is redundant as the union already allows its base type", ZSTR_VAL(literal_str));
+					}
+				}
+			}
+
 			if (ZEND_TYPE_IS_COMPLEX(single_type)) {
 				if (!ZEND_TYPE_IS_COMPLEX(type) && !is_composite) {
 					/* The first class type can be stored directly as the type ptr payload. */
@@ -7675,6 +7855,13 @@ static zend_type zend_compile_typename_ex(
 			zend_ast *type_ast = list->child[i];
 			zend_type single_type = zend_compile_single_typename(type_ast);
 
+			/* The grammar already excludes lit & named; this guards the name-based checks below should that ever change. */
+			if (ZEND_TYPE_HAS_LITERAL(single_type)) {
+				zend_string *literal_str = zend_type_to_string(single_type);
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Type %s cannot be part of an intersection type", ZSTR_VAL(literal_str));
+			}
+
 			/* An intersection of union types cannot exist so invalidate it
 			 * Currently only can happen with iterable getting canonicalized to Traversable|array */
 			if (ZEND_TYPE_IS_ITERABLE_FALLBACK(single_type)) {
@@ -7728,6 +7915,17 @@ static zend_type zend_compile_typename_ex(
 		}
 	} else {
 		type = zend_compile_single_typename(ast);
+		if (ZEND_TYPE_HAS_LITERAL(type)) {
+			/* A standalone literal type is wrapped in a single-element union list so
+			 * the container carries _ZEND_TYPE_LIST_BIT (keeping ZEND_TYPE_IS_SET valid)
+			 * while its pure mask stays empty (so it never accepts the base scalar). */
+			zend_type_list *literal_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(1));
+			literal_list->num_types = 1;
+			literal_list->types[0] = type;
+			type = (zend_type) ZEND_TYPE_INIT_NONE(0);
+			ZEND_TYPE_SET_LIST(type, literal_list);
+			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_UNION_BIT | _ZEND_TYPE_ARENA_BIT;
+		}
 	}
 
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
@@ -7779,6 +7977,33 @@ static bool zend_is_valid_default_value(zend_type type, zval *value)
 		/* Integers are allowed as initializers for floating-point values. */
 		convert_to_double(value);
 		return true;
+	}
+
+	/* For literal types the default value must equal one of the literals (an int
+	 * is also accepted for a matching float literal). */
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		const zend_type *list_type;
+		bool int_matches_double_literal = false;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+			if (!ZEND_TYPE_HAS_LITERAL(*list_type)) {
+				continue;
+			}
+
+			const zval *literal = ZEND_TYPE_LITERAL_VALUE(*list_type);
+			if (zend_literal_types_equal(literal, value)) {
+				return true;
+			}
+
+			if (Z_TYPE_P(literal) == IS_DOUBLE && Z_TYPE_P(value) == IS_LONG
+					&& Z_DVAL_P(literal) == (double) Z_LVAL_P(value)) {
+				int_matches_double_literal = true;
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+
+		if (int_matches_double_literal) {
+			convert_to_double(value);
+			return true;
+		}
 	}
 	return false;
 }

@@ -92,6 +92,17 @@ static void zend_type_copy_ctor(zend_type *const type, bool use_arena, bool pers
 		zend_type_list_copy_ctor(type, use_arena, persistent);
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
 		zend_string_addref(ZEND_TYPE_NAME(*type));
+	} else if (ZEND_TYPE_HAS_LITERAL(*type)) {
+		/* Deep-copy the literal value into a fresh holder in the target domain. */
+		const zval *old_zv = ZEND_TYPE_LITERAL_VALUE(*type);
+		zval *new_zv = use_arena ? zend_arena_alloc(&CG(arena), sizeof(zval)) : pemalloc(sizeof(zval), persistent);
+		if (Z_TYPE_P(old_zv) == IS_STRING && persistent) {
+			ZVAL_STR(new_zv, zend_string_dup(Z_STR_P(old_zv), 1));
+		} else {
+			ZVAL_COPY(new_zv, old_zv);
+		}
+
+		ZEND_TYPE_SET_PTR(*type, new_zv);
 	}
 }
 
@@ -666,6 +677,39 @@ static inheritance_status zend_is_intersection_subtype_of_type(
 	return early_exit_status == INHERITANCE_ERROR ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 }
 
+static bool zend_literal_type_values_identical(const zval *a, const zval *b)
+{
+	if (Z_TYPE_P(a) != Z_TYPE_P(b)) {
+		return false;
+	}
+
+	switch (Z_TYPE_P(a)) {
+		case IS_LONG:   return Z_LVAL_P(a) == Z_LVAL_P(b);
+		case IS_DOUBLE: return Z_DVAL_P(a) == Z_DVAL_P(b);
+		case IS_STRING: return zend_string_equals(Z_STR_P(a), Z_STR_P(b));
+		default:        return false;
+	}
+}
+
+/* A literal fe member is a subtype of proto if proto allows its base scalar type
+ * (e.g. 1 ∈ int) or contains an identical literal (e.g. 1 ∈ 1|2).  */
+static inheritance_status zend_is_literal_subtype_of_type(
+		const zval *literal, const zend_type proto_type)
+{
+	if (ZEND_TYPE_PURE_MASK(proto_type) & (1u << Z_TYPE_P(literal))) {
+		return INHERITANCE_SUCCESS;
+	}
+
+	const zend_type *single_type;
+	ZEND_TYPE_FOREACH(proto_type, single_type) {
+		if (ZEND_TYPE_HAS_LITERAL(*single_type) && zend_literal_type_values_identical(literal, ZEND_TYPE_LITERAL_VALUE(*single_type))) {
+			return INHERITANCE_SUCCESS;
+		}
+	} ZEND_TYPE_FOREACH_END();
+
+	return INHERITANCE_ERROR;
+}
+
 static inheritance_status zend_perform_covariant_type_check(
 		zend_class_entry *fe_scope, const zend_type fe_type,
 		zend_class_entry *proto_scope, const zend_type proto_type)
@@ -729,6 +773,8 @@ static inheritance_status zend_perform_covariant_type_check(
 			if (ZEND_TYPE_IS_INTERSECTION(*single_type)) {
 				status = zend_is_intersection_subtype_of_type(
 					fe_scope, *single_type, proto_scope, proto_type);
+			} else if (ZEND_TYPE_HAS_LITERAL(*single_type)) {
+				status = zend_is_literal_subtype_of_type(ZEND_TYPE_LITERAL_VALUE(*single_type), proto_type);
 			} else {
 				zend_string *fe_class_name = get_class_from_type(fe_scope, *single_type);
 				if (!fe_class_name) {

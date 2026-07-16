@@ -111,11 +111,24 @@ ZEND_API void destroy_zend_function(zend_function *function)
 
 ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(type)) {
+		bool uses_arena = ZEND_TYPE_USES_ARENA(type);
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH_MUTABLE(ZEND_TYPE_LIST(type), list_type) {
+			/* Literal entries own a zval holder (and, for strings, the string).
+			 * The holder lives in the arena unless the list is non-arena. */
+			if (ZEND_TYPE_HAS_LITERAL(*list_type)) {
+				zval *zv = ZEND_TYPE_LITERAL_VALUE(*list_type);
+				if (Z_TYPE_P(zv) == IS_STRING) {
+					zend_string_release(Z_STR_P(zv));
+				}
+				if (!uses_arena) {
+					pefree(zv, persistent);
+				}
+				continue;
+			}
 			zend_type_release(*list_type, persistent);
 		} ZEND_TYPE_LIST_FOREACH_END();
-		if (!ZEND_TYPE_USES_ARENA(type)) {
+		if (!uses_arena) {
 			pefree(ZEND_TYPE_LIST(type), persistent);
 		}
 	} else if (ZEND_TYPE_HAS_NAME(type)) {

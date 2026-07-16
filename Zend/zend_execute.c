@@ -1009,6 +1009,10 @@ static bool zend_check_and_resolve_property_or_class_constant_class_type(
 		} else {
 			const zend_type *list_type;
 			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(member_type), list_type) {
+				if (ZEND_TYPE_HAS_LITERAL(*list_type)) {
+					continue;
+				}
+
 				if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
 					if (zend_check_intersection_for_property_or_class_constant_class_type(
 							scope, ZEND_TYPE_LIST(*list_type), value_ce)) {
@@ -1039,6 +1043,8 @@ static bool zend_check_and_resolve_property_or_class_constant_class_type(
 	return false;
 }
 
+static bool zend_check_literal_type(const zend_type *type, zval *arg, bool strict, bool allow_coercion);
+
 static zend_always_inline bool i_zend_check_property_type(const zend_property_info *info, zval *property, bool strict)
 {
 	ZEND_ASSERT(!Z_ISREF_P(property));
@@ -1048,6 +1054,10 @@ static zend_always_inline bool i_zend_check_property_type(const zend_property_in
 
 	if (ZEND_TYPE_IS_COMPLEX(info->type) && Z_TYPE_P(property) == IS_OBJECT
 			&& zend_check_and_resolve_property_or_class_constant_class_type(info->ce, info->type, Z_OBJCE_P(property))) {
+		return 1;
+	}
+
+	if (ZEND_TYPE_HAS_LIST(info->type) && zend_check_literal_type(&info->type, property, strict, /* allow_coercion */ true)) {
 		return 1;
 	}
 
@@ -1151,6 +1161,148 @@ static bool zend_check_intersection_type_from_list(
 	return true;
 }
 
+/* Whether a runtime value exactly equals a literal type value (same base type
+ * and value; int 1 and float 1.0 are distinct). */
+static zend_always_inline bool zend_literal_type_value_matches(const zval *literal, const zval *arg)
+{
+	if (Z_TYPE_P(literal) != Z_TYPE_P(arg)) {
+		return false;
+	}
+
+	switch (Z_TYPE_P(literal)) {
+		case IS_LONG:
+			return Z_LVAL_P(literal) == Z_LVAL_P(arg);
+		case IS_DOUBLE:
+			return Z_DVAL_P(literal) == Z_DVAL_P(arg);
+		case IS_STRING:
+			return zend_string_equals(Z_STR_P(literal), Z_STR_P(arg));
+		default:
+			return false;
+	}
+}
+
+/* Whether a value equals any literal entry of the type (used after coercion). */
+static zend_always_inline bool zend_value_matches_a_literal(const zend_type *type, const zval *value)
+{
+	const zend_type *list_type;
+	ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
+		if (ZEND_TYPE_HAS_LITERAL(*list_type) && zend_literal_type_value_matches(ZEND_TYPE_LITERAL_VALUE(*list_type), value)) {
+			return true;
+		}
+	} ZEND_TYPE_LIST_FOREACH_END();
+
+	return false;
+}
+
+/* Check whether arg satisfies any literal entry of a (union) type. In weak mode
+ * (allow_coercion && !strict) the value is coerced to a literal's base scalar
+ * type and then tested for membership; on success arg is updated in place. */
+static bool zend_check_literal_type(const zend_type *type, zval *arg, bool strict, bool allow_coercion)
+{
+	const zend_type *list_type;
+	uint32_t literal_base_mask = 0;
+
+	/* Exact value match first; this never mutates arg. */
+	ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
+		if (!ZEND_TYPE_HAS_LITERAL(*list_type)) {
+			continue;
+		}
+
+		const zval *literal = ZEND_TYPE_LITERAL_VALUE(*list_type);
+		literal_base_mask |= 1u << Z_TYPE_P(literal);
+		if (zend_literal_type_value_matches(literal, arg)) {
+			return true;
+		}
+	} ZEND_TYPE_LIST_FOREACH_END();
+
+	if (literal_base_mask == 0 || !allow_coercion) {
+		return false;
+	}
+
+	if (strict) {
+		/* Under strict_types only the int -> float widening is allowed, mirroring
+		 * how the float type accepts an int argument. */
+		if ((literal_base_mask & MAY_BE_DOUBLE) && Z_TYPE_P(arg) == IS_LONG) {
+			double dval = (double) Z_LVAL_P(arg);
+			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
+				if (ZEND_TYPE_HAS_LITERAL(*list_type)) {
+					const zval *literal = ZEND_TYPE_LITERAL_VALUE(*list_type);
+					if (Z_TYPE_P(literal) == IS_DOUBLE && Z_DVAL_P(literal) == dval) {
+						ZVAL_DOUBLE(arg, dval);
+						return true;
+					}
+				}
+			} ZEND_TYPE_LIST_FOREACH_END();
+		}
+
+		return false;
+	}
+
+	if (Z_TYPE_P(arg) == IS_NULL) {
+		return false;
+	}
+
+	zend_long lval;
+	double dval;
+	zval coerced;
+
+	if (literal_base_mask & MAY_BE_LONG) {
+		if ((literal_base_mask & MAY_BE_DOUBLE) && Z_TYPE_P(arg) == IS_STRING) {
+			uint8_t kind = is_numeric_str_function(Z_STR_P(arg), &lval, &dval);
+			if (kind == IS_LONG) {
+				ZVAL_LONG(&coerced, lval);
+				if (zend_value_matches_a_literal(type, &coerced)) {
+					zval_ptr_dtor(arg);
+					ZVAL_LONG(arg, lval);
+					return true;
+				}
+			} else if (kind == IS_DOUBLE) {
+				ZVAL_DOUBLE(&coerced, dval);
+				if (zend_value_matches_a_literal(type, &coerced)) {
+					zval_ptr_dtor(arg);
+					ZVAL_DOUBLE(arg, dval);
+					return true;
+				}
+			}
+		} else if (zend_parse_arg_long_weak(arg, &lval, (uint32_t)-1)) {
+			ZVAL_LONG(&coerced, lval);
+			if (zend_value_matches_a_literal(type, &coerced)) {
+				zend_parse_arg_long_weak(arg, &lval, 0);
+				zval_ptr_dtor(arg);
+				ZVAL_LONG(arg, lval);
+				return true;
+			}
+		}
+	}
+
+	if (literal_base_mask & MAY_BE_DOUBLE) {
+		dval = zend_parse_arg_double_weak(arg, (uint32_t)-1);
+		if (!zend_isnan(dval)) {
+			ZVAL_DOUBLE(&coerced, dval);
+			if (zend_value_matches_a_literal(type, &coerced)) {
+				zval_ptr_dtor(arg);
+				ZVAL_DOUBLE(arg, dval);
+				return true;
+			}
+		}
+	}
+
+	if (literal_base_mask & MAY_BE_STRING) {
+		zval tmp;
+		ZVAL_COPY(&tmp, arg);
+		if (zend_parse_arg_str_weak(&tmp, (uint32_t)-1)) {
+			if (zend_value_matches_a_literal(type, &tmp)) {
+				zval_ptr_dtor(arg);
+				ZVAL_COPY_VALUE(arg, &tmp);
+				return true;
+			}
+		}
+		zval_ptr_dtor(&tmp);
+	}
+
+	return false;
+}
+
 static zend_always_inline bool zend_check_type_slow(
 		const zend_type *type, zval *arg, const zend_reference *ref,
 		bool is_return_type, bool is_internal)
@@ -1167,6 +1319,9 @@ static zend_always_inline bool zend_check_type_slow(
 						if (zend_check_intersection_type_from_list(ZEND_TYPE_LIST(*list_type), Z_OBJCE_P(arg))) {
 							return true;
 						}
+					} else if (ZEND_TYPE_HAS_LITERAL(*list_type)) {
+						/* A literal entry can never match an object */
+						continue;
 					} else {
 						ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
 						ce = zend_fetch_ce_from_type(list_type);
@@ -1184,6 +1339,15 @@ static zend_always_inline bool zend_check_type_slow(
 			if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
 				return true;
 			}
+		}
+	}
+
+	/* Literal types (int/float/string literal values), stored as list entries. */
+	if (ZEND_TYPE_HAS_LIST(*type)) {
+		bool strict = is_return_type ? ZEND_RET_USES_STRICT_TYPES() : ZEND_ARG_USES_STRICT_TYPES();
+		bool allow_coercion = !(ref && ZEND_REF_HAS_TYPE_SOURCES(ref)) && !(is_internal && is_return_type);
+		if (zend_check_literal_type(type, arg, strict, allow_coercion)) {
+			return 1;
 		}
 	}
 
