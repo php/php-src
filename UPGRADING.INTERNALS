@@ -130,7 +130,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     ReflectionProperty::setRawValueWithoutLazyInitialization() and
     ReflectionProperty::setRawValue() to C extensions.
   . zend_argument_error_variadic() now takes a new 'function' parameters.
-  . Added zend_argument_error_ex(), zend_argument_type_error_ex().
+  . Added zend_argument_error_ex(), zend_argument_type_error_ex(),
+    zend_argument_value_error_ex().
 
 ========================
 2. Build system changes

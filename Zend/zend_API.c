@@ -437,6 +437,16 @@ ZEND_API ZEND_COLD void zend_argument_type_error(uint32_t arg_num, const char *f
 }
 /* }}} */
 
+ZEND_API ZEND_COLD void zend_argument_value_error_ex(
+	const zend_function *function, uint32_t arg_num, const char *format, ...)
+{
+	va_list va;
+
+	va_start(va, format);
+	zend_argument_error_variadic(zend_ce_value_error, function, arg_num, format, va);
+	va_end(va);
+}
+
 ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *format, ...) /* {{{ */
 {
 	va_list va;
