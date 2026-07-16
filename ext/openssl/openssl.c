@@ -640,7 +640,7 @@ static void php_openssl_check_path_error(uint32_t arg_num, int type, const char 
 	va_start(va, format);
 
 	if (type == E_ERROR) {
-		zend_argument_error_variadic(zend_ce_value_error, arg_num, format, va);
+		zend_argument_error_variadic(zend_ce_value_error, zend_active_function(), arg_num, format, va);
 	} else {
 		arg_name = get_active_function_arg_name(arg_num);
 		php_verror(NULL, arg_name, type, format, va);
