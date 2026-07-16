@@ -66,7 +66,7 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: unlink(%s/rename_variation2.tmp): No such file or directory in %s on line %d
+Warning: unlink(): No such file or directory in %s on line %d
 -- Iteration 3 --
 bool(true)
 bool(false)

@@ -626,26 +626,6 @@ PHPAPI void php_stream_wrapper_error(php_stream_wrapper *wrapper, php_stream_con
 			wrapper_name, context, docref, options, severity, terminating, code, NULL, message);
 }
 
-PHPAPI void php_stream_wrapper_error_param(php_stream_wrapper *wrapper, php_stream_context *context,
-		const char *docref, int options, int severity, bool terminating,
-		zend_enum_StreamErrorCode code, const char *param, const char *fmt, ...)
-{
-	if (!(options & REPORT_ERRORS)) {
-		return;
-	}
-
-	va_list args;
-	va_start(args, fmt);
-	zend_string *message = vstrpprintf(0, fmt, args);
-	va_end(args);
-
-	const char *wrapper_name = PHP_STREAM_ERROR_WRAPPER_NAME(wrapper);
-	char *param_copy = param ? estrdup(param) : NULL;
-
-	php_stream_wrapper_error_internal(wrapper_name, context, docref, options, severity, terminating,
-			code, param_copy, message);
-}
-
 /* Stream error reporting */
 
 PHPAPI void php_stream_error(php_stream *stream, const char *docref, int severity,
@@ -740,18 +720,6 @@ PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper,
 	va_start(args, fmt);
 	php_stream_wrapper_log_error_internal(
 			wrapper, context, options, severity, terminating, code, NULL, fmt, args);
-	va_end(args);
-}
-
-PHPAPI void php_stream_wrapper_log_error_param(const php_stream_wrapper *wrapper,
-		php_stream_context *context, int options, int severity, bool terminating,
-		zend_enum_StreamErrorCode code, const char *param, const char *fmt, ...)
-{
-	va_list args;
-	va_start(args, fmt);
-	char *param_copy = param ? estrdup(param) : NULL;
-	php_stream_wrapper_log_error_internal(
-			wrapper, context, options, severity, terminating, code, param_copy, fmt, args);
 	va_end(args);
 }
 
