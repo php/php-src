@@ -665,15 +665,13 @@ static void php_stream_error_list_dtor(zval *item)
 }
 
 static void php_stream_wrapper_log_store_error(zend_string *message, zend_enum_StreamErrorCode code,
-		const char *wrapper_name, const char *param, int severity, bool terminating)
+		const char *wrapper_name, int severity, bool terminating)
 {
-	char *param_copy = param ? estrdup(param) : NULL;
-
 	php_stream_error_entry *entry = ecalloc(1, sizeof(php_stream_error_entry));
 	entry->message = message;
 	entry->code = code;
 	entry->wrapper_name = wrapper_name ? estrdup(wrapper_name) : NULL;
-	entry->param = param_copy;
+	entry->param = NULL;
 	entry->severity = severity;
 	entry->terminating = terminating;
 
@@ -710,7 +708,7 @@ PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper,
 				wrapper_name, context, NULL, options, severity, terminating, code, NULL, message);
 	} else {
 		php_stream_wrapper_log_store_error(
-				message, code, wrapper_name, NULL, severity, terminating);
+				message, code, wrapper_name, severity, terminating);
 	}
 	va_end(args);
 }
