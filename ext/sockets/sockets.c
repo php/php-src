@@ -2211,7 +2211,7 @@ PHP_FUNCTION(socket_set_option)
 			}
 
 			if (val_linger < 0 || val_linger > USHRT_MAX) {
-				zend_argument_value_error(4, "\"%s\" must be between 0 and %d", l_linger, USHRT_MAX);
+				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", l_linger_key, USHRT_MAX);
 				RETURN_THROWS();
 			}
 
@@ -2375,8 +2375,8 @@ PHP_FUNCTION(socket_set_option)
 
 			// UDP segmentation offload maximum size or 0 to disable it
 			if (ov < 0 || ov > USHRT_MAX) {
-				zend_argument_value_error(4, "must be of between 0 and %u", USHRT_MAX);
-				RETURN_FALSE;
+				zend_argument_value_error(4, "must be between 0 and %u", USHRT_MAX);
+				RETURN_THROWS();
 			}
 
 			optlen = sizeof(ov);
