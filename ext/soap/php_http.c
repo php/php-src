@@ -956,14 +956,14 @@ try_again:
 				if (tmp != NULL) {
 					tmp++;
 					http_status = atoi(tmp);
-				}
-				tmp = strstr(tmp," ");
-				if (tmp != NULL) {
-					tmp++;
-					if (http_msg) {
-						efree(http_msg);
+					tmp = strstr(tmp," ");
+					if (tmp != NULL) {
+						tmp++;
+						if (http_msg) {
+							efree(http_msg);
+						}
+						http_msg = estrdup(tmp);
 					}
-					http_msg = estrdup(tmp);
 				}
 				efree(http_version);
 
