@@ -269,6 +269,8 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 			/* if the user has configured who they are,
 			   send that as the password */
 			if (FG(from_address)) {
+				PHP_FTP_CNTRL_CHK(ZSTR_VAL(FG(from_address)), ZSTR_LEN(FG(from_address)), "Invalid password %s")
+
 				php_stream_printf(stream, "PASS %s\r\n", ZSTR_VAL(FG(from_address)));
 			} else {
 				php_stream_write_string(stream, "PASS anonymous\r\n");
