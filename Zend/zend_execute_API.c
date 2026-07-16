@@ -33,6 +33,7 @@
 #include "zend_vm.h"
 #include "zend_float.h"
 #include "zend_fibers.h"
+#include "zend_async_API.h"
 #include "zend_weakrefs.h"
 #include "zend_inheritance.h"
 #include "zend_observer.h"
@@ -180,6 +181,8 @@ void init_executor(void) /* {{{ */
 	EG(fake_scope) = NULL;
 	EG(trampoline).common.function_name = NULL;
 
+	memset(&EG(shutdown_context), 0, sizeof(EG(shutdown_context)));
+
 	EG(ht_iterators_count) = sizeof(EG(ht_iterators_slots)) / sizeof(HashTableIterator);
 	EG(ht_iterators_used) = 0;
 	EG(ht_iterators) = EG(ht_iterators_slots);
@@ -205,19 +208,6 @@ void init_executor(void) /* {{{ */
 	zend_hash_init(&EG(partial_function_application_cache), 8, NULL, zend_partial_op_array_dtor, 0);
 
 	EG(active) = 1;
-}
-/* }}} */
-
-static int zval_call_destructor(zval *zv) /* {{{ */
-{
-	if (Z_TYPE_P(zv) == IS_INDIRECT) {
-		zv = Z_INDIRECT_P(zv);
-	}
-	if (Z_TYPE_P(zv) == IS_OBJECT && Z_REFCOUNT_P(zv) == 1) {
-		return ZEND_HASH_APPLY_REMOVE;
-	} else {
-		return ZEND_HASH_APPLY_KEEP;
-	}
 }
 /* }}} */
 
@@ -249,21 +239,120 @@ static ZEND_COLD void zend_throw_or_error(uint32_t fetch_type, zend_class_entry 
 }
 /* }}} */
 
+static void shutdown_destructors_iterator_entry(void)
+{
+	shutdown_destructors();
+}
+
+/* Torn down mid-pass: reset the cursor and give up on the remaining
+ * destructors — dispose may run inside a bailout, no user code from here. */
+static void shutdown_destructors_coroutine_dtor(zend_coroutine_t *coroutine)
+{
+	if (EG(shutdown_context).coroutine == coroutine) {
+		EG(shutdown_context).coroutine = NULL;
+		EG(shutdown_context).pass = ZEND_SHUTDOWN_PASS_NONE;
+		zend_error(E_WARNING, "Shutdown destructors coroutine was not finished properly");
+		EG(symbol_table).pDestructor = zend_unclean_zval_ptr_dtor;
+		zend_objects_store_mark_destructed(&EG(objects_store));
+	}
+}
+
+static bool shutdown_destructors_switch_handler(zend_coroutine_t *coroutine, bool is_enter)
+{
+	(void) coroutine;
+
+	if (is_enter) {
+		return true;
+	}
+
+	if (EG(shutdown_context).pass != ZEND_SHUTDOWN_PASS_SYMBOLS) {
+		return false;
+	}
+
+	zend_coroutine_t *iterator = ZEND_ASYNC_GC_NEW_COROUTINE();
+
+	if (UNEXPECTED(iterator == NULL)) {
+		return false;
+	}
+
+	iterator->internal_entry = shutdown_destructors_iterator_entry;
+	iterator->extended_dispose = shutdown_destructors_coroutine_dtor;
+
+	ZEND_ASYNC_ENQUEUE_COROUTINE(iterator);
+
+	return false;
+}
+
 void shutdown_destructors(void) /* {{{ */
 {
+	zend_coroutine_t *coroutine = ZEND_ASYNC_IS_ACTIVE ? ZEND_ASYNC_CURRENT_COROUTINE : NULL;
+
+	if (coroutine != NULL) {
+		ZEND_ASYNC_ADD_SWITCH_HANDLER(coroutine, shutdown_destructors_switch_handler);
+	}
+
 	if (CG(unclean_shutdown)) {
 		EG(symbol_table).pDestructor = zend_unclean_zval_ptr_dtor;
 	}
+
+	HashTable *symbol_table = &EG(symbol_table);
+
+	if (EG(shutdown_context).pass != ZEND_SHUTDOWN_PASS_SYMBOLS) {
+		EG(shutdown_context).pass = ZEND_SHUTDOWN_PASS_SYMBOLS;
+		EG(shutdown_context).coroutine = coroutine;
+		EG(shutdown_context).num_elements = zend_hash_num_elements(symbol_table);
+		EG(shutdown_context).idx = symbol_table->nNumUsed;
+	}
+
 	zend_try {
-		uint32_t symbols;
+		bool should_continue = false;
+
 		do {
-			symbols = zend_hash_num_elements(&EG(symbol_table));
-			zend_hash_reverse_apply(&EG(symbol_table), (apply_func_t) zval_call_destructor);
-		} while (symbols != zend_hash_num_elements(&EG(symbol_table)));
-		zend_objects_store_call_destructors(&EG(objects_store));
+			if (should_continue) {
+				EG(shutdown_context).num_elements = zend_hash_num_elements(symbol_table);
+				EG(shutdown_context).idx = symbol_table->nNumUsed;
+			} else {
+				should_continue = true;
+			}
+
+			while (EG(shutdown_context).idx > 0) {
+				EG(shutdown_context).idx--;
+
+				Bucket *p = symbol_table->arData + EG(shutdown_context).idx;
+
+				if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) {
+					continue;
+				}
+
+				const zval *zv = &p->val;
+				if (Z_TYPE_P(zv) == IS_INDIRECT) {
+					zv = Z_INDIRECT_P(zv);
+				}
+
+				if (Z_TYPE_P(zv) == IS_OBJECT && Z_REFCOUNT_P(zv) == 1) {
+					zend_hash_del_bucket(symbol_table, p);
+				}
+
+				if (coroutine != NULL && coroutine != ZEND_ASYNC_CURRENT_COROUTINE) {
+					should_continue = false;
+					break;
+				}
+			}
+
+			if (!should_continue) {
+				break;
+			}
+		} while (EG(shutdown_context).num_elements != zend_hash_num_elements(symbol_table));
+
+		if (should_continue) {
+			EG(shutdown_context).pass = ZEND_SHUTDOWN_PASS_NONE;
+			EG(shutdown_context).coroutine = NULL;
+			zend_objects_store_call_destructors_async(&EG(objects_store));
+		}
 	} zend_catch {
 		/* if we couldn't destruct cleanly, mark all objects as destructed anyway */
 		zend_objects_store_mark_destructed(&EG(objects_store));
+		EG(shutdown_context).pass = ZEND_SHUTDOWN_PASS_NONE;
 	} zend_end_try();
 }
 /* }}} */
