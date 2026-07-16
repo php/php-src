@@ -63,6 +63,13 @@ $write_filters = implode('|', array_fill(0, 16, $filter));
 $fp = fopen("php://filter/write=$write_filters/$filter/resource=php://temp", 'w+');
 var_dump(is_resource($fp));
 
+echo "# setting max_filter_count to -1 disables warning\n";
+$ctx = stream_context_create(['filter' => ['max_filter_count' => -1]]);
+$allowed_read = createFilterChains(20, 'data:text/plain,twenty');
+foreach ($allowed_read as $chain) {
+    var_dump(file_get_contents($chain, false, $ctx));
+}
+
 echo "# many filters with stream_filter_append still works\n";
 $fp = fopen('data:text/plain,stream_filter_append', 'r');
 for ($i = 0; $i < 80; $i++) {
@@ -129,5 +136,9 @@ string(8) "EIGHTEEN"
 
 Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
 bool(true)
+# setting max_filter_count to -1 disables warning
+string(6) "TWENTY"
+string(6) "TWENTY"
+string(6) "TWENTY"
 # many filters with stream_filter_append still works
 string(20) "STREAM_FILTER_APPEND"

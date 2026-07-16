@@ -146,38 +146,33 @@ static const php_stream_ops php_stream_input_ops = {
 
 static const zend_long max_filter_count_default = 16;
 
-static zend_long php_get_max_filter_count(php_stream_context *context) {
-	if (context != NULL) {
-		zval *option_val = php_stream_context_get_option(context, "filter", "max_filter_count");
-		if (option_val) {
-			zend_long custom_limit = zval_get_long(option_val);
-			if (custom_limit >= 0) {
-				return custom_limit;
-			}
-		}
-	}
-	return -1;
-}
-
-static zend_result php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain, zend_long max_filter_count) /* {{{ */
+static zend_result php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain, php_stream_context *context) /* {{{ */
 {
 	char *p, *token = NULL;
 	php_stream_filter *temp_filter;
+
+	zend_long max_filter_count = max_filter_count_default;
+	bool max_filter_count_configured = false;
+	if (context != NULL) {
+		zval *option_val = php_stream_context_get_option(context, "filter", "max_filter_count");
+		if (option_val) {
+			max_filter_count = zval_get_long(option_val);
+			max_filter_count_configured = true;
+		}
+	}
 
 	p = php_strtok_r(filterlist, "|", &token);
 	while (p) {
 		zend_long read_count = read_chain ? stream->readfilters.count : 0;
 		zend_long write_count = write_chain ? stream->writefilters.count : 0;
 
-		if (max_filter_count == -1) {
-			// No max_filter_count configured; use default
-			if (read_count == max_filter_count_default || write_count == max_filter_count_default) {
+		if (read_count == max_filter_count || write_count == max_filter_count) {
+			if (max_filter_count_configured) {
+				return FAILURE;
+			} else {
+				// No max_filter_count configured; raise deprecation error if over default
 				zend_error(E_DEPRECATED, "Using more than " ZEND_LONG_FMT " filters in a php://filter URL is deprecated, "
 					"set this limit using the stream context option max_filter_count, or use stream_filter_append", max_filter_count_default);
-			}
-		} else {
-			if (read_count == max_filter_count || write_count == max_filter_count) {
-				return FAILURE;
 			}
 		}
 
@@ -401,19 +396,17 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 			return NULL;
 		}
 
-		zend_long max_filter_count = php_get_max_filter_count(context);
 		zend_result safl_result = SUCCESS;
-
 		*p = '\0';
 
 		p = php_strtok_r(pathdup + 1, "/", &token);
 		while (p) {
 			if (!strncasecmp(p, "read=", 5)) {
-				safl_result = php_stream_apply_filter_list(stream, p + 5, 1, 0, max_filter_count);
+				safl_result = php_stream_apply_filter_list(stream, p + 5, 1, 0, context);
 			} else if (!strncasecmp(p, "write=", 6)) {
-				safl_result = php_stream_apply_filter_list(stream, p + 6, 0, 1, max_filter_count);
+				safl_result = php_stream_apply_filter_list(stream, p + 6, 0, 1, context);
 			} else {
-				safl_result = php_stream_apply_filter_list(stream, p, mode_rw & PHP_STREAM_FILTER_READ, mode_rw & PHP_STREAM_FILTER_WRITE, max_filter_count);
+				safl_result = php_stream_apply_filter_list(stream, p, mode_rw & PHP_STREAM_FILTER_READ, mode_rw & PHP_STREAM_FILTER_WRITE, context);
 			}
 
 			if (safl_result == FAILURE) {
