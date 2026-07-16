@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
+- Sockets:
+  . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
+    SO_LINGER options. (Weilin Du)
+
 30 Jul 2026, PHP 8.5.9
 
 - Core:
