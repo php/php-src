@@ -51,6 +51,12 @@ foreach ($blocked_read as $chain) {
     var_dump(file_get_contents($chain));
 }
 
+// Warn on too many write filters, even when number of read filters is OK
+$filter = 'string.toupper';
+$write_filters = implode('|', array_fill(0, 16, $filter));
+$fp = fopen("php://filter/write=$write_filters/$filter/resource=php://temp", 'w+');
+var_dump(is_resource($fp));
+
 // many filters with stream_filter_append still works
 $fp = fopen('data:text/plain,stream_filter_append', 'r');
 for ($i = 0; $i < 80; $i++) {
@@ -106,4 +112,7 @@ string(8) "EIGHTEEN"
 
 Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
 string(8) "EIGHTEEN"
+
+Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
+bool(true)
 string(20) "STREAM_FILTER_APPEND"

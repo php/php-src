@@ -177,10 +177,14 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 
 	p = php_strtok_r(filterlist, "|", &token);
 	while (p) {
-		zend_long count = read_chain ? php_stream_filter_count(&stream->readfilters) : write_chain ? php_stream_filter_count(&stream->writefilters) : 0;
-		if (warn_filter_count && count == max_filter_count_default) {
-			zend_error(E_DEPRECATED, "Using more than " ZEND_LONG_FMT " filters in a php://filter URL is deprecated, "
-				"set this limit using the stream context option max_filter_count, or use stream_filter_append", max_filter_count_default);
+		if (warn_filter_count) {
+			zend_long read_count = read_chain ? php_stream_filter_count(&stream->readfilters) : 0;
+			zend_long write_count = write_chain ? php_stream_filter_count(&stream->writefilters) : 0;
+
+			if (read_count == max_filter_count_default || write_count == max_filter_count_default) {
+				zend_error(E_DEPRECATED, "Using more than " ZEND_LONG_FMT " filters in a php://filter URL is deprecated, "
+					"set this limit using the stream context option max_filter_count, or use stream_filter_append", max_filter_count_default);
+			}
 		}
 
 		php_url_decode(p, strlen(p));
