@@ -469,7 +469,7 @@ PHP_METHOD(SQLite3, escapeString)
 	zend_string *sql;
 	char *ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "S", &sql)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "P", &sql)) {
 		RETURN_THROWS();
 	}
 
