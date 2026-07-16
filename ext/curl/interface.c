@@ -819,6 +819,17 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 					memcpy(data, Z_STRVAL(retval), length);
 				} else if (Z_TYPE(retval) == IS_LONG) {
 					length = Z_LVAL_P(&retval);
+
+					switch (length) {
+						// Acceptable long values:
+						case 0:
+						case CURL_READFUNC_ABORT:
+						case CURL_READFUNC_PAUSE:
+							break;
+						default:
+							zend_value_error("The CURLOPT_READFUNCTION callback must return a string or CURL_READFUNC_ABORT or CURL_READFUNC_PAUSE");
+							length = CURL_READFUNC_ABORT;
+					}
 				}
 				// TODO Do type error if invalid type?
 				zval_ptr_dtor(&retval);
