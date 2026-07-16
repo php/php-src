@@ -696,30 +696,22 @@ static void php_stream_wrapper_log_store_error(zend_string *message, zend_enum_S
 	zend_llist_add_element(list, &entry);
 }
 
-static void php_stream_wrapper_log_error_internal(const php_stream_wrapper *wrapper,
-		php_stream_context *context, int options, int severity, bool terminating,
-		zend_enum_StreamErrorCode code, char *param, const char *fmt, va_list args)
-{
-	zend_string *message = vstrpprintf(0, fmt, args);
-	const char *wrapper_name = PHP_STREAM_ERROR_WRAPPER_NAME(wrapper);
-
-	if (options & REPORT_ERRORS) {
-		php_stream_wrapper_error_internal(
-				wrapper_name, context, NULL, options, severity, terminating, code, param, message);
-	} else {
-		php_stream_wrapper_log_store_error(
-				message, code, wrapper_name, param, severity, terminating);
-	}
-}
-
 PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper,
 		php_stream_context *context, int options, int severity, bool terminating,
 		zend_enum_StreamErrorCode code, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	php_stream_wrapper_log_error_internal(
-			wrapper, context, options, severity, terminating, code, NULL, fmt, args);
+	zend_string *message = vstrpprintf(0, fmt, args);
+	const char *wrapper_name = PHP_STREAM_ERROR_WRAPPER_NAME(wrapper);
+
+	if (options & REPORT_ERRORS) {
+		php_stream_wrapper_error_internal(
+				wrapper_name, context, NULL, options, severity, terminating, code, NULL, message);
+	} else {
+		php_stream_wrapper_log_store_error(
+				message, code, wrapper_name, NULL, severity, terminating);
+	}
 	va_end(args);
 }
 
