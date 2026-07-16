@@ -148,14 +148,14 @@ static const zend_long max_filter_count_default = 16;
 
 static zend_long php_get_max_filter_count(php_stream_context *context) {
 	if (context != NULL) {
-        zval *option_val = php_stream_context_get_option(context, "filter", "max_filter_count");
-        if (option_val) {
-            zend_long custom_limit = zval_get_long(option_val);
-            if (custom_limit >= 0) {
-                return custom_limit;
-            }
-        }
-    }
+		zval *option_val = php_stream_context_get_option(context, "filter", "max_filter_count");
+		if (option_val) {
+			zend_long custom_limit = zval_get_long(option_val);
+			if (custom_limit >= 0) {
+				return custom_limit;
+			}
+		}
+	}
 	return -1;
 }
 
