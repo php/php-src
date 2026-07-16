@@ -57,4 +57,34 @@ void php_openssl_disable_peer_verification(SSL_CTX *ctx, php_stream *stream);
 /* Add the negotiated cipher_name/bits/version to a crypto metadata array. */
 void php_openssl_add_crypto_cipher(zval *crypto, SSL *ssl);
 
+/* Userland session-resumption callbacks, shared (refcounted) by a listener and
+ * its accepted connections. */
+typedef struct _php_openssl_session_callbacks_t {
+	int refcount;
+	zend_fcall_info_cache new_cb;
+	zend_fcall_info_cache get_cb;
+	zend_fcall_info_cache remove_cb;
+} php_openssl_session_callbacks_t;
+
+enum php_openssl_session_callback_type {
+	PHP_OPENSSL_NEW_CB,
+	PHP_OPENSSL_GET_CB,
+	PHP_OPENSSL_REMOVE_CB,
+};
+
+/* ex-data indices on the SSL_CTX so the shared session callbacks can reach the
+ * stream and the callbacks struct without knowing the transport's netstream type. */
+int php_openssl_get_ctx_session_callbacks_index(void);
+int php_openssl_get_ctx_stream_index(void);
+
+/* The OpenSSL session cache callbacks (data comes from the CTX ex-data). */
+int php_openssl_session_new_cb(SSL *ssl, SSL_SESSION *session);
+SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *session_id, int session_id_len, int *copy);
+void php_openssl_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *session);
+
+/* Validate a session_*_cb callable and store it in *callbacks (allocating it). */
+zend_result php_openssl_validate_and_allocate_session_callback(php_stream *stream,
+		php_openssl_session_callbacks_t **callbacks, const zval *callable,
+		enum php_openssl_session_callback_type cb_type, bool is_persistent);
+
 #endif /* PHP_OPENSSL_XP_COMMON_H */

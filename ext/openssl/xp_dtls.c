@@ -38,14 +38,6 @@
 /* Index of the php_stream pointer stored on an SSL, so a callback can recover it. */
 extern int php_openssl_get_ssl_stream_data_index(void);
 
-/* Holds the session cache callbacks */
-typedef struct _php_openssl_dtls_session_callbacks_t {
-	int refcount;
-	zend_fcall_info_cache new_cb;
-	zend_fcall_info_cache get_cb;
-	zend_fcall_info_cache remove_cb;
-} php_openssl_dtls_session_callbacks_t;
-
 /* The base socket data is embedded first so the generic socket option handlers
  * can be reused; the datagram BIO is owned by ssl_handle (freed with it). */
 typedef struct _php_openssl_dtls_data_t {
@@ -58,20 +50,8 @@ typedef struct _php_openssl_dtls_data_t {
 	php_stream_xport_crypt_method_t method;
 	struct timeval connect_timeout;
 	char *url_name;
-	php_openssl_dtls_session_callbacks_t *session_callbacks;
+	php_openssl_session_callbacks_t *session_callbacks;
 } php_openssl_dtls_data_t;
-
-/* Index of the php_stream pointer stored on an SSL_CTX, for the remove callback
- * which is only passed the context. */
-static int php_openssl_dtls_ctx_stream_index = -1;
-static int php_openssl_dtls_get_ctx_stream_index(void)
-{
-	if (php_openssl_dtls_ctx_stream_index < 0) {
-		php_openssl_dtls_ctx_stream_index =
-				SSL_CTX_get_ex_new_index(0, "PHP dtls ctx stream index", NULL, NULL, NULL);
-	}
-	return php_openssl_dtls_ctx_stream_index;
-}
 
 static const php_stream_ops php_openssl_dtls_socket_ops;
 
@@ -604,151 +584,17 @@ static int php_openssl_dtls_cookie_verify(SSL *ssl, const unsigned char *cookie,
 	return (cookie_len == len && CRYPTO_memcmp(cookie, expected, len) == 0) ? 1 : 0;
 }
 
-/* The session_new_cb / session_get_cb / session_remove_cb options let userland
- * keep the session cache. A single-peer server uses a new context per accepted
- * connection, so the built-in cache cannot resume across connections. */
-
-enum php_openssl_dtls_session_cb_type {
-	PHP_OPENSSL_DTLS_NEW_CB,
-	PHP_OPENSSL_DTLS_GET_CB,
-	PHP_OPENSSL_DTLS_REMOVE_CB,
-};
-
-/* Called when a new session is established. */
-static int php_openssl_dtls_session_new_cb(SSL *ssl, SSL_SESSION *session)
-{
-	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl, php_openssl_get_ssl_stream_data_index());
-	if (!stream) {
-		return 0;
-	}
-	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
-	if (!dtlssock || !dtlssock->session_callbacks) {
-		return 0;
-	}
-
-	/* The PHP object takes its own reference. */
-	SSL_SESSION_up_ref(session);
-
-	zval args[2];
-	ZVAL_RES(&args[0], stream->res);
-	php_openssl_session_object_init(&args[1], session);
-	zend_call_known_fcc(&dtlssock->session_callbacks->new_cb, NULL, 2, args, NULL);
-	zval_ptr_dtor(&args[1]);
-
-	return 0;
-}
-
-/* Called when the server looks up a session by id. */
-static SSL_SESSION *php_openssl_dtls_session_get_cb(SSL *ssl, const unsigned char *session_id,
-		int session_id_len, int *copy)
-{
-	*copy = 0;
-	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl, php_openssl_get_ssl_stream_data_index());
-	if (!stream) {
-		return NULL;
-	}
-	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
-	if (!dtlssock || !dtlssock->session_callbacks) {
-		return NULL;
-	}
-
-	zval args[2];
-	zval retval;
-	ZVAL_RES(&args[0], stream->res);
-	ZVAL_STRINGL(&args[1], (char *)session_id, session_id_len);
-
-	SSL_SESSION *session = NULL;
-	zend_call_known_fcc(&dtlssock->session_callbacks->get_cb, &retval, 2, args, NULL);
-	zval_ptr_dtor(&args[1]);
-
-	if (php_openssl_is_session_ce(&retval)) {
-		SSL_SESSION *found = php_openssl_session_from_zval(&retval);
-		if (found != NULL) {
-			/* OpenSSL takes ownership of the returned session. */
-			SSL_SESSION_up_ref(found);
-			session = found;
-		}
-	} else if (Z_TYPE(retval) != IS_NULL) {
-		zend_type_error("session_get_cb return type must be null or Openssl\\Session");
-	}
-	zval_ptr_dtor(&retval);
-
-	return session;
-}
-
-/* Called when a session is removed from the cache. */
-static void php_openssl_dtls_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *session)
-{
-	php_stream *stream = (php_stream *)SSL_CTX_get_ex_data(ctx, php_openssl_dtls_get_ctx_stream_index());
-	if (!stream) {
-		return;
-	}
-	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
-	if (!dtlssock || !dtlssock->session_callbacks) {
-		return;
-	}
-
-	unsigned int session_id_len = 0;
-	const unsigned char *session_id = SSL_SESSION_get_id(session, &session_id_len);
-
-	zval args[2];
-	ZVAL_RES(&args[0], stream->res);
-	ZVAL_STRINGL(&args[1], (char *)session_id, session_id_len);
-	zend_call_known_fcc(&dtlssock->session_callbacks->remove_cb, NULL, 2, args, NULL);
-	zval_ptr_dtor(&args[1]);
-}
-
-/* Validate a session callback option and store it, allocating the struct once. */
-static zend_result php_openssl_dtls_store_session_cb(php_stream *stream,
-		php_openssl_dtls_data_t *dtlssock, const zval *callable,
-		enum php_openssl_dtls_session_cb_type cb_type)
-{
-	const char *name = cb_type == PHP_OPENSSL_DTLS_NEW_CB ? "session_new_cb"
-			: cb_type == PHP_OPENSSL_DTLS_GET_CB ? "session_get_cb" : "session_remove_cb";
-
-	char *is_callable_error = NULL;
-	zend_fcall_info_cache fcc;
-	if (!zend_is_callable_ex(callable, NULL, 0, NULL, &fcc, &is_callable_error)) {
-		if (is_callable_error) {
-			zend_type_error("%s must be a valid callback, %s", name, is_callable_error);
-			efree(is_callable_error);
-		} else {
-			zend_type_error("%s must be a valid callback", name);
-		}
-		return FAILURE;
-	}
-
-	if (!dtlssock->session_callbacks) {
-		dtlssock->session_callbacks = pecalloc(1, sizeof(*dtlssock->session_callbacks), 0);
-		dtlssock->session_callbacks->refcount = 1;
-	}
-
-	zend_fcc_addref(&fcc);
-	switch (cb_type) {
-		case PHP_OPENSSL_DTLS_NEW_CB: dtlssock->session_callbacks->new_cb = fcc; break;
-		case PHP_OPENSSL_DTLS_GET_CB: dtlssock->session_callbacks->get_cb = fcc; break;
-		case PHP_OPENSSL_DTLS_REMOVE_CB: dtlssock->session_callbacks->remove_cb = fcc; break;
-	}
-	return SUCCESS;
-}
-
 /* Configure server-side session resumption from the "ssl" context options. */
 static zend_result php_openssl_dtls_setup_server_session(php_stream *stream,
 		php_openssl_dtls_data_t *dtlssock)
 {
 	zval *val;
 	bool has_get_cb = false, has_new_cb = false, has_session_id_context = false;
-
-	if (php_stream_is_persistent(stream) &&
-			(GET_VER_OPT("session_new_cb") || GET_VER_OPT("session_get_cb")
-					|| GET_VER_OPT("session_remove_cb"))) {
-		php_stream_warn(stream, PersistentNotSupported,
-				"session callbacks are not supported for persistent dtls:// streams");
-		return FAILURE;
-	}
+	bool is_persistent = php_stream_is_persistent(stream);
 
 	if (GET_VER_OPT("session_get_cb")) {
-		if (php_openssl_dtls_store_session_cb(stream, dtlssock, val, PHP_OPENSSL_DTLS_GET_CB) == FAILURE) {
+		if (php_openssl_validate_and_allocate_session_callback(
+				stream, &dtlssock->session_callbacks, val, PHP_OPENSSL_GET_CB, is_persistent) == FAILURE) {
 			return FAILURE;
 		}
 		has_get_cb = true;
@@ -765,7 +611,8 @@ static zend_result php_openssl_dtls_setup_server_session(php_stream *stream,
 	}
 
 	if (GET_VER_OPT("session_new_cb")) {
-		if (php_openssl_dtls_store_session_cb(stream, dtlssock, val, PHP_OPENSSL_DTLS_NEW_CB) == FAILURE) {
+		if (php_openssl_validate_and_allocate_session_callback(
+				stream, &dtlssock->session_callbacks, val, PHP_OPENSSL_NEW_CB, is_persistent) == FAILURE) {
 			return FAILURE;
 		}
 		has_new_cb = true;
@@ -782,21 +629,24 @@ static zend_result php_openssl_dtls_setup_server_session(php_stream *stream,
 	}
 
 	if (GET_VER_OPT("session_remove_cb")) {
-		if (php_openssl_dtls_store_session_cb(stream, dtlssock, val, PHP_OPENSSL_DTLS_REMOVE_CB) == FAILURE) {
+		if (php_openssl_validate_and_allocate_session_callback(
+				stream, &dtlssock->session_callbacks, val, PHP_OPENSSL_REMOVE_CB, is_persistent) == FAILURE) {
 			return FAILURE;
 		}
 	}
 
 	if (has_get_cb) {
 		/* External cache mode - the callbacks hold the sessions. */
-		SSL_CTX_set_ex_data(dtlssock->ctx, php_openssl_dtls_get_ctx_stream_index(), stream);
+		SSL_CTX_set_ex_data(dtlssock->ctx, php_openssl_get_ctx_stream_index(), stream);
+		SSL_CTX_set_ex_data(dtlssock->ctx, php_openssl_get_ctx_session_callbacks_index(),
+				dtlssock->session_callbacks);
 		SSL_CTX_set_session_cache_mode(dtlssock->ctx,
 				SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_INTERNAL);
-		SSL_CTX_sess_set_new_cb(dtlssock->ctx, php_openssl_dtls_session_new_cb);
-		SSL_CTX_sess_set_get_cb(dtlssock->ctx, php_openssl_dtls_session_get_cb);
+		SSL_CTX_sess_set_new_cb(dtlssock->ctx, php_openssl_session_new_cb);
+		SSL_CTX_sess_set_get_cb(dtlssock->ctx, php_openssl_session_get_cb);
 		if (dtlssock->session_callbacks
 				&& ZEND_FCC_INITIALIZED(dtlssock->session_callbacks->remove_cb)) {
-			SSL_CTX_sess_set_remove_cb(dtlssock->ctx, php_openssl_dtls_session_remove_cb);
+			SSL_CTX_sess_set_remove_cb(dtlssock->ctx, php_openssl_session_remove_cb);
 		}
 		/* Tickets bypass the id-based cache, so disable them here. */
 		SSL_CTX_set_options(dtlssock->ctx, SSL_OP_NO_TICKET);
