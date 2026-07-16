@@ -166,6 +166,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_CLASS         "'class'"
 %token <ident> T_TRAIT         "'trait'"
 %token <ident> T_INTERFACE     "'interface'"
+%token <ident> T_EXTENSION     "'extension'"
 %token <ident> T_ENUM          "'enum'"
 %token <ident> T_EXTENDS       "'extends'"
 %token <ident> T_IMPLEMENTS    "'implements'"
@@ -284,6 +285,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
+%type <ast> extension_declaration_statement
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
 %type <ast> optional_parameter_list clone_argument_list non_empty_clone_argument_list
@@ -310,7 +312,7 @@ reserved_non_modifiers:
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
-	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM
+	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM | T_EXTENSION
 	| T_PROPERTY_C
 ;
 
@@ -392,6 +394,7 @@ attributed_statement:
 	|	trait_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
 	|	enum_declaration_statement			{ $$ = $1; }
+	|	extension_declaration_statement		{ $$ = $1; }
 ;
 
 attributed_top_statement:
@@ -649,6 +652,14 @@ enum_declaration_statement:
 		T_ENUM { $<num>$ = CG(zend_lineno); }
 		T_STRING enum_backing_type implements_list backup_doc_comment '{' class_statement_list '}'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_ENUM|ZEND_ACC_FINAL, $<num>2, $6, zend_ast_get_str($3), NULL, $5, $8, NULL, $4); }
+;
+
+extension_declaration_statement:
+		T_EXTENSION { $<num>$ = CG(zend_lineno); }
+		class_name T_VARIABLE backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create(ZEND_AST_EXTENSION_DECL, $3, $4,
+			       zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL, $<num>2, $5,
+			           NULL, NULL, NULL, $7, NULL, NULL)); }
 ;
 
 enum_backing_type:

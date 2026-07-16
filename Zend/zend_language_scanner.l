@@ -1567,9 +1567,18 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 }
 
 /*
- * The enum keyword must be followed by whitespace and another identifier.
- * This avoids the BC break of using enum in classes, namespaces, functions and constants.
+ * The enum and extension keywords must be followed by whitespace and another identifier.
+ * This avoids the BC break of using them in classes, namespaces, functions and constants.
  */
+<ST_IN_SCRIPTING>"extension"{WHITESPACE_OR_COMMENTS}("extends"|"implements") {
+	yyless(9);
+	RETURN_TOKEN_WITH_STR(T_STRING, 0);
+}
+<ST_IN_SCRIPTING>"extension"{WHITESPACE_OR_COMMENTS}("\\"|[a-zA-Z_\x80-\xff]) {
+	yyless(9);
+	RETURN_TOKEN_WITH_IDENT(T_EXTENSION);
+}
+
 <ST_IN_SCRIPTING>"enum"{WHITESPACE_OR_COMMENTS}("extends"|"implements") {
 	yyless(4);
 	RETURN_TOKEN_WITH_STR(T_STRING, 0);

@@ -331,7 +331,9 @@ END_EXTERN_C()
 #define ZEND_INIT_PARENT_PROPERTY_HOOK_CALL 209
 #define ZEND_DECLARE_ATTRIBUTED_CONST       210
 #define ZEND_TYPE_ASSERT                    211
+#define ZEND_BIND_EXTENSION                 212
+#define ZEND_RECV_RECEIVER                  213
 
-#define ZEND_VM_LAST_OPCODE                 211
+#define ZEND_VM_LAST_OPCODE                 213
 
 #endif
