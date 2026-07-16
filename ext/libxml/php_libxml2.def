@@ -1,7 +1,4 @@
 EXPORTS
-__oldXMLWDcompatibility
-__xmlBufferAllocScheme
-__xmlDefaultBufferSize
 __xmlDeregisterNodeDefaultValue
 __xmlDoValidityCheckingDefaultValue
 xmlFree DATA
@@ -11,17 +8,11 @@ __xmlGetWarningsDefaultValue
 __xmlIndentTreeOutput
 xmlIsPubidChar_tab DATA
 __xmlKeepBlanksDefaultValue
-xmlLastError DATA
 __xmlLineNumbersDefaultValue
 __xmlLoadExtDtdDefaultValue
 xmlMalloc DATA
 xmlMallocAtomic DATA
 xmlMemStrdup DATA
-xmlOutputBufferCreateFilenameValue DATA
-__xmlParserDebugEntities
-xmlParserInputBufferCreateFilenameValue DATA
-xmlParserMaxDepth DATA
-__xmlParserVersion
 __xmlPedanticParserDefaultValue
 xmlRealloc DATA
 __xmlRegisterNodeDefaultValue
@@ -29,34 +20,11 @@ __xmlSaveNoEmptyTags
 xmlStringComment DATA
 xmlStringText DATA
 xmlStringTextNoenc DATA
-xmlStructuredError DATA
 __xmlSubstituteEntitiesDefaultValue
 __xmlTreeIndentString
 xmlXPathNAN DATA
 xmlXPathNINF DATA
 xmlXPathPINF DATA
-UTF8Toisolat1
-attribute
-attributeDecl
-cdataBlock
-characters
-checkNamespace
-comment
-elementDecl
-endDocument
-endElement
-entityDecl
-externalSubset
-getColumnNumber
-getEntity
-getLineNumber
-getNamespace
-getParameterEntity
-getPublicId
-getSystemId
-globalNamespace
-hasExternalSubset
-hasInternalSubset
 htmlAttrAllowed
 htmlAutoCloseTag
 htmlCreateFileParserCtxt
@@ -113,31 +81,8 @@ htmlSaveFileEnc
 htmlSaveFileFormat
 htmlSetMetaEncoding
 htmlTagLookup
-ignorableWhitespace
-initGenericErrorDefaultFunc
-inithtmlDefaultSAXHandler
-initxmlDefaultSAXHandler
-inputPop
-inputPush
-internalSubset
-isStandalone
-isolat1ToUTF8
-namePop
-namePush
-namespaceDecl
 nodePop
 nodePush
-notationDecl
-processingInstruction
-reference
-resolveEntity
-setDocumentLocator
-setNamespace
-startDocument
-startElement
-unparsedEntityDecl
-valuePop
-valuePush
 xmlACatalogAdd
 xmlACatalogDump
 xmlACatalogRemove
@@ -177,7 +122,6 @@ xmlAutomataNewState
 xmlAutomataNewTransition
 xmlAutomataNewTransition2
 xmlAutomataSetFinalState
-xmlBoolToText
 xmlBufferAdd
 xmlBufferAddHead
 xmlBufferCCat
@@ -245,7 +189,6 @@ xmlCleanupInputCallbacks
 xmlCleanupMemory
 xmlCleanupOutputCallbacks
 xmlCleanupParser
-xmlCleanupPredefinedEntities
 xmlCleanupThreads
 xmlClearNodeInfoSeq
 xmlClearParserCtxt
@@ -300,7 +243,6 @@ xmlDebugDumpNode
 xmlDebugDumpNodeList
 xmlDebugDumpOneNode
 xmlDebugDumpString
-xmlDecodeEntities
 xmlDefaultSAXHandlerInit
 xmlDelEncodingAlias
 xmlDeregisterNodeDefault
@@ -332,7 +274,6 @@ xmlDumpEntityDecl
 xmlDumpNotationDecl
 xmlDumpNotationTable
 xmlElemDump
-xmlEncodeEntities
 xmlEncodeEntitiesReentrant
 xmlEncodeSpecialChars
 xmlFileClose
@@ -385,9 +326,6 @@ xmlGetDtdQAttrDesc
 xmlGetDtdQElementDesc
 xmlGetEncodingAlias
 xmlGetExternalEntityLoader
-xmlGetFeature
-xmlGetFeaturesList
-xmlGetGlobalState
 xmlGetID
 xmlGetIntSubset
 xmlGetLastChild
@@ -401,9 +339,7 @@ xmlGetParameterEntity
 xmlGetPredefinedEntity
 xmlGetProp
 xmlGetRefs
-xmlGetThreadId
 xmlGetUTF8Char
-xmlHandleEntity
 xmlHasNsProp
 xmlHasProp
 xmlHashAddEntry
@@ -429,10 +365,6 @@ xmlHashSize
 xmlHashUpdateEntry
 xmlHashUpdateEntry2
 xmlHashUpdateEntry3
-xmlIOFTPClose
-xmlIOFTPMatch
-xmlIOFTPOpen
-xmlIOFTPRead
 xmlIOParseDTD
 xmlInitCharEncodingHandlers
 xmlInitGlobals
@@ -442,8 +374,6 @@ xmlInitParser
 xmlInitParserCtxt
 xmlInitThreads
 xmlInitializeCatalog
-xmlInitializeGlobalState
-xmlInitializePredefinedEntities
 xmlIsBaseChar
 xmlIsBlank
 xmlIsBlankNode
@@ -454,7 +384,6 @@ xmlIsExtender
 xmlIsID
 xmlIsIdeographic
 xmlIsLetter
-xmlIsMainThread
 xmlIsMixedElement
 xmlIsPubidChar
 xmlIsRef
@@ -493,8 +422,6 @@ xmlLoadCatalogs
 xmlLoadExternalEntity
 xmlLoadSGMLSuperCatalog
 xmlLockLibrary
-xmlLsCountNode
-xmlLsOneNode
 xmlMallocAtomicLoc
 xmlMallocLoc
 xmlMemBlocks
@@ -515,9 +442,6 @@ xmlModuleOpen
 xmlModuleSymbol
 xmlMutexLock
 xmlMutexUnlock
-xmlNamespaceParseNCName
-xmlNamespaceParseNSDef
-xmlNamespaceParseQName
 xmlNewAutomata
 xmlNewCDataBlock
 xmlNewCatalog
@@ -538,7 +462,6 @@ xmlNewDocTextLen
 xmlNewDtd
 xmlNewElementContent
 xmlNewEntityInputStream
-xmlNewGlobalNs
 xmlNewIOInputStream
 xmlNewInputFromFile
 xmlNewInputStream
@@ -642,7 +565,6 @@ xmlParseMarkupDecl
 xmlParseMemory
 xmlParseMisc
 xmlParseName
-xmlParseNamespace
 xmlParseNmtoken
 xmlParseNotationDecl
 xmlParseNotationType
@@ -650,7 +572,6 @@ xmlParsePEReference
 xmlParsePI
 xmlParsePITarget
 xmlParsePubidLiteral
-xmlParseQuotedString
 xmlParseReference
 xmlParseSDDecl
 xmlParseStartTag
@@ -667,7 +588,6 @@ xmlParserFindNodeInfo
 xmlParserFindNodeInfoIndex
 xmlParserGetDirectory
 xmlParserHandlePEReference
-xmlParserHandleReference
 xmlParserInputBufferCreateFd
 xmlParserInputBufferCreateFile
 xmlParserInputBufferCreateFilename
@@ -863,9 +783,7 @@ xmlSearchNsByHref
 xmlSetBufferAllocationScheme
 xmlSetCompressMode
 xmlSetDocCompressMode
-xmlSetEntityReferenceFunc
 xmlSetExternalEntityLoader
-xmlSetFeature
 xmlSetGenericErrorFunc
 xmlSetListDoc
 xmlSetNs
@@ -1047,8 +965,6 @@ xmlTextWriterWriteVFormatElementNS
 xmlTextWriterWriteVFormatPI
 xmlTextWriterWriteVFormatRaw
 xmlTextWriterWriteVFormatString
-xmlThrDefBufferAllocScheme
-xmlThrDefDefaultBufferSize
 xmlThrDefDeregisterNodeDefault
 xmlThrDefDoValidityCheckingDefaultValue
 xmlThrDefGetWarningsDefaultValue
@@ -1057,7 +973,6 @@ xmlThrDefKeepBlanksDefaultValue
 xmlThrDefLineNumbersDefaultValue
 xmlThrDefLoadExtDtdDefaultValue
 xmlThrDefOutputBufferCreateFilenameDefault
-xmlThrDefParserDebugEntities
 xmlThrDefParserInputBufferCreateFilenameDefault
 xmlThrDefPedanticParserDefaultValue
 xmlThrDefRegisterNodeDefault
