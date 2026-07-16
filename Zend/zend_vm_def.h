@@ -22,6 +22,8 @@
  * php zend_vm_gen.php
  */
 
+#include "zend_variables.h"
+
 ZEND_VM_HELPER(zend_add_helper, ANY, ANY, zval *op_1, zval *op_2)
 {
 	USE_OPLINE
@@ -4533,6 +4535,40 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 		ZEND_VM_NEXT_OPCODE();
 #endif
 	}
+}
+
+ZEND_VM_COLD_CONST_HANDLER(45, ZEND_CAST_VALUE_FOR_RETURN_TYPE, TMP|VAR|CV, UNUSED)
+{
+	USE_OPLINE
+	zval *retval_ptr = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	ZEND_ASSERT(!Z_ISREF_P(retval_ptr));
+
+	switch (opline->extended_value) {
+		case IS_LONG: {
+			zend_long lval = zval_get_long(retval_ptr);
+			zval_ptr_dtor(retval_ptr);
+			ZVAL_LONG(retval_ptr, lval);
+			break;
+		}
+		case IS_DOUBLE: {
+			double dval = zval_get_double(retval_ptr);
+			zval_ptr_dtor(retval_ptr);
+			ZVAL_DOUBLE(retval_ptr, dval);
+			break;
+		}
+		case IS_STRING:
+			/* retval_ptr cannot be a refcounted value */
+			ZVAL_STR(retval_ptr, zval_get_string(retval_ptr));
+			break;
+		case IS_FALSE: { /* Used for booleans */
+			bool bval = i_zend_is_true(retval_ptr);
+			zval_ptr_dtor(retval_ptr);
+			ZVAL_BOOL(retval_ptr, bval);
+			break;
+		}
+		/* Default case assert? */
+	}
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_COLD_HANDLER(201, ZEND_VERIFY_NEVER_TYPE, UNUSED, UNUSED)
