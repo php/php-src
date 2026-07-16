@@ -553,11 +553,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long 
 		} else {
 			zend_long lval = zend_dval_to_lval(Z_DVAL_P(arg));
 			if (UNEXPECTED(!zend_is_long_compatible(Z_DVAL_P(arg), lval))) {
-				/* Check arg_num is not (uint32_t)-1, as otherwise its called by
-				 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
-				if (arg_num != (uint32_t)-1) {
-					zend_incompatible_double_to_long_error(Z_DVAL_P(arg));
-				}
+				zend_incompatible_double_to_long_error(Z_DVAL_P(arg));
 				if (UNEXPECTED(EG(exception))) {
 					return 0;
 				}
@@ -581,11 +577,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long 
 				lval = zend_dval_to_lval(d);
 				/* This only checks for a fractional part as if doesn't fit it already throws a TypeError */
 				if (UNEXPECTED(!zend_is_long_compatible(d, lval))) {
-					/* Check arg_num is not (uint32_t)-1, as otherwise its called by
-					 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
-					if (arg_num != (uint32_t)-1) {
-						zend_incompatible_string_to_long_error(Z_STR_P(arg));
-					}
+					zend_incompatible_string_to_long_error(Z_STR_P(arg));
 					if (UNEXPECTED(EG(exception))) {
 						return 0;
 					}
