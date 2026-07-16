@@ -2304,16 +2304,11 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 			default:
 				php_stream_close(stream);
 				stream = NULL;
-				if (options & REPORT_ERRORS) {
-					char *tmp = estrdup(path);
-					php_strip_url_passwd(tmp);
-					php_stream_wrapper_warn_param(wrapper, context, options,
-							SeekNotSupported, tmp,
-							"could not make seekable - %s", tmp);
-					efree(tmp);
-
-					options &= ~REPORT_ERRORS;
-				}
+				php_stream_wrapper_warn(wrapper, context, options,
+						SeekNotSupported,
+						"could not make seekable - %s", path);
+				/* We do not want multiple errors so we negate it */
+				options &= ~REPORT_ERRORS;
 		}
 	}
 
