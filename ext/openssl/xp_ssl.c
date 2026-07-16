@@ -189,14 +189,6 @@ typedef struct _php_openssl_psk_callbacks_t {
 	zend_fcall_info_cache server_cb;
 } php_openssl_psk_callbacks_t;
 
-/* Holds session callback */
-typedef struct _php_openssl_session_callbacks_t {
-	int refcount;
-	zend_fcall_info_cache new_cb;
-	zend_fcall_info_cache get_cb;
-	zend_fcall_info_cache remove_cb;
-} php_openssl_session_callbacks_t;
-
 /* This implementation is very closely tied to the that of the native
  * sockets implemented in the core.
  * Don't try this technique in other extensions!
@@ -1287,15 +1279,6 @@ static int php_openssl_server_alpn_callback(SSL *ssl_handle,
 
 #endif
 
-static int php_openssl_get_ctx_stream_data_index(void)
-{
-	static int ctx_data_index = -1;
-	if (ctx_data_index < 0) {
-		ctx_data_index = SSL_CTX_get_ex_new_index(0, NULL, NULL, NULL, NULL);
-	}
-	return ctx_data_index;
-}
-
 /**
  * Build a SSL_SESSION suitable for use as an external PSK in TLS 1.3.
  */
@@ -1702,180 +1685,6 @@ static zend_result php_openssl_setup_server_psk(php_stream *stream,
 }
 
 /**
- * OpenSSL new session callback - called when a new session is established
- */
-static int php_openssl_session_new_cb(SSL *ssl, SSL_SESSION *session)
-{
-	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl, php_openssl_get_ssl_stream_data_index());
-	if (!stream) {
-		return 0;
-	}
-
-	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t *)stream->abstract;
-	if (!sslsock || !sslsock->session_callbacks) {
-		return 0;
-	}
-
-	/* Increment reference - we're giving ownership to the PHP object */
-	SSL_SESSION_up_ref(session);
-
-	zval args[2];
-
-	ZVAL_RES(&args[0], stream->res);
-	php_openssl_session_object_init(&args[1], session);
-
-	zend_call_known_fcc(&sslsock->session_callbacks->new_cb, NULL, 2, args, NULL);
-
-	zval_ptr_dtor(&args[1]);
-
-	return 0;
-}
-
-/**
- * OpenSSL get session callback - called when server needs to retrieve a session
- */
-static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *session_id,
-		int session_id_len, int *copy)
-{
-	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl, php_openssl_get_ssl_stream_data_index());
-	if (!stream) {
-		*copy = 0;
-		return NULL;
-	}
-
-	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t *)stream->abstract;
-	if (!sslsock || !sslsock->session_callbacks) {
-		*copy = 0;
-		return NULL;
-	}
-
-	zval args[2];
-	zval retval;
-
-	ZVAL_RES(&args[0], stream->res);
-	ZVAL_STRINGL(&args[1], (char *)session_id, session_id_len);
-
-	SSL_SESSION *session = NULL;
-
-	zend_call_known_fcc(&sslsock->session_callbacks->get_cb, &retval, 2, args, NULL);
-	zval_ptr_dtor(&args[1]);
-
-	if (php_openssl_is_session_ce(&retval)) {
-		/* Get session from object and increment ref since OpenSSL will own it */
-		php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(&retval);
-		if (obj->session) {
-			SSL_SESSION_up_ref(obj->session);
-			session = obj->session;
-		}
-	} else if (Z_TYPE(retval) != IS_NULL) {
-		zend_type_error("session_get_cb return type must be null or OpenSSLSession");
-	}
-
-	zval_ptr_dtor(&retval);
-
-	*copy = 0;
-	return session;
-}
-
-/**
- * OpenSSL remove session callback - called when a session is evicted from cache
- */
-static void php_openssl_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *session)
-{
-	php_stream *stream = (php_stream *)SSL_CTX_get_ex_data(ctx, php_openssl_get_ctx_stream_data_index());
-	if (!stream) {
-		return;
-	}
-
-	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t *)stream->abstract;
-	if (!sslsock || !sslsock->session_callbacks) {
-		return;
-	}
-
-	unsigned int session_id_len = 0;
-	const unsigned char *session_id = SSL_SESSION_get_id(session, &session_id_len);
-
-	zval args[2];
-
-	ZVAL_RES(&args[0], stream->res);
-	ZVAL_STRINGL(&args[1], (char *)session_id, session_id_len);
-
-	zend_call_known_fcc(&sslsock->session_callbacks->remove_cb, NULL, 2, args, NULL);
-	zval_ptr_dtor(&args[1]);
-}
-
-
-enum php_openssl_session_callback_type {
-	PHP_OPENSSL_NEW_CB,
-	PHP_OPENSSL_GET_CB,
-	PHP_OPENSSL_REMOVE_CB,
-};
-/**
- * Validate callable and allocate callback structure if needed.
- */
-static zend_result php_openssl_validate_and_allocate_session_callback(
-		php_stream *stream,
-		php_openssl_netstream_data_t *sslsock, const zval *callable,
-		enum php_openssl_session_callback_type cb_type, bool is_persistent)
-{
-	char *is_callable_error = NULL;
-	const char *callback_name;
-
-	switch (cb_type) {
-		case PHP_OPENSSL_NEW_CB:
-			callback_name = "session_new_cb";
-			break;
-		case PHP_OPENSSL_GET_CB:
-			callback_name = "session_get_cb";
-			break;
-		case PHP_OPENSSL_REMOVE_CB:
-			callback_name = "session_remove_cb";
-			break;
-	}
-
-	/* Callbacks not supported for persistent streams */
-	if (is_persistent) {
-		php_stream_warn(stream, PersistentNotSupported,
-				"%s is not supported for persistent streams", callback_name);
-		return FAILURE;
-	}
-
-	/* Validate callable */
-	zend_fcall_info_cache fcc;
-	if (!zend_is_callable_ex(callable, NULL, 0, NULL, &fcc, &is_callable_error)) {
-		if (is_callable_error) {
-			zend_type_error("%s must be a valid callback, %s", callback_name, is_callable_error);
-			efree(is_callable_error);
-		} else {
-			zend_type_error("%s must be a valid callback", callback_name);
-		}
-		return FAILURE;
-	}
-
-	/* Allocate callback structure if not already allocated */
-	if (!sslsock->session_callbacks) {
-		sslsock->session_callbacks = (php_openssl_session_callbacks_t *)pecalloc(
-				1, sizeof(php_openssl_session_callbacks_t), is_persistent);
-		sslsock->session_callbacks->refcount = 1;
-	}
-
-	zend_fcc_addref(&fcc);
-	switch (cb_type) {
-		case PHP_OPENSSL_NEW_CB:
-			sslsock->session_callbacks->new_cb = fcc;
-			break;
-		case PHP_OPENSSL_GET_CB:
-			sslsock->session_callbacks->get_cb = fcc;
-			break;
-		case PHP_OPENSSL_REMOVE_CB:
-			sslsock->session_callbacks->remove_cb = fcc;
-			break;
-	}
-
-	return SUCCESS;
-}
-
-/**
  * Configure session resumption options for client connections
  */
 static zend_result php_openssl_setup_client_session(php_stream *stream,
@@ -1896,7 +1705,7 @@ static zend_result php_openssl_setup_client_session(php_stream *stream,
 
 	if (GET_VER_OPT("session_new_cb")) {
 		if (FAILURE == php_openssl_validate_and_allocate_session_callback(
-				stream, sslsock, val, PHP_OPENSSL_NEW_CB, is_persistent)) {
+				stream, &sslsock->session_callbacks, val, PHP_OPENSSL_NEW_CB, is_persistent)) {
 			return FAILURE;
 		}
 
@@ -1943,7 +1752,7 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 	/* Check for session_get_cb first (determines cache mode) */
 	if (GET_VER_OPT("session_get_cb")) {
 		if (FAILURE == php_openssl_validate_and_allocate_session_callback(
-				stream, sslsock, val, PHP_OPENSSL_GET_CB, is_persistent)) {
+				stream, &sslsock->session_callbacks, val, PHP_OPENSSL_GET_CB, is_persistent)) {
 			return FAILURE;
 		}
 		has_get_cb = true;
@@ -1962,7 +1771,7 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 	/* Check for session_new_cb */
 	if (GET_VER_OPT("session_new_cb")) {
 		if (FAILURE == php_openssl_validate_and_allocate_session_callback(
-				stream, sslsock, val, PHP_OPENSSL_NEW_CB, is_persistent)) {
+				stream, &sslsock->session_callbacks, val, PHP_OPENSSL_NEW_CB, is_persistent)) {
 			return FAILURE;
 		}
 		has_new_cb = true;
@@ -1983,7 +1792,7 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 	/* Check for session_remove_cb (optional) */
 	if (GET_VER_OPT("session_remove_cb")) {
 		if (FAILURE == php_openssl_validate_and_allocate_session_callback(
-				stream, sslsock, val, PHP_OPENSSL_REMOVE_CB, is_persistent)) {
+				stream, &sslsock->session_callbacks, val, PHP_OPENSSL_REMOVE_CB, is_persistent)) {
 			return FAILURE;
 		}
 
@@ -2113,7 +1922,7 @@ static zend_result php_openssl_create_server_ctx(php_stream *stream,
 		return FAILURE;
 	}
 
-	SSL_CTX_set_ex_data(sslsock->ctx, php_openssl_get_ctx_stream_data_index(), stream);
+	SSL_CTX_set_ex_data(sslsock->ctx, php_openssl_get_ctx_stream_index(), stream);
 
 	zend_long min_version = 0;
 	zend_long max_version = 0;
@@ -2248,6 +2057,9 @@ static zend_result php_openssl_create_server_ctx(php_stream *stream,
 		return FAILURE;
 	}
 #endif
+
+	SSL_CTX_set_ex_data(sslsock->ctx, php_openssl_get_ctx_session_callbacks_index(),
+			sslsock->session_callbacks);
 
 	return SUCCESS;
 }

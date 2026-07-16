@@ -219,6 +219,149 @@ void php_openssl_add_crypto_cipher(zval *crypto, SSL *ssl)
 	}
 }
 
+int php_openssl_get_ctx_session_callbacks_index(void)
+{
+	static int index = -1;
+	if (index < 0) {
+		index = SSL_CTX_get_ex_new_index(0, "PHP openssl session callbacks index", NULL, NULL, NULL);
+	}
+	return index;
+}
+
+int php_openssl_get_ctx_stream_index(void)
+{
+	static int index = -1;
+	if (index < 0) {
+		index = SSL_CTX_get_ex_new_index(0, "PHP openssl ctx stream index", NULL, NULL, NULL);
+	}
+	return index;
+}
+
+static php_openssl_session_callbacks_t *php_openssl_ctx_session_callbacks(SSL_CTX *ctx)
+{
+	return (php_openssl_session_callbacks_t *)SSL_CTX_get_ex_data(ctx,
+			php_openssl_get_ctx_session_callbacks_index());
+}
+
+int php_openssl_session_new_cb(SSL *ssl, SSL_SESSION *session)
+{
+	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl, php_openssl_get_ssl_stream_data_index());
+	php_openssl_session_callbacks_t *cbs = php_openssl_ctx_session_callbacks(SSL_get_SSL_CTX(ssl));
+	if (!stream || !cbs) {
+		return 0;
+	}
+
+	/* Increment reference - we're giving ownership to the PHP object */
+	SSL_SESSION_up_ref(session);
+
+	zval args[2];
+	ZVAL_RES(&args[0], stream->res);
+	php_openssl_session_object_init(&args[1], session);
+
+	zend_call_known_fcc(&cbs->new_cb, NULL, 2, args, NULL);
+
+	zval_ptr_dtor(&args[1]);
+	return 0;
+}
+
+SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *session_id, int session_id_len, int *copy)
+{
+	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl, php_openssl_get_ssl_stream_data_index());
+	php_openssl_session_callbacks_t *cbs = php_openssl_ctx_session_callbacks(SSL_get_SSL_CTX(ssl));
+	if (!stream || !cbs) {
+		*copy = 0;
+		return NULL;
+	}
+
+	zval args[2], retval;
+	ZVAL_RES(&args[0], stream->res);
+	ZVAL_STRINGL(&args[1], (char *)session_id, session_id_len);
+
+	SSL_SESSION *session = NULL;
+	zend_call_known_fcc(&cbs->get_cb, &retval, 2, args, NULL);
+	zval_ptr_dtor(&args[1]);
+
+	if (php_openssl_is_session_ce(&retval)) {
+		SSL_SESSION *found = php_openssl_session_from_zval(&retval);
+		if (found != NULL) {
+			/* OpenSSL takes ownership of the returned session. */
+			SSL_SESSION_up_ref(found);
+			session = found;
+		}
+	} else if (Z_TYPE(retval) != IS_NULL) {
+		zend_type_error("session_get_cb return type must be null or Openssl\\Session");
+	}
+
+	zval_ptr_dtor(&retval);
+	*copy = 0;
+	return session;
+}
+
+void php_openssl_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *session)
+{
+	php_stream *stream = (php_stream *)SSL_CTX_get_ex_data(ctx, php_openssl_get_ctx_stream_index());
+	php_openssl_session_callbacks_t *cbs = php_openssl_ctx_session_callbacks(ctx);
+	if (!stream || !cbs) {
+		return;
+	}
+
+	unsigned int session_id_len = 0;
+	const unsigned char *session_id = SSL_SESSION_get_id(session, &session_id_len);
+
+	zval args[2];
+	ZVAL_RES(&args[0], stream->res);
+	ZVAL_STRINGL(&args[1], (char *)session_id, session_id_len);
+
+	zend_call_known_fcc(&cbs->remove_cb, NULL, 2, args, NULL);
+	zval_ptr_dtor(&args[1]);
+}
+
+zend_result php_openssl_validate_and_allocate_session_callback(php_stream *stream,
+		php_openssl_session_callbacks_t **callbacks, const zval *callable,
+		enum php_openssl_session_callback_type cb_type, bool is_persistent)
+{
+	const char *callback_name = NULL;
+	switch (cb_type) {
+		case PHP_OPENSSL_NEW_CB: callback_name = "session_new_cb"; break;
+		case PHP_OPENSSL_GET_CB: callback_name = "session_get_cb"; break;
+		case PHP_OPENSSL_REMOVE_CB: callback_name = "session_remove_cb"; break;
+	}
+
+	/* Callbacks not supported for persistent streams */
+	if (is_persistent) {
+		php_stream_warn(stream, PersistentNotSupported,
+				"%s is not supported for persistent streams", callback_name);
+		return FAILURE;
+	}
+
+	char *is_callable_error = NULL;
+	zend_fcall_info_cache fcc;
+	if (!zend_is_callable_ex(callable, NULL, 0, NULL, &fcc, &is_callable_error)) {
+		if (is_callable_error) {
+			zend_type_error("%s must be a valid callback, %s", callback_name, is_callable_error);
+			efree(is_callable_error);
+		} else {
+			zend_type_error("%s must be a valid callback", callback_name);
+		}
+		return FAILURE;
+	}
+
+	if (!*callbacks) {
+		*callbacks = (php_openssl_session_callbacks_t *)pecalloc(
+				1, sizeof(php_openssl_session_callbacks_t), is_persistent);
+		(*callbacks)->refcount = 1;
+	}
+
+	zend_fcc_addref(&fcc);
+	switch (cb_type) {
+		case PHP_OPENSSL_NEW_CB: (*callbacks)->new_cb = fcc; break;
+		case PHP_OPENSSL_GET_CB: (*callbacks)->get_cb = fcc; break;
+		case PHP_OPENSSL_REMOVE_CB: (*callbacks)->remove_cb = fcc; break;
+	}
+
+	return SUCCESS;
+}
+
 zend_result php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream)
 {
 	zval *val;
