@@ -129,6 +129,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_reflection_property_set_raw_value() to expose the functionality of
     ReflectionProperty::setRawValueWithoutLazyInitialization() and
     ReflectionProperty::setRawValue() to C extensions.
+  . Added zend_object_set_properties_reinitable() to centralise temporarily
+    allowing reinitialisation of initialised readonly properties during
+    controlled operations such as cloning and unserialisation.
 
 ========================
 2. Build system changes
