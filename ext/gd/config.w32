@@ -3,6 +3,11 @@
 ARG_WITH("gd", "Bundled GD support", "yes,shared");
 ARG_WITH("libwebp", "webp support", "yes");
 ARG_WITH("libavif", "avif support", "yes");
+ARG_WITH("heif", "HEIF support", "yes");
+ARG_WITH("uhdr", "UltraHDR support", "yes");
+ARG_WITH("jxl", "JPEG XL support", "yes");
+ARG_WITH("imagequant", "libimagequant support", "no");
+ARG_WITH("tiff", "TIFF support", "no");
 
 if (PHP_GD != "no") {
 	if (
@@ -25,12 +30,17 @@ if (PHP_GD != "no") {
 			CHECK_HEADER("xpm.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\X11")
 		) {
 			AC_DEFINE('HAVE_XPM', 1, "Define to 1 if you have the xpm library.");
+			AC_DEFINE('HAVE_LIBXPM', 1, "Define to 1 if you have the xpm library.");
 			AC_DEFINE('HAVE_GD_XPM', 1, "Define to 1 if gd extension has XPM support.");
 		}
 		if (PHP_LIBWEBP != "no") {
 			if ((CHECK_LIB("libwebp_a.lib", "gd", PHP_GD) || CHECK_LIB("libwebp.lib", "gd", PHP_GD)) &&
+				(CHECK_LIB("libwebpdemux_a.lib", "gd", PHP_GD) || CHECK_LIB("libwebpdemux.lib", "gd", PHP_GD)) &&
+				(CHECK_LIB("libwebpmux_a.lib", "gd", PHP_GD) || CHECK_LIB("libwebpmux.lib", "gd", PHP_GD)) &&
 				CHECK_HEADER("decode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp") &&
-				CHECK_HEADER("encode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp")) {
+				CHECK_HEADER("demux.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp") &&
+				CHECK_HEADER("encode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp") &&
+				CHECK_HEADER("mux.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp")) {
 				AC_DEFINE("HAVE_LIBWEBP", 1, "Define to 1 if you have the libwebp library.");
 				AC_DEFINE("HAVE_GD_WEBP", 1, "Define to 1 if gd extension has WebP support.");
 			} else {
@@ -49,18 +59,107 @@ if (PHP_GD != "no") {
 				WARNING("libavif not enabled; libraries and headers not found");
 			}
 		}
+
+		if (PHP_HEIF != "no") {
+			var heif_location = CHECK_LIB("heif_a.lib;heif.lib", "gd", PHP_GD);
+			if (!CHECK_HEADER("libheif/heif.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include")) {
+				heif_location = false;
+			}
+			if (heif_location && heif_location.match(/heif_a\.lib$/)) {
+				if (!(CHECK_LIB("libde265_a.lib", "gd", PHP_GD) &&
+					CHECK_LIB("x265_a.lib", "gd", PHP_GD) &&
+					CHECK_LIB("aom_a.lib", "gd", PHP_GD) &&
+					CHECK_LIB("dav1d_a.lib", "gd", PHP_GD))) {
+					WARNING("static libheif not enabled; codec libraries not found");
+					heif_location = false;
+				} else {
+					ADD_FLAG("CFLAGS_GD", "/D LIBHEIF_STATIC_BUILD");
+				}
+			}
+			if (heif_location) {
+				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBHEIF /D HAVE_GD_HEIF");
+			} else {
+				WARNING("libheif not enabled; library and headers not found");
+			}
+		}
+
+		// requires UHDR_WRITE_XMP=Off, for the windows build team, when adding/updating libuhdr
+		if (PHP_UHDR != "no") {
+			var uhdr_location = CHECK_LIB("uhdr_a.lib;uhdr.lib", "gd", PHP_GD);
+			if (uhdr_location &&
+				CHECK_HEADER("ultrahdr_api.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include")) {
+				if (uhdr_location.match(/uhdr\.lib$/)) {
+					ADD_FLAG("CFLAGS_GD", "/D UHDR_USING_SHARED_LIBRARY");
+				}
+				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBUHDR /D HAVE_GD_UHDR");
+			} else {
+				WARNING("libuhdr not enabled; library and headers not found");
+			}
+		}
+
+		if (PHP_JXL != "no") {
+			var jxl_location = CHECK_LIB("jxl_a.lib;jxl.lib", "gd", PHP_GD);
+			if (jxl_location && jxl_location.match(/jxl_a\.lib$/)) {
+				if (!(CHECK_LIB("jxl_cms_a.lib", "gd", PHP_GD) &&
+					CHECK_LIB("hwy_a.lib", "gd", PHP_GD) &&
+					CHECK_LIB("brotlienc.lib;brotlienc-static.lib", "gd", PHP_GD) &&
+					CHECK_LIB("brotlidec.lib;brotlidec-static.lib", "gd", PHP_GD) &&
+					CHECK_LIB("brotlicommon.lib;brotlicommon-static.lib", "gd", PHP_GD))) {
+					WARNING("static libjxl not enabled; dependency libraries not found");
+					jxl_location = false;
+				} else {
+					ADD_FLAG("CFLAGS_GD", "/D JXL_STATIC_DEFINE /D JXL_CMS_STATIC_DEFINE");
+				}
+			}
+			if (jxl_location &&
+				CHECK_HEADER("jxl/decode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include") &&
+				CHECK_HEADER("jxl/encode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include")) {
+				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBJXL /D HAVE_GD_JXL");
+			} else {
+				WARNING("libjxl not enabled; library and headers not found");
+			}
+		}
+
+		if (PHP_IMAGEQUANT != "no") {
+			if (CHECK_LIB("imagequant.lib", "gd", PHP_GD) &&
+				CHECK_HEADER("libimagequant.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include")) {
+				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBIMAGEQUANT /D HAVE_GD_IMAGEQUANT");
+			} else {
+				WARNING("libimagequant not enabled; library and headers not found");
+			}
+		}
+
+		if (PHP_TIFF != "no") {
+			if (CHECK_LIB("tiff_a.lib;tiff.lib", "gd", PHP_GD) &&
+				CHECK_LIB("liblzma_a.lib;liblzma.lib", "gd", PHP_GD) &&
+				CHECK_LIB("libzstd_a.lib;libzstd.lib", "gd", PHP_GD) &&
+				CHECK_LIB("libwebp_a.lib;libwebp.lib", "gd", PHP_GD) &&
+				CHECK_HEADER("tiff.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include")) {
+				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBTIFF /D HAVE_GD_TIFF");
+			} else {
+				WARNING("libtiff not enabled; library and headers not found");
+			}
+		}
+
 		CHECK_LIB("User32.lib", "gd", PHP_GD);
 		CHECK_LIB("Gdi32.lib", "gd", PHP_GD);
+		CHECK_LIB("Advapi32.lib", "gd", PHP_GD);
 
 		EXTENSION("gd", "gd.c", null, "-Iext/gd/libgd");
 		ADD_SOURCES("ext/gd/libgd", "gd2copypal.c gd.c \
 			gdcache.c gdfontg.c gdfontl.c gdfontmb.c gdfonts.c gdfontt.c \
 			gdft.c gd_gd2.c gd_gd.c gd_gif_in.c gd_gif_out.c gdhelpers.c gd_io.c gd_io_dp.c \
-			gd_io_file.c gd_io_ss.c gd_jpeg.c gdkanji.c gd_png.c gd_ss.c \
+			gd_io_file.c gd_io_ss.c gd_jpeg.c gdkanji.c gd_metadata.c gd_png.c gd_ss.c \
 			gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c gd_xbm.c gd_security.c gd_transform.c \
 			gd_filter.c gd_rotate.c gd_color_match.c gd_webp.c gd_avif.c \
-			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c", "gd");
+			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c gd_qoi.c gd_jxl.c gd_color_map.c \
+			gd_heif.c gd_uhdr.c gd_tiff.c gd_nnquant.c gd_color.c gd_readimage.c gd_filename.c \
+			gd_array.c gd_span_rle.c \
+			gd_surface.c gd_version.c gd_compositor.c gd_gradient.c gd_path.c gd_path_arc.c gd_path_dash.c \
+			gd_path_matrix.c gd_path_stroke.c gd_draw.c gd_draw_blend.c gd_perceptual_diff.c", "gd");
+		ADD_SOURCES("ext/gd/libgd/ftraster", "gd_ft_math.c gd_ft_raster.c gd_ft_stroker.c", "gd");
 		AC_DEFINE('HAVE_GD_BUNDLED', 1, "Define to 1 if gd extension uses GD library bundled in PHP.");
+		AC_DEFINE('HAVE_GD_PNG_GET_VERSION_STRING', 1, "Define to 1 if GD library has the 'gdPngGetVersionString' function.");
 		AC_DEFINE('HAVE_GD_PNG', 1, "Define to 1 if gd extension has PNG support.");
 		AC_DEFINE('HAVE_LIBPNG', 1, "Define to 1 if you have the libpng library.");
 		AC_DEFINE('HAVE_LIBJPEG', 1, "Define to 1 if you have the libjpeg library.");

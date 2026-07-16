@@ -299,6 +299,15 @@ PHP_INI_END()
 /* {{{ php_gd_error_method */
 void php_gd_error_method(int type, const char *format, va_list args)
 {
+	/* Keep PHP's historical PNG warning text while bundled gd_png.c stays
+	 * identical to upstream libgd. */
+	if (strcmp(format, "gd-png: fatal libpng error: %s\n") == 0) {
+		format = "gd-png:  fatal libpng error: %s";
+	} else if (strncmp(format, "gd-png error: setjmp returns error condition",
+			sizeof("gd-png error: setjmp returns error condition") - 1) == 0) {
+		format = "gd-png error: setjmp returns error condition";
+	}
+
 	switch (type) {
 #ifndef PHP_WIN32
 		case GD_DEBUG:
@@ -358,7 +367,7 @@ PHP_RSHUTDOWN_FUNCTION(gd)
 /* }}} */
 
 #ifdef HAVE_GD_BUNDLED
-#define PHP_GD_VERSION_STRING "bundled (2.1.0 compatible)"
+#define PHP_GD_VERSION_STRING "bundled (2.4.0 compatible)"
 #else
 # define PHP_GD_VERSION_STRING GD_VERSION_STRING
 #endif
@@ -413,7 +422,7 @@ PHP_MINFO_FUNCTION(gd)
 
 #ifdef HAVE_GD_PNG
 	php_info_print_table_row(2, "PNG Support", "enabled");
-#ifdef HAVE_GD_BUNDLED
+#ifdef HAVE_GD_PNG_GET_VERSION_STRING
 	php_info_print_table_row(2, "libPNG Version", gdPngGetVersionString());
 #endif
 #endif
@@ -722,6 +731,10 @@ PHP_FUNCTION(imagetruecolortopalette)
 		zend_argument_value_error(3, "must be greater than 0 and less than %d", INT_MAX);
 		RETURN_THROWS();
 	}
+
+	/* Preserve PHP's historical palette conversion behavior regardless of
+	 * whether bundled libgd was built with libimagequant support. */
+	gdImageTrueColorToPaletteSetMethod(im, GD_QUANT_JQUANT, 0);
 
 	if (gdImageTrueColorToPalette(im, dither, (int)ncolors)) {
 		RETURN_TRUE;
@@ -1880,6 +1893,8 @@ PHP_FUNCTION(imagegif)
 	gdImagePtr im;
 	gdIOCtx *ctx;
 	zval *to_zval = NULL;
+	int quantization_method;
+	int quantization_speed;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!", &imgind, gd_image_ce, &to_zval) == FAILURE) {
 		RETURN_THROWS();
@@ -1892,7 +1907,18 @@ PHP_FUNCTION(imagegif)
 		RETURN_FALSE;
 	}
 
+	quantization_method = im->paletteQuantizationMethod;
+	quantization_speed = im->paletteQuantizationSpeed;
+	if (im->trueColor) {
+		/* GIF conversion historically used JQUANT in PHP. Keep output stable
+		 * when bundled libgd has a build-dependent default such as LIQ. */
+		gdImageTrueColorToPaletteSetMethod(im, GD_QUANT_JQUANT, 0);
+	}
 	gdImageGifCtx(im, ctx);
+	if (im->trueColor) {
+		gdImageTrueColorToPaletteSetMethod(im, quantization_method,
+										 quantization_speed);
+	}
 
 	ctx->gd_free(ctx);
 
@@ -1928,7 +1954,28 @@ PHP_FUNCTION(imagepng)
 	}
 
 #ifdef HAVE_GD_BUNDLED
-	gdImagePngCtxEx(im, ctx, (int) quality, (int) basefilter);
+	{
+		gdPngWriteOptions options;
+		unsigned int filters = GD_PNG_FILTER_NONE;
+		unsigned int unknown_filters;
+
+		gdPngWriteOptionsInit(&options);
+		options.compression_level = (int) quality;
+		if (basefilter >= 0) {
+			unsigned long php_filters = (unsigned long) basefilter;
+			if (php_filters & 0x08) filters |= GD_PNG_FILTER_NONE;
+			if (php_filters & 0x10) filters |= GD_PNG_FILTER_SUB;
+			if (php_filters & 0x20) filters |= GD_PNG_FILTER_UP;
+			if (php_filters & 0x40) filters |= GD_PNG_FILTER_AVERAGE;
+			if (php_filters & 0x80) filters |= GD_PNG_FILTER_PAETH;
+			unknown_filters = (unsigned int) (php_filters & ~0xf8UL);
+			if (unknown_filters != 0) {
+				filters |= 1U << 31;
+			}
+		}
+		options.filters = filters;
+		(void) gdImagePngCtxWithOptions(im, ctx, &options);
+	}
 #else
 	gdImagePngCtxEx(im, ctx, (int) quality);
 #endif
