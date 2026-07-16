@@ -52,6 +52,7 @@ typedef struct php_io_poll_watcher_object {
 	zval data;
 	bool active;
 	php_poll_ctx *poll_ctx; /* Back reference to poll context */
+	HashTable *watchers; /* Back reference to context watcher registry */
 	zend_object std;
 } php_io_poll_watcher_object;
 
@@ -252,6 +253,7 @@ static zend_object *php_io_poll_watcher_create_object(zend_class_entry *ce)
 	intern->triggered_events = 0;
 	intern->active = false;
 	intern->poll_ctx = NULL;
+	intern->watchers = NULL;
 	ZVAL_NULL(&intern->data);
 
 	return &intern->std;
@@ -294,6 +296,7 @@ static void php_io_poll_context_free_object(zend_object *obj)
 			php_io_poll_watcher_object *watcher = PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(Z_OBJ_P(zv));
 			watcher->active = false;
 			watcher->poll_ctx = NULL;
+			watcher->watchers = NULL;
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -638,13 +641,21 @@ PHP_METHOD(Io_Poll_Watcher, remove)
 		RETURN_THROWS();
 	}
 
+	php_poll_ctx *poll_ctx = intern->poll_ctx;
+	HashTable *watchers = intern->watchers;
+	zend_ulong hash_key = php_io_poll_compute_ptr_key(intern->handle);
 	php_socket_t fd = php_poll_handle_get_fd(intern->handle);
 	if (fd != SOCK_ERR) {
-		php_poll_remove(intern->poll_ctx, (int) fd);
+		php_poll_remove(poll_ctx, (int) fd);
 	}
 
 	intern->active = false;
 	intern->poll_ctx = NULL;
+	intern->watchers = NULL;
+
+	if (watchers) {
+		zend_hash_index_del(watchers, hash_key);
+	}
 }
 
 PHP_METHOD(Io_Poll_Context, __construct)
@@ -727,8 +738,6 @@ PHP_METHOD(Io_Poll_Context, add)
 	watcher->handle = handle;
 	watcher->watched_events = events;
 	watcher->triggered_events = 0;
-	watcher->active = true;
-	watcher->poll_ctx = intern->ctx;
 
 	GC_ADDREF(&handle->std);
 
@@ -757,7 +766,17 @@ PHP_METHOD(Io_Poll_Context, add)
 	GC_ADDREF(&watcher->std);
 
 	zend_ulong hash_key = php_io_poll_compute_ptr_key(handle);
-	zend_hash_index_add(intern->watchers, hash_key, &watcher_zv);
+	if (zend_hash_index_add(intern->watchers, hash_key, &watcher_zv) == NULL) {
+		php_poll_remove(intern->ctx, (int) fd);
+		zval_ptr_dtor(&watcher_zv);
+		zend_throw_exception(
+				php_io_poll_handle_already_watched_class_entry, "Handle already added", 0);
+		RETURN_THROWS();
+	}
+
+	watcher->active = true;
+	watcher->poll_ctx = intern->ctx;
+	watcher->watchers = intern->watchers;
 }
 
 PHP_METHOD(Io_Poll_Context, wait)
