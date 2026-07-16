@@ -166,8 +166,8 @@ static zend_result php_stream_apply_filter_list(php_stream *stream, char *filter
 
 	p = php_strtok_r(filterlist, "|", &token);
 	while (p) {
-		zend_long read_count = read_chain ? php_stream_filter_count(&stream->readfilters) : 0;
-		zend_long write_count = write_chain ? php_stream_filter_count(&stream->writefilters) : 0;
+		zend_long read_count = read_chain ? stream->readfilters.count : 0;
+		zend_long write_count = write_chain ? stream->writefilters.count : 0;
 
 		if (max_filter_count == -1) {
 			// No max_filter_count configured; use default
