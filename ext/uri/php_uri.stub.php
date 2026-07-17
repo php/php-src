@@ -45,6 +45,7 @@ namespace Uri\Rfc3986 {
         case RegisteredName;
     }
 
+    /** @strict-properties */
     final class UriBuilder
     {
         private ?string $scheme = null;
