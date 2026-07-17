@@ -11,6 +11,11 @@ $handle = new StreamPollHandle($r);
 $first = $context->add($handle, [Io\Poll\Event::Read]);
 $first->remove();
 
+$ref = WeakReference::create($first);
+unset($first);
+gc_collect_cycles();
+var_dump($ref->get()); // should be NULL
+
 $second = $context->add($handle, [Io\Poll\Event::Read]);
 
 unset($context);

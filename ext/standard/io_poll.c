@@ -51,8 +51,7 @@ typedef struct php_io_poll_watcher_object {
 	uint32_t triggered_events;
 	zval data;
 	bool active;
-	php_poll_ctx *poll_ctx; /* Back reference to poll context */
-	HashTable *watchers; /* Back reference to context watcher registry */
+	php_io_poll_context_object *context; /* Back reference to Context object */
 	zend_object std;
 } php_io_poll_watcher_object;
 
