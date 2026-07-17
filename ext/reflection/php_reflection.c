@@ -375,7 +375,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 
 	/* The information where a class is declared is only available for user classes */
 	if (ce->type == ZEND_USER_CLASS) {
-		smart_str_append_printf(str, "%s  @@ %s %d-%d\n", indent, ZSTR_VAL(ce->info.user.filename),
+		smart_str_append_printf(str, "%s  @@ %s %" PRIu32 "-%" PRIu32 "\n", indent, ZSTR_VAL(ce->info.user.filename),
 						ce->info.user.line_start, ce->info.user.line_end);
 	}
 
@@ -410,12 +410,12 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 	// Enum cases go first, but the heading is only shown if there are any
 	if (enum_case_count) {
 		smart_str_appendc(str, '\n');
-		smart_str_append_printf(str, "%s  - Enum cases [%d] {\n", indent, enum_case_count);
+		smart_str_append_printf(str, "%s  - Enum cases [%" PRIu32 "] {\n", indent, enum_case_count);
 		smart_str_append_smart_str(str, &enum_case_str);
 		smart_str_append_printf(str, "%s  }\n", indent);
 	}
 	smart_str_appendc(str, '\n');
-	smart_str_append_printf(str, "%s  - Constants [%d] {\n", indent, constant_count);
+	smart_str_append_printf(str, "%s  - Constants [%" PRIu32 "] {\n", indent, constant_count);
 	smart_str_append_smart_str(str, &constant_str);
 	smart_str_append_printf(str, "%s  }\n", indent);
 
@@ -424,9 +424,9 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 
 	/* Static properties */
 	/* counting static properties */
-	int count = zend_hash_num_elements(&ce->properties_info);
-	int count_static_props = 0;
-	int count_shadow_props = 0;
+	uint32_t count = zend_hash_num_elements(&ce->properties_info);
+	uint32_t count_static_props = 0;
+	uint32_t count_shadow_props = 0;
 	if (count > 0) {
 		ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, zend_property_info *prop) {
 			if ((prop->flags & ZEND_ACC_PRIVATE) && prop->ce != ce) {
@@ -438,7 +438,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 	}
 
 	/* static properties */
-	smart_str_append_printf(str, "\n%s  - Static properties [%d] {\n", indent, count_static_props);
+	smart_str_append_printf(str, "\n%s  - Static properties [%" PRIu32 "] {\n", indent, count_static_props);
 	if (count_static_props > 0) {
 		ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, zend_property_info *prop) {
 			if ((prop->flags & ZEND_ACC_STATIC) && (!(prop->flags & ZEND_ACC_PRIVATE) || prop->ce == ce)) {
@@ -451,7 +451,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 	/* Static methods */
 	/* counting static methods */
 	count = zend_hash_num_elements(&ce->function_table);
-	int count_static_funcs = 0;
+	uint32_t count_static_funcs = 0;
 	if (count > 0) {
 		ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zend_function *mptr) {
 			if ((mptr->common.fn_flags & ZEND_ACC_STATIC)
@@ -463,7 +463,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 	}
 
 	/* static methods */
-	smart_str_append_printf(str, "\n%s  - Static methods [%d] {", indent, count_static_funcs);
+	smart_str_append_printf(str, "\n%s  - Static methods [%" PRIu32 "] {", indent, count_static_funcs);
 	if (count_static_funcs > 0) {
 		ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zend_function *mptr) {
 			if ((mptr->common.fn_flags & ZEND_ACC_STATIC)
@@ -480,7 +480,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 
 	/* Default/Implicit properties */
 	count = zend_hash_num_elements(&ce->properties_info) - count_static_props - count_shadow_props;
-	smart_str_append_printf(str, "\n%s  - Properties [%d] {\n", indent, count);
+	smart_str_append_printf(str, "\n%s  - Properties [%" PRIu32 "] {\n", indent, count);
 	if (count > 0) {
 		ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, zend_property_info *prop) {
 			if (!(prop->flags & ZEND_ACC_STATIC)
@@ -539,7 +539,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 				_free_function(closure);
 			}
 		} ZEND_HASH_FOREACH_END();
-		smart_str_append_printf(str, "\n%s  - Methods [%d] {", indent, count);
+		smart_str_append_printf(str, "\n%s  - Methods [%" PRIu32 "] {", indent, count);
 		smart_str_append_smart_str(str, &method_str);
 		if (!count) {
 			smart_str_appendc(str, '\n');
@@ -749,7 +749,7 @@ static void format_default_value(smart_str *str, const zval *value) {
 /* {{{ _parameter_string */
 static void _parameter_string(smart_str *str, const zend_function *fptr, const struct _zend_arg_info *arg_info, uint32_t offset, bool required)
 {
-	smart_str_append_printf(str, "Parameter #%d [ ", offset);
+	smart_str_append_printf(str, "Parameter #%" PRIu32 " [ ", offset);
 	if (!required) {
 		smart_str_appends(str, "<optional> ");
 	} else {
@@ -806,7 +806,7 @@ static void _function_parameter_string(smart_str *str, const zend_function *fptr
 	uint32_t num_required = fptr->common.required_num_args;
 
 	smart_str_appendc(str, '\n');
-	smart_str_append_printf(str, "%s- Parameters [%d] {\n", indent, num_args);
+	smart_str_append_printf(str, "%s- Parameters [%" PRIu32 "] {\n", indent, num_args);
 	for (uint32_t i = 0; i < num_args; i++) {
 		smart_str_append_printf(str, "%s  ", indent);
 		_parameter_string(str, fptr, arg_info, i, i < num_required);
@@ -832,10 +832,10 @@ static void _function_closure_string(smart_str *str, const zend_function *fptr, 
 	}
 
 	smart_str_appendc(str, '\n');
-	smart_str_append_printf(str, "%s- Bound Variables [%u] {\n", indent, count);
+	smart_str_append_printf(str, "%s- Bound Variables [%" PRIu32 "] {\n", indent, count);
 	uint32_t i = 0;
 	ZEND_HASH_MAP_FOREACH_STR_KEY(static_variables, const zend_string *key) {
-		smart_str_append_printf(str, "%s    Variable #%d [ $%s ]\n", indent, i++, ZSTR_VAL(key));
+		smart_str_append_printf(str, "%s    Variable #%" PRIu32 " [ $%s ]\n", indent, i++, ZSTR_VAL(key));
 	} ZEND_HASH_FOREACH_END();
 	smart_str_append_printf(str, "%s}\n", indent);
 }
@@ -929,7 +929,7 @@ static void _function_string(smart_str *str, const zend_function *fptr, const ze
 	smart_str_append_printf(str, "%s ] {\n", ZSTR_VAL(fptr->common.function_name));
 	/* The information where a function is declared is only available for user classes */
 	if (fptr->type == ZEND_USER_FUNCTION) {
-		smart_str_append_printf(str, "%s  @@ %s %d - %d\n", indent,
+		smart_str_append_printf(str, "%s  @@ %s %" PRIu32 " - %" PRIu32 "\n", indent,
 						ZSTR_VAL(fptr->op_array.filename),
 						fptr->op_array.line_start,
 						fptr->op_array.line_end);
@@ -1113,7 +1113,7 @@ static void _extension_ini_string(const zend_ini_entry *ini_entry, smart_str *st
 }
 /* }}} */
 
-static void _extension_class_string(zend_class_entry *ce, zend_string *key, smart_str *str, const char *indent, const zend_module_entry *module, int *num_classes) /* {{{ */
+static void _extension_class_string(zend_class_entry *ce, zend_string *key, smart_str *str, const char *indent, const zend_module_entry *module, uint32_t *num_classes) /* {{{ */
 {
 	if (ce->type == ZEND_INTERNAL_CLASS
 		&& ce->info.internal.module
@@ -1191,7 +1191,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module) /
 
 	{
 		smart_str str_constants = {0};
-		int num_constants = 0;
+		uint32_t num_constants = 0;
 
 		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), zend_constant *constant) {
 			if (ZEND_CONSTANT_MODULE_NUMBER(constant) == module->module_number) {
@@ -1201,7 +1201,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module) /
 		} ZEND_HASH_FOREACH_END();
 
 		if (num_constants) {
-			smart_str_append_printf(str, "\n  - Constants [%d] {\n", num_constants);
+			smart_str_append_printf(str, "\n  - Constants [%" PRIu32 "] {\n", num_constants);
 			smart_str_append_smart_str(str, &str_constants);
 			smart_str_appends(str, "  }\n");
 		}
@@ -1229,13 +1229,13 @@ static void _extension_string(smart_str *str, const zend_module_entry *module) /
 
 	{
 		smart_str str_classes = {0};
-		int num_classes = 0;
+		uint32_t num_classes = 0;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(class_table), zend_string *key, zend_class_entry *ce) {
 			_extension_class_string(ce, key, &str_classes, "    ", module, &num_classes);
 		} ZEND_HASH_FOREACH_END();
 		if (num_classes) {
-			smart_str_append_printf(str, "\n  - Classes [%d] {", num_classes);
+			smart_str_append_printf(str, "\n  - Classes [%" PRIu32 "] {", num_classes);
 			smart_str_append_smart_str(str, &str_classes);
 			smart_str_appends(str, "  }\n");
 		}
@@ -4961,7 +4961,7 @@ ZEND_METHOD(ReflectionClass, newInstance)
 		}
 
 		zval *params;
-		int num_args;
+		uint32_t num_args;
 		HashTable *named_params;
 		ZEND_PARSE_PARAMETERS_START(0, -1)
 			Z_PARAM_VARIADIC_WITH_NAMED(params, num_args, named_params)
@@ -5013,7 +5013,7 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 		RETURN_THROWS();
 	}
 
-	int argc = 0;
+	uint32_t argc = 0;
 	if (args) {
 		argc = zend_hash_num_elements(args);
 	}
@@ -7334,10 +7334,10 @@ ZEND_METHOD(ReflectionAttribute, __toString)
 
 	if (attr->data->argc > 0) {
 		smart_str_appends(&str, " {\n");
-		smart_str_append_printf(&str, "  - Arguments [%d] {\n", attr->data->argc);
+		smart_str_append_printf(&str, "  - Arguments [%" PRIu32 "] {\n", attr->data->argc);
 
 		for (uint32_t i = 0; i < attr->data->argc; i++) {
-			smart_str_append_printf(&str, "    Argument #%d [ ", i);
+			smart_str_append_printf(&str, "    Argument #%" PRIu32 " [ ", i);
 			if (attr->data->args[i].name != NULL) {
 				smart_str_append(&str, attr->data->args[i].name);
 				smart_str_appends(&str, " = ");
@@ -7984,7 +7984,7 @@ static void reflection_constant_find_ext(INTERNAL_FUNCTION_PARAMETERS, bool only
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	GET_REFLECTION_OBJECT_PTR(const_);
-	int module_number = ZEND_CONSTANT_MODULE_NUMBER(const_);
+	uint32_t module_number = ZEND_CONSTANT_MODULE_NUMBER(const_);
 	if (module_number == PHP_USER_CONSTANT) {
 		// For user constants, ReflectionConstant::getExtension() returns null,
 		// ReflectionConstant::getExtensionName() returns false
@@ -8007,7 +8007,7 @@ static void reflection_constant_find_ext(INTERNAL_FUNCTION_PARAMETERS, bool only
 	zend_throw_exception_ex(
 		reflection_exception_ptr,
 		0,
-		"Unable to locate extension with module_number %d that provides constant %s",
+		"Unable to locate extension with module_number %" PRIu32 " that provides constant %s",
 		module_number,
 		ZSTR_VAL(const_->name)
 	);
