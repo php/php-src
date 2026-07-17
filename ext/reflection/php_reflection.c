@@ -292,10 +292,10 @@ static zend_object *reflection_objects_new(zend_class_entry *class_type) /* {{{ 
 /* }}} */
 
 static void _const_string(smart_str *str, const zend_string *name, const zval *value, const char *indent);
-static void _function_string(smart_str *str, const zend_function *fptr, const zend_class_entry *scope, const char* indent);
-static void _property_string(smart_str *str, const zend_property_info *prop, const zend_string *prop_name, const char* indent);
-static void _class_const_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char* indent);
-static void _enum_case_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char* indent);
+static void _function_string(smart_str *str, const zend_function *fptr, const zend_class_entry *scope, const char *indent);
+static void _property_string(smart_str *str, const zend_property_info *prop, const zend_string *prop_name, const char *indent);
+static void _class_const_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char *indent);
+static void _enum_case_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char *indent);
 static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent);
 static void _extension_string(smart_str *str, const zend_module_entry *module);
 static void _zend_extension_string(smart_str *str, const zend_extension *extension);
@@ -792,7 +792,7 @@ static void _parameter_string(smart_str *str, const zend_function *fptr, const z
 /* }}} */
 
 /* {{{ _function_parameter_string */
-static void _function_parameter_string(smart_str *str, const zend_function *fptr, const char* indent)
+static void _function_parameter_string(smart_str *str, const zend_function *fptr, const char *indent)
 {
 	const zend_arg_info *arg_info = fptr->common.arg_info;
 	if (!arg_info) {
@@ -818,7 +818,7 @@ static void _function_parameter_string(smart_str *str, const zend_function *fptr
 /* }}} */
 
 /* {{{ _function_closure_string */
-static void _function_closure_string(smart_str *str, const zend_function *fptr, const char* indent)
+static void _function_closure_string(smart_str *str, const zend_function *fptr, const char *indent)
 {
 	if (fptr->type != ZEND_USER_FUNCTION || !fptr->op_array.static_variables) {
 		return;
@@ -842,7 +842,7 @@ static void _function_closure_string(smart_str *str, const zend_function *fptr, 
 /* }}} */
 
 /* {{{ _function_string */
-static void _function_string(smart_str *str, const zend_function *fptr, const zend_class_entry *scope, const char* indent)
+static void _function_string(smart_str *str, const zend_function *fptr, const zend_class_entry *scope, const char *indent)
 {
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?)
 	 * What's "wrong" is that any whitespace before the doc comment start is
@@ -969,7 +969,7 @@ static zval *property_get_default(const zend_property_info *prop_info) {
 }
 
 /* {{{ _property_string */
-static void _property_string(smart_str *str, const zend_property_info *prop, const zend_string *prop_name, const char* indent)
+static void _property_string(smart_str *str, const zend_property_info *prop, const zend_string *prop_name, const char *indent)
 {
 	if (!prop) {
 		// Dynamic property, known to have no doc comment, flags, etc.
@@ -1142,7 +1142,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module) /
 					(module->version == NO_VERSION_YET) ? "<no_version>" : module->version);
 
 	if (module->deps) {
-		const zend_module_dep* dep = module->deps;
+		const zend_module_dep *dep = module->deps;
 
 		smart_str_appends(str, "\n  - Dependencies {\n");
 
