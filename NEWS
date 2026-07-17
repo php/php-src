@@ -12,6 +12,10 @@ PHP                                                                        NEWS
     attribute node that collides by local name with a namespaced
     attribute). (David Carlier)
 
+- MBString:
+  . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
+    offset in a non-UTF-8 encoding). (Eyüp Can Akman)
+
 - Sockets:
   . Fixed various memory related issues in ext/sockets. (David Carlier)
 
