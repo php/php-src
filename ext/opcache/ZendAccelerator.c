@@ -3850,7 +3850,6 @@ static void preload_shutdown(void)
 	}
 
 	if (EG(class_table)) {
-		zend_class_entry *ce;
 		ZEND_HASH_MAP_REVERSE_FOREACH_VAL(EG(class_table), zv) {
 			const zend_class_entry *ce;
 			Z_CE_FROM_ZVAL_P(ce, zv);
