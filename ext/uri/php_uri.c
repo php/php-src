@@ -34,6 +34,7 @@ zend_class_entry *php_uri_ce_rfc3986_uri_builder;
 zend_class_entry *php_uri_ce_rfc3986_uri;
 zend_class_entry *php_uri_ce_rfc3986_uri_type;
 zend_class_entry *php_uri_ce_rfc3986_uri_host_type;
+zend_class_entry *php_uri_ce_whatwg_url_builder;
 zend_class_entry *php_uri_ce_whatwg_url;
 zend_class_entry *php_uri_ce_comparison_mode;
 zend_class_entry *php_uri_ce_exception;
@@ -73,6 +74,15 @@ static zend_always_inline zval *php_uri_deref(zval *zv)
 #define Z_RFC3986_URI_PROP_PATH_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 4))
 #define Z_RFC3986_URI_PROP_QUERY_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 5))
 #define Z_RFC3986_URI_PROP_FRAGMENT_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 6))
+
+#define Z_WHATWG_URL_PROP_SCHEME_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
+#define Z_WHATWG_URL_PROP_USERNAME_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
+#define Z_WHATWG_URL_PROP_PASSWORD_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 2))
+#define Z_WHATWG_URL_PROP_HOST_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 3))
+#define Z_WHATWG_URL_PROP_PORT_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 4))
+#define Z_WHATWG_URL_PROP_PATH_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 5))
+#define Z_WHATWG_URL_PROP_QUERY_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 6))
+#define Z_WHATWG_URL_PROP_FRAGMENT_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 7))
 
 static HashTable *uri_get_debug_properties(php_uri_object *object)
 {
@@ -1245,6 +1255,135 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, build)
 	uri_object->uri = uriparser_uris;
 }
 
+PHP_METHOD(Uri_WhatWg_UrlBuilder, reset)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zval_ptr_dtor(Z_WHATWG_URL_PROP_SCHEME_P(ZEND_THIS));
+	ZVAL_EMPTY_STRING(Z_WHATWG_URL_PROP_SCHEME_P(ZEND_THIS));
+	convert_to_null(Z_WHATWG_URL_PROP_USERNAME_P(ZEND_THIS));
+	convert_to_null(Z_WHATWG_URL_PROP_PASSWORD_P(ZEND_THIS));
+	convert_to_null(Z_WHATWG_URL_PROP_HOST_P(ZEND_THIS));
+	convert_to_null(Z_WHATWG_URL_PROP_PORT_P(ZEND_THIS));
+	zval_ptr_dtor(Z_WHATWG_URL_PROP_PATH_P(ZEND_THIS));
+	ZVAL_EMPTY_STRING(Z_WHATWG_URL_PROP_PATH_P(ZEND_THIS));
+	convert_to_null(Z_WHATWG_URL_PROP_QUERY_P(ZEND_THIS));
+	convert_to_null(Z_WHATWG_URL_PROP_FRAGMENT_P(ZEND_THIS));
+
+	RETVAL_COPY(ZEND_THIS);
+}
+
+PHP_METHOD(Uri_WhatWg_UrlBuilder, setScheme)
+{
+	php_uri_builder_set_component_string(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("scheme"),
+		php_uri_parser_whatwg_validate_scheme
+	);
+}
+
+PHP_METHOD(Uri_WhatWg_UrlBuilder, setUsername)
+{
+	php_uri_builder_set_component_string_or_null(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("username"),
+		php_uri_parser_whatwg_validate_none
+	);
+}
+
+PHP_METHOD(Uri_WhatWg_UrlBuilder, setPassword)
+{
+	php_uri_builder_set_component_string_or_null(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("password"),
+		php_uri_parser_whatwg_validate_none
+	);
+}
+
+PHP_METHOD(Uri_WhatWg_UrlBuilder, setHost)
+{
+	php_uri_builder_set_component_string_or_null(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("host"),
+		php_uri_parser_whatwg_validate_none
+	);
+}
+
+PHP_METHOD(Uri_WhatWg_UrlBuilder, setPort)
+{
+	php_uri_builder_set_component_long_or_null(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("port"),
+		php_uri_parser_whatwg_validate_port
+	);
+}
+
+PHP_METHOD(Uri_WhatWg_UrlBuilder, setPath)
+{
+	php_uri_builder_set_component_string(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("path"),
+		php_uri_parser_whatwg_validate_none
+	);
+}
+
+PHP_METHOD(Uri_WhatWg_UrlBuilder, setQuery)
+{
+	php_uri_builder_set_component_string_or_null(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("query"),
+		php_uri_parser_whatwg_validate_none
+	);
+}
+
+PHP_METHOD(Uri_WhatWg_UrlBuilder, setFragment)
+{
+	php_uri_builder_set_component_string_or_null(
+		INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_STRL("fragment"),
+		php_uri_parser_whatwg_validate_none
+	);
+}
+
+PHP_METHOD(Uri_WhatWg_UrlBuilder, build)
+{
+	zval *base_url_zv = NULL;
+	zval *errors = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(base_url_zv, php_uri_ce_whatwg_url)
+		Z_PARAM_ZVAL(errors)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const zval *scheme = Z_WHATWG_URL_PROP_SCHEME_P(ZEND_THIS);
+	const zval *username = Z_WHATWG_URL_PROP_USERNAME_P(ZEND_THIS);
+	const zval *password = Z_WHATWG_URL_PROP_PASSWORD_P(ZEND_THIS);
+	const zval *host = Z_WHATWG_URL_PROP_HOST_P(ZEND_THIS);
+	const zval *port = Z_WHATWG_URL_PROP_PORT_P(ZEND_THIS);
+	const zval *path = Z_WHATWG_URL_PROP_PATH_P(ZEND_THIS);
+	const zval *query = Z_WHATWG_URL_PROP_QUERY_P(ZEND_THIS);
+	const zval *fragment = Z_WHATWG_URL_PROP_FRAGMENT_P(ZEND_THIS);
+
+	lxb_url_t *base_url = NULL;
+	if (base_url_zv != NULL) {
+		base_url = Z_URI_OBJECT_P(base_url_zv)->uri;
+	}
+
+	lxb_url_t *lexbor_url = php_uri_parser_whatwg_build_from_zval(
+		base_url, scheme, username, password, host, port, path, query, fragment,
+		errors
+	);
+	if (lexbor_url == NULL) {
+		RETURN_THROWS();
+	}
+
+	object_init_ex(return_value, php_uri_ce_whatwg_url);
+	php_uri_object *uri_object = Z_URI_OBJECT_P(return_value);
+	uri_object->parser = &php_uri_parser_whatwg;
+	uri_object->uri = lexbor_url;
+}
+
 PHPAPI php_uri_object *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser)
 {
 	php_uri_object *uri_object = zend_object_alloc(sizeof(*uri_object), class_type);
@@ -1326,6 +1465,8 @@ static PHP_MINIT_FUNCTION(uri)
 
 	php_uri_ce_rfc3986_uri_type = register_class_Uri_Rfc3986_UriType();
 	php_uri_ce_rfc3986_uri_host_type = register_class_Uri_Rfc3986_UriHostType();
+
+	php_uri_ce_whatwg_url_builder = register_class_Uri_WhatWg_UrlBuilder();
 
 	php_uri_ce_whatwg_url = register_class_Uri_WhatWg_Url();
 	php_uri_ce_whatwg_url->create_object = php_uri_object_create_whatwg;

@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: 1a396b7a5b170b968d84a2c64a5bcf7d962653db
+ * Stub hash: bfa277cf0720adcd0f8e44ecec73187f42adb127
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_reset, 0, 0, IS_STATIC, 0)
@@ -141,6 +141,35 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_WhatWg_UrlValidationError___construct, 
 	ZEND_ARG_TYPE_INFO(0, failure, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_Uri_WhatWg_UrlBuilder_reset arginfo_class_Uri_Rfc3986_UriBuilder_reset
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_UrlBuilder_setScheme, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_UrlBuilder_setUsername, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, username, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_UrlBuilder_setPassword, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Uri_WhatWg_UrlBuilder_setHost arginfo_class_Uri_Rfc3986_UriBuilder_setHost
+
+#define arginfo_class_Uri_WhatWg_UrlBuilder_setPort arginfo_class_Uri_Rfc3986_UriBuilder_setPort
+
+#define arginfo_class_Uri_WhatWg_UrlBuilder_setPath arginfo_class_Uri_Rfc3986_UriBuilder_setPath
+
+#define arginfo_class_Uri_WhatWg_UrlBuilder_setQuery arginfo_class_Uri_Rfc3986_UriBuilder_setQuery
+
+#define arginfo_class_Uri_WhatWg_UrlBuilder_setFragment arginfo_class_Uri_Rfc3986_UriBuilder_setFragment
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_WhatWg_UrlBuilder_build, 0, 0, Uri\\WhatWg\\\125rl, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, baseUrl, Uri\\WhatWg\\\125rl, 1, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, errors, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, baseUrl, Uri\\WhatWg\\\125rl, 1, "null")
@@ -155,24 +184,18 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url_getScheme arginfo_class_Uri_Rfc3986_Uri_getPath
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_withScheme, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Uri_WhatWg_Url_withScheme arginfo_class_Uri_WhatWg_UrlBuilder_setScheme
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_isSpecialScheme, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url_getUsername arginfo_class_Uri_Rfc3986_Uri_getScheme
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_withUsername, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, username, IS_STRING, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Uri_WhatWg_Url_withUsername arginfo_class_Uri_WhatWg_UrlBuilder_setUsername
 
 #define arginfo_class_Uri_WhatWg_Url_getPassword arginfo_class_Uri_Rfc3986_Uri_getScheme
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_withPassword, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Uri_WhatWg_Url_withPassword arginfo_class_Uri_WhatWg_UrlBuilder_setPassword
 
 #define arginfo_class_Uri_WhatWg_Url_getAsciiHost arginfo_class_Uri_Rfc3986_Uri_getScheme
 
@@ -265,6 +288,16 @@ ZEND_METHOD(Uri_Rfc3986_Uri, __unserialize);
 ZEND_METHOD(Uri_Rfc3986_Uri, __debugInfo);
 ZEND_METHOD(Uri_WhatWg_InvalidUrlException, __construct);
 ZEND_METHOD(Uri_WhatWg_UrlValidationError, __construct);
+ZEND_METHOD(Uri_WhatWg_UrlBuilder, reset);
+ZEND_METHOD(Uri_WhatWg_UrlBuilder, setScheme);
+ZEND_METHOD(Uri_WhatWg_UrlBuilder, setUsername);
+ZEND_METHOD(Uri_WhatWg_UrlBuilder, setPassword);
+ZEND_METHOD(Uri_WhatWg_UrlBuilder, setHost);
+ZEND_METHOD(Uri_WhatWg_UrlBuilder, setPort);
+ZEND_METHOD(Uri_WhatWg_UrlBuilder, setPath);
+ZEND_METHOD(Uri_WhatWg_UrlBuilder, setQuery);
+ZEND_METHOD(Uri_WhatWg_UrlBuilder, setFragment);
+ZEND_METHOD(Uri_WhatWg_UrlBuilder, build);
 ZEND_METHOD(Uri_WhatWg_Url, parse);
 ZEND_METHOD(Uri_WhatWg_Url, __construct);
 ZEND_METHOD(Uri_WhatWg_Url, getScheme);
@@ -342,6 +375,20 @@ static const zend_function_entry class_Uri_WhatWg_InvalidUrlException_methods[] 
 
 static const zend_function_entry class_Uri_WhatWg_UrlValidationError_methods[] = {
 	ZEND_ME(Uri_WhatWg_UrlValidationError, __construct, arginfo_class_Uri_WhatWg_UrlValidationError___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Uri_WhatWg_UrlBuilder_methods[] = {
+	ZEND_ME(Uri_WhatWg_UrlBuilder, reset, arginfo_class_Uri_WhatWg_UrlBuilder_reset, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_UrlBuilder, setScheme, arginfo_class_Uri_WhatWg_UrlBuilder_setScheme, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_UrlBuilder, setUsername, arginfo_class_Uri_WhatWg_UrlBuilder_setUsername, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_UrlBuilder, setPassword, arginfo_class_Uri_WhatWg_UrlBuilder_setPassword, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_UrlBuilder, setHost, arginfo_class_Uri_WhatWg_UrlBuilder_setHost, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_UrlBuilder, setPort, arginfo_class_Uri_WhatWg_UrlBuilder_setPort, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_UrlBuilder, setPath, arginfo_class_Uri_WhatWg_UrlBuilder_setPath, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_UrlBuilder, setQuery, arginfo_class_Uri_WhatWg_UrlBuilder_setQuery, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_UrlBuilder, setFragment, arginfo_class_Uri_WhatWg_UrlBuilder_setFragment, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_WhatWg_UrlBuilder, build, arginfo_class_Uri_WhatWg_UrlBuilder_build, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -625,6 +672,51 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlHostType(void)
 	zend_enum_add_case_cstr(class_entry, "Opaque", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "Empty", NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Uri_WhatWg_UrlBuilder(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Uri\\WhatWg", "UrlBuilder", class_Uri_WhatWg_UrlBuilder_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+
+	zval property_scheme_default_value;
+	ZVAL_EMPTY_STRING(&property_scheme_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_SCHEME), &property_scheme_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+
+	zval property_username_default_value;
+	ZVAL_NULL(&property_username_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_USERNAME), &property_username_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+
+	zval property_password_default_value;
+	ZVAL_NULL(&property_password_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PASSWORD), &property_password_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+
+	zval property_host_default_value;
+	ZVAL_NULL(&property_host_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_HOST), &property_host_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+
+	zval property_port_default_value;
+	ZVAL_NULL(&property_port_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PORT), &property_port_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+
+	zval property_path_default_value;
+	ZVAL_EMPTY_STRING(&property_path_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_PATH), &property_path_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+
+	zval property_query_default_value;
+	ZVAL_NULL(&property_query_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_QUERY), &property_query_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+
+	zval property_fragment_default_value;
+	ZVAL_NULL(&property_fragment_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_FRAGMENT), &property_fragment_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setpassword", sizeof("setpassword") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }
