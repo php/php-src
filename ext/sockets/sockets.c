@@ -1839,6 +1839,7 @@ PHP_FUNCTION(socket_get_option)
 #endif
 
 	optlen = sizeof(other_val);
+	other_val = 0;
 
 	if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&other_val, &optlen) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
