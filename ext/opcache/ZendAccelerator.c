@@ -2146,8 +2146,7 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 			 * See comment in zend_accel_pfa_key(). */
 			zend_op_array *copy = zend_arena_alloc(&CG(arena), sizeof(*copy));
 			memcpy(copy, called_function, sizeof(*copy));
-			zend_string_addref(copy->function_name);
-			(*copy->refcount)++;
+			function_add_ref((zend_function *) copy);
 			/* Reference the copy in op_array->dynamic_func_defs so that it's
 			 * destroyed when op_array is destroyed. */
 			ZEND_ASSERT(!op_array->dynamic_func_defs && !op_array->num_dynamic_func_defs);
