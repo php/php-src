@@ -1361,7 +1361,8 @@ CWD_API int virtual_access(const char *pathname, int mode) /* {{{ */
 	int ret;
 
 #ifndef ZEND_WIN32
-	if (virtual_path_is_direct(pathname)) {
+	if (pathname[0] == '/' &&
+		(CWDG(realpath_cache_size_limit) || virtual_path_is_direct(pathname))) {
 		return access(pathname, mode);
 	}
 #endif
@@ -1582,7 +1583,8 @@ CWD_API int virtual_stat(const char *path, zend_stat_t *buf) /* {{{ */
 	int retval;
 
 #ifndef ZEND_WIN32
-	if (virtual_path_is_direct(path)) {
+	if (path[0] == '/' &&
+		(CWDG(realpath_cache_size_limit) || virtual_path_is_direct(path))) {
 		return php_sys_stat(path, buf);
 	}
 #endif
@@ -1606,6 +1608,9 @@ CWD_API int virtual_lstat(const char *path, zend_stat_t *buf) /* {{{ */
 	int retval;
 
 #ifndef ZEND_WIN32
+	/* CWD_EXPAND strips '..' textually (save=0 -> no symlink lookups),
+	 * but the kernel resolves it physically. Different file
+	 * when a parent component is a symlink. */
 	if (virtual_path_is_direct(path)) {
 		return php_sys_lstat(path, buf);
 	}
