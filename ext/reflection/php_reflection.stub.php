@@ -128,6 +128,10 @@ class ReflectionFunction extends ReflectionFunctionAbstract
 
     public function isAnonymous(): bool {}
 
+    public function getConstExprId(): ?string {}
+
+    public function getConstExprClass(): ?string {}
+
     /**
      * @tentative-return-type
      */

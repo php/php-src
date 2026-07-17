@@ -11812,11 +11812,27 @@ static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
 			"Cannot use(...) variables in constant expression");
 	}
 
+	/* Serialization verifies a declaration-site reference against a hash of
+	 * the closure's code, so that a reference cannot silently resolve to a
+	 * different closure after the surrounding declarations were reordered.
+	 * Hash the pretty-printed declaration (whitespace- and layout-insensitive)
+	 * before it is compiled, while nested declarations are still source ASTs.
+	 * 0 is reserved for "no hash" (a first-class callable reference carries
+	 * none), so a zero result maps to 1. */
+	zend_string *code = zend_ast_export("", (zend_ast *) closure_ast, "");
+	uint32_t code_hash = (uint32_t) zend_inline_hash_func(ZSTR_VAL(code), ZSTR_LEN(code));
+	zend_string_release_ex(code, 0);
+	if (code_hash == 0) {
+		code_hash = 1;
+	}
+
 	znode node;
 	zend_op_array *op = zend_compile_func_decl(&node, (zend_ast*)closure_ast, FUNC_DECL_LEVEL_CONSTEXPR);
+	op->fn_flags2 |= ZEND_ACC2_CONSTEXPR_CLOSURE;
 
 	zend_ast_destroy(*ast_ptr);
 	*ast_ptr = zend_ast_create_op_array(op);
+	zend_ast_get_op_array(*ast_ptr)->code_hash = code_hash;
 }
 
 static void zend_compile_const_expr_fcc(zend_ast **ast_ptr)

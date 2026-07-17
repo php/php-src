@@ -25,6 +25,7 @@
 #include "zend_smart_str.h"
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
+#include "zend_execute.h"
 #include "zend_enum.h"
 #include "zend_exceptions.h"
 #include "zend_types.h"
@@ -1492,16 +1493,31 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 	}
 
 cleanup:
-	if (class_hash) {
+	/* Reset to previous options in case this is a nested call. The
+	 * allowed_classes filter is restored (and its table freed) only for a
+	 * genuinely nested call that shares var_hash; for the call that owns
+	 * var_hash it is kept installed across DESTROY, so that the delayed
+	 * __unserialize() hooks run there still observe it (a Closure payload
+	 * resolves its referenced class by name inside __unserialize()), then
+	 * torn down together with var_hash below. */
+	php_var_unserialize_set_max_depth(var_hash, prev_max_depth);
+	php_var_unserialize_set_cur_depth(var_hash, prev_cur_depth);
+
+	bool owns_var_hash = BG(serialize_lock) || BG(unserialize).level == 1;
+	if (!owns_var_hash) {
+		php_var_unserialize_set_allowed_classes(var_hash, prev_class_hash);
+		if (class_hash) {
+			zend_hash_destroy(class_hash);
+			FREE_HASHTABLE(class_hash);
+		}
+	}
+
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+
+	if (owns_var_hash && class_hash) {
 		zend_hash_destroy(class_hash);
 		FREE_HASHTABLE(class_hash);
 	}
-
-	/* Reset to previous options in case this is a nested call */
-	php_var_unserialize_set_allowed_classes(var_hash, prev_class_hash);
-	php_var_unserialize_set_max_depth(var_hash, prev_max_depth);
-	php_var_unserialize_set_cur_depth(var_hash, prev_cur_depth);
-	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
 	/* Per calling convention we must not return a reference here, so unwrap. We're doing this at
 	 * the very end, because __wakeup() calls performed during UNSERIALIZE_DESTROY might affect
@@ -1567,8 +1583,34 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("unserialize_max_depth", "4096", PHP_INI_ALL, OnUpdateLong, unserialize_max_depth, php_basic_globals, basic_globals)
 PHP_INI_END()
 
+/* Installed as zend_unserialize_class_allowed so the engine can apply the
+ * innermost active unserialize()'s allowed_classes filter to a class a magic
+ * __unserialize() resolves by name (e.g. Closure). Mirrors the object path's
+ * unserialize_allowed_class(): no active unserialize() or no filter allows
+ * everything; an empty filter allows nothing. */
+static bool php_unserialize_class_allowed(zend_string *class_name)
+{
+	if (!BG(unserialize).level) {
+		return true;
+	}
+
+	HashTable *classes = php_var_unserialize_get_allowed_classes(BG(unserialize).data);
+	if (classes == NULL) {
+		return true;
+	}
+	if (!zend_hash_num_elements(classes)) {
+		return false;
+	}
+
+	zend_string *lcname = zend_string_tolower(class_name);
+	bool allowed = zend_hash_exists(classes, lcname);
+	zend_string_release_ex(lcname, 0);
+	return allowed;
+}
+
 PHP_MINIT_FUNCTION(var)
 {
 	REGISTER_INI_ENTRIES();
+	zend_unserialize_class_allowed = php_unserialize_class_allowed;
 	return SUCCESS;
 }

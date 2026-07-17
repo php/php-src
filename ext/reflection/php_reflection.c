@@ -1983,6 +1983,53 @@ ZEND_METHOD(ReflectionFunction, isAnonymous)
 }
 /* }}} */
 
+/* {{{ Returns the declaration-site id of a closure declared in a constant
+       expression (an anonymous closure or a first-class callable reference),
+       for use with Closure::fromConstExpr(), or null */
+ZEND_METHOD(ReflectionFunction, getConstExprId)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	zend_string *id;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT();
+
+	if (Z_ISUNDEF(intern->obj)
+	 || Z_OBJCE(intern->obj) != zend_ce_closure
+	 || zend_constexpr_closure_ref(Z_OBJ(intern->obj), &ce, &id) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	RETURN_STR(id);
+}
+/* }}} */
+
+/* {{{ Returns the class whose constant expressions declared this closure,
+       for use with Closure::fromConstExpr() together with getConstExprId(),
+       or null */
+ZEND_METHOD(ReflectionFunction, getConstExprClass)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	zend_string *id;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT();
+
+	if (Z_ISUNDEF(intern->obj)
+	 || Z_OBJCE(intern->obj) != zend_ce_closure
+	 || zend_constexpr_closure_ref(Z_OBJ(intern->obj), &ce, &id) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	zend_string_release(id);
+	RETURN_STR_COPY(ce->name);
+}
+/* }}} */
+
 /* {{{ Returns whether this function has been disabled or not */
 ZEND_METHOD(ReflectionFunction, isDisabled)
 {

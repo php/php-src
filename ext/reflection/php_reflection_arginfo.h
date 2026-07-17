@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_reflection.stub.php instead.
- * Stub hash: c80946cc8c8215bb6527e09bb71b3a97a76a6a98
+ * Stub hash: 6617d3a93a0de137083bf0a8c309da867a34f5c9
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
@@ -95,6 +95,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunction___toStr
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionFunction_isAnonymous arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunction_getConstExprId, 0, 0, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionFunction_getConstExprClass arginfo_class_ReflectionFunction_getConstExprId
 
 #define arginfo_class_ReflectionFunction_isDisabled arginfo_class_ReflectionFunctionAbstract_inNamespace
 
@@ -698,8 +703,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionFiber_getFiber, 0, 0, Fiber, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFiber_getExecutingFile, 0, 0, IS_STRING, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionFiber_getExecutingFile arginfo_class_ReflectionFunction_getConstExprId
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFiber_getExecutingLine, 0, 0, IS_LONG, 1)
 ZEND_END_ARG_INFO()
@@ -771,6 +775,8 @@ ZEND_METHOD(ReflectionFunctionAbstract, getAttributes);
 ZEND_METHOD(ReflectionFunction, __construct);
 ZEND_METHOD(ReflectionFunction, __toString);
 ZEND_METHOD(ReflectionFunction, isAnonymous);
+ZEND_METHOD(ReflectionFunction, getConstExprId);
+ZEND_METHOD(ReflectionFunction, getConstExprClass);
 ZEND_METHOD(ReflectionFunction, isDisabled);
 ZEND_METHOD(ReflectionFunction, invoke);
 ZEND_METHOD(ReflectionFunction, invokeArgs);
@@ -1055,6 +1061,8 @@ static const zend_function_entry class_ReflectionFunction_methods[] = {
 	ZEND_ME(ReflectionFunction, __construct, arginfo_class_ReflectionFunction___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunction, __toString, arginfo_class_ReflectionFunction___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunction, isAnonymous, arginfo_class_ReflectionFunction_isAnonymous, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunction, getConstExprId, arginfo_class_ReflectionFunction_getConstExprId, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunction, getConstExprClass, arginfo_class_ReflectionFunction_getConstExprClass, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunction, isDisabled, arginfo_class_ReflectionFunction_isDisabled, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME(ReflectionFunction, invoke, arginfo_class_ReflectionFunction_invoke, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunction, invokeArgs, arginfo_class_ReflectionFunction_invokeArgs, ZEND_ACC_PUBLIC)

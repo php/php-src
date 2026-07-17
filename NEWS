@@ -173,6 +173,11 @@ PHP                                                                        NEWS
 - Core:
   . Added first-class callable cache to share instances for the duration of the
     request. (ilutov)
+  . Closures declared in constant expressions (anonymous closures and
+    first-class callables) can now be serialized as references to their
+    declaration site. Added Closure::fromConstExpr(),
+    ReflectionFunction::getConstExprId() and getConstExprClass().
+    (nicolas-grekas)
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand. (ndossche)
   . Added `clamp()`. (kylekatarnls, thinkverse)

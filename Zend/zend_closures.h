@@ -40,6 +40,18 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *obj);
 ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj);
 ZEND_API zval* zend_get_closure_this_ptr(zval *obj);
 
+/* Closures declared in constant expressions (anonymous declarations as well
+ * as first-class callable references) are addressable by an element-scoped
+ * reference: an opaque "<site>@<key>[#<hash>]" string where <site> names the
+ * declaring reflection element and <key> is the closure's rank within that
+ * element (for an anonymous closure, then suffixed with a hash of the
+ * closure's code as a staleness check) or the referenced callable's name (for
+ * a first-class callable; names cannot drift and carry no hash).
+ * zend_constexpr_closure_ref() returns the reference (a fresh zend_string the
+ * caller owns) for a Closure object, when it has one. */
+ZEND_API zend_result zend_constexpr_closure_ref(zend_object *closure_obj, zend_class_entry **ce, zend_string **id);
+ZEND_API void zend_closure_mark_as_constexpr_fcc(zval *closure_zv, zend_class_entry *site_class);
+
 END_EXTERN_C()
 
 #endif
