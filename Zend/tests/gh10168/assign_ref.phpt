@@ -15,4 +15,5 @@ var_dump($a = &$tmp);
 
 ?>
 --EXPECT--
-NULL
+object(Test)#2 (0) {
+}

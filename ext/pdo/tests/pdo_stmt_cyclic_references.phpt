@@ -106,7 +106,7 @@ object(TestRow)#%d (4) {
   string(11) "Hello world"
 }
 Fetch into:
-object(TestRow)#4 (4) {
+object(TestRow)#5 (4) {
   ["id"]=>
   string(1) "1"
   ["val"]=>
@@ -116,7 +116,7 @@ object(TestRow)#4 (4) {
   ["arg"]=>
   string(21) "I am being fetch into"
 }
-object(TestRow)#4 (4) {
+object(TestRow)#5 (4) {
   ["id"]=>
   string(1) "2"
   ["val"]=>
@@ -126,7 +126,7 @@ object(TestRow)#4 (4) {
   ["arg"]=>
   string(21) "I am being fetch into"
 }
-object(TestRow)#4 (4) {
+object(TestRow)#5 (4) {
   ["id"]=>
   string(1) "3"
   ["val"]=>

@@ -115,6 +115,11 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 	zend_function *destructor = object->ce->destructor;
 
 	if (destructor) {
+		uint32_t defer_flags = OBJ_EXTRA_FLAGS(object)
+			& (IS_OBJ_DTOR_PENDING|IS_OBJ_DTOR_VIS_FAIL);
+
+		OBJ_EXTRA_FLAGS(object) &= ~(IS_OBJ_DTOR_PENDING|IS_OBJ_DTOR_VIS_FAIL);
+
 		if (UNEXPECTED(zend_object_is_lazy(object))) {
 			return;
 		}
@@ -123,23 +128,32 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 		const zend_op *old_opline_before_exception = NULL;
 
 		if (destructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
-			if (EG(current_execute_data)) {
-				zend_class_entry *scope = zend_get_executed_scope();
-				/* Ensure that if we're calling a protected or private function, we're allowed to do so. */
-				ZEND_ASSERT(!(destructor->common.fn_flags & ZEND_ACC_PUBLIC));
-				if (!zend_check_method_accessible(destructor, scope)) {
-					zend_throw_error(NULL,
+			zend_class_entry *scope = NULL;
+			bool accessible;
+
+			ZEND_ASSERT(!(destructor->common.fn_flags & ZEND_ACC_PUBLIC));
+			if (defer_flags & IS_OBJ_DTOR_PENDING) {
+				accessible = !(defer_flags & IS_OBJ_DTOR_VIS_FAIL);
+				if (!accessible) {
+					scope = zend_get_executed_scope();
+				}
+			} else {
+				scope = zend_get_executed_scope();
+				accessible = zend_check_method_accessible(destructor, scope);
+			}
+			if (!accessible) {
+				if (EG(current_execute_data) || !(EG(flags) & EG_FLAGS_IN_SHUTDOWN)) {
+					zend_throw_exception_ex(zend_ce_error, 0,
 						"Call to %s %s::__destruct() from %s%s",
 						zend_visibility_string(destructor->common.fn_flags), ZSTR_VAL(object->ce->name),
 						scope ? "scope " : "global scope",
 						scope ? ZSTR_VAL(scope->name) : ""
 					);
-					return;
+				} else {
+					zend_error(E_WARNING,
+						"Call to %s %s::__destruct() from global scope during shutdown ignored",
+						zend_visibility_string(destructor->common.fn_flags), ZSTR_VAL(object->ce->name));
 				}
-			} else {
-				zend_error(E_WARNING,
-					"Call to %s %s::__destruct() from global scope during shutdown ignored",
-					zend_visibility_string(destructor->common.fn_flags), ZSTR_VAL(object->ce->name));
 				return;
 			}
 		}

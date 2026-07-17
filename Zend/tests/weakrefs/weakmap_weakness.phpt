@@ -78,13 +78,13 @@ object(WeakMap)#1 (0) {
 
 Destructor in WeakMap value:
 Before unset:
-Dtor!
 After unset:
+Dtor!
 object(WeakMap)#1 (0) {
 }
 
 Destroying map with live object:
-object(stdClass)#2 (0) {
+object(stdClass)#3 (0) {
 }
 
 Object freed by GC:
@@ -92,7 +92,7 @@ object(WeakMap)#1 (1) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#3 (1) {
+    object(stdClass)#2 (1) {
       ["obj"]=>
       *RECURSION*
     }
@@ -104,7 +104,7 @@ object(WeakMap)#1 (0) {
 }
 
 Storing object as own value:
-object(WeakMap)#3 (1) {
+object(WeakMap)#2 (1) {
   [0]=>
   array(2) {
     ["key"]=>
@@ -117,7 +117,7 @@ object(WeakMap)#3 (1) {
 }
 
 Storing map in itself:
-object(WeakMap)#3 (1) {
+object(WeakMap)#2 (1) {
   [0]=>
   array(2) {
     ["key"]=>

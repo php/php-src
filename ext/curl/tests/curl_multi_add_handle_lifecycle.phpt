@@ -44,6 +44,6 @@ echo "Removed", PHP_EOL;
 ?>
 --EXPECTF--
 Removing
-MyClass::__destruct
-MyClass::__destruct
 Removed
+MyClass::__destruct
+MyClass::__destruct

@@ -128,6 +128,7 @@ typedef struct _zend_inheritance_cache_entry zend_inheritance_cache_entry;
 typedef struct _zend_error_info {
 	int type;
 	uint32_t lineno;
+	int error_reporting;
 	zend_string *filename;
 	zend_string *message;
 } zend_error_info;
@@ -453,6 +454,8 @@ ZEND_API void zend_begin_record_errors(void);
 ZEND_API void zend_emit_recorded_errors(void);
 ZEND_API void zend_emit_recorded_errors_ex(uint32_t num_errors, zend_error_info **errors);
 ZEND_API void zend_free_recorded_errors(void);
+ZEND_API void zend_flush_deferred_errors(void);
+ZEND_API void zend_free_deferred_errors(void);
 END_EXTERN_C()
 
 #define DEBUG_BACKTRACE_PROVIDE_OBJECT (1<<0)

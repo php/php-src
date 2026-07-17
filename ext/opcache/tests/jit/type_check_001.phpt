@@ -20,5 +20,5 @@ try {
     echo "Exception: " . $e->getMessage() . "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 Exception: Undefined variable $a

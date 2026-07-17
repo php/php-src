@@ -62,6 +62,12 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_destroy(zend_objects_store *objec
 ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object);
 ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object);
 
+ZEND_API void ZEND_FASTCALL zend_defer_dtor(zend_object *object);
+ZEND_API void ZEND_FASTCALL zend_flush_deferred_dtors(void);
+ZEND_API void ZEND_FASTCALL zend_flush_deferred_dtors_surface(void);
+ZEND_API void ZEND_FASTCALL zend_surface_deferred_dtor_exception(void);
+ZEND_API void ZEND_FASTCALL zend_release_deferred_dtors(void);
+
 /* Called when the ctor was terminated by an exception */
 static zend_always_inline void zend_object_store_ctor_failed(zend_object *obj)
 {

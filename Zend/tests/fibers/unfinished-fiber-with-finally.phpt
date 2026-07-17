@@ -26,5 +26,5 @@ echo "done\n";
 ?>
 --EXPECT--
 fiber
-finally
 done
+finally

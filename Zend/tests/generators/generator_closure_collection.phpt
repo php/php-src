@@ -21,6 +21,8 @@ var_dump($r->get());
 
 unset($generator);
 
+(function () {})();
+
 var_dump($r->get());
 
 ?>

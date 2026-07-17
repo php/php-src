@@ -1438,9 +1438,10 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 		} \
 	} while (0)
 
-ZEND_API ZEND_COLD void zend_error_zstr_at(
+static void zend_call_user_error_handler(
 		int orig_type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
 {
+	int type = orig_type & E_ALL;
 	zval params[4];
 	zval retval;
 	zval orig_user_error_handler;
@@ -1448,10 +1449,203 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	zend_class_entry *saved_class_entry = NULL;
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
-	int type = orig_type & E_ALL;
 	bool orig_record_errors;
 	zend_err_buf orig_errors_buf;
 	zend_result res;
+
+	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF
+		|| !(EG(user_error_handler_error_reporting) & type)
+		|| EG(error_handling) != EH_NORMAL) {
+		zend_error_cb(orig_type, error_filename, error_lineno, message);
+		return;
+	}
+
+	zend_flush_deferred_dtors();
+	zend_flush_deferred_errors();
+
+	if (UNEXPECTED(EG(exception))) {
+		return;
+	}
+
+	ZVAL_STR_COPY(&params[1], message);
+	ZVAL_LONG(&params[0], type);
+
+	if (error_filename) {
+		ZVAL_STR_COPY(&params[2], error_filename);
+	} else {
+		ZVAL_NULL(&params[2]);
+	}
+
+	ZVAL_LONG(&params[3], error_lineno);
+
+	ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
+	ZVAL_UNDEF(&EG(user_error_handler));
+
+	/* User error handler may include() additional PHP files.
+	 * If an error was generated during compilation PHP will compile
+	 * such scripts recursively, but some CG() variables may be
+	 * inconsistent. */
+
+	in_compilation = CG(in_compilation);
+	if (in_compilation) {
+		saved_class_entry = CG(active_class_entry);
+		CG(active_class_entry) = NULL;
+		SAVE_STACK(loop_var_stack);
+		SAVE_STACK(delayed_oplines_stack);
+		CG(in_compilation) = 0;
+	}
+
+	orig_record_errors = EG(record_errors);
+	EG(record_errors) = false;
+
+	orig_errors_buf = EG(errors);
+	memset(&EG(errors), 0, sizeof(EG(errors)));
+
+	res = call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params);
+
+	EG(record_errors) = orig_record_errors;
+	EG(errors) = orig_errors_buf;
+
+	if (res == SUCCESS) {
+		if (Z_TYPE(retval) != IS_UNDEF) {
+			if (Z_TYPE(retval) == IS_FALSE) {
+				zend_error_cb(orig_type, error_filename, error_lineno, message);
+			}
+			zval_ptr_dtor(&retval);
+		}
+	} else if (!EG(exception)) {
+		/* The user error handler failed, use built-in error handler */
+		zend_error_cb(orig_type, error_filename, error_lineno, message);
+	}
+
+	if (in_compilation) {
+		CG(active_class_entry) = saved_class_entry;
+		RESTORE_STACK(loop_var_stack);
+		RESTORE_STACK(delayed_oplines_stack);
+		CG(in_compilation) = 1;
+	}
+
+	zval_ptr_dtor(&params[2]);
+	zval_ptr_dtor(&params[1]);
+
+	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF) {
+		ZVAL_COPY_VALUE(&EG(user_error_handler), &orig_user_error_handler);
+	} else {
+		zval_ptr_dtor(&orig_user_error_handler);
+	}
+}
+
+static zend_always_inline bool zend_can_defer_error(int type)
+{
+	if (type == E_USER_ERROR || type == E_RECOVERABLE_ERROR) {
+		return false;
+	}
+	if (CG(in_compilation) || !EG(current_execute_data) || !EG(current_execute_data)->func) {
+		return false;
+	}
+	zend_execute_data *ex = EG(current_execute_data);
+	if (!ZEND_USER_CODE(ex->func->type) || !ex->opline) {
+		return false;
+	}
+	switch (ex->opline->opcode) {
+		case ZEND_DECLARE_CLASS:
+		case ZEND_DECLARE_CLASS_DELAYED:
+		case ZEND_DECLARE_ANON_CLASS:
+		case ZEND_INIT_FCALL:
+		case ZEND_INIT_FCALL_BY_NAME:
+		case ZEND_INIT_NS_FCALL_BY_NAME:
+		case ZEND_INIT_METHOD_CALL:
+		case ZEND_INIT_STATIC_METHOD_CALL:
+		case ZEND_INIT_USER_CALL:
+		case ZEND_INIT_DYNAMIC_CALL:
+		case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
+		case ZEND_DO_FCALL:
+		case ZEND_DO_FCALL_BY_NAME:
+		case ZEND_DO_UCALL:
+		case ZEND_FETCH_CONSTANT:
+		case ZEND_FETCH_CLASS_CONSTANT:
+		case ZEND_INCLUDE_OR_EVAL:
+			return false;
+	}
+	return true;
+}
+
+static void zend_defer_error(
+		int orig_type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
+{
+	zend_error_info *info = emalloc(sizeof(zend_error_info));
+	info->type = orig_type;
+	info->lineno = error_lineno;
+	info->error_reporting = EG(error_reporting);
+	info->filename = error_filename ? zend_string_copy(error_filename) : NULL;
+	info->message = zend_string_copy(message);
+
+	EG(deferred_errors).size++;
+	if (EG(deferred_errors).size > EG(deferred_errors).capacity) {
+		uint32_t capacity = EG(deferred_errors).capacity
+			? EG(deferred_errors).capacity + (EG(deferred_errors).capacity >> 1) : 2;
+		EG(deferred_errors).errors = erealloc(EG(deferred_errors).errors, sizeof(zend_error_info *) * capacity);
+		EG(deferred_errors).capacity = capacity;
+	}
+	EG(deferred_errors).errors[EG(deferred_errors).size - 1] = info;
+
+	zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+}
+
+ZEND_API void zend_flush_deferred_errors(void)
+{
+	if (!EG(deferred_errors).size) {
+		return;
+	}
+
+	/* A user error handler cannot run while an exception is pending. Keep the
+	 * errors buffered so ZEND_HANDLE_EXCEPTION can flush them with the
+	 * exception cleared, instead of silently dropping them. */
+	if (EG(exception)) {
+		return;
+	}
+
+	zend_err_buf buf = EG(deferred_errors);
+	memset(&EG(deferred_errors), 0, sizeof(EG(deferred_errors)));
+
+	int orig_error_reporting = EG(error_reporting);
+	for (uint32_t i = 0; i < buf.size; i++) {
+		zend_error_info *info = buf.errors[i];
+		if (!EG(exception)) {
+			EG(error_reporting) = info->error_reporting;
+			zend_call_user_error_handler(info->type, info->filename, info->lineno, info->message);
+		}
+		if (info->filename) {
+			zend_string_release(info->filename);
+		}
+		zend_string_release(info->message);
+		efree_size(info, sizeof(zend_error_info));
+	}
+	EG(error_reporting) = orig_error_reporting;
+	efree(buf.errors);
+}
+
+ZEND_API void zend_free_deferred_errors(void)
+{
+	if (!EG(deferred_errors).size) {
+		return;
+	}
+	for (uint32_t i = 0; i < EG(deferred_errors).size; i++) {
+		zend_error_info *info = EG(deferred_errors).errors[i];
+		if (info->filename) {
+			zend_string_release(info->filename);
+		}
+		zend_string_release(info->message);
+		efree_size(info, sizeof(zend_error_info));
+	}
+	efree(EG(deferred_errors).errors);
+	memset(&EG(deferred_errors), 0, sizeof(EG(deferred_errors)));
+}
+
+ZEND_API ZEND_COLD void zend_error_zstr_at(
+		int orig_type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
+{
+	int type = orig_type & E_ALL;
 
 	/* If we're executing a function during SCCP, count any warnings that may be emitted,
 	 * but don't perform any other error handling. */
@@ -1485,6 +1679,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		zend_error_info *info = emalloc(sizeof(zend_error_info));
 		info->type = type;
 		info->lineno = error_lineno;
+		info->error_reporting = EG(error_reporting);
 		info->filename = zend_string_copy(error_filename);
 		info->message = zend_string_copy(message);
 		EG(errors).size++;
@@ -1546,72 +1741,10 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 			zend_error_cb(orig_type, error_filename, error_lineno, message);
 			break;
 		default:
-			/* Handle the error in user space */
-			ZVAL_STR_COPY(&params[1], message);
-			ZVAL_LONG(&params[0], type);
-
-			if (error_filename) {
-				ZVAL_STR_COPY(&params[2], error_filename);
+			if (zend_can_defer_error(type)) {
+				zend_defer_error(orig_type, error_filename, error_lineno, message);
 			} else {
-				ZVAL_NULL(&params[2]);
-			}
-
-			ZVAL_LONG(&params[3], error_lineno);
-
-			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
-			ZVAL_UNDEF(&EG(user_error_handler));
-
-			/* User error handler may include() additional PHP files.
-			 * If an error was generated during compilation PHP will compile
-			 * such scripts recursively, but some CG() variables may be
-			 * inconsistent. */
-
-			in_compilation = CG(in_compilation);
-			if (in_compilation) {
-				saved_class_entry = CG(active_class_entry);
-				CG(active_class_entry) = NULL;
-				SAVE_STACK(loop_var_stack);
-				SAVE_STACK(delayed_oplines_stack);
-				CG(in_compilation) = 0;
-			}
-
-			orig_record_errors = EG(record_errors);
-			EG(record_errors) = false;
-
-			orig_errors_buf = EG(errors);
-			memset(&EG(errors), 0, sizeof(EG(errors)));
-
-			res = call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params);
-
-			EG(record_errors) = orig_record_errors;
-			EG(errors) = orig_errors_buf;
-
-			if (res == SUCCESS) {
-				if (Z_TYPE(retval) != IS_UNDEF) {
-					if (Z_TYPE(retval) == IS_FALSE) {
-						zend_error_cb(orig_type, error_filename, error_lineno, message);
-					}
-					zval_ptr_dtor(&retval);
-				}
-			} else if (!EG(exception)) {
-				/* The user error handler failed, use built-in error handler */
-				zend_error_cb(orig_type, error_filename, error_lineno, message);
-			}
-
-			if (in_compilation) {
-				CG(active_class_entry) = saved_class_entry;
-				RESTORE_STACK(loop_var_stack);
-				RESTORE_STACK(delayed_oplines_stack);
-				CG(in_compilation) = 1;
-			}
-
-			zval_ptr_dtor(&params[2]);
-			zval_ptr_dtor(&params[1]);
-
-			if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF) {
-				ZVAL_COPY_VALUE(&EG(user_error_handler), &orig_user_error_handler);
-			} else {
-				zval_ptr_dtor(&orig_user_error_handler);
+				zend_call_user_error_handler(orig_type, error_filename, error_lineno, message);
 			}
 			break;
 	}
@@ -1974,7 +2107,12 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 
 	zend_result ret = SUCCESS;
 	if (op_array) {
+		zend_execute_data *previous_execute_data = EG(current_execute_data);
 		zend_execute(op_array, retval);
+		EG(current_execute_data) = previous_execute_data;
+		zend_flush_deferred_dtors();
+		zend_surface_deferred_dtor_exception();
+		zend_flush_deferred_errors();
 		if (UNEXPECTED(EG(exception))) {
 			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 				zend_user_exception_handler();

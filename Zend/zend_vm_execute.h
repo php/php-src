@@ -433,7 +433,7 @@ static zend_vm_opcode_handler_func_t zend_vm_get_opcode_handler_func(uint8_t opc
 #if defined(ZEND_VM_FP_GLOBAL_REG)
 # define ZEND_VM_ENTER_EX()        ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()
 # define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()
-# define ZEND_VM_LEAVE()           ZEND_VM_CONTINUE()
+# define ZEND_VM_LEAVE()           ZEND_VM_LOOP_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()
 #elif defined(ZEND_VM_IP_GLOBAL_REG)
 # define ZEND_VM_ENTER_EX()        return  1
 # define ZEND_VM_ENTER()           opline = EG(current_execute_data)->opline; ZEND_VM_ENTER_EX()
@@ -446,13 +446,14 @@ static zend_vm_opcode_handler_func_t zend_vm_get_opcode_handler_func(uint8_t opc
 #endif
 #define ZEND_VM_INTERRUPT()      ZEND_VM_TAIL_CALL(zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 #ifdef ZEND_VM_FP_GLOBAL_REG
-#define ZEND_VM_LOOP_INTERRUPT() zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#define ZEND_VM_LOOP_INTERRUPT() zend_loop_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #else
-#define ZEND_VM_LOOP_INTERRUPT() opline = (zend_op*)((uintptr_t)zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU) & ~ZEND_VM_ENTER_BIT);
+#define ZEND_VM_LOOP_INTERRUPT() opline = (zend_op*)((uintptr_t)zend_loop_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU) & ~ZEND_VM_ENTER_BIT);
 #endif
 #define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler_func(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS);
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_loop_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS);
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);
 
 static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV_EX  zend_add_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
@@ -1157,8 +1158,13 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 	SAVE_OPLINE();
 #endif
 
+	if (UNEXPECTED(EG(deferred_errors).size)) {
+		zend_flush_deferred_errors();
+	}
+
 	if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) == 0)) {
 		EG(current_execute_data) = EX(prev_execute_data);
+		EG(frame_teardown)++;
 		i_free_compiled_variables(execute_data);
 
 #ifdef ZEND_PREFER_RELOAD
@@ -1169,6 +1175,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
+		EG(frame_teardown)--;
 		EG(vm_stack_top) = (zval*)execute_data;
 		execute_data = EX(prev_execute_data);
 
@@ -1181,6 +1188,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 		ZEND_VM_LEAVE();
 	} else if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP)) == 0)) {
 		EG(current_execute_data) = EX(prev_execute_data);
+		EG(frame_teardown)++;
 		i_free_compiled_variables(execute_data);
 
 #ifdef ZEND_PREFER_RELOAD
@@ -1203,6 +1211,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
+		EG(frame_teardown)--;
 
 		old_execute_data = execute_data;
 		execute_data = EX(prev_execute_data);
@@ -1220,8 +1229,10 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 			zend_detach_symbol_table(execute_data);
 			call_info |= ZEND_CALL_NEEDS_REATTACH;
 		}
+		EG(frame_teardown)++;
 		zend_destroy_static_vars(&EX(func)->op_array);
 		destroy_op_array(&EX(func)->op_array);
+		EG(frame_teardown)--;
 		efree_size(EX(func), sizeof(zend_op_array));
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
@@ -1244,6 +1255,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 	} else {
 		if (EXPECTED((call_info & ZEND_CALL_CODE) == 0)) {
 			EG(current_execute_data) = EX(prev_execute_data);
+			EG(frame_teardown)++;
 			i_free_compiled_variables(execute_data);
 #ifdef ZEND_PREFER_RELOAD
 			call_info = EX_CALL_INFO();
@@ -1260,6 +1272,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 			if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 				OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 			}
+			EG(frame_teardown)--;
 			ZEND_VM_RETURN();
 		} else /* if (call_kind == ZEND_CALL_TOP_CODE) */ {
 			zend_array *symbol_table = EX(symbol_table);
@@ -1318,6 +1331,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 	ret = 0 ? EX_VAR(opline->result.var) : &retval;
 	ZVAL_NULL(ret);
 
+	if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+	 && !0
+	 && !EX(call))) {
+		zend_flush_deferred_dtors_surface();
+		if (UNEXPECTED(EG(exception))) {
+			goto icall_skip;
+		}
+	}
+
 
 	fbc->internal_function.handler(call, ret);
 
@@ -1341,6 +1363,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 
 	ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+icall_skip:
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
 
@@ -1388,6 +1411,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 	ret = 1 ? EX_VAR(opline->result.var) : &retval;
 	ZVAL_NULL(ret);
 
+	if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+	 && !1
+	 && !EX(call))) {
+		zend_flush_deferred_dtors_surface();
+		if (UNEXPECTED(EG(exception))) {
+			goto icall_skip;
+		}
+	}
+
 
 	fbc->internal_function.handler(call, ret);
 
@@ -1411,6 +1443,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 
 	ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+icall_skip:
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
 
@@ -1458,6 +1491,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 	ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
 	ZVAL_NULL(ret);
 
+	if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+	 && !RETURN_VALUE_USED(opline)
+	 && !EX(call))) {
+		zend_flush_deferred_dtors_surface();
+		if (UNEXPECTED(EG(exception))) {
+			goto icall_skip;
+		}
+	}
+
 	zend_observer_fcall_begin_specialized(call, false);
 	fbc->internal_function.handler(call, ret);
 
@@ -1480,6 +1522,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 	zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
 	ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+icall_skip:
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
 
@@ -1644,6 +1687,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 		ret = 0 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+		 && !0
+		 && !EX(call))) {
+			zend_flush_deferred_dtors_surface();
+			if (UNEXPECTED(EG(exception))) {
+				goto fcall_by_name_skip;
+			}
+		}
+
 
 		fbc->internal_function.handler(call, ret);
 
@@ -1668,6 +1720,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 
 		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+fcall_by_name_skip:
 		EG(current_execute_data) = execute_data;
 
 		goto fcall_by_name_end;
@@ -1762,6 +1815,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 		ret = 1 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+		 && !1
+		 && !EX(call))) {
+			zend_flush_deferred_dtors_surface();
+			if (UNEXPECTED(EG(exception))) {
+				goto fcall_by_name_skip;
+			}
+		}
+
 
 		fbc->internal_function.handler(call, ret);
 
@@ -1786,6 +1848,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 
 		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+fcall_by_name_skip:
 		EG(current_execute_data) = execute_data;
 
 		goto fcall_by_name_end;
@@ -1879,6 +1942,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+		 && !RETURN_VALUE_USED(opline)
+		 && !EX(call))) {
+			zend_flush_deferred_dtors_surface();
+			if (UNEXPECTED(EG(exception))) {
+				goto fcall_by_name_skip;
+			}
+		}
+
 		zend_observer_fcall_begin_specialized(call, false);
 		fbc->internal_function.handler(call, ret);
 
@@ -1902,6 +1974,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
 		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+fcall_by_name_skip:
 		EG(current_execute_data) = execute_data;
 
 		goto fcall_by_name_end;
@@ -2010,6 +2083,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 		ret = 0 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+		 && !0
+		 && !EX(call))) {
+			zend_flush_deferred_dtors_surface();
+			if (UNEXPECTED(EG(exception))) {
+				goto fcall_skip;
+			}
+		}
+
 
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
@@ -2039,6 +2121,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 
 		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+fcall_skip:
 		EG(current_execute_data) = execute_data;
 
 		goto fcall_end;
@@ -2145,6 +2228,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 		ret = 1 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+		 && !1
+		 && !EX(call))) {
+			zend_flush_deferred_dtors_surface();
+			if (UNEXPECTED(EG(exception))) {
+				goto fcall_skip;
+			}
+		}
+
 
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
@@ -2174,6 +2266,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_D
 
 		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+fcall_skip:
 		EG(current_execute_data) = execute_data;
 
 		goto fcall_end;
@@ -2277,6 +2370,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+		 && !RETURN_VALUE_USED(opline)
+		 && !EX(call))) {
+			zend_flush_deferred_dtors_surface();
+			if (UNEXPECTED(EG(exception))) {
+				goto fcall_skip;
+			}
+		}
+
 		zend_observer_fcall_begin_specialized(call, false);
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
@@ -2305,6 +2407,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
 		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+fcall_skip:
 		EG(current_execute_data) = execute_data;
 
 		goto fcall_end;
@@ -3355,7 +3458,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV_
 			 && (EX(func)->op_array.opcodes[Z_OPLINE_NUM_P(fast_call)].op2_type & (IS_TMP_VAR | IS_VAR))) {
 				zval *return_value = EX_VAR(EX(func)->op_array.opcodes[Z_OPLINE_NUM_P(fast_call)].op2.var);
 
+				EG(frame_teardown)++;
 				zval_ptr_dtor(return_value);
+				EG(frame_teardown)--;
 			}
 
 			/* Chain potential exception from wrapping finally block */
@@ -3363,7 +3468,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV_
 				if (ex) {
 					if (zend_is_unwind_exit(ex) || zend_is_graceful_exit(ex)) {
 						/* discard the previously thrown exception */
+						EG(frame_teardown)++;
 						OBJ_RELEASE(Z_OBJ_P(fast_call));
+						EG(frame_teardown)--;
 					} else {
 						zend_exception_set_previous(ex, Z_OBJ_P(fast_call));
 					}
@@ -3398,6 +3505,28 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV_
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	const zend_op *throw_op = EG(opline_before_exception);
+
+	if (EG(deferred_errors).size || EG(deferred_dtors).count || EG(deferred_dtors).values_count) {
+		zend_object *orig_exception = EG(exception);
+		EX(opline) = EG(opline_before_exception);
+		EG(exception) = NULL;
+
+		zend_flush_deferred_dtors();
+		zend_flush_deferred_errors();
+
+		if (EG(exception)) {
+			if (UNEXPECTED(zend_is_unwind_exit(orig_exception) || zend_is_graceful_exit(orig_exception))) {
+				OBJ_RELEASE(EG(exception));
+				EG(exception) = orig_exception;
+				EX(opline) = EG(exception_op);
+			} else {
+				zend_exception_set_previous(EG(exception), orig_exception);
+			}
+		} else {
+			EG(exception) = orig_exception;
+			EX(opline) = EG(exception_op);
+		}
+	}
 
 	/* Exception was thrown before executing any op */
 	if (UNEXPECTED(!throw_op)) {
@@ -3547,7 +3676,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FAST_RET_SPEC
 	if (Z_OPLINE_NUM_P(fast_call) != (uint32_t)-1) {
 		const zend_op *fast_ret = EX(func)->op_array.opcodes + Z_OPLINE_NUM_P(fast_call);
 
-		ZEND_VM_JMP_EX(fast_ret + 1, 0);
+		ZEND_VM_SET_OPCODE_NO_INTERRUPT(fast_ret + 1);
+		ZEND_VM_INTERRUPT_CHECK();
+		ZEND_VM_CONTINUE();
 	}
 
 	/* special case for unhandled exceptions */
@@ -3556,6 +3687,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FAST_RET_SPEC
 	current_try_catch_offset = opline->op2.num;
 	current_op_num = opline - EX(func)->op_array.opcodes;
 	ZEND_VM_DISPATCH_TO_HELPER(zend_dispatch_try_catch_finally_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX current_try_catch_offset, current_op_num));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FLUSH_DEFERRED_DTORS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		SAVE_OPLINE();
+		if ((opline + 1)->opcode == ZEND_THROW) {
+			zend_flush_deferred_dtors_surface();
+		} else {
+			zend_flush_deferred_dtors();
+		}
+		if (UNEXPECTED(EG(exception))) {
+			zend_rethrow_exception(execute_data);
+			HANDLE_EXCEPTION();
+		}
+	}
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSERT_CHECK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -4040,23 +4190,30 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 #endif
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
-	} else if (zend_interrupt_function) {
-		zend_interrupt_function(execute_data);
-		if (EG(exception)) {
-			/* We have to UNDEF result, because ZEND_HANDLE_EXCEPTION is going to free it */
-			const zend_op *throw_op = EG(opline_before_exception);
-
-			if (throw_op
-			 && throw_op->result_type & (IS_TMP_VAR|IS_VAR)
-			 && throw_op->opcode != ZEND_ADD_ARRAY_ELEMENT
-			 && throw_op->opcode != ZEND_ADD_ARRAY_UNPACK
-			 && throw_op->opcode != ZEND_ROPE_INIT
-			 && throw_op->opcode != ZEND_ROPE_ADD) {
-				ZVAL_UNDEF(ZEND_CALL_VAR(EG(current_execute_data), throw_op->result.var));
-
-			}
+	} else if (zend_interrupt_process(execute_data, opline, false)) {
+		zend_interrupt_handle_exception();
+		if (!zend_atomic_bool_load_ex(&EG(vm_interrupt))) {
+			ZEND_VM_ENTER();
 		}
-		ZEND_VM_ENTER();
+	}
+	ZEND_VM_CONTINUE();
+}
+
+static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV  zend_loop_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+	LOAD_OPLINE();
+#else
+	SAVE_OPLINE();
+#endif
+	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+		zend_timeout();
+	} else if (zend_interrupt_process(execute_data, opline, true)) {
+		zend_interrupt_handle_exception();
+		if (!zend_atomic_bool_load_ex(&EG(vm_interrupt))) {
+			ZEND_VM_ENTER();
+		}
 	}
 	ZEND_VM_CONTINUE();
 }
@@ -5042,6 +5199,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_GENERATOR_RET
 	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
 
 	SAVE_OPLINE();
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			HANDLE_EXCEPTION();
+		}
+	}
 	retval = RT_CONSTANT(opline, opline->op1);
 
 	/* Copy return value into generator->retval */
@@ -5088,6 +5253,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_GENERATOR_RET
 	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
 
 	SAVE_OPLINE();
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			FREE_OP(opline->op1_type, opline->op1.var);
+			HANDLE_EXCEPTION();
+		}
+	}
 	retval = get_zval_ptr(opline->op1_type, opline->op1, BP_VAR_R);
 
 	/* Copy return value into generator->retval */
@@ -5957,6 +6129,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_FROM_SP
 
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 yield_from_try_again:
@@ -8372,6 +8554,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_CO
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -10783,6 +10977,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_CO
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -11666,6 +11871,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_CO
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -13404,6 +13621,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_CO
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -15614,6 +15843,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FREE_SPEC_TMP
 
 	SAVE_OPLINE();
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	if (UNEXPECTED((opline->extended_value & ZEND_FREE_ON_RETURN)
+	 && (EG(deferred_dtors).count || EG(deferred_dtors).values_count))) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zend_rethrow_exception(execute_data);
+		}
+	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -15629,6 +15865,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_F
 			zend_hash_iterator_del(Z_FE_ITER_P(var));
 		}
 		zval_ptr_dtor_nogc(var);
+		if (UNEXPECTED((opline->extended_value & ZEND_FREE_ON_RETURN)
+		 && (EG(deferred_dtors).count || EG(deferred_dtors).values_count))) {
+			zend_flush_deferred_dtors();
+			if (UNEXPECTED(EG(exception))) {
+				zend_rethrow_exception(execute_data);
+			}
+		}
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 
@@ -15637,6 +15880,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_F
 	if (Z_REFCOUNTED_P(var) && !Z_DELREF_P(var)) {
 		SAVE_OPLINE();
 		rc_dtor_func(Z_COUNTED_P(var));
+		if (UNEXPECTED((opline->extended_value & ZEND_FREE_ON_RETURN)
+		 && (EG(deferred_dtors).count || EG(deferred_dtors).values_count))) {
+			zend_flush_deferred_dtors();
+			if (UNEXPECTED(EG(exception))) {
+				zend_rethrow_exception(execute_data);
+			}
+		}
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -17270,6 +17520,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_GENERATOR_RET
 	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
 
 	SAVE_OPLINE();
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			HANDLE_EXCEPTION();
+		}
+	}
 	retval = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
 	/* Copy return value into generator->retval */
@@ -18048,6 +18305,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_FROM_SP
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 yield_from_try_again:
@@ -19703,6 +19969,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_TM
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -21190,6 +21467,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_TM
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -21882,6 +22169,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_TM
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -23058,6 +23356,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_TM
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -23514,6 +23823,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_GENERATOR_RET
 	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
 
 	SAVE_OPLINE();
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			HANDLE_EXCEPTION();
+		}
+	}
 	retval = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	/* Copy return value into generator->retval */
@@ -26381,6 +26697,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_VA
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -28639,6 +28966,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_VA
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -30277,6 +30614,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_VA
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -32517,6 +32865,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_VA
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -34762,6 +35121,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_UN
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -36652,6 +37023,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_UN
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -37199,6 +37581,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_UN
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -39241,6 +39635,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_UN
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -39946,6 +40352,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_GENERATOR_RET
 	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
 
 	SAVE_OPLINE();
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			HANDLE_EXCEPTION();
+		}
+	}
 	retval = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 
 	/* Copy return value into generator->retval */
@@ -40645,6 +41059,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_FROM_SP
 
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 yield_from_try_again:
@@ -44577,6 +45001,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_CV
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -48189,6 +48625,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_CV
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -49776,6 +50223,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_CV
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -53366,6 +53825,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_CV
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -53552,7 +54023,7 @@ static ZEND_COLD zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_F
 # define ZEND_VM_DISPATCH_TO_LEAVE_HELPER(helper) opline = &call_leave_op; SAVE_OPLINE(); ZEND_VM_CONTINUE()
 # define ZEND_VM_INTERRUPT()        ZEND_VM_TAIL_CALL(zend_interrupt_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))
 # define ZEND_VM_ENTER_EX() ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()
-# define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()
+# define ZEND_VM_LEAVE()    ZEND_VM_LOOP_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_interrupt_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS);
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_interrupt(ZEND_OPCODE_HANDLER_ARGS);
@@ -53963,8 +54434,13 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 	SAVE_OPLINE();
 #endif
 
+	if (UNEXPECTED(EG(deferred_errors).size)) {
+		zend_flush_deferred_errors();
+	}
+
 	if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) == 0)) {
 		EG(current_execute_data) = EX(prev_execute_data);
+		EG(frame_teardown)++;
 		i_free_compiled_variables(execute_data);
 
 #ifdef ZEND_PREFER_RELOAD
@@ -53975,6 +54451,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
+		EG(frame_teardown)--;
 		EG(vm_stack_top) = (zval*)execute_data;
 		execute_data = EX(prev_execute_data);
 
@@ -53987,6 +54464,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 		ZEND_VM_LEAVE();
 	} else if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP)) == 0)) {
 		EG(current_execute_data) = EX(prev_execute_data);
+		EG(frame_teardown)++;
 		i_free_compiled_variables(execute_data);
 
 #ifdef ZEND_PREFER_RELOAD
@@ -54009,6 +54487,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
+		EG(frame_teardown)--;
 
 		old_execute_data = execute_data;
 		execute_data = EX(prev_execute_data);
@@ -54026,8 +54505,10 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 			zend_detach_symbol_table(execute_data);
 			call_info |= ZEND_CALL_NEEDS_REATTACH;
 		}
+		EG(frame_teardown)++;
 		zend_destroy_static_vars(&EX(func)->op_array);
 		destroy_op_array(&EX(func)->op_array);
+		EG(frame_teardown)--;
 		efree_size(EX(func), sizeof(zend_op_array));
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
@@ -54050,6 +54531,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 	} else {
 		if (EXPECTED((call_info & ZEND_CALL_CODE) == 0)) {
 			EG(current_execute_data) = EX(prev_execute_data);
+			EG(frame_teardown)++;
 			i_free_compiled_variables(execute_data);
 #ifdef ZEND_PREFER_RELOAD
 			call_info = EX_CALL_INFO();
@@ -54066,6 +54548,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 			if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 				OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 			}
+			EG(frame_teardown)--;
 			ZEND_VM_RETURN();
 		} else /* if (call_kind == ZEND_CALL_TOP_CODE) */ {
 			zend_array *symbol_table = EX(symbol_table);
@@ -54124,6 +54607,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_ICA
 	ret = 0 ? EX_VAR(opline->result.var) : &retval;
 	ZVAL_NULL(ret);
 
+	if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+	 && !0
+	 && !EX(call))) {
+		zend_flush_deferred_dtors_surface();
+		if (UNEXPECTED(EG(exception))) {
+			goto icall_skip;
+		}
+	}
+
 
 	fbc->internal_function.handler(call, ret);
 
@@ -54147,6 +54639,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_ICA
 
 	ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+icall_skip:
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
 
@@ -54194,6 +54687,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_ICA
 	ret = 1 ? EX_VAR(opline->result.var) : &retval;
 	ZVAL_NULL(ret);
 
+	if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+	 && !1
+	 && !EX(call))) {
+		zend_flush_deferred_dtors_surface();
+		if (UNEXPECTED(EG(exception))) {
+			goto icall_skip;
+		}
+	}
+
 
 	fbc->internal_function.handler(call, ret);
 
@@ -54217,6 +54719,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_ICA
 
 	ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+icall_skip:
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
 
@@ -54264,6 +54767,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_IC
 	ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
 	ZVAL_NULL(ret);
 
+	if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+	 && !RETURN_VALUE_USED(opline)
+	 && !EX(call))) {
+		zend_flush_deferred_dtors_surface();
+		if (UNEXPECTED(EG(exception))) {
+			goto icall_skip;
+		}
+	}
+
 	zend_observer_fcall_begin_specialized(call, false);
 	fbc->internal_function.handler(call, ret);
 
@@ -54286,6 +54798,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_IC
 	zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
 	ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+icall_skip:
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
 
@@ -54450,6 +54963,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 		ret = 0 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+		 && !0
+		 && !EX(call))) {
+			zend_flush_deferred_dtors_surface();
+			if (UNEXPECTED(EG(exception))) {
+				goto fcall_by_name_skip;
+			}
+		}
+
 
 		fbc->internal_function.handler(call, ret);
 
@@ -54474,6 +54996,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 
 		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+fcall_by_name_skip:
 		EG(current_execute_data) = execute_data;
 
 		goto fcall_by_name_end;
@@ -54568,6 +55091,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 		ret = 1 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+		 && !1
+		 && !EX(call))) {
+			zend_flush_deferred_dtors_surface();
+			if (UNEXPECTED(EG(exception))) {
+				goto fcall_by_name_skip;
+			}
+		}
+
 
 		fbc->internal_function.handler(call, ret);
 
@@ -54592,6 +55124,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 
 		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+fcall_by_name_skip:
 		EG(current_execute_data) = execute_data;
 
 		goto fcall_by_name_end;
@@ -54685,6 +55218,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FC
 		ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+		 && !RETURN_VALUE_USED(opline)
+		 && !EX(call))) {
+			zend_flush_deferred_dtors_surface();
+			if (UNEXPECTED(EG(exception))) {
+				goto fcall_by_name_skip;
+			}
+		}
+
 		zend_observer_fcall_begin_specialized(call, false);
 		fbc->internal_function.handler(call, ret);
 
@@ -54708,6 +55250,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FC
 		zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
 		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+fcall_by_name_skip:
 		EG(current_execute_data) = execute_data;
 
 		goto fcall_by_name_end;
@@ -54816,6 +55359,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 		ret = 0 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+		 && !0
+		 && !EX(call))) {
+			zend_flush_deferred_dtors_surface();
+			if (UNEXPECTED(EG(exception))) {
+				goto fcall_skip;
+			}
+		}
+
 
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
@@ -54845,6 +55397,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 
 		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+fcall_skip:
 		EG(current_execute_data) = execute_data;
 
 		goto fcall_end;
@@ -54951,6 +55504,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 		ret = 1 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+		 && !1
+		 && !EX(call))) {
+			zend_flush_deferred_dtors_surface();
+			if (UNEXPECTED(EG(exception))) {
+				goto fcall_skip;
+			}
+		}
+
 
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
@@ -54980,6 +55542,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FCA
 
 		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+fcall_skip:
 		EG(current_execute_data) = execute_data;
 
 		goto fcall_end;
@@ -55083,6 +55646,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FC
 		ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
+		if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+		 && !RETURN_VALUE_USED(opline)
+		 && !EX(call))) {
+			zend_flush_deferred_dtors_surface();
+			if (UNEXPECTED(EG(exception))) {
+				goto fcall_skip;
+			}
+		}
+
 		zend_observer_fcall_begin_specialized(call, false);
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
@@ -55111,6 +55683,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DO_FC
 		zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
 		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
+fcall_skip:
 		EG(current_execute_data) = execute_data;
 
 		goto fcall_end;
@@ -56089,6 +56662,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HANDLE_EXCEPTION_S
 {
 	const zend_op *throw_op = EG(opline_before_exception);
 
+	if (EG(deferred_errors).size || EG(deferred_dtors).count || EG(deferred_dtors).values_count) {
+		zend_object *orig_exception = EG(exception);
+		EX(opline) = EG(opline_before_exception);
+		EG(exception) = NULL;
+
+		zend_flush_deferred_dtors();
+		zend_flush_deferred_errors();
+
+		if (EG(exception)) {
+			if (UNEXPECTED(zend_is_unwind_exit(orig_exception) || zend_is_graceful_exit(orig_exception))) {
+				OBJ_RELEASE(EG(exception));
+				EG(exception) = orig_exception;
+				EX(opline) = EG(exception_op);
+			} else {
+				zend_exception_set_previous(EG(exception), orig_exception);
+			}
+		} else {
+			EG(exception) = orig_exception;
+			EX(opline) = EG(exception_op);
+		}
+	}
+
 	/* Exception was thrown before executing any op */
 	if (UNEXPECTED(!throw_op)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_dispatch_try_catch_finally_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX -1, 0));
@@ -56237,7 +56832,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FAST_RET_SPEC_TAIL
 	if (Z_OPLINE_NUM_P(fast_call) != (uint32_t)-1) {
 		const zend_op *fast_ret = EX(func)->op_array.opcodes + Z_OPLINE_NUM_P(fast_call);
 
-		ZEND_VM_JMP_EX(fast_ret + 1, 0);
+		ZEND_VM_SET_OPCODE_NO_INTERRUPT(fast_ret + 1);
+		ZEND_VM_INTERRUPT_CHECK();
+		ZEND_VM_CONTINUE();
 	}
 
 	/* special case for unhandled exceptions */
@@ -56246,6 +56843,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FAST_RET_SPEC_TAIL
 	current_try_catch_offset = opline->op2.num;
 	current_op_num = opline - EX(func)->op_array.opcodes;
 	ZEND_VM_DISPATCH_TO_HELPER(zend_dispatch_try_catch_finally_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX current_try_catch_offset, current_op_num));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FLUSH_DEFERRED_DTORS_SPEC_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		SAVE_OPLINE();
+		if ((opline + 1)->opcode == ZEND_THROW) {
+			zend_flush_deferred_dtors_surface();
+		} else {
+			zend_flush_deferred_dtors();
+		}
+		if (UNEXPECTED(EG(exception))) {
+			zend_rethrow_exception(execute_data);
+			HANDLE_EXCEPTION();
+		}
+	}
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSERT_CHECK_SPEC_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -56730,26 +57346,15 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 #endif
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
-	} else if (zend_interrupt_function) {
-		zend_interrupt_function(execute_data);
-		if (EG(exception)) {
-			/* We have to UNDEF result, because ZEND_HANDLE_EXCEPTION is going to free it */
-			const zend_op *throw_op = EG(opline_before_exception);
-
-			if (throw_op
-			 && throw_op->result_type & (IS_TMP_VAR|IS_VAR)
-			 && throw_op->opcode != ZEND_ADD_ARRAY_ELEMENT
-			 && throw_op->opcode != ZEND_ADD_ARRAY_UNPACK
-			 && throw_op->opcode != ZEND_ROPE_INIT
-			 && throw_op->opcode != ZEND_ROPE_ADD) {
-				ZVAL_UNDEF(ZEND_CALL_VAR(EG(current_execute_data), throw_op->result.var));
-
-			}
+	} else if (zend_interrupt_process(execute_data, opline, false)) {
+		zend_interrupt_handle_exception();
+		if (!zend_atomic_bool_load_ex(&EG(vm_interrupt))) {
+			ZEND_VM_ENTER();
 		}
-		ZEND_VM_ENTER();
 	}
 	ZEND_VM_CONTINUE();
 }
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -57732,6 +58337,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_GENERATOR_RETURN_S
 	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
 
 	SAVE_OPLINE();
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			HANDLE_EXCEPTION();
+		}
+	}
 	retval = RT_CONSTANT(opline, opline->op1);
 
 	/* Copy return value into generator->retval */
@@ -57778,6 +58391,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_GENERATOR_RETURN_S
 	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
 
 	SAVE_OPLINE();
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			FREE_OP(opline->op1_type, opline->op1.var);
+			HANDLE_EXCEPTION();
+		}
+	}
 	retval = get_zval_ptr(opline->op1_type, opline->op1, BP_VAR_R);
 
 	/* Copy return value into generator->retval */
@@ -58647,6 +59267,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_FROM_SPEC_CO
 
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 yield_from_try_again:
@@ -61062,6 +61692,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_CONST_C
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -63473,6 +64115,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_CONST_T
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -64254,6 +64907,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_CONST_U
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -65992,6 +66657,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_CONST_C
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -68202,6 +68879,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FREE_SPEC_TMPVAR_T
 
 	SAVE_OPLINE();
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	if (UNEXPECTED((opline->extended_value & ZEND_FREE_ON_RETURN)
+	 && (EG(deferred_dtors).count || EG(deferred_dtors).values_count))) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zend_rethrow_exception(execute_data);
+		}
+	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -68217,6 +68901,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FE_FRE
 			zend_hash_iterator_del(Z_FE_ITER_P(var));
 		}
 		zval_ptr_dtor_nogc(var);
+		if (UNEXPECTED((opline->extended_value & ZEND_FREE_ON_RETURN)
+		 && (EG(deferred_dtors).count || EG(deferred_dtors).values_count))) {
+			zend_flush_deferred_dtors();
+			if (UNEXPECTED(EG(exception))) {
+				zend_rethrow_exception(execute_data);
+			}
+		}
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 
@@ -68225,6 +68916,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FE_FRE
 	if (Z_REFCOUNTED_P(var) && !Z_DELREF_P(var)) {
 		SAVE_OPLINE();
 		rc_dtor_func(Z_COUNTED_P(var));
+		if (UNEXPECTED((opline->extended_value & ZEND_FREE_ON_RETURN)
+		 && (EG(deferred_dtors).count || EG(deferred_dtors).values_count))) {
+			zend_flush_deferred_dtors();
+			if (UNEXPECTED(EG(exception))) {
+				zend_rethrow_exception(execute_data);
+			}
+		}
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -69858,6 +70556,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_GENERATOR_RETURN_S
 	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
 
 	SAVE_OPLINE();
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			HANDLE_EXCEPTION();
+		}
+	}
 	retval = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
 	/* Copy return value into generator->retval */
@@ -70636,6 +71341,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_FROM_SPEC_TM
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 yield_from_try_again:
@@ -72291,6 +73005,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_TMP_CON
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -73778,6 +74503,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_TMP_TMP
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -74370,6 +75105,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_TMP_UNU
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -75546,6 +76292,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_TMP_CV_
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -76002,6 +76759,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_GENERATOR_RETURN_S
 	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
 
 	SAVE_OPLINE();
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			HANDLE_EXCEPTION();
+		}
+	}
 	retval = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	/* Copy return value into generator->retval */
@@ -78869,6 +79633,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_VAR_CON
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -81127,6 +81902,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_VAR_TMP
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -82765,6 +83550,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_VAR_UNU
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -85005,6 +85801,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_VAR_CV_
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -87250,6 +88057,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_UNUSED_
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -89140,6 +89959,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_UNUSED_
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -89687,6 +90517,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_UNUSED_
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -91729,6 +92571,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_UNUSED_
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -92434,6 +93288,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_GENERATOR_RETURN_S
 	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
 
 	SAVE_OPLINE();
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			HANDLE_EXCEPTION();
+		}
+	}
 	retval = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 
 	/* Copy return value into generator->retval */
@@ -93133,6 +93995,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_FROM_SPEC_CV
 
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 yield_from_try_again:
@@ -97065,6 +97937,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_CV_CONS
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -100677,6 +101561,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_CV_TMP_
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -102162,6 +103057,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_CV_UNUS
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	/* Destroy the previously yielded value */
@@ -105752,6 +106659,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_CV_CV_T
 		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+		if (UNEXPECTED(EG(exception))) {
+
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+	}
+
 	/* Destroy the previously yielded value */
 	zval_ptr_dtor(&generator->value);
 
@@ -106321,7 +107240,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV_EX  z
 			 && (EX(func)->op_array.opcodes[Z_OPLINE_NUM_P(fast_call)].op2_type & (IS_TMP_VAR | IS_VAR))) {
 				zval *return_value = EX_VAR(EX(func)->op_array.opcodes[Z_OPLINE_NUM_P(fast_call)].op2.var);
 
+				EG(frame_teardown)++;
 				zval_ptr_dtor(return_value);
+				EG(frame_teardown)--;
 			}
 
 			/* Chain potential exception from wrapping finally block */
@@ -106329,7 +107250,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV_EX  z
 				if (ex) {
 					if (zend_is_unwind_exit(ex) || zend_is_graceful_exit(ex)) {
 						/* discard the previously thrown exception */
+						EG(frame_teardown)++;
 						OBJ_RELEASE(Z_OBJ_P(fast_call));
+						EG(frame_teardown)--;
 					} else {
 						zend_exception_set_previous(ex, Z_OBJ_P(fast_call));
 					}
@@ -109275,6 +110198,7 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED_LABEL,
 			(void*)&&ZEND_DECLARE_ATTRIBUTED_CONST_SPEC_CONST_CONST_LABEL,
 			(void*)&&ZEND_TYPE_ASSERT_SPEC_CONST_LABEL,
+			(void*)&&ZEND_FLUSH_DEFERRED_DTORS_SPEC_LABEL,
 			(void*)&&ZEND_INIT_FCALL_OFFSET_SPEC_CONST_LABEL,
 			(void*)&&ZEND_RECV_NOTYPE_SPEC_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -110306,8 +111230,13 @@ zend_leave_helper_SPEC_LABEL:
 	SAVE_OPLINE();
 #endif
 
+	if (UNEXPECTED(EG(deferred_errors).size)) {
+		zend_flush_deferred_errors();
+	}
+
 	if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) == 0)) {
 		EG(current_execute_data) = EX(prev_execute_data);
+		EG(frame_teardown)++;
 		i_free_compiled_variables(execute_data);
 
 #ifdef ZEND_PREFER_RELOAD
@@ -110318,6 +111247,7 @@ zend_leave_helper_SPEC_LABEL:
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
+		EG(frame_teardown)--;
 		EG(vm_stack_top) = (zval*)execute_data;
 		execute_data = EX(prev_execute_data);
 
@@ -110330,6 +111260,7 @@ zend_leave_helper_SPEC_LABEL:
 		ZEND_VM_LEAVE();
 	} else if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP)) == 0)) {
 		EG(current_execute_data) = EX(prev_execute_data);
+		EG(frame_teardown)++;
 		i_free_compiled_variables(execute_data);
 
 #ifdef ZEND_PREFER_RELOAD
@@ -110352,6 +111283,7 @@ zend_leave_helper_SPEC_LABEL:
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
+		EG(frame_teardown)--;
 
 		old_execute_data = execute_data;
 		execute_data = EX(prev_execute_data);
@@ -110369,8 +111301,10 @@ zend_leave_helper_SPEC_LABEL:
 			zend_detach_symbol_table(execute_data);
 			call_info |= ZEND_CALL_NEEDS_REATTACH;
 		}
+		EG(frame_teardown)++;
 		zend_destroy_static_vars(&EX(func)->op_array);
 		destroy_op_array(&EX(func)->op_array);
+		EG(frame_teardown)--;
 		efree_size(EX(func), sizeof(zend_op_array));
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
@@ -110393,6 +111327,7 @@ zend_leave_helper_SPEC_LABEL:
 	} else {
 		if (EXPECTED((call_info & ZEND_CALL_CODE) == 0)) {
 			EG(current_execute_data) = EX(prev_execute_data);
+			EG(frame_teardown)++;
 			i_free_compiled_variables(execute_data);
 #ifdef ZEND_PREFER_RELOAD
 			call_info = EX_CALL_INFO();
@@ -110409,6 +111344,7 @@ zend_leave_helper_SPEC_LABEL:
 			if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 				OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 			}
+			EG(frame_teardown)--;
 			ZEND_VM_RETURN();
 		} else /* if (call_kind == ZEND_CALL_TOP_CODE) */ {
 			zend_array *symbol_table = EX(symbol_table);
@@ -110608,6 +111544,11 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_FAST_RET_SPEC)
 				ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_FAST_RET_SPEC)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FLUSH_DEFERRED_DTORS_SPEC):
+				VM_TRACE(ZEND_FLUSH_DEFERRED_DTORS_SPEC)
+				ZEND_FLUSH_DEFERRED_DTORS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_FLUSH_DEFERRED_DTORS_SPEC)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSERT_CHECK_SPEC):
 				VM_TRACE(ZEND_ASSERT_CHECK_SPEC)
@@ -118213,6 +119154,7 @@ void zend_vm_init(void)
 		ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED_HANDLER,
 		ZEND_DECLARE_ATTRIBUTED_CONST_SPEC_CONST_CONST_HANDLER,
 		ZEND_TYPE_ASSERT_SPEC_CONST_HANDLER,
+		ZEND_FLUSH_DEFERRED_DTORS_SPEC_HANDLER,
 		ZEND_INIT_FCALL_OFFSET_SPEC_CONST_HANDLER,
 		ZEND_RECV_NOTYPE_SPEC_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -121691,6 +122633,7 @@ void zend_vm_init(void)
 		ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED_TAILCALL_HANDLER,
 		ZEND_DECLARE_ATTRIBUTED_CONST_SPEC_CONST_CONST_TAILCALL_HANDLER,
 		ZEND_TYPE_ASSERT_SPEC_CONST_TAILCALL_HANDLER,
+		ZEND_FLUSH_DEFERRED_DTORS_SPEC_TAILCALL_HANDLER,
 		ZEND_INIT_FCALL_OFFSET_SPEC_CONST_TAILCALL_HANDLER,
 		ZEND_RECV_NOTYPE_SPEC_TAILCALL_HANDLER,
 		ZEND_NULL_TAILCALL_HANDLER,
@@ -122659,7 +123602,7 @@ void zend_vm_init(void)
 		1255,
 		1256 | SPEC_RULE_OP1,
 		1261 | SPEC_RULE_OP1,
-		3474,
+		3475,
 		1266 | SPEC_RULE_OP1,
 		1271 | SPEC_RULE_OP1,
 		1276 | SPEC_RULE_OP2,
@@ -122693,7 +123636,7 @@ void zend_vm_init(void)
 		1559 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1584 | SPEC_RULE_OP1,
 		1589,
-		3474,
+		3475,
 		1590 | SPEC_RULE_OP1,
 		1595 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1620 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
@@ -122826,50 +123769,50 @@ void zend_vm_init(void)
 		2556,
 		2557,
 		2558,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
-		3474,
+		2559,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
+		3475,
 	};
 #if 0
 #elif (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
@@ -123062,7 +124005,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2567 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2568 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -123070,7 +124013,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2592 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2593 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -123078,7 +124021,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2617 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2618 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -123089,17 +124032,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2642 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2643 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2667 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2668 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2692 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2693 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_MUL:
@@ -123110,17 +124053,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2717 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2718 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2742 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2743 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2767 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2768 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_IDENTICAL:
@@ -123131,16 +124074,16 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2792 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2793 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2867 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2868 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op2_type == IS_CONST && (Z_TYPE_P(RT_CONSTANT(op, op->op2)) == IS_ARRAY && zend_hash_num_elements(Z_ARR_P(RT_CONSTANT(op, op->op2))) == 0)) {
-				spec = 3092 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3093 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF))) {
-				spec = 3098 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3099 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_IDENTICAL:
@@ -123151,16 +124094,16 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2942 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2943 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3017 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3018 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op2_type == IS_CONST && (Z_TYPE_P(RT_CONSTANT(op, op->op2)) == IS_ARRAY && zend_hash_num_elements(Z_ARR_P(RT_CONSTANT(op, op->op2))) == 0)) {
-				spec = 3095 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3096 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF))) {
-				spec = 3103 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3104 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_EQUAL:
@@ -123171,12 +124114,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2792 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2793 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2867 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2868 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_EQUAL:
@@ -123187,12 +124130,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2942 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2943 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3017 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3018 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_SMALLER:
@@ -123200,12 +124143,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3108 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3109 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3183 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3184 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
@@ -123213,79 +124156,79 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3258 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3259 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3333 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3334 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_QM_ASSIGN:
 			if (op1_info == MAY_BE_LONG) {
-				spec = 3420 | SPEC_RULE_OP1;
+				spec = 3421 | SPEC_RULE_OP1;
 			} else if (op1_info == MAY_BE_DOUBLE) {
-				spec = 3425 | SPEC_RULE_OP1;
+				spec = 3426 | SPEC_RULE_OP1;
 			} else if ((op->op1_type == IS_CONST) ? !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1)) : (!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))))) {
-				spec = 3430 | SPEC_RULE_OP1;
+				spec = 3431 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_PRE_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3408 | SPEC_RULE_RETVAL;
+				spec = 3409 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3410 | SPEC_RULE_RETVAL;
+				spec = 3411 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_PRE_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3412 | SPEC_RULE_RETVAL;
+				spec = 3413 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3414 | SPEC_RULE_RETVAL;
+				spec = 3415 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_POST_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3416;
-			} else if (op1_info == MAY_BE_LONG) {
 				spec = 3417;
+			} else if (op1_info == MAY_BE_LONG) {
+				spec = 3418;
 			}
 			break;
 		case ZEND_POST_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3418;
-			} else if (op1_info == MAY_BE_LONG) {
 				spec = 3419;
+			} else if (op1_info == MAY_BE_LONG) {
+				spec = 3420;
 			}
 			break;
 		case ZEND_JMP:
 			if (OP_JMP_ADDR(op, op->op1) > op) {
-				spec = 2566;
+				spec = 2567;
 			}
 			break;
 		case ZEND_INIT_FCALL:
 			if (Z_EXTRA_P(RT_CONSTANT(op, op->op2)) != 0) {
-				spec = 2559;
+				spec = 2560;
 			}
 			break;
 		case ZEND_RECV:
 			if (op->op2.num == MAY_BE_ANY) {
-				spec = 2560;
+				spec = 2561;
 			}
 			break;
 		case ZEND_SEND_VAL:
 			if (op->op1_type == IS_CONST && op->op2_type == IS_UNUSED && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 3470;
+				spec = 3471;
 			}
 			break;
 		case ZEND_SEND_VAR_EX:
 			if (op->op2_type == IS_UNUSED && op->op2.num <= MAX_ARG_FLAG_NUM && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 3465 | SPEC_RULE_OP1;
+				spec = 3466 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_FE_FETCH_R:
 			if (op->op2_type == IS_CV && (op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 3472 | SPEC_RULE_RETVAL;
+				spec = 3473 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_FETCH_DIM_R:
@@ -123293,22 +124236,22 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3435 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3436 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_SEND_VAL_EX:
 			if (op->op2_type == IS_UNUSED && op->op2.num <= MAX_ARG_FLAG_NUM && op->op1_type == IS_CONST && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 3471;
+				spec = 3472;
 			}
 			break;
 		case ZEND_SEND_VAR:
 			if (op->op2_type == IS_UNUSED && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 3460 | SPEC_RULE_OP1;
+				spec = 3461 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_COUNT:
 			if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 2561 | SPEC_RULE_OP1;
+				spec = 2562 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_BW_OR:

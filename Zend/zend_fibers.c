@@ -113,6 +113,9 @@ typedef struct _zend_fiber_vm_state {
 	uint32_t jit_trace_num;
 	JMP_BUF *bailout;
 	zend_fiber *active_fiber;
+	zend_dtor_buf deferred_dtors;
+	uint32_t dtor_defer_gate;
+	uint32_t frame_teardown;
 #ifdef ZEND_CHECK_STACK_LIMIT
 	void *stack_base;
 	void *stack_limit;
@@ -130,6 +133,9 @@ static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *
 	state->jit_trace_num = EG(jit_trace_num);
 	state->bailout = EG(bailout);
 	state->active_fiber = EG(active_fiber);
+	state->deferred_dtors = EG(deferred_dtors);
+	state->dtor_defer_gate = EG(dtor_defer_gate);
+	state->frame_teardown = EG(frame_teardown);
 #ifdef ZEND_CHECK_STACK_LIMIT
 	state->stack_base = EG(stack_base);
 	state->stack_limit = EG(stack_limit);
@@ -147,10 +153,17 @@ static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *
 	EG(jit_trace_num) = state->jit_trace_num;
 	EG(bailout) = state->bailout;
 	EG(active_fiber) = state->active_fiber;
+	EG(deferred_dtors) = state->deferred_dtors;
+	EG(dtor_defer_gate) = state->dtor_defer_gate;
+	EG(frame_teardown) = state->frame_teardown;
 #ifdef ZEND_CHECK_STACK_LIMIT
 	EG(stack_base) = state->stack_base;
 	EG(stack_limit) = state->stack_limit;
 #endif
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+	}
 }
 
 #ifdef ZEND_FIBER_UCONTEXT
@@ -598,6 +611,10 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		EG(jit_trace_num) = 0;
 		EG(error_reporting) = error_reporting;
 
+		memset(&EG(deferred_dtors), 0, sizeof(EG(deferred_dtors)));
+		EG(dtor_defer_gate) = 1;
+		EG(frame_teardown) = 0;
+
 #ifdef ZEND_CHECK_STACK_LIMIT
 		EG(stack_base) = zend_fiber_stack_base(fiber->context.stack);
 		EG(stack_limit) = zend_fiber_stack_limit(fiber->context.stack);
@@ -606,6 +623,10 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		fiber->fci.retval = &fiber->result;
 
 		zend_call_function(&fiber->fci, &fiber->fci_cache);
+
+		if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+			zend_flush_deferred_dtors();
+		}
 
 		/* Cleanup callback and unset field to prevent GC / duplicate dtor issues. */
 		zval_ptr_dtor(&fiber->fci.function_name);
@@ -626,6 +647,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 	} zend_catch {
 		fiber->flags |= ZEND_FIBER_FLAG_BAILOUT;
 		transfer->flags = ZEND_FIBER_TRANSFER_FLAG_BAILOUT;
+		zend_release_deferred_dtors();
 	} zend_end_try();
 
 	fiber->context.cleanup = &zend_fiber_cleanup;

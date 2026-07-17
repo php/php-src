@@ -22,4 +22,9 @@ Fatal error: Uncaught Exception in %s:%d
 Stack trace:
 #0 [internal function]: C->__destruct()
 #1 {main}
+
+Next Exception in %s:%d
+Stack trace:
+#0 [internal function]: C->__destruct()
+#1 {main}
   thrown in %s on line %d

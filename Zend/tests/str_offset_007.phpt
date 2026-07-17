@@ -11,6 +11,9 @@ $a[0][$d]='b';
 var_dump($a);
 ?>
 --EXPECT--
+array(1) {
+  [0]=>
+  string(1) "b"
+}
 Err: Undefined variable $d
 Err: String offset cast occurred
-string(0) ""

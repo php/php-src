@@ -27,6 +27,7 @@ test($box);
 
 ?>
 --EXPECT--
-NULL
-object(Test)#2 (0) {
+object(Test)#3 (0) {
+}
+object(Test)#3 (0) {
 }

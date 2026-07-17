@@ -4316,13 +4316,73 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
 	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
-	} else if (zend_interrupt_function) {
-		zend_interrupt_function(call);
+	} else {
+		zend_flush_deferred_errors();
+		if (zend_interrupt_function) {
+			zend_interrupt_function(call);
+		}
+		if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+			zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+		}
+	}
+}
+
+static zend_always_inline bool zend_interrupt_process(
+		zend_execute_data *execute_data, const zend_op *opline, bool flush_dtors)
+{
+	bool entered = false;
+	bool pending_dtors = EG(deferred_dtors).count || EG(deferred_dtors).values_count;
+
+	if (EG(deferred_errors).size || pending_dtors) {
+		if (EX(call)
+		 || opline->opcode == ZEND_DO_FCALL
+		 || opline->opcode == ZEND_DO_ICALL
+		 || opline->opcode == ZEND_DO_UCALL
+		 || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+			zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+		} else {
+			if (flush_dtors
+			 || (pending_dtors
+			  && opline >= EX(func)->op_array.opcodes
+			  && opline <= EX(func)->op_array.opcodes + EX(func)->op_array.num_args)) {
+				zend_flush_deferred_dtors();
+				entered = true;
+			} else if (pending_dtors) {
+				zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+			}
+			if (EG(deferred_errors).size) {
+				zend_flush_deferred_errors();
+				entered = true;
+			}
+		}
+	}
+	if (zend_interrupt_function) {
+		zend_interrupt_function(execute_data);
+		entered = true;
+	}
+
+	return entered;
+}
+
+static zend_always_inline void zend_interrupt_handle_exception(void)
+{
+	if (EG(exception)) {
+		const zend_op *throw_op = EG(opline_before_exception);
+
+		if (throw_op
+		 && throw_op->result_type & (IS_TMP_VAR|IS_VAR)
+		 && throw_op->opcode != ZEND_ADD_ARRAY_ELEMENT
+		 && throw_op->opcode != ZEND_ADD_ARRAY_UNPACK
+		 && throw_op->opcode != ZEND_ROPE_INIT
+		 && throw_op->opcode != ZEND_ROPE_ADD) {
+			ZVAL_UNDEF(ZEND_CALL_VAR(EG(current_execute_data), throw_op->result.var));
+		}
 	}
 }
 
 #define ZEND_VM_INTERRUPT_CHECK() do { \
 		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+			SAVE_OPLINE(); \
 			ZEND_VM_INTERRUPT(); \
 		} \
 	} while (0)
@@ -4781,6 +4841,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 {
 	if (UNEXPECTED(EX(call))) {
 		zend_execute_data *call = EX(call);
+		EG(frame_teardown)++;
 		zend_op *opline = EX(func)->op_array.opcodes + op_num;
 		int level;
 		int do_exit;
@@ -4909,12 +4970,14 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 			zend_vm_stack_free_call_frame(call);
 			call = EX(call);
 		} while (call);
+		EG(frame_teardown)--;
 	}
 }
 /* }}} */
 
 static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
 {
+	EG(frame_teardown)++;
 	for (uint32_t i = 0; i < EX(func)->op_array.last_live_range; i++) {
 		const zend_live_range *range = &EX(func)->op_array.live_range[i];
 		if (range->start > op_num) {
@@ -4975,6 +5038,7 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 			}
 		}
 	}
+	EG(frame_teardown)--;
 }
 /* }}} */
 
@@ -5784,9 +5848,22 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 	CHECK_SYMBOL_TABLES() \
 	OPLINE = new_op
 
-#define ZEND_VM_SET_OPCODE(new_op) \
-	ZEND_VM_SET_OPCODE_NO_INTERRUPT(new_op); \
-	ZEND_VM_INTERRUPT_CHECK()
+#define ZEND_VM_SET_OPCODE(new_op) do { \
+		const zend_op *_target = (new_op); \
+		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+			bool _backward = _target <= OPLINE; \
+			ZEND_VM_SET_OPCODE_NO_INTERRUPT(_target); \
+			if (_backward) { \
+				ZEND_VM_KIND_TAILCALL_SAVE_OPLINE(); \
+				ZEND_VM_LOOP_INTERRUPT(); \
+			} else { \
+				SAVE_OPLINE(); \
+				ZEND_VM_INTERRUPT(); \
+			} \
+		} else { \
+			ZEND_VM_SET_OPCODE_NO_INTERRUPT(_target); \
+		} \
+	} while (0)
 
 #define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \
 	ZEND_VM_SET_OPCODE(ZEND_OFFSET_TO_OPLINE(opline, offset))

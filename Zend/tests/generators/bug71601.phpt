@@ -34,6 +34,6 @@ echo "Done\n";
 --EXPECT--
 Entered try/catch
 int(1)
+Done
 Inner finally
 Finally
-Done

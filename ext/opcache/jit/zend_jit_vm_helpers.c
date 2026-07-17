@@ -102,6 +102,13 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPC
 {
 	zend_execute_data *old_execute_data;
 
+	if (UNEXPECTED(EG(deferred_errors).size || EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		EX(opline) = opline;
+		zend_flush_deferred_dtors();
+		zend_flush_deferred_errors();
+	}
+
+	EG(frame_teardown)++;
 	if (UNEXPECTED(call_info & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 		zend_clean_and_cache_symbol_table(EX(symbol_table));
 	}
@@ -115,6 +122,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPC
 	if (UNEXPECTED(call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
 		zend_free_extra_named_params(EX(extra_named_params));
 	}
+	EG(frame_teardown)--;
 
 	old_execute_data = execute_data;
 	execute_data = EX(prev_execute_data);
@@ -1094,6 +1102,21 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 #endif
 		if (UNEXPECTED(execute_data != prev_execute_data)) {
 
+			if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+			 && !EX(call)
+			 && opline->opcode != ZEND_DO_FCALL
+			 && opline->opcode != ZEND_DO_ICALL
+			 && opline->opcode != ZEND_DO_UCALL
+			 && opline->opcode != ZEND_DO_FCALL_BY_NAME) {
+				EX(opline) = opline;
+				zend_flush_deferred_dtors();
+				if (UNEXPECTED(EG(exception))) {
+					opline = EX(opline);
+					stop = ZEND_JIT_TRACE_STOP_EXCEPTION;
+					break;
+				}
+			}
+
 			op_array = &EX(func)->op_array;
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
@@ -1114,6 +1137,18 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 
 			if (execute_data->prev_execute_data == prev_execute_data) {
 				/* Enter into function */
+				if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+					stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
+					break;
+				}
+				if (UNEXPECTED(EG(deferred_errors).size)) {
+					EX(opline) = opline;
+					zend_flush_deferred_errors();
+					if (UNEXPECTED(EG(exception))) {
+						stop = ZEND_JIT_TRACE_STOP_EXCEPTION;
+						break;
+					}
+				}
 				prev_call = NULL;
 				if (level > ZEND_JIT_TRACE_MAX_CALL_DEPTH) {
 					stop = ZEND_JIT_TRACE_STOP_TOO_DEEP;

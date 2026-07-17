@@ -130,14 +130,70 @@ static void zend_generator_cleanup_unfinished_execution(
 }
 /* }}} */
 
+static void zend_generator_drain_deferred_dtors(zend_generator *generator)
+{
+	if (EXPECTED(!generator->deferred_dtors.count && !generator->deferred_dtors.values_count)) {
+		return;
+	}
+
+	zend_dtor_buf original_deferred_dtors = EG(deferred_dtors);
+
+	EG(deferred_dtors) = generator->deferred_dtors;
+	memset(&generator->deferred_dtors, 0, sizeof(generator->deferred_dtors));
+
+	if (UNEXPECTED(CG(unclean_shutdown))) {
+		zend_release_deferred_dtors();
+	} else {
+		zend_flush_deferred_dtors();
+	}
+
+	EG(deferred_dtors) = original_deferred_dtors;
+}
+
+static zend_always_inline void zend_generator_enter_dtor_state(zend_generator *generator, zend_dtor_buf *deferred_dtors, uint32_t *dtor_defer_gate, uint32_t *frame_teardown)
+{
+	*deferred_dtors = EG(deferred_dtors);
+	*dtor_defer_gate = EG(dtor_defer_gate);
+	*frame_teardown = EG(frame_teardown);
+
+	EG(deferred_dtors) = generator->deferred_dtors;
+	EG(dtor_defer_gate) = generator->dtor_defer_gate;
+	EG(frame_teardown) = generator->frame_teardown;
+
+	memset(&generator->deferred_dtors, 0, sizeof(generator->deferred_dtors));
+	generator->frame_teardown = 0;
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+	}
+}
+
+static zend_always_inline void zend_generator_leave_dtor_state(zend_generator *generator, const zend_dtor_buf *deferred_dtors, uint32_t dtor_defer_gate, uint32_t frame_teardown)
+{
+	generator->deferred_dtors = EG(deferred_dtors);
+	generator->dtor_defer_gate = EG(dtor_defer_gate);
+	generator->frame_teardown = EG(frame_teardown);
+
+	EG(deferred_dtors) = *deferred_dtors;
+	EG(dtor_defer_gate) = dtor_defer_gate;
+	EG(frame_teardown) = frame_teardown;
+
+	if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+	}
+}
+
 ZEND_API void zend_generator_close(zend_generator *generator, bool finished_execution) /* {{{ */
 {
+	zend_generator_drain_deferred_dtors(generator);
+
 	if (EXPECTED(generator->execute_data)) {
 		zend_execute_data *execute_data = generator->execute_data;
 		/* Null out execute_data early, to prevent double frees if GC runs while we're
 		 * already cleaning up execute_data. */
 		generator->execute_data = NULL;
 
+		EG(frame_teardown)++;
 		if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table);
 		}
@@ -150,6 +206,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, bool finished_exec
 		if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		}
+		EG(frame_teardown)--;
 
 		/* A fatal error / die occurred during the generator execution.
 		 * Trying to clean up the stack may not be safe in this case. */
@@ -158,7 +215,9 @@ ZEND_API void zend_generator_close(zend_generator *generator, bool finished_exec
 			return;
 		}
 
+		EG(frame_teardown)++;
 		zend_vm_stack_free_extra_args(execute_data);
+		EG(frame_teardown)--;
 
 		/* Some cleanups are only necessary if the generator was closed
 		 * before it could finish execution (reach a return statement). */
@@ -470,6 +529,8 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 	/* The key will be incremented on first use, so it'll start at 0 */
 	generator->largest_used_integer_key = -1;
 
+	generator->dtor_defer_gate = 1;
+
 	ZVAL_UNDEF(&generator->retval);
 	ZVAL_UNDEF(&generator->values);
 
@@ -519,11 +580,16 @@ static zend_result zend_generator_throw_exception(zend_generator *generator, zva
 	}
 
 	zend_execute_data *original_execute_data = EG(current_execute_data);
+	zend_dtor_buf original_deferred_dtors;
+	uint32_t original_dtor_defer_gate;
+	uint32_t original_frame_teardown;
 
 	/* Throw the exception in the context of the generator. Decrementing the opline
 	 * to pretend the exception happened during the YIELD opcode. */
 	EG(current_execute_data) = generator->execute_data;
 	generator->execute_data->prev_execute_data = original_execute_data;
+
+	zend_generator_enter_dtor_state(generator, &original_deferred_dtors, &original_dtor_defer_gate, &original_frame_teardown);
 
 	if (exception) {
 		zend_throw_exception_object(exception);
@@ -537,6 +603,7 @@ static zend_result zend_generator_throw_exception(zend_generator *generator, zva
 		ZVAL_UNDEF(&generator->values);
 	}
 
+	zend_generator_leave_dtor_state(generator, &original_deferred_dtors, original_dtor_defer_gate, original_frame_teardown);
 	EG(current_execute_data) = original_execute_data;
 
 	return SUCCESS;
@@ -791,10 +858,15 @@ try_again:
 	/* Backup executor globals */
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	uint32_t original_jit_trace_num = EG(jit_trace_num);
+	zend_dtor_buf original_deferred_dtors;
+	uint32_t original_dtor_defer_gate;
+	uint32_t original_frame_teardown;
 
 	/* Set executor globals */
 	EG(current_execute_data) = generator->execute_data;
 	EG(jit_trace_num) = 0;
+
+	zend_generator_enter_dtor_state(generator, &original_deferred_dtors, &original_dtor_defer_gate, &original_frame_teardown);
 
 	/* We want the backtrace to look as if the generator function was
 	 * called from whatever method we are current running (e.g. next()).
@@ -814,6 +886,7 @@ try_again:
 	if (UNEXPECTED(!Z_ISUNDEF(generator->values))) {
 		if (EXPECTED(zend_generator_get_next_delegated_value(generator) == SUCCESS)) {
 			/* Restore executor globals */
+			zend_generator_leave_dtor_state(generator, &original_deferred_dtors, original_dtor_defer_gate, original_frame_teardown);
 			EG(current_execute_data) = original_execute_data;
 			EG(jit_trace_num) = original_jit_trace_num;
 
@@ -863,6 +936,12 @@ try_again:
 	/* Restore executor globals */
 	EG(current_execute_data) = original_execute_data;
 	EG(jit_trace_num) = original_jit_trace_num;
+
+	if (UNEXPECTED(!generator->execute_data)
+	 && UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+		zend_flush_deferred_dtors();
+	}
+	zend_generator_leave_dtor_state(generator, &original_deferred_dtors, original_dtor_defer_gate, original_frame_teardown);
 
 	/* If an exception was thrown in the generator we have to internally
 	 * rethrow it in the parent scope.

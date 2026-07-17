@@ -192,6 +192,11 @@ void init_executor(void) /* {{{ */
 
 	EG(record_errors) = false;
 	memset(&EG(errors), 0, sizeof(EG(errors)));
+	memset(&EG(deferred_errors), 0, sizeof(EG(deferred_errors)));
+	memset(&EG(deferred_dtors), 0, sizeof(EG(deferred_dtors)));
+	EG(deferred_dtor_exception) = NULL;
+	EG(dtor_defer_gate) = 1;
+	EG(frame_teardown) = 0;
 
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
@@ -257,11 +262,21 @@ void shutdown_destructors(void) /* {{{ */
 		do {
 			symbols = zend_hash_num_elements(&EG(symbol_table));
 			zend_hash_reverse_apply(&EG(symbol_table), (apply_func_t) zval_call_destructor);
-		} while (symbols != zend_hash_num_elements(&EG(symbol_table)));
+			zend_flush_deferred_dtors();
+			zend_surface_deferred_dtor_exception();
+		} while (symbols != zend_hash_num_elements(&EG(symbol_table))
+			|| (!EG(exception) && (EG(deferred_dtors).count || EG(deferred_dtors).values_count)));
 		zend_objects_store_call_destructors(&EG(objects_store));
+		zend_flush_deferred_dtors();
+		zend_surface_deferred_dtor_exception();
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			zend_exception_error(EG(exception), E_ERROR);
+			zend_bailout();
+		}
 	} zend_catch {
 		/* if we couldn't destruct cleanly, mark all objects as destructed anyway */
 		zend_objects_store_mark_destructed(&EG(objects_store));
+		zend_release_deferred_dtors();
 	} zend_end_try();
 }
 /* }}} */
@@ -444,6 +459,13 @@ void shutdown_executor(void) /* {{{ */
 #else
 	bool fast_shutdown = is_zend_mm() && !EG(full_tables_cleanup);
 #endif
+
+	zend_free_deferred_errors();
+	if (EG(deferred_dtor_exception)) {
+		GC_DELREF(EG(deferred_dtor_exception));
+		EG(deferred_dtor_exception) = NULL;
+	}
+	zend_release_deferred_dtors();
 
 	zend_try {
 		zend_stream_shutdown();
@@ -869,6 +891,14 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	}
 #endif
 
+	if (UNEXPECTED((EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+			&& !EG(frame_teardown))) {
+		zend_flush_deferred_dtors_surface();
+		if (UNEXPECTED(EG(exception))) {
+			return SUCCESS;
+		}
+	}
+
 	call = zend_vm_stack_push_call_frame(call_info,
 		func, fci->param_count, object_or_called_scope);
 	uint32_t consumed_args = fci->param_count ? fci->consumed_args : 0;
@@ -1055,6 +1085,7 @@ cleanup_args:
 #endif
 		ZEND_OBSERVER_FCALL_END(call, fci->retval);
 		EG(current_execute_data) = call->prev_execute_data;
+		EG(frame_teardown)++;
 		zend_vm_stack_free_args(call);
 		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
 			zend_array_release(call->extra_named_params);
@@ -1064,6 +1095,7 @@ cleanup_args:
 			zval_ptr_dtor(fci->retval);
 			ZVAL_UNDEF(fci->retval);
 		}
+		EG(frame_teardown)--;
 
 		/* This flag is regularly checked while running user functions, but not internal
 		 * So see whether interrupt flag was set while the function was running... */
@@ -1074,9 +1106,14 @@ cleanup_args:
 				zend_interrupt_function(EG(current_execute_data));
 			}
 		}
+		if (UNEXPECTED(EG(deferred_dtors).count || EG(deferred_dtors).values_count)) {
+			zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+		}
 
 		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
+			EG(frame_teardown)++;
 			OBJ_RELEASE(Z_OBJ(call->This));
+			EG(frame_teardown)--;
 		}
 	}
 	EG(fake_scope) = orig_fake_scope;
@@ -1085,7 +1122,9 @@ cleanup_args:
 
 	if (UNEXPECTED(EG(exception))) {
 		if (UNEXPECTED(!EG(current_execute_data))) {
-			zend_throw_exception_internal(NULL);
+			if (!EG(frame_teardown)) {
+				zend_throw_exception_internal(NULL);
+			}
 		} else if (EG(current_execute_data)->func &&
 		           ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
 			zend_rethrow_exception(EG(current_execute_data));

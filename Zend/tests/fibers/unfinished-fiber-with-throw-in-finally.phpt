@@ -41,8 +41,8 @@ echo "done\n";
 ?>
 --EXPECT--
 fiber
+done
 inner finally
 finally exception
 outer finally
 Cannot suspend in a force-closed fiber
-done

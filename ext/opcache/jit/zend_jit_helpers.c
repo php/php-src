@@ -3437,6 +3437,54 @@ static void ZEND_FASTCALL zend_jit_exception_in_interrupt_handler_helper(void)
 	}
 }
 
+static void ZEND_FASTCALL zend_jit_flush_deferred_dtors_helper(zend_execute_data *execute_data)
+{
+	zend_flush_deferred_dtors();
+	if (UNEXPECTED(EG(exception))) {
+		zend_rethrow_exception(execute_data);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_flush_deferred_dtors_surface_helper(zend_execute_data *execute_data)
+{
+	zend_flush_deferred_dtors_surface();
+	if (UNEXPECTED(EG(exception))) {
+		zend_rethrow_exception(execute_data);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_check_deferred_errors(zend_execute_data *execute_data)
+{
+	bool pending_dtors = EG(deferred_dtors).count || EG(deferred_dtors).values_count;
+
+	if ((EG(deferred_errors).size || pending_dtors) && execute_data->call) {
+		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+	} else {
+		if (pending_dtors) {
+			const zend_op *opline = EX(opline);
+
+			if (opline >= EX(func)->op_array.opcodes
+			 && opline <= EX(func)->op_array.opcodes + EX(func)->op_array.num_args) {
+				zend_flush_deferred_dtors();
+			} else {
+				zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+			}
+		}
+		zend_flush_deferred_errors();
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_check_deferred_loop(zend_execute_data *execute_data)
+{
+	if ((EG(deferred_errors).size || EG(deferred_dtors).count || EG(deferred_dtors).values_count)
+			&& execute_data->call) {
+		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+	} else {
+		zend_flush_deferred_dtors();
+		zend_flush_deferred_errors();
+	}
+}
+
 static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t count)
 {
 	zend_string *ret;

@@ -161,12 +161,12 @@ TypeError: TestUserWithConstructorArgs::__construct(): Argument #1 ($int_param) 
 Error: Unknown named parameter $unused_param
 object(TestUserWithConstructorArgs)#%d (0) {
 }
-Destructor for TestUserWithConstructorArgs
 Passing too many args to constructor
+Destructor for TestUserWithConstructorArgs
 object(TestUserWithConstructorArgs)#%d (0) {
 }
-Destructor for TestUserWithConstructorArgs
 Testing class with defined constructor and no params
+Destructor for TestUserWithConstructorArgs
 object(TestUserWithConstructorNoParams)#%d (0) {
 }
 Destructor for TestUserWithConstructorNoParams

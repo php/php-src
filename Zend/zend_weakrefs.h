@@ -27,6 +27,7 @@ void zend_weakrefs_init(void);
 void zend_weakrefs_shutdown(void);
 
 ZEND_API void zend_weakrefs_notify(zend_object *object);
+void zend_weakrefs_notify_detach(zend_object *object);
 
 ZEND_API zval *zend_weakrefs_hash_add(HashTable *ht, zend_object *key, zval *pData);
 ZEND_API zend_result zend_weakrefs_hash_del(HashTable *ht, zend_object *key);

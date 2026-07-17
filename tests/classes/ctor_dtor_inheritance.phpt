@@ -59,12 +59,12 @@ base Object
 (
     [name] => base
 )
+Testing class derived
 base::__destruct
 base Object
 (
     [name] => base
 )
-Testing class derived
 derived Object
 (
     [name] => init
@@ -82,6 +82,7 @@ derived Object
     [name] => derived
     [other] => other
 )
+Done
 base::__destruct
 derived Object
 (
@@ -94,4 +95,3 @@ derived Object
     [name] => derived
     [other] => other
 )
-Done

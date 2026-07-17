@@ -79,9 +79,10 @@ $foo->bar($a, $b, $c);
 Fatal error: Uncaught Error: Class "DoesNotExists" not found in %s:%d
 Stack trace:
 #0 %s(%d): {closure:%s:%d}(2, 'MethodCallbackB...', '%s', 8)
-#1 %sbug72101.php(%d): PHPUnit_Framework_MockObject_Stub_ReturnCallback->invoke(Object(PHPUnit_Framework_MockObject_Invocation_Static))
-#2 %sbug72101.php(%d): PHPUnit_Framework_MockObject_Matcher->invoked(Object(PHPUnit_Framework_MockObject_Invocation_Static))
-#3 %sbug72101.php(%d): PHPUnit_Framework_MockObject_InvocationMocker->invoke(Object(PHPUnit_Framework_MockObject_Invocation_Static))
-#4 %sbug72101.php(%d): Mock_MethodCallbackByReference_7b180d26->bar(0, 0, 0)
-#5 {main}
+#1 %sbug72101.php(%d): MethodCallbackByReference->callback(0, 0, 0)
+#2 %sbug72101.php(%d): PHPUnit_Framework_MockObject_Stub_ReturnCallback->invoke(Object(PHPUnit_Framework_MockObject_Invocation_Static))
+#3 %sbug72101.php(%d): PHPUnit_Framework_MockObject_Matcher->invoked(Object(PHPUnit_Framework_MockObject_Invocation_Static))
+#4 %sbug72101.php(%d): PHPUnit_Framework_MockObject_InvocationMocker->invoke(Object(PHPUnit_Framework_MockObject_Invocation_Static))
+#5 %sbug72101.php(%d): Mock_MethodCallbackByReference_7b180d26->bar(0, 0, 0)
+#6 {main}
   thrown in %sbug72101.php on line %d

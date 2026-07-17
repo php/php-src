@@ -19,7 +19,9 @@ unset($obj);
 ?>
 ===DONE===
 --EXPECTF--
+===DONE===
+
 Fatal error: Uncaught Error: Call to private Derived::__destruct() from global scope in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %sdestructor_visibility_001.php on line %d
+  thrown in %s on line %d

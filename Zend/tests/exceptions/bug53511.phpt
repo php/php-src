@@ -21,9 +21,11 @@ test();
 echo "bug\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught Exception: ops 1 in %sbug53511.php:4
+ops 2
+bug
+
+Fatal error: Uncaught Exception: ops 1 in %sbug53511.php:%d
 Stack trace:
-#0 %sbug53511.php(12): Foo->__destruct()
-#1 %sbug53511.php(17): test()
-#2 {main}
-  thrown in %sbug53511.php on line 4
+#0 %s: Foo->__destruct()
+#1 {main}
+  thrown in %sbug53511.php on line %d

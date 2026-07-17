@@ -54,5 +54,6 @@ catch(FatalException $e)
 FailClass::__destruct
 Caught: FailClass
 FatalException::__construct
+Done: FatalException::__construct
 FailClass::__destruct
 Caught Exception: FailClass

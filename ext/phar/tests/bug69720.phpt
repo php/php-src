@@ -29,7 +29,7 @@ array(1) {
   ["whatever"]=>
   int(123)
 }
-object(DateTime)#6 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2000-01-01 00:00:00.000000"
   ["timezone_type"]=>

@@ -23,4 +23,4 @@ $filename = __DIR__ . '/bug70417.tar';
 @unlink("$filename.gz");
 ?>
 --EXPECT--
-int(0)
+int(2)

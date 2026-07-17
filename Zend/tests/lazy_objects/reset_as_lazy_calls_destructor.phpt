@@ -51,8 +51,8 @@ string(13) "C::__destruct"
 After makeLazy
 string(11) "initializer"
 int(1)
-string(13) "C::__destruct"
 # Proxy:
+string(13) "C::__destruct"
 In makeLazy
 string(13) "C::__destruct"
 After makeLazy

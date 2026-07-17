@@ -35,5 +35,5 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-NULL
 Done
+NULL

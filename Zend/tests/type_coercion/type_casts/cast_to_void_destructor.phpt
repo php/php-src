@@ -26,5 +26,5 @@ do_it();
 ?>
 --EXPECT--
 Before
-WithDestructor::__destruct
 After
+WithDestructor::__destruct

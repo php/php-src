@@ -22,14 +22,16 @@ try {
 
 set_error_handler(function($type, $msg) { throw new Exception($msg); });
 
+function concat(&$a, $b) { $a .= $b; }
+
 try {
     $a = [];
-    $a .= "foo";
+    concat($a, "foo");
 } catch (Throwable $e) { var_dump($a); }
 
 try {
     $a = "foo";
-    $a .= [];
+    concat($a, []);
 } catch (Throwable $e) { var_dump($a); }
 
 $x = new stdClass;
@@ -202,9 +204,8 @@ var_dump($x);
 int(1)
 int(1)
 int(1)
-array(0) {
-}
-string(3) "foo"
+string(8) "Arrayfoo"
+string(8) "fooArray"
 object(stdClass)#%d (0) {
 }
 int(1)

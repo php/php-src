@@ -23,6 +23,19 @@ PHP 8.6 UPGRADE NOTES
   . It is no longer possible to clone variant objects, this is because
     the cloning behaviour was ill defined.
 
+- Core:
+  . Object destructors (__destruct) now run at the next VM safepoint (a
+    function call, loop back-edge, try-region boundary, or script end) rather
+    than synchronously when an object's last reference is released. Logical
+    death stays synchronous: a WeakReference reads null and a WeakMap entry is
+    gone as soon as the reference drops. Code that assumed a destructor ran
+    before the next statement in the same scope may observe its side effects
+    slightly later, and a destructor's stack trace now shows [internal
+    function] for the frame that triggered it instead of the releasing line.
+    An exception thrown from a destructor is raised at the safepoint and
+    remains catchable by the try/catch that was active when the object was
+    released.
+
 - DOM:
   . Properties previously documented as @readonly (e.g. DOMNode::$nodeType,
     DOMDocument::$xmlEncoding, DOMEntity::$actualEncoding, ::$encoding,

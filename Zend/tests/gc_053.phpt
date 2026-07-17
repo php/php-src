@@ -23,15 +23,15 @@ $weakO = \WeakReference::create($o);
 echo "---\n";
 unset($o);
 echo "---\n";
-var_dump($weakO->get() !== null); // verify if kept allocated
+var_dump($weakO->get() !== null); // weakref severed at the drop; the deferred dtor re-referencing $this does not restore it
 G::$v = null;
 echo "---\n";
-var_dump($weakO->get() !== null); // verify if released
+var_dump($weakO->get() !== null); // still severed
 ?>
 --EXPECT--
 ---
-d
 ---
-bool(true)
+d
+bool(false)
 ---
 bool(false)

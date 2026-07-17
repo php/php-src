@@ -943,6 +943,8 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 
 #define IS_OBJ_LAZY_UNINITIALIZED   (1U<<31) /* Virtual proxy or uninitialized Ghost */
 #define IS_OBJ_LAZY_PROXY           (1U<<30) /* Virtual proxy (may be initialized) */
+#define IS_OBJ_DTOR_PENDING         (1U<<29) /* Destructor deferred to the next VM safepoint */
+#define IS_OBJ_DTOR_VIS_FAIL        (1U<<28) /* Deferred destructor inaccessible from the drop-site scope */
 
 #define OBJ_EXTRA_FLAGS(obj)		((obj)->extra_flags)
 
