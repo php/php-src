@@ -1952,9 +1952,9 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 
 			/* Force UID and PWD to be set in the DSN */
 			if (use_uid_arg || use_pwd_arg) {
-				db_end--;
-				if ((unsigned char)*(db_end) == ';') {
-					*db_end = '\0';
+				size_t base_len = db_len;
+				if (base_len > 0 && db[base_len - 1] == ';') {
+					base_len--;
 				}
 
 				char *uid_quoted = NULL, *pwd_quoted = NULL;
@@ -1970,7 +1970,7 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 					}
 
 					if (!use_pwd_arg) {
-						spprintf(&ldb, 0, "%s;UID=%s;", db, uid_quoted);
+						spprintf(&ldb, 0, "%.*s;UID=%s;", (int) base_len, db, uid_quoted);
 					}
 				}
 
@@ -1985,12 +1985,12 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 					}
 
 					if (!use_uid_arg) {
-						spprintf(&ldb, 0, "%s;PWD=%s;", db, pwd_quoted);
+						spprintf(&ldb, 0, "%.*s;PWD=%s;", (int) base_len, db, pwd_quoted);
 					}
 				}
 
 				if (use_uid_arg && use_pwd_arg) {
-					spprintf(&ldb, 0, "%s;UID=%s;PWD=%s;", db, uid_quoted, pwd_quoted);
+					spprintf(&ldb, 0, "%.*s;UID=%s;PWD=%s;", (int) base_len, db, uid_quoted, pwd_quoted);
 				}
 
 				if (uid_quoted && should_quote_uid) {
