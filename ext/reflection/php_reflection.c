@@ -176,7 +176,7 @@ typedef struct {
 
 #define reflection_object_from_obj(obj) ZEND_CONTAINER_OF(obj, reflection_object, zo)
 
-#define Z_REFLECTION_P(zv)  reflection_object_from_obj(Z_OBJ_P((zv)))
+#define Z_REFLECTION_P(zv) reflection_object_from_obj(Z_OBJ_P((zv)))
 /* }}} */
 
 static zend_object_handlers reflection_object_handlers;
@@ -493,7 +493,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 	smart_str_append_printf(str, "%s  }\n", indent);
 
 	if (obj && Z_TYPE_P(obj) == IS_OBJECT) {
-		HashTable    *properties = zend_get_properties_no_lazy_init(Z_OBJ_P(obj));
+		HashTable *properties = zend_get_properties_no_lazy_init(Z_OBJ_P(obj));
 		smart_str prop_str = {0};
 
 		count = 0;
@@ -1861,7 +1861,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureUsedVariables)
 		opline++;
 	}
 
-	for (; opline->opcode == ZEND_BIND_STATIC; opline++)  {
+	for (; opline->opcode == ZEND_BIND_STATIC; opline++) {
 		if (!(opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
 			continue;
 		}
@@ -3317,7 +3317,7 @@ ZEND_METHOD(ReflectionMethod, getClosure)
 
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
-	if (mptr->common.fn_flags & ZEND_ACC_STATIC)  {
+	if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, mptr->common.scope, NULL);
 		return;
 	}
@@ -4190,7 +4190,7 @@ ZEND_METHOD(ReflectionClass, setStaticPropertyValue)
 	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = ce;
 	zend_property_info *prop_info;
-	zval *variable_ptr =  zend_std_get_static_property_with_info(ce, name, BP_VAR_W, &prop_info);
+	zval *variable_ptr = zend_std_get_static_property_with_info(ce, name, BP_VAR_W, &prop_info);
 	EG(fake_scope) = old_scope;
 	if (!variable_ptr) {
 		zend_clear_exception();
@@ -4615,7 +4615,7 @@ static void _addproperty(zend_property_info *pptr, zend_string *key, zend_class_
 		return;
 	}
 
-	if (pptr->flags	& filter) {
+	if (pptr->flags & filter) {
 		zval property;
 		reflection_property_factory(ce, key, pptr, &property);
 		zend_hash_next_index_insert_new(ht, &property);
@@ -6499,7 +6499,6 @@ ZEND_METHOD(ReflectionProperty, getHooks)
 
 ZEND_METHOD(ReflectionProperty, hasHook)
 {
-
 	const reflection_object *intern;
 	const property_reference *ref;
 	zend_enum_PropertyHookType type;
