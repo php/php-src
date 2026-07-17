@@ -39,11 +39,11 @@ var_dump(file_get_contents("http://exa%23mple.org", context: $context)); // inva
 --EXPECTF--
 file_get_contents(): Provided stream context has invalid value for the "uri_parser_class" option
 
-Warning: file_get_contents(http:///example.com): Failed to open stream: operation failed in %s on line %d
+Warning: file_get_contents(): Failed to open stream: operation failed in %s on line %d
 bool(false)
 
-Warning: file_get_contents(http://éxamplé.com): Failed to open stream: operation failed in %s on line %d
+Warning: file_get_contents(): Failed to open stream: operation failed in %s on line %d
 bool(false)
 
-Warning: file_get_contents(http://exa%23mple.org): Failed to open stream: operation failed in %s on line %d
+Warning: file_get_contents(): Failed to open stream: operation failed in %s on line %d
 bool(false)
