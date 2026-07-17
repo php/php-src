@@ -30,7 +30,7 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
-    SO_LINGER options. (Weilin Du)
+    TCP_USER_TIMEOUT, and SO_LINGER options. (Weilin Du)
 
 16 Jul 2026, PHP 8.6.0alpha2
 
