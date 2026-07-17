@@ -2357,6 +2357,7 @@ PHP_FUNCTION(socket_import_stream)
 	retsock = Z_SOCKET_P(return_value);
 
 	if (!socket_import_file_descriptor(socket, retsock)) {
+		retsock->bsd_socket = -1;
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
