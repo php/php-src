@@ -854,6 +854,10 @@ lxb_url_get(lxb_url_parser_t *parser)
     return parser->url;
 }
 
+lxb_status_t
+lxb_url_percent_decode_plus(const lxb_char_t *data, const lxb_char_t *end,
+							lexbor_str_t *str, lexbor_mraw_t *mraw);
+
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -559,6 +559,22 @@ static zend_result php_uri_parser_whatwg_fragment_write(void *uri, const zval *v
 	return SUCCESS;
 }
 
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_query_component_percent_decode(const char *str, const size_t str_length)
+{
+	lexbor_str_t result = {0};
+
+	const lxb_status_t status = lxb_url_percent_decode_plus(
+		(const lxb_char_t *) str, (const lxb_char_t *) (str + str_length),
+		&result, &lexbor_mraw
+	);
+
+	if (status != LXB_STATUS_OK) {
+		return NULL;
+	}
+
+	return zend_string_init((const char *) result.data, result.length, 0);
+}
+
 PHP_RINIT_FUNCTION(uri_parser_whatwg)
 {
 	lxb_status_t status;

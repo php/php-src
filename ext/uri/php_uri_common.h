@@ -26,6 +26,8 @@ extern zend_class_entry *php_uri_ce_comparison_mode;
 extern zend_class_entry *php_uri_ce_exception;
 extern zend_class_entry *php_uri_ce_error;
 extern zend_class_entry *php_uri_ce_invalid_uri_exception;
+extern zend_class_entry *php_uri_ce_query_params;
+extern zend_class_entry *php_uri_ce_query_param_options;
 extern zend_class_entry *php_uri_ce_whatwg_invalid_url_exception;
 extern zend_class_entry *php_uri_ce_whatwg_url_validation_error_type;
 extern zend_class_entry *php_uri_ce_whatwg_url_validation_error;
@@ -162,6 +164,7 @@ PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object);
 #define PHP_URI_PARSER_WHATWG "Uri\\WhatWg\\Url"
 #define PHP_URI_PARSER_PHP_PARSE_URL "parse_url"
 #define PHP_URI_SERIALIZE_URI_FIELD_NAME "uri"
+#define PHP_URI_SERIALIZE_URI_QUERY_PARAM_FIELD_NAME "query"
 
 static inline const php_uri_property_handler *php_uri_parser_property_handler_by_name(const php_uri_parser *parser, php_uri_property_name property_name)
 {
@@ -190,5 +193,34 @@ void php_uri_property_read_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property
 void php_uri_property_write_str_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
 void php_uri_property_write_str_or_null_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
 void php_uri_property_write_long_or_null_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
+
+typedef struct php_uri_query_param_list_entry {
+	zend_string *key;
+	zend_string *value;
+	uint32_t next_same_key;
+} php_uri_query_param_list_entry;
+
+typedef struct php_uri_query_param_lookup_entry {
+	uint32_t first_index;
+	uint32_t last_index;
+} php_uri_query_param_lookup_entry;
+
+typedef struct php_uri_query_params_object {
+	HashTable entry_list;
+	HashTable entry_lookup_table;
+	uint32_t tombstone_count;
+	bool is_initialized;
+	zend_object std;
+} php_uri_query_params_object;
+
+typedef struct php_uri_query_param_options_object {
+	size_t parsing_max_query_string_length;
+	uint32_t parsing_max_param_count;
+	zend_string *true_value;
+	zend_string *false_value;
+	bool use_null_as_string;
+	bool is_initialized;
+	zend_object std;
+} php_uri_query_param_options_object;
 
 #endif

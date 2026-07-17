@@ -613,10 +613,6 @@ lxb_url_percent_decode(const lxb_char_t *data, const lxb_char_t *end,
                        lexbor_str_t *str, lexbor_mraw_t *mraw,
                        lxb_url_host_opt_t *opt);
 
-static lxb_status_t
-lxb_url_percent_decode_plus(const lxb_char_t *data, const lxb_char_t *end,
-                            lexbor_str_t *str, lexbor_mraw_t *mraw);
-
 static const lxb_char_t *
 lxb_url_path_part_by_index(const lxb_url_t *url, size_t index,
                            size_t *out_length);
@@ -4071,7 +4067,7 @@ lxb_url_percent_decode(const lxb_char_t *data, const lxb_char_t *end,
     return LXB_STATUS_OK;
 }
 
-static lxb_status_t
+lxb_status_t
 lxb_url_percent_decode_plus(const lxb_char_t *data, const lxb_char_t *end,
                             lexbor_str_t *str, lexbor_mraw_t *mraw)
 {

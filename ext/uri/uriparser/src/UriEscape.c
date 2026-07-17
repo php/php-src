@@ -65,14 +65,9 @@
 #    include "UriSets.h"
 #  endif
 
-URI_CHAR * URI_FUNC(Escape)(const URI_CHAR * in, URI_CHAR * out, UriBool spaceToPlus,
-                            UriBool normalizeBreaks) {
-    return URI_FUNC(EscapeEx)(in, NULL, out, spaceToPlus, normalizeBreaks);
-}
-
-URI_CHAR * URI_FUNC(EscapeEx)(const URI_CHAR * inFirst, const URI_CHAR * inAfterLast,
-                              URI_CHAR * out, UriBool spaceToPlus,
-                              UriBool normalizeBreaks) {
+URI_CHAR * URI_FUNC(EscapeQueryEngine)(const URI_CHAR * inFirst, const URI_CHAR * inAfterLast,
+										URI_CHAR * out, UriBool spaceToPlus,
+										UriBool encodeReserved, UriBool normalizeBreaks) {
     const URI_CHAR * read = inFirst;
     URI_CHAR * write = out;
     UriBool prevWasCr = URI_FALSE;
@@ -155,6 +150,26 @@ URI_CHAR * URI_FUNC(EscapeEx)(const URI_CHAR * inFirst, const URI_CHAR * inAfter
             prevWasCr = URI_TRUE;
             break;
 
+        case URI_SET_SUB_DELIMS(_UT):
+        		/* intentional fallback */
+        case _UT(':'):
+        		/* intentional fallback */
+        case _UT('@'):
+        		/* intentional fallback */
+        case _UT('/'):
+        		/* intentional fallback */
+        case _UT('?'):
+        	if (!encodeReserved) {
+        		/* Copy unmodified */
+        		write[0] = read[0];
+        		write++;
+
+        		prevWasCr = URI_FALSE;
+        		break;
+        	}
+
+        	/* intentional fallback */
+
         default:
             /* Percent encode */
             {
@@ -173,6 +188,27 @@ URI_CHAR * URI_FUNC(EscapeEx)(const URI_CHAR * inFirst, const URI_CHAR * inAfter
 
         read++;
     }
+}
+
+URI_CHAR * URI_FUNC(Escape)(const URI_CHAR * in, URI_CHAR * out, UriBool spaceToPlus,
+                            UriBool normalizeBreaks) {
+    return URI_FUNC(EscapeEx)(in, NULL, out, spaceToPlus, normalizeBreaks);
+}
+
+URI_CHAR * URI_FUNC(EscapeEx)(const URI_CHAR * inFirst, const URI_CHAR * inAfterLast,
+                              URI_CHAR * out, UriBool spaceToPlus,
+                              UriBool normalizeBreaks) {
+	return URI_FUNC(EscapeQueryEngine)(inFirst, inAfterLast, out, spaceToPlus, URI_TRUE, normalizeBreaks);
+}
+
+URI_CHAR * URI_FUNC(EscapeQueryRfc3986)(const URI_CHAR * in, URI_CHAR * out,
+										UriBool normalizeBreaks) {
+	return URI_FUNC(EscapeQueryRfc3986Ex)(in, NULL, out, normalizeBreaks);
+}
+
+URI_CHAR * URI_FUNC(EscapeQueryRfc3986Ex)(const URI_CHAR * inFirst, const URI_CHAR * inAfterLast,
+										URI_CHAR * out, UriBool normalizeBreaks) {
+	return URI_FUNC(EscapeQueryEngine)(inFirst, inAfterLast, out, URI_FALSE, URI_FALSE, normalizeBreaks);
 }
 
 const URI_CHAR * URI_FUNC(UnescapeInPlace)(URI_CHAR * inout) {

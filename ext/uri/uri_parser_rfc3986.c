@@ -679,6 +679,90 @@ ZEND_ATTRIBUTE_NONNULL static zend_string *php_uri_parser_rfc3986_to_string(void
 	return uri_string;
 }
 
+zend_string *php_uri_parser_rfc3986_query_component_percent_decode(const char *str, const size_t str_length, const bool plus_to_space)
+{
+	if (UNEXPECTED(str == NULL)) {
+		return NULL;
+	}
+
+	if (UNEXPECTED(str_length == 0)) {
+		return zend_empty_string;
+	}
+
+	const bool needs_percent_decoding = memchr(str, '%', strlen(str));
+	if (EXPECTED(!needs_percent_decoding)) {
+		return zend_string_init(str, str_length, false);
+	}
+
+	zend_string *result = zend_string_alloc(str_length, false);
+
+	memcpy(ZSTR_VAL(result), str, str_length);
+	ZSTR_VAL(result)[str_length] = '\0';
+
+	const char *end = uriUnescapeInPlaceExA(ZSTR_VAL(result), plus_to_space, URI_BR_DONT_TOUCH);
+
+	ZSTR_LEN(result) = (size_t)(end - ZSTR_VAL(result));
+
+	return result;
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_rfc3986_query_component_percent_encode(const char *str, const size_t str_length, const bool space_to_plus)
+{
+	zend_string *result = zend_string_alloc(str_length * 3, false);
+
+	const char *end;
+
+	if (space_to_plus) {
+		end = uriEscapeExA(str, str + str_length, ZSTR_VAL(result), space_to_plus, URI_BR_DONT_TOUCH);
+	} else {
+		end = uriEscapeQueryRfc3986ExA(str, str + str_length, ZSTR_VAL(result), URI_BR_DONT_TOUCH);
+	}
+
+	ZSTR_LEN(result) = (size_t)(end - ZSTR_VAL(result));
+
+	return result;
+}
+
+ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_rfc3986_query_component_append_to_string(
+	 const zend_string *component, const bool space_to_plus, smart_str *buf
+) {
+	const bool needs_percent_encoding = true; // TODO
+	if (UNEXPECTED(needs_percent_encoding)) {
+		smart_str_append(buf, php_uri_parser_rfc3986_query_component_percent_encode(ZSTR_VAL(component), ZSTR_LEN(component), space_to_plus));
+	} else {
+		smart_str_appendl(buf, ZSTR_VAL(component), ZSTR_LEN(component));
+	}
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_rfc3986_query_params_to_string(
+	const php_uri_query_params_object *query_params_object, const bool space_to_plus
+) {
+	smart_str buf = {0};
+	bool is_first = true;
+
+	ZEND_HASH_FOREACH_PTR(&query_params_object->entry_list, php_uri_query_param_list_entry *entry) {
+		const zend_string *name = entry->key;
+		const zend_string *value = entry->value;
+
+		if (name == NULL) {
+			continue;
+		}
+
+		if (!is_first) {
+			smart_str_appendc(&buf, '&');
+		}
+		is_first = false;
+
+		php_uri_parser_rfc3986_query_component_append_to_string(name, space_to_plus, &buf);
+		if (value != NULL) {
+			smart_str_appendc(&buf, '=');
+			php_uri_parser_rfc3986_query_component_append_to_string(value, space_to_plus, &buf);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return buf.s != NULL ? smart_str_extract(&buf) : ZSTR_EMPTY_ALLOC();
+}
+
 static void php_uri_parser_rfc3986_destroy(void *uri)
 {
 	php_uri_parser_rfc3986_uris *uriparser_uris = uri;
