@@ -62,7 +62,7 @@ ValueError: Path must not be empty
 
 -- Filename: " " --
 
-Warning: file_put_contents( ): Failed to open stream: Permission denied in %s on line %d
+Warning: file_put_contents(): Failed to open stream: Permission denied in %s on line %d
 Failed to write data to: " "
 
 -- Filename: \0 --
