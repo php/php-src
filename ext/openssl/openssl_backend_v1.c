@@ -78,34 +78,55 @@ EVP_PKEY_CTX *php_openssl_pkey_new_from_pkey(EVP_PKEY *pkey)
 	return EVP_PKEY_CTX_new(pkey, NULL);
 }
 
-static bool php_openssl_pkey_init_rsa_data(RSA *rsa, zval *data)
+static bool php_openssl_pkey_init_rsa_data(RSA *rsa, zval *data, bool *is_private)
 {
 	BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
 
 	OPENSSL_PKEY_SET_BN(data, n);
 	OPENSSL_PKEY_SET_BN(data, e);
 	OPENSSL_PKEY_SET_BN(data, d);
-	if (!n || !d || !RSA_set0_key(rsa, n, e, d)) {
+	/* The modulus n and public exponent e form the public key and are always
+	 * required; d is only present for a private key. */
+	if (!n || !e || !RSA_set0_key(rsa, n, e, d)) {
 		return false;
 	}
+	/* n, e and d are now owned by rsa. */
+	*is_private = d != NULL;
 
+	/* The factor and CRT components are meaningless without the private
+	 * exponent d, so reject them rather than silently ignoring them. */
 	OPENSSL_PKEY_SET_BN(data, p);
 	OPENSSL_PKEY_SET_BN(data, q);
-	if ((p || q) && !RSA_set0_factors(rsa, p, q)) {
-		return false;
+	if (p || q) {
+		if (!d) {
+			BN_free(p);
+			BN_free(q);
+			return false;
+		}
+		if (!RSA_set0_factors(rsa, p, q)) {
+			return false;
+		}
 	}
 
 	OPENSSL_PKEY_SET_BN(data, dmp1);
 	OPENSSL_PKEY_SET_BN(data, dmq1);
 	OPENSSL_PKEY_SET_BN(data, iqmp);
-	if ((dmp1 || dmq1 || iqmp) && !RSA_set0_crt_params(rsa, dmp1, dmq1, iqmp)) {
-		return false;
+	if (dmp1 || dmq1 || iqmp) {
+		if (!d) {
+			BN_free(dmp1);
+			BN_free(dmq1);
+			BN_free(iqmp);
+			return false;
+		}
+		if (!RSA_set0_crt_params(rsa, dmp1, dmq1, iqmp)) {
+			return false;
+		}
 	}
 
 	return true;
 }
 
-EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
+EVP_PKEY *php_openssl_pkey_init_rsa(zval *data, bool *is_private)
 {
 	EVP_PKEY *pkey = EVP_PKEY_new();
 	if (!pkey) {
@@ -120,7 +141,7 @@ EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
 		return NULL;
 	}
 
-	if (!php_openssl_pkey_init_rsa_data(rsa, data) || !EVP_PKEY_assign_RSA(pkey, rsa)) {
+	if (!php_openssl_pkey_init_rsa_data(rsa, data, is_private) || !EVP_PKEY_assign_RSA(pkey, rsa)) {
 		php_openssl_store_errors();
 		EVP_PKEY_free(pkey);
 		RSA_free(rsa);
