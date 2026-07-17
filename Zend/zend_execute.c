@@ -1153,7 +1153,7 @@ static bool zend_check_intersection_type_from_list(
 
 static zend_always_inline bool zend_check_type_slow(
 		const zend_type *type, zval *arg, const zend_reference *ref,
-		bool is_return_type, bool is_internal)
+		bool current_frame, bool is_internal)
 {
 	if (ZEND_TYPE_IS_COMPLEX(*type) && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_class_entry *ce;
@@ -1199,7 +1199,7 @@ static zend_always_inline bool zend_check_type_slow(
 		/* We cannot have conversions for typed refs. */
 		return 0;
 	}
-	if (is_internal && is_return_type) {
+	if (is_internal && current_frame) {
 		/* For internal returns, the type has to match exactly, because we're not
 		 * going to check it for non-debug builds, and there will be no chance to
 		 * apply coercions. */
@@ -1207,7 +1207,7 @@ static zend_always_inline bool zend_check_type_slow(
 	}
 
 	return zend_verify_scalar_type_hint(type_mask, arg,
-		is_return_type ? ZEND_RET_USES_STRICT_TYPES() : ZEND_ARG_USES_STRICT_TYPES(),
+		current_frame ? ZEND_RET_USES_STRICT_TYPES() : ZEND_ARG_USES_STRICT_TYPES(),
 		is_internal);
 
 	/* Special handling for IS_VOID is not necessary (for return types),
@@ -1215,7 +1215,7 @@ static zend_always_inline bool zend_check_type_slow(
 }
 
 static zend_always_inline bool zend_check_type(
-		const zend_type *type, zval *arg, bool is_return_type, bool is_internal)
+		const zend_type *type, zval *arg, bool current_frame, bool is_internal)
 {
 	const zend_reference *ref = NULL;
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(*type));
@@ -1229,21 +1229,21 @@ static zend_always_inline bool zend_check_type(
 		return 1;
 	}
 
-	return zend_check_type_slow(type, arg, ref, is_return_type, is_internal);
+	return zend_check_type_slow(type, arg, ref, current_frame, is_internal);
 }
 
 /* We can not expose zend_check_type() directly because it's inline and uses static functions */
 ZEND_API bool zend_check_type_ex(
-		const zend_type *type, zval *arg, bool is_return_type, bool is_internal)
+		const zend_type *type, zval *arg, bool current_frame, bool is_internal)
 {
-	return zend_check_type(type, arg, is_return_type, is_internal);
+	return zend_check_type(type, arg, current_frame, is_internal);
 }
 
 ZEND_API bool zend_check_user_type_slow(
-		const zend_type *type, zval *arg, const zend_reference *ref, bool is_return_type)
+		const zend_type *type, zval *arg, const zend_reference *ref, bool current_frame)
 {
 	return zend_check_type_slow(
-		type, arg, ref, is_return_type, /* is_internal */ false);
+		type, arg, ref, current_frame, /* is_internal */ false);
 }
 
 static zend_always_inline bool zend_verify_recv_arg_type(const zend_function *zf, uint32_t arg_num, zval *arg)
