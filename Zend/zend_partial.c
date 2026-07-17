@@ -1069,6 +1069,13 @@ static const zend_op_array *zp_get_op_array(zval *this_ptr, zend_function *funct
 	return op_array;
 }
 
+static void zp_free_unbound_args(uint32_t start, uint32_t argc, zval *argv)
+{
+	for (uint32_t offset = start; offset < argc; offset++) {
+		zval_ptr_dtor_nogc(&argv[offset]);
+	}
+}
+
 /* Bind pre-bound arguments as lexical vars */
 static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *argv,
 		zend_array *extra_named_params) {
@@ -1102,6 +1109,7 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 			zend_verify_arg_error(function, arg_info, offset+1, var);
 			zval_ptr_dtor(result);
 			ZVAL_NULL(result);
+			zp_free_unbound_args(offset, argc, argv);
 			return;
 		}
 		ZEND_ASSERT(zp_arg_must_be_sent_by_ref(function, offset+1) ? Z_ISREF_P(var) : !Z_ISREF_P(var));
@@ -1131,6 +1139,7 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 
 	if (UNEXPECTED(!op_array)) {
 		ZEND_ASSERT(EG(exception));
+		zp_free_unbound_args(0, argc, argv);
 		ZVAL_NULL(result);
 		return;
 	}
