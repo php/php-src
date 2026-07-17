@@ -246,10 +246,8 @@ static void fpm_event_queue_destroy(struct fpm_event_queue_s **queue) /* {{{ */
 		return;
 	}
 
-	if (*queue == fpm_event_queue_fd && module) {
+	if (*queue == fpm_event_queue_fd) {
 		// XXX: There is no way to clean up without freeing the module.
-		php_poll_destroy(module);
-		module = NULL;
 	}
 
 	q = *queue;
