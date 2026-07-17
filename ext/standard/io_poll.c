@@ -766,13 +766,7 @@ PHP_METHOD(Io_Poll_Context, add)
 	GC_ADDREF(&watcher->std);
 
 	zend_ulong hash_key = php_io_poll_compute_ptr_key(handle);
-	if (zend_hash_index_add(intern->watchers, hash_key, &watcher_zv) == NULL) {
-		php_poll_remove(intern->ctx, (int) fd);
-		zval_ptr_dtor(&watcher_zv);
-		zend_throw_exception(
-				php_io_poll_handle_already_watched_class_entry, "Handle already added", 0);
-		RETURN_THROWS();
-	}
+	zend_hash_index_add_new(intern->watchers, hash_key, &watcher_zv);
 
 	watcher->active = true;
 	watcher->poll_ctx = intern->ctx;
