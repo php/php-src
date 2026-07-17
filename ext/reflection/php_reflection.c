@@ -747,7 +747,7 @@ static void format_default_value(smart_str *str, const zval *value) {
 }
 
 /* {{{ _parameter_string */
-static void _parameter_string(smart_str *str, const zend_function *fptr, const struct _zend_arg_info *arg_info, uint32_t offset, bool required)
+static void _parameter_string(smart_str *str, const zend_function *fptr, const zend_arg_info *arg_info, uint32_t offset, bool required)
 {
 	smart_str_append_printf(str, "Parameter #%" PRIu32 " [ ", offset);
 	if (!required) {
@@ -794,7 +794,7 @@ static void _parameter_string(smart_str *str, const zend_function *fptr, const s
 /* {{{ _function_parameter_string */
 static void _function_parameter_string(smart_str *str, const zend_function *fptr, const char* indent)
 {
-	const struct _zend_arg_info *arg_info = fptr->common.arg_info;
+	const zend_arg_info *arg_info = fptr->common.arg_info;
 	if (!arg_info) {
 		return;
 	}
@@ -1416,7 +1416,7 @@ static void reflection_extension_factory(zval *object, zend_module_entry *module
 /* }}} */
 
 /* {{{ reflection_parameter_factory */
-static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, const struct _zend_arg_info *arg_info, uint32_t offset, bool required, zval *object)
+static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, const zend_arg_info *arg_info, uint32_t offset, bool required, zval *object)
 {
 	object_init_ex(object, reflection_parameter_ptr);
 	reflection_object *intern = Z_REFLECTION_P(object);
@@ -2177,7 +2177,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameters)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	const struct _zend_arg_info *arg_info = fptr->common.arg_info;
+	const zend_arg_info *arg_info = fptr->common.arg_info;
 	uint32_t num_args = fptr->common.num_args;
 	if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
 		num_args++;
@@ -2524,7 +2524,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 	}
 
 	/* Now, search for the parameter */
-	const struct _zend_arg_info *arg_info = fptr->common.arg_info;
+	const zend_arg_info *arg_info = fptr->common.arg_info;
 	uint32_t num_args = fptr->common.num_args;
 	if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
 		num_args++;
