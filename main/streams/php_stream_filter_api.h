@@ -108,7 +108,7 @@ typedef struct _php_stream_filter_ops {
 
 typedef struct _php_stream_filter_chain {
 	php_stream_filter *head, *tail;
-	zend_long count;
+	zend_long num_filters;
 
 	/* Owning stream */
 	php_stream *stream;

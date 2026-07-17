@@ -340,7 +340,7 @@ PHPAPI void php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_str
 		chain->tail = filter;
 	}
 	chain->head = filter;
-	chain->count += 1;
+	chain->num_filters += 1;
 	filter->chain = chain;
 }
 
@@ -361,7 +361,7 @@ PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, p
 		chain->head = filter;
 	}
 	chain->tail = filter;
-	chain->count += 1;
+	chain->num_filters += 1;
 	filter->chain = chain;
 
 	if (&(stream->readfilters) == chain && (stream->writepos - stream->readpos) > 0) {
@@ -447,7 +447,7 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 			filter->prev->next = NULL;
 			chain->tail = filter->prev;
 		}
-		chain->count -= 1;
+		chain->num_filters -= 1;
 	}
 }
 
@@ -549,7 +549,7 @@ PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, bo
 		filter->chain->tail = filter->prev;
 	}
 
-	filter->chain->count -= 1;
+	filter->chain->num_filters -= 1;
 
 	if (filter->res) {
 		zend_list_delete(filter->res);
