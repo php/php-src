@@ -1865,6 +1865,10 @@ PHP_FUNCTION(socket_set_option)
 #else
 	struct					timeval tv;
 #endif
+#ifdef SO_ATTACH_REUSEPORT_CBPF
+	struct sock_filter cbpf[8] = {0};
+	struct sock_fprog bpfprog;
+#endif
 	zend_long					level, optname;
 	void 					*opt_ptr;
 	HashTable		 		*opt_ht;
@@ -2074,8 +2078,6 @@ PHP_FUNCTION(socket_set_option)
 				optname = SO_DETACH_BPF;
 			} else {
 				uint32_t k = (uint32_t)cbpf_val;
-				static struct sock_filter cbpf[8] = {0};
-				static struct sock_fprog bpfprog;
 
 				switch (k) {
 					case SKF_AD_CPU:
