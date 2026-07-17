@@ -14,7 +14,7 @@ $first->remove();
 $ref = WeakReference::create($first);
 unset($first);
 gc_collect_cycles();
-var_dump($ref->get()); // should be NULL
+var_dump($ref->get());
 
 $second = $context->add($handle, [Io\Poll\Event::Read]);
 
@@ -32,6 +32,7 @@ try {
 echo "done\n";
 ?>
 --EXPECT--
+NULL
 bool(false)
 Cannot remove inactive watcher
 done
