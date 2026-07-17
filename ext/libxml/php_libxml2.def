@@ -6,6 +6,12 @@ __xmlGenericError
 __xmlGenericErrorContext
 __xmlGetWarningsDefaultValue
 __xmlIndentTreeOutput
+xmlIsBaseCharGroup DATA
+xmlIsCharGroup DATA
+xmlIsCombiningGroup DATA
+xmlIsDigitGroup DATA
+xmlIsExtenderGroup DATA
+xmlIsIdeographicGroup DATA
 xmlIsPubidChar_tab DATA
 __xmlKeepBlanksDefaultValue
 __xmlLineNumbersDefaultValue
@@ -222,6 +228,7 @@ xmlCreatePushParserCtxt
 xmlCreateURI
 xmlCreateURLParserCtxt
 xmlCtxtGetLastError
+xmlCtxtParseDocument
 xmlCtxtReadDoc
 xmlCtxtReadFd
 xmlCtxtReadFile
@@ -1180,6 +1187,8 @@ xmlXPathTrailingSorted
 xmlXPathTranslateFunction
 xmlXPathTrueFunction
 xmlXPathValueFlipSign
+xmlXPathValuePop
+xmlXPathValuePush
 xmlXPathVariableLookup
 xmlXPathVariableLookupNS
 xmlXPathWrapCString
