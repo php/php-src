@@ -1127,6 +1127,14 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		}
 
 		ZEND_ASSERT(ce->backed_enum_table == NULL);
+
+		if (ce->num_friends) {
+			for (uint32_t i = 0; i < ce->num_friends; i++) {
+				zend_accel_store_interned_string(ce->friend_names[i].name);
+				zend_accel_store_interned_string(ce->friend_names[i].lc_name);
+			}
+			ce->friend_names = zend_shared_memdup_free(ce->friend_names, sizeof(zend_class_name) * ce->num_friends);
+		}
 	}
 
 	return ce;

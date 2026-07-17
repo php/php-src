@@ -2099,6 +2099,8 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 	ce->attributes = NULL;
 	ce->enum_backing_type = IS_UNDEF;
 	ce->backed_enum_table = NULL;
+	ce->num_friends = 0;
+	ce->friend_names = NULL;
 
 	if (nullify_handlers) {
 		ce->constructor = NULL;
@@ -2790,7 +2792,8 @@ static inline bool zend_is_unticked_stmt(const zend_ast *ast) /* {{{ */
 {
 	return ast->kind == ZEND_AST_STMT_LIST || ast->kind == ZEND_AST_LABEL
 		|| ast->kind == ZEND_AST_PROP_DECL || ast->kind == ZEND_AST_CLASS_CONST_GROUP
-		|| ast->kind == ZEND_AST_USE_TRAIT || ast->kind == ZEND_AST_METHOD;
+		|| ast->kind == ZEND_AST_USE_TRAIT || ast->kind == ZEND_AST_METHOD
+		|| ast->kind == ZEND_AST_FRIEND;
 }
 /* }}} */
 
@@ -9671,6 +9674,55 @@ static void zend_compile_use_trait(const zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void zend_compile_friend(const zend_ast *ast)
+{
+	zend_class_entry *ce = CG(active_class_entry);
+	// Not yet supported for internal classes
+	ZEND_ASSERT(ce->type == ZEND_USER_CLASS);
+
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		zend_string *friend_name = zend_ast_get_str(ast->child[0]);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot add friends to interfaces. "
+			"%s is used in %s", ZSTR_VAL(friend_name), ZSTR_VAL(ce->name));
+	}
+
+	if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		zend_string *friend_name = zend_ast_get_str(ast->child[0]);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot add friends to traits. "
+			"%s is used in %s", ZSTR_VAL(friend_name), ZSTR_VAL(ce->name));
+	}
+
+	zend_string *resolved = zend_resolve_const_class_name_reference(ast->child[0], "friend name");
+	zend_string *resolved_lc = zend_string_tolower(resolved);
+
+	// Check if the friend is already declared
+	// Optimization: skip the check for the first friend being added
+	if (ce->num_friends) {
+		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_HAS_FRIENDS);
+		for (uint32_t i = 0; i < ce->num_friends; ++i) {
+			// No need for case insensitive comparison here since names are
+			// stored in lower case already
+			if (zend_string_equals(ce->friend_names[i].lc_name, resolved_lc)) {
+				zend_error_noreturn(
+					E_COMPILE_ERROR,
+					"Cannot add %s as a friend of %s multiple times.",
+					ZSTR_VAL(resolved),
+					ZSTR_VAL(ce->name)
+				);
+			}
+		}
+	} else {
+		ZEND_ASSERT((ce->ce_flags & ZEND_ACC_HAS_FRIENDS) == 0);
+		ce->ce_flags |= ZEND_ACC_HAS_FRIENDS;
+	}
+
+	ce->friend_names = erealloc(ce->friend_names, sizeof(zend_class_name) * (ce->num_friends + 1));
+
+	ce->friend_names[ce->num_friends].name = resolved;
+	ce->friend_names[ce->num_friends].lc_name = resolved_lc;
+	ce->num_friends++;
+}
+
 static void zend_compile_implements(zend_ast *ast) /* {{{ */
 {
 	const zend_ast_list *list = zend_ast_get_list(ast);
@@ -12277,6 +12329,9 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_USE_TRAIT:
 			zend_compile_use_trait(ast);
+			break;
+		case ZEND_AST_FRIEND:
+			zend_compile_friend(ast);
 			break;
 		case ZEND_AST_CLASS:
 			zend_compile_class_decl(NULL, ast, false);

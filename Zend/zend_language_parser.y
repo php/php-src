@@ -158,6 +158,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_PROTECTED_SET "'protected(set)'"
 %token <ident> T_PUBLIC_SET    "'public(set)'"
 %token <ident> T_READONLY      "'readonly'"
+%token <ident> T_FRIEND        "'friend'"
 %token <ident> T_VAR           "'var'"
 %token <ident> T_UNSET         "'unset'"
 %token <ident> T_ISSET         "'isset'"
@@ -1007,6 +1008,7 @@ class_statement:
 	|	attributes attributed_class_statement { $$ = zend_ast_with_attributes($2, $1); }
 	|	T_USE class_name_list trait_adaptations
 			{ $$ = zend_ast_create(ZEND_AST_USE_TRAIT, $2, $3); }
+	|	T_FRIEND class_name ';' { $$ = zend_ast_create(ZEND_AST_FRIEND, $2); }
 ;
 
 class_name_list:

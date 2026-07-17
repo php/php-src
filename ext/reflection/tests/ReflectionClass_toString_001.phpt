@@ -30,7 +30,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
     Property [ public string $name ]
   }
 
-  - Methods [64] {
+  - Methods [65] {
     Method [ <internal:Reflection> private method __clone ] {
 
       - Parameters [0] {
@@ -257,6 +257,13 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
       - Parameters [0] {
       }
       - Tentative return [ array ]
+    }
+
+    Method [ <internal:Reflection> public method getFriendNames ] {
+
+      - Parameters [0] {
+      }
+      - Return [ array ]
     }
 
     Method [ <internal:Reflection> public method isTrait ] {

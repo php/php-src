@@ -375,6 +375,14 @@ ZEND_API void destroy_zend_class(zval *zv)
 				if (ce->num_traits > 0) {
 					_destroy_zend_class_traits_info(ce);
 				}
+
+				if (ce->num_friends > 0) {
+					for (uint32_t i = 0; i < ce->num_friends; i++) {
+						zend_string_release_ex(ce->friend_names[i].name, 0);
+						zend_string_release_ex(ce->friend_names[i].lc_name, 0);
+					}
+					efree(ce->friend_names);
+				}
 			}
 
 			if (ce->default_properties_table) {
@@ -535,6 +543,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			if (ce->attributes) {
 				zend_hash_release(ce->attributes);
 			}
+			ZEND_ASSERT(ce->num_friends == 0);
 			free(ce);
 			break;
 	}
