@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
+- Sockets:
+  . Fixed various memory related issues in ext/sockets. (David Carlier)
+
 30 Jul 2026, PHP 8.4.24
 
 - Calendar:
