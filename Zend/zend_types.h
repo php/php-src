@@ -943,6 +943,8 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 
 #define IS_OBJ_LAZY_UNINITIALIZED   (1U<<31) /* Virtual proxy or uninitialized Ghost */
 #define IS_OBJ_LAZY_PROXY           (1U<<30) /* Virtual proxy (may be initialized) */
+#define OBJ_EXTRA_FLAG_PRIV_1       (1U<<29) /* Reserved for private use by the object itself */
+#define OBJ_EXTRA_FLAG_PRIV_2       (1U<<28) /* Reserved for private use by the object itself */
 
 #define OBJ_EXTRA_FLAGS(obj)		((obj)->extra_flags)
 

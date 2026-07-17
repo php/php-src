@@ -235,6 +235,8 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/debugable-enums
   . #[\Override] can now be applied to class constants, including enum cases.
     RFC: https://wiki.php.net/rfc/override_constants
+  . Implemented partial function application
+    RFC: https://wiki.php.net/rfc/partial_function_application_v2
 
 - Curl:
   . curl_getinfo() return array now includes a new size_delivered key, which
