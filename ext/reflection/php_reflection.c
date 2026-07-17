@@ -6556,7 +6556,7 @@ ZEND_METHOD(ReflectionProperty, isFinal)
 	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_FINAL);
 }
 
-static zend_result get_ce_from_scope_name(zend_class_entry **scope, zend_string *scope_name, zend_execute_data *execute_data)
+static zend_result get_ce_from_scope_name(zend_class_entry **scope, zend_string *scope_name)
 {
 	if (!scope_name) {
 		*scope = NULL;
@@ -6670,7 +6670,7 @@ handle_magic_get:
 	}
 
 	zend_class_entry *scope;
-	if (get_ce_from_scope_name(&scope, scope_name, execute_data) == FAILURE) {
+	if (get_ce_from_scope_name(&scope, scope_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -6756,7 +6756,7 @@ handle_magic_set:
 	}
 
 	zend_class_entry *scope;
-	if (get_ce_from_scope_name(&scope, scope_name, execute_data) == FAILURE) {
+	if (get_ce_from_scope_name(&scope, scope_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
