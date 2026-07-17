@@ -1,0 +1,34 @@
+--TEST--
+Markup\Html: the injected default __toString() survives opcache (arena-allocated internal method)
+--EXTENSIONS--
+markup
+--SKIPIF--
+<?php if (!extension_loaded('Zend OPcache')) die('skip opcache not loaded'); ?>
+--INI--
+opcache.enable=1
+opcache.enable_cli=1
+--FILE--
+<?php
+declare(strict_types=1);
+
+class Card implements Markup\Html {
+    public function __construct(private string $title) {}
+    public function toHtml(): Markup\Html {
+        return <div class="card">{$this->title}</div>;
+    }
+}
+
+// Inheritance pushes the linked class (with its injected internal method)
+// through opcache's inheritance cache / persistence paths.
+class FancyCard extends Card {}
+
+echo new Card('a & b'), PHP_EOL;
+echo new FancyCard('c'), PHP_EOL;
+echo <section>{new Card('nested')}</section>, PHP_EOL;
+var_dump((new ReflectionMethod(FancyCard::class, '__toString'))->isInternal());
+?>
+--EXPECT--
+<div class="card">a &amp; b</div>
+<div class="card">c</div>
+<section><div class="card">nested</div></section>
+bool(true)

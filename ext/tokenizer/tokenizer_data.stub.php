@@ -764,6 +764,56 @@ const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG = UNKNOWN;
 const T_BAD_CHARACTER = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_MARKUP_NAME
+ */
+const T_MARKUP_NAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_MARKUP_TEXT
+ */
+const T_MARKUP_TEXT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_MARKUP_ATTR_VALUE
+ */
+const T_MARKUP_ATTR_VALUE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_MARKUP_COMMENT
+ */
+const T_MARKUP_COMMENT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_MARKUP_OPEN
+ */
+const T_MARKUP_OPEN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_MARKUP_CLOSE_OPEN
+ */
+const T_MARKUP_CLOSE_OPEN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_MARKUP_TAG_END
+ */
+const T_MARKUP_TAG_END = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_MARKUP_SELF_CLOSE
+ */
+const T_MARKUP_SELF_CLOSE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_MARKUP_INTERP_START
+ */
+const T_MARKUP_INTERP_START = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_MARKUP_DOCTYPE
+ */
+const T_MARKUP_DOCTYPE = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_PAAMAYIM_NEKUDOTAYIM
  */
 const T_DOUBLE_COLON = UNKNOWN;

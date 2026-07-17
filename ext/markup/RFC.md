@@ -1,0 +1,631 @@
+# Native Markup Expressions (JSX-style syntax)
+
+## Introduction
+
+PHP began as a templating language - code embedded *inside* HTML. As the language and its ecosystem have matured, the inverse has become just as desirable: embedding HTML *inside* PHP, as a first-class value you can compose, return, and pass around.
+
+Yet PHP still has no native way to do it. Today authors choose between:
+
+* **Inline HTML** (`?> <h1><?= $x ?></h1> <?php`) - output-only: it cannot be captured as a value without output buffering, offers no composition, does not escape, and the tag-soup syntax is verbose and hard to read.
+* **String concatenation / heredocs** - no escaping, no structure, error-prone.
+* **Userland template engines** (Blade, Twig, Latte) - powerful, but each requires a separate template dialect and files, a compilation step, a parser written in PHP, and its own third-party IDE/tooling support.
+
+This RFC proposes a **native markup expression syntax**, inspired by JSX, that produces an in-memory tree of objects which renders to safely-escaped HTML. Markup becomes a *value*: it can be returned, passed to functions, stored, and composed.
+
+```php
+class Greeting implements Markup\Html
+{
+    public function __construct(public string $name, public string $type) {}
+
+    public function toHtml(): Markup\Html
+    {
+        return <>
+            <h1 class="title">Hello, {$this->name ?: ucfirst($this->type)}!</h1>
+            <p>Welcome to PHP, where markup is a first-class expression.</p>
+        </>;
+    }
+}
+
+echo <Greeting name="Rasmus" type="guest" />; // prints the rendered HTML, dynamic values escaped
+```
+
+Despite appearances, this is not a new template language grafted onto PHP - the syntax is **pure compile-time sugar**. Every markup expression lowers, during compilation, to a plain `new` expression:
+
+```php
+// The new syntax...
+$html = <button class="btn">Sign in</button>;
+
+// ...compiles to exactly this - same AST, same opcodes:
+$html = new \Markup\Element('button', ['class' => 'btn'], ['Sign in']);
+```
+
+Nothing downstream of the parser changes, and markup obeys the expression semantics every PHP developer already knows.
+
+The two headline benefits over every existing option are **composition** (components, attributes, slots) and **escape-by-default safety** - neither of which PHP's existing markup facilities provide. And because markup is ordinary PHP code rather than a string dialect, static analysis reaches inside it: component props are named arguments checked against real signatures, so templates become type-checkable end-to-end.
+
+### Why this is worth doing
+
+Generating HTML is not a niche PHP task - it is arguably *the* PHP task, and essentially every major framework has independently built the same answer to it: an escape-by-default, composable template engine. Their adoption is enormous - on Packagist, `laravel/framework` (Blade) has over **540 million** installs and `twig/twig` over **460 million**, before counting Latte, Smarty, Plates, or hand-rolled templates that never appear in a dependency graph.
+
+That every engine converged on the same two features is strong evidence the need is real and the language does not meet it: developers reach for a third-party compiler, a separate dialect, and a build step to obtain what the runtime could provide natively. And escape-by-default is no mere convenience - cross-site scripting has sat in the OWASP Top 10 for its entire existence, and automatic HTML escaping is one of the disciplines that prevents it.
+
+## History
+
+This idea is not new - PHP is where it started. Around 2010, Facebook built **XHP**, a PHP extension that made XML/HTML fragments valid PHP expressions with automatic escaping - `<a href={$url}>Link</a>` as a real value - and it survives today as a native feature of Hack. **JSX was born directly out of XHP**, and has since become *the* way most frontend developers write user interfaces. The pattern has proven itself at ecosystem scale; this RFC brings it home.
+
+The approach has surfaced in various forms many times over the years without a formal proposal; discussions about "automatic template escaping" resulted in arguments that "XHP really is the right solution for this problem," though that also raised the central objection - escaping is context-dependent (HTML vs URL vs JS vs CSS) - which this RFC answers by scoping escaping to HTML context only (see Escape-by-default).
+
+### Why core, and not an extension
+
+An obvious question - especially given the XHP precedent - is whether this could be proven out as a PECL extension first. It cannot, for one technical reason and one practical one.
+
+Technically, markup must begin at a bare `<` in operand position, and telling that apart from the comparison and shift operators requires the scanner change described under Parsing - state no extension can reach. The only route open to an extension is rewriting source text before compilation (the original XHP extension's approach), which shifts line numbers in errors and stack traces and leaves the raw file something `token_get_all()` - and therefore every tool built on it - cannot tokenize.
+
+Practically, a *syntax* lives or dies by its ecosystem. Code using an extension-only syntax cannot be reasonably published to Packagist - it is a parse error on any install without the extension - and no IDE, formatter, or static analyser updates its grammar for syntax that may not exist on a given machine. That chicken-and-egg is part of where XHP for PHP stalled, while the same feature thrived in Hack, where it is part of the language. Shipping in core is what makes markup part of PHP itself: parsers, IDEs, and analysis tools implement it once, and every developer's markup gets the same highlighting, formatting, and static analysis their ordinary code already enjoys.
+
+## Goals & Non-Goals
+
+The goal of this RFC is a native, ergonomic syntax for building HTML - the output format the overwhelming majority of PHP produces - with escaping and composition built in.
+
+This RFC is deliberately narrower than XHP: it targets **HTML specifically**, not general XML. That choice is visible throughout - escaping uses `htmlspecialchars`; void elements serialize as HTML5 (`<br>`, not `<br/>`); text and attribute handling follow HTML, not XML, semantics. There is no XML namespace support, no CDATA, no DTD, and no requirement that output be well-formed XML. This keeps the surface small and the output aimed at the one thing PHP overwhelmingly produces: web pages. Emitting XML (RSS, SVG, SOAP) remains the job of the existing DOM / `XMLWriter` APIs and is out of scope.
+
+Semantic validation of attribute *values* is also not a goal - a `javascript:` URL in `href`/`src` escapes cleanly yet is not blocked: sometimes it is intentional, and the policy is the application's to set. (Latte nullifies such URLs and React warns; a framework can enforce the same here via a component decorator or userland wrapper.) Attribute and tag *names*, by contrast, are always validated - see Escape-by-default.
+
+The aim, in short: enough syntax to make HTML a first-class concern of PHP, with the extension points for frameworks to customize behaviour, and room to grow without breaking backward compatibility (see Future Scope).
+
+## Proposal
+
+### 1. A markup expression that evaluates to an object
+
+The core proposal is that a markup expression evaluates to an instance of a built-in type implementing `Markup\Html`. It is **not** a string - but casting it to one will return a string value.
+
+This is the JSX model (elements are objects, strings appear only after rendering) and is what makes composition and a single, central escaping step possible.
+
+#### Desugaring at a glance
+
+Every construct in this proposal lowers the same way - at compile time, to a `new` expression or a function call, behaviour PHP already supports well; no other part of the engine changes.
+
+```php
+// Attributes: literal, ={expr}, bare boolean, {...spread}     (see Attributes)
+<a href={$url} class="btn">{$label}</a>
+// → new \Markup\Element('a', ['href' => $url, 'class' => 'btn'], [$label])
+
+// Fragments group children with no wrapper element            (see Syntax structure)
+<><h1>{$title}</h1><input {...$attrs} required /></>
+// → new \Markup\Fragment([
+//       new \Markup\Element('h1', [], [$title]),
+//       new \Markup\Element('input', [...$attrs, 'required' => true], []),
+//   ])
+
+// Components dispatch through Markup\render_component()         (see Tags)
+<Card title="Hi" />
+// → \Markup\render_component(Card::class, ['title' => 'Hi'])
+
+// Component body → slot; extra regions are markup-valued props   (see Children & slots)
+<Layout theme="dark" header={<h1>Title</h1>}>
+    <p>Body content.</p>
+</Layout>
+// → \Markup\render_component(
+//       Layout::class,                          // resolved as a class name string
+//       ['theme' => 'dark',                     // props → named arguments
+//        'header' => new \Markup\Element('h1', [], ['Title'])],
+//       new \Markup\Fragment([/* <p>...</p> */]),   // body slot
+//   )
+
+// Dynamic tags: the value classifies at runtime                (see Tags)
+<$tag class="box">{$content}</$tag>
+// → \Markup\render_dynamic($tag, ['class' => 'box'], [$content])
+```
+
+Two properties fall directly out of this lowering. Markup is **zero-cost sugar** - writing the objects by hand produces the same AST and opcodes. And markup obeys **ordinary expression semantics** - attributes and children are argument expressions, evaluated eagerly, scoped and typed like any other PHP code.
+
+Every lowering in this document can be reproduced on the reference implementation with no extra tooling: `php -d zend.assertions=1 -r 'assert(false && <markup />);'` prints the desugared form in the assertion message.
+
+### 2. Escape-by-default
+
+This is a *templating* feature, and like every major PHP template engine (Blade, Twig, Latte) it **escapes by default**:
+
+* Interpolations `{$expr}` and **attribute values** are escaped with `htmlspecialchars($v, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401)` - like `htmlspecialchars()` itself, the charset comes from ini `default_charset` (UTF-8 by default), so non-UTF-8 applications keep working.
+* Any value implementing `Markup\Html` (including elements and fragments) passes through **un-escaped** - it is already assumed to be safe HTML.
+* The explicit, greppable opt-out for trusted raw strings is `Markup\raw($trustedString)`, which returns a `Markup\Html`. `Markup\escape($string)` is also provided.
+
+Escaping is **HTML-context only**. URL/JS/CSS-context escaping is explicitly **out of scope** and remains the author's responsibility. Full context-aware escaping is noted as Future Scope.
+
+A single escaping context is sound here in a way it is not for string-template engines, because there is no context to *detect*:
+
+* The grammar admits dynamic data in few positions - child content and attribute values - each escaped by one fixed rule (attribute values are always serialized double-quoted; no unquoted output form exists).
+* Dynamically-supplied *names* (spread keys, `new Element($tag)`) are **validated** and can throw a runtime exception, not escaped - an invalid name is a `ValueError`, so a name can never break out of the markup.
+* `<script>`/`<style>` get no raw-text mode: interpolated content there is HTML-escaped like any other child, so `</script>` breakout is inexpressible.
+
+### 3. Tags: HTML elements vs components
+
+Dispatch is purely **syntactic** (the compiler cannot know runtime types):
+
+| Tag form | Meaning |
+|---|---|
+| `<div>`, `<my-widget>` (lowercase / hyphenated) | literal HTML element → `Markup\Element` |
+| `<Card>` (bare, capitalized) | a **component** - resolved as a class name honoring `use` / namespace |
+| `<App\Card>`, `<\App\Card>` (namespace-qualified) | a **component** - a namespace-qualified or fully-qualified class name |
+| `<Author::byline>` | a **component** - a public static method on a class |
+| `<$tag>`, `<{expr}>` (a variable / any expression) | a **dynamic tag** - the runtime string value is classified by the same rule, at runtime |
+
+Any tag whose name is capitalized, contains a namespace separator (`\`), or names a static method (`::`) is a component; everything else is a literal HTML element.
+
+A **component produces `Markup\Html`**, and every component tag resolves through the *class* name rules alone. There are two forms:
+
+```php
+// Class implementing Markup\Html - the instance IS the renderable
+class Card implements Markup\Html {
+    public function __construct(public string $title) {}
+    public function toHtml(): Markup\Html {
+        return <div class="card">{$this->title}</div>;
+    }
+}
+// <Card title="Hi" />  →  new Card(title: 'Hi')
+
+// Static method - multiple small components can live together on one class
+class Author {
+    public static function byline(string $name): Markup\Html { /* ... */ }
+    public static function avatar(string $src): Markup\Html { /* ... */ }
+}
+// <Author::byline name="Rasmus" />  →  Author::byline(name: 'Rasmus')
+```
+
+`toHtml()` returns markup, not a string, so it composes under `strict_types` with no cast, and callers can still reach the produced `Markup\Element` tree. It may also return another `Html` - e.g. delegate to another component instance. A static-method component must likewise return `Markup\Html`, and must be public, static, and user-defined.
+
+Both forms resolve through the class resolution every PHP developer already knows - a `<Author::byline/>` tag's *class part* resolves exactly as `Author::class` would. Plain *function* components are deferred to Future Scope: a bare `<Foo/>` gives no syntactic signal whether a class or a function is meant, and PHP resolves the two through separate `use` / `use function` import tables, so supporting functions means dual-candidate name resolution in the compiler and a class-vs-function dispatch order at runtime (plus guarding tags like `<Date/>` from resolving to internal functions such as `date()`). A static method has no such ambiguity.
+
+#### Bare-tag and qualified-tag resolution
+
+A component tag resolves exactly as a class name does - honoring `use` imports and the current namespace, precisely as `Foo::class` would where the tag appears. The same applies to the class part of a static-method tag:
+
+```php
+namespace Views;
+
+use App\Card;
+use App\Author;
+
+<Card title="Hi" />         // → new App\Card(title: 'Hi')
+<Author::byline name="R"/>  // → App\Author::byline(name: 'R')
+```
+
+Tags may also be written **namespace-qualified** or **fully-qualified** directly; any tag containing `\` is a component regardless of the first letter's case:
+
+```php
+<App\Card title="Hi"/>    // namespace-relative
+<\App\Card title="Hi"/>   // fully-qualified
+```
+
+#### Dynamic tags - `<$tag>` and `<{expr}>`
+
+The tag position also accepts a dynamic value, for the common CMS/builder case where the element or component is data ("render this list of blocks"). It follows the rule PHP developers already know from double-quoted string interpolation: a simple variable may appear bare, and braces admit any expression:
+
+```php
+$tag = $isImportant ? 'strong' : 'span';
+echo <$tag class="note">{$text}</$tag>;
+
+echo <{$block->type} {...$block->attributes} />;
+echo <{$isImportant ? 'strong' : 'span'}>{$text}</>;
+```
+
+This is consistent with the rest of the grammar, where braces already mark every dynamic value.
+
+The value is classified **at runtime by exactly the compile-time rule**: a string with an uppercase first character, a `\`, or a `::` dispatches as a component; anything else constructs a literal `Markup\Element`. So `$tag = 'div'` behaves like `<div>` and `$component = Card::class` behaves like `<Card/>`, and only classification moves to runtime. Two differences follow from the name being data rather than source: it is not resolved against `use` imports (there is no compile-time name to resolve - pass a fully-qualified name, which `::class` already produces), and element names are validated when the tree is serialized rather than when it is parsed (the existing `Markup\Element` rule; an invalid name throws, it can never break out of the markup).
+
+Closing follows the form:
+- A variable tag closes by repeating the same variable such as `<$a>...</$a>`
+    - `<$a>...</$b>` is a compile error, exactly as `<div>...</span>` is
+- An expression tag with a brace closes **anonymously** with `</>`
+    - A closing tag cannot restate the expression - re-evaluating it would run its side effects twice, and matching it textually is meaningless for a computed value; the expression is evaluated exactly once.
+- A self-closing `<$tag/>` / `<{expr}/>` needs no closer at all.
+
+#### Userland integration: dispatch hooks
+
+By default the engine constructs a class component with `new` and calls a static-method component directly. In userland, particularly within frameworks, they will often want to intervene - to resolve components through a dependency-injection container (autowiring the constructor dependencies the props do not supply), or to apply a cross-cutting transform to every component's output. Two request-scoped hook lists make this possible without touching any component's code. Each behaves like `spl_autoload_register` - handlers are kept in registration order, with a matching `unregister_*` that reports whether a handler matched:
+
+| Hook | Fires for | Signature | Purpose |
+|---|---|---|---|
+| `Markup\register_component_factory` | class components | `(string $class, array $args): ?object` | replace `new` (e.g. container construction) |
+| `Markup\register_component_decorator` | **every** component kind | `(Markup\Html $rendered, string $component): Markup\Html` | transform / wrap / log / cache the output |
+
+The engine always does the part only it can: resolve the name, confirm the target, and route props + `#[Markup\Slot]` content into `$args`. A **factory** only changes *how a class component's instance is produced* - it returns an instance of the requested class, or `null` to defer to the next handler (and finally to the engine's own `new`). A **decorator** is the cross-cutting seam: it runs on the `Markup\Html` every component produces - class and static-method alike - composing in registration order. (Plain HTML elements such as `<div>` are not components; no hook fires for them. A static-method component's *call* has no production hook; a component that needs container construction is a class component.)
+
+Every `register_*`/`unregister_*` function also takes an optional second argument, `?string $component = null`, that scopes the hook to a single component: the hook only fires when the resolved name it would receive - the class FQCN, or `"Class::method"` - matches (case-insensitively, with or without a leading backslash). Scoped and unscoped hooks share one chain in registration order, and the dispatch skips out-of-scope hooks inside the engine, before any userland call, so a hook registered for one component costs the others nothing. Unregistering matches on both the callable and the scope it was registered with.
+
+Registration is scoped to the current runtime, so a framework registers hooks during bootstrap; when nothing is registered the hooks add no cost - the default `new`/call path is unchanged.
+
+```php
+$container = ...;
+
+// A framework's bootstrap: wire components to the service container...
+Markup\register_component_factory(
+    fn(string $class, array $args) => $container->make($class, $args)
+);
+
+// ...and a cross-cutting decorator (profiling, caching, wrapping, ...).
+Markup\register_component_decorator(function (Markup\Html $rendered, string $component) {
+    return $rendered;
+});
+```
+
+A component can then simply declare its dependencies; the container supplies them while markup attributes still fill the remaining parameters as named arguments:
+
+```php
+final class UserCard implements Markup\Html {
+    public function __construct(private Clock $clock, public string $name) {}
+    public function toHtml(): Markup\Html { /* ...uses $this->clock... */ }
+}
+
+<UserCard name="Rasmus"/>   // the container injects $clock; the prop fills $name
+```
+
+### 4. Attributes
+
+```php
+<a href={$url} class="btn" data-id={$id} disabled {...$extra}>{$label}</a>
+```
+
+| Form | Meaning |
+|---|---|
+| `class="btn"` | literal string |
+| `href={$expr}` | PHP expression (same `{}` as interpolation) |
+| `disabled` (bare) | boolean `true` |
+| `{...$attrs}` | spread (array → attributes; named-argument unpacking for components) |
+
+* Attribute names are **native HTML names** (`class`, `for`, `data-x`) - *not* `className`. PHP accepts reserved words as parameter names and named-argument labels, so no `className`/`htmlFor` aliasing is needed like JSX.
+* On **HTML elements**, attributes become a string-keyed map.
+* On **components**, attributes become **named arguments**. Unknown attributes are a `TypeError` (`Unknown named parameter`) unless the component declares a `...$attrs` variadic, which collects them as a string-keyed array - exactly PHP's existing named-argument + variadic semantics, no new machinery. Hyphenated names (`data-x`, `aria-y`) are not legal named-argument *labels* in a normal call, but as markup attributes they pass through the same mechanism and are collected by the variadic.
+
+#### Attribute value coercion
+
+| Value | Result |
+|---|---|
+| `null` / `false` | attribute **omitted** |
+| `true` | boolean attribute (bare name) |
+| `string` / `int` / `float` / `Stringable` | `="escaped value"` |
+| `array` / other | `TypeError` |
+
+### 5. Children and slots
+
+#### HTML elements
+
+Children are an ordered list of child nodes (text, interpolations, sub-elements).
+
+#### Components - the body slot via `#[Markup\Slot]`
+
+The body of a component is routed to the constructor parameter marked with the `#[Markup\Slot]` attribute.
+
+```php
+class Time implements Markup\Html {
+    public function __construct(
+        public DateTimeInterface $datetime,
+        #[Markup\Slot] public ?Markup\Html $slot = null,
+    ) {}
+    public function toHtml(): Markup\Html {
+        return <time datetime={$this->datetime->format('c')}>
+            {$this->slot ?? Markup\escape($this->datetime->format('F j'))}
+        </time>;
+    }
+}
+
+// <Time datetime={$d} />            →  new Time(datetime: $d)
+// <Time datetime={$d}>July 4</Time> →  new Time(datetime: $d, slot: <fragment "July 4">)
+```
+
+The slot value is always a single `Markup\Fragment` (a `Markup\Html` whose children are each normalized to `Markup\Html`); `{$slot}` renders the whole body, correctly escaped. The fragment's children are introspectable as an opt-in (`$slot->children`).
+
+Rules for the slot parameter:
+
+* **At most one** parameter may carry `#[Markup\Slot]`; more than one is an **error**.
+* Body content given to a component with no `#[Markup\Slot]` parameter, or a parameter filled both by an attribute and by body content, is an **error**.
+* `#[Markup\Slot]` on a variadic parameter → **error** (a slot is a single value).
+* The slot is an ordinary parameter, so a **required** slot (no default) left unfilled fails at runtime like any missing argument (`ArgumentCountError`). Declare a default (`?Markup\Html $slot = null`) to make it optional.
+
+#### Further content areas are markup-valued props
+
+A component has exactly one body slot; any *additional* content regions are passed as ordinary props typed `Markup\Html`. Because an attribute value is an arbitrary expression and markup is a value, a chunk of markup passes straight through with no extra syntax:
+
+```php
+class Layout implements Markup\Html {
+    public function __construct(
+        #[Markup\Slot] public Markup\Html $body,
+        public ?Markup\Html $header = null,
+        public ?Markup\Html $footer = null,
+    ) {}
+    public function toHtml(): Markup\Html { /* ... */ }
+}
+
+<Layout
+    header={<h1>Title</h1>}
+    footer={<>© 2026</>}
+>
+    <p>Body content flows to the slot.</p>
+</Layout>
+```
+
+A "named slot" is therefore just a prop, checked against the component's real signature exactly like any other - a misspelled `heaer=` is the same `TypeError` a misspelled prop is, not a silent no-op. This keeps the whole surface consistent with the RFC's headline property that props are type-checkable named arguments.
+
+This is also the proposal's answer to **template inheritance**: what Twig, Latte and Blade's older syntax call a base template with overridable *blocks* is here a `Layout` component whose regions are markup-valued props (and the body slot) filled by composition, rather than a template that is extended; layouts nest the same way. (A dedicated `<slot:name>` block form for large named regions is a possible future ergonomic addition - see Future Scope - but expresses nothing a prop cannot.)
+
+#### Eager evaluation, and opting into laziness with `#lazy`
+
+Because a component invocation is an ordinary call, **the body is fully evaluated before the component runs** (PHP evaluates arguments before the call). A component therefore cannot, by default, conditionally skip or defer rendering its body - the body has already been built by the time the component decides what to do with it.
+
+The `#lazy` directive on a component tag opts its body out of that rule:
+
+```php
+class Auth implements Markup\Html
+{
+    public function __construct(
+        public bool $check,
+        #[Markup\Slot] public ?Markup\Html $slot = null,
+    ) {}
+    public function toHtml(): Markup\Html
+    {
+        // When logged out we never reference $slot, so with #lazy the body's
+        // expressions never run.
+        return $this->check ? <div class="user">{$this->slot}</div> : <></>;
+    }
+}
+
+// Eager: auth()->user()->name is evaluated before Auth runs - and would error
+// when logged out - even though Auth discards the body in that case.
+<Auth check={auth()->check()}>Hello, {auth()->user()->name}</Auth>
+
+// Lazy: the body is built, and its interpolations run, only if Auth renders it.
+<Auth #lazy check={auth()->check()}>Hello, {auth()->user()->name}</Auth>
+```
+
+With `#lazy` the body lowers to a `Markup\LazyFragment` wrapping a closure, instead of an eager `Markup\Fragment`:
+
+```php
+// <Auth #lazy>Hello, {$name}</Auth>
+// → \Markup\render_component(Auth::class, [],
+//       new \Markup\LazyFragment(fn() => new \Markup\Fragment(['Hello, ', $name])), 'Auth')
+```
+
+`Markup\LazyFragment` is *itself* a `Markup\Html`, so **the component's slot parameter type is unchanged** (`?Markup\Html`) and a component need not be written any differently to accept a lazy body - laziness is transparent to it. It evaluates its closure on first render and **memoizes** the result, so a body rendered more than once still runs its expressions once. Variables the body references are captured by value at the point of the tag (ordinary arrow-function semantics); only the *expressions* - method calls, property reads - are deferred to render time. A body that is never rendered is never evaluated.
+
+`#lazy` is deliberately the single point where markup departs from "an ordinary call with eager arguments," which is why it is explicit and opt-in; eager remains the default. (For a body that should be evaluated *repeatedly* rather than merely deferred, pass a closure as an ordinary prop and call it - e.g. `each={fn($x) => <li>{$x}</li>}`.)
+
+#### Child coercion
+
+| Child value | Renders as |
+|---|---|
+| `Markup\Html` | itself, **not** escaped (resolved through `toHtml()` and serialized natively) |
+| `string` / `int` / `float` / `bool` / `null` | cast to string and escaped - so `false`/`null` → `""`, `true` → `"1"` |
+| `array` / `Traversable` | flattened, each element coerced recursively |
+| non-`Stringable` object / resource | `TypeError` |
+
+This makes control flow ride entirely on `{...}` with no new directives, exactly what JSX has landed on:
+
+```php
+<ul>{array_map(fn($i) => <li>{$i->name}</li>, $items)}</ul>      // loop (array flattens)
+<div>{$user !== null ? <span>{$user->name}</span> : null}</div>  // conditional (null → "")
+<div>{$loggedIn ? <a href="/logout">Log out</a> : null}</div>    // optional (null → "")
+```
+
+Conditionals use a ternary, not the JSX `{condition && <x/>}` idiom: in PHP, `&&` evaluates to a boolean, so `{$cond && <x/>}` would render `"1"`, not the element.
+
+### 6. Syntax structure
+
+* **Closing tags must match** their opener, including `</Author::byline>` and the dynamic `</$tag>`. Mismatches are a compile error (catches the most common markup typo early).
+* **Childless elements**: `<div></div>` and `<div/>` are equivalent - existing HTML can be pasted into markup unchanged. The parser needs **no hardcoded HTML void-element list**; the serializer still *emits* `<br>` (no closing tag, no slash) for known void elements, so output is clean HTML5 whichever source form was used. Giving a void element children (possible when constructing `Markup\Element` by hand) is an error rather than silent data loss.
+* **Fragments** `<>...</>` produce a `Markup\Fragment` with no wrapper element.
+* **Whitespace** follows the JSX/Babel algorithm: split each text run into lines, trim leading whitespace on every line but the first and trailing whitespace on every line but the last, drop blank lines, and join the surviving lines with a single space. The net effect is that indentation/newlines between block elements vanish while a meaningful single space between inline content is preserved.
+* **Character references**: markup text and literal attribute values decode HTML character references at compile time - the full WHATWG named set (semicolon-terminated forms only) plus numeric `&#8212;` / `&#x2014;`. The named list is *frozen by the HTML standard*, so it is baked into the scanner as a generated table. Decoding is lenient like HTML and JSX: a bare `&`, an unknown name, or an invalid numeric form stays literal - `<p>fish & chips</p>` needs no escaping. The decoded value is an ordinary string escaped at render time, so `&amp;` round-trips and `&lt;script&gt;` can never smuggle real markup structure. Text decodes *after* whitespace normalization; comment contents and interpolated PHP strings are never decoded, and `token_get_all()` still sees the raw source.
+* **Literal braces**: `{` begins interpolation, so a literal `{` in text is written as in HTML or JSX - a character reference (`&#123;` / `&lbrace;`) or an interpolated string (`{'{'}`). A lone `}` is already literal. No additional escape syntax (eg. Blade-style `@{{`) is introduced. A block of literal JSON/JS inside `<script>` wants the `Markup\raw()` JSON-island pattern from Escape-by-default instead.
+* **Comments**: `<!-- ... -->` is emitted as a literal HTML comment; `{/* ... */}` renders   nothing (source-only).
+* **Doctype**: `<!DOCTYPE html>` is allowed in *content position* and emitted verbatim (case-insensitive, no interpolation). It does **not** begin a markup expression - a markup expression is a single root node, so a full document wraps it in a fragment, exactly as JSX handles sibling roots: `<> <!DOCTYPE html> <html>...</html> </>`. Position is not validated (browsers ignore a misplaced doctype; it is the author's responsibility). Other `<!` declarations (e.g. CDATA sections, which terminate at `]]>` and may contain `>`) are a parse error with a targeted message.
+
+### 7. Element model
+
+Markup builds a **lightweight, immutable value-object tree** (`Markup\Element`,`Markup\Fragment`), *not* PHP 8.4's `Dom\*` tree. Reasons:
+
+1. **Document ownership** - a `Dom\Element` must be created from and owned by a `Dom\Document`; markup literals are free-floating values, which fights that model.
+2. **Cost** - DOM nodes are heavyweight (parent pointers, owner document, namespaces, live collections); templating wants cheap throwaway nodes per value.
+3. **`Markup\raw()`** requires opaque byte passthrough to avoid confusion to end users, which a DOM cannot represent without parsing and reserializing (potentially altering it).
+4. **Component contract** - returning `Markup\Html` (one method) is far lighter than returning a document-owned `Dom\Node`.
+
+The two worlds can still connect through the string boundary, in userland, with no dedicated API: markup renders to HTML (`Dom\HTMLDocument::createFromString((string) $el)` or a fragment parse via `innerHTML`), and a DOM node serializes to HTML that `Markup\raw()` accepts as a child.
+
+### 8. New symbols
+
+The runtime lives in a new always-enabled bundled extension, `ext/markup`. It cannot be disabled (like `ext/random`): the syntax lowers into these symbols at compile time, so a build without them would parse markup and then fail at runtime.
+
+All under the `Markup\` namespace:
+
+* Interface `Markup\Html extends Stringable` - the renderable contract. The one method a class writes is `toHtml(): Html`, which returns markup (ultimately an `Element`/`Fragment`/`Raw`). The inherited `__toString(): string` requirement is satisfied automatically: a userland class that does not declare (or inherit) a `__toString` of its own receives a default implementation at class-link time - it serializes what `toHtml()` produces - exactly the way every enum receives `cases()`. So `echo`/`(string)` work on any markup value or component, while `strict_types` components can `return <div>...</div>;` directly and callers can still reach the object tree via `toHtml()`. A declared `__toString` wins for string casts; markup rendering always goes through `toHtml()`.
+* Classes `Markup\Element`, `Markup\Fragment` (and `Markup\Raw`, the opaque passthrough that backs `raw()`/`escape()`). All are `final`, immutable value objects with `readonly` properties (`$tag`, `$attributes`, `$children` / `$html`).
+* Class `Markup\LazyFragment` - a `final` `Markup\Html` wrapping a `Closure` thunk (`__construct(Closure $thunk)`). The `#lazy` directive lowers a component body into one; it evaluates the thunk on first render and memoizes the result (see Children & slots). Not typically written by hand.
+* Attribute `Markup\Slot` (bare `#[Markup\Slot]`, no arguments) marking the parameter that receives a component's body.
+* Functions `Markup\raw(string $html): Markup\Html`, `Markup\escape(string $text): Markup\Html`.
+* Function `Markup\render_component()` - the runtime target a component tag lowers into (resolved class name, props, slot). It is a public function so the dispatch rules are testable and so generated code is honest, but user code is expected to write tags, not call it.
+* Function `Markup\render_dynamic()` - the runtime target a dynamic tag `<$tag>` lowers into: classifies the value by the element-vs-component rule and either constructs a `Markup\Element` or dispatches through the `render_component()` machinery. Public for the same reasons.
+* Dispatch hooks, each with a matching `unregister_*` returning `bool`: `Markup\register_component_factory()`, `Markup\register_component_decorator()`. Each takes an optional `?string $component = null` scoping the hook to one component. Registering a non-callable throws a `TypeError` immediately (as `spl_autoload_register()` does).
+
+### Error handling
+
+Compile-time violations (mismatched closing tag, a stray `<` in markup text) throw the standard **`CompileError`** / **`ParseError`**, catchable exactly like any other PHP syntax error. At runtime, unsupported attribute/child value types throw **`TypeError`**; invalid dynamically-supplied tag/attribute names throw **`ValueError`**; dispatch failures (unknown component, non-`Html` return, a misconfigured slot) throw **`Error`**.
+
+## Examples
+
+The constructs above compose with no special cases. The examples below show how they combine in the scenarios everyday template code actually consists of.
+
+### A page is one expression
+
+A markup expression spans as many lines as it needs. It is an ordinary expression, so the statement simply ends at the `;` - there is no heredoc-style terminator and no directive to close - and PHP control flow stays available inside `{}` throughout:
+
+```php
+function ProductPage(Product $product, User $viewer): Markup\Html
+{
+    return <Layout title={$product->name} header={<>
+            <h1>{$product->name}</h1>
+            {$product->onSale ? <span class="badge">Sale</span> : null}
+        </>}>
+        <p class="description">{$product->description}</p>
+        <ul class="features">
+            {array_map(fn($feature) => <li>{$feature}</li>, $product->features)}
+        </ul>
+
+        {$viewer->isAdmin() ? <a href={"/admin/products/{$product->id}"}>Edit</a> : null}
+    </Layout>;
+}
+```
+
+### Typed props - enums and `match`
+
+Attribute expressions are arbitrary PHP, and component props are real, typed parameters - so a prop can be an enum, and its value can be computed inline with `match`:
+
+```php
+enum Variant: string
+{
+    case Primary = 'btn-primary';
+    case Secondary = 'btn-secondary';
+}
+
+class Button implements Markup\Html
+{
+    public function __construct(
+        public Variant $variant,
+        #[Markup\Slot] public Markup\Html $label,
+    ) {}
+    public function toHtml(): Markup\Html
+    {
+        return <button class={$this->variant->value}>{$this->label}</button>;
+    }
+}
+
+echo <Button variant={match ($theme) {
+    'brand' => Variant::Primary,
+    default => Variant::Secondary,
+}}>Click me</Button>;
+
+// <button class="btn-secondary">Click me</button>
+```
+
+A prop mismatch - a misspelled attribute name, a string where the enum is expected - is an ordinary `TypeError`, and because the signature is real, static analysers can report it before the code ever runs.
+
+### JSON output in markup
+
+As the `{` character in markup triggers PHP syntax, it is important to note the character can still be output in various ways - it is the same workaround JSX requires:
+
+```php
+echo <script type="application/ld+json">{Markup\raw(json_encode($json))}</script>;
+
+echo <script type="application/ld+json">{Markup\raw('
+    {
+        "@type": "WebPage",
+        "name": "PHP",
+        "url": "https://php.net",
+        "@context": "http://schema.org"
+    }
+')}</script>;
+
+echo <div>{'{'}example{'}'}</div>;
+```
+
+### Components are testable values
+
+A component is an ordinary object and its `toHtml()` result an ordinary value object, so a component is unit-tested directly: construct it, assert against the tree - no rendering, no string matching, no DOM parsing:
+
+```php
+public function testSaleBadgeShownWhenOnSale(): void
+{
+    $el = (new ProductBadge(product: $this->saleProduct()))->toHtml();
+
+    $this->assertInstanceOf(Markup\Element::class, $el);
+    $this->assertSame('span', $el->tag);
+    $this->assertSame('badge sale', $el->attributes['class']);
+}
+```
+
+Views decompose the way any other code does: small component classes, each testable in isolation, composed by a top-level component returning the final page.
+
+### Framework components - a Livewire-style clock
+
+In frameworks whose components are PHP classes that render themselves - Livewire is the clearest example - the class and its markup are forced apart today: the component holds the state and behaviour, while the HTML lives in a separate Blade file the class points to by name.
+
+With markup expressions the same component could collapse into one self-contained class - `render()` returns the view instead of naming a file that contains it:
+
+```php
+class Clock extends Component
+{
+    public string $timezone = 'UTC';
+
+    public function render(): Markup\Html
+    {
+        return <div wire:poll.1s>
+            <span class="time">{now($this->timezone)->format('H:i:s')}</span>
+        </div>;
+    }
+}
+```
+
+## Backward Incompatible Changes
+
+`<` is heavily overloaded in PHP (`<`, `<=`, `<=>`, `<<`, `<>`, `<<<`), so this was the main design risk. It is resolved by the same technique JavaScript uses to tell regex from division: the scanner tracks whether it is in **operand position** (a value is expected) or **operator position** (a value just ended), from the last significant token. Markup begins only when `<` is in operand position *and* is immediately followed by `[A-Za-z>]`, by `\` then a letter (a fully-qualified component tag such as `<\App\Card/>`), by `$` then a variable name, or by `{` (the dynamic tags `<$tag>` / `<{expr}>`):
+
+* In `$a < $b` (or the no-space `$a <$b`), `<` follows an operand → comparison, unchanged.
+* In `$a < \Foo::BAR`, `<` is in operator position → comparison, unchanged.
+* In `return <div>`, `<` is in operand position followed by a letter → markup.
+
+The operand-position decision is an explicit allowlist that **fails closed**: markup begins only after a token that *expects* an operand - `return`, `echo`, `=`, `(`, `,`, `=>`, binary and assignment operators, casts, and the other expression-introducing contexts - which are exactly the positions where an infix `<` cannot legally appear today, and where `<` followed by a letter, `$`, `{`, or `>` is *always a syntax error*. After every other token, `<` keeps its existing meaning. Two properties follow:
+
+* **No valid program changes meaning, by construction.** Reclaiming `<` only ever applies where the source could not previously compile.
+* **The design is future-proof in the safe direction.** If a token is missing from the allowlist (or a future PHP version adds a new operator and forgets to include it), the only consequence is that markup cannot directly follow that token - a loud, feature-side parse error worked around with parentheses and fixed by a one-line addition. A gap can never silently change what existing code means.
+
+`<>` is the legacy alias of `!=` and is preserved in infix position (`$a <> $b` is still not-equal). `<>` is only reinterpreted as a fragment opener in **operand position**, where it is currently a syntax error - so no valid program needs changes. Two positions are deliberately excluded from the allowlist because an infix `<` after them is (or may be) valid PHP: after a bare `yield` (`yield < LIM` is valid, so yielding markup is written `yield (<div/>)`) and after a closing `}` (which ends `match` and interpolation values), so markup as a bare expression statement immediately following a block is assigned or echoed instead.
+
+This leaves just one backwards compatibility concern:
+
+1. **New `Markup\` namespace** - introduces `Markup\Html`, `Markup\Element`, `Markup\Fragment`, `Markup\Raw`, `Markup\Slot`, `Markup\raw()`, `Markup\escape()`. Top-level `Markup\` follows the established precedent for bundled extensions (`Random\`, `Dom\`, `Uri\`). Existing userland use of the prefix is minimal: a handful of Packagist packages autoload sub-namespaces such as `Markup\Json\` (which coexist with internal `Markup\` classes, exactly as userland `Random\*` sub-namespaces did when `Random\` shipped in PHP 8.2), and a public-code search finds no class or function whose fully-qualified name collides with the symbols introduced here. No existing keywords are reserved and no new global reserved words are introduced (the syntax uses bare `<`, and the `#lazy` directive is only meaningful inside a markup tag).
+
+### Impact on tooling
+
+The scanner emits new `T_MARKUP_*` tokens (exposed as constants and through `token_get_all()`/`PhpToken`); ordinary code continues to tokenize identically. Tools that parse PHP source (nikic/php-parser, PHPStan, Psalm, php-cs-fixer, IDEs) will need grammar updates to understand markup expressions, as with any new syntax.
+
+A working syntax-highlighting/IDE extension for VS Code was built alongside the reference implementation to validate that the syntax is toolable.
+
+Because markup lowers to ordinary AST at compile time, everything downstream of the parser is unaffected: opcache caches and restores markup-containing files normally (verified, including the file cache), and reflection, serialization, `var_export()`, `clone` and `json_encode()` on the value objects behave as for any other class.
+
+A related question is what this means for **template engines** (Blade, Twig, Latte). This RFC does not replace them, and does not aim to: a full engine is much more than syntax plus escaping - layout inheritance, a designer-facing dialect that is deliberately *not* PHP, sandboxed rendering of untrusted templates, context-aware escaping, fragment caching, and years of ecosystem conventions. Nothing here removes any of that; markup is opt-in syntax, and code that never uses it is untouched.
+
+What this RFC offers the engines is a first-class substrate to build on. Today each engine maintains its own parser, its own escaping, and its own component model, because the language provides none. With markup native, an engine can adopt the shared foundation where it fits: `Markup\Html` is a common currency (a Blade view and a markup expression can accept and return the same interface and compose within one page); the dispatch hooks exist precisely so a framework can route component tags through its existing container and resolution logic; and an engine's component layer could compile *to* markup expressions, inheriting escape-by-default and end-to-end static analysis for free. The likely long-term shape is convergence rather than replacement: engines keep their higher-level features and progressively delegate parsing, escaping, and the value model to the language - much as database layers did not disappear when PDO shipped, but re-based onto it.
+
+## Future Scope
+
+Some natural extensions are deliberately left out of this RFC to keep its scope tight and expandable in the future; none is required for the feature to be useful:
+
+* **Context-aware escaping** (URL/JS/CSS contexts), as in Go's `html/template` or Latte's escaping, - so that e.g. a `javascript:` URL in `href` is caught. This RFC escapes HTML context only; the value-tree model is designed so this can be layered on later without a syntax change. Some examples include:
+  * A JavaScript escaping context inside `<script>` tags, `onload=""`, `onclick=""`, etc. attributes
+  * A CSS escaping context inside `<style>` tags or `style=""` attributes
+* **Function components** - plain functions (`<Greeting/>` → `greeting()`) as component tags. Deferred because a bare tag gives no syntactic signal whether a class or a function is meant, and PHP resolves the two through separate `use` / `use function` import tables - supporting functions needs dual-candidate name resolution in the compiler (a function-name analogue of `Foo::class`), a class-then-function dispatch order at runtime, a guard against tags resolving to internal functions (`<Date/>` → `date()`), and an *invoker* hook alongside the factory so containers can autowire calls as well as construction. All of it is purely additive - no syntax change - and the reference implementation had a complete working version, so this is a natural first follow-up RFC. In v1 a small function component is a small class or a static method instead.
+* **A dedicated `<slot:name>` block form** for passing large named regions, as an ergonomic alternative to markup-valued props for content that reads better as a block than as an attribute value. It would be pure sugar over what props already express (see Children & slots), so it is deferred rather than shipped in v1.
+* **Further laziness controls** - the `#lazy` directive already defers a component's body (see Children & slots); a natural extension is deferring individual markup-valued props the same way, or a component declaring that its body is always lazy so callers need not write `#lazy`.
+* **DOM interoperability APIs** - a built-in `toDom(?Dom\Document): Dom\DocumentFragment` on the node classes, and accepting a `Dom\Node` directly as a markup child. Both are expressible in userland today through the string boundary (see Element model), so they are deferred; a native version would also want ext/dom to expose `HTMLTemplateElement::$content` first, so fragments can parse in `<template>` context instead of "in body" context (which mangles top-level `<td>`/`<tr>`).
+* **XML documents** - a markup expression opening with an XML declaration (`<?xml version="1.0"?><feed>...</feed>`) would evaluate to a `Markup\Xml` document that serializes the same `Markup\Element` tree under XML rules (empty elements self-close, no void-elements, no bare boolean attributes) instead of HTML rules.
+* **CDATA sections** in XML documents - `<![CDATA[...]]>` as a literal-text island (opaque to interpolation, entities, and whitespace normalization; in XML semantics a CDATA section *is* character data).
+* **Control structures** in the markup syntax, such as Vue's `v-if`.
+* **Dedicated template files**, potentially reigniting the `.phpc` file debate.
+
+## Reference implementation status
+
+* **Zero regressions** across the `Zend/tests`, `tests/`, `ext/tokenizer` and `ext/dom` suites (6000+ tests); 50+ dedicated `ext/markup` tests (including bare/qualified/fully-qualified resolution and the dispatch hooks).
+* **opcache-safe** - markup compiles to ordinary opcode literals that persist and restore through the file cache (verified).
+* **Safe by construction** - dynamically-supplied tag/attribute names are validated so a spread key or `new Element($x)` can never break out of the markup; child recursion is depth-bounded.
+* **No measurable cost to non-markup code** - the syntax itself is zero-cost versus the equivalent hand-written `Markup\Element` objects (it compiles to exactly those), and the scanner change is within measurement noise on ordinary PHP.
+
+## References
+
+* JSX specification - https://facebook.github.io/jsx/
+* Laravel Blade, Twig, Latte - escape-by-default precedent in PHP templating.
+
+### History and related work
+
+* XHP - https://en.wikipedia.org/wiki/XHP ; Hack/HHVM docs: https://docs.hhvm.com/hack/XHP/introduction/
+* Facebook's original PHP 5 extension (archived): https://github.com/facebookarchive/xhp-php5-extension
+* `phplang/xhp` - XHP for PHP 7+ as a community extension: https://github.com/phplang/xhp
+* Internals discussion endorsing the XHP approach over an auto-escape flag (2018):  https://externals.io/message/91797
+* Adjacent string-interpolation RFCs: https://wiki.php.net/rfc/arbitrary_string_interpolation , https://wiki.php.net/rfc/arbitrary_expression_interpolation
+* Userland JSX-for-PHP experiment - https://github.com/attitude/phpx

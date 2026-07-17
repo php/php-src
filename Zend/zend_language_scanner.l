@@ -46,6 +46,7 @@
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_virtual_cwd.h"
+#include "zend_markup.h"
 
 #define YYCTYPE   unsigned char
 #define YYFILL(n) { if ((YYCURSOR + n) >= (YYLIMIT + ZEND_MMAP_AHEAD)) { return 0; } }
@@ -198,6 +199,7 @@ void startup_scanner(void)
 	zend_stack_init(&SCNG(nest_location_stack), sizeof(zend_nest_location));
 	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
 	SCNG(heredoc_scan_ahead) = 0;
+	SCNG(last_token) = 0;
 }
 
 static void heredoc_label_dtor(zend_heredoc_label *heredoc_label) {
@@ -237,6 +239,7 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
 
 	lex_state->in = SCNG(yy_in);
 	lex_state->yy_state = YYSTATE;
+	lex_state->last_token = SCNG(last_token);
 	lex_state->filename = CG(compiled_filename);
 	lex_state->lineno = CG(zend_lineno);
 	CG(compiled_filename) = NULL;
@@ -277,6 +280,7 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 
 	SCNG(yy_in) = lex_state->in;
 	YYSETCONDITION(lex_state->yy_state);
+	SCNG(last_token) = lex_state->last_token;
 	CG(zend_lineno) = lex_state->lineno;
 	zend_restore_compiled_filename(lex_state->filename);
 
@@ -547,6 +551,7 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 	/* Reset the scanner for scanning the new file */
 	SCNG(yy_in) = file_handle;
 	SCNG(yy_start) = NULL;
+	SCNG(last_token) = 0;
 
 	if (size != (size_t)-1) {
 		if (CG(multibyte)) {
@@ -748,6 +753,7 @@ ZEND_API void zend_prepare_string_for_scanning(zval *str, zend_string *filename)
 
 	SCNG(yy_in) = NULL;
 	SCNG(yy_start) = NULL;
+	SCNG(last_token) = 0;
 
 	buf = Z_STRVAL_P(str);
 	size = old_len;
@@ -1361,6 +1367,119 @@ static zend_result check_nesting_at_end(void)
 		} \
 	} while (0)
 
+/* Native markup (RFC: Native Markup Expressions). A bare "<" in ST_IN_SCRIPTING
+ * begins a markup expression only in *operand* position (where a value, not an
+ * operator, is expected), decided from the last significant token. The decision
+ * is an allowlist that FAILS CLOSED: markup begins only after a token known to
+ * expect an operand - a position where an infix "<" cannot legally appear
+ * today - and after every other token "<" keeps its existing meaning. So a
+ * token missing from this list can never change what existing code means; the
+ * worst a gap can do is make markup unavailable in that one context (a loud
+ * feature-side parse error, fixed by parenthesizing - or by adding the token
+ * here). Contributors adding a new operator or expression-introducing keyword
+ * should add it to this list so markup can follow it directly.
+ *
+ * Deliberate exclusions, each because "<" after it is (or may be) valid PHP:
+ *   - "}" ends match/interpolation values, so it must stay a comparison; the
+ *     cost is that markup as an expression statement directly after a block -
+ *     `if ($c) { ... } <p>hi</p>;` - fails to parse. Assign or echo it instead.
+ *   - bare `yield` is a complete operand (`yield < LIM`, `yield <> 5` are
+ *     valid PHP), so yielding markup needs parentheses: `yield (<div/>)`.
+ *     (`yield from` requires an operand, so markup after it just works.)
+ *   - ")" would enable `if ($c) <p>hi</p>;` but ends grouped operands
+ *     (`($a+$b) < $c`); parenthesized markup `(<p/>)` already works. */
+static bool zend_markup_operand_position(void)
+{
+	switch (SCNG(last_token)) {
+		/* nothing scanned yet (an eval'd string can begin with an expression) */
+		case 0:
+		/* statement starts and separators */
+		case T_OPEN_TAG:
+		case T_OPEN_TAG_WITH_ECHO:
+		case ';':
+		case '{':
+		case ':': /* alternative syntax, case/default labels, ternary else */
+		/* grouping and lists */
+		case '(':
+		case '[':
+		case ',':
+		/* assignment */
+		case '=':
+		case T_PLUS_EQUAL:
+		case T_MINUS_EQUAL:
+		case T_MUL_EQUAL:
+		case T_DIV_EQUAL:
+		case T_MOD_EQUAL:
+		case T_CONCAT_EQUAL:
+		case T_AND_EQUAL:
+		case T_OR_EQUAL:
+		case T_XOR_EQUAL:
+		case T_SL_EQUAL:
+		case T_SR_EQUAL:
+		case T_POW_EQUAL:
+		case T_COALESCE_EQUAL:
+		case T_DOUBLE_ARROW:
+		/* unary and binary operators */
+		case '+':
+		case '-':
+		case '*':
+		case '/':
+		case '%':
+		case '.':
+		case '<':
+		case '>':
+		case '|':
+		case '^':
+		case '?':
+		case '!':
+		case '~':
+		case '@':
+		case T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG:
+		case T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG:
+		case T_SL:
+		case T_SR:
+		case T_POW:
+		case T_COALESCE:
+		case T_BOOLEAN_AND:
+		case T_BOOLEAN_OR:
+		case T_LOGICAL_AND:
+		case T_LOGICAL_OR:
+		case T_LOGICAL_XOR:
+		case T_IS_EQUAL:
+		case T_IS_NOT_EQUAL:
+		case T_IS_IDENTICAL:
+		case T_IS_NOT_IDENTICAL:
+		case T_IS_SMALLER_OR_EQUAL:
+		case T_IS_GREATER_OR_EQUAL:
+		case T_SPACESHIP:
+		case T_PIPE:
+		/* keywords that introduce an expression */
+		case T_RETURN:
+		case T_ECHO:
+		case T_PRINT:
+		case T_THROW:
+		case T_CLONE:
+		case T_CASE:
+		case T_YIELD_FROM:
+		case T_ELLIPSIS:
+		/* casts */
+		case T_INT_CAST:
+		case T_DOUBLE_CAST:
+		case T_STRING_CAST:
+		case T_ARRAY_CAST:
+		case T_OBJECT_CAST:
+		case T_BOOL_CAST:
+		case T_UNSET_CAST:
+		case T_VOID_CAST:
+		/* markup interpolation: `{` in markup content, child or attribute
+		 * position, restarts expression context (nested markup must lex) */
+		case T_MARKUP_INTERP_START:
+			return true;
+		default:
+			return false;
+	}
+}
+
 int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem)
 {
 int token;
@@ -1380,6 +1499,9 @@ HNUM	"0x"[0-9a-fA-F]+(_[0-9a-fA-F]+)*
 BNUM	"0b"[01]+(_[01]+)*
 ONUM	"0o"[0-7]+(_[0-7]+)*
 LABEL	[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*
+/* Native markup: one segment of a tag or attribute name. Dots,
+ * colons and hyphens are allowed inside (<my-widget>, wire:poll.1s). */
+MARKUP_LABEL [a-zA-Z][a-zA-Z0-9_.:-]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
 TOKENS [;:,.|^&+-/*=%!~$<>?@]
@@ -1846,7 +1968,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN(T_IS_EQUAL);
 }
 
-<ST_IN_SCRIPTING>"!="|"<>" {
+<ST_IN_SCRIPTING>"!=" {
 	RETURN_TOKEN(T_IS_NOT_EQUAL);
 }
 
@@ -1978,6 +2100,200 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	yy_push_state(ST_IN_SCRIPTING);
 	enter_nesting('{');
 	RETURN_TOKEN('{');
+}
+
+
+/* Native markup (RFC: Native Markup Expressions). In operand position, "<"
+ * followed by a tag opener begins markup: "<tag" / "<\Ns\Tag" (element or
+ * component), "<>" (fragment), "<$var" / "<{expr}" (dynamic tags). In operator
+ * position everything keeps its existing meaning: "<" a comparison ("$a <$b",
+ * "$a < \Foo::BAR") and "<>" the legacy not-equal alias. The opener set here
+ * is mirrored by ST_MARKUP_CONTENT's nested-tag rule below. */
+<ST_IN_SCRIPTING>"<"("\\"?[a-zA-Z]|[>${]) {
+	if (zend_markup_operand_position()) {
+		yyless(1);
+		yy_push_state(ST_MARKUP_TAG);
+		RETURN_TOKEN(T_MARKUP_OPEN);
+	}
+	if (yytext[1] == '>') {
+		RETURN_TOKEN(T_IS_NOT_EQUAL);
+	}
+	yyless(1);
+	RETURN_TOKEN('<');
+}
+
+<ST_MARKUP_TAG,ST_MARKUP_CLOSE>{WHITESPACE} {
+	/* Count newlines and emit T_WHITESPACE in tokenizer mode, like ordinary
+	 * whitespace (a bare restart would freeze line numbers and swallow the
+	 * whitespace from token_get_all). */
+	goto return_whitespace;
+}
+
+<ST_MARKUP_TAG,ST_MARKUP_CLOSE>"\\"?{MARKUP_LABEL}("\\"{MARKUP_LABEL})* {
+	/* A tag name, optionally namespace-qualified (<App\Card/>) or fully
+	 * qualified (<\App\Card/>). A name containing a backslash always dispatches as a
+	 * component (see zend_markup_name_is_component in Zend/zend_markup.c). */
+	RETURN_TOKEN_WITH_STR(T_MARKUP_NAME, 0);
+}
+
+<ST_MARKUP_TAG>[:@#]{MARKUP_LABEL} {
+	/* An attribute name with a ":", "@" or "#" prefix (Vue/Alpine shorthands
+	 * like :class and @click, and compiler directives like #lazy). Attribute
+	 * position only: this can never lex as a tag name, because every
+	 * markup-open rule requires a letter, backslash, "$", "{" or ">" after "<",
+	 * and ST_MARKUP_CLOSE is excluded here. */
+	RETURN_TOKEN_WITH_STR(T_MARKUP_NAME, 0);
+}
+
+<ST_MARKUP_TAG,ST_MARKUP_CLOSE>"$"{LABEL} {
+	/* A dynamic tag name (<$tag>…</$tag>): an ordinary variable whose runtime
+	 * value decides element vs component (see Markup\render_dynamic). */
+	RETURN_TOKEN_WITH_STR(T_VARIABLE, 1);
+}
+
+<ST_MARKUP_TAG>"=" {
+	RETURN_TOKEN('=');
+}
+
+<ST_MARKUP_TAG>"\"" [^"]* "\"" {
+	/* Literal double-quoted attribute value (escaped at render time). The
+	 * quotes stay part of the token text (yyleng untouched) so token_get_all
+	 * round-trips; only the zval payload is the unquoted interior, with
+	 * character references decoded for the compiler. */
+	HANDLE_NEWLINES(yytext, yyleng);
+	zend_copy_value(zendlval, yytext + 1, yyleng - 2);
+	if (PARSER_MODE() && !SCNG(on_event) && Z_TYPE_P(zendlval) == IS_STRING) {
+		ZVAL_STR(zendlval, zend_markup_decode_entities(Z_STR_P(zendlval)));
+	}
+	RETURN_TOKEN_WITH_VAL(T_MARKUP_ATTR_VALUE);
+}
+
+<ST_MARKUP_TAG>"{" {
+	yy_push_state(ST_IN_SCRIPTING);
+	enter_nesting('{');
+	RETURN_TOKEN(T_MARKUP_INTERP_START);
+}
+
+<ST_MARKUP_TAG>"/>" {
+	yy_pop_state();
+	RETURN_TOKEN(T_MARKUP_SELF_CLOSE);
+}
+
+<ST_MARKUP_TAG>">" {
+	BEGIN(ST_MARKUP_CONTENT);
+	RETURN_TOKEN(T_MARKUP_TAG_END);
+}
+
+<ST_MARKUP_CLOSE>">" {
+	yy_pop_state();
+	RETURN_TOKEN(T_MARKUP_TAG_END);
+}
+
+<ST_MARKUP_TAG,ST_MARKUP_CLOSE>{ANY_CHAR} {
+	if (YYCURSOR > YYLIMIT) {
+		RETURN_END_TOKEN;
+	}
+	RETURN_TOKEN(T_ERROR);
+}
+
+<ST_MARKUP_CONTENT>"<!--" {
+	/* An HTML comment, emitted verbatim. Scan to the closing "-->";
+	 * content is literal (no interpolation). */
+	while (YYCURSOR < YYLIMIT) {
+		if (YYCURSOR + 2 < YYLIMIT && YYCURSOR[0] == '-' && YYCURSOR[1] == '-' && YYCURSOR[2] == '>') {
+			YYCURSOR += 3;
+			yyleng = YYCURSOR - SCNG(yy_text);
+			HANDLE_NEWLINES(yytext, yyleng);
+			RETURN_TOKEN_WITH_STR(T_MARKUP_COMMENT, 0);
+		}
+		YYCURSOR++;
+	}
+	RETURN_TOKEN(T_ERROR);
+}
+
+<ST_MARKUP_CONTENT>"<!doctype" {
+	/* An HTML doctype, emitted verbatim like a comment. Matches
+	 * case-insensitively (--case-inverted); scan to the closing ">";
+	 * content is literal (no interpolation). */
+	while (YYCURSOR < YYLIMIT) {
+		if (*YYCURSOR == '>') {
+			YYCURSOR++;
+			yyleng = YYCURSOR - SCNG(yy_text);
+			HANDLE_NEWLINES(yytext, yyleng);
+			RETURN_TOKEN_WITH_STR(T_MARKUP_DOCTYPE, 0);
+		}
+		YYCURSOR++;
+	}
+	RETURN_TOKEN(T_ERROR);
+}
+
+<ST_MARKUP_CONTENT>"<!" {
+	/* Any other markup declaration. CDATA sections in particular cannot take
+	 * the scan-to-">" shortcut (they end at "]]>" and may contain ">"), so
+	 * reject with a targeted message rather than the generic stray-"<" one. */
+	if (PARSER_MODE()) {
+		zend_throw_exception(zend_ce_parse_error,
+			"Unsupported markup declaration; only <!-- --> comments and <!doctype> are supported", 0);
+	}
+	RETURN_TOKEN(T_ERROR);
+}
+
+<ST_MARKUP_CONTENT>"</" {
+	BEGIN(ST_MARKUP_CLOSE);
+	RETURN_TOKEN(T_MARKUP_CLOSE_OPEN);
+}
+
+<ST_MARKUP_CONTENT>"<"("\\"?[a-zA-Z]|[>${]) {
+	/* A nested tag ("<div", "<\App\Card", dynamic "<$tag" / "<{expr}",
+	 * fragment "<>") - the same opener set as the ST_IN_SCRIPTING rule, always
+	 * markup here (content is operand position by construction). "</",
+	 * "<!--" and "<!doctype" have their own rules above. */
+	yyless(1);
+	yy_push_state(ST_MARKUP_TAG);
+	RETURN_TOKEN(T_MARKUP_OPEN);
+}
+
+<ST_MARKUP_CONTENT>"<" {
+	/* A stray "<" in text - give a clear error rather than a bare syntax
+	 * error on T_ERROR. */
+	if (PARSER_MODE()) {
+		zend_throw_exception(zend_ce_parse_error,
+			"Unescaped \"<\" in markup text; write {'<'} for a literal less-than sign", 0);
+	}
+	RETURN_TOKEN(T_ERROR);
+}
+
+<ST_MARKUP_CONTENT>"{" {
+	yy_push_state(ST_IN_SCRIPTING);
+	enter_nesting('{');
+	RETURN_TOKEN(T_MARKUP_INTERP_START);
+}
+
+<ST_MARKUP_CONTENT>{ANY_CHAR} {
+	if (YYCURSOR > YYLIMIT) {
+		RETURN_END_TOKEN;
+	}
+	/* Accumulate a run of literal text up to the next "<" or "{". */
+	while (YYCURSOR < YYLIMIT) {
+		if (*YYCURSOR == '<' || *YYCURSOR == '{') {
+			break;
+		}
+		YYCURSOR++;
+	}
+	yyleng = YYCURSOR - SCNG(yy_text);
+	HANDLE_NEWLINES(yytext, yyleng);
+	/* Normalize whitespace for the compiler only; when collecting tokens
+	 * (token_get_all) emit the raw text so the source round-trips. */
+	if (PARSER_MODE() && !SCNG(on_event)) {
+		zend_string *normalized = zend_markup_normalize_text(yytext, yyleng);
+		if (ZSTR_LEN(normalized) == 0) {
+			zend_string_release(normalized);
+			goto restart;
+		}
+		ZVAL_STR(zendlval, zend_markup_decode_entities(normalized));
+		RETURN_TOKEN_WITH_VAL(T_MARKUP_TEXT);
+	}
+	RETURN_TOKEN_WITH_STR(T_MARKUP_TEXT, 0);
 }
 
 
@@ -3200,12 +3516,19 @@ emit_token_with_val:
 	}
 
 emit_token:
+	/* Track the last significant token for operand-vs-operator detection of a
+	 * bare "<" (native markup). Whitespace/comments are skipped in parser mode
+	 * but emitted in tokenizer mode, so ignore them here for a consistent view. */
+	if (token != T_WHITESPACE && token != T_COMMENT && token != T_DOC_COMMENT) {
+		SCNG(last_token) = token;
+	}
 	if (SCNG(on_event)) {
 		SCNG(on_event)(ON_TOKEN, token, start_line, yytext, yyleng, SCNG(on_event_context));
 	}
 	return token;
 
 emit_token_with_ident:
+	SCNG(last_token) = token;
 	if (PARSER_MODE()) {
 		elem->ident = SCNG(yy_text);
 	}

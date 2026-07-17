@@ -1,0 +1,133 @@
+--TEST--
+Html components: tag lowering, class/static-method dispatch, resolution errors, hyphenated attrs
+--EXTENSIONS--
+markup
+--FILE--
+<?php
+use Markup\Element as E;
+use Markup\Slot;
+use function Markup\render_component;
+
+function err(callable $fn): string {
+    try { $fn(); return "no error"; }
+    catch (\Throwable $e) { return $e::class . ': ' . $e->getMessage(); }
+}
+
+// --- component tag lowering: class + static-method dispatch ---
+
+// Class component implementing Html, with a prop and an anonymous slot.
+class Card implements Markup\Html {
+    public function __construct(
+        public string $title,
+        #[Slot] public ?Markup\Html $body = null,
+    ) {}
+    public function toHtml(): Markup\Html {
+        return new E('section', ['class' => 'card'], [new E('h2', [], [$this->title]), $this->body]);
+    }
+}
+
+// A second, minimal component for nesting cases.
+class Badge implements Markup\Html {
+    public function __construct(public string $label) {}
+    public function toHtml(): Markup\Html {
+        return new E('span', ['class' => 'badge'], [$this->label]);
+    }
+}
+
+// Static-method component - multiple components can live together on one class.
+// (broken() returns a non-Html, for the error section below.)
+class Author {
+    public static function byline(string $name): Markup\Html {
+        return new E('p', ['class' => 'by'], ['By ', $name]);
+    }
+    public static function broken(): string {
+        return 'plain';
+    }
+}
+
+$who = 'Ada & co';
+
+// class component: attribute prop + body routed to the anonymous slot
+echo (<Card title={$who}><p>Hi {$who}</p></Card>)->__toString(), PHP_EOL;
+
+// self-closing class component (no body -> slot is null)
+echo (<Card title="Solo"/>)->__toString(), PHP_EOL;
+
+// static-method component
+echo (<Author::byline name={$who}/>)->__toString(), PHP_EOL;
+
+// the same dispatch, called directly by name
+echo render_component(Badge::class, ['label' => 'New &'])->__toString(), PHP_EOL;
+
+// a component used as a child of an HTML element, and inside interpolation
+echo (<div class="wrap"><Badge label="x"/></div>)->__toString(), PHP_EOL;
+echo (<ul>{array_map(fn($t) => <Badge label={$t}/>, ['a', 'b'])}</ul>)->__toString(), PHP_EOL;
+
+// --- resolution errors: a component is a class implementing Html ---
+
+// Unknown symbol -> hard error.
+echo err(fn() => render_component('NoSuchThing')), PHP_EOL;
+
+// A function name is not a component (functions are Future Scope).
+function Chip(): Markup\Html { return Markup\raw('FROM FUNCTION'); }
+echo err(fn() => render_component('Chip')), PHP_EOL;
+
+// A "date"-named tag can never reach the internal date() function.
+echo err(fn() => render_component('date', ['datetime' => 'now'])), PHP_EOL;
+
+// A class that does NOT implement Html -> hard error.
+class Plain {}
+echo err(fn() => render_component('Plain')), PHP_EOL;
+
+// "Class::method" resolves to a public static method and is called; the
+// result must be a Markup\Html.
+echo render_component('Author::byline', ['name' => 'Ada'])->__toString(), PHP_EOL;
+echo err(fn() => render_component('Author::broken')), PHP_EOL;
+echo err(fn() => render_component('NoSuchClass::method')), PHP_EOL;
+
+// A class implementing Html resolves, regardless of same-named functions.
+function Widget(): Markup\Html { return Markup\raw('FROM FUNCTION'); }
+class Widget implements Markup\Html {
+    public function toHtml(): Markup\Html { return Markup\raw('FROM CLASS'); }
+}
+echo render_component('Widget')->__toString(), PHP_EOL;
+
+// --- hyphenated attributes route through named args ---
+
+// A component that collects arbitrary (incl. hyphenated) attributes via a variadic.
+class Box implements Markup\Html {
+    private array $attrs;
+    public function __construct(public string $kind, ...$attrs) { $this->attrs = $attrs; }
+    public function toHtml(): Markup\Html {
+        return new E('div', ['class' => $this->kind, ...$this->attrs], ['box']);
+    }
+}
+
+// Hyphenated attributes work directly on a component (no spread needed) - they
+// become named arguments and the variadic collects them.
+echo (<Box kind="note" data-id="7" aria-label="hi"/>), PHP_EOL;
+
+// A component without a variadic rejects an unknown (hyphenated) attribute.
+class Tight implements Markup\Html {
+    public function __construct(public string $kind) {}
+    public function toHtml(): Markup\Html { return new E('div', ['class' => $this->kind], ['y']); }
+}
+echo err(fn() => (<Tight kind="b" data-x="1"/>)->__toString()), PHP_EOL;
+?>
+--EXPECT--
+<section class="card"><h2>Ada &amp; co</h2><p>Hi Ada &amp; co</p></section>
+<section class="card"><h2>Solo</h2></section>
+<p class="by">By Ada &amp; co</p>
+<span class="badge">New &amp;</span>
+<div class="wrap"><span class="badge">x</span></div>
+<ul><span class="badge">a</span><span class="badge">b</span></ul>
+Error: "NoSuchThing" is not a component: no such class implementing Markup\Html
+Error: "Chip" is not a component: no such class implementing Markup\Html
+Error: "date" is not a component: no such class implementing Markup\Html
+Error: "Plain" is not a component: no such class implementing Markup\Html
+<p class="by">By Ada</p>
+Error: Component "Author::broken" did not return a Markup\Html
+Error: Component class "NoSuchClass" not found
+FROM CLASS
+<div class="note" data-id="7" aria-label="hi">box</div>
+Error: Unknown named parameter $data-x

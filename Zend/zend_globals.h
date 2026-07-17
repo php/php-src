@@ -400,6 +400,11 @@ struct _zend_php_scanner_globals {
 	/* initial string length after scanning to first variable */
 	int scanned_string_len;
 
+	/* Last significant token returned, used to decide whether a bare "<" in
+	 * ST_IN_SCRIPTING is in operand position (begins native markup) or operator
+	 * position (a comparison). See zend_language_scanner.l. */
+	int last_token;
+
 	/* hooks */
 	void (*on_event)(
 		zend_php_scanner_event event, int token, int line,
