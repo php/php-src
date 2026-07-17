@@ -21,12 +21,6 @@
 #include "fpm_clock.h"
 #include "fpm_log.h"
 
-#include "events/select.h"
-#include "events/poll.h"
-#include "events/epoll.h"
-#include "events/port.h"
-#include "events/kqueue.h"
-
 #ifdef HAVE_SYSTEMD
 #include "fpm_systemd.h"
 #endif
