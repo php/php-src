@@ -94,6 +94,9 @@ typedef struct {
 	zval *value;
 	php_user_cache_prepared_value prepared;
 	php_user_cache_store_result store_result;
+	/* True while this item's store has committed but its captured replaced
+	 * entry has not been discarded or rolled back; consulted on bailout. */
+	bool committed;
 } php_user_cache_bulk_store_item;
 
 typedef struct {
@@ -107,6 +110,10 @@ typedef struct {
 	zend_long tombstone_count;
 	zend_long expunge_count;
 	zend_long store_failure_count;
+	zend_long graph_pin_slots_in_use;
+	zend_long graph_pinned_references;
+	zend_long dead_pin_owners_reclaimed;
+	zend_long dead_pins_stripped;
 } php_user_cache_info_stats;
 
 typedef struct {
@@ -162,7 +169,8 @@ php_user_cache_context php_user_cache_context_state = {
 	.clear_on_pressure = true,
 };
 bool php_user_cache_runtime_opted_in = false;
-/* Read-only after module startup. */
+/* Append-only; cgi/lsapi boundary partitions are added lazily on request
+ * activation. Never mutated concurrently within a single SAPI process. */
 php_user_cache_partition *php_user_cache_partitions = NULL;
 
 static void user_cache_object_free(zend_object *obj);
@@ -1104,7 +1112,9 @@ static void user_cache_collect_info_stats(php_user_cache_info_stats *stats)
 	php_user_cache_runtime *runtime;
 	php_user_cache_storage *storage;
 	php_user_cache_header *header;
+	php_user_cache_graph_pin_slot *pin_slot;
 	size_t free_memory = 0, wasted_memory = 0, tail_memory = 0;
+	uint32_t i;
 
 	memset(stats, 0, sizeof(*stats));
 
@@ -1141,6 +1151,20 @@ static void user_cache_collect_info_stats(php_user_cache_info_stats *stats)
 	stats->tombstone_count = (zend_long) header->tombstone_count;
 	stats->expunge_count = user_cache_count_to_zend_long(header->expunge_count);
 	stats->store_failure_count = user_cache_count_to_zend_long(header->store_failure_count);
+	stats->dead_pin_owners_reclaimed = user_cache_count_to_zend_long(header->graph_dead_pin_owners_reclaimed);
+	stats->dead_pins_stripped = user_cache_count_to_zend_long(header->graph_dead_pins_stripped);
+
+	for (i = 0; i < PHP_USER_CACHE_GRAPH_PIN_SLOTS; i++) {
+		pin_slot = &header->graph_pin_slots[i];
+
+		if (zend_atomic_int_load_ex(&pin_slot->owner_pid) != 0) {
+			stats->graph_pin_slots_in_use++;
+		}
+
+		stats->graph_pinned_references +=
+			(zend_long) zend_atomic_int_load_ex(&pin_slot->pin_count);
+	}
+
 	stats->free_memory = user_cache_size_to_zend_long(free_memory);
 	stats->wasted_memory = user_cache_size_to_zend_long(wasted_memory);
 	stats->used_memory = storage->size > free_memory
@@ -1719,6 +1743,18 @@ static uint32_t user_cache_prepare_bulk_store_items(
 	return i;
 }
 
+#if ZEND_DEBUG
+/* Debug-only fault injection: force a bailout escaping the commit loop after
+ * the first item commits, exercising the replaced-entry rollback path that is
+ * otherwise unreachable from userland. */
+static bool user_cache_debug_force_bulk_commit_bailout(void)
+{
+	const char *value = getenv("USER_CACHE_DEBUG_FORCE_BULK_COMMIT_BAILOUT");
+
+	return value != NULL && value[0] != '\0' && value[0] != '0';
+}
+#endif
+
 /* Rolls back the entire batch if any store fails. */
 static uint32_t user_cache_commit_bulk_store_locked(
 		php_user_cache_bulk_store_item *items,
@@ -1731,6 +1767,8 @@ static uint32_t user_cache_commit_bulk_store_locked(
 	uint32_t i, j, stored_count = 0;
 
 	*result = true;
+
+	UC_G(store_defer_unlock) = true;
 
 	for (i = 0; i < prepared_count; i++) {
 		if (!php_user_cache_store_prepared_locked(
@@ -1746,8 +1784,17 @@ static uint32_t user_cache_commit_bulk_store_locked(
 			break;
 		}
 
+		items[i].committed = true;
 		stored_count = i + 1;
+
+#if ZEND_DEBUG
+		if (i == 0 && prepared_count > 1 && user_cache_debug_force_bulk_commit_bailout()) {
+			zend_bailout();
+		}
+#endif
 	}
+
+	UC_G(store_defer_unlock) = false;
 
 	if (*result) {
 		for (i = 0; i < stored_count; i++) {
@@ -1755,6 +1802,7 @@ static uint32_t user_cache_commit_bulk_store_locked(
 				storage_keys[i],
 				&items[i].store_result.replaced_entry
 			);
+			items[i].committed = false;
 		}
 	} else {
 		for (j = stored_count; j > 0; j--) {
@@ -1762,12 +1810,45 @@ static uint32_t user_cache_commit_bulk_store_locked(
 				storage_keys[j - 1],
 				&items[j - 1].store_result.replaced_entry
 			);
+			items[j - 1].committed = false;
 		}
 
 		stored_count = 0;
 	}
 
 	return stored_count;
+}
+
+/* A bailout escaping the bulk commit would strand every captured replaced
+ * entry: the new entries are published, so the snapshots hold the only
+ * references to the old key/value blocks. The commit kept the write lock held
+ * across the bailout (store_defer_unlock), so this restores the pre-batch
+ * state on the same lock hold before the bailout continues. */
+static void user_cache_abort_bulk_store_on_bailout(
+		php_user_cache_bulk_store_item *items,
+		zend_string **storage_keys,
+		uint32_t prepared_count)
+{
+	uint32_t j;
+
+	UC_G(store_defer_unlock) = false;
+
+	/* The lock is expected to still be held; re-acquire defensively otherwise. */
+	if (!UC_G(lock_held) && !php_user_cache_wlock()) {
+		return;
+	}
+
+	for (j = prepared_count; j > 0; j--) {
+		if (items[j - 1].committed) {
+			php_user_cache_rollback_replaced_entry_locked(
+				storage_keys[j - 1],
+				&items[j - 1].store_result.replaced_entry
+			);
+			items[j - 1].committed = false;
+		}
+	}
+
+	php_user_cache_unlock_if_held();
 }
 
 static void user_cache_finish_bulk_store(
@@ -1847,7 +1928,7 @@ static bool user_cache_instance_store_multiple(
 				&result
 			);
 		} zend_catch {
-			php_user_cache_unlock_if_held();
+			user_cache_abort_bulk_store_on_bailout(items, storage_keys, prepared_count);
 
 			zend_bailout();
 		} zend_end_try();
@@ -2409,13 +2490,14 @@ static void user_cache_globals_ctor(php_user_cache_globals *user_cache_globals)
 	memset(user_cache_globals, 0, sizeof(php_user_cache_globals));
 }
 
-#ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
-/* Release reader slots owned by the terminating thread. */
 static void user_cache_globals_dtor(php_user_cache_globals *user_cache_globals)
 {
+#ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
+	/* Release reader slots owned by the terminating thread. */
 	php_user_cache_release_thread_reader_claims(user_cache_globals);
-}
 #endif
+	php_user_cache_release_thread_graph_pin_claims(user_cache_globals);
+}
 
 size_t php_user_cache_globals_size(void)
 {
@@ -2430,11 +2512,7 @@ void php_user_cache_globals_startup(void)
 		&user_cache_globals_offset,
 		sizeof(php_user_cache_globals),
 		(ts_allocate_ctor) user_cache_globals_ctor,
-#ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
 		(ts_allocate_dtor) user_cache_globals_dtor
-#else
-		NULL
-#endif
 	);
 }
 #endif
@@ -2493,14 +2571,6 @@ void php_user_cache_mshutdown(void)
 	user_cache_reset_class_entries();
 }
 
-void php_user_cache_invalidate_active(void)
-{
-	user_cache_invalidate_context(php_user_cache_active_context());
-
-	php_user_cache_lookup_cache_clear();
-	php_user_cache_release_active_request_local_slots();
-}
-
 zend_result php_user_cache_rshutdown(void)
 {
 	php_user_cache_unlock_if_held();
@@ -2533,6 +2603,7 @@ zend_result php_user_cache_rshutdown(void)
 zend_result php_user_cache_post_deactivate(void)
 {
 	php_user_cache_release_request_shared_graph_refs();
+	php_user_cache_expunge_expired_at_request_end();
 
 	return SUCCESS;
 }
@@ -2698,6 +2769,14 @@ PHP_USER_CACHE_DEFINE_STATUS_LONG_GETTER(getExpungeCount, expunge_count)
 
 PHP_USER_CACHE_DEFINE_STATUS_LONG_GETTER(getStoreFailureCount, store_failure_count)
 
+PHP_USER_CACHE_DEFINE_STATUS_LONG_GETTER(getGraphPinSlotsInUse, graph_pin_slots_in_use)
+
+PHP_USER_CACHE_DEFINE_STATUS_LONG_GETTER(getGraphPinnedReferences, graph_pinned_references)
+
+PHP_USER_CACHE_DEFINE_STATUS_LONG_GETTER(getDeadPinOwnersReclaimed, dead_pin_owners_reclaimed)
+
+PHP_USER_CACHE_DEFINE_STATUS_LONG_GETTER(getDeadPinsStripped, dead_pins_stripped)
+
 ZEND_METHOD(UserCache_CachePoolStatus, __construct)
 {
 }
@@ -2834,6 +2913,43 @@ ZEND_METHOD(UserCache_Cache, getPools)
 		/* Preserve numeric-looking pool names as string keys. */
 		zend_hash_add(Z_ARRVAL_P(return_value), pool, instance);
 	} ZEND_HASH_FOREACH_END();
+}
+
+ZEND_METHOD(UserCache_Cache, deletePool)
+{
+	zend_string *pool, *scope_prefix;
+	bool cleared = true;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(pool)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!user_cache_validate_pool_name(pool, 1)) {
+		RETURN_THROWS();
+	}
+
+	if (user_cache_can_write()) {
+		scope_prefix = user_cache_build_scope_prefix(pool);
+		cleared = user_cache_clear_scope_prevalidated(scope_prefix);
+		zend_string_release(scope_prefix);
+	} else if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
+	if (!cleared) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+
+		RETURN_FALSE;
+	}
+
+	/* Drop the request-local pool object; a later getPool() recreates it empty. */
+	if (UC_G(pool_table) != NULL) {
+		zend_hash_del(UC_G(pool_table), pool);
+	}
+
+	RETURN_TRUE;
 }
 
 ZEND_METHOD(UserCache_Cache, getStatus)
@@ -3357,15 +3473,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("user_cache.preferred_memory_model", "",     PHP_INI_SYSTEM, OnUpdateStringUnempty,    memory_model,  php_user_cache_globals, user_cache_globals)
 PHP_INI_END()
 
-ZEND_FUNCTION(user_cache_reset)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	php_user_cache_invalidate_active();
-
-	RETURN_TRUE;
-}
-
 static PHP_MINIT_FUNCTION(cache)
 {
 	REGISTER_INI_ENTRIES();
@@ -3401,7 +3508,7 @@ static PHP_MINFO_FUNCTION(cache)
 zend_module_entry user_cache_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"user_cache",
-	ext_functions,
+	NULL,
 	PHP_MINIT(cache),
 	PHP_MSHUTDOWN(cache),
 	NULL,
