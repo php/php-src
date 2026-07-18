@@ -1,8 +1,8 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: 54e953b1da0d08c64509666b9278c59483d1e171 */
+ * Stub hash: 9e087e3aefdab5662892e7fad9de87857aa63057 */
 
-#ifndef ZEND_PHP_URI_DECL_54e953b1da0d08c64509666b9278c59483d1e171_H
-#define ZEND_PHP_URI_DECL_54e953b1da0d08c64509666b9278c59483d1e171_H
+#ifndef ZEND_PHP_URI_DECL_9e087e3aefdab5662892e7fad9de87857aa63057_H
+#define ZEND_PHP_URI_DECL_9e087e3aefdab5662892e7fad9de87857aa63057_H
 
 typedef enum zend_enum_Uri_UriComparisonMode {
 	ZEND_ENUM_Uri_UriComparisonMode_IncludeFragment = 1,
@@ -63,4 +63,17 @@ typedef enum zend_enum_Uri_WhatWg_UrlHostType {
 	ZEND_ENUM_Uri_WhatWg_UrlHostType_Empty = 5,
 } zend_enum_Uri_WhatWg_UrlHostType;
 
-#endif /* ZEND_PHP_URI_DECL_54e953b1da0d08c64509666b9278c59483d1e171_H */
+typedef enum zend_enum_Uri_WhatWg_UrlPercentEncodingMode {
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Username = 1,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Password = 2,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_OpaqueHost = 3,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Path = 4,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_OpaquePath = 5,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_PathSegment = 6,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Query = 7,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_SpecialQuery = 8,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_FormQuery = 9,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Fragment = 10,
+} zend_enum_Uri_WhatWg_UrlPercentEncodingMode;
+
+#endif /* ZEND_PHP_URI_DECL_9e087e3aefdab5662892e7fad9de87857aa63057_H */
