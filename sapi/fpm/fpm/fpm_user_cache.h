@@ -13,7 +13,7 @@
 */
 
 #ifndef FPM_USER_CACHE_H
-# define FPM_USER_CACHE_H
+#define FPM_USER_CACHE_H 1
 
 int fpm_user_cache_init_main(void);
 
