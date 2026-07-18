@@ -85,6 +85,7 @@ truncate_segment:
 #endif
 	if (ftruncate(shared_segment->shm_fd, requested_size) != 0) {
 		*error_in = "ftruncate";
+		close(shared_segment->shm_fd);
 		shm_unlink(shared_segment_name);
 
 		return PHP_USER_CACHE_ALLOC_FAILURE;
@@ -93,6 +94,7 @@ truncate_segment:
 	shared_segment->common.p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED, shared_segment->shm_fd, 0);
 	if (shared_segment->common.p == MAP_FAILED) {
 		*error_in = "mmap";
+		close(shared_segment->shm_fd);
 		shm_unlink(shared_segment_name);
 
 		return PHP_USER_CACHE_ALLOC_FAILURE;

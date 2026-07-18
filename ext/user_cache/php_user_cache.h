@@ -117,7 +117,6 @@ void php_user_cache_minit(void);
 void php_user_cache_mshutdown(void);
 zend_result php_user_cache_rshutdown(void);
 zend_result php_user_cache_post_deactivate(void);
-void php_user_cache_invalidate_active(void);
 
 extern zend_module_entry user_cache_module_entry;
 
