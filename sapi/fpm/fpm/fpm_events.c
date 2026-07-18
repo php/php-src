@@ -39,6 +39,8 @@ static struct php_poll_ctx *module;
 static struct fpm_event_queue_s *fpm_event_queue_timer = NULL;
 static struct fpm_event_queue_s *fpm_event_queue_fd = NULL;
 static struct fpm_event_s children_bury_timer;
+static php_poll_event *events;
+static int max_events;
 
 static void fpm_event_cleanup(int which, void *arg) /* {{{ */
 {
@@ -291,7 +293,6 @@ int fpm_event_support_edge_trigger(void)
 int fpm_event_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
-	int max;
 
 	if (!module) {
 		zlog(ZLOG_ERROR, "no event module found");
@@ -301,11 +302,11 @@ int fpm_event_init_main(void)
 	const char *module_name = fpm_event_mechanism_name();
 
 	/* count the max number of necessary fds for polling */
-	max = 1; /* only one FD is necessary at startup for the master process signal pipe */
+	max_events = 1; /* only one FD is necessary at startup for the master process signal pipe */
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		if (!wp->config) continue;
 		if (wp->config->catch_workers_output && wp->config->pm_max_children > 0) {
-			max += (wp->config->pm_max_children * 2);
+			max_events += (wp->config->pm_max_children * 2);
 		}
 	}
 
@@ -316,29 +317,15 @@ int fpm_event_init_main(void)
 				php_poll_error_string(poll_error));
 		return -1;
 	}
-	php_poll_set_max_events_hint(module, max);
+	php_poll_set_max_events_hint(module, max_events);
+	events = safe_emalloc(max_events, sizeof(*events), true);
 
-	zlog(ZLOG_DEBUG, "event module is %s and %d fds have been reserved", module_name, max);
+	zlog(ZLOG_DEBUG, "event module is %s and %d fds have been reserved", module_name, max_events);
 
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_event_cleanup, NULL)) {
 		return -1;
 	}
 	return 0;
-}
-
-static int fpm_queue_count(struct fpm_event_queue_s **queue)
-{
-	int count = 0;
-	if (!queue) {
-		return count;
-	}
-	struct fpm_event_queue_s *q;
-	q = *queue;
-	while (q) {
-		q = q->next;
-		count++;
-	}
-	return count;
 }
 
 void fpm_event_loop(int err) /* {{{ */
@@ -411,9 +398,6 @@ void fpm_event_loop(int err) /* {{{ */
 		}
 
 		/* translate from our linked list to its array */
-		/* TODO: change representation to native, don't alloc every iter */
-		int max_events = fpm_queue_count(&fpm_event_queue_fd) + 1;
-		php_poll_event *events = safe_emalloc(max_events, sizeof(*events), 0);
 		ret = php_poll_wait(module, events, max_events, &timeout);
 
 		if (ret > 0) {
@@ -429,7 +413,6 @@ void fpm_event_loop(int err) /* {{{ */
 				fpm_event_fire(ev);
 			}
 		}
-		efree(events);
 
 		/* trigger timers */
 		q = fpm_event_queue_timer;
