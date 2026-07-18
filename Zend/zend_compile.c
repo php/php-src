@@ -3775,6 +3775,14 @@ static uint32_t zend_get_arg_num(const zend_function *fn, const zend_string *arg
 	return (uint32_t) -1;
 }
 
+static zend_always_inline void zend_free_pending_named_positions(zval *named_positions)
+{
+	if (named_positions != NULL && !Z_ISUNDEF_P(named_positions)) {
+		zend_array_destroy(Z_ARRVAL_P(named_positions));
+		ZVAL_UNDEF(named_positions);
+	}
+}
+
 static uint32_t zend_compile_args_ex(
 		zend_ast *ast, const zend_function *fbc,
 		bool *may_have_extra_named_args,
@@ -3806,6 +3814,7 @@ static uint32_t zend_compile_args_ex(
 
 		if (arg->kind == ZEND_AST_UNPACK) {
 			if (uses_named_args) {
+				zend_free_pending_named_positions(named_positions);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot use argument unpacking after named arguments");
 			}
@@ -3857,6 +3866,7 @@ static uint32_t zend_compile_args_ex(
 			}
 
 			if (uses_variadic_placeholder) {
+				zend_free_pending_named_positions(named_positions);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Variadic placeholder must be last");
 			}
@@ -3870,12 +3880,14 @@ static uint32_t zend_compile_args_ex(
 				&& arg->attr == ZEND_PLACEHOLDER_VARIADIC;
 
 			if (uses_named_args && !is_variadic_placeholder) {
+				zend_free_pending_named_positions(named_positions);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot use positional argument after named argument");
 			}
 
 			if (uses_variadic_placeholder) {
 				if (is_variadic_placeholder) {
+					zend_free_pending_named_positions(named_positions);
 					zend_error_noreturn(E_COMPILE_ERROR,
 						"Variadic placeholder may only appear once");
 				} else {
