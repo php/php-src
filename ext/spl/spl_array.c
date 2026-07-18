@@ -1549,19 +1549,20 @@ static void spl_array_object_user_cache_unserialize_state(zval *object, HashTabl
 	iterator_class_zv = zend_hash_index_find(data, 2);
 
 	if (!flags_zv || !storage_zv ||
-			Z_TYPE_P(flags_zv) != IS_LONG ||
-			(iterator_class_zv &&
-				(
-					Z_TYPE_P(iterator_class_zv) != IS_NULL &&
-					Z_TYPE_P(iterator_class_zv) != IS_STRING
-				)
+		Z_TYPE_P(flags_zv) != IS_LONG ||
+		(iterator_class_zv &&
+			(
+				Z_TYPE_P(iterator_class_zv) != IS_NULL &&
+				Z_TYPE_P(iterator_class_zv) != IS_STRING
 			)
-		) {
-			zend_throw_exception(
-				spl_ce_UnexpectedValueException,
-				"Incomplete or ill-typed serialization data",
-				0
-			);
+		)
+	) {
+		zend_throw_exception(
+			spl_ce_UnexpectedValueException,
+			"Incomplete or ill-typed serialization data",
+			0
+		);
+
 		return;
 	}
 
@@ -1622,13 +1623,13 @@ static bool spl_array_object_copy_user_cache_state(
 	zval new_zv, cloned_storage_zv;
 	bool result;
 
-	result = false;
-	old_intern = spl_array_from_obj(old_obj);
-	new_intern = spl_array_from_obj(new_obj);
-
 	if (clone_value == NULL) {
 		return false;
 	}
+
+	result = false;
+	old_intern = spl_array_from_obj(old_obj);
+	new_intern = spl_array_from_obj(new_obj);
 
 	ZVAL_OBJ(&new_zv, new_obj);
 	ZVAL_UNDEF(&cloned_storage_zv);
