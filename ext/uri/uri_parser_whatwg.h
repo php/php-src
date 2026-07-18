@@ -25,6 +25,16 @@ ZEND_ATTRIBUTE_NONNULL void php_uri_parser_whatwg_host_type_read(const lxb_url_t
 
 lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent);
 
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_userinfo_component(const char *str, size_t str_length);
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_opaque_host_component(const char *str, size_t str_length);
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_path_component(const char *str, size_t str_length);
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_opaque_path_component(const char *str, size_t str_length);
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_path_segment_component(const char *str, size_t str_length);
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_query_component(const char *str, size_t str_length);
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_special_query_component(const char *str, size_t str_length);
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_form_query_component(const char *str, size_t str_length);
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_fragment_component(const char *str, size_t str_length);
+
 PHP_RINIT_FUNCTION(uri_parser_whatwg);
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(uri_parser_whatwg);
 

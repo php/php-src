@@ -284,4 +284,20 @@ namespace Uri\WhatWg {
 
         public function __debugInfo(): array {}
     }
+
+    enum UrlPercentEncodingMode
+    {
+        case Username;
+        case Password;
+        case OpaqueHost;
+        case Path;
+        case OpaquePath;
+        case PathSegment;
+        case Query;
+        case SpecialQuery;
+        case FormQuery;
+        case Fragment;
+    }
+
+    function url_percent_encode(string $input, \Uri\WhatWg\UrlPercentEncodingMode $mode): string {}
 }
