@@ -11,8 +11,6 @@ opcache.file_cache_only=0
 user_cache.shm_size=1M
 --FILE--
 <?php
-user_cache_reset();
-
 $cache = UserCache\Cache::getPool('expired-read-reclaim');
 
 for ($i = 0; $i < 80; $i++) {
