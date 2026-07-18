@@ -35,17 +35,19 @@ static int fpm_event_queue_add(struct fpm_event_queue_s **queue, struct fpm_even
 static int fpm_event_queue_del(struct fpm_event_queue_s **queue, struct fpm_event_s *ev);
 static void fpm_event_queue_destroy(struct fpm_event_queue_s **queue);
 
-static struct php_poll_ctx *module;
+static struct php_poll_ctx *module = NULL;
 static struct fpm_event_queue_s *fpm_event_queue_timer = NULL;
 static struct fpm_event_queue_s *fpm_event_queue_fd = NULL;
 static struct fpm_event_s children_bury_timer;
-static php_poll_event *events;
+static php_poll_event *events = NULL;
 static int max_events;
 
 static void fpm_event_cleanup(int which, void *arg) /* {{{ */
 {
 	fpm_event_queue_destroy(&fpm_event_queue_timer);
 	fpm_event_queue_destroy(&fpm_event_queue_fd);
+	// XXX: Freeing the poll context causes more problems than not.
+	free(events);
 }
 /* }}} */
 
@@ -242,10 +244,6 @@ static void fpm_event_queue_destroy(struct fpm_event_queue_s **queue) /* {{{ */
 		return;
 	}
 
-	if (*queue == fpm_event_queue_fd) {
-		// XXX: There is no way to clean up without freeing the module.
-	}
-
 	q = *queue;
 	while (q) {
 		tmp = q;
@@ -318,7 +316,7 @@ int fpm_event_init_main(void)
 		return -1;
 	}
 	php_poll_set_max_events_hint(module, max_events);
-	events = safe_emalloc(max_events, sizeof(*events), true);
+	events = calloc(max_events, sizeof(*events));
 
 	zlog(ZLOG_DEBUG, "event module is %s and %d fds have been reserved", module_name, max_events);
 
