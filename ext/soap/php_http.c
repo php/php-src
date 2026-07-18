@@ -25,6 +25,23 @@ static zend_string *get_http_headers(php_stream *socketd);
 #define smart_str_append_const(str, const) \
 	smart_str_appendl(str,const,sizeof(const)-1)
 
+static void soap_smart_str_append_header_value(smart_str *dest, const zend_string *value, const char *header_name)
+{
+	const char *src = ZSTR_VAL(value);
+	size_t len = ZSTR_LEN(value);
+	size_t i = 0;
+	while (i < len && src[i] != '\r' && src[i] != '\n') {
+		i++;
+	}
+	if (i < len) {
+		smart_str_appendl(dest, src, i);
+		php_error_docref(NULL, E_WARNING,
+			"Header %s value contains newline characters and has been truncated", header_name);
+	} else {
+		smart_str_append(dest, value);
+	}
+}
+
 /* Proxy HTTP Authentication */
 bool proxy_authentication(zval* this_ptr, smart_str* soap_headers)
 {
@@ -607,25 +624,25 @@ try_again:
 			smart_str_append_const(&soap_headers, "\r\n"
 				"Connection: Keep-Alive\r\n");
 		}
+		zend_string *ua_str = NULL;
+
 		tmp = Z_CLIENT_USER_AGENT_P(this_ptr);
 		if (Z_TYPE_P(tmp) == IS_STRING) {
-			if (Z_STRLEN_P(tmp) > 0) {
-				smart_str_append_const(&soap_headers, "User-Agent: ");
-				smart_str_append(&soap_headers, Z_STR_P(tmp));
-				smart_str_append_const(&soap_headers, "\r\n");
-			}
+			ua_str = Z_STR_P(tmp);
 		} else if (context &&
 		           (tmp = php_stream_context_get_option(context, "http", "user_agent")) != NULL &&
 		           Z_TYPE_P(tmp) == IS_STRING) {
-			if (Z_STRLEN_P(tmp) > 0) {
+			ua_str = Z_STR_P(tmp);
+		} else if (FG(user_agent)) {
+			ua_str = FG(user_agent);
+		}
+
+		if (ua_str) {
+			if (ZSTR_LEN(ua_str) > 0) {
 				smart_str_append_const(&soap_headers, "User-Agent: ");
-				smart_str_append(&soap_headers, Z_STR_P(tmp));
+				soap_smart_str_append_header_value(&soap_headers, ua_str, "User-Agent");
 				smart_str_append_const(&soap_headers, "\r\n");
 			}
-		} else if (FG(user_agent)) {
-			smart_str_append_const(&soap_headers, "User-Agent: ");
-			smart_str_append(&soap_headers, FG(user_agent));
-			smart_str_append_const(&soap_headers, "\r\n");
 		} else {
 			smart_str_append_const(&soap_headers, "User-Agent: PHP-SOAP/"PHP_VERSION"\r\n");
 		}
@@ -957,14 +974,14 @@ try_again:
 				if (tmp != NULL) {
 					tmp++;
 					http_status = atoi(tmp);
-				}
-				tmp = strstr(tmp," ");
-				if (tmp != NULL) {
-					tmp++;
-					if (http_msg) {
-						efree(http_msg);
+					tmp = strstr(tmp," ");
+					if (tmp != NULL) {
+						tmp++;
+						if (http_msg) {
+							efree(http_msg);
+						}
+						http_msg = estrdup(tmp);
 					}
-					http_msg = estrdup(tmp);
 				}
 				efree(http_version);
 

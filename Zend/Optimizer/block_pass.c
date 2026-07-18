@@ -653,7 +653,7 @@ optimize_type_check:
 					} else if (opline->op1_type == IS_TMP_VAR &&
 					           !zend_bitset_in(used_ext, VAR_NUM(opline->op1.var))) {
 						src = VAR_SOURCE(opline->op1);
-						if (src) {
+						if (src && (src->op1_type != IS_VAR)) {
 							if (src->opcode == ZEND_BOOL_NOT) {
 								VAR_SOURCE(opline->op1) = NULL;
 								COPY_NODE(opline->op1, src->op1);
@@ -697,7 +697,7 @@ optimize_type_check:
 					           (!zend_bitset_in(used_ext, VAR_NUM(opline->op1.var)) ||
 					            opline->result.var == opline->op1.var)) {
 						src = VAR_SOURCE(opline->op1);
-						if (src) {
+						if (src && (src->op1_type != IS_VAR)) {
 							if (src->opcode == ZEND_BOOL ||
 							    src->opcode == ZEND_QM_ASSIGN) {
 								VAR_SOURCE(opline->op1) = NULL;

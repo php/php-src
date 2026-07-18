@@ -140,6 +140,27 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 
 /* }}} */
 
+zend_string *php_stream_escape_persistent_key(const char *host, size_t hostlen)
+{
+	zend_string *escaped = zend_string_safe_alloc(hostlen, 2, 0, 0);
+	char *ptr = ZSTR_VAL(escaped);
+	for (size_t i = 0; i < hostlen; i++) {
+		if (host[i] == '\0') {
+			*ptr++ = '\\';
+			*ptr++ = '0';
+		} else if (host[i] == '\\') {
+			*ptr++ = '\\';
+			*ptr++ = '\\';
+		} else {
+			*ptr++ = host[i];
+		}
+	}
+	*ptr = '\0';
+	ZSTR_LEN(escaped) = ptr - ZSTR_VAL(escaped);
+
+	return escaped;
+}
+
 /* allocate a new stream for a particular ops */
 PHPAPI php_stream *_php_stream_alloc(const php_stream_ops *ops, void *abstract, const char *persistent_id, const char *mode STREAMS_DC) /* {{{ */
 {
@@ -2283,16 +2304,11 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 			default:
 				php_stream_close(stream);
 				stream = NULL;
-				if (options & REPORT_ERRORS) {
-					char *tmp = estrdup(path);
-					php_strip_url_passwd(tmp);
-					php_stream_wrapper_warn_param(wrapper, context, options,
-							SeekNotSupported, tmp,
-							"could not make seekable - %s", tmp);
-					efree(tmp);
-
-					options &= ~REPORT_ERRORS;
-				}
+				php_stream_wrapper_warn(wrapper, context, options,
+						SeekNotSupported,
+						"could not make seekable - %s", path);
+				/* We do not want multiple errors so we negate it */
+				options &= ~REPORT_ERRORS;
 		}
 	}
 

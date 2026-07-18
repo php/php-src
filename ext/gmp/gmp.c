@@ -327,8 +327,17 @@ static zend_result binop_operator_helper(gmp_binary_op_t gmp_op, zval *return_va
 
 typedef void (*gmp_binary_ui_op_t)(mpz_ptr, mpz_srcptr, gmp_ulong);
 
+static void gmp_shift_operator_range_error(uint8_t opcode) {
+	zend_throw_error(
+		zend_ce_value_error, "%s must be between 0 and %lu",
+		opcode == ZEND_POW ? "Exponent" : "Shift", ULONG_MAX
+	);
+}
+
 static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zval *op1, zval *op2, uint8_t opcode) {
 	zend_long shift = 0;
+	gmp_ulong shift_ui = 0;
+	bool have_shift_ui = false;
 
 	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
 		if (UNEXPECTED(!IS_GMP(op2))) {
@@ -349,30 +358,35 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 					goto typeof_op_failure;
 			}
 		} else {
-			// TODO We shouldn't cast the GMP object to int here
-			shift = zval_get_long(op2);
+			mpz_ptr gmpnum_shift = GET_GMP_FROM_ZVAL(op2);
+			if (!mpz_fits_ulong_p(gmpnum_shift)) {
+				gmp_shift_operator_range_error(opcode);
+				return FAILURE;
+			}
+			shift_ui = (gmp_ulong) mpz_get_ui(gmpnum_shift);
+			have_shift_ui = true;
 		}
 	} else {
 		shift = Z_LVAL_P(op2);
 	}
 
-	if (shift < 0 || shift > ULONG_MAX) {
-		zend_throw_error(
-			zend_ce_value_error, "%s must be between 0 and %lu",
-			opcode == ZEND_POW ? "Exponent" : "Shift", ULONG_MAX
-		);
-		return FAILURE;
-	} else {
-		mpz_ptr gmpnum_op, gmpnum_result;
-
-		if (!gmp_zend_parse_arg_into_mpz_ex(op1, &gmpnum_op, 1, true)) {
-			goto typeof_op_failure;
+	if (!have_shift_ui) {
+		if (shift < 0 || shift > ULONG_MAX) {
+			gmp_shift_operator_range_error(opcode);
+			return FAILURE;
 		}
-
-		INIT_GMP_RETVAL(gmpnum_result);
-		op(gmpnum_result, gmpnum_op, (gmp_ulong) shift);
-		return SUCCESS;
+		shift_ui = (gmp_ulong) shift;
 	}
+
+	mpz_ptr gmpnum_op, gmpnum_result;
+
+	if (!gmp_zend_parse_arg_into_mpz_ex(op1, &gmpnum_op, 1, true)) {
+		goto typeof_op_failure;
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	op(gmpnum_result, gmpnum_op, shift_ui);
+	return SUCCESS;
 
 typeof_op_failure: ;
 	/* Returning FAILURE without throwing an exception would emit the

@@ -17,7 +17,9 @@
  * John Ellson  (ellson@graphviz.org)  Oct 31, 1997
  *
  * Test this with:
- *               gcc -o gdcache -g -Wall -DTEST gdcache.c
+ *               gcc -o gdcache -g -Wall -DTEST -DNEED_CACHE gdcache.c -lgd
+ *               or
+ *               gcc -o gdcache -g -Wall -DTEST -DNEED_CACHE gdcache.c libgd.a
  *
  * The cache is implemented by a singly-linked list of elements
  * each containing a pointer to a user struct that is being managed by
@@ -51,159 +53,163 @@
 /* implementation                                        */
 /*********************************************************/
 
-
 /* create a new cache */
-gdCache_head_t *
-gdCacheCreate (
-		int size,
-		gdCacheTestFn_t gdCacheTest,
-		gdCacheFetchFn_t gdCacheFetch,
-		gdCacheReleaseFn_t gdCacheRelease)
+gdCache_head_t *gdCacheCreate(int size, gdCacheTestFn_t gdCacheTest, gdCacheFetchFn_t gdCacheFetch,
+                              gdCacheReleaseFn_t gdCacheRelease)
 {
-  gdCache_head_t *head;
+    gdCache_head_t *head;
 
-  head = (gdCache_head_t *) gdPMalloc(sizeof (gdCache_head_t));
-  head->mru = NULL;
-  head->size = size;
-  head->gdCacheTest = gdCacheTest;
-  head->gdCacheFetch = gdCacheFetch;
-  head->gdCacheRelease = gdCacheRelease;
-  return head;
+    head = (gdCache_head_t *)gdMalloc(sizeof(gdCache_head_t));
+    if (!head) {
+        return NULL;
+    }
+
+    head->mru = NULL;
+    head->size = size;
+    head->gdCacheTest = gdCacheTest;
+    head->gdCacheFetch = gdCacheFetch;
+    head->gdCacheRelease = gdCacheRelease;
+
+    return head;
 }
 
-void
-gdCacheDelete (gdCache_head_t * head)
+void gdCacheDelete(gdCache_head_t *head)
 {
-  gdCache_element_t *elem, *prev;
+    gdCache_element_t *elem, *prev;
 
-  elem = head->mru;
-  while (elem)
-    {
-      (*(head->gdCacheRelease)) (elem->userdata);
-      prev = elem;
-      elem = elem->next;
-      gdPFree ((char *) prev);
+    elem = head->mru;
+    while (elem) {
+        (*(head->gdCacheRelease))(elem->userdata);
+        prev = elem;
+        elem = elem->next;
+        gdFree((char *)prev);
     }
-  gdPFree ((char *) head);
+    gdFree((char *)head);
 }
 
-void *
-gdCacheGet (gdCache_head_t * head, void *keydata)
+void *gdCacheGet(gdCache_head_t *head, void *keydata)
 {
-  int i = 0;
-  gdCache_element_t *elem, *prev = NULL, *prevprev = NULL;
-  void *userdata;
+    int i = 0;
+    gdCache_element_t *elem, *prev = NULL, *prevprev = NULL;
+    void *userdata;
 
-  elem = head->mru;
-  while (elem)
-    {
-      if ((*(head->gdCacheTest)) (elem->userdata, keydata))
-	{
-	  if (i)
-	    {			/* if not already most-recently-used */
-	      /* relink to top of list */
-	      prev->next = elem->next;
-	      elem->next = head->mru;
-	      head->mru = elem;
-	    }
-	  return elem->userdata;
-	}
-      prevprev = prev;
-      prev = elem;
-      elem = elem->next;
-      i++;
+    elem = head->mru;
+    while (elem) {
+        if ((*(head->gdCacheTest))(elem->userdata, keydata)) {
+            if (i) {
+                /* if not already most-recently-used */
+                /* relink to top of list */
+                prev->next = elem->next;
+                elem->next = head->mru;
+                head->mru = elem;
+            }
+            return elem->userdata;
+        }
+        prevprev = prev;
+        prev = elem;
+        elem = elem->next;
+        i++;
     }
-  userdata = (*(head->gdCacheFetch)) (&(head->error), keydata);
-  if (!userdata)
-    {
-      /* if there was an error in the fetch then don't cache */
-      return NULL;
+    userdata = (*(head->gdCacheFetch))(&(head->error), keydata);
+    if (!userdata) {
+        /* if there was an error in the fetch then don't cache */
+        return NULL;
     }
-  if (i < head->size)
-    {				/* cache still growing - add new elem */
-      elem = (gdCache_element_t *) gdPMalloc(sizeof (gdCache_element_t));
+
+    if (i < head->size) {
+        /* cache still growing - add new elem */
+        elem = (gdCache_element_t *)gdMalloc(sizeof(gdCache_element_t));
+        if (!elem) {
+            (*(head->gdCacheRelease))(userdata);
+            return NULL;
+        }
+    } else {
+        /* cache full - replace least-recently-used */
+        if (!prevprev) {
+            /* cache size is 1 */
+            head->mru = NULL;
+        } else {
+            /* prevprev becomes new end of list */
+            prevprev->next = NULL;
+        }
+        elem = prev;
+        if (!elem) {
+            /* Happen only with an invalid cache size (<= 0). Bad state but
+             * still worth handling it here before deref */
+            (*(head->gdCacheRelease))(userdata);
+            return NULL;
+        }
+        (*(head->gdCacheRelease))(elem->userdata);
     }
-  else
-    {				/* cache full - replace least-recently-used */
-      /* preveprev becomes new end of list */
-      prevprev->next = NULL;
-      elem = prev;
-      (*(head->gdCacheRelease)) (elem->userdata);
-    }
-  /* relink to top of list */
-  elem->next = head->mru;
-  head->mru = elem;
-  elem->userdata = userdata;
-  return userdata;
+
+    /* relink to top of list */
+    elem->next = head->mru;
+    head->mru = elem;
+    elem->userdata = userdata;
+
+    return userdata;
 }
-
-
 
 /*********************************************************/
 /* test stub                                             */
 /*********************************************************/
 
-
 #ifdef TEST
 
 #include <stdio.h>
 
-typedef struct
+typedef struct {
+    int key;
+    int value;
+} key_value_t;
+
+static int cacheTest(void *map, void *key) { return (((key_value_t *)map)->key == *(int *)key); }
+
+static void *cacheFetch(char **error, void *key)
 {
-  int key;
-  int value;
-}
-key_value_t;
+    key_value_t *map;
 
-static int
-cacheTest (void *map, void *key)
-{
-  return (((key_value_t *) map)->key == *(int *) key);
-}
+    map = (key_value_t *)gdMalloc(sizeof(key_value_t));
+    if (!map) {
+        *error = "gdMalloc failed";
+        return NULL;
+    }
+    map->key = *(int *)key;
+    map->value = 3;
 
-static void *
-cacheFetch (char **error, void *key)
-{
-  key_value_t *map;
+    *error = NULL;
 
-  map = (key_value_t *) gdMalloc (sizeof (key_value_t));
-  map->key = *(int *) key;
-  map->value = 3;
-
-  *error = NULL;
-  return (void *) map;
+    return (void *)map;
 }
 
-static void
-cacheRelease (void *map)
+static void cacheRelease(void *map) { gdFree((char *)map); }
+
+int main(int argc, char **argv)
 {
-  gdFree ((char *) map);
-}
+    gdCache_head_t *cacheTable;
+    int elem, key;
 
-int
-main (char *argv[], int argc)
-{
-  gdCache_head_t *cacheTable;
-  int elem, key;
+    cacheTable = gdCacheCreate(3, cacheTest, cacheFetch, cacheRelease);
+    if (!cacheTable) {
+        exit(1);
+    }
 
-  cacheTable = gdCacheCreate (3, cacheTest, cacheFetch, cacheRelease);
+    key = 20;
+    elem = *(int *)gdCacheGet(cacheTable, &key);
+    key = 30;
+    elem = *(int *)gdCacheGet(cacheTable, &key);
+    key = 40;
+    elem = *(int *)gdCacheGet(cacheTable, &key);
+    key = 50;
+    elem = *(int *)gdCacheGet(cacheTable, &key);
+    key = 30;
+    elem = *(int *)gdCacheGet(cacheTable, &key);
+    key = 30;
+    elem = *(int *)gdCacheGet(cacheTable, &key);
 
-  key = 20;
-  elem = *(int *) gdCacheGet (cacheTable, &key);
-  key = 30;
-  elem = *(int *) gdCacheGet (cacheTable, &key);
-  key = 40;
-  elem = *(int *) gdCacheGet (cacheTable, &key);
-  key = 50;
-  elem = *(int *) gdCacheGet (cacheTable, &key);
-  key = 30;
-  elem = *(int *) gdCacheGet (cacheTable, &key);
-  key = 30;
-  elem = *(int *) gdCacheGet (cacheTable, &key);
+    gdCacheDelete(cacheTable);
 
-  gdCacheDelete (cacheTable);
-
-  return 0;
+    return 0;
 }
 
 #endif /* TEST */

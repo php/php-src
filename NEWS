@@ -2,9 +2,35 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0alpha3
 
+- Core:
+  . Implemented partial function application RFC. (Arnaud)
+
+- GMP:
+  . Fixed GMP power and shift operators to reject GMP right operands outside
+    the unsigned long range instead of silently truncating them. (Weilin Du)
+
+- ODBC:
+  . Fixed bug GH-22668 (Heap buffer over-read when a column value exceeds the
+    driver-reported display size). (iliaal)
+
+- Opcache:
+  . Re-enable JIT for ZTS builds on Apple Silicon. (realFlowControl)
+
+- PDO_ODBC:
+  . Fixed bug GH-22667 (Heap buffer over-read when a column value exceeds the
+    driver-reported display size). (iliaal)
+  . Fixed bug GH-22666 (Heap buffer overflow when an output parameter value is
+    longer than the declared maxlen). (iliaal)
+  . Fixed bug GH-22665 (Out-of-bounds write when the ODBC driver reports a
+    diagnostic message length beyond the error buffer). (iliaal)
+
 - Reflection:
   . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
     (DanielEScherzer)
+
+- Sockets:
+  . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
+    TCP_USER_TIMEOUT, and SO_LINGER options. (Weilin Du)
 
 16 Jul 2026, PHP 8.6.0alpha2
 
@@ -335,6 +361,10 @@ PHP                                                                        NEWS
     when building a phar. (ndossche)
   . Mark Phar::buildFromIterator() base directory argument as a path.
     (ndossche)
+
+- phpdbg:
+  . Fixed GH-22480 (Use-after-free when re-watching an already-watched
+    variable). (iliaal)
 
 - Posix:
   . Added validity check to the flags argument for posix_access(). (arshidkv12)
