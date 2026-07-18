@@ -50,7 +50,7 @@ static int user_cache_alloc_shm_create_segments(size_t requested_size, php_user_
 	int shmget_flags;
 	php_user_cache_shm_segment_shm *shared_segments;
 
-	shmget_flags = IPC_CREAT|SHM_R|SHM_W|IPC_EXCL;
+	shmget_flags = IPC_CREAT | SHM_R | SHM_W | IPC_EXCL;
 
 	seg_allocate_size = requested_size;
 	first_segment_id = shmget(first_segment_key, seg_allocate_size, shmget_flags);

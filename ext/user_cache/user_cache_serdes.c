@@ -84,6 +84,8 @@ static bool user_cache_serdes_decoder_register_string(
 	zend_string *str
 );
 
+/* Fixed-width values are self-aligned; the padding is part of the wire
+ * format. */
 static zend_always_inline void user_cache_serdes_put_pad(smart_str *buf, size_t align)
 {
 	size_t len = smart_str_get_len(buf), pad = (align - (len & (align - 1))) & (align - 1);
@@ -142,6 +144,9 @@ static zend_always_inline void user_cache_serdes_patch_u32(
 	memcpy(ZSTR_VAL(buf->s) + pos, &value, sizeof(value));
 }
 
+/* Back-ref ids are assigned in traversal order and must match the decoder's
+ * registration order; ids are stored biased by one so an empty slot stays
+ * distinguishable from id 0. */
 static zend_always_inline bool user_cache_serdes_encode_backref_or_register(
 		php_user_cache_serdes_encoder *enc,
 		const void *container,

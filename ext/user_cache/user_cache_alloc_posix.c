@@ -33,7 +33,7 @@ static int user_cache_alloc_posix_create_segments(size_t requested_size, php_use
 {
 	php_user_cache_shm_segment_posix *shared_segment;
 	char shared_segment_name[sizeof("/php_user_cache.") + 20];
-	int shared_segment_flags = O_RDWR|O_CREAT|O_TRUNC;
+	int shared_segment_flags = O_RDWR | O_CREAT | O_TRUNC;
 	mode_t shared_segment_mode = 0600;
 
 #if defined(HAVE_SHM_CREATE_LARGEPAGE)
