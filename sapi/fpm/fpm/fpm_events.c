@@ -35,7 +35,7 @@ static int fpm_event_queue_add(struct fpm_event_queue_s **queue, struct fpm_even
 static int fpm_event_queue_del(struct fpm_event_queue_s **queue, struct fpm_event_s *ev);
 static void fpm_event_queue_destroy(struct fpm_event_queue_s **queue);
 
-static struct php_poll_ctx *module = NULL;
+static struct php_poll_ctx *poll_ctx = NULL;
 static struct fpm_event_queue_s *fpm_event_queue_timer = NULL;
 static struct fpm_event_queue_s *fpm_event_queue_fd = NULL;
 static struct fpm_event_s children_bury_timer;
@@ -192,7 +192,7 @@ static int fpm_event_queue_add(struct fpm_event_queue_s **queue, struct fpm_even
 		if (ev->flags & FPM_EV_READ) {
 			events |= PHP_POLL_READ;
 		}
-		ev->index = php_poll_add(module, ev->fd, events, ev) == SUCCESS ? ev->fd : -1;
+		ev->index = php_poll_add(poll_ctx, ev->fd, events, ev) == SUCCESS ? ev->fd : -1;
 	}
 
 	return 0;
@@ -223,7 +223,7 @@ static int fpm_event_queue_del(struct fpm_event_queue_s **queue, struct fpm_even
 
 			/* ask the event module to remove the fd from its own queue */
 			if (*queue == fpm_event_queue_fd) {
-				php_poll_remove(module, ev->fd);
+				php_poll_remove(poll_ctx, ev->fd);
 				ev->index = ev->fd;
 			}
 
@@ -261,11 +261,11 @@ int fpm_event_pre_init(char *mechanism) /* {{{ */
 
 	uint32_t flags = PHP_POLL_FLAG_PERSISTENT;
 	if (mechanism) {
-		module = php_poll_create_by_name(mechanism, flags);
+		poll_ctx = php_poll_create_by_name(mechanism, flags);
 	} else {
-		module = php_poll_create(PHP_POLL_BACKEND_AUTO, flags);
+		poll_ctx = php_poll_create(PHP_POLL_BACKEND_AUTO, flags);
 	}
-	if (module) {
+	if (poll_ctx) {
 		return 0;
 	}
 
@@ -280,24 +280,24 @@ int fpm_event_pre_init(char *mechanism) /* {{{ */
 
 const char *fpm_event_mechanism_name(void)
 {
-	return module ? php_poll_backend_name(module) : NULL;
+	return poll_ctx ? php_poll_backend_name(poll_ctx) : NULL;
 }
 
 int fpm_event_support_edge_trigger(void)
 {
-	return module ? php_poll_backend_supports_edge_triggering(php_poll_get_backend_type(module)) : 0;
+	return poll_ctx ? php_poll_backend_supports_edge_triggering(php_poll_get_backend_type(poll_ctx)) : 0;
 }
 
 int fpm_event_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
 
-	if (!module) {
-		zlog(ZLOG_ERROR, "no event module found");
+	if (!poll_ctx) {
+		zlog(ZLOG_ERROR, "no event poll_ctx found");
 		return -1;
 	}
 
-	const char *module_name = fpm_event_mechanism_name();
+	const char *poll_ctx_name = fpm_event_mechanism_name();
 
 	/* count the max number of necessary fds for polling */
 	max_events = 1; /* only one FD is necessary at startup for the master process signal pipe */
@@ -308,17 +308,17 @@ int fpm_event_init_main(void)
 		}
 	}
 
-	if (php_poll_init(module) != SUCCESS) {
-		php_poll_error poll_error = php_poll_get_error(module);
-		zlog(ZLOG_ERROR, "Unable to initialize the event module %s: %s",
-				module_name,
+	if (php_poll_init(poll_ctx) != SUCCESS) {
+		php_poll_error poll_error = php_poll_get_error(poll_ctx);
+		zlog(ZLOG_ERROR, "Unable to initialize the event poll_ctx %s: %s",
+				poll_ctx_name,
 				php_poll_error_string(poll_error));
 		return -1;
 	}
-	php_poll_set_max_events_hint(module, max_events);
+	php_poll_set_max_events_hint(poll_ctx, max_events);
 	events = calloc(max_events, sizeof(*events));
 
-	zlog(ZLOG_DEBUG, "event module is %s and %d fds have been reserved", module_name, max_events);
+	zlog(ZLOG_DEBUG, "event poll_ctx is %s and %d fds have been reserved", poll_ctx_name, max_events);
 
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_event_cleanup, NULL)) {
 		return -1;
@@ -396,18 +396,18 @@ void fpm_event_loop(int err) /* {{{ */
 		}
 
 		/* translate from our linked list to its array */
-		ret = php_poll_wait(module, events, max_events, &timeout);
+		ret = php_poll_wait(poll_ctx, events, max_events, &timeout);
 
 		if (ret > 0) {
-			zlog(ZLOG_DEBUG, "event module triggered %d events", ret);
+			zlog(ZLOG_DEBUG, "event poll_ctx triggered %d events", ret);
 		} else if (ret < 0) {
-			php_poll_error poll_error = php_poll_get_error(module);
+			php_poll_error poll_error = php_poll_get_error(poll_ctx);
 			/* we don't care about signal interrupts */
 			if (poll_error != PHP_POLL_ERROR_CODE_INTERRUPTED) {
 				zlog(ZLOG_ERROR, "poll error: %s", php_poll_error_string(poll_error));
 			}
 		}
-		/* do the logic the modules used to */
+		/* do the logic the event module used to */
 		for (int i = 0; i < ret; i++) {
 			struct fpm_event_s *ev = (struct fpm_event_s *)events[i].data;
 			if (events[i].data) {
