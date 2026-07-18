@@ -1410,6 +1410,8 @@ static bool spl_heap_object_user_cache_state_has_unstorable(
 	return false;
 }
 
+/* The state is [flags, [elem...]]; priority-queue elements are encoded as
+ * [data, priority] pairs. */
 static bool spl_heap_object_serialize_user_cache_state(zval *state, const zval *object)
 {
 	spl_heap_object *intern;
