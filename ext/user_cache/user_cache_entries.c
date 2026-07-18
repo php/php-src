@@ -83,6 +83,17 @@ typedef struct {
 	const char **failure_message;
 } php_user_cache_unstorable_context;
 
+typedef struct {
+	uint64_t generation;
+	const void *context;
+	bool needs_deep_clone;
+	bool has_clone_verdicts;
+	bool no_aliases;
+	bool has_value;
+	zval value;
+	HashTable clone_verdicts;
+} php_user_cache_request_local_slot;
+
 static bool user_cache_clone_request_local_value(
 	php_user_cache_request_local_clone_context *ctx,
 	zval *dst,
@@ -105,7 +116,6 @@ static bool user_cache_find_unstorable_value(
 );
 
 static void user_cache_rehash_locked(php_user_cache_header *header);
-static bool user_cache_expunge_expired_locked(void);
 static bool user_cache_expunge_expired_bounded_locked(void);
 
 static zend_always_inline bool user_cache_value_uses_offset(uint8_t value_type)
@@ -312,6 +322,8 @@ static zend_always_inline void user_cache_lookup_cache_store_hit(
 
 	lookup_entry->key = zend_string_copy(key);
 
+	/* Only non-expiring scalars may be promoted; the lookup fast path returns
+	 * them without an expiry recheck. */
 	if (entry->expires_at != 0) {
 		return;
 	}
@@ -642,7 +654,9 @@ static zend_always_inline php_user_cache_request_local_slot *user_cache_alloc_re
 	return slot;
 }
 
-/* The caller must recheck write_seq before using the snapshot. */
+/* The caller must recheck write_seq before using the snapshot. Returns false
+ * when the snapshot is unusable (out-of-bounds offset or corrupt state); the
+ * caller must fall back to the locked path. */
 static bool user_cache_optimistic_probe(
 		const php_user_cache_header *header,
 		zend_string *key,
@@ -1808,6 +1822,8 @@ static bool user_cache_find_slot_for_write_locked(
 	}
 
 	header = *header_ptr;
+	/* Keep at least 1/8 of the table free so linear probing always terminates
+	 * on an EMPTY slot. */
 	if (!*found && header->count >= header->capacity - header->capacity / 8) {
 		return false;
 	}
@@ -1931,16 +1947,8 @@ static bool user_cache_expunge_expired_bounded_locked(void)
 	return removed;
 }
 
-static void user_cache_handle_store_failure(const char *msg, bool throw_on_failure, bool honor_strict_store_failure)
+static void user_cache_handle_store_failure(const char *msg, bool throw_on_failure)
 {
-	php_user_cache_context *ctx = php_user_cache_active_context();
-
-	if (honor_strict_store_failure && ctx->strict_store_failure && !throw_on_failure) {
-		zend_throw_exception_ex(php_user_cache_exception_ce, 0, "%s", msg);
-
-		return;
-	}
-
 	if (throw_on_failure) {
 		zend_throw_exception_ex(php_user_cache_exception_ce, 0, "%s", msg);
 	}
@@ -2139,7 +2147,7 @@ static bool user_cache_find_unstorable_value(
 	return false;
 }
 
-static bool user_cache_validate_storable_value(zval *value, bool throw_on_failure, bool honor_strict_store_failure)
+static bool user_cache_validate_storable_value(zval *value, bool throw_on_failure)
 {
 	const char *msg = NULL;
 	HashTable seen_arrs, seen_objs;
@@ -2377,8 +2385,7 @@ static php_user_cache_store_attempt_result user_cache_store_attempt_locked(
 		php_user_cache_header_ptr()->store_failure_count++;
 		user_cache_handle_store_failure(
 			"cache hash table is full",
-			options->throw_on_failure,
-			options->honor_strict_store_failure
+			options->throw_on_failure
 		);
 
 		return PHP_USER_CACHE_STORE_ATTEMPT_FAILED;
@@ -2689,8 +2696,7 @@ failure:
 	header->store_failure_count++;
 	user_cache_handle_store_failure(
 		msg,
-		options->throw_on_failure,
-		options->honor_strict_store_failure
+		options->throw_on_failure
 	);
 
 	return PHP_USER_CACHE_STORE_ATTEMPT_FAILED;
@@ -2874,8 +2880,7 @@ static bool user_cache_prepare_shared_graph_value(
 
 	user_cache_handle_store_failure(
 		"value cannot be stored in the user cache: it contains a resource, a closure, or an object with opaque internal state (e.g. Fiber, Generator, PDO)",
-		options->throw_on_failure,
-		options->honor_strict_store_failure
+		options->throw_on_failure
 	);
 
 	return false;
@@ -2952,7 +2957,6 @@ static bool user_cache_fetch_emit_value_locked(
 	}
 
 	if (user_cache_scalar_to_zval(entry->value_type, entry->long_value, entry->double_value, return_value)) {
-
 		return true;
 	}
 
@@ -3123,12 +3127,10 @@ static bool user_cache_atomic_insert_missing_locked(
 	php_user_cache_prepare_options prep_opts = {
 		.caller_holds_write_lock = true,
 		.throw_on_failure = false,
-		.honor_strict_store_failure = false,
 	};
 	php_user_cache_store_options store_opts = {
 		.retry_after_memory_pressure = true,
 		.throw_on_failure = false,
-		.honor_strict_store_failure = false,
 		.capture_replaced_entry = false,
 	};
 	php_user_cache_prepared_value prepared;
@@ -3526,8 +3528,7 @@ bool php_user_cache_prepare_value(
 	if (Z_TYPE_P(value) == IS_RESOURCE) {
 		user_cache_handle_store_failure(
 			PHP_USER_CACHE_MSG_RESOURCE_UNSTORABLE,
-			options->throw_on_failure,
-			options->honor_strict_store_failure
+			options->throw_on_failure
 		);
 
 		return false;
@@ -3536,8 +3537,7 @@ bool php_user_cache_prepare_value(
 	if (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == zend_ce_closure) {
 		user_cache_handle_store_failure(
 			PHP_USER_CACHE_MSG_CLOSURE_UNSTORABLE,
-			options->throw_on_failure,
-			options->honor_strict_store_failure
+			options->throw_on_failure
 		);
 
 		return false;
@@ -3569,10 +3569,7 @@ bool php_user_cache_prepare_value(
 
 	/* A verbatim root contains no values rejected by validation. */
 	if (!verbatim_eligible &&
-		!user_cache_validate_storable_value(
-			value,
-			options->throw_on_failure,
-			options->honor_strict_store_failure)
+		!user_cache_validate_storable_value(value, options->throw_on_failure)
 	) {
 		result = false;
 
@@ -3626,7 +3623,6 @@ void php_user_cache_destroy_prepared_value(php_user_cache_prepared_value *prepar
 	user_cache_init_prepared_value(prepared);
 }
 
-/* Use zend_array_release here to avoid changing GC timing. */
 void php_user_cache_object_table_dtor(zval *zv)
 {
 	zend_object *obj = Z_PTR_P(zv);
@@ -3724,7 +3720,7 @@ bool php_user_cache_store_prepared_locked(
 	return stored;
 }
 
-bool php_user_cache_fetch_finish(
+void php_user_cache_fetch_finish(
 		zend_string *key,
 		uint64_t gen,
 		zval *return_value,
@@ -3760,8 +3756,6 @@ bool php_user_cache_fetch_finish(
 			);
 		}
 	}
-
-	return true;
 }
 
 bool php_user_cache_fetch_locked(

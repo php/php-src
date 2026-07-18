@@ -34,6 +34,13 @@ typedef struct {
 } php_user_cache_recovered_entry_lock;
 
 typedef struct {
+	php_user_cache_context *context;
+	uint64_t owner_pid;
+	zend_long lease;
+	bool preserve_lease;
+} php_user_cache_entry_lock;
+
+typedef struct {
 	zend_string *key;
 	php_user_cache_entry_lock *lock;
 } php_user_cache_entry_lock_release_pair;
@@ -68,13 +75,6 @@ static php_user_cache_startup_lock php_user_cache_startup_storage_lock_state =
 ;
 
 static inline uint64_t user_cache_process_start_time_token(uint64_t pid);
-
-static zend_always_inline bool user_cache_startup_failure_forced(void)
-{
-	const char *value = getenv("PHP_USER_CACHE_FORCE_STARTUP_FAILURE");
-
-	return value != NULL && value[0] != '\0' && value[0] != '0';
-}
 
 static zend_always_inline bool user_cache_requires_pre_request_storage(void)
 {
@@ -234,6 +234,9 @@ static zend_always_inline void user_cache_atomic_fence_seq_cst(void)
 }
 #endif
 
+/* Announce fences so the odd (write-in-progress) sequence is visible before the
+ * payload writes; publish needs no fence because readers re-check the sequence
+ * after copying. */
 static zend_always_inline void user_cache_seq_announce(uint64_t *seq, uint64_t value)
 {
 #ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
@@ -1136,6 +1139,8 @@ static bool user_cache_entry_lock_owner_is_dead(uint64_t owner_pid, uint64_t own
 	return UC_G(entry_lock_owner_probe_dead);
 }
 
+/* Key offsets in a segment recovered after owner death are untrusted; bound
+ * them before reading. */
 static bool user_cache_recovery_lock_key_is_readable(
 		const php_user_cache_header *header,
 		const php_user_cache_entry_lock_record *record)
@@ -3108,6 +3113,10 @@ static bool user_cache_select_storage_handler(void)
 	return false;
 }
 
+/* Adopt the segment's advertised lock model: re-acquire via the shared mutex
+ * if an initialized segment already uses one, otherwise stay on the fcntl
+ * lock and recover. Returns false when negotiation fails and the caller must
+ * tear down. */
 static bool user_cache_negotiate_lock_model(void)
 {
 #ifdef PHP_USER_CACHE_HAVE_SHARED_MUTEX
@@ -3344,6 +3353,25 @@ found:
 	return (int32_t) i;
 }
 
+#ifdef ZTS
+static bool user_cache_reader_claim_header_is_attached(const php_user_cache_header *header)
+{
+	const php_user_cache_partition *partition;
+
+	if (user_cache_storage_holds_header(&php_user_cache_context_state.storage, header)) {
+		return true;
+	}
+
+	for (partition = php_user_cache_partitions; partition != NULL; partition = partition->next) {
+		if (user_cache_storage_holds_header(&partition->context.storage, header)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+#endif
+
 bool php_user_cache_quiesce_graph_payloads_locked(void)
 {
 	php_user_cache_header *header;
@@ -3467,23 +3495,6 @@ void php_user_cache_optimistic_reader_end(php_user_cache_header *header, uint32_
 }
 
 #ifdef ZTS
-static bool user_cache_reader_claim_header_is_attached(const php_user_cache_header *header)
-{
-	const php_user_cache_partition *partition;
-
-	if (user_cache_storage_holds_header(&php_user_cache_context_state.storage, header)) {
-		return true;
-	}
-
-	for (partition = php_user_cache_partitions; partition != NULL; partition = partition->next) {
-		if (user_cache_storage_holds_header(&partition->context.storage, header)) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
 /* Release per-thread reader slots before their live process pid makes them
  * permanently unclaimable. Clear active and start time before owner_pid. */
 void php_user_cache_release_thread_reader_claims(php_user_cache_globals *globals)
@@ -3684,12 +3695,6 @@ bool php_user_cache_startup_storage_before_request(void)
 {
 	php_user_cache_storage *storage = &php_user_cache_active_context()->storage;
 
-	if (user_cache_startup_failure_forced()) {
-		user_cache_set_unavailable(PHP_USER_CACHE_REASON_SHM_INIT_FAILED);
-
-		return false;
-	}
-
 	if (!user_cache_is_opted_in()) {
 		user_cache_set_unavailable(PHP_USER_CACHE_REASON_SAPI_NOT_ENABLED);
 
@@ -3753,6 +3758,9 @@ bool php_user_cache_rlock(void)
 			return true;
 		}
 
+		/* An odd write_seq means a writer died mid-update; take the write
+		 * lock to drive recovery, then retry the read. Bail after a bounded
+		 * number of attempts. */
 		php_user_cache_unlock();
 
 		if (++recovery_attempts > 8) {
