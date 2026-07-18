@@ -19,7 +19,7 @@
 
 /* Public API for extensions, SAPIs and embedders. */
 
-/* Keep in sync with availability_enum_case(). */
+/* Keep in sync with user_cache_availability_enum_case(). */
 typedef enum {
 	PHP_USER_CACHE_REASON_NONE = 0,
 	PHP_USER_CACHE_REASON_DISABLED_BY_INI,
@@ -31,7 +31,10 @@ typedef enum {
 	PHP_USER_CACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE
 } php_user_cache_reason;
 
-/* Handlers for copying native object state without invoking user code. */
+/* Handlers for copying native object state without invoking user code.
+ * All handlers take the destination before the source; callers pass a NULL
+ * clone_value callback to probe copy capability, so copy handlers must
+ * return false without side effects in that case. */
 typedef bool (*php_user_cache_safe_direct_clone_value_func_t)(
 	void *context,
 	zval *dst,
