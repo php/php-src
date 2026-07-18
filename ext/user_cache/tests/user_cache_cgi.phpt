@@ -12,9 +12,8 @@ DOCUMENT_ROOT=/tmp/php-user-cache-cgi
 SERVER_NAME=php-user-user_cache.local
 --FILE--
 <?php
-user_cache_reset();
-
 $cache = UserCache\Cache::getPool('cgi');
+$cache->clear();
 $status = UserCache\Cache::getStatus();
 $poolStatus = $cache->getPoolStatus();
 

@@ -1,5 +1,5 @@
 --TEST--
-UserCache\Cache: info statistics and user cache reset
+UserCache\Cache: info statistics
 --EXTENSIONS--
 user_cache
 --INI--
@@ -9,8 +9,8 @@ opcache.file_cache_only=0
 user_cache.shm_size=16M
 --FILE--
 <?php
-$cache = UserCache\Cache::getPool('info-reset-a');
-$other = UserCache\Cache::getPool('info-reset-b');
+$cache = UserCache\Cache::getPool('info-stats-a');
+$other = UserCache\Cache::getPool('info-stats-b');
 $cache->clear();
 $other->clear();
 
@@ -39,17 +39,18 @@ var_dump($afterStore->getWastedMemory() >= 0);
 var_dump($afterStore->getTombstoneCount() >= 0);
 var_dump($afterStorePool->getUsedMemory() > 0);
 
-var_dump(user_cache_reset());
+var_dump($cache->clear());
+var_dump($other->clear());
 var_dump($cache->fetch('key', 'missing'));
 var_dump($other->fetch('key', 'missing'));
 
-$afterReset = UserCache\Cache::getStatus();
-$afterResetPool = $cache->getPoolStatus();
-var_dump($afterReset->getEntryCount());
-var_dump($afterResetPool->getEntryCount());
+$afterClear = UserCache\Cache::getStatus();
+$afterClearPool = $cache->getPoolStatus();
+var_dump($afterClear->getEntryCount());
+var_dump($afterClearPool->getEntryCount());
 ?>
 --EXPECT--
-string(12) "info-reset-a"
+string(12) "info-stats-a"
 string(9) "Available"
 bool(true)
 bool(true)
@@ -60,6 +61,7 @@ bool(true)
 bool(true)
 int(1)
 int(1)
+bool(true)
 bool(true)
 bool(true)
 bool(true)

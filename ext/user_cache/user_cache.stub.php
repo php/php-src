@@ -46,13 +46,17 @@ final readonly class CacheStatus
 
 	public function getTombstoneCount(): int {}
 
-	/**
-	 * Number of times memory pressure forced a full cache wipe. Routine
-	 * removal of expired entries is not counted.
-	 */
 	public function getExpungeCount(): int {}
 
 	public function getStoreFailureCount(): int {}
+
+	public function getGraphPinSlotsInUse(): int {}
+
+	public function getGraphPinnedReferences(): int {}
+
+	public function getDeadPinOwnersReclaimed(): int {}
+
+	public function getDeadPinsStripped(): int {}
 }
 
 /**
@@ -80,7 +84,9 @@ final class Cache
 
 	public static function getPool(string $pool): Cache {}
 
-	/** @return array<string, Cache> */
+	public static function deletePool(string $pool): bool {}
+
+	/** @return array<string, Cache> Keys are pool names. */
 	public static function getPools(): array {}
 
 	public static function getStatus(): CacheStatus {}
@@ -117,11 +123,5 @@ final class Cache
 
 	public function getPoolStatus(): CachePoolStatus {}
 }
-
-}
-
-namespace {
-
-function user_cache_reset(): bool {}
 
 }

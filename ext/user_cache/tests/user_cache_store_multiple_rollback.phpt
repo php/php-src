@@ -9,8 +9,6 @@ opcache.file_cache_only=0
 user_cache.shm_size=1M
 --FILE--
 <?php
-user_cache_reset();
-
 $cache = UserCache\Cache::getPool('store-multiple-rollback');
 
 var_dump($cache->store('existing-a', 'old-a'));
