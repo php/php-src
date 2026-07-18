@@ -1218,6 +1218,7 @@ static void to_zval_read_iov(const char *msghdr_c, zval *zv, res_context *ctx)
 	if (iovlen > UINT_MAX) {
 		do_to_zval_err(ctx, "unexpectedly large value for iov_len: %lu",
 				(unsigned long)iovlen);
+		return;
 	}
 	array_init_size(zv, (uint32_t)iovlen);
 
