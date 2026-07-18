@@ -21,13 +21,16 @@
 #define PHP_USER_CACHE_REQUEST_LOCAL_NO_DEEP_CLONE ((void *) 1)
 #define PHP_USER_CACHE_REQUEST_LOCAL_NEEDS_DEEP_CLONE ((void *) 2)
 
-/* Release the lock before propagating a bailout. */
+/* Release the lock before propagating a bailout, unless a bulk store asked to
+ * keep it held so its rollback runs without a lock gap. */
 #define PHP_USER_CACHE_TRY_UNLOCK_ON_BAILOUT(stmt) \
 	do { \
 		zend_try { \
 			stmt \
 		} zend_catch { \
-			php_user_cache_unlock_if_held(); \
+			if (!UC_G(store_defer_unlock)) { \
+				php_user_cache_unlock_if_held(); \
+			} \
 			zend_bailout(); \
 		} zend_end_try(); \
 	} while (0)
@@ -100,7 +103,7 @@ static bool user_cache_clone_request_local_value(
 	zval *src
 );
 
-static bool user_cache_collect_request_local_clone_verdicts_inner(
+static bool user_cache_collect_request_local_clone_verdicts_impl(
 	zval *value,
 	HashTable *seen_arrs,
 	HashTable *seen_objs,
@@ -576,11 +579,16 @@ static zend_always_inline void user_cache_maybe_rehash_locked(void)
 
 static zend_always_inline void user_cache_maybe_expunge_expired_locked(void)
 {
-	if (EXPECTED(UC_G(expired_read_observations) < PHP_USER_CACHE_EXPIRED_READ_EXPUNGE_THRESHOLD)) {
+	UC_G(expunge_write_ops)++;
+
+	if (EXPECTED(UC_G(expired_read_observations) < PHP_USER_CACHE_EXPIRED_READ_EXPUNGE_THRESHOLD &&
+		UC_G(expunge_write_ops) < PHP_USER_CACHE_EXPUNGE_WRITE_OP_INTERVAL)
+	) {
 		return;
 	}
 
 	UC_G(expired_read_observations) = 0;
+	UC_G(expunge_write_ops) = 0;
 
 	(void) user_cache_expunge_expired_bounded_locked();
 }
@@ -735,7 +743,7 @@ static void user_cache_request_local_slot_dtor(zval *slot_zv)
 	efree(slot);
 }
 
-static bool user_cache_value_needs_request_local_deep_clone_inner(
+static bool user_cache_value_needs_request_local_deep_clone_impl(
 		zval *value,
 		HashTable *seen_arrs)
 {
@@ -760,7 +768,7 @@ static bool user_cache_value_needs_request_local_deep_clone_inner(
 			}
 
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), elem) {
-				if (user_cache_value_needs_request_local_deep_clone_inner(elem, seen_arrs)) {
+				if (user_cache_value_needs_request_local_deep_clone_impl(elem, seen_arrs)) {
 					zend_hash_index_del(seen_arrs, arr_key);
 
 					return true;
@@ -790,7 +798,7 @@ static bool user_cache_value_needs_request_local_deep_clone(zval *value)
 
 	zend_hash_init(&seen_arrs, 8, NULL, NULL, 0);
 
-	result = user_cache_value_needs_request_local_deep_clone_inner(value, &seen_arrs);
+	result = user_cache_value_needs_request_local_deep_clone_impl(value, &seen_arrs);
 	zend_hash_destroy(&seen_arrs);
 
 	return result;
@@ -837,7 +845,7 @@ static bool user_cache_collect_request_local_object_clone_verdict(
 		end = src + obj->ce->default_properties_count;
 
 		do {
-			if (user_cache_collect_request_local_clone_verdicts_inner(
+			if (user_cache_collect_request_local_clone_verdicts_impl(
 					src,
 					seen_arrs,
 					seen_objs,
@@ -857,7 +865,7 @@ static bool user_cache_collect_request_local_object_clone_verdict(
 
 		ZEND_HASH_MAP_FOREACH_VAL(obj->properties, prop) {
 			if (Z_TYPE_P(prop) != IS_INDIRECT) {
-				user_cache_collect_request_local_clone_verdicts_inner(
+				user_cache_collect_request_local_clone_verdicts_impl(
 					prop,
 					seen_arrs,
 					seen_objs,
@@ -879,7 +887,7 @@ static bool user_cache_collect_request_local_object_clone_verdict(
 	return members_need_clone;
 }
 
-static bool user_cache_collect_request_local_clone_verdicts_inner(
+static bool user_cache_collect_request_local_clone_verdicts_impl(
 		zval *value,
 		HashTable *seen_arrs,
 		HashTable *seen_objs,
@@ -898,7 +906,7 @@ static bool user_cache_collect_request_local_clone_verdicts_inner(
 	}
 
 	if (Z_ISREF_P(value)) {
-		user_cache_collect_request_local_clone_verdicts_inner(
+		user_cache_collect_request_local_clone_verdicts_impl(
 			&Z_REF_P(value)->val,
 			seen_arrs,
 			seen_objs,
@@ -934,7 +942,7 @@ static bool user_cache_collect_request_local_clone_verdicts_inner(
 			}
 
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), elem) {
-				if (user_cache_collect_request_local_clone_verdicts_inner(
+				if (user_cache_collect_request_local_clone_verdicts_impl(
 						elem,
 						seen_arrs,
 						seen_objs,
@@ -974,7 +982,7 @@ static bool user_cache_collect_request_local_clone_verdicts(
 	zend_hash_init(&seen_arrs, 8, NULL, NULL, 0);
 	zend_hash_init(&seen_objs, 8, NULL, NULL, 0);
 
-	result = user_cache_collect_request_local_clone_verdicts_inner(
+	result = user_cache_collect_request_local_clone_verdicts_impl(
 		value,
 		&seen_arrs,
 		&seen_objs,
@@ -2297,10 +2305,20 @@ static bool user_cache_reclaim_space_for_store_locked(
 		bool *expired_retry_used,
 		bool *clear_retry_used)
 {
+	bool reclaimed;
+
 	if (!*expired_retry_used) {
 		*expired_retry_used = true;
 
-		if (user_cache_expunge_expired_locked()) {
+		reclaimed = user_cache_expunge_expired_locked();
+
+		/* Pins left by killed workers hold payload blocks the expiry pass
+		 * cannot see; strip them before falling through to a full clear. */
+		if (php_user_cache_shared_graph_strip_dead_pins_locked(true)) {
+			reclaimed = true;
+		}
+
+		if (reclaimed) {
 			return true;
 		}
 	}
@@ -2537,7 +2555,9 @@ static php_user_cache_store_attempt_result user_cache_store_attempt_locked(
 						if (graph_offset != combined_reuse_offset) {
 							php_user_cache_free_locked(graph_offset);
 						}
-						php_user_cache_unlock_if_held();
+						if (!UC_G(store_defer_unlock)) {
+							php_user_cache_unlock_if_held();
+						}
 						zend_bailout();
 					} zend_end_try();
 
@@ -2593,7 +2613,9 @@ static php_user_cache_store_attempt_result user_cache_store_attempt_locked(
 						);
 					} zend_catch {
 						php_user_cache_free_locked(graph_offset);
-						php_user_cache_unlock_if_held();
+						if (!UC_G(store_defer_unlock)) {
+							php_user_cache_unlock_if_held();
+						}
 						zend_bailout();
 					} zend_end_try();
 
@@ -3458,6 +3480,26 @@ static php_user_cache_optimistic_result user_cache_optimistic_emit_shared_graph(
 }
 #endif
 
+/* Read-only workloads observe expired entries but never take the write paths
+ * that drive the bounded scan; run one scan at request end once enough
+ * expired reads accumulated so read-heavy pools reclaim without a store. */
+void php_user_cache_expunge_expired_at_request_end(void)
+{
+	if (EXPECTED(UC_G(expired_read_observations) < PHP_USER_CACHE_EXPIRED_READ_EXPUNGE_THRESHOLD)) {
+		return;
+	}
+
+	if (!php_user_cache_wlock()) {
+		return;
+	}
+
+	UC_G(expired_read_observations) = 0;
+
+	(void) user_cache_expunge_expired_bounded_locked();
+
+	php_user_cache_unlock();
+}
+
 bool php_user_cache_clear_locked(void)
 {
 	php_user_cache_header *header = php_user_cache_header_ptr();
@@ -3480,6 +3522,7 @@ bool php_user_cache_clear_locked(void)
 	memset(entries, 0, sizeof(php_user_cache_entry) * header->capacity);
 
 	php_user_cache_shared_graph_reclaim_orphaned_locked();
+	(void) php_user_cache_shared_graph_strip_dead_pins_locked(true);
 
 	header->count = 0;
 	header->tombstone_count = 0;
