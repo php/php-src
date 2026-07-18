@@ -26,7 +26,7 @@
 #include "spl_fixedarray.h"
 #include "spl_exceptions.h"
 #include "ext/json/php_json.h" /* For php_json_serializable_ce */
-#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct support path */
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 
 static zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
@@ -735,6 +735,8 @@ static bool spl_fixedarray_object_user_cache_state_has_unstorable(
 
 static bool spl_fixedarray_object_serialize_user_cache_state(zval *state, const zval *object)
 {
+	/* Building the element list only addrefs existing zvals and cannot
+	 * fail. */
 	spl_fixedarray_object_build_user_cache_elements(Z_SPLFIXEDARRAY_P((zval *) object), state);
 
 	return true;

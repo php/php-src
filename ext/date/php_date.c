@@ -5889,6 +5889,10 @@ static void php_date_user_cache_add_assoc_int64(zval *arr, const char *name, int
 #endif
 }
 
+/* The snapshot is stored verbatim as a binary string and memcpy'd back on
+ * restore, so it is only valid within an identical struct layout. Pointer
+ * fields (tz_info, tz_abbr) stay NULL and are re-resolved from the
+ * "timezone" state entry. */
 static void php_date_user_cache_copy_time_snapshot(timelib_time *dst, const timelib_time *src)
 {
 	memset(dst, 0, sizeof(*dst));
@@ -6046,12 +6050,9 @@ static bool php_date_copy_user_cache_state(
 	return false;
 }
 
-static bool php_date_user_cache_timezone_pair_to_hash(php_date_obj *dateobj, HashTable *props)
+static bool php_date_user_cache_timezone_to_hash(php_date_obj *dateobj, HashTable *props)
 {
 	zval zv;
-
-	ZVAL_LONG(&zv, dateobj->time->zone_type);
-	zend_hash_str_update(props, "timezone_type", sizeof("timezone_type")-1, &zv);
 
 	switch (dateobj->time->zone_type) {
 		case TIMELIB_ZONETYPE_ID:
@@ -6066,7 +6067,7 @@ static bool php_date_user_cache_timezone_pair_to_hash(php_date_obj *dateobj, Has
 		default:
 			return false;
 	}
-	zend_hash_str_update(props, "timezone", sizeof("timezone")-1, &zv);
+	zend_hash_str_update(props, PHP_DATE_USER_CACHE_STATE_TIMEZONE, PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN, &zv);
 
 	return true;
 }
@@ -6080,11 +6081,11 @@ static bool php_date_serialize_datetime_user_cache_state(php_date_obj *dateobj, 
 		return false;
 	}
 
-	array_init_size(state, 3);
+	array_init_size(state, 2);
 
 	php_date_user_cache_copy_time_snapshot(&snapshot, dateobj->time);
 
-	if (!php_date_user_cache_timezone_pair_to_hash(dateobj, Z_ARRVAL_P(state))) {
+	if (!php_date_user_cache_timezone_to_hash(dateobj, Z_ARRVAL_P(state))) {
 		zval_ptr_dtor(state);
 		ZVAL_UNDEF(state);
 
