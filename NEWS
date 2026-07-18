@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - GMP:
   . Fixed GMP power and shift operators to reject GMP right operands outside
     the unsigned long range instead of silently truncating them. (Weilin Du)
+  . Fixed GMP integer string parsing to reject strings containing NUL bytes
+    instead of silently truncating them. (Weilin Du)
 
 - ODBC:
   . Fixed bug GH-22668 (Heap buffer over-read when a column value exceeds the
