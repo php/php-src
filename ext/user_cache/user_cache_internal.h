@@ -75,6 +75,7 @@
 #define PHP_USER_CACHE_SHARED_GRAPH_FLAG_HAS_SHARED_IDENTITY	0x2U
 #define PHP_USER_CACHE_SHARED_GRAPH_FLAG_HAS_OBJECT 			0x4U
 #define PHP_USER_CACHE_SHARED_GRAPH_FLAG_PREFERS_PROTOTYPE		0x8U
+/* ref_state packs the RETIRED flag (bit 30) with the live refcount (low bits). */
 #define PHP_USER_CACHE_SHARED_GRAPH_RETIRED						(1 << 30)
 #define PHP_USER_CACHE_SHARED_GRAPH_REFCOUNT_MASK				(PHP_USER_CACHE_SHARED_GRAPH_RETIRED - 1)
 
@@ -264,7 +265,6 @@ typedef struct {
 	const char *sem_filename_prefix;
 #endif
 	bool clear_on_pressure;
-	bool strict_store_failure;
 	bool boundary_shared;
 	const char *boundary_identity;
 	size_t boundary_identity_len;
@@ -311,21 +311,15 @@ typedef struct {
 	uint64_t store_failure_count;
 	uint32_t tombstone_count;
 	uint32_t lock_model;
-	uint32_t lock_model_reserved;
 	uint32_t orphaned_graphs_saturated;
-	uint32_t orphaned_graphs_reserved;
 	uint8_t boundary_identity_digest[32];
 	uint32_t boundary_identity_digest_set;
-	uint32_t boundary_identity_reserved;
 	uint32_t orphaned_graphs[PHP_USER_CACHE_ORPHANED_GRAPH_SLOTS];
 	php_user_cache_reader_slot reader_slots[PHP_USER_CACHE_READER_SLOTS];
 #ifdef PHP_USER_CACHE_HAVE_SHARED_MUTEX
 	php_user_cache_shared_mutex global_shared_mutex;
 #endif
 	php_user_cache_entry_lock_record entry_lock_records[PHP_USER_CACHE_ENTRY_LOCK_TABLE_SIZE];
-#ifndef ZEND_WIN32
-	uint32_t reserved_lock;
-#endif
 } php_user_cache_header;
 
 typedef struct {
@@ -370,17 +364,6 @@ typedef struct {
 } php_user_cache_lookup_entry;
 
 typedef struct {
-	uint64_t generation;
-	const void *context;
-	bool needs_deep_clone;
-	bool has_clone_verdicts;
-	bool no_aliases;
-	bool has_value;
-	zval value;
-	HashTable clone_verdicts;
-} php_user_cache_request_local_slot;
-
-typedef struct {
 	zend_ulong hash;
 	size_t payload_size;
 	size_t payload_used_size;
@@ -402,13 +385,11 @@ typedef struct {
 typedef struct {
 	bool caller_holds_write_lock;
 	bool throw_on_failure;
-	bool honor_strict_store_failure;
 } php_user_cache_prepare_options;
 
 typedef struct {
 	bool retry_after_memory_pressure;
 	bool throw_on_failure;
-	bool honor_strict_store_failure;
 	bool capture_replaced_entry;
 } php_user_cache_store_options;
 
@@ -446,13 +427,6 @@ typedef struct {
 } php_user_cache_shared_graph_ref;
 
 typedef struct {
-	php_user_cache_context *context;
-	uint64_t owner_pid;
-	zend_long lease;
-	bool preserve_lease;
-} php_user_cache_entry_lock;
-
-typedef struct {
 	uint8_t type;
 	uint8_t reserved[7];
 	union {
@@ -465,7 +439,7 @@ typedef struct {
 typedef struct {
 	uint32_t name_offset;
 	/* Declared property index plus one for __sleep state, otherwise zero. */
-	uint32_t reserved;
+	uint32_t sleep_state_index;
 	php_user_cache_shared_graph_value value;
 } php_user_cache_shared_graph_property;
 
@@ -490,8 +464,6 @@ typedef struct {
 typedef struct {
 	uint32_t count;
 	uint32_t elements_offset;
-	uint32_t reserved;
-	uint32_t reserved2;
 } php_user_cache_shared_graph_array_shape;
 
 typedef struct {
@@ -500,7 +472,6 @@ typedef struct {
 	uint32_t shape_offset;
 	uint32_t reserved;
 	uint32_t values_offset;
-	uint32_t reserved2;
 } php_user_cache_shared_graph_shaped_array;
 
 typedef struct {
@@ -548,59 +519,6 @@ typedef struct {
 	uint32_t case_name_offset;
 } php_user_cache_shared_graph_enum;
 
-typedef struct {
-	size_t size;
-	HashTable seen_arrays;
-	HashTable seen_objects;
-	HashTable seen_references;
-	HashTable string_dedup;
-	HashTable array_shape_dedup;
-	HashTable state_schema_dedup;
-	HashTable direct_array_dedup;
-	HashTable direct_verdicts;
-	bool verbatim_arrays_allowed;
-	/* Distinguishes a sizing failure from an ineligible node. */
-	bool reserve_failed;
-	/* Array address to verbatim eligibility, shared by CALC and COPY. */
-	HashTable *shared_verdicts;
-	HashTable *state_memo;
-} php_user_cache_shared_graph_calc_context;
-
-typedef struct {
-	uint8_t *buffer;
-	size_t size;
-	size_t position;
-	/* Absolute pointer slots to patch if the payload moves. */
-	uint32_t *fixup_offsets;
-	uint32_t fixup_count;
-	uint32_t fixup_capacity;
-	HashTable seen_arrays;
-	/* Packs the aligned object offset and flags-field displacement. */
-	HashTable seen_objects;
-	HashTable seen_references;
-	HashTable string_dedup;
-	HashTable array_shape_dedup;
-	HashTable state_schema_dedup;
-	HashTable direct_array_dedup;
-	HashTable direct_verdicts;
-	bool has_shared_identity;
-	bool has_object;
-	bool prefers_prototype;
-	bool has_userland_restore_object;
-	bool has_verbatim_array;
-	bool verbatim_arrays_allowed;
-	/* CALC verdicts remain valid only if no snapshot hook ran. */
-	const HashTable *shared_verdicts;
-	HashTable *state_memo;
-} php_user_cache_shared_graph_copy_context;
-
-typedef struct {
-	const uint8_t *old_base;
-	const uint8_t *new_base;
-	size_t len;
-	ptrdiff_t delta;
-	HashTable *seen;
-} php_user_cache_shared_graph_rebase_context;
 
 typedef enum {
 	PHP_USER_CACHE_OPTIMISTIC_FALLBACK = 0,
@@ -721,8 +639,6 @@ bool php_user_cache_acquire_entry_locks(zend_string **keys, bool *acquired, uint
 void php_user_cache_release_entry_locks(zend_string **keys, const bool *acquired, uint32_t count);
 bool php_user_cache_entry_locks_allow_clear_locked(void);
 void php_user_cache_release_request_entry_locks(void);
-void php_user_cache_safe_direct_handlers_init(void);
-void php_user_cache_safe_direct_handlers_destroy(void);
 const php_user_cache_safe_direct_handlers *php_user_cache_safe_direct_find_handlers(
 	zend_class_entry *ce,
 	zend_class_entry **base_ce_ptr
@@ -796,7 +712,6 @@ bool php_user_cache_shared_graph_publish_copied_payload_locked(
 );
 bool php_user_cache_shared_graph_acquire_ref(uint32_t payload_offset);
 bool php_user_cache_shared_graph_retire_payload_locked(uint32_t payload_offset);
-bool php_user_cache_shared_graph_release_ref_locked(uint32_t payload_offset);
 bool php_user_cache_has_request_shared_graph_ref(uint32_t payload_offset);
 void php_user_cache_register_shared_graph_ref(uint32_t payload_offset);
 bool php_user_cache_release_request_shared_graph_refs(void);
@@ -825,7 +740,7 @@ bool php_user_cache_fetch_locked(
 	bool *found,
 	php_user_cache_fetch_pending_seed *pending_seed
 );
-bool php_user_cache_fetch_finish(zend_string *key, uint64_t gen, zval *return_value, uint32_t flags);
+void php_user_cache_fetch_finish(zend_string *key, uint64_t gen, zval *return_value, uint32_t flags);
 bool php_user_cache_exists_locked(zend_string *key);
 void php_user_cache_delete_locked(zend_string *key);
 void php_user_cache_discard_replaced_entry_locked(zend_string *key, php_user_cache_replaced_entry *replaced_entry);
