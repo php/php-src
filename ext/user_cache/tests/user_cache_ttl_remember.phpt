@@ -9,8 +9,6 @@ opcache.file_cache_only=0
 user_cache.shm_size=16M
 --FILE--
 <?php
-user_cache_reset();
-
 $cache = UserCache\Cache::getPool('ttl-remember');
 var_dump($cache->store('ttl', 'value', 1));
 var_dump($cache->has('ttl'));

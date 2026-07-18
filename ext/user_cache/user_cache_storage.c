@@ -93,7 +93,7 @@ static zend_always_inline bool user_cache_is_opted_in(void)
 	return php_user_cache_runtime_opted_in;
 }
 
-static zend_always_inline bool user_cache_cache_is_disabled_for_sapi(void)
+static zend_always_inline bool user_cache_is_disabled_for_sapi(void)
 {
 	if (!UC_G(enable)) {
 		return true;
@@ -398,7 +398,8 @@ static inline uint64_t user_cache_process_start_time_token(uint64_t pid)
 
 	stat_buf[stat_len] = '\0';
 
-	/* Field 22 follows the closing parenthesis of comm. */
+	/* State (field 3) follows comm's closing parenthesis; skip 19 fields
+	 * from there to reach starttime (field 22). */
 	p = strrchr(stat_buf, ')');
 	if (p == NULL) {
 		return 0;
@@ -1102,7 +1103,7 @@ static void user_cache_cleanup_segments(const php_user_cache_shm_handlers *handl
 	free(segments);
 }
 
-static bool user_cache_entry_lock_owner_is_dead_uncached(uint64_t owner_pid, uint64_t owner_start_time)
+static bool user_cache_entry_lock_owner_is_dead_impl(uint64_t owner_pid, uint64_t owner_start_time)
 {
 	uint64_t current_start_time;
 
@@ -1131,7 +1132,7 @@ static bool user_cache_entry_lock_owner_is_dead(uint64_t owner_pid, uint64_t own
 		return UC_G(entry_lock_owner_probe_dead);
 	}
 
-	UC_G(entry_lock_owner_probe_dead) = user_cache_entry_lock_owner_is_dead_uncached(owner_pid, owner_start_time);
+	UC_G(entry_lock_owner_probe_dead) = user_cache_entry_lock_owner_is_dead_impl(owner_pid, owner_start_time);
 	UC_G(entry_lock_owner_probe_pid) = owner_pid;
 	UC_G(entry_lock_owner_probe_start_time) = owner_start_time;
 	UC_G(entry_lock_owner_probe_at) = now;
@@ -1163,7 +1164,8 @@ static bool user_cache_recovery_lock_key_is_readable(
 	return record->key_len <= data_end - record->key_offset;
 }
 
-/* Dead owners may remain live until their lease expires. */
+/* A lock whose owner has died stays active until its lease expires, then is
+ * demoted to ownerless. */
 static bool user_cache_entry_lock_record_is_active_locked(
 		php_user_cache_entry_lock_record *record,
 		uint64_t now,
@@ -1338,8 +1340,62 @@ static bool user_cache_header_boundary_identity_matches_locked(
 }
 #endif
 
-/* Recover an interrupted write while holding the exclusive lock. */
-static void user_cache_recover_after_owner_death(void)
+/* A segment wipe would invalidate the zero-copy views (verbatim arrays, pinned
+ * payloads) that live processes still reference from optimistic reads or graph
+ * pins. Recovery defers while any live owner holds one; dead owners do not
+ * block, since their state is stale and their memory is unreferenced. During
+ * recovery write_seq is odd, so no new optimistic reader can start and this
+ * snapshot of the reader/pin state is stable. */
+static bool user_cache_recovery_blocked_by_live_reference(const php_user_cache_header *header)
+{
+	const php_user_cache_graph_pin_slot *pin_slot;
+#ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
+	const php_user_cache_reader_slot *reader_slot;
+	uint64_t owner_start_time;
+#endif
+	uint64_t owner_pid;
+	uint32_t i;
+
+	user_cache_atomic_fence_seq_cst();
+
+#ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
+	for (i = 0; i < PHP_USER_CACHE_READER_SLOTS; i++) {
+		reader_slot = &header->reader_slots[i];
+		if (user_cache_atomic_load_32(&reader_slot->active) == 0) {
+			continue;
+		}
+
+		owner_pid = php_user_cache_atomic_load_64(&reader_slot->owner_pid);
+		owner_start_time = php_user_cache_atomic_load_64(&reader_slot->owner_start_time);
+		if (owner_pid != 0 &&
+			!user_cache_entry_lock_owner_is_dead(owner_pid, owner_start_time)
+		) {
+			return true;
+		}
+	}
+#endif
+
+	for (i = 0; i < PHP_USER_CACHE_GRAPH_PIN_SLOTS; i++) {
+		pin_slot = &header->graph_pin_slots[i];
+		if (zend_atomic_int_load_ex(&pin_slot->pin_count) == 0) {
+			continue;
+		}
+
+		owner_pid = (uint64_t) (uint32_t) zend_atomic_int_load_ex(&pin_slot->owner_pid);
+		if (owner_pid != 0 &&
+			!user_cache_entry_lock_owner_is_dead(owner_pid, pin_slot->owner_start_time)
+		) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/* Recover an interrupted write while holding the exclusive lock. Returns false
+ * when recovery must be deferred (see user_cache_recovery_blocked_by_live_reference);
+ * the caller then leaves the segment as-is and fails until the reference drains. */
+static bool user_cache_recover_after_owner_death(void)
 {
 	php_user_cache_header *header = php_user_cache_header_ptr();
 	php_user_cache_recovered_entry_lock *locks;
@@ -1348,11 +1404,15 @@ static void user_cache_recover_after_owner_death(void)
 	uint32_t lock_count = 0, i;
 
 	if (header == NULL || !php_user_cache_header_is_initialized_locked()) {
-		return;
+		return true;
 	}
 
 	if ((header->write_seq & 1) == 0) {
-		return;
+		return true;
+	}
+
+	if (user_cache_recovery_blocked_by_live_reference(header)) {
+		return false;
 	}
 
 	locks = user_cache_collect_recovery_entry_locks(header, &lock_count);
@@ -1404,6 +1464,8 @@ static void user_cache_recover_after_owner_death(void)
 	php_user_cache_bump_mutation_epoch_locked(header);
 
 	user_cache_seq_publish(&header->write_seq, header->write_seq + 1);
+
+	return true;
 }
 
 #ifdef PHP_USER_CACHE_HAVE_SHARED_MUTEX
@@ -1445,7 +1507,11 @@ static bool user_cache_shared_mutex_lock(void)
 			return false;
 		}
 
-		user_cache_recover_after_owner_death();
+		if (!user_cache_recover_after_owner_death()) {
+			pthread_mutex_unlock(&header->global_shared_mutex.mutex);
+
+			return false;
+		}
 
 		result = 0;
 	}
@@ -3137,7 +3203,14 @@ static bool user_cache_negotiate_lock_model(void)
 		}
 	} else {
 		UC_G(lock_held_is_write) = true;
-		user_cache_recover_after_owner_death();
+
+		if (!user_cache_recover_after_owner_death()) {
+			UC_G(lock_held_is_write) = false;
+			user_cache_unlock_impl();
+
+			return false;
+		}
+
 		user_cache_write_section_enter();
 	}
 
@@ -3248,7 +3321,7 @@ static void user_cache_resolve_runtime(void)
 		return;
 	}
 
-	if (user_cache_cache_is_disabled_for_sapi()) {
+	if (user_cache_is_disabled_for_sapi()) {
 		user_cache_set_unavailable(PHP_USER_CACHE_REASON_DISABLED_BY_INI);
 
 		return;
@@ -3278,6 +3351,58 @@ static void user_cache_resolve_runtime(void)
 
 	user_cache_set_available();
 }
+
+#ifdef ZTS
+static bool user_cache_claim_header_is_attached(const php_user_cache_header *header)
+{
+	const php_user_cache_partition *partition;
+
+	if (user_cache_storage_holds_header(&php_user_cache_context_state.storage, header)) {
+		return true;
+	}
+
+	for (partition = php_user_cache_partitions; partition != NULL; partition = partition->next) {
+		if (user_cache_storage_holds_header(&partition->context.storage, header)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/* Release per-thread graph pin slots before their live process pid makes
+ * them permanently unclaimable. Slots with pins outstanding are left for the
+ * dead-owner sweep. */
+void php_user_cache_release_thread_graph_pin_claims(php_user_cache_globals *globals)
+{
+	php_user_cache_graph_pin_slot *slot;
+	int expected;
+	uint32_t i;
+
+	for (i = 0; i < globals->graph_pin_claim_count; i++) {
+		if (!user_cache_claim_header_is_attached(globals->graph_pin_claims[i].header)) {
+			continue;
+		}
+
+		slot = &globals->graph_pin_claims[i].header->graph_pin_slots[
+			globals->graph_pin_claims[i].slot_index
+		];
+
+		expected = zend_atomic_int_load_ex(&slot->owner_pid);
+		if (expected != (int) (uint32_t) php_user_cache_cached_pid() ||
+			zend_atomic_int_load_ex(&slot->pin_count) != 0
+		) {
+			continue;
+		}
+
+		/* Clear start time before pid so scanners cannot combine owners. */
+		slot->owner_start_time = 0;
+		zend_atomic_int_compare_exchange_ex(&slot->owner_pid, &expected, 0);
+	}
+
+	globals->graph_pin_claim_count = 0;
+}
+#endif
 
 #ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
 static bool user_cache_reader_slot_owner_is_dead(const php_user_cache_reader_slot *slot)
@@ -3352,25 +3477,6 @@ found:
 
 	return (int32_t) i;
 }
-
-#ifdef ZTS
-static bool user_cache_reader_claim_header_is_attached(const php_user_cache_header *header)
-{
-	const php_user_cache_partition *partition;
-
-	if (user_cache_storage_holds_header(&php_user_cache_context_state.storage, header)) {
-		return true;
-	}
-
-	for (partition = php_user_cache_partitions; partition != NULL; partition = partition->next) {
-		if (user_cache_storage_holds_header(&partition->context.storage, header)) {
-			return true;
-		}
-	}
-
-	return false;
-}
-#endif
 
 bool php_user_cache_quiesce_graph_payloads_locked(void)
 {
@@ -3510,7 +3616,7 @@ void php_user_cache_release_thread_reader_claims(php_user_cache_globals *globals
 	my_pid = php_user_cache_cached_pid();
 
 	for (i = 0; i < globals->reader_claim_count; i++) {
-		if (!user_cache_reader_claim_header_is_attached(globals->reader_claims[i].header)) {
+		if (!user_cache_claim_header_is_attached(globals->reader_claims[i].header)) {
 			continue;
 		}
 
@@ -3548,6 +3654,18 @@ void php_user_cache_optimistic_reader_end(php_user_cache_header *header, uint32_
 	(void) slot_idx;
 }
 #endif
+
+/* Shared-graph pin owners reuse the entry-lock liveness probe and its
+ * one-second cache. */
+bool php_user_cache_graph_pin_owner_is_dead(uint64_t owner_pid, uint64_t owner_start_time)
+{
+	return user_cache_entry_lock_owner_is_dead(owner_pid, owner_start_time);
+}
+
+uint64_t php_user_cache_self_start_time_token(void)
+{
+	return user_cache_cached_self_start_time_token(php_user_cache_cached_pid());
+}
 
 void php_user_cache_reset_runtime(void)
 {
@@ -3597,7 +3715,8 @@ bool php_user_cache_header_init_locked(void)
 	data_offset = storage->data_offset_memo;
 
 	if (header->magic == PHP_USER_CACHE_MAGIC && header->version == PHP_USER_CACHE_VERSION) {
-		/* Reformat segments whose compile-time layout differs. */
+		/* Adopt an initialized segment only when its layout matches this
+		 * build; otherwise fall through and reformat it. */
 		if (header->capacity == capacity && header->data_offset == data_offset) {
 #ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
 			return user_cache_header_boundary_identity_matches_locked(header, storage->size);
@@ -3725,7 +3844,7 @@ void php_user_cache_shutdown_storage(void)
 	php_user_cache_reset_storage();
 }
 
-void php_user_cache_ensure_ready_slow(void)
+void php_user_cache_ensure_ready_impl(void)
 {
 	php_user_cache_context *ctx = php_user_cache_active_context();
 
@@ -3783,7 +3902,12 @@ bool php_user_cache_wlock(void)
 
 	UC_G(lock_held_is_write) = true;
 
-	user_cache_recover_after_owner_death();
+	if (!user_cache_recover_after_owner_death()) {
+		UC_G(lock_held_is_write) = false;
+		user_cache_unlock_impl();
+
+		return false;
+	}
 
 	user_cache_write_section_enter();
 

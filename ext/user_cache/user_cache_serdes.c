@@ -1166,10 +1166,12 @@ static bool user_cache_serdes_decode_array(
 		}
 
 		if (key != NULL) {
-			result = zend_hash_add_new(Z_ARRVAL_P(dst), key, &elem) != NULL;
+			/* Reject a corrupt blob with duplicate keys rather than trusting
+			 * the encoder's uniqueness; add_new would assert or double-insert. */
+			result = zend_hash_add(Z_ARRVAL_P(dst), key, &elem) != NULL;
 			zend_string_release(key);
 		} else if (tag == PHP_USER_CACHE_SERDES_TAG_HASHED_ARRAY) {
-			result = zend_hash_index_add_new(Z_ARRVAL_P(dst), (zend_ulong) key_h, &elem) != NULL;
+			result = zend_hash_index_add(Z_ARRVAL_P(dst), (zend_ulong) key_h, &elem) != NULL;
 		} else {
 			result = zend_hash_next_index_insert_new(Z_ARRVAL_P(dst), &elem) != NULL;
 		}

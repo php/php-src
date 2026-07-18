@@ -119,6 +119,10 @@
 
 #define PHP_USER_CACHE_EXPIRED_READ_EXPUNGE_THRESHOLD	64U
 
+/* Advance the bounded expiry scan on write traffic alone: expired entries
+ * that are never read again would otherwise wait for allocation pressure. */
+#define PHP_USER_CACHE_EXPUNGE_WRITE_OP_INTERVAL		64U
+
 #define PHP_USER_CACHE_EXPUNGE_SCAN_MAX	4096U
 
 #define PHP_USER_CACHE_ENTRY_LOCK_TABLE_SIZE		1024U
@@ -158,6 +162,12 @@
 #endif
 
 #define PHP_USER_CACHE_ORPHANED_GRAPH_SLOTS	32U
+
+#define PHP_USER_CACHE_GRAPH_PIN_SLOTS				256U
+#define PHP_USER_CACHE_GRAPH_PIN_WORDS				(PHP_USER_CACHE_GRAPH_PIN_SLOTS / 32U)
+#define PHP_USER_CACHE_GRAPH_PIN_CLAIM_MAX			4U
+/* Rate limit for the request-end dead-pin-owner probes. */
+#define PHP_USER_CACHE_GRAPH_PIN_PROBE_INTERVAL_SEC	8U
 
 #define PHP_USER_CACHE_LOOKUP_EMPTY	0
 #define PHP_USER_CACHE_LOOKUP_HIT	1
@@ -294,6 +304,21 @@ typedef struct {
 	uint32_t reserved;
 } php_user_cache_reader_slot;
 
+/* Per-process record of shared-graph payload pins, claimed lock-free under
+ * the read lock or an optimistic reader section. The pid lives in a
+ * zend_atomic_int because, unlike reader slots, pin claims must also work on
+ * builds without the 64-bit atomic macros; pids fit in 32 bits on every
+ * supported platform. Pins of an abnormally terminated owner are stripped by
+ * php_user_cache_shared_graph_strip_dead_pins_locked() via pid + start-time
+ * liveness, which is what makes retired-but-pinned payloads reclaimable. */
+typedef struct {
+	zend_atomic_int owner_pid;
+	/* Live pins held by this owner. Advisory: a crash window can leave it
+	 * higher than the surviving bits, so it only gates liveness probes. */
+	zend_atomic_int pin_count;
+	uint64_t owner_start_time;
+} php_user_cache_graph_pin_slot;
+
 /* Cross-references are offsets from the segment base. */
 typedef struct {
 	uint32_t magic;
@@ -309,12 +334,19 @@ typedef struct {
 	uint64_t write_seq;
 	uint64_t expunge_count;
 	uint64_t store_failure_count;
+	/* Cumulative dead-pin recovery statistics: owners whose slots the sweep
+	 * reclaimed, and individual payload references stripped from them. A
+	 * rising value means workers died (SIGKILL/OOM) while holding
+	 * shared-graph references. */
+	uint64_t graph_dead_pin_owners_reclaimed;
+	uint64_t graph_dead_pins_stripped;
 	uint32_t tombstone_count;
 	uint32_t lock_model;
 	uint32_t orphaned_graphs_saturated;
 	uint8_t boundary_identity_digest[32];
 	uint32_t boundary_identity_digest_set;
 	uint32_t orphaned_graphs[PHP_USER_CACHE_ORPHANED_GRAPH_SLOTS];
+	php_user_cache_graph_pin_slot graph_pin_slots[PHP_USER_CACHE_GRAPH_PIN_SLOTS];
 	php_user_cache_reader_slot reader_slots[PHP_USER_CACHE_READER_SLOTS];
 #ifdef PHP_USER_CACHE_HAVE_SHARED_MUTEX
 	php_user_cache_shared_mutex global_shared_mutex;
@@ -419,6 +451,10 @@ typedef struct {
 	uint32_t root_type;
 	uint32_t flags;
 	zend_atomic_int ref_state;
+	/* Bit per graph_pin_slots index: which owners hold ref_state references.
+	 * A reference taken without a claimable slot sets no bit and stays
+	 * unreclaimable if its owner crashes (the pre-record behavior). */
+	zend_atomic_int pin_owners[PHP_USER_CACHE_GRAPH_PIN_WORDS];
 } php_user_cache_shared_graph_header;
 
 typedef struct {
@@ -542,6 +578,11 @@ typedef struct {
 #endif
 
 typedef struct {
+	php_user_cache_header *header;
+	uint32_t slot_index;
+} php_user_cache_graph_pin_claim;
+
+typedef struct {
 	php_user_cache_partition *active_partition;
 	php_user_cache_runtime runtime_state;
 	php_user_cache_context *active_context_ptr;
@@ -578,6 +619,10 @@ typedef struct {
 #endif
 	bool write_seq_bumped;
 	bool stack_overflowed;
+	/* Set while a bulk store commits its items so a per-item bailout keeps the
+	 * write lock held: the bulk rollback then runs without a lock gap another
+	 * process could mutate through. */
+	bool store_defer_unlock;
 	/* Request shutdown must collect cyclic slot clones. */
 	bool request_local_slot_may_cycle;
 #ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
@@ -585,7 +630,13 @@ typedef struct {
 	php_user_cache_reader_claim reader_claims[PHP_USER_CACHE_READER_CLAIM_MAX];
 	uint32_t reader_claim_count;
 #endif
+	php_user_cache_graph_pin_claim graph_pin_claims[PHP_USER_CACHE_GRAPH_PIN_CLAIM_MAX];
+	uint32_t graph_pin_claim_count;
+	/* Rate limit for request-end dead-pin sweeps. */
+	uint64_t graph_pin_probe_last_at;
 	uint32_t expired_read_observations;
+	/* Write operations since the last bounded expiry scan. */
+	uint32_t expunge_write_ops;
 	/* Process-local resume point for bounded expiry scans. */
 	uint32_t expired_expunge_cursor;
 	uint64_t entry_lock_owner_probe_pid;
@@ -626,7 +677,7 @@ void php_user_cache_free_locked(uint32_t payload_offset);
 uint32_t php_user_cache_alloc_locked(size_t size, const void *src);
 bool php_user_cache_startup_storage_before_request(void);
 void php_user_cache_shutdown_storage(void);
-void php_user_cache_ensure_ready_slow(void);
+void php_user_cache_ensure_ready_impl(void);
 bool php_user_cache_rlock(void);
 bool php_user_cache_wlock(void);
 bool php_user_cache_wlock_for_entry_mutation(zend_string *key);
@@ -712,9 +763,11 @@ bool php_user_cache_shared_graph_publish_copied_payload_locked(
 );
 bool php_user_cache_shared_graph_acquire_ref(uint32_t payload_offset);
 bool php_user_cache_shared_graph_retire_payload_locked(uint32_t payload_offset);
+bool php_user_cache_shared_graph_release_ref_locked(uint32_t payload_offset);
 bool php_user_cache_has_request_shared_graph_ref(uint32_t payload_offset);
 void php_user_cache_register_shared_graph_ref(uint32_t payload_offset);
 bool php_user_cache_release_request_shared_graph_refs(void);
+void php_user_cache_expunge_expired_at_request_end(void);
 bool php_user_cache_clear_locked(void);
 void php_user_cache_lookup_cache_clear(void);
 bool php_user_cache_prepare_value(
@@ -775,6 +828,12 @@ bool php_user_cache_quiesce_graph_payloads_locked(void);
 void php_user_cache_shared_graph_ref_reserve(void);
 void php_user_cache_shared_graph_orphan_payload_locked(uint32_t payload_offset);
 void php_user_cache_shared_graph_reclaim_orphaned_locked(void);
+bool php_user_cache_shared_graph_strip_dead_pins_locked(bool force);
+bool php_user_cache_graph_pin_owner_is_dead(uint64_t owner_pid, uint64_t owner_start_time);
+uint64_t php_user_cache_self_start_time_token(void);
+#ifdef ZTS
+void php_user_cache_release_thread_graph_pin_claims(php_user_cache_globals *globals);
+#endif
 
 static zend_always_inline uint64_t php_user_cache_current_pid(void)
 {
@@ -967,7 +1026,7 @@ static zend_always_inline void php_user_cache_ensure_ready(void)
 		return;
 	}
 
-	php_user_cache_ensure_ready_slow();
+	php_user_cache_ensure_ready_impl();
 }
 
 static inline bool php_user_cache_class_overrides_safe_direct_magic_serialize_ex(

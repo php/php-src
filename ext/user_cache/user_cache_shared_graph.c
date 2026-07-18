@@ -498,13 +498,6 @@ static zend_always_inline bool user_cache_shared_graph_is_unmangled_property_nam
 	return ZSTR_LEN(prop_name) != 0 && ZSTR_VAL(prop_name)[0] != '\0';
 }
 
-/*
- * The state table pointer is captured before recursing into the state graph:
- * the memoized state zval lives in a HashTable whose bucket array is
- * reallocated when nested objects add their own memo entries, so a pointer
- * into that bucket must not be dereferenced afterwards. The referenced state
- * array itself is stable, so its HashTable is safe to hold across recursion.
- */
 static zend_always_inline bool user_cache_shared_graph_safe_direct_property_shadows_state(
 		zend_string *prop_name, const HashTable *state_ht)
 {
@@ -950,7 +943,7 @@ static bool user_cache_shared_graph_calc_shaped_state_object(
 	return true;
 }
 
-static php_user_cache_object_route user_cache_shared_graph_classify_object_route_uncached(zend_class_entry *ce)
+static php_user_cache_object_route user_cache_shared_graph_classify_object_route_impl(zend_class_entry *ce)
 {
 	if (user_cache_shared_graph_can_use_safe_direct(ce)) {
 		return PHP_USER_CACHE_OBJECT_ROUTE_SAFE_DIRECT;
@@ -1003,7 +996,7 @@ static php_user_cache_object_route user_cache_shared_graph_classify_object_route
 		zend_hash_init(UC_G(object_route_memo), 8, NULL, NULL, 0);
 	}
 
-	route = user_cache_shared_graph_classify_object_route_uncached(ce);
+	route = user_cache_shared_graph_classify_object_route_impl(ce);
 
 	ZVAL_LONG(&route_zv, (zend_long) route);
 	zend_hash_index_add(UC_G(object_route_memo), (zend_ulong) (uintptr_t) ce, &route_zv);
@@ -2206,7 +2199,7 @@ static bool user_cache_shared_graph_copy_alloc(
 	return true;
 }
 
-/* Record absolute pointer slots for relocation. */
+/* Copy an interned string into the buffer, deduplicating by offset. */
 static bool user_cache_shared_graph_copy_string(
 	php_user_cache_shared_graph_copy_context *ctx,
 	const zend_string *str,
@@ -2437,16 +2430,17 @@ static bool user_cache_shared_graph_copy_verbatim_value(
 
 	switch (Z_TYPE_P(src)) {
 		case IS_UNDEF:
-			ZVAL_UNDEF(dst);
-			return true;
 		case IS_NULL:
-			ZVAL_NULL(dst);
-			return true;
 		case IS_TRUE:
-			ZVAL_TRUE(dst);
-			return true;
 		case IS_FALSE:
-			ZVAL_FALSE(dst);
+			/* These types carry no value, so ZVAL_UNDEF()/ZVAL_NULL()/
+			 * ZVAL_TRUE()/ZVAL_FALSE() write the type tag only and leave the
+			 * value union holding whatever the verbatim copy brought over.
+			 * PHP never writes that union either, so it is uninitialised heap;
+			 * write both halves to keep it out of the shared segment. */
+			Z_LVAL_P(dst) = 0;
+			Z_TYPE_INFO_P(dst) = Z_TYPE_P(src);
+
 			return true;
 		case IS_LONG:
 			ZVAL_LONG(dst, Z_LVAL_P(src));
@@ -2528,6 +2522,13 @@ static bool user_cache_shared_graph_copy_verbatim_value(
 				dst_packed = target->arPacked;
 				for (i = 0; i < src_arr->nNumUsed; i++) {
 					src_packed = &src_arr->arPacked[i];
+
+					/* PHP never writes a packed slot in full: zval.u2 is
+					 * unused and hole slots only get a type tag, so the
+					 * verbatim memcpy above brought uninitialised heap bytes
+					 * along; zero the slot before writing its value. */
+					memset(&dst_packed[i], 0, sizeof(zval));
+
 					if (!user_cache_shared_graph_copy_verbatim_value(ctx, src_packed, &dst_packed[i])) {
 						result = false;
 
@@ -4076,12 +4077,14 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_dynamic_arr
 				return user_cache_decode_fail_zval(dst);
 			}
 
-			if (zend_hash_add_new(Z_ARRVAL_P(dst), key, &val) == NULL) {
+			/* Reject a corrupt payload with duplicate keys rather than trusting
+			 * the encoder's uniqueness; add_new would assert or double-insert. */
+			if (zend_hash_add(Z_ARRVAL_P(dst), key, &val) == NULL) {
 				zval_ptr_dtor(&val);
 				return user_cache_decode_fail_zval(dst);
 			}
 		} else {
-			if (zend_hash_index_add_new(Z_ARRVAL_P(dst), graph_elem->h, &val) == NULL) {
+			if (zend_hash_index_add(Z_ARRVAL_P(dst), graph_elem->h, &val) == NULL) {
 				zval_ptr_dtor(&val);
 				return user_cache_decode_fail_zval(dst);
 			}
@@ -4849,6 +4852,202 @@ static php_user_cache_shared_graph_header *user_cache_shared_graph_payload_heade
 	return header;
 }
 
+static void user_cache_shared_graph_pin_owners_init(php_user_cache_shared_graph_header *header)
+{
+	uint32_t w;
+
+	for (w = 0; w < PHP_USER_CACHE_GRAPH_PIN_WORDS; w++) {
+		ZEND_ATOMIC_INT_INIT(&header->pin_owners[w], 0);
+	}
+}
+
+static uint32_t user_cache_graph_pin_popcount(uint32_t v)
+{
+	v = v - ((v >> 1) & 0x55555555U);
+	v = (v & 0x33333333U) + ((v >> 2) & 0x33333333U);
+
+	return (((v + (v >> 4)) & 0x0F0F0F0FU) * 0x01010101U) >> 24;
+}
+
+static void user_cache_graph_pin_count_add(php_user_cache_graph_pin_slot *slot, int delta)
+{
+	int expected = zend_atomic_int_load_ex(&slot->pin_count), desired;
+
+	for (;;) {
+		desired = expected + delta;
+		if (desired < 0) {
+			desired = 0;
+		}
+
+		if (zend_atomic_int_compare_exchange_ex(&slot->pin_count, &expected, desired)) {
+			return;
+		}
+	}
+}
+
+static void user_cache_graph_pin_bit_set(php_user_cache_shared_graph_header *header, uint32_t slot_idx)
+{
+	zend_atomic_int *word = &header->pin_owners[slot_idx / 32U];
+	int mask = (int) (1U << (slot_idx % 32U));
+	int expected = zend_atomic_int_load_ex(word);
+
+	while ((expected & mask) == 0) {
+		if (zend_atomic_int_compare_exchange_ex(word, &expected, expected | mask)) {
+			return;
+		}
+	}
+}
+
+static bool user_cache_graph_pin_bit_clear(php_user_cache_shared_graph_header *header, uint32_t slot_idx)
+{
+	zend_atomic_int *word = &header->pin_owners[slot_idx / 32U];
+	int mask = (int) (1U << (slot_idx % 32U));
+	int expected = zend_atomic_int_load_ex(word);
+
+	while ((expected & mask) != 0) {
+		if (zend_atomic_int_compare_exchange_ex(word, &expected, expected & ~mask)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/* Find (optionally claiming) this process's pin slot for the given segment.
+ * Runs lock-free: claims race with other readers, so the pid is taken by
+ * CAS. Claims are cached per header and validated against the slot's pid, so
+ * a fork child never reuses its parent's slot. Returns -1 when the table is
+ * saturated; the caller then pins without a record, which restores the
+ * pre-record (unreclaimable on crash) behavior for that reference only. */
+static int32_t user_cache_graph_pin_slot_find(php_user_cache_header *header, bool claim)
+{
+	php_user_cache_graph_pin_claim *claims = UC_G(graph_pin_claims);
+	php_user_cache_graph_pin_slot *slot;
+	uint64_t my_pid = php_user_cache_cached_pid();
+	int my_pid32 = (int) (uint32_t) my_pid, expected;
+	uint32_t i = 0;
+	int32_t found = -1;
+
+	while (i < UC_G(graph_pin_claim_count)) {
+		slot = &claims[i].header->graph_pin_slots[claims[i].slot_index];
+
+		if (zend_atomic_int_load_ex(&slot->owner_pid) != my_pid32) {
+			/* Stale after a fork (the slot still belongs to the parent) or
+			 * after the slot was reclaimed; drop the cache entry. */
+			claims[i] = claims[--UC_G(graph_pin_claim_count)];
+
+			continue;
+		}
+
+		if (claims[i].header == header) {
+			return (int32_t) claims[i].slot_index;
+		}
+
+		i++;
+	}
+
+	if (!claim || UC_G(graph_pin_claim_count) == PHP_USER_CACHE_GRAPH_PIN_CLAIM_MAX) {
+		return -1;
+	}
+
+	for (i = 0; i < PHP_USER_CACHE_GRAPH_PIN_SLOTS; i++) {
+		slot = &header->graph_pin_slots[i];
+		expected = zend_atomic_int_load_ex(&slot->owner_pid);
+
+		if (expected != 0) {
+			/* Only steal slots whose owner exited cleanly (no pins left);
+			 * slots with pins outstanding belong to the dead-owner sweep.
+			 * A slot carrying our own pid can be a sibling thread's claim,
+			 * so it is never taken over either. */
+			if (expected == my_pid32 ||
+				zend_atomic_int_load_ex(&slot->pin_count) != 0 ||
+				!php_user_cache_graph_pin_owner_is_dead(
+					(uint64_t) (uint32_t) expected,
+					slot->owner_start_time
+				)
+			) {
+				continue;
+			}
+
+			/* Clear start time before pid so scanners cannot combine owners. */
+			slot->owner_start_time = 0;
+			if (!zend_atomic_int_compare_exchange_ex(&slot->owner_pid, &expected, 0)) {
+				continue;
+			}
+		}
+
+		expected = 0;
+		if (zend_atomic_int_compare_exchange_ex(&slot->owner_pid, &expected, my_pid32)) {
+			slot->owner_start_time = php_user_cache_self_start_time_token();
+			found = (int32_t) i;
+
+			break;
+		}
+	}
+
+	if (found >= 0) {
+		claims[UC_G(graph_pin_claim_count)].header = header;
+		claims[UC_G(graph_pin_claim_count)].slot_index = (uint32_t) found;
+		UC_G(graph_pin_claim_count)++;
+	}
+
+	return found;
+}
+
+/* Clear the dead owners' bits and drop ref_state accordingly. Runs with the
+ * write lock held and payload readers quiesced. */
+static uint32_t user_cache_graph_pin_strip_payload_locked(
+	php_user_cache_shared_graph_header *graph_header,
+	const uint32_t *dead_pin_mask
+)
+{
+	int expected, desired, refcount;
+	uint32_t w, drop, cleared = 0;
+
+	for (w = 0; w < PHP_USER_CACHE_GRAPH_PIN_WORDS; w++) {
+		if (dead_pin_mask[w] == 0) {
+			continue;
+		}
+
+		expected = zend_atomic_int_load_ex(&graph_header->pin_owners[w]);
+
+		for (;;) {
+			desired = expected & ~(int) dead_pin_mask[w];
+			if (desired == expected) {
+				break;
+			}
+
+			if (zend_atomic_int_compare_exchange_ex(&graph_header->pin_owners[w], &expected, desired)) {
+				cleared += user_cache_graph_pin_popcount((uint32_t) expected & dead_pin_mask[w]);
+
+				break;
+			}
+		}
+	}
+
+	if (cleared == 0) {
+		return 0;
+	}
+
+	expected = zend_atomic_int_load_ex(&graph_header->ref_state);
+
+	for (;;) {
+		refcount = expected & PHP_USER_CACHE_SHARED_GRAPH_REFCOUNT_MASK;
+		/* Fewer references than stripped bits means the state is already
+		 * corrupt; clamp rather than underflow into the RETIRED bit. */
+		drop = (uint32_t) refcount < cleared ? (uint32_t) refcount : cleared;
+		desired = (expected & PHP_USER_CACHE_SHARED_GRAPH_RETIRED) | (refcount - (int) drop);
+
+		if (zend_atomic_int_compare_exchange_ex(&graph_header->ref_state, &expected, desired)) {
+			break;
+		}
+	}
+
+	php_user_cache_header_ptr()->graph_dead_pins_stripped += cleared;
+
+	return cleared;
+}
+
 /* Debug-only cross-check for recorded relocation fixups. */
 #if ZEND_DEBUG
 static bool user_cache_shared_graph_rebase_verbatim_zval(
@@ -5087,35 +5286,6 @@ static void user_cache_shared_graph_force_retire_locked(uint32_t payload_offset)
 	}
 }
 
-/* Returns true only when this drops the last reference of an already-retired
- * payload, signaling the caller to free it. */
-static bool user_cache_shared_graph_release_ref_locked(uint32_t payload_offset)
-{
-	php_user_cache_shared_graph_header *header = user_cache_shared_graph_payload_header(payload_offset);
-	int state, refcount, expected, desired;
-
-	if (header == NULL) {
-		return false;
-	}
-
-	for (;;) {
-		state = zend_atomic_int_load_ex(&header->ref_state);
-		refcount = state & PHP_USER_CACHE_SHARED_GRAPH_REFCOUNT_MASK;
-		expected = state;
-
-		if (refcount == 0) {
-			return false;
-		}
-
-		desired = (state & PHP_USER_CACHE_SHARED_GRAPH_RETIRED) | (refcount - 1);
-		if (zend_atomic_int_compare_exchange_ex(&header->ref_state, &expected, desired)) {
-			return (desired & PHP_USER_CACHE_SHARED_GRAPH_RETIRED) != 0 &&
-				(desired & PHP_USER_CACHE_SHARED_GRAPH_REFCOUNT_MASK) == 0
-			;
-		}
-	}
-}
-
 static int user_cache_shared_graph_orphan_offset_compare(const void *a, const void *b)
 {
 	uint32_t lhs = *(const uint32_t *) a;
@@ -5131,11 +5301,14 @@ static uint32_t user_cache_shared_graph_snapshot_live_offsets_locked(
 )
 {
 	php_user_cache_entry *entries, *entry;
+	const php_user_cache_entry_lock_record *lock_record;
 	uint32_t *offsets;
 	uint32_t i, count;
 
 	entries = php_user_cache_entries_ptr(header);
-	offsets = emalloc((size_t) header->capacity * 2 * sizeof(*offsets));
+	offsets = emalloc(
+		((size_t) header->capacity * 2 + PHP_USER_CACHE_ENTRY_LOCK_TABLE_SIZE) * sizeof(*offsets)
+	);
 	count = 0;
 
 	for (i = 0; i < header->capacity; i++) {
@@ -5150,6 +5323,18 @@ static uint32_t user_cache_shared_graph_snapshot_live_offsets_locked(
 
 		if (entry->value_offset != 0) {
 			offsets[count++] = entry->value_offset;
+		}
+	}
+
+	/* Entry-lock key blocks hold user-controlled bytes outside the entry
+	 * table; without them in the snapshot a crafted key that parses as a
+	 * retired graph header could be freed out from under its record. */
+	for (i = 0; i < PHP_USER_CACHE_ENTRY_LOCK_TABLE_SIZE; i++) {
+		lock_record = &header->entry_lock_records[i];
+		if (lock_record->state == PHP_USER_CACHE_ENTRY_LOCK_USED &&
+			lock_record->key_offset != 0
+		) {
+			offsets[count++] = lock_record->key_offset;
 		}
 	}
 
@@ -5186,7 +5371,10 @@ static bool user_cache_orphaned_graph_block_is_referenced_locked(
 	return lo < live_offset_count && live_offsets[lo] < block_offset + block_size;
 }
 
-static bool user_cache_shared_graph_reclaim_orphaned_by_scan_locked(php_user_cache_header *header)
+static bool user_cache_shared_graph_reclaim_orphaned_by_scan_locked(
+	php_user_cache_header *header,
+	const uint32_t *dead_pin_mask
+)
 {
 	php_user_cache_block *block;
 	php_user_cache_shared_graph_header *graph_header;
@@ -5219,14 +5407,18 @@ static bool user_cache_shared_graph_reclaim_orphaned_by_scan_locked(php_user_cac
 				payload_offset = offset + (uint32_t) sizeof(php_user_cache_block);
 				graph_header = user_cache_shared_graph_payload_header(payload_offset);
 
-				if (graph_header != NULL &&
-					zend_atomic_int_load_ex(&graph_header->ref_state) == PHP_USER_CACHE_SHARED_GRAPH_RETIRED
-				) {
-					php_user_cache_free_locked(payload_offset);
-					reclaimed = true;
-					restart = true;
+				if (graph_header != NULL) {
+					if (dead_pin_mask != NULL) {
+						(void) user_cache_graph_pin_strip_payload_locked(graph_header, dead_pin_mask);
+					}
 
-					break;
+					if (zend_atomic_int_load_ex(&graph_header->ref_state) == PHP_USER_CACHE_SHARED_GRAPH_RETIRED) {
+						php_user_cache_free_locked(payload_offset);
+						reclaimed = true;
+						restart = true;
+
+						break;
+					}
 				}
 			}
 
@@ -5851,6 +6043,7 @@ bool php_user_cache_build_shared_graph_in_place(
 	;
 
 	ZEND_ATOMIC_INT_INIT(&header->ref_state, 0);
+	user_cache_shared_graph_pin_owners_init(header);
 
 	if (graph_len != NULL) {
 		*graph_len = copy_ctx.position;
@@ -6020,6 +6213,7 @@ bool php_user_cache_shared_graph_publish_copied_payload_locked(
 
 	header = (php_user_cache_shared_graph_header *) dst_base;
 	ZEND_ATOMIC_INT_INIT(&header->ref_state, 0);
+	user_cache_shared_graph_pin_owners_init(header);
 
 	if (src_base == dst_base) {
 		return true;
@@ -6131,19 +6325,159 @@ void php_user_cache_shared_graph_reclaim_orphaned_locked(void)
 			checked_quiescent = true;
 		}
 
-		user_cache_shared_graph_reclaim_orphaned_by_scan_locked(header);
+		user_cache_shared_graph_reclaim_orphaned_by_scan_locked(header, NULL);
 
 		header->orphaned_graphs_saturated = 0;
 	}
 }
 
+/* Strip shared-graph pins left behind by abnormally terminated owners so
+ * their retired payloads can reach refcount zero and be reclaimed. Requires
+ * the write lock. force runs the liveness probes unconditionally (reset,
+ * clear, allocation pressure); otherwise they are rate-limited per process.
+ * Returns true when payload blocks were freed. */
+bool php_user_cache_shared_graph_strip_dead_pins_locked(bool force)
+{
+	php_user_cache_header *header = php_user_cache_header_ptr();
+	php_user_cache_graph_pin_slot *slot;
+	php_user_cache_entry *entries, *entry;
+	php_user_cache_shared_graph_header *graph_header;
+	uint64_t now, owner_pid;
+	uint32_t dead_mask[PHP_USER_CACHE_GRAPH_PIN_WORDS];
+	uint32_t i;
+	int value;
+	bool any_pinned = false, any_dead = false;
+
+	if (header == NULL || !php_user_cache_header_is_initialized_locked()) {
+		return false;
+	}
+
+	for (i = 0; i < PHP_USER_CACHE_GRAPH_PIN_SLOTS; i++) {
+		slot = &header->graph_pin_slots[i];
+
+		if (zend_atomic_int_load_ex(&slot->owner_pid) != 0 &&
+			zend_atomic_int_load_ex(&slot->pin_count) != 0
+		) {
+			any_pinned = true;
+
+			break;
+		}
+	}
+
+	if (!any_pinned) {
+		return false;
+	}
+
+	if (!force) {
+		now = (uint64_t) time(NULL);
+
+		if (UC_G(graph_pin_probe_last_at) != 0 &&
+			now - UC_G(graph_pin_probe_last_at) < PHP_USER_CACHE_GRAPH_PIN_PROBE_INTERVAL_SEC
+		) {
+			return false;
+		}
+
+		UC_G(graph_pin_probe_last_at) = now;
+	}
+
+	memset(dead_mask, 0, sizeof(dead_mask));
+
+	for (i = 0; i < PHP_USER_CACHE_GRAPH_PIN_SLOTS; i++) {
+		slot = &header->graph_pin_slots[i];
+
+		value = zend_atomic_int_load_ex(&slot->owner_pid);
+		if (value == 0 || zend_atomic_int_load_ex(&slot->pin_count) == 0) {
+			continue;
+		}
+
+		owner_pid = (uint64_t) (uint32_t) value;
+		if (owner_pid == php_user_cache_cached_pid()) {
+			continue;
+		}
+
+		if (php_user_cache_graph_pin_owner_is_dead(owner_pid, slot->owner_start_time)) {
+			dead_mask[i / 32U] |= 1U << (i % 32U);
+			any_dead = true;
+		}
+	}
+
+	if (!any_dead) {
+		return false;
+	}
+
+	if (!php_user_cache_quiesce_graph_payloads_locked()) {
+		return false;
+	}
+
+	/* Attached payloads first: an owner can die while the entry is still
+	 * stored, and those blocks are invisible to the orphan scan below. */
+	entries = php_user_cache_entries_ptr(header);
+	for (i = 0; i < header->capacity; i++) {
+		entry = &entries[i];
+
+		if (entry->state != PHP_USER_CACHE_ENTRY_USED ||
+			entry->value_type != PHP_USER_CACHE_VALUE_SHARED_GRAPH ||
+			entry->value_offset == 0
+		) {
+			continue;
+		}
+
+		graph_header = user_cache_shared_graph_payload_header(entry->value_offset);
+		if (graph_header != NULL) {
+			(void) user_cache_graph_pin_strip_payload_locked(graph_header, dead_mask);
+		}
+	}
+
+	/* Detached (retired or orphaned) payloads, freeing whatever reaches
+	 * refcount zero. */
+	if (!user_cache_shared_graph_reclaim_orphaned_by_scan_locked(header, dead_mask)) {
+		any_dead = false;
+	}
+
+	/* Release the dead slots; the write order mirrors the reader slots so a
+	 * concurrent claimer can only take a fully cleaned slot. */
+	for (i = 0; i < PHP_USER_CACHE_GRAPH_PIN_SLOTS; i++) {
+		if ((dead_mask[i / 32U] & (1U << (i % 32U))) == 0) {
+			continue;
+		}
+
+		slot = &header->graph_pin_slots[i];
+
+		value = zend_atomic_int_load_ex(&slot->pin_count);
+		while (value != 0 && !zend_atomic_int_compare_exchange_ex(&slot->pin_count, &value, 0)) {
+		}
+
+		slot->owner_start_time = 0;
+
+		value = zend_atomic_int_load_ex(&slot->owner_pid);
+		while (value != 0 && !zend_atomic_int_compare_exchange_ex(&slot->owner_pid, &value, 0)) {
+		}
+
+		header->graph_dead_pin_owners_reclaimed++;
+	}
+
+	return any_dead;
+}
+
 bool php_user_cache_shared_graph_acquire_ref(uint32_t payload_offset)
 {
 	php_user_cache_shared_graph_header *header = user_cache_shared_graph_payload_header(payload_offset);
+	php_user_cache_header *cache_header = php_user_cache_header_ptr();
 	int state, refcount, expected;
+	int32_t pin_slot = -1;
 
 	if (header == NULL) {
 		return false;
+	}
+
+	/* Record ownership before the reference is visible: every crash window
+	 * below then errs toward an inflated pin_count or an unattributed (never
+	 * a double-stripped) reference. */
+	if (cache_header != NULL) {
+		pin_slot = user_cache_graph_pin_slot_find(cache_header, true);
+		if (pin_slot >= 0) {
+			user_cache_graph_pin_count_add(&cache_header->graph_pin_slots[pin_slot], 1);
+		}
 	}
 
 	for (;;) {
@@ -6154,19 +6488,28 @@ bool php_user_cache_shared_graph_acquire_ref(uint32_t payload_offset)
 		if ((state & PHP_USER_CACHE_SHARED_GRAPH_RETIRED) != 0 ||
 			refcount == PHP_USER_CACHE_SHARED_GRAPH_REFCOUNT_MASK
 		) {
+			if (pin_slot >= 0) {
+				user_cache_graph_pin_count_add(&cache_header->graph_pin_slots[pin_slot], -1);
+			}
+
 			return false;
 		}
 
 		if (zend_atomic_int_compare_exchange_ex(&header->ref_state, &expected, state + 1)) {
-			return true;
+			break;
 		}
 	}
+
+	if (pin_slot >= 0) {
+		user_cache_graph_pin_bit_set(header, (uint32_t) pin_slot);
+	}
+
+	return true;
 }
 
-/* Abnormally terminated owners can leave retired payloads pinned. Reclaiming
- * them safely requires per-owner reference records and a layout version bump.
- * Returns true when the payload is already unreferenced (free it now), false
- * when it only set RETIRED and the last release must free it. */
+/* Owners that terminate abnormally while holding references leave retired
+ * payloads pinned; php_user_cache_shared_graph_strip_dead_pins_locked() strips
+ * such pins via the per-owner records so the payloads become reclaimable. */
 bool php_user_cache_shared_graph_retire_payload_locked(uint32_t payload_offset)
 {
 	php_user_cache_shared_graph_header *header = user_cache_shared_graph_payload_header(payload_offset);
@@ -6198,6 +6541,55 @@ bool php_user_cache_shared_graph_retire_payload_locked(uint32_t payload_offset)
 			return false;
 		}
 	}
+}
+
+bool php_user_cache_shared_graph_release_ref_locked(uint32_t payload_offset)
+{
+	php_user_cache_shared_graph_header *header = user_cache_shared_graph_payload_header(payload_offset);
+	php_user_cache_header *cache_header = php_user_cache_header_ptr();
+	int state, refcount, expected, desired = 0;
+	int32_t pin_slot = -1;
+	bool released = false, bit_cleared = false;
+
+	if (header == NULL) {
+		return false;
+	}
+
+	/* Clear the owner bit before the refcount: a crash between the two steps
+	 * must leave a leaked reference, never a bit the dead-owner sweep would
+	 * turn into a second decrement. */
+	if (cache_header != NULL) {
+		pin_slot = user_cache_graph_pin_slot_find(cache_header, false);
+		if (pin_slot >= 0) {
+			bit_cleared = user_cache_graph_pin_bit_clear(header, (uint32_t) pin_slot);
+		}
+	}
+
+	for (;;) {
+		state = zend_atomic_int_load_ex(&header->ref_state);
+		refcount = state & PHP_USER_CACHE_SHARED_GRAPH_REFCOUNT_MASK;
+		expected = state;
+
+		if (refcount == 0) {
+			break;
+		}
+
+		desired = (state & PHP_USER_CACHE_SHARED_GRAPH_RETIRED) | (refcount - 1);
+		if (zend_atomic_int_compare_exchange_ex(&header->ref_state, &expected, desired)) {
+			released = true;
+
+			break;
+		}
+	}
+
+	if (bit_cleared) {
+		user_cache_graph_pin_count_add(&cache_header->graph_pin_slots[pin_slot], -1);
+	}
+
+	return released &&
+		(desired & PHP_USER_CACHE_SHARED_GRAPH_RETIRED) != 0 &&
+		(desired & PHP_USER_CACHE_SHARED_GRAPH_REFCOUNT_MASK) == 0
+	;
 }
 
 bool php_user_cache_has_request_shared_graph_ref(uint32_t payload_offset)
@@ -6328,7 +6720,7 @@ bool php_user_cache_release_request_shared_graph_refs(void)
 					}
 
 					released = true;
-					if (user_cache_shared_graph_release_ref_locked(ref->payload_offset)) {
+					if (php_user_cache_shared_graph_release_ref_locked(ref->payload_offset)) {
 						if (php_user_cache_quiesce_graph_payloads_locked()) {
 							php_user_cache_free_locked(ref->payload_offset);
 						} else {
@@ -6340,6 +6732,7 @@ bool php_user_cache_release_request_shared_graph_refs(void)
 				}
 
 				php_user_cache_shared_graph_reclaim_orphaned_locked();
+				(void) php_user_cache_shared_graph_strip_dead_pins_locked(false);
 			}
 
 			php_user_cache_unlock();
