@@ -644,6 +644,15 @@ static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val,
 	const char *num_str = ZSTR_VAL(val);
 	bool skip_lead = false;
 
+	if (UNEXPECTED(zend_str_has_nul_byte(val))) {
+		if (arg_pos == 0) {
+			zend_value_error("Number is not an integer string");
+		} else {
+			zend_argument_value_error(arg_pos, "is not an integer string");
+		}
+		return FAILURE;
+	}
+
 	size_t num_len = ZSTR_LEN(val);
 	while (isspace((unsigned char)*num_str)) {
 		++num_str;
