@@ -10,8 +10,6 @@ user_cache.shm_size=16M
 --FILE--
 <?php
 
-user_cache_reset();
-
 $a = UserCache\Cache::getPool('mem-a');
 $b = UserCache\Cache::getPool('mem-b');
 

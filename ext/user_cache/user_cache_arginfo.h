@@ -1,9 +1,6 @@
 /* This is a generated file, edit user_cache.stub.php instead.
- * Stub hash: f475d675d1f7d8fc96ecc58b290107267010d958
+ * Stub hash: b25da167f06731356239d522e2d99641eeb6a8a5
  * Has decl header: yes */
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_user_cache_reset, 0, 0, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_UserCache_CacheStatus___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -32,6 +29,14 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_UserCache_CacheStatus_getStoreFailureCount arginfo_class_UserCache_CacheStatus_getConfiguredMemory
 
+#define arginfo_class_UserCache_CacheStatus_getGraphPinSlotsInUse arginfo_class_UserCache_CacheStatus_getConfiguredMemory
+
+#define arginfo_class_UserCache_CacheStatus_getGraphPinnedReferences arginfo_class_UserCache_CacheStatus_getConfiguredMemory
+
+#define arginfo_class_UserCache_CacheStatus_getDeadPinOwnersReclaimed arginfo_class_UserCache_CacheStatus_getConfiguredMemory
+
+#define arginfo_class_UserCache_CacheStatus_getDeadPinsStripped arginfo_class_UserCache_CacheStatus_getConfiguredMemory
+
 #define arginfo_class_UserCache_CachePoolStatus___construct arginfo_class_UserCache_CacheStatus___construct
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_UserCache_CachePoolStatus_getPoolName, 0, 0, IS_STRING, 0)
@@ -51,6 +56,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_UserCache_Cache_getPool, 0, 1, UserCache\\Cache, 0)
 	ZEND_ARG_TYPE_INFO(0, pool, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_UserCache_Cache_deletePool arginfo_class_UserCache_Cache_hasPool
 
 #define arginfo_class_UserCache_Cache_getPools arginfo_class_UserCache_CachePoolStatus_getEntryKeys
 
@@ -98,7 +105,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_UserCache_Cache_deleteMult
 	ZEND_ARG_TYPE_INFO(0, keys, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_UserCache_Cache_clear arginfo_user_cache_reset
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_UserCache_Cache_clear, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_UserCache_Cache_has arginfo_class_UserCache_Cache_delete
 
@@ -118,7 +126,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_UserCache_Cache_getPoolStatus, 0, 0, UserCache\\CachePoolStatus, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_FUNCTION(user_cache_reset);
 ZEND_METHOD(UserCache_CacheStatus, __construct);
 ZEND_METHOD(UserCache_CacheStatus, getAvailability);
 ZEND_METHOD(UserCache_CacheStatus, getConfiguredMemory);
@@ -131,6 +138,10 @@ ZEND_METHOD(UserCache_CacheStatus, getEntryCapacity);
 ZEND_METHOD(UserCache_CacheStatus, getTombstoneCount);
 ZEND_METHOD(UserCache_CacheStatus, getExpungeCount);
 ZEND_METHOD(UserCache_CacheStatus, getStoreFailureCount);
+ZEND_METHOD(UserCache_CacheStatus, getGraphPinSlotsInUse);
+ZEND_METHOD(UserCache_CacheStatus, getGraphPinnedReferences);
+ZEND_METHOD(UserCache_CacheStatus, getDeadPinOwnersReclaimed);
+ZEND_METHOD(UserCache_CacheStatus, getDeadPinsStripped);
 ZEND_METHOD(UserCache_CachePoolStatus, __construct);
 ZEND_METHOD(UserCache_CachePoolStatus, getPoolName);
 ZEND_METHOD(UserCache_CachePoolStatus, getEntryCount);
@@ -138,6 +149,7 @@ ZEND_METHOD(UserCache_CachePoolStatus, getEntryKeys);
 ZEND_METHOD(UserCache_CachePoolStatus, getUsedMemory);
 ZEND_METHOD(UserCache_Cache, hasPool);
 ZEND_METHOD(UserCache_Cache, getPool);
+ZEND_METHOD(UserCache_Cache, deletePool);
 ZEND_METHOD(UserCache_Cache, getPools);
 ZEND_METHOD(UserCache_Cache, getStatus);
 ZEND_METHOD(UserCache_Cache, __construct);
@@ -157,11 +169,6 @@ ZEND_METHOD(UserCache_Cache, unlock);
 ZEND_METHOD(UserCache_Cache, remember);
 ZEND_METHOD(UserCache_Cache, getPoolStatus);
 
-static const zend_function_entry ext_functions[] = {
-	ZEND_FE(user_cache_reset, arginfo_user_cache_reset)
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_UserCache_CacheStatus_methods[] = {
 	ZEND_ME(UserCache_CacheStatus, __construct, arginfo_class_UserCache_CacheStatus___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(UserCache_CacheStatus, getAvailability, arginfo_class_UserCache_CacheStatus_getAvailability, ZEND_ACC_PUBLIC)
@@ -175,6 +182,10 @@ static const zend_function_entry class_UserCache_CacheStatus_methods[] = {
 	ZEND_ME(UserCache_CacheStatus, getTombstoneCount, arginfo_class_UserCache_CacheStatus_getTombstoneCount, ZEND_ACC_PUBLIC)
 	ZEND_ME(UserCache_CacheStatus, getExpungeCount, arginfo_class_UserCache_CacheStatus_getExpungeCount, ZEND_ACC_PUBLIC)
 	ZEND_ME(UserCache_CacheStatus, getStoreFailureCount, arginfo_class_UserCache_CacheStatus_getStoreFailureCount, ZEND_ACC_PUBLIC)
+	ZEND_ME(UserCache_CacheStatus, getGraphPinSlotsInUse, arginfo_class_UserCache_CacheStatus_getGraphPinSlotsInUse, ZEND_ACC_PUBLIC)
+	ZEND_ME(UserCache_CacheStatus, getGraphPinnedReferences, arginfo_class_UserCache_CacheStatus_getGraphPinnedReferences, ZEND_ACC_PUBLIC)
+	ZEND_ME(UserCache_CacheStatus, getDeadPinOwnersReclaimed, arginfo_class_UserCache_CacheStatus_getDeadPinOwnersReclaimed, ZEND_ACC_PUBLIC)
+	ZEND_ME(UserCache_CacheStatus, getDeadPinsStripped, arginfo_class_UserCache_CacheStatus_getDeadPinsStripped, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -190,6 +201,7 @@ static const zend_function_entry class_UserCache_CachePoolStatus_methods[] = {
 static const zend_function_entry class_UserCache_Cache_methods[] = {
 	ZEND_ME(UserCache_Cache, hasPool, arginfo_class_UserCache_Cache_hasPool, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(UserCache_Cache, getPool, arginfo_class_UserCache_Cache_getPool, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(UserCache_Cache, deletePool, arginfo_class_UserCache_Cache_deletePool, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(UserCache_Cache, getPools, arginfo_class_UserCache_Cache_getPools, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(UserCache_Cache, getStatus, arginfo_class_UserCache_Cache_getStatus, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(UserCache_Cache, __construct, arginfo_class_UserCache_Cache___construct, ZEND_ACC_PRIVATE)
