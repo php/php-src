@@ -404,7 +404,10 @@ void fpm_event_loop(int err) /* {{{ */
 			zlog(ZLOG_DEBUG, "event module triggered %d events", ret);
 		} else if (ret < 0) {
 			php_poll_error poll_error = php_poll_get_error(module);
-			zlog(ZLOG_ERROR, "poll error: %s", php_poll_error_string(poll_error));
+			/* we don't care about signal interrupts */
+			if (poll_error != PHP_POLL_ERROR_CODE_INTERRUPTED) {
+				zlog(ZLOG_ERROR, "poll error: %s", php_poll_error_string(poll_error));
+			}
 		}
 		/* do the logic the modules used to */
 		for (int i = 0; i < ret; i++) {
