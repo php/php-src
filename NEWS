@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
     SO_LINGER options. (Weilin Du)
+  . Fixed various memory related issues in ext/sockets. (David Carlier)
 
 30 Jul 2026, PHP 8.5.9
 
