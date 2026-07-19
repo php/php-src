@@ -2581,7 +2581,7 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 	server->server_sock = server_sock;
 
 	if (!php_user_cache_startup_default_context_storage()) {
-		php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "OPcache User Cache startup failed; User Cache will be unavailable");
+		php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "UserCache startup failed; UserCache will be unavailable");
 	}
 
 	php_cli_server_startup_workers();
