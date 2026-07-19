@@ -490,9 +490,10 @@ static void php_apache_user_cache_init_partitions(apr_pool_t *pconf, server_rec 
 	unsigned int i;
 
 	/* The partition entries are pool-allocated (freed with pconf); the
-	 * php_user_cache_partition objects created below are owned by
-	 * OPcache and released together in its MSHUTDOWN (partitions_shutdown),
-	 * so no cgi/lsapi-style SAPI shutdown hook is required here. */
+	 * php_user_cache_partition objects created below are owned by the
+	 * user_cache extension and released together in its MSHUTDOWN
+	 * (user_cache_partitions_shutdown), so no cgi/lsapi-style SAPI
+	 * shutdown hook is required here. */
 	php_apache_user_cache_partitions = NULL;
 	php_user_cache_opt_in();
 
@@ -511,12 +512,12 @@ static void php_apache_user_cache_init_partitions(apr_pool_t *pconf, server_rec 
 		entry->server = cur;
 		entry->partition = php_user_cache_partition_create(partition_name);
 		if (entry->partition == NULL) {
-			ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cur, "Unable to allocate OPcache User Cache partition");
+			ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cur, "Unable to allocate UserCache partition");
 			continue;
 		}
 
 		if (!php_user_cache_partition_startup_storage(entry->partition)) {
-			ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cur, "OPcache User Cache partition startup failed; User Cache will be unavailable");
+			ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cur, "UserCache partition startup failed; UserCache will be unavailable");
 		}
 
 		entry->next = php_apache_user_cache_partitions;

@@ -2794,7 +2794,7 @@ PHPAPI bool php_tsrm_startup_ex(int expected_threads)
 		TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)));
 	(void)ts_resource(0);
-	/* Allocated here rather than from the OPcache module wiring: SAPI
+	/* Allocated here rather than from the user_cache module wiring: SAPI
 	 * activate hooks consume these globals before the module MINIT runs. */
 	php_user_cache_globals_startup();
 	return ret;
