@@ -4418,17 +4418,16 @@ ZEND_METHOD(ReflectionClass, getMethod)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	zend_function *mptr;
-	zval obj_tmp;
 	zend_string *name;
-	bool is_invoke;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	is_invoke = is_closure_invoke(ce, name);
+	zend_function *mptr;
+	zval obj_tmp;
+	bool is_invoke = is_closure_invoke(ce, name);
 	if (!Z_ISUNDEF(intern->obj) && is_invoke
 		&& (mptr = zend_get_closure_invoke_method(Z_OBJ(intern->obj))) != NULL)
 	{
