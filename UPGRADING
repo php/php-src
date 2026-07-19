@@ -42,6 +42,12 @@ PHP 8.6 UPGRADE NOTES
   . imagesetstyle(), imagefilter() and imagecrop() filter their array arguments
     types / values and raise a TypeError / ValueError accordingly.
 
+- GMP:
+  . GMP power and shift operators now throw ValueError when GMP right operands
+    are outside the unsigned long range, instead of silently truncating them.
+  . GMP integer string parsing now throw ValueError strings containing NUL
+    bytes, instead of silently truncating them.
+
 - Intl:
   . Passing a non-stringable object as a time zone to Intl APIs that accept
     time zone objects or strings now raises a TypeError instead of an Error.
