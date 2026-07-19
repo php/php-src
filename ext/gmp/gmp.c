@@ -1082,6 +1082,11 @@ GMP_UNARY_OP_FUNCTION(com);
 /* {{{ Finds next prime of a */
 GMP_UNARY_OP_FUNCTION(nextprime);
 
+#ifdef HAVE___GMPZ_PREVPRIME
+/* {{{ Finds previous prime of a */
+GMP_UNARY_OP_FUNCTION(prevprime);
+#endif
+
 /* Add a and b */
 GMP_BINARY_OP_FUNCTION(add);
 /* Subtract b from a */
