@@ -335,9 +335,7 @@ typedef struct {
 	uint64_t expunge_count;
 	uint64_t store_failure_count;
 	/* Cumulative dead-pin recovery statistics: owners whose slots the sweep
-	 * reclaimed, and individual payload references stripped from them. A
-	 * rising value means workers died (SIGKILL/OOM) while holding
-	 * shared-graph references. */
+	 * reclaimed, and payload references stripped from them. */
 	uint64_t graph_dead_pin_owners_reclaimed;
 	uint64_t graph_dead_pins_stripped;
 	uint32_t tombstone_count;
@@ -763,7 +761,6 @@ bool php_user_cache_shared_graph_publish_copied_payload_locked(
 );
 bool php_user_cache_shared_graph_acquire_ref(uint32_t payload_offset);
 bool php_user_cache_shared_graph_retire_payload_locked(uint32_t payload_offset);
-bool php_user_cache_shared_graph_release_ref_locked(uint32_t payload_offset);
 bool php_user_cache_has_request_shared_graph_ref(uint32_t payload_offset);
 void php_user_cache_register_shared_graph_ref(uint32_t payload_offset);
 bool php_user_cache_release_request_shared_graph_refs(void);
@@ -808,7 +805,6 @@ bool php_user_cache_atomic_update_locked(
 	php_user_cache_atomic_update_result *result
 );
 void php_user_cache_release_request_local_slots(void);
-void php_user_cache_release_active_request_local_slots(void);
 void php_user_cache_release_active_request_local_slots_by_prefix(zend_string *prefix);
 void php_user_cache_store_request_local_slot(zend_string *key, uint64_t gen, zval *value, bool no_aliases);
 void php_user_cache_object_table_dtor(zval *zv);
