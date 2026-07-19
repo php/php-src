@@ -46,6 +46,10 @@ final readonly class CacheStatus
 
 	public function getTombstoneCount(): int {}
 
+	/**
+	 * Number of times memory pressure forced a full cache wipe. Routine
+	 * removal of expired entries is not counted.
+	 */
 	public function getExpungeCount(): int {}
 
 	public function getStoreFailureCount(): int {}
@@ -86,7 +90,7 @@ final class Cache
 
 	public static function deletePool(string $pool): bool {}
 
-	/** @return array<string, Cache> Keys are pool names. */
+	/** @return array<string, Cache> */
 	public static function getPools(): array {}
 
 	public static function getStatus(): CacheStatus {}
