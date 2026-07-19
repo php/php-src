@@ -3481,8 +3481,8 @@ static php_user_cache_optimistic_result user_cache_optimistic_emit_shared_graph(
 #endif
 
 /* Read-only workloads observe expired entries but never take the write paths
- * that drive the bounded scan; run one scan at request end once enough
- * expired reads accumulated so read-heavy pools reclaim without a store. */
+ * that drive the bounded scan, so run one scan at request end once enough
+ * expired reads have accumulated. */
 void php_user_cache_expunge_expired_at_request_end(void)
 {
 	if (EXPECTED(UC_G(expired_read_observations) < PHP_USER_CACHE_EXPIRED_READ_EXPUNGE_THRESHOLD)) {
@@ -4081,12 +4081,6 @@ bool php_user_cache_atomic_update_locked(
 void php_user_cache_release_request_local_slots(void)
 {
 	user_cache_release_request_local_slot_table(&UC_G(request_local_slot_table));
-}
-
-void php_user_cache_release_active_request_local_slots(void)
-{
-	/* Generation and context checks make over-invalidation safe. */
-	php_user_cache_release_request_local_slots();
 }
 
 void php_user_cache_release_active_request_local_slots_by_prefix(zend_string *prefix)
