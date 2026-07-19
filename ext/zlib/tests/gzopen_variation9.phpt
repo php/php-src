@@ -38,6 +38,6 @@ gzopen=bool(false)
 
 mode=e
 
-Warning: gzopen(%s/test.txt.gz): Failed to open stream: %s in %s on line %d
+Warning: gzopen(): Failed to open stream: %s in %s on line %d
 gzopen=bool(false)
 

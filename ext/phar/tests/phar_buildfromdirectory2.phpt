@@ -21,4 +21,4 @@ try {
 ?>
 --EXPECTF--
 %s(24) "UnexpectedValueException"
-RecursiveDirectoryIterator::__construct(1): Failed to open directory: No such file or directory
+RecursiveDirectoryIterator::__construct(): Failed to open directory: No such file or directory

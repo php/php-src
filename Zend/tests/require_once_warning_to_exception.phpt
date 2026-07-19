@@ -16,4 +16,4 @@ try {
 
 ?>
 --EXPECT--
-require_once(does-not-exist.php): Failed to open stream: No such file or directory
+require_once(): Failed to open stream: No such file or directory

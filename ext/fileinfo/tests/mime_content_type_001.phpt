@@ -46,6 +46,6 @@ mime_content_type(): Argument #1 ($filename) must be of type resource|string, nu
 mime_content_type(): Argument #1 ($filename) must be of type resource|string, stdClass given
 mime_content_type(): Argument #1 ($filename) must be of type resource|string, array given
 
-Warning: mime_content_type(foo/inexistent): Failed to open stream: No such file or directory in %s on line %d
+Warning: mime_content_type(): Failed to open stream: No such file or directory in %s on line %d
 mime_content_type(): Argument #1 ($filename) must not be empty
 mime_content_type(): Argument #1 ($filename) must not contain any null bytes

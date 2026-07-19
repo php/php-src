@@ -2148,7 +2148,7 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 	}
 	if (stream == NULL && (options & REPORT_ERRORS)) {
 		php_stream_display_wrapper_errors(wrapper, context, PHP_STREAM_EC(OpenFailed),
-				path, "Failed to open directory");
+				"Failed to open directory");
 	}
 	php_stream_tidy_wrapper_error_log(wrapper);
 
@@ -2323,7 +2323,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 
 	if (stream == NULL && (options & REPORT_ERRORS)) {
 		php_stream_display_wrapper_name_errors(wrapper_name, context, PHP_STREAM_EC(OpenFailed),
-				path, "Failed to open stream");
+				"Failed to open stream");
 		if (opened_path && *opened_path) {
 			zend_string_release_ex(*opened_path, 0);
 			*opened_path = NULL;

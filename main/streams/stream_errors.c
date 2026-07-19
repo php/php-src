@@ -723,7 +723,7 @@ static zend_llist *php_stream_get_wrapper_errors_list(const char *wrapper_name)
 }
 
 PHPAPI void php_stream_display_wrapper_name_errors(const char *wrapper_name,
-		php_stream_context *context, zend_enum_StreamErrorCode code, const char *path,
+		php_stream_context *context, zend_enum_StreamErrorCode code,
 		const char *caption)
 {
 	char *msg;
@@ -734,7 +734,6 @@ PHPAPI void php_stream_display_wrapper_name_errors(const char *wrapper_name,
 		return;
 	}
 
-	char *tmp = estrdup(path);
 	if (strcmp(wrapper_name, PHP_STREAM_ERROR_WRAPPER_DEFAULT_NAME)) {
 		zend_llist *err_list = php_stream_get_wrapper_errors_list(wrapper_name);
 		if (err_list) {
@@ -783,12 +782,10 @@ PHPAPI void php_stream_display_wrapper_name_errors(const char *wrapper_name,
 		msg = "no suitable wrapper could be found";
 	}
 
-	php_strip_url_passwd(tmp);
-
 	zend_string *message = strpprintf(0, "%s: %s", caption, msg);
 
 	php_stream_wrapper_error_internal(wrapper_name, context, NULL, REPORT_ERRORS, E_WARNING, true,
-			code, tmp, message);
+			code, NULL, message);
 
 	if (free_msg) {
 		efree(msg);
@@ -796,12 +793,12 @@ PHPAPI void php_stream_display_wrapper_name_errors(const char *wrapper_name,
 }
 
 PHPAPI void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
-		php_stream_context *context, zend_enum_StreamErrorCode code, const char *path,
+		php_stream_context *context, zend_enum_StreamErrorCode code,
 		const char *caption)
 {
 	if (wrapper) {
 		const char *wrapper_name = PHP_STREAM_ERROR_WRAPPER_NAME(wrapper);
-		php_stream_display_wrapper_name_errors(wrapper_name, context, code, path, caption);
+		php_stream_display_wrapper_name_errors(wrapper_name, context, code, caption);
 	}
 }
 

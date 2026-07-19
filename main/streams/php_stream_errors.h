@@ -141,11 +141,11 @@ PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper,
 		ZEND_ATTRIBUTE_FORMAT(printf, 7, 8);
 
 PHPAPI void php_stream_display_wrapper_name_errors(const char *wrapper_name,
-		php_stream_context *context, zend_enum_StreamErrorCode code, const char *path,
+		php_stream_context *context, zend_enum_StreamErrorCode code,
 		const char *caption);
 
 PHPAPI void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
-		php_stream_context *context, zend_enum_StreamErrorCode code, const char *path,
+		php_stream_context *context, zend_enum_StreamErrorCode code,
 		const char *caption);
 
 PHPAPI void php_stream_tidy_wrapper_name_error_log(const char *wrapper_name);

@@ -30,8 +30,8 @@ try {
 ?>
 --EXPECTF--
 
-Warning: fopen(php://nonexistent): Failed to open stream: operation failed in %s on line %d
+Warning: fopen(): Failed to open stream: operation failed in %s on line %d
 Caught TypeError for error_mode
 
-Warning: fopen(php://nonexistent): Failed to open stream: operation failed in %s on line %d
+Warning: fopen(): Failed to open stream: operation failed in %s on line %d
 Caught TypeError for error_store
