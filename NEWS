@@ -326,6 +326,8 @@ PHP                                                                        NEWS
     and Openssl\Session class. (Jakub Zelenka)
   . Added TLS external PSK support for streams with new context options and
     Openssl\Psk class. (Jakub Zelenka)
+  . Added TLS 1.3 early data (0-RTT) support for streams with new context
+    options early_data, max_early_data and early_data_cb. (Jakub Zelenka)
   . Added stream crypto status for exposing OpenSSL WANT_READ / WANT_WRITE.
     (Jakub Zelenka)
 
