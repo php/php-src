@@ -1,5 +1,5 @@
 /* This is a generated file, edit user_cache.stub.php instead.
- * Stub hash: b25da167f06731356239d522e2d99641eeb6a8a5
+ * Stub hash: b8be7cb1df9773c913f73583906d434b343175b5
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_UserCache_CacheStatus___construct, 0, 0, 0)

@@ -1,8 +1,8 @@
 /* This is a generated file, edit user_cache.stub.php instead.
- * Stub hash: b25da167f06731356239d522e2d99641eeb6a8a5 */
+ * Stub hash: b8be7cb1df9773c913f73583906d434b343175b5 */
 
-#ifndef ZEND_USER_CACHE_DECL_b25da167f06731356239d522e2d99641eeb6a8a5_H
-#define ZEND_USER_CACHE_DECL_b25da167f06731356239d522e2d99641eeb6a8a5_H
+#ifndef ZEND_USER_CACHE_DECL_b8be7cb1df9773c913f73583906d434b343175b5_H
+#define ZEND_USER_CACHE_DECL_b8be7cb1df9773c913f73583906d434b343175b5_H
 
 typedef enum zend_enum_UserCache_CacheAvailability {
 	ZEND_ENUM_UserCache_CacheAvailability_Available = 1,
@@ -16,4 +16,4 @@ typedef enum zend_enum_UserCache_CacheAvailability {
 	ZEND_ENUM_UserCache_CacheAvailability_UnavailableByUnknownReason = 9,
 } zend_enum_UserCache_CacheAvailability;
 
-#endif /* ZEND_USER_CACHE_DECL_b25da167f06731356239d522e2d99641eeb6a8a5_H */
+#endif /* ZEND_USER_CACHE_DECL_b8be7cb1df9773c913f73583906d434b343175b5_H */
