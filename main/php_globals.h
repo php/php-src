@@ -74,7 +74,7 @@ struct _php_core_globals {
 	zend_long max_memory_limit;
 	zend_long max_input_time;
 
-	char *error_log;
+	zend_string *error_log;
 
 	zend_string *doc_root;
 	char *user_dir;

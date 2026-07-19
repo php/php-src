@@ -706,8 +706,9 @@ static PHP_INI_MH(OnUpdateErrorLog)
 			return FAILURE;
 		}
 	}
-	char **p = ZEND_INI_GET_ADDR();
-	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
+
+	zend_string **p = ZEND_INI_GET_ADDR();
+	*p = new_value && ZSTR_LEN(new_value) > 0 ? new_value : NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -940,7 +941,7 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int sys
 		int error_log_mode;
 
 #ifdef HAVE_SYSLOG_H
-		if (!strcmp(PG(error_log), "syslog")) {
+		if (zend_string_equals_literal(PG(error_log), "syslog")) {
 			php_syslog(syslog_type_int, "%s", log_message);
 			PG(in_error_log) = 0;
 			return;
@@ -953,7 +954,7 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int sys
 			error_log_mode = PG(error_log_mode);
 		}
 
-		fd = VCWD_OPEN_MODE(PG(error_log), O_CREAT | O_APPEND | O_WRONLY, error_log_mode);
+		fd = VCWD_OPEN_MODE(ZSTR_VAL(PG(error_log)), O_CREAT | O_APPEND | O_WRONLY, error_log_mode);
 		if (fd != -1) {
 			char *tmp;
 			size_t len;
