@@ -79,8 +79,8 @@ static int user_cache_alloc_shm_create_segments(size_t requested_size, php_user_
 	*shared_segments_p = (php_user_cache_shm_segment_shm **) calloc(1, (*shared_segments_count) * sizeof(php_user_cache_shm_segment_shm) + sizeof(void *) * (*shared_segments_count));
 	if (!*shared_segments_p) {
 		*error_in = "calloc";
-		/* Not yet attached, so IPC_RMID both marks and destroys it; without
-		 * this the segment would outlive the process until ipcrm/reboot. */
+		/* Nothing is attached yet, so IPC_RMID destroys the segment
+		 * immediately instead of leaking it. */
 		shmctl(first_segment_id, IPC_RMID, &sds);
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}

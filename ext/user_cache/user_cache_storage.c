@@ -3370,9 +3370,9 @@ static bool user_cache_claim_header_is_attached(const php_user_cache_header *hea
 	return false;
 }
 
-/* Release per-thread graph pin slots before their live process pid makes
- * them permanently unclaimable. Slots with pins outstanding are left for the
- * dead-owner sweep. */
+/* Release this thread's graph pin slot claims: the process outlives the
+ * thread, so its live pid would keep the slots unclaimable. Slots with pins
+ * outstanding are left for the dead-owner sweep. */
 void php_user_cache_release_thread_graph_pin_claims(php_user_cache_globals *globals)
 {
 	php_user_cache_graph_pin_slot *slot;

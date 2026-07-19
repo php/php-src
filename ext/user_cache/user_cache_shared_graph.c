@@ -2199,7 +2199,7 @@ static bool user_cache_shared_graph_copy_alloc(
 	return true;
 }
 
-/* Copy an interned string into the buffer, deduplicating by offset. */
+/* Copy a string into the buffer, returning the existing offset for repeats. */
 static bool user_cache_shared_graph_copy_string(
 	php_user_cache_shared_graph_copy_context *ctx,
 	const zend_string *str,
@@ -2433,11 +2433,9 @@ static bool user_cache_shared_graph_copy_verbatim_value(
 		case IS_NULL:
 		case IS_TRUE:
 		case IS_FALSE:
-			/* These types carry no value, so ZVAL_UNDEF()/ZVAL_NULL()/
-			 * ZVAL_TRUE()/ZVAL_FALSE() write the type tag only and leave the
-			 * value union holding whatever the verbatim copy brought over.
-			 * PHP never writes that union either, so it is uninitialised heap;
-			 * write both halves to keep it out of the shared segment. */
+			/* ZVAL_NULL() and friends write the type tag only, and PHP never
+			 * initializes the value union of these types, so copying it would
+			 * leak uninitialized heap bytes into the shared segment. */
 			Z_LVAL_P(dst) = 0;
 			Z_TYPE_INFO_P(dst) = Z_TYPE_P(src);
 
@@ -2523,10 +2521,9 @@ static bool user_cache_shared_graph_copy_verbatim_value(
 				for (i = 0; i < src_arr->nNumUsed; i++) {
 					src_packed = &src_arr->arPacked[i];
 
-					/* PHP never writes a packed slot in full: zval.u2 is
-					 * unused and hole slots only get a type tag, so the
-					 * verbatim memcpy above brought uninitialised heap bytes
-					 * along; zero the slot before writing its value. */
+					/* Packed slots leave zval.u2 (and, for holes, the value
+					 * union) uninitialized, so the memcpy above copied heap
+					 * garbage; zero the slot before writing its value. */
 					memset(&dst_packed[i], 0, sizeof(zval));
 
 					if (!user_cache_shared_graph_copy_verbatim_value(ctx, src_packed, &dst_packed[i])) {
@@ -6434,8 +6431,8 @@ bool php_user_cache_shared_graph_strip_dead_pins_locked(bool force)
 		any_dead = false;
 	}
 
-	/* Release the dead slots; the write order mirrors the reader slots so a
-	 * concurrent claimer can only take a fully cleaned slot. */
+	/* Release the dead slots, clearing the pid last so a concurrent claimer
+	 * can only take a fully cleaned slot. */
 	for (i = 0; i < PHP_USER_CACHE_GRAPH_PIN_SLOTS; i++) {
 		if ((dead_mask[i / 32U] & (1U << (i % 32U))) == 0) {
 			continue;
@@ -6543,7 +6540,9 @@ bool php_user_cache_shared_graph_retire_payload_locked(uint32_t payload_offset)
 	}
 }
 
-bool php_user_cache_shared_graph_release_ref_locked(uint32_t payload_offset)
+/* Returns true only when this drops the last reference of an already-retired
+ * payload, signaling the caller to free it. */
+static bool user_cache_shared_graph_release_ref_locked(uint32_t payload_offset)
 {
 	php_user_cache_shared_graph_header *header = user_cache_shared_graph_payload_header(payload_offset);
 	php_user_cache_header *cache_header = php_user_cache_header_ptr();
@@ -6720,7 +6719,7 @@ bool php_user_cache_release_request_shared_graph_refs(void)
 					}
 
 					released = true;
-					if (php_user_cache_shared_graph_release_ref_locked(ref->payload_offset)) {
+					if (user_cache_shared_graph_release_ref_locked(ref->payload_offset)) {
 						if (php_user_cache_quiesce_graph_payloads_locked()) {
 							php_user_cache_free_locked(ref->payload_offset);
 						} else {
