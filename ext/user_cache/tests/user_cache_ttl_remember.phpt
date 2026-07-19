@@ -10,6 +10,8 @@ user_cache.shm_size=16M
 --FILE--
 <?php
 $cache = UserCache\Cache::getPool('ttl-remember');
+$cache->clear();
+
 var_dump($cache->store('ttl', 'value', 1));
 var_dump($cache->has('ttl'));
 sleep(2);
