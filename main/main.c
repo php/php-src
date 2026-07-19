@@ -2311,10 +2311,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	/* initialize stream wrappers registry
 	 * (this uses configuration parameters from php.ini)
 	 */
-	if (php_init_stream_wrappers(module_number) == FAILURE)	{
-		fprintf(stderr, "PHP:  Unable to initialize stream url wrappers.\n");
-		return FAILURE;
-	}
+	php_init_stream_wrappers(module_number);
 
 	zuv.html_errors = 1;
 	php_startup_auto_globals();

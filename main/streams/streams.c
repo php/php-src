@@ -1739,7 +1739,7 @@ void php_shutdown_stream_hashes(void)
 	php_stream_error_state_cleanup();
 }
 
-zend_result php_init_stream_wrappers(int module_number)
+void php_init_stream_wrappers(int module_number)
 {
 	le_stream = zend_register_list_destructors_ex(stream_resource_regular_dtor, NULL, "stream", module_number);
 	le_pstream = zend_register_list_destructors_ex(NULL, stream_resource_persistent_dtor, "persistent stream", module_number);
@@ -1751,16 +1751,12 @@ zend_result php_init_stream_wrappers(int module_number)
 	zend_hash_init(php_get_stream_filters_hash_global(), 8, NULL, NULL, 1);
 	zend_hash_init(php_stream_xport_get_hash(), 8, NULL, NULL, 1);
 
-	return (php_stream_xport_register("tcp", php_stream_generic_socket_factory) == SUCCESS
-			&&
-			php_stream_xport_register("udp", php_stream_generic_socket_factory) == SUCCESS
+	php_stream_xport_register("tcp", php_stream_generic_socket_factory);
+	php_stream_xport_register("udp", php_stream_generic_socket_factory);
 #if defined(AF_UNIX) && !(defined(PHP_WIN32) || defined(__riscos__))
-			&&
-			php_stream_xport_register("unix", php_stream_generic_socket_factory) == SUCCESS
-			&&
-			php_stream_xport_register("udg", php_stream_generic_socket_factory) == SUCCESS
+	php_stream_xport_register("unix", php_stream_generic_socket_factory);
+	php_stream_xport_register("udg", php_stream_generic_socket_factory);
 #endif
-		) ? SUCCESS : FAILURE;
 }
 
 void php_shutdown_stream_wrappers(int module_number)
