@@ -4195,7 +4195,7 @@ ZEND_METHOD(ReflectionClass, setStaticPropertyValue)
 	if (!variable_ptr) {
 		zend_clear_exception();
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Class %s does not have a property named %s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				"Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		RETURN_THROWS();
 	}
 
