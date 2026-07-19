@@ -3728,7 +3728,7 @@ ZEND_METHOD(ReflectionMethod, getPrototype)
 
 	if (!mptr->common.prototype) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Method %s::%s does not have a prototype", ZSTR_VAL(intern->ce->name), ZSTR_VAL(mptr->common.function_name));
+			"Method %s::%s() does not have a prototype", ZSTR_VAL(intern->ce->name), ZSTR_VAL(mptr->common.function_name));
 		RETURN_THROWS();
 	}
 
