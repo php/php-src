@@ -411,6 +411,7 @@ void zend_file_context_begin(zend_file_context *prev_context) /* {{{ */
 	FC(in_namespace) = 0;
 	FC(has_bracketed_namespaces) = 0;
 	FC(declarables).ticks = 0;
+	FC(declarables).strict_namespace = 0;
 	zend_hash_init(&FC(seen_symbols), 8, NULL, NULL, 0);
 }
 /* }}} */
@@ -4222,6 +4223,11 @@ static bool zend_compile_function_name(znode *name_node, zend_ast *name_ast) /* 
 	ZVAL_STR(&name_node->u.constant, zend_resolve_function_name(
 		orig_name, name_ast->attr, &is_fully_qualified));
 
+	/* Name is already namespace-prefixed; resolve as qualified, no fallback */
+	if (FC(declarables).strict_namespace) {
+		return false;
+	}
+
 	return !is_fully_qualified && FC(current_namespace);
 }
 /* }}} */
@@ -7497,6 +7503,27 @@ static void zend_compile_declare(const zend_ast *ast) /* {{{ */
 			if (Z_LVAL(value_zv) == 1) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_TYPES;
 			}
+
+		} else if (zend_string_equals_literal_ci(name, "strict_namespace")) {
+			zval value_zv;
+
+			if (FAILURE == zend_is_first_statement(ast, /* allow_nop */ true)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "strict_namespace declaration must be "
+					"the very first statement in the script");
+			}
+
+			if (ast->child[1] != NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "strict_namespace declaration must not "
+					"use block mode");
+			}
+
+			zend_const_expr_to_zval(&value_zv, value_ast_ptr, /* allow_dynamic */ false);
+
+			if (Z_TYPE(value_zv) != IS_LONG || (Z_LVAL(value_zv) != 0 && Z_LVAL(value_zv) != 1)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "strict_namespace declaration must have 0 or 1 as its value");
+			}
+
+			FC(declarables).strict_namespace = Z_LVAL(value_zv) == 1;
 
 		} else {
 			zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", ZSTR_VAL(name));
@@ -11556,7 +11583,9 @@ static void zend_compile_const(znode *result, const zend_ast *ast) /* {{{ */
 	opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, NULL);
 	opline->op2_type = IS_CONST;
 
-	if (is_fully_qualified || !FC(current_namespace)) {
+	/* strict_namespace disables the fallback; true/false/null were already
+	 * resolved by zend_try_ct_eval_const() above */
+	if (is_fully_qualified || FC(declarables).strict_namespace || !FC(current_namespace)) {
 		opline->op1.num = 0;
 		opline->op2.constant = zend_add_const_name_literal(
 			resolved_name, false);
@@ -11933,8 +11962,10 @@ static void zend_compile_const_expr_const(zend_ast **ast_ptr) /* {{{ */
 	}
 
 	zend_ast_destroy(ast);
+	/* strict_namespace also suppresses the fallback in constant expressions
+	 * (const X = FOO;, default values, attribute arguments) */
 	*ast_ptr = zend_ast_create_constant(resolved_name,
-		!is_fully_qualified && FC(current_namespace) ? IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE : 0);
+		!is_fully_qualified && !FC(declarables).strict_namespace && FC(current_namespace) ? IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE : 0);
 }
 /* }}} */
 
