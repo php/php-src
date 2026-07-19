@@ -12,6 +12,7 @@ user_cache.shm_size=1M
 --FILE--
 <?php
 $cache = UserCache\Cache::getPool('expired-read-reclaim');
+$cache->clear();
 
 for ($i = 0; $i < 80; $i++) {
     $cache->store('expiring-' . $i, str_repeat('v', 64), 1);
