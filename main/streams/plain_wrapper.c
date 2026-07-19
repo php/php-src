@@ -69,8 +69,8 @@ extern int php_get_gid_by_name(const char *name, gid_t *gid);
 # endif
 #endif
 
-/* parse standard "fopen" modes into open() flags */
-PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
+/* parse standard "fopen" modes into open() flags. Returns -1 on failure, open flags on success. */
+PHPAPI int php_stream_parse_fopen_modes(const char *mode)
 {
 	int flags;
 
@@ -92,7 +92,7 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 			break;
 		default:
 			/* unknown mode */
-			return FAILURE;
+			return -1;
 	}
 
 	if (strchr(mode, '+')) {
@@ -123,8 +123,7 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 	}
 #endif
 
-	*open_flags = flags;
-	return SUCCESS;
+	return flags;
 }
 
 
@@ -1166,15 +1165,15 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, const
 PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zend_string **opened_path, int options STREAMS_DC)
 {
 	char realpath[MAXPATHLEN];
-	int open_flags;
 	int fd;
 	php_stream *ret;
 	int persistent = options & STREAM_OPEN_PERSISTENT;
 	char *persistent_id = NULL;
 
-	if (FAILURE == php_stream_parse_fopen_modes(mode, &open_flags)) {
+	int open_flags = php_stream_parse_fopen_modes(mode);
+	if (UNEXPECTED(open_flags == -1)) {
 		php_stream_wrapper_log_warn(&php_plain_files_wrapper, NULL, options,
-				InvalidMode, "`%s' is not a valid mode for fopen", mode);
+				InvalidMode, "\"%s\" is not a valid mode for fopen", mode);
 		return NULL;
 	}
 

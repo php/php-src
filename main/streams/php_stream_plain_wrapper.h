@@ -49,6 +49,6 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char * path, char * mode, int opt
 #define php_stream_open_wrapper_as_file(path, mode, options, opened_path) _php_stream_open_wrapper_as_file((path), (mode), (options), (opened_path) STREAMS_CC)
 
 /* parse standard "fopen" modes into open() flags */
-PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags);
+PHPAPI int php_stream_parse_fopen_modes(const char *mode);
 
 END_EXTERN_C()

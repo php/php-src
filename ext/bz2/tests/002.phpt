@@ -27,18 +27,18 @@ var_dump(bzopen($fp, "r"));
 $fp = fopen("bz_open_002.txt", "wb");
 var_dump(bzopen($fp, "w"));
 
-$fp = fopen("bz_open_002.txt", "br");
 try {
+	$fp = fopen("bz_open_002.txt", "br");
     var_dump(bzopen($fp, "r"));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }
 
-$fp = fopen("bz_open_002.txt", "br");
 try {
+	$fp = fopen("bz_open_002.txt", "br");
     var_dump(bzopen($fp, "w"));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }
 
 $fp = fopen("bz_open_002.txt", "r");
@@ -89,12 +89,8 @@ Warning: bzopen(): Cannot read from a stream opened in write only mode in %s on 
 bool(false)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
-
-Warning: fopen(bz_open_002.txt): Failed to open stream: `br' is not a valid mode for fopen in %s on line %d
-bzopen(): Argument #1 ($file) must be of type string or file-resource, false given
-
-Warning: fopen(bz_open_002.txt): Failed to open stream: `br' is not a valid mode for fopen in %s on line %d
-bzopen(): Argument #1 ($file) must be of type string or file-resource, false given
+ValueError: fopen(): Argument #2 ($mode) must be a valid mode
+ValueError: fopen(): Argument #2 ($mode) must be a valid mode
 
 Warning: bzopen(): cannot write to a stream opened in read only mode in %s on line %d
 bool(false)

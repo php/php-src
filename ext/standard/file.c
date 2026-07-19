@@ -747,6 +747,12 @@ PHP_FUNCTION(fopen)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
+	int open_flags = php_stream_parse_fopen_modes(mode);
+	if (UNEXPECTED(open_flags == -1)) {
+		zend_argument_value_error(2, "must be a valid mode");
+		RETURN_THROWS();
+	}
+
 	php_stream_error_operation_begin();
 	context = php_stream_context_from_zval(zcontext, 0);
 
