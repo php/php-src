@@ -169,8 +169,8 @@ php_user_cache_context php_user_cache_context_state = {
 	.clear_on_pressure = true,
 };
 bool php_user_cache_runtime_opted_in = false;
-/* Append-only; cgi/lsapi boundary partitions are added lazily on request
- * activation. Never mutated concurrently within a single SAPI process. */
+/* Append-only; cgi/lsapi boundary partitions are added lazily at request
+ * activation, and those SAPIs are single-threaded, so no locking is needed. */
 php_user_cache_partition *php_user_cache_partitions = NULL;
 
 static void user_cache_object_free(zend_object *obj);
@@ -482,32 +482,6 @@ static void user_cache_reset_class_entries(void)
 	php_user_cache_status_ce = NULL;
 	php_user_cache_pool_status_ce = NULL;
 	php_user_cache_ce = NULL;
-}
-
-static void user_cache_invalidate_context(php_user_cache_context *ctx)
-{
-	php_user_cache_context *prev_ctx;
-
-	prev_ctx = php_user_cache_activate_context(ctx);
-
-	if (UC_G(shm_size) == 0 || !ctx->storage.initialized) {
-		php_user_cache_restore_context(prev_ctx);
-
-		return;
-	}
-
-	if (!php_user_cache_wlock()) {
-		php_user_cache_restore_context(prev_ctx);
-
-		return;
-	}
-
-	if (php_user_cache_header_is_initialized_locked()) {
-		php_user_cache_clear_locked();
-	}
-
-	php_user_cache_unlock();
-	php_user_cache_restore_context(prev_ctx);
 }
 
 static bool user_cache_validate_non_negative(zend_long value, uint32_t arg_num)
