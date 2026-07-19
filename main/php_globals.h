@@ -158,12 +158,10 @@ struct _php_core_globals {
 	bool in_error_log;
 
 	bool allow_url_include;
-#ifdef PHP_WIN32
-	bool com_initialized;
-#endif
 	bool in_user_include;
 
 #ifdef PHP_WIN32
+	bool com_initialized;
 	bool windows_show_crt_warning;
 #endif
 
