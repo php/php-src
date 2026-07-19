@@ -265,6 +265,12 @@ PHP 8.6 UPGRADE NOTES
 - Fileinfo:
   . finfo_file() now works with remote streams.
 
+- GMP:
+  . Added gmp_prevprime() to get the largest prime smaller than the given
+    number. A ValueError is thrown if no such prime exists. This function is
+    available only when PHP is built against GNU MP 6.3.0 or later; it is not
+    available on official Windows builds using MPIR.
+
 - Intl:
   . Added Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue(),
     with the alias of locale_get_display_keyword() and
@@ -414,6 +420,9 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 6. New Functions
 ========================================
+
+- GMP:
+  . gmp_prevprime()
 
 - Intl:
   . grapheme_strrev()
