@@ -468,7 +468,6 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 	char *error = NULL;
 	php_output_handler *handler = NULL;
 	php_output_handler_alias_ctor_t alias = NULL;
-	php_output_handler_user_func_t *user = NULL;
 
 	switch (Z_TYPE_P(output_handler)) {
 		case IS_NULL:
@@ -480,22 +479,23 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				break;
 			}
 			ZEND_FALLTHROUGH;
-		default:
-			user = ecalloc(1, sizeof(php_output_handler_user_func_t));
-			if (SUCCESS == zend_fcall_info_init(output_handler, 0, &user->fci, &user->fcc, &handler_name, &error)) {
+		default: {
+			zend_fcall_info_cache *fcc = ecalloc(1, sizeof(*fcc));
+
+			if (zend_is_callable_ex(output_handler, NULL, 0, &handler_name, fcc, &error)) {
 				handler = php_output_handler_init(handler_name, chunk_size, PHP_OUTPUT_HANDLER_ABILITY_FLAGS(flags) | PHP_OUTPUT_HANDLER_USER);
-				ZVAL_COPY(&user->zoh, output_handler);
-				handler->func.user = user;
+				zend_fcc_addref(fcc);
+				handler->func.user_fcc = fcc;
 			} else {
-				efree(user);
-			}
-			if (error) {
+				efree(fcc);
+				ZEND_ASSERT(error);
 				php_error_docref("ref.outcontrol", E_WARNING, "%s", error);
 				efree(error);
 			}
 			if (handler_name) {
 				zend_string_release_ex(handler_name, 0);
 			}
+		}
 	}
 
 	return handler;
@@ -707,8 +707,8 @@ PHPAPI void php_output_handler_dtor(php_output_handler *handler)
 		efree(handler->buffer.data);
 	}
 	if (handler->flags & PHP_OUTPUT_HANDLER_USER) {
-		zval_ptr_dtor(&handler->func.user->zoh);
-		efree(handler->func.user);
+		zend_fcc_dtor(handler->func.user_fcc);
+		efree(handler->func.user_fcc);
 	}
 	if (handler->dtor && handler->opaq) {
 		handler->dtor(handler->opaq);
@@ -966,13 +966,12 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			/* ob_mode */
 			ZVAL_LONG(&ob_args[1], (zend_long) context->op);
 
-			/* Set FCI info */
-			handler->func.user->fci.param_count = 2;
-			handler->func.user->fci.params = ob_args;
-			handler->func.user->fci.retval = &retval;
-			handler->func.user->fci.consumed_args = zend_fci_consumed_arg(0);
+			zend_call_known_fcc(handler->func.user_fcc, &retval, 2, ob_args, NULL);
 
-			if (SUCCESS == zend_call_function(&handler->func.user->fci, &handler->func.user->fcc) && Z_TYPE(retval) != IS_UNDEF) {
+			zval_ptr_dtor(&ob_args[0]);
+			zval_ptr_dtor(&ob_args[1]);
+
+			if (Z_TYPE(retval) != IS_UNDEF) {
 				if (handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
 					// Make sure that we don't get lost in the current output buffer
 					// by disabling it
@@ -1027,8 +1026,6 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			}
 
 			/* Free arguments and return value */
-			zval_ptr_dtor(&ob_args[0]);
-			zval_ptr_dtor(&ob_args[1]);
 			zval_ptr_dtor(&retval);
 
 		} else {
