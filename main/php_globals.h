@@ -83,7 +83,7 @@ struct _php_core_globals {
 	bool open_basedir_modified;
 	char *extension_dir;
 	char *php_binary;
-	char *sys_temp_dir;
+	zend_string *sys_temp_dir;
 
 	char *upload_tmp_dir;
 	zend_long upload_max_filesize;
