@@ -38,14 +38,14 @@ test($obj, 'name');
 
 ?>
 --EXPECT--
-Can not use setRawValueWithoutLazyInitialization on static property Demo::$myStatic
-Can not use skipLazyInitialization on static property Demo::$myStatic
+Cannot use setRawValueWithoutLazyInitialization() on static property Demo::$myStatic
+Cannot use skipLazyInitialization() on static property Demo::$myStatic
 
-Can not use setRawValueWithoutLazyInitialization on virtual property Demo::$myVirtual
-Can not use skipLazyInitialization on virtual property Demo::$myVirtual
+Cannot use setRawValueWithoutLazyInitialization() on virtual property Demo::$myVirtual
+Cannot use skipLazyInitialization() on virtual property Demo::$myVirtual
 
-Can not use setRawValueWithoutLazyInitialization on dynamic property Demo::$myDynamic
-Can not use skipLazyInitialization on dynamic property Demo::$myDynamic
+Cannot use setRawValueWithoutLazyInitialization() on dynamic property Demo::$myDynamic
+Cannot use skipLazyInitialization() on dynamic property Demo::$myDynamic
 
-Can not use setRawValueWithoutLazyInitialization on internal class ReflectionClass
-Can not use skipLazyInitialization on internal class ReflectionClass
+Cannot use setRawValueWithoutLazyInitialization() on internal class ReflectionClass
+Cannot use skipLazyInitialization() on internal class ReflectionClass
