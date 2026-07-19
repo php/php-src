@@ -1196,7 +1196,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module) /
 		unsigned int num_const_tables = zend_get_constants_tables(const_tables);
 
 		for (unsigned int t = 0; t < num_const_tables; t++) {
-			ZEND_HASH_MAP_FOREACH_PTR(const_tables[t], constant) {
+			ZEND_HASH_MAP_FOREACH_PTR(const_tables[t], zend_constant *constant) {
 				if (ZEND_CONSTANT_MODULE_NUMBER(constant) == module->module_number) {
 					_const_string(&str_constants, constant->name, &constant->value, "    ");
 					num_constants++;
@@ -6910,7 +6910,7 @@ ZEND_METHOD(ReflectionExtension, getConstants)
 	HashTable *const_tables[2];
 	unsigned int num_const_tables = zend_get_constants_tables(const_tables);
 	for (unsigned int t = 0; t < num_const_tables; t++) {
-		ZEND_HASH_MAP_FOREACH_PTR(const_tables[t], constant) {
+		ZEND_HASH_MAP_FOREACH_PTR(const_tables[t], zend_constant *constant) {
 			if (module->module_number == ZEND_CONSTANT_MODULE_NUMBER(constant)) {
 				zval const_val;
 				ZVAL_COPY_OR_DUP(&const_val, &constant->value);
