@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
+- Opcache:
+  . Fixed GH-22693 (DT_TEXTREL in JIT-generated TLS access on x86_64).
+    (David Carlier)
+
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
     SO_LINGER options. (Weilin Du)
