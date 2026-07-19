@@ -30,12 +30,12 @@ int fpm_user_cache_init_main(void)
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		wp->user_cache_partition = php_user_cache_partition_create(wp->config->name);
 		if (wp->user_cache_partition == NULL) {
-			zlog(ZLOG_ERROR, "[pool %s] unable to allocate OPcache User Cache partition", wp->config->name);
+			zlog(ZLOG_ERROR, "[pool %s] unable to allocate UserCache partition", wp->config->name);
 			return -1;
 		}
 
 		if (!php_user_cache_partition_startup_storage(wp->user_cache_partition)) {
-			zlog(ZLOG_WARNING, "[pool %s] OPcache User Cache partition startup failed; User Cache will be unavailable", wp->config->name);
+			zlog(ZLOG_WARNING, "[pool %s] UserCache partition startup failed; UserCache will be unavailable", wp->config->name);
 		}
 	}
 
