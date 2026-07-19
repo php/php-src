@@ -136,7 +136,7 @@ struct _php_core_globals {
 	bool report_zend_debug;
 
 	int last_error_type;
-	int last_error_lineno;
+	uint32_t last_error_lineno;
 	zend_string *last_error_message;
 	zend_string *last_error_file;
 
