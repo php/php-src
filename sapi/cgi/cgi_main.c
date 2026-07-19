@@ -1221,7 +1221,7 @@ static void init_request_info(fcgi_request *request)
 			size_t script_path_translated_len;
 
 			if (!env_document_root && PG(doc_root)) {
-				env_document_root = CGI_PUTENV("DOCUMENT_ROOT", PG(doc_root));
+				env_document_root = CGI_PUTENV("DOCUMENT_ROOT", ZSTR_VAL(PG(doc_root)));
 				/* fix docroot */
 				TRANSLATE_SLASHES(env_document_root);
 			}
