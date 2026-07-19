@@ -136,6 +136,12 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added zend_compile_ast().
   . Added zend_check_type_ex().
   . Added zend_create_partial_closure().
+  . The php_stream_parse_fopen_modes() function was changed from the following
+    PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags);
+    to
+    PHPAPI int php_stream_parse_fopen_modes(const char *mode);
+    Instead of returning SUCCESS or FAILURE it now returns the open flags or -1
+    on failure.
 
 ========================
 2. Build system changes
