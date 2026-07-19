@@ -65,7 +65,7 @@ struct _php_core_globals {
 	bool ignore_repeated_source;
 	bool report_memleaks;
 
-	char *output_handler;
+	zend_string *output_handler;
 
 	zend_string *unserialize_callback_func;
 	zend_long serialize_precision;
