@@ -11,6 +11,9 @@ user_cache.shm_size=16M
 <?php
 
 $cache = UserCache\Cache::getPool('status-objects');
+$cache->clear();
+UserCache\Cache::getPool('status-objects-other')->clear();
+
 $status = UserCache\Cache::getStatus();
 $poolStatus = $cache->getPoolStatus();
 
