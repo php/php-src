@@ -1348,7 +1348,9 @@ static bool user_cache_header_boundary_identity_matches_locked(
  * snapshot of the reader/pin state is stable. */
 static bool user_cache_recovery_blocked_by_live_reference(const php_user_cache_header *header)
 {
-	const php_user_cache_graph_pin_slot *pin_slot;
+	/* Not const: zend_atomic_int_load_ex() takes a non-const pointer on
+	 * Windows because the Interlocked API has no read-only form. */
+	php_user_cache_graph_pin_slot *pin_slot;
 #ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
 	const php_user_cache_reader_slot *reader_slot;
 	uint64_t owner_start_time;
@@ -1376,7 +1378,7 @@ static bool user_cache_recovery_blocked_by_live_reference(const php_user_cache_h
 #endif
 
 	for (i = 0; i < PHP_USER_CACHE_GRAPH_PIN_SLOTS; i++) {
-		pin_slot = &header->graph_pin_slots[i];
+		pin_slot = (php_user_cache_graph_pin_slot *) &header->graph_pin_slots[i];
 		if (zend_atomic_int_load_ex(&pin_slot->pin_count) == 0) {
 			continue;
 		}
