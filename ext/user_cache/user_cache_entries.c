@@ -8,7 +8,7 @@
    |                                                                      |
    | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Author: Go Kudo <zeriyoshi@php.net>.                                 |
+   | Author: Go Kudo <zeriyoshi@php.net>                                  |
    +----------------------------------------------------------------------+
 */
 
