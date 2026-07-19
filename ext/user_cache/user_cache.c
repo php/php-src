@@ -2147,7 +2147,7 @@ static php_user_cache_boundary_partition *user_cache_create_boundary_partition(
 
 	if (php_user_cache_boundary_partition_count >= PHP_USER_CACHE_MAX_BOUNDARY_PARTITIONS) {
 		if (!php_user_cache_boundary_limit_logged) {
-			log_message("User Cache disabled for this request because the cache boundary partition limit was reached");
+			log_message("UserCache disabled for this request because the cache boundary partition limit was reached");
 			php_user_cache_boundary_limit_logged = true;
 		}
 
@@ -2401,7 +2401,7 @@ ZEND_API php_user_cache_partition *php_user_cache_boundary_partition_get(
 	if (!php_user_cache_partition_startup_storage(entry->partition) &&
 		!php_user_cache_boundary_startup_failed_logged
 	) {
-		log_message("User Cache partition startup failed; User Cache will be unavailable");
+		log_message("UserCache partition startup failed; UserCache will be unavailable");
 		php_user_cache_boundary_startup_failed_logged = true;
 	}
 
@@ -3473,7 +3473,7 @@ static PHP_RSHUTDOWN_FUNCTION(cache)
 static PHP_MINFO_FUNCTION(cache)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "User Cache support", "enabled");
+	php_info_print_table_row(2, "UserCache support", "enabled");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
