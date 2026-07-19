@@ -76,7 +76,7 @@ struct _php_core_globals {
 
 	char *error_log;
 
-	char *doc_root;
+	zend_string *doc_root;
 	char *user_dir;
 	char *include_path;
 	char *open_basedir;

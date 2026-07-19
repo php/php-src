@@ -1083,7 +1083,7 @@ static void init_request_info(void)
 			int script_path_translated_len;
 
 			if (!env_document_root && PG(doc_root)) {
-				env_document_root = FCGI_PUTENV(request, "DOCUMENT_ROOT", PG(doc_root));
+				env_document_root = FCGI_PUTENV(request, "DOCUMENT_ROOT", ZSTR_VAL(PG(doc_root)));
 			}
 
 			if (!apache_was_here && env_path_translated != NULL && env_redirect_url != NULL &&
