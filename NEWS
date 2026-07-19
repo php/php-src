@@ -35,6 +35,11 @@ PHP                                                                        NEWS
     TCP_USER_TIMEOUT, and SO_LINGER options. (Weilin Du)
   . Fixed various memory related issues in ext/sockets. (David Carlier)
 
+- Streams:
+  . Added a new IO copy API used by php_stream_copy_to_stream_ex() that
+    leverages platform primitives (sendfile, splice, copy_file_range,
+    TransmitFile) for faster stream copying. (Jakub Zelenka, David Carlier)
+
 16 Jul 2026, PHP 8.6.0alpha2
 
 - Core:
