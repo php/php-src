@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
+- DOM:
+  . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
+    declares a default value for the attribute). (iliaal)
+
 - Sockets:
   . Fixed various memory related issues in ext/sockets. (David Carlier)
 
