@@ -55,33 +55,11 @@ namespace {
         public function traitMethod2(): int {}
     }
 
-    trait _ZendTestTraitWithUnionProp
-    {
-        public int|string $unionProp = 42;
-    }
-
-    class _ZendTestClassWithTrait
-    {
-        use _ZendTestTraitForInternalClass;
-    }
-
-    class _ZendTestClassWithMultipleTraits
+    class _ZendTestClassWithTraits
     {
         use _ZendTestTraitForInternalClass;
         use _ZendTestTraitForInternalClass2;
     }
-
-    class _ZendTestClassWithUnionTypeTrait
-    {
-        use _ZendTestTraitWithUnionProp;
-    }
-
-    class _ZendTestNotATraitForInternalTraits {}
-
-    class _ZendTestInternalTraitsDriver {}
-
-    function zend_test_use_internal_traits_zero(): void {}
-    function zend_test_use_internal_traits_not_trait(): void {}
 
     /** @alias _ZendTestClassAlias */
     class _ZendTestClass implements _ZendTestInterface {

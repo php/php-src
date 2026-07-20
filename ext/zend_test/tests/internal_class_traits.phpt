@@ -1,15 +1,15 @@
 --TEST--
-Test internal class using multiple traits via zend_class_use_internal_traits
+Test traits in internal classes
 --EXTENSIONS--
 zend_test
 --FILE--
 <?php
 
 // Constants from both traits
-var_dump(_ZendTestClassWithMultipleTraits::ZEND_TRAIT_CONST);
-var_dump(_ZendTestClassWithMultipleTraits::ZEND_TRAIT_CONST2);
+var_dump(_ZendTestClassWithTraits::ZEND_TRAIT_CONST);
+var_dump(_ZendTestClassWithTraits::ZEND_TRAIT_CONST2);
 
-$obj = new _ZendTestClassWithMultipleTraits();
+$obj = new _ZendTestClassWithTraits();
 
 // Property from trait 1
 var_dump($obj->traitProp);
@@ -19,10 +19,10 @@ var_dump($obj->traitMethod());
 var_dump($obj->traitMethod2());
 
 // Static property from trait 2
-var_dump(_ZendTestClassWithMultipleTraits::$staticTraitProp);
+var_dump(_ZendTestClassWithTraits::$staticTraitProp);
 
 // Reflection should show both traits
-$rc = new ReflectionClass(_ZendTestClassWithMultipleTraits::class);
+$rc = new ReflectionClass(_ZendTestClassWithTraits::class);
 $traits = $rc->getTraitNames();
 sort($traits);
 var_dump(count($traits));
