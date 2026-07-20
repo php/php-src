@@ -355,6 +355,7 @@ static zend_never_inline zend_result ZEND_FASTCALL _zendi_try_convert_scalar_to_
 			}
 			ZEND_ASSERT(Z_TYPE_P(holder) == IS_LONG || Z_TYPE_P(holder) == IS_DOUBLE);
 			return SUCCESS;
+		case IS_UNDEF:
 		case IS_RESOURCE:
 		case IS_ARRAY:
 			return FAILURE;
@@ -556,6 +557,7 @@ ZEND_API void ZEND_FASTCALL convert_to_long(zval *op) /* {{{ */
 
 try_again:
 	switch (Z_TYPE_P(op)) {
+		case IS_UNDEF:
 		case IS_NULL:
 		case IS_FALSE:
 			ZVAL_LONG(op, 0);
@@ -617,6 +619,7 @@ ZEND_API void ZEND_FASTCALL convert_to_double(zval *op) /* {{{ */
 
 try_again:
 	switch (Z_TYPE_P(op)) {
+		case IS_UNDEF:
 		case IS_NULL:
 		case IS_FALSE:
 			ZVAL_DOUBLE(op, 0.0);
@@ -689,6 +692,7 @@ try_again:
 		case IS_FALSE:
 		case IS_TRUE:
 			break;
+		case IS_UNDEF:
 		case IS_NULL:
 			ZVAL_FALSE(op);
 			break;
@@ -1024,6 +1028,7 @@ ZEND_API double ZEND_FASTCALL zval_get_double_func(const zval *op) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
+		case IS_UNDEF:
 		case IS_NULL:
 		case IS_FALSE:
 			return 0.0;
