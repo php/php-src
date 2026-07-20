@@ -326,7 +326,7 @@ PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
 }
 
 static void php_stream_error_add(zend_enum_StreamErrorCode code, const char *wrapper_name,
-		zend_string *message, const char *docref, char *param, int severity, bool terminating)
+		zend_string *message, const char *docref, int severity, bool terminating)
 {
 	php_stream_error_operation *op = FG(stream_error_state).current_operation;
 	ZEND_ASSERT(op != NULL);
@@ -335,7 +335,7 @@ static void php_stream_error_add(zend_enum_StreamErrorCode code, const char *wra
 	entry->message = message;
 	entry->code = code;
 	entry->wrapper_name = wrapper_name ? estrdup(wrapper_name) : NULL;
-	entry->param = param;
+	entry->param = NULL;
 	entry->docref = docref ? estrdup(docref) : NULL;
 	entry->severity = severity;
 	entry->terminating = terminating;
@@ -575,15 +575,15 @@ PHPAPI void php_stream_error_operation_abort(void)
 /* Wrapper error reporting */
 
 static void php_stream_wrapper_error_internal(const char *wrapper_name, php_stream_context *context,
-		const char *docref, int options, int severity, bool terminating,
-		zend_enum_StreamErrorCode code, char *param, zend_string *message)
+		const char *docref, int severity, bool terminating,
+		zend_enum_StreamErrorCode code, zend_string *message)
 {
 	bool implicit_operation = (FG(stream_error_state).current_operation == NULL);
 	if (implicit_operation) {
 		php_stream_error_operation_begin();
 	}
 
-	php_stream_error_add(code, wrapper_name, message, docref, param, severity, terminating);
+	php_stream_error_add(code, wrapper_name, message, docref, severity, terminating);
 
 	if (implicit_operation) {
 		php_stream_error_operation_end(context);
@@ -604,7 +604,7 @@ PHPAPI void php_stream_wrapper_error_with_name(const char *wrapper_name,
 	va_end(args);
 
 	php_stream_wrapper_error_internal(
-			wrapper_name, context, docref, options, severity, terminating, code, NULL, message);
+			wrapper_name, context, docref, severity, terminating, code, message);
 }
 
 PHPAPI void php_stream_wrapper_error(php_stream_wrapper *wrapper, php_stream_context *context,
@@ -623,7 +623,7 @@ PHPAPI void php_stream_wrapper_error(php_stream_wrapper *wrapper, php_stream_con
 	const char *wrapper_name = PHP_STREAM_ERROR_WRAPPER_NAME(wrapper);
 
 	php_stream_wrapper_error_internal(
-			wrapper_name, context, docref, options, severity, terminating, code, NULL, message);
+			wrapper_name, context, docref, severity, terminating, code, message);
 }
 
 /* Stream error reporting */
@@ -641,8 +641,8 @@ PHPAPI void php_stream_error(php_stream *stream, const char *docref, int severit
 
 	php_stream_context *context = PHP_STREAM_CONTEXT(stream);
 
-	php_stream_wrapper_error_internal(wrapper_name, context, docref, REPORT_ERRORS, severity,
-			terminating, code, NULL, message);
+	php_stream_wrapper_error_internal(wrapper_name, context, docref, severity,
+			terminating, code, message);
 }
 
 /* Legacy wrapper error logging */
@@ -705,7 +705,7 @@ PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper,
 
 	if (options & REPORT_ERRORS) {
 		php_stream_wrapper_error_internal(
-				wrapper_name, context, NULL, options, severity, terminating, code, NULL, message);
+				wrapper_name, context, NULL, severity, terminating, code, message);
 	} else {
 		php_stream_wrapper_log_store_error(
 				message, code, wrapper_name, severity, terminating);
@@ -784,8 +784,8 @@ PHPAPI void php_stream_display_wrapper_name_errors(const char *wrapper_name,
 
 	zend_string *message = strpprintf(0, "%s: %s", caption, msg);
 
-	php_stream_wrapper_error_internal(wrapper_name, context, NULL, REPORT_ERRORS, E_WARNING, true,
-			code, NULL, message);
+	php_stream_wrapper_error_internal(wrapper_name, context, NULL, E_WARNING, true,
+			code, message);
 
 	if (free_msg) {
 		efree(msg);
