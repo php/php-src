@@ -42,6 +42,8 @@
 # define PHP_OS_FAMILY			"Darwin"
 #elif defined(__sun__)
 # define PHP_OS_FAMILY			"Solaris"
+#elif defined(_AIX)
+# define PHP_OS_FAMILY			"AIX"
 #elif defined(__linux__)
 # define PHP_OS_FAMILY			"Linux"
 #else
