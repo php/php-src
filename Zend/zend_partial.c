@@ -588,6 +588,7 @@ static zend_ast *zp_compile_forwarding_call(
 			if (Z_TYPE(default_value) == IS_CONSTANT_AST) {
 				/* Must dup AST because we are going to destroy it */
 				default_value_ast = zend_ast_dup(Z_ASTVAL(default_value));
+				zval_ptr_dtor_nogc(&default_value);
 			} else {
 				default_value_ast = zend_ast_create_zval(&default_value);
 			}

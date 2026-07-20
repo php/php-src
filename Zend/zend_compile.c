@@ -11519,11 +11519,24 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void zend_emit_fetch_constant(znode *result, zend_string *resolved_name, bool unqualified_in_namespace)
+{
+	zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, NULL);
+	opline->op2_type = IS_CONST;
+
+	if (unqualified_in_namespace) {
+		opline->op1.num = IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE;
+		opline->op2.constant = zend_add_const_name_literal(resolved_name, true);
+	} else {
+		opline->op1.num = 0;
+		opline->op2.constant = zend_add_const_name_literal(resolved_name, false);
+	}
+	opline->extended_value = zend_alloc_cache_slot();
+}
+
 static void zend_compile_const(znode *result, const zend_ast *ast) /* {{{ */
 {
 	zend_ast *name_ast = ast->child[0];
-
-	zend_op *opline;
 
 	bool is_fully_qualified;
 	zend_string *orig_name = zend_ast_get_str(name_ast);
@@ -11553,21 +11566,18 @@ static void zend_compile_const(znode *result, const zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, NULL);
-	opline->op2_type = IS_CONST;
-
-	if (is_fully_qualified || !FC(current_namespace)) {
-		opline->op1.num = 0;
-		opline->op2.constant = zend_add_const_name_literal(
-			resolved_name, false);
-	} else {
-		opline->op1.num = IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE;
-		opline->op2.constant = zend_add_const_name_literal(
-			resolved_name, true);
-	}
-	opline->extended_value = zend_alloc_cache_slot();
+	zend_emit_fetch_constant(result, resolved_name,
+		!is_fully_qualified && FC(current_namespace));
 }
 /* }}} */
+
+static void zend_compile_constant(znode *result, zend_ast *ast)
+{
+	zend_string *name = zend_ast_get_constant_name(ast);
+
+	zend_emit_fetch_constant(result, zend_string_copy(name),
+		(ast->attr & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) != 0);
+}
 
 static void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 {
@@ -12435,6 +12445,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_CONST:
 			zend_compile_const(result, ast);
+			return;
+		case ZEND_AST_CONSTANT:
+			zend_compile_constant(result, ast);
 			return;
 		case ZEND_AST_CLASS_CONST:
 			zend_compile_class_const(result, ast);
