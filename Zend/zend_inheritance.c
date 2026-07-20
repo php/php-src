@@ -3022,11 +3022,6 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 
 ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int num_traits, ...) /* {{{ */
 {
-	zend_class_entry *trait_entry;
-	va_list trait_list;
-	zend_class_entry **traits;
-	zend_function *fn;
-
 	ZEND_ASSERT(class_entry->ce_flags & ZEND_ACC_LINKED);
 	ZEND_ASSERT(num_traits >= 0);
 
@@ -3034,18 +3029,19 @@ ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int 
 		return;
 	}
 
-	traits = safe_emalloc(num_traits, sizeof(zend_class_entry *), 0);
-	class_entry->trait_names = safe_pemalloc(num_traits, sizeof(zend_class_name), 0, 1);
+	zend_class_entry **traits = safe_pemalloc(num_traits, sizeof(zend_class_entry *), 0, /* persistent */ true);
+	class_entry->trait_names = safe_pemalloc(num_traits, sizeof(zend_class_name), 0, /* persistent */ true);
 	class_entry->num_traits = num_traits;
 
+	va_list trait_list;
 	va_start(trait_list, num_traits);
 	for (int i = 0; i < num_traits; i++) {
-		trait_entry = va_arg(trait_list, zend_class_entry *);
+		zend_class_entry *trait_entry = va_arg(trait_list, zend_class_entry *);
 		class_entry->trait_names[i].name = zend_string_copy(trait_entry->name);
-		class_entry->trait_names[i].lc_name = zend_string_tolower_ex(zend_string_copy(trait_entry->name), 1);
+		class_entry->trait_names[i].lc_name = zend_string_tolower_ex(zend_string_copy(trait_entry->name), /* persistent */ true);
 
 		if (UNEXPECTED(!(trait_entry->ce_flags & ZEND_ACC_TRAIT))) {
-			efree(traits);
+			free(traits);
 			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot use %s - it is not a trait",
 				ZSTR_VAL(class_entry->name), ZSTR_VAL(trait_entry->name));
 		}
@@ -3055,16 +3051,14 @@ ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int 
 
 	bool contains_abstract_methods = false;
 	zend_do_traits_method_binding(class_entry, traits, NULL, NULL, false, &contains_abstract_methods);
-
 	zend_do_traits_constant_binding(class_entry, traits);
-
 	zend_do_traits_property_binding(class_entry, traits);
 
-	ZEND_HASH_MAP_FOREACH_PTR(&class_entry->function_table, fn) {
+	ZEND_HASH_MAP_FOREACH_PTR(&class_entry->function_table, zend_function *fn) {
 		zend_fixup_trait_method(fn, class_entry);
 	} ZEND_HASH_FOREACH_END();
 
-	efree(traits);
+	free(traits);
 
 	/* TODO: Verify abstract trait method implementation requirements are enforced. */
 }
