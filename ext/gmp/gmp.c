@@ -1087,19 +1087,24 @@ GMP_UNARY_OP_FUNCTION(nextprime);
 ZEND_FUNCTION(gmp_prevprime)
 {
 	mpz_ptr gmpnum_a, gmpnum_result;
+	mpz_t prevprime_result;
 	int res;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
 	ZEND_PARSE_PARAMETERS_END();
 
-	INIT_GMP_RETVAL(gmpnum_result);
-	res = mpz_prevprime(gmpnum_result, gmpnum_a);
+	mpz_init(prevprime_result);
+	res = mpz_prevprime(prevprime_result, gmpnum_a);
 	if (!res) {
-		zval_ptr_dtor(return_value);
+		mpz_clear(prevprime_result);
 		zend_argument_value_error(1, "must be greater than 2");
 		RETURN_THROWS();
 	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	mpz_set(gmpnum_result, prevprime_result);
+	mpz_clear(prevprime_result);
 }
 /* }}} */
 #endif
