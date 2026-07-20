@@ -96,7 +96,6 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . ZSTR_INIT_LITERAL(), zend_string_starts_with_literal(), and
     zend_string_starts_with_literal_ci() now support strings containing NUL
     bytes. Passing non-literal char* is no longer supported.
-  . Added zend_string_equals_cstr_ci().
   . The zend_active_function{_ex}() functions now return a const zend_function
     pointer.
   . zend_function.arg_info is now always a zend_arg_info*. Before, it was a
@@ -111,6 +110,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . EG(in_autoload) was renamed to EG(autoload_current_classnames) and no
     longer is a pointer, but a directly embedded HashTable struct.
   . Extended php_stream_filter_ops with seek method.
+  . zend_argument_error_variadic() now takes a new 'function' parameter.
 
 - Added:
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
@@ -134,7 +134,6 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_reflection_property_set_raw_value() to expose the functionality of
     ReflectionProperty::setRawValueWithoutLazyInitialization() and
     ReflectionProperty::setRawValue() to C extensions.
-  . zend_argument_error_variadic() now takes a new 'function' parameter.
   . Added zend_argument_error_ex(), zend_argument_type_error_ex(),
     zend_argument_value_error_ex().
   . Added zend_ast_dup().
@@ -145,6 +144,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     file descriptors using the most efficient platform primitive available
     (sendfile, splice, copy_file_range, TransmitFile), and is now used by
     php_stream_copy_to_stream_ex(). The mmap-based copy fallback was removed.
+  . Added zend_string_equals_cstr_ci().
 
 ========================
 2. Build system changes
