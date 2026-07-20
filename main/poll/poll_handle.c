@@ -20,13 +20,14 @@ static php_socket_t php_poll_handle_default_get_fd(php_poll_handle_object *handl
 {
 	zval retval;
 
-	zend_function *method = zend_hash_str_find_ptr_lc(&handle->std.ce->function_table, ZEND_STRL("getFileDescriptor"));
+	/* Grab getFileDescriptor() method pointer which is stored in lowercase in the function table */
+	zend_function *method = zend_hash_str_find_ptr_lc(&handle->std.ce->function_table, ZEND_STRL("getfiledescriptor"));
 	ZEND_ASSERT(method && "no default method???");
 
 	/* Call getFileDescriptor() method */
 	zend_call_known_function(method, &handle->std, handle->std.ce, &retval, 0, NULL, NULL);
 
-
+	/* No need to deref the return value as the class is final and thus the method cannot be changed to return by-ref */
 	if (EXPECTED(Z_TYPE(retval) == IS_LONG)) {
 		php_socket_t fd = Z_LVAL(retval) < 0 ? SOCK_ERR : (php_socket_t) Z_LVAL(retval);
 		/* No need to clean the retval as we know it is an integer, and thus it's just on the stack */
