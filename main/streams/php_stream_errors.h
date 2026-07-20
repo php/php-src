@@ -73,7 +73,6 @@ typedef struct _php_stream_error_entry {
 	zend_string *message;
 	zend_enum_StreamErrorCode code;
 	char *wrapper_name;
-	char *param;
 	char *docref;
 	int severity;
 	bool terminating;

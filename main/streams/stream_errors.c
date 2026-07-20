@@ -67,12 +67,8 @@ static void php_stream_error_create_object(zval *zv, php_stream_error_entry *ent
 	zend_update_property_bool(
 			php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("terminating"), entry->terminating);
 
-	if (entry->param) {
-		zend_update_property_string(
-				php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("param"), entry->param);
-	} else {
-		zend_update_property_null(php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("param"));
-	}
+	/* TODO: Remove property */
+	zend_update_property_null(php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("param"));
 }
 
 /* Create array of StreamError objects from error chain */
@@ -213,7 +209,6 @@ static void php_stream_error_entry_free(php_stream_error_entry *entry)
 		php_stream_error_entry *next = entry->next;
 		zend_string_release(entry->message);
 		efree(entry->wrapper_name);
-		efree(entry->param);
 		efree(entry->docref);
 		efree(entry);
 		entry = next;
@@ -335,7 +330,6 @@ static void php_stream_error_add(zend_enum_StreamErrorCode code, const char *wra
 	entry->message = message;
 	entry->code = code;
 	entry->wrapper_name = wrapper_name ? estrdup(wrapper_name) : NULL;
-	entry->param = NULL;
 	entry->docref = docref ? estrdup(docref) : NULL;
 	entry->severity = severity;
 	entry->terminating = terminating;
@@ -399,15 +393,9 @@ static void php_stream_report_errors(php_stream_context *context, php_stream_err
 {
 	switch (error_mode) {
 		case PHP_STREAM_ERROR_MODE_ERROR: {
-			php_stream_error_entry *entry = op->first_error;
+			const php_stream_error_entry *entry = op->first_error;
 			while (entry) {
-				if (entry->param) {
-					php_error_docref1(entry->docref, entry->param, entry->severity, "%s",
-							ZSTR_VAL(entry->message));
-				} else {
-					php_error_docref(
-							entry->docref, entry->severity, "%s", ZSTR_VAL(entry->message));
-				}
+				php_error_docref(entry->docref, entry->severity, "%s", ZSTR_VAL(entry->message));
 				entry = entry->next;
 			}
 			break;
@@ -652,7 +640,6 @@ static void php_stream_error_entry_dtor_legacy(void *error)
 	php_stream_error_entry *entry = *(php_stream_error_entry **) error;
 	zend_string_release(entry->message);
 	efree(entry->wrapper_name);
-	efree(entry->param);
 	efree(entry->docref);
 	efree(entry);
 }
@@ -671,7 +658,6 @@ static void php_stream_wrapper_log_store_error(zend_string *message, zend_enum_S
 	entry->message = message;
 	entry->code = code;
 	entry->wrapper_name = wrapper_name ? estrdup(wrapper_name) : NULL;
-	entry->param = NULL;
 	entry->severity = severity;
 	entry->terminating = terminating;
 
