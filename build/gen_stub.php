@@ -4488,6 +4488,9 @@ class FileInfo {
                             $classStmt->expr ? $prettyPrinter->prettyPrintExpr($classStmt->expr) : null,
                         );
                     } else if ($classStmt instanceof TraitUse) {
+                        if ($classStmt->adaptations) {
+                            throw new Exception("Trait adaptations are not supported");
+                        }
                         foreach ($classStmt->traits as $trait) {
                             $traitUses[] = $trait;
                         }
