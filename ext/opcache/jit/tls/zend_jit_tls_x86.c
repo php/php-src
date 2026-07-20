@@ -110,6 +110,12 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 		/* Load thread pointer address */
 		"movl   %%gs:0, %%ebx\n"
 		: "=a" (t_addr), "=S" (code), "=b" (thread_pointer)
+		:
+		/* call may clobber volatile registers */
+		: "ecx", "edx",
+		  "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)",
+		  "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7",
+		  "cc", "memory"
 	);
 
 	ZEND_ASSERT(t_addr == &_tsrm_ls_cache);
