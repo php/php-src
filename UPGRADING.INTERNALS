@@ -145,6 +145,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     (sendfile, splice, copy_file_range, TransmitFile), and is now used by
     php_stream_copy_to_stream_ex(). The mmap-based copy fallback was removed.
   . Added zend_string_equals_cstr_ci().
+  . Added zend_string_ends_with() and related variants.
 
 ========================
 2. Build system changes
