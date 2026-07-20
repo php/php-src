@@ -25,5 +25,5 @@ bool(false)
 string(126) "IntlCalendar::setTimeZone(): time zone id 'WEST' extracted from ext/date DateTimeZone not recognized: U_ILLEGAL_ARGUMENT_ERROR"
 string(16) "Europe/Amsterdam"
 bool(false)
-string(102) "IntlCalendar::setTimeZone(): object has an time zone offset that's too large: U_ILLEGAL_ARGUMENT_ERROR"
+string(102) "IntlCalendar::setTimeZone(): object has a time zone offset that is too large: U_ILLEGAL_ARGUMENT_ERROR"
 string(16) "Europe/Amsterdam"

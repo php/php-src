@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed GMP integer string parsing to reject strings containing NUL bytes
     instead of silently truncating them. (Weilin Du)
 
+- Intl:
+  . Fixed grammatical issues in Normalizer invalid form and IntlCalendar time
+    zone offset error messages. (Weilin Du)
+
 - ODBC:
   . Fixed bug GH-22668 (Heap buffer over-read when a column value exceeds the
     driver-reported display size). (iliaal)
