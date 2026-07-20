@@ -262,7 +262,8 @@ PHP 8.6 UPGRADE NOTES
 
 - GMP:
   . Added gmp_prevprime() to get the largest prime smaller than the given
-    number. Requires GNU MP 6.3.0 or later.
+    number. A ValueError is thrown if no such prime exists. Requires GNU MP
+    6.3.0 or later.
 
 - Intl:
   . Added Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue(),

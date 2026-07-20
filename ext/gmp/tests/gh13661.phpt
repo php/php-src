@@ -11,41 +11,24 @@ if (!function_exists('gmp_prevprime')) {
 --FILE--
 <?php
 
-var_dump(gmp_prevprime(-1));
-var_dump(gmp_prevprime(0));
-var_dump(gmp_prevprime(1));
-var_dump(gmp_prevprime(2));
-var_dump(gmp_prevprime(3));
-var_dump(gmp_prevprime(4));
-var_dump(gmp_prevprime(10000));
+foreach ([-1, 0, 1, 2] as $value) {
+    try {
+        var_dump(gmp_prevprime($value));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+}
+
+var_dump(gmp_strval(gmp_prevprime(3)));
+var_dump(gmp_strval(gmp_prevprime(4)));
+var_dump(gmp_strval(gmp_prevprime(10000)));
 
 ?>
---EXPECTF--
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(1) "0"
-}
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(1) "0"
-}
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(1) "0"
-}
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(1) "0"
-}
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(1) "2"
-}
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(1) "3"
-}
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(4) "9973"
-}
+--EXPECT--
+gmp_prevprime(): Argument #1 ($num) must be greater than 2
+gmp_prevprime(): Argument #1 ($num) must be greater than 2
+gmp_prevprime(): Argument #1 ($num) must be greater than 2
+gmp_prevprime(): Argument #1 ($num) must be greater than 2
+string(1) "2"
+string(1) "3"
+string(4) "9973"

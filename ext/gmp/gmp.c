@@ -1084,7 +1084,24 @@ GMP_UNARY_OP_FUNCTION(nextprime);
 
 #ifdef HAVE___GMPZ_PREVPRIME
 /* {{{ Finds previous prime of a */
-GMP_UNARY_OP_FUNCTION(prevprime);
+ZEND_FUNCTION(gmp_prevprime)
+{
+	mpz_ptr gmpnum_a, gmpnum_result;
+	int res;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
+	ZEND_PARSE_PARAMETERS_END();
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	res = mpz_prevprime(gmpnum_result, gmpnum_a);
+	if (!res) {
+		zval_ptr_dtor(return_value);
+		zend_argument_value_error(1, "must be greater than 2");
+		RETURN_THROWS();
+	}
+}
+/* }}} */
 #endif
 
 /* Add a and b */
