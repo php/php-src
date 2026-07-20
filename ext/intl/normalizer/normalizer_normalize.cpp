@@ -115,7 +115,7 @@ U_CFUNC PHP_FUNCTION( normalizer_normalize )
 		case NORMALIZER_FORM_KC_CF:
 			break;
 		default:
-			zend_argument_value_error(2, "must be a a valid normalization form");
+			zend_argument_value_error(2, "must be a valid normalization form");
 			RETURN_THROWS();
 	}
 
@@ -232,7 +232,7 @@ U_CFUNC PHP_FUNCTION( normalizer_is_normalized )
 		case NORMALIZER_FORM_KC_CF:
 			break;
 		default:
-			zend_argument_value_error(2, "must be a a valid normalization form");
+			zend_argument_value_error(2, "must be a valid normalization form");
 			RETURN_THROWS();
 	}
 
