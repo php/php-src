@@ -66,9 +66,6 @@ static void php_stream_error_create_object(zval *zv, php_stream_error_entry *ent
 
 	zend_update_property_bool(
 			php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("terminating"), entry->terminating);
-
-	/* TODO: Remove property */
-	zend_update_property_null(php_ce_stream_error, Z_OBJ_P(zv), ZEND_STRL("param"));
 }
 
 /* Create array of StreamError objects from error chain */
