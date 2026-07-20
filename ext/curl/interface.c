@@ -32,11 +32,6 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 
-/* As of curl 7.11.1 this is no longer defined inside curl.h */
-#ifndef HttpPost
-#define HttpPost curl_httppost
-#endif
-
 #include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -1110,7 +1105,7 @@ void init_curl_handle(php_curl *ch)
 
 	memset(&ch->err, 0, sizeof(struct _php_curl_error));
 
-	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost *), (llist_dtor_func_t)curl_free_post,   0);
+	zend_llist_init(&ch->to_free->post,  sizeof(struct curl_httppost *), (llist_dtor_func_t)curl_free_post,   0);
 	zend_llist_init(&ch->to_free->stream, sizeof(struct mime_data_cb_arg *), (llist_dtor_func_t)curl_free_cb_arg, 0);
 
 	zend_hash_init(&ch->to_free->slist, 4, NULL, curl_free_slist, 0);
