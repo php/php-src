@@ -601,20 +601,21 @@ PHP_FUNCTION(stream_filter_register)
 		RETURN_THROWS();
 	}
 
+	/* Register the factory first; if that fails, don't (re)create the map,
+	 * which would leak during shutdown re-registration. */
+	if (php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	if (!BG(user_filter_map)) {
 		BG(user_filter_map) = (HashTable*) emalloc(sizeof(HashTable));
 		/* We don't need a destructor as we are only storing a CE which should be never modified */
 		zend_hash_init(BG(user_filter_map), 8, NULL, NULL, 0);
 	}
 
-	if (zend_hash_add_ptr(BG(user_filter_map), filtername, ce) != NULL) {
-		if (php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == SUCCESS) {
-			RETURN_TRUE;
-		}
+	/* The factory has just been (re)registered, so keep the map in sync. */
+	zend_hash_update_ptr(BG(user_filter_map), filtername, ce);
 
-		zend_hash_del(BG(user_filter_map), filtername);
-	}
-
-	RETURN_FALSE;
+	RETURN_TRUE;
 }
 /* }}} */
