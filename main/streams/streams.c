@@ -2130,9 +2130,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	if (!wrapper->wops->stream_opener) {
-		php_stream_wrapper_warn(wrapper, context, options,
-			NoOpener,
-			"wrapper does not support stream open");
+		php_stream_wrapper_warn(wrapper, context, options, NoOpener,
+				"Failed to open stream: wrapper does not support stream open");
 		if (resolved_path) {
 			zend_string_release_ex(resolved_path, 0);
 		}
@@ -2165,19 +2164,15 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	/* if the caller asked for a persistent stream but the wrapper did not
 	 * return one, force an error here */
 	if (persistent && !stream->is_persistent) {
-		php_stream_wrapper_log_warn(wrapper, context, options & ~REPORT_ERRORS,
-				PersistentNotSupported,
-				"wrapper does not support persistent streams");
+		php_stream_wrapper_warn(wrapper, context, options, PersistentNotSupported,
+				"Failed to open stream: wrapper does not support persistent streams");
 		php_stream_close(stream);
 		if (options & REPORT_ERRORS) {
-			php_stream_display_wrapper_name_errors(wrapper_name, context, PHP_STREAM_EC(OpenFailed),
-					"Failed to open stream");
 			if (opened_path && *opened_path) {
 				zend_string_release_ex(*opened_path, 0);
 				*opened_path = NULL;
 			}
 		}
-		php_stream_tidy_wrapper_name_error_log(wrapper_name);
 		pefree(wrapper_name, persistent);
 		if (resolved_path) {
 			zend_string_release_ex(resolved_path, 0);
@@ -2235,7 +2230,6 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 				php_stream_wrapper_warn(wrapper, context, options,
 						SeekNotSupported,
 						"could not make seekable - %s", path);
-				php_stream_tidy_wrapper_name_error_log(wrapper_name);
 				pefree(wrapper_name, persistent);
 				if (resolved_path) {
 					zend_string_release_ex(resolved_path, 0);
