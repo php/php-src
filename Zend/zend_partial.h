@@ -36,7 +36,7 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 		const zend_array *named_positions,
 		zend_string *declaring_filename,
 		const uint32_t *declaring_lineno_ptr, void **cache_slot,
-		zend_string *pfa_name, uint32_t flags);
+		zend_string *pfa_name, uint32_t flags, uint32_t const_args);
 
 void zend_partial_op_array_dtor(zval *pDest);
 
