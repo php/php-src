@@ -566,6 +566,8 @@ PHP 8.6 UPGRADE NOTES
 - Core:
   . In case of a hard OOM PHP now calls abort() instead of exit(1), changing
     the exit code to 134 and possibly creating a core dump.
+  . The PHP_OS_FAMILY constant has an AIX value for when running on AIX or
+    IBM i via PASE.
 
 ========================================
 14. Performance Improvements
