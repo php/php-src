@@ -2032,6 +2032,7 @@ PHP_FUNCTION(socket_get_option)
 #endif
 
 	optlen = sizeof(other_val);
+	other_val = 0;
 
 	if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&other_val, &optlen) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
@@ -2057,6 +2058,10 @@ PHP_FUNCTION(socket_set_option)
 	DWORD						timeout;
 #else
 	struct					timeval tv;
+#endif
+#ifdef SO_ATTACH_REUSEPORT_CBPF
+	struct sock_filter cbpf[8] = {0};
+	struct sock_fprog bpfprog;
 #endif
 	zend_long					level, optname;
 	void 					*opt_ptr;
@@ -2345,8 +2350,6 @@ PHP_FUNCTION(socket_set_option)
 				optname = SO_DETACH_BPF;
 			} else {
 				uint32_t k = (uint32_t)cbpf_val;
-				static struct sock_filter cbpf[8] = {0};
-				static struct sock_fprog bpfprog;
 
 				switch (k) {
 					case SKF_AD_CPU:
@@ -2645,6 +2648,7 @@ PHP_FUNCTION(socket_import_stream)
 	retsock = Z_SOCKET_P(return_value);
 
 	if (!socket_import_file_descriptor(socket, retsock)) {
+		retsock->bsd_socket = -1;
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}

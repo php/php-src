@@ -249,7 +249,7 @@ ZEND_API void zend_class_init_statics(zend_class_entry *ce);
 ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
 ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend_string *property_name, int type, struct _zend_property_info **prop_info);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type);
-ZEND_API ZEND_COLD bool zend_std_unset_static_property(const zend_class_entry *ce, const zend_string *property_name);
+ZEND_API ZEND_COLD void zend_std_unset_static_property(const zend_class_entry *ce, const zend_string *property_name);
 ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
 ZEND_API struct _zend_property_info *zend_get_property_info(const zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);

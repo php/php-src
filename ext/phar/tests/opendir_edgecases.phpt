@@ -60,4 +60,4 @@ opendir(): Argument #1 ($directory) must be of type string, array given
 ..
 foo
 
-Warning: opendir(phar://%sopendir_edgecases.phar.php/oops): Failed to open directory: %s in phar://%sopendir_edgecases.phar.php/foo on line %d
+Warning: opendir(): Failed to open directory: %s in phar://%sopendir_edgecases.phar.php/foo on line %d

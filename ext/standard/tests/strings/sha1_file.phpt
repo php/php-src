@@ -78,12 +78,12 @@ Path must not be empty
 
 -- invalid filename --
 
-Warning: sha1_file(rewncwYcn89q): Failed to open stream: No such file or directory in %s on line %d
+Warning: sha1_file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Scalar value as filename --
 
-Warning: sha1_file(12): Failed to open stream: No such file or directory in %s on line %d
+Warning: sha1_file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- NULL as filename --

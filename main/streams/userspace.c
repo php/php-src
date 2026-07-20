@@ -249,10 +249,7 @@ typedef struct _php_userstream_data php_userstream_data_t;
 
 static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php_stream_context *context, zval *object)
 {
-	if (uwrap->ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
-		ZVAL_UNDEF(object);
-		return;
-	}
+	ZEND_ASSERT((uwrap->ce->ce_flags & ZEND_ACC_UNINSTANTIABLE) == 0);
 
 	/* create an instance of our class */
 	if (object_init_ex(object, uwrap->ce) == FAILURE) {
@@ -464,6 +461,11 @@ PHP_FUNCTION(stream_wrapper_register)
 	zend_long flags = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SC|l", &protocol, &ce, &flags) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
+		zend_argument_value_error(2, "must be a concrete class");
 		RETURN_THROWS();
 	}
 

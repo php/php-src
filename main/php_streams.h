@@ -555,6 +555,8 @@ END_EXTERN_C()
 #define PHP_STREAM_AS_SOCKETD	2
 /* cast as fd/socket for select purposes */
 #define PHP_STREAM_AS_FD_FOR_SELECT 3
+/* cast as fd/socket for copy purposes */
+#define PHP_STREAM_AS_FD_FOR_COPY   4
 
 /* try really, really hard to make sure the cast happens (avoid using this flag if possible) */
 #define PHP_STREAM_CAST_TRY_HARD	0x80000000
@@ -627,7 +629,7 @@ END_EXTERN_C()
 /* this flag is only used by include/require functions */
 #define STREAM_OPEN_FOR_ZEND_STREAM     0x00010000
 
-zend_result php_init_stream_wrappers(int module_number);
+void php_init_stream_wrappers(int module_number);
 void php_shutdown_stream_wrappers(int module_number);
 void php_shutdown_stream_hashes(void);
 PHP_RSHUTDOWN_FUNCTION(streams);

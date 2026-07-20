@@ -72,11 +72,11 @@ The File Contents
 The File Contents
 -- Iteration 5 --
 
-Warning: readfile(%sreadfileVar9Sub/..///readfileVar9Sub//..//../readfileVar9Sub/fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(): Failed to open stream: No such file or directory in %s on line %d
 
 -- Iteration 6 --
 
-Warning: readfile(%sreadfileVar9Sub/BADDIR/fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(): Failed to open stream: No such file or directory in %s on line %d
 
 -- Iteration 7 --
 The File Contents
@@ -88,6 +88,6 @@ The File Contents
 The File Contents
 -- Iteration 11 --
 
-Warning: readfile(BADDIR/fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(): Failed to open stream: No such file or directory in %s on line %d
 
 *** Done ***
