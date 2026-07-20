@@ -13,6 +13,7 @@ use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Enum_;
 use PhpParser\Node\Stmt\Interface_;
 use PhpParser\Node\Stmt\Trait_;
+use PhpParser\Node\Stmt\TraitUse;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 
@@ -3383,6 +3384,7 @@ class ClassInfo {
      * @param AttributeInfo[] $attributes
      * @param Name[] $extends
      * @param Name[] $implements
+     * @param Name[] $uses
      * @param ConstInfo[] $constInfos
      * @param PropertyInfo[] $propertyInfos
      * @param FuncInfo[] $funcInfos
@@ -3401,6 +3403,7 @@ class ClassInfo {
         private bool $isNotSerializable,
         private readonly array $extends,
         private readonly array $implements,
+        private readonly array $uses,
         public /* readonly */ array $constInfos,
         private /* readonly */ array $propertyInfos,
         public array $funcInfos,
@@ -3420,6 +3423,9 @@ class ClassInfo {
         }
         foreach ($this->implements as $implements) {
             $params[] = "zend_class_entry *class_entry_" . implode("_", $implements->getParts());
+        }
+        foreach ($this->uses as $use) {
+            $params[] = "zend_class_entry *class_entry_" . implode("_", $use->getParts());
         }
 
         $escapedName = implode("_", $this->name->getParts());
@@ -3516,6 +3522,17 @@ class ClassInfo {
 
         if (!empty($implements)) {
             $code .= "\tzend_class_implements(class_entry, " . count($implements) . ", " . implode(", ", $implements) . ");\n";
+        }
+
+        $traits = array_map(
+            function (Name $item) {
+                return "class_entry_" . implode("_", $item->getParts());
+            },
+            $this->uses
+        );
+
+        if (!empty($traits)) {
+            $code .= "\tzend_class_use_internal_traits(class_entry, " . count($traits) . ", " . implode(", ", $traits) . ");\n";
         }
 
         if ($this->alias) {
@@ -4408,6 +4425,7 @@ class FileInfo {
                 $propertyInfos = [];
                 $methodInfos = [];
                 $enumCaseInfos = [];
+                $traitUses = [];
                 foreach ($stmt->stmts as $classStmt) {
                     $cond = self::handlePreprocessorConditions($conds, $classStmt);
                     if ($classStmt instanceof Stmt\Nop) {
@@ -4469,6 +4487,10 @@ class FileInfo {
                             $classStmt->expr,
                             $classStmt->expr ? $prettyPrinter->prettyPrintExpr($classStmt->expr) : null,
                         );
+                    } else if ($classStmt instanceof TraitUse) {
+                        foreach ($classStmt->traits as $trait) {
+                            $traitUses[] = $trait;
+                        }
                     } else {
                         throw new Exception("Not implemented {$classStmt->getType()}");
                     }
@@ -4481,6 +4503,7 @@ class FileInfo {
                     $propertyInfos,
                     $methodInfos,
                     $enumCaseInfos,
+                    $traitUses,
                     $cond,
                     $this->getMinimumPhpVersionIdCompatibility(),
                     $this->isUndocumentable
@@ -5167,6 +5190,7 @@ function parseProperty(
  * @param PropertyInfo[] $properties
  * @param FuncInfo[] $methods
  * @param EnumCaseInfo[] $enumCases
+ * @param Name[] $traitUses
  */
 function parseClass(
     Name $name,
@@ -5175,6 +5199,7 @@ function parseClass(
     array $properties,
     array $methods,
     array $enumCases,
+    array $traitUses,
     ?string $cond,
     ?int $minimumPhpVersionIdCompatibility,
     bool $isUndocumentable
@@ -5247,6 +5272,7 @@ function parseClass(
         $isNotSerializable,
         $extends,
         $implements,
+        $traitUses,
         $consts,
         $properties,
         $methods,

@@ -1,6 +1,11 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 8ca2fc33013d5a1c325bf5f0090cc6416a242297
+ * Stub hash: 82fca4e852eea91a582060cef099c4897305133c
  * Has decl header: yes */
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_use_internal_traits_zero, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_use_internal_traits_not_trait arginfo_zend_test_use_internal_traits_zero
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
@@ -11,8 +16,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_nullable_array_return, 0, 0, IS_ARRAY, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_void_return, 0, 0, IS_VOID, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_zend_test_void_return arginfo_zend_test_use_internal_traits_zero
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_compile_string, 0, 3, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, source_string, IS_STRING, 0)
@@ -24,16 +28,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_deprecated, 0, 0, IS_V
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_zend_test_deprecated_attr arginfo_zend_test_void_return
+#define arginfo_zend_test_deprecated_attr arginfo_zend_test_use_internal_traits_zero
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_nodiscard, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_deprecated_nodiscard arginfo_zend_test_nodiscard
 
-#define arginfo_zend_test_aliased arginfo_zend_test_void_return
+#define arginfo_zend_test_aliased arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_zend_test_deprecated_aliased arginfo_zend_test_void_return
+#define arginfo_zend_test_deprecated_aliased arginfo_zend_test_use_internal_traits_zero
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_create_unterminated_string, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
@@ -100,7 +104,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_parameter_with_attribu
 	ZEND_ARG_TYPE_INFO(0, parameter, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_zend_test_attribute_with_named_argument arginfo_zend_test_void_return
+#define arginfo_zend_test_attribute_with_named_argument arginfo_zend_test_use_internal_traits_zero
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_get_current_func_name, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -199,7 +203,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_compile_to_ast arginfo_zend_create_unterminated_string
 
-#define arginfo_zend_test_gh18756 arginfo_zend_test_void_return
+#define arginfo_zend_test_gh18756 arginfo_zend_test_use_internal_traits_zero
 
 #define arginfo_zend_test_opcache_preloading arginfo_zend_test_is_pcre_bundled
 
@@ -208,23 +212,27 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_uri_parser, 0, 2, IS_A
 	ZEND_ARG_TYPE_INFO(0, parser, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_zend_test_gh19792 arginfo_zend_test_void_return
+#define arginfo_zend_test_gh19792 arginfo_zend_test_use_internal_traits_zero
 
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
-#define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
+#define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_ZendTestNS2_namespaced_aliased_func arginfo_zend_test_void_return
+#define arginfo_ZendTestNS2_namespaced_aliased_func arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_ZendTestNS2_namespaced_deprecated_aliased_func arginfo_zend_test_void_return
+#define arginfo_ZendTestNS2_namespaced_deprecated_aliased_func arginfo_zend_test_use_internal_traits_zero
 
 #define arginfo_ZendTestNS2_ZendSubNS_namespaced_func arginfo_zend_test_is_pcre_bundled
 
-#define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func arginfo_zend_test_void_return
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_ZendTestNS2_ZendSubNS_namespaced_aliased_func arginfo_zend_test_void_return
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_aliased_func arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func arginfo_zend_test_void_return
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func arginfo_zend_test_use_internal_traits_zero
+
+#define arginfo_class__ZendTestTraitForInternalClass_traitMethod arginfo_zend_test_nodiscard
+
+#define arginfo_class__ZendTestTraitForInternalClass2_traitMethod2 arginfo_zend_test_nodiscard
 
 #define arginfo_class__ZendTestClass_is_object arginfo_zend_test_nodiscard
 
@@ -274,9 +282,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ZendTestChildClassWithMethodWithParameterAttribute_override arginfo_zend_test_parameter_with_attribute
 
-#define arginfo_class_ZendTestForbidDynamicCall_call arginfo_zend_test_void_return
+#define arginfo_class_ZendTestForbidDynamicCall_call arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_class_ZendTestForbidDynamicCall_callStatic arginfo_zend_test_void_return
+#define arginfo_class_ZendTestForbidDynamicCall_callStatic arginfo_zend_test_use_internal_traits_zero
 
 #if (PHP_VERSION_ID >= 80100)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZendTestNS_Foo_method, 0, 0, IS_LONG, 0)
@@ -291,10 +299,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ZendTestNS_NotUnlikelyCompileError_method, 0, 0, ZendTestNS\\\116otUnlikelyCompileError, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_void_return
+#define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_use_internal_traits_zero
 
-#define arginfo_class_ZendTestNS2_ZendSubNS_Foo_method arginfo_zend_test_void_return
+#define arginfo_class_ZendTestNS2_ZendSubNS_Foo_method arginfo_zend_test_use_internal_traits_zero
 
+static ZEND_FUNCTION(zend_test_use_internal_traits_zero);
+static ZEND_FUNCTION(zend_test_use_internal_traits_not_trait);
 static ZEND_FUNCTION(zend_trigger_bailout);
 static ZEND_FUNCTION(zend_test_array_return);
 static ZEND_FUNCTION(zend_test_nullable_array_return);
@@ -361,6 +371,8 @@ static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_deprecated_func);
+static ZEND_METHOD(_ZendTestTraitForInternalClass, traitMethod);
+static ZEND_METHOD(_ZendTestTraitForInternalClass2, traitMethod2);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
 static ZEND_METHOD(_ZendTestClass, returnsStatic);
@@ -387,6 +399,8 @@ static ZEND_METHOD(ZendTestNS2_Foo, method);
 static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
 
 static const zend_function_entry ext_functions[] = {
+	ZEND_FE(zend_test_use_internal_traits_zero, arginfo_zend_test_use_internal_traits_zero)
+	ZEND_FE(zend_test_use_internal_traits_not_trait, arginfo_zend_test_use_internal_traits_not_trait)
 	ZEND_FE(zend_trigger_bailout, arginfo_zend_trigger_bailout)
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 #if (PHP_VERSION_ID >= 80400)
@@ -539,6 +553,16 @@ static const zend_function_entry ext_functions[] = {
 #else
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_deprecated_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func, ZEND_ACC_DEPRECATED)
 #endif
+	ZEND_FE_END
+};
+
+static const zend_function_entry class__ZendTestTraitForInternalClass_methods[] = {
+	ZEND_ME(_ZendTestTraitForInternalClass, traitMethod, arginfo_class__ZendTestTraitForInternalClass_traitMethod, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class__ZendTestTraitForInternalClass2_methods[] = {
+	ZEND_ME(_ZendTestTraitForInternalClass2, traitMethod2, arginfo_class__ZendTestTraitForInternalClass2_traitMethod2, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -716,6 +740,154 @@ static zend_class_entry *register_class__ZendTestInterface(void)
 	zend_string *const_DUMMY_comment = zend_string_init_interned("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.2\n         */", 98, 1);
 	zend_declare_class_constant_ex(class_entry, const_DUMMY_name, &const_DUMMY_value, ZEND_ACC_PUBLIC, const_DUMMY_comment);
 	zend_string_release_ex(const_DUMMY_name, true);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestTraitForInternalClass(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestTraitForInternalClass", class__ZendTestTraitForInternalClass_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_TRAIT);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_TRAIT;
+#endif
+
+	zval const_ZEND_TRAIT_CONST_value;
+	ZVAL_LONG(&const_ZEND_TRAIT_CONST_value, 123);
+	zend_string *const_ZEND_TRAIT_CONST_name = zend_string_init_interned("ZEND_TRAIT_CONST", sizeof("ZEND_TRAIT_CONST") - 1, true);
+	zend_declare_class_constant_ex(class_entry, const_ZEND_TRAIT_CONST_name, &const_ZEND_TRAIT_CONST_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release_ex(const_ZEND_TRAIT_CONST_name, true);
+
+	zval property_traitProp_default_value;
+	ZVAL_LONG(&property_traitProp_default_value, 456);
+	zend_string *property_traitProp_name = zend_string_init("traitProp", sizeof("traitProp") - 1, true);
+	zend_declare_typed_property(class_entry, property_traitProp_name, &property_traitProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(property_traitProp_name, true);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestTraitForInternalClass2(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestTraitForInternalClass2", class__ZendTestTraitForInternalClass2_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_TRAIT);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_TRAIT;
+#endif
+
+	zval const_ZEND_TRAIT_CONST2_value;
+	ZVAL_LONG(&const_ZEND_TRAIT_CONST2_value, 321);
+	zend_string *const_ZEND_TRAIT_CONST2_name = zend_string_init_interned("ZEND_TRAIT_CONST2", sizeof("ZEND_TRAIT_CONST2") - 1, true);
+	zend_declare_class_constant_ex(class_entry, const_ZEND_TRAIT_CONST2_name, &const_ZEND_TRAIT_CONST2_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release_ex(const_ZEND_TRAIT_CONST2_name, true);
+
+	zval property_staticTraitProp_default_value;
+	ZVAL_LONG(&property_staticTraitProp_default_value, 999);
+	zend_string *property_staticTraitProp_name = zend_string_init("staticTraitProp", sizeof("staticTraitProp") - 1, true);
+	zend_declare_typed_property(class_entry, property_staticTraitProp_name, &property_staticTraitProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(property_staticTraitProp_name, true);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestTraitWithUnionProp(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestTraitWithUnionProp", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_TRAIT);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_TRAIT;
+#endif
+
+	zval property_unionProp_default_value;
+	ZVAL_LONG(&property_unionProp_default_value, 42);
+	zend_string *property_unionProp_name = zend_string_init("unionProp", sizeof("unionProp") - 1, true);
+	zend_declare_typed_property(class_entry, property_unionProp_name, &property_unionProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_STRING));
+	zend_string_release_ex(property_unionProp_name, true);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestClassWithTrait(zend_class_entry *class_entry__ZendTestTraitForInternalClass)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestClassWithTrait", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+#endif
+	zend_class_use_internal_traits(class_entry, 1, class_entry__ZendTestTraitForInternalClass);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestClassWithMultipleTraits(zend_class_entry *class_entry__ZendTestTraitForInternalClass, zend_class_entry *class_entry__ZendTestTraitForInternalClass2)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestClassWithMultipleTraits", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+#endif
+	zend_class_use_internal_traits(class_entry, 2, class_entry__ZendTestTraitForInternalClass, class_entry__ZendTestTraitForInternalClass2);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestClassWithUnionTypeTrait(zend_class_entry *class_entry__ZendTestTraitWithUnionProp)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestClassWithUnionTypeTrait", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+#endif
+	zend_class_use_internal_traits(class_entry, 1, class_entry__ZendTestTraitWithUnionProp);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestNotATraitForInternalTraits(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestNotATraitForInternalTraits", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestInternalTraitsDriver(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestInternalTraitsDriver", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+#endif
 
 	return class_entry;
 }
