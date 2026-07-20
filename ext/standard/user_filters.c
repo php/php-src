@@ -579,7 +579,7 @@ PHP_FUNCTION(stream_get_filters)
 PHP_FUNCTION(stream_filter_register)
 {
 	zend_string *filtername;
-	zend_class_entry *ce;
+	zend_class_entry *ce = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(filtername)
