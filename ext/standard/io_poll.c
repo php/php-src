@@ -44,6 +44,8 @@ static zend_object_handlers php_io_poll_context_object_handlers;
 static zend_object_handlers php_io_poll_watcher_object_handlers;
 static zend_object_handlers php_io_poll_handle_object_handlers;
 
+typedef struct php_io_poll_context_object php_io_poll_context_object;
+
 /* Watcher object structure */
 typedef struct php_io_poll_watcher_object {
 	php_poll_handle_object *handle;
@@ -51,16 +53,16 @@ typedef struct php_io_poll_watcher_object {
 	uint32_t triggered_events;
 	zval data;
 	bool active;
-	php_poll_ctx *poll_ctx; /* Back reference to poll context */
+	php_io_poll_context_object *context; /* Back reference to Context object */
 	zend_object std;
 } php_io_poll_watcher_object;
 
 /* Context object structure */
-typedef struct php_io_poll_context_object {
+struct php_io_poll_context_object {
 	php_poll_ctx *ctx;
 	HashTable *watchers; /* Maps handle pointer -> watcher object */
 	zend_object std;
-} php_io_poll_context_object;
+};
 
 /* Stream poll handle specific data */
 typedef struct php_stream_poll_handle_data {
@@ -251,7 +253,7 @@ static zend_object *php_io_poll_watcher_create_object(zend_class_entry *ce)
 	intern->watched_events = 0;
 	intern->triggered_events = 0;
 	intern->active = false;
-	intern->poll_ctx = NULL;
+	intern->context = NULL;
 	ZVAL_NULL(&intern->data);
 
 	return &intern->std;
@@ -293,7 +295,7 @@ static void php_io_poll_context_free_object(zend_object *obj)
 		ZEND_HASH_FOREACH_VAL(intern->watchers, zval *zv) {
 			php_io_poll_watcher_object *watcher = PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(Z_OBJ_P(zv));
 			watcher->active = false;
-			watcher->poll_ctx = NULL;
+			watcher->context = NULL;
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -349,7 +351,7 @@ static zend_always_inline zend_ulong php_io_poll_compute_ptr_key(void *ptr)
 static zend_result php_io_poll_watcher_modify_events(
 		php_io_poll_watcher_object *watcher, uint32_t events)
 {
-	if (!watcher->active || !watcher->poll_ctx) {
+	if (!watcher->active || !watcher->context) {
 		zend_throw_exception(
 				php_io_poll_inactive_watcher_class_entry, "Cannot modify inactive watcher", 0);
 		return FAILURE;
@@ -363,8 +365,9 @@ static zend_result php_io_poll_watcher_modify_events(
 	}
 
 	/* Modify in poll context */
-	if (php_poll_modify(watcher->poll_ctx, (int) fd, events, watcher) != SUCCESS) {
-		php_poll_error err = php_poll_get_error(watcher->poll_ctx);
+	php_poll_ctx *poll_ctx = watcher->context->ctx;
+	if (php_poll_modify(poll_ctx, (int) fd, events, watcher) != SUCCESS) {
+		php_poll_error err = php_poll_get_error(poll_ctx);
 		php_io_poll_throw_failed_operation(php_io_poll_failed_watcher_mod_class_entry,
 				"Failed to modify watcher in polling system", err);
 		return FAILURE;
@@ -632,19 +635,27 @@ PHP_METHOD(Io_Poll_Watcher, remove)
 
 	php_io_poll_watcher_object *intern = PHP_POLL_WATCHER_OBJ_FROM_ZV(getThis());
 
-	if (!intern->active || !intern->poll_ctx) {
+	if (!intern->active || !intern->context) {
 		zend_throw_exception(
 				php_io_poll_inactive_watcher_class_entry, "Cannot remove inactive watcher", 0);
 		RETURN_THROWS();
 	}
 
+	php_io_poll_context_object *context = intern->context;
+	php_poll_ctx *poll_ctx = context->ctx;
+	HashTable *watchers = context->watchers;
+	zend_ulong hash_key = php_io_poll_compute_ptr_key(intern->handle);
 	php_socket_t fd = php_poll_handle_get_fd(intern->handle);
 	if (fd != SOCK_ERR) {
-		php_poll_remove(intern->poll_ctx, (int) fd);
+		php_poll_remove(poll_ctx, (int) fd);
 	}
 
 	intern->active = false;
-	intern->poll_ctx = NULL;
+	intern->context = NULL;
+
+	if (watchers) {
+		zend_hash_index_del(watchers, hash_key);
+	}
 }
 
 PHP_METHOD(Io_Poll_Context, __construct)
@@ -727,8 +738,6 @@ PHP_METHOD(Io_Poll_Context, add)
 	watcher->handle = handle;
 	watcher->watched_events = events;
 	watcher->triggered_events = 0;
-	watcher->active = true;
-	watcher->poll_ctx = intern->ctx;
 
 	GC_ADDREF(&handle->std);
 
@@ -757,7 +766,10 @@ PHP_METHOD(Io_Poll_Context, add)
 	GC_ADDREF(&watcher->std);
 
 	zend_ulong hash_key = php_io_poll_compute_ptr_key(handle);
-	zend_hash_index_add(intern->watchers, hash_key, &watcher_zv);
+	zend_hash_index_add_new(intern->watchers, hash_key, &watcher_zv);
+
+	watcher->active = true;
+	watcher->context = intern;
 }
 
 PHP_METHOD(Io_Poll_Context, wait)
