@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
+- DOM:
+  . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
+    declares a default value for the attribute). (iliaal)
+
 - Opcache:
   . Fixed GH-22693 (DT_TEXTREL in JIT-generated TLS access on x86_64).
     (David Carlier)

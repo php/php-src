@@ -466,6 +466,8 @@ PHP_METHOD(DOMElement, setAttribute)
 					break;
 				case XML_NAMESPACE_DECL:
 					RETURN_FALSE;
+				case XML_ATTRIBUTE_DECL:
+					break;
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 		}
@@ -593,6 +595,8 @@ static bool dom_remove_attribute(xmlNodePtr thisp, xmlNodePtr attrp)
 
 			break;
 		}
+		case XML_ATTRIBUTE_DECL:
+			return false;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 	return true;
@@ -722,7 +726,11 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 		existattrp = xmlHasProp(nodep, attrp->name);
 	}
 
-	if (existattrp != NULL && existattrp->type != XML_ATTRIBUTE_DECL) {
+	if (existattrp != NULL && existattrp->type == XML_ATTRIBUTE_DECL) {
+		existattrp = NULL;
+	}
+
+	if (existattrp != NULL) {
 		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL &&
 			((php_libxml_node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
 		{
@@ -1908,8 +1916,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 
 	/* Step 5 */
 	if (force_is_null || !force) {
-		dom_remove_attribute(thisp, attribute);
-		retval = false;
+		retval = !dom_remove_attribute(thisp, attribute);
 		goto out;
 	}
 
