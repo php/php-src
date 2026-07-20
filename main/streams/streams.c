@@ -2030,20 +2030,13 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 
 	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, options);
 	if (UNEXPECTED(wrapper == NULL)) {
-		if (options & REPORT_ERRORS) {
-			php_stream_display_wrapper_errors(NULL, context, PHP_STREAM_EC(OpenFailed),
-					"Failed to open directory");
-			php_stream_tidy_wrapper_error_log(wrapper);
-		}
+		php_stream_wrapper_warn_name(PHP_STREAM_ERROR_WRAPPER_DEFAULT_NAME, context, options, OpenFailed,
+			"Failed to open directory");
 		return NULL;
 	}
 
 	if (UNEXPECTED(!wrapper->wops->dir_opener)) {
-		php_stream_wrapper_log_warn(wrapper, context, options & ~REPORT_ERRORS,
-				NoOpener, "not implemented");
-		php_stream_display_wrapper_errors(wrapper, context, PHP_STREAM_EC(OpenFailed),
-				"Failed to open directory");
-		php_stream_tidy_wrapper_error_log(wrapper);
+		php_stream_wrapper_warn(wrapper, context, options, NoOpener, "Failed to open directory: not implemented");
 		return NULL;
 	}
 
