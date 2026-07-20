@@ -3020,7 +3020,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 }
 /* }}} */
 
-ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int num_traits, ...) /* {{{ */
+ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int num_traits, ...)
 {
 	ZEND_ASSERT(class_entry->ce_flags & ZEND_ACC_LINKED);
 	ZEND_ASSERT(num_traits >= 0);
@@ -3062,7 +3062,6 @@ ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int 
 
 	/* TODO: Verify abstract trait method implementation requirements are enforced. */
 }
-/* }}} */
 
 #define MAX_ABSTRACT_INFO_CNT 3
 #define MAX_ABSTRACT_INFO_FMT "%s%s%s%s"
