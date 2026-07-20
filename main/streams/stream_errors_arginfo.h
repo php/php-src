@@ -1,5 +1,5 @@
 /* This is a generated file, edit stream_errors.stub.php instead.
- * Stub hash: 4cddf758cc9f2041802d8cbbaaa45593022a5db1
+ * Stub hash: d3087b608996f81bf0dd19c25792feec9744e768
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamException_getErrors, 0, 0, IS_ARRAY, 0)
@@ -236,12 +236,6 @@ static zend_class_entry *register_class_StreamError(void)
 	zend_string *property_terminating_name = zend_string_init("terminating", sizeof("terminating") - 1, true);
 	zend_declare_typed_property(class_entry, property_terminating_name, &property_terminating_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release_ex(property_terminating_name, true);
-
-	zval property_param_default_value;
-	ZVAL_UNDEF(&property_param_default_value);
-	zend_string *property_param_name = zend_string_init("param", sizeof("param") - 1, true);
-	zend_declare_typed_property(class_entry, property_param_name, &property_param_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release_ex(property_param_name, true);
 
 	return class_entry;
 }
