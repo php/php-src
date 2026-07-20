@@ -351,7 +351,7 @@ static zend_always_inline zend_ulong php_io_poll_compute_ptr_key(void *ptr)
 static zend_result php_io_poll_watcher_modify_events(
 		php_io_poll_watcher_object *watcher, uint32_t events)
 {
-	if (!watcher->active || !watcher->context || !watcher->context->ctx) {
+	if (!watcher->active || !watcher->context) {
 		zend_throw_exception(
 				php_io_poll_inactive_watcher_class_entry, "Cannot modify inactive watcher", 0);
 		return FAILURE;
@@ -635,7 +635,7 @@ PHP_METHOD(Io_Poll_Watcher, remove)
 
 	php_io_poll_watcher_object *intern = PHP_POLL_WATCHER_OBJ_FROM_ZV(getThis());
 
-	if (!intern->active || !intern->context || !intern->context->ctx) {
+	if (!intern->active || !intern->context) {
 		zend_throw_exception(
 				php_io_poll_inactive_watcher_class_entry, "Cannot remove inactive watcher", 0);
 		RETURN_THROWS();
