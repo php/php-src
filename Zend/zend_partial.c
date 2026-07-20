@@ -1105,8 +1105,14 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 			arg_info = NULL;
 		}
 		if (arg_info && ZEND_TYPE_IS_SET(arg_info->type)
-				&& UNEXPECTED(!zend_check_type_ex(&arg_info->type, var, 0, 0))) {
-			zend_verify_arg_error(function, arg_info, offset+1, var);
+				&& UNEXPECTED(!zend_check_type_ex(&arg_info->type, var,
+					/* current_frame */ true, /* is_internal */ false))) {
+			zend_string *need_msg = zend_type_to_string_resolved(arg_info->type,
+					function->common.scope);
+			zend_argument_type_error_ex(function, offset + 1,
+					"must be of type %s, %s given",
+					ZSTR_VAL(need_msg), zend_zval_value_name(var));
+			zend_string_release(need_msg);
 			zval_ptr_dtor(result);
 			ZVAL_NULL(result);
 			zp_free_unbound_args(offset, argc, argv);
