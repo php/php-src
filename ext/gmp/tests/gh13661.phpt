@@ -1,5 +1,5 @@
 --TEST--
-GH-13661: Add gmp_prevprime()
+gmp_prevprime()
 --EXTENSIONS--
 gmp
 --SKIPIF--
