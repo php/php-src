@@ -1096,6 +1096,11 @@ ZEND_FUNCTION(gmp_prevprime)
 
 	mpz_init(prevprime_result);
 	res = mpz_prevprime(prevprime_result, gmpnum_a);
+	/*
+	 * mpz_prevprime() returns 0 when no previous prime exists, which happens
+	 * for operands less than 3.
+	 * https://gmplib.org/manual/Number-Theoretic-Functions#index-mpz_005fprevprime
+	 */
 	if (!res) {
 		mpz_clear(prevprime_result);
 		zend_argument_value_error(1, "must be greater than 2");
