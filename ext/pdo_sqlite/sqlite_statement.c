@@ -276,8 +276,13 @@ static int pdo_sqlite_stmt_get_col(
 			int64_t i = sqlite3_column_int64(S->stmt, colno);
 #if SIZEOF_ZEND_LONG < 8
 			if (i > ZEND_LONG_MAX || i < ZEND_LONG_MIN) {
+				const char *text = (const char *) sqlite3_column_text(S->stmt, colno);
+				if (UNEXPECTED(!text)) {
+					pdo_sqlite_error_stmt(stmt);
+					return 0;
+				}
 				ZVAL_STRINGL(result,
-					(char *) sqlite3_column_text(S->stmt, colno),
+					text,
 					sqlite3_column_bytes(S->stmt, colno));
 				return 1;
 			}
@@ -295,10 +300,15 @@ static int pdo_sqlite_stmt_get_col(
 				sqlite3_column_blob(S->stmt, colno), sqlite3_column_bytes(S->stmt, colno));
 			return 1;
 
-		default:
-			ZVAL_STRINGL_FAST(result,
-				(char *) sqlite3_column_text(S->stmt, colno), sqlite3_column_bytes(S->stmt, colno));
+		default: {
+			const char *text = (const char *) sqlite3_column_text(S->stmt, colno);
+			if (UNEXPECTED(!text)) {
+				pdo_sqlite_error_stmt(stmt);
+				return 0;
+			}
+			ZVAL_STRINGL_FAST(result, text, sqlite3_column_bytes(S->stmt, colno));
 			return 1;
+		}
 	}
 }
 
