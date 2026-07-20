@@ -1,4 +1,9 @@
 PHP_LEXBOR_CFLAGS="-Wno-unknown-warning-option -Wno-unterminated-string-initialization -I@ext_srcdir@/"
+
+if test "$PHP_ADDRESS_SANITIZER" = "yes"; then
+    PHP_LEXBOR_CFLAGS="$PHP_LEXBOR_CFLAGS -DLEXBOR_HAVE_ADDRESS_SANITIZER=1"
+fi
+
 LEXBOR_DIR="lexbor"
 
 AC_DEFINE([HAVE_LEXBOR], [1], [Define to 1 if the PHP extension 'lexbor' is available.])
