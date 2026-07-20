@@ -1353,7 +1353,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 					ZEND_CALL_NUM_ARGS(frame), ZEND_CALL_ARG(frame, 1),
 					extra_named_params, named_positions,
 					fcc_ast->filename, &ast->lineno,
-					(void**)cache_slot, fcc_ast->name, flags);
+					(void**)cache_slot, fcc_ast->name, flags, 0);
 
 			if (named_positions) {
 				zend_array_release(named_positions);

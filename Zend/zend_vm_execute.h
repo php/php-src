@@ -8672,6 +8672,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_PARTIAL_FLAGS);
 	zval *named_positions = RT_CONSTANT(opline, opline->op2);
 	zend_string *pfa_name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+	uint32_t const_args;
+
+	if (IS_CONST == IS_UNUSED) {
+		const_args = opline->op2.num;
+	} else {
+		const_args = Z_EXTRA_P(named_positions);
+	}
 
 	zend_partial_create(EX_VAR(opline->result.var),
 		&call->This, call->func,
@@ -8680,7 +8687,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 			call->extra_named_params : NULL,
 		IS_CONST == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
 		EX(func)->op_array.filename, &opline->lineno, cache_slot,
-		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS);
+		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
 		zend_array_release(call->extra_named_params);
@@ -12038,6 +12045,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_PARTIAL_FLAGS);
 	zval *named_positions = NULL;
 	zend_string *pfa_name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+	uint32_t const_args;
+
+	if (IS_UNUSED == IS_UNUSED) {
+		const_args = opline->op2.num;
+	} else {
+		const_args = Z_EXTRA_P(named_positions);
+	}
 
 	zend_partial_create(EX_VAR(opline->result.var),
 		&call->This, call->func,
@@ -12046,7 +12060,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 			call->extra_named_params : NULL,
 		IS_UNUSED == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
 		EX(func)->op_array.filename, &opline->lineno, cache_slot,
-		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS);
+		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
 		zend_array_release(call->extra_named_params);
@@ -61490,6 +61504,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_P
 	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_PARTIAL_FLAGS);
 	zval *named_positions = RT_CONSTANT(opline, opline->op2);
 	zend_string *pfa_name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+	uint32_t const_args;
+
+	if (IS_CONST == IS_UNUSED) {
+		const_args = opline->op2.num;
+	} else {
+		const_args = Z_EXTRA_P(named_positions);
+	}
 
 	zend_partial_create(EX_VAR(opline->result.var),
 		&call->This, call->func,
@@ -61498,7 +61519,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_P
 			call->extra_named_params : NULL,
 		IS_CONST == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
 		EX(func)->op_array.filename, &opline->lineno, cache_slot,
-		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS);
+		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
 		zend_array_release(call->extra_named_params);
@@ -64754,6 +64775,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_P
 	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_PARTIAL_FLAGS);
 	zval *named_positions = NULL;
 	zend_string *pfa_name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+	uint32_t const_args;
+
+	if (IS_UNUSED == IS_UNUSED) {
+		const_args = opline->op2.num;
+	} else {
+		const_args = Z_EXTRA_P(named_positions);
+	}
 
 	zend_partial_create(EX_VAR(opline->result.var),
 		&call->This, call->func,
@@ -64762,7 +64790,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_P
 			call->extra_named_params : NULL,
 		IS_UNUSED == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
 		EX(func)->op_array.filename, &opline->lineno, cache_slot,
-		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS);
+		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
 		zend_array_release(call->extra_named_params);
