@@ -1087,29 +1087,25 @@ GMP_UNARY_OP_FUNCTION(nextprime);
 ZEND_FUNCTION(gmp_prevprime)
 {
 	mpz_ptr gmpnum_a, gmpnum_result;
-	mpz_t prevprime_result;
 	int res;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
 	ZEND_PARSE_PARAMETERS_END();
 
-	mpz_init(prevprime_result);
-	res = mpz_prevprime(prevprime_result, gmpnum_a);
-	/*
-	 * mpz_prevprime() returns 0 when no previous prime exists, which happens
-	 * for operands less than 3.
-	 * https://gmplib.org/manual/Number-Theoretic-Functions#index-mpz_005fprevprime
-	 */
-	if (!res) {
-		mpz_clear(prevprime_result);
+	if (mpz_cmp_ui(gmpnum_a, 2) <= 0) {
+		/*
+		 * mpz_prevprime() returns 0 when no previous prime exists, which happens
+		 * for operands not greater than 2.
+		 * https://gmplib.org/manual/Number-Theoretic-Functions#index-mpz_005fprevprime
+		 */
 		zend_argument_value_error(1, "must be greater than 2");
 		RETURN_THROWS();
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
-	mpz_set(gmpnum_result, prevprime_result);
-	mpz_clear(prevprime_result);
+	res = mpz_prevprime(gmpnum_result, gmpnum_a);
+	ZEND_ASSERT(res);
 }
 /* }}} */
 #endif
