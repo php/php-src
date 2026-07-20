@@ -2108,10 +2108,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 			options &= ~USE_PATH;
 		}
 		if (EG(exception)) {
-			if (resolved_path) {
-				zend_string_release_ex(resolved_path, false);
-			}
-			return NULL;
+			goto cleanup_no_wrapper_name;
 		}
 	}
 
@@ -2121,28 +2118,19 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	if (UNEXPECTED(!wrapper)) {
 		php_stream_wrapper_warn_name(PHP_STREAM_ERROR_WRAPPER_DEFAULT_NAME, context, options, OpenFailed,
 			"Failed to open stream: no suitable wrapper could be found");
-		if (resolved_path) {
-			zend_string_release_ex(resolved_path, 0);
-		}
-		return NULL;
+		goto cleanup_no_wrapper_name;
 	}
 	if ((options & STREAM_USE_URL) && !wrapper->is_url) {
 		php_stream_wrapper_warn(wrapper, context, options,
 			ProtocolUnsupported,
 			"This function may only be used against URLs");
-		if (resolved_path) {
-			zend_string_release_ex(resolved_path, 0);
-		}
-		return NULL;
+		goto cleanup_no_wrapper_name;
 	}
 
 	if (!wrapper->wops->stream_opener) {
 		php_stream_wrapper_warn(wrapper, context, options, NoOpener,
 				"Failed to open stream: wrapper does not support stream open");
-		if (resolved_path) {
-			zend_string_release_ex(resolved_path, 0);
-		}
-		return NULL;
+		goto cleanup_no_wrapper_name;
 	}
 
 	/* wrapper name needs to be stored as wrapper can be removed in opener (user stream) */
@@ -2155,17 +2143,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		if (options & REPORT_ERRORS) {
 			php_stream_display_wrapper_name_errors(wrapper_name, context, PHP_STREAM_EC(OpenFailed),
 					"Failed to open stream");
-			if (opened_path && *opened_path) {
-				zend_string_release_ex(*opened_path, 0);
-				*opened_path = NULL;
-			}
 		}
 		php_stream_tidy_wrapper_name_error_log(wrapper_name);
-		pefree(wrapper_name, persistent);
-		if (resolved_path) {
-			zend_string_release_ex(resolved_path, 0);
-		}
-		return NULL;
+		goto cleanup;
 	}
 
 	/* if the caller asked for a persistent stream but the wrapper did not
@@ -2174,17 +2154,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		php_stream_wrapper_warn(wrapper, context, options, PersistentNotSupported,
 				"Failed to open stream: wrapper does not support persistent streams");
 		php_stream_close(stream);
-		if (options & REPORT_ERRORS) {
-			if (opened_path && *opened_path) {
-				zend_string_release_ex(*opened_path, 0);
-				*opened_path = NULL;
-			}
-		}
-		pefree(wrapper_name, persistent);
-		if (resolved_path) {
-			zend_string_release_ex(resolved_path, 0);
-		}
-		return NULL;
+		stream = NULL;
+		goto cleanup;
 	}
 
 	stream->wrapper = wrapper;
@@ -2217,31 +2188,21 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 					(options & STREAM_WILL_CAST)
 						? PHP_STREAM_PREFER_STDIO : PHP_STREAM_NO_PREFERENCE)) {
 			case PHP_STREAM_UNCHANGED:
-				if (resolved_path) {
-					zend_string_release_ex(resolved_path, 0);
-				}
-				pefree(wrapper_name, persistent);
-				return stream;
+				goto cleanup;
 			case PHP_STREAM_RELEASED:
 				if (newstream->orig_path) {
 					pefree(newstream->orig_path, persistent);
 				}
 				newstream->orig_path = pestrdup(path, persistent);
-				if (resolved_path) {
-					zend_string_release_ex(resolved_path, 0);
-				}
-				pefree(wrapper_name, persistent);
-				return newstream;
+				stream = newstream;
+				goto cleanup;
 			default:
-				php_stream_close(stream);
 				php_stream_wrapper_warn(wrapper, context, options,
 						SeekNotSupported,
 						"could not make seekable - %s", path);
-				pefree(wrapper_name, persistent);
-				if (resolved_path) {
-					zend_string_release_ex(resolved_path, 0);
-				}
-				return NULL;
+				php_stream_close(stream);
+				stream = NULL;
+				goto cleanup;
 		}
 	}
 
@@ -2254,9 +2215,17 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		}
 	}
 
+cleanup:
 	pefree(wrapper_name, persistent);
+cleanup_no_wrapper_name:
 	if (resolved_path) {
 		zend_string_release_ex(resolved_path, 0);
+	}
+	if (stream == NULL) {
+		if (opened_path && *opened_path) {
+			zend_string_release_ex(*opened_path, 0);
+			*opened_path = NULL;
+		}
 	}
 	return stream;
 }
