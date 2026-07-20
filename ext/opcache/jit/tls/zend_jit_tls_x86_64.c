@@ -100,7 +100,7 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 		"leaq   _tsrm_ls_cache@tlsgd(%%rip), %%rdi\n"
 		".word  0x6666\n"
 		"rex64\n"
-		"call   __tls_get_addr\n"
+		"call   __tls_get_addr@PLT\n"
 		/* Load thread pointer address */
 		"movq   %%fs:0, %%rsi\n"
 		: "=a" (addr), "=b" (code), "=S" (thread_pointer)
