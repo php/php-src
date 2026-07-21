@@ -1249,7 +1249,7 @@ ZEND_FUNCTION(gmp_root)
 	}
 
 	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
-		zend_argument_value_error(2, "must be odd if argument #1 ($a) is negative");
+		zend_argument_value_error(2, "must be odd if argument #1 ($num) is negative");
 		RETURN_THROWS();
 	}
 
@@ -1276,7 +1276,7 @@ ZEND_FUNCTION(gmp_rootrem)
 	}
 
 	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
-		zend_argument_value_error(2, "must be odd if argument #1 ($a) is negative");
+		zend_argument_value_error(2, "must be odd if argument #1 ($num) is negative");
 		RETURN_THROWS();
 	}
 
@@ -1528,7 +1528,7 @@ ZEND_FUNCTION(gmp_random_range)
 
 	gmp_init_random();
 	if (mpz_cmp(gmpnum_max, gmpnum_min) <= 0) {
-		zend_argument_value_error(1, "must be less than argument #2 ($maximum)");
+		zend_argument_value_error(1, "must be less than argument #2 ($max)");
 		RETURN_THROWS();
 	}
 

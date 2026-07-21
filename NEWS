@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     the unsigned long range instead of silently truncating them. (Weilin Du)
   . Fixed GMP integer string parsing to reject strings containing NUL bytes
     instead of silently truncating them. (Weilin Du)
+  . Fixed GMP error messages that referenced outdated parameter names.
+    (Weilin Du)
 
 - Intl:
   . Fixed grammatical issues in Normalizer invalid form and IntlCalendar time
