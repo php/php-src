@@ -370,7 +370,7 @@ static void php_stream_throw_exception_with_errors(const php_stream_error_operat
 
 	/* Set message from first error */
 	zend_update_property_str(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("message"),
-			zend_string_copy(op->first_error->message));
+			op->first_error->message);
 
 	/* Set code from first error */
 	zend_update_property_long(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("code"),
