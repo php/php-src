@@ -137,7 +137,8 @@ static php_stream_filter_status_t userfilter_filter(
 	zval func_name;
 	zval retval;
 	zval args[4];
-	int call_result;
+	int call_result = FAILURE;
+	bool bailout = false;
 
 	/* the userfilter object probably doesn't exist anymore */
 	if (CG(unclean_shutdown)) {
@@ -188,27 +189,33 @@ static php_stream_filter_status_t userfilter_filter(
 
 	ZVAL_BOOL(&args[3], flags & PSFS_FLAG_FLUSH_CLOSE);
 
-	call_result = call_user_function(NULL,
-			obj,
-			&func_name,
-			&retval,
-			4, args);
+	zend_try {
+		call_result = call_user_function(NULL,
+				obj,
+				&func_name,
+				&retval,
+				4, args);
+	} zend_catch {
+		bailout = true;
+	} zend_end_try();
 
 	zval_ptr_dtor(&func_name);
 
-	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		convert_to_long(&retval);
-		ret = (int)Z_LVAL(retval);
-	} else if (call_result == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Failed to call filter function");
-	}
+	if (!bailout) {
+		if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+			convert_to_long(&retval);
+			ret = (int)Z_LVAL(retval);
+		} else if (call_result == FAILURE) {
+			php_error_docref(NULL, E_WARNING, "Failed to call filter function");
+		}
 
-	if (bytes_consumed) {
-		*bytes_consumed = zval_get_long(&args[2]);
-	}
+		if (bytes_consumed) {
+			*bytes_consumed = zval_get_long(&args[2]);
+		}
 
-	if (buckets_in->head) {
-		php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
+		if (buckets_in->head) {
+			php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
+		}
 	}
 
 	/* filter resources are cleaned up by the stream destructor,
@@ -223,6 +230,9 @@ static php_stream_filter_status_t userfilter_filter(
 
 	zend_string_release(stream_name);
 
+	zend_list_close(Z_RES(args[1]));
+	zend_list_close(Z_RES(args[0]));
+
 	zval_ptr_dtor(&args[3]);
 	zval_ptr_dtor(&args[2]);
 	zval_ptr_dtor(&args[1]);
@@ -230,6 +240,10 @@ static php_stream_filter_status_t userfilter_filter(
 
 	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
 	stream->flags |= orig_no_fclose;
+
+	if (bailout) {
+		zend_bailout();
+	}
 
 	return ret;
 }

@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed various memory related issues in ext/sockets. (David Carlier)
 
+- Standard:
+  . Fixed bug GH-22845 (Use-after-free when a user filter stashes its bucket
+    brigade resource). (iliaal)
+
 30 Jul 2026, PHP 8.4.24
 
 - Calendar:
