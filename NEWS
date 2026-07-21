@@ -466,6 +466,8 @@ PHP                                                                        NEWS
     while COW violation flag is still set). (alexandre-daubois)
   . Added form feed (\f) in the default trimmed characters of trim(), rtrim()
     and ltrim(). (Weilin Du)
+  . Fixed bug GH-21673 Reject NUL bytes in bcrypt passwords passed to
+    password_verify(). (Weilin Du)
   . Invalid mode values now throw in array_filter() instead of being silently
     defaulted to 0. (Jorg Sowa)
   . Fixed bug GH-21058 (error_log() crashes with message_type 3 and
