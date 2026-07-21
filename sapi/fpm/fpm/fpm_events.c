@@ -259,7 +259,7 @@ int fpm_event_pre_init(char *mechanism) /* {{{ */
 {
 	php_poll_register_backends();
 
-	uint32_t flags = PHP_POLL_FLAG_PERSISTENT;
+	uint32_t flags = PHP_POLL_FLAG_PERSISTENT | PHP_POLL_FLAG_RAW_EVENTS;
 	if (mechanism) {
 		poll_ctx = php_poll_create_by_name(mechanism, flags);
 	} else {
