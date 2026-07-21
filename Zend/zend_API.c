@@ -964,6 +964,8 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 			break;
 
 		case 'A':
+			zend_error(E_DEPRECATED, "ZPP spec A is deprecated");
+			ZEND_FALLTHROUGH;
 		case 'a':
 			{
 				zval **p = va_arg(*va, zval **);
@@ -975,6 +977,8 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 			break;
 
 		case 'H':
+			zend_error(E_DEPRECATED, "ZPP spec H is deprecated");
+			ZEND_FALLTHROUGH;
 		case 'h':
 			{
 				HashTable **p = va_arg(*va, HashTable **);
