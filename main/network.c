@@ -385,6 +385,7 @@ PHPAPI int php_network_connect_socket(php_stream *stream,
 	php_deadline_init(&deadline, timeout);
 	n = php_pollfd_deadline(stream, sockfd, events, &deadline);
 	if (n < 0) {
+		error = php_socket_errno();
 		ret = -1;
 	} else if (n == 0) {
 		error = PHP_TIMEOUT_ERROR_VALUE;
@@ -393,6 +394,7 @@ PHPAPI int php_network_connect_socket(php_stream *stream,
 		/* BSD-derived systems set errno correctly.
 		 * Solaris returns -1 from getsockopt in case of error. */
 		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len) != 0) {
+			error = php_socket_errno();
 			ret = -1;
 		}
 	}
