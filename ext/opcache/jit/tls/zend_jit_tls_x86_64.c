@@ -110,6 +110,7 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 		/* call may clobber volatile registers */
 		: "rcx", "rdx", "rdi",
 		  "r8", "r9", "r10", "r11",
+		  "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)",
 		  "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7",
 		  "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15",
 		  "cc", "memory"
