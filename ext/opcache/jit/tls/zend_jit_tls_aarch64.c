@@ -124,7 +124,9 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 		"add   %2, x8, x0\n"
 		: "=r" (thread_pointer), "=r" (insn), "=r" (addr)
 		:
-		: "x0", "x1", "x8");
+		/* Resolver call clobbers only a few registers: https://github.com/ARM-software/abi-aa/blob/ee4b3c12d57c8424ff60c2ae56e10690d0604ab6/sysvabi64/sysvabi64.rst#calling-convention.
+		 * We also clobber x8. */
+		: "x0", "x1", "x8", "x30", "cc", "memory");
 
 	ZEND_ASSERT(addr == &_tsrm_ls_cache);
 
