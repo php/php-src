@@ -25,7 +25,7 @@ ADD_SOURCES("ext/lexbor/lexbor/unicode", "idna.c unicode.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/url", "url.c","lexbor");
 ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_BUILDING /utf-8");
 
-if (PHP_ADDRESS_SANITIZER == "yes") {
+if (PHP_SANITIZER == "yes") {
     ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_HAVE_ADDRESS_SANITIZER=1");
 }
 
