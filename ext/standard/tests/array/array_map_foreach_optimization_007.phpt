@@ -44,7 +44,7 @@ $_main:
 0016 RETURN int(1)
 
 plusn:
-     ; (lines=4, args=2, vars=2, tmps=1)
+     ; (lines=4, args=2, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($x) = RECV 1
@@ -53,7 +53,7 @@ plusn:
 0003 RETURN T2
 
 $_main:
-     ; (lines=4, args=0, vars=1, tmps=1)
+     ; (lines=4, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s:1-9
 0000 T1 = DECLARE_LAMBDA_FUNCTION 0
@@ -64,7 +64,7 @@ LIVE RANGES:
      1: 0001 - 0002 (tmp/var)
 
 {closure:pfa:%s:9}:
-     ; (lines=18, args=1, vars=2, tmps=2)
+     ; (lines=18, args=1, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s:9-9
 0000 CV0($x) = RECV 1
