@@ -201,6 +201,8 @@ PHP 8.6 UPGRADE NOTES
     bytes.
   . parse_str() now raises a ValueError when the $string argument contains NUL
     bytes.
+  . setlocale() now raises a ValueError when a locale name contains NUL bytes,
+    instead of silently truncating it.
   . linkinfo() now raises a ValueError when the $path argument is empty.
   . pathinfo() now raises a ValueError when an invalid $flag argument value is
     passed.

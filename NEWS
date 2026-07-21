@@ -49,6 +49,10 @@ PHP                                                                        NEWS
     TCP_USER_TIMEOUT, and SO_LINGER options. (Weilin Du)
   . Fixed various memory related issues in ext/sockets. (David Carlier)
 
+- Standard:
+  . Fixed setlocale() to reject locale names containing NUL bytes instead of
+    silently truncating them. (Weilin Du)
+
 - Streams:
   . Added a new IO copy API used by php_stream_copy_to_stream_ex() that
     leverages platform primitives (sendfile, splice, copy_file_range,
