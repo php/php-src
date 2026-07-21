@@ -370,17 +370,12 @@ static zend_always_inline const zend_class_entry *get_fake_or_executed_scope(voi
  * runtime cache is NOT populated. A populated write-site cache slot
  * therefore guarantees set access, which lets the VM's cached direct-assign
  * fast path skip the per-write asymmetric visibility check. */
-static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, const zend_property_info **info_ptr, bool write_access) /* {{{ */
+static zend_never_inline uintptr_t zend_get_property_offset_slow(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, const zend_property_info **info_ptr, bool write_access) /* {{{ */
 {
 	zval *zv;
 	zend_property_info *property_info;
 	uint32_t flags;
 	uintptr_t offset;
-
-	if (cache_slot && EXPECTED(ce == CACHED_PTR_EX(cache_slot))) {
-		*info_ptr = CACHED_PTR_EX(cache_slot + 2);
-		return (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
-	}
 
 	if (UNEXPECTED(zend_hash_num_elements(&ce->properties_info) == 0)
 	 || UNEXPECTED((zv = zend_hash_find(&ce->properties_info, member)) == NULL)) {
@@ -490,6 +485,18 @@ found:
 	return offset;
 }
 /* }}} */
+
+/* Keep the inlined body limited to the cache-hit fast path; resolution
+ * (visibility, modules, surfaces, hooks) stays out of line so callers'
+ * hot paths remain compact. */
+static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, const zend_property_info **info_ptr, bool write_access)
+{
+	if (cache_slot && EXPECTED(ce == CACHED_PTR_EX(cache_slot))) {
+		*info_ptr = CACHED_PTR_EX(cache_slot + 2);
+		return (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
+	}
+	return zend_get_property_offset_slow(ce, member, silent, cache_slot, info_ptr, write_access);
+}
 
 static ZEND_COLD void zend_wrong_offset(zend_class_entry *ce, zend_string *member) /* {{{ */
 {
