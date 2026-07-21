@@ -2125,6 +2125,7 @@ PHP_METHOD(SQLite3Result, reset)
 	sqlite3result_clear_column_names_cache(result_obj);
 
 	if (sqlite3_reset(result_obj->stmt_obj->stmt) != SQLITE_OK) {
+		php_sqlite3_error(result_obj->db_obj, sqlite3_errcode(sqlite3_db_handle(result_obj->stmt_obj->stmt)), "Unable to reset statement: %s", sqlite3_errmsg(sqlite3_db_handle(result_obj->stmt_obj->stmt)));
 		RETURN_FALSE;
 	}
 
@@ -2150,7 +2151,9 @@ PHP_METHOD(SQLite3Result, finalize)
 		zend_llist_del_element(&(result_obj->db_obj->free_list), result_obj->stmt_obj,
 			(int (*)(void *, void *)) php_sqlite3_compare_stmt_free);
 	} else {
-		sqlite3_reset(result_obj->stmt_obj->stmt);
+		if (sqlite3_reset(result_obj->stmt_obj->stmt) != SQLITE_OK) {
+			php_sqlite3_error(result_obj->db_obj, sqlite3_errcode(sqlite3_db_handle(result_obj->stmt_obj->stmt)), "Unable to reset statement: %s", sqlite3_errmsg(sqlite3_db_handle(result_obj->stmt_obj->stmt)));
+		}
 	}
 
 	RETURN_TRUE;
