@@ -92,7 +92,7 @@ array(2) {
     string(2) "19"
   }
 }
-gmp_rootrem(): Argument #2 ($nth) must be odd if argument #1 ($a) is negative
+gmp_rootrem(): Argument #2 ($nth) must be odd if argument #1 ($num) is negative
 array(2) {
   [0]=>
   object(GMP)#%d (1) {

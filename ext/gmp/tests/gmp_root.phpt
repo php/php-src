@@ -53,7 +53,7 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(1) "3"
 }
-gmp_root(): Argument #2 ($nth) must be odd if argument #1 ($a) is negative
+gmp_root(): Argument #2 ($nth) must be odd if argument #1 ($num) is negative
 object(GMP)#%d (1) {
   ["num"]=>
   string(1) "0"
