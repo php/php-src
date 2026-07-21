@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
     declares a default value for the attribute). (iliaal)
 
+- Curl:
+  . Bumped required libcurl version to 7.61.1. (GrahamCampbell)
+
 - GMP:
   . Fixed GMP power and shift operators to reject GMP right operands outside
     the unsigned long range instead of silently truncating them. (Weilin Du)

@@ -493,6 +493,9 @@ PHP 8.6 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Curl:
+  . The Curl extension now requires at least libcurl 7.61.1.
+
 - Hash:
   . The bundled version of xxHash was upgraded to 0.8.2.
 
