@@ -8,8 +8,8 @@ $formatter = new NumberFormatter("en_GB", NumberFormatter::CURRENCY);
 try {
     serialize($formatter);
 } catch (Exception $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+    echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Serialization of 'NumberFormatter' is not allowed
+Exception: Serialization of 'NumberFormatter' is not allowed

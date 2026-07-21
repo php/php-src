@@ -9,44 +9,44 @@ intl
 try {
     var_dump(IntlGregorianCalendar::createFromDateTime(99999999999, 1, 1, 1, 1, 1));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump(IntlGregorianCalendar::createFromDateTime(1, 99999999999, 1, 1, 1, 1));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump(IntlGregorianCalendar::createFromDateTime(1, 1, 99999999999, 1, 1, 1));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump(IntlGregorianCalendar::createFromDateTime(1, 1, 1, 99999999999, 1, 1));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump(IntlGregorianCalendar::createFromDateTime(1, 1, 1, 1, 99999999999, 1));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump(IntlGregorianCalendar::createFromDateTime(1, 1, 1, 1, 1, 99999999999));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-IntlGregorianCalendar::createFromDateTime(): Argument #1 ($year) must be between -2147483648 and 2147483647
-IntlGregorianCalendar::createFromDateTime(): Argument #2 ($month) must be between -2147483648 and 2147483647
-IntlGregorianCalendar::createFromDateTime(): Argument #3 ($dayOfMonth) must be between -2147483648 and 2147483647
-IntlGregorianCalendar::createFromDateTime(): Argument #4 ($hour) must be between -2147483648 and 2147483647
-IntlGregorianCalendar::createFromDateTime(): Argument #5 ($minute) must be between -2147483648 and 2147483647
-IntlGregorianCalendar::createFromDateTime(): Argument #6 ($second) must be between -2147483648 and 2147483647
+ValueError: IntlGregorianCalendar::createFromDateTime(): Argument #1 ($year) must be between -2147483648 and 2147483647
+ValueError: IntlGregorianCalendar::createFromDateTime(): Argument #2 ($month) must be between -2147483648 and 2147483647
+ValueError: IntlGregorianCalendar::createFromDateTime(): Argument #3 ($dayOfMonth) must be between -2147483648 and 2147483647
+ValueError: IntlGregorianCalendar::createFromDateTime(): Argument #4 ($hour) must be between -2147483648 and 2147483647
+ValueError: IntlGregorianCalendar::createFromDateTime(): Argument #5 ($minute) must be between -2147483648 and 2147483647
+ValueError: IntlGregorianCalendar::createFromDateTime(): Argument #6 ($second) must be between -2147483648 and 2147483647

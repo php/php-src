@@ -26,10 +26,10 @@ var_dump(get_class($rbbi));
 try {
     $obj = new IntlRuleBasedBreakIterator('[\p{Letter}\uFFFD]+;[:number:]+', 'aoeu');
 } catch (IntlException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
 string(26) "IntlRuleBasedBreakIterator"
-IntlRuleBasedBreakIterator::__construct(): unable to create instance from compiled rules
+IntlException: IntlRuleBasedBreakIterator::__construct(): unable to create instance from compiled rules

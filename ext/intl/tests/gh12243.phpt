@@ -16,9 +16,9 @@ try {
 	    timezone: $datetime->getTimezone(),
     );
 } catch (\IntlException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-IntlDateFormatter::__construct(): datefmt_create: time format must be IntlDateFormatter::PATTERN if date format is IntlDateFormatter::PATTERN
+IntlException: IntlDateFormatter::__construct(): datefmt_create: time format must be IntlDateFormatter::PATTERN if date format is IntlDateFormatter::PATTERN

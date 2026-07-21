@@ -16,13 +16,13 @@ ini_set('intl.use_exceptions', '1');
 try {
     Locale::lookup([''], 'de-DE', false, 'en-US');
 } catch (IntlException $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     locale_lookup([''], 'de-DE', false, 'en-US');
 } catch (IntlException $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -31,5 +31,5 @@ NULL
 string(75) "Locale::lookup(): unable to canonicalize lang_tag: U_ILLEGAL_ARGUMENT_ERROR"
 NULL
 string(74) "locale_lookup(): unable to canonicalize lang_tag: U_ILLEGAL_ARGUMENT_ERROR"
-Locale::lookup(): unable to canonicalize lang_tag
-locale_lookup(): unable to canonicalize lang_tag
+IntlException: Locale::lookup(): unable to canonicalize lang_tag
+IntlException: locale_lookup(): unable to canonicalize lang_tag

@@ -11,22 +11,22 @@ $cal = IntlCalendar::createInstance();
 try {
     $cal->setDate(99999999999, 1, 1);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $cal->setDate(1, 99999999999, 1);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $cal->setDate(1, 1, 99999999999);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-IntlCalendar::setDate(): Argument #1 ($year) must be between -2147483648 and 2147483647
-IntlCalendar::setDate(): Argument #2 ($month) must be between -2147483648 and 2147483647
-IntlCalendar::setDate(): Argument #3 ($dayOfMonth) must be between -2147483648 and 2147483647
+ValueError: IntlCalendar::setDate(): Argument #1 ($year) must be between -2147483648 and 2147483647
+ValueError: IntlCalendar::setDate(): Argument #2 ($month) must be between -2147483648 and 2147483647
+ValueError: IntlCalendar::setDate(): Argument #3 ($dayOfMonth) must be between -2147483648 and 2147483647

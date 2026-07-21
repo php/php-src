@@ -9,8 +9,8 @@ $collator = new Collator('en_US');
 try {
     $collator->__construct('en_US');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Collator object is already constructed
+Error: Collator object is already constructed

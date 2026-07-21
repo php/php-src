@@ -89,7 +89,7 @@ function ut_main()
     try {
         ut_loc_set_default("a-\0DE");
     } catch (\ValueError $e) {
-        echo $e->getMessage(), PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     return $res_str;
@@ -101,8 +101,8 @@ ut_run();
 
 ?>
 --EXPECT--
-Locale::setDefault(): Argument #1 ($locale) must not contain any null bytes
-locale_set_default(): Argument #1 ($locale) must not contain any null bytes
+ValueError: Locale::setDefault(): Argument #1 ($locale) must not contain any null bytes
+ValueError: locale_set_default(): Argument #1 ($locale) must not contain any null bytes
 uk-ua_CALIFORNIA@currency=;currency=GRN: set locale 'uk-ua_CALIFORNIA@currency=;currency=GRN'
 root: set locale 'root'
 uk@currency=EURO: set locale 'uk@currency=EURO'
