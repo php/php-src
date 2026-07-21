@@ -51,6 +51,10 @@ PHP                                                                        NEWS
     TCP_USER_TIMEOUT, and SO_LINGER options. (Weilin Du)
   . Fixed various memory related issues in ext/sockets. (David Carlier)
 
+- Standard:
+  . Fixed bug GH-22844 (Use-after-free in StreamPollHandle after the
+    underlying stream is closed). (iliaal, arnaud-lb)
+
 - Streams:
   . Added a new IO copy API used by php_stream_copy_to_stream_ex() that
     leverages platform primitives (sendfile, splice, copy_file_range,
