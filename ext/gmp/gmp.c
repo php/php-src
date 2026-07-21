@@ -1098,6 +1098,9 @@ ZEND_FUNCTION(gmp_prevprime)
 		 * mpz_prevprime() returns 0 when no previous prime exists, which happens
 		 * for operands not greater than 2.
 		 * https://gmplib.org/manual/Number-Theoretic-Functions#index-mpz_005fprevprime
+		 * However. since returning a prime number smaller than 2 is mathemeticaly
+		 * impossible, throwing a ValueError instead is a more widely used solution
+		 * through out the php code base.
 		 */
 		zend_argument_value_error(1, "must be greater than 2");
 		RETURN_THROWS();
