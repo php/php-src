@@ -1,5 +1,5 @@
 /* This is a generated file, edit gmp.stub.php instead.
- * Stub hash: 3aabd5a5d2db0df15b249a425465ae718c13ab6b */
+ * Stub hash: 83e56e602d1b6666e95c09cb84411eede6b0e2bc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_init, 0, 1, GMP, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -90,6 +90,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_powm, 0, 3, GMP, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, exponent, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_OBJ_TYPE_MASK(0, modulus, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
+
+#if defined(HAVE___GMPZ_POWM_SEC)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_powm_sec, 0, 3, GMP, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, num, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, exponent, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, modulus, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_perfect_square, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, num, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -218,6 +226,9 @@ ZEND_FUNCTION(gmp_root);
 ZEND_FUNCTION(gmp_rootrem);
 ZEND_FUNCTION(gmp_pow);
 ZEND_FUNCTION(gmp_powm);
+#if defined(HAVE___GMPZ_POWM_SEC)
+ZEND_FUNCTION(gmp_powm_sec);
+#endif
 ZEND_FUNCTION(gmp_perfect_square);
 ZEND_FUNCTION(gmp_perfect_power);
 ZEND_FUNCTION(gmp_prob_prime);
@@ -274,6 +285,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gmp_rootrem, arginfo_gmp_rootrem)
 	ZEND_FE(gmp_pow, arginfo_gmp_pow)
 	ZEND_FE(gmp_powm, arginfo_gmp_powm)
+#if defined(HAVE___GMPZ_POWM_SEC)
+	ZEND_FE(gmp_powm_sec, arginfo_gmp_powm_sec)
+#endif
 	ZEND_FE(gmp_perfect_square, arginfo_gmp_perfect_square)
 	ZEND_FE(gmp_perfect_power, arginfo_gmp_perfect_power)
 	ZEND_FE(gmp_prob_prime, arginfo_gmp_prob_prime)

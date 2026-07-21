@@ -60,6 +60,9 @@ $functions2 = [
 $functions3 = [
     'gmp_powm',
 ];
+if (function_exists('gmp_powm_sec')) {
+    $functions3[] = 'gmp_powm_sec';
+}
 
 echo 'Explicit base with gmp_init:', \PHP_EOL;
 echo 'Hexadecimal', \PHP_EOL;
