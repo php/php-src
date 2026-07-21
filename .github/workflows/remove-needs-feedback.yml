@@ -16,9 +16,9 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions-ecosystem/action-remove-labels@v1
+      - uses: actions-ecosystem/action-remove-labels@f27b608878404679385c85cfa523b85ccb86e213 # v1
         with:
           labels: "Status: Needs Feedback"
-      - uses: actions-ecosystem/action-add-labels@v1
+      - uses: actions-ecosystem/action-add-labels@e79a6962e0d4c0c17b229090214935d2e33f8354 # v1
         with:
           labels: "Status: Needs Triage"

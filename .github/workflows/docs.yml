@@ -17,14 +17,14 @@ jobs:
     if: github.repository == 'php/php-src'
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Install dependencies
         run: pip install -r docs/requirements.txt
       - name: Check formatting
         run: make -C docs check-formatting
       - name: Publish
         if: github.event_name == 'push'
-        uses: sphinx-notes/pages@v3
+        uses: sphinx-notes/pages@71e8d5144caa0d4a1e292348bfafa3866d08c855 # v3
         with:
           checkout: false
           documentation_path: docs/source

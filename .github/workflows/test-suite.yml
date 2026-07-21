@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 180
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: System info
@@ -61,7 +61,7 @@ jobs:
       image: 'alpine:3.22'
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: apk
@@ -135,7 +135,7 @@ jobs:
     timeout-minutes: 180
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: Create MSSQL container
@@ -258,7 +258,7 @@ jobs:
           FIREBIRD_PASSWORD: test
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: apt
@@ -316,7 +316,7 @@ jobs:
     timeout-minutes: 180
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: Update clang
@@ -394,7 +394,7 @@ jobs:
     timeout-minutes: 180
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: Create MSSQL container
@@ -422,7 +422,7 @@ jobs:
       - name: Generate coverage report
         if: ${{ !cancelled() }}
         run: make gcovr-xml
-      - uses: codecov/codecov-action@v6
+      - uses: codecov/codecov-action@5bef64f19d7facfb25b37b414482c7164d639639 # v6
         if: ${{ !cancelled() }}
         with:
           disable_search: true
@@ -444,7 +444,7 @@ jobs:
       USE_TRACKED_ALLOC: 1
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: apt
@@ -651,7 +651,7 @@ jobs:
     timeout-minutes: 180
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: Create MSSQL container
@@ -715,7 +715,7 @@ jobs:
     timeout-minutes: 180
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: apt
@@ -807,7 +807,7 @@ jobs:
     timeout-minutes: 180
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: apt
@@ -861,7 +861,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: Setup
@@ -880,7 +880,7 @@ jobs:
     timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: FreeBSD
@@ -896,7 +896,7 @@ jobs:
     timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: Solaris
@@ -911,7 +911,7 @@ jobs:
     timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
           fetch-depth: 0
@@ -973,7 +973,7 @@ jobs:
           mysql -uroot -proot -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'wordpress'; FLUSH PRIVILEGES;"
           mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'wordpress'@'localhost' WITH GRANT OPTION;"
       - name: git checkout benchmarking-data
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           repository: php/benchmarking-data
           ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
@@ -1004,7 +1004,7 @@ jobs:
             ${{ github.sha }} \
             ${{ github.event.pull_request.base.sha }} \
             > $GITHUB_STEP_SUMMARY
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: profiles
           path: ${{ github.workspace }}/benchmark/profiles
