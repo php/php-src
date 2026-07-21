@@ -15,25 +15,25 @@ $r = new Uri\WhatWg\InvalidUrlException(
 try {
     $r->__construct("foo");
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $r->__construct("bar", []);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $r->__construct("baz", [], 0);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $r->__construct("qax", [], 0, null);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump($r->getMessage());
@@ -43,10 +43,10 @@ var_dump($r->getPrevious()::class);
 
 ?>
 --EXPECTF--
-Cannot modify readonly property Uri\WhatWg\InvalidUrlException::$errors
-Cannot modify readonly property Uri\WhatWg\InvalidUrlException::$errors
-Cannot modify readonly property Uri\WhatWg\InvalidUrlException::$errors
-Cannot modify readonly property Uri\WhatWg\InvalidUrlException::$errors
+Error: Cannot modify readonly property Uri\WhatWg\InvalidUrlException::$errors
+Error: Cannot modify readonly property Uri\WhatWg\InvalidUrlException::$errors
+Error: Cannot modify readonly property Uri\WhatWg\InvalidUrlException::$errors
+Error: Cannot modify readonly property Uri\WhatWg\InvalidUrlException::$errors
 string(3) "qax"
 array(%d) {
   [%d]=>

@@ -9,7 +9,7 @@ $uri = new Uri\WhatWg\Url('https://example.com');
 try {
   $uri->__construct('ftp://example.org');
 } catch (Throwable $e) {
-  echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+  echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($uri);
 
@@ -17,7 +17,7 @@ $uri = new Uri\WhatWg\Url('https://example.com');
 try {
   $uri->__unserialize([['uri' => 'ftp://example.org'], []]);
 } catch (Throwable $e) {
-  echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+  echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($uri);
 
@@ -25,7 +25,7 @@ $uri = new Uri\Rfc3986\Uri('https://example.com');
 try {
   $uri->__construct('ftp://example.org');
 } catch (Throwable $e) {
-  echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+  echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($uri);
 
@@ -33,7 +33,7 @@ $uri = new Uri\Rfc3986\Uri('https://example.com');
 try {
   $uri->__unserialize([['uri' => 'ftp://example.org'], []]);
 } catch (Throwable $e) {
-  echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+  echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($uri);
 

@@ -28,7 +28,7 @@ var_dump($uri2->getPort());
 try {
     $uri4->withUserInfo("u:s/r");
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $uri5 = Uri\Rfc3986\Uri::parse("file:///foo/bar/");
@@ -48,6 +48,6 @@ NULL
 string(13) "%75s%2Fr:pass"
 string(11) "us%2Fr:pass"
 NULL
-The specified userinfo is malformed
+Uri\InvalidUriException: The specified userinfo is malformed
 NULL
 string(9) "user:pass"

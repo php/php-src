@@ -6,7 +6,7 @@ Test Uri\Rfc3986\Uri parsing - path - reserved character
 try {
     new Uri\Rfc3986\Uri("https://example.com/fo[o/ba]r/");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

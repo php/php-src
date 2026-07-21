@@ -10,7 +10,7 @@ $uri = new Uri\Rfc3986\Uri("https://example.com");
 try {
     $uri->resolve("á");
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $url = new Uri\WhatWg\Url("https://example.com");
@@ -18,7 +18,7 @@ $url = new Uri\WhatWg\Url("https://example.com");
 try {
     $url->resolve("https://1.2.3.4.5");
 } catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $softErrors = [];
@@ -28,8 +28,8 @@ var_dump($softErrors);
 
 ?>
 --EXPECTF--
-The specified URI is malformed
-The specified URI is malformed (Ipv4TooManyParts)
+Uri\InvalidUriException: The specified URI is malformed
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (Ipv4TooManyParts)
 string(23) "https://example.com/foo"
 array(%d) {
   [0]=>

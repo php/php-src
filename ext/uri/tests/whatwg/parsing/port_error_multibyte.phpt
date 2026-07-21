@@ -6,7 +6,7 @@ Test Uri\WhatWg\Url parsing - port - multibyte
 try {
     new Uri\WhatWg\Url("https://example.com:Ȏ");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

@@ -40,7 +40,7 @@ var_dump($uri5->getQuery());
 try {
     $uri5->withQuery("#");
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $url1 = Uri\WhatWg\Url::parse("https://example.com?foo=bar");
@@ -83,7 +83,7 @@ string(6) "t%65st"
 string(4) "test"
 string(25) "foo=foo%26bar&baz=/qux%3D"
 string(25) "foo=foo%26bar&baz=/qux%3D"
-The specified query is malformed
+Uri\InvalidUriException: The specified query is malformed
 string(7) "foo=bar"
 string(7) "foo=baz"
 NULL

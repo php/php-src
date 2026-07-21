@@ -6,7 +6,7 @@ Test Uri\Rfc3986\Uri parsing - basic - URI contains null byte
 try {
     new Uri\Rfc3986\Uri("https://exam\0ple.com");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

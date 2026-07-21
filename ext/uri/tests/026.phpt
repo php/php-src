@@ -32,25 +32,25 @@ var_dump($uri6->getHost());
 try {
     $uri3->withHost("test.com:8080");
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $uri3->withHost("t%3As%2Ft.com"); // t:s/t.com
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $uri3->withHost("t:s/t.com");
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $uri2->withHost("");
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $uri1 = Uri\Rfc3986\Uri::parse("ftp://user:pass@foo.com?query=abc#foo");
@@ -62,7 +62,7 @@ var_dump($uri2->getHost());
 try {
     $uri1->withHost(null);
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $url1 = Uri\WhatWg\Url::parse("https://example.com");
@@ -80,25 +80,25 @@ var_dump($url5->getAsciiHost());
 try {
     $url3->withHost("test.com:8080");
 } catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $url3->withHost("t%3As%2Ft.com"); // t:s/t.com
 } catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $url3->withHost("t:s/t.com");     // t:s/t.com
 } catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $url2->withHost(null);
 } catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $url1 = Uri\WhatWg\Url::parse("ftp://foo.com?query=abc#foo");
@@ -121,19 +121,19 @@ string(11) "192.168.0.1"
 string(11) "192.168.0.1"
 string(40) "[2001:db8:3333:4444:5555:6666:7777:8888]"
 string(40) "[2001:db8:3333:4444:5555:6666:7777:8888]"
-The specified host is malformed
-The specified host is malformed
+Uri\InvalidUriException: The specified host is malformed
+Uri\InvalidUriException: The specified host is malformed
 string(7) "foo.com"
 string(8) "test.com"
-Cannot remove the host from a URI that has a userinfo
+Uri\InvalidUriException: Cannot remove the host from a URI that has a userinfo
 string(11) "example.com"
 string(8) "test.com"
 string(8) "test.com"
 string(11) "192.168.0.1"
 string(40) "[2001:db8:3333:4444:5555:6666:7777:8888]"
-The specified host is malformed
-The specified host is malformed (DomainInvalidCodePoint)
-The specified host is malformed
-The specified host is malformed (HostMissing)
+Uri\WhatWg\InvalidUrlException: The specified host is malformed
+Uri\WhatWg\InvalidUrlException: The specified host is malformed (DomainInvalidCodePoint)
+Uri\WhatWg\InvalidUrlException: The specified host is malformed
+Uri\WhatWg\InvalidUrlException: The specified host is malformed (HostMissing)
 string(7) "foo.com"
 string(8) "test.com"

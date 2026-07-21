@@ -8,11 +8,11 @@ uri
 try {
     new \Uri\WhatWg\Url('http://localhost:99999');
 } catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     var_dump($e->errors[0]->type === \Uri\WhatWg\UrlValidationErrorType::PortOutOfRange);
 }
 
 ?>
 --EXPECT--
-The specified URI is malformed (PortOutOfRange)
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (PortOutOfRange)
 bool(true)

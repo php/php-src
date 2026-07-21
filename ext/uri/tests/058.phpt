@@ -22,7 +22,7 @@ try {
         new \Uri\Rfc3986\Uri('https://example.com:2147483648');
     }
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

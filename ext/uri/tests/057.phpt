@@ -13,7 +13,7 @@ $f = new Foo();
 try {
     Uri\WhatWg\Url::parse(" https://example.org ", errors: $f->x);
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

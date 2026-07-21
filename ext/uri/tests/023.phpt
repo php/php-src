@@ -20,13 +20,13 @@ var_dump($uri3->getScheme());
 try {
     $uri3->withScheme("");
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $uri3->withScheme("http%73");
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $url1 = Uri\WhatWg\Url::parse("https://example.com");
@@ -38,13 +38,13 @@ var_dump($url2->getScheme());
 try {
     $url2->withScheme("");
 } catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $url2->withScheme("http%73");
 } catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -55,9 +55,9 @@ string(4) "http"
 string(4) "http"
 NULL
 NULL
-The specified scheme is malformed
-The specified scheme is malformed
+Uri\InvalidUriException: The specified scheme is malformed
+Uri\InvalidUriException: The specified scheme is malformed
 string(5) "https"
 string(4) "http"
-The specified scheme is malformed
-The specified scheme is malformed
+Uri\WhatWg\InvalidUrlException: The specified scheme is malformed
+Uri\WhatWg\InvalidUrlException: The specified scheme is malformed

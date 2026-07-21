@@ -8,13 +8,13 @@ uri
 try {
     new Uri\Rfc3986\Uri("https://example.com:8080@username:password/path?q=r#fragment");
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     new Uri\WhatWg\Url("https://example.com:8080@username:password/path?q=r#fragment");
 } catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     var_dump($e->errors);
 }
 
@@ -25,8 +25,8 @@ var_dump($failures);
 
 ?>
 --EXPECTF--
-The specified URI is malformed
-The specified URI is malformed (PortInvalid)
+Uri\InvalidUriException: The specified URI is malformed
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (PortInvalid)
 array(%d) {
   [0]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {

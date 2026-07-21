@@ -12,7 +12,7 @@ $url = new Uri\WhatWg\Url("https://example.com")
 try {
     $url->withScheme("0");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     var_dump($e->errors);
 }
 
