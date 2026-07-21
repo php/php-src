@@ -323,7 +323,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 					/* Prevent a memory leak in case there are more transfer-encoding headers. */
 					php_stream_filter_free(header_info->transfer_encoding);
 				}
-				header_info->transfer_encoding = php_stream_filter_create(
+				header_info->transfer_encoding = chunked_filter_create(
 						"dechunk", NULL, php_stream_is_persistent(stream));
 				if (header_info->transfer_encoding != NULL) {
 					/* Do not store transfer-encoding header. */
