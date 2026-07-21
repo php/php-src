@@ -29,48 +29,30 @@ $values = array(111000111,
                 );
 
 for ($i = 0; $i < count($values); $i++) {
-    $res = bindec($values[$i]);
-    var_dump($res);
+    try {
+        $res = bindec($values[$i]);
+        var_dump($res);
+    } catch (ValueError $e) {
+        echo 'ValueError: ', $e->getMessage(), "\n";
+    }
 }
 ?>
---EXPECTF--
+--EXPECT--
 int(455)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(32766)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(5)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(129)
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 int(455)
 int(224)
 int(2147483647)
 int(2147483648)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(129)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(13)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(13)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(26)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(6)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
 int(1)
 int(0)

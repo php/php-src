@@ -55,13 +55,15 @@ foreach($inputs as $input) {
     try {
         var_dump(base_convert($input, 10, 8));
     } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
+        echo 'TypeError: ', $exception->getMessage() . "\n";
+    } catch (ValueError $exception) {
+        echo 'ValueError: ', $exception->getMessage() . "\n";
     }
     $iterator++;
 }
 fclose($fp);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing base_convert() : usage variations ***
 
 -- Iteration 1 --
@@ -74,37 +76,25 @@ string(1) "1"
 string(2) "14"
 
 -- Iteration 4 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(2) "14"
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 5 --
 string(11) "17777777777"
 
 -- Iteration 6 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(3) "151"
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 7 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(3) "151"
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 8 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(7) "4553207"
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 9 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(7) "4553207"
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 10 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "5"
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 11 --
 string(1) "1"
@@ -125,22 +115,16 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 17 --
-base_convert(): Argument #1 ($num) must be of type string, array given
+TypeError: base_convert(): Argument #1 ($num) must be of type string, array given
 
 -- Iteration 18 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 19 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 20 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
+ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 -- Iteration 21 --
-base_convert(): Argument #1 ($num) must be of type string, resource given
+TypeError: base_convert(): Argument #1 ($num) must be of type string, resource given
