@@ -375,30 +375,64 @@ static zend_always_inline bool zend_ast_is_decl(const zend_ast *ast) {
 static zend_always_inline bool zend_ast_is_list(const zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_IS_LIST_SHIFT) & 1;
 }
-static zend_always_inline zend_ast_list *zend_ast_get_list(zend_ast *ast) {
-	ZEND_ASSERT(zend_ast_is_list(ast));
-	return (zend_ast_list *) ast;
-}
 
-static zend_always_inline zval *zend_ast_get_zval(zend_ast *ast) {
-	ZEND_ASSERT(ast->kind == ZEND_AST_ZVAL);
-	return &((zend_ast_zval *) ast)->val;
+#if __cplusplus
+extern "C++" {
+	static inline const zend_ast_list *zend_ast_get_list(const zend_ast *ast) {
+		ZEND_ASSERT(zend_ast_is_list(ast));
+		return reinterpret_cast<const zend_ast_list *>(ast);
+	}
+	static inline zend_ast_list *zend_ast_get_list(zend_ast *ast) {
+		ZEND_ASSERT(zend_ast_is_list(ast));
+		return reinterpret_cast<zend_ast_list *>(ast);
+	}
+	static inline const zval *zend_ast_get_zval(const zend_ast *ast) {
+		ZEND_ASSERT(ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT);
+		return &reinterpret_cast<const zend_ast_zval *>(ast)->val;
+	}
+	static inline zval *zend_ast_get_zval(zend_ast *ast) {
+		ZEND_ASSERT(ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT);
+		return &reinterpret_cast<zend_ast_zval *>(ast)->val;
+	}
+	static inline const zend_ast_op_array *zend_ast_get_op_array(const zend_ast *ast) {
+		ZEND_ASSERT(ast->kind == ZEND_AST_OP_ARRAY);
+		return reinterpret_cast<const zend_ast_op_array *>(ast);
+	}
+	static inline zend_ast_op_array *zend_ast_get_op_array(zend_ast *ast) {
+		ZEND_ASSERT(ast->kind == ZEND_AST_OP_ARRAY);
+		return reinterpret_cast<zend_ast_op_array *>(ast);
+	}
 }
-static zend_always_inline zend_string *zend_ast_get_str(zend_ast *ast) {
+#else
+# define zend_ast_get_list(ast) (ZEND_ASSERT(zend_ast_is_list(ast)), _Generic( \
+		(ast), \
+		const zend_ast *: ((const zend_ast_list *) ast), \
+		zend_ast *: ((zend_ast_list *) ast) \
+	))
+
+# define zend_ast_get_zval(ast) (ZEND_ASSERT((ast)->kind == ZEND_AST_ZVAL || (ast)->kind == ZEND_AST_CONSTANT), _Generic( \
+		(ast), \
+		const zend_ast *: (&((const zend_ast_zval *) ast)->val), \
+		zend_ast *: (&((zend_ast_zval *) ast)->val) \
+	))
+
+# define zend_ast_get_op_array(ast) (ZEND_ASSERT((ast)->kind == ZEND_AST_OP_ARRAY), _Generic( \
+		(ast), \
+		const zend_ast *: ((const zend_ast_op_array *) ast), \
+		zend_ast *: ((zend_ast_op_array *) ast) \
+	))
+#endif
+
+static zend_always_inline zend_string *zend_ast_get_str(const zend_ast *ast) {
 	const zval *zv = zend_ast_get_zval(ast);
 	ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
 	return Z_STR_P(zv);
 }
 
-static zend_always_inline zend_ast_op_array *zend_ast_get_op_array(zend_ast *ast) {
-	ZEND_ASSERT(ast->kind == ZEND_AST_OP_ARRAY);
-	return (zend_ast_op_array *) ast;
-}
-
-static zend_always_inline zend_string *zend_ast_get_constant_name(zend_ast *ast) {
-	ZEND_ASSERT(ast->kind == ZEND_AST_CONSTANT);
-	ZEND_ASSERT(Z_TYPE(((zend_ast_zval *) ast)->val) == IS_STRING);
-	return Z_STR(((zend_ast_zval *) ast)->val);
+static zend_always_inline zend_string *zend_ast_get_constant_name(const zend_ast *ast) {
+	const zval *zv = zend_ast_get_zval(ast);
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+	return Z_STR_P(zv);
 }
 
 static zend_always_inline uint32_t zend_ast_get_num_children(const zend_ast *ast) {
