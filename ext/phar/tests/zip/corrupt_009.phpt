@@ -7,8 +7,8 @@ phar
 try {
     new PharData(__DIR__ . '/files/extralen_toolong.zip');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-phar error: Unable to process extra field header for file in central directory in zip-based phar "%sextralen_toolong.zip"
+UnexpectedValueException: phar error: Unable to process extra field header for file in central directory in zip-based phar "%sextralen_toolong.zip"

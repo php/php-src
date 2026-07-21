@@ -29,7 +29,7 @@ try
 }
 catch(exception $e)
 {
-    echo 'Exception: ' . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
@@ -47,7 +47,7 @@ __HALT_COMPILER();
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 bool(true)
-Exception: illegal stub for phar "%sphar_stub_error.phar.php" (__HALT_COMPILER(); is missing)
+PharException: illegal stub for phar "%sphar_stub_error.phar.php" (__HALT_COMPILER(); is missing)
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 bool(true)
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"

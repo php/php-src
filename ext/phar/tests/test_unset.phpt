@@ -22,7 +22,7 @@ $phar['b'] = 'whatever'; // flushed
 try {
    $phar->setAlias('first');
 } catch(Exception $e) {
-   echo $e->getMessage()."\n";
+   echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $phar = new Phar($fname);

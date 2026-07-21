@@ -41,7 +41,7 @@ try {
     $phar['test']->chmod(0666);
     var_dump($phar['test']->isReadable());
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--

@@ -21,10 +21,10 @@ for ($i = 0; $i < 2; $i++) {
 
 echo("\nWritten files: $i\n");
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECTF--
 string(26) "file 0 in DataArchive.phar"
-unable to seek to start of file "0" while creating new phar "%sDataArchive.phar"
+PharException: unable to seek to start of file "0" while creating new phar "%sDataArchive.phar"

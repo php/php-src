@@ -13,14 +13,14 @@ try {
 file_put_contents($fname, 'blah');
 $a = new PharFileInfo($pname . '/oops');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 unlink($fname);
 }
 
 try {
 $a = new PharFileInfo(array());
 } catch (TypeError $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $a = new Phar($fname);
@@ -30,26 +30,26 @@ $b = $a['a'];
 try {
 $a = new PharFileInfo($pname . '/oops/I/do/not/exist');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 $b->__construct('oops');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 $a = new PharFileInfo(__FILE__);
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 --EXPECTF--
-Cannot open phar file 'phar://%spharfileinfo_construct.phar/oops': internal corruption of phar "%spharfileinfo_construct.phar" (truncated entry)
-PharFileInfo::__construct(): Argument #1 ($filename) must be of type string, array given
-Cannot access phar file entry '%s' in archive '%s'
-Cannot call constructor twice
-'%s' is not a valid phar archive URL (must have at least phar://filename.phar)
+RuntimeException: Cannot open phar file 'phar://%spharfileinfo_construct.phar/oops': internal corruption of phar "%spharfileinfo_construct.phar" (truncated entry)
+TypeError: PharFileInfo::__construct(): Argument #1 ($filename) must be of type string, array given
+RuntimeException: Cannot access phar file entry '%s' in archive '%s'
+BadMethodCallException: Cannot call constructor twice
+RuntimeException: '%s' is not a valid phar archive URL (must have at least phar://filename.phar)

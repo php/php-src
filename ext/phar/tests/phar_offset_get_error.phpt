@@ -22,7 +22,7 @@ try
 }
 catch(Exception $e)
 {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 include($pname . $iname);
@@ -31,18 +31,18 @@ include($pname . $iname);
 try {
 $p['.phar/oops'] = 'hi';
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 $a = $p['.phar/stub.php'];
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
-Entry /error/.. does not exist and cannot be created: phar error: invalid path "/error/.." contains upper directory reference
+BadMethodCallException: Entry /error/.. does not exist and cannot be created: phar error: invalid path "/error/.." contains upper directory reference
 foobar
-Cannot set any files or directories in magic ".phar" directory
-Entry .phar/stub.php does not exist
+BadMethodCallException: Cannot set any files or directories in magic ".phar" directory
+BadMethodCallException: Entry .phar/stub.php does not exist

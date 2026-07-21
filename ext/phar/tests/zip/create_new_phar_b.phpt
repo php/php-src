@@ -18,4 +18,3 @@ Warning: file_put_contents(phar://%screate_new_phar_b.phar.zip/a.php): Failed to
 Warning: include(phar://%screate_new_phar_b.phar.zip/a.php): Failed to open stream: %s in %screate_new_phar_b.php on line %d
 
 Warning: include(): Failed opening 'phar://%screate_new_phar_b.phar.zip/a.php' for inclusion (include_path='%s') in %screate_new_phar_b.php on line %d
-

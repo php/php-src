@@ -26,7 +26,7 @@ try
 }
 catch(exception $e)
 {
-    echo 'Exception: ' . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
@@ -44,7 +44,7 @@ __HALT_COMPILER();
 string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
 "
 bool(true)
-Exception: illegal stub for zip-based phar "%sphar_stub_error.phar.zip"
+PharException: illegal stub for zip-based phar "%sphar_stub_error.phar.zip"
 string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
 "
 bool(true)

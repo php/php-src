@@ -23,25 +23,25 @@ $b = new PharFileInfo($pname . '/a/subdir');
 try {
 var_dump($b->getCRC32());
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $b = new PharFileInfo($pname . '/a/subdir/here');
 try {
 var_dump($b->getCRC32());
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 $a = file_get_contents($pname . '/a/subdir/here');
 try {
 var_dump($b->getCRC32());
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 --EXPECTF--
-Phar entry is a directory, does not have a CRC
-Phar entry was not CRC checked
+BadMethodCallException: Phar entry is a directory, does not have a CRC
+BadMethodCallException: Phar entry was not CRC checked
 int(%s)

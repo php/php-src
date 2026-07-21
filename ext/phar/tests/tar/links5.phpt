@@ -9,7 +9,7 @@ phar.require_hash=0
 try {
     $p = new PharData(__DIR__ . '/files/subdirlink.tar');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 echo $p['hi/test.txt']->getContent();
 echo $p['hi/link.txt']->getContent();

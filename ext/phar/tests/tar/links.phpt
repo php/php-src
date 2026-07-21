@@ -11,7 +11,7 @@ copy(__DIR__ . '/files/links.tar', $fname);
 try {
     $p = new PharData($fname);
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($p['testit/link']->getContent());
 var_dump($p['testit/hard']->getContent());

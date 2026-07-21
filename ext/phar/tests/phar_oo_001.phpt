@@ -28,14 +28,14 @@ try
 }
 catch (LogicException $e)
 {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $phar = new Phar('test.phar');
     $phar->__construct('oops');
 } catch (LogicException $e)
 {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -47,5 +47,5 @@ __halt_compiler();
 --EXPECT--
 string(5) "1.0.0"
 int(5)
-string(50) "Cannot call method on an uninitialized Phar object"
-string(29) "Cannot call constructor twice"
+BadMethodCallException: Cannot call method on an uninitialized Phar object
+BadMethodCallException: Cannot call constructor twice

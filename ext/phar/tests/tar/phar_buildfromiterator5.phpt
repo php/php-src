@@ -40,13 +40,11 @@ try {
     $phar = new Phar(__DIR__ . '/buildfromiterator.phar.tar');
     var_dump($phar->buildFromIterator(new myIterator(array('a' => new stdClass))));
 } catch (Exception $e) {
-    var_dump(get_class($e));
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
 rewind
 valid
 current
-%s(24) "UnexpectedValueException"
-Iterator myIterator returned an invalid value (must return a string, a stream, or an SplFileInfo object)
+UnexpectedValueException: Iterator myIterator returned an invalid value (must return a string, a stream, or an SplFileInfo object)

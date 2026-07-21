@@ -17,11 +17,11 @@ $phar['x'] = 'hi';
 try {
     $phar->convertToData(Phar::ZIP, Phar::NONE, 'zip');
 } catch (BadMethodCallException $e) {
-    echo $e->getMessage(),"\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.zip');?>
 --EXPECTF--
-phar "%sbug48377.zip" exists and must be unlinked prior to conversion
+BadMethodCallException: phar "%sbug48377.zip" exists and must be unlinked prior to conversion

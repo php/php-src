@@ -7,14 +7,14 @@ phar
 try {
     new PharData(__DIR__ . '/files/count1.zip');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     new PharData(__DIR__ . '/files/count2.zip');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar "%scount1.zip"
-phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar "%scount2.zip"
+UnexpectedValueException: phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar "%scount1.zip"
+UnexpectedValueException: phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar "%scount2.zip"

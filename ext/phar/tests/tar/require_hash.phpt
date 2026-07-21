@@ -24,7 +24,7 @@ try {
     $phar = new Phar($fname);
     var_dump($phar->getStub());
 } catch (Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ini_set('phar.require_hash', 0);
 try {
@@ -34,7 +34,7 @@ try {
     $phar->setSignatureAlgorithm(Phar::MD5);
     var_dump($phar->getSignature());
 } catch (Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -44,7 +44,7 @@ try {
 @unlink(__DIR__ . '/require_hash.tar');
 ?>
 --EXPECTF--
-tar-based phar "%srequire_hash.phar.tar" does not have a signature
+UnexpectedValueException: tar-based phar "%srequire_hash.phar.tar" does not have a signature
 bool(false)
 array(2) {
   ["hash"]=>

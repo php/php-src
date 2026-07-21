@@ -28,7 +28,7 @@ try {
     $a['a.php']->chmod(0666);
     var_dump($a['a.php']->isExecutable());
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
@@ -37,4 +37,4 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php');
 ?>
 --EXPECTF--
 bool(false)
-Cannot modify permissions for file "a.php" in phar "%s033a.1.phar.php", write operations are prohibited
+PharException: Cannot modify permissions for file "a.php" in phar "%s033a.1.phar.php", write operations are prohibited

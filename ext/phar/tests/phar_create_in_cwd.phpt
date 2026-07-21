@@ -22,7 +22,7 @@ __HALT_COMPILER();
 ?>");
     var_dump($p->getStub());
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--

@@ -7,9 +7,9 @@ phar
 try {
     $p = new PharData(__DIR__ . '/files/trunc.tar');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECTF--
-phar error: "%strunc.tar" is a corrupted tar file (truncated)
+UnexpectedValueException: phar error: "%strunc.tar" is a corrupted tar file (truncated)

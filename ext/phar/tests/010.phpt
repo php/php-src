@@ -20,10 +20,10 @@ try {
 include __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 echo file_get_contents('phar://hio/a');
 } catch (Exception $e) {
-echo $e->getMessage();
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-internal corruption of phar "%s" (too many manifest entries for size of manifest)
+PharException: internal corruption of phar "%s" (too many manifest entries for size of manifest)

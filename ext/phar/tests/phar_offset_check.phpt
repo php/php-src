@@ -20,19 +20,19 @@ $phar['b.txt'] = "second file\n";
 try {
     $phar->offsetGet('.phar/stub.php');
 } catch (Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $phar->offsetGet('.phar/alias.txt');
 } catch (Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $phar->offsetSet('.phar/stub.php', '<?php __HALT_COMPILER(); ?>');
 } catch (Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump(strlen($phar->getStub()));
@@ -40,7 +40,7 @@ var_dump(strlen($phar->getStub()));
 try {
     $phar->offsetUnset('.phar/stub.php');
 } catch (Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump(strlen($phar->getStub()));
@@ -48,7 +48,7 @@ var_dump(strlen($phar->getStub()));
 try {
     $phar->offsetSet('.phar/alias.txt', 'dolly');
 } catch (Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump($phar->getAlias());
@@ -56,7 +56,7 @@ var_dump($phar->getAlias());
 try {
     $phar->offsetUnset('.phar/alias.txt');
 } catch (Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump($phar->getAlias());
@@ -65,11 +65,11 @@ var_dump($phar->getAlias());
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-Entry .phar/stub.php does not exist
-Entry .phar/alias.txt does not exist
-Cannot set stub ".phar/stub.php" directly in phar "%sphar_offset_check.phar.php", use setStub
+BadMethodCallException: Entry .phar/stub.php does not exist
+BadMethodCallException: Entry .phar/alias.txt does not exist
+BadMethodCallException: Cannot set stub ".phar/stub.php" directly in phar "%sphar_offset_check.phar.php", use setStub
 int(6643)
 int(6643)
-Cannot set alias ".phar/alias.txt" directly in phar "%sphar_offset_check.phar.php", use setAlias
+BadMethodCallException: Cannot set alias ".phar/alias.txt" directly in phar "%sphar_offset_check.phar.php", use setAlias
 string(5) "susan"
 string(5) "susan"

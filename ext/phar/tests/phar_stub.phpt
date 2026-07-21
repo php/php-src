@@ -61,7 +61,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
 try {
     $phar->setStub($fp);
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 set_error_handler(null);
 fclose($fp);
@@ -106,7 +106,7 @@ __HALT_COMPILER();
 Deprecated: Calling Phar::setStub(resource $stub, int $length) is deprecated in %s on line %d
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>booya
-Calling Phar::setStub(resource $stub, int $length) is deprecated
+Exception: Calling Phar::setStub(resource $stub, int $length) is deprecated
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 
 Deprecated: Calling Phar::setStub(resource $stub, int $length) is deprecated in %s on line %d

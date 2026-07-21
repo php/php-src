@@ -22,7 +22,7 @@ $phar->setSignatureAlgorithm(Phar::OPENSSL, "randomcrap");
 try {
     $phar->addEmptyDir('blah');
 } catch (PharException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -31,4 +31,4 @@ try {
 @unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
 ?>
 --EXPECTF--
-phar error: unable to write signature to tar-based phar: unable to write phar "%s" with requested openssl signature
+PharException: phar error: unable to write signature to tar-based phar: unable to write phar "%s" with requested openssl signature

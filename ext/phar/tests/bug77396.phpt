@@ -8,8 +8,8 @@ $path = '../' . str_repeat("x", PHP_MAXPATHLEN) . '.tar';
 try {
     $phar = new PharData($path);
 } catch (UnexpectedValueException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Phar creation or opening failed
+UnexpectedValueException: Phar creation or opening failed

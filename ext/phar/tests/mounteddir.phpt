@@ -62,22 +62,22 @@ foreach ($out as $b) {
 try {
 Phar::mount($pname . '/testit', 'another\\..\\mistake');
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 Phar::mount($pname . '/notfound', __DIR__ . '/this/does/not/exist');
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 Phar::mount($pname . '/testit', __DIR__);
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 Phar::mount($pname . '/testit/extfile.php', __DIR__);
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
@@ -109,7 +109,7 @@ extfile2.php
 phar://%stempmanifest1.phar.php/testit%cdirectory
 phar://%stempmanifest1.phar.php/testit%cextfile.php
 phar://%stempmanifest1.phar.php/testit%cextfile2.php
-Mounting of /testit to another\..\mistake within phar %stempmanifest1.phar.php failed
-Mounting of /notfound to %stests/this/does/not/exist within phar %stempmanifest1.phar.php failed
-Mounting of /testit to %stests within phar %stests/tempmanifest1.phar.php failed
-Mounting of /testit/extfile.php to %stests within phar %stests/tempmanifest1.phar.php failed
+PharException: Mounting of /testit to another\..\mistake within phar %stempmanifest1.phar.php failed
+PharException: Mounting of /notfound to %stests/this/does/not/exist within phar %stempmanifest1.phar.php failed
+PharException: Mounting of /testit to %stests within phar %stests/tempmanifest1.phar.php failed
+PharException: Mounting of /testit/extfile.php to %stests within phar %stests/tempmanifest1.phar.php failed

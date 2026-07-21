@@ -9,9 +9,9 @@ try {
     $nx = new Phar();
     $nx->getLinkTarget();
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Phar::__construct() expects at least 1 argument, 0 given
+ArgumentCountError: Phar::__construct() expects at least 1 argument, 0 given

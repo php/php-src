@@ -16,7 +16,7 @@ $phar = new PharData($fname);
 try {
     $phar->extractTo($extract);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $phar = new PharData($fname2);
@@ -27,7 +27,7 @@ foreach ($phar as $filename) {
 try {
     $phar->extractTo($extract);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -39,6 +39,6 @@ $dir = __DIR__ . '/test-extract3/';
 @rmdir($dir);
 ?>
 --EXPECTF--
-Invalid argument, %sfiles/bogus.zip cannot be found
+InvalidArgumentException: Invalid argument, %sfiles/bogus.zip cannot be found
 phar://%sfiles/notbogus.zip%cnonsense.txt
 phar://%sfiles/notbogus.zip%cstuff.txt

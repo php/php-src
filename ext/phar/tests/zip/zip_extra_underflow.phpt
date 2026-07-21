@@ -80,7 +80,7 @@ try {
     echo "Loaded corrupt ZIP\n";
     echo $phar[$entry]->getMTime(), "\n";
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
@@ -88,4 +88,4 @@ try {
 @unlink(__DIR__ . '/zip_extra_underflow.zip');
 ?>
 --EXPECTF--
-phar error: Unable to process extra field header for file in central directory in zip-based phar "%szip_extra_underflow.zip"
+UnexpectedValueException: phar error: Unable to process extra field header for file in central directory in zip-based phar "%szip_extra_underflow.zip"

@@ -23,7 +23,7 @@ $phar->setAlias('hio2');
 try {
     $p = new Phar($tname);
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -33,4 +33,4 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 ?>
 --EXPECTF--
-phar tar error: "%sexists_as_phar.phar.tar" already exists as a regular phar and must be deleted from disk prior to creating as a tar-based phar
+UnexpectedValueException: phar tar error: "%sexists_as_phar.phar.tar" already exists as a regular phar and must be deleted from disk prior to creating as a tar-based phar

@@ -39,12 +39,12 @@ __HALT_COMPILER();');
 try {
 include $fname2;
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 Phar::mount($pname . '/oops', '/home/oops/../../etc/passwd:');
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 Phar::mount($pname . '/testit2', $pname . '/testit1');
 echo substr($a['testit2']->getContent(),0, 50),"\n";
@@ -55,7 +55,7 @@ echo substr($a['testit2']->getContent(),0, 50),"\n";
 --EXPECTF--
 Mounting of testit to %sphar_mount.php within phar %sphar_mount.phar.php failed
 Can only mount internal paths within a phar archive, use a relative path instead of "phar://%sphar_mount.phar.php/testit1"
-Mounting of testit to %sphar_mount.php within phar %sphar_mount.phar.tar failed
-Mounting of /oops to /home/oops/../../etc/passwd: within phar %sphar_mount.phar.php failed
+PharException: Mounting of testit to %sphar_mount.php within phar %sphar_mount.phar.tar failed
+PharException: Mounting of /oops to /home/oops/../../etc/passwd: within phar %sphar_mount.phar.php failed
 <?php
 $fname = dirname(__FILE__) . '/' . basename(

@@ -13,7 +13,7 @@ $pname = 'phar://' . $fname;
 try {
     fopen(array(), 'r');
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 chdir(__DIR__);
 file_put_contents($fname, "blah\n");
@@ -37,7 +37,7 @@ include $pname . '/foo/hi';
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/fopen_edgecases2.txt'); ?>
 --EXPECTF--
-fopen(): Argument #1 ($filename) must be of type string, array given
+TypeError: fopen(): Argument #1 ($filename) must be of type string, array given
 blah
 test
 

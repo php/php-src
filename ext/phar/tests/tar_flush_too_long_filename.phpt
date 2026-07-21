@@ -29,7 +29,7 @@ $phar->setSignatureAlgorithm(Phar::OPENSSL, "randomcrap");
 try {
     $phar->addEmptyDir('blah2/' . str_repeat('X', 1000));
 } catch (PharException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -38,4 +38,4 @@ try {
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
 ?>
 --EXPECTF--
-tar-based phar "%s" cannot be created, filename "%s" is too long for tar file format
+PharException: tar-based phar "%s" cannot be created, filename "%s" is too long for tar file format

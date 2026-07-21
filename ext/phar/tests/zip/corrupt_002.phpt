@@ -7,8 +7,8 @@ phar
 try {
     new PharData(__DIR__ . '/files/nozipend.zip');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-phar error: end of central directory not found in zip-based phar "%snozipend.zip"
+UnexpectedValueException: phar error: end of central directory not found in zip-based phar "%snozipend.zip"
