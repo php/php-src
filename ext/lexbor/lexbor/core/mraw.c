@@ -166,6 +166,7 @@ lexbor_mraw_mem_alloc(lexbor_mraw_t *mraw, size_t length)
         mem->chunk_length++;
 
 #if defined(LEXBOR_HAVE_ADDRESS_SANITIZER)
+        printf("asd");
         ASAN_POISON_MEMORY_REGION(mem->chunk->data, mem->chunk->size);
 #endif
     }
