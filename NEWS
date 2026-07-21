@@ -17,6 +17,7 @@ PHP                                                                        NEWS
     declares a default value for the attribute). (iliaal)
 
 - GMP:
+  . Added gmp_powm_sec(). (Weilin Du)
   . Added gmp_prevprime(). (Weilin Du, David Carlier)
   . Fixed GMP power and shift operators to reject GMP right operands outside
     the unsigned long range instead of silently truncating them. (Weilin Du)

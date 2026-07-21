@@ -125,6 +125,10 @@ function gmp_pow(GMP|int|string $num, int $exponent): GMP {}
 
 function gmp_powm(GMP|int|string $num, GMP|int|string $exponent, GMP|int|string $modulus): GMP {}
 
+#ifdef HAVE___GMPZ_POWM_SEC
+function gmp_powm_sec(GMP|int|string $num, GMP|int|string $exponent, GMP|int|string $modulus): GMP {}
+#endif
+
 function gmp_perfect_square(GMP|int|string $num): bool {}
 
 function gmp_perfect_power(GMP|int|string $num): bool {}
