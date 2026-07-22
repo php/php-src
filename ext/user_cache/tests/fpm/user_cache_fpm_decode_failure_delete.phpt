@@ -1,7 +1,5 @@
 --TEST--
 FPM: UserCache\Cache drops silently-corrupt entries but propagates decode exceptions
---EXTENSIONS--
-user_cache
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--

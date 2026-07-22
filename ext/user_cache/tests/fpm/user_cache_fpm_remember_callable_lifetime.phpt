@@ -1,7 +1,5 @@
 --TEST--
 FPM: UserCache\Cache remember does not retain callables across requests
---EXTENSIONS--
-user_cache
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--

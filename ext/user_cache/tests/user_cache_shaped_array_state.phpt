@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: shaped associative state arrays preserve unserialize semantics
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

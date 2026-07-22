@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: atomic increment and decrement
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

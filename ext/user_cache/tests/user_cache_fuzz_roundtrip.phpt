@@ -1,7 +1,6 @@
 --TEST--
 UserCache\Cache: deterministic store/fetch round-trip fuzz cases
 --EXTENSIONS--
-user_cache
 spl
 --INI--
 user_cache.enable=1

@@ -53,7 +53,7 @@ static int user_cache_alloc_posix_create_segments(size_t requested_size, php_use
 			}
 		}
 	}
-#endif
+#endif /* HAVE_SHM_CREATE_LARGEPAGE */
 
 	*shared_segments_count = 1;
 	*shared_segments_p = (php_user_cache_shm_segment_posix **) calloc(1, sizeof(php_user_cache_shm_segment_posix) + sizeof(void *));
@@ -72,7 +72,7 @@ static int user_cache_alloc_posix_create_segments(size_t requested_size, php_use
 			goto truncate_segment;
 		}
 	}
-#endif
+#endif /* HAVE_SHM_CREATE_LARGEPAGE */
 
 	shared_segment->shm_fd = shm_open(shared_segment_name, shared_segment_flags, shared_segment_mode);
 	if (shared_segment->shm_fd == -1) {
@@ -82,7 +82,7 @@ static int user_cache_alloc_posix_create_segments(size_t requested_size, php_use
 
 #if defined(HAVE_SHM_CREATE_LARGEPAGE)
 truncate_segment:
-#endif
+#endif /* HAVE_SHM_CREATE_LARGEPAGE */
 	if (ftruncate(shared_segment->shm_fd, requested_size) != 0) {
 		*error_in = "ftruncate";
 		close(shared_segment->shm_fd);
@@ -102,7 +102,6 @@ truncate_segment:
 
 	shm_unlink(shared_segment_name);
 
-	shared_segment->common.pos = 0;
 	shared_segment->common.size = requested_size;
 
 	return PHP_USER_CACHE_ALLOC_SUCCESS;

@@ -135,15 +135,17 @@ typedef struct _php_user_cache_boundary_partition {
 #ifndef ZTS
 php_user_cache_globals user_cache_globals;
 #else
-int user_cache_globals_id;
+static int user_cache_globals_id;
 size_t user_cache_globals_offset;
 #endif
 
 static HashTable php_user_cache_safe_direct_handler_table;
-static bool user_cache_safe_direct_handlers_initialized = false;
+static bool php_user_cache_safe_direct_handlers_initialized = false;
 static php_user_cache_boundary_partition *php_user_cache_boundary_partitions = NULL;
 static zend_class_entry *php_user_cache_availability_ce;
 static zend_class_entry *php_user_cache_ce;
+static zend_class_entry *php_user_cache_status_ce;
+static zend_class_entry *php_user_cache_pool_status_ce;
 static zend_object_handlers php_user_cache_object_handlers;
 static zend_object_handlers php_user_cache_status_object_handlers;
 static zend_object_handlers php_user_cache_pool_status_object_handlers;
@@ -157,8 +159,6 @@ static bool php_user_cache_pid_atfork_registered = false;
 #endif
 
 zend_class_entry *php_user_cache_exception_ce;
-zend_class_entry *php_user_cache_status_ce;
-zend_class_entry *php_user_cache_pool_status_ce;
 php_user_cache_context php_user_cache_context_state = {
 	.storage = { .lock_file = -1 },
 	.name = "user cache",
@@ -191,6 +191,20 @@ static bool user_cache_user_key_is_valid(zend_string *key)
 	return ZSTR_LEN(key) != 0 &&
 		memchr(ZSTR_VAL(key), PHP_USER_CACHE_KEY_DELIMITER_CHAR, ZSTR_LEN(key)) == NULL
 	;
+}
+
+static zend_always_inline void user_cache_ensure_ready(void)
+{
+	php_user_cache_context *ctx = php_user_cache_active_context();
+
+	if (UC_G(runtime_resolved) &&
+		UC_G(runtime_resolved_context) == ctx &&
+		UC_G(runtime_resolved_enabled) == UC_G(enable)
+	) {
+		return;
+	}
+
+	php_user_cache_ensure_ready_impl();
 }
 
 static bool user_cache_validate_delimiter_free(zend_string *str, uint32_t arg_num, const char *empty_error)
@@ -497,7 +511,7 @@ static bool user_cache_validate_non_negative(zend_long value, uint32_t arg_num)
 
 static bool user_cache_can_read(void)
 {
-	php_user_cache_ensure_ready();
+	user_cache_ensure_ready();
 
 	return php_user_cache_active_runtime()->available;
 }
@@ -576,6 +590,12 @@ static bool user_cache_clear_scope_prevalidated(
 		return false;
 	}
 
+	if (!php_user_cache_entry_locks_allow_clear_locked()) {
+		php_user_cache_unlock();
+
+		return false;
+	}
+
 	php_user_cache_delete_by_prefix_locked(scope_prefix);
 
 	php_user_cache_unlock();
@@ -589,14 +609,14 @@ static bool user_cache_fetch_if_present_api(
 		zval *return_value)
 {
 	php_user_cache_fetch_pending_seed pending_seed;
-	bool fetched, entry_found = false;
+	bool fetched, entry_found = false, lock_held = true;
 
 	if (!user_cache_can_read()) {
 		return false;
 	}
 
 	UC_G(stack_overflowed) = false;
-	switch (php_user_cache_fetch_optimistic(key, return_value)) {
+	switch (php_user_cache_fetch_optimistic(key, return_value, true)) {
 		case PHP_USER_CACHE_OPTIMISTIC_FOUND:
 			return true;
 		case PHP_USER_CACHE_OPTIMISTIC_MISS:
@@ -610,6 +630,7 @@ static bool user_cache_fetch_if_present_api(
 		 * recur under the read lock, so surface a miss and drop the exception. */
 		if (UC_G(stack_overflowed)) {
 			UC_G(stack_overflowed) = false;
+
 			zend_clear_exception();
 
 			return false;
@@ -623,7 +644,12 @@ static bool user_cache_fetch_if_present_api(
 	}
 
 	UC_G(stack_overflowed) = false;
-	fetched = php_user_cache_fetch_locked(key, false, true, return_value, &entry_found, &pending_seed);
+
+	fetched = php_user_cache_fetch_locked(key, false, true, return_value, &entry_found, &pending_seed, &lock_held);
+
+	if (!lock_held) {
+		return false;
+	}
 
 	php_user_cache_unlock();
 
@@ -669,23 +695,6 @@ static void user_cache_fetch_api(
 	}
 }
 
-static void user_cache_fetch_multiple_fill_defaults(
-		zend_string **prepared_keys,
-		zend_string **storage_keys,
-		uint32_t count,
-		zval *default_value,
-		zval *return_value)
-{
-	zval default_copy;
-	uint32_t i;
-
-	for (i = 0; i < count; i++) {
-		ZVAL_COPY(&default_copy, default_value);
-		zend_symtable_update(Z_ARRVAL_P(return_value), prepared_keys[i], &default_copy);
-		zend_string_release(storage_keys[i]);
-	}
-}
-
 /* A corrupt entry drops the batch lock and switches subsequent reads to the
  * self-locking path. */
 static void user_cache_fetch_multiple_fetch_one(
@@ -695,7 +704,7 @@ static void user_cache_fetch_multiple_fetch_one(
 		zval *out,
 		php_user_cache_fetch_pending_seed *pending_seed)
 {
-	bool fetched, found;
+	bool fetched, found, lock_held = true;
 
 	pending_seed->should_seed_request_local_slot = false;
 
@@ -706,7 +715,20 @@ static void user_cache_fetch_multiple_fetch_one(
 	}
 
 	UC_G(stack_overflowed) = false;
-	fetched = php_user_cache_fetch_locked(storage_key, false, true, out, &found, pending_seed);
+	fetched = php_user_cache_fetch_locked(storage_key, false, true, out, &found, pending_seed, &lock_held);
+
+	if (!lock_held) {
+		*rlock_held = false;
+
+		if (EG(exception)) {
+			ZVAL_UNDEF(out);
+		} else {
+			ZVAL_COPY(out, default_value);
+		}
+
+		return;
+	}
+
 	if (fetched) {
 		return;
 	}
@@ -731,6 +753,7 @@ static void user_cache_fetch_multiple_fetch_one(
 	} else {
 		php_user_cache_unlock();
 		*rlock_held = false;
+
 		user_cache_delete_corrupt_entry_prevalidated(storage_key);
 
 		ZVAL_COPY(out, default_value);
@@ -849,91 +872,110 @@ static zend_result user_cache_fetch_multiple_api(
 		zval *return_value)
 {
 	php_user_cache_fetch_pending_seed *pending_seeds;
-	zend_string **prepared_keys, **storage_keys, *key, *storage_key;
-	zval val;
-	uint32_t count, i;
-	bool rlock_held;
+	zend_string **prepared_keys, **storage_keys;
+	zval *vals;
+	uint32_t count, i, p, pending_count = 0, *pending_idx;
+	bool rlock_held, backend_readable;
 
 	if (!user_cache_prepare_key_list(keys, 1, &prepared_keys, &count)) {
 		return FAILURE;
 	}
 
+	backend_readable = user_cache_can_read();
+
 	/* Do not allocate while holding the read lock. */
 	storage_keys = NULL;
 	pending_seeds = NULL;
+	pending_idx = NULL;
+	vals = NULL;
 	if (count != 0) {
 		storage_keys = safe_emalloc(count, sizeof(zend_string *), 0);
 		pending_seeds = safe_emalloc(count, sizeof(php_user_cache_fetch_pending_seed), 0);
+		pending_idx = safe_emalloc(count, sizeof(uint32_t), 0);
+		vals = safe_emalloc(count, sizeof(zval), 0);
+
+		memset(pending_seeds, 0, count * sizeof(php_user_cache_fetch_pending_seed));
 
 		for (i = 0; i < count; i++) {
 			storage_keys[i] = user_cache_storage_key(cache, prepared_keys[i]);
+			ZVAL_UNDEF(&vals[i]);
 		}
 	}
 
-	array_init_size(return_value, count);
+	for (i = 0; backend_readable && i < count && !EG(exception); i++) {
+		UC_G(stack_overflowed) = false;
 
-	if (!user_cache_begin_read()) {
-		user_cache_fetch_multiple_fill_defaults(
-			prepared_keys,
-			storage_keys,
-			count,
-			default_value,
-			return_value
-		);
-
-		if (storage_keys != NULL) {
-			efree(storage_keys);
-		}
-
-		if (pending_seeds != NULL) {
-			efree(pending_seeds);
-		}
-
-		user_cache_release_key_list(prepared_keys, count);
-
-		return SUCCESS;
-	}
-
-	rlock_held = true;
-
-	zend_try {
-		for (i = 0; i < count; i++) {
-			key = prepared_keys[i];
-			storage_key = storage_keys[i];
-
-			user_cache_fetch_multiple_fetch_one(
-				storage_key,
-				default_value,
-				&rlock_held,
-				&val,
-				&pending_seeds[i]
-			);
-
-			/* A restore hook or autoloader threw: abort the batch and let the
-			 * userland exception propagate, matching native unserialize(). */
-			if (EG(exception)) {
-				zval_ptr_dtor(&val);
-
+		switch (php_user_cache_fetch_optimistic(storage_keys[i], &vals[i], false)) {
+			case PHP_USER_CACHE_OPTIMISTIC_FOUND:
+			case PHP_USER_CACHE_OPTIMISTIC_MISS:
+				continue;
+			case PHP_USER_CACHE_OPTIMISTIC_FALLBACK:
 				break;
+		}
+
+		if (EG(exception)) {
+			if (UC_G(stack_overflowed)) {
+				UC_G(stack_overflowed) = false;
+				zend_clear_exception();
+
+				continue;
 			}
 
-			zend_symtable_update(Z_ARRVAL_P(return_value), key, &val);
+			break;
 		}
-	} zend_catch {
-		php_user_cache_unlock_if_held();
-		zend_bailout();
-	} zend_end_try();
 
-	if (rlock_held) {
-		php_user_cache_unlock();
+		pending_idx[pending_count++] = i;
+	}
+
+	if (pending_count != 0 && !EG(exception)) {
+		if (user_cache_begin_read()) {
+			rlock_held = true;
+
+			zend_try {
+				for (p = 0; p < pending_count; p++) {
+					i = pending_idx[p];
+
+					user_cache_fetch_multiple_fetch_one(
+						storage_keys[i],
+						default_value,
+						&rlock_held,
+						&vals[i],
+						&pending_seeds[i]
+					);
+
+					/* A restore hook or autoloader threw: abort the batch and let the
+					 * userland exception propagate, matching native unserialize(). */
+					if (EG(exception)) {
+						zval_ptr_dtor(&vals[i]);
+
+						ZVAL_UNDEF(&vals[i]);
+
+						break;
+					}
+				}
+			} zend_catch {
+				php_user_cache_unlock_if_held();
+				zend_bailout();
+			} zend_end_try();
+
+			if (rlock_held) {
+				php_user_cache_unlock();
+			}
+		}
+	}
+
+	if (pending_idx != NULL) {
+		efree(pending_idx);
 	}
 
 	if (EG(exception)) {
-		zval_ptr_dtor(return_value);
-		ZVAL_UNDEF(return_value);
-
 		for (i = 0; i < count; i++) {
+			zval_ptr_dtor(&vals[i]);
 			zend_string_release(storage_keys[i]);
+		}
+
+		if (vals != NULL) {
+			efree(vals);
 		}
 
 		if (storage_keys != NULL) {
@@ -947,6 +989,20 @@ static zend_result user_cache_fetch_multiple_api(
 		user_cache_release_key_list(prepared_keys, count);
 
 		return FAILURE;
+	}
+
+	array_init_size(return_value, count);
+
+	for (i = 0; i < count; i++) {
+		if (Z_ISUNDEF(vals[i])) {
+			ZVAL_COPY(&vals[i], default_value);
+		}
+
+		zend_symtable_update(Z_ARRVAL_P(return_value), prepared_keys[i], &vals[i]);
+	}
+
+	if (vals != NULL) {
+		efree(vals);
 	}
 
 	/* Clone outside the shared-memory lock. */
@@ -1055,22 +1111,30 @@ static zend_long user_cache_size_to_zend_long(size_t size)
 static size_t user_cache_sum_wasted_memory_locked(php_user_cache_header *header)
 {
 	php_user_cache_block *block;
-	uint32_t block_offset, block_limit, next_offset, iter_limit, iters;
+	uint64_t block_limit;
+	uint32_t block_offset, iter_limit, iters;
 	size_t wasted_memory = 0;
 
-	block_limit = header->data_offset + header->next_free;
+	if (header->next_free > header->data_size) {
+		return 0;
+	}
+
+	block_limit = (uint64_t) header->data_offset + header->next_free;
 	iter_limit = (header->data_size / ((uint32_t) sizeof(php_user_cache_block)));
 	for (block_offset = header->free_list, iters = 0;
 		block_offset != 0 && iters < iter_limit;
 		iters++
 	) {
-		if (block_offset < header->data_offset || block_offset > block_limit - sizeof(php_user_cache_block)) {
+		if (block_offset < header->data_offset ||
+			(uint64_t) block_offset + sizeof(php_user_cache_block) > block_limit
+		) {
 			break;
 		}
 
 		block = php_user_cache_block_ptr(block_offset);
-		next_offset = block_offset + block->size;
-		if (block->size < sizeof(php_user_cache_block) || next_offset > block_limit) {
+		if (block->size < sizeof(php_user_cache_block) ||
+			(uint64_t) block_offset + block->size > block_limit
+		) {
 			break;
 		}
 
@@ -1106,8 +1170,9 @@ static void user_cache_collect_info_stats(php_user_cache_info_stats *stats)
 	}
 
 	header = php_user_cache_header_ptr();
-	if (header == NULL || !php_user_cache_header_is_initialized_locked()) {
+	if (header == NULL || !php_user_cache_header_adoptable_locked()) {
 		stats->free_memory = stats->shared_memory_size;
+
 		php_user_cache_unlock();
 
 		return;
@@ -1136,7 +1201,8 @@ static void user_cache_collect_info_stats(php_user_cache_info_stats *stats)
 		}
 
 		stats->graph_pinned_references +=
-			(zend_long) zend_atomic_int_load_ex(&pin_slot->pin_count);
+			(zend_long) zend_atomic_int_load_ex(&pin_slot->pin_count)
+		;
 	}
 
 	stats->free_memory = user_cache_size_to_zend_long(free_memory);
@@ -1179,6 +1245,9 @@ static zend_object *user_cache_availability_enum_case(php_user_cache_reason reas
 		case PHP_USER_CACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE:
 			case_id = ZEND_ENUM_UserCache_CacheAvailability_UnavailableByLsapiBoundary;
 			break;
+		case PHP_USER_CACHE_REASON_REQUEST_SHUTDOWN:
+			case_id = ZEND_ENUM_UserCache_CacheAvailability_UnavailableByUnknownReason;
+			break;
 	}
 
 	return zend_enum_get_case_by_id(php_user_cache_availability_ce, case_id);
@@ -1188,7 +1257,7 @@ static void user_cache_return_status(zval *return_value)
 {
 	php_user_cache_status_object *status;
 
-	php_user_cache_ensure_ready();
+	user_cache_ensure_ready();
 
 	object_init_ex(return_value, php_user_cache_status_ce);
 	status = php_user_cache_status_object_from_obj(Z_OBJ_P(return_value));
@@ -1212,16 +1281,32 @@ static void user_cache_add_pool_memory(size_t *used_memory, size_t size)
 	*used_memory += size;
 }
 
-static size_t user_cache_payload_block_size(uint32_t payload_offset)
+static zend_always_inline bool user_cache_payload_in_bounds(
+		const php_user_cache_header *header,
+		uint32_t offset,
+		uint64_t len)
+{
+	uint64_t limit = (uint64_t) header->data_offset + header->data_size;
+
+	return offset >= header->data_offset + sizeof(php_user_cache_block) &&
+		(uint64_t) offset + len <= limit
+	;
+}
+
+static size_t user_cache_payload_block_size(
+		const php_user_cache_header *header,
+		uint32_t payload_offset)
 {
 	php_user_cache_block *block;
 
-	if (payload_offset < sizeof(php_user_cache_block)) {
+	if (!user_cache_payload_in_bounds(header, payload_offset, 0)) {
 		return 0;
 	}
 
 	block = php_user_cache_block_ptr(payload_offset - sizeof(php_user_cache_block));
-	if (block->size < sizeof(php_user_cache_block)) {
+	if (block->size < sizeof(php_user_cache_block) ||
+		!user_cache_payload_in_bounds(header, payload_offset, block->size - sizeof(php_user_cache_block))
+	) {
 		return 0;
 	}
 
@@ -1229,6 +1314,7 @@ static size_t user_cache_payload_block_size(uint32_t payload_offset)
 }
 
 static void user_cache_account_pool_entry(
+		const php_user_cache_header *header,
 		const php_user_cache_entry *entry,
 		zend_string *prefix,
 		zend_long *entry_count,
@@ -1251,16 +1337,16 @@ static void user_cache_account_pool_entry(
 	if (combined_value_key) {
 		user_cache_add_pool_memory(
 			used_memory,
-			user_cache_payload_block_size(entry->value_offset)
+			user_cache_payload_block_size(header, entry->value_offset)
 		);
 	} else {
 		user_cache_add_pool_memory(
 			used_memory,
-			user_cache_payload_block_size(entry->key_offset)
+			user_cache_payload_block_size(header, entry->key_offset)
 		);
 		user_cache_add_pool_memory(
 			used_memory,
-			user_cache_payload_block_size(entry->value_offset)
+			user_cache_payload_block_size(header, entry->value_offset)
 		);
 	}
 }
@@ -1293,7 +1379,7 @@ static void user_cache_collect_pool_status(
 
 	header = php_user_cache_header_ptr();
 	if (header == NULL ||
-		!php_user_cache_header_is_initialized_locked()
+		!php_user_cache_header_adoptable_locked()
 	) {
 		php_user_cache_unlock();
 		php_user_cache_restore_context(prev_ctx);
@@ -1308,10 +1394,12 @@ static void user_cache_collect_pool_status(
 		for (i = 0; i < header->capacity; i++) {
 			entry = &entries[i];
 			if (entry->state == PHP_USER_CACHE_ENTRY_USED &&
+				user_cache_payload_in_bounds(header, entry->key_offset, entry->key_len) &&
 				entry->key_len >= ZSTR_LEN(prefix) &&
 				memcmp(php_user_cache_ptr(entry->key_offset), ZSTR_VAL(prefix), ZSTR_LEN(prefix)) == 0
 			) {
 				user_cache_account_pool_entry(
+					header,
 					entry,
 					prefix,
 					entry_count,
@@ -1338,7 +1426,7 @@ static void user_cache_return_pool_status(
 {
 	php_user_cache_pool_status_object *status;
 
-	php_user_cache_ensure_ready();
+	user_cache_ensure_ready();
 
 	object_init_ex(return_value, php_user_cache_pool_status_ce);
 
@@ -1482,9 +1570,19 @@ static bool user_cache_validate_pool_name(zend_string *pool, uint32_t arg_num)
 	return user_cache_validate_delimiter_free(pool, arg_num, "must not be empty");
 }
 
+static zend_object *user_cache_create_pool_object(zend_string *pool)
+{
+	zend_object *obj = user_cache_object_create(php_user_cache_ce);
+	php_user_cache_object *cache = php_user_cache_object_from_obj(obj);
+
+	cache->scope = zend_string_copy(pool);
+	cache->scope_prefix = user_cache_build_scope_prefix(pool);
+
+	return obj;
+}
+
 static zend_object *user_cache_get_or_create_pool(zend_string *pool)
 {
-	php_user_cache_object *cache;
 	zend_object *obj;
 	zval *existing, pool_zv;
 	HashTable *pools = user_cache_pools();
@@ -1494,11 +1592,7 @@ static zend_object *user_cache_get_or_create_pool(zend_string *pool)
 		return Z_OBJ_P(existing);
 	}
 
-	obj = user_cache_object_create(php_user_cache_ce);
-
-	cache = php_user_cache_object_from_obj(obj);
-	cache->scope = zend_string_copy(pool);
-	cache->scope_prefix = user_cache_build_scope_prefix(pool);
+	obj = user_cache_create_pool_object(pool);
 
 	ZVAL_OBJ(&pool_zv, obj);
 
@@ -1522,7 +1616,7 @@ const php_user_cache_safe_direct_handlers *php_user_cache_safe_direct_find_handl
 {
 	const php_user_cache_safe_direct_handlers *handlers;
 
-	if (!user_cache_safe_direct_handlers_initialized) {
+	if (!php_user_cache_safe_direct_handlers_initialized) {
 		return NULL;
 	}
 
@@ -1549,11 +1643,9 @@ static bool user_cache_store_storage_key_prevalidated(zend_string *key, zval *va
 {
 	php_user_cache_prepare_options prep_opts = {
 		.caller_holds_write_lock = false,
-		.throw_on_failure = false,
 	};
 	php_user_cache_store_options store_opts = {
 		.retry_after_memory_pressure = true,
-		.throw_on_failure = false,
 		.capture_replaced_entry = false,
 	};
 	php_user_cache_prepared_value prepared;
@@ -1727,7 +1819,7 @@ static bool user_cache_debug_force_bulk_commit_bailout(void)
 
 	return value != NULL && value[0] != '\0' && value[0] != '0';
 }
-#endif
+#endif /* ZEND_DEBUG */
 
 /* Rolls back the entire batch if any store fails. */
 static uint32_t user_cache_commit_bulk_store_locked(
@@ -1765,7 +1857,7 @@ static uint32_t user_cache_commit_bulk_store_locked(
 		if (i == 0 && prepared_count > 1 && user_cache_debug_force_bulk_commit_bailout()) {
 			zend_bailout();
 		}
-#endif
+#endif /* ZEND_DEBUG */
 	}
 
 	UC_G(store_defer_unlock) = false;
@@ -1776,6 +1868,7 @@ static uint32_t user_cache_commit_bulk_store_locked(
 				storage_keys[i],
 				&items[i].store_result.replaced_entry
 			);
+
 			items[i].committed = false;
 		}
 	} else {
@@ -1784,6 +1877,7 @@ static uint32_t user_cache_commit_bulk_store_locked(
 				storage_keys[j - 1],
 				&items[j - 1].store_result.replaced_entry
 			);
+
 			items[j - 1].committed = false;
 		}
 
@@ -1818,6 +1912,7 @@ static void user_cache_abort_bulk_store_on_bailout(
 				storage_keys[j - 1],
 				&items[j - 1].store_result.replaced_entry
 			);
+
 			items[j - 1].committed = false;
 		}
 	}
@@ -1854,11 +1949,9 @@ static bool user_cache_instance_store_multiple(
 	zend_string **storage_keys;
 	php_user_cache_prepare_options prep_opts = {
 		.caller_holds_write_lock = false,
-		.throw_on_failure = false,
 	};
 	php_user_cache_store_options store_opts = {
 		.retry_after_memory_pressure = false,
-		.throw_on_failure = false,
 		.capture_replaced_entry = true,
 	};
 	uint32_t i, count, prepared_count, stored_count = 0;
@@ -2219,7 +2312,7 @@ uint64_t php_user_cache_cached_pid(void)
 
 static void user_cache_safe_direct_handlers_init(void)
 {
-	if (user_cache_safe_direct_handlers_initialized) {
+	if (php_user_cache_safe_direct_handlers_initialized) {
 		return;
 	}
 
@@ -2231,18 +2324,18 @@ static void user_cache_safe_direct_handlers_init(void)
 		true
 	);
 
-	user_cache_safe_direct_handlers_initialized = true;
+	php_user_cache_safe_direct_handlers_initialized = true;
 }
 
 static void user_cache_safe_direct_handlers_destroy(void)
 {
-	if (!user_cache_safe_direct_handlers_initialized) {
+	if (!php_user_cache_safe_direct_handlers_initialized) {
 		return;
 	}
 
 	zend_hash_destroy(&php_user_cache_safe_direct_handler_table);
 
-	user_cache_safe_direct_handlers_initialized = false;
+	php_user_cache_safe_direct_handlers_initialized = false;
 }
 
 ZEND_API void php_user_cache_safe_direct_register_class(
@@ -2362,7 +2455,7 @@ ZEND_API void php_user_cache_partition_activate(php_user_cache_partition *partit
 	UC_G(runtime_resolved) = false;
 }
 
-ZEND_API void php_user_cache_activate_request_unavailable(php_user_cache_reason reason)
+static void user_cache_activate_request_unavailable(php_user_cache_reason reason)
 {
 	UC_G(active_partition) = NULL;
 	UC_G(active_context_ptr) = NULL;
@@ -2370,7 +2463,7 @@ ZEND_API void php_user_cache_activate_request_unavailable(php_user_cache_reason 
 	UC_G(runtime_resolved) = false;
 }
 
-ZEND_API php_user_cache_partition *php_user_cache_boundary_partition_get(
+static php_user_cache_partition *user_cache_boundary_partition_get(
 		const char *sapi_prefix,
 		const char *boundary,
 		void (*log_message)(const char *message))
@@ -2423,11 +2516,11 @@ ZEND_API void php_user_cache_activate_boundary_partition(
 	}
 
 	if (boundary != NULL && boundary[0] != '\0') {
-		partition = php_user_cache_boundary_partition_get(sapi_prefix, boundary, log_message);
+		partition = user_cache_boundary_partition_get(sapi_prefix, boundary, log_message);
 	}
 
 	if (partition == NULL) {
-		php_user_cache_activate_request_unavailable(failure_reason);
+		user_cache_activate_request_unavailable(failure_reason);
 
 		return;
 	}
@@ -2466,11 +2559,10 @@ static void user_cache_globals_ctor(php_user_cache_globals *user_cache_globals)
 
 static void user_cache_globals_dtor(php_user_cache_globals *user_cache_globals)
 {
-#ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
 	/* Release reader slots owned by the terminating thread. */
 	php_user_cache_release_thread_reader_claims(user_cache_globals);
-#endif
 	php_user_cache_release_thread_graph_pin_claims(user_cache_globals);
+	php_user_cache_free_thread_deferred_entry_lock_releases(user_cache_globals);
 }
 
 size_t php_user_cache_globals_size(void)
@@ -2489,9 +2581,9 @@ void php_user_cache_globals_startup(void)
 		(ts_allocate_dtor) user_cache_globals_dtor
 	);
 }
-#endif
+#endif /* ZTS */
 
-void php_user_cache_minit(void)
+static void user_cache_minit(void)
 {
 	php_user_cache_context *prev_ctx;
 
@@ -2523,7 +2615,7 @@ void php_user_cache_minit(void)
 	php_user_cache_restore_context(prev_ctx);
 }
 
-void php_user_cache_mshutdown(void)
+static void user_cache_mshutdown(void)
 {
 	php_user_cache_context *prev_ctx;
 
@@ -2545,8 +2637,10 @@ void php_user_cache_mshutdown(void)
 	user_cache_reset_class_entries();
 }
 
-zend_result php_user_cache_rshutdown(void)
+static zend_result user_cache_rshutdown(void)
 {
+	UC_G(in_request_shutdown) = true;
+
 	php_user_cache_unlock_if_held();
 
 	UC_G(request_unavailable_reason) = PHP_USER_CACHE_REASON_NONE;
@@ -2574,10 +2668,13 @@ zend_result php_user_cache_rshutdown(void)
 	return SUCCESS;
 }
 
-zend_result php_user_cache_post_deactivate(void)
+static zend_result user_cache_post_deactivate(void)
 {
 	php_user_cache_release_request_shared_graph_refs();
 	php_user_cache_expunge_expired_at_request_end();
+
+	UC_G(in_request_shutdown) = false;
+	UC_G(runtime_resolved) = false;
 
 	return SUCCESS;
 }
@@ -2616,8 +2713,15 @@ static void user_cache_store_method(INTERNAL_FUNCTION_PARAMETERS, bool add_only)
 		RETURN_THROWS();
 	}
 
-	if (!(user_cache_can_write() &&
-		user_cache_store_storage_key_prevalidated(storage_key, value, ttl, add_only))
+	if (!(
+			user_cache_can_write() &&
+			user_cache_store_storage_key_prevalidated(
+				storage_key,
+				value,
+				ttl,
+				add_only
+			)
+		)
 	) {
 		zend_string_release(storage_key);
 
@@ -2850,6 +2954,10 @@ ZEND_METHOD(UserCache_Cache, getPool)
 
 	if (!user_cache_validate_pool_name(pool, 1)) {
 		RETURN_THROWS();
+	}
+
+	if (UC_G(in_request_shutdown)) {
+		RETURN_OBJ(user_cache_create_pool_object(pool));
 	}
 
 	obj = user_cache_get_or_create_pool(pool);
@@ -3289,7 +3397,9 @@ ZEND_METHOD(UserCache_Cache, remember)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zval result;
-	bool found = false, locked = false, callback_failed = false;
+	bool found = false, preheld = false,
+		locked = false, callback_failed = false
+	;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(key)
@@ -3329,7 +3439,8 @@ ZEND_METHOD(UserCache_Cache, remember)
 		RETURN_THROWS();
 	}
 
-	locked = user_cache_lock_api(storage_key, 0);
+	preheld = user_cache_can_write() && php_user_cache_request_owns_entry_lock(storage_key);
+	locked = !preheld && user_cache_lock_api(storage_key, 0);
 
 	/* Another request may have populated the entry while the lock was acquired. */
 	found = user_cache_fetch_if_present_api(storage_key, return_value);
@@ -3356,7 +3467,8 @@ ZEND_METHOD(UserCache_Cache, remember)
 	/* Do not return before zend_end_try() restores the bailout chain. */
 	zend_try {
 		callback_failed =
-			!user_cache_invoke_remember_callback(key, storage_key, &fci, &fcc, ttl, &result);
+			!user_cache_invoke_remember_callback(key, storage_key, &fci, &fcc, ttl, &result)
+		;
 	} zend_catch {
 		if (locked) {
 			locked = user_cache_unlock_api(storage_key);
@@ -3370,7 +3482,9 @@ ZEND_METHOD(UserCache_Cache, remember)
 	if (callback_failed) {
 		zval_ptr_dtor(&result);
 
-		locked = user_cache_unlock_api(storage_key);
+		if (locked) {
+			locked = user_cache_unlock_api(storage_key);
+		}
 
 		zend_string_release(storage_key);
 
@@ -3431,6 +3545,7 @@ static ZEND_INI_MH(OnUpdateUserCacheShmSize)
 
 	if ((zend_ulong) size > UINT32_MAX - ZEND_MM_ALIGNMENT) {
 		size = (zend_long) (UINT32_MAX - ZEND_MM_ALIGNMENT);
+
 		zend_error(E_WARNING, "user_cache.shm_size is limited to slightly under 4096M; clamping");
 	}
 
@@ -3451,14 +3566,14 @@ static PHP_MINIT_FUNCTION(cache)
 {
 	REGISTER_INI_ENTRIES();
 
-	php_user_cache_minit();
+	user_cache_minit();
 
 	return SUCCESS;
 }
 
 static PHP_MSHUTDOWN_FUNCTION(cache)
 {
-	php_user_cache_mshutdown();
+	user_cache_mshutdown();
 
 	UNREGISTER_INI_ENTRIES();
 
@@ -3467,13 +3582,20 @@ static PHP_MSHUTDOWN_FUNCTION(cache)
 
 static PHP_RSHUTDOWN_FUNCTION(cache)
 {
-	return php_user_cache_rshutdown();
+	return user_cache_rshutdown();
 }
 
 static PHP_MINFO_FUNCTION(cache)
 {
+	const php_user_cache_storage *storage = &php_user_cache_active_context()->storage;
+
 	php_info_print_table_start();
 	php_info_print_table_row(2, "UserCache support", "enabled");
+	php_info_print_table_row(
+		2,
+		"Active memory model",
+		storage->initialized && storage->handler_name != NULL ? storage->handler_name : "none"
+	);
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -3490,6 +3612,6 @@ zend_module_entry user_cache_module_entry = {
 	PHP_MINFO(cache),
 	PHP_VERSION,
 	NO_MODULE_GLOBALS,
-	php_user_cache_post_deactivate,
+	user_cache_post_deactivate,
 	STANDARD_MODULE_PROPERTIES_EX
 };

@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: litespeed partitions cache data by boundary
---EXTENSIONS--
-user_cache
 --CONFLICTS--
 all
 --SKIPIF--
