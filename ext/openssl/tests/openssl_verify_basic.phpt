@@ -13,6 +13,14 @@ $wrong = "wrong";
 openssl_sign($data, $sign, $privkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING);
 var_dump(openssl_verify($data, $sign, $pubkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING));
 var_dump(openssl_verify($data, $sign, $pubkey, OPENSSL_ALGO_SHA256));
+openssl_sign($data, $sign_pss, $privkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING, OPENSSL_RSA_PSS_SALTLEN_DIGEST);
+var_dump(openssl_verify($data, $sign_pss, $pubkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING, OPENSSL_RSA_PSS_SALTLEN_DIGEST));
+var_dump(openssl_verify($data, $sign_pss, $pubkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING, 32));
+var_dump(openssl_verify($data, $sign_pss, $pubkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING, OPENSSL_RSA_PSS_SALTLEN_AUTO));
+var_dump(openssl_verify($data, $sign_pss, $pubkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING, 20));
+openssl_sign($data, $sign_pss, $privkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING, OPENSSL_RSA_PSS_SALTLEN_MAX);
+var_dump(openssl_verify($data, $sign_pss, $pubkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING, OPENSSL_RSA_PSS_SALTLEN_MAX));
+var_dump(openssl_verify($data, $sign_pss, $pubkey, OPENSSL_ALGO_SHA256, OPENSSL_PKCS1_PSS_PADDING, OPENSSL_RSA_PSS_SALTLEN_DIGEST));
 openssl_sign($data, $sign, $privkey, OPENSSL_ALGO_SHA256);
 var_dump(openssl_verify($data, $sign, $pubkey, OPENSSL_ALGO_SHA256));
 var_dump(openssl_verify($data, $sign, $privkey, OPENSSL_ALGO_SHA256));
@@ -21,6 +29,12 @@ var_dump(openssl_verify($data, $wrong, $pubkey, OPENSSL_ALGO_SHA256));
 var_dump(openssl_verify($wrong, $sign, $pubkey, OPENSSL_ALGO_SHA256));
 ?>
 --EXPECTF--
+int(1)
+int(0)
+int(1)
+int(1)
+int(1)
+int(0)
 int(1)
 int(0)
 int(1)

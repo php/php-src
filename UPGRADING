@@ -383,6 +383,10 @@ PHP 8.6 UPGRADE NOTES
 - OpenSSL:
   . Output of openssl_x509_parse() contains criticalExtensions listing all
     critical certificate extensions.
+  . openssl_sign() and openssl_verify() now have an additional optional
+    argument $salt_length that allows controlling the RSA-PSS salt length
+    when OPENSSL_PKCS1_PSS_PADDING is used. It accepts an explicit length or
+    one of the new OPENSSL_RSA_PSS_SALTLEN_* constants.
 
 - PDO_DBLIB:
   . When using persistent connections, there is now a liveness check in the
@@ -512,6 +516,11 @@ PHP 8.6 UPGRADE NOTES
   . CURL_SEEKFUNC_OK.
   . CURL_SEEKFUNC_FAIL.
   . CURL_SEEKFUNC_CANTSEEK.
+
+- OpenSSL:
+  . OPENSSL_RSA_PSS_SALTLEN_DIGEST.
+  . OPENSSL_RSA_PSS_SALTLEN_AUTO.
+  . OPENSSL_RSA_PSS_SALTLEN_MAX.
 
 - Sockets:
   . TCP_USER_TIMEOUT (Linux only).
