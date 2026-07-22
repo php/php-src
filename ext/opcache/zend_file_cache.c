@@ -1308,7 +1308,9 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 		zend_ast_get_op_array(ast)->op_array = Z_PTR(z);
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
-		ZEND_MAP_PTR_NEW(fcc->fptr);
+		if (!script->corrupted) {
+			ZEND_MAP_PTR_NEW(fcc->fptr);
+		}
 		if (!IS_UNSERIALIZED(fcc->args)) {
 			UNSERIALIZE_PTR(fcc->args);
 			zend_file_cache_unserialize_ast(fcc->args, script, buf);

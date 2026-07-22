@@ -1139,6 +1139,12 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 		case ZEND_AST_CALL:
 		case ZEND_AST_STATIC_CALL:
 		{
+			// Preloading will attempt to resolve constants but objects can't be stored in shm
+			// Aborting here to store the const AST instead
+			if (CG(in_compilation)) {
+				return FAILURE;
+			}
+
 			zend_function *fptr;
 			zend_class_entry *called_scope = NULL;
 

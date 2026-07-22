@@ -12037,8 +12037,6 @@ static void zend_compile_const_expr_fcc(zend_ast **ast_ptr)
 		zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
 	}
 
-	ZEND_MAP_PTR_NEW(((zend_ast_fcc *)*args_ast)->fptr);
-
 	switch ((*ast_ptr)->kind) {
 		case ZEND_AST_CALL: {
 			zend_ast *name_ast = (*ast_ptr)->child[0];
