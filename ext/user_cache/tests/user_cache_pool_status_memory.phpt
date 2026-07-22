@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: pool status reports per-pool memory usage
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
