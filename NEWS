@@ -29,6 +29,10 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Re-enable JIT for ZTS builds on Apple Silicon. (realFlowControl)
+  . Fixed JIT-emitted fast path for FETCH_OBJ_R/IS/W to also route hooked
+    property offsets (including virtual property hooks alongside asymmetric
+    -visibility declared properties) through the slow path, instead of using
+    the small hooked-offset value as an in-object byte offset. (coderzhao)
 
 - PDO_ODBC:
   . Fixed bug GH-22667 (Heap buffer over-read when a column value exceeds the

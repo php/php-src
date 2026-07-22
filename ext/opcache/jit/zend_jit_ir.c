@@ -14275,6 +14275,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 	zval *member;
 	zend_property_info *prop_info;
 	bool may_be_dynamic = true;
+	bool may_be_hooked = true;
 	zend_jit_addr prop_addr;
 	uint32_t res_info = RES_INFO();
 	ir_ref prop_type_ref = IR_UNUSED;
@@ -14401,7 +14402,23 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*)));
 
 		may_be_dynamic = zend_may_be_dynamic_property(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array);
-		if (may_be_dynamic) {
+		/* When the cache slot may hold a hooked-property offset (a small
+		 * positive integer in the range [1..15]), the fast path must first
+		 * verify offset >= ZEND_FIRST_PROPERTY_OFFSET. Otherwise the hooked
+		 * offset is used as an in-object byte offset and the JIT reads a
+		 * bogus zval from within the object (typically overlapping an
+		 * adjacent property slot). This affects e.g. virtual property hooks
+		 * (get-only, no backing storage) combined with asymmetric-visibility
+		 * declared properties on the same class.
+		 *
+		 * IS_HOOKED_PROPERTY_OFFSET(offset) is true when 0 < offset < 16 and
+		 * IS_DYNAMIC_PROPERTY_OFFSET(offset) is true when offset < 0, so a
+		 * single signed comparison offset < ZEND_FIRST_PROPERTY_OFFSET (=16)
+		 * covers both cases and delegates them to zend_jit_fetch_obj_*_dynamic
+		 * helpers, which route hooked offsets to the slow path (which calls
+		 * the get hook via read_property). */
+		may_be_hooked = zend_may_be_hooked_property(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array);
+		if (may_be_dynamic || may_be_hooked) {
 			ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, ir_CONST_ADDR(ZEND_FIRST_PROPERTY_OFFSET)));
 			if (opline->opcode == ZEND_FETCH_OBJ_W) {
 				ir_IF_TRUE_cold(if_dynamic);

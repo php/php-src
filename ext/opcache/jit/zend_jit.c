@@ -682,7 +682,6 @@ static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *memb
 		}
 	}
 
-	// TODO: Treat property hooks more precisely.
 	info = (zend_property_info*)zend_hash_find_ptr(&ce->properties_info, member);
 	if (info == NULL ||
 	    !IS_VALID_PROPERTY_OFFSET(info->offset) ||
@@ -693,6 +692,63 @@ static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *memb
 
 	if (!(info->flags & ZEND_ACC_PUBLIC) &&
 	    (!on_this || info->ce != ce)) {
+		return 1;
+	}
+
+	return 0;
+}
+
+/* Determines whether the runtime cache slot for the given (ce, member) pair
+ * may hold ZEND_HOOKED_PROPERTY_OFFSET, i.e. whether the resolved property
+ * may be a hooked property (with a get/set hook, including virtual
+ * properties without backing storage).
+ *
+ * This complements zend_may_be_dynamic_property(): the two together tell the
+ * JIT whether the cached offset is guaranteed to be a valid property offset
+ * (>= ZEND_FIRST_PROPERTY_OFFSET). If either function returns true, the
+ * JIT-emitted fast path MUST verify the offset before dereferencing it,
+ * otherwise a hooked offset (which is a small integer in the range
+ * [1..15]) will be interpreted as an in-object offset, producing memory
+ * reads at bogus locations (typically within an adjacent property slot).
+ *
+ * A conservative "true" is always safe. */
+static bool zend_may_be_hooked_property(zend_class_entry *ce, zend_string *member, bool on_this, const zend_op_array *op_array)
+{
+	zend_property_info *info;
+
+	if (!ce || (ce->ce_flags & ZEND_ACC_TRAIT) || (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
+		return 1;
+	}
+
+	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+		if (ce->info.user.filename != op_array->filename) {
+			/* class declaration might be changed independently */
+			return 1;
+		}
+	}
+
+	info = (zend_property_info*)zend_hash_find_ptr(&ce->properties_info, member);
+	if (info == NULL) {
+		/* Unknown property. Might resolve to a hooked property at runtime
+		 * (e.g. added by a subclass) unless we can rule that out. */
+		return 1;
+	}
+
+	if (info->flags & ZEND_ACC_STATIC) {
+		/* Static properties never go through the instance fetch path. */
+		return 0;
+	}
+
+	if (info->hooks) {
+		return 1;
+	}
+
+	/* When accessing through $this and the class is not final, a subclass may
+	 * shadow this property with a hooked one (asymmetric visibility does not
+	 * prevent shadowing). Only inaccessible-from-scope shadowing is safe. */
+	if (on_this
+	 && !(ce->ce_flags & ZEND_ACC_FINAL)
+	 && (info->flags & ZEND_ACC_PUBLIC)) {
 		return 1;
 	}
 
