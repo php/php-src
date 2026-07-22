@@ -1,7 +1,5 @@
 --TEST--
 FPM: UserCache\Cache safe-direct DatePeriod state survives across requests
---EXTENSIONS--
-user_cache
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--

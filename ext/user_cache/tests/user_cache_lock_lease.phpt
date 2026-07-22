@@ -1,7 +1,6 @@
 --TEST--
 UserCache\Cache: lock lease expires and can be taken over by another process
 --EXTENSIONS--
-user_cache
 pcntl
 --INI--
 user_cache.enable=1

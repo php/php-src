@@ -1,7 +1,6 @@
 --TEST--
 FPM: UserCache\Cache safe-direct DateTime and SPL state survives requests
 --EXTENSIONS--
-user_cache
 spl
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
