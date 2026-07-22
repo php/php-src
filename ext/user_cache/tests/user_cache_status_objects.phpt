@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: status objects
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
@@ -36,6 +34,7 @@ $poolStatus = $cache->getPoolStatus();
 $otherStatus = $other->getPoolStatus();
 
 var_dump($status->getEntryCount() >= 3);
+var_dump($status->getGraphPinSlotsInUse() >= 0);
 var_dump($poolStatus->getEntryCount());
 var_dump($otherStatus->getEntryCount());
 $keys = $poolStatus->getEntryKeys();
@@ -66,6 +65,7 @@ int(0)
 array(0) {
 }
 int(0)
+bool(true)
 bool(true)
 bool(true)
 bool(true)

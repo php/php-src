@@ -1,7 +1,5 @@
 --TEST--
 FPM: UserCache\Cache request-local slots amortize __unserialize per request only
---EXTENSIONS--
-user_cache
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--

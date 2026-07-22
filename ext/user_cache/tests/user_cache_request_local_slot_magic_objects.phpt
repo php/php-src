@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: graphs with magic restore methods re-run them on every fetch
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

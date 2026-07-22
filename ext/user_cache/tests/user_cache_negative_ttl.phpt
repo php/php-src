@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: negative TTL throws ValueError on every write API
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

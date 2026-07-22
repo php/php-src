@@ -1,7 +1,5 @@
 --TEST--
 CGI/FastCGI: UserCache\Cache round-trips a rich value matrix across the cross-process named segment
---EXTENSIONS--
-user_cache
 --CONFLICTS--
 all
 --SKIPIF--

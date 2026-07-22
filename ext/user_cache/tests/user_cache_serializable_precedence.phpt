@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: Serializable interface outranks __sleep/__wakeup/__unserialize (native precedence)
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

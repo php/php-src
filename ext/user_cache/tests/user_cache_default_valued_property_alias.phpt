@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: default-valued properties are stored when they carry aliases
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

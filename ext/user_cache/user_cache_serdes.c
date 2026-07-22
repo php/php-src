@@ -335,6 +335,7 @@ static bool user_cache_serdes_put_str(
 
 				return false;
 			}
+
 			id = enc->string_count++;
 
 			ZVAL_LONG(string_id, (zend_long) id + 1);
@@ -349,6 +350,7 @@ static bool user_cache_serdes_put_str(
 		}
 
 		id = (uint32_t) (Z_LVAL_P(string_id) - 1);
+
 		user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_STRING_REF);
 		user_cache_serdes_put_u32(&enc->buf, id);
 
@@ -390,6 +392,7 @@ static zend_result user_cache_serdes_try_add_sleep_prop(
 
 	if (Z_TYPE_P(val) == IS_INDIRECT) {
 		val = Z_INDIRECT_P(val);
+
 		if (Z_TYPE_P(val) == IS_UNDEF) {
 			if (zend_get_typed_property_info_for_slot(Z_OBJ_P(obj_zv), val) != NULL) {
 				return SUCCESS;
@@ -1156,6 +1159,7 @@ static bool user_cache_serdes_decode_array(
 		}
 
 		ZVAL_UNDEF(&elem);
+
 		if (!user_cache_serdes_decode_value(dec, &elem)) {
 			zval_ptr_dtor(&elem);
 			if (key != NULL) {
@@ -1169,6 +1173,7 @@ static bool user_cache_serdes_decode_array(
 			/* Reject a corrupt blob with duplicate keys rather than trusting
 			 * the encoder's uniqueness; add_new would assert or double-insert. */
 			result = zend_hash_add(Z_ARRVAL_P(dst), key, &elem) != NULL;
+
 			zend_string_release(key);
 		} else if (tag == PHP_USER_CACHE_SERDES_TAG_HASHED_ARRAY) {
 			result = zend_hash_index_add(Z_ARRVAL_P(dst), (zend_ulong) key_h, &elem) != NULL;
@@ -1183,8 +1188,13 @@ static bool user_cache_serdes_decode_array(
 		}
 	}
 
+	if (UNEXPECTED((zend_long) next_free < 0)) {
+		goto failure;
+	}
+
 	Z_ARRVAL_P(dst)->nNextFreeElement = (zend_long) next_free;
 	PHP_USER_CACHE_HT_DISALLOW_COW_VIOLATION(Z_ARRVAL_P(dst));
+
 	return true;
 
 failure:
@@ -1661,6 +1671,7 @@ bool php_user_cache_serdes_decode(const uint8_t *data, size_t len, zval *dst)
 
 	if (!result && !Z_ISUNDEF_P(dst)) {
 		zval_ptr_dtor(dst);
+
 		ZVAL_UNDEF(dst);
 	}
 

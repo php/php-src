@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: floats round-trip bit-exactly (negative zero, subnormals, precision)
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

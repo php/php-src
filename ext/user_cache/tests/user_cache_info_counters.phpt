@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: expunge and store-failure counters are exposed
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

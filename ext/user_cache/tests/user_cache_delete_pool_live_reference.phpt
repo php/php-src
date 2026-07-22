@@ -1,7 +1,6 @@
 --TEST--
 UserCache\Cache: deletePool() keeps values and objects alive until the last reference drops
 --EXTENSIONS--
-user_cache
 pcntl
 --SKIPIF--
 <?php

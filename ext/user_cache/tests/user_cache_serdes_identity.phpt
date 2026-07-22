@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: identity, cycles, and graph nesting of __sleep() objects
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
