@@ -4,24 +4,24 @@ setlocale() rejects locale names with null bytes
 <?php
 class NullByteStringable {
     public function __toString(): string {
-        return "C\0invalid";
+        return "C\0locale";
     }
 }
 
 try {
-    var_dump(setlocale(LC_ALL, "C\0invalid"));
+    var_dump(setlocale(LC_ALL, "C\0locale"));
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    var_dump(setlocale(LC_ALL, ["invalid\0locale", "C"]));
+    var_dump(setlocale(LC_ALL, ["locale\0name", "C"]));
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
-    var_dump(setlocale(LC_ALL, ["invalid", "C\0invalid"]));
+    var_dump(@setlocale(LC_ALL, [str_repeat("x", 255), "C\0locale"]));
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
