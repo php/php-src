@@ -3,9 +3,7 @@ EXTENSION("user_cache", "\
 	user_cache_storage.c \
 	user_cache_shared_graph.c \
 	user_cache_entries.c \
-	user_cache_serdes.c \
-	user_cache_alloc_shm.c \
-	user_cache_alloc_posix.c", false);
+	user_cache_serdes.c", false);
 
 ADD_EXTENSION_DEP('user_cache', 'date');
 ADD_EXTENSION_DEP('user_cache', 'spl');

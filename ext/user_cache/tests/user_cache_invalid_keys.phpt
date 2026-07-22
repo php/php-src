@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: invalid cache keys are rejected consistently
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

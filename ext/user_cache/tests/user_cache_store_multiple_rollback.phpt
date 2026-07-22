@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: storeMultiple rolls back partial writes on failure
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

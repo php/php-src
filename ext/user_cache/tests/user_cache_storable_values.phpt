@@ -1,7 +1,6 @@
 --TEST--
 UserCache\Cache: storable values use shared graph and opaque values are refused
 --EXTENSIONS--
-user_cache
 spl
 --INI--
 user_cache.enable=1

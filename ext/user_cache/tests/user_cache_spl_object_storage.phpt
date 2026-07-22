@@ -1,7 +1,6 @@
 --TEST--
 UserCache\Cache: SplObjectStorage round-trips entries, data, and shared identity
 --EXTENSIONS--
-user_cache
 spl
 --INI--
 user_cache.enable=1

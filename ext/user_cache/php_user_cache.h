@@ -18,7 +18,6 @@
 #include "php.h"
 
 /* Public API for extensions, SAPIs and embedders. */
-
 /* Keep in sync with user_cache_availability_enum_case(). */
 typedef enum {
 	PHP_USER_CACHE_REASON_NONE = 0,
@@ -28,7 +27,8 @@ typedef enum {
 	PHP_USER_CACHE_REASON_BACKEND_NOT_INITIALIZED_BEFORE_WORKER,
 	PHP_USER_CACHE_REASON_BACKEND_INITIALIZED_AFTER_WORKER,
 	PHP_USER_CACHE_REASON_CGI_BOUNDARY_UNAVAILABLE,
-	PHP_USER_CACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE
+	PHP_USER_CACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE,
+	PHP_USER_CACHE_REASON_REQUEST_SHUTDOWN
 } php_user_cache_reason;
 
 /* Handlers for copying native object state without invoking user code.
@@ -91,13 +91,7 @@ ZEND_API void php_user_cache_opt_in(void);
 ZEND_API bool php_user_cache_startup_default_context_storage(void);
 ZEND_API php_user_cache_partition *php_user_cache_partition_create(const char *name);
 ZEND_API bool php_user_cache_partition_startup_storage(php_user_cache_partition *partition);
-ZEND_API void php_user_cache_activate_request_unavailable(php_user_cache_reason reason);
 ZEND_API void php_user_cache_partition_activate(php_user_cache_partition *partition);
-ZEND_API php_user_cache_partition *php_user_cache_boundary_partition_get(
-	const char *sapi_prefix,
-	const char *boundary,
-	void (*log_message)(const char *message)
-);
 /* Activate a request partition using DOCUMENT_ROOT or SERVER_NAME. */
 ZEND_API void php_user_cache_activate_boundary_partition(
 	const char *sapi_prefix,
@@ -112,11 +106,6 @@ ZEND_API void php_user_cache_boundary_partitions_shutdown(void);
 size_t php_user_cache_globals_size(void);
 void php_user_cache_globals_startup(void);
 #endif
-
-void php_user_cache_minit(void);
-void php_user_cache_mshutdown(void);
-zend_result php_user_cache_rshutdown(void);
-zend_result php_user_cache_post_deactivate(void);
 
 extern zend_module_entry user_cache_module_entry;
 

@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: a single reference shared across array and object containers survives
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

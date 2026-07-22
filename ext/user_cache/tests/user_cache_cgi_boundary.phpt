@@ -1,7 +1,5 @@
 --TEST--
 CGI/FastCGI: UserCache\Cache partitions cache data by boundary
---EXTENSIONS--
-user_cache
 --CONFLICTS--
 all
 --SKIPIF--
