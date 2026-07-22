@@ -82,6 +82,7 @@ static bool php_zip_set_file_comment(struct zip *za, zip_uint64_t index, const c
 # define add_ascii_assoc_string add_assoc_string
 # define add_ascii_assoc_long add_assoc_long
 
+#ifdef HAVE_ENCRYPTION
 static bool php_zip_file_set_encryption(struct zip *intern, zend_long index, zend_long method, char *password) {
 	// FIXME: is a workaround to reset/free the password in case of consecutive calls.
 	// when libzip 1.11.5 is available, we can save this call in this case.
@@ -92,6 +93,7 @@ static bool php_zip_file_set_encryption(struct zip *intern, zend_long index, zen
 
 	return (zip_file_set_encryption(intern, (zip_uint64_t)index, (zip_uint16_t)method, password) == 0);
 }
+#endif
 
 /* Flatten a path by making a relative path (to .)*/
 static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
