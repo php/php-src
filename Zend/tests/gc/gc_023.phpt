@@ -11,14 +11,17 @@ for ($i=0; $i < 9999; $i++) {
 }
 var_dump(gc_collect_cycles());
 unset($a);
+flush(); // handle interrupts
 var_dump(gc_collect_cycles());
 $a=array();
 for ($i=0; $i < 10001; $i++) {
     $a[$i] = array(array());
     $a[$i][0] = & $a[$i];
 }
+flush(); // handle interrupts
 var_dump(gc_collect_cycles());
-unset($a); // 10000 zvals collected automatic
+unset($a);
+flush(); // handle interrupts. 10000 zvals collected automatic
 var_dump(gc_collect_cycles());
 echo "ok\n";
 ?>
@@ -26,5 +29,5 @@ echo "ok\n";
 int(0)
 int(9999)
 int(0)
-int(1)
+int(0)
 ok
