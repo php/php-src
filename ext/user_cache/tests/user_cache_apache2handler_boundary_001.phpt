@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: apache2handler partitions cache data by virtual host
---EXTENSIONS--
-user_cache
 --SKIPIF--
 <?php
 if (!function_exists('proc_open')) die('skip proc_open() not available');

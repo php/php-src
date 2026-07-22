@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: plain cyclic object graph round-trips and remains collectable
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

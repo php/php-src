@@ -1,7 +1,6 @@
 --TEST--
 UserCache\Cache: request-local slots are promoted after the first shared-graph fetch
 --EXTENSIONS--
-user_cache
 pcntl
 --INI--
 user_cache.enable=1

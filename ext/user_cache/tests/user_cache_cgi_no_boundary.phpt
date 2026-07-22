@@ -1,8 +1,6 @@
 --TEST--
 CGI: UserCache\Cache is unavailable without a cache boundary
 --CGI--
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 opcache.file_cache_only=0

@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: pure (non-backed) enum cases round-trip as singletons
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

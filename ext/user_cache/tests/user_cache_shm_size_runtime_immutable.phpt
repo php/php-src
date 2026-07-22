@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: user_cache.shm_size cannot be changed at runtime
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

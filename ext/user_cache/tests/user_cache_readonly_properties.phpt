@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: readonly and inherited readonly properties survive the round trip
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

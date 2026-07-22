@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: legacy Serializable interface honours its serialize()/unserialize() contract
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

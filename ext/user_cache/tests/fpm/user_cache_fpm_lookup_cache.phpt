@@ -1,7 +1,5 @@
 --TEST--
 FPM: UserCache\Cache request-local lookup cache sees same-request updates
---EXTENSIONS--
-user_cache
 --SKIPIF--
 <?php include __DIR__ . '/skipif.inc'; ?>
 --FILE--

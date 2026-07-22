@@ -1,7 +1,6 @@
 --TEST--
 UserCache\Cache: shared-graph pins of SIGKILLed workers are stripped and their payloads reclaimed
 --EXTENSIONS--
-user_cache
 pcntl
 --SKIPIF--
 <?php

@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: DatePeriod safe-direct state round-trips (incl. subclasses)
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
