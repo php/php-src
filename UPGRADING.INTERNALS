@@ -114,6 +114,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     longer is a pointer, but a directly embedded HashTable struct.
   . Extended php_stream_filter_ops with seek method.
   . zend_argument_error_variadic() now takes a new 'function' parameter.
+  . The param argument in the php_verror() function has been removed.
 
 - Added:
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
