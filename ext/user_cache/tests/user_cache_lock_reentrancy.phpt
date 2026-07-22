@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: lock re-entry within a request and unlock of unheld keys
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

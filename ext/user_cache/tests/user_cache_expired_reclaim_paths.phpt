@@ -1,7 +1,6 @@
 --TEST--
 UserCache\Cache: expired entries are reclaimed by read-only request shutdown and by write traffic alone
 --EXTENSIONS--
-user_cache
 pcntl
 --SKIPIF--
 <?php
