@@ -357,6 +357,10 @@ PHP                                                                        NEWS
   . pcntl_exec() now throws a ValueError if the $args array is not a list
     array. (Weilin Du)
 
+- PCRE:
+  . Added the PREG_THROW_ON_ERROR flag to make the preg_*() functions throw a
+    \PregException on any PCRE error. (aldemeery)
+
 - PDO_DBLIB:
   . Added dblib_handle_check_liveness handler. (freddy77)
 

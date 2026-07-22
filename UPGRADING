@@ -300,6 +300,23 @@ PHP 8.6 UPGRADE NOTES
   . Added TLS external PSK support for streams with new strem context options:
     psk_client_cb and psk_server_cb. This allows setting and receiving PSK.
 
+- PCRE:
+  . Added the PREG_THROW_ON_ERROR flag. When passed to a preg_*() function that
+    accepts a $flags argument, a PCRE error additionally throws a \PregException
+    whose code and message are exactly what preg_last_error() and
+    preg_last_error_msg() report for that call. The flag does not otherwise
+    change the call: same warnings, same return value. It covers both execution
+    errors (such as an exhausted backtrack limit or malformed UTF-8 input under
+    the /u modifier) and compilation errors (such as a malformed pattern, which
+    still also emits its usual warning). preg_replace() and preg_filter() gained
+    a $flags parameter to accept it. A PCRE error raised by a nested preg_*()
+    call inside a preg_replace_callback()/preg_replace_callback_array() callback
+    is not attributed to the outer call, so a successful outer call does not
+    throw on its account. As on the non-flag path, by-reference outputs (the
+    $matches and $count arguments) may already have been written when the
+    \PregException is thrown, so a catch block should not assume they are left
+    untouched.
+
 - Phar:
   . Overriding the getMTime() and getPathname() methods of SplFileInfo now
     influences the result of the phar buildFrom family of functions.
@@ -384,6 +401,10 @@ PHP 8.6 UPGRADE NOTES
   . Output of openssl_x509_parse() contains criticalExtensions listing all
     critical certificate extensions.
 
+- PCRE:
+  . preg_replace() and preg_filter() now accept an optional $flags argument
+    (for PREG_THROW_ON_ERROR).
+
 - PDO_DBLIB:
   . When using persistent connections, there is now a liveness check in the
     constructor.
@@ -454,6 +475,9 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/tls_session_resumption
   . Openssl\Psk
 
+- PCRE:
+  . PregException
+
 - Standard:
   . enum SortDirection
     RFC: https://wiki.php.net/rfc/sort_direction_enum
@@ -512,6 +536,9 @@ PHP 8.6 UPGRADE NOTES
   . CURL_SEEKFUNC_OK.
   . CURL_SEEKFUNC_FAIL.
   . CURL_SEEKFUNC_CANTSEEK.
+
+- PCRE:
+  . PREG_THROW_ON_ERROR.
 
 - Sockets:
   . TCP_USER_TIMEOUT (Linux only).
