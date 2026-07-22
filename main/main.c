@@ -1258,35 +1258,6 @@ PHPAPI ZEND_COLD void php_error_docref_unchecked(const char *docref, int type, c
 }
 /* }}} */
 
-/* {{{ php_error_docref1 */
-/* See: CODING_STANDARDS.md for details. */
-PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
-{
-	va_list args;
-
-	va_start(args, format);
-	php_verror(docref, param1, type, format, args);
-	va_end(args);
-}
-/* }}} */
-
-/* {{{ php_error_docref2 */
-/* See: CODING_STANDARDS.md for details. */
-PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
-{
-	char *params;
-	va_list args;
-
-	spprintf(&params, 0, "%s,%s", param1, param2);
-	va_start(args, format);
-	php_verror(docref, params ? params : "...", type, format, args);
-	va_end(args);
-	if (params) {
-		efree(params);
-	}
-}
-/* }}} */
-
 /* {{{ php_html_puts */
 PHPAPI void php_html_puts(const char *str, size_t size)
 {
