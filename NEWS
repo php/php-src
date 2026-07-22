@@ -8,13 +8,20 @@ PHP                                                                        NEWS
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
+- DOM:
+  . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
+    declares a default value for the attribute). (iliaal)
+
 - Opcache:
+  . Fixed GH-22693 (DT_TEXTREL in JIT-generated TLS access on x86_64).
+    (David Carlier)
   . Fixed bug GH-22763 (JIT fails to clear ZREG_TYPE_ONLY after setting reg).
     (Arnaud)
 
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
     SO_LINGER options. (Weilin Du)
+  . Fixed various memory related issues in ext/sockets. (David Carlier)
 
 30 Jul 2026, PHP 8.5.9
 

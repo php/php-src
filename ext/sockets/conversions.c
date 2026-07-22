@@ -1207,6 +1207,7 @@ static void to_zval_read_iov(const char *msghdr_c, zval *zv, res_context *ctx)
 	if (iovlen > UINT_MAX) {
 		do_to_zval_err(ctx, "unexpectedly large value for iov_len: %lu",
 				(unsigned long)iovlen);
+		return;
 	}
 	array_init_size(zv, (uint32_t)iovlen);
 
@@ -1270,11 +1271,10 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 #elif defined(SIOCGIFINDEX)
 		{
 			struct ifreq ifr;
-			if (ZSTR_LEN(str) >= sizeof(ifr.ifr_name)) {
+			if (strlcpy(ifr.ifr_name, ZSTR_VAL(str), sizeof(ifr.ifr_name))
+					>= sizeof(ifr.ifr_name)) {
 				do_from_zval_err(ctx, "the interface name \"%s\" is too large ", ZSTR_VAL(str));
-			}
-			memcpy(ifr.ifr_name, ZSTR_VAL(str), ZSTR_LEN(str) + 1);
-			if (ioctl(ctx->sock->bsd_socket, SIOCGIFINDEX, &ifr) < 0) {
+			} else if (ioctl(ctx->sock->bsd_socket, SIOCGIFINDEX, &ifr) < 0) {
 				if (errno == ENODEV) {
 					do_from_zval_err(ctx, "no interface with name \"%s\" could be "
 							"found", ZSTR_VAL(str));

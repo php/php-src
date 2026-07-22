@@ -70,7 +70,7 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 	const unsigned char *e = s + char_len;
 	zend_string *str;
 
-	memset(tmp, 1, sizeof(tmp)-1);
+	memset(tmp, 1, sizeof(tmp));
 
 	while (s < e) {
 		tmp[*s++] = '\0';

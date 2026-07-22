@@ -654,7 +654,7 @@ zend_result php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struc
 retry:
 	retval = GetIpAddrTable(addr_table, &size, 0);
 	if (retval == ERROR_INSUFFICIENT_BUFFER) {
-		erealloc(addr_table, size);
+		addr_table = erealloc(addr_table, size);
 		goto retry;
 	}
 	if (retval != NO_ERROR) {
@@ -696,7 +696,7 @@ zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, uns
 retry:
 	retval = GetIpAddrTable(addr_table, &size, 0);
 	if (retval == ERROR_INSUFFICIENT_BUFFER) {
-		erealloc(addr_table, size);
+		addr_table = erealloc(addr_table, size);
 		goto retry;
 	}
 	if (retval != NO_ERROR) {
