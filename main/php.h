@@ -299,7 +299,7 @@ static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handli
 }
 static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling(void) {}
 
-PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
+PHPAPI ZEND_COLD void php_verror(const char *docref, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
 
 /* PHPAPI void php_error(int type, const char *format, ...); */
 PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
