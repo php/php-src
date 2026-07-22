@@ -21,3 +21,5 @@ tl_config.Close();
 
 PHP_INSTALL_HEADERS("ext/date", "php_date.h lib/timelib.h lib/timelib_config.h");
 AC_DEFINE('HAVE_TIMELIB_CONFIG_H', 1, 'Define to 1 if you have the <timelib_config.h> header file.');
+
+ADD_MAKEFILE_FRAGMENT();
