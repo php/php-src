@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: throwing __unserialize propagates and keeps the entry
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

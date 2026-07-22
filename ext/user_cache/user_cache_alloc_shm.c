@@ -42,13 +42,11 @@ typedef struct {
 
 static int user_cache_alloc_shm_create_segments(size_t requested_size, php_user_cache_shm_segment_shm ***shared_segments_p, int *shared_segments_count, const char **error_in)
 {
-	int i;
-	size_t allocate_size = 0, remaining_bytes, seg_allocate_size;
-	int first_segment_id = -1;
-	key_t first_segment_key = -1;
-	struct shmid_ds sds;
-	int shmget_flags;
 	php_user_cache_shm_segment_shm *shared_segments;
+	struct shmid_ds sds;
+	size_t allocate_size = 0, remaining_bytes, seg_allocate_size;
+	key_t first_segment_key = IPC_PRIVATE;
+	int i, shmget_flags, first_segment_id = -1;
 
 	shmget_flags = IPC_CREAT | SHM_R | SHM_W | IPC_EXCL;
 
@@ -66,11 +64,13 @@ static int user_cache_alloc_shm_create_segments(size_t requested_size, php_user_
 			if (first_segment_id != -1) {
 				break;
 			}
+
 			seg_allocate_size >>= 1;
 		}
 
 		if (first_segment_id == -1) {
 			*error_in = "shmget";
+
 			return PHP_USER_CACHE_ALLOC_FAILURE;
 		}
 	}
@@ -82,6 +82,7 @@ static int user_cache_alloc_shm_create_segments(size_t requested_size, php_user_
 		/* Nothing is attached yet, so IPC_RMID destroys the segment
 		 * immediately instead of leaking it. */
 		shmctl(first_segment_id, IPC_RMID, &sds);
+
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
 	shared_segments = (php_user_cache_shm_segment_shm *)((char *)(*shared_segments_p) + sizeof(void *) * (*shared_segments_count));
@@ -100,6 +101,7 @@ static int user_cache_alloc_shm_create_segments(size_t requested_size, php_user_
 
 		if (shared_segments[i].shm_id == -1) {
 			*error_in = "shmget";
+
 			return PHP_USER_CACHE_ALLOC_FAILURE;
 		}
 
@@ -107,20 +109,22 @@ static int user_cache_alloc_shm_create_segments(size_t requested_size, php_user_
 		if (shared_segments[i].common.p == (void *)-1) {
 			*error_in = "shmat";
 			shmctl(shared_segments[i].shm_id, IPC_RMID, &sds);
+
 			return PHP_USER_CACHE_ALLOC_FAILURE;
 		}
 		shmctl(shared_segments[i].shm_id, IPC_RMID, &sds);
 
-		shared_segments[i].common.pos = 0;
 		shared_segments[i].common.size = allocate_size;
 		remaining_bytes -= allocate_size;
 	}
+
 	return PHP_USER_CACHE_ALLOC_SUCCESS;
 }
 
 static int user_cache_alloc_shm_detach_segment(php_user_cache_shm_segment_shm *shared_segment)
 {
 	shmdt(shared_segment->common.p);
+
 	return 0;
 }
 

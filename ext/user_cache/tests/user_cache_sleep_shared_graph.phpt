@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: __sleep() objects restore from shared graph state
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
