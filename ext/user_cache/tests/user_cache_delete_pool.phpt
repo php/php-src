@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: deletePool() removes a pool and its values, leaving others intact
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

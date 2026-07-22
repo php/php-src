@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: __unserialize() without __serialize() is honored
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

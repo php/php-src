@@ -1,7 +1,5 @@
 --TEST--
 FPM: UserCache\Cache storeMultiple rolls back a committed replacement when the commit loop bails out
---EXTENSIONS--
-user_cache
 --SKIPIF--
 <?php
 include __DIR__ . '/skipif.inc';

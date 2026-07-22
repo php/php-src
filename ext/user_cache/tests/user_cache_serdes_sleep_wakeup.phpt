@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: __sleep()/__wakeup() classes round-trip through the serialization contract
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

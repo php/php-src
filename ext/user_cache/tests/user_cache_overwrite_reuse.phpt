@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: repeated stores reuse existing entries
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

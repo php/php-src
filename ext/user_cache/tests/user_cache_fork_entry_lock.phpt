@@ -1,7 +1,6 @@
 --TEST--
 UserCache\Cache: forked child does not inherit parent entry lock ownership
 --EXTENSIONS--
-user_cache
 pcntl
 --INI--
 user_cache.enable=1

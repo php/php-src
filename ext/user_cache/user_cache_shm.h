@@ -61,13 +61,6 @@
 #define PHP_USER_CACHE_ALLOC_FAILURE  0
 #define PHP_USER_CACHE_ALLOC_SUCCESS  1
 
-/* Part of the shared-memory layout; bump PHP_USER_CACHE_VERSION if changed. */
-typedef union {
-	void *ptr;
-	double dbl;
-	zend_long lng;
-} php_user_cache_align_test;
-
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
 # define PHP_USER_CACHE_PLATFORM_ALIGNMENT (alignof(php_user_cache_align_test) < 8 ? 8 : alignof(php_user_cache_align_test))
 #elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
@@ -81,10 +74,15 @@ typedef union {
 #define PHP_USER_CACHE_ALIGNED_SIZE(size) \
 	ZEND_MM_ALIGNED_SIZE_EX(size, PHP_USER_CACHE_PLATFORM_ALIGNMENT)
 
+/* Part of the shared-memory layout; bump PHP_USER_CACHE_VERSION if changed. */
+typedef union {
+	void *ptr;
+	double dbl;
+	zend_long lng;
+} php_user_cache_align_test;
+
 typedef struct {
 	size_t size;
-	size_t end;
-	size_t pos;
 	void *p;
 } php_user_cache_shm_segment;
 

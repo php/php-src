@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: serdes arrays keep mixed string/integer keys intact
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
