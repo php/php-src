@@ -257,6 +257,12 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
 	int release_cast = 1;
 	php_stream_context *context;
 
+	/* Not using php_stream_check_in_use() as we want to allow releasing file descriptors during resource shutdown */
+	if (UNEXPECTED((stream->flags & PHP_STREAM_FLAG_IN_USE) && !(EG(flags) & EG_FLAGS_IN_RESOURCE_SHUTDOWN))) {
+		php_stream_in_use_error();
+		return 0;
+	}
+
 	/* During shutdown resources may be released before other resources still holding them.
 	 * When only resources are referenced this is not a problem, because they are refcounted
 	 * and will only be fully freed once the refcount drops to zero. However, if php_stream*
@@ -435,6 +441,10 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 {
 	/* allocate/fill the buffer */
 
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return FAILURE;
+	}
+
 	zend_result retval;
 	bool old_eof = stream->eof;
 
@@ -607,6 +617,10 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 {
 	ssize_t toread = 0, didread = 0;
 
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return 0;
+	}
+
 	while (size > 0) {
 
 		/* take from the read buffer first.
@@ -709,6 +723,10 @@ PHPAPI zend_string *php_stream_read_to_str(php_stream *stream, size_t len)
 
 PHPAPI bool _php_stream_eof(php_stream *stream)
 {
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return 0;
+	}
+
 	/* if there is data in the buffer, it's not EOF */
 	if (stream->writepos - stream->readpos > 0) {
 		return 0;
@@ -758,6 +776,10 @@ PHPAPI bool _php_stream_puts(php_stream *stream, const char *buf)
 
 PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb)
 {
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return -1;
+	}
+
 	memset(ssb, 0, sizeof(*ssb));
 
 	/* if the stream was wrapped, allow the wrapper to stat it */
@@ -781,6 +803,10 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf)
 	size_t avail;
 	const char *eol = NULL;
 	const char *readptr;
+
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return 0;
+	}
 
 	if (!buf) {
 		readptr = (char*)stream->readbuf + stream->readpos;
@@ -826,6 +852,10 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 	size_t total_copied = 0;
 	int grow_mode = 0;
 	char *bufstart = buf;
+
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return NULL;
+	}
 
 	if (buf == NULL) {
 		grow_mode = 1;
@@ -972,6 +1002,10 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 	size_t	buffered_len,
 			tent_ret_len;			/* tentative returned length */
 	bool	has_delim = delim_len > 0;
+
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return NULL;
+	}
 
 	if (maxlen == 0) {
 		return NULL;
@@ -1187,6 +1221,10 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing)
 {
 	int ret = 0;
 
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return -1;
+	}
+
 	if (stream->writefilters.head && stream->ops->write) {
 		_php_stream_write_filtered(stream, NULL, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC );
 	}
@@ -1203,6 +1241,10 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing)
 PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t count)
 {
 	ssize_t bytes;
+
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return (ssize_t) -1;
+	}
 
 	if (count == 0) {
 		return 0;
@@ -1306,6 +1348,10 @@ static zend_result php_stream_filters_seek_all(php_stream *stream, bool is_start
 
 PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 {
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return -1;
+	}
+
 	if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 		/* flush can call seek internally so we need to prevent an infinite loop */
 		if (!stream->fclose_stdiocast_flush_in_progress) {
@@ -1415,6 +1461,10 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 {
 	int ret = PHP_STREAM_OPTION_RETURN_NOTIMPL;
 
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return PHP_STREAM_OPTION_RETURN_ERR;
+	}
+
 	if (stream->ops->set_option) {
 		ret = stream->ops->set_option(stream, option, value, ptrparam);
 	}
@@ -1465,6 +1515,10 @@ PHPAPI ssize_t _php_stream_passthru(php_stream * stream STREAMS_DC)
 	char buf[8192];
 	ssize_t b;
 
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return -1;
+	}
+
 	if (php_stream_mmap_possible(stream)) {
 		char *p;
 		size_t mapped;
@@ -1505,6 +1559,10 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, bool
 	size_t len = 0, buflen;
 	php_stream_statbuf ssbuf;
 	zend_string *result;
+
+	if (php_stream_check_in_use(src) != SUCCESS) {
+		return NULL;
+	}
 
 	if (maxlen == 0) {
 		return ZSTR_EMPTY_ALLOC();
@@ -1594,7 +1652,6 @@ static zend_result php_stream_copy_fallback(php_stream *src, php_stream *dest, s
 {
 	char buf[CHUNK_SIZE];
 	size_t haveread = 0;
-
 	if (maxlen == PHP_STREAM_COPY_ALL) {
 		maxlen = 0;
 	}
@@ -2240,6 +2297,10 @@ PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream
 {
 	php_stream_context *oldcontext = PHP_STREAM_CONTEXT(stream);
 
+	if (php_stream_check_in_use(stream) != SUCCESS) {
+		return NULL;
+	}
+
 	if (context) {
 		stream->ctx = context->res;
 		GC_ADDREF(context->res);
@@ -2430,3 +2491,8 @@ overflow:
 	return -1;
 }
 /* }}} */
+
+PHPAPI ZEND_COLD void php_stream_in_use_error(void)
+{
+	zend_throw_error(NULL, "Concurrent access to a stream");
+}

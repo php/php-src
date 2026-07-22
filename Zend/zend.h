@@ -364,6 +364,14 @@ extern ZEND_API void (*zend_ticks_function)(int ticks);
  */
 extern ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
 
+typedef enum {
+	ZEND_SIGNAL_RESTART,   /* Restart the interrupted syscall */
+	ZEND_SIGNAL_INTERRUPT, /* Do not restart */
+} zend_signal_interrupt_result;
+
+/* Called when a syscall is interrupted by a signal. Not null. */
+extern ZEND_API zend_signal_interrupt_result (*zend_signal_interrupt_function)(void);
+
 extern ZEND_API void (*zend_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 extern ZEND_API void (*zend_on_timeout)(int seconds);
 extern ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handle);
