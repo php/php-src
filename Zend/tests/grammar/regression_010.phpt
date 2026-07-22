@@ -12,4 +12,4 @@ echo "Done", PHP_EOL;
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected namespaced name "implements\A", expecting "{" in %s on line %d
+Parse error: syntax error, unexpected namespaced name "implements\A", expecting ";" or "{" in %s on line %d
