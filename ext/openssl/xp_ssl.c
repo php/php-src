@@ -1775,7 +1775,9 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 				return FAILURE;
 			}
 			if (sslsock->is_client) {
-				SSL_CTX_set_alpn_protos(sslsock->ctx, alpn, alpn_len);
+				if (SSL_CTX_set_alpn_protos(sslsock->ctx, alpn, alpn_len) != 0) {
+					php_openssl_store_errors();
+				}
 			} else {
 				sslsock->alpn_ctx.data = (unsigned char *) pestrndup((const char*)alpn, alpn_len, php_stream_is_persistent(stream));
 				sslsock->alpn_ctx.len = alpn_len;

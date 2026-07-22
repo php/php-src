@@ -971,7 +971,9 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 	if (str != NULL && php_openssl_check_path_ex(str, strlen(str), path, 0, false, false, "oid_file")) {
 		BIO *oid_bio = BIO_new_file(path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 		if (oid_bio) {
-			OBJ_create_objects(oid_bio);
+			if (OBJ_create_objects(oid_bio) == 0) {
+				php_openssl_store_errors();
+			}
 			BIO_free(oid_bio);
 			php_openssl_store_errors();
 		}
@@ -1299,7 +1301,9 @@ PHP_MINIT_FUNCTION(openssl)
 	OSSL_PROVIDER_load(NULL, "legacy");
 	OSSL_PROVIDER_load(NULL, "default");
 #endif
-	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL);
+	if (OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL) != 1) {
+		php_error_docref(NULL, E_WARNING, "Failed to initialize OpenSSL");
+	}
 #endif
 
 	/* register a resource id number with OpenSSL so that we can map SSL -> stream structures in
@@ -2060,22 +2064,34 @@ static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 		name = sk_GENERAL_NAME_value(names, i);
 		switch (name->type) {
 			case GEN_EMAIL:
-				BIO_puts(bio, "email:");
+				if (BIO_puts(bio, "email:") < 0) {
+					php_openssl_store_errors();
+				}
 				as = name->d.rfc822Name;
-				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+				if (BIO_write(bio, ASN1_STRING_get0_data(as),
+					ASN1_STRING_length(as)) < 0) {
+					php_openssl_store_errors();
+				}
 				break;
 			case GEN_DNS:
-				BIO_puts(bio, "DNS:");
+				if (BIO_puts(bio, "DNS:") < 0) {
+					php_openssl_store_errors();
+				}
 				as = name->d.dNSName;
-				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+				if (BIO_write(bio, ASN1_STRING_get0_data(as),
+					ASN1_STRING_length(as)) < 0) {
+					php_openssl_store_errors();
+				}
 				break;
 			case GEN_URI:
-				BIO_puts(bio, "URI:");
+				if (BIO_puts(bio, "URI:") < 0) {
+					php_openssl_store_errors();
+				}
 				as = name->d.uniformResourceIdentifier;
-				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+				if (BIO_write(bio, ASN1_STRING_get0_data(as),
+					ASN1_STRING_length(as)) < 0) {
+					php_openssl_store_errors();
+				}
 				break;
 			default:
 				/* use builtin print for GEN_OTHERNAME, GEN_X400,
@@ -2591,6 +2607,7 @@ static STACK_OF(X509) *php_array_to_X509_sk(zval * zcerts, uint32_t arg_num, con
 
 			}
 			if (sk_X509_push(sk, cert) <= 0) {
+				php_openssl_store_errors();
 				X509_free(cert);
 				goto push_fail_exit;
 			}
@@ -2612,6 +2629,7 @@ static STACK_OF(X509) *php_array_to_X509_sk(zval * zcerts, uint32_t arg_num, con
 			}
 		}
 		if (sk_X509_push(sk, cert) <= 0) {
+			php_openssl_store_errors();
 			X509_free(cert);
 			goto push_fail_exit;
 		}
@@ -5900,6 +5918,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 				}
 			}
 			if (sk_X509_push(recipcerts, cert) <= 0) {
+				php_openssl_store_errors();
 				X509_free(cert);
 				goto clean_exit;
 			}
@@ -5924,6 +5943,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 			}
 		}
 		if (sk_X509_push(recipcerts, cert) <= 0) {
+			php_openssl_store_errors();
 			X509_free(cert);
 			goto clean_exit;
 		}
