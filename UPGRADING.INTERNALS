@@ -80,6 +80,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     directly.
   . The {_}php_stream_fopen_with_path() functions have been removed as they are
     unused.
+  . The php_error_docref1() and php_error_docref2() functions have been
+    removed, instead rely on the error_include_args INI option to show the
+    arguments to functions in a consistent manner.
 
 - Changed:
   . Internal functions that return by reference are now expected to
