@@ -1303,7 +1303,9 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 		zend_ast_get_op_array(ast)->op_array = Z_PTR(z);
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
-		ZEND_MAP_PTR_NEW(fcc->fptr);
+		if (!script->corrupted) {
+			ZEND_MAP_PTR_NEW(fcc->fptr);
+		}
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -2109,7 +2111,7 @@ void zend_file_cache_invalidate(zend_string *full_path)
 	if (ZCG(accel_directives).file_cache_read_only) {
 		return;
 	}
-	
+
 	char *filename;
 
 	filename = zend_file_cache_get_bin_file_path(full_path);

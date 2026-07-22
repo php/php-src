@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.10
 
+- Core:
+  . Fixed bug GH-22782 (Const expr FCC crashes under preloading). (Arnaud)
+
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
@@ -12,6 +15,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed GH-22693 (DT_TEXTREL in JIT-generated TLS access on x86_64).
     (David Carlier)
+  . Fixed bug GH-22763 (JIT fails to clear ZREG_TYPE_ONLY after setting reg).
+    (Arnaud)
 
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
@@ -126,7 +131,7 @@ PHP                                                                        NEWS
     PHP 8.3 and PHP 8.5). (jorgsowa)
 
 - SPL:
-  . Fix	class_parents for classes with leading slash in non-autoload mode.                                                                     
+  . Fix	class_parents for classes with leading slash in non-autoload mode.
     (jorgsowa)
   . Ignore leading back-slash in class_parents(), class_implements(), and
     class_uses(). (jorgsowa)
