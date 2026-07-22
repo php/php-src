@@ -1,7 +1,13 @@
 --TEST--
-PREG_THROW_ON_ERROR: a malformed pattern throws PregException carrying the same error as preg_last_error()/preg_last_error_msg(), with no warning
+PREG_THROW_ON_ERROR: a malformed pattern still warns exactly as without the flag, and additionally throws PregException carrying the generic error preg_last_error()/preg_last_error_msg() report
 --FILE--
 <?php
+
+$warned = false;
+set_error_handler(function ($errno, $errstr) use (&$warned) {
+    $warned = true;
+    return true;
+});
 
 $bad = '/[/';
 
@@ -17,48 +23,27 @@ $cases = [
 ];
 
 foreach ($cases as $name => $case) {
+    $warned = false;
     try {
         $case();
         echo "$name: no exception thrown\n";
     } catch (PregException $e) {
-        printf("%s: %s | matches preg_last_error()/msg(): %s\n",
+        printf("%s: %s | warned: %s | matches: %s\n",
             $name, $e->getMessage(),
+            $warned ? 'yes' : 'no',
             ($e->getCode() === preg_last_error() && $e->getMessage() === preg_last_error_msg()) ? 'yes' : 'no');
     }
 }
 
-echo "\n";
-
-$sites = [
-    'empty pattern'       => '',
-    'bad delimiter'       => '1a1',
-    'no ending delimiter' => '/x',
-    'unknown modifier'    => '/x/Z',
-    'unterminated class'  => '/[/',
-];
-foreach ($sites as $label => $bad) {
-    try {
-        preg_match($bad, 'x', $m, PREG_THROW_ON_ERROR);
-        echo "$label: no exception thrown\n";
-    } catch (PregException $e) {
-        printf("%s: %s | matches: %s\n", $label, $e->getMessage(),
-            ($e->getCode() === preg_last_error() && $e->getMessage() === preg_last_error_msg()) ? 'yes' : 'no');
-    }
-}
+restore_error_handler();
 
 ?>
 --EXPECT--
-preg_match: Internal error | matches preg_last_error()/msg(): yes
-preg_match_all: Internal error | matches preg_last_error()/msg(): yes
-preg_replace: Internal error | matches preg_last_error()/msg(): yes
-preg_filter: Internal error | matches preg_last_error()/msg(): yes
-preg_replace_callback: Internal error | matches preg_last_error()/msg(): yes
-preg_replace_callback_array: Internal error | matches preg_last_error()/msg(): yes
-preg_split: Internal error | matches preg_last_error()/msg(): yes
-preg_grep: Internal error | matches preg_last_error()/msg(): yes
-
-empty pattern: Internal error | matches: yes
-bad delimiter: Internal error | matches: yes
-no ending delimiter: Internal error | matches: yes
-unknown modifier: Internal error | matches: yes
-unterminated class: Internal error | matches: yes
+preg_match: Internal error | warned: yes | matches: yes
+preg_match_all: Internal error | warned: yes | matches: yes
+preg_replace: Internal error | warned: yes | matches: yes
+preg_filter: Internal error | warned: yes | matches: yes
+preg_replace_callback: Internal error | warned: yes | matches: yes
+preg_replace_callback_array: Internal error | warned: yes | matches: yes
+preg_split: Internal error | warned: yes | matches: yes
+preg_grep: Internal error | warned: yes | matches: yes

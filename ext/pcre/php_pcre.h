@@ -23,7 +23,7 @@
 
 #include <locale.h>
 
-PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, const char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count, zend_long flags);
+PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, const char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count);
 PHPAPI pcre2_code* pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count);
 
 extern zend_module_entry pcre_module_entry;
@@ -45,7 +45,7 @@ typedef enum {
 } php_pcre_error_code;
 
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex);
-PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bool locale_aware, zend_long flags);
+PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bool locale_aware);
 
 PHPAPI void  php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zval *subpats, bool global, zend_long flags, zend_off_t start_offset);

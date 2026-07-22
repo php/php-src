@@ -291,17 +291,20 @@ PHP 8.6 UPGRADE NOTES
 
 - PCRE:
   . Added the PREG_THROW_ON_ERROR flag. When passed to a preg_*() function that
-    accepts a $flags argument, any PCRE error reported by preg_last_error()
-    throws a \PregException instead of emitting a warning or returning
-    false/null. The exception's code and message are exactly what
-    preg_last_error() and preg_last_error_msg() report for the same call: the
-    flag changes how an error is delivered, not the error itself. This covers
-    both compilation errors (such as a malformed pattern) and execution errors
-    (such as an exhausted backtrack limit or malformed UTF-8 input under the /u
-    modifier). preg_replace() and preg_filter() gained a $flags parameter to
-    accept it. As on the non-flag path, by-reference outputs (the $matches and
-    $count arguments) may already have been written when the \PregException is
-    thrown, so a catch block should not assume they are left untouched.
+    accepts a $flags argument, a PCRE error additionally throws a \PregException
+    whose code and message are exactly what preg_last_error() and
+    preg_last_error_msg() report for that call. The flag does not otherwise
+    change the call: same warnings, same return value. It covers both execution
+    errors (such as an exhausted backtrack limit or malformed UTF-8 input under
+    the /u modifier) and compilation errors (such as a malformed pattern, which
+    still also emits its usual warning). preg_replace() and preg_filter() gained
+    a $flags parameter to accept it. A PCRE error raised by a nested preg_*()
+    call inside a preg_replace_callback()/preg_replace_callback_array() callback
+    is not attributed to the outer call, so a successful outer call does not
+    throw on its account. As on the non-flag path, by-reference outputs (the
+    $matches and $count arguments) may already have been written when the
+    \PregException is thrown, so a catch block should not assume they are left
+    untouched.
 
 - Phar:
   . Overriding the getMTime() and getPathname() methods of SplFileInfo now

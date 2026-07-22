@@ -1,22 +1,21 @@
 --TEST--
-PREG_THROW_ON_ERROR: preg_replace() with an array of patterns throws on the first failing pattern
+PREG_THROW_ON_ERROR: preg_replace() with an array of patterns stops at the first failing pattern and throws the error preg_last_error() would report
 --FILE--
 <?php
 
-try {
-    preg_replace(['/a/', '/[/', '/c/'], 'x', 'abc', -1, $count, PREG_THROW_ON_ERROR);
-    echo "compile: no exception thrown\n";
-} catch (PregException $e) {
-    printf("compile: %s | matches: %s\n", $e->getMessage(),
-        ($e->getCode() === preg_last_error() && $e->getMessage() === preg_last_error_msg()) ? 'yes' : 'no');
-}
+$cases = [
+    'compile' => fn() => @preg_replace(['/a/', '/[/', '/c/'], 'x', 'abc', -1, $c, PREG_THROW_ON_ERROR),
+    'exec'    => fn() => preg_replace(['/a/', '//u'], 'x', "\xff", -1, $c, PREG_THROW_ON_ERROR),
+];
 
-try {
-    preg_replace(['/a/', '//u'], 'x', "\xff", -1, $count, PREG_THROW_ON_ERROR);
-    echo "exec: no exception thrown\n";
-} catch (PregException $e) {
-    printf("exec: %s | matches: %s\n", $e->getMessage(),
-        ($e->getCode() === preg_last_error() && $e->getMessage() === preg_last_error_msg()) ? 'yes' : 'no');
+foreach ($cases as $label => $case) {
+    try {
+        $case();
+        echo "$label: no exception thrown\n";
+    } catch (PregException $e) {
+        printf("%s: %s | matches: %s\n", $label, $e->getMessage(),
+            ($e->getCode() === preg_last_error() && $e->getMessage() === preg_last_error_msg()) ? 'yes' : 'no');
+    }
 }
 
 ?>

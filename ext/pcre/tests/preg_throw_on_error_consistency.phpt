@@ -14,7 +14,7 @@ $cases = [
 
 foreach ($cases as $label => $case) {
     try {
-        $case();
+        @$case();
         echo "$label: no exception thrown\n";
     } catch (PregException $e) {
         printf("%s: %s | code===preg_last_error()=%s, msg===preg_last_error_msg()=%s\n",

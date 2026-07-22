@@ -497,7 +497,7 @@ check_fmt(struct magic_set *ms, const char *fmt)
 		return 0;
 
 	pattern = ZSTR_INIT_LITERAL("~%[-0-9\\.]*s~", 0);
-	if ((pce = pcre_get_compiled_regex_cache_ex(pattern, 0, 0)) == NULL) {
+	if ((pce = pcre_get_compiled_regex_cache_ex(pattern, 0)) == NULL) {
 		rv = -1;
 	} else {
 		pcre2_code *re = php_pcre_pce_re(pce);
