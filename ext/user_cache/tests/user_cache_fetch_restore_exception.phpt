@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: fetch/remember/fetchMultiple propagate restore-hook exceptions and keep the entry
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: references and cyclic graphs survive fetch and access
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1

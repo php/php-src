@@ -121,9 +121,8 @@
 
 /* Advance the bounded expiry scan on write traffic alone: expired entries
  * that are never read again would otherwise wait for allocation pressure. */
-#define PHP_USER_CACHE_EXPUNGE_WRITE_OP_INTERVAL		64U
-
-#define PHP_USER_CACHE_EXPUNGE_SCAN_MAX	4096U
+#define PHP_USER_CACHE_EXPUNGE_WRITE_OP_INTERVAL	64U
+#define PHP_USER_CACHE_EXPUNGE_SCAN_MAX				4096U
 
 #define PHP_USER_CACHE_ENTRY_LOCK_TABLE_SIZE		1024U
 #define PHP_USER_CACHE_ENTRY_LOCK_WAIT_TIMEOUT_US	(10U * 1000U * 1000U)
@@ -157,9 +156,7 @@
 #define PHP_USER_CACHE_READER_SLOTS				256U
 #define PHP_USER_CACHE_READER_DRAIN_SPIN		1024U
 #define PHP_USER_CACHE_READER_DRAIN_TIMEOUT_US	10000U
-#ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
-# define PHP_USER_CACHE_READER_CLAIM_MAX	4U
-#endif
+#define PHP_USER_CACHE_READER_CLAIM_MAX		4U
 
 #define PHP_USER_CACHE_ORPHANED_GRAPH_SLOTS	32U
 
@@ -190,6 +187,7 @@
 #endif
 
 #ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
+# define PHP_USER_CACHE_OPTIMISTIC_ENABLED 1
 #ifdef PHP_USER_CACHE_OPTIMISTIC_MSVC
 # define PHP_USER_CACHE_ATOMIC_LOAD_64(target) \
 	((uint64_t) _InterlockedOr64((volatile __int64 *) (target), 0))
@@ -224,8 +222,23 @@
 	__atomic_compare_exchange_n((target), &(expected), (desired), false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)
 # define PHP_USER_CACHE_ATOMIC_FENCE_SEQ_CST()	__atomic_thread_fence(__ATOMIC_SEQ_CST)
 # define PHP_USER_CACHE_ATOMIC_FENCE_ACQUIRE()	__atomic_thread_fence(__ATOMIC_ACQUIRE)
-#endif
-#endif
+#endif /* PHP_USER_CACHE_OPTIMISTIC_MSVC */
+#else
+/* Single-threaded fallbacks: PHP_USER_CACHE_OPTIMISTIC_ENABLED gates off the
+ * lock-free reader path, so every remaining consumer runs under the exclusive
+ * global lock. */
+# define PHP_USER_CACHE_OPTIMISTIC_ENABLED 0
+# define PHP_USER_CACHE_ATOMIC_LOAD_64(target) (*(target))
+# define PHP_USER_CACHE_ATOMIC_STORE_64(target, value) ((void) (*(target) = (value)))
+# define PHP_USER_CACHE_ATOMIC_CAS_64(target, expected, desired) \
+	(*(target) == (expected) ? ((*(target) = (desired)), true) : false)
+# define PHP_USER_CACHE_ATOMIC_LOAD_32(target) (*(target))
+# define PHP_USER_CACHE_ATOMIC_STORE_32(target, value) ((void) (*(target) = (value)))
+# define PHP_USER_CACHE_ATOMIC_CAS_32(target, expected, desired) \
+	(*(target) == (expected) ? ((*(target) = (desired)), true) : false)
+# define PHP_USER_CACHE_ATOMIC_FENCE_SEQ_CST()	((void) 0)
+# define PHP_USER_CACHE_ATOMIC_FENCE_ACQUIRE()	((void) 0)
+#endif /* PHP_USER_CACHE_HAVE_OPTIMISTIC */
 
 #ifdef PHP_USER_CACHE_HAVE_SHARED_MUTEX
 typedef union {
@@ -241,8 +254,13 @@ typedef struct {
 	bool available;
 } php_user_cache_runtime;
 
+/* Global lock model dispatch table (fcntl / robust shared mutex / win32),
+ * defined in user_cache_storage.c and selected at lock negotiation time. */
+typedef struct _php_user_cache_lock_ops php_user_cache_lock_ops;
+
 typedef struct {
 	const php_user_cache_shm_handlers *handler;
+	const char *handler_name;
 	php_user_cache_shm_segment **segments;
 	int segment_count;
 	size_t size;
@@ -250,7 +268,7 @@ typedef struct {
 	uint32_t startup_complete;
 	bool initialized_before_request;
 	bool lock_initialized;
-	bool use_shared_mutex;
+	const php_user_cache_lock_ops *lock_ops;
 	int lock_file;
 	char lockfile_name[MAXPATHLEN];
 	/* Cached for the lifetime of the attached segment. */
@@ -296,6 +314,16 @@ typedef struct {
 	uint8_t state;
 	uint8_t reserved[7];
 } php_user_cache_entry_lock_record;
+
+typedef struct {
+	php_user_cache_context *context;
+	char *key;
+	uint32_t key_len;
+	uint64_t owner_pid;
+	uint64_t owner_start_time;
+	zend_long lease;
+	bool preserve_lease;
+} php_user_cache_deferred_entry_lock_release;
 
 typedef struct {
 	uint64_t owner_pid;
@@ -414,12 +442,10 @@ typedef struct {
 
 typedef struct {
 	bool caller_holds_write_lock;
-	bool throw_on_failure;
 } php_user_cache_prepare_options;
 
 typedef struct {
 	bool retry_after_memory_pressure;
-	bool throw_on_failure;
 	bool capture_replaced_entry;
 } php_user_cache_store_options;
 
@@ -553,7 +579,6 @@ typedef struct {
 	uint32_t case_name_offset;
 } php_user_cache_shared_graph_enum;
 
-
 typedef enum {
 	PHP_USER_CACHE_OPTIMISTIC_FALLBACK = 0,
 	PHP_USER_CACHE_OPTIMISTIC_FOUND,
@@ -568,12 +593,10 @@ typedef enum {
 	PHP_USER_CACHE_VERBATIM_ROOT_INELIGIBLE
 } php_user_cache_verbatim_root_result;
 
-#ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
 typedef struct {
 	php_user_cache_header *header;
 	uint32_t slot_index;
 } php_user_cache_reader_claim;
-#endif
 
 typedef struct {
 	php_user_cache_header *header;
@@ -589,6 +612,7 @@ typedef struct {
 	bool lock_held_is_write;
 	bool runtime_resolved;
 	bool runtime_resolved_enabled;
+	bool in_request_shutdown;
 	const php_user_cache_context *runtime_resolved_context;
 	php_user_cache_shared_graph_ref *shared_graph_refs;
 	uint32_t shared_graph_ref_count;
@@ -598,6 +622,9 @@ typedef struct {
 	php_user_cache_lookup_entry lookup_entry_storage[PHP_USER_CACHE_LOOKUP_BUCKETS];
 	HashTable *request_local_slot_table;
 	HashTable *entry_lock_table;
+	php_user_cache_deferred_entry_lock_release *deferred_entry_lock_releases;
+	uint32_t deferred_entry_lock_release_count;
+	uint32_t deferred_entry_lock_release_capacity;
 	HashTable *pool_table;
 	HashTable *decode_identity_map;
 	HashTable *decode_reference_map;
@@ -614,7 +641,7 @@ typedef struct {
 	uint8_t decode_shape_prototype_direct_next;
 #ifndef ZEND_WIN32
 	zend_ulong entry_lock_owner_pid;
-#endif
+#endif /* ZEND_WIN32 */
 	bool write_seq_bumped;
 	bool stack_overflowed;
 	/* Set while a bulk store commits its items so a per-item bailout keeps the
@@ -623,11 +650,9 @@ typedef struct {
 	bool store_defer_unlock;
 	/* Request shutdown must collect cyclic slot clones. */
 	bool request_local_slot_may_cycle;
-#ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
 	int8_t reader_drain_state;
 	php_user_cache_reader_claim reader_claims[PHP_USER_CACHE_READER_CLAIM_MAX];
 	uint32_t reader_claim_count;
-#endif
 	php_user_cache_graph_pin_claim graph_pin_claims[PHP_USER_CACHE_GRAPH_PIN_CLAIM_MAX];
 	uint32_t graph_pin_claim_count;
 	/* Rate limit for request-end dead-pin sweeps. */
@@ -653,7 +678,6 @@ typedef struct {
 
 #ifdef ZTS
 # define UC_G(v) ZEND_TSRMG_FAST(user_cache_globals_offset, php_user_cache_globals *, v)
-extern int user_cache_globals_id;
 extern size_t user_cache_globals_offset;
 #else
 # define UC_G(v) (user_cache_globals.v)
@@ -661,8 +685,6 @@ extern php_user_cache_globals user_cache_globals;
 #endif
 
 extern zend_class_entry *php_user_cache_exception_ce;
-extern zend_class_entry *php_user_cache_status_ce;
-extern zend_class_entry *php_user_cache_pool_status_ce;
 extern php_user_cache_context php_user_cache_context_state;
 extern bool php_user_cache_runtime_opted_in;
 extern php_user_cache_partition *php_user_cache_partitions;
@@ -671,6 +693,7 @@ uint64_t php_user_cache_cached_pid(void);
 void php_user_cache_reset_runtime(void);
 void php_user_cache_reset_storage(void);
 bool php_user_cache_header_init_locked(void);
+bool php_user_cache_header_adoptable_locked(void);
 void php_user_cache_free_locked(uint32_t payload_offset);
 uint32_t php_user_cache_alloc_locked(size_t size, const void *src);
 bool php_user_cache_startup_storage_before_request(void);
@@ -679,15 +702,20 @@ void php_user_cache_ensure_ready_impl(void);
 bool php_user_cache_rlock(void);
 bool php_user_cache_wlock(void);
 bool php_user_cache_wlock_for_entry_mutation(zend_string *key);
+bool php_user_cache_wlock_for_ref_release(bool *recovered);
 void php_user_cache_unlock(void);
 void php_user_cache_unlock_if_held(void);
 bool php_user_cache_try_acquire_entry_lock(zend_string *key, zend_long lease);
 bool php_user_cache_release_entry_lock(zend_string *key);
+bool php_user_cache_request_owns_entry_lock(zend_string *key);
 /* Keys must be sorted with duplicates adjacent. */
 bool php_user_cache_acquire_entry_locks(zend_string **keys, bool *acquired, uint32_t count);
 void php_user_cache_release_entry_locks(zend_string **keys, const bool *acquired, uint32_t count);
 bool php_user_cache_entry_locks_allow_clear_locked(void);
 void php_user_cache_release_request_entry_locks(void);
+#ifdef ZTS
+void php_user_cache_free_thread_deferred_entry_lock_releases(php_user_cache_globals *globals);
+#endif /* ZTS */
 const php_user_cache_safe_direct_handlers *php_user_cache_safe_direct_find_handlers(
 	zend_class_entry *ce,
 	zend_class_entry **base_ce_ptr
@@ -765,7 +793,6 @@ bool php_user_cache_has_request_shared_graph_ref(uint32_t payload_offset);
 void php_user_cache_register_shared_graph_ref(uint32_t payload_offset);
 bool php_user_cache_release_request_shared_graph_refs(void);
 void php_user_cache_expunge_expired_at_request_end(void);
-bool php_user_cache_clear_locked(void);
 void php_user_cache_lookup_cache_clear(void);
 bool php_user_cache_prepare_value(
 	zend_string *key,
@@ -788,7 +815,8 @@ bool php_user_cache_fetch_locked(
 	bool use_request_local_slot,
 	zval *return_value,
 	bool *found,
-	php_user_cache_fetch_pending_seed *pending_seed
+	php_user_cache_fetch_pending_seed *pending_seed,
+	bool *lock_held
 );
 void php_user_cache_fetch_finish(zend_string *key, uint64_t gen, zval *return_value, uint32_t flags);
 bool php_user_cache_exists_locked(zend_string *key);
@@ -811,13 +839,14 @@ void php_user_cache_object_table_dtor(zval *zv);
 void php_user_cache_reference_table_dtor(zval *zv);
 php_user_cache_optimistic_result php_user_cache_fetch_optimistic(
 	zend_string *key,
-	zval *return_value
+	zval *return_value,
+	bool allow_decode
 );
 php_user_cache_optimistic_result php_user_cache_exists_optimistic(zend_string *key);
 bool php_user_cache_optimistic_reader_begin(php_user_cache_header *header, uint32_t *slot_idx_ptr);
 void php_user_cache_optimistic_reader_end(php_user_cache_header *header, uint32_t slot_idx);
 void php_user_cache_optimistic_fork_setup(void);
-#if defined(ZTS) && defined(PHP_USER_CACHE_HAVE_OPTIMISTIC)
+#ifdef ZTS
 void php_user_cache_release_thread_reader_claims(php_user_cache_globals *globals);
 #endif
 bool php_user_cache_quiesce_graph_payloads_locked(void);
@@ -829,7 +858,7 @@ bool php_user_cache_graph_pin_owner_is_dead(uint64_t owner_pid, uint64_t owner_s
 uint64_t php_user_cache_self_start_time_token(void);
 #ifdef ZTS
 void php_user_cache_release_thread_graph_pin_claims(php_user_cache_globals *globals);
-#endif
+#endif /* ZTS */
 
 static zend_always_inline uint64_t php_user_cache_current_pid(void)
 {
@@ -853,10 +882,9 @@ static zend_always_inline bool php_user_cache_stack_overflowed(void)
 	return overflowed;
 #else
 	return false;
-#endif
+#endif /* ZEND_CHECK_STACK_LIMIT */
 }
 
-#ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
 static zend_always_inline uint64_t php_user_cache_atomic_load_64(const uint64_t *target)
 {
 	return PHP_USER_CACHE_ATOMIC_LOAD_64(target);
@@ -866,7 +894,16 @@ static zend_always_inline void php_user_cache_atomic_fence_acquire(void)
 {
 	PHP_USER_CACHE_ATOMIC_FENCE_ACQUIRE();
 }
-#endif
+
+static zend_always_inline uint64_t php_user_cache_graph_pin_token_load(const uint64_t *token)
+{
+	return PHP_USER_CACHE_ATOMIC_LOAD_64(token);
+}
+
+static zend_always_inline void php_user_cache_graph_pin_token_store(uint64_t *token, uint64_t value)
+{
+	PHP_USER_CACHE_ATOMIC_STORE_64(token, value);
+}
 
 static zend_always_inline php_user_cache_context *php_user_cache_owning_context(void)
 {
@@ -955,22 +992,7 @@ static zend_always_inline php_user_cache_runtime *php_user_cache_active_runtime(
 
 static zend_always_inline uint64_t php_user_cache_seq_load(const uint64_t *seq)
 {
-#ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
 	return php_user_cache_atomic_load_64(seq);
-#else
-	return *seq;
-#endif
-}
-
-static zend_always_inline uint64_t php_user_cache_seq_reload(const uint64_t *seq)
-{
-#ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
-	php_user_cache_atomic_fence_acquire();
-
-	return php_user_cache_atomic_load_64(seq);
-#else
-	return *seq;
-#endif
 }
 
 static zend_always_inline bool php_user_cache_header_is_initialized_locked(void)
@@ -1009,20 +1031,6 @@ static zend_always_inline bool php_user_cache_seen_test_and_add(HashTable *seen,
 	}
 
 	return zend_hash_index_add_empty_element(seen, key) != NULL;
-}
-
-static zend_always_inline void php_user_cache_ensure_ready(void)
-{
-	php_user_cache_context *ctx = php_user_cache_active_context();
-
-	if (UC_G(runtime_resolved) &&
-		UC_G(runtime_resolved_context) == ctx &&
-		UC_G(runtime_resolved_enabled) == UC_G(enable)
-	) {
-		return;
-	}
-
-	php_user_cache_ensure_ready_impl();
 }
 
 static inline bool php_user_cache_class_overrides_safe_direct_magic_serialize_ex(

@@ -1,7 +1,5 @@
 --TEST--
 UserCache\Cache: classes that cannot round-trip without __serialize()/__unserialize()
---EXTENSIONS--
-user_cache
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
