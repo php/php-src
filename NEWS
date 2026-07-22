@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0alpha3
 
+- apache2handler:
+  . Added the apache_connection_stream() function for CGI WebSockets. (Richard Tyler Miles)
+
 - Core:
   . Implemented partial function application RFC. (Arnaud)
   . Fixed bug GH-22263 (reset typed property default on every unserialize
