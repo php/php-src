@@ -1302,7 +1302,12 @@ static zend_result php_stream_filters_seek_all(php_stream *stream, bool is_start
 	return SUCCESS;
 }
 
-
+static bool php_stream_copy_context(php_stream *stream)
+{
+	php_stream_context *context = PHP_STREAM_CONTEXT(stream);
+	/* The fd-level copy cannot emit progress notifications. */
+	return context && context->notifier;
+}
 
 PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 {
@@ -1655,7 +1660,8 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 	 * are empty, so the fd offsets match the logical stream positions */
 	if (!php_stream_is(src, PHP_STREAM_IS_USERSPACE) && !php_stream_is(dest, PHP_STREAM_IS_USERSPACE) &&
 			src->writepos == src->readpos && dest->writepos == dest->readpos &&
-			!php_stream_is_filtered(src) && !php_stream_is_filtered(dest)) {
+			!php_stream_is_filtered(src) && !php_stream_is_filtered(dest) &&
+			!php_stream_copy_context(src) && !php_stream_copy_context(dest)) {
 		php_io_fd src_copy_fd, dest_copy_fd;
 
 		if (php_stream_cast(src, PHP_STREAM_AS_FD_FOR_COPY, (void *) &src_copy_fd, 0) == SUCCESS &&
