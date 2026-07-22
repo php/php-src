@@ -3571,6 +3571,8 @@ static int zend_jit_trace_deoptimization(
 				}
 			}
 		} else if (STACK_FLAGS(parent_stack, i) == ZREG_TYPE_ONLY) {
+			ZEND_ASSERT(reg == ZREG_NONE);
+
 			uint8_t type = STACK_TYPE(parent_stack, i);
 
 			if (!zend_jit_store_type(jit, i, type)) {
