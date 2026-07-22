@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22665 (Out-of-bounds write when the ODBC driver reports a
     diagnostic message length beyond the error buffer). (iliaal)
 
+- Phar:
+  . Fixed grammatical issues and outdated terminology in Phar error messages.
+    (Weilin Du)
+
 - Reflection:
   . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
     (DanielEScherzer)
