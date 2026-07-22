@@ -1,7 +1,14 @@
 PHP_LEXBOR_CFLAGS="-Wno-unknown-warning-option -Wno-unterminated-string-initialization -I@ext_srcdir@/"
 
 if test "$PHP_ADDRESS_SANITIZER" = "yes"; then
-    PHP_LEXBOR_CFLAGS="$PHP_LEXBOR_CFLAGS -DLEXBOR_HAVE_ADDRESS_SANITIZER=1"
+  PHP_LEXBOR_CFLAGS="$PHP_LEXBOR_CFLAGS -DLEXBOR_HAVE_ADDRESS_SANITIZER=1"
+else
+  case "$CFLAGS" in
+    *-fsanitize=address*|\
+    *-fsanitize=*,address*)
+      PHP_LEXBOR_CFLAGS="$PHP_LEXBOR_CFLAGS -DLEXBOR_HAVE_ADDRESS_SANITIZER=1"
+      ;;
+  esac
 fi
 
 LEXBOR_DIR="lexbor"
