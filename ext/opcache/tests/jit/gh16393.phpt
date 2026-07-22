@@ -15,4 +15,4 @@ $appendProp2 = (function() {
 $appendProp2();
 ?>
 --EXPECTF--
-Warning: Undefined variable $test in %sgh16393.php on line 6
+%r(?:Warning: Cannot change opcache\.jit setting at run-time \(JIT is disabled\) in .*gh16393\.php on line 2\n\n)?%rWarning: Undefined variable $test in %sgh16393.php on line 6

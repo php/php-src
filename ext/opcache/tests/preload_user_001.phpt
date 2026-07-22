@@ -22,7 +22,7 @@ var_dump(function_exists("f2"));
 ?>
 OK
 --EXPECTF--
-%sWarning "opcache.preload_user" is ignored because the current user is not "root"
+%r(?:.*: Warning Apple Silicon ZTS JIT requires pthread_jit_write_protect_np\(\) support\. JIT disabled\.\n)?%r%sWarning "opcache.preload_user" is ignored because the current user is not "root"
 bool(true)
 bool(false)
 OK
