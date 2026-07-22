@@ -4,6 +4,8 @@ Deprecation promoted to exception during inheritance
 <?php
 if (getenv('SKIP_PRELOAD')) die('skip Error handler not active during preloading');
 ?>
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 
