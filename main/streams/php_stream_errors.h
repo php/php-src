@@ -22,16 +22,20 @@
 BEGIN_EXTERN_C()
 
 /* Error mode context options (internal C constants) */
-#define PHP_STREAM_ERROR_MODE_ERROR 0
-#define PHP_STREAM_ERROR_MODE_EXCEPTION 1
-#define PHP_STREAM_ERROR_MODE_SILENT 2
+C23_ENUM(php_stream_error_mode, uint8_t) {
+	PHP_STREAM_ERROR_MODE_ERROR = 0,
+	PHP_STREAM_ERROR_MODE_EXCEPTION = 1,
+	PHP_STREAM_ERROR_MODE_SILENT = 2
+};
 
 /* Error store context options (internal C constants) */
-#define PHP_STREAM_ERROR_STORE_AUTO 0
-#define PHP_STREAM_ERROR_STORE_NONE 1
-#define PHP_STREAM_ERROR_STORE_NON_TERM 2
-#define PHP_STREAM_ERROR_STORE_TERMINAL 3
-#define PHP_STREAM_ERROR_STORE_ALL 4
+C23_ENUM(php_stream_error_store_mode, uint8_t) {
+	PHP_STREAM_ERROR_STORE_AUTO = 0,
+	PHP_STREAM_ERROR_STORE_NONE = 1,
+	PHP_STREAM_ERROR_STORE_NON_TERM = 2,
+	PHP_STREAM_ERROR_STORE_TERMINAL = 3,
+	PHP_STREAM_ERROR_STORE_ALL = 4
+};
 
 /* Maximum operation nesting depth */
 #define PHP_STREAM_ERROR_MAX_DEPTH 1000
@@ -105,8 +109,8 @@ typedef struct {
 
 /* Error operation management */
 PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void);
-PHPAPI void php_stream_error_operation_end(php_stream_context *context);
-PHPAPI void php_stream_error_operation_end_for_stream(php_stream *stream);
+PHPAPI void php_stream_error_operation_end(const php_stream_context *context);
+PHPAPI void php_stream_error_operation_end_for_stream(const php_stream *stream);
 PHPAPI void php_stream_error_operation_abort(void);
 
 /* State cleanup function */
@@ -120,35 +124,36 @@ PHPAPI void php_stream_error_clear_stored(void);
 
 /* Wrapper error reporting functions */
 PHPAPI void php_stream_wrapper_error_with_name(const char *wrapper_name,
-		php_stream_context *context, const char *docref, int options, int severity,
+		const php_stream_context *context, const char *docref, int options, int severity,
 		bool terminating, zend_enum_StreamErrorCode code, const char *fmt, ...)
 		ZEND_ATTRIBUTE_FORMAT(printf, 8, 9);
 
-PHPAPI void php_stream_wrapper_error(php_stream_wrapper *wrapper, php_stream_context *context,
+PHPAPI void php_stream_wrapper_error(
+		const php_stream_wrapper *wrapper, const php_stream_context *context,
 		const char *docref, int options, int severity, bool terminating,
 		zend_enum_StreamErrorCode code, const char *fmt, ...)
 		ZEND_ATTRIBUTE_FORMAT(printf, 8, 9);
 
-PHPAPI void php_stream_error(php_stream *stream, const char *docref, int severity,
+PHPAPI void php_stream_error(const php_stream *stream, const char *docref, int severity,
 		bool terminating, zend_enum_StreamErrorCode code, const char *fmt, ...)
 		ZEND_ATTRIBUTE_FORMAT(printf, 6, 7);
 
 /* Legacy wrapper error log functions */
 PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper,
-		php_stream_context *context, int options, int severity, bool terminating,
+		const php_stream_context *context, int options, int severity, bool terminating,
 		zend_enum_StreamErrorCode code, const char *fmt, ...)
 		ZEND_ATTRIBUTE_FORMAT(printf, 7, 8);
 
 PHPAPI void php_stream_display_wrapper_name_errors(const char *wrapper_name,
-		php_stream_context *context, zend_enum_StreamErrorCode code,
+		const php_stream_context *context, zend_enum_StreamErrorCode code,
 		const char *caption);
 
-PHPAPI void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper,
-		php_stream_context *context, zend_enum_StreamErrorCode code,
+PHPAPI void php_stream_display_wrapper_errors(const php_stream_wrapper *wrapper,
+		const php_stream_context *context, zend_enum_StreamErrorCode code,
 		const char *caption);
 
 PHPAPI void php_stream_tidy_wrapper_name_error_log(const char *wrapper_name);
-PHPAPI void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper);
+PHPAPI void php_stream_tidy_wrapper_error_log(const php_stream_wrapper *wrapper);
 
 /* Convenience macros - code argument is the bare case name (e.g. RenameFailed) */
 #define php_stream_wrapper_warn(wrapper, context, options, code, ...) \
