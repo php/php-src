@@ -1361,6 +1361,7 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 	SSL *handle = NULL;
 	php_socket_t fd;
 	size_t sent;
+	int ret;
 
 	if (ftp->use_ssl && ftp->fd == s && ftp->ssl_active) {
 		handle = ftp->ssl_handle;
@@ -1373,8 +1374,8 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 	}
 
 	do {
-		sent = SSL_write(handle, buf, size);
-		err = SSL_get_error(handle, sent);
+		ret = SSL_write_ex(handle, buf, size, &sent);
+		err = SSL_get_error(handle, ret);
 
 		switch (err) {
 			case SSL_ERROR_NONE:
@@ -1383,6 +1384,7 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 
 			case SSL_ERROR_ZERO_RETURN:
 				retry = false;
+				sent = 0;
 				SSL_shutdown(handle);
 				break;
 
@@ -1406,7 +1408,7 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 				return -1;
 		}
 	} while (retry);
-	return sent;
+	return (int)sent;
 #else
 	return my_send_wrapper_with_restart(s, buf, size, 0);
 #endif
