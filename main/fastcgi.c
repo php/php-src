@@ -68,15 +68,6 @@ static int is_impersonate = 0;
 # include <netdb.h>
 # include <signal.h>
 
-# if defined(HAVE_POLL_H) && defined(HAVE_POLL)
-#  include <poll.h>
-# elif defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
-#  include <sys/poll.h>
-# endif
-# if defined(HAVE_SYS_SELECT_H)
-#  include <sys/select.h>
-# endif
-
 #ifndef INADDR_NONE
 #define INADDR_NONE ((unsigned long) -1)
 #endif
@@ -1426,42 +1417,16 @@ int fcgi_accept_request(fcgi_request *req)
 				break;
 #else
 				if (req->fd >= 0) {
-#if defined(HAVE_POLL)
-					struct pollfd fds;
 					int ret;
 
-					fds.fd = req->fd;
-					fds.events = POLLIN;
-					fds.revents = 0;
 					do {
 						errno = 0;
-						ret = poll(&fds, 1, 5000);
+						ret = php_pollfd_for_ms(req->fd, POLLIN, 5000);
 					} while (ret < 0 && errno == EINTR);
-					if (ret > 0 && (fds.revents & POLLIN)) {
+					if (ret & POLLIN) {
 						break;
 					}
 					fcgi_close(req, 1, 0);
-#else
-					if (req->fd < FD_SETSIZE) {
-						struct timeval tv = {5,0};
-						fd_set set;
-						int ret;
-
-						FD_ZERO(&set);
-						FD_SET(req->fd, &set);
-						do {
-							errno = 0;
-							ret = select(req->fd + 1, &set, NULL, NULL, &tv) >= 0;
-						} while (ret < 0 && errno == EINTR);
-						if (ret > 0 && FD_ISSET(req->fd, &set)) {
-							break;
-						}
-						fcgi_close(req, 1, 0);
-					} else {
-						fcgi_log(FCGI_ERROR, "Too many open file descriptors. FD_SETSIZE limit exceeded.");
-						fcgi_close(req, 1, 0);
-					}
-#endif
 				}
 #endif
 			}
