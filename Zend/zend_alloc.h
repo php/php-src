@@ -215,7 +215,14 @@ ZEND_API ZEND_ATTRIBUTE_MALLOC char * __zend_strdup(const char *s);
 #define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
 
 ZEND_API zend_result zend_set_memory_limit(size_t memory_limit);
+ZEND_API size_t zend_memory_limit(void);
+ZEND_API bool zend_memory_limit_is_unlimited(void);
 ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void);
+
+/* Throws a catchable MemoryError and returns true when allocating "nmemb *
+ * size + offset" bytes would overflow or exceed the configured memory limit;
+ * returns false (without throwing) otherwise. */
+ZEND_API bool zend_alloc_size_exceeds_memory(size_t nmemb, size_t size, size_t offset, const char *kind);
 
 ZEND_API void start_memory_manager(void);
 ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown);

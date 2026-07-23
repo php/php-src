@@ -1420,6 +1420,10 @@ PHP_FUNCTION(number_format)
 		RETURN_THROWS();
 	}
 
+	if (dec > 0 && UNEXPECTED(zend_string_alloc_size_exceeds_memory((size_t)dec, 1, 0))) {
+		RETURN_THROWS();
+	}
+
 	switch (Z_TYPE_P(num)) {
 		case IS_LONG:
 			RETURN_STR(_php_math_number_format_long(Z_LVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));

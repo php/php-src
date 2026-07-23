@@ -1230,6 +1230,9 @@ PHP_FUNCTION(sodium_crypto_stream)
 		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_STREAM_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory((size_t) ciphertext_len, 1, 0))) {
+		RETURN_THROWS();
+	}
 	ciphertext = zend_string_alloc((size_t) ciphertext_len, 0);
 	if (crypto_stream((unsigned char *) ZSTR_VAL(ciphertext),
 					  (unsigned long long) ciphertext_len, nonce, key) != 0) {
@@ -1308,6 +1311,9 @@ PHP_FUNCTION(sodium_crypto_stream_xchacha20)
 	}
 	if (key_len != crypto_stream_xchacha20_KEYBYTES) {
 		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES bytes long");
+		RETURN_THROWS();
+	}
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory((size_t) ciphertext_len, 1, 0))) {
 		RETURN_THROWS();
 	}
 	ciphertext = zend_string_checked_alloc((size_t) ciphertext_len, 0);
@@ -1436,6 +1442,9 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 	if (hash_len >= 0xffffffff) {
 		zend_argument_value_error(1, "must be less than 4294967295 bytes");
 		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory((size_t) hash_len, 1, 0))) {
 		RETURN_THROWS();
 	}
 	if (passwd_len >= 0xffffffff) {

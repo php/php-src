@@ -2811,6 +2811,10 @@ PHP_FUNCTION(pg_lo_read)
 		RETURN_THROWS();
 	}
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(buffer_length, 1, 0))) {
+		RETURN_THROWS();
+	}
+
 	buf = zend_string_alloc(buffer_length, 0);
 	if ((nbytes = lo_read((PGconn *)pgsql->conn, pgsql->lofd, ZSTR_VAL(buf), ZSTR_LEN(buf)))<0) {
 		zend_string_efree(buf);

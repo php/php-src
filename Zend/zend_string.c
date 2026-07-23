@@ -528,6 +528,11 @@ ZEND_API zend_string *zend_string_concat3(
 	return res;
 }
 
+ZEND_API bool zend_string_alloc_size_exceeds_memory(size_t nmemb, size_t size, size_t offset)
+{
+	return zend_alloc_size_exceeds_memory(nmemb, size, offset, "string");
+}
+
 /* strlcpy and strlcat are not always intercepted by msan, so we need to do it
  * ourselves. Apply a simple heuristic to determine the platforms that need it.
  * See https://github.com/php/php-src/issues/20002. */

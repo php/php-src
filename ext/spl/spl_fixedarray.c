@@ -101,6 +101,10 @@ static void spl_fixedarray_init_non_empty_struct(spl_fixedarray *array, zend_lon
 static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
 {
 	if (size > 0) {
+		if (UNEXPECTED(zend_alloc_size_exceeds_memory(size, sizeof(zval), 0, "SplFixedArray"))) {
+			spl_fixedarray_default_ctor(array);
+			return;
+		}
 		spl_fixedarray_init_non_empty_struct(array, size);
 		spl_fixedarray_init_elems(array, 0, size);
 	} else {
@@ -176,6 +180,10 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 	/* first initialization */
 	if (array->size == 0) {
 		spl_fixedarray_init(array, size);
+		return;
+	}
+
+	if (size > array->size && UNEXPECTED(zend_alloc_size_exceeds_memory(size, sizeof(zval), 0, "SplFixedArray"))) {
 		return;
 	}
 

@@ -2044,6 +2044,17 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void)
 	zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
 }
 
+static zend_always_inline bool zend_string_offset_extend_exceeds_memory(size_t new_len)
+{
+	if (zend_memory_limit_is_unlimited()) {
+		return false;
+	}
+	size_t limit = zend_memory_limit();
+	size_t usage = zend_memory_usage(false);
+	size_t available = (limit > usage) ? (limit - usage) : 0;
+	return new_len > available;
+}
+
 static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_uchar c;
@@ -2168,6 +2179,14 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	if ((size_t)offset >= ZSTR_LEN(s)) {
 		/* Extend string if needed */
 		zend_long old_len = ZSTR_LEN(s);
+		if (UNEXPECTED(zend_string_offset_extend_exceeds_memory((size_t)offset + 1))) {
+			zend_throw_error(zend_ce_memory_error,
+				"String offset assignment produces a string too large to fit in the configured memory limit");
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+			}
+			return;
+		}
 		ZVAL_NEW_STR(str, zend_string_extend(s, (size_t)offset + 1, 0));
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;

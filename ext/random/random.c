@@ -590,6 +590,10 @@ PHP_FUNCTION(random_bytes)
 		RETURN_THROWS();
 	}
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(size, 1, 0))) {
+		RETURN_THROWS();
+	}
+
 	bytes = zend_string_alloc(size, 0);
 
 	if (php_random_bytes_throw(ZSTR_VAL(bytes), size) == FAILURE) {
