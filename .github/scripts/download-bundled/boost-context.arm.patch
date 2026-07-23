@@ -1,0 +1,71 @@
+diff --git a/Zend/asm/jump_arm_aapcs_elf_gas.S b/Zend/asm/jump_arm_aapcs_elf_gas.S
+index 4415a541fd3..647ae9f45ad 100644
+--- a/Zend/asm/jump_arm_aapcs_elf_gas.S
++++ b/Zend/asm/jump_arm_aapcs_elf_gas.S
+@@ -50,7 +50,7 @@ jump_fcontext:
+     push {lr}
+     @ save hidden,V1-V8,LR
+ 
+-    #if __ARM_ARCH >= 7
++    #if !defined(__ARM_ARCH_6M__)
+ 
+     push {a1,v1-v8,lr}
+ 
+@@ -102,7 +102,7 @@ jump_fcontext:
+     add  sp, sp, #64
+ 
+     @ restore hidden,V1-V8,LR
+-    #if __ARM_ARCH >= 7
++    #if !defined(__ARM_ARCH_6M__)
+     pop {a4,v1-v8,lr}
+     #else
+ 
+diff --git a/Zend/asm/make_arm_aapcs_elf_gas.S b/Zend/asm/make_arm_aapcs_elf_gas.S
+index 2367c75a6a7..b5cf0c8fa09 100644
+--- a/Zend/asm/make_arm_aapcs_elf_gas.S
++++ b/Zend/asm/make_arm_aapcs_elf_gas.S
+@@ -48,7 +48,7 @@
+ make_fcontext:
+     @ shift address in A1 to lower 16 byte boundary
+ 
+-    #if __ARM_ARCH >= 7
++    #if !defined(__ARM_ARCH_6M__)
+     bic  a1, a1, #15
+     #else
+     lsrs	a1, a1, #4
+@@ -56,7 +56,7 @@ make_fcontext:
+     #endif
+ 
+     @ reserve space for context-data on context-stack
+-    #if __ARM_ARCH >= 7
++    #if !defined(__ARM_ARCH_6M__)
+     sub  a1, a1, #124
+     #else
+     subs  a1, #124
+@@ -66,7 +66,7 @@ make_fcontext:
+     str  a3, [a1, #104]
+ 
+     @ compute address of returned transfer_t
+-    #if __ARM_ARCH >= 7
++    #if !defined(__ARM_ARCH_6M__)
+     add  a2, a1, #108
+     #else
+     mov  a2, a1
+@@ -77,7 +77,7 @@ make_fcontext:
+ 
+ 
+     @ compute abs address of label finish
+-    #if __ARM_ARCH >= 7
++    #if !defined(__ARM_ARCH_6M__)
+     adr  a2, finish
+     #else
+     ldr  a2, =finish
+@@ -93,7 +93,7 @@ make_fcontext:
+ 
+ finish:
+     @ exit code is zero
+-    #if __ARM_ARCH >=7
++    #if !defined(__ARM_ARCH_6M__)
+     mov  a1, #0
+     #else
+     movs	r3, #0
