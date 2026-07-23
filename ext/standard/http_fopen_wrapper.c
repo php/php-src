@@ -187,21 +187,17 @@ static bool php_stream_http_response_header_trim(char *http_header_line,
  * last header line.  */
 static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *wrapper,
 		php_stream *stream, php_stream_context *context, int options,
-		zend_string *last_header_line_str, char *header_line, size_t *header_line_length,
+		zend_string *last_header_line, char *header_line, size_t *header_line_length,
 		int response_code, zval *response_header,
 		php_stream_http_response_header_info *header_info)
 {
-	char *last_header_line = ZSTR_VAL(last_header_line_str);
-	size_t last_header_line_length = ZSTR_LEN(last_header_line_str);
-	char *last_header_line_end = ZSTR_VAL(last_header_line_str) + ZSTR_LEN(last_header_line_str) - 1;
-
 	/* Process non empty header line. */
 	if (header_line && (*header_line != '\n' && *header_line != '\r')) {
 		/* Removing trailing white spaces. */
 		if (php_stream_http_response_header_trim(header_line, header_line_length) &&
 				*header_line_length == 0) {
 			/* Only spaces so treat as an empty folding header. */
-			return last_header_line_str;
+			return last_header_line;
 		}
 
 		/* Process folding headers if starting with a space or a tab. */
@@ -218,27 +214,27 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 			ZEND_ASSERT(http_folded_header_line_length > 0);
 			/* Concatenate last header line, space and current header line. */
 			zend_string *extended_header_str = zend_string_concat3(
-					last_header_line, last_header_line_length,
+					ZSTR_VAL(last_header_line), ZSTR_LEN(last_header_line),
 					" ", 1,
 					http_folded_header_line, http_folded_header_line_length);
-			zend_string_efree(last_header_line_str);
-			last_header_line_str = extended_header_str;
+			zend_string_efree(last_header_line);
+			last_header_line = extended_header_str;
 			/* Return new header line. */
-			return last_header_line_str;
+			return last_header_line;
 		}
 	}
 
 	/* Find header separator position. */
-	char *last_header_value = memchr(last_header_line, ':', last_header_line_length);
+	char *last_header_value = memchr(ZSTR_VAL(last_header_line), ':', ZSTR_LEN(last_header_line));
 	if (last_header_value) {
 		/* Verify there is no space in header name */
-		const char *last_header_name = last_header_line + 1;
+		const char *last_header_name = ZSTR_VAL(last_header_line) + 1;
 		while (last_header_name < last_header_value) {
 			if (*last_header_name == ' ' || *last_header_name == '\t') {
 				header_info->error = true;
 				php_stream_wrapper_log_warn(wrapper, context, options, InvalidResponse,
 					"HTTP invalid response format (space in header name)!");
-				zend_string_efree(last_header_line_str);
+				zend_string_efree(last_header_line);
 				return NULL;
 			}
 			++last_header_name;
@@ -247,6 +243,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 		last_header_value++; /* Skip ':'. */
 
 		/* Strip leading whitespace. */
+		const char *last_header_line_end = ZSTR_VAL(last_header_line) + ZSTR_LEN(last_header_line) - 1;
 		while (last_header_value < last_header_line_end
 				&& (*last_header_value == ' ' || *last_header_value == '\t')) {
 			last_header_value++;
@@ -256,14 +253,14 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 		header_info->error = true;
 		php_stream_wrapper_log_warn(wrapper, context, options, InvalidResponse,
 				"HTTP invalid response format (no colon in header line)!");
-		zend_string_efree(last_header_line_str);
+		zend_string_efree(last_header_line);
 		return NULL;
 	}
 
 	bool store_header = true;
 	zval *tmpzval = NULL;
 
-	if (!strncasecmp(last_header_line, "Location:", sizeof("Location:")-1)) {
+	if (zend_string_starts_with_literal_ci(last_header_line, "Location:")) {
 		/* Check if the location should be followed. */
 		if (context && (tmpzval = php_stream_context_get_option(context, "http", "follow_location")) != NULL) {
 			header_info->follow_location = zend_is_true(tmpzval);
@@ -281,7 +278,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 			php_stream_wrapper_log_warn(wrapper, context, options, InvalidResponse,
 					"HTTP Location header size is over the limit of %d bytes",
 					HTTP_HEADER_MAX_LOCATION_SIZE);
-			zend_string_efree(last_header_line_str);
+			zend_string_efree(last_header_line);
 			return NULL;
 		}
 		if (header_info->location_len == 0) {
@@ -291,9 +288,9 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 		}
 		header_info->location_len = last_header_value_len;
 		memcpy(header_info->location, last_header_value, last_header_value_len + 1);
-	} else if (!strncasecmp(last_header_line, "Content-Type:", sizeof("Content-Type:")-1)) {
+	} else if (zend_string_starts_with_literal_ci(last_header_line, "Content-Type:")) {
 		php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, last_header_value, 0);
-	} else if (!strncasecmp(last_header_line, "Content-Length:", sizeof("Content-Length:")-1)) {
+	} else if (zend_string_starts_with_literal_ci(last_header_line, "Content-Length:")) {
 		/* https://www.rfc-editor.org/rfc/rfc9110.html#name-content-length */
 		const char *ptr = last_header_value;
 		/* must contain only digits, no + or - symbols */
@@ -304,11 +301,11 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 			if (endptr && !*endptr) {
 				/* truncate for 32-bit such that no negative file sizes occur */
 				header_info->file_size = MIN(parsed, ZEND_LONG_MAX);
-				php_stream_notify_file_size(context, header_info->file_size, last_header_line, 0);
+				php_stream_notify_file_size(context, header_info->file_size, ZSTR_VAL(last_header_line), 0);
 			}
 		}
 	} else if (
-		!strncasecmp(last_header_line, "Transfer-Encoding:", sizeof("Transfer-Encoding:")-1)
+		zend_string_starts_with_literal_ci(last_header_line, "Transfer-Encoding:")
 		&& !strncasecmp(last_header_value, "Chunked", sizeof("Chunked")-1)
 	) {
 		/* Create filter to decode response body. */
@@ -335,10 +332,10 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 
 	if (store_header) {
 		zval http_header;
-		ZVAL_NEW_STR(&http_header, last_header_line_str);
+		ZVAL_NEW_STR(&http_header, last_header_line);
 		zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_header);
 	} else {
-		zend_string_efree(last_header_line_str);
+		zend_string_efree(last_header_line);
 	}
 
 	return NULL;
