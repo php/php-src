@@ -2101,115 +2101,105 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 			options &= ~USE_PATH;
 		}
 		if (EG(exception)) {
-			if (resolved_path) {
-				zend_string_release_ex(resolved_path, false);
-			}
-			return NULL;
+			goto cleanup_no_wrapper_name;
 		}
 	}
 
 	path_to_open = path;
 
 	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, options);
-	if ((options & STREAM_USE_URL) && (!wrapper || !wrapper->is_url)) {
-		if (wrapper) {
-			php_stream_wrapper_warn(wrapper, context, options,
-					ProtocolUnsupported,
-					"This function may only be used against URLs");
-		} else {
-			php_error_docref(NULL, E_WARNING, "This function may only be used against URLs");
-		}
-		if (resolved_path) {
-			zend_string_release_ex(resolved_path, 0);
-		}
-		return NULL;
+	if (UNEXPECTED(!wrapper)) {
+		php_stream_wrapper_warn_name(PHP_STREAM_ERROR_WRAPPER_DEFAULT_NAME, context, options, OpenFailed,
+			"Failed to open stream: no suitable wrapper could be found");
+		goto cleanup_no_wrapper_name;
+	}
+	if ((options & STREAM_USE_URL) && !wrapper->is_url) {
+		php_stream_wrapper_warn(wrapper, context, options,
+			ProtocolUnsupported,
+			"This function may only be used against URLs");
+		goto cleanup_no_wrapper_name;
+	}
+
+	if (!wrapper->wops->stream_opener) {
+		php_stream_wrapper_warn(wrapper, context, options, NoOpener,
+				"Failed to open stream: wrapper does not support stream open");
+		goto cleanup_no_wrapper_name;
 	}
 
 	/* wrapper name needs to be stored as wrapper can be removed in opener (user stream) */
 	char *wrapper_name = pestrdup(PHP_STREAM_ERROR_WRAPPER_NAME(wrapper), persistent);
-	if (wrapper) {
-		if (!wrapper->wops->stream_opener) {
-			php_stream_wrapper_log_warn(wrapper, context, options & ~REPORT_ERRORS,
-					NoOpener,
-					"wrapper does not support stream open");
-		} else {
-			stream = wrapper->wops->stream_opener(wrapper,
-				path_to_open, mode, options & ~REPORT_ERRORS,
-				opened_path, context STREAMS_REL_CC);
-		}
+	stream = wrapper->wops->stream_opener(wrapper,
+		path_to_open, mode, options & ~REPORT_ERRORS,
+		opened_path, context STREAMS_REL_CC);
 
-		/* if the caller asked for a persistent stream but the wrapper did not
-		 * return one, force an error here */
-		if (stream && persistent && !stream->is_persistent) {
-			php_stream_wrapper_log_warn(wrapper, context, options & ~REPORT_ERRORS,
-					PersistentNotSupported,
-					"wrapper does not support persistent streams");
-			php_stream_close(stream);
-			stream = NULL;
+	if (UNEXPECTED(!stream)) {
+		if (options & REPORT_ERRORS) {
+			php_stream_display_wrapper_name_errors(wrapper_name, context, PHP_STREAM_EC(OpenFailed),
+					"Failed to open stream");
 		}
-
-		if (stream) {
-			stream->wrapper = wrapper;
-		}
+		php_stream_tidy_wrapper_name_error_log(wrapper_name);
+		goto cleanup;
 	}
 
-	if (stream) {
-		if (opened_path && !*opened_path && resolved_path) {
-			*opened_path = resolved_path;
-			resolved_path = NULL;
-		}
-		if (stream->orig_path) {
-			pefree(stream->orig_path, persistent);
-		}
-		stream->orig_path = pestrdup(path, persistent);
+	/* if the caller asked for a persistent stream but the wrapper did not
+	 * return one, force an error here */
+	if (persistent && !stream->is_persistent) {
+		php_stream_wrapper_warn(wrapper, context, options, PersistentNotSupported,
+				"Failed to open stream: wrapper does not support persistent streams");
+		php_stream_close(stream);
+		stream = NULL;
+		goto cleanup;
+	}
+
+	stream->wrapper = wrapper;
+
+	if (opened_path && !*opened_path && resolved_path) {
+		*opened_path = resolved_path;
+		resolved_path = NULL;
+	}
+	if (stream->orig_path) {
+		pefree(stream->orig_path, persistent);
+	}
+	stream->orig_path = pestrdup(path, persistent);
 #if ZEND_DEBUG
 		stream->open_filename = __zend_orig_filename ? __zend_orig_filename : __zend_filename;
 		stream->open_lineno = __zend_orig_lineno ? __zend_orig_lineno : __zend_lineno;
 #endif
-		/* Attach an explicitly provided context to the stream, but never the
-		 * default context: sharing it by reference would let a later
-		 * stream_context_set_option() on the stream mutate the global default
-		 * context, leaking options into every other stream. Stream errors fall
-		 * back to the default context on their own when the stream has none. */
-		if (stream->ctx == NULL && context != NULL && context != FG(default_context) && !persistent) {
-			php_stream_context_set(stream, context);
-		}
+	/* Attach an explicitly provided context to the stream, but never the
+	 * default context: sharing it by reference would let a later
+	 * stream_context_set_option() on the stream mutate the global default
+	 * context, leaking options into every other stream. Stream errors fall
+	 * back to the default context on their own when the stream has none. */
+	if (stream->ctx == NULL && context != NULL && context != FG(default_context) && !persistent) {
+		php_stream_context_set(stream, context);
 	}
 
-	if (stream != NULL && (options & STREAM_MUST_SEEK)) {
+	if (options & STREAM_MUST_SEEK) {
 		php_stream *newstream;
 
 		switch(php_stream_make_seekable_rel(stream, &newstream,
 					(options & STREAM_WILL_CAST)
 						? PHP_STREAM_PREFER_STDIO : PHP_STREAM_NO_PREFERENCE)) {
 			case PHP_STREAM_UNCHANGED:
-				if (resolved_path) {
-					zend_string_release_ex(resolved_path, 0);
-				}
-				pefree(wrapper_name, persistent);
-				return stream;
+				goto cleanup;
 			case PHP_STREAM_RELEASED:
 				if (newstream->orig_path) {
 					pefree(newstream->orig_path, persistent);
 				}
 				newstream->orig_path = pestrdup(path, persistent);
-				if (resolved_path) {
-					zend_string_release_ex(resolved_path, 0);
-				}
-				pefree(wrapper_name, persistent);
-				return newstream;
+				stream = newstream;
+				goto cleanup;
 			default:
-				php_stream_close(stream);
-				stream = NULL;
 				php_stream_wrapper_warn(wrapper, context, options,
 						SeekNotSupported,
 						"could not make seekable - %s", path);
-				/* We do not want multiple errors so we negate it */
-				options &= ~REPORT_ERRORS;
+				php_stream_close(stream);
+				stream = NULL;
+				goto cleanup;
 		}
 	}
 
-	if (stream && stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && strchr(mode, 'a') && stream->position == 0) {
+	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && strchr(mode, 'a') && stream->position == 0) {
 		zend_off_t newpos = 0;
 
 		/* if opened for append, we need to revise our idea of the initial file position */
@@ -2218,18 +2208,17 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		}
 	}
 
-	if (stream == NULL && (options & REPORT_ERRORS)) {
-		php_stream_display_wrapper_name_errors(wrapper_name, context, PHP_STREAM_EC(OpenFailed),
-				"Failed to open stream");
+cleanup:
+	pefree(wrapper_name, persistent);
+cleanup_no_wrapper_name:
+	if (resolved_path) {
+		zend_string_release_ex(resolved_path, 0);
+	}
+	if (stream == NULL) {
 		if (opened_path && *opened_path) {
 			zend_string_release_ex(*opened_path, 0);
 			*opened_path = NULL;
 		}
-	}
-	php_stream_tidy_wrapper_name_error_log(wrapper_name);
-	pefree(wrapper_name, persistent);
-	if (resolved_path) {
-		zend_string_release_ex(resolved_path, 0);
 	}
 	return stream;
 }
