@@ -131,6 +131,36 @@ $g = $cache->fetch('graph');
 var_dump(serialize($g) === serialize($graph));
 var_dump($g['interval'] instanceof DateInterval && $g['zone']->getName() === 'Asia/Tokyo');
 var_dump(period_dates($g['period']) === ['2026-06-01', '2026-06-03', '2026-06-05']);
+
+/* --- members with offset timezones --- */
+$offsetPeriod = new DatePeriod(
+	new DateTimeImmutable('2026-01-01 00:00:00 +09:00'),
+	new DateInterval('P1D'),
+	new DateTimeImmutable('2026-01-04 00:00:00 +09:00'),
+);
+$cache->store('offset-tz', $offsetPeriod);
+$o = $cache->fetch('offset-tz');
+var_dump(serialize($o) === serialize($offsetPeriod));
+var_dump(period_dates($o) === ['2026-01-01', '2026-01-02', '2026-01-03']);
+var_dump($o->getStartDate()->getTimezone()->getName());
+
+/* --- members with abbreviation timezones --- */
+$abbrPeriod = new DatePeriod(
+	new DateTimeImmutable('2026-01-01 00:00:00 PST'),
+	new DateInterval('P1D'),
+	2,
+);
+$cache->store('abbr-tz', $abbrPeriod);
+$a = $cache->fetch('abbr-tz');
+var_dump(serialize($a) === serialize($abbrPeriod));
+var_dump($a->getStartDate()->getTimezone()->getName());
+
+/* --- iterated period keeps its cursor state --- */
+$iterated = new DatePeriod(new DateTimeImmutable('2026-01-01'), new DateInterval('P1D'), 2);
+foreach ($iterated as $unused) {
+}
+$cache->store('iterated', $iterated);
+var_dump(serialize($cache->fetch('iterated')) === serialize($iterated));
 ?>
 --EXPECT--
 bool(true)
@@ -151,4 +181,10 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+bool(true)
+bool(true)
+bool(true)
+string(6) "+09:00"
+bool(true)
+string(3) "PST"
 bool(true)
