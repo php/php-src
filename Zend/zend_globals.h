@@ -169,6 +169,23 @@ struct _zend_compiler_globals {
 #endif
 };
 
+/* Coroutine relay state for shutdown_destructors() / zend_objects_store_
+ * call_destructors_async(). The passes run in sequence, never concurrently,
+ * and share the cursor. A switch handler can outlive its pass (it only
+ * self-drops on a switch-out), so handlers check `pass`: a stale one must
+ * not act on the other pass's cursor. */
+typedef enum {
+	ZEND_SHUTDOWN_PASS_NONE = 0,
+	ZEND_SHUTDOWN_PASS_SYMBOLS,
+	ZEND_SHUTDOWN_PASS_OBJECTS,
+} zend_shutdown_pass_t;
+
+typedef struct {
+	zend_shutdown_pass_t pass;
+	void *coroutine;
+	uint32_t num_elements;
+	uint32_t idx;
+} zend_shutdown_context_t;
 
 struct _zend_executor_globals {
 	zval uninitialized_zval;
@@ -182,6 +199,8 @@ struct _zend_executor_globals {
 	zend_array **symtable_cache_ptr;
 
 	zend_array symbol_table;		/* main symbol table */
+
+	zend_shutdown_context_t shutdown_context;
 
 	HashTable included_files;	/* files already included */
 

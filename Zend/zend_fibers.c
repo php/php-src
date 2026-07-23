@@ -550,14 +550,61 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	}
 }
 
+ZEND_API zend_execute_data *zend_fiber_vm_stack_start(
+		zend_fiber_context *context, zend_function *root_function)
+{
+	/* Determine the current error_reporting ini setting. NULL or an empty
+	 * string means "never configured"; only an explicit "0" keeps 0. */
+	zend_long error_reporting = zend_ini_long_literal("error_reporting");
+	if (!error_reporting) {
+		zend_string *value = zend_ini_str_literal("error_reporting");
+
+		if (value == NULL || ZSTR_LEN(value) == 0) {
+			error_reporting = E_ALL;
+		}
+	}
+
+	zend_vm_stack stack = zend_vm_stack_new_page(ZEND_FIBER_VM_STACK_SIZE, NULL);
+
+	EG(vm_stack) = stack;
+	EG(vm_stack_top) = stack->top + ZEND_CALL_FRAME_SLOT;
+	EG(vm_stack_end) = stack->end;
+	EG(vm_stack_page_size) = ZEND_FIBER_VM_STACK_SIZE;
+
+	zend_execute_data *execute_data = (zend_execute_data *) stack->top;
+
+	memset(execute_data, 0, sizeof(zend_execute_data));
+	execute_data->func = root_function;
+	execute_data->prev_execute_data = EG(current_execute_data);
+
+	EG(current_execute_data) = execute_data;
+	EG(jit_trace_num) = 0;
+	EG(error_reporting) = (int) error_reporting;
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+	EG(stack_base) = zend_fiber_stack_base(context->stack);
+	EG(stack_limit) = zend_fiber_stack_limit(context->stack);
+#else
+	(void) context;
+#endif
+
+	return execute_data;
+}
+
+ZEND_API void zend_fiber_vm_stack_free(zend_vm_stack stack)
+{
+	zend_vm_stack current_stack = EG(vm_stack);
+
+	EG(vm_stack) = stack;
+	zend_vm_stack_destroy();
+	EG(vm_stack) = current_stack;
+}
+
 static void zend_fiber_cleanup(zend_fiber_context *context)
 {
 	zend_fiber *fiber = zend_fiber_from_context(context);
 
-	zend_vm_stack current_stack = EG(vm_stack);
-	EG(vm_stack) = fiber->vm_stack;
-	zend_vm_stack_destroy();
-	EG(vm_stack) = current_stack;
+	zend_fiber_vm_stack_free(fiber->vm_stack);
 	fiber->execute_data = NULL;
 	fiber->stack_bottom = NULL;
 	fiber->caller = NULL;
@@ -570,38 +617,11 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 
 	zend_fiber *fiber = EG(active_fiber);
 
-	/* Determine the current error_reporting ini setting. */
-	zend_long error_reporting = zend_ini_long_literal("error_reporting");
-	/* If error_reporting is 0 and not explicitly set to 0, zend_ini_str returns a null pointer. */
-	if (!error_reporting && !zend_ini_str_literal("error_reporting")) {
-		error_reporting = E_ALL;
-	}
-
 	EG(vm_stack) = NULL;
 
 	zend_first_try {
-		zend_vm_stack stack = zend_vm_stack_new_page(ZEND_FIBER_VM_STACK_SIZE, NULL);
-		EG(vm_stack) = stack;
-		EG(vm_stack_top) = stack->top + ZEND_CALL_FRAME_SLOT;
-		EG(vm_stack_end) = stack->end;
-		EG(vm_stack_page_size) = ZEND_FIBER_VM_STACK_SIZE;
-
-		fiber->execute_data = (zend_execute_data *) stack->top;
+		fiber->execute_data = zend_fiber_vm_stack_start(&fiber->context, &zend_fiber_function);
 		fiber->stack_bottom = fiber->execute_data;
-
-		memset(fiber->execute_data, 0, sizeof(zend_execute_data));
-
-		fiber->execute_data->func = &zend_fiber_function;
-		fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
-
-		EG(current_execute_data) = fiber->execute_data;
-		EG(jit_trace_num) = 0;
-		EG(error_reporting) = error_reporting;
-
-#ifdef ZEND_CHECK_STACK_LIMIT
-		EG(stack_base) = zend_fiber_stack_base(fiber->context.stack);
-		EG(stack_limit) = zend_fiber_stack_limit(fiber->context.stack);
-#endif
 
 		fiber->fci.retval = &fiber->result;
 
@@ -708,6 +728,316 @@ static zend_always_inline zend_fiber_transfer zend_fiber_suspend_internal(zend_f
 	return zend_fiber_switch_to(caller, value, false);
 }
 
+/////////////////////////////////////////////////////////////////////
+/// Coroutine mode: the fiber as a coroutine of the scheduler
+/////////////////////////////////////////////////////////////////////
+
+/* A fiber under a scheduler has no context of its own: the scheduler runs its
+ * body through this entry point. start()/resume()/throw() wake the coroutine
+ * and wait; Fiber::suspend() wakes the waiter and parks. */
+static void zend_fiber_coroutine_entry(void);
+
+/* The coroutine is going away while the fiber still points at it. */
+static void zend_fiber_coroutine_dispose(zend_coroutine_t *coroutine)
+{
+	zend_fiber *fiber = coroutine->extended_data;
+
+	if (fiber == NULL) {
+		return;
+	}
+
+	coroutine->extended_data = NULL;
+	fiber->coroutine = NULL;
+}
+
+/* The fiber lets go of its coroutine. Ownership is one-way (fiber → coroutine,
+ * never back), which keeps the fiber collectable. A fiber that dies while its
+ * body is still parked cancels it — the body unwinds through its finally
+ * blocks, like a force-closed legacy fiber. */
+static void zend_fiber_release_coroutine(zend_fiber *fiber)
+{
+	zend_coroutine_t *coroutine = fiber->coroutine;
+
+	if (coroutine == NULL) {
+		return;
+	}
+
+	zend_object *coroutine_object = ZEND_COROUTINE_OBJECT(coroutine);
+
+	coroutine->extended_data = NULL;
+	fiber->coroutine = NULL;
+
+	if (ZEND_ASYNC_ON && ZEND_COROUTINE_IS_STARTED(coroutine)
+		&& !ZEND_COROUTINE_IS_FINISHED(coroutine)) {
+		ZEND_ASYNC_CANCEL(coroutine, zend_create_graceful_exit(), true);
+	}
+
+	if (coroutine_object != NULL) {
+		OBJ_RELEASE(coroutine_object);
+	}
+}
+
+static void zend_fiber_coroutine_entry(void)
+{
+	zend_coroutine_t *coroutine = ZEND_ASYNC_CURRENT_COROUTINE;
+	zend_fiber *fiber = coroutine->extended_data;
+	zend_fiber *previous_fiber = EG(active_fiber);
+
+	ZEND_ASSERT(fiber != NULL && "A fiber coroutine must know its fiber");
+
+	/* Inside the body, Fiber::suspend() and Fiber::getCurrent() must see this
+	 * fiber, exactly as on the legacy path. */
+	EG(active_fiber) = fiber;
+	fiber->context.status = ZEND_FIBER_STATUS_RUNNING;
+
+	/* The body runs on a stack the scheduler owns, whose bottom frame belongs
+	 * to nobody. Link it to the frame that started us, or a backtrace taken
+	 * inside the fiber would stop at the fiber and never reach the caller. */
+	fiber->stack_bottom = EG(current_execute_data);
+
+	if (fiber->execute_data != NULL) {
+		fiber->stack_bottom->prev_execute_data = fiber->execute_data;
+		fiber->execute_data = NULL;
+	}
+
+	bool is_bailout = false;
+
+	zend_try {
+		coroutine->fcall->fci.retval = &fiber->result;
+		zend_call_function(&coroutine->fcall->fci, &coroutine->fcall->fci_cache);
+	} zend_catch {
+		is_bailout = true;
+	} zend_end_try();
+
+	EG(active_fiber) = previous_fiber;
+
+	/* A fatal error in the body is the fiber's own outcome: getReturn() has to
+	 * be able to tell it apart from a fiber that simply never returned. The
+	 * unwinding then goes on to the scheduler. */
+	if (UNEXPECTED(is_bailout)) {
+		fiber = coroutine->extended_data;
+
+		if (fiber != NULL) {
+			fiber->flags |= ZEND_FIBER_FLAG_BAILOUT;
+			fiber->stack_bottom = NULL;
+			fiber->context.status = ZEND_FIBER_STATUS_DEAD;
+		}
+
+		zend_bailout();
+	}
+
+	/* The Fiber object may have been dropped while the body was parked: it is
+	 * the coroutine that owns the body, not the object. */
+	fiber = coroutine->extended_data;
+
+	zend_coroutine_t *caller = NULL;
+
+	if (fiber != NULL) {
+		/* The caller's frame may be gone by the time anything looks at this
+		 * stack again. */
+		if (fiber->stack_bottom != NULL) {
+			fiber->stack_bottom->prev_execute_data = NULL;
+			fiber->stack_bottom = NULL;
+		}
+
+		fiber->context.status = ZEND_FIBER_STATUS_DEAD;
+
+		caller = fiber->caller_coroutine;
+		fiber->caller_coroutine = NULL;
+	}
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		/* exit(): the scheduler decides what happens to the rest. A graceful
+		 * exit is a disposal unwind and must not shut anything down. */
+		if (zend_is_unwind_exit(EG(exception))) {
+			ZEND_ASYNC_SHUTDOWN();
+		}
+
+		if (fiber != NULL) {
+			fiber->flags |= ZEND_FIBER_FLAG_THREW;
+		}
+
+		/* Nobody is waiting: the exception belongs to the coroutine, and the
+		 * scheduler decides what to do with it (a graceful exit from a
+		 * force-closed fiber included). */
+		if (caller == NULL) {
+			return;
+		}
+
+		zend_object *exception = EG(exception);
+		GC_ADDREF(exception);
+		zend_clear_exception();
+
+		ZEND_ASYNC_ENQUEUE_WITH_ERROR(caller, exception, true);
+		return;
+	}
+
+	if (caller != NULL) {
+		ZEND_ASYNC_ENQUEUE_COROUTINE(caller);
+	}
+}
+
+/* Fiber::suspend() in coroutine mode: hand the value to whoever is waiting,
+ * wake them, and park until somebody resumes us. */
+static void zend_fiber_coroutine_yield(zend_fiber *fiber, zval *value, zval *return_value)
+{
+	zend_coroutine_t *coroutine = fiber->coroutine;
+
+	if (value != NULL) {
+		ZVAL_COPY(&fiber->transfer, value);
+	} else {
+		ZVAL_NULL(&fiber->transfer);
+	}
+
+	zend_coroutine_t *caller = fiber->caller_coroutine;
+	fiber->caller_coroutine = NULL;
+	fiber->context.status = ZEND_FIBER_STATUS_SUSPENDED;
+
+	/* Sever now, not when the caller wakes: GC may walk this parked stack
+	 * in between, and it must end at our own root frame. */
+	if (fiber->stack_bottom != NULL) {
+		fiber->stack_bottom->prev_execute_data = NULL;
+	}
+
+	if (caller != NULL) {
+		ZEND_ASYNC_ENQUEUE_COROUTINE(caller);
+	}
+
+	const bool resumed = ZEND_ASYNC_SUSPEND();
+
+	/* Parked all this time; the Fiber object may not have survived — a fiber
+	 * nobody holds is force-closed, arriving as a graceful exit thrown here.
+	 * Keep EG(active_fiber) off a fiber that is gone. */
+	fiber = coroutine->extended_data;
+	EG(active_fiber) = fiber;
+
+	if (fiber != NULL) {
+		fiber->context.status = ZEND_FIBER_STATUS_RUNNING;
+	}
+
+	/* throw(), or the cancellation of a dropped fiber, lands here. */
+	if (UNEXPECTED(!resumed)) {
+		return;
+	}
+
+	if (UNEXPECTED(fiber == NULL) || Z_ISUNDEF(fiber->transfer)) {
+		ZVAL_NULL(return_value);
+		return;
+	}
+
+	ZVAL_COPY_VALUE(return_value, &fiber->transfer);
+	ZVAL_UNDEF(&fiber->transfer);
+}
+
+/* Wait for the fiber to yield or finish. Returns what it yielded; NULL when
+ * it finished (the return value is getReturn()'s business, as ever). */
+static zend_result zend_fiber_await(zend_fiber *fiber, zval *return_value)
+{
+	zend_coroutine_t *caller = ZEND_ASYNC_CURRENT_COROUTINE;
+
+	ZEND_ASSERT(caller != NULL && "A scheduler is active, so there is a current coroutine");
+
+	if (UNEXPECTED(caller == fiber->coroutine)) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot await a fiber from within itself");
+		return FAILURE;
+	}
+
+	fiber->caller_coroutine = caller;
+
+	/* Hand the body the frame it was started from, so a backtrace taken
+	 * inside the fiber continues into its caller. Before the first run there
+	 * is no stack to link to yet, and the entry point does it instead. */
+	if (fiber->stack_bottom != NULL) {
+		fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
+	} else {
+		fiber->execute_data = EG(current_execute_data);
+	}
+
+	ZVAL_NULL(return_value);
+
+	/* Parked until the fiber hands control back. An exception that escaped the
+	 * fiber is delivered here, at the start()/resume() call site. */
+	if (UNEXPECTED(!ZEND_ASYNC_SUSPEND())) {
+		fiber->caller_coroutine = NULL;
+
+		if (fiber->stack_bottom != NULL) {
+			fiber->stack_bottom->prev_execute_data = NULL;
+		}
+
+		return FAILURE;
+	}
+
+	fiber->caller_coroutine = NULL;
+
+	/* Our frame stops being the fiber's parent the moment it parks again. */
+	if (fiber->stack_bottom != NULL) {
+		fiber->stack_bottom->prev_execute_data = NULL;
+	}
+
+	if (!Z_ISUNDEF(fiber->transfer)) {
+		ZVAL_COPY_VALUE(return_value, &fiber->transfer);
+		ZVAL_UNDEF(&fiber->transfer);
+	}
+
+	return SUCCESS;
+}
+
+/* Offer the starting fiber to the scheduler. It answers with a coroutine to
+ * run the fiber as, or with NULL to leave it on the legacy path (that is how
+ * a scheduler keeps its own fibers to itself). */
+static bool zend_fiber_adopt(zend_fiber *fiber)
+{
+	if (!ZEND_ASYNC_ON) {
+		return false;
+	}
+
+	/* A registered scheduler launches once, before the script's first line, so
+	 * it is never still READY here; ZEND_ASYNC_INTERCEPT_FIBER() falls back to
+	 * the legacy path on its own if needed. */
+	zend_coroutine_t *coroutine = ZEND_ASYNC_INTERCEPT_FIBER(fiber);
+
+	if (coroutine == NULL) {
+		return false;
+	}
+
+	coroutine->internal_entry = zend_fiber_coroutine_entry;
+	coroutine->extended_data = fiber;
+	coroutine->extended_dispose = zend_fiber_coroutine_dispose;
+	ZEND_COROUTINE_SET_FIBER(coroutine);
+
+	/* The fiber shares ownership of the coroutine with the scheduler. Never
+	 * the other way round: see zend_fiber_release_coroutine(). */
+	zend_object *coroutine_object = ZEND_COROUTINE_OBJECT(coroutine);
+
+	if (coroutine_object != NULL) {
+		GC_ADDREF(coroutine_object);
+	}
+
+	fiber->coroutine = coroutine;
+
+	return true;
+}
+
+/* Queue the body and wait for the first yield. */
+static void zend_fiber_coroutine_start(zend_fiber *fiber, zval *return_value)
+{
+	ZEND_ASYNC_FCALL_DEFINE(fcall,
+			fiber->fci,
+			fiber->fci_cache,
+			fiber->fci.params,
+			fiber->fci.param_count,
+			fiber->fci.named_params);
+
+	fiber->coroutine->fcall = fcall;
+
+	if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_COROUTINE(fiber->coroutine))) {
+		zend_fiber_release_coroutine(fiber);
+		return;
+	}
+
+	zend_fiber_await(fiber, return_value);
+}
+
 ZEND_API zend_result zend_fiber_start(zend_fiber *fiber, zval *return_value)
 {
 	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_INIT);
@@ -769,6 +1099,15 @@ static void zend_fiber_object_destroy(zend_object *object)
 {
 	zend_fiber *fiber = (zend_fiber *) object;
 
+	/* Coroutine mode: release unconditionally — even a normally-finished (DEAD)
+	 * fiber still holds the scheduler-shared reference and nothing else drops
+	 * it. The legacy path below never applies (fiber->context uninitialized). */
+	if (fiber->coroutine != NULL) {
+		fiber->flags |= ZEND_FIBER_FLAG_DESTROYED;
+		zend_fiber_release_coroutine(fiber);
+		return;
+	}
+
 	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED) {
 		return;
 	}
@@ -793,7 +1132,14 @@ static void zend_fiber_object_destroy(zend_object *object)
 			zend_rethrow_exception(EG(current_execute_data));
 		}
 
-		zend_exception_set_previous(EG(exception), exception);
+		/* A graceful/unwind exit is an internal marker, not a Throwable that
+		 * carries a $previous — chaining onto it creates a bogus dynamic
+		 * property (and a deprecation notice). */
+		if (!zend_is_graceful_exit(EG(exception)) && !zend_is_unwind_exit(EG(exception))) {
+			zend_exception_set_previous(EG(exception), exception);
+		} else if (exception != NULL) {
+			OBJ_RELEASE(exception);
+		}
 
 		if (!EG(current_execute_data)) {
 			zend_exception_error(EG(exception), E_ERROR);
@@ -807,28 +1153,24 @@ static void zend_fiber_object_destroy(zend_object *object)
 static void zend_fiber_object_free(zend_object *object)
 {
 	zend_fiber *fiber = (zend_fiber *) object;
+	/* A fiber that was never suspended (so dtor_obj had nothing to close) can
+	 * still own a coroutine: one that never started, or one that already
+	 * finished. */
+	zend_fiber_release_coroutine(fiber);
 
 	zval_ptr_dtor(&fiber->fci.function_name);
 	zval_ptr_dtor(&fiber->result);
+	zval_ptr_dtor(&fiber->transfer);
 
 	zend_object_std_dtor(&fiber->std);
 }
 
-static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *num)
+/* Walk the frames of a stack parked at a clean Fiber::suspend(): their
+ * variables take part in cycle collection. Returns the last symbol table met. */
+static HashTable *zend_fiber_frames_gc(zend_execute_data *ex, zend_get_gc_buffer *buf)
 {
-	zend_fiber *fiber = (zend_fiber *) object;
-	zend_get_gc_buffer *buf = zend_get_gc_buffer_create();
-
-	zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
-	zend_get_gc_buffer_add_zval(buf, &fiber->result);
-
-	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL) {
-		zend_get_gc_buffer_use(buf, table, num);
-		return NULL;
-	}
-
 	HashTable *lastSymTable = NULL;
-	zend_execute_data *ex = fiber->execute_data;
+
 	for (; ex; ex = ex->prev_execute_data) {
 		HashTable *symTable;
 		if (ZEND_CALL_INFO(ex) & ZEND_CALL_GENERATOR) {
@@ -862,6 +1204,71 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 			lastSymTable = symTable;
 		}
 	}
+
+	return lastSymTable;
+}
+
+static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *num)
+{
+	zend_fiber *fiber = (zend_fiber *) object;
+	zend_get_gc_buffer *buf = zend_get_gc_buffer_create();
+
+	/* Coroutine-mode fiber. Running or awaiting inside the body — a GC root:
+	 * the stack is mid-operation, scanning it is unsafe. Parked at a clean
+	 * Fiber::suspend() (context.status is set only by the yield path) — the
+	 * stack is passive and its frames join cycle collection, like a legacy
+	 * suspended fiber. */
+	if (fiber->coroutine != NULL) {
+		if (ZEND_COROUTINE_IS_FINISHED(fiber->coroutine)) {
+			zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
+			zend_get_gc_buffer_add_zval(buf, &fiber->result);
+			zend_get_gc_buffer_add_zval(buf, &fiber->transfer);
+
+			zend_object *coroutine_object = ZEND_COROUTINE_OBJECT(fiber->coroutine);
+
+			if (coroutine_object != NULL) {
+				zend_get_gc_buffer_add_obj(buf, coroutine_object);
+			}
+
+			zend_get_gc_buffer_use(buf, table, num);
+			return NULL;
+		}
+
+		if (fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED) {
+			zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
+			zend_get_gc_buffer_add_zval(buf, &fiber->transfer);
+
+			/* The coroutine object stays out of the buffer: the scheduler
+			 * holds references GC cannot see, exposing it would miscount. */
+			HashTable *lastSymTable = zend_fiber_frames_gc(
+					ZEND_ASYNC_COROUTINE_EXECUTE_DATA(fiber->coroutine), buf);
+
+			zend_get_gc_buffer_use(buf, table, num);
+			return lastSymTable;
+		}
+
+		zend_get_gc_buffer_use(buf, table, num);
+		return NULL;
+	}
+
+	zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
+	zend_get_gc_buffer_add_zval(buf, &fiber->result);
+	zend_get_gc_buffer_add_zval(buf, &fiber->transfer);
+
+	zend_execute_data *ex;
+
+	if (fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED && fiber->caller == NULL) {
+		ex = fiber->execute_data;
+	} else {
+		ex = NULL;
+	}
+
+	if (ex == NULL) {
+		zend_get_gc_buffer_use(buf, table, num);
+		return NULL;
+	}
+
+	HashTable *lastSymTable = zend_fiber_frames_gc(ex, buf);
 
 	zend_get_gc_buffer_use(buf, table, num);
 
@@ -909,6 +1316,22 @@ ZEND_METHOD(Fiber, start)
 		RETURN_THROWS();
 	}
 
+	/* A scheduler gets to claim the fiber here, once, and then it is a
+	 * coroutine: no context of its own is ever created. */
+	if (zend_fiber_adopt(fiber)) {
+		zend_fiber_coroutine_start(fiber, return_value);
+
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			RETURN_THROWS();
+		}
+
+		return;
+	}
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		RETURN_THROWS();
+	}
+
 	if (zend_fiber_init_context(&fiber->context, zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size)) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -928,6 +1351,31 @@ ZEND_METHOD(Fiber, suspend)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(value);
 	ZEND_PARSE_PARAMETERS_END();
+
+	const zend_coroutine_t *current = ZEND_ASYNC_CURRENT_COROUTINE;
+	const zend_fiber *active = EG(active_fiber);
+	const bool in_legacy_fiber = active != NULL && active->coroutine == NULL;
+
+	if (!in_legacy_fiber && current != NULL) {
+		if (UNEXPECTED(!ZEND_COROUTINE_IS_FIBER(current))) {
+			zend_throw_error(zend_ce_fiber_error, "Cannot suspend outside of a fiber");
+			RETURN_THROWS();
+		}
+
+		if (UNEXPECTED(zend_fiber_switch_blocked())) {
+			zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
+			RETURN_THROWS();
+		}
+
+		if (UNEXPECTED(current->extended_data == NULL || ZEND_COROUTINE_IS_CANCELLED(current))) {
+			zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a force-closed fiber");
+			RETURN_THROWS();
+		}
+
+		zend_fiber_coroutine_yield(current->extended_data, value, return_value);
+
+		return;
+	}
 
 	zend_fiber *fiber = EG(active_fiber);
 
@@ -977,6 +1425,21 @@ ZEND_METHOD(Fiber, resume)
 		RETURN_THROWS();
 	}
 
+	if (fiber->coroutine != NULL) {
+		if (value != NULL) {
+			ZVAL_COPY(&fiber->transfer, value);
+		} else {
+			ZVAL_NULL(&fiber->transfer);
+		}
+
+		if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_COROUTINE(fiber->coroutine))
+			|| UNEXPECTED(zend_fiber_await(fiber, return_value) == FAILURE)) {
+			RETURN_THROWS();
+		}
+
+		return;
+	}
+
 	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
 
 	zend_fiber_transfer transfer = zend_fiber_resume_internal(fiber, value, false);
@@ -1003,6 +1466,15 @@ ZEND_METHOD(Fiber, throw)
 	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
 		RETURN_THROWS();
+	}
+
+	if (fiber->coroutine != NULL) {
+		if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_WITH_ERROR(fiber->coroutine, Z_OBJ_P(exception), false))
+			|| UNEXPECTED(zend_fiber_await(fiber, return_value) == FAILURE)) {
+			RETURN_THROWS();
+		}
+
+		return;
 	}
 
 	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
